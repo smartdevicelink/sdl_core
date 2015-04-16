@@ -37,6 +37,7 @@ Copyright (c) 2013, Ford Motor Company
 #include "application_manager/commands/mobile/system_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/policies/policy_handler.h"
 #include "interfaces/MOBILE_API.h"
 #include "config_profile/profile.h"
 #include "utils/file_system.h"
@@ -48,6 +49,9 @@ namespace application_manager {
 namespace commands {
 
 uint32_t SystemRequest::index = 0;
+
+const std::string kSYNC = "SYNC";
+const std::string kIVSU = "IVSU";
 
 SystemRequest::SystemRequest(const MessageSharedPtr& message)
     : CommandRequestImpl(message) {
@@ -72,85 +76,96 @@ void SystemRequest::Run() {
       static_cast<mobile_apis::RequestType::eType>(
           (*message_)[strings::msg_params][strings::request_type].asInt());
 
-  if (!(*message_)[strings::params].keyExists(strings::binary_data) &&
-      (mobile_apis::RequestType::PROPRIETARY == request_type ||
-       mobile_apis::RequestType::QUERY_APPS == request_type)) {
+  if (!policy::PolicyHandler::instance()->IsRequestTypeAllowed(
+           application->mobile_app_id(), request_type)) {
+    SendResponse(false, mobile_apis::Result::DISALLOWED);
+    return;
+  }
 
-      LOG4CXX_ERROR(logger_, "Binary data empty");
+  std::string file_name;
+  if ((*message_)[strings::msg_params].keyExists(strings::file_name)) {
+    file_name = (*message_)[strings::msg_params][strings::file_name].asString();
+  } else {
+    file_name = kSYNC;
+  }
 
-      SendResponse(false, mobile_apis::Result::INVALID_DATA);
-      return;
+  bool is_system_file =
+      std::string::npos != file_name.find(kSYNC) ||
+      std::string::npos != file_name.find(kIVSU);
+
+  // to avoid override existing file
+  if (is_system_file) {
+    const uint8_t max_size = 255;
+    char buf[max_size] = {'\0'};
+    snprintf(buf, sizeof(buf)/sizeof(buf[0]), "%d%s", index++, file_name.c_str());
+    file_name = buf;
   }
 
   std::vector<uint8_t> binary_data;
+  std::string binary_data_folder;
   if ((*message_)[strings::params].keyExists(strings::binary_data)) {
     binary_data = (*message_)[strings::params][strings::binary_data].asBinary();
+    binary_data_folder = profile::Profile::instance()->system_files_path();
+  } else {
+    binary_data_folder = profile::Profile::instance()->app_storage_folder();
+    binary_data_folder += "/";
+    binary_data_folder += application->folder_name();
+    binary_data_folder += "/";
   }
+
+  std::string file_dst_path = profile::Profile::instance()->system_files_path();
+  file_dst_path += "/";
+  file_dst_path += file_name;
+
+  if ((*message_)[strings::params].keyExists(strings::binary_data)) {
+    LOG4CXX_DEBUG(logger_, "Binary data is present. Trying to save it to: "
+                  << binary_data_folder);
+    if (mobile_apis::Result::SUCCESS  !=
+        (ApplicationManagerImpl::instance()->SaveBinary(
+            binary_data, binary_data_folder, file_name, 0))) {
+      LOG4CXX_DEBUG(logger_, "Binary data can't be saved.");
+      SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
+      return;
+    }
+  } else {
+    std::string app_full_file_path = binary_data_folder;
+    app_full_file_path += file_name;
+
+    LOG4CXX_DEBUG(logger_, "Binary data is not present. Trying to find file "
+                  << file_name << " within previously saved app file in "
+                  << binary_data_folder);
+
+    const AppFile* file = application->GetFile(app_full_file_path);
+    if (!file || !file->is_download_complete ||
+        !file_system::MoveFile(app_full_file_path, file_dst_path)) {
+      LOG4CXX_DEBUG(logger_, "Binary data not found.");
+      SendResponse(false, mobile_apis::Result::REJECTED);
+      return;
+    }
+    processing_file_ = file_dst_path;
+  }
+
+  LOG4CXX_DEBUG(logger_, "Binary data ok.");
 
   if (mobile_apis::RequestType::QUERY_APPS == request_type) {
     using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
 
-    const std::string json(binary_data.begin(), binary_data.end());
-    Json::Value value;
-    Json::Reader reader;
-    if (!reader.parse(json.c_str(), value)) {
-      LOG4CXX_ERROR(logger_, "Can't parse json received from QueryApps.");
-      return;
-    }
-
     smart_objects::SmartObject sm_object;
-    CFormatterJsonBase::jsonValueToObj(value, sm_object);
-
-    if (!ValidateQueryAppData(sm_object)) {
-      SendResponse(false, mobile_apis::Result::INVALID_DATA);
-      return;
-    }
-
+    CFormatterJsonBase::jsonValueToObj(Json::Value(
+                                         std::string(binary_data.begin(),
+                                                     binary_data.end())),
+                                       sm_object);
     ApplicationManagerImpl::instance()->ProcessQueryApp(sm_object,
                                                         connection_key());
-    SendResponse(true, mobile_apis::Result::SUCCESS);
     return;
-  }
-
-  std::string file_path = profile::Profile::instance()->system_files_path();
-  if (!file_system::CreateDirectoryRecursively(file_path)) {
-    LOG4CXX_ERROR(logger_, "Cann't create folder.");
-    SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
-    return;
-  }
-
-  std::string file_name = "SYNC";
-  if ((*message_)[strings::msg_params].keyExists(strings::file_name)) {
-    file_name = (*message_)[strings::msg_params][strings::file_name].asString();
-  }
-
-  // to avoid override existing file
-  const uint8_t max_size = 255;
-  char buf[max_size] = {'\0'};
-  snprintf(buf, sizeof(buf)/sizeof(buf[0]), "%d%s", index++, file_name.c_str());
-  file_name = buf;
-
-  std::string full_file_path = file_path + "/" + file_name;
-  if (binary_data.size()) {
-    if (mobile_apis::Result::SUCCESS  !=
-        (ApplicationManagerImpl::instance()->SaveBinary(
-            binary_data, file_path, file_name, 0))) {
-      SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
-      return;
-    }
-  } else {
-    if (!(file_system::CreateFile(full_file_path))) {
-      SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
-      return;
-    }
   }
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
-  if (std::string::npos != file_name.find("IVSU")) {
+  if (std::string::npos != file_name.find(kIVSU)) {
     msg_params[strings::file_name] = file_name.c_str();
   } else {
-    msg_params[strings::file_name] = full_file_path;
+    msg_params[strings::file_name] = file_dst_path;
   }
 
   if (mobile_apis::RequestType::PROPRIETARY != request_type) {
@@ -182,6 +197,10 @@ void SystemRequest::on_event(const event_engine::Event& event) {
         return;
       }
 
+      if (!processing_file_.empty()) {
+        file_system::DeleteFile(processing_file_);
+        processing_file_.clear();
+      }
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
       break;
     }

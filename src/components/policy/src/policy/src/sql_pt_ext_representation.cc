@@ -472,7 +472,7 @@ bool SQLPTExtRepresentation::SetUserPermissionsForApp(
 }
 
 std::vector<UserFriendlyMessage> SQLPTExtRepresentation::GetUserFriendlyMsg(
-  const std::vector<std::string>& msg_codes, const std::string& language) {  
+  const std::vector<std::string>& msg_codes, const std::string& language) {
   dbms::SQLQuery query(db());
   std::vector<UserFriendlyMessage> result;
   if (!query.Prepare(sql_pt_ext::kSelectFriendlyMsg)) {
@@ -614,8 +614,8 @@ bool SQLPTExtRepresentation::SetSystemLanguage(const std::string& language) {
   return true;
 }
 
-bool SQLPTExtRepresentation::SaveApplicationPolicies(
-  const policy_table::ApplicationPolicies& apps) {
+bool SQLPTExtRepresentation::SaveApplicationPoliciesSection(
+    const policy_table::ApplicationPoliciesSection& policies) {
   LOG4CXX_INFO(logger_, "SaveApplicationPolicies ext");
   dbms::SQLQuery query_delete(db());
   if (!query_delete.Exec(sql_pt::kDeleteAppGroup)) {
@@ -634,33 +634,35 @@ bool SQLPTExtRepresentation::SaveApplicationPolicies(
     return false;
   }
 
+  if (!query_delete.Exec(sql_pt::kDeleteRequestType)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from request type.");
+    return false;
+  }
+
   // First, all predefined apps (e.g. default, pre_DataConsent) should be saved,
   // otherwise another app with the predefined permissions can get incorrect
   // permissions
   policy_table::ApplicationPolicies::const_iterator it_default =
-      apps.find(kDefaultId);
-  if (apps.end() != it_default) {
+      policies.apps.find(kDefaultId);
+  if (policies.apps.end() != it_default) {
     if (!SaveSpecificAppPolicy(*it_default)) {
       return false;
     }
   }
   policy_table::ApplicationPolicies::const_iterator it_pre_data_consent =
-      apps.find(kPreDataConsentId);
-  if (apps.end() != it_pre_data_consent) {
+      policies.apps.find(kPreDataConsentId);
+  if (policies.apps.end() != it_pre_data_consent) {
     if (!SaveSpecificAppPolicy(*it_pre_data_consent)) {
       return false;
     }
   }
-  policy_table::ApplicationPolicies::const_iterator it_device =
-      apps.find(kDeviceId);
-  if (apps.end() != it_device) {
-    if (!SaveSpecificAppPolicy(*it_device)) {
-      return false;
-    }
+
+  if (!SaveDevicePolicy(policies.device)) {
+    return false;
   }
 
-  policy_table::ApplicationPolicies::const_iterator it;  
-  for (it = apps.begin(); it != apps.end(); ++it) {
+  policy_table::ApplicationPolicies::const_iterator it;
+  for (it = policies.apps.begin(); it != policies.apps.end(); ++it) {
     // Skip saving of predefined app, since they should be saved before
     if (IsPredefinedApp(*it)) {
       continue;
@@ -680,8 +682,14 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
       if (!SetDefaultPolicy(app.first)) {
         return false;
       }
+      if (!SaveRequestType(app.first, *app.second.RequestType)) {
+        return false;
+      }
     } else if (kPreDataConsentId.compare(app.second.get_string()) == 0) {
       if (!SetPredataPolicy(app.first)) {
+        return false;
+      }
+      if (!SaveRequestType(app.first, *app.second.RequestType)) {
         return false;
       }
     }
@@ -737,8 +745,42 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   return true;
 }
 
-bool SQLPTExtRepresentation::GatherApplicationPolicies(
-  policy_table::ApplicationPolicies* apps) const {
+bool policy::SQLPTExtRepresentation::SaveDevicePolicy(
+    const policy_table::DevicePolicy& device) {
+  dbms::SQLQuery app_query(db());
+  if (!app_query.Prepare(sql_pt_ext::kInsertApplication)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement into application (device).");
+    return false;
+  }
+  app_query.Bind(0, kDeviceId);
+  app_query.Bind(1, device.keep_context);
+  app_query.Bind(2, device.steal_focus);
+  app_query.Bind(
+    3, std::string(policy_table::EnumToJsonString(device.default_hmi)));
+  app_query.Bind(
+    4, std::string(policy_table::EnumToJsonString(device.priority)));
+  app_query.Bind(5, false);
+  app_query.Bind(6, 0);
+  app_query.Bind(7, 0);
+  app_query.Bind(8, std::string());
+
+  if (!app_query.Exec() || !app_query.Reset()) {
+    LOG4CXX_WARN(logger_, "Incorrect insert into application.");
+    return false;
+  }
+
+  if (!SaveAppGroup(kDeviceId, device.groups)) {
+    return false;
+  }
+  if (!SavePreconsentedGroup(kDeviceId, *device.preconsented_groups)) {
+    return false;
+  }
+
+  return true;
+}
+
+bool SQLPTExtRepresentation::GatherApplicationPoliciesSection(
+    policy_table::ApplicationPoliciesSection* policies) const {
   LOG4CXX_INFO(logger_, "Gather applications policies");
   dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectAppPolicies)) {
@@ -751,14 +793,31 @@ bool SQLPTExtRepresentation::GatherApplicationPolicies(
     const std::string& app_id = query.GetString(0);
     if (IsApplicationRevoked(app_id)) {
       params.set_to_null();
-      (*apps)[app_id] = params;
+      (*policies).apps[app_id] = params;
       continue;
     }
     if (IsDefaultPolicy(app_id)) {
-      (*apps)[app_id].set_to_string(kDefaultId);
+      (*policies).apps[app_id].set_to_string(kDefaultId);
     }
     if (IsPredataPolicy(app_id)) {
-      (*apps)[app_id].set_to_string(kPreDataConsentId);
+      (*policies).apps[app_id].set_to_string(kPreDataConsentId);
+    }
+    if (kDeviceId == app_id) {
+      policy_table::DevicePolicy device_policy;
+      policy_table::Priority priority;
+      policy_table::EnumFromJsonString(query.GetString(1), &priority);
+      device_policy.priority = priority;
+      policy_table::HmiLevel hmi;
+      policy_table::EnumFromJsonString(query.GetString(2), &hmi);
+      device_policy.default_hmi = hmi;
+      device_policy.keep_context = query.GetBoolean(3);
+      device_policy.steal_focus = query.GetBoolean(4);
+      if (!GatherAppGroup(app_id, &device_policy.groups)) {
+        return false;
+      }
+      GatherPreconsentedGroup(app_id, &*device_policy.preconsented_groups);
+      (*policies).device = device_policy;
+      continue;
     }
     policy_table::Priority priority;
     policy_table::EnumFromJsonString(query.GetString(1), &priority);
@@ -776,17 +835,17 @@ bool SQLPTExtRepresentation::GatherApplicationPolicies(
     if (!GatherAppGroup(app_id, &params.groups)) {
       return false;
     }
-    // TODO(IKozyrenko): Check logic if optional container is missing
     if (!GatherNickName(app_id, &*params.nicknames)) {
       return false;
     }
-    // TODO(IKozyrenko): Check logic if optional container is missing
     if (!GatherAppType(app_id, &*params.AppHMIType)) {
       return false;
     }
-    // TODO(IKozyrenko): Check logic if optional container is missing
+    if (!GatherRequestType(app_id, &*params.RequestType)) {
+      return false;
+    }
     GatherPreconsentedGroup(app_id, &*params.preconsented_groups);
-    (*apps)[app_id] = params;
+    (*policies).apps[app_id] = params;
   }
   return true;
 }
@@ -936,8 +995,8 @@ const policy_table::DeviceData& devices) {
   dbms::SQLQuery drop_device_query(db());
   const std::string drop_device = "DELETE FROM `device`";
   if (!drop_device_query.Exec(drop_device)) {
-	LOG4CXX_WARN(logger_, "Could not clear device table.");
-	return false;
+    LOG4CXX_WARN(logger_, "Could not clear device table.");
+    return false;
   }
 
   dbms::SQLQuery drop_device_consents_query(db());

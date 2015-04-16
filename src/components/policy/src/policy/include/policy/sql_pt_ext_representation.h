@@ -139,15 +139,17 @@ class SQLPTExtRepresentation : public SQLPTRepresentation,
     void GatherDeviceData(policy_table::DeviceData* data) const;
     void GatherConsentGroup(const std::string& device_id,
                             policy_table::UserConsentRecords* records) const;
-    bool GatherApplicationPolicies(policy_table::ApplicationPolicies* apps) const;
+    bool GatherApplicationPoliciesSection(
+        policy_table::ApplicationPoliciesSection* policies) const;
     bool SaveDeviceData(const policy_table::DeviceData& devices);
     bool GatherConsumerFriendlyMessages(
         policy_table::ConsumerFriendlyMessages* messages) const;
     bool SaveConsentGroup(const std::string& device_id,
                           const policy_table::UserConsentRecords& records);
-    bool SaveApplicationPolicies(const policy_table::ApplicationPolicies& apps);
+    bool SaveApplicationPoliciesSection(const policy_table::ApplicationPoliciesSection& policies);
     bool SaveSpecificAppPolicy(
         const policy_table::ApplicationPolicies::value_type& app);
+    bool SaveDevicePolicy(const policy_table::DevicePolicy& device);
     bool SavePreconsentedGroup(const std::string& app_id,
                                const policy_table::Strings& groups);
     bool SaveMessageString(const std::string& type, const std::string& lang,

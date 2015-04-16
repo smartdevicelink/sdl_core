@@ -79,6 +79,34 @@ bool IsValidEnum(AppHMIType val);
 const char* EnumToJsonString(AppHMIType val);
 bool EnumFromJsonString(const std::string& literal, AppHMIType* result);
 
+
+enum RequestType {
+  RT_HTTP,
+  RT_FILE_RESUME,
+  RT_AUTH_REQUEST,
+  RT_AUTH_CHALLENGE,
+  RT_AUTH_ACK,
+  RT_PROPRIETARY,
+  RT_QUERY_APPS,
+  RT_LAUNCH_APP,
+  RT_LOCK_SCREEN_ICON_URL,
+  RT_TRAFFIC_MESSAGE_CHANNEL,
+  RT_DRIVER_PROFILE,
+  RT_VOICE_SEARCH,
+  RT_NAVIGATION,
+  RT_PHONE,
+  RT_CLIMATE,
+  RT_SETTINGS,
+  RT_VEHICLE_DIAGNOSTICS,
+  RT_EMERGENCY,
+  RT_MEDIA,
+  RT_FOTA
+};
+
+bool IsValidEnum(RequestType val);
+const char* EnumToJsonString(RequestType val);
+bool EnumFromJsonString(const std::string& literal, RequestType* result);
+
 extern const std::string kDefaultApp;
 extern const std::string kPreDataConsentApp;
 extern const std::string kDeviceApp;
