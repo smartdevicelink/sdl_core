@@ -70,6 +70,13 @@ void SubscribeButtonRequest::Run() {
     return;
   }
 
+  if (!CheckHMICapabilities(btn_id)) {
+    LOG4CXX_ERROR_EXT(logger_, "Subscribe on button " << btn_id
+                      << " isn't allowed by HMI capabilities");
+    SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
+    return;
+  }
+
   if (app->IsSubscribedToButton(btn_id)) {
     LOG4CXX_ERROR_EXT(logger_, "Already subscribed to button " << btn_id);
     SendResponse(false, mobile_apis::Result::IGNORED);
@@ -95,6 +102,37 @@ bool SubscribeButtonRequest::IsSubscriptionAllowed(
   }
 
   return true;
+}
+
+bool SubscribeButtonRequest::CheckHMICapabilities(
+    mobile_apis::ButtonName::eType button) {
+  using namespace smart_objects;
+  using namespace mobile_apis;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
+  DCHECK_OR_RETURN(app_mgr, false);
+
+  const HMICapabilities& hmi_caps = app_mgr->hmi_capabilities();
+  if (!hmi_caps.is_ui_cooperating()) {
+    LOG4CXX_ERROR_EXT(logger_, "UI is not supported by HMI.");
+    return false;
+  }
+
+  const SmartObject* button_caps_ptr = hmi_caps.button_capabilities();
+  if (button_caps_ptr) {
+    const SmartObject& button_caps = *button_caps_ptr;
+    const size_t length = button_caps.length();
+    for (size_t i = 0; i < length; ++i) {
+      const SmartObject& caps = button_caps[i];
+      const ButtonName::eType name =
+          static_cast<ButtonName::eType>(caps.getElement(hmi_response::button_name).asInt());
+      if (name == button) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 void SubscribeButtonRequest::SendSubscribeButtonNotification() {
