@@ -76,7 +76,7 @@ class SubscribeButtonRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise false
    **/
-  bool IsSubscribtionAllowed(ApplicationSharedPtr app,
+  bool IsSubscriptionAllowed(ApplicationSharedPtr app,
                              const mobile_apis::ButtonName::eType btn_id);
 
   /**

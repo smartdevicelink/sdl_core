@@ -63,7 +63,7 @@ void SubscribeButtonRequest::Run() {
       static_cast<mobile_apis::ButtonName::eType>(
           (*message_)[str::msg_params][str::button_name].asUInt());
 
-  if (!IsSubscribtionAllowed(app, btn_id)) {
+  if (!IsSubscriptionAllowed(app, btn_id)) {
     LOG4CXX_ERROR_EXT(logger_, "Subscribe on button " << btn_id
                       << " isn't allowed");
     SendResponse(false, mobile_apis::Result::REJECTED);
@@ -83,7 +83,7 @@ void SubscribeButtonRequest::Run() {
   app->UpdateHash();
 }
 
-bool SubscribeButtonRequest::IsSubscribtionAllowed(
+bool SubscribeButtonRequest::IsSubscriptionAllowed(
     ApplicationSharedPtr app, mobile_apis::ButtonName::eType btn_id) {
 
   if (!app->is_media_application() &&
