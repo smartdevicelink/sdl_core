@@ -44,7 +44,8 @@ const int32_t CommandImpl::protocol_version_ = 3;
 
 CommandImpl::CommandImpl(const MessageSharedPtr& message)
     : message_(message),
-      default_timeout_(profile::Profile::instance()->default_timeout()) {
+      default_timeout_(profile::Profile::instance()->default_timeout()),
+      allowed_to_terminate_(true) {
 }
 
 CommandImpl::~CommandImpl() {

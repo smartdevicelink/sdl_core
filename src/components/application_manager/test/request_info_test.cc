@@ -21,6 +21,8 @@ class  MockRequest: public application_manager::commands::Command {
     MOCK_CONST_METHOD0(default_timeout, uint32_t ());
     MOCK_CONST_METHOD0(function_id, int32_t ());
     MOCK_METHOD0(onTimeOut, void ());
+    MOCK_METHOD0(AllowedToTerminate, bool ());
+    MOCK_METHOD1(SetAllowedToTerminate, void (bool));
 
     uint32_t connection_key_;
     uint32_t correlation_id_;

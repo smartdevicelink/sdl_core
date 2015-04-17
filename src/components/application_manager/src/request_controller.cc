@@ -222,29 +222,34 @@ void RequestController::removeNotification(
 
 void RequestController::terminateRequest(
     const uint32_t& correlation_id,
-    const uint32_t& connection_key) {
+    const uint32_t& connection_key, bool force_terminate) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "correlation_id = " << correlation_id
-                << " connection_key = " << connection_key);
+                << " connection_key = " << connection_key
+                << " force_terminate = " << force_terminate);
   RequestInfoPtr request = waiting_for_response_.Find(connection_key,
                                                       correlation_id);
   if (request) {
-    waiting_for_response_.RemoveRequest(request);
+    if (force_terminate ||
+        request->request()->AllowedToTerminate()) {
+      waiting_for_response_.RemoveRequest(request);
+    } else {
+      LOG4CXX_WARN(logger_, "Request was not terminated");
+    }
     UpdateTimer();
   } else {
-    LOG4CXX_WARN(logger_, "Request not found in waiting_for_response_ : "
-                 << correlation_id);
+    LOG4CXX_WARN(logger_, "Request not found in waiting_for_response_");
   }
 }
 
-void RequestController::terminateMobileRequest(
+void RequestController::OnMobileResponse(
     const uint32_t& mobile_correlation_id,
     const uint32_t& connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
   terminateRequest(mobile_correlation_id, connection_key);
 }
 
-void RequestController::terminateHMIRequest(const uint32_t &correlation_id) {
+void RequestController::OnHMIResponse(const uint32_t &correlation_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   terminateRequest(correlation_id, RequestInfo::HmiConnectoinKey);
 }

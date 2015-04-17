@@ -318,7 +318,7 @@ class ResumeCtrl: public event_engine::EventObserver {
 
     Json::Value JsonFromSO(const smart_objects::SmartObject *so);
 
-    void SendHMIRequest(const hmi_apis::FunctionID::eType& function_id,
+   uint32_t SendHMIRequest(const hmi_apis::FunctionID::eType& function_id,
                         const smart_objects::SmartObject* msg_params = NULL,
                         bool use_events = false);
 
