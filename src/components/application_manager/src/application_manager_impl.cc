@@ -771,6 +771,7 @@ void application_manager::ApplicationManagerImpl::MarkAppsGreyOut(
   }
 }
 
+
 void ApplicationManagerImpl::OnErrorSending(
   hmi_message_handler::MessageSharedPointer message) {
   return;
@@ -2467,7 +2468,7 @@ void ApplicationManagerImpl::NaviAppStreamStatus(bool stream_active) {
   using namespace mobile_apis;
   if(active_app && active_app->is_media_application()) {
     LOG4CXX_DEBUG(logger_, "Stream status: " << active_app->app_id());
-    SetState(active_app,
+    SetState(active_app->app_id(),
              stream_active ? AudioStreamingState::ATTENUATED :
              AudioStreamingState::AUDIBLE);
   }
