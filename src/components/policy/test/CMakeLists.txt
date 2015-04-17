@@ -63,6 +63,12 @@ set(testSources
     sql_pt_representation_test.cc
   )
 
+if (REMOTE_CONTROL)
+  list (APPEND testSources
+    access_remote_impl_test.cc
+  )
+endif ()
+
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   list(REMOVE_ITEM testLibraries dl)
   # --- Tests for QDB Wrapper

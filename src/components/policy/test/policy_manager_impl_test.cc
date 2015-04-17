@@ -36,10 +36,11 @@
 #include "mock_pt_ext_representation.h"
 #include "mock_cache_manager.h"
 #include "mock_update_status_manager.h"
+#include "policy/policy_manager_impl.h"
+
 #ifdef SDL_REMOTE_CONTROL
 #  include "mock_access_remote.h"
 #endif  // SDL_REMOTE_CONTROL
-#include "policy/policy_manager_impl.h"
 
 using ::testing::_;
 using ::testing::Return;
@@ -47,18 +48,6 @@ using ::testing::DoAll;
 using ::testing::SetArgReferee;
 using ::testing::NiceMock;
 using ::testing::AtLeast;
-
-using ::policy::PTRepresentation;
-using ::policy::MockPolicyListener;
-using ::policy::MockPTRepresentation;
-using ::policy::MockPTExtRepresentation;
-using ::policy::MockCacheManagerInterface;
-using ::policy::MockAccessRemote;
-using ::policy::MockUpdateStatusManager;
-
-using ::policy::PolicyManagerImpl;
-using ::policy::PolicyTable;
-using ::policy::EndpointUrls;
 
 namespace policy_table = rpc::policy_table_interface_base;
 

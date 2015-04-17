@@ -33,7 +33,6 @@
 #include <algorithm>
 
 #include "policy/access_remote_impl.h"
-#include "policy/cache_manager.h"
 #include "types.h"
 #include "utils/logger.h"
 
@@ -126,6 +125,13 @@ struct Match {
     return true;
   }
 };
+
+AccessRemoteImpl::AccessRemoteImpl()
+    : cache_(new CacheManager()),
+      primary_device_(),
+      enabled_(true),
+      acl_() {
+}
 
 AccessRemoteImpl::AccessRemoteImpl(utils::SharedPtr<CacheManager> cache)
     : cache_(cache),

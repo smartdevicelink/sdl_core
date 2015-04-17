@@ -33,15 +33,16 @@
 #define SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ACCESS_REMOTE_IMPL_H_
 
 #include <map>
+#include "utils/macro.h"
 #include "utils/shared_ptr.h"
 #include "policy/access_remote.h"
+#include "policy/cache_manager.h"
 
 namespace policy {
 
-class CacheManager;
-
 class AccessRemoteImpl : public AccessRemote {
  public:
+  AccessRemoteImpl();
   explicit AccessRemoteImpl(utils::SharedPtr<CacheManager> cache);
 
   virtual void Init();
@@ -75,6 +76,17 @@ class AccessRemoteImpl : public AccessRemote {
 
   friend struct Erase;
   friend struct IsTypeAccess;
+
+  FRIEND_TEST(AccessRemoteImplTest, KeyMapTest);
+  FRIEND_TEST(AccessRemoteImplTest, Allow);
+  FRIEND_TEST(AccessRemoteImplTest, Deny);
+  FRIEND_TEST(AccessRemoteImplTest, ChangeAccess);
+  FRIEND_TEST(AccessRemoteImplTest, ResetBySubject);
+  FRIEND_TEST(AccessRemoteImplTest, ResetByObject);
+  FRIEND_TEST(AccessRemoteImplTest, CheckAllowed);
+  FRIEND_TEST(AccessRemoteImplTest, CheckDisallowed);
+  FRIEND_TEST(AccessRemoteImplTest, CheckManual);
+
 };
 
 }  // namespace policy
