@@ -280,7 +280,7 @@ std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
   return apps;
 }
 
-bool ApplicationManagerImpl::DoesAudioAppWithSameHMITypeExistInFullOrLimited(
+bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
     ApplicationSharedPtr app) const {
   bool voice_state = app->is_voice_communication_supported();
   bool media_state = app->is_media_application();
@@ -465,9 +465,9 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   apps_to_register_list_lock_.Release();
 
   if (!application->hmi_app_id()) {
-    resume_ctrl_.IsApplicationSaved(application->mobile_app_id())?
-              resume_ctrl_.GetHMIApplicationID(application->mobile_app_id()) :
-          GenerateNewHMIAppID();
+    const bool is_saved = resume_ctrl_.IsApplicationSaved(mobile_app_id);
+    application->set_hmi_application_id(is_saved ?
+              resume_ctrl_.GetHMIApplicationID(mobile_app_id) : GenerateNewHMIAppID());
   }
 
   ApplicationListAccessor app_list_accesor;
@@ -491,6 +491,7 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(app, false);
 
+
   HMILevel::eType hmi_level = HMILevel::HMI_FULL;
   AudioStreamingState::eType audio_state;
   app->IsAudioApplication() ? audio_state = AudioStreamingState::AUDIBLE :
@@ -509,10 +510,8 @@ mobile_api::HMILevel::eType ApplicationManagerImpl::IsHmiLevelFullAllowed(
   }
   bool is_audio_app = app->IsAudioApplication();
   bool does_audio_app_with_same_type_exist =
-      DoesAudioAppWithSameHMITypeExistInFullOrLimited(app);
+      IsAppTypeExistsInFullOrLimited(app);
   bool is_active_app_exist = active_application().valid();
-
-
 
   mobile_api::HMILevel::eType result = mobile_api::HMILevel::HMI_FULL;
   if (is_audio_app && does_audio_app_with_same_type_exist) {

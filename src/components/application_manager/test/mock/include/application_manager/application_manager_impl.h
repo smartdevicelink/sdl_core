@@ -209,6 +209,7 @@ class ApplicationManagerImpl : public ApplicationManager,
   MOCK_METHOD1(HeadUnitReset, void(mobile_api::AppInterfaceUnregisteredReason::eType));
   MOCK_METHOD1(LoadAppDataToHMI, bool(ApplicationSharedPtr));
   MOCK_METHOD1(ActivateApplication, bool (ApplicationSharedPtr));
+  MOCK_METHOD1(DeactivateApplication, bool (ApplicationSharedPtr));
   MOCK_METHOD1(IsHmiLevelFullAllowed, mobile_api::HMILevel::eType (ApplicationSharedPtr));
   MOCK_METHOD2(UnregisterRevokedApplication, void(uint32_t, mobile_apis::Result::eType));
   MOCK_METHOD1(SetUnregisterAllApplicationsReason, void(mobile_api::AppInterfaceUnregisteredReason::eType));
@@ -298,7 +299,7 @@ class ApplicationManagerImpl : public ApplicationManager,
   MOCK_CONST_METHOD0(get_limited_media_application, ApplicationSharedPtr());
   MOCK_CONST_METHOD0(get_limited_navi_application, ApplicationSharedPtr());
   MOCK_CONST_METHOD0(get_limited_voice_application, ApplicationSharedPtr());
-  MOCK_CONST_METHOD1(DoesAudioAppWithSameHMITypeExistInFullOrLimited, bool(ApplicationSharedPtr));
+  MOCK_CONST_METHOD1(IsAppTypeExistsInFullOrLimited, bool(ApplicationSharedPtr));
   MOCK_CONST_METHOD0(active_application, ApplicationSharedPtr ());
   MOCK_METHOD0(OnApplicationListUpdateTimer, void());
   MOCK_METHOD0(OnLowVoltage, void());

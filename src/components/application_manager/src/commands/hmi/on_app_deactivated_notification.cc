@@ -51,33 +51,40 @@ OnAppDeactivatedNotification::~OnAppDeactivatedNotification() {
 
 void OnAppDeactivatedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+
   uint32_t app_id = (*message_)[strings::msg_params][strings::app_id].asUInt();
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(app_id);
+
   if (!app.valid()) {
-    LOG4CXX_ERROR(logger_, "Application not found, id="<<app_id);
+    LOG4CXX_ERROR(logger_, "Application with id " << app_id << " not found");
     return;
   }
 
-  using namespace mobile_apis::HMILevel;
+  using namespace hmi_apis;
+  using namespace mobile_apis;
   using namespace helpers;
-  if (!(((hmi_apis::Common_DeactivateReason::AUDIO ==
-      (*message_)[strings::msg_params][hmi_request::reason].asInt()) ||
-      (hmi_apis::Common_DeactivateReason::PHONECALL ==
-            (*message_)[strings::msg_params][hmi_request::reason].asInt())) &&
-      (app->hmi_level() == HMI_LIMITED))) {
+
+  Common_DeactivateReason::eType deactivate_reason =
+      static_cast<Common_DeactivateReason::eType>
+          ((*message_)[strings::msg_params][hmi_request::reason].asInt());
+
+  if (!((Common_DeactivateReason::AUDIO == deactivate_reason ||
+      Common_DeactivateReason::PHONECALL == deactivate_reason) &&
+      HMILevel::HMI_LIMITED == app->hmi_level())) {
     app = ApplicationManagerImpl::instance()->active_application();
+
     if (!app.valid()) {
-      LOG4CXX_ERROR_EXT(logger_, "OnAppDeactivatedNotification no active app!");
+      LOG4CXX_ERROR_EXT(logger_, "No active application");
       return;
     }
     if (app_id != app->app_id()) {
-      LOG4CXX_ERROR_EXT(logger_, "Wrong application id!");
+      LOG4CXX_ERROR_EXT(logger_, "Wrong application id");
       return;
     }
   }
 
-  if (HMI_NONE == app->hmi_level()) {
+  if (HMILevel::HMI_NONE == app->hmi_level()) {
     return;
   }
   HmiStatePtr regular = app->RegularHmiState();
