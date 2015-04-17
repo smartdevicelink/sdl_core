@@ -32,7 +32,6 @@
 
 #include "gtest/gtest.h"
 #include "policy/access_remote_impl.h"
-//#include "mock_cache_manager.h"
 
 namespace policy {
 
@@ -153,6 +152,28 @@ TEST(AccessRemoteImplTest, CheckManual) {
 
   access_remote.Deny(who1, what);
   EXPECT_EQ(TypeAccess::kManual, access_remote.Check(who, what));
+}
+
+TEST(AccessRemoteImplTest, MatchPredicate) {
+  policy_table::FunctionalGroupings groups;
+  policy_table::Rpc& rpcs = groups["group1"].rpcs;
+  policy_table::RpcParameters& rpc = rpcs["SetMaxVolume"];
+  rpc.parameters->push_back(policy_table::P_VIN);
+
+  RemoteControlParams empty;
+  RemoteControlParams vin;
+  vin.push_back("vin");
+  RemoteControlParams gps;
+  gps.push_back("gps");
+  RemoteControlParams wrong;
+  wrong.push_back("wrong");
+
+  EXPECT_TRUE(Match(groups, "SetMaxVolume", vin)("group1"));
+  EXPECT_FALSE(Match(groups, "Any", empty)("no-group"));
+  EXPECT_FALSE(Match(groups, "no-rpc", empty)("group1"));
+  EXPECT_FALSE(Match(groups, "SetMaxVolume", empty)("group1"));
+  EXPECT_FALSE(Match(groups, "SetMaxVolume", wrong)("group1"));
+  EXPECT_FALSE(Match(groups, "SetMaxVolume", gps)("group1"));
 }
 
 }  // namespace policy

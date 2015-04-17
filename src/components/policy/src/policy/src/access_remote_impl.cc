@@ -29,17 +29,15 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "policy/access_remote_impl.h"
 
 #include <algorithm>
 
-#include "policy/access_remote_impl.h"
-#include "types.h"
 #include "utils/logger.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyManagerImpl")
 
 using policy_table::DeviceData;
-using policy_table::FunctionalGroupings;
 using rpc::policy_table_interface_base::EnumFromJsonString;
 
 namespace policy {
@@ -87,44 +85,38 @@ struct IsTypeAccess {
   }
 };
 
-struct Match {
- private:
-  const FunctionalGroupings& groups_;
-  const PTString& rpc_;
-  const RemoteControlParams& params_;
- public:
-  Match(const FunctionalGroupings& groups, const PTString& rpc,
-        const RemoteControlParams& params)
-      : groups_(groups),
-        rpc_(rpc),
-        params_(params) {
+Match::Match(const FunctionalGroupings& groups, const PTString& rpc,
+      const RemoteControlParams& params)
+    : groups_(groups),
+      rpc_(rpc),
+      params_(params) {
+}
+
+bool Match::operator ()(const PTString& item) const {
+  const FunctionalGroupings::const_iterator i = groups_.find(item);
+  if (i == groups_.end()) {
+    return false;
   }
-  bool operator ()(const PTString& item) const {
-    const FunctionalGroupings::const_iterator i = groups_.find(item);
-    if (i == groups_.end()) {
-      return false;
-    }
-    const policy_table::Rpc::const_iterator j = i->second.rpcs.find(rpc_);
-    if (j == i->second.rpcs.end()) {
-      return false;
-    }
-    const policy_table::Parameters& params = *j->second.parameters;
-    if (params_.size() != params.size()) {
-      return false;
-    }
-    for (RemoteControlParams::const_iterator j = params_.begin();
-        j != params_.end(); ++j) {
-      policy_table::AppHMIType value;
-      if (EnumFromJsonString(*j, &value)) {
-        return false;
-      }
-      if (std::find(params.begin(), params.end(), value) == params.end()) {
-        return false;
-      }
-    }
-    return true;
+  const policy_table::Rpc::const_iterator j = i->second.rpcs.find(rpc_);
+  if (j == i->second.rpcs.end()) {
+    return false;
   }
-};
+  const policy_table::Parameters& params = *j->second.parameters;
+  if (params_.size() != params.size()) {
+    return false;
+  }
+  for (RemoteControlParams::const_iterator j = params_.begin();
+      j != params_.end(); ++j) {
+    policy_table::Parameter value;
+    if (!EnumFromJsonString(*j, &value)) {
+      return false;
+    }
+    if (std::find(params.begin(), params.end(), value) == params.end()) {
+      return false;
+    }
+  }
+  return true;
+}
 
 AccessRemoteImpl::AccessRemoteImpl()
     : cache_(new CacheManager()),

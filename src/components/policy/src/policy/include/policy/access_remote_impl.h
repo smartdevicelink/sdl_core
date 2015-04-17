@@ -33,12 +33,26 @@
 #define SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ACCESS_REMOTE_IMPL_H_
 
 #include <map>
+#include "types.h"
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
 #include "policy/access_remote.h"
 #include "policy/cache_manager.h"
 
+using policy_table::FunctionalGroupings;
+
 namespace policy {
+
+struct Match {
+ private:
+  const FunctionalGroupings& groups_;
+  const PTString& rpc_;
+  const RemoteControlParams& params_;
+ public:
+  Match(const FunctionalGroupings& groups, const PTString& rpc,
+        const RemoteControlParams& params);
+  bool operator ()(const PTString& item) const;
+};
 
 class AccessRemoteImpl : public AccessRemote {
  public:
@@ -86,7 +100,7 @@ class AccessRemoteImpl : public AccessRemote {
   FRIEND_TEST(AccessRemoteImplTest, CheckAllowed);
   FRIEND_TEST(AccessRemoteImplTest, CheckDisallowed);
   FRIEND_TEST(AccessRemoteImplTest, CheckManual);
-
+  FRIEND_TEST(AccessRemoteImplTest, SetPrimaryDevice);
 };
 
 }  // namespace policy
