@@ -45,7 +45,6 @@ set (LIBRARIES
 set(testSources
     ${COMPONENTS_DIR}/dbus/test/test_schema.cc
     ${COMPONENTS_DIR}/dbus/test/test_dbus_adapter.cc
-    ${COMPONENTS_DIR}/dbus/test/main.cc
 )
 
 create_test("test_DBus_test" "${testSources}" "${LIBRARIES}")

@@ -46,7 +46,6 @@ set(LIBRARIES
 
 set(SOURCES
 ${COMPONENTS_DIR}/formatters/test/generic_json_formatter_test.cc
-${COMPONENTS_DIR}/formatters/test/main.cc
 )
 
 create_test("generic_json_formatter_test" "${SOURCES}" "${LIBRARIES}")

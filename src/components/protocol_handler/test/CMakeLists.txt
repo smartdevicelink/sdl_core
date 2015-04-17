@@ -46,7 +46,6 @@ set(LIBRARIES
 )
 
 set(SOURCES
-  main.cc
   incoming_data_handler_test.cc
   protocol_header_validator_test.cc
   protocol_handler_tm_test.cc

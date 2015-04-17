@@ -73,6 +73,16 @@ ProtocolPacket::ProtocolHeader::ProtocolHeader(
     messageId(messageID) {
 }
 
+inline uint32_t read_be_uint32(const uint8_t* const data) {
+  // Int value read byte per byte
+  // reintercast for non-4 byte address alignment lead to UB on arm platform
+  uint32_t value = data[3];
+  value += (data[2] <<  8);
+  value += (data[1] << 16);
+  value += (data[0] << 24);
+  return value;
+}
+
 void ProtocolPacket::ProtocolHeader::deserialize(
     const uint8_t* message, const size_t messageSize) {
   if (messageSize < PROTOCOL_HEADER_V1_SIZE) {
@@ -90,8 +100,7 @@ void ProtocolPacket::ProtocolHeader::deserialize(
   sessionId   = message[3];
 
   // FIXME(EZamakhov): usage for FirstFrame message
-  const uint32_t data_size_be = *(reinterpret_cast<const uint32_t*>(message + 4));
-  dataSize = BE_TO_LE32(data_size_be);
+  dataSize = read_be_uint32(message + 4);
   switch (version) {
     case PROTOCOL_VERSION_2:
     case PROTOCOL_VERSION_3:
@@ -99,9 +108,7 @@ void ProtocolPacket::ProtocolHeader::deserialize(
         if (messageSize < PROTOCOL_HEADER_V2_SIZE) {
           return;
         }
-        const uint32_t message_id_be =
-            *(reinterpret_cast<const  uint32_t*>(message + 8));
-        messageId = BE_TO_LE32(message_id_be);
+        messageId = read_be_uint32(message + 8);
       }
       break;
     default:
@@ -410,7 +417,7 @@ void ProtocolPacket::set_total_data_bytes(size_t dataBytes) {
   if (dataBytes) {
     delete[] packet_data_.data;
     packet_data_.data = new (std::nothrow) uint8_t[dataBytes];
-    packet_data_.totalDataBytes = packet_data_.data ? dataBytes : 0;
+    packet_data_.totalDataBytes = packet_data_.data ? dataBytes : 0u;
   }
 }
 
@@ -424,7 +431,7 @@ void ProtocolPacket::set_data(
       memcpy(packet_data_.data, new_data, packet_data_.totalDataBytes);
     } else {
       // TODO(EZamakhov): add log info about memory problem
-      packet_header_.dataSize = packet_data_.totalDataBytes = 0;
+      packet_header_.dataSize = packet_data_.totalDataBytes = 0u;
     }
   }
 }

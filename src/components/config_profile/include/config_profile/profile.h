@@ -475,6 +475,12 @@ class Profile : public utils::Singleton<Profile> {
 
     size_t message_frequency_time() const;
 
+    bool malformed_message_filtering() const;
+
+    size_t malformed_frequency_count() const;
+
+    size_t malformed_frequency_time() const;
+
     uint16_t attempts_to_open_policy_db() const;
 
     uint16_t open_attempt_timeout_ms() const;

@@ -43,11 +43,11 @@ set_property(DIRECTORY "" PROPERTY INCLUDE_DIRECTORIES ${the_include_dirs})
 include_directories(
   ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/include
   ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/gtest/include
+  ${COMPONENTS_DIR}/application_manager/include/application_manager/
   ${COMPONENTS_DIR}/application_manager/include/application_manager/policies
 )
 
 set(testSources
-  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/src/gmock_main.cc
   ${AM_TEST_DIR}/command_impl_test.cc  
   ${COMPONENTS_DIR}/application_manager/test/mobile_message_handler_test.cc
   ${AM_TEST_DIR}/request_info_test.cc
@@ -82,11 +82,9 @@ set(AM_SOURCES
   ${AM_SOURCE_DIR}/src/resume_ctrl.cpp
   ${AM_SOURCE_DIR}/src/mobile_message_handler.cc
 )
-
   include_directories(
     ${AM_SOURCE_DIR}/policy/src/policy/policy_table/table_struct
   )
-
 set(testLibraries
   gmock
   gmock_main
@@ -122,7 +120,7 @@ if(ENABLE_LOG)
   list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
 endif()
 
-add_library("ApplicationManagerTest" ${mockedSources} ${testSources} ${AM_SOURCES})
+add_library("ApplicationManagerTest" ${mockedSources} ${testSources})
 
 target_link_libraries("ApplicationManagerTest" ${testLibraries} AMHMICommandsLibrary
                                                                 AMMobileCommandsLibrary
@@ -130,7 +128,17 @@ target_link_libraries("ApplicationManagerTest" ${testLibraries} AMHMICommandsLib
                                                                 AMPolicyLibrary)
 
 create_test("application_manager_test" "${testSources}" "${ApplicationManagerTest}")
-target_link_libraries("application_manager_test" ApplicationManagerTest ${test_exec_libraries})
+target_link_libraries("application_manager_test"
+  ApplicationManagerTest ${test_exec_libraries}
+  ApplicationManager
+  ProtocolLibrary
+  connectionHandler
+  ConfigProfile
+  jsoncpp
+  MediaManager
+  ProtocolHandler
+  Resumption
+)
 
 #add_executable(application_manager_test ${testSources})
 #target_link_libraries(application_manager_test ApplicationManagerTest ${test_exec_libraries})

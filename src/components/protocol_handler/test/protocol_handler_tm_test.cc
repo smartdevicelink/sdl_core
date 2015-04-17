@@ -60,21 +60,26 @@ using ::testing::Invoke;
 
 class ProtocolHandlerImplTest : public ::testing::Test {
  protected:
-  void IntitProtocolHandlerImpl(const size_t period_msec,
-                                const size_t max_messages) {
+  void InitProtocolHandlerImpl(
+      const size_t period_msec, const size_t max_messages,
+      bool malformed_message_filtering = false,
+      const size_t malformd_period_msec = 0u,
+      const size_t malformd_max_messages = 0u) {
     protocol_handler_impl.reset(
-        new ProtocolHandlerImpl(&transport_manager_mock, period_msec,
-                                max_messages));
+        new ProtocolHandlerImpl(&transport_manager_mock,
+                                period_msec, max_messages,
+                                malformed_message_filtering,
+                                malformd_period_msec, malformd_max_messages));
     protocol_handler_impl->set_session_observer(&session_observer_mock);
     tm_listener = protocol_handler_impl.get();
   }
   void SetUp() OVERRIDE {
-    IntitProtocolHandlerImpl(0u, 0u);
+    InitProtocolHandlerImpl(0u, 0u);
     connection_id = 0xAu;
     session_id = 0xFFu;
     connection_key = 0xFF00AAu;
     message_id = 0xABCDEFu;
-    some_date.resize(256, 0xAB);
+    some_data.resize(256, 0xAB);
 
     // expect ConnectionHandler support methods call (conversion, check heartbeat)
     EXPECT_CALL(session_observer_mock,
@@ -159,7 +164,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   // uniq id as connection_id and session_id in one
   uint32_t connection_key;
   uint32_t message_id;
-  std::vector<uint8_t> some_date;
+  std::vector<uint8_t> some_data;
   // Strict mocks (same as all methods EXPECT_CALL().Times(0))
   testing::StrictMock<protocol_handler_test::TransportManagerMock> transport_manager_mock;
   testing::StrictMock<protocol_handler_test::SessionObserverMock> session_observer_mock;
@@ -192,10 +197,9 @@ TEST_F(ProtocolHandlerImplTest, RecieveEmptyRawMessage) {
 /*
  * ProtocolHandler shall disconnect on no connection
  */
-TEST_F(ProtocolHandlerImplTest, RecieveOnUnknownConenction) {
-  // expect malformed message callback call on no connection for received data
-  EXPECT_CALL(session_observer_mock,
-      OnMalformedMessageCallback(connection_id));
+TEST_F(ProtocolHandlerImplTest, RecieveOnUnknownConnection) {
+  EXPECT_CALL(transport_manager_mock, DisconnectForce(connection_id)).
+      WillOnce(Return(E_SUCCESS));
 
   SendTMMessage(connection_id, PROTOCOL_VERSION_3, PROTECTION_OFF,
                 FRAME_TYPE_CONTROL, kRpc, FRAME_DATA_START_SERVICE,
@@ -671,11 +675,13 @@ TEST_F(ProtocolHandlerImplTest,
 
   SendControlMessage(PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
 }
+#endif  // ENABLE_SECURITY
+
 TEST_F(ProtocolHandlerImplTest,
     FloodVerification) {
-  const size_t period_msec = 1000;
+  const size_t period_msec = 10000;
   const size_t max_messages = 1000;
-  IntitProtocolHandlerImpl(period_msec, max_messages);
+  InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
   AddSession();
 
@@ -687,14 +693,14 @@ TEST_F(ProtocolHandlerImplTest,
   for (size_t i = 0; i < max_messages + 1; ++i) {
     SendTMMessage(connection_id, PROTOCOL_VERSION_3, PROTECTION_OFF, FRAME_TYPE_SINGLE,
         kControl, FRAME_DATA_SINGLE, session_id,
-        some_date.size(), message_id, &some_date[0]);
+        some_data.size(), message_id, &some_data[0]);
   }
 }
 TEST_F(ProtocolHandlerImplTest,
     FloodVerification_ThresholdValue) {
-  const size_t period_msec = 1000;
+  const size_t period_msec = 10000;
   const size_t max_messages = 1000;
-  IntitProtocolHandlerImpl(period_msec, max_messages);
+  InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
   AddSession();
 
@@ -702,14 +708,14 @@ TEST_F(ProtocolHandlerImplTest,
   for (size_t i = 0; i < max_messages - 1; ++i) {
     SendTMMessage(connection_id, PROTOCOL_VERSION_3, PROTECTION_OFF, FRAME_TYPE_SINGLE,
         kControl, FRAME_DATA_SINGLE, session_id,
-        some_date.size(), message_id, &some_date[0]);
+        some_data.size(), message_id, &some_data[0]);
   }
 }
 TEST_F(ProtocolHandlerImplTest,
     FloodVerification_VideoFrameSkip) {
-  const size_t period_msec = 1000;
+  const size_t period_msec = 10000;
   const size_t max_messages = 1000;
-  IntitProtocolHandlerImpl(period_msec, max_messages);
+  InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
   AddSession();
 
@@ -717,14 +723,14 @@ TEST_F(ProtocolHandlerImplTest,
   for (size_t i = 0; i < max_messages + 1; ++i) {
     SendTMMessage(connection_id, PROTOCOL_VERSION_3, PROTECTION_OFF, FRAME_TYPE_SINGLE,
         kMobileNav, FRAME_DATA_SINGLE, session_id,
-        some_date.size(), message_id, &some_date[0]);
+        some_data.size(), message_id, &some_data[0]);
   }
 }
 TEST_F(ProtocolHandlerImplTest,
     FloodVerification_AudioFrameSkip) {
-  const size_t period_msec = 1000;
+  const size_t period_msec = 10000;
   const size_t max_messages = 1000;
-  IntitProtocolHandlerImpl(period_msec, max_messages);
+  InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
   AddSession();
 
@@ -732,14 +738,14 @@ TEST_F(ProtocolHandlerImplTest,
   for (size_t i = 0; i < max_messages + 1; ++i) {
     SendTMMessage(connection_id, PROTOCOL_VERSION_3, PROTECTION_OFF, FRAME_TYPE_SINGLE,
         kAudio, FRAME_DATA_SINGLE, session_id,
-        some_date.size(), message_id, &some_date[0]);
+        some_data.size(), message_id, &some_data[0]);
   }
 }
 TEST_F(ProtocolHandlerImplTest,
     FloodVerificationDisable) {
   const size_t period_msec = 0;
   const size_t max_messages = 0;
-  IntitProtocolHandlerImpl(period_msec, max_messages);
+  InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
   AddSession();
 
@@ -747,11 +753,175 @@ TEST_F(ProtocolHandlerImplTest,
   for (size_t i = 0; i < max_messages + 1; ++i) {
     SendTMMessage(connection_id, PROTOCOL_VERSION_3, PROTECTION_OFF, FRAME_TYPE_SINGLE,
         kControl, FRAME_DATA_SINGLE, session_id,
-        some_date.size(), message_id, &some_date[0]);
+        some_data.size(), message_id, &some_data[0]);
   }
 }
-#endif  // ENABLE_SECURITY
+
+
+TEST_F(ProtocolHandlerImplTest,
+       MalformedVerificationDisable) {
+  const size_t period_msec = 10000;
+  const size_t max_messages = 100;
+  InitProtocolHandlerImpl(0u, 0u, false, period_msec, max_messages);
+  AddConnection();
+  AddSession();
+
+  // expect malformed notification to CH
+  EXPECT_CALL(session_observer_mock,
+              OnMalformedMessageCallback(connection_id)).
+      Times(max_messages);
+
+  const uint8_t malformed_version = PROTOCOL_VERSION_MAX;
+  for (size_t i = 0; i < max_messages; ++i) {
+    SendTMMessage(connection_id, malformed_version, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+                  kControl, FRAME_DATA_SINGLE, session_id,
+                  some_data.size(), message_id, &some_data[0]);
+  }
 }
-  // namespace test
-} // namespace components
+
+TEST_F(ProtocolHandlerImplTest,
+       MalformedLimitVerification) {
+  const size_t period_msec = 10000;
+  const size_t max_messages = 100;
+  InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
+  AddConnection();
+  AddSession();
+
+  // expect malformed notification to CH
+  EXPECT_CALL(session_observer_mock,
+              OnMalformedMessageCallback(connection_id)).
+      Times(1);
+
+  // Sending malformed packets
+  const uint8_t malformed_version = PROTOCOL_VERSION_MAX;
+  for (size_t i = 0; i < max_messages * 2; ++i) {
+    // Malformed message
+    SendTMMessage(connection_id, malformed_version, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+                  kControl, FRAME_DATA_SINGLE, session_id,
+                  some_data.size(), message_id, &some_data[0]);
+    // Common message
+    SendTMMessage(connection_id, PROTOCOL_VERSION_1, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+                  kControl, FRAME_DATA_SINGLE, session_id,
+                  some_data.size(), message_id, &some_data[0]);
+  }
+}
+
+TEST_F(ProtocolHandlerImplTest,
+    MalformedLimitVerification_MalformedStock) {
+  const size_t period_msec = 10000;
+  const size_t max_messages = 100;
+  InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
+  AddConnection();
+  AddSession();
+
+  // expect malformed notification to CH
+  EXPECT_CALL(session_observer_mock,
+      OnMalformedMessageCallback(connection_id)).
+  Times(1);
+
+  // Sending malformed packets
+  const uint8_t malformed_version = PROTOCOL_VERSION_MAX;
+  const uint8_t malformed_frame_type = FRAME_TYPE_MAX_VALUE;
+  const uint8_t malformed_service_type = kInvalidServiceType;
+  for (size_t i = 0; i < max_messages * 2; ++i) {
+    // Malformed message 1
+    SendTMMessage(connection_id, malformed_version, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+        kControl, FRAME_DATA_SINGLE, session_id,
+        some_data.size(), message_id, &some_data[0]);
+    // Malformed message 2
+    SendTMMessage(connection_id, PROTOCOL_VERSION_1, PROTECTION_OFF, malformed_frame_type,
+        kControl, FRAME_DATA_SINGLE, session_id,
+        some_data.size(), message_id, &some_data[0]);
+    // Malformed message 3
+    SendTMMessage(connection_id, PROTOCOL_VERSION_1, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+        malformed_service_type, FRAME_DATA_SINGLE, session_id,
+        some_data.size(), message_id, &some_data[0]);
+
+    // Common message
+    SendTMMessage(connection_id, PROTOCOL_VERSION_1, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+                  kControl, FRAME_DATA_SINGLE, session_id,
+                  some_data.size(), message_id, &some_data[0]);
+  }
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       MalformedLimitVerification_MalformedOnly) {
+  const size_t period_msec = 10000;
+  const size_t max_messages = 100;
+  InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
+  AddConnection();
+  AddSession();
+
+  // expect NO malformed notification to CH
+  EXPECT_CALL(session_observer_mock,
+              OnMalformedMessageCallback(connection_id)).
+      Times(0);
+
+  // Sending malformed packets
+  const uint8_t malformed_version = PROTOCOL_VERSION_MAX;
+  const uint8_t malformed_frame_type = FRAME_TYPE_MAX_VALUE;
+  const uint8_t malformed_service_type = kInvalidServiceType;
+  for (size_t i = 0; i < max_messages * 2; ++i) {
+    // Malformed message 1
+    SendTMMessage(connection_id, malformed_version, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+                  kControl, FRAME_DATA_SINGLE, session_id,
+                  some_data.size(), message_id, &some_data[0]);
+    // Malformed message 2
+    SendTMMessage(connection_id, PROTOCOL_VERSION_1, PROTECTION_OFF, malformed_frame_type,
+                  kControl, FRAME_DATA_SINGLE, session_id,
+                  some_data.size(), message_id, &some_data[0]);
+    // Malformed message 3
+    SendTMMessage(connection_id, PROTOCOL_VERSION_1, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+                  malformed_service_type, FRAME_DATA_SINGLE, session_id,
+                  some_data.size(), message_id, &some_data[0]);
+
+    // No common message
+  }
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       MalformedLimitVerification_NullTimePeriod) {
+  const size_t period_msec = 0;
+  const size_t max_messages = 1000;
+  InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
+  AddConnection();
+  AddSession();
+
+  // expect no malformed notification to CH
+  EXPECT_CALL(session_observer_mock,
+              OnMalformedMessageCallback(connection_id)).
+      Times(0);
+
+  // Sending malformed packets
+  const uint8_t malformed_version = PROTOCOL_VERSION_MAX;
+  for (size_t i = 0; i < max_messages + 1; ++i) {
+    SendTMMessage(connection_id, malformed_version, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+                  kControl, FRAME_DATA_SINGLE, session_id,
+                  some_data.size(), message_id, &some_data[0]);
+  }
+}
+TEST_F(ProtocolHandlerImplTest,
+       MalformedLimitVerification_NullCount) {
+  const size_t period_msec = 10000;
+  const size_t max_messages = 0;
+  InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
+  AddConnection();
+  AddSession();
+
+  // expect no malformed notification to CH
+  EXPECT_CALL(session_observer_mock,
+              OnMalformedMessageCallback(connection_id)).
+      Times(0);
+
+  // Sending malformed packets
+  const uint8_t malformed_version = PROTOCOL_VERSION_MAX;
+  for (size_t i = 0; i < max_messages + 1; ++i) {
+    SendTMMessage(connection_id, malformed_version, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+                  kControl, FRAME_DATA_SINGLE, session_id,
+                  some_data.size(), message_id, &some_data[0]);
+  }
+}
+
+}  // namespace test
+}  // namespace components
 }  // namespace protocol_handler_test

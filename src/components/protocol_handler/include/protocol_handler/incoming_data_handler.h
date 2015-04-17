@@ -36,7 +36,7 @@
 #include <map>
 #include <vector>
 #include "utils/macro.h"
-#include "protocol_packet.h"
+#include "protocol_handler/protocol_packet.h"
 #include "transport_manager/common.h"
 
 namespace protocol_handler {
@@ -53,16 +53,21 @@ class IncomingDataHandler {
    * @brief Setting additional validator for checking malformed packets
    * \param validator pointer
    */
-  void set_validator(const ProtocolPacket::ProtocolHeaderValidator* const validator);
+  void set_validator(const ProtocolPacket::ProtocolHeaderValidator *const validator);
   /**
-   * @brief Contecat TM messages to ford frames and validate ford header data
+   * @brief Concatenate TM messages to ford frames and validate ford header data
    * \param TM messages for converting to frames
    * \param result of convertion
-   *   - RESULT_FAIL - packet serialization or validation error occurs
+   * \param malformed_occurrence count of malformed messages occurrence
    *   - RESULT_OK - no error ocures
+   *   - RESULT_MALFORMED_OCCURS - messages concatenated,
+   *                               but malformed message occurs
+   *   - RESULT_FAIL - packet serialization or validation error occurs
    * \return list of complete, correct packets
    */
-  std::list<ProtocolFramePtr> ProcessData(const RawMessage& tm_message, RESULT_CODE* result);
+  std::list<ProtocolFramePtr> ProcessData(const RawMessage &tm_message,
+                                          RESULT_CODE *result,
+                                          size_t *malformed_occurrence);
   /**
    * @brief Add connection for data handling and verification
    */
@@ -78,10 +83,11 @@ class IncomingDataHandler {
   /**
    * @brief Returns size of frame to be formed from raw bytes.
    */
-  static uint32_t GetPacketSize(const ProtocolPacket::ProtocolHeader& header);
+  static uint32_t GetPacketSize(const ProtocolPacket::ProtocolHeader &header);
   /**
    * @brief Try to create frame from incoming data
    * \param incommung_data raw stream
+   * \param malformed_occurrence count of malformed messages occurrence
    * \param out_frames list for read frames
    *
    * \return operation RESULT_CODE
@@ -89,14 +95,16 @@ class IncomingDataHandler {
    *   - RESULT_OK - one or more frames successfully created
    *   - RESULT_FAIL - packet serialization or validation error occurs
    */
-  RESULT_CODE CreateFrame(std::vector<uint8_t>& incoming_data,
-                          std::list<ProtocolFramePtr>& out_frames,
+  RESULT_CODE CreateFrame(std::vector<uint8_t> &incoming_data,
+                          std::list<ProtocolFramePtr> &out_frames,
+                          size_t &malformed_occurrence,
                           const transport_manager::ConnectionUID connection_id);
 
-  typedef std::map<transport_manager::ConnectionUID, std::vector<uint8_t> > ConnectionsDataMap;
+  typedef std::map<transport_manager::ConnectionUID, std::vector<uint8_t> >
+  ConnectionsDataMap;
   ConnectionsDataMap connections_data_;
   ProtocolPacket::ProtocolHeader header_;
-  const  ProtocolPacket::ProtocolHeaderValidator * validator_;
+  const  ProtocolPacket::ProtocolHeaderValidator *validator_;
   DISALLOW_COPY_AND_ASSIGN(IncomingDataHandler);
 };
 }  // namespace protocol_handler
