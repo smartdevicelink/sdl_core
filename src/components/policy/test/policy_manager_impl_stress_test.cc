@@ -64,7 +64,7 @@ class PolicyManagerImplStressTest : public ::testing::Test {
   static void CreateFuncs(std::ofstream& ofs);
   static void CreateAppGroups(std::ofstream& ofs);
   static void CreateGroup(int i, std::ofstream& ofs);
-  static void CreateFunction(std::ofstream& ofs);
+  static void CreateFunction(int i, std::ofstream& ofs);
   static void CreateHmiLevels(std::ofstream& ofs);
   static void CreateParameters(std::ofstream& ofs);
 };
@@ -131,10 +131,10 @@ void PolicyManagerImplStressTest::CreateParameters(std::ofstream& ofs) {
       "]";
 }
 
-void PolicyManagerImplStressTest::CreateFunction(std::ofstream& ofs) {
+void PolicyManagerImplStressTest::CreateFunction(int i, std::ofstream& ofs) {
   std::stringstream ss;
   std::string number;
-  ss << rand() % kNumberFuncs << std::endl;
+  ss << i << std::endl;
   ss >> number;
   ofs << "\"Func-" << number << "\":{\n\t";
   CreateHmiLevels(ofs);
@@ -168,11 +168,11 @@ void PolicyManagerImplStressTest::CreateGroups(std::ofstream& ofs) {
 void PolicyManagerImplStressTest::CreateFuncs(std::ofstream& ofs) {
   for (int i = 0; i < kNumberGroupFuncs - 1; ++i) {
     ofs << "\t";
-    CreateFunction(ofs);
+    CreateFunction(rand() % kNumberFuncs, ofs);
     ofs << ",\n";
   }
   ofs << "\t";
-  CreateFunction(ofs);
+  CreateFunction(0, ofs);
   ofs << "\n";
 }
 
@@ -280,7 +280,7 @@ TEST_F(PolicyManagerImplStressTest, OneCheck_AppAndFunctuionExisting_RpcAllowed)
   ::policy::RPCParams input_params;
   ::policy::CheckPermissionResult output;
   EXPECT_CALL(*mock_listener, OnCurrentDeviceIdUpdateRequired("2"));
-  manager->CheckPermissions("2", "FULL", "Func-1", input_params, output);
+  manager->CheckPermissions("2", "FULL", "Func-0", input_params, output);
   EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
 }
 
