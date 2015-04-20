@@ -25,6 +25,9 @@
           ]
         }
       },
+      "lock_screen_icon_url": {
+         "default": ["http://i.imgur.com/QwZ9uKG.png"]
+      },
       "notifications_per_minute_by_priority": {
         "EMERGENCY": 60,
         "NAVIGATION": 15,
