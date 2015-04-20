@@ -153,10 +153,11 @@ bool policy::CheckAppPolicy::HasRevokedGroups(
                       std::back_inserter(revoked_group_list), Compare);
 
   // Remove groups which are not required user consent
-  for (policy_table::Strings::iterator it_revoked = revoked_group_list.begin();
-       revoked_group_list.end() != it_revoked; ) {
+  policy_table::Strings::iterator it_revoked = revoked_group_list.begin();
+  for (;revoked_group_list.end() != it_revoked; ) {
     if (!IsConsentRequired(app_policy.first, std::string(*it_revoked))) {
       revoked_group_list.erase(it_revoked);
+      it_revoked = revoked_group_list.begin();
     } else {
       ++it_revoked;
     }
