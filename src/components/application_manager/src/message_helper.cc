@@ -388,6 +388,33 @@ smart_objects::SmartObjectSPtr MessageHelper::GetHashUpdateNotification(
   return message;
 }
 
+smart_objects::SmartObject* MessageHelper::GetLockScreenIconUrlNotification(const uint32_t connection_key) {
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(connection_key);
+  DCHECK(app.get());
+
+  smart_objects::SmartObject* message = new smart_objects::SmartObject(smart_objects::SmartType_Map);
+  (*message)[strings::params][strings::function_id] = mobile_apis::FunctionID::OnSystemRequestID;
+  (*message)[strings::params][strings::connection_key] = connection_key;
+  (*message)[strings::params][strings::message_type] = mobile_apis::messageType::notification;
+  (*message)[strings::params][strings::protocol_type] = commands::CommandImpl::mobile_protocol_type_;
+  (*message)[strings::params][strings::protocol_version] = commands::CommandImpl::protocol_version_;
+
+  (*message)[strings::msg_params][strings::request_type] = mobile_apis::RequestType::LOCK_SCREEN_ICON_URL;
+
+  (*message)[strings::msg_params][strings::url] = policy::PolicyHandler::instance()->GetLockScreenIconUrl();
+
+
+  return message;
+}
+
+void MessageHelper::SendLockScreenIconUrlNotification(const uint32_t connection_key) {
+  LOG4CXX_INFO(logger_, "SendLockScreenIconUrlNotification");
+
+  smart_objects::SmartObject* so = GetLockScreenIconUrlNotification(connection_key);
+  PrintSmartObject(*so);
+  DCHECK(ApplicationManagerImpl::instance()->ManageMobileCommand(so));
+}
+
 void MessageHelper::SendHashUpdateNotification(const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 

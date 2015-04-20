@@ -101,6 +101,8 @@ class PolicyHandler :
                                  StringArray* app_hmi_types = NULL);
   void GetServiceUrls(const std::string& service_type,
                       EndpointUrls& end_points);
+
+  std::string GetLockScreenIconUrl() const;
   void ResetRetrySequence();
   int NextRetryTimeout();
   int TimeoutExchange();
