@@ -153,6 +153,13 @@ class CacheManagerInterface {
                               EndpointUrls& end_points) = 0;
 
   /**
+   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
+   *
+   * @return url which point to the resourse where lock screen icon could be obtained.
+   */
+  virtual std::string GetLockScreenIconUrl() const = 0;
+
+  /**
    * @brief Get allowed number of notifications
    * depending on application priority.
    * @param priority Priority of application
