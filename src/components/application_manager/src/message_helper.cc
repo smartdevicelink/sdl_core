@@ -726,6 +726,50 @@ smart_objects::SmartObjectList MessageHelper::GetIVISubscriptionRequests(
   return hmi_requests;
 }
 
+void MessageHelper::SendOnButtonSubscriptionNotifications(
+    ApplicationSharedPtr app) {
+  using namespace smart_objects;
+  using namespace hmi_apis;
+  using namespace mobile_apis;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!app.valid()) {
+    LOG4CXX_ERROR(logger_, "Invalid application pointer ");
+    return;
+  }
+
+  std::set<ButtonName::eType> subscriptions = app->SubscribedButtons();
+  std::set<ButtonName::eType>::iterator it = subscriptions.begin();
+  for (; subscriptions.end() != it; ++it) {
+    SmartObjectSPtr notification_ptr = new SmartObject(SmartType_Map);
+    if (!notification_ptr) {
+      LOG4CXX_ERROR(logger_, "Memory allocation failed.");
+      return;
+    }
+
+    SmartObject& notification = *notification_ptr;
+
+    SmartObject msg_params = SmartObject(SmartType_Map);
+    msg_params[strings::app_id] = app->hmi_app_id();
+    msg_params[strings::name] = static_cast<Common_ButtonName::eType>(*it);
+    msg_params[strings::is_suscribed] = true;
+
+    notification[strings::params][strings::message_type] =
+        static_cast<int32_t>(application_manager::MessageType::kNotification);
+    notification[strings::params][strings::protocol_version] =
+        commands::CommandImpl::protocol_version_;
+    notification[strings::params][strings::protocol_type] =
+        commands::CommandImpl::hmi_protocol_type_;
+    notification[strings::params][strings::function_id] =
+        hmi_apis::FunctionID::Buttons_OnButtonSubscription;
+    notification[strings::msg_params] = msg_params;
+
+    if (!ApplicationManagerImpl::instance()->ManageHMICommand(notification_ptr)) {
+      LOG4CXX_ERROR(logger_, "Unable to send HMI notification");
+    }
+  }
+}
+
 void MessageHelper::SendSetAppIcon(uint32_t app_id,
                                    const std::string& icon_path) {
   using namespace smart_objects;

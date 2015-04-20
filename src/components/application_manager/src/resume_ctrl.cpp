@@ -959,7 +959,8 @@ void ResumeCtrl::AddCommands(ApplicationSharedPtr application, const Json::Value
 }
 
 void ResumeCtrl::AddChoicesets(ApplicationSharedPtr application, const Json::Value& saved_app) {
-  if(saved_app.isMember(strings::application_choise_sets)) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (saved_app.isMember(strings::application_choise_sets)) {
     const Json::Value& app_choise_sets = saved_app[strings::application_choise_sets];
     for (Json::Value::iterator json_it = app_choise_sets.begin();
         json_it != app_choise_sets.end(); ++json_it)  {
@@ -993,6 +994,7 @@ void ResumeCtrl::AddChoicesets(ApplicationSharedPtr application, const Json::Val
 }
 
 void ResumeCtrl::SetGlobalProperties(ApplicationSharedPtr application, const Json::Value& saved_app) {
+  LOG4CXX_AUTO_TRACE(logger_);
   const Json::Value& global_properties = saved_app[strings::application_global_properties];
   if (!global_properties.isNull()) {
     smart_objects::SmartObject properties_so(smart_objects::SmartType::SmartType_Map);
@@ -1003,6 +1005,7 @@ void ResumeCtrl::SetGlobalProperties(ApplicationSharedPtr application, const Jso
 }
 
 void ResumeCtrl::AddSubscriptions(ApplicationSharedPtr application, const Json::Value& saved_app) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (saved_app.isMember(strings::application_subscribtions)) {
     const Json::Value& subscribtions = saved_app[strings::application_subscribtions];
 
@@ -1024,8 +1027,8 @@ void ResumeCtrl::AddSubscriptions(ApplicationSharedPtr application, const Json::
         application->SubscribeToIVI(ivi);
       }
     }
-
     ProcessHMIRequests(MessageHelper::GetIVISubscriptionRequests(application));
+    MessageHelper::SendOnButtonSubscriptionNotifications(application);
   }
 }
 

@@ -178,14 +178,19 @@ class MessageHelper {
         const std::string& path_to_icon, uint32_t app_id);
 
     /**
-     * @brief Sends IVI subscriptions
+     * @brief Sends IVI subscription requests
      */
     static bool SendIVISubscribtions(const uint32_t app_id);
 
     /**
-     * @brief Sends IVI subscriptions
+     * @brief Creates IVI subscription requests
      */
     static smart_objects::SmartObjectList GetIVISubscriptionRequests(ApplicationSharedPtr app);
+
+    /**
+     * @brief Sends Button subscription notifications
+     */
+    static void SendOnButtonSubscriptionNotifications(ApplicationSharedPtr app);
 
     static void SendAppDataToHMI(ApplicationConstSharedPtr app);
     static void SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app);
