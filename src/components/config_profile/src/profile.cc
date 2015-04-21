@@ -82,13 +82,15 @@ const char* kServerAddressKey = "ServerAddress";
 const char* kAppInfoStorageKey = "AppInfoStorage";
 const char* kAppStorageFolderKey = "AppStorageFolder";
 const char* kAppResourseFolderKey = "AppResourceFolder";
-const char* kLogsEnabledKey = "LogsEnabled";
 const char* kAppConfigFolderKey = "AppConfigFolder";
 const char* kEnableProtocol4Key = "EnableProtocol4";
 const char* kAppIconsFolderKey = "AppIconsFolder";
 const char* kAppIconsFolderMaxSizeKey = "AppIconsFolderMaxSize";
 const char* kAppIconsAmountToRemoveKey = "AppIconsAmountToRemove";
 const char* kLaunchHMIKey = "LaunchHMI";
+#ifdef WEB_HMI
+const char* kLinkToWebHMI = "LinkToWebHMI";
+#endif // WEB_HMI
 const char* kStartStreamRetry = "StartStreamRetry";
 const char* kEnableRedecodingKey = "EnableRedecoding";
 const char* kVideoStreamConsumerKey = "VideoStreamConsumer";
@@ -160,6 +162,9 @@ const char* kMalformedFrequencyCount = "MalformedFrequencyCount";
 const char* kMalformedFrequencyTime = "MalformedFrequencyTime";
 const char* kHashStringSizeKey = "HashStringSize";
 
+#ifdef WEB_HMI
+const char* kDefaultLinkToWebHMI = "HMI/index.html";
+#endif // WEB_HMI
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
 const char* kDefaultPreloadedPTFileName = "sdl_preloaded_pt.json";
@@ -206,9 +211,9 @@ const uint32_t kDefaultAppHmiLevelNoneRequestsTimeScale = 10;
 const uint32_t kDefaultPendingRequestsAmount = 0;
 const uint32_t kDefaultTransportManagerDisconnectTimeout = 0;
 const uint32_t kDefaultApplicationListUpdateTimeout = 1;
-const std::pair<uint32_t, uint32_t> kReadDIDFrequency = {5 , 1};
-const std::pair<uint32_t, uint32_t> kGetVehicleDataFrequency = {5 , 1};
-const std::pair<uint32_t, uint32_t> kStartStreamRetryAmount = {3 , 1};
+const std::pair<uint32_t, uint32_t> kReadDIDFrequency = { 5, 1 };
+const std::pair<uint32_t, uint32_t> kGetVehicleDataFrequency = { 5, 1 };
+const std::pair<uint32_t, uint32_t> kStartStreamRetryAmount = { 3, 1 };
 const uint32_t kDefaultMaxThreadPoolSize = 2;
 const int kDefaultIAP2HubConnectAttempts = 0;
 const int kDefaultIAPHubConnectionWaitTimeout = 10;
@@ -232,51 +237,54 @@ namespace profile {
 CREATE_LOGGERPTR_GLOBAL(logger_, "Profile")
 
 Profile::Profile()
-  : launch_hmi_(true),
-    app_config_folder_(),
-    app_storage_folder_(),
-    app_resourse_folder_(),
-    enable_protocol_4_(false),
-    app_icons_folder_(),
-    app_icons_folder_max_size_(kDefaultAppIconsFolderMaxSize),
-    app_icons_amount_to_remove_(kDefaultAppIconsAmountToRemove),
-    config_file_name_(kDefaultConfigFileName),
-    server_address_(kDefaultServerAddress),
-    server_port_(kDefaultServerPort),
-    video_streaming_port_(kDefaultVideoStreamingPort),
-    audio_streaming_port_(kDefaultAudioStreamingPort),
-    time_testing_port_(kDefaultTimeTestingPort),
-    hmi_capabilities_file_name_(kDefaultHmiCapabilitiesFileName),
-    help_prompt_(),
-    time_out_promt_(),
-    min_tread_stack_size_(threads::Thread::kMinStackSize),
-    is_mixing_audio_supported_(false),
-    is_redecoding_enabled_(false),
-    max_cmd_id_(kDefaultMaxCmdId),
-    default_timeout_(kDefaultTimeout),
-    app_resuming_timeout_(kDefaultAppResumingTimeout),
-    app_dir_quota_(kDefaultDirQuota),
-    app_hmi_level_none_time_scale_max_requests_(
-      kDefaultAppHmiLevelNoneTimeScaleMaxRequests),
-    app_hmi_level_none_requests_time_scale_(
-      kDefaultAppHmiLevelNoneRequestsTimeScale),
-    app_time_scale_max_requests_(kDefaultAppTimeScaleMaxRequests),
-    app_requests_time_scale_(kDefaultAppRequestsTimeScale),
-    pending_requests_amount_(kDefaultPendingRequestsAmount),
-    put_file_in_none_(kDefaultPutFileRequestInNone),
-    delete_file_in_none_(kDefaultDeleteFileRequestInNone),
-    list_files_in_none_(kDefaultListFilesRequestInNone),
-    app_info_storage_(kDefaultAppInfoFileName),
-    heart_beat_timeout_(kDefaultHeartBeatTimeout),
-    policy_snapshot_file_name_(kDefaultPoliciesSnapshotFileName),
-    enable_policy_(false),
-    transport_manager_disconnect_timeout_(
-      kDefaultTransportManagerDisconnectTimeout),
-    use_last_state_(false),
-    supported_diag_modes_(),
-    system_files_path_(kDefaultSystemFilesPath),
-    transport_manager_tcp_adapter_port_(kDefautTransportManagerTCPPort),
-    tts_delimiter_(kDefaultTtsDelimiter),
+    : launch_hmi_(true),
+#ifdef WEB_HMI
+      link_to_web_hmi_(kDefaultLinkToWebHMI),
+#endif // WEB_HMI
+      app_config_folder_(),
+      app_storage_folder_(),
+      app_resourse_folder_(),
+      enable_protocol_4_(false),
+      app_icons_folder_(),
+      app_icons_folder_max_size_(kDefaultAppIconsFolderMaxSize),
+      app_icons_amount_to_remove_(kDefaultAppIconsAmountToRemove),
+      config_file_name_(kDefaultConfigFileName),
+      server_address_(kDefaultServerAddress),
+      server_port_(kDefaultServerPort),
+      video_streaming_port_(kDefaultVideoStreamingPort),
+      audio_streaming_port_(kDefaultAudioStreamingPort),
+      time_testing_port_(kDefaultTimeTestingPort),
+      hmi_capabilities_file_name_(kDefaultHmiCapabilitiesFileName),
+      help_prompt_(),
+      time_out_promt_(),
+      min_tread_stack_size_(threads::Thread::kMinStackSize),
+      is_mixing_audio_supported_(false),
+      is_redecoding_enabled_(false),
+      max_cmd_id_(kDefaultMaxCmdId),
+      default_timeout_(kDefaultTimeout),
+      app_resuming_timeout_(kDefaultAppResumingTimeout),
+      app_dir_quota_(kDefaultDirQuota),
+      app_hmi_level_none_time_scale_max_requests_(
+          kDefaultAppHmiLevelNoneTimeScaleMaxRequests),
+      app_hmi_level_none_requests_time_scale_(
+          kDefaultAppHmiLevelNoneRequestsTimeScale),
+      app_time_scale_max_requests_(kDefaultAppTimeScaleMaxRequests),
+      app_requests_time_scale_(kDefaultAppRequestsTimeScale),
+      pending_requests_amount_(kDefaultPendingRequestsAmount),
+      put_file_in_none_(kDefaultPutFileRequestInNone),
+      delete_file_in_none_(kDefaultDeleteFileRequestInNone),
+      list_files_in_none_(kDefaultListFilesRequestInNone),
+      app_info_storage_(kDefaultAppInfoFileName),
+      heart_beat_timeout_(kDefaultHeartBeatTimeout),
+      policy_snapshot_file_name_(kDefaultPoliciesSnapshotFileName),
+      enable_policy_(false),
+      transport_manager_disconnect_timeout_(
+          kDefaultTransportManagerDisconnectTimeout),
+      use_last_state_(false),
+      supported_diag_modes_(),
+      system_files_path_(kDefaultSystemFilesPath),
+      transport_manager_tcp_adapter_port_(kDefautTransportManagerTCPPort),
+      tts_delimiter_(kDefaultTtsDelimiter),
     mme_db_name_(kDefaultMmeDatabaseName),
     event_mq_name_(kDefaultEventMQ),
     ack_mq_name_(kDefaultAckMQ),
@@ -290,11 +298,10 @@ Profile::Profile()
     iap2_system_config_(kDefaultIAP2SystemConfig),
     iap2_hub_connect_attempts_(kDefaultIAP2HubConnectAttempts),
     iap_hub_connection_wait_timeout_(kDefaultIAPHubConnectionWaitTimeout),
-    tts_global_properties_timeout_(kDefaultTTSGlobalPropertiesTimeout),
+     tts_global_properties_timeout_(kDefaultTTSGlobalPropertiesTimeout),
     attempts_to_open_policy_db_(kDefaultAttemptsToOpenPolicyDB),
     open_attempt_timeout_ms_(kDefaultAttemptsToOpenPolicyDB),
-    hash_string_size_(kDefaultHashStringSize),
-    logs_enabled_(false) {
+    hash_string_size_(kDefaultHashStringSize) {
 }
 
 Profile::~Profile() {
@@ -314,6 +321,12 @@ const std::string& Profile::config_file_name() const {
 bool Profile::launch_hmi() const {
   return launch_hmi_;
 }
+
+#ifdef WEB_HMI
+std::string Profile::link_to_web_hmi() const {
+  return link_to_web_hmi_;
+}
+#endif // WEB_HMI
 
 const std::string& Profile::app_config_folder() const {
   return app_config_folder_;
@@ -402,7 +415,6 @@ uint32_t Profile::stop_streaming_timeout() const {
 const uint16_t& Profile::time_testing_port() const {
   return time_testing_port_;
 }
-
 
 const uint64_t& Profile::thread_min_stack_size() const {
   return min_tread_stack_size_;
@@ -545,23 +557,23 @@ uint32_t Profile::application_list_update_timeout() const {
   return application_list_update_timeout_;
 }
 
-const std::pair<uint32_t, int32_t>& Profile::read_did_frequency() const  {
+const std::pair<uint32_t, int32_t>& Profile::read_did_frequency() const {
   return read_did_frequency_;
 }
 
-const std::pair<uint32_t, int32_t>& Profile::get_vehicle_data_frequency() const  {
+const std::pair<uint32_t, int32_t>& Profile::get_vehicle_data_frequency() const {
   return get_vehicle_data_frequency_;
 }
 
-const  std::pair<uint32_t, int32_t>& Profile::start_stream_retry_amount() const {
+const std::pair<uint32_t, int32_t>& Profile::start_stream_retry_amount() const {
   return start_stream_retry_amount_;
 }
 
-uint32_t Profile::thread_pool_size() const  {
+uint32_t Profile::thread_pool_size() const {
   return max_thread_pool_size_;
 }
 
-uint32_t Profile::default_hub_protocol_index() const{
+uint32_t Profile::default_hub_protocol_index() const {
   return default_hub_protocol_index_;
 }
 
@@ -610,7 +622,7 @@ size_t Profile::message_frequency_count() const {
 size_t Profile::message_frequency_time() const {
   size_t message_frequency_time = 0;
   ReadUIntValue(&message_frequency_time, kDefaultFrequencyTime,
-                kProtocolHandlerSection,kFrequencyTime );
+                kProtocolHandlerSection, kFrequencyTime);
   return message_frequency_time;
 }
 
@@ -659,10 +671,6 @@ uint16_t Profile::tts_global_properties_timeout() const {
   return tts_global_properties_timeout_;
 }
 
-bool Profile::logs_enabled() const {
-  return logs_enabled_;
-}
-
 void Profile::UpdateValues() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -675,12 +683,14 @@ void Profile::UpdateValues() {
     launch_hmi_ = false;
   }
 
-  LOG_UPDATED_BOOL_VALUE(launch_hmi_, kLaunchHMIKey, kHmiSection);
+ LOG_UPDATED_BOOL_VALUE(launch_hmi_, kLaunchHMIKey, kHmiSection);
 
-  // Logs enabled
-  ReadBoolValue(&logs_enabled_, false, kMainSection, kLogsEnabledKey);
-
-  LOG_UPDATED_BOOL_VALUE(logs_enabled_, kLogsEnabledKey, kMainSection);
+#ifdef WEB_HMI
+  // Link to web HMI parameter
+  ReadStringValue(&link_to_web_hmi_, kDefaultLinkToWebHMI,
+                  kHmiSection, kLinkToWebHMI);
+  LOG_UPDATED_BOOL_VALUE(link_to_web_hmi_, kLinkToWebHMI, kHmiSection);
+#endif // WEB_HMI
 
   // Application config folder
   ReadStringValue(&app_config_folder_,
@@ -857,7 +867,7 @@ void Profile::UpdateValues() {
                     kMediaManagerSection);
 
   // Named video pipe path
-  ReadStringValue(&named_video_pipe_path_, "" , kMediaManagerSection,
+  ReadStringValue(&named_video_pipe_path_, "", kMediaManagerSection,
                   kNamedVideoPipePathKey);
 
   named_video_pipe_path_ = app_storage_folder_ + "/" + named_video_pipe_path_;
@@ -866,7 +876,7 @@ void Profile::UpdateValues() {
                     kMediaManagerSection);
 
   // Named audio pipe path
-  ReadStringValue(&named_audio_pipe_path_, "" , kMediaManagerSection,
+  ReadStringValue(&named_audio_pipe_path_, "", kMediaManagerSection,
                   kNamedAudioPipePathKey);
 
   named_audio_pipe_path_ = app_storage_folder_ + "/" + named_audio_pipe_path_;
@@ -1022,7 +1032,7 @@ void Profile::UpdateValues() {
     str = strtok(const_cast<char*>(help_prompt_value.c_str()), ",");
     while (str != NULL) {
       // Default prompt should have delimiter included for each item
-      const std::string prompt_item = std::string(str)+tts_delimiter_;
+      const std::string prompt_item = std::string(str) + tts_delimiter_;
       help_prompt_.push_back(prompt_item);
       LOG_UPDATED_VALUE(prompt_item, kHelpPromptKey,
                         kGlobalPropertiesSection);
@@ -1045,7 +1055,7 @@ void Profile::UpdateValues() {
     str = strtok(const_cast<char*>(timeout_prompt_value.c_str()), ",");
     while (str != NULL) {
       // Default prompt should have delimiter included for each item
-      const std::string prompt_item = std::string(str)+tts_delimiter_;
+      const std::string prompt_item = std::string(str) + tts_delimiter_;
       time_out_promt_.push_back(prompt_item);
       LOG_UPDATED_VALUE(prompt_item, kTimeoutPromptKey,
                         kGlobalPropertiesSection);
@@ -1358,17 +1368,17 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_VALUE(iap_hub_connection_wait_timeout_,
                     kIAPHubConnectionWaitTimeoutKey, kIAPSection);
-
+ 
   ReadUIntValue(&default_hub_protocol_index_, kDefaultHubProtocolIndex, kIAPSection, kDefaultHubProtocolIndexKey);
 
   LOG_UPDATED_VALUE(default_hub_protocol_index_, kDefaultHubProtocolIndexKey, kIAPSection);
 
-  ReadUIntValue(&hash_string_size_,
+    ReadUIntValue(&hash_string_size_,
                 kDefaultHashStringSize,
                 kApplicationManagerSection,
                 kHashStringSizeKey);
 
-  LOG_UPDATED_VALUE(hash_string_size_,
+   LOG_UPDATED_VALUE(hash_string_size_,
                     kHashStringSizeKey,
                     kApplicationManagerSection);
 }
@@ -1382,7 +1392,7 @@ bool Profile::ReadValue(bool* value, const char* const pSection,
   *buf = '\0';
   if ((0 != ini_read_value(config_file_name_.c_str(), pSection, pKey, buf))
       && ('\0' != *buf)) {
-    const int32_t tmpVal = atoi(buf);
+     const int32_t tmpVal = atoi(buf);
     if (0 == tmpVal) {
       *value = false;
     } else {
@@ -1434,7 +1444,7 @@ bool Profile::ReadIntValue(int32_t* value, const int32_t default_value,
 }
 
 bool Profile::ReadUintIntPairValue(std::pair<uint32_t, int32_t>* value,
-                                   const  std::pair<uint32_t, uint32_t>& default_value,
+    const std::pair<uint32_t, uint32_t>& default_value,
                                    const char *const pSection,
                                    const char *const pKey) const {
   std::string string_value;
@@ -1467,7 +1477,7 @@ int32_t hex_to_int(const std::string& value) {
 
 std::list<int> Profile::ReadIntContainer(
     const char * const pSection, const char * const pKey,
-    bool *out_result) const {
+                                         bool *out_result) const {
   const std::list<std::string> string_list =
       ReadStringContainer(pSection, pKey, out_result);
   std::list<int> value_list;
@@ -1479,12 +1489,12 @@ std::list<int> Profile::ReadIntContainer(
 
 std::list<std::string> Profile::ReadStringContainer(
     const char * const pSection, const char * const pKey,
-    bool *out_result) const {
+                                                    bool *out_result) const {
   std::string string;
   const bool result = ReadValue(&string, pSection, pKey);
   if (out_result)
     *out_result = result;
-  std::list<std::string> value_container;
+  std::list < std::string > value_container;
   if (result) {
     std::istringstream iss(string);
     std::string temp_str;
@@ -1525,7 +1535,7 @@ bool Profile::ReadUIntValue(uint32_t* value, uint32_t default_value,
   } else {
     uint64_t user_value;
     if (!StringToNumber(string_value, user_value)) {
-      *value = default_value;
+     *value = default_value;
       return false;
     }
 
@@ -1580,4 +1590,4 @@ void Profile::MakeAbsolutePath(std::string& path) {
   path = file_system::CurrentWorkingDirectory() + "/" + path;
 }
 
-}  //  namespace profile
+}//  namespace profile

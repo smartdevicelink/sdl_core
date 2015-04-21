@@ -184,7 +184,6 @@ std::ofstream* file_system::Open(const std::string& file_name,
     return file;
   }
 
-  delete file;
   return NULL;
 }
 
