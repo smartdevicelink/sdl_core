@@ -2499,8 +2499,12 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
   if (result.hmi_level_permitted != policy::kRpcAllowed) {
     LOG4CXX_WARN(logger_, "Request is blocked by policies. " << log_msg );
 
-    application_by_policy_id(policy_app_id)->
-        usage_report().RecordPolicyRejectedRpcCall();
+    ApplicationSharedPtr app = application_by_policy_id(policy_app_id);
+    if (!app) {
+      LOG4CXX_ERROR(logger_, "No application for policy id " << policy_app_id);
+      return mobile_apis::Result::GENERIC_ERROR;
+    }
+    app->usage_report().RecordPolicyRejectedRpcCall();
 
     switch (result.hmi_level_permitted) {
       case policy::kRpcDisallowed:
