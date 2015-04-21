@@ -127,6 +127,13 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     return false;
   }
 
+  // Checking of difference between PTU and current policy state
+  // Must to be done before PTU applying since it is possible, that functional
+  // groups, which had been present before are absent in PTU and will be
+  // removed after update. So in case of revoked groups system has to know
+  // names and ids of revoked groups before they will be removed.
+  CheckPermissionsChanges(pt_update, policy_table_snapshot);
+
   // Replace current data with updated
   if (!cache_->ApplyUpdate(*pt_update)) {
     LOG4CXX_WARN(logger_, "Unsuccessful save of updated policy table.");
@@ -137,16 +144,12 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     listener_->OnCertificateUpdated(*(pt_update->policy_table.module_config.certificate));
   }
 
-
-  // Check permissions for applications, send notifications
-  CheckPermissionsChanges(pt_update, policy_table_snapshot);
-
   std::map<std::string, StringArray> app_hmi_types;
   cache_->GetHMIAppTypeAfterUpdate(app_hmi_types);
   if (!app_hmi_types.empty()) {
     LOG4CXX_INFO(logger_, "app_hmi_types is full calling OnUpdateHMIAppType");
     listener_->OnUpdateHMIAppType(app_hmi_types);
-  }else{
+  } else {
     LOG4CXX_INFO(logger_, "app_hmi_types empty" << pt_content.size());
   }
 
