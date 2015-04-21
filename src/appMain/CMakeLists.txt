@@ -206,7 +206,7 @@ install(
 )
 if (${WEB_HMI})
   if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hmi_link DESTINATION bin)
+    #install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hmi_link DESTINATION bin)
   endif ()
 elseif (${QT_HMI})
   if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
