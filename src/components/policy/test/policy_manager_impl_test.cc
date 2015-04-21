@@ -137,6 +137,7 @@ TEST_F(PolicyManagerImplTest, DISABLED_GetUpdateUrl) {
 TEST_F(PolicyManagerImplTest, ResetPT) {
   EXPECT_CALL(*cache_manager, ResetPT("filename")).WillOnce(Return(true))
       .WillOnce(Return(false));
+  EXPECT_CALL(*cache_manager, ResetCalculatedPermissions()).Times(2);
   EXPECT_CALL(*cache_manager, TimeoutResponse());
   EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_));
 
@@ -153,7 +154,9 @@ TEST_F(PolicyManagerImplTest, CheckPermissions_SetHmiLevelFullForAlert_ExpectAll
   expected.list_of_allowed_params.push_back("gps");
 
   //assert
-  EXPECT_CALL(*cache_manager, CheckPermissions(_, "12345678", "FULL", "Alert", _)).
+  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345678")).
+      WillOnce(Return("dev1"));
+  EXPECT_CALL(*cache_manager, CheckPermissions("dev1", "12345678", "FULL", "Alert", _)).
       WillOnce(SetArgReferee<4>(expected));
 
   //act
@@ -266,6 +269,11 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
       update.policy_table);
 
   //assert
+  std::map<std::string, StringArray> hmi_types;
+  hmi_types["1234"] = StringArray();
+  EXPECT_CALL(*cache_manager, GetHMIAppTypeAfterUpdate(_)).
+      WillOnce(SetArgReferee<0>(hmi_types));
+  EXPECT_CALL(*listener, OnUpdateHMIAppType(hmi_types));
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
   EXPECT_CALL(*listener, GetAppName("1234")).WillOnce(Return(""));
@@ -284,6 +292,7 @@ TEST_F(PolicyManagerImplTest, RequestPTUpdate_SetPT_GeneratedSnapshotAndPTUpdate
       new ::policy_table::Table();
 
   //assert
+  EXPECT_CALL(*listener, OnSnapshotCreated(_, _, _));
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(p_table));
 
   //act
