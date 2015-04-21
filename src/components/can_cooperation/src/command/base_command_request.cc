@@ -319,8 +319,9 @@ void BaseCommandRequest::Run() {
     seat = extension->seat();
   }
 
+  seat = 0;
   // TODO(KKolodiy): get zone and params
-  SeatLocation zone;
+  SeatLocation zone = 10;
   std::vector<std::string> params;
   application_manager::TypeAccess access = service_->CheckAccess(
       app_->app_id(), message_->function_name(), params, seat, zone);
@@ -374,7 +375,7 @@ void BaseCommandRequest::on_event(const event_engine::Event<application_manager:
     }
     // TODO(KKolodiy): get group name and zone from message
     std::string group_name = "Radio";
-    SeatLocation zone = 1;
+    SeatLocation zone = 10;
     service_->SetAccess(app_->app_id(), group_name, zone, allowed);
   } else {
     OnEvent(event);  // run child's logic
