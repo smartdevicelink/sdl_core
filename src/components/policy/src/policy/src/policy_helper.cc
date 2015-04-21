@@ -77,7 +77,8 @@ bool operator()(const policy::StringsValueType& value) {
   if (groups_attributes_.end() == it) {
     return false;
   }  
-  FunctionalGroupPermission group;  
+  FunctionalGroupPermission group;
+  group.group_name = it->second.second;
   group.group_alias = it->second.first;
   group.group_id = it->first;
   groups_permissions_.push_back(group);
