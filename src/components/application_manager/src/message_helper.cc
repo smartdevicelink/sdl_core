@@ -925,18 +925,12 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateAppVrHelp(
   smart_objects::SmartObject& vr_help = *result;
   vr_help[strings::vr_help_title] = app->name();
 
-  ApplicationManagerImpl::ApplicationListAccessor accessor;
-
   int32_t index = 0;
- ApplicationManagerImpl::ApplictionSetConstIt it_app =
-     accessor.begin();
-  for (; accessor.end() != it_app; ++it_app) {
-    if ((*it_app)->vr_synonyms()) {
-      smart_objects::SmartObject item(smart_objects::SmartType_Map);
-      item[strings::text] = (*((*it_app)->vr_synonyms())).getElement(0);
-      item[strings::position] = index + 1;
-      vr_help[strings::vr_help][index++] = item;
-    }
+  if (app->vr_synonyms()) {
+    smart_objects::SmartObject item(smart_objects::SmartType_Map);
+    item[strings::text] = (*(app->vr_synonyms())).getElement(0);
+    item[strings::position] = index + 1;
+    vr_help[strings::vr_help][index++] = item;
   }
 
   // copy all app VR commands
