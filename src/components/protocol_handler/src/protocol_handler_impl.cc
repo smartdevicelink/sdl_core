@@ -188,7 +188,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
 
-  LOG4CXX_INFO(logger_,
+  LOG4CXX_DEBUG(logger_,
                "SendStartSessionAck() for connection " << connection_id
                << " for service_type " << static_cast<int32_t>(service_type)
                << " session_id " << static_cast<int32_t>(session_id)
@@ -209,7 +209,7 @@ void ProtocolHandlerImpl::SendStartSessionNAck(ConnectionID connection_id,
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
 
-  LOG4CXX_INFO(logger_,
+  LOG4CXX_DEBUG(logger_,
                "SendStartSessionNAck() for connection " << connection_id
                << " for service_type " << static_cast<int32_t>(service_type)
                << " session_id " << static_cast<int32_t>(session_id));
@@ -229,7 +229,7 @@ void ProtocolHandlerImpl::SendEndSessionNAck(ConnectionID connection_id,
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
 
-  LOG4CXX_INFO(logger_, "SendEndSessionNAck() for connection " << connection_id
+  LOG4CXX_DEBUG(logger_, "SendEndSessionNAck() for connection " << connection_id
                << " for service_type " << static_cast<int32_t>(service_type)
                << " session_id " << static_cast<int32_t>(session_id));
 }
@@ -248,7 +248,7 @@ void ProtocolHandlerImpl::SendEndSessionAck(ConnectionID connection_id,
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
 
-  LOG4CXX_INFO(logger_,
+  LOG4CXX_DEBUG(logger_,
                "SendEndSessionAck() for connection " << connection_id
                << " for service_type " << static_cast<int32_t>(service_type)
                << " session_id " << static_cast<int32_t>(session_id));
@@ -269,11 +269,11 @@ void ProtocolHandlerImpl::SendEndServicePrivate(int32_t connection_id,
 
     raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
-    LOG4CXX_INFO(logger_, "SendEndSession() for connection " << connection_id
+    LOG4CXX_DEBUG(logger_, "SendEndSession() for connection " << connection_id
                    << " for service_type " << service_type
                    << " session_id " << static_cast<int32_t>(session_id));
   } else {
-  LOG4CXX_WARN(logger_, "SendEndSession is failed connection or session does not exist");
+    LOG4CXX_WARN(logger_, "SendEndSession is failed connection or session does not exist");
   }
 }
 
@@ -701,10 +701,11 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
       LOG4CXX_TRACE(logger_, "handleMessage() - case FRAME_TYPE_CONTROL");
       return HandleControlMessage(connection_id, packet);
     case FRAME_TYPE_SINGLE:
+      LOG4CXX_TRACE(logger_, "handleMessage() - case FRAME_TYPE_SINGLE");
       return HandleSingleFrameMessage(connection_id, packet);
     case FRAME_TYPE_FIRST:
     case FRAME_TYPE_CONSECUTIVE:
-      LOG4CXX_TRACE(logger_, "handleMessage() - case FRAME_TYPE_CONSECUTIVE");
+      LOG4CXX_TRACE(logger_, "handleMessage() - case FRAME_TYPE_FIRST or FRAME_TYPE_CONSECUTIVE");
       return HandleMultiFrameMessage(connection_id, packet);
     default: {
       LOG4CXX_WARN(logger_, "handleMessage() - case unknown frame type"
@@ -770,16 +771,16 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
 
   const uint32_t key = session_observer_->KeyFromPair(connection_id,
                                                       packet->session_id());
-  LOG4CXX_INFO_EXT(
+  LOG4CXX_DEBUG(
       logger_,
       "Packet " << packet << "; session id " << static_cast<int32_t>(key));
 
   if (packet->frame_type() == FRAME_TYPE_FIRST) {
-    LOG4CXX_INFO(logger_, "handleMultiFrameMessage() - FRAME_TYPE_FIRST "
+    LOG4CXX_DEBUG(logger_, "handleMultiFrameMessage() - FRAME_TYPE_FIRST "
                  << packet->data_size());
     incomplete_multi_frame_messages_[key] = packet;
   } else {
-    LOG4CXX_INFO(logger_, "handleMultiFrameMessage() - Consecutive frame");
+    LOG4CXX_DEBUG(logger_, "handleMultiFrameMessage() - Consecutive frame");
 
     std::map<int32_t, ProtocolFramePtr>::iterator it =
         incomplete_multi_frame_messages_.find(key);
@@ -798,7 +799,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
     }
 
     if (packet->frame_data() == FRAME_DATA_LAST_CONSECUTIVE) {
-      LOG4CXX_INFO(
+      LOG4CXX_DEBUG(
           logger_,
           "Last frame of multiframe message size " << packet->data_size()
               << "; connection key " << key);
@@ -824,7 +825,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
                            completePacket->service_type(),
                            completePacket->payload_size()));
 
-      LOG4CXX_INFO(logger_,
+      LOG4CXX_DEBUG(logger_,
                     "total_data_bytes " << completePacket->total_data_bytes() <<
                     " packet_size " << completePacket->packet_size() <<
                     " data size " <<  completePacket->data_size() <<
@@ -916,7 +917,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
                        packet.protocol_version(), service_type);
     message_counters_.erase(current_session_id);
   } else {
-    LOG4CXX_INFO_EXT(
+    LOG4CXX_WARN(
         logger_,
         "Refused to end session " << static_cast<int>(service_type) << " type.");
     SendEndSessionNAck(connection_id, current_session_id, packet.protocol_version(),
@@ -997,7 +998,7 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     ConnectionID connection_id, const ProtocolPacket &packet) {
-  LOG4CXX_TRACE(logger_,
+  LOG4CXX_DEBUG(logger_,
                 "Protocol version: " <<
                 static_cast<int>(packet.protocol_version()));
   const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
@@ -1072,7 +1073,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
     ConnectionID connection_id, const ProtocolPacket &packet) {
-  LOG4CXX_INFO(
+  LOG4CXX_DEBUG(
       logger_,
       "Sending heart beat acknowledgment for connection " << connection_id);
   uint8_t protocol_version;
@@ -1173,7 +1174,7 @@ void ProtocolHandlerImpl::Handle(
   if (((0 != message->data()) && (0 != message->data_size())) ||
       FRAME_TYPE_CONTROL == message->frame_type() ||
       FRAME_TYPE_FIRST == message->frame_type()) {
-      LOG4CXX_INFO_EXT(logger_, "Packet: dataSize " << message->data_size());
+      LOG4CXX_DEBUG(logger_, "Packet: dataSize " << message->data_size());
       HandleMessage(message->connection_id(), message);
   } else {
     LOG4CXX_WARN(logger_,
@@ -1182,7 +1183,7 @@ void ProtocolHandlerImpl::Handle(
 }
 
 void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile message) {
-  LOG4CXX_INFO_EXT(
+  LOG4CXX_DEBUG(
       logger_,
       "Message to mobile app: connection id " <<
         static_cast<int>(message->connection_id()) << ";"
@@ -1310,7 +1311,7 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
 
 void ProtocolHandlerImpl::SendFramesNumber(uint32_t connection_key,
                                            int32_t number_of_frames) {
-  LOG4CXX_INFO(logger_,
+  LOG4CXX_DEBUG(logger_,
                "SendFramesNumber MobileNaviAck for session " << connection_key);
 
   // TODO(EZamakhov): add protocol version check - to avoid send for PROTOCOL_VERSION_1
