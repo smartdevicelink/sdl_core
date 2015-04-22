@@ -794,6 +794,12 @@ bool SQLPTRepresentation::SaveApplicationPolicies(
     LOG4CXX_WARN(logger_, "Incorrect delete from app_group.");
     return false;
   }
+#ifdef SDL_REMOTE_CONTROL
+  if (!query_delete.Exec(sql_pt::kDeleteAppGroupNonPrimary)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from app_group_non_primary.");
+    return false;
+  }
+#endif  // SDL_REMOTE_CONTROL
   if (!query_delete.Exec(sql_pt::kDeleteApplication)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from application.");
     return false;
@@ -980,7 +986,8 @@ bool SQLPTRepresentation::SaveModuleConfig(
   query.Bind(6, *(config.vehicle_model)) : query.Bind(6);
   config.vehicle_year.is_initialized() ?
   query.Bind(7, *(config.vehicle_year)) : query.Bind(7);
-  query.Bind(8, config.remote_control);
+  config.remote_control.is_initialized() ?
+  query.Bind(8, *(config.remote_control)) : query.Bind(8);
 
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Incorrect update module config");

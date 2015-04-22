@@ -93,6 +93,7 @@ extern const std::string kDeleteMessageString;
 extern const std::string kDeleteFunctionalGroup;
 extern const std::string kDeleteRpc;
 extern const std::string kDeleteAppGroup;
+extern const std::string kDeleteAppGroupNonPrimary;
 extern const std::string kDeleteApplication;
 extern const std::string kDeleteDevice;
 extern const std::string kIncrementIgnitionCycles;

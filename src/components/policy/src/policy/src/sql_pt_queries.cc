@@ -522,7 +522,7 @@ const std::string kInsertNotificationsByPriority =
   "  VALUES (?, ?)";
 
 const std::string kInsertDeviceData =
-  "INSERT OR IGNORE INTO `device` (`id`, `primary`) VALUES (?, ?)";
+  "INSERT OR REPLACE INTO `device` (`id`, `primary`) VALUES (?, ?)";
 
 const std::string kInsertAppLevel =
   "INSERT INTO `app_level` (`application_id`, `minutes_in_hmi_full`,"
@@ -549,6 +549,8 @@ const std::string kDeleteFunctionalGroup = "DELETE FROM `functional_group`";
 const std::string kDeleteRpc = "DELETE FROM `rpc`";
 
 const std::string kDeleteAppGroup = "DELETE FROM `app_group`";
+
+const std::string kDeleteAppGroupNonPrimary = "DELETE FROM `app_group_non_primary`";
 
 const std::string kSelectModuleConfig =
   "SELECT `preloaded_pt`, `exchange_after_x_ignition_cycles`, "
