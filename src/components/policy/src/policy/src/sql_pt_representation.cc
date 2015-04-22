@@ -1370,6 +1370,7 @@ bool SQLPTRepresentation::GatherAppGroupNonPrimary(
 
 bool SQLPTRepresentation::SaveAppGroupNonPrimary(
   const std::string& app_id, const policy_table::Strings& app_groups) {
+  LOG4CXX_AUTO_TRACE(logger_);
   dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kInsertAppGroupNonPrimary)) {
     LOG4CXX_WARN(logger_, "Incorrect insert statement for app group non primary");

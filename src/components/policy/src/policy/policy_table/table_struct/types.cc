@@ -35,6 +35,7 @@ ApplicationParams::~ApplicationParams() {
 ApplicationParams::ApplicationParams(const Json::Value* value__)
   : CompositeType(InitHelper(value__, &Json::Value::isObject)),
     groups(impl::ValueMember(value__, "groups")),
+    groups_non_primaryRC(impl::ValueMember(value__, "groups_non_primaryRC")),
     nicknames(impl::ValueMember(value__, "nicknames")),
     AppHMIType(impl::ValueMember(value__, "AppHMIType")),
     priority(impl::ValueMember(value__, "priority")),
@@ -45,6 +46,7 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
 Json::Value ApplicationParams::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("groups", groups, &result__);
+  impl::WriteJsonField("groups_non_primaryRC", groups_non_primaryRC, &result__);
   impl::WriteJsonField("nicknames", nicknames, &result__);
   impl::WriteJsonField("AppHMIType", AppHMIType, &result__);
   impl::WriteJsonField("priority", priority, &result__);
@@ -55,6 +57,9 @@ Json::Value ApplicationParams::ToJsonValue() const {
 }
 bool ApplicationParams::is_valid() const {
   if (!groups.is_valid()) {
+    return false;
+  }
+  if (!groups_non_primaryRC.is_valid()) {
     return false;
   }
   if (!nicknames.is_valid()) {
@@ -82,6 +87,9 @@ bool ApplicationParams::is_initialized() const {
 }
 bool ApplicationParams::struct_empty() const {
   if (groups.is_initialized()) {
+    return false;
+  }
+  if (groups_non_primaryRC.is_initialized()) {
     return false;
   }
   if (nicknames.is_initialized()) {
@@ -112,6 +120,9 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
     rpc::CompositeType::ReportErrors(report__);
   }
   if (!groups.is_valid()) {
+    groups.ReportErrors(&report__->ReportSubobject("groups"));
+  }
+  if (!groups_non_primaryRC.is_valid()) {
     groups.ReportErrors(&report__->ReportSubobject("groups"));
   }
   if (!nicknames.is_valid()) {
