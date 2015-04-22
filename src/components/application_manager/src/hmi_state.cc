@@ -46,11 +46,13 @@ mobile_apis::AudioStreamingState::eType
 TTSHmiState::audio_streaming_state() const {
   using namespace helpers;
   using namespace mobile_apis;
+
   AudioStreamingState::eType expected_state = AudioStreamingState::NOT_AUDIBLE;
   if (state_context_.is_attenuated_supported() &&
-      Compare<HMILevel::eType, EQ, ONE> (hmi_level(), HMILevel::HMI_FULL,
-                                         HMILevel::HMI_LIMITED)) {
-      expected_state = AudioStreamingState::ATTENUATED;
+    AudioStreamingState::NOT_AUDIBLE != parent()->audio_streaming_state() &&
+    Compare<HMILevel::eType, EQ, ONE> (hmi_level(), HMILevel::HMI_FULL,
+                                       HMILevel::HMI_LIMITED)) {
+    expected_state = AudioStreamingState::ATTENUATED;
   }
   return expected_state;
 }
@@ -63,9 +65,11 @@ mobile_apis::AudioStreamingState::eType
 NaviStreamingHmiState::audio_streaming_state() const {
   using namespace helpers;
   using namespace mobile_apis;
+
   AudioStreamingState::eType expected_state = parent()->audio_streaming_state();
   if (Compare<HMILevel::eType, EQ, ONE> (hmi_level(), HMILevel::HMI_FULL) &&
-      !state_context_.is_navi_app(app_id_)) {
+      !state_context_.is_navi_app(app_id_) &&
+      AudioStreamingState::AUDIBLE == expected_state) {
     if (state_context_.is_attenuated_supported()) {
       expected_state = AudioStreamingState::ATTENUATED;
     } else {
