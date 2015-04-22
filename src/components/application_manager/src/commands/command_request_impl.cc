@@ -238,6 +238,10 @@ void CommandRequestImpl::CreateHMINotification(
 
   notify[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
+  notify[strings::params][strings::protocol_version] =
+      CommandImpl::protocol_version_;
+  notify[strings::params][strings::protocol_type] =
+      CommandImpl::hmi_protocol_type_;
   notify[strings::params][strings::function_id] = function_id;
   notify[strings::msg_params] = msg_params;
 

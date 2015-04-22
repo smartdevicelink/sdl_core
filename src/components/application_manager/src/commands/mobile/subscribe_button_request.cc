@@ -77,6 +77,7 @@ void SubscribeButtonRequest::Run() {
   }
 
   app->SubscribeToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id));
+  SendSubscribeButtonNotification();
   SendResponse(true, mobile_apis::Result::SUCCESS);
 
   app->UpdateHash();
@@ -94,6 +95,19 @@ bool SubscribeButtonRequest::IsSubscribtionAllowed(
   }
 
   return true;
+}
+
+void SubscribeButtonRequest::SendSubscribeButtonNotification() {
+  using namespace smart_objects;
+  using namespace hmi_apis;
+
+  // send OnButtonSubscription notification
+  SmartObject msg_params = SmartObject(SmartType_Map);
+  msg_params[strings::app_id] = connection_key();
+  msg_params[strings::name] = static_cast<Common_ButtonName::eType>(
+      (*message_)[strings::msg_params][strings::button_name].asUInt());
+  msg_params[strings::is_suscribed] = true;
+  CreateHMINotification(FunctionID::Buttons_OnButtonSubscription, msg_params);
 }
 
 }  // namespace commands

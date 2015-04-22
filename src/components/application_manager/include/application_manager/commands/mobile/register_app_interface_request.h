@@ -137,6 +137,23 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
    */
   bool IsWhiteSpaceExist();
 
+  /**
+   * @brief Checks vehicle type params (model, year etc.) and in case of absense
+   * replaces with policy table backup values
+   * @param vehicle_type VehicleType struct
+   * @param param Vehicle param
+   * @param backup_value Backup value
+   */
+  void CheckResponseVehicleTypeParam(smart_objects::SmartObject& vehicle_type,
+                                     const std::string& param,
+                                     const std::string& backup_value);
+  /**
+   * @brief Sends ButtonSubscription notification at start up
+   * to notify HMI that app subscribed on the custom button by default.
+   */
+  void SendSubscribeCustomButtonNotification();
+
+private:
   std::string response_info_;
   mobile_apis::Result::eType result_checking_app_hmi_type_;
 
