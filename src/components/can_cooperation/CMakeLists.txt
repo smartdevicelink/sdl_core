@@ -68,6 +68,7 @@ set (SOURCES
     ./src/validators/event_details_validator.cc
     ./src/validators/web_activity_validator.cc
     ./src/validators/on_radio_details_notification_validator.cc
+    ./src/policy_helper.cc
 )
 
 set (LIBRARIES

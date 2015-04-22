@@ -47,6 +47,7 @@ option(TIME_TESTER "Enable profiling time test util" ON)
 option(ENABLE_LOG "Logging feature" ON)
 option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
+option(REMOTE_CONTROL "Enable Reverse functionality" OFF)
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
 set(DEBUG_OPTION 	"$ENV{DEBUG}")
@@ -60,8 +61,6 @@ set(POLICY_OPTION 	"$ENV{POLICY_TYPE}")
 set(SECURITY_OPTION 	"$ENV{SECURITY_MODE}")
 set(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
 set(SNAPSHOT_TAG 	"$ENV{SNAPSHOT_TAG}")
-set(REMOTE_CONTROL "$ENV{REMOTE_CONTROL}")
-
 
 
 if (ARCH_TYPE_OPTION)

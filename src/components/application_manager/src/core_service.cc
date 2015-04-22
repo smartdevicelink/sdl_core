@@ -35,6 +35,7 @@
 #include "application_manager/core_service.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/policies/policy_handler.h"
+#include "application_manager/message_helper.h"
 #include "json/json.h"
 
 namespace application_manager {
@@ -126,9 +127,11 @@ void CoreService::ResetAccess(const std::string& group_name,
 #endif  // SDL_REMOTE_CONTROL
 }
 
-void CoreService::SetPrimaryDevice(const std::string& dev_id) {
+void CoreService::SetPrimaryDevice(const uint32_t dev_id) {
 #ifdef SDL_REMOTE_CONTROL
-  policy::PolicyHandler::instance()->SetPrimaryDevice(dev_id);
+  std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
+    dev_id);
+  policy::PolicyHandler::instance()->SetPrimaryDevice(device_handle);
 #endif  // SDL_REMOTE_CONTROL
 }
 

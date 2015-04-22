@@ -54,9 +54,11 @@ enum MobileFunctionID {
 };
 
 namespace hmi_api {
-  const char grant_access[]       = "VehicleInfo.GrantAccess";
-  const char cancel_access[]      = "VehicleInfo.CancelAccess";
-  const char on_control_changed[] = "VehicleInfo.OnControlChanged";
+  const char grant_access[]             = "VehicleInfo.GrantAccess";
+  const char cancel_access[]            = "VehicleInfo.CancelAccess";
+  const char on_control_changed[]       = "VehicleInfo.OnControlChanged";
+  const char on_reverse_apps_allowing[] = "VehicleInfo.OnReverseAppsAllowing";
+  const char on_primary_device[]        = "VehicleInfo.OnPrimaryDevice";
 }
 
 namespace can_api {
