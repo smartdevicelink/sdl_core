@@ -192,11 +192,12 @@ RequestInfoPtr RequestInfoSet::FrontWithNotNullTimeout() {
   RequestInfoPtr result;
   TimeSortedRequestInfoSet::iterator it = time_sorted_pending_requests_.begin();
   while (it != time_sorted_pending_requests_.end()) {
-    if (0 != (*it)->timeout_sec()) {
-      result =*it;
-      it = time_sorted_pending_requests_.end();
-    } else {
+    RequestInfoPtr tmp = *it;
+    if (0 == tmp ->timeout_sec()) {
       ++it;
+    } else {
+      result = tmp;
+      it = time_sorted_pending_requests_.end();
     }
   }
   return result;
@@ -356,10 +357,6 @@ bool RequestInfoTimeComparator::operator()(const RequestInfoPtr lhs,
   }
   // compare_result == date_time::EQUAL
   // If time is equal, sort by hash
-  LOG4CXX_DEBUG(logger_, "EQUAL " << lhs->end_time().tv_sec << ":" << lhs->end_time().tv_usec
-                << " and " << rhs->end_time().tv_sec << ":" << rhs->end_time().tv_usec
-                << "; compare hash: " << lhs->hash() << " < " << rhs->hash()
-                << " = " << (lhs->hash() < rhs->hash()));
   return lhs->hash() < rhs->hash();
 }
 

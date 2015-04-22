@@ -470,6 +470,13 @@ class ApplicationManagerImpl : public ApplicationManager,
     void SendMessageToMobile(const commands::MessageSharedPtr message,
                              bool final_message = false);
 
+    /**
+     * @brief TerminateRequest forces termination of request
+     * @param connection_key - application id of request
+     * @param corr_id correlation id of request
+     */
+    void TerminateRequest(uint32_t connection_key, uint32_t corr_id);
+
     bool ManageMobileCommand(
             const commands::MessageSharedPtr message,
             commands::Command::CommandOrigin origin =

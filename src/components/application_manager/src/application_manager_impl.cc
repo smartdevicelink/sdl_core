@@ -1247,7 +1247,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
   // If correlation_id is not present, it is from-HMI message which should be
   // checked against policy permissions
   if (msg_to_mobile[strings::params].keyExists(strings::correlation_id)) {
-    request_ctrl_.terminateMobileRequest(
+    request_ctrl_.OnMobileResponse(
       msg_to_mobile[strings::params][strings::correlation_id].asInt(),
       msg_to_mobile[strings::params][strings::connection_key].asInt());
   } else if (app) {
@@ -1294,7 +1294,11 @@ void ApplicationManagerImpl::SendMessageToMobile(
     LOG4CXX_DEBUG(logger_, "Binary data size: " << message_to_send->binary_data()->size());
   }
   messages_to_mobile_.PostMessage(impl::MessageToMobile(message_to_send,
-                                  final_message));
+                                                        final_message));
+}
+
+void ApplicationManagerImpl::TerminateRequest(uint32_t connection_key, uint32_t corr_id) {
+  request_ctrl_.terminateRequest(corr_id, connection_key, true);
 }
 
 bool ApplicationManagerImpl::ManageMobileCommand(
@@ -1530,8 +1534,8 @@ bool ApplicationManagerImpl::ManageHMICommand(
     command->Run();
       if (kResponse == message_type) {
         int32_t correlation_id =
-            (*(message.get()))[strings::params][strings::correlation_id].asInt();
-        request_ctrl_.terminateHMIRequest(correlation_id);
+          (*(message.get()))[strings::params][strings::correlation_id].asInt();
+        request_ctrl_.OnHMIResponse(correlation_id);
       }
       return true;
   }

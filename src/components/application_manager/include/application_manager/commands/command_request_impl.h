@@ -107,9 +107,9 @@ class CommandRequestImpl : public CommandImpl,
    * @param function_id HMI request ID
    * @param msg_params HMI request msg params
    * @param use_events true if we need subscribe on event(HMI request)
-   *
+   * @return hmi correlation id
    */
-  void SendHMIRequest(const hmi_apis::FunctionID::eType& function_id,
+  uint32_t SendHMIRequest(const hmi_apis::FunctionID::eType& function_id,
                       const smart_objects::SmartObject* msg_params = NULL,
                       bool use_events = false);
 
