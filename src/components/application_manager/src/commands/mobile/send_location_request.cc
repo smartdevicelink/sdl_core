@@ -59,9 +59,10 @@ void SendLocationRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
-  const smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
 
+  const smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
   std::list<Common_TextFieldName::eType> fields_to_check;
+
   if (msg_params.keyExists(strings::location_name)) {
     fields_to_check.push_back(Common_TextFieldName::locationName);
   }
@@ -98,9 +99,13 @@ void SendLocationRequest::Run() {
     }
   }
 
+  smart_objects::SmartObject request_msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
+  request_msg_params = (*message_)[strings::msg_params];
+  request_msg_params[strings::app_id] = app->hmi_app_id();
+
   SendHMIRequest(hmi_apis::FunctionID::Navigation_SendLocation,
-                 &((*message_)[strings::msg_params]),
-                   true);
+                 &request_msg_params, true);
 }
 
 void SendLocationRequest::on_event(const event_engine::Event& event) {

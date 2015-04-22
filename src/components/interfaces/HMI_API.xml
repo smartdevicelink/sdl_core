@@ -3056,6 +3056,9 @@
   </function>
   <function name="SendLocation" messagetype="request">
       <description>That allows the app to send a destination to the embedded nav system.</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
     <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="true">
     </param>
     <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="true">
