@@ -14,21 +14,20 @@
         625
       ],
       "endpoints": {
-        "0x04": {
-          "default": [
-            "http://ivsu.software.ford.com/api/getsoftwareupdates"
-          ]
-        },
         "0x07": {
-          "default": [
-            "http://policies.telematics.ford.com/api/policies"
-          ]
-        }
-      },
-      "lock_screen_icon_url": {
-         "default": ["http://i.imgur.com/QwZ9uKG.png"]
-      },
-      "notifications_per_minute_by_priority": {
+          "default": ["http://policies.telematics.ford.com/api/policies"]
+         },
+         "0x04": {
+           "default": ["http://ivsu.software.ford.com/api/getsoftwareupdates"]
+         },
+         "queryAppsUrl": {
+           "default": ["http://sdl.shaid.server"]
+         },
+         "lock_screen_icon_url": {
+           "default": ["http://i.imgur.com/QwZ9uKG.png"]
+         }
+       },
+       "notifications_per_minute_by_priority": {
         "EMERGENCY": 60,
         "NAVIGATION": 15,
         "VOICECOM": 20,
