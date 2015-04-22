@@ -400,8 +400,15 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       *hmi_capabilities.preset_bank_capabilities();
   }
   if (hmi_capabilities.hmi_zone_capabilities()) {
-    response_params[hmi_response::hmi_zone_capabilities][0] =
-      *hmi_capabilities.hmi_zone_capabilities();
+    if (smart_objects::SmartType_Array ==
+        hmi_capabilities.hmi_zone_capabilities()->getType()) {
+      // hmi_capabilities json contains array and HMI response object
+      response_params[hmi_response::hmi_zone_capabilities] =
+        *hmi_capabilities.hmi_zone_capabilities();
+    } else {
+      response_params[hmi_response::hmi_zone_capabilities][0] =
+        *hmi_capabilities.hmi_zone_capabilities();
+    }
   }
   if (hmi_capabilities.speech_capabilities()) {
     response_params[strings::speech_capabilities] =
@@ -412,8 +419,15 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       *hmi_capabilities.vr_capabilities();
   }
   if (hmi_capabilities.audio_pass_thru_capabilities()) {
-    response_params[strings::audio_pass_thru_capabilities][0] =
-      *hmi_capabilities.audio_pass_thru_capabilities();
+    if (smart_objects::SmartType_Array ==
+        hmi_capabilities.audio_pass_thru_capabilities()->getType()) {
+      // hmi_capabilities json contains array and HMI response object
+      response_params[strings::audio_pass_thru_capabilities] =
+        *hmi_capabilities.audio_pass_thru_capabilities();
+    } else {
+      response_params[strings::audio_pass_thru_capabilities][0] =
+        *hmi_capabilities.audio_pass_thru_capabilities();
+    }
   }
   if (hmi_capabilities.vehicle_type()) {
     response_params[hmi_response::vehicle_type] =
