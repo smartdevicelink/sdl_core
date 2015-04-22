@@ -666,6 +666,9 @@ const std::string kDeleteDevice = "DELETE FROM `device` WHERE `id` = ?";
 const std::string kDeleteAppGroupByApplicationId =
   "DELETE FROM `app_group` WHERE `application_id` = ?";
 
+const std::string kDeleteAppGroupNonPrimaryByApplicationId =
+  "DELETE FROM `app_group_non_primary` WHERE `application_id` = ?";
+
 const std::string kInsertApplicationFull =
   "INSERT OR IGNORE INTO `application` (`id`, `keep_context`, `steal_focus`, "
   "  `default_hmi`, `priority_value`, `is_revoked`, `is_default`, `is_predata`, "

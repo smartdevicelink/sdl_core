@@ -108,6 +108,7 @@ extern const std::string kSelectApplicationIsDefault;
 extern const std::string kUpdateIsDefault;
 extern const std::string kInsertInitData;
 extern const std::string kDeleteAppGroupByApplicationId;
+extern const std::string kDeleteAppGroupNonPrimaryByApplicationId;
 extern const std::string kInsertApplicationFull;
 extern const std::string kDeletePreconsentedGroupsByApplicationId;
 extern const std::string kSelectApplicationFull;
