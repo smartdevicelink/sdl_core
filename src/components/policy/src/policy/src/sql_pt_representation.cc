@@ -1595,8 +1595,7 @@ bool SQLPTRepresentation::CopyApplication(const std::string& source,
                        : query.Bind(7, source_app.GetBoolean(6));
   query.Bind(8, source_app.GetInteger(7));
   query.Bind(9, source_app.GetInteger(8));
-  source_app.IsNull(9) ? query.Bind(10)
-                       : query.Bind(10, source_app.GetString(9));
+
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Failed inserting into application.");
     return false;
