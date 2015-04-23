@@ -394,11 +394,9 @@ void ApplicationImpl::set_video_streaming_started(bool state) {
     if (video_stream_retry_timer_->isRunning()) {
       video_stream_retry_timer_->stop();
       video_streaming_started_ = state;
-      set_video_streaming_allowed(state);
     }
   } else {
     video_streaming_started_ = state;
-    set_video_streaming_allowed(state);
   }
 }
 
@@ -411,11 +409,9 @@ void ApplicationImpl::set_audio_streaming_started(bool state) {
     if (audio_stream_retry_timer_->isRunning()) {
       audio_stream_retry_timer_->stop();
       audio_streaming_started_ = state;
-      set_audio_streaming_allowed(state);
     }
   } else {
     audio_streaming_started_ = state;
-    set_audio_streaming_allowed(state);
   }
 }
 

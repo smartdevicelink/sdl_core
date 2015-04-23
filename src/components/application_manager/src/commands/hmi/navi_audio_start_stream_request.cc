@@ -51,7 +51,16 @@ void AudioStartStreamRequest::Run() {
 
   subscribe_on_event(hmi_apis::FunctionID::Navigation_StartAudioStream,
                      correlation_id());
-  SendRequest();
+  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
+  DCHECK_OR_RETURN_VOID(app_mgr);
+  ApplicationSharedPtr app = app_mgr->application_by_hmi_app(application_id());
+  if (app) {
+    app->set_audio_streaming_allowed(true);
+    SendRequest();
+  } else {
+    LOG4CXX_ERROR(logger_, "Applcation with hmi_app_id "
+                 << application_id() << " does not exist");
+  }
 }
 
 void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
@@ -59,10 +68,7 @@ void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-  if (!app_mgr) {
-    LOG4CXX_ERROR_EXT(logger_, "Application manager not found");
-    return;
-  }
+  DCHECK_OR_RETURN_VOID(app_mgr);
 
   ApplicationSharedPtr app = app_mgr->application_by_hmi_app(application_id());
   if (!app) {
@@ -87,6 +93,7 @@ void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
         } else {
           LOG4CXX_DEBUG(logger_,
                        "StartAudioStreamRequest aborted. Application can not stream");
+          ApplicationManagerImpl::instance()->EndNaviServices(app->app_id());
         }
       }
       break;
