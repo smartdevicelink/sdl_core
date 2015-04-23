@@ -35,6 +35,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/application_manager_impl.h"
+#include "protocol_handler/protocol_handler.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
@@ -85,8 +86,12 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
       active_message_(NULL),
       is_media_(false),
       is_navi_(false),
-      hmi_supports_navi_video_streaming_(false),
-      hmi_supports_navi_audio_streaming_(false),
+      video_streaming_started_(false),
+      audio_streaming_started_(false),
+      video_streaming_allowed_(false),
+      audio_streaming_allowed_(false),
+      video_streaming_suspended_(true),
+      audio_streaming_suspended_(true),
       is_app_allowed_(true),
       has_been_activated_(false),
       tts_properties_in_none_(false),
@@ -98,8 +103,6 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
       usage_report_(mobile_app_id, statistics_manager),
       protocol_version_(ProtocolVersion::kV3),
       is_voice_communication_application_(false),
-      is_video_stream_retry_active_(false),
-      is_audio_stream_retry_active_(false),
       video_stream_retry_number_(0),
       audio_stream_retry_number_(0) {
 
@@ -107,7 +110,6 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
       {date_time::DateTime::getCurrentTime(), 0};
   cmd_number_to_time_limits_[mobile_apis::FunctionID::GetVehicleDataID] =
       {date_time::DateTime::getCurrentTime(), 0};
-
 
   set_mobile_app_id(mobile_app_id);
   set_name(app_name);
@@ -124,6 +126,29 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
                                           mobile_apis::AudioStreamingState::INVALID_ENUM,
                                           mobile_api::SystemContext::SYSCTXT_MAIN);
   hmi_states_.push_back(initial_state);
+
+  video_stream_suspend_timeout_ =
+      profile::Profile::instance()->video_data_stopped_timeout() / 1000;
+  audio_stream_suspend_timeout_ =
+      profile::Profile::instance()->audio_data_stopped_timeout() / 1000;
+
+  video_stream_retry_timer_ = ApplicationTimerPtr(
+          new timer::TimerThread<ApplicationImpl>(
+              "VideoStartStreamRetry", this,
+              &ApplicationImpl::OnVideoStartStreamRetry, true));
+  audio_stream_retry_timer_ = ApplicationTimerPtr(
+          new timer::TimerThread<ApplicationImpl>(
+              "AudioStartStreamRetry", this,
+              &ApplicationImpl::OnAudioStartStreamRetry, true));
+
+  video_stream_suspend_timer_ = ApplicationTimerPtr(
+          new timer::TimerThread<ApplicationImpl>(
+              "VideoStreamSuspend", this,
+              &ApplicationImpl::OnVideoStreamSuspend, true));
+  audio_stream_suspend_timer_ = ApplicationTimerPtr(
+          new timer::TimerThread<ApplicationImpl>(
+              "AudioStreamSuspend", this,
+              &ApplicationImpl::OnAudioStreamSuspend, true));
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -364,100 +389,186 @@ bool ApplicationImpl::tts_properties_in_full() {
   return tts_properties_in_full_;
 }
 
-void ApplicationImpl::set_hmi_supports_navi_video_streaming(bool supports) {
-  hmi_supports_navi_video_streaming_ = supports;
-
-  if ((!supports) && (!video_stream_retry_active())) {
-    std::pair<uint32_t, int32_t> stream_retry =
-        profile::Profile::instance()->start_stream_retry_amount();
-    set_video_stream_retry_active(true);
-    video_stream_retry_number_ = stream_retry.first;
-    video_stream_retry_timer_ =
-        utils::SharedPtr<timer::TimerThread<ApplicationImpl>>(
-            new timer::TimerThread<ApplicationImpl>(
-                "VideoStreamRetry", this, &ApplicationImpl::OnVideoStreamRetry, true));
-    // start separate pthread for timer without delays
-    video_stream_retry_timer_->start(0);
+void ApplicationImpl::set_video_streaming_started(bool state) {
+  if (state) {
+    if (video_stream_retry_timer_->isRunning()) {
+      video_stream_retry_timer_->stop();
+      video_streaming_started_ = state;
+      set_video_streaming_allowed(state);
+    }
+  } else {
+    video_streaming_started_ = state;
+    set_video_streaming_allowed(state);
   }
 }
 
-bool ApplicationImpl::hmi_supports_navi_video_streaming() const {
-  return hmi_supports_navi_video_streaming_;
+bool ApplicationImpl::video_streaming_started() const {
+  return video_streaming_started_;
 }
 
-void ApplicationImpl::set_hmi_supports_navi_audio_streaming(bool supports) {
-  hmi_supports_navi_audio_streaming_ = supports;
-
-  if ((!supports) && (!audio_stream_retry_active())) {
-    std::pair<uint32_t, int32_t> stream_retry =
-        profile::Profile::instance()->start_stream_retry_amount();
-    set_audio_stream_retry_active(true);
-    audio_stream_retry_number_ = stream_retry.first;
-    audio_stream_retry_timer_ =
-        utils::SharedPtr<timer::TimerThread<ApplicationImpl>>(
-            new timer::TimerThread<ApplicationImpl>(
-                "AudioStreamRetry", this, &ApplicationImpl::OnAudioStreamRetry, true));
-    // start separate pthread for timer without delays
-    audio_stream_retry_timer_->start(0);
+void ApplicationImpl::set_audio_streaming_started(bool state) {
+  if (state) {
+    if (audio_stream_retry_timer_->isRunning()) {
+      audio_stream_retry_timer_->stop();
+      audio_streaming_started_ = state;
+      set_audio_streaming_allowed(state);
+    }
+  } else {
+    audio_streaming_started_ = state;
+    set_audio_streaming_allowed(state);
   }
 }
 
-bool ApplicationImpl::hmi_supports_navi_audio_streaming() const {
-  return hmi_supports_navi_audio_streaming_;
+bool ApplicationImpl::audio_streaming_started() const {
+  return audio_streaming_started_;
 }
 
-bool ApplicationImpl::video_stream_retry_active() const {
-  return is_video_stream_retry_active_;
+void ApplicationImpl::set_video_streaming_allowed(bool state) {
+  video_streaming_allowed_ = state;
 }
 
-void ApplicationImpl::set_video_stream_retry_active(bool active) {
-  is_video_stream_retry_active_ = active;
+bool ApplicationImpl::video_streaming_allowed() const {
+  return video_streaming_allowed_;
 }
 
-bool ApplicationImpl::audio_stream_retry_active() const {
-  return is_audio_stream_retry_active_;
+void ApplicationImpl::set_audio_streaming_allowed(bool state) {
+  audio_streaming_allowed_ = state;
 }
 
-void ApplicationImpl::set_audio_stream_retry_active(bool active) {
-  is_audio_stream_retry_active_ = active;
+bool ApplicationImpl::audio_streaming_allowed() const {
+  return audio_streaming_allowed_;
 }
 
-void ApplicationImpl::OnVideoStreamRetry() {
+void ApplicationImpl::StartStreaming(
+    protocol_handler::ServiceType service_type) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  std::pair<uint32_t, int32_t> stream_retry =
+      profile::Profile::instance()->start_stream_retry_amount();
+
+  if (ServiceType::kMobileNav == service_type) {
+    if (!video_streaming_started()) {
+      MessageHelper::SendNaviStartStream(app_id());
+      video_stream_retry_number_ = stream_retry.first;
+      video_stream_retry_timer_->start(stream_retry.second);
+    }
+  } else if (ServiceType::kAudio == service_type) {
+    if (!audio_streaming_started()) {
+      MessageHelper::SendAudioStartStream(app_id());
+      audio_stream_retry_number_ = stream_retry.first;
+      audio_stream_retry_timer_->start(stream_retry.second);
+    }
+  }
+}
+
+void ApplicationImpl::StopStreaming(
+    protocol_handler::ServiceType service_type) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (ServiceType::kMobileNav == service_type) {
+    video_stream_retry_timer_->stop();
+    if (video_streaming_started()) {
+      video_stream_suspend_timer_->stop();
+      MessageHelper::SendNaviStopStream(app_id());
+      set_video_streaming_started(false);
+    }
+  } else if (ServiceType::kAudio == service_type) {
+    audio_stream_retry_timer_->stop();
+    if (audio_streaming_started()) {
+      audio_stream_suspend_timer_->stop();
+      MessageHelper::SendAudioStopStream(app_id());
+      set_audio_streaming_started(false);
+    }
+  }
+}
+
+void ApplicationImpl::SuspendStreaming(
+    protocol_handler::ServiceType service_type) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (ServiceType::kMobileNav == service_type) {
+    video_stream_suspend_timer_->suspend();
+    ApplicationManagerImpl::instance()->OnAppStreaming(app_id(), false);
+    sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
+    video_streaming_suspended_ = true;
+  } else if (ServiceType::kAudio == service_type) {
+    audio_stream_suspend_timer_->suspend();
+    ApplicationManagerImpl::instance()->OnAppStreaming(app_id(), false);
+    sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
+    audio_streaming_suspended_ = true;
+  }
+  MessageHelper::SendOnDataStreaming(service_type, false);
+}
+
+void ApplicationImpl::WakeUpStreaming(
+    protocol_handler::ServiceType service_type) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (ServiceType::kMobileNav == service_type) {
+    sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
+    if (video_streaming_suspended_) {
+      ApplicationManagerImpl::instance()->OnAppStreaming(app_id(), true);
+      MessageHelper::SendOnDataStreaming(ServiceType::kMobileNav, true);
+      video_streaming_suspended_ = false;
+    }
+    video_stream_suspend_timer_->start(video_stream_suspend_timeout_);
+  } else if (ServiceType::kAudio == service_type) {
+    sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
+    if (audio_streaming_suspended_) {
+      ApplicationManagerImpl::instance()->OnAppStreaming(app_id(), true);
+      MessageHelper::SendOnDataStreaming(ServiceType::kAudio, true);
+      audio_streaming_suspended_ = false;
+    }
+    audio_stream_suspend_timer_->start(audio_stream_suspend_timeout_);
+  }
+}
+
+void ApplicationImpl::OnVideoStartStreamRetry() {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (video_stream_retry_number_) {
-    LOG4CXX_INFO(logger_, "Send video stream retry "
+    LOG4CXX_INFO(logger_, "Send video start stream retry "
                  << video_stream_retry_number_);
 
-    application_manager::MessageHelper::SendNaviStartStream(app_id());
+    MessageHelper::SendNaviStartStream(app_id());
     --video_stream_retry_number_;
-
-    std::pair<uint32_t, int32_t> stream_retry =
-        profile::Profile::instance()->start_stream_retry_amount();
-    int32_t time_out = stream_retry.second;
-    video_stream_retry_timer_->updateTimeOut(time_out);
   } else {
-    LOG4CXX_INFO(logger_, "Stop video streaming retry");
-    video_stream_retry_timer_->stop();
-    set_video_stream_retry_active(false);
+    video_stream_retry_timer_->suspend();
+    ApplicationManagerImpl::instance()->EndNaviServices(app_id());
+    LOG4CXX_INFO(logger_, "Video start stream retry timer stopped");
   }
 }
 
-void ApplicationImpl::OnAudioStreamRetry() {
+void ApplicationImpl::OnAudioStartStreamRetry() {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (audio_stream_retry_number_) {
-    LOG4CXX_INFO(logger_, "Send audio streaming retry "
+    LOG4CXX_INFO(logger_, "Send audio start stream retry "
                  << audio_stream_retry_number_);
 
-    application_manager::MessageHelper::SendAudioStartStream(app_id());
+    MessageHelper::SendAudioStartStream(app_id());
     --audio_stream_retry_number_;
-
-    std::pair<uint32_t, int32_t> stream_retry =
-        profile::Profile::instance()->start_stream_retry_amount();
-    int32_t time_out = stream_retry.second;
-    audio_stream_retry_timer_->updateTimeOut(time_out);
   } else {
-    LOG4CXX_INFO(logger_, "Stop audio streaming retry");
-    audio_stream_retry_timer_->stop();
-    set_audio_stream_retry_active(false);
+    audio_stream_retry_timer_->suspend();
+    ApplicationManagerImpl::instance()->EndNaviServices(app_id());
+    LOG4CXX_INFO(logger_, "Audio start stream retry timer stopped");
   }
+}
+
+void ApplicationImpl::OnVideoStreamSuspend() {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "Suspend video streaming by timer");
+  SuspendStreaming(ServiceType::kMobileNav);
+}
+
+void ApplicationImpl::OnAudioStreamSuspend() {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "Suspend audio streaming by timer");
+  SuspendStreaming(ServiceType::kAudio);
 }
 
 void ApplicationImpl::increment_put_file_in_none_count() {

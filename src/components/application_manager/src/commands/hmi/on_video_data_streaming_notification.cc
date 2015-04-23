@@ -1,5 +1,6 @@
+
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,49 +31,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_START_STREAM_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_START_STREAM_REQUEST_H_
-
-#include "application_manager/commands/hmi/request_to_hmi.h"
+#include "application_manager/commands/hmi/on_video_data_streaming_notification.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief NaviStartStreamRequest command class
- **/
-class NaviStartStreamRequest : public RequestToHMI,
-                               public event_engine::EventObserver {
- public:
-  /**
-   * @brief NaviStartStreamRequest class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit NaviStartStreamRequest(const MessageSharedPtr& message);
+OnVideoDataStreamingNotification::OnVideoDataStreamingNotification(
+    const MessageSharedPtr& message)
+    : NotificationToHMI(message) {
+}
 
-  /**
-   * @brief OnNaviStartStreamRequest class destructor
-   **/
-  virtual ~NaviStartStreamRequest();
+OnVideoDataStreamingNotification::~OnVideoDataStreamingNotification() {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
-  /**
-   * @brief On event callback
-   **/
-  virtual void on_event(const event_engine::Event& event);
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(NaviStartStreamRequest);
-};
+void OnVideoDataStreamingNotification::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  SendNotification();
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_START_STREAM_REQUEST_H_

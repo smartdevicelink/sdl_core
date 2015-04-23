@@ -195,13 +195,17 @@ bool SendLocationRequest::CheckHMICapabilities(std::list<hmi_apis::Common_TextFi
   using namespace smart_objects;
   using namespace hmi_apis;
 
+  if (fields_names.empty()) {
+    return true;
+  }
+
   ApplicationManagerImpl* instance = ApplicationManagerImpl::instance();
   const HMICapabilities& hmi_capabilities = instance->hmi_capabilities();
   if (!hmi_capabilities.is_ui_cooperating()) {
     LOG4CXX_ERROR_EXT(logger_, "UI is not supported.");
     return false;
   }
-  const size_t size_before = fields_names.size();
+
   if (hmi_capabilities.display_capabilities()) {
     const SmartObject disp_cap = (*hmi_capabilities.display_capabilities());
     const SmartObject& text_fields = disp_cap.getElement(hmi_response::text_fields);
@@ -217,7 +221,8 @@ bool SendLocationRequest::CheckHMICapabilities(std::list<hmi_apis::Common_TextFi
       }
     }
   }
-  if (fields_names.size() == size_before) {
+
+  if (!fields_names.empty()) {
     LOG4CXX_ERROR_EXT(logger_, "Some fields are not supported by capabilities");
     return false;
   }

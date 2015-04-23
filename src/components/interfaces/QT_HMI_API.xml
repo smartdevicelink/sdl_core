@@ -3074,7 +3074,21 @@
     </function>
     <function name="StopAudioStream" messagetype="response">
   </function>
+  <function name="OnAudioDataStreaming" messagetype="notification">
+    <description>Sender: SDL->HMI. Purpose: notify about raw audio data presence over the URL provided via StartAudioStream SDL's request.</description>
+    <param name="available" type="Boolean" mandatory="true">
+      <description>If "true" - audio data started. If "false" - audio data stopped.</description>
+    </param>
+  </function>
+  <function name="OnVideoDataStreaming" messagetype="notification">
+    <description>Sender: SDL->HMI. Purpose: notify about raw video data presence over the URL provided via StartStream SDL's request.</description>
+    <param name="available" type="Boolean" mandatory="true">
+      <description>If "true" - video data started. If "false" - video data stopped.</description>
+    </param>
+  </function>
+
   </interface>
+
   <interface name="VehicleInfo" version="1.0" date="2013-04-21">
     <function name="IsReady" messagetype="request" provider="hmi">
       <description>Method is invoked at system startup. Response should provide information about presence of any of vehicle information modules (ECU, GPS, etc) and their readiness to cooperate with SDL.</description>

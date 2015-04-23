@@ -214,6 +214,8 @@ void StateController::OnStateChanged(ApplicationSharedPtr app,
     if (new_state->hmi_level() == mobile_apis::HMILevel::HMI_NONE) {
       app->ResetDataInNone();
     }
+    ApplicationManagerImpl::instance()->OnHMILevelChanged(app->app_id(),
+        old_state->hmi_level(), new_state->hmi_level());
   } else {
     LOG4CXX_ERROR(logger_, "Status not changed");
   }
@@ -356,6 +358,26 @@ void StateController::OnTTSStopped() {
   TempStateStopped(HmiState::STATE_ID_TTS_SESSION);
 }
 
+void StateController::OnNaviStreamingStarted() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ForEachApplication(std::bind1st(
+                       std::mem_fun(
+                         &StateController::HMIStateStarted<HmiState::STATE_ID_NAVI_STREAMING>),
+                       this)
+                     );
+    TempStateStarted(HmiState::STATE_ID_NAVI_STREAMING);
+}
+
+void StateController::OnNaviStreamingStopped() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ForEachApplication(std::bind1st(
+                       std::mem_fun(
+                         &StateController::HMIStateStopped<HmiState::STATE_ID_NAVI_STREAMING>),
+                       this)
+                     );
+  TempStateStopped(HmiState::STATE_ID_NAVI_STREAMING);
+}
+
 HmiStatePtr StateController::CreateHmiState(uint32_t app_id, HmiState::StateID state_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   HmiStatePtr new_state;
@@ -374,6 +396,10 @@ HmiStatePtr StateController::CreateHmiState(uint32_t app_id, HmiState::StateID s
     }
     case HmiState::STATE_ID_TTS_SESSION: {
       new_state.reset(new TTSHmiState(app_id, state_context_));
+      break;
+    }
+    case HmiState::STATE_ID_NAVI_STREAMING: {
+      new_state.reset(new NaviStreamingHmiState(app_id, state_context_));
       break;
     }
     case HmiState::STATE_ID_REGULAR: {

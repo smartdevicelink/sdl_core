@@ -42,7 +42,8 @@ namespace commands {
 /**
  * @brief AudioStartStreamRequest command class
  **/
-class AudioStartStreamRequest : public RequestToHMI {
+class AudioStartStreamRequest : public RequestToHMI,
+                                public event_engine::EventObserver {
  public:
   /**
    * @brief AudioStartStreamRequest class constructor
@@ -60,6 +61,11 @@ class AudioStartStreamRequest : public RequestToHMI {
    * @brief Execute command
    **/
   virtual void Run();
+
+  /**
+   * @brief On event callback
+   **/
+  virtual void on_event(const event_engine::Event& event);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(AudioStartStreamRequest);

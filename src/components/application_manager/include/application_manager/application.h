@@ -43,9 +43,11 @@
 #include "connection_handler/device.h"
 #include "application_manager/message.h"
 #include "application_manager/hmi_state.h"
+#include "protocol_handler/protocol_handler.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
+
 class SmartObject;
 }
 }
@@ -400,18 +402,47 @@ class Application : public virtual InitialApplicationData,
     virtual void CloseActiveMessage() = 0;
     virtual bool IsFullscreen() const = 0;
     virtual void ChangeSupportingAppHMIType() = 0;
+
     virtual bool is_navi() const = 0;
     virtual void set_is_navi(bool allow) = 0;
-    virtual bool hmi_supports_navi_video_streaming() const = 0;
-    virtual void set_hmi_supports_navi_video_streaming(bool supports) = 0;
-    virtual bool hmi_supports_navi_audio_streaming() const = 0;
-    virtual void set_hmi_supports_navi_audio_streaming(bool supports) = 0;
 
-    bool is_streaming_allowed() const { return can_stream_;}
-    void set_streaming_allowed(bool can_stream) { can_stream_ = can_stream;}
-    bool streaming() const {return streaming_;}
-    void set_streaming(bool can_stream) { streaming_ = can_stream;}
+    virtual bool video_streaming_started() const = 0;
+    virtual void set_video_streaming_started(bool state) = 0;
+    virtual bool audio_streaming_started() const = 0;
+    virtual void set_audio_streaming_started(bool state) = 0;
 
+    virtual bool video_streaming_allowed() const = 0;
+    virtual void set_video_streaming_allowed(bool state) = 0;
+    virtual bool audio_streaming_allowed() const = 0;
+    virtual void set_audio_streaming_allowed(bool state) = 0;
+
+    /**
+     * @brief Starts streaming service for application
+     * @param service_type Type of streaming service
+     */
+    virtual void StartStreaming(
+        protocol_handler::ServiceType service_type) = 0;
+
+    /**
+     * @brief Stops streaming service for application
+     * @param service_type Type of streaming service
+     */
+    virtual void StopStreaming(
+        protocol_handler::ServiceType service_type) = 0;
+
+    /**
+     * @brief Suspends streaming process for application
+     * @param service_type Type of streaming service
+     */
+    virtual void SuspendStreaming(
+        protocol_handler::ServiceType service_type) = 0;
+
+    /**
+     * @brief Wakes up streaming process for application
+     * @param service_type Type of streaming service
+     */
+    virtual void WakeUpStreaming(
+        protocol_handler::ServiceType service_type) = 0;
 
     virtual bool is_voice_communication_supported() const = 0;
     virtual void set_voice_communication_supported(
@@ -671,16 +702,6 @@ class Application : public virtual InitialApplicationData,
 
   protected:
 
-    // interfaces for NAVI retry sequence
-    virtual bool video_stream_retry_active() const = 0;
-    virtual void set_video_stream_retry_active(bool active) = 0;
-    virtual bool audio_stream_retry_active() const = 0;
-    virtual void set_audio_stream_retry_active(bool active) = 0;
-    virtual void OnVideoStreamRetry() = 0;
-    virtual void OnAudioStreamRetry() = 0;
-
-  protected:
-
     /**
      * @brief Active states of application
      */
@@ -691,8 +712,6 @@ class Application : public virtual InitialApplicationData,
     std::string url_;
     std::string package_name_;
     std::string device_id_;
-    bool can_stream_;
-    bool streaming_;
     ssize_t connection_id_;
     bool is_greyed_out_;
 };

@@ -63,6 +63,8 @@
 #include "application_manager/commands/hmi/on_app_permission_changed_notification.h"
 #include "application_manager/commands/hmi/on_app_permission_consent_notification.h"
 #include "application_manager/commands/hmi/on_app_activated_notification.h"
+#include "application_manager/commands/hmi/on_audio_data_streaming_notification.h"
+#include "application_manager/commands/hmi/on_video_data_streaming_notification.h"
 #include "application_manager/commands/hmi/on_sdl_consent_needed_notification.h"
 #include "application_manager/commands/hmi/on_exit_all_applications_notification.h"
 #include "application_manager/commands/hmi/on_exit_application_notification.h"
@@ -1960,6 +1962,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       } else {
         command.reset(new commands::AudioStopStreamRequest(message));
       }
+      break;
+    }
+    case hmi_apis::FunctionID::Navigation_OnAudioDataStreaming: {
+      command.reset(new commands::OnAudioDataStreamingNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::Navigation_OnVideoDataStreaming: {
+      command.reset(new commands::OnVideoDataStreamingNotification(message));
       break;
     }
     case hmi_apis::FunctionID::VR_PerformInteraction: {

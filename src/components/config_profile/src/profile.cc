@@ -99,8 +99,8 @@ const char* kNamedVideoPipePathKey = "NamedVideoPipePath";
 const char* kNamedAudioPipePathKey = "NamedAudioPipePath";
 const char* kVideoStreamFileKey = "VideoStreamFile";
 const char* kAudioStreamFileKey = "AudioStreamFile";
-
-
+const char* kAudioDataStoppedTimeoutKey = "AudioDataStoppedTimeout";
+const char* kVideoDataStoppedTimeoutKey = "VideoDataStoppedTimeout";
 const char* kMixingAudioSupportedKey = "MixingAudioSupported";
 const char* kHelpPromptKey = "HelpPromt";
 const char* kTimeoutPromptKey = "TimeOutPromt";
@@ -172,6 +172,8 @@ const char* kDefaultServerAddress = "127.0.0.1";
 const char* kDefaultAppInfoFileName = "app_info.dat";
 const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
 const char* kDefaultTtsDelimiter = ",";
+const uint32_t kDefaultAudioDataStoppedTimeout = 1000;
+const uint32_t kDefaultVideoDataStoppedTimeout = 1000;
 const char* kDefaultMmeDatabaseName = "/dev/qdb/mediaservice_db";
 const char* kDefaultEventMQ = "/dev/mqueue/ToSDLCoreUSBAdapter";
 const char* kDefaultAckMQ = "/dev/mqueue/FromSDLCoreUSBAdapter";
@@ -285,23 +287,25 @@ Profile::Profile()
       system_files_path_(kDefaultSystemFilesPath),
       transport_manager_tcp_adapter_port_(kDefautTransportManagerTCPPort),
       tts_delimiter_(kDefaultTtsDelimiter),
-    mme_db_name_(kDefaultMmeDatabaseName),
-    event_mq_name_(kDefaultEventMQ),
-    ack_mq_name_(kDefaultAckMQ),
-    recording_file_source_(kDefaultRecordingFileSourceName),
-    recording_file_name_(kDefaultRecordingFileName),
-    application_list_update_timeout_(kDefaultApplicationListUpdateTimeout),
-    iap_legacy_protocol_mask_(kDefaultLegacyProtocolMask),
-    iap_hub_protocol_mask_(kDefaultHubProtocolMask),
-    iap_pool_protocol_mask_(kDefaultPoolProtocolMask),
-    iap_system_config_(kDefaultIAPSystemConfig),
-    iap2_system_config_(kDefaultIAP2SystemConfig),
-    iap2_hub_connect_attempts_(kDefaultIAP2HubConnectAttempts),
-    iap_hub_connection_wait_timeout_(kDefaultIAPHubConnectionWaitTimeout),
-     tts_global_properties_timeout_(kDefaultTTSGlobalPropertiesTimeout),
-    attempts_to_open_policy_db_(kDefaultAttemptsToOpenPolicyDB),
-    open_attempt_timeout_ms_(kDefaultAttemptsToOpenPolicyDB),
-    hash_string_size_(kDefaultHashStringSize) {
+      audio_data_stopped_timeout_(kDefaultAudioDataStoppedTimeout),
+      video_data_stopped_timeout_(kDefaultVideoDataStoppedTimeout),
+      mme_db_name_(kDefaultMmeDatabaseName),
+      event_mq_name_(kDefaultEventMQ),
+      ack_mq_name_(kDefaultAckMQ),
+      recording_file_source_(kDefaultRecordingFileSourceName),
+      recording_file_name_(kDefaultRecordingFileName),
+      application_list_update_timeout_(kDefaultApplicationListUpdateTimeout),
+      iap_legacy_protocol_mask_(kDefaultLegacyProtocolMask),
+      iap_hub_protocol_mask_(kDefaultHubProtocolMask),
+      iap_pool_protocol_mask_(kDefaultPoolProtocolMask),
+      iap_system_config_(kDefaultIAPSystemConfig),
+      iap2_system_config_(kDefaultIAP2SystemConfig),
+      iap2_hub_connect_attempts_(kDefaultIAP2HubConnectAttempts),
+      iap_hub_connection_wait_timeout_(kDefaultIAPHubConnectionWaitTimeout),
+      tts_global_properties_timeout_(kDefaultTTSGlobalPropertiesTimeout),
+      attempts_to_open_policy_db_(kDefaultAttemptsToOpenPolicyDB),
+      open_attempt_timeout_ms_(kDefaultAttemptsToOpenPolicyDB),
+      hash_string_size_(kDefaultHashStringSize) {
 }
 
 Profile::~Profile() {
@@ -464,6 +468,13 @@ const std::string& Profile::audio_stream_file() const {
   return audio_stream_file_;
 }
 
+const std::uint32_t Profile::audio_data_stopped_timeout() const {
+  return audio_data_stopped_timeout_;
+}
+
+const std::uint32_t Profile::video_data_stopped_timeout() const {
+  return video_data_stopped_timeout_;
+}
 
 const uint32_t& Profile::app_time_scale() const {
   return app_requests_time_scale_;
@@ -813,7 +824,7 @@ void Profile::UpdateValues() {
 
   // Streaming timeout
   ReadUIntValue(&stop_streaming_timeout_, kDefaultStopStreamingTimeout,
-                kHmiSection, kStopStreamingTimeout);
+                kMediaManagerSection, kStopStreamingTimeout);
 
   stop_streaming_timeout_ = std::max(kDefaultStopStreamingTimeout, stop_streaming_timeout_);
 
@@ -902,6 +913,17 @@ void Profile::UpdateValues() {
   LOG_UPDATED_VALUE(audio_stream_file_, kAudioStreamFileKey,
                     kMediaManagerSection);
 
+  ReadUIntValue(&audio_data_stopped_timeout_, kDefaultAudioDataStoppedTimeout,
+                kMediaManagerSection, kAudioDataStoppedTimeoutKey);
+
+  LOG_UPDATED_VALUE(audio_data_stopped_timeout_, kAudioDataStoppedTimeoutKey,
+                    kMediaManagerSection);
+
+  ReadUIntValue(&video_data_stopped_timeout_, kDefaultVideoDataStoppedTimeout,
+                kMediaManagerSection, kVideoDataStoppedTimeoutKey);
+
+  LOG_UPDATED_VALUE(video_data_stopped_timeout_, kVideoDataStoppedTimeoutKey,
+                    kMediaManagerSection);
 
   // Mixing audio parameter
   std::string mixing_audio_value;

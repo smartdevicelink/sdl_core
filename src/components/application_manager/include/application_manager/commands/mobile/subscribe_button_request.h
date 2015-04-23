@@ -76,7 +76,7 @@ class SubscribeButtonRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise false
    **/
-  bool IsSubscribtionAllowed(ApplicationSharedPtr app,
+  bool IsSubscriptionAllowed(ApplicationSharedPtr app,
                              const mobile_apis::ButtonName::eType btn_id);
 
   /**
@@ -84,6 +84,12 @@ class SubscribeButtonRequest : public CommandRequestImpl {
    * to notify HMI that app subscribed on the button.
    */
   void SendSubscribeButtonNotification();
+
+  /**
+   * @brief Checks HMI capabilities for specified button support
+   * @param button Button to check
+   */
+  bool CheckHMICapabilities(mobile_apis::ButtonName::eType button);
 
   DISALLOW_COPY_AND_ASSIGN(SubscribeButtonRequest);
 };

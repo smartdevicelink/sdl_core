@@ -37,6 +37,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <deque>
 #include <algorithm>
 
 #include "application_manager/hmi_command_factory.h"
@@ -49,6 +50,7 @@
 #include "application_manager/vehicle_info_data.h"
 #include "application_manager/state_controller.h"
 #include "protocol_handler/protocol_observer.h"
+#include "protocol_handler/protocol_handler.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "hmi_message_handler/hmi_message_sender.h"
 #include "application_manager/policies/policy_handler_observer.h"
@@ -77,8 +79,6 @@
 #include "utils/singleton.h"
 #include "utils/data_accessor.h"
 
-
-
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 class SmartObject;
@@ -93,6 +93,8 @@ class CommandNotificationImpl;
 
 namespace application_manager {
 namespace mobile_api = mobile_apis;
+using namespace utils;
+using namespace timer;
 
 class ApplicationManagerImpl;
 
@@ -654,42 +656,56 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     void RemovePolicyObserver(PolicyHandlerObserver* listener);
 
-    /*
-     * @brief Checks HMI level and returns true if audio streaming is allowed
+    /**
+     * @brief Checks HMI level and returns true if streaming is allowed
+     * @param app_id Application id
+     * @param service_type Service type to check
+     * @return True if streaming is allowed, false in other case
      */
-    bool IsAudioStreamingAllowed(uint32_t connection_key) const;
-
-    /*
-     * @brief Checks HMI level and returns true if video streaming is allowed
-     */
-    bool IsVideoStreamingAllowed(uint32_t connection_key) const;
+    bool IsStreamingAllowed(
+        uint32_t app_id, protocol_handler::ServiceType service_type) const;
 
     /**
-     * @brief CanAppStream allows to check whether application is permited for
-     * data streaming.
-     *
-     * In case streaming for app is disallowed the method will send EndService to mobile.
-     *
-     * @param app_id the application id which should be checked.
-     *
-     * @return true in case streaming is allowed, false otherwise.
+     * @brief Checks if application can stream (streaming service is started and
+     * streaming is enabled in application)
+     * @param app_id Application id
+     * @param service_type Service type to check
+     * @return True if streaming is allowed, false in other case
      */
-    bool CanAppStream(uint32_t app_id) const;
+    bool CanAppStream(
+        uint32_t app_id, protocol_handler::ServiceType service_type) const;
 
     /**
-     * @brief StreamingEnded Callback called from MediaManager when it decide that
-     * streaming has been ended
-     *
-     * @param app_id the id of application that stops stream.
+     * @brief Ends opened navi services (audio/video) for application
+     * @param app_id Application id
      */
-    void StreamingEnded(uint32_t app_id);
+    void EndNaviServices(uint32_t app_id);
 
     /**
      * @brief ForbidStreaming forbid the stream over the certain application.
-     *
      * @param app_id the application's id which should stop streaming.
      */
     void ForbidStreaming(uint32_t app_id);
+
+    /**
+     * @brief Callback calls when application starts/stops data streaming
+     * @param app_id Streaming application id
+     * @param state Shows if streaming started or stopped
+     */
+    void OnAppStreaming(uint32_t app_id, bool state);
+
+    /**
+     * @brief OnHMILevelChanged the callback that allows SDL to react when
+     * application's HMILeval has been changed.
+     *
+     * @param app_id application identifier for which HMILevel has been chaned.
+     *
+     * @param from previous HMILevel.
+     * @param to current HMILevel.
+     */
+    void OnHMILevelChanged(uint32_t app_id,
+                           mobile_apis::HMILevel::eType from,
+                           mobile_apis::HMILevel::eType to);
 
     mobile_api::HMILevel::eType GetDefaultHmiLevel(
         ApplicationSharedPtr application) const;
@@ -1139,79 +1155,63 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool IsLowVoltage();
 
   private:
-    /**
-
-     * @brief OnHMILevelChanged the callback that allows SDL to react when
-     * application's HMILeval has been changed.
-     *
-     * @param app_id application identifier for which HMILevel has been chaned.
-     *
-     * @param from previous HMILevel.
-     * @param to current HMILevel.
+    /*
+     * NaviServiceStatusMap shows which navi service (audio/video) is opened
+     * for specified application. Two bool values in std::pair mean:
+     * 1st value - is video service opened or not
+     * 2nd value - is audio service opened or not
      */
-    void OnHMILevelChanged(uint32_t app_id,
-                           mobile_apis::HMILevel::eType from,
-                           mobile_apis::HMILevel::eType to);
+    typedef std::map<uint32_t, std::pair<bool, bool> > NaviServiceStatusMap;
+
+    typedef SharedPtr<TimerThread<ApplicationManagerImpl> > ApplicationManagerTimerPtr;
 
     /**
-     * @brief EndNaviServices either send EndService to mobile or proceed
-     * unregister application procedure.
+     * @brief Removes suspended and stopped timers from timer pool
      */
-    void EndNaviServices();
+    void ClearTimerPool();
 
     /**
      * @brief CloseNaviApp allows to unregister application in case the EndServiceEndedAck
-     * didn't come for at least one of services(audio or video).
+     * didn't come for at least one of services(audio or video)
      */
     void CloseNaviApp();
 
     /**
-     * @brief AckReceived allows to distinguish if ack for appropriate service
-     * has been received (means EndServiceAck).
-     *
-     * @param type service type.
-     *
-     * @return in case EndService has been sent and appropriate ack has been
-     * received it returns true. In case no EndService for appropriate serevice type
-     * has been sent and no ack has been received it returns true as well.
-     * Otherwise it will return false.
-     *
+     * @brief Suspends streaming ability of application in case application's HMI level
+     * has been changed to not allowed for streaming
      */
-    bool AckReceived(protocol_handler::ServiceType type);
+    void EndNaviStreaming();
 
     /**
-     * @brief NaviAppChangeLevel the callback which reacts on case when applications
-     * hmi level has been changed.
+     * @brief Starts specified navi service for application
+     * @param app_id Application to proceed
+     * @param service_type Type of service to start
+     * @return True on success, false on fail
      */
-    void NaviAppChangeLevel(mobile_apis::HMILevel::eType new_level);
+    bool StartNaviService(
+        uint32_t app_id, protocol_handler::ServiceType service_type);
 
     /**
-     * @brief ChangeStreamStatus allows to process streaming state.
-     *
-     * @param app_id id of application whose stream state has been changed.
-     *
-     * @param can_stream streaming state if true - streaming active, if false
-     * streaming is not active.
+     * @brief Stops specified navi service for application
+     * @param app_id Application to proceed
+     * @param service_type Type of service to stop
      */
-    void ChangeStreamStatus(uint32_t app_id, bool can_stream);
+    void StopNaviService(
+        uint32_t app_id, protocol_handler::ServiceType service_type);
 
     /**
-     * @brief ProcessNaviService allows to start navi service
-     *
-     * @param type service type.
-     *
-     * @param connection_key the application id.
+     * @brief Allows streaming for application if it was disallowed by
+     * DisallowStreaming()
+     * @param app_id Application to proceed
      */
-    bool ProcessNaviService(protocol_handler::ServiceType type, uint32_t connection_key);
+    void AllowStreaming(uint32_t app_id);
 
     /**
-     * @brief NaviAppStreamStatus allows to handle case when navi streaming state
-     * has ben changed from streaming to non streaming and vise versa.
-     *
-     * @param stream_active the stream's state - is it streams or not.
+     * @brief Disallows streaming for application, but doesn't close
+     * opened services. Streaming ability could be restored by AllowStreaming();
+     * @param app_id Application to proceed
      */
-    void NaviAppStreamStatus(bool stream_active);
-
+    void DisallowStreaming(uint32_t app_id);
 
     /**
      * @brief Function returns supported SDL Protocol Version
@@ -1263,7 +1263,6 @@ class ApplicationManagerImpl : public ApplicationManager,
         const connection_handler::DeviceHandle handle);
 
   private:
-
     /**
      * @brief List of applications
      */
@@ -1331,15 +1330,15 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     ResumeCtrl resume_ctrl_;
 
-    // The map contains service type as a key and pair as a value.
-    // The pair meaning is: first item shows if EndService has been sent and
-    // the second one shows if appropriate ACK has been received.
-    std::map<protocol_handler::ServiceType, std::pair<bool, bool> > service_status_;
+    NaviServiceStatusMap                    navi_service_status_;
+    std::deque<uint32_t>                    navi_app_to_stop_;
+    std::deque<uint32_t>                    navi_app_to_end_stream_;
+    uint32_t                                navi_close_app_timeout_;
+    uint32_t                                navi_end_stream_timeout_;
 
-    timer::TimerThread<ApplicationManagerImpl> end_services_timer;
-    uint32_t wait_end_service_timeout_;
-    uint32_t navi_app_to_stop_;
-    
+    std::vector<ApplicationManagerTimerPtr> timer_pool_;
+    sync_primitives::Lock                   timer_pool_lock_;
+
     StateController state_ctrl_;
 
 #ifdef TIME_TESTER

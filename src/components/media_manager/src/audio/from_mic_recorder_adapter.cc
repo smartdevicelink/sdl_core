@@ -90,7 +90,10 @@ void FromMicRecorderAdapter::StopActivity(int32_t application_key) {
   }
 
   if (recorder_thread_) {
-    recorder_thread_->stop();
+    recorder_thread_->join();
+    delete recorder_thread_->delegate();
+    threads::DeleteThread(recorder_thread_);
+    recorder_thread_ = NULL;
   }
   current_application_ = 0;
 }

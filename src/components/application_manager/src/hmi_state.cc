@@ -30,15 +30,8 @@ void HmiState::set_parent(HmiStatePtr parent) {
 
 mobile_apis::AudioStreamingState::eType
 VRHmiState::audio_streaming_state() const {
-  using namespace helpers;
   using namespace mobile_apis;
-  AudioStreamingState::eType expected_state = AudioStreamingState::NOT_AUDIBLE;
-  if (state_context_.is_attenuated_supported() &&
-      Compare<HMILevel::eType, EQ, ONE> (hmi_level(), HMILevel::HMI_FULL,
-                                         HMILevel::HMI_LIMITED)) {
-      expected_state = AudioStreamingState::ATTENUATED;
-  }
-  return expected_state;
+  return AudioStreamingState::NOT_AUDIBLE;
 }
 
 VRHmiState::VRHmiState(uint32_t app_id, StateContext& state_context):
@@ -58,6 +51,26 @@ TTSHmiState::audio_streaming_state() const {
       Compare<HMILevel::eType, EQ, ONE> (hmi_level(), HMILevel::HMI_FULL,
                                          HMILevel::HMI_LIMITED)) {
       expected_state = AudioStreamingState::ATTENUATED;
+  }
+  return expected_state;
+}
+
+NaviStreamingHmiState::NaviStreamingHmiState(uint32_t app_id, StateContext& state_context):
+  HmiState(app_id, state_context, STATE_ID_NAVI_STREAMING) {
+}
+
+mobile_apis::AudioStreamingState::eType
+NaviStreamingHmiState::audio_streaming_state() const {
+  using namespace helpers;
+  using namespace mobile_apis;
+  AudioStreamingState::eType expected_state = parent()->audio_streaming_state();
+  if (Compare<HMILevel::eType, EQ, ONE> (hmi_level(), HMILevel::HMI_FULL) &&
+      !state_context_.is_navi_app(app_id_)) {
+    if (state_context_.is_attenuated_supported()) {
+      expected_state = AudioStreamingState::ATTENUATED;
+    } else {
+      expected_state = AudioStreamingState::NOT_AUDIBLE;
+    }
   }
   return expected_state;
 }

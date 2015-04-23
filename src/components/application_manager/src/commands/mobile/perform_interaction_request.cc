@@ -393,10 +393,10 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
       } else {
         msg_params = message[strings::msg_params];
         msg_params[strings::trigger_source] = mobile_apis::TriggerSource::TS_MENU;
-        if (message[strings::msg_params].keyExists(strings::manual_text_entry)) {
-          msg_params[strings::trigger_source] = mobile_apis::TriggerSource::TS_KEYBOARD;
-        }
       }
+    } else if (message[strings::msg_params].keyExists(strings::manual_text_entry)) {
+      msg_params = message[strings::msg_params];
+      msg_params[strings::trigger_source] = mobile_apis::TriggerSource::TS_KEYBOARD;
     }
   }
 
