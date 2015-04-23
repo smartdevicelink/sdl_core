@@ -357,10 +357,19 @@ const policy_table::Strings& CacheManager::GetGroups(const PTString &device_id,
                                                      const PTString &app_id) {
   policy_table::Strings& groups = pt_->policy_table.app_policies[app_id].groups;
 #ifdef SDL_REMOTE_CONTROL
-  policy_table::DeviceData& devices = *pt_->policy_table.device_data;
-  bool primary = *devices[device_id].primary;
-  if (!primary) {
-    groups = *pt_->policy_table.app_policies[app_id].groups_non_primaryRC;
+  const policy_table::AppHMITypes& hmi_types =
+      *pt_->policy_table.app_policies[app_id].AppHMIType;
+  bool reverse = std::find(hmi_types.begin(), hmi_types.end(),
+                           policy_table::AHT_REMOTE_CONTROL) != hmi_types.end();
+
+  if (reverse) {
+    policy_table::DeviceData& devices = *pt_->policy_table.device_data;
+    bool primary = *devices[device_id].primary;
+    if (primary) {
+      groups = *pt_->policy_table.app_policies[app_id].groups_primaryRC;
+    } else {
+      groups = *pt_->policy_table.app_policies[app_id].groups_non_primaryRC;
+    }
   }
 #endif  // SDL_REMOTE_CONTROL
   return groups;
