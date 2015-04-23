@@ -287,7 +287,8 @@ class PolicyHandler :
    * registration process
    * @param application_id The policy aplication id.
    */
-  void AddApplication(const std::string& application_id);
+  void AddApplication(const std::string& application_id,
+                      const smart_objects::SmartObject* app_types);
 
   /**
    * Checks whether application is revoked

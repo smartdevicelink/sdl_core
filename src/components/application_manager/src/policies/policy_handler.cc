@@ -412,11 +412,19 @@ struct SOToString {
 };
 
 void PolicyHandler::AddApplication(const std::string& application_id,
-                                   const smart_objects::SmartArray* app_types) {
+                                   const smart_objects::SmartObject* app_types) {
   POLICY_LIB_CHECK_VOID();
-  std::vector<std::string> hmi_types(app_types->size());
-  std::transform(app_types->begin(), app_types->end(), hmi_types.begin(),
-                 SOToString());
+  size_t count = 0;
+  smart_objects::SmartArray* hmi_list;
+  if (app_types) {
+    hmi_list = app_types->asArray();
+    count = hmi_list->size();
+  }
+  std::vector<std::string> hmi_types(count);
+  if (count) {
+    std::transform(hmi_list->begin(), hmi_list->end(), hmi_types.begin(),
+                   SOToString());
+  }
   policy_manager_->AddApplication(application_id, hmi_types);
 }
 

@@ -344,7 +344,7 @@ class PolicyHandler :
    * @param app_types list of hmi types
    */
   void AddApplication(const std::string& application_id,
-                      const smart_objects::SmartArray* app_types);
+                      const smart_objects::SmartObject* app_types);
 
   /**
    * Checks whether application is revoked
