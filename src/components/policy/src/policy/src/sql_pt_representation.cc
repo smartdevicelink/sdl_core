@@ -1530,7 +1530,7 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
   }
 #ifdef SDL_REMOTE_CONTROL
   dbms::SQLQuery query_p(db());
-  if (!query_np.Prepare(sql_pt::kDeleteAppGroupPrimaryByApplicationId)) {
+  if (!query_p.Prepare(sql_pt::kDeleteAppGroupPrimaryByApplicationId)) {
     LOG4CXX_ERROR(logger_, "Incorrect statement to delete from app_group_primary.");
     return false;
   }

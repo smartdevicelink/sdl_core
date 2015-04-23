@@ -2321,7 +2321,8 @@
                 "steal_focus": false,
                 "priority": "NONE",
                 "default_hmi": "NONE",
-                "groups": ["Base-4", "Base-RC", "Radio", "Climate"],
+                "groups": ["Base-4"],
+                "groups_primaryRC": ["Base-4", "Base-RC", "Radio", "Climate"],
                 "groups_non_primaryRC": ["Base-RC", "Radio", "Climate"]
             },
             "device": {
