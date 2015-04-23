@@ -35,6 +35,7 @@ ApplicationParams::~ApplicationParams() {
 ApplicationParams::ApplicationParams(const Json::Value* value__)
   : CompositeType(InitHelper(value__, &Json::Value::isObject)),
     groups(impl::ValueMember(value__, "groups")),
+    groups_primaryRC(impl::ValueMember(value__, "groups_primaryRC")),
     groups_non_primaryRC(impl::ValueMember(value__, "groups_non_primaryRC")),
     nicknames(impl::ValueMember(value__, "nicknames")),
     AppHMIType(impl::ValueMember(value__, "AppHMIType")),
@@ -46,6 +47,7 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
 Json::Value ApplicationParams::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("groups", groups, &result__);
+  impl::WriteJsonField("groups_primaryRC", groups_primaryRC, &result__);
   impl::WriteJsonField("groups_non_primaryRC", groups_non_primaryRC, &result__);
   impl::WriteJsonField("nicknames", nicknames, &result__);
   impl::WriteJsonField("AppHMIType", AppHMIType, &result__);
@@ -57,6 +59,9 @@ Json::Value ApplicationParams::ToJsonValue() const {
 }
 bool ApplicationParams::is_valid() const {
   if (!groups.is_valid()) {
+    return false;
+  }
+  if (!groups_primaryRC.is_valid()) {
     return false;
   }
   if (!groups_non_primaryRC.is_valid()) {
@@ -87,6 +92,9 @@ bool ApplicationParams::is_initialized() const {
 }
 bool ApplicationParams::struct_empty() const {
   if (groups.is_initialized()) {
+    return false;
+  }
+  if (groups_primaryRC.is_initialized()) {
     return false;
   }
   if (groups_non_primaryRC.is_initialized()) {
@@ -122,8 +130,11 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
   if (!groups.is_valid()) {
     groups.ReportErrors(&report__->ReportSubobject("groups"));
   }
+  if (!groups_primaryRC.is_valid()) {
+    groups_primaryRC.ReportErrors(&report__->ReportSubobject("groups_primaryRC"));
+  }
   if (!groups_non_primaryRC.is_valid()) {
-    groups.ReportErrors(&report__->ReportSubobject("groups"));
+    groups_non_primaryRC.ReportErrors(&report__->ReportSubobject("groups_non_primaryRC"));
   }
   if (!nicknames.is_valid()) {
     nicknames.ReportErrors(&report__->ReportSubobject("nicknames"));
