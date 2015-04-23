@@ -160,8 +160,8 @@ void ResumptionDataDB::SaveApplication(
     LOG4CXX_ERROR(logger_, "Saving of application data is not finished");
     return;
   }
-
   LOG4CXX_INFO(logger_, "All data from application were saved successfully");
+  WriteDb();
 }
 
 int ResumptionDataDB::GetStoredHMILevel(const std::string& m_app_id,
@@ -233,6 +233,7 @@ void ResumptionDataDB::OnSuspend() {
       LOG4CXX_INFO(logger_, "Data last_ign_off_time was updated");
     }
   }
+  WriteDb();
 }
 
 bool ResumptionDataDB::DeleteAppWithIgnCount(int application_lifes) {
@@ -263,6 +264,7 @@ bool ResumptionDataDB::DeleteAppWithIgnCount(int application_lifes) {
     }
   }
   LOG4CXX_WARN(logger_, "Applications data were removed successfully");
+  WriteDb();
   return true;
 }
 
@@ -341,7 +343,12 @@ bool ResumptionDataDB::RemoveApplicationFromSaved(
         " exist");
     return false;
   }
-  return DeleteSavedApplication(mobile_app_id, device_id);
+  bool result = false;
+  if (DeleteSavedApplication(policy_app_id, device_id)) {
+    WriteDb();
+    result = true;
+  }
+  return result;
 }
 
 uint32_t ResumptionDataDB::GetIgnOffTime() {
@@ -543,7 +550,7 @@ void ResumptionDataDB::UpdateHmiLevel(const std::string& mobile_app_id,
       LOG4CXX_INFO(logger_, "Saved data has application with mobile appID = "
                    <<mobile_app_id<<" and deviceID = "<<device_id
                    <<" has new HMI level = "<<hmi_level);
-
+      WriteDb();
     }
   }
 }
@@ -2190,8 +2197,13 @@ void ResumptionDataDB::UpdateDataOnAwake() {
   if (query.Prepare(kUpdateIgnOffCount)) {
     if (query.Exec()) {
       LOG4CXX_INFO(logger_, "Values of ignition off counts were updated successfully");
+      WriteDb();
     }
   }
+}
+
+void ResumptionDataDB::WriteDb() {
+  db_->Backup();
 }
 
 utils::dbms::SQLDatabase* ResumptionDataDB::db() const {

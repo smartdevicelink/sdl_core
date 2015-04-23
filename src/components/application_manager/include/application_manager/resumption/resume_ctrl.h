@@ -453,12 +453,12 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
     */
     mutable sync_primitives::Lock   queue_lock_;
     timer::TimerThread<ResumeCtrl>  restore_hmi_level_timer_;
-    bool                            is_resumption_active_;
     timer::TimerThread<ResumeCtrl>  save_persistent_data_timer_;
     typedef std::list<uint32_t>     WaitingForTimerList;
     WaitingForTimerList             waiting_for_timer_;
-    bool is_data_saved_;
-    time_t launch_time_;
+    bool                            is_resumption_active_;
+    bool                            is_data_saved_;
+    time_t                          launch_time_;
     utils::SharedPtr<ResumptionData>    resumption_storage_;
 };
 

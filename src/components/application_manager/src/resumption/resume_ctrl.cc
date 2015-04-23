@@ -58,9 +58,9 @@ ResumeCtrl::ResumeCtrl():
   queue_lock_(false),
   restore_hmi_level_timer_("RsmCtrlRstore",
                            this, &ResumeCtrl::ApplicationResumptiOnTimer),
-  is_resumption_active_(false),
   save_persistent_data_timer_("RsmCtrlPercist",
                               this, &ResumeCtrl::SaveDataOnTimer, true),
+  is_resumption_active_(false),
   is_data_saved_(false),
   launch_time_(time(NULL)) {
 
@@ -78,6 +78,8 @@ bool ResumeCtrl::Init() {
     resumption_storage_.reset(new ResumptionDataJson());
   }
   LoadResumeData();
+  save_persistent_data_timer_.start(
+      profile::Profile::instance()->app_resumption_save_persistent_data_timeout());
   return true;
 }
 
@@ -282,14 +284,23 @@ void ResumeCtrl::OnSuspend() {
 
 void ResumeCtrl::OnAwake() {
   return resumption_storage_->OnAwake();
+  ResetLaunchTime();
+  StartSavePersistentDataTimer();
 }
 
 void ResumeCtrl::StartSavePersistentDataTimer() {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (!save_persistent_data_timer_.isRunning()) {
+    save_persistent_data_timer_.start(
+        profile::Profile::instance()->app_resumption_save_persistent_data_timeout());
+  }
 }
 
 void ResumeCtrl::StopSavePersistentDataTimer() {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (save_persistent_data_timer_.isRunning()) {
+    save_persistent_data_timer_.stop();
+  }
 }
 
 bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
@@ -397,13 +408,17 @@ bool ResumeCtrl::CheckApplicationHash(ApplicationSharedPtr application,
 
 void ResumeCtrl::SaveDataOnTimer() {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (is_resumption_active_ || is_data_saved_) {
-    LOG4CXX_WARN(logger_, "Do not need to Save Data."
-                 "is_resumption_active_ : " << is_resumption_active_
-                 << " is_resumption_active_ : " << is_data_saved_);
-  } else {
+  if (is_resumption_active_) {
+    LOG4CXX_WARN(logger_, "Resumption timer is active skip saving");
+    return;
+  }
+
+  if (false == is_data_saved_) {
     SaveAllApplications();
     is_data_saved_ = true;
+    if (!(profile::Profile::instance()->use_db_for_resumption())) {
+      resumption::LastState::instance()->SaveToFileSystem();
+    }
   }
 }
 
