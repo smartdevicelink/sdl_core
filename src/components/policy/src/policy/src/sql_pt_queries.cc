@@ -573,6 +573,8 @@ const std::string kDeleteRpc = "DELETE FROM `rpc`";
 
 const std::string kDeleteAppGroup = "DELETE FROM `app_group`";
 
+const std::string kDeleteAppGroupPrimary = "DELETE FROM `app_group_primary`";
+
 const std::string kDeleteAppGroupNonPrimary = "DELETE FROM `app_group_non_primary`";
 
 const std::string kSelectModuleConfig =
@@ -694,6 +696,9 @@ const std::string kDeleteDevice = "DELETE FROM `device` WHERE `id` = ?";
 
 const std::string kDeleteAppGroupByApplicationId =
   "DELETE FROM `app_group` WHERE `application_id` = ?";
+
+const std::string kDeleteAppGroupPrimaryByApplicationId =
+  "DELETE FROM `app_group_primary` WHERE `application_id` = ?";
 
 const std::string kDeleteAppGroupNonPrimaryByApplicationId =
   "DELETE FROM `app_group_non_primary` WHERE `application_id` = ?";

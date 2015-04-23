@@ -798,6 +798,10 @@ bool SQLPTRepresentation::SaveApplicationPolicies(
     return false;
   }
 #ifdef SDL_REMOTE_CONTROL
+  if (!query_delete.Exec(sql_pt::kDeleteAppGroupPrimary)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from app_group_primary.");
+    return false;
+  }
   if (!query_delete.Exec(sql_pt::kDeleteAppGroupNonPrimary)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from app_group_non_primary.");
     return false;
@@ -1525,16 +1529,27 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
     return false;
   }
 #ifdef SDL_REMOTE_CONTROL
+  dbms::SQLQuery query_p(db());
+  if (!query_np.Prepare(sql_pt::kDeleteAppGroupPrimaryByApplicationId)) {
+    LOG4CXX_ERROR(logger_, "Incorrect statement to delete from app_group_primary.");
+    return false;
+  }
+  query_p.Bind(0, app_id);
+  if (!query_p.Exec()) {
+    LOG4CXX_ERROR(logger_, "Failed deleting from app_group_primary.");
+    return false;
+  }
+
   dbms::SQLQuery query_np(db());
   if (!query_np.Prepare(sql_pt::kDeleteAppGroupNonPrimaryByApplicationId)) {
-      LOG4CXX_ERROR(logger_, "Incorrect statement to delete from app_group_non_primary.");
-      return false;
-    }
-    query_np.Bind(0, app_id);
-    if (!query_np.Exec()) {
-      LOG4CXX_ERROR(logger_, "Failed deleting from app_group_non_primary.");
-      return false;
-    }
+    LOG4CXX_ERROR(logger_, "Incorrect statement to delete from app_group_non_primary.");
+    return false;
+  }
+  query_np.Bind(0, app_id);
+  if (!query_np.Exec()) {
+    LOG4CXX_ERROR(logger_, "Failed deleting from app_group_non_primary.");
+    return false;
+  }
 #endif  // SDL_REMOTE_CONTROL
 
   if (!CopyApplication(kDefaultId, app_id)) {
