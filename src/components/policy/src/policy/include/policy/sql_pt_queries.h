@@ -99,6 +99,7 @@ extern const std::string kDeleteAppGroupPrimary;
 extern const std::string kDeleteAppGroupNonPrimary;
 extern const std::string kDeleteApplication;
 extern const std::string kDeleteDevice;
+extern const std::string kDeleteAllDevices;
 extern const std::string kIncrementIgnitionCycles;
 extern const std::string kResetIgnitionCycles;
 extern const std::string kUpdateFlagUpdateRequired;

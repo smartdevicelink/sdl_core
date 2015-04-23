@@ -1193,6 +1193,10 @@ bool SQLPTRepresentation::SaveNumberOfNotificationsPerMinute(
 bool SQLPTRepresentation::SaveDeviceData(
   const policy_table::DeviceData& devices) {
   dbms::SQLQuery query(db());
+  if (!query.Exec(sql_pt::kDeleteAllDevices)) {
+    LOG4CXX_WARN(logger_, "Could not clear device table.");
+    return false;
+  }
   if (!query.Prepare(sql_pt::kInsertDeviceData)) {
     LOG4CXX_WARN(logger_, "Incorrect insert statement for device data.");
     return false;
@@ -1202,9 +1206,9 @@ bool SQLPTRepresentation::SaveDeviceData(
   for (it = devices.begin(); it != devices.end(); ++it) {
     const policy_table::DeviceParams& params = it->second;
     query.Bind(0, it->first);
-    params.primary.is_initialized() ? query.Bind(1, params.primary)
+    params.primary.is_initialized() ? query.Bind(1, *params.primary)
         : query.Bind(1);
-    if (!query.Exec()) {
+    if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into device data.");
       return false;
     }

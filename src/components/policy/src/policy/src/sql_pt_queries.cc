@@ -545,7 +545,7 @@ const std::string kInsertNotificationsByPriority =
   "  VALUES (?, ?)";
 
 const std::string kInsertDeviceData =
-  "INSERT OR REPLACE INTO `device` (`id`, `primary`) VALUES (?, ?)";
+  "INSERT INTO `device` (`id`, `primary`) VALUES (?, ?)";
 
 const std::string kInsertAppLevel =
   "INSERT INTO `app_level` (`application_id`, `minutes_in_hmi_full`,"
@@ -691,6 +691,8 @@ const std::string kSelectApplicationIsDefault =
 
 const std::string kUpdateIsDefault =
   "UPDATE `application` SET `is_default` = ? WHERE `id` = ?";
+
+const std::string kDeleteAllDevices = "DELETE FROM `device`;";
 
 const std::string kDeleteDevice = "DELETE FROM `device` WHERE `id` = ?";
 
