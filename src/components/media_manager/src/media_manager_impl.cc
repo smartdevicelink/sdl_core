@@ -41,6 +41,7 @@
 #include "protocol_handler/protocol_handler.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
+#include "utils/helpers.h"
 #if defined(EXTENDED_MEDIA_MODE)
 #include "media_manager/audio/a2dp_source_player_adapter.h"
 #include "media_manager/audio/from_mic_recorder_adapter.h"
@@ -88,20 +89,20 @@ void MediaManagerImpl::Init() {
 #endif
 
   if ("socket" == profile::Profile::instance()->video_server_type()) {
-    video_streamer_ = new SocketVideoStreamerAdapter();
+    streamer_[ServiceType::kMobileNav] = new SocketVideoStreamerAdapter();
   } else if ("pipe" == profile::Profile::instance()->video_server_type()) {
-    video_streamer_ = new PipeVideoStreamerAdapter();
+    streamer_[ServiceType::kMobileNav] = new PipeVideoStreamerAdapter();
   } else if ("file" == profile::Profile::instance()->video_server_type()) {
-    video_streamer_ = new VideoStreamToFileAdapter(
+    streamer_[ServiceType::kMobileNav] = new VideoStreamToFileAdapter(
         profile::Profile::instance()->video_stream_file());
   }
 
   if ("socket" == profile::Profile::instance()->audio_server_type()) {
-    audio_streamer_ = new SocketAudioStreamerAdapter();
+    streamer_[ServiceType::kAudio] = new SocketAudioStreamerAdapter();
   } else if ("pipe" == profile::Profile::instance()->audio_server_type()) {
-    audio_streamer_ = new PipeAudioStreamerAdapter();
+    streamer_[ServiceType::kAudio] = new PipeAudioStreamerAdapter();
   } else if ("file" == profile::Profile::instance()->audio_server_type()) {
-    audio_streamer_ = new VideoStreamToFileAdapter(
+    streamer_[ServiceType::kAudio] = new VideoStreamToFileAdapter(
         profile::Profile::instance()->audio_stream_file());
   }
 
