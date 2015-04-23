@@ -76,8 +76,9 @@ bool operator()(const policy::StringsValueType& value) {
                    checker);
   if (groups_attributes_.end() == it) {
     return false;
-  }
+  }  
   FunctionalGroupPermission group;
+  group.group_name = it->second.second;
   group.group_alias = it->second.first;
   group.group_id = it->first;
   groups_permissions_.push_back(group);
@@ -151,6 +152,17 @@ bool policy::CheckAppPolicy::HasRevokedGroups(
   std::set_difference(it_groups_curr, it_groups_curr_end,
                       it_groups_new, it_groups_new_end,
                       std::back_inserter(revoked_group_list), Compare);
+
+  // Remove groups which are not required user consent
+  policy_table::Strings::iterator it_revoked = revoked_group_list.begin();
+  for (;revoked_group_list.end() != it_revoked; ) {
+    if (!IsConsentRequired(app_policy.first, std::string(*it_revoked))) {
+      revoked_group_list.erase(it_revoked);
+      it_revoked = revoked_group_list.begin();
+    } else {
+      ++it_revoked;
+    }
+  }
 
   if (revoked_groups) {
     *revoked_groups = revoked_group_list;
