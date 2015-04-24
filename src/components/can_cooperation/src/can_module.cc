@@ -276,6 +276,7 @@ void CANModule::NotifyMobiles(application_manager::MessagePtr msg) {
     application_manager::MessagePtr message(
         new application_manager::Message(*msg));
     message->set_connection_key((*i)->app_id());
+
     commands::Command* command = MobileCommandFactory::CreateCommand(message);
     if (command) {
       command->Run();

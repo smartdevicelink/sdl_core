@@ -56,7 +56,8 @@ MessageType MessageTypeFromRpcType(protocol_handler::RpcType rpc_type) {
 }
 
 Message::Message(protocol_handler::MessagePriority priority)
-    : function_id_(0),
+    : function_name_(),
+      function_id_(0),
       correlation_id_(0),
       type_(kUnknownType),
       priority_(priority),
@@ -68,11 +69,13 @@ Message::Message(protocol_handler::MessagePriority priority)
 }
 
 Message::Message(const Message& message)
-    : priority_(message.priority_) {
+    : priority_(message.priority_),
+      binary_data_(NULL) {
   *this = message;
 }
 
 Message& Message::operator=(const Message& message) {
+  set_function_name(message.function_name_);
   set_function_id(message.function_id_);
   set_correlation_id(message.correlation_id_);
   set_connection_key(message.connection_key_);
