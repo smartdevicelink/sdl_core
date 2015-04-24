@@ -239,7 +239,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    */
   virtual const HmiStatePtr RegularHmiState() const;
 
- protected:
+  uint32_t audio_stream_retry_number() const;
+
+  void set_audio_stream_retry_number(const uint32_t& audio_stream_retry_number);
+
+  protected:
 
   /**
    * @brief Clean up application folder. Persistent files will stay
@@ -259,12 +263,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * Sends start video stream request to HMI
    */
   void OnVideoStartStreamRetry();
-
-  /**
-   * @brief Callback for audio start stream retry timer.
-   * Sends start audio stream request to HMI
-   */
-  void OnAudioStartStreamRetry();
 
   /**
    * @brief Callback for video streaming suspend timer.
@@ -321,7 +319,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   uint32_t                                 video_stream_suspend_timeout_;
   uint32_t                                 audio_stream_suspend_timeout_;
   ApplicationTimerPtr                      video_stream_retry_timer_;
-  ApplicationTimerPtr                      audio_stream_retry_timer_;
   ApplicationTimerPtr                      video_stream_suspend_timer_;
   ApplicationTimerPtr                      audio_stream_suspend_timer_;
 

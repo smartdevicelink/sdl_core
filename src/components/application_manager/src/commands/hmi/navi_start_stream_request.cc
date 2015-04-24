@@ -94,7 +94,6 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
         } else {
           LOG4CXX_DEBUG(logger_,
                        "NaviStartStreamRequest aborted. Application can not stream");
-          ApplicationManagerImpl::instance()->EndNaviServices(app->app_id());
         }
       }
       break;

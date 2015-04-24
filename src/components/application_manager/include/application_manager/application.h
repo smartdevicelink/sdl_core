@@ -190,6 +190,12 @@ class DynamicApplicationData {
         const smart_objects::SmartObject& menu_title) = 0;
     virtual void set_menu_icon(
         const smart_objects::SmartObject& menu_icon) = 0;
+
+    virtual uint32_t audio_stream_retry_number() const = 0;
+
+    virtual void set_audio_stream_retry_number(
+        const uint32_t& audio_stream_retry_number) = 0;
+
     /*
      * @brief Adds a command to the in application menu
      */

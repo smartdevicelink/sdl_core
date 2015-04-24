@@ -57,6 +57,9 @@ class AudioStartStreamRequest : public RequestToHMI,
    **/
   virtual ~AudioStartStreamRequest();
 
+  virtual bool Init();
+
+  virtual void onTimeOut();
   /**
    * @brief Execute command
    **/
@@ -67,8 +70,10 @@ class AudioStartStreamRequest : public RequestToHMI,
    **/
   virtual void on_event(const event_engine::Event& event);
 
- private:
+    void RetryStartSession();
+  private:
   DISALLOW_COPY_AND_ASSIGN(AudioStartStreamRequest);
+  uint32_t retry_number_;
 };
 
 }  // namespace commands
