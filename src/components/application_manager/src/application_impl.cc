@@ -86,8 +86,8 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
       active_message_(NULL),
       is_media_(false),
       is_navi_(false),
-      video_streaming_started_(false),
-      audio_streaming_started_(false),
+      video_streaming_approved_(false),
+      audio_streaming_approved_(false),
       video_streaming_allowed_(false),
       audio_streaming_allowed_(false),
       video_streaming_suspended_(true),
@@ -389,34 +389,34 @@ bool ApplicationImpl::tts_properties_in_full() {
   return tts_properties_in_full_;
 }
 
-void ApplicationImpl::set_video_streaming_started(bool state) {
+void ApplicationImpl::set_video_streaming_approved(bool state) {
   if (state) {
     if (video_stream_retry_timer_->isRunning()) {
       video_stream_retry_timer_->stop();
-      video_streaming_started_ = state;
+      video_streaming_approved_ = state;
     }
   } else {
-    video_streaming_started_ = state;
+    video_streaming_approved_ = state;
   }
 }
 
-bool ApplicationImpl::video_streaming_started() const {
-  return video_streaming_started_;
+bool ApplicationImpl::video_streaming_approved() const {
+  return video_streaming_approved_;
 }
 
-void ApplicationImpl::set_audio_streaming_started(bool state) {
+void ApplicationImpl::set_audio_streaming_approved(bool state) {
   if (state) {
     if (audio_stream_retry_timer_->isRunning()) {
       audio_stream_retry_timer_->stop();
-      audio_streaming_started_ = state;
+      audio_streaming_approved_ = state;
     }
   } else {
-    audio_streaming_started_ = state;
+    audio_streaming_approved_ = state;
   }
 }
 
-bool ApplicationImpl::audio_streaming_started() const {
-  return audio_streaming_started_;
+bool ApplicationImpl::audio_streaming_approved() const {
+  return audio_streaming_approved_;
 }
 
 void ApplicationImpl::set_video_streaming_allowed(bool state) {
@@ -444,13 +444,13 @@ void ApplicationImpl::StartStreaming(
       profile::Profile::instance()->start_stream_retry_amount();
 
   if (ServiceType::kMobileNav == service_type) {
-    if (!video_streaming_started()) {
+    if (!video_streaming_approved()) {
       MessageHelper::SendNaviStartStream(app_id());
       video_stream_retry_number_ = stream_retry.first;
       video_stream_retry_timer_->start(stream_retry.second);
     }
   } else if (ServiceType::kAudio == service_type) {
-    if (!audio_streaming_started()) {
+    if (!audio_streaming_approved()) {
       MessageHelper::SendAudioStartStream(app_id());
       audio_stream_retry_number_ = stream_retry.first;
       audio_stream_retry_timer_->start(stream_retry.second);
@@ -465,17 +465,17 @@ void ApplicationImpl::StopStreaming(
 
   if (ServiceType::kMobileNav == service_type) {
     video_stream_retry_timer_->stop();
-    if (video_streaming_started()) {
+    if (video_streaming_approved()) {
       video_stream_suspend_timer_->stop();
       MessageHelper::SendNaviStopStream(app_id());
-      set_video_streaming_started(false);
+      set_video_streaming_approved(false);
     }
   } else if (ServiceType::kAudio == service_type) {
     audio_stream_retry_timer_->stop();
-    if (audio_streaming_started()) {
+    if (audio_streaming_approved()) {
       audio_stream_suspend_timer_->stop();
       MessageHelper::SendAudioStopStream(app_id());
-      set_audio_streaming_started(false);
+      set_audio_streaming_approved(false);
     }
   }
 }

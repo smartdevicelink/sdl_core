@@ -978,7 +978,7 @@ bool ApplicationManagerImpl::StartNaviService(
     return false;
   }
 
-  if (IsStreamingAllowed(app_id, service_type)) {
+  if (HMILevelAllowsStreaming(app_id, service_type)) {
     NaviServiceStatusMap::iterator it =
         navi_service_status_.find(app_id);
     if (navi_service_status_.end() == it) {
@@ -2480,7 +2480,7 @@ bool ApplicationManagerImpl::IsLowVoltage() {
   return is_low_voltage_;
 }
 
-bool ApplicationManagerImpl::IsStreamingAllowed(
+bool ApplicationManagerImpl::HMILevelAllowsStreaming(
     uint32_t app_id, protocol_handler::ServiceType service_type) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace mobile_apis::HMILevel;
@@ -2514,7 +2514,7 @@ bool ApplicationManagerImpl::CanAppStream(
   } else {
     LOG4CXX_WARN(logger_, "Unsupported service_type " << service_type);
   }
-  return IsStreamingAllowed(app_id, service_type) && is_allowed;
+  return HMILevelAllowsStreaming(app_id, service_type) && is_allowed;
 }
 
 void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
@@ -2579,13 +2579,13 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
     if (it->second.first) {
       LOG4CXX_DEBUG(logger_, "Going to end video service");
       connection_handler_->SendEndService(app_id, ServiceType::kMobileNav);
-      app->set_video_streaming_started(false);
+      app->set_video_streaming_approved(false);
       app->set_video_streaming_allowed(false);
     }
     if (it->second.second) {
       LOG4CXX_DEBUG(logger_, "Going to end audio service");
       connection_handler_->SendEndService(app_id, ServiceType::kAudio);
-      app->set_audio_streaming_started(false);
+      app->set_audio_streaming_approved(false);
       app->set_audio_streaming_allowed(false);
     }
     navi_app_to_stop_.push_back(app_id);

@@ -89,8 +89,8 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
 
       if (hmi_apis::Common_Result::SUCCESS == code) {
         LOG4CXX_DEBUG(logger_, "NaviStartStreamResponse SUCCESS");
-        if (app_mgr->IsStreamingAllowed(app->app_id(), ServiceType::kMobileNav)) {
-          app->set_video_streaming_started(true);
+        if (app_mgr->HMILevelAllowsStreaming(app->app_id(), ServiceType::kMobileNav)) {
+          app->set_video_streaming_approved(true);
         } else {
           LOG4CXX_DEBUG(logger_,
                        "NaviStartStreamRequest aborted. Application can not stream");

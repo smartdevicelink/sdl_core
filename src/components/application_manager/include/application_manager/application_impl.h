@@ -87,10 +87,10 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   inline bool is_navi() const { return is_navi_; }
   void set_is_navi(bool allow);
 
-  bool video_streaming_started() const;
-  void set_video_streaming_started(bool state);
-  bool audio_streaming_started() const;
-  void set_audio_streaming_started(bool state);
+  bool video_streaming_approved() const;
+  void set_video_streaming_approved(bool state);
+  bool audio_streaming_approved() const;
+  void set_audio_streaming_approved(bool state);
 
   bool video_streaming_allowed() const;
   void set_video_streaming_allowed(bool state);
@@ -289,8 +289,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool                                     is_media_;
   bool                                     is_navi_;
 
-  bool                                     video_streaming_started_;
-  bool                                     audio_streaming_started_;
+  bool                                     video_streaming_approved_;
+  bool                                     audio_streaming_approved_;
   bool                                     video_streaming_allowed_;
   bool                                     audio_streaming_allowed_;
   bool                                     video_streaming_suspended_;
