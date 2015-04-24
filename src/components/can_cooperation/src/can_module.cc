@@ -252,11 +252,10 @@ functional_modules::ProcessResult CANModule::HandleMessage(
         break;
       }
 
-      commands::Command* command = MobileCommandFactory::CreateCommand(msg);
-      if (command) {
-        command->Run();
-      }
+      msg->set_function_name(MessageHelper::GetMobileAPIName(
+          static_cast<functional_modules::MobileFunctionID>(msg->function_id())));
 
+      NotifyMobiles(msg);
       break;
     }
     case application_manager::MessageType::kRequest:
@@ -266,6 +265,22 @@ functional_modules::ProcessResult CANModule::HandleMessage(
   }
 
   return ProcessResult::PROCESSED;
+}
+
+void CANModule::NotifyMobiles(application_manager::MessagePtr msg) {
+  typedef std::vector<application_manager::ApplicationSharedPtr> AppList;
+   AppList applications =
+          service()->GetApplications(CANModule::instance()->GetModuleID());
+  for (AppList::iterator i = applications.begin();
+      i != applications.end(); ++i) {
+    application_manager::MessagePtr message(
+        new application_manager::Message(*msg));
+    message->set_connection_key((*i)->app_id());
+    commands::Command* command = MobileCommandFactory::CreateCommand(message);
+    if (command) {
+      command->Run();
+    }
+  }
 }
 
 void CANModule::SendResponseToMobile(application_manager::MessagePtr msg) {

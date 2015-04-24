@@ -62,15 +62,6 @@ void OnPresetChangedNotification::Execute() {
     LOG4CXX_INFO(logger_, "HMI notification validation failed!");
     return;
   }*/
-
-  CANAppExtensionPtr can_app_extension;
-  application_manager::ApplicationSharedPtr app =
-    GetApplicationWithControl(can_app_extension);
-
-  if (app)  {
-    message_->set_connection_key(app->app_id());
-    service_->SendMessageToMobile(message_);
-  }
 }
 
 }  // namespace commands

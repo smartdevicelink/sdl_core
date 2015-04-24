@@ -110,6 +110,7 @@ class CANModule : public functional_modules::GenericModule,
   ~CANModule();
 
   void SubscribeOnFunctions();
+  void NotifyMobiles(application_manager::MessagePtr msg);
 
   functional_modules::ProcessResult HandleMessage(
     application_manager::MessagePtr msg);

@@ -64,39 +64,58 @@ BaseCommandNotification::BaseCommandNotification(
 BaseCommandNotification::~BaseCommandNotification() {
 }
 
-application_manager::ApplicationSharedPtr BaseCommandNotification::GetApplicationWithControl(
-                                        CANAppExtensionPtr& can_app_extension) {
-  std::vector<application_manager::ApplicationSharedPtr> applications =
-        service_->GetApplications(CANModule::instance()->GetModuleID());
-
-  std::vector<application_manager::ApplicationSharedPtr>::iterator it =
-      applications.begin();
-
-  for (;it != applications.end(); ++it) {
-    if (*it) {
-      application_manager::AppExtensionPtr app_extension =
-          (*it)->QueryInterface(CANModule::instance()->GetModuleID());
-      if (app_extension) {
-        can_app_extension = application_manager::AppExtensionPtr::
-            static_pointer_cast<CANAppExtension>(app_extension);
-        if (can_app_extension->IsControlGiven()) {
-          return (*it);
-        }
-      }
-    }
+CANAppExtensionPtr BaseCommandNotification::GetAppExtension(
+  application_manager::ApplicationSharedPtr app) const {
+  if (!app) {
+    return NULL;
   }
 
-  return application_manager::ApplicationSharedPtr();
+  functional_modules::ModuleID id = CANModule::instance()->GetModuleID();
+
+  CANAppExtensionPtr can_app_extension;
+  application_manager::AppExtensionPtr app_extension = app->QueryInterface(id);
+  if (!app_extension) {
+    return NULL;
+  }
+
+  can_app_extension =
+    application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
+      app_extension);
+
+  return can_app_extension;
 }
 
 void BaseCommandNotification::Run() {
-  // TODO(KKolodiy): No explicit requirements to remove access if notification is received from CAN
-  //if (need_reset_) {
-  //  service_->RemoveAccess(message_->function_name());
-  //}
-  mobile_apis::Result::eType ret = service_->CheckPolicyPermissions(message_);
-  if (ret == mobile_apis::Result::eType::SUCCESS) {
+  application_manager::ApplicationSharedPtr app =
+      service_->GetApplication(message_->connection_key());
+
+  if (!app) {
+    LOG4CXX_WARN(
+        logger_,
+        "Application doesn't " << message_->connection_key() << " registered");
+    return;
+  }
+
+  mobile_apis::Result::eType permission =
+      service_->CheckPolicyPermissions(message_);
+
+  CANAppExtensionPtr extension = GetAppExtension(app);
+  SeatLocation seat;
+  if (extension) {
+    seat = extension->seat();
+  }
+
+  seat = 0;
+  // TODO(KKolodiy): get zone and params
+  SeatLocation zone = 10;
+  std::vector<std::string> params;
+  application_manager::TypeAccess access = service_->CheckAccess(
+      app->app_id(), message_->function_name(), params, seat, zone);
+
+  if (permission == mobile_apis::Result::eType::SUCCESS &&
+      access == application_manager::TypeAccess::kAllowed) {
     Execute();  // run child's logic
+    service_->SendMessageToMobile(message_);
   } else {
     LOG4CXX_WARN(logger_,
                  "Function \"" << message_->function_name() << "\" (#"
