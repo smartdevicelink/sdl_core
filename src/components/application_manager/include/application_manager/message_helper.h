@@ -183,14 +183,22 @@ class MessageHelper {
     static bool SendIVISubscribtions(const uint32_t app_id);
 
     /**
-     * @brief Creates IVI subscription requests
+     * @brief Returns IVI subscription requests
      */
     static smart_objects::SmartObjectList GetIVISubscriptionRequests(ApplicationSharedPtr app);
 
     /**
-     * @brief Sends Button subscription notifications
+     * @brief Sends button subscription notification
      */
-    static void SendOnButtonSubscriptionNotifications(ApplicationSharedPtr app);
+    static void SendOnButtonSubscriptionNotification(
+        uint32_t app_id, hmi_apis::Common_ButtonName::eType button, bool is_subscribed);
+
+    /**
+     * @brief Sends button subscription notifications for all buttons
+     * that application is subscribed on
+     */
+    static void SendAllOnButtonSubscriptionNotificationsForApp(
+        ApplicationConstSharedPtr app);
 
     static void SendAppDataToHMI(ApplicationConstSharedPtr app);
     static void SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app);

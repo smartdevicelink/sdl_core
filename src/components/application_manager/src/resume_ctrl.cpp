@@ -1028,7 +1028,7 @@ void ResumeCtrl::AddSubscriptions(ApplicationSharedPtr application, const Json::
       }
     }
     ProcessHMIRequests(MessageHelper::GetIVISubscriptionRequests(application));
-    MessageHelper::SendOnButtonSubscriptionNotifications(application);
+    MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(application);
   }
 }
 
