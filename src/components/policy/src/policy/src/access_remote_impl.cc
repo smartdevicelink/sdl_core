@@ -89,7 +89,7 @@ struct IsTypeAccess {
 };
 
 Match::Match(const FunctionalGroupings& groups, const PTString& rpc,
-      const RemoteControlParams& params)
+             const RemoteControlParams& params)
     : groups_(groups),
       rpc_(rpc),
       params_(params) {
@@ -122,12 +122,13 @@ bool Match::operator ()(const PTString& item) const {
 }
 
 struct ToHMIType {
-  policy_table::AppHMITypes::value_type operator ()(const std::string& item) const {
-    policy_table::AppHMIType value;
-    if (!EnumFromJsonString(item, &value)) {
-      value = policy_table::AHT_DEFAULT;
+  policy_table::AppHMITypes::value_type operator ()(int item) const {
+    policy_table::AppHMIType type = static_cast<policy_table::AppHMIType>(item);
+    if (!IsValidEnum(type)) {
+      LOG4CXX_WARN(logger_, "HMI types isn't known " << item);
+      type = policy_table::AHT_DEFAULT;
     }
-    return policy_table::AppHMITypes::value_type(value);
+    return policy_table::AppHMITypes::value_type(type);
   }
 };
 
@@ -240,11 +241,14 @@ bool AccessRemoteImpl::IsEnabled() const {
 
 PTString AccessRemoteImpl::FindGroup(const Subject& who, const PTString& rpc,
                                      const RemoteControlParams& params) const {
+  if (!cache_->IsApplicationRepresented(who.app_id)) {
+    return "";
+  }
+
   const policy_table::Strings& groups =
       *cache_->pt_->policy_table.app_policies[who.app_id].groups_non_primaryRC;
   const FunctionalGroupings& all_groups = cache_->pt_->policy_table
       .functional_groupings;
-
   policy_table::Strings::const_iterator i = std::find_if(
       groups.begin(), groups.end(), Match(all_groups, rpc, params));
 
@@ -254,11 +258,17 @@ PTString AccessRemoteImpl::FindGroup(const Subject& who, const PTString& rpc,
   return "";
 }
 
-void AccessRemoteImpl::SetDefaultHmiTypes(
-    const std::string& app_id, const std::vector<std::string>& hmi_types) {
+void AccessRemoteImpl::SetDefaultHmiTypes(const std::string& app_id,
+                                          const std::vector<int>& hmi_types) {
   HMIList::mapped_type types;
   std::transform(hmi_types.begin(), hmi_types.end(), std::back_inserter(types),
                  ToHMIType());
+  std::vector<int>::const_iterator i;
+  HMIList::mapped_type::const_iterator j;
+  for (i = hmi_types.begin(), j = types.begin();
+      i != hmi_types.end(), j != types.end(); ++i, ++j) {
+    LOG4CXX_DEBUG(logger_, "DEFHMI: " << *i << " - " << *j);
+  }
   hmi_types_[app_id] = types;
 }
 

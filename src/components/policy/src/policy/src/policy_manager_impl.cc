@@ -799,14 +799,14 @@ void PolicyManagerImpl::MarkUnpairedDevice(const std::string& device_id) {
 }
 
 void PolicyManagerImpl::AddApplication(const std::string& application_id,
-                                       const std::vector<std::string> hmi_types) {
+                                       const std::vector<int>& hmi_types) {
   LOG4CXX_INFO(logger_, "AddApplication");
   const std::string device_id = GetCurrentDeviceId(application_id);
   DeviceConsent device_consent = GetUserConsentForDevice(device_id);
   sync_primitives::AutoLock lock(apps_registration_lock_);
 
   if (IsNewApplication(application_id)) {
-    AddNewApplication(application_id, device_consent, hmi_types);
+    AddNewApplication(application_id, device_consent);
     update_status_manager_.OnNewApplicationAdded();
   } else {
     PromoteExistedApplication(application_id, device_consent);
@@ -829,8 +829,7 @@ bool PolicyManagerImpl::IsPredataPolicy(const std::string &policy_app_id) {
 }
 
 void PolicyManagerImpl::AddNewApplication(const std::string& application_id,
-                                          DeviceConsent device_consent,
-                                          const std::vector<std::string> hmi_types) {
+                                          DeviceConsent device_consent) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   cache_->SetDefaultPolicy(application_id);

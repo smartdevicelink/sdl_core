@@ -331,7 +331,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @param hmi_types list of hmi types
      */
     virtual void AddApplication(const std::string& application_id,
-                                const std::vector<std::string> hmi_types) = 0;
+                                const std::vector<int>& hmi_types) = 0;
 
     /**
      * @brief Removes unpaired device records and related records from DB

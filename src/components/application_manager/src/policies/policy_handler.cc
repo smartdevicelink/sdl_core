@@ -405,9 +405,9 @@ void PolicyHandler::GetAvailableApps(std::queue<std::string>& apps) {
   }
 }
 
-struct SOToString {
-  std::string operator ()(const smart_objects::SmartObject& item) const {
-    return item.asString();
+struct SmartObjectToInt {
+  int operator ()(const smart_objects::SmartObject& item) const {
+    return item.asInt();
   }
 };
 
@@ -420,10 +420,10 @@ void PolicyHandler::AddApplication(const std::string& application_id,
     hmi_list = app_types->asArray();
     count = hmi_list->size();
   }
-  std::vector<std::string> hmi_types(count);
+  std::vector<int> hmi_types(count);
   if (count) {
     std::transform(hmi_list->begin(), hmi_list->end(), hmi_types.begin(),
-                   SOToString());
+                   SmartObjectToInt());
   }
   policy_manager_->AddApplication(application_id, hmi_types);
 }

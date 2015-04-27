@@ -160,6 +160,8 @@ void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
   CompositeType::SetPolicyTableType(pt_type);
   AppHMIType.SetPolicyTableType(pt_type);
   groups.SetPolicyTableType(pt_type);
+  groups_primaryRC.SetPolicyTableType(pt_type);
+  groups_non_primaryRC.SetPolicyTableType(pt_type);
   priority.SetPolicyTableType(pt_type);
   memory_kb.SetPolicyTableType(pt_type);
   heart_beat_timeout_ms.SetPolicyTableType(pt_type);

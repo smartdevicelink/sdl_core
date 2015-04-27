@@ -171,7 +171,7 @@ class AccessRemote {
    * @param hmi_types list of HMI types
    */
   virtual void SetDefaultHmiTypes(
-      const std::string& app_id, const std::vector<std::string>& hmi_types) = 0;
+      const std::string& app_id, const std::vector<int>& hmi_types) = 0;
 
   /**
    * Gets groups

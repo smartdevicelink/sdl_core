@@ -77,7 +77,7 @@ class AccessRemoteImpl : public AccessRemote {
   virtual PTString FindGroup(const Subject& who, const PTString& rpc,
                              const RemoteControlParams& params) const;
   virtual void SetDefaultHmiTypes(const std::string& app_id,
-                                  const std::vector<std::string>& hmi_types);
+                                  const std::vector<int>& hmi_types);
   virtual const policy_table::Strings& GetGroups(const PTString& device_id,
                                                  const PTString& app_id);
 

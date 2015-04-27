@@ -76,7 +76,7 @@ const std::string kCreateSchema =
   "  `vehicle_make` VARCHAR(45), "
   "  `vehicle_model` VARCHAR(45), "
   "  `vehicle_year` VARCHAR(4),"
-  "  `remote_control` BOOL NOT NULL "
+  "  `remote_control` BOOL "
   "); "
   "CREATE TABLE IF NOT EXISTS `functional_group`( "
   "  `id` INTEGER PRIMARY KEY NOT NULL, "
