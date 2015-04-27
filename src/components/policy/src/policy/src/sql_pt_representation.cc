@@ -881,6 +881,8 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
     }
   }
 
+  LOG4CXX_DEBUG(logger_, "App: " << app.first);
+
   if (!SaveAppGroup(app.first, app.second.groups)) {
     return false;
   }
@@ -1523,6 +1525,7 @@ bool SQLPTRepresentation::IsPredataPolicy(const std::string& app_id) const {
 }
 
 bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
   dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kDeleteAppGroupByApplicationId)) {
     LOG4CXX_ERROR(logger_, "Incorrect statement to delete from app_group.");
@@ -1567,10 +1570,12 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
   bool ret = ( GatherAppGroup(kDefaultId, &default_groups)
       && SaveAppGroup(app_id, default_groups));
 #ifdef SDL_REMOTE_CONTROL
-  ret = ret && (GatherAppGroupPrimary(kDefaultId, &default_groups)
-        && SaveAppGroupPrimary(app_id, default_groups))
-      && (GatherAppGroupNonPrimary(kDefaultId, &default_groups)
-        &&SaveAppGroupNonPrimary(app_id, default_groups));
+  policy_table::Strings groups_primary;
+  ret = ret && (GatherAppGroupPrimary(kDefaultId, &groups_primary)
+        && SaveAppGroupPrimary(app_id, groups_primary));
+  policy_table::Strings groups_non_primary;
+  ret = ret && (GatherAppGroupNonPrimary(kDefaultId, &groups_non_primary)
+        && SaveAppGroupNonPrimary(app_id, groups_non_primary));
 #endif  // SDL_REMOTE_CONTROL
 
   if (ret) {
