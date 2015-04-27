@@ -46,8 +46,8 @@ namespace policy {
 
 class MockCacheManagerInterface : public CacheManagerInterface {
  public:
-  MOCK_METHOD5(CheckPermissions,
-      void(const PTString& device_id, const PTString& app_id, const PTString& hmi_level, const PTString& rpc, CheckPermissionResult& result));
+  MOCK_METHOD4(CheckPermissions,
+      void(const policy_table::Strings &groups, const PTString& hmi_level, const PTString& rpc, CheckPermissionResult& result));
   MOCK_METHOD0(IsPTPreloaded,
       bool());
   MOCK_METHOD0(IgnitionCyclesBeforeExchange,
@@ -183,6 +183,7 @@ class MockCacheManagerInterface : public CacheManagerInterface {
   MOCK_METHOD3(IsPermissionsCalculated,
                bool(const std::string& device_id, const std::string& policy_app_id, policy::Permissions& permission));
   MOCK_CONST_METHOD0(RemoteAppsUrl, std::string());
+  MOCK_METHOD1(GetGroups, const policy_table::Strings&(const PTString &app_id));
 };
 
 }  // namespace policy

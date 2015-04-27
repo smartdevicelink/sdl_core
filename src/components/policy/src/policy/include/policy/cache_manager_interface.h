@@ -569,6 +569,13 @@ class CacheManagerInterface {
       const std::string& device_id,
       const std::string& policy_app_id,
       policy::Permissions& permission) = 0;
+
+  /**
+   * Gets groups list
+   * @param app_id ID application
+   * @return list of groups
+   */
+  virtual const policy_table::Strings& GetGroups(const PTString &app_id) = 0;
 };
 
 typedef utils::SharedPtr<CacheManagerInterface> CacheManagerInterfaceSPtr;

@@ -156,8 +156,8 @@ TEST_F(PolicyManagerImplTest, CheckPermissions_SetHmiLevelFullForAlert_ExpectAll
   //assert
   EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345678")).
       WillOnce(Return("dev1"));
-  EXPECT_CALL(*cache_manager, CheckPermissions("dev1", "12345678", "FULL", "Alert", _)).
-      WillOnce(SetArgReferee<4>(expected));
+  EXPECT_CALL(*cache_manager, CheckPermissions(_, "FULL", "Alert", _)).
+      WillOnce(SetArgReferee<3>(expected));
 
   //act
   ::policy::RPCParams input_params;

@@ -73,6 +73,10 @@ class MockAccessRemote : public AccessRemote {
       TypeAccess(const Subject& who, const Object& what));
   MOCK_CONST_METHOD3(FindGroup,
       PTString(const Subject& who, const PTString& rpc, const RemoteControlParams& params));
+  MOCK_METHOD2(SetDefaultHmiTypes,
+      void(const std::string& app_id, const std::vector<int>& hmi_types));
+  MOCK_METHOD2(GetGroups,
+      const policy_table::Strings&(const PTString& device_id, const PTString& app_id));
 };
 
 }  // namespace policy
