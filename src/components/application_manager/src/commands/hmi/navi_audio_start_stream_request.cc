@@ -48,15 +48,13 @@ AudioStartStreamRequest::AudioStartStreamRequest(
       profile::Profile::instance()->start_stream_retry_amount();
   default_timeout_ = stream_retry.second * date_time::DateTime::MILLISECONDS_IN_SECOND;
   retry_number_ = stream_retry.first;
+  LOG4CXX_DEBUG(logger_, "default_timeout_ = " << default_timeout_
+                <<"; retry_number_ = " << retry_number_);
   //stream_retry.first times after stream_retry.second timeout
   //SDL should resend AudioStartStreamRequest
 }
 
 AudioStartStreamRequest::~AudioStartStreamRequest() {
-}
-
-bool AudioStartStreamRequest::Init() {
-   return true;
 }
 
 void AudioStartStreamRequest::RetryStartSession() {
@@ -66,7 +64,7 @@ void AudioStartStreamRequest::RetryStartSession() {
   ApplicationSharedPtr app = app_mgr->application_by_hmi_app(application_id());
   DCHECK_OR_RETURN_VOID(app);
   uint32_t curr_retry_number =  app->audio_stream_retry_number();
-  if (curr_retry_number < retry_number_) {
+  if (curr_retry_number < retry_number_ - 1) {
     LOG4CXX_INFO(logger_, "Send AudioStartStream retry. retry_number = "
                  << curr_retry_number);
     MessageHelper::SendAudioStartStream(app->app_id());

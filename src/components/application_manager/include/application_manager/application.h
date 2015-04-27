@@ -196,6 +196,11 @@ class DynamicApplicationData {
     virtual void set_audio_stream_retry_number(
         const uint32_t& audio_stream_retry_number) = 0;
 
+    virtual uint32_t video_stream_retry_number() const = 0;
+
+    virtual void set_video_stream_retry_number(
+        const uint32_t& video_stream_retry_number) = 0;
+
     /*
      * @brief Adds a command to the in application menu
      */
