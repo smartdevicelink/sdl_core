@@ -55,6 +55,7 @@
 #include "hmi_message_handler/hmi_message_sender.h"
 #include "application_manager/policies/policy_handler_observer.h"
 #include "media_manager/media_manager_impl.h"
+#include "connection_handler/connection_handler.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
 #include "formatters/CSmartFactory.hpp"
@@ -611,7 +612,7 @@ class ApplicationManagerImpl : public ApplicationManager,
         const protocol_handler::ServiceType& type,
         const connection_handler::CloseSessionReason& close_reason) OVERRIDE;
     void OnApplicationFloodCallBack(const uint32_t& connection_key) OVERRIDE;
-    void OnMalformedMessageCallback(const uint32_t& connection_key) OVERRIDE;
+
     /**
      * @ Add notification to collection
      *

@@ -96,8 +96,8 @@ class ConnectionHandlerObserver {
    * \param close_reson Service close reason
    */
   virtual void OnServiceEndedCallback(
-      const int32_t &session_key,
-      const protocol_handler::ServiceType &type,
+      const int32_t& session_key,
+      const protocol_handler::ServiceType& type,
       const connection_handler::CloseSessionReason& close_reason) = 0;
 
   /**
@@ -106,13 +106,6 @@ class ConnectionHandlerObserver {
    * \param connection_key used by other components as application identifier
    */
   virtual void OnApplicationFloodCallBack(const uint32_t &connection_key) = 0;
-
-  /**
-   * \brief Callback function used by ConnectionHandler
-   * when Mobile Application sends malformed message
-   * \param connection_key used by other components as application identifier
-   */
-  virtual void OnMalformedMessageCallback(const uint32_t &connection_key) = 0;
 
  protected:
   /**

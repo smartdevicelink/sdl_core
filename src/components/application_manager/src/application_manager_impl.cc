@@ -1099,9 +1099,11 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
 
   if (type == kRpc) {
     LOG4CXX_INFO(logger_, "Remove application.");
-    /* in case it was unexpected disconnect application will be removed
-     and we will notify HMI that it was unexpected disconnect,
-     but in case it was closed by mobile we will be unable to find it in the list
+    /* In case it was unexpected disconnect or some special case
+     (malformed message, flood) application will be removed
+     and we will unregister application correctly, but in case it was
+     closed by mobile and already unregistered we will be unable
+     to find it in the list
     */
 
     Result::eType reason;
@@ -1145,30 +1147,6 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
           ServiceType::kMobileNav, ServiceType::kAudio)) {
     StopNaviService(session_key, type);
   }
-}
-
-void ApplicationManagerImpl::OnApplicationFloodCallBack(const uint32_t &connection_key) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Unregister flooding application " << connection_key);
-
-  MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-      connection_key,
-      mobile_apis::AppInterfaceUnregisteredReason::TOO_MANY_REQUESTS);
-
-  const bool resuming = true;
-  const bool unexpected_disconnect = false;
-  UnregisterApplication(connection_key, mobile_apis::Result::TOO_MANY_PENDING_REQUESTS,
-                        resuming, unexpected_disconnect);
-  // TODO(EZamakhov): increment "removals_for_bad_behaviour" field in policy table
-}
-
-void ApplicationManagerImpl::OnMalformedMessageCallback(const uint32_t &connection_key) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Unregister malformed messaging application " << connection_key);
-
-  MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-      connection_key,
-      mobile_apis::AppInterfaceUnregisteredReason::PROTOCOL_VIOLATION);
 }
 
 void ApplicationManagerImpl::set_hmi_message_handler(

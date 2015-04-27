@@ -384,14 +384,10 @@ void ConnectionHandlerImpl::OnApplicationFloodCallBack(const uint32_t &connectio
   }
 }
 
-void ConnectionHandlerImpl::OnMalformedMessageCallback(const uint32_t &connection_key) {
+void ConnectionHandlerImpl::OnMalformedMessageCallback(
+    const uint32_t &connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
-  {
-    sync_primitives::AutoLock lock(connection_handler_observer_lock_);
-    if(connection_handler_observer_) {
-      connection_handler_observer_->OnMalformedMessageCallback(connection_key);
-    }
-  }
+
   transport_manager::ConnectionUID connection_handle = 0;
   uint8_t session_id = 0;
   PairFromKey(connection_key, &connection_handle, &session_id);
@@ -449,7 +445,7 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
   sync_primitives::AutoLock lock2(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
     connection_handler_observer_->OnServiceEndedCallback(
-          session_key, service_type, CloseSessionReason::kCommon);
+        session_key, service_type, CloseSessionReason::kCommon);
   }
   return session_key;
 }
@@ -810,8 +806,8 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
     for (;service_list_itr != service_list.end(); ++service_list_itr) {
       const protocol_handler::ServiceType service_type =
           service_list_itr->service_type;
-      connection_handler_observer_->OnServiceEndedCallback(session_key,
-                                                           service_type);
+      connection_handler_observer_->OnServiceEndedCallback(
+          session_key, service_type, close_reason);
     }
   } else {
     LOG4CXX_ERROR(logger_, "Session with id: "
@@ -942,7 +938,7 @@ void ConnectionHandlerImpl::OnConnectionEnded(
       for (ServiceList::const_iterator service_it = service_list.begin(), end =
            service_list.end(); service_it != end; ++service_it) {
         connection_handler_observer_->OnServiceEndedCallback(
-              session_key, service_it->service_type, CloseSessionReason::kCommon);
+            session_key, service_it->service_type, CloseSessionReason::kCommon);
       }
     }
   }
