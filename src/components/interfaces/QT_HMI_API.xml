@@ -1064,6 +1064,7 @@
   <element name="ALERT" />
   <element name="SPEAK" />
   <element name="AUDIO_PASS_THRU" />
+  <element name="ALERT_MANEUVER" />
 </enum>
 
 <enum name="AlertType">
@@ -3013,6 +3014,9 @@
       <description>Request from SmartDeviceLinkCore to HMI to announce navigation maneuver</description>
       <param name="softButtons" type="Common.SoftButton" minsize="0" maxsize="3" array="true" mandatory="false">
         <description>If omitted, only the system defined "Close" SoftButton should be displayed.</description>
+      </param>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of the application requested this RPC.</description>
       </param>
     </function>
     <function name="AlertManeuver" messagetype="response">
