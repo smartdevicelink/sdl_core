@@ -198,19 +198,25 @@ endif ()
 
 # Install rules
 install(TARGETS ${PROJECT} DESTINATION bin)
-install(
-  FILES log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
-    hmi_capabilities.json sdl_preloaded_pt.json
-    ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
-  DESTINATION bin
-)
-
 # TODO(KKolodiy): In order to make the deployment is easier until SDL-RC is under developing.
 if (REMOTE_CONTROL)
+  install(
+    FILES log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
+      hmi_capabilities.json
+      ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
+    DESTINATION bin
+  )
   install(
     FILES "${CMAKE_SOURCE_DIR}/src/components/can_cooperation/reverse_sdl_pt.json"
     DESTINATION ${CMAKE_BINARY_DIR}/bin
     RENAME sdl_preloaded_pt.json
+  )
+elseif ()
+  install(
+    FILES log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
+      hmi_capabilities.json sdl_preloaded_pt.json
+      ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
+    DESTINATION bin
   )
 endif ()
 
