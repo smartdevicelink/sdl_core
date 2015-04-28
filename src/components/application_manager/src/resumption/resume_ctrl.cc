@@ -145,11 +145,10 @@ bool ResumeCtrl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
   DCHECK_OR_RETURN(application, false);
   mobile_apis::HMILevel::eType default_hmi =
       ApplicationManagerImpl::instance()-> GetDefaultHmiLevel(application);
-  bool result = SetAppHMIState(application, default_hmi, false);
-  return result;
+  return SetAppHMIState(application, default_hmi, false);
 }
 
-bool ResumeCtrl::IsLimmitedAllowed(ApplicationConstSharedPtr application) {
+bool ResumeCtrl::IsLimitedAllowed() {
   using namespace mobile_apis;
   ApplicationManagerImpl::ApplicationListAccessor accessor;
   ApplicationManagerImpl::ApplictionSetConstIt it = accessor.begin();
@@ -175,7 +174,7 @@ ResumeCtrl::ResolveHMILevelConflicts(ApplicationSharedPtr application,
   if (HMILevel::HMI_FULL == hmi_level) {
     restored_hmi_level = IsHmiLevelFullAllowed(application);
   } else if (HMILevel::HMI_LIMITED == hmi_level) {
-    restored_hmi_level = IsLimmitedAllowed(application) ?
+    restored_hmi_level = IsLimitedAllowed() ?
                            HMILevel::HMI_LIMITED:
                            appMngr()->GetDefaultHmiLevel(application);
   }
@@ -263,9 +262,9 @@ bool ResumeCtrl::IsApplicationSaved(const std::string& mobile_app_id,
   return -1 != resumption_storage_->IsApplicationSaved(mobile_app_id, device_id);
 }
 
-uint32_t ResumeCtrl::GetHMIApplicationID(const std::string& mobile_app_id,
-                                         const std::string& device_id) {
-  return resumption_storage_->GetHMIApplicationID(mobile_app_id, device_id);
+uint32_t ResumeCtrl::GetHMIApplicationID(const std::string& policy_app_id,
+                                         const std::string& device_id) const {
+  return resumption_storage_->GetHMIApplicationID(policy_app_id, device_id);
 }
 
 bool ResumeCtrl::RemoveApplicationFromSaved(ApplicationConstSharedPtr application) {
@@ -788,27 +787,6 @@ void ResumeCtrl::LoadResumeData() {
 
 ApplicationManagerImpl* ResumeCtrl::appMngr() {
   return ::application_manager::ApplicationManagerImpl::instance();
-}
-
-void ResumeCtrl::SendHMIRequest(
-    const hmi_apis::FunctionID::eType& function_id,
-    const smart_objects::SmartObject* msg_params, bool use_events) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObjectSPtr result =
-      MessageHelper::CreateModuleInfoSO(function_id);
-  int32_t hmi_correlation_id =
-      (*result)[strings::params][strings::correlation_id].asInt();
-  if (use_events) {
-    subscribe_on_event(function_id, hmi_correlation_id);
-  }
-
-  if (msg_params) {
-    (*result)[strings::msg_params] = *msg_params;
-  }
-
-  if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
-    LOG4CXX_ERROR(logger_, "Unable to send request");
-  }
 }
 
 }  // namespce resumption

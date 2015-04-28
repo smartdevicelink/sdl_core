@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,33 +38,45 @@
 
 namespace resumption {
 
+/**
+ * @brief class contains logic for representation application data in
+ * json file
+ */
 class ResumptionDataJson : public ResumptionData {
-  public:
+ public:
 
-    ResumptionDataJson();
+  /**
+   * @brief Constructor of ResumptionDataJson
+   */
+  ResumptionDataJson();
+
+  /**
+   * @brief allows to destroy ResumptionDataJson object
+   */
+  virtual ~ResumptionDataJson();
 
   /**
    * @brief Save application persistent info for future resuming on json format
    * @param application is application witch need to be saved
    */
-    virtual void SaveApplication(app_mngr::ApplicationConstSharedPtr application);
+  virtual void SaveApplication(app_mngr::ApplicationConstSharedPtr application);
 
   /**
    * @brief Returns HMI level of application from saved data
-   * @param m_app_id contains mobile application id of application
-   * @param device_id contains device id
-   * @return HMI level if saved data does not contain HMI level method
+   * @param policy_app_id contains mobile application id of application
+   * @param device_id contains id of device on which is running application
+   * @return HMI level, if saved data does not contain HMI level method
    * returns -1
    */
-  virtual int GetStoredHMILevel(const std::string& m_app_id,
-                                 const std::string& device_id);
+  virtual int32_t GetStoredHMILevel(const std::string& policy_app_id,
+                                const std::string& device_id) const;
 
   /**
-   * @brief Check if saved data of applications have hmi app id
+   * @brief Checks if saved data of applications have hmi app id
    * @param hmi_app_id - hmi application id
    * @return true if exist, false otherwise
    */
-  virtual bool IsHMIApplicationIdExist(uint32_t hmi_app_id);
+  virtual bool IsHMIApplicationIdExist(uint32_t hmi_app_id) const;
 
   /**
    * @brief Checks if saved data have application
@@ -83,8 +95,8 @@ class ResumptionDataJson : public ResumptionData {
    * @param device_id - contains id of device on which is running application
    * @return HMI app ID
    */
-  virtual uint32_t GetHMIApplicationID(const std::string& mobile_app_id,
-                                       const std::string& device_id);
+  virtual uint32_t GetHMIApplicationID(const std::string& policy_app_id,
+                                       const std::string& device_id) const;
 
   /**
    * @brief Increments ignition counter for all registered applications
@@ -109,7 +121,7 @@ class ResumptionDataJson : public ResumptionData {
    */
   virtual bool GetHashId(const std::string& mobile_app_id,
                          const std::string& device_id,
-                         std::string& hash_id);
+                         std::string& hash_id) const;
 
   /**
    * @brief Retrieves data of saved appliction for the given mobile app ID
@@ -122,7 +134,7 @@ class ResumptionDataJson : public ResumptionData {
    */
   virtual bool GetSavedApplication(const std::string& mobile_app_id,
                                    const std::string& device_id,
-                                   smart_objects::SmartObject& saved_app);
+                                   smart_objects::SmartObject& saved_app) const;
 
   /**
    * @brief Remove application from list of saved applications
@@ -130,29 +142,29 @@ class ResumptionDataJson : public ResumptionData {
    * @param device_id - contains id of device on which is running application
    * @return return true, if success, otherwise return false
    */
-  virtual bool RemoveApplicationFromSaved(const std::string& mobile_app_id,
-                                  const std::string& device_id);
+  virtual bool RemoveApplicationFromSaved(const std::string& policy_app_id,
+                                          const std::string& device_id);
 
   /**
    * @brief Get the last ignition off time from LastState
    * @return the last ignition off time from LastState
    */
-  virtual uint32_t GetIgnOffTime();
+  virtual uint32_t GetIgnOffTime() const;
 
   /**
    * @brief Checks if saved data have application
-   * @param mobile_app_id - mobile application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return index if data of application exists, otherwise returns -1
    */
-  virtual int IsApplicationSaved(const std::string& mobile_app_id,
-                                 const std::string& device_id);
+  virtual ssize_t IsApplicationSaved(const std::string& policy_app_id,
+                                 const std::string& device_id) const;
 
   /**
    * @brief Retrieves data from saved application
    * @param  will be contain data for resume_ctrl
    */
-  virtual void GetDataForLoadResumeData(smart_objects::SmartObject& saved_data);
+  virtual void GetDataForLoadResumeData(smart_objects::SmartObject& saved_data) const;
 
   /**
    * @brief Updates HMI level of saved application
@@ -164,52 +176,41 @@ class ResumptionDataJson : public ResumptionData {
                               const std::string& device_id,
                               int32_t hmi_level);
 
-  virtual ~ResumptionDataJson();
-
   virtual bool Init();
 
-
-
-  private:
+ private:
 
   /**
    * @brief GetFromSavedOrAppend allows to get existed record about application
    * or adds the new one.
-   * @param mobile_app_id application id.
+   * @param policy_app_id application id.
    * @param device_id unique id of device.
    * @return the reference to the record in applications array.
    */
-  Json::Value& GetFromSavedOrAppend(const std::string& mobile_app_id,
-                                    const std::string& device_id);
+  Json::Value& GetFromSavedOrAppend(const std::string& policy_app_id,
+                                    const std::string& device_id) const;
 
   /**
    * @brief Get applications for resumption of LastState
    * @return applications for resumption of LastState
    */
-  Json::Value& GetSavedApplications();
+  Json::Value& GetSavedApplications() const;
 
   /**
    * @brief Get Resumption section of LastState
    * @return Resumption section of LastState in Json
    */
-  Json::Value& GetResumptionData();
+  Json::Value& GetResumptionData() const;
 
   /**
    * @brief GetObjectIndex allows to obtain specified object index from
    * applications arrays.
-   * @param mobile_app_id application id that should be found.
+   * @param policy_app_id application id that should be found.
    * @param device_id unique id of device.
    * @return application's index of or -1 if it doesn't exists
    */
-  int GetObjectIndex(const std::string& mobile_app_id,
-                     const std::string& device_id);
-
-  /**
-   * @brief Return true if application resumption data is valid,
-   * otherwise false
-   * @param index application index in the resumption list
-   */
-  bool IsResumptionJSONDataValid(uint32_t index);
+  ssize_t GetObjectIndex(const std::string& policy_app_id,
+                     const std::string& device_id) const;
 
   /**
    * @brief Set applications for resumption to LastState
@@ -226,10 +227,9 @@ class ResumptionDataJson : public ResumptionData {
   /*
    * @brief Return true if application resumption data is valid,
    * otherwise false
-   *
    * @param index application index in the resumption list
    */
-  bool IsResumptionDataValid(uint32_t index);
+  bool IsResumptionDataValid(uint32_t index) const;
 
   DISALLOW_COPY_AND_ASSIGN(ResumptionDataJson);
 

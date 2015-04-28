@@ -58,6 +58,18 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+include_directories(
+  ${COMPONENTS_DIR}/utils/include/utils/sqlite_wrapper/
+)
+endif ()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "QNX")
+  include_directories(
+  ${COMPONENTS_DIR}/utils/include/utils/qdb_wrapper/
+)
+endif()
+
 file (GLOB SOURCES
   ${AM_SOURCE_DIR}/src/*
 )

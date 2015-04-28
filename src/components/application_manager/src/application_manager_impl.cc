@@ -1572,14 +1572,15 @@ bool ApplicationManagerImpl::Init() {
   LOG4CXX_TRACE(logger_, "Init application manager");
   const std::string app_storage_folder =
       profile::Profile::instance()->app_storage_folder();
+
   if (!InitDirectory(app_storage_folder, TYPE_STORAGE) ||
       !IsReadWriteAllowed(app_storage_folder, TYPE_STORAGE)) {
     return false;
   }
 
-  if(!resume_ctrl_.Init()) {
-    LOG4CXX_ERROR(logger_, "Problem with initialization resume controller");
-    return false;
+  if (!resume_ctrl_.Init()) {
+     LOG4CXX_ERROR(logger_, "Problem with initialization of resume controller");
+     return false;
   }
 
   const std::string system_files_path =
@@ -2373,7 +2374,7 @@ void ApplicationManagerImpl::UnregisterApplication(
   if (is_resuming) {
     resume_ctrl_.SaveApplication(app_to_remove);
   } else {
-    resume_ctrl_.RemoveApplicationFromSaved(app_to_remove->mobile_app_id());
+    resume_ctrl_.RemoveApplicationFromSaved(app_to_remove);
   }
 
   if (audio_pass_thru_active_) {

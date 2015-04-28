@@ -41,7 +41,6 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ResumptionData")
 
 ResumptionData::ResumptionData():
   resumption_lock_(true) {
-
 }
 
 bool ResumptionData::Init() {
@@ -50,7 +49,7 @@ bool ResumptionData::Init() {
 }
 
 smart_objects::SmartObject ResumptionData::GetApplicationCommands(
-    app_mngr::ApplicationConstSharedPtr application) {
+    app_mngr::ApplicationConstSharedPtr application) const {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject commands_array(smart_objects::SmartType_Array);
@@ -69,7 +68,7 @@ smart_objects::SmartObject ResumptionData::GetApplicationCommands(
 }
 
 smart_objects::SmartObject ResumptionData::GetApplicationSubMenus(
-    app_mngr::ApplicationConstSharedPtr application) {
+    app_mngr::ApplicationConstSharedPtr application) const {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -91,7 +90,7 @@ smart_objects::SmartObject ResumptionData::GetApplicationSubMenus(
 }
 
 smart_objects::SmartObject ResumptionData::GetApplicationInteractionChoiseSets(
-      app_mngr::ApplicationConstSharedPtr application) {
+      app_mngr::ApplicationConstSharedPtr application) const {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -112,7 +111,7 @@ smart_objects::SmartObject ResumptionData::GetApplicationInteractionChoiseSets(
 }
 
 smart_objects::SmartObject ResumptionData::GetApplicationGlobalProperties(
-      app_mngr::ApplicationConstSharedPtr application) {
+      app_mngr::ApplicationConstSharedPtr application) const {
   using namespace app_mngr; 
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -144,7 +143,7 @@ smart_objects::SmartObject ResumptionData::GetApplicationGlobalProperties(
 }
 
 smart_objects::SmartObject ResumptionData::GetApplicationSubscriptions(
-        app_mngr::ApplicationConstSharedPtr application) {
+        app_mngr::ApplicationConstSharedPtr application) const {
   using namespace app_mngr; 
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(application.get());
@@ -169,7 +168,7 @@ smart_objects::SmartObject ResumptionData::GetApplicationSubscriptions(
 }
 
 smart_objects::SmartObject ResumptionData::GetApplicationFiles(
-    app_mngr::ApplicationConstSharedPtr application) {
+    app_mngr::ApplicationConstSharedPtr application) const {
   using namespace app_mngr; 
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(application.get());
@@ -202,7 +201,7 @@ smart_objects::SmartObject ResumptionData::GetApplicationFiles(
 }
 
 smart_objects::SmartObject ResumptionData::PointerToSmartObj(
-    const smart_objects::SmartObject* ptr) {
+    const smart_objects::SmartObject* ptr) const {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject temp;
   if (ptr != NULL) {
