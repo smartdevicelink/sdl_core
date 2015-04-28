@@ -52,6 +52,7 @@
 #include "smart_objects/enum_schema_item.h"
 #include "utils/file_system.h"
 #include "utils/macro.h"
+#include "utils/make_shared.h"
 #include "utils/logger.h"
 
 #include "formatters/formatter_json_rpc.h"
@@ -311,7 +312,7 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
 
   std::string priority;
   policy::PolicyHandler::instance()->GetPriority(
-        application_impl.policy_app_id(), &priority);
+        application_impl.mobile_app_id(), &priority);
   if (!priority.empty()) {
     msg_params[strings::priority] = GetPriorityCode(priority);
   }
@@ -320,7 +321,7 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
   smart_objects::SmartObject& application = msg_params[strings::application];
   application[strings::app_name] = application_impl.name();
   application[strings::app_id] = application_impl.app_id();
-  application[strings::policy_app_id] = application_impl.policy_app_id();
+  application[hmi_response::policy_app_id] = application_impl.mobile_app_id();
   application[strings::icon] = application_impl.app_icon_path();
 
   const smart_objects::SmartObject* ngn_media_screen_name =
@@ -342,7 +343,7 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
   if (application_impl.IsRegistered()) {
     std::vector<std::string> request_types =
         policy::PolicyHandler::instance()->GetAppRequestTypes(
-            application_impl.policy_app_id());
+            application_impl.mobile_app_id());
 
     application[strings::request_type] = SmartObject(SmartType_Array);
     smart_objects::SmartObject& request_array = application[strings::request_type];
@@ -1261,7 +1262,7 @@ bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
   output[strings::app_id] = app->hmi_app_id();
   output[strings::hmi_display_language_desired] = app->ui_language();
   output[strings::is_media_application] = app->is_media_application();
-  output[strings::policy_app_id] = app->policy_app_id();
+  output[hmi_response::policy_app_id] = app->mobile_app_id();
 
   if (ngn_media_screen_name) {
     output[strings::ngn_media_screen_app_name] = ngn_media_screen_name->asString();

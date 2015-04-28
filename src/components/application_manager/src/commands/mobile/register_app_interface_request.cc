@@ -265,7 +265,7 @@ void RegisterAppInterfaceRequest::Run() {
     application_manager::MessageHelper::GetDeviceInfoForHandle(handle,
                                                                &dev_params);
     policy::DeviceInfo device_info;
-    device_info.connection_type = dev_params.device_connection_type;
+    device_info.AdoptDeviceType(dev_params.device_connection_type);
     if (msg_params.keyExists(strings::device_info)) {
       FillDeviceInfo(&device_info);
     }

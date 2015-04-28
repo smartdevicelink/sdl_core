@@ -38,7 +38,7 @@
 #include <map>
 #include <set>
 #include "utils/shared_ptr.h"
-
+#include "utils/helpers.h"
 namespace policy {
 
 // TODO(PV): specify errors
@@ -177,6 +177,16 @@ struct DeviceInfo {
     std::string carrier;
     uint32_t max_number_rfcom_ports;
     std::string connection_type;
+
+    void AdoptDeviceType(const std::string& deviceType) {
+      connection_type = "USB_serial_number";
+      using namespace helpers;
+      if (Compare<std::string, EQ, ONE> (deviceType,
+                                         "BLUETOOTH",
+                                         "WIFI")) {
+          connection_type.assign("BTMAC");
+      }
+    }
 };
 
 /**

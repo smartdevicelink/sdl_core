@@ -74,6 +74,8 @@ class MockCacheManagerInterface : public CacheManagerInterface {
       std::vector<UserFriendlyMessage>(const std::vector<std::string>& msg_codes, const std::string& language));
   MOCK_METHOD2(GetServiceUrls,
       void(const std::string& service_type, EndpointUrls& end_points));
+  MOCK_CONST_METHOD0(GetLockScreenIconUrl,
+      std::string());
   MOCK_METHOD1(GetNotificationsNumber,
       int(const std::string& priority));
   MOCK_METHOD2(GetPriority,

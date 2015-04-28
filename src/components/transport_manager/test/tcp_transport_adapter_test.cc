@@ -51,8 +51,8 @@ TEST(TcpAdapterBasicTest, GetDeviceType_Return_sdltcp) {
   //arrange
   TransportAdapter* transport_adapter = new TcpTransportAdapter(12345);
 
-  //assert
-  EXPECT_EQ("sdl-tcp", transport_adapter->GetDeviceType());
+  // Assert
+  EXPECT_EQ(TCP, transport_adapter->GetDeviceType());
 
   delete transport_adapter;
 }

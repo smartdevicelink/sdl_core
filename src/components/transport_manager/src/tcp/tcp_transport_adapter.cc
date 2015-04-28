@@ -71,7 +71,7 @@ TcpTransportAdapter::~TcpTransportAdapter() {
 }
 
 DeviceType TcpTransportAdapter::GetDeviceType() const {
-  return "sdl-tcp";
+  return TCP;
 }
 
 void TcpTransportAdapter::Store() const {
