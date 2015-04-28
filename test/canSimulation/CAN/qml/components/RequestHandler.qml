@@ -47,7 +47,7 @@ Item {
     property string genre: "DEFAULT";
     property string album: "DEFAULT";
     property string songYear: "DEFAULT";
-    property string duration: "DEFAULT";
+    property int duration: 35;
         //location
     property string state: "DEFAULT";
     property string zipcode: "DEFAULT";
