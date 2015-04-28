@@ -44,6 +44,7 @@
 
 using ::testing::_;
 using ::testing::Return;
+using ::testing::ReturnRef;
 using ::testing::DoAll;
 using ::testing::SetArgReferee;
 using ::testing::NiceMock;
@@ -153,9 +154,20 @@ TEST_F(PolicyManagerImplTest, CheckPermissions_SetHmiLevelFullForAlert_ExpectAll
   expected.list_of_allowed_params.push_back("speed");
   expected.list_of_allowed_params.push_back("gps");
 
+  policy_table::Strings groups;
+  groups.push_back("Group-1");
+
   //assert
   EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345678")).
       WillOnce(Return("dev1"));
+#ifdef SDL_REMOTE_CONTROL
+  EXPECT_CALL(*access_remote, GetGroups("dev1", "12345678")).
+      WillOnce(ReturnRef(groups));
+#else  // SDL_REMOTE_CONTROL
+  EXPECT_CALL(*cache_manager, GetGroups("12345678")).
+      WillOnce(ReturnRef(groups));
+#endif  // SDL_REMOTE_CONTROL
+
   EXPECT_CALL(*cache_manager, CheckPermissions(_, "FULL", "Alert", _)).
       WillOnce(SetArgReferee<3>(expected));
 
@@ -433,5 +445,4 @@ TEST_F(PolicyManagerImplTest, CheckAccess_Result) {
 }
 #endif  // SDL_REMOTE_CONTROL
 
-}
-// namespace policy
+} // namespace policy
