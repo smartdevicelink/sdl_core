@@ -611,7 +611,6 @@ class ApplicationManagerImpl : public ApplicationManager,
         const int32_t& session_key,
         const protocol_handler::ServiceType& type,
         const connection_handler::CloseSessionReason& close_reason) OVERRIDE;
-    void OnApplicationFloodCallBack(const uint32_t& connection_key) OVERRIDE;
 
     /**
      * @ Add notification to collection

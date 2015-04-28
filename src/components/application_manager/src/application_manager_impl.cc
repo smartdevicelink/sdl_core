@@ -1092,6 +1092,7 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
   using namespace protocol_handler;
   using namespace mobile_apis;
   using namespace connection_handler;
+  using namespace mobile_apis;
 
   LOG4CXX_DEBUG(logger_, "OnServiceEndedCallback for service "
                 << type << " with reason " << close_reason
@@ -2213,6 +2214,15 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   while (it != accessor.end()) {
     ApplicationSharedPtr app_to_remove = *it;
 
+#ifdef CUSTOMER_PASA
+    if (!is_ignition_off) {
+#endif // CUSTOMER_PASA
+      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+            app_to_remove->app_id(), unregister_reason_);
+#ifdef CUSTOMER_PASA
+    }
+#endif // CUSTOMER_PASA
+
     UnregisterApplication(app_to_remove->app_id(),
                           mobile_apis::Result::INVALID_ENUM, is_ignition_off,
                           is_unexpected_disconnect);
@@ -2261,9 +2271,6 @@ void ApplicationManagerImpl::UnregisterApplication(
   }
 
   //remove appID from tts_global_properties_app_list_
-    MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-          app_id, unregister_reason_);
-
   RemoveAppFromTTSGlobalPropertiesList(app_id);
 
   switch (reason) {
@@ -2332,7 +2339,6 @@ void ApplicationManagerImpl::UnregisterApplication(
   request_ctrl_.terminateAppRequests(app_id);
   return;
 }
-
 
 void ApplicationManagerImpl::OnAppUnauthorized(const uint32_t& app_id) {
   connection_handler_->CloseSession(app_id, connection_handler::kUnauthorizedApp);
@@ -2585,7 +2591,8 @@ void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
       navi_service_status_.find(app_id);
   if (navi_service_status_.end() == it ||
       (!it->second.first && !it->second.second)) {
-    SetUnregisterAllApplicationsReason(PROTOCOL_VIOLATION);
+    MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+        app_id, PROTOCOL_VIOLATION);
     UnregisterApplication(app_id, ABORTED);
     return;
   }
@@ -2713,7 +2720,8 @@ void ApplicationManagerImpl::CloseNaviApp() {
       navi_service_status_.find(app_id);
   if (navi_service_status_.end() != it) {
     if (it->second.first || it->second.second) {
-      SetUnregisterAllApplicationsReason(PROTOCOL_VIOLATION);
+      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+          app_id, PROTOCOL_VIOLATION);
       UnregisterApplication(app_id, ABORTED);
     }
   }

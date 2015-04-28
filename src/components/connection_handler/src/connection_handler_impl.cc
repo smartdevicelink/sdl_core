@@ -363,14 +363,10 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   return new_session_id;
 }
 
-void ConnectionHandlerImpl::OnApplicationFloodCallBack(const uint32_t &connection_key) {
+void ConnectionHandlerImpl::OnApplicationFloodCallBack(
+    const uint32_t &connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
-  {
-    sync_primitives::AutoLock lock(connection_handler_observer_lock_);
-    if(connection_handler_observer_) {
-      connection_handler_observer_->OnApplicationFloodCallBack(connection_key);
-    }
-  }
+
   transport_manager::ConnectionUID connection_handle = 0;
   uint8_t session_id = 0;
   PairFromKey(connection_key, &connection_handle, &session_id);
