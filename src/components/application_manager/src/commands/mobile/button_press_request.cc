@@ -96,7 +96,7 @@ void ButtonPressRequest::Run() {
   msg_params = (*message_)[strings::msg_params];
   msg_params[strings::app_id] = application->app_id();
 
-  SendHMIRequest(hmi_apis::FunctionID::UI_ButtonPress, &msg_params, true);
+  SendHMIRequest(hmi_apis::FunctionID::Buttons_ButtonPress, &msg_params, true);
 }
 
 void ButtonPressRequest::on_event(const event_engine::Event& event) {
@@ -111,8 +111,8 @@ void ButtonPressRequest::on_event(const event_engine::Event& event) {
           default_timeout());
       break;
     }
-    case hmi_apis::FunctionID::UI_ButtonPress: {
-      LOG4CXX_INFO(logger_, "Received UI_ButtonPress event");
+    case hmi_apis::FunctionID::Buttons_ButtonPress: {
+      LOG4CXX_INFO(logger_, "Received Buttons_ButtonPress event");
 
       mobile_apis::Result::eType result_code =
           static_cast<mobile_apis::Result::eType>
