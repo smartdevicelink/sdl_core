@@ -45,9 +45,9 @@ namespace commands {
 class ButtonsButtonPressRequest : public RequestToHMI {
  public:
 
-  explicit ButtonPressRequest(const MessageSharedPtr& message);
+  explicit ButtonsButtonPressRequest(const MessageSharedPtr& message);
 
-  virtual ~ButtonPressRequest();
+  virtual ~ButtonsButtonPressRequest();
 
   /**
    * @brief Execute command
@@ -55,7 +55,7 @@ class ButtonsButtonPressRequest : public RequestToHMI {
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(ButtonPressRequest);
+  DISALLOW_COPY_AND_ASSIGN(ButtonsButtonPressRequest);
 };
 
 }  // namespace commands

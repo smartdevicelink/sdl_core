@@ -36,14 +36,14 @@ namespace application_manager {
 
 namespace commands {
 
-ButtonPressRequest::ButtonPressRequest(const MessageSharedPtr& message)
+ButtonsButtonPressRequest::ButtonsButtonPressRequest(const MessageSharedPtr& message)
     : RequestToHMI(message) {
 }
 
-ButtonPressRequest::~ButtonPressRequest() {
+ButtonsButtonPressRequest::~ButtonsButtonPressRequest() {
 }
 
-void ButtonPressRequest::Run() {
+void ButtonsButtonPressRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   SendRequest();

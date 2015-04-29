@@ -39,17 +39,17 @@ namespace application_manager {
 
 namespace commands {
 
-class ButtonPressResponse : public ResponseFromHMI {
+class ButtonsButtonPressResponse : public ResponseFromHMI {
  public:
 
-  explicit ButtonPressResponse(const MessageSharedPtr& message);
+  explicit ButtonsButtonPressResponse(const MessageSharedPtr& message);
 
-  virtual ~ButtonPressResponse();
+  virtual ~ButtonsButtonPressResponse();
 
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(ButtonPressResponse);
+  DISALLOW_COPY_AND_ASSIGN(ButtonsButtonPressResponse);
 };
 
 }  // namespace commands
