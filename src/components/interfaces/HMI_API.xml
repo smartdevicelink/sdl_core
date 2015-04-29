@@ -94,7 +94,6 @@
     <element name="DEFROST_MAX" />
     <element name="DEFROST" />
     <element name="DEFROST_REAR" />
-    <element name="FAN_DOWN" />
     <element name="UPPER_VENT" />
     <element name="LOWER_VENT" />
 

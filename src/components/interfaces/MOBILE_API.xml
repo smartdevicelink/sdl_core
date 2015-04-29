@@ -132,8 +132,9 @@
       <description>The provided hash ID does not match the hash of the current set of registered data or the core could not resume the previous data.</description>
     </element>
     <element name="CHAR_LIMIT_EXCEEDED"></element>
-    <element name="READ_ONLY"/>
+    <element name="READ_ONLY">
       <description>The value being set is read only</description>
+    </element>
   </enum>
 
   <enum name="ButtonPressMode">
