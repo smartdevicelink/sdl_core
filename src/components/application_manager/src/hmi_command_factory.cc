@@ -1063,6 +1063,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+    case hmi_apis::FunctionID::Buttons_ButtonPress: {
+      if (is_response) {
+        command.reset(new commands::ButtonPressResponse(message));
+      } else {
+        command.reset(new commands::ButtonPressRequest(message));
+      }
+      break;
+    }
     case hmi_apis::FunctionID::SDL_OnAllowSDLFunctionality: {
       command.reset(new commands::OnAllowSDLFunctionalityNotification(message));
       break;
