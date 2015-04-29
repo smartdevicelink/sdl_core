@@ -94,13 +94,13 @@ void ButtonPressRequest::Run() {
       smart_objects::SmartType_Map);
 
   msg_params = (*message_)[strings::msg_params];
-  msg_params[strings::app_id] = application->app_id();
+  msg_params[strings::app_id] = app->app_id();
 
   SendHMIRequest(hmi_apis::FunctionID::Buttons_ButtonPress, &msg_params, true);
 }
 
 void ButtonPressRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_, "ButtonPressRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
