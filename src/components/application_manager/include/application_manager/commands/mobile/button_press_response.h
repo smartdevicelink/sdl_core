@@ -50,8 +50,7 @@ class ButtonPressResponse : public CommandResponseImpl {
   /**
    * \brief SpeakResponseCommand class destructor
    **/
-  virtual ~ButtonPressResponse() {
-  }
+  virtual ~ButtonPressResponse();
 
   /**
    * @brief Execute command
