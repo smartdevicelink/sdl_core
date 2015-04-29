@@ -127,6 +127,8 @@
 #include "application_manager/commands/mobile/send_location_response.h"
 #include "application_manager/commands/mobile/dial_number_request.h"
 #include "application_manager/commands/mobile/dial_number_response.h"
+#include "application_manager/commands/mobile/button_press_request.h"
+#include "application_manager/commands/mobile/button_press_response.h" 
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -486,6 +488,15 @@ commands::Command *MobileCommandFactory::CreateCommand(
         return new commands::DialNumberResponse(message);
       } else {
         return new commands::DialNumberRequest(message);
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::ButtonPressID: {
+      if ((*message)[strings::params][strings::message_type]
+          == static_cast<int>(application_manager::MessageType::kResponse)) {
+        return new commands::ButtonPressResponse(message);
+      } else {
+        return new commands::ButtonPressRequest(message);
       }
       break;
     }
