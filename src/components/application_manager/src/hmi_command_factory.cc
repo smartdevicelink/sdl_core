@@ -1065,9 +1065,9 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::Buttons_ButtonPress: {
       if (is_response) {
-        command.reset(new commands::ButtonPressResponse(message));
+        command.reset(new commands::ButtonsButtonPressResponse(message));
       } else {
-        command.reset(new commands::ButtonPressRequest(message));
+        command.reset(new commands::ButtonsButtonPressRequest(message));
       }
       break;
     }
