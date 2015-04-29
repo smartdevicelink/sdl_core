@@ -262,6 +262,8 @@
 #include "application_manager/commands/hmi/on_phone_call_notification.h"
 #include "application_manager/commands/hmi/dial_number_request.h"
 #include "application_manager/commands/hmi/dial_number_response.h"
+#include "application_manager/commands/hmi/button_press_response.h"
+#include "application_manager/commands/hmi/button_press_request.h"
 
 namespace application_manager {
 
