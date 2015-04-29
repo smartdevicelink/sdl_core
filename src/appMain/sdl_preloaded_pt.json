@@ -51,6 +51,11 @@
                         "hmi_levels": ["FULL",
                         "LIMITED"]
                     },
+                    "ButtonPress": {
+                        "hmi_levels": ["FULL",
+                        "LIMITED",
+                        "BACKGROUND"]
+                    },
                     "ChangeRegistration": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
