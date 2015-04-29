@@ -246,7 +246,7 @@ PTString AccessRemoteImpl::FindGroup(const Subject& who, const PTString& rpc,
   }
 
   const policy_table::Strings& groups =
-      *cache_->pt_->policy_table.app_policies[who.app_id].groups_non_primaryRC;
+      *cache_->pt_->policy_table.app_policies[who.app_id].groups_nonPrimaryRC;
   const FunctionalGroupings& all_groups = cache_->pt_->policy_table
       .functional_groupings;
   policy_table::Strings::const_iterator i = std::find_if(
@@ -291,7 +291,7 @@ const policy_table::Strings& AccessRemoteImpl::GetGroups(
     return
         IsPrimaryDevice(device_id) ?
             *cache_->pt_->policy_table.app_policies[app_id].groups_primaryRC :
-            *cache_->pt_->policy_table.app_policies[app_id].groups_non_primaryRC;
+            *cache_->pt_->policy_table.app_policies[app_id].groups_nonPrimaryRC;
   }
   return cache_->GetGroups(app_id);
 }

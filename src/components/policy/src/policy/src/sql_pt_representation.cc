@@ -643,7 +643,7 @@ bool SQLPTRepresentation::GatherApplicationPolicies(
     if (!GatherAppGroupPrimary(app_id, &*params.groups_primaryRC)) {
       return false;
     }
-    if (!GatherAppGroupNonPrimary(app_id, &*params.groups_non_primaryRC)) {
+    if (!GatherAppGroupNonPrimary(app_id, &*params.groups_nonPrimaryRC)) {
       return false;
     }
 #endif  // SDL_REMOTE_CONTROL
@@ -890,7 +890,7 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   if (!SaveAppGroupPrimary(app.first, *app.second.groups_primaryRC)) {
     return false;
   }
-  if (!SaveAppGroupNonPrimary(app.first, *app.second.groups_non_primaryRC)) {
+  if (!SaveAppGroupNonPrimary(app.first, *app.second.groups_nonPrimaryRC)) {
     return false;
   }
 #endif  // SDL_REMOTE_CONTROL

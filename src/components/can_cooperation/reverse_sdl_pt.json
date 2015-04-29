@@ -2323,7 +2323,7 @@
                 "default_hmi": "NONE",
                 "groups": ["Base-4"],
                 "groups_primaryRC": ["Base-4", "Base-RC", "Radio", "Climate"],
-                "groups_non_primaryRC": ["Base-RC", "Radio", "Climate"]
+                "groups_nonPrimaryRC": ["Base-RC", "Radio", "Climate"]
             },
             "8675311": {
                 "keep_context": false,
@@ -2332,7 +2332,7 @@
                 "default_hmi": "NONE",
                 "groups": ["Base-4"],
                 "groups_primaryRC": ["Base-4", "Base-RC", "Radio", "Climate"],
-                "groups_non_primaryRC": ["Base-RC", "Radio", "Climate"],
+                "groups_nonPrimaryRC": ["Base-RC", "Radio", "Climate"],
                 "AppHMIType": ["REMOTE_CONTROL"]
             },
             "device": {

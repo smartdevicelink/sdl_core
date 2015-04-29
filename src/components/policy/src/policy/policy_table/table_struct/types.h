@@ -58,7 +58,7 @@ struct ApplicationParams : CompositeType {
   public:
     Strings groups;
     Optional< Strings > groups_primaryRC;
-    Optional< Strings > groups_non_primaryRC;
+    Optional< Strings > groups_nonPrimaryRC;
     Optional< Strings > nicknames;
     Optional< AppHMITypes > AppHMIType;
     Enum<Priority> priority;

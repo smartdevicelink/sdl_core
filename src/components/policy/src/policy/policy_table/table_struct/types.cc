@@ -36,7 +36,7 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
   : CompositeType(InitHelper(value__, &Json::Value::isObject)),
     groups(impl::ValueMember(value__, "groups")),
     groups_primaryRC(impl::ValueMember(value__, "groups_primaryRC")),
-    groups_non_primaryRC(impl::ValueMember(value__, "groups_non_primaryRC")),
+    groups_nonPrimaryRC(impl::ValueMember(value__, "groups_nonPrimaryRC")),
     nicknames(impl::ValueMember(value__, "nicknames")),
     AppHMIType(impl::ValueMember(value__, "AppHMIType")),
     priority(impl::ValueMember(value__, "priority")),
@@ -48,7 +48,7 @@ Json::Value ApplicationParams::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("groups", groups, &result__);
   impl::WriteJsonField("groups_primaryRC", groups_primaryRC, &result__);
-  impl::WriteJsonField("groups_non_primaryRC", groups_non_primaryRC, &result__);
+  impl::WriteJsonField("groups_nonPrimaryRC", groups_nonPrimaryRC, &result__);
   impl::WriteJsonField("nicknames", nicknames, &result__);
   impl::WriteJsonField("AppHMIType", AppHMIType, &result__);
   impl::WriteJsonField("priority", priority, &result__);
@@ -64,7 +64,7 @@ bool ApplicationParams::is_valid() const {
   if (!groups_primaryRC.is_valid()) {
     return false;
   }
-  if (!groups_non_primaryRC.is_valid()) {
+  if (!groups_nonPrimaryRC.is_valid()) {
     return false;
   }
   if (!nicknames.is_valid()) {
@@ -97,7 +97,7 @@ bool ApplicationParams::struct_empty() const {
   if (groups_primaryRC.is_initialized()) {
     return false;
   }
-  if (groups_non_primaryRC.is_initialized()) {
+  if (groups_nonPrimaryRC.is_initialized()) {
     return false;
   }
   if (nicknames.is_initialized()) {
@@ -133,8 +133,8 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
   if (!groups_primaryRC.is_valid()) {
     groups_primaryRC.ReportErrors(&report__->ReportSubobject("groups_primaryRC"));
   }
-  if (!groups_non_primaryRC.is_valid()) {
-    groups_non_primaryRC.ReportErrors(&report__->ReportSubobject("groups_non_primaryRC"));
+  if (!groups_nonPrimaryRC.is_valid()) {
+    groups_nonPrimaryRC.ReportErrors(&report__->ReportSubobject("groups_nonPrimaryRC"));
   }
   if (!nicknames.is_valid()) {
     nicknames.ReportErrors(&report__->ReportSubobject("nicknames"));
@@ -161,7 +161,7 @@ void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
   AppHMIType.SetPolicyTableType(pt_type);
   groups.SetPolicyTableType(pt_type);
   groups_primaryRC.SetPolicyTableType(pt_type);
-  groups_non_primaryRC.SetPolicyTableType(pt_type);
+  groups_nonPrimaryRC.SetPolicyTableType(pt_type);
   priority.SetPolicyTableType(pt_type);
   memory_kb.SetPolicyTableType(pt_type);
   heart_beat_timeout_ms.SetPolicyTableType(pt_type);
