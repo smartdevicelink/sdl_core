@@ -574,6 +574,10 @@ const std::string kDeleteTTSChunk =
     "FROM `application` "
     "WHERE `appID` = ? AND `deviceID` = ?))";
 
+const std::string kDeleteFromApplicationTable =
+    "DELETE FROM `application` "
+    "WHERE `appID` = ? AND `deviceID` = ?";
+
 const std::string kDeleteHelpTimeoutPromptArray =
     "DELETE FROM `helpTimeoutPromptArray` "
     "WHERE `idglobalProperties` = (SELECT `idglobalProperties` "
@@ -585,11 +589,6 @@ const std::string kDeleteGlobalProperties =
     "WHERE `idglobalProperties` = (SELECT `idglobalProperties` "
     "FROM `application` "
     "WHERE `appID` = ? AND `deviceID` = ?)";
-
-const std::string kSelectPrimaryKeyFromApplication =
-    "SELECT `idApplication` "
-    "FROM `application` "
-    "WHERE `appID` = ? AND `deviceID` = ?";
 
 const std::string kSelectCountImage =
     "SELECT COUNT (`value`) "
@@ -737,13 +736,6 @@ const std::string kInsertApplication =
     "`isMediaApplication`, `appID`, `deviceID`) "
     "VALUES "
     "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
-
-const std::string kUpdateApplication =
-    "UPDATE `application` "
-    "SET `connection_key` = ?, `grammarID` = ?, `hashID` = ?, "
-    "`hmiAppID` = ?, `hmiLevel` = ?, `ign_off_count` = ?, `suspend_count` = ?, "
-    "`timeStamp` = ?, `idglobalProperties` = ?, `isMediaApplication` = ? "
-    "WHERE `appID` = ? AND `deviceID` = ?;";
 
 const std::string kSelectCountFiles =
     "SELECT COUNT (`idfile`) "

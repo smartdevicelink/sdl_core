@@ -323,6 +323,15 @@ class ResumptionDataDB : public ResumptionData {
    */
   bool DeleteSavedGlobalProperties(const std::string& mobile_app_id,
                                    const std::string& device_id);
+  /**
+   * @brief Deletes data from application table
+   * @param policy_app_id - mobile application id
+   * @param device_id - contains id of device on which is running application
+   * @return true if data was deleted otherwise returns
+   * false
+   */
+  bool DeleteDataFromApplicationTable(const std::string& policy_app_id,
+                                      const std::string& device_id);
 
   /**
    * @brief Saves files data to DB
@@ -389,15 +398,12 @@ class ResumptionDataDB : public ResumptionData {
    * @param application contains data for saving
    * @param mobile_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
-   * @param application_exist = true if application exists
-   * in DB otherwise = false
    * @return true if application data was saved successfully
    * otherwise returns false
    */
   bool SaveApplicationToDB(app_mngr::ApplicationConstSharedPtr application,
                            const std::string& policy_app_id,
-                           const std::string& device_id,
-                           bool application_exist);
+                           const std::string& device_id);
 
   /**
    * @brief Updates ignition of count on saved applications after onAwake
@@ -428,18 +434,6 @@ class ResumptionDataDB : public ResumptionData {
   bool ExecUnionQueryToDeleteData (const std::string& mobile_app_id,
                                    const std::string& device_id,
                                    const std::string& text_query);
-
-  /**
-   * @brief Execute query in order to receive application primary key
-   * @param mobile_app_id - mobile application id
-   * @param device_id - contains id of device on which is running application
-   * @param primary_key - will contain primary key from DB
-   * @return true if query was run successfully otherwise returns
-   * false
-   */
-  bool ExecSelectPrimaryKeyFromApplication(
-      const std::string& policy_app_id, const std::string& device_id,
-      int64_t& primary_key) const;
 
   /**
    * @brief Execute query in order to insert image to DB
@@ -545,8 +539,6 @@ class ResumptionDataDB : public ResumptionData {
    * @param device_id contains id of device on which is running application
    * @param application_primary_key will contain primary key from application table
    * @param global_properties_key contains primary key from globalproperties table
-   * @param application_exist contains TRUE if application exists on DB
-   * otherwise contains FALSE.
    * @return true if query was run successfully otherwise returns
    * false
    */
@@ -554,8 +546,7 @@ class ResumptionDataDB : public ResumptionData {
                              const std::string& mobile_app_id,
                              const std::string& device_id,
                              int64_t& application_primary_key,
-                             int64_t global_properties_key,
-                             bool application_exist);
+                             int64_t global_properties_key);
 
   /**
    * @brief Delete application data where ign_off_count >= application_lifes
