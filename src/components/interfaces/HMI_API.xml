@@ -83,6 +83,33 @@
     <element name="PRESET_9"/>
     <element name="CUSTOM_BUTTON"/>
     <element name="SEARCH"/>
+      <!-- Climate Buttons -->
+    <element name="AC_MAX" />
+    <element name="AC" />
+    <element name="RECIRCULATE" />
+    <element name="FAN_UP" />
+    <element name="FAN_DOWN" />
+    <element name="TEMP_UP" />
+    <element name="TEMP_DOWN" />
+    <element name="DEFROST_MAX" />
+    <element name="DEFROST" />
+    <element name="DEFROST_REAR" />
+    <element name="FAN_DOWN" />
+    <element name="UPPER_VENT" />
+    <element name="LOWER_VENT" />
+
+    <!-- Radio Buttons -->
+    <element name="VOLUME_UP" />
+    <element name="VOLUME_DOWN" />
+    <element name="EJECT" />
+    <element name="SOURCE" />
+    <element name="SHUFFLE" />
+    <element name="REPEAT" />
+</enum>
+
+<enum name="ModuleType">
+  <element name="CLIMATE"/>
+  <element name="RADIO"/>
 </enum>
 
 <enum name="ButtonEventMode">
@@ -1181,6 +1208,24 @@
   </struct>
 <!-- End of Policies -->
 
+<!-- Remote Control -->
+<struct name="InteriorZone">
+  <description>Describes the origin and span of a zone in the vehicle. Vehicle zones can be overlapping</description>
+  <param name="col" type="Integer" minvalue="0" maxvalue="100">
+  </param>
+  <param name="row" type="Integer" minvalue="0" maxvalue="100">
+  </param>
+  <param name="level" type="Integer" minvalue="0" maxvalue="100">
+  </param>
+  <param name="colspan" type="Integer" minvalue="0" maxvalue="100">
+  </param>
+  <param name="rowspan" type="Integer" minvalue="0" maxvalue="100">
+  </param>
+  <param name="levelspan" type="Integer" minvalue="0" maxvalue="100">
+  </param>
+</struct>
+
+<!-- End Remote Control -->
 <struct name="TextField">
   <param name="name" type="Common.TextFieldName">
     <description>The name that identifies the field. See TextFieldName.</description>
@@ -1897,6 +1942,23 @@
         <description>Must be returned if the platform supports custom on-screen Presets</description>
       </param>
     </function>
+
+    <function name="ButtonPress" messagetype="request">
+      <description>Method is invoked when the application tries to press a button</description>
+      <param name="name" type="Common.ButtonName" mandatory="true"/>
+      <param name="mode" type="Common.ButtonPressMode" mandatory="true">
+          <description>Indicates whether this is a LONG or SHORT button press event.</description>
+      </param>
+      <param name="moduleType" type="Common.ModuleType" mandatory="true">
+        <description>The module where this command is being directed</description>
+      </param>
+      <param name="interiorZone" type="Common.InteriorZone" mandatory="true">
+        <description>The interior zone where this command is being directed</description>
+      </param>
+    </function>
+    <function name="ButtonPress" messagetype="response">
+    </function>
+
     <function name="OnButtonEvent" messagetype="notification">
       <description>HU system must notify about every UP/DOWN event for buttons</description>
       <param name="name" type="Common.ButtonName" mandatory="true"/>
