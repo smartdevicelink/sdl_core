@@ -47,7 +47,7 @@ ButtonPressResponse::~ButtonPressResponse() {
 
 void ButtonPressResponse::Run() {
   LOG4CXX_INFO(logger_, "ButtonPressResponse::Run");
-
+  // TODO: something
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 
