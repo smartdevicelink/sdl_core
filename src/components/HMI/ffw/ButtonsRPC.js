@@ -221,6 +221,9 @@ FFW.Buttons = FFW.RPCObserver.create( {
             };
             this.client.send(JSONMessage);
         }
+        else if (request.method == "Buttons.ButtonPress") {
+            Em.Logger.log("Reveived Button Press");
+        }
     },
 
     /**
