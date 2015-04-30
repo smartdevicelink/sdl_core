@@ -59,7 +59,7 @@ class ResumptionDataJson : public ResumptionData {
    * @brief Save application persistent info for future resuming on json format
    * @param application is application witch need to be saved
    */
-  virtual void SaveApplication(app_mngr::ApplicationConstSharedPtr application);
+  virtual void SaveApplication(app_mngr::ApplicationSharedPtr application);
 
   /**
    * @brief Returns HMI level of application from saved data

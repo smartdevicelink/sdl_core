@@ -877,4 +877,9 @@ const std::string kSelectAppTable =
     "FROM `application` "
     "WHERE `appID` = ? AND `deviceID` = ?;";
 
+const std::string kUpdateApplicationData =
+    "UPDATE `application` "
+    "SET `hmiLevel` = ?, `timeStamp` = ? "
+    "WHERE `appID` = ? AND `deviceID` = ?;";
+
 }  // namespace resumption

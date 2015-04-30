@@ -51,7 +51,7 @@ ResumptionDataJson::ResumptionDataJson():
 }
 
 void ResumptionDataJson::SaveApplication(
-    app_mngr::ApplicationConstSharedPtr application) {
+    app_mngr::ApplicationSharedPtr application) {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(application);

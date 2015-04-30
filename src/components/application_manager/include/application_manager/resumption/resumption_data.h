@@ -64,7 +64,7 @@ class ResumptionData {
    * @param application is application witch need to be saved
    */
   virtual void SaveApplication(
-      app_mngr::ApplicationConstSharedPtr application) = 0;
+      app_mngr::ApplicationSharedPtr application) = 0;
 
   /**
    * @brief Returns HMI level of application from saved data

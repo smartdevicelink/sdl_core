@@ -124,6 +124,7 @@ extern const std::string kChecksCharacter;
 extern const std::string kSelectCharacter;
 extern const std::string kSelectTTSChunk;
 extern const std::string kSelectAppTable;
+extern const std::string kUpdateApplicationData;
 }  // namespace resumption
 
 #endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_SQL_QUERY_H_

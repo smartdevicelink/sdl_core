@@ -74,7 +74,7 @@ class ResumptionDataDB : public ResumptionData {
    * @brief Save application persistent info for future resuming to db
    * @param application is application which need to be saved
    */
-  virtual void SaveApplication(app_mngr::ApplicationConstSharedPtr application);
+  virtual void SaveApplication(app_mngr::ApplicationSharedPtr application);
 
   /**
    * @brief Returns HMI level of application from saved data
@@ -705,6 +705,18 @@ class ResumptionDataDB : public ResumptionData {
    */
   bool PrepareSelectQuery(utils::dbms::SQLQuery& query, const std::string& policy_app_id,
                           const std::string& device_id, const std::string& text_query) const;
+
+  /**
+   * @brief Updates HMI level and time stamp in application table
+   * @param application contains data for saving
+   * @param policy_app_id - mobile application id
+   * @param device_id - contains id of device on which is running application
+   * @return true if application data were updated successfully
+   * otherwise returns false
+   */
+  bool UpdateApplicationData(app_mngr::ApplicationConstSharedPtr application,
+                             const std::string& policy_app_id,
+                              const std::string& device_id);
 
   /**
    * @brief Writes data to DB after update

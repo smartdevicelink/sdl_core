@@ -127,7 +127,7 @@ bool ResumptionDataDB::Init() {
 }
 
 void ResumptionDataDB::SaveApplication(
-    app_mngr::ApplicationConstSharedPtr application) {
+    app_mngr::ApplicationSharedPtr application) {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(application);
@@ -138,25 +138,33 @@ void ResumptionDataDB::SaveApplication(
   LOG4CXX_INFO(logger_, "app_id : " << application->app_id()
                 <<" mobile app_id : " << m_app_id
                 <<" device_id : " << device_id);
+  if (application->is_application_data_changed()) {
 
-
-  if (!CheckExistenceApplication(m_app_id, device_id, application_exist)) {
-    LOG4CXX_ERROR(logger_, "Problem with access to DB");
-    return;
-  }
-
-  if (application_exist) {
-    if (!DeleteSavedApplication(m_app_id, device_id)) {
-      LOG4CXX_ERROR(logger_, "Deleting of application data is not finished");
+    if (!CheckExistenceApplication(policy_app_id, device_id, application_exist)) {
+      LOG4CXX_ERROR(logger_, "Problem with access to DB");
       return;
     }
-  }
 
-  if (!SaveApplicationToDB(application, policy_app_id, device_id)) {
-    LOG4CXX_ERROR(logger_, "Saving of application data is not finished");
-    return;
+    if (application_exist) {
+      if (!DeleteSavedApplication(policy_app_id, device_id)) {
+        LOG4CXX_ERROR(logger_, "Deleting of application data is not finished");
+        return;
+      }
+    }
+
+    if (!SaveApplicationToDB(application, policy_app_id, device_id)) {
+      LOG4CXX_ERROR(logger_, "Saving of application data is not finished");
+      return;
+    }
+    LOG4CXX_INFO(logger_, "All data from application were saved successfully");
+    application->set_is_application_data_changed(false);
+  } else {
+    if (!UpdateApplicationData(application, policy_app_id, device_id)) {
+      LOG4CXX_ERROR(logger_, "Updating application data is failed");
+      return;
+    }
+    LOG4CXX_INFO(logger_, "Application data were updated successfully");
   }
-  LOG4CXX_INFO(logger_, "All data from application were saved successfully");
   WriteDb();
 }
 
@@ -2333,7 +2341,42 @@ void ResumptionDataDB::UpdateDataOnAwake() {
   }
 }
 
+bool ResumptionDataDB::UpdateApplicationData(app_mngr::ApplicationConstSharedPtr application,
+                                             const std::string& policy_app_id,
+                                             const std::string& device_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace app_mngr;
+  utils::dbms::SQLQuery query(db());
+
+  const int64_t time_stamp = static_cast<int64_t>(time(NULL));
+  const mobile_apis::HMILevel::eType hmi_level = application->hmi_level();
+
+  if (!query.Prepare(kUpdateApplicationData)) {
+     LOG4CXX_WARN(logger_, "Problem with verification query "
+                  "for updating some application data");
+     return false;
+  }
+
+  /* Positions of binding data for "query":
+     field "hmiLevel" from table "application" = 0
+     field "timeStamp" from table "application" = 1
+     field "appID" from table "application" = 2
+     field "deviceID" from table "application" = 3*/
+   query.Bind(0, static_cast<int32_t>(hmi_level));
+   query.Bind(1, time_stamp);
+   query.Bind(2, policy_app_id);
+   query.Bind(3, device_id);
+
+   if (!query.Exec()) {
+     LOG4CXX_WARN(logger_, "Problem with execution query");
+     return false;
+   }
+   LOG4CXX_INFO(logger_, "Data were updated successfully in application table");
+   return true;
+}
+
 void ResumptionDataDB::WriteDb() {
+  LOG4CXX_AUTO_TRACE(logger_);
   db_->Backup();
 }
 
