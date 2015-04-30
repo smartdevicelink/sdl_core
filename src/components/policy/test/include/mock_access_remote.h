@@ -57,8 +57,8 @@ class MockAccessRemote : public AccessRemote {
       bool());
   MOCK_CONST_METHOD1(IsPrimaryDevice,
       bool(const PTString& dev_id));
-  MOCK_METHOD1(SetPrimaryDevice,
-      void(const PTString& dev_id));
+  MOCK_METHOD2(SetPrimaryDevice,
+      void(const PTString& dev_id, const PTString& input));
   MOCK_CONST_METHOD2(IsPassengerZone,
       bool(const SeatLocation& seat, const SeatLocation& zone));
   MOCK_METHOD2(Allow,

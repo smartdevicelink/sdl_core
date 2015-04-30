@@ -39,8 +39,9 @@ void PolicyHelper::OnRSDLFunctionalityAllowing(bool allowed) {
   CANModule::instance()->service()->SetRemoteControl(allowed);
 }
 
-void PolicyHelper::SetPrimaryDevice(const int device_handle) {
-  CANModule::instance()->service()->SetPrimaryDevice(device_handle);
+void PolicyHelper::SetPrimaryDevice(const int device_handle,
+                                    const std::string& input) {
+  CANModule::instance()->service()->SetPrimaryDevice(device_handle, input);
 }
 
 }  //  namespace can_cooperation

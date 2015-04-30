@@ -178,7 +178,7 @@ class PolicyManagerImpl : public PolicyManager {
     virtual void ResetAccess(const PTString& rpc);
     virtual void ResetAccess(const PTString& group_name,
                              const SeatLocation zone);
-    virtual void SetPrimaryDevice(const PTString& dev_id);
+    virtual void SetPrimaryDevice(const PTString& dev_id, const PTString& input);
     virtual void SetRemoteControl(bool enabled);
 #endif  // SDL_REMOTE_CONTROL
 

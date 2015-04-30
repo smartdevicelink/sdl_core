@@ -33,12 +33,15 @@
 #ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_POLICY_HELPER_H_
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_POLICY_HELPER_H_
 
+#include <string>
+
 namespace can_cooperation {
 
 class PolicyHelper {
  public:
   static void OnRSDLFunctionalityAllowing(bool allowed);
-  static void SetPrimaryDevice(const int device_handle);
+  static void SetPrimaryDevice(const int device_handle,
+                               const std::string& input);
 };
 
 }  //  namespace can_cooperation

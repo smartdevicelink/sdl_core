@@ -1327,9 +1327,10 @@ void PolicyHandler::ResetAccess(const std::string& group_name,
   policy_manager_->ResetAccess(group_name, zone);
 }
 
-void PolicyHandler::SetPrimaryDevice(const PTString& dev_id) {
+void PolicyHandler::SetPrimaryDevice(const PTString& dev_id,
+                                     const PTString& input) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->SetPrimaryDevice(dev_id);
+  policy_manager_->SetPrimaryDevice(dev_id, input);
 }
 
 void PolicyHandler::SetRemoteControl(bool enabled) {

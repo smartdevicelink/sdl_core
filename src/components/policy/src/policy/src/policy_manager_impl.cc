@@ -963,8 +963,9 @@ void PolicyManagerImpl::ResetAccess(const PTString& group_name,
   access_remote_->Reset(who);
 }
 
-void PolicyManagerImpl::SetPrimaryDevice(const PTString& dev_id) {
-  access_remote_->SetPrimaryDevice(dev_id);
+void PolicyManagerImpl::SetPrimaryDevice(const PTString& dev_id,
+                                         const PTString& input) {
+  access_remote_->SetPrimaryDevice(dev_id, input);
 }
 
 void PolicyManagerImpl::SetRemoteControl(bool enabled) {

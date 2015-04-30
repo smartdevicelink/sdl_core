@@ -218,13 +218,19 @@ void AccessRemoteImpl::Reset(const Object& what) {
   acl_.erase(what);
 }
 
-void AccessRemoteImpl::SetPrimaryDevice(const PTString& dev_id) {
+void AccessRemoteImpl::SetPrimaryDevice(const PTString& dev_id,
+                                        const PTString& input) {
   primary_device_ = dev_id;
   DeviceData& devices = *cache_->pt_->policy_table.device_data;
   std::for_each(devices.begin(), devices.end(), SetPrimary(false));
   policy_table::ConsentRecords& record =
       (*devices[dev_id].user_consent_records)[kPrimary];
   *record.is_consented = true;
+  policy_table::Input value;
+  if (EnumFromJsonString(input, &value)) {
+    *record.input = value;
+  }
+  *record.time_stamp = cache_->currentDateTime();
   cache_->Backup();
 }
 

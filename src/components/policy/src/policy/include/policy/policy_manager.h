@@ -440,7 +440,8 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * Sets driver as primary device
      * @param dev_id ID device
      */
-    virtual void SetPrimaryDevice(const PTString& dev_id) = 0;
+    virtual void SetPrimaryDevice(const PTString& dev_id,
+                                  const PTString& input) = 0;
 
     /**
      * Sets mode of remote control (on/off)

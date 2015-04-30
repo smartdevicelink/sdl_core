@@ -113,8 +113,9 @@ class CoreService : public Service {
   /**
    * Sets device as primary device
    * @param dev_id ID device
+   * @param input
    */
-  virtual void SetPrimaryDevice(const uint32_t dev_id);
+  virtual void SetPrimaryDevice(const uint32_t dev_id, const std::string& input);
 
   /**
    * Sets mode of remote control (on/off)

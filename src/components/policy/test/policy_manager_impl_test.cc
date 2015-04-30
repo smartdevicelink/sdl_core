@@ -324,9 +324,9 @@ TEST_F(PolicyManagerImplTest, DISABLED_GetPolicyTableStatus) {
 
 #ifdef SDL_REMOTE_CONTROL
 TEST_F(PolicyManagerImplTest, SetPrimaryDevice) {
-  EXPECT_CALL(*access_remote, SetPrimaryDevice("dev1"));
+  EXPECT_CALL(*access_remote, SetPrimaryDevice("dev1", "GUI"));
 
-  manager->SetPrimaryDevice("dev1");
+  manager->SetPrimaryDevice("dev1", "GUI");
 }
 
 TEST_F(PolicyManagerImplTest, ResetAccessBySubject) {

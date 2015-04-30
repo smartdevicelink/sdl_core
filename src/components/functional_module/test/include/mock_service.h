@@ -67,7 +67,8 @@ class MockService : public Service {
   MOCK_METHOD1(ResetAccess, void(const ApplicationId& app_id));
   MOCK_METHOD2(ResetAccess, void(const std::string& group_name,
                                  const SeatLocation& zone));
-  MOCK_METHOD1(SetPrimaryDevice, void(const uint32_t dev_id));
+  MOCK_METHOD2(SetPrimaryDevice, void(const uint32_t dev_id,
+                                      const std::string& input));
   MOCK_METHOD1(SetRemoteControl, void(bool enabled));
 };
 
