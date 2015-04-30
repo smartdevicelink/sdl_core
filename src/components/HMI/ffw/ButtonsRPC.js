@@ -222,7 +222,16 @@ FFW.Buttons = FFW.RPCObserver.create( {
             this.client.send(JSONMessage);
         }
         else if (request.method == "Buttons.ButtonPress") {
-            Em.Logger.log("Reveived Button Press");
+            Em.Logger.log("Received Button Press");
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": request.id,
+                "result": {
+                    "code": 0,
+                    "method": "Buttons.ButtonPress"
+                }
+            };
+            this.client.send(JSONMessage);
         }
     },
 
