@@ -10,6 +10,7 @@ namespace rpc {
 namespace policy_table_interface_base {
 struct AppLevel;
 struct ApplicationParams;
+struct ConsentRecords;
 struct DeviceParams;
 struct MessageLanguages;
 struct MessageString;
@@ -47,6 +48,8 @@ typedef Map< MessageString, 0, 500 > Languages;
 typedef Map< MessageLanguages, 0, 255 > Messages;
 
 typedef Map< AppLevel, 0, 255 > AppLevels;
+
+typedef Map< ConsentRecords, 0, 1000 > UserConsentRecords;
 
 typedef Map< Stringifyable < Nullable< ApplicationParams > >, 1, 1000 > ApplicationPolicies;
 
@@ -254,9 +257,28 @@ struct UsageAndErrorCounts : CompositeType {
     bool Validate() const;
 };
 
+struct ConsentRecords : CompositeType {
+  public:
+    Optional< Boolean > is_consented;
+    Optional< Enum<Input> > input;
+    Optional< String<1, 255> > time_stamp;
+  public:
+    ConsentRecords();
+    ~ConsentRecords();
+    explicit ConsentRecords(const Json::Value* value__);
+    Json::Value ToJsonValue() const;
+    bool is_valid() const;
+    bool is_initialized() const;
+    bool struct_empty() const;
+    void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
+  private:
+    bool Validate() const;
+};
+
 struct DeviceParams : CompositeType {
   public:
-    Optional< Boolean > primary;
+    Optional< UserConsentRecords > user_consent_records;
   public:
     DeviceParams();
     ~DeviceParams();
@@ -266,6 +288,7 @@ struct DeviceParams : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };

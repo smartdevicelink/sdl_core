@@ -48,8 +48,7 @@ const std::string kCreateSchema =
   "  `carrier` VARCHAR(45), "
   "  `max_number_rfcom_ports` INTEGER,"
   "  `connection_type` VARCHAR(45), "
-  "  `unpaired` BOOL,"
-  "  `primary` BOOL "
+  "  `unpaired` BOOL"
   "); "
   "CREATE TABLE IF NOT EXISTS `usage_and_error_count`( "
   "  `count_of_iap_buffer_full` INTEGER, "
@@ -236,6 +235,23 @@ const std::string kCreateSchema =
   "CREATE INDEX IF NOT EXISTS "
   "`device_consent_group.fk_device_has_functional_group_device1_idx` "
   "  ON `device_consent_group`(`device_id`); "
+
+  /* user_consent */
+  "CREATE TABLE IF NOT EXISTS `user_consent`( "
+  "  `device_id` VARCHAR(100) NOT NULL, "
+  "  `name` VARCHAR(100) NOT NULL, "
+  "  `is_consented` BOOL, "
+  "  `input` VARCHAR(45), "
+  "  `time_stamp` VARCHAR(45), "
+  "  PRIMARY KEY(`device_id`, `name`), "
+  "  CONSTRAINT `fk_device_has_name_user_consent` "
+  "    FOREIGN KEY(`device_id`) "
+  "    REFERENCES `device`(`id`) "
+  "); "
+  "CREATE INDEX IF NOT EXISTS "
+  "`user_consent.fk_device_has_name_user_consent_idx` "
+  "  ON `user_consent`(`device_id`); "
+
   "CREATE TABLE IF NOT EXISTS `app_level`( "
   "  `application_id` VARCHAR(45) PRIMARY KEY NOT NULL, "
   "  `minutes_in_hmi_full` INTEGER DEFAULT 0, "
@@ -545,7 +561,11 @@ const std::string kInsertNotificationsByPriority =
   "  VALUES (?, ?)";
 
 const std::string kInsertDeviceData =
-  "INSERT INTO `device` (`id`, `primary`) VALUES (?, ?)";
+  "INSERT INTO `device` (`id`) VALUES (?)";
+
+const std::string kInsertUserConsent =
+  "INSERT OR REPLACE INTO `user_consent` (`device_id`, `name`, `is_consented`, "
+    "`input`, `time_stamp`) VALUES (?, ?, ?, ?, ?)";
 
 const std::string kInsertAppLevel =
   "INSERT INTO `app_level` (`application_id`, `minutes_in_hmi_full`,"
@@ -596,6 +616,9 @@ const std::string kSelectNotificationsPerPriority =
 const std::string kSelectAppLevels = "SELECT `application_id` FROM `app_level`";
 
 const std::string kSelectDeviceData = "SELECT * FROM `device`";
+
+const std::string kSelectUserConsent = "SELECT `name`, `is_consented`, "
+    "`input`, `time_stamp` FROM `user_consent` WHERE `device_id` = ?";
 
 const std::string kSelectFunctionalGroups =
   "SELECT `id`,`name`, `user_consent_prompt` "

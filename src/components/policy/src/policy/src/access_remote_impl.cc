@@ -47,7 +47,10 @@ namespace policy {
 
 struct IsPrimary {
   bool operator ()(const DeviceData::value_type& item) const {
-    return *item.second.primary == true;
+    const policy_table::UserConsentRecords& consent =
+        *item.second.user_consent_records;
+    policy_table::UserConsentRecords::const_iterator i = consent.find(kPrimary);
+    return i != consent.end() && *i->second.is_consented == true;
   }
 };
 
@@ -59,7 +62,9 @@ struct SetPrimary {
       : value_(value) {
   }
   void operator ()(DeviceData::value_type& item) const {
-    *item.second.primary = value_;
+    policy_table::ConsentRecords& primary =
+        (*item.second.user_consent_records)[kPrimary];
+    *primary.is_consented = value_;
   }
 };
 
@@ -217,7 +222,9 @@ void AccessRemoteImpl::SetPrimaryDevice(const PTString& dev_id) {
   primary_device_ = dev_id;
   DeviceData& devices = *cache_->pt_->policy_table.device_data;
   std::for_each(devices.begin(), devices.end(), SetPrimary(false));
-  *devices[dev_id].primary = true;
+  policy_table::ConsentRecords& record =
+      (*devices[dev_id].user_consent_records)[kPrimary];
+  *record.is_consented = true;
   cache_->Backup();
 }
 

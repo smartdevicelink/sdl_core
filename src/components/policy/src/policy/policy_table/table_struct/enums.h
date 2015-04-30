@@ -80,6 +80,14 @@ bool IsValidEnum(AppHMIType val);
 const char* EnumToJsonString(AppHMIType val);
 bool EnumFromJsonString(const std::string& literal, AppHMIType* result);
 
+enum Input {
+  I_GUI,
+  I_VUI,
+};
+bool IsValidEnum(Input val);
+const char* EnumToJsonString(Input val);
+bool EnumFromJsonString(const std::string& literal, Input* result);
+
 extern const std::string kDefaultApp;
 extern const std::string kPreDataConsentApp;
 extern const std::string kDeviceApp;
