@@ -2042,7 +2042,7 @@
 
 </interface>
 
-<interface name="RC" version="1.0" date="2013-04-12">
+<interface name="RC" version="1.0" date="2015-05-01">
   <function name="GetInteriorVehicleDataCapabilities" messagetype="request">
     <param name="zone" type="Common.InteriorZone" mandatory="false">
     </param>
