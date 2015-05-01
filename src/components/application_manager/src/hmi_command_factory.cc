@@ -265,6 +265,15 @@
 #include "application_manager/commands/hmi/dial_number_request.h"
 #include "application_manager/commands/hmi/dial_number_response.h"
 
+// Remote Control
+#include "application_manager/commands/hmi/rc_get_interior_vehicle_capabilities_request.h"
+#include "application_manager/commands/hmi/rc_get_interior_vehicle_capabilities_response.h"
+#include "application_manager/commands/hmi/rc_get_interior_vehicle_data_request.h"
+#include "application_manager/commands/hmi/rc_get_interior_vehicle_data_response.h"
+#include "application_manager/commands/hmi/rc_set_interior_vehicle_data_request.h"
+#include "application_manager/commands/hmi/rc_set_interior_vehicle_data_response.h"
+#include "application_manager/commands/hmi/on_interior_vehicle_data_notification.h"
+
 namespace application_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
