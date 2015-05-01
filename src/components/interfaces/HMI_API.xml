@@ -106,11 +106,6 @@
     <element name="REPEAT" />
 </enum>
 
-<enum name="ModuleType">
-  <element name="CLIMATE"/>
-  <element name="RADIO"/>
-</enum>
-
 <enum name="ButtonEventMode">
     <element name="BUTTONUP">
         <description>A button has been released up</description>
@@ -1224,6 +1219,124 @@
   </param>
 </struct>
 
+<enum name="ModuleType">
+  <element name="CLIMATE"/>
+  <element name="RADIO"/>
+</enum>
+
+<struct name="ModuleDescription">
+  <param name="moduleZone" type="InteriorZone">
+  </param>
+  <param name="moduleType" type="ModuleType">
+  </param>
+</struct>
+
+<enum name="RadioBand">
+  <element name="AM"/>
+  <element name="FM"/>
+  <element name="XM"/>
+</enum>
+
+<struct name="RdsData">
+  <param name="PS" type="String" minlength="0" maxlength="8">
+    <description>Program Service Name</description>
+  </param>
+  <param name="RT" type="String" minlength="0" maxlength="64">
+    <description>Radio Text</description>
+  </param>
+  <param name="CT" type="String" minlength="24" maxlength="24">
+    <description>The clock text in UTC format as YYYY-MM-DDThh:mm:ss.sTZD</description>
+  </param>
+  <param name="PI" type="String" minlength="0" maxlength="6">
+    <description>Program Identification - the call sign for the radio station</description>
+  </param>
+  <param name="PTY" type="Integer" minvalue="0" maxvalue="31">
+    <description>The program type - The region should be used to differentiate between EU and North America program types</description>
+  </param>
+  <param name="TP" type="Boolean">
+    <description>Traffic Program Identification - Identifies a station that offers traffic</description>
+  </param>
+  <param name="TA" type="Boolean">
+    <description>Traffic Announcement Identification - Indicates an ongoing traffic announcement</description>
+  </param>
+  <param name="REG" type="String">
+    <description>Region</description>
+  </param>
+</struct>
+
+<enum name="RadioState">
+  <element name="ACQUIRING"/>
+  <element name="ACQUIRED"/>
+  <element name="MULTICAST"/>
+  <element name="NOT_FOUND"/>
+</enum>
+
+<struct name="RadioControlData">
+  <param name="frequencyInteger" type="Integer" minvalue="0" maxvalue="1710" mandatory="false">
+    <description>The integer part of the frequency ie for 101.7 this value should be 101</description>
+  </param>
+  <param name="frequencyFraction" type="Integer" minvalue="0" maxvalue="9" mandatory="false">
+    <description>The fractional part of the frequency for 101.7 is 7</description>
+  </param>
+  <param name="band" type="RadioBand" mandatory="false">
+  </param>
+  <param name="rdsData" type="RdsData" mandatory="false">
+  </param>
+  <param name="availableHDs" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
+    <description>number of HD sub-channels if available</description>
+  </param>
+  <param name="hdChannel" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
+    <description>Current HD sub-channel if available</description>
+  </param>
+  <param name="signalStrength" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+  </param>
+  <param name="signalChangeThreshold" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+    <description>If the signal strength falls below the set value for this parameter, the radio will tune to an alternative frequency</description>
+  </param>
+  <param name="radioEnable" type="Boolean" mandatory="false">
+    <description> True if the radio is on, false is the radio is off</description>
+  </param>
+  <param name="state" type="RadioState" mandatory="false">
+  </param>
+</struct>
+
+<enum name="DefrostZone">
+  <element name="FRONT"/>
+  <element name="REAR"/>
+  <element name="ALL"/>
+</enum>
+
+<struct name="ClimateControlData">
+  <param name="fanSpeed" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+  </param>
+  <param name="currentTemp" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+  </param>
+  <param name="desiredTemp" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+  </param>
+  <param name="acEnable" type="Boolean" mandatory="false">
+  </param>
+  <param name="circulateAirEnable" type="Boolean" mandatory="false">
+  </param>
+  <param name="autoEnable" type="Boolean" mandatory="false">
+  </param>
+  <param name="defrost" type="DefrostZone" mandatory="false">
+  </param>
+  <param name="dualModeEnable" type="Boolean" mandatory="false">
+  </param>
+</struct>
+
+<struct name="ModuleData">
+  <description>The moduleType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the moduleType is CLIMATE then a "climateControlData" should exist</description>
+  <param name="moduleType" type="ModuleType">
+  </param>
+  <param name="moduleZone" type="InteriorZone">
+  </param>
+  <param name="radioControlData" type="RadioControlData" mandatory="false">
+  </param>
+  <param name="climateControlData" type="ClimateControlData" mandatory="false">
+  </param>
+</struct>
+
 <!-- End Remote Control -->
 <struct name="TextField">
   <param name="name" type="Common.TextFieldName">
@@ -1927,6 +2040,47 @@
 </struct>
 <!--end of IVI part-->
 
+</interface>
+
+<interface name="RC" version="1.0" date="2013-04-12">
+  <function name="GetInteriorVehicleDataCapabilities" messagetype="request">
+    <param name="zone" type="Common.InteriorZone" mandatory="false">
+    </param>
+    <param name="moduleTypes" type="Common.ModuleType" array="true" mandatory="false" minsize="1" maxsize="1000">
+    </param>
+  </function>
+  <function name="GetInteriorVehicleDataCapabilities" messagetype="response">
+    <param name="interiorVehicleCapabilities" type="Common.ModuleDescription" array="true" minsize="1" maxsize="1000">
+  </param>
+  </function>
+  <function name="SetInteriorVehicleData" messagetype="request">
+    <param name="moduleData" type="Common.ModuleData">
+      <description>The data to set for the (zone, module) pair</description>
+    </param>
+  </function>
+  <function name="SetInteriorVehicleData" messagetype="response">
+    <param name="moduleData" type="Common.ModuleData">
+      <description>The updated data to set for the (zone, module) pair</description>
+    </param>
+  </function>
+  <function name="GetInteriorVehicleData" messagetype="request">
+    <param name="moduleDescription" type="Common.ModuleDescription">
+      <description>The zone and module data to retrieve from the vehicle for that zone</description>
+    </param>
+    <param name="subscribe" type="Boolean" mandatory="false" defvalue="false">
+      <description>If subscribe is true, the array values in requestedDataTypes override the current subscriptions for the zones requested, ie if the developer subscribes to A and B and then subscribes to A, the developer will no longer be subscribed to B. If the array is empty, data for all supported data types is returned</description>
+    </param>
+  </function>
+  <function name="GetInteriorVehicleData" messagetype="response">
+    <param name="moduleData" type="Common.ModuleData">
+      <description>The updated data to set for the (zone, module) pair</description>
+    </param>
+  </function>
+
+  <function name="OnInteriorVehicleData" messagetype="notification">
+    <param name="moduleData" type="Common.ModuleData">
+    </param>
+  </function>
 </interface>
 
 <interface name="Buttons" version="1.0" date="2013-04-12">
