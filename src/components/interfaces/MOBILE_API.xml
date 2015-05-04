@@ -1896,9 +1896,9 @@
     <description>Enumeration listing possible keyboard events.</description>
     <element name="KEYPRESS" />
     <element name="ENTRY_SUBMITTED" />
+    <element name="ENTRY_VOICE" />
     <element name="ENTRY_CANCELLED" />
     <element name="ENTRY_ABORTED" />
-    <element name="ENTRY_VOICE" />    
   </enum>
 
   <enum name="KeypressMode">
