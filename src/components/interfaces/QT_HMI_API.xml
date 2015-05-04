@@ -2641,7 +2641,7 @@
       </param>
       <param name="audioPassThruCapabilities" type="Common.AudioPassThruCapabilities" mandatory="true"/>
       <param name="hmiZoneCapabilities" type="Common.HmiZoneCapabilities" mandatory="true"/>
-      <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" mandatory="false">
+      <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
         <description>Must be returned if the platform supports on-screen SoftButtons.</description>
       </param>
     </function>

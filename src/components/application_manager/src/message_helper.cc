@@ -2344,14 +2344,21 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
     return mobile_apis::Result::SUCCESS;
   }
 
-  const HMICapabilities& hmi_capabilities = ApplicationManagerImpl::instance()
-      ->hmi_capabilities();
-  const SmartObject* soft_button_capabilities = hmi_capabilities
-      .soft_button_capabilities();
+  const HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
+
+  const SmartObject* soft_button_capabilities =
+      hmi_capabilities.soft_button_capabilities();
   bool image_supported = false;
   if (soft_button_capabilities) {
-    image_supported = (*soft_button_capabilities)[hmi_response::image_supported]
-                      .asBool();
+    size_t size = (*soft_button_capabilities).length();
+    // in case HMI has sent multiple soft_button_capabilities
+    // how to determine image supported or not
+    for (uint32_t i = 0; i < size; ++i) {
+      image_supported =
+          (*soft_button_capabilities)[i][hmi_response::image_supported].asBool();
+      break;
+    }
   }
 
   SmartObject& request_soft_buttons = message_params[strings::soft_buttons];
