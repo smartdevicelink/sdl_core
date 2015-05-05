@@ -2006,6 +2006,11 @@ void ApplicationManagerImpl::ProcessQueryApp(
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace policy;
 
+  if (!sm_object.keyExists(json::response)) {
+    LOG4CXX_DEBUG(logger_, "The response key is not exists.");
+    return;
+  }
+
   SmartArray* obj_array = sm_object[json::response].asArray();
   if (NULL != obj_array) {
     CreateApplications(*obj_array, connection_key);
