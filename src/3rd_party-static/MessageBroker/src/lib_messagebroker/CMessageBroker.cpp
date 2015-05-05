@@ -310,7 +310,7 @@ void CMessageBroker::onMessageReceived(int fd, std::string& aJSONData) {
       size_t offset = wmes.length();
       char msg_begin = '{';
       if (aJSONData.at(offset) != msg_begin) {
-        offset = aJSONData.find_last_of(msg_begin, offset);
+        offset -= 1; // wmes can contain redudant \n in the tail.
       }
       aJSONData.erase(aJSONData.begin(), aJSONData.begin() + offset);
       DBG_MSG(("Buffer after cut is:%s\n", aJSONData.c_str()));
