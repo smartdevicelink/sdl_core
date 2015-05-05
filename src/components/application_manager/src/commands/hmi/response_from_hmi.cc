@@ -72,10 +72,9 @@ void ResponseFromHMI::SendResponseToMobile(const MessageSharedPtr& message) {
 
 void ResponseFromHMI::CreateHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
-    const NsSmart::SmartObject& msg_params) const {
+    const smart_objects::SmartObject& msg_params) const {
 
-  NsSmartDeviceLink::NsSmartObjects::SmartObject* result =
-      new NsSmartDeviceLink::NsSmartObjects::SmartObject;
+  smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
 
   if (!result) {
     LOG4CXX_ERROR(logger_, "Memory allocation failed.");

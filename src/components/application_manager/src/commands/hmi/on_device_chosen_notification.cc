@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -45,7 +45,7 @@ OnDeviceChosenNotification::~OnDeviceChosenNotification() {
 }
 
 void OnDeviceChosenNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnDeviceChosenNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   if ((*message_)[strings::msg_params].keyExists(strings::device_info)) {
     ApplicationManagerImpl::instance()->ConnectToDevice(

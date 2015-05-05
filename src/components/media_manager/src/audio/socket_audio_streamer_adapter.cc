@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014 Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +39,7 @@ namespace media_manager {
 CREATE_LOGGERPTR_GLOBAL(logger, "SocketAudioStreamerAdapter")
 
 SocketAudioStreamerAdapter::SocketAudioStreamerAdapter() {
-  LOG4CXX_INFO(logger, "SocketAudioStreamerAdapter::SocketAudioStreamerAdapter");
+  LOG4CXX_AUTO_TRACE(logger);
   port_ = profile::Profile::instance()->audio_streaming_port();
   ip_ = profile::Profile::instance()->server_address();
 

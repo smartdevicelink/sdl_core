@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -62,45 +62,9 @@ namespace application_manager {
       }
 #endif
       SendRequest();
-      subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_ActivateApp,
-                         correlation_id());
       LOG4CXX_TRACE(logger_, "exit");
     }
 
-
-    void ActivateAppRequest::on_event(const event_engine::Event& event) {
-      LOG4CXX_TRACE_ENTER(logger_);
-      const smart_objects::SmartObject* response = &(event.smart_object());
-      const hmi_apis::Common_Result::eType code =
-          static_cast<hmi_apis::Common_Result::eType>(
-            (*response)[strings::params][hmi_response::code].asInt());
-      if (hmi_apis::Common_Result::SUCCESS != code) {
-        LOG4CXX_ERROR(logger_, "Error ActivateApp result code " << code);
-        return;
-      }
-      int32_t correlation_id = RequestToHMI::correlation_id();
-      // Mobile id is converted to HMI id for HMI requests
-      const uint32_t hmi_app_id = ApplicationManagerImpl::instance()->
-                                  application_id(correlation_id);
-      mobile_apis::HMILevel::eType requested_hmi_level = static_cast<mobile_apis::HMILevel::eType>(
-          (*message_)[strings::msg_params][strings::activate_app_hmi_level].asInt());
-      if (0 == hmi_app_id) {
-        LOG4CXX_ERROR(logger_, "Error hmi_app_id = "<< hmi_app_id);
-        return;
-      }
-
-      ApplicationSharedPtr application = ApplicationManagerImpl::instance()->
-                                         application_by_hmi_app(hmi_app_id);
-      if (!application.valid()) {
-        LOG4CXX_ERROR(logger_, "Application can't be activated.");
-        return;
-      }
-      if (mobile_apis::HMILevel::HMI_FULL == requested_hmi_level) {
-        if (ApplicationManagerImpl::instance()->ActivateApplication(application)) {
-          MessageHelper::SendHMIStatusNotification(*(application.get()));
-        }
-      }
-    }
   }  // namespace commands
 
 }  // namespace application_manager

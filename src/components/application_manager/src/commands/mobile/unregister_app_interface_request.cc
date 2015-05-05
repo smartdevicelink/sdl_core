@@ -40,7 +40,7 @@ namespace application_manager {
 namespace commands {
 
 void UnregisterAppInterfaceRequest::Run() {
-  LOG4CXX_INFO(logger_, "UnregisterAppInterfaceRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
 

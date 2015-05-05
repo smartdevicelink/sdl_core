@@ -80,12 +80,6 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    */
   virtual void on_event(const event_engine::Event& event);
 
-  /**
-   * @brief Timer callback function
-   *
-   */
-  void onTimer();
-
  private:
   /*
    * @brief Function is called by RequestController when request execution time
@@ -204,14 +198,13 @@ class PerformInteractionRequest : public CommandRequestImpl  {
   bool CheckChoiceIDFromResponse(ApplicationSharedPtr app, int32_t choice_id);
 
   // members
-  timer::TimerThread<PerformInteractionRequest> timer_;
-
-  DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
   mobile_apis::Result::eType vr_perform_interaction_code_;
   mobile_apis::InteractionMode::eType interaction_mode_;
-  bool ui_response_recived;
-  bool vr_response_recived;
+  bool ui_response_recived_;
+  bool vr_response_recived_;
+  bool app_pi_was_active_before_;
 
+  DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
 };
 
 }  // namespace commands

@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -34,11 +34,11 @@
 
 #include "gmock/gmock.h"
 
-#include "policy/update_status_manager_interface.h"
+#include "policy/update_status_manager.h"
 
 namespace policy {
 
-class MockUpdateStatusManagerInterface : public UpdateStatusManagerInterface {
+class MockUpdateStatusManager : public UpdateStatusManager {
  public:
   MOCK_METHOD1(set_listener,
       void(PolicyListener* listener));

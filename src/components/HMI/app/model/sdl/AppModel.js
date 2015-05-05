@@ -62,6 +62,37 @@ SDL.SDLAppModel = Em.Object.extend({
         appName: '',
 
         /**
+         * Flag to define if application was initialized (registered) correctly
+         * Has correct application type
+         *
+         * @type {Boolean}
+         */
+        initialized: false,
+
+        /**
+         * Media application flag
+         * If application was successfully initialized this flag it set into correct value
+         *
+         * @type {Boolean}
+         */
+        isMedia: null,
+
+        /**
+         * Flag to determine if app in application list can not be activated from HMI
+         *
+         * @type {Boolean}
+         */
+        disabledToActivate: false,
+
+        /**
+         * Application type
+         * If application was successfully initialized this parameter it set into correct value
+         *
+         * @type {String}
+         */
+        appType: "",
+
+        /**
          * Navigation streaming url
          */
         navigationStream: null,

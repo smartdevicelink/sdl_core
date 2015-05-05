@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,22 +49,44 @@ RWLock::~RWLock() {
   }
 }
 
-void RWLock::AcquireForReading() {
+bool RWLock::AcquireForReading() {
   if (pthread_rwlock_rdlock(&rwlock_) != 0) {
     LOG4CXX_ERROR(logger_, "Failed to acquire rwlock for reading");
+    return false;
   }
+  return true;
 }
 
-void RWLock::AcquireForWriting() {
+bool RWLock::TryAcquireForReading() {
+  if (pthread_rwlock_tryrdlock(&rwlock_) != 0) {
+    LOG4CXX_ERROR(logger_, "Failed to acquire rwlock for reading");
+    return false;
+  }
+  return true;
+}
+
+bool RWLock::AcquireForWriting() {
   if (pthread_rwlock_wrlock(&rwlock_) != 0) {
     LOG4CXX_ERROR(logger_, "Failed to acquire rwlock for writing");
+    return false;
   }
+  return true;
 }
 
-void RWLock::Release() {
+bool RWLock::TryAcquireForWriting() {
+  if (pthread_rwlock_trywrlock(&rwlock_) != 0) {
+    LOG4CXX_ERROR(logger_, "Failed to acquire rwlock for writing");
+    return false;
+  }
+  return true;
+}
+
+bool RWLock::Release() {
   if (pthread_rwlock_unlock(&rwlock_) != 0) {
     LOG4CXX_ERROR(logger_, "Failed to release rwlock");
+    return false;
   }
+  return true;
 }
 
 }  // namespace sync_primitives

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -61,10 +61,10 @@ class Backtrace {
 
   // Captured symbols in order from topmost stack frame to last captured
   std::vector<std::string> CallStack() const;
-  threads::Thread::Id ThreadId() const;
+  threads::PlatformThreadHandle ThreadId() const;
 
  private:
-  threads::Thread::Id thread_id_;
+  threads::PlatformThreadHandle thread_id_;
   std::vector<void*> backtrace_;
 };
 

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -42,7 +42,8 @@ namespace commands {
 /**
  * @brief NaviStartStreamRequest command class
  **/
-class NaviStartStreamRequest : public RequestToHMI {
+class NaviStartStreamRequest : public RequestToHMI,
+                               public event_engine::EventObserver {
  public:
   /**
    * @brief NaviStartStreamRequest class constructor
@@ -60,6 +61,11 @@ class NaviStartStreamRequest : public RequestToHMI {
    * @brief Execute command
    **/
   virtual void Run();
+
+  /**
+   * @brief On event callback
+   **/
+  virtual void on_event(const event_engine::Event& event);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(NaviStartStreamRequest);

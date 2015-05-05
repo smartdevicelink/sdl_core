@@ -292,6 +292,143 @@ bool EnumFromJsonString(const std::string& literal, AppHMIType* result) {
   }
 }
 
+bool IsValidEnum(RequestType val) {
+  switch(val) {
+  case RT_HTTP : return true;
+  case RT_FILE_RESUME : return true;
+  case RT_AUTH_REQUEST: return true;
+  case RT_AUTH_CHALLENGE: return true;
+  case RT_AUTH_ACK: return true;
+  case RT_PROPRIETARY: return true;
+  case RT_QUERY_APPS: return true;
+  case RT_LAUNCH_APP: return true;
+  case RT_LOCK_SCREEN_ICON_URL: return true;
+  case RT_TRAFFIC_MESSAGE_CHANNEL: return true;
+  case RT_DRIVER_PROFILE: return true;
+  case RT_VOICE_SEARCH: return true;
+  case RT_NAVIGATION: return true;
+  case RT_PHONE: return true;
+  case RT_CLIMATE: return true;
+  case RT_SETTINGS: return true;
+  case RT_VEHICLE_DIAGNOSTICS: return true;
+  case RT_EMERGENCY: return true;
+  case RT_MEDIA: return true;
+  case RT_FOTA: return true;
+  default: return false;
+  }
+}
+
+const char*EnumToJsonString(RequestType val) {
+  switch(val) {
+  case RT_HTTP : return "HTTP";
+  case RT_FILE_RESUME : return "FILE_RESUME";
+  case RT_AUTH_REQUEST: return "AUTH_REQUEST";
+  case RT_AUTH_CHALLENGE: return "AUTH_CHALLENGE";
+  case RT_AUTH_ACK: return "AUTH_ACK";
+  case RT_PROPRIETARY: return "PROPRIETARY";
+  case RT_QUERY_APPS: return "QUERY_APPS";
+  case RT_LAUNCH_APP: return "LAUNCH_APP";
+  case RT_LOCK_SCREEN_ICON_URL: return "LOCK_SCREEN_ICON_URL";
+  case RT_TRAFFIC_MESSAGE_CHANNEL: return "TRAFFIC_MESSAGE_CHANNEL";
+  case RT_DRIVER_PROFILE: return "DRIVER_PROFILE";
+  case RT_VOICE_SEARCH: return "VOICE_SEARCH";
+  case RT_NAVIGATION: return "NAVIGATION";
+  case RT_PHONE: return "PHONE";
+  case RT_CLIMATE: return "CLIMATE";
+  case RT_SETTINGS: return "SETTINGS";
+  case RT_VEHICLE_DIAGNOSTICS: return "VEHICLE_DIAGNOSTICS";
+  case RT_EMERGENCY: return "EMERGENCY";
+  case RT_MEDIA: return "MEDIA";
+  case RT_FOTA: return "FOTA";
+  default: return "";
+  }
+}
+
+bool EnumFromJsonString(const std::string& literal, RequestType* result) {
+  if ("HTTP" == literal) {
+    *result = RT_HTTP;
+    return true;
+  }
+  if ("FILE_RESUME" == literal) {
+    *result = RT_FILE_RESUME;
+    return true;
+  }
+  if ("AUTH_REQUEST" == literal) {
+    *result = RT_AUTH_REQUEST;
+    return true;
+  }
+  if ("AUTH_CHALLENGE" == literal) {
+    *result = RT_AUTH_CHALLENGE;
+    return true;
+  }
+  if ("AUTH_ACK" == literal) {
+    *result = RT_AUTH_ACK;
+    return true;
+  }
+  if ("PROPRIETARY" == literal) {
+    *result = RT_PROPRIETARY;
+    return true;
+  }
+  if ("QUERY_APPS" == literal) {
+    *result = RT_QUERY_APPS;
+    return true;
+  }
+  if ("LAUNCH_APP" == literal) {
+    *result = RT_LAUNCH_APP;
+    return true;
+  }
+  if ("LOCK_SCREEN_ICON_URL" == literal) {
+    *result = RT_LOCK_SCREEN_ICON_URL;
+    return true;
+  }
+  if ("TRAFFIC_MESSAGE_CHANNEL" == literal) {
+    *result = RT_TRAFFIC_MESSAGE_CHANNEL;
+    return true;
+  }
+  if ("DRIVER_PROFILE" == literal) {
+    *result = RT_DRIVER_PROFILE;
+    return true;
+  }
+  if ("VOICE_SEARCH" == literal) {
+    *result = RT_VOICE_SEARCH;
+    return true;
+  }
+  if ("NAVIGATION" == literal) {
+    *result = RT_NAVIGATION;
+    return true;
+  }
+  if ("PHONE" == literal) {
+    *result = RT_PHONE;
+    return true;
+  }
+  if ("CLIMATE" == literal) {
+    *result = RT_CLIMATE;
+    return true;
+  }
+  if ("SETTINGS" == literal) {
+    *result = RT_SETTINGS;
+    return true;
+  }
+  if ("VEHICLE_DIAGNOSTICS" == literal) {
+    *result = RT_VEHICLE_DIAGNOSTICS;
+    return true;
+  }
+  if ("EMERGENCY" == literal) {
+    *result = RT_EMERGENCY;
+    return true;
+  }
+  if ("MEDIA" == literal) {
+    *result = RT_MEDIA;
+    return true;
+  }
+  if ("FOTA"  == literal) {
+    *result = RT_FOTA;
+    return true;
+  } else {
+    return false;
+  }
+}
+
 const std::string kDefaultApp = "default";
 const std::string kPreDataConsentApp = "pre_DataConsent";
 const std::string kDeviceApp = "device";

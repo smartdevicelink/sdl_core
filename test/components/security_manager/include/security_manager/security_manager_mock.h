@@ -71,6 +71,8 @@ namespace security_manager_test {
                    const uint8_t sessionId,
                    const uint32_t& hashCode,
                    const protocol_handler::ServiceType& service_type));
+    MOCK_METHOD1(OnApplicationFloodCallBack,
+                 void(const uint32_t&));
     MOCK_METHOD2(KeyFromPair,
                  uint32_t(
                    transport_manager::ConnectionUID connection_handle,
@@ -94,7 +96,12 @@ namespace security_manager_test {
     MOCK_METHOD2(IsHeartBeatSupported,
                  bool( transport_manager::ConnectionUID connection_handle,
                        uint8_t session_id));
+    MOCK_METHOD3(ProtocolVersionUsed,
+                 bool(uint32_t connection_id, uint8_t session_id,
+                      uint8_t& protocol_version));
+
   };
+
   /*
    * MOCK implementation of protocol_handler::ProtocolObserver interface
    */

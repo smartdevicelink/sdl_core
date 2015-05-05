@@ -247,6 +247,27 @@ FFW.VR = FFW.RPCObserver.create( {
             case "VR.PerformInteraction":
             {
 
+                // Werify if there is an ansupported data in request
+                if (this.errorResponsePull[request.id] != null) {
+
+                    //Check if there is any available data to  process the request
+                    if ("helpPrompt" in request.params
+                        || "initialPrompt" in request.params
+                        || "timeoutPrompt" in request.params
+                        || "grammarID" in request.params) {
+
+                        this.errorResponsePull[request.id].code = SDL.SDLModel.resultCode["WARNINGS"];
+                    } else {
+                        //If no available data sent error response and stop process current request
+
+                        this.sendError(this.errorResponsePull[request.id].code, request.id, request.method,
+                                "Unsupported " + this.errorResponsePull[request.id].type + " type. Request was not processed.");
+                        this.errorResponsePull[request.id] = null;
+
+                        return;
+                    }
+                }
+
                 SDL.SDLModel.vrPerformInteraction(request);
 
                 break;
@@ -320,6 +341,30 @@ FFW.VR = FFW.RPCObserver.create( {
 
         Em.Logger.log("FFW.VR.PerformInteractionResponse");
 
+        if (this.errorResponsePull[requestID]) {
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": requestID,
+                "error": {
+                    "code": this.errorResponsePull[requestID].code,
+                    "message": "Unsupported " + this.errorResponsePull[requestID].type + " type. Available data in request was processed.",
+                    "data": {
+                        "method": "VR.PerformInteraction"
+                    }
+                }
+            };
+
+            if (commandID) {
+                JSONMessage.error.data.choiceID = commandID;
+            }
+
+            this.client.send(JSONMessage);
+            this.errorResponsePull[requestID] = null;
+            return;
+        }
+
         if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
             // send repsonse
             var JSONMessage = {
@@ -365,6 +410,14 @@ FFW.VR = FFW.RPCObserver.create( {
      *            method
      */
     sendVRResult: function(resultCode, id, method) {
+
+        if (this.errorResponsePull[id]) {
+
+            this.sendError(this.errorResponsePull[id].code, id, method,
+                    "Unsupported " + this.errorResponsePull[id].type + " type. Available data in request was processed.");
+            this.errorResponsePull[id] = null;
+            return;
+        }
 
         Em.Logger.log("FFW." + method + "Response");
 

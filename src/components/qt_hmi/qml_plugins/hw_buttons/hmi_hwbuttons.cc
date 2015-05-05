@@ -1,4 +1,4 @@
-/**
+/*
  * \file hmi_hwbuttons.cpp
  * \brief HmiHWButtons class source file.
  * Copyright (c) 2013, Ford Motor Company

@@ -1,4 +1,4 @@
-/**
+/*
  * \file bluetooth_socket_connection.h
  * \brief BluetoothSocketConnection class header file.
  *

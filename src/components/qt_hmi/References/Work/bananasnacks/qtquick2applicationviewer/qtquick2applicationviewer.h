@@ -6,7 +6,7 @@
   handled here.
   It is recommended not to modify this file, since newer versions of Qt Creator
   may offer an updated version of it.
-*/
+ */
 
 #ifndef QTQUICK2APPLICATIONVIEWER_H
 #define QTQUICK2APPLICATIONVIEWER_H

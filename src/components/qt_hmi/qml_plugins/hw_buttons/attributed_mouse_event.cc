@@ -1,4 +1,4 @@
-/**
+/*
  * \file attributed_mouse_event.cpp
  * \brief AttributedMouseEvent class source file.
  * Copyright (c) 2013, Ford Motor Company

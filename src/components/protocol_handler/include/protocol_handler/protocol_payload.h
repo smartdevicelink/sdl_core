@@ -49,10 +49,10 @@ namespace protocol_handler {
 struct ProtocolPayloadHeaderV2 {
   ProtocolPayloadHeaderV2()
     : rpc_type(kRpcTypeReserved),
-      rpc_function_id(0), corellation_id(0), json_size(0) {}
+      rpc_function_id(0), correlation_id(0), json_size(0) {}
   RpcType  rpc_type;
   uint32_t rpc_function_id;
-  uint32_t corellation_id;
+  uint32_t correlation_id;
   uint32_t json_size;
 };
 

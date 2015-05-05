@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -35,7 +35,6 @@
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
-
 namespace commands {
 
 VIGetVehicleDataResponse::VIGetVehicleDataResponse(
@@ -47,22 +46,14 @@ VIGetVehicleDataResponse::~VIGetVehicleDataResponse() {
 }
 
 void VIGetVehicleDataResponse::Run() {
-  LOG4CXX_INFO(logger_, "VIGetVehicleDataResponse::Run");
-  smart_objects::SmartObject* result_so = new smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-  if (!result_so) {
-    // TODO(PV): add response with out of memory.
-    LOG4CXX_ERROR(logger_,
-                  "Failed to create new Smart Object on get vehicle response.");
-    return;
-  }
+  LOG4CXX_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
 
-  smart_objects::SmartObject& result = *result_so;
-
   if ((*message_)[strings::params][strings::message_type]
       == static_cast<int32_t>(hmi_apis::messageType::error_response)) {
+    smart_objects::SmartObject result(smart_objects::SmartType_Map);
+
     if ((*message_)[strings::params].keyExists(strings::data)) {
       result[strings::msg_params] = (*message_)[strings::params][strings::data];
       result[strings::params][hmi_response::code] =
@@ -79,17 +70,14 @@ void VIGetVehicleDataResponse::Run() {
           (*message_)[strings::params][strings::protocol_version];
     }
 
-
-    event.set_smart_object(*result_so);
+    event.set_smart_object(result);
   } else {
     event.set_smart_object(*message_);
     policy::PolicyHandler::instance()->OnVehicleDataUpdated(*message_);
   }
 
-
   event.raise();
 }
 
 }  // namespace commands
-
 }  // namespace application_manager

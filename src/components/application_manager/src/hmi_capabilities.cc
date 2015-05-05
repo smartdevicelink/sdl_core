@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -133,6 +133,11 @@ std::map<std::string, hmi_apis::Common_TextFieldName::eType> text_fields_enum_na
     {"secondaryText"    , hmi_apis::Common_TextFieldName::secondaryText},
     {"tertiaryText"     , hmi_apis::Common_TextFieldName::tertiaryText},
     {"timeToDestination", hmi_apis::Common_TextFieldName::timeToDestination},
+    {"locationName"     , hmi_apis::Common_TextFieldName::locationName},
+    {"locationDescription", hmi_apis::Common_TextFieldName::locationDescription},
+    {"addressLines"         , hmi_apis::Common_TextFieldName::turnText},
+    {"turnText"         , hmi_apis::Common_TextFieldName::addressLines},
+    {"phoneNumber"         , hmi_apis::Common_TextFieldName::phoneNumber},
     {"turnText"         , hmi_apis::Common_TextFieldName::turnText},
     {"menuTitle"        , hmi_apis::Common_TextFieldName::menuTitle},
 };
@@ -258,6 +263,8 @@ HMICapabilities::HMICapabilities(ApplicationManagerImpl* const app_mngr)
     speech_capabilities_(NULL),
     audio_pass_thru_capabilities_(NULL),
     prerecorded_speech_(NULL),
+    is_navigation_supported_(false),
+    is_phone_call_supported_(false),
     app_mngr_(app_mngr) {
 
   if (false == load_capabilities_from_file()) {
@@ -551,6 +558,13 @@ void HMICapabilities::set_prerecorded_speech(
     prerecorded_speech_ = NULL;
   }
   prerecorded_speech_ = new smart_objects::SmartObject(prerecorded_speech);
+}
+
+void HMICapabilities::set_navigation_supported(bool supported) {
+  is_navigation_supported_ = supported;
+}
+void HMICapabilities::set_phone_call_supported(bool supported) {
+  is_phone_call_supported_ = supported;
 }
 
 bool HMICapabilities::load_capabilities_from_file() {
