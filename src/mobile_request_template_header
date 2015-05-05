@@ -31,24 +31,24 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_{UPPERCASE_INCLUDE}_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_{UPPERCASE_INCLUDE}_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 
-namespace application_manager {
+namespace application_manager {{
 
-namespace commands {
+namespace commands {{
 
 
-class GetInteriorVehicleDataCapabilitiesRequest : public CommandRequestImpl {
+class {mobileClassRequest} : public CommandRequestImpl {{
  public:
 
-  explicit GetInteriorVehicleDataCapabilitiesRequest(const MessageSharedPtr& message);
+  explicit {mobileClassRequest}(const MessageSharedPtr& message);
 
-  virtual ~GetInteriorVehicleDataCapabilitiesRequest();
+  virtual ~{mobileClassRequest}();
 
   virtual bool Init();
 
@@ -57,11 +57,11 @@ class GetInteriorVehicleDataCapabilitiesRequest : public CommandRequestImpl {
   virtual void on_event(const event_engine::Event& event);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(GetInteriorVehicleDataCapabilitiesRequest);
-};
+  DISALLOW_COPY_AND_ASSIGN({mobileClassRequest});
+}};
 
-}  // namespace commands
+}}  // namespace commands
 
-}  // namespace application_manager
+}}  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_{UPPERCASE_INCLUDE}_REQUEST_H_

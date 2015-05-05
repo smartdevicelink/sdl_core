@@ -29,31 +29,29 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_RESPONSE_H_
-
-#include "application_manager/commands/command_response_impl.h"
-#include "application_manager/message.h"
-#include "utils/macro.h"
+#include "application_manager/commands/hmi/rc_get_interior_vehicle_data_capabilities_response.h"
+#include "application_manager/event_engine/event.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
+
 namespace commands {
 
-class GetInteriorVehicleDataCapabilitiesResponse : public CommandResponseImpl {
- public:
+RCGetInteriorVehicleDataCapabilitiesResponse::RCGetInteriorVehicleDataCapabilitiesResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
+}
 
-  explicit GetInteriorVehicleDataCapabilitiesResponse(const MessageSharedPtr& message);
+RCGetInteriorVehicleDataCapabilitiesResponse::~RCGetInteriorVehicleDataCapabilitiesResponse() {
+}
 
-  virtual ~GetInteriorVehicleDataCapabilitiesResponse();
+void RCGetInteriorVehicleDataCapabilitiesResponse::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
 
-  virtual void Run();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(GetInteriorVehicleDataCapabilitiesResponse);
-};
+  event_engine::Event event(hmi_apis::FunctionID::RC_GetInteriorVehicleDataCapabilities);
+  event.set_smart_object(*message_);
+  event.raise();
+}
 
 }  // namespace commands
-}  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_RESPONSE_H_
+} // namespace application_manager

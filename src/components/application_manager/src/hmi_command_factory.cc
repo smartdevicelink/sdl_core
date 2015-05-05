@@ -714,6 +714,13 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+    case hmi_apis::FuncitonID::RC_GetInteriorVehicleData:{
+    	if(is_response){
+    		command.reset(new commands::RCGetInteriorVehicleDataResponse(message));	
+    	} else {
+    		command.reset(new commands::RCGetInteriorVehicleDataRequest(message));
+    	}
+    }
 #ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::VehicleInfo_GetGpsData: {
       if (is_response)

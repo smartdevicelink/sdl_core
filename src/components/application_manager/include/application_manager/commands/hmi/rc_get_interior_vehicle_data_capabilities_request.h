@@ -30,30 +30,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_RC_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_RC_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_REQUEST_H_
 
-#include "application_manager/commands/command_response_impl.h"
-#include "application_manager/message.h"
-#include "utils/macro.h"
+#include "application_manager/commands/hmi/request_to_hmi.h"
 
 namespace application_manager {
+
 namespace commands {
 
-class GetInteriorVehicleDataCapabilitiesResponse : public CommandResponseImpl {
+class RCGetInteriorVehicleDataCapabilitiesRequest : public RequestToHMI {
  public:
 
-  explicit GetInteriorVehicleDataCapabilitiesResponse(const MessageSharedPtr& message);
+  explicit RCGetInteriorVehicleDataCapabilitiesRequest(const MessageSharedPtr& message);
 
-  virtual ~GetInteriorVehicleDataCapabilitiesResponse();
+  virtual ~RCGetInteriorVehicleDataCapabilitiesRequest();
 
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(GetInteriorVehicleDataCapabilitiesResponse);
+  DISALLOW_COPY_AND_ASSIGN(RCGetInteriorVehicleDataCapabilitiesRequest);
 };
 
 }  // namespace commands
+
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_RC_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_REQUEST_H_

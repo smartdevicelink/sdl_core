@@ -30,30 +30,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_{UPPERCASE_INCLUDE}_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_{UPPERCASE_INCLUDE}_RESPONSE_H_
 
 #include "application_manager/commands/command_response_impl.h"
 #include "application_manager/message.h"
 #include "utils/macro.h"
 
-namespace application_manager {
-namespace commands {
+namespace application_manager {{
+namespace commands {{
 
-class GetInteriorVehicleDataCapabilitiesResponse : public CommandResponseImpl {
+class {mobileClassResponse} : public CommandResponseImpl {{
  public:
 
-  explicit GetInteriorVehicleDataCapabilitiesResponse(const MessageSharedPtr& message);
+  explicit {mobileClassResponse}(const MessageSharedPtr& message);
 
-  virtual ~GetInteriorVehicleDataCapabilitiesResponse();
+  virtual ~{mobileClassResponse}();
 
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(GetInteriorVehicleDataCapabilitiesResponse);
-};
+  DISALLOW_COPY_AND_ASSIGN({mobileClassResponse});
+}};
 
-}  // namespace commands
-}  // namespace application_manager
+}}  // namespace commands
+}}  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_{UPPERCASE_INCLUDE}_RESPONSE_H_

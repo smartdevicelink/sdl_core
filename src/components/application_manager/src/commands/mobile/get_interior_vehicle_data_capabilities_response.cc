@@ -31,37 +31,26 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_REQUEST_H_
-
-#include "application_manager/commands/command_request_impl.h"
-#include "interfaces/MOBILE_API.h"
-#include "utils/macro.h"
+#include "application_manager/commands/mobile/get_interior_vehicle_data_capabilities_response.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
+GetInteriorVehicleDataCapabilitiesResponse::GetInteriorVehicleDataCapabilitiesResponse(const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
+}
 
-class GetInteriorVehicleDataCapabilitiesRequest : public CommandRequestImpl {
- public:
+GetInteriorVehicleDataCapabilitiesResponse::~GetInteriorVehicleDataCapabilitiesResponse() {
+}
 
-  explicit GetInteriorVehicleDataCapabilitiesRequest(const MessageSharedPtr& message);
-
-  virtual ~GetInteriorVehicleDataCapabilitiesRequest();
-
-  virtual bool Init();
-
-  virtual void Run();
-
-  virtual void on_event(const event_engine::Event& event);
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(GetInteriorVehicleDataCapabilitiesRequest);
-};
+void GetInteriorVehicleDataCapabilitiesResponse::Run() {
+  LOG4CXX_INFO(logger_, "ButtonPressResponse::Run");
+  
+  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_REQUEST_H_

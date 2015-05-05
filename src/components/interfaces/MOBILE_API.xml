@@ -2342,8 +2342,8 @@
     <element name="DialNumberID" value="40" hexvalue="28" />    
     <element name="ButtonPressID" value="41" hexvalue="29" />
     <element name="GetInteriorVehicleDataCapabilitiesID" value="42" hexvalue="2A" />
-    <element name="GetInteriorVehicleDataID" value="42" hexvalue="2B" />
-    <element name="SetInteriorVehicleDataID" value="43" hexvalue="2C" />
+    <element name="GetInteriorVehicleDataID" value="43" hexvalue="2B" />
+    <element name="SetInteriorVehicleDataID" value="44" hexvalue="2C" />
  
 <!--
 	Base Notifications

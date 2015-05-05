@@ -30,30 +30,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_RESPONSE_H_
-
-#include "application_manager/commands/command_response_impl.h"
-#include "application_manager/message.h"
-#include "utils/macro.h"
+#include "application_manager/commands/hmi/rc_get_interior_vehicle_data_capabilities_request.h"
 
 namespace application_manager {
+
 namespace commands {
 
-class GetInteriorVehicleDataCapabilitiesResponse : public CommandResponseImpl {
- public:
+RCGetInteriorVehicleDataCapabilitiesRequest::RCGetInteriorVehicleDataCapabilitiesRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {
+}
 
-  explicit GetInteriorVehicleDataCapabilitiesResponse(const MessageSharedPtr& message);
+RCGetInteriorVehicleDataCapabilitiesRequest::~RCGetInteriorVehicleDataCapabilitiesRequest() {
+}
 
-  virtual ~GetInteriorVehicleDataCapabilitiesResponse();
+void RCGetInteriorVehicleDataCapabilitiesRequest::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
 
-  virtual void Run();
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(GetInteriorVehicleDataCapabilitiesResponse);
-};
+  SendRequest();
+}
 
 }  // namespace commands
+
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_CAPABILITIES_RESPONSE_H_
