@@ -80,7 +80,8 @@ namespace NsMessageBroker
      unsigned char position = 0; // current buffer position
      unsigned int size = b_size;
 
-     while (0 < size) {
+     static uint32_t minimum_heade_size = 4;
+     while (minimum_heade_size < size) {
 
        bool fin = ((recBuffer[0] & 0x80) | (recBuffer[0] & 0x01)) == 0x81;
        bool rsv1 = (recBuffer[0] & 0x40) == 0x40;
@@ -125,8 +126,8 @@ namespace NsMessageBroker
        position = 2;
 
        if (length > size) {
-          DBG_MSG_ERROR(("Incomplete message"));
-          return b_size;
+         DBG_MSG_ERROR(("Incomplete message"));
+         break;
        }
 
        switch(payload) {
@@ -164,16 +165,14 @@ namespace NsMessageBroker
        DBG_MSG(("CWebSocketHandler::parseWebSocketData()length:%d; size:%d;"
                 " position:%d\n", (int)length, size, position));
 
-       for (unsigned long i = position; (i < size && i < position+length); i++)
-       {
-          Buffer[parsedBufferPosition++] = recBuffer[i];
+       for (unsigned long i = 0; (i < size); i++) {
+         Buffer[parsedBufferPosition + i] = recBuffer[i+position];
        }
-
-       recBuffer += length+position;
+       b_size -= position;
+       parsedBufferPosition += length;
+       recBuffer += length;
        size -= length+position;
      }
-
-     b_size = parsedBufferPosition;
      return b_size;
    }
 
