@@ -69,8 +69,7 @@ namespace NsMessageBroker
       return length;
    }
 
-   int CWebSocketHandler::parseWebSocketData(char* Buffer, unsigned int& b_size)
-   {
+   int CWebSocketHandler::parseWebSocketData(char* Buffer, unsigned int& b_size) {
      // Please see RFC6455 standard protocol specification:
      //http://tools.ietf.org/html/rfc6455
      // Chapter 5.2
@@ -95,8 +94,8 @@ namespace NsMessageBroker
        DBG_MSG(("CWebSocketHandler::fin = %d recBuffer[0] = 0x%02X\n"
                 " parsedlength = %d b_size= %d parsedBufferPosition = %d\n"
                 "rsv1 = %d, rsv2 = %d, rsv3 = %d, opCode = %u\n",
-           fin, recBuffer[0], parsedBufferPosition + position,
-           size, parsedBufferPosition, rsv1, rsv2, rsv3, opCode));
+                fin, recBuffer[0], parsedBufferPosition + position,
+               size, parsedBufferPosition, rsv1, rsv2, rsv3, opCode));
 
        if ((rsv1)|(rsv2)|(rsv3)) {
          DBG_MSG(("rsv1 or rsv2 or rsv3 is 0 \n"));
@@ -114,13 +113,13 @@ namespace NsMessageBroker
        }
 
        if (false == fin) {
-          break;
+         break;
        }
 
        unsigned char payload = (unsigned char)
         ((recBuffer[1] & 0x40) | (recBuffer[1] & 0x20) | (recBuffer[1] & 0x10) |
-        (recBuffer[1] & 0x08) | (recBuffer[1] & 0x04) | (recBuffer[1] & 0x02) |
-        (recBuffer[1] & 0x01));
+         (recBuffer[1] & 0x08) | (recBuffer[1] & 0x04) | (recBuffer[1] & 0x02) |
+         (recBuffer[1] & 0x01));
 
        unsigned long length = parseWebSocketDataLength(recBuffer, size);
        position = 2;
@@ -131,36 +130,32 @@ namespace NsMessageBroker
        }
 
        switch(payload) {
-          case 126:
-             {
-                position +=2;
-                break;
-             }
-          case 127:
-             {
-                position +=8;
-                break;
-             }
-          default:
-             {
-                break;
-             }
+         case 126: {
+           position +=2;
+           break;
+         }
+         case 127: {
+           position +=8;
+           break;
+         }
+         default: {
+           break;
+         }
        }
 
-       if (mask)
-       {
-          unsigned char maskKeys[4];
-          maskKeys[0] = recBuffer[position++];
-          maskKeys[1] = recBuffer[position++];
-          maskKeys[2] = recBuffer[position++];
-          maskKeys[3] = recBuffer[position++];
-          DBG_MSG(("CWebSocketHandler::parseWebSocketData()maskKeys[0]:0x%02X;"
-                 " maskKeys[1]:0x%02X; maskKeys[2]:0x%02X; maskKeys[3]:0x%02X\n"
-                 , maskKeys[0], maskKeys[1], maskKeys[2], maskKeys[3]));
-          for (unsigned long i = position; i < position+length; i++)
-          {
-             recBuffer[i] = recBuffer[i] ^ maskKeys[(i-position)%4];
-          }
+       if (mask) {
+         unsigned char maskKeys[4];
+         maskKeys[0] = recBuffer[position++];
+         maskKeys[1] = recBuffer[position++];
+         maskKeys[2] = recBuffer[position++];
+         maskKeys[3] = recBuffer[position++];
+         DBG_MSG(("CWebSocketHandler::parseWebSocketData()maskKeys[0]:0x%02X;"
+                  "maskKeys[1]:0x%02X; maskKeys[2]:0x%02X; maskKeys[3]:0x%02X\n"
+                  , maskKeys[0], maskKeys[1], maskKeys[2], maskKeys[3]));
+         for (unsigned long i = position; i < position+length; i++)
+         {
+           recBuffer[i] = recBuffer[i] ^ maskKeys[(i-position)%4];
+         }
        }
        DBG_MSG(("CWebSocketHandler::parseWebSocketData()length:%d; size:%d;"
                 " position:%d\n", (int)length, size, position));

@@ -290,18 +290,16 @@ CMessageBroker* CMessageBroker::getInstance() {
 
 void CMessageBroker::onMessageReceived(int fd, std::string& aJSONData) {
   DBG_MSG(("CMessageBroker::onMessageReceived()\n"));
-  while (!aJSONData.empty())
-  {
+  while (!aJSONData.empty()) {
     Json::Value root;
     if (!p->m_reader.parse(aJSONData, root)) {
       DBG_MSG(("Received not JSON string! %s\n", aJSONData.c_str()));
       return;
     }
-    if(root["jsonrpc"]!="2.0")
-      {
-        DBG_MSG(("\t Json::Reader::parce didn't set up jsonrpc!  jsonrpc = '%s'\n", root["jsonrpc"].asString().c_str()));
-          return;
-      }
+    if(root["jsonrpc"]!="2.0") {
+      DBG_MSG(("\t Json::Reader::parce didn't set up jsonrpc!  jsonrpc = '%s'\n", root["jsonrpc"].asString().c_str()));
+      return;
+    }
     std::string wmes = p->m_recieverWriter.write(root);
     DBG_MSG(("Parsed JSON string:%s; length: %d\n", wmes.c_str(), wmes.length()));
     DBG_MSG(("Buffer is:%s\n", aJSONData.c_str()));
