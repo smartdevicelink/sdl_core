@@ -266,12 +266,12 @@
 #include "application_manager/commands/hmi/dial_number_response.h"
 
 // Remote Control
-#include "application_manager/commands/hmi/rc_get_interior_vehicle_capabilities_request.h"
-#include "application_manager/commands/hmi/rc_get_interior_vehicle_capabilities_response.h"
-#include "application_manager/commands/hmi/rc_get_interior_vehicle_data_request.h"
-#include "application_manager/commands/hmi/rc_get_interior_vehicle_data_response.h"
-#include "application_manager/commands/hmi/rc_set_interior_vehicle_data_request.h"
-#include "application_manager/commands/hmi/rc_set_interior_vehicle_data_response.h"
+#include "application_manager/commands/hmi/rc_get_interior_vehicle_data_capabilities_request.h"
+#include "application_manager/commands/hmi/rc_get_interior_vehicle_data_capabilities_response.h"
+//#include "application_manager/commands/hmi/rc_get_interior_vehicle_data_request.h"
+//#include "application_manager/commands/hmi/rc_get_interior_vehicle_data_response.h"
+//#include "application_manager/commands/hmi/rc_set_interior_vehicle_data_request.h"
+//#include "application_manager/commands/hmi/rc_set_interior_vehicle_data_response.h"
 #include "application_manager/commands/hmi/on_interior_vehicle_data_notification.h"
 
 namespace application_manager {
@@ -714,11 +714,11 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case hmi_apis::FuncitonID::RC_GetInteriorVehicleData:{
+    case hmi_apis::FunctionID::RC_GetInteriorVehicleDataCapabilities:{
     	if(is_response){
-    		command.reset(new commands::RCGetInteriorVehicleDataResponse(message));	
+    		command.reset(new commands::RCGetInteriorVehicleDataCapabilitiesResponse(message));	
     	} else {
-    		command.reset(new commands::RCGetInteriorVehicleDataRequest(message));
+    		command.reset(new commands::RCGetInteriorVehicleDataCapabilitiesRequest(message));
     	}
     }
 #ifdef HMI_DBUS_API

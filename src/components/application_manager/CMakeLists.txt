@@ -127,6 +127,8 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/button_get_capabilities_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/button_press_request.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/button_press_response.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/rc_get_interior_vehicle_data_capabilities_request.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/rc_get_interior_vehicle_data_capabilities_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/vr_is_ready_request.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/vr_is_ready_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/vr_add_command_request.cc
