@@ -51,7 +51,7 @@ void OnInteriorVehicleDataNotification::Run() {
 
   //prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-  mobile_apis::FunctionID::OnInteriorVehicleDataId;
+  mobile_apis::FunctionID::OnInteriorVehicleDataID;
   SendNotificationToMobile(message_);
 
 }

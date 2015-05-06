@@ -68,6 +68,10 @@ SDL.RPCController = Em.Object
             if (FLAGS.Navi) {
                 FFW.Navigation.connect();
             }
+            Em.Logger.log("CheckFlags "+FLAGS.RC);
+            if(FLAGS.RC) { 
+                FFW.RC.connect();
+            }
         },
 
         capabilitiesCheck: function(key, value) {

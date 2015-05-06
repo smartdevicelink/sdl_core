@@ -42,36 +42,18 @@ namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief scrollable message request command class
- **/
+
 class SetInteriorVehicleDataRequest : public CommandRequestImpl {
  public:
-  /**
-   * @brief ScrollableMessageRequest class constructor
-   **/
+
   explicit SetInteriorVehicleDataRequest(const MessageSharedPtr& message);
 
-  /**
-   * @brief SliderCommand class destructor
-   **/
   virtual ~SetInteriorVehicleDataRequest();
 
-  /**
-   * @brief Initialize request params
-   **/
   virtual bool Init();
 
-  /**
-   * @brief Execute command
-   **/
   virtual void Run();
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
   virtual void on_event(const event_engine::Event& event);
 
  private:

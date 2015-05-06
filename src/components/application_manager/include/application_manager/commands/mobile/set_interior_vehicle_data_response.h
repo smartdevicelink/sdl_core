@@ -42,20 +42,11 @@ namespace commands {
 
 class SetInteriorVehicleDataResponse : public CommandResponseImpl {
  public:
-  /**
-   * \brief ScrollableMessageResponse class constructor
-   **/
+
   explicit SetInteriorVehicleDataResponse(const MessageSharedPtr& message);
 
-  /**
-   * \brief SpeakResponseCommand class destructor
-   **/
-  virtual ~SetInteriorVehicleDataResponse() {
-  }
+  virtual ~SetInteriorVehicleDataResponse();
 
-  /**
-   * @brief Execute command
-   **/
   virtual void Run();
 
  private:

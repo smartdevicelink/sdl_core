@@ -57,6 +57,8 @@ FLAGS = Em.Object.create( {
 
     TTS: true,
 
-    Navi: true
+    Navi: true,
+
+    RC: true,
 
 });

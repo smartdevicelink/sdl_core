@@ -1315,11 +1315,11 @@
   </param>
   <param name="acEnable" type="Boolean" mandatory="false">
   </param>
-  <param name="circulateAirEnable" type="Boolean" mandatory="false">
+  <param name="recirculateAirEnable" type="Boolean" mandatory="false">
   </param>
-  <param name="autoEnable" type="Boolean" mandatory="false">
+  <param name="autoModeEnable" type="Boolean" mandatory="false">
   </param>
-  <param name="defrost" type="DefrostZone" mandatory="false">
+  <param name="defrostZone" type="DefrostZone" mandatory="false">
   </param>
   <param name="dualModeEnable" type="Boolean" mandatory="false">
   </param>

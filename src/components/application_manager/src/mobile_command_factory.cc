@@ -516,7 +516,7 @@ commands::Command *MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    /*case mobile_apis::FunctionID::GetInteriorVehicleDataID: {
+    case mobile_apis::FunctionID::GetInteriorVehicleDataID: {
       if ((*message)[strings::params][strings::message_type]
           == static_cast<int>(application_manager::MessageType::kResponse)) {
         return new commands::GetInteriorVehicleDataResponse(message);
@@ -533,7 +533,7 @@ commands::Command *MobileCommandFactory::CreateCommand(
         return new commands::SetInteriorVehicleDataRequest(message);
       }
       break;
-    }*/
+    }
     case mobile_apis::FunctionID::OnInteriorVehicleDataID: {
       return new commands::mobile::OnInteriorVehicleDataNotification(message);
       break;

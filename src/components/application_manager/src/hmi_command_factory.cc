@@ -156,6 +156,15 @@
 #include "application_manager/commands/hmi/sdl_activate_app_response.h"
 #include "application_manager/commands/hmi/on_app_permission_changed_notification.h"
 
+// Remote Control
+#include "application_manager/commands/hmi/rc_get_interior_vehicle_data_capabilities_request.h"
+#include "application_manager/commands/hmi/rc_get_interior_vehicle_data_capabilities_response.h"
+#include "application_manager/commands/hmi/rc_get_interior_vehicle_data_request.h"
+#include "application_manager/commands/hmi/rc_get_interior_vehicle_data_response.h"
+#include "application_manager/commands/hmi/rc_set_interior_vehicle_data_request.h"
+#include "application_manager/commands/hmi/rc_set_interior_vehicle_data_response.h"
+#include "application_manager/commands/hmi/on_interior_vehicle_data_notification.h"
+
 #ifdef HMI_DBUS_API
 #include "application_manager/commands/hmi/vi_get_vehicle_data_request_template.h"
 #include "application_manager/commands/hmi/vi_get_vehicle_data_response_template.h"
@@ -265,14 +274,6 @@
 #include "application_manager/commands/hmi/dial_number_request.h"
 #include "application_manager/commands/hmi/dial_number_response.h"
 
-// Remote Control
-#include "application_manager/commands/hmi/rc_get_interior_vehicle_data_capabilities_request.h"
-#include "application_manager/commands/hmi/rc_get_interior_vehicle_data_capabilities_response.h"
-//#include "application_manager/commands/hmi/rc_get_interior_vehicle_data_request.h"
-//#include "application_manager/commands/hmi/rc_get_interior_vehicle_data_response.h"
-//#include "application_manager/commands/hmi/rc_set_interior_vehicle_data_request.h"
-//#include "application_manager/commands/hmi/rc_set_interior_vehicle_data_response.h"
-#include "application_manager/commands/hmi/on_interior_vehicle_data_notification.h"
 
 namespace application_manager {
 
@@ -720,6 +721,23 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     	} else {
     		command.reset(new commands::RCGetInteriorVehicleDataCapabilitiesRequest(message));
     	}
+    	break;
+    }
+    case hmi_apis::FunctionID::RC_GetInteriorVehicleData:{
+    	if(is_response){
+    		command.reset(new commands::RCGetInteriorVehicleDataResponse(message));	
+    	} else {
+    		command.reset(new commands::RCGetInteriorVehicleDataRequest(message));
+    	}
+    	break;
+    }
+    case hmi_apis::FunctionID::RC_SetInteriorVehicleData:{
+    	if(is_response){
+    		command.reset(new commands::RCSetInteriorVehicleDataResponse(message));	
+    	} else {
+    		command.reset(new commands::RCSetInteriorVehicleDataRequest(message));
+    	}
+    	break;
     }
 #ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::VehicleInfo_GetGpsData: {
@@ -1088,6 +1106,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::ButtonsButtonPressRequest(message));
       }
       break;
+    }
+    case hmi_apis::FunctionID::RC_OnInteriorVehicleData: {
+    	command.reset(new commands::hmi::OnInteriorVehicleDataNotification(message));	
+    	break;
     }
     case hmi_apis::FunctionID::SDL_OnAllowSDLFunctionality: {
       command.reset(new commands::OnAllowSDLFunctionalityNotification(message));
