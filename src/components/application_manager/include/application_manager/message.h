@@ -79,6 +79,7 @@ class Message {
   ~Message();
 
   //! --------------------------------------------------------------------------
+  std::string function_name() const;
   int32_t function_id() const;
   int32_t correlation_id() const;
   int32_t connection_key() const;
@@ -96,6 +97,7 @@ class Message {
 #endif
 
   //! --------------------------------------------------------------------------
+  void set_function_name(const std::string& name);
   void set_function_id(int32_t id);
   void set_correlation_id(int32_t id);
   void set_connection_key(int32_t key);
@@ -112,6 +114,7 @@ class Message {
   protocol_handler::MessagePriority Priority() const { return priority_; }
 
  private:
+  std::string function_name_; // string
   int32_t function_id_;  // @remark protocol V2.
   int32_t correlation_id_;  // @remark protocol V2.
   MessageType type_;  // @remark protocol V2.

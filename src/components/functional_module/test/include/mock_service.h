@@ -40,7 +40,7 @@ namespace application_manager {
 class MockService : public Service {
  public:
   MOCK_METHOD1(CheckPolicyPermissions,
-      bool(std::string& json_message));
+      mobile_apis::Result::eType(MessagePtr msg));
   MOCK_METHOD1(GetApplication,
       ApplicationSharedPtr(ApplicationId app_id));
   MOCK_METHOD1(SendMessageToHMI,
@@ -53,8 +53,25 @@ class MockService : public Service {
       std::vector<ApplicationSharedPtr>(AppExtensionUID));
   MOCK_METHOD1(SubscribeToHMINotification,
       void(const std::string& hmi_notification));
+  MOCK_METHOD5(CheckAccess,
+      TypeAccess(const ApplicationId& app_id,
+          const PluginFunctionID& function_id,
+          const std::vector<std::string>& params,
+          const SeatLocation& seat,
+          const SeatLocation& zone));
+  MOCK_METHOD4(SetAccess,
+      void(const ApplicationId& app_id,
+           const std::string& group_id,
+           const SeatLocation& zone,
+           bool allowed));
+  MOCK_METHOD1(ResetAccess, void(const ApplicationId& app_id));
+  MOCK_METHOD2(ResetAccess, void(const std::string& group_name,
+                                 const SeatLocation& zone));
+  MOCK_METHOD1(SetPrimaryDevice, void(const uint32_t dev_id));
+  MOCK_METHOD1(SetRemoteControl, void(bool enabled));
 };
 
-}  // namespace application_manager
+}
+  // namespace application_manager
 
 #endif  // TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_SERVICE_H_

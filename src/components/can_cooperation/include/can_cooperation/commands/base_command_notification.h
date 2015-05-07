@@ -65,20 +65,26 @@ class BaseCommandNotification : public Command {
    */
   virtual void OnTimeout() {}
 
+  void Run();
+
  protected:
   application_manager::MessagePtr message_;
   application_manager::ServicePtr service_;
 
-  /**
-   * @brief Retrieves application with access
-   *
-   * @param app_extesion Outgoing param with app extension for Can
-   *
-   * @return pointer to application
-   */
-  application_manager::ApplicationSharedPtr GetApplicationWithControl(
-    CANAppExtensionPtr& can_app_extension);
+  CANAppExtensionPtr GetAppExtension(
+      application_manager::ApplicationSharedPtr app) const;
 
+  /**
+   * @brief executes specific logic of children classes
+   */
+  virtual void Execute() = 0;
+
+  void set_need_reset(bool need_reset) {
+    need_reset_ = need_reset;
+  }
+
+ private:
+  bool need_reset_;
 };
 
 }  // namespace commands

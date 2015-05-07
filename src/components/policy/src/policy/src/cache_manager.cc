@@ -353,25 +353,19 @@ bool CacheManager::IsApplicationRevoked(const std::string& app_id) const {
   return is_revoked;
 }
 
-void CacheManager::CheckPermissions(const PTString &app_id,
+const policy_table::Strings& CacheManager::GetGroups(const PTString &app_id) {
+  return pt_->policy_table.app_policies[app_id].groups;
+}
+
+void CacheManager::CheckPermissions(const policy_table::Strings &groups,
                                     const PTString &hmi_level,
                                     const PTString &rpc,
                                     CheckPermissionResult &result) {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK_VOID();
 
-  if (pt_->policy_table.app_policies.end() ==
-      pt_->policy_table.app_policies.find(app_id)) {
-    LOG4CXX_ERROR(logger_, "Application id " << app_id
-                  << " was not found in policy DB.");
-    return;
-  }
-
-  policy_table::Strings::const_iterator app_groups_iter =
-      pt_->policy_table.app_policies[app_id].groups.begin();
-
-  policy_table::Strings::const_iterator app_groups_iter_end =
-      pt_->policy_table.app_policies[app_id].groups.end();
+  policy_table::Strings::const_iterator app_groups_iter = groups.begin();
+  policy_table::Strings::const_iterator app_groups_iter_end = groups.end();
 
   policy_table::FunctionalGroupings::const_iterator concrete_group;
 

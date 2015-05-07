@@ -46,6 +46,7 @@
 namespace policy_table = rpc::policy_table_interface_base;
 
 namespace policy {
+class AccessRemote;
 struct CheckAppPolicy;
 
 class PolicyManagerImpl : public PolicyManager {
@@ -150,7 +151,8 @@ class PolicyManagerImpl : public PolicyManager {
     bool CanAppStealFocus(const std::string& app_id);
     void MarkUnpairedDevice(const std::string& device_id);
 
-    void AddApplication(const std::string& application_id);
+    void AddApplication(const std::string& application_id,
+                        const std::vector<int>& hmi_types);
 
     virtual void RemoveAppConsentForGroup(const std::string& app_id,
                                           const std::string& group_name);
@@ -165,6 +167,20 @@ class PolicyManagerImpl : public PolicyManager {
     virtual void OnAppsSearchStarted();
 
     virtual void OnAppsSearchCompleted();
+
+#ifdef SDL_REMOTE_CONTROL
+    virtual TypeAccess CheckAccess(const PTString& app_id, const PTString& rpc,
+                                   const RemoteControlParams& params,
+                                   const SeatLocation& seat,
+                                   const SeatLocation& zone);
+    virtual void SetAccess(const PTString& app_id, const PTString& group_name,
+                           const SeatLocation zone, bool allowed);
+    virtual void ResetAccess(const PTString& rpc);
+    virtual void ResetAccess(const PTString& group_name,
+                             const SeatLocation zone);
+    virtual void SetPrimaryDevice(const PTString& dev_id);
+    virtual void SetRemoteControl(bool enabled);
+#endif  // SDL_REMOTE_CONTROL
 
   protected:
     virtual utils::SharedPtr<policy_table::Table> Parse(
@@ -263,6 +279,9 @@ private:
 
     UpdateStatusManager update_status_manager_;
     CacheManagerInterfaceSPtr cache_;
+#ifdef SDL_REMOTE_CONTROL
+    utils::SharedPtr<AccessRemote> access_remote_;
+#endif  // SDL_REMOTE_CONTROL
     sync_primitives::Lock apps_registration_lock_;
     sync_primitives::Lock app_permissions_diff_lock_;
     std::map<std::string, AppPermissions> app_permissions_diff_;
@@ -301,6 +320,7 @@ private:
     bool ignition_check;
 
     friend struct CheckAppPolicy;
+    friend class PolicyManagerImplTest;
 };
 
 }  // namespace policy

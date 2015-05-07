@@ -132,6 +132,8 @@
 #ifdef BUILD_TESTS
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test
-#endif
+#else  // BUILD_TESTS
+#define FRIEND_TEST(test_case_name, test_name)
+#endif  // BUILD_TESTS
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_MACRO_H_

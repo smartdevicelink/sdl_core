@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -40,6 +40,7 @@
 #include "policy/policy_manager.h"
 #include "application_manager/policies/policy_event_observer.h"
 #include "application_manager/policies/delegates/statistics_delegate.h"
+#include "application_manager/service.h"
 #include "utils/logger.h"
 #include "utils/singleton.h"
 #include "utils/threads/thread.h"
@@ -54,6 +55,8 @@
 namespace Json {
 class Value;
 }
+
+using application_manager::SeatLocation;
 
 namespace policy {
 typedef std::vector<uint32_t> AppIds;
@@ -91,6 +94,57 @@ class PolicyHandler :
                    const PTString& rpc,
                    const RPCParams& rpc_params,
                    CheckPermissionResult& result);
+
+#ifdef SDL_REMOTE_CONTROL
+  /**
+   * Checks access to equipment of vehicle for application by RPC
+   * @param app_id policy id application
+   * @param rpc name of RPC
+   * @param params parameters list
+   * @param seat current seat of passenger
+   * @param zone requested zone control
+   */
+  application_manager::TypeAccess CheckAccess(const PTString& app_id,
+                                              const PTString& rpc,
+                                              const RemoteControlParams& params,
+                                              const SeatLocation& seat,
+                                              const SeatLocation& zone);
+
+  /**
+   * Sets access to equipment of vehicle for application by RPC
+   * @param app_id policy id application
+   * @param group_name RPC group name
+   * @param zone zone control
+   * @param allowed true if access is allowed
+   */
+  void SetAccess(const PTString& app_id, const PTString& group_name,
+                 const SeatLocation& zone, bool allowed);
+
+  /**
+   * Resets access application to all resources
+   * @param app_id policy id application
+   */
+  void ResetAccess(const PTString& app_id);
+
+  /**
+   * Resets access by group name for all applications
+   * @param group_name group name
+   * @param zone zone control
+   */
+  void ResetAccess(const std::string& group_name, const SeatLocation& zone);
+
+  /**
+   * Sets device as primary device
+   * @param dev_id ID device
+   */
+  void SetPrimaryDevice(const PTString& dev_id);
+
+  /**
+   * Sets mode of remote control (on/off)
+   * @param enabled true if remote control is turned on
+   */
+  void SetRemoteControl(bool enabled);
+#endif  // SDL_REMOTE_CONTROL
 
   uint32_t GetNotificationsNumber(const std::string& priority);
   DeviceConsent GetUserConsentForDevice(const std::string& device_id);
@@ -287,8 +341,10 @@ class PolicyHandler :
    * @brief Allows to add new or update existed application during
    * registration process
    * @param application_id The policy aplication id.
+   * @param app_types list of hmi types
    */
-  void AddApplication(const std::string& application_id);
+  void AddApplication(const std::string& application_id,
+                      const smart_objects::SmartObject* app_types);
 
   /**
    * Checks whether application is revoked
@@ -372,6 +428,12 @@ protected:
    */
   void OnAppPermissionConsentInternal(const uint32_t connection_key,
                                       PermissionConsent& permissions);
+
+#ifdef SDL_REMOTE_CONTROL
+  application_manager::TypeAccess ConvertTypeAccess(
+      policy::TypeAccess access) const;
+#endif  // SDL_REMOTE_CONTROL
+
 private:
   class StatisticManagerImpl: public usage_statistics::StatisticsManager {
       //TODO(AKutsan) REMOVE THIS UGLY HOTFIX
@@ -434,6 +496,8 @@ private:
    * for all apps
    */
   std::map<std::string, std::string> app_to_device_link_;
+
+  application_manager::TypeAccess access_;
 
   // Lock for app to device list
   sync_primitives::Lock app_to_device_link_lock_;

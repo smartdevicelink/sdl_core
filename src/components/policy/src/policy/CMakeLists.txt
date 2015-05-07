@@ -63,6 +63,12 @@ set(SOURCES
 )
 
 
+if (REMOTE_CONTROL)
+  list(APPEND SOURCES
+    ./src/access_remote_impl.cc
+  )
+endif()
+
 add_subdirectory(usage_statistics)
 
 include_directories(./policy_table/table_struct)

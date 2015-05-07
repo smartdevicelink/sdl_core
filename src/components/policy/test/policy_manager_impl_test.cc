@@ -38,6 +38,10 @@
 #include "mock_update_status_manager.h"
 #include "policy/policy_manager_impl.h"
 
+#ifdef SDL_REMOTE_CONTROL
+#  include "mock_access_remote.h"
+#endif  // SDL_REMOTE_CONTROL
+
 using ::testing::_;
 using ::testing::Return;
 using ::testing::DoAll;
@@ -45,22 +49,8 @@ using ::testing::SetArgReferee;
 using ::testing::NiceMock;
 using ::testing::AtLeast;
 
-using ::policy::PTRepresentation;
-using ::policy::MockPolicyListener;
-using ::policy::MockPTRepresentation;
-using ::policy::MockPTExtRepresentation;
-using ::policy::MockCacheManagerInterface;
-
-using ::policy::MockUpdateStatusManager;
-
-using ::policy::PolicyManagerImpl;
-using ::policy::PolicyTable;
-using ::policy::EndpointUrls;
-
 namespace policy_table = rpc::policy_table_interface_base;
 
-namespace test {
-namespace components {
 namespace policy {
 
 class PolicyManagerImplTest : public ::testing::Test {
@@ -69,12 +59,20 @@ class PolicyManagerImplTest : public ::testing::Test {
   MockCacheManagerInterface* cache_manager;
   MockUpdateStatusManager update_manager;
   MockPolicyListener* listener;
+#ifdef SDL_REMOTE_CONTROL
+  MockAccessRemote* access_remote;
+#endif  // SDL_REMOTE_CONTROL
 
   void SetUp() {
     manager = new PolicyManagerImpl();
 
     cache_manager = new MockCacheManagerInterface();
     manager->set_cache_manager(cache_manager);
+
+#ifdef SDL_REMOTE_CONTROL
+    access_remote = new MockAccessRemote();
+    manager->access_remote_ = access_remote;
+#endif  // SDL_REMOTE_CONTROL
 
     listener = new MockPolicyListener();
     manager->set_listener(listener);
@@ -139,6 +137,7 @@ TEST_F(PolicyManagerImplTest, DISABLED_GetUpdateUrl) {
 TEST_F(PolicyManagerImplTest, ResetPT) {
   EXPECT_CALL(*cache_manager, ResetPT("filename")).WillOnce(Return(true))
       .WillOnce(Return(false));
+  EXPECT_CALL(*cache_manager, ResetCalculatedPermissions()).Times(2);
   EXPECT_CALL(*cache_manager, TimeoutResponse());
   EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_));
 
@@ -155,7 +154,9 @@ TEST_F(PolicyManagerImplTest, CheckPermissions_SetHmiLevelFullForAlert_ExpectAll
   expected.list_of_allowed_params.push_back("gps");
 
   //assert
-  EXPECT_CALL(*cache_manager, CheckPermissions("12345678", "FULL", "Alert", _)).
+  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345678")).
+      WillOnce(Return("dev1"));
+  EXPECT_CALL(*cache_manager, CheckPermissions(_, "FULL", "Alert", _)).
       WillOnce(SetArgReferee<3>(expected));
 
   //act
@@ -268,6 +269,11 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
       update.policy_table);
 
   //assert
+  std::map<std::string, StringArray> hmi_types;
+  hmi_types["1234"] = StringArray();
+  EXPECT_CALL(*cache_manager, GetHMIAppTypeAfterUpdate(_)).
+      WillOnce(SetArgReferee<0>(hmi_types));
+  EXPECT_CALL(*listener, OnUpdateHMIAppType(hmi_types));
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
   EXPECT_CALL(*listener, GetAppName("1234")).WillOnce(Return(""));
@@ -286,12 +292,12 @@ TEST_F(PolicyManagerImplTest, RequestPTUpdate_SetPT_GeneratedSnapshotAndPTUpdate
       new ::policy_table::Table();
 
   //assert
+  EXPECT_CALL(*listener, OnSnapshotCreated(_, _, _));
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(p_table));
 
   //act
   manager->RequestPTUpdate();
 }
-
 
 TEST_F(PolicyManagerImplTest, DISABLED_AddApplication) {
   // TODO(AOleynik): Implementation of method should be changed to avoid
@@ -304,8 +310,128 @@ TEST_F(PolicyManagerImplTest, DISABLED_GetPolicyTableStatus) {
   //manager->GetPolicyTableStatus();
 }
 
+#ifdef SDL_REMOTE_CONTROL
+TEST_F(PolicyManagerImplTest, SetPrimaryDevice) {
+  EXPECT_CALL(*access_remote, SetPrimaryDevice("dev1"));
+
+  manager->SetPrimaryDevice("dev1");
+}
+
+TEST_F(PolicyManagerImplTest, ResetAccessBySubject) {
+  Subject sub = {"dev1", "12345"};
+
+  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
+      WillOnce(Return("dev1"));
+  EXPECT_CALL(*access_remote, Reset(sub));
+
+  manager->ResetAccess("12345");
+}
+
+TEST_F(PolicyManagerImplTest, ResetAccessByObject) {
+  Object obj = {"group1", 1};
+
+  EXPECT_CALL(*access_remote, Reset(obj));
+
+  manager->ResetAccess("group1", 1);
+}
+
+TEST_F(PolicyManagerImplTest, SetRemoteControl_Enable) {
+  EXPECT_CALL(*access_remote, Enable());
+
+  manager->SetRemoteControl(true);
+}
+
+TEST_F(PolicyManagerImplTest, SetRemoteControl_Disable) {
+  EXPECT_CALL(*access_remote, Disable());
+
+  manager->SetRemoteControl(false);
+}
+
+TEST_F(PolicyManagerImplTest, SetAccess_Allow) {
+  Subject who = {"dev1", "12345"};
+  Object what = {"group1", 1};
+
+  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
+      WillOnce(Return("dev1"));
+  EXPECT_CALL(*access_remote, Allow(who, what));
+
+  manager->SetAccess("12345", "group1", 1, true);
+}
+
+TEST_F(PolicyManagerImplTest, SetAccess_Deny) {
+  Subject who = {"dev1", "12345"};
+  Object what = {"group1", 1};
+
+  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
+      WillOnce(Return("dev1"));
+  EXPECT_CALL(*access_remote, Deny(who, what));
+
+  manager->SetAccess("12345", "group1", 1, false);
+}
+
+TEST_F(PolicyManagerImplTest, CheckAccess_PrimaryDevice) {
+  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
+      WillOnce(Return("dev1"));
+  EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(true));
+
+  EXPECT_EQ(TypeAccess::kAllowed,
+            manager->CheckAccess("12345", "rpc1", RemoteControlParams(), 1, 2));
+}
+
+TEST_F(PolicyManagerImplTest, CheckAccess_DisabledRremoteControl) {
+  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
+      WillOnce(Return("dev1"));
+  EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(false));
+  EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(false));
+
+  EXPECT_EQ(TypeAccess::kDisallowed,
+            manager->CheckAccess("12345", "rpc1", RemoteControlParams(), 1, 2));
+}
+
+TEST_F(PolicyManagerImplTest, CheckAccess_PassengerZone) {
+  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
+      WillOnce(Return("dev1"));
+  EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(false));
+  EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(true));
+  EXPECT_CALL(*access_remote, IsPassengerZone(1, 2)).WillOnce(Return(true));
+
+  EXPECT_EQ(TypeAccess::kAllowed,
+            manager->CheckAccess("12345", "rpc1", RemoteControlParams(), 1, 2));
+}
+
+TEST_F(PolicyManagerImplTest, CheckAccess_UnknownRPC) {
+  Subject who = {"dev1", "12345"};
+
+  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
+      WillOnce(Return("dev1"));
+  EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(false));
+  EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(true));
+  EXPECT_CALL(*access_remote, IsPassengerZone(1, 2)).WillOnce(Return(false));
+  EXPECT_CALL(*access_remote, FindGroup(who, "rpc1", RemoteControlParams())).
+      WillOnce(Return(PTString()));
+
+  EXPECT_EQ(TypeAccess::kDisallowed,
+            manager->CheckAccess("12345", "rpc1", RemoteControlParams(), 1, 2));
+}
+
+TEST_F(PolicyManagerImplTest, CheckAccess_Result) {
+  Subject who = {"dev1", "12345"};
+  Object what = {"group1", 2};
+
+  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
+      WillOnce(Return("dev1"));
+  EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(false));
+  EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(true));
+  EXPECT_CALL(*access_remote, IsPassengerZone(1, 2)).WillOnce(Return(false));
+  EXPECT_CALL(*access_remote, FindGroup(who, "rpc1", RemoteControlParams())).
+      WillOnce(Return("group1"));
+  EXPECT_CALL(*access_remote, Check(who, what)).
+      WillOnce(Return(TypeAccess::kAllowed));
+
+  EXPECT_EQ(TypeAccess::kAllowed,
+            manager->CheckAccess("12345", "rpc1", RemoteControlParams(), 1, 2));
+}
+#endif  // SDL_REMOTE_CONTROL
 
 }
 // namespace policy
-}// namespace components
-}  // namespace test

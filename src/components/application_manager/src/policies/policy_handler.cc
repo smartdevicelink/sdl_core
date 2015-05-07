@@ -405,9 +405,27 @@ void PolicyHandler::GetAvailableApps(std::queue<std::string>& apps) {
   }
 }
 
-void PolicyHandler::AddApplication(const std::string& application_id) {
+struct SmartObjectToInt {
+  int operator ()(const smart_objects::SmartObject& item) const {
+    return item.asInt();
+  }
+};
+
+void PolicyHandler::AddApplication(const std::string& application_id,
+                                   const smart_objects::SmartObject* app_types) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->AddApplication(application_id);
+  size_t count = 0;
+  smart_objects::SmartArray* hmi_list;
+  if (app_types) {
+    hmi_list = app_types->asArray();
+    count = hmi_list->size();
+  }
+  std::vector<int> hmi_types(count);
+  if (count) {
+    std::transform(hmi_list->begin(), hmi_list->end(), hmi_types.begin(),
+                   SmartObjectToInt());
+  }
+  policy_manager_->AddApplication(application_id, hmi_types);
 }
 
 void PolicyHandler::SetDeviceInfo(std::string& device_id,
@@ -1279,5 +1297,64 @@ void PolicyHandler::Add(const std::string& app_id,
   policy_manager_->Add(app_id, type, timespan_seconds);
 }
 
-}  //  namespace policy
+#ifdef SDL_REMOTE_CONTROL
+application_manager::TypeAccess PolicyHandler::CheckAccess(
+    const PTString& app_id, const PTString& rpc,
+    const RemoteControlParams& params, const SeatLocation& seat,
+    const SeatLocation& zone) {
+  POLICY_LIB_CHECK(application_manager::TypeAccess::kNone);
+  policy::TypeAccess access = policy_manager_->CheckAccess(app_id, rpc, params,
+                                                           seat, zone);
+  return ConvertTypeAccess(access);
+}
 
+void PolicyHandler::SetAccess(const PTString& app_id,
+                              const PTString& group_name,
+                              const SeatLocation& zone,
+                              bool allowed) {
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->SetAccess(app_id, group_name, zone, allowed);
+}
+
+void PolicyHandler::ResetAccess(const PTString& app_id) {
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->ResetAccess(app_id);
+}
+
+void PolicyHandler::ResetAccess(const std::string& group_name,
+                                const SeatLocation& zone) {
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->ResetAccess(group_name, zone);
+}
+
+void PolicyHandler::SetPrimaryDevice(const PTString& dev_id) {
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->SetPrimaryDevice(dev_id);
+}
+
+void PolicyHandler::SetRemoteControl(bool enabled) {
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->SetRemoteControl(enabled);
+}
+
+application_manager::TypeAccess PolicyHandler::ConvertTypeAccess(
+    policy::TypeAccess access) const {
+  application_manager::TypeAccess converted;
+  switch (access) {
+    case policy::TypeAccess::kAllowed:
+      converted = application_manager::TypeAccess::kAllowed;
+      break;
+    case policy::TypeAccess::kManual:
+      converted = application_manager::TypeAccess::kManual;
+      break;
+    case policy::TypeAccess::kDisallowed:
+      converted = application_manager::TypeAccess::kDisallowed;
+      break;
+    default:
+      converted = application_manager::TypeAccess::kNone;
+  }
+  return converted;
+}
+#endif  // SDL_REMOTE_CONTROL
+
+}  //  namespace policy

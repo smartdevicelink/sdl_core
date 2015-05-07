@@ -145,6 +145,14 @@ const char kEventTime[]      = "eventTime";
 const char kURL[]        = "url";
 const char kActionCode[] = "actionCode";
 // WebActivity struct
+
+// OnReverseAppsAllowing notification
+const char kAllowed[]    = "allowed";
+// OnReverseAppsAllowing notification
+
+// OnPrimaryDevice notification
+const char kDevice[]     = "device";
+// OnPrimaryDevice notification
 } //  namespace message_params
 
 namespace enums_value {

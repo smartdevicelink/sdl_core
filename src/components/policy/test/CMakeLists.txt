@@ -63,6 +63,12 @@ set(testSources
     sql_pt_representation_test.cc
   )
 
+if (REMOTE_CONTROL)
+  list (APPEND testSources
+    access_remote_impl_test.cc
+  )
+endif ()
+
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   list(REMOVE_ITEM testLibraries dl)
   # --- Tests for QDB Wrapper
@@ -82,9 +88,7 @@ else ()
     sqlite_wrapper/sql_database_test.cc 
     sqlite_wrapper/sql_query_test.cc   
     generated_code_with_sqlite_test.cc   
-
-    # TODO{ALeshin} APPLINK-11132 AssertTrue in SetUpTestCase() return false
-    #policy_manager_impl_stress_test.cc
+    policy_manager_impl_stress_test.cc
   )
   list (APPEND testLibraries sqlite3)
 endif()

@@ -30,8 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <vector>
+#include <algorithm>
 #include "application_manager/core_service.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/message_helper.h"
+#include "json/json.h"
 
 namespace application_manager {
 
@@ -50,9 +55,90 @@ CoreService::CoreService() {
 CoreService::~CoreService() {
 }
 
-bool CoreService::CheckPolicyPermissions(std::string& json_message) {
-  // TODO(VS): Will be implemented later
-  return true;
+mobile_apis::Result::eType CoreService::CheckPolicyPermissions(MessagePtr msg) {
+  ApplicationSharedPtr app = GetApplication(msg->connection_key());
+  if (!app) {
+    return mobile_apis::Result::eType::APPLICATION_NOT_REGISTERED;
+  }
+
+  const RPCParams rpc_params;
+  CommandParametersPermissions params;
+  const mobile_apis::Result::eType ret = ApplicationManagerImpl::instance()
+      ->CheckPolicyPermissions(app->mobile_app_id(), app->hmi_level(),
+                               msg->function_name(), rpc_params, &params);
+
+  if (ret != mobile_apis::Result::eType::SUCCESS) {
+    return ret;
+  }
+
+  FilterParameters(msg, params);
+
+#ifdef SDL_REMOTE_CONTROL
+  if (!AreParametersAllowed(msg, params)) {
+    return mobile_apis::Result::eType::DISALLOWED;
+  }
+#endif  // SDL_REMOTE_CONTROL
+
+  return ret;
+}
+
+TypeAccess CoreService::CheckAccess(const ApplicationId& app_id,
+                                    const PluginFunctionID& function_id,
+                                    const std::vector<std::string>& params,
+                                    const SeatLocation& seat,
+                                    const SeatLocation& zone) {
+#ifdef SDL_REMOTE_CONTROL
+  ApplicationSharedPtr app = GetApplication(app_id);
+  if (app) {
+
+    return policy::PolicyHandler::instance()->CheckAccess(
+        app->mobile_app_id(), function_id, params, seat, zone);
+  }
+#endif  // SDL_REMOTE_CONTROL
+  return kNone;
+}
+
+void CoreService::SetAccess(const ApplicationId& app_id,
+                            const std::string& group_name,
+                            const SeatLocation& zone,
+                            bool allowed) {
+#ifdef SDL_REMOTE_CONTROL
+  ApplicationSharedPtr app = GetApplication(app_id);
+  if (app) {
+    policy::PolicyHandler::instance()->SetAccess(
+        app->mobile_app_id(), group_name, zone, allowed);
+  }
+#endif  // SDL_REMOTE_CONTROL
+}
+
+void CoreService::ResetAccess(const ApplicationId& app_id) {
+#ifdef SDL_REMOTE_CONTROL
+  ApplicationSharedPtr app = GetApplication(app_id);
+  if (app) {
+    policy::PolicyHandler::instance()->ResetAccess(app->mobile_app_id());
+  }
+#endif  // SDL_REMOTE_CONTROL
+}
+
+void CoreService::ResetAccess(const std::string& group_name,
+                              const SeatLocation& zone) {
+#ifdef SDL_REMOTE_CONTROL
+  policy::PolicyHandler::instance()->ResetAccess(group_name, zone);
+#endif  // SDL_REMOTE_CONTROL
+}
+
+void CoreService::SetPrimaryDevice(const uint32_t dev_id) {
+#ifdef SDL_REMOTE_CONTROL
+  std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
+    dev_id);
+  policy::PolicyHandler::instance()->SetPrimaryDevice(device_handle);
+#endif  // SDL_REMOTE_CONTROL
+}
+
+void CoreService::SetRemoteControl(bool enabled) {
+#ifdef SDL_REMOTE_CONTROL
+  policy::PolicyHandler::instance()->SetRemoteControl(enabled);
+#endif  // SDL_REMOTE_CONTROL
 }
 
 ApplicationSharedPtr CoreService::GetApplication(ApplicationId app_id) {
@@ -84,6 +170,47 @@ void CoreService::SubscribeToHMINotification(
     ApplicationManagerImpl::instance()->SubscribeToHMINotification(
         hmi_notification);
   }
+}
+
+void CoreService::FilterParameters(MessagePtr msg,
+                                   const CommandParametersPermissions& params) {
+  // TODO(KKolodiy): may be need to implement filter parameters
+  // see application_manager::command::CommandRequestImpl::RemoveDisallowedParameters
+}
+
+bool CoreService::AreParametersAllowed(
+    MessagePtr msg, const CommandParametersPermissions& params) {
+  Json::Reader reader;
+  Json::Value json;
+  bool ret = reader.parse(msg->json_message(), json);
+  if (ret) {
+    return CheckParams(json.get(strings::params, Json::Value(Json::nullValue)),
+                       params.allowed_params);
+  }
+  return false;
+}
+
+bool CoreService::CheckParams(const Json::Value& object,
+                              const std::vector<std::string>& allowed_params) {
+  if (!object.isObject()) {
+    return true;
+  }
+  for (Json::Value::iterator i = object.begin(); i != object.end(); ++i) {
+    std::string name = i.memberName();
+    const Json::Value& value = *i;
+    bool allowed = IsAllowed(name, allowed_params)
+        && CheckParams(value, allowed_params);
+    if (!allowed) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool CoreService::IsAllowed(const std::string& name,
+                            const std::vector<std::string>& allowed_params) {
+  return std::find(allowed_params.begin(), allowed_params.end(), name)
+      != allowed_params.end();
 }
 
 }  // namespace application_manager

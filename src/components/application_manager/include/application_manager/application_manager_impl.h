@@ -769,7 +769,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     mobile_apis::Result::eType CheckPolicyPermissions(
         const std::string& policy_app_id,
         mobile_apis::HMILevel::eType hmi_level,
-        mobile_apis::FunctionID::eType function_id,
+        const std::string& function_id,
         const RPCParams& rpc_params,
         CommandParametersPermissions* params_permissions = NULL);
 

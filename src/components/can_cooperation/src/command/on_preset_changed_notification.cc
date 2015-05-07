@@ -50,8 +50,8 @@ OnPresetChangedNotification::OnPresetChangedNotification(
 OnPresetChangedNotification::~OnPresetChangedNotification() {
 }
 
-void OnPresetChangedNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnPresetChangedNotification::Run");
+void OnPresetChangedNotification::Execute() {
+  LOG4CXX_AUTO_TRACE(logger_);
 
  /* std::string json = message_->json_message();
   if (validators::ValidationResult::SUCCESS ==
@@ -62,15 +62,6 @@ void OnPresetChangedNotification::Run() {
     LOG4CXX_INFO(logger_, "HMI notification validation failed!");
     return;
   }*/
-
-  CANAppExtensionPtr can_app_extension;
-  application_manager::ApplicationSharedPtr app =
-    GetApplicationWithControl(can_app_extension);
-
-  if (app.valid())  {
-    message_->set_connection_key(app->app_id());
-    service_->SendMessageToMobile(message_);
-  }
 }
 
 }  // namespace commands

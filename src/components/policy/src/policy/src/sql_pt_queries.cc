@@ -48,7 +48,8 @@ const std::string kCreateSchema =
   "  `carrier` VARCHAR(45), "
   "  `max_number_rfcom_ports` INTEGER,"
   "  `connection_type` VARCHAR(45), "
-  "  `unpaired` BOOL "
+  "  `unpaired` BOOL,"
+  "  `primary` BOOL "
   "); "
   "CREATE TABLE IF NOT EXISTS `usage_and_error_count`( "
   "  `count_of_iap_buffer_full` INTEGER, "
@@ -74,7 +75,8 @@ const std::string kCreateSchema =
   "  `timeout_after_x_seconds` INTEGER NOT NULL, "
   "  `vehicle_make` VARCHAR(45), "
   "  `vehicle_model` VARCHAR(45), "
-  "  `vehicle_year` VARCHAR(4) "
+  "  `vehicle_year` VARCHAR(4),"
+  "  `remote_control` BOOL "
   "); "
   "CREATE TABLE IF NOT EXISTS `functional_group`( "
   "  `id` INTEGER PRIMARY KEY NOT NULL, "
@@ -163,6 +165,36 @@ const std::string kCreateSchema =
   "  ON `app_group`(`functional_group_id`); "
   "CREATE INDEX IF NOT EXISTS `app_group.fk_application_has_functional_group_application1_idx` "
   "  ON `app_group`(`application_id`); "
+  "CREATE TABLE IF NOT EXISTS `app_group_primary`( "
+  "  `application_id` VARCHAR(45) NOT NULL, "
+  "  `functional_group_id` INTEGER NOT NULL, "
+  "  PRIMARY KEY(`application_id`,`functional_group_id`), "
+  "  CONSTRAINT `fk_application_has_functional_group_application1` "
+  "    FOREIGN KEY(`application_id`) "
+  "    REFERENCES `application`(`id`), "
+  "  CONSTRAINT `fk_application_has_functional_group_functional_group1` "
+  "    FOREIGN KEY(`functional_group_id`) "
+  "    REFERENCES `functional_group`(`id`) "
+  "); "
+  "CREATE INDEX IF NOT EXISTS `app_group_primary.fk_application_has_functional_group_functional_group1_idx` "
+  "  ON `app_group_primary`(`functional_group_id`); "
+  "CREATE INDEX IF NOT EXISTS `app_group_primary.fk_application_has_functional_group_application1_idx` "
+  "  ON `app_group_primary`(`application_id`); "
+  "CREATE TABLE IF NOT EXISTS `app_group_non_primary`( "
+  "  `application_id` VARCHAR(45) NOT NULL, "
+  "  `functional_group_id` INTEGER NOT NULL, "
+  "  PRIMARY KEY(`application_id`,`functional_group_id`), "
+  "  CONSTRAINT `fk_application_has_functional_group_application1` "
+  "    FOREIGN KEY(`application_id`) "
+  "    REFERENCES `application`(`id`), "
+  "  CONSTRAINT `fk_application_has_functional_group_functional_group1` "
+  "    FOREIGN KEY(`functional_group_id`) "
+  "    REFERENCES `functional_group`(`id`) "
+  "); "
+  "CREATE INDEX IF NOT EXISTS `app_group_non_primary.fk_application_has_functional_group_functional_group1_idx` "
+  "  ON `app_group_non_primary`(`functional_group_id`); "
+  "CREATE INDEX IF NOT EXISTS `app_group_non_primary.fk_application_has_functional_group_application1_idx` "
+  "  ON `app_group_non_primary`(`application_id`); "
   "CREATE TABLE IF NOT EXISTS `preconsented_group`( "
   "  `application_id` VARCHAR(45) NOT NULL, "
   "  `functional_group_id` INTEGER NOT NULL, "
@@ -321,8 +353,8 @@ const std::string kInsertInitData =
   "  VALUES (0, 0, 0, 0); "
   "INSERT OR IGNORE INTO `module_config` (`preloaded_pt`, `is_first_run`,"
   "  `exchange_after_x_ignition_cycles`, `exchange_after_x_kilometers`, "
-  "  `exchange_after_x_days`, `timeout_after_x_seconds`) "
-  "  VALUES(1, 0, 0, 0, 0, 0); "
+  "  `exchange_after_x_days`, `timeout_after_x_seconds`, `remote_control`) "
+  "  VALUES(1, 0, 0, 0, 0, 0, 1); "
   "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('EMERGENCY'); "
   "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('NAVIGATION'); "
   "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('VOICECOMMUNICATION'); "
@@ -364,6 +396,12 @@ const std::string kDropSchema =
   "DROP INDEX IF EXISTS `app_group.fk_application_has_functional_group_application1_idx`; "
   "DROP INDEX IF EXISTS `app_group.fk_application_has_functional_group_functional_group1_idx`; "
   "DROP TABLE IF EXISTS `app_group`; "
+  "DROP INDEX IF EXISTS `app_group_primary.fk_application_has_functional_group_application1_idx`; "
+  "DROP INDEX IF EXISTS `app_group_primary.fk_application_has_functional_group_functional_group1_idx`; "
+  "DROP TABLE IF EXISTS `app_group_primary`; "
+  "DROP INDEX IF EXISTS `app_group_non_primary.fk_application_has_functional_group_application1_idx`; "
+  "DROP INDEX IF EXISTS `app_group_non_primary.fk_application_has_functional_group_functional_group1_idx`; "
+  "DROP TABLE IF EXISTS `app_group_non_primary`; "
   "DROP INDEX IF EXISTS `application.fk_application_priorities1_idx`; "
   "DROP INDEX IF EXISTS `application.fk_application_hmi_level1_idx`; "
   "DROP TABLE IF EXISTS `application`; "
@@ -398,6 +436,8 @@ const std::string kDeleteData =
   "DELETE FROM `seconds_between_retry`; "
   "DELETE FROM `preconsented_group`; "
   "DELETE FROM `app_group`; "
+  "DELETE FROM `app_group_primary`; "
+  "DELETE FROM `app_group_non_primary`; "
   "DELETE FROM `application`; "
   "DELETE FROM `rpc`; "
   "DELETE FROM `version`; "
@@ -460,6 +500,14 @@ const std::string kInsertAppGroup =
   "INSERT INTO `app_group` (`application_id`, `functional_group_id`)"
   "  SELECT ?, `id` FROM `functional_group` WHERE `name` = ? LIMIT 1";
 
+const std::string kInsertAppGroupPrimary =
+  "INSERT INTO `app_group_primary` (`application_id`, `functional_group_id`)"
+  "  SELECT ?, `id` FROM `functional_group` WHERE `name` = ? LIMIT 1";
+
+const std::string kInsertAppGroupNonPrimary =
+  "INSERT INTO `app_group_non_primary` (`application_id`, `functional_group_id`)"
+  "  SELECT ?, `id` FROM `functional_group` WHERE `name` = ? LIMIT 1";
+
 const std::string kInsertNickname =
   "INSERT OR IGNORE INTO `nickname` (`application_id`, `name`) VALUES (?, ?)";
 
@@ -483,7 +531,7 @@ const std::string kUpdateModuleConfig =
   "  `exchange_after_x_ignition_cycles` = ?,"
   "  `exchange_after_x_kilometers` = ?, `exchange_after_x_days` = ?, "
   "  `timeout_after_x_seconds` = ?, `vehicle_make` = ?, "
-  "  `vehicle_model` = ?, `vehicle_year` = ?";
+  "  `vehicle_model` = ?, `vehicle_year` = ?, `remote_control` = ?";
 
 const std::string kInsertEndpoint =
   "INSERT INTO `endpoint` (`service`, `url`, `application_id`) "
@@ -497,7 +545,7 @@ const std::string kInsertNotificationsByPriority =
   "  VALUES (?, ?)";
 
 const std::string kInsertDeviceData =
-  "INSERT OR IGNORE INTO `device` (`id`) VALUES (?)";
+  "INSERT INTO `device` (`id`, `primary`) VALUES (?, ?)";
 
 const std::string kInsertAppLevel =
   "INSERT INTO `app_level` (`application_id`, `minutes_in_hmi_full`,"
@@ -525,11 +573,15 @@ const std::string kDeleteRpc = "DELETE FROM `rpc`";
 
 const std::string kDeleteAppGroup = "DELETE FROM `app_group`";
 
+const std::string kDeleteAppGroupPrimary = "DELETE FROM `app_group_primary`";
+
+const std::string kDeleteAppGroupNonPrimary = "DELETE FROM `app_group_non_primary`";
+
 const std::string kSelectModuleConfig =
   "SELECT `preloaded_pt`, `exchange_after_x_ignition_cycles`, "
   " `exchange_after_x_kilometers`, `exchange_after_x_days`, "
   " `timeout_after_x_seconds`, `vehicle_make`,"
-  " `vehicle_model`, `vehicle_year` "
+  " `vehicle_model`, `vehicle_year`, `remote_control` "
   " FROM `module_config`";
 
 const std::string kSelectEndpoints =
@@ -563,6 +615,18 @@ const std::string kSelectAppGroups = "SELECT `f`.`name` FROM `app_group` AS `a`"
                                      "  LEFT JOIN `functional_group` AS `f` "
                                      "    ON (`f`.`id` = `a`.`functional_group_id`)"
                                      "  WHERE `a`.`application_id` = ?";
+
+const std::string kSelectAppGroupsPrimary =
+  "SELECT `f`.`name` FROM `app_group_primary` AS `a`"
+  "  LEFT JOIN `functional_group` AS `f` "
+  "    ON (`f`.`id` = `a`.`functional_group_id`)"
+  "  WHERE `a`.`application_id` = ?";
+
+const std::string kSelectAppGroupsNonPrimary =
+  "SELECT `f`.`name` FROM `app_group_non_primary` AS `a`"
+  "  LEFT JOIN `functional_group` AS `f` "
+  "    ON (`f`.`id` = `a`.`functional_group_id`)"
+  "  WHERE `a`.`application_id` = ?";
 
 const std::string kSelectNicknames = "SELECT DISTINCT `name` FROM `nickname` "
                                      "WHERE `application_id` = ?";
@@ -628,10 +692,18 @@ const std::string kSelectApplicationIsDefault =
 const std::string kUpdateIsDefault =
   "UPDATE `application` SET `is_default` = ? WHERE `id` = ?";
 
+const std::string kDeleteAllDevices = "DELETE FROM `device`;";
+
 const std::string kDeleteDevice = "DELETE FROM `device` WHERE `id` = ?";
 
 const std::string kDeleteAppGroupByApplicationId =
   "DELETE FROM `app_group` WHERE `application_id` = ?";
+
+const std::string kDeleteAppGroupPrimaryByApplicationId =
+  "DELETE FROM `app_group_primary` WHERE `application_id` = ?";
+
+const std::string kDeleteAppGroupNonPrimaryByApplicationId =
+  "DELETE FROM `app_group_non_primary` WHERE `application_id` = ?";
 
 const std::string kInsertApplicationFull =
   "INSERT OR IGNORE INTO `application` (`id`, `keep_context`, `steal_focus`, "

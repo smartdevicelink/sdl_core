@@ -49,67 +49,17 @@ GrantAccessRequest::GrantAccessRequest(
 GrantAccessRequest::~GrantAccessRequest() {
 }
 
-void GrantAccessRequest::Run() {
-  LOG4CXX_INFO(logger_, "GrantAccessRequest::Run");
-
-  application_manager::ApplicationSharedPtr app =
-    service_->GetApplication(message_->connection_key());
-  if (!app.valid()) {
-    LOG4CXX_ERROR(logger_, "Application doesn't registered!");
-    SendResponse(false, result_codes::kApplicationNotRegistered, "");
-    return;
-  }
-
-  CANAppExtensionPtr extension = GetAppExtension(app);
-  if (extension->IsControlGiven()) {
-    LOG4CXX_ERROR(logger_, "Application already have access!");
-    SendResponse(false, result_codes::kRejected, "");
-    return;
-  }
-
-  Json::Value params;
-
-  params[json_keys::kAppId] = app->hmi_app_id();
-
-  Json::FastWriter writer;
-
-  SendRequest(functional_modules::hmi_api::grant_access, params, true);
+void GrantAccessRequest::Execute() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  // TODO(KKolodiy): to backward compatibility the current mobile application
+  SendResponse(true, result_codes::kSuccess, "Allowed");
 }
 
-void GrantAccessRequest::on_event(
-  const event_engine::Event<application_manager::MessagePtr,
-  std::string>& event) {
-  LOG4CXX_INFO(logger_, "GrantAccessRequest::on_event");
-
-  application_manager::ApplicationSharedPtr app =
-    service_->GetApplication(message_->connection_key());
-  if (!app.valid()) {
-    LOG4CXX_ERROR(logger_, "Application doesn't registered!");
-    SendResponse(false, result_codes::kApplicationNotRegistered, "");
-    return;
-  }
-
-  if (functional_modules::hmi_api::grant_access == event.id()) {
-    std::string result_code;
-    std::string info;
-
-    Json::Value value;
-    Json::Reader reader;
-    reader.parse(event.event_message()->json_message(), value);
-
-    bool success = ParseResultCode(value, result_code, info);
-
-    if (success) {
-      CANAppExtensionPtr extension = GetAppExtension(app);
-
-      extension->GiveControl(true);
-    }
-
-    SendResponse(success, result_code.c_str(), info);
-  } else {
-    LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
-    return;
-  }
+void GrantAccessRequest::OnEvent(
+    const event_engine::Event<application_manager::MessagePtr,
+    std::string>& event) {
+  // TODO(KKolodiy): this is virtual method so it should be implemented
+  // this method do nothing to backward compatibility the current mobile application
 }
 
 }  // namespace commands

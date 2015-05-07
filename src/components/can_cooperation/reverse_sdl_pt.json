@@ -2,6 +2,7 @@
     "policy_table": {
         "module_config": {
             "preloaded_pt": true,
+            "remote_control": true,
             "exchange_after_x_ignition_cycles": 100,
             "exchange_after_x_kilometers": 1800,
             "exchange_after_x_days": 30,
@@ -914,6 +915,78 @@
                     },
                     "PerformAudioPassThru": {
                         "hmi_levels": ["BACKGROUND"]
+                    }
+                }
+            },
+            "Base-RC": {
+                "rpcs": {
+                    "GrantAccess": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "CancelAccess": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "OnControlChanged": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "GetSeatControl": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    }
+                }
+            },
+            "Radio": {
+                "rpcs": {
+                    "StartScan": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "StopScan": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "TuneRadio": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "TuneUp": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "TuneDown": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "OnRadioDetails": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "OnPresetsChanged": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    }
+                }
+            },
+            "Climate": {
+                "rpcs": {
+                    "ClimateControlOn": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
                     }
                 }
             }
@@ -2248,7 +2321,19 @@
                 "steal_focus": false,
                 "priority": "NONE",
                 "default_hmi": "NONE",
-                "groups": ["Base-4"]
+                "groups": ["Base-4"],
+                "groups_primaryRC": ["Base-4", "Base-RC", "Radio", "Climate"],
+                "groups_non_primaryRC": ["Base-RC", "Radio", "Climate"]
+            },
+            "8675311": {
+                "keep_context": false,
+                "steal_focus": false,
+                "priority": "NONE",
+                "default_hmi": "NONE",
+                "groups": ["Base-4"],
+                "groups_primaryRC": ["Base-4", "Base-RC", "Radio", "Climate"],
+                "groups_non_primaryRC": ["Base-RC", "Radio", "Climate"],
+                "AppHMIType": ["REMOTE_CONTROL"]
             },
             "device": {
                 "keep_context": false,

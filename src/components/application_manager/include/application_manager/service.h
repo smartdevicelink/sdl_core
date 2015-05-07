@@ -34,28 +34,91 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SERVICE_H_
 
 #include <string>
+#include <sstream>
 
 #include "application_manager/application.h"
 #include "application_manager/message.h"
 
-
 namespace application_manager {
 
+enum TypeAccess {
+  kNone,
+  kDisallowed,
+  kAllowed,
+  kManual
+};
+
+typedef int SeatLocation;
+
+typedef std::string PluginFunctionID;
 /**
  * @brief Interface to core service
  */
 class Service {
-  public:
+ public:
   virtual ~Service() {
   }
 
   /**
-   * @brief Checks message permissions and parameters according to policy table
-   * permissions
-   * @param json string with params in json format
-   * @return false if message blocked by policy
+   * @brief Checks message permissions and cuts parameters according
+   * to policy table permissions
+   * @param msg message to cut disallowed parameters
+   * @return result according by mobile API
    */
-  virtual bool CheckPolicyPermissions(std::string& json_message) = 0;
+  virtual mobile_apis::Result::eType CheckPolicyPermissions(MessagePtr msg) = 0;
+
+  /**
+   * Checks access to requested equipment of vehicle
+   * @param app_id id of application
+   * @param function_id name of RPC
+   * @param params parameters list
+   * @param seat seat of owner's mobile device
+   * @return return allowed if access exist,
+   * manual if need to send question to driver otherwise disallowed
+   */
+  virtual TypeAccess CheckAccess(const ApplicationId& app_id,
+                                 const PluginFunctionID& function_id,
+                                 const std::vector<std::string>& params,
+                                 const SeatLocation& seat,
+                                 const SeatLocation& zone) = 0;
+
+  /**
+   * Sets access to functional group which contains given RPC for application
+   * @param app_id id of application
+   * @param group_id id RPC
+   * @param zone requested zone
+   * @param allowed true if driver has given access
+   */
+  virtual void SetAccess(const ApplicationId& app_id,
+                         const std::string& group_id,
+                         const SeatLocation& zone,
+                         bool allowed) = 0;
+
+  /**
+   * Resets access application to all resources
+   * @param app_id ID application
+   */
+  virtual void ResetAccess(const ApplicationId& app_id) = 0;
+
+  /**
+   * Resets access by group name for all applications
+   * @param group_name group name
+   * @param zone zone control
+   */
+  virtual void ResetAccess(const std::string& group_name,
+                           const SeatLocation& zone) = 0;
+
+  /**
+   * Sets device as primary device
+   * @param dev_id ID device
+   */
+  virtual void SetPrimaryDevice(const uint32_t dev_id) = 0;
+
+  /**
+   * Sets mode of remote control (on/off)
+   * @param enabled true if remote control is turned on
+   */
+  virtual void SetRemoteControl(bool enabled) = 0;
 
   /**
    * @brief Get pointer to application by application id

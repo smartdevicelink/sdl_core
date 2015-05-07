@@ -82,8 +82,10 @@ add_subdirectory(./media_manager)
 # --- Functional module
 add_subdirectory(./functional_module)
 
-# --- CAN Module
-add_subdirectory(./can_cooperation)
+if (REMOTE_CONTROL)
+  # --- CAN Module
+  add_subdirectory(./can_cooperation)
+endif ()
 
 if (TIME_TESTER)
     add_subdirectory(./time_tester)

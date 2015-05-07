@@ -204,6 +204,16 @@ install(
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin
 )
+
+# TODO(KKolodiy): In order to make the deployment is easier until SDL-RC is under developing.
+if (REMOTE_CONTROL)
+  install(
+    FILES "${CMAKE_SOURCE_DIR}/src/components/can_cooperation/reverse_sdl_pt.json"
+    DESTINATION ${CMAKE_BINARY_DIR}/bin
+    RENAME sdl_preloaded_pt.json
+  )
+endif ()
+
 if (${WEB_HMI})
   if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     #install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hmi_link DESTINATION bin)

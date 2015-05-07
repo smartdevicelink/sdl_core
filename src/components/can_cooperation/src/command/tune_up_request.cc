@@ -49,38 +49,16 @@ TuneUpRequest::TuneUpRequest(
 TuneUpRequest::~TuneUpRequest() {
 }
 
-void TuneUpRequest::Run() {
-  LOG4CXX_INFO(logger_, "TuneUpRequest::Run");
-
-  application_manager::ApplicationSharedPtr app =
-    service_->GetApplication(message_->connection_key());
-  if (!app.valid()) {
-    LOG4CXX_ERROR(logger_, "Application doesn't registered!");
-    SendResponse(false, result_codes::kApplicationNotRegistered,  "");
-    return;
-  }
-
-  CANAppExtensionPtr extension = GetAppExtension(app);
-  if (!extension->IsControlGiven()) {
-    LOG4CXX_ERROR(logger_, "Application doesn't have access!");
-    SendResponse(false, result_codes::kRejected,  "");
-    return;
-  }
+void TuneUpRequest::Execute() {
+  LOG4CXX_AUTO_TRACE(logger_);
 
   SendRequest(functional_modules::can_api::tune_up, Json::Value());
 }
 
-void TuneUpRequest::on_event(const event_engine::Event<application_manager::MessagePtr,
-                             std::string>& event) {
-  LOG4CXX_INFO(logger_, "TuneUpRequest::on_event");
-
-  application_manager::ApplicationSharedPtr app =
-    service_->GetApplication(message_->connection_key());
-  if (!app.valid()) {
-    LOG4CXX_ERROR(logger_, "Application doesn't registered!");
-    SendResponse(false, result_codes::kApplicationNotRegistered, "");
-    return;
-  }
+void TuneUpRequest::OnEvent(
+    const event_engine::Event<application_manager::MessagePtr,
+    std::string>& event) {
+  LOG4CXX_AUTO_TRACE(logger_);
 
   if (functional_modules::can_api::tune_up == event.id()) {
     std::string result_code;
@@ -95,7 +73,6 @@ void TuneUpRequest::on_event(const event_engine::Event<application_manager::Mess
     SendResponse(success, result_code.c_str(), info);
   } else {
     LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
-    return;
   }
 }
 

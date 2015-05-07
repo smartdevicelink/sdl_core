@@ -37,6 +37,8 @@
 #include "can_cooperation/can_module_constants.h"
 #include "application_manager/application.h"
 #include "can_cooperation/can_tcp_connection.h"
+#include "can_cooperation/message_helper.h"
+#include "can_cooperation/policy_helper.h"
 #include "utils/logger.h"
 
 namespace can_cooperation {
@@ -87,6 +89,8 @@ void CANModule::SubscribeOnFunctions() {
   plugin_info_.hmi_function_list.push_back(hmi_api::grant_access);
   plugin_info_.hmi_function_list.push_back(hmi_api::cancel_access);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_control_changed);
+  plugin_info_.hmi_function_list.push_back(hmi_api::on_reverse_apps_allowing);
+  plugin_info_.hmi_function_list.push_back(hmi_api::on_primary_device);
 }
 
 CANModule::~CANModule() {
@@ -103,6 +107,9 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
     LOG4CXX_ERROR(logger_, "Null pointer message received.");
     return ProcessResult::FAILED;
   }
+
+  msg->set_function_name(MessageHelper::GetMobileAPIName(
+      static_cast<functional_modules::MobileFunctionID>(msg->function_id())));
 
   commands::Command* command = MobileCommandFactory::CreateCommand(msg);
   if (command) {
@@ -220,13 +227,35 @@ functional_modules::ProcessResult CANModule::HandleMessage(
       } else if (functional_modules::can_api::on_radio_details
                  == function_name) {
         msg->set_function_id(MobileFunctionID::ON_RADIO_DETAILS);
+      } else if (functional_modules::hmi_api::on_reverse_apps_allowing
+                 == function_name) {
+        if (value.isMember(json_keys::kParams)) {
+          if (value[json_keys::kParams].isMember(message_params::kAllowed)) {
+            PolicyHelper::OnRSDLFunctionalityAllowing(
+              value[json_keys::kParams][message_params::kAllowed].asBool());
+          } else {
+            LOG4CXX_ERROR(logger_, "Invalid OnReverseAppsAllowing notification");
+          }
+        }
+        break;
+      } else if (functional_modules::hmi_api::on_primary_device
+                 == function_name) {
+        if (value.isMember(json_keys::kParams)) {
+          if (value[json_keys::kParams].isMember(message_params::kDevice)) {
+            PolicyHelper::SetPrimaryDevice(
+              value[json_keys::kParams][message_params::kDevice]
+              [json_keys::kId].asInt());
+          } else {
+            LOG4CXX_ERROR(logger_, "Invalid OnPrimaryDevice notification");
+          }
+        }
+        break;
       }
 
-      commands::Command* command = MobileCommandFactory::CreateCommand(msg);
-      if (command) {
-        command->Run();
-      }
+      msg->set_function_name(MessageHelper::GetMobileAPIName(
+          static_cast<functional_modules::MobileFunctionID>(msg->function_id())));
 
+      NotifyMobiles(msg);
       break;
     }
     case application_manager::MessageType::kRequest:
@@ -236,6 +265,23 @@ functional_modules::ProcessResult CANModule::HandleMessage(
   }
 
   return ProcessResult::PROCESSED;
+}
+
+void CANModule::NotifyMobiles(application_manager::MessagePtr msg) {
+  typedef std::vector<application_manager::ApplicationSharedPtr> AppList;
+   AppList applications =
+          service()->GetApplications(CANModule::instance()->GetModuleID());
+  for (AppList::iterator i = applications.begin();
+      i != applications.end(); ++i) {
+    application_manager::MessagePtr message(
+        new application_manager::Message(*msg));
+    message->set_connection_key((*i)->app_id());
+
+    commands::Command* command = MobileCommandFactory::CreateCommand(message);
+    if (command) {
+      command->Run();
+    }
+  }
 }
 
 void CANModule::SendResponseToMobile(application_manager::MessagePtr msg) {

@@ -54,7 +54,7 @@ class OnControlChangedNotification : public BaseCommandNotification {
   /**
    * @brief Execute command
    */
-  virtual void Run();
+  virtual void Execute();
 
   /**
    * @brief OnControlChangedNotification class destructor

@@ -52,6 +52,8 @@ void GenericModule::OnServiceStateChanged(ServiceState state) {
   if (HMI_ADAPTER_INITIALIZED == state_) {
     // We must subscribe to necessary HMI notifications
     service_->SubscribeToHMINotification(hmi_api::on_control_changed);
+    service_->SubscribeToHMINotification(hmi_api::on_reverse_apps_allowing);
+    service_->SubscribeToHMINotification(hmi_api::on_primary_device);
   }
 }
 

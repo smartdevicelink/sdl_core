@@ -65,9 +65,13 @@ class BaseCommandRequest : public Command,
   virtual ~BaseCommandRequest();
 
   /**
-   * \brief BaseCommandRequest on timeout reaction
+   * @brief BaseCommandRequest on timeout reaction
    */
   virtual void OnTimeout();
+
+  void Run();
+  void on_event(const event_engine::Event<application_manager::MessagePtr,
+                std::string>& event);
 
  protected:
   application_manager::MessagePtr message_;
@@ -122,6 +126,30 @@ class BaseCommandRequest : public Command,
   void SendRequest(const char* function_id,
                    const Json::Value& message_params,
                    bool is_hmi_request = false);
+
+  void set_to_can(bool value) {
+    to_can_ = value;
+  }
+
+  application_manager::ApplicationSharedPtr app() {
+    return app_;
+  }
+
+  /**
+   * @brief executes specific logic of children classes
+   */
+  void virtual Execute() = 0;
+
+  /**
+   * @brief Interface method that is called whenever new event received
+   * @param event The received event
+   */
+  void virtual OnEvent(const event_engine::Event<application_manager::MessagePtr,
+                  std::string>& event) = 0;
+
+ private:
+  bool to_can_;
+  application_manager::ApplicationSharedPtr app_;
 };
 
 }  // namespace commands

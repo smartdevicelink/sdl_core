@@ -29,49 +29,56 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_SERVICE_H_
-#define TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_SERVICE_H_
+#ifndef SRC_COMPONENTS_POLICY_TEST_INCLUDE_MOCK_ACCESS_REMOTE_H_
+#define SRC_COMPONENTS_POLICY_TEST_INCLUDE_MOCK_ACCESS_REMOTE_H_
 
 #include "gmock/gmock.h"
-#include "application_manager/service.h"
+#include "policy/access_remote.h"
 
-namespace application_manager {
+namespace policy {
 
-class MockService : public Service {
+class MockSubject : public Subject {
  public:
-  MOCK_METHOD1(CheckPolicyPermissions,
-      mobile_apis::Result::eType(MessagePtr msg));
-  MOCK_METHOD1(GetApplication,
-      ApplicationSharedPtr(ApplicationId app_id));
-  MOCK_METHOD1(SendMessageToHMI,
-      void(const MessagePtr& message));
-  MOCK_METHOD1(SendMessageToMobile,
-      void(const MessagePtr& message));
-  MOCK_METHOD0(GetNextCorrelationID,
-      uint32_t());
-  MOCK_METHOD1(GetApplications,
-      std::vector<ApplicationSharedPtr>(AppExtensionUID uid));
-  MOCK_METHOD1(SubscribeToHMINotification,
-      void(const std::string& hmi_notification));
-  MOCK_METHOD5(CheckAccess,
-      TypeAccess(const ApplicationId& app_id,
-          const PluginFunctionID& function_id,
-          const std::vector<std::string>& params,
-          const SeatLocation& seat,
-          const SeatLocation& zone));
-  MOCK_METHOD4(SetAccess,
-      void(const ApplicationId& app_id,
-          const std::string& group_id,
-          const SeatLocation& zone,
-          bool allowed));
-  MOCK_METHOD1(ResetAccess, void(const ApplicationId& app_id));
-  MOCK_METHOD1(SetPrimaryDevice, void(const uint32_t dev_id));
-  MOCK_METHOD2(ResetAccess, void(const std::string& group_name,
-          const SeatLocation& zone));
-  MOCK_METHOD1(SetRemoteControl, void(bool enabled));
 };
 
-}
-  // namespace application_manager
+class MockObject : public Object {
+ public:
+};
 
-#endif  // TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_SERVICE_H_
+class MockAccessRemote : public AccessRemote {
+ public:
+  MOCK_METHOD0(Init,
+      void());
+  MOCK_METHOD0(Enable,
+      void());
+  MOCK_METHOD0(Disable,
+      void());
+  MOCK_CONST_METHOD0(IsEnabled,
+      bool());
+  MOCK_CONST_METHOD1(IsPrimaryDevice,
+      bool(const PTString& dev_id));
+  MOCK_METHOD1(SetPrimaryDevice,
+      void(const PTString& dev_id));
+  MOCK_CONST_METHOD2(IsPassengerZone,
+      bool(const SeatLocation& seat, const SeatLocation& zone));
+  MOCK_METHOD2(Allow,
+      void(const Subject& who, const Object& what));
+  MOCK_METHOD2(Deny,
+      void(const Subject& who, const Object& what));
+  MOCK_METHOD1(Reset,
+      void(const Subject& who));
+  MOCK_METHOD1(Reset,
+      void(const Object& what));
+  MOCK_CONST_METHOD2(Check,
+      TypeAccess(const Subject& who, const Object& what));
+  MOCK_CONST_METHOD3(FindGroup,
+      PTString(const Subject& who, const PTString& rpc, const RemoteControlParams& params));
+  MOCK_METHOD2(SetDefaultHmiTypes,
+      void(const std::string& app_id, const std::vector<int>& hmi_types));
+  MOCK_METHOD2(GetGroups,
+      const policy_table::Strings&(const PTString& device_id, const PTString& app_id));
+};
+
+}  // namespace policy
+
+#endif  // SRC_COMPONENTS_POLICY_TEST_INCLUDE_MOCK_ACCESS_REMOTE_H_

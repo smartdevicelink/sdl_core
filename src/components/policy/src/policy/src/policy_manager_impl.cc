@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -47,6 +47,10 @@
 #include "policy/update_status_manager.h"
 #include "config_profile/profile.h"
 
+#ifdef SDL_REMOTE_CONTROL
+#include "policy/access_remote_impl.h"
+#endif  // SDL_REMOTE_CONTROL
+
 policy::PolicyManager* CreateManager() {
   return new policy::PolicyManagerImpl();
 }
@@ -59,6 +63,12 @@ PolicyManagerImpl::PolicyManagerImpl()
   : PolicyManager(),
     listener_(NULL),
     cache_(new CacheManager),
+#ifdef SDL_REMOTE_CONTROL
+      access_remote_(
+          new AccessRemoteImpl(
+              CacheManagerInterfaceSPtr::static_pointer_cast<CacheManager>(
+                  cache_))),
+#endif  // SDL_REMOTE_CONTROL
     retry_sequence_timeout_(60),
     retry_sequence_index_(0),
     ignition_check(true) {
@@ -273,7 +283,14 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
     "CheckPermissions for " << app_id << " and rpc " << rpc << " for "
     << hmi_level << " level.");
 
-  cache_->CheckPermissions(app_id, hmi_level, rpc, result);
+#ifdef SDL_REMOTE_CONTROL
+  const PTString device_id = GetCurrentDeviceId(app_id);
+  const policy_table::Strings& groups =
+      access_remote_->GetGroups(device_id, app_id);
+#else  // SDL_REMOTE_CONTROL
+  const policy_table::Strings& groups = cache_->GetGroups(app_id);
+#endif  // SDL_REMOTE_CONTROL
+  cache_->CheckPermissions(groups, hmi_level, rpc, result);
 }
 
 bool PolicyManagerImpl::ResetUserConsent() {
@@ -781,7 +798,8 @@ bool PolicyManagerImpl::CanAppStealFocus(const std::string& app_id) {
 void PolicyManagerImpl::MarkUnpairedDevice(const std::string& device_id) {
 }
 
-void PolicyManagerImpl::AddApplication(const std::string& application_id) {
+void PolicyManagerImpl::AddApplication(const std::string& application_id,
+                                       const std::vector<int>& hmi_types) {
   LOG4CXX_INFO(logger_, "AddApplication");
   const std::string device_id = GetCurrentDeviceId(application_id);
   DeviceConsent device_consent = GetUserConsentForDevice(device_id);
@@ -793,6 +811,9 @@ void PolicyManagerImpl::AddApplication(const std::string& application_id) {
   } else {
     PromoteExistedApplication(application_id, device_consent);
   }
+#if SDL_REMOTE_CONTROL
+  access_remote_->SetDefaultHmiTypes(application_id, hmi_types);
+#endif  // SDL_REMOTE_CONTROL
   StartPTExchange();
   SendNotificationOnPermissionsUpdated(application_id);
 }
@@ -868,6 +889,9 @@ bool PolicyManagerImpl::InitPT(const std::string& file_name) {
   if (ret) {
     RefreshRetrySequence();
     update_status_manager_.OnPolicyInit(cache_->UpdateRequired());
+#ifdef SDL_REMOTE_CONTROL
+    access_remote_->Init();
+#endif  // SDL_REMOTE_CONTROL
   }
   return ret;
 }
@@ -884,6 +908,73 @@ void PolicyManagerImpl::set_cache_manager(
     CacheManagerInterface* cache_manager) {
   cache_ = cache_manager;
 }
+
+#ifdef SDL_REMOTE_CONTROL
+TypeAccess PolicyManagerImpl::CheckAccess(
+    const PTString& app_id, const PTString& rpc,
+    const RemoteControlParams& params,const SeatLocation& seat,
+    const SeatLocation& zone) {
+  TypeAccess access = TypeAccess::kDisallowed;
+
+  std::string dev_id = GetCurrentDeviceId(app_id);
+  if (access_remote_->IsPrimaryDevice(dev_id)) {
+    access = TypeAccess::kAllowed;
+  } else if (access_remote_->IsEnabled()) {
+    if (access_remote_->IsPassengerZone(seat, zone)) {
+      access = TypeAccess::kAllowed;
+    } else {
+      Subject who = {dev_id, app_id};
+      PTString group_name = access_remote_->FindGroup(who, rpc, params);
+      if (group_name.empty()) {
+        // Group wasn't found => request is disallowed
+        access = TypeAccess::kDisallowed;
+      } else {
+        Object what = {group_name, zone};
+        access = access_remote_->Check(who, what);
+      }
+    }
+  }
+  return access;
+}
+
+void PolicyManagerImpl::SetAccess(const PTString& app_id,
+                                  const PTString& group_name,
+                                  const SeatLocation zone,
+                                  bool allowed) {
+  std::string dev_id = GetCurrentDeviceId(app_id);
+  Subject who = {dev_id, app_id};
+  Object what = {group_name, zone};
+  if (allowed) {
+    access_remote_->Allow(who, what);
+  } else {
+    access_remote_->Deny(who, what);
+  }
+}
+
+void PolicyManagerImpl::ResetAccess(const PTString& app_id) {
+  std::string dev_id = GetCurrentDeviceId(app_id);
+  Subject who = {dev_id, app_id};
+  access_remote_->Reset(who);
+}
+
+void PolicyManagerImpl::ResetAccess(const PTString& group_name,
+                                    const SeatLocation zone) {
+  Object who = {group_name, zone};
+  access_remote_->Reset(who);
+}
+
+void PolicyManagerImpl::SetPrimaryDevice(const PTString& dev_id) {
+  access_remote_->SetPrimaryDevice(dev_id);
+}
+
+void PolicyManagerImpl::SetRemoteControl(bool enabled) {
+  if (enabled) {
+    access_remote_->Enable();
+  } else {
+    access_remote_->Disable();
+  }
+}
+#endif  // SDL_REMOTE_CONTROL
 
 }  //  namespace policy
 

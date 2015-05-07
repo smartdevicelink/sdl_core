@@ -238,6 +238,7 @@ bool IsValidEnum(AppHMIType val) {
     case AHT_BACKGROUND_PROCESS: return true;
     case AHT_TESTING: return true;
     case AHT_SYSTEM: return true;
+    case AHT_REMOTE_CONTROL: return true;
     default: return false;
   }
 }
@@ -253,6 +254,7 @@ const char* EnumToJsonString(AppHMIType val) {
     case AHT_BACKGROUND_PROCESS: return "BACKGROUND_PROCESS";
     case AHT_TESTING: return "TESTING";
     case AHT_SYSTEM: return "SYSTEM";
+    case AHT_REMOTE_CONTROL: return "REMOTE_CONTROL";
     default: return "";
   }
 }
@@ -286,6 +288,9 @@ bool EnumFromJsonString(const std::string& literal, AppHMIType* result) {
     return true;
   } else if ("SYSTEM" == literal) {
     *result = AHT_SYSTEM;
+    return true;
+  } else if ("REMOTE_CONTROL" == literal) {
+    *result = AHT_REMOTE_CONTROL;
     return true;
   } else {
     return false;

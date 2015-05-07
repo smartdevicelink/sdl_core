@@ -55,14 +55,14 @@ class ClimateControlOnRequest : public BaseCommandRequest {
   /**
    * @brief Execute command
    */
-  virtual void Run();
+  virtual void Execute();
 
   /**
    * @brief Interface method that is called whenever new event received
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event<application_manager::MessagePtr,
+  void OnEvent(const event_engine::Event<application_manager::MessagePtr,
                 std::string>& event);
 
   /**

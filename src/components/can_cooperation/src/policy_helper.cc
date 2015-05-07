@@ -30,47 +30,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_APP_EXTENSION_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_APP_EXTENSION_H_
-
-#include <string>
-#include "application_manager/service.h"
-#include "application_manager/app_extension.h"
-
-using application_manager::SeatLocation;
+#include "can_cooperation/policy_helper.h"
+#include "can_cooperation/can_module.h"
 
 namespace can_cooperation {
-class CANAppExtension : public application_manager::AppExtension {
-  public:
-    explicit CANAppExtension(application_manager::AppExtensionUID uid);
-    ~CANAppExtension();
 
-    /**
-     * @brief Checks is application has access to a radio tune control
-     * @return true if control given
-     */
-    bool IsControlGiven() const;
+void PolicyHelper::OnRSDLFunctionalityAllowing(bool allowed) {
+  CANModule::instance()->service()->SetRemoteControl(allowed);
+}
 
-    /**
-     * @brief Give radio tune control to application
-     * @param is_control_given true - give control, false - cancel control
-     */
-    void GiveControl(bool is_control_given);
+void PolicyHelper::SetPrimaryDevice(const int device_handle) {
+  CANModule::instance()->service()->SetPrimaryDevice(device_handle);
+}
 
-    void set_seat(const SeatLocation& seat) {
-      seat_ = seat;
-    }
-
-    const SeatLocation& seat() const {
-      return seat_;
-    }
-
-  private:
-    bool is_control_given_;
-    SeatLocation seat_;
-};
-
-typedef utils::SharedPtr<CANAppExtension> CANAppExtensionPtr;
 }  //  namespace can_cooperation
-
-#endif  //  SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_APP_EXTENSION_H_

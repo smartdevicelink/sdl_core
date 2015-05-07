@@ -37,7 +37,13 @@
 #include "application_manager/service.h"
 #include "application_manager/application.h"
 
+namespace Json {
+  class Value;
+}
+
 namespace application_manager {
+
+struct CommandParametersPermissions;
 
 /**
  * @brief Class through which the plug-in can interact with the core
@@ -55,12 +61,66 @@ class CoreService : public Service {
   virtual ~CoreService();
 
   /**
-   * @brief Checks message permissions and parameters according to policy table
-   * permissions
-   * @param json string with params in json format
-   * @return false if message blocked by policy
+   * @brief Checks message permissions and cuts parameters according
+   * to policy table permissions
+   * @param msg message to cut disallowed parameters
+   * @return result according by mobile API
    */
-  virtual bool CheckPolicyPermissions(std::string& json_message);
+  virtual mobile_apis::Result::eType CheckPolicyPermissions(MessagePtr msg);
+
+  /**
+   * Checks access to requested equipment of vehicle
+   * @param app_id id of application
+   * @param function_id name of RPC
+   * @param params parameters list
+   * @param seat seat of owner's mobile device
+   * @return return allowed if access exist,
+   * manual if need to send question to driver otherwise disallowed
+   */
+  virtual TypeAccess CheckAccess(const ApplicationId& app_id,
+                                 const PluginFunctionID& function_id,
+                                 const std::vector<std::string>& params,
+                                 const SeatLocation& seat,
+                                 const SeatLocation& zone);
+
+  /**
+   * Sets access to functional group which contains given RPC for application
+   * @param app_id id of application
+   * @param group_id id RPC
+   * @param zone requested zone
+   * @param allowed true if driver has given access
+   */
+  virtual void SetAccess(const ApplicationId& app_id,
+                         const std::string& group_id,
+                         const SeatLocation& zone,
+                         bool allowed);
+
+  /**
+   * Resets access by group name for all applications
+   * @param group_name group name
+   * @param zone zone control
+   */
+  virtual void ResetAccess(const ApplicationId& app_id);
+
+  /**
+   * Resets access by group name for all applications
+   * @param group_name group name
+   * @param zone zone control
+   */
+  virtual void ResetAccess(const std::string& group_name,
+                           const SeatLocation& zone);
+
+  /**
+   * Sets device as primary device
+   * @param dev_id ID device
+   */
+  virtual void SetPrimaryDevice(const uint32_t dev_id);
+
+  /**
+   * Sets mode of remote control (on/off)
+   * @param enabled true if remote control is turned on
+   */
+  virtual void SetRemoteControl(bool enabled);
 
   /**
    * @brief Get pointer to application by application id
@@ -103,9 +163,17 @@ class CoreService : public Service {
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CoreService);
+
+  void FilterParameters(MessagePtr msg,
+                        const CommandParametersPermissions& params);
+  bool AreParametersAllowed(MessagePtr msg,
+                            const CommandParametersPermissions& params);
+  bool CheckParams(const Json::Value& object,
+                   const std::vector<std::string>& allowed_params);
+  bool IsAllowed(const std::string& name,
+                 const std::vector<std::string>& allowed_params);
 };
 
 }  // namespace application_manager
-
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_CORE_SERVICE_H_

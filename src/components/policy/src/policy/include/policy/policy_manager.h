@@ -38,8 +38,10 @@
 #include "policy/policy_types.h"
 #include "policy/policy_listener.h"
 #include "usage_statistics/statistics_manager.h"
+#include "policy/access_remote.h"
 
 namespace policy {
+
 class PolicyManager : public usage_statistics::StatisticsManager {
   public:
     virtual ~PolicyManager() {
@@ -326,8 +328,10 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @brief Adds, application to the db or update existed one
      * run PTU if policy update is necessary for application.
      * @param Application id assigned by Ford to the application
+     * @param hmi_types list of hmi types
      */
-    virtual void AddApplication(const std::string& application_id) = 0;
+    virtual void AddApplication(const std::string& application_id,
+                                const std::vector<int>& hmi_types) = 0;
 
     /**
      * @brief Removes unpaired device records and related records from DB
@@ -395,6 +399,55 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @brief Handler on applications search completed
      */
     virtual void OnAppsSearchCompleted() = 0;
+
+#ifdef SDL_REMOTE_CONTROL
+    /**
+     * Checks access to equipment of vehicle for application by RPC
+     * @param app_id policy id application
+     * @param rpc name of RPC
+     * @param params parameters list
+     */
+    virtual TypeAccess CheckAccess(const PTString& app_id, const PTString& rpc,
+                                   const RemoteControlParams& params,
+                                   const SeatLocation& seat,
+                                   const SeatLocation& zone) = 0;
+
+    /**
+     * Sets access to equipment of vehicle for application by RPC
+     * @param app_id policy id application
+     * @param group_name RPC group name
+     * @param zone zone control
+     * @param allowed true if access is allowed
+     */
+    virtual void SetAccess(const PTString& app_id, const PTString& group_name,
+                           const SeatLocation zone, bool allowed) = 0;
+
+    /**
+     * Resets access application to all resources
+     * @param app_id policy id application
+     */
+    virtual void ResetAccess(const PTString& app_id) = 0;
+
+    /**
+     * Resets access by functional group for all applications
+     * @param group_name group name
+     * @param zone zone control
+     */
+    virtual void ResetAccess(const PTString& group_name,
+                             const SeatLocation zone) = 0;
+
+    /**
+     * Sets driver as primary device
+     * @param dev_id ID device
+     */
+    virtual void SetPrimaryDevice(const PTString& dev_id) = 0;
+
+    /**
+     * Sets mode of remote control (on/off)
+     * @param enabled true if remote control is turned on
+     */
+    virtual void SetRemoteControl(bool enabled) = 0;
+#endif  // SDL_REMOTE_CONTROL
 
   protected:
     /**

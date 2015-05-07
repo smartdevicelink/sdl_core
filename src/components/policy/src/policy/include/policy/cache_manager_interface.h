@@ -36,6 +36,8 @@
 #include <string>
 #include <vector>
 
+#include "types.h"
+#include "policy/pt_representation.h"
 #include "utils/shared_ptr.h"
 #include "usage_statistics/counter.h"
 
@@ -52,14 +54,15 @@ class CacheManagerInterface {
    * @brief Check if specified RPC for specified application
    * has permission to be executed in specified HMI Level
    * and also its permitted params.
-   * @param app_id Id of application provided during registration
+   * @param groups list of functional groups
    * @param hmi_level Current HMI Level of application
    * @param rpc Name of RPC
    * @return CheckPermissionResult containing flag if HMI Level is allowed
    * and list of allowed params.
    */
-  virtual void CheckPermissions(const PTString& app_id,
-                                const PTString& hmi_level, const PTString& rpc,
+  virtual void CheckPermissions(const policy_table::Strings &groups,
+                                const PTString& hmi_level,
+                                const PTString& rpc,
                                 CheckPermissionResult& result) = 0;
 
   /**
@@ -566,6 +569,13 @@ class CacheManagerInterface {
       const std::string& device_id,
       const std::string& policy_app_id,
       policy::Permissions& permission) = 0;
+
+  /**
+   * Gets groups list
+   * @param app_id ID application
+   * @return list of groups
+   */
+  virtual const policy_table::Strings& GetGroups(const PTString &app_id) = 0;
 };
 
 typedef utils::SharedPtr<CacheManagerInterface> CacheManagerInterfaceSPtr;

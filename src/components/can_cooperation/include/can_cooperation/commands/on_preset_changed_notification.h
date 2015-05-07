@@ -54,7 +54,7 @@ class OnPresetChangedNotification : public BaseCommandNotification {
   /**
    * @brief Execute command
    */
-  virtual void Run();
+  virtual void Execute();
 
   /**
    * @brief OnPresetChangedNotification class destructor

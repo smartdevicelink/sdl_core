@@ -483,6 +483,7 @@ void SQLPTRepresentation::GatherModuleConfig(
     *config->vehicle_make = query.GetString(5);
     *config->vehicle_model = query.GetString(6);
     *config->vehicle_year = query.GetString(7);
+    *config->remote_control = query.GetBoolean(8);
   }
 
   dbms::SQLQuery endpoints(db());
@@ -536,10 +537,13 @@ void SQLPTRepresentation::GatherDeviceData(
 
   dbms::SQLQuery query(db());
   if (query.Prepare(sql_pt::kSelectDeviceData)) {
-    policy_table::DeviceParams device_data_empty;
-    device_data_empty.mark_initialized();
+    policy_table::DeviceParams device_data;
+    device_data.mark_initialized();
     while (query.Next()) {
-      (*data)[query.GetString(0)] = device_data_empty;
+      if (!query.IsNull(9)) {
+        *device_data.primary = query.GetBoolean(9);
+      }
+      (*data)[query.GetString(0)] = device_data;
     }
   }
 }
@@ -635,6 +639,14 @@ bool SQLPTRepresentation::GatherApplicationPolicies(
     if (!GatherAppGroup(app_id, &params.groups)) {
       return false;
     }
+#ifdef SDL_REMOTE_CONTROL
+    if (!GatherAppGroupPrimary(app_id, &*params.groups_primaryRC)) {
+      return false;
+    }
+    if (!GatherAppGroupNonPrimary(app_id, &*params.groups_non_primaryRC)) {
+      return false;
+    }
+#endif  // SDL_REMOTE_CONTROL
     // TODO(IKozyrenko): Check logic if optional container is missing
     if (!GatherNickName(app_id, &*params.nicknames)) {
       return false;
@@ -785,6 +797,16 @@ bool SQLPTRepresentation::SaveApplicationPolicies(
     LOG4CXX_WARN(logger_, "Incorrect delete from app_group.");
     return false;
   }
+#ifdef SDL_REMOTE_CONTROL
+  if (!query_delete.Exec(sql_pt::kDeleteAppGroupPrimary)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from app_group_primary.");
+    return false;
+  }
+  if (!query_delete.Exec(sql_pt::kDeleteAppGroupNonPrimary)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from app_group_non_primary.");
+    return false;
+  }
+#endif  // SDL_REMOTE_CONTROL
   if (!query_delete.Exec(sql_pt::kDeleteApplication)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from application.");
     return false;
@@ -859,9 +881,19 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
     }
   }
 
+  LOG4CXX_DEBUG(logger_, "App: " << app.first);
+
   if (!SaveAppGroup(app.first, app.second.groups)) {
     return false;
   }
+#ifdef SDL_REMOTE_CONTROL
+  if (!SaveAppGroupPrimary(app.first, *app.second.groups_primaryRC)) {
+    return false;
+  }
+  if (!SaveAppGroupNonPrimary(app.first, *app.second.groups_non_primaryRC)) {
+    return false;
+  }
+#endif  // SDL_REMOTE_CONTROL
   // TODO(IKozyrenko): Check logic if optional container is missing
   if (!SaveNickname(app.first, *app.second.nicknames)) {
     return false;
@@ -966,6 +998,8 @@ bool SQLPTRepresentation::SaveModuleConfig(
   query.Bind(6, *(config.vehicle_model)) : query.Bind(6);
   config.vehicle_year.is_initialized() ?
   query.Bind(7, *(config.vehicle_year)) : query.Bind(7);
+  config.remote_control.is_initialized() ?
+  query.Bind(8, *(config.remote_control)) : query.Bind(8);
 
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Incorrect update module config");
@@ -1161,6 +1195,10 @@ bool SQLPTRepresentation::SaveNumberOfNotificationsPerMinute(
 bool SQLPTRepresentation::SaveDeviceData(
   const policy_table::DeviceData& devices) {
   dbms::SQLQuery query(db());
+  if (!query.Exec(sql_pt::kDeleteAllDevices)) {
+    LOG4CXX_WARN(logger_, "Could not clear device table.");
+    return false;
+  }
   if (!query.Prepare(sql_pt::kInsertDeviceData)) {
     LOG4CXX_WARN(logger_, "Incorrect insert statement for device data.");
     return false;
@@ -1168,8 +1206,11 @@ bool SQLPTRepresentation::SaveDeviceData(
 
   policy_table::DeviceData::const_iterator it;
   for (it = devices.begin(); it != devices.end(); ++it) {
+    const policy_table::DeviceParams& params = it->second;
     query.Bind(0, it->first);
-    if (!query.Exec()) {
+    params.primary.is_initialized() ? query.Bind(1, *params.primary)
+        : query.Bind(1);
+    if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into device data.");
       return false;
     }
@@ -1327,6 +1368,88 @@ bool SQLPTRepresentation::GatherAppGroup(
   return true;
 }
 
+#ifdef SDL_REMOTE_CONTROL
+bool SQLPTRepresentation::GatherAppGroupPrimary(
+  const std::string& app_id, policy_table::Strings* app_groups) const {
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectAppGroupsPrimary)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from app groups for primary RC");
+    return false;
+  }
+
+  query.Bind(0, app_id);
+  while (query.Next()) {
+    app_groups->push_back(query.GetString(0));
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::GatherAppGroupNonPrimary(
+  const std::string& app_id, policy_table::Strings* app_groups) const {
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectAppGroupsNonPrimary)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from app groups for non primary RC");
+    return false;
+  }
+
+  query.Bind(0, app_id);
+  while (query.Next()) {
+    app_groups->push_back(query.GetString(0));
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::SaveAppGroupPrimary(
+  const std::string& app_id, const policy_table::Strings& app_groups) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertAppGroupPrimary)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for app group primary");
+    return false;
+  }
+  policy_table::Strings::const_iterator it;
+  for (it = app_groups.begin(); it != app_groups.end(); ++it) {
+    std::string ssss = *it;
+    LOG4CXX_INFO(logger_, "Group: " << ssss);
+    query.Bind(0, app_id);
+    query.Bind(1, *it);
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_WARN(
+        logger_,
+        "Incorrect insert into app group primary." << query.LastError().text());
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool SQLPTRepresentation::SaveAppGroupNonPrimary(
+  const std::string& app_id, const policy_table::Strings& app_groups) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertAppGroupNonPrimary)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for app group non primary");
+    return false;
+  }
+  policy_table::Strings::const_iterator it;
+  for (it = app_groups.begin(); it != app_groups.end(); ++it) {
+    std::string ssss = *it;
+    LOG4CXX_INFO(logger_, "Group: " << ssss);
+    query.Bind(0, app_id);
+    query.Bind(1, *it);
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_WARN(
+        logger_,
+        "Incorrect insert into app group non primary." << query.LastError().text());
+      return false;
+    }
+  }
+
+  return true;
+}
+#endif  // SDL_REMOTE_CONTROL
+
 bool SQLPTRepresentation::SaveApplicationCustomData(const std::string& app_id,
                                                     bool is_revoked,
                                                     bool is_default,
@@ -1402,6 +1525,7 @@ bool SQLPTRepresentation::IsPredataPolicy(const std::string& app_id) const {
 }
 
 bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
   dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kDeleteAppGroupByApplicationId)) {
     LOG4CXX_ERROR(logger_, "Incorrect statement to delete from app_group.");
@@ -1412,6 +1536,29 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
     LOG4CXX_ERROR(logger_, "Failed deleting from app_group.");
     return false;
   }
+#ifdef SDL_REMOTE_CONTROL
+  dbms::SQLQuery query_p(db());
+  if (!query_p.Prepare(sql_pt::kDeleteAppGroupPrimaryByApplicationId)) {
+    LOG4CXX_ERROR(logger_, "Incorrect statement to delete from app_group_primary.");
+    return false;
+  }
+  query_p.Bind(0, app_id);
+  if (!query_p.Exec()) {
+    LOG4CXX_ERROR(logger_, "Failed deleting from app_group_primary.");
+    return false;
+  }
+
+  dbms::SQLQuery query_np(db());
+  if (!query_np.Prepare(sql_pt::kDeleteAppGroupNonPrimaryByApplicationId)) {
+    LOG4CXX_ERROR(logger_, "Incorrect statement to delete from app_group_non_primary.");
+    return false;
+  }
+  query_np.Bind(0, app_id);
+  if (!query_np.Exec()) {
+    LOG4CXX_ERROR(logger_, "Failed deleting from app_group_non_primary.");
+    return false;
+  }
+#endif  // SDL_REMOTE_CONTROL
 
   if (!CopyApplication(kDefaultId, app_id)) {
     return false;
@@ -1420,8 +1567,18 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
   SetPreloaded(false);
 
   policy_table::Strings default_groups;
-  if (GatherAppGroup(kDefaultId, &default_groups) &&
-      SaveAppGroup(app_id, default_groups)) {
+  bool ret = ( GatherAppGroup(kDefaultId, &default_groups)
+      && SaveAppGroup(app_id, default_groups));
+#ifdef SDL_REMOTE_CONTROL
+  policy_table::Strings groups_primary;
+  ret = ret && (GatherAppGroupPrimary(kDefaultId, &groups_primary)
+        && SaveAppGroupPrimary(app_id, groups_primary));
+  policy_table::Strings groups_non_primary;
+  ret = ret && (GatherAppGroupNonPrimary(kDefaultId, &groups_non_primary)
+        && SaveAppGroupNonPrimary(app_id, groups_non_primary));
+#endif  // SDL_REMOTE_CONTROL
+
+  if (ret) {
     return SetIsDefault(app_id, true);
   }
   return false;

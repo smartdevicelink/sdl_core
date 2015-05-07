@@ -57,6 +57,8 @@ typedef Map< DeviceParams, 0, 255 > DeviceData;
 struct ApplicationParams : CompositeType {
   public:
     Strings groups;
+    Optional< Strings > groups_primaryRC;
+    Optional< Strings > groups_non_primaryRC;
     Optional< Strings > nicknames;
     Optional< AppHMITypes > AppHMIType;
     Enum<Priority> priority;
@@ -131,6 +133,7 @@ struct ModuleConfig : CompositeType {
     Optional< String<1, 100> > vehicle_model;
     Optional< String<4, 4> > vehicle_year;
     Optional< String<0, 65535> > certificate;
+    Optional< Boolean > remote_control;
   public:
     ModuleConfig();
     ModuleConfig(uint8_t exchange_after_x_ignition_cycles, int64_t exchange_after_x_kilometers, uint8_t exchange_after_x_days, uint16_t timeout_after_x_seconds, const SecondsBetweenRetries& seconds_between_retries, const ServiceEndpoints& endpoints, const NumberOfNotificationsPerMinute& notifications_per_minute_by_priority);
@@ -253,6 +256,7 @@ struct UsageAndErrorCounts : CompositeType {
 
 struct DeviceParams : CompositeType {
   public:
+    Optional< Boolean > primary;
   public:
     DeviceParams();
     ~DeviceParams();

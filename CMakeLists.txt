@@ -47,7 +47,7 @@ option(TIME_TESTER "Enable profiling time test util" ON)
 option(ENABLE_LOG "Logging feature" ON)
 option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
-option(ENABLE_SECURITY "Security Ford protocol protection" ON)
+option(REMOTE_CONTROL "Enable Reverse functionality" OFF)
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
 set(DEBUG_OPTION 	"$ENV{DEBUG}")
@@ -61,7 +61,6 @@ set(POLICY_OPTION 	"$ENV{POLICY_TYPE}")
 set(SECURITY_OPTION 	"$ENV{SECURITY_MODE}")
 set(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
 set(SNAPSHOT_TAG 	"$ENV{SNAPSHOT_TAG}")
-
 
 
 if (ARCH_TYPE_OPTION)
@@ -141,6 +140,11 @@ if (SECURITY_OPTION)
   endif()
 endif()
 
+if (REMOTE_CONTROL)
+  add_definitions(-DSDL_REMOTE_CONTROL)
+  message(STATUS "Remote control support is enabled (aka Reverse SDL or SDL-RC)")
+endif()
+
 #Jenkins integration section end
 
 add_custom_target(pasa-tarball
@@ -172,12 +176,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
-set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror -Wuninitialized -Wvla")
-
-if(ENABLE_SANITIZE)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
-endif()
-if(ENABLE_GCOV)
+if (ENABLE_GCOV)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
   add_definitions(-DGCOV_ENABLED)
 endif()
