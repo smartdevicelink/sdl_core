@@ -918,6 +918,12 @@ TypeAccess PolicyManagerImpl::CheckAccess(
 
   std::string dev_id = GetCurrentDeviceId(app_id);
   if (access_remote_->IsPrimaryDevice(dev_id)) {
+
+    Subject who = {dev_id, app_id};
+    PTString group_name = access_remote_->FindGroup(who, rpc, params);
+    Object what = {group_name, zone};
+    access_remote_->Allow(who, what);
+
     access = TypeAccess::kAllowed;
   } else if (access_remote_->IsEnabled()) {
     if (access_remote_->IsPassengerZone(seat, zone)) {

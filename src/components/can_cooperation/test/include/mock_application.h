@@ -181,6 +181,8 @@ class MockApplication : public Application {
       bool(AppExtensionPtr extention));
   MOCK_METHOD1(RemoveExtension,
       bool(AppExtensionUID uid));
+  MOCK_METHOD0(RemoveExtensions,
+        void());
   MOCK_CONST_METHOD0(help_prompt,
       const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(timeout_prompt,

@@ -214,6 +214,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    */
   bool RemoveExtension(AppExtensionUID uid);
 
+  /**
+   * @brief Removes all extensions
+   */
+  void RemoveExtensions();
+
  private:
 
   // interfaces for NAVI retry sequence

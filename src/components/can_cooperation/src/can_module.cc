@@ -310,8 +310,10 @@ void CANModule::RemoveAppExtensions() {
     applications.begin();
 
   for (; it != applications.end(); ++it) {
-    if (*it) {
-       (*it)->RemoveExtension(CANModule::instance()->GetModuleID());
+    application_manager::ApplicationSharedPtr app = *it;
+    if (app) {
+      service()->ResetAccess(app->app_id());
+      app->RemoveExtension(CANModule::instance()->GetModuleID());
     }
   }
 }
@@ -321,6 +323,7 @@ void CANModule::RemoveAppExtension(uint32_t app_id) {
         app_id);
 
   if (app) {
+    service()->ResetAccess(app->app_id());
     app->RemoveExtension(kCANModuleID);
   }
 }
