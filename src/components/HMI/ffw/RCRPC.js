@@ -37,9 +37,8 @@ FFW.RC = FFW.RPCObserver.create({
 		this._super();
 	},
 	onRPCRequest: function(request){
-		Em.Logger.log(FFW.RC.onRPCRequest);
 		this._super();
-
+		Em.Logger.log("FFW.RC.onRPCRequest");
 
 		if(request.method == "RC.GetInteriorVehicleDataCapabilities"){
 
@@ -177,6 +176,7 @@ FFW.RC = FFW.RPCObserver.create({
 			}
 
 		}
+
 	},
 
 	sendError: function(resultCode, id, method, message){

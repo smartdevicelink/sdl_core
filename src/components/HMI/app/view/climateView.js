@@ -51,8 +51,8 @@ SDL.ClimateView = Em.ContainerView.create( {
         elementId: 'climate_control',
     
         childViews: [
-            'fanSpeed'
-            //'currentTemp',
+            'fanSpeed',
+            'temperature',
             //'desiredTemp',
             //'acEnable',
             //'recirculateAirEnable',
@@ -62,14 +62,65 @@ SDL.ClimateView = Em.ContainerView.create( {
 
         ],
 
+        temperature: Em.ContainerView.extend({
+            elementId: 'temperature_container',
+            childViews: [
+                'tempLabel',
+                'tempUpButton',
+                'tempDownButton',
+                'tempLevel'
+
+            ],
+
+            tempLabel: SDL.Label.extend({
+                elementId: 'temp_label',
+
+                content: "Temperature",
+            }),
+
+            tempUpButton: SDL.Button.extend({
+                elementId: 'temp_up_button',
+
+                text: 'Up',
+
+                action: 'tempUp',
+
+                target: 'SDL.ClimateController'
+            }),
+
+            tempDownButton: SDL.Button.extend({
+                elementId: 'temp_down_button',
+
+                text: 'Down',
+
+                action: 'tempDown',
+
+                target: 'SDL.ClimateController',
+
+            }),
+
+            tempLevel: SDL.Label.extend({
+                elementId: "temp_level",
+
+                contentBinding: Em.Binding.oneWay('SDL.ClimateController.model.desiredTemp')
+            })
+        }),
+
         fanSpeed: Em.ContainerView.extend({
             elementId: 'fan_speed_container',
             childViews: [
+                'fanSpeedLabel',
                 'fanSpeedUpButton',
                 'fanSpeedDownButton',
                 'fanSpeedLevel'
 
             ],
+
+            fanSpeedLabel: SDL.Label.extend({
+                elementId: 'fan_speed_label',
+
+                content: "Fan Speed"
+            }),
 
             fanSpeedUpButton: SDL.Button.extend({
                 elementId: 'fan_speed_up_button',
