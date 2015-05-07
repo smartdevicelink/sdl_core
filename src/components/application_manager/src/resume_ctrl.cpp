@@ -203,7 +203,7 @@ bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
   if (HMILevel::HMI_FULL == hmi_level) {
     restored_hmi_level = app_mngr_->IsHmiLevelFullAllowed(application);
   } else if (HMILevel::HMI_LIMITED == hmi_level) {
-    bool allowed_limited = true;
+    bool allowed_limited = application->is_media_application();
     ApplicationManagerImpl::ApplicationListAccessor accessor;
     ApplicationManagerImpl::ApplictionSetConstIt it = accessor.begin();
     for (; accessor.end() != it && allowed_limited; ++it) {
@@ -227,9 +227,10 @@ bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
   }
 
   const AudioStreamingState::eType restored_audio_state =
-      HMILevel::HMI_FULL == restored_hmi_level ||
-      HMILevel::HMI_LIMITED == restored_hmi_level ? AudioStreamingState::AUDIBLE:
-                                                    AudioStreamingState::NOT_AUDIBLE;
+      application->is_media_application() &&
+      (HMILevel::HMI_FULL == restored_hmi_level ||
+       HMILevel::HMI_LIMITED == restored_hmi_level)
+          ? AudioStreamingState::AUDIBLE : AudioStreamingState::NOT_AUDIBLE;
 
   if (restored_hmi_level == HMILevel::HMI_FULL) {
     ApplicationManagerImpl::instance()->SetState<true>(application->app_id(),
