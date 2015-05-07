@@ -211,7 +211,7 @@ if (REMOTE_CONTROL)
     DESTINATION ${CMAKE_BINARY_DIR}/bin
     RENAME sdl_preloaded_pt.json
   )
-elseif ()
+else ()
   install(
     FILES log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
       hmi_capabilities.json sdl_preloaded_pt.json
