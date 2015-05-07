@@ -1,0 +1,51 @@
+#climate_control{
+	width: 800px;
+	height: 480px;
+}
+
+#fan_speed_container{
+	width: 282px;
+	height: 200px;
+	position: absolute;
+	left: 100px;
+	top: 141px;
+}
+
+#fan_speed_up_button{
+	left: 95px;
+	top: 0px;
+	width: 93px;
+	height: 49px;
+	border-left: 1px solid #393939;
+	border-right: 1px solid #393939;
+	border-top: 1px solid #393939;
+	font-size: 26px;
+	text-align: center;
+	line-height: 32px;
+}
+
+#fan_speed_down_button{
+	left: 95px;
+	top: 100px;
+	width: 93px;
+	height: 49px;
+	border-left: 1px solid #393939;
+	border-right: 1px solid #000;
+	border-top: 1px solid #393939;
+	font-size: 26px;
+	text-align: center;
+	line-height: 32px;
+}
+
+#fan_speed_level{
+	left: 95px;
+	top: 50px;
+	width: 93px;
+	height: 49px;
+	border-top: 1px solid #393939;
+	border-left: 1px solid #393939;
+	border-right: 1px solid #000;
+		font-size: 26px;
+	text-align: center;
+	line-height: 32px;
+}

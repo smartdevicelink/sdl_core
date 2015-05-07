@@ -42,15 +42,67 @@ SDL.ClimateView = Em.ContainerView.create( {
     
     childViews:
         [
-            'windowText'
+            'climateView'
         ],
 
 
-    windowText: SDL.Label.extend( {
+    climateView: Em.ContainerView.extend( {
     
-        classNames: 'windowText',
+        elementId: 'climate_control',
     
-        content: 'Climate'
+        childViews: [
+            'fanSpeed'
+            //'currentTemp',
+            //'desiredTemp',
+            //'acEnable',
+            //'recirculateAirEnable',
+            //'autoModeEnable',
+            //'defrostZone',
+            //'dualModeEnable'
+
+        ],
+
+        fanSpeed: Em.ContainerView.extend({
+            elementId: 'fan_speed_container',
+            childViews: [
+                'fanSpeedUpButton',
+                'fanSpeedDownButton',
+                'fanSpeedLevel'
+
+            ],
+
+            fanSpeedUpButton: SDL.Button.extend({
+                elementId: 'fan_speed_up_button',
+
+                text: 'Up',
+
+                action: 'climateUp',
+
+                target: "SDL.ClimateController"
+
+
+            }),
+
+            fanSpeedDownButton: SDL.Button.extend({
+                elementId: 'fan_speed_down_button',
+
+                text: 'Down',
+
+                action: 'climateDown',
+
+                target: "SDL.ClimateController",
+
+            }),
+
+            fanSpeedLevel: SDL.Label.extend({
+
+                elementId: 'fan_speed_level',
+
+                contentBinding: Em.Binding.oneWay('SDL.ClimateController.model.currentFanSpeed')
+
+            })
+        })
+
     } )
 
 } );
