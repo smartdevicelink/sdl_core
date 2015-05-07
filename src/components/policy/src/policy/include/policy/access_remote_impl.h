@@ -80,6 +80,9 @@ class AccessRemoteImpl : public AccessRemote {
                                   const std::vector<int>& hmi_types);
   virtual const policy_table::Strings& GetGroups(const PTString& device_id,
                                                  const PTString& app_id);
+  virtual bool GetPermissionsForApp(const std::string &device_id,
+                                    const std::string &app_id,
+                                    FunctionalIdType& group_types);
 
  private:
   typedef std::map<Subject, TypeAccess> AccessControlRow;

@@ -45,6 +45,12 @@ using rpc::policy_table_interface_base::EnumFromJsonString;
 
 namespace policy {
 
+struct GetHashOfGroup {
+  int32_t operator ()(const policy_table::Strings::value_type& item) const {
+    return static_cast<uint32_t>(CacheManager::GenerateHash(item));
+  }
+};
+
 struct IsPrimary {
   bool operator ()(const DeviceData::value_type& item) const {
     return *item.second.primary == true;
@@ -316,6 +322,29 @@ const policy_table::Strings& AccessRemoteImpl::GetGroups(
             *cache_->pt_->policy_table.app_policies[app_id].groups_non_primaryRC;
   }
   return cache_->GetGroups(app_id);
+}
+
+bool AccessRemoteImpl::GetPermissionsForApp(const std::string &device_id,
+                                            const std::string &app_id,
+                                            FunctionalIdType& group_types) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  policy_table::Strings& groups = GetGroups(device_id, app_id);
+  group_types[kTypeGeneral].resize(groups.size());
+  std::transform(groups.begin(), groups.end(), group_types[kTypeGeneral],
+                 GetHashOfGroup());
+
+  policy_table::Strings& groups = GetGroups(device_id, kDefaultId);
+  group_types[kTypeDefault].resize(groups.size());
+  std::transform(groups.begin(), groups.end(), group_types[kTypeDefault],
+                   GetHashOfGroup());
+
+  policy_table::Strings& groups = GetGroups(device_id, kPreDataConsentId);
+  group_types[kTypePreDataConsented].resize(groups.size());
+  std::transform(groups.begin(), groups.end(), group_types[kTypePreDataConsented],
+                   GetHashOfGroup());
+
+  return true;
 }
 
 }
