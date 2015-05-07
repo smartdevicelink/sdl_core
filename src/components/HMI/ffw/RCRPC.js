@@ -146,6 +146,37 @@ FFW.RC = FFW.RPCObserver.create({
 			}
 			this.client.send(JSONMessage);
 		}
+		else if(request.method == RC.SetInteriorVehicleData){
+			Em.Logger.log("FFW.onRPCRequest method: SetInteriorVehicleData")
+			if(request.moduleData.moduleType=="CLIMATE"){
+				Em.Logger.log("RC set Climate data");
+				var currentFanSpeed = SDL.ClimateController.setClimate(request);
+
+			var JSONMessage = {
+				"jsonrpc": "2.0",
+				"id": request.id,
+				"result": {
+					"moduleData" : {
+						"moduleType" : "CLIMATE",
+						"moduleZone" : {},
+						"radioControlData" :{},
+						"climateControlData" : {
+							"fanSpeed" : currentFanSpeed
+						}
+
+					},
+					"code" : 0,
+					"method": "RC.SetInteriorVehicleData"
+				}
+			}
+			this.client.send(JSONMessage);
+
+			}
+			else if(request.moduleData.moduleType=="RADIO"){
+				Em.Logger.log("RC set RADIO data");
+			}
+
+		}
 	},
 
 	sendError: function(resultCode, id, method, message){

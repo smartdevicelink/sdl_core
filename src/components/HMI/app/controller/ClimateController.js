@@ -10,8 +10,9 @@ SDL.ClimateController = Em.Object.create({
 		this.model.decreaseSpeed();
 	},
 	setClimate: function(request){
-
-		this.model.setSpeed(request.params.fanSpeed);
+		Em.Logger.log("Climate controller set climate: " + JSON.stringify(request));
+		this.model.setSpeed(request.moduleData.climateControlData.fanSpeed);
+		return(this.model.currentFanSpeed);
 	}
 
 });
