@@ -2050,7 +2050,7 @@
     </param>
   </function>
   <function name="GetInteriorVehicleDataCapabilities" messagetype="response">
-    <param name="interiorVehicleCapabilities" type="Common.ModuleDescription" array="true" minsize="1" maxsize="1000">
+    <param name="interiorVehicleDataCapabilities" type="Common.ModuleDescription" array="true" minsize="1" maxsize="1000">
   </param>
   </function>
   <function name="SetInteriorVehicleData" messagetype="request">
