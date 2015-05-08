@@ -99,6 +99,21 @@
                         "FULL",
                         "LIMITED"]
                     },
+                    "GetInteriorVehicleDataCapabilities": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "GetInteriorVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "SetInteriorVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
                     "GenericResponse": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
