@@ -86,7 +86,7 @@ FFW.RC = FFW.RPCObserver.create({
 
 			if(request.zone) { //zone specified in request
 				if(request.zone.row == 0) {//front row 
-					if (request.column == 0) // driver side
+					if (request.zone.column == 0) // driver side
 						if(request.moduleTypes) //Module types specified in request
 							for(i=0; i< request.moduleTypes.length; i++){
 								if (request.moduleTypes[i]=="RADIO") {
@@ -100,7 +100,7 @@ FFW.RC = FFW.RPCObserver.create({
 						else //no module specified
 							capabilitiesQuery = zonesAndModulesArray; //driver has control of all modules.
 
-					else if(request.column == 1){ //Passenger side zone specified
+					else if(request.zone.column == 1){ //Passenger side zone specified
 						if(request.moduleTypes){
 							for(i=0; i<request.moduleTypes.length; i++){
 								if (request.moduleTypes[i]=="RADIO") {
