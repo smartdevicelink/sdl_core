@@ -33,6 +33,7 @@
 #define SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ACCESS_REMOTE_H_
 
 #include <vector>
+#include <ostream>
 #include "./types.h"
 #include "policy/policy_types.h"
 
@@ -58,6 +59,10 @@ inline bool operator<(const Subject& x, const Subject& y) {
 inline bool operator==(const Subject& x, const Subject& y) {
   return x.dev_id == y.dev_id && x.app_id == y.app_id;
 }
+inline std::ostream& operator<<(std::ostream& output, const Subject& who) {
+  output << "Subject(dev:" << who.dev_id << ", app:" << who.app_id << ")";
+  return output;
+}
 
 struct Object {
   PTString group_id;
@@ -68,6 +73,10 @@ inline bool operator<(const Object& x, const Object& y) {
 }
 inline bool operator==(const Object& x, const Object& y) {
   return x.group_id == y.group_id && x.zone == y.zone;
+}
+inline std::ostream& operator<<(std::ostream& output, const Object& what) {
+  output << "Object(group:" << what.group_id << ", zone:" << what.zone << ")";
+  return output;
 }
 
 typedef std::vector<PTString> RemoteControlParams;

@@ -922,9 +922,11 @@ TypeAccess PolicyManagerImpl::CheckAccess(
     Subject who = {dev_id, app_id};
     PTString group_name = access_remote_->FindGroup(who, rpc, params);
     Object what = {group_name, zone};
-    access_remote_->Allow(who, what);
-
-    access = TypeAccess::kAllowed;
+    access = access_remote_->Check(who, what);
+    if (access != TypeAccess::kDisallowed) {
+      access_remote_->Allow(who, what);
+      access = TypeAccess::kAllowed;
+    }
   } else if (access_remote_->IsEnabled()) {
     if (access_remote_->IsPassengerZone(seat, zone)) {
       access = TypeAccess::kAllowed;
@@ -947,6 +949,7 @@ void PolicyManagerImpl::SetAccess(const PTString& app_id,
                                   const PTString& group_name,
                                   const SeatLocation zone,
                                   bool allowed) {
+  LOG4CXX_AUTO_TRACE(logger_);
   std::string dev_id = GetCurrentDeviceId(app_id);
   Subject who = {dev_id, app_id};
   Object what = {group_name, zone};
@@ -958,6 +961,7 @@ void PolicyManagerImpl::SetAccess(const PTString& app_id,
 }
 
 void PolicyManagerImpl::ResetAccess(const PTString& app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
   std::string dev_id = GetCurrentDeviceId(app_id);
   Subject who = {dev_id, app_id};
   access_remote_->Reset(who);
@@ -965,15 +969,18 @@ void PolicyManagerImpl::ResetAccess(const PTString& app_id) {
 
 void PolicyManagerImpl::ResetAccess(const PTString& group_name,
                                     const SeatLocation zone) {
+  LOG4CXX_AUTO_TRACE(logger_);
   Object who = {group_name, zone};
   access_remote_->Reset(who);
 }
 
 void PolicyManagerImpl::SetPrimaryDevice(const PTString& dev_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
   access_remote_->SetPrimaryDevice(dev_id);
 }
 
 void PolicyManagerImpl::SetRemoteControl(bool enabled) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (enabled) {
     access_remote_->Enable();
   } else {
