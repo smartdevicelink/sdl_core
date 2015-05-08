@@ -1225,9 +1225,9 @@
 </enum>
 
 <struct name="ModuleDescription">
-  <param name="moduleZone" type="InteriorZone">
+  <param name="moduleZone" type="Common.InteriorZone" mandatory="true">
   </param>
-  <param name="moduleType" type="ModuleType">
+  <param name="moduleType" type="Common.ModuleType" mandatory="true">
   </param>
 </struct>
 
@@ -1278,9 +1278,9 @@
   <param name="frequencyFraction" type="Integer" minvalue="0" maxvalue="9" mandatory="false">
     <description>The fractional part of the frequency for 101.7 is 7</description>
   </param>
-  <param name="band" type="RadioBand" mandatory="false">
+  <param name="band" type="Common.RadioBand" mandatory="false">
   </param>
-  <param name="rdsData" type="RdsData" mandatory="false">
+  <param name="rdsData" type="Common.RdsData" mandatory="false">
   </param>
   <param name="availableHDs" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
     <description>number of HD sub-channels if available</description>
@@ -1296,7 +1296,7 @@
   <param name="radioEnable" type="Boolean" mandatory="false">
     <description> True if the radio is on, false is the radio is off</description>
   </param>
-  <param name="state" type="RadioState" mandatory="false">
+  <param name="state" type="Common.RadioState" mandatory="false">
   </param>
 </struct>
 
@@ -1319,7 +1319,7 @@
   </param>
   <param name="autoModeEnable" type="Boolean" mandatory="false">
   </param>
-  <param name="defrostZone" type="DefrostZone" mandatory="false">
+  <param name="defrostZone" type="Common.DefrostZone" mandatory="false">
   </param>
   <param name="dualModeEnable" type="Boolean" mandatory="false">
   </param>
@@ -1327,13 +1327,13 @@
 
 <struct name="ModuleData">
   <description>The moduleType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the moduleType is CLIMATE then a "climateControlData" should exist</description>
-  <param name="moduleType" type="ModuleType">
+  <param name="moduleType" type="Common.ModuleType">
   </param>
-  <param name="moduleZone" type="InteriorZone">
+  <param name="moduleZone" type="Common.InteriorZone">
   </param>
-  <param name="radioControlData" type="RadioControlData" mandatory="false">
+  <param name="radioControlData" type="Common.RadioControlData" mandatory="false">
   </param>
-  <param name="climateControlData" type="ClimateControlData" mandatory="false">
+  <param name="climateControlData" type="Common.ClimateControlData" mandatory="false">
   </param>
 </struct>
 
@@ -2050,7 +2050,7 @@
     </param>
   </function>
   <function name="GetInteriorVehicleDataCapabilities" messagetype="response">
-    <param name="interiorVehicleDataCapabilities" type="Common.ModuleDescription" array="true" minsize="1" maxsize="1000">
+    <param name="interiorVehicleDataCapabilities" type="Common.ModuleDescription" array="true" minsize="1" maxsize="1000" mandatory="false">
   </param>
   </function>
   <function name="SetInteriorVehicleData" messagetype="request">
