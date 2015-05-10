@@ -250,7 +250,7 @@ class ApplicationManagerImpl : public ApplicationManager,
   MOCK_METHOD2(CanAppStream, bool(uint32_t, protocol_handler::ServiceType));
   MOCK_METHOD1(EndNaviServices, void(int32_t));
   MOCK_METHOD1(ForbidStreaming, void(int32_t));
-  MOCK_METHOD2(OnAppStreaming, void(int32_t, bool));
+  MOCK_METHOD2(OnAppStreaming, void(int32_t, protocol_handler::ServiceType, bool));
 
   MOCK_METHOD1(Unmute, void(VRTTSSessionChanging));
   MOCK_METHOD1(Mute, void(VRTTSSessionChanging));
