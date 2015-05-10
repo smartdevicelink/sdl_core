@@ -211,18 +211,12 @@ void MediaManagerImpl::StartStreaming(
   if (streamer_[service_type]) {
     streamer_[service_type]->StartActivity(application_key);
   }
-  if (streamer_listener_[service_type]) {
-    streamer_listener_[service_type]->OnActivityStarted(application_key);
-  }
 }
 
 void MediaManagerImpl::StopStreaming(
     int32_t application_key, protocol_handler::ServiceType service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (streamer_listener_[service_type]) {
-    streamer_listener_[service_type]->OnActivityEnded(application_key);
-  }
   if (streamer_[service_type]) {
     streamer_[service_type]->StopActivity(application_key);
   }
