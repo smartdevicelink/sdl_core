@@ -4962,7 +4962,7 @@
 </function>
 
 <function name="GetInteriorVehicleDataCapabilities" functionID="GetInteriorVehicleDataCapabilitiesID" messagetype="response">
-  <param name="interiorVehicleCapabilities" type="ModuleDescription" array="true" minsize="1" maxsize="1000">
+  <param name="interiorVehicleDataCapabilities" type="ModuleDescription" array="true" minsize="1" maxsize="1000">
   </param>
 
   <param name="resultCode" type="Result" platform="documentation">
