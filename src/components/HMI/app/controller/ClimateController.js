@@ -11,7 +11,7 @@ SDL.ClimateController = Em.Object.create({
 	},
 	setClimate: function(request){
 		Em.Logger.log("Climate controller set climate: " + JSON.stringify(request));
-		this.model.setSpeed(request.moduleData.climateControlData.fanSpeed);
+		this.model.setSpeed(request.params.moduleData.climateControlData.fanSpeed);
 		return(this.model.currentFanSpeed);
 	},
 	tempUp: function() {
@@ -22,7 +22,7 @@ SDL.ClimateController = Em.Object.create({
 	},
 	setTemp: function(request){
 		Em.Logger.log("Climate controller set temperature: " + JSON.stringify(request));
-		this.model.setTemp(request.moduleData.climateControlData.desiredTemp);
+		this.model.setTemp(request.params.moduleData.climateControlData.desiredTemp);
 		return(this.model.desiredTemp);
 	}
 

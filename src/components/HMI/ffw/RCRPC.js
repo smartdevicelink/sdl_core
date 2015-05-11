@@ -39,6 +39,7 @@ FFW.RC = FFW.RPCObserver.create({
 	onRPCRequest: function(request){
 		this._super();
 		Em.Logger.log("FFW.RC.onRPCRequest");
+		Em.Logger.log(JSON.stringify(request));
 
 		if(request.method == "RC.GetInteriorVehicleDataCapabilities"){
 
@@ -145,10 +146,11 @@ FFW.RC = FFW.RPCObserver.create({
 			}
 			this.client.send(JSONMessage);
 		}
-		else if(request.method == RC.SetInteriorVehicleData){
+		else if(request.method == "RC.SetInteriorVehicleData"){
+			var params = request.params
 			Em.Logger.log("FFW.onRPCRequest method: SetInteriorVehicleData")
-			if(request.moduleData.moduleType=="CLIMATE"){
-				if(request.moduleData.climateControlData.desiredTemp){
+			if(params.moduleData.moduleType=="CLIMATE"){
+				if(params.moduleData.climateControlData.desiredTemp){
 					var desiredTemp = SDL.ClimateController.setTemp(request);
 						var JSONMessage = {
 						"jsonrpc": "2.0",
@@ -170,7 +172,7 @@ FFW.RC = FFW.RPCObserver.create({
 					this.client.send(JSONMessage);
 
 				}
-				else if(request.moduleData.climateControlData.fanSpeed){
+				else if(params.moduleData.climateControlData.fanSpeed){
 						Em.Logger.log("RC set Climate data");
 						var currentFanSpeed = SDL.ClimateController.setClimate(request);
 
@@ -195,7 +197,7 @@ FFW.RC = FFW.RPCObserver.create({
 				}
 
 			}
-			else if(request.moduleData.moduleType=="RADIO"){
+			else if(params.moduleData.moduleType=="RADIO"){
 				Em.Logger.log("RC set RADIO data");
 			}
 
