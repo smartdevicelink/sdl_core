@@ -345,6 +345,15 @@ class CacheManager : public CacheManagerInterface {
       rpc::policy_table_interface_base::Strings &preconsented_groups);
 
   /**
+   * @brief Add's information about mobile device in Policy Table.
+   * @param device_id Generated or obtained id of device
+   * @param connection_type device connection type
+   * @return bool Success of operation
+   */
+  bool AddDevice(const std::string& device_id,
+                 const std::string& connection_type);
+
+  /**
    * @brief Record information about mobile device in Policy Table.
    * @param device_id Generated or obtained id of device
    * @return bool Success of operation

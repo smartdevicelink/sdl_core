@@ -159,6 +159,13 @@ class PolicyHandler :
   void PTExchangeAtUserRequest(uint32_t correlation_id);
 
   /**
+   * @brief Add's device to policy table
+   * @param device_id        Device mac address
+   * @param connection_type  Device connection type
+   */
+  void AddDevice(const std::string& device_id, const std::string& connection_type);
+
+  /**
    * @brief Save device info for specific device to policy table
    * @param device_id Device mac address
    * @param device_info Device params

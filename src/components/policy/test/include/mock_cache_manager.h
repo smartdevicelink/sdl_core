@@ -120,6 +120,8 @@ class MockCacheManagerInterface : public CacheManagerInterface {
       bool(const std::string& device_id, const std::string& app_id, FunctionalIdType &group_types));
   MOCK_METHOD2(GetDeviceGroupsFromPolicies,
       bool(rpc::policy_table_interface_base::Strings &groups, rpc::policy_table_interface_base::Strings &preconsented_groups));
+  MOCK_METHOD2(AddDevice,
+      bool(const std::string& device_id, const std::string& connection_type));
   MOCK_METHOD8(SetDeviceData,
       bool(const std::string& device_id, const std::string& hardware, const std::string& firmware, const std::string& os, const std::string& os_version, const std::string& carrier, const uint32_t number_of_ports, const std::string& connection_type));
   MOCK_METHOD3(SetUserPermissionsForDevice,
