@@ -320,7 +320,8 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
     vehicle_make(impl::ValueMember(value__, "vehicle_make")),
     vehicle_model(impl::ValueMember(value__, "vehicle_model")),
     vehicle_year(impl::ValueMember(value__, "vehicle_year")),
-    user_consent_passengerRC(impl::ValueMember(value__, "user_consent_passengerRC")) {
+    user_consent_passengerRC(impl::ValueMember(value__, "user_consent_passengerRC")),
+    country_consent_passengersRC(impl::ValueMember(value__, "country_consent_passengersRC")) {
 }
 Json::Value ModuleConfig::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
@@ -337,6 +338,7 @@ Json::Value ModuleConfig::ToJsonValue() const {
   impl::WriteJsonField("vehicle_model", vehicle_model, &result__);
   impl::WriteJsonField("vehicle_year", vehicle_year, &result__);
   impl::WriteJsonField("user_consent_passengerRC", user_consent_passengerRC, &result__);
+  impl::WriteJsonField("user_consent_passengerRC", country_consent_passengersRC, &result__);
   return result__;
 }
 bool ModuleConfig::is_valid() const {
@@ -377,6 +379,9 @@ bool ModuleConfig::is_valid() const {
     return false;
   }
   if (!user_consent_passengerRC.is_valid()) {
+    return false;
+  }
+  if (!country_consent_passengersRC.is_valid()) {
     return false;
   }
   return Validate();
@@ -429,6 +434,9 @@ bool ModuleConfig::struct_empty() const {
   if (user_consent_passengerRC.is_initialized()) {
     return false;
   }
+  if (country_consent_passengersRC.is_initialized()) {
+    return false;
+  }
 
   return true;
 }
@@ -475,6 +483,9 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
   if (!user_consent_passengerRC.is_valid()) {
     user_consent_passengerRC.ReportErrors(&report__->ReportSubobject("user_consent_passengerRC"));
   }
+  if (!country_consent_passengersRC.is_valid()) {
+    country_consent_passengersRC.ReportErrors(&report__->ReportSubobject("country_consent_passengersRC"));
+  }
   if (PT_PRELOADED == GetPolicyTableType()) {
     std::string validation_info = ommited_validation_info +
                                   PolicyTableTypeToString(GetPolicyTableType());
@@ -495,6 +506,10 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
       ommited_field_report = &report__->ReportSubobject("user_consent_passengerRC");
       ommited_field_report->set_validation_info(validation_info);
     }
+    if (country_consent_passengersRC.is_initialized()) {
+      ommited_field_report = &report__->ReportSubobject("country_consent_passengersRC");
+      ommited_field_report->set_validation_info(validation_info);
+    }
   }
 }
 
@@ -513,6 +528,7 @@ void ModuleConfig::SetPolicyTableType(PolicyTableType pt_type) {
   vehicle_model.SetPolicyTableType(pt_type);
   vehicle_year.SetPolicyTableType(pt_type);
   user_consent_passengerRC.SetPolicyTableType(pt_type);
+  country_consent_passengersRC.SetPolicyTableType(pt_type);
 }
 
 // MessageString methods
