@@ -483,7 +483,7 @@ void SQLPTRepresentation::GatherModuleConfig(
     *config->vehicle_make = query.GetString(5);
     *config->vehicle_model = query.GetString(6);
     *config->vehicle_year = query.GetString(7);
-    *config->remote_control = query.GetBoolean(8);
+    *config->user_consent_passengerRC = query.GetBoolean(8);
   }
 
   dbms::SQLQuery endpoints(db());
@@ -998,8 +998,8 @@ bool SQLPTRepresentation::SaveModuleConfig(
   query.Bind(6, *(config.vehicle_model)) : query.Bind(6);
   config.vehicle_year.is_initialized() ?
   query.Bind(7, *(config.vehicle_year)) : query.Bind(7);
-  config.remote_control.is_initialized() ?
-  query.Bind(8, *(config.remote_control)) : query.Bind(8);
+  config.user_consent_passengerRC.is_initialized() ?
+  query.Bind(8, *(config.user_consent_passengerRC)) : query.Bind(8);
 
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Incorrect update module config");

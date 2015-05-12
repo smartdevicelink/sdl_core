@@ -149,7 +149,7 @@ AccessRemoteImpl::AccessRemoteImpl(utils::SharedPtr<CacheManager> cache)
 void AccessRemoteImpl::Init() {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(cache_->pt_);
-  enabled_ = *cache_->pt_->policy_table.module_config.remote_control;
+  enabled_ = *cache_->pt_->policy_table.module_config.user_consent_passengerRC;
 
   const DeviceData& devices = *cache_->pt_->policy_table.device_data;
   DeviceData::const_iterator d = std::find_if(devices.begin(), devices.end(),
@@ -248,7 +248,7 @@ void AccessRemoteImpl::Disable() {
 
 void AccessRemoteImpl::set_enabled(bool value) {
   enabled_ = value;
-  *cache_->pt_->policy_table.module_config.remote_control = enabled_;
+  *cache_->pt_->policy_table.module_config.user_consent_passengerRC = enabled_;
   cache_->Backup();
 }
 
