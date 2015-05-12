@@ -550,7 +550,7 @@ void PolicyManagerImpl::GetPermissionsForApp(
   LOG4CXX_INFO(logger_, "GetPermissionsForApp");
 
   if (!cache_->IsApplicationRepresented(policy_app_id)) {
-    LOG4CXX_WARN(logger_, "Application " << app_id << " isn't exist");
+    LOG4CXX_WARN(logger_, "Application " << policy_app_id << " isn't exist");
     return;
   }
 
@@ -568,14 +568,14 @@ void PolicyManagerImpl::GetPermissionsForApp(
 
   FunctionalIdType group_types;
 #ifdef REMOTE_CONTROL
-  bool ret = remote_control->GetPermissionsForApp(device_id, app_id_to_check,
+  bool ret = remote_control->GetPermissionsForApp(device_id, policy_app_id,
                                                   group_types);
 #else
   bool ret = cache_->GetPermissionsForApp(device_id, app_id_to_check,
                                           group_types);
 #endif  // REMOTE_CONTROL
 
-  if (!ret)
+  if (!ret) {
     LOG4CXX_WARN(logger_, "Can't get user permissions for app "
                  << policy_app_id);
     return;

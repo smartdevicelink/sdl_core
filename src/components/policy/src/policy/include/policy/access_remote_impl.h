@@ -90,7 +90,8 @@ class AccessRemoteImpl : public AccessRemote {
   typedef std::map<std::string, policy_table::AppHMITypes> HMIList;
   inline void set_enabled(bool value);
   const policy_table::AppHMITypes& HmiTypes(const std::string& app_id);
-
+  void GetGroupsIds(const std::string &device_id, const std::string &app_id,
+                    FunctionalGroupIDs& grops_ids);
   utils::SharedPtr<CacheManager> cache_;
   PTString primary_device_;
   bool enabled_;

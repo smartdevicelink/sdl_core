@@ -1330,6 +1330,19 @@ void PolicyHandler::ResetAccess(const std::string& group_name,
 void PolicyHandler::SetPrimaryDevice(const PTString& dev_id) {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->SetPrimaryDevice(dev_id);
+
+  connection_handler::DeviceHandle device_handle;
+  ApplicationManagerImpl::instance()->connection_handler()
+      ->GetDeviceID(dev_id, &device_handle);
+
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  for (ApplicationManagerImpl::ApplictionSetConstIt i = accessor.begin();
+      i != accessor.end(); ++i) {
+    const ApplicationSharedPtr app = *i;
+    if (app->device() == device_handle) {
+      policy_manager_->SendNotificationOnPermissionsUpdated(app->mobile_app_id());
+    }
+  }
 }
 
 void PolicyHandler::SetRemoteControl(bool enabled) {
