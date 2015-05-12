@@ -4,6 +4,8 @@ FFW.RC = FFW.RPCObserver.create({
 		componentName: "RC"
 	}),
 
+	subscribeClimateState: false,
+
 	errorResponsePull: {},
 
 	connect: function(){
@@ -200,6 +202,69 @@ FFW.RC = FFW.RPCObserver.create({
 			else if(params.moduleData.moduleType=="RADIO"){
 				Em.Logger.log("RC set RADIO data");
 			}
+
+		}
+		else if(request.method=="RC.GetInteriorVehicleData"){
+
+			Em.Logger.log("RC.GetInteriorVehicleData");
+
+			var moduleData = {
+				'moduleType': null,
+				'moduleZone': null,
+				'radioControlData': null,
+				'climateControlData': null
+			}
+
+			if(params.moduleDescription.moduleType=='CLIMATE'){
+
+				moduleData.moduleType = 'CLIMATE';
+
+				var moduleZone = {
+					'col': 0,
+					'row': 0,
+					'level': 0,
+					'colspan': 2,
+					'rowspan': 0,
+					'levelspan': 0
+				}
+
+				moduleData.moduleZone = moduleZone;
+
+				moduleData.radioControlData = null;
+
+				var climateControlData = {
+					'fanSpeed' : 	SDL.ClimateController.model.currentFanSpeed,
+					'currentTemp': SDL.ClimateController.model.currentTemp,
+					'desiredtemp': SDL.ClimateController.model.desiredtemp,
+					'temperatureUnit': null,
+					'acEnable': null,
+					'circulateAirEnable': null,
+					'autoModeEnable': null,
+					'defrostZone': null,
+					'dualModeEnable': null
+				}
+
+				moduleData.climateControlData = climateControlData;
+
+				if(params.subscribe){
+					this.subscribeClimateState = true;
+				}
+				else{
+					this.subscribeClimateState = false; //resets
+				}
+			}
+
+
+			var JSONMessage = {
+				"jsonrpc": "2.0",
+				"id": request.id,
+				"result": {
+					"moduleData" : moduleData,
+					"code" : 0,
+					"method": "RC.GetInteriorVehicleData"
+				}
+			}
+			this.client.send(JSONMessage);
 
 		}
 
