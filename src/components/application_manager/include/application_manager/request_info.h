@@ -84,7 +84,7 @@ namespace request_controller {
     }
 
     uint64_t timeout_sec() {
-      return request()->default_timeout() / date_time::DateTime::MILLISECONDS_IN_SECOND;
+      return timeout_sec_;
     }
 
     TimevalStruct end_time() {
