@@ -66,6 +66,7 @@ class AccessRemoteImpl : public AccessRemote {
 
   virtual bool IsPrimaryDevice(const PTString& dev_id) const;
   virtual void SetPrimaryDevice(const PTString& dev_id);
+  virtual PTString PrimaryDevice() const;
   virtual bool IsPassengerZone(const SeatLocation& seat,
                                const SeatLocation& zone) const;
 

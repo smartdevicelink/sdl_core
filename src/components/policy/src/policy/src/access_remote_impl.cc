@@ -236,6 +236,10 @@ void AccessRemoteImpl::SetPrimaryDevice(const PTString& dev_id) {
   cache_->Backup();
 }
 
+PTString AccessRemoteImpl::PrimaryDevice() const {
+  return primary_device_;
+}
+
 void AccessRemoteImpl::Enable() {
   LOG4CXX_AUTO_TRACE(logger_);
   set_enabled(true);

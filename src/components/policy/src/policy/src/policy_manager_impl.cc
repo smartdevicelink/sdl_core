@@ -340,8 +340,17 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
   std::string default_hmi;
   default_hmi = "NONE";
 
+#ifdef SDL_REMOTE_CONTROL
+  if (access_remote_->IsPrimaryDevice(device_id)) {
+    listener()->OnPermissionsUpdated(application_id, notification_data);
+  } else {
+    listener()->OnPermissionsUpdated(application_id, notification_data,
+                                     default_hmi);
+  }
+#else
   listener()->OnPermissionsUpdated(application_id, notification_data,
-                                   default_hmi);
+                                     default_hmi);
+#endif  // SDL_REMOTE_CONTROL
 }
 
 bool PolicyManagerImpl::CleanupUnpairedDevices() {
@@ -997,6 +1006,11 @@ void PolicyManagerImpl::ResetAccess(const PTString& group_name,
 void PolicyManagerImpl::SetPrimaryDevice(const PTString& dev_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   access_remote_->SetPrimaryDevice(dev_id);
+}
+
+PTString PolicyManagerImpl::PrimaryDevice() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return access_remote_->PrimaryDevice();
 }
 
 void PolicyManagerImpl::SetRemoteControl(bool enabled) {

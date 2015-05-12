@@ -121,6 +121,12 @@ class AccessRemote {
   virtual void SetPrimaryDevice(const PTString& dev_id) = 0;
 
   /**
+   * Gets current primary device
+   * @return ID device
+   */
+  virtual PTString PrimaryDevice() const = 0;
+
+  /**
    * Checks passenger can control of the requested zone without asking driver
    * @param seat seat of passenger
    * @param zone requested zone to control
