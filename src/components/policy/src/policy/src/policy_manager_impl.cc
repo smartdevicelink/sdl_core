@@ -923,7 +923,7 @@ TypeAccess PolicyManagerImpl::CheckAccess(
     PTString group_name = access_remote_->FindGroup(who, rpc, params);
     Object what = {group_name, zone};
     access = access_remote_->Check(who, what);
-    if (access != TypeAccess::kDisallowed) {
+    if (access == TypeAccess::kManual) {
       access_remote_->Allow(who, what);
       access = TypeAccess::kAllowed;
     }

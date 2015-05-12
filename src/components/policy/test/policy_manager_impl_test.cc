@@ -389,7 +389,9 @@ TEST_F(PolicyManagerImplTest, CheckAccess_PrimaryDevice) {
       WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(true));
   EXPECT_CALL(*access_remote, FindGroup(who, "rpc1", RemoteControlParams())).
-        WillOnce(Return("group1"));
+      WillOnce(Return("group1"));
+  EXPECT_CALL(*access_remote, Check(who, what)).
+      WillOnce(Return(TypeAccess::kManual));
   EXPECT_CALL(*access_remote, Allow(who, what));
 
   EXPECT_EQ(TypeAccess::kAllowed,
@@ -460,6 +462,8 @@ TEST_F(PolicyManagerImplTest, TwoDifferentDevice) {
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(true));
   EXPECT_CALL(*access_remote, FindGroup(who1, "rpc1", RemoteControlParams())).
       WillOnce(Return("group1"));
+  EXPECT_CALL(*access_remote, Check(who1, what)).
+      WillOnce(Return(TypeAccess::kManual));
   EXPECT_CALL(*access_remote, Allow(who1, what));
 
   EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("123456")).
