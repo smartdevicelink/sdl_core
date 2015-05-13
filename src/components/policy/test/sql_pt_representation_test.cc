@@ -524,7 +524,8 @@ TEST_F(SQLPTRepresentationTest, GenerateSnapshot_SetPolicyTable_SnapshotIsPresen
   utils::SharedPtr<policy_table::Table> snapshot = reps->GenerateSnapshot();
   snapshot->SetPolicyTableType(rpc::policy_table_interface_base::PT_SNAPSHOT);
 
-  module_config["user_consent_passengerRC"] = Json::Value(false);
+  module_config["user_consent_passengerRC"] = Json::Value(true);
+  module_config["country_consent_passengersRC"] = Json::Value(true);
   policy_table["device_data"] = Json::Value(Json::objectValue);
   consumer_friendly_messages.removeMember("messages");
 

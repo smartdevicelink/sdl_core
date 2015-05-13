@@ -338,7 +338,7 @@ Json::Value ModuleConfig::ToJsonValue() const {
   impl::WriteJsonField("vehicle_model", vehicle_model, &result__);
   impl::WriteJsonField("vehicle_year", vehicle_year, &result__);
   impl::WriteJsonField("user_consent_passengerRC", user_consent_passengerRC, &result__);
-  impl::WriteJsonField("user_consent_passengerRC", country_consent_passengersRC, &result__);
+  impl::WriteJsonField("country_consent_passengersRC", country_consent_passengersRC, &result__);
   return result__;
 }
 bool ModuleConfig::is_valid() const {

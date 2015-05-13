@@ -318,13 +318,18 @@ const policy_table::Strings& AccessRemoteImpl::GetGroups(
                            policy_table::AHT_REMOTE_CONTROL) != hmi_types.end();
 
   if (reverse) {
-    return
-        IsPrimaryDevice(device_id) ?
-            *cache_->pt_->policy_table.app_policies[app_id].groups_primaryRC :
-            *cache_->pt_->policy_table.app_policies[app_id].groups_non_primaryRC;
+    if (IsPrimaryDevice(device_id)) {
+      return *cache_->pt_->policy_table.app_policies[app_id].groups_primaryRC;
+    } else if (IsEnabled()) {
+      return *cache_->pt_->policy_table.app_policies[app_id].groups_non_primaryRC;
+    } else {
+      return kGroupsEmpty;
+    }
   }
   return cache_->GetGroups(app_id);
 }
+
+const policy_table::Strings AccessRemoteImpl::kGroupsEmpty;
 
 }
 // namespace policy
