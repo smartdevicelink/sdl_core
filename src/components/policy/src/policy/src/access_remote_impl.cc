@@ -254,7 +254,8 @@ void AccessRemoteImpl::set_enabled(bool value) {
 
 bool AccessRemoteImpl::IsEnabled() const {
   LOG4CXX_AUTO_TRACE(logger_);
-  return enabled_;
+  return enabled_
+      && *cache_->pt_->policy_table.module_config.country_consent_passengersRC;
 }
 
 PTString AccessRemoteImpl::FindGroup(const Subject& who, const PTString& rpc,
