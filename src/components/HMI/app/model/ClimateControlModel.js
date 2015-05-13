@@ -3,6 +3,12 @@ SDL.ClimateControlModel = Em.Object.create({
 	currentTemp: 72,
 	desiredTemp: 72,
 	currentFanSpeed: 0,
+	temperatureUnit: 'FAHRENHEIT',
+	acEnable: false,
+	recirculateAirEnable: false,
+	autoModeEnable: false,
+	defrostZone: 'FRONT',
+	dualModeEnable: false,
 
 	increaseSpeed: function(){
 		this.set('currentFanSpeed', this.currentFanSpeed+1);
@@ -33,5 +39,31 @@ SDL.ClimateControlModel = Em.Object.create({
 		this.set('desiredTemp', temp);
 		Em.Logger.log(this.desiredTemp);
 	},
+
+	setAcEnable: function(state){
+		this.set('acEnable', state);
+		Em.Logger.log('acEnable: ' + this.acEnable);
+	},
+
+	setRecirculateAirEnable: function(state){
+		this.set('recirculateAirEnable', state);
+		Em.Logger.log('recirculateAirEnable: ' + this.recirculateAirEnable);
+	},
+	
+	setAutoModeEnable: function(state){
+		this.set('autoModeEnable', state);
+		Em.Logger.log('autoModeEnable :' + this.autoModeEnable);
+	},
+	
+	setDefrostZone: function(zone){
+		this.set('defrostZone', zone);
+		Em.Logger.log('defrostZone', this.defrostZone);
+	},
+	
+	setDualModeEnable: function(state){
+		this.set('dualModeEnable', state);
+		Em.Logger.log('dualModeEnable: ' + this.dualModeEnable);
+	}
+
 
 })

@@ -152,51 +152,71 @@ FFW.RC = FFW.RPCObserver.create({
 			var params = request.params
 			Em.Logger.log("FFW.onRPCRequest method: SetInteriorVehicleData")
 			if(params.moduleData.moduleType=="CLIMATE"){
+				var JSONMessage = {
+					"jsonrpc": "2.0",
+					"id": request.id,
+					"result": {
+						"moduleData" : {
+							"moduleType" : "CLIMATE",
+							"moduleZone" : {},
+							"radioControlData" :{},
+							"climateControlData" : {
+								'fanSpeed' : 	SDL.ClimateController.model.currentFanSpeed,
+								'currentTemp': SDL.ClimateController.model.currentTemp,
+								'desiredTemp': SDL.ClimateController.model.desiredTemp,
+								'temperatureUnit': SDL.ClimateController.model.temperatureUnit,
+								'acEnable': SDL.ClimateController.model.acEnable,
+								'recirculateAirEnable': SDL.ClimateController.model.recirculateAirEnable,
+								'autoModeEnable': SDL.ClimateController.model.autoModeEnable,
+								'defrostZone': SDL.ClimateController.model.defrostZone,
+								'dualModeEnable': SDL.ClimateController.model.dualModeEnable
+							}
+
+						},
+						"code" : 0,
+						"method": "RC.SetInteriorVehicleData"
+					}
+				}
+
 				if(params.moduleData.climateControlData.desiredTemp){
 					var desiredTemp = SDL.ClimateController.setTemp(request);
-						var JSONMessage = {
-						"jsonrpc": "2.0",
-						"id": request.id,
-						"result": {
-							"moduleData" : {
-								"moduleType" : "CLIMATE",
-								"moduleZone" : {},
-								"radioControlData" :{},
-								"climateControlData" : {
-									"desiredTemp" : desiredTemp
-								}
-
-							},
-							"code" : 0,
-							"method": "RC.SetInteriorVehicleData"
-						}
-					}
-					this.client.send(JSONMessage);
+					JSONMessage.result.moduleData.climateControlData.desiredTemp;
+					//this.client.send(JSONMessage);
 
 				}
-				else if(params.moduleData.climateControlData.fanSpeed){
-						Em.Logger.log("RC set Climate data");
-						var currentFanSpeed = SDL.ClimateController.setClimate(request);
-
-					var JSONMessage = {
-						"jsonrpc": "2.0",
-						"id": request.id,
-						"result": {
-							"moduleData" : {
-								"moduleType" : "CLIMATE",
-								"moduleZone" : {},
-								"radioControlData" :{},
-								"climateControlData" : {
-									"fanSpeed" : currentFanSpeed
-								}
-
-							},
-							"code" : 0,
-							"method": "RC.SetInteriorVehicleData"
-						}
-					}
-					this.client.send(JSONMessage);
+				if(params.moduleData.climateControlData.fanSpeed){
+					var currentFanSpeed = SDL.ClimateController.setClimate(request);
+					JSONMessage.result.moduleData.climateControlData.fanSpeed = currentFanSpeed;
+					//this.client.send(JSONMessage);
 				}
+				if(params.moduleData.climateControlData.acEnable){
+					var acEnable = SDL.ClimateController.setAcEnable(request);
+					JSONMessage.result.moduleData.climateControlData.acEnable = acEnable;
+					//this.client.send(JSONMessage);
+				}
+				if(params.moduleData.climateControlData.recirculateAirEnable){
+					var recirculateAirEnable = SDL.ClimateController.setRecirculateAirEnable(request);
+					JSONMessage.result.moduleData.climateControlData.recirculateAirEnable = recirculateAirEnable;
+					//this.client.send(JSONMessage);
+				}
+				if(params.moduleData.climateControlData.autoModeEnable){
+					var autoModeEnable = SDL.ClimateController.setAutoModeEnable(request);
+					JSONMessage.result.moduleData.climateControlData.autoModeEnable = autoModeEnable;
+					//this.client.send(JSONMessage);
+				}
+				if(params.moduleData.climateControlData.defrostZone){
+					var defrostZone = SDL.ClimateController.setDefrostZone(request);
+					JSONMessage.result.moduleData.climateControlData.defrostZone = defrostZone;
+					//this.client.send(JSONMessage);
+				}
+				if(params.moduleData.climateControlData.dualModeEnable){
+					var dualModeEnable = SDL.ClimateController.setDualModeEnable(request);
+					JSONMessage.result.moduleData.climateControlData.dualModeEnable = dualModeEnable;
+					//this.client.send(JSONMessage);
+				}
+
+				this.client.send(JSONMessage);
+				this.onInteriorVehicleDataNotification("CLIMATE");
 
 			}
 			else if(params.moduleData.moduleType=="RADIO"){
@@ -235,13 +255,13 @@ FFW.RC = FFW.RPCObserver.create({
 				var climateControlData = {
 					'fanSpeed' : 	SDL.ClimateController.model.currentFanSpeed,
 					'currentTemp': SDL.ClimateController.model.currentTemp,
-					'desiredtemp': SDL.ClimateController.model.desiredtemp,
-					'temperatureUnit': null,
-					'acEnable': null,
-					'circulateAirEnable': null,
-					'autoModeEnable': null,
-					'defrostZone': null,
-					'dualModeEnable': null
+					'desiredTemp': SDL.ClimateController.model.desiredTemp,
+					'temperatureUnit': SDL.ClimateController.model.temperatureUnit,
+					'acEnable': SDL.ClimateController.model.acEnable,
+					'recirculateAirEnable': SDL.ClimateController.model.recirculateAirEnable,
+					'autoModeEnable': SDL.ClimateController.model.autoModeEnable,
+					'defrostZone': SDL.ClimateController.model.defrostZone,
+					'dualModeEnable': SDL.ClimateController.model.dualModeEnable
 				}
 
 				moduleData.climateControlData = climateControlData;
@@ -270,8 +290,38 @@ FFW.RC = FFW.RPCObserver.create({
 
 	},
 
+	onInteriorVehicleDataNotification: function(module){
+		Em.Logger.log('FFW.onInteriorVehicleDataNotification');
+		if(module=="CLIMATE"){
+			var JSONMessage = {
+				"jsonrpc": "2.0",
+				"method": "RC.OnInteriorVehicleData",
+				"params": {
+					"moduleData" : {
+						"moduleType" : "CLIMATE",
+						"moduleZone" : {},
+						"radioControlData" :{},
+						"climateControlData" : {
+							'fanSpeed' : 	SDL.ClimateController.model.currentFanSpeed,
+							'currentTemp': SDL.ClimateController.model.currentTemp,
+							'desiredTemp': SDL.ClimateController.model.desiredTemp,
+							'temperatureUnit': SDL.ClimateController.model.temperatureUnit,
+							'acEnable': SDL.ClimateController.model.acEnable,
+							'recirculateAirEnable': SDL.ClimateController.model.recirculateAirEnable,
+							'autoModeEnable': SDL.ClimateController.model.autoModeEnable,
+							'defrostZone': SDL.ClimateController.model.defrostZone,
+							'dualModeEnable': SDL.ClimateController.model.dualModeEnable
+						}
+
+					}
+				}
+			}
+		}
+
+	},
+
 	sendError: function(resultCode, id, method, message){
-		Em.logger.log('FFW.'+method+"Response");
+		Em.Logger.log('FFW.'+method+"Response");
 
         if (resultCode) {
 
