@@ -91,6 +91,7 @@ class AccessRemoteImpl : public AccessRemote {
   utils::SharedPtr<CacheManager> cache_;
   PTString primary_device_;
   bool enabled_;
+  bool country_consent_;
   AccessControlList acl_;
   HMIList hmi_types_;
 

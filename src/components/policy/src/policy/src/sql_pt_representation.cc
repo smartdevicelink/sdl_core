@@ -1004,7 +1004,7 @@ bool SQLPTRepresentation::SaveModuleConfig(
   config.user_consent_passengerRC.is_initialized() ?
   query.Bind(8, *(config.user_consent_passengerRC)) : query.Bind(8);
   config.country_consent_passengersRC.is_initialized() ?
-    query.Bind(9, *(config.country_consent_passengersRC)) : query.Bind(8);
+    query.Bind(9, *(config.country_consent_passengersRC)) : query.Bind(9);
 
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Incorrect update module config");
