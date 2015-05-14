@@ -51,31 +51,44 @@ OnExitApplicationNotification::~OnExitApplicationNotification() {
 void OnExitApplicationNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  using namespace mobile_apis;
+  using namespace hmi_apis;
+
   ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-  ApplicationSharedPtr app_impl = app_mgr->application(
-      (*message_)[strings::msg_params][strings::app_id].asUInt());
+  uint32_t app_id = (*message_)[strings::msg_params][strings::app_id].asUInt();
+  ApplicationSharedPtr app_impl = app_mgr->application(app_id);
+      
   if (!(app_impl.valid())) {
     LOG4CXX_ERROR(logger_, "Application does not exist");
     return;
   }
-  hmi_apis::Common_ApplicationToNONEReason::eType reason;
-  reason = static_cast<hmi_apis::Common_ApplicationToNONEReason::eType>
-                       ((*message_)[strings::msg_params][strings::reason].asInt());
+
+  Common_ApplicationExitReason::eType reason;
+  reason = static_cast<Common_ApplicationExitReason::eType>
+      ((*message_)[strings::msg_params][strings::reason].asInt());
+
   switch (reason) {
-    case hmi_apis::Common_ApplicationToNONEReason::USER_EXIT : {
+    case Common_ApplicationExitReason::USER_EXIT: {
       break;
     }
-    default : {
+    case Common_ApplicationExitReason::UNAUTHORIZED_TRANSPORT_REGISTRATION: {
+      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+          app_impl->app_id(), 
+          AppInterfaceUnregisteredReason::APP_UNAUTHORIZED);
+      app_mgr->UnregisterApplication(app_impl->app_id(), Result::SUCCESS);
+      return;
+    }
+    default: {
       LOG4CXX_WARN(logger_, "Unhandled reason");
-      break;
+      return;
     }
   }
 
   ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app_impl->app_id(),
-                                                         mobile_apis::HMILevel::HMI_NONE);
+                                                         HMILevel::HMI_NONE);
 
-  app_impl->set_audio_streaming_state(mobile_apis::AudioStreamingState::NOT_AUDIBLE);
-  app_impl->set_system_context(mobile_api::SystemContext::SYSCTXT_MAIN);
+  app_impl->set_audio_streaming_state(AudioStreamingState::NOT_AUDIBLE);
+  app_impl->set_system_context(SystemContext::SYSCTXT_MAIN);
   MessageHelper::SendHMIStatusNotification(*app_impl);
 }
 
