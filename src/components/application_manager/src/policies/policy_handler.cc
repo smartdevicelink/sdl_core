@@ -1329,7 +1329,34 @@ void PolicyHandler::ResetAccess(const std::string& group_name,
 
 void PolicyHandler::SetPrimaryDevice(const PTString& dev_id) {
   POLICY_LIB_CHECK_VOID();
+  PTString old_dev_id = policy_manager_->PrimaryDevice();
   policy_manager_->SetPrimaryDevice(dev_id);
+
+  connection_handler::DeviceHandle old_device_handle;
+    ApplicationManagerImpl::instance()->connection_handler()
+        ->GetDeviceID(old_dev_id, &old_device_handle);
+
+  connection_handler::DeviceHandle device_handle;
+  ApplicationManagerImpl::instance()->connection_handler()
+      ->GetDeviceID(dev_id, &device_handle);
+
+  LOG4CXX_DEBUG(
+      logger_,
+      "Old: " << old_dev_id << "(" << old_device_handle << ")" <<
+      "New: " << dev_id << "(" << device_handle << ")");
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  for (ApplicationManagerImpl::ApplictionSetConstIt i = accessor.begin();
+      i != accessor.end(); ++i) {
+    const ApplicationSharedPtr app = *i;
+    LOG4CXX_DEBUG(logger_,
+                  "Item: " << app->device() << " - " << app->mobile_app_id());
+    if (app->device() == device_handle || app->device() == old_device_handle) {
+      LOG4CXX_DEBUG(
+          logger_,
+          "Send notify " << app->device() << " - " << app->mobile_app_id());
+      policy_manager_->SendNotificationOnPermissionsUpdated(app->mobile_app_id());
+    }
+  }
 }
 
 void PolicyHandler::SetRemoteControl(bool enabled) {

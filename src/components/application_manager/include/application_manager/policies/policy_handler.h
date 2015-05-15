@@ -497,8 +497,6 @@ private:
    */
   std::map<std::string, std::string> app_to_device_link_;
 
-  application_manager::TypeAccess access_;
-
   // Lock for app to device list
   sync_primitives::Lock app_to_device_link_lock_;
 
