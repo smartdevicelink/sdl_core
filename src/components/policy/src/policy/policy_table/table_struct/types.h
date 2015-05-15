@@ -133,7 +133,8 @@ struct ModuleConfig : CompositeType {
     Optional< String<1, 100> > vehicle_model;
     Optional< String<4, 4> > vehicle_year;
     Optional< String<0, 65535> > certificate;
-    Optional< Boolean > remote_control;
+    Optional< Boolean > user_consent_passengerRC;
+    Optional< Boolean > country_consent_passengersRC;
   public:
     ModuleConfig();
     ModuleConfig(uint8_t exchange_after_x_ignition_cycles, int64_t exchange_after_x_kilometers, uint8_t exchange_after_x_days, uint16_t timeout_after_x_seconds, const SecondsBetweenRetries& seconds_between_retries, const ServiceEndpoints& endpoints, const NumberOfNotificationsPerMinute& notifications_per_minute_by_priority);

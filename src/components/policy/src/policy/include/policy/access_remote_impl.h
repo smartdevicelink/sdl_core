@@ -86,6 +86,7 @@ class AccessRemoteImpl : public AccessRemote {
                                     FunctionalIdType& group_types);
 
  private:
+  static const policy_table::Strings kGroupsEmpty;
   typedef std::map<Subject, TypeAccess> AccessControlRow;
   typedef std::map<Object, AccessControlRow> AccessControlList;
   typedef std::map<std::string, policy_table::AppHMITypes> HMIList;
@@ -96,6 +97,7 @@ class AccessRemoteImpl : public AccessRemote {
   utils::SharedPtr<CacheManager> cache_;
   PTString primary_device_;
   bool enabled_;
+  bool country_consent_;
   AccessControlList acl_;
   HMIList hmi_types_;
 
