@@ -2344,23 +2344,6 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
     return mobile_apis::Result::SUCCESS;
   }
 
-  const HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
-
-  const SmartObject* soft_button_capabilities =
-      hmi_capabilities.soft_button_capabilities();
-  bool image_supported = false;
-  if (soft_button_capabilities) {
-    size_t size = (*soft_button_capabilities).length();
-    // in case HMI has sent multiple soft_button_capabilities
-    // how to determine image supported or not
-    for (uint32_t i = 0; i < size; ++i) {
-      image_supported =
-          (*soft_button_capabilities)[i][hmi_response::image_supported].asBool();
-      break;
-    }
-  }
-
   SmartObject& request_soft_buttons = message_params[strings::soft_buttons];
 
   // Check whether soft buttons request is well-formed
@@ -2382,20 +2365,14 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
 
     switch (request_soft_buttons[i][strings::type].asInt()) {
       case SoftButtonType::SBT_IMAGE: {
-        if (!image_supported) {
-          continue;
-        }
         //Any text value for type "IMAGE" should be ignored.
         if (request_soft_buttons[i].keyExists(strings::text)) {
           request_soft_buttons[i].erase(strings::text);
         }
-        if (request_soft_buttons[i].keyExists(strings::image)) {
-          Result::eType verification_result = VerifyImage(
-                request_soft_buttons[i][strings::image], app);
-          if (Result::SUCCESS != verification_result) {
-            return Result::INVALID_DATA;
-          }
-        } else {
+
+        if ((!request_soft_buttons[i].keyExists(strings::image) ||
+            (Result::SUCCESS != VerifyImage(request_soft_buttons[i][strings::image],
+                                            app)))) {
           return Result::INVALID_DATA;
         }
         break;
@@ -2409,7 +2386,6 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         break;
       }
       case SoftButtonType::SBT_BOTH: {
-
         if ((!request_soft_buttons[i].keyExists(strings::text)) ||
             ((request_soft_buttons[i][strings::text].length())
                 && (!VerifySoftButtonString(
@@ -2417,21 +2393,10 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
           return Result::INVALID_DATA;
         }
 
-        bool image_exist = false;
-        if (image_supported) {
-          image_exist = request_soft_buttons[i].keyExists(strings::image);
-          if (!image_exist) {
-            return Result::INVALID_DATA;
-          }
-        }
-        if (image_exist) {
-          Result::eType verification_result = VerifyImage(
-                request_soft_buttons[i][strings::image], app);
-
-          if (Result::SUCCESS != verification_result) {
-            return Result::INVALID_DATA;
-
-          }
+        if ((!request_soft_buttons[i].keyExists(strings::image) ||
+            (Result::SUCCESS != VerifyImage(request_soft_buttons[i][strings::image],
+                                            app)))) {
+          return Result::INVALID_DATA;
         }
         break;
       }
@@ -2441,8 +2406,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
       }
     }
 
-    soft_buttons[j] = request_soft_buttons[i];
-    ++j;
+    soft_buttons[j++] = request_soft_buttons[i];
   }
 
   request_soft_buttons = soft_buttons;
