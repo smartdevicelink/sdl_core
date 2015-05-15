@@ -236,6 +236,10 @@ void AccessRemoteImpl::SetPrimaryDevice(const PTString& dev_id) {
   cache_->Backup();
 }
 
+PTString AccessRemoteImpl::PrimaryDevice() const {
+  return primary_device_;
+}
+
 void AccessRemoteImpl::Enable() {
   LOG4CXX_AUTO_TRACE(logger_);
   set_enabled(true);
@@ -316,6 +320,26 @@ const policy_table::Strings& AccessRemoteImpl::GetGroups(
             *cache_->pt_->policy_table.app_policies[app_id].groups_non_primaryRC;
   }
   return cache_->GetGroups(app_id);
+}
+
+bool AccessRemoteImpl::GetPermissionsForApp(const std::string &device_id,
+                                            const std::string &app_id,
+                                            FunctionalIdType& group_types) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  GetGroupsIds(device_id, app_id, group_types[kTypeGeneral]);
+  GetGroupsIds(device_id, kDefaultId, group_types[kTypeDefault]);
+  GetGroupsIds(device_id, kPreDataConsentId,
+               group_types[kTypePreDataConsented]);
+  return true;
+}
+
+void AccessRemoteImpl::GetGroupsIds(const std::string &device_id,
+                                    const std::string &app_id,
+                                    FunctionalGroupIDs& groups_ids) {
+  const policy_table::Strings& groups = GetGroups(device_id, app_id);
+  groups_ids.resize(groups.size());
+  std::transform(groups.begin(), groups.end(), groups_ids.begin(),
+                 &CacheManager::GenerateHash);
 }
 
 }

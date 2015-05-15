@@ -278,6 +278,13 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
                                           const PTString& rpc,
                                           const RPCParams& rpc_params,
                                           CheckPermissionResult& result) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!cache_->IsApplicationRepresented(app_id)) {
+    LOG4CXX_WARN(logger_, "Application " << app_id << " isn't exist");
+    return;
+  }
+
   LOG4CXX_INFO(
     logger_,
     "CheckPermissions for " << app_id << " and rpc " << rpc << " for "
@@ -333,8 +340,17 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
   std::string default_hmi;
   default_hmi = "NONE";
 
+#ifdef SDL_REMOTE_CONTROL
+  if (access_remote_->IsPrimaryDevice(device_id)) {
+    listener()->OnPermissionsUpdated(application_id, notification_data);
+  } else {
+    listener()->OnPermissionsUpdated(application_id, notification_data,
+                                     default_hmi);
+  }
+#else
   listener()->OnPermissionsUpdated(application_id, notification_data,
-                                   default_hmi);
+                                     default_hmi);
+#endif  // SDL_REMOTE_CONTROL
 }
 
 bool PolicyManagerImpl::CleanupUnpairedDevices() {
@@ -541,6 +557,12 @@ void PolicyManagerImpl::GetPermissionsForApp(
   const std::string& device_id, const std::string& policy_app_id,
   std::vector<FunctionalGroupPermission>& permissions) {
   LOG4CXX_INFO(logger_, "GetPermissionsForApp");
+
+  if (!cache_->IsApplicationRepresented(policy_app_id)) {
+    LOG4CXX_WARN(logger_, "Application " << policy_app_id << " isn't exist");
+    return;
+  }
+
   std::string app_id_to_check = policy_app_id;
 
   bool allowed_by_default = false;
@@ -554,8 +576,15 @@ void PolicyManagerImpl::GetPermissionsForApp(
   }
 
   FunctionalIdType group_types;
-  if (!cache_->GetPermissionsForApp(device_id, app_id_to_check,
-                                        group_types)) {
+#ifdef REMOTE_CONTROL
+  bool ret = remote_control->GetPermissionsForApp(device_id, policy_app_id,
+                                                  group_types);
+#else
+  bool ret = cache_->GetPermissionsForApp(device_id, app_id_to_check,
+                                          group_types);
+#endif  // REMOTE_CONTROL
+
+  if (!ret) {
     LOG4CXX_WARN(logger_, "Can't get user permissions for app "
                  << policy_app_id);
     return;
@@ -977,6 +1006,11 @@ void PolicyManagerImpl::ResetAccess(const PTString& group_name,
 void PolicyManagerImpl::SetPrimaryDevice(const PTString& dev_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   access_remote_->SetPrimaryDevice(dev_id);
+}
+
+PTString PolicyManagerImpl::PrimaryDevice() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return access_remote_->PrimaryDevice();
 }
 
 void PolicyManagerImpl::SetRemoteControl(bool enabled) {

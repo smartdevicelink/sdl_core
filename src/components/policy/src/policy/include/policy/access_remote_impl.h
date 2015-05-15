@@ -66,6 +66,7 @@ class AccessRemoteImpl : public AccessRemote {
 
   virtual bool IsPrimaryDevice(const PTString& dev_id) const;
   virtual void SetPrimaryDevice(const PTString& dev_id);
+  virtual PTString PrimaryDevice() const;
   virtual bool IsPassengerZone(const SeatLocation& seat,
                                const SeatLocation& zone) const;
 
@@ -80,6 +81,9 @@ class AccessRemoteImpl : public AccessRemote {
                                   const std::vector<int>& hmi_types);
   virtual const policy_table::Strings& GetGroups(const PTString& device_id,
                                                  const PTString& app_id);
+  virtual bool GetPermissionsForApp(const std::string &device_id,
+                                    const std::string &app_id,
+                                    FunctionalIdType& group_types);
 
  private:
   typedef std::map<Subject, TypeAccess> AccessControlRow;
@@ -87,7 +91,8 @@ class AccessRemoteImpl : public AccessRemote {
   typedef std::map<std::string, policy_table::AppHMITypes> HMIList;
   inline void set_enabled(bool value);
   const policy_table::AppHMITypes& HmiTypes(const std::string& app_id);
-
+  void GetGroupsIds(const std::string &device_id, const std::string &app_id,
+                    FunctionalGroupIDs& grops_ids);
   utils::SharedPtr<CacheManager> cache_;
   PTString primary_device_;
   bool enabled_;
