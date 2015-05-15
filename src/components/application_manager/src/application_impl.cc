@@ -211,7 +211,11 @@ const std::string& ApplicationImpl::name() const {
 }
 
 const std::string ApplicationImpl::folder_name() const {
-  return name() + mobile_app_id();
+  const std::string device_id =
+      MessageHelper::GetDeviceMacAddressForHandle(
+        static_cast<uint32_t>(device_));
+
+  return mobile_app_id()+"_"+device_id;
 }
 
 bool ApplicationImpl::is_media_application() const {
