@@ -1003,9 +1003,10 @@ void PolicyManagerImpl::ResetAccess(const PTString& group_name,
   access_remote_->Reset(who);
 }
 
-void PolicyManagerImpl::SetPrimaryDevice(const PTString& dev_id) {
+void PolicyManagerImpl::SetPrimaryDevice(const PTString& dev_id,
+                                         const PTString& input) {
   LOG4CXX_AUTO_TRACE(logger_);
-  access_remote_->SetPrimaryDevice(dev_id);
+  access_remote_->SetPrimaryDevice(dev_id, input);
 }
 
 PTString PolicyManagerImpl::PrimaryDevice() const {

@@ -242,9 +242,11 @@ functional_modules::ProcessResult CANModule::HandleMessage(
                  == function_name) {
         if (value.isMember(json_keys::kParams)) {
           if (value[json_keys::kParams].isMember(message_params::kDevice)) {
+            // TODO(KKolodiy): take out "input" from message
+            // and give it into SetPrimaryDevice
             PolicyHelper::SetPrimaryDevice(
               value[json_keys::kParams][message_params::kDevice]
-              [json_keys::kId].asInt());
+              [json_keys::kId].asInt(), "GUI");
           } else {
             LOG4CXX_ERROR(logger_, "Invalid OnPrimaryDevice notification");
           }

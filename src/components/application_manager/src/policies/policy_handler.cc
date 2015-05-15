@@ -1327,10 +1327,11 @@ void PolicyHandler::ResetAccess(const std::string& group_name,
   policy_manager_->ResetAccess(group_name, zone);
 }
 
-void PolicyHandler::SetPrimaryDevice(const PTString& dev_id) {
+void PolicyHandler::SetPrimaryDevice(const PTString& dev_id,
+                                     const PTString& input) {
   POLICY_LIB_CHECK_VOID();
   PTString old_dev_id = policy_manager_->PrimaryDevice();
-  policy_manager_->SetPrimaryDevice(dev_id);
+  policy_manager_->SetPrimaryDevice(dev_id, input);
 
   connection_handler::DeviceHandle old_device_handle;
     ApplicationManagerImpl::instance()->connection_handler()

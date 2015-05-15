@@ -136,8 +136,9 @@ class PolicyHandler :
   /**
    * Sets device as primary device
    * @param dev_id ID device
+   * @param input
    */
-  void SetPrimaryDevice(const PTString& dev_id);
+  void SetPrimaryDevice(const PTString& dev_id, const PTString& input);
 
   /**
    * Sets mode of remote control (on/off)

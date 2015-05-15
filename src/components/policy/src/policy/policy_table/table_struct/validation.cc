@@ -67,6 +67,9 @@ bool UsageAndErrorCounts::Validate() const {
   }
   return true;
 }
+bool ConsentRecords::Validate() const {
+  return true;
+}
 bool DeviceParams::Validate() const {
   return true;
 }

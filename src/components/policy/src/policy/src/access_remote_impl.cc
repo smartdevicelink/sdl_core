@@ -47,7 +47,10 @@ namespace policy {
 
 struct IsPrimary {
   bool operator ()(const DeviceData::value_type& item) const {
-    return *item.second.primary == true;
+    const policy_table::UserConsentRecords& consent =
+        *item.second.user_consent_records;
+    policy_table::UserConsentRecords::const_iterator i = consent.find(kPrimary);
+    return i != consent.end() && *i->second.is_consented == true;
   }
 };
 
@@ -59,7 +62,9 @@ struct SetPrimary {
       : value_(value) {
   }
   void operator ()(DeviceData::value_type& item) const {
-    *item.second.primary = value_;
+    policy_table::ConsentRecords& primary =
+        (*item.second.user_consent_records)[kPrimary];
+    *primary.is_consented = value_;
   }
 };
 
@@ -235,12 +240,20 @@ void AccessRemoteImpl::Reset(const Object& what) {
   acl_.erase(what);
 }
 
-void AccessRemoteImpl::SetPrimaryDevice(const PTString& dev_id) {
+void AccessRemoteImpl::SetPrimaryDevice(const PTString& dev_id,
+                                        const PTString& input) {
   LOG4CXX_AUTO_TRACE(logger_);
   primary_device_ = dev_id;
   DeviceData& devices = *cache_->pt_->policy_table.device_data;
   std::for_each(devices.begin(), devices.end(), SetPrimary(false));
-  *devices[dev_id].primary = true;
+  policy_table::ConsentRecords& record =
+      (*devices[dev_id].user_consent_records)[kPrimary];
+  *record.is_consented = true;
+  policy_table::Input value;
+  if (EnumFromJsonString(input, &value)) {
+    *record.input = value;
+  }
+  *record.time_stamp = cache_->currentDateTime();
   cache_->Backup();
 }
 
@@ -277,7 +290,7 @@ PTString AccessRemoteImpl::FindGroup(const Subject& who, const PTString& rpc,
   }
 
   const policy_table::Strings& groups =
-      *cache_->pt_->policy_table.app_policies[who.app_id].groups_non_primaryRC;
+      *cache_->pt_->policy_table.app_policies[who.app_id].groups_nonPrimaryRC;
   const FunctionalGroupings& all_groups = cache_->pt_->policy_table
       .functional_groupings;
   policy_table::Strings::const_iterator i = std::find_if(
@@ -325,7 +338,7 @@ const policy_table::Strings& AccessRemoteImpl::GetGroups(
     if (IsPrimaryDevice(device_id)) {
       return *cache_->pt_->policy_table.app_policies[app_id].groups_primaryRC;
     } else if (IsEnabled()) {
-      return *cache_->pt_->policy_table.app_policies[app_id].groups_non_primaryRC;
+      return *cache_->pt_->policy_table.app_policies[app_id].groups_nonPrimaryRC;
     } else {
       return kGroupsEmpty;
     }
