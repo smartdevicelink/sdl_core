@@ -75,7 +75,8 @@ const std::string kCreateSchema =
   "  `vehicle_make` VARCHAR(45), "
   "  `vehicle_model` VARCHAR(45), "
   "  `vehicle_year` VARCHAR(4),"
-  "  `remote_control` BOOL "
+  "  `user_consent_passengerRC` BOOL,"
+  "  `country_consent_passengersRC` BOOL "
   "); "
   "CREATE TABLE IF NOT EXISTS `functional_group`( "
   "  `id` INTEGER PRIMARY KEY NOT NULL, "
@@ -369,8 +370,8 @@ const std::string kInsertInitData =
   "  VALUES (0, 0, 0, 0); "
   "INSERT OR IGNORE INTO `module_config` (`preloaded_pt`, `is_first_run`,"
   "  `exchange_after_x_ignition_cycles`, `exchange_after_x_kilometers`, "
-  "  `exchange_after_x_days`, `timeout_after_x_seconds`, `remote_control`) "
-  "  VALUES(1, 0, 0, 0, 0, 0, 1); "
+  "  `exchange_after_x_days`, `timeout_after_x_seconds`) "
+  "  VALUES(1, 0, 0, 0, 0, 0); "
   "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('EMERGENCY'); "
   "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('NAVIGATION'); "
   "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('VOICECOMMUNICATION'); "
@@ -547,7 +548,8 @@ const std::string kUpdateModuleConfig =
   "  `exchange_after_x_ignition_cycles` = ?,"
   "  `exchange_after_x_kilometers` = ?, `exchange_after_x_days` = ?, "
   "  `timeout_after_x_seconds` = ?, `vehicle_make` = ?, "
-  "  `vehicle_model` = ?, `vehicle_year` = ?, `remote_control` = ?";
+  "  `vehicle_model` = ?, `vehicle_year` = ?, "
+  "  `user_consent_passengerRC` = ?, `country_consent_passengersRC` = ?";
 
 const std::string kInsertEndpoint =
   "INSERT INTO `endpoint` (`service`, `url`, `application_id`) "
@@ -601,7 +603,8 @@ const std::string kSelectModuleConfig =
   "SELECT `preloaded_pt`, `exchange_after_x_ignition_cycles`, "
   " `exchange_after_x_kilometers`, `exchange_after_x_days`, "
   " `timeout_after_x_seconds`, `vehicle_make`,"
-  " `vehicle_model`, `vehicle_year`, `remote_control` "
+  " `vehicle_model`, `vehicle_year`, "
+  " `user_consent_passengerRC` , `country_consent_passengersRC` "
   " FROM `module_config`";
 
 const std::string kSelectEndpoints =

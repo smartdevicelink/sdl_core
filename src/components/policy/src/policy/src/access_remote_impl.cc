@@ -141,6 +141,7 @@ AccessRemoteImpl::AccessRemoteImpl()
     : cache_(new CacheManager()),
       primary_device_(),
       enabled_(true),
+      country_consent_(true),
       acl_() {
 }
 
@@ -148,27 +149,38 @@ AccessRemoteImpl::AccessRemoteImpl(utils::SharedPtr<CacheManager> cache)
     : cache_(cache),
       primary_device_(),
       enabled_(true),
+      country_consent_(true),
       acl_() {
 }
 
 void AccessRemoteImpl::Init() {
+  LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(cache_->pt_);
-  enabled_ = *cache_->pt_->policy_table.module_config.remote_control;
+
+  policy_table::ModuleConfig& config = cache_->pt_->policy_table.module_config;
+  country_consent_ = !config.country_consent_passengersRC.is_initialized()
+      || *config.country_consent_passengersRC;
+  bool enabled = !config.user_consent_passengerRC.is_initialized()
+      || *config.user_consent_passengerRC;
+  set_enabled(enabled);
 
   const DeviceData& devices = *cache_->pt_->policy_table.device_data;
   DeviceData::const_iterator d = std::find_if(devices.begin(), devices.end(),
                                               IsPrimary());
   if (d != devices.end()) {
+    LOG4CXX_TRACE(logger_, "Primary device is set");
     primary_device_ = d->first;
   }
 }
 
 bool AccessRemoteImpl::IsPrimaryDevice(const PTString& dev_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
   return primary_device_ == dev_id;
 }
 
 bool AccessRemoteImpl::IsPassengerZone(const SeatLocation& seat,
                                        const SeatLocation& zone) const {
+  LOG4CXX_AUTO_TRACE(logger_);
   return seat == zone;
 }
 
@@ -182,6 +194,9 @@ TypeAccess AccessRemoteImpl::Check(const Subject& who,
     AccessControlRow::const_iterator j = row.find(who);
     if (j != row.end()) {
       // who has permissions
+      LOG4CXX_TRACE(
+          logger_,
+          "Subject " << who << " has permissions " << ret << " to object " << what);
       ret = j->second;
     } else {
       // Look for somebody is who controls this object
@@ -189,37 +204,45 @@ TypeAccess AccessRemoteImpl::Check(const Subject& who,
                        IsTypeAccess(TypeAccess::kAllowed));
       if (j != row.end()) {
         // Someone controls this object
+        LOG4CXX_TRACE(logger_, "Someone controls " << what);
         ret = TypeAccess::kDisallowed;
       } else {
         // Nobody controls this object
+        LOG4CXX_TRACE(logger_, "Nobody controls " << what);
         ret = TypeAccess::kManual;
       }
     }
   } else {
     // Nobody controls this object
+    LOG4CXX_TRACE(logger_, "Nobody controls " << what);
     ret = TypeAccess::kManual;
   }
   return ret;
 }
 
 void AccessRemoteImpl::Allow(const Subject& who, const Object& what) {
+  LOG4CXX_AUTO_TRACE(logger_);
   acl_[what][who] = TypeAccess::kAllowed;
 }
 
 void AccessRemoteImpl::Deny(const Subject& who, const Object& what) {
+  LOG4CXX_AUTO_TRACE(logger_);
   acl_[what][who] = TypeAccess::kDisallowed;
 }
 
 void AccessRemoteImpl::Reset(const Subject& who) {
+  LOG4CXX_AUTO_TRACE(logger_);
   std::for_each(acl_.begin(), acl_.end(), Erase(who));
 }
 
 void AccessRemoteImpl::Reset(const Object& what) {
+  LOG4CXX_AUTO_TRACE(logger_);
   acl_.erase(what);
 }
 
 void AccessRemoteImpl::SetPrimaryDevice(const PTString& dev_id,
                                         const PTString& input) {
+  LOG4CXX_AUTO_TRACE(logger_);
   primary_device_ = dev_id;
   DeviceData& devices = *cache_->pt_->policy_table.device_data;
   std::for_each(devices.begin(), devices.end(), SetPrimary(false));
@@ -234,26 +257,34 @@ void AccessRemoteImpl::SetPrimaryDevice(const PTString& dev_id,
   cache_->Backup();
 }
 
+PTString AccessRemoteImpl::PrimaryDevice() const {
+  return primary_device_;
+}
+
 void AccessRemoteImpl::Enable() {
+  LOG4CXX_AUTO_TRACE(logger_);
   set_enabled(true);
 }
 
 void AccessRemoteImpl::Disable() {
+  LOG4CXX_AUTO_TRACE(logger_);
   set_enabled(false);
 }
 
 void AccessRemoteImpl::set_enabled(bool value) {
-  enabled_ = value;
-  *cache_->pt_->policy_table.module_config.remote_control = enabled_;
+  enabled_ = country_consent_ && value;
+  *cache_->pt_->policy_table.module_config.user_consent_passengerRC = value;
   cache_->Backup();
 }
 
 bool AccessRemoteImpl::IsEnabled() const {
+  LOG4CXX_AUTO_TRACE(logger_);
   return enabled_;
 }
 
 PTString AccessRemoteImpl::FindGroup(const Subject& who, const PTString& rpc,
                                      const RemoteControlParams& params) const {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (!cache_->IsApplicationRepresented(who.app_id)) {
     return "";
   }
@@ -273,6 +304,7 @@ PTString AccessRemoteImpl::FindGroup(const Subject& who, const PTString& rpc,
 
 void AccessRemoteImpl::SetDefaultHmiTypes(const std::string& app_id,
                                           const std::vector<int>& hmi_types) {
+  LOG4CXX_AUTO_TRACE(logger_);
   HMIList::mapped_type types;
   std::transform(hmi_types.begin(), hmi_types.end(), std::back_inserter(types),
                  ToHMIType());
@@ -287,6 +319,7 @@ void AccessRemoteImpl::SetDefaultHmiTypes(const std::string& app_id,
 
 const policy_table::AppHMITypes& AccessRemoteImpl::HmiTypes(
     const std::string& app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (cache_->IsDefaultPolicy(app_id)) {
     return hmi_types_[app_id];
   } else {
@@ -296,18 +329,44 @@ const policy_table::AppHMITypes& AccessRemoteImpl::HmiTypes(
 
 const policy_table::Strings& AccessRemoteImpl::GetGroups(
     const PTString& device_id, const PTString& app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
   const policy_table::AppHMITypes& hmi_types = HmiTypes(app_id);
   bool reverse = std::find(hmi_types.begin(), hmi_types.end(),
                            policy_table::AHT_REMOTE_CONTROL) != hmi_types.end();
 
   if (reverse) {
-    return
-        IsPrimaryDevice(device_id) ?
-            *cache_->pt_->policy_table.app_policies[app_id].groups_primaryRC :
-            *cache_->pt_->policy_table.app_policies[app_id].groups_nonPrimaryRC;
+    if (IsPrimaryDevice(device_id)) {
+      return *cache_->pt_->policy_table.app_policies[app_id].groups_primaryRC;
+    } else if (IsEnabled()) {
+      return *cache_->pt_->policy_table.app_policies[app_id].groups_nonPrimaryRC;
+    } else {
+      return kGroupsEmpty;
+    }
   }
   return cache_->GetGroups(app_id);
 }
+
+bool AccessRemoteImpl::GetPermissionsForApp(const std::string &device_id,
+                                            const std::string &app_id,
+                                            FunctionalIdType& group_types) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  GetGroupsIds(device_id, app_id, group_types[kTypeGeneral]);
+  GetGroupsIds(device_id, kDefaultId, group_types[kTypeDefault]);
+  GetGroupsIds(device_id, kPreDataConsentId,
+               group_types[kTypePreDataConsented]);
+  return true;
+}
+
+void AccessRemoteImpl::GetGroupsIds(const std::string &device_id,
+                                    const std::string &app_id,
+                                    FunctionalGroupIDs& groups_ids) {
+  const policy_table::Strings& groups = GetGroups(device_id, app_id);
+  groups_ids.resize(groups.size());
+  std::transform(groups.begin(), groups.end(), groups_ids.begin(),
+                 &CacheManager::GenerateHash);
+}
+
+const policy_table::Strings AccessRemoteImpl::kGroupsEmpty;
 
 }
 // namespace policy

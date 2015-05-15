@@ -125,13 +125,13 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
 }
 
 ApplicationImpl::~ApplicationImpl() {
+  LOG4CXX_AUTO_TRACE(logger_);
   // TODO(AK): check if this is correct assimption
   if (active_message_) {
     delete active_message_;
     active_message_ = NULL;
   }
 
-  functional_modules::PluginManager::instance()->RemoveAppExtension(app_id_);
   subscribed_buttons_.clear();
   subscribed_vehicle_info_.clear();
   if (is_perform_interaction_active()) {
@@ -808,6 +808,10 @@ bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
     }
   }
   return false;
+}
+
+void ApplicationImpl::RemoveExtensions() {
+  functional_modules::PluginManager::instance()->RemoveAppExtension(app_id_);
 }
 
 }  // namespace application_manager

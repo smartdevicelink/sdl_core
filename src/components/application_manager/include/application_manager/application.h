@@ -570,6 +570,11 @@ class Application : public virtual InitialApplicationData,
     virtual bool RemoveExtension(AppExtensionUID uid) = 0;
 
     /**
+     * @brief Removes all extensions
+     */
+    virtual void RemoveExtensions() = 0;
+
+    /**
      * @brief Check's if it is media, voice communication or navigation application
      *
      * @return true if application is media, voice communication or navigation

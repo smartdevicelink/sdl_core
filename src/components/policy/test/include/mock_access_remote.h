@@ -59,6 +59,7 @@ class MockAccessRemote : public AccessRemote {
       bool(const PTString& dev_id));
   MOCK_METHOD2(SetPrimaryDevice,
       void(const PTString& dev_id, const PTString& input));
+  MOCK_CONST_METHOD0(PrimaryDevice, PTString());
   MOCK_CONST_METHOD2(IsPassengerZone,
       bool(const SeatLocation& seat, const SeatLocation& zone));
   MOCK_METHOD2(Allow,
@@ -77,6 +78,8 @@ class MockAccessRemote : public AccessRemote {
       void(const std::string& app_id, const std::vector<int>& hmi_types));
   MOCK_METHOD2(GetGroups,
       const policy_table::Strings&(const PTString& device_id, const PTString& app_id));
+  MOCK_METHOD3(GetPermissionsForApp,
+      bool (const std::string& device_id, const std::string& app_id, policy::FunctionalIdType& group_types));
 };
 
 }  // namespace policy

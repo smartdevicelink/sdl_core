@@ -889,6 +889,7 @@ class ApplicationManagerImpl : public ApplicationManager,
       }
 
       void Erase(ApplicationSharedPtr app_to_remove) {
+        app_to_remove->RemoveExtensions();
         ApplicationManagerImpl::instance()->applications_.erase(app_to_remove);
       }
 

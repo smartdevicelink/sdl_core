@@ -444,6 +444,12 @@ class PolicyManager : public usage_statistics::StatisticsManager {
                                   const PTString& input) = 0;
 
     /**
+     * Gets current primary device
+     * @return ID device
+     */
+    virtual PTString PrimaryDevice() const = 0;
+
+    /**
      * Sets mode of remote control (on/off)
      * @param enabled true if remote control is turned on
      */
