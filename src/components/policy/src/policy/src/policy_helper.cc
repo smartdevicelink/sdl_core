@@ -401,7 +401,7 @@ void policy::CheckAppPolicy::SetPendingPermissions(
     // Getting RequestTypes from PTU (not from cache)
     policy_table::RequestTypes::const_iterator it_request_type =
         app_policy.second.RequestType->begin();
-    for (;it_request_type != app_policy.second.RequestType->end();
+    for (; app_policy.second.RequestType->end() != it_request_type;
          ++it_request_type) {
       permissions_diff.requestType.push_back(EnumToJsonString(*it_request_type));
      }
