@@ -699,6 +699,10 @@ class Application : public virtual InitialApplicationData,
      * otherwise - false
      */
     void set_greyed_out(bool is_greyed_out) {is_greyed_out_ = is_greyed_out;}
+    /**
+     * @brief Load persistent files from application folder.
+     */
+    virtual void LoadPersistentFiles() = 0;
 
   protected:
 

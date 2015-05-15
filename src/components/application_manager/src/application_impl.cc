@@ -118,8 +118,6 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
   // subscribe application to custom button by default
   SubscribeToButton(mobile_apis::ButtonName::CUSTOM_BUTTON);
 
-  // load persistent files
-  LoadPersistentFiles();
   HmiStatePtr initial_state =
       ApplicationManagerImpl::instance()->CreateRegularState(app_id(),
                                           mobile_apis::HMILevel::INVALID_ENUM,
@@ -299,7 +297,11 @@ const std::string& ApplicationImpl::name() const {
 }
 
 const std::string ApplicationImpl::folder_name() const {
-  return name() + mobile_app_id();
+  const std::string device_id =
+      MessageHelper::GetDeviceMacAddressForHandle(
+        static_cast<uint32_t>(device_));
+
+  return mobile_app_id()+"_"+device_id;
 }
 
 bool ApplicationImpl::is_media_application() const {

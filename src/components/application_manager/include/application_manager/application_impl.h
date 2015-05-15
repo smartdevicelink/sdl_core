@@ -239,17 +239,17 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    */
   virtual const HmiStatePtr RegularHmiState() const;
 
- protected:
+  /**
+   * @brief Load persistent files from application folder.
+   */
+  virtual void LoadPersistentFiles();
 
+  protected:
   /**
    * @brief Clean up application folder. Persistent files will stay
    */
   void CleanupFiles();
 
-  /**
-   * @brief Load persistent files from application folder.
-   */
-  void LoadPersistentFiles();
 
  private:
   typedef SharedPtr<TimerThread<ApplicationImpl>> ApplicationTimerPtr;
