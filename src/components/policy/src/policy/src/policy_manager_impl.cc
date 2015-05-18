@@ -341,7 +341,8 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
   default_hmi = "NONE";
 
 #ifdef SDL_REMOTE_CONTROL
-  if (access_remote_->IsPrimaryDevice(device_id)) {
+  if (access_remote_->IsPrimaryDevice(device_id)
+      || access_remote_->IsEnabled()) {
     listener()->OnPermissionsUpdated(application_id, notification_data);
   } else {
     listener()->OnPermissionsUpdated(application_id, notification_data,

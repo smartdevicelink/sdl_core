@@ -1363,6 +1363,25 @@ void PolicyHandler::SetPrimaryDevice(const PTString& dev_id,
 void PolicyHandler::SetRemoteControl(bool enabled) {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->SetRemoteControl(enabled);
+
+  PTString device_id = policy_manager_->PrimaryDevice();
+  connection_handler::DeviceHandle device_handle;
+    ApplicationManagerImpl::instance()->connection_handler()
+        ->GetDeviceID(device_id, &device_handle);
+
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  for (ApplicationManagerImpl::ApplictionSetConstIt i = accessor.begin();
+      i != accessor.end(); ++i) {
+    const ApplicationSharedPtr app = *i;
+    LOG4CXX_DEBUG(logger_,
+                  "Item: " << app->device() << " - " << app->mobile_app_id());
+    if (app->device() != device_handle) {
+      LOG4CXX_DEBUG(
+          logger_,
+          "Send notify " << app->device() << " - " << app->mobile_app_id());
+      policy_manager_->SendNotificationOnPermissionsUpdated(app->mobile_app_id());
+    }
+  }
 }
 
 application_manager::TypeAccess PolicyHandler::ConvertTypeAccess(

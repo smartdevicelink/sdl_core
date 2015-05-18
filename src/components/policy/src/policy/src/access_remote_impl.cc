@@ -160,9 +160,9 @@ void AccessRemoteImpl::Init() {
   policy_table::ModuleConfig& config = cache_->pt_->policy_table.module_config;
   country_consent_ = !config.country_consent_passengersRC.is_initialized()
       || *config.country_consent_passengersRC;
-  bool enabled = !config.user_consent_passengerRC.is_initialized()
-      || *config.user_consent_passengerRC;
-  set_enabled(enabled);
+  enabled_ = country_consent_ &&
+      (!config.user_consent_passengerRC.is_initialized()
+      || *config.user_consent_passengerRC);
 
   const DeviceData& devices = *cache_->pt_->policy_table.device_data;
   DeviceData::const_iterator d = std::find_if(devices.begin(), devices.end(),
