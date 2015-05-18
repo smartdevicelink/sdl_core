@@ -603,11 +603,23 @@ bool ResumeCtrl::CheckIgnCycleRestrictions(
 
 bool ResumeCtrl::DisconnectedJustBeforeIgnOff(
     const smart_objects::SmartObject& saved_app) {
+  using namespace date_time;
+  using namespace profile;
   LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK_OR_RETURN(saved_app.keyExists(strings::suspend_count), false);
-  const uint32_t suspend_count = saved_app[strings::suspend_count].asUInt();
-  LOG4CXX_DEBUG(logger_, " suspend_count " << suspend_count);
-  return (1 == suspend_count);
+  DCHECK_OR_RETURN(saved_app.keyExists(strings::time_stamp), false);
+
+  const time_t time_stamp =
+      static_cast<time_t>(saved_app[strings::time_stamp].asUInt());
+  time_t ign_off_time =
+      static_cast<time_t>(resumption_storage_->GetIgnOffTime());
+  const uint32_t sec_spent_before_ign = labs(ign_off_time - time_stamp);
+  LOG4CXX_DEBUG(logger_,"ign_off_time " << ign_off_time
+                << "; app_disconnect_time " << time_stamp
+                << "; sec_spent_before_ign " << sec_spent_before_ign
+                << "; resumption_delay_before_ign " <<
+                Profile::instance()->resumption_delay_before_ign());
+  return sec_spent_before_ign <=
+      Profile::instance()->resumption_delay_before_ign();
 }
 
 bool ResumeCtrl::CheckAppRestrictions(ApplicationConstSharedPtr application,
