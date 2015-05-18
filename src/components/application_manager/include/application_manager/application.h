@@ -424,6 +424,7 @@ class Application : public virtual InitialApplicationData,
     virtual uint32_t hmi_app_id() const = 0;
     virtual uint32_t app_id() const = 0;
     virtual const std::string& name() const = 0;
+    virtual void set_folder_name(const std::string& folder_name) = 0;
     virtual const std::string folder_name() const = 0;
     virtual bool is_media_application() const = 0;
     virtual const mobile_api::HMILevel::eType& hmi_level() const = 0;

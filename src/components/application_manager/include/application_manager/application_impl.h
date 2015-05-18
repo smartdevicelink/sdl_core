@@ -97,6 +97,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   inline uint32_t hmi_app_id() const;
   inline uint32_t app_id() const;
   const std::string& name() const;
+  void set_folder_name(const std::string& folder_name);
   const std::string folder_name() const;
   bool is_media_application() const;
   const mobile_api::HMILevel::eType& hmi_level() const;
@@ -265,6 +266,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   CommandSoftButtonID cmd_softbuttonid_;
   // Lock for command soft button id
   sync_primitives::Lock cmd_softbuttonid_lock_;
+  std::string folder_name_;
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };
 
