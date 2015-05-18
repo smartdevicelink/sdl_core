@@ -129,15 +129,6 @@ class AccessRemote {
   virtual PTString PrimaryDevice() const = 0;
 
   /**
-   * Checks passenger can control of the requested zone without asking driver
-   * @param seat seat of passenger
-   * @param zone requested zone to control
-   * @return true if passenger can control this zone
-   */
-  virtual bool IsPassengerZone(const SeatLocation& seat,
-                               const SeatLocation& zone) const = 0;
-
-  /**
    * Allows access subject to object
    * @param who subject is dev_id and app_id
    * @param what object is group_id and zone

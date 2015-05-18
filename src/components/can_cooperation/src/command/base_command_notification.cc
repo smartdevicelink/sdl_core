@@ -99,18 +99,11 @@ void BaseCommandNotification::Run() {
   mobile_apis::Result::eType permission =
       service_->CheckPolicyPermissions(message_);
 
-  CANAppExtensionPtr extension = GetAppExtension(app);
-  SeatLocation seat;
-  if (extension) {
-    seat = extension->seat();
-  }
-
-  seat = 0;
-  // TODO(KKolodiy): get zone and params
+  // TODO(KKolodiy): get zone and params from message
   SeatLocation zone = 10;
   std::vector<std::string> params;
   application_manager::TypeAccess access = service_->CheckAccess(
-      app->app_id(), message_->function_name(), params, seat, zone);
+      app->app_id(), message_->function_name(), params, zone);
 
   if (permission == mobile_apis::Result::eType::SUCCESS &&
       access == application_manager::TypeAccess::kAllowed) {

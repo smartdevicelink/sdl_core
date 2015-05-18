@@ -53,11 +53,10 @@ class MockService : public Service {
       std::vector<ApplicationSharedPtr>(AppExtensionUID));
   MOCK_METHOD1(SubscribeToHMINotification,
       void(const std::string& hmi_notification));
-  MOCK_METHOD5(CheckAccess,
+  MOCK_METHOD4(CheckAccess,
       TypeAccess(const ApplicationId& app_id,
           const PluginFunctionID& function_id,
           const std::vector<std::string>& params,
-          const SeatLocation& seat,
           const SeatLocation& zone));
   MOCK_METHOD4(SetAccess,
       void(const ApplicationId& app_id,

@@ -178,12 +178,6 @@ bool AccessRemoteImpl::IsPrimaryDevice(const PTString& dev_id) const {
   return primary_device_ == dev_id;
 }
 
-bool AccessRemoteImpl::IsPassengerZone(const SeatLocation& seat,
-                                       const SeatLocation& zone) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return seat == zone;
-}
-
 TypeAccess AccessRemoteImpl::Check(const Subject& who,
                                    const Object& what) const {
   LOG4CXX_AUTO_TRACE(logger_);

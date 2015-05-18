@@ -107,7 +107,6 @@ class PolicyHandler :
   application_manager::TypeAccess CheckAccess(const PTString& app_id,
                                               const PTString& rpc,
                                               const RemoteControlParams& params,
-                                              const SeatLocation& seat,
                                               const SeatLocation& zone);
 
   /**

@@ -314,17 +314,11 @@ void BaseCommandRequest::Run() {
   }
 
   CANAppExtensionPtr extension = GetAppExtension(app_);
-  SeatLocation seat;
-  if (extension) {
-    seat = extension->seat();
-  }
-
-  seat = 0;
-  // TODO(KKolodiy): get zone and params
+  // TODO(KKolodiy): get zone and params from message
   SeatLocation zone = 10;
   std::vector<std::string> params;
   application_manager::TypeAccess access = service_->CheckAccess(
-      app_->app_id(), message_->function_name(), params, seat, zone);
+      app_->app_id(), message_->function_name(), params, zone);
 
   switch (access) {
     case application_manager::kAllowed:

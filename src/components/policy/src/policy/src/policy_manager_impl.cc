@@ -941,8 +941,7 @@ void PolicyManagerImpl::set_cache_manager(
 #ifdef SDL_REMOTE_CONTROL
 TypeAccess PolicyManagerImpl::CheckAccess(
     const PTString& app_id, const PTString& rpc,
-    const RemoteControlParams& params,const SeatLocation& seat,
-    const SeatLocation& zone) {
+    const RemoteControlParams& params, const SeatLocation& zone) {
   TypeAccess access = TypeAccess::kDisallowed;
 
   std::string dev_id = GetCurrentDeviceId(app_id);
@@ -957,18 +956,14 @@ TypeAccess PolicyManagerImpl::CheckAccess(
       access = TypeAccess::kAllowed;
     }
   } else if (access_remote_->IsEnabled()) {
-    if (access_remote_->IsPassengerZone(seat, zone)) {
-      access = TypeAccess::kAllowed;
+    Subject who = {dev_id, app_id};
+    PTString group_name = access_remote_->FindGroup(who, rpc, params);
+    if (group_name.empty()) {
+      // Group wasn't found => request is disallowed
+      access = TypeAccess::kDisallowed;
     } else {
-      Subject who = {dev_id, app_id};
-      PTString group_name = access_remote_->FindGroup(who, rpc, params);
-      if (group_name.empty()) {
-        // Group wasn't found => request is disallowed
-        access = TypeAccess::kDisallowed;
-      } else {
-        Object what = {group_name, zone};
-        access = access_remote_->Check(who, what);
-      }
+      Object what = {group_name, zone};
+      access = access_remote_->Check(who, what);
     }
   }
   return access;
