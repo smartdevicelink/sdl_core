@@ -425,10 +425,15 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
     return ApplicationSharedPtr();
   }
 
-  application->set_device(device_id);
+  const std::string device_mac =
+      MessageHelper::GetDeviceMacAddressForHandle(
+        static_cast<uint32_t>(device_id));
+
+  application->set_folder_name(mobile_app_id+"_"+device_mac);
   // To load persistent files, app folder name must be known first, which is now
   // depends on device_id and mobile_app_id
   application->LoadPersistentFiles();
+  application->set_device(device_id);
 
   application->set_grammar_id(GenerateGrammarID());
   mobile_api::Language::eType launguage_desired =
