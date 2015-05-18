@@ -88,6 +88,7 @@ bool ApplicationPoliciesSection::Validate() const {
         LOG4CXX_WARN(logger_, "App policy RequestTypes ommited."
                               " Will be replaced with default.");
         app_params.RequestType = apps[kDefaultApp].RequestType;
+        ++iter;
         continue;
       }
       if (!is_request_type_valid) {
@@ -99,6 +100,7 @@ bool ApplicationPoliciesSection::Validate() const {
           LOG4CXX_WARN(logger_, "App policy RequestTypes empty after clean-up."
                                 " Will be replaced with default.");
           app_params.RequestType = apps[kDefaultApp].RequestType;
+          ++iter;
           continue;
         }
       }
