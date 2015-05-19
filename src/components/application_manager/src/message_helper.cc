@@ -1222,17 +1222,20 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateAddVRCommandToHMI(
 
 bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
     smart_objects::SmartObject& output) {
+  using namespace smart_objects;
+  LOG4CXX_AUTO_TRACE(logger_);
+
   if (!app) {
     LOG4CXX_WARN(logger_, "Application is not valid");
     return false;
   }
 
-  const smart_objects::SmartObject* app_types = app->app_types();
-  const smart_objects::SmartObject* ngn_media_screen_name = app->ngn_media_screen_name();
+  const SmartObject* app_types = app->app_types();
+  const SmartObject* ngn_media_screen_name = app->ngn_media_screen_name();
   const connection_handler::DeviceHandle handle = app->device();
   std::string device_name = ApplicationManagerImpl::instance()->GetDeviceName(handle);
 
-  output = smart_objects::SmartObject(smart_objects::SmartType_Map);
+  output = SmartObject(SmartType_Map);
   output[strings::app_name] = app->name();
 
   const std::string icon_path = app->app_icon_path();
@@ -1251,8 +1254,14 @@ bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
   if (!app->IsRegistered()) {
     output[strings::greyOut] = app->is_greyed_out();
     if (!app->tts_name()->empty()) {
-      output[json::ttsName][strings::text] = *(app->tts_name());
-      output[json::ttsName][strings::speech_capabilities] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
+      const SmartObject* app_tts_name = app->tts_name();
+      SmartObject output_tts_name = SmartObject(SmartType_Array);
+
+      for (uint32_t i = 0; i < app_tts_name->length(); ++i) {
+        output_tts_name[i][strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
+        output_tts_name[i][strings::text] = (*app_tts_name)[i];
+      }
+      output[json::ttsName] = output_tts_name;
     }
     if (!app->vr_synonyms()->empty()) {
       output[json::vrSynonyms] = *(app->vr_synonyms());
