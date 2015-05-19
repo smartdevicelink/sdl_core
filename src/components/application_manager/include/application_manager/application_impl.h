@@ -119,6 +119,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   inline uint32_t hmi_app_id() const;
   inline uint32_t app_id() const;
   const std::string& name() const;
+  void set_folder_name(const std::string& folder_name) OVERRIDE;
   const std::string folder_name() const;
   bool is_media_application() const;
   virtual bool is_foreground() const;
@@ -239,17 +240,17 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    */
   virtual const HmiStatePtr RegularHmiState() const;
 
- protected:
+  /**
+   * @brief Load persistent files from application folder.
+   */
+  virtual void LoadPersistentFiles();
 
+  protected:
   /**
    * @brief Clean up application folder. Persistent files will stay
    */
   void CleanupFiles();
 
-  /**
-   * @brief Load persistent files from application folder.
-   */
-  void LoadPersistentFiles();
 
  private:
   typedef SharedPtr<TimerThread<ApplicationImpl>> ApplicationTimerPtr;
@@ -345,6 +346,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   CommandSoftButtonID cmd_softbuttonid_;
   // Lock for command soft button id
   sync_primitives::Lock cmd_softbuttonid_lock_;
+  std::string folder_name_;
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };
 
