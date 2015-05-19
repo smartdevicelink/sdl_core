@@ -279,7 +279,9 @@ void PolicyManagerImplStressTest::CreateTable(std::ofstream& ofs) {
 TEST_F(PolicyManagerImplStressTest, OneCheck_AppAndFunctuionExisting_RpcAllowed) {
   ::policy::RPCParams input_params;
   ::policy::CheckPermissionResult output;
+#ifdef SDL_REMOTE_CONTROL
   EXPECT_CALL(*mock_listener, OnCurrentDeviceIdUpdateRequired("2"));
+#endif  // SDL_REMOTE_CONTROL
   manager->CheckPermissions("2", "FULL", "Func-0", input_params, output);
   EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
 }
@@ -287,7 +289,9 @@ TEST_F(PolicyManagerImplStressTest, OneCheck_AppAndFunctuionExisting_RpcAllowed)
 TEST_F(PolicyManagerImplStressTest, NoApp_AppDoesNotExisted_RpcDissallowed) {
   ::policy::RPCParams input_params;
   ::policy::CheckPermissionResult output;
-  EXPECT_CALL(*mock_listener, OnCurrentDeviceIdUpdateRequired("1500"));
+#ifdef SDL_REMOTE_CONTROL
+  EXPECT_CALL(*mock_listener, OnCurrentDeviceIdUpdateRequired("1500")).Times(0);
+#endif  // SDL_REMOTE_CONTROL
   manager->CheckPermissions("1500", "FULL", "Func-88", input_params, output);
   EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
 }
@@ -295,7 +299,9 @@ TEST_F(PolicyManagerImplStressTest, NoApp_AppDoesNotExisted_RpcDissallowed) {
 TEST_F(PolicyManagerImplStressTest, NoFunc_FuncDoesNotExisted_RpcDissallowed) {
   ::policy::RPCParams input_params;
   ::policy::CheckPermissionResult output;
+#ifdef SDL_REMOTE_CONTROL
   EXPECT_CALL(*mock_listener, OnCurrentDeviceIdUpdateRequired("2"));
+#endif  // SDL_REMOTE_CONTROL
   manager->CheckPermissions("2", "FULL", "Func-1500", input_params, output);
   EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
 }
@@ -303,7 +309,9 @@ TEST_F(PolicyManagerImplStressTest, NoFunc_FuncDoesNotExisted_RpcDissallowed) {
 TEST_F(PolicyManagerImplStressTest, NoHmi_HMIInLevelNone_RpcDissallowed) {
   ::policy::RPCParams input_params;
   ::policy::CheckPermissionResult output;
+#ifdef SDL_REMOTE_CONTROL
   EXPECT_CALL(*mock_listener, OnCurrentDeviceIdUpdateRequired("2"));
+#endif  // SDL_REMOTE_CONTROL
   manager->CheckPermissions("2", "NONE", "Func-88", input_params, output);
   EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
 }
@@ -313,8 +321,10 @@ TEST_F(PolicyManagerImplStressTest, FewChecks_CheckSeveralFunctions) {
   std::stringstream ss;
   int app, func;
   std::string app_number, func_number;
+#ifdef SDL_REMOTE_CONTROL
   EXPECT_CALL(*mock_listener, OnCurrentDeviceIdUpdateRequired(_)).Times(
       kNumberOfCheckings);
+#endif  // SDL_REMOTE_CONTROL
   for (int i = 0; i < kNumberOfCheckings; ++i) {
     app = rand() % kNumberApps;
     func = rand() % kNumberFuncs;

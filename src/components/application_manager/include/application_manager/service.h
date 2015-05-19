@@ -79,7 +79,6 @@ class Service {
   virtual TypeAccess CheckAccess(const ApplicationId& app_id,
                                  const PluginFunctionID& function_id,
                                  const std::vector<std::string>& params,
-                                 const SeatLocation& seat,
                                  const SeatLocation& zone) = 0;
 
   /**

@@ -409,7 +409,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      */
     virtual TypeAccess CheckAccess(const PTString& app_id, const PTString& rpc,
                                    const RemoteControlParams& params,
-                                   const SeatLocation& seat,
                                    const SeatLocation& zone) = 0;
 
     /**
