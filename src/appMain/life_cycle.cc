@@ -392,6 +392,9 @@ void LifeCycle::StopComponents() {
     LOG4CXX_ERROR(logger_, "Components wasn't started");
     return;
   }
+
+  functional_modules::PluginManager::destroy();
+
   hmi_handler_->set_message_observer(NULL);
   connection_handler_->set_connection_handler_observer(NULL);
   protocol_handler_->RemoveProtocolObserver(app_manager_);
