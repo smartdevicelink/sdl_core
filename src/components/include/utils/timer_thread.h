@@ -46,6 +46,7 @@
 #include "utils/timer_thread.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
+#include "utils/date_time.h"
 
 namespace timer {
 // TODO(AKutsan): Remove this logger after bugfix
@@ -101,9 +102,9 @@ class TimerThread {
    * On timeout TimerThread::onTimeOut interface will be called.
    * Must not be used in callback function!
    *
-   * @param timeout_seconds Timeout in seconds to be set
+   * @param timeout_milliseconds Timeout in seconds to be set
    */
-  virtual void start(uint32_t timeout_seconds);
+  virtual void start(uint32_t timeout_milliseconds);
 
   /**
    * @brief Starts timer for specified timeout.
@@ -111,7 +112,7 @@ class TimerThread {
    * On timeout TimerThread::onTimeOut interface will be called.
    * Must not be used in callback function!
    *
-   * @param timeout_seconds Timeout in seconds to be set
+   * @param timeout_milliseconds Timeout in seconds to be set
    *
    * @param callee A class that use timer
    *
@@ -119,7 +120,7 @@ class TimerThread {
    *  Attention! "f()" will be called not in main thread but in timer thread
    *  Never use stop() and start() methods inside f
    */
-  virtual void start(uint32_t timeout_seconds, T* callee, void (T::*f)());
+  virtual void start(uint32_t timeout_milliseconds, T* callee, void (T::*f)());
 
   /**
    * @brief Stops timer execution
@@ -142,10 +143,10 @@ class TimerThread {
    * @brief Stop timer update timeout and start timer again
    * Note that it cancel thread of timer, If you use it from callback,
    * it probably will stop execution of callback function
-   * @param timeout_seconds new timeout value
+   * @param timeout_milliseconds new timeout value
    *
    */
-  virtual void updateTimeOut(const uint32_t timeout_seconds);
+  virtual void updateTimeOut(const uint32_t timeout_milliseconds);
 
  protected:
   /**
@@ -183,9 +184,9 @@ class TimerThread {
 
     /**
      * @brief Set new Timeout
-     * @param timeout_seconds New timeout to be set
+     * @param timeout_milliseconds New timeout to be set
      */
-    virtual void setTimeOut(const uint32_t timeout_seconds);
+    virtual void setTimeOut(const uint32_t timeout_milliseconds);
 
     /**
      * @brief Quits threadMain function after next loop.
@@ -199,7 +200,7 @@ class TimerThread {
 
    protected:
     TimerThread* timer_thread_;
-    uint32_t timeout_seconds_;
+    uint32_t timeout_milliseconds_;
     sync_primitives::Lock state_lock_;
     sync_primitives::ConditionalVariable termination_condition_;
     volatile bool stop_flag_;
@@ -270,24 +271,24 @@ TimerThread<T>::~TimerThread() {
 }
 
 template<class T>
-void TimerThread<T>::start(uint32_t timeout_seconds) {
+void TimerThread<T>::start(uint32_t timeout_milliseconds) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (isRunning()) {
     LOG4CXX_INFO(logger_, "Restart timer in thread " << name_);
     delegate_->shouldBeRestarted();
-    updateTimeOut(timeout_seconds);
+    updateTimeOut(timeout_milliseconds);
   } else {
-    updateTimeOut(timeout_seconds);
+    updateTimeOut(timeout_milliseconds);
     thread_->start();
   }
 }
 
 template<class T>
-void TimerThread<T>::start(uint32_t timeout_seconds, T* callee,
+void TimerThread<T>::start(uint32_t timeout_milliseconds, T* callee,
                            void (T::*f)()) {
   callee_ = callee;
   callback_ = f;
-  start(timeout_seconds);
+  start(timeout_milliseconds);
 }
 
 template<class T>
@@ -311,8 +312,8 @@ void TimerThread<T>::suspend() {
 }
 
 template<class T>
-void TimerThread<T>::updateTimeOut(const uint32_t timeout_seconds) {
-  delegate_->setTimeOut(timeout_seconds);
+void TimerThread<T>::updateTimeOut(const uint32_t timeout_milliseconds) {
+  delegate_->setTimeOut(timeout_milliseconds);
 }
 
 template<class T> void TimerThread<T>::onTimeOut() const {
@@ -324,7 +325,7 @@ template<class T> void TimerThread<T>::onTimeOut() const {
 template<class T>
 TimerThread<T>::TimerDelegate::TimerDelegate(TimerThread* timer_thread)
     : timer_thread_(timer_thread),
-      timeout_seconds_(0),
+      timeout_milliseconds_(0),
       state_lock_(true),
       stop_flag_(false),
       restart_flag_(false) {
@@ -356,11 +357,11 @@ void TimerThread<T>::TimerDelegate::threadMain() {
     if (ConditionalVariable::kTimeout == wait_status
         || wait_milliseconds_left <= 0) {
       LOG4CXX_TRACE(logger_,
-                    "Timer timeout " << wait_milliseconds_left << " ms");
+                    "Timer timeout (ms): " << wait_milliseconds_left);
       timer_thread_->onTimeOut();
     } else {
-      LOG4CXX_DEBUG(logger_,
-                    "Timeout reset force: " << TimerDelegate::timeout_seconds_);
+      LOG4CXX_DEBUG(logger_, "Timeout reset force (ms): "
+                    << TimerDelegate::timeout_milliseconds_);
     }
     {
       sync_primitives::AutoLock auto_lock(restart_flag_lock_);
@@ -386,11 +387,11 @@ void TimerThread<T>::TimerLooperDelegate::threadMain() {
     if (ConditionalVariable::kTimeout == wait_status
         || wait_milliseconds_left <= 0) {
       LOG4CXX_TRACE(logger_,
-                    "Timer timeout " << wait_milliseconds_left << " ms");
+                    "Timer timeout (ms): " << wait_milliseconds_left);
       TimerDelegate::timer_thread_->onTimeOut();
     } else {
-      LOG4CXX_DEBUG(logger_,
-                    "Timeout reset force: " << TimerDelegate::timeout_seconds_);
+      LOG4CXX_DEBUG(logger_, "Timeout reset force (ms): "
+                    << TimerDelegate::timeout_milliseconds_);
     }
   }
 }
@@ -402,8 +403,9 @@ void TimerThread<T>::TimerDelegate::exitThreadMain() {
 }
 
 template<class T>
-void TimerThread<T>::TimerDelegate::setTimeOut(const uint32_t timeout_seconds) {
-  timeout_seconds_ = timeout_seconds;
+void TimerThread<T>::TimerDelegate::setTimeOut(
+    const uint32_t timeout_milliseconds) {
+  timeout_milliseconds_ = timeout_milliseconds;
   termination_condition_.NotifyOne();
 }
 
@@ -427,19 +429,25 @@ void TimerThread<T>::TimerDelegate::shouldBeRestarted() {
 
 template<class T>
 int32_t TimerThread<T>::TimerThread::TimerDelegate::calculateMillisecondsLeft() {
+  using namespace date_time;
   time_t cur_time = time(NULL);
   time_t end_time = std::numeric_limits<time_t>::max();
-  if (TimerDelegate::timeout_seconds_ + cur_time
-      > TimerDelegate::timeout_seconds_) {  // no overflow occurred
-    end_time = cur_time + TimerDelegate::timeout_seconds_;
+
+  const uint32_t timeout_in_seconds =
+      TimerDelegate::timeout_milliseconds_ / DateTime::MILLISECONDS_IN_SECOND;
+
+  // if no overflow occurred
+  if (timeout_in_seconds + cur_time > timeout_in_seconds) {
+    end_time = cur_time + timeout_in_seconds;
   }
 
   int64_t wait_seconds_left = static_cast<int64_t>(difftime(end_time, cur_time));
   int32_t wait_milliseconds_left = std::numeric_limits<int32_t>::max();
-  const int32_t milliseconds_in_second = 1000;
+
   if (wait_seconds_left
-      < std::numeric_limits<int32_t>::max() / milliseconds_in_second) {
-    wait_milliseconds_left = milliseconds_in_second * wait_seconds_left;
+      < std::numeric_limits<int32_t>::max() / DateTime::MILLISECONDS_IN_SECOND) {
+    wait_milliseconds_left =
+        DateTime::MILLISECONDS_IN_SECOND * wait_seconds_left;
   }
   return wait_milliseconds_left;
 }
