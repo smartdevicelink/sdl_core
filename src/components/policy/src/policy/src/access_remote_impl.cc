@@ -47,8 +47,8 @@ namespace policy {
 
 struct IsPrimary {
   bool operator ()(const DeviceData::value_type& item) const {
-    const policy_table::UserConsentRecords& consent =
-        *item.second.user_consent_records;
+    const policy_table::UserConsentRecords& consent = *item.second
+        .user_consent_records;
     policy_table::UserConsentRecords::const_iterator i = consent.find(kPrimary);
     return i != consent.end() && *i->second.is_consented == true;
   }
@@ -160,9 +160,9 @@ void AccessRemoteImpl::Init() {
   policy_table::ModuleConfig& config = cache_->pt_->policy_table.module_config;
   country_consent_ = !config.country_consent_passengersRC.is_initialized()
       || *config.country_consent_passengersRC;
-  enabled_ = country_consent_ &&
-      (!config.user_consent_passengerRC.is_initialized()
-      || *config.user_consent_passengerRC);
+  enabled_ = country_consent_
+      && (!config.user_consent_passengerRC.is_initialized()
+          || *config.user_consent_passengerRC);
 
   const DeviceData& devices = *cache_->pt_->policy_table.device_data;
   DeviceData::const_iterator d = std::find_if(devices.begin(), devices.end(),
@@ -357,16 +357,29 @@ bool AccessRemoteImpl::GetPermissionsForApp(const std::string &device_id,
   return true;
 }
 
+std::ostream& operator <<(std::ostream& output,
+                          const FunctionalGroupIDs& types) {
+  for (FunctionalGroupIDs::const_iterator i = types.begin(); i != types.end();
+      ++i) {
+    output << *i << " ";
+  }
+  return output;
+}
+
+extern std::ostream& operator <<(std::ostream& output,
+                                 const policy_table::Strings& groups);
+
 void AccessRemoteImpl::GetGroupsIds(const std::string &device_id,
                                     const std::string &app_id,
                                     FunctionalGroupIDs& groups_ids) {
   const policy_table::Strings& groups = GetGroups(device_id, app_id);
+  LOG4CXX_DEBUG(logger_, "Groups Names: " << groups);
   groups_ids.resize(groups.size());
   std::transform(groups.begin(), groups.end(), groups_ids.begin(),
                  &CacheManager::GenerateHash);
+  LOG4CXX_DEBUG(logger_, "Groups Ids: " << groups_ids);
 }
 
 const policy_table::Strings AccessRemoteImpl::kGroupsEmpty;
-
 }
 // namespace policy
