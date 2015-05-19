@@ -119,7 +119,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   inline uint32_t hmi_app_id() const;
   inline uint32_t app_id() const;
   const std::string& name() const;
-  void set_folder_name(const std::string& folder_name);
+  void set_folder_name(const std::string& folder_name) OVERRIDE;
   const std::string folder_name() const;
   bool is_media_application() const;
   virtual bool is_foreground() const;
