@@ -1954,7 +1954,11 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     PullLanguagesInfo(app_data[os_type], ttsName, vrSynonym);
 
     if (ttsName.empty() || vrSynonym.empty()) {
-      ttsName = vrSynonym = appName;
+      ttsName = SmartObject(SmartType_Array);
+      vrSynonym = SmartObject(SmartType_Array);
+
+      ttsName[0] = appName;
+      vrSynonym[0] = appName;
     }
 
     const uint32_t hmi_app_id = resume_ctrl_.IsApplicationSaved(mobile_app_id)?
