@@ -107,7 +107,8 @@ AppStopwatch::~AppStopwatch() {
 
 void AppStopwatch::Start(AppStopwatchId stopwatch_type) {
   stopwatch_type_ = stopwatch_type;
-  timer_->start(time_out_);
+  const uint32_t milliseconds_in_second = 1000;
+  timer_->start(time_out_*milliseconds_in_second);
 }
 
 void AppStopwatch::Switch(AppStopwatchId stopwatch_type) {
