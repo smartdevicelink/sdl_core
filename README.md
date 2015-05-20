@@ -1,3 +1,5 @@
+##### Note: Please use the [develop](https://github.com/smartdevicelink/sdl_core/tree/develop) or [release candidate](https://github.com/smartdevicelink/sdl_core/tree/release/4.0.0) branches of sdl_core for the most stable versions.
+
 # SmartDeviceLink (SDL)
 
 SmartDeviceLink is a way to connect applications on a smart phone to a vehicle so they can be controlled by a vehicle's head unit (radio interface).  There are three main pieces to SDL - [core](https://github.com/smartdevicelink/sdl_core) (head unit), [mobile libraries](https://github.com/smartdevicelink/sdl_android), and the [server](https://github.com/smartdevicelink/sdl_server).
