@@ -273,6 +273,15 @@ void PolicyManagerImpl::OnAppsSearchCompleted() {
   }
 }
 
+std::ostream& operator <<(std::ostream& output,
+                          const policy_table::Strings& groups) {
+  for (policy_table::Strings::const_iterator i = groups.begin();
+      i != groups.end(); ++i) {
+    output << static_cast<std::string>(*i) << " ";
+  }
+  return output;
+}
+
 void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
                                          const PTString& hmi_level,
                                           const PTString& rpc,
@@ -297,6 +306,7 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
 #else  // SDL_REMOTE_CONTROL
   const policy_table::Strings& groups = cache_->GetGroups(app_id);
 #endif  // SDL_REMOTE_CONTROL
+  LOG4CXX_DEBUG(logger_, "Groups: " << groups);
   cache_->CheckPermissions(groups, hmi_level, rpc, result);
 }
 
@@ -341,7 +351,8 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
   default_hmi = "NONE";
 
 #ifdef SDL_REMOTE_CONTROL
-  if (access_remote_->IsPrimaryDevice(device_id)) {
+  if (access_remote_->IsPrimaryDevice(device_id)
+      || access_remote_->IsEnabled()) {
     listener()->OnPermissionsUpdated(application_id, notification_data);
   } else {
     listener()->OnPermissionsUpdated(application_id, notification_data,
@@ -576,8 +587,9 @@ void PolicyManagerImpl::GetPermissionsForApp(
   }
 
   FunctionalIdType group_types;
-#ifdef REMOTE_CONTROL
-  bool ret = remote_control->GetPermissionsForApp(device_id, policy_app_id,
+#ifdef SDL_REMOTE_CONTROL
+  allowed_by_default = false;
+  bool ret = access_remote_->GetPermissionsForApp(device_id, policy_app_id,
                                                   group_types);
 #else
   bool ret = cache_->GetPermissionsForApp(device_id, app_id_to_check,
