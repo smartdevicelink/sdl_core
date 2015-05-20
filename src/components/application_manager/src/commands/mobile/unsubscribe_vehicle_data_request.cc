@@ -225,19 +225,13 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     }
 
     LOG4CXX_INFO(logger_, "All HMI requests are complete");
+    if (true == any_arg_success) {
+      SetAllowedToTerminate(false);
+    }
     SendResponse(any_arg_success, status, NULL, &response_params);
     if (true == any_arg_success) {
-      ApplicationSharedPtr application =
-          ApplicationManagerImpl::instance()->application(connection_key());
-
-      if (!application) {
-        LOG4CXX_ERROR(logger_, "NULL pointer");
-        return;
-      }
-
-      application->UpdateHash();
+      UpdateHash();
     }
-  }
 #else
   hmi_apis::Common_Result::eType hmi_result =
       static_cast<hmi_apis::Common_Result::eType>(
@@ -262,18 +256,14 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     }
   }
 
- SendResponse(result, result_code, return_info,
-              &(message[strings::msg_params]));
- if (true == result) {
-   ApplicationSharedPtr application =
-       ApplicationManagerImpl::instance()->application(connection_key());
-
-   if (!application) {
-     LOG4CXX_ERROR(logger_, "NULL pointer");
-     return;
-   }
-   application->UpdateHash();
- }
+  if (true == result) {
+    SetAllowedToTerminate(false);
+  }
+  SendResponse(result, result_code, return_info,
+               &(message[strings::msg_params]));
+  if (true == result) {
+    UpdateHash();
+  }
 #endif // #ifdef HMI_DBUS_API
 }
 
@@ -294,6 +284,19 @@ bool UnsubscribeVehicleDataRequest::IsAnythingAlreadyUnsubscribed(
   }
 
   return false;
+}
+
+void UnsubscribeVehicleDataRequest::UpdateHash() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ApplicationSharedPtr application =
+      ApplicationManagerImpl::instance()->application(connection_key());
+  if (application) {
+    application->UpdateHash();
+  } else {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+  }
+  ApplicationManagerImpl::instance()->TerminateRequest(connection_key(),
+                                                       correlation_id());
 }
 
 
