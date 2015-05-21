@@ -46,7 +46,6 @@
 #include "utils/timer_thread.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
-#include "utils/date_time.h"
 
 namespace timer {
 // TODO(AKutsan): Remove this logger after bugfix
@@ -206,7 +205,16 @@ class TimerThread {
     volatile bool stop_flag_;
     sync_primitives::Lock restart_flag_lock_;
     volatile bool restart_flag_;
-    int32_t calculateMillisecondsLeft();
+
+    /**
+     * @brief Gets timeout with overflow check
+     * @return timeout
+     */
+    inline int32_t get_timeout() const {
+      return std::min(
+            static_cast<uint32_t>(std::numeric_limits<int32_t>::max()),
+            timeout_milliseconds_);
+    }
 
    private:
     DISALLOW_COPY_AND_ASSIGN(TimerDelegate);
@@ -350,7 +358,9 @@ void TimerThread<T>::TimerDelegate::threadMain() {
   stop_flag_ = false;
   while (!stop_flag_) {
     // Sleep
-    int32_t wait_milliseconds_left = TimerDelegate::calculateMillisecondsLeft();
+    int32_t wait_milliseconds_left = TimerDelegate::get_timeout();
+    LOG4CXX_DEBUG(logger_, "Milliseconds left to wait: "
+                  << wait_milliseconds_left);
     ConditionalVariable::WaitStatus wait_status =
         termination_condition_.WaitFor(auto_lock, wait_milliseconds_left);
     // Quit sleeping or continue sleeping in case of spurious wake up
@@ -379,7 +389,9 @@ void TimerThread<T>::TimerLooperDelegate::threadMain() {
   sync_primitives::AutoLock auto_lock(TimerDelegate::state_lock_);
   TimerDelegate::stop_flag_ = false;
   while (!TimerDelegate::stop_flag_) {
-    int32_t wait_milliseconds_left = TimerDelegate::calculateMillisecondsLeft();
+    int32_t wait_milliseconds_left = TimerDelegate::get_timeout();
+    LOG4CXX_DEBUG(logger_, "Milliseconds left to wait: "
+                  << wait_milliseconds_left);
     ConditionalVariable::WaitStatus wait_status =
         TimerDelegate::termination_condition_.WaitFor(auto_lock,
                                                       wait_milliseconds_left);
@@ -425,31 +437,6 @@ template<class T>
 void TimerThread<T>::TimerDelegate::shouldBeRestarted() {
   sync_primitives::AutoLock auto_lock(restart_flag_lock_);
   restart_flag_ = true;
-}
-
-template<class T>
-int32_t TimerThread<T>::TimerThread::TimerDelegate::calculateMillisecondsLeft() {
-  using namespace date_time;
-  time_t cur_time = time(NULL);
-  time_t end_time = std::numeric_limits<time_t>::max();
-
-  const uint32_t timeout_in_seconds =
-      TimerDelegate::timeout_milliseconds_ / DateTime::MILLISECONDS_IN_SECOND;
-
-  // if no overflow occurred
-  if (timeout_in_seconds + cur_time > timeout_in_seconds) {
-    end_time = cur_time + timeout_in_seconds;
-  }
-
-  int64_t wait_seconds_left = static_cast<int64_t>(difftime(end_time, cur_time));
-  int32_t wait_milliseconds_left = std::numeric_limits<int32_t>::max();
-
-  if (wait_seconds_left
-      < std::numeric_limits<int32_t>::max() / DateTime::MILLISECONDS_IN_SECOND) {
-    wait_milliseconds_left =
-        DateTime::MILLISECONDS_IN_SECOND * wait_seconds_left;
-  }
-  return wait_milliseconds_left;
 }
 
 }  // namespace timer

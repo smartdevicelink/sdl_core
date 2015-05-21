@@ -76,9 +76,8 @@ TEST_F(TimerThreadTest, StartTimerThreadWithTimeoutOneSec_ExpectSuccessfullInvok
   TimerThread<TimerThreadTest> timer("Test", this, &TimerThreadTest::function,
                                      false);
   AutoLock alock(lock_);
-  EXPECT_EQ(0, check_val);
-  // Start timer with 1 second timeout
-  timer.start(1000);
+  EXPECT_EQ(0u, check_val);
+  timer.start(100);
   condvar_.WaitFor(alock, wait_val);
   EXPECT_EQ(1, check_val);
 }
@@ -88,9 +87,8 @@ TEST_F(TimerThreadTest, StartTimerThreadWithTimeoutOneSecInLoop_ExpectSuccessful
   TimerThread<TimerThreadTest> timer("Test", this, &TimerThreadTest::function,
                                      true);
   AutoLock alock(lock_);
-  EXPECT_EQ(0, check_val);
-  // Start timer with 1 second timeout
-  timer.start(1000);
+  EXPECT_EQ(0u, check_val);
+  timer.start(100);
   while (check_val < val2) {
     condvar_.WaitFor(alock, wait_val);
   }
@@ -103,9 +101,8 @@ TEST_F(TimerThreadTest, StopStartedTimerThreadWithTimeoutOneSecInLoop_ExpectSucc
   TimerThread<TimerThreadTest> timer("Test", this, &TimerThreadTest::function,
                                      true);
   AutoLock alock(lock_);
-  EXPECT_EQ(0, check_val);
-  // Start timer with 1 second timeout
-  timer.start(1000);
+  EXPECT_EQ(0u, check_val);
+  timer.start(100);
   // Stop timer on 3rd second
   while (check_val < val2) {
     if (check_val == val1) {
@@ -122,13 +119,12 @@ TEST_F(TimerThreadTest, ChangeTimeoutForStartedTimerThreadWithTimeoutOneSecInLoo
   TimerThread<TimerThreadTest> timer("Test", this, &TimerThreadTest::function,
                                      true);
   AutoLock alock(lock_);
-  EXPECT_EQ(0, check_val);
-  // Start timer with 1 second timeout
-  timer.start(1000);
-  // Change timer timeout on 3rd second
+  EXPECT_EQ(0u, check_val);
+  timer.start(100);
+  // Change timer timeout
   while (check_val < val2) {
     if (check_val == val1) {
-      timer.updateTimeOut(2000);
+      timer.updateTimeOut(200);
     }
     condvar_.WaitFor(alock, wait_val);
   }
@@ -140,9 +136,8 @@ TEST_F(TimerThreadTest, CheckStartedTimerIsRunning_ExpectTrue) {
   TimerThread<TimerThreadTest> timer("Test", this, &TimerThreadTest::function,
                                      true);
   AutoLock alock(lock_);
-  EXPECT_EQ(0, check_val);
-  // Start timer with 1 second timeout
-  timer.start(1000);
+  EXPECT_EQ(0u, check_val);
+  timer.start(100);
   // Change timer timeout on 3rd second
   while (check_val < val1) {
     condvar_.WaitFor(alock, wait_val);
