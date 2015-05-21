@@ -293,7 +293,8 @@ void UnsubscribeVehicleDataRequest::UpdateHash() const {
   if (application) {
     application->UpdateHash();
   } else {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    LOG4CXX_ERROR(logger_, "Application with connection_key = "<<connection_key()
+                  <<"doesn't exists");
   }
   ApplicationManagerImpl::instance()->TerminateRequest(connection_key(),
                                                        correlation_id());
