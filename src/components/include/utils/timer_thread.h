@@ -38,6 +38,7 @@
 #include <cstdint>
 #include <limits>
 #include <string>
+#include <algorithm>
 
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
