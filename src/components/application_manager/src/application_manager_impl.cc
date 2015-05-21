@@ -509,6 +509,7 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   AudioStreamingState::eType audio_state;
   app->IsAudioApplication() ? audio_state = AudioStreamingState::AUDIBLE :
                               audio_state = AudioStreamingState::NOT_AUDIBLE;
+  state_ctrl_.ApplyStatesForApp(app);
   state_ctrl_.SetRegularState<false>(app, hmi_level, audio_state);
   return true;
 }
