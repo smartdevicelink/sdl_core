@@ -283,6 +283,7 @@ void CANModule::NotifyMobiles(application_manager::MessagePtr msg) {
     if (command) {
       command->Run();
     }
+    delete command;
   }
 }
 

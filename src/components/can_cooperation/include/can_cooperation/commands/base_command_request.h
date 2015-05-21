@@ -128,10 +128,6 @@ class BaseCommandRequest : public Command,
                    const Json::Value& message_params,
                    bool is_hmi_request = false);
 
-  void set_to_can(bool value) {
-    to_can_ = value;
-  }
-
   application_manager::ApplicationSharedPtr app() {
     return app_;
   }
@@ -150,7 +146,10 @@ class BaseCommandRequest : public Command,
                   std::string>& event) = 0;
 
  private:
-  bool to_can_;
+  bool CheckPolicy();
+  void ProcessAccessResponse(
+      const event_engine::Event<application_manager::MessagePtr,
+      std::string>& event);
   application_manager::ApplicationSharedPtr app_;
 };
 

@@ -50,8 +50,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "CANCooperation")
 
 BaseCommandRequest::BaseCommandRequest(
   const application_manager::MessagePtr& message)
-  : message_(message),
-    to_can_(true) {
+  : message_(message) {
   service_ = CANModule::instance()->service();
 }
 
@@ -290,13 +289,19 @@ bool BaseCommandRequest::ParseResultCode(const Json::Value& value,
 
 void BaseCommandRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (CheckPolicy()) {
+    Execute();  // run child's logic
+  }
+}
+
+bool BaseCommandRequest::CheckPolicy() {
+  LOG4CXX_AUTO_TRACE(logger_);
   app_ = service_->GetApplication(message_->connection_key());
   if (!app_) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
     SendResponse(false, result_codes::kApplicationNotRegistered, "");
-    return;
+    return false;
   }
-
 
   mobile_apis::Result::eType ret = service_->CheckPolicyPermissions(message_);
   if (ret != mobile_apis::Result::eType::SUCCESS) {
@@ -304,13 +309,7 @@ void BaseCommandRequest::Run() {
     LOG4CXX_WARN(logger_,
                  "Function \"" << message_->function_name() << "\" (#"
                  << message_->function_id() << ") not allowed by policy");
-    return;
-  }
-
-  // TODO(KKolodiy): may be we won't have mobile API for needs SDL so it is redundant
-  if (!to_can_) {
-    Execute(); // run child's logic
-    return;
+    return false;
   }
 
   CANAppExtensionPtr extension = GetAppExtension(app_);
@@ -322,8 +321,7 @@ void BaseCommandRequest::Run() {
 
   switch (access) {
     case application_manager::kAllowed:
-      Execute();  // run child's logic
-      break;
+      return true;
     case application_manager::kDisallowed:
       SendResponse(false, result_codes::kDisallowed, "");
       break;
@@ -341,10 +339,22 @@ void BaseCommandRequest::Run() {
       LOG4CXX_ERROR(logger_, "Unknown issue");
       SendResponse(false, result_codes::kDisallowed, "Unknown issue");
   }
+  return false;
 }
 
 void BaseCommandRequest::on_event(const event_engine::Event<application_manager::MessagePtr,
                                   std::string>& event) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (event.id() == functional_modules::hmi_api::grant_access) {
+    ProcessAccessResponse(event);
+  } else {
+    OnEvent(event);  // run child's logic
+  }
+}
+
+void BaseCommandRequest::ProcessAccessResponse(
+    const event_engine::Event<application_manager::MessagePtr,
+    std::string>& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   app_ = service_->GetApplication(message_->connection_key());
   if (!app_) {
@@ -352,28 +362,23 @@ void BaseCommandRequest::on_event(const event_engine::Event<application_manager:
     SendResponse(false, result_codes::kApplicationNotRegistered, "");
     return;
   }
+  Json::Value value;
+  Json::Reader reader;
+  reader.parse(event.event_message()->json_message(), value);
 
-  if (event.id() == functional_modules::hmi_api::grant_access) {
-    Json::Value value;
-    Json::Reader reader;
-    reader.parse(event.event_message()->json_message(), value);
+  std::string result_code;
+  std::string info;
+  bool allowed = ParseResultCode(value, result_code, info);
 
-    std::string result_code;
-    std::string info;
-    bool allowed = ParseResultCode(value, result_code, info);
-
-    if (allowed) {
-      Execute();  // run child's logic
-    } else {
-      SendResponse(false, result_codes::kDisallowed, "");
-    }
-    // TODO(KKolodiy): get group name and zone from message
-    std::string group_name = "Radio";
-    SeatLocation zone = 10;
-    service_->SetAccess(app_->app_id(), group_name, zone, allowed);
+  if (allowed) {
+    Execute();  // run child's logic
   } else {
-    OnEvent(event);  // run child's logic
+    SendResponse(false, result_codes::kDisallowed, "");
   }
+  // TODO(KKolodiy): get group name and zone from message
+  std::string group_name = "Radio";
+  SeatLocation zone = 10;
+  service_->SetAccess(app_->app_id(), group_name, zone, allowed);
 }
 
 }  // namespace commands

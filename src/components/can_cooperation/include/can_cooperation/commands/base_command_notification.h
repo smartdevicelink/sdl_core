@@ -86,6 +86,7 @@ class BaseCommandNotification : public Command {
   }
 
  private:
+  bool CheckPolicy();
   bool need_reset_;
 };
 
