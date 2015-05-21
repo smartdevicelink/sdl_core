@@ -188,10 +188,12 @@ void ResumeCtrl::ApplicationResumptiOnTimer() {
   for (; it != waiting_for_timer_.end(); ++it) {
     ApplicationSharedPtr app =
         ApplicationManagerImpl::instance()->application(*it);
-    DCHECK_OR_RETURN_VOID(app);
+    if (!app.get()) {
+      LOG4CXX_ERROR(logger_, "Invalid app_id = " << *it);
+      continue;
+    }
     StartAppHmiStateResumption(app);
-   }
-
+  }
   is_resumption_active_ = false;
   waiting_for_timer_.clear();
 }
