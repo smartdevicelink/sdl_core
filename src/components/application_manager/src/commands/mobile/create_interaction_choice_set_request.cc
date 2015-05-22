@@ -366,7 +366,7 @@ void CreateInteractionChoiceSetRequest::on_event(
         [strings::correlation_id].asUInt());
     SentCommandsMap::iterator it = sent_commands_map_.find(corr_id);
     if (sent_commands_map_.end() == it) {
-      LOG4CXX_DEBUG(logger_, "HMI response for unknown VR command received");
+      LOG4CXX_WARN(logger_, "HMI response for unknown VR command received");
       return;
     }
 
@@ -377,7 +377,7 @@ void CreateInteractionChoiceSetRequest::on_event(
       vr_command.succesful_response_received_ = true;
     } else {
       LOG4CXX_DEBUG(logger_, "Hmi response is not Success: " << vr_result_
-                    << ". Stop sending VRAAdcommands");
+                    << ". Stop sending VRAddCommand requests");
       sync_primitives::AutoLock error_lock(error_from_hmi_lock_);
       if (!error_from_hmi_) {
         error_from_hmi_ = true;
@@ -410,6 +410,7 @@ void CreateInteractionChoiceSetRequest::onTimeOut() {
   }
 
   // We have to keep request alive until receive all responses from HMI
+  // according to SDLAQ-CRS-2976
   sync_primitives::AutoLock timeout_lock_(is_timed_out_lock_);
   is_timed_out_ = true;
   ApplicationManagerImpl::instance()->updateRequestTimeout(
@@ -419,7 +420,6 @@ void CreateInteractionChoiceSetRequest::onTimeOut() {
 void CreateInteractionChoiceSetRequest::DeleteChoices() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  DCHECK_OR_RETURN_VOID(ApplicationManagerImpl::instance());
   ApplicationSharedPtr application =
     ApplicationManagerImpl::instance()->application(connection_key());
   if (!application) {
@@ -449,7 +449,6 @@ void CreateInteractionChoiceSetRequest::DeleteChoices() {
 void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  DCHECK_OR_RETURN_VOID(ApplicationManagerImpl::instance());
   if (!error_from_hmi_) {
     SendResponse(true, mobile_apis::Result::SUCCESS);
 
