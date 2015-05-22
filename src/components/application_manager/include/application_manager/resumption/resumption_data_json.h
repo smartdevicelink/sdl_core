@@ -63,7 +63,7 @@ class ResumptionDataJson : public ResumptionData {
 
   /**
    * @brief Returns HMI level of application from saved data
-   * @param policy_app_id contains mobile application id of application
+   * @param policy_app_id contains policy application id of application
    * @param device_id contains id of device on which is running application
    * @return HMI level, if saved data does not contain HMI level method
    * returns -1
@@ -81,17 +81,17 @@ class ResumptionDataJson : public ResumptionData {
   /**
    * @brief Checks if saved data have application
    * and removes this data if it is not valid
-   * @param mobile_app_id - mobile application id
+   * @param policy_app_id - policy application id
    * @param device_id - contains id of device on which is running application
    * @return true if data exists and data is valid, false otherwise
    */
-  virtual bool CheckSavedApplication(const std::string& mobile_app_id,
+  virtual bool CheckSavedApplication(const std::string& policy_app_id,
                                      const std::string& device_id);
 
   /**
    * @brief Retrieves HMI app ID for the given mobile app ID
    * and device ID from stored information.
-   * @param mobile_app_id - mobile application id
+   * @param policy_app_id - policy application id
    * @param device_id - contains id of device on which is running application
    * @return HMI app ID
    */
@@ -113,32 +113,32 @@ class ResumptionDataJson : public ResumptionData {
   /**
    * @brief Retrieves hash ID for the given mobile app ID
    * and device ID from stored information.
-   * @param mobile_app_id - mobile application id
+   * @param policy_app_id - policy application id
    * @param device_id - contains id of device on which is running application
    * @param hash_id - parameter which will contain HASH id from saved application
    * @return TRUE if application will be found in saved data otherwise
    * returns FALSE
    */
-  virtual bool GetHashId(const std::string& mobile_app_id,
+  virtual bool GetHashId(const std::string& policy_app_id,
                          const std::string& device_id,
                          std::string& hash_id) const;
 
   /**
    * @brief Retrieves data of saved appliction for the given mobile app ID
    * and device ID
-   * @param mobile_app_id - mobile application id
+   * @param policy_app_id - policy application id
    * @param device_id - contains id of device on which is running application
    * @param saved_app - parameter which will contain data of saved application
    * @return TRUE if application will be found in saved data otherwise
    * returns FALSE
    */
-  virtual bool GetSavedApplication(const std::string& mobile_app_id,
+  virtual bool GetSavedApplication(const std::string& policy_app_id,
                                    const std::string& device_id,
                                    smart_objects::SmartObject& saved_app) const;
 
   /**
    * @brief Remove application from list of saved applications
-   * @param mobile_app_id application witch need to be removed
+   * @param policy_app_id application witch need to be removed
    * @param device_id - contains id of device on which is running application
    * @return return true, if success, otherwise return false
    */
@@ -153,7 +153,7 @@ class ResumptionDataJson : public ResumptionData {
 
   /**
    * @brief Checks if saved data have application
-   * @param policy_app_id - mobile application id
+   * @param policy_app_id - policy application id
    * @param device_id - contains id of device on which is running application
    * @return index if data of application exists, otherwise returns -1
    */
@@ -168,11 +168,11 @@ class ResumptionDataJson : public ResumptionData {
 
   /**
    * @brief Updates HMI level of saved application
-   * @param mobile_app_id - mobile application id
+   * @param policy_app_id - policy application id
    * @param device_id - contains id of device on which is running application
    * @param hmi_level - contains hmi level for saved appliction
    */
-  virtual void UpdateHmiLevel(const std::string& mobile_app_id,
+  virtual void UpdateHmiLevel(const std::string& policy_app_id,
                               const std::string& device_id,
                               int32_t hmi_level);
 

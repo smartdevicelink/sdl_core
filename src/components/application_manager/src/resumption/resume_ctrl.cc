@@ -94,7 +94,7 @@ void ResumeCtrl::SaveAllApplications() {
                 std::bind1st(std::mem_fun(&ResumeCtrl::SaveApplication), this));
 }
 
-void ResumeCtrl::SaveApplication(ApplicationConstSharedPtr application) {
+void ResumeCtrl::SaveApplication(ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(application);
   LOG4CXX_INFO(logger_,"application with appID "<<application->app_id()
@@ -111,7 +111,7 @@ bool ResumeCtrl::RestoreAppHMIState(ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(application, false);
   LOG4CXX_DEBUG(logger_, "app_id : " << application->app_id()
-                << "; m_app_id : " << application->mobile_app_id());
+                << "; policy_app_id : " << application->mobile_app_id());
   const std::string device_id =
       MessageHelper::GetDeviceMacAddressForHandle(application->device());
   smart_objects::SmartObject saved_app(smart_objects::SmartType_Map);
@@ -188,7 +188,7 @@ void ResumeCtrl::ApplicationResumptiOnTimer() {
   for (; it != waiting_for_timer_.end(); ++it) {
     ApplicationSharedPtr app =
         ApplicationManagerImpl::instance()->application(*it);
-    if (!app.get()) {
+    if (!app) {
       LOG4CXX_ERROR(logger_, "Invalid app_id = " << *it);
       continue;
     }
@@ -255,9 +255,9 @@ bool ResumeCtrl::IsHMIApplicationIdExist(uint32_t hmi_app_id) {
   return resumption_storage_->IsHMIApplicationIdExist(hmi_app_id);
 }
 
-bool ResumeCtrl::IsApplicationSaved(const std::string& mobile_app_id,
+bool ResumeCtrl::IsApplicationSaved(const std::string& policy_app_id,
                                     const std::string& device_id) {
-  return -1 != resumption_storage_->IsApplicationSaved(mobile_app_id, device_id);
+  return -1 != resumption_storage_->IsApplicationSaved(policy_app_id, device_id);
 }
 
 uint32_t ResumeCtrl::GetHMIApplicationID(const std::string& policy_app_id,
@@ -306,7 +306,7 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
   DCHECK_OR_RETURN(application, false);
   LOG4CXX_DEBUG(logger_, " Resume app_id = " << application->app_id()
                 << " hmi_app_id = " << application->hmi_app_id()
-                << " mobile_id = " << application->mobile_app_id()
+                << " policy_id = " << application->mobile_app_id()
                 << " received hash = " << hash);
   SetupDefaultHMILevel(application);
   smart_objects::SmartObject saved_app;
@@ -328,7 +328,7 @@ bool ResumeCtrl::StartResumptionOnlyHMILevel(ApplicationSharedPtr application) {
   DCHECK_OR_RETURN(application, false);
   LOG4CXX_DEBUG(logger_, " Resume app_id = " << application->app_id()
                 << " hmi_app_id = " << application->hmi_app_id()
-                << " mobile_id = " << application->mobile_app_id());
+                << " policy_id = " << application->mobile_app_id());
   SetupDefaultHMILevel(application);
   smart_objects::SmartObject saved_app;
   bool result = resumption_storage_->GetSavedApplication(application->mobile_app_id(),
@@ -374,7 +374,7 @@ bool ResumeCtrl::CheckPersistenceFilesForResumption(ApplicationSharedPtr applica
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(application, false);
   LOG4CXX_DEBUG(logger_, " Resume app_id = " << application->app_id()
-                << " mobile_id = " << application->mobile_app_id());
+                << " policy_id = " << application->mobile_app_id());
   smart_objects::SmartObject saved_app;
   bool result = resumption_storage_->GetSavedApplication(application->mobile_app_id(),
         MessageHelper::GetDeviceMacAddressForHandle(application->device()),

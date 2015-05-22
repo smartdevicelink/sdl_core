@@ -229,20 +229,20 @@ void RegisterAppInterfaceRequest::Run() {
   } else {
 
     // For resuming application need to restore hmi_app_id from resumeCtrl
-    const std::string mobile_app_id = msg_params[strings::app_id].asString();
+    const std::string policy_app_id = msg_params[strings::app_id].asString();
     const std::string device_id =
         MessageHelper::GetDeviceMacAddressForHandle(application->device());
     resumption::ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
 
     // there is side affect with 2 mobile app with the same mobile app_id
-    if (resumer.IsApplicationSaved(mobile_app_id, device_id)) {
+    if (resumer.IsApplicationSaved(policy_app_id, device_id)) {
       application->set_hmi_application_id(
-          resumer.GetHMIApplicationID(mobile_app_id, device_id));
+          resumer.GetHMIApplicationID(policy_app_id, device_id));
     } else {
-      app->set_hmi_application_id(
+      application->set_hmi_application_id(
           ApplicationManagerImpl::instance()->GenerateNewHMIAppID());
     }
-    app->set_is_media_application(
+    application->set_is_media_application(
         msg_params[strings::is_media_application].asBool());
 
     if (msg_params.keyExists(strings::vr_synonyms)) {

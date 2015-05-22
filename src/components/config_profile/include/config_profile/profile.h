@@ -515,9 +515,8 @@ class Profile : public utils::Singleton<Profile> {
 
     uint32_t hash_string_size() const;
 
-<<<<<<< HEAD
     bool logs_enabled() const;
-=======
+
     /**
      * @brief Returns true if resumption ctrl uses db, returns false if
      * resumption ctrl uses JSON.
@@ -533,7 +532,6 @@ class Profile : public utils::Singleton<Profile> {
      * @brief Returns timeout between attempts
      */
     uint16_t open_attempt_timeout_ms_resumption_db() const;
->>>>>>> APPLINK-9991-implemented data recovery
 
     /*
      * @brief Updates all related values from ini file

@@ -132,11 +132,11 @@ void ResumptionDataDB::SaveApplication(
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(application);
   bool application_exist = false;
-  const std::string& m_app_id = application->mobile_app_id();
+  const std::string& policy_app_id = application->mobile_app_id();
   const std::string device_id =
         MessageHelper::GetDeviceMacAddressForHandle(application->device());
   LOG4CXX_INFO(logger_, "app_id : " << application->app_id()
-                <<" mobile app_id : " << m_app_id
+                <<" policy_app_id : " << policy_app_id
                 <<" device_id : " << device_id);
   if (application->is_application_data_changed()) {
 
@@ -173,8 +173,8 @@ int32_t ResumptionDataDB::GetStoredHMILevel(const std::string& policy_app_id,
   LOG4CXX_AUTO_TRACE(logger_);
 
   int hmi_level;
-  if (SelectHMILevel(m_app_id, device_id, hmi_level)) {
-    LOG4CXX_INFO(logger_, "Application with mobile application id  = "<<m_app_id
+  if (SelectHMILevel(policy_app_id, device_id, hmi_level)) {
+    LOG4CXX_INFO(logger_, "Application with policy application id  = "<<policy_app_id
                  <<" and device id = "<<device_id<<"has hmi level = "<<hmi_level);
     return hmi_level;
   }
@@ -188,16 +188,16 @@ bool ResumptionDataDB::IsHMIApplicationIdExist(uint32_t hmi_app_id) const {
   return CheckExistenceHMIId(hmi_app_id);
 }
 
-bool ResumptionDataDB::CheckSavedApplication(const std::string& mobile_app_id,
+bool ResumptionDataDB::CheckSavedApplication(const std::string& policy_app_id,
                                              const std::string& device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   bool application_exist = false;
-  if (!CheckExistenceApplication(mobile_app_id, device_id, application_exist) ||
+  if (!CheckExistenceApplication(policy_app_id, device_id, application_exist) ||
       !application_exist) {
     LOG4CXX_WARN(logger_, "Problem with access to DB or application does not exist");
     return false;
   }
-  LOG4CXX_INFO(logger_, "Application with mobile_app_id = "<<mobile_app_id
+  LOG4CXX_INFO(logger_, "Application with policy_app_id = "<<policy_app_id
                    <<" and device_id = "<<device_id<<" does exist");
   return true;
 }
@@ -206,7 +206,7 @@ uint32_t ResumptionDataDB::GetHMIApplicationID(const std::string& policy_app_id,
                                                const std::string& device_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
   uint32_t hmi_app_id = 0;
-  SelectHMIId(mobile_app_id, device_id, hmi_app_id);
+  SelectHMIId(policy_app_id, device_id, hmi_app_id);
   return hmi_app_id;
 }
 
@@ -261,15 +261,15 @@ bool ResumptionDataDB::DeleteAppWithIgnCount(const int application_lifes) {
     LOG4CXX_WARN(logger_, "Problem with execution or count app=0");
     return false;
   }
-  std::string mobile_app_id;
+  std::string policy_app_id;
   std::string device_id;
   /* Positions of binding data for "select_apps_for_removing" :
      field "ign_off_count" from table "application" = 0*/
   select_apps_for_removing.Bind(0, application_lifes);
   while (select_apps_for_removing.Next()) {
     device_id = select_apps_for_removing.GetString(0);
-    mobile_app_id = select_apps_for_removing.GetString(1);
-    if (!DeleteSavedApplication(mobile_app_id, device_id)) {
+    policy_app_id = select_apps_for_removing.GetString(1);
+    if (!DeleteSavedApplication(policy_app_id, device_id)) {
       LOG4CXX_WARN(logger_, "Problem with removing application data");
       return false;
     }
@@ -284,7 +284,7 @@ bool ResumptionDataDB::GetHashId(const std::string& policy_app_id,
                                  std::string& hash_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  return SelectHashId(mobile_app_id, device_id, hash_id);
+  return SelectHashId(policy_app_id, device_id, hash_id);
 }
 
 void ResumptionDataDB::OnAwake() {
@@ -293,13 +293,13 @@ void ResumptionDataDB::OnAwake() {
   UpdateDataOnAwake();
 }
 
-bool ResumptionDataDB::GetSavedApplication(const std::string& mobile_app_id,
+bool ResumptionDataDB::GetSavedApplication(const std::string& policy_app_id,
                                            const std::string& device_id,
                                            smart_objects::SmartObject& saved_app) const {
   LOG4CXX_AUTO_TRACE(logger_);
   bool application_exist = false;
 
-  if (!CheckExistenceApplication(mobile_app_id, device_id, application_exist) ||
+  if (!CheckExistenceApplication(policy_app_id, device_id, application_exist) ||
       !application_exist) {
     LOG4CXX_ERROR(logger_, "Problem with access to DB or application does not exists");
     return false;
@@ -344,10 +344,10 @@ bool ResumptionDataDB::GetSavedApplication(const std::string& mobile_app_id,
 }
 
 bool ResumptionDataDB::RemoveApplicationFromSaved(
-    const std::string& mobile_app_id, const std::string& device_id) {
+    const std::string& policy_app_id, const std::string& device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   bool application_exist = false;
-  if (!CheckExistenceApplication(mobile_app_id, device_id, application_exist) ||
+  if (!CheckExistenceApplication(policy_app_id, device_id, application_exist) ||
       !application_exist) {
     LOG4CXX_ERROR(logger_, "Problem with access to DB or application does not"
         " exist");
@@ -371,7 +371,7 @@ ssize_t ResumptionDataDB::IsApplicationSaved(const std::string& policy_app_id,
                                          const std::string& device_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
   bool application_exist = false;
-  if (CheckExistenceApplication(mobile_app_id, device_id, application_exist) &&
+  if (CheckExistenceApplication(policy_app_id, device_id, application_exist) &&
       application_exist) {
     LOG4CXX_INFO(logger_, "Application exists in stored data");
     return 0;
@@ -384,7 +384,7 @@ void ResumptionDataDB::GetDataForLoadResumeData(smart_objects::SmartObject& save
   SelectDataForLoadResumeData(saved_data);
 }
 
-bool ResumptionDataDB::SelectHMILevel(const std::string& m_app_id,
+bool ResumptionDataDB::SelectHMILevel(const std::string& policy_app_id,
                                       const std::string& device_id,
                                       int& hmi_level) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -396,7 +396,7 @@ bool ResumptionDataDB::SelectHMILevel(const std::string& m_app_id,
        field "deviceID" from table "application" = 0
        field "appID" from table "application" = 1 */
     query_count.Bind(0, device_id);
-    query_count.Bind(1, m_app_id);
+    query_count.Bind(1, policy_app_id);
     query_select.Bind(0, device_id);
     query_select.Bind(1, policy_app_id);
     /* Position of data in "query_select" :
@@ -426,7 +426,7 @@ bool ResumptionDataDB::CheckExistenceHMIId(uint32_t hmi_app_id) const {
   return false;
 }
 
-void ResumptionDataDB::SelectHMIId(const std::string& mobile_app_id,
+void ResumptionDataDB::SelectHMIId(const std::string& policy_app_id,
                                    const std::string& device_id,
                                    uint32_t& hmi_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -439,7 +439,7 @@ void ResumptionDataDB::SelectHMIId(const std::string& mobile_app_id,
   if (query_select.Prepare(kSelectHMIId) &&
       query_check.Prepare(kSelectCountHMIId)) {
     query_select.Bind(0, device_id);
-    query_select.Bind(1, mobile_app_id);
+    query_select.Bind(1, policy_app_id);
     query_check.Bind(0, device_id);
     query_check.Bind(1, policy_app_id);
     /* Position of data in "query_select" :
@@ -452,10 +452,10 @@ void ResumptionDataDB::SelectHMIId(const std::string& mobile_app_id,
     }
   }
   LOG4CXX_FATAL(logger_, "Saved data doesn't have application with "
-                "device id = "<<device_id<<" and mobile appID = "<< mobile_app_id);
+                "device id = "<<device_id<<" and policy appID = "<< policy_app_id);
 }
 
-bool ResumptionDataDB::SelectHashId(const std::string& mobile_app_id,
+bool ResumptionDataDB::SelectHashId(const std::string& policy_app_id,
                   const std::string& device_id,
                   std::string& hash_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -471,7 +471,7 @@ bool ResumptionDataDB::SelectHashId(const std::string& mobile_app_id,
      field "deviceID" from table "application" = 0
      field "appID" from table "application" = 1 */
   count.Bind(0, device_id);
-  count.Bind(1, mobile_app_id);
+  count.Bind(1, policy_app_id);
   select_hash.Bind(0, device_id);
   select_hash.Bind(1, policy_app_id);
   /* Position of data in "select_hash" :
@@ -482,7 +482,7 @@ bool ResumptionDataDB::SelectHashId(const std::string& mobile_app_id,
     return true;
   }
   LOG4CXX_WARN(logger_, "Saved data doesn't have application with "
-                "device id = "<<device_id<<" and mobile appID = "<<mobile_app_id
+                "device id = "<<device_id<<" and policy appID = "<<policy_app_id
                 << "or hashID");
   return false;
 }
@@ -503,7 +503,7 @@ uint32_t ResumptionDataDB::SelectIgnOffTime() const {
   return ignOffTime;
 }
 
-bool ResumptionDataDB::CheckExistenceApplication(const std::string& mobile_app_id,
+bool ResumptionDataDB::CheckExistenceApplication(const std::string& policy_app_id,
                                                  const std::string& device_id,
                                                  bool& application_exist) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -514,14 +514,14 @@ bool ResumptionDataDB::CheckExistenceApplication(const std::string& mobile_app_i
      field "appID" from table "application" = 1 */
   if (query.Prepare(kCheckApplication)) {
     query.Bind(0, device_id);
-    query.Bind(1, mobile_app_id);
+    query.Bind(1, policy_app_id);
     result = query.Exec();
   }
   /* Position of data in "query" :
      amount of application = 0 */
   if (result && query.GetInteger(0)) {
-    LOG4CXX_INFO(logger_, "Saved data has application with mobile appID = "
-                       <<mobile_app_id<<" and deviceID = "<<device_id);
+    LOG4CXX_INFO(logger_, "Saved data has application with policy appID = "
+                       <<policy_app_id<<" and deviceID = "<<device_id);
     application_exist = true;
   } else if (result) {
     LOG4CXX_INFO(logger_, "Saved data does not contain application");
@@ -572,7 +572,7 @@ void ResumptionDataDB::SelectDataForLoadResumeData(
   saved_data = so_array_data;
 }
 
-void ResumptionDataDB::UpdateHmiLevel(const std::string& mobile_app_id,
+void ResumptionDataDB::UpdateHmiLevel(const std::string& policy_app_id,
                                       const std::string& device_id,
                                       int32_t hmi_level) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -585,24 +585,24 @@ void ResumptionDataDB::UpdateHmiLevel(const std::string& mobile_app_id,
   if (query.Prepare(kUpdateHMILevel)) {
     query.Bind(0, hmi_level);
     query.Bind(1, device_id);
-    query.Bind(2, mobile_app_id);
+    query.Bind(2, policy_app_id);
     if (query.Exec()) {
-      LOG4CXX_INFO(logger_, "Saved data has application with mobile appID = "
-                   <<mobile_app_id<<" and deviceID = "<<device_id
+      LOG4CXX_INFO(logger_, "Saved data has application with policy appID = "
+                   <<policy_app_id<<" and deviceID = "<<device_id
                    <<" has new HMI level = "<<hmi_level);
       WriteDb();
     }
   }
 }
 
-bool ResumptionDataDB::SelectFilesData(const std::string& mobile_app_id,
+bool ResumptionDataDB::SelectFilesData(const std::string& policy_app_id,
                                        const std::string& device_id,
                                        smart_objects::SmartObject& saved_app) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
   using namespace smart_objects;
   uint32_t count_item = 0;
-  if (!SelectCountFromArray(count_item, kSelectCountFiles, mobile_app_id, device_id)) {
+  if (!SelectCountFromArray(count_item, kSelectCountFiles, policy_app_id, device_id)) {
     return false;
   }
   if (0 == count_item) {
@@ -610,7 +610,7 @@ bool ResumptionDataDB::SelectFilesData(const std::string& mobile_app_id,
     return true;
   }
   utils::dbms::SQLQuery select_files(db());
-  if (!PrepareSelectQuery(select_files, mobile_app_id, device_id, kSelectFiles)) {
+  if (!PrepareSelectQuery(select_files, policy_app_id, device_id, kSelectFiles)) {
     LOG4CXX_WARN(logger_, "Problem with verification select_files");
     return false;
   }
@@ -633,14 +633,14 @@ bool ResumptionDataDB::SelectFilesData(const std::string& mobile_app_id,
   return true;
 }
 
-bool ResumptionDataDB::SelectSubmenuData(const std::string& mobile_app_id,
+bool ResumptionDataDB::SelectSubmenuData(const std::string& policy_app_id,
                                          const std::string& device_id,
                                          smart_objects::SmartObject& saved_app) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
   using namespace smart_objects;
   uint32_t count_item = 0;
-  if (!SelectCountFromArray(count_item, kSelectCountSubMenu, mobile_app_id, device_id)) {
+  if (!SelectCountFromArray(count_item, kSelectCountSubMenu, policy_app_id, device_id)) {
     return false;
   }
   if (0 == count_item) {
@@ -648,7 +648,7 @@ bool ResumptionDataDB::SelectSubmenuData(const std::string& mobile_app_id,
     return true;
   }
   utils::dbms::SQLQuery select_sub_menu(db());
-  if (!PrepareSelectQuery(select_sub_menu, mobile_app_id, device_id, kSelectSubMenu)) {
+  if (!PrepareSelectQuery(select_sub_menu, policy_app_id, device_id, kSelectSubMenu)) {
     LOG4CXX_WARN(logger_, "Problem with verification select_sub_menu");
     return false;
   }
@@ -671,14 +671,14 @@ bool ResumptionDataDB::SelectSubmenuData(const std::string& mobile_app_id,
   return true;
 }
 
-bool ResumptionDataDB::SelectCommandData(const std::string& mobile_app_id,
+bool ResumptionDataDB::SelectCommandData(const std::string& policy_app_id,
                                          const std::string& device_id,
                                          smart_objects::SmartObject& saved_app) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
   using namespace smart_objects;
   uint32_t count_item = 0;
-  if (!SelectCountFromArray(count_item, kSelectCountCommands, mobile_app_id, device_id)) {
+  if (!SelectCountFromArray(count_item, kSelectCountCommands, policy_app_id, device_id)) {
     return false;
   }
   if (0 == count_item) {
@@ -687,7 +687,7 @@ bool ResumptionDataDB::SelectCommandData(const std::string& mobile_app_id,
   }
 
   utils::dbms::SQLQuery select_commands(db());
-  if (!PrepareSelectQuery(select_commands, mobile_app_id, device_id, kSelectCommands)) {
+  if (!PrepareSelectQuery(select_commands, policy_app_id, device_id, kSelectCommands)) {
     return false;
   }
   saved_app[strings::application_commands] = SmartObject(SmartType_Array);
@@ -751,14 +751,14 @@ bool ResumptionDataDB::SelectCommandData(const std::string& mobile_app_id,
   return true;
 }
 
-bool ResumptionDataDB::SelectSubscriptionsData(const std::string& mobile_app_id,
+bool ResumptionDataDB::SelectSubscriptionsData(const std::string& policy_app_id,
                                            const std::string& device_id,
                                            smart_objects::SmartObject& saved_app) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
   using namespace smart_objects;
   uint32_t count_item = 0;
-  if (!SelectCountFromArray(count_item, kSelectCountSubscriptions, mobile_app_id, device_id)) {
+  if (!SelectCountFromArray(count_item, kSelectCountSubscriptions, policy_app_id, device_id)) {
     return false;
   }
   if (0 == count_item) {
@@ -766,7 +766,7 @@ bool ResumptionDataDB::SelectSubscriptionsData(const std::string& mobile_app_id,
     return true;
   }
   utils::dbms::SQLQuery select_subscriptions(db());
-  if (!PrepareSelectQuery(select_subscriptions, mobile_app_id, device_id,
+  if (!PrepareSelectQuery(select_subscriptions, policy_app_id, device_id,
                           kSelectSubscriptions)) {
     LOG4CXX_WARN(logger_, "Problem with verification select_subscriptions");
     return false;
@@ -800,14 +800,14 @@ bool ResumptionDataDB::SelectSubscriptionsData(const std::string& mobile_app_id,
   return true;
 }
 
-bool ResumptionDataDB::SelectChoiceSetData(const std::string& mobile_app_id,
+bool ResumptionDataDB::SelectChoiceSetData(const std::string& policy_app_id,
                                            const std::string& device_id,
                                            smart_objects::SmartObject& saved_app) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
   using namespace smart_objects;
   uint32_t count_item = 0;
-  if (!SelectCountFromArray(count_item, kSelectCountChoiceSet, mobile_app_id, device_id)) {
+  if (!SelectCountFromArray(count_item, kSelectCountChoiceSet, policy_app_id, device_id)) {
     return false;
   }
   if (0 == count_item) {
@@ -815,7 +815,7 @@ bool ResumptionDataDB::SelectChoiceSetData(const std::string& mobile_app_id,
     return true;
   }
   utils::dbms::SQLQuery select_choice_set(db());
-  if (!PrepareSelectQuery(select_choice_set, mobile_app_id, device_id,
+  if (!PrepareSelectQuery(select_choice_set, policy_app_id, device_id,
                           kSelectChoiceSets)) {
     LOG4CXX_WARN(logger_, "Problem with verification select_choice_set");
     return false;
@@ -895,7 +895,7 @@ bool ResumptionDataDB::SelectChoiceSetData(const std::string& mobile_app_id,
   return true;
 }
 
-bool ResumptionDataDB::SelectGlobalPropertiesData(const std::string& mobile_app_id,
+bool ResumptionDataDB::SelectGlobalPropertiesData(const std::string& policy_app_id,
                                                   const std::string& device_id,
                                                   smart_objects::SmartObject& saved_app) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -903,7 +903,7 @@ bool ResumptionDataDB::SelectGlobalPropertiesData(const std::string& mobile_app_
   using namespace smart_objects;
   uint32_t count_item = 0;
   if (!SelectCountFromArray(count_item, kSelectCountGlobalProperties,
-                            mobile_app_id, device_id)) {
+                            policy_app_id, device_id)) {
     return false;
   }
   if (0 == count_item) {
@@ -911,7 +911,7 @@ bool ResumptionDataDB::SelectGlobalPropertiesData(const std::string& mobile_app_
     return true;
   }
   utils::dbms::SQLQuery select_globalproperties(db());
-  if (!PrepareSelectQuery(select_globalproperties, mobile_app_id, device_id,
+  if (!PrepareSelectQuery(select_globalproperties, policy_app_id, device_id,
                           kSelectGlobalProperties)) {
     LOG4CXX_WARN(logger_, "Problem with verification select_globalproperties");
     return false;
@@ -1131,7 +1131,7 @@ bool ResumptionDataDB::SelectTTSChunkData(int64_t tts_chunk_key, smart_objects::
   return true;
 }
 
-bool ResumptionDataDB::SelectDataFromAppTable(const std::string& mobile_app_id,
+bool ResumptionDataDB::SelectDataFromAppTable(const std::string& policy_app_id,
                                               const std::string& device_id,
                                               smart_objects::SmartObject& saved_app) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1141,7 +1141,7 @@ bool ResumptionDataDB::SelectDataFromAppTable(const std::string& mobile_app_id,
     LOG4CXX_WARN(logger_, "Problem with verification kSelectAppTable query");
     return false;
   }
-  query.Bind(0, mobile_app_id);
+  query.Bind(0, policy_app_id);
   query.Bind(1, device_id);
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Problem with execution kSelectAppTable query");
@@ -1185,7 +1185,7 @@ bool ResumptionDataDB::SelectCountFromArray(uint32_t& count_item, const std::str
     LOG4CXX_WARN(logger_, "Problem with verification query");
     return false;
   }
-  query.Bind(0, mobile_app_id);
+  query.Bind(0, policy_app_id);
   query.Bind(1, device_id);
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Problem with execution query");
@@ -1196,31 +1196,31 @@ bool ResumptionDataDB::SelectCountFromArray(uint32_t& count_item, const std::str
   return true;
 }
 
-bool ResumptionDataDB::DeleteSavedApplication(const std::string& mobile_app_id,
+bool ResumptionDataDB::DeleteSavedApplication(const std::string& policy_app_id,
                                               const std::string& device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   db_->BeginTransaction();
-  if (!DeleteSavedFiles(mobile_app_id, device_id)) {
+  if (!DeleteSavedFiles(policy_app_id, device_id)) {
     db_->RollbackTransaction();
     return false;
   }
-  if (!DeleteSavedSubMenu(mobile_app_id, device_id)) {
+  if (!DeleteSavedSubMenu(policy_app_id, device_id)) {
     db_->RollbackTransaction();
     return false;
   }
-  if (!DeleteSavedSubscriptions(mobile_app_id, device_id)) {
+  if (!DeleteSavedSubscriptions(policy_app_id, device_id)) {
     db_->RollbackTransaction();
     return false;
   }
-  if (!DeleteSavedCommands(mobile_app_id, device_id)) {
+  if (!DeleteSavedCommands(policy_app_id, device_id)) {
     db_->RollbackTransaction();
     return false;
   }
-  if (!DeleteSavedChoiceSet(mobile_app_id, device_id)) {
+  if (!DeleteSavedChoiceSet(policy_app_id, device_id)) {
     db_->RollbackTransaction();
     return false;
   }
-  if (!DeleteSavedGlobalProperties(mobile_app_id, device_id)) {
+  if (!DeleteSavedGlobalProperties(policy_app_id, device_id)) {
     db_->RollbackTransaction();
     return false;
   }
@@ -1235,30 +1235,30 @@ bool ResumptionDataDB::DeleteSavedApplication(const std::string& mobile_app_id,
 bool ResumptionDataDB::DeleteSavedFiles(const std::string& policy_app_id,
                                         const std::string& device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!ExecQueryToDeleteData(mobile_app_id, device_id, kDeleteFile)) {
+  if (!ExecQueryToDeleteData(policy_app_id, device_id, kDeleteFile)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from file.");
     return false;
   }
 
   if (!ExecQueryToDeleteData(
-      mobile_app_id, device_id, kDeleteApplicationFilesArray)) {
+      policy_app_id, device_id, kDeleteApplicationFilesArray)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from applicationFilesArray.");
     return false;
   }
   return true;
 }
 
-bool ResumptionDataDB::DeleteSavedSubMenu(const std::string& mobile_app_id,
+bool ResumptionDataDB::DeleteSavedSubMenu(const std::string& policy_app_id,
                                           const std::string& device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (!ExecQueryToDeleteData(mobile_app_id, device_id, kDeleteSubMenu)) {
+  if (!ExecQueryToDeleteData(policy_app_id, device_id, kDeleteSubMenu)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from subMenu.");
     return false;
   }
 
   if (!ExecQueryToDeleteData(
-      mobile_app_id, device_id, kDeleteApplicationSubMenuArray)) {
+      policy_app_id, device_id, kDeleteApplicationSubMenuArray)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from applicationSubMenuArray.");
     return false;
   }
@@ -1266,11 +1266,11 @@ bool ResumptionDataDB::DeleteSavedSubMenu(const std::string& mobile_app_id,
 }
 
 bool ResumptionDataDB::DeleteSavedSubscriptions(
-    const std::string& mobile_app_id, const std::string& device_id) {
+    const std::string& policy_app_id, const std::string& device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!ExecQueryToDeleteData(
-      mobile_app_id, device_id, kDeleteApplicationSubscribtionsArray)) {
+      policy_app_id, device_id, kDeleteApplicationSubscribtionsArray)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect delete from applicationSubscribtionsArray.");
     return false;
@@ -1278,33 +1278,33 @@ bool ResumptionDataDB::DeleteSavedSubscriptions(
   return true;
 }
 
-bool ResumptionDataDB::DeleteSavedCommands(const std::string& mobile_app_id,
+bool ResumptionDataDB::DeleteSavedCommands(const std::string& policy_app_id,
                                            const std::string& device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!ExecQueryToDeleteData(
-      mobile_app_id, device_id, kDeleteImageFromCommands)) {
+      policy_app_id, device_id, kDeleteImageFromCommands)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect delete image from commands.");
     return false;
   }
 
   if (!ExecQueryToDeleteData(
-      mobile_app_id, device_id, kDeleteVrCommands)) {
+      policy_app_id, device_id, kDeleteVrCommands)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect delete vrcommands from commands.");
     return false;
   }
 
   if (!ExecQueryToDeleteData(
-      mobile_app_id, device_id, kDeleteCommands)) {
+      policy_app_id, device_id, kDeleteCommands)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect delete commands.");
     return false;
   }
 
   if (!ExecQueryToDeleteData(
-      mobile_app_id, device_id, kDeleteApplicationCommandsArray)) {
+      policy_app_id, device_id, kDeleteApplicationCommandsArray)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect delete applicationCommandsArray.");
     return false;
@@ -1313,45 +1313,45 @@ bool ResumptionDataDB::DeleteSavedCommands(const std::string& mobile_app_id,
   return true;
 }
 
-bool ResumptionDataDB::DeleteSavedChoiceSet(const std::string& mobile_app_id,
+bool ResumptionDataDB::DeleteSavedChoiceSet(const std::string& policy_app_id,
                                             const std::string& device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!ExecUnionQueryToDeleteData(
-      mobile_app_id, device_id, kDeleteImageFromChoiceSet)) {
+      policy_app_id, device_id, kDeleteImageFromChoiceSet)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect delete image from choice set");
     return false;
   }
 
   if (!ExecQueryToDeleteData(
-      mobile_app_id, device_id, kDeleteVrCommandsFromChoiceSet)) {
+      policy_app_id, device_id, kDeleteVrCommandsFromChoiceSet)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect delete vrCommands from choice set");
     return false;
   }
 
-  if (!ExecQueryToDeleteData(mobile_app_id, device_id, kDeleteChoice)) {
+  if (!ExecQueryToDeleteData(policy_app_id, device_id, kDeleteChoice)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect delete choiceSet");
     return false;
   }
 
-  if (!ExecQueryToDeleteData(mobile_app_id, device_id, kDeleteChoiceArray)) {
+  if (!ExecQueryToDeleteData(policy_app_id, device_id, kDeleteChoiceArray)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect delete from choiceArray");
     return false;
   }
 
   if (!ExecQueryToDeleteData(
-      mobile_app_id, device_id, kDeleteApplicationChoiceSet)) {
+      policy_app_id, device_id, kDeleteApplicationChoiceSet)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect delete applicationChoiceSet");
     return false;
   }
 
   if (!ExecQueryToDeleteData(
-      mobile_app_id, device_id, kDeleteApplicationChoiceSetArray)) {
+      policy_app_id, device_id, kDeleteApplicationChoiceSetArray)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect delete from ApplicationChoiceSetArray");
     return false;
@@ -1360,56 +1360,56 @@ bool ResumptionDataDB::DeleteSavedChoiceSet(const std::string& mobile_app_id,
   return true;
 }
 
-bool ResumptionDataDB::DeleteSavedGlobalProperties(const std::string& mobile_app_id,
+bool ResumptionDataDB::DeleteSavedGlobalProperties(const std::string& policy_app_id,
                                                    const std::string& device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!ExecUnionQueryToDeleteData(
-      mobile_app_id, device_id, kDeleteImageFromGlobalProperties)) {
+      policy_app_id, device_id, kDeleteImageFromGlobalProperties)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect delete image from globalProperties");
     return false;
   }
 
-  if (!ExecQueryToDeleteData(mobile_app_id, device_id, kDeletevrHelpItem)) {
+  if (!ExecQueryToDeleteData(policy_app_id, device_id, kDeletevrHelpItem)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect delete vrHelpItem");
     return false;
   }
 
-  if (!ExecQueryToDeleteData(mobile_app_id, device_id, kDeletevrHelpItemArray)) {
+  if (!ExecQueryToDeleteData(policy_app_id, device_id, kDeletevrHelpItemArray)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect delete vrHelpItemArray");
     return false;
   }
 
   if (!ExecQueryToDeleteData(
-      mobile_app_id, device_id, kDeleteTableLimitedCharacterList)) {
+      policy_app_id, device_id, kDeleteTableLimitedCharacterList)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect delete from tableLimitedCharacterList");
     return false;
   }
 
-  if (!ExecQueryToDeleteData(mobile_app_id, device_id, kDeleteCharacterArray)) {
+  if (!ExecQueryToDeleteData(policy_app_id, device_id, kDeleteCharacterArray)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect delete from characterArray");
     return false;
   }
 
-  if (!ExecUnionQueryToDeleteData(mobile_app_id, device_id, kDeleteTTSChunk)) {
+  if (!ExecUnionQueryToDeleteData(policy_app_id, device_id, kDeleteTTSChunk)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect delete from TTSChunk");
     return false;
   }
 
   if (!ExecQueryToDeleteData(
-      mobile_app_id, device_id, kDeleteHelpTimeoutPromptArray)) {
+      policy_app_id, device_id, kDeleteHelpTimeoutPromptArray)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect delete from HelpTimeoutPromptArray");
     return false;
   }
 
-  if (!ExecQueryToDeleteData(mobile_app_id, device_id, kDeleteGlobalProperties)) {
+  if (!ExecQueryToDeleteData(policy_app_id, device_id, kDeleteGlobalProperties)) {
     LOG4CXX_WARN(logger_,
                  "Incorrect delete from GlobalProperties");
     return false;
@@ -1439,23 +1439,23 @@ bool ResumptionDataDB::ExecQueryToDeleteData(const std::string& policy_app_id,
   utils::dbms::SQLQuery query(db());
   bool result =  query.Prepare(text_query);
   if (result) {
-    query.Bind(0, mobile_app_id);
+    query.Bind(0, policy_app_id);
     query.Bind(1, device_id);
     result = query.Exec();
   }
   return result;
 }
 
-bool ResumptionDataDB::ExecUnionQueryToDeleteData(const std::string& mobile_app_id,
+bool ResumptionDataDB::ExecUnionQueryToDeleteData(const std::string& policy_app_id,
                                                   const std::string& device_id,
                                                   const std::string& text_query) {
   LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   bool result =  query.Prepare(text_query);
   if (result) {
-    query.Bind(0, mobile_app_id);
+    query.Bind(0, policy_app_id);
     query.Bind(1, device_id);
-    query.Bind(2, mobile_app_id);
+    query.Bind(2, policy_app_id);
     query.Bind(3, device_id);
     result = query.Exec();
   }
@@ -2233,7 +2233,7 @@ bool ResumptionDataDB::ExecInsertVRHelpItem(int64_t global_properties_key,
 }
 
 bool ResumptionDataDB::InsertApplicationData(app_mngr::ApplicationConstSharedPtr application,
-                                             const std::string& mobile_app_id,
+                                             const std::string& policy_app_id,
                                              const std::string& device_id,
                                              int64_t& application_primary_key,
                                              int64_t global_properties_key) {
@@ -2278,7 +2278,7 @@ bool ResumptionDataDB::InsertApplicationData(app_mngr::ApplicationConstSharedPtr
   query.Bind(7, time_stamp);
   query.Bind(8, global_properties_key);
   query.Bind(9, is_media_application);
-  query.Bind(10, mobile_app_id);
+  query.Bind(10, policy_app_id);
   query.Bind(11, device_id);
 
   if (!query.Exec()) {
@@ -2316,7 +2316,7 @@ void ResumptionDataDB::CustomBind(const std::string& key,
 }
 
 bool ResumptionDataDB::PrepareSelectQuery(utils::dbms::SQLQuery& query,
-                                          const std::string& mobile_app_id,
+                                          const std::string& policy_app_id,
                                           const std::string& device_id,
                                           const std::string& text_query) const {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -2324,7 +2324,7 @@ bool ResumptionDataDB::PrepareSelectQuery(utils::dbms::SQLQuery& query,
     LOG4CXX_WARN(logger_, "Problem with verification query");
     return false;
   }
-  query.Bind(0, mobile_app_id);
+  query.Bind(0, policy_app_id);
   query.Bind(1, device_id);
   return true;
 }

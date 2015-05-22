@@ -246,7 +246,7 @@ EndpointUrls SQLPTRepresentation::GetUpdateUrls(int service_type) {
 }
 
 std::string SQLPTRepresentation::GetLockScreenIconUrl() const {
-  dbms::SQLQuery query(db());
+  utils::dbms::SQLQuery query(db());
   std::string ret;
   if (query.Prepare(sql_pt::kSelectLockScreenIcon)) {
     query.Bind(0, std::string("lock_screen_icon_url"));
@@ -912,7 +912,7 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
 
 bool policy::SQLPTRepresentation::SaveDevicePolicy(
     const policy_table::DevicePolicy& device) {
-  dbms::SQLQuery app_query(db());
+  utils::dbms::SQLQuery app_query(db());
   if (!app_query.Prepare(sql_pt::kInsertApplication)) {
     LOG4CXX_WARN(logger_, "Incorrect insert statement into application.");
     return false;
@@ -1007,7 +1007,7 @@ bool SQLPTRepresentation::SaveAppType(const std::string& app_id,
 bool SQLPTRepresentation::SaveRequestType(
     const std::string& app_id,
     const policy_table::RequestTypes& types) {
-  dbms::SQLQuery query(db());
+  utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kInsertRequestType)) {
     LOG4CXX_WARN(logger_, "Incorrect insert statement for request types.");
     return false;
@@ -1387,7 +1387,7 @@ bool SQLPTRepresentation::GatherAppType(
 bool SQLPTRepresentation::GatherRequestType(
     const std::string& app_id,
     policy_table::RequestTypes* request_types) const {
-  dbms::SQLQuery query(db());
+  utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kSelectRequestTypes)) {
     LOG4CXX_WARN(logger_, "Incorrect select from request types.");
     return false;
