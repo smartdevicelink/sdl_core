@@ -69,6 +69,19 @@ namespace NsMessageBroker
       DBG_MSG(("Count of controllers: %d\n", mControllersList.size()));
    }
 
+   void CMessageBrokerRegistry::removeControllersByDescriptor(const int fd) {
+      DBG_MSG(("CMessageBrokerRegistry::removeControllersByDescriptor(%d)\n",
+               fd));
+      std::map <std::string, int>::iterator it = mControllersList.begin();
+      while(it != mControllersList.end()) {
+        if (it->second == fd) {
+          deleteController((it++)->first);
+        } else {
+          ++it;
+        }
+      }
+   }
+
    bool CMessageBrokerRegistry::addSubscriber(int fd, std::string name)
    {
       DBG_MSG(("CMessageBrokerRegistry::addSubscriber()\n"));
