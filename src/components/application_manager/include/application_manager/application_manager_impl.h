@@ -241,7 +241,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     ApplicationSharedPtr get_limited_voice_application() const;
 
     /**
-     * @brief Checks if application with the same HMI type 
+     * @brief Checks if application with the same HMI type
      *        (media, voice communication or navi) exists
      *        in HMI_FULL or HMI_LIMITED level.
      *
@@ -595,8 +595,10 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool OnServiceStartedCallback(
         const connection_handler::DeviceHandle& device_handle,
         const int32_t& session_key, const protocol_handler::ServiceType& type) OVERRIDE;
-    void OnServiceEndedCallback(const int32_t& session_key,
-                                const protocol_handler::ServiceType& type) OVERRIDE;
+    void OnServiceEndedCallback(
+        const int32_t& session_key,
+        const protocol_handler::ServiceType& type,
+        const connection_handler::CloseSessionReason& close_reason) OVERRIDE;
     void OnApplicationFloodCallBack(const uint32_t& connection_key) OVERRIDE;
     void OnMalformedMessageCallback(const uint32_t& connection_key) OVERRIDE;
     /**

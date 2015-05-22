@@ -1066,15 +1066,18 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   return false;
 }
 
-void ApplicationManagerImpl::OnServiceEndedCallback(const int32_t& session_key,
-    const protocol_handler::ServiceType& type) {
+void ApplicationManagerImpl::OnServiceEndedCallback(
+    const int32_t& session_key,
+    const protocol_handler::ServiceType& type,
+    const connection_handler::CloseSessionReason& close_reason) {
   using namespace helpers;
   using namespace protocol_handler;
+  using namespace mobile_apis;
+  using namespace connection_handler;
 
-  LOG4CXX_DEBUG(
-    logger_,
-    "OnServiceEndedCallback " << type  << " in session 0x"
-        << std::hex << session_key);
+  LOG4CXX_DEBUG(logger_, "OnServiceEndedCallback for service "
+                << type << " with reason " << close_reason
+                << " in session 0x" << std::hex << session_key);
 
   if (type == kRpc) {
     LOG4CXX_INFO(logger_, "Remove application.");
@@ -1082,8 +1085,41 @@ void ApplicationManagerImpl::OnServiceEndedCallback(const int32_t& session_key,
      and we will notify HMI that it was unexpected disconnect,
      but in case it was closed by mobile we will be unable to find it in the list
     */
-    UnregisterApplication(session_key, mobile_apis::Result::INVALID_ENUM,
-                          true, true);
+
+    Result::eType reason;
+    bool is_resuming;
+    bool is_unexpected_disconnect;
+    switch (close_reason) {
+      case CloseSessionReason::kFlood: {
+        reason = Result::TOO_MANY_PENDING_REQUESTS;
+        is_resuming = true;
+        is_unexpected_disconnect = false;
+
+        MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+            session_key, AppInterfaceUnregisteredReason::TOO_MANY_REQUESTS);
+        break;
+      }
+      case CloseSessionReason::kMalformed: {
+        reason = Result::INVALID_ENUM;
+        is_resuming = true;
+        is_unexpected_disconnect = false;
+        break;
+      }
+      case CloseSessionReason::kUnauthorizedApp: {
+        reason = Result::INVALID_ENUM;
+        is_resuming = true;
+        is_unexpected_disconnect = false;
+        break;
+      }
+      default: {
+        reason = Result::INVALID_ENUM;
+        is_resuming = true;
+        is_unexpected_disconnect = true;
+        break;
+      }
+    }
+    UnregisterApplication(
+        session_key, reason, is_resuming, is_unexpected_disconnect);
     return;
   }
 
@@ -2294,7 +2330,7 @@ void ApplicationManagerImpl::UnregisterApplication(
 
 
 void ApplicationManagerImpl::OnAppUnauthorized(const uint32_t& app_id) {
-  connection_handler_->CloseSession(app_id, connection_handler::kCommon);
+  connection_handler_->CloseSession(app_id, connection_handler::kUnauthorizedApp);
 }
 
 void ApplicationManagerImpl::Handle(const impl::MessageFromMobile message) {
