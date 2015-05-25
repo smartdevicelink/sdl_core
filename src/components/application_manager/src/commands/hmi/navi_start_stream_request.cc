@@ -58,6 +58,7 @@ NaviStartStreamRequest::~NaviStartStreamRequest() {
 void NaviStartStreamRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  SetAllowedToTerminate(false);
   subscribe_on_event(hmi_apis::FunctionID::Navigation_StartStream,
                      correlation_id());
   ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
@@ -103,9 +104,6 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
           LOG4CXX_DEBUG(logger_,
                        "NaviStartStreamRequest aborted. Application can not stream");
         }
-      } else {
-        LOG4CXX_DEBUG(logger_,"Error received from HMI : " << code);
-        RetryStartSession();
       }
       break;
     }
@@ -118,6 +116,10 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
 
 void NaviStartStreamRequest::onTimeOut() {
   RetryStartSession();
+
+  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
+  DCHECK_OR_RETURN_VOID(app_mgr);
+  app_mgr->TerminateRequest(connection_key(), correlation_id());
 }
 
 void NaviStartStreamRequest::RetryStartSession() {
@@ -132,6 +134,12 @@ void NaviStartStreamRequest::RetryStartSession() {
         "NaviStartStreamRequest aborted. Application not found");
     return;
   }
+  if (app->video_streaming_approved()) {
+    LOG4CXX_INFO(logger_, "NaviStartStream retry sequence stopped. "
+                 << "SUCCESS received");
+    app->set_video_stream_retry_number(0);
+    return;
+  }
 
   uint32_t curr_retry_number = app->video_stream_retry_number();
   if (curr_retry_number < retry_number_ - 1) {
@@ -140,9 +148,10 @@ void NaviStartStreamRequest::RetryStartSession() {
     MessageHelper::SendNaviStartStream(app->app_id());
     app->set_video_stream_retry_number(++curr_retry_number);
   } else {
-    LOG4CXX_INFO(logger_, "NaviStartStream retry sequence stopped");
-    app_mgr->EndNaviServices(app->app_id());
+    LOG4CXX_INFO(logger_, "NaviStartStream retry sequence stopped. "
+                 << "Attempts expired");
     app->set_video_stream_retry_number(0);
+    app_mgr->EndNaviServices(app->app_id());
   }
 }
 
