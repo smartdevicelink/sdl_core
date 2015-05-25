@@ -305,6 +305,19 @@ const std::string kCreateSchema =
   "); "
   "CREATE INDEX IF NOT EXISTS `app_type.fk_app_type_application1_idx` "
   "  ON `app_type`(`application_id`); "
+
+  /* module type */
+  "CREATE TABLE IF NOT EXISTS `module_type`( "
+  "  `name` VARCHAR(50) NOT NULL, "
+  "  `application_id` VARCHAR(45) NOT NULL, "
+  "  PRIMARY KEY(`name`,`application_id`), "
+  "  CONSTRAINT `fk_module_type_application1` "
+  "    FOREIGN KEY(`application_id`) "
+  "    REFERENCES `application`(`id`) "
+  "); "
+  "CREATE INDEX IF NOT EXISTS `module_type.fk_module_type_application1_idx` "
+  "  ON `module_type`(`application_id`); "
+
   "CREATE TABLE IF NOT EXISTS `consent_group`( "
   "  `device_id` VARCHAR(100) NOT NULL, "
   "  `application_id` VARCHAR(45) NOT NULL, "
@@ -397,6 +410,8 @@ const std::string kDropSchema =
   "DROP TABLE IF EXISTS `consent_group`; "
   "DROP INDEX IF EXISTS `app_type.fk_app_type_application1_idx`; "
   "DROP TABLE IF EXISTS `app_type`; "
+  "DROP INDEX IF EXISTS `module_type.fk_module_type_application1_idx`; "
+  "DROP TABLE IF EXISTS `module_type`; "
   "DROP INDEX IF EXISTS `nickname.fk_nickname_application1_idx`; "
   "DROP TABLE IF EXISTS `nickname`; "
   "DROP INDEX IF EXISTS `app_level.fk_app_level_language2_idx`; "
@@ -447,6 +462,7 @@ const std::string kDeleteData =
   "DELETE FROM `endpoint`; "
   "DELETE FROM `consent_group`; "
   "DELETE FROM `app_type`; "
+  "DELETE FROM `module_type`; "
   "DELETE FROM `nickname`; "
   "DELETE FROM `app_level`; "
   "DELETE FROM `device_consent_group`; "
@@ -530,6 +546,9 @@ const std::string kInsertNickname =
 
 const std::string kInsertAppType =
   "INSERT OR IGNORE INTO `app_type` (`application_id`, `name`) VALUES (?, ?)";
+
+const std::string kInsertModuleType =
+  "INSERT OR IGNORE INTO `module_type` (`application_id`, `name`) VALUES (?, ?)";
 
 const std::string kUpdateVersion = "UPDATE `version` SET `number`= ?";
 
@@ -659,6 +678,9 @@ const std::string kSelectNicknames = "SELECT DISTINCT `name` FROM `nickname` "
 
 const std::string kSelectAppTypes = "SELECT DISTINCT `name` FROM `app_type` "
                                     "WHERE `application_id` = ?";
+
+const std::string kSelectModuleTypes =
+  "SELECT DISTINCT `name` FROM `module_type` WHERE `application_id` = ?";
 
 const std::string kSelectSecondsBetweenRetries =
   "SELECT `value` FROM `seconds_between_retry` ORDER BY `index`";

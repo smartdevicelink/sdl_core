@@ -681,6 +681,9 @@ bool SQLPTRepresentation::GatherApplicationPolicies(
     if (!GatherAppGroupNonPrimary(app_id, &*params.groups_nonPrimaryRC)) {
       return false;
     }
+    if (!GatherModuleType(app_id, &*params.ModuleType)) {
+      return false;
+    }
 #endif  // SDL_REMOTE_CONTROL
     // TODO(IKozyrenko): Check logic if optional container is missing
     if (!GatherNickName(app_id, &*params.nicknames)) {
@@ -1417,6 +1420,25 @@ bool SQLPTRepresentation::GatherAppType(
   query.Bind(0, app_id);
   while (query.Next()) {
     policy_table::AppHMIType type;
+    if (!policy_table::EnumFromJsonString(query.GetString(0), &type)) {
+      return false;
+    }
+    app_types->push_back(type);
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::GatherModuleType(
+  const std::string& app_id, policy_table::ModuleTypes* app_types) const {
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectModuleTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from app types");
+    return false;
+  }
+
+  query.Bind(0, app_id);
+  while (query.Next()) {
+    policy_table::ModuleType type;
     if (!policy_table::EnumFromJsonString(query.GetString(0), &type)) {
       return false;
     }

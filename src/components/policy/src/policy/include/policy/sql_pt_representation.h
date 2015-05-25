@@ -111,6 +111,8 @@ class SQLPTRepresentation : public virtual PTRepresentation {
     bool GatherUserConsentRecords(
         const std::string& device,
         policy_table::UserConsentRecords* consent) const;
+    bool GatherModuleType(const std::string& app_id,
+                          policy_table::ModuleTypes* module_types) const;
 
     virtual bool SaveApplicationCustomData(const std::string& app_id,
                                    bool is_revoked,
