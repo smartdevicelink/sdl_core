@@ -50,8 +50,6 @@ AudioStartStreamRequest::AudioStartStreamRequest(
   retry_number_ = stream_retry.first;
   LOG4CXX_DEBUG(logger_, "default_timeout_ = " << default_timeout_
                 <<"; retry_number_ = " << retry_number_);
-  //stream_retry.first times after stream_retry.second timeout
-  //SDL should resend AudioStartStreamRequest
 }
 
 AudioStartStreamRequest::~AudioStartStreamRequest() {
@@ -59,10 +57,17 @@ AudioStartStreamRequest::~AudioStartStreamRequest() {
 
 void AudioStartStreamRequest::RetryStartSession() {
   LOG4CXX_AUTO_TRACE(logger_);
+
   ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
   DCHECK_OR_RETURN_VOID(app_mgr);
+
   ApplicationSharedPtr app = app_mgr->application_by_hmi_app(application_id());
-  DCHECK_OR_RETURN_VOID(app);
+  if (!app) {
+    LOG4CXX_ERROR_EXT(logger_,
+        "StartAudioStreamRequest aborted. Application not found");
+    return;
+  }
+
   uint32_t curr_retry_number =  app->audio_stream_retry_number();
   if (curr_retry_number < retry_number_ - 1) {
     LOG4CXX_INFO(logger_, "Send AudioStartStream retry. retry_number = "
@@ -70,7 +75,7 @@ void AudioStartStreamRequest::RetryStartSession() {
     MessageHelper::SendAudioStartStream(app->app_id());
     app->set_audio_stream_retry_number(++curr_retry_number);
   } else {
-    LOG4CXX_INFO(logger_, "Audio start stream retry squence stopped");
+    LOG4CXX_INFO(logger_, "Audio start stream retry sequence stopped");
     app_mgr->EndNaviServices(app->app_id());
     app->set_audio_stream_retry_number(0);
   }

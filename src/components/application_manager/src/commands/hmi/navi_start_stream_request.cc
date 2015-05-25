@@ -67,7 +67,7 @@ void NaviStartStreamRequest::Run() {
     app->set_video_streaming_allowed(true);
     SendRequest();
   } else {
-    LOG4CXX_ERROR(logger_, "Applcation with hhi_app_id "
+    LOG4CXX_ERROR(logger_, "Applcation with hmi_app_id "
                  << application_id() << "does not exist");
   }
 }
@@ -103,6 +103,9 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
           LOG4CXX_DEBUG(logger_,
                        "NaviStartStreamRequest aborted. Application can not stream");
         }
+      } else {
+        LOG4CXX_DEBUG(logger_,"Error received from HMI : " << code);
+        RetryStartSession();
       }
       break;
     }
@@ -119,18 +122,25 @@ void NaviStartStreamRequest::onTimeOut() {
 
 void NaviStartStreamRequest::RetryStartSession() {
   LOG4CXX_AUTO_TRACE(logger_);
+
   ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
   DCHECK_OR_RETURN_VOID(app_mgr);
+
   ApplicationSharedPtr app = app_mgr->application_by_hmi_app(application_id());
-  DCHECK_OR_RETURN_VOID(app);
-  uint32_t curr_retry_number =  app->video_stream_retry_number();
+  if (!app) {
+    LOG4CXX_ERROR_EXT(logger_,
+        "NaviStartStreamRequest aborted. Application not found");
+    return;
+  }
+
+  uint32_t curr_retry_number = app->video_stream_retry_number();
   if (curr_retry_number < retry_number_ - 1) {
     LOG4CXX_INFO(logger_, "Send NaviStartStream retry. retry_number = "
                  << curr_retry_number);
     MessageHelper::SendNaviStartStream(app->app_id());
     app->set_video_stream_retry_number(++curr_retry_number);
   } else {
-    LOG4CXX_INFO(logger_, "NaviStartStream retry squence stopped");
+    LOG4CXX_INFO(logger_, "NaviStartStream retry sequence stopped");
     app_mgr->EndNaviServices(app->app_id());
     app->set_video_stream_retry_number(0);
   }
