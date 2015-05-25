@@ -27,6 +27,8 @@ typedef Array< String<1, 255>, 0, 255 > Strings;
 
 typedef Array< Enum<AppHMIType>, 0, 255 > AppHMITypes;
 
+typedef Array< Enum<ModuleType>, 0, 255 > ModuleTypes;
+
 typedef Array< Enum<HmiLevel>, 0, 4 > HmiLevels;
 
 typedef Array< Enum<Parameter>, 0, 24 > Parameters;
@@ -63,6 +65,7 @@ struct ApplicationParams : CompositeType {
     Optional< Strings > groups_primaryRC;
     Optional< Strings > groups_nonPrimaryRC;
     Optional< Strings > nicknames;
+    Optional< ModuleTypes > moduleType;
     Optional< AppHMITypes > AppHMIType;
     Enum<Priority> priority;
     Optional< Integer<uint16_t, 0, 65225> > memory_kb;
