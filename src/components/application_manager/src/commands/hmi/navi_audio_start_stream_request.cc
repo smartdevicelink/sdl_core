@@ -46,7 +46,7 @@ AudioStartStreamRequest::AudioStartStreamRequest(
   LOG4CXX_AUTO_TRACE(logger_);
   std::pair<uint32_t, int32_t> stream_retry =
       profile::Profile::instance()->start_stream_retry_amount();
-  default_timeout_ = stream_retry.second * date_time::DateTime::MILLISECONDS_IN_SECOND;
+  default_timeout_ = stream_retry.second;
   retry_number_ = stream_retry.first;
   LOG4CXX_DEBUG(logger_, "default_timeout_ = " << default_timeout_
                 <<"; retry_number_ = " << retry_number_);
