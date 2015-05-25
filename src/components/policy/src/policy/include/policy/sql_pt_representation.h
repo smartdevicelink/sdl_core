@@ -111,8 +111,6 @@ class SQLPTRepresentation : public virtual PTRepresentation {
     bool GatherUserConsentRecords(
         const std::string& device,
         policy_table::UserConsentRecords* consent) const;
-    bool GatherModuleType(const std::string& app_id,
-                          policy_table::ModuleTypes* module_types) const;
 
     virtual bool SaveApplicationCustomData(const std::string& app_id,
                                    bool is_revoked,
@@ -149,10 +147,14 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                                policy_table::Strings* app_groups) const;
     bool GatherAppGroupNonPrimary(const std::string& app_id,
                                   policy_table::Strings* app_groups) const;
+    bool GatherModuleType(const std::string& app_id,
+                          policy_table::ModuleTypes* module_types) const;
     bool SaveAppGroupPrimary(const std::string& app_id,
                              const policy_table::Strings& app_groups);
     bool SaveAppGroupNonPrimary(const std::string& app_id,
                                 const policy_table::Strings& app_groups);
+    bool SaveModuleType(const std::string& app_id,
+                        const policy_table::ModuleTypes& types);
 #endif  // SDL_REMOTE_CONTROL
 
   public:

@@ -681,7 +681,7 @@ bool SQLPTRepresentation::GatherApplicationPolicies(
     if (!GatherAppGroupNonPrimary(app_id, &*params.groups_nonPrimaryRC)) {
       return false;
     }
-    if (!GatherModuleType(app_id, &*params.ModuleType)) {
+    if (!GatherModuleType(app_id, &*params.moduleType)) {
       return false;
     }
 #endif  // SDL_REMOTE_CONTROL
@@ -929,6 +929,9 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
     return false;
   }
   if (!SaveAppGroupNonPrimary(app.first, *app.second.groups_nonPrimaryRC)) {
+    return false;
+  }
+  if (!SaveModuleType(app.first, *app.second.moduleType)) {
     return false;
   }
 #endif  // SDL_REMOTE_CONTROL
@@ -1390,6 +1393,12 @@ bool SQLPTRepresentation::GetInitialAppData(const std::string& app_id,
     LOG4CXX_WARN(logger_, "Incorrect select from app types");
     return false;
   }
+  dbms::SQLQuery module_types(db());
+  if (!module_types.Prepare(sql_pt::kSelectModuleTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from module types");
+    return false;
+  }
+
   app_names.Bind(0, app_id);
   while (app_names.Next()) {
     nicknames->push_back(app_names.GetString(0));
@@ -1400,6 +1409,12 @@ bool SQLPTRepresentation::GetInitialAppData(const std::string& app_id,
     app_types->push_back(app_hmi_types.GetString(0));
   }
   app_hmi_types.Reset();
+  module_types.Bind(0, app_id);
+  while (module_types.Next()) {
+    app_types->push_back(module_types.GetString(0));
+  }
+  module_types.Reset();
+
   return true;
 }
 
@@ -1420,25 +1435,6 @@ bool SQLPTRepresentation::GatherAppType(
   query.Bind(0, app_id);
   while (query.Next()) {
     policy_table::AppHMIType type;
-    if (!policy_table::EnumFromJsonString(query.GetString(0), &type)) {
-      return false;
-    }
-    app_types->push_back(type);
-  }
-  return true;
-}
-
-bool SQLPTRepresentation::GatherModuleType(
-  const std::string& app_id, policy_table::ModuleTypes* app_types) const {
-  dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt::kSelectModuleTypes)) {
-    LOG4CXX_WARN(logger_, "Incorrect select from app types");
-    return false;
-  }
-
-  query.Bind(0, app_id);
-  while (query.Next()) {
-    policy_table::ModuleType type;
     if (!policy_table::EnumFromJsonString(query.GetString(0), &type)) {
       return false;
     }
@@ -1508,6 +1504,25 @@ bool SQLPTRepresentation::GatherAppGroupNonPrimary(
   return true;
 }
 
+bool SQLPTRepresentation::GatherModuleType(
+  const std::string& app_id, policy_table::ModuleTypes* app_types) const {
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectModuleTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from app types");
+    return false;
+  }
+
+  query.Bind(0, app_id);
+  while (query.Next()) {
+    policy_table::ModuleType type;
+    if (!policy_table::EnumFromJsonString(query.GetString(0), &type)) {
+      return false;
+    }
+    app_types->push_back(type);
+  }
+  return true;
+}
+
 bool SQLPTRepresentation::SaveAppGroupPrimary(
   const std::string& app_id, const policy_table::Strings& app_groups) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1551,6 +1566,27 @@ bool SQLPTRepresentation::SaveAppGroupNonPrimary(
       LOG4CXX_WARN(
         logger_,
         "Incorrect insert into app group non primary." << query.LastError().text());
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool SQLPTRepresentation::SaveModuleType(const std::string& app_id,
+                                         const policy_table::ModuleTypes& types) {
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertModuleType)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for module type");
+    return false;
+  }
+
+  policy_table::ModuleTypes::const_iterator it;
+  for (it = types.begin(); it != types.end(); ++it) {
+    query.Bind(0, app_id);
+    query.Bind(1, std::string(policy_table::EnumToJsonString(*it)));
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_WARN(logger_, "Incorrect insert into module type.");
       return false;
     }
   }
