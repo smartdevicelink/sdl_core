@@ -65,7 +65,7 @@ struct ApplicationParams : CompositeType {
     Optional< Strings > groups_primaryRC;
     Optional< Strings > groups_nonPrimaryRC;
     Optional< Strings > nicknames;
-    Optional< ModuleTypes > moduleType;
+    mutable Optional< ModuleTypes > moduleType;
     Optional< AppHMITypes > AppHMIType;
     Enum<Priority> priority;
     Optional< Integer<uint16_t, 0, 65225> > memory_kb;
@@ -84,6 +84,7 @@ struct ApplicationParams : CompositeType {
     virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
+    bool ValidateModuleTypes() const;
 };
 
 struct RpcParameters : CompositeType {

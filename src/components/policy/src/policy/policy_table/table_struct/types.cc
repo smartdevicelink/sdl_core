@@ -72,9 +72,6 @@ bool ApplicationParams::is_valid() const {
   if (!nicknames.is_valid()) {
     return false;
   }
-  if (!moduleType.is_valid()) {
-    return false;
-  }
   if (!AppHMIType.is_valid()) {
     return false;
   }
