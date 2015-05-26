@@ -9,6 +9,7 @@ SDL.ClimateControlModel = Em.Object.create({
 	autoModeEnable: false,
 	defrostZone: 'FRONT',
 	dualModeEnable: false,
+	autoModeEnableString: 'OFF',
 
 	increaseSpeed: function(){
 		this.set('currentFanSpeed', this.currentFanSpeed+1);
@@ -53,6 +54,24 @@ SDL.ClimateControlModel = Em.Object.create({
 	setAutoModeEnable: function(state){
 		this.set('autoModeEnable', state);
 		Em.Logger.log('autoModeEnable :' + this.autoModeEnable);
+		if(state==false)
+			autoModeEnableString="OFF";
+		else
+			autoModeEnableString="ON";
+		Em.Logger.log('string: '+ autoModeEnableString);
+	},
+
+	toggleAutoMode: function(){
+		Em.Logger.log("toggleAutoMode");
+		if(this.autoModeEnable){
+			this.set('autoModeEnable', false);
+			this.set('autoModeEnableString', 'OFF');
+		}
+		else{
+			this.set('autoModeEnable', true);
+			this.set('autoModeEnableString', "ON");
+
+		}
 	},
 	
 	setDefrostZone: function(zone){

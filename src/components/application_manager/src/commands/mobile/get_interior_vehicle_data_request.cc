@@ -91,6 +91,17 @@ void GetInteriorVehicleDataRequest::Run()
   */
   //////////////////
 
+  if((*message_)[strings::msg_params]["subscribe"].asBool()){
+    
+    smart_objects::SmartObject module = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
+    
+    module = (*message_)[strings::msg_params]["moduleDescription"];
+    if(!(app->IsSubscribedToInteriorVehicleData(module)))
+      app->SubscribeToInteriorVehicleData(module);
+  }
+
+
   //Construct msg_params to be sent to HMI
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(

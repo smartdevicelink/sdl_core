@@ -294,7 +294,7 @@ Profile::Profile()
     attempts_to_open_policy_db_(kDefaultAttemptsToOpenPolicyDB),
     open_attempt_timeout_ms_(kDefaultAttemptsToOpenPolicyDB),
     hash_string_size_(kDefaultHashStringSize),
-    logs_enabled_(false) {
+    logs_enabled_(true) {
 }
 
 Profile::~Profile() {
@@ -681,6 +681,8 @@ void Profile::UpdateValues() {
   ReadBoolValue(&logs_enabled_, false, kMainSection, kLogsEnabledKey);
 
   LOG_UPDATED_BOOL_VALUE(logs_enabled_, kLogsEnabledKey, kMainSection);
+
+  logs_enabled_ = true;
 
   // Application config folder
   ReadStringValue(&app_config_folder_,

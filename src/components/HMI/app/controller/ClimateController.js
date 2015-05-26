@@ -4,21 +4,26 @@ SDL.ClimateController = Em.Object.create({
 
 	climateUp: function() {
 		this.model.increaseSpeed();
+		FFW.RC.onInteriorVehicleDataNotification("CLIMATE");
 	},
 
 	climateDown: function() {
 		this.model.decreaseSpeed();
+		FFW.RC.onInteriorVehicleDataNotification("CLIMATE");
 	},
 	setClimate: function(request){
 		Em.Logger.log("Climate controller set climate: " + JSON.stringify(request));
 		this.model.setSpeed(request.params.moduleData.climateControlData.fanSpeed);
+		//FFW.RC.onInteriorVehicleDataNotification("CLIMATE");
 		return(this.model.currentFanSpeed);
 	},
 	tempUp: function() {
 		this.model.increaseTemp();
+		FFW.RC.onInteriorVehicleDataNotification("CLIMATE");
 	},
 	tempDown: function() {
 		this.model.decreaseTemp();
+		FFW.RC.onInteriorVehicleDataNotification("CLIMATE");
 	},
 	setTemp: function(request){
 		Em.Logger.log("Climate controller set temperature: " + JSON.stringify(request));
@@ -44,6 +49,11 @@ SDL.ClimateController = Em.Object.create({
 	setDualModeEnable: function(request){
 		this.model.setDualModeEnable(request.params.moduleData.climateControlData.dualModeEnable);
 		return(this.model.dualModeEnable);
+	},
+	toggleAutoMode: function(){
+		Em.Logger.log("toggleautomode controller");
+		this.model.toggleAutoMode;
+		return(this.model.autoModeEnable);
 	}
 
 });

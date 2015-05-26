@@ -211,6 +211,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     ApplicationSharedPtr active_application() const;
     std::vector<ApplicationSharedPtr> applications_by_button(uint32_t button);
     std::vector<ApplicationSharedPtr> applications_by_ivi(uint32_t vehicle_info);
+    std::vector<ApplicationSharedPtr> applications_by_interior_vehicle_data(smart_objects::SmartObject moduleDescription);
     std::vector<ApplicationSharedPtr> applications_with_navi();
 
     /**
@@ -934,6 +935,16 @@ class ApplicationManagerImpl : public ApplicationManager,
         : button_(button) {}
       bool operator () (const ApplicationSharedPtr app) const {
         return app ? app->IsSubscribedToButton(button_) : false;
+      }
+    };
+
+    struct SubscribedToInteriorVehicleDataPredicate {
+      smart_objects::SmartObject interior_module_data_ = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
+      SubscribedToInteriorVehicleDataPredicate(smart_objects::SmartObject interior_module_data)
+        : interior_module_data_(interior_module_data) {}
+      bool operator () (const ApplicationSharedPtr app) const {
+        return app ? app->IsSubscribedToInteriorVehicleData(interior_module_data_) : false;
       }
     };
 

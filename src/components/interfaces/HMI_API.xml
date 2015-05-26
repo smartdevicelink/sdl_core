@@ -2078,7 +2078,7 @@
   </function>
 
   <function name="OnInteriorVehicleData" messagetype="notification">
-    <param name="moduleData" type="Common.ModuleData">
+    <param name="moduleData" type="Common.ModuleData" mandatory="true">
     </param>
   </function>
 </interface>

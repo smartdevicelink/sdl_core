@@ -35,6 +35,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_H_
 
 #include "application_manager/commands/command_notification_impl.h"
+#include "application_manager/application.h"
+
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -66,6 +68,9 @@ class OnInteriorVehicleDataNotification : public CommandNotificationImpl {
   virtual void Run();
 
  private:
+
+  void SendNotificationHelper(ApplicationConstSharedPtr app);
+
   DISALLOW_COPY_AND_ASSIGN(OnInteriorVehicleDataNotification);
 };
 

@@ -5291,6 +5291,10 @@
 		<description>Calculated hash ID to be referenced during RegisterAppInterface.</description>
 	</param>
   </function>
+  <function name="OnInteriorVehicleData" functionID="OnInteriorVehicleDataID" messagetype="notification">
+    <param name="moduleData" type="ModuleData" mandatory="true">
+    </param>
+  </function>
 
 <!-- ~~~~~~~~~~~~~~~~~~ -->
 <!-- Ford Specific APIs -->
@@ -5406,10 +5410,5 @@
     
   </function>
 -->
-
-  <function name="OnInteriorVehicleData" functionID="OnInteriorVehicleDataID" messagetype="notification">
-    <param name="moduleData" type="ModuleData">
-    </param>
-  </function>
   
 </interface>

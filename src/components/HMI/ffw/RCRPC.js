@@ -149,8 +149,8 @@ FFW.RC = FFW.RPCObserver.create({
 			this.client.send(JSONMessage);
 		}
 		else if(request.method == "RC.SetInteriorVehicleData"){
-			var params = request.params
-			Em.Logger.log("FFW.onRPCRequest method: SetInteriorVehicleData")
+			var params = request.params;
+			Em.Logger.log("FFW.onRPCRequest method: SetInteriorVehicleData");
 			if(params.moduleData.moduleType=="CLIMATE"){
 				var JSONMessage = {
 					"jsonrpc": "2.0",
@@ -225,7 +225,7 @@ FFW.RC = FFW.RPCObserver.create({
 
 		}
 		else if(request.method=="RC.GetInteriorVehicleData"){
-
+			var params = request.params;
 			Em.Logger.log("RC.GetInteriorVehicleData");
 
 			var moduleData = {
@@ -234,7 +234,7 @@ FFW.RC = FFW.RPCObserver.create({
 				'radioControlData': null,
 				'climateControlData': null
 			}
-
+			console.log(JSON.stringify(params));
 			if(params.moduleDescription.moduleType=='CLIMATE'){
 
 				moduleData.moduleType = 'CLIMATE';
@@ -273,6 +273,22 @@ FFW.RC = FFW.RPCObserver.create({
 					this.subscribeClimateState = false; //resets
 				}
 			}
+			/*else if(params.moduleDescription.moduleType='RADIO'){
+				moduleData.moduleZone = 'RADIO';
+				var radioControlData = {
+					'frequencyInteger': SDL.RadioController.model.frequencyInteger,
+					'frequencyFraction': SDL.RadioController.model.frequencyFraction,
+					'band': SDL.RadioController.model.band,
+					'rdsData': SDL.RadioController.model.rdsData,
+					'availableHDs': SDL.RadioController.model.availableHDs,
+					'hdChannel': SDL.RadioController.model.hdChannel,
+					'signalStrength': SDL.RadioController.model.signalStrength,
+					'signalChangeThreshold': SDL.RadioController.model.signalChangeThreshold,
+					'radioEnable': SDL.RadioController.model.radioEnable,
+					'state': SDL.RadioController.model.state
+
+				}
+			}*/
 
 
 			var JSONMessage = {
@@ -299,8 +315,14 @@ FFW.RC = FFW.RPCObserver.create({
 				"params": {
 					"moduleData" : {
 						"moduleType" : "CLIMATE",
-						"moduleZone" : {},
-						"radioControlData" :{},
+						"moduleZone" : {
+							"col":0,
+							"row":0,
+							"level":0,
+							"colspan":1,
+							"rowspan":1,
+							"levelspan":1
+						},
 						"climateControlData" : {
 							'fanSpeed' : 	SDL.ClimateController.model.currentFanSpeed,
 							'currentTemp': SDL.ClimateController.model.currentTemp,
@@ -316,6 +338,7 @@ FFW.RC = FFW.RPCObserver.create({
 					}
 				}
 			}
+			this.client.send(JSONMessage);
 		}
 
 	},

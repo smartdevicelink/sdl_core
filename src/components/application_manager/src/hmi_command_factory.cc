@@ -1107,10 +1107,6 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
-    case hmi_apis::FunctionID::RC_OnInteriorVehicleData: {
-    	command.reset(new commands::hmi::OnInteriorVehicleDataNotification(message));	
-    	break;
-    }
     case hmi_apis::FunctionID::SDL_OnAllowSDLFunctionality: {
       command.reset(new commands::OnAllowSDLFunctionalityNotification(message));
       break;
@@ -1219,6 +1215,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     case hmi_apis::FunctionID::Buttons_OnButtonPress: {
       command.reset(new commands::hmi::OnButtonPressNotification(message));
       break;
+    }
+    case hmi_apis::FunctionID::RC_OnInteriorVehicleData: {
+    	command.reset(new commands::hmi::OnInteriorVehicleDataNotification(message));	
+    	break;
     }
 #ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::VehicleInfo_SubscribeGps: {

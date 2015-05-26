@@ -31,7 +31,11 @@
  */
 
 #include "application_manager/commands/hmi/on_interior_vehicle_data_notification.h"
-#include "interfaces/MOBILE_API.h"
+//#include "interfaces/MOBILE_API.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
+#include "utils/logger.h"
+#include "application_manager/event_engine/event.h"
 
 namespace application_manager {
 
@@ -48,7 +52,9 @@ OnInteriorVehicleDataNotification::~OnInteriorVehicleDataNotification() {
 
 void OnInteriorVehicleDataNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  event_engine::Event event(hmi_apis::FunctionID::RC_OnInteriorVehicleData);
+  event.set_smart_object(*message_);
+  event.raise();
   //prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
   mobile_apis::FunctionID::OnInteriorVehicleDataID;

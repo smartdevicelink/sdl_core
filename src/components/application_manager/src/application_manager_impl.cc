@@ -259,6 +259,16 @@ std::vector<ApplicationSharedPtr> ApplicationManagerImpl::applications_by_button
   return apps;
 }
 
+std::vector<ApplicationSharedPtr> ApplicationManagerImpl::applications_by_interior_vehicle_data(
+  smart_objects::SmartObject moduleDescription) {
+  SubscribedToInteriorVehicleDataPredicate finder(
+        moduleDescription);
+  ApplicationListAccessor accessor;
+  std::vector<ApplicationSharedPtr> apps = accessor.FindAll(finder);
+  LOG4CXX_DEBUG(logger_, " Found count: " << apps.size());
+  return apps;
+}
+
 std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
                                              VehicleDataType vehicle_info, int value) {
 
