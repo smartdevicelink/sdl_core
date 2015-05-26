@@ -571,6 +571,11 @@ bool ApplicationImpl::IsSubscribedToInteriorVehicleData(smart_objects::SmartObje
  // return(subscribed_interior_vehicle_data_.end()._M_node!=it._M_node); //!= subscribed_interior_vehicle_data_.find(module));
 }
 
+bool ApplicationImpl::UnsubscribeFromInteriorVehicleData(smart_objects::SmartObject module){
+  subscribed_interior_vehicle_data_.remove(module);
+  return true;
+}
+
 UsageStatistics& ApplicationImpl::usage_report() {
   return usage_report_;
 }

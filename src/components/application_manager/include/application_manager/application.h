@@ -512,7 +512,7 @@ class Application : public virtual InitialApplicationData,
 
     virtual bool SubscribeToInteriorVehicleData(smart_objects::SmartObject module) = 0;
     virtual bool IsSubscribedToInteriorVehicleData(smart_objects::SmartObject module) = 0;
-    //virtual bool UnsubscribeFromInteriorVehicleData(smart_objects::SmartObject module) = 0;
+    virtual bool UnsubscribeFromInteriorVehicleData(smart_objects::SmartObject module) = 0;
 
     /**
      * @brief Check, if limits for command number per time is exceeded

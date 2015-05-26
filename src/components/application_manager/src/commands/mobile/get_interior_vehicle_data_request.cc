@@ -90,17 +90,26 @@ void GetInteriorVehicleDataRequest::Run()
 
   */
   //////////////////
+  if((*message_)[strings::msg_params].keyExists("subscribe")){
+    if((*message_)[strings::msg_params]["subscribe"].asBool()){
 
-  if((*message_)[strings::msg_params]["subscribe"].asBool()){
-    
-    smart_objects::SmartObject module = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-    
-    module = (*message_)[strings::msg_params]["moduleDescription"];
-    if(!(app->IsSubscribedToInteriorVehicleData(module)))
-      app->SubscribeToInteriorVehicleData(module);
+      smart_objects::SmartObject module = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
+      
+      module = (*message_)[strings::msg_params]["moduleDescription"];
+      if(!(app->IsSubscribedToInteriorVehicleData(module)))
+        app->SubscribeToInteriorVehicleData(module);
+    }
+    else if(!(*message_)[strings::msg_params]["subscribe"].asBool()){
+
+      smart_objects::SmartObject module = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
+      
+      module = (*message_)[strings::msg_params]["moduleDescription"];
+      if((app->IsSubscribedToInteriorVehicleData(module)))
+        app->UnsubscribeFromInteriorVehicleData(module);
+    }
   }
-
 
   //Construct msg_params to be sent to HMI
 
@@ -112,6 +121,7 @@ void GetInteriorVehicleDataRequest::Run()
 
   SendHMIRequest(hmi_apis::FunctionID::RC_GetInteriorVehicleData, &msg_params, true);
 }
+
 
 void GetInteriorVehicleDataRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);

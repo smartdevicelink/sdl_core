@@ -155,7 +155,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 
   bool SubscribeToInteriorVehicleData(smart_objects::SmartObject module);
   bool IsSubscribedToInteriorVehicleData(smart_objects::SmartObject module);
-  //bool UnsubscribeFromInteriorVehicleData(smart_objects::SmartObject module);
+  bool UnsubscribeFromInteriorVehicleData(smart_objects::SmartObject module);
 
   virtual const std::set<mobile_apis::ButtonName::eType>& SubscribedButtons() const;
   virtual const  std::set<uint32_t>& SubscribesIVI() const;

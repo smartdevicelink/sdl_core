@@ -58,7 +58,8 @@ SDL.ClimateView = Em.ContainerView.create( {
             'recirculateAirEnable',
             'autoModeEnable',
             'defrostZone',
-            'dualModeEnable'
+            'dualModeEnable',
+            'passengerTemperature'
 
         ],
         dualModeEnable: Em.ContainerView.extend({
@@ -66,35 +67,25 @@ SDL.ClimateView = Em.ContainerView.create( {
             childViews: [
                 'dualModeEnable_label',
                 'dualModeEnable_on',
-                'dualModeEnable_off',
+                //'dualModeEnable_off',
                 'dualModeEnable_status'
             ],
             
             dualModeEnable_label: SDL.Label.extend({
                 elementId:'dualModeEnable_label',
-                content: 'AC Enable'
+                content: 'Dual Mode'
             }),
 
             dualModeEnable_on: SDL.Button.extend({
                 elementId: 'dualModeEnable_on',
-                text: 'On',
-                actionDown: function(){
-                    SDL.ClimateController.setDualModeEnable(true);
-                }
-            }),
-
-            dualModeEnable_off: SDL.Button.extend({
-                elementId: 'dualModeEnable_off',
-                text: 'Off',
-                actionDown: function(){
-                    SDL.ClimateController.setDualModeEnable(false);
-                }
+                text: 'Dual',
+                action: 'toggleDualMode',
+                target: 'SDL.ClimateController.model'
             }),
 
             dualModeEnable_status: SDL.Label.extend({
                 elementId: 'dualModeEnable_status',
-
-                contentBinding: Em.Binding.oneWay('SDL.ClimateController.model.dualModeEnable')
+                contentBinding: Em.Binding.oneWay('SDL.ClimateController.model.dualModeEnableString')
             })
 
 
@@ -117,28 +108,28 @@ SDL.ClimateView = Em.ContainerView.create( {
             defrostZone_front: SDL.Button.extend({
                 elementId: 'defrostZone_front',
                 text: 'Front',
-                actionDown: function(){
-                    SDL.ClimateController.model.setDefrostZone('FRONT');
-                }
+                action: 'defrostFrontEnable',
+                target: 'SDL.ClimateController.model'
+
             }),
             defrostZone_rear: SDL.Button.extend({
                 elementId: 'defrostZone_rear',
                 text: 'Rear',
-                actionDown: function(){
-                    SDL.ClimateController.model.setDefrostZone('REAR');
-                }
+                action: 'defrostRearEnable',
+                target: 'SDL.ClimateController.model'
+
 
             }),
             defrostZone_all: SDL.Button.extend({
                 elementId: 'defrostZone_all',
                 text:'All',
-                actionDown: function(){
-                    SDL.ClimateController.model.setDefrostZone('ALL');
-                }
+                action: 'defrostAllEnable',
+                target: 'SDL.ClimateController.model'
+
             }),
             defrostZone_status: SDL.Label.extend({
                 elementId: "defrostZone_status",
-                contentBinding: Em.Binding.oneWay('SDL.CLimateController.model.defrostZone')
+                contentBinding: Em.Binding.oneWay('SDL.ClimateController.model.defrostZone')        
             })
         }),
 
@@ -177,35 +168,25 @@ SDL.ClimateView = Em.ContainerView.create( {
             childViews: [
                 'recirculateAirEnable_label',
                 'recirculateAirEnable_on',
-                'recirculateAirEnable_off',
+                //'recirculateAirEnable_off',
                 'recirculateAirEnable_status'
             ],
             
             recirculateAirEnable_label: SDL.Label.extend({
                 elementId:'recirculateAirEnable_label',
-                content: 'AC Enable'
+                content: 'Recirculate Air'
             }),
 
             recirculateAirEnable_on: SDL.Button.extend({
                 elementId: 'recirculateAirEnable_on',
-                text: 'On',
-                actionDown: function(){
-                    SDL.ClimateController.setRecirculateAirEnable(true);
-                }
+                text: 'Recirculate',
+                action: 'toggleRecirculateAir',
+                target: 'SDL.ClimateController.model'
             }),
 
-            recirculateAirEnable_off: SDL.Button.extend({
-                elementId: 'recirculateAirEnable_off',
-                text: 'Off',
-                actionDown: function(){
-                    SDL.ClimateController.setRecirculateAirEnable(false);
-                }
-            }),
-
-            recirculateAirEnable_status: SDL.Button.extend({
+            recirculateAirEnable_status: SDL.Label.extend({
                 elementId: 'recirculateAirEnable_status',
-
-                contentBinding: Em.Binding.oneWay('SDL.ClimateController.model.recirculateAirEnable')
+                contentBinding: Em.Binding.oneWay('SDL.ClimateController.model.recirculateAirEnableString')
             })
 
 
@@ -216,7 +197,7 @@ SDL.ClimateView = Em.ContainerView.create( {
             childViews: [
                 'acEnable_label',
                 'acEnable_on',
-                'acEnable_off',
+                //'acEnable_off',
                 'acEnable_status'
             ],
             
@@ -227,24 +208,14 @@ SDL.ClimateView = Em.ContainerView.create( {
 
             acEnable_on: SDL.Button.extend({
                 elementId: 'acEnable_on',
-                text: 'On',
-                actionDown: function(){
-                    SDL.ClimateController.setAcEnable(true);
-                }
+                text: 'AC',
+                action: 'toggleAcEnable',
+                target: 'SDL.ClimateController.model'
             }),
 
-            acEnable_off: SDL.Button.extend({
-                elementId: 'acEnable_off',
-                text: 'Off',
-                actionDown: function(){
-                    SDL.ClimateController.setAcEnable(false);
-                }
-            }),
-
-            acEnable_status: SDL.Button.extend({
+            acEnable_status: SDL.Label.extend({
                 elementId: 'acEnable_status',
-
-                contentBinding: Em.Binding.oneWay('SDL.ClimateController.model.acEnable')
+                contentBinding: Em.Binding.oneWay('SDL.ClimateController.model.acEnableString')
             })
 
 
@@ -273,7 +244,7 @@ SDL.ClimateView = Em.ContainerView.create( {
 
                 action: 'tempUp',
 
-                target: 'SDL.ClimateController'
+                target: 'SDL.ClimateController.model'
             }),
 
             tempDownButton: SDL.Button.extend({
@@ -283,7 +254,7 @@ SDL.ClimateView = Em.ContainerView.create( {
 
                 action: 'tempDown',
 
-                target: 'SDL.ClimateController',
+                target: 'SDL.ClimateController.model',
 
             }),
 
@@ -301,7 +272,6 @@ SDL.ClimateView = Em.ContainerView.create( {
                 'fanSpeedUpButton',
                 'fanSpeedDownButton',
                 'fanSpeedLevel'
-
             ],
 
             fanSpeedLabel: SDL.Label.extend({
@@ -315,9 +285,9 @@ SDL.ClimateView = Em.ContainerView.create( {
 
                 text: 'Up',
 
-                action: 'climateUp',
+                action: 'fanSpeedUp',
 
-                target: "SDL.ClimateController"
+                target: "SDL.ClimateController.model"
 
 
             }),
@@ -327,9 +297,9 @@ SDL.ClimateView = Em.ContainerView.create( {
 
                 text: 'Down',
 
-                action: 'climateDown',
+                action: 'fanSpeedDown',
 
-                target: "SDL.ClimateController",
+                target: "SDL.ClimateController.model",
 
             }),
 
@@ -340,7 +310,50 @@ SDL.ClimateView = Em.ContainerView.create( {
                 contentBinding: Em.Binding.oneWay('SDL.ClimateController.model.currentFanSpeed')
 
             })
-        })
+        }),
+        passengerTemperature: Em.ContainerView.extend({
+            elementId: 'passenger_temperature_container',
+            childViews: [
+                'passengerTempLabel',
+                'passengerTempUpButton',
+                'passengerTempDownButton',
+                'passengerTempLevel'
+
+            ],
+
+            passengerTempLabel: SDL.Label.extend({
+                elementId: 'passenger_temp_label',
+
+                content: "Passenger Temperature",
+            }),
+
+            passengerTempUpButton: SDL.Button.extend({
+                elementId: 'passenger_temp_up_button',
+
+                text: 'Up',
+
+                action: 'passengerTempUp',
+
+                target: 'SDL.ClimateController.model'
+            }),
+
+            passengerTempDownButton: SDL.Button.extend({
+                elementId: 'passenger_temp_down_button',
+
+                text: 'Down',
+
+                action: 'passengerTempDown',
+
+                target: 'SDL.ClimateController.model',
+
+            }),
+
+            passengerTempLevel: SDL.Label.extend({
+                elementId: "passenger_temp_level",
+
+                contentBinding: Em.Binding.oneWay('SDL.ClimateController.model.passengerDesiredTemp')
+            })
+        }),
 
     } )
 

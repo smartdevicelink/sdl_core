@@ -2,12 +2,12 @@
 	width: 800px;
 	height: 480px;
 }
-/*
+
 #autoModeEnable_container{
 	width:100px;
 	height: 75px;
 	position: absolute;
-	top: 50px;
+	top: 100px;
 	left: 10px;
 }
 
@@ -49,23 +49,22 @@
 	text-align: center;
 	line-height: 32px;
 }
-*/
+
 
 #temperature_container{
 	width: 100px;
 	height: 200px;
 	position: absolute;
-	left: 500px;
-	top: 141px;
+	left: 10px;
+	top: 175px;
 }
 
 #temp_label {
 	left: 0px;
 	top: 0px;
 	height: 49px;
-	font-size: 26px;
+	font-size: 14px;
 	text-align: center;
-	line-height: 32px;
 
 }
 
@@ -107,29 +106,29 @@
 	text-align: center;
 	line-height: 32px;
 }
-/*
-#defrostZone{
-	width: 100px;
-	height: 200px;
+
+#recirculateAirEnable_container{
+	width:100px;
+	height: 75px;
 	position: absolute;
-	left: 150px;
-	top: 125px;
+	top: 100px;
+	left: 250px;
 }
 
-#defrostZone_label{
+#recirculateAirEnable_label{
 	top: 0px;
-	font-size: 14px;
-	text-align: center; 
-}
-
-#defrostZone_status{
-	top:0px;
-	left: 74px;
 	font-size: 14px;
 	text-align: center;
 }
 
-#defrostZone_front{
+#recirculateAirEnable_status{
+	top:0px;
+	left: 95px;
+	font-size: 14px;
+	text-align: center;
+}
+
+#recirculateAirEnable_on{
 	top: 20px;
 	left: 0px;
 	width: 93px;
@@ -141,53 +140,120 @@
 	text-align: center;
 	line-height: 32px;
 }
+#defrostZone{
+	width: 100px;
+	height: 200px;
+	position: absolute;
+	left: 250px;
+	top: 175px;
+}
 
-#defrostZone_rear{
-	top: 60px;
+#defrostZone_label{
 	left: 0px;
+	top: 0px;
+	height: 49px;
+	font-size: 14px;
+	text-align: center;
+}
+
+#defrostZone_status{
+	top:0px;
+	left: 85px;
+	font-size: 14px;
+	text-align: center;
+}
+
+#defrostZone_front{
+	left: 0px;
+	top: 50px;
 	width: 93px;
 	height: 49px;
 	border-left: 1px solid #393939;
 	border-right: 1px solid #393939;
 	border-top: 1px solid #393939;
-	font-size: 12px;
+	font-size: 26px;
+	text-align: center;
+	line-height: 32px;
+}
+
+#defrostZone_rear{
+	left: 0px;
+	top: 100px;
+	width: 93px;
+	height: 49px;
+	border-left: 1px solid #393939;
+	border-right: 1px solid #393939;
+	border-top: 1px solid #393939;
+	font-size: 26px;
 	text-align: center;
 	line-height: 32px;
 }
 
 #defrostZone_all{
-	top: 100px;
 	left: 0px;
+	top: 150px;
 	width: 93px;
 	height: 49px;
 	border-left: 1px solid #393939;
 	border-right: 1px solid #393939;
 	border-top: 1px solid #393939;
-	font-size: 12px;
-	text-align: center;
-	line-height: 32px;
-}
-*/
-#fan_speed_container{
-	width: 282px;
-	height: 200px;
-	position: absolute;
-	left: 100px;
-	top: 141px;
-}
-
-#fan_speed_label {
-	left: 80px;
-	top: 0px;
-	height: 49px;
 	font-size: 26px;
 	text-align: center;
 	line-height: 32px;
+}
+
+#acEnable_container{
+	width:100px;
+	height: 75px;
+	position: absolute;
+	top: 100px;
+	left: 450px;
+}
+
+#acEnable_label{
+	top: 0px;
+	font-size: 14px;
+	text-align: center;
+}
+
+#acEnable_status{
+	top:0px;
+	left: 74px;
+	font-size: 14px;
+	text-align: center;
+}
+
+#acEnable_on{
+	top: 20px;
+	left: 0px;
+	width: 93px;
+	height: 39px;
+	border-left: 1px solid #393939;
+	border-right: 1px solid #393939;
+	border-top: 1px solid #393939;
+	font-size: 14px;
+	text-align: center;
+	line-height: 32px;
+}
+#fan_speed_container{
+	width: 100px;
+	height: 200px;
+	position: absolute;
+	left: 450px;
+	top: 175px;
+}
+
+#fan_speed_label {
+	left: 0px;
+	top: 0px;
+	height: 49px;
+	font-size: 14px;
+	text-align: center;
 
 }
 
 #fan_speed_up_button{
-	left: 95px;
+	left: 0px;
 	top: 50px;
 	width: 93px;
 	height: 49px;
@@ -200,7 +266,7 @@
 }
 
 #fan_speed_down_button{
-	left: 95px;
+	left: 0px;
 	top: 150px;
 	width: 93px;
 	height: 49px;
@@ -213,7 +279,99 @@
 }
 
 #fan_speed_level{
-	left: 95px;
+	left: 0px;
+	top: 100px;
+	width: 93px;
+	height: 49px;
+	border-top: 1px solid #393939;
+	border-left: 1px solid #393939;
+	border-right: 1px solid #000;
+		font-size: 26px;
+	text-align: center;
+	line-height: 32px;
+}
+
+#dualModeEnable_container{
+	width:100px;
+	height: 75px;
+	position: absolute;
+	top: 100px;
+	left: 690px;
+}
+
+#dualModeEnable_label{
+	top: 0px;
+	font-size: 14px;
+	text-align: center;
+}
+
+#dualModeEnable_status{
+	top:0px;
+	left: 74px;
+	font-size: 14px;
+	text-align: center;
+}
+
+#dualModeEnable_on{
+	top: 20px;
+	left: 0px;
+	width: 93px;
+	height: 39px;
+	border-left: 1px solid #393939;
+	border-right: 1px solid #393939;
+	border-top: 1px solid #393939;
+	font-size: 14px;
+	text-align: center;
+	line-height: 32px;
+}
+
+
+#passenger_temperature_container{
+	width: 100px;
+	height: 200px;
+	position: absolute;
+	left: 690px;
+	top: 175px;
+}
+
+#passenger_temp_label {
+	left: 0px;
+	top: 0px;
+	height: 49px;
+	font-size: 14px;
+	text-align: center;
+	
+
+}
+
+#passenger_temp_up_button{
+	left: 0px;
+	top: 50px;
+	width: 93px;
+	height: 49px;
+	border-left: 1px solid #393939;
+	border-right: 1px solid #393939;
+	border-top: 1px solid #393939;
+	font-size: 26px;
+	text-align: center;
+	line-height: 32px;
+}
+
+#passenger_temp_down_button{
+	left: 0px;
+	top: 150px;
+	width: 93px;
+	height: 49px;
+	border-left: 1px solid #393939;
+	border-right: 1px solid #000;
+	border-top: 1px solid #393939;
+	font-size: 26px;
+	text-align: center;
+	line-height: 32px;
+}
+
+#passenger_temp_level{
+	left: 0px;
 	top: 100px;
 	width: 93px;
 	height: 49px;

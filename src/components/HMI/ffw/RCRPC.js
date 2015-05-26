@@ -178,11 +178,21 @@ FFW.RC = FFW.RPCObserver.create({
 					}
 				}
 
-				if(params.moduleData.climateControlData.desiredTemp){
-					var desiredTemp = SDL.ClimateController.setTemp(request);
-					JSONMessage.result.moduleData.climateControlData.desiredTemp;
-					//this.client.send(JSONMessage);
+				if((params.moduleData.moduleZone.row == 0)&&(params.moduleData.moduleZone.col==0)){
+					if(params.moduleData.climateControlData.desiredTemp){
+						var desiredTemp = SDL.ClimateController.setTemp(request);
+						JSONMessage.result.moduleData.climateControlData.desiredTemp;
+						//this.client.send(JSONMessage);
 
+					}
+				}
+				else if((params.moduleData.moduleZone.row == 0)&&(params.moduleData.moduleZone.col==1)){
+					if(params.moduleData.climateControlData.desiredTemp){
+						var desiredTemp = SDL.ClimateController.setPassengerTemp(request);
+						JSONMessage.result.moduleData.climateControlData.desiredTemp;
+						//this.client.send(JSONMessage);
+
+					}
 				}
 				if(params.moduleData.climateControlData.fanSpeed){
 					var currentFanSpeed = SDL.ClimateController.setClimate(request);
@@ -306,27 +316,29 @@ FFW.RC = FFW.RPCObserver.create({
 
 	},
 
-	onInteriorVehicleDataNotification: function(module){
+	onInteriorVehicleDataNotification: function(module, zone){
 		Em.Logger.log('FFW.onInteriorVehicleDataNotification');
 		if(module=="CLIMATE"){
+
+			var desiredTemp;
+			if(zone.col==1){
+				desiredTemp = SDL.ClimateController.model.passengerDesiredTemp;
+			}
+			else{
+				desiredTemp = SDL.ClimateController.model.desiredTemp;
+			}
+
 			var JSONMessage = {
 				"jsonrpc": "2.0",
 				"method": "RC.OnInteriorVehicleData",
 				"params": {
 					"moduleData" : {
 						"moduleType" : "CLIMATE",
-						"moduleZone" : {
-							"col":0,
-							"row":0,
-							"level":0,
-							"colspan":1,
-							"rowspan":1,
-							"levelspan":1
-						},
+						"moduleZone" : zone,
 						"climateControlData" : {
 							'fanSpeed' : 	SDL.ClimateController.model.currentFanSpeed,
 							'currentTemp': SDL.ClimateController.model.currentTemp,
-							'desiredTemp': SDL.ClimateController.model.desiredTemp,
+							'desiredTemp': desiredTemp,
 							'temperatureUnit': SDL.ClimateController.model.temperatureUnit,
 							'acEnable': SDL.ClimateController.model.acEnable,
 							'recirculateAirEnable': SDL.ClimateController.model.recirculateAirEnable,
