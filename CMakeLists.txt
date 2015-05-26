@@ -48,7 +48,7 @@ option(ENABLE_LOG "Logging feature" ON)
 option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
-option(REMOTE_CONTROL "Enable Reverse functionality" OFF)
+option(REMOTE_CONTROL "Enable Reverse functionality" ON)
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
 set(DEBUG_OPTION 	"$ENV{DEBUG}")

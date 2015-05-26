@@ -86,6 +86,19 @@ CANAppExtensionPtr BaseCommandNotification::GetAppExtension(
 }
 
 void BaseCommandNotification::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (CheckPolicy()) {
+    Execute();  // run child's logic
+    service_->SendMessageToMobile(message_);
+  } else {
+    LOG4CXX_WARN(logger_,
+                 "Function \"" << message_->function_name() << "\" (#"
+                 << message_->function_id() << ") not allowed by policy");
+  }
+}
+
+bool BaseCommandNotification::CheckPolicy() {
+  LOG4CXX_AUTO_TRACE(logger_);
   application_manager::ApplicationSharedPtr app =
       service_->GetApplication(message_->connection_key());
 
@@ -93,7 +106,7 @@ void BaseCommandNotification::Run() {
     LOG4CXX_WARN(
         logger_,
         "Application doesn't " << message_->connection_key() << " registered");
-    return;
+    return false;
   }
 
   mobile_apis::Result::eType permission =
@@ -105,15 +118,8 @@ void BaseCommandNotification::Run() {
   application_manager::TypeAccess access = service_->CheckAccess(
       app->app_id(), message_->function_name(), params, zone);
 
-  if (permission == mobile_apis::Result::eType::SUCCESS &&
-      access == application_manager::TypeAccess::kAllowed) {
-    Execute();  // run child's logic
-    service_->SendMessageToMobile(message_);
-  } else {
-    LOG4CXX_WARN(logger_,
-                 "Function \"" << message_->function_name() << "\" (#"
-                 << message_->function_id() << ") not allowed by policy");
-  }
+  return permission == mobile_apis::Result::eType::SUCCESS
+      && access == application_manager::TypeAccess::kAllowed;
 }
 
 }  // namespace commands
