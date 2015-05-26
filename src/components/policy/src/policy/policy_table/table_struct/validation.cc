@@ -33,7 +33,7 @@ bool ApplicationParams::ValidateModuleTypes() const {
     ModuleTypes non_initialized;
     moduleType = Optional<ModuleTypes>(non_initialized);
   }
-  return false;
+  return true;
 }
 
 bool RpcParameters::Validate() const {

@@ -681,8 +681,14 @@ bool SQLPTRepresentation::GatherApplicationPolicies(
     if (!GatherAppGroupNonPrimary(app_id, &*params.groups_nonPrimaryRC)) {
       return false;
     }
-    if (!GatherModuleType(app_id, &*params.moduleType)) {
+    bool denied = false;
+    if (!GatherRemoteControlDenied(app_id, &denied)) {
       return false;
+    }
+    if (!denied) {
+      if (!GatherModuleType(app_id, &*params.moduleType)) {
+        return false;
+      }
     }
 #endif  // SDL_REMOTE_CONTROL
     // TODO(IKozyrenko): Check logic if optional container is missing
@@ -931,7 +937,10 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   if (!SaveAppGroupNonPrimary(app.first, *app.second.groups_nonPrimaryRC)) {
     return false;
   }
-  if (!SaveModuleType(app.first, *app.second.moduleType)) {
+
+  bool denied = !app.second.moduleType->is_initialized();
+  if (!SaveRemoteControlDenied(app.first, denied) ||
+      !SaveModuleType(app.first, *app.second.moduleType)) {
     return false;
   }
 #endif  // SDL_REMOTE_CONTROL
@@ -1504,6 +1513,23 @@ bool SQLPTRepresentation::GatherAppGroupNonPrimary(
   return true;
 }
 
+bool SQLPTRepresentation::GatherRemoteControlDenied(const std::string& app_id,
+                                                    bool* denied) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectRemoteControlDenied)) {
+    LOG4CXX_WARN(logger_, "Incorrect select remote control flag");
+    return false;
+  }
+  query.Bind(0, app_id);
+  if (query.Next()) {
+    *denied = query.GetBoolean(0);
+  } else {
+    return false;
+  }
+  return true;
+}
+
 bool SQLPTRepresentation::GatherModuleType(
   const std::string& app_id, policy_table::ModuleTypes* app_types) const {
   dbms::SQLQuery query(db());
@@ -1570,6 +1596,24 @@ bool SQLPTRepresentation::SaveAppGroupNonPrimary(
     }
   }
 
+  return true;
+}
+
+bool SQLPTRepresentation::SaveRemoteControlDenied(const std::string& app_id,
+                                                  bool deny) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kUpdateRemoteControlDenied)) {
+    LOG4CXX_WARN(logger_, "Incorrect update statement for remote control flag");
+    return false;
+  }
+  LOG4CXX_DEBUG(logger_, "App: " << app_id << std::boolalpha << " - " << deny);
+  query.Bind(0, deny);
+  query.Bind(1, app_id);
+  if (!query.Exec()) {
+    LOG4CXX_WARN(logger_, "Incorrect update remote control flag.");
+    return false;
+  }
   return true;
 }
 

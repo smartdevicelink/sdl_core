@@ -149,12 +149,15 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                                   policy_table::Strings* app_groups) const;
     bool GatherModuleType(const std::string& app_id,
                           policy_table::ModuleTypes* module_types) const;
+    bool GatherRemoteControlDenied(const std::string& app_id,
+                                   bool* denied) const;
     bool SaveAppGroupPrimary(const std::string& app_id,
                              const policy_table::Strings& app_groups);
     bool SaveAppGroupNonPrimary(const std::string& app_id,
                                 const policy_table::Strings& app_groups);
     bool SaveModuleType(const std::string& app_id,
                         const policy_table::ModuleTypes& types);
+    bool SaveRemoteControlDenied(const std::string& app_id, bool deny);
 #endif  // SDL_REMOTE_CONTROL
 
   public:

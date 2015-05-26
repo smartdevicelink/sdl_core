@@ -139,6 +139,7 @@ const std::string kCreateSchema =
   "  `memory_kb` INTEGER NOT NULL, "
   "  `heart_beat_timeout_ms` INTEGER NOT NULL, "
   "  `certificate` VARCHAR(45), "
+  "  `remote_control_denied` BOOLEAN NOT NULL DEFAULT 0, "
   "  CONSTRAINT `fk_application_hmi_level1` "
   "    FOREIGN KEY(`default_hmi`) "
   "    REFERENCES `hmi_level`(`value`), "
@@ -715,8 +716,14 @@ const std::string kSelectTimeoutResponse =
 const std::string kUpdateFlagUpdateRequired =
   "UPDATE `module_meta` SET `flag_update_required` = ?";
 
+const std::string kUpdateRemoteControlDenied =
+  "UPDATE `application` SET `remote_control_denied` = ? WHERE `id` = ?";
+
 const std::string kSelectFlagUpdateRequired =
   "SELECT `flag_update_required` FROM `module_meta` LIMIT 1";
+
+const std::string kSelectRemoteControlDenied =
+  "SELECT `remote_control_denied` FROM `application` WHERE `id` = ? LIMIT 1";
 
 const std::string kUpdateCountersSuccessfulUpdate =
   "UPDATE `module_meta` SET `pt_exchanged_at_odometer_x` = ?,"
