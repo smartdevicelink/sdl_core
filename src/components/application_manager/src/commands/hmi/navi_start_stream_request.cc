@@ -61,9 +61,9 @@ void NaviStartStreamRequest::Run() {
   SetAllowedToTerminate(false);
   subscribe_on_event(hmi_apis::FunctionID::Navigation_StartStream,
                      correlation_id());
-  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-  DCHECK_OR_RETURN_VOID(app_mgr);
-  ApplicationSharedPtr app = app_mgr->application_by_hmi_app(application_id());
+
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->
+      application_by_hmi_app(application_id());
   if (app) {
     app->set_video_streaming_allowed(true);
     SendRequest();
@@ -77,12 +77,10 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-  DCHECK_OR_RETURN_VOID(app_mgr);
-
-  ApplicationSharedPtr app = app_mgr->application_by_hmi_app(application_id());
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->
+      application_by_hmi_app(application_id());
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_,
+    LOG4CXX_ERROR(logger_,
         "NaviStartStreamRequest aborted. Application not found");
     return;
   }
@@ -98,7 +96,8 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
 
       if (hmi_apis::Common_Result::SUCCESS == code) {
         LOG4CXX_DEBUG(logger_, "NaviStartStreamResponse SUCCESS");
-        if (app_mgr->HMILevelAllowsStreaming(app->app_id(), ServiceType::kMobileNav)) {
+        if (ApplicationManagerImpl::instance()->
+                HMILevelAllowsStreaming(app->app_id(), ServiceType::kMobileNav)) {
           app->set_video_streaming_approved(true);
         } else {
           LOG4CXX_DEBUG(logger_,
@@ -117,25 +116,22 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
 void NaviStartStreamRequest::onTimeOut() {
   RetryStartSession();
 
-  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-  DCHECK_OR_RETURN_VOID(app_mgr);
-  app_mgr->TerminateRequest(connection_key(), correlation_id());
+  ApplicationManagerImpl::instance()->TerminateRequest(
+      connection_key(), correlation_id());
 }
 
 void NaviStartStreamRequest::RetryStartSession() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-  DCHECK_OR_RETURN_VOID(app_mgr);
-
-  ApplicationSharedPtr app = app_mgr->application_by_hmi_app(application_id());
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->
+      application_by_hmi_app(application_id());
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_,
+    LOG4CXX_ERROR(logger_,
         "NaviStartStreamRequest aborted. Application not found");
     return;
   }
   if (app->video_streaming_approved()) {
-    LOG4CXX_INFO(logger_, "NaviStartStream retry sequence stopped. "
+    LOG4CXX_DEBUG(logger_, "NaviStartStream retry sequence stopped. "
                  << "SUCCESS received");
     app->set_video_stream_retry_number(0);
     return;
@@ -143,15 +139,15 @@ void NaviStartStreamRequest::RetryStartSession() {
 
   uint32_t curr_retry_number = app->video_stream_retry_number();
   if (curr_retry_number < retry_number_ - 1) {
-    LOG4CXX_INFO(logger_, "Send NaviStartStream retry. retry_number = "
+    LOG4CXX_DEBUG(logger_, "Send NaviStartStream retry. retry_number = "
                  << curr_retry_number);
     MessageHelper::SendNaviStartStream(app->app_id());
     app->set_video_stream_retry_number(++curr_retry_number);
   } else {
-    LOG4CXX_INFO(logger_, "NaviStartStream retry sequence stopped. "
+    LOG4CXX_DEBUG(logger_, "NaviStartStream retry sequence stopped. "
                  << "Attempts expired");
     app->set_video_stream_retry_number(0);
-    app_mgr->EndNaviServices(app->app_id());
+    ApplicationManagerImpl::instance()->EndNaviServices(app->app_id());
   }
 }
 

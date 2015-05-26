@@ -58,17 +58,15 @@ AudioStartStreamRequest::~AudioStartStreamRequest() {
 void AudioStartStreamRequest::RetryStartSession() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-  DCHECK_OR_RETURN_VOID(app_mgr);
-
-  ApplicationSharedPtr app = app_mgr->application_by_hmi_app(application_id());
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->
+      application_by_hmi_app(application_id());
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_,
+    LOG4CXX_ERROR(logger_,
         "StartAudioStreamRequest aborted. Application not found");
     return;
   }
   if (app->audio_streaming_approved()) {
-    LOG4CXX_INFO(logger_, "AudioStartStream retry sequence stopped. "
+    LOG4CXX_DEBUG(logger_, "AudioStartStream retry sequence stopped. "
                  << "SUCCESS received");
     app->set_audio_stream_retry_number(0);
     return;
@@ -76,24 +74,23 @@ void AudioStartStreamRequest::RetryStartSession() {
 
   uint32_t curr_retry_number =  app->audio_stream_retry_number();
   if (curr_retry_number < retry_number_ - 1) {
-    LOG4CXX_INFO(logger_, "Send AudioStartStream retry. retry_number = "
+    LOG4CXX_DEBUG(logger_, "Send AudioStartStream retry. retry_number = "
                  << curr_retry_number);
     MessageHelper::SendAudioStartStream(app->app_id());
     app->set_audio_stream_retry_number(++curr_retry_number);
   } else {
-    LOG4CXX_INFO(logger_, "Audio start stream retry sequence stopped. "
+    LOG4CXX_DEBUG(logger_, "Audio start stream retry sequence stopped. "
                  << "Attempts expired.");
     app->set_audio_stream_retry_number(0);
-    app_mgr->EndNaviServices(app->app_id());
+    ApplicationManagerImpl::instance()->EndNaviServices(app->app_id());
   }
 }
 
 void AudioStartStreamRequest::onTimeOut() {
   RetryStartSession();
 
-  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-  DCHECK_OR_RETURN_VOID(app_mgr);
-  app_mgr->TerminateRequest(connection_key(), correlation_id());
+  ApplicationManagerImpl::instance()->TerminateRequest(
+      connection_key(), correlation_id());
 }
 
 void AudioStartStreamRequest::Run() {
@@ -102,15 +99,15 @@ void AudioStartStreamRequest::Run() {
   SetAllowedToTerminate(false);
   subscribe_on_event(hmi_apis::FunctionID::Navigation_StartAudioStream,
                      correlation_id());
-  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-  DCHECK_OR_RETURN_VOID(app_mgr);
-  ApplicationSharedPtr app = app_mgr->application_by_hmi_app(application_id());
+
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->
+      application_by_hmi_app(application_id());
   if (app) {
     app->set_audio_streaming_allowed(true);
     SendRequest();
   } else {
     LOG4CXX_ERROR(logger_, "Applcation with hmi_app_id "
-                 << application_id() << " does not exist");
+                  << application_id() << " does not exist");
   }
 }
 
@@ -118,12 +115,10 @@ void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-  DCHECK_OR_RETURN_VOID(app_mgr);
-
-  ApplicationSharedPtr app = app_mgr->application_by_hmi_app(application_id());
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->
+      application_by_hmi_app(application_id());
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_,
+    LOG4CXX_ERROR(logger_,
         "StartAudioStreamRequest aborted. Application not found");
     return;
   }
@@ -139,7 +134,8 @@ void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
 
       if (hmi_apis::Common_Result::SUCCESS == code) {
         LOG4CXX_DEBUG(logger_, "StartAudioStreamResponse SUCCESS");
-        if (app_mgr->HMILevelAllowsStreaming(app->app_id(), ServiceType::kAudio)) {
+        if (ApplicationManagerImpl::instance()->
+                HMILevelAllowsStreaming(app->app_id(), ServiceType::kAudio)) {
           app->set_audio_streaming_approved(true);
         } else {
           LOG4CXX_DEBUG(logger_,
