@@ -66,13 +66,16 @@ class AccessRemoteImpl : public AccessRemote {
 
   virtual bool IsPrimaryDevice(const PTString& dev_id) const;
   virtual void SetPrimaryDevice(const PTString& dev_id, const PTString& input);
-  virtual PTString PrimaryDevice() const;  
+  virtual PTString PrimaryDevice() const;
 
   virtual void Allow(const Subject& who, const Object& what);
   virtual void Deny(const Subject& who, const Object& what);
   virtual void Reset(const Subject& who);
   virtual void Reset(const Object& what);
   virtual TypeAccess Check(const Subject& who, const Object& what) const;
+  virtual bool CheckModuleType(const PTString& app_id,
+                               policy_table::ModuleType module) const;
+  virtual bool CheckParameters(/* module, zone, params */) const;
   virtual PTString FindGroup(const Subject& who, const PTString& rpc,
                              const RemoteControlParams& params) const;
   virtual void SetDefaultHmiTypes(const std::string& app_id,

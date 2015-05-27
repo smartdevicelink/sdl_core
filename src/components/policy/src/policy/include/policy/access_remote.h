@@ -65,17 +65,16 @@ inline std::ostream& operator<<(std::ostream& output, const Subject& who) {
 }
 
 struct Object {
-  PTString group_id;
-  SeatLocation zone;
+  policy_table::ModuleType module;
 };
 inline bool operator<(const Object& x, const Object& y) {
-  return x.group_id < y.group_id || x.zone < y.zone;
+  return x < y;
 }
 inline bool operator==(const Object& x, const Object& y) {
-  return x.group_id == y.group_id && x.zone == y.zone;
+  return x == y;
 }
 inline std::ostream& operator<<(std::ostream& output, const Object& what) {
-  output << "Object(group:" << what.group_id << ", zone:" << what.zone << ")";
+  output << "Object(module:" << what.module << ")";
   return output;
 }
 
@@ -162,6 +161,21 @@ class AccessRemote {
    * manual if need to ask driver
    */
   virtual TypeAccess Check(const Subject& who, const Object& what) const = 0;
+
+  /**
+   *
+   * @param app_id
+   * @param module
+   * @return
+   */
+  virtual bool CheckModuleType(const PTString& app_id,
+                               policy_table::ModuleType module) const = 0;
+
+  /**
+   *
+   * @return
+   */
+  virtual bool CheckParameters(/* module, zone, params */) const = 0;
 
   /**
    * Find group by RPC name and list of parameters

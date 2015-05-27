@@ -214,6 +214,15 @@ TypeAccess AccessRemoteImpl::Check(const Subject& who,
   return ret;
 }
 
+bool AccessRemoteImpl::CheckModuleType(const PTString& app_id,
+                                       policy_table::ModuleType module) const {
+  return true;
+}
+
+bool AccessRemoteImpl::CheckParameters(/* module, zone, params */) const {
+  return true;
+}
+
 void AccessRemoteImpl::Allow(const Subject& who, const Object& what) {
   LOG4CXX_AUTO_TRACE(logger_);
   acl_[what][who] = TypeAccess::kAllowed;

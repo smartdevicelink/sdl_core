@@ -274,12 +274,20 @@ class PolicyManagerImpl : public PolicyManager {
     bool IsPTValid(utils::SharedPtr<policy_table::Table> policy_table,
                    policy_table::PolicyTableType type) const;
 
+
 private:
     PolicyListener* listener_;
 
     UpdateStatusManager update_status_manager_;
     CacheManagerInterfaceSPtr cache_;
 #ifdef SDL_REMOTE_CONTROL
+    bool CheckModulePermissions(const PTString& app_id,
+                                policy_table::ModuleType module,
+                                const RemoteControlParams& params,
+                                const SeatLocation& zone);
+    TypeAccess CheckDriverConsent(const PTString& app_id,
+                                  policy_table::ModuleType module);
+
     utils::SharedPtr<AccessRemote> access_remote_;
 #endif  // SDL_REMOTE_CONTROL
     sync_primitives::Lock apps_registration_lock_;
