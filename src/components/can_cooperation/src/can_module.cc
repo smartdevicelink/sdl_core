@@ -269,22 +269,13 @@ functional_modules::ProcessResult CANModule::HandleMessage(
   return ProcessResult::PROCESSED;
 }
 
-void CANModule::NotifyMobiles(application_manager::MessagePtr msg) {
-  typedef std::vector<application_manager::ApplicationSharedPtr> AppList;
-   AppList applications =
-          service()->GetApplications(CANModule::instance()->GetModuleID());
-  for (AppList::iterator i = applications.begin();
-      i != applications.end(); ++i) {
-    application_manager::MessagePtr message(
-        new application_manager::Message(*msg));
-    message->set_connection_key((*i)->app_id());
-
-    commands::Command* command = MobileCommandFactory::CreateCommand(message);
-    if (command) {
-      command->Run();
-    }
-    delete command;
+void CANModule::NotifyMobiles(application_manager::MessagePtr message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  commands::Command* command = MobileCommandFactory::CreateCommand(message);
+  if (command) {
+    command->Run();
   }
+  delete command;
 }
 
 void CANModule::SendResponseToMobile(application_manager::MessagePtr msg) {
