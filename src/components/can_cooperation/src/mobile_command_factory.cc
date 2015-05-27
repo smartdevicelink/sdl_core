@@ -32,8 +32,6 @@
 
 #include "can_cooperation/mobile_command_factory.h"
 #include "functional_module/function_ids.h"
-#include "can_cooperation/commands/grant_access_request.h"
-#include "can_cooperation/commands/cancel_access_request.h"
 #include "can_cooperation/commands/start_scan_request.h"
 #include "can_cooperation/commands/stop_scan_request.h"
 #include "can_cooperation/commands/tune_radio_request.h"
@@ -41,9 +39,13 @@
 #include "can_cooperation/commands/tune_down_request.h"
 #include "can_cooperation/commands/climate_control_on_request.h"
 #include "can_cooperation/commands/get_seat_control_request.h"
-#include "can_cooperation/commands/on_control_changed_notification.h"
+#include "can_cooperation/commands/button_press_request.h"
+#include "can_cooperation/commands/get_interior_vehicle_data_capabilities_request.h"
+#include "can_cooperation/commands/get_interior_vehicle_data_request.h"
+#include "can_cooperation/commands/set_interior_vehicle_data_request.h"
 #include "can_cooperation/commands/on_preset_changed_notification.h"
 #include "can_cooperation/commands/on_radio_details_notification.h"
+#include "can_cooperation/commands/on_interior_vehicle_data_notification.h"
 
 
 namespace can_cooperation {
@@ -54,12 +56,20 @@ commands::Command* MobileCommandFactory::CreateCommand(
     const application_manager::MessagePtr& msg) {
 
   switch (msg->function_id()) {
-    case MobileFunctionID::GRANT_ACCESS: {
-      return new commands::GrantAccessRequest(msg);
+    case MobileFunctionID::GET_INTERIOR_VEHICLE_DATA_CAPABILITIES: {
+      return new commands::GetInteriorVehicleDataCapabiliesRequest(msg);
       break;
     }
-    case MobileFunctionID::CANCEL_ACCESS: {
-      return new commands::CancelAccessRequest(msg);
+    case MobileFunctionID::GET_INTERIOR_VEHICLE_DATA: {
+      return new commands::GetInteriorVehicleDataRequest(msg);
+      break;
+    }
+    case MobileFunctionID::SET_INTERIOR_VEHICLE_DATA: {
+      return new commands::SetInteriorVehicleDataRequest(msg);
+      break;
+    }
+    case MobileFunctionID::BUTTON_PRESS: {
+      return new commands::ButtonPressRequest(msg);
       break;
     }
     case MobileFunctionID::START_SCAN: {
@@ -90,8 +100,8 @@ commands::Command* MobileCommandFactory::CreateCommand(
       return new commands::ClimateControlOnRequest(msg);
       break;
     }
-    case MobileFunctionID::ON_CONTROL_CHANGED: {
-      return new commands::OnControlChangedNotification(msg);
+    case MobileFunctionID::ON_INTERIOR_VEHICLE_DATA: {
+      return new commands::OnInteriorVehicleDataNotification(msg);
       break;
     }
     case MobileFunctionID::ON_RADIO_DETAILS: {

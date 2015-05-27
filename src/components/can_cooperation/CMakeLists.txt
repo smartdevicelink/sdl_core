@@ -44,8 +44,6 @@ set (SOURCES
     ./src/message_helper.cc
     ./src/command/base_command_request.cc
     ./src/command/base_command_notification.cc
-    ./src/command/grant_access_request.cc
-    ./src/command/cancel_access_request.cc
     ./src/command/start_scan_request.cc
     ./src/command/stop_scan_request.cc
     ./src/command/tune_radio_request.cc
@@ -53,9 +51,13 @@ set (SOURCES
     ./src/command/tune_up_request.cc
     ./src/command/climate_control_on_request.cc
     ./src/command/get_seat_control_request.cc
+    ./src/command/button_press_request.cc
+    ./src/command/get_interior_vehicle_data_capabilities_request.cc
+    ./src/command/get_interior_vehicle_data_request.cc
+    ./src/command/set_interior_vehicle_data_request.cc
     ./src/command/on_radio_details_notification.cc
-    ./src/command/on_control_changed_notification.cc
     ./src/command/on_preset_changed_notification.cc
+    ./src/command/on_interior_vehicle_data_notification.cc
     ./src/validators/validator.cc
     ./src/validators/on_preset_changed_notification_validator.cc
     ./src/validators/radio_station_validator.cc
