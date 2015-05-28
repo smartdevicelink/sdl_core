@@ -999,6 +999,35 @@
                         "LIMITED"]
                     }
                 }
+            },
+            "RemoteControl": {
+                "rpcs": {
+                    "ButtonPress": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "GetInteriorVehicleDataCapabilities": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "GetInteriorVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "SetInteriorVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "OnInteriorVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    }
+                }
             }
         },
         "consumer_friendly_messages": {
@@ -2332,8 +2361,8 @@
                 "priority": "NONE",
                 "default_hmi": "NONE",
                 "groups": ["Base-4"],
-                "groups_primaryRC": ["Base-4", "Base-RC", "Radio", "Climate"],
-                "groups_nonPrimaryRC": ["Base-RC", "Radio", "Climate", "Notifications-RC"]
+                "groups_primaryRC": ["Base-4", "Base-RC", "Radio", "Climate", "RemoteControl"],
+                "groups_nonPrimaryRC": ["Base-RC", "Radio", "Climate", "Notifications-RC", "RemoteControl"]
             },
             "8675311": {
                 "keep_context": false,
@@ -2341,8 +2370,8 @@
                 "priority": "NONE",
                 "default_hmi": "NONE",
                 "groups": ["Base-4"],
-                "groups_primaryRC": ["Base-4", "Base-RC", "Radio", "Climate"],
-                "groups_nonPrimaryRC": ["Base-RC", "Radio", "Climate", "Notifications-RC"],
+                "groups_primaryRC": ["Base-4", "Base-RC", "Radio", "Climate", "RemoteControl"],
+                "groups_nonPrimaryRC": ["Base-RC", "Radio", "Climate", "Notifications-RC", "RemoteControl"],
                 "AppHMIType": ["REMOTE_CONTROL"]
             },
             "device": {
