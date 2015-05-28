@@ -53,7 +53,8 @@ class BaseCommandNotification : public Command {
    *
    * @param message Message from mobile
    **/
-  explicit BaseCommandNotification(const application_manager::MessagePtr& message);
+  explicit BaseCommandNotification(
+      const application_manager::MessagePtr& message);
 
   /**
    * @brief BaseCommandNotification class destructor

@@ -43,8 +43,6 @@
 
 namespace can_cooperation {
 
-using namespace json_keys;
-
 using functional_modules::ProcessResult;
 using functional_modules::GenericModule;
 using functional_modules::PluginInfo;
@@ -169,7 +167,6 @@ void CANModule::Handle(const MessageFromCAN can_msg) {
 
 functional_modules::ProcessResult CANModule::HandleMessage(
   application_manager::MessagePtr msg) {
-
   LOG4CXX_INFO(logger_, "CANModule::HandleMessage");
 
   Json::Value value;
@@ -179,30 +176,34 @@ functional_modules::ProcessResult CANModule::HandleMessage(
   std::string function_name;
 
   // Request or notification
-  if (value.isMember(kMethod)) {
-    function_name = value[kMethod].asCString();
+  if (value.isMember(json_keys::kMethod)) {
+    function_name = value[json_keys::kMethod].asCString();
 
-    if (value.isMember(kId)) {
+    if (value.isMember(json_keys::kId)) {
       msg->set_message_type(application_manager::MessageType::kRequest);
     } else {
       msg->set_message_type(application_manager::MessageType::kNotification);
     }
     // Response
-  } else if (value.isMember(kResult) && value[kResult].isMember(kMethod)) {
-    function_name = value[kResult][kMethod].asCString();
+  } else if (value.isMember(json_keys::kResult)
+      && value[json_keys::kResult].isMember(json_keys::kMethod)) {
+    function_name = value[json_keys::kResult][json_keys::kMethod].asCString();
     msg->set_message_type(application_manager::MessageType::kResponse);
     // Error response
-  } else if (value.isMember(kError) && value[kError].isMember(kData)
-             && value[kError][kData].isMember(kMethod)) {
-    function_name = value[kError][kData][kMethod].asCString();
+  } else if (value.isMember(json_keys::kError)
+      && value[json_keys::kError].isMember(json_keys::kData)
+             && value[json_keys::kError][json_keys::kData]
+                                         .isMember(json_keys::kMethod)) {
+    function_name = value[json_keys::kError][json_keys::kData]
+                                            [json_keys::kMethod].asCString();
     msg->set_message_type(application_manager::MessageType::kErrorResponse);
   } else {
     DCHECK(false);
     return ProcessResult::FAILED;
   }
 
-  if (value.isMember(kId)) {
-    msg->set_correlation_id(value[kId].asInt());
+  if (value.isMember(json_keys::kId)) {
+    msg->set_correlation_id(value[json_keys::kId].asInt());
   } else if (application_manager::MessageType::kNotification != msg->type()) {
     DCHECK(false);
     return ProcessResult::FAILED;
@@ -234,7 +235,8 @@ functional_modules::ProcessResult CANModule::HandleMessage(
             PolicyHelper::OnRSDLFunctionalityAllowing(
               value[json_keys::kParams][message_params::kAllowed].asBool());
           } else {
-            LOG4CXX_ERROR(logger_, "Invalid OnReverseAppsAllowing notification");
+            LOG4CXX_ERROR(logger_,
+                          "Invalid OnReverseAppsAllowing notification");
           }
         }
         break;
@@ -254,8 +256,10 @@ functional_modules::ProcessResult CANModule::HandleMessage(
         break;
       }
 
-      msg->set_function_name(MessageHelper::GetMobileAPIName(
-          static_cast<functional_modules::MobileFunctionID>(msg->function_id())));
+      int32_t func_id = msg->function_id();
+      std::string func_name = MessageHelper::GetMobileAPIName(
+          static_cast<functional_modules::MobileFunctionID>(func_id));
+      msg->set_function_name(func_name);
 
       NotifyMobiles(msg);
       break;

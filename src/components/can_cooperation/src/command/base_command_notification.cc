@@ -39,8 +39,6 @@ namespace can_cooperation {
 
 namespace commands {
 
-using namespace json_keys;
-
 CREATE_LOGGERPTR_GLOBAL(logger_, "CANCooperation")
 
 BaseCommandNotification::BaseCommandNotification(
@@ -51,9 +49,9 @@ BaseCommandNotification::BaseCommandNotification(
   Json::Value value;
   Json::Reader reader;
   reader.parse(message_->json_message(), value);
-  if (value.isMember(kParams)) {
+  if (value.isMember(json_keys::kParams)) {
     Json::FastWriter writer;
-    message_->set_json_message(writer.write(value[kParams]));
+    message_->set_json_message(writer.write(value[json_keys::kParams]));
   } else {
     message_->set_json_message("");
   }
@@ -91,8 +89,8 @@ void BaseCommandNotification::Run() {
 
 void BaseCommandNotification::NotifyApplications() {
   typedef std::vector<application_manager::ApplicationSharedPtr> AppList;
-   AppList applications =
-          service_->GetApplications(CANModule::instance()->GetModuleID());
+  AppList applications =
+      service_->GetApplications(CANModule::instance()->GetModuleID());
   for (AppList::iterator i = applications.begin();
       i != applications.end(); ++i) {
     application_manager::MessagePtr message(
