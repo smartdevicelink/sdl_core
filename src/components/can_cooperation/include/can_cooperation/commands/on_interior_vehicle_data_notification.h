@@ -30,32 +30,40 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "can_cooperation/commands/on_control_changed_notification.h"
-#include "can_cooperation/can_module.h"
-#include "can_cooperation/can_app_extension.h"
-#include "functional_module/function_ids.h"
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_H_
+
+#include "can_cooperation/commands/base_command_notification.h"
 
 namespace can_cooperation {
 
 namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "OnControlChangedNotification")
+/**
+ * @brief OnInteriorVehicleDataNotification command class
+ */
+class OnInteriorVehicleDataNotification : public BaseCommandNotification {
+ public:
+  /**
+   * @brief OnInteriorVehicleDataNotification class constructor
+   *
+   * @param message Message with notification
+   **/
+  explicit OnInteriorVehicleDataNotification(const application_manager::MessagePtr& message);
 
-OnControlChangedNotification::OnControlChangedNotification(
-  const application_manager::MessagePtr& message)
-  : BaseCommandNotification(message) {
-}
+  /**
+   * @brief Execute command
+   */
+  virtual void Execute();
 
-OnControlChangedNotification::~OnControlChangedNotification() {
-}
-
-void OnControlChangedNotification::Execute() {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  // TODO(KKolodiy): need to remove next line after implementing CoreService
-  CANModule::instance()->SetScanStarted(false);
-}
+  /**
+   * @brief OnInteriorVehicleDataNotification class destructor
+   */
+  virtual ~OnInteriorVehicleDataNotification();
+};
 
 }  // namespace commands
 
 }  // namespace can_cooperation
+
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_H_

@@ -30,49 +30,59 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_CANCEL_ACCESS_REQUEST_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_CANCEL_ACCESS_REQUEST_H_
-
-#include "can_cooperation/commands/base_command_request.h"
-#include "can_cooperation/event_engine/event.h"
+#include "can_cooperation/commands/get_interior_vehicle_data_capabilities_request.h"
+#include "functional_module/function_ids.h"
+#include "json/json.h"
 
 namespace can_cooperation {
 
 namespace commands {
 
-/**
- * @brief CancelAccessRequest command class
- */
-class CancelAccessRequest : public BaseCommandRequest {
- public:
-  /**
-   * @brief CancelAccessRequest class constructor
-   *
-   * @param message Message from mobile
-   **/
-  explicit CancelAccessRequest(const application_manager::MessagePtr& message);
+CREATE_LOGGERPTR_GLOBAL(logger_, "GetInteriorVehicleDataCapabiliesRequest")
 
-  /**
-   * @brief Execute command
-   */
-  virtual void Execute();
+GetInteriorVehicleDataCapabiliesRequest::GetInteriorVehicleDataCapabiliesRequest(
+  const application_manager::MessagePtr& message)
+  : BaseCommandRequest(message) {
+}
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
-  void OnEvent(const event_engine::Event<application_manager::MessagePtr,
-                std::string>& event);
+GetInteriorVehicleDataCapabiliesRequest::~GetInteriorVehicleDataCapabiliesRequest() {
+}
 
-  /**
-   * @brief AddCommandRequest class destructor
-   */
-  virtual ~CancelAccessRequest();
-};
+void GetInteriorVehicleDataCapabiliesRequest::Execute() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  Json::Value params;
+
+  Json::Reader reader;
+  reader.parse(message_->json_message(), params);
+
+  SendRequest(
+      functional_modules::hmi_api::get_interior_vehicle_data_capabilities,
+      params, true);
+}
+
+void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
+    const event_engine::Event<application_manager::MessagePtr,
+    std::string>& event) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (functional_modules::hmi_api::get_interior_vehicle_data_capabilities ==
+      event.id()) {
+    std::string result_code;
+    std::string info;
+
+    Json::Value value;
+    Json::Reader reader;
+    reader.parse(event.event_message()->json_message(), value);
+
+    bool success = ParseResultCode(value, result_code, info);
+
+    SendResponse(success, result_code.c_str(), info);
+  } else {
+    LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
+  }
+}
 
 }  // namespace commands
 
 }  // namespace can_cooperation
-
-#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_CANCEL_ACCESS_REQUEST_H_

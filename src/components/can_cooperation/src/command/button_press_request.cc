@@ -30,40 +30,56 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_ON_CONTROL_CHANGED_NOTIFICATION_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_ON_CONTROL_CHANGED_NOTIFICATION_H_
-
-#include "can_cooperation/commands/base_command_notification.h"
+#include "can_cooperation/commands/button_press_request.h"
+#include "functional_module/function_ids.h"
+#include "json/json.h"
 
 namespace can_cooperation {
 
 namespace commands {
 
-/**
- * @brief OnControlChangedNotification command class
- */
-class OnControlChangedNotification : public BaseCommandNotification {
- public:
-  /**
-   * @brief OnControlChangedNotification class constructor
-   *
-   * @param message Message with notification
-   **/
-  explicit OnControlChangedNotification(const application_manager::MessagePtr& message);
+CREATE_LOGGERPTR_GLOBAL(logger_, "ButtonPressRequest")
 
-  /**
-   * @brief Execute command
-   */
-  virtual void Execute();
+ButtonPressRequest::ButtonPressRequest(
+  const application_manager::MessagePtr& message)
+  : BaseCommandRequest(message) {
+}
 
-  /**
-   * @brief OnControlChangedNotification class destructor
-   */
-  virtual ~OnControlChangedNotification();
-};
+ButtonPressRequest::~ButtonPressRequest() {
+}
+
+void ButtonPressRequest::Execute() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  Json::Value params;
+
+  Json::Reader reader;
+  reader.parse(message_->json_message(), params);
+
+  SendRequest(functional_modules::hmi_api::button_press, params, true);
+}
+
+void ButtonPressRequest::OnEvent(
+    const event_engine::Event<application_manager::MessagePtr,
+    std::string>& event) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (functional_modules::hmi_api::button_press == event.id()) {
+    std::string result_code;
+    std::string info;
+
+    Json::Value value;
+    Json::Reader reader;
+    reader.parse(event.event_message()->json_message(), value);
+
+    bool success = ParseResultCode(value, result_code, info);
+
+    SendResponse(success, result_code.c_str(), info);
+  } else {
+    LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
+  }
+}
 
 }  // namespace commands
 
 }  // namespace can_cooperation
-
-#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_ON_CONTROL_CHANGED_NOTIFICATION_H_

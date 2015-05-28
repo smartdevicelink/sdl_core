@@ -39,26 +39,33 @@ namespace functional_modules {
 enum MobileFunctionID {
   // Reverse SDL functions ids
   GRANT_ACCESS = 100001,
-  CANCEL_ACCESS = 100002,
   START_SCAN = 100003,
   STOP_SCAN = 100004,
   TUNE_RADIO = 100005,
   TUNE_UP = 100006,
   TUNE_DOWN = 100007,
-  ON_CONTROL_CHANGED = 100008,
   ON_RADIO_DETAILS = 100009,
   ON_PRESETS_CHANGED = 100010,
   CLIMATE_CONTROL_ON = 100011,
-  GET_SEAT_CONTROL = 100012
-  /////////////////////////////
+  GET_SEAT_CONTROL = 100012,
+  BUTTON_PRESS = 100015,
+  GET_INTERIOR_VEHICLE_DATA_CAPABILITIES = 100016,
+  GET_INTERIOR_VEHICLE_DATA = 100017,
+  SET_INTERIOR_VEHICLE_DATA = 100018,
+  ON_INTERIOR_VEHICLE_DATA = 100019
 };
 
 namespace hmi_api {
-  const char grant_access[]             = "VehicleInfo.GrantAccess";
-  const char cancel_access[]            = "VehicleInfo.CancelAccess";
-  const char on_control_changed[]       = "VehicleInfo.OnControlChanged";
-  const char on_reverse_apps_allowing[] = "VehicleInfo.OnReverseAppsAllowing";
-  const char on_primary_device[]        = "VehicleInfo.OnPrimaryDevice";
+  const char get_interior_vehicle_data_capabilities[] =
+      "VehicleInfo.GetInteriorVehicleDataCapabilities";
+  const char get_interior_vehicle_data[] = "VehicleInfo.GetInteriorVehicleData";
+  const char set_interior_vehicle_data[] = "VehicleInfo.SetInteriorVehicleData";
+  const char on_interior_vehicle_data[]  = "VehicleInfo.OnInteriorVehicleData";
+  const char button_press[]              = "VehicleInfo.ButtonPress";
+
+  const char grant_access[]              = "VehicleInfo.GrantAccess";
+  const char on_reverse_apps_allowing[]  = "VehicleInfo.OnReverseAppsAllowing";
+  const char on_primary_device[]         = "VehicleInfo.OnPrimaryDevice";
 }
 
 namespace can_api {
