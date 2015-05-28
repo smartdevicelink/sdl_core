@@ -60,7 +60,6 @@ StateController::StateController():EventObserver() {
 
 void StateController::SetRegularState(ApplicationSharedPtr app,
                                       const mobile_apis::AudioStreamingState::eType audio_state) {
-  DCHECK_OR_RETURN_VOID(app);
   HmiStatePtr prev_state = app->RegularHmiState();
   DCHECK_OR_RETURN_VOID(prev_state);
   HmiStatePtr hmi_state = CreateHmiState(app->app_id(),
