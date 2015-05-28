@@ -30,8 +30,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "can_cooperation/commands/grant_access_request.h"
-#include "can_cooperation/can_module_constants.h"
+#include "can_cooperation/commands/set_interior_vehicle_data_request.h"
 #include "functional_module/function_ids.h"
 #include "json/json.h"
 
@@ -39,27 +38,47 @@ namespace can_cooperation {
 
 namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "GrantAccessRequest")
+CREATE_LOGGERPTR_GLOBAL(logger_, "SetInteriorVehicleDataRequest")
 
-GrantAccessRequest::GrantAccessRequest(
+SetInteriorVehicleDataRequest::SetInteriorVehicleDataRequest(
   const application_manager::MessagePtr& message)
   : BaseCommandRequest(message) {
 }
 
-GrantAccessRequest::~GrantAccessRequest() {
+SetInteriorVehicleDataRequest::~SetInteriorVehicleDataRequest() {
 }
 
-void GrantAccessRequest::Execute() {
+void SetInteriorVehicleDataRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
-  // TODO(KKolodiy): to backward compatibility the current mobile application
-  SendResponse(true, result_codes::kSuccess, "Allowed");
+
+  Json::Value params;
+
+  Json::Reader reader;
+  reader.parse(message_->json_message(), params);
+
+  SendRequest(
+      functional_modules::hmi_api::set_interior_vehicle_data, params, true);
 }
 
-void GrantAccessRequest::OnEvent(
+void SetInteriorVehicleDataRequest::OnEvent(
     const event_engine::Event<application_manager::MessagePtr,
     std::string>& event) {
-  // TODO(KKolodiy): this is virtual method so it should be implemented
-  // this method do nothing to backward compatibility the current mobile application
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (functional_modules::hmi_api::set_interior_vehicle_data == event.id()) {
+    std::string result_code;
+    std::string info;
+
+    Json::Value value;
+    Json::Reader reader;
+    reader.parse(event.event_message()->json_message(), value);
+
+    bool success = ParseResultCode(value, result_code, info);
+
+    SendResponse(success, result_code.c_str(), info);
+  } else {
+    LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
+  }
 }
 
 }  // namespace commands

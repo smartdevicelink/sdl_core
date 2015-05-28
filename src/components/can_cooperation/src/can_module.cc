@@ -71,8 +71,6 @@ void CANModule::SubscribeOnFunctions() {
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::TUNE_RADIO);
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::TUNE_UP);
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::TUNE_DOWN);
-  plugin_info_.mobile_function_list.push_back(MobileFunctionID::GRANT_ACCESS);
-  plugin_info_.mobile_function_list.push_back(MobileFunctionID::CANCEL_ACCESS);
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::START_SCAN);
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::STOP_SCAN);
   plugin_info_.mobile_function_list.push_back(
@@ -80,15 +78,27 @@ void CANModule::SubscribeOnFunctions() {
   plugin_info_.mobile_function_list.push_back(
     MobileFunctionID::CLIMATE_CONTROL_ON);
   plugin_info_.mobile_function_list.push_back(
-    MobileFunctionID::ON_CONTROL_CHANGED);
-  plugin_info_.mobile_function_list.push_back(
     MobileFunctionID::ON_RADIO_DETAILS);
   plugin_info_.mobile_function_list.push_back(
     MobileFunctionID::ON_PRESETS_CHANGED);
+  plugin_info_.mobile_function_list.push_back(MobileFunctionID::BUTTON_PRESS);
+  plugin_info_.mobile_function_list.push_back(
+      MobileFunctionID::GET_INTERIOR_VEHICLE_DATA_CAPABILITIES);
+  plugin_info_.mobile_function_list.push_back(
+      MobileFunctionID::GET_INTERIOR_VEHICLE_DATA);
+  plugin_info_.mobile_function_list.push_back(
+      MobileFunctionID::SET_INTERIOR_VEHICLE_DATA);
+  plugin_info_.mobile_function_list.push_back(
+      MobileFunctionID::ON_INTERIOR_VEHICLE_DATA);
+
+  plugin_info_.hmi_function_list.push_back(
+      hmi_api::get_interior_vehicle_data_capabilities);
+  plugin_info_.hmi_function_list.push_back(hmi_api::get_interior_vehicle_data);
+  plugin_info_.hmi_function_list.push_back(hmi_api::set_interior_vehicle_data);
+  plugin_info_.hmi_function_list.push_back(hmi_api::on_interior_vehicle_data);
+  plugin_info_.hmi_function_list.push_back(hmi_api::button_press);
 
   plugin_info_.hmi_function_list.push_back(hmi_api::grant_access);
-  plugin_info_.hmi_function_list.push_back(hmi_api::cancel_access);
-  plugin_info_.hmi_function_list.push_back(hmi_api::on_control_changed);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_reverse_apps_allowing);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_primary_device);
 }
@@ -221,9 +231,9 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     case application_manager::MessageType::kNotification: {
       if (functional_modules::can_api::on_preset_changed == function_name) {
         msg->set_function_id(MobileFunctionID::ON_PRESETS_CHANGED);
-      } else if (functional_modules::hmi_api::on_control_changed
+      } else if (functional_modules::hmi_api::on_interior_vehicle_data
                  == function_name) {
-        msg->set_function_id(MobileFunctionID::ON_CONTROL_CHANGED);
+        msg->set_function_id(MobileFunctionID::ON_INTERIOR_VEHICLE_DATA);
       } else if (functional_modules::can_api::on_radio_details
                  == function_name) {
         msg->set_function_id(MobileFunctionID::ON_RADIO_DETAILS);

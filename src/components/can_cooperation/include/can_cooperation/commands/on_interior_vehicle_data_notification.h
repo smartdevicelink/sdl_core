@@ -30,27 +30,26 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_CANCEL_ACCESS_REQUEST_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_CANCEL_ACCESS_REQUEST_H_
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_H_
 
-#include "can_cooperation/commands/base_command_request.h"
-#include "can_cooperation/event_engine/event.h"
+#include "can_cooperation/commands/base_command_notification.h"
 
 namespace can_cooperation {
 
 namespace commands {
 
 /**
- * @brief CancelAccessRequest command class
+ * @brief OnInteriorVehicleDataNotification command class
  */
-class CancelAccessRequest : public BaseCommandRequest {
+class OnInteriorVehicleDataNotification : public BaseCommandNotification {
  public:
   /**
-   * @brief CancelAccessRequest class constructor
+   * @brief OnInteriorVehicleDataNotification class constructor
    *
-   * @param message Message from mobile
+   * @param message Message with notification
    **/
-  explicit CancelAccessRequest(const application_manager::MessagePtr& message);
+  explicit OnInteriorVehicleDataNotification(const application_manager::MessagePtr& message);
 
   /**
    * @brief Execute command
@@ -58,21 +57,13 @@ class CancelAccessRequest : public BaseCommandRequest {
   virtual void Execute();
 
   /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
+   * @brief OnInteriorVehicleDataNotification class destructor
    */
-  void OnEvent(const event_engine::Event<application_manager::MessagePtr,
-                std::string>& event);
-
-  /**
-   * @brief AddCommandRequest class destructor
-   */
-  virtual ~CancelAccessRequest();
+  virtual ~OnInteriorVehicleDataNotification();
 };
 
 }  // namespace commands
 
 }  // namespace can_cooperation
 
-#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_CANCEL_ACCESS_REQUEST_H_
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_H_

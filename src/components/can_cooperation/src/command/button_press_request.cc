@@ -30,31 +30,54 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "can_cooperation/commands/on_control_changed_notification.h"
-#include "can_cooperation/can_module.h"
-#include "can_cooperation/can_app_extension.h"
+#include "can_cooperation/commands/button_press_request.h"
 #include "functional_module/function_ids.h"
+#include "json/json.h"
 
 namespace can_cooperation {
 
 namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "OnControlChangedNotification")
+CREATE_LOGGERPTR_GLOBAL(logger_, "ButtonPressRequest")
 
-OnControlChangedNotification::OnControlChangedNotification(
+ButtonPressRequest::ButtonPressRequest(
   const application_manager::MessagePtr& message)
-  : BaseCommandNotification(message) {
-  set_need_reset(true);
+  : BaseCommandRequest(message) {
 }
 
-OnControlChangedNotification::~OnControlChangedNotification() {
+ButtonPressRequest::~ButtonPressRequest() {
 }
 
-void OnControlChangedNotification::Execute() {
+void ButtonPressRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  // TODO(KKolodiy): need to remove next line after implementing CoreService
-  CANModule::instance()->SetScanStarted(false);
+  Json::Value params;
+
+  Json::Reader reader;
+  reader.parse(message_->json_message(), params);
+
+  SendRequest(functional_modules::hmi_api::button_press, params, true);
+}
+
+void ButtonPressRequest::OnEvent(
+    const event_engine::Event<application_manager::MessagePtr,
+    std::string>& event) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (functional_modules::hmi_api::button_press == event.id()) {
+    std::string result_code;
+    std::string info;
+
+    Json::Value value;
+    Json::Reader reader;
+    reader.parse(event.event_message()->json_message(), value);
+
+    bool success = ParseResultCode(value, result_code, info);
+
+    SendResponse(success, result_code.c_str(), info);
+  } else {
+    LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
+  }
 }
 
 }  // namespace commands

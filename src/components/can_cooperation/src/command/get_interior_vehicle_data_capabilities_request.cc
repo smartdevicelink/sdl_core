@@ -30,9 +30,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "can_cooperation/commands/cancel_access_request.h"
-#include "can_cooperation/can_module_constants.h"
-#include "can_cooperation/can_module.h"
+#include "can_cooperation/commands/get_interior_vehicle_data_capabilities_request.h"
 #include "functional_module/function_ids.h"
 #include "json/json.h"
 
@@ -40,28 +38,36 @@ namespace can_cooperation {
 
 namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "CancelAccessRequest")
+CREATE_LOGGERPTR_GLOBAL(logger_, "GetInteriorVehicleDataCapabiliesRequest")
 
-CancelAccessRequest::CancelAccessRequest(
+GetInteriorVehicleDataCapabiliesRequest::GetInteriorVehicleDataCapabiliesRequest(
   const application_manager::MessagePtr& message)
   : BaseCommandRequest(message) {
 }
 
-CancelAccessRequest::~CancelAccessRequest() {
+GetInteriorVehicleDataCapabiliesRequest::~GetInteriorVehicleDataCapabiliesRequest() {
 }
 
-void CancelAccessRequest::Execute() {
+void GetInteriorVehicleDataCapabiliesRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  SendRequest(functional_modules::hmi_api::cancel_access, Json::Value(), true);
+  Json::Value params;
+
+  Json::Reader reader;
+  reader.parse(message_->json_message(), params);
+
+  SendRequest(
+      functional_modules::hmi_api::get_interior_vehicle_data_capabilities,
+      params, true);
 }
 
-void CancelAccessRequest::OnEvent(
+void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
     const event_engine::Event<application_manager::MessagePtr,
     std::string>& event) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (functional_modules::hmi_api::cancel_access == event.id()) {
+  if (functional_modules::hmi_api::get_interior_vehicle_data_capabilities ==
+      event.id()) {
     std::string result_code;
     std::string info;
 
@@ -70,13 +76,6 @@ void CancelAccessRequest::OnEvent(
     reader.parse(event.event_message()->json_message(), value);
 
     bool success = ParseResultCode(value, result_code, info);
-
-    if (success) {
-      CANAppExtensionPtr extension = GetAppExtension(app());
-      extension->GiveControl(false);
-      service_->ResetAccess(app()->app_id());
-      CANModule::instance()->SetScanStarted(false);
-    }
 
     SendResponse(success, result_code.c_str(), info);
   } else {
