@@ -58,7 +58,7 @@ ResetGlobalPropertiesRequest::~ResetGlobalPropertiesRequest() {
 }
 
 void ResetGlobalPropertiesRequest::Run() {
-  LOG4CXX_INFO(logger_, "ResetGlobalPropertiesRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   uint32_t app_id = (*message_)[strings::params][strings::connection_key].asUInt();
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
@@ -125,7 +125,7 @@ void ResetGlobalPropertiesRequest::Run() {
         smart_objects::SmartType_Map);
 
     if (vr_help_title_items) {
-      smart_objects::SmartObject* vr_help = MessageHelper::CreateAppVrHelp(app);
+      smart_objects::SmartObjectSPtr vr_help = MessageHelper::CreateAppVrHelp(app);
       if (!vr_help) {
         return;
       }
@@ -236,7 +236,7 @@ bool ResetGlobalPropertiesRequest::ResetVrHelpTitleItems(
 }
 
 void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "ResetGlobalPropertiesRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {

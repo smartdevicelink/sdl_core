@@ -39,6 +39,8 @@
 #include <memory>
 #include <string>
 
+#include "utils/lock.h"
+#include "utils/rwlock.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/transport_adapter/connection.h"
@@ -97,6 +99,12 @@ class TransportAdapterImpl : public TransportAdapter,
    * @return Error information about possible reason of failure.
    **/
   virtual TransportAdapter::Error Init();
+
+  /**
+   * @brief Stops device adapter
+   * Called from transport manager to stop device adapter
+   */
+  virtual void Terminate();
 
   /**
    * @brief Add listener to the container(list) of device adapter listeners.
@@ -264,7 +272,7 @@ class TransportAdapterImpl : public TransportAdapter,
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
    */
-  virtual void ConnectionCreated(Connection* connection,
+  virtual void ConnectionCreated(ConnectionSPtr connection,
                                  const DeviceUID& device_handle,
                                  const ApplicationHandle& app_handle);
 
@@ -405,9 +413,7 @@ class TransportAdapterImpl : public TransportAdapter,
   virtual TMMetricObserver* GetTimeMetricObserver();
 #endif  // TIME_TESTER
 
-
  protected:
-
   /**
    * @brief Store adapter state where applicable
    */
@@ -425,6 +431,13 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual bool ToBeAutoConnected(DeviceSptr device) const;
 
+
+  /**
+   * @brief Returns true if \a device is to be disconnected automatically when
+   * all applications will be closed
+   */
+  virtual bool ToBeAutoDisconnected(DeviceSptr device) const;
+
   /**
    * @brief Find connection that has state - ESTABLISHED.
    *
@@ -433,7 +446,7 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @return pointer to the connection.
    */
-  Connection* FindEstablishedConnection(const DeviceUID& device_handle,
+  ConnectionSPtr FindEstablishedConnection(const DeviceUID& device_handle,
                                            const ApplicationHandle& app_handle) const;
 
  private:
@@ -451,6 +464,15 @@ class TransportAdapterImpl : public TransportAdapter,
   void RemoveDevice(const DeviceUID& device_handle);
 
   /**
+   * Checks whether application is single active on device
+   * @param device_uid
+   * @param app_uid
+   * @return true if this application is the single application on device
+   */
+  bool IsSingleApplication(const DeviceUID& device_uid,
+                           const ApplicationHandle& app_uid);
+
+  /**
    * @brief Listener for device adapter notifications.
    **/
   TransportAdapterListenerList listeners_;
@@ -464,7 +486,7 @@ class TransportAdapterImpl : public TransportAdapter,
    * @brief Structure that holds information about connection.
    */
   struct ConnectionInfo {
-    Connection* connection;
+    ConnectionSPtr connection;
     DeviceUID device_id;
     ApplicationHandle app_handle;
     enum {
@@ -493,7 +515,7 @@ class TransportAdapterImpl : public TransportAdapter,
   /**
    * @brief Mutex restricting access to device map.
    **/
-  mutable pthread_mutex_t devices_mutex_;
+  mutable sync_primitives::Lock devices_mutex_;
 
   /**
    * @brief Container(map) of connections.
@@ -503,9 +525,16 @@ class TransportAdapterImpl : public TransportAdapter,
   /**
    * @brief Mutex restricting access to connections map.
    **/
-  mutable pthread_mutex_t connections_mutex_;
+  mutable sync_primitives::RWLock connections_lock_;
 
  protected:
+#ifdef TIME_TESTER
+  /**
+   * @brief Pointer to time metric observer
+   */
+  TMMetricObserver* metric_observer_;
+#endif  // TIME_TESTER
+
   /**
    * @brief Pointer to the device scanner.
    */
@@ -520,14 +549,8 @@ class TransportAdapterImpl : public TransportAdapter,
    * @brief Pointer to the factory of connections initiated from client.
    */
   ClientConnectionListener* client_connection_listener_;
-
-#ifdef TIME_TESTER
-  /**
-   * @brief Pointer to time metric observer
-   */
-  TMMetricObserver* metric_observer_;
-#endif  // TIME_TESTER
 };
+
 }  // namespace transport_adapter
 }  // namespace transport_manager
 

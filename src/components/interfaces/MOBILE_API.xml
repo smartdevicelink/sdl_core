@@ -76,7 +76,7 @@
     </element>
     <element name="APPLICATION_NOT_REGISTERED">
       <description>An command can not be executed because no application has been registered with RegisterApplication.</description>
-    </element>
+    </element>	
     <element name="WRONG_LANGUAGE">
       <description>
       	The requested language is currently not supported.
@@ -122,7 +122,7 @@
     </element>
     <element name="SAVED">
       <description>The RPC (e.g. Slider) executed successfully and the user elected to save the current position / value.</description>
-    </element>
+    </element>           
     <element name="INVALID_CERT">
       <description>The certificate provided during authentication is invalid.</description>
     </element>
@@ -296,7 +296,7 @@
     <element name="KEYBOARD" />
     <description>
     	This mode causes the interaction to immediately display a keyboard entry through the HMI.
-    </description>
+    </description>    
   </enum>
 
   <enum name="HMILevel">
@@ -404,7 +404,7 @@
     <element name="INITIAL_JINGLE" />
     <element name="LISTEN_JINGLE" />
     <element name="POSITIVE_JINGLE" />
-    <element name="NEGATIVE_JINGLE" />
+    <element name="NEGATIVE_JINGLE" />    
   </enum>
 
   <enum name="SamplingRate">
@@ -559,6 +559,7 @@
     <element name="MFD3" />
     <element name="MFD4" />
     <element name="MFD5" />
+    <element name="GEN3_8-INCH" internal_name="GEN3_8_INCH" />
   </enum>
 
   <enum name="TextFieldName">
@@ -661,13 +662,29 @@
     <element name="timeToDestination">
     	<description> Time to destination</description>
     </element>
-
+    
     <element name="navigationText">
        <description>Navigation text for UpdateTurnList.</description>
     </element>
 
     <element name="notificationText">
       <description> Footer text for slider</description>
+    </element>
+
+    <element name="locationName">
+      <description> Optional name / title of intended location for SendLocation.</description>
+    </element>
+
+    <element name="locationDescription">
+      <description> Optional description of intended location / establishment (if applicable) for SendLocation.</description>
+    </element>
+
+    <element name="addressLines">
+      <description> Optional location address (if applicable) for SendLocation.</description>
+    </element>
+
+    <element name="phoneNumber">
+      <description> Optional hone number of intended location / establishment (if applicable) for SendLocation.</description>
     </element>
 
     <element name="turnText">
@@ -720,7 +737,7 @@
     <element name="showConstantTBTNextTurnIcon">
       <description>The secondary image field for ShowConstantTBT</description>
     </element>
-
+    
     <element name="locationImage">
       <description>The optional image of a destination / location</description>
     </element>
@@ -901,7 +918,7 @@
   </enum>
 
   <struct name="Image">
-    <param name="value" minlength="0" maxlength="65535" type="String">
+    <param name="value" minlength="0" maxlength="65535" type="String"> 
       <description>Either the static hex icon value or the binary image file name identifier (sent by PutFile).</description>
     </param>
     <param name="imageType" type="ImageType">
@@ -989,7 +1006,7 @@
     </element>
     <element name="MENUNAME">
     	<description>The property in-app menu name of setGlobalProperties</description>
-    </element>
+    </element>     
     <element name="MENUICON">
     	<description>The property in-app menu icon of setGlobalProperties</description>
     </element>
@@ -1069,7 +1086,7 @@
     <element name="UNKNOWN">
     </element>
     <element name="FAULT">
-    </element>
+    </element>    
   </enum>
 
   <enum name="ComponentVolumeStatus">
@@ -1478,16 +1495,16 @@
 
   <enum name="FileType">
     <description>Enumeration listing possible file types.</description>
-    <element name="GRAPHIC_BMP" />
-    <element name="GRAPHIC_JPEG" />
+    <element name="GRAPHIC_BMP" />   
+    <element name="GRAPHIC_JPEG" />   
     <element name="GRAPHIC_PNG" />
-    <element name="AUDIO_WAVE" />
+    <element name="AUDIO_WAVE" />   
     <element name="AUDIO_MP3" />
     <element name="AUDIO_AAC" />
     <element name="BINARY" />
     <element name="JSON" />
   </enum>
-
+  
   <enum name="PowerModeQualificationStatus">
     <description>Reflects the status of the current power mode qualification.</description>
     <element name="POWER_MODE_UNDEFINED">
@@ -1829,7 +1846,7 @@
 		</param>
 		<param name="yCoord" type="Integer" mandatory="true">
 		</param>
-  </struct>
+  </struct> 
 
   <struct name="TouchArea">
 		<param name="rotationAngle" type="Float" mandatory="false" minvalue="0" maxvalue="360">
@@ -1850,10 +1867,10 @@
    <struct name="ScreenParams">
     <param name="resolution" type="ImageResolution" mandatory="true">
        <description>The resolution of the prescribed screen area.</description>
-    </param>
+    </param>    
     <param name="touchEventAvailable" type="TouchEventCapabilities" mandatory="false">
-       <description>Types of screen touch events available in screen area.</description>
-    </param>
+       <description>Types of screen touch events available in screen area.</description>    
+    </param>    
    </struct>
 
   <enum name="PermissionStatus">
@@ -2034,12 +2051,12 @@
       <description>Trim of the vehicle, e.g. SE</description>
     </param>
   </struct>
-
+  
   <enum name="KeyboardLayout">
     <description>Enumeration listing possible keyboard layouts.</description>
     <element name="QWERTY" />
     <element name="QWERTZ" />
-    <element name="AZERTY" />
+    <element name="AZERTY" />    
   </enum>
 
   <enum name="KeyboardEvent" platform="MobileNav">
@@ -2047,59 +2064,61 @@
     <element name="KEYPRESS" />
     <element name="ENTRY_SUBMITTED" />
     <element name="ENTRY_CANCELLED" />
-    <element name="ENTRY_ABORTED" />
+    <element name="ENTRY_ABORTED" />    
   </enum>
 
   <enum name="KeypressMode">
     <description>Enumeration listing possible keyboard events.</description>
     <element name="SINGLE_KEYPRESS">
-      <description>Each keypress is individually sent as the user presses the keyboard keys.</description>
+      <description>Each keypress is individually sent as the user presses the keyboard keys.</description>    
     </element>
     <element name="QUEUE_KEYPRESSES">
-      <description>The keypresses are queued and a string is eventually sent once the user chooses to submit their entry.</description>
+      <description>The keypresses are queued and a string is eventually sent once the user chooses to submit their entry.</description>    
     </element>
     <element name="RESEND_CURRENT_ENTRY">
-      <description>The keypresses are queue and a string is sent each time the user presses a keyboard key; the string contains the entire current entry.</description>
+      <description>The keypresses are queue and a string is sent each time the user presses a keyboard key; the string contains the entire current entry.</description>    
     </element>
   </enum>
-
+  
   <struct name="KeyboardProperties">
     <description>Configuration of on-screen keyboard (if available).</description>
 
     <param name="language" type="Language" mandatory="false">
       <description>The keyboard language.</description>
-    </param>
+    </param> 
 
     <param name="keyboardLayout" type="KeyboardLayout" mandatory="false" >
       <description>Desired keyboard layout.</description>
-    </param>
+    </param> 
 
     <param name="keypressMode" type="KeypressMode" mandatory="false" >
       <description>
       	Desired keypress mode.
       	If omitted, this value will be set to RESEND_CURRENT_ENTRY.
       </description>
-    </param>
+    </param> 
 
     <param name="limitedCharacterList" type="String" maxlength="1" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>Array of keyboard characters to enable.</description>
       <description>All omitted characters will be greyed out (disabled) on the keyboard.</description>
-      <description>If omitted, the entire keyboard will be enabled.</description>
+      <description>If omitted, the entire keyboard will be enabled.</description>      
     </param>
-
+    
     <param name="autoCompleteText" type="String" maxlength="1000" mandatory="false">
       <description>Allows an app to prepopulate the text field with a suggested or completed entry as the user types</description>
-    </param>
+    </param>   
   </struct>
 
  <enum name="RequestType">
     <description>Enumeration listing possible asynchronous requests.</description>
-    <element name="HTTP" />
+    <element name="HTTP" />   
     <element name="FILE_RESUME" />
-    <element name="AUTH_REQUEST" />
-    <element name="AUTH_CHALLENGE" />
+    <element name="AUTH_REQUEST" />       
+    <element name="AUTH_CHALLENGE" />       
     <element name="AUTH_ACK" />
     <element name="PROPRIETARY" />
+    <element name="QUERY_APPS" />
+    <element name="LAUNCH_APP" />
   </enum>
 
   <enum name="AppHMIType">
@@ -2160,9 +2179,9 @@
     <element name="ListFilesID" value="34" hexvalue="22" />
     <element name="SetAppIconID" value="35" hexvalue="23" />
     <element name="SetDisplayLayoutID" value="36" hexvalue="24" />
-    <element name="DiagnosticMessageID" value="37" hexvalue="25" />
-    <element name="SystemRequestID" value="38" hexvalue="26" />
-    <element name="SendLocationID" value="39" hexvalue="27" />
+    <element name="DiagnosticMessageID" value="37" hexvalue="25" />    
+    <element name="SystemRequestID" value="38" hexvalue="26" /> 
+    <element name="SendLocationID" value="39" hexvalue="27" />  
 
 
 
@@ -2183,7 +2202,7 @@
     <element name="OnAudioPassThruID" value="32777" hexvalue="8009" />
     <element name="OnLanguageChangeID" value="32778" hexvalue="800A" />
     <element name="OnKeyboardInputID" value="32779" hexvalue="800B" />
-    <element name="OnTouchEventID" value="32780" hexvalue="800C" />
+    <element name="OnTouchEventID" value="32780" hexvalue="800C" /> 
     <element name="OnSystemRequestID" value="32781" hexvalue="800D" />
     <element name="OnHashChangeID" value="32782" hexvalue="800E" />
 <!--
@@ -2191,7 +2210,7 @@
 	Range = 0x 0001 0000 - 0x 0001 7FFF
 -->
 
-
+    
 <!--
 	Ford Specific Notifications
 	Range = 0x 0001 8000 - 0x 0001 FFFF
@@ -2254,7 +2273,7 @@
     <param name="vrSynonyms" type="String" maxlength="40" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>
       	Defines an additional voice recognition command.
-	May not interfere with any app name of previously registered applications and any predefined blacklist of words
+	May not interfere with any app name of previously registered applications and any predefined blacklist of words 
 	(global commands)
       	Only characters from char set [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
       </description>
@@ -2291,7 +2310,7 @@
       <description>
         ID used to uniquely identify current state of all app data that can persist through connection cycles (e.g. ignition cycles).
         This registered data (commands, submenus, choice sets, etc.) can be reestablished without needing to explicitly reregister each piece.
-        If omitted, then the previous state of an app's commands, etc. will not be restored.
+        If omitted, then the previous state of an app's commands, etc. will not be restored. 
       </description>
     </param>
     <param name="deviceInfo" type="DeviceInfo" mandatory="false">
@@ -2325,7 +2344,7 @@
       <element name="WRONG_LANGUAGE"/>
       <element name="DISALLOWED"/>
       <element name="WARNINGS"/>
-      <element name="RESUME_FAILED"/>
+      <element name="RESUME_FAILED"/>         
     </param>
 
     <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
@@ -2385,7 +2404,7 @@
       <description>See PrerecordedSpeech</description>
     </param>
 
-    <param name="supportedDiagModes" type="Integer" minvalue="0" maxvalue="255" array="true" minsize="1" maxsize="100" mandatory="false">
+    <param name="supportedDiagModes" type="Integer" minvalue="0" maxvalue="255" array="true" minsize="1" maxsize="100" mandatory="false">   
       <description>
       	Specifies the white-list of supported diagnostic modes (0x00-0xFF) capable for DiagnosticMessage requests.
       	If a mode outside this list is requested, it will be rejected.
@@ -2462,14 +2481,14 @@
     <param name="menuTitle" maxlength="500" type="String" mandatory="false">
       <description>Optional text to label an app menu button (for certain touchscreen platforms).</description>
     </param>
-
+    
     <param name="menuIcon" type="Image" mandatory="false">
       <description>>Optional icon to draw on an app menu button (for certain touchscreen platforms).</description>
     </param>
-
+    
     <param name="keyboardProperties" type="KeyboardProperties" mandatory="false">
       <description>On-screen keybaord configuration (if available).</description>
-    </param>
+    </param>   
   </function>
 
   <function name="SetGlobalProperties" functionID="SetGlobalPropertiesID" messagetype="response">
@@ -2909,7 +2928,7 @@
       	If omitted, no tone is played.
       </description>
     </param>
-
+    
     <param name="progressIndicator" type="Boolean" mandatory="false" platform="MobileNav">
       <description>
       	If supported on the given platform, the alert GUI will include some sort of animation indicating that loading of a feature is progressing.  e.g. a spinning wheel or hourglass, etc.
@@ -3034,7 +3053,7 @@
        <description>
        	Image struct determining whether static or dynamic secondary image to display in app.
        	If omitted on supported displays, the displayed secondary graphic shall not change.
-       </description>
+       </description>       
      </param>
 
 
@@ -3391,7 +3410,7 @@
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
-    <param name="airbagStatus" type="Boolean" mandatory="false">
+    <param name="airbagStatus" type="Boolean" mandatory="false"> 
       <description>The status of the air bags</description>
     </param>
     <param name="emergencyEvent" type="Boolean" mandatory="false">
@@ -3992,8 +4011,8 @@
 
     <param name="success" type="Boolean" platform="documentation">
       <description> true, if successful; false, if failed </description>
-    </param>
-
+    </param>  
+       
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
       <element name="SUCCESS"/>
@@ -4001,11 +4020,11 @@
       <element name="OUT_OF_MEMORY"/>
       <element name="TOO_MANY_PENDING_REQUESTS"/>
       <element name="APPLICATION_NOT_REGISTERED"/>
-      <element name="GENERIC_ERROR"/>
-      <element name="REJECTED"/>
+      <element name="GENERIC_ERROR"/>    
+      <element name="REJECTED"/>  
       <element name="DISALLOWED"/>
       <element name="USER_DISALLOWED"/>
-      <element name="TRUNCATED_DATA"/>
+      <element name="TRUNCATED_DATA"/>         
     </param>
 
     <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
@@ -4027,7 +4046,7 @@
     </param>
     <param name="timeout" type="Integer" minvalue="1000" maxvalue="65535" defvalue="30000" mandatory="false">
       <description>App defined timeout.  Indicates how long of a timeout from the last action (i.e. scrolling message resets timeout).</description>
-    </param>
+    </param>   
     <param name="softButtons" type="SoftButton" minsize="0" maxsize="8" array="true" mandatory="false">
       <description>
       	App defined SoftButtons.
@@ -4087,7 +4106,7 @@
       	App defined timeout.  Indicates how long of a timeout from the last action (i.e. sliding control resets timeout).
       	If omitted, the value is set to 10000.
       </description>
-    </param>
+    </param>   
   </function>
 
   <function name="Slider" functionID="SliderID" messagetype="response">
@@ -4098,7 +4117,7 @@
     <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
       <element name="SUCCESS"/>
-      <element name="SAVED"/>
+      <element name="SAVED"/>        
       <element name="INVALID_DATA"/>
       <element name="OUT_OF_MEMORY"/>
       <element name="TOO_MANY_PENDING_REQUESTS"/>
@@ -4267,7 +4286,7 @@
     </param>
     <param name="vrSynonyms" type="String" maxlength="40" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>Request new VR synonyms registration</description>
-    </param>
+    </param>  
 
 </function>
 
@@ -4344,20 +4363,20 @@
       	If omitted, the value will be set to false.
       </description>
     </param>
-
+  
    <param name="systemFile" type="Boolean" defvalue="false" mandatory="false">
      <description>Indicates if the file is meant to be passed thru core to elsewhere on the system.
      If set to TRUE, then the system will instead pass the data thru as it arrives to a predetermined area 	 outside of core. If omitted, the value will be set to false.</description>
    </param>
-
+ 
   <param name="offset" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
-    <description>Optional offset in bytes for resuming partial data chunks</description>
+    <description>Optional offset in bytes for resuming partial data chunks</description> 
   </param>
-
+ 
   <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
-    <description>Optional length in bytes for resuming partial data chunks</description>
+    <description>Optional length in bytes for resuming partial data chunks</description> 
   </param>
-
+    
   </function>
 
   <function name="PutFile" functionID="PutFileID" messagetype="response">
@@ -4559,7 +4578,7 @@
       <element name="REJECTED"/>
       <element name="UNSUPPORTED_REQUEST"/>
     </param>
-
+ 
     <param name="displayCapabilities" type="DisplayCapabilities" mandatory="false">
       <description>See DisplayCapabilities</description>
     </param>
@@ -4575,7 +4594,7 @@
     <param name="presetBankCapabilities" type="PresetBankCapabilities" mandatory="false">
       <description>If returned, the platform supports custom on-screen Presets; see PresetBankCapabilities.</description >
     </param>
-
+   
     <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
       <description>Provides additional human readable info regarding the result.</description>
     </param>
@@ -4604,11 +4623,11 @@
         <element name="TOO_MANY_PENDING_REQUESTS"/>
         <element name="APPLICATION_NOT_REGISTERED"/>
         <element name="GENERIC_ERROR"/>
-        <element name="REJECTED"/>
-        <element name="INVALID_CERT"/>
-        <element name="EXPIRED_CERT"/>
+        <element name="REJECTED"/> 
+        <element name="INVALID_CERT"/> 
+        <element name="EXPIRED_CERT"/> 
      </param>
-  </function>
+  </function> 
 
   <function name="SendLocation" functionID="SendLocationID" messagetype="request">
      <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="true">
@@ -4618,27 +4637,27 @@
      <param name="locationName" type="String" maxlength="500" mandatory="false">
         <description>
            Name / title of intended location
-        </description>
+        </description>      
      </param>
      <param name="locationDescription" type="String" maxlength="500" mandatory="false">
         <description>
            Description intended location / establishment (if applicable)
-	</description>
+	</description>      
      </param>
      <param name="addressLines" type="String" maxlength="500" minsize="0" maxsize="4" array="true" mandatory="false">
 	<description>
 	   Location address (if applicable)
-	</description>
+	</description>      
      </param>
      <param name="phoneNumber" type="String" maxlength="500" mandatory="false">
         <description>
            Phone number of intended location / establishment (if applicable)
-	</description>
+	</description>      
      </param>
      <param name="locationImage" type="Image" mandatory="false">
         <description>
            Image / icon of intended location (if applicable and supported)
-	</description>
+	</description>      
      </param>
   </function>
 
@@ -4646,7 +4665,7 @@
      <param name="success" type="Boolean" platform="documentation">
         <description> true, if successful; false, if failed </description>
      </param>
-
+     
      <param name="resultCode" type="Result" platform="documentation">
       <description>See Result</description>
       <element name="SUCCESS"/>
@@ -4655,10 +4674,10 @@
       <element name="TOO_MANY_PENDING_REQUESTS"/>
       <element name="APPLICATION_NOT_REGISTERED"/>
       <element name="GENERIC_ERROR"/>
-      <element name="REJECTED"/>
-      <element name="UNSUPPORTED_RESOURCE"/>
-      <element name="DISALLOWED"/>
-     </param>
+      <element name="REJECTED"/> 
+      <element name="UNSUPPORTED_RESOURCE"/> 
+      <element name="DISALLOWED"/> 
+     </param> 
   </function>
 
 
@@ -4834,13 +4853,13 @@
   </function>
 
   <function name="OnKeyboardInput" functionID="OnKeyboardInputID" messagetype="notification" platform="MobileNav">
-
+   
     <description>On-screen keyboard event.</description>
     <description>Can be full string or individual keypresses depending on keyboard mode.</description>
-
+   
     <param name="event" type="KeyboardEvent" mandatory="true">
       <description>On-screen keyboard input data.</description>
-    </param>
+    </param>    
 
     <param name="data" type="String" maxlength="500" mandatory="false">
       <description>On-screen keyboard input data.</description>
@@ -4872,14 +4891,14 @@
       <description>Optional array of URL(s) for HTTP requests.
 				If blank, the binary data shall be forwarded to the app.
 	      If not blank, the binary data shall be forwarded to the url(s) with a provided timeout in seconds.
-			</description>
+			</description>	
     </param>
     <param name="timeout" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
       <description>
       	Optional timeout for HTTP requests
       	Required if a URL is provided
       </description>
-    </param>
+    </param>  	
     <param name="fileType" type="FileType" mandatory="false">
        <description>Optional file type (meant for HTTP file requests).</description>
     </param>
@@ -4889,7 +4908,12 @@
     <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
        <description>Optional length in bytes for resuming partial data chunks</description>
     </param>
-  </function>
+
+    <!--Parameters below are used only with requestType = LAUNCH_APP -->
+    <param name="appID" type="String" maxlength="100" mandatory="false" />
+    <param name="packageName" type="String" maxlength="1000" mandatory="false" />
+    <param name="urlSchema" type="String" maxlength="1000" mandatory="false" />
+  </function>	
 
 <!-- ~~~~~~~~~~~~~~~~~~ -->
 <!-- Ford Specific APIs -->

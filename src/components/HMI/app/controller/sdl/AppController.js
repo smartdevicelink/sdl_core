@@ -144,6 +144,9 @@ SDL.SDLAppController = Em.Object.create({
      */
     onVRCommand: function (element) {
 
+        if (SDL.SDLModel.VRActive) {
+            SDL.SDLModel.toggleProperty('VRActive');
+        }
         FFW.VR.onCommand(element.commandID, element.appID);
     },
 

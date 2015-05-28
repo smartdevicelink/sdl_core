@@ -1,0 +1,1 @@
+cmd='/usr/bin/cmake;-DCMAKE_INSTALL_PREFIX=/media/akutsan/Media/development/applink/tools/intergen;-GUnix Makefiles;/media/akutsan/Media/development/applink/tools/intergen'

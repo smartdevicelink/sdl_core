@@ -1,34 +1,34 @@
-﻿/*
-* Copyright (c) 2014, Ford Motor Company
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*
-* Redistributions of source code must retain the above copyright notice, this
-* list of conditions and the following disclaimer.
-*
-* Redistributions in binary form must reproduce the above copyright notice,
-* this list of conditions and the following
-* disclaimer in the documentation and/or other materials provided with the
-* distribution.
-*
-* Neither the name of the Ford Motor Company nor the names of its contributors
-* may be used to endorse or promote products derived from this software
-* without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.
-*/
+/*
+ * Copyright (c) 2014, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #ifndef SRC_COMPONENTS_POLICY_INCLUDE_CACHE_MANAGER_H_
 #define SRC_COMPONENTS_POLICY_INCLUDE_CACHE_MANAGER_H_
@@ -38,15 +38,19 @@
 #include "utils/shared_ptr.h"
 #include "policy/pt_representation.h"
 #include "policy/pt_ext_representation.h"
-#include "utils/lock.h"
 #include "usage_statistics/statistics_manager.h"
 #include "policy/cache_manager_interface.h"
+
+#include "utils/lock.h"
+#include "utils/timer_thread.h"
+#include "utils/conditional_variable.h"
 
 namespace policy {
 
 class CacheManager : public CacheManagerInterface {
  public:
   CacheManager();
+  ~CacheManager();
 
   /**
    * @brief Check if specified RPC for specified application
@@ -149,7 +153,7 @@ class CacheManager : public CacheManagerInterface {
    * @param service_type If URLs for specific service are preset,
    * return them otherwise default URLs.
    */
-  virtual EndpointUrls GetUpdateUrls(int service_type);
+  virtual void GetUpdateUrls(int service_type, EndpointUrls& end_points);
 
   /**
    * @brief Get allowed number of notifications
@@ -189,6 +193,12 @@ class CacheManager : public CacheManagerInterface {
   bool ApplyUpdate(const policy_table::Table& update_pt);
 
   /**
+   * @brief Gets list of appHMIType associated with mobile appID
+   * @param container of appHMIType
+   */
+  virtual void GetHMIAppTypeAfterUpdate(std::map<std::string, StringArray>& app_hmi_types);
+
+  /**
    * Gets flag updateRequired
    * @return true if update is required
    */
@@ -219,7 +229,7 @@ class CacheManager : public CacheManagerInterface {
    * @param app_id application id
    * @return true if application is revoked
    */
-  bool IsApplicationRevoked(const std::string& app_id);
+  bool IsApplicationRevoked(const std::string& app_id) const;
 
   /**
    * @brief Get functional groupings from DB
@@ -245,10 +255,9 @@ class CacheManager : public CacheManagerInterface {
   /**
    * @brief SetIsDefault Sets is_default flag for application
    * @param app_id app specific application
-   * @param is_default true if default false otherwise.
    * @return  true in case opperation was done successfully.
    */
-  bool SetIsDefault(const std::string& app_id, bool is_default);
+  bool SetIsDefault(const std::string& app_id);
 
   /**
    * Checks if the application has pre_data policy
@@ -425,12 +434,10 @@ class CacheManager : public CacheManagerInterface {
    * groups for specific application.
    * @param policy_app_id application id.
    * @param device_id device id.
-   * @param result the count of unconsented groups
-   * @return true in case opperation has been done successfully.
+   * @return the count of unconsented groups
    */
-  bool CountUnconsentedGroups(const std::string& policy_app_id,
-                              const std::string& device_id,
-                              int& result);
+  int CountUnconsentedGroups(const std::string& policy_app_id,
+                              const std::string& device_id);
 
   /**
    * @brief Gets functional group names and user_consent_prompts, if any
@@ -489,32 +496,18 @@ class CacheManager : public CacheManagerInterface {
   bool SetPredataPolicy(const std::string& app_id);
 
   /**
-   * @brief Updates application policy to either pre_DataConsented or not
-   * @param app_id Policy Id of application to be checked
-   * @param is_pre_data True of False to setting app policy to be pre_DataConsented
-   * @return true, if succeeded, otherwise - false
-   */
-  bool SetIsPredata(const std::string& app_id, bool is_pre_data);
-
-  /**
    * @brief Removes unpaired devices
    * @return true if success
    */
-  bool CleanupUnpairedDevices(const DeviceIds& device_ids);
+  bool CleanupUnpairedDevices();
 
   /**
    * Sets flag of unpaired device
-   * @param device_id
+   * @param device_id Unique device id
+   * @param unpaired True, if should be marked as unpaired, otherwise - false
    * @return true if success
    */
-  bool SetUnpairedDevice(const std::string& device_id);
-
-  /**
-   * Gets list of unpaired devices
-   * @param device_ids output list
-   * @return true if success
-   */
-  bool UnpairedDevicesList(DeviceIds& device_ids);
+  bool SetUnpairedDevice(const std::string& device_id, bool unpaired = true);
 
   /**
    * Resets Policy Table
@@ -540,6 +533,7 @@ class CacheManager : public CacheManagerInterface {
    * @brief Backup allows to save cache onto hard drive.
    */
   void Backup();
+
 
   /**
    * Returns heart beat timeout
@@ -568,9 +562,7 @@ private:
 
   void GetGroupNameByHashID(const int32_t group_id, std::string& group_name);
   void FillDeviceSpecificData();
-  void FillAppSpecificData();
   bool AppExists(const std::string& app_id) const;
-  void CopyInternalParams(const std::string &from, const std::string& to);
   long ConvertSecondsToMinute(int seconds);
 
   /**
@@ -579,17 +571,59 @@ private:
    */
   void CheckSnapshotInitialization();
 
+  void PersistData();
+
+  void ResetCalculatedPermissions();
+
+  void AddCalculatedPermissions(
+      const std::string& device_id,
+      const std::string& policy_app_id,
+      const policy::Permissions& permissions);
+
+  bool IsPermissionsCalculated(const std::string& device_id,
+                               const std::string& policy_app_id,
+                               policy::Permissions& permission);
+
+  virtual std::string RemoteAppsUrl() const;
+
 private:
   utils::SharedPtr<policy_table::Table> pt_;
   utils::SharedPtr<policy_table::Table> snapshot_;
   utils::SharedPtr<PTRepresentation> backup_;
   utils::SharedPtr<PTExtRepresentation> ex_backup_;
   bool update_required;
-  std::map<std::string, bool> is_predata_;
-  std::map<std::string, bool> is_unpaired_;
+  typedef std::set<std::string> UnpairedDevices;
+  UnpairedDevices is_unpaired_;
 
   sync_primitives::Lock cache_lock_;
-};
-} // policy
+  sync_primitives::Lock unpaired_lock_;
 
+  typedef std::map<std::string, Permissions> AppCalculatedPermissions;
+  typedef std::map<std::string, AppCalculatedPermissions> CalculatedPermissions;
+  CalculatedPermissions calculated_permissions_;
+  sync_primitives::Lock calculated_permissions_lock_;
+
+  class BackgroundBackuper: public threads::ThreadDelegate {
+      friend class CacheManager;
+    public:
+      BackgroundBackuper(CacheManager* cache_manager);
+      ~BackgroundBackuper();
+      virtual void threadMain();
+      virtual void exitThreadMain();
+      void DoBackup();
+    private:
+      void InternalBackup();
+      CacheManager* cache_manager_;
+      sync_primitives::ConditionalVariable backup_notifier_;
+      volatile bool stop_flag_;
+      volatile bool new_data_available_;
+
+      sync_primitives::Lock need_backup_lock_;
+      DISALLOW_COPY_AND_ASSIGN(BackgroundBackuper);
+  };
+  threads::Thread* backup_thread_;
+  sync_primitives::Lock backuper_locker_;
+  BackgroundBackuper* backuper_;
+};
+}  // namespace policy
 #endif // SRC_COMPONENTS_POLICY_INCLUDE_CACHE_MANAGER_H_

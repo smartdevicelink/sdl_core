@@ -28,10 +28,10 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
-#ifndef MESSAGE_QUEUE_CLASS
-#define MESSAGE_QUEUE_CLASS
+#ifndef SRC_COMPONENTS_INCLUDE_UTILS_MESSAGE_QUEUE_H_
+#define SRC_COMPONENTS_INCLUDE_UTILS_MESSAGE_QUEUE_H_
 
 #include <queue>
 
@@ -44,7 +44,9 @@
  * \class MessageQueue
  * \brief Wrapper for multithreading queue.
  */
- //TODO(Ezamakhov): move to utils namespace
+
+namespace utils {
+
 template<typename T, class Q = std::queue<T> > class MessageQueue {
   public:
     typedef Q Queue;
@@ -107,7 +109,6 @@ template<typename T, class Q = std::queue<T> > class MessageQueue {
     void Reset();
 
   private:
-
     /**
      *\brief Queue
      */
@@ -193,4 +194,6 @@ template<typename T, class Q> void MessageQueue<T, Q>::Reset() {
   }
 }
 
-#endif  //  MESSAGE_QUEUE_CLASS
+}  // namespace utils
+
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_MESSAGE_QUEUE_H_

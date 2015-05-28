@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -45,7 +45,7 @@ GetSystemInfoResponse::~GetSystemInfoResponse() {
 }
 
 void GetSystemInfoResponse::Run() {
-  LOG4CXX_INFO(logger_, "GetSystemInfoResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   const hmi_apis::Common_Result::eType code =
       static_cast<hmi_apis::Common_Result::eType>(
           (*message_)[strings::params][hmi_response::code].asInt());

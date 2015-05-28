@@ -50,7 +50,7 @@ OnVehicleDataNotification::~OnVehicleDataNotification() {
 }
 
 void OnVehicleDataNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnVehicleDataNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();
   VehicleData::const_iterator it = vehicle_data.begin();

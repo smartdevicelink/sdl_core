@@ -38,7 +38,7 @@
 namespace threads {
 
 /**
- * @breif Startup options for thread.
+ * @brief Startup options for thread.
  * Look for "threads/thread.h" for example
  */
 class ThreadOptions {
@@ -74,7 +74,7 @@ class ThreadOptions {
    * @param options - new options.
    * @return new options.
    */
-  ThreadOptions& operator=(const ThreadOptions& options ) {
+  ThreadOptions& operator=(const ThreadOptions& options) {
     stack_size_ = options.stack_size();
     is_joinable_ = options.is_joinable();
     return *this;

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -50,7 +50,7 @@ OnPhoneCallNotification::~OnPhoneCallNotification() {
 }
 
 void OnPhoneCallNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnPhoneCallNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   bool is_active =
       (*message_)[strings::msg_params][hmi_notification::is_active].asBool();

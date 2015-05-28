@@ -325,10 +325,12 @@ std::vector<std::string> file_system::ListFiles(
     }
 
     closedir(directory);
-#ifdef __QNXNTO__
-    delete[] direntbuffer;
-#endif
+
   }
+
+#ifdef __QNXNTO__
+  delete[] direntbuffer;
+#endif
 
   return listFiles;
 }
@@ -409,4 +411,15 @@ bool file_system::CreateFile(const std::string& path) {
     file.close();
     return true;
   }
+}
+
+
+uint64_t file_system::GetFileModificationTime(const std::string& path) {
+  struct stat info;
+  stat(path.c_str(), &info);
+#ifndef __QNXNTO__
+  return static_cast<uint64_t>(info.st_mtim.tv_nsec);
+#else
+  return static_cast<uint64_t>(info.st_mtime);
+#endif
 }

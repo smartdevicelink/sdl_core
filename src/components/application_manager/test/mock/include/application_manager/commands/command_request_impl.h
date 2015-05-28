@@ -1,4 +1,4 @@
-﻿/**
+﻿/*
  Copyright (c) 2014, Ford Motor Company
  All rights reserved.
 
@@ -91,7 +91,7 @@ class CommandRequestImpl : public CommandImpl,
   void SendResponse(const bool success,
                     const mobile_apis::Result::eType& result_code,
                     const char* info = NULL,
-                    const NsSmart::SmartObject* response_params = NULL);
+                    const smart_objects::SmartObject* response_params = NULL);
 
   /**
    * @brief Check syntax of string from mobile
@@ -110,7 +110,7 @@ class CommandRequestImpl : public CommandImpl,
    *
    */
   void SendHMIRequest(const hmi_apis::FunctionID::eType& function_id,
-                      const NsSmart::SmartObject* msg_params = NULL,
+                      const smart_objects::SmartObject* msg_params = NULL,
                       bool use_events = false);
 
   /*

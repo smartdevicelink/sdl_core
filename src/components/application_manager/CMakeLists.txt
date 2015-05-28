@@ -1,8 +1,37 @@
-set (COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
+# Copyright (c) 2014, Ford Motor Company
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# Redistributions of source code must retain the above copyright notice, this
+# list of conditions and the following disclaimer.
+#
+# Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following
+# disclaimer in the documentation and/or other materials provided with the
+# distribution.
+#
+# Neither the name of the Ford Motor Company nor the names of its contributors
+# may be used to endorse or promote products derived from this software
+# without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+
 set (AM_SOURCE_DIR ${COMPONENTS_DIR}/application_manager)
 set (AM_TEST_DIR ${AM_SOURCE_DIR}/test)
 set (AM_MOCK_DIR ${AM_TEST_DIR}/mock)
-
 
 
 include_directories (
@@ -18,6 +47,7 @@ include_directories (
   ${COMPONENTS_DIR}/request_watchdog/include/
   ${COMPONENTS_DIR}/resumption/include/
   ${COMPONENTS_DIR}/rpc_base/include/
+  ${COMPONENTS_DIR}/interfaces
   ${CMAKE_BINARY_DIR}/src/components/
   ${COMPONENTS_DIR}/include/
   ${COMPONENTS_DIR}/policy/src/policy/include/
@@ -35,14 +65,12 @@ file (GLOB SOURCES
 set (POLICIES_MANAGER
 ${AM_SOURCE_DIR}/src/policies/policy_handler.cc
 ${AM_SOURCE_DIR}/src/policies/policy_event_observer.cc
+${AM_SOURCE_DIR}/src/policies/delegates/app_permission_delegate.cc
+${AM_SOURCE_DIR}/src/policies/delegates/statistics_delegate.cc
 )
 
   include_directories(
     ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
-  )
-  list(APPEND POLICIES_MANAGER
-    ${AM_SOURCE_DIR}/src/policies/pt_exchange_handler_impl.cc
-    ${AM_SOURCE_DIR}/src/policies/policy_retry_sequence.cc
   )
 
 file (GLOB EVENT_ENGINE
@@ -163,8 +191,8 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/ui_end_audio_pass_thru_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/ui_perform_interaction_request.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/ui_perform_interaction_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_set_icon_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/ui_set_icon_response.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/ui_set_app_icon_request.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/ui_set_app_icon_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/ui_set_media_clock_timer_request.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/ui_set_media_clock_timer_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/ui_show_request.cc
@@ -291,9 +319,14 @@ if (${HMI_DBUS_API})
 endif (${HMI_DBUS_API})
 
 SET (LIBRARIES
-  UsageStatistics
-  dl
+  HMI_API
+  MOBILE_API
+  v4_protocol_v1_2_no_extra
   ProtocolLibrary
+  SmartObjects
+  UsageStatistics
+  dl 
+  formatters
 )
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")

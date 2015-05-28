@@ -48,7 +48,7 @@ DiagnosticMessageRequest::~DiagnosticMessageRequest() {
 }
 
 void DiagnosticMessageRequest::Run() {
-  LOG4CXX_INFO(logger_, "DiagnosticMessageRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
                                connection_key());
@@ -68,7 +68,7 @@ void DiagnosticMessageRequest::Run() {
 }
 
 void DiagnosticMessageRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "DiagnosticMessageRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {

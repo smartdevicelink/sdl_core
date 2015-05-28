@@ -88,7 +88,7 @@ namespace {
 #endif // #ifdef HMI_DBUS_API
 
 void UnsubscribeVehicleDataRequest::Run() {
-  LOG4CXX_INFO(logger_, "UnsubscribeVehicleDataRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       CommandRequestImpl::connection_key());
@@ -176,7 +176,7 @@ void UnsubscribeVehicleDataRequest::Run() {
 }
 
 void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "UnsubscribeVehicleDataRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   const smart_objects::SmartObject& message = event.smart_object();
 

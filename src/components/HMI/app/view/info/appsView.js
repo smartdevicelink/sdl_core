@@ -73,7 +73,8 @@ SDL.InfoAppsView = Em.ContainerView
                         appID: apps[i].appID,
                         classNames: 'list-item button',
                         iconBinding: 'SDL.SDLModel.registeredApps.' + appIndex
-                            + '.appIcon'
+                            + '.appIcon',
+                        disabled: apps[i].disabledToActivate
                     }));
             }
 

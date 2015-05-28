@@ -63,7 +63,7 @@ typedef utils::PrioritizedQueue<SecurityMessage> SecurityMessageQueue;
 typedef threads::MessageLoopThread<SecurityMessageQueue> SecurityMessageLoop;
 
 /**
- * \brief SecurityManagerImpl class implements SecurityManager inteface
+ * \brief SecurityManagerImpl class implements SecurityManager interface
  */
 class SecurityManagerImpl
   : public SecurityManager,

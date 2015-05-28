@@ -48,7 +48,7 @@ PutFileResponse::~PutFileResponse() {
 }
 
 void PutFileResponse::Run() {
-  LOG4CXX_INFO(logger_, "PutFileResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   uint32_t app_id = (*message_)[strings::params][strings::connection_key]
       .asUInt();
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);

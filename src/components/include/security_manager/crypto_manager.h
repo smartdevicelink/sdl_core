@@ -50,7 +50,7 @@ namespace security_manager {
 class SSLContext;
 
 enum Mode { CLIENT, SERVER };
-enum Protocol { SSLv3, TLSv1, TLSv1_1, TLSv1_2 };
+enum Protocol { SSLv3, TLSv1, TLSv1_1, TLSv1_2};
 
 class CryptoManager {
  public:

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,8 +67,9 @@ class SingleThreadSimpleValidator {
   // This method should be called in every public method
   // of classes being checked for absence of concurrent access
   void AssertRunningOnCreationThread() const;
+  PlatformThreadHandle creation_thread_id() const;
  private:
-  const Thread::Id creation_thread_id_;
+  const PlatformThreadHandle creation_thread_id_;
 };
 
 
@@ -91,13 +92,13 @@ class SingleThreadValidator {
 
   // Must be called prior to transferring object being validated to
   // another thread or when passing it back
-  void PassToThread(Thread::Id thread_id) const;
+  void PassToThread(PlatformThreadHandle thread_id) const;
   // This method should be called in every public method
   // of classes being checked for absence of unintended concurrent
   // access
   void AssertRunningOnValidThread() const;
  private:
-  mutable Thread::Id owning_thread_id_;
+  mutable PlatformThreadHandle owning_thread_id_;
 };
 
 } // namespace threads

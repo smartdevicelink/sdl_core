@@ -39,107 +39,158 @@ using ::testing::InSequence;
 namespace usage_statistics {
 namespace test {
 
-TEST(UsageStatisticsTest, TestGlobalCounterIncrementsStatistics) {
+// TEST(A, B_C_D) { ... }
+// A - What you test
+// B - What you do
+// C - Input data
+// D - Expected result
+
+TEST(StatisticsManagerIncrementMethod1Arg, GlobalCounterOverloadedIncrement_CallONCE_StatisticsManagerIncrementCalledONCE) {
+  //Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
   GlobalCounter reboots_counter(msm, SYNC_REBOOTS);
 
-  EXPECT_CALL(*msm, Increment(SYNC_REBOOTS)).Times(1);
+  //Assert
+  EXPECT_CALL(*msm, Increment(SYNC_REBOOTS));
+
+  //Act
   ++reboots_counter;
 }
 
-TEST(UsageStatisticsTest, TestGlobalCounterIncrementsStatisticsTwice) {
+TEST(StatisticsManagerIncrementMethod1Arg, GlobalCounterOverloadedIncrement_CallTWICE_StatisticsManagerIncrementCalledTWICE) {
+  //Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
   GlobalCounter reboots_counter(msm, SYNC_REBOOTS);
 
+  //Assert
   EXPECT_CALL(*msm, Increment(SYNC_REBOOTS)).Times(2);
+
+  //Act
   ++reboots_counter;
   ++reboots_counter;
 }
 
-TEST(UsageStatisticsTest, TestAppCounterIncrementsStatistics) {
+TEST(StatisticsManagerIncrementMethod2Args, AppCounterOverloadedIncrement_CallONCE_StatisticsManagerIncrementCalledONCE) {
+  //Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
   AppCounter user_selections_counter(msm, "HelloApp", USER_SELECTIONS);
 
-  EXPECT_CALL(*msm, Increment("HelloApp", USER_SELECTIONS)).Times(1);
+  //Assert
+  EXPECT_CALL(*msm, Increment("HelloApp", USER_SELECTIONS));
+
+  //Act
   ++user_selections_counter;
 }
 
-TEST(UsageStatisticsTest, TestAppCounterIncrementsStatisticsTwice) {
+TEST(StatisticsManagerIncrementMethod2Args, AppCounterOverloadedIncrement_CallTWICE_StatisticsManagerIncrementCalledTWICE) {
+  //Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
   AppCounter user_selections_counter(msm, "HelloApp", USER_SELECTIONS);
 
+  //Assert
   EXPECT_CALL(*msm, Increment("HelloApp", USER_SELECTIONS)).Times(2);
+
+  //Act
   ++user_selections_counter;
   ++user_selections_counter;
 }
-
-TEST(UsageStatisticsTest, TestAppInfoUpdates) {
+//---
+TEST(StatisticsManagerSetMethod, AppInfoUpdateMethod_CallONCE_StatisticsManagerSetMethodCalledONCE) {
+  //Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
   AppInfo gui_language_info(msm, "HelloApp", LANGUAGE_GUI);
 
-  EXPECT_CALL(*msm, Set("HelloApp", LANGUAGE_GUI, "Klingon")).Times(1);
+  //Assert
+  EXPECT_CALL(*msm, Set("HelloApp", LANGUAGE_GUI, "Klingon"));
+
+  //Act
   gui_language_info.Update("Klingon");
 }
 
-TEST(UsageStatisticsTest, TestAppInfoUpdatesTwice) {
+TEST(StatisticsManagerSetMethod, AppInfoUpdateMethod_CallTWICE_StatisticsManagerSetMethodCalledTWICE) {
+  //Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
   AppInfo gui_language_info(msm, "HelloApp", LANGUAGE_GUI);
 
-  InSequence s;
-  EXPECT_CALL(*msm, Set("HelloApp", LANGUAGE_GUI, "Klingon")).Times(1);
-  EXPECT_CALL(*msm, Set("HelloApp", LANGUAGE_GUI, "UA")).Times(1);
+  //Assert
+  EXPECT_CALL(*msm, Set("HelloApp", LANGUAGE_GUI, "Klingon"));
+  EXPECT_CALL(*msm, Set("HelloApp", LANGUAGE_GUI, "UA"));
+
+  //Act
   gui_language_info.Update("Klingon");
   gui_language_info.Update("UA");
 }
 
-TEST(UsageStatisticsTest, TestAppStopwatchAutoStopsAndAddsZero) {
+
+TEST(StatisticsManagerAddMethod, DISABLED_AppStopwatchStartMethod_CallONCE_StatisticsManagerAddMethodCalledONCE) {
+  //Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
-  AppStopwatch hmi_full_stopwatch(msm, "HelloApp");
+  const std::uint32_t time_out = 1;
+  AppStopwatch hmi_full_stopwatch(msm, "HelloApp", time_out);
 
-  EXPECT_CALL(*msm, Add("HelloApp", SECONDS_HMI_FULL, 0)).Times(1);
+  //Assert
+  EXPECT_CALL(*msm, Add("HelloApp", SECONDS_HMI_FULL, 0));
 
+  //Act
   hmi_full_stopwatch.Start(SECONDS_HMI_FULL);
 }
 
-TEST(UsageStatisticsTest, TestAppStopwatchAddsZero) {
+TEST(StatisticsManagerAddMethod, DISABLED_AppStopwatchStartMethod_Call_StatisticsManagerAddMethodCALLED) {
+  //Arrange
+
+  MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
+  const std::uint32_t time_out = 1;
+  AppStopwatch hmi_full_stopwatch(msm, "HelloApp", time_out);
+
+  //Assert
+  EXPECT_CALL(*msm, Add("HelloApp", SECONDS_HMI_FULL, 0));
+
+  //Act
+  hmi_full_stopwatch.Start(SECONDS_HMI_FULL);
+  sleep(2);
+}
+
+TEST(StatisticsManagerAddMethod, DISABLED_AppStopwatchSwitchMethod_Call_StatisticsManagerAddMethodCALLED) {
+  //Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
   AppStopwatch hmi_full_stopwatch(msm, "HelloApp");
-
-  InSequence s;
-  EXPECT_CALL(*msm, Add("HelloApp", SECONDS_HMI_FULL, 0)).Times(1);
-  EXPECT_CALL(*msm, Add("HelloApp", SECONDS_HMI_BACKGROUND, 0)).Times(1);
-  EXPECT_CALL(*msm, Add("HelloApp", SECONDS_HMI_FULL, 0)).Times(1);
-
   hmi_full_stopwatch.Start(SECONDS_HMI_FULL);
-  hmi_full_stopwatch.Switch(SECONDS_HMI_BACKGROUND);
+
+  //Assert
+  EXPECT_CALL(*msm, Add("HelloApp", SECONDS_HMI_FULL, 0)).Times(2); // Once in stop(), once in destructor
+
+  //Act
   hmi_full_stopwatch.Switch(SECONDS_HMI_FULL);
-  hmi_full_stopwatch.Stop();
 }
 
-TEST(UsageStatisticsTest, TestAppStopwatchAutoStopsInASecond) {
+TEST(StatisticsManagerAddMethod, DISABLED_AppStopwatchStartMethod_CallAnd1SecSleepAfter_StatisticsManagerAddMethodCalledWith1SecTimespan) {
+  //Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
   AppStopwatch hmi_full_stopwatch(msm, "HelloApp");
 
-  EXPECT_CALL(*msm, Add("HelloApp", SECONDS_HMI_FULL, 1)).Times(1);
+  //Assert
+  EXPECT_CALL(*msm, Add("HelloApp", SECONDS_HMI_FULL, 1));
 
+  //Act
   hmi_full_stopwatch.Start(SECONDS_HMI_FULL);
   sleep(1);
 }
 
-TEST(UsageStatisticsTest, TestAppStopwatchStopsInTwoSeconds) {
+
+TEST(StatisticsManagerAddMethod, DISABLED_AppStopwatchSwitchMethod_CallAnd1SecSleepAfter_StatisticsManagerAddMethodCalledWith1SecTimespan) {
+  //Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
-  AppStopwatch hmi_full_stopwatch(msm, "HelloApp");
+  const std::uint32_t time_out = 1;
+  AppStopwatch hmi_full_stopwatch(msm, "HelloApp", time_out);
 
-  EXPECT_CALL(*msm, Add("HelloApp", SECONDS_HMI_NONE, 0)).Times(1);
-  EXPECT_CALL(*msm, Add("HelloApp", SECONDS_HMI_FULL, 1)).Times(1);
-  EXPECT_CALL(*msm, Add("HelloApp", SECONDS_HMI_BACKGROUND, 1)).Times(1);
+  //Assert
+  EXPECT_CALL(*msm, Add("HelloApp", SECONDS_HMI_NONE, 0));
+  EXPECT_CALL(*msm, Add("HelloApp", SECONDS_HMI_BACKGROUND, 1));
 
+  //Act
   hmi_full_stopwatch.Start(SECONDS_HMI_NONE);
-  hmi_full_stopwatch.Switch(SECONDS_HMI_FULL);
-  sleep(1);
   hmi_full_stopwatch.Switch(SECONDS_HMI_BACKGROUND);
-  sleep(1);
+  sleep(2);
 }
-
 }  // namespace test
 }  // namespace usage_statistics

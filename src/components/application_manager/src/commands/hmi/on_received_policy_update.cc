@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -47,7 +47,7 @@ OnReceivedPolicyUpdate::~OnReceivedPolicyUpdate() {
 }
 
 void OnReceivedPolicyUpdate::Run() {
-  LOG4CXX_INFO(logger_, "OnReceivedPolicyUpdate::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   const std::string& file_path =
     (*message_)[strings::msg_params][hmi_notification::policyfile].asString();
   policy::BinaryMessage file_content;

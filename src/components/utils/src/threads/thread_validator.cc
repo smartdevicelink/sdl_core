@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@ SingleThreadSimpleValidator::~SingleThreadSimpleValidator() {
 }
 
 void SingleThreadSimpleValidator::AssertRunningOnCreationThread() const {
-  Thread::Id current_id = Thread::CurrentId();
+  PlatformThreadHandle current_id = Thread::CurrentId();
   if (creation_thread_id_ != current_id) {
     LOG4CXX_ERROR(logger_, "Single-threaded object created at thread "
                           << creation_thread_id_
@@ -60,6 +60,11 @@ void SingleThreadSimpleValidator::AssertRunningOnCreationThread() const {
   }
 }
 
+PlatformThreadHandle SingleThreadSimpleValidator::creation_thread_id() const
+{
+  return creation_thread_id_;
+}
+
 
 SingleThreadValidator::SingleThreadValidator()
     : owning_thread_id_(Thread::CurrentId()){
@@ -68,12 +73,12 @@ SingleThreadValidator::SingleThreadValidator()
 SingleThreadValidator::~SingleThreadValidator() {
 }
 
-void SingleThreadValidator::PassToThread(Thread::Id thread_id) const {
+void SingleThreadValidator::PassToThread(PlatformThreadHandle thread_id) const {
   owning_thread_id_ = thread_id;
 }
 
 void SingleThreadValidator::AssertRunningOnValidThread() const {
-  Thread::Id current_id = Thread::CurrentId();
+  PlatformThreadHandle current_id = Thread::CurrentId();
   if (owning_thread_id_ != current_id) {
     LOG4CXX_ERROR(logger_, "Single-threaded object owned by thread "
                          << owning_thread_id_

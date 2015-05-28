@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -49,7 +49,7 @@ OnExitApplicationNotification::~OnExitApplicationNotification() {
 }
 
 void OnExitApplicationNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnExitApplicationNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
   ApplicationSharedPtr app_impl = app_mgr->application(
@@ -70,7 +70,10 @@ void OnExitApplicationNotification::Run() {
       break;
     }
   }
-  app_impl->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
+
+  ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app_impl->app_id(),
+                                                         mobile_apis::HMILevel::HMI_NONE);
+
   app_impl->set_audio_streaming_state(mobile_apis::AudioStreamingState::NOT_AUDIBLE);
   app_impl->set_system_context(mobile_api::SystemContext::SYSCTXT_MAIN);
   MessageHelper::SendHMIStatusNotification(*app_impl);

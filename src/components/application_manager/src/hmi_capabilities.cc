@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -133,6 +133,11 @@ std::map<std::string, hmi_apis::Common_TextFieldName::eType> text_fields_enum_na
     {"secondaryText"    , hmi_apis::Common_TextFieldName::secondaryText},
     {"tertiaryText"     , hmi_apis::Common_TextFieldName::tertiaryText},
     {"timeToDestination", hmi_apis::Common_TextFieldName::timeToDestination},
+    {"locationName"     , hmi_apis::Common_TextFieldName::locationName},
+    {"locationDescription", hmi_apis::Common_TextFieldName::locationDescription},
+    {"addressLines"         , hmi_apis::Common_TextFieldName::turnText},
+    {"turnText"         , hmi_apis::Common_TextFieldName::addressLines},
+    {"phoneNumber"         , hmi_apis::Common_TextFieldName::phoneNumber},
     {"turnText"         , hmi_apis::Common_TextFieldName::turnText},
     {"menuTitle"        , hmi_apis::Common_TextFieldName::menuTitle},
 };
