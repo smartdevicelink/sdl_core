@@ -1002,6 +1002,11 @@
             },
             "RemoteControl": {
                 "rpcs": {
+                    "ButtonPress": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
                     "GetInteriorVehicleDataCapabilities": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
