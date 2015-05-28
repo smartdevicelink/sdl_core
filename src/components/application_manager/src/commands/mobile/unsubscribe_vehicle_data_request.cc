@@ -113,27 +113,56 @@ void UnsubscribeVehicleDataRequest::Run() {
   smart_objects::SmartObject response_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
 
-  msg_params[strings::app_id] = app->app_id();
-
   for (; vehicle_data.end() != it; ++it) {
-    std::string key_name = it->first;
+    const std::string& key_name = it->first;
     if ((*message_)[strings::msg_params].keyExists(key_name)) {
       bool is_key_enabled = (*message_)[strings::msg_params][key_name].asBool();
       if (is_key_enabled) {
         ++items_to_unsubscribe;
-        msg_params[key_name] = is_key_enabled;
 
         VehicleDataType key_type = it->second;
-        if (app->UnsubscribeFromIVI(static_cast<uint32_t>(key_type))) {
+        if (!app->IsSubscribedToIVI(key_type)) {
           ++unsubscribed_items;
-        } else {
+          vi_already_unsubscribed_by_this_app_.insert(key_type);
           response_params[key_name][strings::data_type] = key_type;
           response_params[key_name][strings::result_code] =
               mobile_apis::VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED;
+          continue;
         }
+
+        if (!app->UnsubscribeFromIVI(static_cast<uint32_t>(key_type))) {
+          LOG4CXX_ERROR(logger_, "Unable to unsubscribe from "
+                                 "VehicleDataType: " << key_type);
+          continue;
+        }
+
+        LOG4CXX_DEBUG(logger_, "Unsubscribed app with connection key "
+                      << connection_key()
+                      << " from VehicleDataType: "
+                      << key_type);
+
+        ++unsubscribed_items;
+
+        if (IsSomeoneSubscribedFor(key_type)) {
+          LOG4CXX_DEBUG(logger_, "There are another apps still subscribed for "
+                                 "VehicleDataType: " << key_type);
+
+          vi_still_subscribed_by_another_apps_.insert(key_type);
+          response_params[key_name][strings::data_type] = key_type;
+          response_params[key_name][strings::result_code] =
+              mobile_apis::VehicleDataResultCode::VDRC_SUCCESS;
+          continue;
+        }
+
+        msg_params[key_name] = is_key_enabled;
       }
     }
   }
+
+  bool is_everything_already_unsubscribed =
+      static_cast<uint32_t>(items_to_unsubscribe) ==
+      vi_still_subscribed_by_another_apps_.size() +
+      vi_already_unsubscribed_by_this_app_.size();
 
   if (0 == items_to_unsubscribe) {
     if (HasDisallowedParams()) {
@@ -143,9 +172,29 @@ void UnsubscribeVehicleDataRequest::Run() {
                    "No data in the request.");
     }
     return;
-  } else if (0 == unsubscribed_items) {
+  }
+
+  if (0 == unsubscribed_items) {
     SendResponse(false, mobile_apis::Result::IGNORED,
                  "Was not subscribed on any VehicleData.", &response_params);
+    return;
+  }
+
+  if (is_everything_already_unsubscribed) {
+    mobile_apis::Result::eType result_code =
+        vi_already_unsubscribed_by_this_app_.size()
+        ? mobile_apis::Result::IGNORED
+        : mobile_apis::Result::SUCCESS;
+
+    const char* info =
+        vi_already_unsubscribed_by_this_app_.size()
+        ? "Already subscribed on some provided VehicleData."
+        : NULL;
+
+    SendResponse(true,
+                 result_code,
+                 info,
+                 &response_params);
     return;
   }
 
@@ -232,12 +281,13 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     if (true == any_arg_success) {
       UpdateHash();
     }
+ }
 #else
   hmi_apis::Common_Result::eType hmi_result =
       static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
 
-  bool result =
+  bool is_succeeded =
       hmi_result == hmi_apis::Common_Result::SUCCESS;
 
   mobile_apis::Result::eType result_code =
@@ -248,42 +298,57 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
 
   const char* return_info = NULL;
 
-  if (result) {
-    if (IsAnythingAlreadyUnsubscribed(message[strings::msg_params])) {
+  if (is_succeeded) {
+    if (vi_already_unsubscribed_by_this_app_.size()) {
       result_code = mobile_apis::Result::IGNORED;
-      return_info =
-          std::string("Some provided VehicleData was not subscribed.").c_str();
+      return_info = "Some provided VehicleData was not subscribed.";
     }
   }
 
-  if (true == result) {
+  if (!vi_still_subscribed_by_another_apps_.empty() ||
+      !vi_already_unsubscribed_by_this_app_.empty()) {
+    AddAlreadyUnsubscribedVI(const_cast<smart_objects::SmartObject&>(
+                             message[strings::msg_params]));
+  }
+
+  if (is_succeeded) {
     SetAllowedToTerminate(false);
   }
-  SendResponse(result, result_code, return_info,
+  SendResponse(is_succeeded, result_code, return_info,
                &(message[strings::msg_params]));
-  if (true == result) {
+  if (is_succeeded) {
     UpdateHash();
   }
 #endif // #ifdef HMI_DBUS_API
 }
 
-bool UnsubscribeVehicleDataRequest::IsAnythingAlreadyUnsubscribed(
-                           const smart_objects::SmartObject& msg_params) const {
-  LOG4CXX_INFO(logger_, "IsAnythingAlreadyUnsubscribed");
+bool UnsubscribeVehicleDataRequest::IsSomeoneSubscribedFor(
+    const uint32_t param_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ApplicationManagerImpl::SubscribedToIVIPredicate finder(param_id);
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  return !accessor.FindAll(finder).empty();
+}
 
-  const VehicleData& vehicle_data = MessageHelper::vehicle_data();
-  VehicleData::const_iterator it = vehicle_data.begin();
-
-  for (; vehicle_data.end() != it; ++it) {
-    if (msg_params.keyExists(it->first)) {
-      if (msg_params[it->first][strings::result_code].asInt() ==
-        hmi_apis::Common_VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED) {
-        return true;
-      }
-    }
+void UnsubscribeVehicleDataRequest::AddAlreadyUnsubscribedVI(
+    smart_objects::SmartObject& response) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace mobile_apis;
+  VehicleInfoSubscriptions::const_iterator it_same_app =
+      vi_already_unsubscribed_by_this_app_.begin();
+  for (;vi_already_unsubscribed_by_this_app_.end() != it_same_app;
+       ++it_same_app) {
+    response[*it_same_app][strings::result_code] =
+        VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED;
   }
 
-  return false;
+  VehicleInfoSubscriptions::const_iterator it_another_app =
+      vi_still_subscribed_by_another_apps_.begin();
+  for (;vi_still_subscribed_by_another_apps_.end() != it_another_app;
+       ++it_another_app) {
+    response[*it_another_app][strings::result_code] =
+        VehicleDataResultCode::VDRC_SUCCESS;
+  }
 }
 
 void UnsubscribeVehicleDataRequest::UpdateHash() const {
@@ -293,8 +358,8 @@ void UnsubscribeVehicleDataRequest::UpdateHash() const {
   if (application) {
     application->UpdateHash();
   } else {
-    LOG4CXX_ERROR(logger_, "Application with connection_key = "<<connection_key()
-                  <<"doesn't exists");
+    LOG4CXX_ERROR(logger_, "Application with connection_key = "
+                  << connection_key() <<" doesn't exist.");
   }
   ApplicationManagerImpl::instance()->TerminateRequest(connection_key(),
                                                        correlation_id());

@@ -3353,9 +3353,6 @@
         The application will be notified by the onVehicleData notification whenever new data is available.
         To unsubscribe the notifications, use unsubscribe with the same subscriptionType.
     </description>
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application that requested this RPC.</description>
-    </param>
     <param name="gps" type="Boolean" mandatory="false">
       <description>See GPSData</description>
     </param>
@@ -3741,9 +3738,6 @@
     </param>
     <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
-    </param>
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
     </param>
   </function>
   <function name="GetVehicleData" messagetype="response">

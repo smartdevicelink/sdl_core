@@ -731,11 +731,13 @@ smart_objects::SmartObjectList MessageHelper::GetIVISubscriptionRequests(
   msg_params[strings::app_id] = app->app_id();
   const VehicleData& vehicle_data = MessageHelper::vehicle_data_;
   VehicleData::const_iterator ivi_it = vehicle_data.begin();
-  const std::set<uint32_t>& subscribes = app->SubscribesIVI();
+  DataAccessor<VehicleInfoSubscriptions> vi_accessor =
+      app->SubscribedIVI();
+  const VehicleInfoSubscriptions& subscriptions = vi_accessor.GetData();
 
   for (; vehicle_data.end() != ivi_it; ++ivi_it) {
     uint32_t type_id = static_cast<int>(ivi_it->second);
-    if (subscribes.end() != subscribes.find(type_id)) {
+    if (subscriptions.end() != subscriptions.find(type_id)) {
       std::string key_name = ivi_it->first;
       msg_params[key_name] = true;
     }
@@ -808,8 +810,9 @@ void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
     return;
   }
 
-  std::set<ButtonName::eType> subscriptions = app->SubscribedButtons();
-  std::set<ButtonName::eType>::iterator it = subscriptions.begin();
+  DataAccessor<ButtonSubscriptions> button_accessor = app->SubscribedButtons();
+  ButtonSubscriptions subscriptions = button_accessor.GetData();
+  ButtonSubscriptions::iterator it = subscriptions.begin();
   for (; subscriptions.end() != it; ++it) {
     SendOnButtonSubscriptionNotification(
         app->hmi_app_id(), static_cast<Common_ButtonName::eType>(*it), true);

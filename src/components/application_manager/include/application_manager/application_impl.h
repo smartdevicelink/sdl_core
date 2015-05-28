@@ -165,17 +165,17 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name);
   bool UnsubscribeFromButton(mobile_apis::ButtonName::eType btn_name);
 
-  bool SubscribeToIVI(uint32_t vehicle_info_type_);
-  bool IsSubscribedToIVI(uint32_t vehicle_info_type_);
-  bool UnsubscribeFromIVI(uint32_t vehicle_info_type_);
+  bool SubscribeToIVI(uint32_t vehicle_info_type) OVERRIDE;
+  bool IsSubscribedToIVI(uint32_t vehicle_info_type) const OVERRIDE;
+  bool UnsubscribeFromIVI(uint32_t vehicle_info_type) OVERRIDE;
+  DataAccessor<VehicleInfoSubscriptions> SubscribedIVI() const OVERRIDE;
 
   /**
    * @brief ResetDataInNone reset data counters in NONE
    */
   virtual void ResetDataInNone();
 
-  virtual const std::set<mobile_apis::ButtonName::eType>& SubscribedButtons() const;
-  virtual const  std::set<uint32_t>& SubscribesIVI() const;
+  virtual DataAccessor<ButtonSubscriptions> SubscribedButtons() const OVERRIDE;
 
   virtual const std::string& curHash() const;
   /**
@@ -264,7 +264,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    */
   void CleanupFiles();
 
-
  private:
   typedef SharedPtr<TimerThread<ApplicationImpl>> ApplicationTimerPtr;
 
@@ -314,7 +313,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 
   AppFilesMap                              app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
-  std::set<uint32_t>                       subscribed_vehicle_info_;
+  VehicleInfoSubscriptions                 subscribed_vehicle_info_;
   UsageStatistics                          usage_report_;
   ProtocolVersion                          protocol_version_;
   bool                                     is_voice_communication_application_;
@@ -346,6 +345,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   CommandSoftButtonID cmd_softbuttonid_;
   // Lock for command soft button id
   sync_primitives::Lock cmd_softbuttonid_lock_;
+  mutable sync_primitives::Lock vi_lock_;
+  sync_primitives::Lock button_lock_;
   std::string folder_name_;
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };
