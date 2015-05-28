@@ -89,17 +89,23 @@ TEST_F(CanModuleTest, ProcessMessagePass) {
 
   std::vector<application_manager::ApplicationSharedPtr> apps;
   MockApplication* app = new MockApplication();
-  apps.push_back(app);
+  application_manager::ApplicationSharedPtr app_ptr(app);
+  apps.push_back(app_ptr);
   application_manager::AppExtensionUID uid = module->GetModuleID();
   CANAppExtension* can_ext = new CANAppExtension(uid);
   can_ext->GiveControl(true);
   application_manager::AppExtensionPtr ext(can_ext);
 
-  EXPECT_CALL(*app, QueryInterface(uid)).Times(1).WillOnce(Return(ext));
-  EXPECT_CALL(*app, app_id()).Times(1).WillOnce(Return(1));
+  EXPECT_CALL(*app, app_id()).Times(2).WillRepeatedly(Return(1));
   EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID())
     ).Times(1).WillOnce(Return(apps));
-  EXPECT_CALL(*mock_service, SendMessageToMobile(message)).Times(1);
+  EXPECT_CALL(*mock_service, GetApplication(_)).Times(1)
+      .WillOnce(Return(app_ptr));
+  EXPECT_CALL(*mock_service, CheckPolicyPermissions(_)).Times(1)
+      .WillOnce(Return(mobile_apis::Result::eType::SUCCESS));
+  EXPECT_CALL(*mock_service, CheckAccess(1, "OnRadioDetails", _, _)).Times(1)
+      .WillOnce(Return(application_manager::kAllowed));
+  EXPECT_CALL(*mock_service, SendMessageToMobile(_)).Times(1);
 
   EXPECT_EQ(ProcessResult::PROCESSED, module->ProcessMessage(message));
 }
