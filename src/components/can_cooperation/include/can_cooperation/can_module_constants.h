@@ -162,18 +162,6 @@ namespace enums_value {
 // TriggerSource enum
 } //  namespace enums
 
-namespace validation_params {
-const char kMinLength[] = "minlength";
-const char kMaxLength[] = "maxlength";
-const char kMinValue[]  = "minvalue";
-const char kMaxValue[]  = "maxvalue";
-const char kMinSize[]   = "minsize";
-const char kMaxSize[]   = "maxsize";
-const char kArray[]     = "array";
-const char kMandatory[] = "mandatory";
-const char kType[] =       "type";
-} //  validation_params
-
 }  //  namespace can_cooperation
 
 #endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_CONSTANTS_H_

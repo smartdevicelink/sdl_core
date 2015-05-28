@@ -32,13 +32,14 @@
 
 #include "can_cooperation/validators/validator.h"
 #include "can_cooperation/can_module_constants.h"
+#include "utils/logger.h"
 
 namespace can_cooperation {
 
 namespace validators {
 
-using namespace validation_params;
-using namespace enums_value;
+CREATE_LOGGERPTR_GLOBAL(logger_, "Validator")
+
 using namespace message_params;
 
 Validator::~Validator() {}
@@ -57,27 +58,11 @@ ValidationResult Validator::ValidateSimpleValues(const Json::Value& json,
     }
   }
 
-  return result;
-}
-
-
-ValidationResult Validator::ValidateEnumValue(const std::string& enum_name,
-                                  const Json::Value& json,
-                                  Json::Value& outgoing_json) {
-  if (enum_name == kTriggerSource) {
-    std::string value = json[kTriggerSource].asCString();
-
-    if (value != kMenu &&
-        value != kVR) {
-      return ValidationResult::INVALID_DATA;
-    }
-
-    outgoing_json[kTriggerSource] = json[kTriggerSource].asCString();
-  } else {
-    return ValidationResult::INVALID_DATA;
+  if (ValidationResult::SUCCESS != result) {
+    LOG4CXX_ERROR(logger_, "Validation scope map empty!");
   }
 
-  return ValidationResult::SUCCESS;
+  return result;
 }
 
 ValidationResult Validator::ValidateValue(const std::string& value_name,
@@ -86,7 +71,8 @@ ValidationResult Validator::ValidateValue(const std::string& value_name,
                                  ValidationScope& validation_scope) {
   // Check if param exist, and its mandatory
   if (!json.isMember(value_name)) {
-    if (validation_scope[kMandatory]) {
+    if (validation_scope[ValidationParams::MANDATORY]) {
+      LOG4CXX_ERROR(logger_, "Mandatory param " <<value_name <<" missing!" );
       return ValidationResult::INVALID_DATA;
     } else {
       return ValidationResult::SUCCESS;
@@ -96,19 +82,22 @@ ValidationResult Validator::ValidateValue(const std::string& value_name,
   ValidationResult result = ValidationResult::INVALID_DATA;
 
   // Check if param array. If it is array check array borders
-  if (validation_scope[kArray]) {
+  if (validation_scope[ValidationParams::ARRAY]) {
     if (!json[value_name].isArray()) {
+      LOG4CXX_ERROR(logger_, value_name <<" must be array!" );
       return ValidationResult::INVALID_DATA;
     }
 
     int size = json[value_name].size();
 
-    if ((validation_scope[kMaxSize] < size) ||
-        (validation_scope[kMinSize] > size)) {
+    if ((validation_scope[ValidationParams::MAX_SIZE] < size) ||
+        (validation_scope[ValidationParams::MIN_SIZE] > size)) {
+      LOG4CXX_ERROR(logger_, value_name <<" array wrong size!" );
       return ValidationResult::INVALID_DATA;
     }
 
     for (int i = 0; i < size; ++i) {
+      LOG4CXX_INFO(logger_, value_name <<" " <<i <<" array member validation." );
       result = Validate(json[value_name][i], validation_scope);
 
       if (ValidationResult::SUCCESS != result) {
@@ -118,6 +107,7 @@ ValidationResult Validator::ValidateValue(const std::string& value_name,
       outgoing_json[value_name][i] = json[value_name][i];
     }
   } else {
+    LOG4CXX_INFO(logger_, value_name <<" validation." );
     result = Validate(json[value_name], validation_scope);
 
     if (ValidationResult::SUCCESS != result) {
@@ -132,30 +122,42 @@ ValidationResult Validator::ValidateValue(const std::string& value_name,
 
 ValidationResult Validator::Validate(const Json::Value& json,
                                      ValidationScope& validation_scope) {
-  if (ValueType::STRING == validation_scope[kType]) {
+  if (ValueType::STRING == validation_scope[ValidationParams::TYPE]) {
     if (!json.isString()) {
+      LOG4CXX_ERROR(logger_, "Must be string!" );
       return ValidationResult::INVALID_DATA;
     }
 
     return ValidateStringValue(json.asCString(), validation_scope);
-  } else if (ValueType::INT == validation_scope[kType]) {
+  } else if (ValueType::INT == validation_scope[ValidationParams::TYPE]) {
     if (!json.isInt()) {
+      LOG4CXX_ERROR(logger_, "Must be integer!" );
       return ValidationResult::INVALID_DATA;
     }
 
     return ValidateIntValue(json.asInt(), validation_scope);
-  } else if (ValueType::DOUBLE == validation_scope[kType]) {
+  } else if (ValueType::DOUBLE == validation_scope[ValidationParams::TYPE]) {
       if (!json.isDouble()) {
+        LOG4CXX_ERROR(logger_, "Must be fractional!" );
         return ValidationResult::INVALID_DATA;
       }
 
       return ValidateDoubleValue(json.asDouble(), validation_scope);
-  } else if (ValueType::BOOL == validation_scope[kType]) {
+  } else if (ValueType::BOOL == validation_scope[ValidationParams::TYPE]) {
     if (!json.isBool()) {
-      return ValidationResult::INVALID_DATA;
+      LOG4CXX_ERROR(logger_, "Must be boolean!" );
+            return ValidationResult::INVALID_DATA;
     }
 
     return ValidationResult::SUCCESS;
+  } else if (ValueType::ENUM == validation_scope[ValidationParams::TYPE]) {
+    if (!json.isString()) {
+      LOG4CXX_ERROR(logger_,
+                    "Enum field must be represented as string in json!" );
+      return ValidationResult::INVALID_DATA;
+    }
+
+    return ValidateEnumValue(json.asCString(), validation_scope);
   } else {
     return ValidationResult::INVALID_DATA;
   }
@@ -163,8 +165,9 @@ ValidationResult Validator::Validate(const Json::Value& json,
 
 ValidationResult Validator::ValidateIntValue(int value,
                                             ValidationScope& validation_scope) {
-  if ((value < validation_scope[kMinValue]) ||
-      (value > validation_scope[kMaxValue])) {
+  if ((value < validation_scope[ValidationParams::MIN_VALUE]) ||
+      (value > validation_scope[ValidationParams::MAX_VALUE])) {
+    LOG4CXX_ERROR(logger_, "Out of scope!" );
     return ValidationResult::INVALID_DATA;
   }
 
@@ -173,8 +176,9 @@ ValidationResult Validator::ValidateIntValue(int value,
 
 ValidationResult Validator::ValidateDoubleValue(double value,
                                             ValidationScope& validation_scope) {
-  if ((value < validation_scope[kMinValue]) ||
-      (value > validation_scope[kMaxValue])) {
+  if ((value < validation_scope[ValidationParams::MIN_VALUE]) ||
+      (value > validation_scope[ValidationParams::MAX_VALUE])) {
+    LOG4CXX_ERROR(logger_, "Out of scope!" );
     return ValidationResult::INVALID_DATA;
   }
 
@@ -184,8 +188,28 @@ ValidationResult Validator::ValidateDoubleValue(double value,
 ValidationResult Validator::ValidateStringValue(const std::string& value,
                                             ValidationScope& validation_scope) {
   int size = value.size();
-  if ((size < validation_scope[kMinLength]) ||
-      (size > validation_scope[kMaxLength])) {
+  if ((size < validation_scope[ValidationParams::MIN_LENGTH]) ||
+      (size > validation_scope[ValidationParams::MAX_LENGTH])) {
+    LOG4CXX_ERROR(logger_, "Out of scope!" );
+    return ValidationResult::INVALID_DATA;
+  }
+
+  return ValidationResult::SUCCESS;
+}
+
+
+
+ValidationResult Validator::ValidateEnumValue(const std::string& value,
+                                            ValidationScope& validation_scope) {
+  if (validation_scope[ValidationParams::ENUM_TYPE] ==
+      EnumType::TRIGGER_SOURCE) {
+    if (value != enums_value::kMenu &&
+        value != enums_value::kVR) {
+      LOG4CXX_ERROR(logger_, "Wrong triggerSource enum value!");
+      return ValidationResult::INVALID_DATA;
+    }
+  } else {
+    LOG4CXX_ERROR(logger_, "Unknow enum!");
     return ValidationResult::INVALID_DATA;
   }
 

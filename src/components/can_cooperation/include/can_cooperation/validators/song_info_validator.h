@@ -62,13 +62,13 @@ class SongInfoValidator : public Validator, public utils::Singleton<SongInfoVali
   FRIEND_BASE_SINGLETON_CLASS(SongInfoValidator);
   SongInfoValidator();
   ~SongInfoValidator() {};
-
+/*
   std::map<std::string, int> name_;
   std::map<std::string, int> artist_;
   std::map<std::string, int> genre_;
   std::map<std::string, int> album_;
   std::map<std::string, int> year_;
-  std::map<std::string, int> duration_;
+  std::map<std::string, int> duration_;*/
 };
 
 }  // namespace valdiators

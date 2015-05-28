@@ -63,7 +63,7 @@ class LocationValidator : public Validator, public utils::Singleton<LocationVali
   LocationValidator();
   ~LocationValidator() {};
 
-  std::map<std::string, int> gps_coordinates_;
+/*  std::map<std::string, int> gps_coordinates_;*/
 };
 
 }  // namespace valdiators

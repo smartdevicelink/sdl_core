@@ -38,10 +38,10 @@ namespace can_cooperation {
 namespace validators {
 
 using namespace message_params;
-using namespace validation_params;
+
 
 SongInfoValidator::SongInfoValidator() {
-  // name="name"
+/*  // name="name"
   name_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
   name_[kMinLength] = 0;
   name_[kMaxLength] = 100;
@@ -88,7 +88,7 @@ SongInfoValidator::SongInfoValidator() {
   validation_scope_map_[kGenre] = &genre_;
   validation_scope_map_[kAlbum] = &album_;
   validation_scope_map_[kSongYear] = &year_;
-  validation_scope_map_[kDuration] = &duration_;
+  validation_scope_map_[kDuration] = &duration_;*/
 }
 
 ValidationResult SongInfoValidator::Validate(const Json::Value& json,
