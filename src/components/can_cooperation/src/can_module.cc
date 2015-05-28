@@ -91,7 +91,7 @@ void CANModule::SubscribeOnFunctions() {
   plugin_info_.mobile_function_list.push_back(
       MobileFunctionID::ON_INTERIOR_VEHICLE_DATA);
 
-    plugin_info_.hmi_function_list.push_back(
+  plugin_info_.hmi_function_list.push_back(
       hmi_api::get_interior_vehicle_data_capabilities);
   plugin_info_.hmi_function_list.push_back(hmi_api::get_interior_vehicle_data);
   plugin_info_.hmi_function_list.push_back(hmi_api::set_interior_vehicle_data);
