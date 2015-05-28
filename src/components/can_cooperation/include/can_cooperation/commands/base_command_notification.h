@@ -53,7 +53,8 @@ class BaseCommandNotification : public Command {
    *
    * @param message Message from mobile
    **/
-  explicit BaseCommandNotification(const application_manager::MessagePtr& message);
+  explicit BaseCommandNotification(
+      const application_manager::MessagePtr& message);
 
   /**
    * @brief BaseCommandNotification class destructor
@@ -69,7 +70,9 @@ class BaseCommandNotification : public Command {
   void Run();
 
  protected:
-  application_manager::MessagePtr message_;
+  application_manager::MessagePtr message() {
+    return message_;
+  }
   application_manager::ServicePtr service_;
 
   CANAppExtensionPtr GetAppExtension(
@@ -81,13 +84,11 @@ class BaseCommandNotification : public Command {
   // TODO(KKolodiy): need rename to Run
   virtual void Execute() = 0;
 
-  void set_need_reset(bool need_reset) {
-    need_reset_ = need_reset;
-  }
-
  private:
-  bool CheckPolicy();
-  bool need_reset_;
+  void NotifyApplications();
+  void NotifyOneApplication(application_manager::MessagePtr message);
+  bool CheckPolicy(application_manager::MessagePtr message);
+  application_manager::MessagePtr message_;
 };
 
 }  // namespace commands

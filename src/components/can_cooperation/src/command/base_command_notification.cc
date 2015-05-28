@@ -39,22 +39,19 @@ namespace can_cooperation {
 
 namespace commands {
 
-using namespace json_keys;
-
 CREATE_LOGGERPTR_GLOBAL(logger_, "CANCooperation")
 
 BaseCommandNotification::BaseCommandNotification(
     const application_manager::MessagePtr& message)
-  : message_(message),
-    need_reset_(false) {
+  : message_(message) {
   service_ = CANModule::instance()->service();
 
   Json::Value value;
   Json::Reader reader;
   reader.parse(message_->json_message(), value);
-  if (value.isMember(kParams)) {
+  if (value.isMember(json_keys::kParams)) {
     Json::FastWriter writer;
-    message_->set_json_message(writer.write(value[kParams]));
+    message_->set_json_message(writer.write(value[json_keys::kParams]));
   } else {
     message_->set_json_message("");
   }
@@ -87,36 +84,55 @@ CANAppExtensionPtr BaseCommandNotification::GetAppExtension(
 
 void BaseCommandNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (CheckPolicy()) {
-    Execute();  // run child's logic
-    service_->SendMessageToMobile(message_);
-  } else {
-    LOG4CXX_WARN(logger_,
-                 "Function \"" << message_->function_name() << "\" (#"
-                 << message_->function_id() << ") not allowed by policy");
+  NotifyApplications();
+}
+
+void BaseCommandNotification::NotifyApplications() {
+  typedef std::vector<application_manager::ApplicationSharedPtr> AppList;
+  AppList applications =
+      service_->GetApplications(CANModule::instance()->GetModuleID());
+  for (AppList::iterator i = applications.begin();
+      i != applications.end(); ++i) {
+    application_manager::MessagePtr message(
+        new application_manager::Message(*message_));
+    message->set_connection_key((*i)->app_id());
+    NotifyOneApplication(message);
   }
 }
 
-bool BaseCommandNotification::CheckPolicy() {
+void BaseCommandNotification::NotifyOneApplication(
+    application_manager::MessagePtr message) {
+  if (CheckPolicy(message)) {
+    Execute();  // run child's logic
+    service_->SendMessageToMobile(message);
+  } else {
+    LOG4CXX_WARN(logger_,
+                 "Function \"" << message->function_name() << "\" (#"
+                 << message->function_id() << ") not allowed by policy");
+  }
+}
+
+bool BaseCommandNotification::CheckPolicy(
+    application_manager::MessagePtr message) {
   LOG4CXX_AUTO_TRACE(logger_);
   application_manager::ApplicationSharedPtr app =
-      service_->GetApplication(message_->connection_key());
+      service_->GetApplication(message->connection_key());
 
   if (!app) {
     LOG4CXX_WARN(
         logger_,
-        "Application doesn't " << message_->connection_key() << " registered");
+        "Application doesn't " << message->connection_key() << " registered");
     return false;
   }
 
   mobile_apis::Result::eType permission =
-      service_->CheckPolicyPermissions(message_);
+      service_->CheckPolicyPermissions(message);
 
   // TODO(KKolodiy): get zone and params from message
   SeatLocation zone = 10;
   std::vector<std::string> params;
   application_manager::TypeAccess access = service_->CheckAccess(
-      app->app_id(), message_->function_name(), params, zone);
+      app->app_id(), message->function_name(), params, zone);
 
   return permission == mobile_apis::Result::eType::SUCCESS
       && access == application_manager::TypeAccess::kAllowed;
