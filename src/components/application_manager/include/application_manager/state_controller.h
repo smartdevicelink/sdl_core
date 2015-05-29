@@ -58,6 +58,9 @@ class StateController : public event_engine::EventObserver {
     template <bool SendActivateApp>
     void SetRegularState(ApplicationSharedPtr app,
                          HmiStatePtr state) {
+      if (!app) {
+        return;
+      }
       DCHECK_OR_RETURN_VOID(state);
       DCHECK_OR_RETURN_VOID(state->state_id() == HmiState::STATE_ID_REGULAR);
 
@@ -89,6 +92,9 @@ class StateController : public event_engine::EventObserver {
     void SetRegularState(ApplicationSharedPtr app,
                          const mobile_apis::HMILevel::eType hmi_level,
                          const mobile_apis::AudioStreamingState::eType audio_state) {
+      if (!app) {
+        return;
+      }
       HmiStatePtr prev_regular = app->RegularHmiState();
       DCHECK_OR_RETURN_VOID(prev_regular);
       HmiStatePtr hmi_state = CreateHmiState(app->app_id(),
@@ -109,6 +115,9 @@ class StateController : public event_engine::EventObserver {
     template <bool SendActivateApp>
     void SetRegularState(ApplicationSharedPtr app,
                          const mobile_apis::HMILevel::eType hmi_level) {
+      if (!app) {
+        return;
+      }
       HmiStatePtr prev_regular = app->RegularHmiState();
       DCHECK_OR_RETURN_VOID(prev_regular);
       HmiStatePtr hmi_state = CreateHmiState(app->app_id(),
@@ -132,6 +141,9 @@ class StateController : public event_engine::EventObserver {
                          const mobile_apis::HMILevel::eType hmi_level,
                          const mobile_apis::AudioStreamingState::eType audio_state,
                          const mobile_apis::SystemContext::eType system_context) {
+      if (!app) {
+        return;
+      }
 
       HmiStatePtr hmi_state = CreateHmiState(app->app_id(),
                                              HmiState::StateID::STATE_ID_REGULAR);
@@ -149,7 +161,9 @@ class StateController : public event_engine::EventObserver {
      */
     void SetRegularState(ApplicationSharedPtr app,
                          const mobile_apis::SystemContext::eType system_context) {
-
+      if (!app) {
+        return;
+      }
       HmiStatePtr prev_regular = app->RegularHmiState();
       DCHECK_OR_RETURN_VOID(prev_regular);
       HmiStatePtr hmi_state = CreateHmiState(app->app_id(),
