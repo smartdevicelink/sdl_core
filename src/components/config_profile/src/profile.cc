@@ -199,8 +199,8 @@ const uint32_t kDefaultPutFileRequestInNone = 5;
 const uint32_t kDefaultDeleteFileRequestInNone = 5;
 const uint32_t kDefaultListFilesRequestInNone = 5;
 const uint32_t kDefaultTimeout = 10000;
-const uint32_t kDefaultAppResumingTimeout = 3;
-const uint32_t kDefaultAppSavePersistentDataTimeout = 10;
+const uint32_t kDefaultAppResumingTimeout = 3000;
+const uint32_t kDefaultAppSavePersistentDataTimeout = 10000;
 const uint32_t kDefaultResumptionDelayBeforeIgn = 30;
 const uint32_t kDefaultResumptionDelayAfterIgn = 30;
 const uint32_t kDefaultHashStringSize = 32;
@@ -218,7 +218,8 @@ const std::pair<uint32_t, uint32_t> kGetVehicleDataFrequency = { 5, 1 };
 const std::pair<uint32_t, uint32_t> kStartStreamRetryAmount = { 3, 1 };
 const uint32_t kDefaultMaxThreadPoolSize = 2;
 const int kDefaultIAP2HubConnectAttempts = 0;
-const int kDefaultIAPHubConnectionWaitTimeout = 10;
+const int kDefaultIAPHubConnectionWaitTimeout = 10000;
+const int kDefaultIAPArmEventTimeout = 500;
 const uint16_t kDefaultTTSGlobalPropertiesTimeout = 20;
 // TCP MTU - header size = 1500 - 12
 const size_t kDefaultMaximumPayloadSize = 1500 - 12;
@@ -1390,7 +1391,7 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_VALUE(iap_hub_connection_wait_timeout_,
                     kIAPHubConnectionWaitTimeoutKey, kIAPSection);
- 
+
   ReadUIntValue(&default_hub_protocol_index_, kDefaultHubProtocolIndex, kIAPSection, kDefaultHubProtocolIndexKey);
 
   LOG_UPDATED_VALUE(default_hub_protocol_index_, kDefaultHubProtocolIndexKey, kIAPSection);

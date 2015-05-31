@@ -123,7 +123,8 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     sync_primitives::AutoLock lock(timer_pool_lock_);
     ApplicationManagerTimerPtr clearTimerPoolTimer(new TimerThread<ApplicationManagerImpl>(
         "ClearTimerPoolTimer", this, &ApplicationManagerImpl::ClearTimerPool, true));
-    clearTimerPoolTimer->start(10);
+    const uint32_t timeout_ms = 10000;
+    clearTimerPoolTimer->start(timeout_ms);
     timer_pool_.push_back(clearTimerPoolTimer);
 }
 
@@ -2868,7 +2869,8 @@ void ApplicationManagerImpl::AddAppToTTSGlobalPropertiesList(
   if (1 == tts_global_properties_app_list_.size()) {
     LOG4CXX_INFO(logger_, "Start tts_global_properties_timer_");
     tts_global_properties_app_list_lock_.Release();
-    tts_global_properties_timer_.start(1);
+    const uint32_t timeout_ms = 1000;
+    tts_global_properties_timer_.start(timeout_ms);
     return;
   }
   tts_global_properties_app_list_lock_.Release();

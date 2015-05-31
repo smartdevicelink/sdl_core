@@ -33,8 +33,9 @@
 #ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_STATISTICS_MANAGER_H_
 #define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_STATISTICS_MANAGER_H_
 
-#include "usage_statistics/counter.h"
 #include <cassert>
+#include "usage_statistics/counter.h"
+#include "utils/date_time.h"
 
 namespace usage_statistics {
 
@@ -107,7 +108,7 @@ AppStopwatch::~AppStopwatch() {
 
 void AppStopwatch::Start(AppStopwatchId stopwatch_type) {
   stopwatch_type_ = stopwatch_type;
-  timer_->start(time_out_);
+  timer_->start(time_out_ * date_time::DateTime::MILLISECONDS_IN_SECOND );
 }
 
 void AppStopwatch::Switch(AppStopwatchId stopwatch_type) {
