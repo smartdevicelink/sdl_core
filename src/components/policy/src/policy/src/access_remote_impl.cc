@@ -93,39 +93,6 @@ struct IsTypeAccess {
   }
 };
 
-Match::Match(const FunctionalGroupings& groups, const PTString& rpc,
-             const RemoteControlParams& params)
-    : groups_(groups),
-      rpc_(rpc),
-      params_(params) {
-}
-
-bool Match::operator ()(const PTString& item) const {
-  const FunctionalGroupings::const_iterator i = groups_.find(item);
-  if (i == groups_.end()) {
-    return false;
-  }
-  const policy_table::Rpc::const_iterator j = i->second.rpcs.find(rpc_);
-  if (j == i->second.rpcs.end()) {
-    return false;
-  }
-  const policy_table::Parameters& params = *j->second.parameters;
-  if (params_.size() != params.size()) {
-    return false;
-  }
-  for (RemoteControlParams::const_iterator j = params_.begin();
-      j != params_.end(); ++j) {
-    policy_table::Parameter value;
-    if (!EnumFromJsonString(*j, &value)) {
-      return false;
-    }
-    if (std::find(params.begin(), params.end(), value) == params.end()) {
-      return false;
-    }
-  }
-  return true;
-}
-
 struct ToHMIType {
   policy_table::AppHMITypes::value_type operator ()(int item) const {
     policy_table::AppHMIType type = static_cast<policy_table::AppHMIType>(item);
@@ -283,26 +250,6 @@ void AccessRemoteImpl::set_enabled(bool value) {
 bool AccessRemoteImpl::IsEnabled() const {
   LOG4CXX_AUTO_TRACE(logger_);
   return enabled_;
-}
-
-PTString AccessRemoteImpl::FindGroup(const Subject& who, const PTString& rpc,
-                                     const RemoteControlParams& params) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (!cache_->IsApplicationRepresented(who.app_id)) {
-    return "";
-  }
-
-  const policy_table::Strings& groups =
-      *cache_->pt_->policy_table.app_policies[who.app_id].groups_nonPrimaryRC;
-  const FunctionalGroupings& all_groups = cache_->pt_->policy_table
-      .functional_groupings;
-  policy_table::Strings::const_iterator i = std::find_if(
-      groups.begin(), groups.end(), Match(all_groups, rpc, params));
-
-  if (i != groups.end()) {
-    return *i;
-  }
-  return "";
 }
 
 void AccessRemoteImpl::SetDefaultHmiTypes(const std::string& app_id,

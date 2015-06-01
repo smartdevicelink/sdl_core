@@ -178,16 +178,6 @@ class AccessRemote {
   virtual bool CheckParameters(/* module, zone, params */) const = 0;
 
   /**
-   * Find group by RPC name and list of parameters
-   * @param who subject is dev_id and app_id
-   * @param rpc name of RPC
-   * @param params parameters list
-   * @return name of group
-   */
-  virtual PTString FindGroup(const Subject& who, const PTString& rpc,
-                             const RemoteControlParams& params) const = 0;
-
-  /**
    * Sets HMI types if application has default policy permissions
    * @param app_id ID application
    * @param hmi_types list of HMI types

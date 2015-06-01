@@ -43,17 +43,6 @@ using policy_table::FunctionalGroupings;
 
 namespace policy {
 
-struct Match {
- private:
-  const FunctionalGroupings& groups_;
-  const PTString& rpc_;
-  const RemoteControlParams& params_;
- public:
-  Match(const FunctionalGroupings& groups, const PTString& rpc,
-        const RemoteControlParams& params);
-  bool operator ()(const PTString& item) const;
-};
-
 class AccessRemoteImpl : public AccessRemote {
  public:
   AccessRemoteImpl();
@@ -76,8 +65,6 @@ class AccessRemoteImpl : public AccessRemote {
   virtual bool CheckModuleType(const PTString& app_id,
                                policy_table::ModuleType module) const;
   virtual bool CheckParameters(/* module, zone, params */) const;
-  virtual PTString FindGroup(const Subject& who, const PTString& rpc,
-                             const RemoteControlParams& params) const;
   virtual void SetDefaultHmiTypes(const std::string& app_id,
                                   const std::vector<int>& hmi_types);
   virtual const policy_table::Strings& GetGroups(const PTString& device_id,
