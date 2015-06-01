@@ -257,6 +257,8 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   app_policies["default"]["keep_context"] = Json::Value(true);
   app_policies["default"]["steal_focus"] = Json::Value(true);
   app_policies["default"]["certificate"] = Json::Value("sign");
+  app_policies["default"]["moduleType"] = Json::Value(Json::arrayValue);
+  app_policies["default"]["moduleType"][0] = Json::Value("RADIO");
   app_policies["1234"] = Json::Value(Json::objectValue);
   app_policies["1234"]["memory_kb"] = Json::Value(50);
   app_policies["1234"]["heart_beat_timeout_ms"] = Json::Value(100);

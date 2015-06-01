@@ -323,6 +323,32 @@ bool EnumFromJsonString(const std::string& literal, Input* result) {
   }
 }
 
+bool IsValidEnum(ModuleType val) {
+  switch (val) {
+    case MT_CLIMATE: return true;
+    case MT_RADIO: return true;
+    default: return false;
+  }
+}
+const char* EnumToJsonString(ModuleType val) {
+  switch (val) {
+    case MT_CLIMATE: return "CLIMATE";
+    case MT_RADIO: return "RADIO";
+    default: return "";
+  }
+}
+bool EnumFromJsonString(const std::string& literal, ModuleType* result) {
+  if ("CLIMATE" == literal) {
+    *result = MT_CLIMATE;
+    return true;
+  } else if ("RADIO" == literal) {
+    *result = MT_RADIO;
+    return true;
+  } else {
+    return false;
+  }
+}
+
 const std::string kDefaultApp = "default";
 const std::string kPreDataConsentApp = "pre_DataConsent";
 const std::string kDeviceApp = "device";

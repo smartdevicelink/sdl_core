@@ -38,6 +38,7 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     groups_primaryRC(impl::ValueMember(value__, "groups_primaryRC")),
     groups_nonPrimaryRC(impl::ValueMember(value__, "groups_nonPrimaryRC")),
     nicknames(impl::ValueMember(value__, "nicknames")),
+    moduleType(impl::ValueMember(value__, "moduleType")),
     AppHMIType(impl::ValueMember(value__, "AppHMIType")),
     priority(impl::ValueMember(value__, "priority")),
     memory_kb(impl::ValueMember(value__, "memory_kb")),
@@ -50,6 +51,7 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField("groups_primaryRC", groups_primaryRC, &result__);
   impl::WriteJsonField("groups_nonPrimaryRC", groups_nonPrimaryRC, &result__);
   impl::WriteJsonField("nicknames", nicknames, &result__);
+  impl::WriteJsonField("moduleType", moduleType, &result__);
   impl::WriteJsonField("AppHMIType", AppHMIType, &result__);
   impl::WriteJsonField("priority", priority, &result__);
   impl::WriteJsonField("memory_kb", memory_kb, &result__);
@@ -103,6 +105,9 @@ bool ApplicationParams::struct_empty() const {
   if (nicknames.is_initialized()) {
     return false;
   }
+  if (moduleType.is_initialized()) {
+    return false;
+  }
 
   if (AppHMIType.is_initialized()) {
     return false;
@@ -139,6 +144,9 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
   if (!nicknames.is_valid()) {
     nicknames.ReportErrors(&report__->ReportSubobject("nicknames"));
   }
+  if (!moduleType.is_valid()) {
+    moduleType.ReportErrors(&report__->ReportSubobject("moduleType"));
+  }
   if (!AppHMIType.is_valid()) {
     AppHMIType.ReportErrors(&report__->ReportSubobject("AppHMIType"));
   }
@@ -162,6 +170,7 @@ void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
   groups.SetPolicyTableType(pt_type);
   groups_primaryRC.SetPolicyTableType(pt_type);
   groups_nonPrimaryRC.SetPolicyTableType(pt_type);
+  moduleType.SetPolicyTableType(pt_type);
   priority.SetPolicyTableType(pt_type);
   memory_kb.SetPolicyTableType(pt_type);
   heart_beat_timeout_ms.SetPolicyTableType(pt_type);
