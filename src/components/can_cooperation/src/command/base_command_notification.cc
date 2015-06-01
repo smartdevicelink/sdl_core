@@ -84,7 +84,27 @@ CANAppExtensionPtr BaseCommandNotification::GetAppExtension(
 
 void BaseCommandNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (CheckPolicy()) {
+  NotifyApplications();
+}
+
+void BaseCommandNotification::NotifyApplications() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  typedef std::vector<application_manager::ApplicationSharedPtr> AppList;
+  AppList applications =
+      service_->GetApplications(CANModule::instance()->GetModuleID());
+  for (AppList::iterator i = applications.begin();
+      i != applications.end(); ++i) {
+    application_manager::MessagePtr message(
+        new application_manager::Message(*message_));
+    message->set_connection_key((*i)->app_id());
+    NotifyOneApplication(message);
+  }
+}
+
+void BaseCommandNotification::NotifyOneApplication(
+    application_manager::MessagePtr message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (CheckPolicy(message)) {
     Execute();  // run child's logic
     service_->SendMessageToMobile(message);
   } else {
