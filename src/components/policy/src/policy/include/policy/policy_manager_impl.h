@@ -169,16 +169,16 @@ class PolicyManagerImpl : public PolicyManager {
     virtual void OnAppsSearchCompleted();
 
 #ifdef SDL_REMOTE_CONTROL
-    virtual TypeAccess CheckAccess(const PTString& app_id, const PTString& rpc,
+    virtual TypeAccess CheckAccess(const PTString& app_id,
+                                   const PTString& module,
                                    const RemoteControlParams& params,
                                    const SeatLocation& zone);
-    virtual void SetAccess(const PTString& app_id, const PTString& group_name,
-                           const SeatLocation zone, bool allowed);
-    virtual void ResetAccess(const PTString& rpc);
-    virtual void ResetAccess(const PTString& group_name,
-                             const SeatLocation zone);
+    virtual void SetAccess(const PTString& app_id, const PTString& module,
+                           bool allowed);
+    virtual void ResetAccess(const PTString& app_id);
+    virtual void ResetAccessByModule(const PTString& module);
     virtual void SetPrimaryDevice(const PTString& dev_id, const PTString& input);
-    virtual PTString PrimaryDevice() const;    
+    virtual PTString PrimaryDevice() const;
     virtual void SetRemoteControl(bool enabled);
 #endif  // SDL_REMOTE_CONTROL
 

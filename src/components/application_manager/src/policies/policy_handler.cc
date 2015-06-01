@@ -1299,20 +1299,19 @@ void PolicyHandler::Add(const std::string& app_id,
 
 #ifdef SDL_REMOTE_CONTROL
 application_manager::TypeAccess PolicyHandler::CheckAccess(
-    const PTString& app_id, const PTString& rpc,
+    const PTString& app_id, const PTString& module,
     const RemoteControlParams& params, const SeatLocation& zone) {
   POLICY_LIB_CHECK(application_manager::TypeAccess::kNone);
-  policy::TypeAccess access = policy_manager_->CheckAccess(app_id, rpc, params,
-                                                           zone);
+  policy::TypeAccess access = policy_manager_->CheckAccess(app_id, module,
+                                                           params, zone);
   return ConvertTypeAccess(access);
 }
 
 void PolicyHandler::SetAccess(const PTString& app_id,
-                              const PTString& group_name,
-                              const SeatLocation& zone,
+                              const PTString& module,
                               bool allowed) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->SetAccess(app_id, group_name, zone, allowed);
+  policy_manager_->SetAccess(app_id, module, allowed);
 }
 
 void PolicyHandler::ResetAccess(const PTString& app_id) {
@@ -1320,10 +1319,9 @@ void PolicyHandler::ResetAccess(const PTString& app_id) {
   policy_manager_->ResetAccess(app_id);
 }
 
-void PolicyHandler::ResetAccess(const std::string& group_name,
-                                const SeatLocation& zone) {
+void PolicyHandler::ResetAccessByModule(const std::string& module) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->ResetAccess(group_name, zone);
+  policy_manager_->ResetAccessByModule(module);
 }
 
 void PolicyHandler::SetPrimaryDevice(const PTString& dev_id,

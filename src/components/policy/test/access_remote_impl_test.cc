@@ -38,7 +38,7 @@ namespace policy {
 TEST(AccessRemoteImplTest, Allow) {
   AccessRemoteImpl access_remote;
   Subject who = { "dev1", "12345" };
-  Object what = { "group1", 1 };
+  Object what = { policy_table::MT_RADIO };
   access_remote.Allow(who, what);
   AccessRemoteImpl::AccessControlList::const_iterator i = access_remote.acl_
       .find(what);
@@ -52,21 +52,17 @@ TEST(AccessRemoteImplTest, KeyMapTest) {
   // Testing operator < to use as key of map
   AccessRemoteImpl access_remote;
   Subject who = { "dev1", "12345" };
-  Object what1 = { "1", 1 };
-  Object what2 = { "1", 2 };
-  Object what3 = { "2", 1 };
-  Object what4 = { "2", 2 };
+  Object what1 = { policy_table::MT_RADIO };
+  Object what2 = { policy_table::MT_CLIMATE };
   access_remote.Allow(who, what1);
   access_remote.Allow(who, what2);
-  access_remote.Allow(who, what3);
-  access_remote.Allow(who, what4);
-  ASSERT_EQ(4, access_remote.acl_.size());
+  ASSERT_EQ(2, access_remote.acl_.size());
 }
 
 TEST(AccessRemoteImplTest, Deny) {
   AccessRemoteImpl access_remote;
   Subject who = { "dev1", "12345" };
-  Object what = { "group1", 1 };
+  Object what = { policy_table::MT_RADIO };
   access_remote.Deny(who, what);
   AccessRemoteImpl::AccessControlList::const_iterator i = access_remote.acl_
       .find(what);
@@ -79,7 +75,7 @@ TEST(AccessRemoteImplTest, Deny) {
 TEST(AccessRemoteImplTest, ChangeAccess) {
   AccessRemoteImpl access_remote;
   Subject who = { "dev1", "12345" };
-  Object what = { "group1", 1 };
+  Object what = { policy_table::MT_RADIO };
   access_remote.Allow(who, what);
   ASSERT_EQ(TypeAccess::kAllowed, access_remote.acl_[what][who]);
   access_remote.Deny(who, what);
@@ -91,8 +87,8 @@ TEST(AccessRemoteImplTest, ChangeAccess) {
 TEST(AccessRemoteImplTest, ResetBySubject) {
   AccessRemoteImpl access_remote;
   Subject who = { "dev1", "12345" };
-  Object what1 = { "group1", 1 };
-  Object what2 = { "group2", 2 };
+  Object what1 = { policy_table::MT_RADIO };
+  Object what2 = { policy_table::MT_CLIMATE };
   access_remote.Allow(who, what1);
   access_remote.Deny(who, what2);
   ASSERT_EQ(2, access_remote.acl_.size());
@@ -109,7 +105,7 @@ TEST(AccessRemoteImplTest, ResetByObject) {
   AccessRemoteImpl access_remote;
   Subject who1 = { "dev1", "12345" };
   Subject who2 = { "dev2", "123456" };
-  Object what = { "group1", 1 };
+  Object what = { policy_table::MT_RADIO };
   access_remote.Allow(who1, what);
   access_remote.Deny(who2, what);
   ASSERT_EQ(1, access_remote.acl_.size());
@@ -122,7 +118,7 @@ TEST(AccessRemoteImplTest, ResetByObject) {
 TEST(AccessRemoteImplTest, CheckAllowed) {
   AccessRemoteImpl access_remote;
   Subject who = { "dev1", "12345" };
-  Object what = { "group1", 1 };
+  Object what = { policy_table::MT_RADIO };
   access_remote.Allow(who, what);
 
   EXPECT_EQ(TypeAccess::kAllowed, access_remote.Check(who, what));
@@ -132,7 +128,7 @@ TEST(AccessRemoteImplTest, CheckDisallowed) {
   AccessRemoteImpl access_remote;
   Subject who = { "dev1", "12345" };
   Subject who1 = { "dev1", "123456" };
-  Object what = { "group1", 1 };
+  Object what = { policy_table::MT_RADIO };
 
   access_remote.Allow(who, what);
   EXPECT_EQ(TypeAccess::kDisallowed, access_remote.Check(who1, what));
@@ -146,7 +142,7 @@ TEST(AccessRemoteImplTest, CheckManual) {
   AccessRemoteImpl access_remote;
   Subject who = { "dev1", "12345" };
   Subject who1 = { "dev1", "123456" };
-  Object what = { "group1", 1 };
+  Object what = { policy_table::MT_RADIO };
 
   EXPECT_EQ(TypeAccess::kManual, access_remote.Check(who, what));
 

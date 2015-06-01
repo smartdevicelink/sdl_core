@@ -992,7 +992,6 @@ TypeAccess PolicyManagerImpl::CheckDriverConsent(
 
 void PolicyManagerImpl::SetAccess(const PTString& app_id,
                                   const PTString& module,
-                                  const SeatLocation zone,
                                   bool allowed) {
   LOG4CXX_AUTO_TRACE(logger_);
   policy_table::ModuleType module_type;
@@ -1018,8 +1017,7 @@ void PolicyManagerImpl::ResetAccess(const PTString& app_id) {
   access_remote_->Reset(who);
 }
 
-void PolicyManagerImpl::ResetAccess(const PTString& module,
-                                    const SeatLocation zone) {
+void PolicyManagerImpl::ResetAccessByModule(const PTString& module) {
   LOG4CXX_AUTO_TRACE(logger_);
   policy_table::ModuleType module_type;
   bool is_valid = EnumFromJsonString(module, &module_type);

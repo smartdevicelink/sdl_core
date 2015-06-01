@@ -313,11 +313,12 @@ bool BaseCommandRequest::CheckPolicy() {
   }
 
   CANAppExtensionPtr extension = GetAppExtension(app_);
-  // TODO(KKolodiy): get zone and params from message
+  // TODO(KKolodiy): get module type, zone and params from message
   SeatLocation zone = 10;
   std::vector<std::string> params;
+  std::string module = "RADIO";
   application_manager::TypeAccess access = service_->CheckAccess(
-      app_->app_id(), message_->function_name(), params, zone);
+      app_->app_id(), module, params, zone);
 
   switch (access) {
     case application_manager::kAllowed:
@@ -375,10 +376,9 @@ void BaseCommandRequest::ProcessAccessResponse(
   } else {
     SendResponse(false, result_codes::kDisallowed, "");
   }
-  // TODO(KKolodiy): get group name and zone from message
-  std::string group_name = "Radio";
-  SeatLocation zone = 10;
-  service_->SetAccess(app_->app_id(), group_name, zone, allowed);
+  // TODO(KKolodiy): get module from message
+  std::string module = "RADIO";
+  service_->SetAccess(app_->app_id(), module, allowed);
 }
 
 }  // namespace commands

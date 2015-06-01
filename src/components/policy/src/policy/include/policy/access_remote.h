@@ -74,7 +74,7 @@ inline bool operator==(const Object& x, const Object& y) {
   return x == y;
 }
 inline std::ostream& operator<<(std::ostream& output, const Object& what) {
-  output << "Object(module:" << what.module << ")";
+  output << "Object(module:" << EnumToJsonString(what.module) << ")";
   return output;
 }
 
@@ -163,17 +163,17 @@ class AccessRemote {
   virtual TypeAccess Check(const Subject& who, const Object& what) const = 0;
 
   /**
-   *
-   * @param app_id
-   * @param module
-   * @return
+   * Checks permissions for module
+   * @param app_id application ID
+   * @param module type
+   * @return true if allowed
    */
   virtual bool CheckModuleType(const PTString& app_id,
                                policy_table::ModuleType module) const = 0;
 
   /**
-   *
-   * @return
+   * Checks permissions for parameters
+   * @return true if allowed
    */
   virtual bool CheckParameters(/* module, zone, params */) const = 0;
 
