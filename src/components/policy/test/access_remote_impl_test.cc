@@ -150,5 +150,157 @@ TEST(AccessRemoteImplTest, CheckManual) {
   EXPECT_EQ(TypeAccess::kManual, access_remote.Check(who, what));
 }
 
+TEST(AccessRemoteImplTest, CheckModuleType) {
+  AccessRemoteImpl access_remote;
+  access_remote.cache_->pt_ = new policy_table::Table();
+
+  // No application
+  EXPECT_FALSE(access_remote.CheckModuleType("1234", policy_table::MT_RADIO));
+
+  // No modules
+  policy_table::ApplicationPolicies& apps = access_remote.cache_->pt_
+      ->policy_table.app_policies;
+  apps["1234"];
+  EXPECT_FALSE(access_remote.CheckModuleType("1234", policy_table::MT_RADIO));
+
+  // Empty modules
+  policy_table::ModuleTypes& modules = *apps["1234"].moduleType;
+  modules.mark_initialized();
+  EXPECT_TRUE(access_remote.CheckModuleType("1234", policy_table::MT_RADIO));
+  EXPECT_TRUE(access_remote.CheckModuleType("1234", policy_table::MT_CLIMATE));
+
+  // Specific modules
+  modules.push_back(policy_table::MT_RADIO);
+  EXPECT_TRUE(access_remote.CheckModuleType("1234", policy_table::MT_RADIO));
+  EXPECT_FALSE(access_remote.CheckModuleType("1234", policy_table::MT_CLIMATE));
+}
+
+TEST(AccessRemoteImplTest, SetPrimaryDevice) {
+  AccessRemoteImpl access_remote;
+  access_remote.cache_->pt_ = new policy_table::Table();
+
+  // One device
+  access_remote.SetPrimaryDevice("dev1", "GUI");
+  policy_table::DeviceData& devices = *access_remote.cache_->pt_->policy_table
+      .device_data;
+  policy_table::ConsentRecords& record =
+      (*devices["dev1"].user_consent_records)[kPrimary];
+  EXPECT_TRUE(*record.is_consented);
+  EXPECT_EQ("dev1", access_remote.PrimaryDevice());
+
+  // Few devices
+  access_remote.SetPrimaryDevice("dev2", "GUI");
+  access_remote.SetPrimaryDevice("dev3", "GUI");
+  access_remote.SetPrimaryDevice("dev4", "GUI");
+  access_remote.SetPrimaryDevice("dev1", "GUI");
+  policy_table::ConsentRecords& record1 =
+      (*devices["dev1"].user_consent_records)[kPrimary];
+  EXPECT_TRUE(*record1.is_consented);
+  policy_table::ConsentRecords& record2 =
+      (*devices["dev2"].user_consent_records)[kPrimary];
+  EXPECT_FALSE(*record2.is_consented);
+  policy_table::ConsentRecords& record3 =
+      (*devices["dev3"].user_consent_records)[kPrimary];
+  EXPECT_FALSE(*record3.is_consented);
+  policy_table::ConsentRecords& record4 =
+      (*devices["dev4"].user_consent_records)[kPrimary];
+  EXPECT_FALSE(*record4.is_consented);
+  EXPECT_EQ("dev1", access_remote.PrimaryDevice());
+}
+
+TEST(AccessRemoteImplTest, EnableDisable) {
+  AccessRemoteImpl access_remote;
+  access_remote.cache_->pt_ = new policy_table::Table();
+  policy_table::ModuleConfig& config = access_remote.cache_->pt_->policy_table
+      .module_config;
+
+  // Country is enabled
+  access_remote.enabled_ = true;
+  access_remote.country_consent_ = true;
+  *config.country_consent_passengersRC = true;
+  access_remote.Enable();
+  EXPECT_TRUE(*config.user_consent_passengerRC);
+  EXPECT_TRUE(*config.country_consent_passengersRC);
+  EXPECT_TRUE(access_remote.country_consent_);
+  EXPECT_TRUE(access_remote.IsEnabled());
+
+  access_remote.Disable();
+  EXPECT_FALSE(*config.user_consent_passengerRC);
+  EXPECT_TRUE(*config.country_consent_passengersRC);
+  EXPECT_TRUE(access_remote.country_consent_);
+  EXPECT_FALSE(access_remote.IsEnabled());
+
+  // Country is disabled
+  access_remote.enabled_ = false;
+  access_remote.country_consent_ = false;
+  *config.country_consent_passengersRC = false;
+  access_remote.Enable();
+  EXPECT_TRUE(*config.user_consent_passengerRC);
+  EXPECT_FALSE(*config.country_consent_passengersRC);
+  EXPECT_FALSE(access_remote.country_consent_);
+  EXPECT_FALSE(access_remote.IsEnabled());
+
+  access_remote.Disable();
+  EXPECT_FALSE(*config.user_consent_passengerRC);
+  EXPECT_FALSE(*config.country_consent_passengersRC);
+  EXPECT_FALSE(access_remote.country_consent_);
+  EXPECT_FALSE(access_remote.IsEnabled());
+}
+
+TEST(AccessRemoteImplTest, SetDefaultHmiTypes) {
+  AccessRemoteImpl access_remote;
+
+  std::vector<int> hmi_expected;
+  hmi_expected.push_back(2);
+  hmi_expected.push_back(6);
+  access_remote.SetDefaultHmiTypes("1234", hmi_expected);
+
+  EXPECT_NE(access_remote.hmi_types_.end(),
+            access_remote.hmi_types_.find("1234"));
+  policy_table::AppHMITypes& hmi_output = access_remote.hmi_types_["1234"];
+  EXPECT_EQ(2, hmi_output.size());
+  EXPECT_EQ(policy_table::AHT_MEDIA, hmi_output[0]);
+  EXPECT_EQ(policy_table::AHT_SOCIAL, hmi_output[1]);
+}
+
+TEST(AccessRemoteImplTest, GetGroups) {
+  AccessRemoteImpl access_remote;
+  access_remote.primary_device_ = "dev1";
+  access_remote.enabled_ = true;
+  access_remote.hmi_types_["1234"].push_back(policy_table::AHT_REMOTE_CONTROL);
+
+  access_remote.cache_->pt_ = new policy_table::Table();
+  policy_table::ApplicationPolicies& apps = access_remote.cache_->pt_
+      ->policy_table.app_policies;
+  apps["1234"].groups.push_back("group_default");
+  apps["1234"].groups_nonPrimaryRC->push_back("group_non_primary");
+  apps["1234"].groups_primaryRC->push_back("group_primary");
+  apps["1234"].AppHMIType->push_back(policy_table::AHT_MEDIA);
+
+  // Default groups
+  const policy_table::Strings& groups1 = access_remote.GetGroups("dev1",
+                                                                 "1234");
+  EXPECT_EQ(std::string("group_default"), std::string(groups1[0]));
+
+  // Primary groups
+  apps["1234"].set_to_string(policy::kDefaultId);
+  const policy_table::Strings& groups2 = access_remote.GetGroups("dev1",
+                                                                 "1234");
+  EXPECT_EQ(std::string("group_primary"), std::string(groups2[0]));
+
+  // Non primary groups
+  apps["1234"].set_to_string(policy::kDefaultId);
+  const policy_table::Strings& groups3 = access_remote.GetGroups("dev2",
+                                                                 "1234");
+  EXPECT_EQ(std::string("group_non_primary"), std::string(groups3[0]));
+
+  // Empty groups
+  access_remote.enabled_ = false;
+  apps["1234"].set_to_string(policy::kDefaultId);
+  const policy_table::Strings& groups4 = access_remote.GetGroups("dev2",
+                                                                 "1234");
+  EXPECT_TRUE(groups4.empty());
+}
+
 }  // namespace policy
 

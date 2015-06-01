@@ -636,6 +636,10 @@ private:
   BackgroundBackuper* backuper_;
 
   friend class AccessRemoteImpl;
+  FRIEND_TEST(AccessRemoteImplTest, CheckModuleType);
+  FRIEND_TEST(AccessRemoteImplTest, SetPrimaryDevice);
+  FRIEND_TEST(AccessRemoteImplTest, EnableDisable);
+  FRIEND_TEST(AccessRemoteImplTest, GetGroups);
 };
 } // policy
 

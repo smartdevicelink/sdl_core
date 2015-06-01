@@ -100,6 +100,8 @@ struct ToHMIType {
       LOG4CXX_WARN(logger_, "HMI types isn't known " << item);
       type = policy_table::AHT_DEFAULT;
     }
+    LOG4CXX_DEBUG(logger_,
+                  "HMI type: " << item << " - " << EnumToJsonString(type));
     return policy_table::AppHMITypes::value_type(type);
   }
 };
@@ -274,12 +276,6 @@ void AccessRemoteImpl::SetDefaultHmiTypes(const std::string& app_id,
   HMIList::mapped_type types;
   std::transform(hmi_types.begin(), hmi_types.end(), std::back_inserter(types),
                  ToHMIType());
-  std::vector<int>::const_iterator i;
-  HMIList::mapped_type::const_iterator j;
-  for (i = hmi_types.begin(), j = types.begin();
-      i != hmi_types.end(), j != types.end(); ++i, ++j) {
-    LOG4CXX_DEBUG(logger_, "DEFHMI: " << *i << " - " << *j);
-  }
   hmi_types_[app_id] = types;
 }
 

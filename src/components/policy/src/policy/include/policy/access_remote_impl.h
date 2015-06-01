@@ -101,7 +101,11 @@ class AccessRemoteImpl : public AccessRemote {
   FRIEND_TEST(AccessRemoteImplTest, CheckAllowed);
   FRIEND_TEST(AccessRemoteImplTest, CheckDisallowed);
   FRIEND_TEST(AccessRemoteImplTest, CheckManual);
+  FRIEND_TEST(AccessRemoteImplTest, CheckModuleType);
   FRIEND_TEST(AccessRemoteImplTest, SetPrimaryDevice);
+  FRIEND_TEST(AccessRemoteImplTest, EnableDisable);
+  FRIEND_TEST(AccessRemoteImplTest, SetDefaultHmiTypes);
+  FRIEND_TEST(AccessRemoteImplTest, GetGroups);
 };
 
 }  // namespace policy
