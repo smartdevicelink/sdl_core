@@ -183,7 +183,23 @@ TypeAccess AccessRemoteImpl::Check(const Subject& who,
 
 bool AccessRemoteImpl::CheckModuleType(const PTString& app_id,
                                        policy_table::ModuleType module) const {
-  return true;
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!cache_->IsApplicationRepresented(app_id)) {
+    return false;
+  }
+
+  const policy_table::ApplicationParams& app = cache_->pt_->policy_table
+      .app_policies[app_id];
+  if (!app.moduleType.is_initialized()) {
+    return false;
+  }
+
+  const policy_table::ModuleTypes& modules = *app.moduleType;
+  if (modules.empty()) {
+    return true;
+  }
+
+  return std::find(modules.begin(), modules.end(), module) != modules.end();
 }
 
 bool AccessRemoteImpl::CheckParameters(/* module, zone, params */) const {
