@@ -1,6 +1,12 @@
+##### Note: Please use the [develop](https://github.com/smartdevicelink/sdl_core/tree/develop) or [release candidate](https://github.com/smartdevicelink/sdl_core/tree/release/4.0.0) branches of sdl_core for the most stable versions.
+
 # SmartDeviceLink (SDL)
 
-SmartDeviceLink is a way to connect applications on a smart phone to a vehicle so they can be controlled by a vehicle's head unit (radio interface).  There are three main pieces to SDL - [core](https://github.com/smartdevicelink/sdl_core) (head unit), [mobile libraries](https://github.com/smartdevicelink/sdl_android), and the [server](https://github.com/smartdevicelink/sdl_server).
+SmartDeviceLink (SDL) is a standard set of protocols and messages that connect applications on a smartphone to a vehicle head unit. This messaging enables a consumer to interact with their application using common in-vehicle interfaces such as a touch screen display, embedded voice recognition, steering wheel controls and various vehicle knobs and buttons. There are three main components that make up the SDL ecosystem.
+
+  * The [Core](https://github.com/smartdevicelink/sdl_core) component is the software which Vehicle Manufacturers (OEMs)  implement in their vehicle head units. Integrating this component into their head unit and HMI based on a set of guidelines and templates enables access to various smartphone applications.
+  * The optional [SDL Server](https://github.com/smartdevicelink/sdl_server) can be used by Vehicle OEMs to update application policies and gather usage information for connected applications.
+  * The [iOS](https://github.com/smartdevicelink/sdl_ios) and [Android](https://github.com/smartdevicelink/sdl_android) libraries are implemented by app developers into their applications to enable command and control via the connected head unit.
 
 Pull Requests Welcome!
 
@@ -9,16 +15,14 @@ Pull Requests Welcome!
   * [Software Architecture Document](https://app.box.com/s/v5ymu5kathzkwfx8iigxxdpr7d5a2xhh)
   * [Transport Manager Programming Guide](https://app.box.com/s/1pjquttvmhf19uujtw4x4fv4t1leqasa)
   * [Software Detailed Design](https://app.box.com/s/ohgrvemtx39f8hfea1ab676xxrzvyx1y)
-  * [Integration Guidelines](https://app.box.com/s/uikmmpeozq6j902uzl1he43n6ct010jp)
+  * [Integration Guidelines](https://app.box.com/s/jkj51mkaa5uganbhjxmtv06lbs8hapa9)
 
 ## SDL Core
 
-The Core component of SDL is meant to run on a vehicle's computing system. It connects to a consumer's smartphone over a variety of transports such as Bluetooth, USB, Android AOA, and TCP. Transport adapters can be written to extend the capabilities of Core's transport manager. Once a smartphone is connected over a preferred transport applications on the mobile phone that implement the mobile libraries can begin to communicate with the vehicle. First, the Core component queries the phone to understand which applications are compatible. The user interface shows the list of compatible applications to the driver. When the user selects an application, it is sent an HMI_STATUS level of FULL (all applications start with a BACKGROUND status). Once an application has the FULL status, it is allowed to populate a template, defined by the vehicle manufacturer, with content such as metadata, artwork, buttons and even supported grammars for voice commands (voice recognition engine not included).
-
-The communication between the Core component and the mobile phone is based on JSON RPC. The communication between the Core component and the user interface is also via JSON RPC. The current code base includes an HTML5 user interface that was released by Ford Motor Company for the My Ford Touch system. The core component can also be configured to support QT5 and DBus, and includes a QT interface as well.
+The Core component of SDL runs on a vehicle's computing system (head unit). Core’s primary responsibility is to pass messages between connected smartphone applications and the vehicle HMI, and pass notifications from the vehicle to those applications. It can connect a smartphone to a vehicle's head unit via a variety of transport protocols such as Bluetooth, USB, Android AOA, and TCP. Once a connection is established, Core discovers compatible applications and displays them to the driver for interaction via voice or display. The core component is implemented into the vehicle HMI based on the integration guidelines above. The core component is configured to follow a set of policies defined in a policy database and updated by a [policy server](https://www.github.com/smartdevicelink/sdl_server). The messaging between a connected application and core is defined by the [Mobile API](https://github.com/smartdevicelink/sdl_core/blob/master/src/components/interfaces/MOBILE_API.xml) and the messaging between sdl core and the vehicle is defined by the [HMI API](https://github.com/smartdevicelink/sdl_core/blob/master/src/components/interfaces/HMI_API.xml).
 
 ## Project Status
-We're ramping up our efforts to get SmartDeviceLink developed and maintained directly in the open. For the Mobile libraries, we're expecting better integration soon, SDL Core is slightly more complicated. We are currently working on generating documentation, creating a developer portal, an open forum, interface requirements, HMI guidelines, Mobile validation, and everything else that we've been asked for to renew the community's interest in this project. From a technical standpoint, SDL is stable, and the most work is being put into making it a more robust solution for app connectivity. We are, however, definitely looking for and interested in other people and company's contributions to SDL whether it be feature based, bug fixes, healthy conversation, or even just suggestions for improvement.
+We're ramping up our efforts to get SmartDeviceLink developed and maintained directly in the open. For the Mobile libraries, we're expecting better integration soon, SDL Core is slightly more complicated. We are currently working on generating documentation, creating a developer portal, an open forum, Mobile validation, and everything else that we've been asked for to renew the community's interest in this project. From a technical standpoint, SDL is stable, and the most work is being put into making it a more robust solution for app connectivity. We are, however, definitely looking for and interested in other people and company's contributions to SDL whether it be feature based, bug fixes, healthy conversation, or even just suggestions for improvement.
 
 # Getting Started
 A quick guide to installing, configuring, and running an instance of the SDL Core on a linux OS.
