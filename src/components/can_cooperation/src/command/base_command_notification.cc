@@ -130,16 +130,21 @@ bool BaseCommandNotification::CheckPolicy(
   mobile_apis::Result::eType permission =
       service_->CheckPolicyPermissions(message);
 
-  // TODO(KKolodiy): get module type, zone and params from message
+  // TODO(KKolodiy): get zone and params from message
   SeatLocation zone = 10;
   std::vector<std::string> params;
-  std::string module = "RADIO";
   application_manager::TypeAccess access = service_->CheckAccess(
-      app->app_id(), module, params, zone);
+      app->app_id(), ModuleType(message), params, zone);
 
   return permission == mobile_apis::Result::eType::SUCCESS
       && access == application_manager::TypeAccess::kAllowed;
 }
+
+std::string BaseCommandNotification::ModuleType(
+    application_manager::MessagePtr message) {
+  return "RADIO";
+}
+
 
 }  // namespace commands
 

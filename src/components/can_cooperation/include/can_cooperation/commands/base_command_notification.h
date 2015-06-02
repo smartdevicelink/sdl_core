@@ -84,6 +84,8 @@ class BaseCommandNotification : public Command {
   // TODO(KKolodiy): need rename to Run
   virtual void Execute() = 0;
 
+  virtual std::string ModuleType(application_manager::MessagePtr message);
+
  private:
   void NotifyApplications();
   void NotifyOneApplication(application_manager::MessagePtr message);

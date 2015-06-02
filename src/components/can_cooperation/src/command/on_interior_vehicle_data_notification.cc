@@ -31,6 +31,8 @@
  */
 
 #include "can_cooperation/commands/on_interior_vehicle_data_notification.h"
+#include "json/json.h"
+#include "can_cooperation/can_module_constants.h"
 
 namespace can_cooperation {
 
@@ -48,6 +50,16 @@ OnInteriorVehicleDataNotification::~OnInteriorVehicleDataNotification() {
 
 void OnInteriorVehicleDataNotification::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
+}
+
+std::string OnInteriorVehicleDataNotification::ModuleType(
+    application_manager::MessagePtr message) {
+  Json::Value value;
+  Json::Reader reader;
+  reader.parse(message->json_message(), value);
+  return value.get(json_keys::kParams, Json::Value(Json::objectValue))
+      .get(message_params::kModuleData, Json::Value(Json::objectValue))
+      .get(message_params::kModuleType, Json::Value("")).asString();
 }
 
 }  // namespace commands
