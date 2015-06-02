@@ -133,15 +133,18 @@ bool BaseCommandNotification::CheckPolicy(
   // TODO(KKolodiy): get zone and params from message
   SeatLocation zone = 10;
   std::vector<std::string> params;
+
+  Json::Value value;
+  Json::Reader reader;
+  reader.parse(message->json_message(), value);
   application_manager::TypeAccess access = service_->CheckAccess(
-      app->app_id(), ModuleType(message), params, zone);
+      app->app_id(), ModuleType(value), params, zone);
 
   return permission == mobile_apis::Result::eType::SUCCESS
       && access == application_manager::TypeAccess::kAllowed;
 }
 
-std::string BaseCommandNotification::ModuleType(
-    application_manager::MessagePtr message) {
+std::string BaseCommandNotification::ModuleType(const Json::Value& message) {
   return "RADIO";
 }
 

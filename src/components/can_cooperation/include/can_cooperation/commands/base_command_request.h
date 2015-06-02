@@ -145,7 +145,7 @@ class BaseCommandRequest : public Command,
   void virtual OnEvent(const event_engine::Event<application_manager::MessagePtr,
                   std::string>& event) = 0;
 
-  virtual std::string ModuleType();
+  virtual std::string ModuleType(const Json::Value& message);
 
  private:
   bool CheckPolicy();

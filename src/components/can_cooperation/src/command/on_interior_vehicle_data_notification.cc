@@ -53,11 +53,8 @@ void OnInteriorVehicleDataNotification::Execute() {
 }
 
 std::string OnInteriorVehicleDataNotification::ModuleType(
-    application_manager::MessagePtr message) {
-  Json::Value value;
-  Json::Reader reader;
-  reader.parse(message->json_message(), value);
-  return value.get(json_keys::kParams, Json::Value(Json::objectValue))
+    const Json::Value& message) {
+  return message.get(json_keys::kParams, Json::Value(Json::objectValue))
       .get(message_params::kModuleData, Json::Value(Json::objectValue))
       .get(message_params::kModuleType, Json::Value("")).asString();
 }

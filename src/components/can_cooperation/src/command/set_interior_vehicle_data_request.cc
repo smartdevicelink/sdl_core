@@ -82,11 +82,9 @@ void SetInteriorVehicleDataRequest::OnEvent(
   }
 }
 
-std::string SetInteriorVehicleDataRequest::ModuleType() {
-  Json::Value value;
-  Json::Reader reader;
-  reader.parse(message_->json_message(), value);
-  return value.get(json_keys::kParams, Json::Value(Json::objectValue))
+std::string SetInteriorVehicleDataRequest::ModuleType(
+    const Json::Value& message) {
+  return message.get(json_keys::kParams, Json::Value(Json::objectValue))
       .get(message_params::kModuleData, Json::Value(Json::objectValue))
       .get(message_params::kModuleType, Json::Value("")).asString();
 }

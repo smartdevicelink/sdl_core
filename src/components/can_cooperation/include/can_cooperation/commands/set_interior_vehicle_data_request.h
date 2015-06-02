@@ -71,7 +71,7 @@ class SetInteriorVehicleDataRequest : public BaseCommandRequest {
   virtual ~SetInteriorVehicleDataRequest();
 
  protected:
-  virtual std::string ModuleType();
+  virtual std::string ModuleType(const Json::Value& message);
 };
 
 }  // namespace commands

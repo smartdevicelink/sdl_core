@@ -81,11 +81,8 @@ void ButtonPressRequest::OnEvent(
   }
 }
 
-std::string ButtonPressRequest::ModuleType() {
-  Json::Value value;
-  Json::Reader reader;
-  reader.parse(message_->json_message(), value);
-  return value.get(json_keys::kParams, Json::Value(Json::objectValue))
+std::string ButtonPressRequest::ModuleType(const Json::Value& message) {
+  return message.get(json_keys::kParams, Json::Value(Json::objectValue))
       .get(message_params::kModuleType, Json::Value("")).asString();
 }
 

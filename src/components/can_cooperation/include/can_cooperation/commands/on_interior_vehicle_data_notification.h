@@ -62,7 +62,7 @@ class OnInteriorVehicleDataNotification : public BaseCommandNotification {
   virtual ~OnInteriorVehicleDataNotification();
 
  protected:
-   virtual std::string ModuleType(application_manager::MessagePtr message);
+   virtual std::string ModuleType(const Json::Value& message);
 };
 
 }  // namespace commands

@@ -316,8 +316,11 @@ bool BaseCommandRequest::CheckPolicy() {
   // TODO(KKolodiy): zone and params from message
   SeatLocation zone = 10;
   std::vector<std::string> params;
+  Json::Value value;
+  Json::Reader reader;
+  reader.parse(message_->json_message(), value);
   application_manager::TypeAccess access = service_->CheckAccess(
-      app_->app_id(), ModuleType(), params, zone);
+      app_->app_id(), ModuleType(value), params, zone);
 
   switch (access) {
     case application_manager::kAllowed:
@@ -342,7 +345,7 @@ bool BaseCommandRequest::CheckPolicy() {
   return false;
 }
 
-std::string BaseCommandRequest::ModuleType() {
+std::string BaseCommandRequest::ModuleType(const Json::Value& message) {
   return "RADIO";
 }
 
