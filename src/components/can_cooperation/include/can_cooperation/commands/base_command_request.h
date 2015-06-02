@@ -146,6 +146,7 @@ class BaseCommandRequest : public Command,
                   std::string>& event) = 0;
 
   virtual std::string ModuleType(const Json::Value& message);
+  virtual bool CheckAccess();
 
  private:
   bool CheckPolicy();

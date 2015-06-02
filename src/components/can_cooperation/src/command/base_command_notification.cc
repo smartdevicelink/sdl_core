@@ -145,6 +145,7 @@ bool BaseCommandNotification::CheckPolicy(
 }
 
 std::string BaseCommandNotification::ModuleType(const Json::Value& message) {
+  // TODO(KKolodiy): stub for old mobile API
   return "RADIO";
 }
 

@@ -83,6 +83,11 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
   }
 }
 
+bool GetInteriorVehicleDataCapabiliesRequest::CheckAccess() {
+  // TODO(KKolodiy): need to clarify how it must work
+  return true;
+}
+
 }  // namespace commands
 
 }  // namespace can_cooperation

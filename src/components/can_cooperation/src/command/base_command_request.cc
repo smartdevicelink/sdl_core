@@ -312,6 +312,11 @@ bool BaseCommandRequest::CheckPolicy() {
     return false;
   }
 
+  return CheckAccess();
+}
+
+bool BaseCommandRequest::CheckAccess() {
+  LOG4CXX_AUTO_TRACE(logger_);
   CANAppExtensionPtr extension = GetAppExtension(app_);
   // TODO(KKolodiy): zone and params from message
   SeatLocation zone = 10;
@@ -346,6 +351,7 @@ bool BaseCommandRequest::CheckPolicy() {
 }
 
 std::string BaseCommandRequest::ModuleType(const Json::Value& message) {
+  // TODO(KKolodiy): stub for old mobile API
   return "RADIO";
 }
 
