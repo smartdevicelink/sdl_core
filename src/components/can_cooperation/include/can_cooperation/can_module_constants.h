@@ -81,6 +81,9 @@ const char kCode[] = "code";
 } //  json_keys
 
 namespace message_params {
+const char kModuleDescription[] = "moduleDescription";
+const char kModuleData[]    = "moduleData";
+const char kModuleType[]    = "moduleType";
 const char kCustomPresets[] = "customPresets";
 const char kRadioStation[]  = "radioStation";
 const char kSongInfo[]      = "songInfo";

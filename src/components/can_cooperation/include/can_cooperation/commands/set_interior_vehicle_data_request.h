@@ -69,6 +69,9 @@ class SetInteriorVehicleDataRequest : public BaseCommandRequest {
    * @brief SetInteriorVehicleDataRequest class destructor
    */
   virtual ~SetInteriorVehicleDataRequest();
+
+ protected:
+  virtual std::string ModuleType();
 };
 
 }  // namespace commands

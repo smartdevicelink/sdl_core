@@ -313,12 +313,11 @@ bool BaseCommandRequest::CheckPolicy() {
   }
 
   CANAppExtensionPtr extension = GetAppExtension(app_);
-  // TODO(KKolodiy): get module type, zone and params from message
+  // TODO(KKolodiy): zone and params from message
   SeatLocation zone = 10;
   std::vector<std::string> params;
-  std::string module = "RADIO";
   application_manager::TypeAccess access = service_->CheckAccess(
-      app_->app_id(), module, params, zone);
+      app_->app_id(), ModuleType(), params, zone);
 
   switch (access) {
     case application_manager::kAllowed:
@@ -341,6 +340,10 @@ bool BaseCommandRequest::CheckPolicy() {
       SendResponse(false, result_codes::kDisallowed, "Unknown issue");
   }
   return false;
+}
+
+std::string BaseCommandRequest::ModuleType() {
+  return "RADIO";
 }
 
 void BaseCommandRequest::on_event(const event_engine::Event<application_manager::MessagePtr,

@@ -33,6 +33,7 @@
 #include "can_cooperation/commands/button_press_request.h"
 #include "functional_module/function_ids.h"
 #include "json/json.h"
+#include "can_cooperation/can_module_constants.h"
 
 namespace can_cooperation {
 
@@ -78,6 +79,14 @@ void ButtonPressRequest::OnEvent(
   } else {
     LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
   }
+}
+
+std::string ButtonPressRequest::ModuleType() {
+  Json::Value value;
+  Json::Reader reader;
+  reader.parse(message_->json_message(), value);
+  return value.get(json_keys::kParams, Json::Value(Json::objectValue))
+      .get(message_params::kModuleType, Json::Value("")).asString();
 }
 
 }  // namespace commands
