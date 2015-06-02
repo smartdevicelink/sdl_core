@@ -82,14 +82,7 @@ void GetInteriorVehicleDataRequest::Run()
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
-  //////////////////
 
-  //Checks needed?//
-
-  /*
-
-  */
-  //////////////////
   if((*message_)[strings::msg_params].keyExists("subscribe")){
     if((*message_)[strings::msg_params]["subscribe"].asBool()){
 

@@ -36,7 +36,6 @@ SDL.MediaController = Em.Object.create({
      * Initial substate
      */
     activeState: 'media.player',
-
     /**
      * Turn on CD
      */

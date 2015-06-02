@@ -30,6 +30,14 @@ SDL.ClimateControlModel = Em.Object.create({
 		"rowspan":1,
 		"levelspan":1
 	},
+	radioZone:{
+		"col":0,
+		"row":0,
+		"level":0,
+		"colspan":2,
+		"rowspan":1,
+		"levelspan":1
+	},
 	fanSpeedUp: function(){
 		this.set('currentFanSpeed', this.currentFanSpeed+1);
 		Em.Logger.log(this.currentFanSpeed);
@@ -192,5 +200,88 @@ SDL.ClimateControlModel = Em.Object.create({
 		FFW.RC.onInteriorVehicleDataNotification("CLIMATE", this.passengerZone);
 	},
 
+	frequencyDisplay: "99.5",
+	frequencyFM: 99.5,
+	frequencyAM: 1000,
+	frequencyInteger: 99,
+	frequencyFraction: 5,
+	band: 'FM',
+	tuneUp: function(){
+		if(this.band=='FM'){
+			this.set('frequencyFM', this.frequencyFM+0.2);
+			if(this.frequencyFM>108.1)
+				this.set('frequencyFM', 88.1)
+			this.set('frequencyDisplay', this.frequencyFM.toFixed(1));
+		}
+		else {
+			this.set('frequencyAM', this.frequencyAM+10);
+			if(this.frequencyAM>1600)
+				this.set('frequencyAM', 540);
+			this.set('frequencyDisplay', this.frequencyAM.toFixed(0));
+		}
+		Em.Logger.log("Tune up: "+this.frequencyDisplay);
+		FFW.RC.onInteriorVehicleDataNotification("RADIO", this.radioZone);
+	},
+	tuneDown: function(){
+		if(this.band=='FM'){
+			this.set('frequencyFM', this.frequencyFM-0.2);
+			if(this.frequencyFM<88.1)
+				this.set('frequencyFM', 108.1)
+			this.set('frequencyDisplay', this.frequencyFM.toFixed(1));
+		}
+		else {
+			this.set('frequencyAM', this.frequencyAM-10);
+			if(this.frequencyAM<540)
+				this.set('frequencyAM', 1600);
+			this.set('frequencyDisplay', this.frequencyAM.toFixed(0));
+		}
+
+		Em.Logger.log("Tune Down: "+this.frequencyDisplay);
+		FFW.RC.onInteriorVehicleDataNotification("RADIO", this.radioZone);
+	},
+	selectAM: function(){
+		this.set('band', 'AM');
+		Em.Logger.log('Select AM');
+		this.set('frequencyDisplay', this.frequencyAM.toFixed(0));
+		FFW.RC.onInteriorVehicleDataNotification("RADIO", this.radioZone);
+
+	},
+	selectFM: function(){
+		this.set('band', 'FM');
+		this.set('frequencyDisplay', this.frequencyFM.toFixed(1));
+		Em.Logger.log('Select FM');
+		FFW.RC.onInteriorVehicleDataNotification("RADIO", this.radioZone);
+	},
+
+	setFrequencyInteger:function(freqInt){
+		Em.Logger.log("Set freq int: "+freqInt);
+		if(this.band=='FM'){
+			Em.Logger.log(this.frequencyFM + " " + this.frequencyFM.toFixed(0));
+			var fraction = this.frequencyFM-Math.floor(this.frequencyFM);
+			Em.Logger.log("fraction: "+fraction);
+			var newFreq = freqInt+fraction;
+			Em.Logger.log("newFreq: "+newFreq);
+			this.set('frequencyFM', newFreq);
+			this.set('frequencyDisplay', newFreq.toFixed(1));
+		}
+		else{
+			this.set('frequencyAM', freqInt);
+		}
+		FFW.RC.onInteriorVehicleDataNotification("RADIO", this.radioZone);
+		
+	},
+	setFrequencyFraction:function(fraction){
+		Em.Logger.log("Set fraction: "+freqInt);
+		if(this.band=='FM'){
+			var integer = this.frequencyFM.toFixed(0);
+			Em.Logger.log("integer: "+integer);
+			var newFreq = integer+fraction;
+			Em.Logger.log("newFreq: "+newFreq);
+			this.set('frequencyFM', newFreq);
+			this.set('frequencyDisplay', newFreq.toFixed(1));
+		}
+		FFW.RC.onInteriorVehicleDataNotification("RADIO", this.radioZone);
+		
+	}
 
 })

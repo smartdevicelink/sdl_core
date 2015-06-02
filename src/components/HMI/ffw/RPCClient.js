@@ -128,10 +128,11 @@ FFW.RPCClient = Em.Object
         onWSMessage: function(evt) {
 
             Em.Logger.log("Message received: " + evt.data);
-
+            Em.Logger.log("evt: " + JSON.stringify(evt));
             var jsonObj = JSON.parse(evt.data, SDL.RPCController.capabilitiesCheck);
 
             if (SDL.RPCController.capabilityCheckResult != null) {
+                Em.Logger.log("rpcclient capability check");
                 this.observer.errorResponsePull[jsonObj.id] = SDL.RPCController.capabilityCheckResult;
                 SDL.RPCController.capabilityCheckResult = null;
                 this.observer.checkImage(jsonObj.params);
@@ -144,18 +145,21 @@ FFW.RPCClient = Em.Object
 
             // handle component registration
             if (jsonObj.id == this.registerRequestId && jsonObj.method == null && typeof jsonObj.result == 'number') {
+                Em.Logger.log("rpcclient component reg");
                 if (jsonObj.error == null) {
                     this.requestId = this.idStart = jsonObj.result;
                     this.observer.onRPCRegistered();
                 }
                 // handle component unregistration
             } else if (jsonObj.id == this.unregisterRequestId) {
+                Em.Logger.log("rpcclient unreg");
                 if (jsonObj.error == null) {
                     this.socket.close();
                     this.observer.onRPCUnregistered();
                 }
                 // handle result, error, notification, requests
             } else {
+                Em.Logger.log("rpcclient req/res/notif/err: "+ JSON.stringify(jsonObj));
                 if (jsonObj.id == null) {
                     this.observer.onRPCNotification(jsonObj);
                 } else {

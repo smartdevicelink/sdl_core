@@ -37,6 +37,16 @@ SDL.ClimateController = Em.Object.create({
 		Em.Logger.log("Climate controller set  passenger temperature: " + JSON.stringify(request));
 		this.model.setPassengerTemp(request.params.moduleData.climateControlData.desiredTemp);
 		return(this.model.passengerDesiredTemp);
+	},
+	setFrequencyInteger: function(request){
+		Em.Logger.log("climate controller set frequency integer");
+		this.model.setFrequencyInteger(request.params.moduleData.radioControlData.frequencyInteger);
+		return(this.model.frequencyInteger);
+	},
+	setFrequencyFraction: function(request){
+		Em.Logger.log("climate controller set frequency fraction");
+		this.model.setFrequencyFraction(request.params.moduleData.radioControlData.frequencyFraction);
+		return(this.model.frequencyFraction);		
 	}
 
 });

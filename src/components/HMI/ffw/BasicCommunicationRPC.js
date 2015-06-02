@@ -201,7 +201,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
             Em.Logger.log("FFW.BasicCommunicationRPC.onRPCResult");
             this._super();
-
+            Em.Logger.log("OnRPCResult: " + JSON.stringify(response));
             if ("result" in response
                 && response.result.code === SDL.SDLModel.resultCode["SUCCESS"]) {
 
@@ -300,7 +300,7 @@ FFW.BasicCommunication = FFW.RPCObserver
                     } else {
                         this.OnSystemRequest("PROPRIETARY");
                     }
-
+                    Em.Logger.log("response.result.urls: "+ JSON.stringify(response.result.urls));
                     SDL.SettingsController.policyUpdateRetry();
 
                 }
@@ -546,6 +546,7 @@ FFW.BasicCommunication = FFW.RPCObserver
                     this.client.send(JSONMessage);
                 }
                 if (request.method == "BasicCommunication.PolicyUpdate") {
+                    Em.Logger.log("policy update");
                     SDL.SettingsController.policyUpdateFile = request.params.file;
 
                     SDL.SDLModel.policyUpdateRetry.timeout = request.params.timeout;

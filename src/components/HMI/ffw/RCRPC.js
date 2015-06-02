@@ -158,8 +158,8 @@ FFW.RC = FFW.RPCObserver.create({
 					"result": {
 						"moduleData" : {
 							"moduleType" : "CLIMATE",
-							"moduleZone" : {},
-							"radioControlData" :{},
+							//"moduleZone" : {},
+							//"radioControlData" :{},
 							"climateControlData" : {
 								'fanSpeed' : 	SDL.ClimateController.model.currentFanSpeed,
 								'currentTemp': SDL.ClimateController.model.currentTemp,
@@ -226,11 +226,58 @@ FFW.RC = FFW.RPCObserver.create({
 				}
 
 				this.client.send(JSONMessage);
-				this.onInteriorVehicleDataNotification("CLIMATE");
+				//this.onInteriorVehicleDataNotification("CLIMATE");
 
 			}
 			else if(params.moduleData.moduleType=="RADIO"){
 				Em.Logger.log("RC set RADIO data");
+				console.log(JSON.stringify(params.moduleData));
+				var JSONMessage = {
+					"jsonrpc": "2.0",
+					"id": request.id,
+					"result": {
+						"moduleData" : {
+							"moduleType" : "RADIO",
+							//"moduleZone" : {},
+							"radioControlData" : {
+								'frequencyInteger': 101,//SDL.ClimateController.model.frequencyInteger,
+								'frequencyFraction': 1,//SDL.ClimateController.model.frequencyFraction,
+								'band': "FM",//SDL.ClimateController.model.band,
+								'rdsData': {
+									'PS': "name",
+									'RT': "radio",
+									'CT': "YYYY-MM-DDThh:mm:ss.sTZD",
+									'PI': "Sign",
+									'PTY': 1,
+									'TP': true,
+									'TA':true,
+									'REG': 'Murica'
+								},
+
+								'availableHDs': 1,
+								'hdChannel': 1,
+								'signalStrength': 1,
+								'signalChangeThreshold': 1,
+								'radioEnable': true,
+								'state': 'ACQUIRED'
+							},
+							//"climateControlData" : {}
+						},
+						"code" : 0,
+						"method": "RC.SetInteriorVehicleData"
+					}
+				}
+				if(params.moduleData.radioControlData.frequencyInteger){					
+					var frequencyInteger = SDL.ClimateController.setFrequencyInteger(request);
+					JSONMessage.result.moduleData.radioControlData.frequencyInteger = frequencyInteger;
+				}			
+				if(params.moduleData.radioControlData.frequencyFraction){					
+					var frequencyFraction = SDL.ClimateController.setFrequencyFraction(request);
+					JSONMessage.result.moduleData.radioControlData.frequencyFraction = frequencyFraction;
+				}		
+
+
+				this.client.send(JSONMessage);
 			}
 
 		}
@@ -283,22 +330,44 @@ FFW.RC = FFW.RPCObserver.create({
 					this.subscribeClimateState = false; //resets
 				}
 			}
-			/*else if(params.moduleDescription.moduleType='RADIO'){
+			else if(params.moduleDescription.moduleType=='RADIO'){
 				moduleData.moduleZone = 'RADIO';
-				var radioControlData = {
-					'frequencyInteger': SDL.RadioController.model.frequencyInteger,
-					'frequencyFraction': SDL.RadioController.model.frequencyFraction,
-					'band': SDL.RadioController.model.band,
-					'rdsData': SDL.RadioController.model.rdsData,
-					'availableHDs': SDL.RadioController.model.availableHDs,
-					'hdChannel': SDL.RadioController.model.hdChannel,
-					'signalStrength': SDL.RadioController.model.signalStrength,
-					'signalChangeThreshold': SDL.RadioController.model.signalChangeThreshold,
-					'radioEnable': SDL.RadioController.model.radioEnable,
-					'state': SDL.RadioController.model.state
 
+				var moduleZone = {
+					'col': 0,
+					'row': 0,
+					'level': 0,
+					'colspan': 2,
+					'rowspan': 1,
+					'levelspan': 1
 				}
-			}*/
+
+				moduleData.moduleZone = moduleZone;
+
+				var radioControlData = {
+							'frequencyInteger': 101,//SDL.ClimateController.model.frequencyInteger,
+							'frequencyFraction': 1,//SDL.ClimateController.model.frequencyFraction,
+							'band': "FM",//SDL.ClimateController.model.band,
+							'rdsData': {
+								'PS': "name",
+								'RT': "radio",
+								'CT': "YYYY-MM-DDThh:mm:ss.sTZD",
+								'PI': "Sign",
+								'PTY': 1,
+								'TP': true,
+								'TA':true,
+								'REG': 'Murica'
+							},
+
+							'availableHDs': 1,
+							'hdChannel': 1,
+							'signalStrength': 1,
+							'signalChangeThreshold': 1,
+							'radioEnable': true,
+							'state': 'ACQUIRED'
+						}
+				moduleData.radioControlData = radioControlData;
+			}
 
 
 			var JSONMessage = {
@@ -321,6 +390,7 @@ FFW.RC = FFW.RPCObserver.create({
 		if(module=="CLIMATE"){
 
 			var desiredTemp;
+			Em.Logger.log(JSON.stringify(zone));
 			if(zone.col==1){
 				desiredTemp = SDL.ClimateController.model.passengerDesiredTemp;
 			}
@@ -350,6 +420,50 @@ FFW.RC = FFW.RPCObserver.create({
 					}
 				}
 			}
+			this.client.send(JSONMessage);
+		}
+		else if(module=="RADIO"){
+			var JSONMessage = {
+				"jsonrpc": "2.0",
+				"method": "RC.OnInteriorVehicleData",
+				"params": {
+					"moduleData" : {
+						"moduleType" : "RADIO",
+						"moduleZone" : {
+							"col":0,
+							"row":0,
+							"level":0,
+							"colspan":2,
+							"rowspan":1,
+							"levelspan":1
+						},
+						"radioControlData" : {
+							'frequencyInteger': 101,//SDL.ClimateController.model.frequencyInteger,
+							'frequencyFraction': 1,//SDL.ClimateController.model.frequencyFraction,
+							'band': "FM",//SDL.ClimateController.model.band,
+							'rdsData': {
+								'PS': "name",
+								'RT': "radio",
+								'CT': "YYYY-MM-DDThh:mm:ss.sTZD",
+								'PI': "Sign",
+								'PTY': 1,
+								'TP': true,
+								'TA':true,
+								'REG': 'Murica'
+							},
+
+							'availableHDs': 1,
+							'hdChannel': 1,
+							'signalStrength': 1,
+							'signalChangeThreshold': 1,
+							'radioEnable': true,
+							'state': 'ACQUIRED'
+						}
+
+					}
+				}				
+			}
+			Em.Logger.log(JSON.stringify(JSONMessage));
 			this.client.send(JSONMessage);
 		}
 

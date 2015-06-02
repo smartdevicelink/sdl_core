@@ -59,7 +59,15 @@ SDL.ClimateView = Em.ContainerView.create( {
             'autoModeEnable',
             'defrostZone',
             'dualModeEnable',
-            'passengerTemperature'
+            'passengerTemperature',
+            'radio'
+            //'frequencyDisplay',
+            //'activeBand',
+            //'tuneUp',
+            //'tuneDown',
+            //'amSelect',
+            //'fmSelect'
+            //'radioEnable'
 
         ],
         dualModeEnable: Em.ContainerView.extend({
@@ -355,6 +363,122 @@ SDL.ClimateView = Em.ContainerView.create( {
             })
         }),
 
+        radio: Em.ContainerView.extend({
+            elementId: 'radio_container',
+            childViews:[
+                'frequencyDisplay',
+                'activeBand',
+                'tuneUp',
+                'tuneDown',
+                'amSelect',
+                'fmSelect',
+                'sourceLabel'
+               // 'radioEnable'                
+            ],
+            frequencyDisplay: SDL.Label.extend({
+
+                elementId: 'media_player_frequency',
+                contentBinding: Em.Binding.oneWay('SDL.ClimateController.model.frequencyDisplay')
+
+            }),
+            activeBand: SDL.Label.extend({
+
+                elementId: 'media_player_active_band',
+                contentBinding: Em.Binding.oneWay('SDL.ClimateController.model.source')
+            }),
+
+            tuneUp: SDL.Button.extend({
+                elementId: 'media_player_tune_up',
+                text: 'Tune Up',
+                action: 'tuneUp',
+                target: 'SDL.ClimateController.model'
+            }),
+
+            tuneDown: SDL.Button.extend({
+                elementId: 'media_player_tune_down',
+                text: 'Tune Down',
+                action: 'tuneDown',
+                target: 'SDL.ClimateController.model'
+            }),
+
+            amSelect: SDL.Button.extend({
+                elementId: 'media_player_am_select',
+                text: 'AM',
+                action: 'selectAM',
+                target: 'SDL.ClimateController.model'
+            }),
+
+            fmSelect: SDL.Button.extend({
+                elementId: 'media_player_fm_select',
+                text: 'FM',
+                action: 'selectFM',
+                target: 'SDL.ClimateController.model'
+            }),
+            sourceLabel: SDL.Label.extend({
+                elementId: 'media_player_source_label',
+                content: 'Source:'
+            })
+        })
+
+
+       /* */
+
     } )
 
 } );
+
+
+/*
+    childViews: [
+        'frequencyDisplay',
+        //'activeBand',
+        //'tuneUp',
+        //'tuneDown',
+        //'amSelect',
+        //'fmSelect'
+        //'radioEnable'
+    ],
+
+    frequencyDisplay: SDL.Label.extend({
+
+        elementId: 'media_player_frequency',
+        contentBinding: Em.Binding.oneWay('SDL.MediaController.model.frequency')
+
+    })
+
+   /* activeBand: SDL.Label.extend({
+
+        elementId: 'media_player_active_band',
+        contentBinding: Em.Binding.oneWay('SDL.MediaController.model.activeBand')
+    }),
+
+    tuneUp: SDL.Button.extend({
+        elementId: 'media_player_tune_up',
+        text: 'Tune Up',
+        action: 'tuneUp',
+        target: 'SDL.MediaController.model'
+    }),
+
+    tuneDown: SDL.Button.extend({
+        elementId: 'media_player_tune_down',
+        text: 'Tune Down',
+        action: 'tuneDown',
+        target: 'SDL.MediaController.model'
+    }),
+
+    amSelect: SDL.Button.extend({
+        elementId: 'media_player_am_select',
+        text: 'AM',
+        action: 'selectAM',
+        target: 'SDL.MediaController.model'
+    }),
+
+    fmSelect: SDL.Button.extend({
+        elementId: 'media_player_fm_select',
+        text: 'FM',
+        action: 'selectFM',
+        target: 'SDL.MediaController.model'
+    })*/
+
+
+

@@ -112,7 +112,7 @@
 	height: 75px;
 	position: absolute;
 	top: 100px;
-	left: 250px;
+	left: 150px;
 }
 
 #recirculateAirEnable_label{
@@ -144,7 +144,7 @@
 	width: 100px;
 	height: 200px;
 	position: absolute;
-	left: 250px;
+	left: 150px;
 	top: 175px;
 }
 
@@ -207,7 +207,7 @@
 	height: 75px;
 	position: absolute;
 	top: 100px;
-	left: 450px;
+	left: 280px;
 }
 
 #acEnable_label{
@@ -239,7 +239,7 @@
 	width: 100px;
 	height: 200px;
 	position: absolute;
-	left: 450px;
+	left: 280px;
 	top: 175px;
 }
 
@@ -296,7 +296,7 @@
 	height: 75px;
 	position: absolute;
 	top: 100px;
-	left: 690px;
+	left: 420px;
 }
 
 #dualModeEnable_label{
@@ -330,7 +330,7 @@
 	width: 100px;
 	height: 200px;
 	position: absolute;
-	left: 690px;
+	left: 420px;
 	top: 175px;
 }
 
@@ -379,6 +379,99 @@
 	border-left: 1px solid #393939;
 	border-right: 1px solid #000;
 		font-size: 26px;
+	text-align: center;
+	line-height: 32px;
+}
+
+#radio_container{
+	width: 200px;
+	height: 200px;
+	position: absolute;
+	left: 550px;
+	top: 175px;
+}
+
+#media_player_tune_up{
+	left: 0px;
+	top: 50px;
+	width: 93px;
+	height: 49px;
+	border-left: 1px solid #393939;
+	border-right: 1px solid #393939;
+	border-top: 1px solid #393939;
+	font-size: 20px;
+	text-align: center;
+	line-height: 32px;
+}
+
+#media_player_tune_down{
+	left: 0px;
+	top: 150px;
+	width: 93px;
+	height: 49px;
+	border-left: 1px solid #393939;
+	border-right: 1px solid #000;
+	border-top: 1px solid #393939;
+	font-size: 20px;
+	text-align: center;
+	line-height: 32px;
+}
+
+#media_player_frequency{
+	left: 0px;
+	top: 100px;
+	width: 93px;
+	height: 49px;
+	border-top: 1px solid #393939;
+	border-left: 1px solid #393939;
+	border-right: 1px solid #000;
+	font-size: 26px;
+	text-align: center;
+	line-height: 32px;
+}
+
+#media_player_am_select{
+	left: 100px;
+	top: 50px;
+	width: 93px;
+	height: 49px;
+	border-left: 1px solid #393939;
+	border-right: 1px solid #393939;
+	border-top: 1px solid #393939;
+	font-size: 26px;
+	text-align: center;
+	line-height: 32px;
+}
+
+#media_player_fm_select{
+	left: 100px;
+	top: 150px;
+	width: 93px;
+	height: 49px;
+	border-left: 1px solid #393939;
+	border-right: 1px solid #000;
+	border-top: 1px solid #393939;
+	font-size: 26px;
+	text-align: center;
+	line-height: 32px;
+}
+
+#media_player_active_band{
+	left: 50px;
+	top: 0px;
+	width: 93px;
+	height: 49px;
+	font-size: 14px;
+	text-align: center;
+	line-height: 32px;
+}
+
+#media_player_source_label{
+	left: 0px;
+	top: 0px;
+	width: 93px;
+	height: 49px;
+	font-size: 14px;
 	text-align: center;
 	line-height: 32px;
 }

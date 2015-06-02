@@ -438,7 +438,7 @@ SDL.SDLController = Em.Object
          * @param {String}
          */
         systemRequestViewSelected: function(state) {
-
+            Em.Logger.log("policyurl length: "+SDL.SDLModel.policyURLs.length);
             if (SDL.SDLModel.policyURLs.length) {
                 FFW.BasicCommunication.OnSystemRequest(state, SDL.SDLModel.policyURLs[0].policyAppId, null, SDL.SDLModel.policyURLs[0].url);
             } else {
