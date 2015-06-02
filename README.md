@@ -2,7 +2,7 @@
 
 # SmartDeviceLink (SDL)
 
-SmartDeviceLink is a way to connect applications on a smart phone to a vehicle so they can be controlled by a vehicle's head unit (radio interface).  There are three main pieces to SDL - [core](https://github.com/smartdevicelink/sdl_core) (head unit), [mobile libraries](https://github.com/smartdevicelink/sdl_android), and the [server](https://github.com/smartdevicelink/sdl_server).
+SmartDeviceLink (SDL) is a standard set of protocols and messages that connect applications on a smartphone to a vehicle which enable the consumer to safely interact with their applications while driving.  There are three main components that make up the SDL ecosystem. Vehicle Manufacturers (OEMs) implement their vehicle HMI with the  [Core](https://github.com/smartdevicelink/sdl_core) component based on a set of guidelines and templates. OEMs use the [SDL Server](https://github.com/smartdevicelink/sdl_server) to update application policies and gather usage information for connected applications. App developers implement the [iOS](https://github.com/smartdevicelink/sdl_ios) and [Android](https://github.com/smartdevicelink/sdl_android) libraries into their applications to enable command and control via the connected head unit.
 
 Pull Requests Welcome!
 
