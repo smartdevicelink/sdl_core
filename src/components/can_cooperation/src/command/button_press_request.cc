@@ -82,8 +82,7 @@ void ButtonPressRequest::OnEvent(
 }
 
 std::string ButtonPressRequest::ModuleType(const Json::Value& message) {
-  return message.get(json_keys::kParams, Json::Value(Json::objectValue))
-      .get(message_params::kModuleType, Json::Value("")).asString();
+  return message.get(message_params::kModuleType, Json::Value("")).asString();
 }
 
 }  // namespace commands

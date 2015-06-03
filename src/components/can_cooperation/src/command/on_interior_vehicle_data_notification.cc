@@ -54,9 +54,10 @@ void OnInteriorVehicleDataNotification::Execute() {
 
 std::string OnInteriorVehicleDataNotification::ModuleType(
     const Json::Value& message) {
-  return message.get(json_keys::kParams, Json::Value(Json::objectValue))
-      .get(message_params::kModuleData, Json::Value(Json::objectValue))
-      .get(message_params::kModuleType, Json::Value("")).asString();
+  // TODO(KKolodiy): Now notification from CAN(HMI) doesn't have moduleData
+  // it contains list moduleType, moduleZone, radioControlData and
+  // climateControlData
+  return message.get(message_params::kModuleType, Json::Value("")).asString();
 }
 
 }  // namespace commands

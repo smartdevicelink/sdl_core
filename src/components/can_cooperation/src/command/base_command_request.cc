@@ -323,6 +323,7 @@ bool BaseCommandRequest::CheckAccess() {
   std::vector<std::string> params;
   Json::Value value;
   Json::Reader reader;
+  LOG4CXX_DEBUG(logger_, "Request: " << message_->json_message());
   reader.parse(message_->json_message(), value);
   application_manager::TypeAccess access = service_->CheckAccess(
       app_->app_id(), ModuleType(value), params, zone);
@@ -331,7 +332,7 @@ bool BaseCommandRequest::CheckAccess() {
     case application_manager::kAllowed:
       return true;
     case application_manager::kDisallowed:
-      SendResponse(false, result_codes::kDisallowed, "");
+      SendResponse(false, result_codes::kDisallowed, "Remote control is disallowed");
       break;
     case application_manager::kManual: {
       Json::Value params;

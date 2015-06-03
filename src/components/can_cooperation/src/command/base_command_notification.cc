@@ -136,6 +136,7 @@ bool BaseCommandNotification::CheckPolicy(
 
   Json::Value value;
   Json::Reader reader;
+  LOG4CXX_DEBUG(logger_, "Notification: " << message->json_message());
   reader.parse(message->json_message(), value);
   application_manager::TypeAccess access = service_->CheckAccess(
       app->app_id(), ModuleType(value), params, zone);
