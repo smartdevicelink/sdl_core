@@ -140,7 +140,7 @@ struct ModuleConfig : CompositeType {
     Optional< String<1, 100> > vehicle_model;
     Optional< String<4, 4> > vehicle_year;
     Optional< String<0, 65535> > certificate;
-    Optional< Boolean > user_consent_passengerRC;
+    Optional< Boolean > user_consent_passengersRC;
     Optional< Boolean > country_consent_passengersRC;
   public:
     ModuleConfig();

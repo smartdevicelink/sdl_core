@@ -483,7 +483,7 @@ void SQLPTRepresentation::GatherModuleConfig(
     *config->vehicle_make = query.GetString(5);
     *config->vehicle_model = query.GetString(6);
     *config->vehicle_year = query.GetString(7);
-    *config->user_consent_passengerRC = query.IsNull(8) ? true :
+    *config->user_consent_passengersRC = query.IsNull(8) ? true :
         query.GetBoolean(8);
     *config->country_consent_passengersRC = query.IsNull(9) ? true :
         query.GetBoolean(9);
@@ -1048,8 +1048,8 @@ bool SQLPTRepresentation::SaveModuleConfig(
   query.Bind(6, *(config.vehicle_model)) : query.Bind(6);
   config.vehicle_year.is_initialized() ?
   query.Bind(7, *(config.vehicle_year)) : query.Bind(7);
-  config.user_consent_passengerRC.is_initialized() ?
-      query.Bind(8, *(config.user_consent_passengerRC)) : query.Bind(8);
+  config.user_consent_passengersRC.is_initialized() ?
+      query.Bind(8, *(config.user_consent_passengersRC)) : query.Bind(8);
   config.country_consent_passengersRC.is_initialized() ?
       query.Bind(9, *(config.country_consent_passengersRC)) : query.Bind(9);
 
