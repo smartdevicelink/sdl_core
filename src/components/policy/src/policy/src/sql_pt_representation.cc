@@ -1039,8 +1039,10 @@ bool SQLPTRepresentation::SaveModuleConfig(
     return false;
   }
 
-  config.preloaded_pt.is_initialized() ?
-  query.Bind(0, config.preloaded_pt) : query.Bind(0, false);
+  bool is_preloaded = config.preloaded_pt.is_initialized() &&
+                      *config.preloaded_pt;
+
+  query.Bind(0, is_preloaded);
   query.Bind(1, config.exchange_after_x_ignition_cycles);
   query.Bind(2, config.exchange_after_x_kilometers);
   query.Bind(3, config.exchange_after_x_days);
