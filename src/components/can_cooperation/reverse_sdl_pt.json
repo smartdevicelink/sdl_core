@@ -930,21 +930,6 @@
             },
             "Base-RC": {
                 "rpcs": {
-                    "GrantAccess": {
-                        "hmi_levels": ["BACKGROUND",
-                        "FULL",
-                        "LIMITED"]
-                    },
-                    "CancelAccess": {
-                        "hmi_levels": ["BACKGROUND",
-                        "FULL",
-                        "LIMITED"]
-                    },
-                    "OnControlChanged": {
-                        "hmi_levels": ["BACKGROUND",
-                        "FULL",
-                        "LIMITED"]
-                    },
                     "GetSeatControl": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
