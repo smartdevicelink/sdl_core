@@ -1354,7 +1354,7 @@ void PolicyHandler::SetPrimaryDevice(const PTString& dev_id,
       LOG4CXX_DEBUG(
           logger_,
           "Send notify " << app->device() << " - " << app->mobile_app_id());
-      policy_manager_->SendNotificationOnPermissionsUpdated(app->mobile_app_id());
+      policy_manager_->OnChangedPrimaryDevice(app->mobile_app_id());
     }
   }
 }
@@ -1378,7 +1378,7 @@ void PolicyHandler::SetRemoteControl(bool enabled) {
       LOG4CXX_DEBUG(
           logger_,
           "Send notify " << app->device() << " - " << app->mobile_app_id());
-      policy_manager_->SendNotificationOnPermissionsUpdated(app->mobile_app_id());
+      policy_manager_->OnChangedRemoteControl(app->mobile_app_id());
     }
   }
 }

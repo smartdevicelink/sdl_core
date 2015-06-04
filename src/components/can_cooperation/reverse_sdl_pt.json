@@ -306,6 +306,12 @@
                         "FULL",
                         "LIMITED",
                         "NONE"]
+                    },
+                    "OnHMIStatus": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
                     }
                 }
             },
