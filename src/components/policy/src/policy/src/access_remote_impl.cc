@@ -93,39 +93,6 @@ struct IsTypeAccess {
   }
 };
 
-Match::Match(const FunctionalGroupings& groups, const PTString& rpc,
-             const RemoteControlParams& params)
-    : groups_(groups),
-      rpc_(rpc),
-      params_(params) {
-}
-
-bool Match::operator ()(const PTString& item) const {
-  const FunctionalGroupings::const_iterator i = groups_.find(item);
-  if (i == groups_.end()) {
-    return false;
-  }
-  const policy_table::Rpc::const_iterator j = i->second.rpcs.find(rpc_);
-  if (j == i->second.rpcs.end()) {
-    return false;
-  }
-  const policy_table::Parameters& params = *j->second.parameters;
-  if (params_.size() != params.size()) {
-    return false;
-  }
-  for (RemoteControlParams::const_iterator j = params_.begin();
-      j != params_.end(); ++j) {
-    policy_table::Parameter value;
-    if (!EnumFromJsonString(*j, &value)) {
-      return false;
-    }
-    if (std::find(params.begin(), params.end(), value) == params.end()) {
-      return false;
-    }
-  }
-  return true;
-}
-
 struct ToHMIType {
   policy_table::AppHMITypes::value_type operator ()(int item) const {
     policy_table::AppHMIType type = static_cast<policy_table::AppHMIType>(item);
@@ -133,6 +100,8 @@ struct ToHMIType {
       LOG4CXX_WARN(logger_, "HMI types isn't known " << item);
       type = policy_table::AHT_DEFAULT;
     }
+    LOG4CXX_DEBUG(logger_,
+                  "HMI type: " << item << " - " << EnumToJsonString(type));
     return policy_table::AppHMITypes::value_type(type);
   }
 };
@@ -214,6 +183,31 @@ TypeAccess AccessRemoteImpl::Check(const Subject& who,
   return ret;
 }
 
+bool AccessRemoteImpl::CheckModuleType(const PTString& app_id,
+                                       policy_table::ModuleType module) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!cache_->IsApplicationRepresented(app_id)) {
+    return false;
+  }
+
+  const policy_table::ApplicationParams& app = cache_->pt_->policy_table
+      .app_policies[app_id];
+  if (!app.moduleType.is_initialized()) {
+    return false;
+  }
+
+  const policy_table::ModuleTypes& modules = *app.moduleType;
+  if (modules.empty()) {
+    return true;
+  }
+
+  return std::find(modules.begin(), modules.end(), module) != modules.end();
+}
+
+bool AccessRemoteImpl::CheckParameters(/* module, zone, params */) const {
+  return true;
+}
+
 void AccessRemoteImpl::Allow(const Subject& who, const Object& what) {
   LOG4CXX_AUTO_TRACE(logger_);
   acl_[what][who] = TypeAccess::kAllowed;
@@ -276,38 +270,12 @@ bool AccessRemoteImpl::IsEnabled() const {
   return enabled_;
 }
 
-PTString AccessRemoteImpl::FindGroup(const Subject& who, const PTString& rpc,
-                                     const RemoteControlParams& params) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (!cache_->IsApplicationRepresented(who.app_id)) {
-    return "";
-  }
-
-  const policy_table::Strings& groups =
-      *cache_->pt_->policy_table.app_policies[who.app_id].groups_nonPrimaryRC;
-  const FunctionalGroupings& all_groups = cache_->pt_->policy_table
-      .functional_groupings;
-  policy_table::Strings::const_iterator i = std::find_if(
-      groups.begin(), groups.end(), Match(all_groups, rpc, params));
-
-  if (i != groups.end()) {
-    return *i;
-  }
-  return "";
-}
-
 void AccessRemoteImpl::SetDefaultHmiTypes(const std::string& app_id,
                                           const std::vector<int>& hmi_types) {
   LOG4CXX_AUTO_TRACE(logger_);
   HMIList::mapped_type types;
   std::transform(hmi_types.begin(), hmi_types.end(), std::back_inserter(types),
                  ToHMIType());
-  std::vector<int>::const_iterator i;
-  HMIList::mapped_type::const_iterator j;
-  for (i = hmi_types.begin(), j = types.begin();
-      i != hmi_types.end(), j != types.end(); ++i, ++j) {
-    LOG4CXX_DEBUG(logger_, "DEFHMI: " << *i << " - " << *j);
-  }
   hmi_types_[app_id] = types;
 }
 

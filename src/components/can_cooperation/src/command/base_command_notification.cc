@@ -88,6 +88,7 @@ void BaseCommandNotification::Run() {
 }
 
 void BaseCommandNotification::NotifyApplications() {
+  LOG4CXX_AUTO_TRACE(logger_);
   typedef std::vector<application_manager::ApplicationSharedPtr> AppList;
   AppList applications =
       service_->GetApplications(CANModule::instance()->GetModuleID());
@@ -102,6 +103,7 @@ void BaseCommandNotification::NotifyApplications() {
 
 void BaseCommandNotification::NotifyOneApplication(
     application_manager::MessagePtr message) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (CheckPolicy(message)) {
     Execute();  // run child's logic
     service_->SendMessageToMobile(message);
@@ -128,11 +130,12 @@ bool BaseCommandNotification::CheckPolicy(
   mobile_apis::Result::eType permission =
       service_->CheckPolicyPermissions(message);
 
-  // TODO(KKolodiy): get zone and params from message
+  // TODO(KKolodiy): get module type, zone and params from message
   SeatLocation zone = 10;
   std::vector<std::string> params;
+  std::string module = "RADIO";
   application_manager::TypeAccess access = service_->CheckAccess(
-      app->app_id(), message->function_name(), params, zone);
+      app->app_id(), module, params, zone);
 
   return permission == mobile_apis::Result::eType::SUCCESS
       && access == application_manager::TypeAccess::kAllowed;

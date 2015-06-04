@@ -58,14 +58,12 @@ class MockService : public Service {
           const PluginFunctionID& function_id,
           const std::vector<std::string>& params,
           const SeatLocation& zone));
-  MOCK_METHOD4(SetAccess,
+  MOCK_METHOD3(SetAccess,
       void(const ApplicationId& app_id,
-           const std::string& group_id,
-           const SeatLocation& zone,
+           const std::string& module,
            bool allowed));
   MOCK_METHOD1(ResetAccess, void(const ApplicationId& app_id));
-  MOCK_METHOD2(ResetAccess, void(const std::string& group_name,
-                                 const SeatLocation& zone));
+  MOCK_METHOD1(ResetAccessByModule, void(const std::string& module));
   MOCK_METHOD2(SetPrimaryDevice, void(const uint32_t dev_id,
                                       const std::string& input));
   MOCK_METHOD1(SetRemoteControl, void(bool enabled));

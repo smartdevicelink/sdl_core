@@ -65,17 +65,16 @@ inline std::ostream& operator<<(std::ostream& output, const Subject& who) {
 }
 
 struct Object {
-  PTString group_id;
-  SeatLocation zone;
+  policy_table::ModuleType module;
 };
 inline bool operator<(const Object& x, const Object& y) {
-  return x.group_id < y.group_id || x.zone < y.zone;
+  return x.module < y.module;
 }
 inline bool operator==(const Object& x, const Object& y) {
-  return x.group_id == y.group_id && x.zone == y.zone;
+  return x.module == y.module;
 }
 inline std::ostream& operator<<(std::ostream& output, const Object& what) {
-  output << "Object(group:" << what.group_id << ", zone:" << what.zone << ")";
+  output << "Object(module:" << EnumToJsonString(what.module) << ")";
   return output;
 }
 
@@ -164,14 +163,19 @@ class AccessRemote {
   virtual TypeAccess Check(const Subject& who, const Object& what) const = 0;
 
   /**
-   * Find group by RPC name and list of parameters
-   * @param who subject is dev_id and app_id
-   * @param rpc name of RPC
-   * @param params parameters list
-   * @return name of group
+   * Checks permissions for module
+   * @param app_id application ID
+   * @param module type
+   * @return true if allowed
    */
-  virtual PTString FindGroup(const Subject& who, const PTString& rpc,
-                             const RemoteControlParams& params) const = 0;
+  virtual bool CheckModuleType(const PTString& app_id,
+                               policy_table::ModuleType module) const = 0;
+
+  /**
+   * Checks permissions for parameters
+   * @return true if allowed
+   */
+  virtual bool CheckParameters(/* module, zone, params */) const = 0;
 
   /**
    * Sets HMI types if application has default policy permissions

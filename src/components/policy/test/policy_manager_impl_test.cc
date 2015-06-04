@@ -344,11 +344,11 @@ TEST_F(PolicyManagerImplTest, ResetAccessBySubject) {
 }
 
 TEST_F(PolicyManagerImplTest, ResetAccessByObject) {
-  Object obj = {"group1", 1};
+  Object obj = {policy_table::MT_RADIO};
 
   EXPECT_CALL(*access_remote, Reset(obj));
 
-  manager->ResetAccess("group1", 1);
+  manager->ResetAccessByModule("RADIO");
 }
 
 TEST_F(PolicyManagerImplTest, SetRemoteControl_Enable) {
@@ -365,111 +365,109 @@ TEST_F(PolicyManagerImplTest, SetRemoteControl_Disable) {
 
 TEST_F(PolicyManagerImplTest, SetAccess_Allow) {
   Subject who = {"dev1", "12345"};
-  Object what = {"group1", 1};
+  Object what = {policy_table::MT_CLIMATE};
 
   EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
       WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote, Allow(who, what));
 
-  manager->SetAccess("12345", "group1", 1, true);
+  manager->SetAccess("12345", "CLIMATE", true);
 }
 
 TEST_F(PolicyManagerImplTest, SetAccess_Deny) {
   Subject who = {"dev1", "12345"};
-  Object what = {"group1", 1};
+  Object what = {policy_table::MT_RADIO};
 
   EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
       WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote, Deny(who, what));
 
-  manager->SetAccess("12345", "group1", 1, false);
+  manager->SetAccess("12345", "RADIO", false);
 }
 
 TEST_F(PolicyManagerImplTest, CheckAccess_PrimaryDevice) {
   Subject who {"dev1", "12345"};
-  Object what {"group1", 2};
+  Object what {policy_table::MT_CLIMATE};
 
   EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
       WillOnce(Return("dev1"));
+  EXPECT_CALL(*access_remote,
+              CheckModuleType("12345", policy_table::MT_CLIMATE)).
+      WillOnce(Return(true));
+  EXPECT_CALL(*access_remote, CheckParameters()).WillOnce(Return(true));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(true));
-  EXPECT_CALL(*access_remote, FindGroup(who, "rpc1", RemoteControlParams())).
-      WillOnce(Return("group1"));
   EXPECT_CALL(*access_remote, Check(who, what)).
       WillOnce(Return(TypeAccess::kManual));
   EXPECT_CALL(*access_remote, Allow(who, what));
 
   EXPECT_EQ(TypeAccess::kAllowed,
-            manager->CheckAccess("12345", "rpc1", RemoteControlParams(), 2));
+            manager->CheckAccess("12345", "CLIMATE", RemoteControlParams(), 2));
 }
 
 TEST_F(PolicyManagerImplTest, CheckAccess_DisabledRremoteControl) {
   EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
       WillOnce(Return("dev1"));
+  EXPECT_CALL(*access_remote,
+              CheckModuleType("12345", policy_table::MT_RADIO)).
+      WillOnce(Return(true));
+  EXPECT_CALL(*access_remote, CheckParameters()).WillOnce(Return(true));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(false));
   EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(false));
 
   EXPECT_EQ(TypeAccess::kDisallowed,
-            manager->CheckAccess("12345", "rpc1", RemoteControlParams(), 2));
-}
-
-TEST_F(PolicyManagerImplTest, CheckAccess_UnknownRPC) {
-  Subject who = {"dev1", "12345"};
-
-  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
-      WillOnce(Return("dev1"));
-  EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(false));
-  EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(true));
-  EXPECT_CALL(*access_remote, FindGroup(who, "rpc1", RemoteControlParams())).
-      WillOnce(Return(PTString()));
-
-  EXPECT_EQ(TypeAccess::kDisallowed,
-            manager->CheckAccess("12345", "rpc1", RemoteControlParams(), 2));
+            manager->CheckAccess("12345", "RADIO", RemoteControlParams(), 2));
 }
 
 TEST_F(PolicyManagerImplTest, CheckAccess_Result) {
   Subject who = {"dev1", "12345"};
-  Object what = {"group1", 2};
+  Object what = {policy_table::MT_RADIO};
 
   EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
       WillOnce(Return("dev1"));
+  EXPECT_CALL(*access_remote,
+              CheckModuleType("12345", policy_table::MT_RADIO)).
+      WillOnce(Return(true));
+  EXPECT_CALL(*access_remote, CheckParameters()).WillOnce(Return(true));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(false));
   EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(true));
-  EXPECT_CALL(*access_remote, FindGroup(who, "rpc1", RemoteControlParams())).
-      WillOnce(Return("group1"));
   EXPECT_CALL(*access_remote, Check(who, what)).
       WillOnce(Return(TypeAccess::kAllowed));
 
   EXPECT_EQ(TypeAccess::kAllowed,
-            manager->CheckAccess("12345", "rpc1", RemoteControlParams(), 2));
+            manager->CheckAccess("12345", "RADIO", RemoteControlParams(), 2));
 }
 
 TEST_F(PolicyManagerImplTest, TwoDifferentDevice) {
   Subject who1 = {"dev1", "12345"};
   Subject who2 = {"dev2", "123456"};
-  Object what = {"group1", 1};
+  Object what = {policy_table::MT_RADIO};
 
   EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
       WillOnce(Return("dev1"));
+  EXPECT_CALL(*access_remote,
+              CheckModuleType("12345", policy_table::MT_RADIO)).
+      WillOnce(Return(true));
+  EXPECT_CALL(*access_remote, CheckParameters()).Times(2).
+      WillRepeatedly(Return(true));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(true));
-  EXPECT_CALL(*access_remote, FindGroup(who1, "rpc1", RemoteControlParams())).
-      WillOnce(Return("group1"));
   EXPECT_CALL(*access_remote, Check(who1, what)).
       WillOnce(Return(TypeAccess::kManual));
   EXPECT_CALL(*access_remote, Allow(who1, what));
 
   EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("123456")).
       WillOnce(Return("dev2"));
+  EXPECT_CALL(*access_remote,
+              CheckModuleType("123456", policy_table::MT_RADIO)).
+      WillOnce(Return(true));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev2")).WillOnce(Return(false));
   EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(true));
-  EXPECT_CALL(*access_remote, FindGroup(who2, "rpc1", RemoteControlParams())).
-      WillOnce(Return("group1"));
   EXPECT_CALL(*access_remote, Check(who2, what)).
         WillOnce(Return(TypeAccess::kDisallowed));
 
   EXPECT_EQ(TypeAccess::kAllowed,
-            manager->CheckAccess("12345", "rpc1", RemoteControlParams(), 1));
+            manager->CheckAccess("12345", "RADIO", RemoteControlParams(), 1));
   EXPECT_EQ(TypeAccess::kDisallowed,
-              manager->CheckAccess("123456", "rpc1", RemoteControlParams(), 1));
+              manager->CheckAccess("123456", "RADIO", RemoteControlParams(), 1));
 }
 #endif  // SDL_REMOTE_CONTROL
 

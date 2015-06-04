@@ -952,43 +952,57 @@ void PolicyManagerImpl::set_cache_manager(
 
 #ifdef SDL_REMOTE_CONTROL
 TypeAccess PolicyManagerImpl::CheckAccess(
-    const PTString& app_id, const PTString& rpc,
+    const PTString& app_id, const PTString& module,
     const RemoteControlParams& params, const SeatLocation& zone) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  policy_table::ModuleType module_type;
+  bool is_valid = EnumFromJsonString(module, &module_type);
+  if (is_valid && CheckModulePermissions(app_id, module_type, params, zone)) {
+    return CheckDriverConsent(app_id, module_type);
+  }
+  return TypeAccess::kDisallowed;
+}
+
+bool PolicyManagerImpl::CheckModulePermissions(
+    const PTString& app_id, policy_table::ModuleType module,
+    const RemoteControlParams& params, const SeatLocation& zone) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return access_remote_->CheckModuleType(app_id, module)
+      && access_remote_->CheckParameters(/* module, zone, params */);
+}
+
+TypeAccess PolicyManagerImpl::CheckDriverConsent(
+    const PTString& app_id, policy_table::ModuleType module) {
+  LOG4CXX_AUTO_TRACE(logger_);
   TypeAccess access = TypeAccess::kDisallowed;
-
   std::string dev_id = GetCurrentDeviceId(app_id);
+  Subject who = {dev_id, app_id};
+  Object what = {module};
   if (access_remote_->IsPrimaryDevice(dev_id)) {
-
-    Subject who = {dev_id, app_id};
-    PTString group_name = access_remote_->FindGroup(who, rpc, params);
-    Object what = {group_name, zone};
     access = access_remote_->Check(who, what);
     if (access == TypeAccess::kManual) {
       access_remote_->Allow(who, what);
       access = TypeAccess::kAllowed;
     }
   } else if (access_remote_->IsEnabled()) {
-    Subject who = {dev_id, app_id};
-    PTString group_name = access_remote_->FindGroup(who, rpc, params);
-    if (group_name.empty()) {
-      // Group wasn't found => request is disallowed
-      access = TypeAccess::kDisallowed;
-    } else {
-      Object what = {group_name, zone};
-      access = access_remote_->Check(who, what);
-    }
+    access = access_remote_->Check(who, what);
   }
   return access;
 }
 
 void PolicyManagerImpl::SetAccess(const PTString& app_id,
-                                  const PTString& group_name,
-                                  const SeatLocation zone,
+                                  const PTString& module,
                                   bool allowed) {
   LOG4CXX_AUTO_TRACE(logger_);
+  policy_table::ModuleType module_type;
+  bool is_valid = EnumFromJsonString(module, &module_type);
+  if (!is_valid) {
+    return;
+  }
+
   std::string dev_id = GetCurrentDeviceId(app_id);
   Subject who = {dev_id, app_id};
-  Object what = {group_name, zone};
+  Object what = {module_type};
   if (allowed) {
     access_remote_->Allow(who, what);
   } else {
@@ -1003,11 +1017,16 @@ void PolicyManagerImpl::ResetAccess(const PTString& app_id) {
   access_remote_->Reset(who);
 }
 
-void PolicyManagerImpl::ResetAccess(const PTString& group_name,
-                                    const SeatLocation zone) {
+void PolicyManagerImpl::ResetAccessByModule(const PTString& module) {
   LOG4CXX_AUTO_TRACE(logger_);
-  Object who = {group_name, zone};
-  access_remote_->Reset(who);
+  policy_table::ModuleType module_type;
+  bool is_valid = EnumFromJsonString(module, &module_type);
+  if (!is_valid) {
+    return;
+  }
+
+  Object what = {module_type};
+  access_remote_->Reset(what);
 }
 
 void PolicyManagerImpl::SetPrimaryDevice(const PTString& dev_id,
