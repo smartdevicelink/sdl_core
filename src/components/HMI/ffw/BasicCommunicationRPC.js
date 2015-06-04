@@ -1317,6 +1317,8 @@ FFW.BasicCommunication = FFW.RPCObserver
         OnSystemRequest: function(type, appID, fileName, url) {
 
             Em.Logger.log("FFW.BasicCommunication.OnSystemRequest");
+            Em.Logger.log("OnSystemRequest Params: " + type + " " + appID + " " + fileName
+                + " " + url);
 
             // send request
 
