@@ -232,8 +232,9 @@ bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
   const HMILevel::eType restored_hmi_level =
       ResolveHMILevelConflicts(application, hmi_level);
   const AudioStreamingState::eType restored_audio_state =
-      HMILevel::HMI_FULL == restored_hmi_level ||
-      HMILevel::HMI_LIMITED == restored_hmi_level ? AudioStreamingState::AUDIBLE:
+      application->is_media_application() &&
+      (HMILevel::HMI_FULL == restored_hmi_level ||
+      HMILevel::HMI_LIMITED == restored_hmi_level) ? AudioStreamingState::AUDIBLE:
                                                     AudioStreamingState::NOT_AUDIBLE;
   if (restored_hmi_level == HMILevel::HMI_FULL) {
     ApplicationManagerImpl::instance()->SetState<true>(application->app_id(),
