@@ -1183,6 +1183,24 @@ void PolicyHandler::OnUpdateHMIAppType(std::map<std::string, StringArray> app_hm
   }
 }
 
+void PolicyHandler::OnUpdateHMILevel(const std::string& policy_app_id,
+                                     const std::string& hmi_level) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()
+      ->application_by_policy_id(policy_app_id);
+  if (app) {
+    mobile_apis::HMILevel::eType level =
+        MessageHelper::StringToHMILevel(hmi_level);
+    ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
+                                                           level);
+    MessageHelper::SendHMIStatusNotification(*app);
+  } else {
+    LOG4CXX_WARN(
+        logger_,
+        "Connection_key not found for application_id:" << policy_app_id);
+  }
+}
+
 void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(listeners_lock_);

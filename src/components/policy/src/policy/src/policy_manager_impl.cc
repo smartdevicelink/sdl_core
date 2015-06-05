@@ -494,7 +494,8 @@ void PolicyManagerImpl::SetUserConsentForApp(
 bool PolicyManagerImpl::GetDefaultHmi(const std::string& policy_app_id,
                                       std::string* default_hmi) {
   LOG4CXX_INFO(logger_, "GetDefaultHmi");
-  return false;
+  *default_hmi = "NONE";
+  return true;
 }
 
 bool PolicyManagerImpl::GetPriority(const std::string& policy_app_id,
@@ -1037,16 +1038,20 @@ void PolicyManagerImpl::OnChangedPrimaryDevice(
     return;
   }
 
+  if (!access_remote_->IsPrimaryDevice(device_id)) {
+    std::string default_hmi;
+    if (GetDefaultHmi(application_id, &default_hmi)) {
+      listener()->OnUpdateHMILevel(application_id, default_hmi);
+    } else {
+      LOG4CXX_WARN(
+          logger_,
+          "Couldn't get default HMI level for application " << application_id);
+    }
+  }
+
   Permissions notification_data;
   GetPermissions(device_id, application_id, &notification_data);
-
-  if (access_remote_->IsPrimaryDevice(device_id)) {
-    listener()->OnPermissionsUpdated(application_id, notification_data);
-  } else {
-    std::string default_hmi = "NONE";
-    listener()->OnPermissionsUpdated(application_id, notification_data,
-                                     default_hmi);
-  }
+  listener()->OnPermissionsUpdated(application_id, notification_data);
 }
 
 void PolicyManagerImpl::OnChangedRemoteControl(
@@ -1058,22 +1063,27 @@ void PolicyManagerImpl::OnChangedRemoteControl(
                  "'" << application_id << "'");
     return;
   }
+  if (access_remote_->IsPrimaryDevice(device_id)) {
+    LOG4CXX_INFO(logger_, "Device " << device_id << " is primary");
+    return;
+  }
+
+  if (!access_remote_->IsEnabled()) {
+    std::string default_hmi;
+    if (GetDefaultHmi(application_id, &default_hmi)) {
+      listener()->OnUpdateHMILevel(application_id, default_hmi);
+    } else {
+      LOG4CXX_WARN(
+          logger_,
+          "Couldn't get default HMI level for application " << application_id);
+    }
+  }
 
   Permissions notification_data;
   GetPermissions(device_id, application_id, &notification_data);
-
-  if (!access_remote_->IsPrimaryDevice(device_id)) {
-    if (access_remote_->IsEnabled()) {
-      listener()->OnPermissionsUpdated(application_id, notification_data);
-    } else {
-      std::string default_hmi = "NONE";
-      listener()->OnPermissionsUpdated(application_id, notification_data,
-                                       default_hmi);
-    }
-  }
+  listener()->OnPermissionsUpdated(application_id, notification_data);
 }
 
 #endif  // SDL_REMOTE_CONTROL
 
 }  //  namespace policy
-

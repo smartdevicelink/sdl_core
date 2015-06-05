@@ -325,6 +325,8 @@ class PolicyHandler :
   std::string GetAppName(const std::string& policy_app_id);
 
   virtual void OnUpdateHMIAppType(std::map<std::string, StringArray> app_hmi_types);
+  virtual void OnUpdateHMILevel(const std::string& policy_app_id,
+                                  const std::string& hmi_level);
 
   virtual void OnCertificateUpdated(const std::string& certificate_data);
 
