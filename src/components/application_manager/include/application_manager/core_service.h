@@ -161,8 +161,6 @@ class CoreService : public Service {
  private:
   DISALLOW_COPY_AND_ASSIGN(CoreService);
 
-  void FilterParameters(MessagePtr msg,
-                        const CommandParametersPermissions& params);
   bool AreParametersAllowed(MessagePtr msg,
                             const CommandParametersPermissions& params);
   bool CheckParams(const Json::Value& object,
