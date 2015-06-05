@@ -48,7 +48,7 @@ class PluginManager : public utils::Singleton<PluginManager>,
   int LoadPlugins(const std::string& plugin_path);
   void UnloadPlugins();
   void ProcessMessage(application_manager::MessagePtr msg);
-  void ProcessHMIMessage(application_manager::MessagePtr msg);
+  ProcessResult ProcessHMIMessage(application_manager::MessagePtr msg);
   void SetServiceHandler(application_manager::ServicePtr service) {
     service_ = service;
   }

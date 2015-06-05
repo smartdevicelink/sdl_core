@@ -65,9 +65,18 @@ class CANAppExtension : public application_manager::AppExtension {
       return seat_;
     }
 
+    bool is_on_driver_device() const {
+        return is_on_driver_device_;
+    }
+
+    void set_is_on_driver_device(bool is_driver_dev) {
+        is_on_driver_device_ = is_driver_dev;
+    }
+
   private:
     bool is_control_given_;
     SeatLocation seat_;
+    bool is_on_driver_device_;
 };
 
 typedef utils::SharedPtr<CANAppExtension> CANAppExtensionPtr;

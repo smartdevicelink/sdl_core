@@ -150,11 +150,11 @@ void PluginManager::ProcessMessage(application_manager::MessagePtr msg) {
   }
 }
 
-void PluginManager::ProcessHMIMessage(application_manager::MessagePtr msg) {
+ProcessResult PluginManager::ProcessHMIMessage(application_manager::MessagePtr msg) {
   DCHECK(msg);
   if (!msg) {
     LOG4CXX_ERROR(logger_, "Null pointer message was received.");
-    return;
+    return ProcessResult::CANNOT_PROCESS;
   }
 
   Json::Value value;
@@ -181,11 +181,9 @@ void PluginManager::ProcessHMIMessage(application_manager::MessagePtr msg) {
   PluginHMIFunctionsIterator subscribed_plugin_itr =
     hmi_subscribers_.find(function_name);
   if (hmi_subscribers_.end() != subscribed_plugin_itr) {
-    if (subscribed_plugin_itr->second->ProcessHMIMessage(msg) !=
-        ProcessResult::PROCESSED) {
-      LOG4CXX_ERROR(logger_, "Failed process HMI message!");
-    }
+    return subscribed_plugin_itr->second->ProcessHMIMessage(msg);
   }
+  return ProcessResult::CANNOT_PROCESS;
 }
 
 bool PluginManager::IsMessageForPlugin(application_manager::MessagePtr msg) {

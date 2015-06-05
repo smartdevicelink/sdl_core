@@ -66,6 +66,8 @@ namespace hmi_api {
   const char grant_access[]              = "VehicleInfo.GrantAccess";
   const char on_reverse_apps_allowing[]  = "VehicleInfo.OnReverseAppsAllowing";
   const char on_primary_device[]         = "VehicleInfo.OnPrimaryDevice";
+  const char on_app_deactivated[]        = "BasicCommunication.OnAppDeactivated";
+  const char sdl_activate_app[]          = "SDL.ActivateApp";
 }
 
 namespace can_api {

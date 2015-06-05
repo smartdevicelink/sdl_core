@@ -40,6 +40,7 @@
 #include "utils/macro.h"
 #include "json/json.h"
 #include "functional_module/function_ids.h"
+#include "application_manager/application.h"
 
 namespace can_cooperation {
 
@@ -74,6 +75,12 @@ class MessageHelper {
    * @return Value created from string with json
    */
   static Json::Value StringToValue(const std::string& string);
+
+  /*
+   * @brief Send OnHMIStatus notification to mobile.
+   */
+  static std::string CreateOnHMIStatus(
+    const application_manager::Application& app);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(MessageHelper);

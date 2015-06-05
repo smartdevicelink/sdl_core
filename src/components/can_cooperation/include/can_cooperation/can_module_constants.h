@@ -153,6 +153,11 @@ const char kAllowed[]    = "allowed";
 // OnPrimaryDevice notification
 const char kDevice[]     = "device";
 // OnPrimaryDevice notification
+
+const char kHMIAppID[]   = "appID";
+const char kHmiLevel[]   = "hmiLevel";
+const char kSysContext[] = "systemContext";
+const char kAudioState[] = "audioStreamingState";
 } //  namespace message_params
 
 namespace enums_value {

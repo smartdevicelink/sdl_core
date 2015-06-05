@@ -2384,8 +2384,11 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromHmi message) {
 
   if (plugin_manager->IsHMIMessageForPlugin(message)) {
     LOG4CXX_INFO(logger_, "Message will be processed by plugin.");
-    plugin_manager->ProcessHMIMessage(message);
-    return;
+    functional_modules::ProcessResult result = plugin_manager->ProcessHMIMessage(message);
+    if (functional_modules::ProcessResult::PROCESSED == result
+       || functional_modules::ProcessResult::FAILED == result) {
+        return;
+    }
   }
   ProcessMessageFromHMI(message);
 }
