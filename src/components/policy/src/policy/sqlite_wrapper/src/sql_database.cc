@@ -50,7 +50,9 @@ SQLDatabase::SQLDatabase(const std::string& db_name)
       error_(SQLITE_OK) {}
 
 SQLDatabase::~SQLDatabase() {
-  Close();
+  if (conn_) {
+    Close();
+  }
 }
 
 bool SQLDatabase::Open() {
