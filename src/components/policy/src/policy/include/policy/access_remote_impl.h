@@ -54,7 +54,7 @@ class AccessRemoteImpl : public AccessRemote {
   virtual bool IsEnabled() const;
 
   virtual bool IsPrimaryDevice(const PTString& dev_id) const;
-  virtual void SetPrimaryDevice(const PTString& dev_id, const PTString& input);
+  virtual void SetPrimaryDevice(const PTString& dev_id);
   virtual PTString PrimaryDevice() const;
 
   virtual void Allow(const Subject& who, const Object& what);

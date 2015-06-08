@@ -116,10 +116,8 @@ class AccessRemote {
   /**
    * Sets device as driver's device
    * @param dev_id ID device
-   * @param input
    */
-  virtual void SetPrimaryDevice(const PTString& dev_id,
-                                const PTString& input) = 0;
+  virtual void SetPrimaryDevice(const PTString& dev_id) = 0;
 
   /**
    * Gets current primary device

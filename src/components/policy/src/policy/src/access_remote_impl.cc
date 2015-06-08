@@ -197,8 +197,7 @@ void AccessRemoteImpl::Reset(const Object& what) {
   acl_.erase(what);
 }
 
-void AccessRemoteImpl::SetPrimaryDevice(const PTString& dev_id,
-                                        const PTString& input) {
+void AccessRemoteImpl::SetPrimaryDevice(const PTString& dev_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   primary_device_ = dev_id;
 }
