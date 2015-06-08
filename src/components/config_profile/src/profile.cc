@@ -73,6 +73,7 @@ const char* kProtocolHandlerSection = "ProtocolHandler";
 const char* kSDL4Section = "SDL4";
 const char* kResumptionSection = "Resumption";
 
+const char* kSDLVersionKey = "SDLVersion";
 const char* kHmiCapabilitiesKey = "HMICapabilities";
 const char* kPathToSnapshotKey = "PathToSnapshot";
 const char* kPreloadedPTKey = "PreloadedPT";
@@ -165,6 +166,7 @@ const char* kHashStringSizeKey = "HashStringSize";
 #ifdef WEB_HMI
 const char* kDefaultLinkToWebHMI = "HMI/index.html";
 #endif // WEB_HMI
+const char* kDefaultSDLVersion = "";
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
 const char* kDefaultPreloadedPTFileName = "sdl_preloaded_pt.json";
@@ -243,6 +245,7 @@ Profile::Profile()
 #ifdef WEB_HMI
       link_to_web_hmi_(kDefaultLinkToWebHMI),
 #endif // WEB_HMI
+      sdl_version_(kDefaultSDLVersion),
       app_config_folder_(),
       app_storage_folder_(),
       app_resourse_folder_(),
@@ -306,7 +309,11 @@ Profile::Profile()
       attempts_to_open_policy_db_(kDefaultAttemptsToOpenPolicyDB),
       open_attempt_timeout_ms_(kDefaultAttemptsToOpenPolicyDB),
       hash_string_size_(kDefaultHashStringSize) {
+  ReadStringValue(&sdl_version_, kDefaultSDLVersion,
+                  kMainSection, kSDLVersionKey);
 }
+
+
 
 Profile::~Profile() {
 }
@@ -320,6 +327,10 @@ void Profile::config_file_name(const std::string& fileName) {
 
 const std::string& Profile::config_file_name() const {
   return config_file_name_;
+}
+
+const std::string& Profile::sdl_version() const {
+  return sdl_version_;
 }
 
 bool Profile::launch_hmi() const {
@@ -684,6 +695,12 @@ uint16_t Profile::tts_global_properties_timeout() const {
 
 void Profile::UpdateValues() {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  // SDL version
+  ReadStringValue(&sdl_version_, kDefaultSDLVersion,
+                  kMainSection, kSDLVersionKey);
+
+  LOG_UPDATED_VALUE(sdl_version_, kSDLVersionKey, kMainSection);
 
   // Launch HMI parameter
   std::string launch_value;
@@ -1374,7 +1391,7 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_VALUE(iap_hub_connection_wait_timeout_,
                     kIAPHubConnectionWaitTimeoutKey, kIAPSection);
- 
+
   ReadUIntValue(&default_hub_protocol_index_, kDefaultHubProtocolIndex, kIAPSection, kDefaultHubProtocolIndexKey);
 
   LOG_UPDATED_VALUE(default_hub_protocol_index_, kDefaultHubProtocolIndexKey, kIAPSection);

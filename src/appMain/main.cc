@@ -67,14 +67,12 @@
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "appMain")
 
-extern const char* gitVersion;
 namespace {
 
 const std::string kBrowser = "/usr/bin/chromium-browser";
 const std::string kBrowserName = "chromium-browser";
 const std::string kBrowserParams = "--auth-schemes=basic,digest,ntlm";
 const std::string kLocalHostAddress = "127.0.0.1";
-const std::string kApplicationVersion = "Develop";
 
 #ifdef WEB_HMI
 /**
@@ -123,7 +121,6 @@ int32_t main(int32_t argc, char** argv) {
   // --------------------------------------------------------------------------
   // Logger initialization
   INIT_LOGGER("log4cxx.properties");
-  LOG4CXX_INFO(logger_, gitVersion);
 #if defined(__QNXNTO__) and defined(GCOV_ENABLED)
   LOG4CXX_WARN(logger_,
                 "Attention! This application was built with unsupported "
@@ -137,7 +134,8 @@ int32_t main(int32_t argc, char** argv) {
   }
 
   LOG4CXX_INFO(logger_, "Application started!");
-  LOG4CXX_INFO(logger_, "Application version " << kApplicationVersion);
+  LOG4CXX_INFO(logger_, "SDL version: "
+                         << profile::Profile::instance()->sdl_version());
 
   // Initialize gstreamer. Needed to activate debug from the command line.
 #if defined(EXTENDED_MEDIA_MODE)
