@@ -180,6 +180,8 @@ class PolicyManagerImpl : public PolicyManager {
     virtual void SetPrimaryDevice(const PTString& dev_id, const PTString& input);
     virtual PTString PrimaryDevice() const;
     virtual void SetRemoteControl(bool enabled);
+    virtual void OnChangedPrimaryDevice(const std::string& application_id);
+    virtual void OnChangedRemoteControl(const std::string& application_id);
 #endif  // SDL_REMOTE_CONTROL
 
   protected:
@@ -276,6 +278,9 @@ class PolicyManagerImpl : public PolicyManager {
 
 
 private:
+    void GetPermissions(const std::string device_id,
+                        const std::string application_id,
+                        Permissions* data);
     PolicyListener* listener_;
 
     UpdateStatusManager update_status_manager_;
