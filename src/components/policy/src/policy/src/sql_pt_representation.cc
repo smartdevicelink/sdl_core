@@ -873,6 +873,13 @@ bool SQLPTRepresentation::SaveApplicationPolicies(
       return false;
     }
   }
+  policy_table::ApplicationPolicies::const_iterator it_pre_consent_passengerRC =
+      apps.find(kPreConsentPassengersRC);
+  if (apps.end() != it_pre_consent_passengerRC) {
+    if (!SaveSpecificAppPolicy(*it_pre_consent_passengerRC)) {
+      return false;
+    }
+  }
   policy_table::ApplicationPolicies::const_iterator it_device =
       apps.find(kDeviceId);
   if (apps.end() != it_pre_data_consented) {

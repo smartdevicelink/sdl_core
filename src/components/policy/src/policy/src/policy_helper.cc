@@ -658,7 +658,7 @@ void FillFunctionalGroupPermissions(
 
 bool IsPredefinedApp(const AppPoliciesValueType& app) {
   return app.first == kDefaultId || app.first == kPreDataConsentId ||
-         app.first == kDeviceId;
+         app.first == kDeviceId || app.first == kPreConsentPassengersRC;
 }
 
 FunctionalGroupIDs ExcludeSame(const FunctionalGroupIDs& from,
