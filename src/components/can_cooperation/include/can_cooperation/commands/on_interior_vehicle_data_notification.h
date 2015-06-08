@@ -60,6 +60,9 @@ class OnInteriorVehicleDataNotification : public BaseCommandNotification {
    * @brief OnInteriorVehicleDataNotification class destructor
    */
   virtual ~OnInteriorVehicleDataNotification();
+
+ protected:
+   virtual std::string ModuleType(const Json::Value& message);
 };
 
 }  // namespace commands

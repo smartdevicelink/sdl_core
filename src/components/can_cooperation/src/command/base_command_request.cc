@@ -312,19 +312,27 @@ bool BaseCommandRequest::CheckPolicy() {
     return false;
   }
 
+  return CheckAccess();
+}
+
+bool BaseCommandRequest::CheckAccess() {
+  LOG4CXX_AUTO_TRACE(logger_);
   CANAppExtensionPtr extension = GetAppExtension(app_);
-  // TODO(KKolodiy): get module type, zone and params from message
+  // TODO(KKolodiy): zone and params from message
   SeatLocation zone = 10;
   std::vector<std::string> params;
-  std::string module = "RADIO";
+  Json::Value value;
+  Json::Reader reader;
+  LOG4CXX_DEBUG(logger_, "Request: " << message_->json_message());
+  reader.parse(message_->json_message(), value);
   application_manager::TypeAccess access = service_->CheckAccess(
-      app_->app_id(), module, params, zone);
+      app_->app_id(), ModuleType(value), params, zone);
 
   switch (access) {
     case application_manager::kAllowed:
       return true;
     case application_manager::kDisallowed:
-      SendResponse(false, result_codes::kDisallowed, "");
+      SendResponse(false, result_codes::kDisallowed, "Remote control is disallowed");
       break;
     case application_manager::kManual: {
       Json::Value params;
@@ -341,6 +349,11 @@ bool BaseCommandRequest::CheckPolicy() {
       SendResponse(false, result_codes::kDisallowed, "Unknown issue");
   }
   return false;
+}
+
+std::string BaseCommandRequest::ModuleType(const Json::Value& message) {
+  // TODO(KKolodiy): stub for old mobile API
+  return "RADIO";
 }
 
 void BaseCommandRequest::on_event(const event_engine::Event<application_manager::MessagePtr,

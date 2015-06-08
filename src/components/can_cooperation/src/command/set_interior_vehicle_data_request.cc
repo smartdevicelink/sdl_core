@@ -33,6 +33,7 @@
 #include "can_cooperation/commands/set_interior_vehicle_data_request.h"
 #include "functional_module/function_ids.h"
 #include "json/json.h"
+#include "can_cooperation/can_module_constants.h"
 
 namespace can_cooperation {
 
@@ -79,6 +80,13 @@ void SetInteriorVehicleDataRequest::OnEvent(
   } else {
     LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
   }
+}
+
+std::string SetInteriorVehicleDataRequest::ModuleType(
+    const Json::Value& message) {
+  return message.get(message_params::kModuleData,
+                     Json::Value(Json::objectValue))
+      .get(message_params::kModuleType, Json::Value("")).asString();
 }
 
 }  // namespace commands

@@ -955,6 +955,7 @@ TypeAccess PolicyManagerImpl::CheckAccess(
     const PTString& app_id, const PTString& module,
     const RemoteControlParams& params, const SeatLocation& zone) {
   LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Module type: " << module);
   policy_table::ModuleType module_type;
   bool is_valid = EnumFromJsonString(module, &module_type);
   if (is_valid && CheckModulePermissions(app_id, module_type, params, zone)) {
