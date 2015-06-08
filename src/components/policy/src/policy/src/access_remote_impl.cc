@@ -45,29 +45,6 @@ using rpc::policy_table_interface_base::EnumFromJsonString;
 
 namespace policy {
 
-struct IsPrimary {
-  bool operator ()(const DeviceData::value_type& item) const {
-    const policy_table::UserConsentRecords& consent = *item.second
-        .user_consent_records;
-    policy_table::UserConsentRecords::const_iterator i = consent.find(kPrimary);
-    return i != consent.end() && *i->second.is_consented == true;
-  }
-};
-
-struct SetPrimary {
- private:
-  bool value_;
- public:
-  explicit SetPrimary(bool value)
-      : value_(value) {
-  }
-  void operator ()(DeviceData::value_type& item) const {
-    policy_table::ConsentRecords& primary =
-        (*item.second.user_consent_records)[kPrimary];
-    *primary.is_consented = value_;
-  }
-};
-
 struct Erase {
  private:
   const Subject& who_;
@@ -132,14 +109,6 @@ void AccessRemoteImpl::Init() {
   enabled_ = country_consent_
       && (!config.user_consent_passengersRC.is_initialized()
           || *config.user_consent_passengersRC);
-
-  const DeviceData& devices = *cache_->pt_->policy_table.device_data;
-  DeviceData::const_iterator d = std::find_if(devices.begin(), devices.end(),
-                                              IsPrimary());
-  if (d != devices.end()) {
-    LOG4CXX_TRACE(logger_, "Primary device is set");
-    primary_device_ = d->first;
-  }
 }
 
 bool AccessRemoteImpl::IsPrimaryDevice(const PTString& dev_id) const {
@@ -232,17 +201,6 @@ void AccessRemoteImpl::SetPrimaryDevice(const PTString& dev_id,
                                         const PTString& input) {
   LOG4CXX_AUTO_TRACE(logger_);
   primary_device_ = dev_id;
-  DeviceData& devices = *cache_->pt_->policy_table.device_data;
-  std::for_each(devices.begin(), devices.end(), SetPrimary(false));
-  policy_table::ConsentRecords& record =
-      (*devices[dev_id].user_consent_records)[kPrimary];
-  *record.is_consented = true;
-  policy_table::Input value;
-  if (EnumFromJsonString(input, &value)) {
-    *record.input = value;
-  }
-  *record.time_stamp = cache_->currentDateTime();
-  cache_->Backup();
 }
 
 PTString AccessRemoteImpl::PrimaryDevice() const {

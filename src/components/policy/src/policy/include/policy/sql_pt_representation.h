@@ -108,9 +108,6 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                        policy_table::AppHMITypes* app_types) const;
     bool GatherNickName(const std::string& app_id,
                         policy_table::Strings* nicknames) const;
-    bool GatherUserConsentRecords(
-        const std::string& device,
-        policy_table::UserConsentRecords* consent) const;
 
     virtual bool SaveApplicationCustomData(const std::string& app_id,
                                    bool is_revoked,
@@ -191,10 +188,6 @@ class SQLPTRepresentation : public virtual PTRepresentation {
       const policy_table::NumberOfNotificationsPerMinute& notifications);
     bool SaveMessageType(const std::string& type);
     bool SaveLanguage(const std::string& code);
-    bool SaveUserConsentRecords(const std::string& device,
-                                const policy_table::UserConsentRecords& consents);
-    bool SaveUserConsent(const std::string& device, const std::string& name,
-                         const policy_table::ConsentRecords& record);
 };
 }  //  namespace policy
 
