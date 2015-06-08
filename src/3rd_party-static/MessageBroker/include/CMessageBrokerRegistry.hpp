@@ -5,6 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include "utils/lock.h"
 
 /**
  * \namespace NsMessageBroker
@@ -91,12 +92,14 @@ namespace NsMessageBroker
       * For example PhoneController:1080
       */
       std::map <std::string, int> mControllersList;
+      sync_primitives::Lock mControllersListLock;
 
       /**
       * \brief Map to store subscribers information like ComponentName.PropertyName:socketFd:.
       * For example PhoneController.onPhoneBookChanged:1080
       */
       std::multimap <std::string, int> mSubscribersList;
+      sync_primitives::Lock mSubscribersListLock;
    };
 } /* namespace NsMessageBroker */
 
