@@ -71,8 +71,6 @@ mobile_apis::Result::eType CoreService::CheckPolicyPermissions(MessagePtr msg) {
     return ret;
   }
 
-  FilterParameters(msg, params);
-
 #ifdef SDL_REMOTE_CONTROL
   if (!AreParametersAllowed(msg, params)) {
     return mobile_apis::Result::eType::DISALLOWED;
@@ -170,12 +168,6 @@ void CoreService::SubscribeToHMINotification(
   }
 }
 
-void CoreService::FilterParameters(MessagePtr msg,
-                                   const CommandParametersPermissions& params) {
-  // TODO(KKolodiy): may be need to implement filter parameters
-  // see application_manager::command::CommandRequestImpl::RemoveDisallowedParameters
-}
-
 bool CoreService::AreParametersAllowed(
     MessagePtr msg, const CommandParametersPermissions& params) {
   Json::Reader reader;
@@ -195,10 +187,7 @@ bool CoreService::CheckParams(const Json::Value& object,
   }
   for (Json::Value::iterator i = object.begin(); i != object.end(); ++i) {
     std::string name = i.memberName();
-    const Json::Value& value = *i;
-    bool allowed = IsAllowed(name, allowed_params)
-        && CheckParams(value, allowed_params);
-    if (!allowed) {
+    if (!IsAllowed(name, allowed_params)) {
       return false;
     }
   }
