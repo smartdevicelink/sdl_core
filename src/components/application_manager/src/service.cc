@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,41 +29,26 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TEST_COMPONENTS_FUNCTIONAL_MODULE_PLUGINS_MOCK_GENERIC_MODULE_H_
-#define TEST_COMPONENTS_FUNCTIONAL_MODULE_PLUGINS_MOCK_GENERIC_MODULE_H_
 
-#include "gmock/gmock.h"
-#include "functional_module/generic_module.h"
+#include <algorithm>
+#include "application_manager/service.h"
+#include "smart_objects/smart_object.h"
 
-using functional_modules::GenericModule;
-using functional_modules::PluginInfo;
-using functional_modules::ProcessResult;
-using functional_modules::ServiceState;
+namespace application_manager {
 
-using ::testing::_;
-using ::testing::Return;
+namespace {
+int ConvertToInt(const smart_objects::SmartObject& val) {
+  return val.asInt();
+}
+}
 
-class MockGenericModule : public GenericModule {
- public:
-  MockGenericModule();
-  MOCK_CONST_METHOD0(GetPluginInfo,
-      PluginInfo());
-  MOCK_METHOD1(set_service,
-      void(application_manager::ServicePtr service));
-  MOCK_METHOD0(service,
-      application_manager::ServicePtr());
-  MOCK_METHOD1(ProcessMessage,
-      ProcessResult(application_manager::MessagePtr msg));
-  MOCK_METHOD1(ProcessHMIMessage,
-      ProcessResult(application_manager::MessagePtr msg));
-  MOCK_METHOD1(OnServiceStateChanged,
-      void(ServiceState state));
-  MOCK_METHOD1(RemoveAppExtension,
-      void(uint32_t app_id));
-  MOCK_METHOD2(IsAppForPlugin, bool(application_manager::MessagePtr msg,
-      application_manager::ApplicationSharedPtr app));
-  MOCK_METHOD0(RemoveAppExtensions,
-      void());
-};
-
-#endif  // TEST_COMPONENTS_FUNCTIONAL_MODULE_PLUGINS_MOCK_GENERIC_MODULE_H_
+std::vector<int> Service::SmartObjToArrayInt(const smart_objects::SmartObject* data) {
+  if (!data) {
+    return std::vector<int>();
+  }
+  std::vector<int> result(data->asArray()->size());
+  std::transform(data->asArray()->begin(), data->asArray()->end(),
+                 result.begin(), ConvertToInt);
+  return result;
+}
+}

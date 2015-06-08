@@ -56,8 +56,10 @@ void PolicyHelper::SetPrimaryDevice(const uint32_t device_handle,
     DCHECK(extension);
     if (applications[i]->device() == device_handle) {
       extension->set_is_on_driver_device(true);
+      printf("SET DEVICE PRIMARY FOR %d\n", applications[i]->app_id());
     } else {
       extension->set_is_on_driver_device(false);
+      printf("SET DEVICE NOT PRIMARY FOR %d\n", applications[i]->app_id());
     }
   }
 }

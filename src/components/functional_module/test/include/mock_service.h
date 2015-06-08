@@ -53,6 +53,8 @@ class MockService : public Service {
       std::vector<ApplicationSharedPtr>(AppExtensionUID));
   MOCK_METHOD1(SubscribeToHMINotification,
       void(const std::string& hmi_notification));
+  MOCK_METHOD2(ChangeNotifyHMILevel, void(ApplicationSharedPtr app,
+      mobile_apis::HMILevel::eType level));
   MOCK_METHOD4(CheckAccess,
       TypeAccess(const ApplicationId& app_id,
           const PluginFunctionID& function_id,

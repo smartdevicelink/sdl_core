@@ -290,10 +290,9 @@ functional_modules::ProcessResult CANModule::HandleMessage(
                 }
               }
 
-              if (current_app == active_app) {
-                current_app->set_hmi_level(mobile_apis::HMILevel::eType::HMI_LIMITED);
-                //msg->set_json_message(MessageHelper::CreateOnHMIStatus(*current_app));
-                //msg->set_function_id
+              if (current_app && current_app == active_app) {
+                printf("DEACTIVATING THE IMPORTANT \n");
+                service()->ChangeNotifyHMILevel(current_app, mobile_apis::HMILevel::eType::HMI_LIMITED);
                 return ProcessResult::PROCESSED;
               }
 
@@ -423,6 +422,21 @@ void CANModule::RemoveAppExtension(uint32_t app_id) {
     service()->ResetAccess(app->app_id());
     app->RemoveExtension(kCANModuleID);
   }
+}
+
+bool CANModule::IsAppForPlugin(application_manager::MessagePtr msg,
+application_manager::ApplicationSharedPtr app) {
+  if (app->app_types()) {
+    std::vector<int> hmi_types =
+    application_manager::Service::SmartObjToArrayInt(app->app_types());
+    if (hmi_types.end() != std::find(hmi_types.begin(), hmi_types.end(),
+    mobile_apis::AppHMIType::eType::REMOTE_CONTROL)) {
+      CANAppExtensionPtr can_app_extension = new CANAppExtension(GetModuleID());
+      app->AddExtension(can_app_extension);
+      return true;
+    }
+  }
+  return false;
 }
 
 }  //  namespace can_cooperation

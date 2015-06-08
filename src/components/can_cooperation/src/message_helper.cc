@@ -32,6 +32,7 @@
 
 #include <string>
 #include "can_cooperation/message_helper.h"
+#include "can_cooperation/can_module_constants.h"
 
 namespace can_cooperation {
 using functional_modules::MobileFunctionID;
@@ -93,18 +94,4 @@ Json::Value MessageHelper::StringToValue(const std::string& string) {
   return Json::Value(Json::ValueType::nullValue);
 }
 
-std::string MessageHelper::CreateOnHMIStatus(
-  const application_manager::Application& app) {
- /* Json::Value msg_params;
-
-  msg_params[kHmiLevel] = app.hmi_level();
-  msg_params[kSysContext] = app.system_context();
-  msg_params[kAudioState] = app.audio_streaming_state();
-
-  Json::FastWriter writer;
-  std::string params = writer.write(msg_params);*/
-  return "params";
-}
-
 }  // namespace can_cooperation
-

@@ -55,6 +55,8 @@ class DriverGenericModuleTest : public GenericModule {
   }
   virtual void RemoveAppExtension(uint32_t app_id) {}
   virtual void RemoveAppExtensions() {}
+  bool IsAppForPlugin(application_manager::MessagePtr msg,
+      application_manager::ApplicationSharedPtr app) {return true;}
 
   const Observers& observers() {
     return observers_;

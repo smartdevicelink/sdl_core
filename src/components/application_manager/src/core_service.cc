@@ -170,6 +170,13 @@ void CoreService::SubscribeToHMINotification(
   }
 }
 
+void CoreService::ChangeNotifyHMILevel(ApplicationSharedPtr app,
+      mobile_apis::HMILevel::eType level) {
+  ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
+                                                           level);
+  MessageHelper::SendHMIStatusNotification(*app);
+}
+
 void CoreService::FilterParameters(MessagePtr msg,
                                    const CommandParametersPermissions& params) {
   // TODO(KKolodiy): may be need to implement filter parameters

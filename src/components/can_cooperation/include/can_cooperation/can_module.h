@@ -97,6 +97,14 @@ class CANModule : public functional_modules::GenericModule,
    */
   virtual void RemoveAppExtension(uint32_t app_id);
 
+  /*
+   * @brief Check registering app can be handled by plugin
+   * @param msg Registration message
+   * @param app Application basis already create by Core
+   */
+  bool IsAppForPlugin(application_manager::MessagePtr msg,
+      application_manager::ApplicationSharedPtr app);
+
  protected:
   /**
    * @brief Remove extension for all applications

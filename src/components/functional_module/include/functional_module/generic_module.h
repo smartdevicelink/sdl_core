@@ -114,6 +114,14 @@ class GenericModule {
    */
   virtual void RemoveAppExtension(uint32_t app_id) = 0;
 
+  /*
+   * @brief Check registering app can be handled by plugin
+   * @param msg Registration message
+   * @param app Application basis already create by Core
+   */
+  virtual bool IsAppForPlugin(application_manager::MessagePtr msg,
+      application_manager::ApplicationSharedPtr app) = 0;
+
  protected:
   explicit GenericModule(ModuleID module_id);
   void NotifyObservers(ModuleObserver::Errors error);

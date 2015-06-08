@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -156,6 +156,20 @@ class Service {
    */
   virtual void SubscribeToHMINotification(
       const std::string& hmi_notification) = 0;
+
+  /*
+   * @brief Change hmi level of app and notify it
+   * @param app Application to be changed and notified
+   * @param level New HMI level of app
+   */
+  virtual void ChangeNotifyHMILevel(ApplicationSharedPtr app,
+      mobile_apis::HMILevel::eType level) = 0;
+
+  /*
+   * @brief Static helper with smart objects.
+   * @param data Pointer to SmartObject for convertion
+   */
+  static std::vector<int> SmartObjToArrayInt(const smart_objects::SmartObject* data);
 };
 
 typedef utils::SharedPtr<Service> ServicePtr;
