@@ -362,6 +362,20 @@ class HMICapabilities {
   void set_prerecorded_speech(
        const smart_objects::SmartObject& prerecorded_speech);
 
+  /*
+   * @brief Interface used to store information about software version of the target
+   *
+   * @param ccpu_version Received system/hmi software version 
+   */
+  void set_ccpu_version(const std::string& ccpu_version);
+  
+  /*
+   * @brief Returns software version of the target
+   *
+   * @return TRUE if it supported, otherwise FALSE
+   */
+  inline const std::string& ccpu_version() const;
+
  protected:
 
   /*
@@ -426,6 +440,7 @@ class HMICapabilities {
   smart_objects::SmartObject*      speech_capabilities_;
   smart_objects::SmartObject*      audio_pass_thru_capabilities_;
   smart_objects::SmartObject*      prerecorded_speech_;
+  std::string                      ccpu_version_;
 
   ApplicationManagerImpl*          app_mngr_;
 
@@ -531,6 +546,10 @@ const smart_objects::SmartObject* HMICapabilities::vehicle_type() const {
 const smart_objects::SmartObject*
 HMICapabilities::prerecorded_speech() const {
   return prerecorded_speech_;
+}
+
+const std::string& HMICapabilities::ccpu_version() const {
+  return ccpu_version_;
 }
 
 }  //  namespace application_manager
