@@ -1,6 +1,30 @@
 {
     "policy_table": {
         "module_config": {
+            "equipment": {
+              "zones": {
+                "Driver": {
+                  "col": 0,
+                  "row": 0,
+                  "level": 0
+                },
+                "FrontPassenger": {
+                  "col": 1,
+                  "row": 0,
+                  "level": 0
+                },
+                "LeftRarePassenger": {
+                  "col": 0,
+                  "row": 1,
+                  "level": 0
+                },
+                "RightRarePassenger": {
+                  "col": 1,
+                  "row": 1,
+                  "level": 0
+                }
+              }
+            },
             "preloaded_pt": true,
             "country_consent_passengersRC": true,
             "exchange_after_x_ignition_cycles": 100,

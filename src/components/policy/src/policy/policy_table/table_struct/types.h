@@ -15,6 +15,7 @@ struct MessageLanguages;
 struct MessageString;
 struct RpcParameters;
 struct Rpcs;
+struct InteriorZone;
 }  // namespace policy_table_interface_base
 }  // namespace rpc
 
@@ -55,6 +56,8 @@ typedef Map< Stringifyable < Nullable< ApplicationParams > >, 1, 1000 > Applicat
 typedef Map< Rpcs, 1, 255 > FunctionalGroupings;
 
 typedef Map< DeviceParams, 0, 255 > DeviceData;
+
+typedef Map< InteriorZone, 0, 255 > Zones;
 
 struct ApplicationParams : CompositeType {
   public:
@@ -122,6 +125,43 @@ struct Rpcs : CompositeType {
     bool Validate() const;
 };
 
+struct InteriorZone: CompositeType {
+  public:
+    Integer<uint16_t, 0, 65225> col;
+    Integer<uint16_t, 0, 65225> row;
+    Integer<uint16_t, 0, 65225> level;
+  public:
+    InteriorZone();
+    explicit InteriorZone(const InteriorZone& zone);
+    ~InteriorZone();
+    explicit InteriorZone(const Json::Value* value__);
+    Json::Value ToJsonValue() const;
+    bool is_valid() const;
+    bool is_initialized() const;
+    bool struct_empty() const;
+    void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
+  private:
+    bool Validate() const;
+};
+
+struct Equipment : CompositeType {
+  public:
+    Zones zones;
+  public:
+    Equipment();
+    ~Equipment();
+    explicit Equipment(const Json::Value* value__);
+    Json::Value ToJsonValue() const;
+    bool is_valid() const;
+    bool is_initialized() const;
+    bool struct_empty() const;
+    void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
+  private:
+    bool Validate() const;
+};
+
 struct ModuleConfig : CompositeType {
   public:
     Optional< Map< String<0, 100>, 0, 255 > > device_certificates;
@@ -139,6 +179,7 @@ struct ModuleConfig : CompositeType {
     Optional< String<0, 65535> > certificate;
     Optional< Boolean > user_consent_passengersRC;
     Optional< Boolean > country_consent_passengersRC;
+    Optional< Equipment > equipment;
   public:
     ModuleConfig();
     ModuleConfig(uint8_t exchange_after_x_ignition_cycles, int64_t exchange_after_x_kilometers, uint8_t exchange_after_x_days, uint16_t timeout_after_x_seconds, const SecondsBetweenRetries& seconds_between_retries, const ServiceEndpoints& endpoints, const NumberOfNotificationsPerMinute& notifications_per_minute_by_priority);
