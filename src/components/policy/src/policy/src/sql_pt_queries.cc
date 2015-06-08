@@ -78,6 +78,41 @@ const std::string kCreateSchema =
   "  `user_consent_passengersRC` BOOL,"
   "  `country_consent_passengersRC` BOOL "
   "); "
+
+  /* zone */
+  "CREATE TABLE "zone"( "
+  "  `id` INTEGER PRIMARY KEY NOT NULL, "
+  "  `name` VARCHAR(100) NOT NULL, "
+  "  `col` INTEGER NOT NULL, "
+  "  `row` INTEGER NOT NULL, "
+  "  `level` INTEGER NOT NULL "
+  "); "
+  "CREATE INDEX `zone.room` ON `zone`(`col`,`row`,`level`); "
+
+  /* module */
+  "CREATE TABLE `module`( "
+  "  `id` INTEGER PRIMARY KEY NOT NULL, "
+  "  `name` VARCHAR(45) NOT NULL, "
+  "  `zone_id` INTEGER NOT NULL, "
+  "  `access` INTEGER NOT NULL, "
+  "CONSTRAINT `fk_module_1` "
+  "  FOREIGN KEY(`zone_id`) "
+  "  REFERENCES `zone`(`id`) "
+  "); "
+  "CREATE INDEX `module.zone_module` ON `module`(`name`,`zone_id`); "
+  "CREATE INDEX `module.fk_module_1_idx` ON `module`(`zone_id`); "
+
+  /* remote_rpc */
+  "CREATE TABLE `remote_rpc`( "
+  "  `name` VARCHAR(255) NOT NULL, "
+  "  `parameter` VARCHAR(45), "
+  "  `module_id` VARCHAR(45) NOT NULL, "
+  "CONSTRAINT `fk_remote_rpc_1` "
+  "  FOREIGN KEY(`module_id`) "
+  "  REFERENCES `module`(`name`) "
+  "); "
+  "CREATE INDEX `remote_rpc.fk_remote_rpc_1_idx` ON `remote_rpc`(`module_id`); "
+
   "CREATE TABLE IF NOT EXISTS `functional_group`( "
   "  `id` INTEGER PRIMARY KEY NOT NULL, "
   "  `user_consent_prompt` TEXT UNIQUE ON CONFLICT REPLACE, "
