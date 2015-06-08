@@ -59,6 +59,10 @@ typedef Map< DeviceParams, 0, 255 > DeviceData;
 
 typedef Map< InteriorZone, 0, 255 > Zones;
 
+typedef Map<Strings, 0, 255> AccessRpcList;
+
+typedef Map<AccessRpcList, 0, 255> AccessModuleList;
+
 struct ApplicationParams : CompositeType {
   public:
     Strings groups;
@@ -130,6 +134,9 @@ struct InteriorZone: CompositeType {
     Integer<uint16_t, 0, 65225> col;
     Integer<uint16_t, 0, 65225> row;
     Integer<uint16_t, 0, 65225> level;
+    AccessModuleList auto_allow;
+    AccessModuleList driver_allow;
+    AccessModuleList disallow;
   public:
     InteriorZone();
     explicit InteriorZone(const InteriorZone& zone);

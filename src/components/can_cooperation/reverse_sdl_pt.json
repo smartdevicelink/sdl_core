@@ -6,22 +6,44 @@
                 "Driver": {
                   "col": 0,
                   "row": 0,
-                  "level": 0
+                  "level": 0,
+                  "auto_allow": {
+                    "RADIO": {}
+                  },
+                  "driver_allow": {},
+                  "disallow": {}
                 },
-                "FrontPassenger": {
+                "Front Passenger": {
                   "col": 1,
                   "row": 0,
-                  "level": 0
+                  "level": 0,
+                  "auto_allow": {
+                    "RADIO": {
+                      "SetInteriorVehicleData": []
+                    }
+                  },
+                  "driver_allow": {},
+                  "disallow": {}
                 },
-                "LeftRarePassenger": {
+                "Left Rare Passenger": {
                   "col": 0,
                   "row": 1,
-                  "level": 0
+                  "level": 0,
+                  "auto_allow": {
+                    "RADIO": {
+                      "SetInteriorVehicleData": ["frequencyInteger"]
+                    }
+                  },
+                  "driver_allow": {},
+                  "disallow": {}
                 },
-                "RightRarePassenger": {
+                "Right Rare Passenger": {
                   "col": 1,
                   "row": 1,
-                  "level": 0
+                  "level": 0,
+                  "auto_allow": {},
+                  "driver_allow": {},
+                  "disallow": {}
                 }
               }
             },
