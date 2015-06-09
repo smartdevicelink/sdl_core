@@ -1044,6 +1044,12 @@ bool SQLPTRepresentation::SaveModuleConfig(
     return false;
   }
 
+#ifdef SDL_REMOTE_CONTROL
+  if (!SaveEquipment(*config.equipment)) {
+    return false;
+  }
+#endif  // SDL_REMOTE_CONTROL
+
   return true;
 }
 
@@ -1558,6 +1564,49 @@ bool SQLPTRepresentation::SaveModuleType(const std::string& app_id,
     }
   }
 
+  return true;
+}
+
+bool SQLPTRepresentation::SaveEquipment(
+    const policy_table::Equipment& equipment) {
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertInteriorZone)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for interior zone");
+    return false;
+  }
+
+  policy_table::Zones::const_iterator i;
+  for (i = equipment.zones.begin(); i != equipment.zones.end(); ++i) {
+    const std::string& name = i->first;
+    const policy_table::InteriorZone& zone = i->second;
+    query.Bind(0, name);
+    query.Bind(1, zone.col);
+    query.Bind(2, zone.row);
+    query.Bind(3, zone.level);
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_WARN(logger_, "Incorrect insert into interior zone.");
+      return false;
+    }
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::GatherEquipment(
+    policy_table::Equipment* equipment) const {
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectInteriorZones)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from interior zone");
+    return false;
+  }
+
+  while (query.Next()) {
+    policy_table::InteriorZone zone;
+    std::string name = query.GetString(0);
+    zone.col = query.GetInteger(1);
+    zone.row = query.GetInteger(2);
+    zone.level = query.GetInteger(3);
+    equipment->zones[name] = zone;
+  }
   return true;
 }
 #endif  // SDL_REMOTE_CONTROL

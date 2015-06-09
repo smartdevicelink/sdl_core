@@ -59,9 +59,9 @@ typedef Map< DeviceParams, 0, 255 > DeviceData;
 
 typedef Map< InteriorZone, 0, 255 > Zones;
 
-typedef Map<Strings, 0, 255> AccessRpcList;
+typedef Map<Strings, 0, 255> RemoteRpcs;
 
-typedef Map<AccessRpcList, 0, 255> AccessModuleList;
+typedef Map<RemoteRpcs, 0, 255> AccessModules;
 
 struct ApplicationParams : CompositeType {
   public:
@@ -134,9 +134,9 @@ struct InteriorZone: CompositeType {
     Integer<uint16_t, 0, 65225> col;
     Integer<uint16_t, 0, 65225> row;
     Integer<uint16_t, 0, 65225> level;
-    AccessModuleList auto_allow;
-    AccessModuleList driver_allow;
-    AccessModuleList disallow;
+    AccessModules auto_allow;
+    AccessModules driver_allow;
+    AccessModules disallow;
   public:
     InteriorZone();
     explicit InteriorZone(const InteriorZone& zone);

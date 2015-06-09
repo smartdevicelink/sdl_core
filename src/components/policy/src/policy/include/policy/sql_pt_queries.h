@@ -85,6 +85,8 @@ extern const std::string kInsertLanguage;
 extern const std::string kInsertMessageString;
 extern const std::string kUpdateVersion;
 extern const std::string kUpdateModuleConfig;
+extern const std::string kInsertInteriorZone;
+extern const std::string kSelectInteriorZones;
 extern const std::string kInsertEndpoint;
 extern const std::string kInsertSecondsBetweenRetry;
 extern const std::string kInsertNotificationsByPriority;
