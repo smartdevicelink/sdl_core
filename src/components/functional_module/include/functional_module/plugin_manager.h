@@ -30,10 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_PLUGIN_MANANGER_H_
-#define SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_PLUGIN_MANANGER_H_
+#ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_PLUGIN_MANAGER_H_
+#define SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_PLUGIN_MANAGER_H_
 
 #include <map>
+#include <string>
 #include "functional_module/generic_module.h"
 #include "application_manager/service.h"
 #include "application_manager/message.h"
@@ -74,8 +75,6 @@ class PluginManager : public utils::Singleton<PluginManager>,
  private:
   PluginManager();
   ~PluginManager();
-  DISALLOW_COPY_AND_ASSIGN(PluginManager);
-  FRIEND_BASE_SINGLETON_CLASS(PluginManager);
   Modules plugins_;
   std::map<ModuleID, void*> dlls_;
   std::map<MobileFunctionID, ModulePtr> mobile_subscribers_;
@@ -83,8 +82,10 @@ class PluginManager : public utils::Singleton<PluginManager>,
   application_manager::ServicePtr service_;
 
   friend class PluginManagerTest;
+  FRIEND_BASE_SINGLETON_CLASS(PluginManager);
+  DISALLOW_COPY_AND_ASSIGN(PluginManager);
 };
 
 }  //  namespace functional_modules
 
-#endif  //  SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_PLUGIN_MANANGER_H_
+#endif  // SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_PLUGIN_MANAGER_H_

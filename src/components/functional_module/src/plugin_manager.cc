@@ -51,7 +51,7 @@ PluginManager::PluginManager()
 }
 
 PluginManager::~PluginManager() {
-  //  TODO(PV): unsubscribe plugins from functions
+  // TODO(PV): unsubscribe plugins from functions
   mobile_subscribers_.clear();
   hmi_subscribers_.clear();
   UnloadPlugins();
@@ -78,29 +78,34 @@ int PluginManager::LoadPlugins(const std::string& plugin_path) {
       continue;
     }
     typedef GenericModule* (*Create)();
-    Create create_manager = reinterpret_cast<Create>(dlsym(generic_plugin_dll, "Create"));
+    Create create_manager = reinterpret_cast<Create>(
+      dlsym(generic_plugin_dll, "Create"));
     char* error_string = dlerror();
     if (NULL != error_string) {
-      LOG4CXX_ERROR(logger_, "Failed to export dll's " << plugin_files[i] << " symbols\n"
-                    << error_string);
+      LOG4CXX_ERROR(logger_, "Failed to export dll's " << plugin_files[i]
+        << " symbols\n" << error_string);
       dlclose(generic_plugin_dll);
       continue;
     }
     ModulePtr module = create_manager();
     if (!module) {
-      LOG4CXX_ERROR(logger_, "Failed to create plugin main class " << plugin_files[i]);
+      LOG4CXX_ERROR(logger_, "Failed to create plugin main class "
+        << plugin_files[i]);
       dlclose(generic_plugin_dll);
       continue;
     } else {
       LOG4CXX_DEBUG(logger_, "Opened and working plugin from "
-                    << plugin_files[i] << " with id " << module->GetModuleID());
+                    << plugin_files[i] << " with id "
+                    << module->GetModuleID());
       dlls_.insert(std::pair<ModuleID, void*>(
                      module->GetModuleID(), generic_plugin_dll));
       plugins_.insert(std::pair<ModuleID, ModulePtr>(
                         module->GetModuleID(), module));
-      std::deque<MobileFunctionID> subscribers = module->GetPluginInfo().mobile_function_list;
+      std::deque<MobileFunctionID> subscribers =
+        module->GetPluginInfo().mobile_function_list;
       for (size_t i = 0; i < subscribers.size(); ++i) {
-        mobile_subscribers_.insert(std::pair<MobileFunctionID, ModulePtr>(subscribers[i], module));
+        mobile_subscribers_.insert(std::pair<MobileFunctionID, ModulePtr>(
+          subscribers[i], module));
       }
 
       std::deque<HMIFunctionID> hmi_subscribers =
@@ -130,15 +135,18 @@ void PluginManager::UnloadPlugins() {
 }
 
 // TODO(VS): Optimize similar code in ProcessMessage, IsMessageForPlugin,
-//           ProcessHMIMessage, IsHMIMessageForPlugin methods(also we have similar code in can module)
+// ProcessHMIMessage, IsHMIMessageForPlugin methods
+// (also we have similar code in can module)
 void PluginManager::ProcessMessage(application_manager::MessagePtr msg) {
   DCHECK(msg);
   if (!msg) {
     LOG4CXX_ERROR(logger_, "Null pointer message was received.");
     return;
   }
-  if (application_manager::ProtocolVersion::kUnknownProtocol != msg->protocol_version()
-      && application_manager::ProtocolVersion::kHMI != msg->protocol_version()) {
+  if (application_manager::ProtocolVersion::kUnknownProtocol !=
+        msg->protocol_version()
+      && application_manager::ProtocolVersion::kHMI !=
+        msg->protocol_version()) {
     PluginFunctionsIterator subscribed_plugin_itr = mobile_subscribers_.find(
           static_cast<MobileFunctionID>(msg->function_id()));
     if (mobile_subscribers_.end() != subscribed_plugin_itr) {
@@ -192,8 +200,10 @@ bool PluginManager::IsMessageForPlugin(application_manager::MessagePtr msg) {
     LOG4CXX_ERROR(logger_, "Null pointer message was received.");
     return false;
   }
-  if (application_manager::ProtocolVersion::kUnknownProtocol != msg->protocol_version()
-      && application_manager::ProtocolVersion::kHMI != msg->protocol_version()) {
+  if (application_manager::ProtocolVersion::kUnknownProtocol !=
+      msg->protocol_version()
+      && application_manager::ProtocolVersion::kHMI !=
+      msg->protocol_version()) {
     MobileFunctionID id = static_cast<MobileFunctionID>(msg->function_id());
     return (mobile_subscribers_.find(id) != mobile_subscribers_.end());
   } else {
@@ -268,7 +278,8 @@ void PluginManager::RemoveAppExtension(uint32_t app_id) {
   }
 }
 
-bool PluginManager::IsAppForPlugins(application_manager::ApplicationSharedPtr app) {
+bool PluginManager::IsAppForPlugins(
+  application_manager::ApplicationSharedPtr app) {
   DCHECK(app);
   if (!app) {
     return false;

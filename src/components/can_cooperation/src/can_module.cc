@@ -283,7 +283,8 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     }
     case application_manager::MessageType::kRequest: {
         if (function_name == functional_modules::hmi_api::sdl_activate_app) {
-          ProcessSDLActivateApp(msg, value);
+          msg->set_protocol_version(application_manager::ProtocolVersion::kHMI);
+          return ProcessSDLActivateApp(value);
         }
         return ProcessResult::CANNOT_PROCESS;
       }

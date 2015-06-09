@@ -38,12 +38,24 @@
 
 namespace can_cooperation {
 
+/*
+ * @brief Checks if deactivated app was of R-SDL type
+ * and process correspondingly. Otherwise returns
+ * CANNOT_PROCESS.
+ * @param value Json notification from HMI
+ */
 functional_modules::ProcessResult ProcessOnAppDeactivation(
   const Json::Value& value);
+
+/*
+ * @brief Check if activated/other apps are of R-SDL type;
+ * process correspondingly.
+ * If no R-SDL app is involved returns CANNOT_PROCESS.
+ * @param value Json request from HMI
+ */
 functional_modules::ProcessResult ProcessSDLActivateApp(
-  application_manager::MessagePtr msg,
   const Json::Value& value);
 
 }  //  namespace can_cooperation
 
-#endif  //  SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_MODULE_HELPER_H_
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_MODULE_HELPER_H_

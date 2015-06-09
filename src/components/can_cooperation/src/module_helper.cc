@@ -38,12 +38,14 @@
 namespace can_cooperation {
 
 using functional_modules::ProcessResult;
+using application_manager::AppExtensionPtr;
 
 ProcessResult ProcessOnAppDeactivation(
   const Json::Value& value) {
   if (value.isMember(json_keys::kParams)
       && value[json_keys::kParams].isMember(message_params::kHMIAppID)) {
-    uint32_t hmi_app_id = value[json_keys::kParams][message_params::kHMIAppID].asUInt();
+    uint32_t hmi_app_id =
+      value[json_keys::kParams][message_params::kHMIAppID].asUInt();
     typedef std::vector<application_manager::ApplicationSharedPtr> AppList;
     AppList applications = CANModule::instance()->service()->GetApplications(
                              CANModule::instance()->GetModuleID());
@@ -73,9 +75,7 @@ ProcessResult ProcessOnAppDeactivation(
 }
 
 functional_modules::ProcessResult ProcessSDLActivateApp(
-  application_manager::MessagePtr msg,
   const Json::Value& value) {
-  msg->set_protocol_version(application_manager::ProtocolVersion::kHMI);
   if (value.isMember(json_keys::kParams)
       && value[json_keys::kParams].isMember(message_params::kHMIAppID)) {
     uint32_t hmi_app_id =
@@ -95,8 +95,9 @@ functional_modules::ProcessResult ProcessSDLActivateApp(
           new_app = applications[i];
         }
         CANAppExtensionPtr app_ext =
-          application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-            applications[i]->QueryInterface(CANModule::instance()->GetModuleID()));
+          AppExtensionPtr::static_pointer_cast<CANAppExtension>(
+            applications[i]->QueryInterface(
+              CANModule::instance()->GetModuleID()));
         DCHECK(app_ext);
         if (!app_ext) {
           continue;
@@ -110,7 +111,7 @@ functional_modules::ProcessResult ProcessSDLActivateApp(
         return ProcessResult::CANNOT_PROCESS;
       }
       CANAppExtensionPtr new_app_ext =
-        application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
+        AppExtensionPtr::static_pointer_cast<CANAppExtension>(
           new_app->QueryInterface(CANModule::instance()->GetModuleID()));
       DCHECK(new_app_ext);
       if (!new_app_ext) {
