@@ -5,7 +5,6 @@
  */
 
 #include "CMessageBrokerRegistry.hpp"
-
 #include "libMBDebugHelper.h"
 
 #include <vector>
@@ -55,7 +54,7 @@ namespace NsMessageBroker
 
       int fd;
       {
-         sync_primitives::AutoLock controllers_lock(mControllersListLock);
+         sync_primitives::AutoLock lock(mControllersListLock);
          it = mControllersList.find(name);
          if (it != mControllersList.end())
          {
@@ -67,8 +66,30 @@ namespace NsMessageBroker
          }
          DBG_MSG(("Count of controllers: %d\n", mControllersList.size()));
       }
+      removeSubscribersByDescriptor(fd);
+   }
 
-      sync_primitives::AutoLock subscribers_lock(mSubscribersListLock);
+   void CMessageBrokerRegistry::removeControllersByDescriptor(const int fd) {
+      DBG_MSG(("CMessageBrokerRegistry::removeControllersByDescriptor(%d)\n",
+               fd));
+      {
+        sync_primitives::AutoLock lock(mControllersListLock);
+        std::map <std::string, int>::iterator it = mControllersList.begin();
+        for (; it != mControllersList.end();) {
+          if (it->second == fd) {
+            mControllersList.erase(it);
+          } else {
+            ++it;
+          }
+        }
+      }
+      removeSubscribersByDescriptor(fd);
+   }
+
+   void CMessageBrokerRegistry::removeSubscribersByDescriptor(const int fd) {
+      DBG_MSG(("CMessageBrokerRegistry::removeSubscribersByDescriptor(%d)\n",
+               fd));
+      sync_primitives::AutoLock lock(mSubscribersListLock);
       std::multimap <std::string, int>::iterator it_s = mSubscribersList.begin();
       for (; it_s !=mSubscribersList.end(); ) {
          if (it_s->second == fd) {
@@ -76,29 +97,6 @@ namespace NsMessageBroker
          } else {
             ++it_s;
          }
-      }
-   }
-
-   void CMessageBrokerRegistry::removeControllersByDescriptor(const int fd) {
-      DBG_MSG(("CMessageBrokerRegistry::removeControllersByDescriptor(%d)\n",
-               fd));
-      std::vector<std::string> controllers_to_delete;
-      {
-        sync_primitives::AutoLock controllers_lock(mControllersListLock);
-        std::map <std::string, int>::iterator it = mControllersList.begin();
-        for (; it != mControllersList.end();) {
-          if (it->second == fd) {
-            controllers_to_delete.push_back((it++)->first);
-          } else {
-            ++it;
-          }
-        }
-      }
-
-      std::vector<std::string>::iterator delete_it =
-          controllers_to_delete.begin();
-      for (; controllers_to_delete.end() != delete_it; ++delete_it) {
-        deleteController(*delete_it);
       }
    }
 

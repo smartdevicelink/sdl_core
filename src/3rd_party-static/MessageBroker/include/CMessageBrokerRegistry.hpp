@@ -53,6 +53,12 @@ namespace NsMessageBroker
       void removeControllersByDescriptor(const int fd);
 
       /**
+      * \brief Remove all subscribers by descriptor
+      * \param fd descriptor
+      */
+      void removeSubscribersByDescriptor(const int fd);
+
+      /**
       * \brief adds notification subscriber to the registry.
       * \param fd file descriptor of controller.
       * \param name name of property which should be observed.
