@@ -1051,6 +1051,10 @@ void PolicyManagerImpl::SetRemoteControl(bool enabled) {
 void PolicyManagerImpl::OnChangedPrimaryDevice(
     const std::string& application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (!access_remote_->IsAppReverse(application_id)) {
+    LOG4CXX_INFO(logger_, "Application " << application_id << " isn't reverse");
+    return;
+  }
   const std::string device_id = GetCurrentDeviceId(application_id);
   if (device_id.empty()) {
     LOG4CXX_WARN(logger_, "Couldn't find device info for application id "
@@ -1077,6 +1081,10 @@ void PolicyManagerImpl::OnChangedPrimaryDevice(
 void PolicyManagerImpl::OnChangedRemoteControl(
     const std::string& application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (!access_remote_->IsAppReverse(application_id)) {
+    LOG4CXX_INFO(logger_, "Application " << application_id << " isn't reverse");
+    return;
+  }
   const std::string device_id = GetCurrentDeviceId(application_id);
   if (device_id.empty()) {
     LOG4CXX_WARN(logger_, "Couldn't find device info for application id "
