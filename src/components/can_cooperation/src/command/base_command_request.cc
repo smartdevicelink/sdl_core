@@ -289,7 +289,7 @@ bool BaseCommandRequest::ParseResultCode(const Json::Value& value,
 
 void BaseCommandRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (CheckPolicy()) {
+  if (Validate() && CheckPolicy()) {
     Execute();  // run child's logic
   }
 }

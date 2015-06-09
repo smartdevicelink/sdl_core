@@ -31,6 +31,9 @@
  */
 
 #include "can_cooperation/commands/button_press_request.h"
+#include "can_cooperation/message_helper.h"
+#include "can_cooperation/validators/button_press_request_validator.h"
+#include "can_cooperation/can_module_constants.h"
 #include "functional_module/function_ids.h"
 #include "json/json.h"
 
@@ -81,6 +84,22 @@ void ButtonPressRequest::OnEvent(
 }
 
 bool ButtonPressRequest::Validate() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  Json::Value json;
+
+  json = MessageHelper::StringToValue(message_->json_message());
+  Json::Value outgoing_json;
+
+  if (validators::ValidationResult::SUCCESS !=
+      validators::ButtonPressRequestValidator::instance()->Validate(
+          json, outgoing_json)) {
+    LOG4CXX_INFO(logger_, "ButtonPressRequest validation failed!");
+    SendResponse(false, result_codes::kInvalidData,
+                 "Mobile request validation failed!");
+    return false;
+  }
+
   return true;
 }
 
