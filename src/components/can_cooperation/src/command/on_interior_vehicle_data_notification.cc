@@ -31,6 +31,8 @@
  */
 
 #include "can_cooperation/commands/on_interior_vehicle_data_notification.h"
+#include "json/json.h"
+#include "can_cooperation/can_module_constants.h"
 
 namespace can_cooperation {
 
@@ -52,6 +54,14 @@ void OnInteriorVehicleDataNotification::Execute() {
 
 bool OnInteriorVehicleDataNotification::Validate() {
   return true;
+}
+
+std::string OnInteriorVehicleDataNotification::ModuleType(
+    const Json::Value& message) {
+  // TODO(KKolodiy): Now notification from CAN(HMI) doesn't have moduleData
+  // it contains list moduleType, moduleZone, radioControlData and
+  // climateControlData
+  return message.get(message_params::kModuleType, Json::Value("")).asString();
 }
 
 }  // namespace commands

@@ -43,17 +43,6 @@ using policy_table::FunctionalGroupings;
 
 namespace policy {
 
-struct Match {
- private:
-  const FunctionalGroupings& groups_;
-  const PTString& rpc_;
-  const RemoteControlParams& params_;
- public:
-  Match(const FunctionalGroupings& groups, const PTString& rpc,
-        const RemoteControlParams& params);
-  bool operator ()(const PTString& item) const;
-};
-
 class AccessRemoteImpl : public AccessRemote {
  public:
   AccessRemoteImpl();
@@ -66,15 +55,16 @@ class AccessRemoteImpl : public AccessRemote {
 
   virtual bool IsPrimaryDevice(const PTString& dev_id) const;
   virtual void SetPrimaryDevice(const PTString& dev_id, const PTString& input);
-  virtual PTString PrimaryDevice() const;  
+  virtual PTString PrimaryDevice() const;
 
   virtual void Allow(const Subject& who, const Object& what);
   virtual void Deny(const Subject& who, const Object& what);
   virtual void Reset(const Subject& who);
   virtual void Reset(const Object& what);
   virtual TypeAccess Check(const Subject& who, const Object& what) const;
-  virtual PTString FindGroup(const Subject& who, const PTString& rpc,
-                             const RemoteControlParams& params) const;
+  virtual bool CheckModuleType(const PTString& app_id,
+                               policy_table::ModuleType module) const;
+  virtual bool CheckParameters(/* module, zone, params */) const;
   virtual void SetDefaultHmiTypes(const std::string& app_id,
                                   const std::vector<int>& hmi_types);
   virtual const policy_table::Strings& GetGroups(const PTString& device_id,
@@ -111,7 +101,11 @@ class AccessRemoteImpl : public AccessRemote {
   FRIEND_TEST(AccessRemoteImplTest, CheckAllowed);
   FRIEND_TEST(AccessRemoteImplTest, CheckDisallowed);
   FRIEND_TEST(AccessRemoteImplTest, CheckManual);
+  FRIEND_TEST(AccessRemoteImplTest, CheckModuleType);
   FRIEND_TEST(AccessRemoteImplTest, SetPrimaryDevice);
+  FRIEND_TEST(AccessRemoteImplTest, EnableDisable);
+  FRIEND_TEST(AccessRemoteImplTest, SetDefaultHmiTypes);
+  FRIEND_TEST(AccessRemoteImplTest, GetGroups);
 };
 
 }  // namespace policy

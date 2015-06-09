@@ -71,8 +71,6 @@ mobile_apis::Result::eType CoreService::CheckPolicyPermissions(MessagePtr msg) {
     return ret;
   }
 
-  FilterParameters(msg, params);
-
 #ifdef SDL_REMOTE_CONTROL
   if (!AreParametersAllowed(msg, params)) {
     return mobile_apis::Result::eType::DISALLOWED;
@@ -83,7 +81,7 @@ mobile_apis::Result::eType CoreService::CheckPolicyPermissions(MessagePtr msg) {
 }
 
 TypeAccess CoreService::CheckAccess(const ApplicationId& app_id,
-                                    const PluginFunctionID& function_id,
+                                    const std::string& module,
                                     const std::vector<std::string>& params,
                                     const SeatLocation& zone) {
 #ifdef SDL_REMOTE_CONTROL
@@ -91,21 +89,20 @@ TypeAccess CoreService::CheckAccess(const ApplicationId& app_id,
   if (app) {
 
     return policy::PolicyHandler::instance()->CheckAccess(
-        app->mobile_app_id(), function_id, params, zone);
+        app->mobile_app_id(), module, params, zone);
   }
 #endif  // SDL_REMOTE_CONTROL
   return kNone;
 }
 
 void CoreService::SetAccess(const ApplicationId& app_id,
-                            const std::string& group_name,
-                            const SeatLocation& zone,
+                            const std::string& module,
                             bool allowed) {
 #ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
     policy::PolicyHandler::instance()->SetAccess(
-        app->mobile_app_id(), group_name, zone, allowed);
+        app->mobile_app_id(), module, allowed);
   }
 #endif  // SDL_REMOTE_CONTROL
 }
@@ -119,10 +116,9 @@ void CoreService::ResetAccess(const ApplicationId& app_id) {
 #endif  // SDL_REMOTE_CONTROL
 }
 
-void CoreService::ResetAccess(const std::string& group_name,
-                              const SeatLocation& zone) {
+void CoreService::ResetAccessByModule(const std::string& module) {
 #ifdef SDL_REMOTE_CONTROL
-  policy::PolicyHandler::instance()->ResetAccess(group_name, zone);
+  policy::PolicyHandler::instance()->ResetAccessByModule(module);
 #endif  // SDL_REMOTE_CONTROL
 }
 
@@ -172,12 +168,6 @@ void CoreService::SubscribeToHMINotification(
   }
 }
 
-void CoreService::FilterParameters(MessagePtr msg,
-                                   const CommandParametersPermissions& params) {
-  // TODO(KKolodiy): may be need to implement filter parameters
-  // see application_manager::command::CommandRequestImpl::RemoveDisallowedParameters
-}
-
 bool CoreService::AreParametersAllowed(
     MessagePtr msg, const CommandParametersPermissions& params) {
   Json::Reader reader;
@@ -197,10 +187,7 @@ bool CoreService::CheckParams(const Json::Value& object,
   }
   for (Json::Value::iterator i = object.begin(); i != object.end(); ++i) {
     std::string name = i.memberName();
-    const Json::Value& value = *i;
-    bool allowed = IsAllowed(name, allowed_params)
-        && CheckParams(value, allowed_params);
-    if (!allowed) {
+    if (!IsAllowed(name, allowed_params)) {
       return false;
     }
   }

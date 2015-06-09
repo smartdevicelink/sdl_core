@@ -80,6 +80,9 @@ class MockAccessRemote : public AccessRemote {
       const policy_table::Strings&(const PTString& device_id, const PTString& app_id));
   MOCK_METHOD3(GetPermissionsForApp,
       bool (const std::string& device_id, const std::string& app_id, policy::FunctionalIdType& group_types));
+  MOCK_CONST_METHOD2(CheckModuleType, bool(const PTString& app_id,
+                                            policy_table::ModuleType module));
+  MOCK_CONST_METHOD0(CheckParameters, bool());
 };
 
 }  // namespace policy

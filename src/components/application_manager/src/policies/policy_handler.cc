@@ -1183,6 +1183,24 @@ void PolicyHandler::OnUpdateHMIAppType(std::map<std::string, StringArray> app_hm
   }
 }
 
+void PolicyHandler::OnUpdateHMILevel(const std::string& policy_app_id,
+                                     const std::string& hmi_level) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()
+      ->application_by_policy_id(policy_app_id);
+  if (app) {
+    mobile_apis::HMILevel::eType level =
+        MessageHelper::StringToHMILevel(hmi_level);
+    ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
+                                                           level);
+    MessageHelper::SendHMIStatusNotification(*app);
+  } else {
+    LOG4CXX_WARN(
+        logger_,
+        "Connection_key not found for application_id:" << policy_app_id);
+  }
+}
+
 void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(listeners_lock_);
@@ -1299,20 +1317,19 @@ void PolicyHandler::Add(const std::string& app_id,
 
 #ifdef SDL_REMOTE_CONTROL
 application_manager::TypeAccess PolicyHandler::CheckAccess(
-    const PTString& app_id, const PTString& rpc,
+    const PTString& app_id, const PTString& module,
     const RemoteControlParams& params, const SeatLocation& zone) {
   POLICY_LIB_CHECK(application_manager::TypeAccess::kNone);
-  policy::TypeAccess access = policy_manager_->CheckAccess(app_id, rpc, params,
-                                                           zone);
+  policy::TypeAccess access = policy_manager_->CheckAccess(app_id, module,
+                                                           params, zone);
   return ConvertTypeAccess(access);
 }
 
 void PolicyHandler::SetAccess(const PTString& app_id,
-                              const PTString& group_name,
-                              const SeatLocation& zone,
+                              const PTString& module,
                               bool allowed) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->SetAccess(app_id, group_name, zone, allowed);
+  policy_manager_->SetAccess(app_id, module, allowed);
 }
 
 void PolicyHandler::ResetAccess(const PTString& app_id) {
@@ -1320,10 +1337,9 @@ void PolicyHandler::ResetAccess(const PTString& app_id) {
   policy_manager_->ResetAccess(app_id);
 }
 
-void PolicyHandler::ResetAccess(const std::string& group_name,
-                                const SeatLocation& zone) {
+void PolicyHandler::ResetAccessByModule(const std::string& module) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->ResetAccess(group_name, zone);
+  policy_manager_->ResetAccessByModule(module);
 }
 
 void PolicyHandler::SetPrimaryDevice(const PTString& dev_id,
@@ -1354,7 +1370,7 @@ void PolicyHandler::SetPrimaryDevice(const PTString& dev_id,
       LOG4CXX_DEBUG(
           logger_,
           "Send notify " << app->device() << " - " << app->mobile_app_id());
-      policy_manager_->SendNotificationOnPermissionsUpdated(app->mobile_app_id());
+      policy_manager_->OnChangedPrimaryDevice(app->mobile_app_id());
     }
   }
 }
@@ -1378,7 +1394,7 @@ void PolicyHandler::SetRemoteControl(bool enabled) {
       LOG4CXX_DEBUG(
           logger_,
           "Send notify " << app->device() << " - " << app->mobile_app_id());
-      policy_manager_->SendNotificationOnPermissionsUpdated(app->mobile_app_id());
+      policy_manager_->OnChangedRemoteControl(app->mobile_app_id());
     }
   }
 }

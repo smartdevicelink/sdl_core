@@ -36,6 +36,7 @@
 #include "can_cooperation/can_module_constants.h"
 #include "functional_module/function_ids.h"
 #include "json/json.h"
+#include "can_cooperation/can_module_constants.h"
 
 namespace can_cooperation {
 
@@ -101,6 +102,10 @@ bool ButtonPressRequest::Validate() {
   }
 
   return true;
+}
+
+std::string ButtonPressRequest::ModuleType(const Json::Value& message) {
+  return message.get(message_params::kModuleType, Json::Value("")).asString();
 }
 
 }  // namespace commands

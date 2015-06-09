@@ -129,6 +129,11 @@ bool GetInteriorVehicleDataCapabiliesRequest::Validate() {
   return true;
 }
 
+bool GetInteriorVehicleDataCapabiliesRequest::CheckAccess() {
+  // TODO(KKolodiy): need to clarify how it must work
+  return true;
+}
+
 }  // namespace commands
 
 }  // namespace can_cooperation

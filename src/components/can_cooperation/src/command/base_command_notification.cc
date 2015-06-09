@@ -92,6 +92,7 @@ void BaseCommandNotification::Run() {
 }
 
 void BaseCommandNotification::NotifyApplications() {
+  LOG4CXX_AUTO_TRACE(logger_);
   typedef std::vector<application_manager::ApplicationSharedPtr> AppList;
   AppList applications =
       service_->GetApplications(CANModule::instance()->GetModuleID());
@@ -106,6 +107,7 @@ void BaseCommandNotification::NotifyApplications() {
 
 void BaseCommandNotification::NotifyOneApplication(
     application_manager::MessagePtr message) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (CheckPolicy(message)) {
     Execute();  // run child's logic
     service_->SendMessageToMobile(message);
@@ -135,12 +137,23 @@ bool BaseCommandNotification::CheckPolicy(
   // TODO(KKolodiy): get zone and params from message
   SeatLocation zone = 10;
   std::vector<std::string> params;
+
+  Json::Value value;
+  Json::Reader reader;
+  LOG4CXX_DEBUG(logger_, "Notification: " << message->json_message());
+  reader.parse(message->json_message(), value);
   application_manager::TypeAccess access = service_->CheckAccess(
-      app->app_id(), message->function_name(), params, zone);
+      app->app_id(), ModuleType(value), params, zone);
 
   return permission == mobile_apis::Result::eType::SUCCESS
       && access == application_manager::TypeAccess::kAllowed;
 }
+
+std::string BaseCommandNotification::ModuleType(const Json::Value& message) {
+  // TODO(KKolodiy): stub for old mobile API
+  return "RADIO";
+}
+
 
 }  // namespace commands
 

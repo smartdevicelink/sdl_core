@@ -75,7 +75,7 @@ const std::string kCreateSchema =
   "  `vehicle_make` VARCHAR(45), "
   "  `vehicle_model` VARCHAR(45), "
   "  `vehicle_year` VARCHAR(4),"
-  "  `user_consent_passengerRC` BOOL,"
+  "  `user_consent_passengersRC` BOOL,"
   "  `country_consent_passengersRC` BOOL "
   "); "
   "CREATE TABLE IF NOT EXISTS `functional_group`( "
@@ -139,6 +139,7 @@ const std::string kCreateSchema =
   "  `memory_kb` INTEGER NOT NULL, "
   "  `heart_beat_timeout_ms` INTEGER NOT NULL, "
   "  `certificate` VARCHAR(45), "
+  "  `remote_control_denied` BOOLEAN NOT NULL DEFAULT 0, "
   "  CONSTRAINT `fk_application_hmi_level1` "
   "    FOREIGN KEY(`default_hmi`) "
   "    REFERENCES `hmi_level`(`value`), "
@@ -305,6 +306,19 @@ const std::string kCreateSchema =
   "); "
   "CREATE INDEX IF NOT EXISTS `app_type.fk_app_type_application1_idx` "
   "  ON `app_type`(`application_id`); "
+
+  /* module type */
+  "CREATE TABLE IF NOT EXISTS `module_type`( "
+  "  `name` VARCHAR(50) NOT NULL, "
+  "  `application_id` VARCHAR(45) NOT NULL, "
+  "  PRIMARY KEY(`name`,`application_id`), "
+  "  CONSTRAINT `fk_module_type_application1` "
+  "    FOREIGN KEY(`application_id`) "
+  "    REFERENCES `application`(`id`) "
+  "); "
+  "CREATE INDEX IF NOT EXISTS `module_type.fk_module_type_application1_idx` "
+  "  ON `module_type`(`application_id`); "
+
   "CREATE TABLE IF NOT EXISTS `consent_group`( "
   "  `device_id` VARCHAR(100) NOT NULL, "
   "  `application_id` VARCHAR(45) NOT NULL, "
@@ -397,6 +411,8 @@ const std::string kDropSchema =
   "DROP TABLE IF EXISTS `consent_group`; "
   "DROP INDEX IF EXISTS `app_type.fk_app_type_application1_idx`; "
   "DROP TABLE IF EXISTS `app_type`; "
+  "DROP INDEX IF EXISTS `module_type.fk_module_type_application1_idx`; "
+  "DROP TABLE IF EXISTS `module_type`; "
   "DROP INDEX IF EXISTS `nickname.fk_nickname_application1_idx`; "
   "DROP TABLE IF EXISTS `nickname`; "
   "DROP INDEX IF EXISTS `app_level.fk_app_level_language2_idx`; "
@@ -447,6 +463,7 @@ const std::string kDeleteData =
   "DELETE FROM `endpoint`; "
   "DELETE FROM `consent_group`; "
   "DELETE FROM `app_type`; "
+  "DELETE FROM `module_type`; "
   "DELETE FROM `nickname`; "
   "DELETE FROM `app_level`; "
   "DELETE FROM `device_consent_group`; "
@@ -531,6 +548,9 @@ const std::string kInsertNickname =
 const std::string kInsertAppType =
   "INSERT OR IGNORE INTO `app_type` (`application_id`, `name`) VALUES (?, ?)";
 
+const std::string kInsertModuleType =
+  "INSERT OR IGNORE INTO `module_type` (`application_id`, `name`) VALUES (?, ?)";
+
 const std::string kUpdateVersion = "UPDATE `version` SET `number`= ?";
 
 const std::string kInsertMessageType =
@@ -549,7 +569,7 @@ const std::string kUpdateModuleConfig =
   "  `exchange_after_x_kilometers` = ?, `exchange_after_x_days` = ?, "
   "  `timeout_after_x_seconds` = ?, `vehicle_make` = ?, "
   "  `vehicle_model` = ?, `vehicle_year` = ?, "
-  "  `user_consent_passengerRC` = ?, `country_consent_passengersRC` = ?";
+  "  `user_consent_passengersRC` = ?, `country_consent_passengersRC` = ?";
 
 const std::string kInsertEndpoint =
   "INSERT INTO `endpoint` (`service`, `url`, `application_id`) "
@@ -604,7 +624,7 @@ const std::string kSelectModuleConfig =
   " `exchange_after_x_kilometers`, `exchange_after_x_days`, "
   " `timeout_after_x_seconds`, `vehicle_make`,"
   " `vehicle_model`, `vehicle_year`, "
-  " `user_consent_passengerRC` , `country_consent_passengersRC` "
+  " `user_consent_passengersRC` , `country_consent_passengersRC` "
   " FROM `module_config`";
 
 const std::string kSelectEndpoints =
@@ -660,6 +680,9 @@ const std::string kSelectNicknames = "SELECT DISTINCT `name` FROM `nickname` "
 const std::string kSelectAppTypes = "SELECT DISTINCT `name` FROM `app_type` "
                                     "WHERE `application_id` = ?";
 
+const std::string kSelectModuleTypes =
+  "SELECT DISTINCT `name` FROM `module_type` WHERE `application_id` = ?";
+
 const std::string kSelectSecondsBetweenRetries =
   "SELECT `value` FROM `seconds_between_retry` ORDER BY `index`";
 
@@ -693,8 +716,14 @@ const std::string kSelectTimeoutResponse =
 const std::string kUpdateFlagUpdateRequired =
   "UPDATE `module_meta` SET `flag_update_required` = ?";
 
+const std::string kUpdateRemoteControlDenied =
+  "UPDATE `application` SET `remote_control_denied` = ? WHERE `id` = ?";
+
 const std::string kSelectFlagUpdateRequired =
   "SELECT `flag_update_required` FROM `module_meta` LIMIT 1";
+
+const std::string kSelectRemoteControlDenied =
+  "SELECT `remote_control_denied` FROM `application` WHERE `id` = ? LIMIT 1";
 
 const std::string kUpdateCountersSuccessfulUpdate =
   "UPDATE `module_meta` SET `pt_exchanged_at_odometer_x` = ?,"

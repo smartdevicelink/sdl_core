@@ -39,6 +39,10 @@
 #include "can_cooperation/can_app_extension.h"
 #include "utils/logger.h"
 
+namespace Json {
+class Value;
+}
+
 namespace can_cooperation {
 
 namespace commands {
@@ -88,6 +92,8 @@ class BaseCommandNotification : public Command {
    * @brief executes specific message validation logic of children classes
    */
   virtual bool Validate() = 0;
+
+  virtual std::string ModuleType(const Json::Value& message);
 
  private:
   void NotifyApplications();

@@ -74,6 +74,9 @@ class GetInteriorVehicleDataCapabiliesRequest : public BaseCommandRequest {
    * @brief GetInteriorVehicleDataCapabiliesRequest class destructor
    */
   virtual ~GetInteriorVehicleDataCapabiliesRequest();
+
+ protected:
+  virtual bool CheckAccess();
 };
 
 }  // namespace commands

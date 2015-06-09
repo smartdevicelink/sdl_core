@@ -169,17 +169,19 @@ class PolicyManagerImpl : public PolicyManager {
     virtual void OnAppsSearchCompleted();
 
 #ifdef SDL_REMOTE_CONTROL
-    virtual TypeAccess CheckAccess(const PTString& app_id, const PTString& rpc,
+    virtual TypeAccess CheckAccess(const PTString& app_id,
+                                   const PTString& module,
                                    const RemoteControlParams& params,
                                    const SeatLocation& zone);
-    virtual void SetAccess(const PTString& app_id, const PTString& group_name,
-                           const SeatLocation zone, bool allowed);
-    virtual void ResetAccess(const PTString& rpc);
-    virtual void ResetAccess(const PTString& group_name,
-                             const SeatLocation zone);
+    virtual void SetAccess(const PTString& app_id, const PTString& module,
+                           bool allowed);
+    virtual void ResetAccess(const PTString& app_id);
+    virtual void ResetAccessByModule(const PTString& module);
     virtual void SetPrimaryDevice(const PTString& dev_id, const PTString& input);
-    virtual PTString PrimaryDevice() const;    
+    virtual PTString PrimaryDevice() const;
     virtual void SetRemoteControl(bool enabled);
+    virtual void OnChangedPrimaryDevice(const std::string& application_id);
+    virtual void OnChangedRemoteControl(const std::string& application_id);
 #endif  // SDL_REMOTE_CONTROL
 
   protected:
@@ -274,12 +276,23 @@ class PolicyManagerImpl : public PolicyManager {
     bool IsPTValid(utils::SharedPtr<policy_table::Table> policy_table,
                    policy_table::PolicyTableType type) const;
 
+
 private:
+    void GetPermissions(const std::string device_id,
+                        const std::string application_id,
+                        Permissions* data);
     PolicyListener* listener_;
 
     UpdateStatusManager update_status_manager_;
     CacheManagerInterfaceSPtr cache_;
 #ifdef SDL_REMOTE_CONTROL
+    bool CheckModulePermissions(const PTString& app_id,
+                                policy_table::ModuleType module,
+                                const RemoteControlParams& params,
+                                const SeatLocation& zone);
+    TypeAccess CheckDriverConsent(const PTString& app_id,
+                                  policy_table::ModuleType module);
+
     utils::SharedPtr<AccessRemote> access_remote_;
 #endif  // SDL_REMOTE_CONTROL
     sync_primitives::Lock apps_registration_lock_;

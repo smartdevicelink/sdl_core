@@ -404,22 +404,23 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     /**
      * Checks access to equipment of vehicle for application by RPC
      * @param app_id policy id application
-     * @param rpc name of RPC
+     * @param module
      * @param params parameters list
+     * @param zone control
      */
-    virtual TypeAccess CheckAccess(const PTString& app_id, const PTString& rpc,
+    virtual TypeAccess CheckAccess(const PTString& app_id,
+                                   const PTString& module,
                                    const RemoteControlParams& params,
                                    const SeatLocation& zone) = 0;
 
     /**
      * Sets access to equipment of vehicle for application by RPC
      * @param app_id policy id application
-     * @param group_name RPC group name
-     * @param zone zone control
+     * @param module type
      * @param allowed true if access is allowed
      */
-    virtual void SetAccess(const PTString& app_id, const PTString& group_name,
-                           const SeatLocation zone, bool allowed) = 0;
+    virtual void SetAccess(const PTString& app_id, const PTString& module,
+                           bool allowed) = 0;
 
     /**
      * Resets access application to all resources
@@ -429,11 +430,9 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
     /**
      * Resets access by functional group for all applications
-     * @param group_name group name
-     * @param zone zone control
+     * @param module type
      */
-    virtual void ResetAccess(const PTString& group_name,
-                             const SeatLocation zone) = 0;
+    virtual void ResetAccessByModule(const PTString& module) = 0;
 
     /**
      * Sets driver as primary device
@@ -453,6 +452,18 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @param enabled true if remote control is turned on
      */
     virtual void SetRemoteControl(bool enabled) = 0;
+
+    /**
+     * Handles changed primary device event for a application
+     * @param application_id ID application
+     */
+    virtual void OnChangedPrimaryDevice(const std::string& application_id) = 0;
+
+    /**
+     * Handles changed remote control event for a application
+     * @param application_id ID application
+     */
+    virtual void OnChangedRemoteControl(const std::string& application_id) = 0;
 #endif  // SDL_REMOTE_CONTROL
 
   protected:

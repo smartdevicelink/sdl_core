@@ -71,27 +71,25 @@ class CoreService : public Service {
   /**
    * Checks access to requested equipment of vehicle
    * @param app_id id of application
-   * @param function_id name of RPC
+   * @param module type
    * @param params parameters list
    * @param seat seat of owner's mobile device
    * @return return allowed if access exist,
    * manual if need to send question to driver otherwise disallowed
    */
   virtual TypeAccess CheckAccess(const ApplicationId& app_id,
-                                 const PluginFunctionID& function_id,
+                                 const std::string& module,
                                  const std::vector<std::string>& params,
                                  const SeatLocation& zone);
 
   /**
    * Sets access to functional group which contains given RPC for application
    * @param app_id id of application
-   * @param group_id id RPC
-   * @param zone requested zone
+   * @param module type
    * @param allowed true if driver has given access
    */
   virtual void SetAccess(const ApplicationId& app_id,
-                         const std::string& group_id,
-                         const SeatLocation& zone,
+                         const std::string& module,
                          bool allowed);
 
   /**
@@ -103,18 +101,17 @@ class CoreService : public Service {
 
   /**
    * Resets access by group name for all applications
-   * @param group_name group name
-   * @param zone zone control
+   * @param module type
    */
-  virtual void ResetAccess(const std::string& group_name,
-                           const SeatLocation& zone);
+  virtual void ResetAccessByModule(const std::string& module);
 
   /**
    * Sets device as primary device
    * @param dev_id ID device
    * @param input
    */
-  virtual void SetPrimaryDevice(const uint32_t dev_id, const std::string& input);
+  virtual void SetPrimaryDevice(const uint32_t dev_id,
+                                const std::string& input);
 
   /**
    * Sets mode of remote control (on/off)
@@ -164,8 +161,6 @@ class CoreService : public Service {
  private:
   DISALLOW_COPY_AND_ASSIGN(CoreService);
 
-  void FilterParameters(MessagePtr msg,
-                        const CommandParametersPermissions& params);
   bool AreParametersAllowed(MessagePtr msg,
                             const CommandParametersPermissions& params);
   bool CheckParams(const Json::Value& object,

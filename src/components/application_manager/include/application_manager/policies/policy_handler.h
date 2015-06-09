@@ -99,25 +99,23 @@ class PolicyHandler :
   /**
    * Checks access to equipment of vehicle for application by RPC
    * @param app_id policy id application
-   * @param rpc name of RPC
+   * @param module type
    * @param params parameters list
-   * @param seat current seat of passenger
    * @param zone requested zone control
    */
   application_manager::TypeAccess CheckAccess(const PTString& app_id,
-                                              const PTString& rpc,
+                                              const PTString& module,
                                               const RemoteControlParams& params,
                                               const SeatLocation& zone);
 
   /**
    * Sets access to equipment of vehicle for application by RPC
    * @param app_id policy id application
-   * @param group_name RPC group name
-   * @param zone zone control
+   * @param module type
    * @param allowed true if access is allowed
    */
-  void SetAccess(const PTString& app_id, const PTString& group_name,
-                 const SeatLocation& zone, bool allowed);
+  void SetAccess(const PTString& app_id, const PTString& module,
+                 bool allowed);
 
   /**
    * Resets access application to all resources
@@ -127,10 +125,9 @@ class PolicyHandler :
 
   /**
    * Resets access by group name for all applications
-   * @param group_name group name
-   * @param zone zone control
+   * @param module type
    */
-  void ResetAccess(const std::string& group_name, const SeatLocation& zone);
+  void ResetAccessByModule(const std::string& module);
 
   /**
    * Sets device as primary device
@@ -325,6 +322,8 @@ class PolicyHandler :
   std::string GetAppName(const std::string& policy_app_id);
 
   virtual void OnUpdateHMIAppType(std::map<std::string, StringArray> app_hmi_types);
+  virtual void OnUpdateHMILevel(const std::string& policy_app_id,
+                                  const std::string& hmi_level);
 
   virtual void OnCertificateUpdated(const std::string& certificate_data);
 

@@ -316,16 +316,10 @@ bool PolicyManagerImpl::ResetUserConsent() {
   return result;
 }
 
-void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
-  const std::string& application_id) {
+void PolicyManagerImpl::GetPermissions(const std::string device_id,
+    const std::string application_id, Permissions* data) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const std::string device_id = GetCurrentDeviceId(application_id);
-  if (device_id.empty()) {
-    LOG4CXX_WARN(logger_, "Couldn't find device info for application id "
-                 "'" << application_id << "'");
-    return;
-  }
-
+  DCHECK(data);
   std::vector<FunctionalGroupPermission> app_group_permissions;
   GetPermissionsForApp(device_id, application_id, app_group_permissions);
 
@@ -341,27 +335,30 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
     app_groups.push_back((*it).group_name);
   }
 
+  PrepareNotificationData(functional_groupings, app_groups,
+                          app_group_permissions, *data);
+}
+
+void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
+  const std::string& application_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const std::string device_id = GetCurrentDeviceId(application_id);
+  if (device_id.empty()) {
+    LOG4CXX_WARN(logger_, "Couldn't find device info for application id "
+                 "'" << application_id << "'");
+    return;
+  }
+
   Permissions notification_data;
-  PrepareNotificationData(functional_groupings, app_groups, app_group_permissions,
-                          notification_data);
+  GetPermissions(device_id, application_id, &notification_data);
 
   LOG4CXX_INFO(logger_, "Send notification for application_id:" << application_id);
 
   std::string default_hmi;
   default_hmi = "NONE";
 
-#ifdef SDL_REMOTE_CONTROL
-  if (access_remote_->IsPrimaryDevice(device_id)
-      || access_remote_->IsEnabled()) {
-    listener()->OnPermissionsUpdated(application_id, notification_data);
-  } else {
-    listener()->OnPermissionsUpdated(application_id, notification_data,
-                                     default_hmi);
-  }
-#else
   listener()->OnPermissionsUpdated(application_id, notification_data,
-                                     default_hmi);
-#endif  // SDL_REMOTE_CONTROL
+                                   default_hmi);
 }
 
 bool PolicyManagerImpl::CleanupUnpairedDevices() {
@@ -497,7 +494,8 @@ void PolicyManagerImpl::SetUserConsentForApp(
 bool PolicyManagerImpl::GetDefaultHmi(const std::string& policy_app_id,
                                       std::string* default_hmi) {
   LOG4CXX_INFO(logger_, "GetDefaultHmi");
-  return false;
+  *default_hmi = "NONE";
+  return true;
 }
 
 bool PolicyManagerImpl::GetPriority(const std::string& policy_app_id,
@@ -952,43 +950,58 @@ void PolicyManagerImpl::set_cache_manager(
 
 #ifdef SDL_REMOTE_CONTROL
 TypeAccess PolicyManagerImpl::CheckAccess(
-    const PTString& app_id, const PTString& rpc,
+    const PTString& app_id, const PTString& module,
     const RemoteControlParams& params, const SeatLocation& zone) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Module type: " << module);
+  policy_table::ModuleType module_type;
+  bool is_valid = EnumFromJsonString(module, &module_type);
+  if (is_valid && CheckModulePermissions(app_id, module_type, params, zone)) {
+    return CheckDriverConsent(app_id, module_type);
+  }
+  return TypeAccess::kDisallowed;
+}
+
+bool PolicyManagerImpl::CheckModulePermissions(
+    const PTString& app_id, policy_table::ModuleType module,
+    const RemoteControlParams& params, const SeatLocation& zone) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return access_remote_->CheckModuleType(app_id, module)
+      && access_remote_->CheckParameters(/* module, zone, params */);
+}
+
+TypeAccess PolicyManagerImpl::CheckDriverConsent(
+    const PTString& app_id, policy_table::ModuleType module) {
+  LOG4CXX_AUTO_TRACE(logger_);
   TypeAccess access = TypeAccess::kDisallowed;
-
   std::string dev_id = GetCurrentDeviceId(app_id);
+  Subject who = {dev_id, app_id};
+  Object what = {module};
   if (access_remote_->IsPrimaryDevice(dev_id)) {
-
-    Subject who = {dev_id, app_id};
-    PTString group_name = access_remote_->FindGroup(who, rpc, params);
-    Object what = {group_name, zone};
     access = access_remote_->Check(who, what);
     if (access == TypeAccess::kManual) {
       access_remote_->Allow(who, what);
       access = TypeAccess::kAllowed;
     }
   } else if (access_remote_->IsEnabled()) {
-    Subject who = {dev_id, app_id};
-    PTString group_name = access_remote_->FindGroup(who, rpc, params);
-    if (group_name.empty()) {
-      // Group wasn't found => request is disallowed
-      access = TypeAccess::kDisallowed;
-    } else {
-      Object what = {group_name, zone};
-      access = access_remote_->Check(who, what);
-    }
+    access = access_remote_->Check(who, what);
   }
   return access;
 }
 
 void PolicyManagerImpl::SetAccess(const PTString& app_id,
-                                  const PTString& group_name,
-                                  const SeatLocation zone,
+                                  const PTString& module,
                                   bool allowed) {
   LOG4CXX_AUTO_TRACE(logger_);
+  policy_table::ModuleType module_type;
+  bool is_valid = EnumFromJsonString(module, &module_type);
+  if (!is_valid) {
+    return;
+  }
+
   std::string dev_id = GetCurrentDeviceId(app_id);
   Subject who = {dev_id, app_id};
-  Object what = {group_name, zone};
+  Object what = {module_type};
   if (allowed) {
     access_remote_->Allow(who, what);
   } else {
@@ -1003,11 +1016,16 @@ void PolicyManagerImpl::ResetAccess(const PTString& app_id) {
   access_remote_->Reset(who);
 }
 
-void PolicyManagerImpl::ResetAccess(const PTString& group_name,
-                                    const SeatLocation zone) {
+void PolicyManagerImpl::ResetAccessByModule(const PTString& module) {
   LOG4CXX_AUTO_TRACE(logger_);
-  Object who = {group_name, zone};
-  access_remote_->Reset(who);
+  policy_table::ModuleType module_type;
+  bool is_valid = EnumFromJsonString(module, &module_type);
+  if (!is_valid) {
+    return;
+  }
+
+  Object what = {module_type};
+  access_remote_->Reset(what);
 }
 
 void PolicyManagerImpl::SetPrimaryDevice(const PTString& dev_id,
@@ -1029,7 +1047,63 @@ void PolicyManagerImpl::SetRemoteControl(bool enabled) {
     access_remote_->Disable();
   }
 }
+
+void PolicyManagerImpl::OnChangedPrimaryDevice(
+    const std::string& application_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const std::string device_id = GetCurrentDeviceId(application_id);
+  if (device_id.empty()) {
+    LOG4CXX_WARN(logger_, "Couldn't find device info for application id "
+                 "'" << application_id << "'");
+    return;
+  }
+
+  if (!access_remote_->IsPrimaryDevice(device_id)) {
+    std::string default_hmi;
+    if (GetDefaultHmi(application_id, &default_hmi)) {
+      listener()->OnUpdateHMILevel(application_id, default_hmi);
+    } else {
+      LOG4CXX_WARN(
+          logger_,
+          "Couldn't get default HMI level for application " << application_id);
+    }
+  }
+
+  Permissions notification_data;
+  GetPermissions(device_id, application_id, &notification_data);
+  listener()->OnPermissionsUpdated(application_id, notification_data);
+}
+
+void PolicyManagerImpl::OnChangedRemoteControl(
+    const std::string& application_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const std::string device_id = GetCurrentDeviceId(application_id);
+  if (device_id.empty()) {
+    LOG4CXX_WARN(logger_, "Couldn't find device info for application id "
+                 "'" << application_id << "'");
+    return;
+  }
+  if (access_remote_->IsPrimaryDevice(device_id)) {
+    LOG4CXX_INFO(logger_, "Device " << device_id << " is primary");
+    return;
+  }
+
+  if (!access_remote_->IsEnabled()) {
+    std::string default_hmi;
+    if (GetDefaultHmi(application_id, &default_hmi)) {
+      listener()->OnUpdateHMILevel(application_id, default_hmi);
+    } else {
+      LOG4CXX_WARN(
+          logger_,
+          "Couldn't get default HMI level for application " << application_id);
+    }
+  }
+
+  Permissions notification_data;
+  GetPermissions(device_id, application_id, &notification_data);
+  listener()->OnPermissionsUpdated(application_id, notification_data);
+}
+
 #endif  // SDL_REMOTE_CONTROL
 
 }  //  namespace policy
-

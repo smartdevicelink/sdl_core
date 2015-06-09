@@ -74,6 +74,9 @@ class ButtonPressRequest : public BaseCommandRequest {
    * @brief executes specific message validation
    */
   virtual bool Validate();
+
+ protected:
+  virtual std::string ModuleType(const Json::Value& message);
 };
 
 }  // namespace commands
