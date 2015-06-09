@@ -119,7 +119,7 @@ class GenericModule {
    * @param msg Registration message
    * @param app Application basis already create by Core
    */
-  virtual bool IsAppForPlugin(application_manager::MessagePtr msg,
+  virtual bool IsAppForPlugin(
       application_manager::ApplicationSharedPtr app) = 0;
 
  protected:

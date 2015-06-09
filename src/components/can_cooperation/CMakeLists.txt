@@ -71,6 +71,7 @@ set (SOURCES
     ./src/validators/web_activity_validator.cc
     ./src/validators/on_radio_details_notification_validator.cc
     ./src/policy_helper.cc
+    ./src/module_helper.cc
 )
 
 set (LIBRARIES

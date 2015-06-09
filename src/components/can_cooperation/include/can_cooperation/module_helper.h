@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,40 +29,21 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TEST_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_DRIVER_GENERIC_MODULE_TEST_H_
-#define TEST_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_DRIVER_GENERIC_MODULE_TEST_H_
+
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_MODULE_HELPER_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_MODULE_HELPER_H_
 
 #include "functional_module/generic_module.h"
+#include "json/json.h"
 
-namespace functional_modules {
+namespace can_cooperation {
 
-class DriverGenericModuleTest : public GenericModule {
- public:
-  explicit DriverGenericModuleTest(ModuleID module_id) : GenericModule(module_id) {}
-  virtual ~DriverGenericModuleTest() {}
-  virtual PluginInfo GetPluginInfo() const {
-    PluginInfo info;
-    info.name = "DriverGenericModuleTest";
-    info.version = 1;
-    return info;
-  }
-  virtual ProcessResult ProcessMessage(application_manager::MessagePtr msg) {
-    NotifyObservers(ModuleObserver::FS_FAILURE);
-    return ProcessResult::FAILED;
-  }
-  virtual ProcessResult ProcessHMIMessage(application_manager::MessagePtr msg) {
-    return ProcessResult::PROCESSED;
-  }
-  virtual void RemoveAppExtension(uint32_t app_id) {}
-  virtual void RemoveAppExtensions() {}
-  bool IsAppForPlugin(
-      application_manager::ApplicationSharedPtr app) {return true;}
+functional_modules::ProcessResult ProcessOnAppDeactivation(
+  const Json::Value& value);
+functional_modules::ProcessResult ProcessSDLActivateApp(
+  application_manager::MessagePtr msg,
+  const Json::Value& value);
 
-  const Observers& observers() {
-    return observers_;
-  }
-};
+}  //  namespace can_cooperation
 
-}  // namespace functional_modules
-
-#endif  // TEST_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_DRIVER_GENERIC_MODULE_TEST_H_
+#endif  //  SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_MODULE_HELPER_H_

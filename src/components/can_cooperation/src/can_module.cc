@@ -40,6 +40,7 @@
 #include "can_cooperation/message_helper.h"
 #include "can_cooperation/policy_helper.h"
 #include "can_cooperation/can_app_extension.h"
+#include "can_cooperation/module_helper.h"
 #include "utils/logger.h"
 
 namespace can_cooperation {
@@ -269,37 +270,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
         break;
         } else if (functional_modules::hmi_api::on_app_deactivated ==
         function_name) {
-          LOG4CXX_INFO(logger_, "XOXOXO - OnAppDeactivated");
-          if (value.isMember(json_keys::kParams)
-          && value[json_keys::kParams].isMember(message_params::kHMIAppID)) {
-            printf("YEXUXUXU\n");
-            uint32_t hmi_app_id = value[json_keys::kParams][message_params::kHMIAppID].asUInt();
-            typedef std::vector<application_manager::ApplicationSharedPtr> AppList;
-            AppList applications = service()->GetApplications(this->GetModuleID());
-            if (!applications.empty()) {
-              printf("EYS APPS\n");
-              application_manager::ApplicationSharedPtr current_app;
-              application_manager::ApplicationSharedPtr active_app;
-
-              for (size_t i = 0; i < applications.size(); ++i) {
-                if (applications[i]->hmi_app_id() == hmi_app_id) {
-                  current_app = applications[i];
-                }
-                if (applications[i]->IsFullscreen()) {
-                  active_app = applications[i];
-                }
-              }
-
-              if (current_app && current_app == active_app) {
-                printf("DEACTIVATING THE IMPORTANT \n");
-                service()->ChangeNotifyHMILevel(current_app, mobile_apis::HMILevel::eType::HMI_LIMITED);
-                return ProcessResult::PROCESSED;
-              }
-
-              return ProcessResult::PARTIALLY_PROCESSED;
-            }
-          }
-          return ProcessResult::CANNOT_PROCESS;
+          return ProcessOnAppDeactivation(value);
         }
 
       int32_t func_id = msg->function_id();
@@ -312,54 +283,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     }
     case application_manager::MessageType::kRequest: {
         if (function_name == functional_modules::hmi_api::sdl_activate_app) {
-          msg->set_protocol_version(application_manager::ProtocolVersion::kHMI);
-          if (value.isMember(json_keys::kParams)
-          && value[json_keys::kParams].isMember(message_params::kHMIAppID)) {
-            uint32_t hmi_app_id =
-              value[json_keys::kParams][message_params::kHMIAppID].asUInt();
-            printf("LOLOLO %d\n", hmi_app_id);
-            typedef std::vector<application_manager::ApplicationSharedPtr> AppList;
-            AppList applications = service()->GetApplications(this->GetModuleID());
-            if (!applications.empty()) {
-              printf("WORKING WITH APPS %d\n", applications.size());
-              application_manager::ApplicationSharedPtr new_app;
-              application_manager::ApplicationSharedPtr active_app;
-              AppList limited_apps;
-              for (size_t i = 0; i < applications.size(); ++i) {
-                if (applications[i]->IsFullscreen()) {
-                  active_app = applications[i];
-                }
-                if (applications[i]->hmi_app_id() == hmi_app_id) {
-                  new_app = applications[i];
-                }
-                CANAppExtensionPtr app_ext =
-                application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-                  applications[i]->QueryInterface(GetModuleID()));
-                DCHECK(app_ext);
-                if (!app_ext) continue;
-                if (applications[i]->hmi_level() == mobile_apis::HMILevel::HMI_LIMITED
-                      && app_ext->is_on_driver_device()) {
-                  limited_apps.push_back(applications[i]);
-                }
-              }
-              if (active_app == new_app) {
-                printf("\n\n\nWE ARE HEERE\n");
-                return ProcessResult::CANNOT_PROCESS;
-              }
-              CANAppExtensionPtr new_app_ext =
-                application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-                  new_app->QueryInterface(GetModuleID()));
-              DCHECK(new_app_ext);
-              if (!new_app_ext) return ProcessResult::CANNOT_PROCESS;
-              if (new_app_ext->is_on_driver_device()) {
-                for (size_t i = 0; i < limited_apps.size(); ++i) {
-                  limited_apps[i]->set_hmi_level(mobile_apis::HMILevel::HMI_BACKGROUND);
-                  //msg->set_json_message(MessageHelper::CreateOnHMIStatus(*current_app));
-                }
-              }
-              return ProcessResult::PARTIALLY_PROCESSED;
-            }
-          }
+          ProcessSDLActivateApp(msg, value);
         }
         return ProcessResult::CANNOT_PROCESS;
       }
@@ -424,7 +348,7 @@ void CANModule::RemoveAppExtension(uint32_t app_id) {
   }
 }
 
-bool CANModule::IsAppForPlugin(application_manager::MessagePtr msg,
+bool CANModule::IsAppForPlugin(
 application_manager::ApplicationSharedPtr app) {
   if (app->app_types()) {
     std::vector<int> hmi_types =

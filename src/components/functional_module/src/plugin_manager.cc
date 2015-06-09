@@ -268,4 +268,16 @@ void PluginManager::RemoveAppExtension(uint32_t app_id) {
   }
 }
 
+bool PluginManager::IsAppForPlugins(application_manager::ApplicationSharedPtr app) {
+  DCHECK(app);
+  if (!app) {
+    return false;
+  }
+  bool res = false;
+  for (PluginsIterator it = plugins_.begin(); plugins_.end() != it; ++it) {
+    res = res || it->second->IsAppForPlugin(app);
+  }
+  return res;
+}
+
 }  //  namespace functional_modules

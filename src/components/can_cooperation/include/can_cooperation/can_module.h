@@ -102,7 +102,7 @@ class CANModule : public functional_modules::GenericModule,
    * @param msg Registration message
    * @param app Application basis already create by Core
    */
-  bool IsAppForPlugin(application_manager::MessagePtr msg,
+  bool IsAppForPlugin(
       application_manager::ApplicationSharedPtr app);
 
  protected:

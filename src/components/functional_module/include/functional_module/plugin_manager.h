@@ -64,6 +64,13 @@ class PluginManager : public utils::Singleton<PluginManager>,
    */
   void RemoveAppExtension(uint32_t app_id);
 
+  /*
+   * @brief Check if app cooperates with one or more plugins, init it
+   * inside plugin accordingly if needed.
+   * @param app Application in question.
+   */
+  bool IsAppForPlugins(application_manager::ApplicationSharedPtr app);
+
  private:
   PluginManager();
   ~PluginManager();
