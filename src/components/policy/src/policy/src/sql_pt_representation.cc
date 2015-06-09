@@ -517,6 +517,12 @@ void SQLPTRepresentation::GatherModuleConfig(
       config->seconds_between_retries.push_back(seconds.GetInteger(0));
     }
   }
+
+#ifdef SDL_REMOTE_CONTROL
+  if (!GatherEquipment(&*config->equipment)) {
+    LOG4CXX_WARN(logger_, "Couldn't gather equipment");
+  }
+#endif  // SDL_REMOTE_CONTROL
 }
 
 bool SQLPTRepresentation::GatherUsageAndErrorCounts(
@@ -1569,6 +1575,21 @@ bool SQLPTRepresentation::SaveModuleType(const std::string& app_id,
 
 bool SQLPTRepresentation::SaveEquipment(
     const policy_table::Equipment& equipment) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery is_empty(db());
+  if (!is_empty.Prepare(sql_pt::kCountInteriorZones)) {
+    LOG4CXX_WARN(logger_, "Incorrect statement for count interior zones");
+    return false;
+  }
+  if (!is_empty.Exec()) {
+    LOG4CXX_WARN(logger_, "Couldn't count interior zones");
+    return false;
+  }
+  if (is_empty.GetInteger(0) > 0) {
+    LOG4CXX_INFO(logger_, "Equipment has already been saved into database");
+    return true;
+  }
+
   dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kInsertInteriorZone)) {
     LOG4CXX_WARN(logger_, "Incorrect insert statement for interior zone");
@@ -1583,8 +1604,22 @@ bool SQLPTRepresentation::SaveEquipment(
     query.Bind(1, zone.col);
     query.Bind(2, zone.row);
     query.Bind(3, zone.level);
-    if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_, "Incorrect insert into interior zone.");
+    if (!query.Exec()) {
+      LOG4CXX_INFO(logger_, "Incorrect insert into interior zone.");
+      return false;
+    }
+    int id = query.LastInsertId();
+    if (!query.Reset()) {
+      LOG4CXX_WARN(logger_, "Couldn't reset query interior zone.");
+      return false;;
+    }
+    if (!SaveAccessModule(id, kAllowed, zone.auto_allow)) {
+      return false;
+    }
+    if (!SaveAccessModule(id, kManual, zone.driver_allow)) {
+      return false;
+    }
+    if (!SaveAccessModule(id, kDisallowed, zone.disallow)) {
       return false;
     }
   }
@@ -1593,6 +1628,7 @@ bool SQLPTRepresentation::SaveEquipment(
 
 bool SQLPTRepresentation::GatherEquipment(
     policy_table::Equipment* equipment) const {
+  LOG4CXX_AUTO_TRACE(logger_);
   dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kSelectInteriorZones)) {
     LOG4CXX_WARN(logger_, "Incorrect select from interior zone");
@@ -1601,11 +1637,123 @@ bool SQLPTRepresentation::GatherEquipment(
 
   while (query.Next()) {
     policy_table::InteriorZone zone;
-    std::string name = query.GetString(0);
-    zone.col = query.GetInteger(1);
-    zone.row = query.GetInteger(2);
-    zone.level = query.GetInteger(3);
+    int id = query.GetInteger(0);
+    std::string name = query.GetString(1);
+    zone.col = query.GetInteger(2);
+    zone.row = query.GetInteger(3);
+    zone.level = query.GetInteger(4);
+    if (!GatherAccessModule(id, kAllowed, &zone.auto_allow)) {
+      return false;
+    }
+    if (!GatherAccessModule(id, kManual, &zone.driver_allow)) {
+      return false;
+    }
+    if (!GatherAccessModule(id, kDisallowed, &zone.disallow)) {
+      return false;
+    }
     equipment->zones[name] = zone;
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::SaveAccessModule(
+    int zone_id, TypeAccess access,
+    const policy_table::AccessModules& modules) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertAccessModule)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for access module");
+    return false;
+  }
+
+  policy_table::AccessModules::const_iterator i;
+  for (i = modules.begin(); i != modules.end(); ++i) {
+    const std::string& name = i->first;
+    const policy_table::RemoteRpcs& rpcs = i->second;
+    query.Bind(0, name);
+    query.Bind(1, zone_id);
+    query.Bind(2, access);
+    if (!query.Exec()) {
+      LOG4CXX_WARN(logger_, "Incorrect insert into access module.");
+      return false;
+    }
+    int id = query.LastInsertId();
+    if (!query.Reset()) {
+      LOG4CXX_WARN(logger_, "Couldn't reset query access module.");
+      return false;
+    }
+    if (!SaveRemoteRpc(id, rpcs)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::GatherAccessModule(
+    int zone_id, TypeAccess access,
+    policy_table::AccessModules* modules) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectAccessModules)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from access module");
+    return false;
+  }
+
+  query.Bind(0, zone_id);
+  query.Bind(1, access);
+  while (query.Next()) {
+    int id = query.GetInteger(0);
+    std::string name = query.GetString(1);
+    policy_table::RemoteRpcs rpcs;
+    if (!GatherRemoteRpc(id, &rpcs)) {
+      return false;
+    }
+    modules->insert(std::make_pair(name,rpcs));
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::SaveRemoteRpc(
+    int module_id, const policy_table::RemoteRpcs& rpcs) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertRemoteRpc)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for remote rpc");
+    return false;
+  }
+  policy_table::RemoteRpcs::const_iterator i;
+  for (i = rpcs.begin(); i != rpcs.end(); ++i) {
+    const std::string& name = i->first;
+    const policy_table::Strings& params = i->second;
+    policy_table::Strings::const_iterator j;
+    for (j = params.begin(); j != params.end(); ++j) {
+      std::string param = *j;
+      query.Bind(0, module_id);
+      query.Bind(1, name);
+      query.Bind(2, param);
+      if (!query.Exec() || !query.Reset()) {
+        LOG4CXX_WARN(logger_, "Incorrect insert into remote rpc.");
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::GatherRemoteRpc(
+    int module_id, policy_table::RemoteRpcs* rpcs) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectRemoteRpcs)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from remote rpc");
+    return false;
+  }
+
+  query.Bind(0, module_id);
+  while (query.Next()) {
+    std::string name = query.GetString(0);
+    std::string parameter = query.GetString(1);
+    (*rpcs)[name].push_back(parameter);
   }
   return true;
 }

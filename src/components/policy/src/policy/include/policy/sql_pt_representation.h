@@ -140,6 +140,11 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                      const policy_table::AppHMITypes& types);
 
 #ifdef SDL_REMOTE_CONTROL
+    enum TypeAccess {
+      kDisallowed,
+      kAllowed,
+      kManual
+    };
     bool GatherAppGroupPrimary(const std::string& app_id,
                                policy_table::Strings* app_groups) const;
     bool GatherAppGroupNonPrimary(const std::string& app_id,
@@ -149,6 +154,9 @@ class SQLPTRepresentation : public virtual PTRepresentation {
     bool GatherRemoteControlDenied(const std::string& app_id,
                                    bool* denied) const;
     bool GatherEquipment(policy_table::Equipment* equipment) const;
+    bool GatherAccessModule(int zone_id, TypeAccess access,
+                            policy_table::AccessModules* modules) const;
+    bool GatherRemoteRpc(int module_id, policy_table::RemoteRpcs* rpcs) const;
     bool SaveAppGroupPrimary(const std::string& app_id,
                              const policy_table::Strings& app_groups);
     bool SaveAppGroupNonPrimary(const std::string& app_id,
@@ -157,6 +165,9 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                         const policy_table::ModuleTypes& types);
     bool SaveRemoteControlDenied(const std::string& app_id, bool deny);
     bool SaveEquipment(const policy_table::Equipment& equipment);
+    bool SaveAccessModule(int zone_id, TypeAccess access,
+                          const policy_table::AccessModules& modules);
+    bool SaveRemoteRpc(int module_id, const policy_table::RemoteRpcs& rpcs);
 #endif  // SDL_REMOTE_CONTROL
 
   public:

@@ -104,13 +104,13 @@ const std::string kCreateSchema =
 
   /* remote_rpc */
   "CREATE TABLE `remote_rpc`( "
-  "  `id` PRIMARY KEY NOT NULL, "
+  "  `id` INTEGER PRIMARY KEY NOT NULL, "
   "  `name` VARCHAR(255) NOT NULL, "
   "  `parameter` VARCHAR(45), "
-  "  `module_id` VARCHAR(45) NOT NULL, "
+  "  `module_id` INTEGER NOT NULL, "
   "CONSTRAINT `fk_remote_rpc_1` "
   "  FOREIGN KEY(`module_id`) "
-  "  REFERENCES `module`(`name`) "
+  "  REFERENCES `access_module`(`id`) "
   "); "
   "CREATE INDEX `remote_rpc.fk_remote_rpc_1_idx` ON `remote_rpc`(`module_id`); "
 
@@ -602,11 +602,30 @@ const std::string kUpdateModuleConfig =
   "  `user_consent_passengersRC` = ?, `country_consent_passengersRC` = ?";
 
 const std::string kInsertInteriorZone =
-  "INSERT OR IGNORE INTO `interior_zone` (`name`, `col`, `row`, `level`) "
+  "INSERT INTO `interior_zone` (`name`, `col`, `row`, `level`) "
   "  VALUES(?, ?, ?, ?)";
 
+const std::string kCountInteriorZones =
+  "SELECT COUNT(`id`) FROM `interior_zone`";
+
 const std::string kSelectInteriorZones =
-  "SELECT `name`, `col`, `row`, `level` FROM `interior_zone`";
+  "SELECT `id`, `name`, `col`, `row`, `level` FROM `interior_zone`";
+
+const std::string kInsertAccessModule =
+  "INSERT INTO `access_module` (`name`, `zone_id`, `access`) "
+  "  VALUES(?, ?, ?)";
+
+const std::string kSelectAccessModules =
+  "SELECT `id`, `name` FROM `access_module` "
+  "  WHERE `zone_id` = ? AND `access` = ?";
+
+const std::string kInsertRemoteRpc =
+  "INSERT INTO `remote_rpc` (`module_id`, `name`, `parameter`) "
+  "  VALUES(?, ?, ?)";
+
+const std::string kSelectRemoteRpcs =
+  "SELECT `name`, `parameter` FROM `remote_rpc` "
+  "  WHERE `module_id` = ?";
 
 const std::string kInsertEndpoint =
   "INSERT INTO `endpoint` (`service`, `url`, `application_id`) "
