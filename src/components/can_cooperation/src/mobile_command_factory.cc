@@ -32,6 +32,7 @@
 
 #include "can_cooperation/mobile_command_factory.h"
 #include "functional_module/function_ids.h"
+/*
 #include "can_cooperation/commands/start_scan_request.h"
 #include "can_cooperation/commands/stop_scan_request.h"
 #include "can_cooperation/commands/tune_radio_request.h"
@@ -39,12 +40,15 @@
 #include "can_cooperation/commands/tune_down_request.h"
 #include "can_cooperation/commands/climate_control_on_request.h"
 #include "can_cooperation/commands/get_seat_control_request.h"
+*/
 #include "can_cooperation/commands/button_press_request.h"
 #include "can_cooperation/commands/get_interior_vehicle_data_capabilities_request.h"
 #include "can_cooperation/commands/get_interior_vehicle_data_request.h"
 #include "can_cooperation/commands/set_interior_vehicle_data_request.h"
+/*
 #include "can_cooperation/commands/on_preset_changed_notification.h"
 #include "can_cooperation/commands/on_radio_details_notification.h"
+*/
 #include "can_cooperation/commands/on_interior_vehicle_data_notification.h"
 
 
@@ -72,7 +76,11 @@ commands::Command* MobileCommandFactory::CreateCommand(
       return new commands::ButtonPressRequest(msg);
       break;
     }
-    case MobileFunctionID::START_SCAN: {
+    case MobileFunctionID::ON_INTERIOR_VEHICLE_DATA: {
+      return new commands::OnInteriorVehicleDataNotification(msg);
+      break;
+    }
+  /*  case MobileFunctionID::START_SCAN: {
       return new commands::StartScanRequest(msg);
       break;
     }
@@ -99,19 +107,15 @@ commands::Command* MobileCommandFactory::CreateCommand(
     case MobileFunctionID::CLIMATE_CONTROL_ON: {
       return new commands::ClimateControlOnRequest(msg);
       break;
-    }
-    case MobileFunctionID::ON_INTERIOR_VEHICLE_DATA: {
-      return new commands::OnInteriorVehicleDataNotification(msg);
-      break;
-    }
-    case MobileFunctionID::ON_RADIO_DETAILS: {
+    }*/
+   /* case MobileFunctionID::ON_RADIO_DETAILS: {
       return new commands::OnRadioDetailsNotification(msg);
       break;
     }
     case MobileFunctionID::ON_PRESETS_CHANGED: {
       return new commands::OnPresetChangedNotification(msg);
       break;
-    }
+    }*/
     default: {
       return NULL;
     }

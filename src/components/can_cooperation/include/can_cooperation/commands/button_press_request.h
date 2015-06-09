@@ -69,6 +69,11 @@ class ButtonPressRequest : public BaseCommandRequest {
    * @brief ButtonPressRequest class destructor
    */
   virtual ~ButtonPressRequest();
+
+  /**
+   * @brief executes specific message validation
+   */
+  virtual bool Validate();
 };
 
 }  // namespace commands

@@ -139,6 +139,11 @@ class BaseCommandRequest : public Command,
   void virtual Execute() = 0;
 
   /**
+   * @brief executes specific message validation logic of children classes
+   */
+  virtual bool Validate() = 0;
+
+  /**
    * @brief Interface method that is called whenever new event received
    * @param event The received event
    */

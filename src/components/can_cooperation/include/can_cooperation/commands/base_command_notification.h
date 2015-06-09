@@ -84,6 +84,11 @@ class BaseCommandNotification : public Command {
   // TODO(KKolodiy): need rename to Run
   virtual void Execute() = 0;
 
+  /**
+   * @brief executes specific message validation logic of children classes
+   */
+  virtual bool Validate() = 0;
+
  private:
   void NotifyApplications();
   void NotifyOneApplication(application_manager::MessagePtr message);

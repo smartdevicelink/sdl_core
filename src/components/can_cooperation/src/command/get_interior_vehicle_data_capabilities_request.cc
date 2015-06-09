@@ -83,6 +83,10 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
   }
 }
 
+bool GetInteriorVehicleDataCapabiliesRequest::Validate() {
+  return true;
+}
+
 }  // namespace commands
 
 }  // namespace can_cooperation

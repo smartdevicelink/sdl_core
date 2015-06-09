@@ -197,15 +197,84 @@ ValidationResult Validator::ValidateStringValue(const std::string& value,
   return ValidationResult::SUCCESS;
 }
 
-
-
+//TODO(VS): this function needs refactoring(maybe better use vectors with enum values and find())
 ValidationResult Validator::ValidateEnumValue(const std::string& value,
                                             ValidationScope& validation_scope) {
   if (validation_scope[ValidationParams::ENUM_TYPE] ==
-      EnumType::TRIGGER_SOURCE) {
+      EnumType::MODULE_TYPE) {
+    if (value != enums_value::kClimate &&
+        value != enums_value::kRadio) {
+      LOG4CXX_ERROR(logger_, "Wrong ModuleType enum value!");
+      return ValidationResult::INVALID_DATA;
+    }
+/*  } else if (validation_scope[ValidationParams::ENUM_TYPE] ==
+    EnumType::TRIGGER_SOURCE) {
     if (value != enums_value::kMenu &&
         value != enums_value::kVR) {
       LOG4CXX_ERROR(logger_, "Wrong triggerSource enum value!");
+      return ValidationResult::INVALID_DATA;
+    }*/
+  } else if (validation_scope[ValidationParams::ENUM_TYPE] ==
+      EnumType::RADIO_BAND) {
+    if (value != enums_value::kFM &&
+        value != enums_value::kAM &&
+        value != enums_value::kXM) {
+      LOG4CXX_ERROR(logger_, "Wrong RadioBand enum value!");
+      return ValidationResult::INVALID_DATA;
+    }
+  }  else if (validation_scope[ValidationParams::ENUM_TYPE] ==
+      EnumType::RADIO_STATE) {
+    if (value != enums_value::kAcquiring &&
+        value != enums_value::kAcquired  &&
+        value != enums_value::kMulticast &&
+        value != enums_value::kNotFound) {
+      LOG4CXX_ERROR(logger_, "Wrong RadioState enum value!");
+      return ValidationResult::INVALID_DATA;
+    }
+  } else if (validation_scope[ValidationParams::ENUM_TYPE] ==
+      EnumType::DEFROST_ZONE) {
+    if (value != enums_value::kFront &&
+        value != enums_value::kRear  &&
+        value != enums_value::kAll) {
+      LOG4CXX_ERROR(logger_, "Wrong DefrostZone enum value!");
+      return ValidationResult::INVALID_DATA;
+    }
+  } else if (validation_scope[ValidationParams::ENUM_TYPE] ==
+      EnumType::TEMPERATURE_UNIT) {
+    if (value != enums_value::kKelvin      &&
+        value != enums_value::kFahrenheit  &&
+        value != enums_value::kCelsius) {
+      LOG4CXX_ERROR(logger_, "Wrong TemperatureUnit enum value!");
+      return ValidationResult::INVALID_DATA;
+    }
+  } else if (validation_scope[ValidationParams::ENUM_TYPE] ==
+      EnumType::BUTTON_NAME) {
+    if (value != enums_value::kACMax       &&
+        value != enums_value::kAC          &&
+        value != enums_value::kRecirculate &&
+        value != enums_value::kFanUp       &&
+        value != enums_value::kFanDown     &&
+        value != enums_value::kTempUp      &&
+        value != enums_value::kTempDown    &&
+        value != enums_value::kDefrostMax  &&
+        value != enums_value::kDefrost     &&
+        value != enums_value::kDefrostRear &&
+        value != enums_value::kUpperVent   &&
+        value != enums_value::kLowerVent   &&
+        value != enums_value::kVolumeUp    &&
+        value != enums_value::kVolumeDown  &&
+        value != enums_value::kEject       &&
+        value != enums_value::kSource      &&
+        value != enums_value::kShuffle     &&
+        value != enums_value::kRepeat) {
+      LOG4CXX_ERROR(logger_, "Wrong ButtonName enum value!");
+      return ValidationResult::INVALID_DATA;
+    }
+  } else if (validation_scope[ValidationParams::ENUM_TYPE] ==
+      EnumType::BUTTON_PRESS_MODE) {
+    if (value != enums_value::kLong &&
+        value != enums_value::kShort) {
+      LOG4CXX_ERROR(logger_, "Wrong ButtonPressMode enum value!");
       return ValidationResult::INVALID_DATA;
     }
   } else {

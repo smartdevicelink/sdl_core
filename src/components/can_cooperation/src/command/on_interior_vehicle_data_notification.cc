@@ -50,6 +50,10 @@ void OnInteriorVehicleDataNotification::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
+bool OnInteriorVehicleDataNotification::Validate() {
+  return true;
+}
+
 }  // namespace commands
 
 }  // namespace can_cooperation

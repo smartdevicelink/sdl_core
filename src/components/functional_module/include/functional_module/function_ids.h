@@ -57,15 +57,15 @@ enum MobileFunctionID {
 
 namespace hmi_api {
   const char get_interior_vehicle_data_capabilities[] =
-      "VehicleInfo.GetInteriorVehicleDataCapabilities";
-  const char get_interior_vehicle_data[] = "VehicleInfo.GetInteriorVehicleData";
-  const char set_interior_vehicle_data[] = "VehicleInfo.SetInteriorVehicleData";
-  const char on_interior_vehicle_data[]  = "VehicleInfo.OnInteriorVehicleData";
-  const char button_press[]              = "VehicleInfo.ButtonPress";
+                               "RC.GetInteriorVehicleDataCapabilities";
+  const char get_interior_vehicle_data[] = "RC.GetInteriorVehicleData";
+  const char set_interior_vehicle_data[] = "RC.SetInteriorVehicleData";
+  const char on_interior_vehicle_data[]  = "RC.OnInteriorVehicleData";
+  const char button_press[]              = "Buttons.ButtonPress";
 
-  const char grant_access[]              = "VehicleInfo.GrantAccess";
-  const char on_reverse_apps_allowing[]  = "VehicleInfo.OnReverseAppsAllowing";
-  const char on_primary_device[]         = "VehicleInfo.OnPrimaryDevice";
+  const char grant_access[]              = "RC.GrantAccess";
+  const char on_reverse_apps_allowing[]  = "RC.OnReverseAppsAllowing";
+  const char on_primary_device[]         = "RC.OnPrimaryDevice";
 }
 
 namespace can_api {

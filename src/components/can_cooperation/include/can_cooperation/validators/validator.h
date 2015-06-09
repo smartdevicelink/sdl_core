@@ -72,11 +72,18 @@ enum ValueType {
 };
 
 enum EnumType {
-  TRIGGER_SOURCE
+  //TRIGGER_SOURCE,
+  BUTTON_NAME,
+  MODULE_TYPE,
+  RADIO_BAND,
+  RADIO_STATE,
+  DEFROST_ZONE,
+  TEMPERATURE_UNIT,
+  BUTTON_PRESS_MODE
 };
 
 //validation_scope map with data that will be used for validation(minlength. maxlength, etc.)
-typedef std::map<int, int> ValidationScope;
+typedef std::map<ValidationParams, int> ValidationScope;
 
 typedef std::map<std::string, ValidationScope*> ValidationScopeMap;
 

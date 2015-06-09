@@ -57,6 +57,11 @@ class OnInteriorVehicleDataNotification : public BaseCommandNotification {
   virtual void Execute();
 
   /**
+   * @brief executes specific message validation
+   */
+  virtual bool Validate();
+
+  /**
    * @brief OnInteriorVehicleDataNotification class destructor
    */
   virtual ~OnInteriorVehicleDataNotification();

@@ -80,6 +80,10 @@ void ButtonPressRequest::OnEvent(
   }
 }
 
+bool ButtonPressRequest::Validate() {
+  return true;
+}
+
 }  // namespace commands
 
 }  // namespace can_cooperation
