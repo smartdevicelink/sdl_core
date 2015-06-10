@@ -77,20 +77,12 @@ ValidationResult ModuleDataValidator::Validate(const Json::Value& json,
     result = RadioControlDataValidator::instance()->Validate(
                                               json[kRadioControlData],
                                               outgoing_json[kRadioControlData]);
-  } else {
-    result = ValidationResult::INVALID_DATA;
-    LOG4CXX_ERROR(
-        logger_, "Mandatory param " <<kRadioControlData <<" missing!" );
   }
 
   if (json.isMember(kClimateControlData)) {
     result = ClimateControlDataValidator::instance()->Validate(
                                              json[kClimateControlData],
                                              outgoing_json[kClimateControlData]);
-  } else {
-    result = ValidationResult::INVALID_DATA;
-    LOG4CXX_ERROR(
-        logger_, "Mandatory param " <<kClimateControlData <<" missing!" );
   }
 
   return result;
