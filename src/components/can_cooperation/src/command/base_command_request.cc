@@ -321,7 +321,7 @@ bool BaseCommandRequest::CheckAccess() {
   LOG4CXX_AUTO_TRACE(logger_);
   CANAppExtensionPtr extension = GetAppExtension(app_);
   // TODO(KKolodiy): zone and params from message
-  SeatLocation zone = 10;
+  SeatLocation zone {0, 0, 0};
   std::vector<std::string> params;
   Json::Value value;
   Json::Reader reader;

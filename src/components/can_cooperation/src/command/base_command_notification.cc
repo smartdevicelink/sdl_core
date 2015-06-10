@@ -135,7 +135,7 @@ bool BaseCommandNotification::CheckPolicy(
       service_->CheckPolicyPermissions(message);
 
   // TODO(KKolodiy): get zone and params from message
-  SeatLocation zone = 10;
+  SeatLocation zone = {0, 0, 0};
   std::vector<std::string> params;
 
   Json::Value value;

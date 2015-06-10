@@ -87,7 +87,6 @@ TypeAccess CoreService::CheckAccess(const ApplicationId& app_id,
 #ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
-
     return policy::PolicyHandler::instance()->CheckAccess(
         app->mobile_app_id(), module, params, zone);
   }

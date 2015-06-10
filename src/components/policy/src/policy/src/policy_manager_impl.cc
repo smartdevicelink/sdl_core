@@ -964,7 +964,7 @@ TypeAccess PolicyManagerImpl::CheckAccess(
     if (access_remote_->IsPrimaryDevice(who.dev_id)) {
       return TryOccupy(who, what);
     } else {
-      return CheckDriverConsent(who, what);
+      return CheckDriverConsent(who, what, zone, params);
     }
   }
   return TypeAccess::kDisallowed;
@@ -984,13 +984,14 @@ TypeAccess PolicyManagerImpl::TryOccupy(const Subject& who,
 }
 
 TypeAccess PolicyManagerImpl::CheckDriverConsent(
-    const Subject& who, const Object& what) {
+    const Subject& who, const Object& what, const SeatLocation& zone,
+    const RemoteControlParams& params) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!access_remote_->IsEnabled()) {
     return TypeAccess::kDisallowed;
   }
 
-  TypeAccess access = access_remote_->CheckParameters();
+  TypeAccess access = access_remote_->CheckParameters(what.module, zone, params);
   if (access == TypeAccess::kManual) {
     return access_remote_->Check(who, what);
   }

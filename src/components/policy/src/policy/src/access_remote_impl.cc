@@ -83,6 +83,19 @@ struct ToHMIType {
   }
 };
 
+struct IsZone {
+ private:
+  const SeatLocation& seat_;
+ public:
+  explicit IsZone(const SeatLocation& seat)
+      : seat_(seat) {
+  }
+  bool operator ()(const policy_table::Zones::value_type& item) const {
+    const policy_table::InteriorZone& zone = item.second;
+    return seat_ == zone;
+  }
+};
+
 AccessRemoteImpl::AccessRemoteImpl()
     : cache_(new CacheManager()),
       primary_device_(),
@@ -173,7 +186,14 @@ bool AccessRemoteImpl::CheckModuleType(const PTString& app_id,
   return std::find(modules.begin(), modules.end(), module) != modules.end();
 }
 
-TypeAccess AccessRemoteImpl::CheckParameters(/* module, zone, params */) const {
+TypeAccess AccessRemoteImpl::CheckParameters(
+    policy_table::ModuleType module, const SeatLocation& zone,
+    const RemoteControlParams& params) const {
+  policy_table::Zones& zones = cache_->pt_->policy_table.module_config.equipment
+      ->zones;
+  policy_table::Zones::const_iterator i = std::find_if(zones.begin(),
+                                                       zones.end(),
+                                                       IsZone(zone));
   return TypeAccess::kManual;
 }
 

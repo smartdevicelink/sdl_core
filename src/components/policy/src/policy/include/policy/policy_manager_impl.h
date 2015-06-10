@@ -287,7 +287,9 @@ private:
     CacheManagerInterfaceSPtr cache_;
 #ifdef SDL_REMOTE_CONTROL
     TypeAccess TryOccupy(const Subject& who, const Object& what);
-    TypeAccess CheckDriverConsent(const Subject& who, const Object& what);
+    TypeAccess CheckDriverConsent(const Subject& who, const Object& what,
+                                  const SeatLocation& zone,
+                                  const RemoteControlParams& params);
 
     utils::SharedPtr<AccessRemote> access_remote_;
 #endif  // SDL_REMOTE_CONTROL

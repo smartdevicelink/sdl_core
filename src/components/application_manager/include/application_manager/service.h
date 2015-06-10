@@ -48,7 +48,9 @@ enum TypeAccess {
   kManual
 };
 
-typedef int SeatLocation;
+struct SeatLocation {
+  int col, row, level;
+};
 
 typedef std::string PluginFunctionID;
 /**

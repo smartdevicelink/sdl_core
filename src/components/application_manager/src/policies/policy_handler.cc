@@ -53,6 +53,7 @@
 #include "policy/policy_types.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
+#include "policy/policy_manager.h"
 
 namespace policy {
 
@@ -1316,12 +1317,35 @@ void PolicyHandler::Add(const std::string& app_id,
 }
 
 #ifdef SDL_REMOTE_CONTROL
+namespace {
+application_manager::TypeAccess ConvertTypeAccess(
+    policy::TypeAccess access) {
+  application_manager::TypeAccess converted;
+  switch (access) {
+    case policy::TypeAccess::kAllowed:
+      converted = application_manager::TypeAccess::kAllowed;
+      break;
+    case policy::TypeAccess::kManual:
+      converted = application_manager::TypeAccess::kManual;
+      break;
+    case policy::TypeAccess::kDisallowed:
+      converted = application_manager::TypeAccess::kDisallowed;
+      break;
+    default:
+      converted = application_manager::TypeAccess::kNone;
+  }
+  return converted;
+}
+}  // namespace
+
 application_manager::TypeAccess PolicyHandler::CheckAccess(
     const PTString& app_id, const PTString& module,
-    const RemoteControlParams& params, const SeatLocation& zone) {
+    const std::vector<PTString>& params,
+    const application_manager::SeatLocation& zone) {
   POLICY_LIB_CHECK(application_manager::TypeAccess::kNone);
+  policy::SeatLocation policy_zone {zone.col, zone.row, zone.level};
   policy::TypeAccess access = policy_manager_->CheckAccess(app_id, module,
-                                                           params, zone);
+                                                           params, policy_zone);
   return ConvertTypeAccess(access);
 }
 
@@ -1396,25 +1420,6 @@ void PolicyHandler::SetRemoteControl(bool enabled) {
       policy_manager_->OnChangedRemoteControl(app->mobile_app_id());
     }
   }
-}
-
-application_manager::TypeAccess PolicyHandler::ConvertTypeAccess(
-    policy::TypeAccess access) const {
-  application_manager::TypeAccess converted;
-  switch (access) {
-    case policy::TypeAccess::kAllowed:
-      converted = application_manager::TypeAccess::kAllowed;
-      break;
-    case policy::TypeAccess::kManual:
-      converted = application_manager::TypeAccess::kManual;
-      break;
-    case policy::TypeAccess::kDisallowed:
-      converted = application_manager::TypeAccess::kDisallowed;
-      break;
-    default:
-      converted = application_manager::TypeAccess::kNone;
-  }
-  return converted;
 }
 #endif  // SDL_REMOTE_CONTROL
 
