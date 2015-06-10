@@ -136,7 +136,6 @@ struct InteriorZone: CompositeType {
     Integer<uint16_t, 0, 65225> level;
     AccessModules auto_allow;
     AccessModules driver_allow;
-    AccessModules disallow;
   public:
     InteriorZone();
     explicit InteriorZone(const InteriorZone& zone);

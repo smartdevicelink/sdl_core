@@ -1170,8 +1170,7 @@ InteriorZone::InteriorZone(const InteriorZone& zone)
     row(zone.row),
     level(zone.level),
     auto_allow(zone.auto_allow),
-    driver_allow(zone.driver_allow),
-    disallow(zone.disallow) {
+    driver_allow(zone.driver_allow) {
 }
 InteriorZone::~InteriorZone() {
 }
@@ -1181,8 +1180,7 @@ InteriorZone::InteriorZone(const Json::Value* value__)
     row(impl::ValueMember(value__, "row")),
     level(impl::ValueMember(value__, "level")),
     auto_allow(impl::ValueMember(value__, "auto_allow")),
-    driver_allow(impl::ValueMember(value__, "driver_allow")),
-    disallow(impl::ValueMember(value__, "disallow")) {
+    driver_allow(impl::ValueMember(value__, "driver_allow")) {
 }
 Json::Value InteriorZone::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
@@ -1191,7 +1189,6 @@ Json::Value InteriorZone::ToJsonValue() const {
   impl::WriteJsonField("level", level, &result__);
   impl::WriteJsonField("auto_allow", auto_allow, &result__);
   impl::WriteJsonField("driver_allow", driver_allow, &result__);
-  impl::WriteJsonField("disallow", disallow, &result__);
   return result__;
 }
 bool InteriorZone::is_valid() const {
@@ -1208,9 +1205,6 @@ bool InteriorZone::is_valid() const {
     return false;
   }
   if (!driver_allow.is_valid()) {
-    return false;
-  }
-  if (!disallow.is_valid()) {
     return false;
   }
 
@@ -1235,9 +1229,6 @@ bool InteriorZone::struct_empty() const {
   if (driver_allow.is_initialized()) {
     return false;
   }
-  if (disallow.is_initialized()) {
-    return false;
-  }
 
   return true;
 }
@@ -1260,9 +1251,6 @@ void InteriorZone::ReportErrors(rpc::ValidationReport* report__) const {
   if (!driver_allow.is_valid()) {
     driver_allow.ReportErrors(&report__->ReportSubobject("driver_allow"));
   }
-  if (!disallow.is_valid()) {
-    disallow.ReportErrors(&report__->ReportSubobject("disallow"));
-  }
 }
 
 void InteriorZone::SetPolicyTableType(PolicyTableType pt_type) {
@@ -1272,7 +1260,6 @@ void InteriorZone::SetPolicyTableType(PolicyTableType pt_type) {
   level.SetPolicyTableType(pt_type);
   auto_allow.SetPolicyTableType(pt_type);
   driver_allow.SetPolicyTableType(pt_type);
-  disallow.SetPolicyTableType(pt_type);
 }
 
 }  // namespace policy_table_interface_base

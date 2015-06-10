@@ -10,8 +10,7 @@
                   "auto_allow": {
                     "RADIO": {}
                   },
-                  "driver_allow": {},
-                  "disallow": {}
+                  "driver_allow": {}
                 },
                 "Front Passenger": {
                   "col": 1,
@@ -22,8 +21,7 @@
                       "SetInteriorVehicleData": []
                     }
                   },
-                  "driver_allow": {},
-                  "disallow": {}
+                  "driver_allow": {}
                 },
                 "Left Rare Passenger": {
                   "col": 0,
@@ -34,16 +32,14 @@
                       "SetInteriorVehicleData": ["frequencyInteger"]
                     }
                   },
-                  "driver_allow": {},
-                  "disallow": {}
+                  "driver_allow": {}
                 },
                 "Right Rare Passenger": {
                   "col": 1,
                   "row": 1,
                   "level": 0,
                   "auto_allow": {},
-                  "driver_allow": {},
-                  "disallow": {}
+                  "driver_allow": {}
                 }
               }
             },

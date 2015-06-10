@@ -1619,9 +1619,6 @@ bool SQLPTRepresentation::SaveEquipment(
     if (!SaveAccessModule(id, kManual, zone.driver_allow)) {
       return false;
     }
-    if (!SaveAccessModule(id, kDisallowed, zone.disallow)) {
-      return false;
-    }
   }
   return true;
 }
@@ -1646,9 +1643,6 @@ bool SQLPTRepresentation::GatherEquipment(
       return false;
     }
     if (!GatherAccessModule(id, kManual, &zone.driver_allow)) {
-      return false;
-    }
-    if (!GatherAccessModule(id, kDisallowed, &zone.disallow)) {
       return false;
     }
     equipment->zones[name] = zone;

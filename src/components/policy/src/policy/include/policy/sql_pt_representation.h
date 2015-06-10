@@ -141,7 +141,6 @@ class SQLPTRepresentation : public virtual PTRepresentation {
 
 #ifdef SDL_REMOTE_CONTROL
     enum TypeAccess {
-      kDisallowed,
       kAllowed,
       kManual
     };
