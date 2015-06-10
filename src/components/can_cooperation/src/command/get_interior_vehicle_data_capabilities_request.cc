@@ -85,15 +85,28 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
     bool success = ParseResultCode(value, result_code, info);
 
 
-    // TOD(VS): Create GetInteriorVehicleDataCapabiliesResponseValidator
+    // TOD(VS): Create GetInteriorVehicleDataCapabiliesResponseValidator. Replace this code there and correct it
     validators::ValidationResult validation_result = validators::SUCCESS;
+
+    const int capabilities_min_size = 1;
+    const int capabilities_max_size = 1000;
 
     if (success) {
       if (value[kResult].isMember(kInteriorVehicleDataCapabilities)) {
-        validation_result =
-            validators::ModuleDescriptionValidator::instance()->Validate(
-                            value[kResult][kInteriorVehicleDataCapabilities],
-                            response_params_[kInteriorVehicleDataCapabilities]);
+        int capabilities_size =
+            value[kResult][kInteriorVehicleDataCapabilities].size();
+        if (value[kResult][kInteriorVehicleDataCapabilities].isArray() &&
+            (capabilities_size >= capabilities_min_size)               &&
+            (capabilities_size <= capabilities_max_size)) {
+          for (int i = 0; i < capabilities_size; ++i) {
+            validation_result =
+              validators::ModuleDescriptionValidator::instance()->Validate(
+                value[kResult][kInteriorVehicleDataCapabilities][i],
+                response_params_[kInteriorVehicleDataCapabilities][i]);
+          }
+        } else {
+          validation_result = validators::INVALID_DATA;
+        }
       } else {
         validation_result = validators::INVALID_DATA;
       }

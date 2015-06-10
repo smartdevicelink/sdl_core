@@ -48,9 +48,9 @@ GetInteriorVehicleDataCapabilitiesRequestValidator() {
   module_type_[ValidationParams::TYPE] = ValueType::ENUM;
   module_type_[ValidationParams::ENUM_TYPE] = EnumType::MODULE_TYPE;
   module_type_[ValidationParams::ARRAY] = 1;
-  module_type_[ValidationParams::MANDATORY] = 1;
+  module_type_[ValidationParams::MANDATORY] = 0;
   module_type_[ValidationParams::MIN_SIZE] = 1;
-  module_type_[ValidationParams::MAX_SIZE] = 2;
+  module_type_[ValidationParams::MAX_SIZE] = 1000;
 
   validation_scope_map_[kModuleTypes] = &module_type_;
 };
@@ -69,9 +69,6 @@ ValidationResult GetInteriorVehicleDataCapabilitiesRequestValidator::Validate(
   if (json.isMember(kZone)) {
     result = InteriorZoneValidator::instance()->Validate(json[kZone],
                                                     outgoing_json[kZone]);
-  } else {
-    result = ValidationResult::INVALID_DATA;
-    LOG4CXX_ERROR(logger_, "Mandatory param " <<kZone <<" missing!" );
   }
 
   return result;
