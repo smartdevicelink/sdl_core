@@ -30,48 +30,35 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "can_cooperation/validators/get_interior_vehicle_data_capabilities_request_validator.h"
-#include "can_cooperation/validators/struct_validators/interior_zone_validator.h"
+#include "can_cooperation/validators/set_interior_vehicle_data_request_validator.h"
+#include "can_cooperation/validators/struct_validators/module_data_validator.h"
 #include "can_cooperation/can_module_constants.h"
 
 namespace can_cooperation {
 
 namespace validators {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "GetInteriorVehicleDataCapabilitiesRequestValidator")
+CREATE_LOGGERPTR_GLOBAL(logger_, "SetInteriorVehicleDataRequestValidator")
 
 using namespace message_params;
 
-GetInteriorVehicleDataCapabilitiesRequestValidator::
-GetInteriorVehicleDataCapabilitiesRequestValidator() {
-  // name="moduleType"
-  module_type_[ValidationParams::TYPE] = ValueType::ENUM;
-  module_type_[ValidationParams::ENUM_TYPE] = EnumType::MODULE_TYPE;
-  module_type_[ValidationParams::ARRAY] = 1;
-  module_type_[ValidationParams::MANDATORY] = 1;
-  module_type_[ValidationParams::MIN_SIZE] = 1;
-  module_type_[ValidationParams::MAX_SIZE] = 2;
-
-  validation_scope_map_[kModuleTypes] = &module_type_;
+SetInteriorVehicleDataRequestValidator::
+SetInteriorVehicleDataRequestValidator() {
 };
 
-ValidationResult GetInteriorVehicleDataCapabilitiesRequestValidator::Validate(
+ValidationResult SetInteriorVehicleDataRequestValidator::Validate(
                                                    const Json::Value& json,
                                                    Json::Value& outgoing_json) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ValidationResult result = ValidateSimpleValues(json, outgoing_json);
-
-  if (result != ValidationResult::SUCCESS) {
-    return result;
-  }
+  ValidationResult result;
 
   if (json.isMember(kZone)) {
-    result = InteriorZoneValidator::instance()->Validate(json[kZone],
-                                                    outgoing_json[kZone]);
+    result = ModuleDataValidator::instance()->
+        Validate(json[kModuleData], outgoing_json[kModuleData]);
   } else {
     result = ValidationResult::INVALID_DATA;
-    LOG4CXX_ERROR(logger_, "Mandatory param " <<kZone <<" missing!" );
+    LOG4CXX_ERROR(logger_, "Mandatory param " <<kModuleData <<" missing!" );
   }
 
   return result;

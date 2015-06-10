@@ -31,13 +31,19 @@
  */
 
 #include "can_cooperation/commands/set_interior_vehicle_data_request.h"
+#include "can_cooperation/validators/set_interior_vehicle_data_request_validator.h"
+#include "can_cooperation/validators/struct_validators/module_data_validator.h"
+#include "can_cooperation/can_module_constants.h"
+#include "can_cooperation/message_helper.h"
 #include "functional_module/function_ids.h"
 #include "json/json.h"
-#include "can_cooperation/can_module_constants.h"
 
 namespace can_cooperation {
 
 namespace commands {
+
+using namespace json_keys;
+using namespace message_params;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "SetInteriorVehicleDataRequest")
 
@@ -76,6 +82,26 @@ void SetInteriorVehicleDataRequest::OnEvent(
 
     bool success = ParseResultCode(value, result_code, info);
 
+    // TOD(VS): Create SetInteriorVehicleDataResponseValidator
+    validators::ValidationResult validation_result = validators::SUCCESS;
+
+    if (success) {
+      if (value[kResult].isMember(kModuleData)) {
+        validation_result =
+            validators::ModuleDataValidator::instance()->Validate(
+                                              value[kResult][kModuleData],
+                                              response_params_[kModuleData]);
+      } else {
+        validation_result = validators::INVALID_DATA;
+      }
+
+      if (validators::SUCCESS != validation_result) {
+        success = false;
+        info = "Response validation failed";
+        result_code = result_codes::kInvalidData;
+      }
+    }
+
     SendResponse(success, result_code.c_str(), info);
   } else {
     LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
@@ -83,6 +109,22 @@ void SetInteriorVehicleDataRequest::OnEvent(
 }
 
 bool SetInteriorVehicleDataRequest::Validate() {
+
+  Json::Value json;
+
+  json = MessageHelper::StringToValue(message_->json_message());
+  Json::Value outgoing_json;
+
+  if (validators::ValidationResult::SUCCESS !=
+    validators::SetInteriorVehicleDataRequestValidator::instance()->
+                                                Validate(json, outgoing_json)) {
+    LOG4CXX_INFO(logger_,
+                 "SetInteriorVehicleDataRequest validation failed!");
+    SendResponse(false, result_codes::kInvalidData,
+                 "Mobile request validation failed!");
+    return false;
+  }
+
   return true;
 }
 

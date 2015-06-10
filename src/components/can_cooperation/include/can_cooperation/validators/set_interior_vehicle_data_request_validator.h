@@ -30,54 +30,43 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "can_cooperation/validators/get_interior_vehicle_data_capabilities_request_validator.h"
-#include "can_cooperation/validators/struct_validators/interior_zone_validator.h"
-#include "can_cooperation/can_module_constants.h"
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_SET_INTERIOR_VEHICLE_DATA_REQUEST_VALIDATOR_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_SET_INTERIOR_VEHICLE_DATA_REQUEST_VALIDATOR_H_
+
+#include "can_cooperation/validators/validator.h"
+#include "utils/singleton.h"
 
 namespace can_cooperation {
 
 namespace validators {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "GetInteriorVehicleDataCapabilitiesRequestValidator")
+/**
+ * @brief SetInteriorVehicleDataRequestValidator class
+ */
+class SetInteriorVehicleDataRequestValidator : public Validator,
+   public utils::Singleton<SetInteriorVehicleDataRequestValidator> {
+ public:
 
-using namespace message_params;
+  /**
+   * @brief Validate json with message params
+   *
+   * @param json_string string with message params(fake params will be cut off)
+   * @param outgoing_json outgoing json
+   *
+   * @return validation result
+   */
+  ValidationResult Validate(const Json::Value& json,
+                            Json::Value& outgoing_json);
 
-GetInteriorVehicleDataCapabilitiesRequestValidator::
-GetInteriorVehicleDataCapabilitiesRequestValidator() {
-  // name="moduleType"
-  module_type_[ValidationParams::TYPE] = ValueType::ENUM;
-  module_type_[ValidationParams::ENUM_TYPE] = EnumType::MODULE_TYPE;
-  module_type_[ValidationParams::ARRAY] = 1;
-  module_type_[ValidationParams::MANDATORY] = 1;
-  module_type_[ValidationParams::MIN_SIZE] = 1;
-  module_type_[ValidationParams::MAX_SIZE] = 2;
-
-  validation_scope_map_[kModuleTypes] = &module_type_;
+ private:
+  DISALLOW_COPY_AND_ASSIGN(SetInteriorVehicleDataRequestValidator);
+  FRIEND_BASE_SINGLETON_CLASS(SetInteriorVehicleDataRequestValidator);
+  SetInteriorVehicleDataRequestValidator();
+  ~SetInteriorVehicleDataRequestValidator() {};
 };
-
-ValidationResult GetInteriorVehicleDataCapabilitiesRequestValidator::Validate(
-                                                   const Json::Value& json,
-                                                   Json::Value& outgoing_json) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  ValidationResult result = ValidateSimpleValues(json, outgoing_json);
-
-  if (result != ValidationResult::SUCCESS) {
-    return result;
-  }
-
-  if (json.isMember(kZone)) {
-    result = InteriorZoneValidator::instance()->Validate(json[kZone],
-                                                    outgoing_json[kZone]);
-  } else {
-    result = ValidationResult::INVALID_DATA;
-    LOG4CXX_ERROR(logger_, "Mandatory param " <<kZone <<" missing!" );
-  }
-
-  return result;
-}
 
 }  // namespace valdiators
 
 }  // namespace can_cooperation
 
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_SET_INTERIOR_VEHICLE_DATA_REQUEST_VALIDATOR_H_

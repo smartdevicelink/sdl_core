@@ -84,13 +84,16 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
 
     bool success = ParseResultCode(value, result_code, info);
 
+
+    // TOD(VS): Create GetInteriorVehicleDataCapabiliesResponseValidator
     validators::ValidationResult validation_result = validators::SUCCESS;
 
     if (success) {
       if (value[kResult].isMember(kInteriorVehicleDataCapabilities)) {
         validation_result =
             validators::ModuleDescriptionValidator::instance()->Validate(
-                                              value[kResult], response_params_);
+                            value[kResult][kInteriorVehicleDataCapabilities],
+                            response_params_[kInteriorVehicleDataCapabilities]);
       } else {
         validation_result = validators::INVALID_DATA;
       }
