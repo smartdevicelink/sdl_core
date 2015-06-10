@@ -53,7 +53,7 @@ ValidationResult SetInteriorVehicleDataRequestValidator::Validate(
 
   ValidationResult result;
 
-  if (json.isMember(kZone)) {
+  if (json.isMember(kModuleData)) {
     result = ModuleDataValidator::instance()->
         Validate(json[kModuleData], outgoing_json[kModuleData]);
   } else {

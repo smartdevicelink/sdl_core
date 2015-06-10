@@ -30,54 +30,41 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "can_cooperation/commands/on_interior_vehicle_data_notification.h"
-#include "can_cooperation/validators/on_interior_vehicle_data_notification_validator.h"
-#include "json/json.h"
-#include "can_cooperation/can_module_constants.h"
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_VALIDATOR_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_VALIDATOR_H_
+
+#include "can_cooperation/validators/validator.h"
+#include "utils/singleton.h"
 
 namespace can_cooperation {
 
-namespace commands {
+namespace validators {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "OnInteriorVehicleDataNotification")
+/**
+ * @brief OnInteriorVehicleDataNotificationValidator class
+ */
+class OnInteriorVehicleDataNotificationValidator : public Validator,
+                  public utils::Singleton<OnInteriorVehicleDataNotificationValidator> {
+ public:
 
-OnInteriorVehicleDataNotification::OnInteriorVehicleDataNotification(
-  const application_manager::MessagePtr& message)
-  : BaseCommandNotification(message) {
-}
+  /**
+   * @brief Validate json with message params
+   *
+   * @param json_string string with message params(fake params will be cut off)
+   *
+   * @return validation result
+   */
+  ValidationResult Validate(std::string& json_string);
 
-OnInteriorVehicleDataNotification::~OnInteriorVehicleDataNotification() {
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnInteriorVehicleDataNotificationValidator);
+  FRIEND_BASE_SINGLETON_CLASS(OnInteriorVehicleDataNotificationValidator);
+  OnInteriorVehicleDataNotificationValidator();
+  ~OnInteriorVehicleDataNotificationValidator() {};
+};
 
-void OnInteriorVehicleDataNotification::Execute() {
-  LOG4CXX_AUTO_TRACE(logger_);
-}
-
-bool OnInteriorVehicleDataNotification::Validate() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  application_manager::MessagePtr msg = message();
-  std::string json = msg->json_message();
-
-  if (validators::ValidationResult::SUCCESS ==
-      validators::OnInteriorVehicleDataNotificationValidator::instance()->
-      Validate(json)) {
-    msg->set_json_message(json);
-  } else {
-    LOG4CXX_INFO(logger_, "HMI notification validation failed!");
-    return false;
-  }
-
-  return true;
-}
-
-std::string OnInteriorVehicleDataNotification::ModuleType(
-    const Json::Value& message) {
-  // TODO(KKolodiy): Now notification from CAN(HMI) doesn't have moduleData
-  // it contains list moduleType, moduleZone, radioControlData and
-  // climateControlData
-  return message.get(message_params::kModuleType, Json::Value("")).asString();
-}
-
-}  // namespace commands
+}  // namespace valdiators
 
 }  // namespace can_cooperation
+
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_VALIDATOR_H_

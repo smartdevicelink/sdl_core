@@ -30,54 +30,48 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "can_cooperation/commands/on_interior_vehicle_data_notification.h"
 #include "can_cooperation/validators/on_interior_vehicle_data_notification_validator.h"
-#include "json/json.h"
+#include "can_cooperation/validators/struct_validators/module_data_validator.h"
 #include "can_cooperation/can_module_constants.h"
+#include "can_cooperation/message_helper.h"
 
 namespace can_cooperation {
 
-namespace commands {
+namespace validators {
+CREATE_LOGGERPTR_GLOBAL(logger_, "OnInteriorVehicleDataNotificationValidator")
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "OnInteriorVehicleDataNotification")
+using namespace message_params;
+using namespace json_keys;
 
-OnInteriorVehicleDataNotification::OnInteriorVehicleDataNotification(
-  const application_manager::MessagePtr& message)
-  : BaseCommandNotification(message) {
+OnInteriorVehicleDataNotificationValidator::OnInteriorVehicleDataNotificationValidator() {
 }
 
-OnInteriorVehicleDataNotification::~OnInteriorVehicleDataNotification() {
-}
+ValidationResult OnInteriorVehicleDataNotificationValidator::Validate(
+    std::string& json_string) {
+  Json::Value json;
 
-void OnInteriorVehicleDataNotification::Execute() {
-  LOG4CXX_AUTO_TRACE(logger_);
-}
+  json = MessageHelper::StringToValue(json_string);
 
-bool OnInteriorVehicleDataNotification::Validate() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  application_manager::MessagePtr msg = message();
-  std::string json = msg->json_message();
+  Json::Value outgoing_json;
 
-  if (validators::ValidationResult::SUCCESS ==
-      validators::OnInteriorVehicleDataNotificationValidator::instance()->
-      Validate(json)) {
-    msg->set_json_message(json);
+  ValidationResult result;
+
+  if (json.isMember(kModuleData)) {
+    result = ModuleDataValidator::instance()->
+        Validate(json[kModuleData], outgoing_json[kModuleData]);
   } else {
-    LOG4CXX_INFO(logger_, "HMI notification validation failed!");
-    return false;
+    result = ValidationResult::INVALID_DATA;
+    LOG4CXX_ERROR(logger_, "Mandatory param " <<kModuleData <<" missing!" );
   }
 
-  return true;
+  if  (ValidationResult::SUCCESS == result) {
+    json_string = MessageHelper::ValueToString(outgoing_json);
+  }
+
+  return result;
 }
 
-std::string OnInteriorVehicleDataNotification::ModuleType(
-    const Json::Value& message) {
-  // TODO(KKolodiy): Now notification from CAN(HMI) doesn't have moduleData
-  // it contains list moduleType, moduleZone, radioControlData and
-  // climateControlData
-  return message.get(message_params::kModuleType, Json::Value("")).asString();
-}
-
-}  // namespace commands
+}  // namespace valdiators
 
 }  // namespace can_cooperation
+
