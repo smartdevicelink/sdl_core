@@ -49,19 +49,17 @@ void PolicyHelper::SetPrimaryDevice(const uint32_t device_handle,
   std::vector<application_manager::ApplicationSharedPtr> applications =
     CANModule::instance()->service()->GetApplications(module_id);
 
-  for(size_t i = 0; i < applications.size(); ++i) {
+  for (size_t i = 0; i < applications.size(); ++i) {
     CANAppExtensionPtr extension =
       application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
         applications[i]->QueryInterface(module_id));
     DCHECK(extension);
     if (applications[i]->device() == device_handle) {
       extension->set_is_on_driver_device(true);
-      printf("SET DEVICE PRIMARY FOR %d\n", applications[i]->app_id());
     } else {
       extension->set_is_on_driver_device(false);
-      printf("SET DEVICE NOT PRIMARY FOR %d\n", applications[i]->app_id());
     }
   }
 }
 
-}  //  namespace can_cooperation
+}  // namespace can_cooperation

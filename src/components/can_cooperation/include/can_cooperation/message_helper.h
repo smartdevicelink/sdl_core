@@ -40,7 +40,6 @@
 #include "utils/macro.h"
 #include "json/json.h"
 #include "functional_module/function_ids.h"
-#include "application_manager/application.h"
 
 namespace can_cooperation {
 

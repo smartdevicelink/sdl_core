@@ -267,7 +267,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
             LOG4CXX_ERROR(logger_, "Invalid OnPrimaryDevice notification");
           }
         }
-        break;
+          return ProcessResult::PROCESSED;
         } else if (functional_modules::hmi_api::on_app_deactivated ==
         function_name) {
           return ProcessOnAppDeactivation(value);

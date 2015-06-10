@@ -32,7 +32,6 @@
 
 #include <string>
 #include "can_cooperation/message_helper.h"
-#include "can_cooperation/can_module_constants.h"
 
 namespace can_cooperation {
 using functional_modules::MobileFunctionID;
