@@ -954,37 +954,45 @@ TypeAccess PolicyManagerImpl::CheckAccess(
     const RemoteControlParams& params, const SeatLocation& zone) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Module type: " << module);
+
   policy_table::ModuleType module_type;
   bool is_valid = EnumFromJsonString(module, &module_type);
-  if (is_valid && CheckModulePermissions(app_id, module_type, params, zone)) {
-    return CheckDriverConsent(app_id, module_type);
+  if (is_valid && access_remote_->CheckModuleType(app_id, module_type)) {
+    std::string dev_id = GetCurrentDeviceId(app_id);
+    Subject who = {dev_id, app_id};
+    Object what = {module_type};
+    if (access_remote_->IsPrimaryDevice(who.dev_id)) {
+      return TryOccupy(who, what);
+    } else {
+      return CheckDriverConsent(who, what);
+    }
   }
   return TypeAccess::kDisallowed;
 }
 
-bool PolicyManagerImpl::CheckModulePermissions(
-    const PTString& app_id, policy_table::ModuleType module,
-    const RemoteControlParams& params, const SeatLocation& zone) {
+TypeAccess PolicyManagerImpl::TryOccupy(const Subject& who,
+                                        const Object& what) {
   LOG4CXX_AUTO_TRACE(logger_);
-  return access_remote_->CheckModuleType(app_id, module)
-      && access_remote_->CheckParameters(/* module, zone, params */);
+  TypeAccess access = access_remote_->Check(who, what);
+  // if nobody controls this module
+  if (access == TypeAccess::kManual) {
+    // driver's application occupies this module
+    access_remote_->Allow(who, what);
+    return TypeAccess::kAllowed;
+  }
+  return access;
 }
 
 TypeAccess PolicyManagerImpl::CheckDriverConsent(
-    const PTString& app_id, policy_table::ModuleType module) {
+    const Subject& who, const Object& what) {
   LOG4CXX_AUTO_TRACE(logger_);
-  TypeAccess access = TypeAccess::kDisallowed;
-  std::string dev_id = GetCurrentDeviceId(app_id);
-  Subject who = {dev_id, app_id};
-  Object what = {module};
-  if (access_remote_->IsPrimaryDevice(dev_id)) {
-    access = access_remote_->Check(who, what);
-    if (access == TypeAccess::kManual) {
-      access_remote_->Allow(who, what);
-      access = TypeAccess::kAllowed;
-    }
-  } else if (access_remote_->IsEnabled()) {
-    access = access_remote_->Check(who, what);
+  if (!access_remote_->IsEnabled()) {
+    return TypeAccess::kDisallowed;
+  }
+
+  TypeAccess access = access_remote_->CheckParameters();
+  if (access == TypeAccess::kManual) {
+    return access_remote_->Check(who, what);
   }
   return access;
 }

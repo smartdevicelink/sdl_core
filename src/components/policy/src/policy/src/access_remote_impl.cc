@@ -173,8 +173,8 @@ bool AccessRemoteImpl::CheckModuleType(const PTString& app_id,
   return std::find(modules.begin(), modules.end(), module) != modules.end();
 }
 
-bool AccessRemoteImpl::CheckParameters(/* module, zone, params */) const {
-  return true;
+TypeAccess AccessRemoteImpl::CheckParameters(/* module, zone, params */) const {
+  return TypeAccess::kManual;
 }
 
 void AccessRemoteImpl::Allow(const Subject& who, const Object& what) {

@@ -286,12 +286,8 @@ private:
     UpdateStatusManager update_status_manager_;
     CacheManagerInterfaceSPtr cache_;
 #ifdef SDL_REMOTE_CONTROL
-    bool CheckModulePermissions(const PTString& app_id,
-                                policy_table::ModuleType module,
-                                const RemoteControlParams& params,
-                                const SeatLocation& zone);
-    TypeAccess CheckDriverConsent(const PTString& app_id,
-                                  policy_table::ModuleType module);
+    TypeAccess TryOccupy(const Subject& who, const Object& what);
+    TypeAccess CheckDriverConsent(const Subject& who, const Object& what);
 
     utils::SharedPtr<AccessRemote> access_remote_;
 #endif  // SDL_REMOTE_CONTROL

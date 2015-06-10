@@ -173,7 +173,7 @@ class AccessRemote {
    * Checks permissions for parameters
    * @return true if allowed
    */
-  virtual bool CheckParameters(/* module, zone, params */) const = 0;
+  virtual TypeAccess CheckParameters(/* module, zone, params */) const = 0;
 
   /**
    * Sets HMI types if application has default policy permissions

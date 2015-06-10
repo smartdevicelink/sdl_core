@@ -394,7 +394,7 @@ TEST_F(PolicyManagerImplTest, CheckAccess_PrimaryDevice) {
   EXPECT_CALL(*access_remote,
               CheckModuleType("12345", policy_table::MT_CLIMATE)).
       WillOnce(Return(true));
-  EXPECT_CALL(*access_remote, CheckParameters()).WillOnce(Return(true));
+  EXPECT_CALL(*access_remote, CheckParameters()).WillOnce(Return(kAllowed));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(true));
   EXPECT_CALL(*access_remote, Check(who, what)).
       WillOnce(Return(TypeAccess::kManual));
@@ -410,7 +410,7 @@ TEST_F(PolicyManagerImplTest, CheckAccess_DisabledRremoteControl) {
   EXPECT_CALL(*access_remote,
               CheckModuleType("12345", policy_table::MT_RADIO)).
       WillOnce(Return(true));
-  EXPECT_CALL(*access_remote, CheckParameters()).WillOnce(Return(true));
+  EXPECT_CALL(*access_remote, CheckParameters()).WillOnce(Return(kAllowed));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(false));
   EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(false));
 
@@ -427,7 +427,7 @@ TEST_F(PolicyManagerImplTest, CheckAccess_Result) {
   EXPECT_CALL(*access_remote,
               CheckModuleType("12345", policy_table::MT_RADIO)).
       WillOnce(Return(true));
-  EXPECT_CALL(*access_remote, CheckParameters()).WillOnce(Return(true));
+  EXPECT_CALL(*access_remote, CheckParameters()).WillOnce(Return(kAllowed));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(false));
   EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(true));
   EXPECT_CALL(*access_remote, Check(who, what)).
@@ -448,7 +448,7 @@ TEST_F(PolicyManagerImplTest, TwoDifferentDevice) {
               CheckModuleType("12345", policy_table::MT_RADIO)).
       WillOnce(Return(true));
   EXPECT_CALL(*access_remote, CheckParameters()).Times(2).
-      WillRepeatedly(Return(true));
+      WillRepeatedly(Return(kAllowed));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(true));
   EXPECT_CALL(*access_remote, Check(who1, what)).
       WillOnce(Return(TypeAccess::kManual));
