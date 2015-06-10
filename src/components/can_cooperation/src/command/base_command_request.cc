@@ -328,7 +328,8 @@ bool BaseCommandRequest::CheckAccess() {
   LOG4CXX_DEBUG(logger_, "Request: " << message_->json_message());
   reader.parse(message_->json_message(), value);
   application_manager::TypeAccess access = service_->CheckAccess(
-      app_->app_id(), ModuleType(value), params, zone);
+      app_->app_id(), zone, ModuleType(value), message_->function_name(),
+      params);
 
   switch (access) {
     case application_manager::kAllowed:

@@ -81,14 +81,15 @@ mobile_apis::Result::eType CoreService::CheckPolicyPermissions(MessagePtr msg) {
 }
 
 TypeAccess CoreService::CheckAccess(const ApplicationId& app_id,
+                                    const SeatLocation& zone,
                                     const std::string& module,
-                                    const std::vector<std::string>& params,
-                                    const SeatLocation& zone) {
+                                    const std::string& rpc,
+                                    const std::vector<std::string>& params) {
 #ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
     return policy::PolicyHandler::instance()->CheckAccess(
-        app->mobile_app_id(), module, params, zone);
+        app->mobile_app_id(), zone, module, "", params);
   }
 #endif  // SDL_REMOTE_CONTROL
   return kNone;

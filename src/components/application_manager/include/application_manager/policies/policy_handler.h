@@ -98,14 +98,15 @@ class PolicyHandler :
   /**
    * Checks access to equipment of vehicle for application by RPC
    * @param app_id policy id application
-   * @param module type
-   * @param params parameters list
    * @param zone requested zone control
+   * @param module type
+   * @param rpc name of rpc
+   * @param params parameters list
    */
   application_manager::TypeAccess CheckAccess(
-      const PTString& app_id, const PTString& module,
-      const std::vector<PTString>& params,
-      const application_manager::SeatLocation& zone);
+      const PTString& app_id, const application_manager::SeatLocation& zone,
+      const PTString& module, const std::string& rpc,
+      const std::vector<PTString>& params);
 
   /**
    * Sets access to equipment of vehicle for application by RPC

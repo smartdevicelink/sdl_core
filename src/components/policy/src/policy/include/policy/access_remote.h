@@ -199,8 +199,8 @@ class AccessRemote {
    * manual if need to ask driver
    */
   virtual TypeAccess CheckParameters(
-      policy_table::ModuleType module, const SeatLocation& zone,
-      const RemoteControlParams& params) const = 0;
+      policy_table::ModuleType module, const SeatLocation& seat,
+      const std::string& rpc, const RemoteControlParams& params) const = 0;
 
   /**
    * Sets HMI types if application has default policy permissions

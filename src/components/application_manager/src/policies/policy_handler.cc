@@ -1339,13 +1339,13 @@ application_manager::TypeAccess ConvertTypeAccess(
 }  // namespace
 
 application_manager::TypeAccess PolicyHandler::CheckAccess(
-    const PTString& app_id, const PTString& module,
-    const std::vector<PTString>& params,
-    const application_manager::SeatLocation& zone) {
+    const PTString& app_id, const application_manager::SeatLocation& zone,
+    const PTString& module, const std::string& rpc,
+    const std::vector<PTString>& params) {
   POLICY_LIB_CHECK(application_manager::TypeAccess::kNone);
   policy::SeatLocation policy_zone {zone.col, zone.row, zone.level};
-  policy::TypeAccess access = policy_manager_->CheckAccess(app_id, module,
-                                                           params, policy_zone);
+  policy::TypeAccess access = policy_manager_->CheckAccess(app_id, policy_zone,
+                                                           module, rpc, params);
   return ConvertTypeAccess(access);
 }
 

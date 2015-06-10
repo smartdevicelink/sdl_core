@@ -143,7 +143,7 @@ bool BaseCommandNotification::CheckPolicy(
   LOG4CXX_DEBUG(logger_, "Notification: " << message->json_message());
   reader.parse(message->json_message(), value);
   application_manager::TypeAccess access = service_->CheckAccess(
-      app->app_id(), ModuleType(value), params, zone);
+      app->app_id(), zone, ModuleType(value), message->function_name(), params);
 
   return permission == mobile_apis::Result::eType::SUCCESS
       && access == application_manager::TypeAccess::kAllowed;

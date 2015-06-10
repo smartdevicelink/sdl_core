@@ -950,8 +950,8 @@ void PolicyManagerImpl::set_cache_manager(
 
 #ifdef SDL_REMOTE_CONTROL
 TypeAccess PolicyManagerImpl::CheckAccess(
-    const PTString& app_id, const PTString& module,
-    const RemoteControlParams& params, const SeatLocation& zone) {
+    const PTString& app_id, const SeatLocation& zone, const PTString& module,
+    const PTString& rpc, const RemoteControlParams& params) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Module type: " << module);
 
@@ -964,7 +964,7 @@ TypeAccess PolicyManagerImpl::CheckAccess(
     if (access_remote_->IsPrimaryDevice(who.dev_id)) {
       return TryOccupy(who, what);
     } else {
-      return CheckDriverConsent(who, what, zone, params);
+      return CheckDriverConsent(who, what, zone, rpc, params);
     }
   }
   return TypeAccess::kDisallowed;
@@ -985,13 +985,14 @@ TypeAccess PolicyManagerImpl::TryOccupy(const Subject& who,
 
 TypeAccess PolicyManagerImpl::CheckDriverConsent(
     const Subject& who, const Object& what, const SeatLocation& zone,
-    const RemoteControlParams& params) {
+    const std::string& rpc, const RemoteControlParams& params) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!access_remote_->IsEnabled()) {
     return TypeAccess::kDisallowed;
   }
 
-  TypeAccess access = access_remote_->CheckParameters(what.module, zone, params);
+  TypeAccess access = access_remote_->CheckParameters(what.module, zone,
+                                                      rpc, params);
   if (access == TypeAccess::kManual) {
     return access_remote_->Check(who, what);
   }

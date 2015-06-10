@@ -394,7 +394,7 @@ TEST_F(PolicyManagerImplTest, CheckAccess_PrimaryDevice) {
   EXPECT_CALL(*access_remote,
               CheckModuleType("12345", policy_table::MT_CLIMATE)).
       WillOnce(Return(true));
-  EXPECT_CALL(*access_remote, CheckParameters(_,_,_)).WillOnce(Return(kAllowed));
+  EXPECT_CALL(*access_remote, CheckParameters(_,_,_,_)).WillOnce(Return(kAllowed));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(true));
   EXPECT_CALL(*access_remote, Check(who, what)).
       WillOnce(Return(TypeAccess::kManual));
@@ -402,7 +402,7 @@ TEST_F(PolicyManagerImplTest, CheckAccess_PrimaryDevice) {
 
   SeatLocation zone {0,0,0};
   EXPECT_EQ(TypeAccess::kAllowed,
-            manager->CheckAccess("12345", "CLIMATE", RemoteControlParams(), zone));
+            manager->CheckAccess("12345", zone, "CLIMATE", "", RemoteControlParams()));
 }
 
 TEST_F(PolicyManagerImplTest, CheckAccess_DisabledRremoteControl) {
@@ -411,13 +411,13 @@ TEST_F(PolicyManagerImplTest, CheckAccess_DisabledRremoteControl) {
   EXPECT_CALL(*access_remote,
               CheckModuleType("12345", policy_table::MT_RADIO)).
       WillOnce(Return(true));
-  EXPECT_CALL(*access_remote, CheckParameters(_,_,_)).WillOnce(Return(kAllowed));
+  EXPECT_CALL(*access_remote, CheckParameters(_,_,_,_)).WillOnce(Return(kAllowed));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(false));
   EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(false));
 
   SeatLocation zone {0,0,0};
   EXPECT_EQ(TypeAccess::kDisallowed,
-            manager->CheckAccess("12345", "RADIO", RemoteControlParams(), zone));
+            manager->CheckAccess("12345", zone, "RADIO", "", RemoteControlParams()));
 }
 
 TEST_F(PolicyManagerImplTest, CheckAccess_Result) {
@@ -429,7 +429,7 @@ TEST_F(PolicyManagerImplTest, CheckAccess_Result) {
   EXPECT_CALL(*access_remote,
               CheckModuleType("12345", policy_table::MT_RADIO)).
       WillOnce(Return(true));
-  EXPECT_CALL(*access_remote, CheckParameters(_,_,_)).WillOnce(Return(kAllowed));
+  EXPECT_CALL(*access_remote, CheckParameters(_,_,_,_)).WillOnce(Return(kAllowed));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(false));
   EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(true));
   EXPECT_CALL(*access_remote, Check(who, what)).
@@ -437,7 +437,7 @@ TEST_F(PolicyManagerImplTest, CheckAccess_Result) {
 
   SeatLocation zone {0,0,0};
   EXPECT_EQ(TypeAccess::kAllowed,
-            manager->CheckAccess("12345", "RADIO", RemoteControlParams(), zone));
+            manager->CheckAccess("12345", zone, "RADIO", "", RemoteControlParams()));
 }
 
 TEST_F(PolicyManagerImplTest, TwoDifferentDevice) {
@@ -450,7 +450,7 @@ TEST_F(PolicyManagerImplTest, TwoDifferentDevice) {
   EXPECT_CALL(*access_remote,
               CheckModuleType("12345", policy_table::MT_RADIO)).
       WillOnce(Return(true));
-  EXPECT_CALL(*access_remote, CheckParameters(_,_,_)).Times(2).
+  EXPECT_CALL(*access_remote, CheckParameters(_,_,_,_)).Times(2).
       WillRepeatedly(Return(kAllowed));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(true));
   EXPECT_CALL(*access_remote, Check(who1, what)).
@@ -469,9 +469,9 @@ TEST_F(PolicyManagerImplTest, TwoDifferentDevice) {
 
   SeatLocation zone {0,0,0};
   EXPECT_EQ(TypeAccess::kAllowed,
-            manager->CheckAccess("12345", "RADIO", RemoteControlParams(), zone));
+            manager->CheckAccess("12345", zone, "RADIO", "", RemoteControlParams()));
   EXPECT_EQ(TypeAccess::kDisallowed,
-              manager->CheckAccess("123456", "RADIO", RemoteControlParams(), zone));
+              manager->CheckAccess("123456", zone, "RADIO", "", RemoteControlParams()));
 }
 #endif  // SDL_REMOTE_CONTROL
 

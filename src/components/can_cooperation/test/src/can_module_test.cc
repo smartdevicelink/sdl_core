@@ -111,7 +111,7 @@ TEST_F(CanModuleTest, ProcessMessagePass) {
       .WillOnce(Return(app_ptr));
   EXPECT_CALL(*mock_service, CheckPolicyPermissions(_)).Times(1)
       .WillOnce(Return(mobile_apis::Result::eType::SUCCESS));
-  EXPECT_CALL(*mock_service, CheckAccess(1, "OnInteriorVehicleData", _, _)).Times(1)
+  EXPECT_CALL(*mock_service, CheckAccess(1, _, _, "OnInteriorVehicleData", _)).Times(1)
       .WillOnce(Return(application_manager::kAllowed));
   EXPECT_CALL(*mock_service, SendMessageToMobile(_)).Times(1);
 

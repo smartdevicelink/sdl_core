@@ -71,16 +71,18 @@ class CoreService : public Service {
   /**
    * Checks access to requested equipment of vehicle
    * @param app_id id of application
-   * @param module type
-   * @param params parameters list
    * @param seat seat of owner's mobile device
+   * @param module type
+   * @param rpc name of rpc
+   * @param params parameters list
    * @return return allowed if access exist,
    * manual if need to send question to driver otherwise disallowed
    */
   virtual TypeAccess CheckAccess(const ApplicationId& app_id,
+                                 const SeatLocation& zone,
                                  const std::string& module,
-                                 const std::vector<std::string>& params,
-                                 const SeatLocation& zone);
+                                 const std::string& rpc,
+                                 const std::vector<std::string>& params);
 
   /**
    * Sets access to functional group which contains given RPC for application
