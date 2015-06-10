@@ -242,7 +242,7 @@ class Connection {
 
   /**
    * @brief Sets heart beat timeout
-   * @param timeout in seconds
+   * @param timeout in milliseconds
    */
   void SetHeartBeatTimeout(int32_t timeout, uint8_t session_id);
 
