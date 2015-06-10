@@ -452,6 +452,18 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @param enabled true if remote control is turned on
      */
     virtual void SetRemoteControl(bool enabled) = 0;
+
+    /**
+     * Handles changed primary device event for a application
+     * @param application_id ID application
+     */
+    virtual void OnChangedPrimaryDevice(const std::string& application_id) = 0;
+
+    /**
+     * Handles changed remote control event for a application
+     * @param application_id ID application
+     */
+    virtual void OnChangedRemoteControl(const std::string& application_id) = 0;
 #endif  // SDL_REMOTE_CONTROL
 
   protected:

@@ -80,6 +80,8 @@ class MockPolicyListener : public PolicyListener {
   MOCK_METHOD0(CanUpdate,
                bool());
   MOCK_METHOD1(OnCertificateUpdated, void (const std::string&));
+  MOCK_METHOD2(OnUpdateHMILevel, void(const std::string& policy_app_id,
+                                      const std::string& hmi_level));
 };
 
 }  // namespace policy

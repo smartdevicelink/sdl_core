@@ -39,6 +39,10 @@
 #include "can_cooperation/can_app_extension.h"
 #include "utils/logger.h"
 
+namespace Json {
+class Value;
+}
+
 namespace can_cooperation {
 
 namespace commands {
@@ -83,6 +87,8 @@ class BaseCommandNotification : public Command {
    */
   // TODO(KKolodiy): need rename to Run
   virtual void Execute() = 0;
+
+  virtual std::string ModuleType(const Json::Value& message);
 
  private:
   void NotifyApplications();

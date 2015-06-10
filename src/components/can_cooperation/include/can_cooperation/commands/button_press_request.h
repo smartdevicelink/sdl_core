@@ -69,6 +69,9 @@ class ButtonPressRequest : public BaseCommandRequest {
    * @brief ButtonPressRequest class destructor
    */
   virtual ~ButtonPressRequest();
+
+ protected:
+  virtual std::string ModuleType(const Json::Value& message);
 };
 
 }  // namespace commands

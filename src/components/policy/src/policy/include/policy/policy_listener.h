@@ -54,6 +54,8 @@ class PolicyListener {
   virtual void OnSystemInfoUpdateRequired() = 0;
   virtual std::string GetAppName(const std::string& policy_app_id) = 0;
   virtual void OnUpdateHMIAppType(std::map<std::string, StringArray> app_hmi_types) = 0;
+  virtual void OnUpdateHMILevel(const std::string& policy_app_id,
+                                const std::string& hmi_level) = 0;
 
     /**
    * @brief CanUpdate allows to find active application
