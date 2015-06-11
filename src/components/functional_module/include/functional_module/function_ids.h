@@ -64,8 +64,8 @@ namespace hmi_api {
   const char button_press[]              = "Buttons.ButtonPress";
 
   const char grant_access[]              = "RC.GrantAccess";
-  const char on_reverse_apps_allowing[]  = "RC.OnReverseAppsAllowing";
-  const char on_primary_device[]         = "RC.OnPrimaryDevice";
+  const char on_reverse_apps_allowing[]  = "VehicleInfo.OnReverseAppsAllowing";
+  const char on_primary_device[]         = "VehicleInfo.OnPrimaryDevice";
   const char on_app_deactivated[]        = "BasicCommunication.OnAppDeactivated";
   const char sdl_activate_app[]          = "SDL.ActivateApp";
 }
