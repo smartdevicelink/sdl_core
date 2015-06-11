@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -120,6 +120,15 @@ void HMIMessageHandlerImpl::Handle(const impl::MessageToHmi message) {
       ++it) {
     (*it)->SendMessageToHMI(message);
   }
+}
+
+void  HMIMessageHandlerImpl::SubscribeToHMINotification(const std::string& hmi_notification) {
+  for (std::set<HMIMessageAdapter*>::iterator it =
+        message_adapters_.begin();
+        it != message_adapters_.end();
+        ++it) {
+      (*it)->SubscribeToHMINotification(hmi_notification);
+    }
 }
 
 

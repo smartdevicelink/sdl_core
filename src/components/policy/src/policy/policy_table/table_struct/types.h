@@ -10,6 +10,7 @@ namespace rpc {
 namespace policy_table_interface_base {
 struct AppLevel;
 struct ApplicationParams;
+struct ConsentRecords;
 struct DeviceParams;
 struct MessageLanguages;
 struct MessageString;
@@ -25,6 +26,8 @@ namespace policy_table_interface_base {
 typedef Array< String<1, 255>, 0, 255 > Strings;
 
 typedef Array< Enum<AppHMIType>, 0, 255 > AppHMITypes;
+
+typedef Array< Enum<ModuleType>, 0, 255 > ModuleTypes;
 
 typedef Array< Enum<HmiLevel>, 0, 4 > HmiLevels;
 
@@ -48,6 +51,8 @@ typedef Map< MessageLanguages, 0, 255 > Messages;
 
 typedef Map< AppLevel, 0, 255 > AppLevels;
 
+typedef Map< ConsentRecords, 0, 1000 > UserConsentRecords;
+
 typedef Map< Stringifyable < Nullable< ApplicationParams > >, 1, 1000 > ApplicationPolicies;
 
 typedef Map< Rpcs, 1, 255 > FunctionalGroupings;
@@ -57,11 +62,14 @@ typedef Map< DeviceParams, 0, 255 > DeviceData;
 struct ApplicationParams : CompositeType {
   public:
     Strings groups;
+    Optional< Strings > groups_primaryRC;
+    Optional< Strings > groups_nonPrimaryRC;
     Optional< Strings > nicknames;
+    mutable Optional< ModuleTypes > moduleType;
     Optional< AppHMITypes > AppHMIType;
     Enum<Priority> priority;
-    Optional< Integer<uint16_t, 1, 65225> > memory_kb;
-    Optional< Integer<uint16_t, 1, 65225> > heart_beat_timeout_ms;
+    Optional< Integer<uint16_t, 0, 65225> > memory_kb;
+    Optional< Integer<uint16_t, 0, 65225> > heart_beat_timeout_ms;
     Optional< String<0, 255> > certificate;
   public:
     ApplicationParams();
@@ -76,6 +84,7 @@ struct ApplicationParams : CompositeType {
     virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
+    bool ValidateModuleTypes() const;
 };
 
 struct RpcParameters : CompositeType {
@@ -130,6 +139,9 @@ struct ModuleConfig : CompositeType {
     Optional< String<1, 100> > vehicle_make;
     Optional< String<1, 100> > vehicle_model;
     Optional< String<4, 4> > vehicle_year;
+    Optional< String<0, 65535> > certificate;
+    Optional< Boolean > user_consent_passengersRC;
+    Optional< Boolean > country_consent_passengersRC;
   public:
     ModuleConfig();
     ModuleConfig(uint8_t exchange_after_x_ignition_cycles, int64_t exchange_after_x_kilometers, uint8_t exchange_after_x_days, uint16_t timeout_after_x_seconds, const SecondsBetweenRetries& seconds_between_retries, const ServiceEndpoints& endpoints, const NumberOfNotificationsPerMinute& notifications_per_minute_by_priority);
@@ -250,8 +262,28 @@ struct UsageAndErrorCounts : CompositeType {
     bool Validate() const;
 };
 
+struct ConsentRecords : CompositeType {
+  public:
+    Optional< Boolean > is_consented;
+    Optional< Enum<Input> > input;
+    Optional< String<1, 255> > time_stamp;
+  public:
+    ConsentRecords();
+    ~ConsentRecords();
+    explicit ConsentRecords(const Json::Value* value__);
+    Json::Value ToJsonValue() const;
+    bool is_valid() const;
+    bool is_initialized() const;
+    bool struct_empty() const;
+    void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
+  private:
+    bool Validate() const;
+};
+
 struct DeviceParams : CompositeType {
   public:
+    Optional< UserConsentRecords > user_consent_records;
   public:
     DeviceParams();
     ~DeviceParams();
@@ -261,6 +293,7 @@ struct DeviceParams : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };

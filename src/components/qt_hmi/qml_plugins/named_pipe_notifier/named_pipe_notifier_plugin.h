@@ -1,4 +1,4 @@
-/**
+/*
  * \file named_pipe_notifier_plugin.h
  * \brief NamedPipeNotifierPlugin class header file.
  * Copyright (c) 2013, Ford Motor Company

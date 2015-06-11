@@ -51,7 +51,7 @@ OnKeyBoardInputNotification::~OnKeyBoardInputNotification() {
 }
 
 void OnKeyBoardInputNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnKeyBoardInputNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   const std::vector<ApplicationSharedPtr>& applications =
       ApplicationManagerImpl::instance()->applications_with_navi();

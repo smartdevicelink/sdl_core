@@ -33,40 +33,42 @@
 #define SRC_COMPONENTS_INCLUDE_UTILS_DATA_ACCESSOR_H_
 
 #include "utils/lock.h"
+#include "utils/shared_ptr.h"
 
 // This class is for thread-safe access to data
 template<class T>
 class DataAccessor {
  public:
   DataAccessor(const T& data, const sync_primitives::Lock& lock)
-  : data_(data)
-  , lock_(const_cast<sync_primitives::Lock&>(lock))
-  , counter_(0) {
-  lock_.Acquire();
+      : data_(data),
+        lock_(const_cast<sync_primitives::Lock&>(lock)),
+        counter_( new uint32_t(0)) {
+    lock_.Acquire();
   }
-  template<class O> DataAccessor(const DataAccessor<O>& other)
-  : data_(other.data_)
-  , lock_(other.lock_)
-  , counter_(other.counter_) {
-    ++counter_;
+
+  DataAccessor(const DataAccessor<T>& other)
+      : data_(other.data_),
+        lock_(other.lock_),
+        counter_(other.counter_) {
+    ++(*counter_);
   }
+
   ~DataAccessor() {
-    if (counter_ > 0) {
-      --counter_;
-    }
-    if (0 == counter_) {
-      lock_.Release();
+    if (0 == *counter_) {
+          lock_.Release();
+    } else {
+      --(*counter_);
     }
   }
   const T& GetData() const {
     return data_;
   }
  private:
-  template <class O> const DataAccessor<T>& operator=(const DataAccessor<O>& other);
 
-  const T&                     data_;
-  sync_primitives::Lock&           lock_;
-  uint32_t                         counter_;
+  void *operator new(size_t size);
+  const T& data_;
+  sync_primitives::Lock& lock_;
+  utils::SharedPtr<uint32_t> counter_;
 };
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_DATA_ACCESSOR_H_

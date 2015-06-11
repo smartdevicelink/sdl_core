@@ -1,4 +1,4 @@
-﻿/**
+﻿/*
  Copyright (c) 2014, Ford Motor Company
  All rights reserved.
 
@@ -44,7 +44,6 @@ namespace application_manager {
  **/
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-typedef utils::SharedPtr<smart_objects::SmartObject> MessageSharedPtr;
 
 namespace commands {
 
@@ -108,7 +107,13 @@ class Command {
    */
   virtual void onTimeOut() = 0;
 
+  enum CommandOrigin {
+    ORIGIN_SDL,
+    ORIGIN_MOBILE
+  };
 };
+
+typedef smart_objects::SmartObjectSPtr MessageSharedPtr;
 
 }  // namespace commands
 

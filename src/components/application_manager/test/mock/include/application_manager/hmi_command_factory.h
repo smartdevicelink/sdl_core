@@ -51,7 +51,7 @@ class HMICommandFactory {
    * @param  smartObject SmartObject shared pointer.
    * @return Pointer to created command object.
    **/
-  static CommandSharedPtr CreateCommand(const MessageSharedPtr& message);
+  static CommandSharedPtr CreateCommand(const commands::MessageSharedPtr& message);
 
  private:
   HMICommandFactory();

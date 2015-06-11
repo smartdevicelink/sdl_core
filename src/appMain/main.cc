@@ -176,10 +176,7 @@ int32_t main(int32_t argc, char** argv) {
 #ifdef __QNX__
   if (profile::Profile::instance()->enable_policy()) {
     if (!utils::System("./init_policy.sh").Execute(true)) {
-      LOG4CXX_ERROR(logger_, "Failed initialization of policy database");
-#ifdef ENABLE_LOG
-      logger::LogMessageLoopThread::destroy();
-#endif
+      LOG4CXX_FATAL(logger_, "Failed to init policy database");
       DEINIT_LOGGER();
       exit(EXIT_FAILURE);
     }
@@ -187,10 +184,8 @@ int32_t main(int32_t argc, char** argv) {
 #endif  // __QNX__
 
   if (!main_namespace::LifeCycle::instance()->StartComponents()) {
+    LOG4CXX_FATAL(logger_, "Failed to start components");
     main_namespace::LifeCycle::instance()->StopComponents();
-#ifdef ENABLE_LOG
-    logger::LogMessageLoopThread::destroy();
-#endif
     DEINIT_LOGGER();
     exit(EXIT_FAILURE);
   }
@@ -198,23 +193,14 @@ int32_t main(int32_t argc, char** argv) {
   // --------------------------------------------------------------------------
   // Third-Party components initialization.
 
-  if (!main_namespace::LifeCycle::instance()->InitMessageSystem()) {
-    main_namespace::LifeCycle::instance()->StopComponents();
-    DEINIT_LOGGER();
-    exit(EXIT_FAILURE);
-  }
-  LOG4CXX_INFO(logger_, "InitMessageBroker successful");
-
   if (profile::Profile::instance()->launch_hmi()) {
     if (profile::Profile::instance()->server_address() == kLocalHostAddress) {
       LOG4CXX_INFO(logger_, "Start HMI on localhost");
 
 #ifndef NO_HMI
       if (!InitHmi()) {
+        LOG4CXX_FATAL(logger_, "Failed to init HMI");
         main_namespace::LifeCycle::instance()->StopComponents();
-#ifdef ENABLE_LOG
-        logger::LogMessageLoopThread::destroy();
-#endif
         DEINIT_LOGGER();
         exit(EXIT_FAILURE);
       }
@@ -230,9 +216,6 @@ int32_t main(int32_t argc, char** argv) {
   main_namespace::LifeCycle::instance()->StopComponents();
 
   LOG4CXX_INFO(logger_, "Application successfully stopped");
-#ifdef ENABLE_LOG
-  logger::LogMessageLoopThread::destroy();
-#endif
   DEINIT_LOGGER();
 
   return EXIT_SUCCESS;

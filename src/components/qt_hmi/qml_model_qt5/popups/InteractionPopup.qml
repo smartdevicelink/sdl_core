@@ -46,6 +46,7 @@ ContextPopup {
     property int appID
     property int interactionLayout
     property var async
+    property var grammarID
     property bool performInteractionIsActiveNow
 
     Text {
@@ -84,13 +85,15 @@ ContextPopup {
         }
     }
 
-    function performInteraction(initialText, choiceSet, vrHelpTitle, vrHelp, timeout, interactionLayout, appID) {
+    function performInteraction(initialTextArg, choiceSet, vrHelpTitle, vrHelp, timeout, interactionLayout, appID) {
         console.debug("enter")
         var app = dataContainer.getApplication(appID)
         var dataToUpdate = {}
 
         performInteractionIsActiveNow = true
-        initialText.text = initialText.fieldText
+        if (initialTextArg !== undefined){
+            initialText.text = initialTextArg.fieldText
+        }
         this.timeout = timeout
         this.appID = appID
 
@@ -123,6 +126,8 @@ ContextPopup {
         async = new Async.AsyncCall()
         if (piPopUp.choiceSet.count !== 0) {
             activate()
+        }else if (grammarID) {
+                vrActivate()
         }
         console.debug("exit")
         return async
@@ -132,7 +137,19 @@ ContextPopup {
         console.debug("enter")
         timer.interval = timeout
         timer.start()
+        if (grammarID) {
+            vrPopUp.sortModelforPerformInteraction()
+        }
         show()
+        console.debug("exit")
+    }
+    function vrActivate () {
+        console.debug("enter")
+        timer.interval = timeout
+        timer.start()
+        vrPopUp.sortModelforPerformInteraction()
+        vrPopUp.show()
+        vrHelpPopup.show()
         console.debug("exit")
     }
 
@@ -150,6 +167,7 @@ ContextPopup {
                 break
         }
         timer.stop()
+        grammarID = ""
         hide()
         performInteractionIsActiveNow = false
         console.debug("exit")

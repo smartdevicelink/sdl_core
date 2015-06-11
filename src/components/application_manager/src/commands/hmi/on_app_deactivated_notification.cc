@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -35,6 +35,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "config_profile/profile.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 
@@ -49,7 +50,7 @@ OnAppDeactivatedNotification::~OnAppDeactivatedNotification() {
 }
 
 void OnAppDeactivatedNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnAppDeactivatedNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   uint32_t app_id = (*message_)[strings::msg_params][strings::app_id].asUInt();
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(app_id);
@@ -58,11 +59,13 @@ void OnAppDeactivatedNotification::Run() {
     return;
   }
 
+  using namespace mobile_apis::HMILevel;
+  using namespace helpers;
   if (!(((hmi_apis::Common_DeactivateReason::AUDIO ==
       (*message_)[strings::msg_params][hmi_request::reason].asInt()) ||
       (hmi_apis::Common_DeactivateReason::PHONECALL ==
             (*message_)[strings::msg_params][hmi_request::reason].asInt())) &&
-      (app->hmi_level() == mobile_api::HMILevel::eType::HMI_LIMITED))) {
+      (app->hmi_level() == HMI_LIMITED))) {
     app = ApplicationManagerImpl::instance()->active_application();
     if (!app.valid()) {
       LOG4CXX_ERROR_EXT(logger_, "OnAppDeactivatedNotification no active app!");
@@ -74,10 +77,11 @@ void OnAppDeactivatedNotification::Run() {
     }
   }
 
-  if (mobile_api::HMILevel::eType::HMI_NONE == app->hmi_level()) {
+  if (HMI_NONE == app->hmi_level()) {
     return;
   }
 
+  eType new_hmi_level = app->hmi_level();
   switch ((*message_)[strings::msg_params][hmi_request::reason].asInt()) {
     case hmi_apis::Common_DeactivateReason::AUDIO: {
       if (app->is_media_application()) {
@@ -89,27 +93,12 @@ void OnAppDeactivatedNotification::Run() {
           app->set_audio_streaming_state(mobile_api::AudioStreamingState::NOT_AUDIBLE);
         }
       }
-      // switch HMI level for all applications in FULL or LIMITED
-      ApplicationManagerImpl::ApplicationListAccessor accessor;
-      ApplicationManagerImpl::TAppList applications =
-          accessor.applications();
-      ApplicationManagerImpl::TAppListIt it =
-          applications.begin();
-      for (; applications.end() != it; ++it) {
-          ApplicationSharedPtr app = *it;
-          if (app.valid()) {
-            if (mobile_apis::HMILevel::eType::HMI_FULL == app->hmi_level() ||
-                mobile_apis::HMILevel::eType::HMI_LIMITED == app->hmi_level()) {
-                app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
-                MessageHelper::SendHMIStatusNotification(*app);
-            }
-          }
+      // HMI must send this notification for each active app
+      if (app.valid()) {
+        if (Compare<eType, EQ, ONE>(app->hmi_level(), HMI_FULL, HMI_LIMITED)) {
+          new_hmi_level = HMI_BACKGROUND;
+        }
       }
-      break;
-    }
-    case hmi_apis::Common_DeactivateReason::PHONECALL: {
-      app->set_audio_streaming_state(mobile_api::AudioStreamingState::NOT_AUDIBLE);
-      app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
       break;
     }
     case hmi_apis::Common_DeactivateReason::NAVIGATIONMAP:
@@ -119,9 +108,9 @@ void OnAppDeactivatedNotification::Run() {
       if ((!app->IsAudioApplication()) ||
           ApplicationManagerImpl::instance()->
           DoesAudioAppWithSameHMITypeExistInFullOrLimited(app)) {
-        app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
+        new_hmi_level = HMI_BACKGROUND;
       } else {
-        app->set_hmi_level(mobile_api::HMILevel::HMI_LIMITED);
+        new_hmi_level = HMI_LIMITED;
       }
       break;
     }
@@ -131,7 +120,11 @@ void OnAppDeactivatedNotification::Run() {
     }
   }
 
-  MessageHelper::SendHMIStatusNotification(*app);
+  if (new_hmi_level != app->hmi_level()) {
+    ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
+                                                           new_hmi_level);
+    MessageHelper::SendHMIStatusNotification(*app);
+  }
 }
 
 }  // namespace commands

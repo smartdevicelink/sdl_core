@@ -97,6 +97,10 @@ class ProtocolHandler {
     */
   virtual void SendEndSession(int32_t connection_id, uint8_t session_id) = 0;
 
+  virtual void SendEndService(int32_t connection_id,
+                              uint8_t session_id,
+                              uint8_t service_type) = 0;
+
  protected:
   /**
    * \brief Destructor

@@ -47,13 +47,13 @@ EndAudioPassThruRequest::~EndAudioPassThruRequest() {
 }
 
 void EndAudioPassThruRequest::Run() {
-  LOG4CXX_INFO(logger_, "EndAudioPassThruRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   SendHMIRequest(hmi_apis::FunctionID::UI_EndAudioPassThru, NULL, true);
 }
 
 void EndAudioPassThruRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "EndAudioPassThruRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {

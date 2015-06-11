@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -233,6 +233,13 @@ const std::string ConvertPathForURL(const std::string& path);
   * @return if result success return true
 */
 bool CreateFile(const std::string& path);
+
+/**
+ * @brief Get modification time of file
+ * @param path Path to file
+ * @return Modification time in nanoseconds
+ */
+uint64_t GetFileModificationTime(const std::string& path);
 
 void remove_directory_content(const std::string& directory_name);
 

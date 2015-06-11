@@ -131,6 +131,8 @@ class AddCommandRequest : public CommandRequestImpl {
    */
   bool IsWhiteSpaceExist();
 
+  inline bool BothSend() const;
+
   bool send_ui_;
   bool send_vr_;
 

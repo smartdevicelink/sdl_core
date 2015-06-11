@@ -1,5 +1,5 @@
-﻿/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <list>
 #include <utility>
 
 #include "utils/date_time.h"
@@ -70,13 +71,16 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   const smart_objects::SmartObject* active_message() const;
   void CloseActiveMessage();
   bool IsFullscreen() const;
-  bool MakeFullscreen();
+
+  /**
+   * @brief change supporting COMMUNICATION NAVIGATION
+   */
+  virtual void ChangeSupportingAppHMIType();
   bool IsAudible() const;
-  void MakeNotAudible();
 
   // navi
-  bool allowed_support_navigation() const;
-  void set_allowed_support_navigation(bool allow);
+  inline bool is_navi() const { return is_navi_; }
+  void set_is_navi(bool allow);
   bool hmi_supports_navi_video_streaming() const;
   void set_hmi_supports_navi_video_streaming(bool supports);
   bool hmi_supports_navi_audio_streaming() const;
@@ -87,6 +91,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
       bool is_voice_communication_supported);
   inline bool app_allowed() const;
   bool has_been_activated() const;
+  bool set_activated(bool is_active);
 
   const Version& version() const;
   void set_hmi_application_id(uint32_t hmi_app_id);
@@ -96,6 +101,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   const std::string folder_name() const;
   bool is_media_application() const;
   const mobile_api::HMILevel::eType& hmi_level() const;
+  virtual bool is_foreground() const;
+  virtual void set_foreground(bool is_foreground);
   const uint32_t put_file_in_none_count() const;
   const uint32_t delete_file_in_none_count() const;
   const uint32_t list_files_in_none_count() const;
@@ -149,15 +156,13 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   virtual const std::set<mobile_apis::ButtonName::eType>& SubscribedButtons() const;
   virtual const  std::set<uint32_t>& SubscribesIVI() const;
 
-  virtual uint32_t nextHash();
-  virtual uint32_t curHash() const;
-
+  virtual const std::string& curHash() const;
   /**
    * @brief Change Hash for current application
    * and send notification to mobile
    * @return updated_hash
    */
-  virtual uint32_t UpdateHash();
+  virtual void UpdateHash();
 
   UsageStatistics& usage_report();
 
@@ -188,6 +193,32 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    */
   void LoadPersistentFiles();
 
+  /**
+   * @brief Return pointer to extension by uid
+   * @param uid uid of extension
+   * @return Pointer to extension, if extension was initialized, otherwise NULL
+   */
+  AppExtensionPtr QueryInterface(AppExtensionUID uid);
+
+  /**
+   * @brief Add extension to application
+   * @param extension pointer to extension
+   * @return true if success, false if extension already initialized
+   */
+  bool AddExtension(AppExtensionPtr extention);
+
+  /**
+   * @brief Remove extension from application
+   * @param uid uid of extension
+   * @return true if success, false if extension is not present
+   */
+  bool RemoveExtension(AppExtensionUID uid);
+
+  /**
+   * @brief Removes all extensions
+   */
+  void RemoveExtensions();
+
  private:
 
   // interfaces for NAVI retry sequence
@@ -198,7 +229,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void OnVideoStreamRetry();
   void OnAudioStreamRetry();
 
-  uint32_t                                 hash_val_;
+  std::string                              hash_val_;
   uint32_t                                 grammar_id_;
 
 
@@ -208,7 +239,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   uint32_t                                 app_id_;
   smart_objects::SmartObject*              active_message_;
   bool                                     is_media_;
-  bool                                     allowed_support_navigation_;
+  bool                                     is_navi_;
   bool                                     hmi_supports_navi_video_streaming_;
   bool                                     hmi_supports_navi_audio_streaming_;
   bool                                     is_app_allowed_;
@@ -217,6 +248,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool                                     tts_properties_in_none_;
   bool                                     tts_properties_in_full_;
   mobile_api::HMILevel::eType              hmi_level_;
+  bool                                     is_foreground_;
   uint32_t                                 put_file_in_none_count_;
   uint32_t                                 delete_file_in_none_count_;
   uint32_t                                 list_files_in_none_count_;
@@ -231,7 +263,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   UsageStatistics                          usage_report_;
   ProtocolVersion                          protocol_version_;
   bool                                     is_voice_communication_application_;
-
   // NAVI retry stream
   volatile bool                            is_video_stream_retry_active_;
   volatile bool                            is_audio_stream_retry_active_;
@@ -240,6 +271,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   utils::SharedPtr<timer::TimerThread<ApplicationImpl>> video_stream_retry_timer_;
   utils::SharedPtr<timer::TimerThread<ApplicationImpl>> audio_stream_retry_timer_;
 
+  std::list<AppExtensionPtr> extensions_;
 
   /**
    * @brief Defines number per time in seconds limits

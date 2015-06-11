@@ -86,7 +86,7 @@ void DBusMessageAdapter::SendMessageToHMI(MessageSharedPointer message) {
       break;
     case hmi_apis::messageType::INVALID_ENUM:
     default:
-      LOG4CXX_INFO(logger_, "Message type is invalid");
+      LOG4CXX_WARN(logger_, "Message type is invalid");
   }
 }
 
@@ -156,7 +156,7 @@ void DBusMessageAdapter::SubscribeTo() {
 }
 
 void DBusMessageAdapter::SendMessageToCore(const smart_objects::SmartObject& obj) {
-  LOG4CXX_INFO(logger_, "DBusMessageAdapter::SendMessageToCore");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   if (!handler()) {
     LOG4CXX_WARN(logger_, "DBusMessageAdapter hasn't handler");

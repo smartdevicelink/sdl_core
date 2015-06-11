@@ -78,6 +78,8 @@ class TransportManagerMock: public ::transport_manager::TransportManager {
                int(const DeviceHandle &));
   MOCK_CONST_METHOD1(Visibility,
                      int(const bool &));
+  MOCK_METHOD0(Reinit,
+               int());
 };
 }  // namespace transport_manager_test
 }  // namespace components

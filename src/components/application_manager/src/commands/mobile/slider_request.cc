@@ -60,7 +60,7 @@ bool SliderRequest::Init() {
 }
 
 void SliderRequest::Run() {
-  LOG4CXX_INFO(logger_, "SliderRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application =
       application_manager::ApplicationManagerImpl::instance()->application(
@@ -110,7 +110,7 @@ void SliderRequest::Run() {
 }
 
 void SliderRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "SliderRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   const event_engine::Event::EventID event_id = event.id();
@@ -131,18 +131,16 @@ void SliderRequest::on_event(const event_engine::Event& event) {
 
   const int response_code =
       message[strings::params][hmi_response::code].asInt();
-
   smart_objects::SmartObject response_msg_params = message[strings::msg_params];
-  if (response_code == hmi_apis::Common_Result::ABORTED) {
+  if (response_code == hmi_apis::Common_Result::ABORTED &&
+      message[strings::params][strings::data].keyExists(strings::slider_position)) {
     //Copy slider_position info to msg_params section
-    response_msg_params[strings::slider_position] =
+	response_msg_params[strings::slider_position] =
         message[strings::params][strings::data][strings::slider_position];
   }
 
   const bool is_response_success =
-      (mobile_apis::Result::SUCCESS == response_code) ||
-      //Aborted has slider_position data
-      (mobile_apis::Result::ABORTED == response_code);
+      (mobile_apis::Result::SUCCESS == response_code);
 
   SendResponse(is_response_success,
                mobile_apis::Result::eType(response_code),

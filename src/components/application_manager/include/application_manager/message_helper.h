@@ -1,4 +1,4 @@
-﻿/*
+/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -43,6 +43,7 @@
 #include "application_manager/application.h"
 #include "application_manager/vehicle_info_data.h"
 #include "policy/policy_types.h"
+#include "smart_objects/smart_object.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -67,9 +68,6 @@ typedef std::map<std::string, VehicleDataType> VehicleData;
  **/
 class MessageHelper {
   public:
-
-    typedef std::vector<smart_objects::SmartObject*> SmartObjectList;
-
     /**
      * @brief Creates request for different interfaces(JSON, DBUS)
      * @param correlation_id unique ID
@@ -99,7 +97,7 @@ class MessageHelper {
     /**
      * @brief Create mobile HashUpdateNotification
      */
-    static smart_objects::SmartObject* GetHashUpdateNotification(const uint32_t app_id);
+    static smart_objects::SmartObjectSPtr GetHashUpdateNotification(const uint32_t app_id);
 
     /**
      * @brief Sends to mobile HashUpdateNotification
@@ -149,7 +147,7 @@ class MessageHelper {
     static std::string StringifiedFunctionID(
       mobile_apis::FunctionID::eType function_id);
 
-    static smart_objects::SmartObject* CreateBlockedByPoliciesResponse(
+    static smart_objects::SmartObjectSPtr CreateBlockedByPoliciesResponse(
       mobile_apis::FunctionID::eType function_id,
       mobile_apis::Result::eType result, uint32_t correlation_id,
       uint32_t connection_key);
@@ -161,14 +159,14 @@ class MessageHelper {
      * @param devices Devices list
      *
      */
-    static smart_objects::SmartObject* CreateDeviceListSO(
-      const connection_handler::DeviceMap& devices);
+    static smart_objects::SmartObjectSPtr CreateDeviceListSO(
+        const connection_handler::DeviceMap& devices);
 
-    static smart_objects::SmartObject* CreateModuleInfoSO(
-      uint32_t function_id);
+    static smart_objects::SmartObjectSPtr CreateModuleInfoSO(
+        uint32_t function_id);
 
-    static smart_objects::SmartObject* CreateSetAppIcon(
-      const std::string& path_to_icon, uint32_t app_id);
+    static smart_objects::SmartObjectSPtr CreateSetAppIcon(
+        const std::string& path_to_icon, uint32_t app_id);
 
     /**
      * @brief Sends IVI subscriptions
@@ -178,28 +176,34 @@ class MessageHelper {
     /**
      * @brief Sends IVI subscriptions
      */
-    static SmartObjectList GetIVISubscribtionRequests(const uint32_t app_id);
+    static smart_objects::SmartObjectList GetIVISubscriptionRequests(ApplicationSharedPtr app);
 
     static void SendAppDataToHMI(ApplicationConstSharedPtr app);
     static void SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app);
-    static SmartObjectList CreateGlobalPropertiesRequestsToHMI(ApplicationConstSharedPtr app);
+    static smart_objects::SmartObjectList CreateGlobalPropertiesRequestsToHMI(ApplicationConstSharedPtr app);
 
-    static smart_objects::SmartObject* CreateAppVrHelp(ApplicationConstSharedPtr app);
+    static smart_objects::SmartObjectSPtr CreateAppVrHelp(
+        ApplicationConstSharedPtr app);
 
-    static SmartObjectList CreateShowRequestToHMI(ApplicationConstSharedPtr app);
+    static smart_objects::SmartObjectList CreateShowRequestToHMI(ApplicationConstSharedPtr app);
     static void SendShowRequestToHMI(ApplicationConstSharedPtr app);
     static void SendShowConstantTBTRequestToHMI(ApplicationConstSharedPtr app);
     static void SendAddCommandRequestToHMI(ApplicationConstSharedPtr app);
-    static SmartObjectList CreateAddCommandRequestToHMI(ApplicationConstSharedPtr app);
+    static smart_objects::SmartObjectList CreateAddCommandRequestToHMI(ApplicationConstSharedPtr app);
 
+    /**
+     * @brief Sends UI_ChangeRegistration to HMI with list of AppHMIType
+     * @param app applicaton instace
+     */
+    static void SendUIChangeRegistrationRequestToHMI(ApplicationConstSharedPtr app);
     static void SendChangeRegistrationRequestToHMI(ApplicationConstSharedPtr app);
     static void SendAddVRCommandToHMI(
       uint32_t cmd_id, const smart_objects::SmartObject& vr_commands,
       uint32_t app_id);
 
-    static smart_objects::SmartObject* CreateAddVRCommandToHMI(
-      uint32_t cmd_id, const smart_objects::SmartObject& vr_commands,
-      uint32_t app_id);
+    static smart_objects::SmartObjectSPtr CreateAddVRCommandToHMI(
+        uint32_t cmd_id, const smart_objects::SmartObject& vr_commands,
+        uint32_t app_id);
 
     /*
      * @brief Create Common.HMIApplication struct application instance
@@ -211,7 +215,7 @@ class MessageHelper {
                                       smart_objects::SmartObject& output);
 
     static void SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
-    static SmartObjectList CreateAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
+    static smart_objects::SmartObjectList CreateAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
 
     /*
      * @brief Creates BasicCommunication.OnAppUnregistered notification
@@ -223,7 +227,8 @@ class MessageHelper {
                                                 bool is_unexpected_disconnect = false);
     static void SendActivateAppToHMI(
       uint32_t const app_id,
-      hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL);
+      hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL,
+      bool send_policy_priority = true);
 
     static void SendOnResumeAudioSourceToHMI(const uint32_t app_id);
 
@@ -305,6 +310,29 @@ class MessageHelper {
       unsigned int connection_key, const std::vector<uint8_t>& policy_data,
       const std::string& url = "", int timeout = -1);
 
+    static void SendSystemRequestNotification(
+        uint32_t connection_key,
+        NsSmartDeviceLink::NsSmartObjects::SmartObject& content);
+
+    /**
+     * @brief SendLaunchApp allows to send OnSystemRequest with LAUNCH_UP.
+     *
+     * @param connection_key application id.
+     *
+     * @param urlSchema application's url schema.
+     *
+     * @param packageName application's package name.
+     */
+    static void SendLaunchApp(uint32_t connection_key,
+                              const std::string& urlSchema,
+                              const std::string& packageName);
+
+    /**
+     * @brief Sends OnSystemRequest which queries remote apps list
+     * @param connection_key application id, which is used for sending out
+     */
+    static void SendQueryApps(uint32_t connection_key);
+
     /*
     * @brief Send notification to mobile on application permissions update
     * @param connection_key Id of application to send message to
@@ -374,9 +402,9 @@ class MessageHelper {
      */
     static bool SendStopAudioPathThru();
 
-    static smart_objects::SmartObject* CreateNegativeResponse(
-      uint32_t connection_key, int32_t function_id, uint32_t correlation_id,
-      int32_t result_code);
+    static smart_objects::SmartObjectSPtr CreateNegativeResponse(
+        uint32_t connection_key, int32_t function_id, uint32_t correlation_id,
+        int32_t result_code);
 
     /*
      * @brief Verify image and add image file full path
@@ -420,6 +448,16 @@ class MessageHelper {
     static mobile_apis::Result::eType ProcessSoftButtons(
       smart_objects::SmartObject& message_params,
       ApplicationConstSharedPtr app);
+
+    /**
+     * @brief checkWithPolicy allows to check soft button's parameters
+     * according to the current policy
+     * @param system_action system action
+     * @param app_mobile_id policy application id
+     * @return
+     */
+    static bool CheckWithPolicy(mobile_apis::SystemAction::eType system_action,
+                                const std::string& app_mobile_id);
 
     /*
      * @brief subscribe application to softbutton
@@ -471,7 +509,16 @@ class MessageHelper {
     static void SendTTSGlobalProperties(
         ApplicationSharedPtr app, bool default_help_prompt);
 
-    private:
+    /**
+     * @brief SendSetAppIcon allows to send SetAppIcon request.
+     *
+     * @param app_id application for which icon request should be sent.
+     *
+     * @param icon_path path to the icon.
+     */
+    static void SendSetAppIcon(uint32_t app_id,
+                               const std::string& icon_path);
+  private:
     /**
      * @brief Allows to fill SO according to the  current permissions.
      * @param permissions application permissions.
@@ -480,8 +527,9 @@ class MessageHelper {
     static void FillAppRevokedPermissions(const policy::AppPermissions& permissions,
                                    smart_objects::SmartObject& message);
 
-    static smart_objects::SmartObject* CreateChangeRegistration(
-      int32_t function_id, int32_t language, uint32_t app_id);
+    static smart_objects::SmartObjectSPtr CreateChangeRegistration(
+        int32_t function_id, int32_t language, uint32_t app_id,
+        const smart_objects::SmartObject* app_types = NULL);
 
     MessageHelper();
 

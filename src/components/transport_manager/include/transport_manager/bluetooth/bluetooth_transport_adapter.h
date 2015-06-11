@@ -1,4 +1,4 @@
-/**
+/*
  * \file bluetooth_transport_adapter.h
  * \brief BluetoothAdapter class header file.
  *

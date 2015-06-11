@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -44,7 +44,7 @@ VRDeleteCommandRequest::~VRDeleteCommandRequest() {
 }
 
 void VRDeleteCommandRequest::Run() {
-  LOG4CXX_INFO(logger_, "VRDeleteCommandRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   SendRequest();
 }

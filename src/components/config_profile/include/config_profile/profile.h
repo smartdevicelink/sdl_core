@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,6 +78,27 @@ class Profile : public utils::Singleton<Profile> {
     const std::string& app_resourse_folder() const;
 
     /**
+     * @brief Returns true, if SDL 4.0 is enabled
+     */
+    bool enable_protocol_4() const;
+
+    /**
+     * @brief Returns application icons folder path
+     */
+    const std::string& app_icons_folder() const;
+
+    /**
+     * @brief Returns application icons folder maximum size
+     */
+    const uint32_t& app_icons_folder_max_size() const;
+
+    /**
+     * @brief Returns application icons amount to remove from icon folder,
+     * if maximum size exceeded
+     */
+    const uint32_t& app_icons_amount_to_remove() const;
+
+    /**
      * @brief Returns the path to the config file
      */
     const std::string& config_file_name() const;
@@ -106,6 +127,11 @@ class Profile : public utils::Singleton<Profile> {
       * @brief Returns port for audio streaming
       */
     const uint16_t& audio_streaming_port() const;
+
+    /**
+     * @brief Returns streaming timeout
+     */
+    uint32_t stop_streaming_timeout() const;
 
     /**
       * @brief Returns port for time reports
@@ -147,6 +173,7 @@ class Profile : public utils::Singleton<Profile> {
      * @brief Default timeout for waiting for resuming
      */
     const uint32_t& app_resuming_timeout() const;
+    const uint32_t& app_resumption_save_persistent_data_timeout() const;
 
     /**
      * @brief Returns desirable thread stack size
@@ -297,6 +324,11 @@ class Profile : public utils::Singleton<Profile> {
     const std::string& system_files_path() const;
 
     /**
+      * @brief Returns folder containing all plugins
+      */
+    const std::string& plugins_folder() const;
+
+    /**
      * @brief Returns port for TCP transport adapter
      */
     uint16_t transport_manager_tcp_adapter_port() const;
@@ -439,6 +471,31 @@ class Profile : public utils::Singleton<Profile> {
      */
     int iap_hub_connection_wait_timeout() const;
 
+    /*
+     * ProtocolHandler section
+     */
+    size_t maximum_payload_size() const;
+
+    size_t message_frequency_count() const;
+
+    size_t message_frequency_time() const;
+
+    uint16_t attempts_to_open_policy_db() const;
+
+    uint16_t open_attempt_timeout_ms() const;
+
+    uint32_t resumption_delay_before_ign() const;
+
+    uint32_t resumption_delay_after_ign() const;
+
+    uint32_t hash_string_size() const;
+
+    /*
+     * @brief Updates all related values from ini file
+     */
+    void UpdateValues();
+
+
   private:
     /**
      * Default constructor
@@ -448,10 +505,6 @@ class Profile : public utils::Singleton<Profile> {
      */
     Profile();
 
-    /*
-     * @brief Updates all related values from ini file
-     */
-    void UpdateValues();
 
     /**
      * @brief Reads a boolean value from the profile
@@ -525,23 +578,41 @@ class Profile : public utils::Singleton<Profile> {
                        const char* const pKey) const;
 
     /**
-     * @brief Write to log content of container
-     * @param array Source array
-     * @param log Log string
+     * @brief Checks, if path is relative
+     * @param path Path
+     * @return true, if is relative, otherwise - false
      */
-    void LogContainer(const std::vector<std::string>& container,
-                      std::string* log);
+    bool IsRelativePath(const std::string& path);
 
-    // Members section
+    /**
+     * @brief Makes relative path absolute
+     * @param path Path
+     */
+    void MakeAbsolutePath(std::string& path);
+
+    /**
+     * @brief Converts input string to number
+     * @param input Input string
+     * @param output Output number
+     * @return true, if successfully converted, otherwise - false
+     */
+    bool StringToNumber(const std::string& input, uint64_t& output) const;
+
+private:
     bool                            launch_hmi_;
     std::string                     app_config_folder_;
     std::string                     app_storage_folder_;
     std::string                     app_resourse_folder_;
+    bool                            enable_protocol_4_;
+    std::string                     app_icons_folder_;
+    uint32_t                        app_icons_folder_max_size_;
+    uint32_t                        app_icons_amount_to_remove_;
     std::string                     config_file_name_;
     std::string                     server_address_;
     uint16_t                        server_port_;
     uint16_t                        video_streaming_port_;
     uint16_t                        audio_streaming_port_;
+    uint32_t                        stop_streaming_timeout_;
     uint16_t                        time_testing_port_;
     std::string                     hmi_capabilities_file_name_;
     std::vector<std::string>        help_prompt_;
@@ -553,6 +624,7 @@ class Profile : public utils::Singleton<Profile> {
     uint32_t                        max_cmd_id_;
     uint32_t                        default_timeout_;
     uint32_t                        app_resuming_timeout_;
+    uint32_t                        app_resumption_save_persistent_data_timeout_;
     std::string                     vr_help_title_;
     uint32_t                        app_dir_quota_;
     std::string                     video_consumer_type_;
@@ -578,6 +650,7 @@ class Profile : public utils::Singleton<Profile> {
     bool                            use_last_state_;
     std::vector<uint32_t>           supported_diag_modes_;
     std::string                     system_files_path_;
+    std::string                     plugins_folder_;
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
     std::string                     mme_db_name_;
@@ -614,6 +687,11 @@ class Profile : public utils::Singleton<Profile> {
     int                             iap2_hub_connect_attempts_;
     int                             iap_hub_connection_wait_timeout_;
     uint16_t                        tts_global_properties_timeout_;
+    uint16_t                        attempts_to_open_policy_db_;
+    uint16_t                        open_attempt_timeout_ms_;
+    uint32_t                        resumption_delay_before_ign_;
+    uint32_t                        resumption_delay_after_ign_;
+    uint32_t                        hash_string_size_;
 
     FRIEND_BASE_SINGLETON_CLASS(Profile);
     DISALLOW_COPY_AND_ASSIGN(Profile);

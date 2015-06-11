@@ -50,6 +50,8 @@
 
 namespace time_tester {
 
+using ::utils::MessageQueue;
+
 class TimeManager {
  public:
   TimeManager();
@@ -64,25 +66,27 @@ class TimeManager {
     explicit Streamer(TimeManager* const server);
     ~Streamer();
     void threadMain() OVERRIDE;
-    bool exitThreadMain() OVERRIDE;
+    void exitThreadMain() OVERRIDE;
     bool IsReady() const;
     void Start();
     void Stop();
     bool Send(const std::string &msg);
-  volatile bool is_client_connected_;
-  private:
+    void PushMessage(utils::SharedPtr<MetricWrapper> metric);
+    volatile bool is_client_connected_;
+    private:
+    void ShutDownAndCloseSocket(int32_t socket_fd);
     TimeManager* const server_;
-    int32_t new_socket_fd_;  
+    int32_t server_socket_fd_;
+    int32_t client_socket_fd_;
     volatile bool stop_flag_;
+    MessageQueue<utils::SharedPtr<MetricWrapper> > messages_;
     DISALLOW_COPY_AND_ASSIGN(Streamer);
   };
 
   int16_t port_;
   std::string ip_;
-  int32_t socket_fd_;
   bool is_ready_;
   threads::Thread* thread_;
-  MessageQueue<utils::SharedPtr<MetricWrapper> > messages_;
   Streamer* streamer_;
   ApplicationManagerObserver app_observer;
   TransportManagerObserver tm_observer;

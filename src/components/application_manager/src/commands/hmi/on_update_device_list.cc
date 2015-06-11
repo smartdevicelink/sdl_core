@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -44,7 +44,7 @@ OnUpdateDeviceList::~OnUpdateDeviceList() {
 }
 
 void OnUpdateDeviceList::Run() {
-  LOG4CXX_INFO(logger_, "OnUpdateDeviceList::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 }
 
 }  // namespace commands

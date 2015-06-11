@@ -66,7 +66,7 @@ class SQLPTRepresentation : public virtual PTRepresentation {
     virtual void ResetIgnitionCycles();
     virtual int TimeoutResponse();
     virtual bool SecondsBetweenRetries(std::vector<int>* seconds);
-
+    virtual bool RefreshDB();
     virtual VehicleData GetVehicleData();
 
     virtual std::vector<UserFriendlyMessage> GetUserFriendlyMsg(
@@ -81,6 +81,7 @@ class SQLPTRepresentation : public virtual PTRepresentation {
     bool Close();
     bool Clear();
     bool Drop();
+    virtual void WriteDb();
     virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot() const;
     virtual bool Save(const policy_table::Table& table);
     bool GetInitialAppData(const std::string& app_id, StringArray* nicknames =
@@ -107,6 +108,9 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                        policy_table::AppHMITypes* app_types) const;
     bool GatherNickName(const std::string& app_id,
                         policy_table::Strings* nicknames) const;
+    bool GatherUserConsentRecords(
+        const std::string& device,
+        policy_table::UserConsentRecords* consent) const;
 
     virtual bool SaveApplicationCustomData(const std::string& app_id,
                                    bool is_revoked,
@@ -137,6 +141,24 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                       const policy_table::Strings& nicknames);
     bool SaveAppType(const std::string& app_id,
                      const policy_table::AppHMITypes& types);
+
+#ifdef SDL_REMOTE_CONTROL
+    bool GatherAppGroupPrimary(const std::string& app_id,
+                               policy_table::Strings* app_groups) const;
+    bool GatherAppGroupNonPrimary(const std::string& app_id,
+                                  policy_table::Strings* app_groups) const;
+    bool GatherModuleType(const std::string& app_id,
+                          policy_table::ModuleTypes* module_types) const;
+    bool GatherRemoteControlDenied(const std::string& app_id,
+                                   bool* denied) const;
+    bool SaveAppGroupPrimary(const std::string& app_id,
+                             const policy_table::Strings& app_groups);
+    bool SaveAppGroupNonPrimary(const std::string& app_id,
+                                const policy_table::Strings& app_groups);
+    bool SaveModuleType(const std::string& app_id,
+                        const policy_table::ModuleTypes& types);
+    bool SaveRemoteControlDenied(const std::string& app_id, bool deny);
+#endif  // SDL_REMOTE_CONTROL
 
   public:
     bool UpdateRequired() const;
@@ -169,6 +191,10 @@ class SQLPTRepresentation : public virtual PTRepresentation {
       const policy_table::NumberOfNotificationsPerMinute& notifications);
     bool SaveMessageType(const std::string& type);
     bool SaveLanguage(const std::string& code);
+    bool SaveUserConsentRecords(const std::string& device,
+                                const policy_table::UserConsentRecords& consents);
+    bool SaveUserConsent(const std::string& device, const std::string& name,
+                         const policy_table::ConsentRecords& record);
 };
 }  //  namespace policy
 

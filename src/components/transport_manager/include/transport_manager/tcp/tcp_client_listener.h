@@ -1,4 +1,4 @@
-/**
+/*
  * \file tcp_client_listener.h
  * \brief TcpClientListener class header file.
  *
@@ -36,10 +36,10 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_CLIENT_LISTENER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_CLIENT_LISTENER_H_
 
+#include "utils/threads/thread_delegate.h"
 #include "transport_manager/transport_adapter/client_connection_listener.h"
 
-#include "utils/threads/thread_delegate.h"
-#include "utils/threads/thread.h"
+class Thread;
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -49,8 +49,7 @@ class TransportAdapterController;
 /**
  * @brief Listener of device adapter that use TCP transport.
  */
-class TcpClientListener : public ClientConnectionListener,
-                          public threads::ThreadDelegate {
+class TcpClientListener : public ClientConnectionListener {
  public:
   /**
    * @breaf Constructor.
@@ -62,14 +61,6 @@ class TcpClientListener : public ClientConnectionListener,
    */
   TcpClientListener(TransportAdapterController* controller, uint16_t port,
                     bool enable_keepalive);
-
-  /**
-   * @brief Start TCP client listener thread.
-   */
-  void threadMain();
-
-  bool exitThreadMain();
- protected:
 
   /**
    * @brief Destructor.
@@ -107,18 +98,29 @@ class TcpClientListener : public ClientConnectionListener,
    * @brief Terminate TCP client listener thread.
    */
   virtual TransportAdapter::Error StopListening();
+
  private:
   const uint16_t port_;
   const bool enable_keepalive_;
   TransportAdapterController* controller_;
-  // TODO(Eamakhov): change to threads::Thread usage
   threads::Thread* thread_;
   int socket_;
-  bool thread_started_;
   bool thread_stop_requested_;
+
+  void Loop();
+  void StopLoop();
+
+  class ListeningThreadDelegate : public threads::ThreadDelegate {
+   public:
+    explicit ListeningThreadDelegate(TcpClientListener* parent);
+    virtual void threadMain();
+    void exitThreadMain();
+   private:
+    TcpClientListener* parent_;
+  };
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif /* TCP_CLIENT_LISTENER_H_ */
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_CLIENT_LISTENER_H_

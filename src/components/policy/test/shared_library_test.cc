@@ -1,4 +1,4 @@
-/* Copyright (c) 2013, Ford Motor Company
+/* Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,18 +45,27 @@ namespace policy {
   }
 }
 
-TEST(SharedLibraryTest, Full) {
+TEST(SharedLibraryTest, FullTest_OpenLibrarySetSymbolCloseLibrary_ExpectActsWithoutErrors) {
+  //Arrange
   const std::string kLib = "../src/policy/libPolicy.so";
   void* handle = dlopen(kLib.c_str(), RTLD_LAZY);
+
+  //Assert
   EXPECT_FALSE(IsError(dlerror()));
   ASSERT_TRUE(handle);
 
+  //Act
   const std::string kSymbol = "CreateManager";
   void* symbol = dlsym(handle, kSymbol.c_str());
+
+  //Assert
   EXPECT_FALSE(IsError(dlerror()));
   EXPECT_TRUE(symbol);
 
+  //Act
   int ret = dlclose(handle);
+
+  //Assert
   EXPECT_FALSE(ret);
   EXPECT_FALSE(IsError(dlerror()));
 }

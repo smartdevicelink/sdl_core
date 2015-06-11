@@ -1,4 +1,4 @@
-/**
+/*
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -31,25 +31,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
-#include "transport_manager/tcp/tcp_device.h"
-#include "utils/logger.h"
 
 #include <memory.h>
 #include <signal.h>
 #include <errno.h>
+#include <unistd.h>
+
+#include "utils/logger.h"
+#include "utils/threads/thread.h"
+#include "transport_manager/tcp/tcp_device.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
-
 TcpSocketConnection::TcpSocketConnection(const DeviceUID& device_uid,
-    const ApplicationHandle& app_handle,
-    TransportAdapterController* controller)
-  : ThreadedSocketConnection(device_uid, app_handle, controller) {
+                                         const ApplicationHandle& app_handle,
+                                         TransportAdapterController* controller)
+    : ThreadedSocketConnection(device_uid, app_handle, controller) {
 }
 
 TcpSocketConnection::~TcpSocketConnection() {
@@ -60,30 +62,32 @@ bool TcpSocketConnection::Establish(ConnectError** error) {
 }
 
 TcpServerOiginatedSocketConnection::TcpServerOiginatedSocketConnection(
-  const DeviceUID& device_uid, const ApplicationHandle& app_handle,
-  TransportAdapterController* controller)
-  : ThreadedSocketConnection(device_uid, app_handle, controller) {
+    const DeviceUID& device_uid, const ApplicationHandle& app_handle,
+    TransportAdapterController* controller)
+    : ThreadedSocketConnection(device_uid, app_handle, controller) {
 }
 
 TcpServerOiginatedSocketConnection::~TcpServerOiginatedSocketConnection() {
 }
 
 bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
-  LOG4CXX_TRACE(logger_, "enter. error " << error);
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK(error);
+  LOG4CXX_DEBUG(logger_, "error " << error);
   DeviceSptr device = controller()->FindDevice(device_handle());
   if (!device.valid()) {
     LOG4CXX_ERROR(logger_, "Device " << device_handle() << " not found");
     *error = new ConnectError();
-    LOG4CXX_TRACE(logger_, "exit with FALSE. Condition: !device.valid()");
     return false;
   }
   TcpDevice* tcp_device = static_cast<TcpDevice*>(device.get());
 
-  int port;
-  if (-1 == (port = tcp_device->GetApplicationPort(application_handle()))) {
-    LOG4CXX_ERROR(logger_, "Application port for " << application_handle() << " not found");
+  const int port = tcp_device->GetApplicationPort(application_handle());
+  if (-1 == port) {
+    LOG4CXX_ERROR(
+        logger_,
+        "Application port for " << application_handle() << " not found");
     *error = new ConnectError();
-    LOG4CXX_TRACE(logger_, "exit with FALSE. Condition: port not found");
     return false;
   }
 
@@ -91,7 +95,6 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
   if (socket < 0) {
     LOG4CXX_ERROR(logger_, "Failed to create socket");
     *error = new ConnectError();
-    LOG4CXX_TRACE(logger_, "exit with FALSE. Condition: failed to create socket");
     return false;
   }
 
@@ -100,21 +103,20 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
   addr.sin_addr.s_addr = tcp_device->in_addr();
   addr.sin_port = htons(port);
 
-  LOG4CXX_INFO(logger_, "Connecting " << inet_ntoa(addr.sin_addr) << ":"
-               << port);
+  LOG4CXX_DEBUG(logger_,
+               "Connecting " << inet_ntoa(addr.sin_addr) << ":" << port);
   if (::connect(socket, (struct sockaddr*) &addr, sizeof(addr)) < 0) {
-    LOG4CXX_ERROR(logger_, "Failed to connect for application "
-                  << application_handle() << ", error " << errno);
+    LOG4CXX_ERROR(
+        logger_,
+        "Failed to connect for application " << application_handle() << ", error " << errno);
     *error = new ConnectError();
-    LOG4CXX_TRACE(logger_, "exit with FALSE. Condition: failed to connect to application");
+    ::close(socket);
     return false;
   }
 
   set_socket(socket);
-  LOG4CXX_TRACE(logger_, "exit with TRUE");
   return true;
 }
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-
