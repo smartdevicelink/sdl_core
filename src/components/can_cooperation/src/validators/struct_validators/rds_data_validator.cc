@@ -45,49 +45,45 @@ RdsDataValidator::RdsDataValidator() {
   // name="PS"
   ps_[ValidationParams::TYPE] = ValueType::STRING;
   ps_[ValidationParams::MIN_LENGTH] = 0;
-  ps_[ValidationParams::MAX_LENGTH] = 100;
+  ps_[ValidationParams::MAX_LENGTH] = 8;
   ps_[ValidationParams::ARRAY] = 0;
   ps_[ValidationParams::MANDATORY] = 1;
 
   // name="RT"
   rt_[ValidationParams::TYPE] = ValueType::STRING;
   rt_[ValidationParams::MIN_LENGTH] = 0;
-  rt_[ValidationParams::MAX_LENGTH] = 100;
+  rt_[ValidationParams::MAX_LENGTH] = 64;
   rt_[ValidationParams::ARRAY] = 0;
   rt_[ValidationParams::MANDATORY] = 1;
 
   // name="CT"
   ct_[ValidationParams::TYPE] = ValueType::STRING;
-  ct_[ValidationParams::MIN_LENGTH] = 0;
-  ct_[ValidationParams::MAX_LENGTH] = 100;
+  ct_[ValidationParams::MIN_LENGTH] = 24;
+  ct_[ValidationParams::MAX_LENGTH] = 24;
   ct_[ValidationParams::ARRAY] = 0;
   ct_[ValidationParams::MANDATORY] = 1;
 
   // name="PI"
   pi_[ValidationParams::TYPE] = ValueType::STRING;
   pi_[ValidationParams::MIN_LENGTH] = 0;
-  pi_[ValidationParams::MAX_LENGTH] = 100;
+  pi_[ValidationParams::MAX_LENGTH] = 6;
   pi_[ValidationParams::ARRAY] = 0;
   pi_[ValidationParams::MANDATORY] = 1;
 
   // name="PTY"
-  pty_[ValidationParams::TYPE] = ValueType::STRING;
-  pty_[ValidationParams::MIN_LENGTH] = 0;
-  pty_[ValidationParams::MAX_LENGTH] = 100;
+  pty_[ValidationParams::TYPE] = ValueType::INT;
+  pty_[ValidationParams::MIN_VALUE] = 0;
+  pty_[ValidationParams::MAX_VALUE] = 31;
   pty_[ValidationParams::ARRAY] = 0;
   pty_[ValidationParams::MANDATORY] = 1;
 
   // name="TA"
-  ta_[ValidationParams::TYPE] = ValueType::STRING;
-  ta_[ValidationParams::MIN_LENGTH] = 0;
-  ta_[ValidationParams::MAX_LENGTH] = 100;
+  ta_[ValidationParams::TYPE] = ValueType::BOOL;
   ta_[ValidationParams::ARRAY] = 0;
   ta_[ValidationParams::MANDATORY] = 1;
 
   // name="TP"
-  tp_[ValidationParams::TYPE] = ValueType::STRING;
-  tp_[ValidationParams::MIN_LENGTH] = 0;
-  tp_[ValidationParams::MAX_LENGTH] = 100;
+  tp_[ValidationParams::TYPE] = ValueType::BOOL;
   tp_[ValidationParams::ARRAY] = 0;
   tp_[ValidationParams::MANDATORY] = 1;
 
