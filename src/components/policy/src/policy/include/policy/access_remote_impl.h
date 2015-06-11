@@ -74,7 +74,6 @@ class AccessRemoteImpl : public AccessRemote {
                                     FunctionalIdType& group_types);
 
  private:
-  static const policy_table::Strings kGroupsEmpty;
   typedef std::map<Subject, TypeAccess> AccessControlRow;
   typedef std::map<Object, AccessControlRow> AccessControlList;
   typedef std::map<std::string, policy_table::AppHMITypes> HMIList;

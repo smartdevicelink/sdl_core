@@ -302,7 +302,7 @@ const policy_table::Strings& AccessRemoteImpl::GetGroups(
     } else if (IsEnabled()) {
       return *cache_->pt_->policy_table.app_policies[app_id].groups_nonPrimaryRC;
     } else {
-      return kGroupsEmpty;
+      return cache_->GetGroups(kPreConsentPassengersRC);
     }
   }
   return cache_->GetGroups(app_id);
@@ -342,6 +342,4 @@ void AccessRemoteImpl::GetGroupsIds(const std::string &device_id,
   LOG4CXX_DEBUG(logger_, "Groups Ids: " << groups_ids);
 }
 
-const policy_table::Strings AccessRemoteImpl::kGroupsEmpty;
-}
-// namespace policy
+}  // namespace policy

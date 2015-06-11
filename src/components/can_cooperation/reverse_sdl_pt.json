@@ -315,6 +315,22 @@
                     }
                 }
             },
+            "pre_BaseRC-1": {
+                "rpcs": {
+                    "OnPermissionsChange": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    },
+                    "OnHMIStatus": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
+                    }
+                }
+            },
             "DrivingCharacteristics-3": {
                 "user_consent_prompt": "DrivingCharacteristics",
                 "rpcs": {
@@ -2366,6 +2382,10 @@
                 "groups_primaryRC": ["Base-4", "Base-RC", "Radio", "Climate", "RemoteControl"],
                 "groups_nonPrimaryRC": ["Base-RC", "Radio", "Climate", "Notifications-RC", "RemoteControl"],
                 "AppHMIType": ["REMOTE_CONTROL"]
+            },
+            "pre_consent_passengersRC": {
+                "priority": "NONE",
+                "groups": ["pre_BaseRC-1"]
             },
             "device": {
                 "keep_context": false,
