@@ -61,6 +61,8 @@ class OnRadioDetailsNotificationValidator : public Validator,
   FRIEND_BASE_SINGLETON_CLASS(OnRadioDetailsNotificationValidator);
   OnRadioDetailsNotificationValidator();
   ~OnRadioDetailsNotificationValidator() {};
+
+  //td::map<std::string, int> trigger_source_;
 };
 
 }  // namespace valdiators

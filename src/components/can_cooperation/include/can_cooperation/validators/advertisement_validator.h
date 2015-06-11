@@ -62,10 +62,10 @@ class AdvertisementValidator : public Validator, public utils::Singleton<Adverti
   FRIEND_BASE_SINGLETON_CLASS(AdvertisementValidator);
   AdvertisementValidator();
   ~AdvertisementValidator() {};
-
+/*
   std::map<std::string, int> product_name_;
   std::map<std::string, int> company_name_;
-  std::map<std::string, int> phone_number_;
+  std::map<std::string, int> phone_number_;*/
 };
 
 }  // namespace valdiators

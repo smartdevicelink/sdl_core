@@ -38,7 +38,7 @@ namespace functional_modules {
 
 enum MobileFunctionID {
   // Reverse SDL functions ids
-  GRANT_ACCESS = 100001,
+/*  GRANT_ACCESS = 100001,
   START_SCAN = 100003,
   STOP_SCAN = 100004,
   TUNE_RADIO = 100005,
@@ -47,7 +47,7 @@ enum MobileFunctionID {
   ON_RADIO_DETAILS = 100009,
   ON_PRESETS_CHANGED = 100010,
   CLIMATE_CONTROL_ON = 100011,
-  GET_SEAT_CONTROL = 100012,
+  GET_SEAT_CONTROL = 100012,*/
   BUTTON_PRESS = 100015,
   GET_INTERIOR_VEHICLE_DATA_CAPABILITIES = 100016,
   GET_INTERIOR_VEHICLE_DATA = 100017,
@@ -57,20 +57,20 @@ enum MobileFunctionID {
 
 namespace hmi_api {
   const char get_interior_vehicle_data_capabilities[] =
-      "VehicleInfo.GetInteriorVehicleDataCapabilities";
-  const char get_interior_vehicle_data[] = "VehicleInfo.GetInteriorVehicleData";
-  const char set_interior_vehicle_data[] = "VehicleInfo.SetInteriorVehicleData";
-  const char on_interior_vehicle_data[]  = "VehicleInfo.OnInteriorVehicleData";
-  const char button_press[]              = "VehicleInfo.ButtonPress";
+                               "RC.GetInteriorVehicleDataCapabilities";
+  const char get_interior_vehicle_data[] = "RC.GetInteriorVehicleData";
+  const char set_interior_vehicle_data[] = "RC.SetInteriorVehicleData";
+  const char on_interior_vehicle_data[]  = "RC.OnInteriorVehicleData";
+  const char button_press[]              = "Buttons.ButtonPress";
 
-  const char grant_access[]              = "VehicleInfo.GrantAccess";
-  const char on_reverse_apps_allowing[]  = "VehicleInfo.OnReverseAppsAllowing";
-  const char on_primary_device[]         = "VehicleInfo.OnPrimaryDevice";
+  const char grant_access[]              = "RC.GrantAccess";
+  const char on_reverse_apps_allowing[]  = "RC.OnReverseAppsAllowing";
+  const char on_primary_device[]         = "RC.OnPrimaryDevice";
   const char on_app_deactivated[]        = "BasicCommunication.OnAppDeactivated";
   const char sdl_activate_app[]          = "SDL.ActivateApp";
 }
 
-namespace can_api {
+/*namespace can_api {
   const char start_scan[]         = "CAN.StartScan";
   const char stop_scan[]          = "CAN.StopScan";
   const char tune_radion[]        = "CAN.TuneRadio";
@@ -80,7 +80,7 @@ namespace can_api {
   const char on_preset_changed[]  = "CAN.OnPresetsChanged";
   const char climate_control_on[] = "CAN.ClimateControlOn";
   const char get_seat_control[]   = "CAN.GetSeatControl";
-}
+}*/
 
 }  //  namespace functional_modules
 

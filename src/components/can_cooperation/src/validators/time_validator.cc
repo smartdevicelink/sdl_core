@@ -38,10 +38,10 @@ namespace can_cooperation {
 namespace validators {
 
 using namespace message_params;
-using namespace validation_params;
+
 
 TimeValidator::TimeValidator() {
-  // name="hours"
+/*  // name="hours"
   hours_[kType] = ValueType::INT;
   hours_[kMinValue] = 0;
   hours_[kMaxValue] = 23;
@@ -97,7 +97,7 @@ TimeValidator::TimeValidator() {
   validation_scope_map_[kYear] = &year_;
   validation_scope_map_[kMonth] = &month_;
   validation_scope_map_[kDay] = &day_;
-  validation_scope_map_[kTZD] = &tzd_;
+  validation_scope_map_[kTZD] = &tzd_;*/
 }
 
 ValidationResult TimeValidator::Validate(const Json::Value& json,

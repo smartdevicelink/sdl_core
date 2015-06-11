@@ -62,7 +62,7 @@ class OnPresetChangedNotificationValidator : public Validator,
   OnPresetChangedNotificationValidator();
   ~OnPresetChangedNotificationValidator() {};
 
-  std::map<std::string, int> custom_presets_;
+  std::map<int, int> custom_presets_;
 };
 
 }  // namespace valdiators

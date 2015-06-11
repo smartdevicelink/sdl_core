@@ -84,6 +84,10 @@ CANAppExtensionPtr BaseCommandNotification::GetAppExtension(
 
 void BaseCommandNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (!Validate()) {
+    return;
+  }
+
   NotifyApplications();
 }
 

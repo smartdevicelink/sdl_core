@@ -46,7 +46,7 @@ ValidationResult TuneRadioRequestValidator::Validate(const Json::Value& json,
                                                    Json::Value& outgoing_json) {
   if (json.isMember(kRadioStation)) {
     return RadioStationValidator::instance()->Validate(
-        json[kRadioStation], outgoing_json[kParams][kRadioStation]);
+        json[kRadioStation], outgoing_json[kRadioStation]);
   } else {
     return ValidationResult::INVALID_DATA;
   }

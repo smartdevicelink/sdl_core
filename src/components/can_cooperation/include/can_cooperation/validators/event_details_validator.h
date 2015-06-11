@@ -63,9 +63,9 @@ class EventDetailsValidator : public Validator, public utils::Singleton<EventDet
   EventDetailsValidator();
   ~EventDetailsValidator() {};
 
-  std::map<std::string, int> event_name_;
+/*  std::map<std::string, int> event_name_;
   std::map<std::string, int> phone_number_;
-  std::map<std::string, int> price_;
+  std::map<std::string, int> price_;*/
 };
 
 }  // namespace valdiators

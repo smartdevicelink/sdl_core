@@ -63,13 +63,11 @@ class RadioStationValidator : public Validator,
   FRIEND_BASE_SINGLETON_CLASS(RadioStationValidator);
   RadioStationValidator();
   ~RadioStationValidator() {};
-
-  ValidationScopeMap validation_scope_map_;
-
+/*
   std::map<std::string, int> frequency_;
   std::map<std::string, int> fraction_;
   std::map<std::string, int> available_hds_;
-  std::map<std::string, int> current_hd_;
+  std::map<std::string, int> current_hd_;*/
 };
 
 }  // namespace valdiators

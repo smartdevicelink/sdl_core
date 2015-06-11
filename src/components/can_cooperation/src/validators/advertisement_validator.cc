@@ -39,10 +39,10 @@ namespace can_cooperation {
 namespace validators {
 
 using namespace message_params;
-using namespace validation_params;
+
 
 AdvertisementValidator::AdvertisementValidator() {
-  // name="productName"
+/*  // name="productName"
   product_name_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
   product_name_[kMinLength] = 0;
   product_name_[kMaxLength] = 100;
@@ -65,7 +65,7 @@ AdvertisementValidator::AdvertisementValidator() {
 
   validation_scope_map_[kProductName] = &product_name_;
   validation_scope_map_[kCompanyName] =  &company_name_;
-  validation_scope_map_[kPhoneNumber] = &phone_number_;
+  validation_scope_map_[kPhoneNumber] = &phone_number_;*/
 }
 
 ValidationResult AdvertisementValidator::Validate(const Json::Value& json,

@@ -38,10 +38,10 @@ namespace can_cooperation {
 namespace validators {
 
 using namespace message_params;
-using namespace validation_params;
+
 
 WebActivityValidator::WebActivityValidator() {
-  // name="url"
+/*  // name="url"
   url_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
   url_[kMinLength] = 0;
   url_[kMaxLength] = 100;
@@ -56,7 +56,7 @@ WebActivityValidator::WebActivityValidator() {
   action_code_[kMandatory] = 0;
 
   validation_scope_map_[kURL] = &url_;
-  validation_scope_map_[kActionCode] =  &action_code_;
+  validation_scope_map_[kActionCode] =  &action_code_;*/
 }
 
 ValidationResult WebActivityValidator::Validate(const Json::Value& json,

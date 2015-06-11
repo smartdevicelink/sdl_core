@@ -68,7 +68,7 @@ CANModule::CANModule()
 }
 
 void CANModule::SubscribeOnFunctions() {
-  plugin_info_.mobile_function_list.push_back(MobileFunctionID::TUNE_RADIO);
+ /* plugin_info_.mobile_function_list.push_back(MobileFunctionID::TUNE_RADIO);
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::TUNE_UP);
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::TUNE_DOWN);
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::START_SCAN);
@@ -80,7 +80,7 @@ void CANModule::SubscribeOnFunctions() {
   plugin_info_.mobile_function_list.push_back(
     MobileFunctionID::ON_RADIO_DETAILS);
   plugin_info_.mobile_function_list.push_back(
-    MobileFunctionID::ON_PRESETS_CHANGED);
+    MobileFunctionID::ON_PRESETS_CHANGED);*/
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::BUTTON_PRESS);
   plugin_info_.mobile_function_list.push_back(
     MobileFunctionID::GET_INTERIOR_VEHICLE_DATA_CAPABILITIES);
@@ -234,14 +234,14 @@ functional_modules::ProcessResult CANModule::HandleMessage(
       break;
     }
     case application_manager::MessageType::kNotification: {
-      if (functional_modules::can_api::on_preset_changed == function_name) {
-        msg->set_function_id(MobileFunctionID::ON_PRESETS_CHANGED);
-      } else if (functional_modules::hmi_api::on_interior_vehicle_data
-                 == function_name) {
+      if (functional_modules::hmi_api::on_interior_vehicle_data
+                       == function_name) {
         msg->set_function_id(MobileFunctionID::ON_INTERIOR_VEHICLE_DATA);
+/*     } else if (functional_modules::can_api::on_preset_changed == function_name) {
+        msg->set_function_id(MobileFunctionID::ON_PRESETS_CHANGED);
       } else if (functional_modules::can_api::on_radio_details
                  == function_name) {
-        msg->set_function_id(MobileFunctionID::ON_RADIO_DETAILS);
+        msg->set_function_id(MobileFunctionID::ON_RADIO_DETAILS);*/
       } else if (functional_modules::hmi_api::on_reverse_apps_allowing
                  == function_name) {
         if (value.isMember(json_keys::kParams)) {
