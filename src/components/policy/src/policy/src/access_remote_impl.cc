@@ -292,11 +292,7 @@ const policy_table::AppHMITypes& AccessRemoteImpl::HmiTypes(
 const policy_table::Strings& AccessRemoteImpl::GetGroups(
     const PTString& device_id, const PTString& app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const policy_table::AppHMITypes& hmi_types = HmiTypes(app_id);
-  bool reverse = std::find(hmi_types.begin(), hmi_types.end(),
-                           policy_table::AHT_REMOTE_CONTROL) != hmi_types.end();
-
-  if (reverse) {
+  if (IsAppReverse(app_id)) {
     if (IsPrimaryDevice(device_id)) {
       return *cache_->pt_->policy_table.app_policies[app_id].groups_primaryRC;
     } else if (IsEnabled()) {
@@ -306,6 +302,12 @@ const policy_table::Strings& AccessRemoteImpl::GetGroups(
     }
   }
   return cache_->GetGroups(app_id);
+}
+
+bool AccessRemoteImpl::IsAppReverse(const PTString& app_id) {
+  const policy_table::AppHMITypes& hmi_types = HmiTypes(app_id);
+  return std::find(hmi_types.begin(), hmi_types.end(),
+                   policy_table::AHT_REMOTE_CONTROL) != hmi_types.end();
 }
 
 bool AccessRemoteImpl::GetPermissionsForApp(const std::string &device_id,
