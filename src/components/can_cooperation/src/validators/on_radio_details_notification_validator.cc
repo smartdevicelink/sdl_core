@@ -45,10 +45,15 @@ namespace can_cooperation {
 namespace validators {
 
 using namespace message_params;
-using namespace validation_params;
 using namespace json_keys;
 
 OnRadioDetailsNotificationValidator::OnRadioDetailsNotificationValidator() {
+/*  trigger_source_[kType] = ValueType::ENUM;
+  trigger_source_[kEnumType] = EnumType::TRIGGER_SOURCE;
+  trigger_source_[kArray] = 0;
+  trigger_source_[kMandatory] = 1;
+
+  validation_scope_map_[kTriggerSource] = &trigger_source_;*/
 }
 
 ValidationResult OnRadioDetailsNotificationValidator::Validate(
@@ -63,7 +68,7 @@ ValidationResult OnRadioDetailsNotificationValidator::Validate(
 
   if (json.isMember(kRadioStation)) {
     result = SongInfoValidator::instance()->Validate(
-        json[kParams][kRadioStation], outgoing_json[kParams][kRadioStation]);
+        json[kRadioStation], outgoing_json[kRadioStation]);
   }
 
   if (result != ValidationResult::SUCCESS) {
@@ -72,7 +77,7 @@ ValidationResult OnRadioDetailsNotificationValidator::Validate(
 
   if (json.isMember(kSongInfo)) {
     result = SongInfoValidator::instance()->Validate(
-        json[kParams][kSongInfo], outgoing_json[kParams][kSongInfo]);
+        json[kSongInfo], outgoing_json[kSongInfo]);
   }
 
   if (result != ValidationResult::SUCCESS) {
@@ -81,7 +86,7 @@ ValidationResult OnRadioDetailsNotificationValidator::Validate(
 
   if (json.isMember(kEvent)) {
     result = EventDetailsValidator::instance()->Validate(
-        json[kParams][kEvent], outgoing_json[kParams][kEvent]);
+        json[kEvent], outgoing_json[kEvent]);
   }
 
   if (result != ValidationResult::SUCCESS) {
@@ -90,7 +95,7 @@ ValidationResult OnRadioDetailsNotificationValidator::Validate(
 
   if (json.isMember(kAdvertisement)) {
     result = AdvertisementValidator::instance()->Validate(
-        json[kParams][kAdvertisement], outgoing_json[kParams][kAdvertisement]);
+        json[kAdvertisement], outgoing_json[kAdvertisement]);
   }
 
   if (result != ValidationResult::SUCCESS) {
@@ -99,7 +104,7 @@ ValidationResult OnRadioDetailsNotificationValidator::Validate(
 
   if (json.isMember(kActivity)) {
     result = WebActivityValidator::instance()->Validate(
-        json[kParams][kActivity], outgoing_json[kParams][kActivity]);
+        json[kActivity], outgoing_json[kActivity]);
   }
 
   if (result != ValidationResult::SUCCESS) {
@@ -108,17 +113,14 @@ ValidationResult OnRadioDetailsNotificationValidator::Validate(
 
   if (json.isMember(kLocation)) {
     result = LocationValidator::instance()->Validate(
-        json[kParams][kLocation], outgoing_json[kParams][kLocation]);
+        json[kLocation], outgoing_json[kLocation]);
   }
 
   if (result != ValidationResult::SUCCESS) {
     return result;
   }
 
-  if (json.isMember(kTriggerSource)) {
-    result = ValidateEnumValue(kTriggerSource, json[kParams],
-                               outgoing_json[kParams]);
-  }
+  result = ValidateSimpleValues(json, outgoing_json);
 
   if  (ValidationResult::SUCCESS == result) {
     json_string = MessageHelper::ValueToString(outgoing_json);

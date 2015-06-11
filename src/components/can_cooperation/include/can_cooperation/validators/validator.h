@@ -47,15 +47,43 @@ enum ValidationResult {
   INVALID_DATA
 };
 
+
+// TOD(VS): Use this enum as key for ValidationScope map
+enum ValidationParams {
+  MIN_LENGTH,
+  MAX_LENGTH,
+  MIN_VALUE,
+  MAX_VALUE,
+  MIN_SIZE,
+  MAX_SIZE,
+  ARRAY,
+  MANDATORY,
+  TYPE,
+  ENUM_TYPE
+};
+
+
 enum ValueType {
   INT,
   STRING,
   DOUBLE,
-  BOOL
+  BOOL,
+  ENUM
+};
+
+enum EnumType {
+  //TRIGGER_SOURCE,
+  BUTTON_NAME,
+  MODULE_TYPE,
+  RADIO_BAND,
+  RADIO_STATE,
+  DEFROST_ZONE,
+  TEMPERATURE_UNIT,
+  BUTTON_PRESS_MODE
 };
 
 //validation_scope map with data that will be used for validation(minlength. maxlength, etc.)
-typedef std::map<std::string, int> ValidationScope;
+typedef std::map<ValidationParams, int> ValidationScope;
 
 typedef std::map<std::string, ValidationScope*> ValidationScopeMap;
 
@@ -80,18 +108,6 @@ class Validator {
   */
  ValidationResult ValidateSimpleValues(const Json::Value& json,
                                        Json::Value& outgoing_json);
-
- /**
-  * @brief Validate string with enum value that comes in request/response/notification
-  *
-  * @param enum_name enum name
-  * @param json incoming json with request-response params
-  * @param outgoing_json outgoing json where is param will be copied after verification
-  *
-  * @return true if value right, otherwise false
-  */
- ValidationResult ValidateEnumValue(const std::string& enum_name,
-                        const Json::Value& json, Json::Value& outgoing_json);
 
  ValidationScopeMap validation_scope_map_;
 
@@ -131,6 +147,17 @@ class Validator {
    */
   ValidationResult ValidateStringValue(const std::string& value,
                                        ValidationScope& validation_scope);
+
+  /**
+   * @brief Validate string with enum value that comes in request/response/notification
+   *
+   * @param value value to verify
+   * @param validation_scope map with data that will be used for validation
+   *
+   * @return true if value right, otherwise false
+   */
+  ValidationResult ValidateEnumValue(const std::string& value,
+                                     ValidationScope& validation_scope);
 
   /**
    * @brief Validate int value

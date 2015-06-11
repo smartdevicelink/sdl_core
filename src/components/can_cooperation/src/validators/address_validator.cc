@@ -38,10 +38,10 @@ namespace can_cooperation {
 namespace validators {
 
 using namespace message_params;
-using namespace validation_params;
+
 
 AddressValidator::AddressValidator() {
-  // name="state"
+/*  // name="state"
   state_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
   state_[kMinLength] = 0;
   state_[kMaxLength] = 100;
@@ -72,7 +72,7 @@ AddressValidator::AddressValidator() {
   validation_scope_map_[kState] = &state_;
   validation_scope_map_[kZipCode] =  &zip_code_;
   validation_scope_map_[kCity] = &city_;
-  validation_scope_map_[kStreet] = &street_;
+  validation_scope_map_[kStreet] = &street_;*/
 }
 
 ValidationResult AddressValidator::Validate(const Json::Value& json,

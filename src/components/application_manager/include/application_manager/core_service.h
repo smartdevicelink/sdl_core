@@ -156,6 +156,14 @@ class CoreService : public Service {
    */
   virtual void SubscribeToHMINotification(const std::string& hmi_notification);
 
+  /*
+   * @brief Change hmi level of app and notify it
+   * @param app Application to be changed and notified
+   * @param level New HMI level of app
+   */
+  void ChangeNotifyHMILevel(ApplicationSharedPtr app,
+      mobile_apis::HMILevel::eType level);
+
  private:
   DISALLOW_COPY_AND_ASSIGN(CoreService);
 

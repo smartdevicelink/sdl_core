@@ -39,18 +39,17 @@ namespace can_cooperation {
 namespace validators {
 
 using namespace message_params;
-using namespace validation_params;
 using namespace json_keys;
 
 OnPresetChangedNotificationValidator::OnPresetChangedNotificationValidator() {
   // name="customPresets"
-  custom_presets_[kType] = ValueType::STRING;
-  custom_presets_[kMinLength] = 0;
-  custom_presets_[kMaxLength] = 500;
-  custom_presets_[kMinSize] = 6;
-  custom_presets_[kMaxSize] = 6;
-  custom_presets_[kArray] = 1;
-  custom_presets_[kMandatory] = 1;
+  custom_presets_[ValidationParams::TYPE] = ValueType::STRING;
+  custom_presets_[ValidationParams::MIN_LENGTH] = 0;
+  custom_presets_[ValidationParams::MAX_LENGTH] = 500;
+  custom_presets_[ValidationParams::MIN_SIZE] = 6;
+  custom_presets_[ValidationParams::MAX_SIZE] = 6;
+  custom_presets_[ValidationParams::ARRAY] = 1;
+  custom_presets_[ValidationParams::MANDATORY] = 1;
 
   validation_scope_map_[kCustomPresets] = &custom_presets_;
 }
@@ -63,8 +62,8 @@ ValidationResult OnPresetChangedNotificationValidator::Validate(
 
   Json::Value outgoing_json;
 
-  ValidationResult result = ValidateSimpleValues(json[kParams],
-                                                 outgoing_json[kParams]);
+  ValidationResult result = ValidateSimpleValues(json,
+                                                 outgoing_json);
 
   if  (ValidationResult::SUCCESS == result) {
     json_string = MessageHelper::ValueToString(outgoing_json);

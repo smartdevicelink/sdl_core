@@ -62,9 +62,9 @@ class WebActivityValidator : public Validator, public utils::Singleton<WebActivi
   FRIEND_BASE_SINGLETON_CLASS(WebActivityValidator);
   WebActivityValidator();
   ~WebActivityValidator() {};
-
+/*
   std::map<std::string, int> url_;
-  std::map<std::string, int> action_code_;
+  std::map<std::string, int> action_code_;*/
 };
 
 }  // namespace valdiators

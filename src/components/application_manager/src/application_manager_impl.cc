@@ -1224,16 +1224,24 @@ void ApplicationManagerImpl::SendMessageToMobile(
   }
 
   smart_objects::SmartObject& msg_to_mobile = *message;
+  mobile_apis::FunctionID::eType function_id =
+        static_cast<mobile_apis::FunctionID::eType>(
+        (*message)[strings::params][strings::function_id].asUInt());
+
   // If correlation_id is not present, it is from-HMI message which should be
   // checked against policy permissions
   if (msg_to_mobile[strings::params].keyExists(strings::correlation_id)) {
     request_ctrl_.terminateMobileRequest(
       msg_to_mobile[strings::params][strings::correlation_id].asInt(),
       msg_to_mobile[strings::params][strings::connection_key].asInt());
+    if (function_id == mobile_apis::FunctionID::RegisterAppInterfaceID &&
+        (*message)[strings::msg_params][strings::success].asBool()) {
+      bool is_for_plugin =
+        functional_modules::PluginManager::instance()->IsAppForPlugins(app);
+      LOG4CXX_INFO(logger_, "Registered app " << app->app_id() << " is "
+         << (is_for_plugin ?  "" : "not ") << "for plugins.");
+    }
   } else if (app) {
-    mobile_apis::FunctionID::eType function_id =
-        static_cast<mobile_apis::FunctionID::eType>(
-        (*message)[strings::params][strings::function_id].asUInt());
     RPCParams params;
 
     const smart_objects::SmartObject& s_map = (*message)[strings::msg_params];
@@ -2384,8 +2392,11 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromHmi message) {
 
   if (plugin_manager->IsHMIMessageForPlugin(message)) {
     LOG4CXX_INFO(logger_, "Message will be processed by plugin.");
-    plugin_manager->ProcessHMIMessage(message);
-    return;
+    functional_modules::ProcessResult result = plugin_manager->ProcessHMIMessage(message);
+    if (functional_modules::ProcessResult::PROCESSED == result
+       || functional_modules::ProcessResult::FAILED == result) {
+        return;
+    }
   }
   ProcessMessageFromHMI(message);
 }

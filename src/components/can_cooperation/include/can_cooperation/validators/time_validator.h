@@ -63,13 +63,13 @@ class TimeValidator : public Validator, public utils::Singleton<TimeValidator> {
   TimeValidator();
   ~TimeValidator() {};
 
-  std::map<std::string, int> hours_;
+/*  std::map<std::string, int> hours_;
   std::map<std::string, int> minutes_;
   std::map<std::string, int> seconds_;
   std::map<std::string, int> year_;
   std::map<std::string, int> month_;
   std::map<std::string, int> day_;
-  std::map<std::string, int> tzd_;
+  std::map<std::string, int> tzd_;*/
 };
 
 }  // namespace valdiators

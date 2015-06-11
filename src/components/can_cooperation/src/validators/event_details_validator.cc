@@ -40,10 +40,10 @@ namespace can_cooperation {
 namespace validators {
 
 using namespace message_params;
-using namespace validation_params;
+
 
 EventDetailsValidator::EventDetailsValidator() {
-  // name="eventName"
+/*  // name="eventName"
   event_name_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
   event_name_[kMinLength] = 0;
   event_name_[kMaxLength] = 100;
@@ -66,7 +66,7 @@ EventDetailsValidator::EventDetailsValidator() {
 
   validation_scope_map_[kEventName] = &event_name_;
   validation_scope_map_[kPhoneNumber] =  &phone_number_;
-  validation_scope_map_[kPrice] = &price_;
+  validation_scope_map_[kPrice] = &price_;*/
 }
 
 ValidationResult EventDetailsValidator::Validate(const Json::Value& json,

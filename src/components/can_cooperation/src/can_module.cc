@@ -35,10 +35,12 @@
 #include "can_cooperation/can_module_event.h"
 #include "can_cooperation/event_engine/event_dispatcher.h"
 #include "can_cooperation/can_module_constants.h"
-#include "application_manager/application.h"
+
 #include "can_cooperation/can_tcp_connection.h"
 #include "can_cooperation/message_helper.h"
 #include "can_cooperation/policy_helper.h"
+#include "can_cooperation/can_app_extension.h"
+#include "can_cooperation/module_helper.h"
 #include "utils/logger.h"
 
 namespace can_cooperation {
@@ -66,7 +68,7 @@ CANModule::CANModule()
 }
 
 void CANModule::SubscribeOnFunctions() {
-  plugin_info_.mobile_function_list.push_back(MobileFunctionID::TUNE_RADIO);
+ /* plugin_info_.mobile_function_list.push_back(MobileFunctionID::TUNE_RADIO);
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::TUNE_UP);
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::TUNE_DOWN);
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::START_SCAN);
@@ -78,19 +80,19 @@ void CANModule::SubscribeOnFunctions() {
   plugin_info_.mobile_function_list.push_back(
     MobileFunctionID::ON_RADIO_DETAILS);
   plugin_info_.mobile_function_list.push_back(
-    MobileFunctionID::ON_PRESETS_CHANGED);
+    MobileFunctionID::ON_PRESETS_CHANGED);*/
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::BUTTON_PRESS);
   plugin_info_.mobile_function_list.push_back(
-      MobileFunctionID::GET_INTERIOR_VEHICLE_DATA_CAPABILITIES);
+    MobileFunctionID::GET_INTERIOR_VEHICLE_DATA_CAPABILITIES);
   plugin_info_.mobile_function_list.push_back(
-      MobileFunctionID::GET_INTERIOR_VEHICLE_DATA);
+    MobileFunctionID::GET_INTERIOR_VEHICLE_DATA);
   plugin_info_.mobile_function_list.push_back(
-      MobileFunctionID::SET_INTERIOR_VEHICLE_DATA);
+    MobileFunctionID::SET_INTERIOR_VEHICLE_DATA);
   plugin_info_.mobile_function_list.push_back(
-      MobileFunctionID::ON_INTERIOR_VEHICLE_DATA);
+    MobileFunctionID::ON_INTERIOR_VEHICLE_DATA);
 
   plugin_info_.hmi_function_list.push_back(
-      hmi_api::get_interior_vehicle_data_capabilities);
+    hmi_api::get_interior_vehicle_data_capabilities);
   plugin_info_.hmi_function_list.push_back(hmi_api::get_interior_vehicle_data);
   plugin_info_.hmi_function_list.push_back(hmi_api::set_interior_vehicle_data);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_interior_vehicle_data);
@@ -99,6 +101,8 @@ void CANModule::SubscribeOnFunctions() {
   plugin_info_.hmi_function_list.push_back(hmi_api::grant_access);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_reverse_apps_allowing);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_primary_device);
+  plugin_info_.hmi_function_list.push_back(hmi_api::on_app_deactivated);
+  plugin_info_.hmi_function_list.push_back(hmi_api::sdl_activate_app);
 }
 
 CANModule::~CANModule() {
@@ -117,7 +121,7 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
   }
 
   msg->set_function_name(MessageHelper::GetMobileAPIName(
-      static_cast<functional_modules::MobileFunctionID>(msg->function_id())));
+                           static_cast<functional_modules::MobileFunctionID>(msg->function_id())));
 
   commands::Command* command = MobileCommandFactory::CreateCommand(msg);
   if (command) {
@@ -196,16 +200,16 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     }
     // Response
   } else if (value.isMember(json_keys::kResult)
-      && value[json_keys::kResult].isMember(json_keys::kMethod)) {
+             && value[json_keys::kResult].isMember(json_keys::kMethod)) {
     function_name = value[json_keys::kResult][json_keys::kMethod].asCString();
     msg->set_message_type(application_manager::MessageType::kResponse);
     // Error response
   } else if (value.isMember(json_keys::kError)
-      && value[json_keys::kError].isMember(json_keys::kData)
+             && value[json_keys::kError].isMember(json_keys::kData)
              && value[json_keys::kError][json_keys::kData]
-                                         .isMember(json_keys::kMethod)) {
+             .isMember(json_keys::kMethod)) {
     function_name = value[json_keys::kError][json_keys::kData]
-                                            [json_keys::kMethod].asCString();
+                    [json_keys::kMethod].asCString();
     msg->set_message_type(application_manager::MessageType::kErrorResponse);
   } else {
     DCHECK(false);
@@ -230,14 +234,14 @@ functional_modules::ProcessResult CANModule::HandleMessage(
       break;
     }
     case application_manager::MessageType::kNotification: {
-      if (functional_modules::can_api::on_preset_changed == function_name) {
-        msg->set_function_id(MobileFunctionID::ON_PRESETS_CHANGED);
-      } else if (functional_modules::hmi_api::on_interior_vehicle_data
-                 == function_name) {
+      if (functional_modules::hmi_api::on_interior_vehicle_data
+                       == function_name) {
         msg->set_function_id(MobileFunctionID::ON_INTERIOR_VEHICLE_DATA);
+/*     } else if (functional_modules::can_api::on_preset_changed == function_name) {
+        msg->set_function_id(MobileFunctionID::ON_PRESETS_CHANGED);
       } else if (functional_modules::can_api::on_radio_details
                  == function_name) {
-        msg->set_function_id(MobileFunctionID::ON_RADIO_DETAILS);
+        msg->set_function_id(MobileFunctionID::ON_RADIO_DETAILS);*/
       } else if (functional_modules::hmi_api::on_reverse_apps_allowing
                  == function_name) {
         if (value.isMember(json_keys::kParams)) {
@@ -258,25 +262,34 @@ functional_modules::ProcessResult CANModule::HandleMessage(
           if (value[json_keys::kParams].isMember(message_params::kDevice)) {
             PolicyHelper::SetPrimaryDevice(
               value[json_keys::kParams][message_params::kDevice]
-              [json_keys::kId].asInt());
+              [json_keys::kId].asUInt());
           } else {
             LOG4CXX_ERROR(logger_, "Invalid OnPrimaryDevice notification");
           }
         }
-        break;
+        return ProcessResult::PROCESSED;
+      } else if (functional_modules::hmi_api::on_app_deactivated ==
+                 function_name) {
+        return ProcessOnAppDeactivation(value);
       }
 
       int32_t func_id = msg->function_id();
       std::string func_name = MessageHelper::GetMobileAPIName(
-          static_cast<functional_modules::MobileFunctionID>(func_id));
+                                static_cast<functional_modules::MobileFunctionID>(func_id));
       msg->set_function_name(func_name);
 
       NotifyMobiles(msg);
       break;
     }
-    case application_manager::MessageType::kRequest:
+    case application_manager::MessageType::kRequest: {
+      if (function_name == functional_modules::hmi_api::sdl_activate_app) {
+        msg->set_protocol_version(application_manager::ProtocolVersion::kHMI);
+        return ProcessSDLActivateApp(value);
+      }
+      return ProcessResult::CANNOT_PROCESS;
+    }
     default: {
-      return ProcessResult::FAILED;;
+      return ProcessResult::FAILED;
     }
   }
 
@@ -334,6 +347,21 @@ void CANModule::RemoveAppExtension(uint32_t app_id) {
     service()->ResetAccess(app->app_id());
     app->RemoveExtension(kCANModuleID);
   }
+}
+
+bool CANModule::IsAppForPlugin(
+  application_manager::ApplicationSharedPtr app) {
+  if (app->app_types()) {
+    std::vector<int> hmi_types =
+      application_manager::SmartObjToArrayInt(app->app_types());
+    if (hmi_types.end() != std::find(hmi_types.begin(), hmi_types.end(),
+                                     mobile_apis::AppHMIType::eType::REMOTE_CONTROL)) {
+      CANAppExtensionPtr can_app_extension = new CANAppExtension(GetModuleID());
+      app->AddExtension(can_app_extension);
+      return true;
+    }
+  }
+  return false;
 }
 
 }  //  namespace can_cooperation

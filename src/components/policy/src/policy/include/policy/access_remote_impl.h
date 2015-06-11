@@ -72,9 +72,9 @@ class AccessRemoteImpl : public AccessRemote {
   virtual bool GetPermissionsForApp(const std::string &device_id,
                                     const std::string &app_id,
                                     FunctionalIdType& group_types);
+  virtual bool IsAppReverse(const PTString& app_id);
 
  private:
-  static const policy_table::Strings kGroupsEmpty;
   typedef std::map<Subject, TypeAccess> AccessControlRow;
   typedef std::map<Object, AccessControlRow> AccessControlList;
   typedef std::map<std::string, policy_table::AppHMITypes> HMIList;

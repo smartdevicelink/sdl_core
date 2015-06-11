@@ -31,6 +31,7 @@
  */
 
 #include "can_cooperation/commands/on_interior_vehicle_data_notification.h"
+#include "can_cooperation/validators/on_interior_vehicle_data_notification_validator.h"
 #include "json/json.h"
 #include "can_cooperation/can_module_constants.h"
 
@@ -50,6 +51,23 @@ OnInteriorVehicleDataNotification::~OnInteriorVehicleDataNotification() {
 
 void OnInteriorVehicleDataNotification::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
+}
+
+bool OnInteriorVehicleDataNotification::Validate() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  application_manager::MessagePtr msg = message();
+  std::string json = msg->json_message();
+
+  if (validators::ValidationResult::SUCCESS ==
+      validators::OnInteriorVehicleDataNotificationValidator::instance()->
+      Validate(json)) {
+    msg->set_json_message(json);
+  } else {
+    LOG4CXX_INFO(logger_, "HMI notification validation failed!");
+    return false;
+  }
+
+  return true;
 }
 
 std::string OnInteriorVehicleDataNotification::ModuleType(

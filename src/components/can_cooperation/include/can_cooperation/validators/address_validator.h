@@ -63,10 +63,10 @@ class AddressValidator : public Validator, public utils::Singleton<AddressValida
   AddressValidator();
   ~AddressValidator() {};
 
-  std::map<std::string, int> state_;
+/*  std::map<std::string, int> state_;
   std::map<std::string, int> zip_code_;
   std::map<std::string, int> city_;
-  std::map<std::string, int> street_;
+  std::map<std::string, int> street_;*/
 };
 
 }  // namespace valdiators

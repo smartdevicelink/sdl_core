@@ -83,6 +83,7 @@ class MockAccessRemote : public AccessRemote {
   MOCK_CONST_METHOD2(CheckModuleType, bool(const PTString& app_id,
                                             policy_table::ModuleType module));
   MOCK_CONST_METHOD0(CheckParameters, bool());
+  MOCK_METHOD1(IsAppReverse, bool(const PTString& app_id));
 };
 
 }  // namespace policy

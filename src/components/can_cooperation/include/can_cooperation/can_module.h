@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_H_
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_H_
 
+#include <queue>
+#include <string>
 #include "functional_module/generic_module.h"
 #include "can_cooperation/can_connection.h"
 #include "can_cooperation/request_controller.h"
@@ -49,7 +51,7 @@ class CANModule : public functional_modules::GenericModule,
   public utils::Singleton<CANModule>,
   public CANConnectionObserver,
   public threads::MessageLoopThread <std::queue<MessageFromCAN >>::Handler,
-      public threads::MessageLoopThread <std::queue<MessageFromMobile >>::Handler {
+  public threads::MessageLoopThread <std::queue<MessageFromMobile >>::Handler {
  public:
   functional_modules::PluginInfo GetPluginInfo() const;
   virtual functional_modules::ProcessResult ProcessMessage(
@@ -97,15 +99,20 @@ class CANModule : public functional_modules::GenericModule,
    */
   virtual void RemoveAppExtension(uint32_t app_id);
 
+  /*
+   * @brief Check registering app can be handled by plugin
+   * @param msg Registration message
+   * @param app Application basis already create by Core
+   */
+  bool IsAppForPlugin(
+      application_manager::ApplicationSharedPtr app);
+
  protected:
   /**
    * @brief Remove extension for all applications
    */
   virtual void RemoveAppExtensions();
  private:
-  DISALLOW_COPY_AND_ASSIGN(CANModule);
-  FRIEND_BASE_SINGLETON_CLASS(CANModule);
-
   CANModule();
   ~CANModule();
 
@@ -124,10 +131,12 @@ class CANModule : public functional_modules::GenericModule,
   request_controller::RequestController request_controller_;
 
   friend class CanModuleTest;
+  FRIEND_BASE_SINGLETON_CLASS(CANModule);
+  DISALLOW_COPY_AND_ASSIGN(CANModule);
 };
 
 EXPORT_FUNCTION(CANModule)
 
-}
+}  // namespace can_cooperation
 
-#endif  //  SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_H_
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_H_

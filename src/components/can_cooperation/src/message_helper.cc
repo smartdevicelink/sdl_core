@@ -38,21 +38,20 @@ using functional_modules::MobileFunctionID;
 namespace {
 std::map<MobileFunctionID, std::string> GenerateAPINames() {
   std::map<MobileFunctionID, std::string> result;
-  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::GRANT_ACCESS, "GrantAccess"));
   result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::BUTTON_PRESS, "ButtonPress"));
   result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::GET_INTERIOR_VEHICLE_DATA_CAPABILITIES, "GetInteriorVehicleDataCapabilities"));
   result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::GET_INTERIOR_VEHICLE_DATA, "GetInteriorVehicleData"));
   result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::SET_INTERIOR_VEHICLE_DATA, "SetInteriorVehicleData"));
-  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::START_SCAN, "StartScan"));
+  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::ON_INTERIOR_VEHICLE_DATA, "OnInteriorVehicleData"));
+/*  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::START_SCAN, "StartScan"));
   result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::STOP_SCAN, "StopScan"));
   result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::TUNE_RADIO, "TuneRadio"));
   result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::TUNE_UP, "TuneUp"));
   result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::TUNE_DOWN, "TuneDown"));
-  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::ON_INTERIOR_VEHICLE_DATA, "OnInteriorVehicleData"));
   result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::ON_RADIO_DETAILS, "OnRadioDetails"));
   result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::ON_PRESETS_CHANGED, "OnPresetsChanged"));
   result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::CLIMATE_CONTROL_ON, "ClimateControlOn"));
-  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::GET_SEAT_CONTROL, "GetSeatControl"));
+  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::GET_SEAT_CONTROL, "GetSeatControl")); */
   return result;
 }
 }
@@ -94,4 +93,3 @@ Json::Value MessageHelper::StringToValue(const std::string& string) {
 }
 
 }  // namespace can_cooperation
-

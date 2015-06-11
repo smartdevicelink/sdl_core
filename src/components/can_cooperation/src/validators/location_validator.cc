@@ -39,17 +39,17 @@ namespace can_cooperation {
 namespace validators {
 
 using namespace message_params;
-using namespace validation_params;
+
 
 LocationValidator::LocationValidator() {
-  // name="gpsCoordinates"
+/*  // name="gpsCoordinates"
   gps_coordinates_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
   gps_coordinates_[kMinLength] = 0;
   gps_coordinates_[kMaxLength] = 100;
   gps_coordinates_[kArray] = 0;
   gps_coordinates_[kMandatory] = 0;
 
-  validation_scope_map_[kGPSCoordinates] = &gps_coordinates_;
+  validation_scope_map_[kGPSCoordinates] = &gps_coordinates_;*/
 }
 
 ValidationResult LocationValidator::Validate(const Json::Value& json,

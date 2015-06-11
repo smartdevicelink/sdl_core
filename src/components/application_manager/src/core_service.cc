@@ -167,6 +167,13 @@ void CoreService::SubscribeToHMINotification(
   }
 }
 
+void CoreService::ChangeNotifyHMILevel(ApplicationSharedPtr app,
+      mobile_apis::HMILevel::eType level) {
+  ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
+                                                           level);
+  MessageHelper::SendHMIStatusNotification(*app);
+}
+
 bool CoreService::AreParametersAllowed(
     MessagePtr msg, const CommandParametersPermissions& params) {
   Json::Reader reader;

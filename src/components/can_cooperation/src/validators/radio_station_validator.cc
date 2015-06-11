@@ -38,10 +38,9 @@ namespace can_cooperation {
 namespace validators {
 
 using namespace message_params;
-using namespace validation_params;
 
 RadioStationValidator::RadioStationValidator() {
-  // name="frequency"
+/*  // name="frequency"
   frequency_[kType] = ValueType::INT;
   frequency_[kMinValue] = 87;
   frequency_[kMaxValue] = 100;
@@ -72,7 +71,7 @@ RadioStationValidator::RadioStationValidator() {
   validation_scope_map_[kFrequency] = &frequency_;
   validation_scope_map_[kFraction] =  &fraction_;
   validation_scope_map_[kAvailableHDs] = &frequency_;
-  validation_scope_map_[kCurrentHD] = &current_hd_;
+  validation_scope_map_[kCurrentHD] = &current_hd_;*/
 }
 
 ValidationResult RadioStationValidator::Validate(const Json::Value& json,
