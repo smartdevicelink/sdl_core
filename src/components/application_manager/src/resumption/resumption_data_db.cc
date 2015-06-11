@@ -138,13 +138,13 @@ void ResumptionDataDB::SaveApplication(
   LOG4CXX_INFO(logger_, "app_id : " << application->app_id()
                 <<" policy_app_id : " << policy_app_id
                 <<" device_id : " << device_id);
+
+  if (!CheckExistenceApplication(policy_app_id, device_id, application_exist)) {
+    LOG4CXX_ERROR(logger_, "Problem with access to DB");
+    return;
+  }
+
   if (application->is_application_data_changed()) {
-
-    if (!CheckExistenceApplication(policy_app_id, device_id, application_exist)) {
-      LOG4CXX_ERROR(logger_, "Problem with access to DB");
-      return;
-    }
-
     if (application_exist) {
       if (!DeleteSavedApplication(policy_app_id, device_id)) {
         LOG4CXX_ERROR(logger_, "Deleting of application data is not finished");
@@ -159,11 +159,21 @@ void ResumptionDataDB::SaveApplication(
     LOG4CXX_INFO(logger_, "All data from application were saved successfully");
     application->set_is_application_data_changed(false);
   } else {
-    if (!UpdateApplicationData(application, policy_app_id, device_id)) {
-      LOG4CXX_ERROR(logger_, "Updating application data is failed");
-      return;
+    if (application_exist) {
+      if (!UpdateApplicationData(application, policy_app_id, device_id)) {
+        LOG4CXX_ERROR(logger_, "Updating application data is failed");
+        return;
+      }
+      LOG4CXX_INFO(logger_, "Application data were updated successfully");
+    } else {
+      if (mobile_api::HMILevel::HMI_FULL == application->hmi_level() ||
+          mobile_api::HMILevel::HMI_LIMITED == application->hmi_level()) {
+        if (!InsertApplicationData(application, policy_app_id, device_id)) {
+          LOG4CXX_ERROR(logger_, "Saving data of application is failed");
+          return;
+        }
+      }
     }
-    LOG4CXX_INFO(logger_, "Application data were updated successfully");
   }
   WriteDb();
 }
@@ -1647,7 +1657,7 @@ bool ResumptionDataDB::SaveApplicationToDB(
     return false;
   }
   if (!InsertApplicationData(application, policy_app_id, device_id,
-                             application_primary_key, global_properties_key)) {
+                             &application_primary_key, global_properties_key)) {
     LOG4CXX_WARN(logger_, "Incorrect insert application data to DB.");
     db_->RollbackTransaction();
     return false;
@@ -2235,7 +2245,7 @@ bool ResumptionDataDB::ExecInsertVRHelpItem(int64_t global_properties_key,
 bool ResumptionDataDB::InsertApplicationData(app_mngr::ApplicationConstSharedPtr application,
                                              const std::string& policy_app_id,
                                              const std::string& device_id,
-                                             int64_t& application_primary_key,
+                                             int64_t* application_primary_key,
                                              int64_t global_properties_key) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
@@ -2276,7 +2286,11 @@ bool ResumptionDataDB::InsertApplicationData(app_mngr::ApplicationConstSharedPtr
   query.Bind(5, 0);
   query.Bind(6, 0);
   query.Bind(7, time_stamp);
-  query.Bind(8, global_properties_key);
+  if (global_properties_key) {
+    query.Bind(8, global_properties_key);
+  } else {
+    query.Bind(8);
+  }
   query.Bind(9, is_media_application);
   query.Bind(10, policy_app_id);
   query.Bind(11, device_id);
@@ -2285,7 +2299,9 @@ bool ResumptionDataDB::InsertApplicationData(app_mngr::ApplicationConstSharedPtr
     LOG4CXX_WARN(logger_, "Problem with execution query");
     return false;
   }
-  application_primary_key = query.LastInsertId();
+  if (NULL != application_primary_key) {
+    *application_primary_key = query.LastInsertId();
+  }
   LOG4CXX_INFO(logger_, "Data were saved successfully to application table");
   return true;
 }

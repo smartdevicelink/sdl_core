@@ -545,8 +545,8 @@ class ResumptionDataDB : public ResumptionData {
   bool InsertApplicationData(app_mngr::ApplicationConstSharedPtr,
                              const std::string& policy_app_id,
                              const std::string& device_id,
-                             int64_t& application_primary_key,
-                             int64_t global_properties_key);
+                             int64_t* application_primary_key = NULL,
+                             int64_t global_properties_key = 0);
 
   /**
    * @brief Delete application data where ign_off_count >= application_lifes
