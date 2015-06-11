@@ -73,16 +73,16 @@ bool OnInteriorVehicleDataNotification::Validate() {
 
 std::string OnInteriorVehicleDataNotification::ModuleType(
     const Json::Value& message) {
-  // TODO(KKolodiy): Now notification from CAN(HMI) doesn't have moduleData
-  // it contains list moduleType, moduleZone, radioControlData and
-  // climateControlData
-  return message.get(message_params::kModuleType, Json::Value("")).asString();
+  return message.get(message_params::kModuleData,
+                     Json::Value(Json::objectValue))
+      .get(message_params::kModuleType, Json::Value("")).asString();
 }
 
 SeatLocation OnInteriorVehicleDataNotification::InteriorZone(
     const Json::Value& message) {
-  Json::Value zone = message.get(message_params::kModuleZone,
-                                 Json::Value(Json::objectValue));
+  Json::Value zone = message.get(message_params::kModuleData,
+                                 Json::Value(Json::objectValue)).get(
+      message_params::kModuleZone, Json::Value(Json::objectValue));
   return CreateInteriorZone(zone);
 }
 
