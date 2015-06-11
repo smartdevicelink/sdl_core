@@ -1342,11 +1342,10 @@ void PolicyHandler::ResetAccessByModule(const std::string& module) {
   policy_manager_->ResetAccessByModule(module);
 }
 
-void PolicyHandler::SetPrimaryDevice(const PTString& dev_id,
-                                     const PTString& input) {
+void PolicyHandler::SetPrimaryDevice(const PTString& dev_id) {
   POLICY_LIB_CHECK_VOID();
   PTString old_dev_id = policy_manager_->PrimaryDevice();
-  policy_manager_->SetPrimaryDevice(dev_id, input);
+  policy_manager_->SetPrimaryDevice(dev_id);
 
   connection_handler::DeviceHandle old_device_handle;
     ApplicationManagerImpl::instance()->connection_handler()

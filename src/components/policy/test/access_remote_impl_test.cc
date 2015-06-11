@@ -175,39 +175,6 @@ TEST(AccessRemoteImplTest, CheckModuleType) {
   EXPECT_FALSE(access_remote.CheckModuleType("1234", policy_table::MT_CLIMATE));
 }
 
-TEST(AccessRemoteImplTest, SetPrimaryDevice) {
-  AccessRemoteImpl access_remote;
-  access_remote.cache_->pt_ = new policy_table::Table();
-
-  // One device
-  access_remote.SetPrimaryDevice("dev1", "GUI");
-  policy_table::DeviceData& devices = *access_remote.cache_->pt_->policy_table
-      .device_data;
-  policy_table::ConsentRecords& record =
-      (*devices["dev1"].user_consent_records)[kPrimary];
-  EXPECT_TRUE(*record.is_consented);
-  EXPECT_EQ("dev1", access_remote.PrimaryDevice());
-
-  // Few devices
-  access_remote.SetPrimaryDevice("dev2", "GUI");
-  access_remote.SetPrimaryDevice("dev3", "GUI");
-  access_remote.SetPrimaryDevice("dev4", "GUI");
-  access_remote.SetPrimaryDevice("dev1", "GUI");
-  policy_table::ConsentRecords& record1 =
-      (*devices["dev1"].user_consent_records)[kPrimary];
-  EXPECT_TRUE(*record1.is_consented);
-  policy_table::ConsentRecords& record2 =
-      (*devices["dev2"].user_consent_records)[kPrimary];
-  EXPECT_FALSE(*record2.is_consented);
-  policy_table::ConsentRecords& record3 =
-      (*devices["dev3"].user_consent_records)[kPrimary];
-  EXPECT_FALSE(*record3.is_consented);
-  policy_table::ConsentRecords& record4 =
-      (*devices["dev4"].user_consent_records)[kPrimary];
-  EXPECT_FALSE(*record4.is_consented);
-  EXPECT_EQ("dev1", access_remote.PrimaryDevice());
-}
-
 TEST(AccessRemoteImplTest, EnableDisable) {
   AccessRemoteImpl access_remote;
   access_remote.cache_->pt_ = new policy_table::Table();

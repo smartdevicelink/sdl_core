@@ -41,9 +41,8 @@ void PolicyHelper::OnRSDLFunctionalityAllowing(bool allowed) {
   CANModule::instance()->service()->SetRemoteControl(allowed);
 }
 
-void PolicyHelper::SetPrimaryDevice(const uint32_t device_handle,
-                                    const std::string& input) {
-  CANModule::instance()->service()->SetPrimaryDevice(device_handle, input);
+void PolicyHelper::SetPrimaryDevice(const uint32_t device_handle) {
+  CANModule::instance()->service()->SetPrimaryDevice(device_handle);
 
   application_manager::AppExtensionUID module_id = CANModule::instance()->GetModuleID();
   std::vector<application_manager::ApplicationSharedPtr> applications =

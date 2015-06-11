@@ -122,12 +122,11 @@ void CoreService::ResetAccessByModule(const std::string& module) {
 #endif  // SDL_REMOTE_CONTROL
 }
 
-void CoreService::SetPrimaryDevice(const uint32_t dev_id,
-                                   const std::string& input) {
+void CoreService::SetPrimaryDevice(const uint32_t dev_id) {
 #ifdef SDL_REMOTE_CONTROL
   std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
     dev_id);
-  policy::PolicyHandler::instance()->SetPrimaryDevice(device_handle, input);
+  policy::PolicyHandler::instance()->SetPrimaryDevice(device_handle);
 #endif  // SDL_REMOTE_CONTROL
 }
 

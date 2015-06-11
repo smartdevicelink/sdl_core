@@ -544,43 +544,9 @@ void SQLPTRepresentation::GatherDeviceData(
     device_data.mark_initialized();
     while (query.Next()) {
       const std::string device = query.GetString(0);
-      if (!GatherUserConsentRecords(device, &*device_data.user_consent_records)) {
-        LOG4CXX_WARN(logger_, "Could not gather user consent");
-        return;
-      }
       (*data)[device] = device_data;
     }
   }
-}
-
-bool SQLPTRepresentation::GatherUserConsentRecords(
-    const std::string& device, policy_table::UserConsentRecords* consent) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  consent->mark_initialized();
-  dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt::kSelectUserConsent)) {
-    LOG4CXX_WARN(logger_, "Incorrect select user consent");
-    return false;
-  }
-  query.Bind(0, device);
-  while (query.Next()) {
-    policy_table::ConsentRecords record;
-    const std::string& name = query.GetString(0);
-    if (!query.IsNull(1)) {
-      *record.is_consented = query.GetBoolean(1);
-    }
-    if (!query.IsNull(2)) {
-      const std::string& input = query.GetString(2);
-      policy_table::Input value;
-      policy_table::EnumFromJsonString(input, &value);
-      *record.input = value;
-    }
-    if (!query.IsNull(2)) {
-      *record.time_stamp = query.GetString(3);
-    }
-    (*consent)[name] = record;
-  }
-  return true;
 }
 
 bool SQLPTRepresentation::GatherFunctionalGroupings(
@@ -1267,64 +1233,14 @@ bool SQLPTRepresentation::SaveDeviceData(
   policy_table::DeviceData::const_iterator it;
   for (it = devices.begin(); it != devices.end(); ++it) {
     const std::string& device = it->first;
-    const policy_table::DeviceParams& params = it->second;
 
     query.Bind(0, device);
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into device data.");
       return false;
     }
-
-    if (params.user_consent_records.is_initialized()) {
-      if (!SaveUserConsentRecords(device, *params.user_consent_records)) {
-        LOG4CXX_WARN(logger_, "Could not save user consent");
-        return false;
-      }
-    }
   }
 
-  return true;
-}
-
-bool SQLPTRepresentation::SaveUserConsentRecords(
-    const std::string& device,
-    const policy_table::UserConsentRecords& consents) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  typedef policy_table::UserConsentRecords::const_iterator ConsentIterator;
-  for (ConsentIterator i = consents.begin(); i != consents.end(); ++i) {
-    const std::string& name = i->first;
-    const policy_table::ConsentRecords& record = i->second;
-    if (record.is_consented.is_initialized()) {
-      if (!SaveUserConsent(device, name, record)) {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-bool SQLPTRepresentation::SaveUserConsent(
-    const std::string& device, const std::string& name,
-    const policy_table::ConsentRecords& record) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt::kInsertUserConsent)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for user consent.");
-    return false;
-  }
-  query.Bind(0, device);
-  query.Bind(1, name);
-  record.is_consented.is_initialized() ?
-      query.Bind(2, *record.is_consented) : query.Bind(2);
-  record.input.is_initialized() ?
-      query.Bind(3, *record.input) : query.Bind(3);
-  record.time_stamp.is_initialized() ?
-      query.Bind(4, *record.time_stamp) : query.Bind(4);
-  if (!query.Exec()) {
-    LOG4CXX_WARN(logger_,
-                 "Could not save user consent: " << device << " - "<< name);
-    return false;
-  }
   return true;
 }
 

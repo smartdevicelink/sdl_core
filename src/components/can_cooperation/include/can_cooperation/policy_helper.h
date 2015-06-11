@@ -40,8 +40,7 @@ namespace can_cooperation {
 class PolicyHelper {
  public:
   static void OnRSDLFunctionalityAllowing(bool allowed);
-  static void SetPrimaryDevice(const uint32_t device_handle,
-                               const std::string& input);
+  static void SetPrimaryDevice(const uint32_t device_handle);
 };
 
 }  //  namespace can_cooperation

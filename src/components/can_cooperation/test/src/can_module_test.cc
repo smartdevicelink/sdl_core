@@ -80,7 +80,7 @@ TEST_F(CanModuleTest, ProcessMessageEmptyAppsList) {
   application_manager::MessagePtr message = new application_manager::Message(
     protocol_handler::MessagePriority::FromServiceType(
       protocol_handler::ServiceType::kRpc));
-  message->set_function_id(MobileFunctionID::ON_RADIO_DETAILS);
+  message->set_function_id(MobileFunctionID::ON_INTERIOR_VEHICLE_DATA);
 
   std::vector<application_manager::ApplicationSharedPtr> apps;
   EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID())
@@ -93,7 +93,7 @@ TEST_F(CanModuleTest, ProcessMessagePass) {
   application_manager::MessagePtr message = new application_manager::Message(
     protocol_handler::MessagePriority::FromServiceType(
       protocol_handler::ServiceType::kRpc));
-  message->set_function_id(MobileFunctionID::ON_RADIO_DETAILS);
+  message->set_function_id(MobileFunctionID::ON_INTERIOR_VEHICLE_DATA);
 
   std::vector<application_manager::ApplicationSharedPtr> apps;
   MockApplication* app = new MockApplication();
@@ -111,7 +111,7 @@ TEST_F(CanModuleTest, ProcessMessagePass) {
       .WillOnce(Return(app_ptr));
   EXPECT_CALL(*mock_service, CheckPolicyPermissions(_)).Times(1)
       .WillOnce(Return(mobile_apis::Result::eType::SUCCESS));
-  EXPECT_CALL(*mock_service, CheckAccess(1, "OnRadioDetails", _, _)).Times(1)
+  EXPECT_CALL(*mock_service, CheckAccess(1, "OnInteriorVehicleData", _, _)).Times(1)
       .WillOnce(Return(application_manager::kAllowed));
   EXPECT_CALL(*mock_service, SendMessageToMobile(_)).Times(1);
 
@@ -216,7 +216,7 @@ TEST_F(CanModuleTest, ChangeDriverDevice) {
   ServicePtr mock_service2_ptr(mock_service2);
   module->set_service(mock_service2_ptr);
 
-  EXPECT_CALL(*mock_service2, SetPrimaryDevice(1, _)).Times(1);
+  EXPECT_CALL(*mock_service2, SetPrimaryDevice(1)).Times(1);
   CanModuleTest::HandleMessage(message);
   ASSERT_TRUE(ext->is_on_driver_device());
   app_ptr->RemoveExtension(module->GetModuleID());
@@ -252,7 +252,7 @@ TEST_F(CanModuleTest, ChangeDriverDeviceOnOther) {
   ServicePtr mock_service2_ptr(mock_service2);
   module->set_service(mock_service2_ptr);
 
-  EXPECT_CALL(*mock_service2, SetPrimaryDevice(1, _)).Times(1);
+  EXPECT_CALL(*mock_service2, SetPrimaryDevice(1)).Times(1);
   CanModuleTest::HandleMessage(message);
   ASSERT_FALSE(ext->is_on_driver_device());
   app_ptr->RemoveExtension(module->GetModuleID());

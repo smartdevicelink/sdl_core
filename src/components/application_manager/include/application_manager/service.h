@@ -106,10 +106,8 @@ class Service {
   /**
    * Sets device as primary device
    * @param dev_id ID device
-   * @param input
    */
-  virtual void SetPrimaryDevice(const uint32_t dev_id,
-                                const std::string& input) = 0;
+  virtual void SetPrimaryDevice(const uint32_t dev_id) = 0;
 
   /**
    * Sets mode of remote control (on/off)

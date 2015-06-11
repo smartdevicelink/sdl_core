@@ -68,6 +68,7 @@ namespace hmi_api {
   const char on_primary_device[]         = "RC.OnPrimaryDevice";
   const char on_app_deactivated[]        = "BasicCommunication.OnAppDeactivated";
   const char sdl_activate_app[]          = "SDL.ActivateApp";
+  const char on_set_driver_device[]      = "RC.OnSetDriverDevice";
 }
 
 /*namespace can_api {
