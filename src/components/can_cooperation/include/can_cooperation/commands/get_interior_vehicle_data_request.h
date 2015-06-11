@@ -77,6 +77,7 @@ class GetInteriorVehicleDataRequest : public BaseCommandRequest {
 
  protected:
   virtual std::string ModuleType(const Json::Value& message);
+  virtual SeatLocation InteriorZone(const Json::Value& message);
 };
 
 }  // namespace commands

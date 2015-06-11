@@ -132,8 +132,17 @@ bool GetInteriorVehicleDataRequest::Validate() {
 std::string GetInteriorVehicleDataRequest::ModuleType(
     const Json::Value& message) {
   return message.get(message_params::kModuleDescription,
-                     Json::Value(Json::objectValue))
-      .get(message_params::kModuleType, Json::Value("")).asString();
+                     Json::Value(Json::objectValue)).get(
+      message_params::kModuleType, Json::Value("")).asString();
+}
+
+SeatLocation GetInteriorVehicleDataRequest::InteriorZone(
+    const Json::Value& message) {
+  Json::Value zone = message.get(message_params::kModuleDescription,
+                                 Json::Value(Json::objectValue)).get(
+      message_params::kModuleZone, Json::Value(Json::objectValue));
+  return CreateInteriorZone(zone);
+);
 }
 
 }  // namespace commands

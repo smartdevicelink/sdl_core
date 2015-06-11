@@ -309,8 +309,8 @@ bool BaseCommandRequest::CheckPolicy() {
   if (ret != mobile_apis::Result::eType::SUCCESS) {
     SendResponse(false, result_codes::kDisallowed, "");
     LOG4CXX_WARN(logger_,
-                 "Function \"" << message_->function_name() << "\" (#"
-                 << message_->function_id() << ") not allowed by policy");
+        "Function \"" << message_->function_name() << "\" (#"
+        << message_->function_id() << ") not allowed by policy");
     return false;
   }
 
@@ -321,21 +321,22 @@ bool BaseCommandRequest::CheckAccess() {
   LOG4CXX_AUTO_TRACE(logger_);
   CANAppExtensionPtr extension = GetAppExtension(app_);
   // TODO(KKolodiy): zone and params from message
-  SeatLocation zone {0, 0, 0};
+  SeatLocation zone { 0, 0, 0 };
   std::vector<std::string> params;
   Json::Value value;
   Json::Reader reader;
   LOG4CXX_DEBUG(logger_, "Request: " << message_->json_message());
   reader.parse(message_->json_message(), value);
   application_manager::TypeAccess access = service_->CheckAccess(
-      app_->app_id(), zone, ModuleType(value), message_->function_name(),
-      params);
+      app_->app_id(), InteriorZone(value), ModuleType(value),
+      message_->function_name(), params);
 
   switch (access) {
     case application_manager::kAllowed:
       return true;
     case application_manager::kDisallowed:
-      SendResponse(false, result_codes::kDisallowed, "Remote control is disallowed");
+      SendResponse(false, result_codes::kDisallowed,
+                   "Remote control is disallowed");
       break;
     case application_manager::kManual: {
       Json::Value params;
@@ -359,8 +360,19 @@ std::string BaseCommandRequest::ModuleType(const Json::Value& message) {
   return "RADIO";
 }
 
-void BaseCommandRequest::on_event(const event_engine::Event<application_manager::MessagePtr,
-                                  std::string>& event) {
+SeatLocation BaseCommandRequest::InteriorZone(const Json::Value& message) {
+  return CreateInteriorZone(Json::Value(Json::objectValue));
+}
+
+SeatLocation BaseCommandRequest::CreateInteriorZone(const Json::Value& zone) {
+  int col = zone.get(message_params::kInteriorZoneCol, Json::Value(-1));
+  int row = zone.get(message_params::kInteriorZoneRow, Json::Value(-1));
+  int level = zone.get(message_params::kInteriorZoneLevel, Json::Value(-1));
+  return SeatLocation(col, row, level);
+}
+
+void BaseCommandRequest::on_event(
+    const event_engine::Event<application_manager::MessagePtr, std::string>& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (event.id() == functional_modules::hmi_api::grant_access) {
     ProcessAccessResponse(event);
