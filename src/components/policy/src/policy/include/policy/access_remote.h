@@ -69,6 +69,16 @@ enum TypeAccess {
   kAllowed,
   kManual
 };
+inline std::ostream& operator<<(std::ostream& output, TypeAccess x) {
+  output << "Access: ";
+      switch (x) {
+        case kDisallowed: output << "DISALLOWED"; break;
+        case kAllowed: output << "ALLOWED"; break;
+        case kManual: output << "MANUAL"; break;
+        default: output << "Error: Unknown type";
+      }
+  return output;
+}
 
 struct Subject {
   PTString dev_id;

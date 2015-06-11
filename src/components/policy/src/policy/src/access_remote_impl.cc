@@ -186,6 +186,7 @@ TypeAccess AccessRemoteImpl::Check(const Subject& who,
     LOG4CXX_TRACE(logger_, "Nobody controls " << what);
     ret = TypeAccess::kManual;
   }
+  LOG4CXX_DEBUG(logger_, ret);
   return ret;
 }
 

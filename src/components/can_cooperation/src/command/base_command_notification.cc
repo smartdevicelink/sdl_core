@@ -134,26 +134,39 @@ bool BaseCommandNotification::CheckPolicy(
   mobile_apis::Result::eType permission =
       service_->CheckPolicyPermissions(message);
 
-  // TODO(KKolodiy): get zone and params from message
-  SeatLocation zone = {0, 0, 0};
-  std::vector<std::string> params;
-
   Json::Value value;
   Json::Reader reader;
   LOG4CXX_DEBUG(logger_, "Notification: " << message->json_message());
   reader.parse(message->json_message(), value);
   application_manager::TypeAccess access = service_->CheckAccess(
-      app->app_id(), zone, ModuleType(value), message->function_name(), params);
+      app->app_id(), InteriorZone(value), ModuleType(value),
+      message->function_name(), ControlData(value));
 
   return permission == mobile_apis::Result::eType::SUCCESS
       && access == application_manager::TypeAccess::kAllowed;
 }
 
 std::string BaseCommandNotification::ModuleType(const Json::Value& message) {
-  // TODO(KKolodiy): stub for old mobile API
-  return "RADIO";
+  return "";
 }
 
+SeatLocation BaseCommandNotification::InteriorZone(const Json::Value& message) {
+  return CreateInteriorZone(Json::Value(Json::objectValue));
+}
+
+SeatLocation BaseCommandNotification::CreateInteriorZone(
+    const Json::Value& zone) {
+  int col = zone.get(message_params::kCol, Json::Value(-1)).asInt();
+  int row = zone.get(message_params::kRow, Json::Value(-1)).asInt();
+  int level = zone.get(message_params::kLevel, Json::Value(-1)).asInt();
+  SeatLocation seat = {col, row, level};
+  return seat;
+}
+
+std::vector<std::string> BaseCommandNotification::ControlData(
+    const Json::Value& message) {
+  return std::vector<std::string>();
+}
 
 }  // namespace commands
 

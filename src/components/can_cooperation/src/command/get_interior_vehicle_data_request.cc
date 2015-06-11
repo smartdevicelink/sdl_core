@@ -142,7 +142,6 @@ SeatLocation GetInteriorVehicleDataRequest::InteriorZone(
                                  Json::Value(Json::objectValue)).get(
       message_params::kModuleZone, Json::Value(Json::objectValue));
   return CreateInteriorZone(zone);
-);
 }
 
 }  // namespace commands

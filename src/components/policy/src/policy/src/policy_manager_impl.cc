@@ -954,6 +954,7 @@ TypeAccess PolicyManagerImpl::CheckAccess(
     const PTString& rpc, const RemoteControlParams& params) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Module type: " << module);
+  LOG4CXX_DEBUG(logger_, "Interior zone: " << zone);
 
   policy_table::ModuleType module_type;
   bool is_valid = EnumFromJsonString(module, &module_type);
@@ -967,6 +968,7 @@ TypeAccess PolicyManagerImpl::CheckAccess(
       return CheckDriverConsent(who, what, zone, rpc, params);
     }
   }
+  LOG4CXX_DEBUG(logger_, TypeAccess::kDisallowed);
   return TypeAccess::kDisallowed;
 }
 
@@ -980,6 +982,7 @@ TypeAccess PolicyManagerImpl::TryOccupy(const Subject& who,
     access_remote_->Allow(who, what);
     return TypeAccess::kAllowed;
   }
+  LOG4CXX_DEBUG(logger_, access);
   return access;
 }
 
@@ -996,6 +999,7 @@ TypeAccess PolicyManagerImpl::CheckDriverConsent(
   if (access == TypeAccess::kManual) {
     return access_remote_->Check(who, what);
   }
+  LOG4CXX_DEBUG(logger_, access);
   return access;
 }
 

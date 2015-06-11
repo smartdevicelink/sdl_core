@@ -108,6 +108,13 @@ std::string ButtonPressRequest::ModuleType(const Json::Value& message) {
   return message.get(message_params::kModuleType, Json::Value("")).asString();
 }
 
+SeatLocation ButtonPressRequest::InteriorZone(
+    const Json::Value& message) {
+  Json::Value zone = message.get(message_params::kZone,
+                                 Json::Value(Json::objectValue));
+  return CreateInteriorZone(zone);
+}
+
 }  // namespace commands
 
 }  // namespace can_cooperation

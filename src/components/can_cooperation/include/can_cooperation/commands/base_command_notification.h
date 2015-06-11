@@ -94,6 +94,10 @@ class BaseCommandNotification : public Command {
   virtual bool Validate() = 0;
 
   virtual std::string ModuleType(const Json::Value& message);
+  virtual SeatLocation InteriorZone(const Json::Value& message);
+  virtual std::vector<std::string> ControlData(const Json::Value& message);
+
+  SeatLocation CreateInteriorZone(const Json::Value& zone);
 
  private:
   void NotifyApplications();
