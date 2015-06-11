@@ -48,7 +48,9 @@ enum TypeAccess {
   kManual
 };
 
-typedef int SeatLocation;
+struct SeatLocation {
+  int col, row, level;
+};
 
 typedef std::string PluginFunctionID;
 /**
@@ -70,16 +72,18 @@ class Service {
   /**
    * Checks access to requested equipment of vehicle
    * @param app_id id of application
-   * @param module type
-   * @param params parameters list
    * @param seat seat of owner's mobile device
+   * @param module type
+   * @param rpc name of rpc
+   * @param params parameters list
    * @return return allowed if access exist,
    * manual if need to send question to driver otherwise disallowed
    */
   virtual TypeAccess CheckAccess(const ApplicationId& app_id,
+                                 const SeatLocation& zone,
                                  const std::string& module,
-                                 const std::vector<std::string>& params,
-                                 const SeatLocation& zone) = 0;
+                                 const std::string& rpc,
+                                 const std::vector<std::string>& params) = 0;
 
   /**
    * Sets access to functional group which contains given RPC for application

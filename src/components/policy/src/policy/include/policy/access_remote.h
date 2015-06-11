@@ -41,13 +41,44 @@ namespace policy_table = ::rpc::policy_table_interface_base;
 
 namespace policy {
 
-typedef int SeatLocation;
+struct SeatLocation {
+  int col, row, level;
+};
+inline bool operator<(const SeatLocation& x, const SeatLocation& y) {
+  return x.col < y.col || x.row < y.row || x.level < y.level;
+}
+inline bool operator==(const SeatLocation& x, const SeatLocation& y) {
+  return x.col == y.col && x.row == y.row && x.level == y.level;
+}
+inline bool operator==(const SeatLocation& x,
+                       const policy_table::InteriorZone& y) {
+  return x == SeatLocation{y.col, y.row, y.level};
+}
+inline bool operator==(const policy_table::InteriorZone& x,
+                       const SeatLocation& y) {
+  return y == x;
+}
+inline std::ostream& operator<<(std::ostream& output, const SeatLocation& x) {
+  output << "Interior zone(col:" << x.col << ", row:" << x.row << ", level:"
+         << x.level << ")";
+  return output;
+}
 
 enum TypeAccess {
   kDisallowed,
   kAllowed,
   kManual
 };
+inline std::ostream& operator<<(std::ostream& output, TypeAccess x) {
+  output << "Access: ";
+      switch (x) {
+        case kDisallowed: output << "DISALLOWED"; break;
+        case kAllowed: output << "ALLOWED"; break;
+        case kManual: output << "MANUAL"; break;
+        default: output << "Error: Unknown type";
+      }
+  return output;
+}
 
 struct Subject {
   PTString dev_id;
@@ -171,9 +202,15 @@ class AccessRemote {
 
   /**
    * Checks permissions for parameters
-   * @return true if allowed
+   * @param module type
+   * @param zone
+   * @param params
+   * @return true allowed if access was given, disallowed if access was denied
+   * manual if need to ask driver
    */
-  virtual bool CheckParameters(/* module, zone, params */) const = 0;
+  virtual TypeAccess CheckParameters(
+      policy_table::ModuleType module, const SeatLocation& seat,
+      const std::string& rpc, const RemoteControlParams& params) const = 0;
 
   /**
    * Sets HMI types if application has default policy permissions

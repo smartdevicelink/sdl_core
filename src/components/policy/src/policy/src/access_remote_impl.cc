@@ -83,6 +83,43 @@ struct ToHMIType {
   }
 };
 
+struct IsZone {
+ private:
+  const SeatLocation& seat_;
+ public:
+  explicit IsZone(const SeatLocation& seat)
+      : seat_(seat) {
+  }
+  bool operator ()(const policy_table::Zones::value_type& item) const {
+    const policy_table::InteriorZone& zone = item.second;
+    return seat_ == zone;
+  }
+};
+
+struct NotContained {
+ private:
+  const policy_table::Strings& params_;
+ public:
+  explicit NotContained(const policy_table::Strings& params)
+      : params_(params) {
+  }
+  bool operator ()(const RemoteControlParams::value_type& item) const {
+    return std::find_if(params_.begin(), params_.end(), CompareString(item))
+        == params_.end();
+  }
+  struct CompareString {
+   private:
+    const RemoteControlParams::value_type& value_;
+   public:
+    explicit CompareString(const RemoteControlParams::value_type& value)
+        : value_(value) {
+    }
+    bool operator ()(const policy_table::Strings::value_type& item) const {
+      return value_ == static_cast<std::string>(item);
+    }
+  };
+};
+
 AccessRemoteImpl::AccessRemoteImpl()
     : cache_(new CacheManager()),
       primary_device_(),
@@ -149,6 +186,7 @@ TypeAccess AccessRemoteImpl::Check(const Subject& who,
     LOG4CXX_TRACE(logger_, "Nobody controls " << what);
     ret = TypeAccess::kManual;
   }
+  LOG4CXX_DEBUG(logger_, ret);
   return ret;
 }
 
@@ -173,8 +211,82 @@ bool AccessRemoteImpl::CheckModuleType(const PTString& app_id,
   return std::find(modules.begin(), modules.end(), module) != modules.end();
 }
 
-bool AccessRemoteImpl::CheckParameters(/* module, zone, params */) const {
-  return true;
+TypeAccess AccessRemoteImpl::CheckParameters(
+    policy_table::ModuleType module, const SeatLocation& seat,
+    const std::string& rpc, const RemoteControlParams& params) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const policy_table::Zones& zones = cache_->pt_->policy_table.module_config
+      .equipment->zones;
+  policy_table::Zones::const_iterator i = std::find_if(zones.begin(),
+                                                       zones.end(),
+                                                       IsZone(seat));
+  if (i == zones.end()) {
+    return TypeAccess::kDisallowed;
+  }
+
+  const policy_table::InteriorZone& zone = i->second;
+  if (IsAutoAllowed(zone, module, rpc, params)) {
+    return TypeAccess::kAllowed;
+  }
+  if (IsDriverAllowed(zone, module, rpc, params)) {
+    return TypeAccess::kManual;
+  }
+  return TypeAccess::kDisallowed;
+}
+
+bool AccessRemoteImpl::IsAutoAllowed(const policy_table::InteriorZone& zone,
+                                     policy_table::ModuleType module,
+                                     const std::string rpc,
+                                     const RemoteControlParams& params) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  policy_table::AccessModules::const_iterator i = zone.auto_allow.find(
+      EnumToJsonString(module));
+  if (i != zone.auto_allow.end()) {
+    const policy_table::RemoteRpcs& rpcs = i->second;
+    return CheckRpc(rpc, params, rpcs);
+  }
+  return false;
+}
+
+bool AccessRemoteImpl::IsDriverAllowed(
+    const policy_table::InteriorZone& zone, policy_table::ModuleType module,
+    const std::string rpc, const RemoteControlParams& params) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  policy_table::AccessModules::const_iterator i = zone.driver_allow.find(
+      EnumToJsonString(module));
+  if (i != zone.driver_allow.end()) {
+    const policy_table::RemoteRpcs& rpcs = i->second;
+    return CheckRpc(rpc, params, rpcs);
+  }
+  return false;
+}
+
+bool AccessRemoteImpl::CheckRpc(const std::string& name,
+                                const RemoteControlParams& params,
+                                const policy_table::RemoteRpcs& rpcs) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (rpcs.empty()) {
+    return true;
+  }
+
+  policy_table::RemoteRpcs::const_iterator i = rpcs.find(name);
+  if (i != rpcs.end()) {
+    const policy_table::Strings& parameters = i->second;
+    return CompareParameters(params, parameters);
+  }
+  return false;
+}
+
+bool AccessRemoteImpl::CompareParameters(
+    const RemoteControlParams& input,
+    const policy_table::Strings& parameters) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (parameters.empty()) {
+    return true;
+  }
+
+  return std::find_if(input.begin(), input.end(), NotContained(parameters))
+      == input.end();
 }
 
 void AccessRemoteImpl::Allow(const Subject& who, const Object& what) {

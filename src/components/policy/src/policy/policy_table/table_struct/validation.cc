@@ -123,6 +123,14 @@ bool PolicyTable::Validate() const {
 bool Table::Validate() const {
   return true;
 }
+
+bool InteriorZone::Validate() const {
+  return true;
+}
+
+bool Equipment::Validate() const {
+  return true;
+}
 }  // namespace policy_table_interface_base
 }  // namespace rpc
 

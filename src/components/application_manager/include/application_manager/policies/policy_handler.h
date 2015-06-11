@@ -37,7 +37,7 @@
 #include <map>
 #include <set>
 #include <vector>
-#include "policy/policy_manager.h"
+#include "policy/policy_listener.h"
 #include "application_manager/policies/policy_event_observer.h"
 #include "application_manager/policies/delegates/statistics_delegate.h"
 #include "application_manager/service.h"
@@ -56,11 +56,10 @@ namespace Json {
 class Value;
 }
 
-using application_manager::SeatLocation;
-
 namespace policy {
 typedef std::vector<uint32_t> AppIds;
 typedef std::vector<uint32_t> DeviceHandles;
+class PolicyManager;
 
 class PolicyHandler :
     public utils::Singleton<PolicyHandler, utils::deleters::Deleter<PolicyHandler> >,
@@ -99,14 +98,15 @@ class PolicyHandler :
   /**
    * Checks access to equipment of vehicle for application by RPC
    * @param app_id policy id application
-   * @param module type
-   * @param params parameters list
    * @param zone requested zone control
+   * @param module type
+   * @param rpc name of rpc
+   * @param params parameters list
    */
-  application_manager::TypeAccess CheckAccess(const PTString& app_id,
-                                              const PTString& module,
-                                              const RemoteControlParams& params,
-                                              const SeatLocation& zone);
+  application_manager::TypeAccess CheckAccess(
+      const PTString& app_id, const application_manager::SeatLocation& zone,
+      const PTString& module, const std::string& rpc,
+      const std::vector<PTString>& params);
 
   /**
    * Sets access to equipment of vehicle for application by RPC
@@ -426,11 +426,6 @@ protected:
    */
   void OnAppPermissionConsentInternal(const uint32_t connection_key,
                                       PermissionConsent& permissions);
-
-#ifdef SDL_REMOTE_CONTROL
-  application_manager::TypeAccess ConvertTypeAccess(
-      policy::TypeAccess access) const;
-#endif  // SDL_REMOTE_CONTROL
 
 private:
   class StatisticManagerImpl: public usage_statistics::StatisticsManager {

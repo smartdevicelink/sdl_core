@@ -78,6 +78,42 @@ const std::string kCreateSchema =
   "  `user_consent_passengersRC` BOOL,"
   "  `country_consent_passengersRC` BOOL "
   "); "
+
+  /* interior_zone */
+  "CREATE TABLE `interior_zone`( "
+  "  `id` INTEGER PRIMARY KEY NOT NULL, "
+  "  `name` VARCHAR(100) NOT NULL, "
+  "  `col` INTEGER NOT NULL, "
+  "  `row` INTEGER NOT NULL, "
+  "  `level` INTEGER NOT NULL "
+  "); "
+  "CREATE UNIQUE INDEX `interior_zone.room` ON `interior_zone`(`col`,`row`,`level`); "
+
+  /* access_module */
+  "CREATE TABLE `access_module`( "
+  "  `id` INTEGER PRIMARY KEY NOT NULL, "
+  "  `name` VARCHAR(45) NOT NULL, "
+  "  `zone_id` INTEGER NOT NULL, "
+  "  `access` INTEGER NOT NULL, "
+  "CONSTRAINT `fk_module_1` "
+  "  FOREIGN KEY(`zone_id`) "
+  "  REFERENCES `interior_zone`(`id`) "
+  "); "
+  "CREATE INDEX `access_module.zone_module` ON `access_module`(`name`,`zone_id`); "
+  "CREATE INDEX `access_module.fk_module_1_idx` ON `access_module`(`zone_id`); "
+
+  /* remote_rpc */
+  "CREATE TABLE `remote_rpc`( "
+  "  `id` INTEGER PRIMARY KEY NOT NULL, "
+  "  `name` VARCHAR(255) NOT NULL, "
+  "  `parameter` VARCHAR(45), "
+  "  `module_id` INTEGER NOT NULL, "
+  "CONSTRAINT `fk_remote_rpc_1` "
+  "  FOREIGN KEY(`module_id`) "
+  "  REFERENCES `access_module`(`id`) "
+  "); "
+  "CREATE INDEX `remote_rpc.fk_remote_rpc_1_idx` ON `remote_rpc`(`module_id`); "
+
   "CREATE TABLE IF NOT EXISTS `functional_group`( "
   "  `id` INTEGER PRIMARY KEY NOT NULL, "
   "  `user_consent_prompt` TEXT UNIQUE ON CONFLICT REPLACE, "
@@ -435,6 +471,13 @@ const std::string kDropSchema =
   "DROP TABLE IF EXISTS `priority`; "
   "DROP TABLE IF EXISTS `functional_group`; "
   "DROP TABLE IF EXISTS `module_config`; "
+  "DROP TABLE IF EXISTS `interior_zone`; "
+  "DROP INDEX IF EXISTS `interior_zone.room`; "
+  "DROP TABLE IF EXISTS `access_module`; "
+  "DROP INDEX IF EXISTS `access_module.zone_module`; "
+  "DROP INDEX IF EXISTS `access_module.fk_module_1_idx`; "
+  "DROP TABLE IF EXISTS `remote_rpc`; "
+  "DROP INDEX IF EXISTS `remote_rpc.fk_remote_rpc_1_idx`; "
   "DROP TABLE IF EXISTS `module_meta`; "
   "DROP TABLE IF EXISTS `usage_and_error_count`; "
   "DROP TABLE IF EXISTS `device`; "
@@ -466,6 +509,9 @@ const std::string kDeleteData =
   "DELETE FROM `priority`; "
   "DELETE FROM `functional_group`; "
   "DELETE FROM `module_config`; "
+  "DELETE FROM `interior_zone`; "
+  "DELETE FROM `access_module`; "
+  "DELETE FROM `remote_rpc`; "
   "DELETE FROM `module_meta`; "
   "DELETE FROM `usage_and_error_count`; "
   "DELETE FROM `device`; "
@@ -554,6 +600,32 @@ const std::string kUpdateModuleConfig =
   "  `timeout_after_x_seconds` = ?, `vehicle_make` = ?, "
   "  `vehicle_model` = ?, `vehicle_year` = ?, "
   "  `user_consent_passengersRC` = ?, `country_consent_passengersRC` = ?";
+
+const std::string kInsertInteriorZone =
+  "INSERT INTO `interior_zone` (`name`, `col`, `row`, `level`) "
+  "  VALUES(?, ?, ?, ?)";
+
+const std::string kCountInteriorZones =
+  "SELECT COUNT(`id`) FROM `interior_zone`";
+
+const std::string kSelectInteriorZones =
+  "SELECT `id`, `name`, `col`, `row`, `level` FROM `interior_zone`";
+
+const std::string kInsertAccessModule =
+  "INSERT INTO `access_module` (`name`, `zone_id`, `access`) "
+  "  VALUES(?, ?, ?)";
+
+const std::string kSelectAccessModules =
+  "SELECT `id`, `name` FROM `access_module` "
+  "  WHERE `zone_id` = ? AND `access` = ?";
+
+const std::string kInsertRemoteRpc =
+  "INSERT INTO `remote_rpc` (`module_id`, `name`, `parameter`) "
+  "  VALUES(?, ?, ?)";
+
+const std::string kSelectRemoteRpcs =
+  "SELECT `name`, `parameter` FROM `remote_rpc` "
+  "  WHERE `module_id` = ?";
 
 const std::string kInsertEndpoint =
   "INSERT INTO `endpoint` (`service`, `url`, `application_id`) "

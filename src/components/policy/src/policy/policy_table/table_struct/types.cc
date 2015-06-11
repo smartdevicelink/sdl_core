@@ -330,7 +330,8 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
     vehicle_model(impl::ValueMember(value__, "vehicle_model")),
     vehicle_year(impl::ValueMember(value__, "vehicle_year")),
     user_consent_passengersRC(impl::ValueMember(value__, "user_consent_passengersRC")),
-    country_consent_passengersRC(impl::ValueMember(value__, "country_consent_passengersRC")) {
+    country_consent_passengersRC(impl::ValueMember(value__, "country_consent_passengersRC")),
+    equipment(impl::ValueMember(value__, "equipment")) {
 }
 Json::Value ModuleConfig::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
@@ -348,6 +349,7 @@ Json::Value ModuleConfig::ToJsonValue() const {
   impl::WriteJsonField("vehicle_year", vehicle_year, &result__);
   impl::WriteJsonField("user_consent_passengersRC", user_consent_passengersRC, &result__);
   impl::WriteJsonField("country_consent_passengersRC", country_consent_passengersRC, &result__);
+  impl::WriteJsonField("equipment", equipment, &result__);
   return result__;
 }
 bool ModuleConfig::is_valid() const {
@@ -391,6 +393,9 @@ bool ModuleConfig::is_valid() const {
     return false;
   }
   if (!country_consent_passengersRC.is_valid()) {
+    return false;
+  }
+  if (!equipment.is_valid()) {
     return false;
   }
   return Validate();
@@ -446,6 +451,9 @@ bool ModuleConfig::struct_empty() const {
   if (country_consent_passengersRC.is_initialized()) {
     return false;
   }
+  if (equipment.is_initialized()) {
+    return false;
+  }
 
   return true;
 }
@@ -495,6 +503,9 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
   if (!country_consent_passengersRC.is_valid()) {
     country_consent_passengersRC.ReportErrors(&report__->ReportSubobject("country_consent_passengersRC"));
   }
+  if (!equipment.is_valid()) {
+    equipment.ReportErrors(&report__->ReportSubobject("equipment"));
+  }
   if (PT_PRELOADED == GetPolicyTableType()) {
     std::string validation_info = ommited_validation_info +
                                   PolicyTableTypeToString(GetPolicyTableType());
@@ -538,6 +549,7 @@ void ModuleConfig::SetPolicyTableType(PolicyTableType pt_type) {
   vehicle_year.SetPolicyTableType(pt_type);
   user_consent_passengersRC.SetPolicyTableType(pt_type);
   country_consent_passengersRC.SetPolicyTableType(pt_type);
+  equipment.SetPolicyTableType(pt_type);
 }
 
 // MessageString methods
@@ -1100,6 +1112,154 @@ void Table::ReportErrors(rpc::ValidationReport* report__) const {
 void Table::SetPolicyTableType(PolicyTableType pt_type) {
   CompositeType::SetPolicyTableType(pt_type);
   policy_table.SetPolicyTableType(pt_type);
+}
+
+// Equipment methods
+Equipment::Equipment()
+  : CompositeType(kUninitialized) {
+}
+Equipment::~Equipment() {
+}
+Equipment::Equipment(const Json::Value* value__)
+  : CompositeType(InitHelper(value__, &Json::Value::isObject)),
+    zones(impl::ValueMember(value__, "zones")) {
+}
+Json::Value Equipment::ToJsonValue() const {
+  Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("zones", zones, &result__);
+  return result__;
+}
+bool Equipment::is_valid() const {
+  if (!zones.is_valid()) {
+    return false;
+  }
+
+  return Validate();
+}
+bool Equipment::is_initialized() const {
+  return (initialization_state__ != kUninitialized) || (!struct_empty());
+}
+bool Equipment::struct_empty() const {
+  if (zones.is_initialized()) {
+    return false;
+  }
+
+  return true;
+}
+void Equipment::ReportErrors(rpc::ValidationReport* report__) const {
+  if (struct_empty()) {
+    rpc::CompositeType::ReportErrors(report__);
+  }
+  if (!zones.is_valid()) {
+    zones.ReportErrors(&report__->ReportSubobject("zones"));
+  }
+}
+
+void Equipment::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  zones.SetPolicyTableType(pt_type);
+}
+
+// InteriorZone methods
+InteriorZone::InteriorZone()
+  : CompositeType(kUninitialized) {
+}
+InteriorZone::InteriorZone(const InteriorZone& zone)
+  : CompositeType(kUninitialized),
+    col(zone.col),
+    row(zone.row),
+    level(zone.level),
+    auto_allow(zone.auto_allow),
+    driver_allow(zone.driver_allow) {
+}
+InteriorZone::~InteriorZone() {
+}
+InteriorZone::InteriorZone(const Json::Value* value__)
+  : CompositeType(InitHelper(value__, &Json::Value::isObject)),
+    col(impl::ValueMember(value__, "col")),
+    row(impl::ValueMember(value__, "row")),
+    level(impl::ValueMember(value__, "level")),
+    auto_allow(impl::ValueMember(value__, "auto_allow")),
+    driver_allow(impl::ValueMember(value__, "driver_allow")) {
+}
+Json::Value InteriorZone::ToJsonValue() const {
+  Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("col", col, &result__);
+  impl::WriteJsonField("row", row, &result__);
+  impl::WriteJsonField("level", level, &result__);
+  impl::WriteJsonField("auto_allow", auto_allow, &result__);
+  impl::WriteJsonField("driver_allow", driver_allow, &result__);
+  return result__;
+}
+bool InteriorZone::is_valid() const {
+  if (!col.is_valid()) {
+    return false;
+  }
+  if (!row.is_valid()) {
+    return false;
+  }
+  if (!level.is_valid()) {
+    return false;
+  }
+  if (!auto_allow.is_valid()) {
+    return false;
+  }
+  if (!driver_allow.is_valid()) {
+    return false;
+  }
+
+  return Validate();
+}
+bool InteriorZone::is_initialized() const {
+  return (initialization_state__ != kUninitialized) || (!struct_empty());
+}
+bool InteriorZone::struct_empty() const {
+  if (col.is_initialized()) {
+    return false;
+  }
+  if (row.is_initialized()) {
+    return false;
+  }
+  if (level.is_initialized()) {
+    return false;
+  }
+  if (auto_allow.is_initialized()) {
+    return false;
+  }
+  if (driver_allow.is_initialized()) {
+    return false;
+  }
+
+  return true;
+}
+void InteriorZone::ReportErrors(rpc::ValidationReport* report__) const {
+  if (struct_empty()) {
+    rpc::CompositeType::ReportErrors(report__);
+  }
+  if (!col.is_valid()) {
+    col.ReportErrors(&report__->ReportSubobject("col"));
+  }
+  if (!row.is_valid()) {
+    row.ReportErrors(&report__->ReportSubobject("row"));
+  }
+  if (!level.is_valid()) {
+    level.ReportErrors(&report__->ReportSubobject("level"));
+  }
+  if (!auto_allow.is_valid()) {
+    auto_allow.ReportErrors(&report__->ReportSubobject("auto_allow"));
+  }
+  if (!driver_allow.is_valid()) {
+    driver_allow.ReportErrors(&report__->ReportSubobject("driver_allow"));
+  }
+}
+
+void InteriorZone::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  col.SetPolicyTableType(pt_type);
+  row.SetPolicyTableType(pt_type);
+  level.SetPolicyTableType(pt_type);
+  auto_allow.SetPolicyTableType(pt_type);
+  driver_allow.SetPolicyTableType(pt_type);
 }
 
 }  // namespace policy_table_interface_base

@@ -31,6 +31,7 @@
  */
 
 #include "can_cooperation/commands/set_interior_vehicle_data_request.h"
+#include <algorithm>
 #include "can_cooperation/validators/set_interior_vehicle_data_request_validator.h"
 #include "can_cooperation/validators/struct_validators/module_data_validator.h"
 #include "can_cooperation/can_module_constants.h"
@@ -133,6 +134,40 @@ std::string SetInteriorVehicleDataRequest::ModuleType(
   return message.get(message_params::kModuleData,
                      Json::Value(Json::objectValue))
       .get(message_params::kModuleType, Json::Value("")).asString();
+}
+
+SeatLocation SetInteriorVehicleDataRequest::InteriorZone(
+    const Json::Value& message) {
+  Json::Value zone = message.get(message_params::kModuleData,
+                                 Json::Value(Json::objectValue)).get(
+      message_params::kModuleZone, Json::Value(Json::objectValue));
+  return CreateInteriorZone(zone);
+}
+
+namespace {
+std::string ToString(const Json::Value& i) {
+  return i.asString();
+}
+}  // namespace
+
+std::vector<std::string> SetInteriorVehicleDataRequest::ControlData(
+    const Json::Value& message) {
+  Json::Value data = message.get(message_params::kModuleData,
+                                   Json::Value(Json::objectValue));
+
+  Json::Value radio = data.get(message_params::kRadioControlData,
+                               Json::Value(Json::objectValue));
+  Json::Value climate = data.get(message_params::kClimateControlData,
+                                 Json::Value(Json::objectValue));
+
+  std::vector<std::string> params(radio.size() + climate.size());
+  std::vector<std::string>::iterator i = std::transform(radio.begin(),
+                                                        radio.end(),
+                                                        params.begin(),
+                                                        &ToString);
+  std::transform(climate.begin(), climate.end(), i, &ToString);
+
+  return params;
 }
 
 }  // namespace commands

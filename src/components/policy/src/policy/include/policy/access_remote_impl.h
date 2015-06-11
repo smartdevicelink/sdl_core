@@ -64,7 +64,10 @@ class AccessRemoteImpl : public AccessRemote {
   virtual TypeAccess Check(const Subject& who, const Object& what) const;
   virtual bool CheckModuleType(const PTString& app_id,
                                policy_table::ModuleType module) const;
-  virtual bool CheckParameters(/* module, zone, params */) const;
+  virtual TypeAccess CheckParameters(policy_table::ModuleType module,
+                                     const SeatLocation& seat,
+                                     const std::string& rpc,
+                                     const RemoteControlParams& params) const;
   virtual void SetDefaultHmiTypes(const std::string& app_id,
                                   const std::vector<int>& hmi_types);
   virtual const policy_table::Strings& GetGroups(const PTString& device_id,
@@ -82,6 +85,16 @@ class AccessRemoteImpl : public AccessRemote {
   const policy_table::AppHMITypes& HmiTypes(const std::string& app_id);
   void GetGroupsIds(const std::string &device_id, const std::string &app_id,
                     FunctionalGroupIDs& grops_ids);
+  bool IsAutoAllowed(const policy_table::InteriorZone& zone,
+                     policy_table::ModuleType module, const std::string rpc,
+                     const RemoteControlParams& params) const;
+  bool IsDriverAllowed(const policy_table::InteriorZone& zone,
+                       policy_table::ModuleType module, const std::string rpc,
+                       const RemoteControlParams& params) const;
+  bool CheckRpc(const std::string& name, const RemoteControlParams& params,
+                const policy_table::RemoteRpcs& rpcs) const;
+  bool CompareParameters(const RemoteControlParams& input,
+                         const policy_table::Strings& parameters) const;
   utils::SharedPtr<CacheManager> cache_;
   PTString primary_device_;
   bool enabled_;

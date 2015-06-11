@@ -151,7 +151,11 @@ class BaseCommandRequest : public Command,
                   std::string>& event) = 0;
 
   virtual std::string ModuleType(const Json::Value& message);
+  virtual SeatLocation InteriorZone(const Json::Value& message);
+  virtual std::vector<std::string> ControlData(const Json::Value& message);
   virtual bool CheckAccess();
+
+  SeatLocation CreateInteriorZone(const Json::Value& zone);
 
  private:
   bool CheckPolicy();
