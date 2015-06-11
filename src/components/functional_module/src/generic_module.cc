@@ -53,6 +53,8 @@ void GenericModule::OnServiceStateChanged(ServiceState state) {
     // We must subscribe to necessary HMI notifications
     service_->SubscribeToHMINotification(hmi_api::on_interior_vehicle_data);
     service_->SubscribeToHMINotification(hmi_api::on_reverse_apps_allowing);
+    service_->SubscribeToHMINotification(hmi_api::on_set_driver_device);
+    // TODO(KKolodiy): for backward compatibility HMI (REVSDL-1134)
     service_->SubscribeToHMINotification(hmi_api::on_primary_device);
   }
 }
