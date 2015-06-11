@@ -30,11 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_FUNCTINAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_GENERIC_MODULE_H_
-#define SRC_COMPONENTS_FUNCTINAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_GENERIC_MODULE_H_
+#ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_GENERIC_MODULE_H_
+#define SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_GENERIC_MODULE_H_
 
 #include <deque>
-
+#include <string>
 #include "functional_module/module_observer.h"
 #include "functional_module/function_ids.h"
 #include "utils/shared_ptr.h"
@@ -89,7 +89,8 @@ class GenericModule {
   virtual application_manager::ServicePtr service();
 
   virtual ProcessResult ProcessMessage(application_manager::MessagePtr msg) = 0;
-  virtual ProcessResult ProcessHMIMessage(application_manager::MessagePtr msg) = 0;
+  virtual ProcessResult ProcessHMIMessage(
+    application_manager::MessagePtr msg) = 0;
   virtual void OnServiceStateChanged(ServiceState state);
 
   /**
@@ -114,6 +115,14 @@ class GenericModule {
    */
   virtual void RemoveAppExtension(uint32_t app_id) = 0;
 
+  /*
+   * @brief Check registering app can be handled by plugin
+   * @param msg Registration message
+   * @param app Application basis already create by Core
+   */
+  virtual bool IsAppForPlugin(
+      application_manager::ApplicationSharedPtr app) = 0;
+
  protected:
   explicit GenericModule(ModuleID module_id);
   void NotifyObservers(ModuleObserver::Errors error);
@@ -124,7 +133,6 @@ class GenericModule {
   virtual void RemoveAppExtensions() = 0;
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(GenericModule);
   application_manager::ServicePtr service_;
   const ModuleID kModuleId_;
 
@@ -132,8 +140,9 @@ class GenericModule {
   ServiceState state_;
 
   friend class DriverGenericModuleTest;
+  DISALLOW_COPY_AND_ASSIGN(GenericModule);
 };
 
 }  //  namespace functional_modules
 
-#endif  //  SRC_COMPONENTS_FUNCTINAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_GENERIC_MODULE_H_
+#endif  // SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_GENERIC_MODULE_H_

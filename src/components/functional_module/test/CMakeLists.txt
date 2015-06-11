@@ -6,6 +6,8 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/application_manager/include
   ${CMAKE_SOURCE_DIR}/src/components/connection_handler/include
   ${CMAKE_SOURCE_DIR}/src/components/utils/include
+  ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/usage_statistics/include
+  ${CMAKE_SOURCE_DIR}/src/components/smart_objects/include
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
   include

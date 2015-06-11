@@ -52,7 +52,7 @@ enum MobileFunctionID {
   GET_INTERIOR_VEHICLE_DATA_CAPABILITIES = 100016,
   GET_INTERIOR_VEHICLE_DATA = 100017,
   SET_INTERIOR_VEHICLE_DATA = 100018,
-  ON_INTERIOR_VEHICLE_DATA = 100019
+  ON_INTERIOR_VEHICLE_DATA = 100019,
 };
 
 namespace hmi_api {
@@ -66,6 +66,8 @@ namespace hmi_api {
   const char grant_access[]              = "VehicleInfo.GrantAccess";
   const char on_reverse_apps_allowing[]  = "VehicleInfo.OnReverseAppsAllowing";
   const char on_primary_device[]         = "VehicleInfo.OnPrimaryDevice";
+  const char on_app_deactivated[]        = "BasicCommunication.OnAppDeactivated";
+  const char sdl_activate_app[]          = "SDL.ActivateApp";
 }
 
 namespace can_api {
