@@ -83,16 +83,16 @@ void CANModule::SubscribeOnFunctions() {
     MobileFunctionID::ON_PRESETS_CHANGED);
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::BUTTON_PRESS);
   plugin_info_.mobile_function_list.push_back(
-      MobileFunctionID::GET_INTERIOR_VEHICLE_DATA_CAPABILITIES);
+    MobileFunctionID::GET_INTERIOR_VEHICLE_DATA_CAPABILITIES);
   plugin_info_.mobile_function_list.push_back(
-      MobileFunctionID::GET_INTERIOR_VEHICLE_DATA);
+    MobileFunctionID::GET_INTERIOR_VEHICLE_DATA);
   plugin_info_.mobile_function_list.push_back(
-      MobileFunctionID::SET_INTERIOR_VEHICLE_DATA);
+    MobileFunctionID::SET_INTERIOR_VEHICLE_DATA);
   plugin_info_.mobile_function_list.push_back(
-      MobileFunctionID::ON_INTERIOR_VEHICLE_DATA);
+    MobileFunctionID::ON_INTERIOR_VEHICLE_DATA);
 
   plugin_info_.hmi_function_list.push_back(
-      hmi_api::get_interior_vehicle_data_capabilities);
+    hmi_api::get_interior_vehicle_data_capabilities);
   plugin_info_.hmi_function_list.push_back(hmi_api::get_interior_vehicle_data);
   plugin_info_.hmi_function_list.push_back(hmi_api::set_interior_vehicle_data);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_interior_vehicle_data);
@@ -121,7 +121,7 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
   }
 
   msg->set_function_name(MessageHelper::GetMobileAPIName(
-      static_cast<functional_modules::MobileFunctionID>(msg->function_id())));
+                           static_cast<functional_modules::MobileFunctionID>(msg->function_id())));
 
   commands::Command* command = MobileCommandFactory::CreateCommand(msg);
   if (command) {
@@ -200,16 +200,16 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     }
     // Response
   } else if (value.isMember(json_keys::kResult)
-      && value[json_keys::kResult].isMember(json_keys::kMethod)) {
+             && value[json_keys::kResult].isMember(json_keys::kMethod)) {
     function_name = value[json_keys::kResult][json_keys::kMethod].asCString();
     msg->set_message_type(application_manager::MessageType::kResponse);
     // Error response
   } else if (value.isMember(json_keys::kError)
-      && value[json_keys::kError].isMember(json_keys::kData)
+             && value[json_keys::kError].isMember(json_keys::kData)
              && value[json_keys::kError][json_keys::kData]
-                                         .isMember(json_keys::kMethod)) {
+             .isMember(json_keys::kMethod)) {
     function_name = value[json_keys::kError][json_keys::kData]
-                                            [json_keys::kMethod].asCString();
+                    [json_keys::kMethod].asCString();
     msg->set_message_type(application_manager::MessageType::kErrorResponse);
   } else {
     DCHECK(false);
@@ -267,27 +267,27 @@ functional_modules::ProcessResult CANModule::HandleMessage(
             LOG4CXX_ERROR(logger_, "Invalid OnPrimaryDevice notification");
           }
         }
-          return ProcessResult::PROCESSED;
-        } else if (functional_modules::hmi_api::on_app_deactivated ==
-        function_name) {
-          return ProcessOnAppDeactivation(value);
-        }
+        return ProcessResult::PROCESSED;
+      } else if (functional_modules::hmi_api::on_app_deactivated ==
+                 function_name) {
+        return ProcessOnAppDeactivation(value);
+      }
 
       int32_t func_id = msg->function_id();
       std::string func_name = MessageHelper::GetMobileAPIName(
-          static_cast<functional_modules::MobileFunctionID>(func_id));
+                                static_cast<functional_modules::MobileFunctionID>(func_id));
       msg->set_function_name(func_name);
 
       NotifyMobiles(msg);
       break;
     }
     case application_manager::MessageType::kRequest: {
-        if (function_name == functional_modules::hmi_api::sdl_activate_app) {
-          msg->set_protocol_version(application_manager::ProtocolVersion::kHMI);
-          return ProcessSDLActivateApp(value);
-        }
-        return ProcessResult::CANNOT_PROCESS;
+      if (function_name == functional_modules::hmi_api::sdl_activate_app) {
+        msg->set_protocol_version(application_manager::ProtocolVersion::kHMI);
+        return ProcessSDLActivateApp(value);
       }
+      return ProcessResult::CANNOT_PROCESS;
+    }
     default: {
       return ProcessResult::FAILED;
     }
@@ -350,12 +350,12 @@ void CANModule::RemoveAppExtension(uint32_t app_id) {
 }
 
 bool CANModule::IsAppForPlugin(
-application_manager::ApplicationSharedPtr app) {
+  application_manager::ApplicationSharedPtr app) {
   if (app->app_types()) {
     std::vector<int> hmi_types =
-    application_manager::Service::SmartObjToArrayInt(app->app_types());
+      application_manager::SmartObjToArrayInt(app->app_types());
     if (hmi_types.end() != std::find(hmi_types.begin(), hmi_types.end(),
-    mobile_apis::AppHMIType::eType::REMOTE_CONTROL)) {
+                                     mobile_apis::AppHMIType::eType::REMOTE_CONTROL)) {
       CANAppExtensionPtr can_app_extension = new CANAppExtension(GetModuleID());
       app->AddExtension(can_app_extension);
       return true;

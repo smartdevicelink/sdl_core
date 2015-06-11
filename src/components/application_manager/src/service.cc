@@ -42,7 +42,7 @@ int ConvertToInt(const smart_objects::SmartObject& val) {
 }
 }
 
-std::vector<int> Service::SmartObjToArrayInt(const smart_objects::SmartObject* data) {
+std::vector<int> SmartObjToArrayInt(const smart_objects::SmartObject* data) {
   if (!data) {
     return std::vector<int>();
   }

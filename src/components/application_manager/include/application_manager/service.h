@@ -164,15 +164,15 @@ class Service {
    */
   virtual void ChangeNotifyHMILevel(ApplicationSharedPtr app,
       mobile_apis::HMILevel::eType level) = 0;
-
-  /*
-   * @brief Static helper with smart objects.
-   * @param data Pointer to SmartObject for convertion
-   */
-  static std::vector<int> SmartObjToArrayInt(const smart_objects::SmartObject* data);
 };
 
 typedef utils::SharedPtr<Service> ServicePtr;
+
+/*
+ * @brief Helper function with smart objects.
+ * @param data Pointer to SmartObject for convertion
+ */
+std::vector<int> SmartObjToArrayInt(const smart_objects::SmartObject* data);
 
 }  // namespace application_manager
 

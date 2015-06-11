@@ -284,6 +284,7 @@ bool PluginManager::IsAppForPlugins(
   if (!app) {
     return false;
   }
+
   bool res = false;
   for (PluginsIterator it = plugins_.begin(); plugins_.end() != it; ++it) {
     res = res || it->second->IsAppForPlugin(app);

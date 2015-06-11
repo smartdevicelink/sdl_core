@@ -54,11 +54,8 @@ void PolicyHelper::SetPrimaryDevice(const uint32_t device_handle,
       application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
         applications[i]->QueryInterface(module_id));
     DCHECK(extension);
-    if (applications[i]->device() == device_handle) {
-      extension->set_is_on_driver_device(true);
-    } else {
-      extension->set_is_on_driver_device(false);
-    }
+    bool is_driver = (applications[i]->device() == device_handle);
+    extension->set_is_on_driver_device(is_driver);
   }
 }
 
