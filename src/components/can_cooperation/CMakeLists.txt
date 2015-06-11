@@ -82,6 +82,7 @@ set (SOURCES
     ./src/validators/set_interior_vehicle_data_request_validator.cc
     ./src/validators/on_interior_vehicle_data_notification_validator.cc
     ./src/policy_helper.cc
+    ./src/module_helper.cc
 )
 
 set (LIBRARIES

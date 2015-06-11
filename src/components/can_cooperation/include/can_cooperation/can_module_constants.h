@@ -251,6 +251,10 @@ const char kRadioControlData[]     = "radioControlData";
 const char kClimateControlData[]   = "climateControlData";
 // ModuleData struct
 
+const char kHMIAppID[]   = "appID";
+const char kHmiLevel[]   = "hmiLevel";
+const char kSysContext[] = "systemContext";
+const char kAudioState[] = "audioStreamingState";
 } //  namespace message_params
 
 namespace enums_value {

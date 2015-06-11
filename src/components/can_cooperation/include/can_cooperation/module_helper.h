@@ -30,33 +30,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "can_cooperation/policy_helper.h"
-#include "can_cooperation/can_module.h"
-#include "can_cooperation/can_app_extension.h"
-#include "application_manager/application.h"
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_MODULE_HELPER_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_MODULE_HELPER_H_
+
+#include "functional_module/generic_module.h"
+#include "json/json.h"
 
 namespace can_cooperation {
 
-void PolicyHelper::OnRSDLFunctionalityAllowing(bool allowed) {
-  CANModule::instance()->service()->SetRemoteControl(allowed);
-}
+/*
+ * @brief Checks if deactivated app was of R-SDL type
+ * and process correspondingly. Otherwise returns
+ * CANNOT_PROCESS.
+ * @param value Json notification from HMI
+ */
+functional_modules::ProcessResult ProcessOnAppDeactivation(
+  const Json::Value& value);
 
-void PolicyHelper::SetPrimaryDevice(const uint32_t device_handle,
-                                    const std::string& input) {
-  CANModule::instance()->service()->SetPrimaryDevice(device_handle, input);
+/*
+ * @brief Check if activated/other apps are of R-SDL type;
+ * process correspondingly.
+ * If no R-SDL app is involved returns CANNOT_PROCESS.
+ * @param value Json request from HMI
+ */
+functional_modules::ProcessResult ProcessSDLActivateApp(
+  const Json::Value& value);
 
-  application_manager::AppExtensionUID module_id = CANModule::instance()->GetModuleID();
-  std::vector<application_manager::ApplicationSharedPtr> applications =
-    CANModule::instance()->service()->GetApplications(module_id);
+}  //  namespace can_cooperation
 
-  for (size_t i = 0; i < applications.size(); ++i) {
-    CANAppExtensionPtr extension =
-      application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-        applications[i]->QueryInterface(module_id));
-    DCHECK(extension);
-    bool is_driver = (applications[i]->device() == device_handle);
-    extension->set_is_on_driver_device(is_driver);
-  }
-}
-
-}  // namespace can_cooperation
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_MODULE_HELPER_H_

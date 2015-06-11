@@ -30,33 +30,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "can_cooperation/policy_helper.h"
-#include "can_cooperation/can_module.h"
-#include "can_cooperation/can_app_extension.h"
-#include "application_manager/application.h"
+#include <algorithm>
+#include "application_manager/service.h"
+#include "smart_objects/smart_object.h"
 
-namespace can_cooperation {
+namespace application_manager {
 
-void PolicyHelper::OnRSDLFunctionalityAllowing(bool allowed) {
-  CANModule::instance()->service()->SetRemoteControl(allowed);
+namespace {
+int ConvertToInt(const smart_objects::SmartObject& val) {
+  return val.asInt();
+}
 }
 
-void PolicyHelper::SetPrimaryDevice(const uint32_t device_handle,
-                                    const std::string& input) {
-  CANModule::instance()->service()->SetPrimaryDevice(device_handle, input);
-
-  application_manager::AppExtensionUID module_id = CANModule::instance()->GetModuleID();
-  std::vector<application_manager::ApplicationSharedPtr> applications =
-    CANModule::instance()->service()->GetApplications(module_id);
-
-  for (size_t i = 0; i < applications.size(); ++i) {
-    CANAppExtensionPtr extension =
-      application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-        applications[i]->QueryInterface(module_id));
-    DCHECK(extension);
-    bool is_driver = (applications[i]->device() == device_handle);
-    extension->set_is_on_driver_device(is_driver);
+std::vector<int> SmartObjToArrayInt(const smart_objects::SmartObject* data) {
+  if (!data) {
+    return std::vector<int>();
   }
+  std::vector<int> result(data->asArray()->size());
+  std::transform(data->asArray()->begin(), data->asArray()->end(),
+                 result.begin(), ConvertToInt);
+  return result;
 }
-
-}  // namespace can_cooperation
+}

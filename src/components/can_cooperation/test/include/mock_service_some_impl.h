@@ -29,28 +29,28 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_SERVICE_H_
-#define TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_SERVICE_H_
+#ifndef TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_SERVICE_SOME_IMPL_H_
+#define TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_SERVICE_SOME_IMPL_H_
 
 #include "gmock/gmock.h"
 #include "application_manager/service.h"
 
 namespace application_manager {
 
-class MockService : public Service {
+class MockServiceSomeImpl : public Service {
  public:
   MOCK_METHOD1(CheckPolicyPermissions,
       mobile_apis::Result::eType(MessagePtr msg));
-  MOCK_METHOD1(GetApplication,
-      ApplicationSharedPtr(ApplicationId app_id));
+  ApplicationSharedPtr GetApplication(ApplicationId app_id) { return app_; }
+  void set_app(ApplicationSharedPtr app) { app_ = app; }
   MOCK_METHOD1(SendMessageToHMI,
       void(const MessagePtr& message));
   MOCK_METHOD1(SendMessageToMobile,
       void(const MessagePtr& message));
   MOCK_METHOD0(GetNextCorrelationID,
       uint32_t());
-  MOCK_METHOD1(GetApplications,
-      std::vector<ApplicationSharedPtr>(AppExtensionUID));
+  std::vector<ApplicationSharedPtr> GetApplications(AppExtensionUID uid) {
+     std::vector<ApplicationSharedPtr> v; v.push_back(app_); return v;}
   MOCK_METHOD1(SubscribeToHMINotification,
       void(const std::string& hmi_notification));
   MOCK_METHOD2(ChangeNotifyHMILevel, void(ApplicationSharedPtr app,
@@ -62,16 +62,18 @@ class MockService : public Service {
           const SeatLocation& zone));
   MOCK_METHOD3(SetAccess,
       void(const ApplicationId& app_id,
-           const std::string& module,
-           bool allowed));
+          const std::string& module,
+          bool allowed));
   MOCK_METHOD1(ResetAccess, void(const ApplicationId& app_id));
   MOCK_METHOD1(ResetAccessByModule, void(const std::string& module));
   MOCK_METHOD2(SetPrimaryDevice, void(const uint32_t dev_id,
                                       const std::string& input));
   MOCK_METHOD1(SetRemoteControl, void(bool enabled));
+private:
+  ApplicationSharedPtr app_;
 };
 
 }
   // namespace application_manager
 
-#endif  // TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_SERVICE_H_
+#endif  // TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_SERVICE_SOME_IMPL_H_

@@ -3,6 +3,7 @@
 #include "functional_module/plugin_manager.h"
 #include "mock_generic_module.h"
 #include "mock_service.h"
+#include "mock_application.h"
 
 using application_manager::Message;
 using application_manager::ProtocolVersion;
@@ -126,6 +127,13 @@ TEST_F(PluginManagerTest, ProcessHMIMessagePass) {
   EXPECT_CALL(*module, ProcessHMIMessage(message)).Times(1).WillOnce(
       Return(ProcessResult::PROCESSED));
   manager->ProcessHMIMessage(message);
+}
+
+TEST_F(PluginManagerTest, IsAppForPlugins) {
+  application_manager::MockApplication* app = new application_manager::MockApplication();
+  application_manager::ApplicationSharedPtr app_ptr(app);
+  EXPECT_CALL(*module, IsAppForPlugin(app_ptr)).Times(1);
+  manager->IsAppForPlugins(app_ptr);
 }
 
 }  // namespace functional_modules

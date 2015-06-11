@@ -60,6 +60,8 @@ class MockGenericModule : public GenericModule {
       void(ServiceState state));
   MOCK_METHOD1(RemoveAppExtension,
       void(uint32_t app_id));
+  MOCK_METHOD1(IsAppForPlugin, bool(
+      application_manager::ApplicationSharedPtr app));
   MOCK_METHOD0(RemoveAppExtensions,
       void());
 };

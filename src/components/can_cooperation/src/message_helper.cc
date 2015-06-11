@@ -93,4 +93,3 @@ Json::Value MessageHelper::StringToValue(const std::string& string) {
 }
 
 }  // namespace can_cooperation
-
