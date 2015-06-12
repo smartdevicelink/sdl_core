@@ -146,7 +146,7 @@ class ConnectionHandler {
    * @param timeout in milliseconds
    */
   virtual void SetHeartBeatTimeout(uint32_t connection_key,
-                                   int32_t timeout) = 0;
+                                   uint32_t timeout) = 0;
 
   /**
    * \brief binds protocol version with session

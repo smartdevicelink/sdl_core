@@ -717,7 +717,7 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   app_query.Bind(
     5, app.second.is_null());
   app_query.Bind(6, *app.second.memory_kb);
-  app_query.Bind(7, *app.second.heart_beat_timeout_ms);
+  app_query.Bind(7, static_cast<int64_t>(*app.second.heart_beat_timeout_ms));
   app.second.certificate.is_initialized() ?
   app_query.Bind(8, *app.second.certificate) : app_query.Bind(8, std::string());
 
@@ -828,7 +828,7 @@ bool SQLPTExtRepresentation::GatherApplicationPoliciesSection(
     params.keep_context = query.GetBoolean(3);
     params.steal_focus = query.GetBoolean(4);
     *params.memory_kb = query.GetInteger(5);
-    *params.heart_beat_timeout_ms = query.GetInteger(6);
+    *params.heart_beat_timeout_ms = query.GetUInteger(6);
     if (!query.IsNull(7)) {
       *params.certificate = query.GetString(7);
     }

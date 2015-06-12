@@ -43,7 +43,7 @@ using namespace sync_primitives;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "HeartBeatMonitor")
 
-HeartBeatMonitor::HeartBeatMonitor(int32_t heartbeat_timeout_mseconds,
+HeartBeatMonitor::HeartBeatMonitor(uint32_t heartbeat_timeout_mseconds,
                                    Connection *connection)
     : default_heartbeat_timeout_(heartbeat_timeout_mseconds),
       connection_(connection),
@@ -131,7 +131,7 @@ void HeartBeatMonitor::exitThreadMain() {
   AutoLock main_lock(main_thread_lock_);
 }
 
-void HeartBeatMonitor::set_heartbeat_timeout_milliseconds(int32_t timeout,
+void HeartBeatMonitor::set_heartbeat_timeout_milliseconds(uint32_t timeout,
                                                      uint8_t session_id) {
   LOG4CXX_DEBUG(logger_, "Set new heart beat timeout " << timeout <<
                 "For session: " << session_id);
@@ -142,7 +142,7 @@ void HeartBeatMonitor::set_heartbeat_timeout_milliseconds(int32_t timeout,
   }
 }
 
-HeartBeatMonitor::SessionState::SessionState(int32_t heartbeat_timeout_mseconds)
+HeartBeatMonitor::SessionState::SessionState(uint32_t heartbeat_timeout_mseconds)
   : heartbeat_timeout_mseconds_(heartbeat_timeout_mseconds),
     is_heartbeat_sent_(false) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -152,16 +152,14 @@ HeartBeatMonitor::SessionState::SessionState(int32_t heartbeat_timeout_mseconds)
 void HeartBeatMonitor::SessionState::RefreshExpiration() {
   LOG4CXX_DEBUG(logger_, "Refresh expiration: " << heartbeat_timeout_mseconds_);
   using namespace date_time;
-  heartbeat_expiration_ = DateTime::getCurrentTime();
-  uint32_t sec = heartbeat_timeout_mseconds_/DateTime::MILLISECONDS_IN_SECOND;
-  uint32_t usec = (heartbeat_timeout_mseconds_%DateTime::MILLISECONDS_IN_SECOND)*
-      DateTime::MICROSECONDS_IN_MILLISECONDS;
-  heartbeat_expiration_.tv_sec += sec;
-  heartbeat_expiration_.tv_usec += usec;
+  TimevalStruct time = DateTime::getCurrentTime();
+  DateTime::AddMilliseconds(time, heartbeat_timeout_mseconds_);
+  heartbeat_expiration_ = time;
+
 }
 
 void HeartBeatMonitor::SessionState::UpdateTimeout(
-    int32_t heartbeat_timeout_mseconds) {
+    uint32_t heartbeat_timeout_mseconds) {
   LOG4CXX_DEBUG(logger_, "Update timout with value " <<
                 heartbeat_timeout_mseconds_);
   heartbeat_timeout_mseconds_ = heartbeat_timeout_mseconds;
@@ -179,8 +177,8 @@ bool HeartBeatMonitor::SessionState::IsReadyToClose() const {
 }
 
 void HeartBeatMonitor::SessionState::KeepAlive() {
+  LOG4CXX_AUTO_TRACE(logger_);
   is_heartbeat_sent_ = false;
-  LOG4CXX_DEBUG(logger_, "keep alive");
   RefreshExpiration();
 }
 

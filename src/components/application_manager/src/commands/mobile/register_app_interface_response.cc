@@ -80,7 +80,7 @@ void RegisterAppInterfaceResponse::SetHeartBeatTimeout(
   LOG4CXX_AUTO_TRACE(logger_);
   policy::PolicyHandler *policy_handler = policy::PolicyHandler::instance();
   if (policy_handler->PolicyEnabled()) {
-    const int32_t timeout = policy_handler->HeartBeatTimeout(policy_app_id);
+    const uint32_t timeout = policy_handler->HeartBeatTimeout(policy_app_id);
     if (timeout > 0) {
       application_manager::ApplicationManagerImpl::instance()->
           connection_handler()->SetHeartBeatTimeout(connection_key, timeout);

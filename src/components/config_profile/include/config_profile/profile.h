@@ -308,7 +308,7 @@ class Profile : public utils::Singleton<Profile> {
     /*
      * @brief Heartbeat timeout before closing connection
      */
-    int32_t heart_beat_timeout() const;
+    uint32_t heart_beat_timeout() const;
 
     /*
      * @brief Path to preloaded policy file

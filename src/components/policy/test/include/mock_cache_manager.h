@@ -177,7 +177,7 @@ class MockCacheManagerInterface : public CacheManagerInterface {
   MOCK_METHOD0(Backup,
       void());
   MOCK_CONST_METHOD1(HeartBeatTimeout,
-      uint16_t(const std::string& app_id));
+      uint32_t(const std::string& app_id));
   MOCK_CONST_METHOD2(GetAppRequestTypes,
       void(const std::string& policy_app_id,
            std::vector<std::string>& request_types));

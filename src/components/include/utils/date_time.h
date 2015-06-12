@@ -69,6 +69,15 @@ class DateTime {
   static int64_t calculateTimeDiff(const TimevalStruct& time1,
                                    const TimevalStruct& time2);
 
+  /**
+   * @brief Adds milliseconds to time struct
+   * @param time contains time struct
+   * @param milliseconds contains value wich need to
+   * add to time struct
+   **/
+  static void AddMilliseconds(TimevalStruct& time,
+                             uint32_t milliseconds);
+
   static TimevalStruct Sub(const TimevalStruct& time1,
                            const TimevalStruct& time2);
 

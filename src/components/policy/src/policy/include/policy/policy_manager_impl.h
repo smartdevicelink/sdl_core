@@ -161,7 +161,7 @@ class PolicyManagerImpl : public PolicyManager {
     virtual void RemoveAppConsentForGroup(const std::string& app_id,
                                           const std::string& group_name);
 
-    virtual uint16_t HeartBeatTimeout(const std::string& app_id) const;
+    virtual uint32_t HeartBeatTimeout(const std::string& app_id) const;
 
     virtual void SaveUpdateStatusRequired(bool is_update_needed);
 

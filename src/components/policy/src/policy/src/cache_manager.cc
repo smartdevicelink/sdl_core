@@ -93,9 +93,9 @@ bool CacheManager::CanAppKeepContext(const std::string &app_id) {
   return result;
 }
 
-uint16_t CacheManager::HeartBeatTimeout(const std::string &app_id) const {
+uint32_t CacheManager::HeartBeatTimeout(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(0);
-  uint16_t result = 0;
+  uint32_t result = 0;
   if (AppExists(app_id)) {
     if (pt_->policy_table.app_policies_section.apps[app_id].heart_beat_timeout_ms
         .is_initialized()) {

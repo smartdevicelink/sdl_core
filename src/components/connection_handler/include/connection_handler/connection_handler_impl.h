@@ -367,7 +367,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * @param connection_key pair of connection and session id
    * @param timeout in milliseconds
    */
-  virtual void SetHeartBeatTimeout(uint32_t connection_key, int32_t timeout);
+  virtual void SetHeartBeatTimeout(uint32_t connection_key, uint32_t timeout);
 
   /**
    * \brief Keep connection associated with the key from being closed by heartbeat monitor
