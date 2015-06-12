@@ -54,7 +54,8 @@ SDL.VehicleInfo = Em.ContainerView.create( {
             'ecu1Data',
             'ecu2Data',
             'odometrTitle',
-            'odometrInput'
+            'odometrInput',
+            'onAwakeSDLButton'
         ],
 
     /**
@@ -185,6 +186,21 @@ SDL.VehicleInfo = Em.ContainerView.create( {
 
         valueBinding: 'SDL.SDLVehicleInfoModel.prndlSelectState'
     } ),
+
+    /**
+     * Button to send OnEmergencyEvent to SDL
+     */
+    onAwakeSDLButton: SDL.Button.extend( {
+        classNames: 'button onEmergencyEvent',
+        textBinding: 'this.displayText',
+        action: 'OnEmergencyEventNotificationSend',
+        target: 'SDL.SDLController',
+        enabled: false,
+        onDown: false,
+        displayText: function () {
+            return this.enabled ? 'Send OnEmergencyEvent On' : 'Send OnEmergencyEvent Off';
+        }.property('this.enabled')
+    }),
 
     /**
      * Trigger function that activates and deactivates VehicleInfo PopUp

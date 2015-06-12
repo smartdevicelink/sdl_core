@@ -1,4 +1,4 @@
-﻿/**
+﻿/*
  Copyright (c) 2014, Ford Motor Company
  All rights reserved.
 
@@ -44,7 +44,6 @@ namespace application_manager {
  **/
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-typedef utils::SharedPtr<smart_objects::SmartObject> MessageSharedPtr;
 
 namespace commands {
 
@@ -108,7 +107,27 @@ class Command {
    */
   virtual void onTimeOut() = 0;
 
+  /**
+ * @brief AllowedToTerminate tells if request controller is allowed
+ * to terminate this command
+ * @return
+ */
+  virtual bool AllowedToTerminate() = 0;
+
+    /**
+   * @brief SetAllowedToTerminate set up allowed to terminate flag.
+   * If true, request controller will terminate request on response
+   */
+  virtual void SetAllowedToTerminate(bool allowed) = 0;
+
+
+  enum CommandOrigin {
+    ORIGIN_SDL,
+    ORIGIN_MOBILE
+  };
 };
+
+typedef smart_objects::SmartObjectSPtr MessageSharedPtr;
 
 }  // namespace commands
 

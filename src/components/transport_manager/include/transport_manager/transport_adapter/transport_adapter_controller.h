@@ -95,7 +95,7 @@ class TransportAdapterController {
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
    */
-  virtual void ConnectionCreated(Connection* connection,
+  virtual void ConnectionCreated(ConnectionSPtr connection,
                                  const DeviceUID& device_handle,
                                  const ApplicationHandle& app_handle) = 0;
 

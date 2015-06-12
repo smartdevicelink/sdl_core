@@ -1,4 +1,4 @@
-/**
+/*
  * \file threaded_socket_connection.h
  * \brief Header for classes responsible for communication over sockets.
  * Copyright (c) 2013, Ford Motor Company
@@ -41,9 +41,11 @@
 #include "transport_manager/transport_adapter/connection.h"
 #include "protocol/common.h"
 #include "utils/threads/thread_delegate.h"
-#include "utils/threads/thread.h"
+#include "utils/lock.h"
 
 using ::transport_manager::transport_adapter::Connection;
+
+class Thread;
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -53,10 +55,8 @@ class TransportAdapterController;
 /**
  * @brief Class responsible for communication over sockets.
  */
-class ThreadedSocketConnection : public Connection,
-                                 public threads::ThreadDelegate {
+class ThreadedSocketConnection : public Connection {
  public:
-
   /**
    * @brief Send data frame.
    *
@@ -86,8 +86,8 @@ class ThreadedSocketConnection : public Connection,
   void set_socket(int socket) {
     socket_ = socket;
   }
- protected:
 
+ protected:
   /**
    * @brief Constructor.
    *
@@ -103,7 +103,6 @@ class ThreadedSocketConnection : public Connection,
    * @brief Destructor.
    */
   virtual ~ThreadedSocketConnection();
-
 
   virtual bool Establish(ConnectError** error) = 0;
 
@@ -129,11 +128,18 @@ class ThreadedSocketConnection : public Connection,
   }
 
  private:
+  class SocketConnectionDelegate : public threads::ThreadDelegate {
+   public:
+    explicit SocketConnectionDelegate(ThreadedSocketConnection* connection);
+    void threadMain() OVERRIDE;
+    void exitThreadMain() OVERRIDE;
+   private:
+    ThreadedSocketConnection* connection_;
+  };
 
   int read_fd_;
   int write_fd_;
   void threadMain();
-  bool exitThreadMain();
   void Transmit();
   void Finalize();
   TransportAdapter::Error Notify() const;
@@ -147,7 +153,7 @@ class ThreadedSocketConnection : public Connection,
    **/
   typedef std::queue<protocol_handler::RawMessagePtr> FrameQueue;
   FrameQueue frames_to_send_;
-  mutable pthread_mutex_t frames_to_send_mutex_;
+  mutable sync_primitives::Lock frames_to_send_mutex_;
 
   int socket_;
   bool terminate_flag_;
@@ -159,4 +165,4 @@ class ThreadedSocketConnection : public Connection,
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_SOCKET_COMMUNICATION
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_THREADED_SOCKET_CONNECTION_H_

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -47,7 +47,7 @@ OnSystemContextNotification::~OnSystemContextNotification() {
 }
 
 void OnSystemContextNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnSystemContextNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   mobile_api::SystemContext::eType system_context =
     static_cast<mobile_api::SystemContext::eType>(
@@ -77,8 +77,8 @@ void OnSystemContextNotification::Run() {
 
 void OnSystemContextNotification::SendSystemContextNotification(ApplicationSharedPtr app,
     mobile_api::SystemContext::eType system_context) {
-  app->set_system_context(system_context);
-  MessageHelper::SendHMIStatusNotification(*app);
+  ApplicationManagerImpl::instance()->SetState(app->app_id(),
+                                               system_context);
 }
 
 }  // namespace commands

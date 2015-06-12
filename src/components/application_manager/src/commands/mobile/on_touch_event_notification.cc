@@ -50,7 +50,7 @@ OnTouchEventNotification::~OnTouchEventNotification() {
 }
 
 void OnTouchEventNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnTouchEventNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   const std::vector<ApplicationSharedPtr>& applications =
       ApplicationManagerImpl::instance()->applications_with_navi();
@@ -58,7 +58,7 @@ void OnTouchEventNotification::Run() {
   std::vector<ApplicationSharedPtr>::const_iterator it = applications.begin();
   for (; applications.end() != it; ++it) {
     ApplicationSharedPtr app = *it;
-    if (mobile_apis::HMILevel::HMI_FULL == app->hmi_level()) {
+    if (app->IsFullscreen()) {
       (*message_)[strings::params][strings::connection_key] = app->app_id();
       SendNotification();
     }

@@ -51,7 +51,6 @@ SDL.SDLAppController = Em.Object.create({
      */
     showAppList: function() {
 
-        SDL.InfoAppsView.showAppList();
         SDL.AppPermissionsListView.showAppList();
     }.observes('SDL.SDLModel.registeredApps.@each'),
 
@@ -144,6 +143,9 @@ SDL.SDLAppController = Em.Object.create({
      */
     onVRCommand: function (element) {
 
+        if (SDL.SDLModel.VRActive) {
+            SDL.SDLModel.toggleProperty('VRActive');
+        }
         FFW.VR.onCommand(element.commandID, element.appID);
     },
 

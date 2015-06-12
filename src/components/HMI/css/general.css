@@ -16,7 +16,7 @@ html, body {
 
 body {
     /*FONT FAMILY*/
-    font-family: helvetica-neue;
+    font-family: sans-serif;
     /*Defaul font size*/
     font-size: 16px;
     background-color: #000;
@@ -43,7 +43,7 @@ div {
 
 .ffw-button {
     cursor: pointer;
-    background: black;
+    background: url(../images/common/button.png) repeat-x;
 }
 
 .ffw-button.pressed {
@@ -131,7 +131,7 @@ div {
     height: 100px;
     z-index: 1;
     border-radius: 10 PX;
-    top: 330px;
+    top: 8px;
     -webkit-transition: opacity 1s ease-in-out;
     display: none;
 }
@@ -162,6 +162,24 @@ div {
     font-size: 30px;
 }
 
+#TTSPopUp .checkBoxLabel {
+    color: white;
+    top: 106px;
+    width: 72px;
+    height: 35px;
+    left: 25px;
+    background-color: rgb(90, 90, 90);
+    border-radius: 3px;
+    border: 1px solid rgb(255,255,255);
+    padding: 2px;
+}
+
+#TTSPopUp .checkBoxTTS {
+    top: 118px;
+    position: absolute;
+    left: 8px;
+}
+
 #TTSPopUp .okButton {
     right: 52px;
     width: 113px;
@@ -174,6 +192,7 @@ div {
 #TTSPopUp.active {
     opacity: 1;
     display: block;
+    z-index: 10000;
 }
 
 /* Diver Distraction PopUp */
@@ -577,6 +596,7 @@ div {
 #media {
     width: 800px;
     height: 480px;
+    background: url(../images/media/bg.png) no-repeat;
 }
 
 /****************************** FOR MEDIA VIEW************************************************/
@@ -792,7 +812,7 @@ margin-top: 90px;
 
 /* List item background */
 .list-item.notpressed {
-    background: rgb(29, 6, 6);
+    background-image: url(../images/list/list_item_bg.png);
 }
 
 .list-item .highLighted {
@@ -882,12 +902,12 @@ margin-top: 90px;
 
 /* List item  button background */
 .list-item.pressed {
-    background: DarkGray;
+    background-image: url(../images/list/list_item_pressed.png);
 }
 
 /** Background for pressed button */
 .button.pressed {
-    background: DarkGray;
+    background-image: url(../images/list/list_item_pressed.png);
 }
 
 /* Hide function */
@@ -984,7 +1004,7 @@ margin-top: 90px;
 }
 
 .button {
-    background: rgb(29, 6, 6);
+    background-image: url(../images/list/list_item_bg.png);
     cursor: pointer;
 }
 
@@ -1089,7 +1109,7 @@ margin-top: 90px;
     width: 800px;
     height: 480px;
     z-index: 12001;
-    background: black;
+    background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0, rgb(218, 218, 218)), color-stop(0.3, rgb(0, 0, 0)));
 }
 
 #warning_view.fr .text {
@@ -1111,6 +1131,7 @@ margin-top: 90px;
     font-size: 42px;
     font-weight: bold;
     top: 20px;
+    text-shadow: 1px 1px 3px white;
     color: #CC2A2A;
 }
 
@@ -1136,7 +1157,6 @@ margin-top: 90px;
 }
 
 #warning_view .components{
-    display: none;
     margin-top: 20px;
     width: 420px;
 }
@@ -1288,7 +1308,7 @@ to {
 #wo_popup_denypopup_ok_button {
     width: 238px;
     height: 48px;
-    background: gray;
+    background: url(../images/common/bt_bg.png) repeat-x;
     cursor: pointer;
     position: relative;
     float: left;
@@ -1328,7 +1348,7 @@ to {
 }
 
 #wo_popup_yes_button.pressed, #wo_popup_no_button.pressed, #wo_popup_denypopup_ok_button.pressed {
-    background: gray !important;
+    background: url(../images/common/bt_bg_pressed.png) repeat-x !important;
 }
 
 /* END Welcome Orientation View*/

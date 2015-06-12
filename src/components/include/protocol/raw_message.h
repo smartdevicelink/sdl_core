@@ -78,7 +78,7 @@ class RawMessage {
   /**
    * \brief Getter for message size
    */
-  size_t data_size() const;
+ size_t data_size() const;
   /**
    * \brief Getter for actual data size
    */

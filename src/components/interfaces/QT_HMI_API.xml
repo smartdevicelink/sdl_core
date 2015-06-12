@@ -56,6 +56,7 @@
       <element name="WARNINGS" value="21"/>
       <element name="GENERIC_ERROR" value="22"/>
       <element name="USER_DISALLOWED" value="23"/>
+      <element name="TRUNCATED_DATA" value="24"/>
     </enum>
     <enum name="ButtonName">
       <description>Defines the hard (physical) and soft (touchscreen) buttons available from SYNC</description>
@@ -432,6 +433,18 @@
       <element name="notificationText">
         <description>Text of notification to be displayed on screen.</description>
       </element>
+      <element name="locationName">
+        <description> Optional name / title of intended location for SendLocation.</description>
+      </element>
+      <element name="locationDescription">
+        <description> Optional description of intended location / establishment (if applicable) for SendLocation.</description>
+      </element>
+      <element name="addressLines">
+        <description> Optional location address (if applicable) for SendLocation.</description>
+      </element>
+      <element name="phoneNumber">
+        <description> Optional hone number of intended location / establishment (if applicable) for SendLocation.</description>
+      </element>
         <!-- TO DO to be removed -->
       <element name="turnText"/>
     </enum>
@@ -495,13 +508,13 @@
         <description>
       minutesFieldWidth = 3;minutesFieldMax = 199;secondsFieldWidth = 2;secondsFieldMax = 99;maxHours = 59;maxMinutes = 59;maxSeconds = 59;
     Is used for Type V head units.
-	</description>
+    </description>
       </element>
       <element name="CLOCK3">
         <description>
       minutesFieldWidth = 2;minutesFieldMax = 59;secondsFieldWidth = 2;secondsFieldMax = 59;maxHours = 9;maxMinutes = 59;maxSeconds = 59;
     Is used for GEN1.1 (i.e. MFD3/4/5) head units.
-	</description>
+    </description>
       </element>
       <element name="CLOCKTEXT1">
         <description>
@@ -511,7 +524,7 @@
       c    : character out of following character set: sp|0-9|[letters
       :|sp : colon or space
     Is used for Type II head unit
-	</description>
+    </description>
       </element>
       <element name="CLOCKTEXT2">
         <description>
@@ -520,8 +533,8 @@
       1|sp : digit "1" or space
       c    : character out of following character set: sp|0-9|[letters
       :|sp : colon or space
-	Is used for CID and NGN head unit
-	</description>
+    Is used for CID and NGN head unit
+    </description>
       </element>
       <element name="CLOCKTEXT3">
         <description>
@@ -910,6 +923,20 @@
       <element name="AUTH_CHALLENGE"/>
       <element name="AUTH_ACK"/>
       <element name="PROPRIETARY"/>
+      <element name="QUERY_APPS" />
+      <element name="LAUNCH_APP" />
+      <element name="LOCK_SCREEN_ICON_URL" />
+      <element name="TRAFFIC_MESSAGE_CHANNEL" />
+      <element name="DRIVER_PROFILE" />
+      <element name="VOICE_SEARCH" />
+      <element name="NAVIGATION" />
+      <element name="PHONE" />
+      <element name="CLIMATE" />
+      <element name="SETTINGS" />
+      <element name="VEHICLE_DIAGNOSTICS" />
+      <element name="EMERGENCY" />
+      <element name="MEDIA" />
+      <element name="FOTA" />
     </enum>
     <enum name="ECallConfirmationStatus">
       <description>Reflects the status of the eCall Notification.</description>
@@ -1032,10 +1059,11 @@
       <element name="NORMAL"/>
       <element name="NONE"/>
     </enum>
-<enum name="SpeakType">
+<enum name="MethodName">
   <description>Defines the type of the request which causes text-to-speech prompt</description>
   <element name="ALERT" />
   <element name="SPEAK" />
+  <element name="AUDIO_PASS_THRU" />
 </enum>
 
 <enum name="AlertType">
@@ -1224,6 +1252,21 @@
       <param name="deviceName" type="String" mandatory="true">
         <description>The name of device which the provided application is running on.</description>
       </param>
+      <param name="ttsName" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
+        <description>
+          TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green".
+          Meant to overcome any failing on speech engine in properly pronouncing / understanding app name.
+          May not be empty.
+          May not start with a new line character.
+          Not unique value
+        </description>
+      </param>
+      <param name="vrSynonyms" type="String" maxlength="40" minsize="1" maxsize="100" array="true" mandatory="false">
+        <description>
+          Defines an additional voice recognition command.
+          Must not interfere with any name of previously registered applications(SDL makes check).
+        </description>
+      </param>
       <param name="appID" type="Integer" mandatory="true">
         <description>Unique (during ignition cycle) id of the application. To be used in all RPCs sent by both HU system and SDL</description>
       </param>
@@ -1236,6 +1279,17 @@
       <param name="appType" type="Common.AppHMIType" minsize="1" maxsize="100" array="true" mandatory="false">
         <description>List of all applicable app types stating which classifications to be given to the app.</description>
         <description>e.g. for platforms like GEN2, this determines which "corner(s)" the app can populate.</description>
+      </param>
+      <param name="greyOut" type="Boolean" mandatory="false">
+        <description>Indicates whether application should be dimmed on the screen.</description>
+        <description>Applicable only for apps received through QueryApps and still not registered.</description>
+      </param>
+      <param name="requestType" type="Common.RequestType" minsize="0" maxsize="100" array="true" mandatory="false">
+        <description>The list of SystemRequest's RequestTypes allowed by policies for the named application</description>
+        <description>(the app's SystemRequest sent with RequestType out of this list will get 'disallowed' response from SDL).</description>
+        <description>If SDL sends an empty array - any RequestType is allowed for this app.</description>
+        <description>If SDL omits this parameter - none RequestType is allowed for this app</description>
+        <description>(either this is a pre-registered app or such is dictated by policies).</description>
       </param>
     </struct>
     <struct name="MenuParams">
@@ -1405,8 +1459,8 @@
       </param>
       <param name="keypressMode" type="Common.KeypressMode" mandatory="false">
         <description>
-    	Desired keypress mode.
-    	If omitted, this value will be set to RESEND_CURRENT_ENTRY.
+        Desired keypress mode.
+        If omitted, this value will be set to RESEND_CURRENT_ENTRY.
     </description>
       </param>
       <param name="limitedCharacterList" type="String" maxlength="1" minsize="1" maxsize="100" array="true" mandatory="false">
@@ -1788,6 +1842,24 @@
         </description>
       </param>
     </function>
+    <function name="OnButtonSubscription" messagetype="notification">
+      <description>
+        Sender: SDL->HMI. Purpose: to notify about button subscription state is changed for the named application
+      </description>
+      <param name="name" type="Common.ButtonName" mandatory="true" />
+      <param name="isSubscribed" type="Boolean" mandatory="true">
+        <description>
+          Defines whether the named button has status of 'subscribed' or 'unsubscribed':
+          If "true" - the named button is subscribed.
+          If "false" - the named button is unsubscribed.
+        </description>
+      </param>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>
+          The ID of application that relates to this button-subscription status change.
+        </description>
+      </param>
+    </function>
   </interface>
   <interface name="BasicCommunication" version="1.0" date="2013-04-12">
     <function name="OnReady" messagetype="notification" provider="hmi">
@@ -1805,6 +1877,15 @@
         <description>Must be 'true' - when the phone call is started on HMI. Must be 'false' when the phone call is ended on HMI</description>
       </param>
     </function>
+    <function name="OnEmergencyEvent" messagetype="notification">
+      <description>
+        "Sender: HMI->SDL. Conditions: when HMI enters the mode of "911 Assist", or other rear view camera,
+        or something else in the future. Purpose: for SDL to change the audioStreamingState of the related apps to
+        NOT_AUDIBLE when "enabled:true" and back to AUDIBLE when "enabled:false""
+      </description>
+      <param name="enabled" type="Boolean" mandatory="true">
+      </param>
+    </function>
     <function name="OnResumeAudioSource" messagetype="notification" provider="sdl">
       <description>This method must be invoked by SDL to update audio state.</description>
       <param name="appID" type="Integer" mandatory="true">
@@ -1815,7 +1896,7 @@
     </function>
     <function name="UpdateAppList" messagetype="request" provider="hmi">
       <description>Issued by SDL to notify HMI about new applications registered.</description>
-      <param name="applications" type="Common.HMIApplication" mandatory="true" array="true" minsize="1" maxsize="100"/>
+      <param name="applications" type="Common.HMIApplication" mandatory="true" array="true" minsize="0" maxsize="100"/>
     </function>
     <function name="UpdateAppList" messagetype="response">
     </function>
@@ -1944,6 +2025,11 @@
         <description>Specifies reason for exiting all apllications.</description>
       </param>
     </function>
+    <function name="OnAwakeSDL" messagetype="notification">
+        <description>
+            Sender: HMI->SDL. Must be sent to return SDL to normal operation after 'Suspend' or 'LowVoltage' events
+        </description>
+    </function>
     <function name="MixingAudioSupported" messagetype="request" provider="hmi">
       <description>Request from SDL to HMI to find out if the last one supports mixing audio (i.e. recording TTS command and playing audio).</description>
     </function>
@@ -1955,6 +2041,12 @@
     </function>
     <function name="PlayTone" messagetype="notification" provider="sdl">
       <description>Sent by SDL to HMI to notify that the tone should be played.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of the application that invoked this notification</description>
+      </param>
+      <param name="methodName" type="Common.MethodName" mandatory="true">
+        <description>Defines the name of app's request that initiates playing a tone</description>
+      </param>
     </function>
     <!-- Policies -->
     <!-- SyncP RPC-->
@@ -2041,8 +2133,8 @@
       </param>
       <param name="fileSize" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
         <description>Full Size of file. sends in first OnPutFile notification if file is splited
-		     	   into many PutFiles
-	  </description>
+                   into many PutFiles
+      </description>
       </param>
       <param name="FileName" type="String" maxlength="255" mandatory="true">
         <description>File reference name.</description>
@@ -2267,7 +2359,7 @@
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of application that requested this RPC.</description>
       </param>
-    <param name="speakType" type="Common.SpeakType" mandatory="false">
+    <param name="speakType" type="Common.MethodName" mandatory="false">
       <description>Defines the type of the request which causes text-to-speech</description>
     </param>
     </function>
@@ -2506,8 +2598,8 @@
       </param>
       <param name="manualTextEntry" type="String" minlength="0" maxlength="500" mandatory="false">
         <description>
-	       	Manually entered text selection, e.g. through keyboard
-        	Can be returned in lieu of choiceID, depending on trigger source
+            Manually entered text selection, e.g. through keyboard
+            Can be returned in lieu of choiceID, depending on trigger source
       </description>
       </param>
     </function>
@@ -2519,9 +2611,9 @@
       <param name="endTime" type="Common.TimeFormat" mandatory="false">
         <description>
           See TimeFormat.
-      	  endTime can be provided for "COUNTUP" and "COUNTDOWN"; to be used to calculate any visual progress bar (if not provided, this feature is ignored)
-      	  If endTime is greater then startTime for COUNTDOWN or less than startTime for COUNTUP, then the request will return an INVALID_DATA.
-      	  endTime will be ignored for "PAUSE", "RESUME", and "CLEAR"
+          endTime can be provided for "COUNTUP" and "COUNTDOWN"; to be used to calculate any visual progress bar (if not provided, this feature is ignored)
+          If endTime is greater then startTime for COUNTDOWN or less than startTime for COUNTUP, then the request will return an INVALID_DATA.
+          endTime will be ignored for "PAUSE", "RESUME", and "CLEAR"
       </description>
       </param>
       <param name="updateMode" type="Common.ClockUpdateMode" mandatory="true">
@@ -2609,6 +2701,11 @@
       <param name="language" type="Common.Language" mandatory="true">
         <description>The language application wants to switch to.</description>
       </param>
+      <param name="appHMIType" type="Common.AppHMIType" minsize="1" maxsize="100" array="true" mandatory="false">
+        <description>
+          Sent when app's requested-during-registration AppHMIType is changed to different one due to Policies update. Contains the updated list of all allowed app's AppHMITypes.
+        </description>
+      </param>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of application that concerns this RPC.</description>
       </param>
@@ -2655,8 +2752,8 @@
     <function name="SetDisplayLayout" messagetype="request" provider="hmi">
       <param name="displayLayout" type="String" maxlength="500" mandatory="true">
         <description>
-      	Predefined or dynamically created screen layout.
-      	Currently only predefined screen layouts are defined.
+        Predefined or dynamically created screen layout.
+        Currently only predefined screen layouts are defined.
       </description>
       </param>
       <param name="appID" type="Integer" mandatory="true">
@@ -2681,27 +2778,27 @@
       <description>Used to show a custom form; it can be a parent or child screen. If no parent screen is designated, it is set as a parent screen.</description>
       <param name="customFormID" type="String" maxlength="500" mandatory="true">
         <description>
-			Predefined or dynamically created screen layout.
-			Currently only predefined forms are defined.
-			Predefined layouts include:
-				"DEFAULT" - Default media / non-media screen
-				"ONSCREEN_PRESETS" - Custom root media screen containing app-defined onscreen presets.
-				"KEYBOARD_SEARCH" - Custom template containing app-configured on-screen keyboard with active search updating; user also can trigger voice search.
-				"NAV_FULLSCREEN_MAP" - Custom root template screen containing full screen map with navigation controls.
-				"NAV_POI_MENU" - Custom template containing app-defined POI options.
-				"NAV_SEARCH_RESULTS" - Custom template containing a list of app-defined search results
-				"NAV_POI_INFO" - Custom template containing app-defined POI information (and potentially map data).
+            Predefined or dynamically created screen layout.
+            Currently only predefined forms are defined.
+            Predefined layouts include:
+                "DEFAULT" - Default media / non-media screen
+                "ONSCREEN_PRESETS" - Custom root media screen containing app-defined onscreen presets.
+                "KEYBOARD_SEARCH" - Custom template containing app-configured on-screen keyboard with active search updating; user also can trigger voice search.
+                "NAV_FULLSCREEN_MAP" - Custom root template screen containing full screen map with navigation controls.
+                "NAV_POI_MENU" - Custom template containing app-defined POI options.
+                "NAV_SEARCH_RESULTS" - Custom template containing a list of app-defined search results
+                "NAV_POI_INFO" - Custom template containing app-defined POI information (and potentially map data).
       </description>
       </param>
       <param name="parentFormID" type="String" maxlength="500" defvalue="DEFAULT" mandatory="false">
         <description>
-			Parent screen of predefined form to display.
-			Currently only predefined forms are defined.
-			If not provided, then set to "DEFAULT".
-			Predefined layouts include:
-				"DEFAULT" - Default media / non-media screen
-				"ONSCREEN_PRESETS" - Custom root media screen containing app-defined onscreen presets.
-				"NAV_FULLSCREEN_MAP" - Custom template containing full screen map with navigation controls.
+            Parent screen of predefined form to display.
+            Currently only predefined forms are defined.
+            If not provided, then set to "DEFAULT".
+            Predefined layouts include:
+                "DEFAULT" - Default media / non-media screen
+                "ONSCREEN_PRESETS" - Custom root media screen containing app-defined onscreen presets.
+                "NAV_FULLSCREEN_MAP" - Custom template containing full screen map with navigation controls.
       </description>
       </param>
     </function>
@@ -2850,6 +2947,9 @@
     </function>
     <function name="SendLocation" messagetype="request">
         <description>That allows the app to send a destination to the embedded nav system.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application related to this RPC.</description>
+      </param>
       <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="true">
       </param>
       <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="true">
@@ -2974,7 +3074,21 @@
     </function>
     <function name="StopAudioStream" messagetype="response">
   </function>
+  <function name="OnAudioDataStreaming" messagetype="notification">
+    <description>Sender: SDL->HMI. Purpose: notify about raw audio data presence over the URL provided via StartAudioStream SDL's request.</description>
+    <param name="available" type="Boolean" mandatory="true">
+      <description>If "true" - audio data started. If "false" - audio data stopped.</description>
+    </param>
+  </function>
+  <function name="OnVideoDataStreaming" messagetype="notification">
+    <description>Sender: SDL->HMI. Purpose: notify about raw video data presence over the URL provided via StartStream SDL's request.</description>
+    <param name="available" type="Boolean" mandatory="true">
+      <description>If "true" - video data started. If "false" - video data stopped.</description>
+    </param>
+  </function>
+
   </interface>
+
   <interface name="VehicleInfo" version="1.0" date="2013-04-21">
     <function name="IsReady" messagetype="request" provider="hmi">
       <description>Method is invoked at system startup. Response should provide information about presence of any of vehicle information modules (ECU, GPS, etc) and their readiness to cooperate with SDL.</description>
@@ -3041,7 +3155,7 @@
       </param>
       <param name="messageData" type="Integer" minvalue="0" maxvalue="255" minsize="1" maxsize="65535" array="true" mandatory="true">
         <description>
-      	Array of bytes comprising CAN message.
+        Array of bytes comprising CAN message.
       </description>
       </param>
       <param name="appID" type="Integer" mandatory="true">
@@ -3051,7 +3165,7 @@
     <function name="DiagnosticMessage" messagetype="response">
       <param name="messageDataResult" type="Integer" minvalue="0" maxvalue="255" minsize="1" maxsize="65535" array="true" mandatory="true">
         <description>
-      	Array of bytes comprising CAN message result.
+        Array of bytes comprising CAN message result.
       </description>
       </param>
     </function>
@@ -4037,6 +4151,12 @@
       </param>
       <param name="priority" type="Common.AppPriority" mandatory="false">
         <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
+      </param>
+      <param name="requestType" type="Common.RequestType" minsize="0" maxsize="100" array="true" mandatory="false">
+        <description>The list of SystemRequest's RequestTypes allowed by policies for the named application (the app's SystemRequest sent with RequestType           out of this list will get 'disallowed' response from SDL).
+        If SDL sends an empty array - any RequestType is allowed for this app.
+        If SDL omits this parameter - nothing is changed for RequestType in the policies
+        </description>
       </param>
     </function>
     <function name="OnSDLConsentNeeded" messagetype="notification" provider="sdl">

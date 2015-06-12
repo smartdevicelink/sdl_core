@@ -67,6 +67,7 @@ const std::string kCreateSchema =
   "); "
   "CREATE TABLE IF NOT EXISTS `module_config`( "
   "  `preloaded_pt` BOOL NOT NULL, "
+  "  `is_first_run` BOOL NOT NULL, "
   "  `exchange_after_x_ignition_cycles` INTEGER NOT NULL, "
   "  `exchange_after_x_kilometers` INTEGER NOT NULL, "
   "  `exchange_after_x_days` INTEGER NOT NULL, "
@@ -188,7 +189,7 @@ const std::string kCreateSchema =
   "  `functional_group_id` INTEGER NOT NULL, "
   "  `is_consented` BOOL NOT NULL, "
   "  `input` VARCHAR(45), "
-  "  `time_stamp` DATETIME DEFAULT CURRENT_TIMESTAMP, "
+  "  `time_stamp` VARCHAR(45), "
   "  PRIMARY KEY(`device_id`,`functional_group_id`), "
   "  CONSTRAINT `fk_device_has_functional_group_device1` "
   "    FOREIGN KEY(`device_id`) "
@@ -253,6 +254,14 @@ const std::string kCreateSchema =
   "    FOREIGN KEY(`application_id`) "
   "    REFERENCES `application`(`id`) "
   "); "
+  "CREATE TABLE IF NOT EXISTS `request_type`( "
+  "  `request_type` VARCHAR(50) NOT NULL, "
+  "  `application_id` VARCHAR(45) NOT NULL, "
+  "  PRIMARY KEY(`request_type`,`application_id`), "
+  "  CONSTRAINT `fk_app_type_application1` "
+  "    FOREIGN KEY(`application_id`) "
+  "    REFERENCES `application`(`id`) "
+  "); "
   "CREATE INDEX IF NOT EXISTS `app_type.fk_app_type_application1_idx` "
   "  ON `app_type`(`application_id`); "
   "CREATE TABLE IF NOT EXISTS `consent_group`( "
@@ -261,7 +270,7 @@ const std::string kCreateSchema =
   "  `functional_group_id` INTEGER NOT NULL, "
   "  `is_consented` BOOL NOT NULL, "
   "  `input` VARCHAR(45), "
-  "  `time_stamp` DATETIME DEFAULT CURRENT_TIMESTAMP, "
+  "  `time_stamp` VARCHAR(45), "
   "  PRIMARY KEY(`application_id`,`functional_group_id`,`device_id`), "
   "  CONSTRAINT `fk_consent_group_device1` "
   "    FOREIGN KEY(`device_id`) "
@@ -279,7 +288,7 @@ const std::string kCreateSchema =
   "CREATE INDEX IF NOT EXISTS `consent_group.fk_consent_group_functional_group1_idx` "
   "  ON `consent_group`(`functional_group_id`); "
   "CREATE TABLE IF NOT EXISTS `endpoint`( "
-  "  `service` INTEGER NOT NULL, "
+  "  `service` VARCHAR(100) NOT NULL, "
   "  `url` VARCHAR(100) NOT NULL, "
   "  `application_id` VARCHAR(45) NOT NULL, "
   "  CONSTRAINT `fk_endpoint_application1` "
@@ -318,10 +327,10 @@ const std::string kInsertInitData =
   "  `pt_exchanged_x_days_after_epoch`, `ignition_cycles_since_last_exchange`,"
   "  `flag_update_required`) "
   "  VALUES (0, 0, 0, 0); "
-  "INSERT OR IGNORE INTO `module_config` (`preloaded_pt`, "
+  "INSERT OR IGNORE INTO `module_config` (`preloaded_pt`, `is_first_run`,"
   "  `exchange_after_x_ignition_cycles`, `exchange_after_x_kilometers`, "
   "  `exchange_after_x_days`, `timeout_after_x_seconds`) "
-  "  VALUES(1, 0, 0, 0, 0); "
+  "  VALUES(1, 0, 0, 0, 0, 0); "
   "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('EMERGENCY'); "
   "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('NAVIGATION'); "
   "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('VOICECOMMUNICATION'); "
@@ -439,6 +448,9 @@ const std::string kSetNotFirstRun =
 const std::string kSelectEndpoint =
   "SELECT `url`, `application_id` FROM `endpoint` WHERE `service` = ? ";
 
+const std::string kSelectLockScreenIcon =
+  "SELECT `url` FROM `endpoint` WHERE `service` = ? AND `application_id` = ?";
+
 const std::string kInsertFunctionalGroup =
   "INSERT INTO `functional_group` (`id`, `name`, `user_consent_prompt`) "
   "  VALUES (?, ?, ?)";
@@ -464,6 +476,9 @@ const std::string kInsertNickname =
 
 const std::string kInsertAppType =
   "INSERT OR IGNORE INTO `app_type` (`application_id`, `name`) VALUES (?, ?)";
+
+const std::string kInsertRequestType =
+  "INSERT OR IGNORE INTO `request_type` (`application_id`, `request_type`) VALUES (?, ?)";
 
 const std::string kUpdateVersion = "UPDATE `version` SET `number`= ?";
 
@@ -532,9 +547,7 @@ const std::string kSelectModuleConfig =
   " FROM `module_config`";
 
 const std::string kSelectEndpoints =
-  "SELECT `url`, `service`, `application_id` "
-  "FROM `endpoint` "
-  "GROUP BY `application_id`";
+  "SELECT `url`, `service`, `application_id` FROM `endpoint` ";
 
 const std::string kSelectNotificationsPerMin =
   "SELECT `priority_value`, `value` FROM notifications_by_priority";
@@ -570,6 +583,9 @@ const std::string kSelectNicknames = "SELECT DISTINCT `name` FROM `nickname` "
 
 const std::string kSelectAppTypes = "SELECT DISTINCT `name` FROM `app_type` "
                                     "WHERE `application_id` = ?";
+
+const std::string kSelectRequestTypes =
+    "SELECT DISTINCT `request_type` FROM `request_type` WHERE `application_id` = ?";
 
 const std::string kSelectSecondsBetweenRetries =
   "SELECT `value` FROM `seconds_between_retry` ORDER BY `index`";
@@ -612,6 +628,8 @@ const std::string kUpdateCountersSuccessfulUpdate =
   "`pt_exchanged_x_days_after_epoch` = ?";
 
 const std::string kDeleteApplication = "DELETE FROM `application`";
+
+const std::string kDeleteRequestType = "DELETE FROM `request_type`";
 
 const std::string kSelectApplicationRevoked =
   "SELECT `is_revoked` FROM `application` WHERE `id` = ?";

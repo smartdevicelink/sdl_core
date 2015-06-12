@@ -48,7 +48,7 @@ DeleteSubMenuRequest::~DeleteSubMenuRequest() {
 }
 
 void DeleteSubMenuRequest::Run() {
-  LOG4CXX_INFO(logger_, "DeleteSubMenuRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
@@ -77,9 +77,10 @@ void DeleteSubMenuRequest::Run() {
 }
 
 void DeleteSubMenuRequest::DeleteSubMenuVRCommands(ApplicationConstSharedPtr app) {
-  LOG4CXX_INFO(logger_, "DeleteSubMenuRequest::DeleteSubMenuVRCommands");
+  LOG4CXX_AUTO_TRACE(logger_);
 
-  const CommandsMap& commands = app->commands_map();
+  const DataAccessor<CommandsMap> accessor = app->commands_map();
+  const CommandsMap& commands = accessor.GetData();
   CommandsMap::const_iterator it = commands.begin();
 
   for (; commands.end() != it; ++it) {
@@ -104,14 +105,16 @@ void DeleteSubMenuRequest::DeleteSubMenuVRCommands(ApplicationConstSharedPtr app
 }
 
 void DeleteSubMenuRequest::DeleteSubMenuUICommands(ApplicationSharedPtr const app) {
-  LOG4CXX_INFO(logger_, "DeleteSubMenuRequest::DeleteSubMenuUICommands");
+  LOG4CXX_AUTO_TRACE(logger_);
 
-  const CommandsMap& commands = app->commands_map();
+  const DataAccessor<CommandsMap> accessor(app->commands_map());
+  const CommandsMap& commands = accessor.GetData();
   CommandsMap::const_iterator it = commands.begin();
 
   while (commands.end() != it) {
-
     if (!(*it->second).keyExists(strings::menu_params)) {
+      LOG4CXX_ERROR(logger_, "menu_params not exist");
+      ++it;
       continue;
     }
 
@@ -122,9 +125,7 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(ApplicationSharedPtr const ap
           smart_objects::SmartType_Map);
       msg_params[strings::app_id] = app->app_id();
       msg_params[strings::cmd_id] = (*it->second)[strings::cmd_id].asInt();
-
       app->RemoveCommand((*it->second)[strings::cmd_id].asInt());
-
       it = commands.begin();  // Can not relay on
                               // iterators after erase was called
 
@@ -136,7 +137,7 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(ApplicationSharedPtr const ap
 }
 
 void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "DeleteSubMenuRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {

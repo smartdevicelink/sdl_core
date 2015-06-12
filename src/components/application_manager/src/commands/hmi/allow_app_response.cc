@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -45,7 +45,7 @@ AllowAppResponse::~AllowAppResponse() {
 }
 
 void AllowAppResponse::Run() {
-  LOG4CXX_INFO(logger_, "AllowAppResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   uint32_t connection_key =
     (*message_)[strings::params][strings::connection_key].asInt();

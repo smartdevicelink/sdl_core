@@ -49,7 +49,7 @@ class UsbConnection : public Connection {
   UsbConnection(const DeviceUID& device_uid,
                 const ApplicationHandle& app_handle,
                 TransportAdapterController* controller,
-                const UsbHandlerSptr& usb_handler, PlatformUsbDevice* device);
+                const UsbHandlerSptr usb_handler, PlatformUsbDevice* device);
   bool Init();
   virtual ~UsbConnection();
 

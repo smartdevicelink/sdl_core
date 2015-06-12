@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_LISTENER_H_
 #define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_LISTENER_H_
 
+#include <queue>
+
 #include "policy/policy_types.h"
 
 namespace policy {
@@ -40,18 +42,41 @@ class PolicyListener {
  public:
   virtual ~PolicyListener() {
   }
-  virtual void OnPTExchangeNeeded() = 0;
   virtual void OnPermissionsUpdated(const std::string& policy_app_id,
                                     const Permissions& permissions,
                                     const policy::HMILevel& default_hmi) = 0;
+  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
+                                    const Permissions& permissions) = 0;
   virtual void OnPendingPermissionChange(const std::string& policy_app_id) = 0;
-  virtual void OnAppRevoked(const std::string& policy_app_id) = 0;
-  virtual void OnUpdateStatusChanged(policy::PolicyTableStatus status) = 0;
+  virtual void OnUpdateStatusChanged(const std::string&) = 0;
   virtual std::string OnCurrentDeviceIdUpdateRequired(
       const std::string& policy_app_id) = 0;
   virtual void OnSystemInfoUpdateRequired() = 0;
   virtual std::string GetAppName(const std::string& policy_app_id) = 0;
-  virtual void OnUserRequestedUpdateCheckRequired() = 0;
+  virtual void OnUpdateHMIAppType(std::map<std::string, StringArray> app_hmi_types) = 0;
+
+    /**
+   * @brief CanUpdate allows to find active application
+   * and check whether related device consented.
+   *
+   * @return true if there are at least one application has been registered
+   * with consented device.
+   */
+  virtual bool CanUpdate() = 0;
+
+  /**
+   * @brief OnSnapshotCreated the notification which will be sent
+   * when snapshot for PTU has been created.
+   *
+   * @param pt_string the snapshot
+   *
+   * @param retry_seconds retry sequence timeouts.
+   *
+   * @param timeout_exceed timeout.
+   */
+  virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
+                                 const std::vector<int>& retry_seconds,
+                                 int timeout_exceed) = 0;
 
   /**
    * @brief Make appropriate changes for related applications permissions and
@@ -61,6 +86,19 @@ class PolicyListener {
    */
   virtual void OnDeviceConsentChanged(const std::string& device_id,
                                       bool is_allowed) = 0;
+
+  /**
+   * @brief GetAvailableApps allows to obtain list of registered applications.
+   */
+  virtual void GetAvailableApps(std::queue<std::string>&) = 0;
+
+  /**
+   * @brief OnCertificateUpdated the callback which signals if certificate field
+   * has been updated during PTU
+   *
+   * @param certificate_data the value of the updated field.
+   */
+  virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
 };
 }  //  namespace policy
 #endif  //  SRC_COMPONENTS_POLICY_INCLUDE_POLICY_LISTENER_H_

@@ -3,6 +3,12 @@
 
 namespace rpc {
 namespace policy_table_interface_base {
+bool PolicyBase::Validate() const {
+  return true;
+}
+bool ApplicationPoliciesSection::Validate() const {
+  return true;
+}
 bool ApplicationParams::Validate() const {
   return true;
 }
@@ -71,16 +77,6 @@ bool DeviceParams::Validate() const {
   return true;
 }
 bool PolicyTable::Validate() const {
-  for (ApplicationPolicies::const_iterator it = app_policies.begin();
-       app_policies.end() != it; ++it) {
-    if (kDeviceApp == it->first) {
-      if (it->second.nicknames.is_initialized()) {
-        initialization_state__ = kUninitialized;
-        return false;
-      }
-      continue;
-    }
-  }
   if (PT_PRELOADED == GetPolicyTableType() ||
       PT_UPDATE == GetPolicyTableType()) {
     if (device_data.is_initialized()) {

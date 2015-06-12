@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -46,7 +46,7 @@ UIPerformAudioPassThruResponse::~UIPerformAudioPassThruResponse() {
 }
 
 void UIPerformAudioPassThruResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIPerformAudioPassThruResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::UI_PerformAudioPassThru);
   event.set_smart_object(*message_);

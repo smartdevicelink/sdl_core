@@ -8,8 +8,8 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/test/components/include)
 
 # --- components tests
-add_subdirectory(./components)
-add_subdirectory(./thirdPartyLibs)
+#add_subdirectory(./components)
+#add_subdirectory(./thirdPartyLibs)
 add_subdirectory(./tools)
 
 set (INCLUDE_DIR
@@ -17,6 +17,7 @@ set (INCLUDE_DIR
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${CMAKE_SOURCE_DIR}/src/components/utils/include
   ../src/appMain
   ../src/components/application_manager/include
   ../src/components/hmi_message_handler/include
@@ -105,11 +106,11 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 endif()
 
-add_executable("test_suit" "./test_suit.cc")
-file(COPY ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem DESTINATION ${CMAKE_BINARY_DIR}/test/)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+#add_executable("test_suit" "./test_suit.cc")
+#file(COPY ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem DESTINATION ${CMAKE_BINARY_DIR}/test/)
+#file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-include_directories(${INCLUDE_DIR})
-target_link_libraries("test_suit" ${LIBRARIES})
+#include_directories(${INCLUDE_DIR})
+#target_link_libraries("test_suit" ${LIBRARIES})
 
 # vim: set ts=2 sw=2 et:

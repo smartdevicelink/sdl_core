@@ -151,6 +151,24 @@ FFW.TTS = FFW.RPCObserver.create( {
         switch (request.method) {
         case "TTS.Speak": {
 
+            // Werify if there is an ansupported data in request
+            if (this.errorResponsePull[request.id] != null) {
+
+                //Check if there is any available data to  process the request
+                if ("ttsChunks" in request.params) {
+
+                    this.errorResponsePull[request.id].code = SDL.SDLModel.resultCode["WARNINGS"];
+                } else {
+                    //If no available data sent error response and stop process current request
+
+                    this.sendError(this.errorResponsePull[request.id].code, request.id, request.method,
+                            "Unsupported " + this.errorResponsePull[request.id].type + " type. Request was not processed.");
+                    this.errorResponsePull[request.id] = null;
+
+                    return;
+                }
+            }
+
             if (SDL.TTSPopUp.active) {
                 FFW.TTS.sendError(SDL.SDLModel.resultCode["REJECTED"], request.id, "TTS.Speak", "TTS in progress. Rejected.");
             } else {
@@ -161,6 +179,25 @@ FFW.TTS = FFW.RPCObserver.create( {
             break;
         }
         case "TTS.SetGlobalProperties": {
+
+            // Werify if there is an ansupported data in request
+            if (this.errorResponsePull[request.id] != null) {
+
+                //Check if there is any available data to  process the request
+                if ("helpPrompt" in request.params
+                    || "timeoutPrompt" in request.params) {
+
+                    this.errorResponsePull[request.id].code = SDL.SDLModel.resultCode["WARNINGS"];
+                } else {
+                    //If no available data sent error response and stop process current request
+
+                    this.sendError(this.errorResponsePull[request.id].code, request.id, request.method,
+                            "Unsupported " + this.errorResponsePull[request.id].type + " type. Request was not processed.");
+                    this.errorResponsePull[request.id] = null;
+
+                    return;
+                }
+            }
 
             SDL.SDLModel.setProperties(request.params);
 
@@ -248,6 +285,25 @@ FFW.TTS = FFW.RPCObserver.create( {
         }
         case "TTS.ChangeRegistration": {
 
+            // Werify if there is an ansupported data in request
+            if (this.errorResponsePull[request.id] != null) {
+
+                //Check if there is any available data to  process the request
+                if ("ttsName" in request.params
+                    || "language" in request.params) {
+
+                    this.errorResponsePull[request.id].code = SDL.SDLModel.resultCode["WARNINGS"];
+                } else {
+                    //If no available data sent error response and stop process current request
+
+                    this.sendError(this.errorResponsePull[request.id].code, request.id, request.method,
+                            "Unsupported " + this.errorResponsePull[request.id].type + " type. Request was not processed.");
+                    this.errorResponsePull[request.id] = null;
+
+                    return;
+                }
+            }
+
             SDL.SDLModel.changeRegistrationTTSVR(request.params.language, request.params.appID);
 
             this.sendTTSResult(SDL.SDLModel.resultCode["SUCCESS"],
@@ -327,6 +383,14 @@ FFW.TTS = FFW.RPCObserver.create( {
      *            method
      */
     sendTTSResult: function(resultCode, id, method) {
+
+        if (this.errorResponsePull[id]) {
+
+            this.sendError(this.errorResponsePull[id].code, id, method,
+                    "Unsupported " + this.errorResponsePull[id].type + " type. Available data in request was processed.");
+            this.errorResponsePull[id] = null;
+            return;
+        }
 
         Em.Logger.log("FFW." + method + "Response");
 

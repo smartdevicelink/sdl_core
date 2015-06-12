@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -48,9 +48,11 @@ OnAppActivatedNotification::~OnAppActivatedNotification() {
 }
 
 void OnAppActivatedNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnAppActivatedNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   uint32_t app_id = ((*message_)[strings::msg_params][strings::app_id]).asUInt();
-  MessageHelper::SendActivateAppToHMI(app_id);
+  ApplicationManagerImpl::instance()->SetState<true>(app_id,
+                                               mobile_apis::HMILevel::HMI_FULL
+                                               );
 }
 
 }  // namespace commands

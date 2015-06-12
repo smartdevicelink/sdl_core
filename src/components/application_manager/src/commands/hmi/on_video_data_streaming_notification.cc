@@ -1,5 +1,6 @@
+
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,9 +31,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gmock/gmock.h"
+#include "application_manager/commands/hmi/on_video_data_streaming_notification.h"
 
-int main(int argc, char** argv) {
- testing::InitGoogleMock(&argc, argv);
- return RUN_ALL_TESTS();
+namespace application_manager {
+
+namespace commands {
+
+OnVideoDataStreamingNotification::OnVideoDataStreamingNotification(
+    const MessageSharedPtr& message)
+    : NotificationToHMI(message) {
 }
+
+OnVideoDataStreamingNotification::~OnVideoDataStreamingNotification() {
+}
+
+void OnVideoDataStreamingNotification::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  SendNotification();
+}
+
+}  // namespace commands
+
+}  // namespace application_manager

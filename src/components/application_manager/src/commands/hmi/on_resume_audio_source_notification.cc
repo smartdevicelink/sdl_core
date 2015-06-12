@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -46,7 +46,7 @@ OnResumeAudioSourceNotification::~OnResumeAudioSourceNotification() {
 }
 
 void OnResumeAudioSourceNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnResumeAudioSourceNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   SendNotification();
 }
 

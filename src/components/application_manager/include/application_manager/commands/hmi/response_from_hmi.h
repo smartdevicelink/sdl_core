@@ -1,4 +1,4 @@
-﻿/**
+﻿/*
  Copyright (c) 2014, Ford Motor Company
  All rights reserved.
 
@@ -46,7 +46,7 @@ namespace application_manager {
 
 namespace commands {
 
-namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 class ResponseFromHMI : public CommandImpl {
  public:
@@ -64,7 +64,7 @@ class ResponseFromHMI : public CommandImpl {
    * @param msg_params HMI request msg params
    */
   void CreateHMIRequest(const hmi_apis::FunctionID::eType& function_id,
-                          const NsSmart::SmartObject& msg_params) const;
+                        const smart_objects::SmartObject& msg_params) const;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ResponseFromHMI);

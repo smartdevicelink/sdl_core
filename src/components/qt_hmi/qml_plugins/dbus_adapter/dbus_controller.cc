@@ -1,4 +1,4 @@
-/**
+/*
  * \file dbus_controller.cpp
  * \brief DbusController class.
  * Copyright (c) 2013, Ford Motor Company

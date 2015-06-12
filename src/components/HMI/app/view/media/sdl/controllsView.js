@@ -38,7 +38,7 @@ SDL.SDLMediaControlls = Em.ContainerView.create( {
         [
             'info',
             'Controls',
-            'tuneButtons' // Uncomment to see preset buttons on sdl screen
+            'tuneButtons'
         ],
 
     /**
