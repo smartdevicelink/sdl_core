@@ -698,6 +698,24 @@ std::string ApplicationManagerImpl::GetDeviceName(
   return device_name;
 }
 
+hmi_apis::Common_TransportType::eType ApplicationManagerImpl::GetDeviceTransportType(
+    const std::string& transport_type) {
+  hmi_apis::Common_TransportType::eType result =
+      hmi_apis::Common_TransportType::INVALID_ENUM;
+
+  if ("BLUETOOTH" == transport_type) {
+    result = hmi_apis::Common_TransportType::BLUETOOTH;
+  } else if ("WIFI" == transport_type) {
+    result = hmi_apis::Common_TransportType::WIFI;
+  } else if ("USB" == transport_type) {
+    result = hmi_apis::Common_TransportType::USB;
+  } else {
+    LOG4CXX_ERROR(logger_, "Unknown transport type " << transport_type);
+  }
+
+  return result;
+}
+
 void ApplicationManagerImpl::OnMessageReceived(
   const ::protocol_handler::RawMessagePtr message) {
   LOG4CXX_AUTO_TRACE(logger_);

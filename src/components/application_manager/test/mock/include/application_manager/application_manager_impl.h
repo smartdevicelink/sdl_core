@@ -204,14 +204,15 @@ class ApplicationManagerImpl : public ApplicationManager,
                                           bool));
   MOCK_METHOD1(SendMessageToMobile, bool (const utils::SharedPtr<smart_objects::SmartObject>&));
   MOCK_METHOD1(GetDeviceName, std::string (connection_handler::DeviceHandle));
+  MOCK_METHOD1(GetDeviceTransportType, hmi_apis::Common_TransportType::eType (const std::string&));
   MOCK_METHOD1(application, ApplicationSharedPtr (uint32_t));
   MOCK_METHOD1(application_by_policy_id, ApplicationSharedPtr (const std::string&));
   MOCK_METHOD1(RemoveAppDataFromHMI, bool(ApplicationSharedPtr));
   MOCK_METHOD1(HeadUnitReset, void(mobile_api::AppInterfaceUnregisteredReason::eType));
   MOCK_METHOD1(LoadAppDataToHMI, bool(ApplicationSharedPtr));
   MOCK_METHOD1(ActivateApplication, bool (ApplicationSharedPtr));
-  MOCK_METHOD1(DeactivateApplication, bool (ApplicationSharedPtr));
   MOCK_METHOD1(IsHmiLevelFullAllowed, mobile_api::HMILevel::eType (ApplicationSharedPtr));
+  MOCK_METHOD3(OnHMILevelChanged, void  (uint32_t, mobile_apis::HMILevel::eType, mobile_apis::HMILevel::eType));
   MOCK_METHOD2(UnregisterRevokedApplication, void(uint32_t, mobile_apis::Result::eType));
   MOCK_METHOD1(SetUnregisterAllApplicationsReason, void(mobile_api::AppInterfaceUnregisteredReason::eType));
   MOCK_METHOD0(UnregisterAllApplications, void());

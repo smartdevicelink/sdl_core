@@ -58,6 +58,14 @@
       <element name="USER_DISALLOWED" value="23"/>
       <element name="TRUNCATED_DATA" value="24"/>
     </enum>
+    <enum name="TransportType">
+      <description>
+        Lists of the transport types used for device connection to HU.
+      </description>
+      <element name="BLUETOOTH"/>
+      <element name="USB"/>
+      <element name="WIFI"/>
+    </enum>
     <enum name="ButtonName">
       <description>Defines the hard (physical) and soft (touchscreen) buttons available from SYNC</description>
       <element name="OK"/>
@@ -1250,8 +1258,11 @@
       <param name="icon" type="String" mandatory="false">
         <description>Path to application icon stored on HU.</description>
       </param>
-      <param name="deviceName" type="String" mandatory="true">
-        <description>The name of device which the provided application is running on.</description>
+      <param name="deviceInfo" type="Common.DeviceInfo" mandatory="true">
+        <description>The ID, serial number, transport type the named-app's-device is connected over to HU.</description>
+      </param>
+      <param name="policyAppID" type="String" maxlength="50" minlength="1" mandatory="true">
+        <description>Policy ID(=the appID the application registers with) of registered application.</description>
       </param>
       <param name="ttsName" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
         <description>
@@ -1504,6 +1515,9 @@
       </param>
       <param name="id" type="Integer" mandatory="true">
         <description>The ID of the device connected</description>
+      </param>
+      <param name="transportType" type="Common.TransportType" mandatory="false">
+        <description>The transport type the named-app's-device is connected over HU(BlueTooth, USB or  WiFi). It must be provided in OnAppRegistered and in UpdateDeviceList</description>
       </param>
       <param name="isSDLAllowed" type="Boolean" mandatory="false">
         <description>Sent by SDL in UpdateDeviceList. ’true’ – if device is allowed for PolicyTable Exchange; ‘false’ – if device is NOT allowed for PolicyTable Exchange </description>

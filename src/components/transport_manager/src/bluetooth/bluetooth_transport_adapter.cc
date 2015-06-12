@@ -65,7 +65,7 @@ BluetoothTransportAdapter::BluetoothTransportAdapter()
 }
 
 DeviceType BluetoothTransportAdapter::GetDeviceType() const {
-  return "sdl-bluetooth";
+  return BLUETOOTH;
 }
 
 void BluetoothTransportAdapter::Store() const {

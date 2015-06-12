@@ -56,7 +56,7 @@ UsbAoaAdapter::UsbAoaAdapter()
 UsbAoaAdapter::~UsbAoaAdapter() {}
 
 DeviceType UsbAoaAdapter::GetDeviceType() const {
-  return "sdl-usb-aoa";
+  return PASA_AOA;
 }
 
 bool UsbAoaAdapter::IsInitialised() const {

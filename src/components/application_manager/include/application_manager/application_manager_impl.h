@@ -546,6 +546,17 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     std::string GetDeviceName(connection_handler::DeviceHandle handle);
 
+    /*
+     * @brief Converts connection string transport type representation
+     * to HMI Common_TransportType
+     *
+     * @param transport_type String representing connection type
+     *
+     * @return Corresponding HMI TransporType value
+     */
+    hmi_apis::Common_TransportType::eType GetDeviceTransportType(
+        const std::string& transport_type);
+
     /////////////////////////////////////////////////////
 
     void set_hmi_message_handler(hmi_message_handler::HMIMessageHandler* handler);
