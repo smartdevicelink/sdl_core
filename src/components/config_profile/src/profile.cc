@@ -940,19 +940,11 @@ void Profile::UpdateValues() {
   // Maximum command id value
   ReadUIntValue(&max_cmd_id_, kDefaultMaxCmdId, kMainSection, kMaxCmdIdKey);
 
-  if (max_cmd_id_ < 0) {
-    max_cmd_id_ = kDefaultMaxCmdId;
-  }
-
   LOG_UPDATED_VALUE(max_cmd_id_, kMaxCmdIdKey, kMainSection);
 
   // PutFile restrictions
   ReadUIntValue(&put_file_in_none_, kDefaultPutFileRequestInNone,
                 kFilesystemRestrictionsSection, kPutFileRequestKey);
-
-  if (put_file_in_none_ < 0) {
-    put_file_in_none_ = kDefaultPutFileRequestInNone;
-  }
 
   LOG_UPDATED_VALUE(put_file_in_none_, kPutFileRequestKey,
                     kFilesystemRestrictionsSection);
@@ -961,20 +953,12 @@ void Profile::UpdateValues() {
   ReadUIntValue(&delete_file_in_none_, kDefaultDeleteFileRequestInNone,
                 kFilesystemRestrictionsSection, kDeleteFileRequestKey);
 
-  if (delete_file_in_none_ < 0) {
-    delete_file_in_none_ = kDefaultDeleteFileRequestInNone;
-  }
-
   LOG_UPDATED_VALUE(delete_file_in_none_, kDeleteFileRequestKey,
                     kFilesystemRestrictionsSection);
 
   // ListFiles restrictions
   ReadUIntValue(&list_files_in_none_, kDefaultListFilesRequestInNone,
                 kFilesystemRestrictionsSection, kListFilesRequestKey);
-
-  if (list_files_in_none_ < 0) {
-    list_files_in_none_ = kDefaultListFilesRequestInNone;
-  }
 
   LOG_UPDATED_VALUE(list_files_in_none_, kListFilesRequestKey,
                     kFilesystemRestrictionsSection);
@@ -983,7 +967,7 @@ void Profile::UpdateValues() {
   ReadUIntValue(&default_timeout_, kDefaultTimeout, kMainSection,
                 kDefaultTimeoutKey);
 
-  if (default_timeout_ <= 0) {
+  if (default_timeout_ == 0) {
     default_timeout_ = kDefaultTimeout;
   }
 
@@ -993,7 +977,7 @@ void Profile::UpdateValues() {
   ReadUIntValue(&app_resuming_timeout_, kDefaultAppResumingTimeout,
                 kResumptionSection, kAppResumingTimeoutKey);
 
-  if (app_resuming_timeout_ <= 0) {
+  if (app_resuming_timeout_ == 0) {
     app_resuming_timeout_ = kDefaultAppResumingTimeout;
   }
   // Save resumption info to File System
@@ -1003,7 +987,7 @@ void Profile::UpdateValues() {
   ReadUIntValue(&app_resumption_save_persistent_data_timeout_,
                 kDefaultAppSavePersistentDataTimeout,
                 kResumptionSection, kAppSavePersistentDataTimeoutKey);
-  if (app_resuming_timeout_ <= 0) {
+  if (app_resuming_timeout_ == 0) {
     app_resuming_timeout_ = kDefaultAppSavePersistentDataTimeout;
   }
 
@@ -1031,7 +1015,7 @@ void Profile::UpdateValues() {
   ReadUIntValue(&app_dir_quota_, kDefaultDirQuota, kMainSection,
                 kAppDirectoryQuotaKey);
 
-  if (app_dir_quota_ <= 0) {
+  if (app_dir_quota_ == 0) {
     app_dir_quota_ = kDefaultDirQuota;
   }
 
@@ -1164,7 +1148,7 @@ void Profile::UpdateValues() {
   ReadUIntValue(&pending_requests_amount_, kDefaultPendingRequestsAmount,
                 kMainSection, kPendingRequestsAmoundKey);
 
-  if (pending_requests_amount_ <= 0) {
+  if (pending_requests_amount_ == 0) {
     pending_requests_amount_ = kDefaultPendingRequestsAmount;
   }
 
