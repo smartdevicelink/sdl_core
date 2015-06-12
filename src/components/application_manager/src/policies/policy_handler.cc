@@ -668,9 +668,9 @@ void PolicyHandler::OnPendingPermissionChange(
   if (permissions.appRevoked) {
     application_manager::MessageHelper::SendOnAppPermissionsChangedNotification(
       app_id, permissions);
-    ApplicationManagerImpl::instance()->SetState<false>(app->app_id(),
+    ApplicationManagerImpl::instance()->SetState<true>(app->app_id(),
                                                  mobile_apis::HMILevel::HMI_NONE,
-                                                 mobile_apis::AudioStreamingState::NOT_AUDIBLE);
+                                                 mobile_apis::AudioStreamingState::NOT_AUDIBLE);    
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);
     return;
   }
