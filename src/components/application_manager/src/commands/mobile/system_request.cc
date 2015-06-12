@@ -151,12 +151,24 @@ void SystemRequest::Run() {
     using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
 
     smart_objects::SmartObject sm_object;
-    CFormatterJsonBase::jsonValueToObj(Json::Value(
-                                         std::string(binary_data.begin(),
-                                                     binary_data.end())),
-                                       sm_object);
+    Json::Reader reader;
+    std::string json(binary_data.begin(), binary_data.end());
+    Json::Value root;
+    if (!reader.parse(json.c_str(), root)) {
+      LOG4CXX_DEBUG(logger_, "Unable to parse query_app json file.");
+      return;
+    }
+
+    CFormatterJsonBase::jsonValueToObj(root, sm_object);
+
+    if (!ValidateQueryAppData(sm_object)) {
+      SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      return;
+    }
+
     ApplicationManagerImpl::instance()->ProcessQueryApp(sm_object,
                                                         connection_key());
+    SendResponse(true, mobile_apis::Result::SUCCESS);
     return;
   }
 
