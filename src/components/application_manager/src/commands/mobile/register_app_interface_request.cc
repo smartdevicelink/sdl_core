@@ -448,6 +448,13 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     }
   }
 
+  response_params[strings::hmi_capabilities] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  response_params[strings::hmi_capabilities][strings::navigation] =
+      hmi_capabilities.navigation_supported();
+  response_params[strings::hmi_capabilities][strings::phone_call] =
+      hmi_capabilities.phone_call_supported();
+
   ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
   std::string hash_id = "";
 

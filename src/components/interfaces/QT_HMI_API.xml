@@ -1445,6 +1445,14 @@
         <description>Must be true if the button supports referencing a static or dynamic image.</description>
       </param>
     </struct>
+    <struct name="HMICapabilities">
+      <param name="navigation" type="Boolean" mandatory="false">
+        <description>Availability of build in Nav. True: Available, False: Not Available</description>
+      </param>
+      <param name="phoneCall" type="Boolean" mandatory="false">
+        <description>Availability of build in phone. True: Available, False: Not Available</description>
+      </param>
+    </struct>
     <struct name="AudioPassThruCapabilities">
       <description>
     Describes different audio type configurations for PerformAudioPassThru.
@@ -2698,6 +2706,9 @@
       <param name="hmiZoneCapabilities" type="Common.HmiZoneCapabilities" mandatory="true"/>
       <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" mandatory="false">
         <description>Must be returned if the platform supports on-screen SoftButtons.</description>
+      </param>
+      <param name="hmiCapabilities" type="Common.HMICapabilities" mandatory="false">
+        <description>Specifies the HMI’s capabilities. See HMICapabilities.</description>
       </param>
     </function>
     <function name="ChangeRegistration" messagetype="request" provider="hmi">

@@ -242,6 +242,9 @@ const char slider_position[] = "sliderPosition";
 const char system_action[] = "systemAction";
 const char prerecorded_speech[] = "prerecordedSpeech";
 const char supported_diag_modes[] = "supportedDiagModes";
+const char hmi_capabilities[] = "hmiCapabilities";
+const char navigation[] = "navigation";
+const char phone_call[] = "phoneCall";
 const char priority[] = "priority";
 
 //resuming
