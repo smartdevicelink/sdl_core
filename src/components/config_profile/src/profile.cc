@@ -73,6 +73,7 @@ const char* kProtocolHandlerSection = "ProtocolHandler";
 const char* kSDL4Section = "SDL4";
 const char* kResumptionSection = "Resumption";
 
+const char* kSDLVersionKey = "SDLVersion";
 const char* kHmiCapabilitiesKey = "HMICapabilities";
 const char* kPathToSnapshotKey = "PathToSnapshot";
 const char* kPreloadedPTKey = "PreloadedPT";
@@ -160,6 +161,7 @@ const char* kMalformedFrequencyCount = "MalformedFrequencyCount";
 const char* kMalformedFrequencyTime = "MalformedFrequencyTime";
 const char* kHashStringSizeKey = "HashStringSize";
 
+const char* kDefaultSDLVersion = "";
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
 const char* kDefaultPreloadedPTFileName = "sdl_preloaded_pt.json";
@@ -232,7 +234,8 @@ namespace profile {
 CREATE_LOGGERPTR_GLOBAL(logger_, "Profile")
 
 Profile::Profile()
-  : launch_hmi_(true),
+  : sdl_version_(kDefaultSDLVersion),
+    launch_hmi_(true),
     app_config_folder_(),
     app_storage_folder_(),
     app_resourse_folder_(),
@@ -295,6 +298,10 @@ Profile::Profile()
     open_attempt_timeout_ms_(kDefaultAttemptsToOpenPolicyDB),
     hash_string_size_(kDefaultHashStringSize),
     logs_enabled_(false) {
+  // SDL version
+  ReadStringValue(&sdl_version_, kDefaultSDLVersion,
+                  kMainSection, kSDLVersionKey);
+
 }
 
 Profile::~Profile() {
@@ -309,6 +316,10 @@ void Profile::config_file_name(const std::string& fileName) {
 
 const std::string& Profile::config_file_name() const {
   return config_file_name_;
+}
+
+const std::string& Profile::sdl_version() const {
+  return sdl_version_;
 }
 
 bool Profile::launch_hmi() const {
@@ -665,6 +676,12 @@ bool Profile::logs_enabled() const {
 
 void Profile::UpdateValues() {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  // SDL version
+  ReadStringValue(&sdl_version_, kDefaultSDLVersion,
+                  kMainSection, kSDLVersionKey);
+
+  LOG_UPDATED_VALUE(sdl_version_, kSDLVersionKey, kMainSection);
 
   // Launch HMI parameter
   std::string launch_value;

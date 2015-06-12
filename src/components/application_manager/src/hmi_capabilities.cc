@@ -558,6 +558,10 @@ void HMICapabilities::set_prerecorded_speech(
   prerecorded_speech_ = new smart_objects::SmartObject(prerecorded_speech);
 }
 
+void HMICapabilities::set_ccpu_version(const std::string& ccpu_version) {
+  ccpu_version_ = ccpu_version;
+}
+
 bool HMICapabilities::load_capabilities_from_file() {
   std::string json_string;
   std::string file_name =

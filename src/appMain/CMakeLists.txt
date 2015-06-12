@@ -136,21 +136,10 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/3rd_party/dbus-1.7.8/dbus/
 )
 
-add_custom_target(gitversion
-  COMMAND export GITVERSION=`git rev-parse HEAD` \;
-          if ! grep -s \"\$\${GITVERSION}\" ${CMAKE_CURRENT_BINARY_DIR}/gitversion.cc > /dev/null \;
-          then echo -n \"const char *gitVersion = \\\"Built against \$\${GITVERSION} revision\\\"\;\" > ${CMAKE_CURRENT_BINARY_DIR}/gitversion.cc\; fi
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-)
-add_custom_command(
-  OUTPUT gitversion.cc
-  DEPENDS gitversion
-)
 set (SOURCES
   main.cc
   life_cycle.cc
   signal_handlers.cc
-  gitversion.cc
 )
 
 if( NOT CMAKE_BUILD_TYPE )
@@ -170,6 +159,28 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/sdl_preloaded_pt.json DESTINATION ${CMAKE_
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/init_policy.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endif ()
+
+# Replace commit in ini file
+set(GITCOMMIT "")
+if(EXISTS ${CMAKE_SOURCE_DIR}/.git)
+  find_package(Git)
+  if(GIT_FOUND)
+    execute_process(
+      COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
+      WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+      OUTPUT_VARIABLE GITCOMMIT ERROR_QUIET
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    set(INI_FILE ${CMAKE_CURRENT_BINARY_DIR}/smartDeviceLink.ini)
+    if(EXISTS ${INI_FILE})
+      file(READ ${INI_FILE} FILE_CONTENT)
+      set(LINE SDLVersion)
+      set(SEARCH_REGEX "${LINE}([^/\r/\n]+)")
+      string(REGEX REPLACE "${SEARCH_REGEX}" "${LINE} = ${GITCOMMIT}" 
+             MODIFIED_FILE_CONTENT "${FILE_CONTENT}")
+      file(WRITE "${INI_FILE}" "${MODIFIED_FILE_CONTENT}")
+    endif()
+  endif(GIT_FOUND)
+endif()
 
 if (${QT_HMI})
   set(main_qml "hmi/MainWindow.qml")
