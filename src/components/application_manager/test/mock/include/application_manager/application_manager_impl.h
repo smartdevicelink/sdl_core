@@ -246,7 +246,7 @@ class ApplicationManagerImpl : public ApplicationManager,
   MOCK_METHOD0(resume_controller, ResumeCtrl&());
   MOCK_METHOD1(GetDefaultHmiLevel, mobile_api::HMILevel::eType (ApplicationSharedPtr));
 
-  MOCK_METHOD2(IsStreamingAllowed, bool(uint32_t, protocol_handler::ServiceType));
+  MOCK_METHOD2(HMILevelAllowsStreaming, bool(uint32_t, protocol_handler::ServiceType));
   MOCK_METHOD2(CanAppStream, bool(uint32_t, protocol_handler::ServiceType));
   MOCK_METHOD1(EndNaviServices, void(int32_t));
   MOCK_METHOD1(ForbidStreaming, void(int32_t));

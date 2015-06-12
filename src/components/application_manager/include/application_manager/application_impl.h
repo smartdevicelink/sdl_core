@@ -87,10 +87,10 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   inline bool is_navi() const { return is_navi_; }
   void set_is_navi(bool allow);
 
-  bool video_streaming_started() const;
-  void set_video_streaming_started(bool state);
-  bool audio_streaming_started() const;
-  void set_audio_streaming_started(bool state);
+  bool video_streaming_approved() const;
+  void set_video_streaming_approved(bool state);
+  bool audio_streaming_approved() const;
+  void set_audio_streaming_approved(bool state);
 
   bool video_streaming_allowed() const;
   void set_video_streaming_allowed(bool state);
@@ -239,7 +239,15 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    */
   virtual const HmiStatePtr RegularHmiState() const;
 
- protected:
+  uint32_t audio_stream_retry_number() const;
+
+  void set_audio_stream_retry_number(const uint32_t& audio_stream_retry_number);
+
+  uint32_t video_stream_retry_number() const;
+
+  void set_video_stream_retry_number(const uint32_t& video_stream_retry_number);
+
+  protected:
 
   /**
    * @brief Clean up application folder. Persistent files will stay
@@ -253,18 +261,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 
  private:
   typedef SharedPtr<TimerThread<ApplicationImpl>> ApplicationTimerPtr;
-
-  /**
-   * @brief Callback for video start stream retry timer.
-   * Sends start video stream request to HMI
-   */
-  void OnVideoStartStreamRetry();
-
-  /**
-   * @brief Callback for audio start stream retry timer.
-   * Sends start audio stream request to HMI
-   */
-  void OnAudioStartStreamRetry();
 
   /**
    * @brief Callback for video streaming suspend timer.
@@ -289,8 +285,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool                                     is_media_;
   bool                                     is_navi_;
 
-  bool                                     video_streaming_started_;
-  bool                                     audio_streaming_started_;
+  bool                                     video_streaming_approved_;
+  bool                                     audio_streaming_approved_;
   bool                                     video_streaming_allowed_;
   bool                                     audio_streaming_allowed_;
   bool                                     video_streaming_suspended_;
@@ -320,8 +316,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   uint32_t                                 audio_stream_retry_number_;
   uint32_t                                 video_stream_suspend_timeout_;
   uint32_t                                 audio_stream_suspend_timeout_;
-  ApplicationTimerPtr                      video_stream_retry_timer_;
-  ApplicationTimerPtr                      audio_stream_retry_timer_;
   ApplicationTimerPtr                      video_stream_suspend_timer_;
   ApplicationTimerPtr                      audio_stream_suspend_timer_;
 

@@ -662,7 +662,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param service_type Service type to check
      * @return True if streaming is allowed, false in other case
      */
-    bool IsStreamingAllowed(
+    bool HMILevelAllowsStreaming(
         uint32_t app_id, protocol_handler::ServiceType service_type) const;
 
     /**

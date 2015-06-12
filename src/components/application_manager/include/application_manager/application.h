@@ -199,6 +199,17 @@ class DynamicApplicationData {
         const smart_objects::SmartObject& menu_title) = 0;
     virtual void set_menu_icon(
         const smart_objects::SmartObject& menu_icon) = 0;
+
+    virtual uint32_t audio_stream_retry_number() const = 0;
+
+    virtual void set_audio_stream_retry_number(
+        const uint32_t& audio_stream_retry_number) = 0;
+
+    virtual uint32_t video_stream_retry_number() const = 0;
+
+    virtual void set_video_stream_retry_number(
+        const uint32_t& video_stream_retry_number) = 0;
+
     /*
      * @brief Adds a command to the in application menu
      */
@@ -390,10 +401,10 @@ class Application : public virtual InitialApplicationData,
     virtual bool is_navi() const = 0;
     virtual void set_is_navi(bool allow) = 0;
 
-    virtual bool video_streaming_started() const = 0;
-    virtual void set_video_streaming_started(bool state) = 0;
-    virtual bool audio_streaming_started() const = 0;
-    virtual void set_audio_streaming_started(bool state) = 0;
+    virtual bool video_streaming_approved() const = 0;
+    virtual void set_video_streaming_approved(bool state) = 0;
+    virtual bool audio_streaming_approved() const = 0;
+    virtual void set_audio_streaming_approved(bool state) = 0;
 
     virtual bool video_streaming_allowed() const = 0;
     virtual void set_video_streaming_allowed(bool state) = 0;
