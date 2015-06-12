@@ -94,6 +94,10 @@ GeneralView {
                                 dataContainer.scrollableMessageModel.result = Common.Result.ABORTED
                                 contentLoader.back()
                             }
+                            onStealFocus: {
+                                dataContainer.scrollableMessageModel.result = Common.Result.SUCCESS
+                                contentLoader.back()
+                            }
                         }
                 }
             }

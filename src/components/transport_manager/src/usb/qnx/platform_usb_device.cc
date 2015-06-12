@@ -1,4 +1,4 @@
-/**
+/*
  * \file platform_usb_device.cc
  * \brief QNX PlatformUsbDevice class source file.
  *

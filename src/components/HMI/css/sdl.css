@@ -4,6 +4,7 @@
 .ffw_list_menu {
 	left: 440px;
 	width: 158px;
+	border: 1px solid #393939;
 	overflow: hidden;
 }
 
@@ -14,7 +15,6 @@
 
 .ffw_list_menu .ffw-button {
 	position: relative;
-	z-index: 300;
 	height: 49px;
 	border-bottom: 1px solid #393939;
 	line-height: 50px;
@@ -70,7 +70,7 @@
 }
 
 .sdl-window .back-button {
-	/*top: 80px;*/
+	top: 80px;
 	left: 5px;
 	width: 48px;
 	height: 48px;
@@ -84,10 +84,10 @@
 }
 
 #info_apps_deviceList_view .deviceListLabel,.sdl-window .caption-text {
-	/*top: 80px;*/
+	top: 80px;
 	left: 75px;
 	width: 620px;
-	background: rgb(29, 6, 6);
+	background: #393939;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	line-height: 50px;
@@ -183,7 +183,7 @@
 	height: 251px;
 	border-radius: 2px;
 	left: 75px;
-	top: 51px;
+	top: 150px;
 }
 
 /*#sdl_view_container .list-content,*/
@@ -228,7 +228,7 @@
 	left: 10px;
 	width: 84px;
 	height: 50px;
-	font-size: 12px;
+	font-size: 20px;
 	line-height: 50px;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -236,7 +236,7 @@
 }
 
 #sdl_view_container .preset-items {
-/*	width: 468px; */
+	width: 468px;
 }
 
 #sdl_view_container .main-preset-buttons-wraper .preset-item.a3,#sdl_view_container .main-preset-buttons-wraper .preset-item.a6
@@ -245,17 +245,16 @@
 }
 
 #sdl_view_container .player_controllsV2 {
-
-	top: 200px !important;
+	top: 241px !important;
 	height: 48px;
 }
 
 #sdl_view_container .player_controllsV2 .ffw-button {
-/*	height: 48px;*/
+	height: 48px;
 }
 
 #sdl_view_container .player_controllsV2 img {
-/*	margin-top: -26px; */
+	margin-top: -26px;
 }
 
 /* ScrollableMessage */
@@ -481,6 +480,7 @@
 	position: absolute;
 	top: 90px;
 	right: 10px;
+	border: 1px solid #393939;
 	-webkit-border-radius: 2px;
 	width: 109px;
 	height: 109px;
@@ -490,6 +490,7 @@
 	position: absolute;
 	top: 70px;
 	right: 10px;
+	border: 1px solid #393939;
 	-webkit-border-radius: 2px;
 	width: 109px;
 	height: 109px;
@@ -600,6 +601,25 @@
 	background: #393939;
 }
 
+#exitAppView .onAwakeSDLLabel{
+    top: 200px;
+    width: 600px;
+    left: 40px;
+    height: 20px;
+    padding: 10px;
+    background: #535353;
+}
+
+#exitAppView .onAwakeSDLButton{
+    right: 268px;
+    top: 250px;
+    width: 150px;
+    height: 19px;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid white;
+}
+
 #VehicleInfo .odometrTitle{
     top: 180px;
     width: 290px;
@@ -623,6 +643,22 @@
     color: #FFF;
     padding-left: 10px;
     padding-right: 10px;
+}
+
+#VehicleInfo .onEmergencyEvent{
+	width: 265px;
+	position: absolute;
+	top: 301px;
+	left: 207px;
+	height: 28px;
+	border: 1px solid #333;
+	border-radius: 2px;
+	cursor: pointer;
+	font-size: 18px;
+	color: #FFF;
+	padding-left: 10px;
+	padding-right: 10px;
+	line-height: 28px;
 }
 
 #VehicleInfo .ecu1Title {

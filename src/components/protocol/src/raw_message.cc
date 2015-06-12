@@ -46,7 +46,7 @@ RawMessage::RawMessage(uint32_t connection_key, uint32_t protocol_version,
     service_type_(ServiceTypeFromByte(type)),
     payload_size_(payload_size),
     waiting_(false) {
-  if (data_sz > 0) {
+  if (data_param && data_sz > 0) {
     data_ = new uint8_t[data_sz];
     memcpy(data_, data_param, sizeof(*data_) * data_sz);
   }

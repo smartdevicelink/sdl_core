@@ -6,7 +6,7 @@
 	width: 324px;
 	height: 48px;
 	cursor: pointer;
-	background: gray;
+	background: url(../images/common/nav-status-bg.png) no-repeat;
 	z-index: 1;
 }
 

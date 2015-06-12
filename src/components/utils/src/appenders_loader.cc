@@ -39,7 +39,7 @@ namespace utils {
 AppendersLoader appenders_loader;
 
 AppendersLoader::AppendersLoader() {
-  handle_ = dlopen("libappenders.so", RTLD_LAZY | RTLD_NODELETE);
+  handle_ = dlopen("libappenders.so", RTLD_LAZY);
 }
 
 AppendersLoader::~AppendersLoader() {

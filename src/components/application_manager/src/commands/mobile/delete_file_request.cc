@@ -49,7 +49,7 @@ DeleteFileRequest::~DeleteFileRequest() {
 }
 
 void DeleteFileRequest::Run() {
-  LOG4CXX_INFO(logger_, "DeleteFileRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application =
       ApplicationManagerImpl::instance()->application(connection_key());

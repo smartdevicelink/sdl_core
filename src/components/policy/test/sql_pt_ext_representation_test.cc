@@ -1,4 +1,4 @@
-﻿/* Copyright (c) 2013, Ford Motor Company
+﻿/* Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,16 +30,10 @@
  */
 
 #include <vector>
-#include <algorithm>
-
 #include "gtest/gtest.h"
-
+#include <algorithm>
 #include "driver_dbms.h"
-#include "json/value.h"
 #include "policy/sql_pt_ext_representation.h"
-#include "policy/policy_types.h"
-#include "./types.h"
-#include "./enums.h"
 
 using policy::SQLPTExtRepresentation;
 
@@ -86,7 +80,9 @@ const std::string SQLPTExtRepresentationTest::kDatabaseName = "policy.sqlite";
   }
 }
 
-TEST_F(SQLPTExtRepresentationTest, SaveGenerateSnapshot) {
+TEST_F(SQLPTExtRepresentationTest, GenerateSnapshot_SetPolicyTable_SnapshotIsPresent) {
+
+  //arrange
   Json::Value table(Json::objectValue);
   table["policy_table"] = Json::Value(Json::objectValue);
 
@@ -114,13 +110,13 @@ TEST_F(SQLPTExtRepresentationTest, SaveGenerateSnapshot) {
   module_config["notifications_per_minute_by_priority"] = Json::Value(
       Json::objectValue);
   module_config["notifications_per_minute_by_priority"]["emergency"] =
-  Json::Value(1);
+      Json::Value(1);
   module_config["notifications_per_minute_by_priority"]["navigation"] =
-  Json::Value(2);
+      Json::Value(2);
   module_config["notifications_per_minute_by_priority"]["VOICECOMM"] =
-  Json::Value(3);
+      Json::Value(3);
   module_config["notifications_per_minute_by_priority"]["communication"] =
-  Json::Value(4);
+      Json::Value(4);
   module_config["notifications_per_minute_by_priority"]["normal"] = Json::Value(
       5);
   module_config["notifications_per_minute_by_priority"]["none"] = Json::Value(
@@ -140,10 +136,11 @@ TEST_F(SQLPTExtRepresentationTest, SaveGenerateSnapshot) {
   default_group["rpcs"]["Update"]["parameters"][0] = Json::Value("speed");
 
   Json::Value& consumer_friendly_messages =
-  policy_table["consumer_friendly_messages"];
+      policy_table["consumer_friendly_messages"];
   consumer_friendly_messages["version"] = Json::Value("1.2");
   consumer_friendly_messages["messages"] = Json::Value(Json::objectValue);
-  consumer_friendly_messages["messages"]["MSG1"] = Json::Value(Json::objectValue);
+  consumer_friendly_messages["messages"]["MSG1"] = Json::Value(
+      Json::objectValue);
   Json::Value& msg1 = consumer_friendly_messages["messages"]["MSG1"];
   msg1["languages"] = Json::Value(Json::objectValue);
   msg1["languages"]["en-us"] = Json::Value(Json::objectValue);
@@ -168,8 +165,11 @@ TEST_F(SQLPTExtRepresentationTest, SaveGenerateSnapshot) {
   policy_table::Table update(&table);
   update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
 
+  //assert
   ASSERT_TRUE(IsValid(update));
   ASSERT_TRUE(reps->Save(update));
+
+  //act
   utils::SharedPtr<policy_table::Table> snapshot = reps->GenerateSnapshot();
   snapshot->SetPolicyTableType(rpc::policy_table_interface_base::PT_SNAPSHOT);
 
@@ -193,112 +193,180 @@ TEST_F(SQLPTExtRepresentationTest, SaveGenerateSnapshot) {
 
   policy_table::Table expected(&table);
 
+  //assert
   EXPECT_EQ(expected.ToJsonValue().toStyledString(),
-      snapshot->ToJsonValue().toStyledString());
+            snapshot->ToJsonValue().toStyledString());
 }
 
-TEST_F(SQLPTExtRepresentationTest, CanAppKeepContext) {
+TEST_F(SQLPTExtRepresentationTest, CanAppKeepContext_InsertKeepContext_ExpectValuesThatSetInKeepContextParams) {
+
+  //arrange
   const char* query_delete = "DELETE FROM `application`; ";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_delete));
+
+  //act
   const char* query_insert = "INSERT INTO `application` (`id`, `memory_kb`,"
-  " `heart_beat_timeout_ms`, `keep_context`) VALUES ('12345', 5, 10, 1)";
+      " `heart_beat_timeout_ms`, `keep_context`) VALUES ('12345', 5, 10, 1)";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_insert));
   EXPECT_FALSE(reps->CanAppKeepContext("0"));
   EXPECT_TRUE(reps->CanAppKeepContext("12345"));
 }
 
-TEST_F(SQLPTExtRepresentationTest, CanAppStealFocus) {
+TEST_F(SQLPTExtRepresentationTest, CanAppStealFocus_SetStealFocus_ExpectValuesThatSetInStealFocusParam) {
+
+  //arrange
   const char* query_delete = "DELETE FROM `application`; ";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_delete));
+
+  //act
   const char* query_insert = "INSERT INTO `application` (`id`, `memory_kb`,"
-  " `heart_beat_timeout_ms`, `steal_focus`) VALUES ('12345', 5, 10, 1)";
+      " `heart_beat_timeout_ms`, `steal_focus`) VALUES ('12345', 5, 10, 1)";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_insert));
   EXPECT_TRUE(reps->CanAppStealFocus("12345"));
   EXPECT_FALSE(reps->CanAppStealFocus("0"));
 }
 
-TEST_F(SQLPTExtRepresentationTest, IncrementGlobalCounter) {
+TEST_F(SQLPTExtRepresentationTest, IncrementGlobalCounter_IncrementThreeTimes_ExpectCountEqual3) {
+
+  //arrange
   const char* query_update = "UPDATE `usage_and_error_count` SET"
-  " `count_of_sync_reboots` = 0";
+      " `count_of_sync_reboots` = 0";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_update));
 
+  //act
   reps->Increment("count_of_sync_reboots");
   reps->Increment("count_of_sync_reboots");
   reps->Increment("count_of_sync_reboots");
 
   const char* query_select =
-  "SELECT `count_of_sync_reboots` FROM `usage_and_error_count`";
+      "SELECT `count_of_sync_reboots` FROM `usage_and_error_count`";
+  //assert
   EXPECT_EQ(3, dbms->FetchOneInt(query_select));
 }
 
-TEST_F(SQLPTExtRepresentationTest, IncrementAppCounter) {
+TEST_F(SQLPTExtRepresentationTest, IncrementAppCounter_IncrementCountOfUserSelections3Times_ExpectCountEqual3) {
+
+  //arrange
   const char* query_delete =
-  "DELETE FROM `app_level` WHERE `application_id` = '12345'";
+      "DELETE FROM `app_level` WHERE `application_id` = '12345'";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_delete));
 
+  //act
   reps->Increment("12345", "count_of_user_selections");
   reps->Increment("12345", "count_of_user_selections");
   reps->Increment("12345", "count_of_user_selections");
 
   const char* query_select =
-  "SELECT `count_of_user_selections` FROM `app_level`"
-  "  WHERE `application_id` = '12345'";
+      "SELECT `count_of_user_selections` FROM `app_level`"
+          "  WHERE `application_id` = '12345'";
+
+  //assert
   EXPECT_EQ(3, dbms->FetchOneInt(query_select));
 }
 
-TEST_F(SQLPTExtRepresentationTest, SetAppInfo) {
+TEST_F(SQLPTExtRepresentationTest, AppInfo_SetLanguageRuInGUIAndEnInVUI_ExpectRuInGUIAndEnInVUI) {
+
+  //arrange
   const char* query_delete =
-  "DELETE FROM `app_level` WHERE `application_id` = '12345'";
+      "DELETE FROM `app_level` WHERE `application_id` = '12345'";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_delete));
 
+  //act
   reps->Set("12345", "app_registration_language_gui", "ru-ru");
   reps->Set("12345", "app_registration_language_vui", "en-en");
 
   const char* query_select_gui = "SELECT `app_registration_language_gui`"
-  " FROM `app_level` WHERE `application_id` = '12345'";
+      " FROM `app_level` WHERE `application_id` = '12345'";
 
   const char* query_select_vui = "SELECT `app_registration_language_vui`"
-  " FROM `app_level` WHERE `application_id` = '12345'";
+      " FROM `app_level` WHERE `application_id` = '12345'";
 
+  //assert
   EXPECT_EQ("ru-ru", dbms->FetchOneString(query_select_gui));
   EXPECT_EQ("en-en", dbms->FetchOneString(query_select_vui));
 }
 
-TEST_F(SQLPTExtRepresentationTest, AddAppStopwatch) {
+TEST_F(SQLPTExtRepresentationTest, AddAppStopwatch_Set10And60MinutesForStopwatch_Expect70Minutes) {
+
+  //arrange
   const char* query_delete =
-  "DELETE FROM `app_level` WHERE `application_id` = '12345'";
+      "DELETE FROM `app_level` WHERE `application_id` = '12345'";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_delete));
 
+  //act
   reps->Add("12345", "minutes_in_hmi_full", 10);
   reps->Add("12345", "minutes_in_hmi_full", 60);
 
   const char* query_select = "SELECT `minutes_in_hmi_full` FROM `app_level`"
-  "  WHERE `application_id` = '12345'";
+      "  WHERE `application_id` = '12345'";
+
+  //assert
   EXPECT_EQ(70, dbms->FetchOneInt(query_select));
 }
 
-TEST_F(SQLPTExtRepresentationTest, SetUnpairedDevice) {
+TEST_F(SQLPTExtRepresentationTest, SetUnpairedDevice_SetUnpairedDeviceId12345_ExpectUnpairedDeviceIdEquals12345) {
+
+  //arrange
   const char* query_delete = "DELETE FROM `device`";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_delete));
+
+  //act
   const char* query_insert = "INSERT INTO `device` (`id`) VALUES('12345')";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_insert));
+  ASSERT_TRUE(reps->SetUnpairedDevice("12345", true));
 
-  ASSERT_TRUE(reps->SetUnpairedDevice("12345"));
-
+  //act
   const char* query_select = "SELECT `id` FROM `device` WHERE `unpaired` = 1";
+
+  //assert
   EXPECT_EQ("12345", dbms->FetchOneString(query_select));
 }
 
-TEST_F(SQLPTExtRepresentationTest, UnpairedDevicesList) {
+TEST_F(SQLPTExtRepresentationTest, UnpairedDevicesList_SetUnpairedDevicesWithId12345AndId54321_Expect2UnpairedDevices) {
+
+  //arrange
   const char* query_delete = "DELETE FROM `device`";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_delete));
+
+  //act
   const char* query_insert = "INSERT INTO `device` (`id`, `unpaired`)"
-  " VALUES('12345', 1)";
-  ASSERT_TRUE(dbms->Exec(query_insert));
-  query_insert = "INSERT INTO `device` (`id`, `unpaired`) VALUES('54321', 1)";
+      " VALUES('12345', 1)";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_insert));
 
-  std::vector<std::string> output;
+  //act
+  query_insert = "INSERT INTO `device` (`id`, `unpaired`) VALUES('54321', 1)";
+
+  //assert
+  ASSERT_TRUE(dbms->Exec(query_insert));
+
+  //act
+  std::vector < std::string > output;
+
+  //assert
   ASSERT_TRUE(reps->UnpairedDevicesList(&output));
   ASSERT_EQ(2u, output.size());
   EXPECT_NE(output.end(), std::find(output.begin(), output.end(), "12345"));

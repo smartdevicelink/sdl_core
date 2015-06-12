@@ -1,4 +1,4 @@
-/**
+/*
  * @file log4cxx_plugin.cpp
  * @brief Log4cxxPlugin class header file.
  * Copyright (c) 2013, Ford Motor Company

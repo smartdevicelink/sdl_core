@@ -1,4 +1,4 @@
-/**
+/*
  * @file qt_version.h
  * @brief Defines for check Qt version.
  * Copyright (c) 2013, Ford Motor Company

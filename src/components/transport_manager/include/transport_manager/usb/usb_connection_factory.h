@@ -1,4 +1,4 @@
-/**
+/*
  * \file usb_connection_factory.h
  * \brief UsbConnectionFactory class header file.
  *
@@ -46,7 +46,7 @@ namespace transport_adapter {
 class UsbConnectionFactory : public ServerConnectionFactory {
  public:
   UsbConnectionFactory(TransportAdapterController* controller);
-  void SetUsbHandler(const UsbHandlerSptr& usb_handler);
+  void SetUsbHandler(const UsbHandlerSptr usb_handler);
 
  protected:
   virtual TransportAdapter::Error Init();

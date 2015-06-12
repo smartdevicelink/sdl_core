@@ -88,7 +88,11 @@ SDL.warningView = Em.ContainerView
             appLoaded: function() {
 
                 var self = this;
-	        self.set('isReady', true);
+                /** Show OK Button after 2 second delay */
+                setTimeout(function() {
+
+                    self.set('isReady', true);
+                }, 2000);
 
                 var components = Em.ContainerView.create({
 
@@ -317,7 +321,14 @@ SDL.warningView = Em.ContainerView
 
                 var self = this;
 
-	        self._parentView.set('hide', true); 
+                this._parentView.set('fade', this
+                    .checkForCCS3AnimationSupport());
+
+                setTimeout(function() {
+
+                    self._parentView.set('hide', true);
+                }, 1000);
+
                 SDL.RPCController.ConnectToSDL();
             }
         })

@@ -48,7 +48,7 @@ GetDTCsRequest::~GetDTCsRequest() {
 }
 
 void GetDTCsRequest::Run() {
-  LOG4CXX_INFO(logger_, "GetDTCsRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
@@ -82,7 +82,7 @@ void GetDTCsRequest::Run() {
 }
 
 void GetDTCsRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "GetDTCsRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {

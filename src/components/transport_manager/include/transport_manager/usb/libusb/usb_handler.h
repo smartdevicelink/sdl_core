@@ -1,4 +1,4 @@
-/**
+/*
  * \file usb_handler.h
  * \brief libusb USB handler class header file.
  *
@@ -36,16 +36,17 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_USB_HANDLER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_USB_HANDLER_H_
 
-#include <pthread.h>
-
 #include <libusb/libusb.h>
 
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/usb/usb_control_transfer.h"
 #include "transport_manager/usb/libusb/platform_usb_device.h"
 
-namespace transport_manager {
+#include "utils/threads/thread.h"
 
+class Thread;
+
+namespace transport_manager {
 namespace transport_adapter {
 
 class UsbHandler {
@@ -71,9 +72,16 @@ class UsbHandler {
   friend void UsbTransferSequenceCallback(libusb_transfer* transfer);
 
  private:
+  class UsbHandlerDelegate: public threads::ThreadDelegate {
+   public:
+    explicit UsbHandlerDelegate(UsbHandler* handler);
+    void threadMain() OVERRIDE;
+   private:
+    UsbHandler* handler_;
+  };
+
   bool shutdown_requested_;
-  // TODO(Eamakhov): change to threads::Thread usage
-  pthread_t thread_;
+  threads::Thread* thread_;
 
   friend class UsbDeviceListener;
   std::list<class UsbDeviceListener*> usb_device_listeners_;

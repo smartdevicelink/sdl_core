@@ -48,7 +48,7 @@ SubscribeButtonRequest::~SubscribeButtonRequest() {
 }
 
 void SubscribeButtonRequest::Run() {
-  LOG4CXX_INFO(logger_, "SubscribeButtonRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(connection_key());

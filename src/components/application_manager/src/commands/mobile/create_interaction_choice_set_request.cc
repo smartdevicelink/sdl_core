@@ -53,7 +53,7 @@ CreateInteractionChoiceSetRequest::~CreateInteractionChoiceSetRequest() {
 }
 
 void CreateInteractionChoiceSetRequest::Run() {
-  LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
@@ -114,7 +114,7 @@ void CreateInteractionChoiceSetRequest::Run() {
 
 mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
     ApplicationConstSharedPtr app) {
-  LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetRequest::CheckChoiceSet");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   const smart_objects::SmartArray* new_choice_set_array =
     (*message_)[strings::msg_params][strings::choice_set].asArray();
@@ -141,7 +141,8 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
     }
 
     // Check new choice set params along with already registered choice sets
-    const ChoiceSetMap& app_choice_set_map = app->choice_set_map();
+    const DataAccessor<ChoiceSetMap> accessor = app->choice_set_map();
+    const ChoiceSetMap& app_choice_set_map = accessor.GetData();
     ChoiceSetMap::const_iterator it = app_choice_set_map.begin();
     ChoiceSetMap::const_iterator itEnd = app_choice_set_map.end();
     for (; it != itEnd; ++it) {
@@ -257,7 +258,7 @@ bool CreateInteractionChoiceSetRequest::compareStr(
 
 bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
     const smart_objects::SmartObject& choice_set) {
-  LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetRequest::IsWhiteSpaceExist");
+  LOG4CXX_AUTO_TRACE(logger_);
   const char* str = NULL;
 
   str = choice_set[strings::menu_name].asCharArray();
@@ -316,21 +317,21 @@ bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
 void CreateInteractionChoiceSetRequest::SendVRAddCommandRequest(
     application_manager::ApplicationSharedPtr const app) {
 
-  smart_objects::SmartObject* choice_set = &(*message_)[strings::msg_params];
+  smart_objects::SmartObject& choice_set = (*message_)[strings::msg_params];
 
-  for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
+  for (size_t j = 0; j < choice_set[strings::choice_set].length(); ++j) {
     smart_objects::SmartObject msg_params = smart_objects::SmartObject(
                                               smart_objects::SmartType_Map);
     msg_params[strings::app_id] = app->app_id();
     msg_params[strings::cmd_id] =
-        (*choice_set)[strings::choice_set][j][strings::choice_id];
+        choice_set[strings::choice_set][j][strings::choice_id];
     msg_params[strings::vr_commands] = smart_objects::SmartObject(
                                          smart_objects::SmartType_Array);
     msg_params[strings::vr_commands] =
-        (*choice_set)[strings::choice_set][j][strings::vr_commands];
+        choice_set[strings::choice_set][j][strings::vr_commands];
 
     msg_params[strings::type] = hmi_apis::Common_VRCommandType::Choice;
-    msg_params[strings::grammar_id] =  (*choice_set)[strings::grammar_id];
+    msg_params[strings::grammar_id] =  choice_set[strings::grammar_id];
 
     SendHMIRequest(hmi_apis::FunctionID::VR_AddCommand, &msg_params);
   }

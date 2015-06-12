@@ -43,10 +43,12 @@
 using namespace transport_manager;
 using transport_manager::transport_adapter::TransportAdapter;
 using transport_manager::transport_adapter::TransportAdapterListener;
+using ::protocol_handler::RawMessagePtr;
 
 namespace test {
 namespace components {
 namespace transport_manager {
+using namespace ::protocol_handler;
 
 class MockTransportAdapterListener : public TransportAdapterListener {
  public:

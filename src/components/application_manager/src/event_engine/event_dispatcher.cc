@@ -39,37 +39,38 @@ namespace event_engine {
 using namespace sync_primitives;
 
 EventDispatcher::EventDispatcher()
-    : observers_() {
+    : observer_list_lock_(true),
+      observers_() {
 }
 
 EventDispatcher::~EventDispatcher() {
 }
 
 void EventDispatcher::raise_event(const Event& event) {
-  // create local list
-  ObserverList list;
   {
     AutoLock auto_lock(state_lock_);
     // check if event is notification
     if (hmi_apis::messageType::notification == event.smart_object_type()) {
-
-      //ObserversMap iterator
-      ObserversMap::iterator it = observers_[event.id()].begin();
-      for (; observers_[event.id()].end() != it; ++it) {
-        list = it->second;
-      }
+    	const uint32_t notification_correlation_id = 0;
+    	observers_list_ = observers_[event.id()][notification_correlation_id];
     }
 
     if (hmi_apis::messageType::response == event.smart_object_type()
         || hmi_apis::messageType::error_response == event.smart_object_type()) {
-      list = observers_[event.id()][event.smart_object_correlation_id()];
+    	observers_list_ = observers_[event.id()][event.smart_object_correlation_id()];
     }
   }
 
   // Call observers
-  ObserverList::iterator observers =  list.begin();
-  for (; list.end() != observers; ++observers) {
-      (*observers)->on_event(event);
+  EventObserver* temp;
+  while (observers_list_.size() > 0) {
+    observer_list_lock_.Acquire();
+    if (!observers_list_.empty()) {
+      temp = observers_list_.front();
+      observers_list_.pop_front();
+      temp->on_event(event);
+    }
+    observer_list_lock_.Release();
   }
 }
 
@@ -81,43 +82,57 @@ void EventDispatcher::add_observer(const Event::EventID& event_id,
 }
 
 void EventDispatcher::remove_observer(const Event::EventID& event_id,
-                                      EventObserver* const observer) {
+		                              EventObserver* const observer) {
+  remove_observer_from_list(observer);
   AutoLock auto_lock(state_lock_);
   ObserversMap::iterator it =  observers_[event_id].begin();
   for (; observers_[event_id].end() != it; ++it) {
 
     //ObserverList iterator
-    ObserverList::iterator observer_it =  it->second.begin();
-    while (it->second.end() != observer_it) {
-      if (observer->id() == (*observer_it)->id()) {
-        observer_it = it->second.erase(observer_it);
-      } else {
-        ++observer_it;
-      }
-    }
+	ObserverList::iterator observer_it =  it->second.begin();
+	while (it->second.end() != observer_it) {
+	  if (observer->id() == (*observer_it)->id()) {
+	    observer_it = it->second.erase(observer_it);
+	  } else {
+	    ++observer_it;
+	  }
+	}
   }
 }
 
 void EventDispatcher::remove_observer(EventObserver* const observer) {
+  remove_observer_from_list(observer);
   AutoLock auto_lock(state_lock_);
   EventObserverMap::iterator event_map = observers_.begin();
   for (; observers_.end() != event_map; ++event_map) {
-
     ObserversMap::iterator it =  event_map->second.begin();
-    for (; event_map->second.end() != it; ++it) {
+	for (; event_map->second.end() != it; ++it) {
 
-      //ObserverList iterator
-      ObserverList::iterator observer_it =  it->second.begin();
-      while (it->second.end() != observer_it) {
-        if (observer->id() == (*observer_it)->id()) {
-          observer_it = it->second.erase(observer_it);
-        } else {
-          ++observer_it;
-        }
+	  //ObserverList iterator
+	  ObserverList::iterator observer_it =  it->second.begin();
+	  while (it->second.end() != observer_it) {
+	    if (observer->id() == (*observer_it)->id()) {
+	      observer_it = it->second.erase(observer_it);
+		} else {
+		  ++observer_it;
+		}
+	  }
+	}
+  }
+}
+
+void EventDispatcher::remove_observer_from_list(EventObserver* const observer) {
+  AutoLock auto_lock(observer_list_lock_);
+  if (!observers_list_.empty()) {
+    ObserverList::iterator it_begin = observers_list_.begin();
+    for(; it_begin != observers_list_.end(); ++it_begin) {
+      if ((*it_begin)->id() == observer->id()) {
+        it_begin = observers_list_.erase(it_begin);
       }
     }
   }
 }
 
-}
-}
+} // namespace event_engine
+
+}// namespace application_manager

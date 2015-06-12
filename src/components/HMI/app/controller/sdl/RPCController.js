@@ -72,41 +72,21 @@ SDL.RPCController = Em.Object
 
         capabilitiesCheck: function(key, value) {
             if (key == "imageType" && value == "STATIC") {
-                SDL.RPCController.capabilityCheckResult = 'UNSUPPORTED_RESOURCE';
+                SDL.RPCController.capabilityCheckResult = {code: SDL.SDLModel.resultCode['UNSUPPORTED_RESOURCE'], type: value};
             }
             if (key == "type" && value == "PRE_RECORDED") {
-                SDL.RPCController.capabilityCheckResult = 'UNSUPPORTED_RESOURCE';
+                SDL.RPCController.capabilityCheckResult = {code: SDL.SDLModel.resultCode['UNSUPPORTED_RESOURCE'], type: value};
             }
             if (key == "type" && value == "SAPI_PHONEMES") {
-                SDL.RPCController.capabilityCheckResult = 'UNSUPPORTED_RESOURCE';
+                SDL.RPCController.capabilityCheckResult = {code: SDL.SDLModel.resultCode['UNSUPPORTED_RESOURCE'], type: value};
             }
             if (key == "type" && value == "LHPLUS_PHONEMES") {
-                SDL.RPCController.capabilityCheckResult = 'UNSUPPORTED_RESOURCE';
+                SDL.RPCController.capabilityCheckResult = {code: SDL.SDLModel.resultCode['UNSUPPORTED_RESOURCE'], type: value};
             }
             if (key == "type" && value == "SILENCE") {
-                SDL.RPCController.capabilityCheckResult = 'UNSUPPORTED_RESOURCE';
+                SDL.RPCController.capabilityCheckResult = {code: SDL.SDLModel.resultCode['UNSUPPORTED_RESOURCE'], type: value};
             }
-        },
-
-        /**
-         * Method to check supported image type in request
-         * 
-         * @param {Object}
-         *            array
-         */
-        checkImagesArray: function(array) {
-
-            var error = false;
-            if (array instanceof Array) {
-                for ( var i = 0; i < array.length; i++) {
-                    if (array[i].image && 
-                        ((array[i].image.imageType !== "DYNAMIC") && 
-                         (array[i].image.imageType !== "STATIC"))) {
-
-                    }
-                }
-            }
-            return error;
+            return value;
         },
 
         /**
@@ -1093,17 +1073,6 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if ("softButtons" in params) {
-                        if (SDL.RPCController
-                            .checkImagesArray(params.softButtons)) {
-                            this.resultStruct = {
-                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                "resultMessage": "Unsupported image type!"
-                            };
-
-                            return this.resultStruct;
-                        }
-                    }
                     if ("turnIcon" in params
                         && ((params.turnIcon.imageType !== "DYNAMIC") && (params.turnIcon.imageType !== "STATIC"))) {
                         this.resultStruct = {
@@ -1182,17 +1151,6 @@ SDL.RPCController = Em.Object
                         };
 
                         return this.resultStruct;
-                    }
-                    if ("softButtons" in params) {
-                        if (SDL.RPCController
-                            .checkImagesArray(params.softButtons)) {
-                            this.resultStruct = {
-                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                "resultMessage": "Unsupported image type!"
-                            };
-
-                            return this.resultStruct;
-                        }
                     }
                     if ("turnList" in params) {
 
@@ -1276,17 +1234,6 @@ SDL.RPCController = Em.Object
                         };
 
                         return this.resultStruct;
-                    }
-                    if ("softButtons" in params) {
-                        if (SDL.RPCController
-                            .checkImagesArray(params.softButtons)) {
-                            this.resultStruct = {
-                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                "resultMessage": "Unsupported image type!"
-                            };
-
-                            return this.resultStruct;
-                        }
                     }
                     if (params.alertStrings == null) {
 
@@ -1421,17 +1368,6 @@ SDL.RPCController = Em.Object
                         };
 
                         return this.resultStruct;
-                    }
-                    if ("softButtons" in params) {
-                        if (SDL.RPCController
-                            .checkImagesArray(params.softButtons)) {
-                            this.resultStruct = {
-                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                "resultMessage": "Unsupported image type!"
-                            };
-
-                            return this.resultStruct;
-                        }
                     }
                     if ("graphic" in params
                         && ((params.graphic.imageType !== "DYNAMIC") && (params.graphic.imageType !== "STATIC"))) {
@@ -1934,16 +1870,6 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if ("vrHelp" in params) {
-                        if (SDL.RPCController.checkImagesArray(params.vrHelp)) {
-                            this.resultStruct = {
-                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                "resultMessage": "Unsupported image type!"
-                            };
-
-                            return this.resultStruct;
-                        }
-                    }
                     if (params.appID == null) {
 
                         this.resultStruct = {
@@ -2278,17 +2204,6 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if ("softButtons" in params) {
-                        if (SDL.RPCController
-                            .checkImagesArray(params.softButtons)) {
-                            this.resultStruct = {
-                                "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                "resultMessage": "Unsupported image type!"
-                            };
-
-                            return this.resultStruct;
-                        }
-                    }
                     if (params.messageText == null) {
 
                         this.resultStruct = {
@@ -2434,17 +2349,6 @@ SDL.RPCController = Em.Object
                 ShowVrHelp: function(params) {
 
                     if (params) {
-                        if ("vrHelp" in params) {
-                            if (SDL.RPCController
-                                .checkImagesArray(params.vrHelp)) {
-                                this.resultStruct = {
-                                    "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                                    "resultMessage": "Unsupported image type!"
-                                };
-
-                                return this.resultStruct;
-                            }
-                        }
                         if ("appID" in params) {
 
                             if (typeof params.appID != 'number') {

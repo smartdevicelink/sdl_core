@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -52,7 +52,7 @@ OnDriverDistractionNotification::~OnDriverDistractionNotification() {
 }
 
 void OnDriverDistractionNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnDriverDistractionNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   const hmi_apis::Common_DriverDistractionState::eType state =
       static_cast<hmi_apis::Common_DriverDistractionState::eType>(
@@ -60,10 +60,10 @@ void OnDriverDistractionNotification::Run() {
           .asInt());
   ApplicationManagerImpl::instance()->set_driver_distraction(state);
 
-  MessageSharedPtr on_driver_distraction =
+  smart_objects::SmartObjectSPtr on_driver_distraction =
       new smart_objects::SmartObject();
 
-  if (false == on_driver_distraction.valid()) {
+  if (!on_driver_distraction) {
     LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
     return;
   }
@@ -75,12 +75,12 @@ void OnDriverDistractionNotification::Run() {
       state;
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
-  const std::set<ApplicationSharedPtr> applications = accessor.applications();
+  const ApplicationManagerImpl::ApplictionSet applications = accessor.applications();
 
-  std::set<ApplicationSharedPtr>::const_iterator it = applications.begin();
+  ApplicationManagerImpl::ApplictionSetConstIt it = applications.begin();
   for (; applications.end() != it; ++it) {
-    ApplicationSharedPtr app = *it;
-    if (app.valid()) {
+    const ApplicationSharedPtr app = *it;
+    if (app) {
       if (mobile_apis::HMILevel::eType::HMI_NONE != app->hmi_level()) {
           (*on_driver_distraction)[strings::params]
                                   [strings::connection_key] = app->app_id();

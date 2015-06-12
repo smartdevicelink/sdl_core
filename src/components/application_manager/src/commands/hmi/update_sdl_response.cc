@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -44,7 +44,7 @@ UpdateSDLResponse::~UpdateSDLResponse() {
 }
 
 void UpdateSDLResponse::Run() {
-  LOG4CXX_INFO(logger_, "UpdateSDLResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
 

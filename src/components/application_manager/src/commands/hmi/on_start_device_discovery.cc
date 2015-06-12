@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -45,7 +45,7 @@ OnStartDeviceDiscovery::~OnStartDeviceDiscovery() {
 }
 
 void OnStartDeviceDiscovery::Run() {
-  LOG4CXX_INFO(logger_, "OnStartDeviceDiscovery::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl::instance()->StartDevicesDiscovery();
 }
