@@ -383,7 +383,10 @@ void CreateInteractionChoiceSetRequest::onTimeOut() {
     SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
   }
   OnAllHMIResponsesReceived();
-  default_timeout_ = 0;
+  // If timeout occured, and request is alive is should not be managed by
+  // request controller timer any_more
+  ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
+                                               correlation_id(), 0);
 }
 
 void CreateInteractionChoiceSetRequest::DeleteChoices() {
