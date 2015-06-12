@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -44,7 +44,7 @@ UpdateDeviceListResponse::~UpdateDeviceListResponse() {
 }
 
 void UpdateDeviceListResponse::Run() {
-  LOG4CXX_INFO(logger_, "UpdateDeviceListResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   // TODO(PV): add check for correctness.
 }

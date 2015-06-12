@@ -140,7 +140,7 @@ SDL.AlertPopUp = Em.ContainerView.create({
         this.set('content2', '');
         this.set('content3', '');
 
-        if (reason == 'timeout' && this.softbuttons.buttons._childViews.length > 0) {
+        if (reason == 'timeout' && this.softbuttons.buttons._childViews.length > 0 && reason === 'ABORTED') {
             SDL.SDLController.alertResponse(SDL.SDLModel.resultCode['ABORTED'], this.alertRequestId);
         } else {
             SDL.SDLController.alertResponse(SDL.SDLModel.resultCode['SUCCESS'], this.alertRequestId);

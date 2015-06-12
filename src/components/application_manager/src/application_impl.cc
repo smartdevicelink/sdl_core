@@ -1,5 +1,5 @@
-﻿/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,13 +32,14 @@
 
 #include <string>
 #include <strings.h>
-#include <stdlib.h>
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/application_manager_impl.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
+#include "utils/gen_hash.h"
 
 namespace {
 
@@ -79,10 +80,11 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
     const std::string& app_name,
     utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager)
     : grammar_id_(0),
+      hmi_app_id_(0),
       app_id_(application_id),
       active_message_(NULL),
       is_media_(false),
-      allowed_support_navigation_(false),
+      is_navi_(false),
       hmi_supports_navi_video_streaming_(false),
       hmi_supports_navi_audio_streaming_(false),
       is_app_allowed_(true),
@@ -111,9 +113,10 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
       {date_time::DateTime::getCurrentTime(), 0};
 
 
-  set_mobile_app_id(smart_objects::SmartObject(mobile_app_id));
+  set_mobile_app_id(mobile_app_id);
   set_name(app_name);
 
+  MarkUnregistered();
   // subscribe application to custom button by default
   SubscribeToButton(mobile_apis::ButtonName::CUSTOM_BUTTON);
 
@@ -147,16 +150,24 @@ bool ApplicationImpl::IsFullscreen() const {
   return mobile_api::HMILevel::HMI_FULL == hmi_level_;
 }
 
-bool ApplicationImpl::MakeFullscreen() {
-  hmi_level_ = mobile_api::HMILevel::HMI_FULL;
-  if (is_media_ && !tts_speak_state_) {
-    audio_streaming_state_ = mobile_api::AudioStreamingState::AUDIBLE;
+void ApplicationImpl::ChangeSupportingAppHMIType() {
+  is_navi_ = false;
+  is_voice_communication_application_ = false;
+  const smart_objects::SmartObject& array_app_types = *app_types_;
+  uint32_t lenght_app_types = array_app_types.length();
+
+  for (uint32_t i = 0; i < lenght_app_types; ++i) {
+    if (mobile_apis::AppHMIType::NAVIGATION ==
+        static_cast<mobile_apis::AppHMIType::eType>(
+            array_app_types[i].asUInt())) {
+      is_navi_ = true;
+    }
+    if (mobile_apis::AppHMIType::COMMUNICATION ==
+        static_cast<mobile_apis::AppHMIType::eType>(
+            array_app_types[i].asUInt())) {
+      is_voice_communication_application_ = true;
+    }
   }
-  system_context_ = mobile_api::SystemContext::SYSCTXT_MAIN;
-  if (!has_been_activated_) {
-    has_been_activated_ = true;
-  }
-  return true;
 }
 
 bool ApplicationImpl::IsAudible() const {
@@ -164,17 +175,8 @@ bool ApplicationImpl::IsAudible() const {
       || mobile_api::HMILevel::HMI_LIMITED == hmi_level_;
 }
 
-void ApplicationImpl::MakeNotAudible() {
-  hmi_level_ = mobile_api::HMILevel::HMI_BACKGROUND;
-  audio_streaming_state_ = mobile_api::AudioStreamingState::NOT_AUDIBLE;
-}
-
-bool ApplicationImpl::allowed_support_navigation() const {
-  return allowed_support_navigation_;
-}
-
-void ApplicationImpl::set_allowed_support_navigation(bool allow) {
-  allowed_support_navigation_ = allow;
+void ApplicationImpl::set_is_navi(bool allow) {
+  is_navi_ = allow;
 }
 
 bool ApplicationImpl::is_voice_communication_supported() const {
@@ -189,7 +191,7 @@ void ApplicationImpl::set_voice_communication_supported(
 bool ApplicationImpl::IsAudioApplication() const {
   return is_media_ ||
          is_voice_communication_application_ ||
-         allowed_support_navigation_;
+         is_navi_;
 }
 
 const smart_objects::SmartObject* ApplicationImpl::active_message() const {
@@ -209,7 +211,7 @@ const std::string& ApplicationImpl::name() const {
 }
 
 const std::string ApplicationImpl::folder_name() const {
-  return name() + mobile_app_id()->asString();
+  return name() + mobile_app_id();
 }
 
 bool ApplicationImpl::is_media_application() const {
@@ -218,6 +220,14 @@ bool ApplicationImpl::is_media_application() const {
 
 const mobile_api::HMILevel::eType& ApplicationImpl::hmi_level() const {
   return hmi_level_;
+}
+
+bool application_manager::ApplicationImpl::is_foreground() const {
+  return is_foreground_;
+}
+
+void application_manager::ApplicationImpl::set_foreground(bool is_foreground) {
+  is_foreground_ = is_foreground;
 }
 
 const uint32_t ApplicationImpl::put_file_in_none_count() const {
@@ -295,7 +305,7 @@ void ApplicationImpl::set_hmi_level(
     delete_file_in_none_count_ = 0;
     list_files_in_none_count_ = 0;
   }
-
+  LOG4CXX_INFO(logger_, "hmi_level = " << hmi_level);
   hmi_level_ = hmi_level;
   usage_report_.RecordHmiStateChanged(hmi_level);
 }
@@ -372,7 +382,7 @@ void ApplicationImpl::OnVideoStreamRetry() {
     video_stream_retry_timer_->updateTimeOut(time_out);
   } else {
     LOG4CXX_INFO(logger_, "Stop video streaming retry");
-    video_stream_retry_timer_.release();
+    video_stream_retry_timer_->stop();
     set_video_stream_retry_active(false);
   }
 }
@@ -391,7 +401,7 @@ void ApplicationImpl::OnAudioStreamRetry() {
     audio_stream_retry_timer_->updateTimeOut(time_out);
   } else {
     LOG4CXX_INFO(logger_, "Stop audio streaming retry");
-    audio_stream_retry_timer_.release();
+    audio_stream_retry_timer_->stop();
     set_audio_stream_retry_active(false);
   }
 }
@@ -415,7 +425,7 @@ void ApplicationImpl::set_system_context(
 
 void ApplicationImpl::set_audio_streaming_state(
     const mobile_api::AudioStreamingState::eType& state) {
-  if (!is_media_application()
+  if (!(is_media_application() || is_navi())
       && state != mobile_api::AudioStreamingState::NOT_AUDIBLE) {
     LOG4CXX_WARN(logger_, "Trying to set audio streaming state"
                   " for non-media application to different from NOT_AUDIBLE");
@@ -450,6 +460,11 @@ void ApplicationImpl::set_grammar_id(uint32_t value) {
 
 bool ApplicationImpl::has_been_activated() const {
   return has_been_activated_;
+}
+
+bool ApplicationImpl::set_activated(bool is_active) {
+  has_been_activated_ = is_active;
+  return true;
 }
 
 void ApplicationImpl::set_protocol_version(
@@ -599,7 +614,7 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
   // commands per minute, e.g. 10 command per minute i.e. 1 command per 6 sec
   case POLICY_TABLE: {
     uint32_t cmd_limit = application_manager::MessageHelper::GetAppCommandLimit(
-          mobile_app_id_->asString());
+          mobile_app_id_);
 
     if (0 == cmd_limit) {
       return true;
@@ -646,19 +661,14 @@ const std::set<uint32_t>& ApplicationImpl::SubscribesIVI() const {
   return subscribed_vehicle_info_;
 }
 
-uint32_t ApplicationImpl::nextHash() {
-  hash_val_ = rand();
+const std::string& ApplicationImpl::curHash() const {
   return hash_val_;
 }
 
-uint32_t ApplicationImpl::curHash() const {
-  return hash_val_;
-}
-
-uint32_t ApplicationImpl::UpdateHash() {
-  uint32_t new_hash= nextHash();
+void ApplicationImpl::UpdateHash() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  hash_val_ = utils::gen_hash(profile::Profile::instance()->hash_string_size());
   MessageHelper::SendHashUpdateNotification(app_id());
-  return new_hash;
 }
 
 void ApplicationImpl::CleanupFiles() {
@@ -690,8 +700,23 @@ void ApplicationImpl::CleanupFiles() {
 }
 
 void ApplicationImpl::LoadPersistentFiles() {
-  std::string directory_name =
-      profile::Profile::instance()->app_storage_folder();
+  using namespace profile;
+
+  if (kWaitingForRegistration == app_state_) {
+    const std::string app_icon_dir(Profile::instance()->app_icons_folder());
+    const std::string full_icon_path(app_icon_dir + "/" + mobile_app_id_);
+    if (file_system::FileExists(full_icon_path)) {
+      AppFile file;
+      file.is_persistent = true;
+      file.is_download_complete = true;
+      file.file_name = full_icon_path;
+      file.file_type = mobile_apis::FileType::GRAPHIC_PNG;
+      AddFile(file);
+    }
+    return;
+  }
+
+  std::string directory_name = Profile::instance()->app_storage_folder();
   directory_name += "/" + folder_name();
 
   if (file_system::DirectoryExists(directory_name)) {

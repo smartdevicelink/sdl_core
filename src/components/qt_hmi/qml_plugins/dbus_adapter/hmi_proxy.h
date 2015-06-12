@@ -1,4 +1,4 @@
-/**
+/*
  * \file hmiproxy.h
  * \brief HmiProxy class header file.
  * Copyright (c) 2013, Ford Motor Company

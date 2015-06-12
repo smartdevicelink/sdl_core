@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -49,7 +49,7 @@ OnTTSLanguageChangeNotification::~OnTTSLanguageChangeNotification() {
 }
 
 void OnTTSLanguageChangeNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnTTSLanguageChangeNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   HMICapabilities& hmi_capabilities =
       ApplicationManagerImpl::instance()->hmi_capabilities();
@@ -71,10 +71,9 @@ void OnTTSLanguageChangeNotification::Run() {
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
-  const std::set<ApplicationSharedPtr> applications = accessor.applications();
 
-  std::set<ApplicationSharedPtr>::iterator it = applications.begin();
-  for (;applications.end() != it; ++it) {
+  ApplicationManagerImpl::ApplictionSetIt it = accessor.begin();
+  for (;accessor.end() != it; ++it) {
     ApplicationSharedPtr app = (*it);
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);

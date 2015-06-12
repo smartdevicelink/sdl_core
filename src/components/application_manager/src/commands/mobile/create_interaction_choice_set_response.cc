@@ -49,7 +49,7 @@ CreateInteractionChoiceSetResponse::~CreateInteractionChoiceSetResponse() {
 }
 
 void CreateInteractionChoiceSetResponse::Run() {
-  LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   // check if response false
   if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {

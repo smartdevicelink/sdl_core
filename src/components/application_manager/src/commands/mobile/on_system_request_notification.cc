@@ -50,7 +50,7 @@ OnSystemRequestNotification::~OnSystemRequestNotification() {
 }
 
 void OnSystemRequestNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnSystemRequestNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   mobile_apis::RequestType::eType request_type = static_cast<mobile_apis::RequestType::eType>
       ((*message_)[strings::msg_params][strings::request_type].asInt());

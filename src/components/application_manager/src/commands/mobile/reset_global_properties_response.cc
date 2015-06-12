@@ -47,7 +47,7 @@ ResetGlobalPropertiesResponse::~ResetGlobalPropertiesResponse() {
 }
 
 void ResetGlobalPropertiesResponse::Run() {
-  LOG4CXX_INFO(logger_, "ResetGlobalPropertiesResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }

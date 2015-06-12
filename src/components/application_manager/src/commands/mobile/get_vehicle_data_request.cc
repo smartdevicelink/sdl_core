@@ -54,7 +54,7 @@ GetVehicleDataRequest::~GetVehicleDataRequest() {
 }
 
 void GetVehicleDataRequest::Run() {
-  LOG4CXX_INFO(logger_, "GetVehicleDataRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   int32_t app_id = (*message_)[strings::params][strings::connection_key].asUInt();
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
@@ -213,7 +213,7 @@ GetVehicleDataRequest::~GetVehicleDataRequest() {
 }
 
 void GetVehicleDataRequest::Run() {
-  LOG4CXX_INFO(logger_, "GetVehicleDataRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   int32_t app_id = (*message_)[strings::params][strings::connection_key].asUInt();
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
@@ -260,7 +260,7 @@ void GetVehicleDataRequest::Run() {
 }
 
 void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "GetVehicleDataRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject message = event.smart_object();
 
   switch (event.id()) {

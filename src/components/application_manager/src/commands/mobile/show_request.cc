@@ -50,7 +50,7 @@ ShowRequest::~ShowRequest() {
 }
 
 void ShowRequest::Run() {
-  LOG4CXX_INFO(logger_, "ShowRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application_manager::ApplicationManagerImpl::instance()
       ->application(
@@ -216,7 +216,7 @@ void ShowRequest::Run() {
 }
 
 void ShowRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "ShowRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -251,7 +251,7 @@ void ShowRequest::on_event(const event_engine::Event& event) {
 }
 
 bool ShowRequest::CheckStringsOfShowRequest() {
-  LOG4CXX_INFO(logger_, "ShowRequest::CheckStringsOfShowRequest");
+  LOG4CXX_AUTO_TRACE(logger_);
   const char* str;
 
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_4)) {

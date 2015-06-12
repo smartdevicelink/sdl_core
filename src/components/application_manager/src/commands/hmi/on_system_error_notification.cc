@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -47,7 +47,7 @@ OnSystemErrorNotification::~OnSystemErrorNotification() {
 }
 
 void OnSystemErrorNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnSystemErrorNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   int code = (*message_)[strings::msg_params][hmi_notification::error]
       .asInt();

@@ -1,4 +1,4 @@
-/**
+/*
  * \file qml_dbus_common.h
  * \brief Contain utilities for DBus plugin.
  * Copyright (c) 2013, Ford Motor Company

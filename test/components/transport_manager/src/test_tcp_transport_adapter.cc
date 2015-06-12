@@ -13,14 +13,39 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-TEST(TcpAdapterBasicTest, Basic) {
-  TransportAdapter* transport_adapter = new TcpTransportAdapter(12345);
+using RawMessage = ::protocol_handler::RawMessage;
+using namespace ::protocol_handler;
 
-  EXPECT_EQ("sdl-tcp", transport_adapter->GetDeviceType());
-  EXPECT_TRUE(transport_adapter->IsServerOriginatedConnectSupported());
-  EXPECT_TRUE(transport_adapter->IsClientOriginatedConnectSupported());
-  EXPECT_TRUE(transport_adapter->IsSearchDevicesSupported());
+//TEST(TcpAdapterBasicTest, Basic) {
+//  TransportAdapter* transport_adapter = new TcpTransportAdapter(12345);
+//
+//  EXPECT_EQ("sdl-tcp", transport_adapter->GetDeviceType());
+//  EXPECT_TRUE(transport_adapter->IsServerOriginatedConnectSupported());
+//  EXPECT_TRUE(transport_adapter->IsClientOriginatedConnectSupported());
+//  EXPECT_TRUE(transport_adapter->IsSearchDevicesSupported());
+//}
+
+
+//--should be changed
+TEST(TcpAdapterBasicTest, GetDeviceType_Return_sdl-tcp) {
+	TransportAdapter* transport_adapter = new TcpTransportAdapter(12345);
+	EXPECT_EQ("sdl-tcp", transport_adapter->GetDeviceType());
 }
+
+//TEST(TcpAdapterBasicTest, isServerOriginatedConnectSupported_Return_True) {
+//	TransportAdapter* transport_adapter = new TcpTransportAdapter(12345);
+//	EXPECT_TRUE(transport_adapter->IsServerOriginatedConnectSupported());
+//}
+//
+//TEST(TcpAdapterBasicTest, isClientOriginatedConnectSupported_Return_True) {
+//	TransportAdapter* transport_adapter = new TcpTransportAdapter(12345);
+//	EXPECT_TRUE(transport_adapter->IsClientOriginatedConnectSupported());
+//}
+//TEST(TcpAdapterBasicTest, isSearchDevicesSupported_Return_True) {
+//	TransportAdapter* transport_adapter = new TcpTransportAdapter(12345);
+//	 EXPECT_TRUE(transport_adapter->IsSearchDevicesSupported());
+//}
+
 
 TEST(TcpAdapterBasicTest, NotInitialised) {
   TransportAdapter* transport_adapter = new TcpTransportAdapter(12345);

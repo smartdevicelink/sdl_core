@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Ford Motor Company
+# Copyright (c) 2014, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,3 +36,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
 else ()
     add_subdirectory(./qml_model_qt5)
 endif ()
+
+if(HMI STREQUAL "qt" AND BUILD_TESTS)
+    add_subdirectory(test)
+endif()

@@ -311,6 +311,12 @@ namespace NsMessageBroker
             return false;
          }
 
+         if (root.isMember("result") && root.isMember("error"))
+         {
+            /* message can't contain simultaneously result and error*/
+            return false;
+         }
+
          if (root.isMember("method"))
          {
             if (!root["method"].isString())

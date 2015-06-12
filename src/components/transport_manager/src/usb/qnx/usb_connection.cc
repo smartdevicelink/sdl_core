@@ -50,7 +50,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 UsbConnection::UsbConnection(const DeviceUID& device_uid,
                              const ApplicationHandle& app_handle,
                              TransportAdapterController* controller,
-                             const UsbHandlerSptr& libusb_handler,
+                             const UsbHandlerSptr libusb_handler,
                              PlatformUsbDevice* device)
     : device_uid_(device_uid),
       app_handle_(app_handle),
@@ -60,6 +60,7 @@ UsbConnection::UsbConnection(const DeviceUID& device_uid,
       in_pipe_(NULL),
       out_pipe_(NULL),
       in_buffer_(NULL),
+      out_buffer_(NULL),
       in_urb_(NULL),
       out_urb_(NULL),
       out_messages_(),
@@ -69,7 +70,6 @@ UsbConnection::UsbConnection(const DeviceUID& device_uid,
       disconnecting_(false),
       pending_in_transfer_(false),
       pending_out_transfer_(false) {
-  pthread_mutex_init(&out_messages_mutex_, 0);
 }
 
 UsbConnection::~UsbConnection() {
@@ -89,8 +89,6 @@ UsbConnection::~UsbConnection() {
       LOG4CXX_ERROR(logger_, "Failed to close pipe: " << close_pipe_rc);
     }
   }
-
-  pthread_mutex_destroy(&out_messages_mutex_);
 }
 
 void InTransferCallback(usbd_urb* urb, usbd_pipe*, void* data) {
@@ -212,7 +210,7 @@ void UsbConnection::OnOutTransfer(usbd_urb* urb) {
     }
   }
 
-  pthread_mutex_lock(&out_messages_mutex_);
+  sync_primitives::AutoLock locker(out_messages_mutex_);
 
   if (error) {
     LOG4CXX_ERROR(logger_, "USB out transfer failed");
@@ -234,14 +232,13 @@ void UsbConnection::OnOutTransfer(usbd_urb* urb) {
   } else {
     pending_out_transfer_ = false;
   }
-  pthread_mutex_unlock(&out_messages_mutex_);
 }
 
 TransportAdapter::Error UsbConnection::SendData(::protocol_handler::RawMessagePtr message) {
   if (disconnecting_) {
     return TransportAdapter::BAD_STATE;
   }
-  pthread_mutex_lock(&out_messages_mutex_);
+  sync_primitives::AutoLock locker(out_messages_mutex_);
   if (current_out_message_.valid()) {
     out_messages_.push_back(message);
   } else {
@@ -251,13 +248,12 @@ TransportAdapter::Error UsbConnection::SendData(::protocol_handler::RawMessagePt
                                   DataSendError());
     }
   }
-  pthread_mutex_unlock(&out_messages_mutex_);
   return TransportAdapter::OK;
 }
 
 void UsbConnection::Finalise() {
   LOG4CXX_INFO(logger_, "Finalising");
-  pthread_mutex_lock(&out_messages_mutex_);
+  sync_primitives::AutoLock locker(out_messages_mutex_);
   disconnecting_ = true;
   usbd_abort_pipe(in_pipe_);
   usbd_abort_pipe(out_pipe_);
@@ -265,7 +261,6 @@ void UsbConnection::Finalise() {
        it != out_messages_.end(); it = out_messages_.erase(it)) {
     controller_->DataSendFailed(device_uid_, app_handle_, *it, DataSendError());
   }
-  pthread_mutex_unlock(&out_messages_mutex_);
   while (pending_in_transfer_ || pending_out_transfer_) sched_yield();
 }
 
