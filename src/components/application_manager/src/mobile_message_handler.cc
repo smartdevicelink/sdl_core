@@ -41,6 +41,7 @@
 
 #include <stdint.h>
 #include <memory>
+#include <string>
 
 namespace {
 const uint8_t kRequest = 0x0;
@@ -52,23 +53,49 @@ const uint8_t kUnknown = 0xF;
 namespace application_manager {
 using protocol_handler::Extract;
 
+namespace {
+  typedef std::map<MessageType, std::string> MessageTypeMap;
+  MessageTypeMap messageTypes = {
+    std::make_pair(kRequest, "Request"),
+    std::make_pair(kResponse, "Response"),
+    std::make_pair(kNotification, "Notification")
+  };
+}
 CREATE_LOGGERPTR_GLOBAL(logger_, "MobileMessageHandler")
 
 application_manager::Message* MobileMessageHandler::HandleIncomingMessageProtocol(
   const protocol_handler::RawMessagePtr message) {
+  application_manager::Message* out_message = NULL;
   if (message->protocol_version() == ProtocolVersion::kV1) {
-    return MobileMessageHandler::HandleIncomingMessageProtocolV1(message);
-  }
-  if ((message->protocol_version() == ProtocolVersion::kV2) ||
+    out_message = MobileMessageHandler::HandleIncomingMessageProtocolV1(message);
+  } else if ((message->protocol_version() == ProtocolVersion::kV2) ||
       (message->protocol_version() == ProtocolVersion::kV3) ||
       (message->protocol_version() == ProtocolVersion::kV4)) {
-    return MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
+    out_message = MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
+  } else {
+    return NULL;
   }
-  return NULL;
+
+  LOG4CXX_DEBUG(logger_, "Incoming RPC_INFO: " <<
+                (out_message->connection_key() >> 16) <<", "<<
+                messageTypes[out_message->type()] <<", "<<
+                out_message->function_id() << ", " <<
+                out_message->correlation_id() << ", " <<
+                out_message->json_message());
+
+  return out_message;
 }
 
 protocol_handler::RawMessage* MobileMessageHandler::HandleOutgoingMessageProtocol(
   const MobileMessage& message) {
+
+  LOG4CXX_DEBUG(logger_, "Outgoing RPC_INFO: " <<
+                (message->connection_key() >> 16) <<", "<<
+                messageTypes[message->type()]<<", "<<
+                message->function_id() << ", " <<
+                message->correlation_id() << ", " <<
+                message->json_message());
+
   if (message->protocol_version() == application_manager::kV1) {
     return MobileMessageHandler::HandleOutgoingMessageProtocolV1(message);
   }
