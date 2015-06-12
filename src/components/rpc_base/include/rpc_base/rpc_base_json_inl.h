@@ -1,4 +1,4 @@
-/**
+﻿/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -136,6 +136,12 @@ Integer<T, minval, maxval>::Integer(const Json::Value* value)
       value_state_ = kInvalid;
     }
   }
+}
+
+template<typename T, T minval, T maxval>
+Integer<T, minval, maxval>::Integer(const Integer& val)
+  : PrimitiveType(range_.Includes(val.value_) ? kValid : kInvalid),
+    value_(val.value_) {
 }
 
 template<typename T, T minval, T maxval>

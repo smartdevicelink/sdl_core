@@ -26,4 +26,4 @@ if (${HMI_DBUS_API})
   set (SOURCES ${SOURCES} rpc_base_dbus_test.cc)
 endif ()
 
-create_test("test_rpc_base" "${SOURCES}" "${LIBRARIES}")
+create_test("rpc_base_test" ${SOURCES}" "${LIBRARIES})

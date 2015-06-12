@@ -106,8 +106,8 @@
 #include "application_manager/commands/hmi/ui_set_global_properties_response.h"
 #include "application_manager/commands/hmi/ui_scrollable_message_request.h"
 #include "application_manager/commands/hmi/ui_scrollable_message_response.h"
-#include "application_manager/commands/hmi/ui_set_icon_request.h"
-#include "application_manager/commands/hmi/ui_set_icon_response.h"
+#include "application_manager/commands/hmi/ui_set_app_icon_request.h"
+#include "application_manager/commands/hmi/ui_set_app_icon_response.h"
 #include "application_manager/commands/hmi/ui_perform_audio_pass_thru_response.h"
 #include "application_manager/commands/hmi/ui_perform_audio_pass_thru_request.h"
 #include "application_manager/commands/hmi/ui_end_audio_pass_thru_response.h"
@@ -260,13 +260,15 @@
 #include "application_manager/commands/hmi/navi_send_location_response.h"
 #include "application_manager/commands/hmi/on_tts_reset_timeout_notification.h"
 #include "application_manager/commands/hmi/on_phone_call_notification.h"
+#include "application_manager/commands/hmi/dial_number_request.h"
+#include "application_manager/commands/hmi/dial_number_response.h"
 
 namespace application_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 CommandSharedPtr HMICommandFactory::CreateCommand(
-    const MessageSharedPtr& message) {
+    const commands::MessageSharedPtr& message) {
   const int function_id = (*message)[strings::params][strings::function_id]
       .asInt();
   LOG4CXX_INFO(logger_,
@@ -455,9 +457,9 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::UI_SetAppIcon: {
       if (is_response) {
-        command.reset(new commands::UISetIconResponse(message));
+        command.reset(new commands::UISetAppIconResponse(message));
       } else {
-        command.reset(new commands::UISetIconRequest(message));
+        command.reset(new commands::UISetAppIconRequest(message));
       }
       break;
     }
@@ -2039,6 +2041,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     case hmi_apis::FunctionID::BasicCommunication_OnPhoneCall: {
       command.reset(new commands::hmi::OnPhoneCallNotification(message));
       break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_DialNumber: {
+      if (is_response) {
+        command.reset(new commands::DialNumberResponse(message));
+      } else {
+        command.reset(new commands::DialNumberRequest(message));
+      }
+	  break;
     }
   }
 

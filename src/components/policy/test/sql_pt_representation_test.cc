@@ -1,4 +1,4 @@
-/* Copyright (c) 2013, Ford Motor Company
+/* Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,15 +30,10 @@
  */
 
 #include <vector>
-
 #include "gtest/gtest.h"
-
 #include "driver_dbms.h"
-#include "json/value.h"
 #include "policy/sql_pt_representation.h"
 #include "policy/policy_types.h"
-#include "./types.h"
-#include "./enums.h"
 
 using policy::SQLPTRepresentation;
 using policy::CheckPermissionResult;
@@ -69,14 +64,14 @@ class SQLPTRepresentationTest : public ::testing::Test {
   }
 
   ::testing::AssertionResult IsValid(const policy_table::Table& table) {
-  if (table.is_valid()) {
-    return ::testing::AssertionSuccess();
-  } else {
-    ::rpc::ValidationReport report(" - table");
-    table.ReportErrors(&report);
-    return ::testing::AssertionFailure() << ::rpc::PrettyFormat(report);
+    if (table.is_valid()) {
+      return ::testing::AssertionSuccess();
+    } else {
+      ::rpc::ValidationReport report(" - table");
+      table.ReportErrors(&report);
+      return ::testing::AssertionFailure() << ::rpc::PrettyFormat(report);
+    }
   }
-}
 };
 
 DBMS* SQLPTRepresentationTest::dbms = 0;
@@ -87,204 +82,343 @@ const std::string SQLPTRepresentationTest::kDatabaseName = "policy";
 const std::string SQLPTRepresentationTest::kDatabaseName = "policy.sqlite";
 #endif  // __QNX__
 
-TEST_F(SQLPTRepresentationTest, CheckPermissionsAllowed) {
+TEST_F(SQLPTRepresentationTest, CheckPermissionsAllowed_SetValuesInAppGroupRpcFunctionalGroup_GetEqualParamsInCheckPermissionResult) {
+  //arrange
   const char* query = "INSERT OR REPLACE INTO `application` (`id`, `memory_kb`,"
-                      " `heart_beat_timeout_ms`) VALUES ('12345', 5, 10); "
-                      "INSERT OR REPLACE INTO functional_group (`id`, `name`)"
-                      "  VALUES (1, 'Base-4'); "
-                      "INSERT OR REPLACE INTO `app_group` (`application_id`,"
-                      " `functional_group_id`) VALUES ('12345', 1); "
-                      "INSERT OR REPLACE INTO `rpc` (`name`, `parameter`, `hmi_level_value`,"
-                      " `functional_group_id`) VALUES ('Update', 'gps', 'FULL', 1); "
-                      "INSERT OR REPLACE INTO `rpc` (`name`, `parameter`, `hmi_level_value`,"
-                      " `functional_group_id`) VALUES ('Update', 'speed', 'FULL', 1);";
+      " `heart_beat_timeout_ms`) VALUES ('12345', 5, 10); "
+      "INSERT OR REPLACE INTO functional_group (`id`, `name`)"
+      "  VALUES (1, 'Base-4'); "
+      "INSERT OR REPLACE INTO `app_group` (`application_id`,"
+      " `functional_group_id`) VALUES ('12345', 1); "
+      "INSERT OR REPLACE INTO `rpc` (`name`, `parameter`, `hmi_level_value`,"
+      " `functional_group_id`) VALUES ('Update', 'gps', 'FULL', 1); "
+      "INSERT OR REPLACE INTO `rpc` (`name`, `parameter`, `hmi_level_value`,"
+      " `functional_group_id`) VALUES ('Update', 'speed', 'FULL', 1);";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query));
 
+  //Act
   CheckPermissionResult ret;
   reps->CheckPermissions("12345", "FULL", "Update", ret);
+
+  //assert
   EXPECT_TRUE(ret.hmi_level_permitted == ::policy::kRpcAllowed);
   ASSERT_EQ(2u, ret.list_of_allowed_params.size());
   EXPECT_EQ("gps", ret.list_of_allowed_params[0]);
   EXPECT_EQ("speed", ret.list_of_allowed_params[1]);
 }
 
-TEST_F(SQLPTRepresentationTest, CheckPermissionsAllowedWithoutParameters) {
+TEST_F(SQLPTRepresentationTest, CheckPermissionsAllowedWithoutParameters_SetLimitedPermissions_ExpectEmptyListOfAllowedParams) {
+  //arrange
   const char* query = "INSERT OR REPLACE INTO `application` (`id`, `memory_kb`,"
-                      " `heart_beat_timeout_ms`) VALUES ('12345', 5, 10); "
-                      "INSERT OR REPLACE INTO functional_group (`id`, `name`)"
-                      "  VALUES (1, 'Base-4'); "
-                      "INSERT OR REPLACE INTO `app_group` (`application_id`,"
-                      " `functional_group_id`) VALUES ('12345', 1); "
-                      "DELETE FROM `rpc`; "
-                      "INSERT OR REPLACE INTO `rpc` (`name`, `hmi_level_value`,"
-                      " `functional_group_id`) VALUES ('Update', 'LIMITED', 1);";
+      " `heart_beat_timeout_ms`) VALUES ('12345', 5, 10); "
+      "INSERT OR REPLACE INTO functional_group (`id`, `name`)"
+      "  VALUES (1, 'Base-4'); "
+      "INSERT OR REPLACE INTO `app_group` (`application_id`,"
+      " `functional_group_id`) VALUES ('12345', 1); "
+      "DELETE FROM `rpc`; "
+      "INSERT OR REPLACE INTO `rpc` (`name`, `hmi_level_value`,"
+      " `functional_group_id`) VALUES ('Update', 'LIMITED', 1);";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query));
 
+  //act
   CheckPermissionResult ret;
   reps->CheckPermissions("12345", "LIMITED", "Update", ret);
+
+  //assert
   EXPECT_TRUE(ret.hmi_level_permitted == ::policy::kRpcAllowed);
   EXPECT_TRUE(ret.list_of_allowed_params.empty());
 }
 
-TEST_F(SQLPTRepresentationTest, CheckPermissionsDisallowed) {
+TEST_F(SQLPTRepresentationTest, CheckPermissionsDisallowedWithoutParameters_DeletedAppGroupAndSetFULLLevel_ExpectHmiLevelIsDissalowed) {
+
+  //arrange
   const char* query = "DELETE FROM `app_group`";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query));
 
+  //act
   CheckPermissionResult ret;
   reps->CheckPermissions("12345", "FULL", "Update", ret);
+
+  //assert
   EXPECT_EQ(::policy::kRpcDisallowed, ret.hmi_level_permitted);
   EXPECT_TRUE(ret.list_of_allowed_params.empty());
 }
 
-TEST_F(SQLPTRepresentationTest, IsPTPReloaded) {
+TEST_F(SQLPTRepresentationTest, PTPReloaded_UpdateModuleConfig_ReturnIsPTPreloadedTRUE) {
+
+  //arrange
   const char* query = "UPDATE `module_config` SET `preloaded_pt` = 1";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query));
   EXPECT_TRUE(reps->IsPTPreloaded());
 }
 
-TEST_F(SQLPTRepresentationTest, GetUpdateUrls) {
+TEST_F(SQLPTRepresentationTest, GetUpdateUrls_DeleteAndInsertEndpoints_ExpectUpdateUrls) {
+
+  //arrange
   const char* query_delete = "DELETE FROM `endpoint`; ";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_delete));
+
+  //act
   EndpointUrls ret = reps->GetUpdateUrls(7);
+
+  //assert
   EXPECT_TRUE(ret.empty());
 
+  //act
   const char* query_insert =
-    "INSERT INTO `endpoint` (`application_id`, `url`, `service`) "
-    "  VALUES ('12345', 'http://ford.com/cloud/1', 7);"
-    "INSERT INTO `endpoint` (`application_id`, `url`, `service`) "
-    "  VALUES ('12345', 'http://ford.com/cloud/2', 7);";
+      "INSERT INTO `endpoint` (`application_id`, `url`, `service`) "
+          "  VALUES ('12345', 'http://ford.com/cloud/1', 7);"
+          "INSERT INTO `endpoint` (`application_id`, `url`, `service`) "
+          "  VALUES ('12345', 'http://ford.com/cloud/2', 7);";
 
+  //assert
   ASSERT_TRUE(dbms->Exec(query_insert));
+  //act
   ret = reps->GetUpdateUrls(7);
+
+  //assert
   ASSERT_EQ(2u, ret.size());
   EXPECT_EQ("http://ford.com/cloud/1", ret[0].url[0]);
   EXPECT_EQ("http://ford.com/cloud/2", ret[1].url[0]);
 
+  //act
   ret = reps->GetUpdateUrls(0);
+
+  //assert
   EXPECT_TRUE(ret.empty());
 }
 
-TEST_F(SQLPTRepresentationTest, IgnitionCyclesBeforeExchangeAndIncrement) {
+TEST_F(SQLPTRepresentationTest, IgnitionCyclesBeforeExchange_WithParametersOfQueryEqualZero) {
+
+  //arrange
   const char* query_zeros = "UPDATE `module_meta` SET "
-                            "  `ignition_cycles_since_last_exchange` = 0; "
-                            "  UPDATE `module_config` SET `exchange_after_x_ignition_cycles` = 0";
+      "  `ignition_cycles_since_last_exchange` = 0; "
+      "  UPDATE `module_config` SET `exchange_after_x_ignition_cycles` = 0";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_zeros));
   EXPECT_EQ(0, reps->IgnitionCyclesBeforeExchange());
+
+  //act
   reps->IncrementIgnitionCycles();
+
+  //assert
   EXPECT_EQ(0, reps->IgnitionCyclesBeforeExchange());
 
+}
+
+TEST_F(SQLPTRepresentationTest, IgnitionCyclesBeforeExchange_WithParametersOfQueryAreLessLimit) {
+
+  //arrange
   const char* query_less_limit = "UPDATE `module_meta` SET "
-                                 "  `ignition_cycles_since_last_exchange` = 5; "
-                                 "  UPDATE `module_config` SET `exchange_after_x_ignition_cycles` = 10";
+      "  `ignition_cycles_since_last_exchange` = 5; "
+      "  UPDATE `module_config` SET `exchange_after_x_ignition_cycles` = 10";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_less_limit));
   EXPECT_EQ(5, reps->IgnitionCyclesBeforeExchange());
+
+  //act
   reps->IncrementIgnitionCycles();
+
+  //assert
   EXPECT_EQ(4, reps->IgnitionCyclesBeforeExchange());
 
+}
+
+TEST_F(SQLPTRepresentationTest, IgnitionCyclesBeforeExchange_WithLimitCountOfParametersOfQuery) {
+
+  //arrange
   const char* query_limit = "UPDATE `module_meta` SET "
-                            "  `ignition_cycles_since_last_exchange` = 9; "
-                            "  UPDATE `module_config` SET `exchange_after_x_ignition_cycles` = 10";
+      "  `ignition_cycles_since_last_exchange` = 9; "
+      "  UPDATE `module_config` SET `exchange_after_x_ignition_cycles` = 10";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_limit));
   EXPECT_EQ(1, reps->IgnitionCyclesBeforeExchange());
+
+  //act
   reps->IncrementIgnitionCycles();
+
+  //assert
   EXPECT_EQ(0, reps->IgnitionCyclesBeforeExchange());
 
+}
+
+TEST_F(SQLPTRepresentationTest, IgnitionCyclesBeforeExchange_WithMoreLimitCountOfParametersOfQuery) {
+
+  //arrange
   const char* query_more_limit = "UPDATE `module_meta` SET "
-                                 "  `ignition_cycles_since_last_exchange` = 12; "
-                                 "  UPDATE `module_config` SET `exchange_after_x_ignition_cycles` = 10";
+      "  `ignition_cycles_since_last_exchange` = 12; "
+      "  UPDATE `module_config` SET `exchange_after_x_ignition_cycles` = 10";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_more_limit));
   EXPECT_EQ(0, reps->IgnitionCyclesBeforeExchange());
 
+}
+
+TEST_F(SQLPTRepresentationTest, IgnitionCyclesBeforeExchange_WithNegativeLimitOfParametersOfQuery) {
+
+  //arrange
   const char* query_negative_limit = "UPDATE `module_meta` SET "
-                                     "  `ignition_cycles_since_last_exchange` = 3; "
-                                     "  UPDATE `module_config` SET `exchange_after_x_ignition_cycles` = -1";
+      "  `ignition_cycles_since_last_exchange` = 3; "
+      "  UPDATE `module_config` SET `exchange_after_x_ignition_cycles` = -1";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_negative_limit));
   EXPECT_EQ(0, reps->IgnitionCyclesBeforeExchange());
+}
 
+TEST_F(SQLPTRepresentationTest, IgnitionCyclesBeforeExchange_WithNegativeLimitOfCurrentParameterOfQuery) {
+
+  //arrange
   const char* query_negative_current = "UPDATE `module_meta` SET "
-                                       "  `ignition_cycles_since_last_exchange` = -1; "
-                                       "  UPDATE `module_config` SET `exchange_after_x_ignition_cycles` = 2";
+      "  `ignition_cycles_since_last_exchange` = -1; "
+      "  UPDATE `module_config` SET `exchange_after_x_ignition_cycles` = 2";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_negative_current));
   EXPECT_EQ(0, reps->IgnitionCyclesBeforeExchange());
 }
 
-TEST_F(SQLPTRepresentationTest, KilometersBeforeExchange) {
+TEST_F(SQLPTRepresentationTest, KilometersBeforeExchange_WithParametersOfQueryEqualZero) {
+
+  //arrange
   const char* query_zeros = "UPDATE `module_meta` SET "
-                            "  `pt_exchanged_at_odometer_x` = 0; "
-                            "  UPDATE `module_config` SET `exchange_after_x_kilometers` = 0";
+      "  `pt_exchanged_at_odometer_x` = 0; "
+      "  UPDATE `module_config` SET `exchange_after_x_kilometers` = 0";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_zeros));
   EXPECT_EQ(0, reps->KilometersBeforeExchange(0));
   EXPECT_EQ(0, reps->KilometersBeforeExchange(-10));
   EXPECT_EQ(0, reps->KilometersBeforeExchange(10));
+}
 
+TEST_F(SQLPTRepresentationTest, KilometersBeforeExchange_QueryWithNegativeLimit) {
+
+  //arrange
   const char* query_negative_limit = "UPDATE `module_meta` SET "
-                                     "  `pt_exchanged_at_odometer_x` = 10; "
-                                     "  UPDATE `module_config` SET `exchange_after_x_kilometers` = -10";
+      "  `pt_exchanged_at_odometer_x` = 10; "
+      "  UPDATE `module_config` SET `exchange_after_x_kilometers` = -10";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_negative_limit));
   EXPECT_EQ(0, reps->KilometersBeforeExchange(0));
   EXPECT_EQ(0, reps->KilometersBeforeExchange(10));
+}
 
+TEST_F(SQLPTRepresentationTest, KilometersBeforeExchange_QueryWithNegativeCurrentLimit) {
+
+  //arrange
   const char* query_negative_last = "UPDATE `module_meta` SET "
-                                    "  `pt_exchanged_at_odometer_x` = -10; "
-                                    "  UPDATE `module_config` SET `exchange_after_x_kilometers` = 20";
+      "  `pt_exchanged_at_odometer_x` = -10; "
+      "  UPDATE `module_config` SET `exchange_after_x_kilometers` = 20";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_negative_last));
   EXPECT_EQ(0, reps->KilometersBeforeExchange(0));
   EXPECT_EQ(0, reps->KilometersBeforeExchange(10));
+}
 
+TEST_F(SQLPTRepresentationTest, KilometersBeforeExchange_QueryWithLimitParameters) {
+
+  //arrange
   const char* query_limit = "UPDATE `module_meta` SET "
-                            "  `pt_exchanged_at_odometer_x` = 10; "
-                            "  UPDATE `module_config` SET `exchange_after_x_kilometers` = 100";
+      "  `pt_exchanged_at_odometer_x` = 10; "
+      "  UPDATE `module_config` SET `exchange_after_x_kilometers` = 100";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_limit));
   EXPECT_EQ(0, reps->KilometersBeforeExchange(120));
   EXPECT_EQ(60, reps->KilometersBeforeExchange(50));
   EXPECT_EQ(0, reps->KilometersBeforeExchange(5));
 }
 
-TEST_F(SQLPTRepresentationTest, DaysBeforeExchange) {
+TEST_F(SQLPTRepresentationTest, DaysBeforeExchange_WithParametersOfQueryEqualZero) {
+
+  //arrange
   const char* query_zeros = "UPDATE `module_meta` SET "
-                            "  `pt_exchanged_x_days_after_epoch` = 0; "
-                            "  UPDATE `module_config` SET `exchange_after_x_days` = 0";
+      "  `pt_exchanged_x_days_after_epoch` = 0; "
+      "  UPDATE `module_config` SET `exchange_after_x_days` = 0";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_zeros));
   EXPECT_EQ(0, reps->DaysBeforeExchange(0));
   EXPECT_EQ(0, reps->DaysBeforeExchange(-10));
   EXPECT_EQ(0, reps->DaysBeforeExchange(10));
+}
 
+TEST_F(SQLPTRepresentationTest, DaysBeforeExchange_QueryWithNegativeLimit) {
+
+  //arrange
   const char* query_negative_limit = "UPDATE `module_meta` SET "
-                                     "  `pt_exchanged_x_days_after_epoch` = 10; "
-                                     "  UPDATE `module_config` SET `exchange_after_x_days` = -10";
+      "  `pt_exchanged_x_days_after_epoch` = 10; "
+      "  UPDATE `module_config` SET `exchange_after_x_days` = -10";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_negative_limit));
   EXPECT_EQ(0, reps->DaysBeforeExchange(0));
   EXPECT_EQ(0, reps->DaysBeforeExchange(10));
+}
 
+TEST_F(SQLPTRepresentationTest, DaysBeforeExchange_QueryWithNegativeCurrentLimit) {
+
+  //arrange
   const char* query_negative_last = "UPDATE `module_meta` SET "
-                                    "  `pt_exchanged_x_days_after_epoch` = -10; "
-                                    "  UPDATE `module_config` SET `exchange_after_x_days` = 20";
+      "  `pt_exchanged_x_days_after_epoch` = -10; "
+      "  UPDATE `module_config` SET `exchange_after_x_days` = 20";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_negative_last));
   EXPECT_EQ(0, reps->DaysBeforeExchange(0));
   EXPECT_EQ(0, reps->DaysBeforeExchange(10));
+}
 
+TEST_F(SQLPTRepresentationTest, DaysBeforeExchange_QueryWithLimitParameters) {
+
+  //arrange
   const char* query_limit = "UPDATE `module_meta` SET "
-                            "  `pt_exchanged_x_days_after_epoch` = 10; "
-                            "  UPDATE `module_config` SET `exchange_after_x_days` = 100";
+      "  `pt_exchanged_x_days_after_epoch` = 10; "
+      "  UPDATE `module_config` SET `exchange_after_x_days` = 100";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_limit));
   EXPECT_EQ(0, reps->DaysBeforeExchange(120));
   EXPECT_EQ(60, reps->DaysBeforeExchange(50));
   EXPECT_EQ(0, reps->DaysBeforeExchange(5));
 }
 
-TEST_F(SQLPTRepresentationTest, SecondsBetweenRetries) {
-  std::vector<int> seconds;
+TEST_F(SQLPTRepresentationTest, SecondsBetweenRetries_DeletedAndInsertedSecondsBetweenRetry_ExpectCountOfSecondsEqualInserted) {
 
+  //arrange
+  std::vector<int> seconds;
   const char* query_delete = "DELETE FROM `seconds_between_retry`; ";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_delete));
   ASSERT_TRUE(reps->SecondsBetweenRetries(&seconds));
   EXPECT_EQ(0u, seconds.size());
 
+  //arrange
   const char* query_insert =
-    "INSERT INTO `seconds_between_retry` (`index`, `value`) "
-    "  VALUES (0, 10); "
-    "INSERT INTO `seconds_between_retry` (`index`, `value`) "
-    "  VALUES (1, 20); ";
+      "INSERT INTO `seconds_between_retry` (`index`, `value`) "
+          "  VALUES (0, 10); "
+          "INSERT INTO `seconds_between_retry` (`index`, `value`) "
+          "  VALUES (1, 20); ";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query_insert));
   ASSERT_TRUE(reps->SecondsBetweenRetries(&seconds));
   ASSERT_EQ(2u, seconds.size());
@@ -292,14 +426,20 @@ TEST_F(SQLPTRepresentationTest, SecondsBetweenRetries) {
   EXPECT_EQ(20, seconds[1]);
 }
 
-TEST_F(SQLPTRepresentationTest, TimeoutResponse) {
+TEST_F(SQLPTRepresentationTest, TimeoutResponse_Set60Seconds_GetEqualTimeout) {
+
+  //arrange
   const char* query =
-    "UPDATE `module_config` SET `timeout_after_x_seconds` = 60";
+      "UPDATE `module_config` SET `timeout_after_x_seconds` = 60";
+
+  //assert
   ASSERT_TRUE(dbms->Exec(query));
   EXPECT_EQ(60, reps->TimeoutResponse());
 }
 
-TEST_F(SQLPTRepresentationTest, SaveGenerateSnapshot) {
+TEST_F(SQLPTRepresentationTest, GenerateSnapshot_SetPolicyTable_SnapshotIsPresent) {
+
+  //arrange
   Json::Value table(Json::objectValue);
   table["policy_table"] = Json::Value(Json::objectValue);
 
@@ -324,21 +464,21 @@ TEST_F(SQLPTRepresentationTest, SaveGenerateSnapshot) {
   module_config["endpoints"]["0x00"] = Json::Value(Json::objectValue);
   module_config["endpoints"]["0x00"]["default"] = Json::Value(Json::arrayValue);
   module_config["endpoints"]["0x00"]["default"][0] = Json::Value(
-        "http://ford.com/cloud/default");
+      "http://ford.com/cloud/default");
   module_config["notifications_per_minute_by_priority"] = Json::Value(
-        Json::objectValue);
+      Json::objectValue);
   module_config["notifications_per_minute_by_priority"]["emergency"] =
-    Json::Value(1);
+      Json::Value(1);
   module_config["notifications_per_minute_by_priority"]["navigation"] =
-    Json::Value(2);
+      Json::Value(2);
   module_config["notifications_per_minute_by_priority"]["VOICECOMM"] =
-    Json::Value(3);
+      Json::Value(3);
   module_config["notifications_per_minute_by_priority"]["communication"] =
-    Json::Value(4);
+      Json::Value(4);
   module_config["notifications_per_minute_by_priority"]["normal"] = Json::Value(
-        5);
+      5);
   module_config["notifications_per_minute_by_priority"]["none"] = Json::Value(
-        6);
+      6);
   module_config["vehicle_make"] = Json::Value("MakeT");
   module_config["vehicle_model"] = Json::Value("ModelT");
   module_config["vehicle_year"] = Json::Value("2014");
@@ -354,10 +494,11 @@ TEST_F(SQLPTRepresentationTest, SaveGenerateSnapshot) {
   default_group["rpcs"]["Update"]["parameters"][0] = Json::Value("speed");
 
   Json::Value& consumer_friendly_messages =
-    policy_table["consumer_friendly_messages"];
+      policy_table["consumer_friendly_messages"];
   consumer_friendly_messages["version"] = Json::Value("1.2");
   consumer_friendly_messages["messages"] = Json::Value(Json::objectValue);
-  consumer_friendly_messages["messages"]["MSG1"] = Json::Value(Json::objectValue);
+  consumer_friendly_messages["messages"]["MSG1"] = Json::Value(
+      Json::objectValue);
   Json::Value& msg1 = consumer_friendly_messages["messages"]["MSG1"];
   msg1["languages"] = Json::Value(Json::objectValue);
   msg1["languages"]["en-us"] = Json::Value(Json::objectValue);
@@ -374,8 +515,12 @@ TEST_F(SQLPTRepresentationTest, SaveGenerateSnapshot) {
   policy_table::Table update(&table);
   update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
 
+
+  //assert
   ASSERT_TRUE(IsValid(update));
   ASSERT_TRUE(reps->Save(update));
+
+  //act
   utils::SharedPtr<policy_table::Table> snapshot = reps->GenerateSnapshot();
   snapshot->SetPolicyTableType(rpc::policy_table_interface_base::PT_SNAPSHOT);
 
@@ -384,6 +529,7 @@ TEST_F(SQLPTRepresentationTest, SaveGenerateSnapshot) {
 
   policy_table::Table expected(&table);
 
+  //assert
   EXPECT_EQ(expected.ToJsonValue().toStyledString(),
             snapshot->ToJsonValue().toStyledString());
 }

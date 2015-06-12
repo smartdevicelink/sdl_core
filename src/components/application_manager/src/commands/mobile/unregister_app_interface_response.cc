@@ -38,7 +38,7 @@ namespace application_manager {
 namespace commands {
 
 void UnregisterAppInterfaceResponse::Run() {
-  LOG4CXX_INFO(logger_, "UnregisterAppInterfaceResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   SendResponse((*message_)[strings::msg_params][strings::success].asBool());
 }

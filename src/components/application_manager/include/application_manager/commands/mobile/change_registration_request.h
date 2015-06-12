@@ -105,9 +105,9 @@ class ChangeRegistrationRequest : public CommandRequestImpl  {
   /*
    * @brief Checks result codes
    *
-   * @return true if one of result codes is success
+   * @return true if all of result codes is success
    */
-  static bool WasAnySuccess(const hmi_apis::Common_Result::eType ui,
+   bool AllHmiResponsesSuccess(const hmi_apis::Common_Result::eType ui,
                      const hmi_apis::Common_Result::eType vr,
                      const hmi_apis::Common_Result::eType tts);
 

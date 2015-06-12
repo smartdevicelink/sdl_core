@@ -83,23 +83,44 @@ struct CheckAppPolicy {
     CheckAppPolicy(PolicyManagerImpl* pm,
                    const utils::SharedPtr<policy_table::Table> update,
                    const utils::SharedPtr<policy_table::Table> snapshot);
-    bool HasSameGroups(const AppPoliciesValueType& app_policy,
-                       AppPermissions* perms) const;
-    bool IsNewAppication(const std::string& application_id) const;
-    void SendNotification(const AppPoliciesValueType& app_policy) const;
-    void SendOnPendingPermissions(const AppPoliciesValueType& app_policy,
-                                  AppPermissions permissions) const;
-    bool IsAppRevoked(const AppPoliciesValueType& app_policy) const;
-    bool NicknamesMatch(const std::string app_id,
-                        const AppPoliciesValueType& app_policy) const;
     bool operator()(const AppPoliciesValueType& app_policy);
   private:
+    enum PermissionsCheckResult {
+        RESULT_NO_CHANGES,
+        RESULT_APP_REVOKED,
+        RESULT_NICKNAME_MISMATCH,
+        RESULT_PERMISSIONS_REVOKED,
+        RESULT_CONSENT_NEEDED,
+        RESULT_CONSENT_NOT_REQIURED,
+        RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED
+    };
+
+    void SetPendingPermissions(const AppPoliciesValueType& app_policy,
+                                PermissionsCheckResult result) const;
+    PermissionsCheckResult CheckPermissionsChanges(
+            const AppPoliciesValueType &app_policy) const;
+    bool HasRevokedGroups(const AppPoliciesValueType& app_policy,
+                          policy_table::Strings* revoked_groups = NULL) const;
+    bool HasNewGroups(const AppPoliciesValueType& app_policy,
+                      policy_table::Strings* new_groups = NULL) const;
+    bool HasConsentNeededGroups(const AppPoliciesValueType& app_policy) const;
+    std::vector<FunctionalGroupPermission> GetRevokedGroups(
+            const AppPoliciesValueType& app_policy) const;
+    void RemoveRevokedConsents(
+            const AppPoliciesValueType& app_policy,
+            const std::vector<FunctionalGroupPermission>& revoked_groups) const;
+    bool IsKnownAppication(const std::string& application_id) const;
+    void NotifySystem(const AppPoliciesValueType& app_policy) const;
+    void SendPermissionsToApp(const AppPoliciesValueType& app_policy) const;
+    bool IsAppRevoked(const AppPoliciesValueType& app_policy) const;
+    bool NicknamesMatch(const AppPoliciesValueType& app_policy) const;
     /**
      * @brief Allows to check if appropriate group requires any consent.
      * @param group_name the group for which consent will be checked.
      * @return true if consent is required, false otherwise.
      */
-    bool IsConsentRequired(const std::string& group_name) const;
+    bool IsConsentRequired(const std::string& app_id,
+                           const std::string& group_name) const;
     PolicyManagerImpl* pm_;
     const utils::SharedPtr<policy_table::Table> update_;
     const utils::SharedPtr<policy_table::Table> snapshot_;

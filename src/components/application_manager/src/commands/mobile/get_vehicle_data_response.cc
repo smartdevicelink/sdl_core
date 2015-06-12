@@ -47,7 +47,7 @@ GetVehicleDataResponse::~GetVehicleDataResponse() {
 }
 
 void GetVehicleDataResponse::Run() {
-  LOG4CXX_INFO(logger_, "GetVehicleDataResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }

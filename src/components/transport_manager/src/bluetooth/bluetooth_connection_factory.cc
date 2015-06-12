@@ -1,4 +1,4 @@
-/**
+/*
  * \file bluetooth_connection_factory.cc
  * \brief BluetoothConnectionFactory class source file.
  *

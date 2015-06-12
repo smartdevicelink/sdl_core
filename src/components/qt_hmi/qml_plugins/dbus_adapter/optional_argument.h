@@ -1,4 +1,4 @@
-/**
+/*
  * \file optional_argument.h
  * \brief OptionalArgument struct header file.
  * Copyright (c) 2013, Ford Motor Company

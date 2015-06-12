@@ -46,6 +46,7 @@ include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
   #${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/src/components/utils/include/
+  ${CMAKE_SOURCE_DIR}/src/components
   ${CMAKE_SOURCE_DIR}/src/components/config_profile/include
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )

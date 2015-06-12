@@ -1,4 +1,4 @@
-/**
+/*
  * \file dbus_plugin.cpp
  * \brief DbusPlugin class source file.
  * Copyright (c) 2013, Ford Motor Company

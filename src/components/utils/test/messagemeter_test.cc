@@ -79,7 +79,7 @@ class MessageMeterTest: public ::testing::TestWithParam<TimePair> {
   void TearDown() OVERRIDE {
   }
   ::utils::MessageMeter<int> meter;
-  TimevalStruct time_range {0, 0};
+  TimevalStruct time_range = {0, 0};
   int64_t time_range_msecs;
   int usecs;
   int id1, id2, id3;

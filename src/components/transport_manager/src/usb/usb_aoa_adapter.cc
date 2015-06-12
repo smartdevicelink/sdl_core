@@ -1,4 +1,4 @@
-/**
+/*
  * \file usb_aoa_adapter.cpp
  * \brief UsbAoaAdapter class source file.
  *

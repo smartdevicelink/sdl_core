@@ -33,11 +33,11 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H_
 
-#include <pthread.h>
-
 #include <queue>
 #include <map>
 #include <list>
+#include <vector>
+#include <utility>
 #include <algorithm>
 
 #include "utils/timer_thread.h"
@@ -55,12 +55,17 @@
 
 namespace transport_manager {
 
+typedef threads::MessageLoopThread<std::queue<protocol_handler::RawMessagePtr> >
+  RawMessageLoopThread;
+typedef threads::MessageLoopThread<std::queue<TransportAdapterEvent> >
+  TransportAdapterEventLoopThread;
+
 /**
  * @brief Implementation of transport manager.s
  */
 class TransportManagerImpl : public TransportManager,
-                             public threads::MessageLoopThread<std::queue<protocol_handler::RawMessagePtr> >::Handler,
-                             public threads::MessageLoopThread<std::queue<TransportAdapterEvent> >::Handler {
+                             public RawMessageLoopThread::Handler,
+                             public TransportAdapterEventLoopThread::Handler {
  public:
   struct Connection {
     ConnectionUID id;
@@ -90,7 +95,6 @@ class TransportManagerImpl : public TransportManager,
     void DisconnectFailedRoutine();
   };
  public:
-
   /**
    * @brief Destructor.
    **/
@@ -102,6 +106,12 @@ class TransportManagerImpl : public TransportManager,
    * @return Code error.
    */
   virtual int Init();
+
+  /**
+   * Reinitializes transport manager
+   * @return Error code
+   */
+  virtual int Reinit();
 
   /**
    * @brief Start scanning for new devices.
@@ -223,7 +233,6 @@ class TransportManagerImpl : public TransportManager,
   TransportManagerImpl();
 
  protected:
-
   template <class Proc, class... Args>
   void RaiseEvent(Proc proc, Args... args) {
     for (TransportManagerListenerList::iterator it =
@@ -250,22 +259,11 @@ class TransportManagerImpl : public TransportManager,
    **/
   void PostEvent(const TransportAdapterEvent& event);
 
-  /**
-   * @brief flag that indicates that thread is active
-   * if it is false then threads exist main loop
-   **/
-  volatile bool all_thread_active_;
-
   typedef std::list<TransportManagerListener*> TransportManagerListenerList;
   /**
    * @brief listener that would be called when TM's event happened.
    **/
   TransportManagerListenerList transport_manager_listener_;
-
-  /**
-   * @brief Condition variable to wake up event
-   **/
-  pthread_cond_t device_listener_thread_wakeup_;
 
   /**
    * @brief Flag that TM is initialized
@@ -290,6 +288,8 @@ class TransportManagerImpl : public TransportManager,
     }
 
     DeviceHandle UidToHandle(const DeviceUID& dev_uid, bool& is_new) {
+      {
+      sync_primitives::AutoReadLock lock(conversion_table_lock);
       ConversionTable::iterator it = std::find(
           conversion_table_.begin(), conversion_table_.end(), dev_uid);
       if (it != conversion_table_.end()) {
@@ -297,12 +297,15 @@ class TransportManagerImpl : public TransportManager,
         return std::distance(conversion_table_.begin(), it) +
                1;  // handle begin since 1 (one)
       }
+      }
       is_new = true;
+      sync_primitives::AutoWriteLock lock(conversion_table_lock);
       conversion_table_.push_back(dev_uid);
       return conversion_table_.size();  // handle begin since 1 (one)
     }
 
     DeviceUID HandleToUid(DeviceHandle handle) {
+      sync_primitives::AutoReadLock lock(conversion_table_lock);
       if (handle == 0 || handle > conversion_table_.size()) {
         return DeviceUID();
       }
@@ -310,6 +313,7 @@ class TransportManagerImpl : public TransportManager,
     }
 
     ConversionTable conversion_table_;
+    sync_primitives::RWLock conversion_table_lock;
   };
 
   /**
@@ -320,17 +324,21 @@ class TransportManagerImpl : public TransportManager,
 
   explicit TransportManagerImpl(const TransportManagerImpl&);
   int connection_id_counter_;
+  sync_primitives::RWLock connections_lock_;
   std::vector<ConnectionInternal> connections_;
-  std::map<DeviceUID, TransportAdapter*> device_to_adapter_map_;
+  sync_primitives::RWLock device_to_adapter_map_lock_;
+  typedef std::map<DeviceUID, TransportAdapter*> DeviceToAdapterMap;
+  DeviceToAdapterMap device_to_adapter_map_;
   std::vector<TransportAdapter*> transport_adapters_;
   /** For keep listeners which were add TMImpl */
   std::map<TransportAdapter*, TransportAdapterListenerImpl*>
       transport_adapter_listeners_;
-  threads::MessageLoopThread<std::queue<protocol_handler::RawMessagePtr> > message_queue_;
-  threads::MessageLoopThread<std::queue<TransportAdapterEvent> > event_queue_;
+  RawMessageLoopThread message_queue_;
+  TransportAdapterEventLoopThread event_queue_;
 
   typedef std::vector<std::pair<const TransportAdapter*, DeviceInfo> >
   DeviceInfoList;
+  sync_primitives::RWLock device_list_lock_;
   DeviceInfoList device_list_;
 
   void AddConnection(const ConnectionInternal& c);
@@ -347,15 +355,15 @@ class TransportManagerImpl : public TransportManager,
   bool GetFrameSize(unsigned char* data, unsigned int data_size,
                     unsigned int& frame_size);
   bool GetFrame(std::map<ConnectionUID,
-                         std::pair<unsigned int, unsigned char*> >& container,
+                std::pair<unsigned int, unsigned char*> >& container,
                 ConnectionUID id, unsigned int frame_size,
                 unsigned char** frame);
 
   void OnDeviceListUpdated(TransportAdapter* ta);
+  void DisconnectAllDevices();
+  void TerminateAllAdapters();
+  int InitAllAdapters();
   static Connection convert(const ConnectionInternal& p);
-};
-// class ;
-
+};  // class TransportManagerImpl
 }  // namespace transport_manager
-
-#endif
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H_

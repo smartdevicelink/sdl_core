@@ -30,9 +30,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+#include "utils/back_trace.h"
 
-int main(int argc, char** argv) {
- testing::InitGoogleMock(&argc, argv);
- return RUN_ALL_TESTS();
+namespace test {
+namespace components {
+namespace utils {
+
+using namespace ::utils;
+
+TEST(BackTraceTest, CallStackShouldNotBeEmpty) {
+
+  //arrange
+  Backtrace newtrace = Backtrace();
+  std::vector < std::string > symbols = newtrace.CallStack();
+  //assert
+  ASSERT_FALSE(symbols.empty());
 }
+
+}  // namespace utils
+}  // namespace components
+}  // namespace test
