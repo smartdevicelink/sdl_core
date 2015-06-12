@@ -72,7 +72,7 @@ class DateTime {
   /**
    * @brief Adds milliseconds to time struct
    * @param time contains time struct
-   * @param milliseconds contains value wich need to
+   * @param milliseconds contains value which need to
    * add to time struct
    **/
   static void AddMilliseconds(TimevalStruct& time,

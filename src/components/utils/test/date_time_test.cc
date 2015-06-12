@@ -322,7 +322,6 @@ TEST(DateTimeTest, DISABLED_CalculateEqualTimeSub_UsecConvertedInSec) {
   ASSERT_EQ(EQUAL, date_time::DateTime::compareTime(time_expected, time3));
   ASSERT_EQ(EQUAL, date_time::DateTime::compareTime(time_expected, time4));
 }
-
 }  // namespace utils
 }  // namespace components
 }  // namespace test
