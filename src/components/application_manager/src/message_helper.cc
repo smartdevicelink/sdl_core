@@ -53,6 +53,7 @@
 #include "utils/file_system.h"
 #include "utils/macro.h"
 #include "utils/logger.h"
+#include "utils/make_shared.h"
 
 #include "formatters/formatter_json_rpc.h"
 #include "formatters/CFormatterJsonSDLRPCv2.hpp"
@@ -724,6 +725,59 @@ smart_objects::SmartObjectList MessageHelper::GetIVISubscriptionRequests(
   }
 #endif // #ifdef HMI_DBUS_API
   return hmi_requests;
+}
+
+void MessageHelper::SendOnButtonSubscriptionNotification(
+    uint32_t app_id, hmi_apis::Common_ButtonName::eType button, bool is_subscribed) {
+  using namespace smart_objects;
+  using namespace hmi_apis;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  SmartObjectSPtr notification_ptr = utils::MakeShared<SmartObject>(SmartType_Map);
+  if (!notification_ptr) {
+    LOG4CXX_ERROR(logger_, "Memory allocation failed.");
+    return;
+  }
+  SmartObject& notification = *notification_ptr;
+
+  SmartObject msg_params = SmartObject(SmartType_Map);
+  msg_params[strings::app_id] = app_id;
+  msg_params[strings::name] = button;
+  msg_params[strings::is_suscribed] = is_subscribed;
+
+  notification[strings::params][strings::message_type] =
+      static_cast<int32_t>(application_manager::MessageType::kNotification);
+  notification[strings::params][strings::protocol_version] =
+      commands::CommandImpl::protocol_version_;
+  notification[strings::params][strings::protocol_type] =
+      commands::CommandImpl::hmi_protocol_type_;
+  notification[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::Buttons_OnButtonSubscription;
+  notification[strings::msg_params] = msg_params;
+
+  if (!ApplicationManagerImpl::instance()->ManageHMICommand(notification_ptr)) {
+    LOG4CXX_ERROR(logger_, "Unable to send HMI notification");
+  }
+}
+
+void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
+    ApplicationConstSharedPtr app) {
+  using namespace smart_objects;
+  using namespace hmi_apis;
+  using namespace mobile_apis;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!app.valid()) {
+    LOG4CXX_ERROR(logger_, "Invalid application pointer ");
+    return;
+  }
+
+  std::set<ButtonName::eType> subscriptions = app->SubscribedButtons();
+  std::set<ButtonName::eType>::iterator it = subscriptions.begin();
+  for (; subscriptions.end() != it; ++it) {
+    SendOnButtonSubscriptionNotification(
+        app->hmi_app_id(), static_cast<Common_ButtonName::eType>(*it), true);
+  }
 }
 
 void MessageHelper::SendSetAppIcon(uint32_t app_id,
