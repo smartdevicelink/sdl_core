@@ -50,11 +50,18 @@ void UIGetCapabilitiesResponse::Run() {
   HMICapabilities& hmi_capabilities =
       ApplicationManagerImpl::instance()->hmi_capabilities();
 
-  hmi_capabilities.set_display_capabilities(
-      (*message_)[strings::msg_params][hmi_response::display_capabilities]);
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
 
-  hmi_capabilities.set_hmi_zone_capabilities(
-      (*message_)[strings::msg_params][hmi_response::hmi_zone_capabilities]);
+  if (msg_params.keyExists(hmi_response::display_capabilities)) {
+    hmi_capabilities.set_display_capabilities(
+        msg_params[hmi_response::display_capabilities]);
+  }
+
+  if (msg_params.keyExists(hmi_response::hmi_zone_capabilities)) {
+    hmi_capabilities.set_hmi_zone_capabilities(
+        msg_params[hmi_response::hmi_zone_capabilities]);
+  }
 
   if ((*message_)[strings::msg_params].keyExists(
                                       hmi_response::soft_button_capabilities)) {
