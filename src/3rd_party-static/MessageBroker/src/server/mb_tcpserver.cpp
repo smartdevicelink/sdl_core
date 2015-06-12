@@ -43,8 +43,11 @@ ssize_t TcpServer::Send(int fd, const std::string& data) {
   int bytesToSend = rep.length();
   const char* ptrBuffer = rep.c_str();
   do {
-    int retVal = send(fd, ptrBuffer, bytesToSend, 0);
+    int retVal = send(fd, ptrBuffer, bytesToSend, MSG_NOSIGNAL);
     if (retVal == -1) {
+      if (EPIPE == errno) {
+        m_purge.push_back(fd);
+      }
       return -1;
     }
     bytesToSend -= retVal;
@@ -54,23 +57,24 @@ ssize_t TcpServer::Send(int fd, const std::string& data) {
 }
 
 bool TcpServer::Recv(int fd) {
-  DBG_MSG(("TcpServer::Recv(int fd)\n"));
+  DBG_MSG(("TcpServer::Recv(%d)\n", fd));
   ssize_t nb = -1;
 
   std::string* pReceivingBuffer = getBufferFor(fd);
   std::vector<char> buf;
   buf.reserve(RECV_BUFFER_LENGTH + pReceivingBuffer->size());
-  DBG_MSG(("Left in  pReceivingBuffer: %d : %s\n",
-           pReceivingBuffer->size(), pReceivingBuffer->c_str()));
+  DBG_MSG(("Left in  pReceivingBuffer: %d \n",
+           pReceivingBuffer->size()));
   buf.assign(pReceivingBuffer->c_str(),
              pReceivingBuffer->c_str() + pReceivingBuffer->size());
   buf.resize(RECV_BUFFER_LENGTH + pReceivingBuffer->size());
-  nb = recv(fd, &buf[pReceivingBuffer->size()], MAX_RECV_DATA, 0);
+  ssize_t received_bytes = recv(fd, &buf[pReceivingBuffer->size()], MAX_RECV_DATA, 0);
+  nb = received_bytes;
   DBG_MSG(("Recieved %d from %d\n", nb, fd));
   nb += pReceivingBuffer->size();
   DBG_MSG(("Recieved with buffer %d from %d\n", nb, fd));
 
-  if (nb > 0) {
+  if (received_bytes > 0) {
     unsigned int recieved_data = nb;
     if (isWebSocket(fd)) {
       const unsigned int data_length =
@@ -126,6 +130,8 @@ bool TcpServer::Recv(int fd) {
     return true;
   }
   else {
+    DBG_MSG(("Received %d bytes from %d; error = %d\n",
+             received_bytes, fd, errno));
     m_purge.push_back(fd);
     return false;
   }
@@ -222,8 +228,9 @@ void TcpServer::WaitMessage(uint32_t ms) {
       itr = m_receivingBuffers.find((*it));
       if (itr != m_receivingBuffers.end())
       { // delete receiving buffer of disconnected client
-        delete(*itr).second;
+        delete itr->second;
         m_receivingBuffers.erase(itr);
+        mpMessageBroker->OnSocketClosed(itr->first);
       }
     }
 

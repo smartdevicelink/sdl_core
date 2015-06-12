@@ -69,6 +69,11 @@ namespace NsMessageBroker
        */
       void Test();
 
+      /**
+       * @brief OnSocketClosed should be called if socked is closed by HMI
+       * @param fd socket descriptor
+       */
+      void OnSocketClosed(const int fd);
 
       /**
       * \brief Starts MessageBroker.
