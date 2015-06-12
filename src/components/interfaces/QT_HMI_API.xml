@@ -348,10 +348,16 @@
       <element name="STATIC"/>
       <element name="DYNAMIC"/>
     </enum>
-    <enum name="ApplicationToNONEReason">
-      <description>Describes the reasons of moving the app to NONE.</description>
-      <element name="DRIVER_DISTRACTION_VIOLATION" />
-      <element name="USER_EXIT" />
+    <enum name="ApplicationExitReason">
+      <element name="DRIVER_DISTRACTION_VIOLATION" >
+        <description>By getting this value, SDL puts the named app to NONE HMILevel</description>
+      </element>
+      <element name="USER_EXIT" >
+        <description>By getting this value, SDL puts the named app to NONE HMILevel</description>
+      </element>
+      <element name="UNAUTHORIZED_TRANSPORT_REGISTRATION">
+        <description>By getting this value, SDL unregisters the named application</description>
+      </element>
     </enum>
     <enum name="TextFieldName">
       <element name="mainField1">
@@ -1973,7 +1979,7 @@
     </function>
     <function name="OnExitApplication" messagetype="notification" provider="hmi">
       <description>Must be sent by HMI when the User chooses to exit the application..</description>
-      <param name="reason" type="Common.ApplicationToNONEReason" mandatory="true">
+      <param name="reason" type="Common.ApplicationExitReason" mandatory="true">
         <description>Specifies reason of moving the app to NONE</description>
       </param>
       <param name="appID" type="Integer" mandatory="true">
