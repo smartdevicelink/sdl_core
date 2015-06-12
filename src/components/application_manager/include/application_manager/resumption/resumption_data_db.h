@@ -542,11 +542,23 @@ class ResumptionDataDB : public ResumptionData {
    * @return true if query was run successfully otherwise returns
    * false
    */
-  bool InsertApplicationData(app_mngr::ApplicationConstSharedPtr,
+  bool InsertApplicationData(app_mngr::ApplicationConstSharedPtr application,
                              const std::string& policy_app_id,
                              const std::string& device_id,
-                             int64_t* application_primary_key = NULL,
-                             int64_t global_properties_key = 0);
+                             int64_t* application_primary_key,
+                             int64_t global_properties_key);
+
+  /**
+   * @brief Calls InsertApplicationData method
+   * @param application contains data for saving to DB
+   * @param policy_app_id contains mobile application id of application
+   * @param device_id contains id of device on which is running application
+   * @return true if InsertApplicationData works successfully, otherwise
+   * returns false;
+   */
+  bool InsertApplicationData(app_mngr::ApplicationConstSharedPtr application,
+                             const std::string& policy_app_id,
+                             const std::string& device_id);
 
   /**
    * @brief Delete application data where ign_off_count >= application_lifes

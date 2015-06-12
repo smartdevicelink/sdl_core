@@ -37,6 +37,7 @@
 #include "application_manager/smart_object_keys.h"
 #include "config_profile/profile.h"
 #include "application_manager/message_helper.h"
+#include "utils/helpers.h"
 
 namespace {
 const std::string kDatabaseName = "resumption";
@@ -129,6 +130,8 @@ bool ResumptionDataDB::Init() {
 void ResumptionDataDB::SaveApplication(
     app_mngr::ApplicationSharedPtr application) {
   using namespace app_mngr;
+  using namespace mobile_api;
+  using namespace helpers;
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(application);
   bool application_exist = false;
@@ -166,8 +169,9 @@ void ResumptionDataDB::SaveApplication(
       }
       LOG4CXX_INFO(logger_, "Application data were updated successfully");
     } else {
-      if (mobile_api::HMILevel::HMI_FULL == application->hmi_level() ||
-          mobile_api::HMILevel::HMI_LIMITED == application->hmi_level()) {
+      if (Compare<HMILevel::eType, EQ, ONE>(application->hmi_level(),
+                                            HMILevel::HMI_FULL,
+                                            HMILevel::HMI_LIMITED)) {
         if (!InsertApplicationData(application, policy_app_id, device_id)) {
           LOG4CXX_ERROR(logger_, "Saving data of application is failed");
           return;
@@ -2240,6 +2244,13 @@ bool ResumptionDataDB::ExecInsertVRHelpItem(int64_t global_properties_key,
   }
   LOG4CXX_INFO(logger_, "Data were saved successfully to vrHelpItem array table");
   return true;
+}
+
+bool ResumptionDataDB::InsertApplicationData(app_mngr::ApplicationConstSharedPtr application,
+                                             const std::string& policy_app_id,
+                                             const std::string& device_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return InsertApplicationData(application, policy_app_id, device_id, NULL, 0);
 }
 
 bool ResumptionDataDB::InsertApplicationData(app_mngr::ApplicationConstSharedPtr application,
