@@ -132,10 +132,10 @@ SDL.SDLVehicleInfoModel = Em.Object
                 'width': 800,
                 'height': 480
             },
-            'speed': 80.0,
-            'fuelLevel': 0.2,
+            'speed': 80.08E0,
+            'fuelLevel': 0.2E0,
             'fuelLevel_State': "UNKNOWN",
-            'instantFuelConsumption': 2.2,
+            'instantFuelConsumption': 2.2E0,
             'tirePressure': {
                 'pressureTelltale': 'OFF',
                 'leftFront': {
@@ -203,9 +203,9 @@ SDL.SDLVehicleInfoModel = Em.Object
                 "highBeamsOn": false,
                 "ambientLightSensorStatus": "NIGHT"
             },
-            'engineTorque': 2.5,
-            'accPedalPosition': 10.5,
-            'steeringWheelAngle': 1.2,
+            'engineTorque': 2.5E0,
+            'accPedalPosition': 10.5E0,
+            'steeringWheelAngle': 1.2E0,
             'myKey': {
                 "e911Override": "NO_DATA_EXISTS"
             },
@@ -222,8 +222,8 @@ SDL.SDLVehicleInfoModel = Em.Object
             'satRadioESN': "165165650",
             'rainSensor': 165165650,
             'gps': {
-                'longitudeDegrees': 42,
-                'latitudeDegrees': -83,
+                'longitudeDegrees': 42.5E0,
+                'latitudeDegrees': -83.3E0,
                 'utcYear': 2013,
                 'utcMonth': 2,
                 'utcDay': 14,
@@ -231,15 +231,15 @@ SDL.SDLVehicleInfoModel = Em.Object
                 'utcMinutes': 16,
                 'utcSeconds': 54,
                 'compassDirection': 'SOUTHWEST',
-                'pdop': 8,
-                'hdop': 5,
-                'vdop': 3,
+                'pdop': 8.4E0,
+                'hdop': 5.9E0,
+                'vdop': 3.2E0,
                 'actual': false,
                 'satellites': 8,
                 'dimension': '2D',
-                'altitude': 7,
-                'heading': 173,
-                'speed': 2
+                'altitude': 7.7E0,
+                'heading': 173.99E0,
+                'speed': 2.78E0
             },
             'eCallInfo': {
                 'eCallNotificationStatus': 'NORMAL',

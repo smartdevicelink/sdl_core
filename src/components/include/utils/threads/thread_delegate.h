@@ -35,30 +35,66 @@
 
 #include <pthread.h>
 
+#include "utils/lock.h"
+
 namespace threads {
+
+enum ThreadState {
+  kInit = 0,
+  kStarted = 1,
+  kStopReq = 2
+};
+
+class Thread;
 
 /**
  * Thread procedure interface.
  * Look for "threads/thread.h" for example
  */
 class ThreadDelegate {
-  public:
+ public:
+  ThreadDelegate()
+      : state_(kInit),
+        thread_(NULL) {
+  }
+  /**
+   * \brief Thread procedure.
+   */
+  virtual void threadMain() = 0;
 
-    /**
-     * Thread procedure.
-     */
-    virtual void threadMain() = 0;
+  /**
+   * Should be called to free all resources allocated in threadMain
+   * and exiting threadMain
+   * This function should be blocking and return only when threadMain() will be
+   * finished in other case segmantation failes are possible
+   */
+  virtual void exitThreadMain();
 
-    /**
-     * Should be called to free all resources allocated in threadMain
-     * and exiting threadMain
-     * This function should be blocking and return only when threadMain() will be
-     * finished in other case segmantation failes are possible
-     */
-    virtual bool exitThreadMain() {
-      return false;
+  virtual ~ThreadDelegate();
+
+  Thread* thread() const {
+    return thread_;
+  }
+
+  void set_thread(Thread *thread);
+
+  bool ImproveState(unsigned int to) {
+    state_lock_.Lock();
+    if ((state_ + 1 == to) || (to == kInit && state_ == kStopReq)) {
+      state_ = to;
     }
-    virtual ~ThreadDelegate() { }
+    state_lock_.Unlock();
+    return state_ == to;
+  }
+
+  unsigned int state() const {
+    return state_;
+  }
+
+ private:
+  volatile unsigned int state_;
+  sync_primitives::SpinMutex state_lock_;
+  Thread* thread_;
 };
 
 }  // namespace threads

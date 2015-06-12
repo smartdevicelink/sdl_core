@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -38,6 +38,7 @@
 #include <sys/procfs.h>
 #endif
 
+#include "utils/macro.h"
 #include <string>
 #include <iostream>
 
@@ -119,6 +120,16 @@ class Resources {
   static ResourseUsage* getCurrentResourseUsage();
 
 private:
+
+#ifdef BUILD_TESTS
+  friend class ResourceUsagePrivateTest;
+  FRIEND_TEST(ResourceUsagePrivateTest, ReadStatFileTest);
+  FRIEND_TEST(ResourceUsagePrivateTest, GetProcInfoTest);
+  FRIEND_TEST(ResourceUsagePrivateTest, GetMemInfoTest);
+  FRIEND_TEST(ResourceUsagePrivateTest, GetStatPathTest_FileExists);
+  FRIEND_TEST(ResourceUsagePrivateTest, GetStatPathTest_ReadFile);
+  FRIEND_TEST(ResourceUsagePrivateTest, GetProcPathTest);
+#endif
 
   /*
    * @brief reads /proc/PID/stat file on linux

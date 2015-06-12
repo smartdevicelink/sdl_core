@@ -51,7 +51,7 @@ OnButtonPressNotification::~OnButtonPressNotification() {
 }
 
 void OnButtonPressNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnButtonPressNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   const uint32_t btn_id =
       static_cast<uint32_t>(
@@ -124,17 +124,18 @@ void OnButtonPressNotification::Run() {
 }
 
 void OnButtonPressNotification::SendButtonPress(ApplicationConstSharedPtr app) {
-  smart_objects::SmartObject* on_btn_press = new smart_objects::SmartObject();
+  if (!app) {
+    LOG4CXX_ERROR_EXT(logger_, "OnButtonPress NULL pointer");
+    return;
+  }
+
+  smart_objects::SmartObjectSPtr on_btn_press = new smart_objects::SmartObject();
 
   if (!on_btn_press) {
     LOG4CXX_ERROR_EXT(logger_, "OnButtonPress NULL pointer");
     return;
   }
 
-  if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "OnButtonPress NULL pointer");
-    return;
-  }
 
   (*on_btn_press)[strings::params][strings::connection_key] = app->app_id();
 
@@ -152,7 +153,7 @@ void OnButtonPressNotification::SendButtonPress(ApplicationConstSharedPtr app) {
         (*message_)[strings::msg_params][strings::custom_button_id];
   }
 
-  message_.reset(on_btn_press);
+  message_ = on_btn_press;
   SendNotification();
 }
 

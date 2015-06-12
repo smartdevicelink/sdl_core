@@ -1,4 +1,4 @@
-/* Copyright (c) 2013, Ford Motor Company
+/* Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,6 @@
 */
 
 #include "gtest/gtest.h"
-
 #include "sqlite_wrapper/sql_error.h"
 #include "sqlite_wrapper/sql_database.h"
 
@@ -50,95 +49,178 @@ namespace dbms {
   }
 }
 
-TEST(SQLDatabaseTest, OpenCloseMemory) {
+TEST(SQLDatabaseTest, OpenCloseMemory_OpenAndCloseDB_ActsWithoutError) {
+
+  //arrange
   SQLDatabase db;
   bool ret = db.Open();
+
+  //assert
   EXPECT_FALSE(IsError(db.LastError()));
   ASSERT_TRUE(ret);
 
+  //act
   db.Close();
+
+  //assert
   EXPECT_FALSE(IsError(db.LastError()));
 }
-TEST(SQLDatabaseTest, OpenCloseFile) {
+
+TEST(SQLDatabaseTest, OpenCloseFile_OpenAndCloseSpecifiedDB_ActsWithoutError) {
+
+  //arrange
   SQLDatabase db("test-database");
   bool ret = db.Open();
+
+  //assert
   EXPECT_FALSE(IsError(db.LastError()));
   ASSERT_TRUE(ret);
 
+  //act
   db.Close();
+
+  //assert
   EXPECT_FALSE(IsError(db.LastError()));
+
   remove("test-database.sqlite");
 }
 
-TEST(SQLDatabaseTest, DoubleOpen) {
+TEST(SQLDatabaseTest, OpenDBTwice_NoError) {
+
+  //arrange
   SQLDatabase db;
   bool ret = db.Open();
+
+  //assert
   EXPECT_FALSE(IsError(db.LastError()));
   ASSERT_TRUE(ret);
+
+  //act
   ret = db.Open();
+
+  //assert
   EXPECT_FALSE(IsError(db.LastError()));
   ASSERT_TRUE(ret);
+
   db.Close();
 }
 
-TEST(SQLDatabaseTest, DoubleClose) {
+TEST(SQLDatabaseTest, CloseDBTwice_NoError) {
+
+  //arrange
   SQLDatabase db;
   bool ret = db.Open();
+
+  //assert
   EXPECT_FALSE(IsError(db.LastError()));
   ASSERT_TRUE(ret);
 
+  //act
   db.Close();
+
+  //assert
   EXPECT_FALSE(IsError(db.LastError()));
+
+  //act
   db.Close();
+
+  //assert
   EXPECT_FALSE(IsError(db.LastError()));
 }
 
-TEST(SQLDatabaseTest, CloseWithoutOpen) {
+TEST(SQLDatabaseTest, Close_DBWasNotOpened_NoError) {
+
+  //act
   SQLDatabase db;
   db.Close();
+
+  //assert
   EXPECT_FALSE(IsError(db.LastError()));
 }
 
-TEST(SQLDatabaseTest, CommitTransaction) {
+TEST(SQLDatabaseTest, CommitTransaction_StartAndCommitTransaction_ExpectActsWithoutError) {
+
+  //arrange
   SQLDatabase db;
+
+  //assert
   ASSERT_TRUE(db.Open());
   EXPECT_TRUE(db.BeginTransaction());
   EXPECT_FALSE(IsError(db.LastError()));
   EXPECT_TRUE(db.CommitTransaction());
   EXPECT_FALSE(IsError(db.LastError()));
+
   db.Close();
 }
 
-TEST(SQLDatabaseTest, RollbackTransaction) {
+TEST(SQLDatabaseTest, RollbackTransaction_StartAndRollbackTransaction_ExpectActsWithoutError) {
+
+  //arrange
   SQLDatabase db;
+
+  //assert
   ASSERT_TRUE(db.Open());
   EXPECT_TRUE(db.BeginTransaction());
   EXPECT_FALSE(IsError(db.LastError()));
   EXPECT_TRUE(db.RollbackTransaction());
   EXPECT_FALSE(IsError(db.LastError()));
+
   db.Close();
 }
 
-TEST(SQLDatabaseTest, FailedCommitTransaction) {
+TEST(SQLDatabaseTest, FailedCommitTransaction_CommitTransactionWithoutBeginning_ExpectError) {
+
+  //arrange
   SQLDatabase db;
+
+  //assert
   ASSERT_TRUE(db.Open());
   EXPECT_FALSE(db.CommitTransaction());
   EXPECT_TRUE(IsError(db.LastError()));
+
   db.Close();
 }
 
-TEST(SQLDatabaseTest, FailedRollbackTransaction) {
+TEST(SQLDatabaseTest, FailedRollbackTransaction_RollbackTransactionWithoutBeginning_ExpectError) {
+
+  //arrange
   SQLDatabase db;
+
+  //assert
   ASSERT_TRUE(db.Open());
   EXPECT_FALSE(db.RollbackTransaction());
   EXPECT_TRUE(IsError(db.LastError()));
+
   db.Close();
 }
 
-TEST(SQLDatabaseTest, BadTransaction) {
+TEST(SQLDatabaseTest, BadTransaction_BeginTransitionWithoutOpenDB_ExpectError) {
+
+  //arrange
   SQLDatabase db;
+
+  //assert
   EXPECT_FALSE(db.BeginTransaction());
   EXPECT_TRUE(IsError(db.LastError()));
+}
+
+TEST(SQLDatabaseTest, IsReadWrite_FirstOpenDBIsRWSecondIsNot) {
+
+  //arrange
+  SQLDatabase db("test-database");
+
+  //assert
+  ASSERT_TRUE(db.Open());
+  EXPECT_TRUE(db.IsReadWrite());
+  db.Close();
+  chmod("test-database.sqlite", S_IRUSR);
+
+  //assert
+  ASSERT_TRUE(db.Open());
+  EXPECT_FALSE(db.IsReadWrite());
+
+  db.Close();
+  remove("test-database.sqlite");
 }
 
 }  // namespace dbms

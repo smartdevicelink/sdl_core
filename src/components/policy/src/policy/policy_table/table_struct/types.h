@@ -60,8 +60,8 @@ struct ApplicationParams : CompositeType {
     Optional< Strings > nicknames;
     Optional< AppHMITypes > AppHMIType;
     Enum<Priority> priority;
-    Optional< Integer<uint16_t, 1, 65225> > memory_kb;
-    Optional< Integer<uint16_t, 1, 65225> > heart_beat_timeout_ms;
+    Optional< Integer<uint16_t, 0, 65225> > memory_kb;
+    Optional< Integer<uint16_t, 0, 65225> > heart_beat_timeout_ms;
     Optional< String<0, 255> > certificate;
   public:
     ApplicationParams();
@@ -130,6 +130,7 @@ struct ModuleConfig : CompositeType {
     Optional< String<1, 100> > vehicle_make;
     Optional< String<1, 100> > vehicle_model;
     Optional< String<4, 4> > vehicle_year;
+    Optional< String<0, 65535> > certificate;
   public:
     ModuleConfig();
     ModuleConfig(uint8_t exchange_after_x_ignition_cycles, int64_t exchange_after_x_kilometers, uint8_t exchange_after_x_days, uint16_t timeout_after_x_seconds, const SecondsBetweenRetries& seconds_between_retries, const ServiceEndpoints& endpoints, const NumberOfNotificationsPerMinute& notifications_per_minute_by_priority);

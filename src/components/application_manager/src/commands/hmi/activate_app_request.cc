@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -69,11 +69,11 @@ namespace application_manager {
 
 
     void ActivateAppRequest::on_event(const event_engine::Event& event) {
-      LOG4CXX_TRACE_ENTER(logger_);
-      const smart_objects::SmartObject* response = &(event.smart_object());
+      LOG4CXX_AUTO_TRACE(logger_);
+      const smart_objects::SmartObject& response = event.smart_object();
       const hmi_apis::Common_Result::eType code =
           static_cast<hmi_apis::Common_Result::eType>(
-            (*response)[strings::params][hmi_response::code].asInt());
+            response[strings::params][hmi_response::code].asInt());
       if (hmi_apis::Common_Result::SUCCESS != code) {
         LOG4CXX_ERROR(logger_, "Error ActivateApp result code " << code);
         return;
@@ -82,8 +82,15 @@ namespace application_manager {
       // Mobile id is converted to HMI id for HMI requests
       const uint32_t hmi_app_id = ApplicationManagerImpl::instance()->
                                   application_id(correlation_id);
-      mobile_apis::HMILevel::eType requested_hmi_level = static_cast<mobile_apis::HMILevel::eType>(
-          (*message_)[strings::msg_params][strings::activate_app_hmi_level].asInt());
+
+      mobile_apis::HMILevel::eType requested_hmi_level = mobile_apis::HMILevel::HMI_FULL;
+      if ((*message_)[strings::msg_params].keyExists(
+            strings::activate_app_hmi_level)) {
+        requested_hmi_level = static_cast<mobile_apis::HMILevel::eType>(
+                   (*message_)[strings::msg_params][strings::activate_app_hmi_level].asInt());
+        LOG4CXX_INFO(logger_, "requested_hmi_level = " << requested_hmi_level);
+      }
+
       if (0 == hmi_app_id) {
         LOG4CXX_ERROR(logger_, "Error hmi_app_id = "<< hmi_app_id);
         return;
@@ -95,8 +102,10 @@ namespace application_manager {
         LOG4CXX_ERROR(logger_, "Application can't be activated.");
         return;
       }
+
       if (mobile_apis::HMILevel::HMI_FULL == requested_hmi_level) {
         if (ApplicationManagerImpl::instance()->ActivateApplication(application)) {
+          LOG4CXX_DEBUG(logger_, "Put Application in FULL succes");
           MessageHelper::SendHMIStatusNotification(*(application.get()));
         }
       }

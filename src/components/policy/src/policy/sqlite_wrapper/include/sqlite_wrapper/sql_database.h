@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -93,6 +93,12 @@ class SQLDatabase {
    * If the database is already opened then need reopen it
    */
   void set_path(const std::string& path);
+
+  /**
+   * Checks if database is read/write
+   * @return true if database is read/write
+   */
+  bool IsReadWrite();
 
   /**
    * Call backup for opened DB

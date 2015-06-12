@@ -229,8 +229,9 @@ namespace NsMessageBroker
       unsigned char hash[20] = {0xb3, 0x7a, 0x4f, 0x2c, 0xc0, 0x62, 0x4f, 0x16, 0x90, 0xf6, 0x46, 0x06, 0xcf, 0x38, 0x59, 0x45, 0xb2, 0xbe, 0xc4, 0xea};
       int accept_len;
 
-      strcpy(accept_buf, key.c_str());
-      strcpy(accept_buf + key.length(), websocket_magic_guid_04);
+      strncpy(accept_buf, key.c_str(), MAX_WEBSOCKET_04_KEY_LEN + 37);
+      strncpy(accept_buf + key.length(), websocket_magic_guid_04,
+              MAX_WEBSOCKET_04_KEY_LEN + 37 - strlen(key.c_str()));
 
       SHA1((unsigned char *)accept_buf, key.length() + strlen(websocket_magic_guid_04), hash);
 

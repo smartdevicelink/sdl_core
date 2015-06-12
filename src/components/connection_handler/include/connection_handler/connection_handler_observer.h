@@ -96,6 +96,20 @@ class ConnectionHandlerObserver {
       const int32_t &session_key,
       const protocol_handler::ServiceType &type) = 0;
 
+  /**
+   * \brief Callback function used by ConnectionHandler
+   * when Mobile Application start message flood
+   * \param connection_key used by other components as application identifier
+   */
+  virtual void OnApplicationFloodCallBack(const uint32_t &connection_key) = 0;
+
+  /**
+   * \brief Callback function used by ConnectionHandler
+   * when Mobile Application sends malformed message
+   * \param connection_key used by other components as application identifier
+   */
+  virtual void OnMalformedMessageCallback(const uint32_t &connection_key) = 0;
+
  protected:
   /**
    * \brief Destructor

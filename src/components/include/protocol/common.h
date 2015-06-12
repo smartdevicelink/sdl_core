@@ -57,6 +57,7 @@ const uint8_t PROTOCOL_HEADER_V2_SIZE = 12;
  * First 4-bit field of AppLink protocol packet
  */
 enum {
+
   /**
    *\brief Constant: number of protocol version (1).
    */
@@ -71,9 +72,17 @@ enum {
    *\brief Constant: number of protocol version (3).
    * Has no difference with v.2 in Mobile_API.xml and frame Header difference
    * Support SSL with Encryption, Video and Audio services
-   * Suuport ControlFrame, End Service to/from mobile support, HeartBeat future
+   * Support ControlFrame, End Service to/from mobile support, HeartBeat feature
    */
   PROTOCOL_VERSION_3 = 0x03,
+  /**
+   *@brief Constant: number of protocol version (4).
+   * This protocol is compatibility with version 3
+   * Support SSL with Encryption, Video and Audio services
+   * Support ControlFrame, End Service to/from mobile support, HeartBeat feature,
+   * SDL4.0 feature.
+   */
+  PROTOCOL_VERSION_4 = 0x04,
   /**
    *\brief Maximum value of packet version field (size 4-bit) specified AppLink Protocol v.7
    */
@@ -216,7 +225,7 @@ enum RESULT_CODE {
   RESULT_REASSIGN = 12,
   RESULT_XML_PARSING = 13,
   RESULT_RESEND_ACK = 14,
-  RESULT_DEFRERRED = 15,
+  RESULT_DEFERRED = 15,
   RESULT_ENCRYPTION_FAILED = 16,
   RESULT_HEARTBEAT_IS_NOT_SUPPORTED = 17,
   RESULT_UNKNOWN = 255

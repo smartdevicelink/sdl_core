@@ -1,4 +1,4 @@
-/**
+/*
  * @file formatter_json_rpc.h
  * @brief FormatterJsonRpc header file.
  */

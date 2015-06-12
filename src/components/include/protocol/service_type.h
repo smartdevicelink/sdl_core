@@ -61,7 +61,6 @@ const uint8_t SERVICE_TYPE_NAVI = 0x0B;
  */
 const uint8_t SERVICE_TYPE_BULK = 0x0F;
 
-
 /**
   * \brief Enum describing possible types of sessions: RPC for API messages,
     Navi for video streaming, bulk for PutFile.
@@ -83,5 +82,4 @@ ServiceType ServiceTypeFromByte(uint8_t type);
 uint8_t ServiceTypeToByte(ServiceType type);
 
 }  // namespace protocol_handler
-
 #endif  // SRC_COMPONENTS_INCLUDE_PROTOCOL_SERVICE_TYPE_H_

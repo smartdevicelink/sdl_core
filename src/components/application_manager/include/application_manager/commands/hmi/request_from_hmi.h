@@ -1,4 +1,4 @@
-﻿  /**
+  /*
    Copyright (c) 2014, Ford Motor Company
    All rights reserved.
 
@@ -48,14 +48,23 @@
 
   namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
 
-  class RequestFromHMI : public CommandImpl {
+  class RequestFromHMI : public CommandImpl, public event_engine::EventObserver {
    public:
     explicit RequestFromHMI(const MessageSharedPtr& message);
     virtual ~RequestFromHMI();
     virtual bool Init();
     virtual bool CleanUp();
     virtual void Run();
-
+    virtual void on_event(const event_engine::Event& event);
+    /**
+     * @brief SendResponse allows to send response to hmi
+     * @param correlation_id the correlation id for the rfesponse.
+     * @param function_id the function id for which response will be sent
+     * @param result_code the result code.
+     */
+    void SendResponse(uint32_t correlation_id,
+                      hmi_apis::FunctionID::eType function_id,
+                      hmi_apis::Common_Result::eType result_code);
    private:
     DISALLOW_COPY_AND_ASSIGN(RequestFromHMI);
   };

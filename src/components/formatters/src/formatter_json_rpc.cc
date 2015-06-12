@@ -1,4 +1,4 @@
-/**
+/*
  * @file formatter_json_rpc.cc
  * @brief formatter_json_rpc source file.
  */

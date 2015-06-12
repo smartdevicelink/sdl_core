@@ -46,7 +46,7 @@ GetDTCsResponse::~GetDTCsResponse() {
 }
 
 void GetDTCsResponse::Run() {
-  LOG4CXX_INFO(logger_, "GetDTCsResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }

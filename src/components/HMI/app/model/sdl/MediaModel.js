@@ -333,13 +333,15 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                 }
             } else {
 
-                //this.appInfo.set('alignment', "text-align:center");
+                this.appInfo.set('alignment', "text-align:center");
             }
 
-            if (params.graphic && params.graphic.value != '') {
-                this.appInfo.set('trackIcon', params.graphic.value);
-            } else {
-                this.appInfo.set('trackIcon', 'images/sdl/audio_icon.jpg');
+            if (params.graphic != null) {
+                if (params.graphic.value != "") {
+                    this.appInfo.set('trackIcon', params.graphic.value);
+                } else {
+                    this.appInfo.set('trackIcon', 'images/sdl/audio_icon.jpg');
+                }
             }
 
             if ("softButtons" in params) {

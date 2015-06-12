@@ -76,6 +76,8 @@ class Device {
 
   virtual ApplicationList GetApplicationList() const = 0;
 
+  virtual void Stop() { }
+
   inline const DeviceUID& unique_device_id() const {
     return unique_device_id_;
   }

@@ -106,8 +106,8 @@
 #include "application_manager/commands/hmi/ui_set_global_properties_response.h"
 #include "application_manager/commands/hmi/ui_scrollable_message_request.h"
 #include "application_manager/commands/hmi/ui_scrollable_message_response.h"
-#include "application_manager/commands/hmi/ui_set_icon_request.h"
-#include "application_manager/commands/hmi/ui_set_icon_response.h"
+#include "application_manager/commands/hmi/ui_set_app_icon_request.h"
+#include "application_manager/commands/hmi/ui_set_app_icon_response.h"
 #include "application_manager/commands/hmi/ui_perform_audio_pass_thru_response.h"
 #include "application_manager/commands/hmi/ui_perform_audio_pass_thru_request.h"
 #include "application_manager/commands/hmi/ui_end_audio_pass_thru_response.h"
@@ -227,6 +227,7 @@
 #include "application_manager/commands/hmi/on_navi_tbt_client_state_notification.h"
 #include "application_manager/commands/hmi/on_button_event_notification.h"
 #include "application_manager/commands/hmi/on_button_press_notification.h"
+#include "application_manager/commands/hmi/on_button_subscription_notification.h"
 #include "application_manager/commands/hmi/on_vi_vehicle_data_notification.h"
 #include "application_manager/commands/hmi/on_ui_keyboard_input_notification.h"
 #include "application_manager/commands/hmi/on_ui_touch_event_notification.h"
@@ -266,7 +267,7 @@ namespace application_manager {
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 CommandSharedPtr HMICommandFactory::CreateCommand(
-    const MessageSharedPtr& message) {
+    const commands::MessageSharedPtr& message) {
   const int function_id = (*message)[strings::params][strings::function_id]
       .asInt();
   LOG4CXX_INFO(logger_,
@@ -455,9 +456,9 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::UI_SetAppIcon: {
       if (is_response) {
-        command.reset(new commands::UISetIconResponse(message));
+        command.reset(new commands::UISetAppIconResponse(message));
       } else {
-        command.reset(new commands::UISetIconRequest(message));
+        command.reset(new commands::UISetAppIconRequest(message));
       }
       break;
     }
@@ -1168,6 +1169,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::Buttons_OnButtonPress: {
       command.reset(new commands::hmi::OnButtonPressNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::Buttons_OnButtonSubscription: {
+      command.reset(new commands::hmi::OnButtonSubscriptionNotification(message));
       break;
     }
 #ifdef HMI_DBUS_API
