@@ -99,6 +99,12 @@ void StateController::HmiLevelConflictResolver::operator ()
 
 void StateController::SetupRegularHmiState(ApplicationSharedPtr app,
                                            HmiStatePtr state) {
+  using namespace mobile_apis;
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN_VOID(state);
+  LOG4CXX_DEBUG(logger_, "hmi_level " << state->hmi_level() <<
+                ", audio_state " << state->audio_streaming_state() <<
+                ", system_context " << state->system_context());
   HmiStatePtr curr_state = app->CurrentHmiState();
   HmiStatePtr old_state = CreateHmiState(app->app_id(),
                                          HmiState::StateID::STATE_ID_REGULAR);
@@ -109,6 +115,17 @@ void StateController::SetupRegularHmiState(ApplicationSharedPtr app,
   app->SetRegularState(state);
   if (state->hmi_level() == mobile_apis::HMILevel::HMI_NONE) {
     app->ResetDataInNone();
+  }
+  if (!app->is_media_application()) {
+    if (state->hmi_level() == HMILevel::HMI_LIMITED) {
+      LOG4CXX_ERROR(logger_, "Trying to setup LIMITED to non media app");
+      state->set_hmi_level(HMILevel::HMI_BACKGROUND);
+    }
+    if (state->audio_streaming_state() != AudioStreamingState::NOT_AUDIBLE) {
+      LOG4CXX_ERROR(logger_, "Trying to setup audio state " <<
+                    state->audio_streaming_state() <<" to non media app");
+      state->set_audio_streaming_state(AudioStreamingState::NOT_AUDIBLE);
+    }
   }
   HmiStatePtr new_state = app->CurrentHmiState();
   OnStateChanged(app, old_state, new_state);
