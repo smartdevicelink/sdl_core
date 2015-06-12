@@ -98,6 +98,9 @@ class PolicyManagerImpl : public PolicyManager {
                                    StringArray* nicknames = NULL,
                                    StringArray* app_hmi_types = NULL);
 
+    virtual void AddDevice(const std::string& device_id,
+                           const std::string& connection_type);
+
     virtual void SetDeviceInfo(const std::string& device_id,
                                const DeviceInfo& device_info);
 

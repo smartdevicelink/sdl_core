@@ -410,6 +410,13 @@ void PolicyHandler::AddApplication(const std::string& application_id) {
   policy_manager_->AddApplication(application_id);
 }
 
+void PolicyHandler::AddDevice(const std::string& device_id,
+                              const std::string& connection_type) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->AddDevice(device_id, connection_type);
+}
+
 void PolicyHandler::SetDeviceInfo(std::string& device_id,
                                   const DeviceInfo& device_info) {
   LOG4CXX_AUTO_TRACE(logger_);

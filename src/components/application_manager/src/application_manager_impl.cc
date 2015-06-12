@@ -840,6 +840,21 @@ void ApplicationManagerImpl::OnErrorSending(
 void ApplicationManagerImpl::OnDeviceListUpdated(
     const connection_handler::DeviceMap& device_list) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  // add device to policy DB
+  connection_handler::DeviceMap::const_iterator it = device_list.begin();
+  for (; device_list.end() != it; ++it) {
+    policy::DeviceParams dev_params;
+    MessageHelper::GetDeviceInfoForHandle(it->second.device_handle(),
+                                          &dev_params);
+
+    policy::DeviceInfo device_info;
+    device_info.AdoptDeviceType(dev_params.device_connection_type);
+
+    policy::PolicyHandler::instance()->AddDevice(dev_params.device_mac_address,
+        device_info.connection_type);
+  }
+
   smart_objects::SmartObjectSPtr msg_params = MessageHelper::CreateDeviceListSO(
         device_list);
   if (!msg_params) {

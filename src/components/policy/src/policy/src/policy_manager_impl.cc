@@ -367,6 +367,12 @@ bool PolicyManagerImpl::GetInitialAppData(const std::string& application_id,
   return result;
 }
 
+void PolicyManagerImpl::AddDevice(const std::string& device_id,
+                                  const std::string& connection_type) {
+  LOG4CXX_INFO(logger_, "SetDeviceInfo");
+  LOG4CXX_DEBUG(logger_, "Device :" << device_id);
+}
+
 void PolicyManagerImpl::SetDeviceInfo(const std::string& device_id,
                                       const DeviceInfo& device_info) {
   LOG4CXX_INFO(logger_, "SetDeviceInfo");

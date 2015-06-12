@@ -218,6 +218,15 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     virtual bool GetInitialAppData(const std::string& application_id,
                                    StringArray* nicknames = NULL,
                                    StringArray* app_hmi_types = NULL) = 0;
+
+    /**
+     * @brief Add's device to policy table
+     * @param device_id        Device mac address
+     * @param connection_type  Device connection type
+     */
+    virtual void AddDevice(const std::string& device_id,
+                           const std::string& connection_type) = 0;
+
     /**
      * @brief Stores device parameters received during application registration
      * to policy table

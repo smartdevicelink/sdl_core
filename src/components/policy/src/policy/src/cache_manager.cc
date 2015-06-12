@@ -271,6 +271,16 @@ bool CacheManager::GetDeviceGroupsFromPolicies(
   return true;
 }
 
+bool CacheManager::AddDevice(const std::string& device_id,
+                             const std::string& connection_type) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  CACHE_MANAGER_CHECK(false);
+  Backup();
+  return true;
+}
+
 bool CacheManager::SetDeviceData(const std::string &device_id,
                                  const std::string &hardware,
                                  const std::string &firmware,
