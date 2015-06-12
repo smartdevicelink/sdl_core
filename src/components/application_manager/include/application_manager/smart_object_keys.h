@@ -280,6 +280,7 @@ const char address_lines[] = "addressLines";
 const char phone_number[] = "phoneNumber";
 const char location_image[] = "locationImage";
 const char is_suscribed[] = "isSubscribed";
+const char message_data[] = "messageData";
 }  // namespace strings
 
 namespace json {
