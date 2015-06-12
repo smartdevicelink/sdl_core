@@ -76,7 +76,7 @@ bool operator()(const policy::StringsValueType& value) {
                    checker);
   if (groups_attributes_.end() == it) {
     return false;
-  }  
+  }
   FunctionalGroupPermission group;
   group.group_name = it->second.second;
   group.group_alias = it->second.first;
@@ -397,7 +397,16 @@ void policy::CheckAppPolicy::SetPendingPermissions(
   case RESULT_REQUEST_TYPE_CHANGED:
     permissions_diff.priority.clear();
     permissions_diff.requestTypeChanged = true;
-    permissions_diff.requestType = pm_->GetAppRequestTypes(app_id);
+   {
+    // Getting RequestTypes from PTU (not from cache)
+    policy_table::RequestTypes::const_iterator it_request_type =
+        app_policy.second.RequestType->begin();
+    for (; app_policy.second.RequestType->end() != it_request_type;
+         ++it_request_type) {
+      permissions_diff.requestType.push_back(EnumToJsonString(*it_request_type));
+     }
+    }
+
     break;
   default:
     return;

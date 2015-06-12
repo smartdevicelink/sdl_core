@@ -237,6 +237,8 @@ Json::Value ApplicationParams::ToJsonValue() const {
   return result__;
 }
 bool ApplicationParams::is_valid() const {
+  // RequestType is not validated since there is high-level validation logic,
+  // which takes into account information not available here.
   if (!PolicyBase::is_valid()) {
     return false;
   }
@@ -244,9 +246,6 @@ bool ApplicationParams::is_valid() const {
     return false;
   }
   if (!AppHMIType.is_valid()) {
-    return false;
-  }
-  if (!RequestType.is_valid()) {
     return false;
   }
   if (!memory_kb.is_valid()) {
