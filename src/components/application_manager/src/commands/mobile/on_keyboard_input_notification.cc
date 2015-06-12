@@ -53,16 +53,27 @@ OnKeyBoardInputNotification::~OnKeyBoardInputNotification() {
 void OnKeyBoardInputNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  const std::vector<ApplicationSharedPtr>& applications =
-      ApplicationManagerImpl::instance()->applications_with_navi();
+  ApplicationSharedPtr app_to_notify;
 
-  std::vector<ApplicationSharedPtr>::const_iterator it = applications.begin();
-  for (; applications.end() != it; ++it) {
-    ApplicationSharedPtr app = *it;
-    if (mobile_apis::HMILevel::eType::HMI_NONE != app->hmi_level()) {
-      (*message_)[strings::params][strings::connection_key] = app->app_id();
-      SendNotification();
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  ApplicationManagerImpl::ApplictionSetIt it = accessor.begin();
+  for (; accessor.end() != it; ++it) {
+    // if there is app with active perform interaction use it for notification
+    if ((*it)->is_perform_interaction_active()) {
+      LOG4CXX_INFO(logger_, "There is application with active PerformInteraction");
+      app_to_notify = *it;
+      break;
     }
+
+    if (mobile_apis::HMILevel::eType::HMI_FULL == (*it)->hmi_level()) {
+      LOG4CXX_INFO(logger_, "There is application in HMI_FULL level");
+      app_to_notify = *it;
+    }
+  }
+
+  if (app_to_notify.valid()) {
+    (*message_)[strings::params][strings::connection_key] = app_to_notify->app_id();
+    SendNotification();
   }
 }
 
