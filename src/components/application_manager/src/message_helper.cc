@@ -1293,30 +1293,48 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateAddVRCommandToHMI(
 
 bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
     smart_objects::SmartObject& output) {
+  using namespace smart_objects;
+  LOG4CXX_AUTO_TRACE(logger_);
+
   if (!app) {
     LOG4CXX_WARN(logger_, "Application is not valid");
     return false;
   }
 
-  const smart_objects::SmartObject* app_types = app->app_types();
-  const smart_objects::SmartObject* ngn_media_screen_name = app->ngn_media_screen_name();
-  std::string device_name;
-  std::string mac_address;
-  std::string transport_type;
-  if (-1 == connection_handler::ConnectionHandlerImpl::instance()->
-      GetDataOnDeviceID(app->device(), &device_name,
-                        NULL, &mac_address, &transport_type)) {
-    LOG4CXX_ERROR(logger_, "Failed to extract information for device "
-                  << app->device());
-  }
+  const SmartObject* app_types = app->app_types();
+  DCHECK_OR_RETURN(app_types, false);
+  const SmartObject* ngn_media_screen_name = app->ngn_media_screen_name();
+  DCHECK_OR_RETURN(ngn_media_screen_name, false);
+  const connection_handler::DeviceHandle handle = app->device();
+  std::string device_name = ApplicationManagerImpl::instance()->GetDeviceName(handle);
 
-  output = smart_objects::SmartObject(smart_objects::SmartType_Map);
+  output = SmartObject(SmartType_Map);
   output[strings::app_name] = app->name();
   output[strings::icon] = app->app_icon_path();
   output[strings::app_id] = app->hmi_app_id();
-  output[strings::hmi_display_language_desired] = app->ui_language();
-  output[strings::is_media_application] = app->is_media_application();
-  output[hmi_response::policy_app_id] = app->mobile_app_id();
+
+  if (app->IsRegistered()) {
+    output[strings::hmi_display_language_desired] = app->ui_language();
+    output[strings::is_media_application] = app->is_media_application();
+  }
+
+  if (!app->IsRegistered()) {
+    output[strings::greyOut] = app->is_greyed_out();
+    const SmartObject* app_tts_name = app->tts_name();
+    DCHECK_OR_RETURN(app_tts_name, false);
+    if (!app_tts_name->empty()) {
+      SmartObject output_tts_name = SmartObject(SmartType_Array);
+
+      for (uint32_t i = 0; i < app_tts_name->length(); ++i) {
+        output_tts_name[i][strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
+        output_tts_name[i][strings::text] = (*app_tts_name)[i];
+      }
+      output[json::ttsName] = output_tts_name;
+    }
+    if (!app->vr_synonyms()->empty()) {
+      output[json::vrSynonyms] = *(app->vr_synonyms());
+    }
+  }
 
   if (ngn_media_screen_name) {
     output[strings::ngn_media_screen_app_name] = ngn_media_screen_name->asString();
