@@ -86,6 +86,7 @@ void DateTime::AddMilliseconds(TimevalStruct& time,
   uint32_t usec = (milliseconds%MILLISECONDS_IN_SECOND)*MICROSECONDS_IN_MILLISECONDS;
   time.tv_sec += sec;
   time.tv_usec += usec;
+  time = ConvertionUsecs(time);
 }
 
 TimevalStruct DateTime::Sub(const TimevalStruct& time1,
