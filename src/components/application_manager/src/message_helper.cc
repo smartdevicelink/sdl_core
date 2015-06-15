@@ -1308,6 +1308,15 @@ bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
   const connection_handler::DeviceHandle handle = app->device();
   std::string device_name = ApplicationManagerImpl::instance()->GetDeviceName(handle);
 
+  std::string mac_address;
+  std::string transport_type;
+  if (-1 == connection_handler::ConnectionHandlerImpl::instance()->
+      GetDataOnDeviceID(app->device(), &device_name,
+                        NULL, &mac_address, &transport_type)) {
+    LOG4CXX_ERROR(logger_, "Failed to extract information for device "
+                  << app->device());
+  }
+
   output = SmartObject(SmartType_Map);
   output[strings::app_name] = app->name();
   output[strings::icon] = app->app_icon_path();
