@@ -51,7 +51,7 @@ RequestController::RequestController()
     is_low_voltage_(false) {
   LOG4CXX_AUTO_TRACE(logger_);
   InitializeThreadpool();
-  timer_.start(dafault_sleep_time_);
+  timer_.start(default_sleep_time_);
 }
 
 RequestController::~RequestController() {
@@ -311,9 +311,9 @@ void RequestController::updateRequestTimeout(
     const uint32_t& correlation_id,
     const uint32_t& new_timeout) {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "app_id : " << app_id
-                << " mobile_correlation_id : " << correlation_id
-                << " new_timeout : " << new_timeout);
+  LOG4CXX_DEBUG(logger_, "app_id: " << app_id
+                << " mobile_correlation_id: " << correlation_id
+                << " new_timeout (ms): " << new_timeout);
   RequestInfoPtr request_info =
       waiting_for_response_.Find(app_id, correlation_id);
   if (request_info) {
@@ -324,13 +324,13 @@ void RequestController::updateRequestTimeout(
     waiting_for_response_.Add(request_info);
     UpdateTimer();
     LOG4CXX_INFO(logger_, "Timeout updated for "
-                  << " app_id " << app_id
-                  << " correlation_id " << correlation_id
-                  << " new_timeout " << new_timeout);
+                  << " app_id: " << app_id
+                  << " correlation_id: " << correlation_id
+                  << " new_timeout (ms): " << new_timeout);
   } else {
     LOG4CXX_ERROR(logger_, "Can't find request with "
-                  << " app_id " << app_id
-                  << " correlation_id " << correlation_id);
+                  << " app_id: " << app_id
+                  << " correlation_id: " << correlation_id);
   }
 }
 
@@ -469,20 +469,29 @@ void RequestController::UpdateTimer() {
       const uint64_t secs = end_time.tv_sec - current_time.tv_sec;
       LOG4CXX_DEBUG(logger_, "Sleep for " << secs << " secs");
       // Timeout for bigger than 5 minutes is a mistake
-      timer_.updateTimeOut(secs);
+
+      const uint32_t timeout_ms =
+          secs * date_time::DateTime::MILLISECONDS_IN_SECOND;
+
+      timer_.updateTimeOut(timeout_ms);
     } else {
-      LOG4CXX_WARN(logger_, "Request app_id = " << front->app_id()
-                   << "correlation_id = " << front->requestId()
-                   << "is expired a long time ago: "
-                   << end_time.tv_sec << " - "
-                   << current_time.tv_sec << " >= "
+      LOG4CXX_WARN(logger_, "Request app_id: " << front->app_id()
+                   << " correlation_id: " << front->requestId()
+                   << " is expired. "
+                   << "End time: "
+                   << end_time.tv_sec
+                   << " Current time: "
+                   << current_time.tv_sec
+                   << " Diff (current - end): "
+                   << current_time.tv_sec - end_time.tv_sec
+                   << " Request timeout (sec): "
                    << front->timeout_sec());
       timer_.updateTimeOut(0);
     }
   } else {
     LOG4CXX_DEBUG(logger_, "Sleep for default sleep time "
-                  << dafault_sleep_time_ << " secs");
-    timer_.updateTimeOut(dafault_sleep_time_);
+                  << default_sleep_time_ << " milliseconds.");
+    timer_.updateTimeOut(default_sleep_time_);
   }
 }
 

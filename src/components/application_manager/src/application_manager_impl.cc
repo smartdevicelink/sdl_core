@@ -2898,7 +2898,8 @@ void ApplicationManagerImpl::AddAppToTTSGlobalPropertiesList(
   if (1 == tts_global_properties_app_list_.size()) {
     LOG4CXX_INFO(logger_, "Start tts_global_properties_timer_");
     tts_global_properties_app_list_lock_.Release();
-    tts_global_properties_timer_.start(1);
+    const uint32_t timeout_ms = 1000;
+    tts_global_properties_timer_.start(timeout_ms);
     return;
   }
   tts_global_properties_app_list_lock_.Release();
