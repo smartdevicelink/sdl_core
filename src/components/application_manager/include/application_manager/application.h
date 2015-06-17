@@ -424,6 +424,12 @@ class Application : public virtual InitialApplicationData,
     virtual uint32_t hmi_app_id() const = 0;
     virtual uint32_t app_id() const = 0;
     virtual const std::string& name() const = 0;
+    /**
+     * @brief Sets application folder name, which is used for storing of related
+     * files, e.g. icons
+     * @param folder_name Name of folder
+     */
+    virtual void set_folder_name(const std::string& folder_name) = 0;
     virtual const std::string folder_name() const = 0;
     virtual bool is_media_application() const = 0;
     virtual const mobile_api::HMILevel::eType& hmi_level() const = 0;
@@ -621,6 +627,10 @@ class Application : public virtual InitialApplicationData,
      * otherwise - false
      */
     void set_greyed_out(bool is_greyed_out) {is_greyed_out_ = is_greyed_out;}
+    /**
+     * @brief Load persistent files from application folder.
+     */
+    virtual void LoadPersistentFiles() = 0;
 
   protected:
 

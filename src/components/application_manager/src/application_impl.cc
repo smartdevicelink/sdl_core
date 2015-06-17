@@ -210,8 +210,13 @@ const std::string& ApplicationImpl::name() const {
   return app_name_;
 }
 
+void application_manager::ApplicationImpl::set_folder_name(
+    const std::string& folder_name) {
+  folder_name_ = folder_name;
+}
+
 const std::string ApplicationImpl::folder_name() const {
-  return name() + mobile_app_id();
+  return folder_name_;
 }
 
 bool ApplicationImpl::is_media_application() const {
