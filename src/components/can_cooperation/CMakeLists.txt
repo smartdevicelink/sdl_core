@@ -83,6 +83,7 @@ set (SOURCES
     ./src/validators/on_interior_vehicle_data_notification_validator.cc
     ./src/policy_helper.cc
     ./src/module_helper.cc
+    ./src/vehicle_capabilities.cc
 )
 
 set (LIBRARIES
@@ -90,6 +91,7 @@ set (LIBRARIES
     FunctionalModule
     ApplicationManager
     Utils
+    ConfigProfile
 )
 
 add_library(${target} SHARED ${SOURCES})
@@ -107,8 +109,12 @@ install(TARGETS ${target}
     WORLD_READ WORLD_EXECUTE
 )
 
+set(FILES_FOR_COPY
+${CMAKE_CURRENT_SOURCE_DIR}/InteriorVehicleDataCapabilities.json
+)
+
 install(
-  FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/can_config.json"
+  FILES ${FILES_FOR_COPY}
   DESTINATION ${install_destination}
 )
 
