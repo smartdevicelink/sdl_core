@@ -31,7 +31,6 @@
  */
 
 #include "can_cooperation/request_controller.h"
-#include <fstream>
 #include "json/json.h"
 #include "utils/logger.h"
 #include "functional_module/timer/timer_director_impl.h"
@@ -70,7 +69,7 @@ void RequestController::AddRequest(const uint32_t& mobile_correlation_id,
 
 void RequestController::DeleteRequest(const uint32_t& mobile_correlation_id) {
   mobile_request_list_.erase(mobile_correlation_id);
-  //  TODO(VS): add app id
+  // TODO(VS): add app id
   timer_.RemoveTrackable(TrackableMessage(0, mobile_correlation_id));
 }
 

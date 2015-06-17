@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_SETTINGS_H_
 #define SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_SETTINGS_H_
 
+#include <string>
 #include "json/json.h"
 #include "utils/macro.h"
 
@@ -45,7 +46,6 @@ namespace functional_modules {
  */
 class Settings {
  public:
-
   /*
    * @brief Constrctor
    */

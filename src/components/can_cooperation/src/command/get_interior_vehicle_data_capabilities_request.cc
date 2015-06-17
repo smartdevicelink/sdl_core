@@ -48,12 +48,14 @@ using namespace message_params;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "GetInteriorVehicleDataCapabiliesRequest")
 
-GetInteriorVehicleDataCapabiliesRequest::GetInteriorVehicleDataCapabiliesRequest(
+GetInteriorVehicleDataCapabiliesRequest::
+GetInteriorVehicleDataCapabiliesRequest(
   const application_manager::MessagePtr& message)
   : BaseCommandRequest(message) {
 }
 
-GetInteriorVehicleDataCapabiliesRequest::~GetInteriorVehicleDataCapabiliesRequest() {
+GetInteriorVehicleDataCapabiliesRequest::
+~GetInteriorVehicleDataCapabiliesRequest() {
 }
 
 void GetInteriorVehicleDataCapabiliesRequest::Execute() {
@@ -121,7 +123,8 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
 
     if (!success) {
       // Try to read capabilities from file.
-      LOG4CXX_INFO(logger_, "Failed to get correct response from HMI; trying to read from file");
+      LOG4CXX_INFO(logger_, "Failed to get correct response from HMI; \
+          trying to read from file");
       Json::Value request;
 
       Json::Reader reader;
@@ -136,19 +139,23 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
       }
 
       if (zone_capabilities.type() == Json::ValueType::arrayValue) {
-        LOG4CXX_DEBUG(logger_, "Read vehicle capabilities from file " << zone_capabilities);
+        LOG4CXX_DEBUG(logger_, "Read vehicle capabilities from file "
+            << zone_capabilities);
         if (request.isMember(kModuleTypes)) {
-          response_params_[kInteriorVehicleDataCapabilities] = Json::Value(Json::ValueType::arrayValue);
-          for(size_t i = 0; i < zone_capabilities.size(); ++i) {
-            for(size_t j = 0; j < request[kModuleTypes].size(); ++j) {
-              if (request[kModuleTypes][j] == zone_capabilities[i][kModuleType]) {
+          response_params_[kInteriorVehicleDataCapabilities] = Json::Value(
+            Json::ValueType::arrayValue);
+          for (size_t i = 0; i < zone_capabilities.size(); ++i) {
+            for (size_t j = 0; j < request[kModuleTypes].size(); ++j) {
+              if (request[kModuleTypes][j] ==
+                    zone_capabilities[i][kModuleType]) {
                 response_params_[kInteriorVehicleDataCapabilities].append(
                   zone_capabilities[i]);
               }
             }
           }
         } else {
-          response_params_[kInteriorVehicleDataCapabilities] = zone_capabilities;
+          response_params_[kInteriorVehicleDataCapabilities] =
+            zone_capabilities;
         }
         success = true;
         result_code = result_codes::kSuccess;
