@@ -48,7 +48,7 @@ enum AccessoryVRCommand {
 
 struct ApplicationParams {
     ApplicationParams(const smart_objects::SmartObject& application);
-    ApplicationParams(app_mngr::ApplicationConstSharedPtr application);
+    ApplicationParams(app_mngr::ApplicationSharedPtr application);
 
     std::string m_hash;
     int64_t m_grammar_id;
@@ -416,7 +416,11 @@ class ResumptionDataDB : public ResumptionData {
    * @return true if application data was saved successfully
    * otherwise returns false
    */
-  bool SaveApplicationToDB(app_mngr::ApplicationConstSharedPtr application,
+  bool SaveApplicationToDB(app_mngr::ApplicationSharedPtr application,
+                           const std::string& policy_app_id,
+                           const std::string& device_id);
+
+  bool SaveApplicationToDB(const smart_objects::SmartObject& application,
                            const std::string& policy_app_id,
                            const std::string& device_id);
 
@@ -571,7 +575,7 @@ class ResumptionDataDB : public ResumptionData {
    * @return true if InsertApplicationData works successfully, otherwise
    * returns false;
    */
-  bool InsertApplicationData(app_mngr::ApplicationConstSharedPtr application,
+  bool InsertApplicationData(app_mngr::ApplicationSharedPtr application,
                              const std::string& policy_app_id,
                              const std::string& device_id);
 

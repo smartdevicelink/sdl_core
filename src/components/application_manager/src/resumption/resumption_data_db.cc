@@ -1634,9 +1634,10 @@ bool ResumptionDataDB::ExecInsertDataToArray(
 }
 
 bool ResumptionDataDB::SaveApplicationToDB(
-      app_mngr::ApplicationConstSharedPtr application,
-      const std::string& policy_app_id,
-      const std::string& device_id) {
+    app_mngr::ApplicationSharedPtr application,
+    const std::string& policy_app_id,
+    const std::string& device_id) {
+
   LOG4CXX_AUTO_TRACE(logger_);
   int64_t application_primary_key = 0;
   int64_t global_properties_key = 0;
@@ -1680,6 +1681,63 @@ bool ResumptionDataDB::SaveApplicationToDB(
     return false;
   }
   if (!InsertChoiceSetData(GetApplicationInteractionChoiseSets(application),
+                           application_primary_key)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert choiceset data to DB.");
+    db_->RollbackTransaction();
+    return false;
+  }
+  db_->CommitTransaction();
+  return true;
+}
+
+bool ResumptionDataDB::SaveApplicationToDB(
+      const smart_objects::SmartObject& application,
+      const std::string& policy_app_id,
+      const std::string& device_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  int64_t application_primary_key = 0;
+  int64_t global_properties_key = 0;
+  db_->BeginTransaction();
+  if (!InsertGlobalPropertiesData(application["globalProperties"],
+                                  global_properties_key)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert globalProperties data to DB.");
+    db_->RollbackTransaction();
+    return false;
+  }
+  ApplicationParams app(application);
+  if (!InsertApplicationData(app, policy_app_id, device_id,
+                             &application_primary_key, global_properties_key)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert application data to DB.");
+    db_->RollbackTransaction();
+    return false;
+  }
+  if (!InsertFilesData(application["applicationFiles"],
+                       application_primary_key)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert file data to DB.");
+    db_->RollbackTransaction();
+    return false;
+  }
+
+  if (!InsertSubMenuData(application["applicationSubMenus"],
+                         application_primary_key)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert submenu data to DB.");
+    db_->RollbackTransaction();
+    return false;
+  }
+  if (!InsertCommandsData(application["applicationCommands"],
+                          application_primary_key)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert commands data to DB.");
+    db_->RollbackTransaction();
+    return false;
+  }
+  if (!InsertSubscriptionsData(application["subscribtions"],
+                               application_primary_key)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert subscribtions data to DB.");
+    db_->RollbackTransaction();
+    return false;
+  }
+  if (!InsertChoiceSetData(application["applicationChoiceSets"],
                            application_primary_key)) {
     LOG4CXX_WARN(logger_, "Incorrect insert choiceset data to DB.");
     db_->RollbackTransaction();
@@ -2235,7 +2293,7 @@ bool ResumptionDataDB::ExecInsertVRHelpItem(int64_t global_properties_key,
   return true;
 }
 
-bool ResumptionDataDB::InsertApplicationData(app_mngr::ApplicationConstSharedPtr application,
+bool ResumptionDataDB::InsertApplicationData(app_mngr::ApplicationSharedPtr application,
                                              const std::string& policy_app_id,
                                              const std::string& device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -2435,7 +2493,7 @@ ApplicationParams::ApplicationParams(
   m_is_media_application = application[is_media_application].asBool();
 }
 
-ApplicationParams::ApplicationParams(app_mngr::ApplicationConstSharedPtr application)
+ApplicationParams::ApplicationParams(app_mngr::ApplicationSharedPtr application)
   : m_hash(),
     m_grammar_id(0),
     m_connection_key(0),
