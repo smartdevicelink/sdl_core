@@ -1563,7 +1563,10 @@ bool SQLPTRepresentation::SaveModuleType(const std::string& app_id,
   policy_table::ModuleTypes::const_iterator it;
   for (it = types.begin(); it != types.end(); ++it) {
     query.Bind(0, app_id);
-    query.Bind(1, std::string(policy_table::EnumToJsonString(*it)));
+    std::string module(policy_table::EnumToJsonString(*it));
+    query.Bind(1, module);
+    LOG4CXX_DEBUG(logger_,
+                  "Module(app: " << app_id << ", type: " << module << ")");
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into module type.");
       return false;
