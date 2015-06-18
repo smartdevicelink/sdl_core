@@ -118,6 +118,7 @@ class AccessRemoteImpl : public AccessRemote {
   FRIEND_TEST(AccessRemoteImplTest, EnableDisable);
   FRIEND_TEST(AccessRemoteImplTest, SetDefaultHmiTypes);
   FRIEND_TEST(AccessRemoteImplTest, GetGroups);
+  FRIEND_TEST(AccessRemoteImplTest, CheckParameters);
 };
 
 }  // namespace policy
