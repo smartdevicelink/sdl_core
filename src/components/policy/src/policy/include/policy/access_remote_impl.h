@@ -85,11 +85,11 @@ class AccessRemoteImpl : public AccessRemote {
   const policy_table::AppHMITypes& HmiTypes(const std::string& app_id);
   void GetGroupsIds(const std::string &device_id, const std::string &app_id,
                     FunctionalGroupIDs& grops_ids);
-  bool IsAllowed(policy_table::ModuleType module, const std::string rpc,
-                 const RemoteControlParams& params,
-                 const policy_table::AccessModules& allowed_modules) const;
-  bool CompareParameters(const RemoteControlParams& input,
-                         const policy_table::Strings& parameters) const;
+  bool IsAllowed(const policy_table::AccessModules& modules,
+                 const std::string& module_name, const std::string& rpc_name,
+                 RemoteControlParams* input) const;
+  bool CompareParameters(const policy_table::Strings& parameters,
+                         RemoteControlParams* input) const;
   utils::SharedPtr<CacheManager> cache_;
   PTString primary_device_;
   bool enabled_;
