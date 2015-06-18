@@ -188,7 +188,7 @@ TEST_F(CanModuleTest, IsAppForPluginFail) {
 
 TEST_F(CanModuleTest, ChangeDriverDevice) {
   Json::Value value(Json::ValueType::objectValue);
-  value[json_keys::kMethod] = functional_modules::hmi_api::on_primary_device;
+  value[json_keys::kMethod] = functional_modules::hmi_api::on_set_drivers_device;
   value[json_keys::kParams] = Json::Value(Json::ValueType::objectValue);
   value[json_keys::kParams][message_params::kDevice] = Json::Value(Json::ValueType::objectValue);
   value[json_keys::kParams][message_params::kDevice][json_keys::kId] = 1;
@@ -198,7 +198,7 @@ TEST_F(CanModuleTest, ChangeDriverDevice) {
   application_manager::MessagePtr message = new application_manager::Message(
     protocol_handler::MessagePriority::FromServiceType(
       protocol_handler::ServiceType::kRpc));
-  message->set_function_name(functional_modules::hmi_api::on_primary_device);
+  message->set_function_name(functional_modules::hmi_api::on_set_drivers_device);
   message->set_message_type(application_manager::MessageType::kNotification);
   message->set_json_message(json_str);
 
@@ -224,7 +224,7 @@ TEST_F(CanModuleTest, ChangeDriverDevice) {
 
 TEST_F(CanModuleTest, ChangeDriverDeviceOnOther) {
   Json::Value value(Json::ValueType::objectValue);
-  value[json_keys::kMethod] = functional_modules::hmi_api::on_primary_device;
+  value[json_keys::kMethod] = functional_modules::hmi_api::on_set_drivers_device;
   value[json_keys::kParams] = Json::Value(Json::ValueType::objectValue);
   value[json_keys::kParams][message_params::kDevice] = Json::Value(Json::ValueType::objectValue);
   value[json_keys::kParams][message_params::kDevice][json_keys::kId] = 1;
@@ -234,7 +234,7 @@ TEST_F(CanModuleTest, ChangeDriverDeviceOnOther) {
   application_manager::MessagePtr message = new application_manager::Message(
     protocol_handler::MessagePriority::FromServiceType(
       protocol_handler::ServiceType::kRpc));
-  message->set_function_name(functional_modules::hmi_api::on_primary_device);
+  message->set_function_name(functional_modules::hmi_api::on_set_drivers_device);
   message->set_message_type(application_manager::MessageType::kNotification);
   message->set_json_message(json_str);
 

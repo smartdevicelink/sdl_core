@@ -100,7 +100,7 @@ void CANModule::SubscribeOnFunctions() {
 
   plugin_info_.hmi_function_list.push_back(hmi_api::grant_access);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_reverse_apps_allowing);
-  plugin_info_.hmi_function_list.push_back(hmi_api::on_primary_device);
+  plugin_info_.hmi_function_list.push_back(hmi_api::on_set_drivers_device);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_app_deactivated);
   plugin_info_.hmi_function_list.push_back(hmi_api::sdl_activate_app);
 }
@@ -254,17 +254,15 @@ functional_modules::ProcessResult CANModule::HandleMessage(
           }
         }
         break;
-      } else if (functional_modules::hmi_api::on_set_driver_device
-          == function_name
-          // TODO(KKolodiy): for backward compatibility HMI
-          || functional_modules::hmi_api::on_primary_device == function_name) {
+      } else if (functional_modules::hmi_api::on_set_drivers_device
+          == function_name) {
         if (value.isMember(json_keys::kParams)) {
           if (value[json_keys::kParams].isMember(message_params::kDevice)) {
             PolicyHelper::SetPrimaryDevice(
               value[json_keys::kParams][message_params::kDevice]
               [json_keys::kId].asUInt());
           } else {
-            LOG4CXX_ERROR(logger_, "Invalid OnPrimaryDevice notification");
+            LOG4CXX_ERROR(logger_, "Invalid RC.OnSetDriverDevice notification");
           }
         }
         return ProcessResult::PROCESSED;
