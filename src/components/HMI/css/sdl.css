@@ -528,6 +528,15 @@
 	line-height: 48px;
 }
 
+#policy_update_button {
+	width: 117px;
+	height: 48px;
+	left: 1200px;
+	top: 206px;
+	text-align: center;
+	line-height: 48px;
+}
+
 #tbtClientStateButton.tbtClientStateButton {
 	width: 158px;
 	height: 48px;

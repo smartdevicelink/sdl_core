@@ -201,7 +201,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
             Em.Logger.log("FFW.BasicCommunicationRPC.onRPCResult");
             this._super();
-
+            Em.Logger.log("OnRPCResult: " + JSON.stringify(response));
             if ("result" in response
                 && response.result.code === SDL.SDLModel.resultCode["SUCCESS"]) {
 
@@ -300,7 +300,7 @@ FFW.BasicCommunication = FFW.RPCObserver
                     } else {
                         this.OnSystemRequest("PROPRIETARY");
                     }
-
+                    Em.Logger.log("response.result.urls: "+ JSON.stringify(response.result.urls));
                     SDL.SettingsController.policyUpdateRetry();
 
                 }
@@ -520,6 +520,7 @@ FFW.BasicCommunication = FFW.RPCObserver
                     this.client.send(JSONMessage);
                 }
                 if (request.method == "BasicCommunication.PolicyUpdate") {
+                    Em.Logger.log("policy update");
                     SDL.SettingsController.policyUpdateFile = request.params.file;
 
                     SDL.SDLModel.policyUpdateRetry.timeout = request.params.timeout;
@@ -785,6 +786,27 @@ FFW.BasicCommunication = FFW.RPCObserver
                 "method": "SDL.OnReceivedPolicyUpdate",
                 "params": {
                     "policyfile": policyfile
+                }
+            };
+
+            this.client.send(JSONMessage);
+        },
+
+        /**
+         * Notification of decrypted policy table available
+         *
+         * @param {String} policyfile
+         */
+        OnHMIPolicyUpdate: function() {
+
+            Em.Logger.log("FFW.SDL.OnReceivedPolicyUpdate");
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "method": "SDL.OnReceivedPolicyUpdate",
+                "params": {
+                    "policyfile": document.location.pathname.replace("index.html", "IVSU/POLICY_UPDATE_TEST")
                 }
             };
 
@@ -1290,6 +1312,8 @@ FFW.BasicCommunication = FFW.RPCObserver
         OnSystemRequest: function(type, appID, fileName, url) {
 
             Em.Logger.log("FFW.BasicCommunication.OnSystemRequest");
+            Em.Logger.log("OnSystemRequest Params: " + type + " " + appID + " " + fileName
+                + " " + url);
 
             // send request
 

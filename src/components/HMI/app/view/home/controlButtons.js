@@ -53,8 +53,17 @@ SDL.ControlButtons = Em.ContainerView
             'appTTSVRLanguagesLabel',
             'appUILang',
             'appTTSVRLang',
-            'phoneCall'
+            'phoneCall',
+            'policyUpdate'
         ],
+
+        policyUpdate: SDL.Button.extend({
+            elementId: 'policy_update_button',
+            text: 'Policy Update',
+            action: 'OnHMIPolicyUpdate',
+            target: 'FFW.BasicCommunication'
+
+        }),
 
         /**
          * Button to initiate phone call emulation on HMI
