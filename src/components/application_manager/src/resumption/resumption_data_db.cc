@@ -37,6 +37,8 @@
 #include "application_manager/smart_object_keys.h"
 #include "config_profile/profile.h"
 #include "application_manager/message_helper.h"
+#include "utils/helpers.h"
+#include "utils/gen_hash.h"
 
 namespace {
 const std::string kDatabaseName = "resumption";
@@ -593,6 +595,110 @@ void ResumptionDataDB::UpdateHmiLevel(const std::string& policy_app_id,
       WriteDb();
     }
   }
+}
+
+bool ResumptionDataDB::RefreshDB() const {
+  utils::dbms::SQLQuery query(db());
+  if (!query.Exec(resumption::kDropSchema)) {
+    LOG4CXX_WARN(logger_,
+                 "Failed dropping database: " << query.LastError().text());
+    return false;
+  }
+  if (!query.Exec(resumption::kCreateSchema)) {
+    LOG4CXX_ERROR(
+      logger_,
+      "Failed creating schema of database: " << query.LastError().text());
+    return false;
+  }
+  if (!query.Exec(resumption::kInsertInitData)) {
+    LOG4CXX_ERROR(
+      logger_,
+      "Failed insert init data to database: " << query.LastError().text());
+    return false;
+  }
+  return true;
+}
+
+bool ResumptionDataDB::GetAllData(smart_objects::SmartObject& data) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(resumption::kSelectAllApps)) {
+    LOG4CXX_ERROR(logger_, "Can't get applications data from DB.");
+    return false;
+  }
+
+  data = smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  uint32_t index = 0;
+  while (query.Next()) {
+    const std::string app_id = query.GetString(0);
+    const std::string device_id = query.GetString(1);
+    if (GetSavedApplication(app_id, device_id, data[index])) {
+      ++index;
+    }
+  }
+  return true;
+}
+
+bool ResumptionDataDB::SaveAllData(
+    const smart_objects::SmartObject& data)  {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (smart_objects::SmartType_Array != data.getType()) {
+    LOG4CXX_ERROR(logger_, "Unexpected type for resumption data.");
+    return false;
+  }
+  const smart_objects::SmartArray* apps = data.asArray();
+  smart_objects::SmartArray::const_iterator it_apps =
+      apps->begin();
+  for (;apps->end() != it_apps; ++it_apps) {
+    if (!SaveApplicationToDB((*it_apps),
+                             (*it_apps)["appID"].asString(),
+                             (*it_apps)["deviceID"].asString())) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool ResumptionDataDB::IsDBVersionActual() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(resumption::kSelectDBVersion) || !query.Exec()) {
+    LOG4CXX_ERROR(logger_, "Failed to get DB version: "
+                 << query.LastError().text());
+    return false;
+  }
+
+  const int32_t saved_db_version = query.GetInteger(0);
+  const int32_t current_db_version = GetDBVersion();
+  LOG4CXX_DEBUG(logger_, "Saved DB version is: " << saved_db_version
+                << ". Current DB vesion is: " << current_db_version);
+
+  return current_db_version == saved_db_version;
+}
+
+bool ResumptionDataDB::UpdateDBVersion() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(resumption::kUpdateDBVersion)) {
+    LOG4CXX_ERROR(logger_, "Incorrect DB version update query: "
+                 << query.LastError().text());
+    return false;
+  }
+
+  query.Bind(0, GetDBVersion());
+
+  if (!query.Exec()) {
+    LOG4CXX_ERROR(logger_, "DB version update failed: "
+                 << query.LastError().text());
+    return false;
+  }
+
+  return true;
+}
+
+const int32_t ResumptionDataDB::GetDBVersion() const {
+  return utils::Djb2HashFromString(resumption::kCreateSchema);
 }
 
 bool ResumptionDataDB::SelectFilesData(const std::string& policy_app_id,

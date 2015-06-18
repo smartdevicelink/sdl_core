@@ -1000,10 +1000,25 @@ bool CacheManager::Init(const std::string& file_name) {
     case InitResult::EXISTS: {
       LOG4CXX_INFO(logger_, "Policy Table exists, was loaded correctly.");
       result = LoadFromBackup();
+      if (result) {
+        if (!backup_->IsDBVersionActual()) {
+          if (!backup_->RefreshDB()) {
+            return false;
+          }
+          backup_->UpdateDBVersion();
+          Backup();
+        }
+      }
     } break;
     case InitResult::SUCCESS: {
       LOG4CXX_INFO(logger_, "Policy Table was inited successfully");
       result = LoadFromFile(file_name);
+      backup_->UpdateDBVersion();
+      if (result) {
+        Backup();
+      } else {
+        ex_backup_->RemoveDB();
+      }
     } break;
     default: {
       result = false;

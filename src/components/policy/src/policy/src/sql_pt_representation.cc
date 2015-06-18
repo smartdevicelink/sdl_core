@@ -37,6 +37,8 @@
 #include <unistd.h>
 
 #include "utils/logger.h"
+#include "utils/file_system.h"
+#include "utils/gen_hash.h"
 #include "policy/sql_pt_representation.h"
 #include "policy/sql_wrapper.h"
 #include "policy/sql_pt_queries.h"
@@ -1550,6 +1552,53 @@ bool SQLPTRepresentation::SetIsDefault(const std::string& app_id,
     return false;
   }
   return true;
+}
+
+void SQLPTRepresentation::RemoveDB() const {
+  file_system::DeleteFile(db_->get_path());
+}
+
+bool SQLPTRepresentation::IsDBVersionActual() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectDBVersion) || !query.Exec()) {
+    LOG4CXX_ERROR(logger_, "Failed to get DB version: "
+                 << query.LastError().text());
+    return false;
+  }
+
+  const int32_t saved_db_version = query.GetInteger(0);
+  const int32_t current_db_version = GetDBVersion();
+  LOG4CXX_DEBUG(logger_, "Saved DB version is: " << saved_db_version
+                << ". Current DB vesion is: " << current_db_version);
+
+  return current_db_version == saved_db_version;
+}
+
+bool SQLPTRepresentation::UpdateDBVersion() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kUpdateDBVersion)) {
+    LOG4CXX_ERROR(logger_, "Incorrect DB version query: "
+                 << query.LastError().text());
+    return false;
+  }
+
+  const int32_t db_version = GetDBVersion();
+  LOG4CXX_DEBUG(logger_, "DB version will be updated to: " << db_version);
+  query.Bind(0, db_version);
+
+  if (!query.Exec()) {
+    LOG4CXX_ERROR(logger_, "DB version getting failed: "
+                 << query.LastError().text());
+    return false;
+  }
+
+  return true;
+}
+
+const int32_t SQLPTRepresentation::GetDBVersion() const {
+  return utils::Djb2HashFromString(sql_pt::kCreateSchema);
 }
 
 utils::dbms::SQLDatabase* SQLPTRepresentation::db() const {

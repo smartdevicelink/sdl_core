@@ -317,6 +317,9 @@ const std::string kCreateSchema =
   "  ON `message`(`language_code`);"
   "CREATE INDEX IF NOT EXISTS `message.fk_message_consumer_friendly_messages1_idx` "
   "  ON `message`(`message_type_name`);"
+  "CREATE TABLE IF NOT EXISTS `_internal_data`( "
+  "   `db_version_hash` INTEGER "
+  "  ); "
   "COMMIT;";
 
 const std::string kInsertInitData =
@@ -342,6 +345,7 @@ const std::string kInsertInitData =
   "INSERT OR IGNORE INTO `hmi_level`(`value`) VALUES ('BACKGROUND'); "
   "INSERT OR IGNORE INTO `hmi_level`(`value`) VALUES ('NONE'); "
   "INSERT OR IGNORE INTO `version` (`number`) VALUES('0'); "
+  "INSERT OR IGNORE INTO `_internal_data` (`db_version_hash`) VALUES(0); "
   "";
 
 const std::string kDropSchema =
@@ -391,6 +395,7 @@ const std::string kDropSchema =
   "DROP TABLE IF EXISTS `module_meta`; "
   "DROP TABLE IF EXISTS `usage_and_error_count`; "
   "DROP TABLE IF EXISTS `device`; "
+  "DROP TABLE IF EXISTS `_internal_data`; "
   "COMMIT; "
   "VACUUM;";
 
@@ -662,6 +667,12 @@ const std::string kSelectApplicationFull =
   "SELECT `keep_context`, `steal_focus`, `default_hmi`, `priority_value`, "
   "  `is_revoked`, `is_default`, `is_predata`, `memory_kb`,"
   "  `heart_beat_timeout_ms`, `certificate` FROM `application` WHERE `id` = ?";
+
+const std::string kSelectDBVersion =
+    "SELECT `db_version_hash` from `_internal_data`";
+
+const std::string kUpdateDBVersion =
+    "UPDATE `_internal_data` SET `db_version_hash` = ? ";
 
 }  // namespace sql_pt
 }  // namespace policy

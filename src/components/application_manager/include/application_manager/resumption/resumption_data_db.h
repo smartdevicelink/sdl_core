@@ -203,7 +203,19 @@ class ResumptionDataDB : public ResumptionData {
                               const std::string& device_id,
                               int32_t hmi_level);
 
+  bool RefreshDB() const;
+
+  bool GetAllData(smart_objects::SmartObject& data) const;
+
+  bool SaveAllData(const smart_objects::SmartObject& data);
+
+  bool IsDBVersionActual() const;
+
+  bool UpdateDBVersion() const;
+
  private:
+
+  const int32_t GetDBVersion() const;
 
   /**
    * @brief Retrieves hmi level from db

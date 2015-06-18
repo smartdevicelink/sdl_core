@@ -166,10 +166,26 @@ class SQLPTRepresentation : public virtual PTRepresentation {
     utils::dbms::SQLDatabase* db() const;
     virtual bool SetIsDefault(const std::string& app_id, bool is_default) const;
 
+    /**
+     * @brief RemoveDB allows to remove the database.
+     * It will either remove or do nothing in case file not exists or any other
+     * troubles are happens during this operation.
+     */
+    void RemoveDB() const;
+
+    virtual bool IsDBVersionActual() const;
+
+    virtual bool UpdateDBVersion() const;
+
   private:
     static const std::string kDatabaseName;
     utils::dbms::SQLDatabase* db_;
 
+#ifdef BUILD_TESTS
+    uint32_t open_counter_;
+#endif // BUILD_TESTS
+
+    const int32_t GetDBVersion() const;
     bool SaveRpcs(int64_t group_id, const policy_table::Rpc& rpcs);
     bool SaveServiceEndpoints(const policy_table::ServiceEndpoints& endpoints);
     bool SaveSecondsBetweenRetries(
