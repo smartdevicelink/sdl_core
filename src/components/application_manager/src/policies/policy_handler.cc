@@ -30,13 +30,13 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "application_manager/policies/policy_handler.h"
+
 #include <unistd.h>
 #include <dlfcn.h>
 #include <algorithm>
 #include <vector>
 #include "application_manager/smart_object_keys.h"
-
-#include "application_manager/policies/policy_handler.h"
 
 #include "application_manager/policies/delegates/app_permission_delegate.h"
 
@@ -1080,6 +1080,11 @@ void PolicyHandler::GetServiceUrls(const std::string& service_type, EndpointUrls
   policy_manager_->GetServiceUrls(service_type, end_points);
 }
 
+std::string PolicyHandler::GetLockScreenIconUrl() const {
+  POLICY_LIB_CHECK(std::string(""));
+  return policy_manager_->GetLockScreenIconUrl();
+}
+
 void PolicyHandler::ResetRetrySequence() {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->ResetRetrySequence();
@@ -1290,6 +1295,11 @@ void policy::PolicyHandler::OnAppsSearchStarted() {
 void policy::PolicyHandler::OnAppsSearchCompleted() {
   POLICY_LIB_CHECK();
   policy_manager_->OnAppsSearchCompleted();
+}
+
+void PolicyHandler::OnAppRegisteredOnMobile(const std::string& application_id) {
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->OnAppRegisteredOnMobile(application_id);
 }
 
 void PolicyHandler::Increment(usage_statistics::GlobalCounterId type) {

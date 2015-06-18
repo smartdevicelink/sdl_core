@@ -48,7 +48,7 @@
 #include "utils/conditional_variable.h"
 #include "utils/rwlock.h"
 #include "usage_statistics/statistics_manager.h"
-#include "policy_handler_observer.h"
+#include "application_manager/policies/policy_handler_observer.h"
 #include "utils/threads/async_runner.h"
 #include "application_manager/application_manager_impl.h"
 
@@ -151,6 +151,8 @@ class PolicyHandler :
                                  StringArray* app_hmi_types = NULL);
   void GetServiceUrls(const std::string& service_type,
                       EndpointUrls& end_points);
+
+  std::string GetLockScreenIconUrl() const;
   void ResetRetrySequence();
   int NextRetryTimeout();
   int TimeoutExchange();
@@ -378,6 +380,15 @@ class PolicyHandler :
    * @brief Handler on applications search completed
    */
   virtual void OnAppsSearchCompleted();
+
+  /**
+   * @brief OnAppRegisteredOnMobile alows to handle event when application were
+   * succesfully registered on mobile device.
+   * It will send OnAppPermissionSend notification and will try to start PTU.
+   *
+   * @param application_id registered application.
+   */
+  void OnAppRegisteredOnMobile(const std::string& application_id);
 
 //TODO(AKutsan) REMOVE THIS UGLY HOTFIX
   virtual void Increment(usage_statistics::GlobalCounterId type);

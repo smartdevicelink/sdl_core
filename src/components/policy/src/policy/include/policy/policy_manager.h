@@ -74,7 +74,14 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     virtual bool ResetPT(const std::string& file_name) = 0;
 
     /**
-     * @brief Gets all URLs for particular service.
+     * @brief GetLockScreenIcon allows to obtain lock screen icon url;
+     *
+     * @return url which point to the resourse where lock screen icon could be obtained.
+     */
+    virtual std::string GetLockScreenIconUrl() const = 0;
+
+    /**
+     * @brief Gets all URLs for sending PTS to from PT itself.
      * @param service_type Service specifies user of URL
      * @return vector of urls
      */
@@ -399,6 +406,15 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @brief Handler on applications search completed
      */
     virtual void OnAppsSearchCompleted() = 0;
+
+    /**
+     * @brief OnAppRegisteredOnMobile alows to handle event when application were
+     * succesfully registered on mobile device.
+     * It will send OnAppPermissionSend notification and will try to start PTU.
+     *
+     * @param application_id registered application.
+     */
+    virtual void OnAppRegisteredOnMobile(const std::string& application_id) = 0;
 
 #ifdef SDL_REMOTE_CONTROL
     /**

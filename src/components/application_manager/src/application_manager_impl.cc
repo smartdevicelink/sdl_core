@@ -260,6 +260,16 @@ std::vector<ApplicationSharedPtr> ApplicationManagerImpl::applications_by_button
   return apps;
 }
 
+std::vector<ApplicationSharedPtr> ApplicationManagerImpl::applications_by_interior_vehicle_data(
+  smart_objects::SmartObject moduleDescription) {
+  SubscribedToInteriorVehicleDataPredicate finder(
+        moduleDescription);
+  ApplicationListAccessor accessor;
+  std::vector<ApplicationSharedPtr> apps = accessor.FindAll(finder);
+  LOG4CXX_DEBUG(logger_, " Found count: " << apps.size());
+  return apps;
+}
+
 std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
                                              VehicleDataType vehicle_info, int value) {
 
@@ -281,7 +291,7 @@ std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
   return apps;
 }
 
-bool ApplicationManagerImpl::DoesAudioAppWithSameHMITypeExistInFullOrLimited(
+bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
     ApplicationSharedPtr app) const {
   bool voice_state = app->is_voice_communication_supported();
   bool media_state = app->is_media_application();
@@ -466,13 +476,16 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   apps_to_register_list_lock_.Release();
 
   if (!application->hmi_app_id()) {
-    application->set_hmi_application_id(resume_ctrl_.IsApplicationSaved(application->mobile_app_id())?
-              resume_ctrl_.GetHMIApplicationID(application->mobile_app_id()) :
-          GenerateNewHMIAppID());
+    const bool is_saved = resume_ctrl_.IsApplicationSaved(mobile_app_id);
+    application->set_hmi_application_id(is_saved ?
+              resume_ctrl_.GetHMIApplicationID(mobile_app_id) : GenerateNewHMIAppID());
   }
 
   ApplicationListAccessor app_list_accesor;
   application->MarkRegistered();
+  policy::PolicyHandler::instance()->AddApplication(application->mobile_app_id(),
+      &message[strings::msg_params][strings::app_hmi_type]);
+  application->set_hmi_level(GetDefaultHmiLevel(application));
   app_list_accesor.Insert(application);
 
   return application;
@@ -488,6 +501,7 @@ bool ApplicationManagerImpl::LoadAppDataToHMI(ApplicationSharedPtr app) {
 
 bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
+
   if (!app) {
     LOG4CXX_ERROR(logger_, "Null-pointer application received.");
     NOTREACHED();
@@ -499,57 +513,77 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
     return false;
   }
 
-  using namespace mobile_api::HMILevel;
+  using namespace mobile_api;
 
-  bool is_new_app_media = app->is_media_application();
-  ApplicationSharedPtr current_active_app = active_application();
-
-  if (HMI_LIMITED != app->hmi_level()) {
+  if (HMILevel::HMI_LIMITED != app->hmi_level()) {
     if (app->has_been_activated()) {
       MessageHelper::SendAppDataToHMI(app);
     }
   }
 
-  if (current_active_app) {
+  bool is_new_app_media = app->is_media_application();
+  bool is_new_app_voice = app->is_voice_communication_supported();
+  bool is_new_app_navi = app->is_navi();
+
+  ApplicationSharedPtr limited_media_app = get_limited_media_application();
+  ApplicationSharedPtr limited_voice_app = get_limited_voice_application();
+  ApplicationSharedPtr limited_navi_app = get_limited_navi_application();
+
+  ApplicationSharedPtr current_active_app = active_application();
+  if (current_active_app.valid()) {
     if (is_new_app_media && current_active_app->is_media_application()) {
       MakeAppNotAudible(current_active_app->app_id());
+      MessageHelper::SendHMIStatusNotification(*current_active_app);
     } else {
-      ChangeAppsHMILevel(current_active_app->app_id(),
-                         current_active_app->IsAudioApplication() ? HMI_LIMITED :
-                                                                    HMI_BACKGROUND);
+      DeactivateApplication(current_active_app);
     }
-
-    MessageHelper::SendHMIStatusNotification(*current_active_app);
   }
 
   MakeAppFullScreen(app->app_id());
 
   if (is_new_app_media) {
-    ApplicationSharedPtr limited_app = get_limited_media_application();
-    if (limited_app ) {
-      if (!limited_app->is_navi()) {
-        MakeAppNotAudible(limited_app->app_id());
-        MessageHelper::SendHMIStatusNotification(*limited_app);
+    if (limited_media_app.valid()) {
+      if (!limited_media_app->is_navi()) {
+        MakeAppNotAudible(limited_media_app->app_id());
+        MessageHelper::SendHMIStatusNotification(*limited_media_app);
       } else {
-        app->set_audio_streaming_state(mobile_apis::AudioStreamingState::ATTENUATED);
+        app->set_audio_streaming_state(AudioStreamingState::ATTENUATED);
         MessageHelper::SendHMIStatusNotification(*app);
       }
     }
   }
 
-  if (app->is_voice_communication_supported() || app->is_navi()) {
-    ApplicationSharedPtr limited_app = get_limited_voice_application();
-    if (limited_app.valid()) {
-      if (limited_app->is_media_application()) {
-        limited_app->set_audio_streaming_state(
-            mobile_api::AudioStreamingState::NOT_AUDIBLE);
+  if (is_new_app_voice && limited_voice_app.valid()) {
+    if (limited_voice_app->is_media_application()) {
+      MakeAppNotAudible(limited_voice_app->app_id());
       }
-      ChangeAppsHMILevel(app->app_id(), HMI_BACKGROUND);
-      MessageHelper::SendHMIStatusNotification(*limited_app);
+    ChangeAppsHMILevel(limited_voice_app->app_id(), HMILevel::HMI_BACKGROUND);
+    MessageHelper::SendHMIStatusNotification(*limited_voice_app);
+  }
+
+  if (is_new_app_navi && limited_navi_app.valid()) {
+    if (limited_navi_app->is_media_application()) {
+      MakeAppNotAudible(limited_navi_app->app_id());
     }
+    ChangeAppsHMILevel(limited_navi_app->app_id(), HMILevel::HMI_BACKGROUND);
+    MessageHelper::SendHMIStatusNotification(*limited_navi_app);
   }
 
   return true;
+}
+
+void ApplicationManagerImpl::DeactivateApplication(ApplicationSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  using namespace mobile_apis::HMILevel;
+
+  if (app->IsAudioApplication() && !(ApplicationManagerImpl::instance()->
+          IsAppTypeExistsInFullOrLimited(app))) {
+    ChangeAppsHMILevel(app->app_id(), HMI_LIMITED);
+  } else {
+    ChangeAppsHMILevel(app->app_id(), HMI_BACKGROUND);
+  }
+  MessageHelper::SendHMIStatusNotification(*app);
 }
 
 mobile_api::HMILevel::eType ApplicationManagerImpl::IsHmiLevelFullAllowed(
@@ -562,10 +596,8 @@ mobile_api::HMILevel::eType ApplicationManagerImpl::IsHmiLevelFullAllowed(
   }
   bool is_audio_app = app->IsAudioApplication();
   bool does_audio_app_with_same_type_exist =
-      DoesAudioAppWithSameHMITypeExistInFullOrLimited(app);
+      IsAppTypeExistsInFullOrLimited(app);
   bool is_active_app_exist = active_application().valid();
-
-
 
   mobile_api::HMILevel::eType result = mobile_api::HMILevel::HMI_FULL;
   if (is_audio_app && does_audio_app_with_same_type_exist) {
@@ -2266,6 +2298,10 @@ void ApplicationManagerImpl::UnregisterApplication(
         ApplicationSharedPtr app_ptr = application(app_id);
         if(app_ptr) {
           app_ptr->usage_report().RecordRemovalsForBadBehavior();
+          if (reason == mobile_apis::Result::TOO_MANY_PENDING_REQUESTS) {
+            LOG4CXX_DEBUG(logger_, "INSERT: " << GetHashedAppID(app_id, app_ptr->mobile_app_id()));
+            forbidden_applications.insert(GetHashedAppID(app_id, app_ptr->mobile_app_id()));
+          }
         }
       break;
     }
@@ -2541,6 +2577,18 @@ bool ApplicationManagerImpl::IsLowVoltage() {
   return is_low_voltage_;
 }
 
+std::string ApplicationManagerImpl::GetHashedAppID(uint32_t connection_key,
+                                             const std::string& mobile_app_id) {
+  using namespace connection_handler;
+  uint32_t device_id = 0;
+  ConnectionHandlerImpl::instance()-> GetDataOnSessionKey(
+        connection_key, 0, NULL, &device_id);
+  std::string device_name;
+  ConnectionHandlerImpl::instance()->GetDataOnDeviceID(device_id, &device_name);
+
+  return mobile_app_id + device_name;
+}
+
 void ApplicationManagerImpl::NaviAppStreamStatus(bool stream_active) {
   ApplicationSharedPtr active_app = active_application();
   using namespace mobile_apis;
@@ -2752,6 +2800,12 @@ void ApplicationManagerImpl::Unmute(VRTTSSessionChanging changing_state) {
   }
 }
 
+bool ApplicationManagerImpl::IsApplicationForbidden(uint32_t connection_key,
+                                                    const std::string& mobile_app_id) {
+  const std::string name = GetHashedAppID(connection_key, mobile_app_id);
+  return forbidden_applications.find(name) != forbidden_applications.end();
+}
+
 mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
   const std::vector<uint8_t>& binary_data, const std::string& file_path,
   const std::string& file_name, const int64_t offset) {
@@ -2786,10 +2840,14 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
   if (!file_system::Write(file_stream, binary_data.data(),
                           binary_data.size())) {
     file_system::Close(file_stream);
+    delete file_stream;
+    file_stream = NULL;
     return mobile_apis::Result::GENERIC_ERROR;
   }
 
   file_system::Close(file_stream);
+  delete file_stream;
+  file_stream = NULL;
   LOG4CXX_INFO(logger_, "Successfully write data to file");
   return mobile_apis::Result::SUCCESS;
 }

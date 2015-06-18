@@ -150,10 +150,6 @@ void ConnectionHandlerImpl::OnDeviceAdded(
           device_info.device_handle(),
           Device(device_info.device_handle(), device_info.name(),
                  device_info.mac_address(), device_info.connection_type())));
-  sync_primitives::AutoLock lock(connection_handler_observer_lock_);
-  if (connection_handler_observer_) {
-    connection_handler_observer_->OnDeviceListUpdated(device_list_);
-  }
 }
 
 void ConnectionHandlerImpl::OnDeviceRemoved(
@@ -185,7 +181,6 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
   sync_primitives::AutoLock lock(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
     connection_handler_observer_->RemoveDevice(device_info.device_handle());
-    connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
 }
 
@@ -397,7 +392,7 @@ void ConnectionHandlerImpl::OnMalformedMessageCallback(const uint32_t &connectio
   PairFromKey(connection_key, &connection_handle, &session_id);
 
   LOG4CXX_INFO(logger_, "Disconnect malformed messaging application");
-  CloseConnectionSessions(connection_handle, kCommon);
+  CloseConnectionSessions(connection_handle, kMalformed);
   CloseConnection(connection_handle);
 }
 
@@ -770,10 +765,6 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Closing session with id: " << session_id);
 
-  if (protocol_handler_) {
-    protocol_handler_->SendEndSession(connection_handle, session_id);
-  }
-
   transport_manager::ConnectionUID connection_id =
         ConnectionUIDFromHandle(connection_handle);
 
@@ -795,28 +786,32 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
     }
   }
 
-  SessionMap::const_iterator session_map_itr = session_map.find(session_id);
-  if (session_map_itr != session_map.end()) {
-    const uint32_t session_key = KeyFromPair(connection_id, session_id);
-    const Session &session = session_map_itr->second;
-    const ServiceList &service_list = session.service_list;
-
-    ServiceList::const_iterator service_list_itr = service_list.begin();
-    for (;service_list_itr != service_list.end(); ++service_list_itr) {
-      const protocol_handler::ServiceType service_type =
-          service_list_itr->service_type;
-      connection_handler_observer_->OnServiceEndedCallback(session_key,
-                                                           service_type);
+  // In case of malformed message the connection should be broke up without
+  // any other notification to mobile.
+  if (close_reason != kMalformed) {
+    if (protocol_handler_) {
+      protocol_handler_->SendEndSession(connection_handle, session_id);
     }
-  } else {
-    LOG4CXX_ERROR(logger_, "Session with id: " << session_id
-                  << " not found");
-    session_map.clear();
-    return;
+
+    SessionMap::const_iterator session_map_itr = session_map.find(session_id);
+    if (session_map_itr != session_map.end()) {
+      const uint32_t session_key = KeyFromPair(connection_id, session_id);
+      const Session &session = session_map_itr->second;
+      const ServiceList &service_list = session.service_list;
+
+      ServiceList::const_iterator service_list_itr = service_list.begin();
+      for (;service_list_itr != service_list.end(); ++service_list_itr) {
+        const protocol_handler::ServiceType service_type =
+            service_list_itr->service_type;
+        connection_handler_observer_->OnServiceEndedCallback(session_key,
+                                                             service_type);
+      }
+    } else {
+      LOG4CXX_ERROR(logger_, "Session with id: " << session_id << " not found");
+      return;
+    }
+    LOG4CXX_DEBUG(logger_, "Session with id: " << session_id << " has been closed successfully");
   }
-  session_map.clear();
-  LOG4CXX_DEBUG(logger_, "Session with id: " << session_id
-                << " has been closed successfully");
 }
 
 void ConnectionHandlerImpl::CloseConnectionSessions(

@@ -480,6 +480,12 @@ class Profile : public utils::Singleton<Profile> {
 
     size_t message_frequency_time() const;
 
+    bool malformed_message_filtering() const;
+
+    size_t malformed_frequency_count() const;
+
+    size_t malformed_frequency_time() const;
+
     uint16_t attempts_to_open_policy_db() const;
 
     uint16_t open_attempt_timeout_ms() const;
@@ -489,6 +495,8 @@ class Profile : public utils::Singleton<Profile> {
     uint32_t resumption_delay_after_ign() const;
 
     uint32_t hash_string_size() const;
+
+    bool logs_enabled() const;
 
     /*
      * @brief Updates all related values from ini file
@@ -692,6 +700,7 @@ private:
     uint32_t                        resumption_delay_before_ign_;
     uint32_t                        resumption_delay_after_ign_;
     uint32_t                        hash_string_size_;
+    bool                            logs_enabled_;
 
     FRIEND_BASE_SINGLETON_CLASS(Profile);
     DISALLOW_COPY_AND_ASSIGN(Profile);

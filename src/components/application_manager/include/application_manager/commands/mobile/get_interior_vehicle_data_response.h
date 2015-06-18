@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,13 +29,31 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "gmock/gmock.h"
 
-int main(int argc, char** argv) {
-   testing::InitGoogleMock(&argc, argv);
-   return RUN_ALL_TESTS();
-}
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_RESPONSE_H_
 
+#include "application_manager/commands/command_response_impl.h"
+#include "application_manager/message.h"
+#include "utils/macro.h"
 
+namespace application_manager {
+namespace commands {
 
+class GetInteriorVehicleDataResponse : public CommandResponseImpl {
+ public:
 
+  explicit GetInteriorVehicleDataResponse(const MessageSharedPtr& message);
+
+  virtual ~GetInteriorVehicleDataResponse();
+
+  virtual void Run();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(GetInteriorVehicleDataResponse);
+};
+
+}  // namespace commands
+}  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_INTERIOR_VEHICLE_DATA_RESPONSE_H_

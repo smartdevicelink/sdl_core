@@ -73,7 +73,7 @@ class SQLPTRepresentation : public virtual PTRepresentation {
       const std::vector<std::string>& msg_codes, const std::string& language);
 
     virtual EndpointUrls GetUpdateUrls(int service_type);
-
+    virtual std::string GetLockScreenIconUrl() const;
     virtual int GetNotificationsNumber(const std::string& priority);
     virtual bool GetPriority(const std::string& policy_app_id,
                              std::string* priority);

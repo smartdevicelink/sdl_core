@@ -231,6 +231,10 @@ void PolicyManagerImpl::RequestPTUpdate() {
   update_status_manager_.ResetUpdateSchedule();
 }
 
+std::string PolicyManagerImpl::GetLockScreenIconUrl() const {
+  return cache_->GetLockScreenIconUrl();
+}
+
 void PolicyManagerImpl::StartPTExchange() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -837,6 +841,12 @@ bool PolicyManagerImpl::CanAppStealFocus(const std::string& app_id) {
 void PolicyManagerImpl::MarkUnpairedDevice(const std::string& device_id) {
 }
 
+void PolicyManagerImpl::OnAppRegisteredOnMobile(
+    const std::string& application_id) {
+  StartPTExchange();
+  SendNotificationOnPermissionsUpdated(application_id);
+}
+
 void PolicyManagerImpl::AddApplication(const std::string& application_id,
                                        const std::vector<int>& hmi_types) {
   LOG4CXX_INFO(logger_, "AddApplication");
@@ -853,8 +863,6 @@ void PolicyManagerImpl::AddApplication(const std::string& application_id,
 #if SDL_REMOTE_CONTROL
   access_remote_->SetDefaultHmiTypes(application_id, hmi_types);
 #endif  // SDL_REMOTE_CONTROL
-  StartPTExchange();
-  SendNotificationOnPermissionsUpdated(application_id);
 }
 
 void PolicyManagerImpl::RemoveAppConsentForGroup(const std::string& app_id,

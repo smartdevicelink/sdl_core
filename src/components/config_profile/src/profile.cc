@@ -82,6 +82,7 @@ const char* kServerAddressKey = "ServerAddress";
 const char* kAppInfoStorageKey = "AppInfoStorage";
 const char* kAppStorageFolderKey = "AppStorageFolder";
 const char* kAppResourseFolderKey = "AppResourceFolder";
+const char* kLogsEnabledKey = "LogsEnabled";
 const char* kAppConfigFolderKey = "AppConfigFolder";
 const char* kEnableProtocol4Key = "EnableProtocol4";
 const char* kAppIconsFolderKey = "AppIconsFolder";
@@ -152,9 +153,12 @@ const char* kIAP2HubConnectAttemptskey = "IAP2HubConnectAttempts";
 const char* kIAPHubConnectionWaitTimeoutKey = "ConnectionWaitTimeout";
 const char* kDefaultHubProtocolIndexKey = "DefaultHubProtocolIndex";
 const char* kTTSGlobalPropertiesTimeoutKey = "TTSGlobalPropertiesTimeout";
-const char* kMaximumPayloadSizeKey ="MaximumPayloadSize";
-const char* kFrequencyCount ="FrequencyCount";
-const char* kFrequencyTime ="FrequencyTime";
+const char* kMaximumPayloadSizeKey = "MaximumPayloadSize";
+const char* kFrequencyCount = "FrequencyCount";
+const char* kFrequencyTime = "FrequencyTime";
+const char* kMalformedMessageFiltering = "MalformedMessageFiltering";
+const char* kMalformedFrequencyCount = "MalformedFrequencyCount";
+const char* kMalformedFrequencyTime = "MalformedFrequencyTime";
 const char* kHashStringSizeKey = "HashStringSize";
 
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
@@ -214,7 +218,10 @@ const uint16_t kDefaultTTSGlobalPropertiesTimeout = 20;
 // TCP MTU - header size = 1500 - 12
 const size_t kDefaultMaximumPayloadSize = 1500 - 12;
 const size_t kDefaultFrequencyCount = 1000;
-const size_t kDefaultFrequencyTime  = 1000;
+const size_t kDefaultFrequencyTime = 1000;
+const bool kDefaulMalformedMessageFiltering = true;
+const size_t kDefaultMalformedFrequencyCount = 10;
+const size_t kDefaultMalformedFrequencyTime = 1000;
 const uint16_t kDefaultAttemptsToOpenPolicyDB = 5;
 const uint16_t kDefaultOpenAttemptTimeoutMsKey = 500;
 const uint32_t kDefaultAppIconsFolderMaxSize = 1048576;
@@ -289,7 +296,8 @@ Profile::Profile()
     tts_global_properties_timeout_(kDefaultTTSGlobalPropertiesTimeout),
     attempts_to_open_policy_db_(kDefaultAttemptsToOpenPolicyDB),
     open_attempt_timeout_ms_(kDefaultAttemptsToOpenPolicyDB),
-    hash_string_size_(kDefaultHashStringSize) {
+    hash_string_size_(kDefaultHashStringSize),
+    logs_enabled_(true) {
 }
 
 Profile::~Profile() {
@@ -612,6 +620,27 @@ size_t Profile::message_frequency_time() const {
   return message_frequency_time;
 }
 
+bool Profile::malformed_message_filtering() const {
+  bool malformed_message_filtering = 0;
+  ReadBoolValue(&malformed_message_filtering, kDefaulMalformedMessageFiltering,
+                kProtocolHandlerSection, kMalformedMessageFiltering);
+  return malformed_message_filtering;
+}
+
+size_t Profile::malformed_frequency_count() const {
+  size_t malformed_frequency_count = 0;
+  ReadUIntValue(&malformed_frequency_count, kDefaultMalformedFrequencyCount,
+                kProtocolHandlerSection, kMalformedFrequencyCount);
+  return malformed_frequency_count;
+}
+
+size_t Profile::malformed_frequency_time() const {
+  size_t malformed_frequency_time = 0;
+  ReadUIntValue(&malformed_frequency_time, kDefaultMalformedFrequencyTime,
+                kProtocolHandlerSection, kMalformedFrequencyTime);
+  return malformed_frequency_time;
+}
+
 uint16_t Profile::attempts_to_open_policy_db() const {
   return attempts_to_open_policy_db_;
 }
@@ -636,6 +665,10 @@ uint16_t Profile::tts_global_properties_timeout() const {
   return tts_global_properties_timeout_;
 }
 
+bool Profile::logs_enabled() const {
+  return logs_enabled_;
+}
+
 void Profile::UpdateValues() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -649,6 +682,13 @@ void Profile::UpdateValues() {
   }
 
   LOG_UPDATED_BOOL_VALUE(launch_hmi_, kLaunchHMIKey, kHmiSection);
+
+  // Logs enabled
+  ReadBoolValue(&logs_enabled_, false, kMainSection, kLogsEnabledKey);
+
+  LOG_UPDATED_BOOL_VALUE(logs_enabled_, kLogsEnabledKey, kMainSection);
+
+  logs_enabled_ = true;
 
   // Application config folder
   ReadStringValue(&app_config_folder_,
@@ -951,7 +991,7 @@ void Profile::UpdateValues() {
                 kResumptionSection,
                 kResumptionDelayBeforeIgnKey);
 
-  LOG_UPDATED_VALUE(resumption_delay_after_ign_,
+  LOG_UPDATED_VALUE(resumption_delay_before_ign_,
                     kResumptionDelayBeforeIgnKey, kResumptionSection);
 
   // Open attempt timeout in ms

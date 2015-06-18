@@ -38,6 +38,7 @@
 #include <vector>
 #include <list>
 #include <utility>
+#include <forward_list>
 
 #include "utils/date_time.h"
 #include "application_manager/application_data_impl.h"
@@ -153,6 +154,10 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool IsSubscribedToIVI(uint32_t vehicle_info_type_);
   bool UnsubscribeFromIVI(uint32_t vehicle_info_type_);
 
+  bool SubscribeToInteriorVehicleData(smart_objects::SmartObject module);
+  bool IsSubscribedToInteriorVehicleData(smart_objects::SmartObject module);
+  bool UnsubscribeFromInteriorVehicleData(smart_objects::SmartObject module);
+
   virtual const std::set<mobile_apis::ButtonName::eType>& SubscribedButtons() const;
   virtual const  std::set<uint32_t>& SubscribesIVI() const;
 
@@ -260,6 +265,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   AppFilesMap                              app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
   std::set<uint32_t>                       subscribed_vehicle_info_;
+  std::forward_list<smart_objects::SmartObject>     subscribed_interior_vehicle_data_;
   UsageStatistics                          usage_report_;
   ProtocolVersion                          protocol_version_;
   bool                                     is_voice_communication_application_;

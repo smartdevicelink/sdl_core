@@ -177,6 +177,13 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
+
+  if (ApplicationManagerImpl::instance()->IsApplicationForbidden(connection_key(),
+                                                                 mobile_app_id)) {
+    SendResponse(false, mobile_apis::Result::TOO_MANY_PENDING_REQUESTS);
+    return;
+  }
+
   if (IsApplicationWithSameAppIdRegistered()) {
     SendResponse(false, mobile_apis::Result::DISALLOWED);
     return;
@@ -275,6 +282,9 @@ void RegisterAppInterfaceRequest::Run() {
         device_info);
 
     SendRegisterAppInterfaceResponseToMobile();
+
+    MessageHelper::SendLockScreenIconUrlNotification(
+        (*message_)[strings::params][strings::connection_key].asInt());
   }
 }
 

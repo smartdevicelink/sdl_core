@@ -538,6 +538,13 @@ void CacheManager::GetServiceUrls(const std::string& service_type,
   }
 }
 
+std::string CacheManager::GetLockScreenIconUrl() const {
+  if (backup_) {
+    return backup_->GetLockScreenIconUrl();
+  }
+  return std::string ("");
+}
+
 int CacheManager::GetNotificationsNumber(const std::string &priority) {
   CACHE_MANAGER_CHECK(0);
   typedef rpc::policy_table_interface_base::NumberOfNotificationsPerMinute NNPM;

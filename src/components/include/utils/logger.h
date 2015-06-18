@@ -70,12 +70,14 @@
 
     #define LOG_WITH_LEVEL(loggerPtr, logLevel, logEvent) \
     do { \
-      if (logger::logger_status != logger::DeletingLoggerThread) { \
-        if (loggerPtr->isEnabledFor(logLevel)) { \
-          std::stringstream accumulator; \
-          accumulator << logEvent; \
-          logger::push_log(loggerPtr, logLevel, accumulator.str(), time_now(), \
-                           LOG4CXX_LOCATION, ::log4cxx::spi::LoggingEvent::getCurrentThreadName()); \
+      if (logger::logs_enabled()) { \
+        if (logger::logger_status != logger::DeletingLoggerThread) { \
+          if (loggerPtr->isEnabledFor(logLevel)) { \
+            std::stringstream accumulator; \
+            accumulator << logEvent; \
+            logger::push_log(loggerPtr, logLevel, accumulator.str(), time_now(), \
+                   LOG4CXX_LOCATION, ::log4cxx::spi::LoggingEvent::getCurrentThreadName()); \
+          } \
         } \
       } \
     } while (false)

@@ -13,13 +13,16 @@
             625],
             "endpoints": {
                 "0x07": {
-                    "default": ["http://policies.telematics.ford.com/api/policies"]
+                    "default": ["http://192.168.0.50/policies/sdl/1/query.json"]
                 },
                 "0x04": {
                     "default": ["http://ivsu.software.ford.com/api/getsoftwareupdates"]
                 },
                 "queryAppsUrl": {
                     "default": ["http://sdl.shaid.server"]
+                },
+                "lock_screen_icon_url": {
+                    "default": ["http://i.imgur.com/QwZ9uKG.png"]
                 }
             },
             "notifications_per_minute_by_priority": {
@@ -47,6 +50,11 @@
                     "Alert": {
                         "hmi_levels": ["FULL",
                         "LIMITED"]
+                    },
+                    "ButtonPress": {
+                        "hmi_levels": ["FULL",
+                        "LIMITED",
+                        "BACKGROUND"]
                     },
                     "ChangeRegistration": {
                         "hmi_levels": ["BACKGROUND",
@@ -90,6 +98,27 @@
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
                         "LIMITED"]
+                    },
+                    "GetInteriorVehicleDataCapabilities": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "GetInteriorVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "SetInteriorVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED"]
+                    },
+                    "OnInteriorVehicleData": {
+                        "hmi_levels": ["BACKGROUND",
+                        "FULL",
+                        "LIMITED",
+                        "NONE"]
                     },
                     "GenericResponse": {
                         "hmi_levels": ["BACKGROUND",

@@ -126,6 +126,15 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/on_app_activated_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/button_get_capabilities_request.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/button_get_capabilities_response.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/button_press_request.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/button_press_response.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/rc_get_interior_vehicle_data_capabilities_request.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/rc_get_interior_vehicle_data_capabilities_response.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/rc_get_interior_vehicle_data_request.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/rc_get_interior_vehicle_data_response.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/rc_set_interior_vehicle_data_request.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/rc_set_interior_vehicle_data_response.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_interior_vehicle_data_notification.cc        
   ${AM_SOURCE_DIR}/src/commands/hmi/vr_is_ready_request.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/vr_is_ready_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/vr_add_command_request.cc
@@ -276,6 +285,8 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/on_device_state_changed_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_tts_reset_timeout_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_phone_call_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/dial_number_request.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/dial_number_response.cc
 )
 
 set (HMI_COMMANDS_SOURCES_JSON

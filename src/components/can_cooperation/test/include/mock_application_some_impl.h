@@ -320,6 +320,9 @@ class MockApplicationSomeImpl : public Application {
   MOCK_METHOD1(set_audio_stream_retry_active, void(bool active));
   MOCK_METHOD0(OnVideoStreamRetry, void());
   MOCK_METHOD0(OnAudioStreamRetry, void());
+  MOCK_METHOD1(SubscribeToInteriorVehicleData, bool(smart_objects::SmartObject module));
+  MOCK_METHOD1(IsSubscribedToInteriorVehicleData, bool(smart_objects::SmartObject module));
+  MOCK_METHOD1(UnsubscribeFromInteriorVehicleData, bool(smart_objects::SmartObject module));
   smart_objects::SmartObject app_types_;
   connection_handler::DeviceHandle dev_;
   mobile_api::HMILevel::eType level_;

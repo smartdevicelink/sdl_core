@@ -544,6 +544,9 @@ const std::string kSetNotFirstRun =
 const std::string kSelectEndpoint =
   "SELECT `url`, `application_id` FROM `endpoint` WHERE `service` = ? ";
 
+const std::string kSelectLockScreenIcon =
+  "SELECT `url` FROM `endpoint` WHERE `service` = ? AND `application_id` = ?";
+
 const std::string kInsertFunctionalGroup =
   "INSERT INTO `functional_group` (`id`, `name`, `user_consent_prompt`) "
   "  VALUES (?, ?, ?)";

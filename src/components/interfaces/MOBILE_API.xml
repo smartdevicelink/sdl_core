@@ -132,6 +132,11 @@
       <description>The provided hash ID does not match the hash of the current set of registered data or the core could not resume the previous data.</description>
     </element>
     <element name="CHAR_LIMIT_EXCEEDED"></element>
+    <element name="READ_ONLY">
+      <description>The value being set is read only</description>
+    </element>
+    <element name="PC_LOAD_LETTER">
+    </element>
   </enum>
 
   <enum name="ButtonPressMode">
@@ -489,6 +494,28 @@
     <element name="PRESET_9" />
     <element name="CUSTOM_BUTTON" />
     <element name="SEARCH" />
+
+    <!-- Climate Buttons -->
+    <element name="AC_MAX" />
+    <element name="AC" />
+    <element name="RECIRCULATE" />
+    <element name="FAN_UP" />
+    <element name="FAN_DOWN" />
+    <element name="TEMP_UP" />
+    <element name="TEMP_DOWN" />
+    <element name="DEFROST_MAX" />
+    <element name="DEFROST" />
+    <element name="DEFROST_REAR" />
+    <element name="UPPER_VENT" />
+    <element name="LOWER_VENT" />
+
+    <!-- Radio Buttons -->
+    <element name="VOLUME_UP" />
+    <element name="VOLUME_DOWN" />
+    <element name="EJECT" />
+    <element name="SOURCE" />
+    <element name="SHUFFLE" />
+    <element name="REPEAT" />
   </enum>
 
   <enum name="MediaClockFormat">
@@ -1260,6 +1287,140 @@
     </param>
   </struct>
 
+  <struct name="InteriorZone">
+    <description>Describes the origin and span of a zone in the vehicle. Vehicle zones can be overlapping</description>
+    <param name="col" type="Integer" minvalue="0" maxvalue="100">
+    </param>
+    <param name="row" type="Integer" minvalue="0" maxvalue="100">
+    </param>
+    <param name="level" type="Integer" minvalue="0" maxvalue="100">
+    </param>
+    <param name="colspan" type="Integer" minvalue="0" maxvalue="100">
+    </param>
+    <param name="rowspan" type="Integer" minvalue="0" maxvalue="100">
+    </param>
+    <param name="levelspan" type="Integer" minvalue="0" maxvalue="100">
+    </param>
+  </struct>
+
+  <enum name="ModuleType">
+    <element name="CLIMATE"/>
+    <element name="RADIO"/>
+  </enum>
+
+  <struct name="ModuleDescription">
+    <param name="moduleZone" type="InteriorZone">
+    </param>
+    <param name="moduleType" type="ModuleType">
+    </param>
+  </struct>
+
+  <enum name="RadioBand">
+    <element name="AM"/>
+    <element name="FM"/>
+    <element name="XM"/>
+  </enum>
+
+  <struct name="RdsData">
+    <param name="PS" type="String" minlength="0" maxlength="8">
+      <description>Program Service Name</description>
+    </param>
+    <param name="RT" type="String" minlength="0" maxlength="64">
+      <description>Radio Text</description>
+    </param>
+    <param name="CT" type="String" minlength="24" maxlength="24">
+      <description>The clock text in UTC format as YYYY-MM-DDThh:mm:ss.sTZD</description>
+    </param>
+    <param name="PI" type="String" minlength="0" maxlength="6">
+      <description>Program Identification - the call sign for the radio station</description>
+    </param>
+    <param name="PTY" type="Integer" minvalue="0" maxvalue="31">
+      <description>The program type - The region should be used to differentiate between EU and North America program types</description>
+    </param>
+    <param name="TP" type="Boolean">
+      <description>Traffic Program Identification - Identifies a station that offers traffic</description>
+    </param>
+    <param name="TA" type="Boolean">
+      <description>Traffic Announcement Identification - Indicates an ongoing traffic announcement</description>
+    </param>
+    <param name="REG" type="String">
+      <description>Region</description>
+    </param>
+  </struct>
+
+  <enum name="RadioState">
+    <element name="ACQUIRING"/>
+    <element name="ACQUIRED"/>
+    <element name="MULTICAST"/>
+    <element name="NOT_FOUND"/>
+  </enum>
+
+  <struct name="RadioControlData">
+    <param name="frequencyInteger" type="Integer" minvalue="0" maxvalue="1710" mandatory="false">
+      <description>The integer part of the frequency ie for 101.7 this value should be 101</description>
+    </param>
+    <param name="frequencyFraction" type="Integer" minvalue="0" maxvalue="9" mandatory="false">
+      <description>The fractional part of the frequency for 101.7 is 7</description>
+    </param>
+    <param name="band" type="RadioBand" mandatory="false">
+    </param>
+    <param name="rdsData" type="RdsData" mandatory="false">
+    </param>
+    <param name="availableHDs" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
+      <description>number of HD sub-channels if available</description>
+    </param>
+    <param name="hdChannel" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
+      <description>Current HD sub-channel if available</description>
+    </param>
+    <param name="signalStrength" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+    </param>
+    <param name="signalChangeThreshold" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+      <description>If the signal strength falls below the set value for this parameter, the radio will tune to an alternative frequency</description>
+    </param>
+    <param name="radioEnable" type="Boolean" mandatory="false">
+      <description> True if the radio is on, false is the radio is off</description>
+    </param>
+    <param name="state" type="RadioState" mandatory="false">
+    </param>
+  </struct>
+
+  <enum name="DefrostZone">
+    <element name="FRONT"/>
+    <element name="REAR"/>
+    <element name="ALL"/>
+  </enum>
+
+  <struct name="ClimateControlData">
+    <param name="fanSpeed" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+    </param>
+    <param name="currentTemp" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+    </param>
+    <param name="desiredTemp" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+    </param>
+    <param name="acEnable" type="Boolean" mandatory="false">
+    </param>
+    <param name="recirculateAirEnable" type="Boolean" mandatory="false">
+    </param>
+    <param name="autoModeEnable" type="Boolean" mandatory="false">
+    </param>
+    <param name="defrostZone" type="DefrostZone" mandatory="false">
+    </param>
+    <param name="dualModeEnable" type="Boolean" mandatory="false">
+    </param>
+  </struct>
+
+  <struct name="ModuleData">
+    <description>The moduleType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the moduleType is CLIMATE then a "climateControlData" should exist</description>
+    <param name="moduleType" type="ModuleType">
+    </param>
+    <param name="moduleZone" type="InteriorZone">
+    </param>
+    <param name="radioControlData" type="RadioControlData" mandatory="false">
+    </param>
+    <param name="climateControlData" type="ClimateControlData" mandatory="false">
+    </param>
+  </struct>
+
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~ -->     
 <!-- Ford Specific Data Items -->
 <!-- ~~~~~~~~~~~~~~~~~~~~~~~~ -->     
@@ -1947,19 +2108,19 @@
   <struct name="DeviceInfo">
     <description>Various information abount connecting device.</description>
 
-    <param name="hardware" type="String" maxlength="500" mandatory="false">
+    <param name="hardware" type="String"  minlength="0" maxlength="500" mandatory="false">
       <description>Device model</description>    
     </param>
-    <param name="firmwareRev" type="String" maxlength="500" mandatory="false">
+    <param name="firmwareRev" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>Device firmware revision</description>    
     </param>
-    <param name="os" type="String" maxlength="500" mandatory="false">
+    <param name="os" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>Device OS</description>    
     </param>
-    <param name="osVersion" type="String" maxlength="500" mandatory="false">
+    <param name="osVersion" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>Device OS version</description>    
     </param>
-    <param name="carrier" type="String" maxlength="500" mandatory="false">
+    <param name="carrier" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>Device mobile carrier (if applicable)</description>    
     </param>
     <param name="maxNumberRFCOMMPorts" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
@@ -2180,7 +2341,11 @@
     <element name="SystemRequestID" value="38" hexvalue="26" />
     <element name="SendLocationID" value="39" hexvalue="27" />
     <element name="DialNumberID" value="40" hexvalue="28" />    
-
+    <element name="ButtonPressID" value="41" hexvalue="29" />
+    <element name="GetInteriorVehicleDataCapabilitiesID" value="42" hexvalue="2A" />
+    <element name="GetInteriorVehicleDataID" value="43" hexvalue="2B" />
+    <element name="SetInteriorVehicleDataID" value="44" hexvalue="2C" />
+ 
 <!--
 	Base Notifications
 	Range = 0x 0000 8000 - 0x 0000 FFFF
@@ -2201,6 +2366,7 @@
     <element name="OnTouchEventID" value="32780" hexvalue="800C" />
     <element name="OnSystemRequestID" value="32781" hexvalue="800D" />
     <element name="OnHashChangeID" value="32782" hexvalue="800E" />
+    <element name="OnInteriorVehicleDataID" value="32783" hexvalue="800F" />
 
 <!--
 	Ford Specific Request / Response RPCs
@@ -4751,6 +4917,141 @@
     </param>
   </function>
 
+  <function name="ButtonPress" functionID="ButtonPressID" messagetype="request">
+    <param name="zone" type="InteriorZone">
+          <description>The zone where the button press should occur.</description>
+    </param>
+    <param name="moduleType" type="ModuleType">
+        <description>The module where the button should be pressed</description>
+    </param>
+    <param name="buttonName" type="ButtonName"/>
+      <param name="buttonPressMode" type="ButtonPressMode">
+      <description>Indicates whether this is a LONG or SHORT button press event.</description>
+      </param>
+  </function>
+
+  <function name="ButtonPress" functionID="ButtonPressID" messagetype="response">
+    <param name="resultCode" type="Result" platform="documentation">
+        <description>See Result</description>
+        <element name="SUCCESS"/>
+        <element name="OUT_OF_MEMORY"/>
+        <element name="TOO_MANY_PENDING_REQUESTS"/>
+        <element name="APPLICATION_NOT_REGISTERED"/>
+        <element name="GENERIC_ERROR"/>
+        <element name="REJECTED"/>
+        <element name="IGNORED"/>
+        <element name="DISALLOWED"/>
+        <element name="USER_DISALLOWED"/>
+      </param>
+      <param name="info" type="String" maxlength="1000" mandatory="false">
+      </param>
+      <param name="success" type="Boolean" platform="documentation">
+      <description> true if successful; false, if failed </description>
+    </param>
+
+  </function>
+
+<function name="GetInteriorVehicleDataCapabilities" functionID="GetInteriorVehicleDataCapabilitiesID" messagetype="request">
+  <description>Called to retrieve the available zones and supported control types</description>
+   <!-- Should we send our zone with it? If included, it will only return modules you can control -->
+    <param name="zone" type="InteriorZone" mandatory="false">
+        <description>If included, only the corresponding modules able to be controlled by that zone will be sent back. If not included, all modules will be returned regardless of their ability to be controlled by specifc zones.</description>
+  </param>
+  <param name="moduleTypes" type="ModuleType" array="true" mandatory="false" minsize="1" maxsize="1000">
+    <description>If included, only the corresponding type of modules a will be sent back. If not included, all module types will be returned.</description>
+  </param>
+</function>
+
+<function name="GetInteriorVehicleDataCapabilities" functionID="GetInteriorVehicleDataCapabilitiesID" messagetype="response">
+  <param name="interiorVehicleDataCapabilities" type="ModuleDescription" array="true" minsize="1" maxsize="1000">
+  </param>
+
+  <param name="resultCode" type="Result" platform="documentation">
+      <description>See Result</description>
+      <element name="SUCCESS"/>
+      <element name="OUT_OF_MEMORY"/>
+      <element name="TOO_MANY_PENDING_REQUESTS"/>
+      <element name="APPLICATION_NOT_REGISTERED"/>
+      <element name="GENERIC_ERROR"/>
+      <element name="REJECTED"/>
+      <element name="IGNORED"/>
+      <element name="DISALLOWED"/>
+      <element name="USER_DISALLOWED"/>
+      <element name="UNSUPPORTED_RESOURCE"/>
+    </param>
+    <param name="info" type="String" maxlength="1000" mandatory="false">
+    </param>
+    <param name="success" type="Boolean" platform="documentation">
+    <description> true if successful; false, if failed </description>
+  </param>
+</function>
+
+<function name="GetInteriorVehicleData" functionID="GetInteriorVehicleDataID" messagetype="request">
+  <param name="moduleDescription" type="ModuleDescription">
+    <description>The zone and module data to retrieve from the vehicle for that zone</description>
+  </param>
+  <param name="subscribe" type="Boolean" mandatory="false" defvalue="false">
+    <description>If subscribe is true, the array values in requestedDataTypes override the current subscriptions for the zones requested, ie if the developer subscribes to A and B and then subscribes to A, the developer will no longer be subscribed to B. If the array is empty, data for all supported data types is returned</description>
+  </param>
+</function>
+
+<function name="GetInteriorVehicleData" functionID="GetInteriorVehicleDataID" messagetype="response">
+  <param name="moduleData" type="ModuleData">    
+  </param>
+    <param name="resultCode" type="Result" platform="documentation">
+    <description>See Result</description>
+    <element name="SUCCESS"/>
+    <element name="INVALID_DATA"/>
+    <element name="OUT_OF_MEMORY"/>
+    <element name="TOO_MANY_PENDING_REQUESTS"/>
+    <element name="APPLICATION_NOT_REGISTERED"/>
+    <element name="GENERIC_ERROR"/>
+    <element name="REJECTED"/>
+    <element name="IGNORED"/>
+    <element name="DISALLOWED"/>
+    <element name="USER_DISALLOWED"/>
+    <element name="UNSUPPORTED_RESOURCE"/>
+  </param>
+  <param name="info" type="String" maxlength="1000" mandatory="false">
+    </param>
+  <param name="success" type="Boolean" platform="documentation">
+    <description> true if successful; false, if failed </description>
+  </param>
+</function>
+
+
+<function name="SetInteriorVehicleData" functionID="SetInteriorVehicleDataID" messagetype="request">
+  <param name="moduleData" type="ModuleData">
+    <description>The zone, module, and data to set for the (zone, module) pair</description>
+  </param>
+</function>
+
+<function name="SetInteriorVehicleData" functionID="SetInteriorVehicleDataID" messagetype="response">
+  <description>Used to set the values of one zone and one data type within that zone</description>
+  <param name="moduleData" type="ModuleData">
+  </param>
+  <param name="resultCode" type="Result" platform="documentation">
+    <description>See Result</description>
+    <element name="SUCCESS"/>
+    <element name="INVALID_DATA"/>
+    <element name="OUT_OF_MEMORY"/>
+    <element name="TOO_MANY_PENDING_REQUESTS"/>
+    <element name="APPLICATION_NOT_REGISTERED"/>
+    <element name="GENERIC_ERROR"/>
+    <element name="REJECTED"/>
+    <element name="IGNORED"/>
+    <element name="DISALLOWED"/>
+    <element name="USER_DISALLOWED"/>
+    <element name="READ_ONLY"/>
+    <element name="UNSUPPORTED_RESOURCE"/>
+  </param>
+  <param name="info" type="String" maxlength="1000" mandatory="false">
+  </param>
+  <param name="success" type="Boolean" platform="documentation">
+    <description> true if successful; false, if failed </description>
+  </param>
+</function>
+
   <!-- Notifications -->
 
   <function name="OnHMIStatus" functionID="OnHMIStatusID" messagetype="notification">
@@ -4991,6 +5292,10 @@
 		<description>Calculated hash ID to be referenced during RegisterAppInterface.</description>
 	</param>
   </function>
+  <function name="OnInteriorVehicleData" functionID="OnInteriorVehicleDataID" messagetype="notification">
+    <param name="moduleData" type="ModuleData" mandatory="true">
+    </param>
+  </function>
 
 <!-- ~~~~~~~~~~~~~~~~~~ -->
 <!-- Ford Specific APIs -->
@@ -5106,4 +5411,5 @@
     
   </function>
 -->
-  </interface>
+  
+</interface>

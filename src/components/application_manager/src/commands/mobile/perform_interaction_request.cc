@@ -58,6 +58,7 @@ PerformInteractionRequest::PerformInteractionRequest(
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
   subscribe_on_event(hmi_apis::FunctionID::VR_OnCommand);
   subscribe_on_event(hmi_apis::FunctionID::Buttons_OnButtonPress);
+  subscribe_on_event(hmi_apis::FunctionID::RC_OnInteriorVehicleData);
 }
 
 PerformInteractionRequest::~PerformInteractionRequest() {

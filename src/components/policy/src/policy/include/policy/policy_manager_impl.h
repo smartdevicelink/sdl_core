@@ -59,8 +59,11 @@ class PolicyManagerImpl : public PolicyManager {
     virtual bool InitPT(const std::string& file_name);
     virtual bool LoadPT(const std::string& file, const BinaryMessage& pt_content);
     virtual bool ResetPT(const std::string& file_name);
+
     virtual void GetServiceUrls(const std::string& service_type,
                                 EndpointUrls& end_points);
+
+    virtual std::string GetLockScreenIconUrl() const;
     virtual void RequestPTUpdate();
     virtual void CheckPermissions(const PTString& app_id,
         const PTString& hmi_level,
@@ -168,6 +171,7 @@ class PolicyManagerImpl : public PolicyManager {
 
     virtual void OnAppsSearchCompleted();
 
+    void OnAppRegisteredOnMobile(const std::string& application_id);
 #ifdef SDL_REMOTE_CONTROL
     virtual TypeAccess CheckAccess(const PTString& app_id,
                                    const SeatLocation& zone,

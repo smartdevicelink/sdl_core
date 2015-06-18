@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,9 +30,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gmock/gmock.h"
+#include "application_manager/commands/hmi/on_interior_vehicle_data_notification.h"
+//#include "interfaces/MOBILE_API.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
+#include "utils/logger.h"
+#include "application_manager/event_engine/event.h"
 
-int main(int argc, char** argv) {
- testing::InitGoogleMock(&argc, argv);
- return RUN_ALL_TESTS();
+namespace application_manager {
+
+namespace commands {
+
+namespace hmi {
+
+OnInteriorVehicleDataNotification::OnInteriorVehicleDataNotification(
+    const MessageSharedPtr& message) : NotificationFromHMI(message) {
 }
+
+OnInteriorVehicleDataNotification::~OnInteriorVehicleDataNotification() {
+}
+
+void OnInteriorVehicleDataNotification::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  event_engine::Event event(hmi_apis::FunctionID::RC_OnInteriorVehicleData);
+  event.set_smart_object(*message_);
+  event.raise();
+  //prepare SmartObject for mobile factory
+  (*message_)[strings::params][strings::function_id] =
+  mobile_apis::FunctionID::OnInteriorVehicleDataID;
+  SendNotificationToMobile(message_);
+
+}
+
+}  // namespace hmi
+
+}  // namespace commands
+
+}  // namespace application_manager
