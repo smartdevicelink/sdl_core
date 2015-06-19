@@ -406,8 +406,12 @@ void BaseCommandRequest::ProcessAccessResponse(
   } else {
     SendResponse(false, result_codes::kDisallowed, "");
   }
-  // TODO(KKolodiy): get module from message
-  std::string module = "RADIO";
+
+  Json::Value request;
+  reader.parse(message_->json_message(), request);
+  std::string module = ModuleType(request);
+  LOG4CXX_DEBUG(logger_, "Setting allowed access for " << app_->app_id()
+    << " for " << module);
   service_->SetAccess(app_->app_id(), module, allowed);
 }
 
