@@ -182,9 +182,9 @@ const char kSubscribe[]         = "subscribe";
 const char kAllowed[]    = "allowed";
 // OnReverseAppsAllowing notification
 
-// OnPrimaryDevice notification
+// RC.OnSetDriversDevice notification
 const char kDevice[]     = "device";
-// OnPrimaryDevice notification
+// RC.OnSetDriversDevice notification
 
 // ButtonPress request
 //const char kZone[]          = "zone";
