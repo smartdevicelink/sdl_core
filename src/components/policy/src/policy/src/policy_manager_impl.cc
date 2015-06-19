@@ -127,6 +127,13 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     return false;
   }
 
+  // Checking of difference between PTU and current policy state
+  // Must to be done before PTU applying since it is possible, that functional
+  // groups, which had been present before are absent in PTU and will be
+  // removed after update. So in case of revoked groups system has to know
+  // names and ids of revoked groups before they will be removed.
+  CheckPermissionsChanges(pt_update, policy_table_snapshot);
+
   // Replace current data with updated
   if (!cache_->ApplyUpdate(*pt_update)) {
     LOG4CXX_WARN(logger_, "Unsuccessful save of updated policy table.");
@@ -137,16 +144,12 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     listener_->OnCertificateUpdated(*(pt_update->policy_table.module_config.certificate));
   }
 
-
-  // Check permissions for applications, send notifications
-  CheckPermissionsChanges(pt_update, policy_table_snapshot);
-
   std::map<std::string, StringArray> app_hmi_types;
   cache_->GetHMIAppTypeAfterUpdate(app_hmi_types);
   if (!app_hmi_types.empty()) {
     LOG4CXX_INFO(logger_, "app_hmi_types is full calling OnUpdateHMIAppType");
     listener_->OnUpdateHMIAppType(app_hmi_types);
-  }else{
+  } else {
     LOG4CXX_INFO(logger_, "app_hmi_types empty" << pt_content.size());
   }
 
@@ -170,10 +173,10 @@ void PolicyManagerImpl::CheckPermissionsChanges(
 
   // Replace predefined policies with its actual setting, e.g. "123":"default"
   // to actual values of default section
-  UnwrapAppPolicies(pt_update->policy_table.app_policies);
+  UnwrapAppPolicies(pt_update->policy_table.app_policies_section.apps);
 
-  std::for_each(pt_update->policy_table.app_policies.begin(),
-                pt_update->policy_table.app_policies.end(),
+  std::for_each(pt_update->policy_table.app_policies_section.apps.begin(),
+                pt_update->policy_table.app_policies_section.apps.end(),
                 CheckAppPolicy(this, pt_update, snapshot));
 }
 
@@ -208,6 +211,8 @@ void PolicyManagerImpl::RequestPTUpdate() {
   Json::Value value = policy_table_snapshot->ToJsonValue();
   Json::FastWriter writer;
   std::string message_string = writer.write(value);
+
+  LOG4CXX_DEBUG(logger_, "Snapshot contents is : " << message_string );
 
   BinaryMessage update(message_string.begin(), message_string.end());
 
@@ -267,6 +272,12 @@ void PolicyManagerImpl::OnAppsSearchCompleted() {
   }
 }
 
+const std::vector<std::string> PolicyManagerImpl::GetAppRequestTypes(
+    const std::string policy_app_id) const {
+  std::vector<std::string> request_types;
+  cache_->GetAppRequestTypes(policy_app_id, request_types);
+  return request_types;
+}
 void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
                                          const PTString& hmi_level,
                                           const PTString& rpc,
@@ -771,8 +782,8 @@ AppPermissions PolicyManagerImpl::GetAppPermissionsChanges(
   } else {
     permissions.appPermissionsConsentNeeded = IsConsentNeeded(policy_app_id);
     permissions.appRevoked = IsApplicationRevoked(policy_app_id);
+    GetPriority(permissions.application_id, &permissions.priority);
   }
-  GetPriority(permissions.application_id, &permissions.priority);
   return permissions;
 }
 

@@ -37,19 +37,27 @@
 #include <set>
 #include <vector>
 #include <utility>
+#include <list>
 
 #include "utils/date_time.h"
 #include "application_manager/application_data_impl.h"
 #include "application_manager/usage_statistics.h"
+#include "application_manager/hmi_state.h"
+#include "protocol_handler/protocol_handler.h"
+
 #include "connection_handler/device.h"
 #include "utils/timer_thread.h"
 #include "utils/lock.h"
 
 namespace usage_statistics {
+
 class StatisticsManager;
 }  // namespace usage_statistics
 
 namespace application_manager {
+using namespace utils;
+using namespace timer;
+
 namespace mobile_api = mobile_apis;
 
 class ApplicationImpl : public virtual InitialApplicationDataImpl,
@@ -75,15 +83,29 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * @brief change supporting COMMUNICATION NAVIGATION
    */
   virtual void ChangeSupportingAppHMIType();
-  bool IsAudible() const;
 
-  // navi
   inline bool is_navi() const { return is_navi_; }
   void set_is_navi(bool allow);
-  bool hmi_supports_navi_video_streaming() const;
-  void set_hmi_supports_navi_video_streaming(bool supports);
-  bool hmi_supports_navi_audio_streaming() const;
-  void set_hmi_supports_navi_audio_streaming(bool supports);
+
+  bool video_streaming_approved() const;
+  void set_video_streaming_approved(bool state);
+  bool audio_streaming_approved() const;
+  void set_audio_streaming_approved(bool state);
+
+  bool video_streaming_allowed() const;
+  void set_video_streaming_allowed(bool state);
+  bool audio_streaming_allowed() const;
+  void set_audio_streaming_allowed(bool state);
+
+  void StartStreaming(
+      protocol_handler::ServiceType service_type);
+  void StopStreaming(
+      protocol_handler::ServiceType service_type);
+
+  void SuspendStreaming(
+      protocol_handler::ServiceType service_type);
+  void WakeUpStreaming(
+      protocol_handler::ServiceType service_type);
 
   virtual bool is_voice_communication_supported() const;
   virtual void set_voice_communication_supported(
@@ -100,18 +122,16 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void set_folder_name(const std::string& folder_name) OVERRIDE;
   const std::string folder_name() const;
   bool is_media_application() const;
-  const mobile_api::HMILevel::eType& hmi_level() const;
   virtual bool is_foreground() const;
   virtual void set_foreground(bool is_foreground);
+  virtual const mobile_api::HMILevel::eType hmi_level() const;
   const uint32_t put_file_in_none_count() const;
   const uint32_t delete_file_in_none_count() const;
   const uint32_t list_files_in_none_count() const;
-  const mobile_api::SystemContext::eType& system_context() const;
-  inline const mobile_api::AudioStreamingState::eType&
-  audio_streaming_state() const;
+  const mobile_api::SystemContext::eType system_context() const;
+  inline const mobile_apis::AudioStreamingState::eType audio_streaming_state() const;
   const std::string& app_icon_path() const;
   connection_handler::DeviceHandle device() const;
-  void set_tts_speak_state(bool state_tts_speak);
   bool tts_speak_state();
   void set_tts_properties_in_none(bool active);
   bool tts_properties_in_none();
@@ -120,19 +140,15 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void set_version(const Version& ver);
   void set_name(const std::string& name);
   void set_is_media_application(bool is_media);
-  void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level);
   void increment_put_file_in_none_count();
   void increment_delete_file_in_none_count();
   void increment_list_files_in_none_count();
-  void set_system_context(
-      const mobile_api::SystemContext::eType& system_context);
-  void set_audio_streaming_state(
-      const mobile_api::AudioStreamingState::eType& state);
   bool set_app_icon_path(const std::string& path);
   void set_app_allowed(const bool& allowed);
   void set_device(connection_handler::DeviceHandle device);
   virtual uint32_t get_grammar_id() const;
   virtual void set_grammar_id(uint32_t value);
+
 
   virtual void set_protocol_version(const ProtocolVersion& protocol_version);
   virtual ProtocolVersion protocol_version() const;
@@ -152,6 +168,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool SubscribeToIVI(uint32_t vehicle_info_type_);
   bool IsSubscribedToIVI(uint32_t vehicle_info_type_);
   bool UnsubscribeFromIVI(uint32_t vehicle_info_type_);
+
+  /**
+   * @brief ResetDataInNone reset data counters in NONE
+   */
+  virtual void ResetDataInNone();
 
   virtual const std::set<mobile_apis::ButtonName::eType>& SubscribedButtons() const;
   virtual const  std::set<uint32_t>& SubscribesIVI() const;
@@ -185,6 +206,52 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * @brief Load persistent files from application folder.
    */
   virtual void LoadPersistentFiles();
+  
+  /*
+  * @brief SetRegularState set permanent state of application
+  * @param state state to setup
+  */
+  virtual void SetRegularState(HmiStatePtr state);
+
+  /**
+   * @brief AddHMIState the function that will change application's
+   * hmi state.
+   *
+   * @param app_id id of the application whose hmi level should be changed.
+   *
+   * @param state new hmi state for certain application.
+   */
+  virtual void AddHMIState(HmiStatePtr state);
+
+  /**
+   * @brief RemoveHMIState the function that will turn back hmi_level after end
+   * of some event
+   *
+   * @param app_id id of the application whose hmi level should be changed.
+   *
+   * @param state_id that should be removed
+   */
+  virtual void RemoveHMIState(HmiState::StateID state_id);
+
+  /**
+   * @brief HmiState of application within active events PhoneCall, TTS< etc ...
+   * @return Active HmiState of application
+   */
+  virtual const HmiStatePtr CurrentHmiState() const;
+
+  /**
+   * @brief RegularHmiState of application without active events VR, TTS etc ...
+   * @return HmiState of application
+   */
+  virtual const HmiStatePtr RegularHmiState() const;
+
+  uint32_t audio_stream_retry_number() const;
+
+  void set_audio_stream_retry_number(const uint32_t& audio_stream_retry_number);
+
+  uint32_t video_stream_retry_number() const;
+
+  void set_video_stream_retry_number(const uint32_t& video_stream_retry_number);
 
   protected:
   /**
@@ -194,18 +261,22 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 
 
  private:
+  typedef SharedPtr<TimerThread<ApplicationImpl>> ApplicationTimerPtr;
 
-  // interfaces for NAVI retry sequence
-  bool video_stream_retry_active() const;
-  void set_video_stream_retry_active(bool active);
-  bool audio_stream_retry_active() const;
-  void set_audio_stream_retry_active(bool active);
-  void OnVideoStreamRetry();
-  void OnAudioStreamRetry();
+  /**
+   * @brief Callback for video streaming suspend timer.
+   * Suspends video streaming process for application
+   */
+  void OnVideoStreamSuspend();
+
+  /**
+   * @brief Callback for audio streaming suspend timer.
+   * Suspends audio streaming process for application
+   */
+  void OnAudioStreamSuspend();
 
   std::string                              hash_val_;
   uint32_t                                 grammar_id_;
-
 
   Version version_;
   std::string                              app_name_;
@@ -214,20 +285,24 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   smart_objects::SmartObject*              active_message_;
   bool                                     is_media_;
   bool                                     is_navi_;
-  bool                                     hmi_supports_navi_video_streaming_;
-  bool                                     hmi_supports_navi_audio_streaming_;
+
+  bool                                     video_streaming_approved_;
+  bool                                     audio_streaming_approved_;
+  bool                                     video_streaming_allowed_;
+  bool                                     audio_streaming_allowed_;
+  bool                                     video_streaming_suspended_;
+  bool                                     audio_streaming_suspended_;
+  sync_primitives::Lock                    video_streaming_suspended_lock_;
+  sync_primitives::Lock                    audio_streaming_suspended_lock_;
+
   bool                                     is_app_allowed_;
   bool                                     has_been_activated_;
-  bool                                     tts_speak_state_;
   bool                                     tts_properties_in_none_;
   bool                                     tts_properties_in_full_;
-  mobile_api::HMILevel::eType              hmi_level_;
   bool                                     is_foreground_;
   uint32_t                                 put_file_in_none_count_;
   uint32_t                                 delete_file_in_none_count_;
   uint32_t                                 list_files_in_none_count_;
-  mobile_api::SystemContext::eType         system_context_;
-  mobile_api::AudioStreamingState::eType   audio_streaming_state_;
   std::string                              app_icon_path_;
   connection_handler::DeviceHandle         device_;
 
@@ -237,14 +312,13 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   UsageStatistics                          usage_report_;
   ProtocolVersion                          protocol_version_;
   bool                                     is_voice_communication_application_;
-  // NAVI retry stream
-  volatile bool                            is_video_stream_retry_active_;
-  volatile bool                            is_audio_stream_retry_active_;
+
   uint32_t                                 video_stream_retry_number_;
   uint32_t                                 audio_stream_retry_number_;
-  utils::SharedPtr<timer::TimerThread<ApplicationImpl>> video_stream_retry_timer_;
-  utils::SharedPtr<timer::TimerThread<ApplicationImpl>> audio_stream_retry_timer_;
-
+  uint32_t                                 video_stream_suspend_timeout_;
+  uint32_t                                 audio_stream_suspend_timeout_;
+  ApplicationTimerPtr                      video_stream_suspend_timer_;
+  ApplicationTimerPtr                      audio_stream_suspend_timer_;
 
   /**
    * @brief Defines number per time in seconds limits
@@ -278,9 +352,12 @@ uint32_t ApplicationImpl::app_id() const {
   return app_id_;
 }
 
-const mobile_api::AudioStreamingState::eType&
+const mobile_api::AudioStreamingState::eType
 ApplicationImpl::audio_streaming_state() const {
-  return audio_streaming_state_;
+  using namespace mobile_apis;
+  const HmiStatePtr hmi_state = CurrentHmiState();
+  return hmi_state ? hmi_state->audio_streaming_state() :
+                     AudioStreamingState::INVALID_ENUM;
 }
 
 bool ApplicationImpl::app_allowed() const {

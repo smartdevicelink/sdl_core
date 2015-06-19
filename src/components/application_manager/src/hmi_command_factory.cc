@@ -63,6 +63,8 @@
 #include "application_manager/commands/hmi/on_app_permission_changed_notification.h"
 #include "application_manager/commands/hmi/on_app_permission_consent_notification.h"
 #include "application_manager/commands/hmi/on_app_activated_notification.h"
+#include "application_manager/commands/hmi/on_audio_data_streaming_notification.h"
+#include "application_manager/commands/hmi/on_video_data_streaming_notification.h"
 #include "application_manager/commands/hmi/on_sdl_consent_needed_notification.h"
 #include "application_manager/commands/hmi/on_exit_all_applications_notification.h"
 #include "application_manager/commands/hmi/on_exit_application_notification.h"
@@ -70,6 +72,7 @@
 #include "application_manager/commands/hmi/on_resume_audio_source_notification.h"
 #include "application_manager/commands/hmi/on_ignition_cycle_over_notification.h"
 #include "application_manager/commands/hmi/on_system_info_changed_notification.h"
+#include "application_manager/commands/hmi/on_emergency_event_notification.h"
 #include "application_manager/commands/hmi/get_system_info_request.h"
 #include "application_manager/commands/hmi/get_system_info_response.h"
 #include "application_manager/commands/hmi/close_popup_request.h"
@@ -227,6 +230,7 @@
 #include "application_manager/commands/hmi/on_navi_tbt_client_state_notification.h"
 #include "application_manager/commands/hmi/on_button_event_notification.h"
 #include "application_manager/commands/hmi/on_button_press_notification.h"
+#include "application_manager/commands/hmi/on_button_subscription_notification.h"
 #include "application_manager/commands/hmi/on_vi_vehicle_data_notification.h"
 #include "application_manager/commands/hmi/on_ui_keyboard_input_notification.h"
 #include "application_manager/commands/hmi/on_ui_touch_event_notification.h"
@@ -1087,6 +1091,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       command.reset(new commands::OnSystemInfoChangedNotification(message));
       break;
     }
+    case hmi_apis::FunctionID::BasicCommunication_OnEmergencyEvent: {
+      command.reset(new commands::OnEmergencyEventNotification(message));
+      break;
+    }
     case hmi_apis::FunctionID::BasicCommunication_PlayTone: {
       command.reset(new commands::OnPlayToneNotification(message));
       break;
@@ -1170,6 +1178,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::Buttons_OnButtonPress: {
       command.reset(new commands::hmi::OnButtonPressNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::Buttons_OnButtonSubscription: {
+      command.reset(new commands::hmi::OnButtonSubscriptionNotification(message));
       break;
     }
 #ifdef HMI_DBUS_API
@@ -1952,6 +1964,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       } else {
         command.reset(new commands::AudioStopStreamRequest(message));
       }
+      break;
+    }
+    case hmi_apis::FunctionID::Navigation_OnAudioDataStreaming: {
+      command.reset(new commands::OnAudioDataStreamingNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::Navigation_OnVideoDataStreaming: {
+      command.reset(new commands::OnVideoDataStreamingNotification(message));
       break;
     }
     case hmi_apis::FunctionID::VR_PerformInteraction: {

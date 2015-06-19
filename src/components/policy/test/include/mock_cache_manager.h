@@ -74,6 +74,8 @@ class MockCacheManagerInterface : public CacheManagerInterface {
       std::vector<UserFriendlyMessage>(const std::vector<std::string>& msg_codes, const std::string& language));
   MOCK_METHOD2(GetServiceUrls,
       void(const std::string& service_type, EndpointUrls& end_points));
+  MOCK_CONST_METHOD0(GetLockScreenIconUrl,
+      std::string());
   MOCK_METHOD1(GetNotificationsNumber,
       int(const std::string& priority));
   MOCK_METHOD2(GetPriority,
@@ -176,6 +178,9 @@ class MockCacheManagerInterface : public CacheManagerInterface {
       void());
   MOCK_CONST_METHOD1(HeartBeatTimeout,
       uint16_t(const std::string& app_id));
+  MOCK_CONST_METHOD2(GetAppRequestTypes,
+      void(const std::string& policy_app_id,
+           std::vector<std::string>& request_types));
   MOCK_METHOD1(GetHMIAppTypeAfterUpdate,
         void(std::map<std::string, StringArray>& app_hmi_types));
   MOCK_METHOD0(ResetCalculatedPermissions,

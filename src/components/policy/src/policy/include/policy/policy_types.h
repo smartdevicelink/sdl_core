@@ -234,7 +234,8 @@ struct AppPermissions {
           isAppPermissionsRevoked(false),
           appRevoked(false),
           appPermissionsConsentNeeded(false),
-          appUnauthorized(false) {
+          appUnauthorized(false),
+          requestTypeChanged(false) {
     }
 
     std::string application_id;
@@ -246,6 +247,8 @@ struct AppPermissions {
     bool isSDLAllowed;
     std::string priority;
     DeviceParams deviceInfo;
+    bool requestTypeChanged;
+    std::vector<std::string> requestType;
 };
 
 /**

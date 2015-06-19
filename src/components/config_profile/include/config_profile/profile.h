@@ -67,7 +67,12 @@ class Profile : public utils::Singleton<Profile> {
       * @brief Returns true if HMI should be started, otherwise false
       */
     bool launch_hmi() const;
-
+#ifdef WEB_HMI
+    /**
+      * @brief Returns link to web hmi
+      */
+    std::string link_to_web_hmi() const;
+#endif // WEB_HMI
     /**
       * @brief Returns application configuration path
       */
@@ -241,6 +246,19 @@ class Profile : public utils::Singleton<Profile> {
       * @brief Returns path to testing file to which redirects audio stream
       */
     const std::string& audio_stream_file() const;
+
+    /**
+     * @brief Returns timeout for SDL to wait for the next package of raw data
+     * over audio service
+     */
+    const std::uint32_t audio_data_stopped_timeout() const;
+
+    /**
+     * @brief Returns timeout for SDL to wait for the next package of raw data
+     * over video service
+     */
+    const std::uint32_t video_data_stopped_timeout() const;
+
     /**
      * @brief Returns allowable max amount of requests per time scale for
      * application in hmi level none
@@ -610,6 +628,9 @@ class Profile : public utils::Singleton<Profile> {
 private:
     std::string                     sdl_version_;
     bool                            launch_hmi_;
+#ifdef WEB_HMI
+    std::string                     link_to_web_hmi_;
+#endif // WEB_HMI
     std::string                     app_config_folder_;
     std::string                     app_storage_folder_;
     std::string                     app_resourse_folder_;
@@ -662,6 +683,8 @@ private:
     std::string                     system_files_path_;
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
+    std::uint32_t                   audio_data_stopped_timeout_;
+    std::uint32_t                   video_data_stopped_timeout_;
     std::string                     mme_db_name_;
     std::string                     event_mq_name_;
     std::string                     ack_mq_name_;

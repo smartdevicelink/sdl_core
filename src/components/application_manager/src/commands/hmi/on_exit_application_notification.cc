@@ -83,13 +83,11 @@ void OnExitApplicationNotification::Run() {
       return;
     }
   }
-
-  ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app_impl->app_id(),
-                                                         HMILevel::HMI_NONE);
-
-  app_impl->set_audio_streaming_state(AudioStreamingState::NOT_AUDIBLE);
-  app_impl->set_system_context(SystemContext::SYSCTXT_MAIN);
-  MessageHelper::SendHMIStatusNotification(*app_impl);
+  using namespace mobile_apis;
+  ApplicationManagerImpl::instance()->SetState<false>(app_impl->app_id(),
+                                                      HMILevel::HMI_NONE,
+                                                      AudioStreamingState::NOT_AUDIBLE,
+                                                      SystemContext::SYSCTXT_MAIN);
 }
 
 }  // namespace commands

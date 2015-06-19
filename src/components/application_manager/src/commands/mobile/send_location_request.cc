@@ -59,9 +59,10 @@ void SendLocationRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
-  const smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
 
+  const smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
   std::list<Common_TextFieldName::eType> fields_to_check;
+
   if (msg_params.keyExists(strings::location_name)) {
     fields_to_check.push_back(Common_TextFieldName::locationName);
   }
@@ -98,9 +99,13 @@ void SendLocationRequest::Run() {
     }
   }
 
+  smart_objects::SmartObject request_msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
+  request_msg_params = (*message_)[strings::msg_params];
+  request_msg_params[strings::app_id] = app->hmi_app_id();
+
   SendHMIRequest(hmi_apis::FunctionID::Navigation_SendLocation,
-                 &((*message_)[strings::msg_params]),
-                   true);
+                 &request_msg_params, true);
 }
 
 void SendLocationRequest::on_event(const event_engine::Event& event) {
@@ -190,13 +195,17 @@ bool SendLocationRequest::CheckHMICapabilities(std::list<hmi_apis::Common_TextFi
   using namespace smart_objects;
   using namespace hmi_apis;
 
+  if (fields_names.empty()) {
+    return true;
+  }
+
   ApplicationManagerImpl* instance = ApplicationManagerImpl::instance();
   const HMICapabilities& hmi_capabilities = instance->hmi_capabilities();
   if (!hmi_capabilities.is_ui_cooperating()) {
     LOG4CXX_ERROR_EXT(logger_, "UI is not supported.");
     return false;
   }
-  const size_t size_before = fields_names.size();
+
   if (hmi_capabilities.display_capabilities()) {
     const SmartObject disp_cap = (*hmi_capabilities.display_capabilities());
     const SmartObject& text_fields = disp_cap.getElement(hmi_response::text_fields);
@@ -212,7 +221,8 @@ bool SendLocationRequest::CheckHMICapabilities(std::list<hmi_apis::Common_TextFi
       }
     }
   }
-  if (fields_names.size() == size_before) {
+
+  if (!fields_names.empty()) {
     LOG4CXX_ERROR_EXT(logger_, "Some fields are not supported by capabilities");
     return false;
   }

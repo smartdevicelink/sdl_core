@@ -51,15 +51,9 @@ OnPhoneCallNotification::~OnPhoneCallNotification() {
 
 void OnPhoneCallNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  bool is_active =
-      (*message_)[strings::msg_params][hmi_notification::is_active].asBool();
-
-  if (is_active) {
-    ApplicationManagerImpl::instance()->CreatePhoneCallAppList();
-  } else {
-    ApplicationManagerImpl::instance()->ResetPhoneCallAppList();
-  }
+  event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_OnPhoneCall);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace hmi

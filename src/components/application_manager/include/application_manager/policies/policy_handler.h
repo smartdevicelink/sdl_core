@@ -327,12 +327,29 @@ class PolicyHandler :
   /**
    * @brief Handler on applications search started
    */
-  virtual void OnAppsSearchStarted();
+  void OnAppsSearchStarted();
 
   /**
    * @brief Handler on applications search completed
    */
-  virtual void OnAppsSearchCompleted();
+  void OnAppsSearchCompleted();
+
+  /**
+   * @brief Checks if certain request type is allowed for application
+   * @param policy_app_id Unique applicaion id
+   * @param type Request type
+   * @return true, if allowed, otherwise - false
+   */
+  bool IsRequestTypeAllowed(const std::string& policy_app_id,
+                            mobile_apis::RequestType::eType type) const;
+
+  /**
+   * @brief Gets application request types
+   * @param policy_app_id Unique application id
+   * @return request types
+   */
+  const std::vector<std::string> GetAppRequestTypes(
+      const std::string& policy_app_id) const;
 
   /**
    * @brief OnAppRegisteredOnMobile alows to handle event when application were

@@ -443,8 +443,8 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
 
   sync_primitives::AutoLock lock2(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
-    connection_handler_observer_->OnServiceEndedCallback(session_key,
-                                                         service_type);
+    connection_handler_observer_->OnServiceEndedCallback(
+          session_key, service_type, CloseSessionReason::kCommon);
   }
   return session_key;
 }
@@ -804,7 +804,8 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
         const protocol_handler::ServiceType service_type =
             service_list_itr->service_type;
         connection_handler_observer_->OnServiceEndedCallback(session_key,
-                                                             service_type);
+                                                             service_type,
+							     close_reason);
       }
     } else {
       LOG4CXX_ERROR(logger_, "Session with id: " << session_id << " not found");
@@ -934,7 +935,7 @@ void ConnectionHandlerImpl::OnConnectionEnded(
       for (ServiceList::const_iterator service_it = service_list.begin(), end =
            service_list.end(); service_it != end; ++service_it) {
         connection_handler_observer_->OnServiceEndedCallback(
-              session_key, service_it->service_type);
+              session_key, service_it->service_type, CloseSessionReason::kCommon);
       }
     }
   }
@@ -968,7 +969,7 @@ bool ConnectionHandlerImpl::IsHeartBeatSupported(
 }
 
 bool ConnectionHandlerImpl::ProtocolVersionUsed(uint32_t connection_id,
-		  uint8_t session_id, uint8_t& protocol_version) {
+          uint8_t session_id, uint8_t& protocol_version) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionList::iterator it = connection_list_.find(connection_id);

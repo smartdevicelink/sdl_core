@@ -290,27 +290,26 @@ CMessageBroker* CMessageBroker::getInstance() {
 
 void CMessageBroker::onMessageReceived(int fd, std::string& aJSONData) {
   DBG_MSG(("CMessageBroker::onMessageReceived()\n"));
-  while (!aJSONData.empty())
-  {
+  while (!aJSONData.empty()) {
     Json::Value root;
     if (!p->m_reader.parse(aJSONData, root)) {
       DBG_MSG(("Received not JSON string! %s\n", aJSONData.c_str()));
       return;
     }
-    if(root["jsonrpc"]!="2.0")
-      {
-        DBG_MSG(("\t Json::Reader::parce didn't set up jsonrpc!  jsonrpc = '%s'\n", root["jsonrpc"].asString().c_str()));
-          return;
-      }
+    if(root["jsonrpc"]!="2.0") {
+      DBG_MSG(("\t Json::Reader::parce didn't set up jsonrpc!  jsonrpc = '%s'\n", root["jsonrpc"].asString().c_str()));
+      return;
+    }
     std::string wmes = p->m_recieverWriter.write(root);
-    DBG_MSG(("Parsed JSON string:%s; length: %d\n", wmes.c_str(), wmes.length()));
+    DBG_MSG(("Parsed JSON string %d : %s\n", wmes.length(),
+             wmes.c_str()));
     DBG_MSG(("Buffer is:%s\n", aJSONData.c_str()));
     if (aJSONData.length() > wmes.length()) {
       // wmes string length can differ from buffer substr length
       size_t offset = wmes.length();
       char msg_begin = '{';
       if (aJSONData.at(offset) != msg_begin) {
-        offset = aJSONData.find_last_of(msg_begin, offset);
+        offset -= 1; // wmes can contain redudant \n in the tail.
       }
       aJSONData.erase(aJSONData.begin(), aJSONData.begin() + offset);
       DBG_MSG(("Buffer after cut is:%s\n", aJSONData.c_str()));
@@ -343,6 +342,13 @@ void CMessageBroker::Test() {
     } else {
       DBG_MSG_ERROR(("Wrong message:%s\n", wmes.c_str()));
     }
+  }
+}
+
+void CMessageBroker::OnSocketClosed(const int fd) {
+  DBG_MSG(("CMessageBroker::OnSocketClosed(%d)\n", fd));
+  if (p->mpRegistry) {
+    p->mpRegistry->removeControllersByDescriptor(fd);
   }
 }
 
@@ -665,7 +671,7 @@ void CMessageBroker_Private::processError(CMessage* pMessage) {
 }
 
 void CMessageBroker_Private::sendJsonMessage(int fd, Json::Value message) {
-  DBG_MSG(("CMessageBroker::sendJsonMessage()\n"));
+  DBG_MSG(("CMessageBroker::sendJsonMessage(%d)\n", fd));
   if (mpSender) {
     std::string mes = m_writer.write(message);
     int retVal = mpSender->Send(fd, mes);

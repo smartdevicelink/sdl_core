@@ -480,7 +480,7 @@ SQLPTRepresentation::GenerateSnapshot() const {
   GatherFunctionalGroupings(&table->policy_table.functional_groupings);
   GatherConsumerFriendlyMessages(
     &*table->policy_table.consumer_friendly_messages);
-  GatherApplicationPolicies(&table->policy_table.app_policies);
+  GatherApplicationPoliciesSection(&table->policy_table.app_policies_section);
   return table;
 }
 
@@ -597,7 +597,6 @@ bool SQLPTRepresentation::GatherFunctionalGroupings(
       if (!rpcs.IsNull(2)) {
         policy_table::Parameter param;
         if (policy_table::EnumFromJsonString(rpcs.GetString(2), &param)) {
-          // TODO(IKozyrenko): Check logic if optional container is missing
           InsertUnique(param, &(*rpcs_tbl.rpcs[rpcs.GetString(0)].parameters));
         }
       }
@@ -623,8 +622,8 @@ bool SQLPTRepresentation::GatherConsumerFriendlyMessages(
   return true;
 }
 
-bool SQLPTRepresentation::GatherApplicationPolicies(
-  policy_table::ApplicationPolicies* apps) const {
+bool SQLPTRepresentation::GatherApplicationPoliciesSection(
+    policy_table::ApplicationPoliciesSection* policies) const {
   LOG4CXX_INFO(logger_, "Gather applications policies");
   dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kSelectAppPolicies)) {
@@ -637,14 +636,21 @@ bool SQLPTRepresentation::GatherApplicationPolicies(
     const std::string& app_id = query.GetString(0);
     if (IsApplicationRevoked(app_id)) {
       params.set_to_null();
-      (*apps)[app_id] = params;
+      (*policies).apps[app_id] = params;
       continue;
     }
     if (IsDefaultPolicy(app_id)) {
-      (*apps)[app_id].set_to_string(kDefaultId);
+      (*policies).apps[app_id].set_to_string(kDefaultId);
     }
     if (IsPredataPolicy(app_id)) {
-      (*apps)[app_id].set_to_string(kPreDataConsentId);
+      (*policies).apps[app_id].set_to_string(kPreDataConsentId);
+    }
+    if (kDeviceId == app_id) {
+      // Priority is only SDL-specific item for device
+      policy_table::Priority priority;
+      policy_table::EnumFromJsonString(query.GetString(1), &priority);
+      (*policies).device.priority = priority;
+      continue;
     }
     policy_table::Priority priority;
     policy_table::EnumFromJsonString(query.GetString(1), &priority);
@@ -658,15 +664,17 @@ bool SQLPTRepresentation::GatherApplicationPolicies(
     if (!GatherAppGroup(app_id, &params.groups)) {
       return false;
     }
-    // TODO(IKozyrenko): Check logic if optional container is missing
     if (!GatherNickName(app_id, &*params.nicknames)) {
       return false;
     }
-    // TODO(IKozyrenko): Check logic if optional container is missing
     if (!GatherAppType(app_id, &*params.AppHMIType)) {
       return false;
     }
-    (*apps)[app_id] = params;
+    if (!GatherRequestType(app_id, &*params.RequestType)) {
+      return false;
+    }
+
+    (*policies).apps[app_id] = params;
   }
   return true;
 }
@@ -678,7 +686,7 @@ bool SQLPTRepresentation::Save(const policy_table::Table& table) {
     db_->RollbackTransaction();
     return false;
   }
-  if (!SaveApplicationPolicies(table.policy_table.app_policies)) {
+  if (!SaveApplicationPoliciesSection(table.policy_table.app_policies_section)) {
     db_->RollbackTransaction();
     return false;
   }
@@ -801,8 +809,8 @@ bool SQLPTRepresentation::SaveRpcs(int64_t group_id,
   return true;
 }
 
-bool SQLPTRepresentation::SaveApplicationPolicies(
-  const policy_table::ApplicationPolicies& apps) {
+bool SQLPTRepresentation::SaveApplicationPoliciesSection(
+    const policy_table::ApplicationPoliciesSection& policies) {
   dbms::SQLQuery query_delete(db());
   if (!query_delete.Exec(sql_pt::kDeleteAppGroup)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from app_group.");
@@ -813,32 +821,35 @@ bool SQLPTRepresentation::SaveApplicationPolicies(
     return false;
   }
 
+  if (!query_delete.Exec(sql_pt::kDeleteRequestType)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from request type.");
+    return false;
+  }
+
   // All predefined apps (e.g. default, pre_DataConsent) should be saved first,
   // otherwise another app with the predefined permissions can get incorrect
   // permissions
   policy_table::ApplicationPolicies::const_iterator it_default =
-      apps.find(kDefaultId);
-  if (apps.end() != it_default) {
+      policies.apps.find(kDefaultId);
+  if (policies.apps.end() != it_default) {
     if (!SaveSpecificAppPolicy(*it_default)) {
       return false;
     }
   }
   policy_table::ApplicationPolicies::const_iterator it_pre_data_consented =
-      apps.find(kPreDataConsentId);
-  if (apps.end() != it_pre_data_consented) {
+      policies.apps.find(kPreDataConsentId);
+  if (policies.apps.end() != it_pre_data_consented) {
     if (!SaveSpecificAppPolicy(*it_pre_data_consented)) {
       return false;
     }
   }
-  policy_table::ApplicationPolicies::const_iterator it_device =
-      apps.find(kDeviceId);
-  if (apps.end() != it_pre_data_consented) {
-    if (!SaveSpecificAppPolicy(*it_device)) {
-      return false;
-    }
+
+  if (!SaveDevicePolicy(policies.device)) {
+    return false;
   }
+
   policy_table::ApplicationPolicies::const_iterator it;
-  for (it = apps.begin(); it != apps.end(); ++it) {
+  for (it = policies.apps.begin(); it != policies.apps.end(); ++it) {
     // Skip saving of predefined app, since they should be saved before
     if (IsPredefinedApp(*it)) {
       continue;
@@ -855,7 +866,7 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
     const policy_table::ApplicationPolicies::value_type& app) {
   dbms::SQLQuery app_query(db());
   if (!app_query.Prepare(sql_pt::kInsertApplication)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement into application.");
+    LOG4CXX_WARN(logger_, "Incorrect insert statement into application (device).");
     return false;
   }
 
@@ -885,12 +896,41 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   if (!SaveAppGroup(app.first, app.second.groups)) {
     return false;
   }
-  // TODO(IKozyrenko): Check logic if optional container is missing
   if (!SaveNickname(app.first, *app.second.nicknames)) {
     return false;
   }
-  // TODO(IKozyrenko): Check logic if optional container is missing
   if (!SaveAppType(app.first, *app.second.AppHMIType)) {
+    return false;
+  }
+
+  if (!SaveRequestType(app.first, *app.second.RequestType)) {
+    return false;
+  }
+
+  return true;
+}
+
+bool policy::SQLPTRepresentation::SaveDevicePolicy(
+    const policy_table::DevicePolicy& device) {
+  dbms::SQLQuery app_query(db());
+  if (!app_query.Prepare(sql_pt::kInsertApplication)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement into application.");
+    return false;
+  }
+
+  app_query.Bind(0, kDeviceId);
+  app_query.Bind(1, std::string(policy_table::EnumToJsonString(device.priority)));
+  app_query.Bind(2, false);
+  app_query.Bind(3, 0);
+  app_query.Bind(4, 0);
+  app_query.Bind(5);
+
+  if (!app_query.Exec() || !app_query.Reset()) {
+    LOG4CXX_WARN(logger_, "Incorrect insert into application.");
+    return false;
+  }
+
+  if (!SaveAppGroup(kDeviceId, device.groups)) {
     return false;
   }
 
@@ -964,6 +1004,28 @@ bool SQLPTRepresentation::SaveAppType(const std::string& app_id,
   return true;
 }
 
+bool SQLPTRepresentation::SaveRequestType(
+    const std::string& app_id,
+    const policy_table::RequestTypes& types) {
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertRequestType)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for request types.");
+    return false;
+  }
+
+  policy_table::RequestTypes::const_iterator it;
+  for (it = types.begin(); it != types.end(); ++it) {
+    query.Bind(0, app_id);
+    query.Bind(1, std::string(policy_table::EnumToJsonString(*it)));
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_WARN(logger_, "Incorrect insert into request types.");
+      return false;
+    }
+  }
+
+  return true;
+}
+
 bool SQLPTRepresentation::SaveModuleMeta(const policy_table::ModuleMeta& meta) {
   // Section Module Meta is empty for SDL specific
   return true;
@@ -977,8 +1039,10 @@ bool SQLPTRepresentation::SaveModuleConfig(
     return false;
   }
 
-  config.preloaded_pt.is_initialized() ?
-  query.Bind(0, config.preloaded_pt) : query.Bind(0, false);
+  bool is_preloaded = config.preloaded_pt.is_initialized() &&
+                      *config.preloaded_pt;
+
+  query.Bind(0, is_preloaded);
   query.Bind(1, config.exchange_after_x_ignition_cycles);
   query.Bind(2, config.exchange_after_x_kilometers);
   query.Bind(3, config.exchange_after_x_days);
@@ -1316,6 +1380,26 @@ bool SQLPTRepresentation::GatherAppType(
       return false;
     }
     app_types->push_back(type);
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::GatherRequestType(
+    const std::string& app_id,
+    policy_table::RequestTypes* request_types) const {
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectRequestTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from request types.");
+    return false;
+  }
+
+  query.Bind(0, app_id);
+  while (query.Next()) {
+    policy_table::RequestType type;
+    if (!policy_table::EnumFromJsonString(query.GetString(0), &type)) {
+      return false;
+    }
+    request_types->push_back(type);
   }
   return true;
 }

@@ -47,6 +47,7 @@
 #include "resumption/last_state.h"
 #include "policy/policy_manager_impl.h"
 #include "application_manager/policies/policy_handler.h"
+#include "application_manager/state_controller.h"
 
 namespace application_manager {
 
@@ -159,12 +160,10 @@ bool ResumeCtrl::RestoreAppHMIState(ApplicationSharedPtr application) {
 }
 
 bool ResumeCtrl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
-  if (false == application.valid()) {
-    LOG4CXX_ERROR(logger_, "SetupDefaultHMILevel application pointer is invalid");
-    return false;
-  }
-  LOG4CXX_TRACE(logger_, "ENTER app_id : " << application->app_id());
-  mobile_apis::HMILevel::eType default_hmi = ApplicationManagerImpl::instance()-> GetDefaultHmiLevel(application);
+  DCHECK_OR_RETURN(application, false);
+  LOG4CXX_AUTO_TRACE(logger_);
+  mobile_apis::HMILevel::eType default_hmi =
+      ApplicationManagerImpl::instance()-> GetDefaultHmiLevel(application);
   bool result = SetAppHMIState(application, default_hmi, false);
   return result;
 }
@@ -178,9 +177,9 @@ bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
     LOG4CXX_ERROR(logger_, "Application pointer in invalid");
     return false;
   }
-  LOG4CXX_TRACE(logger_, " ENTER Params : ( " << application->app_id()
-                << "," << hmi_level
-                << "," << check_policy << " )");
+  LOG4CXX_TRACE(logger_, " app_id : ( " << application->app_id()
+                << ", hmi_level : " << hmi_level
+                << ", check_policy : " << check_policy << " )");
   const std::string device_id =
       MessageHelper::GetDeviceMacAddressForHandle(application->device());
 
@@ -204,7 +203,7 @@ bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
   if (HMILevel::HMI_FULL == hmi_level) {
     restored_hmi_level = app_mngr_->IsHmiLevelFullAllowed(application);
   } else if (HMILevel::HMI_LIMITED == hmi_level) {
-    bool allowed_limited = true;
+    bool allowed_limited = application->is_media_application();
     ApplicationManagerImpl::ApplicationListAccessor accessor;
     ApplicationManagerImpl::ApplictionSetConstIt it = accessor.begin();
     for (; accessor.end() != it && allowed_limited; ++it) {
@@ -223,22 +222,24 @@ bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
           ApplicationManagerImpl::instance()->GetDefaultHmiLevel(application);
     }
   }
+  if (HMILevel::HMI_LIMITED == restored_hmi_level) {
+    MessageHelper::SendOnResumeAudioSourceToHMI(application->app_id());
+  }
 
   const AudioStreamingState::eType restored_audio_state =
-      HMILevel::HMI_FULL == restored_hmi_level ||
-      HMILevel::HMI_LIMITED == restored_hmi_level ? AudioStreamingState::AUDIBLE:
-                                                    AudioStreamingState::NOT_AUDIBLE;
+      application->is_media_application() &&
+      (HMILevel::HMI_FULL == restored_hmi_level ||
+       HMILevel::HMI_LIMITED == restored_hmi_level)
+          ? AudioStreamingState::AUDIBLE : AudioStreamingState::NOT_AUDIBLE;
 
-  application->set_audio_streaming_state(restored_audio_state);
-
-  if (HMILevel::HMI_FULL == restored_hmi_level) {
-    MessageHelper::SendActivateAppToHMI(application->app_id());
+  if (restored_hmi_level == HMILevel::HMI_FULL) {
+    ApplicationManagerImpl::instance()->SetState<true>(application->app_id(),
+                                                       restored_hmi_level,
+                                                       restored_audio_state);
   } else {
-    if (HMILevel::HMI_LIMITED == restored_hmi_level) {
-      MessageHelper::SendOnResumeAudioSourceToHMI(application->app_id());
-    }
-    application->set_hmi_level(restored_hmi_level);
-    MessageHelper::SendHMIStatusNotification(*(application.get()));
+    ApplicationManagerImpl::instance()->SetState<false>(application->app_id(),
+                                                        restored_hmi_level,
+                                                        restored_audio_state);
   }
   LOG4CXX_INFO(logger_, "Set up application "
                << application->mobile_app_id()
@@ -959,7 +960,8 @@ void ResumeCtrl::AddCommands(ApplicationSharedPtr application, const Json::Value
 }
 
 void ResumeCtrl::AddChoicesets(ApplicationSharedPtr application, const Json::Value& saved_app) {
-  if(saved_app.isMember(strings::application_choise_sets)) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (saved_app.isMember(strings::application_choise_sets)) {
     const Json::Value& app_choise_sets = saved_app[strings::application_choise_sets];
     for (Json::Value::iterator json_it = app_choise_sets.begin();
         json_it != app_choise_sets.end(); ++json_it)  {
@@ -993,6 +995,7 @@ void ResumeCtrl::AddChoicesets(ApplicationSharedPtr application, const Json::Val
 }
 
 void ResumeCtrl::SetGlobalProperties(ApplicationSharedPtr application, const Json::Value& saved_app) {
+  LOG4CXX_AUTO_TRACE(logger_);
   const Json::Value& global_properties = saved_app[strings::application_global_properties];
   if (!global_properties.isNull()) {
     smart_objects::SmartObject properties_so(smart_objects::SmartType::SmartType_Map);
@@ -1003,6 +1006,7 @@ void ResumeCtrl::SetGlobalProperties(ApplicationSharedPtr application, const Jso
 }
 
 void ResumeCtrl::AddSubscriptions(ApplicationSharedPtr application, const Json::Value& saved_app) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (saved_app.isMember(strings::application_subscribtions)) {
     const Json::Value& subscribtions = saved_app[strings::application_subscribtions];
 
@@ -1024,8 +1028,8 @@ void ResumeCtrl::AddSubscriptions(ApplicationSharedPtr application, const Json::
         application->SubscribeToIVI(ivi);
       }
     }
-
     ProcessHMIRequests(MessageHelper::GetIVISubscriptionRequests(application));
+    MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(application);
   }
 }
 
@@ -1277,14 +1281,14 @@ bool ResumeCtrl::IsResumptionDataValid(uint32_t index) {
   return true;
 }
 
-void ResumeCtrl::SendHMIRequest(
+uint32_t ResumeCtrl::SendHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject* msg_params, bool use_events) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr result =
       MessageHelper::CreateModuleInfoSO(function_id);
-  int32_t hmi_correlation_id =
-      (*result)[strings::params][strings::correlation_id].asInt();
+  uint32_t hmi_correlation_id =
+      (*result)[strings::params][strings::correlation_id].asUInt();
   if (use_events) {
     subscribe_on_event(function_id, hmi_correlation_id);
   }
@@ -1296,6 +1300,7 @@ void ResumeCtrl::SendHMIRequest(
   if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
     LOG4CXX_ERROR(logger_, "Unable to send request");
   }
+  return hmi_correlation_id;
 }
 
 }  // namespace application_manager

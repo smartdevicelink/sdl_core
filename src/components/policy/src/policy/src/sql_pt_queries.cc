@@ -254,6 +254,14 @@ const std::string kCreateSchema =
   "    FOREIGN KEY(`application_id`) "
   "    REFERENCES `application`(`id`) "
   "); "
+  "CREATE TABLE IF NOT EXISTS `request_type`( "
+  "  `request_type` VARCHAR(50) NOT NULL, "
+  "  `application_id` VARCHAR(45) NOT NULL, "
+  "  PRIMARY KEY(`request_type`,`application_id`), "
+  "  CONSTRAINT `fk_app_type_application1` "
+  "    FOREIGN KEY(`application_id`) "
+  "    REFERENCES `application`(`id`) "
+  "); "
   "CREATE INDEX IF NOT EXISTS `app_type.fk_app_type_application1_idx` "
   "  ON `app_type`(`application_id`); "
   "CREATE TABLE IF NOT EXISTS `consent_group`( "
@@ -469,6 +477,9 @@ const std::string kInsertNickname =
 const std::string kInsertAppType =
   "INSERT OR IGNORE INTO `app_type` (`application_id`, `name`) VALUES (?, ?)";
 
+const std::string kInsertRequestType =
+  "INSERT OR IGNORE INTO `request_type` (`application_id`, `request_type`) VALUES (?, ?)";
+
 const std::string kUpdateVersion = "UPDATE `version` SET `number`= ?";
 
 const std::string kInsertMessageType =
@@ -573,6 +584,9 @@ const std::string kSelectNicknames = "SELECT DISTINCT `name` FROM `nickname` "
 const std::string kSelectAppTypes = "SELECT DISTINCT `name` FROM `app_type` "
                                     "WHERE `application_id` = ?";
 
+const std::string kSelectRequestTypes =
+    "SELECT DISTINCT `request_type` FROM `request_type` WHERE `application_id` = ?";
+
 const std::string kSelectSecondsBetweenRetries =
   "SELECT `value` FROM `seconds_between_retry` ORDER BY `index`";
 
@@ -614,6 +628,8 @@ const std::string kUpdateCountersSuccessfulUpdate =
   "`pt_exchanged_x_days_after_epoch` = ?";
 
 const std::string kDeleteApplication = "DELETE FROM `application`";
+
+const std::string kDeleteRequestType = "DELETE FROM `request_type`";
 
 const std::string kSelectApplicationRevoked =
   "SELECT `is_revoked` FROM `application` WHERE `id` = ?";

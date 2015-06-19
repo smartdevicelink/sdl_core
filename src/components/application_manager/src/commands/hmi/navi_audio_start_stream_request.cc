@@ -31,6 +31,9 @@
  */
 
 #include "application_manager/commands/hmi/navi_audio_start_stream_request.h"
+#include "application_manager/application_manager_impl.h"
+#include "protocol_handler/protocol_handler.h"
+#include "config_profile/profile.h"
 
 namespace application_manager {
 
@@ -38,20 +41,106 @@ namespace commands {
 
 AudioStartStreamRequest::AudioStartStreamRequest(
     const MessageSharedPtr& message)
-    : RequestToHMI(message) {
+    : RequestToHMI(message),
+    retry_number_(0) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::pair<uint32_t, int32_t> stream_retry =
+      profile::Profile::instance()->start_stream_retry_amount();
+  default_timeout_ = stream_retry.second * date_time::DateTime::MILLISECONDS_IN_SECOND;
+  retry_number_ = stream_retry.first;
+  LOG4CXX_DEBUG(logger_, "default_timeout_ = " << default_timeout_
+                <<"; retry_number_ = " << retry_number_);
+  //stream_retry.first times after stream_retry.second timeout
+  //SDL should resend AudioStartStreamRequest
 }
 
 AudioStartStreamRequest::~AudioStartStreamRequest() {
 }
 
+void AudioStartStreamRequest::RetryStartSession() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
+  DCHECK_OR_RETURN_VOID(app_mgr);
+  ApplicationSharedPtr app = app_mgr->application_by_hmi_app(application_id());
+  DCHECK_OR_RETURN_VOID(app);
+  uint32_t curr_retry_number =  app->audio_stream_retry_number();
+  if (curr_retry_number < retry_number_ - 1) {
+    LOG4CXX_INFO(logger_, "Send AudioStartStream retry. retry_number = "
+                 << curr_retry_number);
+    MessageHelper::SendAudioStartStream(app->app_id());
+    app->set_audio_stream_retry_number(++curr_retry_number);
+  } else {
+    LOG4CXX_INFO(logger_, "Audio start stream retry squence stopped");
+    app_mgr->EndNaviServices(app->app_id());
+    app->set_audio_stream_retry_number(0);
+  }
+}
+
+void AudioStartStreamRequest::onTimeOut() {
+  RetryStartSession();
+}
+
 void AudioStartStreamRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  SendRequest();
+  subscribe_on_event(hmi_apis::FunctionID::Navigation_StartAudioStream,
+                     correlation_id());
+  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
+  DCHECK_OR_RETURN_VOID(app_mgr);
+  ApplicationSharedPtr app = app_mgr->application_by_hmi_app(application_id());
+  if (app) {
+    app->set_audio_streaming_allowed(true);
+    SendRequest();
+  } else {
+    LOG4CXX_ERROR(logger_, "Applcation with hmi_app_id "
+                 << application_id() << " does not exist");
+  }
+}
+
+void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
+  DCHECK_OR_RETURN_VOID(app_mgr);
+
+  ApplicationSharedPtr app = app_mgr->application_by_hmi_app(application_id());
+  if (!app) {
+    LOG4CXX_ERROR_EXT(logger_,
+        "StartAudioStreamRequest aborted. Application not found");
+    return;
+  }
+
+  const smart_objects::SmartObject& message = event.smart_object();
+  switch (event.id()) {
+    case hmi_apis::FunctionID::Navigation_StartAudioStream: {
+      LOG4CXX_DEBUG(logger_, "Received StartStream event");
+
+      const hmi_apis::Common_Result::eType code =
+          static_cast<hmi_apis::Common_Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
+
+      if (hmi_apis::Common_Result::SUCCESS == code) {
+        LOG4CXX_DEBUG(logger_, "StartAudioStreamResponse SUCCESS");
+        if (app_mgr->HMILevelAllowsStreaming(app->app_id(), ServiceType::kAudio)) {
+          app->set_audio_streaming_approved(true);
+        } else {
+          LOG4CXX_DEBUG(logger_,
+                       "StartAudioStreamRequest aborted. Application can not stream");
+        }
+      } else {
+        LOG4CXX_DEBUG(logger_,"Error received from HMI : " << code);
+        RetryStartSession();
+      }
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      return;
+    }
+  }
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-

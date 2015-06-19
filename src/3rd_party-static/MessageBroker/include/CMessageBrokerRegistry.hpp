@@ -46,6 +46,12 @@ namespace NsMessageBroker
       void deleteController(std::string name);
 
       /**
+      * \brief Remove all controllers by descriptor
+      * \param fd descriptor
+      */
+      void removeControllersByDescriptor(const int fd);
+
+      /**
       * \brief adds notification subscriber to the registry.
       * \param fd file descriptor of controller.
       * \param name name of property which should be observed.

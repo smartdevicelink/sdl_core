@@ -153,12 +153,16 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
       result_tts_speak_ = GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asUInt()));
       is_active_tts_speak_ = false;
-      SendRecordStartNotification();
-      StartMicrophoneRecording();
-      ApplicationManagerImpl::instance()->
-          updateRequestTimeout(connection_key(),
-                               correlation_id(),
-                               default_timeout());
+      if (mobile_apis::Result::SUCCESS == result_tts_speak_) {
+        SendRecordStartNotification();
+        StartMicrophoneRecording();
+
+        // update request timeout to get time for perform audio recording
+        ApplicationManagerImpl::instance()->
+            updateRequestTimeout(connection_key(),
+                                 correlation_id(),
+                                 default_timeout());
+      }
       break;
     }
     case hmi_apis::FunctionID::TTS_OnResetTimeout: {

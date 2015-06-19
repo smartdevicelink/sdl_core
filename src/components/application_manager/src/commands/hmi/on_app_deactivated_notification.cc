@@ -87,19 +87,29 @@ void OnAppDeactivatedNotification::Run() {
   if (HMILevel::HMI_NONE == app->hmi_level()) {
     return;
   }
+  HmiStatePtr regular = app->RegularHmiState();
+  DCHECK_OR_RETURN_VOID(regular);
+  HmiStatePtr new_regular(new HmiState(*regular));
 
-  if (Common_DeactivateReason::AUDIO == deactivate_reason) {
-    if (app->is_media_application()) {
-      if (profile::Profile::instance()->is_mixing_audio_supported() &&
-          (ApplicationManagerImpl::instance()->vr_session_started() ||
-          app->tts_speak_state())) {
-        app->set_audio_streaming_state(AudioStreamingState::ATTENUATED);
+  switch ((*message_)[strings::msg_params][hmi_request::reason].asInt()) {
+    case hmi_apis::Common_DeactivateReason::AUDIO: {
+      new_regular->set_audio_streaming_state(mobile_api::AudioStreamingState::NOT_AUDIBLE);
+      new_regular->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
+      break;
+    }
+    case hmi_apis::Common_DeactivateReason::NAVIGATIONMAP:
+    case hmi_apis::Common_DeactivateReason::PHONEMENU:
+    case hmi_apis::Common_DeactivateReason::SYNCSETTINGS:
+    case hmi_apis::Common_DeactivateReason::GENERAL: {
+      if (app->IsAudioApplication()) {
+        new_regular->set_hmi_level(mobile_api::HMILevel::HMI_LIMITED);
       } else {
-        app->set_audio_streaming_state(AudioStreamingState::NOT_AUDIBLE);
+        new_regular->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
       }
     }
   }
-  ApplicationManagerImpl::instance()->DeactivateApplication(app);
+  ApplicationManagerImpl::instance()->SetState<false>(app->app_id(), new_regular);
+
 }
 
 }  // namespace commands

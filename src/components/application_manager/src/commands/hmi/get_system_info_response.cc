@@ -69,6 +69,14 @@ void GetSystemInfoResponse::Run() {
     hmi_capabilities.set_ccpu_version(ccpu_version);
   } else {
     LOG4CXX_WARN(logger_, "GetSystemError returns an error code " << code);
+
+    // We have to set preloaded flag as false in policy table on any response
+    // of GetSystemInfo (SDLAQ-CRS-2365)
+    const std::string empty_value;
+    policy::PolicyHandler::instance()->OnGetSystemInfo(empty_value,
+                                                       empty_value,
+                                                       empty_value);
+    return;
   }
 
   // We have to set preloaded flag as false in policy table on any response

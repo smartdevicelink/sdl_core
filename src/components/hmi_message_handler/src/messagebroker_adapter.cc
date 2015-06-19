@@ -112,6 +112,7 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("BasicCommunication.OnExitAllApplications");
   MessageBrokerController::subscribeTo("BasicCommunication.OnDeviceChosen");
   MessageBrokerController::subscribeTo("BasicCommunication.OnPhoneCall");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnEmergencyEvent");
   MessageBrokerController::subscribeTo("UI.OnLanguageChange");
   MessageBrokerController::subscribeTo("VR.OnLanguageChange");
   MessageBrokerController::subscribeTo("TTS.OnLanguageChange");
@@ -168,7 +169,7 @@ void MessageBrokerAdapter::ProcessRecievedFromMB(Json::Value& root) {
   message->set_protocol_version(application_manager::ProtocolVersion::kHMI);
 
   if (!handler()) {
-    // WARNING
+    LOG4CXX_WARN(logger_, "handler is NULL");
     return;
   }
 

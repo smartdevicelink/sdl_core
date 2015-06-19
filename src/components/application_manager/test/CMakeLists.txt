@@ -57,10 +57,34 @@ set(mockedSources
   ${AM_MOCK_DIR}/src/application_manager_impl.cc
 )
 
-include_directories(
-  ${AM_SOURCE_DIR}/policy/src/policy/policy_table/table_struct
-)
+set(AM_SOURCES
+  ${AM_SOURCE_DIR}/src/policies/policy_handler.cc
+  ${AM_SOURCE_DIR}/src/policies/policy_event_observer.cc
 
+  ${AM_SOURCE_DIR}/src/commands/command_impl.cc
+  ${AM_SOURCE_DIR}/src/commands/command_request_impl.cc
+  ${AM_SOURCE_DIR}/src/commands/command_response_impl.cc
+  ${AM_SOURCE_DIR}/src/commands/command_notification_impl.cc
+  ${AM_SOURCE_DIR}/src/commands/command_notification_from_mobile_impl.cc
+  ${AM_SOURCE_DIR}/src/commands/pending.cc
+
+  ${AM_SOURCE_DIR}/src/usage_statistics.cc
+  ${AM_SOURCE_DIR}/src/request_info.cc
+  ${AM_SOURCE_DIR}/src/message.cc
+  ${AM_SOURCE_DIR}/src/application_impl.cc
+  ${AM_SOURCE_DIR}/src/state_controller.cc
+  ${AM_SOURCE_DIR}/src/mobile_command_factory.cc
+  ${AM_SOURCE_DIR}/src/message_helper.cc
+  ${AM_SOURCE_DIR}/src/hmi_command_factory.cc
+  ${AM_SOURCE_DIR}/src/hmi_capabilities.cc
+  ${AM_SOURCE_DIR}/src/application_data_impl.cc
+  ${AM_SOURCE_DIR}/src/request_controller.cc
+  ${AM_SOURCE_DIR}/src/resume_ctrl.cpp
+  ${AM_SOURCE_DIR}/src/mobile_message_handler.cc
+)
+  include_directories(
+    ${AM_SOURCE_DIR}/policy/src/policy/policy_table/table_struct
+  )
 set(testLibraries
   gmock
   gmock_main

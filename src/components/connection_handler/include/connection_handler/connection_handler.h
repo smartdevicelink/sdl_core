@@ -35,7 +35,6 @@
 
 #include "transport_manager/transport_manager_listener.h"
 #include "protocol_handler/session_observer.h"
-#include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
 #include "connection_handler/connection.h"
 #include "connection_handler/devices_discovery_starter.h"
@@ -49,8 +48,11 @@ namespace connection_handler {
   enum CloseSessionReason {
     kCommon = 0,
     kFlood,
-    kMalformed
+    kMalformed,
+    kUnauthorizedApp
   };
+
+  class ConnectionHandlerObserver;
 
 /**
  * \class ConnectionHandler

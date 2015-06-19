@@ -178,14 +178,27 @@ class MessageHelper {
         const std::string& path_to_icon, uint32_t app_id);
 
     /**
-     * @brief Sends IVI subscriptions
+     * @brief Sends IVI subscription requests
      */
     static bool SendIVISubscribtions(const uint32_t app_id);
 
     /**
-     * @brief Sends IVI subscriptions
+     * @brief Returns IVI subscription requests
      */
     static smart_objects::SmartObjectList GetIVISubscriptionRequests(ApplicationSharedPtr app);
+
+    /**
+     * @brief Sends button subscription notification
+     */
+    static void SendOnButtonSubscriptionNotification(
+        uint32_t app_id, hmi_apis::Common_ButtonName::eType button, bool is_subscribed);
+
+    /**
+     * @brief Sends button subscription notifications for all buttons
+     * that application is subscribed on
+     */
+    static void SendAllOnButtonSubscriptionNotificationsForApp(
+        ApplicationConstSharedPtr app);
 
     static void SendAppDataToHMI(ApplicationConstSharedPtr app);
     static void SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app);
@@ -234,7 +247,7 @@ class MessageHelper {
      */
     static void SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app,
                                                 bool is_unexpected_disconnect = false);
-    static void SendActivateAppToHMI(
+    static uint32_t SendActivateAppToHMI(
       uint32_t const app_id,
       hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL,
       bool send_policy_priority = true);
@@ -401,6 +414,9 @@ class MessageHelper {
      *
      */
     static void SendAudioStopStream(int32_t connection_key);
+
+    static void SendOnDataStreaming(protocol_handler::ServiceType service,
+                                    bool available);
 
     /*
      * @brief Sends notification to HMI to stop audioPathThru

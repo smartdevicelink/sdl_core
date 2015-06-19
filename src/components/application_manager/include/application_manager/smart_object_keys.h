@@ -184,6 +184,7 @@ const char device_info[] = "deviceInfo";
 const char name[] = "name";
 const char id[] = "id";
 const char isSDLAllowed[] = "isSDLAllowed";
+const char transport_type[] = "transportType";
 const char application[] = "application";
 const char applications[] = "applications";
 const char icon[] = "icon";
@@ -241,6 +242,9 @@ const char slider_position[] = "sliderPosition";
 const char system_action[] = "systemAction";
 const char prerecorded_speech[] = "prerecordedSpeech";
 const char supported_diag_modes[] = "supportedDiagModes";
+const char hmi_capabilities[] = "hmiCapabilities";
+const char navigation[] = "navigation";
+const char phone_call[] = "phoneCall";
 const char priority[] = "priority";
 
 //resuming
@@ -276,6 +280,7 @@ const char address_lines[] = "addressLines";
 const char phone_number[] = "phoneNumber";
 const char number[] = "number";
 const char location_image[] = "locationImage";
+const char is_suscribed[] = "isSubscribed";
 const char message_data[] = "messageData";
 }  // namespace strings
 
@@ -391,6 +396,8 @@ const char screen_params[] = "screenParams";
 const char num_custom_presets_available[] = "numCustomPresetsAvailable";
 const char urls[] = "urls";
 const char policy_app_id[] = "policyAppId";
+const char enabled[] = "enabled";
+
 }  // namespace hmi_response
 
 namespace hmi_notification {

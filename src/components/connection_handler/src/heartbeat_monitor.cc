@@ -60,7 +60,7 @@ void HeartBeatMonitor::Process() {
     if (state.HasTimeoutElapsed()) {
       const uint8_t session_id = it->first;
       if (state.IsReadyToClose()) {
-        LOG4CXX_DEBUG(logger_, "Will close session");
+        LOG4CXX_WARN(logger_, "Will close session");
         connection_->CloseSession(session_id);
         it = sessions_.begin();
         continue;
@@ -103,12 +103,12 @@ void HeartBeatMonitor::AddSession(uint8_t session_id) {
 void HeartBeatMonitor::RemoveSession(uint8_t session_id) {
   AutoLock auto_lock(sessions_list_lock_);
 
-  LOG4CXX_INFO(logger_,
-               "Remove session with id " << session_id);
+  LOG4CXX_DEBUG(logger_,
+               "Remove session with id " << static_cast<int>(session_id));
 
   if (sessions_.erase(session_id) == 0) {
-    LOG4CXX_INFO(logger_,
-                 "Remove session with id " << session_id <<
+    LOG4CXX_WARN(logger_,
+                 "Remove session with id " << static_cast<int>(session_id) <<
                  " was unsuccessful");
   }
 }
@@ -146,7 +146,7 @@ void HeartBeatMonitor::set_heartbeat_timeout_seconds(int32_t timeout,
 HeartBeatMonitor::SessionState::SessionState(int32_t heartbeat_timeout_seconds)
   : heartbeat_timeout_seconds_(heartbeat_timeout_seconds),
     is_heartbeat_sent(false) {
-  LOG4CXX_DEBUG(logger_, "SessionState ctor.");
+  LOG4CXX_AUTO_TRACE(logger_);
   RefreshExpiration();
 }
 
@@ -158,8 +158,9 @@ void HeartBeatMonitor::SessionState::RefreshExpiration () {
 
 void HeartBeatMonitor::SessionState::UpdateTimeout(
     int32_t heartbeat_timeout_seconds) {
+  LOG4CXX_DEBUG(logger_, "Update timout with value " <<
+                heartbeat_timeout_seconds_);
   heartbeat_timeout_seconds_ = heartbeat_timeout_seconds;
-  LOG4CXX_DEBUG(logger_, "Update timout");
   RefreshExpiration();
 }
 

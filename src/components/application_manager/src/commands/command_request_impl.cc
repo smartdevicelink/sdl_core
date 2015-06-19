@@ -192,15 +192,11 @@ bool CommandRequestImpl::CheckSyntax(std::string str, bool allow_empty_line) {
   return true;
 }
 
-void CommandRequestImpl::SendHMIRequest(
+uint32_t CommandRequestImpl::SendHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject* msg_params, bool use_events) {
 
   smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
-  if (!result) {
-    LOG4CXX_ERROR(logger_, "Memory allocation failed.");
-    return;
-  }
 
   const uint32_t hmi_correlation_id =
        ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
@@ -226,6 +222,7 @@ void CommandRequestImpl::SendHMIRequest(
     LOG4CXX_ERROR(logger_, "Unable to send request");
     SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
   }
+  return hmi_correlation_id;
 }
 
 void CommandRequestImpl::CreateHMINotification(
@@ -241,6 +238,10 @@ void CommandRequestImpl::CreateHMINotification(
 
   notify[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
+  notify[strings::params][strings::protocol_version] =
+      CommandImpl::protocol_version_;
+  notify[strings::params][strings::protocol_type] =
+      CommandImpl::hmi_protocol_type_;
   notify[strings::params][strings::function_id] = function_id;
   notify[strings::msg_params] = msg_params;
 

@@ -43,8 +43,11 @@ ssize_t TcpServer::Send(int fd, const std::string& data) {
   int bytesToSend = rep.length();
   const char* ptrBuffer = rep.c_str();
   do {
-    int retVal = send(fd, ptrBuffer, bytesToSend, 0);
+    int retVal = send(fd, ptrBuffer, bytesToSend, MSG_NOSIGNAL);
     if (retVal == -1) {
+      if (EPIPE == errno) {
+        m_purge.push_back(fd);
+      }
       return -1;
     }
     bytesToSend -= retVal;
@@ -54,27 +57,28 @@ ssize_t TcpServer::Send(int fd, const std::string& data) {
 }
 
 bool TcpServer::Recv(int fd) {
-  DBG_MSG(("TcpServer::Recv(int fd)\n"));
+  DBG_MSG(("TcpServer::Recv(%d)\n", fd));
   ssize_t nb = -1;
 
   std::string* pReceivingBuffer = getBufferFor(fd);
   std::vector<char> buf;
   buf.reserve(RECV_BUFFER_LENGTH + pReceivingBuffer->size());
-  DBG_MSG(("Left in  pReceivingBuffer: %d : %s\n",
-           pReceivingBuffer->size(), pReceivingBuffer->c_str()));
+  DBG_MSG(("Left in  pReceivingBuffer: %d \n",
+           pReceivingBuffer->size()));
   buf.assign(pReceivingBuffer->c_str(),
              pReceivingBuffer->c_str() + pReceivingBuffer->size());
   buf.resize(RECV_BUFFER_LENGTH + pReceivingBuffer->size());
-  nb = recv(fd, &buf[pReceivingBuffer->size()], MAX_RECV_DATA, 0);
+  ssize_t received_bytes = recv(fd, &buf[pReceivingBuffer->size()], MAX_RECV_DATA, 0);
+  nb = received_bytes;
   DBG_MSG(("Recieved %d from %d\n", nb, fd));
   nb += pReceivingBuffer->size();
   DBG_MSG(("Recieved with buffer %d from %d\n", nb, fd));
 
-  if (nb > 0) {
+  if (received_bytes > 0) {
     unsigned int recieved_data = nb;
     if (isWebSocket(fd)) {
       const unsigned int data_length =
-        mWebSocketHandler.parseWebSocketDataLength(&buf[0], recieved_data);
+          mWebSocketHandler.parseWebSocketDataLength(&buf[0], recieved_data);
 
       DBG_MSG(("Received %d actual data length %d\n",
                recieved_data, data_length));
@@ -104,7 +108,8 @@ bool TcpServer::Recv(int fd) {
       }
     } else { // client is a websocket
       std::string handshakeResponse =
-        "HTTP/1.1 101 Switching Protocols\r\nUpgrade: WebSocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: ";
+          "HTTP/1.1 101 Switching Protocols\r\nUpgrade: WebSocket\r\n"
+          "Connection: Upgrade\r\nSec-WebSocket-Accept: ";
       ssize_t webSocketKeyPos = pReceivingBuffer->find("Sec-WebSocket-Key: ");
       if (-1 != webSocketKeyPos) {
         std::string wsKey = pReceivingBuffer->substr(webSocketKeyPos + 19, 24);
@@ -112,7 +117,8 @@ bool TcpServer::Recv(int fd) {
         handshakeResponse += wsKey;
         handshakeResponse += "\r\n\r\n";
         pReceivingBuffer->clear();
-        std::list<int>::iterator acceptedClientIt = find(m_AcceptedClients.begin(), m_AcceptedClients.end(), fd);
+        std::list<int>::iterator acceptedClientIt =
+            find(m_AcceptedClients.begin(), m_AcceptedClients.end(), fd);
         if (m_AcceptedClients.end() != acceptedClientIt) {
           m_AcceptedClients.erase(acceptedClientIt);
         }
@@ -124,6 +130,8 @@ bool TcpServer::Recv(int fd) {
     return true;
   }
   else {
+    DBG_MSG(("Received %d bytes from %d; error = %d\n",
+             received_bytes, fd, errno));
     m_purge.push_back(fd);
     return false;
   }
@@ -220,8 +228,9 @@ void TcpServer::WaitMessage(uint32_t ms) {
       itr = m_receivingBuffers.find((*it));
       if (itr != m_receivingBuffers.end())
       { // delete receiving buffer of disconnected client
-        delete(*itr).second;
+        delete itr->second;
         m_receivingBuffers.erase(itr);
+        mpMessageBroker->OnSocketClosed(itr->first);
       }
     }
 

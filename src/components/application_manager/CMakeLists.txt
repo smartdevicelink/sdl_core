@@ -115,11 +115,14 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/on_update_device_list.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/update_device_list_request.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/update_device_list_response.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_audio_data_streaming_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_video_data_streaming_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_sdl_consent_needed_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_sdl_persistence_complete_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_exit_all_applications_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_exit_application_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_start_device_discovery.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_emergency_event_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/close_popup_request.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/close_popup_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_app_activated_notification.cc
@@ -243,6 +246,7 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/on_ui_language_change_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_button_event_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_button_press_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_button_subscription_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_find_applications.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_ui_keyboard_input_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_ui_touch_event_notification.cc

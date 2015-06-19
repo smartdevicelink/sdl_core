@@ -165,17 +165,19 @@ class DynamicApplicationDataImpl : public virtual Application {
     /*
      * @brief Adds perform interaction choice set to the application
      *
+     * @param correlation_id Unique ID of the request that added this choice set
      * @param choice_set_id Unique ID used for this interaction choice set
      * @param choice_set SmartObject that represents choice set
      */
-    void AddPerformInteractionChoiceSet(
+    void AddPerformInteractionChoiceSet(uint32_t correlation_id,
       uint32_t choice_set_id, const smart_objects::SmartObject& choice_set);
 
     /*
      * @brief Deletes entirely perform interaction choice set map
+     * @param correlation_id Unique ID of the request that added this choice set
      *
      */
-    void DeletePerformInteractionChoiceSetMap();
+    void DeletePerformInteractionChoiceSet(uint32_t correlation_id);
 
     /*
      * @brief Retrieves entirely ChoiceSet - VR commands map
@@ -183,17 +185,6 @@ class DynamicApplicationDataImpl : public virtual Application {
      * @return ChoiceSet map that is currently in use
      */
     inline DataAccessor<PerformChoiceSetMap> performinteraction_choice_set_map() const;
-
-    /*
-     * @brief Retrieves choice set that is currently in use by perform
-     * interaction
-     *
-     * @param choice_set_id Unique ID of the interaction choice set
-     *
-     * @return SmartObject that represents choice set
-     */
-    smart_objects::SmartObject* FindPerformInteractionChoiceSet(
-      uint32_t choice_set_id) const;
 
     /*
      * @brief Retrieve application commands
@@ -224,21 +215,6 @@ class DynamicApplicationDataImpl : public virtual Application {
      */
     inline uint32_t is_perform_interaction_active() const;
 
-    /*
-     * @brief Sets the choice that was selected in
-     * response to PerformInteraction
-     *
-     * @param choice Choice that was selected
-     */
-    void set_perform_interaction_ui_corrid(uint32_t corr_id);
-
-    /*
-     * @brief Retrieve the choice that was selected in
-     * response to PerformInteraction
-     *
-     * @return Choice that was selected in response to PerformInteraction
-     */
-    inline uint32_t perform_interaction_ui_corrid() const;
     /*
      * @brief Sets the mode for perform interaction: UI/VR/BOTH
      *
@@ -289,7 +265,6 @@ protected:
     PerformChoiceSetMap performinteraction_choice_set_map_;
     mutable sync_primitives::Lock performinteraction_choice_set_lock_;
     uint32_t is_perform_interaction_active_;
-    uint32_t perform_interaction_ui_corrid_;
     bool is_reset_global_properties_active_;
     int32_t perform_interaction_mode_;
 
@@ -321,10 +296,6 @@ DynamicApplicationDataImpl::performinteraction_choice_set_map() const {
 
 uint32_t DynamicApplicationDataImpl::is_perform_interaction_active() const {
   return is_perform_interaction_active_;
-}
-
-uint32_t DynamicApplicationDataImpl::perform_interaction_ui_corrid() const {
-  return perform_interaction_ui_corrid_;
 }
 
 bool DynamicApplicationDataImpl::is_reset_global_properties_active() const {

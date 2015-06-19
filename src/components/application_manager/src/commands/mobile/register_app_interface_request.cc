@@ -155,15 +155,14 @@ void RegisterAppInterfaceRequest::Run() {
   // Flag conditional compilation specific to customer is used in order to exclude hit code
   // to RTC
   // FIXME(EZamakhov): on shutdown - get freez
-  if (true == profile::Profile::instance()->launch_hmi()) {
-    // wait till HMI started
-    while (!ApplicationManagerImpl::instance()->IsHMICooperating()) {
-      sleep(1);
-      // TODO(DK): timer_->StartWait(1);
-      ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
-                                                               correlation_id(),
-                                                               default_timeout());
-    }
+
+  // wait till HMI started
+  while (!ApplicationManagerImpl::instance()->IsHMICooperating()) {
+    sleep(1);
+    // TODO(DK): timer_->StartWait(1);
+    ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
+                                                             correlation_id(),
+                                                             default_timeout());
   }
 
   const std::string mobile_app_id = (*message_)[strings::msg_params][strings::app_id]
@@ -273,7 +272,7 @@ void RegisterAppInterfaceRequest::Run() {
     application_manager::MessageHelper::GetDeviceInfoForHandle(handle,
                                                                &dev_params);
     policy::DeviceInfo device_info;
-    device_info.connection_type = dev_params.device_connection_type;
+    device_info.AdoptDeviceType(dev_params.device_connection_type);
     if (msg_params.keyExists(strings::device_info)) {
       FillDeviceInfo(&device_info);
     }
@@ -407,8 +406,15 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       *hmi_capabilities.preset_bank_capabilities();
   }
   if (hmi_capabilities.hmi_zone_capabilities()) {
-    response_params[hmi_response::hmi_zone_capabilities] =
-      *hmi_capabilities.hmi_zone_capabilities();
+    if (smart_objects::SmartType_Array ==
+        hmi_capabilities.hmi_zone_capabilities()->getType()) {
+      // hmi_capabilities json contains array and HMI response object
+      response_params[hmi_response::hmi_zone_capabilities] =
+        *hmi_capabilities.hmi_zone_capabilities();
+    } else {
+      response_params[hmi_response::hmi_zone_capabilities][0] =
+        *hmi_capabilities.hmi_zone_capabilities();
+    }
   }
   if (hmi_capabilities.speech_capabilities()) {
     response_params[strings::speech_capabilities] =
@@ -419,8 +425,15 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       *hmi_capabilities.vr_capabilities();
   }
   if (hmi_capabilities.audio_pass_thru_capabilities()) {
-    response_params[strings::audio_pass_thru_capabilities] =
-      *hmi_capabilities.audio_pass_thru_capabilities();
+    if (smart_objects::SmartType_Array ==
+        hmi_capabilities.audio_pass_thru_capabilities()->getType()) {
+      // hmi_capabilities json contains array and HMI response object
+      response_params[strings::audio_pass_thru_capabilities] =
+        *hmi_capabilities.audio_pass_thru_capabilities();
+    } else {
+      response_params[strings::audio_pass_thru_capabilities][0] =
+        *hmi_capabilities.audio_pass_thru_capabilities();
+    }
   }
   if (hmi_capabilities.vehicle_type()) {
     response_params[hmi_response::vehicle_type] =
@@ -441,6 +454,13 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       ++index;
     }
   }
+
+  response_params[strings::hmi_capabilities] =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  response_params[strings::hmi_capabilities][strings::navigation] =
+      hmi_capabilities.navigation_supported();
+  response_params[strings::hmi_capabilities][strings::phone_call] =
+      hmi_capabilities.phone_call_supported();
 
   ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
   std::string hash_id = "";
@@ -475,13 +495,17 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     resumption = resumer.IsApplicationSaved(application->mobile_app_id());
   }
 
-  MessageHelper::SendOnAppRegisteredNotificationToHMI(*(application.get()),
-                                                      resumption,
-                                                      need_restore_vr);
+
+  // By default app subscribed to CUSTOM_BUTTON
+  // Need to send notification to HMI
+  SendSubscribeCustomButtonNotification();
 
   MessageHelper::SendChangeRegistrationRequestToHMI(application);
 
   SendResponse(true, result, add_info.c_str(), &response_params);
+  MessageHelper::SendOnAppRegisteredNotificationToHMI(*(application.get()),
+                                                      resumption,
+                                                      need_restore_vr);
   if (result != mobile_apis::Result::RESUME_FAILED) {
     resumer.StartResumption(application, hash_id);
   } else {
@@ -799,6 +823,35 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
     }
   }
   return false;
+}
+
+void RegisterAppInterfaceRequest::CheckResponseVehicleTypeParam(
+    smart_objects::SmartObject& vehicle_type,
+    const std::string& param,
+    const std::string& backup_value) {
+  using namespace hmi_response;
+  if (!vehicle_type.keyExists(param) ||
+      vehicle_type[param].empty()) {
+    if (!backup_value.empty()) {
+      LOG4CXX_DEBUG(logger_, param << " is missing."
+                    "Will be replaced with policy table value.");
+      vehicle_type[param] = backup_value;
+    } else {
+      vehicle_type.erase(param);
+    }
+  }
+}
+
+void RegisterAppInterfaceRequest::SendSubscribeCustomButtonNotification() {
+  using namespace smart_objects;
+  using namespace hmi_apis;
+
+  SmartObject msg_params = SmartObject(SmartType_Map);
+  msg_params[strings::app_id] = connection_key();
+  msg_params[strings::name] = Common_ButtonName::CUSTOM_BUTTON;
+  msg_params[strings::is_suscribed] = true;
+  CreateHMINotification(FunctionID::Buttons_OnButtonSubscription,
+                        msg_params);
 }
 
 }  // namespace commands

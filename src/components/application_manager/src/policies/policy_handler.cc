@@ -58,6 +58,41 @@ namespace policy {
 
 using namespace application_manager;
 
+namespace {
+using namespace mobile_apis;
+typedef std::map<RequestType::eType, std::string> RequestTypeMap;
+RequestTypeMap TypeToString = {
+  {RequestType::INVALID_ENUM, "INVALID_ENUM"},
+  {RequestType::HTTP, "HTTP"},
+  {RequestType::FILE_RESUME, "FILE_RESUME"},
+  {RequestType::AUTH_REQUEST, "AUTH_REQUEST"},
+  {RequestType::AUTH_CHALLENGE, "AUTH_CHALLENGE"},
+  {RequestType::AUTH_ACK, "AUTH_ACK"},
+  {RequestType::PROPRIETARY, "PROPRIETARY"},
+  {RequestType::QUERY_APPS, "QUERY_APPS"},
+  {RequestType::LAUNCH_APP, "LAUNCH_APP"},
+  {RequestType::LOCK_SCREEN_ICON_URL, "LOCK_SCREEN_ICON_URL"},
+  {RequestType::TRAFFIC_MESSAGE_CHANNEL, "TRAFFIC_MESSAGE_CHANNEL"},
+  {RequestType::DRIVER_PROFILE, "DRIVER_PROFILE"},
+  {RequestType::VOICE_SEARCH, "VOICE_SEARCH"},
+  {RequestType::NAVIGATION, "NAVIGATION"},
+  {RequestType::PHONE,"PHONE"},
+  {RequestType::CLIMATE, "CLIMATE"},
+  {RequestType::SETTINGS, "SETTINGS"},
+  {RequestType::VEHICLE_DIAGNOSTICS, "VEHICLE_DIAGNOSTICS"},
+  {RequestType::EMERGENCY, "EMERGENCY"},
+  {RequestType::MEDIA, "MEDIA"},
+  {RequestType::FOTA, "FOTA"}
+};
+
+const std::string RequestTypeToString(RequestType::eType type) {
+  RequestTypeMap::const_iterator it = TypeToString.find(type);
+  if (TypeToString.end() != it) {
+    return (*it).second;
+  }
+  return "";
+}
+}
 #define POLICY_LIB_CHECK(return_value) {\
   sync_primitives::AutoReadLock lock(policy_manager_lock_); \
   if (!policy_manager_) {\
@@ -103,14 +138,9 @@ struct DeactivateApplication {
 
     void operator()(const ApplicationSharedPtr& app) {
       if (device_id_ == app->device()) {
-        if (mobile_api::HMILevel::HMI_NONE != app->hmi_level()) {
-          ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
-                                                                 mobile_apis::HMILevel::HMI_NONE);
-          app->set_audio_streaming_state(mobile_api::AudioStreamingState::NOT_AUDIBLE);
-          MessageHelper::SendActivateAppToHMI(
-                app->app_id(), hmi_apis::Common_HMILevel::NONE);
-          MessageHelper::SendHMIStatusNotification(*app.get());
-        }
+        ApplicationManagerImpl::instance()->SetState<true>(app->app_id(),
+                                                     mobile_apis::HMILevel::HMI_NONE,
+                                                     mobile_apis::AudioStreamingState::NOT_AUDIBLE);
       }
     }
 
@@ -130,32 +160,22 @@ struct SDLAlowedNotification {
     }
     if (device_id_ == app->device()) {
         std::string hmi_level;
-        hmi_apis::Common_HMILevel::eType default_hmi;
         mobile_apis::HMILevel::eType default_mobile_hmi;
         policy_manager_->GetDefaultHmi(app->mobile_app_id(), &hmi_level);
         if ("BACKGROUND" == hmi_level) {
-          default_hmi = hmi_apis::Common_HMILevel::BACKGROUND;
           default_mobile_hmi = mobile_apis::HMILevel::HMI_BACKGROUND;
         } else if ("FULL" == hmi_level) {
-          default_hmi = hmi_apis::Common_HMILevel::FULL;
           default_mobile_hmi = mobile_apis::HMILevel::HMI_FULL;
         } else if ("LIMITED" == hmi_level) {
-          default_hmi = hmi_apis::Common_HMILevel::LIMITED;
           default_mobile_hmi = mobile_apis::HMILevel::HMI_LIMITED;
         } else if ("NONE" == hmi_level) {
-          default_hmi = hmi_apis::Common_HMILevel::NONE;
           default_mobile_hmi = mobile_apis::HMILevel::HMI_NONE;
         } else {
           return ;
         }
-        if (app->hmi_level() == default_mobile_hmi) {
-          LOG4CXX_DEBUG(logger_, "Application already in default hmi state.");
-        } else {
-          ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
-                                                                 default_mobile_hmi);
-          MessageHelper::SendHMIStatusNotification(*app);
-        }
-        MessageHelper::SendActivateAppToHMI(app->app_id(), default_hmi);
+        ApplicationManagerImpl::instance()->SetState<true>(app->app_id(),
+                                                     default_mobile_hmi
+                                                     );
       }
     }
   private:
@@ -652,36 +672,32 @@ void PolicyHandler::OnPendingPermissionChange(
 
   const uint32_t app_id = app->app_id();
 
-  using mobile_apis::HMILevel::eType;
-
   if (permissions.appRevoked) {
     application_manager::MessageHelper::SendOnAppPermissionsChangedNotification(
       app_id, permissions);
-
-    ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
-                                                           eType::HMI_NONE);
-    app->set_audio_streaming_state(mobile_apis::AudioStreamingState::NOT_AUDIBLE);
-    application_manager::MessageHelper::SendActivateAppToHMI(
-          app_id, hmi_apis::Common_HMILevel::NONE);
-    application_manager::MessageHelper::SendHMIStatusNotification(*app);
+    ApplicationManagerImpl::instance()->SetState<true>(app->app_id(),
+                                                 mobile_apis::HMILevel::HMI_NONE,
+                                                 mobile_apis::AudioStreamingState::NOT_AUDIBLE);    
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);
     return;
   }
 
-  eType app_hmi_level = app->hmi_level();
+  mobile_apis::HMILevel::eType app_hmi_level = app->hmi_level();
 
   switch (app_hmi_level) {
-  case eType::HMI_FULL:
-  case eType::HMI_LIMITED: {
+  case mobile_apis::HMILevel::eType::HMI_FULL:
+  case mobile_apis::HMILevel::eType::HMI_LIMITED: {
     if (permissions.appPermissionsConsentNeeded) {
       MessageHelper::
           SendOnAppPermissionsChangedNotification(app->app_id(), permissions);
 
       policy_manager_->RemovePendingPermissionChanges(policy_app_id);
+      // "Break" statement has to be here to continue processing in case of
+      // there is another "true" flag in permissions struct
+      break;
     }
-    break;
   }
-  case eType::HMI_BACKGROUND: {
+  case mobile_apis::HMILevel::eType::HMI_BACKGROUND: {
     if (permissions.isAppPermissionsRevoked) {
       MessageHelper::
           SendOnAppPermissionsChangedNotification(app->app_id(), permissions);
@@ -707,6 +723,11 @@ void PolicyHandler::OnPendingPermissionChange(
 
     ApplicationManagerImpl::instance()->OnAppUnauthorized(app->app_id());
 
+    policy_manager_->RemovePendingPermissionChanges(policy_app_id);
+  }
+  if (permissions.requestTypeChanged) {
+    MessageHelper::
+        SendOnAppPermissionsChangedNotification(app->app_id(), permissions);
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);
   }
 }
@@ -894,7 +915,6 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
   if (false == permissions.appRevoked && true == permissions.isSDLAllowed) {
         LOG4CXX_INFO(logger_, "Application will be activated");
         if (ApplicationManagerImpl::instance()->ActivateApplication(app)) {
-          MessageHelper::SendHMIStatusNotification(*(app.get()));
           last_activated_app_id_ = 0;
         }
   } else {
@@ -954,17 +974,9 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
       LOG4CXX_INFO(logger_, "Changing hmi level of application "
                    << policy_app_id
                    << " to default hmi level " << default_hmi);
-      // If default is FULL, send request to HMI. Notification to mobile will be
-      // sent on response receiving.
-      if (mobile_apis::HMILevel::HMI_FULL == hmi_level) {
-        MessageHelper::SendActivateAppToHMI(app->app_id());
-      } else {
-        // Set application hmi level
-        ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
-                                                               hmi_level);
-        // If hmi Level is full, it will be seted after ActivateApp response
-        MessageHelper::SendHMIStatusNotification(*app.get());
-      }
+      ApplicationManagerImpl::instance()->SetState<true>(app->app_id(),
+                                                   mobile_apis::HMILevel::HMI_FULL
+                                                   );
       break;
     }
     default:
@@ -1270,6 +1282,38 @@ void policy::PolicyHandler::OnAppsSearchCompleted() {
 void PolicyHandler::OnAppRegisteredOnMobile(const std::string& application_id) {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->OnAppRegisteredOnMobile(application_id);
+}
+
+bool PolicyHandler::IsRequestTypeAllowed(
+    const std::string& policy_app_id,
+    mobile_apis::RequestType::eType type) const {
+  POLICY_LIB_CHECK(false);
+  using namespace mobile_apis;
+
+
+  std::string stringified_type = RequestTypeToString(type);
+  if (stringified_type.empty()) {
+    LOG4CXX_ERROR(logger_, "Unknown request type.");
+    return false;
+  }
+
+  std::vector<std::string> request_types =
+      policy_manager_->GetAppRequestTypes(policy_app_id);
+
+  // If no request types are assigned to app - any is allowed
+  if (request_types.empty()) {
+    return true;
+  }
+
+  std::vector<std::string>::const_iterator it =
+      std::find(request_types.begin(), request_types.end(), stringified_type);
+  return request_types.end() != it;
+}
+
+const std::vector<std::string> PolicyHandler::GetAppRequestTypes(
+    const std::string& policy_app_id) const {
+  POLICY_LIB_CHECK(std::vector<std::string>());
+  return policy_manager_->GetAppRequestTypes(policy_app_id);
 }
 
 void PolicyHandler::Increment(usage_statistics::GlobalCounterId type) {

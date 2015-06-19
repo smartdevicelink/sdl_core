@@ -45,6 +45,7 @@ FromMicToFileRecorderThread::FromMicToFileRecorderThread(
   const std::string& output_file, int32_t duration)
   : threads::ThreadDelegate(),
     argc_(5),
+    argv_(NULL),
     oKey_("-o"),
     tKey_("-t"),
     sleepThread_(NULL),
@@ -185,8 +186,6 @@ void FromMicToFileRecorderThread::threadMain() {
 
   LOG4CXX_TRACE(logger_, "Initializing pipeline ...");
   while (GST_STATE(pipeline) != GST_STATE_PLAYING) {
-    LOG4CXX_TRACE(logger_, "GST_STATE(pipeline) != GST_STATE_PLAYING");
-
     bool shouldBeStoped;
     {
       // FIXME(dchmerev@luxoft.com):
@@ -195,10 +194,17 @@ void FromMicToFileRecorderThread::threadMain() {
     }
 
     if (shouldBeStoped) {
+      gst_element_set_state(pipeline, GST_STATE_NULL);
+      gst_object_unref(GST_OBJECT(pipeline));
+      g_option_context_free(context);
+
+      if (argv_) {
+        delete [] argv_;
+        argv_ = NULL;
+      }
       return;
     }
   }
-
   LOG4CXX_TRACE(logger_, "Pipeline started ...\n");
 
   // Start up a timer for the pipeline
@@ -220,6 +226,12 @@ void FromMicToFileRecorderThread::threadMain() {
   LOG4CXX_TRACE(logger_, "Deleting pipeline\n");
   gst_object_unref(GST_OBJECT(pipeline));
   g_main_loop_unref(loop);
+  g_option_context_free(context);
+
+  if (argv_) {
+    delete [] argv_;
+    argv_ = NULL;
+  }
 
   loop = NULL;
 }

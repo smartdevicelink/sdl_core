@@ -173,6 +173,10 @@ class PolicyManagerImpl : public PolicyManager {
     virtual void OnAppsSearchCompleted();
 
     void OnAppRegisteredOnMobile(const std::string& application_id);
+    
+    virtual const std::vector<std::string> GetAppRequestTypes(
+      const std::string policy_app_id) const;
+  
   protected:
     virtual utils::SharedPtr<policy_table::Table> Parse(
         const BinaryMessage& pt_content);
