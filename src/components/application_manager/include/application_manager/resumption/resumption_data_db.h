@@ -203,18 +203,44 @@ class ResumptionDataDB : public ResumptionData {
                               const std::string& device_id,
                               int32_t hmi_level);
 
+  /**
+   * @brief Re-creates and re-init DB
+   * @return true if success, otherwise - false
+   */
   bool RefreshDB() const;
 
+  /**
+   * @brief Gets all the data from DB to memory
+   * @param data Object which holds resumption data
+   * @return true if success, otherwise - false
+   */
   bool GetAllData(smart_objects::SmartObject& data) const;
 
+  /**
+   * @brief Saves all the data to DB
+   * @param data Object, which holds resumption data
+   * @return true if success, otherwise - false
+   */
   bool SaveAllData(const smart_objects::SmartObject& data);
 
+  /**
+   * @brief Checks, if DB version is actual to current schema
+   * @return true if success, otherwise - false
+   */
   bool IsDBVersionActual() const;
 
+  /**
+   * @brief Updates DB version accordingly to current schema
+   * @return true if success, otherwise - false
+   */
   bool UpdateDBVersion() const;
 
  private:
 
+  /**
+   * @brief Calculates DB version from current schema
+   * @return version
+   */
   const int32_t GetDBVersion() const;
 
   /**
@@ -360,65 +386,65 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Saves files data to DB
-   * @param application contains data for saving
+   * @param files contains data for saving
    * @param application_primary_key - primary key from DB table application
    * @return true if data was saved successfully otherwise returns
    * false
    */
-  bool InsertFilesData(const smart_objects::SmartObject& files_array,
-                       int64_t application_primary_key);
+  bool InsertFilesData(const smart_objects::SmartObject& files,
+                       int64_t application_primary_key) const;
 
   /**
    * @brief Saves submenu data to DB
-   * @param application contains data for saving
+   * @param submenus contains data for saving
    * @param application_primary_key - primary key from DB table application
    * @return true if data was saved successfully otherwise returns
    * false
    */
-  bool InsertSubMenuData(const smart_objects::SmartObject& submenu_array,
-                         int64_t application_primary_key);
+  bool InsertSubMenuData(const smart_objects::SmartObject& submenus,
+                         int64_t application_primary_key) const;
 
   /**
    * @brief Saves commands data to DB
-   * @param application contains data for saving
+   * @param commands contains data for saving
    * @param application_primary_key - primary key from DB table application
    * @return true if data was saved successfully otherwise returns
    * false
    */
-  bool InsertCommandsData(const smart_objects::SmartObject& command_array,
-                          int64_t application_primary_key);
+  bool InsertCommandsData(const smart_objects::SmartObject& commands,
+                          int64_t application_primary_key) const;
 
   /**
    * @brief Saves subscriptions data to DB
-   * @param application contains data for saving
+   * @param subscriptions contains data for saving
    * @param application_primary_key - primary key from DB table application
    * @return true if data was saved successfully otherwise returns
    * false
    */
   bool InsertSubscriptionsData(const smart_objects::SmartObject& subscriptions,
-                               int64_t application_primary_key);
+                               int64_t application_primary_key) const;
 
   /**
    * @brief Saves choice set data to DB
-   * @param application contains data for saving
+   * @param choicesets contains data for saving
    * @param application_primary_key - primary key from DB table application
    * @return true if data was saved successfully otherwise returns
    * false
    */
-  bool InsertChoiceSetData(const smart_objects::SmartObject& choiceset_array,
-                           int64_t application_primary_key);
+  bool InsertChoiceSetData(const smart_objects::SmartObject& choicesets,
+                           int64_t application_primary_key) const;
 
   /**
    * @brief Saves globalProperties data to DB
-   * TOFIX
-   * @param application contains data for saving
-   * @param global_properties_key - will contain primary key from global properties table
+   * @param global_properties contains data for saving
+   * @param global_properties_key - will contain primary key from global
+   * properties table
    * @return true if data was saved successfully otherwise returns
    * false
    */
   bool InsertGlobalPropertiesData(
       const smart_objects::SmartObject& global_properties,
-      int64_t& global_properties_key);
+      int64_t& global_properties_key) const;
 
   /**
    * @brief Saves application data to DB
@@ -430,11 +456,11 @@ class ResumptionDataDB : public ResumptionData {
    */
   bool SaveApplicationToDB(app_mngr::ApplicationSharedPtr application,
                            const std::string& policy_app_id,
-                           const std::string& device_id);
+                           const std::string& device_id) const;
 
   bool SaveApplicationToDB(const smart_objects::SmartObject& application,
                            const std::string& policy_app_id,
-                           const std::string& device_id);
+                           const std::string& device_id) const;
 
   /**
    * @brief Updates ignition of count on saved applications after onAwake
@@ -474,7 +500,7 @@ class ResumptionDataDB : public ResumptionData {
    * false
    */
   bool ExecInsertImage(int64_t& image_primary_key,
-                       const smart_objects::SmartObject& image);
+                       const smart_objects::SmartObject& image) const;
 
   /**
    * @brief Execute query in order to insert choice to DB
@@ -485,7 +511,7 @@ class ResumptionDataDB : public ResumptionData {
    * false
    */
   bool ExecInsertChoice(int64_t choice_set_key,
-                        const smart_objects::SmartObject& choice_array);
+                        const smart_objects::SmartObject& choice_array) const;
 
   /**
    * @brief Execute query in order to insert vr commands to DB
@@ -498,7 +524,7 @@ class ResumptionDataDB : public ResumptionData {
    */
   bool ExecInsertVrCommands(const int64_t primary_key,
                             const smart_objects::SmartObject& vr_commands_array,
-                            AccessoryVRCommand value);
+                            AccessoryVRCommand value) const;
 
   /**
    * @brief Execute query in order to insert choice set data to DB
@@ -508,8 +534,9 @@ class ResumptionDataDB : public ResumptionData {
    * @return true if query was run successfully otherwise returns
    * false
    */
-  bool ExecInsertApplicationChoiceSet(int64_t& choice_set_primary_key,
-                                      const smart_objects::SmartObject& choiceset);
+  bool ExecInsertApplicationChoiceSet(
+      int64_t& choice_set_primary_key,
+      const smart_objects::SmartObject& choiceset) const;
 
   /**
    * @brief combines primary key from several table to new table
@@ -521,7 +548,7 @@ class ResumptionDataDB : public ResumptionData {
    */
   bool ExecInsertDataToArray(int64_t first_primary_key,
                              int64_t second_primary_key,
-                             const std::string& text_query);
+                             const std::string& text_query) const;
 
   /**
    * @brief Execute query in order to insert characters array to DB
@@ -530,8 +557,9 @@ class ResumptionDataDB : public ResumptionData {
    * @return true if query was run successfully otherwise returns
    * false
    */
-  bool ExecInsertLimitedCharacters(int64_t global_properties_key,
-                                   const smart_objects::SmartObject& characters_array);
+  bool ExecInsertLimitedCharacters(
+      int64_t global_properties_key,
+      const smart_objects::SmartObject& characters_array) const;
 
   /**
    * @brief Execute query in order to insert vr help item array to DB
@@ -540,8 +568,9 @@ class ResumptionDataDB : public ResumptionData {
    * @return true if query was run successfully otherwise returns
    * false
    */
-  bool ExecInsertVRHelpItem(int64_t global_properties_key,
-                            const smart_objects::SmartObject& vrhelp_array);
+  bool ExecInsertVRHelpItem(
+      int64_t global_properties_key,
+      const smart_objects::SmartObject& vrhelp_array) const;
 
   /**
    * @brief Execute query in order to insert data to ttsChunk table
@@ -551,7 +580,7 @@ class ResumptionDataDB : public ResumptionData {
    * false
    */
   bool ExecInsertTTSChunks(const smart_objects::SmartObject& tts_chunk,
-                           int64_t& tts_chunk_key);
+                           int64_t& tts_chunk_key) const;
 
   /**
    * @brief Execute query in order to insert data to helpTimeoutPromptArray
@@ -560,8 +589,9 @@ class ResumptionDataDB : public ResumptionData {
    * @return true if query was run successfully otherwise returns
    * false
    */
-  bool ExecInsertHelpTimeoutArray(const smart_objects::SmartObject& global_properties,
-                                  int64_t global_properties_key);
+  bool ExecInsertHelpTimeoutArray(
+      const smart_objects::SmartObject& global_properties,
+      int64_t global_properties_key) const;
 
   /**
    * @brief Execute query in order to insert or update data in application table

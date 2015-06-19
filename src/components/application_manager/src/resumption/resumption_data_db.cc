@@ -1569,7 +1569,7 @@ bool ResumptionDataDB::ExecUnionQueryToDeleteData(const std::string& policy_app_
 }
 
 bool ResumptionDataDB::ExecInsertImage(int64_t& image_primary_key,
-                     const smart_objects::SmartObject& image) {
+                     const smart_objects::SmartObject& image) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
   utils::dbms::SQLQuery count_image_query(db());
@@ -1619,8 +1619,9 @@ bool ResumptionDataDB::ExecInsertImage(int64_t& image_primary_key,
   return result;
 }
 
-bool ResumptionDataDB::ExecInsertChoice(int64_t choice_set_key,
-                                        const smart_objects::SmartObject& choice_array) {
+bool ResumptionDataDB::ExecInsertChoice(
+    int64_t choice_set_key,
+    const smart_objects::SmartObject& choice_array) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
   utils::dbms::SQLQuery insert_choice(db());
@@ -1690,8 +1691,9 @@ bool ResumptionDataDB::ExecInsertChoice(int64_t choice_set_key,
 }
 
 bool ResumptionDataDB::ExecInsertVrCommands(
-    const int64_t primary_key, const smart_objects::SmartObject& vr_commands_array,
-    AccessoryVRCommand value) {
+    const int64_t primary_key,
+    const smart_objects::SmartObject& vr_commands_array,
+    AccessoryVRCommand value) const {
   LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery insert_vr_command(db());
 
@@ -1726,7 +1728,7 @@ bool ResumptionDataDB::ExecInsertVrCommands(
 bool ResumptionDataDB::ExecInsertDataToArray(
     int64_t first_primary_key,
     int64_t second_primary_key,
-    const std::string& text_query) {
+    const std::string& text_query) const {
   LOG4CXX_AUTO_TRACE(logger_);
   bool result;
   utils::dbms::SQLQuery query_insert_array(db());
@@ -1742,7 +1744,7 @@ bool ResumptionDataDB::ExecInsertDataToArray(
 bool ResumptionDataDB::SaveApplicationToDB(
     app_mngr::ApplicationSharedPtr application,
     const std::string& policy_app_id,
-    const std::string& device_id) {
+    const std::string& device_id) const {
 
   LOG4CXX_AUTO_TRACE(logger_);
   int64_t application_primary_key = 0;
@@ -1799,7 +1801,7 @@ bool ResumptionDataDB::SaveApplicationToDB(
 bool ResumptionDataDB::SaveApplicationToDB(
       const smart_objects::SmartObject& application,
       const std::string& policy_app_id,
-      const std::string& device_id) {
+      const std::string& device_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
 
   int64_t application_primary_key = 0;
@@ -1853,13 +1855,12 @@ bool ResumptionDataDB::SaveApplicationToDB(
   return true;
 }
 
-bool ResumptionDataDB::InsertFilesData(
-    const smart_objects::SmartObject& files_array,
-    int64_t application_primary_key) {
+bool ResumptionDataDB::InsertFilesData(const smart_objects::SmartObject& files,
+    int64_t application_primary_key) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
   using namespace smart_objects;
-  const size_t length_files_array = files_array.length();
+  const size_t length_files_array = files.length();
   if (0 == length_files_array) {
     LOG4CXX_INFO(logger_, "Application doesn't contain files");
     return true;
@@ -1879,13 +1880,13 @@ bool ResumptionDataDB::InsertFilesData(
      field "syncFileName" from table "file" = 3*/
   for (size_t i = 0; i < length_files_array; ++i) {
     query_insert_file.Bind(
-        0, (files_array[i][strings::file_type]).asInt());
+        0, (files[i][strings::file_type]).asInt());
     query_insert_file.Bind(
-        1, (files_array[i][strings::is_download_complete]).asBool());
+        1, (files[i][strings::is_download_complete]).asBool());
     query_insert_file.Bind(
-        2, (files_array[i][strings::persistent_file]).asBool());
+        2, (files[i][strings::persistent_file]).asBool());
     query_insert_file.Bind(
-        3, (files_array[i][strings::sync_file_name]).asString());
+        3, (files[i][strings::sync_file_name]).asString());
 
     if (!query_insert_file.Exec()) {
       LOG4CXX_WARN(logger_, "Incorrect insertion of files data");
@@ -1905,12 +1906,12 @@ bool ResumptionDataDB::InsertFilesData(
 }
 
 bool ResumptionDataDB::InsertSubMenuData(
-    const smart_objects::SmartObject& submenu_array,
-    int64_t application_primary_key) {
+    const smart_objects::SmartObject& submenus,
+    int64_t application_primary_key) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
   using namespace smart_objects;
-  const size_t length_submenu_array = submenu_array.length();
+  const size_t length_submenu_array = submenus.length();
   if (0 == length_submenu_array) {
     LOG4CXX_INFO(logger_, "Application doesn't contain submenu");
     return true;
@@ -1928,10 +1929,10 @@ bool ResumptionDataDB::InsertSubMenuData(
      field "position" from table "submenu" = 2*/
   for (size_t i = 0; i < length_submenu_array; ++i) {
     query_insert_submenu.Bind(
-        0, (submenu_array[i][strings::menu_id]).asInt());
+        0, (submenus[i][strings::menu_id]).asInt());
     query_insert_submenu.Bind(
-        1, (submenu_array[i][strings::menu_name]).asString());
-    CustomBind(strings::position, submenu_array[i], query_insert_submenu, 2);
+        1, (submenus[i][strings::menu_name]).asString());
+    CustomBind(strings::position, submenus[i], query_insert_submenu, 2);
 
     if (!query_insert_submenu.Exec()) {
       LOG4CXX_WARN(logger_, "Incorrect insertion of submenu data");
@@ -1951,12 +1952,12 @@ bool ResumptionDataDB::InsertSubMenuData(
 }
 
 bool ResumptionDataDB::InsertCommandsData(
-    const smart_objects::SmartObject& command_array,
-    int64_t application_primary_key) {
+    const smart_objects::SmartObject& commands,
+    int64_t application_primary_key) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
   using namespace smart_objects;
-  const size_t length_command_array = command_array.length();
+  const size_t length_command_array = commands.length();
   if (0 == length_command_array) {
     LOG4CXX_INFO(logger_, "Application doesn't contain command");
     return true;
@@ -1977,10 +1978,10 @@ bool ResumptionDataDB::InsertCommandsData(
      field "parentID" from table "command" = 3
      field "position" from table "command" = 4*/
   for (size_t i = 0; i < length_command_array; ++i) {
-    query_insert_command.Bind(0, command_array[i][strings::cmd_id].asInt());
-    if (command_array[i].keyExists(strings::cmd_icon)) {
+    query_insert_command.Bind(0, commands[i][strings::cmd_id].asInt());
+    if (commands[i].keyExists(strings::cmd_icon)) {
       if (!ExecInsertImage(image_primary_key,
-                          command_array[i][strings::cmd_icon])) {
+                          commands[i][strings::cmd_icon])) {
         LOG4CXX_WARN(logger_,
                      "Problem with insert command image to DB");
         return false;
@@ -1990,8 +1991,8 @@ bool ResumptionDataDB::InsertCommandsData(
       query_insert_command.Bind(1);
     }
 
-    if (command_array[i].keyExists(strings::menu_params)) {
-      const SmartObject& menu_params = command_array[i][strings::menu_params];
+    if (commands[i].keyExists(strings::menu_params)) {
+      const SmartObject& menu_params = commands[i][strings::menu_params];
       query_insert_command.Bind(2, menu_params[strings::menu_name].asString());
 
       CustomBind(hmi_request::parent_id, menu_params, query_insert_command, 3);
@@ -2006,9 +2007,9 @@ bool ResumptionDataDB::InsertCommandsData(
       return false;
     }
     command_primary_key = query_insert_command.LastInsertId();
-    if (command_array[i].keyExists(strings::vr_commands)) {
+    if (commands[i].keyExists(strings::vr_commands)) {
       if (!ExecInsertVrCommands(command_primary_key,
-                                command_array[i][strings::vr_commands],
+                                commands[i][strings::vr_commands],
                                 kVRCommandFromCommand)) {
         return false;
       }
@@ -2025,7 +2026,7 @@ bool ResumptionDataDB::InsertCommandsData(
 
 bool ResumptionDataDB::InsertSubscriptionsData(
     const smart_objects::SmartObject& subscriptions,
-    int64_t application_primary_key) {
+    int64_t application_primary_key) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
   using namespace smart_objects;
@@ -2073,26 +2074,26 @@ bool ResumptionDataDB::InsertSubscriptionsData(
 }
 
 bool ResumptionDataDB::InsertChoiceSetData(
-    const smart_objects::SmartObject& choiceset_array,
-    int64_t application_primary_key) {
+    const smart_objects::SmartObject& choicesets,
+    int64_t application_primary_key) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
   using namespace smart_objects;
 
-  if (choiceset_array.empty()) {
+  if (choicesets.empty()) {
     LOG4CXX_INFO(logger_, "Application doesn't contain choiceSet");
     return true;
   }
   int64_t choice_set_key = 0;
-  size_t length_choceset_array = choiceset_array.length();
+  size_t length_choceset_array = choicesets.length();
   for (size_t i = 0; i < length_choceset_array; ++i) {
 
-    if (!ExecInsertApplicationChoiceSet(choice_set_key, choiceset_array[i])) {
+    if (!ExecInsertApplicationChoiceSet(choice_set_key, choicesets[i])) {
       return false;
     }
 
     if (!ExecInsertChoice(choice_set_key,
-                         choiceset_array[i][strings::choice_set])) {
+                         choicesets[i][strings::choice_set])) {
       return false;
     }
 
@@ -2108,7 +2109,8 @@ bool ResumptionDataDB::InsertChoiceSetData(
 }
 
 bool ResumptionDataDB::ExecInsertApplicationChoiceSet(
-    int64_t& choice_set_primary_key, const smart_objects::SmartObject& choiceset) {
+    int64_t& choice_set_primary_key,
+    const smart_objects::SmartObject& choiceset) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
 
@@ -2137,7 +2139,7 @@ bool ResumptionDataDB::ExecInsertApplicationChoiceSet(
 
 bool ResumptionDataDB::InsertGlobalPropertiesData(
     const smart_objects::SmartObject& global_properties,
-    int64_t& global_properties_key) {
+    int64_t& global_properties_key) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
   using namespace smart_objects;
@@ -2238,7 +2240,8 @@ bool ResumptionDataDB::InsertGlobalPropertiesData(
 }
 
 bool ResumptionDataDB::ExecInsertHelpTimeoutArray(
-    const smart_objects::SmartObject& global_properties, int64_t global_properties_key) {
+    const smart_objects::SmartObject& global_properties,
+    int64_t global_properties_key) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
   using namespace smart_objects;
@@ -2303,8 +2306,9 @@ bool ResumptionDataDB::ExecInsertHelpTimeoutArray(
   return true;
 }
 
-bool ResumptionDataDB::ExecInsertTTSChunks(const smart_objects::SmartObject& tts_chunk,
-                                           int64_t& tts_chunk_key) {
+bool ResumptionDataDB::ExecInsertTTSChunks(
+    const smart_objects::SmartObject& tts_chunk,
+    int64_t& tts_chunk_key) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
   utils::dbms::SQLQuery insert_tts_chunk(db());
@@ -2327,7 +2331,8 @@ bool ResumptionDataDB::ExecInsertTTSChunks(const smart_objects::SmartObject& tts
 }
 
 bool ResumptionDataDB::ExecInsertLimitedCharacters(
-    int64_t global_properties_key, const smart_objects::SmartObject& characters_array) {
+    int64_t global_properties_key,
+    const smart_objects::SmartObject& characters_array) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
   utils::dbms::SQLQuery insert_characters(db());
@@ -2356,8 +2361,9 @@ bool ResumptionDataDB::ExecInsertLimitedCharacters(
   return true;
 }
 
-bool ResumptionDataDB::ExecInsertVRHelpItem(int64_t global_properties_key,
-                                            const smart_objects::SmartObject& vrhelp_array) {
+bool ResumptionDataDB::ExecInsertVRHelpItem(
+    int64_t global_properties_key,
+    const smart_objects::SmartObject& vrhelp_array) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
   utils::dbms::SQLQuery insert_vrhelp_item(db());
@@ -2407,11 +2413,12 @@ bool ResumptionDataDB::InsertApplicationData(app_mngr::ApplicationSharedPtr appl
   return InsertApplicationData(app, policy_app_id, device_id, NULL, 0);
 }
 
-bool ResumptionDataDB::InsertApplicationData(const ApplicationParams& application,
-                                             const std::string& policy_app_id,
-                                             const std::string& device_id,
-                                             int64_t* application_primary_key,
-                                             int64_t global_properties_key) const {
+bool ResumptionDataDB::InsertApplicationData(
+    const ApplicationParams& application,
+    const std::string& policy_app_id,
+    const std::string& device_id,
+    int64_t* application_primary_key,
+    int64_t global_properties_key) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
   utils::dbms::SQLQuery query(db());

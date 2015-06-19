@@ -311,8 +311,16 @@ class PTRepresentation {
      */
     virtual void RemoveDB() const = 0;
 
+    /**
+     * @brief Checks if DB version is actual to current schema
+     * @return true if actual, otherwise - false
+     */
     virtual bool IsDBVersionActual() const = 0;
 
+    /**
+     * @brief Updates DB version according to current schema
+     * @return true if success, otherwise - false
+     */
     virtual bool UpdateDBVersion() const = 0;
 };
 
