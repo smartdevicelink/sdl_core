@@ -31,10 +31,10 @@
  */
 
 #include "can_cooperation/request_controller.h"
-#include <fstream>
 #include "json/json.h"
 #include "utils/logger.h"
 #include "functional_module/timer/timer_director_impl.h"
+#include "functional_module/settings.h"
 
 namespace can_cooperation {
 namespace request_controller {
@@ -42,16 +42,10 @@ namespace request_controller {
 CREATE_LOGGERPTR_GLOBAL(logger_, "CANRequestController")
 
 RequestController::RequestController() {
-  // TODO(PV): move setting to separate instance
-  functional_modules::TimeUnit timeout_seconds = 10;
-  std::ifstream in("./plugins/can_config.json");
-  if (in.is_open()) {
-    Json::Reader reader;
-    Json::Value value;
-    if (reader.parse(in, value, false)) {
-      timeout_seconds = value["timeout_period_seconds"].asUInt();
-    }
-  }
+  functional_modules::TimeUnit timeout_seconds = 100;
+  functional_modules::Settings settings;
+  settings.ReadParameter("Remote Control", "timeout_period_seconds",
+                         &timeout_seconds);
   timer_.set_period(timeout_seconds);
   LOG4CXX_DEBUG(logger_, "Timeout is set to " << timeout_seconds);
   timer_.AddObserver(this);
@@ -74,7 +68,7 @@ void RequestController::AddRequest(const uint32_t& mobile_correlation_id,
 
 void RequestController::DeleteRequest(const uint32_t& mobile_correlation_id) {
   mobile_request_list_.erase(mobile_correlation_id);
-  //  TODO(VS): add app id
+  // TODO(VS): add app id
   timer_.RemoveTrackable(TrackableMessage(0, mobile_correlation_id));
 }
 

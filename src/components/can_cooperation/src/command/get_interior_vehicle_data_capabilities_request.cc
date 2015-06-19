@@ -35,6 +35,7 @@
 #include "can_cooperation/validators/struct_validators/module_description_validator.h"
 #include "can_cooperation/can_module_constants.h"
 #include "can_cooperation/message_helper.h"
+#include "can_cooperation/vehicle_capabilities.h"
 #include "functional_module/function_ids.h"
 #include "json/json.h"
 
@@ -47,12 +48,14 @@ using namespace message_params;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "GetInteriorVehicleDataCapabiliesRequest")
 
-GetInteriorVehicleDataCapabiliesRequest::GetInteriorVehicleDataCapabiliesRequest(
+GetInteriorVehicleDataCapabiliesRequest::
+GetInteriorVehicleDataCapabiliesRequest(
   const application_manager::MessagePtr& message)
   : BaseCommandRequest(message) {
 }
 
-GetInteriorVehicleDataCapabiliesRequest::~GetInteriorVehicleDataCapabiliesRequest() {
+GetInteriorVehicleDataCapabiliesRequest::
+~GetInteriorVehicleDataCapabiliesRequest() {
 }
 
 void GetInteriorVehicleDataCapabiliesRequest::Execute() {
@@ -115,6 +118,53 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
         success = false;
         info = "Response validation failed";
         result_code = result_codes::kInvalidData;
+      }
+    }
+
+    if (!success) {
+      // Try to read capabilities from file.
+      LOG4CXX_INFO(logger_, "Failed to get correct response from HMI; \
+          trying to read from file");
+      Json::Value request;
+
+      Json::Reader reader;
+      reader.parse(message_->json_message(), request);
+
+      VehicleCapabilities file_caps;
+      Json::Value zone_capabilities;
+      if (request.isMember(kZone)) {
+        zone_capabilities = file_caps.capabilities(request[kZone]);
+      } else {
+        zone_capabilities = file_caps.capabilities();
+      }
+
+      if (zone_capabilities.type() == Json::ValueType::arrayValue) {
+        LOG4CXX_DEBUG(logger_, "Read vehicle capabilities from file "
+            << zone_capabilities);
+        if (request.isMember(kModuleTypes)) {
+          response_params_[kInteriorVehicleDataCapabilities] = Json::Value(
+            Json::ValueType::arrayValue);
+          for (size_t i = 0; i < zone_capabilities.size(); ++i) {
+            for (size_t j = 0; j < request[kModuleTypes].size(); ++j) {
+              if (request[kModuleTypes][j] ==
+                    zone_capabilities[i][kModuleType]) {
+                response_params_[kInteriorVehicleDataCapabilities].append(
+                  zone_capabilities[i]);
+              }
+            }
+          }
+        } else {
+          response_params_[kInteriorVehicleDataCapabilities] =
+            zone_capabilities;
+        }
+        success = true;
+        result_code = result_codes::kSuccess;
+        info = "";
+      } else {
+        // Failed to read capabilities from file.
+        LOG4CXX_ERROR(logger_, "Failed to read capabilities from file also");
+        result_code = result_codes::kGenericError;
+        info = "Invalid response from the vehicle";
       }
     }
 

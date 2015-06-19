@@ -37,11 +37,11 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <cstring>
-#include <fstream>
 #include "json/json.h"
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
 #include "utils/conditional_variable.h"
+#include "functional_module/settings.h"
 
 namespace can_cooperation {
 
@@ -71,15 +71,11 @@ CANTCPConnection::CANTCPConnection()
   if (-1 == socket_) {
     current_state_ = INVALID;
   }
-  std::ifstream in("./plugins/can_config.json");
-  if (in.is_open()) {
-    Json::Reader reader;
-    Json::Value value;
-    if (reader.parse(in, value, false)) {
-      address_ = value["address"].asString();
-      port_ = value["port"].asUInt();
-    }
-  }
+
+  functional_modules::Settings settings;
+  settings.ReadParameter("Remote Control", "address", &address_);
+  settings.ReadParameter("Remote Control", "port", &port_);
+
   LOG4CXX_INFO(logger_, "Connecting to "
                << address_ << " on port " << port_);
   if (OpenConnection() == ConnectionState::OPENED) {
