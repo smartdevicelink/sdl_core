@@ -73,8 +73,8 @@ CANTCPConnection::CANTCPConnection()
   }
 
   functional_modules::Settings settings;
-  settings.ReadParameter<std::string>("Remote Control", "address", &address_);
-  settings.ReadParameter<int>("Remote Control", "port", &port_);
+  settings.ReadParameter("Remote Control", "address", &address_);
+  settings.ReadParameter("Remote Control", "port", &port_);
 
   LOG4CXX_INFO(logger_, "Connecting to "
                << address_ << " on port " << port_);

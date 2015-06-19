@@ -35,17 +35,21 @@
 
 #include <string>
 #include "json/json.h"
-#include "utils/singleton.h"
+#include "utils/macro.h"
 
 namespace can_cooperation {
 
 /*
- * @brief VehicleCapabilities singleton class stores capabilities from file
+ * @brief VehicleCapabilities class stores capabilities from file
  * specified in smartDeviceLink.ini as InteriorVDCapabilitiesFile
  * or from default location ./plugins/Remote_Control/InteriorVehicleDataCapabilities.json.
  */
-class VehicleCapabilities : public utils::Singleton<VehicleCapabilities> {
+class VehicleCapabilities {
  public:
+  /*
+   * @brief Constructor
+   */
+  VehicleCapabilities();
   /*
    * @brief Destructor
    */
@@ -63,10 +67,8 @@ class VehicleCapabilities : public utils::Singleton<VehicleCapabilities> {
   Json::Value capabilities(const Json::Value& zone) const;
 
  private:
-  VehicleCapabilities();
-  static Json::Value capabilities_;
+  Json::Value capabilities_;
   const std::string kDefaultPath_;
-  FRIEND_BASE_SINGLETON_CLASS(VehicleCapabilities);
   DISALLOW_COPY_AND_ASSIGN(VehicleCapabilities);
 };
 

@@ -41,30 +41,27 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "VehicleCapabilities")
 
 using message_params::kInteriorVehicleDataCapabilities;
 using message_params::kModuleZone;
-Json::Value VehicleCapabilities::capabilities_;
 
 VehicleCapabilities::VehicleCapabilities()
   : kDefaultPath_("./plugins/Remote_Control/InteriorVehicleDataCapabilities.json") {
-  if (capabilities_.type() == Json::ValueType::nullValue) {
-    std::string path_to_file;
-    functional_modules::Settings settings;
-    if (!settings.ReadParameter<std::string>("Remote Control",
-        "InteriorVDCapabilitiesFile",
-        &path_to_file)) {
-      path_to_file = kDefaultPath_;
-    }
-    LOG4CXX_DEBUG(logger_, "Reading capabilities from " << path_to_file);
+  std::string path_to_file;
+  functional_modules::Settings settings;
+  if (!settings.ReadParameter("Remote Control",
+      "InteriorVDCapabilitiesFile",
+      &path_to_file)) {
+    path_to_file = kDefaultPath_;
+  }
+  LOG4CXX_DEBUG(logger_, "Reading capabilities from " << path_to_file);
 
-    std::ifstream in(path_to_file);
-    if (!in.is_open() && path_to_file != kDefaultPath_) {
-      in.open(kDefaultPath_);
-    }
+  std::ifstream in(path_to_file);
+  if (!in.is_open() && path_to_file != kDefaultPath_) {
+    in.open(kDefaultPath_);
+  }
 
-    if (in.is_open()) {
-      Json::Reader reader;
-      if (!reader.parse(in, VehicleCapabilities::capabilities_, false)) {
-        capabilities_ = Json::Value(Json::ValueType::nullValue);
-      }
+  if (in.is_open()) {
+    Json::Reader reader;
+    if (!reader.parse(in, VehicleCapabilities::capabilities_, false)) {
+      capabilities_ = Json::Value(Json::ValueType::nullValue);
     }
   }
 }

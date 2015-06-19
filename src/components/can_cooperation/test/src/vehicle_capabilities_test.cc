@@ -4,18 +4,18 @@
 namespace can_cooperation {
 
 TEST(VehicleCapabilities, Load) {
-  VehicleCapabilities* caps = VehicleCapabilities::instance();
-  ASSERT_EQ(Json::ValueType::arrayValue, caps->capabilities().type());
+  VehicleCapabilities caps;
+  ASSERT_EQ(Json::ValueType::arrayValue, caps.capabilities().type());
 }
 
 TEST(VehicleCapabilities, GetCapabilities) {
-  VehicleCapabilities* caps = VehicleCapabilities::instance();
-  ASSERT_EQ(Json::ValueType::arrayValue, caps->capabilities().type());
-  ASSERT_TRUE(6 == caps->capabilities().size());
+  VehicleCapabilities caps;
+  ASSERT_EQ(Json::ValueType::arrayValue, caps.capabilities().type());
+  ASSERT_TRUE(6 == caps.capabilities().size());
 }
 
 TEST(VehicleCapabilities, GetSpecificCapabilities) {
-  VehicleCapabilities* caps = VehicleCapabilities::instance();
+  VehicleCapabilities caps;
   Json::Value value;
   value["col"] = 0;
   value["row"] = 0;
@@ -23,12 +23,12 @@ TEST(VehicleCapabilities, GetSpecificCapabilities) {
   value["colspan"] = 2;
   value["rowspan"] = 2;
   value["levelspan"] = 1;
-  ASSERT_EQ(Json::ValueType::arrayValue, caps->capabilities(value).type());
-  ASSERT_TRUE(2 == caps->capabilities(value).size());
+  ASSERT_EQ(Json::ValueType::arrayValue, caps.capabilities(value).type());
+  ASSERT_TRUE(2 == caps.capabilities(value).size());
 
   value["row"] = 1;
-  ASSERT_EQ(Json::ValueType::arrayValue, caps->capabilities(value).type());
-  ASSERT_TRUE(1 == caps->capabilities(value).size());
+  ASSERT_EQ(Json::ValueType::arrayValue, caps.capabilities(value).type());
+  ASSERT_TRUE(1 == caps.capabilities(value).size());
 }
 
 }  // namespace can_cooperation

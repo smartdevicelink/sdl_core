@@ -44,9 +44,8 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "CANRequestController")
 RequestController::RequestController() {
   functional_modules::TimeUnit timeout_seconds = 100;
   functional_modules::Settings settings;
-  settings.ReadParameter<functional_modules::TimeUnit>("Remote Control",
-                                                      "timeout_period_seconds",
-                                                      &timeout_seconds);
+  settings.ReadParameter("Remote Control", "timeout_period_seconds",
+                         &timeout_seconds);
   timer_.set_period(timeout_seconds);
   LOG4CXX_DEBUG(logger_, "Timeout is set to " << timeout_seconds);
   timer_.AddObserver(this);

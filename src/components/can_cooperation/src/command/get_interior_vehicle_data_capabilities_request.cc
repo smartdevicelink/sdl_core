@@ -130,7 +130,7 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
       Json::Reader reader;
       reader.parse(message_->json_message(), request);
 
-      VehicleCapabilities& file_caps = *(VehicleCapabilities::instance());
+      VehicleCapabilities file_caps;
       Json::Value zone_capabilities;
       if (request.isMember(kZone)) {
         zone_capabilities = file_caps.capabilities(request[kZone]);
