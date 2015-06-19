@@ -583,6 +583,20 @@ void CacheManager::CheckSnapshotInitialization() {
   *(snapshot_->policy_table.module_config.preloaded_pt) = false;
 }
 
+struct HandleModuleTypes {
+ private:
+  CacheManagerInterface* cache_;
+ public:
+  explicit HandleModuleTypes(CacheManagerInterface* cache) : cache_(cache) {}
+  void operator()(policy_table::ApplicationPolicies::value_type& item) {
+    const std::string& app_id = item.first;
+    if (cache_->IsPredataPolicy(app_id) || app_id == kDeviceId) {
+      LOG4CXX_INFO(logger_, "Clear module types for application " << app_id);
+      item.second.moduleType = rpc::Optional<policy_table::ModuleTypes>();
+    }
+  }
+};
+
 void CacheManager::PersistData() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (backup_.valid()) {
@@ -592,6 +606,8 @@ void CacheManager::PersistData() {
       policy_table::Table copy_pt(*pt_);
       cache_lock_.Release();
 
+      policy_table::ApplicationPolicies& apps = copy_pt.policy_table.app_policies;
+      std::for_each(apps.begin(), apps.end(), HandleModuleTypes(this));
       backup_->Save(copy_pt);
       backup_->SaveUpdateRequired(update_required);
 
@@ -995,6 +1011,8 @@ bool CacheManager::LoadFromFile(const std::string& file_name) {
 
   pt_ = new policy_table::Table(&value);
   if (pt_->is_valid()) {
+    policy_table::ApplicationPolicies& apps = pt_->policy_table.app_policies;
+    std::for_each(apps.begin(), apps.end(), HandleModuleTypes(this));
     if (backup_->Save(*pt_)) {
       backup_->WriteDb();
       return true;
