@@ -877,7 +877,7 @@ bool SQLPTRepresentation::SaveApplicationPolicies(
   }
   policy_table::ApplicationPolicies::const_iterator it_device =
       apps.find(kDeviceId);
-  if (apps.end() != it_pre_data_consented) {
+  if (apps.end() != it_device) {
     if (!SaveSpecificAppPolicy(*it_device)) {
       return false;
     }

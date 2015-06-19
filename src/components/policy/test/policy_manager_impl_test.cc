@@ -389,12 +389,11 @@ TEST_F(PolicyManagerImplTest, CheckAccess_PrimaryDevice) {
   Subject who {"dev1", "12345"};
   Object what {policy_table::MT_CLIMATE};
 
-  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
-      WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote,
               CheckModuleType("12345", policy_table::MT_CLIMATE)).
       WillOnce(Return(true));
-  EXPECT_CALL(*access_remote, CheckParameters(_,_,_,_)).WillOnce(Return(kAllowed));
+  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
+      WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(true));
   EXPECT_CALL(*access_remote, Check(who, what)).
       WillOnce(Return(TypeAccess::kManual));
@@ -402,16 +401,15 @@ TEST_F(PolicyManagerImplTest, CheckAccess_PrimaryDevice) {
 
   SeatLocation zone {0,0,0};
   EXPECT_EQ(TypeAccess::kAllowed,
-            manager->CheckAccess("12345", zone, "CLIMATE", "", RemoteControlParams()));
+            manager->CheckAccess("12345", zone, "CLIMATE", "AnyRpc", RemoteControlParams()));
 }
 
 TEST_F(PolicyManagerImplTest, CheckAccess_DisabledRremoteControl) {
-  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
-      WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote,
               CheckModuleType("12345", policy_table::MT_RADIO)).
       WillOnce(Return(true));
-  EXPECT_CALL(*access_remote, CheckParameters(_,_,_,_)).WillOnce(Return(kAllowed));
+  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
+      WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(false));
   EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(false));
 
@@ -424,14 +422,14 @@ TEST_F(PolicyManagerImplTest, CheckAccess_Result) {
   Subject who = {"dev1", "12345"};
   Object what = {policy_table::MT_RADIO};
 
-  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
-      WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote,
               CheckModuleType("12345", policy_table::MT_RADIO)).
       WillOnce(Return(true));
-  EXPECT_CALL(*access_remote, CheckParameters(_,_,_,_)).WillOnce(Return(kAllowed));
+  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
+      WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(false));
   EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(true));
+  EXPECT_CALL(*access_remote, CheckParameters(_,_,_,_)).WillOnce(Return(kManual));
   EXPECT_CALL(*access_remote, Check(who, what)).
       WillOnce(Return(TypeAccess::kAllowed));
 
@@ -445,25 +443,24 @@ TEST_F(PolicyManagerImplTest, TwoDifferentDevice) {
   Subject who2 = {"dev2", "123456"};
   Object what = {policy_table::MT_RADIO};
 
-  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
-      WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote,
               CheckModuleType("12345", policy_table::MT_RADIO)).
       WillOnce(Return(true));
-  EXPECT_CALL(*access_remote, CheckParameters(_,_,_,_)).Times(2).
-      WillRepeatedly(Return(kAllowed));
+  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
+      WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(true));
   EXPECT_CALL(*access_remote, Check(who1, what)).
       WillOnce(Return(TypeAccess::kManual));
   EXPECT_CALL(*access_remote, Allow(who1, what));
 
-  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("123456")).
-      WillOnce(Return("dev2"));
   EXPECT_CALL(*access_remote,
               CheckModuleType("123456", policy_table::MT_RADIO)).
       WillOnce(Return(true));
+  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("123456")).
+      WillOnce(Return("dev2"));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev2")).WillOnce(Return(false));
   EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(true));
+  EXPECT_CALL(*access_remote, CheckParameters(_,_,_,_)).WillOnce(Return(kManual));
   EXPECT_CALL(*access_remote, Check(who2, what)).
         WillOnce(Return(TypeAccess::kDisallowed));
 
