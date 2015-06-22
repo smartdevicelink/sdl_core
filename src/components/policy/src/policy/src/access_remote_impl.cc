@@ -78,7 +78,7 @@ struct ToHMIType {
       type = policy_table::AHT_DEFAULT;
     }
     LOG4CXX_DEBUG(logger_,
-                  "HMI type: " << item << " - " << EnumToJsonString(type));
+        "HMI type: " << item << " - " << EnumToJsonString(type));
     return policy_table::AppHMITypes::value_type(type);
   }
 };
@@ -96,16 +96,16 @@ struct IsZone {
   }
 };
 
-struct NotContained {
+struct Contained {
  private:
   const policy_table::Strings& params_;
  public:
-  explicit NotContained(const policy_table::Strings& params)
+  explicit Contained(const policy_table::Strings& params)
       : params_(params) {
   }
   bool operator ()(const RemoteControlParams::value_type& item) const {
     return std::find_if(params_.begin(), params_.end(), CompareString(item))
-        == params_.end();
+        != params_.end();
   }
   struct CompareString {
    private:
@@ -225,68 +225,54 @@ TypeAccess AccessRemoteImpl::CheckParameters(
   }
 
   const policy_table::InteriorZone& zone = i->second;
-  if (IsAutoAllowed(zone, module, rpc, params)) {
+  std::string module_name = EnumToJsonString(module);
+  RemoteControlParams copy_params(params);
+  if (IsAllowed(zone.auto_allow, module_name, rpc, &copy_params)) {
     return TypeAccess::kAllowed;
   }
-  if (IsDriverAllowed(zone, module, rpc, params)) {
+  if (IsAllowed(zone.driver_allow, module_name, rpc, &copy_params)) {
     return TypeAccess::kManual;
   }
   return TypeAccess::kDisallowed;
 }
 
-bool AccessRemoteImpl::IsAutoAllowed(const policy_table::InteriorZone& zone,
-                                     policy_table::ModuleType module,
-                                     const std::string rpc,
-                                     const RemoteControlParams& params) const {
+bool AccessRemoteImpl::IsAllowed(
+    const policy_table::AccessModules& modules,
+    const std::string& module_name, const std::string& rpc_name,
+    RemoteControlParams* input) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  policy_table::AccessModules::const_iterator i = zone.auto_allow.find(
-      EnumToJsonString(module));
-  if (i != zone.auto_allow.end()) {
-    const policy_table::RemoteRpcs& rpcs = i->second;
-    return CheckRpc(rpc, params, rpcs);
+  policy_table::AccessModules::const_iterator i = modules.find(module_name);
+  if (i == modules.end()) {
+    return false;
   }
-  return false;
-}
 
-bool AccessRemoteImpl::IsDriverAllowed(
-    const policy_table::InteriorZone& zone, policy_table::ModuleType module,
-    const std::string rpc, const RemoteControlParams& params) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  policy_table::AccessModules::const_iterator i = zone.driver_allow.find(
-      EnumToJsonString(module));
-  if (i != zone.driver_allow.end()) {
-    const policy_table::RemoteRpcs& rpcs = i->second;
-    return CheckRpc(rpc, params, rpcs);
-  }
-  return false;
-}
-
-bool AccessRemoteImpl::CheckRpc(const std::string& name,
-                                const RemoteControlParams& params,
-                                const policy_table::RemoteRpcs& rpcs) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  const policy_table::RemoteRpcs& rpcs = i->second;
   if (rpcs.empty()) {
     return true;
   }
-
-  policy_table::RemoteRpcs::const_iterator i = rpcs.find(name);
-  if (i != rpcs.end()) {
-    const policy_table::Strings& parameters = i->second;
-    return CompareParameters(params, parameters);
+  policy_table::RemoteRpcs::const_iterator j = rpcs.find(rpc_name);
+  if (j != rpcs.end()) {
+    const policy_table::Strings& parameters = j->second;
+    return CompareParameters(parameters, input);
   }
   return false;
 }
 
 bool AccessRemoteImpl::CompareParameters(
-    const RemoteControlParams& input,
-    const policy_table::Strings& parameters) const {
+    const policy_table::Strings& parameters, RemoteControlParams* input) const {
   LOG4CXX_AUTO_TRACE(logger_);
   if (parameters.empty()) {
     return true;
   }
 
-  return std::find_if(input.begin(), input.end(), NotContained(parameters))
-      == input.end();
+  if (input->empty()) {
+    return false;
+  }
+
+  input->erase(
+      std::remove_if(input->begin(), input->end(), Contained(parameters)),
+      input->end());
+  return input->empty();
 }
 
 void AccessRemoteImpl::Allow(const Subject& who, const Object& what) {

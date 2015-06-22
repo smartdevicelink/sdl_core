@@ -72,7 +72,7 @@ class Service {
   /**
    * Checks access to requested equipment of vehicle
    * @param app_id id of application
-   * @param seat seat of owner's mobile device
+   * @param zone interior zone to control
    * @param module type
    * @param rpc name of rpc
    * @param params parameters list
