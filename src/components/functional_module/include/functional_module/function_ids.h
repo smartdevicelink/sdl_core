@@ -63,7 +63,7 @@ namespace hmi_api {
   const char on_interior_vehicle_data[]  = "RC.OnInteriorVehicleData";
   const char button_press[]              = "Buttons.ButtonPress";
 
-  const char grant_access[]              = "RC.GrantAccess";
+  const char get_user_consent[]          = "RC.GetInteriorVehicleDataConsent";
   const char on_reverse_apps_allowing[]  = "VehicleInfo.OnReverseAppsAllowing";
   const char on_app_deactivated[]        = "BasicCommunication.OnAppDeactivated";
   const char sdl_activate_app[]          = "SDL.ActivateApp";

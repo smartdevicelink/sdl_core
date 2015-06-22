@@ -98,7 +98,7 @@ void CANModule::SubscribeOnFunctions() {
   plugin_info_.hmi_function_list.push_back(hmi_api::on_interior_vehicle_data);
   plugin_info_.hmi_function_list.push_back(hmi_api::button_press);
 
-  plugin_info_.hmi_function_list.push_back(hmi_api::grant_access);
+  plugin_info_.hmi_function_list.push_back(hmi_api::get_user_consent);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_reverse_apps_allowing);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_set_drivers_device);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_app_deactivated);

@@ -338,7 +338,9 @@ bool BaseCommandRequest::CheckAccess() {
     case application_manager::kManual: {
       Json::Value params;
       params[json_keys::kAppId] = app_->hmi_app_id();
-      SendRequest(functional_modules::hmi_api::grant_access, params, true);
+      params[message_params::kModuleType] = ModuleType(value);
+      params[message_params::kZone] = GetInteriorZone(value);
+      SendRequest(functional_modules::hmi_api::get_user_consent, params, true);
       break;
     }
     case application_manager::kNone:
@@ -354,6 +356,10 @@ bool BaseCommandRequest::CheckAccess() {
 
 std::string BaseCommandRequest::ModuleType(const Json::Value& message) {
   return "";
+}
+
+Json::Value BaseCommandRequest::GetInteriorZone(const Json::Value& message) {
+  return Json::Value(Json::objectValue);
 }
 
 SeatLocation BaseCommandRequest::InteriorZone(const Json::Value& message) {
@@ -376,7 +382,7 @@ std::vector<std::string> BaseCommandRequest::ControlData(
 void BaseCommandRequest::on_event(
     const event_engine::Event<application_manager::MessagePtr, std::string>& event) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (event.id() == functional_modules::hmi_api::grant_access) {
+  if (event.id() == functional_modules::hmi_api::get_user_consent) {
     ProcessAccessResponse(event);
   } else {
     OnEvent(event);  // run child's logic
@@ -400,11 +406,18 @@ void BaseCommandRequest::ProcessAccessResponse(
   std::string result_code;
   std::string info;
   bool allowed = ParseResultCode(value, result_code, info);
+  // Check if valid successfull message has arrived
+  if (allowed) {
+    if (value[kResult].isMember(message_params::kAllowed)) {
+      allowed = value[kResult][message_params::kAllowed].asBool();
+    } else {
+      allowed = false;
+    }
+  }
 
+  // Check the actual User's answer.
   if (allowed) {
     Execute();  // run child's logic
-  } else {
-    SendResponse(false, result_codes::kDisallowed, "");
   }
 
   Json::Value request;
@@ -413,6 +426,10 @@ void BaseCommandRequest::ProcessAccessResponse(
   LOG4CXX_DEBUG(logger_, "Setting allowed access for " << app_->app_id()
     << " for " << module);
   service_->SetAccess(app_->app_id(), module, allowed);
+
+  if (!allowed) {
+    SendResponse(false, result_codes::kUserDisallowed, "");
+  }
 }
 
 }  // namespace commands
