@@ -418,17 +418,15 @@ void BaseCommandRequest::ProcessAccessResponse(
 
   // Check the actual User's answer.
   if (allowed) {
+    Json::Value request;
+    reader.parse(message_->json_message(), request);
+    std::string module = ModuleType(request);
+    LOG4CXX_DEBUG(
+        logger_,
+        "Setting allowed access for " << app_->app_id() << " for " << module);
+    service_->SetAccess(app_->app_id(), module, allowed);
     Execute();  // run child's logic
-  }
-
-  Json::Value request;
-  reader.parse(message_->json_message(), request);
-  std::string module = ModuleType(request);
-  LOG4CXX_DEBUG(logger_, "Setting allowed access for " << app_->app_id()
-    << " for " << module);
-  service_->SetAccess(app_->app_id(), module, allowed);
-
-  if (!allowed) {
+  } else {
     SendResponse(false, result_codes::kUserDisallowed, "");
   }
 }
