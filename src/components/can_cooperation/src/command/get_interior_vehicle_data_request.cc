@@ -136,6 +136,13 @@ std::string GetInteriorVehicleDataRequest::ModuleType(
       message_params::kModuleType, Json::Value("")).asString();
 }
 
+Json::Value GetInteriorVehicleDataRequest::GetInteriorZone(
+  const Json::Value& message) {
+  return message.get(message_params::kModuleDescription,
+                                 Json::Value(Json::objectValue)).get(
+      message_params::kModuleZone, Json::Value(Json::objectValue));
+}
+
 SeatLocation GetInteriorVehicleDataRequest::InteriorZone(
     const Json::Value& message) {
   Json::Value zone = message.get(message_params::kModuleDescription,

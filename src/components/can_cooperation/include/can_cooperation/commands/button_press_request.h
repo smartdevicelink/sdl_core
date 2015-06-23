@@ -77,6 +77,7 @@ class ButtonPressRequest : public BaseCommandRequest {
 
  protected:
   virtual std::string ModuleType(const Json::Value& message);
+  virtual Json::Value GetInteriorZone(const Json::Value& message);
   virtual SeatLocation InteriorZone(const Json::Value& message);
 };
 
