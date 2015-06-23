@@ -330,6 +330,7 @@ bool BaseCommandRequest::CheckAccess() {
 
   switch (access) {
     case application_manager::kAllowed:
+      CheckHMILevel(access);
       return true;
     case application_manager::kDisallowed:
       SendResponse(false, result_codes::kDisallowed,
@@ -417,6 +418,7 @@ void BaseCommandRequest::ProcessAccessResponse(
 
   // Check the actual User's answer.
   if (allowed) {
+    CheckHMILevel(application_manager::kManual, allowed);
     Execute();  // run child's logic
   }
 
@@ -429,6 +431,38 @@ void BaseCommandRequest::ProcessAccessResponse(
 
   if (!allowed) {
     SendResponse(false, result_codes::kUserDisallowed, "");
+  }
+}
+
+void BaseCommandRequest::CheckHMILevel(application_manager::TypeAccess access,
+  bool user_consented) {
+  switch (access) {
+    case application_manager::kAllowed:
+      if (app_->hmi_level() == mobile_apis::HMILevel::eType::HMI_NONE) {
+        LOG4CXX_DEBUG(logger_, "RSDL functionality for "
+          << app_->name() << " is auto allowed; setting BACKGROUND level.");
+        service_->ChangeNotifyHMILevel(app_,
+          mobile_apis::HMILevel::eType::HMI_BACKGROUND);
+      }
+      break;
+    case application_manager::kManual: {
+      if (user_consented) {
+        LOG4CXX_DEBUG(logger_, "User consented RSDL functionality for "
+                      << app_->name() << "; setting LIMITED level.");
+        if (app_->hmi_level() == mobile_apis::HMILevel::eType::HMI_NONE ||
+            app_->hmi_level() == mobile_apis::HMILevel::eType::HMI_BACKGROUND) {
+          service_->ChangeNotifyHMILevel(app_,
+                                    mobile_apis::HMILevel::eType::HMI_LIMITED);
+        }
+      }
+      break;
+    }
+    case application_manager::kDisallowed:
+    case application_manager::kNone:
+    default:
+      LOG4CXX_DEBUG(logger_, "No access information or disallowed: \
+                        do nothing about hmi levels");
+      break;
   }
 }
 
