@@ -73,10 +73,18 @@ ValidationResult ModuleDataValidator::Validate(const Json::Value& json,
     LOG4CXX_ERROR(logger_, "Mandatory param " <<kModuleZone <<" missing!" );
   }
 
+  if (result != ValidationResult::SUCCESS) {
+    return result;
+  }
+
   if (json.isMember(kRadioControlData)) {
     result = RadioControlDataValidator::instance()->Validate(
                                               json[kRadioControlData],
                                               outgoing_json[kRadioControlData]);
+  }
+
+  if (result != ValidationResult::SUCCESS) {
+    return result;
   }
 
   if (json.isMember(kClimateControlData)) {

@@ -100,6 +100,7 @@ ClimateControlDataValidator::ClimateControlDataValidator() {
   validation_scope_map_[kTemperatureUnit] = &temperature_unit_;
   validation_scope_map_[kACEnable] = &ac_enable_;
   validation_scope_map_[kCirculateAirEnable] = &circulate_air_enable_;
+  validation_scope_map_[kDesiredTemp] = &desired_temp_;
   validation_scope_map_[kAutoModeEnable] = &auto_mode_enable_;
   validation_scope_map_[kDefrostZone] = &defrost_zone_;
   validation_scope_map_[kDualModeEnable] = &dual_mode_enable_;

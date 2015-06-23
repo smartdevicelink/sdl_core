@@ -290,9 +290,10 @@ bool BaseCommandRequest::ParseResultCode(const Json::Value& value,
 void BaseCommandRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (Validate()) {
-      if(CheckPolicy()) {
-        Execute();  // run child's logic
-      }
+    LOG4CXX_INFO(logger_, "Request message validated successfully!");
+    if (CheckPolicy()) {
+      Execute();  // run child's logic
+    }
   }
 }
 

@@ -108,15 +108,15 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
                 response_params_[kInteriorVehicleDataCapabilities][i]);
           }
         } else {
-          validation_result = validators::INVALID_DATA;
+          validation_result = validators::GENERIC_ERROR;
         }
       } else {
-        validation_result = validators::INVALID_DATA;
+        validation_result = validators::GENERIC_ERROR;
       }
 
       if (validators::SUCCESS != validation_result) {
         success = false;
-        info = "Response validation failed";
+        info = "Invalid response from vehicle.";
         result_code = result_codes::kInvalidData;
       }
     }
