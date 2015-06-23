@@ -163,10 +163,10 @@ TypeAccess AccessRemoteImpl::Check(const Subject& who,
     AccessControlRow::const_iterator j = row.find(who);
     if (j != row.end()) {
       // who has permissions
+      ret = j->second;
       LOG4CXX_TRACE(
           logger_,
           "Subject " << who << " has permissions " << ret << " to object " << what);
-      ret = j->second;
     } else {
       // Look for somebody is who controls this object
       j = std::find_if(row.begin(), row.end(),

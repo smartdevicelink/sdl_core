@@ -205,6 +205,9 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
     }
   }
 
+  pt_->policy_table.module_config.country_consent_passengersRC =
+      update_pt.policy_table.module_config.country_consent_passengersRC;
+
   if (update_pt.policy_table.consumer_friendly_messages.is_initialized()) {
     pt_->policy_table.consumer_friendly_messages =
         update_pt.policy_table.consumer_friendly_messages;

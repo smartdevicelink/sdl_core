@@ -1010,63 +1010,6 @@
                     }
                 }
             },
-            "Base-RC": {
-                "rpcs": {
-                    "GetSeatControl": {
-                        "hmi_levels": ["BACKGROUND",
-                        "FULL",
-                        "LIMITED"]
-                    }
-                }
-            },
-            "Radio": {
-                "rpcs": {
-                    "StartScan": {
-                        "hmi_levels": ["BACKGROUND",
-                        "FULL",
-                        "LIMITED"]
-                    },
-                    "StopScan": {
-                        "hmi_levels": ["BACKGROUND",
-                        "FULL",
-                        "LIMITED"]
-                    },
-                    "TuneRadio": {
-                        "hmi_levels": ["BACKGROUND",
-                        "FULL",
-                        "LIMITED"]
-                    },
-                    "TuneUp": {
-                        "hmi_levels": ["BACKGROUND",
-                        "FULL",
-                        "LIMITED"]
-                    },
-                    "TuneDown": {
-                        "hmi_levels": ["BACKGROUND",
-                        "FULL",
-                        "LIMITED"]
-                    },
-                    "OnRadioDetails": {
-                        "hmi_levels": ["BACKGROUND",
-                        "FULL",
-                        "LIMITED"]
-                    },
-                    "OnPresetsChanged": {
-                        "hmi_levels": ["BACKGROUND",
-                        "FULL",
-                        "LIMITED"]
-                    }
-                }
-            },
-            "Climate": {
-                "rpcs": {
-                    "ClimateControlOn": {
-                        "hmi_levels": ["BACKGROUND",
-                        "FULL",
-                        "LIMITED"]
-                    }
-                }
-            },
             "RemoteControl": {
                 "rpcs": {
                     "ButtonPress": {
@@ -2429,8 +2372,8 @@
                 "default_hmi": "NONE",
                 "moduleType": ["RADIO", "CLIMATE"],
                 "groups": ["Base-4"],
-                "groups_primaryRC": ["Base-4", "Base-RC", "Radio", "Climate", "RemoteControl"],
-                "groups_nonPrimaryRC": ["Base-RC", "Radio", "Climate", "Notifications-RC", "RemoteControl"]
+                "groups_primaryRC": ["Base-4", "RemoteControl"],
+                "groups_nonPrimaryRC": ["RemoteControl"]
             },
             "8675311": {
                 "keep_context": false,
@@ -2439,8 +2382,8 @@
                 "default_hmi": "NONE",
                 "moduleType": ["RADIO"],
                 "groups": ["Base-4"],
-                "groups_primaryRC": ["Base-4", "Base-RC", "Radio", "Climate", "RemoteControl"],
-                "groups_nonPrimaryRC": ["Base-RC", "Radio", "Climate", "Notifications-RC", "RemoteControl"],
+                "groups_primaryRC": ["Base-4", "RemoteControl"],
+                "groups_nonPrimaryRC": ["RemoteControl"],
                 "AppHMIType": ["REMOTE_CONTROL"]
             },
             "pre_consent_passengersRC": {
