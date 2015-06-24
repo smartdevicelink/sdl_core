@@ -88,6 +88,8 @@ void BaseCommandNotification::Run() {
     return;
   }
 
+  LOG4CXX_INFO(logger_, "Notification message validated successfully!");
+
   NotifyApplications();
 }
 

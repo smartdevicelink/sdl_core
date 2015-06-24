@@ -290,7 +290,8 @@ bool BaseCommandRequest::ParseResultCode(const Json::Value& value,
 void BaseCommandRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (Validate()) {
-      if (CheckPolicy()) {
+    LOG4CXX_INFO(logger_, "Request message validated successfully!");
+      if(CheckPolicy()) {
         Execute();  // run child's logic
       }
   }
@@ -419,18 +420,16 @@ void BaseCommandRequest::ProcessAccessResponse(
 
   // Check the actual User's answer.
   if (allowed) {
+    Json::Value request;
+    reader.parse(message_->json_message(), request);
+    std::string module = ModuleType(request);
+    LOG4CXX_DEBUG(
+        logger_,
+        "Setting allowed access for " << app_->app_id() << " for " << module);
+    service_->SetAccess(app_->app_id(), module, allowed);
     CheckHMILevel(application_manager::kManual, allowed);
     Execute();  // run child's logic
-  }
-
-  Json::Value request;
-  reader.parse(message_->json_message(), request);
-  std::string module = ModuleType(request);
-  LOG4CXX_DEBUG(logger_, "Setting allowed access for " << app_->app_id()
-    << " for " << module);
-  service_->SetAccess(app_->app_id(), module, allowed);
-
-  if (!allowed) {
+  } else {
     SendResponse(false, result_codes::kUserDisallowed, "");
   }
 }
