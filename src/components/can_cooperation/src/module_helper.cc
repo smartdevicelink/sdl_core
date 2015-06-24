@@ -86,6 +86,7 @@ functional_modules::ProcessResult ProcessSDLActivateApp(
     if (!applications.empty()) {
       application_manager::ApplicationSharedPtr new_app;
       application_manager::ApplicationSharedPtr active_app;
+      CANAppExtensionPtr new_app_ext;
       AppList limited_apps;
       for (size_t i = 0; i < applications.size(); ++i) {
         if (applications[i]->IsFullscreen()) {
@@ -93,6 +94,19 @@ functional_modules::ProcessResult ProcessSDLActivateApp(
         }
         if (applications[i]->hmi_app_id() == hmi_app_id) {
           new_app = applications[i];
+          new_app_ext = AppExtensionPtr::static_pointer_cast<CANAppExtension>(
+            new_app->QueryInterface(CANModule::instance()->GetModuleID()));
+          DCHECK(new_app_ext);
+          if (!new_app_ext) {
+            return ProcessResult::CANNOT_PROCESS;
+          }
+          if (!CANModule::instance()->service()->IsRemoteControlAllowed()) {
+            if (!new_app_ext->is_on_driver_device()) {
+              // Do not change HMI Level of app on passenger's device
+              // if Remote Functionality is disabled
+              return PROCESSED;
+            }
+          }
         }
         CANAppExtensionPtr app_ext =
           AppExtensionPtr::static_pointer_cast<CANAppExtension>(
@@ -110,13 +124,7 @@ functional_modules::ProcessResult ProcessSDLActivateApp(
       if (active_app == new_app) {
         return ProcessResult::CANNOT_PROCESS;
       }
-      CANAppExtensionPtr new_app_ext =
-        AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-          new_app->QueryInterface(CANModule::instance()->GetModuleID()));
-      DCHECK(new_app_ext);
-      if (!new_app_ext) {
-        return ProcessResult::CANNOT_PROCESS;
-      }
+
       if (new_app_ext->is_on_driver_device()) {
         for (size_t i = 0; i < limited_apps.size(); ++i) {
           CANModule::instance()->service()->ChangeNotifyHMILevel(

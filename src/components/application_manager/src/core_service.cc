@@ -136,6 +136,13 @@ void CoreService::SetRemoteControl(bool enabled) {
 #endif  // SDL_REMOTE_CONTROL
 }
 
+bool CoreService::IsRemoteControlAllowed() const {
+#ifdef SDL_REMOTE_CONTROL
+  return policy::PolicyHandler::instance()->GetRemoteControl();
+#endif  // SDL_REMOTE_CONTROL
+  return false;
+}
+
 ApplicationSharedPtr CoreService::GetApplication(ApplicationId app_id) {
   return ApplicationManagerImpl::instance()->application(app_id);
 }

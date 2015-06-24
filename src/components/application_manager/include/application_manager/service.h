@@ -119,6 +119,11 @@ class Service {
    */
   virtual void SetRemoteControl(bool enabled) = 0;
 
+  /*
+   * @brief Is Remote Control allowed by Policy and User
+   */
+  virtual bool IsRemoteControlAllowed() const = 0;
+
   /**
    * @brief Get pointer to application by application id
    * @param app_id application id

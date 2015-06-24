@@ -140,6 +140,12 @@ class PolicyHandler :
    * @param enabled true if remote control is turned on
    */
   void SetRemoteControl(bool enabled);
+
+  /*
+   * @brief If remote control is enabled
+   * by User and by Policy
+   */
+  bool GetRemoteControl() const;
 #endif  // SDL_REMOTE_CONTROL
 
   uint32_t GetNotificationsNumber(const std::string& priority);

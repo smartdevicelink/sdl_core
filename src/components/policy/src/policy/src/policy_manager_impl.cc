@@ -1069,6 +1069,10 @@ void PolicyManagerImpl::SetRemoteControl(bool enabled) {
   }
 }
 
+bool PolicyManagerImpl::GetRemoteControl() const {
+  return access_remote_->IsEnabled();
+}
+
 void PolicyManagerImpl::OnChangedPrimaryDevice(
     const std::string& application_id) {
   LOG4CXX_AUTO_TRACE(logger_);

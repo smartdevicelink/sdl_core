@@ -1431,6 +1431,10 @@ void PolicyHandler::SetRemoteControl(bool enabled) {
     }
   }
 }
+
+bool PolicyHandler::GetRemoteControl() const {
+  return policy_manager_->GetRemoteControl();
+}
 #endif  // SDL_REMOTE_CONTROL
 
 }  //  namespace policy

@@ -119,6 +119,11 @@ class CoreService : public Service {
    */
   virtual void SetRemoteControl(bool enabled);
 
+  /*
+   * @brief Is Remote Control allowed by Policy and User
+   */
+  virtual bool IsRemoteControlAllowed() const;
+
   /**
    * @brief Get pointer to application by application id
    * @param app_id application id
