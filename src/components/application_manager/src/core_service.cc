@@ -181,7 +181,6 @@ void CoreService::ChangeNotifyHMILevel(ApplicationSharedPtr app,
   ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
                                                            level);
   MessageHelper::SendHMIStatusNotification(*app);
-  NotifyHMIAboutHMILevel(app, level);
 }
 
 void CoreService::NotifyHMIAboutHMILevel(ApplicationSharedPtr app,

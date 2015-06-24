@@ -3024,14 +3024,15 @@ void ApplicationManagerImpl::ChangeAppsHMILevel(uint32_t app_id,
   if (old_level != level) {
     app->set_hmi_level(level);
     OnHMILevelChanged(app_id, old_level, level);
+#ifdef SDL_REMOTE_CONTROL
+    //  TODO(PV): make distinction between SDL/plugin apps
+    MessageHelper::SendActivateAppToHMI(app_id,
+      static_cast<hmi_apis::Common_HMILevel::eType>(level), true);
+#endif
   } else {
     LOG4CXX_WARN(logger_, "Redudant changing HMI level : " << level);
   }
 
-#ifdef SDL_REMOTE_CONTROL
-  MessageHelper::SendActivateAppToHMI(app_id,
-    static_cast<hmi_apis::Common_HMILevel::eType>(level), true);
-#endif
 }
 
 void ApplicationManagerImpl::MakeAppNotAudible(uint32_t app_id) {
