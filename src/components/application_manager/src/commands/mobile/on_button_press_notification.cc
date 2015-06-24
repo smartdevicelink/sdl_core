@@ -69,7 +69,7 @@ void OnButtonPressNotification::Run() {
     if (false == (*message_)[strings::msg_params].keyExists(
         hmi_response::custom_button_id)) {
       LOG4CXX_ERROR(logger_,
-                       "CUSTOM_BUTTON OnButtonPress without custom_button_id.");
+                    "CUSTOM_BUTTON OnButtonPress without custom_button_id.");
       return;
     }
 
@@ -109,13 +109,16 @@ void OnButtonPressNotification::Run() {
     //Send ButtonPress notification only in HMI_FULL or HMI_LIMITED mode
     if ((mobile_api::HMILevel::HMI_FULL != subscribed_app->hmi_level()) &&
         (mobile_api::HMILevel::HMI_LIMITED != subscribed_app->hmi_level())) {
-      LOG4CXX_WARN(logger_, "OnButtonPress in HMI_BACKGROUND or NONE");
+      LOG4CXX_WARN(logger_, "OnButtonPress notification is allowed only"
+                   << "in FULL or LIMITED hmi level");
       continue;
     }
 
     //Send ButtonPress notification for OK button only in HMI_FULL mode
     if ((static_cast<uint32_t>(mobile_apis::ButtonName::OK) == btn_id) &&
         (mobile_api::HMILevel::HMI_FULL != subscribed_app->hmi_level())) {
+      LOG4CXX_WARN(logger_, "OnButtonPress notification for OK button"
+                   << "is allowed only in FULL hmi level");
       continue;
     }
 
