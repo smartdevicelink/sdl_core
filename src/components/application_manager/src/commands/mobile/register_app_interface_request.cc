@@ -67,6 +67,8 @@ mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string& str) {
     return mobile_apis::AppHMIType::TESTING;
   } else if ("SYSTEM" == str) {
     return mobile_apis::AppHMIType::SYSTEM;
+  } else if ("REMOTE_CONTROL" == str) {
+    return mobile_apis::AppHMIType::REMOTE_CONTROL;
   } else {
     return mobile_apis::AppHMIType::INVALID_ENUM;
   }
