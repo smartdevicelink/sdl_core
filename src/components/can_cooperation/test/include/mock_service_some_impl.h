@@ -69,6 +69,7 @@ class MockServiceSomeImpl : public Service {
   MOCK_METHOD1(ResetAccessByModule, void(const std::string& module));
   MOCK_METHOD1(SetPrimaryDevice, void(const uint32_t dev_id));
   MOCK_METHOD1(SetRemoteControl, void(bool enabled));
+  MOCK_CONST_METHOD0(IsRemoteControlAllowed, bool());
 private:
   ApplicationSharedPtr app_;
 };

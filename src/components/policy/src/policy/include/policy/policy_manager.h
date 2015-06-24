@@ -474,7 +474,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @brief If remote control is enabled
      * by User and by Policy
      */
-    virtual bool GetRemoteControl() const;
+    virtual bool GetRemoteControl() const = 0;
 
     /**
      * Handles changed primary device event for a application
