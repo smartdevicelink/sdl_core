@@ -87,7 +87,9 @@ void DeleteInteractionChoiceSetRequest::Run() {
   app->RemoveChoiceSet(choise_set_id);
 
   SendResponse(true, mobile_apis::Result::SUCCESS);
-  /*CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteInteractionChoiceSet,
+  app->UpdateHash();
+
+   /*CreateHMIRequest(hmi_apis::FunctionID::UI_DeleteInteractionChoiceSet,
    msg_params, true);*/
 }
 

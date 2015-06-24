@@ -517,11 +517,26 @@ class Profile : public utils::Singleton<Profile> {
 
     bool logs_enabled() const;
 
+    /**
+     * @brief Returns true if resumption ctrl uses db, returns false if
+     * resumption ctrl uses JSON.
+     */
+    bool use_db_for_resumption() const;
+
+    /**
+     * @brief Returns amount of attempts for opening resumption db
+     */
+    uint16_t attempts_to_open_resumption_db() const;
+
+    /**
+     * @brief Returns timeout between attempts
+     */
+    uint16_t open_attempt_timeout_ms_resumption_db() const;
+
     /*
      * @brief Updates all related values from ini file
      */
     void UpdateValues();
-
 
   private:
     /**
@@ -693,6 +708,7 @@ private:
     uint32_t                        application_list_update_timeout_;
     uint32_t                        max_thread_pool_size_;
     uint32_t                        default_hub_protocol_index_;
+
     /*
      * first value is count of request
      * second is time scale
@@ -725,6 +741,9 @@ private:
     uint32_t                        resumption_delay_after_ign_;
     uint32_t                        hash_string_size_;
     bool                            logs_enabled_;
+    bool                            use_db_for_resumption_;
+    uint16_t                        attempts_to_open_resumption_db_;
+    uint16_t                        open_attempt_timeout_ms_resumption_db_;
 
     FRIEND_BASE_SINGLETON_CLASS(Profile);
     DISALLOW_COPY_AND_ASSIGN(Profile);

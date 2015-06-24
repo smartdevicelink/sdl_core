@@ -213,6 +213,9 @@ class MessageHelper {
     static void SendAddCommandRequestToHMI(ApplicationConstSharedPtr app);
     static smart_objects::SmartObjectList CreateAddCommandRequestToHMI(ApplicationConstSharedPtr app);
 
+    static smart_objects::SmartObjectList CreateAddVRCommandRequestFromChoiceToHMI(
+        ApplicationConstSharedPtr app);
+
     /**
      * @brief Sends UI_ChangeRegistration to HMI with list of AppHMIType
      * @param app applicaton instace
@@ -455,8 +458,8 @@ class MessageHelper {
      * @return verification result
      *
      */
-    static mobile_apis::Result::eType VerifyImageFiles(
-      smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
+    static mobile_apis::Result::eType VerifyImageFiles(smart_objects::SmartObject& message,
+                                                       ApplicationConstSharedPtr app);
 
     static mobile_apis::Result::eType VerifyImageVrHelpItems(
       smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
@@ -544,6 +547,12 @@ class MessageHelper {
     static void SendSetAppIcon(uint32_t app_id,
                                const std::string& icon_path);
   private:
+    /**
+     * @brief Creates new request object and fill its header
+     * @return New request object
+     */
+    static smart_objects::SmartObjectSPtr CreateRequestObject();
+
     /**
      * @brief Allows to fill SO according to the  current permissions.
      * @param permissions application permissions.

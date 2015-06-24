@@ -99,7 +99,6 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     audio_pass_thru_messages_("AudioPassThru", this),
     hmi_capabilities_(this),
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM),
-    resume_ctrl_(this),
     navi_close_app_timeout_(profile::Profile::instance()->stop_streaming_timeout()),
     navi_end_stream_timeout_(profile::Profile::instance()->stop_streaming_timeout()),
 #ifdef TIME_TESTER
@@ -294,7 +293,7 @@ std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
 }
 
 bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
-    ApplicationSharedPtr app) const {
+    ApplicationConstSharedPtr app) const {
   bool voice_state = app->is_voice_communication_supported();
   bool media_state = app->is_media_application();
   bool navi_state = app->is_navi();
@@ -399,7 +398,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   smart_objects::SmartObject& params = message[strings::msg_params];
 
-  const std::string& mobile_app_id = params[strings::app_id].asString();
+  const std::string& policy_app_id = params[strings::app_id].asString();
   const std::string& app_name =
     message[strings::msg_params][strings::app_name].asString();
 
@@ -408,11 +407,11 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   ApplicationSharedPtr application(
     new ApplicationImpl(app_id,
-                        mobile_app_id, app_name,
+                        policy_app_id, app_name,
                         policy::PolicyHandler::instance()->GetStatisticManager()));
   if (!application) {
     usage_statistics::AppCounter count_of_rejections_sync_out_of_memory(
-      policy::PolicyHandler::instance()->GetStatisticManager(), mobile_app_id,
+      policy::PolicyHandler::instance()->GetStatisticManager(), policy_app_id,
       usage_statistics::REJECTIONS_SYNC_OUT_OF_MEMORY);
     ++count_of_rejections_sync_out_of_memory;
 
@@ -429,7 +428,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
       MessageHelper::GetDeviceMacAddressForHandle(
         static_cast<uint32_t>(device_id));
 
-  application->set_folder_name(mobile_app_id+"_"+device_mac);
+  application->set_folder_name(policy_app_id+"_"+device_mac);
   // To load persistent files, app folder name must be known first, which is now
   // depends on device_id and mobile_app_id
   application->LoadPersistentFiles();
@@ -487,9 +486,9 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   apps_to_register_list_lock_.Release();
 
   if (!application->hmi_app_id()) {
-    const bool is_saved = resume_ctrl_.IsApplicationSaved(mobile_app_id);
+    const bool is_saved = resume_ctrl_.IsApplicationSaved(policy_app_id, device_mac);
     application->set_hmi_application_id(is_saved ?
-              resume_ctrl_.GetHMIApplicationID(mobile_app_id) : GenerateNewHMIAppID());
+              resume_ctrl_.GetHMIApplicationID(policy_app_id, device_mac) : GenerateNewHMIAppID());
   }
 
   ApplicationListAccessor app_list_accesor;
@@ -514,7 +513,8 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(app, false);
 
-
+  // remove from resumption if app was activated by user
+  resume_controller().OnAppActivated(app);
   HMILevel::eType hmi_level = HMILevel::HMI_FULL;
   AudioStreamingState::eType audio_state;
   app->IsAudioApplication() ? audio_state = AudioStreamingState::AUDIBLE :
@@ -888,7 +888,7 @@ void ApplicationManagerImpl::RemoveDevice(
 }
 
 mobile_apis::HMILevel::eType ApplicationManagerImpl::GetDefaultHmiLevel(
-    ApplicationSharedPtr application) const {
+    ApplicationConstSharedPtr application) const {
   using namespace mobile_apis;
   LOG4CXX_AUTO_TRACE(logger_);
   HMILevel::eType default_hmi = HMILevel::HMI_NONE;
@@ -1571,9 +1571,15 @@ bool ApplicationManagerImpl::Init() {
   LOG4CXX_TRACE(logger_, "Init application manager");
   const std::string app_storage_folder =
       profile::Profile::instance()->app_storage_folder();
+
   if (!InitDirectory(app_storage_folder, TYPE_STORAGE) ||
       !IsReadWriteAllowed(app_storage_folder, TYPE_STORAGE)) {
     return false;
+  }
+
+  if (!resume_ctrl_.Init()) {
+     LOG4CXX_ERROR(logger_, "Problem with initialization of resume controller");
+     return false;
   }
 
   const std::string system_files_path =
@@ -2003,12 +2009,12 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
       continue;
     }
 
-    const std::string mobile_app_id(app_data[json::appId].asString());
+    const std::string policy_app_id(app_data[json::appId].asString());
     ApplicationSharedPtr registered_app =
         ApplicationManagerImpl::instance()->
-        application_by_policy_id(mobile_app_id);
+        application_by_policy_id(policy_app_id);
     if (registered_app) {
-      LOG4CXX_DEBUG(logger_, "Application with the same id: " << mobile_app_id
+      LOG4CXX_DEBUG(logger_, "Application with the same id: " << policy_app_id
                     << " is registered already.");
       continue;
     }
@@ -2040,11 +2046,14 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
       vrSynonym[0] = appName;
     }
 
-    const uint32_t hmi_app_id = resume_ctrl_.IsApplicationSaved(mobile_app_id)?
-          resume_ctrl_.GetHMIApplicationID(mobile_app_id) : GenerateNewHMIAppID();
+    const std::string device_mac =
+        MessageHelper::GetDeviceMacAddressForHandle(registered_app->device());
+
+    const uint32_t hmi_app_id = resume_ctrl_.IsApplicationSaved(policy_app_id, device_mac)?
+          resume_ctrl_.GetHMIApplicationID(policy_app_id, device_mac) : GenerateNewHMIAppID();
 
     const std::string app_icon_dir(Profile::instance()->app_icons_folder());
-    const std::string full_icon_path(app_icon_dir + "/" + mobile_app_id);
+    const std::string full_icon_path(app_icon_dir + "/" + policy_app_id);
 
     uint32_t device_id = 0;
     connection_handler::ConnectionHandlerImpl* con_handler_impl =
@@ -2052,7 +2061,9 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
         connection_handler_);
 
     if (-1 == con_handler_impl->GetDataOnSessionKey(
-          connection_key, NULL, NULL, &device_id)) {
+        connection_key, NULL, NULL, &device_id)) {
+
+
       LOG4CXX_ERROR(logger_,
                     "Failed to create application: no connection info.");
       continue;
@@ -2060,7 +2071,7 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
 
     ApplicationSharedPtr app(
           new ApplicationImpl(0,
-                              mobile_app_id,
+                              policy_app_id,
                               appName,
                               PolicyHandler::instance()->GetStatisticManager()));
     if (app) {
@@ -2189,7 +2200,6 @@ void ApplicationManagerImpl::HeadUnitReset(
   }
 }
 
-
 void ApplicationManagerImpl::SendOnSDLClose() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -2268,7 +2278,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
     it = accessor.begin();
   }
   if (is_ignition_off) {
-    resume_controller().Suspend();
+    resume_controller().OnSuspend();
   }
   request_ctrl_.terminateAllHMIRequests();
 }
@@ -2366,22 +2376,22 @@ void ApplicationManagerImpl::UnregisterApplication(
   }
 
   if (is_resuming) {
-      resume_ctrl_.SaveApplication(app_to_remove);
+    resume_ctrl_.SaveApplication(app_to_remove);
   } else {
-    resume_ctrl_.RemoveApplicationFromSaved(app_to_remove->mobile_app_id());
+    resume_ctrl_.RemoveApplicationFromSaved(app_to_remove);
   }
 
   if (audio_pass_thru_active_) {
-    // May be better to put this code in MessageHelper?
-    end_audio_pass_thru();
-    StopAudioPassThru(app_id);
-    MessageHelper::SendStopAudioPathThru();
-  }
-  MessageHelper::SendOnAppUnregNotificationToHMI(app_to_remove,
-                                                 is_unexpected_disconnect);
+     // May be better to put this code in MessageHelper?
+     end_audio_pass_thru();
+     StopAudioPassThru(app_id);
+     MessageHelper::SendStopAudioPathThru();
+   }
+   MessageHelper::SendOnAppUnregNotificationToHMI(app_to_remove,
+                                                  is_unexpected_disconnect);
 
-  request_ctrl_.terminateAppRequests(app_id);
-  return;
+   request_ctrl_.terminateAppRequests(app_id);
+   return;
 }
 
 

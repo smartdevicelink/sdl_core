@@ -165,6 +165,9 @@ const char* kMalformedMessageFiltering = "MalformedMessageFiltering";
 const char* kMalformedFrequencyCount = "MalformedFrequencyCount";
 const char* kMalformedFrequencyTime = "MalformedFrequencyTime";
 const char* kHashStringSizeKey = "HashStringSize";
+const char* kUseDBForResumptionKey = "UseDBForResumption";
+const char* kAttemptsToOpenResumptionDBKey = "AttemptsToOpenResumptionDB";
+const char* kOpenAttemptTimeoutMsResumptionDBKey = "OpenAttemptTimeoutMsResumptionDB";
 
 #ifdef WEB_HMI
 const char* kDefaultLinkToWebHMI = "HMI/index.html";
@@ -233,10 +236,11 @@ const bool kDefaulMalformedMessageFiltering = true;
 const size_t kDefaultMalformedFrequencyCount = 10;
 const size_t kDefaultMalformedFrequencyTime = 1000;
 const uint16_t kDefaultAttemptsToOpenPolicyDB = 5;
-const uint16_t kDefaultOpenAttemptTimeoutMsKey = 500;
-const uint32_t kDefaultAppIconsFolderMaxSize = 1048576;
+const uint16_t kDefaultOpenAttemptTimeoutMs = 500;
+const uint32_t kDefaultAppIconsFolderMaxSize = 104857600;
 const uint32_t kDefaultAppIconsAmountToRemove = 1;
-
+const uint16_t kDefaultAttemptsToOpenResumptionDB = 5;
+const uint16_t kDefaultOpenAttemptTimeoutMsResumptionDB = 500;
 }  // namespace
 
 namespace profile {
@@ -310,7 +314,11 @@ Profile::Profile()
       tts_global_properties_timeout_(kDefaultTTSGlobalPropertiesTimeout),
       attempts_to_open_policy_db_(kDefaultAttemptsToOpenPolicyDB),
       open_attempt_timeout_ms_(kDefaultAttemptsToOpenPolicyDB),
-      hash_string_size_(kDefaultHashStringSize) {
+      hash_string_size_(kDefaultHashStringSize),
+      use_db_for_resumption_(false),
+      attempts_to_open_resumption_db_(kDefaultAttemptsToOpenResumptionDB),
+      open_attempt_timeout_ms_resumption_db_(kDefaultOpenAttemptTimeoutMsResumptionDB){
+
 }
 
 Profile::~Profile() {
@@ -693,6 +701,18 @@ uint16_t Profile::tts_global_properties_timeout() const {
 
 bool Profile::logs_enabled() const {
   return logs_enabled_;
+}
+
+bool Profile::use_db_for_resumption() const {
+  return use_db_for_resumption_;
+}
+
+uint16_t Profile::attempts_to_open_resumption_db() const {
+  return attempts_to_open_resumption_db_;
+}
+
+uint16_t Profile::open_attempt_timeout_ms_resumption_db() const {
+  return open_attempt_timeout_ms_resumption_db_;
 }
 
 void Profile::UpdateValues() {
@@ -1306,10 +1326,8 @@ void Profile::UpdateValues() {
                     kAttemptsToOpenPolicyDBKey, kPolicySection);
 
   // Open attempt timeout in ms
-  ReadUIntValue(&open_attempt_timeout_ms_,
-                kDefaultOpenAttemptTimeoutMsKey,
-                kPolicySection,
-                kOpenAttemptTimeoutMsKey);
+  ReadUIntValue(&open_attempt_timeout_ms_, kDefaultOpenAttemptTimeoutMs,
+                kPolicySection, kOpenAttemptTimeoutMsKey);
 
   LOG_UPDATED_VALUE(open_attempt_timeout_ms_,
                     kOpenAttemptTimeoutMsKey, kPolicySection);
@@ -1411,6 +1429,26 @@ void Profile::UpdateValues() {
    LOG_UPDATED_VALUE(hash_string_size_,
                     kHashStringSizeKey,
                     kApplicationManagerSection);
+
+  ReadBoolValue(&use_db_for_resumption_, false, kResumptionSection,
+                kUseDBForResumptionKey);
+
+  LOG_UPDATED_BOOL_VALUE(use_db_for_resumption_, kUseDBForResumptionKey,
+                         kResumptionSection);
+
+  ReadUIntValue(&attempts_to_open_resumption_db_, kDefaultAttemptsToOpenResumptionDB,
+                kResumptionSection, kAttemptsToOpenResumptionDBKey);
+
+  LOG_UPDATED_VALUE(attempts_to_open_resumption_db_, kAttemptsToOpenResumptionDBKey,
+                    kResumptionSection);
+
+  ReadUIntValue(&open_attempt_timeout_ms_resumption_db_,
+                kDefaultOpenAttemptTimeoutMsResumptionDB,
+                kResumptionSection, kOpenAttemptTimeoutMsResumptionDBKey);
+
+  LOG_UPDATED_VALUE(open_attempt_timeout_ms_resumption_db_,
+                    kOpenAttemptTimeoutMsResumptionDBKey,
+                    kResumptionSection);
 }
 
 bool Profile::ReadValue(bool* value, const char* const pSection,

@@ -74,6 +74,7 @@ void UnsubscribeButtonRequest::Run() {
 
   SendUnsubscribeButtonNotification();
   SendResponse(true, mobile_apis::Result::SUCCESS);
+  app->UpdateHash();
 }
 
 void UnsubscribeButtonRequest::SendUnsubscribeButtonNotification() {

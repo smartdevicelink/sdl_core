@@ -30,9 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "application_manager/application_impl.h"
 #include <string>
 #include <strings.h>
-#include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/application_manager_impl.h"
 #include "protocol_handler/protocol_handler.h"
@@ -96,6 +96,7 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
       has_been_activated_(false),
       tts_properties_in_none_(false),
       tts_properties_in_full_(false),
+      is_application_data_changed_(false),
       put_file_in_none_count_(0),
       delete_file_in_none_count_(0),
       list_files_in_none_count_(0),
@@ -778,9 +779,18 @@ const std::string& ApplicationImpl::curHash() const {
   return hash_val_;
 }
 
+bool ApplicationImpl::is_application_data_changed() const {
+  return is_application_data_changed_;
+}
+
+void ApplicationImpl::set_is_application_data_changed(bool state_application_data) {
+  is_application_data_changed_ = state_application_data;
+}
+
 void ApplicationImpl::UpdateHash() {
   LOG4CXX_AUTO_TRACE(logger_);
   hash_val_ = utils::gen_hash(profile::Profile::instance()->hash_string_size());
+  set_is_application_data_changed(true);
   MessageHelper::SendHashUpdateNotification(app_id());
 }
 

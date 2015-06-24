@@ -82,6 +82,14 @@ endif()
 
 add_library("Utils" ${SOURCES})
 
+if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+    # --- QDB Wrapper 
+    add_subdirectory(./src/qdb_wrapper)
+else ()
+    # --- SQLite Wrapper
+    add_subdirectory(./src/sqlite_wrapper)
+endif ()
+
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
  list(APPEND LIBRARIES dl) 
 endif()

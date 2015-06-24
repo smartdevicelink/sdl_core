@@ -87,6 +87,10 @@ class UnsubscribeVehicleDataRequest : public CommandRequestImpl {
  private:
   bool IsAnythingAlreadyUnsubscribed(
       const smart_objects::SmartObject& msg_params) const;
+  /**
+   * @brief Allows to update hash after sending response to mobile.
+   */
+  void UpdateHash() const;
   DISALLOW_COPY_AND_ASSIGN(UnsubscribeVehicleDataRequest);
 };
 

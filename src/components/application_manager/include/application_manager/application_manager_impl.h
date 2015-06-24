@@ -46,7 +46,7 @@
 #include "application_manager/message.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/request_controller.h"
-#include "application_manager/resume_ctrl.h"
+#include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/vehicle_info_data.h"
 #include "application_manager/state_controller.h"
 #include "protocol_handler/protocol_observer.h"
@@ -249,7 +249,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      *
      * @return true if exist otherwise false
      */
-    bool IsAppTypeExistsInFullOrLimited(ApplicationSharedPtr app) const;
+    bool IsAppTypeExistsInFullOrLimited(ApplicationConstSharedPtr app) const;
 
     /**
      * @brief Notifies all components interested in Vehicle Data update
@@ -721,13 +721,13 @@ class ApplicationManagerImpl : public ApplicationManager,
                            mobile_apis::HMILevel::eType to);
 
     mobile_api::HMILevel::eType GetDefaultHmiLevel(
-        ApplicationSharedPtr application) const;
+        ApplicationConstSharedPtr application) const;
 
     /**
       * Getter for resume_controller
       * @return Resume Controller
       */
-    ResumeCtrl& resume_controller() {
+    resumption::ResumeCtrl& resume_controller() {
       return resume_ctrl_;
     }
 
@@ -1370,7 +1370,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      * about persistent application data on disk, and save session ID for resuming
      * application in case INGITION_OFF or MASTER_RESSET
      */
-    ResumeCtrl resume_ctrl_;
+    resumption::ResumeCtrl resume_ctrl_;
 
     NaviServiceStatusMap                    navi_service_status_;
     std::deque<uint32_t>                    navi_app_to_stop_;

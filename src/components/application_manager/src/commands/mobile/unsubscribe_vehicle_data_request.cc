@@ -194,7 +194,7 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
       break;
     }
   }
- bool all_complete = true;
+  bool all_complete = true;
   bool any_arg_success = false;
   mobile_api::Result::eType status = mobile_api::Result::eType::SUCCESS;
   for (HmiRequests::const_iterator it = hmi_requests_.begin();
@@ -223,9 +223,15 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
         response_params[it->str] = it->value;
       }
     }
+
     LOG4CXX_INFO(logger_, "All HMI requests are complete");
+    if (true == any_arg_success) {
+      SetAllowedToTerminate(false);
+    }
     SendResponse(any_arg_success, status, NULL, &response_params);
-  }
+    if (true == any_arg_success) {
+      UpdateHash();
+    }
 #else
   hmi_apis::Common_Result::eType hmi_result =
       static_cast<hmi_apis::Common_Result::eType>(
@@ -250,8 +256,14 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     }
   }
 
- SendResponse(result, result_code, return_info,
-              &(message[strings::msg_params]));
+  if (true == result) {
+    SetAllowedToTerminate(false);
+  }
+  SendResponse(result, result_code, return_info,
+               &(message[strings::msg_params]));
+  if (true == result) {
+    UpdateHash();
+  }
 #endif // #ifdef HMI_DBUS_API
 }
 
@@ -272,6 +284,20 @@ bool UnsubscribeVehicleDataRequest::IsAnythingAlreadyUnsubscribed(
   }
 
   return false;
+}
+
+void UnsubscribeVehicleDataRequest::UpdateHash() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ApplicationSharedPtr application =
+      ApplicationManagerImpl::instance()->application(connection_key());
+  if (application) {
+    application->UpdateHash();
+  } else {
+    LOG4CXX_ERROR(logger_, "Application with connection_key = "<<connection_key()
+                  <<"doesn't exists");
+  }
+  ApplicationManagerImpl::instance()->TerminateRequest(connection_key(),
+                                                       correlation_id());
 }
 
 
