@@ -69,7 +69,6 @@ application_manager::MessagePtr ResponseToHMI(unsigned int id,
   message->set_correlation_id(msg[json_keys::kId].asInt());
   Json::FastWriter writer;
   std::string json_msg = writer.write(msg);
-  printf("MESSAGE \n\t%s\n", json_msg.c_str());
   message->set_json_message(json_msg);
   message->set_message_type(
     application_manager::MessageType::kResponse);

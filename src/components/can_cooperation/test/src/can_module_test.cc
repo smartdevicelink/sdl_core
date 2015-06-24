@@ -81,10 +81,17 @@ TEST_F(CanModuleTest, ProcessMessageEmptyAppsList) {
     protocol_handler::MessagePriority::FromServiceType(
       protocol_handler::ServiceType::kRpc));
   message->set_function_id(MobileFunctionID::ON_INTERIOR_VEHICLE_DATA);
+  message->set_function_name("OnInteriorVehicleData");
+
+  std::string json = "{\"jsonrpc\": \"2.0\", \"method\": \"RC.OnInteriorVehicleData\",\
+                        \"params\": {\"moduleData\": {\"moduleType\": \"CLIMATE\",\
+                        \"moduleZone\":  {\"col\": 0,\"row\": 0,\"level\": 0,\"colspan\": 2,\
+                        \"rowspan\": 2, \"levelspan\": 1} }}}";
+  message->set_json_message(json);
 
   std::vector<application_manager::ApplicationSharedPtr> apps;
-  /*EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID())
-    ).Times(1).WillOnce(Return(apps));*/
+  EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID())
+    ).Times(1).WillOnce(Return(apps));
   EXPECT_CALL(*mock_service, SendMessageToMobile(_)).Times(0);
   EXPECT_EQ(ProcessResult::PROCESSED, module->ProcessMessage(message));
 }
@@ -95,6 +102,14 @@ TEST_F(CanModuleTest, ProcessMessagePass) {
       protocol_handler::ServiceType::kRpc));
   message->set_function_id(MobileFunctionID::ON_INTERIOR_VEHICLE_DATA);
 
+  message->set_function_name("OnInteriorVehicleData");
+
+  std::string json = "{\"jsonrpc\": \"2.0\", \"method\": \"RC.OnInteriorVehicleData\",\
+                        \"params\": {\"moduleData\": {\"moduleType\": \"CLIMATE\",\
+                        \"moduleZone\":  {\"col\": 0,\"row\": 0,\"level\": 0,\"colspan\": 2,\
+                        \"rowspan\": 2, \"levelspan\": 1} }}}";
+  message->set_json_message(json);
+
   std::vector<application_manager::ApplicationSharedPtr> apps;
   MockApplication* app = new MockApplication();
   application_manager::ApplicationSharedPtr app_ptr(app);
@@ -104,7 +119,7 @@ TEST_F(CanModuleTest, ProcessMessagePass) {
   can_ext->GiveControl(true);
   application_manager::AppExtensionPtr ext(can_ext);
 
-  /*EXPECT_CALL(*app, app_id()).Times(2).WillRepeatedly(Return(1));
+  EXPECT_CALL(*app, app_id()).Times(2).WillRepeatedly(Return(1));
   EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID())
     ).Times(1).WillOnce(Return(apps));
   EXPECT_CALL(*mock_service, GetApplication(_)).Times(1)
@@ -113,7 +128,7 @@ TEST_F(CanModuleTest, ProcessMessagePass) {
       .WillOnce(Return(mobile_apis::Result::eType::SUCCESS));
   EXPECT_CALL(*mock_service, CheckAccess(1, _, _, "OnInteriorVehicleData", _)).Times(1)
       .WillOnce(Return(application_manager::kAllowed));
-  EXPECT_CALL(*mock_service, SendMessageToMobile(_)).Times(1);*/
+  EXPECT_CALL(*mock_service, SendMessageToMobile(_)).Times(1);
 
   EXPECT_EQ(ProcessResult::PROCESSED, module->ProcessMessage(message));
 }

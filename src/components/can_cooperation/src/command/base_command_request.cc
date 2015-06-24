@@ -291,9 +291,9 @@ void BaseCommandRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (Validate()) {
     LOG4CXX_INFO(logger_, "Request message validated successfully!");
-      if(CheckPolicy()) {
-        Execute();  // run child's logic
-      }
+    if (CheckPolicy()) {
+       Execute();  // run child's logic
+    }
   }
 }
 
