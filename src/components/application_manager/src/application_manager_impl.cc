@@ -3028,6 +3028,10 @@ void ApplicationManagerImpl::ChangeAppsHMILevel(uint32_t app_id,
     LOG4CXX_WARN(logger_, "Redudant changing HMI level : " << level);
   }
 
+#ifdef SDL_REMOTE_CONTROL
+  MessageHelper::SendActivateAppToHMI(app_id,
+    static_cast<hmi_apis::Common_HMILevel::eType>(level), true);
+#endif
 }
 
 void ApplicationManagerImpl::MakeAppNotAudible(uint32_t app_id) {

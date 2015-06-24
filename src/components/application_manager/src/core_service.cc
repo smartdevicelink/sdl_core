@@ -37,6 +37,7 @@
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/message_helper.h"
 #include "json/json.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -180,6 +181,13 @@ void CoreService::ChangeNotifyHMILevel(ApplicationSharedPtr app,
   ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
                                                            level);
   MessageHelper::SendHMIStatusNotification(*app);
+  NotifyHMIAboutHMILevel(app, level);
+}
+
+void CoreService::NotifyHMIAboutHMILevel(ApplicationSharedPtr app,
+      mobile_apis::HMILevel::eType level) {
+  MessageHelper::SendActivateAppToHMI(app->app_id(),
+    static_cast<hmi_apis::Common_HMILevel::eType>(level), true);
 }
 
 bool CoreService::AreParametersAllowed(

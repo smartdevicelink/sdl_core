@@ -172,6 +172,15 @@ class Service {
    */
   virtual void ChangeNotifyHMILevel(ApplicationSharedPtr app,
       mobile_apis::HMILevel::eType level) = 0;
+
+  /*
+   * @brief Notify HMI about app changing HMI Level
+   * only NONE, BACKGROUND and LIMITED levels are sent
+   * @param app Application to be changed and notified
+   * @param level New HMI level of app
+   */
+  virtual void NotifyHMIAboutHMILevel(ApplicationSharedPtr app,
+      mobile_apis::HMILevel::eType level) = 0;
 };
 
 typedef utils::SharedPtr<Service> ServicePtr;
