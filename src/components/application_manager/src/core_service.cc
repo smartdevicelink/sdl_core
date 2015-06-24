@@ -159,7 +159,8 @@ uint32_t CoreService::GetNextCorrelationID() {
   return ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 }
 
-std::vector<ApplicationSharedPtr> CoreService::GetApplications(AppExtensionUID uid) {
+std::vector<ApplicationSharedPtr> CoreService::GetApplications(
+    AppExtensionUID uid) {
   ApplicationManagerImpl::ApplicationListAccessor accessor;
   AppExtensionPredicate predicate;
   predicate.uid = uid;

@@ -290,7 +290,7 @@ bool BaseCommandRequest::ParseResultCode(const Json::Value& value,
 void BaseCommandRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (Validate()) {
-      if(CheckPolicy()) {
+      if (CheckPolicy()) {
         Execute();  // run child's logic
       }
   }
@@ -381,7 +381,8 @@ std::vector<std::string> BaseCommandRequest::ControlData(
 }
 
 void BaseCommandRequest::on_event(
-    const event_engine::Event<application_manager::MessagePtr, std::string>& event) {
+    const event_engine::Event<application_manager::MessagePtr,
+    std::string>& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (event.id() == functional_modules::hmi_api::get_user_consent) {
     ProcessAccessResponse(event);
@@ -460,8 +461,8 @@ void BaseCommandRequest::CheckHMILevel(application_manager::TypeAccess access,
     case application_manager::kDisallowed:
     case application_manager::kNone:
     default:
-      LOG4CXX_DEBUG(logger_, "No access information or disallowed: \
-                        do nothing about hmi levels");
+      LOG4CXX_DEBUG(logger_, "No access information or disallowed: "
+                        << "do nothing about hmi levels");
       break;
   }
 }

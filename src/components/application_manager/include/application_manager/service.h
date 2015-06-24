@@ -155,7 +155,8 @@ class Service {
    * @param uid ID provided by plugin to its extension to app.
    * @return List with shared pointers to applications
    */
-  virtual std::vector<ApplicationSharedPtr> GetApplications(AppExtensionUID uid) = 0;
+  virtual std::vector<ApplicationSharedPtr> GetApplications(
+    AppExtensionUID uid) = 0;
 
   /**
    * @brief Subscribes to notification from HMI
@@ -179,7 +180,8 @@ typedef utils::SharedPtr<Service> ServicePtr;
  * @brief Helper function with smart objects.
  * @param data Pointer to SmartObject for convertion
  */
-std::vector<int> SmartObjToArrayInt(const smart_objects::SmartObject* data);
+std::vector<int> SmartObjToArrayInt(
+  const smart_objects::SmartObject* data);
 
 }  // namespace application_manager
 
