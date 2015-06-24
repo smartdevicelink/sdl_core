@@ -19,6 +19,7 @@ set (SOURCES
   src/can_tcp_connection_test.cc
   src/can_library_test.cc
   src/vehicle_capabilities_test.cc
+  src/vehicle_data_subscription_test.cc
 )
 
 set (LIBRARIES
