@@ -34,11 +34,46 @@
 #include "can_cooperation/can_module.h"
 #include "can_cooperation/can_module_constants.h"
 #include "can_cooperation/can_app_extension.h"
+#include "application_manager/message.h"
+#include "interfaces/HMI_API.h"
 
 namespace can_cooperation {
 
 using functional_modules::ProcessResult;
 using application_manager::AppExtensionPtr;
+
+application_manager::MessagePtr ResponseToHMI(unsigned int id,
+                              hmi_apis::Common_Result::eType result_code,
+                              const std::string& method_name) {
+  Json::Value msg;
+  msg[json_keys::kId] = id;
+  msg[json_keys::kJsonrpc] = "2.0";
+
+  if (hmi_apis::Common_Result::eType::SUCCESS == result_code) {
+    msg[json_keys::kResult] = Json::Value(Json::ValueType::objectValue);
+    msg[json_keys::kResult][json_keys::kCode] = result_code;
+    msg[json_keys::kResult][json_keys::kMethod] = method_name;
+  } else {
+    msg[json_keys::kError] = Json::Value(Json::ValueType::objectValue);
+    msg[json_keys::kError][json_keys::kCode] = result_code;
+    msg[json_keys::kError][json_keys::kData] = Json::Value(
+      Json::ValueType::objectValue);
+    msg[json_keys::kError][json_keys::kData][json_keys::kMethod] = method_name;
+  }
+
+  application_manager::MessagePtr message(
+    new application_manager::Message(
+      protocol_handler::MessagePriority::kDefault));
+  message->set_protocol_version(
+    application_manager::ProtocolVersion::kHMI);
+  message->set_correlation_id(msg[json_keys::kId].asInt());
+  Json::FastWriter writer;
+  std::string json_msg = writer.write(msg);
+  message->set_json_message(json_msg);
+  message->set_message_type(
+    application_manager::MessageType::kResponse);
+  return message;
+}
 
 ProcessResult ProcessOnAppDeactivation(
   const Json::Value& value) {
@@ -86,6 +121,7 @@ functional_modules::ProcessResult ProcessSDLActivateApp(
     if (!applications.empty()) {
       application_manager::ApplicationSharedPtr new_app;
       application_manager::ApplicationSharedPtr active_app;
+      CANAppExtensionPtr new_app_ext;
       AppList limited_apps;
       for (size_t i = 0; i < applications.size(); ++i) {
         if (applications[i]->IsFullscreen()) {
@@ -93,6 +129,26 @@ functional_modules::ProcessResult ProcessSDLActivateApp(
         }
         if (applications[i]->hmi_app_id() == hmi_app_id) {
           new_app = applications[i];
+          new_app_ext = AppExtensionPtr::static_pointer_cast<CANAppExtension>(
+            new_app->QueryInterface(CANModule::instance()->GetModuleID()));
+          DCHECK(new_app_ext);
+          if (!new_app_ext) {
+            return ProcessResult::CANNOT_PROCESS;
+          }
+          if (!CANModule::instance()->service()->IsRemoteControlAllowed()) {
+            if (!new_app_ext->is_on_driver_device()) {
+              // Do not change HMI Level of app on passenger's device
+              // if Remote Functionality is disabled
+              application_manager::MessagePtr msg = ResponseToHMI(
+                value[json_keys::kId].asUInt(),
+                hmi_apis::Common_Result::GENERIC_ERROR,
+                functional_modules::hmi_api::sdl_activate_app);
+
+              CANModule::instance()->service()->SendMessageToHMI(msg);
+
+              return ProcessResult::PROCESSED;
+            }
+          }
         }
         CANAppExtensionPtr app_ext =
           AppExtensionPtr::static_pointer_cast<CANAppExtension>(
@@ -110,13 +166,7 @@ functional_modules::ProcessResult ProcessSDLActivateApp(
       if (active_app == new_app) {
         return ProcessResult::CANNOT_PROCESS;
       }
-      CANAppExtensionPtr new_app_ext =
-        AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-          new_app->QueryInterface(CANModule::instance()->GetModuleID()));
-      DCHECK(new_app_ext);
-      if (!new_app_ext) {
-        return ProcessResult::CANNOT_PROCESS;
-      }
+
       if (new_app_ext->is_on_driver_device()) {
         for (size_t i = 0; i < limited_apps.size(); ++i) {
           CANModule::instance()->service()->ChangeNotifyHMILevel(

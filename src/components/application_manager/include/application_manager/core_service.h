@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_CORE_SERVICE_H_
 
 #include <string>
+#include <vector>
 #include "application_manager/service.h"
 #include "application_manager/application.h"
 
@@ -119,6 +120,11 @@ class CoreService : public Service {
    */
   virtual void SetRemoteControl(bool enabled);
 
+  /*
+   * @brief Is Remote Control allowed by Policy and User
+   */
+  virtual bool IsRemoteControlAllowed() const;
+
   /**
    * @brief Get pointer to application by application id
    * @param app_id application id
@@ -150,7 +156,8 @@ class CoreService : public Service {
    *
    * @return List with shared pointers to applications
    */
-  virtual std::vector<ApplicationSharedPtr> GetApplications(AppExtensionUID uid);
+  virtual std::vector<ApplicationSharedPtr> GetApplications(
+    AppExtensionUID uid);
 
   /**
    * @brief Subscribes to notification from HMI
@@ -167,14 +174,13 @@ class CoreService : public Service {
       mobile_apis::HMILevel::eType level);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(CoreService);
-
   bool AreParametersAllowed(MessagePtr msg,
                             const CommandParametersPermissions& params);
   bool CheckParams(const Json::Value& object,
                    const std::vector<std::string>& allowed_params);
   bool IsAllowed(const std::string& name,
                  const std::vector<std::string>& allowed_params);
+  DISALLOW_COPY_AND_ASSIGN(CoreService);
 };
 
 }  // namespace application_manager

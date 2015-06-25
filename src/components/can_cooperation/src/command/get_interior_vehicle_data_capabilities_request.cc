@@ -122,7 +122,8 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
     }
 
     if (!success) {
-      // Try to read capabilities from file.
+      //  Try to read capabilities from file.
+      //  TODO(PV): move to separate method
       LOG4CXX_INFO(logger_, "Failed to get correct response from HMI; \
           trying to read from file");
       Json::Value request;

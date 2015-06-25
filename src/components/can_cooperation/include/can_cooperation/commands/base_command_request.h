@@ -157,6 +157,8 @@ class BaseCommandRequest : public Command,
   virtual bool CheckAccess();
 
   SeatLocation CreateInteriorZone(const Json::Value& zone);
+  void CheckHMILevel(application_manager::TypeAccess access,
+                     bool user_consented = false);
 
  private:
   bool CheckPolicy();

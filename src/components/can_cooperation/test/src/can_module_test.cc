@@ -81,6 +81,13 @@ TEST_F(CanModuleTest, ProcessMessageEmptyAppsList) {
     protocol_handler::MessagePriority::FromServiceType(
       protocol_handler::ServiceType::kRpc));
   message->set_function_id(MobileFunctionID::ON_INTERIOR_VEHICLE_DATA);
+  message->set_function_name("OnInteriorVehicleData");
+
+  std::string json = "{\"jsonrpc\": \"2.0\", \"method\": \"RC.OnInteriorVehicleData\",\
+                        \"params\": {\"moduleData\": {\"moduleType\": \"CLIMATE\",\
+                        \"moduleZone\":  {\"col\": 0,\"row\": 0,\"level\": 0,\"colspan\": 2,\
+                        \"rowspan\": 2, \"levelspan\": 1} }}}";
+  message->set_json_message(json);
 
   std::vector<application_manager::ApplicationSharedPtr> apps;
   EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID())
@@ -94,6 +101,14 @@ TEST_F(CanModuleTest, ProcessMessagePass) {
     protocol_handler::MessagePriority::FromServiceType(
       protocol_handler::ServiceType::kRpc));
   message->set_function_id(MobileFunctionID::ON_INTERIOR_VEHICLE_DATA);
+
+  message->set_function_name("OnInteriorVehicleData");
+
+  std::string json = "{\"jsonrpc\": \"2.0\", \"method\": \"RC.OnInteriorVehicleData\",\
+                        \"params\": {\"moduleData\": {\"moduleType\": \"CLIMATE\",\
+                        \"moduleZone\":  {\"col\": 0,\"row\": 0,\"level\": 0,\"colspan\": 2,\
+                        \"rowspan\": 2, \"levelspan\": 1} }}}";
+  message->set_json_message(json);
 
   std::vector<application_manager::ApplicationSharedPtr> apps;
   MockApplication* app = new MockApplication();

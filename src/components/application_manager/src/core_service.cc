@@ -136,6 +136,13 @@ void CoreService::SetRemoteControl(bool enabled) {
 #endif  // SDL_REMOTE_CONTROL
 }
 
+bool CoreService::IsRemoteControlAllowed() const {
+#ifdef SDL_REMOTE_CONTROL
+  return policy::PolicyHandler::instance()->GetRemoteControl();
+#endif  // SDL_REMOTE_CONTROL
+  return false;
+}
+
 ApplicationSharedPtr CoreService::GetApplication(ApplicationId app_id) {
   return ApplicationManagerImpl::instance()->application(app_id);
 }
@@ -152,7 +159,8 @@ uint32_t CoreService::GetNextCorrelationID() {
   return ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 }
 
-std::vector<ApplicationSharedPtr> CoreService::GetApplications(AppExtensionUID uid) {
+std::vector<ApplicationSharedPtr> CoreService::GetApplications(
+    AppExtensionUID uid) {
   ApplicationManagerImpl::ApplicationListAccessor accessor;
   AppExtensionPredicate predicate;
   predicate.uid = uid;

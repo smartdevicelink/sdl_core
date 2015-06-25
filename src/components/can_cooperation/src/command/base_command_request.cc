@@ -292,7 +292,7 @@ void BaseCommandRequest::Run() {
   if (Validate()) {
     LOG4CXX_INFO(logger_, "Request message validated successfully!");
     if (CheckPolicy()) {
-      Execute();  // run child's logic
+       Execute();  // run child's logic
     }
   }
 }
@@ -331,6 +331,7 @@ bool BaseCommandRequest::CheckAccess() {
 
   switch (access) {
     case application_manager::kAllowed:
+      CheckHMILevel(access);
       return true;
     case application_manager::kDisallowed:
       SendResponse(false, result_codes::kDisallowed,
@@ -381,7 +382,8 @@ std::vector<std::string> BaseCommandRequest::ControlData(
 }
 
 void BaseCommandRequest::on_event(
-    const event_engine::Event<application_manager::MessagePtr, std::string>& event) {
+    const event_engine::Event<application_manager::MessagePtr,
+    std::string>& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (event.id() == functional_modules::hmi_api::get_user_consent) {
     ProcessAccessResponse(event);
@@ -425,9 +427,42 @@ void BaseCommandRequest::ProcessAccessResponse(
         logger_,
         "Setting allowed access for " << app_->app_id() << " for " << module);
     service_->SetAccess(app_->app_id(), module, allowed);
+    CheckHMILevel(application_manager::kManual, allowed);
     Execute();  // run child's logic
   } else {
     SendResponse(false, result_codes::kUserDisallowed, "");
+  }
+}
+
+void BaseCommandRequest::CheckHMILevel(application_manager::TypeAccess access,
+  bool user_consented) {
+  switch (access) {
+    case application_manager::kAllowed:
+      if (app_->hmi_level() == mobile_apis::HMILevel::eType::HMI_NONE) {
+        LOG4CXX_DEBUG(logger_, "RSDL functionality for "
+          << app_->name() << " is auto allowed; setting BACKGROUND level.");
+        service_->ChangeNotifyHMILevel(app_,
+          mobile_apis::HMILevel::eType::HMI_BACKGROUND);
+      }
+      break;
+    case application_manager::kManual: {
+      if (user_consented) {
+        LOG4CXX_DEBUG(logger_, "User consented RSDL functionality for "
+                      << app_->name() << "; setting LIMITED level.");
+        if (app_->hmi_level() == mobile_apis::HMILevel::eType::HMI_NONE ||
+            app_->hmi_level() == mobile_apis::HMILevel::eType::HMI_BACKGROUND) {
+          service_->ChangeNotifyHMILevel(app_,
+                                    mobile_apis::HMILevel::eType::HMI_LIMITED);
+        }
+      }
+      break;
+    }
+    case application_manager::kDisallowed:
+    case application_manager::kNone:
+    default:
+      LOG4CXX_DEBUG(logger_, "No access information or disallowed: "
+                        << "do nothing about hmi levels");
+      break;
   }
 }
 
