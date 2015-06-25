@@ -2431,6 +2431,9 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         break;
       }
       case SoftButtonType::SBT_TEXT: {
+        if (request_soft_buttons[i].keyExists(strings::image)) {
+          request_soft_buttons[i].erase(strings::image);
+        }
         if ((!request_soft_buttons[i].keyExists(strings::text)) ||
             (!VerifySoftButtonString(
                 request_soft_buttons[i][strings::text].asString()))) {
