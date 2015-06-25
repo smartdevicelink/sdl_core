@@ -114,13 +114,13 @@ void GetInteriorVehicleDataRequest::OnEvent(
                                               value[kResult][kModuleData],
                                               response_params_[kModuleData]);
       } else {
-        validation_result = validators::GENERIC_ERROR;
+        validation_result = validators::INVALID_DATA;
       }
 
       if (validators::SUCCESS != validation_result) {
         success = false;
         info = "Invalid response from vehicle";
-        result_code = result_codes::kInvalidData;
+        result_code = result_codes::kGenericError;
       }
     }
 
