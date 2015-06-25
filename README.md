@@ -45,6 +45,12 @@ Once SDL Core is compiled and installed you can start it from the executable in 
 %./smartDeviceLinkCore
 ```
 
+## Start WEB HMI
+Web HMI is separated from SDL Core and located in another repository. So to make it workable please do next steps.
+
+  1. Clone http://github.com/smartdevicelink/sdl_hmi.git
+  2. Follow the instruction from readme file in sdl_hmi repository.
+
 
 ## A quick note about dependencies
 The dependencies for SDL Core vary based on the configuration. You can change SDL Core's configuration in the top level CMakeLists.txt. We have defaulted this file to a configuration which we believe is common for people who are interested in getting up and running quickly, generally on a Linux VM.
