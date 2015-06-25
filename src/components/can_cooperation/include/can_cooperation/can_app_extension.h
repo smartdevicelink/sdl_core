@@ -34,8 +34,10 @@
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_APP_EXTENSION_H_
 
 #include <string>
+#include <set>
 #include "application_manager/service.h"
 #include "application_manager/app_extension.h"
+#include "json/json.h"
 
 using application_manager::SeatLocation;
 
@@ -73,10 +75,31 @@ class CANAppExtension : public application_manager::AppExtension {
         is_on_driver_device_ = is_driver_dev;
     }
 
+    /**
+     * @brief Subscribe to OnInteriorVehicleDataNotification
+     * @param module interior data specification(zone, data type)
+     */
+    void SubscribeToInteriorVehicleData(const Json::Value& moduleDescription);
+
+
+    /**
+     * @brief Unsubscribe from OnInteriorVehicleDataNotification
+     * @param module interior data specification(zone, data type)
+     */
+    void UnsubscribeFromInteriorVehicleData(const Json::Value& moduleDescription);
+
+    /**
+     * @brief Check if application subscribed to OnInteriorVehicleDataNotification
+     * @param module interior data specification(zone, data type)
+     */
+    bool IsSubscibedToInteriorVehicleData(const Json::Value& moduleDescription);
+
   private:
     bool is_control_given_;
     SeatLocation seat_;
     bool is_on_driver_device_;
+    std::set<Json::Value> subscribed_interior_vehicle_data_;
+
 };
 
 typedef utils::SharedPtr<CANAppExtension> CANAppExtensionPtr;

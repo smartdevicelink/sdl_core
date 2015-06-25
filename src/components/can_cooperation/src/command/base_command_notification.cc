@@ -90,7 +90,7 @@ void BaseCommandNotification::Run() {
 
   LOG4CXX_INFO(logger_, "Notification message validated successfully!");
 
-  NotifyApplications();
+  Execute();
 }
 
 void BaseCommandNotification::NotifyApplications() {

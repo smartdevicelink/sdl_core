@@ -35,6 +35,7 @@
 #include "can_cooperation/validators/struct_validators/module_data_validator.h"
 #include "can_cooperation/can_module_constants.h"
 #include "can_cooperation/message_helper.h"
+#include "can_cooperation/can_module.h"
 #include "functional_module/function_ids.h"
 #include "json/json.h"
 
@@ -62,6 +63,27 @@ void GetInteriorVehicleDataRequest::Execute() {
 
   Json::Reader reader;
   reader.parse(message_->json_message(), params);
+
+  if (params.isMember(kSubscribe)){
+    application_manager::ApplicationSharedPtr app =
+        service_->GetApplication(message_->connection_key());
+
+    if (!app) {
+      LOG4CXX_ERROR(logger_, "Application doesn't registered!");
+      SendResponse(false, result_codes::kApplicationNotRegistered, "");
+      return;
+    }
+
+    CANAppExtensionPtr extension = application_manager::AppExtensionPtr::
+        static_pointer_cast<CANAppExtension>(app->QueryInterface(
+            CANModule::instance()->GetModuleID()));
+
+    if (params[kSubscribe].asBool()){
+      extension->SubscribeToInteriorVehicleData(params[kModuleDescription]);
+    } else {
+      extension->UnsubscribeFromInteriorVehicleData(params[kModuleDescription]);
+    }
+  }
 
   SendRequest(
       functional_modules::hmi_api::get_interior_vehicle_data, params, true);

@@ -32,9 +32,13 @@
 
 #include "can_cooperation/commands/on_interior_vehicle_data_notification.h"
 #include <algorithm>
+#include <vector>
 #include "can_cooperation/validators/on_interior_vehicle_data_notification_validator.h"
 #include "json/json.h"
 #include "can_cooperation/can_module_constants.h"
+#include "can_cooperation/message_helper.h"
+#include "can_cooperation/can_module.h"
+#include "can_cooperation/can_app_extension.h"
 
 namespace can_cooperation {
 
@@ -52,6 +56,34 @@ OnInteriorVehicleDataNotification::~OnInteriorVehicleDataNotification() {
 
 void OnInteriorVehicleDataNotification::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  Json::Value moduleDescription(Json::ValueType::objectValue);
+  Json::Value json;
+
+  application_manager::MessagePtr msg = message();
+
+  json = MessageHelper::StringToValue(msg->json_message());
+
+  moduleDescription[message_params::kModuleType] =
+      json[message_params::kModuleData][message_params::kModuleType];
+
+  moduleDescription[message_params::kModuleZone] =
+      json[message_params::kModuleData][message_params::kModuleZone];
+
+  std::vector<application_manager::ApplicationSharedPtr> applications =
+      service_->GetApplications(CANModule::instance()->GetModuleID());
+
+  for (size_t i = 0; i < applications.size(); ++i) {
+    CANAppExtensionPtr extension =
+      application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
+        applications[i]->QueryInterface(CANModule::instance()->GetModuleID()));
+    DCHECK(extension);
+
+    if (extension->IsSubscibedToInteriorVehicleData(moduleDescription)) {
+      msg->set_connection_key(applications[i]->app_id());
+      NotifyOneApplication(msg);
+    }
+  }
 }
 
 bool OnInteriorVehicleDataNotification::Validate() {

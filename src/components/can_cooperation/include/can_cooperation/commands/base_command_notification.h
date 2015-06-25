@@ -99,9 +99,10 @@ class BaseCommandNotification : public Command {
 
   SeatLocation CreateInteriorZone(const Json::Value& zone);
 
+  void NotifyOneApplication(application_manager::MessagePtr message);
+
  private:
   void NotifyApplications();
-  void NotifyOneApplication(application_manager::MessagePtr message);
   bool CheckPolicy(application_manager::MessagePtr message);
   application_manager::MessagePtr message_;
 };
