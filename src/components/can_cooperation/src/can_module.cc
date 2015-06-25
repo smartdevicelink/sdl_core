@@ -353,9 +353,10 @@ bool CANModule::IsAppForPlugin(
     std::vector<int> hmi_types =
       application_manager::SmartObjToArrayInt(app->app_types());
     if (hmi_types.end() != std::find(hmi_types.begin(), hmi_types.end(),
-                                     mobile_apis::AppHMIType::eType::REMOTE_CONTROL)) {
+                            mobile_apis::AppHMIType::eType::REMOTE_CONTROL)) {
       CANAppExtensionPtr can_app_extension = new CANAppExtension(GetModuleID());
       app->AddExtension(can_app_extension);
+      service()->NotifyHMIAboutHMILevel(app, app->hmi_level());
       return true;
     }
   }

@@ -55,6 +55,8 @@ class MockServiceSomeImpl : public Service {
       void(const std::string& hmi_notification));
   MOCK_METHOD2(ChangeNotifyHMILevel, void(ApplicationSharedPtr app,
       mobile_apis::HMILevel::eType level));
+  MOCK_METHOD2(NotifyHMIAboutHMILevel, void(ApplicationSharedPtr app,
+      mobile_apis::HMILevel::eType level));
   MOCK_METHOD5(CheckAccess,
       TypeAccess(const ApplicationId& app_id,
                  const SeatLocation& zone,

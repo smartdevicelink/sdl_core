@@ -173,6 +173,15 @@ class CoreService : public Service {
   void ChangeNotifyHMILevel(ApplicationSharedPtr app,
       mobile_apis::HMILevel::eType level);
 
+  /*
+   * @brief Notify HMI about app changing HMI Level
+   * only NONE, BACKGROUND and LIMITED levels are sent
+   * @param app Application to be changed and notified
+   * @param level New HMI level of app
+   */
+  void NotifyHMIAboutHMILevel(ApplicationSharedPtr app,
+      mobile_apis::HMILevel::eType level);
+
  private:
   bool AreParametersAllowed(MessagePtr msg,
                             const CommandParametersPermissions& params);
