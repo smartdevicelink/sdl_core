@@ -221,6 +221,7 @@ TypeAccess AccessRemoteImpl::CheckParameters(
                                                        zones.end(),
                                                        IsZone(seat));
   if (i == zones.end()) {
+    LOG4CXX_DEBUG(logger_, seat << " wasn't found");
     return TypeAccess::kDisallowed;
   }
 
@@ -243,6 +244,7 @@ bool AccessRemoteImpl::IsAllowed(
   LOG4CXX_AUTO_TRACE(logger_);
   policy_table::AccessModules::const_iterator i = modules.find(module_name);
   if (i == modules.end()) {
+    LOG4CXX_DEBUG(logger_, "Module " << module_name << " wasn't found");
     return false;
   }
 
@@ -255,6 +257,7 @@ bool AccessRemoteImpl::IsAllowed(
     const policy_table::Strings& parameters = j->second;
     return CompareParameters(parameters, input);
   }
+  LOG4CXX_DEBUG(logger_, "RPC " << rpc_name << " wasn't found");
   return false;
 }
 
@@ -266,6 +269,7 @@ bool AccessRemoteImpl::CompareParameters(
   }
 
   if (input->empty()) {
+    LOG4CXX_DEBUG(logger_, "Input is empty");
     return false;
   }
 

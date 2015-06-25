@@ -1603,6 +1603,7 @@ bool SQLPTRepresentation::SaveModuleType(const std::string& app_id,
 bool SQLPTRepresentation::SaveEquipment(
     const policy_table::Equipment& equipment) {
   LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "PRELOADED: " << equipment.ToJsonValue().toStyledString());
   dbms::SQLQuery is_empty(db());
   if (!is_empty.Prepare(sql_pt::kCountInteriorZones)) {
     LOG4CXX_WARN(logger_, "Incorrect statement for count interior zones");
@@ -1613,7 +1614,7 @@ bool SQLPTRepresentation::SaveEquipment(
     return false;
   }
   if (is_empty.GetInteger(0) > 0) {
-    LOG4CXX_INFO(logger_, "Equipment has already been saved into database");
+    LOG4CXX_WARN(logger_, "Equipment has already been saved into database");
     return true;
   }
 
@@ -1632,7 +1633,7 @@ bool SQLPTRepresentation::SaveEquipment(
     query.Bind(2, zone.row);
     query.Bind(3, zone.level);
     if (!query.Exec()) {
-      LOG4CXX_INFO(logger_, "Incorrect insert into interior zone.");
+      LOG4CXX_WARN(logger_, "Incorrect insert into interior zone.");
       return false;
     }
     int id = query.LastInsertId();
@@ -1747,14 +1748,24 @@ bool SQLPTRepresentation::SaveRemoteRpc(
     const std::string& name = i->first;
     const policy_table::Strings& params = i->second;
     policy_table::Strings::const_iterator j;
-    for (j = params.begin(); j != params.end(); ++j) {
-      std::string param = *j;
+    if (params.empty()) {
       query.Bind(0, module_id);
       query.Bind(1, name);
-      query.Bind(2, param);
+      query.Bind(2);
       if (!query.Exec() || !query.Reset()) {
         LOG4CXX_WARN(logger_, "Incorrect insert into remote rpc.");
         return false;
+      }
+    } else {
+      for (j = params.begin(); j != params.end(); ++j) {
+        const std::string& param = *j;
+        query.Bind(0, module_id);
+        query.Bind(1, name);
+        query.Bind(2, param);
+        if (!query.Exec() || !query.Reset()) {
+          LOG4CXX_WARN(logger_, "Incorrect insert into remote rpc.");
+          return false;
+        }
       }
     }
   }
@@ -1773,8 +1784,12 @@ bool SQLPTRepresentation::GatherRemoteRpc(
   query.Bind(0, module_id);
   while (query.Next()) {
     std::string name = query.GetString(0);
-    std::string parameter = query.GetString(1);
-    (*rpcs)[name].push_back(parameter);
+    if (!query.IsNull(1)) {
+      std::string parameter = query.GetString(1);
+      (*rpcs)[name].push_back(parameter);
+    } else {
+      (*rpcs)[name];
+    }
   }
   return true;
 }

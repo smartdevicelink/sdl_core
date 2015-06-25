@@ -30,20 +30,17 @@
                   "level": 0,
                   "auto_allow": {
                     "RADIO": {
-                      "ButtonPress": [],
-                      "GetInteriorVehicleDataCapabilities": [],
-                      "GetInteriorVehicleData": ["moduleDescription"]
+                      "ButtonPress": []
                     }
                   },
                   "driver_allow": {
                     "RADIO": {
-                      "ButtonPress": ["ButtonName", "ButtonPressMode"],
-                      "GetInteriorVehicleData": ["subscribe"],
+                      "GetInteriorVehicleData": ["frequencyInteger", "frequencyFraction", "band"],
                       "SetInteriorVehicleData": ["frequencyInteger", "frequencyFraction", "band"]
                     },
                     "CLIMATE": {
-                      "ButtonPress": ["ButtonName", "ButtonPressMode"],
-                      "GetInteriorVehicleData": ["subscribe"],
+                      "ButtonPress": [],
+                      "GetInteriorVehicleData": ["fanSpeed", "desiredTemp", "temperatureUnit"],
                       "SetInteriorVehicleData": ["fanSpeed", "desiredTemp", "temperatureUnit"]
                     }
                   }

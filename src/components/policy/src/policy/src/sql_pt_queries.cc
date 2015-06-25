@@ -94,7 +94,7 @@ const std::string kCreateSchema =
   "  `id` INTEGER PRIMARY KEY NOT NULL, "
   "  `name` VARCHAR(45) NOT NULL, "
   "  `zone_id` INTEGER NOT NULL, "
-  "  `access` INTEGER NOT NULL, "
+  "  `user_consent_needed` INTEGER NOT NULL, "
   "CONSTRAINT `fk_module_1` "
   "  FOREIGN KEY(`zone_id`) "
   "  REFERENCES `interior_zone`(`id`) "
@@ -615,12 +615,12 @@ const std::string kSelectInteriorZones =
   "SELECT `id`, `name`, `col`, `row`, `level` FROM `interior_zone`";
 
 const std::string kInsertAccessModule =
-  "INSERT INTO `access_module` (`name`, `zone_id`, `access`) "
+  "INSERT INTO `access_module` (`name`, `zone_id`, `user_consent_needed`) "
   "  VALUES(?, ?, ?)";
 
 const std::string kSelectAccessModules =
   "SELECT `id`, `name` FROM `access_module` "
-  "  WHERE `zone_id` = ? AND `access` = ?";
+  "  WHERE `zone_id` = ? AND `user_consent_needed` = ?";
 
 const std::string kInsertRemoteRpc =
   "INSERT INTO `remote_rpc` (`module_id`, `name`, `parameter`) "
