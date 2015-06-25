@@ -66,6 +66,10 @@ bool SQLDatabase::IsReadWrite() {
 }
 
 void SQLDatabase::Close() {
+  if (!conn_) {
+    return;
+  }
+
   sync_primitives::AutoLock auto_lock(conn_lock_);
   error_ = sqlite3_close(conn_);
   if (error_ == SQLITE_OK) {

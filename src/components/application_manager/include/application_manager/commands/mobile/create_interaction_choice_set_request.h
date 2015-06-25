@@ -91,9 +91,9 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
     void DeleteChoices();
 
     /**
-     * @brief OnAllHMIResponsesReceived If HMI returnes some errors, delete
-     * choices.
-     * Delete self from request controller
+     * @brief Calls after all responses from HMI were received.
+     * Terminates request and sends successful response to mobile
+     * if all responses were SUCCESS or calls DeleteChoices in other case.
      */
     void OnAllHMIResponsesReceived();
 
@@ -116,14 +116,21 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
 
     int32_t choice_set_id_;
     size_t expected_chs_count_;
-    size_t recived_chs_count_;
-
+    size_t received_chs_count_;
 
     /**
      * @brief Flag for stop sending VR commands to HMI, in case one of responses
      * failed
      */
     volatile bool error_from_hmi_;
+    sync_primitives::Lock error_from_hmi_lock_;
+
+    /**
+     * @brief Flag shows if request already was expired by timeout
+     */
+    volatile bool is_timed_out_;
+    sync_primitives::Lock is_timed_out_lock_;
+
     sync_primitives::Lock vr_commands_lock_;
     /*
      * @brief Sends VR AddCommand request to HMI

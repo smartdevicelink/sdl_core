@@ -440,6 +440,8 @@ void ApplicationImpl::StopStreaming(
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
+  SuspendStreaming(service_type);
+
   if (ServiceType::kMobileNav == service_type) {
     if (video_streaming_approved()) {
       video_stream_suspend_timer_->stop();
@@ -462,12 +464,14 @@ void ApplicationImpl::SuspendStreaming(
 
   if (ServiceType::kMobileNav == service_type) {
     video_stream_suspend_timer_->suspend();
-    ApplicationManagerImpl::instance()->OnAppStreaming(app_id(), false);
+    ApplicationManagerImpl::instance()->OnAppStreaming(
+        app_id(), service_type, false);
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
     video_streaming_suspended_ = true;
   } else if (ServiceType::kAudio == service_type) {
     audio_stream_suspend_timer_->suspend();
-    ApplicationManagerImpl::instance()->OnAppStreaming(app_id(), false);
+    ApplicationManagerImpl::instance()->OnAppStreaming(
+        app_id(), service_type, false);
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     audio_streaming_suspended_ = true;
   }
@@ -482,7 +486,8 @@ void ApplicationImpl::WakeUpStreaming(
   if (ServiceType::kMobileNav == service_type) {
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
     if (video_streaming_suspended_) {
-      ApplicationManagerImpl::instance()->OnAppStreaming(app_id(), true);
+      ApplicationManagerImpl::instance()->OnAppStreaming(
+          app_id(), service_type, true);
       MessageHelper::SendOnDataStreaming(ServiceType::kMobileNav, true);
       video_streaming_suspended_ = false;
     }
@@ -490,7 +495,8 @@ void ApplicationImpl::WakeUpStreaming(
   } else if (ServiceType::kAudio == service_type) {
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     if (audio_streaming_suspended_) {
-      ApplicationManagerImpl::instance()->OnAppStreaming(app_id(), true);
+      ApplicationManagerImpl::instance()->OnAppStreaming(
+          app_id(), service_type, true);
       MessageHelper::SendOnDataStreaming(ServiceType::kAudio, true);
       audio_streaming_suspended_ = false;
     }

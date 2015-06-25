@@ -5,6 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
+#include "utils/lock.h"
 
 /**
  * \namespace NsMessageBroker
@@ -52,6 +53,12 @@ namespace NsMessageBroker
       void removeControllersByDescriptor(const int fd);
 
       /**
+      * \brief Remove all subscribers by descriptor
+      * \param fd descriptor
+      */
+      void removeSubscribersByDescriptor(const int fd);
+
+      /**
       * \brief adds notification subscriber to the registry.
       * \param fd file descriptor of controller.
       * \param name name of property which should be observed.
@@ -91,12 +98,14 @@ namespace NsMessageBroker
       * For example PhoneController:1080
       */
       std::map <std::string, int> mControllersList;
+      sync_primitives::Lock mControllersListLock;
 
       /**
       * \brief Map to store subscribers information like ComponentName.PropertyName:socketFd:.
       * For example PhoneController.onPhoneBookChanged:1080
       */
       std::multimap <std::string, int> mSubscribersList;
+      sync_primitives::Lock mSubscribersListLock;
    };
 } /* namespace NsMessageBroker */
 

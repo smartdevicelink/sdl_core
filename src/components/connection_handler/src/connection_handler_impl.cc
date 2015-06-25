@@ -358,14 +358,10 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   return new_session_id;
 }
 
-void ConnectionHandlerImpl::OnApplicationFloodCallBack(const uint32_t &connection_key) {
+void ConnectionHandlerImpl::OnApplicationFloodCallBack(
+    const uint32_t &connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
-  {
-    sync_primitives::AutoLock lock(connection_handler_observer_lock_);
-    if(connection_handler_observer_) {
-      connection_handler_observer_->OnApplicationFloodCallBack(connection_key);
-    }
-  }
+
   transport_manager::ConnectionUID connection_handle = 0;
   uint8_t session_id = 0;
   PairFromKey(connection_key, &connection_handle, &session_id);
@@ -379,14 +375,10 @@ void ConnectionHandlerImpl::OnApplicationFloodCallBack(const uint32_t &connectio
   }
 }
 
-void ConnectionHandlerImpl::OnMalformedMessageCallback(const uint32_t &connection_key) {
+void ConnectionHandlerImpl::OnMalformedMessageCallback(
+    const uint32_t &connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
-  {
-    sync_primitives::AutoLock lock(connection_handler_observer_lock_);
-    if(connection_handler_observer_) {
-      connection_handler_observer_->OnMalformedMessageCallback(connection_key);
-    }
-  }
+
   transport_manager::ConnectionUID connection_handle = 0;
   uint8_t session_id = 0;
   PairFromKey(connection_key, &connection_handle, &session_id);
@@ -444,7 +436,7 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
   sync_primitives::AutoLock lock2(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
     connection_handler_observer_->OnServiceEndedCallback(
-          session_key, service_type, CloseSessionReason::kCommon);
+        session_key, service_type, CloseSessionReason::kCommon);
   }
   return session_key;
 }
@@ -765,6 +757,12 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Closing session with id: " << session_id);
 
+  // In case of malformed message the connection should be broke up without
+  // any other notification to mobile.
+  if (close_reason != kMalformed && protocol_handler_) {
+    protocol_handler_->SendEndSession(connection_handle, session_id);
+  }
+
   transport_manager::ConnectionUID connection_id =
         ConnectionUIDFromHandle(connection_handle);
 
@@ -775,9 +773,7 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
     ConnectionList::iterator connection_list_itr =
         connection_list_.find(connection_id);
     if (connection_list_.end() != connection_list_itr) {
-      if (connection_handler_observer_ && kCommon == close_reason) {
-        session_map = connection_list_itr->second->session_map();
-      }
+      session_map = connection_list_itr->second->session_map();
       connection_list_itr->second->RemoveSession(session_id);
     } else {
       LOG4CXX_ERROR(logger_, "Connection with id: " << connection_id
@@ -935,7 +931,7 @@ void ConnectionHandlerImpl::OnConnectionEnded(
       for (ServiceList::const_iterator service_it = service_list.begin(), end =
            service_list.end(); service_it != end; ++service_it) {
         connection_handler_observer_->OnServiceEndedCallback(
-              session_key, service_it->service_type, CloseSessionReason::kCommon);
+            session_key, service_it->service_type, CloseSessionReason::kCommon);
       }
     }
   }

@@ -170,7 +170,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
       }
 
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
-      if (true == result) {
+      if (result) {
         application->UpdateHash();
       }
     }

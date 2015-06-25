@@ -519,6 +519,7 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   AudioStreamingState::eType audio_state;
   app->IsAudioApplication() ? audio_state = AudioStreamingState::AUDIBLE :
                               audio_state = AudioStreamingState::NOT_AUDIBLE;
+  state_ctrl_.ApplyStatesForApp(app);
   state_ctrl_.SetRegularState<false>(app, hmi_level, audio_state);
   return true;
 }
@@ -1016,11 +1017,6 @@ bool ApplicationManagerImpl::StartNaviService(
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (!media_manager_) {
-    LOG4CXX_DEBUG(logger_, "The media manager is not initialized.");
-    return false;
-  }
-
   if (HMILevelAllowsStreaming(app_id, service_type)) {
     NaviServiceStatusMap::iterator it =
         navi_service_status_.find(app_id);
@@ -1040,8 +1036,6 @@ bool ApplicationManagerImpl::StartNaviService(
         true : it->second.second = true;
 
     application(app_id)->StartStreaming(service_type);
-    media_manager_->StartStreaming(app_id, service_type);
-
     return true;
   }
   return false;
@@ -1064,12 +1058,6 @@ void ApplicationManagerImpl::StopNaviService(
     service_type == ServiceType::kMobileNav ? it->second.first =
         false : it->second.second = false;
   }
-
-  if (!media_manager_) {
-    LOG4CXX_DEBUG(logger_, "The media manager is not initialized.");
-    return;
-  }
-  media_manager_->StopStreaming(app_id, service_type);
 
   ApplicationSharedPtr app = application(app_id);
   if (!app) {
@@ -1117,6 +1105,7 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
   using namespace protocol_handler;
   using namespace mobile_apis;
   using namespace connection_handler;
+  using namespace mobile_apis;
 
   LOG4CXX_DEBUG(logger_, "OnServiceEndedCallback for service "
                 << type << " with reason " << close_reason
@@ -1124,9 +1113,11 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
 
   if (type == kRpc) {
     LOG4CXX_INFO(logger_, "Remove application.");
-    /* in case it was unexpected disconnect application will be removed
-     and we will notify HMI that it was unexpected disconnect,
-     but in case it was closed by mobile we will be unable to find it in the list
+    /* In case it was unexpected disconnect or some special case
+     (malformed message, flood) application will be removed
+     and we will unregister application correctly, but in case it was
+     closed by mobile and already unregistered we will be unable
+     to find it in the list
     */
 
     Result::eType reason;
@@ -1170,30 +1161,6 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
           ServiceType::kMobileNav, ServiceType::kAudio)) {
     StopNaviService(session_key, type);
   }
-}
-
-void ApplicationManagerImpl::OnApplicationFloodCallBack(const uint32_t &connection_key) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Unregister flooding application " << connection_key);
-
-  MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-      connection_key,
-      mobile_apis::AppInterfaceUnregisteredReason::TOO_MANY_REQUESTS);
-
-  const bool resuming = true;
-  const bool unexpected_disconnect = false;
-  UnregisterApplication(connection_key, mobile_apis::Result::TOO_MANY_PENDING_REQUESTS,
-                        resuming, unexpected_disconnect);
-  // TODO(EZamakhov): increment "removals_for_bad_behaviour" field in policy table
-}
-
-void ApplicationManagerImpl::OnMalformedMessageCallback(const uint32_t &connection_key) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Unregister malformed messaging application " << connection_key);
-
-  MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-      connection_key,
-      mobile_apis::AppInterfaceUnregisteredReason::PROTOCOL_VIOLATION);
 }
 
 void ApplicationManagerImpl::set_hmi_message_handler(
@@ -2270,6 +2237,15 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   while (it != accessor.end()) {
     ApplicationSharedPtr app_to_remove = *it;
 
+#ifdef CUSTOMER_PASA
+    if (!is_ignition_off) {
+#endif // CUSTOMER_PASA
+      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+            app_to_remove->app_id(), unregister_reason_);
+#ifdef CUSTOMER_PASA
+    }
+#endif // CUSTOMER_PASA
+
     UnregisterApplication(app_to_remove->app_id(),
                           mobile_apis::Result::INVALID_ENUM, is_ignition_off,
                           is_unexpected_disconnect);
@@ -2318,9 +2294,6 @@ void ApplicationManagerImpl::UnregisterApplication(
   }
 
   //remove appID from tts_global_properties_app_list_
-    MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-          app_id, unregister_reason_);
-
   RemoveAppFromTTSGlobalPropertiesList(app_id);
 
   switch (reason) {
@@ -2393,7 +2366,6 @@ void ApplicationManagerImpl::UnregisterApplication(
    request_ctrl_.terminateAppRequests(app_id);
    return;
 }
-
 
 void ApplicationManagerImpl::OnAppUnauthorized(const uint32_t& app_id) {
   connection_handler_->CloseSession(app_id, connection_handler::kUnauthorizedApp);
@@ -2658,14 +2630,17 @@ void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
       navi_service_status_.find(app_id);
   if (navi_service_status_.end() == it ||
       (!it->second.first && !it->second.second)) {
-    SetUnregisterAllApplicationsReason(PROTOCOL_VIOLATION);
+    MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+        app_id, PROTOCOL_VIOLATION);
     UnregisterApplication(app_id, ABORTED);
     return;
   }
   EndNaviServices(app_id);
 }
 
-void ApplicationManagerImpl::OnAppStreaming(uint32_t app_id, bool state) {
+void ApplicationManagerImpl::OnAppStreaming(
+    uint32_t app_id, protocol_handler::ServiceType service_type, bool state) {
+  using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application(app_id);
@@ -2673,8 +2648,15 @@ void ApplicationManagerImpl::OnAppStreaming(uint32_t app_id, bool state) {
     LOG4CXX_DEBUG(logger_, " There is no navi application with id: " << app_id);
     return;
   }
-  state ? state_ctrl_.OnNaviStreamingStarted() :
-          state_ctrl_.OnNaviStreamingStopped();
+  DCHECK_OR_RETURN_VOID(media_manager_);
+
+  if (state) {
+    state_ctrl_.OnNaviStreamingStarted();
+    media_manager_->StartStreaming(app_id, service_type);
+  } else {
+    media_manager_->StopStreaming(app_id, service_type);
+    state_ctrl_.OnNaviStreamingStopped();
+  }
 }
 
 void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
@@ -2786,7 +2768,8 @@ void ApplicationManagerImpl::CloseNaviApp() {
       navi_service_status_.find(app_id);
   if (navi_service_status_.end() != it) {
     if (it->second.first || it->second.second) {
-      SetUnregisterAllApplicationsReason(PROTOCOL_VIOLATION);
+      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+          app_id, PROTOCOL_VIOLATION);
       UnregisterApplication(app_id, ABORTED);
     }
   }
@@ -2820,15 +2803,9 @@ void ApplicationManagerImpl::DisallowStreaming(uint32_t app_id) {
       navi_service_status_.find(app_id);
   if (navi_service_status_.end() != it) {
     if (it->second.first) {
-      if (media_manager_) {
-        media_manager_->StopStreaming(app_id, ServiceType::kMobileNav);
-      }
       app->set_video_streaming_allowed(false);
     }
     if (it->second.second) {
-      if (media_manager_) {
-        media_manager_->StopStreaming(app_id, ServiceType::kAudio);
-      }
       app->set_audio_streaming_allowed(false);
     }
   }
@@ -2848,15 +2825,9 @@ void ApplicationManagerImpl::AllowStreaming(uint32_t app_id) {
       navi_service_status_.find(app_id);
   if (navi_service_status_.end() != it) {
     if (it->second.first) {
-      if (media_manager_) {
-        media_manager_->StartStreaming(app_id, ServiceType::kMobileNav);
-      }
       app->set_video_streaming_allowed(true);
     }
     if (it->second.second) {
-      if (media_manager_) {
-        media_manager_->StartStreaming(app_id, ServiceType::kAudio);
-      }
       app->set_audio_streaming_allowed(true);
     }
   }
