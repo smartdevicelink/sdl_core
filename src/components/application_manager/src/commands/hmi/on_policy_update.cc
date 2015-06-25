@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -44,7 +44,7 @@ OnPolicyUpdate::~OnPolicyUpdate() {
 }
 
 void OnPolicyUpdate::Run() {
-  LOG4CXX_INFO(logger_, "OnPolicyUpdate::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   policy::PolicyHandler::instance()->OnPTExchangeNeeded();
 }
 

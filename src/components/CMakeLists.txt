@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Ford Motor Company
+# Copyright (c) 2014, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,6 +27,8 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+
+set(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
 
 # --- HMI_API interfaces
 add_subdirectory(./interfaces)
@@ -77,6 +79,13 @@ add_subdirectory(./config_profile)
 
 # --- AudioManager
 add_subdirectory(./media_manager)
+# --- Functional module
+add_subdirectory(./functional_module)
+
+if (REMOTE_CONTROL)
+  # --- CAN Module
+  add_subdirectory(./can_cooperation)
+endif ()
 
 if (TIME_TESTER)
     add_subdirectory(./time_tester)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,25 +42,28 @@ CREATE_LOGGERPTR_GLOBAL(logger, "VideoStreamToFileAdapter")
 VideoStreamToFileAdapter::VideoStreamToFileAdapter(const std::string& file_name)
   : file_name_(file_name),
     is_ready_(false),
-    thread_(NULL) {
+    thread_(threads::CreateThread("VideoStreamer",
+                                    new Streamer(this))) {
   Init();
 }
 
 VideoStreamToFileAdapter::~VideoStreamToFileAdapter() {
+  LOG4CXX_AUTO_TRACE(logger);
   if ((0 != current_application_ ) && (is_ready_)) {
     StopActivity(current_application_);
   }
-
-  thread_->stop();
+  thread_->join();
+  delete thread_->delegate();
+  threads::DeleteThread(thread_);
 }
 
 void VideoStreamToFileAdapter::Init() {
-  if (!thread_) {
-    LOG4CXX_INFO(logger, "Create and start sending thread");
-    thread_ = threads::CreateThread("VideoStreamer",
-                                  new Streamer(this));
+  if (thread_->is_running()) {
+    LOG4CXX_DEBUG(logger, "Start sending thread");
     const size_t kStackSize = 16384;
-    thread_->startWithOptions(threads::ThreadOptions(kStackSize));
+    thread_->start(threads::ThreadOptions(kStackSize));
+  } else {
+    LOG4CXX_WARN(logger, "thread is already running");
   }
 }
 
@@ -169,11 +172,10 @@ void VideoStreamToFileAdapter::Streamer::threadMain() {
   close();
 }
 
-bool VideoStreamToFileAdapter::Streamer::exitThreadMain() {
+void VideoStreamToFileAdapter::Streamer::exitThreadMain() {
   LOG4CXX_INFO(logger, "Streamer::exitThreadMain");
   stop_flag_ = true;
   server_->messages_.Shutdown();
-  return false;
 }
 
 void VideoStreamToFileAdapter::Streamer::open() {

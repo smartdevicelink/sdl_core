@@ -1,4 +1,4 @@
-/**
+/*
  * \file bluetooth_connection_factory.h
  * \brief BluetoothConnectionFactory class header file.
  *

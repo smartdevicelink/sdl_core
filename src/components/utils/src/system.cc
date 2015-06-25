@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -42,6 +42,7 @@
 #include <algorithm>
 #include <functional>
 #include <cstring>
+#include <iostream>
 
 #include "utils/logger.h"
 #include "utils/system.h"
@@ -66,13 +67,21 @@ System::System(const std::string& file, const std::string& command)
   argv_.push_back(command);
 }
 
-bool System::Execute() {
-  return Execute(false);
-}
-
 System& System::Add(const std::string& arg) {
   argv_.push_back(arg);
   return *this;
+}
+
+std::string System::command() const {
+  return command_;
+}
+
+std::vector<std::string> System::argv() const {
+  return argv_;
+}
+
+bool System::Execute() {
+  return Execute(false);
 }
 
 #ifdef __QNX__
@@ -89,7 +98,7 @@ bool System::Execute(bool wait) {
 
   if (ret == -1) {
     LOG4CXX_ERROR(logger_, "Can't execute command: " << command_
-                  << " Errno is: " << std::strerror(errno));
+        << " Errno is: " << std::strerror(errno));
     return false;
   }
 

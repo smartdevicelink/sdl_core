@@ -15,6 +15,7 @@ struct MessageLanguages;
 struct MessageString;
 struct RpcParameters;
 struct Rpcs;
+struct InteriorZone;
 }  // namespace policy_table_interface_base
 }  // namespace rpc
 
@@ -25,6 +26,8 @@ namespace policy_table_interface_base {
 typedef Array< String<1, 255>, 0, 255 > Strings;
 
 typedef Array< Enum<AppHMIType>, 0, 255 > AppHMITypes;
+
+typedef Array< Enum<ModuleType>, 0, 255 > ModuleTypes;
 
 typedef Array< Enum<HmiLevel>, 0, 4 > HmiLevels;
 
@@ -54,14 +57,23 @@ typedef Map< Rpcs, 1, 255 > FunctionalGroupings;
 
 typedef Map< DeviceParams, 0, 255 > DeviceData;
 
+typedef Map< InteriorZone, 0, 255 > Zones;
+
+typedef Map<Strings, 0, 255> RemoteRpcs;
+
+typedef Map<RemoteRpcs, 0, 255> AccessModules;
+
 struct ApplicationParams : CompositeType {
   public:
     Strings groups;
+    Optional< Strings > groups_primaryRC;
+    Optional< Strings > groups_nonPrimaryRC;
     Optional< Strings > nicknames;
+    mutable Optional< ModuleTypes > moduleType;
     Optional< AppHMITypes > AppHMIType;
     Enum<Priority> priority;
-    Optional< Integer<uint16_t, 1, 65225> > memory_kb;
-    Optional< Integer<uint16_t, 1, 65225> > heart_beat_timeout_ms;
+    Optional< Integer<uint16_t, 0, 65225> > memory_kb;
+    Optional< Integer<uint16_t, 0, 65225> > heart_beat_timeout_ms;
     Optional< String<0, 255> > certificate;
   public:
     ApplicationParams();
@@ -76,6 +88,7 @@ struct ApplicationParams : CompositeType {
     virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
+    bool ValidateModuleTypes() const;
 };
 
 struct RpcParameters : CompositeType {
@@ -116,6 +129,45 @@ struct Rpcs : CompositeType {
     bool Validate() const;
 };
 
+struct InteriorZone: CompositeType {
+  public:
+    Integer<uint16_t, 0, 65225> col;
+    Integer<uint16_t, 0, 65225> row;
+    Integer<uint16_t, 0, 65225> level;
+    AccessModules auto_allow;
+    AccessModules driver_allow;
+  public:
+    InteriorZone();
+    explicit InteriorZone(const InteriorZone& zone);
+    ~InteriorZone();
+    explicit InteriorZone(const Json::Value* value__);
+    Json::Value ToJsonValue() const;
+    bool is_valid() const;
+    bool is_initialized() const;
+    bool struct_empty() const;
+    void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
+  private:
+    bool Validate() const;
+};
+
+struct Equipment : CompositeType {
+  public:
+    Zones zones;
+  public:
+    Equipment();
+    ~Equipment();
+    explicit Equipment(const Json::Value* value__);
+    Json::Value ToJsonValue() const;
+    bool is_valid() const;
+    bool is_initialized() const;
+    bool struct_empty() const;
+    void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
+  private:
+    bool Validate() const;
+};
+
 struct ModuleConfig : CompositeType {
   public:
     Optional< Map< String<0, 100>, 0, 255 > > device_certificates;
@@ -130,6 +182,10 @@ struct ModuleConfig : CompositeType {
     Optional< String<1, 100> > vehicle_make;
     Optional< String<1, 100> > vehicle_model;
     Optional< String<4, 4> > vehicle_year;
+    Optional< String<0, 65535> > certificate;
+    Optional< Boolean > user_consent_passengersRC;
+    Optional< Boolean > country_consent_passengersRC;
+    Optional< Equipment > equipment;
   public:
     ModuleConfig();
     ModuleConfig(uint8_t exchange_after_x_ignition_cycles, int64_t exchange_after_x_kilometers, uint8_t exchange_after_x_days, uint16_t timeout_after_x_seconds, const SecondsBetweenRetries& seconds_between_retries, const ServiceEndpoints& endpoints, const NumberOfNotificationsPerMinute& notifications_per_minute_by_priority);
@@ -261,6 +317,7 @@ struct DeviceParams : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };

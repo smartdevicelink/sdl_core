@@ -36,6 +36,12 @@
 
 #include "application_manager/commands/command_request_impl.h"
 
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
+class SmartObject;
+}
+}
+
 namespace application_manager {
 
 namespace commands {
@@ -68,8 +74,16 @@ class SystemRequest : public CommandRequestImpl {
    * @param event The received event
    */
   virtual void on_event(const event_engine::Event& event);
- private:
 
+private:
+  /**
+   * @brief Validates data coming within QueryApps response
+   * @param data Data
+   * @return true, if data is valid, otherwise - false
+   */
+  bool ValidateQueryAppData(const smart_objects::SmartObject& data) const;
+
+ private:
   static uint32_t index;
   DISALLOW_COPY_AND_ASSIGN(SystemRequest);
 };

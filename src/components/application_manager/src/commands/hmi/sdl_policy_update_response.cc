@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -43,7 +43,7 @@ SDLPolicyUpdateResponse::~SDLPolicyUpdateResponse() {
 }
 
 void SDLPolicyUpdateResponse::Run() {
-  LOG4CXX_INFO(logger_, "SDLPolicyUpdateResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   // TODO(PV): add some logic here
 }
 }  // namespace commands

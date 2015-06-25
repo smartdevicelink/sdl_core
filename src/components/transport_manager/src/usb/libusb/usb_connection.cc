@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <pthread.h>
 #include <unistd.h>
 #include <iomanip>
 
@@ -51,7 +52,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 UsbConnection::UsbConnection(const DeviceUID& device_uid,
                              const ApplicationHandle& app_handle,
                              TransportAdapterController* controller,
-                             const UsbHandlerSptr& usb_handler,
+                             const UsbHandlerSptr usb_handler,
                              PlatformUsbDevice* device)
   : device_uid_(device_uid),
     app_handle_(app_handle),

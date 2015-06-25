@@ -1,4 +1,4 @@
-/**
+/*
  * @file generic_json_formatter.cc
  * @brief Generic JSON formatter source file.
  */

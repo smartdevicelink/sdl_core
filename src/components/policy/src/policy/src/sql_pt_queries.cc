@@ -48,7 +48,7 @@ const std::string kCreateSchema =
   "  `carrier` VARCHAR(45), "
   "  `max_number_rfcom_ports` INTEGER,"
   "  `connection_type` VARCHAR(45), "
-  "  `unpaired` BOOL "
+  "  `unpaired` BOOL"
   "); "
   "CREATE TABLE IF NOT EXISTS `usage_and_error_count`( "
   "  `count_of_iap_buffer_full` INTEGER, "
@@ -67,14 +67,53 @@ const std::string kCreateSchema =
   "); "
   "CREATE TABLE IF NOT EXISTS `module_config`( "
   "  `preloaded_pt` BOOL NOT NULL, "
+  "  `is_first_run` BOOL NOT NULL, "
   "  `exchange_after_x_ignition_cycles` INTEGER NOT NULL, "
   "  `exchange_after_x_kilometers` INTEGER NOT NULL, "
   "  `exchange_after_x_days` INTEGER NOT NULL, "
   "  `timeout_after_x_seconds` INTEGER NOT NULL, "
   "  `vehicle_make` VARCHAR(45), "
   "  `vehicle_model` VARCHAR(45), "
-  "  `vehicle_year` VARCHAR(4) "
+  "  `vehicle_year` VARCHAR(4),"
+  "  `user_consent_passengersRC` BOOL,"
+  "  `country_consent_passengersRC` BOOL "
   "); "
+
+  /* interior_zone */
+  "CREATE TABLE `interior_zone`( "
+  "  `id` INTEGER PRIMARY KEY NOT NULL, "
+  "  `name` VARCHAR(100) NOT NULL, "
+  "  `col` INTEGER NOT NULL, "
+  "  `row` INTEGER NOT NULL, "
+  "  `level` INTEGER NOT NULL "
+  "); "
+  "CREATE UNIQUE INDEX `interior_zone.room` ON `interior_zone`(`col`,`row`,`level`); "
+
+  /* access_module */
+  "CREATE TABLE `access_module`( "
+  "  `id` INTEGER PRIMARY KEY NOT NULL, "
+  "  `name` VARCHAR(45) NOT NULL, "
+  "  `zone_id` INTEGER NOT NULL, "
+  "  `access` INTEGER NOT NULL, "
+  "CONSTRAINT `fk_module_1` "
+  "  FOREIGN KEY(`zone_id`) "
+  "  REFERENCES `interior_zone`(`id`) "
+  "); "
+  "CREATE INDEX `access_module.zone_module` ON `access_module`(`name`,`zone_id`); "
+  "CREATE INDEX `access_module.fk_module_1_idx` ON `access_module`(`zone_id`); "
+
+  /* remote_rpc */
+  "CREATE TABLE `remote_rpc`( "
+  "  `id` INTEGER PRIMARY KEY NOT NULL, "
+  "  `name` VARCHAR(255) NOT NULL, "
+  "  `parameter` VARCHAR(45), "
+  "  `module_id` INTEGER NOT NULL, "
+  "CONSTRAINT `fk_remote_rpc_1` "
+  "  FOREIGN KEY(`module_id`) "
+  "  REFERENCES `access_module`(`id`) "
+  "); "
+  "CREATE INDEX `remote_rpc.fk_remote_rpc_1_idx` ON `remote_rpc`(`module_id`); "
+
   "CREATE TABLE IF NOT EXISTS `functional_group`( "
   "  `id` INTEGER PRIMARY KEY NOT NULL, "
   "  `user_consent_prompt` TEXT UNIQUE ON CONFLICT REPLACE, "
@@ -136,6 +175,7 @@ const std::string kCreateSchema =
   "  `memory_kb` INTEGER NOT NULL, "
   "  `heart_beat_timeout_ms` INTEGER NOT NULL, "
   "  `certificate` VARCHAR(45), "
+  "  `remote_control_denied` BOOLEAN NOT NULL DEFAULT 0, "
   "  CONSTRAINT `fk_application_hmi_level1` "
   "    FOREIGN KEY(`default_hmi`) "
   "    REFERENCES `hmi_level`(`value`), "
@@ -162,6 +202,36 @@ const std::string kCreateSchema =
   "  ON `app_group`(`functional_group_id`); "
   "CREATE INDEX IF NOT EXISTS `app_group.fk_application_has_functional_group_application1_idx` "
   "  ON `app_group`(`application_id`); "
+  "CREATE TABLE IF NOT EXISTS `app_group_primary`( "
+  "  `application_id` VARCHAR(45) NOT NULL, "
+  "  `functional_group_id` INTEGER NOT NULL, "
+  "  PRIMARY KEY(`application_id`,`functional_group_id`), "
+  "  CONSTRAINT `fk_application_has_functional_group_application1` "
+  "    FOREIGN KEY(`application_id`) "
+  "    REFERENCES `application`(`id`), "
+  "  CONSTRAINT `fk_application_has_functional_group_functional_group1` "
+  "    FOREIGN KEY(`functional_group_id`) "
+  "    REFERENCES `functional_group`(`id`) "
+  "); "
+  "CREATE INDEX IF NOT EXISTS `app_group_primary.fk_application_has_functional_group_functional_group1_idx` "
+  "  ON `app_group_primary`(`functional_group_id`); "
+  "CREATE INDEX IF NOT EXISTS `app_group_primary.fk_application_has_functional_group_application1_idx` "
+  "  ON `app_group_primary`(`application_id`); "
+  "CREATE TABLE IF NOT EXISTS `app_group_non_primary`( "
+  "  `application_id` VARCHAR(45) NOT NULL, "
+  "  `functional_group_id` INTEGER NOT NULL, "
+  "  PRIMARY KEY(`application_id`,`functional_group_id`), "
+  "  CONSTRAINT `fk_application_has_functional_group_application1` "
+  "    FOREIGN KEY(`application_id`) "
+  "    REFERENCES `application`(`id`), "
+  "  CONSTRAINT `fk_application_has_functional_group_functional_group1` "
+  "    FOREIGN KEY(`functional_group_id`) "
+  "    REFERENCES `functional_group`(`id`) "
+  "); "
+  "CREATE INDEX IF NOT EXISTS `app_group_non_primary.fk_application_has_functional_group_functional_group1_idx` "
+  "  ON `app_group_non_primary`(`functional_group_id`); "
+  "CREATE INDEX IF NOT EXISTS `app_group_non_primary.fk_application_has_functional_group_application1_idx` "
+  "  ON `app_group_non_primary`(`application_id`); "
   "CREATE TABLE IF NOT EXISTS `preconsented_group`( "
   "  `application_id` VARCHAR(45) NOT NULL, "
   "  `functional_group_id` INTEGER NOT NULL, "
@@ -188,7 +258,7 @@ const std::string kCreateSchema =
   "  `functional_group_id` INTEGER NOT NULL, "
   "  `is_consented` BOOL NOT NULL, "
   "  `input` VARCHAR(45), "
-  "  `time_stamp` DATETIME DEFAULT CURRENT_TIMESTAMP, "
+  "  `time_stamp` VARCHAR(45), "
   "  PRIMARY KEY(`device_id`,`functional_group_id`), "
   "  CONSTRAINT `fk_device_has_functional_group_device1` "
   "    FOREIGN KEY(`device_id`) "
@@ -203,6 +273,7 @@ const std::string kCreateSchema =
   "CREATE INDEX IF NOT EXISTS "
   "`device_consent_group.fk_device_has_functional_group_device1_idx` "
   "  ON `device_consent_group`(`device_id`); "
+
   "CREATE TABLE IF NOT EXISTS `app_level`( "
   "  `application_id` VARCHAR(45) PRIMARY KEY NOT NULL, "
   "  `minutes_in_hmi_full` INTEGER DEFAULT 0, "
@@ -255,13 +326,26 @@ const std::string kCreateSchema =
   "); "
   "CREATE INDEX IF NOT EXISTS `app_type.fk_app_type_application1_idx` "
   "  ON `app_type`(`application_id`); "
+
+  /* module type */
+  "CREATE TABLE IF NOT EXISTS `module_type`( "
+  "  `name` VARCHAR(50) NOT NULL, "
+  "  `application_id` VARCHAR(45) NOT NULL, "
+  "  PRIMARY KEY(`name`,`application_id`), "
+  "  CONSTRAINT `fk_module_type_application1` "
+  "    FOREIGN KEY(`application_id`) "
+  "    REFERENCES `application`(`id`) "
+  "); "
+  "CREATE INDEX IF NOT EXISTS `module_type.fk_module_type_application1_idx` "
+  "  ON `module_type`(`application_id`); "
+
   "CREATE TABLE IF NOT EXISTS `consent_group`( "
   "  `device_id` VARCHAR(100) NOT NULL, "
   "  `application_id` VARCHAR(45) NOT NULL, "
   "  `functional_group_id` INTEGER NOT NULL, "
   "  `is_consented` BOOL NOT NULL, "
   "  `input` VARCHAR(45), "
-  "  `time_stamp` DATETIME DEFAULT CURRENT_TIMESTAMP, "
+  "  `time_stamp` VARCHAR(45), "
   "  PRIMARY KEY(`application_id`,`functional_group_id`,`device_id`), "
   "  CONSTRAINT `fk_consent_group_device1` "
   "    FOREIGN KEY(`device_id`) "
@@ -279,7 +363,7 @@ const std::string kCreateSchema =
   "CREATE INDEX IF NOT EXISTS `consent_group.fk_consent_group_functional_group1_idx` "
   "  ON `consent_group`(`functional_group_id`); "
   "CREATE TABLE IF NOT EXISTS `endpoint`( "
-  "  `service` INTEGER NOT NULL, "
+  "  `service` VARCHAR(100) NOT NULL, "
   "  `url` VARCHAR(100) NOT NULL, "
   "  `application_id` VARCHAR(45) NOT NULL, "
   "  CONSTRAINT `fk_endpoint_application1` "
@@ -318,10 +402,10 @@ const std::string kInsertInitData =
   "  `pt_exchanged_x_days_after_epoch`, `ignition_cycles_since_last_exchange`,"
   "  `flag_update_required`) "
   "  VALUES (0, 0, 0, 0); "
-  "INSERT OR IGNORE INTO `module_config` (`preloaded_pt`, "
+  "INSERT OR IGNORE INTO `module_config` (`preloaded_pt`, `is_first_run`,"
   "  `exchange_after_x_ignition_cycles`, `exchange_after_x_kilometers`, "
   "  `exchange_after_x_days`, `timeout_after_x_seconds`) "
-  "  VALUES(1, 0, 0, 0, 0); "
+  "  VALUES(1, 0, 0, 0, 0, 0); "
   "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('EMERGENCY'); "
   "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('NAVIGATION'); "
   "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('VOICECOMMUNICATION'); "
@@ -347,6 +431,8 @@ const std::string kDropSchema =
   "DROP TABLE IF EXISTS `consent_group`; "
   "DROP INDEX IF EXISTS `app_type.fk_app_type_application1_idx`; "
   "DROP TABLE IF EXISTS `app_type`; "
+  "DROP INDEX IF EXISTS `module_type.fk_module_type_application1_idx`; "
+  "DROP TABLE IF EXISTS `module_type`; "
   "DROP INDEX IF EXISTS `nickname.fk_nickname_application1_idx`; "
   "DROP TABLE IF EXISTS `nickname`; "
   "DROP INDEX IF EXISTS `app_level.fk_app_level_language2_idx`; "
@@ -363,6 +449,12 @@ const std::string kDropSchema =
   "DROP INDEX IF EXISTS `app_group.fk_application_has_functional_group_application1_idx`; "
   "DROP INDEX IF EXISTS `app_group.fk_application_has_functional_group_functional_group1_idx`; "
   "DROP TABLE IF EXISTS `app_group`; "
+  "DROP INDEX IF EXISTS `app_group_primary.fk_application_has_functional_group_application1_idx`; "
+  "DROP INDEX IF EXISTS `app_group_primary.fk_application_has_functional_group_functional_group1_idx`; "
+  "DROP TABLE IF EXISTS `app_group_primary`; "
+  "DROP INDEX IF EXISTS `app_group_non_primary.fk_application_has_functional_group_application1_idx`; "
+  "DROP INDEX IF EXISTS `app_group_non_primary.fk_application_has_functional_group_functional_group1_idx`; "
+  "DROP TABLE IF EXISTS `app_group_non_primary`; "
   "DROP INDEX IF EXISTS `application.fk_application_priorities1_idx`; "
   "DROP INDEX IF EXISTS `application.fk_application_hmi_level1_idx`; "
   "DROP TABLE IF EXISTS `application`; "
@@ -379,6 +471,13 @@ const std::string kDropSchema =
   "DROP TABLE IF EXISTS `priority`; "
   "DROP TABLE IF EXISTS `functional_group`; "
   "DROP TABLE IF EXISTS `module_config`; "
+  "DROP TABLE IF EXISTS `interior_zone`; "
+  "DROP INDEX IF EXISTS `interior_zone.room`; "
+  "DROP TABLE IF EXISTS `access_module`; "
+  "DROP INDEX IF EXISTS `access_module.zone_module`; "
+  "DROP INDEX IF EXISTS `access_module.fk_module_1_idx`; "
+  "DROP TABLE IF EXISTS `remote_rpc`; "
+  "DROP INDEX IF EXISTS `remote_rpc.fk_remote_rpc_1_idx`; "
   "DROP TABLE IF EXISTS `module_meta`; "
   "DROP TABLE IF EXISTS `usage_and_error_count`; "
   "DROP TABLE IF EXISTS `device`; "
@@ -391,12 +490,15 @@ const std::string kDeleteData =
   "DELETE FROM `endpoint`; "
   "DELETE FROM `consent_group`; "
   "DELETE FROM `app_type`; "
+  "DELETE FROM `module_type`; "
   "DELETE FROM `nickname`; "
   "DELETE FROM `app_level`; "
   "DELETE FROM `device_consent_group`; "
   "DELETE FROM `seconds_between_retry`; "
   "DELETE FROM `preconsented_group`; "
   "DELETE FROM `app_group`; "
+  "DELETE FROM `app_group_primary`; "
+  "DELETE FROM `app_group_non_primary`; "
   "DELETE FROM `application`; "
   "DELETE FROM `rpc`; "
   "DELETE FROM `version`; "
@@ -407,6 +509,9 @@ const std::string kDeleteData =
   "DELETE FROM `priority`; "
   "DELETE FROM `functional_group`; "
   "DELETE FROM `module_config`; "
+  "DELETE FROM `interior_zone`; "
+  "DELETE FROM `access_module`; "
+  "DELETE FROM `remote_rpc`; "
   "DELETE FROM `module_meta`; "
   "DELETE FROM `usage_and_error_count`; "
   "DELETE FROM `device`; "
@@ -439,6 +544,9 @@ const std::string kSetNotFirstRun =
 const std::string kSelectEndpoint =
   "SELECT `url`, `application_id` FROM `endpoint` WHERE `service` = ? ";
 
+const std::string kSelectLockScreenIcon =
+  "SELECT `url` FROM `endpoint` WHERE `service` = ? AND `application_id` = ?";
+
 const std::string kInsertFunctionalGroup =
   "INSERT INTO `functional_group` (`id`, `name`, `user_consent_prompt`) "
   "  VALUES (?, ?, ?)";
@@ -459,11 +567,22 @@ const std::string kInsertAppGroup =
   "INSERT INTO `app_group` (`application_id`, `functional_group_id`)"
   "  SELECT ?, `id` FROM `functional_group` WHERE `name` = ? LIMIT 1";
 
+const std::string kInsertAppGroupPrimary =
+  "INSERT INTO `app_group_primary` (`application_id`, `functional_group_id`)"
+  "  SELECT ?, `id` FROM `functional_group` WHERE `name` = ? LIMIT 1";
+
+const std::string kInsertAppGroupNonPrimary =
+  "INSERT INTO `app_group_non_primary` (`application_id`, `functional_group_id`)"
+  "  SELECT ?, `id` FROM `functional_group` WHERE `name` = ? LIMIT 1";
+
 const std::string kInsertNickname =
   "INSERT OR IGNORE INTO `nickname` (`application_id`, `name`) VALUES (?, ?)";
 
 const std::string kInsertAppType =
   "INSERT OR IGNORE INTO `app_type` (`application_id`, `name`) VALUES (?, ?)";
+
+const std::string kInsertModuleType =
+  "INSERT OR IGNORE INTO `module_type` (`application_id`, `name`) VALUES (?, ?)";
 
 const std::string kUpdateVersion = "UPDATE `version` SET `number`= ?";
 
@@ -482,7 +601,34 @@ const std::string kUpdateModuleConfig =
   "  `exchange_after_x_ignition_cycles` = ?,"
   "  `exchange_after_x_kilometers` = ?, `exchange_after_x_days` = ?, "
   "  `timeout_after_x_seconds` = ?, `vehicle_make` = ?, "
-  "  `vehicle_model` = ?, `vehicle_year` = ?";
+  "  `vehicle_model` = ?, `vehicle_year` = ?, "
+  "  `user_consent_passengersRC` = ?, `country_consent_passengersRC` = ?";
+
+const std::string kInsertInteriorZone =
+  "INSERT INTO `interior_zone` (`name`, `col`, `row`, `level`) "
+  "  VALUES(?, ?, ?, ?)";
+
+const std::string kCountInteriorZones =
+  "SELECT COUNT(`id`) FROM `interior_zone`";
+
+const std::string kSelectInteriorZones =
+  "SELECT `id`, `name`, `col`, `row`, `level` FROM `interior_zone`";
+
+const std::string kInsertAccessModule =
+  "INSERT INTO `access_module` (`name`, `zone_id`, `access`) "
+  "  VALUES(?, ?, ?)";
+
+const std::string kSelectAccessModules =
+  "SELECT `id`, `name` FROM `access_module` "
+  "  WHERE `zone_id` = ? AND `access` = ?";
+
+const std::string kInsertRemoteRpc =
+  "INSERT INTO `remote_rpc` (`module_id`, `name`, `parameter`) "
+  "  VALUES(?, ?, ?)";
+
+const std::string kSelectRemoteRpcs =
+  "SELECT `name`, `parameter` FROM `remote_rpc` "
+  "  WHERE `module_id` = ?";
 
 const std::string kInsertEndpoint =
   "INSERT INTO `endpoint` (`service`, `url`, `application_id`) "
@@ -496,7 +642,7 @@ const std::string kInsertNotificationsByPriority =
   "  VALUES (?, ?)";
 
 const std::string kInsertDeviceData =
-  "INSERT OR IGNORE INTO `device` (`id`) VALUES (?)";
+  "INSERT INTO `device` (`id`) VALUES (?)";
 
 const std::string kInsertAppLevel =
   "INSERT INTO `app_level` (`application_id`, `minutes_in_hmi_full`,"
@@ -524,17 +670,20 @@ const std::string kDeleteRpc = "DELETE FROM `rpc`";
 
 const std::string kDeleteAppGroup = "DELETE FROM `app_group`";
 
+const std::string kDeleteAppGroupPrimary = "DELETE FROM `app_group_primary`";
+
+const std::string kDeleteAppGroupNonPrimary = "DELETE FROM `app_group_non_primary`";
+
 const std::string kSelectModuleConfig =
   "SELECT `preloaded_pt`, `exchange_after_x_ignition_cycles`, "
   " `exchange_after_x_kilometers`, `exchange_after_x_days`, "
   " `timeout_after_x_seconds`, `vehicle_make`,"
-  " `vehicle_model`, `vehicle_year` "
+  " `vehicle_model`, `vehicle_year`, "
+  " `user_consent_passengersRC` , `country_consent_passengersRC` "
   " FROM `module_config`";
 
 const std::string kSelectEndpoints =
-  "SELECT `url`, `service`, `application_id` "
-  "FROM `endpoint` "
-  "GROUP BY `application_id`";
+  "SELECT `url`, `service`, `application_id` FROM `endpoint` ";
 
 const std::string kSelectNotificationsPerMin =
   "SELECT `priority_value`, `value` FROM notifications_by_priority";
@@ -565,11 +714,26 @@ const std::string kSelectAppGroups = "SELECT `f`.`name` FROM `app_group` AS `a`"
                                      "    ON (`f`.`id` = `a`.`functional_group_id`)"
                                      "  WHERE `a`.`application_id` = ?";
 
+const std::string kSelectAppGroupsPrimary =
+  "SELECT `f`.`name` FROM `app_group_primary` AS `a`"
+  "  LEFT JOIN `functional_group` AS `f` "
+  "    ON (`f`.`id` = `a`.`functional_group_id`)"
+  "  WHERE `a`.`application_id` = ?";
+
+const std::string kSelectAppGroupsNonPrimary =
+  "SELECT `f`.`name` FROM `app_group_non_primary` AS `a`"
+  "  LEFT JOIN `functional_group` AS `f` "
+  "    ON (`f`.`id` = `a`.`functional_group_id`)"
+  "  WHERE `a`.`application_id` = ?";
+
 const std::string kSelectNicknames = "SELECT DISTINCT `name` FROM `nickname` "
                                      "WHERE `application_id` = ?";
 
 const std::string kSelectAppTypes = "SELECT DISTINCT `name` FROM `app_type` "
                                     "WHERE `application_id` = ?";
+
+const std::string kSelectModuleTypes =
+  "SELECT DISTINCT `name` FROM `module_type` WHERE `application_id` = ?";
 
 const std::string kSelectSecondsBetweenRetries =
   "SELECT `value` FROM `seconds_between_retry` ORDER BY `index`";
@@ -604,8 +768,14 @@ const std::string kSelectTimeoutResponse =
 const std::string kUpdateFlagUpdateRequired =
   "UPDATE `module_meta` SET `flag_update_required` = ?";
 
+const std::string kUpdateRemoteControlDenied =
+  "UPDATE `application` SET `remote_control_denied` = ? WHERE `id` = ?";
+
 const std::string kSelectFlagUpdateRequired =
   "SELECT `flag_update_required` FROM `module_meta` LIMIT 1";
+
+const std::string kSelectRemoteControlDenied =
+  "SELECT `remote_control_denied` FROM `application` WHERE `id` = ? LIMIT 1";
 
 const std::string kUpdateCountersSuccessfulUpdate =
   "UPDATE `module_meta` SET `pt_exchanged_at_odometer_x` = ?,"
@@ -629,10 +799,18 @@ const std::string kSelectApplicationIsDefault =
 const std::string kUpdateIsDefault =
   "UPDATE `application` SET `is_default` = ? WHERE `id` = ?";
 
+const std::string kDeleteAllDevices = "DELETE FROM `device`;";
+
 const std::string kDeleteDevice = "DELETE FROM `device` WHERE `id` = ?";
 
 const std::string kDeleteAppGroupByApplicationId =
   "DELETE FROM `app_group` WHERE `application_id` = ?";
+
+const std::string kDeleteAppGroupPrimaryByApplicationId =
+  "DELETE FROM `app_group_primary` WHERE `application_id` = ?";
+
+const std::string kDeleteAppGroupNonPrimaryByApplicationId =
+  "DELETE FROM `app_group_non_primary` WHERE `application_id` = ?";
 
 const std::string kInsertApplicationFull =
   "INSERT OR IGNORE INTO `application` (`id`, `keep_context`, `steal_focus`, "

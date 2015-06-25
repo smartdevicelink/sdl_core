@@ -41,13 +41,20 @@ namespace application_manager {
 typedef utils::SharedPtr<application_manager::Message> MobileMessage;
 class MobileMessageHandler {
   public:
+    static application_manager::Message* HandleIncomingMessageProtocol(
+      const protocol_handler::RawMessagePtr message);
+
+    static protocol_handler::RawMessage* HandleOutgoingMessageProtocol(
+      const MobileMessage& message);
+    //! -------------------------------------------------------------
+  private:
     static application_manager::Message* HandleIncomingMessageProtocolV1(
       const protocol_handler::RawMessagePtr message);
 
     static application_manager::Message* HandleIncomingMessageProtocolV2(
       const protocol_handler::RawMessagePtr message);
 
-    //! -------------------------------------------------------------
+	//! -------------------------------------------------------------
 
     static protocol_handler::RawMessage* HandleOutgoingMessageProtocolV1(
       const MobileMessage& message);

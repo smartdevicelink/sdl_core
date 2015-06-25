@@ -1,4 +1,4 @@
-/**
+/*
  * \file server_connection_factory.h
  * \brief ServerConnectionFactory class header file.
  * Copyright (c) 2013, Ford Motor Company

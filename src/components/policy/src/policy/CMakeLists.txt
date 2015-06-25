@@ -46,6 +46,7 @@ include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
   #${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/src/components/utils/include/
+  ${CMAKE_SOURCE_DIR}/src/components
   ${CMAKE_SOURCE_DIR}/src/components/config_profile/include
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
@@ -61,6 +62,12 @@ set(SOURCES
   ${CMAKE_SOURCE_DIR}/src/components/rpc_base/src/rpc_base/rpc_base.cc
 )
 
+
+if (REMOTE_CONTROL)
+  list(APPEND SOURCES
+    ./src/access_remote_impl.cc
+  )
+endif()
 
 add_subdirectory(usage_statistics)
 

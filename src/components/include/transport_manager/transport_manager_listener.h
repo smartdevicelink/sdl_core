@@ -143,7 +143,7 @@ class TransportManagerListener {
   /**
    * @brief Notifies about recieving message from TM.
    *
-   * @param message Recieved message
+   * @param message Received message
    **/
   virtual void OnTMMessageReceived(const ::protocol_handler::RawMessagePtr message) = 0;
 

@@ -45,7 +45,7 @@ typedef enum {
 // this variable is only changed when creating and deleting logger thread
 // its reads and writes are believed to be atomic
 // thus it shall be considered thread safe
-extern LoggerStatus logger_status;
+extern volatile LoggerStatus logger_status;
 
 }  // namespace logger
 

@@ -28,26 +28,28 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+set (COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
+
 include_directories(
+  include
+  ${SecurityManagerIncludeDir}
+  ${CMAKE_SOURCE_DIR}/src/components/utils/include
+  ${CMAKE_SOURCE_DIR}/src/components/protocol_handler/include
+  ${CMAKE_SOURCE_DIR}/src/components/utils/include/
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${GMOCK_INCLUDE_DIRECTORY}
-  ./include/
-  ../../../src/thirdPartyLibs/gmock-1.7.0/include
-  ../../../src/thirdPartyLibs/gmock-1.7.0/gtest/include
-  ${SecurityManagerIncludeDir}
-  ${CMAKE_SOURCE_DIR}/src/components/protocol_handler/include
+  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.7.0/include
+  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.7.0/gtest/include
 )
 
 set(SOURCES
-  ./src/crypto_manager_impl_test.cc
-  ./src/security_manager_test.cc
-  ./src/security_query_test.cc
-  ./src/security_query_matcher.cc
+  src/crypto_manager_impl_test.cc
+  src/security_manager_test.cc
+  src/security_query_test.cc
+  src/security_query_matcher.cc
 )
 
 set(LIBRARIES
-  gtest
-  gtest_main
   gmock
   gmock_main
   ${SecurityManagerLibrary}

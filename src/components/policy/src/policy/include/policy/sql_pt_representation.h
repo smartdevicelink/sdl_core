@@ -66,14 +66,14 @@ class SQLPTRepresentation : public virtual PTRepresentation {
     virtual void ResetIgnitionCycles();
     virtual int TimeoutResponse();
     virtual bool SecondsBetweenRetries(std::vector<int>* seconds);
-
+    virtual bool RefreshDB();
     virtual VehicleData GetVehicleData();
 
     virtual std::vector<UserFriendlyMessage> GetUserFriendlyMsg(
       const std::vector<std::string>& msg_codes, const std::string& language);
 
     virtual EndpointUrls GetUpdateUrls(int service_type);
-
+    virtual std::string GetLockScreenIconUrl() const;
     virtual int GetNotificationsNumber(const std::string& priority);
     virtual bool GetPriority(const std::string& policy_app_id,
                              std::string* priority);
@@ -81,6 +81,7 @@ class SQLPTRepresentation : public virtual PTRepresentation {
     bool Close();
     bool Clear();
     bool Drop();
+    virtual void WriteDb();
     virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot() const;
     virtual bool Save(const policy_table::Table& table);
     bool GetInitialAppData(const std::string& app_id, StringArray* nicknames =
@@ -137,6 +138,36 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                       const policy_table::Strings& nicknames);
     bool SaveAppType(const std::string& app_id,
                      const policy_table::AppHMITypes& types);
+
+#ifdef SDL_REMOTE_CONTROL
+    enum TypeAccess {
+      kAllowed,
+      kManual
+    };
+    bool GatherAppGroupPrimary(const std::string& app_id,
+                               policy_table::Strings* app_groups) const;
+    bool GatherAppGroupNonPrimary(const std::string& app_id,
+                                  policy_table::Strings* app_groups) const;
+    bool GatherModuleType(const std::string& app_id,
+                          policy_table::ModuleTypes* module_types) const;
+    bool GatherRemoteControlDenied(const std::string& app_id,
+                                   bool* denied) const;
+    bool GatherEquipment(policy_table::Equipment* equipment) const;
+    bool GatherAccessModule(int zone_id, TypeAccess access,
+                            policy_table::AccessModules* modules) const;
+    bool GatherRemoteRpc(int module_id, policy_table::RemoteRpcs* rpcs) const;
+    bool SaveAppGroupPrimary(const std::string& app_id,
+                             const policy_table::Strings& app_groups);
+    bool SaveAppGroupNonPrimary(const std::string& app_id,
+                                const policy_table::Strings& app_groups);
+    bool SaveModuleType(const std::string& app_id,
+                        const policy_table::ModuleTypes& types);
+    bool SaveRemoteControlDenied(const std::string& app_id, bool deny);
+    bool SaveEquipment(const policy_table::Equipment& equipment);
+    bool SaveAccessModule(int zone_id, TypeAccess access,
+                          const policy_table::AccessModules& modules);
+    bool SaveRemoteRpc(int module_id, const policy_table::RemoteRpcs& rpcs);
+#endif  // SDL_REMOTE_CONTROL
 
   public:
     bool UpdateRequired() const;

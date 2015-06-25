@@ -36,6 +36,8 @@
 #include <string>
 #include <vector>
 
+#include "types.h"
+#include "policy/pt_representation.h"
 #include "utils/shared_ptr.h"
 #include "usage_statistics/counter.h"
 
@@ -52,14 +54,15 @@ class CacheManagerInterface {
    * @brief Check if specified RPC for specified application
    * has permission to be executed in specified HMI Level
    * and also its permitted params.
-   * @param app_id Id of application provided during registration
+   * @param groups list of functional groups
    * @param hmi_level Current HMI Level of application
    * @param rpc Name of RPC
    * @return CheckPermissionResult containing flag if HMI Level is allowed
    * and list of allowed params.
    */
-  virtual void CheckPermissions(const PTString& app_id,
-                                const PTString& hmi_level, const PTString& rpc,
+  virtual void CheckPermissions(const policy_table::Strings &groups,
+                                const PTString& hmi_level,
+                                const PTString& rpc,
                                 CheckPermissionResult& result) = 0;
 
   /**
@@ -145,11 +148,19 @@ class CacheManagerInterface {
       const std::string& language) = 0;
 
   /**
-   * @brief Get list of URL to send PTS to
+   * @brief Get list of URLs related to particular service
    * @param service_type If URLs for specific service are preset,
    * return them otherwise default URLs.
    */
-  virtual EndpointUrls GetUpdateUrls(int service_type) = 0;
+  virtual void GetServiceUrls(const std::string& service_type,
+                              EndpointUrls& end_points) = 0;
+
+  /**
+   * @brief GetLockScreenIcon allows to obtain lock screen icon url;
+   *
+   * @return url which point to the resourse where lock screen icon could be obtained.
+   */
+  virtual std::string GetLockScreenIconUrl() const = 0;
 
   /**
    * @brief Get allowed number of notifications
@@ -189,6 +200,12 @@ class CacheManagerInterface {
   virtual bool ApplyUpdate(const policy_table::Table& update_pt) = 0;
 
   /**
+   * @brief Gets list of appHMIType associated with mobile appID
+   * @param container of appHMIType
+   */
+  virtual void GetHMIAppTypeAfterUpdate(std::map<std::string, StringArray>& app_hmi_types) = 0;
+
+  /**
    * Gets flag updateRequired
    * @return true if update is required
    */
@@ -219,7 +236,7 @@ class CacheManagerInterface {
    * @param app_id application id
    * @return true if application is revoked
    */
-  virtual bool IsApplicationRevoked(const std::string& app_id) = 0;
+  virtual bool IsApplicationRevoked(const std::string& app_id) const = 0;
 
   /**
    * @brief Get functional groupings from DB
@@ -246,10 +263,9 @@ class CacheManagerInterface {
   /**
    * @brief SetIsDefault Sets is_default flag for application
    * @param app_id app specific application
-   * @param is_default true if default false otherwise.
    * @return  true in case opperation was done successfully.
    */
-  virtual bool SetIsDefault(const std::string& app_id, bool is_default) = 0;
+  virtual bool SetIsDefault(const std::string& app_id) = 0;
 
   /**
    * Checks if the application has pre_data policy
@@ -423,12 +439,10 @@ class CacheManagerInterface {
    * groups for specific application.
    * @param policy_app_id application id.
    * @param device_id device id.
-   * @param result the count of unconsented groups
-   * @return true in case opperation has been done successfully.
+   * @param the count of unconsented groups
    */
-  virtual bool CountUnconsentedGroups(const std::string& policy_app_id,
-                                      const std::string& device_id,
-                                      int& result) = 0;
+  virtual int CountUnconsentedGroups(const std::string& policy_app_id,
+                                      const std::string& device_id) = 0;
 
   /**
    * @brief Gets functional group names and user_consent_prompts, if any
@@ -487,32 +501,18 @@ class CacheManagerInterface {
   virtual bool SetPredataPolicy(const std::string& app_id) = 0;
 
   /**
-   * @brief Updates application policy to either pre_DataConsented or not
-   * @param app_id Policy Id of application to be checked
-   * @param is_pre_data True of False to setting app policy to be pre_DataConsented
-   * @return true, if succeeded, otherwise - false
-   */
-  virtual bool SetIsPredata(const std::string& app_id, bool is_pre_data) = 0;
-
-  /**
    * @brief Removes unpaired devices
    * @return true if success
    */
-  virtual bool CleanupUnpairedDevices(const DeviceIds& device_ids) = 0;
+  virtual bool CleanupUnpairedDevices() = 0;
 
   /**
    * Sets flag of unpaired device
-   * @param device_id
+   * @param device_id Unique device id
+   * @param unpaired True, if should be marked as unpaired, otherwise - false
    * @return true if success
    */
-  virtual bool SetUnpairedDevice(const std::string& device_id) = 0;
-
-  /**
-   * Gets list of unpaired devices
-   * @param device_ids output list
-   * @return true if success
-   */
-  virtual bool UnpairedDevicesList(DeviceIds& device_ids) = 0;
+  virtual bool SetUnpairedDevice(const std::string& device_id, bool unpaired = true) = 0;
 
   /**
    * Resets Policy Table
@@ -546,6 +546,43 @@ class CacheManagerInterface {
    * otherwise heart beat for specific application isn't set
    */
   virtual uint16_t HeartBeatTimeout(const std::string& app_id) const = 0;
+
+  /**
+   * @brief Resets all calculated permissions in cache
+   */
+  virtual void ResetCalculatedPermissions() = 0;
+
+  /**
+   * @brief Adds calculated permissions for specific app on particular device
+   * into cache
+   * @param device_id Device id
+   * @param policy_app_id Application id
+   * @param permissions Calculated permissions
+   */
+  virtual void AddCalculatedPermissions(
+      const std::string& device_id,
+      const std::string& policy_app_id,
+      const policy::Permissions& permissions) = 0;
+
+  /**
+   * @brief Checks if permissions calculated for specific app on particular
+   * device
+   * @param device_id Device id
+   * @param policy_app_id Application id
+   * @param permission Permissions to be filled, in case of presence in cache
+   * @return true if present, otherwise false
+   */
+  virtual bool IsPermissionsCalculated(
+      const std::string& device_id,
+      const std::string& policy_app_id,
+      policy::Permissions& permission) = 0;
+
+  /**
+   * Gets groups list
+   * @param app_id ID application
+   * @return list of groups
+   */
+  virtual const policy_table::Strings& GetGroups(const PTString &app_id) = 0;
 };
 
 typedef utils::SharedPtr<CacheManagerInterface> CacheManagerInterfaceSPtr;
