@@ -111,7 +111,6 @@ void BaseCommandNotification::NotifyOneApplication(
     application_manager::MessagePtr message) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (CheckPolicy(message)) {
-    Execute();  // run child's logic
     service_->SendMessageToMobile(message);
   } else {
     LOG4CXX_WARN(logger_,
