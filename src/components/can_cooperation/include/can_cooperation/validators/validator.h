@@ -45,7 +45,6 @@ namespace validators {
 enum ValidationResult {
   SUCCESS,
   INVALID_DATA,
-  GENERIC_ERROR
 };
 
 
