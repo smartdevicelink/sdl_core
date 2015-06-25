@@ -116,14 +116,14 @@ void StateController::SetupRegularHmiState(ApplicationSharedPtr app,
   if (state->hmi_level() == mobile_apis::HMILevel::HMI_NONE) {
     app->ResetDataInNone();
   }
-  if (!app->is_media_application()) {
+  if (!app->IsAudioApplication()) {
     if (state->hmi_level() == HMILevel::HMI_LIMITED) {
-      LOG4CXX_ERROR(logger_, "Trying to setup LIMITED to non media app");
+      LOG4CXX_ERROR(logger_, "Trying to setup LIMITED to non audio app");
       state->set_hmi_level(HMILevel::HMI_BACKGROUND);
     }
     if (state->audio_streaming_state() != AudioStreamingState::NOT_AUDIBLE) {
       LOG4CXX_ERROR(logger_, "Trying to setup audio state " <<
-                    state->audio_streaming_state() <<" to non media app");
+                    state->audio_streaming_state() <<" to non audio app");
       state->set_audio_streaming_state(AudioStreamingState::NOT_AUDIBLE);
     }
   }

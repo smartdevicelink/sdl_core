@@ -223,6 +223,307 @@ TEST_F(ConnectionHandlerTest, StartSession) {
   AddTestSession();
 }
 
+TEST_F(ConnectionHandlerTest, GetConnectionSessionsCount) {
+  AddTestDeviceConnection();
+  EXPECT_EQ(0u, connection_handler_->GetConnectionSessionsCount(connection_key_));
+
+  AddTestSession();
+  EXPECT_EQ(1u, connection_handler_->GetConnectionSessionsCount(connection_key_));
+}
+
+TEST_F(ConnectionHandlerTest, GetAppIdOnSessionKey) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  uint32_t app_id = 0;
+  const uint32_t testid = SessionHash(uid_, start_session_id_);
+
+  EXPECT_EQ(0, connection_handler_->GetDataOnSessionKey(connection_key_, &app_id));
+  EXPECT_EQ(testid, app_id);
+}
+
+TEST_F(ConnectionHandlerTest,GetDeviceID) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  DeviceHandle test_handle;
+  const DeviceMap & devmap = connection_handler_->getDeviceList();
+  DeviceMap::const_iterator pos = devmap.find(device_handle_);
+  ASSERT_NE(pos, devmap.end());
+  const Device & devres = pos->second;
+  std::string test_mac_address = devres.mac_address();
+
+  EXPECT_TRUE(connection_handler_->GetDeviceID(test_mac_address, &test_handle));
+  EXPECT_EQ(device_handle_, test_handle);
+}
+
+TEST_F(ConnectionHandlerTest,GetDeviceName) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  std::string test_device_name;
+  DeviceHandle handle = 0;
+  EXPECT_EQ(0, connection_handler_->GetDataOnDeviceID(handle, &test_device_name));
+  EXPECT_EQ(device_name_, test_device_name);
+}
+
+TEST_F(ConnectionHandlerTest,GetConnectionType) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  const DeviceHandle handle = 0;
+  std::string test_connection_type;
+  EXPECT_EQ(0, connection_handler_->GetDataOnDeviceID(handle, NULL, NULL, NULL, &test_connection_type));
+  EXPECT_EQ(connection_type_, test_connection_type);
+}
+
+TEST_F(ConnectionHandlerTest, GetDefaultProtocolVersion) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  uint8_t protocol_version = 0;
+  EXPECT_TRUE(connection_handler_->ProtocolVersionUsed(uid_, start_session_id_, protocol_version));
+
+  EXPECT_EQ(PROTOCOL_VERSION_2, protocol_version);
+}
+
+TEST_F(ConnectionHandlerTest, GetProtocolVersion) {
+  AddTestDeviceConnection();
+  AddTestSession();
+  ChangeProtocol(uid_, start_session_id_, PROTOCOL_VERSION_3);
+
+  uint8_t protocol_version = 0;
+  EXPECT_TRUE(connection_handler_->ProtocolVersionUsed(uid_, start_session_id_, protocol_version));
+
+  EXPECT_EQ(PROTOCOL_VERSION_3, protocol_version);
+}
+
+TEST_F(ConnectionHandlerTest, GetProtocolVersionAfterBinding) {
+  AddTestDeviceConnection();
+  AddTestSession();
+  uint8_t protocol_version = 0;
+  EXPECT_TRUE(connection_handler_->ProtocolVersionUsed(uid_, start_session_id_, protocol_version));
+  EXPECT_EQ(PROTOCOL_VERSION_2, protocol_version);
+
+  connection_handler_->BindProtocolVersionWithSession(connection_key_, PROTOCOL_VERSION_3);
+
+  EXPECT_TRUE(connection_handler_->ProtocolVersionUsed(uid_, start_session_id_, protocol_version));
+  EXPECT_EQ(PROTOCOL_VERSION_3, protocol_version);
+}
+
+TEST_F(ConnectionHandlerTest, GetPairFromKey) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  uint8_t session_id = 0;
+  uint32_t test_uid = 0;
+  connection_handler_->PairFromKey(connection_key_, &test_uid, &session_id);
+  EXPECT_EQ(uid_, test_uid);
+  EXPECT_EQ(start_session_id_, session_id);
+}
+
+TEST_F(ConnectionHandlerTest, IsHeartBeatSupported) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  ChangeProtocol(uid_, start_session_id_, PROTOCOL_VERSION_3);
+  EXPECT_TRUE(connection_handler_->IsHeartBeatSupported(uid_, start_session_id_));
+}
+
+TEST_F(ConnectionHandlerTest,SendEndServiceWithoutSetProtocolHandler) {
+  AddTestDeviceConnection();
+  AddTestSession();
+  protocol_handler_test::ProtocolHandlerMock mock_protocol_handler;
+
+  EXPECT_CALL(mock_protocol_handler, SendEndService(_,_,kRpc)).Times(0);
+  connection_handler_->SendEndService(connection_key_, kRpc);
+}
+
+TEST_F(ConnectionHandlerTest,SendEndService) {
+  AddTestDeviceConnection();
+  AddTestSession();
+  protocol_handler_test::ProtocolHandlerMock mock_protocol_handler;
+
+  connection_handler_->set_protocol_handler(&mock_protocol_handler);
+  EXPECT_CALL(mock_protocol_handler, SendEndService(_,_,kRpc));
+  connection_handler_->SendEndService(connection_key_, kRpc);
+}
+
+TEST_F(ConnectionHandlerTest,OnFindNewApplicationsRequest) {
+  AddTestDeviceConnection();
+  AddTestSession();
+  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+
+  EXPECT_CALL(mock_connection_handler_observer, OnFindNewApplicationsRequest());
+  connection_handler_->OnFindNewApplicationsRequest();
+}
+
+TEST_F(ConnectionHandlerTest,OnFindNewApplicationsRequestWithoutObserver) {
+  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
+  EXPECT_CALL(mock_connection_handler_observer, OnFindNewApplicationsRequest()).Times(0);
+  connection_handler_->OnFindNewApplicationsRequest();
+}
+
+TEST_F(ConnectionHandlerTest,OnFindNewApplicationsRequestWithoutSession) {
+  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+
+  EXPECT_CALL(mock_connection_handler_observer, OnFindNewApplicationsRequest());
+  connection_handler_->OnFindNewApplicationsRequest();
+}
+
+TEST_F(ConnectionHandlerTest, OnMalformedMessageCallback) {
+  AddTestDeviceConnection();
+  AddTestSession();
+  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceEndedCallback(connection_key_,_, kMalformed)).Times(2);
+  connection_handler_->OnMalformedMessageCallback(uid_);
+}
+
+TEST_F(ConnectionHandlerTest, OnApplicationFloodCallBack) {
+  AddTestDeviceConnection();
+  AddTestSession();
+  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+
+  protocol_handler_test::ProtocolHandlerMock mock_protocol_handler;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler);
+
+  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_,start_session_id_));
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceEndedCallback(connection_key_,_, kCommon)).Times(2);
+  connection_handler_->OnApplicationFloodCallBack(uid_);
+}
+
+TEST_F(ConnectionHandlerTest, StartDevicesDiscovery) {
+  AddTestDeviceConnection();
+  AddTestSession();
+  transport_manager_test::TransportManagerMock mock_transport_manager;
+  connection_handler_->set_transport_manager(&mock_transport_manager);
+  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+
+  EXPECT_CALL(mock_transport_manager, SearchDevices());
+  EXPECT_CALL(mock_connection_handler_observer, OnDeviceListUpdated(_));
+  connection_handler_->StartDevicesDiscovery();
+}
+
+TEST_F(ConnectionHandlerTest, StartTransportManager) {
+  AddTestDeviceConnection();
+  AddTestSession();
+  transport_manager_test::TransportManagerMock mock_transport_manager;
+  connection_handler_->set_transport_manager(&mock_transport_manager);
+  EXPECT_CALL(mock_transport_manager, Visibility(true));
+  connection_handler_->StartTransportManager();
+}
+
+TEST_F(ConnectionHandlerTest, CloseConnection) {
+  AddTestDeviceConnection();
+  AddTestSession();
+  transport_manager_test::TransportManagerMock mock_transport_manager;
+  connection_handler_->set_transport_manager(&mock_transport_manager);
+  EXPECT_CALL(mock_transport_manager, DisconnectForce(uid_));
+  connection_handler_->CloseConnection(uid_);
+}
+
+TEST_F(ConnectionHandlerTest, CloseRevokedConnection) {
+  AddTestDeviceConnection();
+  AddTestSession();
+  transport_manager_test::TransportManagerMock mock_transport_manager;
+  connection_handler_->set_transport_manager(&mock_transport_manager);
+  EXPECT_CALL(mock_transport_manager, DisconnectForce(uid_));
+  connection_handler_->CloseRevokedConnection(connection_key_);
+}
+
+TEST_F(ConnectionHandlerTest, CloseSessionWithCommonReason) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+
+  protocol_handler_test::ProtocolHandlerMock mock_protocol_handler;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler);
+
+  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_,start_session_id_));
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceEndedCallback(connection_key_,_, kCommon)).Times(2);
+
+  connection_handler_->CloseSession(connection_key_, kCommon);
+}
+
+TEST_F(ConnectionHandlerTest, CloseSessionWithFloodReason) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+
+  protocol_handler_test::ProtocolHandlerMock mock_protocol_handler;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler);
+
+  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_,start_session_id_));
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceEndedCallback(connection_key_,_, kFlood)).Times(2);
+
+  connection_handler_->CloseSession(connection_key_, kFlood);
+}
+
+TEST_F(ConnectionHandlerTest, CloseSessionWithMalformedMessage) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+
+  protocol_handler_test::ProtocolHandlerMock mock_protocol_handler;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler);
+
+  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_,start_session_id_)).Times(0);
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceEndedCallback(connection_key_,_, kMalformed)).Times(2);
+
+  connection_handler_->CloseSession(connection_key_, kMalformed);
+}
+
+TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithMalformedMessage) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+
+  protocol_handler_test::ProtocolHandlerMock mock_protocol_handler;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler);
+
+  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_,start_session_id_)).Times(0);
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceEndedCallback(connection_key_,_, kMalformed)).Times(2);
+
+  connection_handler_->CloseConnectionSessions(uid_, kMalformed);
+}
+
+TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithCommonReason) {
+  AddTestDeviceConnection();
+  AddTestSession();
+
+  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+
+  protocol_handler_test::ProtocolHandlerMock mock_protocol_handler;
+  connection_handler_->set_protocol_handler(&mock_protocol_handler);
+
+  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_,start_session_id_));
+  EXPECT_CALL(mock_connection_handler_observer,
+              OnServiceEndedCallback(connection_key_,_, kCommon)).Times(2);
+
+  connection_handler_->CloseConnectionSessions(uid_, kCommon);
+}
+
 TEST_F(ConnectionHandlerTest, StartService_withServices) {
   // Add virtual device and connection
   AddTestDeviceConnection();

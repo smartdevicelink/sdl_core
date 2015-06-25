@@ -55,6 +55,7 @@
 #include "hmi_message_handler/hmi_message_sender.h"
 #include "application_manager/policies/policy_handler_observer.h"
 #include "media_manager/media_manager_impl.h"
+#include "connection_handler/connection_handler.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
 #include "formatters/CSmartFactory.hpp"
@@ -610,8 +611,7 @@ class ApplicationManagerImpl : public ApplicationManager,
         const int32_t& session_key,
         const protocol_handler::ServiceType& type,
         const connection_handler::CloseSessionReason& close_reason) OVERRIDE;
-    void OnApplicationFloodCallBack(const uint32_t& connection_key) OVERRIDE;
-    void OnMalformedMessageCallback(const uint32_t& connection_key) OVERRIDE;
+
     /**
      * @ Add notification to collection
      *
@@ -703,9 +703,11 @@ class ApplicationManagerImpl : public ApplicationManager,
     /**
      * @brief Callback calls when application starts/stops data streaming
      * @param app_id Streaming application id
+     * @param service_type Streaming service type
      * @param state Shows if streaming started or stopped
      */
-    void OnAppStreaming(uint32_t app_id, bool state);
+    void OnAppStreaming(
+        uint32_t app_id, protocol_handler::ServiceType service_type, bool state);
 
     /**
      * @brief OnHMILevelChanged the callback that allows SDL to react when

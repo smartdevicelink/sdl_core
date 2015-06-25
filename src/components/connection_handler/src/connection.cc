@@ -79,7 +79,8 @@ Connection::Connection(ConnectionHandle connection_handle,
                        int32_t heartbeat_timeout)
     : connection_handler_(connection_handler),
       connection_handle_(connection_handle),
-      connection_device_handle_(connection_device_handle) {
+      connection_device_handle_(connection_device_handle),
+      session_map_lock_(true) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(connection_handler_);
 
