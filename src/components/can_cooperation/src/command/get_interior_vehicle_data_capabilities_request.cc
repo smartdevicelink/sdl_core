@@ -147,10 +147,10 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
             Json::ValueType::arrayValue);
           for (size_t i = 0; i < zone_capabilities.size(); ++i) {
             for (size_t j = 0; j < request[kModuleTypes].size(); ++j) {
-              if (request[kModuleTypes][j] ==
-                    zone_capabilities[i][kModuleType]) {
+              if (request[kModuleTypes][static_cast<int>(j)] ==
+                    zone_capabilities[static_cast<int>(i)][kModuleType]) {
                 response_params_[kInteriorVehicleDataCapabilities].append(
-                  zone_capabilities[i]);
+                  zone_capabilities[static_cast<int>(i)]);
               }
             }
           }
