@@ -591,6 +591,7 @@ void ResumeCtrl::AddSubscriptions(ApplicationSharedPtr application,
         application->SubscribeToButton(btn);
       }
     }
+    MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(application);
 
     if (subscribtions.keyExists(strings::application_vehicle_info)) {
       const smart_objects::SmartObject& subscribtions_ivi =
