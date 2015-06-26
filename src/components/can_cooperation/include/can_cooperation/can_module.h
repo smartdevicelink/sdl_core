@@ -107,6 +107,14 @@ class CANModule : public functional_modules::GenericModule,
   bool IsAppForPlugin(
       application_manager::ApplicationSharedPtr app);
 
+  /*
+   * @brief Notify about change of HMILevel of plugin's app
+   * @param app App with new HMILevel
+   * @param old_level Old HMILevel of app
+   */
+  void OnAppHMILevelChanged(application_manager::ApplicationSharedPtr app,
+    mobile_apis::HMILevel::eType old_level);
+
  protected:
   /**
    * @brief Remove extension for all applications

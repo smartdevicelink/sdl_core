@@ -211,7 +211,6 @@ bool PluginManager::IsMessageForPlugin(application_manager::MessagePtr msg) {
   }
 }
 
-
 bool PluginManager::IsHMIMessageForPlugin(application_manager::MessagePtr msg) {
   DCHECK(msg);
   if (!msg) {
@@ -290,6 +289,23 @@ bool PluginManager::IsAppForPlugins(
     res = res || it->second->IsAppForPlugin(app);
   }
   return res;
+}
+
+void PluginManager::OnAppHMILevelChanged(
+    application_manager::ApplicationSharedPtr app,
+    mobile_apis::HMILevel::eType old_level) {
+  DCHECK(app);
+  if (!app) {
+    return;
+  }
+  for (PluginsIterator it = plugins_.begin(); plugins_.end() != it; ++it) {
+    if (it->second->IsAppForPlugin(app)) {
+      LOG4CXX_DEBUG(logger_, "Application " << app->name() << " of plugin "
+        << it->second->GetModuleID() << " has changed level from " << old_level
+        << " to " << app->hmi_level());
+      it->second->OnAppHMILevelChanged(app, old_level);
+    }
+  }
 }
 
 }  //  namespace functional_modules

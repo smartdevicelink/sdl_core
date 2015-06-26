@@ -220,6 +220,7 @@ TEST_F(CanModuleTest, IsAppForPluginSuccess) {
   smart_objects::SmartObject obj(smart_objects::SmartType::SmartType_Array);
   obj[0] = 10;  //  REMOTE_CONTROL
   app_ptr->set_app_types(obj);
+  EXPECT_CALL(*mock_service, NotifyHMIAboutHMILevel(app_ptr, _)).Times(1);
   ASSERT_TRUE(module->IsAppForPlugin(app_ptr));
 }
 
