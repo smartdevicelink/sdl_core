@@ -57,6 +57,7 @@ using ::testing::_;
 using ::testing::NiceMock;
 using ::testing::StrictMock;
 using ::testing::Return;
+using ::testing::ReturnRef;
 
 namespace can_cooperation {
 
@@ -224,6 +225,15 @@ TEST_F(CanModuleTest, IsAppForPluginSuccess) {
   ASSERT_TRUE(module->IsAppForPlugin(app_ptr));
 }
 
+TEST_F(CanModuleTest, IsAppForPluginNotNew) {
+  CANAppExtension* ext = new CANAppExtension(module->GetModuleID());
+  MockApplicationSomeImpl* app = new MockApplicationSomeImpl();
+  application_manager::ApplicationSharedPtr app_ptr(app);
+  app_ptr->AddExtension(ext);
+  EXPECT_CALL(*mock_service, NotifyHMIAboutHMILevel(app_ptr, _)).Times(0);
+  ASSERT_TRUE(module->IsAppForPlugin(app_ptr));
+}
+
 TEST_F(CanModuleTest, IsAppForPluginFail) {
   MockApplicationSomeImpl* app = new MockApplicationSomeImpl();
   application_manager::ApplicationSharedPtr app_ptr(app);
@@ -232,6 +242,16 @@ TEST_F(CanModuleTest, IsAppForPluginFail) {
   obj[1] = 8;
   app_ptr->set_app_types(obj);
   ASSERT_FALSE(module->IsAppForPlugin(app_ptr));
+}
+
+TEST_F(CanModuleTest, OnAppHMILevelChanged) {
+  NiceMock<MockApplicationSomeImpl>* app =
+    new NiceMock<MockApplicationSomeImpl>();
+  application_manager::ApplicationSharedPtr app_ptr(app);
+  std::string name("name");
+  ON_CALL(*app, name()).WillByDefault(ReturnRef(name));
+  EXPECT_CALL(*mock_service, NotifyHMIAboutHMILevel(app_ptr, app_ptr->hmi_level())).Times(1);
+  module->OnAppHMILevelChanged(app_ptr, mobile_apis::HMILevel::eType::HMI_FULL);
 }
 
 TEST_F(CanModuleTest, ChangeDriverDevice) {

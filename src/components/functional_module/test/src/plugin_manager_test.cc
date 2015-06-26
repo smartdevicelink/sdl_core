@@ -8,6 +8,9 @@
 using application_manager::Message;
 using application_manager::ProtocolVersion;
 using application_manager::MockService;
+using ::testing::NiceMock;
+using ::testing::Expectation;
+using ::testing::ReturnRef;
 
 namespace functional_modules {
 
@@ -134,6 +137,24 @@ TEST_F(PluginManagerTest, IsAppForPlugins) {
   application_manager::ApplicationSharedPtr app_ptr(app);
   EXPECT_CALL(*module, IsAppForPlugin(app_ptr)).Times(1);
   manager->IsAppForPlugins(app_ptr);
+}
+
+TEST_F(PluginManagerTest, OnAppHMILevelChanged) {
+  NiceMock<application_manager::MockApplication>* app =
+    new NiceMock<application_manager::MockApplication>();
+  application_manager::ApplicationSharedPtr app_ptr(app);
+
+  std::string name("name");
+  ON_CALL(*app, name()).WillByDefault(ReturnRef(name));
+  mobile_apis::HMILevel::eType level = mobile_apis::HMILevel::eType::HMI_NONE;
+  ON_CALL(*app, hmi_level()).WillByDefault(ReturnRef(level));
+
+  Expectation is_for_plugin = EXPECT_CALL(*module, IsAppForPlugin(app_ptr))
+    .WillOnce(Return(true));
+  EXPECT_CALL(*module, OnAppHMILevelChanged(app_ptr, _))
+    .Times(1)
+    .After(is_for_plugin);
+  manager->OnAppHMILevelChanged(app_ptr, mobile_apis::HMILevel::eType::HMI_FULL);
 }
 
 }  // namespace functional_modules
