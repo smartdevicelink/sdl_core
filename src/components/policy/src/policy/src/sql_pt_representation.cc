@@ -1788,7 +1788,7 @@ bool SQLPTRepresentation::GatherRemoteRpc(
       std::string parameter = query.GetString(1);
       (*rpcs)[name].push_back(parameter);
     } else {
-      (*rpcs)[name];
+      rpcs->insert(std::make_pair(name, policy_table::Strings()));
     }
   }
   return true;
