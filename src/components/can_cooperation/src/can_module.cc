@@ -348,19 +348,34 @@ void CANModule::RemoveAppExtension(uint32_t app_id) {
 }
 
 bool CANModule::IsAppForPlugin(
-  application_manager::ApplicationSharedPtr app) {
-  if (app->app_types()) {
-    std::vector<int> hmi_types =
-      application_manager::SmartObjToArrayInt(app->app_types());
-    if (hmi_types.end() != std::find(hmi_types.begin(), hmi_types.end(),
+    application_manager::ApplicationSharedPtr app) {
+  application_manager::AppExtensionPtr app_extension = app->QueryInterface(
+    GetModuleID());
+  if (!app_extension) {
+    if (app->app_types()) {
+      std::vector<int> hmi_types =
+        application_manager::SmartObjToArrayInt(app->app_types());
+      if (hmi_types.end() !=
+                  std::find(hmi_types.begin(), hmi_types.end(),
                             mobile_apis::AppHMIType::eType::REMOTE_CONTROL)) {
-      CANAppExtensionPtr can_app_extension = new CANAppExtension(GetModuleID());
-      app->AddExtension(can_app_extension);
-      service()->NotifyHMIAboutHMILevel(app, app->hmi_level());
-      return true;
+        CANAppExtensionPtr can_app_extension = new CANAppExtension(
+          GetModuleID());
+        app->AddExtension(can_app_extension);
+        service()->NotifyHMIAboutHMILevel(app, app->hmi_level());
+        return true;
+      }
     }
+    return false;
   }
-  return false;
+  return true;
+}
+
+void CANModule::OnAppHMILevelChanged(
+    application_manager::ApplicationSharedPtr app,
+    mobile_apis::HMILevel::eType) {
+  LOG4CXX_DEBUG(logger_, "RSDL application " << app->name()
+        << " has changed hmi level to " << app->hmi_level());
+  service()->NotifyHMIAboutHMILevel(app, app->hmi_level());
 }
 
 }  //  namespace can_cooperation

@@ -58,6 +58,10 @@ class DriverGenericModuleTest : public GenericModule {
   bool IsAppForPlugin(
       application_manager::ApplicationSharedPtr app) {return true;}
 
+  void OnAppHMILevelChanged(
+    application_manager::ApplicationSharedPtr,
+    mobile_apis::HMILevel::eType) {}
+
   const Observers& observers() {
     return observers_;
   }

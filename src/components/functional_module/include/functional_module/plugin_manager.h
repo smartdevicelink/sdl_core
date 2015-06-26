@@ -72,6 +72,15 @@ class PluginManager : public utils::Singleton<PluginManager>,
    */
   bool IsAppForPlugins(application_manager::ApplicationSharedPtr app);
 
+  /*
+   * @brief Notify plugins about change of HMILevel of app
+   * if app is related to plugin
+   * @param app App with new HMILevel
+   * @param old_level Old HMILevel of app
+   */
+  void OnAppHMILevelChanged(application_manager::ApplicationSharedPtr app,
+    mobile_apis::HMILevel::eType old_level);
+
  private:
   PluginManager();
   ~PluginManager();

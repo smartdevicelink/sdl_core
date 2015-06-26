@@ -123,6 +123,15 @@ class GenericModule {
   virtual bool IsAppForPlugin(
       application_manager::ApplicationSharedPtr app) = 0;
 
+  /*
+   * @brief Notify about change of HMILevel of plugin's app
+   * @param app App with new HMILevel
+   * @param old_level Old HMILevel of app
+   */
+  virtual void OnAppHMILevelChanged(
+    application_manager::ApplicationSharedPtr app,
+    mobile_apis::HMILevel::eType old_level) = 0;
+
  protected:
   explicit GenericModule(ModuleID module_id);
   void NotifyObservers(ModuleObserver::Errors error);
