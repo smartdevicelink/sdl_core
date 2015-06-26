@@ -90,7 +90,7 @@ TypeAccess CoreService::CheckAccess(const ApplicationId& app_id,
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
     return policy::PolicyHandler::instance()->CheckAccess(
-        app->mobile_app_id(), zone, module, "", params);
+        app->mobile_app_id(), zone, module, rpc, params);
   }
 #endif  // SDL_REMOTE_CONTROL
   return kNone;
