@@ -221,12 +221,6 @@ void ApplicationImpl::SetRegularState(HmiStatePtr state) {
   hmi_states_.push_front(state);
 }
 
-void ApplicationImpl::AddHMIState(HmiStatePtr state) {
-  DCHECK_OR_RETURN_VOID(state);
-  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-  hmi_states_.push_back(state);
-}
-
 struct StateIdFindPredicate {
     HmiState::StateID state_id_;
     StateIdFindPredicate(HmiState::StateID state_id):
@@ -235,6 +229,21 @@ struct StateIdFindPredicate {
       return cur->state_id() == state_id_;
     }
 };
+
+void ApplicationImpl::AddHMIState(HmiStatePtr state) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN_VOID(state);
+  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
+  HmiStateList::iterator it =
+      std::find_if(hmi_states_.begin(), hmi_states_.end(),
+                   StateIdFindPredicate(state->state_id()));
+  if (hmi_states_.end() == it) {
+    hmi_states_.push_back(state);
+  } else {
+    LOG4CXX_WARN(logger_, "Hmi state with ID " << state->state_id()
+                 << "has been already applied to this application. Ignoring");
+  }
+}
 
 void ApplicationImpl::RemoveHMIState(HmiState::StateID state_id) {
   LOG4CXX_AUTO_TRACE(logger_);
