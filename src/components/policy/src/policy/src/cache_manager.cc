@@ -726,6 +726,11 @@ CacheManager::GenerateSnapshot() {
   snapshot_ = new policy_table::Table();
   snapshot_->policy_table = pt_->policy_table;
   CheckSnapshotInitialization();
+
+  policy_table::ConsumerFriendlyMessages messages(
+    snapshot_->policy_table.consumer_friendly_messages->version);
+  *(snapshot_->policy_table.consumer_friendly_messages) = messages;
+
   return snapshot_;
 }
 

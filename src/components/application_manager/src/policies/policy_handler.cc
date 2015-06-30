@@ -728,16 +728,29 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK(false);
 
+  ApplicationSharedPtr app;
+  uint32_t app_id = 0;
   if (last_used_app_ids_.empty()) {
     LOG4CXX_WARN(logger_, "last_used_app_ids_ is empty");
-    return false;
+#ifdef SDL_REMOTE_CONTROL
+    app = ApplicationManagerImpl::instance()->active_application();
+    if (!app) {
+      ApplicationManagerImpl::ApplicationListAccessor accessor;
+      if(accessor.begin() != accessor.end()) {
+        app = *(accessor.begin());
+        app_id = app->app_id();
+      }
+    }
+#else
+      return false;
+#endif
+  } else {
+    app_id = last_used_app_ids_.back();
+
+    app = ApplicationManagerImpl::instance()->application(app_id);
   }
-  uint32_t app_id = last_used_app_ids_.back();
 
-  ApplicationSharedPtr app =
-    ApplicationManagerImpl::instance()->application(app_id);
-
-  if (!app.valid()) {
+  if (!app) {
     LOG4CXX_WARN(logger_, "There is no registered application with "
                  "connection key '" << app_id << "'");
     return false;
