@@ -35,7 +35,7 @@
 
 #include <string>
 #include <sstream>
-
+#include <vector>
 #include "application_manager/application.h"
 #include "application_manager/message.h"
 

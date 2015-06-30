@@ -45,7 +45,7 @@ class PolicyHelper {
   static void SetIsAppOnPrimaryDevice(
     application_manager::ApplicationSharedPtr app);
 
-private:
+ private:
   static void MarkAppOnPrimaryDevice(
     application_manager::ApplicationSharedPtr app,
     const uint32_t device_handle);
@@ -53,4 +53,4 @@ private:
 
 }  //  namespace can_cooperation
 
-#endif  //  SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_POLICY_HELPER_H_
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_POLICY_HELPER_H_
