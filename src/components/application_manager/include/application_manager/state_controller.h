@@ -271,6 +271,19 @@ class StateController : public event_engine::EventObserver {
      */
     void TempStateStopped(HmiState::StateID ID);
 
+    /**
+     * @brief Sets BACKGROUND or LIMITED hmi level to application
+     * depends on application type
+     * @param app Application to deactivate
+     */
+    void DeactivateAppWithGeneralReason(ApplicationSharedPtr app);
+
+    /**
+     * @brief Sets BACKGROUND or LIMITED hmi level to application
+     * depends on application type
+     * @param app Application to deactivate
+     */
+    void DeactivateAppWithAudioReason(ApplicationSharedPtr app);
 
     /**
      * Function to remove temporary HmiState for application
@@ -342,10 +355,22 @@ class StateController : public event_engine::EventObserver {
                               const mobile_apis::AudioStreamingState::eType audio_state);
 
     /**
-     * @brief OnActivateAppResponse calback for activate app response
+     * @brief OnActivateAppResponse callback for activate app response
      * @param message Smart Object
      */
     void OnActivateAppResponse(const smart_objects::SmartObject& message);
+
+    /**
+     * @brief OnAppDeactivated callback for OnAppDeactivated notification
+     * @param message Smart Object
+     */
+    void OnAppDeactivated(const smart_objects::SmartObject& message);
+
+    /**
+     * @brief OnAppActivated callback for OnAppActivated notification
+     * @param message Smart Object
+     */
+    void OnAppActivated(const smart_objects::SmartObject& message);
 
     /**
      * @brief OnPhoneCallStarted process Phone Call Started event
