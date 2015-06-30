@@ -736,7 +736,7 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
     app = ApplicationManagerImpl::instance()->active_application();
     if (!app) {
       ApplicationManagerImpl::ApplicationListAccessor accessor;
-      if(accessor.begin() != accessor.end()) {
+      if (!accessor.Empty()) {
         app = *(accessor.begin());
         app_id = app->app_id();
       }
