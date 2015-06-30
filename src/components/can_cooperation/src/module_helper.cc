@@ -135,19 +135,16 @@ functional_modules::ProcessResult ProcessSDLActivateApp(
           if (!new_app_ext) {
             return ProcessResult::CANNOT_PROCESS;
           }
-          if (!CANModule::instance()->service()->IsRemoteControlAllowed()) {
-            if (!new_app_ext->is_on_driver_device()) {
-              // Do not change HMI Level of app on passenger's device
-              // if Remote Functionality is disabled
-              application_manager::MessagePtr msg = ResponseToHMI(
-                value[json_keys::kId].asUInt(),
-                hmi_apis::Common_Result::GENERIC_ERROR,
-                functional_modules::hmi_api::sdl_activate_app);
+          if (!new_app_ext->is_on_driver_device()) {
+            // Do not change HMI Level of app on passenger's device
+            application_manager::MessagePtr msg = ResponseToHMI(
+              value[json_keys::kId].asUInt(),
+              hmi_apis::Common_Result::GENERIC_ERROR,
+              functional_modules::hmi_api::sdl_activate_app);
 
-              CANModule::instance()->service()->SendMessageToHMI(msg);
+            CANModule::instance()->service()->SendMessageToHMI(msg);
 
-              return ProcessResult::PROCESSED;
-            }
+            return ProcessResult::PROCESSED;
           }
         }
         CANAppExtensionPtr app_ext =
