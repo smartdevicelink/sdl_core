@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_POLICY_HELPER_H_
 
 #include <string>
+#include "application_manager/application.h"
 
 namespace can_cooperation {
 
@@ -41,6 +42,13 @@ class PolicyHelper {
  public:
   static void OnRSDLFunctionalityAllowing(bool allowed);
   static void SetPrimaryDevice(const uint32_t device_handle);
+  static void SetIsAppOnPrimaryDevice(
+    application_manager::ApplicationSharedPtr app);
+
+private:
+  static void MarkAppOnPrimaryDevice(
+    application_manager::ApplicationSharedPtr app,
+    const uint32_t device_handle);
 };
 
 }  //  namespace can_cooperation

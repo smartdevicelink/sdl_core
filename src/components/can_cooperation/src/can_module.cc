@@ -362,6 +362,7 @@ bool CANModule::IsAppForPlugin(
           GetModuleID());
         app->AddExtension(can_app_extension);
         service()->NotifyHMIAboutHMILevel(app, app->hmi_level());
+        PolicyHelper::SetIsAppOnPrimaryDevice(app);
         return true;
       }
     }

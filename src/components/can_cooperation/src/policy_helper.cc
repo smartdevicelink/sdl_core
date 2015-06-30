@@ -33,7 +33,6 @@
 #include "can_cooperation/policy_helper.h"
 #include "can_cooperation/can_module.h"
 #include "can_cooperation/can_app_extension.h"
-#include "application_manager/application.h"
 
 namespace can_cooperation {
 
@@ -44,18 +43,33 @@ void PolicyHelper::OnRSDLFunctionalityAllowing(bool allowed) {
 void PolicyHelper::SetPrimaryDevice(const uint32_t device_handle) {
   CANModule::instance()->service()->SetPrimaryDevice(device_handle);
 
-  application_manager::AppExtensionUID module_id = CANModule::instance()->GetModuleID();
+  application_manager::AppExtensionUID module_id =
+    CANModule::instance()->GetModuleID();
   std::vector<application_manager::ApplicationSharedPtr> applications =
     CANModule::instance()->service()->GetApplications(module_id);
 
   for (size_t i = 0; i < applications.size(); ++i) {
-    CANAppExtensionPtr extension =
-      application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-        applications[i]->QueryInterface(module_id));
-    DCHECK(extension);
-    bool is_driver = (applications[i]->device() == device_handle);
-    extension->set_is_on_driver_device(is_driver);
+    MarkAppOnPrimaryDevice(applications[i], device_handle);
   }
+}
+
+void PolicyHelper::SetIsAppOnPrimaryDevice(
+    application_manager::ApplicationSharedPtr app) {
+  MarkAppOnPrimaryDevice(app,
+    CANModule::instance()->service()->PrimaryDevice());
+}
+
+void PolicyHelper::MarkAppOnPrimaryDevice(
+    application_manager::ApplicationSharedPtr app,
+    const uint32_t device_handle) {
+  application_manager::AppExtensionUID module_id =
+    CANModule::instance()->GetModuleID();
+  CANAppExtensionPtr extension =
+    application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
+      app->QueryInterface(module_id));
+  DCHECK(extension);
+  bool is_driver = (app->device() == device_handle);
+  extension->set_is_on_driver_device(is_driver);
 }
 
 }  // namespace can_cooperation

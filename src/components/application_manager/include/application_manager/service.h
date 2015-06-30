@@ -113,6 +113,11 @@ class Service {
    */
   virtual void SetPrimaryDevice(const uint32_t dev_id) = 0;
 
+  /*
+   * Return id of primary device
+   */
+  virtual uint32_t PrimaryDevice() const = 0;
+
   /**
    * Sets mode of remote control (on/off)
    * @param enabled true if remote control is turned on

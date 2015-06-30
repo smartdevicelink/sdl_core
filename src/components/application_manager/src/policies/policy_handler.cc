@@ -1421,14 +1421,22 @@ void PolicyHandler::SetPrimaryDevice(const PTString& dev_id) {
   }
 }
 
+uint32_t PolicyHandler::PrimaryDevice() const {
+  PTString device_id = policy_manager_->PrimaryDevice();
+  connection_handler::DeviceHandle device_handle;
+  if (ApplicationManagerImpl::instance()->connection_handler()
+        ->GetDeviceID(device_id, &device_handle)) {
+    return device_handle;
+  } else {
+    return 0;
+  }
+}
+
 void PolicyHandler::SetRemoteControl(bool enabled) {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->SetRemoteControl(enabled);
 
-  PTString device_id = policy_manager_->PrimaryDevice();
-  connection_handler::DeviceHandle device_handle;
-    ApplicationManagerImpl::instance()->connection_handler()
-        ->GetDeviceID(device_id, &device_handle);
+  connection_handler::DeviceHandle device_handle = PrimaryDevice();
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
   for (ApplicationManagerImpl::ApplictionSetConstIt i = accessor.begin();
