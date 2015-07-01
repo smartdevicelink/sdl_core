@@ -116,7 +116,7 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
 
       if (validators::SUCCESS != validation_result) {
         success = false;
-        info = "Invalid response from vehicle.";
+        info = "Invalid response from the vehicle.";
         result_code = result_codes::kGenericError;
       }
     }
@@ -165,7 +165,7 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
         // Failed to read capabilities from file.
         LOG4CXX_ERROR(logger_, "Failed to read capabilities from file also");
         result_code = result_codes::kGenericError;
-        info = "Invalid response from the the vehicle";
+        info = "Invalid response from the vehicle";
       }
     }
 
