@@ -738,8 +738,13 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
       ApplicationManagerImpl::ApplicationListAccessor accessor;
       if (!accessor.Empty()) {
         app = *(accessor.begin());
-        app_id = app->app_id();
       }
+    }
+    if (!app) {
+      LOG4CXX_DEBUG(logger_, "No registered application was found.");
+      return false;
+    } else {
+      app_id = app->app_id();
     }
 #else
       return false;
