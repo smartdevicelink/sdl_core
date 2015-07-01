@@ -64,12 +64,6 @@ void ReadDIDRequest::Run() {
     return;
   }
 
-  if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
-    SendResponse(false, mobile_apis::Result::REJECTED);
-    LOG4CXX_ERROR(logger_, "Rejected");
-    return;
-  }
-
   if (app->IsCommandLimitsExceeded(
         static_cast<mobile_apis::FunctionID::eType>(function_id()),
         application_manager::TLimitSource::CONFIG_FILE)) {
