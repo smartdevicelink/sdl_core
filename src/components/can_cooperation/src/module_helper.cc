@@ -146,18 +146,19 @@ functional_modules::ProcessResult ProcessSDLActivateApp(
 
             return ProcessResult::PROCESSED;
           }
-        }
-        CANAppExtensionPtr app_ext =
-          AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-            applications[i]->QueryInterface(
-              CANModule::instance()->GetModuleID()));
-        DCHECK(app_ext);
-        if (!app_ext) {
-          continue;
-        }
-        if (applications[i]->hmi_level() == mobile_apis::HMILevel::HMI_LIMITED
-            && app_ext->is_on_driver_device()) {
-          limited_apps.push_back(applications[i]);
+        } else {
+          CANAppExtensionPtr app_ext =
+            AppExtensionPtr::static_pointer_cast<CANAppExtension>(
+              applications[i]->QueryInterface(
+                CANModule::instance()->GetModuleID()));
+          DCHECK(app_ext);
+          if (!app_ext) {
+            continue;
+          }
+          if (applications[i]->hmi_level() == mobile_apis::HMILevel::HMI_LIMITED
+              && app_ext->is_on_driver_device()) {
+            limited_apps.push_back(applications[i]);
+          }
         }
       }
       if (active_app == new_app) {
