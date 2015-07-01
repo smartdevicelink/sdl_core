@@ -116,7 +116,7 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
 
       if (validators::SUCCESS != validation_result) {
         success = false;
-        info = "Invalid response from vehicle.";
+        info = "Invalid response from the vehicle.";
         result_code = result_codes::kGenericError;
       }
     }
@@ -191,6 +191,8 @@ bool GetInteriorVehicleDataCapabiliesRequest::Validate() {
     SendResponse(false, result_codes::kInvalidData,
                  "Mobile request validation failed!");
     return false;
+  } else {
+    message_->set_json_message(MessageHelper::ValueToString(outgoing_json));
   }
 
   return true;
