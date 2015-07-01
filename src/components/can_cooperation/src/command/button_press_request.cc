@@ -99,6 +99,8 @@ bool ButtonPressRequest::Validate() {
     SendResponse(false, result_codes::kInvalidData,
                  "Mobile request validation failed!");
     return false;
+  } else {
+    message_->set_json_message(MessageHelper::ValueToString(outgoing_json));
   }
 
   return true;

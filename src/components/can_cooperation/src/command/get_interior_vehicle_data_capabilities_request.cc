@@ -165,7 +165,7 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
         // Failed to read capabilities from file.
         LOG4CXX_ERROR(logger_, "Failed to read capabilities from file also");
         result_code = result_codes::kGenericError;
-        info = "Invalid response from the vehicle";
+        info = "Invalid response from the the vehicle";
       }
     }
 
@@ -191,6 +191,8 @@ bool GetInteriorVehicleDataCapabiliesRequest::Validate() {
     SendResponse(false, result_codes::kInvalidData,
                  "Mobile request validation failed!");
     return false;
+  } else {
+    message_->set_json_message(MessageHelper::ValueToString(outgoing_json));
   }
 
   return true;
