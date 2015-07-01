@@ -593,7 +593,8 @@ struct HandleModuleTypes {
   explicit HandleModuleTypes(CacheManagerInterface* cache) : cache_(cache) {}
   void operator()(policy_table::ApplicationPolicies::value_type& item) {
     const std::string& app_id = item.first;
-    if (cache_->IsPredataPolicy(app_id) || app_id == kDeviceId) {
+    if (cache_->IsPredataPolicy(app_id) || app_id == kDeviceId
+        || app_id == kPreConsentPassengersRC) {
       LOG4CXX_INFO(logger_, "Clear module types for application " << app_id);
       item.second.moduleType = rpc::Optional<policy_table::ModuleTypes>();
     }
