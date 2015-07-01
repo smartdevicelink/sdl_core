@@ -35,7 +35,7 @@
 
 #include <string>
 #include <sstream>
-
+#include <vector>
 #include "application_manager/application.h"
 #include "application_manager/message.h"
 
@@ -112,6 +112,11 @@ class Service {
    * @param dev_id ID device
    */
   virtual void SetPrimaryDevice(const uint32_t dev_id) = 0;
+
+  /*
+   * Return id of primary device
+   */
+  virtual uint32_t PrimaryDevice() const = 0;
 
   /**
    * Sets mode of remote control (on/off)

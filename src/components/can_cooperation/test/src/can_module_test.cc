@@ -222,6 +222,7 @@ TEST_F(CanModuleTest, IsAppForPluginSuccess) {
   obj[0] = 10;  //  REMOTE_CONTROL
   app_ptr->set_app_types(obj);
   EXPECT_CALL(*mock_service, NotifyHMIAboutHMILevel(app_ptr, _)).Times(1);
+  EXPECT_CALL(*mock_service, PrimaryDevice()).Times(1);
   ASSERT_TRUE(module->IsAppForPlugin(app_ptr));
 }
 
@@ -252,6 +253,52 @@ TEST_F(CanModuleTest, OnAppHMILevelChanged) {
   ON_CALL(*app, name()).WillByDefault(ReturnRef(name));
   EXPECT_CALL(*mock_service, NotifyHMIAboutHMILevel(app_ptr, app_ptr->hmi_level())).Times(1);
   module->OnAppHMILevelChanged(app_ptr, mobile_apis::HMILevel::eType::HMI_FULL);
+}
+
+TEST_F(CanModuleTest, SetDriverDeviceOnRegister) {
+  NiceMock<MockApplicationSomeImpl>* app = new NiceMock<MockApplicationSomeImpl>();
+  application_manager::ApplicationSharedPtr app_ptr(app);
+  smart_objects::SmartObject obj(smart_objects::SmartType::SmartType_Array);
+  obj[0] = 10;
+  app_ptr->set_app_types(obj);
+  app_ptr->set_device(1);
+
+  NiceMock<MockServiceSomeImpl>* mock_service2 = new NiceMock<MockServiceSomeImpl>();
+  mock_service2->set_app(app_ptr);
+  ServicePtr mock_service2_ptr(mock_service2);
+  module->set_service(mock_service2_ptr);
+
+  ON_CALL(*mock_service2, PrimaryDevice()).WillByDefault(Return(1));
+
+  EXPECT_CALL(*mock_service2, NotifyHMIAboutHMILevel(app_ptr, _)).Times(1);
+  EXPECT_CALL(*mock_service2, PrimaryDevice()).Times(1);
+  ASSERT_TRUE(module->IsAppForPlugin(app_ptr));
+  ASSERT_TRUE(application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
+      app_ptr->QueryInterface(module->GetModuleID()))->is_on_driver_device());
+  app_ptr->RemoveExtension(module->GetModuleID());
+}
+
+TEST_F(CanModuleTest, SetDriverDeviceOnRegisterFail) {
+  NiceMock<MockApplicationSomeImpl>* app = new NiceMock<MockApplicationSomeImpl>();
+  application_manager::ApplicationSharedPtr app_ptr(app);
+  smart_objects::SmartObject obj(smart_objects::SmartType::SmartType_Array);
+  obj[0] = 10;
+  app_ptr->set_app_types(obj);
+  app_ptr->set_device(1);
+
+  NiceMock<MockServiceSomeImpl>* mock_service2 = new NiceMock<MockServiceSomeImpl>();
+  mock_service2->set_app(app_ptr);
+  ServicePtr mock_service2_ptr(mock_service2);
+  module->set_service(mock_service2_ptr);
+
+  ON_CALL(*mock_service2, PrimaryDevice()).WillByDefault(Return(0));
+
+  EXPECT_CALL(*mock_service2, NotifyHMIAboutHMILevel(app_ptr, _)).Times(1);
+  EXPECT_CALL(*mock_service2, PrimaryDevice()).Times(1);
+  ASSERT_TRUE(module->IsAppForPlugin(app_ptr));
+  ASSERT_FALSE(application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
+      app_ptr->QueryInterface(module->GetModuleID()))->is_on_driver_device());
+  app_ptr->RemoveExtension(module->GetModuleID());
 }
 
 TEST_F(CanModuleTest, ChangeDriverDevice) {

@@ -114,6 +114,11 @@ class CoreService : public Service {
    */
   virtual void SetPrimaryDevice(const uint32_t dev_id);
 
+  /*
+   * Return id of primary device
+   */
+  uint32_t PrimaryDevice() const;
+
   /**
    * Sets mode of remote control (on/off)
    * @param enabled true if remote control is turned on

@@ -121,7 +121,8 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
   }
 
   msg->set_function_name(MessageHelper::GetMobileAPIName(
-                           static_cast<functional_modules::MobileFunctionID>(msg->function_id())));
+                          static_cast<functional_modules::MobileFunctionID>(
+                            msg->function_id())));
 
   commands::Command* command = MobileCommandFactory::CreateCommand(msg);
   if (command) {
@@ -272,8 +273,9 @@ functional_modules::ProcessResult CANModule::HandleMessage(
       }
 
       int32_t func_id = msg->function_id();
-      std::string func_name = MessageHelper::GetMobileAPIName(
-                                static_cast<functional_modules::MobileFunctionID>(func_id));
+      std::string func_name =
+        MessageHelper::GetMobileAPIName(
+                  static_cast<functional_modules::MobileFunctionID>(func_id));
       msg->set_function_name(func_name);
 
       NotifyMobiles(msg);
@@ -362,6 +364,7 @@ bool CANModule::IsAppForPlugin(
           GetModuleID());
         app->AddExtension(can_app_extension);
         service()->NotifyHMIAboutHMILevel(app, app->hmi_level());
+        PolicyHelper::SetIsAppOnPrimaryDevice(app);
         return true;
       }
     }
