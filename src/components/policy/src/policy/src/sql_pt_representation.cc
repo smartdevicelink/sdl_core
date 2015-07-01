@@ -670,9 +670,9 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     if (!GatherAppType(app_id, &*params.AppHMIType)) {
       return false;
     }
-    /*if (!GatherRequestType(app_id, &*params.RequestType)) {
+    if (!GatherRequestType(app_id, &*params.RequestType)) {
       return false;
-    }*/
+    }
 
     (*policies).apps[app_id] = params;
   }
@@ -821,10 +821,10 @@ bool SQLPTRepresentation::SaveApplicationPoliciesSection(
     return false;
   }
 
-  /*if (!query_delete.Exec(sql_pt::kDeleteRequestType)) {
+  if (!query_delete.Exec(sql_pt::kDeleteRequestType)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from request type.");
     return false;
-  }*/
+  }
 
   // All predefined apps (e.g. default, pre_DataConsent) should be saved first,
   // otherwise another app with the predefined permissions can get incorrect
@@ -903,9 +903,9 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
     return false;
   }
 
-  /*if (!SaveRequestType(app.first, *app.second.RequestType)) {
+  if (!SaveRequestType(app.first, *app.second.RequestType)) {
     return false;
-  }*/
+  }
 
   return true;
 }
