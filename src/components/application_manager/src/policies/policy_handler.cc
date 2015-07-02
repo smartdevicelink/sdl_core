@@ -1427,6 +1427,7 @@ void PolicyHandler::SetPrimaryDevice(const PTString& dev_id) {
 }
 
 uint32_t PolicyHandler::PrimaryDevice() const {
+  POLICY_LIB_CHECK(0);
   PTString device_id = policy_manager_->PrimaryDevice();
   connection_handler::DeviceHandle device_handle;
   if (ApplicationManagerImpl::instance()->connection_handler()
@@ -1459,6 +1460,7 @@ void PolicyHandler::SetRemoteControl(bool enabled) {
 }
 
 bool PolicyHandler::GetRemoteControl() const {
+  POLICY_LIB_CHECK(false);
   return policy_manager_->GetRemoteControl();
 }
 #endif  // SDL_REMOTE_CONTROL
