@@ -1110,6 +1110,20 @@
       <element name="UNKNOWN"/>
       <element name="UNPAIRED"/>
     </enum>
+     <struct name="DeviceInfo">
+      <param name="name" type="String" mandatory="true">
+        <description>The name of the device connected.</description>
+      </param>
+      <param name="id" type="Integer" mandatory="true">
+        <description>The ID of the device connected</description>
+      </param>
+      <param name="transportType" type="Common.TransportType" mandatory="false">
+        <description>The transport type the named-app's-device is connected over HU(BlueTooth, USB or  WiFi). It must be provided in OnAppRegistered and in UpdateDeviceList</description>
+      </param>
+      <param name="isSDLAllowed" type="Boolean" mandatory="false">
+        <description>Sent by SDL in UpdateDeviceList. ’true’ – if device is allowed for PolicyTable Exchange; ‘false’ – if device is NOT allowed for PolicyTable Exchange </description>
+      </param>
+    </struct>
     <struct name="UserFriendlyMessage" scope="internal">
     <param name="messageCode" type="String" mandatory="true"/>
       <param name="ttsString" type="String" mandatory="false"/>
@@ -1516,20 +1530,6 @@
       <param name="trim" type="String" maxlength="500" mandatory="false">
         <description>Trim of the vehicle</description>
         <description>e.g. SE</description>
-      </param>
-    </struct>
-    <struct name="DeviceInfo">
-      <param name="name" type="String" mandatory="true">
-        <description>The name of the device connected.</description>
-      </param>
-      <param name="id" type="Integer" mandatory="true">
-        <description>The ID of the device connected</description>
-      </param>
-      <param name="transportType" type="Common.TransportType" mandatory="false">
-        <description>The transport type the named-app's-device is connected over HU(BlueTooth, USB or  WiFi). It must be provided in OnAppRegistered and in UpdateDeviceList</description>
-      </param>
-      <param name="isSDLAllowed" type="Boolean" mandatory="false">
-        <description>Sent by SDL in UpdateDeviceList. ’true’ – if device is allowed for PolicyTable Exchange; ‘false’ – if device is NOT allowed for PolicyTable Exchange </description>
       </param>
     </struct>
     <!--IVI part-->
