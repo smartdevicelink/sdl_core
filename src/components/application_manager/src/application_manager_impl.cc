@@ -901,7 +901,9 @@ void ApplicationManagerImpl::SendUpdateAppList() {
 
 void ApplicationManagerImpl::RemoveDevice(
     const connection_handler::DeviceHandle& device_handle) {
-  LOG4CXX_INFO(logger_, "device_handle " << device_handle);
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "device_handle " << device_handle);
+  functional_modules::PluginManager::instance()->OnDeviceRemoved(device_handle);
 }
 
 bool ApplicationManagerImpl::IsAudioStreamingAllowed(uint32_t application_key) const {

@@ -31,6 +31,7 @@
  */
 
 #include <dlfcn.h>
+#include <algorithm>
 #include "functional_module/plugin_manager.h"
 #include "functional_module/function_ids.h"
 #include "utils/file_system.h"
@@ -306,6 +307,24 @@ void PluginManager::OnAppHMILevelChanged(
       it->second->OnAppHMILevelChanged(app, old_level);
     }
   }
+}
+
+typedef std::map<ModuleID, ModulePtr>::value_type PluginsValueType;
+struct HandleDeviceRemoved {
+ private:
+  const connection_handler::DeviceHandle& device_;
+ public:
+  explicit HandleDeviceRemoved(const connection_handler::DeviceHandle& device)
+      : device_(device) {}
+  void operator()(PluginsValueType& x) {
+    x.second->OnDeviceRemoved(device_);
+  }
+};
+
+void PluginManager::OnDeviceRemoved(
+    const connection_handler::DeviceHandle& device) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::for_each(plugins_.begin(), plugins_.end(), HandleDeviceRemoved(device));
 }
 
 }  //  namespace functional_modules

@@ -65,6 +65,8 @@ class DriverGenericModuleTest : public GenericModule {
   const Observers& observers() {
     return observers_;
   }
+
+  void OnDeviceRemoved(const connection_handler::DeviceHandle&) {}
 };
 
 }  // namespace functional_modules

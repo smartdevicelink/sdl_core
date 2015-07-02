@@ -99,7 +99,7 @@ class CANModule : public functional_modules::GenericModule,
    */
   virtual void RemoveAppExtension(uint32_t app_id);
 
-  /*
+  /**
    * @brief Check registering app can be handled by plugin
    * @param msg Registration message
    * @param app Application basis already create by Core
@@ -107,13 +107,19 @@ class CANModule : public functional_modules::GenericModule,
   bool IsAppForPlugin(
       application_manager::ApplicationSharedPtr app);
 
-  /*
+  /**
    * @brief Notify about change of HMILevel of plugin's app
    * @param app App with new HMILevel
    * @param old_level Old HMILevel of app
    */
   void OnAppHMILevelChanged(application_manager::ApplicationSharedPtr app,
     mobile_apis::HMILevel::eType old_level);
+
+  /**
+   * Handles removing (disconnecting) device
+   * @param device removed
+   */
+  void OnDeviceRemoved(const connection_handler::DeviceHandle& device);
 
  protected:
   /**

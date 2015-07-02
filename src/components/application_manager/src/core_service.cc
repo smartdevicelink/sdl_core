@@ -131,6 +131,12 @@ void CoreService::SetPrimaryDevice(const uint32_t dev_id) {
 #endif  // SDL_REMOTE_CONTROL
 }
 
+void CoreService::ResetPrimaryDevice() {
+#ifdef SDL_REMOTE_CONTROL
+  policy::PolicyHandler::instance()->ResetPrimaryDevice();
+#endif  // SDL_REMOTE_CONTROL
+}
+
 uint32_t CoreService::PrimaryDevice() const {
 #ifdef SDL_REMOTE_CONTROL
   return policy::PolicyHandler::instance()->PrimaryDevice();

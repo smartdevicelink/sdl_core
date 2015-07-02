@@ -177,11 +177,11 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
     RemoveConnection(*it);
   }
 
-  device_list_.erase(device_info.device_handle());
   sync_primitives::AutoLock lock(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
     connection_handler_observer_->RemoveDevice(device_info.device_handle());
   }
+  device_list_.erase(device_info.device_handle());
 }
 
 void ConnectionHandlerImpl::OnScanDevicesFinished() {
