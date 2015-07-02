@@ -65,12 +65,11 @@
 </enum>
 
 <enum name="TransportType">
-    <description>
-      Lists of the transport types used for device connection to HU.
-    </description>
-    <element name="BLUETOOTH"/>
-    <element name="USB"/>
-    <element name="WIFI"/>
+  <description>Lists of the transport types used for device connection to HU.</description>
+  <element name="BLUETOOTH"/>
+  <element name="USB_IOS"/>
+  <element name="USB_AOA"/>
+  <element name="WIFI"/>
 </enum>
 
 <enum name="ButtonName">
@@ -1308,8 +1307,8 @@
   <param name="name" type="String" mandatory="true">
     <description>The name of the device connected.</description>
   </param>
-  <param name="id" type="Integer" mandatory="true">
-    <description>The ID of the device connected</description>
+  <param name="id" type="String" mandatory="true">
+    <description>The ID of the device connectedi: either hash of device's USB serial number(in case of USB connection) or has of device's MAC address(in case of BlueTooth or WIFI connection</description>
   </param>
   <param name="transportType" type="Common.TransportType" mandatory="false">
     <description>The transport type the named-app's-device is connected over HU(BlueTooth, USB or WiFi). It must be provided in OnAppRegistered and in UpdateDeviceList</description>

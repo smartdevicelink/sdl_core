@@ -388,7 +388,7 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
                   << application_impl.device());
   }
   device_info[strings::name] = device_name;
-  device_info[strings::id] = application_impl.device();
+  device_info[strings::id] = mac_address;
 
   const policy::DeviceConsent device_consent =
       policy::PolicyHandler::instance()->GetUserConsentForDevice(mac_address);
