@@ -563,14 +563,20 @@ mobile_api::HMILevel::eType ApplicationManagerImpl::IsHmiLevelFullAllowed(
   return result;
 }
 
-void ApplicationManagerImpl::ConnectToDevice(uint32_t id) {
+void ApplicationManagerImpl::ConnectToDevice(const std::string& device_mac) {
   // TODO(VS): Call function from ConnectionHandler
   if (!connection_handler_) {
     LOG4CXX_WARN(logger_, "Connection handler is not set.");
     return;
   }
 
-  connection_handler_->ConnectToDevice(id);
+  connection_handler::DeviceHandle handle;
+  if (!connection_handler_->GetDeviceID(device_mac, &handle) ) {
+    LOG4CXX_ERROR(logger_, "Attempt to connect to invalid device with mac:"
+                  << device_mac );
+    return;
+  }
+  connection_handler_->ConnectToDevice(handle);
 }
 
 void ApplicationManagerImpl::OnHMIStartedCooperation() {
