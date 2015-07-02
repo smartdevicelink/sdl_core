@@ -107,6 +107,7 @@ extern const std::string kDeleteRpc;
 extern const std::string kDeleteAppGroup;
 extern const std::string kDeleteAppGroupPrimary;
 extern const std::string kDeleteAppGroupNonPrimary;
+extern const std::string kDeleteModuleTypes;
 extern const std::string kDeleteApplication;
 extern const std::string kDeleteDevice;
 extern const std::string kDeleteAllDevices;

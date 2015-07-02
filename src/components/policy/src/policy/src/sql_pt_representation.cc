@@ -845,6 +845,10 @@ bool SQLPTRepresentation::SaveApplicationPolicies(
     LOG4CXX_WARN(logger_, "Incorrect delete from app_group_non_primary.");
     return false;
   }
+  if (!query_delete.Exec(sql_pt::kDeleteModuleTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from module_type.");
+    return false;
+  }
 #endif  // SDL_REMOTE_CONTROL
   if (!query_delete.Exec(sql_pt::kDeleteApplication)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from application.");

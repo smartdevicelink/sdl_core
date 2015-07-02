@@ -674,6 +674,8 @@ const std::string kDeleteAppGroupPrimary = "DELETE FROM `app_group_primary`";
 
 const std::string kDeleteAppGroupNonPrimary = "DELETE FROM `app_group_non_primary`";
 
+const std::string kDeleteModuleTypes = "DELETE FROM `module_type`";
+
 const std::string kSelectModuleConfig =
   "SELECT `preloaded_pt`, `exchange_after_x_ignition_cycles`, "
   " `exchange_after_x_kilometers`, `exchange_after_x_days`, "
