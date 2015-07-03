@@ -77,6 +77,7 @@ class GetInteriorVehicleDataCapabiliesRequest : public BaseCommandRequest {
 
  protected:
   virtual bool CheckAccess();
+  bool ReadCapabilitiesFromFile();
 };
 
 }  // namespace commands
