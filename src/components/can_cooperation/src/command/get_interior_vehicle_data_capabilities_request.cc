@@ -123,7 +123,6 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
 
     if (!success) {
       //  Try to read capabilities from file.
-      //  TODO(PV): move to separate method
       if (ReadCapabilitiesFromFile()) {
         success = true;
         result_code = result_codes::kSuccess;
