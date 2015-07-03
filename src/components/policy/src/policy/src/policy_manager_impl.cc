@@ -889,6 +889,8 @@ void PolicyManagerImpl::PromoteExistedApplication(
   if (kDeviceAllowed == device_consent
       && cache_->IsPredataPolicy(application_id)) {
     cache_->SetDefaultPolicy(application_id);
+  } else if (cache_->IsDefaultPolicy(application_id)) {
+    cache_->SetDefaultPolicy(application_id);
   }
 }
 
