@@ -44,7 +44,7 @@ namespace validators {
 
 enum ValidationResult {
   SUCCESS,
-  INVALID_DATA,
+  INVALID_DATA
 };
 
 
