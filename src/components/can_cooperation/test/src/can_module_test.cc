@@ -307,6 +307,7 @@ TEST_F(CanModuleTest, ChangeDriverDevice) {
   value[json_keys::kParams] = Json::Value(Json::ValueType::objectValue);
   value[json_keys::kParams][message_params::kDevice] = Json::Value(Json::ValueType::objectValue);
   value[json_keys::kParams][message_params::kDevice][json_keys::kId] = 1;
+  value[json_keys::kParams][message_params::kDevice][message_params::kName] = "1";
   Json::FastWriter writer;
   std::string json_str = writer.write(value);
 
@@ -343,6 +344,7 @@ TEST_F(CanModuleTest, ChangeDriverDeviceOnOther) {
   value[json_keys::kParams] = Json::Value(Json::ValueType::objectValue);
   value[json_keys::kParams][message_params::kDevice] = Json::Value(Json::ValueType::objectValue);
   value[json_keys::kParams][message_params::kDevice][json_keys::kId] = 1;
+  value[json_keys::kParams][message_params::kDevice][message_params::kName] = "1";
   Json::FastWriter writer;
   std::string json_str = writer.write(value);
 
