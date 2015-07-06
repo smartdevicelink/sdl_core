@@ -246,6 +246,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
       } else if (functional_modules::hmi_api::on_reverse_apps_allowing
                  == function_name) {
         if (value.isMember(json_keys::kParams)) {
+          // TODO(VS): move validation to separate class
           if (value[json_keys::kParams].isMember(message_params::kAllowed)
                 && value[json_keys::kParams][message_params::kAllowed].isBool()) {
             PolicyHelper::OnRSDLFunctionalityAllowing(
@@ -259,6 +260,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
       } else if (functional_modules::hmi_api::on_set_drivers_device
           == function_name) {
         if (value.isMember(json_keys::kParams)) {
+          // TODO(VS): move validation to separate class
           if (value[json_keys::kParams].isMember(message_params::kDevice)
             && value[json_keys::kParams][message_params::kDevice].isObject()
             && value[json_keys::kParams][message_params::kDevice].isMember(json_keys::kId)
