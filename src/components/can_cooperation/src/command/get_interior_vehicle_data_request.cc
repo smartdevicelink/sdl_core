@@ -134,8 +134,10 @@ bool GetInteriorVehicleDataRequest::Validate() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   Json::Value json;
+  if (!this->ParseJsonString(&json)) {
+    return false;
+  }
 
-  json = MessageHelper::StringToValue(message_->json_message());
   Json::Value outgoing_json;
 
   if (validators::ValidationResult::SUCCESS !=

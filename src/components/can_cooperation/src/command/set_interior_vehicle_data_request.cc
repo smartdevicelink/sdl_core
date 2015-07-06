@@ -112,8 +112,10 @@ void SetInteriorVehicleDataRequest::OnEvent(
 bool SetInteriorVehicleDataRequest::Validate() {
 
   Json::Value json;
+  if (!this->ParseJsonString(&json)) {
+    return false;
+  }
 
-  json = MessageHelper::StringToValue(message_->json_message());
   Json::Value outgoing_json;
 
   if (validators::ValidationResult::SUCCESS !=

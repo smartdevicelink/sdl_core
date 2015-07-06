@@ -143,6 +143,13 @@ class BaseCommandRequest : public Command,
    */
   virtual bool Validate() = 0;
 
+  /*
+   * @brief Parses incoming string into Json
+   * @param parsed_mgs Resulting json object (must be valid pointer)
+   * @returns True if json string was valid false otherwise.
+   */
+  virtual bool ParseJsonString(Json::Value* parsed_msg);
+
   /**
    * @brief Interface method that is called whenever new event received
    * @param event The received event
