@@ -411,7 +411,8 @@ void BaseCommandRequest::ProcessAccessResponse(
   bool allowed = ParseResultCode(value, result_code, info);
   // Check if valid successfull message has arrived
   if (allowed) {
-    if (value[kResult].isMember(message_params::kAllowed)) {
+    if (value[kResult].isMember(message_params::kAllowed)
+         && value[kResult][message_params::kAllowed].isBool()) {
       allowed = value[kResult][message_params::kAllowed].asBool();
     } else {
       allowed = false;
