@@ -130,6 +130,21 @@ void  BaseCommandRequest::SendRequest(const char* function_id,
   }
 }
 
+bool BaseCommandRequest::ParseJsonString(Json::Value* parsed_msg) {
+  DCHECK(parsed_msg);
+  if (!parsed_msg) return false;
+
+  (*parsed_msg) = MessageHelper::StringToValue(message_->json_message());
+  if (Json::ValueType::nullValue == parsed_msg->type()) {
+    LOG4CXX_ERROR(logger_, "Invalid JSON received in " <<
+      message_->json_message());
+    SendResponse(false, result_codes::kInvalidData,
+                 "Mobile request validation failed!");
+    return false;
+  }
+  return true;
+}
+
 const char* BaseCommandRequest::GetMobileResultCode(
   const hmi_apis::Common_Result::eType& hmi_code) const {
   switch (hmi_code) {
