@@ -259,7 +259,12 @@ functional_modules::ProcessResult CANModule::HandleMessage(
       } else if (functional_modules::hmi_api::on_set_drivers_device
           == function_name) {
         if (value.isMember(json_keys::kParams)) {
-          if (value[json_keys::kParams].isMember(message_params::kDevice)) {
+          if (value[json_keys::kParams].isMember(message_params::kDevice)
+            && value[json_keys::kParams][message_params::kDevice].isObject()
+            && value[json_keys::kParams][message_params::kDevice].isMember(json_keys::kId)
+            && value[json_keys::kParams][message_params::kDevice][json_keys::kId].isUInt()
+            && value[json_keys::kParams][message_params::kDevice].isMember(message_params::kName)
+            && value[json_keys::kParams][message_params::kDevice][message_params::kName].isString()) {
             PolicyHelper::SetPrimaryDevice(
               value[json_keys::kParams][message_params::kDevice]
               [json_keys::kId].asUInt());

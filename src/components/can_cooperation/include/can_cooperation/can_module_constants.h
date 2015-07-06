@@ -120,7 +120,6 @@ const char kAddress[]        = "address";
 // Location struct
 
 // SongInfo struct
-const char kName[]     = "name";
 const char kArtist[]   = "artist";
 const char kGenre[]    = "genre";
 const char kAlbum[]    = "album";
@@ -184,6 +183,7 @@ const char kAllowed[]    = "allowed";
 
 // RC.OnSetDriversDevice notification
 const char kDevice[]     = "device";
+const char kName[]       = "name";
 // RC.OnSetDriversDevice notification
 
 // ButtonPress request
