@@ -115,7 +115,7 @@ class GenericModule {
    */
   virtual void RemoveAppExtension(uint32_t app_id) = 0;
 
-  /*
+  /**
    * @brief Check registering app can be handled by plugin
    * @param msg Registration message
    * @param app Application basis already create by Core
@@ -123,7 +123,7 @@ class GenericModule {
   virtual bool IsAppForPlugin(
       application_manager::ApplicationSharedPtr app) = 0;
 
-  /*
+  /**
    * @brief Notify about change of HMILevel of plugin's app
    * @param app App with new HMILevel
    * @param old_level Old HMILevel of app
@@ -131,6 +131,13 @@ class GenericModule {
   virtual void OnAppHMILevelChanged(
     application_manager::ApplicationSharedPtr app,
     mobile_apis::HMILevel::eType old_level) = 0;
+
+  /**
+   * Handles removing (disconnecting) device
+   * @param device removed
+   */
+  virtual void OnDeviceRemoved(
+      const connection_handler::DeviceHandle& device) = 0;
 
  protected:
   explicit GenericModule(ModuleID module_id);

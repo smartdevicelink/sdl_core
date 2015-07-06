@@ -114,7 +114,12 @@ class CoreService : public Service {
    */
   virtual void SetPrimaryDevice(const uint32_t dev_id);
 
-  /*
+  /**
+   * Resets driver's device
+   */
+  virtual void ResetPrimaryDevice();
+
+  /**
    * Return id of primary device
    */
   uint32_t PrimaryDevice() const;
@@ -125,7 +130,7 @@ class CoreService : public Service {
    */
   virtual void SetRemoteControl(bool enabled);
 
-  /*
+  /**
    * @brief Is Remote Control allowed by Policy and User
    */
   virtual bool IsRemoteControlAllowed() const;
@@ -170,7 +175,7 @@ class CoreService : public Service {
    */
   virtual void SubscribeToHMINotification(const std::string& hmi_notification);
 
-  /*
+  /**
    * @brief Change hmi level of app and notify it
    * @param app Application to be changed and notified
    * @param level New HMI level of app
@@ -178,7 +183,7 @@ class CoreService : public Service {
   void ChangeNotifyHMILevel(ApplicationSharedPtr app,
       mobile_apis::HMILevel::eType level);
 
-  /*
+  /**
    * @brief Notify HMI about app changing HMI Level
    * only NONE, BACKGROUND and LIMITED levels are sent
    * @param app Application to be changed and notified

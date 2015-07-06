@@ -183,6 +183,7 @@ class PolicyManagerImpl : public PolicyManager {
     virtual void ResetAccess(const PTString& app_id);
     virtual void ResetAccessByModule(const PTString& module);
     virtual void SetPrimaryDevice(const PTString& dev_id);
+    virtual void ResetPrimaryDevice();
     virtual PTString PrimaryDevice() const;
     virtual void SetRemoteControl(bool enabled);
     virtual bool GetRemoteControl() const;

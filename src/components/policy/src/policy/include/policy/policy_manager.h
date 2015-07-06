@@ -459,6 +459,11 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     virtual void SetPrimaryDevice(const PTString& dev_id) = 0;
 
     /**
+     * Resets driver's device
+     */
+    virtual void ResetPrimaryDevice() = 0;
+
+    /**
      * Gets current primary device
      * @return ID device
      */

@@ -135,6 +135,11 @@ class PolicyHandler :
    */
   void SetPrimaryDevice(const PTString& dev_id);
 
+  /**
+   * Resets driver's device
+   */
+  void ResetPrimaryDevice();
+
   /*
    * Return id of primary device
    */

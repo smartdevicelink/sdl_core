@@ -381,5 +381,14 @@ void CANModule::OnAppHMILevelChanged(
   service()->NotifyHMIAboutHMILevel(app, app->hmi_level());
 }
 
+void CANModule::OnDeviceRemoved(
+    const connection_handler::DeviceHandle& device) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  bool is_driver = service()->PrimaryDevice() == device;
+  if (is_driver) {
+    service()->ResetPrimaryDevice();
+  }
+}
+
 }  //  namespace can_cooperation
 

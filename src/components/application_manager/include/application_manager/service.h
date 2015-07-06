@@ -113,7 +113,12 @@ class Service {
    */
   virtual void SetPrimaryDevice(const uint32_t dev_id) = 0;
 
-  /*
+  /**
+   * Resets driver's device
+   */
+  virtual void ResetPrimaryDevice() = 0;
+
+  /**
    * Return id of primary device
    */
   virtual uint32_t PrimaryDevice() const = 0;
@@ -124,7 +129,7 @@ class Service {
    */
   virtual void SetRemoteControl(bool enabled) = 0;
 
-  /*
+  /**
    * @brief Is Remote Control allowed by Policy and User
    */
   virtual bool IsRemoteControlAllowed() const = 0;
@@ -155,7 +160,7 @@ class Service {
    */
   virtual uint32_t GetNextCorrelationID() = 0;
 
-  /*
+  /**
    * @brief Returns all applications related to plugin
    * @param uid ID provided by plugin to its extension to app.
    * @return List with shared pointers to applications
@@ -170,7 +175,7 @@ class Service {
   virtual void SubscribeToHMINotification(
       const std::string& hmi_notification) = 0;
 
-  /*
+  /**
    * @brief Change hmi level of app and notify it
    * @param app Application to be changed and notified
    * @param level New HMI level of app
@@ -178,7 +183,7 @@ class Service {
   virtual void ChangeNotifyHMILevel(ApplicationSharedPtr app,
       mobile_apis::HMILevel::eType level) = 0;
 
-  /*
+  /**
    * @brief Notify HMI about app changing HMI Level
    * only NONE, BACKGROUND and LIMITED levels are sent
    * @param app Application to be changed and notified
@@ -190,7 +195,7 @@ class Service {
 
 typedef utils::SharedPtr<Service> ServicePtr;
 
-/*
+/**
  * @brief Helper function with smart objects.
  * @param data Pointer to SmartObject for convertion
  */

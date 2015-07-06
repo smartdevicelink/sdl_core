@@ -65,14 +65,14 @@ class PluginManager : public utils::Singleton<PluginManager>,
    */
   void RemoveAppExtension(uint32_t app_id);
 
-  /*
+  /**
    * @brief Check if app cooperates with one or more plugins, init it
    * inside plugin accordingly if needed.
    * @param app Application in question.
    */
   bool IsAppForPlugins(application_manager::ApplicationSharedPtr app);
 
-  /*
+  /**
    * @brief Notify plugins about change of HMILevel of app
    * if app is related to plugin
    * @param app App with new HMILevel
@@ -80,6 +80,12 @@ class PluginManager : public utils::Singleton<PluginManager>,
    */
   void OnAppHMILevelChanged(application_manager::ApplicationSharedPtr app,
     mobile_apis::HMILevel::eType old_level);
+
+  /**
+   * Handles removing (disconnecting) device
+   * @param device removed
+   */
+  void OnDeviceRemoved(const connection_handler::DeviceHandle& device);
 
  private:
   PluginManager();
