@@ -83,7 +83,7 @@ ValidationResult ModuleDataValidator::Validate(const Json::Value& json,
                                               outgoing_json[kRadioControlData]);
   } else {
     if (enums_value::kRadio == outgoing_json[kModuleType].asString()) {
-      LOG4CXX_ERROR(logger_, "Incorrect combination of params (like RADIO with ClimateData)" );
+      LOG4CXX_ERROR(logger_, "Radio control data missed!" );
       return ValidationResult::INVALID_DATA;
     }
   }
@@ -96,6 +96,11 @@ ValidationResult ModuleDataValidator::Validate(const Json::Value& json,
     result = ClimateControlDataValidator::instance()->Validate(
                                              json[kClimateControlData],
                                              outgoing_json[kClimateControlData]);
+  } else {
+    if (enums_value::kClimate == outgoing_json[kModuleType].asString()) {
+      LOG4CXX_ERROR(logger_, "Climate control data missed!" );
+      return ValidationResult::INVALID_DATA;
+    }
   }
 
   return result;

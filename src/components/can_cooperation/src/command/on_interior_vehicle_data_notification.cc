@@ -96,7 +96,7 @@ bool OnInteriorVehicleDataNotification::Validate() {
       Validate(json)) {
     msg->set_json_message(json);
   } else {
-    LOG4CXX_INFO(logger_, "HMI notification validation failed!");
+    LOG4CXX_INFO(logger_, "Invalid notification from the vehicle!");
     return false;
   }
 
