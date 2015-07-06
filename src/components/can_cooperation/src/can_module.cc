@@ -246,7 +246,8 @@ functional_modules::ProcessResult CANModule::HandleMessage(
       } else if (functional_modules::hmi_api::on_reverse_apps_allowing
                  == function_name) {
         if (value.isMember(json_keys::kParams)) {
-          if (value[json_keys::kParams].isMember(message_params::kAllowed)) {
+          if (value[json_keys::kParams].isMember(message_params::kAllowed)
+                && value[json_keys::kParams][message_params::kAllowed].isBool()) {
             PolicyHelper::OnRSDLFunctionalityAllowing(
               value[json_keys::kParams][message_params::kAllowed].asBool());
           } else {
