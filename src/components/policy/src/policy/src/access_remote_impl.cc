@@ -384,10 +384,8 @@ bool AccessRemoteImpl::GetPermissionsForApp(const std::string &device_id,
 
 std::ostream& operator <<(std::ostream& output,
                           const FunctionalGroupIDs& types) {
-  for (FunctionalGroupIDs::const_iterator i = types.begin(); i != types.end();
-      ++i) {
-    output << *i << " ";
-  }
+  std::copy(types.begin(), types.end(),
+      std::ostream_iterator<FunctionalGroupIDs::value_type>(output, " "));
   return output;
 }
 
