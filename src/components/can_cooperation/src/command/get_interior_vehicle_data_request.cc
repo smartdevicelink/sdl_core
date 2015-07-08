@@ -64,7 +64,7 @@ void GetInteriorVehicleDataRequest::Execute() {
   Json::Reader reader;
   reader.parse(message_->json_message(), params);
 
-  if (params.isMember(kSubscribe)){
+  if (IsMember(params, kSubscribe)){
     application_manager::ApplicationSharedPtr app =
         service_->GetApplication(message_->connection_key());
 
@@ -108,7 +108,7 @@ void GetInteriorVehicleDataRequest::OnEvent(
     validators::ValidationResult validation_result = validators::SUCCESS;
 
     if (success) {
-      if (value[kResult].isMember(kModuleData)) {
+      if (IsMember(value[kResult], kModuleData)) {
         validation_result =
             validators::ModuleDataValidator::instance()->Validate(
                                               value[kResult][kModuleData],

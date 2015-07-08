@@ -280,16 +280,16 @@ bool BaseCommandRequest::ParseResultCode(const Json::Value& value,
   result_code = result_codes::kInvalidData;
   info = "";
 
-  if (value.isMember(kResult) && value[kResult].isMember(kCode)) {
+  if (IsMember(value, kResult) && IsMember(value[kResult], kCode)) {
     result_code = GetMobileResultCode(
                     static_cast<hmi_apis::Common_Result::eType>(
                       value[kResult][kCode].asInt()));
-  } else if (value.isMember(kError) && value[kError].isMember(kCode)) {
+  } else if (IsMember(value, kError) && IsMember(value[kError], kCode)) {
     result_code = GetMobileResultCode(
                     static_cast<hmi_apis::Common_Result::eType>(
                       value[kError][kCode].asInt()));
 
-    if (value[kError].isMember(kMessage)) {
+    if (IsMember(value[kError], kMessage)) {
       info = value[kError][kMessage].asCString();
     }
   }
@@ -426,8 +426,8 @@ void BaseCommandRequest::ProcessAccessResponse(
   bool allowed = ParseResultCode(value, result_code, info);
   // Check if valid successfull message has arrived
   if (allowed) {
-    if (value[kResult].isMember(message_params::kAllowed)
-         && value[kResult][message_params::kAllowed].isBool()) {
+    if (IsMember(value[kResult], message_params::kAllowed)
+        && value[kResult][message_params::kAllowed].isBool()) {
       allowed = value[kResult][message_params::kAllowed].asBool();
     } else {
       allowed = false;

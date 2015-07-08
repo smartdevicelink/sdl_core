@@ -33,6 +33,7 @@
 #include "can_cooperation/validators/set_interior_vehicle_data_request_validator.h"
 #include "can_cooperation/validators/struct_validators/module_data_validator.h"
 #include "can_cooperation/can_module_constants.h"
+#include "can_cooperation/message_helper.h"
 
 namespace can_cooperation {
 
@@ -53,7 +54,7 @@ ValidationResult SetInteriorVehicleDataRequestValidator::Validate(
 
   ValidationResult result;
 
-  if (json.isMember(kModuleData)) {
+  if (IsMember(json, kModuleData)) {
     result = ModuleDataValidator::instance()->
         Validate(json[kModuleData], outgoing_json[kModuleData]);
   } else {

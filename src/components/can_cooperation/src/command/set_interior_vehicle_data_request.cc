@@ -87,7 +87,7 @@ void SetInteriorVehicleDataRequest::OnEvent(
     validators::ValidationResult validation_result = validators::SUCCESS;
 
     if (success) {
-      if (value[kResult].isMember(kModuleData)) {
+      if (IsMember(value[kResult], kModuleData)) {
         validation_result =
             validators::ModuleDataValidator::instance()->Validate(
                                               value[kResult][kModuleData],

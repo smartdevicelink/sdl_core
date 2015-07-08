@@ -35,6 +35,7 @@
 #include "can_cooperation/validators/struct_validators/radio_control_data_validator.h"
 #include "can_cooperation/validators/struct_validators/climate_control_data_validator.h"
 #include "can_cooperation/can_module_constants.h"
+#include "can_cooperation/message_helper.h"
 
 namespace can_cooperation {
 
@@ -65,7 +66,7 @@ ValidationResult ModuleDataValidator::Validate(const Json::Value& json,
     return result;
   }
 
-  if (json.isMember(kModuleZone)) {
+  if (IsMember(json, kModuleZone)) {
     result = InteriorZoneValidator::instance()->Validate(json[kModuleZone],
                                                     outgoing_json[kModuleZone]);
   } else {
@@ -77,7 +78,7 @@ ValidationResult ModuleDataValidator::Validate(const Json::Value& json,
     return result;
   }
 
-  if (json.isMember(kRadioControlData)) {
+  if (IsMember(json, kRadioControlData)) {
     result = RadioControlDataValidator::instance()->Validate(
                                               json[kRadioControlData],
                                               outgoing_json[kRadioControlData]);
@@ -92,7 +93,7 @@ ValidationResult ModuleDataValidator::Validate(const Json::Value& json,
     return result;
   }
 
-  if (json.isMember(kClimateControlData)) {
+  if (IsMember(json, kClimateControlData)) {
     result = ClimateControlDataValidator::instance()->Validate(
                                              json[kClimateControlData],
                                              outgoing_json[kClimateControlData]);

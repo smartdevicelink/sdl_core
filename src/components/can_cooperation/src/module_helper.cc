@@ -36,6 +36,7 @@
 #include "can_cooperation/can_app_extension.h"
 #include "application_manager/message.h"
 #include "interfaces/HMI_API.h"
+#include "can_cooperation/message_helper.h"
 
 namespace can_cooperation {
 
@@ -77,8 +78,8 @@ application_manager::MessagePtr ResponseToHMI(unsigned int id,
 
 ProcessResult ProcessOnAppDeactivation(
   const Json::Value& value) {
-  if (value.isMember(json_keys::kParams)
-      && value[json_keys::kParams].isMember(message_params::kHMIAppID)) {
+  if (IsMember(value, json_keys::kParams)
+      && IsMember(value[json_keys::kParams], message_params::kHMIAppID)) {
     uint32_t hmi_app_id =
       value[json_keys::kParams][message_params::kHMIAppID].asUInt();
     typedef std::vector<application_manager::ApplicationSharedPtr> AppList;
@@ -111,8 +112,8 @@ ProcessResult ProcessOnAppDeactivation(
 
 functional_modules::ProcessResult ProcessSDLActivateApp(
   const Json::Value& value) {
-  if (value.isMember(json_keys::kParams)
-      && value[json_keys::kParams].isMember(message_params::kHMIAppID)) {
+  if (IsMember(value, json_keys::kParams)
+      && IsMember(value[json_keys::kParams], message_params::kHMIAppID)) {
     uint32_t hmi_app_id =
       value[json_keys::kParams][message_params::kHMIAppID].asUInt();
     typedef std::vector<application_manager::ApplicationSharedPtr> AppList;

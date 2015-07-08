@@ -33,6 +33,7 @@
 #include "can_cooperation/validators/get_interior_vehicle_data_capabilities_request_validator.h"
 #include "can_cooperation/validators/struct_validators/interior_zone_validator.h"
 #include "can_cooperation/can_module_constants.h"
+#include "can_cooperation/message_helper.h"
 
 namespace can_cooperation {
 
@@ -66,7 +67,7 @@ ValidationResult GetInteriorVehicleDataCapabilitiesRequestValidator::Validate(
     return result;
   }
 
-  if (json.isMember(kZone)) {
+  if (IsMember(json, kZone)) {
     result = InteriorZoneValidator::instance()->Validate(json[kZone],
                                                     outgoing_json[kZone]);
   }
