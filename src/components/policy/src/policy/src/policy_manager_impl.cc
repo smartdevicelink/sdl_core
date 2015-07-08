@@ -1097,6 +1097,8 @@ void PolicyManagerImpl::OnChangedPrimaryDevice(
   if (!access_remote_->IsPrimaryDevice(device_id)) {
     std::string default_hmi;
     if (GetDefaultHmi(application_id, &default_hmi)) {
+      Subject who = { device_id, application_id };
+      access_remote_->Reset(who);
       listener()->OnUpdateHMILevel(application_id, default_hmi);
     } else {
       LOG4CXX_WARN(
@@ -1131,6 +1133,8 @@ void PolicyManagerImpl::OnChangedRemoteControl(
   if (!access_remote_->IsEnabled()) {
     std::string default_hmi;
     if (GetDefaultHmi(application_id, &default_hmi)) {
+      Subject who = { device_id, application_id };
+      access_remote_->Reset(who);
       listener()->OnUpdateHMILevel(application_id, default_hmi);
     } else {
       LOG4CXX_WARN(
