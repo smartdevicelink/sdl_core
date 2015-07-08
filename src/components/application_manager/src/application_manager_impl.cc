@@ -357,18 +357,39 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
 ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   const utils::SharedPtr<smart_objects::SmartObject>&
   request_for_registration) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  smart_objects::SmartObject& message = *request_for_registration;
+  uint32_t connection_key =
+      message[strings::params][strings::connection_key].asInt();
+
+  // app_id is SDL "internal" ID
+  // original app_id can be gotten via ApplicationImpl::policy_app_id()
+  uint32_t app_id = 0;
+  std::list<int32_t> sessions_list;
+  uint32_t device_id = 0;
+
+  DCHECK_OR_RETURN(connection_handler_, ApplicationSharedPtr());
+  if (connection_handler_->GetDataOnSessionKey(connection_key, &app_id,
+      &sessions_list, &device_id) == -1) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to create application: no connection info.");
+    utils::SharedPtr<smart_objects::SmartObject> response(
+      MessageHelper::CreateNegativeResponse(
+        connection_key, mobile_apis::FunctionID::RegisterAppInterfaceID,
+        message[strings::params][strings::correlation_id].asUInt(),
+        mobile_apis::Result::GENERIC_ERROR));
+    ManageMobileCommand(response);
+    return ApplicationSharedPtr();
+  }
 
   LOG4CXX_DEBUG(logger_, "Restarting application list update timer");
   policy::PolicyHandler::instance()->OnAppsSearchStarted();
   uint32_t timeout = profile::Profile::instance()->application_list_update_timeout();
   application_list_update_timer_->start(timeout);
 
-  smart_objects::SmartObject& message = *request_for_registration;
-  uint32_t connection_key =
-    message[strings::params][strings::connection_key].asInt();
-
   if (false == is_all_apps_allowed_) {
-    LOG4CXX_INFO(logger_,
+    LOG4CXX_WARN(logger_,
                  "RegisterApplication: access to app's disabled by user");
     utils::SharedPtr<smart_objects::SmartObject> response(
       MessageHelper::CreateNegativeResponse(
@@ -377,32 +398,6 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
         mobile_apis::Result::DISALLOWED));
     ManageMobileCommand(response);
     return ApplicationSharedPtr();
-  }
-
-  // app_id is SDL "internal" ID
-  // original app_id can be gotten via ApplicationImpl::mobile_app_id()
-  uint32_t app_id = 0;
-  std::list<int32_t> sessions_list;
-  uint32_t device_id = 0;
-
-  if (connection_handler_) {
-    connection_handler::ConnectionHandlerImpl* con_handler_impl =
-      static_cast<connection_handler::ConnectionHandlerImpl*>(
-        connection_handler_);
-
-    if (con_handler_impl->GetDataOnSessionKey(connection_key, &app_id,
-        &sessions_list, &device_id)
-        == -1) {
-      LOG4CXX_ERROR(logger_,
-                    "Failed to create application: no connection info.");
-      utils::SharedPtr<smart_objects::SmartObject> response(
-        MessageHelper::CreateNegativeResponse(
-          connection_key, mobile_apis::FunctionID::RegisterAppInterfaceID,
-          message[strings::params][strings::correlation_id].asUInt(),
-          mobile_apis::Result::GENERIC_ERROR));
-      ManageMobileCommand(response);
-      return ApplicationSharedPtr();
-    }
   }
 
   smart_objects::SmartObject& params = message[strings::msg_params];
@@ -474,15 +469,13 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
       message[strings::params][strings::protocol_version].asInt());
   application->set_protocol_version(protocol_version);
 
-  if (connection_handler_) {
-    if (ProtocolVersion::kUnknownProtocol != protocol_version) {
-      connection_handler_->BindProtocolVersionWithSession(
-          connection_key, static_cast<uint8_t>(protocol_version));
-    }
-    if (protocol_version >= ProtocolVersion::kV3 &&
-            profile::Profile::instance()->heart_beat_timeout() > 0) {
-      connection_handler_->StartSessionHeartBeat(connection_key);
-    }
+  if (ProtocolVersion::kUnknownProtocol != protocol_version) {
+    connection_handler_->BindProtocolVersionWithSession(
+        connection_key, static_cast<uint8_t>(protocol_version));
+  }
+  if (protocol_version >= ProtocolVersion::kV3 &&
+          profile::Profile::instance()->heart_beat_timeout() > 0) {
+    connection_handler_->StartSessionHeartBeat(connection_key);
   }
 
   // Keep HMI add id in case app is present in "waiting for registration" list
