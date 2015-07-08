@@ -131,7 +131,7 @@ TEST(AccessRemoteImplTest, CheckDisallowed) {
   Object what = { policy_table::MT_RADIO };
 
   access_remote.Allow(who, what);
-  EXPECT_EQ(TypeAccess::kDisallowed, access_remote.Check(who1, what));
+  EXPECT_EQ(TypeAccess::kManual, access_remote.Check(who1, what));
 
   access_remote.Reset(who);
   access_remote.Deny(who1, what);

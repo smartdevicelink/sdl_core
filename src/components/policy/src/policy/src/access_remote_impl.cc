@@ -168,18 +168,8 @@ TypeAccess AccessRemoteImpl::Check(const Subject& who,
           logger_,
           "Subject " << who << " has permissions " << ret << " to object " << what);
     } else {
-      // Look for somebody is who controls this object
-      j = std::find_if(row.begin(), row.end(),
-                       IsTypeAccess(TypeAccess::kAllowed));
-      if (j != row.end()) {
-        // Someone controls this object
-        LOG4CXX_TRACE(logger_, "Someone controls " << what);
-        ret = TypeAccess::kDisallowed;
-      } else {
-        // Nobody controls this object
-        LOG4CXX_TRACE(logger_, "Nobody controls " << what);
-        ret = TypeAccess::kManual;
-      }
+      LOG4CXX_TRACE(logger_, who << " needs driver permission for " << what);
+      ret = TypeAccess::kManual;
     }
   } else {
     // Nobody controls this object
