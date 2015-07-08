@@ -292,7 +292,7 @@ ConnectionHandle Connection::connection_handle() const {
   return connection_handle_;
 }
 
-DeviceHandle Connection::connection_device_handle() {
+DeviceHandle Connection::connection_device_handle() const {
   return connection_device_handle_;
 }
 
