@@ -981,11 +981,11 @@ TypeAccess PolicyManagerImpl::CheckAccess(
   if (is_valid && access_remote_->CheckModuleType(app_id, module_type)) {
     std::string dev_id = GetCurrentDeviceId(app_id);
     Subject who = {dev_id, app_id};
-    Object what = {module_type};
+    Object what = {module_type, zone};
     if (access_remote_->IsPrimaryDevice(who.dev_id)) {
       return TryOccupy(who, what);
     } else {
-      return CheckDriverConsent(who, what, zone, rpc, params);
+      return CheckDriverConsent(who, what, rpc, params);
     }
   }
   LOG4CXX_DEBUG(logger_, TypeAccess::kDisallowed);
@@ -1007,15 +1007,14 @@ TypeAccess PolicyManagerImpl::TryOccupy(const Subject& who,
 }
 
 TypeAccess PolicyManagerImpl::CheckDriverConsent(
-    const Subject& who, const Object& what, const SeatLocation& zone,
-    const std::string& rpc, const RemoteControlParams& params) {
+    const Subject& who, const Object& what, const std::string& rpc,
+    const RemoteControlParams& params) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!access_remote_->IsEnabled()) {
     return TypeAccess::kDisallowed;
   }
 
-  TypeAccess access = access_remote_->CheckParameters(what.module, zone,
-                                                      rpc, params);
+  TypeAccess access = access_remote_->CheckParameters(what, rpc, params);
   if (access == TypeAccess::kManual) {
     return access_remote_->Check(who, what);
   }

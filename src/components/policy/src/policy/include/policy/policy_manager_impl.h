@@ -295,7 +295,6 @@ private:
 #ifdef SDL_REMOTE_CONTROL
     TypeAccess TryOccupy(const Subject& who, const Object& what);
     TypeAccess CheckDriverConsent(const Subject& who, const Object& what,
-                                  const SeatLocation& zone,
                                   const std::string& rpc,
                                   const RemoteControlParams& params);
 

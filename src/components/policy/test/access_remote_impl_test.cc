@@ -38,7 +38,8 @@ namespace policy {
 TEST(AccessRemoteImplTest, Allow) {
   AccessRemoteImpl access_remote;
   Subject who = { "dev1", "12345" };
-  Object what = { policy_table::MT_RADIO };
+  SeatLocation zone = { 0, 0, 0 };
+  Object what = { policy_table::MT_RADIO, zone };
   access_remote.Allow(who, what);
   AccessRemoteImpl::AccessControlList::const_iterator i = access_remote.acl_
       .find(what);
@@ -52,8 +53,9 @@ TEST(AccessRemoteImplTest, KeyMapTest) {
   // Testing operator < to use as key of map
   AccessRemoteImpl access_remote;
   Subject who = { "dev1", "12345" };
-  Object what1 = { policy_table::MT_RADIO };
-  Object what2 = { policy_table::MT_CLIMATE };
+  SeatLocation zone = { 0, 0, 0 };
+  Object what1 = { policy_table::MT_RADIO, zone };
+  Object what2 = { policy_table::MT_CLIMATE, zone };
   access_remote.Allow(who, what1);
   access_remote.Allow(who, what2);
   ASSERT_EQ(2, access_remote.acl_.size());
@@ -62,7 +64,8 @@ TEST(AccessRemoteImplTest, KeyMapTest) {
 TEST(AccessRemoteImplTest, Deny) {
   AccessRemoteImpl access_remote;
   Subject who = { "dev1", "12345" };
-  Object what = { policy_table::MT_RADIO };
+  SeatLocation zone = { 0, 0, 0 };
+  Object what = { policy_table::MT_RADIO, zone };
   access_remote.Deny(who, what);
   AccessRemoteImpl::AccessControlList::const_iterator i = access_remote.acl_
       .find(what);
@@ -75,7 +78,8 @@ TEST(AccessRemoteImplTest, Deny) {
 TEST(AccessRemoteImplTest, ChangeAccess) {
   AccessRemoteImpl access_remote;
   Subject who = { "dev1", "12345" };
-  Object what = { policy_table::MT_RADIO };
+  SeatLocation zone = { 0, 0, 0 };
+  Object what = { policy_table::MT_RADIO, zone };
   access_remote.Allow(who, what);
   ASSERT_EQ(TypeAccess::kAllowed, access_remote.acl_[what][who]);
   access_remote.Deny(who, what);
@@ -87,8 +91,9 @@ TEST(AccessRemoteImplTest, ChangeAccess) {
 TEST(AccessRemoteImplTest, ResetBySubject) {
   AccessRemoteImpl access_remote;
   Subject who = { "dev1", "12345" };
-  Object what1 = { policy_table::MT_RADIO };
-  Object what2 = { policy_table::MT_CLIMATE };
+  SeatLocation zone = { 0, 0, 0 };
+  Object what1 = { policy_table::MT_RADIO, zone };
+  Object what2 = { policy_table::MT_CLIMATE, zone };
   access_remote.Allow(who, what1);
   access_remote.Deny(who, what2);
   ASSERT_EQ(2, access_remote.acl_.size());
@@ -105,7 +110,8 @@ TEST(AccessRemoteImplTest, ResetByObject) {
   AccessRemoteImpl access_remote;
   Subject who1 = { "dev1", "12345" };
   Subject who2 = { "dev2", "123456" };
-  Object what = { policy_table::MT_RADIO };
+  SeatLocation zone = { 0, 0, 0 };
+  Object what = { policy_table::MT_RADIO, zone };
   access_remote.Allow(who1, what);
   access_remote.Deny(who2, what);
   ASSERT_EQ(1, access_remote.acl_.size());
@@ -118,7 +124,8 @@ TEST(AccessRemoteImplTest, ResetByObject) {
 TEST(AccessRemoteImplTest, CheckAllowed) {
   AccessRemoteImpl access_remote;
   Subject who = { "dev1", "12345" };
-  Object what = { policy_table::MT_RADIO };
+  SeatLocation zone = { 0, 0, 0 };
+  Object what = { policy_table::MT_RADIO, zone };
   access_remote.Allow(who, what);
 
   EXPECT_EQ(TypeAccess::kAllowed, access_remote.Check(who, what));
@@ -128,7 +135,8 @@ TEST(AccessRemoteImplTest, CheckDisallowed) {
   AccessRemoteImpl access_remote;
   Subject who = { "dev1", "12345" };
   Subject who1 = { "dev1", "123456" };
-  Object what = { policy_table::MT_RADIO };
+  SeatLocation zone = { 0, 0, 0 };
+  Object what = { policy_table::MT_RADIO, zone };
 
   access_remote.Allow(who, what);
   EXPECT_EQ(TypeAccess::kManual, access_remote.Check(who1, what));
@@ -142,7 +150,8 @@ TEST(AccessRemoteImplTest, CheckManual) {
   AccessRemoteImpl access_remote;
   Subject who = { "dev1", "12345" };
   Subject who1 = { "dev1", "123456" };
-  Object what = { policy_table::MT_RADIO };
+  SeatLocation zone = { 0, 0, 0 };
+  Object what = { policy_table::MT_RADIO, zone };
 
   EXPECT_EQ(TypeAccess::kManual, access_remote.Check(who, what));
 
@@ -292,147 +301,117 @@ TEST(AccessRemoteImplTest, CheckParameters) {
 
   // No zone
   SeatLocation no_zone = { 2, 2, 2 };
+  Object what_no = { policy_table::MT_RADIO, no_zone };
   EXPECT_EQ(
       TypeAccess::kDisallowed,
-      access_remote.CheckParameters(policy_table::MT_RADIO, no_zone, "Any rpc",
-                                    RemoteControlParams()));
+      access_remote.CheckParameters(what_no, "Any rpc", RemoteControlParams()));
 
   // No module
   SeatLocation block_a = { 0, 0, 0 };
+  Object what_a = { policy_table::ModuleType(-1), block_a };
   EXPECT_EQ(
       TypeAccess::kDisallowed,
-      access_remote.CheckParameters(policy_table::ModuleType(-1), block_a,
-                                    "Any rpc", RemoteControlParams()));
+      access_remote.CheckParameters(what_a, "Any rpc", RemoteControlParams()));
 
   // Driver allow, all RPCs are allowed
+  Object what_ca = { policy_table::MT_CLIMATE, block_a };
   EXPECT_EQ(
       TypeAccess::kManual,
-      access_remote.CheckParameters(policy_table::MT_CLIMATE, block_a,
-                                    "Any rpc", RemoteControlParams()));
+      access_remote.CheckParameters(what_ca, "Any rpc", RemoteControlParams()));
 
   // Driver allow, no RPC
   SeatLocation block_b = { 1, 1, 1 };
+  Object what_cb = { policy_table::MT_CLIMATE, block_b };
   EXPECT_EQ(
       TypeAccess::kDisallowed,
-      access_remote.CheckParameters(policy_table::MT_CLIMATE, block_b, "No rpc",
-                                    RemoteControlParams()));
+      access_remote.CheckParameters(what_cb, "No rpc", RemoteControlParams()));
 
   // Driver allow, Rpc 2, all parameters are allowed
   RemoteControlParams params;
   params.push_back("param 1");
-  EXPECT_EQ(
-      TypeAccess::kManual,
-      access_remote.CheckParameters(policy_table::MT_CLIMATE, block_b, "Rpc 2",
-                                    params));
+  EXPECT_EQ(TypeAccess::kManual,
+            access_remote.CheckParameters(what_cb, "Rpc 2", params));
 
   // Driver allow, Rpc 3, empty input parameters
   EXPECT_EQ(
       TypeAccess::kDisallowed,
-      access_remote.CheckParameters(policy_table::MT_CLIMATE, block_b, "Rpc 3",
-                                    RemoteControlParams()));
+      access_remote.CheckParameters(what_cb, "Rpc 3", RemoteControlParams()));
 
   // Driver allow, Rpc 3, param 1
   RemoteControlParams params_0;
   params_0.push_back("param 1");
-  EXPECT_EQ(
-      TypeAccess::kManual,
-      access_remote.CheckParameters(policy_table::MT_CLIMATE, block_b, "Rpc 3",
-                                    params_0));
+  EXPECT_EQ(TypeAccess::kManual,
+            access_remote.CheckParameters(what_cb, "Rpc 3", params_0));
 
   // Driver allow, Rpc 3, param 1 and 2
   RemoteControlParams params_1;
   params_1.push_back("param 1");
   params_1.push_back("param 2");
-  EXPECT_EQ(
-      TypeAccess::kManual,
-      access_remote.CheckParameters(policy_table::MT_CLIMATE, block_b, "Rpc 3",
-                                    params_1));
+  EXPECT_EQ(TypeAccess::kManual,
+            access_remote.CheckParameters(what_cb, "Rpc 3", params_1));
 
   // Driver allow, Rpc 3, param 1 and 2 and 3
   RemoteControlParams params_2;
   params_2.push_back("param 1");
   params_2.push_back("param 2");
   params_2.push_back("param 3");
-  EXPECT_EQ(
-      TypeAccess::kDisallowed,
-      access_remote.CheckParameters(policy_table::MT_CLIMATE, block_b, "Rpc 3",
-                                    params_2));
+  EXPECT_EQ(TypeAccess::kDisallowed,
+            access_remote.CheckParameters(what_cb, "Rpc 3", params_2));
 
   // Driver allow, Rpc 3, param 1 and 2 and 3
   RemoteControlParams params_3;
   params_3.push_back("param 3");
-  EXPECT_EQ(
-      TypeAccess::kDisallowed,
-      access_remote.CheckParameters(policy_table::MT_CLIMATE, block_b, "Rpc 3",
-                                    params_3));
+  EXPECT_EQ(TypeAccess::kDisallowed,
+            access_remote.CheckParameters(what_cb, "Rpc 3", params_3));
 
   // Auto allow, Rpc 4, empty input parameters
+  Object what_rb = { policy_table::MT_RADIO, block_b };
   EXPECT_EQ(
       TypeAccess::kDisallowed,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 4",
-                                    RemoteControlParams()));
+      access_remote.CheckParameters(what_rb, "Rpc 4", RemoteControlParams()));
 
   // Auto allow, Rpc 4, param 1
-  EXPECT_EQ(
-      TypeAccess::kAllowed,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 4",
-                                    params_0));
+  EXPECT_EQ(TypeAccess::kAllowed,
+            access_remote.CheckParameters(what_rb, "Rpc 4", params_0));
 
   // Auto allow, Rpc 4, param 1 and 2
-  EXPECT_EQ(
-      TypeAccess::kAllowed,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 4",
-                                    params_1));
+  EXPECT_EQ(TypeAccess::kAllowed,
+            access_remote.CheckParameters(what_rb, "Rpc 4", params_1));
 
   // Auto allow, Rpc 4, param 1 and 2 and 3
-  EXPECT_EQ(
-      TypeAccess::kDisallowed,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 4",
-                                    params_2));
+  EXPECT_EQ(TypeAccess::kDisallowed,
+            access_remote.CheckParameters(what_rb, "Rpc 4", params_2));
 
   // Auto allow, Rpc 4, param 1 and 2 and 3
-  EXPECT_EQ(
-      TypeAccess::kDisallowed,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 4",
-                                    params_3));
+  EXPECT_EQ(TypeAccess::kDisallowed,
+            access_remote.CheckParameters(what_rb, "Rpc 4", params_3));
 
   // Auto allow, Rpc 5, empty input parameters
   EXPECT_EQ(
       TypeAccess::kDisallowed,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 5",
-                                    RemoteControlParams()));
+      access_remote.CheckParameters(what_rb, "Rpc 5", RemoteControlParams()));
 
   // Auto allow, Rpc 5, param 1
-  EXPECT_EQ(
-      TypeAccess::kAllowed,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 5",
-                                    params_0));
+  EXPECT_EQ(TypeAccess::kAllowed,
+            access_remote.CheckParameters(what_rb, "Rpc 5", params_0));
 
   // Auto allow, Rpc 5, param 2
   RemoteControlParams params_12;
   params_12.push_back("param 2");
-  EXPECT_EQ(
-      TypeAccess::kManual,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 5",
-                                    params_12));
+  EXPECT_EQ(TypeAccess::kManual,
+            access_remote.CheckParameters(what_rb, "Rpc 5", params_12));
 
   // Auto allow, Rpc 5, param 1 and 2
-  EXPECT_EQ(
-      TypeAccess::kManual,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 5",
-                                    params_1));
+  EXPECT_EQ(TypeAccess::kManual,
+            access_remote.CheckParameters(what_rb, "Rpc 5", params_1));
 
   // Auto allow, Rpc 5, param 1 and 2 and 3
-  EXPECT_EQ(
-      TypeAccess::kDisallowed,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 5",
-                                    params_2));
+  EXPECT_EQ(TypeAccess::kDisallowed,
+            access_remote.CheckParameters(what_rb, "Rpc 5", params_2));
 
   // Auto allow, Rpc 5, param 3
-  EXPECT_EQ(
-      TypeAccess::kDisallowed,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 5",
-                                    params_3));
+  EXPECT_EQ(TypeAccess::kDisallowed,
+            access_remote.CheckParameters(what_rb, "Rpc 5", params_3));
 }
 
 TEST(AccessRemoteImplTest, CheckPTUUpdatesChange) {
