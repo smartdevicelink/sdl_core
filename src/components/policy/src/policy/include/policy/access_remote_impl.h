@@ -76,12 +76,16 @@ class AccessRemoteImpl : public AccessRemote {
                                     const std::string &app_id,
                                     FunctionalIdType& group_types);
   virtual bool IsAppReverse(const PTString& app_id);
+  bool CheckPTUUpdatesChange(
+    const utils::SharedPtr<policy_table::Table> pt_update,
+    const utils::SharedPtr<policy_table::Table> snapshot);
 
  private:
   typedef std::map<Subject, TypeAccess> AccessControlRow;
   typedef std::map<Object, AccessControlRow> AccessControlList;
   typedef std::map<std::string, policy_table::AppHMITypes> HMIList;
   inline void set_enabled(bool value);
+  inline bool country_consent() const;
   const policy_table::AppHMITypes& HmiTypes(const std::string& app_id);
   void GetGroupsIds(const std::string &device_id, const std::string &app_id,
                     FunctionalGroupIDs& grops_ids);
@@ -93,7 +97,6 @@ class AccessRemoteImpl : public AccessRemote {
   utils::SharedPtr<CacheManager> cache_;
   PTString primary_device_;
   bool enabled_;
-  bool country_consent_;
   AccessControlList acl_;
   HMIList hmi_types_;
 

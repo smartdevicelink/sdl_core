@@ -156,6 +156,12 @@ class PolicyHandler :
    * by User and by Policy
    */
   bool GetRemoteControl() const;
+
+  /*
+   * @brief Notifies passengers' apps about change
+   * @param new_consent New value of remote permission
+   */
+  void OnRemoteAllowedChanged(bool new_consent);
 #endif  // SDL_REMOTE_CONTROL
 
   uint32_t GetNotificationsNumber(const std::string& priority);
