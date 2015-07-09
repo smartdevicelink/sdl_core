@@ -32,6 +32,7 @@
 
 #include "can_cooperation/validators/struct_validators/radio_control_data_validator.h"
 #include "can_cooperation/validators/struct_validators/rds_data_validator.h"
+#include "can_cooperation/message_helper.h"
 #include "can_cooperation/can_module_constants.h"
 
 namespace can_cooperation {
@@ -123,7 +124,7 @@ ValidationResult RadioControlDataValidator::Validate(const Json::Value& json,
     return result;
   }
 
-  if (json.isMember(kRdsData)) {
+  if (IsMember(json, kRdsData)) {
     result = RdsDataValidator::instance()->Validate(json[kRdsData],
                                                     outgoing_json[kRdsData]);
   }

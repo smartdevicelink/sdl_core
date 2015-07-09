@@ -184,6 +184,7 @@ ProcessResult PluginManager::ProcessHMIMessage(application_manager::MessagePtr m
       function_name = value["error"]["data"]["method"].asCString();
     } else {
       DCHECK(false);
+      return ProcessResult::CANNOT_PROCESS;
     }
   }
 

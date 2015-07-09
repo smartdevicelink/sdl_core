@@ -84,6 +84,16 @@ class MessageHelper {
   static const std::map<functional_modules::MobileFunctionID, std::string> kMobileAPINames;
 };
 
+/**
+ * @brief Check for existence of specified key in Json::Value
+ *
+ * @param value Value with json
+ * @param key string with key name
+ *
+ * @return true if key exist
+ */
+bool IsMember(const Json::Value& value, const std::string& key);
+
 }  // namespace can_cooperation
 
 #endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_MESSAGE_HELPER_H_

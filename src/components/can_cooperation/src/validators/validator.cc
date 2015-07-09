@@ -32,6 +32,7 @@
 
 #include "can_cooperation/validators/validator.h"
 #include "can_cooperation/can_module_constants.h"
+#include "can_cooperation/message_helper.h"
 #include "utils/logger.h"
 
 namespace can_cooperation {
@@ -70,7 +71,7 @@ ValidationResult Validator::ValidateValue(const std::string& value_name,
                                  Json::Value& outgoing_json,
                                  ValidationScope& validation_scope) {
   // Check if param exist, and its mandatory
-  if (!json.isMember(value_name)) {
+  if (!IsMember(json, value_name)) {
     if (validation_scope[ValidationParams::MANDATORY]) {
       LOG4CXX_ERROR(logger_, "Mandatory param " <<value_name <<" missing!" );
       return ValidationResult::INVALID_DATA;

@@ -56,7 +56,7 @@ ValidationResult OnInteriorVehicleDataNotificationValidator::Validate(
 
   ValidationResult result;
 
-  if (json.isMember(kModuleData)) {
+  if (IsMember(json, kModuleData)) {
     result = ModuleDataValidator::instance()->
         Validate(json[kModuleData], outgoing_json[kModuleData]);
   } else {

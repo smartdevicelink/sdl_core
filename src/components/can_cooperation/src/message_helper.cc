@@ -92,4 +92,12 @@ Json::Value MessageHelper::StringToValue(const std::string& string) {
   return Json::Value(Json::ValueType::nullValue);
 }
 
+bool IsMember(const Json::Value& value, const std::string& key) {
+  if (!value.isObject()) {
+    return false;
+  }
+
+  return value.isMember(key);
+}
+
 }  // namespace can_cooperation

@@ -95,7 +95,7 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
     const int capabilities_max_size = 1000;
 
     if (success) {
-      if (value[kResult].isMember(kInteriorVehicleDataCapabilities)) {
+      if (IsMember(value[kResult], kInteriorVehicleDataCapabilities)) {
         int capabilities_size =
             value[kResult][kInteriorVehicleDataCapabilities].size();
         if (value[kResult][kInteriorVehicleDataCapabilities].isArray() &&
@@ -152,7 +152,7 @@ bool GetInteriorVehicleDataCapabiliesRequest::ReadCapabilitiesFromFile() {
 
   VehicleCapabilities file_caps;
   Json::Value zone_capabilities;
-  if (request.isMember(kZone)) {
+  if (IsMember(request, kZone)) {
     zone_capabilities = file_caps.capabilities(request[kZone]);
   } else {
     zone_capabilities = file_caps.capabilities();
@@ -161,7 +161,7 @@ bool GetInteriorVehicleDataCapabiliesRequest::ReadCapabilitiesFromFile() {
   if (zone_capabilities.type() == Json::ValueType::arrayValue) {
     LOG4CXX_DEBUG(logger_, "Read vehicle capabilities from file "
         << zone_capabilities);
-    if (request.isMember(kModuleTypes)) {
+    if (IsMember(request, kModuleTypes)) {
       response_params_[kInteriorVehicleDataCapabilities] = Json::Value(
         Json::ValueType::arrayValue);
       for (unsigned int i = 0; i < zone_capabilities.size(); ++i) {

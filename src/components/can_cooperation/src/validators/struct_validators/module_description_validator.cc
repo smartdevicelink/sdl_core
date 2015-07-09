@@ -32,6 +32,7 @@
 
 #include "can_cooperation/validators/struct_validators/module_description_validator.h"
 #include "can_cooperation/validators/struct_validators/interior_zone_validator.h"
+#include "can_cooperation/message_helper.h"
 #include "can_cooperation/can_module_constants.h"
 
 namespace can_cooperation {
@@ -63,7 +64,7 @@ ValidationResult ModuleDescriptionValidator::Validate(const Json::Value& json,
     return result;
   }
 
-  if (json.isMember(kModuleZone)) {
+  if (IsMember(json, kModuleZone)) {
     result = InteriorZoneValidator::instance()->Validate(json[kModuleZone],
                                                     outgoing_json[kModuleZone]);
   } else {
