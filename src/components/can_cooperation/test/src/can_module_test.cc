@@ -34,6 +34,7 @@
 #include "can_cooperation/can_module.h"
 #include "can_cooperation/can_app_extension.h"
 #include "can_cooperation/can_module_constants.h"
+#include "can_cooperation/message_helper.h"
 #include "functional_module/module_observer.h"
 #include "mock_application.h"
 #include "mock_service.h"
@@ -119,7 +120,7 @@ TEST_F(CanModuleTest, ProcessMessageEmptyAppsList) {
   std::string json = "{\"jsonrpc\": \"2.0\", \"method\": \"RC.OnInteriorVehicleData\",\
                         \"params\": {\"moduleData\": {\"moduleType\": \"CLIMATE\",\
                         \"moduleZone\":  {\"col\": 0,\"row\": 0,\"level\": 0,\"colspan\": 2,\
-                        \"rowspan\": 2, \"levelspan\": 1} }}}";
+                        \"rowspan\": 2, \"levelspan\": 1}, \"climateControlData\": {\"fanSpeed\": 100} }}}";
   message->set_json_message(json);
 
   std::vector<application_manager::ApplicationSharedPtr> apps;
@@ -138,10 +139,20 @@ TEST_F(CanModuleTest, ProcessMessagePass) {
   message->set_function_name("OnInteriorVehicleData");
 
   std::string json = "{\"jsonrpc\": \"2.0\", \"method\": \"RC.OnInteriorVehicleData\",\
-                        \"params\": {\"moduleData\": {\"moduleType\": \"CLIMATE\",\
-                        \"moduleZone\":  {\"col\": 0,\"row\": 0,\"level\": 0,\"colspan\": 2,\
-                        \"rowspan\": 2, \"levelspan\": 1} }}}";
+      \"params\": {\"moduleData\": {\"moduleType\": \"CLIMATE\",\
+      \"moduleZone\":  {\"col\": 0,\"row\": 0,\"level\": 0,\"colspan\": 2,\
+      \"rowspan\": 2, \"levelspan\": 1}, \"climateControlData\": {\"fanSpeed\": 100} }}}";
   message->set_json_message(json);
+  Json::Value json_value = MessageHelper::StringToValue(json);
+  Json::Value moduleDescription;
+
+   moduleDescription[message_params::kModuleType] =
+       json_value[json_keys::kParams][message_params::kModuleData]
+                                      [message_params::kModuleType];
+
+   moduleDescription[message_params::kModuleZone] =
+       json_value[json_keys::kParams][message_params::kModuleData]
+                                      [message_params::kModuleZone];
 
   std::vector<application_manager::ApplicationSharedPtr> apps;
   MockApplication* app = new MockApplication();
@@ -150,6 +161,8 @@ TEST_F(CanModuleTest, ProcessMessagePass) {
   application_manager::AppExtensionUID uid = module->GetModuleID();
   CANAppExtension* can_ext = new CANAppExtension(uid);
   can_ext->GiveControl(true);
+
+  can_ext->SubscribeToInteriorVehicleData(moduleDescription);
   application_manager::AppExtensionPtr ext(can_ext);
 
   EXPECT_CALL(*app, app_id()).Times(2).WillRepeatedly(Return(1));
