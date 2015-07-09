@@ -76,6 +76,9 @@ class AccessRemoteImpl : public AccessRemote {
                                     const std::string &app_id,
                                     FunctionalIdType& group_types);
   virtual bool IsAppReverse(const PTString& app_id);
+  bool CheckPTUUpdatesChange(
+    const utils::SharedPtr<policy_table::Table> pt_update,
+    const utils::SharedPtr<policy_table::Table> snapshot);
 
  private:
   typedef std::map<Subject, TypeAccess> AccessControlRow;

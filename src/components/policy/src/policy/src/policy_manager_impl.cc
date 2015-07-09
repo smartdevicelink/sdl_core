@@ -147,9 +147,19 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     listener_->OnCertificateUpdated(*(pt_update->policy_table.module_config.certificate));
   }
 
-
   // Check permissions for applications, send notifications
   CheckPermissionsChanges(pt_update, policy_table_snapshot);
+
+#ifdef SDL_REMOTE_CONTROL
+  // Check country_consent
+  bool has_changed = access_remote_->CheckPTUUpdatesChange(pt_update,
+                                        policy_table_snapshot);
+  access_remote_->Init();
+  if (has_changed) {
+    listener()->OnCountryConsentChanged(
+      *pt_update->policy_table.module_config.country_consent_passengersRC);
+  }
+#endif  // SDL_REMOTE_CONTROL
 
   std::map<std::string, StringArray> app_hmi_types;
   cache_->GetHMIAppTypeAfterUpdate(app_hmi_types);

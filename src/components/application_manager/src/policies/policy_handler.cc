@@ -1470,6 +1470,16 @@ void PolicyHandler::SetRemoteControl(bool enabled) {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->SetRemoteControl(enabled);
 
+  OnCountryConsentChanged(enabled);
+}
+
+bool PolicyHandler::GetRemoteControl() const {
+  POLICY_LIB_CHECK(false);
+  return policy_manager_->GetRemoteControl();
+}
+
+void PolicyHandler::OnCountryConsentChanged(bool new_consent) {
+  POLICY_LIB_CHECK_VOID();
   connection_handler::DeviceHandle device_handle = PrimaryDevice();
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
@@ -1485,11 +1495,6 @@ void PolicyHandler::SetRemoteControl(bool enabled) {
       policy_manager_->OnChangedRemoteControl(app->mobile_app_id());
     }
   }
-}
-
-bool PolicyHandler::GetRemoteControl() const {
-  POLICY_LIB_CHECK(false);
-  return policy_manager_->GetRemoteControl();
 }
 #endif  // SDL_REMOTE_CONTROL
 

@@ -101,6 +101,14 @@ class PolicyListener {
    * @param certificate_data the value of the updated field.
    */
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
+
+#ifdef SDL_REMOTE_CONTROL
+  /*
+   * @brief Signal that country_consent field was updated during PTU
+   * @param new_consent New value of country_consent
+   */
+   virtual void OnCountryConsentChanged(bool new_consent) = 0;
+#endif  // SDL_REMOTE_CONTROL
 };
 }  //  namespace policy
 #endif  //  SRC_COMPONENTS_POLICY_INCLUDE_POLICY_LISTENER_H_

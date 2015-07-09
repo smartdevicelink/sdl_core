@@ -403,4 +403,28 @@ void AccessRemoteImpl::GetGroupsIds(const std::string &device_id,
   LOG4CXX_DEBUG(logger_, "Groups Ids: " << groups_ids);
 }
 
+bool AccessRemoteImpl::CheckPTUUpdatesChange(
+    const utils::SharedPtr<policy_table::Table> pt_update,
+    const utils::SharedPtr<policy_table::Table> snapshot) {
+  policy_table::ModuleConfig& new_config = pt_update->policy_table.module_config;
+  policy_table::ModuleConfig& old_config = snapshot->policy_table.module_config;
+
+  if (new_config.country_consent_passengersRC.is_initialized()) {
+    if (old_config.country_consent_passengersRC.is_initialized()) {
+      if (*new_config.country_consent_passengersRC
+            != *old_config.country_consent_passengersRC) {
+        return true;
+      }
+    } else if (!(*new_config.country_consent_passengersRC)) {
+      return true;
+    }
+  } else {
+    if (old_config.country_consent_passengersRC.is_initialized() &&
+          !(*old_config.country_consent_passengersRC)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 }  // namespace policy

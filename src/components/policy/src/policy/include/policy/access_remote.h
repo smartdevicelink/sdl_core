@@ -246,6 +246,17 @@ class AccessRemote {
    * @return true if application uses remote control
    */
   virtual bool IsAppReverse(const PTString& app_id) = 0;
+
+  /**
+   * Checks if PTU contains some updates that need to be reported
+   * to any Reverse Mobile App
+   * @param pt_update PTU
+   * @param snapshot PTS
+   * @return true if changing current state updates are present
+   */
+  virtual bool CheckPTUUpdatesChange(
+    const utils::SharedPtr<policy_table::Table> pt_update,
+    const utils::SharedPtr<policy_table::Table> snapshot) = 0;
 };
 
 }  // namespace policy

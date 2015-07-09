@@ -156,6 +156,12 @@ class PolicyHandler :
    * by User and by Policy
    */
   bool GetRemoteControl() const;
+
+  /*
+   * @brief Signal that country_consent field was updated during PTU
+   * @param new_consent New value of country_consent
+   */
+  void OnCountryConsentChanged(bool new_consent);
 #endif  // SDL_REMOTE_CONTROL
 
   uint32_t GetNotificationsNumber(const std::string& priority);
