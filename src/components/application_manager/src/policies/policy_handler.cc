@@ -1470,7 +1470,7 @@ void PolicyHandler::SetRemoteControl(bool enabled) {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->SetRemoteControl(enabled);
 
-  OnCountryConsentChanged(enabled);
+  OnRemoteAllowedChanged(enabled);
 }
 
 bool PolicyHandler::GetRemoteControl() const {
@@ -1478,7 +1478,7 @@ bool PolicyHandler::GetRemoteControl() const {
   return policy_manager_->GetRemoteControl();
 }
 
-void PolicyHandler::OnCountryConsentChanged(bool new_consent) {
+void PolicyHandler::OnRemoteAllowedChanged(bool new_consent) {
   POLICY_LIB_CHECK_VOID();
   connection_handler::DeviceHandle device_handle = PrimaryDevice();
 

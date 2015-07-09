@@ -107,7 +107,7 @@ class PolicyListener {
    * @brief Signal that country_consent field was updated during PTU
    * @param new_consent New value of country_consent
    */
-   virtual void OnCountryConsentChanged(bool new_consent) = 0;
+   virtual void OnRemoteAllowedChanged(bool new_consent) = 0;
 #endif  // SDL_REMOTE_CONTROL
 };
 }  //  namespace policy

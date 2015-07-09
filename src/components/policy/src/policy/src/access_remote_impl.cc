@@ -406,25 +406,21 @@ void AccessRemoteImpl::GetGroupsIds(const std::string &device_id,
 bool AccessRemoteImpl::CheckPTUUpdatesChange(
     const utils::SharedPtr<policy_table::Table> pt_update,
     const utils::SharedPtr<policy_table::Table> snapshot) {
-  policy_table::ModuleConfig& new_config = pt_update->policy_table.module_config;
-  policy_table::ModuleConfig& old_config = snapshot->policy_table.module_config;
+  rpc::Optional<rpc::Boolean>& new_consent =
+    pt_update->policy_table.module_config.country_consent_passengersRC;
+  rpc::Optional<rpc::Boolean>& old_consent =
+    snapshot->policy_table.module_config.country_consent_passengersRC;
 
-  if (new_config.country_consent_passengersRC.is_initialized()) {
-    if (old_config.country_consent_passengersRC.is_initialized()) {
-      if (*new_config.country_consent_passengersRC
-            != *old_config.country_consent_passengersRC) {
-        return true;
-      }
-    } else if (!(*new_config.country_consent_passengersRC)) {
-      return true;
-    }
-  } else {
-    if (old_config.country_consent_passengersRC.is_initialized() &&
-          !(*old_config.country_consent_passengersRC)) {
-      return true;
-    }
+  if (!new_consent.is_initialized() && !old_consent.is_initialized()) {
+    return false;
   }
-  return false;
+
+  if (new_consent.is_initialized() && old_consent.is_initialized())
+    return *new_consent != *old_consent;
+
+  bool not_changed_consent1 = !new_consent.is_initialized() && *old_consent;
+  bool not_changed_consent2 = !old_consent.is_initialized() && *new_consent;
+  return !(not_changed_consent1 || not_changed_consent2);
 }
 
 }  // namespace policy

@@ -156,7 +156,7 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
                                         policy_table_snapshot);
   access_remote_->Init();
   if (has_changed) {
-    listener()->OnCountryConsentChanged(
+    listener()->OnRemoteAllowedChanged(
       *pt_update->policy_table.module_config.country_consent_passengersRC);
   }
 #endif  // SDL_REMOTE_CONTROL
