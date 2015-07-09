@@ -322,22 +322,22 @@ TEST(AccessRemoteImplTest, CheckParameters) {
   params.push_back("param 1");
   EXPECT_EQ(
       TypeAccess::kManual,
-      access_remote.CheckParameters(policy_table::MT_CLIMATE, block_b,
-                                    "Rpc 2", params));
+      access_remote.CheckParameters(policy_table::MT_CLIMATE, block_b, "Rpc 2",
+                                    params));
 
   // Driver allow, Rpc 3, empty input parameters
   EXPECT_EQ(
       TypeAccess::kDisallowed,
-      access_remote.CheckParameters(policy_table::MT_CLIMATE, block_b,
-                                    "Rpc 3", RemoteControlParams()));
+      access_remote.CheckParameters(policy_table::MT_CLIMATE, block_b, "Rpc 3",
+                                    RemoteControlParams()));
 
   // Driver allow, Rpc 3, param 1
   RemoteControlParams params_0;
   params_0.push_back("param 1");
   EXPECT_EQ(
       TypeAccess::kManual,
-      access_remote.CheckParameters(policy_table::MT_CLIMATE, block_b,
-                                    "Rpc 3", params_0));
+      access_remote.CheckParameters(policy_table::MT_CLIMATE, block_b, "Rpc 3",
+                                    params_0));
 
   // Driver allow, Rpc 3, param 1 and 2
   RemoteControlParams params_1;
@@ -345,8 +345,8 @@ TEST(AccessRemoteImplTest, CheckParameters) {
   params_1.push_back("param 2");
   EXPECT_EQ(
       TypeAccess::kManual,
-      access_remote.CheckParameters(policy_table::MT_CLIMATE, block_b,
-                                    "Rpc 3", params_1));
+      access_remote.CheckParameters(policy_table::MT_CLIMATE, block_b, "Rpc 3",
+                                    params_1));
 
   // Driver allow, Rpc 3, param 1 and 2 and 3
   RemoteControlParams params_2;
@@ -355,84 +355,136 @@ TEST(AccessRemoteImplTest, CheckParameters) {
   params_2.push_back("param 3");
   EXPECT_EQ(
       TypeAccess::kDisallowed,
-      access_remote.CheckParameters(policy_table::MT_CLIMATE, block_b,
-                                    "Rpc 3", params_2));
+      access_remote.CheckParameters(policy_table::MT_CLIMATE, block_b, "Rpc 3",
+                                    params_2));
 
   // Driver allow, Rpc 3, param 1 and 2 and 3
   RemoteControlParams params_3;
   params_3.push_back("param 3");
   EXPECT_EQ(
       TypeAccess::kDisallowed,
-      access_remote.CheckParameters(policy_table::MT_CLIMATE, block_b,
-                                    "Rpc 3", params_3));
+      access_remote.CheckParameters(policy_table::MT_CLIMATE, block_b, "Rpc 3",
+                                    params_3));
 
   // Auto allow, Rpc 4, empty input parameters
   EXPECT_EQ(
       TypeAccess::kDisallowed,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b,
-                                    "Rpc 4", RemoteControlParams()));
+      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 4",
+                                    RemoteControlParams()));
 
   // Auto allow, Rpc 4, param 1
   EXPECT_EQ(
       TypeAccess::kAllowed,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b,
-                                    "Rpc 4", params_0));
+      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 4",
+                                    params_0));
 
   // Auto allow, Rpc 4, param 1 and 2
   EXPECT_EQ(
       TypeAccess::kAllowed,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b,
-                                    "Rpc 4", params_1));
+      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 4",
+                                    params_1));
 
   // Auto allow, Rpc 4, param 1 and 2 and 3
   EXPECT_EQ(
       TypeAccess::kDisallowed,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b,
-                                    "Rpc 4", params_2));
+      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 4",
+                                    params_2));
 
   // Auto allow, Rpc 4, param 1 and 2 and 3
   EXPECT_EQ(
       TypeAccess::kDisallowed,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b,
-                                    "Rpc 4", params_3));
+      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 4",
+                                    params_3));
 
   // Auto allow, Rpc 5, empty input parameters
   EXPECT_EQ(
       TypeAccess::kDisallowed,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b,
-                                    "Rpc 5", RemoteControlParams()));
+      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 5",
+                                    RemoteControlParams()));
 
   // Auto allow, Rpc 5, param 1
   EXPECT_EQ(
       TypeAccess::kAllowed,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b,
-                                    "Rpc 5", params_0));
+      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 5",
+                                    params_0));
 
   // Auto allow, Rpc 5, param 2
   RemoteControlParams params_12;
   params_12.push_back("param 2");
   EXPECT_EQ(
       TypeAccess::kManual,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b,
-                                    "Rpc 5", params_12));
+      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 5",
+                                    params_12));
 
   // Auto allow, Rpc 5, param 1 and 2
   EXPECT_EQ(
       TypeAccess::kManual,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b,
-                                    "Rpc 5", params_1));
+      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 5",
+                                    params_1));
 
   // Auto allow, Rpc 5, param 1 and 2 and 3
   EXPECT_EQ(
       TypeAccess::kDisallowed,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b,
-                                    "Rpc 5", params_2));
+      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 5",
+                                    params_2));
 
   // Auto allow, Rpc 5, param 3
   EXPECT_EQ(
       TypeAccess::kDisallowed,
-      access_remote.CheckParameters(policy_table::MT_RADIO, block_b,
-                                    "Rpc 5", params_3));
+      access_remote.CheckParameters(policy_table::MT_RADIO, block_b, "Rpc 5",
+                                    params_3));
+}
+
+TEST(AccessRemoteImplTest, CheckPTUUpdatesChange) {
+  AccessRemoteImpl access_remote;
+  utils::SharedPtr<policy_table::Table> update = new policy_table::Table();
+  utils::SharedPtr<policy_table::Table> snapshot = new policy_table::Table();
+  rpc::Optional<rpc::Boolean>& new_consent = update->policy_table.module_config
+      .country_consent_passengersRC;
+  rpc::Optional<rpc::Boolean>& old_consent = snapshot->policy_table
+      .module_config.country_consent_passengersRC;
+
+  // Both are not initialized
+  EXPECT_FALSE(access_remote.CheckPTUUpdatesChange(update, snapshot));
+
+  *old_consent = true;
+  *new_consent = true;
+  EXPECT_FALSE(access_remote.CheckPTUUpdatesChange(update, snapshot));
+
+  *old_consent = false;
+  *new_consent = false;
+  EXPECT_FALSE(access_remote.CheckPTUUpdatesChange(update, snapshot));
+
+  *old_consent = true;
+  *new_consent = false;
+  EXPECT_TRUE(access_remote.CheckPTUUpdatesChange(update, snapshot));
+
+  *old_consent = false;
+  *new_consent = true;
+  EXPECT_TRUE(access_remote.CheckPTUUpdatesChange(update, snapshot));
+
+  snapshot = new policy_table::Table();
+  old_consent = snapshot->policy_table.module_config
+      .country_consent_passengersRC;
+
+  // snapshot is not initialized, update is true
+  *new_consent = true;
+  EXPECT_FALSE(access_remote.CheckPTUUpdatesChange(update, snapshot));
+
+  // snapshot is not initialized, update is false
+  *new_consent = false;
+  EXPECT_TRUE(access_remote.CheckPTUUpdatesChange(update, snapshot));
+
+  update = new policy_table::Table();
+  new_consent = update->policy_table.module_config.country_consent_passengersRC;
+
+  // snapshot is true, update is not initialized
+  *old_consent = true;
+  EXPECT_FALSE(access_remote.CheckPTUUpdatesChange(update, snapshot));
+
+  // snapshot is false, update is not initialized
+  *old_consent = false;
+  EXPECT_TRUE(access_remote.CheckPTUUpdatesChange(update, snapshot));
 }
 
 }  // namespace policy
