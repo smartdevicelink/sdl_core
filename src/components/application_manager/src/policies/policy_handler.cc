@@ -1378,10 +1378,12 @@ application_manager::TypeAccess PolicyHandler::CheckAccess(
 }
 
 void PolicyHandler::SetAccess(const PTString& app_id,
+                              const application_manager::SeatLocation& zone,
                               const PTString& module,
                               bool allowed) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->SetAccess(app_id, module, allowed);
+  policy::SeatLocation policy_zone {zone.col, zone.row, zone.level};
+  policy_manager_->SetAccess(app_id, policy_zone, module, allowed);
 }
 
 void PolicyHandler::ResetAccess(const PTString& app_id) {
@@ -1389,9 +1391,11 @@ void PolicyHandler::ResetAccess(const PTString& app_id) {
   policy_manager_->ResetAccess(app_id);
 }
 
-void PolicyHandler::ResetAccessByModule(const std::string& module) {
+void PolicyHandler::ResetAccess(const application_manager::SeatLocation& zone,
+                                const std::string& module) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->ResetAccessByModule(module);
+  policy::SeatLocation policy_zone {zone.col, zone.row, zone.level};
+  policy_manager_->ResetAccess(policy_zone, module);
 }
 
 void PolicyHandler::SetPrimaryDevice(const PTString& dev_id) {

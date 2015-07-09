@@ -88,10 +88,12 @@ class CoreService : public Service {
   /**
    * Sets access to functional group which contains given RPC for application
    * @param app_id id of application
+   * @param zone interior zone
    * @param module type
    * @param allowed true if driver has given access
    */
   virtual void SetAccess(const ApplicationId& app_id,
+                         const SeatLocation& zone,
                          const std::string& module,
                          bool allowed);
 
@@ -104,9 +106,11 @@ class CoreService : public Service {
 
   /**
    * Resets access by group name for all applications
+   * @param zone interior zone
    * @param module type
    */
-  virtual void ResetAccessByModule(const std::string& module);
+  virtual void ResetAccess(const SeatLocation& zone,
+                           const std::string& module);
 
   /**
    * Sets device as primary device

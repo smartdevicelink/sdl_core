@@ -443,8 +443,7 @@ TEST(AccessRemoteImplTest, CheckPTUUpdatesChange) {
   EXPECT_TRUE(access_remote.CheckPTUUpdatesChange(update, snapshot));
 
   snapshot = new policy_table::Table();
-  old_consent = snapshot->policy_table.module_config
-      .country_consent_passengersRC;
+  new_consent = update->policy_table.module_config.country_consent_passengersRC;
 
   // snapshot is not initialized, update is true
   *new_consent = true;
@@ -455,7 +454,8 @@ TEST(AccessRemoteImplTest, CheckPTUUpdatesChange) {
   EXPECT_TRUE(access_remote.CheckPTUUpdatesChange(update, snapshot));
 
   update = new policy_table::Table();
-  new_consent = update->policy_table.module_config.country_consent_passengersRC;
+  old_consent = snapshot->policy_table.module_config
+      .country_consent_passengersRC;
 
   // snapshot is true, update is not initialized
   *old_consent = true;

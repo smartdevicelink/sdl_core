@@ -344,11 +344,12 @@ TEST_F(PolicyManagerImplTest, ResetAccessBySubject) {
 }
 
 TEST_F(PolicyManagerImplTest, ResetAccessByObject) {
-  Object obj = {policy_table::MT_RADIO};
+  SeatLocation zone = {0, 0, 0};
+  Object obj = {policy_table::MT_RADIO, zone};
 
   EXPECT_CALL(*access_remote, Reset(obj));
 
-  manager->ResetAccessByModule("RADIO");
+  manager->ResetAccess(zone, "RADIO");
 }
 
 TEST_F(PolicyManagerImplTest, SetRemoteControl_Enable) {
@@ -365,29 +366,32 @@ TEST_F(PolicyManagerImplTest, SetRemoteControl_Disable) {
 
 TEST_F(PolicyManagerImplTest, SetAccess_Allow) {
   Subject who = {"dev1", "12345"};
-  Object what = {policy_table::MT_CLIMATE};
+  SeatLocation zone = {0, 0, 0};
+  Object what = {policy_table::MT_CLIMATE, zone};
 
   EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
       WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote, Allow(who, what));
 
-  manager->SetAccess("12345", "CLIMATE", true);
+  manager->SetAccess("12345", zone, "CLIMATE", true);
 }
 
 TEST_F(PolicyManagerImplTest, SetAccess_Deny) {
   Subject who = {"dev1", "12345"};
-  Object what = {policy_table::MT_RADIO};
+  SeatLocation zone = {0, 0, 0};
+  Object what = {policy_table::MT_RADIO, zone};
 
   EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
       WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote, Deny(who, what));
 
-  manager->SetAccess("12345", "RADIO", false);
+  manager->SetAccess("12345", zone, "RADIO", false);
 }
 
 TEST_F(PolicyManagerImplTest, CheckAccess_PrimaryDevice) {
   Subject who {"dev1", "12345"};
-  Object what {policy_table::MT_CLIMATE};
+  SeatLocation zone = {0, 0, 0};
+  Object what {policy_table::MT_CLIMATE, zone};
 
   EXPECT_CALL(*access_remote,
               CheckModuleType("12345", policy_table::MT_CLIMATE)).
@@ -399,7 +403,6 @@ TEST_F(PolicyManagerImplTest, CheckAccess_PrimaryDevice) {
       WillOnce(Return(TypeAccess::kManual));
   EXPECT_CALL(*access_remote, Allow(who, what));
 
-  SeatLocation zone {0,0,0};
   EXPECT_EQ(TypeAccess::kAllowed,
             manager->CheckAccess("12345", zone, "CLIMATE", "AnyRpc", RemoteControlParams()));
 }
@@ -420,7 +423,8 @@ TEST_F(PolicyManagerImplTest, CheckAccess_DisabledRremoteControl) {
 
 TEST_F(PolicyManagerImplTest, CheckAccess_Result) {
   Subject who = {"dev1", "12345"};
-  Object what = {policy_table::MT_RADIO};
+  SeatLocation zone = {0, 0, 0};
+  Object what = {policy_table::MT_RADIO, zone};
 
   EXPECT_CALL(*access_remote,
               CheckModuleType("12345", policy_table::MT_RADIO)).
@@ -433,7 +437,6 @@ TEST_F(PolicyManagerImplTest, CheckAccess_Result) {
   EXPECT_CALL(*access_remote, Check(who, what)).
       WillOnce(Return(TypeAccess::kAllowed));
 
-  SeatLocation zone {0,0,0};
   EXPECT_EQ(TypeAccess::kAllowed,
             manager->CheckAccess("12345", zone, "RADIO", "", RemoteControlParams()));
 }
@@ -441,7 +444,8 @@ TEST_F(PolicyManagerImplTest, CheckAccess_Result) {
 TEST_F(PolicyManagerImplTest, TwoDifferentDevice) {
   Subject who1 = {"dev1", "12345"};
   Subject who2 = {"dev2", "123456"};
-  Object what = {policy_table::MT_RADIO};
+  SeatLocation zone = {0, 0, 0};
+  Object what = {policy_table::MT_RADIO, zone};
 
   EXPECT_CALL(*access_remote,
               CheckModuleType("12345", policy_table::MT_RADIO)).
@@ -464,7 +468,6 @@ TEST_F(PolicyManagerImplTest, TwoDifferentDevice) {
   EXPECT_CALL(*access_remote, Check(who2, what)).
         WillOnce(Return(TypeAccess::kDisallowed));
 
-  SeatLocation zone {0,0,0};
   EXPECT_EQ(TypeAccess::kAllowed,
             manager->CheckAccess("12345", zone, "RADIO", "", RemoteControlParams()));
   EXPECT_EQ(TypeAccess::kDisallowed,

@@ -1023,6 +1023,7 @@ TypeAccess PolicyManagerImpl::CheckDriverConsent(
 }
 
 void PolicyManagerImpl::SetAccess(const PTString& app_id,
+                                  const SeatLocation& zone,
                                   const PTString& module,
                                   bool allowed) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1034,7 +1035,7 @@ void PolicyManagerImpl::SetAccess(const PTString& app_id,
 
   std::string dev_id = GetCurrentDeviceId(app_id);
   Subject who = {dev_id, app_id};
-  Object what = {module_type};
+  Object what = {module_type, zone};
   if (allowed) {
     access_remote_->Allow(who, what);
   } else {
@@ -1049,7 +1050,8 @@ void PolicyManagerImpl::ResetAccess(const PTString& app_id) {
   access_remote_->Reset(who);
 }
 
-void PolicyManagerImpl::ResetAccessByModule(const PTString& module) {
+void PolicyManagerImpl::ResetAccess(const SeatLocation& zone,
+                                    const PTString& module) {
   LOG4CXX_AUTO_TRACE(logger_);
   policy_table::ModuleType module_type;
   bool is_valid = EnumFromJsonString(module, &module_type);
@@ -1057,7 +1059,7 @@ void PolicyManagerImpl::ResetAccessByModule(const PTString& module) {
     return;
   }
 
-  Object what = {module_type};
+  Object what = {module_type, zone};
   access_remote_->Reset(what);
 }
 

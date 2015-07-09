@@ -98,7 +98,7 @@ class PolicyHandler :
   /**
    * Checks access to equipment of vehicle for application by RPC
    * @param app_id policy id application
-   * @param zone requested zone control
+   * @param zone interior zone
    * @param module type
    * @param rpc name of rpc
    * @param params parameters list
@@ -111,10 +111,13 @@ class PolicyHandler :
   /**
    * Sets access to equipment of vehicle for application by RPC
    * @param app_id policy id application
+   * @param zone interior zone
    * @param module type
    * @param allowed true if access is allowed
    */
-  void SetAccess(const PTString& app_id, const PTString& module,
+  void SetAccess(const PTString& app_id,
+                 const application_manager::SeatLocation& zone,
+                 const PTString& module,
                  bool allowed);
 
   /**
@@ -125,9 +128,11 @@ class PolicyHandler :
 
   /**
    * Resets access by group name for all applications
+   * @param zone interior zone
    * @param module type
    */
-  void ResetAccessByModule(const std::string& module);
+  void ResetAccess(const application_manager::SeatLocation& zone,
+                   const std::string& module);
 
   /**
    * Sets device as primary device

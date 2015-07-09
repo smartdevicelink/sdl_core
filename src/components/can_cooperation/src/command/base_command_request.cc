@@ -439,10 +439,11 @@ void BaseCommandRequest::ProcessAccessResponse(
     Json::Value request;
     reader.parse(message_->json_message(), request);
     std::string module = ModuleType(request);
+    SeatLocation zone = InteriorZone(request);
     LOG4CXX_DEBUG(
         logger_,
         "Setting allowed access for " << app_->app_id() << " for " << module);
-    service_->SetAccess(app_->app_id(), module, allowed);
+    service_->SetAccess(app_->app_id(), zone, module, allowed);
     CheckHMILevel(application_manager::kManual, allowed);
     Execute();  // run child's logic
   } else {
