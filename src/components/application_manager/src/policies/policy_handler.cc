@@ -1371,7 +1371,7 @@ application_manager::TypeAccess PolicyHandler::CheckAccess(
     const PTString& module, const std::string& rpc,
     const std::vector<PTString>& params) {
   POLICY_LIB_CHECK(application_manager::TypeAccess::kNone);
-  policy::SeatLocation policy_zone {zone.col, zone.row, zone.level};
+  policy::SeatLocation policy_zone = {zone.col, zone.row, zone.level};
   policy::TypeAccess access = policy_manager_->CheckAccess(app_id, policy_zone,
                                                            module, rpc, params);
   return ConvertTypeAccess(access);
@@ -1382,7 +1382,7 @@ void PolicyHandler::SetAccess(const PTString& app_id,
                               const PTString& module,
                               bool allowed) {
   POLICY_LIB_CHECK_VOID();
-  policy::SeatLocation policy_zone {zone.col, zone.row, zone.level};
+  policy::SeatLocation policy_zone = {zone.col, zone.row, zone.level};
   policy_manager_->SetAccess(app_id, policy_zone, module, allowed);
 }
 
@@ -1394,7 +1394,7 @@ void PolicyHandler::ResetAccess(const PTString& app_id) {
 void PolicyHandler::ResetAccess(const application_manager::SeatLocation& zone,
                                 const std::string& module) {
   POLICY_LIB_CHECK_VOID();
-  policy::SeatLocation policy_zone {zone.col, zone.row, zone.level};
+  policy::SeatLocation policy_zone  = {zone.col, zone.row, zone.level};
   policy_manager_->ResetAccess(policy_zone, module);
 }
 

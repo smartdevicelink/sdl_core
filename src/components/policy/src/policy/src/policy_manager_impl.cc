@@ -1036,6 +1036,9 @@ void PolicyManagerImpl::SetAccess(const PTString& app_id,
   std::string dev_id = GetCurrentDeviceId(app_id);
   Subject who = {dev_id, app_id};
   Object what = {module_type, zone};
+  LOG4CXX_DEBUG(logger_,
+                "Driver's consent: " << who << ", " << what <<
+                " is " << std::boolalpha << allowed);
   if (allowed) {
     access_remote_->Allow(who, what);
   } else {

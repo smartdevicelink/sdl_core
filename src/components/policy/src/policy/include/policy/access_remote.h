@@ -45,7 +45,8 @@ struct SeatLocation {
   int col, row, level;
 };
 inline bool operator<(const SeatLocation& x, const SeatLocation& y) {
-  return x.col < y.col || x.row < y.row || x.level < y.level;
+  return (x.col < y.col) || (x.col == y.col && x.row < y.row) ||
+      (x.col == y.col && x.row == y.row && x.level < y.level);
 }
 inline bool operator==(const SeatLocation& x, const SeatLocation& y) {
   return x.col == y.col && x.row == y.row && x.level == y.level;
@@ -92,7 +93,7 @@ struct Subject {
   PTString app_id;
 };
 inline bool operator<(const Subject& x, const Subject& y) {
-  return x.dev_id < y.dev_id || x.app_id < y.app_id;
+  return x.dev_id < y.dev_id || (x.dev_id == y.dev_id && x.app_id < y.app_id);
 }
 inline bool operator==(const Subject& x, const Subject& y) {
   return x.dev_id == y.dev_id && x.app_id == y.app_id;
@@ -107,7 +108,7 @@ struct Object {
   SeatLocation zone;
 };
 inline bool operator<(const Object& x, const Object& y) {
-  return x.module < y.module || x.zone < y.zone;
+  return x.module < y.module || (x.module == y.module && x.zone < y.zone);
 }
 inline bool operator==(const Object& x, const Object& y) {
   return x.module == y.module && x.zone == y.zone;
