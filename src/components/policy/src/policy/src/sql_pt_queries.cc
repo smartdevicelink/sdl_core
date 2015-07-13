@@ -614,6 +614,8 @@ const std::string kCountInteriorZones =
 const std::string kSelectInteriorZones =
   "SELECT `id`, `name`, `col`, `row`, `level` FROM `interior_zone`";
 
+const std::string kDeleteInteriorZones = "DELETE FROM `interior_zone`";
+
 const std::string kInsertAccessModule =
   "INSERT INTO `access_module` (`name`, `zone_id`, `user_consent_needed`) "
   "  VALUES(?, ?, ?)";
@@ -622,6 +624,8 @@ const std::string kSelectAccessModules =
   "SELECT `id`, `name` FROM `access_module` "
   "  WHERE `zone_id` = ? AND `user_consent_needed` = ?";
 
+const std::string kDeleteAccessModules = "DELETE FROM `access_module`";
+
 const std::string kInsertRemoteRpc =
   "INSERT INTO `remote_rpc` (`module_id`, `name`, `parameter`) "
   "  VALUES(?, ?, ?)";
@@ -629,6 +633,8 @@ const std::string kInsertRemoteRpc =
 const std::string kSelectRemoteRpcs =
   "SELECT `name`, `parameter` FROM `remote_rpc` "
   "  WHERE `module_id` = ?";
+
+const std::string kDeleteRemoteRpc = "DELETE FROM `remote_rpc`";
 
 const std::string kInsertEndpoint =
   "INSERT INTO `endpoint` (`service`, `url`, `application_id`) "
