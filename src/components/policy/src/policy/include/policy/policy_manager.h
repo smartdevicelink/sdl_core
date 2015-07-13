@@ -434,11 +434,12 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     /**
      * Sets access to equipment of vehicle for application by RPC
      * @param app_id policy id application
+     * @param zone control
      * @param module type
      * @param allowed true if access is allowed
      */
-    virtual void SetAccess(const PTString& app_id, const PTString& module,
-                           bool allowed) = 0;
+    virtual void SetAccess(const PTString& app_id, const SeatLocation& zone,
+                           const PTString& module, bool allowed) = 0;
 
     /**
      * Resets access application to all resources
@@ -448,9 +449,11 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
     /**
      * Resets access by functional group for all applications
+     * @param zone control
      * @param module type
      */
-    virtual void ResetAccessByModule(const PTString& module) = 0;
+    virtual void ResetAccess(const SeatLocation& zone,
+                             const PTString& module) = 0;
 
     /**
      * Sets driver as primary device

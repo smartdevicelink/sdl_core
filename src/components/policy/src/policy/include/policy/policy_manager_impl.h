@@ -178,10 +178,10 @@ class PolicyManagerImpl : public PolicyManager {
                                    const PTString& module,
                                    const PTString& rpc,
                                    const RemoteControlParams& params);
-    virtual void SetAccess(const PTString& app_id, const PTString& module,
-                           bool allowed);
+    virtual void SetAccess(const PTString& app_id, const SeatLocation& zone,
+                           const PTString& module, bool allowed);
     virtual void ResetAccess(const PTString& app_id);
-    virtual void ResetAccessByModule(const PTString& module);
+    virtual void ResetAccess(const SeatLocation& zone, const PTString& module);
     virtual void SetPrimaryDevice(const PTString& dev_id);
     virtual void ResetPrimaryDevice();
     virtual PTString PrimaryDevice() const;
@@ -295,7 +295,6 @@ private:
 #ifdef SDL_REMOTE_CONTROL
     TypeAccess TryOccupy(const Subject& who, const Object& what);
     TypeAccess CheckDriverConsent(const Subject& who, const Object& what,
-                                  const SeatLocation& zone,
                                   const std::string& rpc,
                                   const RemoteControlParams& params);
 

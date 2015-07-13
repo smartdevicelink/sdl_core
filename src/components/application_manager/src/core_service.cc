@@ -97,13 +97,14 @@ TypeAccess CoreService::CheckAccess(const ApplicationId& app_id,
 }
 
 void CoreService::SetAccess(const ApplicationId& app_id,
+                            const SeatLocation& zone,
                             const std::string& module,
                             bool allowed) {
 #ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
     policy::PolicyHandler::instance()->SetAccess(
-        app->mobile_app_id(), module, allowed);
+        app->mobile_app_id(), zone, module, allowed);
   }
 #endif  // SDL_REMOTE_CONTROL
 }
@@ -117,9 +118,10 @@ void CoreService::ResetAccess(const ApplicationId& app_id) {
 #endif  // SDL_REMOTE_CONTROL
 }
 
-void CoreService::ResetAccessByModule(const std::string& module) {
+void CoreService::ResetAccess(const SeatLocation& zone,
+                              const std::string& module) {
 #ifdef SDL_REMOTE_CONTROL
-  policy::PolicyHandler::instance()->ResetAccessByModule(module);
+  policy::PolicyHandler::instance()->ResetAccess(zone, module);
 #endif  // SDL_REMOTE_CONTROL
 }
 

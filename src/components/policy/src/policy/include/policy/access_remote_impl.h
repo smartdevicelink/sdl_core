@@ -64,8 +64,7 @@ class AccessRemoteImpl : public AccessRemote {
   virtual TypeAccess Check(const Subject& who, const Object& what) const;
   virtual bool CheckModuleType(const PTString& app_id,
                                policy_table::ModuleType module) const;
-  virtual TypeAccess CheckParameters(policy_table::ModuleType module,
-                                     const SeatLocation& seat,
+  virtual TypeAccess CheckParameters(const Object& what,
                                      const std::string& rpc,
                                      const RemoteControlParams& params) const;
   virtual void SetDefaultHmiTypes(const std::string& app_id,
