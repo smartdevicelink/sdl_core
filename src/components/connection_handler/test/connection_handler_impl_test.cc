@@ -238,7 +238,7 @@ TEST_F(ConnectionHandlerTest, GetAppIdOnSessionKey) {
   uint32_t app_id = 0;
   const uint32_t testid = SessionHash(uid_, start_session_id_);
 
-  EXPECT_EQ(0, connection_handler_->GetDataOnSessionKey(connection_key_, &app_id));
+  EXPECT_EQ(0, connection_handler_->GetDataOnSessionKey(connection_key_, &app_id, NULL, NULL));
   EXPECT_EQ(testid, app_id);
 }
 

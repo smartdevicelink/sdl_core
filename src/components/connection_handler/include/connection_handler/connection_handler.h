@@ -166,9 +166,9 @@ class ConnectionHandler {
    * \param device_id Returned: DeviceID
    * \return int32_t -1 in case of error or 0 in case of success
    */
-  virtual int32_t GetDataOnSessionKey(uint32_t key, uint32_t* app_id = 0,
-                                      std::list<int32_t>* sessions_list = NULL,
-                                      uint32_t* device_id = 0) = 0;
+  virtual int32_t GetDataOnSessionKey(uint32_t key, uint32_t* app_id,
+                                      std::list<int32_t>* sessions_list,
+                                      uint32_t* device_id) = 0;
 
  protected:
   /**
