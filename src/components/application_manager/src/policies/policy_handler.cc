@@ -1377,6 +1377,12 @@ application_manager::TypeAccess PolicyHandler::CheckAccess(
   return ConvertTypeAccess(access);
 }
 
+bool PolicyHandler::CheckModule(const PTString& app_id,
+                                const PTString& module) {
+  POLICY_LIB_CHECK(false);
+  return policy_manager_->CheckModule(app_id, module);
+}
+
 void PolicyHandler::SetAccess(const PTString& app_id,
                               const application_manager::SeatLocation& zone,
                               const PTString& module,

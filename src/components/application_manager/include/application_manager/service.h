@@ -86,6 +86,15 @@ class Service {
                                  const std::vector<std::string>& params) = 0;
 
   /**
+   * Checks access to module for application
+   * @param app_id id of application
+   * @param module type
+   * @return true if module is allowed for application
+   */
+  virtual bool CheckModule(const ApplicationId& app_id,
+                           const std::string& module) = 0;
+
+  /**
    * Sets access to functional group which contains given RPC for application
    * @param app_id id of application
    * @param zone interior zone

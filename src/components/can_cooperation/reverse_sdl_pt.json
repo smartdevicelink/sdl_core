@@ -35,12 +35,12 @@
                   },
                   "driver_allow": {
                     "RADIO": {
-                      "GetInteriorVehicleData": ["frequencyInteger", "frequencyFraction", "band"],
+                      "GetInteriorVehicleData": [],
                       "SetInteriorVehicleData": ["frequencyInteger", "frequencyFraction", "band"]
                     },
                     "CLIMATE": {
                       "ButtonPress": [],
-                      "GetInteriorVehicleData": ["fanSpeed", "desiredTemp", "temperatureUnit"],
+                      "GetInteriorVehicleData": [],
                       "SetInteriorVehicleData": ["fanSpeed", "desiredTemp", "temperatureUnit"]
                     }
                   }

@@ -139,12 +139,9 @@ bool BaseCommandNotification::CheckPolicy(
   Json::Reader reader;
   LOG4CXX_DEBUG(logger_, "Notification: " << message->json_message());
   reader.parse(message->json_message(), value);
-  application_manager::TypeAccess access = service_->CheckAccess(
-      app->app_id(), InteriorZone(value), ModuleType(value),
-      message->function_name(), ControlData(value));
 
   return permission == mobile_apis::Result::eType::SUCCESS
-      && access == application_manager::TypeAccess::kAllowed;
+      && service_->CheckModule(app->app_id(), ModuleType(value));
 }
 
 std::string BaseCommandNotification::ModuleType(const Json::Value& message) {

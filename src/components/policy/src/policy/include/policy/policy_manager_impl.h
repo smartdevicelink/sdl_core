@@ -178,6 +178,7 @@ class PolicyManagerImpl : public PolicyManager {
                                    const PTString& module,
                                    const PTString& rpc,
                                    const RemoteControlParams& params);
+    virtual bool CheckModule(const PTString& app_id, const PTString& module);
     virtual void SetAccess(const PTString& app_id, const SeatLocation& zone,
                            const PTString& module, bool allowed);
     virtual void ResetAccess(const PTString& app_id);

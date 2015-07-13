@@ -109,6 +109,14 @@ class PolicyHandler :
       const std::vector<PTString>& params);
 
   /**
+   * Checks access to module for application
+   * @param app_id policy id application
+   * @param module
+   * @return true if module is allowed for application
+   */
+  bool CheckModule(const PTString& app_id, const PTString& module);
+
+  /**
    * Sets access to equipment of vehicle for application by RPC
    * @param app_id policy id application
    * @param zone interior zone

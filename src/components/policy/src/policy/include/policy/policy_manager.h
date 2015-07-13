@@ -432,6 +432,15 @@ class PolicyManager : public usage_statistics::StatisticsManager {
                                    const RemoteControlParams& params) = 0;
 
     /**
+     * Checks access to module for application
+     * @param app_id policy id application
+     * @param module
+     * @return true if module is allowed for application
+     */
+    virtual bool CheckModule(const PTString& app_id,
+                             const PTString& module) = 0;
+
+    /**
      * Sets access to equipment of vehicle for application by RPC
      * @param app_id policy id application
      * @param zone control
