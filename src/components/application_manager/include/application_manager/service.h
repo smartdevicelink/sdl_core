@@ -88,10 +88,12 @@ class Service {
   /**
    * Sets access to functional group which contains given RPC for application
    * @param app_id id of application
+   * @param zone interior zone
    * @param module type
    * @param allowed true if driver has given access
    */
   virtual void SetAccess(const ApplicationId& app_id,
+                         const SeatLocation& zone,
                          const std::string& module,
                          bool allowed) = 0;
 
@@ -102,10 +104,12 @@ class Service {
   virtual void ResetAccess(const ApplicationId& app_id) = 0;
 
   /**
-   * Resets access by group name for all applications
+   * Resets access by module and interior zone for all applications
+   * @param zone interior zone
    * @param module type
    */
-  virtual void ResetAccessByModule(const std::string& module) = 0;
+  virtual void ResetAccess(const SeatLocation& zone,
+                           const std::string& module) = 0;
 
   /**
    * Sets device as primary device

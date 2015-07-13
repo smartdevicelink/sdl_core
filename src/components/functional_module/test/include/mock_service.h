@@ -63,12 +63,14 @@ class MockService : public Service {
                  const std::string& module,
                  const std::string& rpc,
                  const std::vector<std::string>& params));
-  MOCK_METHOD3(SetAccess,
+  MOCK_METHOD4(SetAccess,
       void(const ApplicationId& app_id,
+           const SeatLocation& zone,
            const std::string& module,
            bool allowed));
   MOCK_METHOD1(ResetAccess, void(const ApplicationId& app_id));
-  MOCK_METHOD1(ResetAccessByModule, void(const std::string& module));
+  MOCK_METHOD2(ResetAccess, void(const SeatLocation& zone,
+                                 const std::string& module));
   MOCK_METHOD1(SetPrimaryDevice, void(const uint32_t dev_id));
   MOCK_METHOD0(ResetPrimaryDevice, void());
   MOCK_CONST_METHOD0(PrimaryDevice, uint32_t());

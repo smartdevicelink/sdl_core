@@ -45,14 +45,15 @@ struct SeatLocation {
   int col, row, level;
 };
 inline bool operator<(const SeatLocation& x, const SeatLocation& y) {
-  return x.col < y.col || x.row < y.row || x.level < y.level;
+  return (x.col < y.col) || (x.col == y.col && x.row < y.row) ||
+      (x.col == y.col && x.row == y.row && x.level < y.level);
 }
 inline bool operator==(const SeatLocation& x, const SeatLocation& y) {
   return x.col == y.col && x.row == y.row && x.level == y.level;
 }
 inline bool operator==(const SeatLocation& x,
                        const policy_table::InteriorZone& y) {
-  return x == SeatLocation{y.col, y.row, y.level};
+  return x == SeatLocation { y.col, y.row, y.level };
 }
 inline bool operator==(const policy_table::InteriorZone& x,
                        const SeatLocation& y) {
@@ -71,12 +72,19 @@ enum TypeAccess {
 };
 inline std::ostream& operator<<(std::ostream& output, TypeAccess x) {
   output << "Access: ";
-      switch (x) {
-        case kDisallowed: output << "DISALLOWED"; break;
-        case kAllowed: output << "ALLOWED"; break;
-        case kManual: output << "MANUAL"; break;
-        default: output << "Error: Unknown type";
-      }
+  switch (x) {
+    case kDisallowed:
+      output << "DISALLOWED";
+      break;
+    case kAllowed:
+      output << "ALLOWED";
+      break;
+    case kManual:
+      output << "MANUAL";
+      break;
+    default:
+      output << "Error: Unknown type";
+  }
   return output;
 }
 
@@ -85,7 +93,7 @@ struct Subject {
   PTString app_id;
 };
 inline bool operator<(const Subject& x, const Subject& y) {
-  return x.dev_id < y.dev_id || x.app_id < y.app_id;
+  return x.dev_id < y.dev_id || (x.dev_id == y.dev_id && x.app_id < y.app_id);
 }
 inline bool operator==(const Subject& x, const Subject& y) {
   return x.dev_id == y.dev_id && x.app_id == y.app_id;
@@ -97,15 +105,17 @@ inline std::ostream& operator<<(std::ostream& output, const Subject& who) {
 
 struct Object {
   policy_table::ModuleType module;
+  SeatLocation zone;
 };
 inline bool operator<(const Object& x, const Object& y) {
-  return x.module < y.module;
+  return x.module < y.module || (x.module == y.module && x.zone < y.zone);
 }
 inline bool operator==(const Object& x, const Object& y) {
-  return x.module == y.module;
+  return x.module == y.module && x.zone == y.zone;
 }
 inline std::ostream& operator<<(std::ostream& output, const Object& what) {
-  output << "Object(module:" << EnumToJsonString(what.module) << ")";
+  output << "Object(module:" << EnumToJsonString(what.module) << ", "
+         << what.zone << ")";
   return output;
 }
 
@@ -202,15 +212,14 @@ class AccessRemote {
 
   /**
    * Checks permissions for parameters
-   * @param module type
-   * @param zone
+   * @param what object is module type and interior zone
    * @param params
    * @return true allowed if access was given, disallowed if access was denied
    * manual if need to ask driver
    */
   virtual TypeAccess CheckParameters(
-      policy_table::ModuleType module, const SeatLocation& seat,
-      const std::string& rpc, const RemoteControlParams& params) const = 0;
+      const Object& what, const std::string& rpc,
+      const RemoteControlParams& params) const = 0;
 
   /**
    * Sets HMI types if application has default policy permissions
@@ -255,8 +264,8 @@ class AccessRemote {
    * @return true if changing current state updates are present
    */
   virtual bool CheckPTUUpdatesChange(
-    const utils::SharedPtr<policy_table::Table> pt_update,
-    const utils::SharedPtr<policy_table::Table> snapshot) = 0;
+      const utils::SharedPtr<policy_table::Table> pt_update,
+      const utils::SharedPtr<policy_table::Table> snapshot) = 0;
 };
 
 }  // namespace policy
