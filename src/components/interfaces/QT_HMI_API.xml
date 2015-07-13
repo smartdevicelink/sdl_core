@@ -176,6 +176,21 @@
       <element name="NO-NO" internal_name="NO_NO">
         <description>Norwegian - Norway</description>
       </element>
+      <element name="NL-BE" internal_name="NL_BE">
+        <description>Dutch (Flemish) - Belgium</description>
+      </element>
+      <element name="EL-GR" internal_name="EL_GR">
+        <description>Greek - Greece</description>
+      </element>
+      <element name="HU-HU" internal_name="HU_HU">
+        <description>Hungarian - Hungary</description>
+      </element>
+      <element name="FI-FI" internal_name="FI_FI">
+        <description>Finnish - Finland</description>
+      </element>
+      <element name="SK-SK" internal_name="SK_SK">
+        <description>Slovak - Slovakia</description>
+      </element>
     </enum>
     <enum name="SoftButtonType">
       <description>Contains information about the SoftButton capabilities.</description>
