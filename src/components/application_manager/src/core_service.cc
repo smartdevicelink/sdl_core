@@ -96,6 +96,18 @@ TypeAccess CoreService::CheckAccess(const ApplicationId& app_id,
   return kNone;
 }
 
+bool CoreService::CheckModule(const ApplicationId& app_id,
+                              const std::string& module) {
+#ifdef SDL_REMOTE_CONTROL
+  ApplicationSharedPtr app = GetApplication(app_id);
+  if (app) {
+    return policy::PolicyHandler::instance()->CheckModule(app->mobile_app_id(),
+                                                          module);
+  }
+#endif  // SDL_REMOTE_CONTROL
+  return false;
+}
+
 void CoreService::SetAccess(const ApplicationId& app_id,
                             const SeatLocation& zone,
                             const std::string& module,

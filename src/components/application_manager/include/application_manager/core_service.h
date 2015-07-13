@@ -86,6 +86,15 @@ class CoreService : public Service {
                                  const std::vector<std::string>& params);
 
   /**
+   * Checks access to module for application
+   * @param app_id id of application
+   * @param module type
+   * @return true if module is allowed for application
+   */
+  virtual bool CheckModule(const ApplicationId& app_id,
+                           const std::string& module);
+
+  /**
    * Sets access to functional group which contains given RPC for application
    * @param app_id id of application
    * @param zone interior zone

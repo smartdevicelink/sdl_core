@@ -992,6 +992,14 @@ TypeAccess PolicyManagerImpl::CheckAccess(
   return TypeAccess::kDisallowed;
 }
 
+bool PolicyManagerImpl::CheckModule(const PTString& app_id,
+                                    const PTString& module) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  policy_table::ModuleType module_type;
+  return EnumFromJsonString(module, &module_type)
+      && access_remote_->CheckModuleType(app_id, module_type);
+}
+
 TypeAccess PolicyManagerImpl::TryOccupy(const Subject& who,
                                         const Object& what) {
   LOG4CXX_AUTO_TRACE(logger_);

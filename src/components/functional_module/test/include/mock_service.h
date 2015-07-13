@@ -63,6 +63,8 @@ class MockService : public Service {
                  const std::string& module,
                  const std::string& rpc,
                  const std::vector<std::string>& params));
+  MOCK_METHOD2(CheckModule, bool(const ApplicationId& app_id,
+                                 const std::string& module));
   MOCK_METHOD4(SetAccess,
       void(const ApplicationId& app_id,
            const SeatLocation& zone,
