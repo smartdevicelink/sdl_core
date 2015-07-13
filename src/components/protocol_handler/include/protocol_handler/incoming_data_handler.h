@@ -105,6 +105,7 @@ class IncomingDataHandler {
   ConnectionsDataMap connections_data_;
   ProtocolPacket::ProtocolHeader header_;
   const  ProtocolPacket::ProtocolHeaderValidator *validator_;
+  bool last_portion_of_data_was_malformed_;
   DISALLOW_COPY_AND_ASSIGN(IncomingDataHandler);
 };
 }  // namespace protocol_handler

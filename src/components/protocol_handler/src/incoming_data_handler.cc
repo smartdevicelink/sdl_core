@@ -38,7 +38,7 @@ namespace protocol_handler {
 CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
 
 IncomingDataHandler::IncomingDataHandler()
-  : header_(), validator_(NULL) {}
+  : header_(), validator_(NULL), last_portion_of_data_was_malformed_(false) {}
 
 void IncomingDataHandler::set_validator(
   const ProtocolPacket::ProtocolHeaderValidator *const validator) {
@@ -92,7 +92,7 @@ std::list<ProtocolFramePtr> IncomingDataHandler::ProcessData(
       LOG4CXX_WARN(logger_, "No packets have been created.");
     }
   }
-  if (*malformed_occurrence > 0u) {
+  if (*malformed_occurrence > 0u || last_portion_of_data_was_malformed_) {
     *result = RESULT_MALFORMED_OCCURS;
   } else {
     *result = RESULT_OK;
@@ -135,9 +135,9 @@ RESULT_CODE IncomingDataHandler::CreateFrame(
     size_t &malformed_occurrence,
     const transport_manager::ConnectionUID connection_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  bool correct_frame_occurs = true;
   std::vector<uint8_t>::iterator data_it = incoming_data.begin();
   size_t data_size = incoming_data.size();
+
   while (data_size >= MIN_HEADER_SIZE) {
     header_.deserialize(&*data_it, data_size);
     const RESULT_CODE validate_result =
@@ -145,10 +145,11 @@ RESULT_CODE IncomingDataHandler::CreateFrame(
 
     if (validate_result != RESULT_OK) {
       LOG4CXX_WARN(logger_, "Packet validation failed");
-      if(correct_frame_occurs) {
+      if (!last_portion_of_data_was_malformed_) {
         ++malformed_occurrence;
+        LOG4CXX_DEBUG(logger_, "Malformed message found " << malformed_occurrence);
       }
-      correct_frame_occurs = false;
+      last_portion_of_data_was_malformed_ = true;
       ++data_it;
       --data_size;
       LOG4CXX_DEBUG(logger_, "Moved to the next byte " << std::hex
@@ -178,8 +179,10 @@ RESULT_CODE IncomingDataHandler::CreateFrame(
       incoming_data.erase(incoming_data.begin(), data_it);
       return RESULT_FAIL;
     }
+
     out_frames.push_back(frame);
-    correct_frame_occurs = true;
+    last_portion_of_data_was_malformed_ = false;
+    LOG4CXX_DEBUG(logger_, "Frame added");
 
     data_it += packet_size;
     data_size -= packet_size;
