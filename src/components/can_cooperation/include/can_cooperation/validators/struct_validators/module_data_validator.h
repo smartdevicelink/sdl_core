@@ -61,7 +61,6 @@ class ModuleDataValidator : public Validator, public utils::Singleton<ModuleData
   DISALLOW_COPY_AND_ASSIGN(ModuleDataValidator);
   FRIEND_BASE_SINGLETON_CLASS(ModuleDataValidator);
   ModuleDataValidator();
-  ~ModuleDataValidator() {};
 
   ValidationScope module_type_;
 };
