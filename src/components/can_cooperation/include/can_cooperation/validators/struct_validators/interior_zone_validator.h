@@ -61,7 +61,6 @@ class InteriorZoneValidator : public Validator, public utils::Singleton<Interior
   DISALLOW_COPY_AND_ASSIGN(InteriorZoneValidator);
   FRIEND_BASE_SINGLETON_CLASS(InteriorZoneValidator);
   InteriorZoneValidator();
-  ~InteriorZoneValidator() {};
 
   ValidationScope col_;
   ValidationScope row_;

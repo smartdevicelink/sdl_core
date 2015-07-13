@@ -61,7 +61,6 @@ class RadioControlDataValidator : public Validator, public utils::Singleton<Radi
   DISALLOW_COPY_AND_ASSIGN(RadioControlDataValidator);
   FRIEND_BASE_SINGLETON_CLASS(RadioControlDataValidator);
   RadioControlDataValidator();
-  ~RadioControlDataValidator() {};
 
   ValidationScope frequency_integer_;
   ValidationScope frequency_fraction_;

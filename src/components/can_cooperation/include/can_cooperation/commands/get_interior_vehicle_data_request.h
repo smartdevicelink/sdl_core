@@ -70,11 +70,6 @@ class GetInteriorVehicleDataRequest : public BaseCommandRequest {
   void OnEvent(const event_engine::Event<application_manager::MessagePtr,
                 std::string>& event);
 
-  /**
-   * @brief GetInteriorVehicleDataRequest class destructor
-   */
-  virtual ~GetInteriorVehicleDataRequest();
-
  protected:
   virtual std::string ModuleType(const Json::Value& message);
   virtual Json::Value GetInteriorZone(const Json::Value& message);

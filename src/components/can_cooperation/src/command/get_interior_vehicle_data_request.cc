@@ -53,9 +53,6 @@ GetInteriorVehicleDataRequest::GetInteriorVehicleDataRequest(
   : BaseCommandRequest(message) {
 }
 
-GetInteriorVehicleDataRequest::~GetInteriorVehicleDataRequest() {
-}
-
 void GetInteriorVehicleDataRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -74,9 +71,7 @@ void GetInteriorVehicleDataRequest::Execute() {
       return;
     }
 
-    CANAppExtensionPtr extension = application_manager::AppExtensionPtr::
-        static_pointer_cast<CANAppExtension>(app->QueryInterface(
-            CANModule::instance()->GetModuleID()));
+    CANAppExtensionPtr extension = GetAppExtension(app);
 
     if (params[kSubscribe].asBool()){
       extension->SubscribeToInteriorVehicleData(params[kModuleDescription]);

@@ -62,7 +62,6 @@ class SetInteriorVehicleDataRequestValidator : public Validator,
   DISALLOW_COPY_AND_ASSIGN(SetInteriorVehicleDataRequestValidator);
   FRIEND_BASE_SINGLETON_CLASS(SetInteriorVehicleDataRequestValidator);
   SetInteriorVehicleDataRequestValidator();
-  ~SetInteriorVehicleDataRequestValidator() {};
 };
 
 }  // namespace valdiators
