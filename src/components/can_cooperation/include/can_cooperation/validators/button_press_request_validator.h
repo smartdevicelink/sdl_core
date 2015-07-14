@@ -62,7 +62,6 @@ class ButtonPressRequestValidator : public Validator,
   DISALLOW_COPY_AND_ASSIGN(ButtonPressRequestValidator);
   FRIEND_BASE_SINGLETON_CLASS(ButtonPressRequestValidator);
   ButtonPressRequestValidator();
-  ~ButtonPressRequestValidator() {};
 
   ValidationScope module_type_;
   ValidationScope button_name_;

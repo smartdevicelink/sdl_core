@@ -62,7 +62,6 @@ class GetInteriorVehicleDataCapabilitiesRequestValidator : public Validator,
   DISALLOW_COPY_AND_ASSIGN(GetInteriorVehicleDataCapabilitiesRequestValidator);
   FRIEND_BASE_SINGLETON_CLASS(GetInteriorVehicleDataCapabilitiesRequestValidator);
   GetInteriorVehicleDataCapabilitiesRequestValidator();
-  ~GetInteriorVehicleDataCapabilitiesRequestValidator() {};
 
   ValidationScope module_type_;
 };

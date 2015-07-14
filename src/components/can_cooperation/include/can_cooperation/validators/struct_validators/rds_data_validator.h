@@ -61,7 +61,6 @@ class RdsDataValidator : public Validator, public utils::Singleton<RdsDataValida
   DISALLOW_COPY_AND_ASSIGN(RdsDataValidator);
   FRIEND_BASE_SINGLETON_CLASS(RdsDataValidator);
   RdsDataValidator();
-  ~RdsDataValidator() {};
 
   ValidationScope ps_;
   ValidationScope rt_;

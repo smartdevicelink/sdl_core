@@ -61,7 +61,6 @@ class ClimateControlDataValidator : public Validator, public utils::Singleton<Cl
   DISALLOW_COPY_AND_ASSIGN(ClimateControlDataValidator);
   FRIEND_BASE_SINGLETON_CLASS(ClimateControlDataValidator);
   ClimateControlDataValidator();
-  ~ClimateControlDataValidator() {};
 
   ValidationScope fan_speed_;
   ValidationScope current_temp_;

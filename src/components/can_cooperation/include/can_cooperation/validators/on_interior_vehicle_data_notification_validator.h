@@ -60,7 +60,6 @@ class OnInteriorVehicleDataNotificationValidator : public Validator,
   DISALLOW_COPY_AND_ASSIGN(OnInteriorVehicleDataNotificationValidator);
   FRIEND_BASE_SINGLETON_CLASS(OnInteriorVehicleDataNotificationValidator);
   OnInteriorVehicleDataNotificationValidator();
-  ~OnInteriorVehicleDataNotificationValidator() {};
 };
 
 }  // namespace valdiators
