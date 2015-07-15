@@ -189,6 +189,8 @@ class PolicyManagerImpl : public PolicyManager {
     virtual bool GetRemoteControl() const;
     virtual void OnChangedPrimaryDevice(const std::string& application_id);
     virtual void OnChangedRemoteControl(const std::string& application_id);
+    virtual void SendAppPermissionsChanged(const std::string& device_id,
+      const std::string& application_id);
 #endif  // SDL_REMOTE_CONTROL
 
   protected:

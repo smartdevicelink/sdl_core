@@ -108,6 +108,14 @@ class PolicyListener {
    * @param new_consent New value of country_consent
    */
    virtual void OnRemoteAllowedChanged(bool new_consent) = 0;
+
+   /*
+   * @brief Notifies Remote apps about change in permissions
+   * @param device_id Device on which app is running
+   * @param application_id ID of app whose permissions are changed
+   */
+  virtual void OnRemoteAppPermissionsChanged(const std::string& device_id,
+      const std::string& application_id) = 0;
 #endif  // SDL_REMOTE_CONTROL
 };
 }  //  namespace policy

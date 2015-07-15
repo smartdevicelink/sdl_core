@@ -77,6 +77,7 @@ PolicyManagerImpl::PolicyManagerImpl()
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
   listener_ = listener;
   update_status_manager_.set_listener(listener);
+  access_remote_->set_listener(listener);
 }
 
 utils::SharedPtr<policy_table::Table> PolicyManagerImpl::Parse(
@@ -151,14 +152,14 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
   CheckPermissionsChanges(pt_update, policy_table_snapshot);
 
 #ifdef SDL_REMOTE_CONTROL
-  // Check country_consent
-  bool has_changed = access_remote_->CheckPTUUpdatesChange(pt_update,
-                                        policy_table_snapshot);
   access_remote_->Init();
-  if (has_changed) {
-    listener()->OnRemoteAllowedChanged(
-      *pt_update->policy_table.module_config.country_consent_passengersRC);
-  }
+  // Check PTU changes
+  //CheckPTUUpdatesChange(pt_update, policy_table_snapshot, access_remote_);
+  access_remote_->CheckPTURemoteCtrlChange(pt_update, policy_table_snapshot);
+
+  access_remote_->CheckPTUZonesChange(pt_update, policy_table_snapshot);
+
+  access_remote_->CheckPTUGroupsChange(pt_update, policy_table_snapshot);
 #endif  // SDL_REMOTE_CONTROL
 
   std::map<std::string, StringArray> app_hmi_types;
@@ -1121,9 +1122,7 @@ void PolicyManagerImpl::OnChangedPrimaryDevice(
     }
   }
 
-  Permissions notification_data;
-  GetPermissions(device_id, application_id, &notification_data);
-  listener()->OnPermissionsUpdated(application_id, notification_data);
+  SendAppPermissionsChanged(device_id, application_id);
 }
 
 void PolicyManagerImpl::OnChangedRemoteControl(
@@ -1157,6 +1156,11 @@ void PolicyManagerImpl::OnChangedRemoteControl(
     }
   }
 
+  SendAppPermissionsChanged(device_id, application_id);
+}
+
+void PolicyManagerImpl::SendAppPermissionsChanged(const std::string& device_id,
+      const std::string& application_id) {
   Permissions notification_data;
   GetPermissions(device_id, application_id, &notification_data);
   listener()->OnPermissionsUpdated(application_id, notification_data);

@@ -53,7 +53,7 @@ inline bool operator==(const SeatLocation& x, const SeatLocation& y) {
 }
 inline bool operator==(const SeatLocation& x,
                        const policy_table::InteriorZone& y) {
-  return x == SeatLocation { y.col, y.row, y.level };
+  return x == SeatLocation{y.col, y.row, y.level};
 }
 inline bool operator==(const policy_table::InteriorZone& x,
                        const SeatLocation& y) {
@@ -72,7 +72,7 @@ enum TypeAccess {
 };
 inline std::ostream& operator<<(std::ostream& output, TypeAccess x) {
   output << "Access: ";
-  switch (x) {
+      switch (x) {
     case kDisallowed:
       output << "DISALLOWED";
       break;
@@ -84,7 +84,7 @@ inline std::ostream& operator<<(std::ostream& output, TypeAccess x) {
       break;
     default:
       output << "Error: Unknown type";
-  }
+      }
   return output;
 }
 
@@ -120,11 +120,17 @@ inline std::ostream& operator<<(std::ostream& output, const Object& what) {
 }
 
 typedef std::vector<PTString> RemoteControlParams;
+class PolicyListener;
 
 class AccessRemote {
  public:
   virtual ~AccessRemote() {
   }
+
+  /*
+   * Sets pointer to listener to changes in PT
+   */
+  virtual void set_listener(PolicyListener* listener) = 0;
 
   /**
    * Initializes oneself
@@ -263,9 +269,29 @@ class AccessRemote {
    * @param snapshot PTS
    * @return true if changing current state updates are present
    */
-  virtual bool CheckPTUUpdatesChange(
-      const utils::SharedPtr<policy_table::Table> pt_update,
-      const utils::SharedPtr<policy_table::Table> snapshot) = 0;
+  virtual bool CheckPTURemoteCtrlChange(
+    const utils::SharedPtr<policy_table::Table> pt_update,
+    const utils::SharedPtr<policy_table::Table> snapshot) = 0;
+
+  /**
+   * Checks if PTU contains some updates in equipment section
+   * that requires reseting User's consent
+   * @param pt_update PTU
+   * @param snapshot PTS
+   */
+  virtual void CheckPTUZonesChange(
+    const utils::SharedPtr<policy_table::Table> pt_update,
+    const utils::SharedPtr<policy_table::Table> snapshot) = 0;
+
+  /**
+   * Checks if PTU contains some updates in Reverse Mobile App groups
+   * that need to be reported to this Reverse Mobile App
+   * @param pt_update PTU
+   * @param snapshot PTS
+   */
+  virtual void CheckPTUGroupsChange(
+    const utils::SharedPtr<policy_table::Table> pt_update,
+    const utils::SharedPtr<policy_table::Table> snapshot) = 0;
 };
 
 }  // namespace policy

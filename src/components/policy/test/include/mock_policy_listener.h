@@ -83,6 +83,9 @@ class MockPolicyListener : public PolicyListener {
   MOCK_METHOD2(OnUpdateHMILevel, void(const std::string& policy_app_id,
                                       const std::string& hmi_level));
   MOCK_METHOD1(OnRemoteAllowedChanged, void(bool new_consent));
+  MOCK_METHOD2(OnRemoteAppPermissionsChanged, void(
+      const std::string& device_id,
+      const std::string& application_id));
 };
 
 }  // namespace policy

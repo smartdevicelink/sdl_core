@@ -167,6 +167,14 @@ class PolicyHandler :
    * @param new_consent New value of remote permission
    */
   void OnRemoteAllowedChanged(bool new_consent);
+
+  /*
+   * @brief Notifies Remote apps about change in permissions
+   * @param device_id Device on which app is running
+   * @param application_id ID of app whose permissions are changed
+   */
+  void OnRemoteAppPermissionsChanged(const std::string& device_id,
+      const std::string& application_id);
 #endif  // SDL_REMOTE_CONTROL
 
   uint32_t GetNotificationsNumber(const std::string& priority);

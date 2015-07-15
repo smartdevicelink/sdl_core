@@ -1,4 +1,4 @@
-﻿/*
+/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -36,6 +36,10 @@
 #include "utils/logger.h"
 #include "policy/policy_helper.h"
 #include "policy/policy_manager_impl.h"
+
+#ifdef SDL_REMOTE_CONTROL
+#include "policy/access_remote_impl.h"
+#endif  // SDL_REMOTE_CONTROL
 
 namespace policy {
 
