@@ -205,6 +205,16 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
     }
   }
 
+
+  for (policy_table::ApplicationPolicies::iterator it =
+        pt_->policy_table.app_policies.begin();
+        pt_->policy_table.app_policies.end() != it;
+        ++it) {
+    if (IsDefaultPolicy(it->first)) {
+      SetDefaultPolicy(it->first);
+    }
+  }
+
   pt_->policy_table.module_config.country_consent_passengersRC =
       update_pt.policy_table.module_config.country_consent_passengersRC;
   pt_->policy_table.module_config.equipment =

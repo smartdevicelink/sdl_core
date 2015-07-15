@@ -160,8 +160,15 @@ struct ProccessAppGroups {
       LOG4CXX_DEBUG(logger_, "Ignore non-reverse app");
       return;
     }
-    policy_table::ApplicationPolicies::const_iterator it =
-        reference_.find(app.first);
+
+    policy_table::ApplicationPolicies::const_iterator it;
+    if (access_remote_->cache_->IsDefaultPolicy(app.first)) {
+      LOG4CXX_DEBUG(logger_, "App remained with default policies;"
+          << " comparing accordingly.");
+      it = reference_.find(kDefaultId);
+    } else {
+      it = reference_.find(app.first);
+    }
 
     if (reference_.end() != it) {
       bool is_primary = false;
@@ -538,7 +545,7 @@ void AccessRemoteImpl::CheckPTUGroupsChange(
   }
   policy_table::ApplicationPolicies& new_apps = pt_update->policy_table.app_policies;
   policy_table::ApplicationPolicies& old_apps = snapshot->policy_table.app_policies;
-  std::for_each(new_apps.begin(), new_apps.end(), ProccessAppGroups(old_apps, this));
+  std::for_each(old_apps.begin(), old_apps.end(), ProccessAppGroups(new_apps, this));
 }
 
 }  // namespace policy
