@@ -38,7 +38,10 @@ namespace protocol_handler {
 CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
 
 IncomingDataHandler::IncomingDataHandler()
-  : header_(), validator_(NULL), last_portion_of_data_was_malformed_(false) {}
+  : header_(),
+    validator_(NULL),
+    last_portion_of_data_was_malformed_(false)
+    {}
 
 void IncomingDataHandler::set_validator(
   const ProtocolPacket::ProtocolHeaderValidator *const validator) {
@@ -182,7 +185,7 @@ RESULT_CODE IncomingDataHandler::CreateFrame(
 
     out_frames.push_back(frame);
     last_portion_of_data_was_malformed_ = false;
-    LOG4CXX_DEBUG(logger_, "Frame added");
+    LOG4CXX_DEBUG(logger_, "Frame added. " << "Connection ID " << connection_id);
 
     data_it += packet_size;
     data_size -= packet_size;
