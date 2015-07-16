@@ -65,24 +65,40 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "MobileMessageHandler")
 
 application_manager::Message* MobileMessageHandler::HandleIncomingMessageProtocol(
   const protocol_handler::RawMessagePtr message) {
+  DCHECK_OR_RETURN(message, NULL);
   application_manager::Message* out_message = NULL;
-  if (message->protocol_version() == ProtocolVersion::kV1) {
+  switch (message->protocol_version()) {
+  case ProtocolVersion::kV1:
+    LOG4CXX_DEBUG(logger_, "Protocol version - V1");
     out_message = MobileMessageHandler::HandleIncomingMessageProtocolV1(message);
-  } else if ((message->protocol_version() == ProtocolVersion::kV2) ||
-      (message->protocol_version() == ProtocolVersion::kV3) ||
-      (message->protocol_version() == ProtocolVersion::kV4)) {
+    break;
+  case ProtocolVersion::kV2:
+    LOG4CXX_DEBUG(logger_, "Protocol version - V2");
     out_message = MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
-  } else {
-    return NULL;
+    break;
+  case ProtocolVersion::kV3:
+    LOG4CXX_DEBUG(logger_, "Protocol version - V3");
+    out_message = MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
+    break;
+  case ProtocolVersion::kV4:
+    LOG4CXX_DEBUG(logger_, "Protocol version - V4");
+    out_message = MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
+    break;
+  default:
+    LOG4CXX_WARN(logger_, "Can't recognise protocol version");
+    out_message = NULL;
+    break;
   }
-
+  if (out_message == NULL) {
+      LOG4CXX_WARN(logger_, "Message is NULL");
+      return NULL;
+  }
   LOG4CXX_DEBUG(logger_, "Incoming RPC_INFO: " <<
-                (out_message->connection_key() >> 16) <<", "<<
-                messageTypes[out_message->type()] <<", "<<
-                out_message->function_id() << ", " <<
-                out_message->correlation_id() << ", " <<
-                out_message->json_message());
-
+                         (out_message->connection_key() >> 16) <<", "<<
+                         messageTypes[out_message->type()] <<", "<<
+                         out_message->function_id() << ", " <<
+                         out_message->correlation_id() << ", " <<
+                         out_message->json_message());
   return out_message;
 }
 
@@ -111,8 +127,7 @@ protocol_handler::RawMessage* MobileMessageHandler::HandleOutgoingMessageProtoco
 application_manager::Message*
 MobileMessageHandler::HandleIncomingMessageProtocolV1(
   const ::protocol_handler::RawMessagePtr message) {
-  LOG4CXX_INFO(logger_,
-               "MobileMessageHandler HandleIncomingMessageProtocolV1()");
+  LOG4CXX_AUTO_TRACE(logger_);
   application_manager::Message* outgoing_message =
     new application_manager::Message(
     protocol_handler::MessagePriority::FromServiceType(
@@ -142,9 +157,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV1(
 application_manager::Message*
 MobileMessageHandler::HandleIncomingMessageProtocolV2(
   const ::protocol_handler::RawMessagePtr message) {
-  LOG4CXX_INFO(logger_,
-               "MobileMessageHandler HandleIncomingMessageProtocolV2()");
-
+  LOG4CXX_AUTO_TRACE(logger_);
   utils::BitStream message_bytestream(message->data(), message->data_size());
   protocol_handler::ProtocolPayloadV2 payload;
   protocol_handler::Extract(&message_bytestream, &payload,
