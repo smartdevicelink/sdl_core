@@ -53,7 +53,7 @@ struct Erase {
   explicit Erase(const Subject& who)
       : who_(who) {
   }
-  void operator ()(AccessRemoteImpl::AccessControlList::value_type& row) const {
+  void operator() (AccessRemoteImpl::AccessControlList::value_type& row) const {
     row.second.erase(who_);
   }
 };
@@ -65,14 +65,14 @@ struct IsTypeAccess {
   explicit IsTypeAccess(const TypeAccess& type)
       : type_(type) {
   }
-  bool operator ()(
+  bool operator() (
       const AccessRemoteImpl::AccessControlRow::value_type& item) const {
     return item.second == type_;
   }
 };
 
 struct ToHMIType {
-  policy_table::AppHMITypes::value_type operator ()(int item) const {
+  policy_table::AppHMITypes::value_type operator() (int item) const {
     policy_table::AppHMIType type = static_cast<policy_table::AppHMIType>(item);
     if (!IsValidEnum(type)) {
       LOG4CXX_WARN(logger_, "HMI types isn't known " << item);
@@ -91,7 +91,7 @@ struct IsZone {
   explicit IsZone(const SeatLocation& seat)
       : seat_(seat) {
   }
-  bool operator ()(const policy_table::Zones::value_type& item) const {
+  bool operator() (const policy_table::Zones::value_type& item) const {
     const policy_table::InteriorZone& zone = item.second;
     return seat_ == zone;
   }
@@ -104,7 +104,7 @@ struct Contained {
   explicit Contained(const policy_table::Strings& params)
       : params_(params) {
   }
-  bool operator ()(const RemoteControlParams::value_type& item) const {
+  bool operator() (const RemoteControlParams::value_type& item) const {
     return std::find_if(params_.begin(), params_.end(), CompareString(item))
         != params_.end();
   }
@@ -115,7 +115,7 @@ struct Contained {
     explicit CompareString(const RemoteControlParams::value_type& value)
         : value_(value) {
     }
-    bool operator ()(const policy_table::Strings::value_type& item) const {
+    bool operator() (const policy_table::Strings::value_type& item) const {
       return value_ == static_cast<std::string>(item);
     }
   };
@@ -251,7 +251,8 @@ TypeAccess AccessRemoteImpl::Check(const Subject& who,
       ret = j->second;
       LOG4CXX_TRACE(
           logger_,
-          "Subject " << who << " has permissions " << ret << " to object " << what);
+          "Subject " << who << " has permissions " << ret <<
+          " to object " << what);
     } else {
       LOG4CXX_TRACE(logger_, who << " needs driver permission for " << what);
       ret = TypeAccess::kManual;
@@ -337,7 +338,8 @@ bool AccessRemoteImpl::IsAllowed(
 }
 
 bool AccessRemoteImpl::CompareParameters(
-    const policy_table::Strings& parameters, RemoteControlParams* input) const {
+    const policy_table::Strings& parameters,
+    RemoteControlParams* input) const {
   LOG4CXX_AUTO_TRACE(logger_);
   if (parameters.empty()) {
     return true;
@@ -436,7 +438,8 @@ const policy_table::Strings& AccessRemoteImpl::GetGroups(
     if (IsPrimaryDevice(device_id)) {
       return *cache_->pt_->policy_table.app_policies[app_id].groups_primaryRC;
     } else if (IsEnabled()) {
-      return *cache_->pt_->policy_table.app_policies[app_id].groups_nonPrimaryRC;
+      return
+        *cache_->pt_->policy_table.app_policies[app_id].groups_nonPrimaryRC;
     } else {
       return cache_->GetGroups(kPreConsentPassengersRC);
     }
@@ -543,9 +546,12 @@ void AccessRemoteImpl::CheckPTUGroupsChange(
     LOG4CXX_ERROR(logger_, "No listener for policy changes is set; exiting.");
     return;
   }
-  policy_table::ApplicationPolicies& new_apps = pt_update->policy_table.app_policies;
-  policy_table::ApplicationPolicies& old_apps = snapshot->policy_table.app_policies;
-  std::for_each(old_apps.begin(), old_apps.end(), ProccessAppGroups(new_apps, this));
+  policy_table::ApplicationPolicies& new_apps =
+      pt_update->policy_table.app_policies;
+  policy_table::ApplicationPolicies& old_apps =
+      snapshot->policy_table.app_policies;
+  std::for_each(old_apps.begin(), old_apps.end(),
+      ProccessAppGroups(new_apps, this));
 }
 
 }  // namespace policy

@@ -34,6 +34,7 @@
 
 #include <vector>
 #include <ostream>
+#include <string>
 #include "./types.h"
 #include "policy/policy_types.h"
 
@@ -53,7 +54,7 @@ inline bool operator==(const SeatLocation& x, const SeatLocation& y) {
 }
 inline bool operator==(const SeatLocation& x,
                        const policy_table::InteriorZone& y) {
-  return x == SeatLocation{y.col, y.row, y.level};
+  return x == SeatLocation {y.col, y.row, y.level};
 }
 inline bool operator==(const policy_table::InteriorZone& x,
                        const SeatLocation& y) {
