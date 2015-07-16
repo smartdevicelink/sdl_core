@@ -446,7 +446,6 @@ TEST(AccessRemoteImplTest, CheckPTURemoteCtrlChange) {
   EXPECT_TRUE(access_remote.CheckPTURemoteCtrlChange(update, snapshot));
 
   snapshot = new policy_table::Table();
-  new_consent = update->policy_table.module_config.country_consent_passengersRC;
 
   // snapshot is not initialized, update is true
   *new_consent = true;
@@ -457,15 +456,15 @@ TEST(AccessRemoteImplTest, CheckPTURemoteCtrlChange) {
   EXPECT_TRUE(access_remote.CheckPTURemoteCtrlChange(update, snapshot));
 
   update = new policy_table::Table();
-  old_consent = snapshot->policy_table.module_config
-      .country_consent_passengersRC;
 
   // snapshot is true, update is not initialized
-  *old_consent = true;
+  *(snapshot->policy_table.module_config
+      .country_consent_passengersRC) = true;
   EXPECT_FALSE(access_remote.CheckPTURemoteCtrlChange(update, snapshot));
 
   // snapshot is false, update is not initialized
-  *old_consent = false;
+  *(snapshot->policy_table.module_config
+      .country_consent_passengersRC) = false;
   EXPECT_TRUE(access_remote.CheckPTURemoteCtrlChange(update, snapshot));
   delete listener;
 }

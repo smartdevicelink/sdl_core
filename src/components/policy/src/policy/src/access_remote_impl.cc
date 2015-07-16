@@ -202,6 +202,7 @@ struct ProccessAppGroups {
       }
     }
   }
+
  private:
   const policy_table::ApplicationPolicies& reference_;
   AccessRemoteImpl* access_remote_;
