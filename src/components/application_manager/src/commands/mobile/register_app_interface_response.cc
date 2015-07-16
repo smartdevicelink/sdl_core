@@ -55,8 +55,10 @@ void RegisterAppInterfaceResponse::Run() {
       last_message = false;
     }
   }
-
+ 
   SendResponse(success, result_code, last_message);
+
+  if (mobile_apis::Result::SUCCESS != result_code) { return; }
 
   // Add registered application to the policy db right after response sent to
   // mobile to be able to check all other API according to app permissions
