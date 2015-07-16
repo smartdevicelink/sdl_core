@@ -336,6 +336,9 @@ bool BaseCommandRequest::CheckPolicy() {
 bool BaseCommandRequest::CheckAccess() {
   LOG4CXX_AUTO_TRACE(logger_);
   CANAppExtensionPtr extension = GetAppExtension(app_);
+  if (!extension) {
+    return false;
+  }
   Json::Value value;
   Json::Reader reader;
   LOG4CXX_DEBUG(logger_, "Request: " << message_->json_message());
@@ -346,7 +349,9 @@ bool BaseCommandRequest::CheckAccess() {
 
   switch (access) {
     case application_manager::kAllowed:
-      CheckHMILevel(access);
+      if (!extension->is_on_driver_device()) {
+        CheckHMILevel(access);
+      }
       return true;
     case application_manager::kDisallowed:
       SendResponse(false, result_codes::kDisallowed,
