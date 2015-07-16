@@ -105,6 +105,7 @@ enum VRTTSSessionChanging {
 };
 
 struct CommandParametersPermissions;
+typedef std::map<std::string, hmi_apis::Common_TransportType::eType> DeviceTypes;
 
 namespace impl {
 using namespace threads;
