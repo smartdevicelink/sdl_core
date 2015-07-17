@@ -1270,7 +1270,9 @@ void ApplicationManagerImpl::SendMessageToMobile(
       msg_to_mobile[strings::params][strings::connection_key].asInt());
     if (function_id == mobile_apis::FunctionID::RegisterAppInterfaceID &&
         (*message)[strings::msg_params][strings::success].asBool()) {
+      #ifdef ENABLE_LOG
       bool is_for_plugin =
+      #endif
         functional_modules::PluginManager::instance()->IsAppForPlugins(app);
       LOG4CXX_INFO(logger_, "Registered app " << app->app_id() << " is "
          << (is_for_plugin ?  "" : "not ") << "for plugins.");
