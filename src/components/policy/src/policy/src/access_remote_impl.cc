@@ -120,14 +120,6 @@ struct Contained {
   };
 };
 
-
-bool CompareGroups(const policy_table::Strings::value_type& first,
-                   const policy_table::Strings::value_type& second) {
-  const std::string& first_str = first;
-  const std::string& second_str = second;
-  return (strcasecmp(first_str.c_str(), second_str.c_str()) < 0);
-}
-
 AccessRemoteImpl::AccessRemoteImpl()
     : cache_(new CacheManager()),
       primary_device_(),

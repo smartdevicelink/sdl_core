@@ -73,7 +73,7 @@ enum TypeAccess {
 };
 inline std::ostream& operator<<(std::ostream& output, TypeAccess x) {
   output << "Access: ";
-      switch (x) {
+  switch (x) {
     case kDisallowed:
       output << "DISALLOWED";
       break;
@@ -85,7 +85,7 @@ inline std::ostream& operator<<(std::ostream& output, TypeAccess x) {
       break;
     default:
       output << "Error: Unknown type";
-      }
+  }
   return output;
 }
 
@@ -121,7 +121,6 @@ inline std::ostream& operator<<(std::ostream& output, const Object& what) {
 }
 
 typedef std::vector<PTString> RemoteControlParams;
-class PolicyListener;
 
 class AccessRemote {
  public:
