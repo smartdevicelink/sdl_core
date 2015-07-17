@@ -118,6 +118,11 @@ ValidationResult RadioControlDataValidator::Validate(const Json::Value& json,
                                                  Json::Value& outgoing_json) {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  if (!json.isObject()) {
+    LOG4CXX_ERROR(logger_, "RadioControlData must be struct");
+    return INVALID_DATA;
+  }
+
   ValidationResult result = ValidateSimpleValues(json, outgoing_json);
 
   if (result != ValidationResult::SUCCESS) {

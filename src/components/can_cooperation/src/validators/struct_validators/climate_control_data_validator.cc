@@ -110,6 +110,12 @@ ClimateControlDataValidator::ClimateControlDataValidator() {
 ValidationResult ClimateControlDataValidator::Validate(const Json::Value& json,
                                                  Json::Value& outgoing_json) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!json.isObject()) {
+    LOG4CXX_ERROR(logger_, "ClimateControlData must be struct");
+    return INVALID_DATA;
+  }
+
   return ValidateSimpleValues(json, outgoing_json);
 }
 
