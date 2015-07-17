@@ -42,7 +42,6 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyManagerImpl")
 using policy_table::DeviceData;
 using policy_table::FunctionalGroupings;
 using rpc::policy_table_interface_base::EnumFromJsonString;
-using rpc::policy_table_interface_base::Equipment;
 
 namespace policy {
 
@@ -129,99 +128,18 @@ bool CompareGroups(const policy_table::Strings::value_type& first,
   return (strcasecmp(first_str.c_str(), second_str.c_str()) < 0);
 }
 
-bool HaveGroupsChanged(const rpc::Optional<policy_table::Strings>& old_groups,
-                      const rpc::Optional<policy_table::Strings>& new_groups) {
-  if (!old_groups.is_initialized() && !new_groups.is_initialized()) {
-    return false;
-  }
-  if (!old_groups.is_initialized() || !new_groups.is_initialized()) {
-    return true;
-  }
-  policy_table::Strings old_groups_abs = *old_groups;
-  policy_table::Strings new_groups_abs = *new_groups;
-  if (old_groups_abs.size() != new_groups_abs.size()) {
-    return true;
-  }
-  std::sort(new_groups_abs.begin(), new_groups_abs.end(), CompareGroups);
-  std::sort(old_groups_abs.begin(), old_groups_abs.end(), CompareGroups);
-
-  return std::equal(new_groups_abs.begin(), new_groups_abs.end(),
-                    old_groups_abs.begin(), CompareGroups);
-}
-
-struct ProccessAppGroups {
-  ProccessAppGroups(const policy_table::ApplicationPolicies& ref,
-                    AccessRemoteImpl* access_remote)
-    : reference_(ref),
-      access_remote_(access_remote) {
-  }
-  void operator()(const policy_table::ApplicationPolicies::value_type & app) {
-    if (!access_remote_->IsAppReverse(app.first)) {
-      LOG4CXX_DEBUG(logger_, "Ignore non-reverse app");
-      return;
-    }
-
-    policy_table::ApplicationPolicies::const_iterator it;
-    if (access_remote_->cache_->IsDefaultPolicy(app.first)) {
-      LOG4CXX_DEBUG(logger_, "App remained with default policies;"
-          << " comparing accordingly.");
-      it = reference_.find(kDefaultId);
-    } else {
-      it = reference_.find(app.first);
-    }
-
-    if (reference_.end() != it) {
-      bool is_primary = false;
-      const std::string device_id =
-        access_remote_->listener_->OnCurrentDeviceIdUpdateRequired(app.first);
-      if (device_id.empty()) {
-        LOG4CXX_DEBUG(logger_, "Couldn't find device info for application id "
-                     "'" << app.first << "'; app is not currently registered.");
-        return;
-      }
-      is_primary = access_remote_->IsPrimaryDevice(device_id);
-
-      if (HaveGroupsChanged(it->second.groups_primaryRC,
-                            app.second.groups_primaryRC)) {
-        LOG4CXX_DEBUG(logger_, "Primary groups for " << app.first
-            << " have changed");
-
-        if (is_primary) {
-          access_remote_->listener_->OnRemoteAppPermissionsChanged(device_id,
-              app.first);
-        }
-      }
-      if (HaveGroupsChanged(it->second.groups_nonPrimaryRC,
-                            app.second.groups_nonPrimaryRC)) {
-        LOG4CXX_DEBUG(logger_, "Non-primary groups for " << app.first
-            << " have changed");
-        if (!is_primary && access_remote_->IsEnabled()) {
-          access_remote_->listener_->OnRemoteAppPermissionsChanged(device_id,
-              app.first);
-        }
-      }
-    }
-  }
-
- private:
-  const policy_table::ApplicationPolicies& reference_;
-  AccessRemoteImpl* access_remote_;
-};
-
 AccessRemoteImpl::AccessRemoteImpl()
     : cache_(new CacheManager()),
       primary_device_(),
       enabled_(true),
-      acl_(),
-      listener_(NULL) {
+      acl_() {
 }
 
 AccessRemoteImpl::AccessRemoteImpl(utils::SharedPtr<CacheManager> cache)
     : cache_(cache),
       primary_device_(),
       enabled_(true),
-      acl_(),
-      listener_(NULL) {
+      acl_() {
 }
 
 void AccessRemoteImpl::Init() {
@@ -377,6 +295,10 @@ void AccessRemoteImpl::Reset(const Object& what) {
   acl_.erase(what);
 }
 
+void AccessRemoteImpl::Reset() {
+  acl_.clear();
+}
+
 void AccessRemoteImpl::SetPrimaryDevice(const PTString& dev_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   primary_device_ = dev_id;
@@ -484,75 +406,6 @@ void AccessRemoteImpl::GetGroupsIds(const std::string &device_id,
   std::transform(groups.begin(), groups.end(), groups_ids.begin(),
                  &CacheManager::GenerateHash);
   LOG4CXX_DEBUG(logger_, "Groups Ids: " << groups_ids);
-}
-
-bool AccessRemoteImpl::CheckPTURemoteCtrlChange(
-    const utils::SharedPtr<policy_table::Table> pt_update,
-    const utils::SharedPtr<policy_table::Table> snapshot) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (!listener_) {
-    LOG4CXX_ERROR(logger_, "No listener for policy changes is set; exiting.");
-    return false;
-  }
-
-  rpc::Optional<rpc::Boolean>& new_consent =
-    pt_update->policy_table.module_config.country_consent_passengersRC;
-  rpc::Optional<rpc::Boolean>& old_consent =
-    snapshot->policy_table.module_config.country_consent_passengersRC;
-
-  if (!new_consent.is_initialized() && !old_consent.is_initialized()) {
-    return false;
-  }
-
-  bool result = false;
-  if (new_consent.is_initialized() && old_consent.is_initialized()) {
-    result = (*new_consent != *old_consent);
-  } else {
-    bool not_changed_consent1 = !new_consent.is_initialized() && *old_consent;
-    bool not_changed_consent2 = !old_consent.is_initialized() && *new_consent;
-
-    result = !(not_changed_consent1 || not_changed_consent2);
-  }
-
-  if (result) {
-    listener_->OnRemoteAllowedChanged(result);
-  }
-
-  return result;
-}
-
-void AccessRemoteImpl::CheckPTUZonesChange(
-    const utils::SharedPtr<policy_table::Table> pt_update,
-    const utils::SharedPtr<policy_table::Table> snapshot) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  rpc::Optional<Equipment>& old_equipment =
-    snapshot->policy_table.module_config.equipment;
-  rpc::Optional<Equipment>& new_equipment =
-    pt_update->policy_table.module_config.equipment;
-
-  if (!old_equipment.is_initialized() || !new_equipment.is_initialized()) {
-    LOG4CXX_DEBUG(logger_, "No need to reset access, equipment is not inited");
-    return;
-  }
-  // TODO(KK): change to erasing only affected by PTU changes permissions
-  // when described in requirements
-  acl_.clear();
-}
-
-void AccessRemoteImpl::CheckPTUGroupsChange(
-    const utils::SharedPtr<policy_table::Table> pt_update,
-    const utils::SharedPtr<policy_table::Table> snapshot) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (!listener_) {
-    LOG4CXX_ERROR(logger_, "No listener for policy changes is set; exiting.");
-    return;
-  }
-  policy_table::ApplicationPolicies& new_apps =
-      pt_update->policy_table.app_policies;
-  policy_table::ApplicationPolicies& old_apps =
-      snapshot->policy_table.app_policies;
-  std::for_each(old_apps.begin(), old_apps.end(),
-      ProccessAppGroups(new_apps, this));
 }
 
 }  // namespace policy

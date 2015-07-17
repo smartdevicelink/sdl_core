@@ -93,6 +93,13 @@ class PolicyManagerImplTest : public ::testing::Test {
       return ::testing::AssertionFailure() << ::rpc::PrettyFormat(report);
     }
   }
+
+ public:
+  bool CheckPTURemoteCtrlChange(
+      const utils::SharedPtr<policy_table::Table> pt_update,
+      const utils::SharedPtr<policy_table::Table> snapshot) {
+    return manager->CheckPTURemoteCtrlChange(pt_update, snapshot);
+  }
 };
 
 TEST_F(PolicyManagerImplTest, RefreshRetrySequence_SetSecondsBetweenRetries_ExpectRetryTimeoutSequenceWithSameSeconds) {
@@ -472,6 +479,56 @@ TEST_F(PolicyManagerImplTest, TwoDifferentDevice) {
             manager->CheckAccess("12345", zone, "RADIO", "", RemoteControlParams()));
   EXPECT_EQ(TypeAccess::kDisallowed,
               manager->CheckAccess("123456", zone, "RADIO", "", RemoteControlParams()));
+}
+
+TEST_F(PolicyManagerImplTest, CheckPTURemoteCtrlChange) {
+  utils::SharedPtr<policy_table::Table> update = new policy_table::Table();
+  utils::SharedPtr<policy_table::Table> snapshot = new policy_table::Table();
+  rpc::Optional<rpc::Boolean>& new_consent = update->policy_table.module_config
+      .country_consent_passengersRC;
+  rpc::Optional<rpc::Boolean>& old_consent = snapshot->policy_table
+      .module_config.country_consent_passengersRC;
+
+  // Both are not initialized
+  EXPECT_FALSE(CheckPTURemoteCtrlChange(update, snapshot));
+
+  *old_consent = true;
+  *new_consent = true;
+  EXPECT_FALSE(CheckPTURemoteCtrlChange(update, snapshot));
+
+  *old_consent = false;
+  *new_consent = false;
+  EXPECT_FALSE(CheckPTURemoteCtrlChange(update, snapshot));
+
+  *old_consent = true;
+  *new_consent = false;
+  EXPECT_TRUE(CheckPTURemoteCtrlChange(update, snapshot));
+
+  *old_consent = false;
+  *new_consent = true;
+  EXPECT_TRUE(CheckPTURemoteCtrlChange(update, snapshot));
+
+  snapshot = new policy_table::Table();
+
+  // snapshot is not initialized, update is true
+  *new_consent = true;
+  EXPECT_FALSE(CheckPTURemoteCtrlChange(update, snapshot));
+
+  // snapshot is not initialized, update is false
+  *new_consent = false;
+  EXPECT_TRUE(CheckPTURemoteCtrlChange(update, snapshot));
+
+  update = new policy_table::Table();
+
+  // snapshot is true, update is not initialized
+  *(snapshot->policy_table.module_config
+      .country_consent_passengersRC) = true;
+  EXPECT_FALSE(CheckPTURemoteCtrlChange(update, snapshot));
+
+  // snapshot is false, update is not initialized
+  *(snapshot->policy_table.module_config
+      .country_consent_passengersRC) = false;
+  EXPECT_TRUE(CheckPTURemoteCtrlChange(update, snapshot));
 }
 #endif  // SDL_REMOTE_CONTROL
 

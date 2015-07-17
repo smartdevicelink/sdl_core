@@ -48,7 +48,6 @@ class AccessRemoteImpl : public AccessRemote {
   AccessRemoteImpl();
   explicit AccessRemoteImpl(utils::SharedPtr<CacheManager> cache);
 
-  virtual void set_listener(PolicyListener* listener) { listener_ = listener;}
   virtual void Init();
   virtual void Enable();
   virtual void Disable();
@@ -62,6 +61,7 @@ class AccessRemoteImpl : public AccessRemote {
   virtual void Deny(const Subject& who, const Object& what);
   virtual void Reset(const Subject& who);
   virtual void Reset(const Object& what);
+  virtual void Reset();
   virtual TypeAccess Check(const Subject& who, const Object& what) const;
   virtual bool CheckModuleType(const PTString& app_id,
                                policy_table::ModuleType module) const;
@@ -76,18 +76,6 @@ class AccessRemoteImpl : public AccessRemote {
                                     const std::string &app_id,
                                     FunctionalIdType& group_types);
   virtual bool IsAppReverse(const PTString& app_id);
-
-  virtual bool CheckPTURemoteCtrlChange(
-    const utils::SharedPtr<policy_table::Table> pt_update,
-    const utils::SharedPtr<policy_table::Table> snapshot);
-
-  virtual void CheckPTUZonesChange(
-    const utils::SharedPtr<policy_table::Table> pt_update,
-    const utils::SharedPtr<policy_table::Table> snapshot);
-
-  virtual void CheckPTUGroupsChange(
-    const utils::SharedPtr<policy_table::Table> pt_update,
-    const utils::SharedPtr<policy_table::Table> snapshot);
 
  private:
   typedef std::map<Subject, TypeAccess> AccessControlRow;
@@ -108,11 +96,9 @@ class AccessRemoteImpl : public AccessRemote {
   bool enabled_;
   AccessControlList acl_;
   HMIList hmi_types_;
-  PolicyListener* listener_;
 
   friend struct Erase;
   friend struct IsTypeAccess;
-  friend struct ProccessAppGroups;
 
   FRIEND_TEST(AccessRemoteImplTest, KeyMapTest);
   FRIEND_TEST(AccessRemoteImplTest, Allow);

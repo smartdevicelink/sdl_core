@@ -300,7 +300,20 @@ private:
     TypeAccess CheckDriverConsent(const Subject& who, const Object& what,
                                   const std::string& rpc,
                                   const RemoteControlParams& params);
+    void CheckPTUUpdatesChange(
+      const utils::SharedPtr<policy_table::Table> pt_update,
+      const utils::SharedPtr<policy_table::Table> snapshot);
+    bool CheckPTURemoteCtrlChange(
+      const utils::SharedPtr<policy_table::Table> pt_update,
+      const utils::SharedPtr<policy_table::Table> snapshot);
 
+    void CheckPTUZonesChange(
+      const utils::SharedPtr<policy_table::Table> pt_update,
+      const utils::SharedPtr<policy_table::Table> snapshot);
+
+    void CheckRemoteGroupsChange(
+      const utils::SharedPtr<policy_table::Table> pt_update,
+      const utils::SharedPtr<policy_table::Table> snapshot);
     utils::SharedPtr<AccessRemote> access_remote_;
 #endif  // SDL_REMOTE_CONTROL
     sync_primitives::Lock apps_registration_lock_;
@@ -341,6 +354,7 @@ private:
     bool ignition_check;
 
     friend struct CheckAppPolicy;
+    friend struct ProccessAppGroups;
     friend class PolicyManagerImplTest;
 };
 

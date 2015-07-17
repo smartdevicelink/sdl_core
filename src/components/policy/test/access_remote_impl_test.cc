@@ -415,59 +415,5 @@ TEST(AccessRemoteImplTest, CheckParameters) {
             access_remote.CheckParameters(what_rb, "Rpc 5", params_3));
 }
 
-TEST(AccessRemoteImplTest, CheckPTURemoteCtrlChange) {
-  AccessRemoteImpl access_remote;
-  MockPolicyListener* listener = new MockPolicyListener;
-  access_remote.set_listener(listener);
-  utils::SharedPtr<policy_table::Table> update = new policy_table::Table();
-  utils::SharedPtr<policy_table::Table> snapshot = new policy_table::Table();
-  rpc::Optional<rpc::Boolean>& new_consent = update->policy_table.module_config
-      .country_consent_passengersRC;
-  rpc::Optional<rpc::Boolean>& old_consent = snapshot->policy_table
-      .module_config.country_consent_passengersRC;
-
-  // Both are not initialized
-  EXPECT_FALSE(access_remote.CheckPTURemoteCtrlChange(update, snapshot));
-
-  *old_consent = true;
-  *new_consent = true;
-  EXPECT_FALSE(access_remote.CheckPTURemoteCtrlChange(update, snapshot));
-
-  *old_consent = false;
-  *new_consent = false;
-  EXPECT_FALSE(access_remote.CheckPTURemoteCtrlChange(update, snapshot));
-
-  *old_consent = true;
-  *new_consent = false;
-  EXPECT_TRUE(access_remote.CheckPTURemoteCtrlChange(update, snapshot));
-
-  *old_consent = false;
-  *new_consent = true;
-  EXPECT_TRUE(access_remote.CheckPTURemoteCtrlChange(update, snapshot));
-
-  snapshot = new policy_table::Table();
-
-  // snapshot is not initialized, update is true
-  *new_consent = true;
-  EXPECT_FALSE(access_remote.CheckPTURemoteCtrlChange(update, snapshot));
-
-  // snapshot is not initialized, update is false
-  *new_consent = false;
-  EXPECT_TRUE(access_remote.CheckPTURemoteCtrlChange(update, snapshot));
-
-  update = new policy_table::Table();
-
-  // snapshot is true, update is not initialized
-  *(snapshot->policy_table.module_config
-      .country_consent_passengersRC) = true;
-  EXPECT_FALSE(access_remote.CheckPTURemoteCtrlChange(update, snapshot));
-
-  // snapshot is false, update is not initialized
-  *(snapshot->policy_table.module_config
-      .country_consent_passengersRC) = false;
-  EXPECT_TRUE(access_remote.CheckPTURemoteCtrlChange(update, snapshot));
-  delete listener;
-}
-
 }  // namespace policy
 

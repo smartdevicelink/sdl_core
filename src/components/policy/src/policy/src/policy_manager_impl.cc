@@ -49,6 +49,7 @@
 
 #ifdef SDL_REMOTE_CONTROL
 #include "policy/access_remote_impl.h"
+using rpc::policy_table_interface_base::Equipment;
 #endif  // SDL_REMOTE_CONTROL
 
 policy::PolicyManager* CreateManager() {
@@ -77,7 +78,6 @@ PolicyManagerImpl::PolicyManagerImpl()
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
   listener_ = listener;
   update_status_manager_.set_listener(listener);
-  access_remote_->set_listener(listener);
 }
 
 utils::SharedPtr<policy_table::Table> PolicyManagerImpl::Parse(
@@ -153,13 +153,7 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
 
 #ifdef SDL_REMOTE_CONTROL
   access_remote_->Init();
-  // Check PTU changes
-  //CheckPTUUpdatesChange(pt_update, policy_table_snapshot, access_remote_);
-  access_remote_->CheckPTURemoteCtrlChange(pt_update, policy_table_snapshot);
-
-  access_remote_->CheckPTUZonesChange(pt_update, policy_table_snapshot);
-
-  access_remote_->CheckPTUGroupsChange(pt_update, policy_table_snapshot);
+  CheckPTUUpdatesChange(pt_update, policy_table_snapshot);
 #endif  // SDL_REMOTE_CONTROL
 
   std::map<std::string, StringArray> app_hmi_types;
@@ -1172,6 +1166,76 @@ void PolicyManagerImpl::SendAppPermissionsChanged(const std::string& device_id,
   Permissions notification_data;
   GetPermissions(device_id, application_id, &notification_data);
   listener()->OnPermissionsUpdated(application_id, notification_data);
+}
+
+void PolicyManagerImpl::CheckPTUUpdatesChange(
+    const utils::SharedPtr<policy_table::Table> pt_update,
+    const utils::SharedPtr<policy_table::Table> snapshot) {
+  CheckPTURemoteCtrlChange(pt_update, snapshot);
+  CheckPTUZonesChange(pt_update, snapshot);
+  CheckRemoteGroupsChange(pt_update, snapshot);
+}
+
+bool PolicyManagerImpl::CheckPTURemoteCtrlChange(
+    const utils::SharedPtr<policy_table::Table> pt_update,
+    const utils::SharedPtr<policy_table::Table> snapshot) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  rpc::Optional<rpc::Boolean>& new_consent =
+    pt_update->policy_table.module_config.country_consent_passengersRC;
+  rpc::Optional<rpc::Boolean>& old_consent =
+    snapshot->policy_table.module_config.country_consent_passengersRC;
+
+  if (!new_consent.is_initialized() && !old_consent.is_initialized()) {
+    return false;
+  }
+
+  bool result = false;
+  if (new_consent.is_initialized() && old_consent.is_initialized()) {
+    result = (*new_consent != *old_consent);
+  } else {
+    bool not_changed_consent1 = !new_consent.is_initialized() && *old_consent;
+    bool not_changed_consent2 = !old_consent.is_initialized() && *new_consent;
+
+    result = !(not_changed_consent1 || not_changed_consent2);
+  }
+
+  if (result) {
+    listener()->OnRemoteAllowedChanged(result);
+  }
+
+  return result;
+}
+
+void PolicyManagerImpl::CheckPTUZonesChange(
+    const utils::SharedPtr<policy_table::Table> pt_update,
+    const utils::SharedPtr<policy_table::Table> snapshot) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  rpc::Optional<Equipment>& old_equipment =
+    snapshot->policy_table.module_config.equipment;
+  rpc::Optional<Equipment>& new_equipment =
+    pt_update->policy_table.module_config.equipment;
+
+  if (!old_equipment.is_initialized() || !new_equipment.is_initialized()) {
+    LOG4CXX_DEBUG(logger_, "No need to reset access, equipment is not inited");
+    return;
+  }
+  // TODO(KKolodiy): change to erasing only affected by PTU changes permissions
+  // when described in requirements
+  access_remote_->Reset();
+}
+
+void PolicyManagerImpl::CheckRemoteGroupsChange(
+    const utils::SharedPtr<policy_table::Table> pt_update,
+    const utils::SharedPtr<policy_table::Table> snapshot) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  policy_table::ApplicationPolicies& new_apps =
+      pt_update->policy_table.app_policies;
+  policy_table::ApplicationPolicies& old_apps =
+      snapshot->policy_table.app_policies;
+  std::for_each(old_apps.begin(), old_apps.end(),
+      ProccessAppGroups(new_apps, this));
 }
 
 #endif  // SDL_REMOTE_CONTROL
