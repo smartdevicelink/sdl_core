@@ -89,8 +89,8 @@ void SDLActivateAppRequest::Run() {
                                      app->SchemaUrl(),
                                      app->PackageName());
       }
-      subscribe_on_event(BasicCommunication_OnAppRegistered);
     }
+    subscribe_on_event(BasicCommunication_OnAppRegistered);
   } else {
     policy::PolicyHandler::instance()->OnActivateApp(application_id,
                                                      correlation_id());
