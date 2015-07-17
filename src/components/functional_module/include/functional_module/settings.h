@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_SETTINGS_H_
 
 #include <string>
+#include <sstream>
 #include "json/json.h"
 #include "utils/macro.h"
 
