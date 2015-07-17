@@ -450,8 +450,10 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
           session_observer_->OnMalformedMessageCallback(connection_key);
         }
       // For tracking only malformed occurrence check outpute
-      } else if(!protocol_frames.empty()) {
-        TrackMalformedMessage(connection_key, malformed_occurs);
+      } else {
+        if (malformed_occurs > 0) {
+          TrackMalformedMessage(connection_key, malformed_occurs);
+        }
       }
     } else {
       LOG4CXX_ERROR(logger_, "Incoming data processing failed.");
