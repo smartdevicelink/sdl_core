@@ -1,4 +1,4 @@
-﻿/*
+/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -741,5 +741,77 @@ bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies) {
 
   return true;
 }
+
+#ifdef SDL_REMOTE_CONTROL
+bool HaveGroupsChanged(const rpc::Optional<policy_table::Strings>& old_groups,
+                      const rpc::Optional<policy_table::Strings>& new_groups) {
+  if (!old_groups.is_initialized() && !new_groups.is_initialized()) {
+    return false;
+  }
+  if (!old_groups.is_initialized() || !new_groups.is_initialized()) {
+    return true;
+  }
+  policy_table::Strings old_groups_abs = *old_groups;
+  policy_table::Strings new_groups_abs = *new_groups;
+  if (old_groups_abs.size() != new_groups_abs.size()) {
+    return true;
+  }
+  std::sort(new_groups_abs.begin(), new_groups_abs.end(), Compare);
+  std::sort(old_groups_abs.begin(), old_groups_abs.end(), Compare);
+
+  return std::equal(new_groups_abs.begin(), new_groups_abs.end(),
+                    old_groups_abs.begin(), Compare);
+}
+
+void ProccessAppGroups::operator() (
+    const policy_table::ApplicationPolicies::value_type & app) {
+  if (!pm_->access_remote_->IsAppReverse(app.first)) {
+    LOG4CXX_DEBUG(logger_, "Ignore non-reverse app");
+    return;
+  }
+
+  policy_table::ApplicationPolicies::const_iterator it;
+  if (pm_->cache_->IsDefaultPolicy(app.first)) {
+    LOG4CXX_DEBUG(logger_, "App remained with default policies;"
+        << " comparing accordingly.");
+    it = reference_.find(kDefaultId);
+  } else {
+    it = reference_.find(app.first);
+  }
+
+  if (reference_.end() != it) {
+    bool is_primary = false;
+    const std::string device_id =
+      pm_->listener()->OnCurrentDeviceIdUpdateRequired(app.first);
+    if (device_id.empty()) {
+      LOG4CXX_DEBUG(logger_, "Couldn't find device info for application id "
+                   "'" << app.first << "'; app is not currently registered.");
+      return;
+    }
+    is_primary = pm_->access_remote_->IsPrimaryDevice(device_id);
+
+    if (HaveGroupsChanged(it->second.groups_primaryRC,
+                          app.second.groups_primaryRC)) {
+      LOG4CXX_DEBUG(logger_, "Primary groups for " << app.first
+          << " have changed");
+
+      if (is_primary) {
+        pm_->listener()->OnRemoteAppPermissionsChanged(device_id,
+            app.first);
+      }
+    }
+    if (HaveGroupsChanged(it->second.groups_nonPrimaryRC,
+                          app.second.groups_nonPrimaryRC)) {
+      LOG4CXX_DEBUG(logger_, "Non-primary groups for " << app.first
+          << " have changed");
+      if (!is_primary && pm_->access_remote_->IsEnabled()) {
+        pm_->listener_->OnRemoteAppPermissionsChanged(device_id,
+            app.first);
+      }
+    }
+  }
+}
+
+#endif  // SDL_REMOTE_CONTROL
 
 }

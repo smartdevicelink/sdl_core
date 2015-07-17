@@ -1488,7 +1488,7 @@ bool PolicyHandler::GetRemoteControl() const {
   return policy_manager_->GetRemoteControl();
 }
 
-void PolicyHandler::OnRemoteAllowedChanged(bool new_consent) {
+void PolicyHandler::OnRemoteAllowedChanged(bool /*new_consent*/) {
   POLICY_LIB_CHECK_VOID();
   connection_handler::DeviceHandle device_handle = PrimaryDevice();
 
@@ -1505,6 +1505,12 @@ void PolicyHandler::OnRemoteAllowedChanged(bool new_consent) {
       policy_manager_->OnChangedRemoteControl(app->mobile_app_id());
     }
   }
+}
+
+void PolicyHandler::OnRemoteAppPermissionsChanged(const std::string& device_id,
+      const std::string& application_id) {
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->SendAppPermissionsChanged(device_id, application_id);
 }
 #endif  // SDL_REMOTE_CONTROL
 

@@ -33,7 +33,6 @@
 
 #include <algorithm>
 #include <iterator>
-
 #include "policy/cache_manager.h"
 #include "utils/logger.h"
 
@@ -52,7 +51,7 @@ struct Erase {
   explicit Erase(const Subject& who)
       : who_(who) {
   }
-  void operator ()(AccessRemoteImpl::AccessControlList::value_type& row) const {
+  void operator() (AccessRemoteImpl::AccessControlList::value_type& row) const {
     row.second.erase(who_);
   }
 };
@@ -64,14 +63,14 @@ struct IsTypeAccess {
   explicit IsTypeAccess(const TypeAccess& type)
       : type_(type) {
   }
-  bool operator ()(
+  bool operator() (
       const AccessRemoteImpl::AccessControlRow::value_type& item) const {
     return item.second == type_;
   }
 };
 
 struct ToHMIType {
-  policy_table::AppHMITypes::value_type operator ()(int item) const {
+  policy_table::AppHMITypes::value_type operator() (int item) const {
     policy_table::AppHMIType type = static_cast<policy_table::AppHMIType>(item);
     if (!IsValidEnum(type)) {
       LOG4CXX_WARN(logger_, "HMI types isn't known " << item);
@@ -90,7 +89,7 @@ struct IsZone {
   explicit IsZone(const SeatLocation& seat)
       : seat_(seat) {
   }
-  bool operator ()(const policy_table::Zones::value_type& item) const {
+  bool operator() (const policy_table::Zones::value_type& item) const {
     const policy_table::InteriorZone& zone = item.second;
     return seat_ == zone;
   }
@@ -103,7 +102,7 @@ struct Contained {
   explicit Contained(const policy_table::Strings& params)
       : params_(params) {
   }
-  bool operator ()(const RemoteControlParams::value_type& item) const {
+  bool operator() (const RemoteControlParams::value_type& item) const {
     return std::find_if(params_.begin(), params_.end(), CompareString(item))
         != params_.end();
   }
@@ -114,7 +113,7 @@ struct Contained {
     explicit CompareString(const RemoteControlParams::value_type& value)
         : value_(value) {
     }
-    bool operator ()(const policy_table::Strings::value_type& item) const {
+    bool operator() (const policy_table::Strings::value_type& item) const {
       return value_ == static_cast<std::string>(item);
     }
   };
@@ -162,7 +161,8 @@ TypeAccess AccessRemoteImpl::Check(const Subject& who,
       ret = j->second;
       LOG4CXX_TRACE(
           logger_,
-          "Subject " << who << " has permissions " << ret << " to object " << what);
+          "Subject " << who << " has permissions " << ret <<
+          " to object " << what);
     } else {
       LOG4CXX_TRACE(logger_, who << " needs driver permission for " << what);
       ret = TypeAccess::kManual;
@@ -248,7 +248,8 @@ bool AccessRemoteImpl::IsAllowed(
 }
 
 bool AccessRemoteImpl::CompareParameters(
-    const policy_table::Strings& parameters, RemoteControlParams* input) const {
+    const policy_table::Strings& parameters,
+    RemoteControlParams* input) const {
   LOG4CXX_AUTO_TRACE(logger_);
   if (parameters.empty()) {
     return true;
@@ -283,6 +284,10 @@ void AccessRemoteImpl::Reset(const Subject& who) {
 void AccessRemoteImpl::Reset(const Object& what) {
   LOG4CXX_AUTO_TRACE(logger_);
   acl_.erase(what);
+}
+
+void AccessRemoteImpl::Reset() {
+  acl_.clear();
 }
 
 void AccessRemoteImpl::SetPrimaryDevice(const PTString& dev_id) {
@@ -347,7 +352,8 @@ const policy_table::Strings& AccessRemoteImpl::GetGroups(
     if (IsPrimaryDevice(device_id)) {
       return *cache_->pt_->policy_table.app_policies[app_id].groups_primaryRC;
     } else if (IsEnabled()) {
-      return *cache_->pt_->policy_table.app_policies[app_id].groups_nonPrimaryRC;
+      return
+        *cache_->pt_->policy_table.app_policies[app_id].groups_nonPrimaryRC;
     } else {
       return cache_->GetGroups(kPreConsentPassengersRC);
     }
@@ -391,26 +397,6 @@ void AccessRemoteImpl::GetGroupsIds(const std::string &device_id,
   std::transform(groups.begin(), groups.end(), groups_ids.begin(),
                  &CacheManager::GenerateHash);
   LOG4CXX_DEBUG(logger_, "Groups Ids: " << groups_ids);
-}
-
-bool AccessRemoteImpl::CheckPTUUpdatesChange(
-    const utils::SharedPtr<policy_table::Table> pt_update,
-    const utils::SharedPtr<policy_table::Table> snapshot) {
-  rpc::Optional<rpc::Boolean>& new_consent =
-    pt_update->policy_table.module_config.country_consent_passengersRC;
-  rpc::Optional<rpc::Boolean>& old_consent =
-    snapshot->policy_table.module_config.country_consent_passengersRC;
-
-  if (!new_consent.is_initialized() && !old_consent.is_initialized()) {
-    return false;
-  }
-
-  if (new_consent.is_initialized() && old_consent.is_initialized())
-    return *new_consent != *old_consent;
-
-  bool not_changed_consent1 = !new_consent.is_initialized() && *old_consent;
-  bool not_changed_consent2 = !old_consent.is_initialized() && *new_consent;
-  return !(not_changed_consent1 || not_changed_consent2);
 }
 
 }  // namespace policy

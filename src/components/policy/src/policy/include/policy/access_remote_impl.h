@@ -61,6 +61,7 @@ class AccessRemoteImpl : public AccessRemote {
   virtual void Deny(const Subject& who, const Object& what);
   virtual void Reset(const Subject& who);
   virtual void Reset(const Object& what);
+  virtual void Reset();
   virtual TypeAccess Check(const Subject& who, const Object& what) const;
   virtual bool CheckModuleType(const PTString& app_id,
                                policy_table::ModuleType module) const;
@@ -75,9 +76,6 @@ class AccessRemoteImpl : public AccessRemote {
                                     const std::string &app_id,
                                     FunctionalIdType& group_types);
   virtual bool IsAppReverse(const PTString& app_id);
-  bool CheckPTUUpdatesChange(
-    const utils::SharedPtr<policy_table::Table> pt_update,
-    const utils::SharedPtr<policy_table::Table> snapshot);
 
  private:
   typedef std::map<Subject, TypeAccess> AccessControlRow;

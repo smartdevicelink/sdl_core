@@ -1618,8 +1618,20 @@ bool SQLPTRepresentation::SaveEquipment(
     return false;
   }
   if (is_empty.GetInteger(0) > 0) {
-    LOG4CXX_WARN(logger_, "Equipment has already been saved into database");
-    return true;
+    LOG4CXX_WARN(logger_, "Equipment exists into database");
+    dbms::SQLQuery query_delete(db());
+    if (!query_delete.Exec(sql_pt::kDeleteInteriorZones)) {
+      LOG4CXX_WARN(logger_, "Incorrect delete from interior zones.");
+      return false;
+    }
+    if (!query_delete.Exec(sql_pt::kDeleteAccessModules)) {
+      LOG4CXX_WARN(logger_, "Incorrect delete from access modules.");
+      return false;
+    }
+    if (!query_delete.Exec(sql_pt::kDeleteRemoteRpc)) {
+      LOG4CXX_WARN(logger_, "Incorrect delete from remote rpcs.");
+      return false;
+    }
   }
 
   dbms::SQLQuery query(db());

@@ -86,9 +86,7 @@ class MockAccessRemote : public AccessRemote {
       TypeAccess(const Object& what, const std::string& rpc,
                  const RemoteControlParams& params));
   MOCK_METHOD1(IsAppReverse, bool(const PTString& app_id));
-  MOCK_METHOD2(CheckPTUUpdatesChange, bool(
-    const utils::SharedPtr<policy_table::Table> pt_update,
-    const utils::SharedPtr<policy_table::Table> snapshot));
+  MOCK_METHOD0(Reset, void());
 };
 
 }  // namespace policy

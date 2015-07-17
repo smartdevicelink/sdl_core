@@ -151,14 +151,8 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
   CheckPermissionsChanges(pt_update, policy_table_snapshot);
 
 #ifdef SDL_REMOTE_CONTROL
-  // Check country_consent
-  bool has_changed = access_remote_->CheckPTUUpdatesChange(pt_update,
-                                        policy_table_snapshot);
   access_remote_->Init();
-  if (has_changed) {
-    listener()->OnRemoteAllowedChanged(
-      *pt_update->policy_table.module_config.country_consent_passengersRC);
-  }
+  CheckPTUUpdatesChange(pt_update, policy_table_snapshot);
 #endif  // SDL_REMOTE_CONTROL
 
   std::map<std::string, StringArray> app_hmi_types;
@@ -1129,9 +1123,7 @@ void PolicyManagerImpl::OnChangedPrimaryDevice(
     }
   }
 
-  Permissions notification_data;
-  GetPermissions(device_id, application_id, &notification_data);
-  listener()->OnPermissionsUpdated(application_id, notification_data);
+  SendAppPermissionsChanged(device_id, application_id);
 }
 
 void PolicyManagerImpl::OnChangedRemoteControl(
@@ -1165,9 +1157,84 @@ void PolicyManagerImpl::OnChangedRemoteControl(
     }
   }
 
+  SendAppPermissionsChanged(device_id, application_id);
+}
+
+void PolicyManagerImpl::SendAppPermissionsChanged(const std::string& device_id,
+      const std::string& application_id) {
   Permissions notification_data;
   GetPermissions(device_id, application_id, &notification_data);
   listener()->OnPermissionsUpdated(application_id, notification_data);
+}
+
+void PolicyManagerImpl::CheckPTUUpdatesChange(
+    const utils::SharedPtr<policy_table::Table> pt_update,
+    const utils::SharedPtr<policy_table::Table> snapshot) {
+  CheckPTURemoteCtrlChange(pt_update, snapshot);
+  CheckPTUZonesChange(pt_update, snapshot);
+  CheckRemoteGroupsChange(pt_update, snapshot);
+}
+
+bool PolicyManagerImpl::CheckPTURemoteCtrlChange(
+    const utils::SharedPtr<policy_table::Table> pt_update,
+    const utils::SharedPtr<policy_table::Table> snapshot) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  rpc::Optional<rpc::Boolean>& new_consent =
+    pt_update->policy_table.module_config.country_consent_passengersRC;
+  rpc::Optional<rpc::Boolean>& old_consent =
+    snapshot->policy_table.module_config.country_consent_passengersRC;
+
+  if (!new_consent.is_initialized() && !old_consent.is_initialized()) {
+    return false;
+  }
+
+  bool result = false;
+  if (new_consent.is_initialized() && old_consent.is_initialized()) {
+    result = (*new_consent != *old_consent);
+  } else {
+    bool not_changed_consent1 = !new_consent.is_initialized() && *old_consent;
+    bool not_changed_consent2 = !old_consent.is_initialized() && *new_consent;
+
+    result = !(not_changed_consent1 || not_changed_consent2);
+  }
+
+  if (result) {
+    listener()->OnRemoteAllowedChanged(result);
+  }
+
+  return result;
+}
+
+void PolicyManagerImpl::CheckPTUZonesChange(
+    const utils::SharedPtr<policy_table::Table> pt_update,
+    const utils::SharedPtr<policy_table::Table> snapshot) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  rpc::Optional<policy_table::Equipment>& old_equipment =
+    snapshot->policy_table.module_config.equipment;
+  rpc::Optional<policy_table::Equipment>& new_equipment =
+    pt_update->policy_table.module_config.equipment;
+
+  if (!old_equipment.is_initialized() || !new_equipment.is_initialized()) {
+    LOG4CXX_DEBUG(logger_, "No need to reset access, equipment is not inited");
+    return;
+  }
+  // TODO(PVysh): change to erasing only affected by PTU changes permissions
+  // when described in requirements
+  access_remote_->Reset();
+}
+
+void PolicyManagerImpl::CheckRemoteGroupsChange(
+    const utils::SharedPtr<policy_table::Table> pt_update,
+    const utils::SharedPtr<policy_table::Table> snapshot) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  policy_table::ApplicationPolicies& new_apps =
+      pt_update->policy_table.app_policies;
+  policy_table::ApplicationPolicies& old_apps =
+      snapshot->policy_table.app_policies;
+  std::for_each(old_apps.begin(), old_apps.end(),
+      ProccessAppGroups(new_apps, this));
 }
 
 #endif  // SDL_REMOTE_CONTROL

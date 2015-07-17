@@ -34,6 +34,7 @@
 
 #include <vector>
 #include <ostream>
+#include <string>
 #include "./types.h"
 #include "policy/policy_types.h"
 
@@ -53,7 +54,7 @@ inline bool operator==(const SeatLocation& x, const SeatLocation& y) {
 }
 inline bool operator==(const SeatLocation& x,
                        const policy_table::InteriorZone& y) {
-  return x == SeatLocation { y.col, y.row, y.level };
+  return x == SeatLocation {y.col, y.row, y.level};
 }
 inline bool operator==(const policy_table::InteriorZone& x,
                        const SeatLocation& y) {
@@ -192,6 +193,11 @@ class AccessRemote {
    */
   virtual void Reset(const Object& what) = 0;
 
+  /*
+   * Resets all stored consents
+   */
+  virtual void Reset() = 0;
+
   /**
    * Checks access subject to object
    * @param who subject is dev_id and app_id
@@ -255,17 +261,6 @@ class AccessRemote {
    * @return true if application uses remote control
    */
   virtual bool IsAppReverse(const PTString& app_id) = 0;
-
-  /**
-   * Checks if PTU contains some updates that need to be reported
-   * to any Reverse Mobile App
-   * @param pt_update PTU
-   * @param snapshot PTS
-   * @return true if changing current state updates are present
-   */
-  virtual bool CheckPTUUpdatesChange(
-      const utils::SharedPtr<policy_table::Table> pt_update,
-      const utils::SharedPtr<policy_table::Table> snapshot) = 0;
 };
 
 }  // namespace policy

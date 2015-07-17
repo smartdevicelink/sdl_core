@@ -234,6 +234,22 @@ FunctionalGroupIDs FindSame(const FunctionalGroupIDs& first,
  */
 bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies);
 
+#ifdef SDL_REMOTE_CONTROL
+
+struct ProccessAppGroups {
+  ProccessAppGroups(const policy_table::ApplicationPolicies& ref,
+                    PolicyManagerImpl* pm)
+    : reference_(ref),
+      pm_(pm) {
+  }
+  void operator() (const policy_table::ApplicationPolicies::value_type & app);
+ private:
+  const policy_table::ApplicationPolicies& reference_;
+  PolicyManagerImpl* pm_;
+};
+
+#endif  // SDL_REMOTE_CONTROL
+
 }
 
 #endif // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_HELPER_H_
