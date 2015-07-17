@@ -66,6 +66,10 @@ class PrioritizedQueue {
   bool empty() const {
     return queues_.empty();
   }
+  void swap(PrioritizedQueue<M>&) {
+    queues_.clear();
+    total_size_ = 0;
+  }
   value_type front() {
     DCHECK(!queues_.empty() && !queues_.rbegin()->second.empty());
     return queues_.rbegin()->second.front();

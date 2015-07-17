@@ -183,6 +183,10 @@ template<typename T, class Q> T MessageQueue<T, Q>::pop() {
 template<typename T, class Q> void MessageQueue<T, Q>::Shutdown() {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   shutting_down_ = true;
+  if (!queue_.empty()) {
+    Queue empty_queue;
+    queue_.swap(empty_queue);
+  }
   queue_new_items_.Broadcast();
 }
 
