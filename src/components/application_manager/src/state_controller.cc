@@ -89,9 +89,15 @@ void StateController::HmiLevelConflictResolver::operator ()
       if (applied_->IsAudioApplication() && state_ctrl_->IsSameAppType(applied_, to_resolve)) {
         state_ctrl_->SetupRegularHmiState(to_resolve, HMILevel::HMI_BACKGROUND,
                      AudioStreamingState::NOT_AUDIBLE);
-      } else {
+      } else if (HMILevel::HMI_FULL == state_->hmi_level() &&
+          HMILevel::HMI_FULL == cur_state->hmi_level()) {
+        LOG4CXX_DEBUG(logger_, "HMI level will be changed for application with appID="
+                      <<to_resolve->app_id());
         state_ctrl_->SetupRegularHmiState(to_resolve, HMILevel::HMI_LIMITED,
                      AudioStreamingState::AUDIBLE);
+      } else {
+        LOG4CXX_DEBUG(logger_, "HMI will not be changed level for application with appID="
+                      <<to_resolve->app_id());
       }
     }
   }
@@ -151,6 +157,7 @@ void StateController::SetupRegularHmiState(ApplicationSharedPtr app,
 
 void StateController::ApplyRegularState(ApplicationSharedPtr app,
                                                   HmiStatePtr state) {
+  LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
   DCHECK_OR_RETURN_VOID(state);
   DCHECK_OR_RETURN_VOID(state->state_id() == HmiState::STATE_ID_REGULAR);
