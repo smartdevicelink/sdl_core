@@ -380,6 +380,8 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
 
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
+  
+  smart_objects::SmartObject& param_data = msg_params;
 
   mobile_apis::Result::eType result_code =
       GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
@@ -399,24 +401,31 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
         mobile_apis::Result::WARNINGS);
 
   std::string info;
-  if (is_pi_unsupported_warning) {
-    result_code = mobile_apis::Result::WARNINGS;
-    info = "Unsupported phoneme type was sent in an item";
-  }
 
-  if (result && message.keyExists(strings::msg_params)) {
-    msg_params = message[strings::msg_params];
+  if (result) {
+    if (is_pi_unsupported_warning) {
+      result_code = mobile_apis::Result::WARNINGS;
+      info = "Unsupported phoneme type was sent in an item";
+      if (message.keyExists(strings::params) 
+          && message[strings::params].keyExists(strings::data)) {
+        param_data = message[strings::params][strings::data];
+      }
+    } else if (message.keyExists(strings::msg_params)) {
+      param_data = message[strings::msg_params];
+    }
     // result code must be GENERIC_ERROR in case wrong choice_id
-    if (msg_params.keyExists(strings::choice_id)) {
+    if (param_data.keyExists(strings::choice_id)) {
       if (!CheckChoiceIDFromResponse(app,
-                                     msg_params[strings::choice_id].asInt())) {
+                                     param_data[strings::choice_id].asInt())) {
         result_code = mobile_apis::Result::GENERIC_ERROR;
         info = "Wrong choiceID was received from HMI";
       } else {
+        msg_params = param_data;
         msg_params[strings::trigger_source] =
             mobile_apis::TriggerSource::TS_MENU;
       }
-    } else if (msg_params.keyExists(strings::manual_text_entry)) {
+    } else if (param_data.keyExists(strings::manual_text_entry)) {
+      msg_params = param_data;
       msg_params[strings::trigger_source] =
           mobile_apis::TriggerSource::TS_KEYBOARD;
     }
