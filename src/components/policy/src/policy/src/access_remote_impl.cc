@@ -33,7 +33,6 @@
 
 #include <algorithm>
 #include <iterator>
-#include "policy/policy_listener.h"
 #include "policy/cache_manager.h"
 #include "utils/logger.h"
 

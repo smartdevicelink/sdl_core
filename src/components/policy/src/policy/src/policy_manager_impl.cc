@@ -49,7 +49,6 @@
 
 #ifdef SDL_REMOTE_CONTROL
 #include "policy/access_remote_impl.h"
-using rpc::policy_table_interface_base::Equipment;
 #endif  // SDL_REMOTE_CONTROL
 
 policy::PolicyManager* CreateManager() {
@@ -1211,16 +1210,16 @@ void PolicyManagerImpl::CheckPTUZonesChange(
     const utils::SharedPtr<policy_table::Table> pt_update,
     const utils::SharedPtr<policy_table::Table> snapshot) {
   LOG4CXX_AUTO_TRACE(logger_);
-  rpc::Optional<Equipment>& old_equipment =
+  rpc::Optional<policy_table::Equipment>& old_equipment =
     snapshot->policy_table.module_config.equipment;
-  rpc::Optional<Equipment>& new_equipment =
+  rpc::Optional<policy_table::Equipment>& new_equipment =
     pt_update->policy_table.module_config.equipment;
 
   if (!old_equipment.is_initialized() || !new_equipment.is_initialized()) {
     LOG4CXX_DEBUG(logger_, "No need to reset access, equipment is not inited");
     return;
   }
-  // TODO(KKolodiy): change to erasing only affected by PTU changes permissions
+  // TODO(PVysh): change to erasing only affected by PTU changes permissions
   // when described in requirements
   access_remote_->Reset();
 }

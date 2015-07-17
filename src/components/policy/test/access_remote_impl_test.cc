@@ -32,7 +32,6 @@
 
 #include "gtest/gtest.h"
 #include "policy/access_remote_impl.h"
-#include "./mock_policy_listener.h"
 
 namespace policy {
 
