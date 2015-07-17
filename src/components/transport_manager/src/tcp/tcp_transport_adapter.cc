@@ -64,7 +64,7 @@ TcpTransportAdapter::TcpTransportAdapter(const uint16_t port)
                            NULL,
 #endif
                            new TcpConnectionFactory(this),
-                           new TcpClientListener(this, port, false)) {
+                           new TcpClientListener(this, port, true)) {
 }
 
 TcpTransportAdapter::~TcpTransportAdapter() {
