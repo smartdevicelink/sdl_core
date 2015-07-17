@@ -81,11 +81,9 @@ void OnDriverDistractionNotification::Run() {
   for (; applications.end() != it; ++it) {
     const ApplicationSharedPtr app = *it;
     if (app) {
-      if (mobile_apis::HMILevel::eType::HMI_NONE != app->hmi_level()) {
-          (*on_driver_distraction)[strings::params]
-                                  [strings::connection_key] = app->app_id();
-          SendNotificationToMobile(on_driver_distraction);
-      }
+      (*on_driver_distraction)[strings::params]
+                              [strings::connection_key] = app->app_id();
+      SendNotificationToMobile(on_driver_distraction);
     }
   }
 }

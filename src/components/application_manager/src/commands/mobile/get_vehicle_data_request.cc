@@ -65,12 +65,6 @@ void GetVehicleDataRequest::Run() {
     return;
   }
 
-  if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
-    LOG4CXX_ERROR(logger_, "app in HMI level HMI_NONE");
-    SendResponse(false, mobile_apis::Result::REJECTED);
-    return;
-  }
-
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();
   VehicleData::const_iterator it = vehicle_data.begin();
 
@@ -181,7 +175,7 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
       }
       LOG4CXX_TRACE(logger_, "Status from HMI: " << it->status << ", so response status become " << status);
     } else {
-    	any_arg_success = true;
+        any_arg_success = true;
     }
   }
 
@@ -224,16 +218,11 @@ void GetVehicleDataRequest::Run() {
     return;
   }
 
-  if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
-    LOG4CXX_ERROR(logger_, "app in HMI level HMI_NONE.");
-    SendResponse(false, mobile_apis::Result::REJECTED);
-    return;
-  }
   if (app->IsCommandLimitsExceeded(
         static_cast<mobile_apis::FunctionID::eType>(function_id()),
         application_manager::TLimitSource::CONFIG_FILE)) {
     LOG4CXX_ERROR(logger_, "GetVehicleData frequency is too high.");
-    SendResponse(false, mobile_apis::Result::REJECTED);    
+    SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();

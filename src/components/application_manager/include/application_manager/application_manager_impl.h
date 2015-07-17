@@ -430,6 +430,10 @@ class ApplicationManagerImpl : public ApplicationManager,
     void SetState(uint32_t app_id,
                   mobile_apis::AudioStreamingState::eType audio_state) {
       ApplicationSharedPtr app  = application(app_id);
+      if (!app) {
+        LOG4CXX_ERROR(logger_, "Application with appID="<<app_id<<" does not exist");
+        return;
+      }
       state_ctrl_.SetRegularState(app, audio_state);
     }
 
@@ -443,6 +447,10 @@ class ApplicationManagerImpl : public ApplicationManager,
     void SetState(uint32_t app_id,
                   HmiStatePtr new_state) {
       ApplicationSharedPtr app  = application(app_id);
+      if (!app) {
+        LOG4CXX_ERROR(logger_, "Application with appID="<<app_id<<" does not exist");
+        return;
+      }
       state_ctrl_.SetRegularState<SendActivateApp>(app, new_state);
     }
 
@@ -455,6 +463,10 @@ class ApplicationManagerImpl : public ApplicationManager,
     void SetState(uint32_t app_id,
                   mobile_apis::HMILevel::eType hmi_level){
       ApplicationSharedPtr app  = application(app_id);
+      if (!app) {
+        LOG4CXX_ERROR(logger_, "Application with appID="<<app_id<<" does not exist");
+        return;
+      }
       state_ctrl_.SetRegularState<SendActivateApp>(app, hmi_level);
     }
 
@@ -470,6 +482,10 @@ class ApplicationManagerImpl : public ApplicationManager,
                   mobile_apis::HMILevel::eType hmi_level,
                   mobile_apis::AudioStreamingState::eType audio_state){
       ApplicationSharedPtr app  = application(app_id);
+      if (!app) {
+        LOG4CXX_ERROR(logger_, "Application with appID="<<app_id<<" does not exist");
+        return;
+      }
       state_ctrl_.SetRegularState<SendActivateApp>(app, hmi_level, audio_state);
     }
 
@@ -485,6 +501,10 @@ class ApplicationManagerImpl : public ApplicationManager,
                   mobile_apis::AudioStreamingState::eType audio_state,
                   mobile_apis::SystemContext::eType system_context) {
       ApplicationSharedPtr app  = application(app_id);
+      if (!app) {
+        LOG4CXX_ERROR(logger_, "Application with appID="<<app_id<<" does not exist");
+        return;
+      }
       state_ctrl_.SetRegularState<SendActivateApp>(app, hmi_level,
                                                    audio_state, system_context);
     }
@@ -497,6 +517,10 @@ class ApplicationManagerImpl : public ApplicationManager,
     void SetState(uint32_t app_id,
                   mobile_apis::SystemContext::eType system_context) {
       ApplicationSharedPtr app  = application(app_id);
+      if (!app) {
+        LOG4CXX_ERROR(logger_, "Application with appID="<<app_id<<" does not exist");
+        return;
+      }
       state_ctrl_.SetRegularState(app, system_context);
     }
 

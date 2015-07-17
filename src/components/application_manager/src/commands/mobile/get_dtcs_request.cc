@@ -59,12 +59,6 @@ void GetDTCsRequest::Run() {
     return;
   }
 
-  if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
-    LOG4CXX_ERROR(logger_, "App has not been activated");
-    SendResponse(false, mobile_apis::Result::REJECTED);
-    return;
-  }
-
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
 
