@@ -113,6 +113,7 @@ void TimerDirector::UnregisterTimer(const ModuleTimer<T>& timer) {
     return;
   }
   it->second->stop();
+  delete it->second->delegate();
   DeleteThread(it->second);
   timer_threads_.erase(it);
 }
@@ -121,6 +122,7 @@ void TimerDirector::UnregisterAllTimers() {
   for (std::map<std::string, threads::Thread*>::iterator it =
          timer_threads_.begin(); timer_threads_.end() != it; ++it) {
     it->second->stop();
+    delete it->second->delegate();
     DeleteThread(it->second);
   }
   timer_threads_.clear();
