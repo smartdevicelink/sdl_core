@@ -35,7 +35,7 @@
 
 #include <queue>
 #include <map>
-#include <iostream>
+#include <algorithm>
 
 #include "utils/macro.h"
 
@@ -66,9 +66,9 @@ class PrioritizedQueue {
   bool empty() const {
     return queues_.empty();
   }
-  void swap(PrioritizedQueue<M>&) {
-    queues_.clear();
-    total_size_ = 0;
+  void swap(PrioritizedQueue<M>& x) {
+    std::swap(queues_, x.queues_);
+    std::swap(total_size_, x.total_size_);
   }
   value_type front() {
     DCHECK(!queues_.empty() && !queues_.rbegin()->second.empty());
