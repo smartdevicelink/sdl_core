@@ -67,14 +67,14 @@ VehicleCapabilities::VehicleCapabilities()
 }
 
 Json::Value VehicleCapabilities::capabilities() const {
-  if (capabilities_.type() != Json::ValueType::nullValue) {
+  if (capabilities_.type() == Json::ValueType::objectValue) {
     return capabilities_[kInteriorVehicleDataCapabilities];
   }
   return capabilities_;
 }
 
 Json::Value VehicleCapabilities::capabilities(const Json::Value& zone) const {
-  if (capabilities_.type() != Json::ValueType::nullValue) {
+  if (capabilities_.type() == Json::ValueType::objectValue) {
     Json::Value result(Json::ValueType::arrayValue);
     for (Json::Value::iterator it =
            capabilities_[kInteriorVehicleDataCapabilities].begin();
