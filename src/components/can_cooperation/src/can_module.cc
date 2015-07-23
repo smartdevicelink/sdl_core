@@ -389,6 +389,23 @@ void CANModule::OnAppHMILevelChanged(
   service()->NotifyHMIAboutHMILevel(app, app->hmi_level());
 }
 
+bool CANModule::CanAppChangeHMILevel(
+    application_manager::ApplicationSharedPtr app,
+    mobile_apis::HMILevel::eType new_level) {
+  application_manager::AppExtensionPtr app_extension = app->QueryInterface(
+      GetModuleID());
+  if (!app_extension) {
+    return true;
+  }
+  CANAppExtensionPtr can_app_extension =
+    application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
+      app_extension);
+  if (new_level == mobile_apis::HMILevel::eType::HMI_FULL) {
+    return can_app_extension->is_on_driver_device();
+  }
+  return true;
+}
+
 void CANModule::OnDeviceRemoved(
     const connection_handler::DeviceHandle& device) {
   LOG4CXX_AUTO_TRACE(logger_);
