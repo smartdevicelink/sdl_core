@@ -34,11 +34,14 @@
 
 #if defined(OS_POSIX)
 #include <pthread.h>
+#include <sched.h>
 #else
 #error Please implement lock for your OS
 #endif
 #include <stdint.h>
 #include "utils/macro.h"
+#include "utils/atomic.h"
+#include "utils/memory_barrier.h"
 
 namespace sync_primitives {
 
@@ -47,6 +50,31 @@ namespace impl {
 typedef pthread_mutex_t PlatformMutex;
 #endif
 } // namespace impl
+
+
+class SpinMutex {
+ public:
+  SpinMutex()
+    : state_(0) { }
+  void Lock() {
+    if (atomic_post_set(&state_) == 0) {
+      return;
+    }
+    for(;;) {
+      sched_yield();
+      if (state_ == 0 && atomic_post_set(&state_) == 0) {
+        return;
+      }
+    }
+  }
+  void Unlock() {
+    state_ = 0;
+  }
+  ~SpinMutex() {
+  }
+ private:
+  volatile unsigned int state_;
+};
 
 /* Platform-indepenednt NON-RECURSIVE lock (mutex) wrapper
    Please use AutoLock to ackquire and (automatically) release it

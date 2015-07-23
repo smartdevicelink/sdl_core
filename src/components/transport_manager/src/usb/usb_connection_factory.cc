@@ -54,7 +54,7 @@ TransportAdapter::Error UsbConnectionFactory::Init() {
   return TransportAdapter::OK;
 }
 
-void UsbConnectionFactory::SetUsbHandler(const UsbHandlerSptr& usb_handler) {
+void UsbConnectionFactory::SetUsbHandler(const UsbHandlerSptr usb_handler) {
   usb_handler_ = usb_handler;
 }
 

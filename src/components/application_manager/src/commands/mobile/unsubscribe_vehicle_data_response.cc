@@ -45,7 +45,7 @@ UnsubscribeVehicleDataResponse::~UnsubscribeVehicleDataResponse() {
 }
 
 void UnsubscribeVehicleDataResponse::Run() {
-  LOG4CXX_INFO(logger_, "UnsubscribeVehicleDataResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 

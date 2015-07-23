@@ -281,7 +281,9 @@
 
 #buttonControls .ContainerControlls {
 	left: 34px;
-	background: black no-repeat;
+	background:
+		url(../images/home/controlButtons/backGroundControllButtons.png)
+		no-repeat;
 	width: 200px;
 	height: 200px;
 }
@@ -404,8 +406,8 @@
 	-webkit-transition: 0.2s;
 	border-radius: 8px;
 	background-color: #1D1D1D;
-/*	border: 1px solid #383737;
-	box-shadow: inset 5px 5px 10px #383737, inset -3px -3px 10px black;*/
+	border: 1px solid #383737;
+	box-shadow: inset 5px 5px 10px #383737, inset -3px -3px 10px black;
 	-webkit-transition: 0.2s;
 	font-size: 38px;
 	line-height: 42px;

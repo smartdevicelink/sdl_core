@@ -114,16 +114,31 @@ SDL.PopUp = Em.ContainerView.extend({
         }
 
         this.set('callback', null);
+        this.set('content', '');
         this.remove();
     },
 
-    popupActivate: function(message, callback) {
+    /**
+     * HMI modal window popUp Activation method
+     * @param textBody - main text to be displayes on PopUp
+     * @param callback - Callback function handled result parameter made by user action, if null - popUp will be closed by timer
+     * @param indicator - popUp will not be closed by timer and
+     * should be deactivated manually by developer in code using method's returned parameter this.
+     * callback shuld be null if indicator is true
+     * @param label
+     * @param line1
+     * @param line2
+     * @returns {SDL.PopUp} - returns current instance of PopUp
+     */
+    popupActivate: function(textBody, callback, indicator, label, line1, line2) {
         this.set('active', true);
 
         clearTimeout(this.timer);
         this.timer = null;
 
-        if (callback) {
+        if (indicator) {
+            this.set('buttons', true);
+        } else if (callback) {
             this.set('callback', callback);
             this.set('buttons', false);
         } else {
@@ -135,8 +150,11 @@ SDL.PopUp = Em.ContainerView.extend({
             5000);
         }
 
-        this.set('content', message);
+        this.set('content', textBody);
+        this.set('label', label);
+        this.set('line1', line1);
+        this.set('line2', line2);
 
-        return ++this.popUpId;
+        return this;
     }
 });

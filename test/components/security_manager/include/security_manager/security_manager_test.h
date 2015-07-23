@@ -277,7 +277,7 @@ using namespace ::security_manager;
     call_OnMessageReceived(NULL, 0, kInvalidServiceType);
   }
   /*
-   * Shall send InternallError on null data recieved
+   * Shall send InternallError on null data received
    */
   TEST_F(SecurityManagerTest, GetEmptyQuery) {
     EXPECT_CALL(mock_protocol_handler,
@@ -289,7 +289,7 @@ using namespace ::security_manager;
     call_OnMessageReceived(NULL, 0, secureServiceType);
   }
   /*
-   * Shall send InternallError on null data recieved
+   * Shall send InternallError on null data received
    */
   TEST_F(SecurityManagerTest, GetWrongJSONSize) {
     SetMockCryptoManger();

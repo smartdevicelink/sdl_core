@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -51,7 +51,7 @@ OnVRCommandNotification::~OnVRCommandNotification() {
 }
 
 void OnVRCommandNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnVRCommandNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr active_app = ApplicationManagerImpl::instance()
       ->active_application();
@@ -62,7 +62,10 @@ void OnVRCommandNotification::Run() {
   // Check if this is one of standart VR commands (i.e. "Help")
   if (cmd_id > max_cmd_id + 1) {
     LOG4CXX_INFO(logger_, "Switched App");
-    MessageHelper::SendActivateAppToHMI(cmd_id - max_cmd_id);
+    const uint32_t app_id = cmd_id - max_cmd_id;
+    ApplicationManagerImpl::instance()->SetState<true>(app_id,
+                                                 mobile_apis::HMILevel::HMI_FULL
+                                                 );
     return;
   }
 

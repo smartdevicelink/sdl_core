@@ -1,4 +1,4 @@
-/**
+/*
  * \file usb_handler.cc
  * \brief UsbHandler class source file.
  *

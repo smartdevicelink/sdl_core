@@ -79,7 +79,11 @@ SDL.DialpadPhoneView = Em.ContainerView.create( {
 
             classNames: 'left',
 
-            text: '1'
+            text: '1',
+
+            action: "keyPress",
+
+            target: "SDL.PhoneController"
         } ),
 
         key2: SDL.Button.extend( {
@@ -87,7 +91,11 @@ SDL.DialpadPhoneView = Em.ContainerView.create( {
 
             classNames: 'center',
 
-            text: '2'
+            text: '2',
+
+            action: "keyPress",
+
+            target: "SDL.PhoneController"
         } ),
 
         key3: SDL.Button.extend( {
@@ -95,8 +103,11 @@ SDL.DialpadPhoneView = Em.ContainerView.create( {
 
             classNames: 'right',
 
-            text: '3'
+            text: '3',
 
+            action: "keyPress",
+
+            target: "SDL.PhoneController"
         } ),
 
         key4: SDL.Button.extend( {
@@ -104,7 +115,11 @@ SDL.DialpadPhoneView = Em.ContainerView.create( {
 
             classNames: 'left',
 
-            text: '4'
+            text: '4',
+
+            action: "keyPress",
+
+            target: "SDL.PhoneController"
         } ),
 
         key5: SDL.Button.extend( {
@@ -112,7 +127,11 @@ SDL.DialpadPhoneView = Em.ContainerView.create( {
 
             classNames: 'center',
 
-            text: '5'
+            text: '5',
+
+            action: "keyPress",
+
+            target: "SDL.PhoneController"
         } ),
 
         key6: SDL.Button.extend( {
@@ -120,7 +139,11 @@ SDL.DialpadPhoneView = Em.ContainerView.create( {
 
             classNames: 'right',
 
-            text: '6'
+            text: '6',
+
+            action: "keyPress",
+
+            target: "SDL.PhoneController"
         } ),
 
         key7: SDL.Button.extend( {
@@ -128,7 +151,11 @@ SDL.DialpadPhoneView = Em.ContainerView.create( {
 
             classNames: 'left',
 
-            text: '7'
+            text: '7',
+
+            action: "keyPress",
+
+            target: "SDL.PhoneController"
         } ),
 
         key8: SDL.Button.extend( {
@@ -136,7 +163,11 @@ SDL.DialpadPhoneView = Em.ContainerView.create( {
 
             classNames: 'center',
 
-            text: '8'
+            text: '8',
+
+            action: "keyPress",
+
+            target: "SDL.PhoneController"
         } ),
 
         key9: SDL.Button.extend( {
@@ -144,7 +175,11 @@ SDL.DialpadPhoneView = Em.ContainerView.create( {
 
             classNames: 'right',
 
-            text: '9'
+            text: '9',
+
+            action: "keyPress",
+
+            target: "SDL.PhoneController"
         } ),
 
         key0: SDL.Button.extend( {
@@ -152,7 +187,11 @@ SDL.DialpadPhoneView = Em.ContainerView.create( {
 
             classNames: 'center',
 
-            text: '0'
+            text: '0',
+
+            action: "keyPress",
+
+            target: "SDL.PhoneController"
         } ),
 
         keyStar: SDL.Button.extend( {
@@ -160,7 +199,11 @@ SDL.DialpadPhoneView = Em.ContainerView.create( {
 
             classNames: 'left',
 
-            text: '*'
+            text: '*',
+
+            action: "keyPress",
+
+            target: "SDL.PhoneController"
         } ),
 
         keyDiez: SDL.Button.extend( {
@@ -168,7 +211,11 @@ SDL.DialpadPhoneView = Em.ContainerView.create( {
 
             classNames: 'right',
 
-            text: '#'
+            text: '#',
+
+            action: "keyPress",
+
+            target: "SDL.PhoneController"
         } )
     } ),
 

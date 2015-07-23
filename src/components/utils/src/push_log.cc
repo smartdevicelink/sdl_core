@@ -33,6 +33,7 @@
 #include "utils/push_log.h"
 #include "utils/log_message_loop_thread.h"
 #include "utils/logger_status.h"
+#include "config_profile/profile.h"
 
 namespace logger {
 
@@ -63,6 +64,10 @@ bool push_log(log4cxx::LoggerPtr logger,
 // while deleting logger thread
 
   return false;
+}
+
+bool logs_enabled() {
+  return profile::Profile::instance()->logs_enabled();
 }
 
 }  // namespace logger

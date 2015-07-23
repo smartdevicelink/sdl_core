@@ -202,93 +202,134 @@ FFW.BasicCommunication = FFW.RPCObserver
             Em.Logger.log("FFW.BasicCommunicationRPC.onRPCResult");
             this._super();
 
-            if (response.result.method == "SDL.GetUserFriendlyMessage") {
+            if ("result" in response
+                && response.result.code === SDL.SDLModel.resultCode["SUCCESS"]) {
 
-                Em.Logger.log("SDL.GetUserFriendlyMessage: Response from SDL!");
+                if (response.result.method == "SDL.GetUserFriendlyMessage") {
 
-                if (response.id in SDL.SDLModel.userFriendlyMessagePull) {
-                    var callbackObj = SDL.SDLModel.userFriendlyMessagePull[response.id];
-                    callbackObj.callbackFunc(response.result.messages, callbackObj.appID);
-                    delete SDL.SDLModel.userFriendlyMessagePull[response.id];
+                    Em.Logger.log("SDL.GetUserFriendlyMessage: Response from SDL!");
+
+                    if (response.id in SDL.SDLModel.userFriendlyMessagePull) {
+                        var callbackObj = SDL.SDLModel.userFriendlyMessagePull[response.id];
+                        callbackObj.callbackFunc(response.result.messages);
+                        delete SDL.SDLModel.userFriendlyMessagePull[response.id];
+                    }
                 }
-            }
 
-            if (response.result.method == "SDL.ActivateApp") {
+                if (response.result.method == "SDL.ActivateApp") {
 
-                Em.Logger.log("SDL.ActivateApp: Response from SDL!");
+                    Em.Logger.log("SDL.ActivateApp: Response from SDL!");
 
-                if (response.id in SDL.SDLModel.activateAppRequestsList) {
+                    if (response.id in SDL.SDLModel.activateAppRequestsList) {
 
-                    var appID = SDL.SDLModel.activateAppRequestsList[response.id];
+                        var appID = SDL.SDLModel.activateAppRequestsList[response.id].appID,
+                            popUp = SDL.SDLModel.activateAppRequestsList[response.id].popUp;
 
-                    if (!response.result.isSDLAllowed) {
+                        popUp.deactivate();
 
-                        SDL.SettingsController.currentDeviceAllowance = response.result.device;
+                        if (response.error && response.error.code === SDL.SDLModel.resultCode["APPLICATION_NOT_REGISTERED"]) {
 
-                        FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.AllowSDLFunctionality, appID, ["DataConsent"]);
+                            SDL.PopUp.create().appendTo('body').popupActivate("Activation FAILED!");
+                            return;
+                        }
+
+                        if (!response.result.isSDLAllowed) {
+
+                            SDL.SettingsController.currentDeviceAllowance = response.result.device;
+
+                            FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.AllowSDLFunctionality, appID, ["DataConsent"]);
+                        }
+
+                        if (response.result.isPermissionsConsentNeeded) {
+
+                            this.GetListOfPermissions(appID);
+                        }
+
+                        if (response.result.isAppPermissionsRevoked) {
+
+                            SDL.SDLModel.setAppPermissions(appID, response.result.appRevokedPermissions);
+                        }
+
+                        if (response.result.isAppRevoked) {
+
+                            FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.simpleParseUserFriendlyMessageData, appID, ["AppUnsupported"]);
+                        } else {
+
+                            SDL.SDLController.getApplicationModel(appID).deviceID = response.result.device ? response.result.device.id : null;
+
+                            if (SDL.SDLAppController.model && SDL.SDLAppController.model.appID != appID) {
+                                SDL.States.goToStates('info.apps');
+                            }
+
+                            if (SDL.SDLModel.stateLimited == appID) {
+                                SDL.SDLModel.stateLimited = null;
+                                SDL.SDLModel.set('limitedExist', false);
+                            }
+
+                            if (response.result.isSDLAllowed) {
+                                SDL.SDLController.getApplicationModel(appID).turnOnSDL(appID);
+                            }
+                        }
+
+                        delete SDL.SDLModel.activateAppRequestsList[response.id];
                     }
+                } else if (response.result.method == "SDL.ActivateApp" && response.result.code != 0) {
+                    Em.Logger.error("SDL.ActivateApp: Wrong Response from SDL!");
+                }
 
-                    if (response.result.isPermissionsConsentNeeded) {
+                if (response.result.method == "SDL.GetListOfPermissions") {
 
-                        this.GetListOfPermissions(appID);
-                    }
+                    Em.Logger.log("SDL.GetListOfPermissions: Response from SDL!");
 
-                    if (response.result.isAppPermissionsRevoked) {
+                    SDL.SettingsController.GetListOfPermissionsResponse(response);
+                }
 
-                        SDL.SDLModel.setAppPermissions(appID, response.result.appRevokedPermissions);
-                    }
+                if (response.result.method == "SDL.GetStatusUpdate") {
 
-                    if (response.result.isAppRevoked) {
+                    Em.Logger.log("SDL.GetStatusUpdate: Response from SDL!");
 
-                        FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.simpleParseUserFriendlyMessageData, appID, ["AppUnsupported"]);
+                    SDL.PopUp.create().appendTo('body').popupActivate(response.result);
+                }
+
+                if (response.result.method == "SDL.GetURLS") {
+
+                    SDL.SDLModel.set('policyURLs', response.result.urls);
+
+                    if (response.result.urls.length) {
+                        this.OnSystemRequest("PROPRIETARY", response.result.urls[0].policyAppId, SDL.SettingsController.policyUpdateFile, response.result.urls[0].url);
                     } else {
-
-                        SDL.SDLController.getApplicationModel(appID).deviceID = response.result.device ? response.result.device.id : null;
-
-                        if ( SDL.SDLAppController.model && SDL.SDLAppController.model.appID != appID) {
-                            SDL.States.goToStates('info.apps');
-                        }
-
-                        if (SDL.SDLModel.stateLimited == appID) {
-                            SDL.SDLModel.stateLimited = null;
-                            SDL.SDLModel.set('limitedExist', false);
-                        }
-
-                        if (response.result.isSDLAllowed) {
-                            SDL.SDLController.getApplicationModel(appID).turnOnSDL(appID);
-                        }
+                        this.OnSystemRequest("PROPRIETARY");
                     }
 
-                    delete SDL.SDLModel.activateAppRequestsList[response.id];
+                    SDL.SettingsController.policyUpdateRetry();
+
                 }
-            }
+            } else if ("error" in response
+                && "code" in response.error
+                && response.error.code !== SDL.SDLModel.resultCode["SUCCESS"]) {
 
-            if (response.result.method == "SDL.GetListOfPermissions") {
 
-                Em.Logger.log("SDL.GetListOfPermissions: Response from SDL!");
+                if ("data" in response.error && "method" in response.error.data) {
+                    //&& response.error.data.method == "SDL.ActivateApp" && response.error.code === 15) {
 
-                SDL.SettingsController.GetListOfPermissionsResponse(response);
-            }
+                    if (response.error.data.method == "SDL.ActivateApp") {
 
-            if (response.result.method == "SDL.GetStatusUpdate") {
+                        var appID = SDL.SDLModel.activateAppRequestsList[response.id].appID,
+                            popUp = SDL.SDLModel.activateAppRequestsList[response.id].popUp;
 
-                Em.Logger.log("SDL.GetStatusUpdate: Response from SDL!");
+                        popUp.deactivate();
 
-                SDL.PopUp.create().appendTo('body').popupActivate(response.result);
-            }
+                        if (SDL.SDLModel.resultCode["APPLICATION_NOT_REGISTERED"]) {
+                            SDL.PopUp.create().appendTo('body').popupActivate("Activation FAILED! Application not registered!");
+                        }
 
-            if (response.result.method == "SDL.GetURLS") {
-
-                SDL.SDLModel.set('policyURLs', response.result.urls);
-
-                if (response.result.urls.length) {
-                    this.OnSystemRequest("PROPRIETARY", response.result.urls[0].policyAppId, SDL.SettingsController.policyUpdateFile, response.result.urls[0].url);
+                        delete SDL.SDLModel.activateAppRequestsList[response.id];
+                    }
                 } else {
-                    this.OnSystemRequest("PROPRIETARY");
+                    console.error("Wrong JSON response structure!");
                 }
-
-                SDL.SettingsController.policyUpdateRetry();
-
+            } else {
+                console.error("Wrong JSON response structure!");
             }
         },
 
@@ -345,7 +386,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
                 if (notification.params.isAppPermissionsRevoked) {
 
-                    SDL.SDLModel.setAppPermissions(notification.params.appID, response.result.appRevokedPermissions);
+                    SDL.SDLModel.setAppPermissions(notification.params.appID, notification.params.appRevokedPermissions);
                 }
 
                 if (notification.params.appRevoked) {
@@ -360,7 +401,7 @@ FFW.BasicCommunication = FFW.RPCObserver
             }
 
             if (notification.method == this.onAppRegisteredNotification) {
-                SDL.SDLModel.onAppRegistered(notification.params);
+                SDL.SDLModel.onAppRegistered(notification.params.application);
                 this.OnFindApplications();
             }
 
@@ -418,9 +459,19 @@ FFW.BasicCommunication = FFW.RPCObserver
                 }
                 if (request.method == "BasicCommunication.UpdateAppList") {
 
+                    var message = "Was found " + request.params.applications.length + " apps";
+
+                    SDL.PopUp.create().appendTo('body').popupActivate(message);
+
+                    SDL.SDLModel.set('updatedAppsList', request.params.applications);
+
+                    SDL.InfoAppsView.showAppList();
+
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
                         request.id,
                         request.method);
+
+                    SDL.InfoAppsView.showAppList();
                 }
                 if (request.method == "BasicCommunication.SystemRequest") {
 
@@ -433,6 +484,32 @@ FFW.BasicCommunication = FFW.RPCObserver
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
                         request.id,
                         request.method);
+                }
+                if (request.method == "BasicCommunication.DialNumber") {
+
+                    SDL.PopUp.create().appendTo('body').popupActivate(
+                        "Would you like to dial " + request.params.number + " ?",
+                        function (result) {
+                            if (result) {
+
+                                FFW.BasicCommunication.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
+                                    request.id,
+                                    request.method);
+
+                                SDL.SDLModel.onDeactivateApp('call', request.params.appID);
+                                SDL.States.goToStates('phone.dialpad');
+                                SDL.PhoneController.incomingCall(request);
+                            } else {
+
+
+                                FFW.BasicCommunication.sendError(SDL.SDLModel.resultCode["REJECTED"],
+                                    request.id,
+                                    request.method,
+                                    "No paired device!"
+                                );
+                            }
+                        },
+                        false);
                 }
                 if (request.method == "BasicCommunication.ActivateApp") {
 
@@ -494,7 +571,10 @@ FFW.BasicCommunication = FFW.RPCObserver
 
             var itemIndex = this.client.generateId();
 
-            SDL.SDLModel.activateAppRequestsList[itemIndex] = appID;
+            SDL.SDLModel.activateAppRequestsList[itemIndex] = {
+                "appID": appID,
+                "popUp": SDL.PopUp.create().appendTo('body').popupActivate("Activation in progress...", null, true)
+            };
 
             Em.Logger.log("FFW.SDL.OnAppActivated: Request from HMI!");
 
@@ -508,6 +588,17 @@ FFW.BasicCommunication = FFW.RPCObserver
                 }
             };
             this.client.send(JSONMessage);
+
+            setTimeout(function(){
+                if (itemIndex in SDL.SDLModel.activateAppRequestsList) {
+
+                    SDL.SDLModel.activateAppRequestsList[itemIndex].popUp.deactivate();
+
+                    SDL.PopUp.create().appendTo('body').popupActivate("Activation FAILED! Application not registered!");
+
+                    delete SDL.SDLModel.activateAppRequestsList[itemIndex];
+                }
+            }, 20000);
         },
 
         /**
@@ -1000,6 +1091,24 @@ FFW.BasicCommunication = FFW.RPCObserver
         },
 
         /**
+         * OnAwakeSDL from HMI returns SDL to normal operation
+         * after OnExitAllApplications(SUSPEND)
+         */
+        OnAwakeSDL: function() {
+
+            Em.Logger.log("FFW.BasicCommunication.OnAwakeSDL");
+
+            // send request
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "method": "BasicCommunication.OnAwakeSDL"
+            };
+            this.client.send(JSONMessage);
+        },
+
+
+
+        /**
          * Used by HMI when User chooses to exit application.
          *
          * @params {Number}
@@ -1150,6 +1259,25 @@ FFW.BasicCommunication = FFW.RPCObserver
             this.client.send(JSONMessage);
         },
 
+        /**
+         * Notifies if audio state was changed
+         *
+         * @param {Boolean} enabled
+         */
+        OnEmergencyEvent: function(enabled) {
+
+            Em.Logger.log("FFW.BasicCommunication.OnEmergencyEvent");
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "method": "BasicCommunication.OnEmergencyEvent",
+                "params": {
+                    "enabled": enabled
+                }
+            };
+            this.client.send(JSONMessage);
+        },
         /**
          * Send error response from onRPCRequest
          *

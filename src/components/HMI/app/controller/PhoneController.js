@@ -33,24 +33,50 @@
 
 SDL.PhoneController = Em.Object.create( {
 
-    /** Model binding */
+    /**
+     * Model binding
+     */
     modelBinding: "SDL.PhoneModel",
 
-    /** Dialpad delete key press handeler */
+    /**
+     * Dialpad delete key press handeler
+     */
     onDelete: function() {
 
         this.model.deleteDialpadNumber();
     },
 
-    /** Dial call handeler */
+    /**
+     *  Dial call handeler
+     */
     onEndCall: function() {
 
+        FFW.BasicCommunication.OnPhoneCall(false);
         this.model.endCall();
     },
 
-    /** Dial call handeler */
+    /**
+     * Dial call handeler
+     */
     onDialCall: function() {
 
+        FFW.BasicCommunication.OnPhoneCall(true);
         this.model.dialCall();
+    },
+
+    /**
+     * Dialpad key press handler
+     */
+    keyPress: function(element) {
+        this.model.setDialpadNumber(element.text)
+    },
+
+    /**
+     *
+     */
+    incomingCall: function(request) {
+
+        this.model.setDialpadNumber(request.params.number);
+        this.onDialCall();
     }
 });

@@ -68,7 +68,7 @@ bool ScrollableMessageRequest::Init() {
 }
 
 void ScrollableMessageRequest::Run() {
-  LOG4CXX_INFO(logger_, "ScrollableMessageRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application_manager::ApplicationManagerImpl::instance()
       ->application((*message_)[strings::params][strings::connection_key].asUInt());
@@ -113,7 +113,7 @@ void ScrollableMessageRequest::Run() {
 }
 
 void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "ScrollableMessageRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -133,8 +133,7 @@ void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
       HMICapabilities& hmi_capabilities =
           ApplicationManagerImpl::instance()->hmi_capabilities();
       bool result = false;
-      if (mobile_apis::Result::SUCCESS == result_code ||
-          mobile_apis::Result::ABORTED == result_code) {
+      if (mobile_apis::Result::SUCCESS == result_code) {
         result = true;
       } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code) &&
           hmi_capabilities.is_ui_cooperating()) {

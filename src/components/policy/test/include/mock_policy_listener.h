@@ -47,18 +47,17 @@ namespace policy {
 
 class MockPolicyListener : public PolicyListener {
  public:
-  MOCK_METHOD0(OnPTExchangeNeeded,
-               void());
   MOCK_METHOD3(OnPermissionsUpdated,
                void(const std::string& policy_app_id,
                     const Permissions& permissions,
                     const policy::HMILevel& default_hmi));
+  MOCK_METHOD2(OnPermissionsUpdated,
+               void(const std::string& policy_app_id,
+                    const Permissions& permissions));
   MOCK_METHOD1(OnPendingPermissionChange,
                void(const std::string& policy_app_id));
-  MOCK_METHOD1(OnAppRevoked,
-               void(const std::string& policy_app_id));
   MOCK_METHOD1(OnUpdateStatusChanged,
-               void(policy::PolicyTableStatus status));
+               void(const std::string& status));
   MOCK_METHOD1(OnCurrentDeviceIdUpdateRequired,
                std::string(const std::string& policy_app_id));
   MOCK_METHOD0(OnSystemInfoUpdateRequired,
@@ -70,6 +69,17 @@ class MockPolicyListener : public PolicyListener {
   MOCK_METHOD2(OnDeviceConsentChanged,
                void(const std::string& device_id,
                     bool is_allowed));
+  MOCK_METHOD1(OnUpdateHMIAppType,
+               void(std::map<std::string, StringArray>));
+  MOCK_METHOD1(GetAvailableApps,
+               void(std::queue<std::string>&));
+  MOCK_METHOD3(OnSnapshotCreated,
+               void(const BinaryMessage& pt_string,
+                    const std::vector<int>& retry_seconds,
+                    int timeout_exceed));
+  MOCK_METHOD0(CanUpdate,
+               bool());
+  MOCK_METHOD1(OnCertificateUpdated, void (const std::string&));
 };
 
 }  // namespace policy

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -42,7 +42,7 @@ namespace commands {
 /**
  * @brief ActivateAppRequest command class
  **/
-class ActivateAppRequest : public RequestToHMI, event_engine::EventObserver {
+class ActivateAppRequest : public RequestToHMI {
   public:
     /**
      * @brief ActivateAppRequest class constructor
@@ -50,13 +50,6 @@ class ActivateAppRequest : public RequestToHMI, event_engine::EventObserver {
      * @param message Incoming SmartObject message
      **/
     explicit ActivateAppRequest(const MessageSharedPtr& message);
-
-    /**
-     * @brief Calback for response
-     *
-     * @param event - event response
-     **/
-    virtual void on_event(const event_engine::Event& event);
 
     /**
      * @brief ActivateAppRequest class destructor

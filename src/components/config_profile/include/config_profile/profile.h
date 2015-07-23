@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,10 +58,21 @@ class Profile : public utils::Singleton<Profile> {
     virtual ~Profile();
 
     /**
+     * @brief Returns sdl version represented
+     * by git commit or value specified by user
+     */
+    const std::string& sdl_version() const;
+
+    /**
       * @brief Returns true if HMI should be started, otherwise false
       */
     bool launch_hmi() const;
-
+#ifdef WEB_HMI
+    /**
+      * @brief Returns link to web hmi
+      */
+    std::string link_to_web_hmi() const;
+#endif // WEB_HMI
     /**
       * @brief Returns application configuration path
       */
@@ -76,6 +87,27 @@ class Profile : public utils::Singleton<Profile> {
      * @brief Return application resourse folder
      */
     const std::string& app_resourse_folder() const;
+
+    /**
+     * @brief Returns true, if SDL 4.0 is enabled
+     */
+    bool enable_protocol_4() const;
+
+    /**
+     * @brief Returns application icons folder path
+     */
+    const std::string& app_icons_folder() const;
+
+    /**
+     * @brief Returns application icons folder maximum size
+     */
+    const uint32_t& app_icons_folder_max_size() const;
+
+    /**
+     * @brief Returns application icons amount to remove from icon folder,
+     * if maximum size exceeded
+     */
+    const uint32_t& app_icons_amount_to_remove() const;
 
     /**
      * @brief Returns the path to the config file
@@ -106,6 +138,11 @@ class Profile : public utils::Singleton<Profile> {
       * @brief Returns port for audio streaming
       */
     const uint16_t& audio_streaming_port() const;
+
+    /**
+     * @brief Returns streaming timeout
+     */
+    uint32_t stop_streaming_timeout() const;
 
     /**
       * @brief Returns port for time reports
@@ -147,6 +184,7 @@ class Profile : public utils::Singleton<Profile> {
      * @brief Default timeout for waiting for resuming
      */
     const uint32_t& app_resuming_timeout() const;
+    const uint32_t& app_resumption_save_persistent_data_timeout() const;
 
     /**
      * @brief Returns desirable thread stack size
@@ -208,6 +246,19 @@ class Profile : public utils::Singleton<Profile> {
       * @brief Returns path to testing file to which redirects audio stream
       */
     const std::string& audio_stream_file() const;
+
+    /**
+     * @brief Returns timeout for SDL to wait for the next package of raw data
+     * over audio service
+     */
+    const std::uint32_t audio_data_stopped_timeout() const;
+
+    /**
+     * @brief Returns timeout for SDL to wait for the next package of raw data
+     * over video service
+     */
+    const std::uint32_t video_data_stopped_timeout() const;
+
     /**
      * @brief Returns allowable max amount of requests per time scale for
      * application in hmi level none
@@ -439,6 +490,54 @@ class Profile : public utils::Singleton<Profile> {
      */
     int iap_hub_connection_wait_timeout() const;
 
+    /*
+     * ProtocolHandler section
+     */
+    size_t maximum_payload_size() const;
+
+    size_t message_frequency_count() const;
+
+    size_t message_frequency_time() const;
+
+    bool malformed_message_filtering() const;
+
+    size_t malformed_frequency_count() const;
+
+    size_t malformed_frequency_time() const;
+
+    uint16_t attempts_to_open_policy_db() const;
+
+    uint16_t open_attempt_timeout_ms() const;
+
+    uint32_t resumption_delay_before_ign() const;
+
+    uint32_t resumption_delay_after_ign() const;
+
+    uint32_t hash_string_size() const;
+
+    bool logs_enabled() const;
+
+    /**
+     * @brief Returns true if resumption ctrl uses db, returns false if
+     * resumption ctrl uses JSON.
+     */
+    bool use_db_for_resumption() const;
+
+    /**
+     * @brief Returns amount of attempts for opening resumption db
+     */
+    uint16_t attempts_to_open_resumption_db() const;
+
+    /**
+     * @brief Returns timeout between attempts
+     */
+    uint16_t open_attempt_timeout_ms_resumption_db() const;
+
+    /*
+     * @brief Updates all related values from ini file
+     */
+    void UpdateValues();
+
   private:
     /**
      * Default constructor
@@ -448,10 +547,6 @@ class Profile : public utils::Singleton<Profile> {
      */
     Profile();
 
-    /*
-     * @brief Updates all related values from ini file
-     */
-    void UpdateValues();
 
     /**
      * @brief Reads a boolean value from the profile
@@ -525,23 +620,45 @@ class Profile : public utils::Singleton<Profile> {
                        const char* const pKey) const;
 
     /**
-     * @brief Write to log content of container
-     * @param array Source array
-     * @param log Log string
+     * @brief Checks, if path is relative
+     * @param path Path
+     * @return true, if is relative, otherwise - false
      */
-    void LogContainer(const std::vector<std::string>& container,
-                      std::string* log);
+    bool IsRelativePath(const std::string& path);
 
-    // Members section
+    /**
+     * @brief Makes relative path absolute
+     * @param path Path
+     */
+    void MakeAbsolutePath(std::string& path);
+
+    /**
+     * @brief Converts input string to number
+     * @param input Input string
+     * @param output Output number
+     * @return true, if successfully converted, otherwise - false
+     */
+    bool StringToNumber(const std::string& input, uint64_t& output) const;
+
+private:
+    std::string                     sdl_version_;
     bool                            launch_hmi_;
+#ifdef WEB_HMI
+    std::string                     link_to_web_hmi_;
+#endif // WEB_HMI
     std::string                     app_config_folder_;
     std::string                     app_storage_folder_;
     std::string                     app_resourse_folder_;
+    bool                            enable_protocol_4_;
+    std::string                     app_icons_folder_;
+    uint32_t                        app_icons_folder_max_size_;
+    uint32_t                        app_icons_amount_to_remove_;
     std::string                     config_file_name_;
     std::string                     server_address_;
     uint16_t                        server_port_;
     uint16_t                        video_streaming_port_;
     uint16_t                        audio_streaming_port_;
+    uint32_t                        stop_streaming_timeout_;
     uint16_t                        time_testing_port_;
     std::string                     hmi_capabilities_file_name_;
     std::vector<std::string>        help_prompt_;
@@ -553,6 +670,7 @@ class Profile : public utils::Singleton<Profile> {
     uint32_t                        max_cmd_id_;
     uint32_t                        default_timeout_;
     uint32_t                        app_resuming_timeout_;
+    uint32_t                        app_resumption_save_persistent_data_timeout_;
     std::string                     vr_help_title_;
     uint32_t                        app_dir_quota_;
     std::string                     video_consumer_type_;
@@ -580,6 +698,8 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     system_files_path_;
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
+    std::uint32_t                   audio_data_stopped_timeout_;
+    std::uint32_t                   video_data_stopped_timeout_;
     std::string                     mme_db_name_;
     std::string                     event_mq_name_;
     std::string                     ack_mq_name_;
@@ -588,6 +708,7 @@ class Profile : public utils::Singleton<Profile> {
     uint32_t                        application_list_update_timeout_;
     uint32_t                        max_thread_pool_size_;
     uint32_t                        default_hub_protocol_index_;
+
     /*
      * first value is count of request
      * second is time scale
@@ -614,6 +735,15 @@ class Profile : public utils::Singleton<Profile> {
     int                             iap2_hub_connect_attempts_;
     int                             iap_hub_connection_wait_timeout_;
     uint16_t                        tts_global_properties_timeout_;
+    uint16_t                        attempts_to_open_policy_db_;
+    uint16_t                        open_attempt_timeout_ms_;
+    uint32_t                        resumption_delay_before_ign_;
+    uint32_t                        resumption_delay_after_ign_;
+    uint32_t                        hash_string_size_;
+    bool                            logs_enabled_;
+    bool                            use_db_for_resumption_;
+    uint16_t                        attempts_to_open_resumption_db_;
+    uint16_t                        open_attempt_timeout_ms_resumption_db_;
 
     FRIEND_BASE_SINGLETON_CLASS(Profile);
     DISALLOW_COPY_AND_ASSIGN(Profile);

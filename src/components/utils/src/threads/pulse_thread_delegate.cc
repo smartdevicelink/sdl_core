@@ -91,7 +91,7 @@ void PulseThreadDelegate::threadMain() {
   Finalize();
 }
 
-bool PulseThreadDelegate::exitThreadMain() {
+void PulseThreadDelegate::exitThreadMain() {
   run_ = false;
 
   LOG4CXX_TRACE(logger_, "Disconnecting from QNX channel " << chid_);
@@ -109,8 +109,6 @@ bool PulseThreadDelegate::exitThreadMain() {
   else {
     LOG4CXX_WARN(logger_, "Failed to destroy QNX channel " << chid_);
   }
-
-  return true;
 }
 
 }  // namespace threads

@@ -1,4 +1,4 @@
-/**
+/*
  * \file device_scanner.h
  * \brief DeviceScanner class header file.
  * Copyright (c) 2013, Ford Motor Company

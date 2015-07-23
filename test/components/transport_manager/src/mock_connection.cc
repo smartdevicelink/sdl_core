@@ -41,7 +41,13 @@
 #include "transport_manager/common.h"
 #include "transport_manager/mock_connection.h"
 
+<<<<<<< HEAD:test/components/transport_manager/src/mock_connection.cc
 #include <algorithm>
+=======
+DeviceType MmeTransportAdapter::GetDeviceType() const {
+  return MME;
+}
+>>>>>>> 35db1ec... APPLINK-12266. Implement ability to handle transport type.:src/components/transport_manager/src/mme/mme_transport_adapter.cc
 
 #include "transport_manager/mock_transport_adapter.h"
 

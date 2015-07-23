@@ -47,7 +47,9 @@ SDL.ExitApp = Em.ContainerView.create( {
         [
             'exitAppViewLabel',
             'exitAppViewTitle',
-            'exitAppViewSelect'
+            'exitAppViewSelect',
+            'onAwakeSDLLabel',
+            'onAwakeSDLButton'
         ],
 
     /**
@@ -103,6 +105,24 @@ SDL.ExitApp = Em.ContainerView.create( {
 
         }
     } ),
+
+    onAwakeSDLLabel: SDL.Label.extend( {
+
+        elementId: 'onAwakeSDLLabel',
+
+        classNames: 'onAwakeSDLLabel',
+
+        content: 'onAwakeSDL notification send'
+    } ),
+
+    onAwakeSDLButton: SDL.Button.extend( {
+        classNames: 'button onAwakeSDLButton',
+        text: 'Send onAwakeSDL',
+        action: 'onAwakeSDLNotificationSend',
+        target: 'SDL.SDLController',
+        buttonAction: true,
+        onDown: false
+    }),
 
     /**
      * Trigger function that activates and deactivates tbtClientStateView

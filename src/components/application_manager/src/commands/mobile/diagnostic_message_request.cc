@@ -31,9 +31,11 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <algorithm>
 #include "application_manager/commands/mobile/diagnostic_message_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "config_profile/profile.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -48,14 +50,32 @@ DiagnosticMessageRequest::~DiagnosticMessageRequest() {
 }
 
 void DiagnosticMessageRequest::Run() {
-  LOG4CXX_INFO(logger_, "DiagnosticMessageRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-                               connection_key());
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "An application is not registered.");
+    LOG4CXX_ERROR(logger_, "Application is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
+
+  const std::vector<uint32_t>& supported_diag_modes =
+      profile::Profile::instance()->supported_diag_modes();
+
+  smart_objects::SmartObject& msg_data =
+      (*message_)[strings::msg_params][strings::message_data];
+
+  const uint8_t mode_position = 0;
+  const uint32_t msg_diagnostic_mode = msg_data[mode_position].asUInt();
+  if (supported_diag_modes.end() == std::find(supported_diag_modes.begin(),
+                                              supported_diag_modes.end(),
+                                              msg_diagnostic_mode)) {
+    LOG4CXX_ERROR(logger_, "Received diagnostic mode " << msg_diagnostic_mode <<
+                           " is not supported.");
+    SendResponse(false, mobile_apis::Result::REJECTED,
+                 "Received diagnostic mode is not supported.");
     return;
   }
 
@@ -68,7 +88,7 @@ void DiagnosticMessageRequest::Run() {
 }
 
 void DiagnosticMessageRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "DiagnosticMessageRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {

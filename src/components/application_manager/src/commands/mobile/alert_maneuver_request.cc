@@ -52,7 +52,7 @@ AlertManeuverRequest::~AlertManeuverRequest() {
 }
 
 void AlertManeuverRequest::Run() {
-  LOG4CXX_INFO(logger_, "AlertManeuverRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   if ((!(*message_)[strings::msg_params].keyExists(strings::soft_buttons)) &&
       (!(*message_)[strings::msg_params].keyExists(strings::tts_chunks))) {
@@ -103,6 +103,8 @@ void AlertManeuverRequest::Run() {
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
 
+  msg_params[strings::app_id] = app->app_id();
+
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     msg_params[hmi_request::soft_buttons] =
               (*message_)[strings::msg_params][strings::soft_buttons];
@@ -120,14 +122,15 @@ void AlertManeuverRequest::Run() {
 
     msg_params[hmi_request::tts_chunks] =
         (*message_)[strings::msg_params][strings::tts_chunks];
+    msg_params[hmi_request::speak_type] =
+        hmi_apis::Common_MethodName::ALERT_MANEUVER;
 
-    msg_params[strings::app_id] = app->app_id();
     SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
   }
 }
 
 void AlertManeuverRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "AlertManeuverRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
@@ -206,7 +209,7 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
 }
 
 bool AlertManeuverRequest::IsWhiteSpaceExist() {
-  LOG4CXX_INFO(logger_, "AlertManeuverRequest::IsWhiteSpaceExist");
+  LOG4CXX_AUTO_TRACE(logger_);
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {

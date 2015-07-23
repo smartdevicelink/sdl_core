@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -45,7 +45,7 @@ BasicCommunicationSystemResponse::~BasicCommunicationSystemResponse() {
 }
 
 void BasicCommunicationSystemResponse::Run() {
-  LOG4CXX_INFO(logger_, "BasicCommunicationSystemResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_SystemRequest);
   event.set_smart_object(*message_);
   event.raise();

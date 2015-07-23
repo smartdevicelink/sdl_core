@@ -46,6 +46,7 @@ include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
   #${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/src/components/utils/include/
+  ${CMAKE_SOURCE_DIR}/src/components
   ${CMAKE_SOURCE_DIR}/src/components/config_profile/include
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
@@ -69,13 +70,11 @@ add_subdirectory(policy_table/table_struct)
 
 set(LIBRARIES ConfigProfile policy_struct dbms jsoncpp Utils)
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  # --- QDB Wrapper
-  include_directories (qdb_wrapper/include)
-  add_subdirectory(qdb_wrapper)
+  # --- QDB Wrapper 
+  include_directories (${COMPONENTS_DIR}/utils/include/utils)
 else ()
   # --- SQLite Wrapper
-  include_directories (sqlite_wrapper/include)
-  add_subdirectory(sqlite_wrapper)
+  include_directories (${COMPONENTS_DIR}/utils/include/utils)
   list(APPEND LIBRARIES sqlite3)
 endif ()
 

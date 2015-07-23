@@ -13,7 +13,7 @@ NaviStopStreamRequest::~NaviStopStreamRequest() {
 }
 
 void NaviStopStreamRequest::Run() {
-  LOG4CXX_INFO(logger_, "NaviStopStreamRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   SendRequest();
 }

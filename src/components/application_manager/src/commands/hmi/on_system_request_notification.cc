@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -52,7 +52,7 @@ OnSystemRequestNotification::~OnSystemRequestNotification() {
 }
 
 void OnSystemRequestNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnSystemRequestNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   smart_objects::SmartObject& params = (*message_)[strings::params];
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
@@ -60,8 +60,10 @@ void OnSystemRequestNotification::Run() {
   params[strings::function_id] =
     static_cast<int32_t>(mobile_apis::FunctionID::eType::OnSystemRequestID);
 
-  std::string app_id = msg_params[strings::app_id].asString();
+  const std::string app_id = msg_params[strings::app_id].asString();
+  LOG4CXX_DEBUG(logger_, "Received OnSystemRequest for " << app_id );
 
+  ApplicationSharedPtr app;
   if (strings::default_app_id == app_id) {
     PolicyHandler* policy_handler = PolicyHandler::instance();
     uint32_t selected_app_id = policy_handler->GetAppIdForSending();
@@ -71,22 +73,18 @@ void OnSystemRequestNotification::Run() {
       return;
     }
     ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-    ApplicationSharedPtr selected_app = app_mgr->application(selected_app_id);
-    if (!selected_app.valid()) {
-      LOG4CXX_ERROR(logger_, "PolicyHandler selected invalid app_id");
-      return;
-    }
-    params[strings::connection_key] = selected_app_id;
+    app = app_mgr->application(selected_app_id);
   } else {
-    ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application_by_policy_id(app_id);
-    if (!app.valid()) {
-      LOG4CXX_WARN(logger_, "Application with such id is not yet registered.");
-      return;
-    }
-    params[strings::connection_key] = app->app_id();
+    app = ApplicationManagerImpl::instance()->application_by_policy_id(app_id);
   }
 
+  if (!app.valid()) {
+    LOG4CXX_WARN(logger_, "Application with connection key " << app_id <<
+                 "is not registered.");
+    return;
+  }
+
+  params[strings::connection_key] = app->app_id();
   SendNotificationToMobile(message_);
 }
 

@@ -1,4 +1,4 @@
-/**
+/*
  * \file tcp_device.h
  * \brief TcpDevice class header file.
  *
@@ -36,9 +36,6 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_DEVICE_H_
 
-#include "transport_manager/transport_adapter/device.h"
-
-#include <map>
 #include <memory.h>
 #include <signal.h>
 #include <errno.h>
@@ -46,6 +43,12 @@
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+
+#include <map>
+#include <string>
+
+#include "utils/lock.h"
+#include "transport_manager/transport_adapter/device.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -136,7 +139,7 @@ class TcpDevice : public Device {
     uint16_t port;
   };
   std::map<ApplicationHandle, Application> applications_;
-  mutable pthread_mutex_t applications_mutex_;
+  mutable sync_primitives::Lock applications_mutex_;
   const in_addr_t in_addr_;
   const std::string name_;
   ApplicationHandle last_handle_;
@@ -145,4 +148,4 @@ class TcpDevice : public Device {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif /* TCP_DEVICE_H_ */
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_DEVICE_H_
