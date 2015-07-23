@@ -75,7 +75,15 @@ utils::SharedPtr<policy_table::Table> PolicyManagerImpl::Parse(
   Json::Value value;
   Json::Reader reader;
   if (reader.parse(json.c_str(), value)) {
-    return new policy_table::Table(&value);
+    //For PT Update received from SDL Server.
+    if(value["data"].size()!=0){
+    Json::Value data = value["data"];
+    //First Element in 
+    return new policy_table::Table(&data[0]);
+    }
+    else {
+      return new policy_table::Table(&value);
+    }
   } else {
     return utils::SharedPtr<policy_table::Table>();
   }
