@@ -67,6 +67,9 @@ class MockGenericModule : public GenericModule {
     mobile_apis::HMILevel::eType old_level));
   MOCK_METHOD1(OnDeviceRemoved, void(
       const connection_handler::DeviceHandle& device));
+  MOCK_METHOD2(CanAppChangeHMILevel, bool(
+    application_manager::ApplicationSharedPtr app,
+    mobile_apis::HMILevel::eType new_level));
   MOCK_METHOD0(RemoveAppExtensions,
       void());
 };

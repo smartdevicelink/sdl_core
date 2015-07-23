@@ -310,6 +310,26 @@ void PluginManager::OnAppHMILevelChanged(
   }
 }
 
+bool PluginManager::CanAppChangeHMILevel(
+    application_manager::ApplicationSharedPtr app,
+    mobile_apis::HMILevel::eType new_level) {
+  DCHECK(app);
+  if (!app) {
+    return false;
+  }
+  bool result = true;
+  for (PluginsIterator it = plugins_.begin(); plugins_.end() != it; ++it) {
+    if (it->second->IsAppForPlugin(app)) {
+      result = result && it->second->CanAppChangeHMILevel(app, new_level);
+      LOG4CXX_DEBUG(logger_, "Application " << app->name() << " of plugin "
+        << it->second->GetModuleID() << " is "
+        << (result ? "allowed": "not allowed") << " to change level to "
+        << new_level);
+    }
+  }
+  return result;
+}
+
 typedef std::map<ModuleID, ModulePtr>::value_type PluginsValueType;
 struct HandleDeviceRemoved {
  private:

@@ -426,13 +426,48 @@ TEST_F(CanModuleTest, DeactivateApp) {
   app_ptr->RemoveExtension(module->GetModuleID());
 }
 
-/*TEST_F(CanModuleTest, DISABLED_HandleMessage) {
-  std::string kMessage = "Message to handle";
-  const ConnectionState kRet = ConnectionState::INVALID;
+TEST_F(CanModuleTest, CanAppChangeHMILevelPrimary) {
+  NiceMock<MockApplicationSomeImpl>* app = new NiceMock<MockApplicationSomeImpl>();
+  application_manager::ApplicationSharedPtr app_ptr(app);
+  smart_objects::SmartObject obj(smart_objects::SmartType::SmartType_Array);
+  obj[0] = 10;
+  app_ptr->set_app_types(obj);
+  app_ptr->set_hmi_application_id(11);
+  std::vector<application_manager::ApplicationSharedPtr> apps;
+  apps.push_back(app_ptr);
+  ON_CALL(*mock_service, GetApplications(module->GetModuleID())
+    ).WillByDefault(Return(apps));
 
-  EXPECT_CALL(*mock_conn, Flash()).Times(1).WillOnce(Return(kRet));
+  CANAppExtension* ext = new CANAppExtension(module->GetModuleID());
+  app_ptr->AddExtension(ext);
+  ext->set_is_on_driver_device(true);
 
-  module->Handle(kMessage);
-}*/
+  ASSERT_TRUE(module->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_FULL));
+  ASSERT_TRUE(module->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_LIMITED));
+  ASSERT_TRUE(module->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_BACKGROUND));
+  ASSERT_TRUE(module->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_NONE));
+}
+
+TEST_F(CanModuleTest, CanAppChangeHMILevelPassenger) {
+  NiceMock<MockApplicationSomeImpl>* app = new NiceMock<MockApplicationSomeImpl>();
+  application_manager::ApplicationSharedPtr app_ptr(app);
+  smart_objects::SmartObject obj(smart_objects::SmartType::SmartType_Array);
+  obj[0] = 10;
+  app_ptr->set_app_types(obj);
+  app_ptr->set_hmi_application_id(11);
+  std::vector<application_manager::ApplicationSharedPtr> apps;
+  apps.push_back(app_ptr);
+  ON_CALL(*mock_service, GetApplications(module->GetModuleID())
+    ).WillByDefault(Return(apps));
+
+  CANAppExtension* ext = new CANAppExtension(module->GetModuleID());
+  app_ptr->AddExtension(ext);
+  ext->set_is_on_driver_device(false);
+
+  ASSERT_FALSE(module->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_FULL));
+  ASSERT_TRUE(module->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_LIMITED));
+  ASSERT_TRUE(module->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_BACKGROUND));
+  ASSERT_TRUE(module->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_NONE));
+}
 
 }  // namespace can_cooperation

@@ -607,6 +607,11 @@ mobile_api::HMILevel::eType ApplicationManagerImpl::IsHmiLevelFullAllowed(
   } else if (is_active_app_exist && (!is_audio_app)) {
     result = GetDefaultHmiLevel(app);
   }
+  if (!functional_modules::PluginManager::instance()->CanAppChangeHMILevel(app,
+    mobile_apis::HMILevel::HMI_FULL)) {
+    result = GetDefaultHmiLevel(app);
+  }
+
   LOG4CXX_ERROR(logger_, "is_audio_app : " << is_audio_app
                 << "; does_audio_app_with_same_type_exist : " << does_audio_app_with_same_type_exist
                 << "; is_active_app_exist : " << is_active_app_exist

@@ -82,6 +82,15 @@ class PluginManager : public utils::Singleton<PluginManager>,
     mobile_apis::HMILevel::eType old_level);
 
   /**
+   * @brief Checks if plugin hasn't put restrictions on app's HMI Level
+   * @param app App with old HMILevel
+   * @param new_level HMILevel which is about to be set to app
+   * @return false if any of the plugins returns false.
+   */
+  bool CanAppChangeHMILevel(application_manager::ApplicationSharedPtr app,
+    mobile_apis::HMILevel::eType new_level);
+
+  /**
    * Handles removing (disconnecting) device
    * @param device removed
    */

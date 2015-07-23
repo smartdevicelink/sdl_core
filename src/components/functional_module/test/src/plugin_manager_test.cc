@@ -157,4 +157,54 @@ TEST_F(PluginManagerTest, OnAppHMILevelChanged) {
   manager->OnAppHMILevelChanged(app_ptr, mobile_apis::HMILevel::eType::HMI_FULL);
 }
 
+TEST_F(PluginManagerTest, CanAppChangeHMILevel) {
+  NiceMock<application_manager::MockApplication>* app =
+    new NiceMock<application_manager::MockApplication>();
+  application_manager::ApplicationSharedPtr app_ptr(app);
+
+  std::string name("name");
+  ON_CALL(*app, name()).WillByDefault(ReturnRef(name));
+
+  Expectation is_for_plugin = EXPECT_CALL(*module, IsAppForPlugin(app_ptr))
+    .WillOnce(Return(true));
+  EXPECT_CALL(*module, CanAppChangeHMILevel(app_ptr, _))
+    .Times(1)
+    .After(is_for_plugin)
+    .WillOnce(Return(true));
+  ASSERT_TRUE(manager->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_FULL));
+}
+
+TEST_F(PluginManagerTest, CanAppChangeHMILevelNegative) {
+  NiceMock<application_manager::MockApplication>* app =
+    new NiceMock<application_manager::MockApplication>();
+  application_manager::ApplicationSharedPtr app_ptr(app);
+
+  std::string name("name");
+  ON_CALL(*app, name()).WillByDefault(ReturnRef(name));
+
+  Expectation is_for_plugin = EXPECT_CALL(*module, IsAppForPlugin(app_ptr))
+    .WillOnce(Return(true));
+  EXPECT_CALL(*module, CanAppChangeHMILevel(app_ptr, _))
+    .Times(1)
+    .After(is_for_plugin)
+    .WillOnce(Return(false));
+  ASSERT_FALSE(manager->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_BACKGROUND));
+}
+
+TEST_F(PluginManagerTest, CanAppChangeHMILevelNotForPlugin) {
+  NiceMock<application_manager::MockApplication>* app =
+    new NiceMock<application_manager::MockApplication>();
+  application_manager::ApplicationSharedPtr app_ptr(app);
+
+  std::string name("name");
+  ON_CALL(*app, name()).WillByDefault(ReturnRef(name));
+
+  Expectation is_for_plugin = EXPECT_CALL(*module, IsAppForPlugin(app_ptr))
+    .WillOnce(Return(false));
+  EXPECT_CALL(*module, CanAppChangeHMILevel(app_ptr, _))
+    .Times(0)
+    .After(is_for_plugin);
+  ASSERT_TRUE(manager->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_BACKGROUND));
+}
+
 }  // namespace functional_modules
