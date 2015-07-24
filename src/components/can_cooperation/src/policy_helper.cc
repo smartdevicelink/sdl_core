@@ -33,6 +33,9 @@
 #include "can_cooperation/policy_helper.h"
 #include "can_cooperation/can_module.h"
 #include "can_cooperation/can_app_extension.h"
+#include "utils/logger.h"
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "CanModule")
 
 namespace can_cooperation {
 
@@ -40,16 +43,18 @@ void PolicyHelper::OnRSDLFunctionalityAllowing(bool allowed) {
   CANModule::instance()->service()->SetRemoteControl(allowed);
 }
 
-void PolicyHelper::SetPrimaryDevice(const uint32_t device_handle) {
-  CANModule::instance()->service()->SetPrimaryDevice(device_handle);
-
-  application_manager::AppExtensionUID module_id =
-    CANModule::instance()->GetModuleID();
-  std::vector<application_manager::ApplicationSharedPtr> applications =
-    CANModule::instance()->service()->GetApplications(module_id);
-
-  for (size_t i = 0; i < applications.size(); ++i) {
-    MarkAppOnPrimaryDevice(applications[i], device_handle);
+void PolicyHelper::ChangeDeviceRank(const uint32_t device_handle,
+                                    const std::string& rank) {
+  if (rank == "DRIVER") {
+    CANModule::instance()->service()->SetPrimaryDevice(device_handle);
+    MarkApplications(device_handle);
+  } else if (rank == "PASSENGER") {
+      if (CANModule::instance()->service()->PrimaryDevice() == device_handle) {
+        CANModule::instance()->service()->ResetPrimaryDevice();
+        MarkApplications(0);
+      }
+  } else {
+    LOG4CXX_WARN(logger_, "Unknown device rank");
   }
 }
 
@@ -70,6 +75,17 @@ void PolicyHelper::MarkAppOnPrimaryDevice(
   DCHECK(extension);
   bool is_driver = (app->device() == device_handle);
   extension->set_is_on_driver_device(is_driver);
+}
+
+void PolicyHelper::MarkApplications(const uint32_t device_handle) {
+  application_manager::AppExtensionUID module_id =
+      CANModule::instance()->GetModuleID();
+  std::vector<application_manager::ApplicationSharedPtr> applications =
+    CANModule::instance()->service()->GetApplications(module_id);
+
+  for (size_t i = 0; i < applications.size(); ++i) {
+    MarkAppOnPrimaryDevice(applications[i], device_handle);
+  }
 }
 
 }  // namespace can_cooperation
