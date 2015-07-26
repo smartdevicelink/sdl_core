@@ -241,11 +241,11 @@ namespace profile {
 CREATE_LOGGERPTR_GLOBAL(logger_, "Profile")
 
 Profile::Profile()
-    : launch_hmi_(true),
+    : sdl_version_(kDefaultSDLVersion),
+      launch_hmi_(true),
 #ifdef WEB_HMI
       link_to_web_hmi_(kDefaultLinkToWebHMI),
 #endif // WEB_HMI
-      sdl_version_(kDefaultSDLVersion),
       app_config_folder_(),
       app_storage_folder_(),
       app_resourse_folder_(),
