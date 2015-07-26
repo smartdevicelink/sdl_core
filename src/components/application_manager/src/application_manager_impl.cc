@@ -507,7 +507,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   app_list_accesor.Insert(application);
 
   policy::PolicyHandler::instance()->AddApplication(application->mobile_app_id())
-	  ;
+          ;
   return application;
 }
 
@@ -576,6 +576,8 @@ void ApplicationManagerImpl::ConnectToDevice(uint32_t id) {
 void ApplicationManagerImpl::OnHMIStartedCooperation() {
   hmi_cooperating_ = true;
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnHMIStartedCooperation()");
+
+  MessageHelper::SendGetSystemInfoRequest();
 
   utils::SharedPtr<smart_objects::SmartObject> is_vr_ready(
       MessageHelper::CreateModuleInfoSO(
