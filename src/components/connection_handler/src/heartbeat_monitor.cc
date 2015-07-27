@@ -81,7 +81,7 @@ void HeartBeatMonitor::threadMain() {
       logger_,
       "Start heart beat monitor. Timeout is " << default_heartbeat_timeout_);
   while (run_) {
-    heartbeat_monitor_.Wait(main_lock);
+    heartbeat_monitor_.WaitFor(main_lock, kDefaultCycleTimeout);
     Process();
   }
 }
@@ -141,7 +141,6 @@ void HeartBeatMonitor::set_heartbeat_timeout_seconds(int32_t timeout,
   AutoLock session_locker(sessions_list_lock_);
   if (sessions_.end() != sessions_.find(session_id)) {
     sessions_[session_id].UpdateTimeout(timeout);
-    heartbeat_monitor_.NotifyOne();
   }
 }
 
