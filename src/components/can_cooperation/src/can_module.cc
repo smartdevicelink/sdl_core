@@ -400,7 +400,8 @@ bool CANModule::CanAppChangeHMILevel(
   CANAppExtensionPtr can_app_extension =
     application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
       app_extension);
-  if (new_level == mobile_apis::HMILevel::eType::HMI_FULL) {
+  if (new_level == mobile_apis::HMILevel::eType::HMI_FULL ||
+      new_level == mobile_apis::HMILevel::eType::HMI_LIMITED) {
     return can_app_extension->is_on_driver_device();
   }
   return true;

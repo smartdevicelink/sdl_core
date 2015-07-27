@@ -47,6 +47,7 @@
 #include "resumption/last_state.h"
 #include "policy/policy_manager_impl.h"
 #include "application_manager/policies/policy_handler.h"
+#include "functional_module/plugin_manager.h"
 
 namespace application_manager {
 
@@ -222,6 +223,12 @@ bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
       restored_hmi_level =
           ApplicationManagerImpl::instance()->GetDefaultHmiLevel(application);
     }
+  }
+  if (!functional_modules::PluginManager::instance()->CanAppChangeHMILevel(
+      application,
+      restored_hmi_level)) {
+    restored_hmi_level =
+        ApplicationManagerImpl::instance()->GetDefaultHmiLevel(application);
   }
 
   const AudioStreamingState::eType restored_audio_state =
