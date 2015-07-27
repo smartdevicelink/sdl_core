@@ -110,6 +110,7 @@ class HeartBeatMonitor: public threads::ThreadDelegate {
   sync_primitives::Lock sessions_list_lock_; // recurcive
   sync_primitives::Lock main_thread_lock_;
   mutable sync_primitives::Lock heartbeat_timeout_seconds_lock_;
+  sync_primitives::ConditionalVariable heartbeat_monitor_;
 
   volatile bool run_;
 

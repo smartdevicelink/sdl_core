@@ -158,11 +158,12 @@ template<typename T, class Q> void MessageQueue<T, Q>::push(const T& element) {
   {
     sync_primitives::AutoLock auto_lock(queue_lock_);
     if (shutting_down_) {
-      CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-      LOG4CXX_ERROR(logger_, "Runtime error, pushing into queue"
+        CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
+        LOG4CXX_ERROR(logger_, "Runtime error, pushing into queue"
                            " that is being shut down");
+        return;
     }
-    queue_.push(element);
+        queue_.push(element);
   }
   queue_new_items_.Broadcast();
 }

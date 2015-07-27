@@ -88,6 +88,8 @@ void PipeStreamerAdapter::StartActivity(int32_t application_key) {
   current_application_ = application_key;
   is_ready_ = true;
 
+  messages_.Reset();
+
   for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
        media_listeners_.end() != it;
        ++it) {
