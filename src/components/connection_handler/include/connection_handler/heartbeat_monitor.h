@@ -83,7 +83,8 @@ class HeartBeatMonitor: public threads::ThreadDelegate {
   // \brief Connection that must be closed when timeout elapsed
   Connection *connection_;
 
-  static const int32_t kDefaultCycleTimeout = 100000;
+  //Default HeartBeat cycle timeout (in miliseconds)
+  static const int32_t kDefaultCycleTimeout = 100;
 
   class SessionState {
     public:
