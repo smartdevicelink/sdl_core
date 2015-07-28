@@ -69,7 +69,23 @@ void PolicyManagerImpl::set_listener(PolicyListener* listener) {
   update_status_manager_.set_listener(listener);
 }
 
+#ifdef USE_HMI_PTU_DECRYPTION
+
 utils::SharedPtr<policy_table::Table> PolicyManagerImpl::Parse(
+  const BinaryMessage& pt_content) {
+  std::string json(pt_content.begin(), pt_content.end());
+  Json::Value value;
+  Json::Reader reader;
+  if (reader.parse(json.c_str(), value)) {
+      return new policy_table::Table(&value);
+  } else {
+    return utils::SharedPtr<policy_table::Table>();
+  } 
+}
+
+#else
+
+utils::SharedPtr<policy_table::Table> PolicyManagerImpl::ParseArray(
   const BinaryMessage& pt_content) {
   std::string json(pt_content.begin(), pt_content.end());
   Json::Value value;
@@ -88,6 +104,8 @@ utils::SharedPtr<policy_table::Table> PolicyManagerImpl::Parse(
     return utils::SharedPtr<policy_table::Table>();
   }
 }
+
+#endif
 
 void PolicyManagerImpl::CheckTriggers() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -108,8 +126,16 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
                                const BinaryMessage& pt_content) {
   LOG4CXX_INFO(logger_, "LoadPT of size " << pt_content.size());
 
+  #ifdef USE_HMI_PTU_DECRYPTION
+  // Assuemes Policy Table was parsed, formatted, and/or decrypted by
+  // the HMI after system request before calling OnReceivedPolicyUpdate
   // Parse message into table struct
   utils::SharedPtr<policy_table::Table> pt_update = Parse(pt_content);
+  #else
+  //Message Received from server unecnrypted with PTU in first element 
+  //of 'data' array. No Parsing was done by HMI.
+  utils::SharedPtr<policy_table::Table> pt_update = ParseArray(pt_content); 
+  #endif
   if (!pt_update) {
     LOG4CXX_WARN(logger_, "Parsed table pointer is 0.");
     update_status_manager_.OnWrongUpdateReceived();

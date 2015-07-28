@@ -172,8 +172,13 @@ class PolicyManagerImpl : public PolicyManager {
     virtual const std::vector<std::string> GetAppRequestTypes(
       const std::string policy_app_id) const;
   protected:
+    #ifdef USE_HMI_PTU_DECRYPTION
     virtual utils::SharedPtr<policy_table::Table> Parse(
         const BinaryMessage& pt_content);
+    #else
+    virtual utils::SharedPtr<policy_table::Table> ParseArray(
+        const BinaryMessage& pt_content);
+    #endif
 
   private:
     void CheckTriggers();
