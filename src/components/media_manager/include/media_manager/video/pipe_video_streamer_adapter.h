@@ -33,17 +33,14 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_PIPE_VIDEO_STREAMER_ADAPTER_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_PIPE_VIDEO_STREAMER_ADAPTER_H_
 
-#include <string>
 #include "media_manager/pipe_streamer_adapter.h"
 
 namespace media_manager {
-class PipeVideoStreamerAdapter : public PipeStreamerAdapter {
-  public:
-    PipeVideoStreamerAdapter();
-    ~PipeVideoStreamerAdapter();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(PipeVideoStreamerAdapter);
+class PipeVideoStreamerAdapter : public PipeStreamerAdapter {
+ public:
+  PipeVideoStreamerAdapter();
+  ~PipeVideoStreamerAdapter();
 };
 
 }  //  namespace media_manager

@@ -33,17 +33,14 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_PIPE_AUDIO_STREAMER_ADAPTER_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_PIPE_AUDIO_STREAMER_ADAPTER_H_
 
-#include <string>
 #include "media_manager/pipe_streamer_adapter.h"
 
 namespace media_manager {
-class PipeAudioStreamerAdapter : public PipeStreamerAdapter {
-  public:
-    PipeAudioStreamerAdapter();
-    ~PipeAudioStreamerAdapter();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(PipeAudioStreamerAdapter);
+class PipeAudioStreamerAdapter : public PipeStreamerAdapter {
+ public:
+  PipeAudioStreamerAdapter();
+  ~PipeAudioStreamerAdapter();
 };
 
 }  //  namespace media_manager

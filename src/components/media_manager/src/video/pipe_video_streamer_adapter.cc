@@ -35,17 +35,11 @@
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger, "PipeVideoStreamerAdapter")
-
-PipeVideoStreamerAdapter::PipeVideoStreamerAdapter() {
-  LOG4CXX_AUTO_TRACE(logger);
-  named_pipe_path_ = profile::Profile::instance()->named_video_pipe_path();
-
-  Init();
+PipeVideoStreamerAdapter::PipeVideoStreamerAdapter()
+  : PipeStreamerAdapter(profile::Profile::instance()->named_video_pipe_path()) {
 }
 
 PipeVideoStreamerAdapter::~PipeVideoStreamerAdapter() {
-  LOG4CXX_INFO(logger, "PipeVideoStreamerAdapter::~PipeVideoStreamerAdapter");
 }
 
 }  // namespace media_manager
