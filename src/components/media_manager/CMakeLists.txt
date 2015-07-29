@@ -45,11 +45,14 @@ set(default_sources
     ${COMPONENTS_DIR}/media_manager/src/audio/from_mic_to_file_recorder_thread.cc
     ${COMPONENTS_DIR}/media_manager/src/audio/socket_audio_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/audio/pipe_audio_streamer_adapter.cc
+    ${COMPONENTS_DIR}/media_manager/src/audio/file_audio_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/video/socket_video_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/video/pipe_video_streamer_adapter.cc
-    ${COMPONENTS_DIR}/media_manager/src/video/video_stream_to_file_adapter.cc
+    ${COMPONENTS_DIR}/media_manager/src/video/file_video_streamer_adapter.cc
+    ${COMPONENTS_DIR}/media_manager/src/streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/pipe_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/socket_streamer_adapter.cc
+    ${COMPONENTS_DIR}/media_manager/src/file_streamer_adapter.cc
 )
 set(LIBRARIES
     ${GSTREAMER_gstreamer_LIBRARY}
@@ -63,14 +66,16 @@ else(EXTENDED_MEDIA_MODE)
 set(default_includes
 )
 set(default_sources
-    ${COMPONENTS_DIR}/media_manager/src/video/video_stream_to_file_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/audio/socket_audio_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/audio/pipe_audio_streamer_adapter.cc
+    ${COMPONENTS_DIR}/media_manager/src/audio/file_audio_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/video/socket_video_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/video/pipe_video_streamer_adapter.cc
-    ${COMPONENTS_DIR}/media_manager/src/video/video_stream_to_file_adapter.cc
+    ${COMPONENTS_DIR}/media_manager/src/video/file_video_streamer_adapter.cc
+    ${COMPONENTS_DIR}/media_manager/src/streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/pipe_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/socket_streamer_adapter.cc
+    ${COMPONENTS_DIR}/media_manager/src/file_streamer_adapter.cc
 )
 set(LIBRARIES
     ProtocolLibrary
