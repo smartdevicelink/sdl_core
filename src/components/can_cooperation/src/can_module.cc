@@ -385,6 +385,7 @@ void CANModule::SendHmiStatusNotification(
   msg->set_message_type(application_manager::MessageType::kNotification);
 
   msg->set_connection_key(app->app_id());
+  msg->set_protocol_version(application_manager::kV3);
 
   msg_params["hmiLevel"] =
     static_cast<uint32_t>(app->hmi_level());
