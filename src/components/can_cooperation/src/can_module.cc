@@ -42,6 +42,7 @@
 #include "can_cooperation/can_app_extension.h"
 #include "can_cooperation/module_helper.h"
 #include "utils/logger.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace can_cooperation {
 
@@ -275,6 +276,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
             std::string rank = value[json_keys::kParams]
                                      [message_params::kRank].asString();
             PolicyHelper::ChangeDeviceRank(device_id, rank);
+            SendHmiStatusNotifications(device_id, rank);
           } else {
             LOG4CXX_ERROR(logger_,
                           "Invalid RC.OnDeviceRankChanged notification");
@@ -308,6 +310,107 @@ functional_modules::ProcessResult CANModule::HandleMessage(
   }
 
   return ProcessResult::PROCESSED;
+}
+
+void CANModule::SendHmiStatusNotifications(const uint32_t device_handle,
+                                           const std::string& rank) {
+  std::vector<application_manager::ApplicationSharedPtr> applications =
+    CANModule::instance()->service()->GetApplications(GetModuleID());
+
+  if (rank == "DRIVER") {
+    bool is_rank_actually_changed = false;
+
+    for (uint32_t i = 0; i < applications.size(); ++i) {
+      if (applications[i]->device() == device_handle) {
+        application_manager::AppExtensionPtr app_extension = applications[i]->QueryInterface(
+            GetModuleID());
+        if (app_extension) {
+          CANAppExtensionPtr can_app_extension =
+              application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
+                  app_extension);
+          if (!can_app_extension->is_on_driver_device()) {
+            can_app_extension->set_is_on_driver_device(true);
+            is_rank_actually_changed = true;
+            SendHmiStatusNotification(applications[i]);
+          }
+        }
+      }
+    }
+
+    if (is_rank_actually_changed) {
+      for (uint32_t i = 0; i < applications.size(); ++i) {
+        if (applications[i]->device() != device_handle) {
+          application_manager::AppExtensionPtr app_extension = applications[i]->QueryInterface(
+              GetModuleID());
+          if (app_extension) {
+            CANAppExtensionPtr can_app_extension =
+              application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
+                  app_extension);
+            if (can_app_extension->is_on_driver_device()) {
+              can_app_extension->set_is_on_driver_device(false);
+              SendHmiStatusNotification(applications[i]);
+            }
+          }
+        }
+      }
+    }
+
+  } else if (rank == "PASSENGER") {
+    for (uint32_t i = 0; i < applications.size(); ++i) {
+      if (applications[i]->device() == device_handle) {
+        application_manager::AppExtensionPtr app_extension = applications[i]->QueryInterface(
+            GetModuleID());
+        if (app_extension) {
+          CANAppExtensionPtr can_app_extension =
+               application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
+                   app_extension);
+           if (can_app_extension->is_on_driver_device()) {
+             can_app_extension->set_is_on_driver_device(false);
+             SendHmiStatusNotification(applications[i]);
+           }
+         }
+       }
+     }
+   }
+}
+
+void CANModule::SendHmiStatusNotification(
+                                application_manager::ApplicationSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  application_manager::MessagePtr msg = new application_manager::Message(
+      protocol_handler::MessagePriority::kDefault);
+  Json::Value msg_params;
+
+  msg->set_function_id(mobile_apis::FunctionID::OnHMIStatusID);
+  msg->set_message_type(application_manager::MessageType::kNotification);
+
+  msg->set_connection_key(app->app_id());
+  msg->set_protocol_version(application_manager::kV3);
+
+  msg_params["hmiLevel"] =
+    static_cast<uint32_t>(app->hmi_level());
+
+  msg_params["audioStreamingState"] =
+    static_cast<uint32_t>(app->audio_streaming_state());
+
+  msg_params["systemContext"] =
+    static_cast<uint32_t>(app->system_context());
+
+  application_manager::AppExtensionPtr app_extension = app->QueryInterface(
+                                                                 GetModuleID());
+  CANAppExtensionPtr can_app_extension =
+     application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
+                     app_extension);
+
+  if (can_app_extension->is_on_driver_device()) {
+    msg_params[message_params::kRank] = "DRIVER";
+  } else {
+    msg_params[message_params::kRank] = "PASSENGER";
+  }
+
+  msg->set_json_message(MessageHelper::ValueToString(msg_params));
+
+  service()->SendMessageToMobile(msg);
 }
 
 void CANModule::NotifyMobiles(application_manager::MessagePtr message) {
@@ -379,6 +482,7 @@ bool CANModule::IsAppForPlugin(
         app->AddExtension(can_app_extension);
         service()->NotifyHMIAboutHMILevel(app, app->hmi_level());
         PolicyHelper::SetIsAppOnPrimaryDevice(app);
+        SendHmiStatusNotification(app);
         return true;
       }
     }
@@ -386,6 +490,8 @@ bool CANModule::IsAppForPlugin(
   }
   return true;
 }
+
+
 
 void CANModule::OnAppHMILevelChanged(
     application_manager::ApplicationSharedPtr app,

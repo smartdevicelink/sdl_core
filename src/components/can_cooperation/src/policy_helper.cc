@@ -47,11 +47,11 @@ void PolicyHelper::ChangeDeviceRank(const uint32_t device_handle,
                                     const std::string& rank) {
   if (rank == "DRIVER") {
     CANModule::instance()->service()->SetPrimaryDevice(device_handle);
-    MarkApplications(device_handle);
+    //MarkApplications(device_handle);
   } else if (rank == "PASSENGER") {
       if (CANModule::instance()->service()->PrimaryDevice() == device_handle) {
         CANModule::instance()->service()->ResetPrimaryDevice();
-        MarkApplications(0);
+        //MarkApplications(0);
       }
   } else {
     LOG4CXX_WARN(logger_, "Unknown device rank");

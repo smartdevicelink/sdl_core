@@ -130,6 +130,11 @@ class CANModule : public functional_modules::GenericModule,
    */
   void OnDeviceRemoved(const connection_handler::DeviceHandle& device);
 
+  void SendHmiStatusNotifications(const uint32_t device_handle,
+                                  const std::string& rank);
+
+  void SendHmiStatusNotification(application_manager::ApplicationSharedPtr app);
+
  protected:
   /**
    * @brief Remove extension for all applications
