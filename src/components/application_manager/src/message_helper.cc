@@ -1493,6 +1493,13 @@ std::string MessageHelper::GetDeviceMacAddressForHandle(
   return device_mac_address;
 }
 
+uint32_t MessageHelper::GetDeviceHandleForMac(const std::string& device_mac) {
+  uint32_t device_id(0);
+  connection_handler::ConnectionHandlerImpl::instance()->GetDeviceID(
+      device_mac, &device_id);
+  return device_id;
+}
+
 void MessageHelper::GetDeviceInfoForHandle(const uint32_t device_handle,
     policy::DeviceParams* device_info) {
   if (!device_info) {
@@ -1513,6 +1520,12 @@ void MessageHelper::GetDeviceInfoForApp(uint32_t connection_key,
                                  connection_key)->device();
 
   GetDeviceInfoForHandle(device_info->device_handle, device_info);
+}
+
+void MessageHelper::GetConnectedDevicesMAC(
+    std::vector<std::string>& device_macs) {
+  connection_handler::ConnectionHandlerImpl::instance()->GetConnectedDevicesMAC(
+      device_macs);
 }
 
 void MessageHelper::SendSDLActivateAppResponse(policy::AppPermissions& permissions,

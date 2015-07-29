@@ -250,6 +250,15 @@ class ConnectionHandlerImpl : public ConnectionHandler,
                                     std::list<uint32_t> *applications_list = NULL,
                                     std::string *mac_address = NULL,
                                     std::string* connection_type = NULL);
+
+  /**
+   * @brief GetConnectedDevicesMAC allows to obtain MAC adresses for all
+   * currently connected devices.
+   *
+   * @param device_macs collection of MAC adresses for connected devices.
+   */
+  void GetConnectedDevicesMAC(std::vector<std::string> &device_macs) const;
+
 #ifdef ENABLE_SECURITY
   /**
    * \brief Sets crypto context of connection
@@ -402,7 +411,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * @return TRUE if session and connection exist otherwise returns FALSE
    */
   virtual bool ProtocolVersionUsed(uint32_t connection_id,
-  		  uint8_t session_id, uint8_t& protocol_version);
+                  uint8_t session_id, uint8_t& protocol_version);
   private:
   /**
    * \brief Default class constructor
