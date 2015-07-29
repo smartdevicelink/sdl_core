@@ -100,7 +100,7 @@ void CANModule::SubscribeOnFunctions() {
 
   plugin_info_.hmi_function_list.push_back(hmi_api::get_user_consent);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_reverse_apps_allowing);
-  plugin_info_.hmi_function_list.push_back(hmi_api::on_set_drivers_device);
+  plugin_info_.hmi_function_list.push_back(hmi_api::on_device_rank_changed);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_app_deactivated);
   plugin_info_.hmi_function_list.push_back(hmi_api::sdl_activate_app);
 }
@@ -257,7 +257,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
           }
         }
         break;
-      } else if (functional_modules::hmi_api::on_set_drivers_device
+      } else if (functional_modules::hmi_api::on_device_rank_changed
           == function_name) {
         if (value.isMember(json_keys::kParams)) {
           // TODO(VS): move validation to separate class
@@ -266,12 +266,18 @@ functional_modules::ProcessResult CANModule::HandleMessage(
             && value[json_keys::kParams][message_params::kDevice].isMember(json_keys::kId)
             && value[json_keys::kParams][message_params::kDevice][json_keys::kId].isIntegral()
             && value[json_keys::kParams][message_params::kDevice].isMember(message_params::kName)
-            && value[json_keys::kParams][message_params::kDevice][message_params::kName].isString()) {
-            PolicyHelper::SetPrimaryDevice(
-              value[json_keys::kParams][message_params::kDevice]
-              [json_keys::kId].asUInt());
+            && value[json_keys::kParams][message_params::kDevice][message_params::kName].isString()
+            && value[json_keys::kParams].isMember(message_params::kRank)
+            && value[json_keys::kParams][message_params::kRank].isString()) {
+            uint32_t device_id = value[json_keys::kParams]
+                                       [message_params::kDevice]
+                                        [json_keys::kId].asUInt();
+            std::string rank = value[json_keys::kParams]
+                                     [message_params::kRank].asString();
+            PolicyHelper::ChangeDeviceRank(device_id, rank);
           } else {
-            LOG4CXX_ERROR(logger_, "Invalid RC.OnSetDriverDevice notification");
+            LOG4CXX_ERROR(logger_,
+                          "Invalid RC.OnDeviceRankChanged notification");
           }
         }
         return ProcessResult::PROCESSED;
