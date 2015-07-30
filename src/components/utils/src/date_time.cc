@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,17 +47,20 @@ namespace date_time {
   }
 
 int64_t date_time::DateTime::getSecs(const TimevalStruct &time) {
-   return static_cast<int64_t>(time.tv_sec);
+   const TimevalStruct times = ConvertionUsecs(time);
+   return static_cast<int64_t>(times.tv_sec);
 }
 
 int64_t DateTime::getmSecs(const TimevalStruct &time) {
-  return static_cast<int64_t>(time.tv_sec) * MILLISECONDS_IN_SECOND
-      + time.tv_usec / MICROSECONDS_IN_MILLISECONDS;
+  const TimevalStruct times = ConvertionUsecs(time);
+  return static_cast<int64_t>(times.tv_sec) * MILLISECONDS_IN_SECOND
+      + times.tv_usec / MICROSECONDS_IN_MILLISECONDS;
 }
 
 int64_t DateTime::getuSecs(const TimevalStruct &time) {
-  return static_cast<int64_t>(time.tv_sec) * MILLISECONDS_IN_SECOND
-      * MICROSECONDS_IN_MILLISECONDS + time.tv_usec;
+  const TimevalStruct times = ConvertionUsecs(time);
+  return static_cast<int64_t>(times.tv_sec) * MILLISECONDS_IN_SECOND
+      * MICROSECONDS_IN_MILLISECONDS + times.tv_usec;
 }
 
 int64_t DateTime::calculateTimeSpan(const TimevalStruct& sinceTime) {
@@ -66,38 +69,58 @@ int64_t DateTime::calculateTimeSpan(const TimevalStruct& sinceTime) {
 
 int64_t DateTime::calculateTimeDiff(const TimevalStruct &time1,
                                     const TimevalStruct &time2){
+  const TimevalStruct times1 = ConvertionUsecs(time1);
+  const TimevalStruct times2 = ConvertionUsecs(time2);
   TimevalStruct ret;
-  if (Greater(time1, time2)) {
-    ret = Sub(time1, time2);
+  if (Greater(times1, times2)) {
+    ret = Sub(times1, times2);
   } else {
-    ret = Sub(time2, time1);
+    ret = Sub(times2, times1);
   }
   return getmSecs(ret);
 }
 
 TimevalStruct DateTime::Sub(const TimevalStruct& time1,
                             const TimevalStruct& time2) {
+  const TimevalStruct times1 = ConvertionUsecs(time1);
+  const TimevalStruct times2 = ConvertionUsecs(time2);
   TimevalStruct ret;
-  timersub(&time1, &time2, &ret);
+  timersub(&times1, &times2, &ret);
   return ret;
 }
 
 bool DateTime::Greater(const TimevalStruct& time1, const TimevalStruct& time2) {
-  return timercmp(&time1, &time2, >);
+  const TimevalStruct times1 = ConvertionUsecs(time1);
+  const TimevalStruct times2 = ConvertionUsecs(time2);
+  return timercmp(&times1, &times2, >);
 }
 
 bool DateTime::Less(const TimevalStruct& time1, const TimevalStruct& time2) {
-  return timercmp(&time1, &time2, <);
+  const TimevalStruct times1 = ConvertionUsecs(time1);
+  const TimevalStruct times2 = ConvertionUsecs(time2);
+  return timercmp(&times1, &times2, <);
 }
 
 bool DateTime::Equal(const TimevalStruct& time1, const TimevalStruct& time2) {
-  return !timercmp(&time1, &time2, !=);
+  const TimevalStruct times1 = ConvertionUsecs(time1);
+  const TimevalStruct times2 = ConvertionUsecs(time2);
+  return !timercmp(&times1, &times2, !=);
 }
 
 TimeCompare date_time::DateTime::compareTime(const TimevalStruct &time1, const TimevalStruct &time2) {
   if (Greater(time1, time2)) return GREATER;
   if (Less(time1, time2)) return LESS;
   return EQUAL;
+}
+
+TimevalStruct date_time::DateTime::ConvertionUsecs(const TimevalStruct &time){
+  if (time.tv_usec >= MICROSECONDS_IN_SECOND) {
+    TimevalStruct time1;
+    time1.tv_sec = static_cast<int64_t>(time.tv_sec) + (time.tv_usec/MICROSECONDS_IN_SECOND);
+    time1.tv_usec = static_cast<int64_t>(time.tv_usec) % MICROSECONDS_IN_SECOND;
+    return time1;
+  }
+  return time;
 }
 
 }  // namespace date_time
