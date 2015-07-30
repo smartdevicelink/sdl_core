@@ -35,6 +35,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SUBSCRIBE_VEHICLE_DATA_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/application.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -85,8 +86,41 @@ class SubscribeVehicleDataRequest : public CommandRequestImpl {
 #endif // #ifdef HMI_DBUS_API
 
  private:
-  bool IsAnythingAlreadySubscribed(
+  /**
+   * @brief Checks, if any app is subscribed for particular VI parameter
+   * @param param_id VI parameter id
+   * @return true, if there are registered apps subscribed for VI parameter,
+   * otherwise - false
+   */
+  bool IsSomeoneSubscribedFor(const uint32_t param_id) const;
+
+  /**
+   * @brief Adds VI parameters being subscribed by another or the same app to
+   * response with appropriate results
+   * @param msg_params 'message_params' response section reference
+   */
+  void AddAlreadySubscribedVI(smart_objects::SmartObject& msg_params) const;
+
+  /**
+   * @brief Removes subscription for VI parameters which subsription attempt
+   * returned an error
+   * @param app Pointer to application sent subscribe request
+   * @param msg_params 'message_parameters' response section reference
+   */
+  void UnsubscribeFailedSubscriptions(
+      ApplicationSharedPtr app,
       const smart_objects::SmartObject& msg_params) const;
+
+  /**
+   * @brief VI parameters which had been already subscribed by another apps
+   * befor particular app subscribed for these parameters
+   */
+  VehicleInfoSubscriptions vi_already_subscribed_by_another_apps_;
+
+  /**
+   * @brief VI parameters which had been subscribed already by particular app
+   */
+  VehicleInfoSubscriptions vi_already_subscribed_by_this_app_;
 
   DISALLOW_COPY_AND_ASSIGN(SubscribeVehicleDataRequest);
 };

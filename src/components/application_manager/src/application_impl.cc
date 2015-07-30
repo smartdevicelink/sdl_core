@@ -638,39 +638,41 @@ const AppFile* ApplicationImpl::GetFile(const std::string& file_name) {
    return NULL;
 }
 
-bool ApplicationImpl::SubscribeToButton(mobile_apis::ButtonName::eType btn_name) {
-  size_t old_size = subscribed_buttons_.size();
-  subscribed_buttons_.insert(btn_name);
-  return (subscribed_buttons_.size() == old_size + 1);
+bool ApplicationImpl::SubscribeToButton(
+    mobile_apis::ButtonName::eType btn_name) {
+  sync_primitives::AutoLock lock(button_lock_);
+  return subscribed_buttons_.insert(btn_name).second;
 }
 
-bool ApplicationImpl::IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name) {
-  std::set<mobile_apis::ButtonName::eType>::iterator it = subscribed_buttons_.find(btn_name);
+bool ApplicationImpl::IsSubscribedToButton(
+    mobile_apis::ButtonName::eType btn_name) {
+  sync_primitives::AutoLock lock(button_lock_);
+  std::set<mobile_apis::ButtonName::eType>::iterator it =
+      subscribed_buttons_.find(btn_name);
   return (subscribed_buttons_.end() != it);
 }
 
-bool ApplicationImpl::UnsubscribeFromButton(mobile_apis::ButtonName::eType btn_name) {
-  size_t old_size = subscribed_buttons_.size();
-  subscribed_buttons_.erase(btn_name);
-  return (subscribed_buttons_.size() == old_size - 1);
+bool ApplicationImpl::UnsubscribeFromButton(
+    mobile_apis::ButtonName::eType btn_name) {
+  sync_primitives::AutoLock lock(button_lock_);
+  return subscribed_buttons_.erase(btn_name);
 }
 
-bool ApplicationImpl::SubscribeToIVI(uint32_t vehicle_info_type_) {
-  size_t old_size = subscribed_vehicle_info_.size();
-  subscribed_vehicle_info_.insert(vehicle_info_type_);
-  return (subscribed_vehicle_info_.size() == old_size + 1);
+bool ApplicationImpl::SubscribeToIVI(uint32_t vehicle_info_type) {
+  sync_primitives::AutoLock lock(vi_lock_);
+  return subscribed_vehicle_info_.insert(vehicle_info_type).second;
 }
 
-bool ApplicationImpl::IsSubscribedToIVI(uint32_t vehicle_info_type_) {
-  std::set<uint32_t>::iterator it = subscribed_vehicle_info_.find(
-      vehicle_info_type_);
+bool ApplicationImpl::IsSubscribedToIVI(uint32_t vehicle_info_type) const {
+  sync_primitives::AutoLock lock(vi_lock_);
+  VehicleInfoSubscriptions::const_iterator it = subscribed_vehicle_info_.find(
+      vehicle_info_type);
   return (subscribed_vehicle_info_.end() != it);
 }
 
-bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type_) {
-  size_t old_size = subscribed_vehicle_info_.size();
-  subscribed_vehicle_info_.erase(vehicle_info_type_);
-  return (subscribed_vehicle_info_.size() == old_size - 1);
+bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type) {
+  sync_primitives::AutoLock lock(vi_lock_);
+  return subscribed_vehicle_info_.erase(vehicle_info_type);
 }
 
 UsageStatistics& ApplicationImpl::usage_report() {
@@ -773,12 +775,14 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
   return true;
 }
 
-const std::set<mobile_apis::ButtonName::eType>& ApplicationImpl::SubscribedButtons() const {
-  return subscribed_buttons_;
+DataAccessor<ButtonSubscriptions> ApplicationImpl::SubscribedButtons() const {
+  return DataAccessor<ButtonSubscriptions>(subscribed_buttons_,
+                                           button_lock_);
 }
 
-const std::set<uint32_t>& ApplicationImpl::SubscribesIVI() const {
-  return subscribed_vehicle_info_;
+DataAccessor<VehicleInfoSubscriptions> ApplicationImpl::SubscribedIVI() const {
+  return DataAccessor<VehicleInfoSubscriptions>(subscribed_vehicle_info_,
+                                                vi_lock_);
 }
 
 const std::string& ApplicationImpl::curHash() const {

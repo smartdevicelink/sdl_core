@@ -161,6 +161,16 @@ typedef std::map<uint32_t, PerformChoice> PerformChoiceSetMap;
  */
 typedef std::set<uint32_t> SoftButtonID;
 
+/**
+ * @brief Defines set of vehicle info types
+ */
+typedef std::set<uint32_t> VehicleInfoSubscriptions;
+
+/**
+ * @brief Defines set of buttons subscription
+ */
+typedef std::set<mobile_apis::ButtonName::eType> ButtonSubscriptions;
+
 class DynamicApplicationData {
   public:
     virtual ~DynamicApplicationData() {
@@ -172,8 +182,8 @@ class DynamicApplicationData {
     virtual const mobile_api::TBTState::eType& tbt_state() const = 0;
     virtual const smart_objects::SmartObject* show_command() const = 0;
     virtual const smart_objects::SmartObject* tbt_show_command() const = 0;
-    virtual const std::set<mobile_apis::ButtonName::eType>& SubscribedButtons() const = 0;
-    virtual const std::set<uint32_t>& SubscribesIVI() const = 0;
+    virtual DataAccessor<ButtonSubscriptions> SubscribedButtons() const = 0;
+    virtual DataAccessor<VehicleInfoSubscriptions> SubscribedIVI() const = 0;
     virtual const smart_objects::SmartObject* keyboard_props() const = 0;
     virtual const smart_objects::SmartObject* menu_title() const = 0;
     virtual const smart_objects::SmartObject* menu_icon() const = 0;
@@ -568,9 +578,9 @@ class Application : public virtual InitialApplicationData,
     virtual bool IsSubscribedToButton(mobile_apis::ButtonName::eType btn_name) = 0;
     virtual bool UnsubscribeFromButton(mobile_apis::ButtonName::eType btn_name) = 0;
 
-    virtual bool SubscribeToIVI(uint32_t vehicle_info_type_) = 0;
-    virtual bool IsSubscribedToIVI(uint32_t vehicle_info_type_) = 0;
-    virtual bool UnsubscribeFromIVI(uint32_t vehicle_info_type_) = 0;
+    virtual bool SubscribeToIVI(uint32_t vehicle_info_type) = 0;
+    virtual bool IsSubscribedToIVI(uint32_t vehicle_info_type) const = 0;
+    virtual bool UnsubscribeFromIVI(uint32_t vehicle_info_type) = 0;
 
     /**
      * @brief ResetDataInNone reset data counters in NONE
