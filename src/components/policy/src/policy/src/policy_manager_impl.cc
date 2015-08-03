@@ -842,6 +842,11 @@ void PolicyManagerImpl::OnAppRegisteredOnMobile(
   SendNotificationOnPermissionsUpdated(application_id);
 }
 
+std::string PolicyManagerImpl::RetrieveCertificate() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return cache_->GetCertificate();
+}
+
 void PolicyManagerImpl::AddApplication(const std::string& application_id) {
   LOG4CXX_INFO(logger_, "AddApplication");
   const std::string device_id = GetCurrentDeviceId(application_id);

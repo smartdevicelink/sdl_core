@@ -428,6 +428,14 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      */
     virtual void OnAppRegisteredOnMobile(const std::string& application_id) = 0;
 
+    /**
+     * @brief RetrieveCertificate Allows to obtain certificate in order
+     * to start secure connection.
+     *
+     * @return The certificate in PKCS#7 format.
+     */
+    virtual std::string RetrieveCertificate() const = 0;
+
   protected:
     /**
      * Checks is PT exceeded IgnitionCycles

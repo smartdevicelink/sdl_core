@@ -38,6 +38,7 @@
 #ifdef ENABLE_SECURITY
 #include "security_manager/security_manager_impl.h"
 #include "security_manager/crypto_manager_impl.h"
+#include "application_manager/policies/policy_handler.h"
 #endif  // ENABLE_SECURITY
 
 #ifdef ENABLE_LOG
@@ -163,12 +164,12 @@ bool LifeCycle::StartComponents() {
   }
 
   if (!crypto_manager_->Init(
-      ssl_mode == "SERVER" ? security_manager::SERVER : security_manager::CLIENT,
-          protocol,
-          cert_filename,
-          key_filename,
-          ciphers_list,
-          verify_peer)) {
+        ssl_mode == "SERVER" ? security_manager::SERVER : security_manager::CLIENT,
+        protocol,
+        policy::PolicyHandler::instance()->RetrieveCertificate(),
+        profile::Profile::instance()->ciphers_list(),
+        profile::Profile::instance()->verify_peer(),
+        profile::Profile::instance()->ca_cert_path())) {
     LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
     return false;
   }
@@ -410,7 +411,6 @@ void LifeCycle::StopComponents() {
 
 #ifdef ENABLE_SECURITY
   LOG4CXX_INFO(logger_, "Destroying Crypto Manager");
-  crypto_manager_->Finish();
   delete crypto_manager_;
 
   LOG4CXX_INFO(logger_, "Destroying Security Manager");

@@ -1,4 +1,4 @@
-﻿/*
+/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -305,6 +305,14 @@ typedef std::map<uint32_t, std::pair<std::string, std::string> > FunctionalGroup
  * @brief Array of device ids, which are an identifiers in policy table
  */
 typedef std::vector<std::string> DeviceIds;
+
+/**
+ * @brief Counters that calculated on receiving of succesful update
+ */
+enum Counters {
+  KILOMETERS,
+  DAYS_AFTER_EPOCH
+};
 
 }  //  namespace policy
 

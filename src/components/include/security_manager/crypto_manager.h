@@ -57,11 +57,11 @@ class CryptoManager {
   virtual bool Init(Mode mode,
                     Protocol protocol,
                     const std::string &cert_filename,
-                    const std::string &key_filename,
                     const std::string &ciphers_list,
-                    bool verify_peer) = 0;
-  virtual void Finish() = 0;
+                    bool verify_peer,
+                    const std::string& ca_cert_file) = 0;
   virtual SSLContext *CreateSSLContext() = 0;
+  virtual bool OnCertificateUpdated(const std::string& data) = 0;
   virtual void ReleaseSSLContext(SSLContext *context) = 0;
   virtual std::string LastError() const = 0;
   virtual ~CryptoManager() { }
