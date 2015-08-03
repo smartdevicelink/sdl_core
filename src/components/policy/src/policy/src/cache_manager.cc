@@ -898,6 +898,48 @@ void CacheManager::Increment(usage_statistics::GlobalCounterId type) {
 void CacheManager::Increment(const std::string &app_id,
                              usage_statistics::AppCounterId type) {
   CACHE_MANAGER_CHECK_VOID();
+
+  switch (type) {
+    case usage_statistics::USER_SELECTIONS:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_user_selections;
+      break;
+    case usage_statistics::REJECTIONS_SYNC_OUT_OF_MEMORY:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_rejections_sync_out_of_memory;
+      break;
+    case usage_statistics::REJECTIONS_NICKNAME_MISMATCH:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_rejections_nickname_mismatch;
+      break;
+    case usage_statistics::REJECTIONS_DUPLICATE_NAME:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_rejections_duplicate_name;
+      break;
+    case usage_statistics::REJECTED_RPC_CALLS:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_rejected_rpc_calls;
+      break;
+    case usage_statistics::RPCS_IN_HMI_NONE:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_rpcs_sent_in_hmi_none;
+      break;
+    case usage_statistics::REMOVALS_MISBEHAVED:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_removals_for_bad_behavior;
+      break;
+    case usage_statistics::RUN_ATTEMPTS_WHILE_REVOKED:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_run_attempts_while_revoked;
+      break;
+    case usage_statistics::COUNT_OF_TLS_ERRORS:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_tls_error;
+      break;
+    default:
+      LOG4CXX_WARN(logger_, "Type app counter is unknown");
+      return;
+  }
   Backup();
 }
 

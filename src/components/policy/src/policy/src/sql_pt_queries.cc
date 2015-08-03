@@ -218,6 +218,7 @@ const std::string kCreateSchema =
   "  `count_of_rpcs_sent_in_hmi_none` INTEGER DEFAULT 0, "
   "  `count_of_removals_for_bad_behavior` INTEGER DEFAULT 0, "
   "  `count_of_run_attempts_while_revoked` INTEGER DEFAULT 0, "
+  "  `count_of_tls_errors` INTEGER DEFAULT 0, "
   "  `app_registration_language_gui` VARCHAR(25), "
   "  `app_registration_language_vui` VARCHAR(25), "
   "  CONSTRAINT `fk_app_levels_application1` "

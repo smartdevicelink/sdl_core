@@ -42,7 +42,7 @@ class SecurityManagerListener {
    * \return \c true on success notification or \c false otherwise
    */
   virtual bool OnHandshakeDone(uint32_t connection_key,
-                               bool success) = 0;
+                               SSLContext::HandshakeResult result) = 0;
   virtual ~SecurityManagerListener() {}
 };
 }  // namespace security_manager
