@@ -66,7 +66,7 @@ void OnSystemContextNotification::Run() {
     }
   }
 
-  if (app) {
+  if (app && mobile_api::SystemContext::INVALID_ENUM != system_context) {
     ApplicationManagerImpl::instance()->SetState(app->app_id(), system_context);
   } else {
     LOG4CXX_ERROR(logger_, "Application does not exist");
