@@ -38,7 +38,6 @@
 
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
-#include "utils/logger.h"
 #include "utils/prioritized_queue.h"
 
 /**
@@ -85,10 +84,11 @@ template<typename T, class Q = std::queue<T> > class MessageQueue {
     void push(const T& element);
 
     /**
-     * \brief Removes element from the queue and returns it.
-     * \return To element of the queue.
+     * \brief Removes element from the queue and returns it
+     * \param element Element to be returned
+     * \return True on success, false if queue is empty
      */
-    T pop();
+    bool pop(T& element);
 
     /**
      * \brief Conditional wait.
@@ -128,10 +128,6 @@ template<typename T, class Q> MessageQueue<T, Q>::MessageQueue()
 }
 
 template<typename T, class Q> MessageQueue<T, Q>::~MessageQueue() {
-  if (!queue_.empty()) {
-    CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-    LOG4CXX_ERROR(logger_, "Destruction of non-drained queue");
-  }
 }
 
 template<typename T, class Q> void MessageQueue<T, Q>::wait() {
@@ -159,26 +155,21 @@ template<typename T, class Q> void MessageQueue<T, Q>::push(const T& element) {
   {
     sync_primitives::AutoLock auto_lock(queue_lock_);
     if (shutting_down_) {
-        CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-        LOG4CXX_ERROR(logger_, "Runtime error, pushing into queue"
-                           " that is being shut down");
-        return;
+      return;
     }
-        queue_.push(element);
+    queue_.push(element);
   }
   queue_new_items_.Broadcast();
 }
 
-template<typename T, class Q> T MessageQueue<T, Q>::pop() {
+template<typename T, class Q> bool MessageQueue<T, Q>::pop(T& element) {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   if (queue_.empty()) {
-    CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-    LOG4CXX_ERROR(logger_, "Runtime error, popping out of empty queue");
-    NOTREACHED();
+    return false;
   }
-  T result = queue_.front();
+  element = queue_.front();
   queue_.pop();
-  return result;
+  return true;
 }
 
 template<typename T, class Q> void MessageQueue<T, Q>::Shutdown() {

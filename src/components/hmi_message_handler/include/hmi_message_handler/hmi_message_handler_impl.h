@@ -55,14 +55,16 @@ namespace impl {
 * when we have them.
 */
 struct MessageFromHmi: public MessageSharedPointer {
-  MessageFromHmi(const MessageSharedPointer& message)
+  MessageFromHmi() {}
+  explicit MessageFromHmi(const MessageSharedPointer& message)
       : MessageSharedPointer(message) {}
   // PrioritizedQueue requres this method to decide which priority to assign
   size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
 };
 
 struct MessageToHmi: public MessageSharedPointer {
-  MessageToHmi(const MessageSharedPointer& message)
+  MessageToHmi() {}
+  explicit MessageToHmi(const MessageSharedPointer& message)
       : MessageSharedPointer(message) {}
   // PrioritizedQueue requres this method to decide which priority to assign
   size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }

@@ -121,7 +121,10 @@ void TimeManager::Streamer::threadMain() {
     is_client_connected_ = true;
     while (is_client_connected_) {
       while (!messages_.empty()) {
-        utils::SharedPtr<MetricWrapper> metric = messages_.pop();
+        utils::SharedPtr<MetricWrapper> metric;
+        if (!messages_.pop(metric)) {
+          continue;
+        }
         is_client_connected_ = Send(metric->GetStyledString());
       }
 

@@ -52,6 +52,7 @@ namespace security_manager {
  * for thread working
  */
 struct SecurityMessage: public SecurityQueryPtr {
+  SecurityMessage() {}
   explicit SecurityMessage(const SecurityQueryPtr &message)
     : SecurityQueryPtr(message) {}
   // PrioritizedQueue requires this method to decide which priority to assign

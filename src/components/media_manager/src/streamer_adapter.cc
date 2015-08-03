@@ -131,7 +131,11 @@ void StreamerAdapter::Streamer::threadMain() {
   while (!stop_flag_) {
     adapter_->messages_.wait();
     while (!adapter_->messages_.empty()) {
-      protocol_handler::RawMessagePtr msg = adapter_->messages_.pop();
+      protocol_handler::RawMessagePtr msg;
+      if (!adapter_->messages_.pop(msg)) {
+        LOG4CXX_ERROR(logger, "Empty message queue");
+        continue;
+      }
       if (!msg) {
         LOG4CXX_ERROR(logger, "Null pointer message");
         continue;
