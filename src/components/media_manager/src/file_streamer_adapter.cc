@@ -97,14 +97,14 @@ bool FileStreamerAdapter::FileStreamer::Send(
     return false;
   }
 
-  if (!file_system::Write(file_stream_, (*msg).data(),
-                          (*msg).data_size())) {
+  if (!file_system::Write(file_stream_, msg->data(),
+                          msg->data_size())) {
     LOG4CXX_ERROR(logger, "Failed writing data to file "
                   << file_name_);
     return false;
   }
 
-  LOG4CXX_INFO(logger, "Streamer::sent " << (*msg).data_size());
+  LOG4CXX_INFO(logger, "Streamer::sent " << msg->data_size());
   return true;
 }
 

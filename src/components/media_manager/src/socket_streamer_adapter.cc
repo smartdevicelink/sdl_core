@@ -137,19 +137,19 @@ bool SocketStreamerAdapter::SocketStreamer::Send(
     is_first_frame_ = false;
   }
 
-  ret = send(send_socket_fd_, (*msg).data(),
-             (*msg).data_size(), MSG_NOSIGNAL);
+  ret = send(send_socket_fd_, msg->data(),
+             msg->data_size(), MSG_NOSIGNAL);
   if (-1 == ret) {
     LOG4CXX_ERROR(logger, "Unable to send data to socket");
     return false;
   }
 
-  if (static_cast<uint32_t>(ret) != (*msg).data_size()) {
+  if (static_cast<uint32_t>(ret) != msg->data_size()) {
     LOG4CXX_WARN(logger, "Couldn't send all the data to socket "
                  << send_socket_fd_);
   }
 
-  LOG4CXX_INFO(logger, "Streamer::sent " << (*msg).data_size());
+  LOG4CXX_INFO(logger, "Streamer::sent " << msg->data_size());
   return true;
 }
 

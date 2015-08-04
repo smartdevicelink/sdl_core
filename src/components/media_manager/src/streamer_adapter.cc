@@ -42,19 +42,14 @@ StreamerAdapter::StreamerAdapter(Streamer* const streamer)
     messages_(),
     streamer_(streamer),
     thread_(NULL) {
-  if (streamer_) {
-    thread_ = threads::CreateThread("StreamerAdapter", streamer_);
-  }
+  DCHECK(streamer_);
+  thread_ = threads::CreateThread("StreamerAdapter", streamer_);
 }
 
 StreamerAdapter::~StreamerAdapter() {
-  if (thread_) {
-    thread_->join();
-    threads::DeleteThread(thread_);
-  }
-  if (streamer_) {
-    delete streamer_;
-  }
+  thread_->join();
+  threads::DeleteThread(thread_);
+  delete streamer_;
 }
 
 void StreamerAdapter::StartActivity(int32_t application_key) {
@@ -65,10 +60,11 @@ void StreamerAdapter::StartActivity(int32_t application_key) {
     return;
   }
   messages_.Reset();
-  if (thread_) {
-    const size_t kStackSize = 16384;
-    thread_->start(threads::ThreadOptions(kStackSize));
-  }
+
+  DCHECK(thread_);
+  const size_t kStackSize = 16384;
+  thread_->start(threads::ThreadOptions(kStackSize));
+
   for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
        media_listeners_.end() != it;
        ++it) {
@@ -84,9 +80,10 @@ void StreamerAdapter::StopActivity(int32_t application_key) {
                  << application_key << " has not been started");
     return;
   }
-  if (thread_) {
-    thread_->stop();
-  }
+
+  DCHECK(thread_);
+  thread_->stop();
+
   for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
        media_listeners_.end() != it;
        ++it) {
@@ -106,13 +103,15 @@ void StreamerAdapter::SendData(int32_t application_key,
   messages_.push(msg);
 }
 
-bool StreamerAdapter::is_app_performing_activity(int32_t application_key) {
+bool StreamerAdapter::is_app_performing_activity(
+    int32_t application_key) const {
   return application_key == current_application_;
 }
 
 StreamerAdapter::Streamer::Streamer(StreamerAdapter* const adapter)
   : stop_flag_(false),
     adapter_(adapter) {
+  DCHECK(adapter_);
 }
 
 StreamerAdapter::Streamer::~Streamer() {
@@ -145,9 +144,9 @@ void StreamerAdapter::Streamer::threadMain() {
       static int32_t messages_for_session = 0;
       ++messages_for_session;
 
-      LOG4CXX_INFO(logger, "Handling map streaming message. This is "
-                   << messages_for_session << " message for "
-                   << adapter_->current_application_);
+      LOG4CXX_DEBUG(logger, "Handling map streaming message. This is "
+                    << messages_for_session << " message for "
+                    << adapter_->current_application_);
       std::set<MediaListenerPtr>::iterator it = adapter_->media_listeners_
           .begin();
       for (; adapter_->media_listeners_.end() != it; ++it) {

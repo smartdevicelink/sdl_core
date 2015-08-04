@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Ford Motor Company
+ * Copyright (c) 2014-2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,19 +30,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "config_profile/profile.h"
 #include "media_manager/audio/socket_audio_streamer_adapter.h"
+
+namespace {
+  const std::string kHeader = "HTTP/1.1 200 OK\r\n"
+                              "Connection: Keep-Alive\r\n"
+                              "Keep-Alive: timeout=15, max=300\r\n"
+                              "Server: SDL\r\n"
+                              "Content-Type: video/mp4\r\n\r\n";
+}
 
 namespace media_manager {
 
 SocketAudioStreamerAdapter::SocketAudioStreamerAdapter()
   : SocketStreamerAdapter(profile::Profile::instance()->server_address(),
                           profile::Profile::instance()->audio_streaming_port(),
-                          "HTTP/1.1 200 OK\r\n"
-                          "Connection: Keep-Alive\r\n"
-                          "Keep-Alive: timeout=15, max=300\r\n"
-                          "Server: SDL\r\n"
-                          "Content-Type: video/mp4\r\n\r\n") {
+                          kHeader) {
 }
 
 SocketAudioStreamerAdapter::~SocketAudioStreamerAdapter() {

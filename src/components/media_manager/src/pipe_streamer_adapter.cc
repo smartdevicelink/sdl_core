@@ -99,19 +99,19 @@ void PipeStreamerAdapter::PipeStreamer::Disconnect() {
 bool PipeStreamerAdapter::PipeStreamer::Send(
     protocol_handler::RawMessagePtr msg) {
   LOG4CXX_AUTO_TRACE(logger);
-  ssize_t ret = write(pipe_fd_, (*msg).data(), (*msg).data_size());
+  ssize_t ret = write(pipe_fd_, msg->data(), msg->data_size());
   if (-1 == ret) {
     LOG4CXX_ERROR(logger, "Failed writing data to pipe "
                   << named_pipe_path_);
     return false;
   }
 
-  if (static_cast<uint32_t>(ret) != (*msg).data_size()) {
+  if (static_cast<uint32_t>(ret) != msg->data_size()) {
     LOG4CXX_WARN(logger, "Couldn't write all the data to pipe "
                  << named_pipe_path_);
   }
 
-  LOG4CXX_INFO(logger, "Streamer::sent " << (*msg).data_size());
+  LOG4CXX_INFO(logger, "Streamer::sent " << msg->data_size());
   return true;
 }
 

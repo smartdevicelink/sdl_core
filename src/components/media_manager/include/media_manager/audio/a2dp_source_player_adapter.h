@@ -52,7 +52,7 @@ class A2DPSourcePlayerAdapter : public MediaAdapterImpl {
                   const ::protocol_handler::RawMessagePtr message) {}
     void StartActivity(int32_t application_key);
     void StopActivity(int32_t application_key);
-    bool is_app_performing_activity(int32_t application_key);
+    bool is_app_performing_activity(int32_t application_key) const;
 
   private:
     class A2DPSourcePlayerThread;

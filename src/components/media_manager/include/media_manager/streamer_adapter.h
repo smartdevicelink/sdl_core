@@ -39,9 +39,15 @@
 #include "utils/threads/thread_delegate.h"
 #include "utils/atomic_object.h"
 #include "utils/shared_ptr.h"
+#include "protocol/raw_message.h"
 
 namespace media_manager {
 
+/**
+ * Class StreamerAdapter represents media adapter
+ * for streaming data to some destination point
+ * (pipe, socket, file)
+ */
 class StreamerAdapter : public MediaAdapterImpl {
  protected:
   class Streamer;
@@ -54,9 +60,11 @@ class StreamerAdapter : public MediaAdapterImpl {
   virtual void StopActivity(int32_t application_key);
   virtual void SendData(int32_t application_key,
                         const ::protocol_handler::RawMessagePtr msg);
-  virtual bool is_app_performing_activity(int32_t application_key);
+  virtual bool is_app_performing_activity(
+      int32_t application_key) const;
 
  protected:
+  // TODO(AN): APPLINK-15203 Use MessageLoopThread
   class Streamer : public threads::ThreadDelegate {
    public:
     explicit Streamer(StreamerAdapter* const adapter);
