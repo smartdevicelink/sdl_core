@@ -133,7 +133,8 @@ void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
       HMICapabilities& hmi_capabilities =
           ApplicationManagerImpl::instance()->hmi_capabilities();
       bool result = false;
-      if (mobile_apis::Result::SUCCESS == result_code) {
+      if (mobile_apis::Result::SUCCESS == result_code ||
+          mobile_apis::Result::WARNINGS == result_code) {
         result = true;
       } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code) &&
           hmi_capabilities.is_ui_cooperating()) {

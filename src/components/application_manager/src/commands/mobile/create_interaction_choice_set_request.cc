@@ -371,7 +371,7 @@ void CreateInteractionChoiceSetRequest::on_event(
     }
 
     Common_Result::eType  vr_result_ = static_cast<Common_Result::eType>(
-        message[strings::params][hmi_response::code].asInt());
+          message[strings::params][hmi_response::code].asInt());
     if (Common_Result::SUCCESS == vr_result_) {
       VRCommandInfo& vr_command = it->second;
       vr_command.succesful_response_received_ = true;
@@ -393,10 +393,24 @@ void CreateInteractionChoiceSetRequest::on_event(
       sync_primitives::AutoLock timeout_lock_(is_timed_out_lock_);
       if (!is_timed_out_) {
         ApplicationManagerImpl::instance()->updateRequestTimeout(
-            connection_key(), correlation_id(), default_timeout());
+              connection_key(), correlation_id(), default_timeout());
+        Common_Result::eType  vr_result = static_cast<Common_Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
+        if (Common_Result::SUCCESS == vr_result ||
+            Common_Result::WARNINGS == vr_result) {
+          VRCommandInfo& vr_command = it->second;
+          vr_command.succesful_response_received_ = true;
+        } else {
+          LOG4CXX_DEBUG(logger_, "Hmi response is not Success: " << vr_result
+                        << ". Stop sending VRAddCommand requests");
+          if (!error_from_hmi_) {
+            error_from_hmi_ = true;
+            SendResponse(false, GetMobileResultCode(vr_result));
+          }
+        }
+      } else {
+        OnAllHMIResponsesReceived();
       }
-    } else {
-      OnAllHMIResponsesReceived();
     }
   }
 }

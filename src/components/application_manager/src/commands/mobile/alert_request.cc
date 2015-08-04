@@ -146,8 +146,10 @@ void AlertRequest::on_event(const event_engine::Event& event) {
           static_cast<mobile_apis::Result::eType>(
               message[strings::params][hmi_response::code].asInt());
       // Mobile Alert request is successful when UI_Alert is successful
-      response_success_ = (mobile_apis::Result::SUCCESS == result_code ||
-          mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code);
+      response_success_ =
+          mobile_apis::Result::SUCCESS == result_code ||
+          mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code ||
+          mobile_apis::Result::WARNINGS == result_code;
       response_result_ = result_code;
       response_params_ = message[strings::msg_params];
       break;
@@ -224,7 +226,7 @@ bool AlertRequest::Validate(uint32_t app_id) {
         static_cast<mobile_apis::FunctionID::eType>(function_id()),
         application_manager::TLimitSource::POLICY_TABLE)) {
     LOG4CXX_ERROR(logger_, "Alert frequency is too high.");
-    SendResponse(false, mobile_apis::Result::REJECTED);    
+    SendResponse(false, mobile_apis::Result::REJECTED);
     return false;
   }
 

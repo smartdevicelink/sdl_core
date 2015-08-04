@@ -79,8 +79,7 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
    *@param application_impl application
    *
    **/
-  void SendRegisterAppInterfaceResponseToMobile(
-      mobile_apis::Result::eType result = mobile_apis::Result::SUCCESS);
+  void SendRegisterAppInterfaceResponseToMobile();
 
  private:
   /*

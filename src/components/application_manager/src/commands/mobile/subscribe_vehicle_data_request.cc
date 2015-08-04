@@ -230,6 +230,11 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
 
   const smart_objects::SmartObject& message = event.smart_object();
 
+  if (hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData != event.id()) {
+    LOG4CXX_ERROR(logger_, "Received unknown event.");
+    return;
+  }
+
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       CommandRequestImpl::connection_key());
 
@@ -288,14 +293,12 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
           message[strings::params][hmi_response::code].asInt());
 
   bool is_succeeded =
-      hmi_result == hmi_apis::Common_Result::SUCCESS ||
+      hmi_apis::Common_Result::SUCCESS == hmi_result||
+      hmi_apis::Common_Result::WARNINGS == hmi_result ||
       !vi_already_subscribed_by_another_apps_.empty();
 
   mobile_apis::Result::eType result_code =
-      hmi_result == hmi_apis::Common_Result::SUCCESS
-      ? mobile_apis::Result::SUCCESS
-      : static_cast<mobile_apis::Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
+      static_cast<mobile_apis::Result::eType>(hmi_result);
 
   const char* return_info = NULL;
   if (is_succeeded) {

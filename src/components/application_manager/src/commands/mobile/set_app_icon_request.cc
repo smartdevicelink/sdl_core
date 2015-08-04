@@ -238,7 +238,9 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
           static_cast<mobile_apis::Result::eType>(
               event_message[strings::params][hmi_response::code].asInt());
 
-      bool result = mobile_apis::Result::SUCCESS == result_code;
+      bool result =
+          mobile_apis::Result::SUCCESS == result_code ||
+          mobile_apis::Result::WARNINGS == result_code;
 
       if (result) {
         ApplicationSharedPtr app =

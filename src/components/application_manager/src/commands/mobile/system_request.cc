@@ -199,7 +199,9 @@ void SystemRequest::on_event(const event_engine::Event& event) {
       mobile_apis::Result::eType result_code =
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asUInt()));
-      bool result = mobile_apis::Result::SUCCESS == result_code;
+      bool result =
+          mobile_apis::Result::SUCCESS == result_code ||
+          mobile_apis::Result::WARNINGS == result_code;
 
       ApplicationSharedPtr application =
              ApplicationManagerImpl::instance()->application(connection_key());

@@ -377,7 +377,8 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
       GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asUInt()));
 
-  if (mobile_apis::Result::SUCCESS == result_code) {
+  if (mobile_apis::Result::SUCCESS == result_code ||
+      mobile_apis::Result::WARNINGS == result_code) {
     result = true;
   }
 

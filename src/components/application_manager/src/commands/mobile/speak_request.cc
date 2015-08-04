@@ -101,8 +101,8 @@ void SpeakRequest::on_event(const event_engine::Event& event) {
 void SpeakRequest::ProcessTTSSpeakResponse(
   const smart_objects::SmartObject& message) {
   LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationSharedPtr application = ApplicationManagerImpl::instance()->application(
-                               connection_key());
+  ApplicationSharedPtr application =
+      ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -110,11 +110,15 @@ void SpeakRequest::ProcessTTSSpeakResponse(
   }
 
   bool result = false;
-  mobile_apis::Result::eType result_code =
-    static_cast<mobile_apis::Result::eType>(
+  hmi_apis::Common_Result::eType hmi_result_code =
+      static_cast<hmi_apis::Common_Result::eType>(
       message[strings::params][hmi_response::code].asInt());
-  if (hmi_apis::Common_Result::SUCCESS ==
-      static_cast<hmi_apis::Common_Result::eType>(result_code)) {
+
+  mobile_apis::Result::eType result_code =
+    static_cast<mobile_apis::Result::eType>(hmi_result_code);
+
+  if (hmi_apis::Common_Result::SUCCESS == hmi_result_code ||
+      hmi_apis::Common_Result::WARNINGS == hmi_result_code) {
     result = true;
   }
   (*message_)[strings::params][strings::function_id] =
@@ -122,15 +126,14 @@ void SpeakRequest::ProcessTTSSpeakResponse(
 
   const char* return_info = NULL;
 
-  if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
-      static_cast<hmi_apis::Common_Result::eType>(result_code)) {
+  if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == hmi_result_code) {
     result_code = mobile_apis::Result::WARNINGS;
     return_info = std::string(
         "Unsupported phoneme type sent in a prompt").c_str();
   }
 
-  SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
-               return_info, &(message[strings::msg_params]));
+  SendResponse(result, result_code, return_info,
+               &(message[strings::msg_params]));
 }
 
 bool SpeakRequest::IsWhiteSpaceExist() {

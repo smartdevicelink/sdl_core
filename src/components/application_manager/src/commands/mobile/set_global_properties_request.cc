@@ -308,8 +308,6 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(CommandRequestImpl::connection_key());
-
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetGlobalProperties: {
       LOG4CXX_INFO(logger_, "Received UI_SetGlobalProperties event");

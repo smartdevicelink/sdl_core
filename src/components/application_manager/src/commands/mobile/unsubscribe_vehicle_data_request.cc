@@ -229,6 +229,11 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
 
   const smart_objects::SmartObject& message = event.smart_object();
 
+  if (hmi_apis::FunctionID::VehicleInfo_UnsubscribeVehicleData != event.id()) {
+    LOG4CXX_ERROR(logger_, "Received unknown event.");
+    return;
+  }
+
 #ifdef HMI_DBUS_API
   for (HmiRequests::iterator it = hmi_requests_.begin();
       it != hmi_requests_.end(); ++it) {
@@ -288,13 +293,11 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
           message[strings::params][hmi_response::code].asInt());
 
   bool is_succeeded =
-      hmi_result == hmi_apis::Common_Result::SUCCESS;
+      hmi_apis::Common_Result::SUCCESS == hmi_result ||
+      hmi_apis::Common_Result::WARNINGS == hmi_result;
 
   mobile_apis::Result::eType result_code =
-      hmi_result == hmi_apis::Common_Result::SUCCESS
-      ? mobile_apis::Result::SUCCESS
-      : static_cast<mobile_apis::Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
+      static_cast<mobile_apis::Result::eType>(hmi_result);
 
   const char* return_info = NULL;
 

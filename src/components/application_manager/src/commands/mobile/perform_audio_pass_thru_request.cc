@@ -135,8 +135,10 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
       FinishTTSSpeak();
 
       std::string return_info;
-      bool result = mobile_apis::Result::SUCCESS == mobile_code ||
-                          mobile_apis::Result::RETRY == mobile_code;
+      bool result =
+          mobile_apis::Result::SUCCESS == mobile_code ||
+          mobile_apis::Result::RETRY == mobile_code ||
+          mobile_apis::Result::WARNINGS == mobile_code;
 
       if ((mobile_apis::Result::SUCCESS == mobile_code) &&
           (mobile_apis::Result::UNSUPPORTED_RESOURCE == result_tts_speak_)) {
