@@ -77,7 +77,7 @@ void RequestController::InitializeThreadpool() {
 void RequestController::DestroyThreadpool() {
   LOG4CXX_AUTO_TRACE(logger_);
   {
-    AutoLock auto_lock(mobile_request_list_lock_);
+    AutoLock auto_lock(mobile_request_info_list_lock_);
     pool_state_ = TPoolState::STOPPED;
     LOG4CXX_DEBUG(logger_, "Broadcasting STOP signal to all threads...");
     cond_var_.Broadcast();  // notify all threads we are shutting down
@@ -136,7 +136,7 @@ bool RequestController::CheckPendingRequestsAmount(
     const uint32_t& pending_requests_amount) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (pending_requests_amount > 0) {
-    const size_t pending_requests_size = mobile_request_list_.size();
+    const size_t pending_requests_size = mobile_request_info_list_.size();
     const bool available_to_add =
         pending_requests_amount > pending_requests_size;
     if (!available_to_add) {
@@ -162,10 +162,14 @@ RequestController::TResult RequestController::addMobileRequest(
                 << "connection_key : " << request->connection_key());
   RequestController::TResult result = CheckPosibilitytoAdd(request);
   if (SUCCESS ==result) {
-    AutoLock auto_lock_list(mobile_request_list_lock_);
-    mobile_request_list_.push_back(request);
+    // Temporary set timeout to zero. Correct value will be set at the moment
+    // of processing start - in threadMain()
+    RequestInfoPtr request_info_ptr(new MobileRequestInfo(request, 0));
+    request_info_ptr->set_hmi_level(hmi_level);
+    AutoLock auto_lock_list(mobile_request_info_list_lock_);
+    mobile_request_info_list_.push_back(request_info_ptr);
     LOG4CXX_DEBUG(logger_, "Waiting for execution: "
-                  << mobile_request_list_.size());
+                  << mobile_request_info_list_.size());
   // wake up one thread that is waiting for a task to be available
   }
   cond_var_.NotifyOne();
@@ -258,20 +262,22 @@ void RequestController::terminateWaitingForExecutionAppRequests(
     const uint32_t& app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "app_id: "  << app_id
-                << "Waiting for execution" << mobile_request_list_.size());
+                << "Waiting for execution" << mobile_request_info_list_.size());
   AutoLock
-      auto_lock(mobile_request_list_lock_);
-  std::list<RequestPtr>::iterator request_it = mobile_request_list_.begin();
-  while (mobile_request_list_.end() != request_it) {
-    RequestPtr request = (*request_it);
-    if ((request.valid()) && (request->connection_key() == app_id)) {
-      mobile_request_list_.erase(request_it++);
+      auto_lock(mobile_request_info_list_lock_);
+  std::list<RequestInfoPtr>::iterator request_it =
+      mobile_request_info_list_.begin();
+  while (mobile_request_info_list_.end() != request_it) {
+    RequestInfoPtr request_info = (*request_it);
+    if ((request_info.valid()) &&
+        (request_info->request()->connection_key() == app_id)) {
+      mobile_request_info_list_.erase(request_it++);
     } else {
       ++request_it;
     }
   }
   LOG4CXX_DEBUG(logger_, "Waiting for execution "
-                << mobile_request_list_.size());
+                << mobile_request_info_list_.size());
 }
 
 void RequestController::terminateWaitingForResponseAppRequests(
@@ -287,7 +293,7 @@ void RequestController::terminateAppRequests(
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "app_id : " << app_id
                 << "Requests waiting for execution count : "
-                << mobile_request_list_.size()
+                << mobile_request_info_list_.size()
                 << "Requests waiting for response count : "
                 << waiting_for_response_.Size());
 
@@ -305,8 +311,8 @@ void RequestController::terminateAllMobileRequests() {
   LOG4CXX_AUTO_TRACE(logger_);
   waiting_for_response_.RemoveMobileRequests();
   LOG4CXX_DEBUG(logger_, "Mobile Requests waiting for response cleared");
-  AutoLock waiting_execution_auto_lock(mobile_request_list_lock_);
-  mobile_request_list_.clear();
+  AutoLock waiting_execution_auto_lock(mobile_request_info_list_lock_);
+  mobile_request_info_list_.clear();
   LOG4CXX_DEBUG(logger_, "Mobile Requests waiting for execution cleared");
   UpdateTimer();
 }
@@ -409,10 +415,10 @@ void RequestController::Worker::threadMain() {
   AutoLock auto_lock(thread_lock_);
   while (!stop_flag_) {
     // Try to pick a request
-    AutoLock auto_lock(request_controller_->mobile_request_list_lock_);
+    AutoLock auto_lock(request_controller_->mobile_request_info_list_lock_);
 
     while ((request_controller_->pool_state_ != TPoolState::STOPPED) &&
-           (request_controller_->mobile_request_list_.empty())) {
+           (request_controller_->mobile_request_info_list_.empty())) {
       // Wait until there is a task in the queue
       // Unlock mutex while wait, then lock it back when signaled
       LOG4CXX_INFO(logger_, "Unlocking and waiting");
@@ -425,19 +431,23 @@ void RequestController::Worker::threadMain() {
       break;
     }
 
-    if (request_controller_->mobile_request_list_.empty()) {
+    if (request_controller_->mobile_request_info_list_.empty()) {
       LOG4CXX_WARN(logger_, "Mobile request list is empty");
       break;
     }
 
-    RequestPtr request(request_controller_->mobile_request_list_.front());
-    request_controller_->mobile_request_list_.pop_front();
-    bool init_res = request->Init();  // to setup specific default timeout
+    RequestInfoPtr request_info_ptr(
+        request_controller_->mobile_request_info_list_.front());
+    request_controller_->mobile_request_info_list_.pop_front();
+    bool init_res = request_info_ptr->request()->Init();  // to setup specific
+                                                          // default timeout
 
     const uint32_t timeout_in_seconds =
-       request->default_timeout() / date_time::DateTime::MILLISECONDS_IN_SECOND;
-    RequestInfoPtr request_info_ptr(new MobileRequestInfo(request,
-                                                          timeout_in_seconds));
+        request_info_ptr->request()->default_timeout() /
+        date_time::DateTime::MILLISECONDS_IN_SECOND;
+    // Start time, end time and timeout need to be updated to appropriate values
+    request_info_ptr->update_start_time(date_time::DateTime::getCurrentTime());
+    request_info_ptr->updateTimeOut(timeout_in_seconds);
 
     request_controller_->waiting_for_response_.Add(request_info_ptr);
     if (0 != timeout_in_seconds) {
@@ -454,8 +464,8 @@ void RequestController::Worker::threadMain() {
 
     // execute
     if ((false == request_controller_->IsLowVoltage()) &&
-        request->CheckPermissions() && init_res) {
-      request->Run();
+        request_info_ptr->request()->CheckPermissions() && init_res) {
+      request_info_ptr->request()->Run();
     }
   }
 }
