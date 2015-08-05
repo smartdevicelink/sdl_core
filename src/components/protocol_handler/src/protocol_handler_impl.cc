@@ -37,6 +37,7 @@
 #include "connection_handler/connection_handler_impl.h"
 #include "config_profile/profile.h"
 #include "utils/byte_order.h"
+#include "protocol/common.h"
 
 #ifdef ENABLE_SECURITY
 #include "security_manager/ssl_context.h"
@@ -358,29 +359,39 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
     metric_observer_->StartMessageProcess(message_id, start_time);
   }
 #endif  // TIME_TESTER
-
-  const uint32_t header_size = (PROTOCOL_VERSION_1 == message->protocol_version())
-      ? PROTOCOL_HEADER_V1_SIZE : PROTOCOL_HEADER_V2_SIZE;
-  uint32_t max_frame_size = MAXIMUM_FRAME_DATA_SIZE - header_size;
+  const size_t max_frame_size =
+      profile::Profile::instance()->maximum_payload_size();
+  size_t frame_size = DEFAULT_FRAME_DATA_SIZE;
+  switch (message->protocol_version()) {
+    case PROTOCOL_VERSION_1:
+    case PROTOCOL_VERSION_2:
+      break;
+    case PROTOCOL_VERSION_3:
+    case PROTOCOL_VERSION_4:
+      frame_size = max_frame_size > DEFAULT_FRAME_DATA_SIZE ?
+                   max_frame_size : DEFAULT_FRAME_DATA_SIZE;
+      break;
+    default:
+      break;
+  }
 #ifdef ENABLE_SECURITY
   const security_manager::SSLContext *ssl_context = session_observer_->
       GetSSLContext(message->connection_key(), message->service_type());
   if (ssl_context && ssl_context->IsInitCompleted()) {
-    const size_t max_block_size = ssl_context->get_max_block_size(max_frame_size);
+    const size_t max_block_size = ssl_context->get_max_block_size(frame_size);
     DCHECK(max_block_size > 0);
     if (max_block_size > 0) {
-      max_frame_size = max_block_size;
-      LOG4CXX_DEBUG(logger_, "Security set new optimal packet size " << max_frame_size);
+      frame_size = max_block_size;
+      LOG4CXX_DEBUG(logger_, "Security set new optimal packet size " << frame_size);
     } else {
       LOG4CXX_ERROR(logger_, "Security could not return max block size, use the origin one");
     }
   }
-  LOG4CXX_DEBUG(logger_, "Optimal packet size is " << max_frame_size);
+  LOG4CXX_DEBUG(logger_, "Optimal packet size is " << frame_size);
 #endif  // ENABLE_SECURITY
-  DCHECK(MAXIMUM_FRAME_DATA_SIZE > max_frame_size);
+  DCHECK(DEFAULT_FRAME_DATA_SIZE <= frame_size);
 
-
-  if (message->data_size() <= max_frame_size) {
+  if (message->data_size() <= frame_size) {
     RESULT_CODE result = SendSingleFrameMessage(connection_handle, sessionID,
                                                 message->protocol_version(),
                                                 message->service_type(),
@@ -394,14 +405,14 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
   } else {
     LOG4CXX_DEBUG(
         logger_,
-        "Message will be sent in multiple frames; max frame size is " << max_frame_size);
+        "Message will be sent in multiple frames; max frame size is " << frame_size);
 
     RESULT_CODE result = SendMultiFrameMessage(connection_handle, sessionID,
                                                message->protocol_version(),
                                                message->service_type(),
                                                message->data_size(),
                                                message->data(),
-                                               max_frame_size, final_message);
+                                               frame_size, final_message);
     if (result != RESULT_OK) {
       LOG4CXX_ERROR(logger_,
           "ProtocolHandler failed to send multiframe messages.");

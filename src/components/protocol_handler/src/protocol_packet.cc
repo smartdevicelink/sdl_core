@@ -36,6 +36,7 @@
 #include <cstring>
 #include <limits>
 
+#include "protocol/common.h"
 #include "protocol_handler/protocol_packet.h"
 #include "utils/macro.h"
 #include "utils/byte_order.h"
@@ -118,7 +119,8 @@ void ProtocolPacket::ProtocolHeader::deserialize(
 }
 
 ProtocolPacket::ProtocolHeaderValidator::ProtocolHeaderValidator()
-  : max_payload_size_(std::numeric_limits<size_t>::max()) {}
+  : max_payload_size_(std::numeric_limits<size_t>::max()) {
+}
 
 void ProtocolPacket::ProtocolHeaderValidator::set_max_payload_size(
     const size_t max_payload_size) {
@@ -129,13 +131,20 @@ size_t ProtocolPacket::ProtocolHeaderValidator::max_payload_size() const {
   return max_payload_size_;
 }
 
-RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(const ProtocolHeader& header) const {
-  // Protocol version shall be from 1 to 4
+RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
+    const ProtocolHeader& header) const {
+  // expected payload size will be calculated depending
+  // on used protocol version
+  size_t payload_size = DEFAULT_FRAME_DATA_SIZE;
+  // Protocol version shall be from 1 to 3
   switch (header.version) {
     case PROTOCOL_VERSION_1:
     case PROTOCOL_VERSION_2:
+      break;
     case PROTOCOL_VERSION_3:
     case PROTOCOL_VERSION_4:
+      payload_size = max_payload_size_ > DEFAULT_FRAME_DATA_SIZE ?
+                     max_payload_size_ : DEFAULT_FRAME_DATA_SIZE;
       break;
     default:
       return RESULT_FAIL;
@@ -185,8 +194,8 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(const ProtocolHead
   }
   // For Control frames Data Size value shall be less than MTU header
   // For Single and Consecutive Data Size value shall be greater than 0x00
-  // and shall be less than N (this value will be defined in .ini file)
-  if (header.dataSize > max_payload_size_) {
+  // and shall be less than payload size
+  if (header.dataSize > payload_size) {
     return RESULT_FAIL;
   }
   switch (header.frameType) {
@@ -208,7 +217,6 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(const ProtocolHead
   }
   return RESULT_OK;
 }
-
 
 ProtocolPacket::ProtocolPacket()
   : payload_size_(0), connection_id_(0)  {
