@@ -212,8 +212,11 @@ void CoreService::ChangeNotifyHMILevel(ApplicationSharedPtr app,
 
 void CoreService::NotifyHMIAboutHMILevel(ApplicationSharedPtr app,
       mobile_apis::HMILevel::eType level) {
-  MessageHelper::SendActivateAppToHMI(app->app_id(),
-    static_cast<hmi_apis::Common_HMILevel::eType>(level), true);
+  if (app->hmi_level() != mobile_apis::HMILevel::eType::HMI_FULL) {
+    MessageHelper::SendActivateAppToHMI(
+        app->app_id(), static_cast<hmi_apis::Common_HMILevel::eType>(level),
+        true);
+  }
 }
 
 bool CoreService::AreParametersAllowed(
