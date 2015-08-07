@@ -62,14 +62,16 @@ void RegisterAppInterfaceResponse::Run() {
 
   // Add registered application to the policy db right after response sent to
   // mobile to be able to check all other API according to app permissions
-  application_manager::ApplicationConstSharedPtr app =
-      application_manager::ApplicationManagerImpl::instance()->
-      application(connection_key());
-  if (app.valid()) {
-    policy::PolicyHandler *policy_handler = policy::PolicyHandler::instance();
-    std::string mobile_app_id = app->mobile_app_id();
-    policy_handler->AddApplication(mobile_app_id);
-    SetHeartBeatTimeout(connection_key(), mobile_app_id);
+  uint32_t connection_key =
+      (*message_)[strings::params][strings::connection_key].asUInt();
+  application_manager::ApplicationSharedPtr app =
+      application_manager::ApplicationManagerImpl::instance()->application(
+          connection_key);
+  if (app) {
+    std::string policy_app_id = app->policy_app_id();
+    policy::PolicyHandler::instance()->OnAppRegisteredOnMobile(policy_app_id);
+
+    SetHeartBeatTimeout(connection_key, policy_app_id);
   }
 }
 
