@@ -39,6 +39,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "application_manager/smart_object_keys.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 namespace commands {
@@ -91,7 +92,7 @@ void UnsubscribeVehicleDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-      CommandRequestImpl::connection_key());
+      connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -99,9 +100,7 @@ void UnsubscribeVehicleDataRequest::Run() {
     return;
   }
 
-  // counter for items to subscribe
   int32_t items_to_unsubscribe = 0;
-  // counter for subscribed items by application
   int32_t unsubscribed_items = 0;
 
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();
@@ -226,6 +225,7 @@ void UnsubscribeVehicleDataRequest::Run() {
 
 void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
 
   const smart_objects::SmartObject& message = event.smart_object();
 
@@ -240,8 +240,8 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     HmiRequest & hmi_request = *it;
     if (hmi_request.func_id == event.id()) {
       hmi_request.status =
-          static_cast<hmi_apis::Common_Result::eType>(message[strings::params][hmi_response::code]
-              .asInt());
+          static_cast<hmi_apis::Common_Result::eType>(
+            message[strings::params][hmi_response::code].asInt());
       if (hmi_apis::Common_Result::SUCCESS == hmi_request.status)
         hmi_request.value = message[strings::msg_params][hmi_request.str];
       hmi_request.complete = true;
@@ -293,11 +293,13 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
           message[strings::params][hmi_response::code].asInt());
 
   bool is_succeeded =
-      hmi_apis::Common_Result::SUCCESS == hmi_result ||
-      hmi_apis::Common_Result::WARNINGS == hmi_result;
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+        hmi_result,
+        hmi_apis::Common_Result::SUCCESS,
+        hmi_apis::Common_Result::WARNINGS);
 
   mobile_apis::Result::eType result_code =
-      static_cast<mobile_apis::Result::eType>(hmi_result);
+      MessageHelper::HMIToMobileResult(hmi_result);
 
   const char* return_info = NULL;
 

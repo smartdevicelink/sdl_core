@@ -34,6 +34,8 @@
 #include "application_manager/commands/mobile/slider_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 
@@ -111,6 +113,7 @@ void SliderRequest::Run() {
 
 void SliderRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
   const smart_objects::SmartObject& message = event.smart_object();
 
   const event_engine::Event::EventID event_id = event.id();
@@ -128,28 +131,32 @@ void SliderRequest::on_event(const event_engine::Event& event) {
 
   LOG4CXX_INFO(logger_, "Received UI_Slider event");
 
-  const int response_code =
-      message[strings::params][hmi_response::code].asInt();
+  const hmi_apis::Common_Result::eType response_code =
+      static_cast<hmi_apis::Common_Result::eType>(
+      message[strings::params][hmi_response::code].asInt());
+
   smart_objects::SmartObject response_msg_params = message[strings::msg_params];
   if (response_code == hmi_apis::Common_Result::ABORTED &&
-      message[strings::params][strings::data].keyExists(strings::slider_position)) {
+      response_msg_params[strings::data].keyExists(strings::slider_position)) {
     //Copy slider_position info to msg_params section
         response_msg_params[strings::slider_position] =
         message[strings::params][strings::data][strings::slider_position];
   }
 
   const bool is_response_success =
-      mobile_apis::Result::SUCCESS == response_code ||
-      mobile_apis::Result::WARNINGS == response_code;
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+        response_code,
+        hmi_apis::Common_Result::SUCCESS,
+        hmi_apis::Common_Result::WARNINGS);
 
   SendResponse(is_response_success,
-               mobile_apis::Result::eType(response_code),
+               MessageHelper::HMIToMobileResult(response_code),
                0,
                &response_msg_params);
 }
 
 bool SliderRequest::IsWhiteSpaceExist() {
-  LOG4CXX_INFO(logger_, "PerformAudioPassThruRequest::IsWhiteSpaceExist");
+  LOG4CXX_AUTO_TRACE(logger_);
   const char* str = NULL;
 
   str = (*message_)[strings::msg_params][strings::slider_header].asCharArray();

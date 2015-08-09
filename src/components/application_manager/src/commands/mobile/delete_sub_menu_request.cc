@@ -35,6 +35,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/HMI_API.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 
@@ -50,8 +51,8 @@ DeleteSubMenuRequest::~DeleteSubMenuRequest() {
 void DeleteSubMenuRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-      (*message_)[strings::params][strings::connection_key].asUInt());
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -59,10 +60,12 @@ void DeleteSubMenuRequest::Run() {
     return;
   }
 
-  if (!app->FindSubMenu(
-      (*message_)[strings::msg_params][strings::menu_id].asInt())) {
+  const int32_t menu_id =
+      (*message_)[strings::msg_params][strings::menu_id].asInt();
+
+  if (!app->FindSubMenu(menu_id)) {
+    LOG4CXX_ERROR(logger_, "Menu with id " << menu_id << " is not found.");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
-    LOG4CXX_ERROR(logger_, "Invalid ID");
     return;
   }
 
@@ -76,7 +79,8 @@ void DeleteSubMenuRequest::Run() {
   SendHMIRequest(hmi_apis::FunctionID::UI_DeleteSubMenu, &msg_params, true);
 }
 
-void DeleteSubMenuRequest::DeleteSubMenuVRCommands(ApplicationConstSharedPtr app) {
+void DeleteSubMenuRequest::DeleteSubMenuVRCommands(
+    ApplicationConstSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const DataAccessor<CommandsMap> accessor = app->commands_map();
@@ -104,7 +108,8 @@ void DeleteSubMenuRequest::DeleteSubMenuVRCommands(ApplicationConstSharedPtr app
   }
 }
 
-void DeleteSubMenuRequest::DeleteSubMenuUICommands(ApplicationSharedPtr const app) {
+void DeleteSubMenuRequest::DeleteSubMenuUICommands(
+    ApplicationSharedPtr const app) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const DataAccessor<CommandsMap> accessor(app->commands_map());
@@ -138,6 +143,7 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(ApplicationSharedPtr const ap
 
 void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -146,9 +152,11 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
           static_cast<mobile_apis::Result::eType>(
               message[strings::params][hmi_response::code].asInt());
 
-      bool result =
-          mobile_apis::Result::SUCCESS == result_code ||
-          mobile_apis::Result::WARNINGS == result_code;
+      const bool result =
+          Compare<mobile_api::Result::eType, EQ, ONE>(
+            result_code,
+            mobile_api::Result::SUCCESS,
+            mobile_api::Result::WARNINGS);
 
       ApplicationSharedPtr application =
              ApplicationManagerImpl::instance()->application(connection_key());
@@ -167,7 +175,7 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
        }
 
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
-      if (true == result) {
+      if (result) {
         application->UpdateHash();
       }
       break;

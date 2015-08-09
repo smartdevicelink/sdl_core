@@ -39,6 +39,7 @@
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 
@@ -64,13 +65,12 @@ void SetGlobalPropertiesRequest::Run() {
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
 
-  uint32_t app_id =
-      (*message_)[strings::params][strings::connection_key].asUInt();
-
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
+    LOG4CXX_ERROR(logger_, "No application associated with connection key "
+                  << connection_key());
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -88,9 +88,8 @@ void SetGlobalPropertiesRequest::Run() {
     verification_result = MessageHelper::VerifyImage(
         (*message_)[strings::msg_params][strings::menu_icon], app);
     if (mobile_apis::Result::SUCCESS != verification_result) {
-      LOG4CXX_ERROR_EXT(
-          logger_,
-          "MessageHelper::VerifyImage return " << verification_result);
+      LOG4CXX_ERROR(logger_, "MessageHelper::VerifyImage return "
+                    << verification_result);
       SendResponse(false, verification_result);
       return;
     }
@@ -99,9 +98,7 @@ void SetGlobalPropertiesRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
     if (mobile_apis::Result::SUCCESS != MessageHelper::VerifyImageVrHelpItems(
         (*message_)[strings::msg_params][strings::vr_help], app)) {
-      LOG4CXX_ERROR_EXT(
-          logger_,
-          "MessageHelper::VerifyImage return INVALID_DATA!" );
+      LOG4CXX_ERROR(logger_,"MessageHelper::VerifyImage return INVALID_DATA!" );
       SendResponse(false, mobile_apis::Result::INVALID_DATA);
       return;
     }
@@ -114,9 +111,8 @@ void SetGlobalPropertiesRequest::Run() {
 
   //if application waits for sending ttsGlobalProperties need to remove this
   //application from tts_global_properties_app_list_
-  LOG4CXX_INFO(logger_, "RemoveAppFromTTSGlobalPropertiesList");
   ApplicationManagerImpl::instance()->RemoveAppFromTTSGlobalPropertiesList(
-      app_id);
+      connection_key());
   bool is_help_prompt_present = msg_params.keyExists(strings::help_prompt);
   bool is_timeout_prompt_present = msg_params.keyExists(
       strings::timeout_prompt);
@@ -279,6 +275,7 @@ void SetGlobalPropertiesRequest::Run() {
 }
 
 bool SetGlobalPropertiesRequest::CheckVrHelpItemsOrder() {
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject vr_help = (*message_)[strings::msg_params]
       .getElement(strings::vr_help);
 
@@ -306,6 +303,7 @@ bool SetGlobalPropertiesRequest::CheckVrHelpItemsOrder() {
 
 void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -329,49 +327,72 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
     }
   }
 
-  if (!IsPendingResponseExist()) {
-    bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_)
-          && (hmi_apis::Common_Result::SUCCESS == tts_result_ ||
-              hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_))
-          || ((hmi_apis::Common_Result::SUCCESS == ui_result_ ||
-              hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_)
-              && (hmi_apis::Common_Result::INVALID_ENUM == tts_result_))
-          || ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_ ||
-              hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_)
-              && (hmi_apis::Common_Result::SUCCESS == tts_result_));
-
-    mobile_apis::Result::eType result_code;
-    const char* return_info = NULL;
-
-    if (result) {
-      if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_) {
-        result_code = mobile_apis::Result::WARNINGS;
-        return_info =
-            std::string("Unsupported phoneme type sent in a prompt").c_str();
-      } else {
-        result_code = static_cast<mobile_apis::Result::eType>(
-        std::max(ui_result_, tts_result_));
-      }
-    } else {
-      result_code = static_cast<mobile_apis::Result::eType>(
-          std::max(ui_result_, tts_result_));
-    }
-
-    ApplicationSharedPtr application =
-        ApplicationManagerImpl::instance()->application(connection_key());
-    SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
-                 return_info, &(message[strings::msg_params]));
-    application->UpdateHash();
+  if (IsPendingResponseExist()) {
+    return;
   }
+
+  const bool is_tts_success_unsupported =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+        tts_result_,
+        hmi_apis::Common_Result::SUCCESS,
+        hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
+
+  const bool is_ui_success_unsupported =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+        ui_result_,
+        hmi_apis::Common_Result::SUCCESS,
+        hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
+
+  const bool is_ui_invalid_unsupported =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+        ui_result_,
+        hmi_apis::Common_Result::INVALID_ENUM,
+        hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
+
+  bool result =
+      (is_tts_success_unsupported &&
+       hmi_apis::Common_Result::SUCCESS == ui_result_) ||
+      (is_ui_success_unsupported &&
+       hmi_apis::Common_Result::INVALID_ENUM == tts_result_) ||
+      (is_ui_invalid_unsupported &&
+       hmi_apis::Common_Result::SUCCESS == tts_result_);
+
+  mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
+  const char* return_info = NULL;
+
+  const bool is_ui_or_tts_warning =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+        hmi_apis::Common_Result::WARNINGS,
+        tts_result_,
+        ui_result_);
+
+  if (result &&
+      (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_ ||
+       is_ui_or_tts_warning)) {
+    result_code = mobile_apis::Result::WARNINGS;
+    return_info =
+        std::string("Unsupported phoneme type sent in a prompt").c_str();
+  } else {
+    result_code = MessageHelper::HMIToMobileResult(
+          std::max(ui_result_, tts_result_));
+  }
+
+  ApplicationSharedPtr application =
+      ApplicationManagerImpl::instance()->application(connection_key());
+
+  SendResponse(result, result_code, return_info,
+               &(message[strings::msg_params]));
+
+  application->UpdateHash();
 }
 
 bool SetGlobalPropertiesRequest::IsPendingResponseExist() {
-
   return is_ui_send_ != is_ui_received_ || is_tts_send_ != is_tts_received_;
 }
 
 bool SetGlobalPropertiesRequest::ValidateConditionalMandatoryParameters(
     const smart_objects::SmartObject& params) {
+  LOG4CXX_AUTO_TRACE(logger_);
   return params.keyExists(strings::help_prompt)
       || params.keyExists(strings::timeout_prompt)
       || params.keyExists(strings::vr_help_title)

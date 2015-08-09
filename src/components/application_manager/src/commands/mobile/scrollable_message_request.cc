@@ -38,6 +38,7 @@
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 
@@ -70,8 +71,9 @@ bool ScrollableMessageRequest::Init() {
 void ScrollableMessageRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = application_manager::ApplicationManagerImpl::instance()
-      ->application((*message_)[strings::params][strings::connection_key].asUInt());
+  ApplicationSharedPtr app =
+      application_manager::ApplicationManagerImpl::instance()
+      ->application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -89,8 +91,6 @@ void ScrollableMessageRequest::Run() {
     SendResponse(false, processing_result);
     return;
   }
-
-
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
@@ -114,6 +114,7 @@ void ScrollableMessageRequest::Run() {
 
 void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -130,16 +131,21 @@ void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
       mobile_apis::Result::eType result_code =
           static_cast<mobile_apis::Result::eType>
           (message[strings::params][hmi_response::code].asInt());
+
       HMICapabilities& hmi_capabilities =
           ApplicationManagerImpl::instance()->hmi_capabilities();
-      bool result = false;
-      if (mobile_apis::Result::SUCCESS == result_code ||
-          mobile_apis::Result::WARNINGS == result_code) {
-        result = true;
-      } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code) &&
+
+      bool result =
+          Compare<mobile_api::Result::eType, EQ, ONE>(
+            result_code,
+            mobile_api::Result::SUCCESS,
+            mobile_api::Result::WARNINGS);
+
+      if (mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code &&
           hmi_capabilities.is_ui_cooperating()) {
         result = true;
       }
+
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
       break;
     }

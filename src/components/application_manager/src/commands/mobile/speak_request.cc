@@ -35,6 +35,7 @@
 #include "application_manager/commands/mobile/speak_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 
@@ -51,8 +52,9 @@ SpeakRequest::~SpeakRequest() {
 void SpeakRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = application_manager::ApplicationManagerImpl::instance()
-                     ->application(connection_key());
+  ApplicationSharedPtr app =
+      application_manager::ApplicationManagerImpl::instance()->application(
+        connection_key());
 
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
@@ -101,6 +103,8 @@ void SpeakRequest::on_event(const event_engine::Event& event) {
 void SpeakRequest::ProcessTTSSpeakResponse(
   const smart_objects::SmartObject& message) {
   LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
+
   ApplicationSharedPtr application =
       ApplicationManagerImpl::instance()->application(connection_key());
 
@@ -109,24 +113,31 @@ void SpeakRequest::ProcessTTSSpeakResponse(
     return;
   }
 
-  bool result = false;
   hmi_apis::Common_Result::eType hmi_result_code =
       static_cast<hmi_apis::Common_Result::eType>(
       message[strings::params][hmi_response::code].asInt());
 
   mobile_apis::Result::eType result_code =
-    static_cast<mobile_apis::Result::eType>(hmi_result_code);
+    MessageHelper::HMIToMobileResult(hmi_result_code);
 
-  if (hmi_apis::Common_Result::SUCCESS == hmi_result_code ||
-      hmi_apis::Common_Result::WARNINGS == hmi_result_code) {
-    result = true;
-  }
+  const bool result =
+      Compare<mobile_api::Result::eType, EQ, ONE>(
+        result_code,
+        mobile_api::Result::SUCCESS,
+        mobile_api::Result::WARNINGS);
+
   (*message_)[strings::params][strings::function_id] =
-    mobile_apis::FunctionID::SpeakID;
+      mobile_apis::FunctionID::SpeakID;
 
   const char* return_info = NULL;
 
-  if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == hmi_result_code) {
+  const bool is_result_ok =
+      Compare<mobile_api::Result::eType, EQ, ONE>(
+        result_code,
+        mobile_api::Result::UNSUPPORTED_RESOURCE,
+        mobile_api::Result::WARNINGS);
+
+  if (is_result_ok) {
     result_code = mobile_apis::Result::WARNINGS;
     return_info = std::string(
         "Unsupported phoneme type sent in a prompt").c_str();
