@@ -135,16 +135,16 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
     const ProtocolHeader& header) const {
   // expected payload size will be calculated depending
   // on used protocol version
-  size_t payload_size = DEFAULT_FRAME_DATA_SIZE;
-  // Protocol version shall be from 1 to 3
+  size_t payload_size = MAXIMUM_FRAME_DATA_V2_SIZE;
+  // Protocol version shall be from 1 to 4
   switch (header.version) {
     case PROTOCOL_VERSION_1:
     case PROTOCOL_VERSION_2:
       break;
     case PROTOCOL_VERSION_3:
     case PROTOCOL_VERSION_4:
-      payload_size = max_payload_size_ > DEFAULT_FRAME_DATA_SIZE ?
-                     max_payload_size_ : DEFAULT_FRAME_DATA_SIZE;
+      payload_size = max_payload_size_ > MAXIMUM_FRAME_DATA_V2_SIZE ?
+                     max_payload_size_ : MAXIMUM_FRAME_DATA_V2_SIZE;
       break;
     default:
       return RESULT_FAIL;

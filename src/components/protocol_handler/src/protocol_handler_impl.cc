@@ -341,7 +341,6 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
     return;
   }
 
-
   if (!session_observer_) {
     LOG4CXX_ERROR(
         logger_,
@@ -361,15 +360,12 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
 #endif  // TIME_TESTER
   const size_t max_frame_size =
       profile::Profile::instance()->maximum_payload_size();
-  size_t frame_size = DEFAULT_FRAME_DATA_SIZE;
+  size_t frame_size = MAXIMUM_FRAME_DATA_V2_SIZE;
   switch (message->protocol_version()) {
-    case PROTOCOL_VERSION_1:
-    case PROTOCOL_VERSION_2:
-      break;
     case PROTOCOL_VERSION_3:
     case PROTOCOL_VERSION_4:
-      frame_size = max_frame_size > DEFAULT_FRAME_DATA_SIZE ?
-                   max_frame_size : DEFAULT_FRAME_DATA_SIZE;
+      frame_size = max_frame_size > MAXIMUM_FRAME_DATA_V2_SIZE ?
+                   max_frame_size : MAXIMUM_FRAME_DATA_V2_SIZE;
       break;
     default:
       break;
@@ -389,7 +385,6 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
   }
   LOG4CXX_DEBUG(logger_, "Optimal packet size is " << frame_size);
 #endif  // ENABLE_SECURITY
-  DCHECK(DEFAULT_FRAME_DATA_SIZE <= frame_size);
 
   if (message->data_size() <= frame_size) {
     RESULT_CODE result = SendSingleFrameMessage(connection_handle, sessionID,
