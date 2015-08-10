@@ -360,13 +360,13 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
         hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
 
   const bool is_no_ui_error =
-      Compare<hmi_apis::Common_Result::eType, EQ, ALL>(
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
         ui_result_,
         hmi_apis::Common_Result::SUCCESS,
         hmi_apis::Common_Result::WARNINGS);
 
   const bool is_no_vr_error =
-      Compare<hmi_apis::Common_Result::eType, EQ, ALL>(
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
         vr_result_,
         hmi_apis::Common_Result::SUCCESS,
         hmi_apis::Common_Result::WARNINGS);
