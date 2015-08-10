@@ -35,6 +35,7 @@
 #include "application_manager/request_controller.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/commands/hmi/request_to_hmi.h"
+#include "utils/make_shared.h"
 
 namespace application_manager {
 
@@ -164,7 +165,7 @@ RequestController::TResult RequestController::addMobileRequest(
   if (SUCCESS ==result) {
     // Temporary set timeout to zero. Correct value will be set at the moment
     // of processing start - in threadMain()
-    RequestInfoPtr request_info_ptr(new MobileRequestInfo(request, 0));
+    RequestInfoPtr request_info_ptr(utils::MakeShared<MobileRequestInfo>(request, 0u));
     request_info_ptr->set_hmi_level(hmi_level);
     AutoLock auto_lock_list(mobile_request_info_list_lock_);
     mobile_request_info_list_.push_back(request_info_ptr);
@@ -263,8 +264,7 @@ void RequestController::terminateWaitingForExecutionAppRequests(
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "app_id: "  << app_id
                 << "Waiting for execution" << mobile_request_info_list_.size());
-  AutoLock
-      auto_lock(mobile_request_info_list_lock_);
+  AutoLock auto_lock(mobile_request_info_list_lock_);
   std::list<RequestInfoPtr>::iterator request_it =
       mobile_request_info_list_.begin();
   while (mobile_request_info_list_.end() != request_it) {
@@ -451,13 +451,11 @@ void RequestController::Worker::threadMain() {
 
     request_controller_->waiting_for_response_.Add(request_info_ptr);
     if (0 != timeout_in_seconds) {
-      LOG4CXX_INFO(logger_, "Execute MobileRequest corr_id = "
-                   << request_info_ptr->requestId() <<
-                            " with timeout: " << timeout_in_seconds);
       request_controller_->UpdateTimer();
     } else {
-      LOG4CXX_INFO(logger_, "Default timeout was set to 0."
-                   "RequestController will not track timeout of this request.");
+      LOG4CXX_DEBUG(logger_, "Default timeout was set to 0. "
+                    "RequestController will not track timeout "
+                    "of this request.");
     }
 
     AutoUnlock unlock(auto_lock);
@@ -465,6 +463,9 @@ void RequestController::Worker::threadMain() {
     // execute
     if ((false == request_controller_->IsLowVoltage()) &&
         request_info_ptr->request()->CheckPermissions() && init_res) {
+      LOG4CXX_DEBUG(logger_, "Execute MobileRequest corr_id = "
+                             << request_info_ptr->requestId()
+                             << " with timeout: " << timeout_in_seconds);
       request_info_ptr->request()->Run();
     }
   }
