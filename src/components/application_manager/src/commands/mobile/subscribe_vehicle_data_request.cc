@@ -215,8 +215,8 @@ void SubscribeVehicleDataRequest::Run() {
       hmi_requests_.push_back(hmi_request);
     }
   }
-  LOG4CXX_INFO(logger_, hmi_requests_.size() <<
-               " requests are going to be sent to HMI");
+  LOG4CXX_DEBUG(logger_, hmi_requests_.size() <<
+                " requests are going to be sent to HMI");
 
   //Send subrequests
   for (HmiRequests::const_iterator it = hmi_requests_.begin();

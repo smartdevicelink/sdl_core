@@ -496,7 +496,7 @@ const VehicleData& MessageHelper::vehicle_data() {
   return vehicle_data_;
 }
 
-std::string MessageHelper::StringifiedHMIResult(
+std::string MessageHelper::HMIResultToString(
     hmi_apis::Common_Result::eType hmi_result) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
   const char* str = 0;
@@ -507,7 +507,7 @@ std::string MessageHelper::StringifiedHMIResult(
   return std::string();
 }
 
-hmi_apis::Common_Result::eType MessageHelper::StringToHMIResult(
+hmi_apis::Common_Result::eType MessageHelper::HMIResultFromString(
     const std::string &hmi_result) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
   hmi_apis::Common_Result::eType value;
@@ -518,7 +518,7 @@ hmi_apis::Common_Result::eType MessageHelper::StringToHMIResult(
   return hmi_apis::Common_Result::INVALID_ENUM;
 }
 
-std::string MessageHelper::StringifiedMobileResult(
+std::string MessageHelper::MobileResultToString(
     mobile_apis::Result::eType mobile_result) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
   const char* str = 0;
@@ -529,7 +529,7 @@ std::string MessageHelper::StringifiedMobileResult(
   return std::string();
 }
 
-mobile_apis::Result::eType MessageHelper::StringToMobileResult(
+mobile_apis::Result::eType MessageHelper::MobileResultFromString(
     const std::string &mobile_result) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
   mobile_apis::Result::eType value;
@@ -542,20 +542,20 @@ mobile_apis::Result::eType MessageHelper::StringToMobileResult(
 
 mobile_apis::Result::eType MessageHelper::HMIToMobileResult(
     const hmi_apis::Common_Result::eType hmi_result) {
-  const std::string result = StringifiedHMIResult(hmi_result);
+  const std::string result = HMIResultToString(hmi_result);
   if (result.empty()) {
     return mobile_api::Result::INVALID_ENUM;
   }
-  return StringToMobileResult(result);
+  return MobileResultFromString(result);
 }
 
 hmi_apis::Common_Result::eType MessageHelper::MobileToHMIResult(
     const mobile_apis::Result::eType mobile_result) {
-  const std::string result = StringifiedMobileResult(mobile_result);
+  const std::string result = MobileResultToString(mobile_result);
   if (result.empty()) {
     return hmi_apis::Common_Result::INVALID_ENUM;
   }
-  return StringToHMIResult(result);
+  return HMIResultFromString(result);
 }
 
 mobile_apis::HMILevel::eType MessageHelper::StringToHMILevel(

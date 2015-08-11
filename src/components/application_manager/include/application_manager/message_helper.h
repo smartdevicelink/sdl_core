@@ -137,7 +137,7 @@ class MessageHelper {
      * @param hmi_result HMI Result enum value
      * @return stringified value for enum if succedeed, otherwise - empty string
      */
-    static std::string StringifiedHMIResult(
+    static std::string HMIResultToString(
       hmi_apis::Common_Result::eType hmi_result);
 
     /**
@@ -146,7 +146,7 @@ class MessageHelper {
      * @return HMI Result enum value if succedeed, otherwise - INVALID_ENUM
      * value
      */
-    static hmi_apis::Common_Result::eType StringToHMIResult(
+    static hmi_apis::Common_Result::eType HMIResultFromString(
       const std::string& hmi_result);
 
     /**
@@ -154,7 +154,7 @@ class MessageHelper {
      * @param mobile_result mobile Result enum value
      * @return stringified value for enum if succedeed, otherwise - empty string
      */
-    static std::string StringifiedMobileResult(
+    static std::string MobileResultToString(
       mobile_apis::Result::eType mobile_result);
 
     /**
@@ -163,7 +163,7 @@ class MessageHelper {
      * @return mobile Result enum value if succedeed, otherwise - INVALID_ENUM
      * value
      */
-    static mobile_api::Result::eType StringToMobileResult(
+    static mobile_api::Result::eType MobileResultFromString(
       const std::string& mobile_result);
 
     /**

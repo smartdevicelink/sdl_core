@@ -175,9 +175,9 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
   }
 
   if (!pending_requests_.IsFinal(event_id)) {
-    LOG4CXX_INFO(logger_,
-                "There are some pending responses from HMI."
-                "AlertManeuverRequest still waiting.");
+    LOG4CXX_DEBUG(logger_,
+                  "There are some pending responses from HMI."
+                  "AlertManeuverRequest still waiting.");
     return;
   }
 
