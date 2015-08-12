@@ -108,7 +108,7 @@ void RequestInfo::updateTimeOut(const uint64_t& timeout_sec)  {
 bool RequestInfo::isExpired() {
   TimevalStruct curr_time = date_time::DateTime::getCurrentTime();
   return end_time_.tv_sec <= curr_time.tv_sec;
-  // TODO(AKutsan) APPLINK-9711 Need to use compareTime method when timer will support millisecconds
+  // TODO(EZamakhov) APPLINK-15219 Need to use compareTime method when timer will support milliseconds
   // return date_time::GREATER == date_time::DateTime::compareTime(end_time_, curr_time);
 }
 
