@@ -373,10 +373,8 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
 
   bool result =
       (is_no_ui_error && is_no_vr_error) ||
-      (hmi_apis::Common_Result::SUCCESS == ui_result_ &&
-       is_vr_invalid_unsupported) ||
-      (hmi_apis::Common_Result::SUCCESS == vr_result_ &&
-       is_ui_ivalid_unsupported);
+      (is_no_ui_error && is_vr_invalid_unsupported) ||
+      (is_no_vr_error && is_ui_ivalid_unsupported);
 
   const bool is_vr_or_ui_warning =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
