@@ -52,7 +52,6 @@ uint32_t PerformInteractionRequest::pi_requests_count_ = 0;
 PerformInteractionRequest::PerformInteractionRequest(
   const MessageSharedPtr& message)
 : CommandRequestImpl(message),
-  vr_perform_interaction_code_(mobile_apis::Result::INVALID_ENUM),
   interaction_mode_(mobile_apis::InteractionMode::INVALID_ENUM),
   ui_response_recived_(false),
   vr_response_recived_(false),
@@ -98,7 +97,7 @@ void PerformInteractionRequest::Run() {
   }
 
   if (app->is_perform_interaction_active()) {
-    LOG4CXX_INFO(logger_, "Application has active PerformInteraction");
+    LOG4CXX_DEBUG(logger_, "Application has active PerformInteraction");
     app_pi_was_active_before_ = true;
   }
 
@@ -169,7 +168,7 @@ void PerformInteractionRequest::Run() {
 
   switch (interaction_mode_) {
     case mobile_apis::InteractionMode::BOTH: {
-      LOG4CXX_INFO(logger_, "Interaction Mode: BOTH");
+      LOG4CXX_DEBUG(logger_, "Interaction Mode: BOTH");
       if (!CheckChoiceSetVRSynonyms(app) ||
           !CheckChoiceSetMenuNames(app)  ||
           !CheckVrHelpItemPositions(app)) {
@@ -178,7 +177,7 @@ void PerformInteractionRequest::Run() {
       break;
     }
     case mobile_apis::InteractionMode::MANUAL_ONLY: {
-      LOG4CXX_INFO(logger_, "Interaction Mode: MANUAL_ONLY");
+      LOG4CXX_DEBUG(logger_, "Interaction Mode: MANUAL_ONLY");
       if (!CheckChoiceSetVRSynonyms(app) ||
           !CheckChoiceSetMenuNames(app)  ||
           !CheckVrHelpItemPositions(app)) {
@@ -187,7 +186,7 @@ void PerformInteractionRequest::Run() {
       break;
     }
     case mobile_apis::InteractionMode::VR_ONLY: {
-      LOG4CXX_INFO(logger_, "Interaction Mode: VR_ONLY");
+      LOG4CXX_DEBUG(logger_, "Interaction Mode: VR_ONLY");
       if (!CheckChoiceSetVRSynonyms(app) ||
           !CheckVrHelpItemPositions(app)) {
         return;
@@ -213,19 +212,19 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
+      LOG4CXX_DEBUG(logger_, "Received UI_OnResetTimeout event");
       ApplicationManagerImpl::instance()->updateRequestTimeout(
             connection_key(), correlation_id(), default_timeout());
       break;
     }
     case hmi_apis::FunctionID::UI_PerformInteraction: {
-      LOG4CXX_INFO(logger_, "Received UI_PerformInteraction event");
+      LOG4CXX_DEBUG(logger_, "Received UI_PerformInteraction event");
       ui_response_recived_ = true;
       ProcessPerformInteractionResponse(event.smart_object());
       break;
     }
     case hmi_apis::FunctionID::VR_PerformInteraction: {
-      LOG4CXX_INFO(logger_, "Received VR_PerformInteraction");
+      LOG4CXX_DEBUG(logger_, "Received VR_PerformInteraction");
       vr_response_recived_ = true;
       ProcessVRResponse(event.smart_object());
       break;
@@ -282,46 +281,54 @@ void PerformInteractionRequest::ProcessVRResponse(
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(connection_key());
 
-  if (!app.get()) {
+  if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
 
-  vr_perform_interaction_code_ = static_cast<eType>(
-      message[strings::params][hmi_response::code].asInt());
+  const mobile_apis::Result::eType vr_perform_interaction_code =
+      static_cast<eType>(message[strings::params][hmi_response::code].asInt());
+
+  const bool is_generic_error =
+      GENERIC_ERROR == vr_perform_interaction_code;
+  if (is_generic_error) {
+    LOG4CXX_DEBUG(logger_, "VR response GENERIC_ERROR");
+    TerminatePerformInteraction();
+    SendResponse(false, GENERIC_ERROR);
+    return;
+  }
 
   const bool is_vr_aborted_timeout =
-      Compare<Result::eType, EQ, ONE>(vr_perform_interaction_code_,
+      Compare<Result::eType, EQ, ONE>(vr_perform_interaction_code,
                                       ABORTED,
                                       TIMED_OUT);
 
   if (is_vr_aborted_timeout) {
-    LOG4CXX_INFO(logger_, "VR response aborted");
+    LOG4CXX_DEBUG(logger_, "VR response aborted");
     if (InteractionMode::VR_ONLY == interaction_mode_) {
-      LOG4CXX_INFO(logger_, "Aborted or Timeout Send Close Popup");
+      LOG4CXX_DEBUG(logger_, "Aborted or Timeout Send Close Popup");
       TerminatePerformInteraction();
-      SendResponse(false, vr_perform_interaction_code_);
-      return;
-    } else {
-      LOG4CXX_INFO(logger_, "Update timeout for UI");
-      ApplicationManagerImpl::instance()->
-          updateRequestTimeout(connection_key(),
-                               correlation_id(),
-                               default_timeout());
+      SendResponse(false, vr_perform_interaction_code);
       return;
     }
-  }
-
-  if (REJECTED == vr_perform_interaction_code_) {
-    LOG4CXX_INFO(logger_, "VR had been rejected.");
-    TerminatePerformInteraction();
-    SendResponse(false, vr_perform_interaction_code_);
+    LOG4CXX_DEBUG(logger_, "Update timeout for UI");
+    ApplicationManagerImpl::instance()->
+        updateRequestTimeout(connection_key(),
+                             correlation_id(),
+                             default_timeout());
     return;
   }
 
-  if (SUCCESS == vr_perform_interaction_code_ &&
+  if (REJECTED == vr_perform_interaction_code) {
+    LOG4CXX_DEBUG(logger_, "VR had been rejected.");
+    TerminatePerformInteraction();
+    SendResponse(false, vr_perform_interaction_code);
+    return;
+  }
+
+  if (SUCCESS == vr_perform_interaction_code &&
       InteractionMode::MANUAL_ONLY == interaction_mode_) {
-    LOG4CXX_INFO(logger_, "VR response SUCCESS in MANUAL_ONLY mode " <<
+    LOG4CXX_DEBUG(logger_, "VR response SUCCESS in MANUAL_ONLY mode " <<
                           "Wait for UI response");
     // in case MANUAL_ONLY mode VR.PI SUCCESS just return
     return;
@@ -330,41 +337,33 @@ void PerformInteractionRequest::ProcessVRResponse(
   SmartObject msg_params = SmartObject(SmartType_Map);
 
   const SmartObject& hmi_msg_params = message[strings::msg_params];
-
-  SmartObject* ptr_msg_params = NULL;
-  if (message[strings::msg_params].keyExists(strings::choice_id)) {
-    if (CheckChoiceIDFromResponse(app,
-                                  hmi_msg_params[strings::choice_id].asInt())) {
-      msg_params[strings::choice_id] =
-          hmi_msg_params[strings::choice_id].asInt();
-      ptr_msg_params = &msg_params;
-    } else {
+  if (hmi_msg_params.keyExists(strings::choice_id)) {
+    const int choise_id = hmi_msg_params[strings::choice_id].asInt();
+    if (!CheckChoiceIDFromResponse(app, choise_id)) {
       LOG4CXX_ERROR(logger_, "Wrong choiceID was received from HMI");
       TerminatePerformInteraction();
       SendResponse(false, GENERIC_ERROR,"Wrong choiceID was received from HMI");
       return;
     }
+    msg_params[strings::choice_id] = choise_id;
   }
 
-  eType result_code = INVALID_ENUM;
-
-  const bool is_vr_result_ok =
-      Compare<Result::eType, EQ, ONE>(vr_perform_interaction_code_,
+  const bool is_vr_result_warning =
+      Compare<Result::eType, EQ, ONE>(vr_perform_interaction_code,
                                       UNSUPPORTED_REQUEST,
                                       WARNINGS);
 
-  if (is_vr_result_ok) {
-    LOG4CXX_INFO(logger_, "VR response WARNINGS");
-    result_code = WARNINGS;
-  } else {
-    LOG4CXX_INFO(logger_, "VR response SUCCESS");
-    result_code = SUCCESS;
-    msg_params[strings::trigger_source] =
-            static_cast<int32_t>(TriggerSource::TS_VR);
-    ptr_msg_params = &msg_params;
+  if (is_vr_result_warning) {
+    LOG4CXX_DEBUG(logger_, "VR response WARNINGS");
+    TerminatePerformInteraction();
+    SendResponse(true, WARNINGS);
+    return;
   }
+
+  LOG4CXX_DEBUG(logger_, "VR response consider to be SUCCESS");
   TerminatePerformInteraction();
-  SendResponse(true, result_code, NULL, ptr_msg_params);
+  msg_params[strings::trigger_source] = static_cast<int32_t>(TriggerSource::TS_VR);
+  SendResponse(true, SUCCESS, NULL, &msg_params);
 }
 
 void PerformInteractionRequest::ProcessPerformInteractionResponse(
@@ -374,7 +373,7 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
 
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(connection_key());
-  if (!app.get()) {
+  if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
@@ -386,7 +385,7 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
       GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asUInt()));
 
-  bool result =
+  const bool result =
       Compare<mobile_api::Result::eType, EQ, ONE>(
         result_code,
         mobile_apis::Result::SUCCESS,
