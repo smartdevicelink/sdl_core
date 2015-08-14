@@ -1282,9 +1282,7 @@ bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
   }
 
   const SmartObject* app_types = app->app_types();
-  DCHECK_OR_RETURN(app_types, false);
   const SmartObject* ngn_media_screen_name = app->ngn_media_screen_name();
-  DCHECK_OR_RETURN(ngn_media_screen_name, false);
   const connection_handler::DeviceHandle handle = app->device();
   std::string device_name = ApplicationManagerImpl::instance()->GetDeviceName(handle);
 
@@ -1299,18 +1297,19 @@ bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
 
   output = SmartObject(SmartType_Map);
   output[strings::app_name] = app->name();
-  output[strings::icon] = app->app_icon_path();
   output[strings::app_id] = app->hmi_app_id();
+
+  const std::string icon_path = app->app_icon_path();
+  if (!icon_path.empty()) {
+    output[strings::icon] = icon_path;
+  }
 
   if (app->IsRegistered()) {
     output[strings::hmi_display_language_desired] = app->ui_language();
     output[strings::is_media_application] = app->is_media_application();
-  }
-
-  if (!app->IsRegistered()) {
+  } else {
     output[strings::greyOut] = app->is_greyed_out();
     const SmartObject* app_tts_name = app->tts_name();
-    DCHECK_OR_RETURN(app_tts_name, false);
     if (!app_tts_name->empty()) {
       SmartObject output_tts_name = SmartObject(SmartType_Array);
 
