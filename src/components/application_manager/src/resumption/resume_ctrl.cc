@@ -344,10 +344,14 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
 bool ResumeCtrl::StartResumptionOnlyHMILevel(ApplicationSharedPtr application) {
   //sync_primitives::AutoLock lock(resumtion_lock_);
   LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK_OR_RETURN(application, false);
-  LOG4CXX_DEBUG(logger_, " Resume app_id = " << application->app_id()
-                << " hmi_app_id = " << application->hmi_app_id()
-                << " policy_id = " << application->mobile_app_id());
+  if (!application) {
+    LOG4CXX_WARN(logger_, "Application does not exist.");
+    return false;
+  }
+  LOG4CXX_DEBUG(logger_, "HMI level resumption requested for application id "
+                << application->app_id()
+                << "with hmi_app_id " << application->hmi_app_id()
+                << ", policy_app_id " << application->policy_app_id());
   SetupDefaultHMILevel(application);
   smart_objects::SmartObject saved_app;
   bool result = resumption_storage_->GetSavedApplication(application->mobile_app_id(),
