@@ -152,7 +152,7 @@ class TcpConnectionTest {
   CANTCPConnection& conn_;
 };
 
-TEST(CanTcpConnectionTest, OpenClose) {
+TEST(CanTcpConnectionTest, DISABLED_OpenClose) {
   TCPServer server("127.0.0.1", 8092);
   server.Start();
   sleep(4);
