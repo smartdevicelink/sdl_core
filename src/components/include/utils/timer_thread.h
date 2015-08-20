@@ -34,7 +34,6 @@
 #define SRC_COMPONENTS_INCLUDE_UTILS_TIMER_THREAD_H_
 
 #include <time.h>
-#include <inttypes.h>
 #include <cstdint>
 #include <limits>
 #include <string>
