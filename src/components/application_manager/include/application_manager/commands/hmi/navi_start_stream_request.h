@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -42,27 +42,46 @@ namespace commands {
 /**
  * @brief NaviStartStreamRequest command class
  **/
-class NaviStartStreamRequest : public RequestToHMI {
- public:
-  /**
+class NaviStartStreamRequest : public RequestToHMI,
+                               public event_engine::EventObserver {
+  public:
+    /**
    * @brief NaviStartStreamRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit NaviStartStreamRequest(const MessageSharedPtr& message);
+    explicit NaviStartStreamRequest(const MessageSharedPtr& message);
 
-  /**
-   * @brief OnNaviStartStreamRequest class destructor
-   **/
-  virtual ~NaviStartStreamRequest();
+    /**
+     * @brief OnNaviStartStreamRequest class destructor
+     **/
+    virtual ~NaviStartStreamRequest();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(NaviStartStreamRequest);
+    /**
+     * @brief On event callback
+     **/
+    virtual void on_event(const event_engine::Event& event);
+
+    /**
+     * @brief onTimeOut from requrst Controller
+     */
+    virtual void onTimeOut();
+
+
+    /**
+   * @brief RetryStartSession resend HMI startSession request if needed.
+   * If limit expired, set video_stream_retry_number counter to 0
+   */
+    void RetryStartSession();
+
+  private:
+    uint32_t retry_number_;
+    DISALLOW_COPY_AND_ASSIGN(NaviStartStreamRequest);
 };
 
 }  // namespace commands

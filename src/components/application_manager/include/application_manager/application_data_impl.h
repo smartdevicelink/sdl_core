@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_DATA_IMPL_H_
 
 #include <string>
+#include "utils/lock.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/application.h"
 #include "interfaces/MOBILE_API.h"
@@ -49,14 +50,14 @@ class InitialApplicationDataImpl : public virtual Application {
 
     const smart_objects::SmartObject* app_types() const;
     const smart_objects::SmartObject* vr_synonyms() const;
-    const smart_objects::SmartObject* mobile_app_id() const;
+    virtual std::string mobile_app_id() const;
     const smart_objects::SmartObject* tts_name() const;
     const smart_objects::SmartObject* ngn_media_screen_name() const;
     const mobile_api::Language::eType& language() const;
     const mobile_api::Language::eType& ui_language() const;
     void set_app_types(const smart_objects::SmartObject& app_types);
     void set_vr_synonyms(const smart_objects::SmartObject& vr_synonyms);
-    void set_mobile_app_id(const smart_objects::SmartObject& mobile_app_id);
+    void set_mobile_app_id(const std::string& mobile_app_id);
     void set_tts_name(const smart_objects::SmartObject& tts_name);
     void set_ngn_media_screen_name(const smart_objects::SmartObject& ngn_name);
     void set_language(const mobile_api::Language::eType& language);
@@ -65,7 +66,7 @@ class InitialApplicationDataImpl : public virtual Application {
   protected:
     smart_objects::SmartObject* app_types_;
     smart_objects::SmartObject* vr_synonyms_;
-    smart_objects::SmartObject* mobile_app_id_;
+    std::string mobile_app_id_;
     smart_objects::SmartObject* tts_name_;
     smart_objects::SmartObject* ngn_media_screen_name_;
     mobile_api::Language::eType language_;
@@ -89,6 +90,7 @@ class DynamicApplicationDataImpl : public virtual Application {
     const smart_objects::SmartObject* menu_title() const;
     const smart_objects::SmartObject* menu_icon() const;
 
+    void load_global_properties(const smart_objects::SmartObject& properties_so);
     void set_help_prompt(const smart_objects::SmartObject& help_prompt);
     void set_timeout_prompt(const smart_objects::SmartObject& timeout_prompt);
     void set_vr_help_title(const smart_objects::SmartObject& vr_help_title);
@@ -163,50 +165,41 @@ class DynamicApplicationDataImpl : public virtual Application {
     /*
      * @brief Adds perform interaction choice set to the application
      *
+     * @param correlation_id Unique ID of the request that added this choice set
      * @param choice_set_id Unique ID used for this interaction choice set
      * @param choice_set SmartObject that represents choice set
      */
-    void AddPerformInteractionChoiceSet(
+    void AddPerformInteractionChoiceSet(uint32_t correlation_id,
       uint32_t choice_set_id, const smart_objects::SmartObject& choice_set);
 
     /*
      * @brief Deletes entirely perform interaction choice set map
+     * @param correlation_id Unique ID of the request that added this choice set
      *
      */
-    void DeletePerformInteractionChoiceSetMap();
+    void DeletePerformInteractionChoiceSet(uint32_t correlation_id);
 
     /*
      * @brief Retrieves entirely ChoiceSet - VR commands map
      *
      * @return ChoiceSet map that is currently in use
      */
-    inline const PerformChoiceSetMap& performinteraction_choice_set_map() const;
-
-    /*
-     * @brief Retrieves choice set that is currently in use by perform
-     * interaction
-     *
-     * @param choice_set_id Unique ID of the interaction choice set
-     *
-     * @return SmartObject that represents choice set
-     */
-    smart_objects::SmartObject* FindPerformInteractionChoiceSet(
-      uint32_t choice_set_id) const;
+    inline DataAccessor<PerformChoiceSetMap> performinteraction_choice_set_map() const;
 
     /*
      * @brief Retrieve application commands
      */
-    inline const CommandsMap& commands_map() const;
+    inline DataAccessor<CommandsMap> commands_map() const;
 
     /*
      * @brief Retrieve application sub menus
      */
-    inline const SubMenuMap& sub_menu_map() const;
+    inline DataAccessor<SubMenuMap> sub_menu_map() const;
 
     /*
      * @brief Retrieve application choice set map
      */
-    inline const ChoiceSetMap& choice_set_map() const;
+    inline DataAccessor<ChoiceSetMap> choice_set_map() const;
 
     /*
      * @brief Sets perform interaction state
@@ -222,21 +215,6 @@ class DynamicApplicationDataImpl : public virtual Application {
      */
     inline uint32_t is_perform_interaction_active() const;
 
-    /*
-     * @brief Sets the choice that was selected in
-     * response to PerformInteraction
-     *
-     * @param choice Choice that was selected
-     */
-    void set_perform_interaction_ui_corrid(uint32_t corr_id);
-
-    /*
-     * @brief Retrieve the choice that was selected in
-     * response to PerformInteraction
-     *
-     * @return Choice that was selected in response to PerformInteraction
-     */
-    inline uint32_t perform_interaction_ui_corrid() const;
     /*
      * @brief Sets the mode for perform interaction: UI/VR/BOTH
      *
@@ -265,7 +243,7 @@ class DynamicApplicationDataImpl : public virtual Application {
      */
     inline bool is_reset_global_properties_active() const;
 
-  protected:
+protected:
     smart_objects::SmartObject* help_prompt_;
     smart_objects::SmartObject* timeout_prompt_;
     smart_objects::SmartObject* vr_help_title_;
@@ -279,44 +257,49 @@ class DynamicApplicationDataImpl : public virtual Application {
 
 
     CommandsMap commands_;
+    mutable sync_primitives::Lock commands_lock_;
     SubMenuMap sub_menu_;
+    mutable sync_primitives::Lock sub_menu_lock_;
     ChoiceSetMap choice_set_map_;
+    mutable sync_primitives::Lock choice_set_map_lock_;
     PerformChoiceSetMap performinteraction_choice_set_map_;
+    mutable sync_primitives::Lock performinteraction_choice_set_lock_;
     uint32_t is_perform_interaction_active_;
-    uint32_t perform_interaction_ui_corrid_;
     bool is_reset_global_properties_active_;
     int32_t perform_interaction_mode_;
-  private:
+
+private:
+    void SetGlobalProperties(const smart_objects::SmartObject& param,
+                             void (DynamicApplicationData::*callback)(
+                               const NsSmartDeviceLink::NsSmartObjects::SmartObject&));
     DISALLOW_COPY_AND_ASSIGN(DynamicApplicationDataImpl);
 };
 
-const CommandsMap& DynamicApplicationDataImpl::commands_map() const {
-  return commands_;
+DataAccessor<CommandsMap> DynamicApplicationDataImpl::commands_map() const {
+  return DataAccessor<CommandsMap>(commands_, commands_lock_);
 }
 
-const SubMenuMap& DynamicApplicationDataImpl::sub_menu_map() const {
-  return sub_menu_;
+DataAccessor<SubMenuMap> DynamicApplicationDataImpl::sub_menu_map() const {
+  return DataAccessor<SubMenuMap>(sub_menu_, sub_menu_lock_);
 }
 
-const ChoiceSetMap& DynamicApplicationDataImpl::choice_set_map() const {
-  return choice_set_map_;
+DataAccessor<ChoiceSetMap> DynamicApplicationDataImpl::choice_set_map() const {
+  return DataAccessor<ChoiceSetMap>(choice_set_map_, choice_set_map_lock_);
+}
+
+DataAccessor<PerformChoiceSetMap>
+DynamicApplicationDataImpl::performinteraction_choice_set_map() const {
+  return DataAccessor<PerformChoiceSetMap>(
+           performinteraction_choice_set_map_,
+           performinteraction_choice_set_lock_);
 }
 
 uint32_t DynamicApplicationDataImpl::is_perform_interaction_active() const {
   return is_perform_interaction_active_;
 }
 
-uint32_t DynamicApplicationDataImpl::perform_interaction_ui_corrid() const {
-  return perform_interaction_ui_corrid_;
-}
-
 bool DynamicApplicationDataImpl::is_reset_global_properties_active() const {
   return is_reset_global_properties_active_;
-}
-
-const PerformChoiceSetMap&
-DynamicApplicationDataImpl::performinteraction_choice_set_map() const {
-  return performinteraction_choice_set_map_;
 }
 
 inline int32_t DynamicApplicationDataImpl::perform_interaction_mode() const {

@@ -138,7 +138,7 @@ TEST(json2_command, notification) {
 }
 
 TEST(json2_command, request_no_params) {
-  std::string incoming_string = "{\"id\":5005,\"jsonrpc\":\"2.0\",\"method\":\"BasicCommunication.GetAppList\"}";
+  std::string incoming_string = "{\"id\":5005,\"jsonrpc\":\"2.0\",\"method\":\"BasicCommunication.GeApplictionSet\"}";
 
   smart_objects::SmartObject incoming_message;
 

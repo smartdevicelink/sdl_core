@@ -58,23 +58,30 @@ SDL.InfoAppsView = Em.ContainerView
 
             this.listOfApplications.list.refresh();
 
-            var i, apps = SDL.SDLModel.registeredApps, appIndex;
+            var i, apps = SDL.SDLModel.updatedAppsList, btn, appIndex;
 
             for (i = 0; i < apps.length; i++) {
 
-                appIndex = SDL.SDLModel.registeredApps.indexOf(apps[i]);
+                btn = {
+                    action: 'onActivateSDLApp',
+                    target: 'SDL.SDLController',
+                    text: apps[i].appName + " - " + apps[i].deviceName,
+                    appName: apps[i].appName,
+                    appID: apps[i].appID,
+                    classNames: 'list-item button',
+                    disabled: apps[i].greyOut
+                };
 
-                this.get('listOfApplications.list.childViews')
-                    .pushObject(SDL.Button.create( {
-                        action: 'onActivateSDLApp',
-                        target: 'SDL.SDLController',
-                        text: apps[i].appName + " - " + apps[i].deviceName,
-                        appName: apps[i].appName,
-                        appID: apps[i].appID,
-                        classNames: 'list-item button',
-                        iconBinding: 'SDL.SDLModel.registeredApps.' + appIndex
-                            + '.appIcon'
-                    }));
+                if (SDL.SDLController.getApplicationModel(apps[i].appID)) {
+                    var index = SDL.SDLModel.registeredApps.indexOf(
+                        SDL.SDLController.getApplicationModel(apps[i].appID)
+                    );
+                    btn.iconBinding = 'SDL.SDLModel.registeredApps.' + index + '.appIcon';
+                } else {
+                    btn.icon = apps[i].icon ?  apps[i].icon : SDL.SDLModel.defaultListOfIcons.app;
+                }
+
+                this.get('listOfApplications.list.childViews').pushObject(SDL.Button.create(btn));
             }
 
         },

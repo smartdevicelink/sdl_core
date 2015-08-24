@@ -34,7 +34,6 @@
 
 import QtQuick 2.0
 import "Common.js" as Common
-
 Item {
     function isReady() {
         console.log("Message Received - {method: 'VR.IsReady'}")
@@ -43,7 +42,7 @@ Item {
         }
     }
 
-    function addCommand(cmdID, vrCommands, appID) {
+    function addCommand(cmdID, vrCommands, type, grammarID, appID) {
         var vrCommandsLog = "";
         if (vrCommands) {
             for (var i = 0; i < vrCommands.length; i++) {
@@ -53,14 +52,29 @@ Item {
         console.log("Message Received - {method: 'VR.AddCommand', params:{ " +
                     "vrCommands: [" + vrCommandsLog + "], " +
                     "cmdID: " + cmdID + ", " +
-                    "appID: " + appID +
+                    "appID: " + appID + ", " +
+                    "type: " + type + ", " +
+                    "grammarID: " + grammarID +
                     "}}")
         for (var i = 0; i < vrCommands.length; ++i) {
-            dataContainer.vrCommands.append({
+            if (type === Common.VRCommandType.Command) {
+                dataContainer.vrCommands.append({
                                                cmdID: cmdID,
                                                command: vrCommands[i],
                                                appID: appID === undefined ? 0 : appID,
+                                               type: type,
+                                               grammarID: grammarID,
                                            });
+            }
+            else {
+                dataContainer.choicesVrCommands.append({
+                                                   cmdID: cmdID,
+                                                   command: vrCommands[i],
+                                                   appID: appID === undefined ? 0 : appID,
+                                                   type: type,
+                                                   grammarID: grammarID,
+                                               });
+            }
         }
         console.log("exit")
     }
@@ -109,6 +123,48 @@ Item {
                     "appID: " + appID +
                     "}}")
         dataContainer.changeRegistrationTTSVR(language, appID);
+        console.debug("exit");
+    }
+    function ttsChunksToString(ttsChunks){
+        return ttsChunks.map(function(str) { return str.text }).join('\n')
+    }
+    function performInteraction(helpPrompt, initialPrompt, timeoutPrompt, timeout, grammarID) {
+        console.debug("enter");
+        var helpttsChunksLog = "",
+            initialttsChunkLog = "",
+            timeoutttsChunkLog = "",
+            grammarIDLog ="";
+
+        if (helpPrompt) {
+            for (var i = 0; i < helpPrompt.length; i++) {
+                helpttsChunksLog += "{type: " + helpPrompt[i].type + ", " +
+                        "text: '" + helpPrompt[i].text + "'}, ";
+            }
+        }
+        if (initialPrompt) {
+            for (var i = 0; i < initialPrompt.length; i++) {
+                initialttsChunkLog += "{type: " + initialPrompt[i].type + ", " +
+                        "text: '" + initialPrompt[i].text + "'}, ";
+            }
+        }
+        if (timeoutPrompt) {
+            for (var i = 0; i < timeoutPrompt.length; i++) {
+                timeoutttsChunkLog += "{type: " + timeoutPrompt[i].type + ", " +
+                        "text: '" + timeoutPrompt[i].text + "'}, ";
+            }
+        }
+        console.log("Message Received - {method: 'TTS.PerformInteraction', params:{ " +
+                    "helpPrompt: [" + helpttsChunksLog + "], " +
+                    "initialPrompt: [" + initialttsChunkLog + "], " +
+                    "timeoutPrompt: [" + timeoutttsChunkLog + "], " +
+                    "timeout: " + timeout +
+                    "}}")
+
+        ttsPopUp.performInteraction(ttsChunksToString(helpPrompt),
+                                    ttsChunksToString(initialPrompt),
+                                    ttsChunksToString(timeoutPrompt),
+                                    timeout)
+        interactionPopup.grammarID = grammarID
         console.debug("exit");
     }
 }

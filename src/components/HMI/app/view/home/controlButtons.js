@@ -52,7 +52,8 @@ SDL.ControlButtons = Em.ContainerView
             'appUILanguagesLabel',
             'appTTSVRLanguagesLabel',
             'appUILang',
-            'appTTSVRLang'
+            'appTTSVRLang',
+            'phoneCall'
         ],
 
         /**

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -45,29 +45,45 @@ UIGetCapabilitiesResponse::~UIGetCapabilitiesResponse() {
 }
 
 void UIGetCapabilitiesResponse::Run() {
-  LOG4CXX_INFO(logger_, "UIGetCapabilitiesResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   HMICapabilities& hmi_capabilities =
       ApplicationManagerImpl::instance()->hmi_capabilities();
 
-  hmi_capabilities.set_display_capabilities(
-      (*message_)[strings::msg_params][hmi_response::display_capabilities]);
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
 
-  hmi_capabilities.set_hmi_zone_capabilities(
-      (*message_)[strings::msg_params][hmi_response::hmi_zone_capabilities]);
+  if (msg_params.keyExists(hmi_response::display_capabilities)) {
+    hmi_capabilities.set_display_capabilities(
+        msg_params[hmi_response::display_capabilities]);
+  }
 
-  if ((*message_)[strings::msg_params].keyExists(
-                                      hmi_response::soft_button_capabilities)) {
+  if (msg_params.keyExists(hmi_response::hmi_zone_capabilities)) {
+    hmi_capabilities.set_hmi_zone_capabilities(
+        msg_params[hmi_response::hmi_zone_capabilities]);
+  }
+
+  if (msg_params.keyExists(hmi_response::soft_button_capabilities)) {
     hmi_capabilities.set_soft_button_capabilities(
-      (*message_)[strings::msg_params][hmi_response::soft_button_capabilities]);
+        msg_params[hmi_response::soft_button_capabilities]);
   }
 
-  if ((*message_)[strings::msg_params].keyExists(
-                                      strings::audio_pass_thru_capabilities)) {
-
+  if (msg_params.keyExists(strings::audio_pass_thru_capabilities)) {
     hmi_capabilities.set_audio_pass_thru_capabilities(
-      (*message_)[strings::msg_params][strings::audio_pass_thru_capabilities]);
+        msg_params[strings::audio_pass_thru_capabilities]);
   }
+
+  if (msg_params.keyExists(strings::hmi_capabilities)) {
+    if (msg_params[strings::hmi_capabilities].keyExists(strings::navigation)) {
+      hmi_capabilities.set_navigation_supported(
+          msg_params[strings::hmi_capabilities][strings::navigation].asBool());
+    }
+    if (msg_params[strings::hmi_capabilities].keyExists(strings::phone_call)) {
+      hmi_capabilities.set_phone_call_supported(
+          msg_params[strings::hmi_capabilities][strings::phone_call].asBool());
+    }
+  }
+
 }
 
 }  // namespace commands

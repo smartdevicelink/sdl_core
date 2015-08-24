@@ -80,12 +80,6 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    */
   virtual void on_event(const event_engine::Event& event);
 
-  /**
-   * @brief Timer callback function
-   *
-   */
-  void onTimer();
-
  private:
   /*
    * @brief Function is called by RequestController when request execution time
@@ -137,12 +131,6 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @param app_id Application ID
    */
   void SendUIShowVRHelpRequest(ApplicationSharedPtr const app);
-
-  /**
-   * @brief Creates and Sends Perform interaction to UI.
-   */
-  void CreateUIPerformInteraction(const smart_objects::SmartObject& msg_params,
-                                  application_manager::ApplicationSharedPtr const app);
 
   /*
    * @brief Checks if incoming choice set doesn't has similar menu names.
@@ -203,15 +191,13 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    */
   bool CheckChoiceIDFromResponse(ApplicationSharedPtr app, int32_t choice_id);
 
-  // members
-  timer::TimerThread<PerformInteractionRequest> timer_;
+  mobile_apis::InteractionMode::eType interaction_mode_;
+  bool                                ui_response_recived_;
+  bool                                vr_response_recived_;
+  bool                                app_pi_was_active_before_;
+  static uint32_t                     pi_requests_count_;
 
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
-  mobile_apis::Result::eType vr_perform_interaction_code_;
-  mobile_apis::InteractionMode::eType interaction_mode_;
-  bool ui_response_recived;
-  bool vr_response_recived;
-
 };
 
 }  // namespace commands

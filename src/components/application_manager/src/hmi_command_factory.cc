@@ -63,6 +63,8 @@
 #include "application_manager/commands/hmi/on_app_permission_changed_notification.h"
 #include "application_manager/commands/hmi/on_app_permission_consent_notification.h"
 #include "application_manager/commands/hmi/on_app_activated_notification.h"
+#include "application_manager/commands/hmi/on_audio_data_streaming_notification.h"
+#include "application_manager/commands/hmi/on_video_data_streaming_notification.h"
 #include "application_manager/commands/hmi/on_sdl_consent_needed_notification.h"
 #include "application_manager/commands/hmi/on_exit_all_applications_notification.h"
 #include "application_manager/commands/hmi/on_exit_application_notification.h"
@@ -70,6 +72,7 @@
 #include "application_manager/commands/hmi/on_resume_audio_source_notification.h"
 #include "application_manager/commands/hmi/on_ignition_cycle_over_notification.h"
 #include "application_manager/commands/hmi/on_system_info_changed_notification.h"
+#include "application_manager/commands/hmi/on_emergency_event_notification.h"
 #include "application_manager/commands/hmi/get_system_info_request.h"
 #include "application_manager/commands/hmi/get_system_info_response.h"
 #include "application_manager/commands/hmi/close_popup_request.h"
@@ -106,8 +109,8 @@
 #include "application_manager/commands/hmi/ui_set_global_properties_response.h"
 #include "application_manager/commands/hmi/ui_scrollable_message_request.h"
 #include "application_manager/commands/hmi/ui_scrollable_message_response.h"
-#include "application_manager/commands/hmi/ui_set_icon_request.h"
-#include "application_manager/commands/hmi/ui_set_icon_response.h"
+#include "application_manager/commands/hmi/ui_set_app_icon_request.h"
+#include "application_manager/commands/hmi/ui_set_app_icon_response.h"
 #include "application_manager/commands/hmi/ui_perform_audio_pass_thru_response.h"
 #include "application_manager/commands/hmi/ui_perform_audio_pass_thru_request.h"
 #include "application_manager/commands/hmi/ui_end_audio_pass_thru_response.h"
@@ -227,6 +230,7 @@
 #include "application_manager/commands/hmi/on_navi_tbt_client_state_notification.h"
 #include "application_manager/commands/hmi/on_button_event_notification.h"
 #include "application_manager/commands/hmi/on_button_press_notification.h"
+#include "application_manager/commands/hmi/on_button_subscription_notification.h"
 #include "application_manager/commands/hmi/on_vi_vehicle_data_notification.h"
 #include "application_manager/commands/hmi/on_ui_keyboard_input_notification.h"
 #include "application_manager/commands/hmi/on_ui_touch_event_notification.h"
@@ -260,13 +264,15 @@
 #include "application_manager/commands/hmi/navi_send_location_response.h"
 #include "application_manager/commands/hmi/on_tts_reset_timeout_notification.h"
 #include "application_manager/commands/hmi/on_phone_call_notification.h"
+#include "application_manager/commands/hmi/dial_number_request.h"
+#include "application_manager/commands/hmi/dial_number_response.h"
 
 namespace application_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 CommandSharedPtr HMICommandFactory::CreateCommand(
-    const MessageSharedPtr& message) {
+    const commands::MessageSharedPtr& message) {
   const int function_id = (*message)[strings::params][strings::function_id]
       .asInt();
   LOG4CXX_INFO(logger_,
@@ -455,9 +461,9 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::UI_SetAppIcon: {
       if (is_response) {
-        command.reset(new commands::UISetIconResponse(message));
+        command.reset(new commands::UISetAppIconResponse(message));
       } else {
-        command.reset(new commands::UISetIconRequest(message));
+        command.reset(new commands::UISetAppIconRequest(message));
       }
       break;
     }
@@ -1085,6 +1091,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       command.reset(new commands::OnSystemInfoChangedNotification(message));
       break;
     }
+    case hmi_apis::FunctionID::BasicCommunication_OnEmergencyEvent: {
+      command.reset(new commands::OnEmergencyEventNotification(message));
+      break;
+    }
     case hmi_apis::FunctionID::BasicCommunication_PlayTone: {
       command.reset(new commands::OnPlayToneNotification(message));
       break;
@@ -1168,6 +1178,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::Buttons_OnButtonPress: {
       command.reset(new commands::hmi::OnButtonPressNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::Buttons_OnButtonSubscription: {
+      command.reset(new commands::hmi::OnButtonSubscriptionNotification(message));
       break;
     }
 #ifdef HMI_DBUS_API
@@ -1952,6 +1966,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+    case hmi_apis::FunctionID::Navigation_OnAudioDataStreaming: {
+      command.reset(new commands::OnAudioDataStreamingNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::Navigation_OnVideoDataStreaming: {
+      command.reset(new commands::OnVideoDataStreamingNotification(message));
+      break;
+    }
     case hmi_apis::FunctionID::VR_PerformInteraction: {
       if (is_response) {
         command.reset(new commands::VRPerformInteractionResponse(message));
@@ -2039,6 +2061,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     case hmi_apis::FunctionID::BasicCommunication_OnPhoneCall: {
       command.reset(new commands::hmi::OnPhoneCallNotification(message));
       break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_DialNumber: {
+      if (is_response) {
+        command.reset(new commands::DialNumberResponse(message));
+      } else {
+        command.reset(new commands::DialNumberRequest(message));
+      }
+	  break;
     }
   }
 

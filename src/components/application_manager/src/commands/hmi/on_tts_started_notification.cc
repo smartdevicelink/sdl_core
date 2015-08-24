@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -46,9 +46,10 @@ OnTTSStartedNotification::~OnTTSStartedNotification() {
 }
 
 void OnTTSStartedNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnTTSStartedNotification::Run");
-
-  ApplicationManagerImpl::instance()->Mute(kTTSSessionChanging);
+  LOG4CXX_AUTO_TRACE(logger_);
+  event_engine::Event event(hmi_apis::FunctionID::TTS_Started);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands

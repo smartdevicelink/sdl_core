@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -46,10 +46,11 @@ OnVRStartedNotification::~OnVRStartedNotification() {
 }
 
 void OnVRStartedNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnVRStartedNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl::instance()->set_vr_session_started(true);
-  ApplicationManagerImpl::instance()->Mute(kVRSessionChanging);
+  event_engine::Event event(hmi_apis::FunctionID::VR_Started);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands

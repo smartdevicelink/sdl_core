@@ -1,4 +1,4 @@
-/**
+/*
  * \file masked_container.h
  * \brief MaskedContainer class header file.
  * Copyright (c) 2013, Ford Motor Company

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -45,7 +45,7 @@ UIPerformAudioPassThruRequest::~UIPerformAudioPassThruRequest() {
 }
 
 void UIPerformAudioPassThruRequest::Run() {
-  LOG4CXX_INFO(logger_, "UIPerformAudioPassThruRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   SendRequest();
 }

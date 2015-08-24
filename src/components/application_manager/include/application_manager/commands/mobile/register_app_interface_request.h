@@ -72,14 +72,6 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
    * @brief Execute command
    **/
   virtual void Run();
-  // virtual void cleanUp() = 0;
-
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
-  virtual void on_event(const event_engine::Event& event);
 
   /**
    * @brief Sends RegisterAppInterface response to mobile
@@ -87,8 +79,7 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
    *@param application_impl application
    *
    **/
-  void SendRegisterAppInterfaceResponseToMobile(
-      mobile_apis::Result::eType result = mobile_apis::Result::SUCCESS);
+  void SendRegisterAppInterfaceResponseToMobile();
 
  private:
   /*
@@ -97,23 +88,6 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
    * return TRUE if ID is known already, otherwise - FALSE
    */
   bool IsApplicationWithSameAppIdRegistered();
-
-  /*
-   * @brief Check for some request param. names restrictions, e.g. for
-   * newline characters
-   *
-   * return SUCCESS if param name pass the check, otherwise - error code
-   * will be returned
-   */
-  mobile_apis::Result::eType CheckRestrictions() const;
-
-  /*
-   * @brief Removes hidden symbols and spaces
-   *
-   * return cleared copy of param name
-   */
-  std::string ClearParamName(std::string param_name) const;
-
 
   /*
    * @brief Check new application parameters (name, tts, vr) for
@@ -162,7 +136,26 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
    */
   bool IsWhiteSpaceExist();
 
+  /**
+   * @brief Checks vehicle type params (model, year etc.) and in case of absense
+   * replaces with policy table backup values
+   * @param vehicle_type VehicleType struct
+   * @param param Vehicle param
+   * @param backup_value Backup value
+   */
+  void CheckResponseVehicleTypeParam(smart_objects::SmartObject& vehicle_type,
+                                     const std::string& param,
+                                     const std::string& backup_value);
+  /**
+   * @brief Sends ButtonSubscription notification at start up
+   * to notify HMI that app subscribed on the custom button by default.
+   */
+  void SendSubscribeCustomButtonNotification();
+
+private:
   std::string response_info_;
+  mobile_apis::Result::eType result_checking_app_hmi_type_;
+
 
   DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);
 };

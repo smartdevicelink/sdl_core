@@ -1,4 +1,4 @@
-/**
+/*
  * \file masked_container.cpp
  * \brief MaskedContainer class source file.
  * Copyright (c) 2013, Ford Motor Company

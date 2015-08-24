@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -42,7 +42,8 @@ namespace commands {
 /**
  * @brief AudioStartStreamRequest command class
  **/
-class AudioStartStreamRequest : public RequestToHMI {
+class AudioStartStreamRequest : public RequestToHMI,
+                                public event_engine::EventObserver {
  public:
   /**
    * @brief AudioStartStreamRequest class constructor
@@ -56,12 +57,30 @@ class AudioStartStreamRequest : public RequestToHMI {
    **/
   virtual ~AudioStartStreamRequest();
 
+    /**
+   * @brief onTimeOut from requrst Controller
+   */
+  virtual void onTimeOut();
+
+
   /**
    * @brief Execute command
    **/
   virtual void Run();
 
- private:
+  /**
+   * @brief On event callback
+   **/
+  virtual void on_event(const event_engine::Event& event);
+
+    /**
+   * @brief RetryStartSession resend HMI startSession request if needed.
+   * If limit expired, set audio_stream_retry_number counter to 0
+   */
+  void RetryStartSession();
+
+  private:
+  uint32_t retry_number_;
   DISALLOW_COPY_AND_ASSIGN(AudioStartStreamRequest);
 };
 

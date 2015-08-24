@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -30,8 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/navi_start_stream_response.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
 
 namespace application_manager {
 
@@ -45,27 +43,11 @@ NaviStartStreamResponse::~NaviStartStreamResponse() {
 }
 
 void NaviStartStreamResponse::Run() {
-  LOG4CXX_INFO(logger_, "NaviStartStreamResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->active_application();
-
-  if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "NaviStartStreamResponse no active app!");
-    return;
-  }
-
-  const hmi_apis::Common_Result::eType code =
-      static_cast<hmi_apis::Common_Result::eType>(
-          (*message_)[strings::params][hmi_response::code].asInt());
-
-  if (hmi_apis::Common_Result::SUCCESS == code) {
-    LOG4CXX_INFO(logger_, "NaviStartStreamResponse SUCCESS");
-    app->set_hmi_supports_navi_video_streaming(true);
-  } else {
-    LOG4CXX_INFO(logger_, "NaviStartStreamResponse NOT SUCCESS");
-    app->set_hmi_supports_navi_video_streaming(false);
-  }
+  event_engine::Event event(hmi_apis::FunctionID::Navigation_StartStream);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands

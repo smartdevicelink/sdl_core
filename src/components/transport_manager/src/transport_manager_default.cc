@@ -43,7 +43,6 @@
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #endif
 
-// CUSTOMER_PASA
 
 #if defined(USB_SUPPORT)
 #include "transport_manager/usb/usb_aoa_adapter.h"
@@ -72,6 +71,8 @@ int TransportManagerDefault::Init() {
 #endif  // TIME_TESTER
   AddTransportAdapter(ta);
 #endif
+
+
   uint16_t port = profile::Profile::instance()->transport_manager_tcp_adapter_port();
   ta = new transport_adapter::TcpTransportAdapter(port);
 #ifdef TIME_TESTER
@@ -81,7 +82,6 @@ int TransportManagerDefault::Init() {
 #endif  // TIME_TESTER
   AddTransportAdapter(ta);
 
-// CUSTOMER_PASA
 
 #if defined(USB_SUPPORT)
   ta = new transport_adapter::UsbAoaAdapter();

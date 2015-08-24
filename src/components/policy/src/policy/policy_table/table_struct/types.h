@@ -54,20 +54,71 @@ typedef Map< Rpcs, 1, 255 > FunctionalGroupings;
 
 typedef Map< DeviceParams, 0, 255 > DeviceData;
 
-struct ApplicationParams : CompositeType {
+typedef Array< Enum<RequestType>, 0, 255 > RequestTypes;
+
+struct PolicyBase : CompositeType {
   public:
     Strings groups;
+    Optional< Strings > preconsented_groups;
+    Enum<Priority> priority;
+    Enum<HmiLevel> default_hmi;
+    Boolean keep_context;
+    Boolean steal_focus;
+  public:
+    PolicyBase();
+    PolicyBase(const Strings& groups, Priority priority, HmiLevel default_hmi, bool keep_context, bool steal_focus);
+    virtual ~PolicyBase();
+    explicit PolicyBase(const Json::Value* value__);
+    Json::Value ToJsonValue() const;
+    bool is_valid() const;
+    bool is_initialized() const;
+    bool struct_empty() const;
+    void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
+  private:
+    bool Validate() const;
+};
+
+struct DevicePolicy : PolicyBase {
+  public:
+    DevicePolicy();
+    DevicePolicy(const Strings& groups, Priority priority, HmiLevel default_hmi, bool keep_context, bool steal_focus);
+    ~DevicePolicy();
+    explicit DevicePolicy(const Json::Value* value__);
+};
+
+struct ApplicationParams : PolicyBase {
+  public:
     Optional< Strings > nicknames;
     Optional< AppHMITypes > AppHMIType;
-    Enum<Priority> priority;
-    Optional< Integer<uint16_t, 1, 65225> > memory_kb;
-    Optional< Integer<uint16_t, 1, 65225> > heart_beat_timeout_ms;
+    Optional< RequestTypes > RequestType;
+    Optional< Integer<uint16_t, 0, 65225> > memory_kb;
+    Optional< Integer<uint16_t, 0, 65225> > heart_beat_timeout_ms;
     Optional< String<0, 255> > certificate;
   public:
     ApplicationParams();
-    explicit ApplicationParams(const Strings& groups);
+    ApplicationParams(const Strings& groups, Priority priority, HmiLevel default_hmi, bool keep_context, bool steal_focus);
     ~ApplicationParams();
     explicit ApplicationParams(const Json::Value* value__);
+    Json::Value ToJsonValue() const;
+    bool is_valid() const;
+    bool is_initialized() const;
+    bool struct_empty() const;
+    void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
+  private:
+    bool Validate() const;
+};
+
+struct ApplicationPoliciesSection : CompositeType {
+  public:
+    mutable ApplicationPolicies apps;
+    DevicePolicy device;
+  public:
+    ApplicationPoliciesSection();
+    ApplicationPoliciesSection(const ApplicationPolicies& apps, const DevicePolicy& device);
+    ~ApplicationPoliciesSection();
+    explicit ApplicationPoliciesSection(const Json::Value* value__);
     Json::Value ToJsonValue() const;
     bool is_valid() const;
     bool is_initialized() const;
@@ -130,6 +181,7 @@ struct ModuleConfig : CompositeType {
     Optional< String<1, 100> > vehicle_make;
     Optional< String<1, 100> > vehicle_model;
     Optional< String<4, 4> > vehicle_year;
+    Optional< String<0, 65535> > certificate;
   public:
     ModuleConfig();
     ModuleConfig(uint8_t exchange_after_x_ignition_cycles, int64_t exchange_after_x_kilometers, uint8_t exchange_after_x_days, uint16_t timeout_after_x_seconds, const SecondsBetweenRetries& seconds_between_retries, const ServiceEndpoints& endpoints, const NumberOfNotificationsPerMinute& notifications_per_minute_by_priority);
@@ -267,7 +319,7 @@ struct DeviceParams : CompositeType {
 
 struct PolicyTable : CompositeType {
   public:
-    ApplicationPolicies app_policies;
+    ApplicationPoliciesSection app_policies_section;
     FunctionalGroupings functional_groupings;
     Optional < ConsumerFriendlyMessages > consumer_friendly_messages;
     ModuleConfig module_config;
@@ -276,7 +328,10 @@ struct PolicyTable : CompositeType {
     Optional< DeviceData > device_data;
   public:
     PolicyTable();
-    PolicyTable(const ApplicationPolicies& app_policies, const FunctionalGroupings& functional_groupings, const ConsumerFriendlyMessages& consumer_friendly_messages, const ModuleConfig& module_config);
+    PolicyTable(const ApplicationPoliciesSection& app_policies_section,
+                const FunctionalGroupings& functional_groupings,
+                const ConsumerFriendlyMessages& consumer_friendly_messages,
+                const ModuleConfig& module_config);
     ~PolicyTable();
     explicit PolicyTable(const Json::Value* value__);
     Json::Value ToJsonValue() const;

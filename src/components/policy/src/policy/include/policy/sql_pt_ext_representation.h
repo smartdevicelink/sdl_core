@@ -121,7 +121,7 @@ class SQLPTExtRepresentation : public SQLPTRepresentation,
     bool SetPredataPolicy(const std::string& app_id);
     bool SetIsPredata(const std::string& app_id, bool is_pre_data);
     bool IsPredataPolicy(const std::string& app_id) const;
-    bool SetUnpairedDevice(const std::string& device_id) const;
+    bool SetUnpairedDevice(const std::string& device_id, bool unpaired) const;
     bool UnpairedDevicesList(DeviceIds* device_ids) const;
     bool RemoveAppConsentForGroup(
         const std::string& policy_app_id,
@@ -139,15 +139,17 @@ class SQLPTExtRepresentation : public SQLPTRepresentation,
     void GatherDeviceData(policy_table::DeviceData* data) const;
     void GatherConsentGroup(const std::string& device_id,
                             policy_table::UserConsentRecords* records) const;
-    bool GatherApplicationPolicies(policy_table::ApplicationPolicies* apps) const;
+    bool GatherApplicationPoliciesSection(
+        policy_table::ApplicationPoliciesSection* policies) const;
     bool SaveDeviceData(const policy_table::DeviceData& devices);
     bool GatherConsumerFriendlyMessages(
         policy_table::ConsumerFriendlyMessages* messages) const;
     bool SaveConsentGroup(const std::string& device_id,
                           const policy_table::UserConsentRecords& records);
-    bool SaveApplicationPolicies(const policy_table::ApplicationPolicies& apps);
+    bool SaveApplicationPoliciesSection(const policy_table::ApplicationPoliciesSection& policies);
     bool SaveSpecificAppPolicy(
         const policy_table::ApplicationPolicies::value_type& app);
+    bool SaveDevicePolicy(const policy_table::DevicePolicy& device);
     bool SavePreconsentedGroup(const std::string& app_id,
                                const policy_table::Strings& groups);
     bool SaveMessageString(const std::string& type, const std::string& lang,
@@ -155,6 +157,12 @@ class SQLPTExtRepresentation : public SQLPTRepresentation,
 
     virtual bool SaveUsageAndErrorCounts(
         const policy_table::UsageAndErrorCounts& counts);
+
+    virtual bool SaveModuleMeta(const policy_table::ModuleMeta& meta);
+
+    bool SaveAppCounters(const policy_table::AppLevels& app_levels);
+
+    bool SaveGlobalCounters(const policy_table::UsageAndErrorCounts& counts);
 
     bool IsExistAppLevel(const std::string& app_id) const;
 

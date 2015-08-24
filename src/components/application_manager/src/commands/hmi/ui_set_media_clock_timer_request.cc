@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -45,7 +45,7 @@ UISetMediaClockTimerRequest::~UISetMediaClockTimerRequest() {
 }
 
 void UISetMediaClockTimerRequest::Run() {
-  LOG4CXX_INFO(logger_, "UISetMediaClockTimerRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   SendRequest();
 }

@@ -49,9 +49,9 @@ SetDisplayLayoutRequest::~SetDisplayLayoutRequest() {
 }
 
 void SetDisplayLayoutRequest::Run() {
-  LOG4CXX_INFO(logger_, "SetDisplayLayoutRequest::Run");
-  ApplicationConstSharedPtr app = ApplicationManagerImpl::instance()
-  ->application(connection_key());
+  LOG4CXX_AUTO_TRACE(logger_);
+  ApplicationConstSharedPtr app =
+      ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -66,7 +66,7 @@ void SetDisplayLayoutRequest::Run() {
 }
 
 void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "SetDisplayLayoutRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
@@ -77,38 +77,22 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
             static_cast<mobile_apis::Result::eType>(
                 message[strings::params][hmi_response::code].asInt());
       bool response_success = mobile_apis::Result::SUCCESS == result_code;
+
+      smart_objects::SmartObject msg_params = message[strings::msg_params];
+
       if (response_success) {
         HMICapabilities& hmi_capabilities =
             ApplicationManagerImpl::instance()->hmi_capabilities();
-        if (message[strings::msg_params].keyExists(hmi_response::display_capabilities)) {
-          hmi_capabilities.set_display_capabilities(
-                message[strings::msg_params][hmi_response::display_capabilities]);
-        }
 
-        if (message[strings::msg_params].keyExists(
-                                            hmi_response::soft_button_capabilities)) {
-          if (message[strings::msg_params][hmi_response::soft_button_capabilities].getType() ==
-              smart_objects::SmartType_Array) {
-            hmi_capabilities.set_soft_button_capabilities(
-              message[strings::msg_params][hmi_response::soft_button_capabilities][0]);
-          } else {
-            hmi_capabilities.set_soft_button_capabilities(
-              message[strings::msg_params][hmi_response::soft_button_capabilities]);
+        // in case templates_available is empty copy from hmi capabilities
+        if (msg_params.keyExists(hmi_response::display_capabilities)) {
+          if (0 == msg_params[hmi_response::display_capabilities][hmi_response::templates_available].length()) {
+            msg_params[hmi_response::display_capabilities][hmi_response::templates_available] =
+                hmi_capabilities.display_capabilities()->getElement(hmi_response::templates_available);
           }
         }
-
-        if (message[strings::msg_params].keyExists(hmi_response::button_capabilities)) {
-          hmi_capabilities.set_button_capabilities(
-              message[strings::msg_params][hmi_response::button_capabilities]);
-        }
-
-        if (message[strings::msg_params].keyExists(hmi_response::preset_bank_capabilities)) {
-          hmi_capabilities.set_preset_bank_capabilities(
-              message[strings::msg_params][hmi_response::preset_bank_capabilities]);
-        }
-
       }
-      SendResponse(response_success, result_code, NULL, &(message[strings::msg_params]));
+      SendResponse(response_success, result_code, NULL, &msg_params);
       break;
     }
     default: {

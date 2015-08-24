@@ -36,6 +36,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 
@@ -55,7 +56,7 @@ PerformAudioPassThruRequest::~PerformAudioPassThruRequest() {
 }
 
 void PerformAudioPassThruRequest::onTimeOut() {
-  LOG4CXX_INFO(logger_, "PerformAudioPassThruRequest::onTimeOut");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   if (ApplicationManagerImpl::instance()->end_audio_pass_thru()) {
     ApplicationManagerImpl::instance()->StopAudioPassThru(connection_key());
@@ -73,7 +74,7 @@ bool PerformAudioPassThruRequest::Init() {
 }
 
 void PerformAudioPassThruRequest::Run() {
-  LOG4CXX_INFO(logger_, "PerformAudioPassThruRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(connection_key());
@@ -92,7 +93,8 @@ void PerformAudioPassThruRequest::Run() {
 
   if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_,
-                  "Incoming perform audio pass thru has contains \\t\\n \\\\t \\\\n"
+                  "Incoming perform audio pass thru has contains "
+                  "\\t\\n \\\\t \\\\n"
                   " text contains only whitespace in initialPrompt");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
@@ -111,7 +113,9 @@ void PerformAudioPassThruRequest::Run() {
 }
 
 void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "PerformAudioPassThruRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
+
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -135,11 +139,21 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
       FinishTTSSpeak();
 
       std::string return_info;
-      bool result = mobile_apis::Result::SUCCESS == mobile_code ||
-                          mobile_apis::Result::RETRY == mobile_code;
+      const bool result =
+          Compare<mobile_api::Result::eType, EQ, ONE>(
+            mobile_code,
+            mobile_apis::Result::SUCCESS,
+            mobile_apis::Result::RETRY,
+            mobile_apis::Result::WARNINGS);
 
-      if ((mobile_apis::Result::SUCCESS == mobile_code) &&
-          (mobile_apis::Result::UNSUPPORTED_RESOURCE == result_tts_speak_)) {
+      const bool is_result_ok =
+          Compare<mobile_api::Result::eType, EQ, ONE>(
+            mobile_code,
+            mobile_apis::Result::SUCCESS,
+            mobile_apis::Result::WARNINGS);
+
+      if (is_result_ok &&
+          mobile_apis::Result::UNSUPPORTED_RESOURCE == result_tts_speak_) {
         mobile_code = mobile_apis::Result::WARNINGS;
         return_info = "Unsupported phoneme type sent in a prompt";
       }
@@ -150,15 +164,20 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::TTS_Speak: {
       LOG4CXX_INFO(logger_, "Received TTS_Speak event");
-      result_tts_speak_ = GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
+      result_tts_speak_ = GetMobileResultCode(
+            static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asUInt()));
       is_active_tts_speak_ = false;
-      SendRecordStartNotification();
-      StartMicrophoneRecording();
-      ApplicationManagerImpl::instance()->
-          updateRequestTimeout(connection_key(),
-                               correlation_id(),
-                               default_timeout());
+      if (mobile_apis::Result::SUCCESS == result_tts_speak_) {
+        SendRecordStartNotification();
+        StartMicrophoneRecording();
+
+        // update request timeout to get time for perform audio recording
+        ApplicationManagerImpl::instance()->
+            updateRequestTimeout(connection_key(),
+                                 correlation_id(),
+                                 default_timeout());
+      }
       break;
     }
     case hmi_apis::FunctionID::TTS_OnResetTimeout: {
@@ -176,9 +195,12 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
 }
 
 void PerformAudioPassThruRequest::SendSpeakRequest() {
-  // crate HMI TTS speak request
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  using namespace hmi_apis;
+  using namespace smart_objects;
+
+  SmartObject msg_params = smart_objects::SmartObject(SmartType_Map);
 
   if ((*message_)[str::msg_params].keyExists(str::initial_prompt) &&
       (0 < (*message_)[str::msg_params][str::initial_prompt].length())) {
@@ -192,18 +214,20 @@ void PerformAudioPassThruRequest::SendSpeakRequest() {
     }
     // app_id
     msg_params[strings::app_id] = connection_key();
+    msg_params[hmi_request::speak_type] = Common_MethodName::AUDIO_PASS_THRU;
     is_active_tts_speak_ = true;
-    SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
+    SendHMIRequest(FunctionID::TTS_Speak, &msg_params, true);
   }
 }
 
 void PerformAudioPassThruRequest::SendPerformAudioPassThruRequest() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
 
   msg_params[str::app_id] = connection_key();
 
-  // duration
   msg_params[hmi_request::max_duration] =
       (*message_)[str::msg_params][str::max_duration];
 
@@ -241,6 +265,8 @@ void PerformAudioPassThruRequest::SendPerformAudioPassThruRequest() {
 }
 
 void PerformAudioPassThruRequest::SendRecordStartNotification() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
   msg_params[strings::app_id] = connection_key();
@@ -249,6 +275,8 @@ void PerformAudioPassThruRequest::SendRecordStartNotification() {
 }
 
 void PerformAudioPassThruRequest::StartMicrophoneRecording() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
   ApplicationManagerImpl::instance()->begin_audio_pass_thru();
 
   ApplicationManagerImpl::instance()->StartAudioPassThruThread(
@@ -260,7 +288,7 @@ void PerformAudioPassThruRequest::StartMicrophoneRecording() {
 }
 
 bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
-  LOG4CXX_INFO(logger_, "PerformAudioPassThruRequest::IsWhiteSpaceExist");
+  LOG4CXX_AUTO_TRACE(logger_);
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::initial_prompt)) {
@@ -306,10 +334,13 @@ bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
 }
 
 void PerformAudioPassThruRequest::FinishTTSSpeak(){
-  if (is_active_tts_speak_) {
-    is_active_tts_speak_ = false;
-    SendHMIRequest(hmi_apis::FunctionID::TTS_StopSpeaking, NULL);
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!is_active_tts_speak_) {
+    LOG4CXX_DEBUG(logger_, "TTS Speak is inactive.");
+    return;
   }
+  is_active_tts_speak_ = false;
+  SendHMIRequest(hmi_apis::FunctionID::TTS_StopSpeaking, NULL);
 }
 
 }  // namespace commands

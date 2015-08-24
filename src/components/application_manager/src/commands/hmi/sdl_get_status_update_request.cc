@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -45,7 +45,7 @@ SDLGetStatusUpdateRequest::~SDLGetStatusUpdateRequest() {
 }
 
 void SDLGetStatusUpdateRequest::Run() {
-  LOG4CXX_INFO(logger_, "SDLGetStatusUpdateRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   policy::PolicyHandler::instance()->OnGetStatusUpdate(
         (*message_)[strings::params][strings::correlation_id].asUInt());
 }

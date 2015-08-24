@@ -45,7 +45,7 @@ OnAudioPassThruNotification::~OnAudioPassThruNotification() {
 }
 
 void OnAudioPassThruNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnAudioPassThruNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   SendNotification();
 }

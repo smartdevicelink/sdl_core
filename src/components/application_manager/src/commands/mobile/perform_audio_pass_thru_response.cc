@@ -48,7 +48,7 @@ PerformAudioPassThruResponse::~PerformAudioPassThruResponse() {
 }
 
 void PerformAudioPassThruResponse::Run() {
-  LOG4CXX_INFO(logger_, "PerformAudioPassThruResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
