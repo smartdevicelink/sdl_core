@@ -49,34 +49,6 @@
 namespace application_manager {
 namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
-std::map<std::string, hmi_apis::Common_Language::eType> languages_enum_values =
-{
-    {"EN_US", hmi_apis::Common_Language::EN_US},
-    {"ES_MX", hmi_apis::Common_Language::ES_MX},
-    {"FR_CA", hmi_apis::Common_Language::FR_CA},
-    {"DE_DE", hmi_apis::Common_Language::DE_DE},
-    {"ES_ES", hmi_apis::Common_Language::ES_ES},
-    {"EN_GB", hmi_apis::Common_Language::EN_GB},
-    {"RU_RU", hmi_apis::Common_Language::RU_RU},
-    {"TR_TR", hmi_apis::Common_Language::TR_TR},
-    {"PL_PL", hmi_apis::Common_Language::PL_PL},
-    {"FR_FR", hmi_apis::Common_Language::FR_FR},
-    {"IT_IT", hmi_apis::Common_Language::IT_IT},
-    {"SV_SE", hmi_apis::Common_Language::SV_SE},
-    {"PT_PT", hmi_apis::Common_Language::PT_PT},
-    {"NL_NL", hmi_apis::Common_Language::NL_NL},
-    {"EN_AU", hmi_apis::Common_Language::EN_AU},
-    {"ZH_CN", hmi_apis::Common_Language::ZH_CN},
-    {"ZH_TW", hmi_apis::Common_Language::ZH_TW},
-    {"JA_JP", hmi_apis::Common_Language::JA_JP},
-    {"AR_SA", hmi_apis::Common_Language::AR_SA},
-    {"KO_KR", hmi_apis::Common_Language::KO_KR},
-    {"PT_BR", hmi_apis::Common_Language::PT_BR},
-    {"CS_CZ", hmi_apis::Common_Language::CS_CZ},
-    {"DA_DK", hmi_apis::Common_Language::DA_DK},
-    {"NO_NO", hmi_apis::Common_Language::NO_NO}
-};
-
 CREATE_LOGGERPTR_GLOBAL(logger_, "HMICapabilities")
 
 std::map<std::string, hmi_apis::Common_VrCapabilities::eType> vr_enum_capabilities =
@@ -594,12 +566,8 @@ bool HMICapabilities::load_capabilities_from_file() {
       Json::Value ui = root_json.get("UI", Json::Value::null);
 
       if (check_existing_json_member(ui, "language")) {
-        std::string lang = ui.get("language", "EN_US").asString();
-        std::map<std::string, hmi_apis::Common_Language::eType>::const_iterator
-          it = languages_enum_values.find(lang);
-        if (it != languages_enum_values.end()) {
-          set_active_ui_language(it->second);
-        }
+        const std::string lang = ui.get("language", "EN_US").asString();
+        set_active_ui_language(MessageHelper::CommonLanguageFromString(lang));
       }
 
       if (check_existing_json_member(ui, "languages")) {
@@ -779,8 +747,8 @@ bool HMICapabilities::load_capabilities_from_file() {
     if (check_existing_json_member(root_json, "VR")) {
       Json::Value vr = root_json.get("VR", "");
       if (check_existing_json_member(vr, "language")) {
-        set_active_vr_language(
-            languages_enum_values.find(vr.get("language", "").asString())->second);
+        const std::string lang = vr.get("language", "").asString();
+        set_active_vr_language(MessageHelper::CommonLanguageFromString(lang));
       }
 
       if (check_existing_json_member(vr, "languages")) {
@@ -808,8 +776,8 @@ bool HMICapabilities::load_capabilities_from_file() {
       Json::Value tts = root_json.get("TTS", "");
 
       if (check_existing_json_member(tts, "language")) {
-        set_active_tts_language(
-            languages_enum_values.find(tts.get("language", "").asString())->second);
+        const std::string lang = tts.get("language", "").asString();
+        set_active_tts_language(MessageHelper::CommonLanguageFromString(lang));
       }
 
       if (check_existing_json_member(tts, "languages")) {
@@ -881,11 +849,8 @@ bool HMICapabilities::check_existing_json_member(
 void HMICapabilities::convert_json_languages_to_obj(Json::Value& json_languages,
                                      smart_objects::SmartObject& languages) {
   for (uint32_t i = 0, j = 0; i < json_languages.size(); ++i) {
-    std::map<std::string, hmi_apis::Common_Language::eType>::const_iterator it =
-        languages_enum_values.find(json_languages[i].asString());
-    if (languages_enum_values.end() != it) {
-      languages[j++] =  it->second;
-    }
+    languages[j++] =  MessageHelper::CommonLanguageFromString(
+                        json_languages[i].asString());
   }
 }
 
