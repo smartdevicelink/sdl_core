@@ -331,17 +331,19 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
     return;
   }
 
-  const bool is_tts_success_unsupported =
+  const bool is_tts_succeeded =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
         tts_result_,
         hmi_apis::Common_Result::SUCCESS,
-        hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
+        hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
+        hmi_apis::Common_Result::WARNINGS);
 
-  const bool is_ui_success_unsupported =
+  const bool is_ui_succeeded =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
         ui_result_,
         hmi_apis::Common_Result::SUCCESS,
-        hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
+        hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
+        hmi_apis::Common_Result::WARNINGS);
 
   const bool is_ui_invalid_unsupported =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
@@ -350,12 +352,10 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
         hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
 
   bool result =
-      (is_tts_success_unsupported &&
-       hmi_apis::Common_Result::SUCCESS == ui_result_) ||
-      (is_ui_success_unsupported &&
+      (is_tts_succeeded && is_ui_succeeded) ||
+      (is_ui_succeeded &&
        hmi_apis::Common_Result::INVALID_ENUM == tts_result_) ||
-      (is_ui_invalid_unsupported &&
-       hmi_apis::Common_Result::SUCCESS == tts_result_);
+      (is_ui_invalid_unsupported && is_tts_succeeded);
 
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
   const char* return_info = NULL;
