@@ -65,6 +65,17 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "CacheManager")
   }\
 }
 
+struct LanguageFinder {
+  LanguageFinder(const std::string& language):
+    language_(language) {
+  }
+  bool operator()(const policy_table::Languages::value_type& lang) const {
+    return !strcasecmp(language_.c_str(), lang.first.c_str());
+  }
+
+private:
+  const std::string& language_;
+};
 
 CacheManager::CacheManager()
   : CacheManagerInterface(),
@@ -525,10 +536,44 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
   std::vector<UserFriendlyMessage> result;
   CACHE_MANAGER_CHECK(result);
 
-  const std::string fallback_language = "en-us";
   std::vector<std::string>::const_iterator it = msg_codes.begin();
   std::vector<std::string>::const_iterator it_end = msg_codes.end();
   for (; it != it_end; ++it) {
+
+    policy_table::MessageLanguages msg_languages =
+        (*pt_->policy_table.consumer_friendly_messages->messages)[*it];
+
+    policy_table::MessageString message_string;
+
+    // If message has no records with required language, fallback language
+    // should be used instead.
+    LanguageFinder finder(language);
+    policy_table::Languages::const_iterator it_language =
+        std::find_if(msg_languages.languages.begin(),
+                  msg_languages.languages.end(),
+                  finder);
+
+    if (msg_languages.languages.end() == it_language) {
+      LOG4CXX_WARN(logger_, "Language " << language <<
+                   " haven't been found for message code: " << *it);
+
+      LanguageFinder fallback_language_finder("en-us");
+
+      policy_table::Languages::const_iterator it_fallback_language =
+          std::find_if(msg_languages.languages.begin(),
+                       msg_languages.languages.end(),
+                       fallback_language_finder);
+
+      if (msg_languages.languages.end() == it_fallback_language) {
+        LOG4CXX_ERROR(logger_, "No fallback language found for message code: "
+                      << *it);
+        continue;
+      }
+
+      message_string = it_fallback_language->second;
+    } else {
+      message_string = it_language->second;
+    }
 
     UserFriendlyMessage msg;
     msg.message_code = *it;

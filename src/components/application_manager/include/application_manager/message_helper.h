@@ -514,6 +514,14 @@ class MessageHelper {
       hmi_apis::Common_Language::eType language);
 
     /**
+     * @brief Converts string to common language enum value
+     * @param language language as string
+     * @return Common language enum value
+     */
+    static hmi_apis::Common_Language::eType CommonLanguageFromString(
+       const std::string& language);
+
+    /**
      * @brief Gets command limit number per minute for specific application
      * @param policy_app_id Unique application id
      * @return Limit for number of command per minute
