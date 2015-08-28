@@ -898,7 +898,7 @@ bool PolicyManagerImpl::InitPT(const std::string& file_name) {
   return ret;
 }
 
-uint16_t PolicyManagerImpl::HeartBeatTimeout(const std::string& app_id) const {
+uint32_t PolicyManagerImpl::HeartBeatTimeout(const std::string& app_id) const {
   return cache_->HeartBeatTimeout(app_id);
 }
 

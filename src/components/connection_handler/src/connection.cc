@@ -76,7 +76,7 @@ const Service *Session::FindService(const protocol_handler::ServiceType &service
 Connection::Connection(ConnectionHandle connection_handle,
                        DeviceHandle connection_device_handle,
                        ConnectionHandler *connection_handler,
-                       int32_t heartbeat_timeout)
+                       uint32_t heartbeat_timeout)
     : connection_handler_(connection_handler),
       connection_handle_(connection_handle),
       connection_device_handle_(connection_device_handle),
@@ -374,8 +374,8 @@ void Connection::KeepAlive(uint8_t session_id) {
   heartbeat_monitor_->KeepAlive(session_id);
 }
 
-void Connection::SetHeartBeatTimeout(int32_t timeout, uint8_t session_id) {
-  heartbeat_monitor_->set_heartbeat_timeout_seconds(timeout, session_id);
+void Connection::SetHeartBeatTimeout(uint32_t timeout, uint8_t session_id) {
+  heartbeat_monitor_->set_heartbeat_timeout_milliseconds(timeout, session_id);
 }
 
 }  // namespace connection_handler

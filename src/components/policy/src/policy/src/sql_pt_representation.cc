@@ -659,7 +659,8 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     params.priority = priority;
 
     *params.memory_kb = query.GetInteger(2);
-    *params.heart_beat_timeout_ms = query.GetInteger(3);
+
+    *params.heart_beat_timeout_ms = query.GetUInteger(3);
     if (!query.IsNull(3)) {
       *params.certificate = query.GetString(4);
     }
@@ -876,10 +877,9 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   app_query.Bind(1, std::string(policy_table::EnumToJsonString(app.second.priority)));
   app_query.Bind(2, app.second.is_null());
   app_query.Bind(3, *app.second.memory_kb);
-  app_query.Bind(4, *app.second.heart_beat_timeout_ms);
+  app_query.Bind(4, static_cast<int64_t>(*app.second.heart_beat_timeout_ms));
   app.second.certificate.is_initialized() ?
   app_query.Bind(5, *app.second.certificate) : app_query.Bind(5);
-
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
     return false;

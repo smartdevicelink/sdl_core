@@ -548,10 +548,10 @@ class CacheManagerInterface {
   /**
    * Returns heart beat timeout
    * @param app_id application id
-   * @return if timeout was set then value in seconds greater zero
+   * @return if timeout was set then value in milliseconds greater zero
    * otherwise heart beat for specific application isn't set
    */
-  virtual uint16_t HeartBeatTimeout(const std::string& app_id) const = 0;
+  virtual uint32_t HeartBeatTimeout(const std::string& app_id) const = 0;
 
   /**
    * @brief Resets all calculated permissions in cache

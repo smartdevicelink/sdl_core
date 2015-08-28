@@ -80,6 +80,15 @@ int64_t DateTime::calculateTimeDiff(const TimevalStruct &time1,
   return getmSecs(ret);
 }
 
+void DateTime::AddMilliseconds(TimevalStruct& time,
+                             uint32_t milliseconds) {
+  const uint32_t sec = milliseconds/MILLISECONDS_IN_SECOND;
+  const uint32_t usec = (milliseconds%MILLISECONDS_IN_SECOND)*MICROSECONDS_IN_MILLISECONDS;
+  time.tv_sec += sec;
+  time.tv_usec += usec;
+  time = ConvertionUsecs(time);
+}
+
 TimevalStruct DateTime::Sub(const TimevalStruct& time1,
                             const TimevalStruct& time2) {
   const TimevalStruct times1 = ConvertionUsecs(time1);

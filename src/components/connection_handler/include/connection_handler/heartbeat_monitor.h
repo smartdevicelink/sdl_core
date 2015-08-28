@@ -50,7 +50,7 @@ class Connection;
  */
 class HeartBeatMonitor: public threads::ThreadDelegate {
  public:
-  HeartBeatMonitor(int32_t heartbeat_timeout_seconds,
+  HeartBeatMonitor(uint32_t heartbeat_timeout_mseconds,
                    Connection *connection);
 
   /**
@@ -73,13 +73,18 @@ class HeartBeatMonitor: public threads::ThreadDelegate {
    * \brief Thread exit procedure.
    */
   virtual void exitThreadMain();
-
-  void set_heartbeat_timeout_seconds(int32_t timeout, uint8_t session_id);
+  /**
+   * @brief Update heart beat timeout for session
+   * @param timeout contains timeout for updating
+   * @param session_id contain id session for which update timeout
+   * timeout
+   **/
+  void set_heartbeat_timeout_milliseconds(uint32_t timeout, uint8_t session_id);
 
  private:
 
   // \brief Heartbeat timeout, should be read from profile
-  int32_t default_heartbeat_timeout_;
+  uint32_t default_heartbeat_timeout_;
   // \brief Connection that must be closed when timeout elapsed
   Connection *connection_;
 
@@ -87,8 +92,8 @@ class HeartBeatMonitor: public threads::ThreadDelegate {
 
   class SessionState {
     public:
-      explicit SessionState(int32_t heartbeat_timeout_seconds = 0);
-      void UpdateTimeout(int32_t heartbeat_timeout_seconds);
+      explicit SessionState(uint32_t heartbeat_timeout_mseconds = 0);
+      void UpdateTimeout(uint32_t heartbeat_timeout_mseconds);
       void PrepareToClose();
       bool IsReadyToClose() const;
       void KeepAlive();
@@ -96,9 +101,9 @@ class HeartBeatMonitor: public threads::ThreadDelegate {
     private:
       void RefreshExpiration();
 
-      int32_t heartbeat_timeout_seconds_;
-      TimevalStruct heartbeat_expiration;
-      bool is_heartbeat_sent;
+      uint32_t heartbeat_timeout_mseconds_;
+      TimevalStruct heartbeat_expiration_;
+      bool is_heartbeat_sent_;
 
   };
 

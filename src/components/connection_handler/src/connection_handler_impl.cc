@@ -45,7 +45,7 @@
 #endif  // ENABLE_SECURITY
 
 namespace {
-int32_t HeartBeatTimeout() {
+uint32_t HeartBeatTimeout() {
   return profile::Profile::instance()->heart_beat_timeout();
 }
 }  // namespace
@@ -887,7 +887,7 @@ void ConnectionHandlerImpl::StartSessionHeartBeat(uint32_t connection_key) {
 }
 
 void ConnectionHandlerImpl::SetHeartBeatTimeout(uint32_t connection_key,
-                                                int32_t timeout) {
+                                                uint32_t timeout) {
   uint32_t connection_handle = 0;
   uint8_t session_id = 0;
   PairFromKey(connection_key, &connection_handle, &session_id);

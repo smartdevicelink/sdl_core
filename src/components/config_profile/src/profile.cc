@@ -521,7 +521,7 @@ const std::string& Profile::app_info_storage() const {
   return app_info_storage_;
 }
 
-int32_t Profile::heart_beat_timeout() const {
+uint32_t Profile::heart_beat_timeout() const {
   return heart_beat_timeout_;
 }
 

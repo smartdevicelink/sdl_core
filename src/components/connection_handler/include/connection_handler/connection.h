@@ -129,7 +129,7 @@ class Connection {
   Connection(ConnectionHandle connection_handle,
              DeviceHandle connection_device_handle,
              ConnectionHandler *connection_handler,
-             int32_t heartbeat_timeout);
+             uint32_t heartbeat_timeout);
 
   /**
    * @brief Destructor
@@ -242,9 +242,9 @@ class Connection {
 
   /**
    * @brief Sets heart beat timeout
-   * @param timeout in seconds
+   * @param timeout in milliseconds
    */
-  void SetHeartBeatTimeout(int32_t timeout, uint8_t session_id);
+  void SetHeartBeatTimeout(uint32_t timeout, uint8_t session_id);
 
   /**
    * @brief changes protocol version in session
