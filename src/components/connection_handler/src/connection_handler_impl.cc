@@ -591,6 +591,18 @@ int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
 
   return result;
 }
+
+void ConnectionHandlerImpl::GetConnectedDevicesMAC(
+    std::vector<std::string> &device_macs) const {
+  DeviceMap::const_iterator first = device_list_.begin();
+  DeviceMap::const_iterator last = device_list_.end();
+
+  while(first != last) {
+    device_macs.push_back((*first).second.mac_address());
+    ++first;
+  }
+}
+
 #ifdef ENABLE_SECURITY
 int ConnectionHandlerImpl::SetSSLContext(
     const uint32_t &key, security_manager::SSLContext *context) {
@@ -801,7 +813,7 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
             service_list_itr->service_type;
         connection_handler_observer_->OnServiceEndedCallback(session_key,
                                                              service_type,
-							     close_reason);
+                                                             close_reason);
       }
     } else {
       LOG4CXX_ERROR(logger_, "Session with id: " << session_id << " not found");
