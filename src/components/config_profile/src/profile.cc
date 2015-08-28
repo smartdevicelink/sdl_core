@@ -143,7 +143,6 @@ const char* kTTSDelimiterKey = "TTSDelimiter";
 const char* kRecordingFileNameKey = "RecordingFileName";
 const char* kRecordingFileSourceKey = "RecordingFileSource";
 const char* kEnablePolicy = "EnablePolicy";
-const char* kMmeDatabaseNameKey = "MMEDatabase";
 const char* kEventMQKey = "EventMQ";
 const char* kAckMQKey = "AckMQ";
 const char* kApplicationListUpdateTimeoutKey = "ApplicationListUpdateTimeout";
@@ -181,7 +180,6 @@ const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
 const char* kDefaultTtsDelimiter = ",";
 const uint32_t kDefaultAudioDataStoppedTimeout = 1000;
 const uint32_t kDefaultVideoDataStoppedTimeout = 1000;
-const char* kDefaultMmeDatabaseName = "/dev/qdb/mediaservice_db";
 const char* kDefaultEventMQ = "/dev/mqueue/ToSDLCoreUSBAdapter";
 const char* kDefaultAckMQ = "/dev/mqueue/FromSDLCoreUSBAdapter";
 const char* kDefaultRecordingFileSourceName = "audio.8bit.wav";
@@ -298,7 +296,6 @@ Profile::Profile()
       tts_delimiter_(kDefaultTtsDelimiter),
       audio_data_stopped_timeout_(kDefaultAudioDataStoppedTimeout),
       video_data_stopped_timeout_(kDefaultVideoDataStoppedTimeout),
-      mme_db_name_(kDefaultMmeDatabaseName),
       event_mq_name_(kDefaultEventMQ),
       ack_mq_name_(kDefaultAckMQ),
       recording_file_source_(kDefaultRecordingFileSourceName),
@@ -567,10 +564,6 @@ const std::string& Profile::recording_file_source() const {
 
 const std::string&Profile::recording_file_name() const {
   return recording_file_name_;
-}
-
-const std::string& Profile::mme_db_name() const {
-  return mme_db_name_;
 }
 
 const std::string& Profile::event_mq_name() const {
@@ -1253,13 +1246,6 @@ void Profile::UpdateValues() {
   LOG_UPDATED_VALUE(transport_manager_tcp_adapter_port_, kTCPAdapterPortKey,
                     kTransportManagerSection);
 
-  // MME database name
-  ReadStringValue(&mme_db_name_,
-                  kDefaultMmeDatabaseName,
-                  kTransportManagerSection,
-                  kMmeDatabaseNameKey);
-
-  LOG_UPDATED_VALUE(mme_db_name_, kMmeDatabaseNameKey, kTransportManagerSection);
   // Event MQ
   ReadStringValue(&event_mq_name_,
                   kDefaultEventMQ,

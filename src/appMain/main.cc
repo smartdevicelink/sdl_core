@@ -83,7 +83,7 @@ bool InitHmi() {
   std::string hmi_link = profile::Profile::instance()->link_to_web_hmi();
   struct stat sb;
   if (stat(hmi_link.c_str(), &sb) == -1) {
-    LOG4CXX_FATAL(logger_, "HMI index.html doesn't exist!");
+    LOG4CXX_FATAL(logger_, "HMI index file " << hmi_link << " doesn't exist!");
     return false;
   }
   return utils::System(kBrowser, kBrowserName).Add(kBrowserParams).Add(hmi_link)
