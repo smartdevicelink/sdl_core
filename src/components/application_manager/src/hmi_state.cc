@@ -88,6 +88,8 @@ mobile_apis::HMILevel::eType PhoneCallHmiState::hmi_level() const {
    if (parent()->hmi_level() == HMILevel::HMI_FULL
        && state_context_.is_navi_app(app_id_)) {
      expected_level = HMILevel::HMI_LIMITED;
+   } else if (parent()->hmi_level() == HMILevel::HMI_NONE) {
+     expected_level = HMILevel::HMI_NONE;
    }
    return expected_level;
 }
