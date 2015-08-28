@@ -73,8 +73,11 @@ void UnsubscribeButtonRequest::Run() {
   app->UnsubscribeFromButton(static_cast<mobile_apis::ButtonName::eType>(btn_id));
 
   SendUnsubscribeButtonNotification();
-  SendResponse(true, mobile_apis::Result::SUCCESS);
-  app->UpdateHash();
+  const bool is_succedeed = true;
+  SendResponse(is_succedeed, mobile_apis::Result::SUCCESS);
+  if (is_succedeed) {
+    app->UpdateHash();
+  }
 }
 
 void UnsubscribeButtonRequest::SendUnsubscribeButtonNotification() {

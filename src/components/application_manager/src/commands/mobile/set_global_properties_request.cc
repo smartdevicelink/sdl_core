@@ -359,11 +359,20 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
           std::max(ui_result_, tts_result_));
     }
 
+
+    SendResponse(result, result_code, return_info,
+                 &(message[strings::msg_params]));
+
     ApplicationSharedPtr application =
         ApplicationManagerImpl::instance()->application(connection_key());
-    SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
-                 return_info, &(message[strings::msg_params]));
-    application->UpdateHash();
+    if (!application) {
+      LOG4CXX_DEBUG(logger_, "NULL pointer.");
+      return;
+    }
+
+    if (result) {
+      application->UpdateHash();
+    }
   }
 }
 

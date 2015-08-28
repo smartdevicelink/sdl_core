@@ -423,6 +423,7 @@ void CreateInteractionChoiceSetRequest::DeleteChoices() {
   ApplicationSharedPtr application =
     ApplicationManagerImpl::instance()->application(connection_key());
   if (!application) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
   application->RemoveChoiceSet(choice_set_id_);
@@ -454,9 +455,11 @@ void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
 
     ApplicationSharedPtr application =
         ApplicationManagerImpl::instance()->application(connection_key());
-    if (application) {
-      application->UpdateHash();
+    if (!application) {
+      LOG4CXX_ERROR(logger_, "NULL pointer");
+      return;
     }
+    application->UpdateHash();
   } else {
     DeleteChoices();
   }
