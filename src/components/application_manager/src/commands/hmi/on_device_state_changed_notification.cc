@@ -95,8 +95,7 @@ void OnDeviceStateChangedNotification::Run() {
                             .asString();
     if (device_id.empty()) {
       if ((*message_)[strings::msg_params].keyExists("deviceId")) {
-        device_id = MessageHelper::GetDeviceMacAddressForHandle(
-                      (*message_)[strings::msg_params]["deviceId"]["id"].asInt());
+        device_id = (*message_)[strings::msg_params]["deviceId"]["id"].asString();
       }
     } else {
      // Policy uses hashed MAC address as device_id

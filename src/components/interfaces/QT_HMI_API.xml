@@ -1114,7 +1114,7 @@
       <param name="name" type="String" mandatory="true">
         <description>The name of the device connected.</description>
       </param>
-      <param name="id" type="Integer" mandatory="true">
+      <param name="id" type="String" mandatory="true">
         <description>The ID of the device connected</description>
       </param>
       <param name="transportType" type="Common.TransportType" mandatory="false">

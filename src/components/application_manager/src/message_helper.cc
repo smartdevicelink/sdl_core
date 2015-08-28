@@ -335,7 +335,7 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
                   << application_impl.device());
   }
   device_info[strings::name] = device_name;
-  device_info[strings::id] = application_impl.device();
+  device_info[strings::id] = mac_address;
 
   const policy::DeviceConsent device_consent =
       policy::PolicyHandler::instance()->GetUserConsentForDevice(mac_address);
@@ -1320,7 +1320,7 @@ bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
 
   output[strings::device_info] = smart_objects::SmartObject(smart_objects::SmartType_Map);
   output[strings::device_info][strings::name] = device_name;
-  output[strings::device_info][strings::id] = app->device();
+  output[strings::device_info][strings::id] = mac_address;
   const policy::DeviceConsent device_consent =
       policy::PolicyHandler::instance()->GetUserConsentForDevice(mac_address);
   output[strings::device_info][strings::isSDLAllowed] =
@@ -1537,7 +1537,7 @@ void MessageHelper::SendSDLActivateAppResponse(policy::AppPermissions& permissio
     (*message)[strings::msg_params]["device"]["name"] = permissions.deviceInfo
         .device_name;
     (*message)[strings::msg_params]["device"]["id"] = permissions.deviceInfo
-        .device_handle;
+        .device_mac_address;
   }
 
   (*message)[strings::msg_params]["isAppRevoked"] = permissions.appRevoked;
@@ -1577,7 +1577,7 @@ void MessageHelper::SendOnSDLConsentNeeded(
   (*message)[strings::params][strings::message_type] =
     MessageType::kNotification;
 
-  (*message)[strings::msg_params]["device"]["id"] = device_info.device_handle;
+  (*message)[strings::msg_params]["device"]["id"] = device_info.device_mac_address;
   (*message)[strings::msg_params]["device"]["name"] = device_info.device_name;
 
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
