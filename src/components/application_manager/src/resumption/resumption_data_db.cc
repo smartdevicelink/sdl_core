@@ -2421,14 +2421,15 @@ bool ResumptionDataDB::InsertApplicationData(app_mngr::ApplicationSharedPtr appl
                                              const std::string& policy_app_id,
                                              const std::string& device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  return InsertApplicationData(application, policy_app_id, device_id, NULL, 0);
+  ApplicationParams app(application);
+  return InsertApplicationData(app, policy_app_id, device_id, NULL, 0);
 }
 
-bool ResumptionDataDB::InsertApplicationData(app_mngr::ApplicationConstSharedPtr application,
-                                             const std::string& policy_app_id,
-                                             const std::string& device_id,
-                                             int64_t* application_primary_key,
-                                             int64_t global_properties_key) {
+bool ResumptionDataDB::InsertApplicationData(
+    const ApplicationParams& application, const std::string& policy_app_id,
+    const std::string& device_id, int64_t* application_primary_key,
+    int64_t global_properties_key) const {
+
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
   utils::dbms::SQLQuery query(db());
