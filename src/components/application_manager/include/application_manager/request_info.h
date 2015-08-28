@@ -83,8 +83,16 @@ namespace request_controller {
       return start_time_;
     }
 
+    void update_start_time(TimevalStruct start_time) {
+      start_time_ = start_time;
+    }
+
     uint64_t timeout_sec() {
       return timeout_sec_;
+    }
+
+    void set_timeout_sec(uint64_t timeout) {
+      timeout_sec_ = timeout;
     }
 
     TimevalStruct end_time() {
@@ -97,6 +105,10 @@ namespace request_controller {
 
     mobile_apis::HMILevel::eType hmi_level() {
       return hmi_level_;
+    }
+
+    void set_hmi_level(const mobile_apis::HMILevel::eType& level) {
+      hmi_level_ = level;
     }
 
     RequestType requst_type() const {
