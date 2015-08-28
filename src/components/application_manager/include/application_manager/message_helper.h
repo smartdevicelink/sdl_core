@@ -133,6 +133,57 @@ class MessageHelper {
     static const VehicleData& vehicle_data();
 
     /**
+     * @brief Converts HMI Result enum value to string
+     * @param hmi_result HMI Result enum value
+     * @return stringified value for enum if succedeed, otherwise - empty string
+     */
+    static std::string HMIResultToString(
+      hmi_apis::Common_Result::eType hmi_result);
+
+    /**
+     * @brief Converts string to HMI Result enum value
+     * @param hmi_result stringified value
+     * @return HMI Result enum value if succedeed, otherwise - INVALID_ENUM
+     * value
+     */
+    static hmi_apis::Common_Result::eType HMIResultFromString(
+      const std::string& hmi_result);
+
+    /**
+     * @brief Converts mobile Result enum value to string
+     * @param mobile_result mobile Result enum value
+     * @return stringified value for enum if succedeed, otherwise - empty string
+     */
+    static std::string MobileResultToString(
+      mobile_apis::Result::eType mobile_result);
+
+    /**
+     * @brief Converts string to mobile Result enum value
+     * @param mobile_result stringified value
+     * @return mobile Result enum value if succedeed, otherwise - INVALID_ENUM
+     * value
+     */
+    static mobile_api::Result::eType MobileResultFromString(
+      const std::string& mobile_result);
+
+    /**
+     * @brief Converts HMI Result enum value to mobile Result enum value
+     * @param hmi_result HMI Result enum value
+     * @return mobile Result enum value if succedeed, otherwise - INVALID_ENUM
+     * value
+     */
+    static mobile_api::Result::eType HMIToMobileResult(
+            const hmi_apis::Common_Result::eType hmi_result);
+
+    /**
+     * @brief Converts mobile Result enum value to HMI Result enum value
+     * @param mobile_result mobile Result enum value
+     * @return HMI Result enum value
+     */
+    static hmi_apis::Common_Result::eType MobileToHMIResult(
+            const mobile_api::Result::eType mobile_result);
+
+    /**
      * @brief Convert string to HMI level, if possible
      * @param hmi_level Stringified HMI level
      * @return Appropriate enum from HMI level, or INVALID_ENUM, if conversiion

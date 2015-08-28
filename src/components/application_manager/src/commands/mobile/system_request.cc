@@ -43,6 +43,7 @@ Copyright (c) 2013, Ford Motor Company
 #include "utils/file_system.h"
 #include "formatters/CFormatterJsonBase.hpp"
 #include "json/json.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 
@@ -191,7 +192,9 @@ void SystemRequest::Run() {
 }
 
 void SystemRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "AddSubMenuRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
+
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -199,7 +202,12 @@ void SystemRequest::on_event(const event_engine::Event& event) {
       mobile_apis::Result::eType result_code =
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asUInt()));
-      bool result = mobile_apis::Result::SUCCESS == result_code;
+
+      const bool result =
+          Compare<mobile_api::Result::eType, EQ, ONE>(
+            result_code,
+            mobile_api::Result::SUCCESS,
+            mobile_api::Result::WARNINGS);
 
       ApplicationSharedPtr application =
              ApplicationManagerImpl::instance()->application(connection_key());

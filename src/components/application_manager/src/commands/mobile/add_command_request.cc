@@ -37,6 +37,7 @@
 #include "application_manager/application.h"
 #include "application_manager/message_helper.h"
 #include "utils/file_system.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 
@@ -287,6 +288,7 @@ bool AddCommandRequest::CheckCommandParentId(ApplicationConstSharedPtr app) {
 
 void AddCommandRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
 
   const smart_objects::SmartObject& message = event.smart_object();
 
@@ -331,74 +333,109 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
     }
   }
 
-  if (!IsPendingResponseExist()) {
+  if (IsPendingResponseExist()) {
+    return;
+  }
 
-    ApplicationSharedPtr application =
-        ApplicationManagerImpl::instance()->application(connection_key());
+  if (hmi_apis::Common_Result::REJECTED == ui_result_) {
+    RemoveCommand();
+  }
 
-    if (hmi_apis::Common_Result::REJECTED == ui_result_) {
-      RemoveCommand();
-    }
+  smart_objects::SmartObject msg_params(smart_objects::SmartType_Map);
+  msg_params[strings::cmd_id] = (*message_)[strings::msg_params][strings::cmd_id];
+  msg_params[strings::app_id] = application->app_id();
 
-    smart_objects::SmartObject msg_params(smart_objects::SmartType_Map);
-    msg_params[strings::cmd_id] = (*message_)[strings::msg_params][strings::cmd_id];
-    msg_params[strings::app_id] = application->app_id();
+  mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
 
-    mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
+  const bool is_vr_invalid_unsupported =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+        vr_result_,
+        hmi_apis::Common_Result::INVALID_ENUM,
+        hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
 
-    bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_) &&
-        (hmi_apis::Common_Result::SUCCESS == vr_result_)) ||
-        ((hmi_apis::Common_Result::SUCCESS == ui_result_) &&
-        (hmi_apis::Common_Result::INVALID_ENUM == vr_result_ ||
-         hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == vr_result_)) ||
-        ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_ ||
-         hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_ ) &&
-        (hmi_apis::Common_Result::SUCCESS == vr_result_));
+  const bool is_ui_ivalid_unsupported =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+        ui_result_,
+        hmi_apis::Common_Result::INVALID_ENUM,
+        hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
 
-    if (!result && (hmi_apis::Common_Result::REJECTED == ui_result_)) {
-      result_code = static_cast<mobile_apis::Result::eType>(ui_result_);
-    } else {
-      result_code = static_cast<mobile_apis::Result::eType>(
-          std::max(ui_result_, vr_result_));
-    }
+  const bool is_no_ui_error =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+        ui_result_,
+        hmi_apis::Common_Result::SUCCESS,
+        hmi_apis::Common_Result::WARNINGS);
 
-    if (BothSend() && hmi_apis::Common_Result::SUCCESS == vr_result_) {
-      if (hmi_apis::Common_Result::SUCCESS != ui_result_ &&
-          hmi_apis::Common_Result::WARNINGS != ui_result_ &&
-          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE != ui_result_) {
+  const bool is_no_vr_error =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+        vr_result_,
+        hmi_apis::Common_Result::SUCCESS,
+        hmi_apis::Common_Result::WARNINGS);
 
-        result_code =
-            (ui_result_ == hmi_apis::Common_Result::REJECTED) ?
-              mobile_apis::Result::REJECTED : mobile_apis::Result::GENERIC_ERROR;
+  bool result =
+      (is_no_ui_error && is_no_vr_error) ||
+      (is_no_ui_error && is_vr_invalid_unsupported) ||
+      (is_no_vr_error && is_ui_ivalid_unsupported);
 
-        msg_params[strings::grammar_id] = application->get_grammar_id();
-        msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
+  const bool is_vr_or_ui_warning =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+      hmi_apis::Common_Result::WARNINGS,
+      ui_result_,
+      vr_result_);
 
-        SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params);
-        application->RemoveCommand((*message_)[strings::msg_params]
-                                       [strings::cmd_id].asUInt());
-        result = false;
-      }
-    }
+  if (!result &&
+      hmi_apis::Common_Result::REJECTED == ui_result_) {
+    result_code = MessageHelper::HMIToMobileResult(ui_result_);
+  } else if (is_vr_or_ui_warning) {
+    result_code = mobile_apis::Result::WARNINGS;
+  } else {
+    result_code = MessageHelper::HMIToMobileResult(
+        std::max(ui_result_, vr_result_));
+  }
 
-    if(BothSend() && hmi_apis::Common_Result::SUCCESS == ui_result_ &&
-       hmi_apis::Common_Result::SUCCESS != vr_result_) {
+  if (BothSend() && hmi_apis::Common_Result::SUCCESS == vr_result_) {
+    const bool is_ui_not_ok =
+        Compare<hmi_apis::Common_Result::eType, NEQ, ALL>(
+          ui_result_,
+          hmi_apis::Common_Result::SUCCESS,
+          hmi_apis::Common_Result::WARNINGS,
+          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
 
+    if (is_ui_not_ok) {
       result_code =
-          (vr_result_ == hmi_apis::Common_Result::REJECTED) ?
-            mobile_apis::Result::REJECTED : mobile_apis::Result::GENERIC_ERROR;
+          ui_result_ == hmi_apis::Common_Result::REJECTED
+          ? mobile_apis::Result::REJECTED
+          : mobile_apis::Result::GENERIC_ERROR;
 
-      SendHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, &msg_params);
+      msg_params[strings::grammar_id] = application->get_grammar_id();
+      msg_params[strings::type] = hmi_apis::Common_VRCommandType::Command;
 
+      SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params);
       application->RemoveCommand((*message_)[strings::msg_params]
                                      [strings::cmd_id].asUInt());
       result = false;
     }
+  }
 
-    SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
-    if (true == result) {
-      application->UpdateHash();
-    }
+  if(BothSend() &&
+     hmi_apis::Common_Result::SUCCESS == ui_result_ &&
+     !is_no_vr_error) {
+
+    result_code =
+        vr_result_ == hmi_apis::Common_Result::REJECTED
+        ? mobile_apis::Result::REJECTED :
+          mobile_apis::Result::GENERIC_ERROR;
+
+    SendHMIRequest(hmi_apis::FunctionID::UI_DeleteCommand, &msg_params);
+
+    application->RemoveCommand((*message_)[strings::msg_params]
+                                   [strings::cmd_id].asUInt());
+    result = false;
+  }
+
+  SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+
+  if (result) {
+    application->UpdateHash();
   }
 }
 

@@ -127,11 +127,11 @@ class AlertRequest : public CommandRequestImpl {
   bool                        awaiting_ui_alert_response_;
   bool                        awaiting_tts_speak_response_;
   bool                        awaiting_tts_stop_speaking_response_;
-  bool                        response_success_;
-  bool                        flag_other_component_sent_;
-  mobile_apis::Result::eType  response_result_;
-  smart_objects::SmartObject  response_params_;
-  mobile_apis::Result::eType  tts_speak_response_;
+  bool                        is_alert_succeeded_;
+  bool                        is_ui_alert_sent_;
+  mobile_apis::Result::eType  alert_result_;
+  smart_objects::SmartObject  alert_response_params_;
+  mobile_apis::Result::eType  tts_speak_result_;
 
   DISALLOW_COPY_AND_ASSIGN(AlertRequest);
 };

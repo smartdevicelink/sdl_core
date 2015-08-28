@@ -496,6 +496,68 @@ const VehicleData& MessageHelper::vehicle_data() {
   return vehicle_data_;
 }
 
+std::string MessageHelper::HMIResultToString(
+    hmi_apis::Common_Result::eType hmi_result) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+  const char* str = 0;
+  if (EnumConversionHelper<hmi_apis::Common_Result::eType>::EnumToCString(
+        hmi_result, &str)) {
+    return str;
+  }
+  return std::string();
+}
+
+hmi_apis::Common_Result::eType MessageHelper::HMIResultFromString(
+    const std::string &hmi_result) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+  hmi_apis::Common_Result::eType value;
+  if (EnumConversionHelper<hmi_apis::Common_Result::eType>::StringToEnum(
+        hmi_result, &value)) {
+    return value;
+  }
+  return hmi_apis::Common_Result::INVALID_ENUM;
+}
+
+std::string MessageHelper::MobileResultToString(
+    mobile_apis::Result::eType mobile_result) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+  const char* str = 0;
+  if (EnumConversionHelper<mobile_apis::Result::eType>::EnumToCString(
+        mobile_result, &str)) {
+    return str;
+  }
+  return std::string();
+}
+
+mobile_apis::Result::eType MessageHelper::MobileResultFromString(
+    const std::string &mobile_result) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+  mobile_apis::Result::eType value;
+  if (EnumConversionHelper<mobile_apis::Result::eType>::StringToEnum(
+        mobile_result, &value)) {
+    return value;
+  }
+  return mobile_apis::Result::INVALID_ENUM;
+}
+
+mobile_apis::Result::eType MessageHelper::HMIToMobileResult(
+    const hmi_apis::Common_Result::eType hmi_result) {
+  const std::string result = HMIResultToString(hmi_result);
+  if (result.empty()) {
+    return mobile_api::Result::INVALID_ENUM;
+  }
+  return MobileResultFromString(result);
+}
+
+hmi_apis::Common_Result::eType MessageHelper::MobileToHMIResult(
+    const mobile_apis::Result::eType mobile_result) {
+  const std::string result = MobileResultToString(mobile_result);
+  if (result.empty()) {
+    return hmi_apis::Common_Result::INVALID_ENUM;
+  }
+  return HMIResultFromString(result);
+}
+
 mobile_apis::HMILevel::eType MessageHelper::StringToHMILevel(
   const std::string& hmi_level) {
   using namespace NsSmartDeviceLink::NsSmartObjects;

@@ -38,6 +38,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "utils/file_system.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 
@@ -230,15 +231,20 @@ bool SetAppIconRequest::IsEnoughSpaceForIcon(const uint64_t icon_size) const {
 
 void SetAppIconRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const smart_objects::SmartObject& event_message = event.smart_object();
+  using namespace helpers;
+  const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetAppIcon: {
       mobile_apis::Result::eType result_code =
           static_cast<mobile_apis::Result::eType>(
-              event_message[strings::params][hmi_response::code].asInt());
+              message[strings::params][hmi_response::code].asInt());
 
-      bool result = mobile_apis::Result::SUCCESS == result_code;
+     const bool result =
+         Compare<mobile_api::Result::eType, EQ, ONE>(
+           result_code,
+           mobile_api::Result::SUCCESS,
+           mobile_api::Result::WARNINGS);
 
       if (result) {
         ApplicationSharedPtr app =
@@ -258,7 +264,7 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
                      "Icon path was set to '" << app->app_icon_path() << "'");
       }
 
-      SendResponse(result, result_code, NULL, &(event_message[strings::msg_params]));
+      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
       break;
     }
     default: {

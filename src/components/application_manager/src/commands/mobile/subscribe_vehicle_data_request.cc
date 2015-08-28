@@ -35,6 +35,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 namespace commands {
@@ -87,7 +88,7 @@ void SubscribeVehicleDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-      CommandRequestImpl::connection_key());
+      connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -214,10 +215,12 @@ void SubscribeVehicleDataRequest::Run() {
       hmi_requests_.push_back(hmi_request);
     }
   }
-  LOG4CXX_INFO(logger_, hmi_requests_.size() << " requests are going to be sent to HMI");
+  LOG4CXX_DEBUG(logger_, hmi_requests_.size() <<
+                " requests are going to be sent to HMI");
 
   //Send subrequests
-  for (HmiRequests::const_iterator it = hmi_requests_.begin(); it != hmi_requests_.end(); ++it)
+  for (HmiRequests::const_iterator it = hmi_requests_.begin();
+       it != hmi_requests_.end(); ++it)
     SendHMIRequest(it->func_id, &msg_params, true);
 #else
   SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
@@ -227,8 +230,14 @@ void SubscribeVehicleDataRequest::Run() {
 
 void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
 
   const smart_objects::SmartObject& message = event.smart_object();
+
+  if (hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData != event.id()) {
+    LOG4CXX_ERROR(logger_, "Received unknown event.");
+    return;
+  }
 
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       CommandRequestImpl::connection_key());
@@ -239,8 +248,8 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     HmiRequest & hmi_request = *it;
     if (hmi_request.func_id == event.id()) {
       hmi_request.status =
-          static_cast<hmi_apis::Common_Result::eType>(message[strings::params][hmi_response::code]
-              .asInt());
+          static_cast<hmi_apis::Common_Result::eType>(
+            message[strings::params][hmi_response::code].asInt());
       if (hmi_apis::Common_Result::SUCCESS == hmi_request.status)
         hmi_request.value = message[strings::msg_params][hmi_request.str];
       hmi_request.complete = true;
@@ -287,15 +296,17 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
       static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
 
-  bool is_succeeded =
-      hmi_result == hmi_apis::Common_Result::SUCCESS ||
+  const bool is_result_no_error =
+      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+        hmi_result,
+        hmi_apis::Common_Result::SUCCESS,
+        hmi_apis::Common_Result::WARNINGS);
+
+  bool is_succeeded = is_result_no_error ||
       !vi_already_subscribed_by_another_apps_.empty();
 
   mobile_apis::Result::eType result_code =
-      hmi_result == hmi_apis::Common_Result::SUCCESS
-      ? mobile_apis::Result::SUCCESS
-      : static_cast<mobile_apis::Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
+      MessageHelper::HMIToMobileResult(hmi_result);
 
   const char* return_info = NULL;
   if (is_succeeded) {

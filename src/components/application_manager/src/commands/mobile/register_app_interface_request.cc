@@ -302,9 +302,10 @@ void RegisterAppInterfaceRequest::Run() {
   }
 }
 
-void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
-  mobile_apis::Result::eType result) {
+void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
   smart_objects::SmartObject response_params(smart_objects::SmartType_Map);
+
+  mobile_apis::Result::eType result_code = mobile_apis::Result::SUCCESS;
 
   ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
   const HMICapabilities& hmi_capabilities = app_manager->hmi_capabilities();
@@ -350,7 +351,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       << " - "
       << hmi_capabilities.active_ui_language());
 
-    result = mobile_apis::Result::WRONG_LANGUAGE;
+    result_code = mobile_apis::Result::WRONG_LANGUAGE;
   }
 
   if (hmi_capabilities.display_capabilities()) {
@@ -487,22 +488,22 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     hash_id = (*message_)[strings::msg_params][strings::hash_id].asString();
     if (!resumer.CheckApplicationHash(application, hash_id)) {
       LOG4CXX_WARN(logger_, "Hash does not match");
-      result = mobile_apis::Result::RESUME_FAILED;
+      result_code = mobile_apis::Result::RESUME_FAILED;
       add_info = "Hash does not match";
       need_restore_vr = false;
     } else if (!resumer.CheckPersistenceFilesForResumption(application)) {
       LOG4CXX_WARN(logger_, "Persistent data is missed");
-      result = mobile_apis::Result::RESUME_FAILED;
+      result_code = mobile_apis::Result::RESUME_FAILED;
       add_info = "Persistent data is missed";
       need_restore_vr = false;
     } else {
       add_info = " Resume Succeed";
     }
   }
-  if ((mobile_apis::Result::SUCCESS == result) &&
+  if ((mobile_apis::Result::SUCCESS == result_code) &&
       (mobile_apis::Result::INVALID_ENUM != result_checking_app_hmi_type_)) {
     add_info += response_info_;
-    result = result_checking_app_hmi_type_;
+    result_code = result_checking_app_hmi_type_;
   }
 
   // in case application exist in resumption we need to send resumeVrgrammars
@@ -519,11 +520,12 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   MessageHelper::SendChangeRegistrationRequestToHMI(application);
 
-  SendResponse(true, result, add_info.c_str(), &response_params);
+  bool is_success = true;
+  SendResponse(is_success, result_code, add_info.c_str(), &response_params);
   MessageHelper::SendOnAppRegisteredNotificationToHMI(*(application.get()),
                                                       resumption,
                                                       need_restore_vr);
-  if (result != mobile_apis::Result::RESUME_FAILED) {
+  if (result_code != mobile_apis::Result::RESUME_FAILED) {
     resumer.StartResumption(application, hash_id);
   } else {
     resumer.StartResumptionOnlyHMILevel(application);
