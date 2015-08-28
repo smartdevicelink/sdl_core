@@ -59,7 +59,7 @@ class IncomingDataHandlerTest : public ::testing::Test {
     protov1_message_id = 0x0;
     some_message_id = 0xABCDEF0;
     some_session_id = 0xFEDCBA0;
-    payload_bigger_mtu.resize(MAXIMUM_FRAME_DATA_SIZE + 1);
+    payload_bigger_mtu.resize(MAXIMUM_FRAME_DATA_V2_SIZE + 1);
   }
   void TearDown() OVERRIDE {
     delete[] some_data;

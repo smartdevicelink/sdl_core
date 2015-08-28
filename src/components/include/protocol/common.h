@@ -198,7 +198,7 @@ enum {
  *\brief If FRAME_TYPE_CONTROL: Constant: Maximum size of one frame excluding
  *\brief frame header (used Ethernet MTU as default target transport)
  */
-const uint32_t MAXIMUM_FRAME_DATA_SIZE = 1500;
+const uint32_t MAXIMUM_FRAME_DATA_V2_SIZE = 1500;
 
 /**
  *\brief If FRAME_TYPE_CONSECUTIVE: Constant: Size of first frame in

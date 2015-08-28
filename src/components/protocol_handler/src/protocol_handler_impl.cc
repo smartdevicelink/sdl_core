@@ -361,7 +361,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
 
   const uint32_t header_size = (PROTOCOL_VERSION_1 == message->protocol_version())
       ? PROTOCOL_HEADER_V1_SIZE : PROTOCOL_HEADER_V2_SIZE;
-  uint32_t max_frame_size = MAXIMUM_FRAME_DATA_SIZE - header_size;
+  uint32_t max_frame_size = MAXIMUM_FRAME_DATA_V2_SIZE - header_size;
 #ifdef ENABLE_SECURITY
   const security_manager::SSLContext *ssl_context = session_observer_->
       GetSSLContext(message->connection_key(), message->service_type());
@@ -377,7 +377,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
   }
   LOG4CXX_DEBUG(logger_, "Optimal packet size is " << max_frame_size);
 #endif  // ENABLE_SECURITY
-  DCHECK(MAXIMUM_FRAME_DATA_SIZE > max_frame_size);
+  DCHECK(MAXIMUM_FRAME_DATA_V2_SIZE > max_frame_size);
 
 
   if (message->data_size() <= max_frame_size) {
