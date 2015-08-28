@@ -107,6 +107,10 @@ void SQLDatabase::set_path(const std::string& path) {
   databasename_ = path +  databasename_;
 }
 
+std::string SQLDatabase::get_path() const {
+  return databasename_;
+}
+
 bool SQLDatabase::Backup() {
    return true;
 }

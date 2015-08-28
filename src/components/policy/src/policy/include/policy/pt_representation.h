@@ -303,6 +303,25 @@ class PTRepresentation {
                                            bool is_predata) = 0;
 
     virtual void WriteDb() = 0;
+
+    /**
+     * @brief RemoveDB allows to remove the database.
+     * It will either remove or do nothing in case file not exists or any other
+     * troubles are happens during this operation.
+     */
+    virtual void RemoveDB() const = 0;
+
+    /**
+     * @brief Checks if DB version is actual to current schema
+     * @return true if actual, otherwise - false
+     */
+    virtual bool IsDBVersionActual() const = 0;
+
+    /**
+     * @brief Updates DB version according to current schema
+     * @return true if success, otherwise - false
+     */
+    virtual bool UpdateDBVersion() const = 0;
 };
 
 }  //  namespace policy

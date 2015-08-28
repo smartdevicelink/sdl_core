@@ -50,4 +50,19 @@ const std::string gen_hash(size_t size) {
   return hash;
 }
 
+int32_t Djb2HashFromString(const std::string& str_to_hash) {
+  uint32_t hash = 5381U;
+  std::string::const_iterator it = str_to_hash.begin();
+  std::string::const_iterator it_end = str_to_hash.end();
+
+  for (;it != it_end; ++it) {
+    hash = ((hash << 5) + hash) + (*it);
+  }
+
+  // Reset sign bit in case it has been set.
+  // This is needed to avoid overflow for signed int.
+  const int32_t result = hash & 0x7FFFFFFF;
+  return result;
+}
+
 }  // namespace utils

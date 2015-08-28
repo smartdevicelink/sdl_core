@@ -71,8 +71,26 @@ bool ResumeCtrl::Init() {
   bool use_db = Profile::instance()->use_db_for_resumption();
   if (use_db) {
     resumption_storage_.reset(new ResumptionDataDB());
-    if (!(resumption_storage_->Init())) {
+    if (!resumption_storage_->Init()) {
       return false;
+    }
+
+    ResumptionDataDB* db =
+        dynamic_cast<ResumptionDataDB*>(resumption_storage_.get());
+
+    if (!db->IsDBVersionActual()) {
+      LOG4CXX_INFO(logger_, "DB version had been changed. "
+                            "Rebuilding resumption DB.");
+
+      smart_objects::SmartObject data;
+      db->GetAllData(data);
+
+      if (!db->RefreshDB()) {
+        return false;
+      }
+
+      db->SaveAllData(data);
+      db->UpdateDBVersion();
     }
   } else {
     resumption_storage_.reset(new ResumptionDataJson());

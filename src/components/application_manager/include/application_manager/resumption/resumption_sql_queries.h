@@ -38,6 +38,7 @@
 namespace resumption {
 
 extern const std::string kCreateSchema;
+extern const std::string kDropSchema;
 extern const std::string kInsertInitData;
 extern const std::string kChecksResumptionData;
 extern const std::string kSelectCountHMILevel;
@@ -124,7 +125,10 @@ extern const std::string kChecksCharacter;
 extern const std::string kSelectCharacter;
 extern const std::string kSelectTTSChunk;
 extern const std::string kSelectAppTable;
+extern const std::string kSelectAllApps;
 extern const std::string kUpdateApplicationData;
+extern const std::string kSelectDBVersion;
+extern const std::string kUpdateDBVersion;
 }  // namespace resumption
 
 #endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_SQL_QUERY_H_
