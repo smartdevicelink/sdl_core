@@ -108,6 +108,8 @@ void PipeStreamerAdapter::StopActivity(int32_t application_key) {
   is_ready_ = false;
   current_application_ = 0;
 
+  messages_.Reset();
+
   for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
        media_listeners_.end() != it;
        ++it) {
