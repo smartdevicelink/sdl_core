@@ -220,7 +220,7 @@ SDL.SettingsController = Em.Object.create( {
     },
 
     getURLS: function() {
-        FFW.BasicCommunication.GetURLS();
+        FFW.BasicCommunication.GetURLS(7);
     },
 
     AllowSDLFunctionality: function(messages) {

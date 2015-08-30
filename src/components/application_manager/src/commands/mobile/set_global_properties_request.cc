@@ -377,13 +377,19 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
           std::max(ui_result_, tts_result_));
   }
 
-  ApplicationSharedPtr application =
-      ApplicationManagerImpl::instance()->application(connection_key());
-
   SendResponse(result, result_code, return_info,
                &(message[strings::msg_params]));
 
-  application->UpdateHash();
+  ApplicationSharedPtr application =
+      ApplicationManagerImpl::instance()->application(connection_key());
+  if (!application) {
+    LOG4CXX_DEBUG(logger_, "NULL pointer.");
+    return;
+  }
+
+  if (result) {
+    application->UpdateHash();
+  }
 }
 
 bool SetGlobalPropertiesRequest::IsPendingResponseExist() {

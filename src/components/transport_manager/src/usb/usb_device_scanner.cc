@@ -180,11 +180,11 @@ class AoaInitSequence::AoaTurnIntoAccessoryMode : public UsbControlOutTransfer {
   }
 };
 
-static char manufacturer[] = "Ford";
-static char model_name[] = "HMI";
-static char description[] = "Human machine interface";
+static char manufacturer[] = "SDL";
+static char model_name[] = "Core";
+static char description[] = "SmartDeviceLink Core Component USB";
 static char version[] = "1.0";
-static char uri[] = "http://www.ford.com";
+static char uri[] = "http://www.smartdevicelink.org";
 static char serial_num[] = "N000000";
 
 AoaInitSequence::AoaInitSequence()

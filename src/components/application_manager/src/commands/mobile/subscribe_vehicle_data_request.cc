@@ -242,6 +242,11 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       CommandRequestImpl::connection_key());
 
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "NULL pointer.");
+    return;
+  }
+
 #ifdef HMI_DBUS_API
   for (HmiRequests::iterator it = hmi_requests_.begin();
       it != hmi_requests_.end(); ++it) {
@@ -288,8 +293,11 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
       }
     }
     LOG4CXX_DEBUG(logger_, "All HMI requests are complete");
+    const bool result = any_arg_success;
     SendResponse(any_arg_success, status, NULL, &response_params);
-    app->UpdateHash();
+    if (result) {
+      app->UpdateHash();
+    }
   }
 #else
   hmi_apis::Common_Result::eType hmi_result =
@@ -329,7 +337,9 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
                return_info,
                &(message[strings::msg_params]));
 
-  app->UpdateHash();
+  if (is_succeeded) {
+    app->UpdateHash();
+  }
 #endif // #ifdef HMI_DBUS_API
 }
 
