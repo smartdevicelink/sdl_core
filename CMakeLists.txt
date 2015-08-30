@@ -48,6 +48,7 @@ option(ENABLE_LOG "Logging feature" ON)
 option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
+option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
 set(DEBUG_OPTION 	"$ENV{DEBUG}")
@@ -237,6 +238,7 @@ find_package(PkgConfig)
 pkg_check_modules(GLIB2 REQUIRED glib-2.0)
 add_definitions(${GLIB2_CFLAGS})
 endif()
+
 
 # --- Interface generator
 
@@ -616,6 +618,11 @@ if(ENABLE_SECURITY)
   set(SecurityManagerLibrary SecurityManager)
   set(SecurityManagerIncludeDir ${COMPONENTS_DIR}/security_manager/include)
   #set(SecurityManagerTestIncludeDir ${CMAKE_SOURCE_DIR}/test/components/security_manager/include)
+endif()
+
+if(ENABLE_HMI_PTU_DECRYPTION)
+  MESSAGE("USE DHMI_PTU_PARSER")
+  add_definitions(-DUSE_HMI_PTU_DECRYPTION)
 endif()
 
 set(RTLIB rt)
