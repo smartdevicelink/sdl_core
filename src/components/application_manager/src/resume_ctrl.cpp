@@ -451,8 +451,6 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
     return false;
   }
 
-  SetupDefaultHMILevel(application);
-
   LOG4CXX_DEBUG(logger_, " Resume app_id = " << application->app_id()
                         << " hmi_app_id = " << application->hmi_app_id()
                         << " mobile_id = " << application->mobile_app_id()
@@ -543,8 +541,6 @@ bool ResumeCtrl::StartResumptionOnlyHMILevel(ApplicationSharedPtr application) {
     LOG4CXX_WARN(logger_, "Application do not exists");
     return false;
   }
-
-  SetupDefaultHMILevel(application);
 
   LOG4CXX_DEBUG(logger_, "ENTER app_id = " << application->app_id()
                         << "mobile_id = "

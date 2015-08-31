@@ -493,21 +493,26 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   }
 
 
-  // By default app subscribed to CUSTOM_BUTTON
-  // Need to send notification to HMI
-  SendSubscribeCustomButtonNotification();
-
-  MessageHelper::SendChangeRegistrationRequestToHMI(application);
-
-  SendResponse(true, result, add_info.c_str(), &response_params);
   MessageHelper::SendOnAppRegisteredNotificationToHMI(*(application.get()),
                                                       resumption,
                                                       need_restore_vr);
+
+  SendResponse(true, result, add_info.c_str(), &response_params);
+
+  // Default HMI level should be set before any permissions validation, since it
+  // relies on HMI level.
+  resumer.SetupDefaultHMILevel(application);
+
   if (result != mobile_apis::Result::RESUME_FAILED) {
     resumer.StartResumption(application, hash_id);
   } else {
     resumer.StartResumptionOnlyHMILevel(application);
   }
+
+  // By default app subscribed to CUSTOM_BUTTON
+  // Need to send notification to HMI
+  SendSubscribeCustomButtonNotification();
+  MessageHelper::SendChangeRegistrationRequestToHMI(application);
 }
 
 mobile_apis::Result::eType
