@@ -344,30 +344,44 @@ bool LifeCycle::InitMessageSystem() {
 #endif  // MQUEUE_HMIADAPTER
 
 namespace {
-
+  pthread_t main_thread;
   void sig_handler(int sig) {
-    // Do nothing
+    switch(sig) {
+      case SIGINT:
+        LOG4CXX_DEBUG(logger_, "SIGINT signal has been caught");
+        break;
+      case SIGTERM:
+        LOG4CXX_DEBUG(logger_, "SIGTERM signal has been caught");
+        break;
+      case SIGSEGV:
+        LOG4CXX_DEBUG(logger_, "SIGSEGV signal has been caught");
+        break;
+      default:
+        LOG4CXX_DEBUG(logger_, "Unexpected signal has been caught");
+        break;
+    }
+    /*
+     * Resend signal to the main thread in case it was
+     * caught by another thread
+     */
+    if(pthread_equal(pthread_self(), main_thread) == 0) {
+      LOG4CXX_DEBUG(logger_, "Resend signal to the main thread");
+      if(pthread_kill(main_thread, sig) != 0) {
+        LOG4CXX_FATAL(logger_, "Send signal to thread error");
+      }
+    }
   }
-
-  void agony(int sig) {
-// these actions are not signal safe
-// (in case logger is on)
-// but they cannot be moved to a separate thread
-// because the application most probably will crash as soon as this handler returns
-//
-// the application is anyway about to crash
-    LOG4CXX_FATAL(logger_, "Stopping application due to segmentation fault");
-#ifdef ENABLE_LOG
-    logger::LogMessageLoopThread::destroy();
-#endif
-  }
-
 }  //  namespace
 
 void LifeCycle::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  main_thread = pthread_self();
   // First, register signal handlers
-  ::utils::SubscribeToTerminateSignal(&sig_handler);
-  ::utils::SubscribeToFaultSignal(&agony);
+  if(!::utils::SubscribeToInterruptSignal(&sig_handler) ||
+     !::utils::SubscribeToTerminateSignal(&sig_handler) ||
+     !::utils::SubscribeToFaultSignal(&sig_handler)) {
+    LOG4CXX_FATAL(logger_, "Subscribe to system signals error");
+  }
   // Now wait for any signal
   pause();
 }

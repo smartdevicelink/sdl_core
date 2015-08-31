@@ -37,27 +37,31 @@
 
 namespace utils {
 
+bool SubscribeToInterruptSignal(sighandler_t func) {
+  struct sigaction act;
+  act.sa_handler = func;
+  sigemptyset(&act.sa_mask);
+  act.sa_flags = 0;
+
+  return sigaction(SIGINT, &act, NULL) == 0;
+}
+
 bool SubscribeToTerminateSignal(sighandler_t func) {
   struct sigaction act;
   act.sa_handler = func;
   sigemptyset(&act.sa_mask);
   act.sa_flags = 0;
 
-  bool sigint_subscribed = (sigaction(SIGINT, &act, NULL) == 0);
-  bool sigterm_subscribed = (sigaction(SIGTERM, &act, NULL) == 0);
-
-  return sigint_subscribed && sigterm_subscribed;
+  return sigaction(SIGTERM, &act, NULL) == 0;
 }
 
 bool SubscribeToFaultSignal(sighandler_t func) {
   struct sigaction act;
   act.sa_handler = func;
   sigemptyset(&act.sa_mask);
-  act.sa_flags = SA_RESETHAND; // we only want to catch SIGSEGV once to flush logger queue
+  act.sa_flags = 0;
 
-  bool sigsegv_subscribed = (sigaction(SIGSEGV, &act, NULL) == 0);
-
-  return sigsegv_subscribed;
+  return sigaction(SIGSEGV, &act, NULL) == 0;
 }
 
 }  //  namespace utils
