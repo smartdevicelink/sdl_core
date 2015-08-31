@@ -333,14 +333,14 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
 
   if (!IsPendingResponseExist()) {
     bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_)
-          && (hmi_apis::Common_Result::SUCCESS == tts_result_ ||
-              hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_))
-          || ((hmi_apis::Common_Result::SUCCESS == ui_result_ ||
-              hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_)
-              && (hmi_apis::Common_Result::INVALID_ENUM == tts_result_))
-          || ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_ ||
-              hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_)
-              && (hmi_apis::Common_Result::SUCCESS == tts_result_));
+                   && (hmi_apis::Common_Result::SUCCESS == tts_result_ ||
+                       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_))
+                  || ((hmi_apis::Common_Result::SUCCESS == ui_result_ ||
+                       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_)
+                      && (hmi_apis::Common_Result::INVALID_ENUM == tts_result_))
+                  || ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_ ||
+                       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_)
+                      && (hmi_apis::Common_Result::SUCCESS == tts_result_));
 
     mobile_apis::Result::eType result_code;
     const char* return_info = NULL;
@@ -352,19 +352,20 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
             std::string("Unsupported phoneme type sent in a prompt").c_str();
       } else {
         result_code = static_cast<mobile_apis::Result::eType>(
-        std::max(ui_result_, tts_result_));
+                        std::max(ui_result_, tts_result_));
       }
     } else {
       result_code = static_cast<mobile_apis::Result::eType>(
-          std::max(ui_result_, tts_result_));
+                      std::max(ui_result_, tts_result_));
     }
 
+    // TODO(AOleynik): APPLINK-15858
+    ApplicationSharedPtr application =
+        ApplicationManagerImpl::instance()->application(connection_key());
 
     SendResponse(result, result_code, return_info,
                  &(message[strings::msg_params]));
 
-    ApplicationSharedPtr application =
-        ApplicationManagerImpl::instance()->application(connection_key());
     if (!application) {
       LOG4CXX_DEBUG(logger_, "NULL pointer.");
       return;
