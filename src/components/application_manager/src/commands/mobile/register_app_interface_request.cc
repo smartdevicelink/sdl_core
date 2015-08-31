@@ -477,6 +477,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
       hmi_capabilities.navigation_supported();
   response_params[strings::hmi_capabilities][strings::phone_call] =
       hmi_capabilities.phone_call_supported();
+  response_params[strings::sdl_version] =
+      profile::Profile::instance()->sdl_version();
+  response_params[strings::system_software_version] =
+      hmi_capabilities.ccpu_version();
 
   resumption::ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
   std::string hash_id = "";
