@@ -535,8 +535,13 @@ void HMICapabilities::set_prerecorded_speech(
 void HMICapabilities::set_navigation_supported(bool supported) {
   is_navigation_supported_ = supported;
 }
+
 void HMICapabilities::set_phone_call_supported(bool supported) {
   is_phone_call_supported_ = supported;
+}
+
+void HMICapabilities::set_ccpu_version(const std::string& ccpu_version) {
+  ccpu_version_ = ccpu_version;
 }
 
 bool HMICapabilities::load_capabilities_from_file() {

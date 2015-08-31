@@ -58,6 +58,12 @@ class Profile : public utils::Singleton<Profile> {
     virtual ~Profile();
 
     /**
+     * @brief Returns sdl version represented
+     * by git commit or value specified by user
+     */
+    const std::string& sdl_version() const;
+
+    /**
       * @brief Returns true if HMI should be started, otherwise false
       */
     bool launch_hmi() const;
@@ -618,6 +624,7 @@ class Profile : public utils::Singleton<Profile> {
     bool StringToNumber(const std::string& input, uint64_t& output) const;
 
 private:
+    std::string                     sdl_version_;
     bool                            launch_hmi_;
 #ifdef WEB_HMI
     std::string                     link_to_web_hmi_;
