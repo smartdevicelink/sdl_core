@@ -271,7 +271,7 @@ std::string SQLPTRepresentation::GetLockScreenIconUrl() const {
 
 
 int SQLPTRepresentation::GetNotificationsNumber(const std::string& priority) {
-  LOG4CXX_INFO(logger_, "GetNotificationsNumber");
+  LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kSelectNotificationsPerPriority)) {
     LOG4CXX_WARN(logger_, "Incorrect select statement for priority "
@@ -293,7 +293,7 @@ int SQLPTRepresentation::GetNotificationsNumber(const std::string& priority) {
 
 bool SQLPTRepresentation::GetPriority(const std::string& policy_app_id,
                                       std::string* priority) {
-  LOG4CXX_INFO(logger_, "GetPriority");
+  LOG4CXX_AUTO_TRACE(logger_);
   if (NULL == priority) {
     LOG4CXX_WARN(logger_, "Input priority parameter is null.");
     return false;
@@ -473,7 +473,7 @@ bool SQLPTRepresentation::RefreshDB() {
 
 utils::SharedPtr<policy_table::Table>
 SQLPTRepresentation::GenerateSnapshot() const {
-  LOG4CXX_INFO(logger_, "GenerateSnapshot");
+  LOG4CXX_AUTO_TRACE(logger_);
   utils::SharedPtr<policy_table::Table> table = new policy_table::Table();
   GatherModuleMeta(&*table->policy_table.module_meta);
   GatherModuleConfig(&table->policy_table.module_config);
@@ -1301,7 +1301,7 @@ void SQLPTRepresentation::IncrementIgnitionCycles() {
 }
 
 void SQLPTRepresentation::ResetIgnitionCycles() {
-  LOG4CXX_INFO(logger_, "ResetIgnitionCycles");
+  LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Exec(sql_pt::kResetIgnitionCycles)) {
     LOG4CXX_WARN(logger_, "Failed to reset ignition cycles number.");
@@ -1363,7 +1363,7 @@ bool SQLPTRepresentation::GetInitialAppData(const std::string& app_id,
 
 bool SQLPTRepresentation::GetFunctionalGroupings(
   policy_table::FunctionalGroupings& groups) {
-  LOG4CXX_INFO(logger_, "GetFunctionalGroupings");
+  LOG4CXX_AUTO_TRACE(logger_);
   return GatherFunctionalGroupings(&groups);
 }
 

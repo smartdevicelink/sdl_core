@@ -1221,7 +1221,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
                                (*message)[strings::params][strings::connection_key].asUInt());
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_,
+    LOG4CXX_ERROR(logger_,
                       "No application associated with connection key");
     if ((*message)[strings::msg_params].keyExists(strings::result_code) &&
         ((*message)[strings::msg_params][strings::result_code] ==
@@ -1359,7 +1359,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
       (mobile_apis::FunctionID::UnregisterAppInterfaceID != function_id)) {
     app = ApplicationManagerImpl::instance()->application(connection_key);
     if (!app) {
-      LOG4CXX_ERROR_EXT(logger_, "RET APPLICATION_NOT_REGISTERED");
+      LOG4CXX_ERROR(logger_, "RET APPLICATION_NOT_REGISTERED");
       smart_objects::SmartObjectSPtr response =
           MessageHelper::CreateNegativeResponse(connection_key,
                                                 static_cast<int32_t>(function_id),
@@ -1414,7 +1414,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     } else if (result ==
                request_controller::RequestController::
                TOO_MANY_PENDING_REQUESTS) {
-      LOG4CXX_ERROR_EXT(logger_, "RET  Unable top perform request: " <<
+      LOG4CXX_ERROR(logger_, "RET  Unable top perform request: " <<
                         "TOO_MANY_PENDING_REQUESTS");
 
       smart_objects::SmartObjectSPtr response =
@@ -1427,7 +1427,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
       return false;
     } else if (result ==
                request_controller::RequestController::TOO_MANY_REQUESTS) {
-      LOG4CXX_ERROR_EXT(logger_, "RET  Unable to perform request: " <<
+      LOG4CXX_ERROR(logger_, "RET  Unable to perform request: " <<
                         "TOO_MANY_REQUESTS");
 
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
@@ -1441,7 +1441,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     } else if (result ==
                request_controller::RequestController::
                NONE_HMI_LEVEL_MANY_REQUESTS) {
-      LOG4CXX_ERROR_EXT(logger_, "RET  Unable to perform request: " <<
+      LOG4CXX_ERROR(logger_, "RET  Unable to perform request: " <<
                         "REQUEST_WHILE_IN_NONE_HMI_LEVEL");
 
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
@@ -1456,7 +1456,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
                             false);
       return false;
     } else {
-      LOG4CXX_ERROR_EXT(logger_, "RET  Unable to perform request: Unknown case");
+      LOG4CXX_ERROR(logger_, "RET  Unable to perform request: Unknown case");
       return false;
     }
     return true;
@@ -1859,7 +1859,7 @@ utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
 
 void ApplicationManagerImpl::ProcessMessageFromMobile(
   const utils::SharedPtr<Message> message) {
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ProcessMessageFromMobile()");
+  LOG4CXX_AUTO_TRACE(logger_);
 #ifdef TIME_TESTER
   AMMetricObserver::MessageMetricSharedPtr metric(new AMMetricObserver::MessageMetric());
   metric->begin = date_time::DateTime::getCurrentTime();
@@ -1893,7 +1893,7 @@ void ApplicationManagerImpl::ProcessMessageFromMobile(
 
 void ApplicationManagerImpl::ProcessMessageFromHMI(
   const utils::SharedPtr<Message> message) {
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::ProcessMessageFromHMI()");
+  LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr smart_object(new smart_objects::SmartObject);
 
   if (!smart_object) {
@@ -2456,11 +2456,11 @@ void ApplicationManagerImpl::Handle(const impl::AudioData message) {
   smart_objects::SmartObjectSPtr on_audio_pass = new smart_objects::SmartObject();
 
   if (!on_audio_pass) {
-    LOG4CXX_ERROR_EXT(logger_, "OnAudioPassThru NULL pointer");
+    LOG4CXX_ERROR(logger_, "OnAudioPassThru NULL pointer");
     return;
   }
 
-  LOG4CXX_INFO_EXT(logger_, "Fill smart object");
+  LOG4CXX_INFO(logger_, "Fill smart object");
 
   (*on_audio_pass)[strings::params][strings::message_type] =
       application_manager::MessageType::kNotification;
@@ -2470,14 +2470,14 @@ void ApplicationManagerImpl::Handle(const impl::AudioData message) {
   (*on_audio_pass)[strings::params][strings::function_id] =
       mobile_apis::FunctionID::OnAudioPassThruID;
 
-  LOG4CXX_INFO_EXT(logger_, "Fill binary data");
+  LOG4CXX_INFO(logger_, "Fill binary data");
   // binary data
   (*on_audio_pass)[strings::params][strings::binary_data] =
       smart_objects::SmartObject(message.binary_data);
 
-   LOG4CXX_INFO_EXT(logger_, "After fill binary data");
+   LOG4CXX_INFO(logger_, "After fill binary data");
 
-   LOG4CXX_INFO_EXT(logger_, "Send data");
+   LOG4CXX_INFO(logger_, "Send data");
    CommandSharedPtr command (
        MobileCommandFactory::CreateCommand(on_audio_pass,
                                            commands::Command::ORIGIN_SDL));
@@ -2492,7 +2492,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
     mobile_apis::FunctionID::eType function_id,
     const RPCParams& rpc_params,
     CommandParametersPermissions* params_permissions) {
-  LOG4CXX_INFO(logger_, "CheckPolicyPermissions");
+  LOG4CXX_AUTO_TRACE(logger_);
   // TODO(AOleynik): Remove check of policy_enable, when this flag will be
   // unused in config file
   if (!policy::PolicyHandler::instance()->PolicyEnabled()) {

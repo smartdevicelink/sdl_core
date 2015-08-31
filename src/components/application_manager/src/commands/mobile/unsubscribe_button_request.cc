@@ -56,7 +56,7 @@ void UnsubscribeButtonRequest::Run() {
       ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
+    LOG4CXX_ERROR(logger_, "APPLICATION_NOT_REGISTERED");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -65,7 +65,7 @@ void UnsubscribeButtonRequest::Run() {
       (*message_)[str::msg_params][str::button_name].asUInt();
 
   if (!app->IsSubscribedToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id))) {
-    LOG4CXX_ERROR_EXT(logger_, "App doesn't subscibe to button " << btn_id);
+    LOG4CXX_ERROR(logger_, "App doesn't subscibe to button " << btn_id);
     SendResponse(false, mobile_apis::Result::IGNORED);
     return;
   }

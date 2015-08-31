@@ -1026,7 +1026,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
         connection_id, packet.session_id(), service_type, protection, &hash_id);
 
   if (0 == session_id) {
-    LOG4CXX_WARN_EXT(logger_, "Refused to create service " <<
+    LOG4CXX_WARN(logger_, "Refused to create service " <<
                      static_cast<int32_t>(service_type) << " type.");
     SendStartSessionNAck(connection_id, packet.session_id(),
                          protocol_version, packet.service_type());

@@ -1198,7 +1198,7 @@ void PolicyHandler::RemoveDevice(const std::string& device_id) {
 }
 
 bool PolicyHandler::IsApplicationRevoked(const std::string& app_id) {
-  LOG4CXX_TRACE(logger_, "PolicyHandler::IsApplicationRevoked");
+  LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK(false);
 
   return policy_manager_->IsApplicationRevoked(app_id);

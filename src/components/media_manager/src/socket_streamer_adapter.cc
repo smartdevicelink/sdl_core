@@ -213,14 +213,14 @@ void SocketStreamerAdapter::Streamer::start() {
   server_->socket_fd_ = socket(AF_INET, SOCK_STREAM, 0);
 
   if (0 >= server_->socket_fd_) {
-    LOG4CXX_ERROR_EXT(logger, "Server open error");
+    LOG4CXX_ERROR(logger, "Server open error");
     return;
   }
 
   int32_t optval = 1;
   if (-1 == setsockopt(server_->socket_fd_, SOL_SOCKET, SO_REUSEADDR,
                        &optval, sizeof optval)) {
-    LOG4CXX_ERROR_EXT(logger, "Unable to set sockopt");
+    LOG4CXX_ERROR(logger, "Unable to set sockopt");
     return;
   }
 
@@ -232,13 +232,13 @@ void SocketStreamerAdapter::Streamer::start() {
   if (-1 == bind(server_->socket_fd_,
                  reinterpret_cast<struct sockaddr*>(&serv_addr_),
                  sizeof(serv_addr_))) {
-    LOG4CXX_ERROR_EXT(logger, "Unable to bind");
+    LOG4CXX_ERROR(logger, "Unable to bind");
     return;
   }
 
   LOG4CXX_INFO(logger, "SocketStreamerAdapter::listen for connections");
   if (-1 == listen(server_->socket_fd_, 5)) {
-    LOG4CXX_ERROR_EXT(logger, "Unable to listen");
+    LOG4CXX_ERROR(logger, "Unable to listen");
     return;
   }
 }
@@ -271,10 +271,10 @@ bool SocketStreamerAdapter::Streamer::is_ready() const {
   retval = select(new_socket_fd_ + 1, 0, &fds, 0, &tv);
 
   if (-1 == retval) {
-    LOG4CXX_ERROR_EXT(logger, "An error occurred");
+    LOG4CXX_ERROR(logger, "An error occurred");
     result = false;
   } else if (0 == retval) {
-    LOG4CXX_ERROR_EXT(logger, "The timeout expired");
+    LOG4CXX_ERROR(logger, "The timeout expired");
     result = false;
   }
   return result;
@@ -283,7 +283,7 @@ bool SocketStreamerAdapter::Streamer::is_ready() const {
 bool SocketStreamerAdapter::Streamer::send(
   const ::protocol_handler::RawMessagePtr msg) {
   if (!is_ready()) {
-    LOG4CXX_ERROR_EXT(logger, " Socket is not ready");
+    LOG4CXX_ERROR(logger, " Socket is not ready");
     return false;
   }
 
@@ -297,14 +297,14 @@ bool SocketStreamerAdapter::Streamer::send(
                  };
 
     if (-1 == ::send(new_socket_fd_, hdr, strlen(hdr), MSG_NOSIGNAL)) {
-      LOG4CXX_ERROR_EXT(logger, " Unable to send");
+      LOG4CXX_ERROR(logger, " Unable to send");
       return false;
     }
   }
 
   if (-1 == ::send(new_socket_fd_, (*msg).data(),
                    (*msg).data_size(), MSG_NOSIGNAL)) {
-    LOG4CXX_ERROR_EXT(logger, " Unable to send");
+    LOG4CXX_ERROR(logger, " Unable to send");
     return false;
   }
 

@@ -65,7 +65,7 @@ void OnVehicleDataNotification::Run() {
       for (; applications.end() != it; ++it) {
         utils::SharedPtr<Application> app = *it;
         if (!app) {
-          LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
+          LOG4CXX_ERROR(logger_, "NULL pointer");
           continue;
         }
 

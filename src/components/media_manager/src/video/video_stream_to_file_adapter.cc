@@ -139,7 +139,7 @@ VideoStreamToFileAdapter::Streamer::~Streamer() {
 }
 
 void VideoStreamToFileAdapter::Streamer::threadMain() {
-  LOG4CXX_INFO(logger, "Streamer::threadMain");
+  LOG4CXX_AUTO_TRACE(logger);
 
   open();
 
@@ -173,7 +173,7 @@ void VideoStreamToFileAdapter::Streamer::threadMain() {
 }
 
 void VideoStreamToFileAdapter::Streamer::exitThreadMain() {
-  LOG4CXX_INFO(logger, "Streamer::exitThreadMain");
+  LOG4CXX_AUTO_TRACE(logger);
   stop_flag_ = true;
   server_->messages_.Shutdown();
 }

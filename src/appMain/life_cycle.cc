@@ -88,7 +88,7 @@ LifeCycle::LifeCycle()
 { }
 
 bool LifeCycle::StartComponents() {
-  LOG4CXX_INFO(logger_, "LifeCycle::StartComponents()");
+  LOG4CXX_AUTO_TRACE(logger_);
   transport_manager_ =
     transport_manager::TransportManagerDefault::instance();
   DCHECK(transport_manager_ != NULL);
