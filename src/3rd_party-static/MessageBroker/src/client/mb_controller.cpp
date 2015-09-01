@@ -15,11 +15,11 @@ namespace NsMessageBroker
    TcpClient(address, port),
    m_receivingBuffer(""),
    mControllersIdStart(-1),
-   mControllersIdCurrent(0)
+   mControllersIdCurrent(0),
+   stop(false)
    {
       mControllersName = name;
    }
-
 
    std::string CMessageBrokerController::getControllersName()
    {
@@ -272,7 +272,6 @@ namespace NsMessageBroker
 
    void* CMessageBrokerController::MethodForReceiverThread(void * arg)
    {
-      sync_primitives::AutoLock auto_lock(receiving_thread_lock_);
       stop = false;
       arg = arg; // to avoid compiler warnings
       while(!stop)
