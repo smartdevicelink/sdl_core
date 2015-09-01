@@ -216,7 +216,6 @@ bool LifeCycle::StartComponents() {
   // start transport manager
   transport_manager_->Visibility(true);
 
-  components_started_ = true;
   return true;
 }
 
@@ -388,11 +387,8 @@ void LifeCycle::Run() {
 
 
 void LifeCycle::StopComponents() {
-  if (!components_started_) {
-    LOG4CXX_TRACE(logger_, "exit");
-    LOG4CXX_ERROR(logger_, "Components wasn't started");
-    return;
-  }
+  LOG4CXX_AUTO_TRACE(logger_);
+
   hmi_handler_->set_message_observer(NULL);
   connection_handler_->set_connection_handler_observer(NULL);
   protocol_handler_->RemoveProtocolObserver(app_manager_);
@@ -438,6 +434,7 @@ void LifeCycle::StopComponents() {
   application_manager::ApplicationManagerImpl::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
+
 #ifdef DBUS_HMIADAPTER
   if (dbus_adapter_) {
     if (hmi_handler_) {
@@ -452,22 +449,20 @@ void LifeCycle::StopComponents() {
     delete dbus_adapter_;
   }
 #endif  // DBUS_HMIADAPTER
+
 #ifdef MESSAGEBROKER_HMIADAPTER
-  hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
   if (mb_adapter_) {
+    hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
     mb_adapter_->unregisterController();
-    mb_adapter_->Close();
     mb_adapter_->exitReceivingThread();
     if (mb_adapter_thread_) {
+      mb_adapter_thread_->Stop();
       mb_adapter_thread_->Join();
+      delete mb_adapter_thread_;
     }
     delete mb_adapter_;
   }
   hmi_message_handler::HMIMessageHandlerImpl::destroy();
-  if (mb_adapter_thread_) {
-    mb_adapter_thread_->Stop();
-    delete mb_adapter_thread_;
-  }
 
 #endif  // MESSAGEBROKER_HMIADAPTER
 
@@ -502,8 +497,6 @@ void LifeCycle::StopComponents() {
     time_tester_ = NULL;
   }
 #endif  // TIME_TESTER
-  components_started_ = false;
-  LOG4CXX_TRACE(logger_, "exit");
 }
 
 }  //  namespace main_namespace
