@@ -35,8 +35,6 @@
 #include <apr_time.h>
 
 void deinit_logger () {
-  CREATE_LOGGERPTR_LOCAL (logger_, "Logger");
-  LOG4CXX_DEBUG(logger_, "Logger deinitialization");
   logger::LogMessageLoopThread::destroy();
   log4cxx::LoggerPtr rootLogger = log4cxx::Logger::getRootLogger();
   log4cxx::spi::LoggerRepositoryPtr repository = rootLogger->getLoggerRepository();
