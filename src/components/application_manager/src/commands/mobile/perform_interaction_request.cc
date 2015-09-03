@@ -370,6 +370,7 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
     const smart_objects::SmartObject& message) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
+  using namespace smart_objects;
 
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(connection_key());
@@ -378,11 +379,9 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
     return;
   }
 
-  smart_objects::SmartObject msg_params =
-      smart_objects::SmartObject(smart_objects::SmartType_Map);
+  SmartObject msg_params =
+      SmartObject(SmartType_Map);
   
-  smart_objects::SmartObject& param_data = msg_params;
-
   mobile_apis::Result::eType result_code =
       GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asUInt()));
@@ -408,24 +407,22 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
       info = "Unsupported phoneme type was sent in an item";
       if (message.keyExists(strings::params) 
           && message[strings::params].keyExists(strings::data)) {
-        param_data = message[strings::params][strings::data];
+        msg_params = message[strings::params][strings::data];
       }
     } else if (message.keyExists(strings::msg_params)) {
-      param_data = message[strings::msg_params];
+      msg_params = message[strings::msg_params];
     }
     // result code must be GENERIC_ERROR in case wrong choice_id
-    if (param_data.keyExists(strings::choice_id)) {
+    if (msg_params.keyExists(strings::choice_id)) {
       if (!CheckChoiceIDFromResponse(app,
-                                     param_data[strings::choice_id].asInt())) {
+                                     msg_params[strings::choice_id].asInt())) {
         result_code = mobile_apis::Result::GENERIC_ERROR;
         info = "Wrong choiceID was received from HMI";
       } else {
-        msg_params = param_data;
         msg_params[strings::trigger_source] =
             mobile_apis::TriggerSource::TS_MENU;
       }
-    } else if (param_data.keyExists(strings::manual_text_entry)) {
-      msg_params = param_data;
+    } else if (msg_params.keyExists(strings::manual_text_entry)) {
       msg_params[strings::trigger_source] =
           mobile_apis::TriggerSource::TS_KEYBOARD;
     }
@@ -434,7 +431,7 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
   DisablePerformInteraction();
 
   const char* return_info = (info.empty()) ? NULL : info.c_str();
-  const smart_objects::SmartObject* response_params =
+  const SmartObject* response_params =
       msg_params.empty()
       ? NULL
       : &msg_params;
