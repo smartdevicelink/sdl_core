@@ -351,10 +351,8 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
       return true;
     }
   }
-
   return false;
 }
-
 
 ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   const utils::SharedPtr<smart_objects::SmartObject>&
@@ -2014,8 +2012,7 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
       url_scheme = app_data[os_type][json::urlScheme].asString();
     } else if (app_data.keyExists(json::android)) {
       os_type = json::android;
-      package_name =
-          app_data[os_type][json::packageName].asString();
+      package_name = app_data[os_type][json::packageName].asString();
     }
 
     PullLanguagesInfo(app_data[os_type], ttsName, vrSynonym);
@@ -2028,51 +2025,52 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
       vrSynonym[0] = appName;
     }
 
-    const std::string device_mac =
-        MessageHelper::GetDeviceMacAddressForHandle(registered_app->device());
-
-    const uint32_t hmi_app_id = resume_ctrl_.IsApplicationSaved(policy_app_id, device_mac)?
-          resume_ctrl_.GetHMIApplicationID(policy_app_id, device_mac) : GenerateNewHMIAppID();
-
     const std::string app_icon_dir(Profile::instance()->app_icons_folder());
     const std::string full_icon_path(app_icon_dir + "/" + policy_app_id);
 
     uint32_t device_id = 0;
+
     connection_handler::ConnectionHandlerImpl* con_handler_impl =
       static_cast<connection_handler::ConnectionHandlerImpl*>(
         connection_handler_);
 
     if (-1 == con_handler_impl->GetDataOnSessionKey(
         connection_key, NULL, NULL, &device_id)) {
-
-
       LOG4CXX_ERROR(logger_,
                     "Failed to create application: no connection info.");
       continue;
     }
 
+    const std::string device_mac =
+        MessageHelper::GetDeviceMacAddressForHandle(
+          static_cast<uint32_t>(device_id));
+
+    const uint32_t hmi_app_id = resume_ctrl_.IsApplicationSaved(policy_app_id, device_mac)?
+          resume_ctrl_.GetHMIApplicationID(policy_app_id, device_mac) : GenerateNewHMIAppID();
+
+    // AppId = 0 because this is query_app(provided by hmi for download, but not yet registered)
     ApplicationSharedPtr app(
           new ApplicationImpl(0,
                               policy_app_id,
                               appName,
                               PolicyHandler::instance()->GetStatisticManager()));
-    if (app) {
-      app->SetShemaUrl(url_scheme);
-      app->SetPackageName(package_name);
-      app->set_app_icon_path(full_icon_path);
-      app->set_hmi_application_id(hmi_app_id);
-      app->set_device(device_id);
 
-      app->set_vr_synonyms(vrSynonym);
-      app->set_tts_name(ttsName);
+    DCHECK_OR_RETURN_VOID(app);
+    app->SetShemaUrl(url_scheme);
+    app->SetPackageName(package_name);
+    app->set_app_icon_path(full_icon_path);
+    app->set_hmi_application_id(hmi_app_id);
+    app->set_device(device_id);
 
-      sync_primitives::AutoLock lock(apps_to_register_list_lock_);
-      LOG4CXX_DEBUG(logger_, "apps_to_register_ size before: "
-                    << apps_to_register_.size());
-      apps_to_register_.insert(app);
-      LOG4CXX_DEBUG(logger_, "apps_to_register_ size after: "
-                    << apps_to_register_.size());
-    }
+    app->set_vr_synonyms(vrSynonym);
+    app->set_tts_name(ttsName);
+
+    sync_primitives::AutoLock lock(apps_to_register_list_lock_);
+    LOG4CXX_DEBUG(logger_, "apps_to_register_ size before: "
+                  << apps_to_register_.size());
+    apps_to_register_.insert(app);
+    LOG4CXX_DEBUG(logger_, "apps_to_register_ size after: "
+                  << apps_to_register_.size());
   }
 }
 
