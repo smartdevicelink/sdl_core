@@ -1339,13 +1339,8 @@ bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
     output[strings::greyOut] = app->is_greyed_out();
     const SmartObject* app_tts_name = app->tts_name();
     if (!app_tts_name->empty()) {
-      SmartObject output_tts_name = SmartObject(SmartType_Array);
-
-      for (uint32_t i = 0; i < app_tts_name->length(); ++i) {
-        output_tts_name[i][strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
-        output_tts_name[i][strings::text] = (*app_tts_name)[i];
-      }
-      output[json::ttsName] = output_tts_name;
+      output[json::ttsName][strings::text] = *(app->tts_name());
+      output[json::ttsName][strings::speech_capabilities] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
     }
     if (!app->vr_synonyms()->empty()) {
       output[json::vrSynonyms] = *(app->vr_synonyms());
