@@ -43,6 +43,10 @@ class SecurityManagerListener {
    */
   virtual bool OnHandshakeDone(uint32_t connection_key,
                                SSLContext::HandshakeResult result) = 0;
+  /**
+   * @brief Notify listeners that certificate update is required.
+   */
+  virtual void OnCertificateUpdateRequired() = 0;
   virtual ~SecurityManagerListener() {}
 };
 }  // namespace security_manager

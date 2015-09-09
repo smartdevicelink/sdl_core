@@ -111,6 +111,31 @@ const char* kNamedVideoPipePathKey = "NamedVideoPipePath";
 const char* kNamedAudioPipePathKey = "NamedAudioPipePath";
 const char* kVideoStreamFileKey = "VideoStreamFile";
 const char* kAudioStreamFileKey = "AudioStreamFile";
+
+#ifdef ENABLE_SECURITY
+const char* kSecurityProtocolKey = "Protocol";
+const char* kSecurityCertificatePathKey = "CertificatePath";
+const char* kSecurityCACertificatePathKey = "CACertificatePath";
+const char* kSecuritySSLModeKey = "SSLMode";
+const char* kSecurityKeyPathKey = "KeyPath";
+const char* kSecurityCipherListKey = "CipherList";
+const char* kSecurityVerifyPeerKey = "VerifyPeer";
+const char* kBeforeUpdateHours = "UpdateBeforeHours";
+#endif
+
+#ifdef CUSTOMER_PASA
+const char* kHMIHeartBeatTimeoutKey = "HMIHeartBeatTimeout";
+const char* kLoggerSection = "LOGGING";
+const char* kAudioMQPath = "MQAudioPath";
+const char* kLoggerConfigFileKey = "LoggerConfigFile";
+const char* kRemoteLoggingFlagFileKey = "RemoteLoggingFlagFile";
+const char* kRemoteLoggingFlagFilePathKey = "RemoteLoggingFlagFilePath";
+const char* kTargetLogFileHomeDirKey = "TargetLogFileHomeDir";
+const char* kTargetLogFileNamePatternKey = "TargetLogFileNamePattern";
+const char* kTargetBootCountFileKey = "TargetBootCountFile";
+const char* kTargetTmpDirKey = "TargetTmpDir";
+const char* kLogFileMaxSizeKey = "LogFileMaxSize";
+#endif
 const char* kAudioDataStoppedTimeoutKey = "AudioDataStoppedTimeout";
 const char* kVideoDataStoppedTimeoutKey = "VideoDataStoppedTimeout";
 const char* kMixingAudioSupportedKey = "MixingAudioSupported";
@@ -254,18 +279,6 @@ const uint32_t kDefaultAppIconsFolderMaxSize = 104857600;
 const uint32_t kDefaultAppIconsAmountToRemove = 1;
 const uint16_t kDefaultAttemptsToOpenResumptionDB = 5;
 const uint16_t kDefaultOpenAttemptTimeoutMsResumptionDB = 500;
-
-#ifdef ENABLE_SECURITY
-const char* kSecurityProtocolKey = "Protocol";
-const char* kSecurityCertificatePathKey = "CertificatePath";
-const char* kSecurityCACertificatePathKey = "CACertificatePath";
-const char* kSecuritySSLModeKey = "SSLMode";
-const char* kSecurityKeyPathKey = "KeyPath";
-const char* kSecurityCipherListKey = "CipherList";
-const char* kSecurityVerifyPeerKey = "VerifyPeer";
-const char* kBeforeUpdateHours = "UpdateBeforeHours";
-#endif
-
 }  // namespace
 
 namespace profile {

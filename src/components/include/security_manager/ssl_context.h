@@ -74,6 +74,13 @@ class SSLContext {
   struct HandshakeContext {
     std::string expected_sn;
     std::string expected_cn;
+
+    HandshakeContext& make_context(const std::string& sn,
+                                  const std::string& cn) {
+      expected_sn = sn;
+      expected_cn = cn;
+      return *this;
+    }
   };
 
   virtual HandshakeResult StartHandshake(const uint8_t** const out_data,

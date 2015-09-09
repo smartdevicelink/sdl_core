@@ -64,6 +64,8 @@ class CryptoManager {
   virtual bool OnCertificateUpdated(const std::string& data) = 0;
   virtual void ReleaseSSLContext(SSLContext *context) = 0;
   virtual std::string LastError() const = 0;
+
+  virtual bool IsCertificateUpdateRequired() const = 0;
   virtual ~CryptoManager() { }
 };
 

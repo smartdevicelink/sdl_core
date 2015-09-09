@@ -400,7 +400,6 @@ class Profile : public utils::Singleton<Profile> {
   uint32_t update_before_hours() const;
 
 #endif //ENABLE_SECURITY
-
     /**
      * @brief Reads a string value from the profile
      *

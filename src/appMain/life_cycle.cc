@@ -198,6 +198,7 @@ bool LifeCycle::StartComponents() {
 #ifdef ENABLE_SECURITY
   security_manager_->set_session_observer(connection_handler_);
   security_manager_->set_protocol_handler(protocol_handler_);
+  security_manager_->AddListener(app_manager_);
   security_manager_->set_crypto_manager(crypto_manager_);
 #endif  // ENABLE_SECURITY
 
@@ -388,6 +389,7 @@ void LifeCycle::StopComponents() {
   protocol_handler_->RemoveProtocolObserver(media_manager_);
 #ifdef ENABLE_SECURITY
   protocol_handler_->RemoveProtocolObserver(security_manager_);
+  security_manager_->RemoveListener(app_manager_);
 #endif  // ENABLE_SECURITY
   protocol_handler_->Stop();
 

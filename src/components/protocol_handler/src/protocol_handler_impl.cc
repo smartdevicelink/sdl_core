@@ -994,6 +994,9 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
     return true;
   }
 
+  void OnCertificateUpdateRequired() OVERRIDE {
+  }
+
  private:
   const uint32_t connection_key_;
   ProtocolHandlerImpl *protocol_handler_;

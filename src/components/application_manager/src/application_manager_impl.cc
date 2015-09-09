@@ -1199,7 +1199,12 @@ bool ApplicationManagerImpl::OnHandshakeDone(
        SSLContext::Handshake_Result_NotYetValid)) {
       app->usage_report().RecordTLSError();
   }
-  return true;
+  return false;
+}
+
+void ApplicationManagerImpl::OnCertificateUpdateRequired() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  policy::PolicyHandler::instance()->OnPTExchangeNeeded();
 }
 
 security_manager::SSLContext::HandshakeContext

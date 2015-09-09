@@ -651,6 +651,8 @@ class ApplicationManagerImpl : public ApplicationManager,
         uint32_t connection_key,
         security_manager::SSLContext::HandshakeResult result) OVERRIDE FINAL;
 
+    void OnCertificateUpdateRequired() OVERRIDE FINAL;
+
     security_manager::SSLContext::HandshakeContext
     GetHandshakeContext(uint32_t key) const OVERRIDE FINAL;
 #endif // ENABLE_SECURITY

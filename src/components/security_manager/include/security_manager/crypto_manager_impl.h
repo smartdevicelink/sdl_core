@@ -107,11 +107,16 @@ class CryptoManagerImpl : public CryptoManager {
   SSLContext *CreateSSLContext() OVERRIDE;
   void ReleaseSSLContext(SSLContext *context) OVERRIDE;
   std::string LastError() const OVERRIDE;
+  virtual bool IsCertificateUpdateRequired() const OVERRIDE;
 
 private:
   bool set_certificate(const std::string &cert_data);
 
+  int pull_number_from_buf(char* buf, int* idx);
+  void asn1_time_to_tm(ASN1_TIME* time);
+
   SSL_CTX *context_;
+  mutable struct tm expiration_time_;
   Mode mode_;
   static uint32_t instance_count_;
   static sync_primitives::Lock instance_lock_;
