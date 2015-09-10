@@ -1339,8 +1339,10 @@ bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
     output[strings::greyOut] = app->is_greyed_out();
     const SmartObject* app_tts_name = app->tts_name();
     if (!app_tts_name->empty()) {
-      output[json::ttsName][strings::text] = *(app->tts_name());
-      output[json::ttsName][strings::speech_capabilities] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
+      SmartObject output_tts_name = SmartObject(SmartType_Array);
+      output_tts_name[0][strings::text] = *(app->tts_name());
+      output_tts_name[0][strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
+      output[json::ttsName] = output_tts_name;
     }
     if (!app->vr_synonyms()->empty()) {
       output[json::vrSynonyms] = *(app->vr_synonyms());
@@ -2500,7 +2502,7 @@ void MessageHelper::SubscribeApplicationToSoftButton(
 
 // TODO(AK): change printf to logger
 bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
-  return true;
+//return true;
 #ifdef ENABLE_LOG
   static uint32_t tab = 0;
   std::string tab_buffer;
