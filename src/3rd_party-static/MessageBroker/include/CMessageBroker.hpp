@@ -61,9 +61,10 @@ namespace NsMessageBroker
       * \brief Receive data from TCP server (from client).
       * \param fd FileDescriptor of socket.
       * \param aJSONData JSON string.
+      * \param tryHard give up on first JSON parse error or try to workaround it.
       */
-      void onMessageReceived(int fd, std::string& aJSONData);
-      
+      void onMessageReceived(int fd, std::string& aJSONData, bool tryHard);
+
       /**
        * \brief Test of buffer parsing.
        */
