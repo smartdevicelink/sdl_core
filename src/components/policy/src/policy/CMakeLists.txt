@@ -35,9 +35,26 @@ set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_S
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-
 #Generation of policy table interface...
 #include(${CMAKE_SOURCE_DIR}/tools/intergen/GenerateInterfaceLibrary.cmake)
+
+if (ENABLE_GCOV)
+  set(GCOV_FLAGS "-ftest-coverage -fprofile-arcs")
+else()
+  set(GCOV_FLAGS "")
+endif()
+
+set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror ${GCOV_FLAGS}")
+
+if (CMAKE_BUILD_TYPE)
+  if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+    set(CMAKE_CXX_FLAGS_DEBUG "")
+  else ()
+    set(CMAKE_CXX_FLAGS_RELEASE "")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g3 -ggdb3 -DDEBUG")
+  endif()
+endif()
 
 include_directories (
   ./include
@@ -75,6 +92,7 @@ include_directories(./policy_table/table_struct)
 add_subdirectory(policy_table/table_struct)
 
 set(LIBRARIES ConfigProfile policy_struct dbms jsoncpp Utils)
+
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   # --- QDB Wrapper
   include_directories (qdb_wrapper/include)
