@@ -24,6 +24,7 @@ set (LIBRARIES
   jsoncpp
   Utils
   ConfigProfile
+  gcov
 )
 
 set(SOURCES

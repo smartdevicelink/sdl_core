@@ -48,6 +48,7 @@ set(testLibraries
   Utils
   Policy
   UsageStatistics
+  gcov
 )
 
 set(testSources

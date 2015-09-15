@@ -3,9 +3,7 @@ set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_S
 set(install_destination ${CMAKE_BINARY_DIR}/bin/plugins)
 set(copy_destination ${CMAKE_BINARY_DIR}/src/appMain/plugins)
 
-option(ENABLE_TEST_COV_COUNT "Enable compilation flags to count test coverage" OFF)
-
-if (ENABLE_TEST_COV_COUNT)
+if (ENABLE_GCOV)
   set(GCOV_FLAGS "-ftest-coverage -fprofile-arcs")
 else()
   set(GCOV_FLAGS "")
