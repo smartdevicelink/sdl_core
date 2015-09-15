@@ -24,6 +24,8 @@ if (NOT LIBAVAHI_COMMON)
     message(STATUS " sudo apt-get install libavahi-common-dev")
 endif (NOT LIBAVAHI_COMMON)
 
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
 if (NOT LIBAVAHI_COMMON OR NOT LIBAVAHI_CLIENT)
   message(FATAL_ERROR "One of necesary component of libavahi is not found. Exiting!")
 endif(NOT LIBAVAHI_COMMON OR NOT LIBAVAHI_CLIENT)
+endif()
