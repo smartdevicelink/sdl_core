@@ -1,0 +1,103 @@
+
+// 基础结构定义...
+
+typedef unsigned char uint8_t;
+typedef unsigned short int uint16_t;
+typedef unsigned int uint32_t;
+typedef struct {
+	uint8_t data[16];
+} uint128_t;
+
+// 蓝牙设备地址编号 
+typedef struct {
+	uint8_t b[6];
+} bdaddr_t;
+
+// 蓝牙设备应用服务UUID
+typedef struct {
+	uint8_t type;
+	union {
+		uint16_t  uuid16;
+		uint32_t  uuid32;
+		uint128_t uuid128;
+	} value;
+} uuid_t;
+
+// 蓝牙设备Socket应用
+struct sockaddr_rc {
+	bdaddr_t rc_bdaddr; // 蓝牙设备地址编号
+	uint8_t rc_channel; // 蓝牙应用通道
+};
+
+// 函数接口定义...
+
+// 查找未匹配的蓝牙设备地址编号集合
+// 出口参数：
+// result: 查找未匹配的蓝牙设备地址编号集合
+// len: 查找未匹配的蓝牙设备地址编号集合个数
+// 返回：
+// 0: 成功
+// <0: 失败
+int hci_inquiry(bdaddr_t result[], int len);
+
+// 获得已经匹配的蓝牙设备地址编号集合
+// 出口参数：
+// result: 已经匹配的蓝牙设备地址编号集合
+// len: 已经匹配的蓝牙设备地址编号集合个数
+// 返回：
+// 0: 成功
+// <0: 失败
+int FindPairedDevs(bdaddr_t result[], int len);
+
+// 根据接入的蓝牙设备地址编号和蓝牙设备应用服务UUID查找设备的蓝牙应用通道
+// 入口参数：
+// device_address: 蓝牙设备地址编号
+// smart_device_link_service_uuid: 蓝牙设备应用服务UUID
+// 出口参数：
+// channels: 蓝牙应用通道集合
+// len: 蓝牙应用通道集合个数
+// 返回：
+// 0: 成功
+// <0: 失败
+int DiscoverSmartDeviceLinkRFCOMMChannels(const bdaddr_t device_address, const uuid_t smart_device_link_service_uuid, uint8_t channels[], int len);
+
+// 根据接入的蓝牙设备地址编号，获得设备名称
+// 入口参数：
+// device_address: 蓝牙设备地址编号
+// 出口参数：
+// name: 设备名称
+// len: 设备名称长度
+// 返回：
+// 0: 成功
+// <0: 失败
+int hci_read_remote_name(const bdaddr_t device_address, char *name, int len);
+
+// 根据接入的蓝牙设备地址编号，获得设备地址字符串
+// 入口参数：
+// device_address: 蓝牙设备地址编号
+// 出口参数：
+// addr_str: 设备地址字符串
+// len: 设备地址字符串长度
+// 返回：
+// 0: 成功
+// <0: 失败
+int ba2str(const bdaddr_t device_address, char *addr_str, int len);
+
+
+// 用Socket方式连接远程蓝牙设备应用
+// 入口参数：
+// fd: 主机Socket句柄
+// sockaddr_rc: 蓝牙设备Socket应用
+// len: 蓝牙设备Socket应用长度
+// 返回：
+// 0: 成功
+// <0: 失败
+int connect(const int fd, const sockaddr_rc addr, const int len);
+
+// 关闭远程蓝牙设备应用
+// 入口参数：
+// fd: 主机Socket句柄
+// 返回：
+// 0: 成功
+// <0: 失败
+int close(const int fd);

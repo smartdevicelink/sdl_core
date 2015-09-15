@@ -1,0 +1,14 @@
+# Microsoft Developer Studio Generated Dependency File, included by xml.mak
+
+!IF  "$(CFG)" == "xml - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "xml - Win32 Debug"
+
+!ENDIF 
+
+!IF  "$(CFG)" == "xml - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "xml - Win32 Debug"
+
+!ENDIF 
+
