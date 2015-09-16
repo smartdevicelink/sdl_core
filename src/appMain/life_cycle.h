@@ -32,8 +32,10 @@
 
 #ifndef SRC_APPMAIN_LIFE_CYCLE_H_
 #define SRC_APPMAIN_LIFE_CYCLE_H_
+#ifndef OS_WIN32
 #include "utils/macro.h"
 #include "unistd.h"
+#endif
 
 #include "hmi_message_handler/hmi_message_handler_impl.h"
 #ifdef DBUS_HMIADAPTER

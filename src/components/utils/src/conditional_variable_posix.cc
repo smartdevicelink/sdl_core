@@ -29,6 +29,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifdef MODIFY_FUNCTION_SIGN
+#include <global_first.h>
+#endif
 #include "utils/conditional_variable.h"
 
 #include <errno.h>
@@ -36,6 +39,13 @@
 
 #include "utils/lock.h"
 #include "utils/logger.h"
+#ifdef OS_WIN32
+#include "utils/date_time.h"
+//#pragma warning(disable : 4390)
+#elif defined(OS_MAC)
+#include "utils/date_time.h"
+#else
+#endif
 
 namespace {
 const long kNanosecondsPerSecond = 1000000000;
@@ -53,7 +63,15 @@ ConditionalVariable::ConditionalVariable() {
   if (initialized != 0)
     LOG4CXX_ERROR(logger_, "Failed to initialize "
                             "conditional variable attributes");
+#ifdef OS_WIN32
+//
+#elif defined(OS_MAC)
+//
+#elif defined(OS_ANDROID)
+//
+#else
   pthread_condattr_setclock(&attrs, CLOCK_MONOTONIC);
+#endif
   initialized = pthread_cond_init(&cond_var_, &attrs);
   if (initialized != 0)
     LOG4CXX_ERROR(logger_, "Failed to initialize "
@@ -111,7 +129,13 @@ bool ConditionalVariable::Wait(AutoLock& auto_lock) {
 ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
     AutoLock& auto_lock, int32_t milliseconds){
   struct timespec now;
+#ifdef OS_WIN32
+  clock_gettime(CLOCK_REALTIME, &now);
+#elif defined(OS_MAC)
   clock_gettime(CLOCK_MONOTONIC, &now);
+#else
+  clock_gettime(CLOCK_MONOTONIC, &now); 
+#endif
   timespec wait_interval;
   wait_interval.tv_sec = now.tv_sec +
       (milliseconds / kMillisecondsPerSecond);

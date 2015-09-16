@@ -40,6 +40,9 @@
  * with a fake pipe. The read/write functions are only meant to be used in that
  * context.
  */
+#ifdef MODIFY_FUNCTION_SIGN
+#include <global_first.h>
+#endif
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>

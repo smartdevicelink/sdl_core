@@ -188,7 +188,11 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
 
     mobile_apis::Result::eType result_code =
         static_cast<mobile_apis::Result::eType>(std::max(tts_speak_result_code_,
-                                             navi_alert_maneuver_result_code_));
+#ifdef OS_WIN32
+						max((uint32_t)tts_speak_result_code_, (uint32_t)navi_alert_maneuver_result_code_));
+#else
+						std::max(tts_speak_result_code_,navi_alert_maneuver_result_code_));
+#endif
 
     const char* return_info = NULL;
 

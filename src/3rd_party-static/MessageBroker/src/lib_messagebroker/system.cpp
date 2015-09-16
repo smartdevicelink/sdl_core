@@ -21,7 +21,9 @@
  * \brief System utils.
  * \author Sebastien Vincent
  */
-
+#ifdef MODIFY_FUNCTION_SIGN
+#include <global_first.h>
+#endif
 #include <time.h>
 
 #include "system.h"
@@ -82,7 +84,9 @@ bool Thread::Start(bool detach) {
 }
 
 bool Thread::Stop() {
+#ifndef  OS_ANDROID
   pthread_cancel(m_id);
+#endif
   return false;// Android does not support 'pthread_cancel';
 }
 
@@ -200,7 +204,11 @@ bool Thread::Start(bool detach) {
 }
 
 bool Thread::Stop() {
+#ifdef OS_WIN32
+	return TerminateThread(m_id, (DWORD)-1) == TRUE ? true : false; 
+#else
   return TerminateThread(m_id, (DWORD) - 1);
+#endif
 }
 
 bool Thread::Join(void** ret) {
@@ -250,7 +258,12 @@ bool Mutex::Unlock() {
     return false;
   }
 
+#ifdef OS_WIN32
+  return ReleaseMutex(m_mutex) == TRUE ? true : false;
+#else
   return ReleaseMutex(m_mutex);
+#endif
+
 }
 
 #endif

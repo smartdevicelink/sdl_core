@@ -37,10 +37,22 @@
 #include <atomic.h>
 #endif
 
+#ifdef OS_WIN32
+#include <Windows.h>
+#endif
+
+
 #if defined(__QNXNTO__)
 #define atomic_post_inc(ptr) atomic_add_value((ptr), 1)
 #elif defined(__GNUG__)
 #define atomic_post_inc(ptr) __sync_fetch_and_add((ptr), 1)
+#elif defined(_MSC_VER) && (_MSC_VER >= 1200)
+//#define atomic_post_inc(ptr) ::InterlockedIncrement(ptr)
+#ifdef OS_WINCE
+#define atomic_post_inc(ptr) ::InterlockedExchangeAdd((volatile LONG*)(ptr), 1)
+#else
+#define atomic_post_inc(ptr) ::InterlockedExchangeAdd((ptr), 1)
+#endif
 #else
 #warning "atomic_post_inc() implementation is not atomic"
 #define atomic_post_inc(ptr) (*(ptr))++
@@ -50,6 +62,13 @@
 #define atomic_post_dec(ptr) atomic_sub_value((ptr), 1)
 #elif defined(__GNUG__)
 #define atomic_post_dec(ptr) __sync_fetch_and_sub((ptr), 1)
+#elif defined(_MSC_VER) && (_MSC_VER >= 1200)
+//#define atomic_post_dec(ptr) ::InterlockedDecrement(ptr)
+#ifdef OS_WINCE
+#define atomic_post_dec(ptr) ::InterlockedExchangeAdd((volatile LONG*)(ptr), -1)
+#else
+#define atomic_post_dec(ptr) ::InterlockedExchangeSubtract((ptr), 1)
+#endif
 #else
 #warning "atomic_post_dec() implementation is not atomic"
 #define atomic_post_dec(ptr) (*(ptr))--
@@ -61,6 +80,8 @@
 #elif defined(__GNUG__)
 // with g++ pointer assignment is believed to be atomic
 #define atomic_pointer_assign(dst, src) (dst) = (src)
+#elif defined(_MSC_VER) && (_MSC_VER >= 1200)
+#define atomic_pointer_assign(dst, src) (dst) = (src)
 #else
 #warning atomic_pointer_assign() implementation may be non-atomic
 #define atomic_pointer_assign(dst, src) (dst) = (src)
@@ -71,7 +92,10 @@
 #elif defined(__GNUG__)
 #define atomic_post_set(dst) __sync_val_compare_and_swap((dst), 0, 1)
 #else
-#error "atomic post set operation not defined"
+#ifdef OS_WIN32
+#else
+#erro "atomic post set operation not defined"
+#endif
 #endif
 
 #if defined(__QNXNTO__)
@@ -79,7 +103,10 @@
 #elif defined(__GNUG__)
 #define atomic_post_clr(dst) __sync_val_compare_and_swap((dst), 1, 0)
 #else
+#ifdef OS_WIN32
+#else
 #error "atomic post clear operation not defined"
+#endif
 #endif
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_ATOMIC_H_

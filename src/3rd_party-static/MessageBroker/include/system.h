@@ -268,7 +268,9 @@ namespace System
   };
 
 #ifdef _WIN32
-#warning "BinarySemaphore is implemented for POSIX systems only"
+#ifdef OS_WIN32
+//#warning "BinarySemaphore is implemented for POSIX systems only"
+#endif
 #else
   /**
    * \class BinarySemaphore

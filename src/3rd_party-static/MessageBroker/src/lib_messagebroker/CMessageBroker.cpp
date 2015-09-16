@@ -3,7 +3,9 @@
  * \brief CMessageBroker singletone class implementation.
  * \author AKara
  */
-
+#ifdef MODIFY_FUNCTION_SIGN
+#include <global_first.h>
+#endif
 #include <stdio.h>
 #include <vector>
 
@@ -265,13 +267,24 @@ class CMessageBroker_Private {
      * \brief Binary semaphore that is used to notify the
      * messaging thread that a new message is available.
      */
-    System::BinarySemaphore m_messageQueueSemaphore;
+#ifdef OS_WIN32
+	HANDLE m_messageQueueSemaphore;
+#else
+	System::BinarySemaphore m_messageQueueSemaphore;
+#endif
 };
 
 CMessageBroker_Private::CMessageBroker_Private() :
   mControllersIdCounter(1),
   mpSender(NULL) {
   mpRegistry = CMessageBrokerRegistry::getInstance();
+#ifdef OS_WIN32
+#ifdef OS_WINCE
+  m_messageQueueSemaphore = ::CreateEvent(0, false, false, L"messagebroker-private");
+#else
+  m_messageQueueSemaphore = ::CreateEvent(0, false, false, "messagebroker-private");
+#endif
+#endif
 }
 
 
@@ -386,7 +399,11 @@ void CMessageBroker_Private::pushMessage(CMessage* pMessage) {
   }
   mMessagesQueueMutex.Unlock();
 
+#ifdef OS_WIN32
+  ::SetEvent(m_messageQueueSemaphore);
+#else
   m_messageQueueSemaphore.Notify();
+#endif
 }
 
 bool CMessageBroker_Private::isEventQueueEmpty() {
@@ -492,6 +509,14 @@ void CMessageBroker_Private::processInternalMessage(CMessage* pMessage) {
       Json::Value params = root["params"];
       if (params.isMember("componentName") && params["componentName"].isString()) {
         std::string controllerName = params["componentName"].asString();
+#ifdef MODIFY_FUNCTION_SIGN
+				int nControllerFd = mpRegistry->getDestinationFd(controllerName);
+				bool isExistController = nControllerFd != -1 ? true : false;
+				if (isExistController){
+					// there is not the controller
+					mpRegistry->deleteController(controllerName);
+				}
+#endif
         if (mpRegistry->addController(pMessage->getSenderFd(), controllerName)) {
           Json::Value response;
           response["id"] = root["id"];
@@ -520,6 +545,15 @@ void CMessageBroker_Private::processInternalMessage(CMessage* pMessage) {
       Json::Value params = root["params"];
       if (params.isMember("propertyName") && params["propertyName"].isString()) {
         std::string propertyName = params["propertyName"].asString();
+#ifdef MODIFY_FUNCTION_SIGN
+				std::vector<int> vecSubscriber;
+				int nSubscriberFd = mpRegistry->getSubscribersFd(propertyName, vecSubscriber);
+				bool isExistSubscriber = nSubscriberFd > 0 ? true : false;
+				if (isExistSubscriber){
+					// there is not the subscriber
+					mpRegistry->deleteSubscriber(propertyName);
+				}
+#endif
         if (mpRegistry->addSubscriber(pMessage->getSenderFd(), propertyName)) {
           Json::Value response;
           response["id"] = root["id"];
@@ -720,11 +754,24 @@ void* CMessageBroker::MethodForThread(void* arg) {
         delete message;// delete message object
       }
     }
-    p->m_messageQueueSemaphore.Wait();
+
+#ifdef OS_WIN32
+	::WaitForSingleObject(p->m_messageQueueSemaphore, INFINITE);
+#else
+	p->m_messageQueueSemaphore.Wait();
+#endif
   }
 
   return NULL;
 }
+
+#ifdef MODIFY_FUNCTION_SIGN
+void CMessageBroker::clearController()
+{
+	p->mpRegistry->clearController();
+	p->mpRegistry->clearSubscriber();
+}
+#endif
 
 bool CMessageBroker_Private::checkMessage(CMessage* pMessage, Json::Value& error) {
   DBG_MSG(("CMessageBroker::checkMessage()\n"));

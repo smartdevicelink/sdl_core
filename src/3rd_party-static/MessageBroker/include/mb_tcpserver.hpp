@@ -62,6 +62,16 @@ namespace NsMessageBroker
          */
          virtual ssize_t Send(int fd, const std::string& data);
 
+#ifdef MODIFY_FUNCTION_SIGN
+				 /**
+				 * \brief Send data.
+				 * \param fd file descriptor of the client TCP socket
+				 * \param data data to send
+				 * \return number of bytes sent or -1 if error
+				 */
+				 virtual ssize_t Send(int fd, const char *data, int len);
+#endif
+
          /**
          * \brief Wait message.
          *

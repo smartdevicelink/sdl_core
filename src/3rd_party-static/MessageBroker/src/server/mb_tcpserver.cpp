@@ -3,9 +3,15 @@
  * \brief MessageBroker TCP server.
  * \author AKara
  */
-
+#ifdef MODIFY_FUNCTION_SIGN
+#include <global_first.h>
+#endif
 #include <cstring>
+#ifdef OS_WINCE
+#include <errno.h>
+#else
 #include <cerrno>
+#endif
 #include <iostream>
 #include <algorithm>
 #include <vector>
@@ -43,7 +49,11 @@ ssize_t TcpServer::Send(int fd, const std::string& data) {
   int bytesToSend = rep.length();
   const char* ptrBuffer = rep.c_str();
   do {
-    int retVal = send(fd, ptrBuffer, bytesToSend, MSG_NOSIGNAL);
+#ifdef OS_WIN32
+    int retVal = send(fd, ptrBuffer, bytesToSend, 0);
+#else
+	int retVal = send(fd, ptrBuffer, bytesToSend, MSG_NOSIGNAL);
+#endif
     if (retVal == -1) {
       if (EPIPE == errno) {
         m_purge.push_back(fd);
@@ -56,6 +66,25 @@ ssize_t TcpServer::Send(int fd, const std::string& data) {
   return rep.length();
 }
 
+#ifdef MODIFY_FUNCTION_SIGN
+	 ssize_t TcpServer::Send(int fd, const char *data, int size)
+	 {
+		 DBG_MSG(("Send to %d: %s\n", fd, data));
+		 int bytesToSend = size;
+		 const char* ptrBuffer = data;
+		 do
+		 {
+			 int retVal = send(fd, ptrBuffer, bytesToSend, 0);
+			 if (retVal == -1)
+			 {
+				 return -1;
+			 }
+			 bytesToSend -= retVal;
+			 ptrBuffer += retVal;
+		 } while (bytesToSend > 0);
+		 return size;
+	 }
+#endif
 bool TcpServer::Recv(int fd) {
   DBG_MSG(("TcpServer::Recv(%d)\n", fd));
   ssize_t nb = -1;
@@ -262,8 +291,14 @@ bool TcpServer::Accept() {
   if (m_sock == -1) {
     return false;
   }
-
-  client = accept(m_sock, 0, &addrlen);
+#ifdef OS_WINCE
+	  sockaddr_in client_address;
+	  socklen_t client_address_size = sizeof(client_address);
+      client = accept(m_sock, (struct sockaddr*)&client_address,
+                                     &client_address_size);
+#else
+      client = accept(m_sock, 0, &addrlen);
+#endif
 
   if (client == -1) {
     return false;

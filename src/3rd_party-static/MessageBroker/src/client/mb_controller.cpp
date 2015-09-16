@@ -3,7 +3,9 @@
  * \brief MessageBroker Controller.
  * \author AKara
  */
-
+#ifdef MODIFY_FUNCTION_SIGN
+#include <global_first.h>
+#endif
 #include "mb_controller.hpp"
 
 #include "MBDebugHelper.h" 
@@ -274,12 +276,14 @@ namespace NsMessageBroker
    {
       sync_primitives::AutoLock auto_lock(receiving_thread_lock_);
       stop = false;
+      is_active = true;
       arg = arg; // to avoid compiler warnings
       while(!stop)
       {
          std::string data = "";
          Recv(data);
       }
+      is_active = false;
       return NULL;
    }
 

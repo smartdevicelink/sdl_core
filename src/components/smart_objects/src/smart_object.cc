@@ -30,12 +30,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef MODIFY_FUNCTION_SIGN
+#include <global_first.h>
+#endif
 #include "smart_objects/smart_object.h"
 
 #include <errno.h>
 #include <inttypes.h>
 #include <limits>
 #include <stdlib.h>
+#include <cstdio>
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
@@ -718,7 +722,13 @@ void SmartObject::duplicate(const SmartObject& OtherObject) {
   cleanup_data();
 
   m_type = newType;
+#ifdef OS_WIN32
+  if (m_type != SmartType_Null && m_type != SmartType_Invalid){
+	  m_data = newData;
+  }
+#else
   m_data = newData;
+#endif
 }
 
 void SmartObject::cleanup_data() {
@@ -850,7 +860,11 @@ bool SmartObject::keyExists(const std::string& Key) const {
   if (m_type != SmartType_Map) {
     return false;
   }
-  return m_data.map_value->find(Key) != m_data.map_value->end();
+#ifdef OS_WIN32
+  return m_data.map_value->count(Key) > 0 ? true : false;
+#else
+  return m_data.map_value->count(Key);
+#endif
 }
 
 bool SmartObject::erase(const std::string& Key) {

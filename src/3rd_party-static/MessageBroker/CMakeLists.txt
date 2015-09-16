@@ -5,8 +5,12 @@ include_directories (
   ./include/
   ../jsoncpp/include
   ../../components/utils/include
-
 )
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+include_directories (
+  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/pthread-win32-2.9.1
+)
+endif()
 
 set (MESSAGE_BROKER_SOURCES
   ./src/lib_messagebroker/CMessageBroker.cpp

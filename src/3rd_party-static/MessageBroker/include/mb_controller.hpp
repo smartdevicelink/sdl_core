@@ -190,6 +190,13 @@ namespace NsMessageBroker
       virtual void exitReceivingThread() {
         Close();
         stop = true;
+        while (is_active) {
+#ifdef OS_WIN32
+					Sleep(1000);
+#else
+          sleep(1);
+#endif
+        }
       }
 
    protected:
@@ -197,6 +204,11 @@ namespace NsMessageBroker
        * @brief flag top stop thread
        */
       volatile bool stop;
+
+      /**
+       * @brief Flag represents that receaving data is active
+       */
+      volatile bool is_active;
 
    private:
       /**

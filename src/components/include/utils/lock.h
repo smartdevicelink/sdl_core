@@ -36,7 +36,10 @@
 #include <pthread.h>
 #include <sched.h>
 #else
-#error Please implement lock for your OS
+#ifdef OS_WIN32
+#include <pthread.h>
+//#error Please implement lock for your OS
+#endif
 #endif
 #include <stdint.h>
 #include "utils/macro.h"
@@ -48,6 +51,10 @@ namespace sync_primitives {
 namespace impl {
 #if defined(OS_POSIX)
 typedef pthread_mutex_t PlatformMutex;
+#else
+#ifdef OS_WIN32
+	typedef pthread_mutex_t PlatformMutex;
+#endif
 #endif
 } // namespace impl
 
@@ -57,6 +64,8 @@ class SpinMutex {
   SpinMutex()
     : state_(0) { }
   void Lock() {
+#ifdef OS_WIN32
+#else
     if (atomic_post_set(&state_) == 0) {
       return;
     }
@@ -66,6 +75,7 @@ class SpinMutex {
         return;
       }
     }
+#endif
   }
   void Unlock() {
     state_ = 0;

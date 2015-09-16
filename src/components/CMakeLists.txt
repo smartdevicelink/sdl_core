@@ -34,25 +34,25 @@ set(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
 add_subdirectory(./interfaces)
 
 # --- ProtocolHandler
-add_subdirectory(./protocol)
+#add_subdirectory(./protocol)
 
 # --- TransportManager
-add_subdirectory(./transport_manager)
+#add_subdirectory(./transport_manager)
 
 # --- Policies
-add_subdirectory(./resumption)
+#add_subdirectory(./resumption)
 
 # --- formatters
-add_subdirectory(./formatters)
+#add_subdirectory(./formatters)
 
 # --- ProtocolHandler
-add_subdirectory(./protocol_handler)
+#add_subdirectory(./protocol_handler)
 
 # --- ConnectionHandler
-add_subdirectory(./connection_handler)
+#add_subdirectory(./connection_handler)
 
 # --- Utils
-add_subdirectory(./utils)
+#add_subdirectory(./utils)
 
 # --- Security manager
 if(ENABLE_SECURITY)
@@ -60,7 +60,7 @@ if(ENABLE_SECURITY)
 endif()
 #
 # --- Policy_impl
-add_subdirectory(./policy)
+#add_subdirectory(./policy)
 
 # --- Validated types
 add_subdirectory(./rpc_base)
@@ -69,7 +69,7 @@ add_subdirectory(./rpc_base)
 add_subdirectory(./smart_objects)
 
 # --- Application manager
-add_subdirectory(./application_manager)
+#add_subdirectory(./application_manager)
 
 # --- HMI Message Handler
 add_subdirectory(./hmi_message_handler)

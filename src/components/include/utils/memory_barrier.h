@@ -37,6 +37,10 @@
 #include <sys/cpuinline.h>
 #endif
 
+#ifdef OS_WIN32
+#include <Windows.h>
+#endif
+
 namespace utils {
 
 inline void memory_barrier() {
@@ -44,6 +48,10 @@ inline void memory_barrier() {
   __cpu_membarrier();
 #elif defined(__GNUG__)
   __sync_synchronize();
+#elif defined(_MSC_VER) && (_MSC_VER >= 1200)
+#ifndef OS_WINCE
+	::MemoryBarrier();
+#endif
 #else
 #warning "memory_barrier() implementation does nothing"
 #endif

@@ -3,7 +3,9 @@
  * \brief MessageBroker client.
  * \author AKara
  */
-
+#ifdef MODIFY_FUNCTION_SIGN
+#include <global_first.h>
+#endif
 #include <cstring>
 
 #include "mb_client.hpp"
@@ -66,8 +68,11 @@ namespace NsMessageBroker
 
    void Client::Close()
    {
+#ifdef OS_WIN32
+		 // do nothing
+#else
       shutdown(m_sock, SHUT_RDWR);
-
+#endif
       close(m_sock);
       m_sock = -1;
    }

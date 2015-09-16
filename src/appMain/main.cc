@@ -29,10 +29,18 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
+#ifdef MODIFY_FUNCTION_SIGN
+#include <global_first.h>
+#endif
+#ifndef OS_WINCE
 #include <sys/stat.h>
+#endif
+
+#ifdef OS_WIN32
+#include <stdint.h>
+#else
 #include <unistd.h>
-#include <signal.h>
+#endif
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
@@ -41,9 +49,9 @@
 #include <fstream>   // cpplint: Streams are highly discouraged.
 
 // ----------------------------------------------------------------------------
-
-#include "utils/log_message_loop_thread.h"
-#include "utils/logger.h"
+#ifdef OS_WIN32
+#include <winsock2.h>
+#endif
 
 #include "./life_cycle.h"
 #include "signal_handlers.h"
@@ -62,6 +70,16 @@
 // Third-Party includes
 #include "networking.h"  // cpplint: Include the directory when naming .h files
 
+#ifdef MODIFY_FUNCTION_SIGN
+#include <lib_msp_vr.h>
+#endif
+#ifdef OS_WINCE
+#include "utils/file_system.h"
+#endif
+
+#ifdef BUILD_TARGET_LIB
+#include <main.h>
+#endif
 // ----------------------------------------------------------------------------
 
 
@@ -73,6 +91,7 @@ const std::string kBrowser = "/usr/bin/chromium-browser";
 const std::string kBrowserName = "chromium-browser";
 const std::string kBrowserParams = "--auth-schemes=basic,digest,ntlm";
 const std::string kLocalHostAddress = "127.0.0.1";
+const std::string kApplicationVersion = "SDL_RB_B3.5";
 
 #ifdef WEB_HMI
 /**
@@ -80,12 +99,56 @@ const std::string kLocalHostAddress = "127.0.0.1";
  * @return true if success otherwise false.
  */
 bool InitHmi() {
-  std::string hmi_link = profile::Profile::instance()->link_to_web_hmi();
-  struct stat sb;
-  if (stat(hmi_link.c_str(), &sb) == -1) {
-    LOG4CXX_FATAL(logger_, "HMI index.html doesn't exist!");
-    return false;
-  }
+#ifdef OS_WINCE
+	LPWIN32_FIND_DATA  sb;
+	if(INVALID_HANDLE_VALUE==FindFirstFile((LPCWSTR)"hmi_link",sb)){
+		LOG4CXX_FATAL(logger, "File with HMI link doesn't exist!");
+		return false;
+	}
+#else
+struct stat sb;
+if (stat("hmi_link", &sb) == -1) {
+  LOG4CXX_FATAL(logger, "File with HMI link doesn't exist!");
+  return false;
+}
+#endif
+
+std::ifstream file_str;
+file_str.open("hmi_link");
+
+if (!file_str.is_open()) {
+  LOG4CXX_FATAL(logger, "File with HMI link was not opened!");
+  return false;
+}
+
+file_str.seekg(0, std::ios::end);
+int32_t length = file_str.tellg();
+file_str.seekg(0, std::ios::beg);
+
+std::string hmi_link;
+std::getline(file_str, hmi_link);
+
+
+LOG4CXX_INFO(logger,
+             "Input string:" << hmi_link << " length = " << hmi_link.size());
+#ifdef OS_WIN32
+#ifdef close
+#undef close
+file_str.close();
+#define close closesocket
+#endif
+#else
+file_str.close();
+#endif
+
+#ifdef OS_WIN32
+#elif defined(OS_MAC)
+#else
+if (stat(hmi_link.c_str(), &sb) == -1) {
+  LOG4CXX_FATAL(logger, "HMI index.html doesn't exist!");
+  return false;
+}
+#endif
   return utils::System(kBrowser, kBrowserName).Add(kBrowserParams).Add(hmi_link)
       .Execute();
 }
@@ -110,16 +173,29 @@ bool InitHmi() {
 
 }
 
+#ifdef BUILD_TARGET_LIB
+void sdl_stop(){
+	//main_namespace::LifeCycle::instance()->StopComponents();
+}
+#endif
+
 /**
  * \brief Entry point of the program.
  * \param argc number of argument
  * \param argv array of arguments
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
+#ifndef BUILD_TARGET_LIB
 int32_t main(int32_t argc, char** argv) {
+#else
+int32_t sdl_start(int32_t argc,char** argv){
+#endif
 
   // --------------------------------------------------------------------------
   // Logger initialization
+#ifdef OS_WINCE
+	INIT_LOGGER(file_system::CurrentWorkingDirectory() + "/" + "log4cxx.properties");
+#else
   INIT_LOGGER("log4cxx.properties");
 #if defined(__QNXNTO__) and defined(GCOV_ENABLED)
   LOG4CXX_WARN(logger_,
@@ -147,7 +223,11 @@ int32_t main(int32_t argc, char** argv) {
   if ((argc > 1)&&(0 != argv)) {
       profile::Profile::instance()->config_file_name(argv[1]);
   } else {
+#ifdef OS_WINCE
+      profile::Profile::instance()->config_file_name(file_system::CurrentWorkingDirectory() + "/" + "smartDeviceLink.ini");
+#else
       profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
+#endif
   }
 
 #ifdef __QNX__

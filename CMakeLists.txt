@@ -178,10 +178,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # flag is handled by CMake
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
-
-if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL  "Android")
 set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror -Wuninitialized -Wvla")
-endif()
 
 if(ENABLE_SANITIZE)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
@@ -190,8 +188,18 @@ if(ENABLE_GCOV)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
   add_definitions(-DGCOV_ENABLED)
 endif()
-set(CMAKE_CXX_FLAGS_RELEASE " -DNDEBUG -s -O2")
-set(CMAKE_CXX_FLAGS_DEBUG   " -DDEBUG -g3 -ggdb3")
+set(CMAKE_CXX_FLAGS_RELEASE "-fPIC -s -O2") #It will be appended to CMAKE_CXX_FLAGS in release
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+set(CMAKE_CXX_FLAGS "-g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized --coverage -std=c++0x") # -stdlib=libc++ -m32
+set(CMAKE_CXX_FLAGS_RELEASE "-s -O2") #It will be appended to CMAKE_CXX_FLAGS in release
+#set(CMAKE_EXE_LINKER_FLAGS "-stdlib=libc++")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+set(CMAKE_CXX_FLAGS "/wd\"4819\" /wd\"4244\" /wd\"4390\" /EHsc")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG") #It will be appended to CMAKE_CXX_FLAGS in release
+elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+set(CMAKE_CXX_FLAGS "/wd\"4819\" /wd\"4244\" /wd\"4390\" /wd\"4996\" /EHsc")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG") #It will be appended to CMAKE_CXX_FLAGS in release
+endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   add_definitions(-DOS_LINUX)
@@ -204,14 +212,14 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
   add_definitions(-DOS_WIN32)
   add_definitions(-DWIN32)
-  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+#  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
   add_definitions(-DWIN32_LEAN_AND_MEAN)
   add_definitions(-DASR_HAS_VR)
   SET(BUILD_AVAHI_SUPPORT OFF)
   SET(BUILD_USB_SUPPORT OFF)
   SET(BUILD_BT_SUPPORT OFF)
   SET(EXTENDED_MEDIA_MODE OFF)
-  SET(ENABLE_LOG ON)
+  SET(ENABLE_LOG OFF)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
   add_definitions(-D_WIN32_WCE=$(CEVER))
   add_definitions(-D_WINDOWS)
@@ -249,7 +257,13 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL  "Android")
   SET(BUILD_AVAHI_SUPPORT OFF)
   SET(BUILD_BACKTRACE_SUPPORT OFF)
 endif()
+if(MODIFY_FUNCTION_FLAGS)
+add_definitions(-DMODIFY_FUNCTION_SIGN)
+endif()
 
+if(BUILD_TARGET_LIBRARY)
+add_definitions(-DBUILD_TARGET_LIB)
+endif()
 
 if (BUILD_USB_SUPPORT)
   add_definitions(-DUSB_SUPPORT)
@@ -337,6 +351,7 @@ if(NOT PYTHONINTERP_FOUND)
     message(FATAL_ERROR "Exiting!")
 endif(NOT PYTHONINTERP_FOUND)
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL  "Android")
 if (HMI STREQUAL "qt")
     cmake_minimum_required(VERSION 2.8.11)
     if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
@@ -362,6 +377,7 @@ if (HMI STREQUAL "qt")
         set(qmlplugindump_binary ${qt_bin_dir}/qmlplugindump)
     endif ()
 endif()
+endif()
 
 set(INTEFRACE_GENERATOR "${PROJECT_SOURCE_DIR}/tools/InterfaceGenerator/Generator.py")
 set(INTEFRACE_GENERATOR_CMD ${PYTHON_EXECUTABLE} -B ${INTEFRACE_GENERATOR})
@@ -378,12 +394,21 @@ macro (GenerateInterface arg_xml_name arg_namespace parser_type)
     set(cpp_file "${CMAKE_CURRENT_BINARY_DIR}/${file_name}_schema.cc")
     set(full_xml_name "${CMAKE_CURRENT_SOURCE_DIR}/${arg_xml_name}")
 
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     add_custom_command( OUTPUT ${hpp_file} ${cpp_file}
                         COMMAND ${INTEFRACE_GENERATOR_CMD} ${full_xml_name} ${arg_namespace} ${CMAKE_CURRENT_BINARY_DIR} "--parser-type" "${parser_type}"
                         DEPENDS ${INTERFACE_GENERATOR_DEPENDENCIES} ${full_xml_name}
                         COMMENT "Generating files:\n   ${hpp_file}\n   ${cpp_file}\nfrom:\n   ${arg_xml_name} ..."
                         VERBATIM
                        )
+else()
+    add_custom_command( OUTPUT ${hpp_file} ${cpp_file}
+                        COMMAND ${INTEFRACE_GENERATOR_CMD} ${full_xml_name} ${arg_namespace} ${CMAKE_CURRENT_BINARY_DIR} "--parser-type" "${parser_type}"
+                        DEPENDS ${INTERFACE_GENERATOR_DEPENDENCIES} ${full_xml_name}
+                        COMMENT ""
+                        VERBATIM
+                       )
+endif()
 
     include_directories (
         ${COMPONENTS_DIR}/smart_objects/include
@@ -394,6 +419,7 @@ macro (GenerateInterface arg_xml_name arg_namespace parser_type)
     add_library("${file_name}" ${cpp_file})
 endmacro(GenerateInterface)
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
 # --- Useful macro
 macro(create_test NAME SOURCES LIBS)
   add_executable("${NAME}" ${CMAKE_SOURCE_DIR}/src/components/test_main.cc ${SOURCES})
@@ -408,6 +434,38 @@ macro(create_test NAME SOURCES LIBS)
     add_test(${NAME} ${NAME})
   endif()
 endmacro(create_test)
+endif()
+
+
+# Include direction and link library
+
+if(MODIFY_FUNCTION_FLAGS)
+include_directories (
+${CMAKE_SOURCE_DIR}/include/all
+)
+endif()
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+include_directories (
+${CMAKE_SOURCE_DIR}/include/win32
+)
+LINK_DIRECTORIES(
+${CMAKE_SOURCE_DIR}/lib/win32
+)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+include_directories (
+${CMAKE_SOURCE_DIR}/include/wince
+)
+LINK_DIRECTORIES(
+${CMAKE_SOURCE_DIR}/lib/wince
+)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+include_directories (
+/usr/local/Cellar/log4cxx/0.10.0/include
+)
+LINK_DIRECTORIES(
+/usr/local/Cellar/log4cxx/0.10.0/lib
+)
+endif()
 
 # --replace in list macro
 macro(LIST_REPLACE LIST INDEX NEWVALUE)
@@ -420,6 +478,7 @@ endmacro(LIST_REPLACE)
 # Building application
 
 # --- Type HMI
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
 if (HMI STREQUAL "qt")
     set(QT_HMI ON)
     add_definitions(-DQT_HMI)
@@ -430,6 +489,10 @@ else ()
     set(HMI "no")
     add_definitions(-DNO_HMI)
 endif ()
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+    set(WEB_HMI ON)
+    add_definitions(-DWEB_HMI)
+endif()
 
 if (HMI STREQUAL "qt" AND NOT DEFINED HMIADAPTER)
     set(HMIADAPTER "dbus")
@@ -725,17 +788,17 @@ endif()
 add_subdirectory(./src/3rd_party-static)
 
 # --- Tools
-add_subdirectory(./tools)
+#add_subdirectory(./tools)
 
 
 # --- Components
-add_subdirectory(./src/components)
+#add_subdirectory(./src/components)
 
 # --- Main application
-add_subdirectory(./src/appMain)
+#add_subdirectory(./src/appMain)
 
 # --- Plugins
-add_subdirectory(./src/plugins)
+#add_subdirectory(./src/plugins)
 
 
 # Building tests
@@ -747,6 +810,7 @@ endif()
                                                                                                                                                                                        
 # Building documentation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL  "Android")
 # At first creating directory for generated documentation. Unfortunately doxygen
 # cannot generate it byself
 FIND_PACKAGE(Doxygen)
@@ -768,4 +832,9 @@ FIND_PACKAGE(Doxygen)
     MESSAGE(STATUS "To enable processing of MscGen comments please install mscgen")
     MESSAGE(STATUS "sudo apt-get install mscgen")
 ENDIF(DOXYGEN_FOUND)
+endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+set(CMAKE_BUILD_TYPE OFF)
+MESSAGE(STATUS "set CMAKE_BUILD_TYPE OFF")
+endif()

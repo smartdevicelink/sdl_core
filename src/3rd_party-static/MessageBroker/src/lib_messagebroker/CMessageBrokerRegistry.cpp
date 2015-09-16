@@ -3,7 +3,9 @@
  * \brief CMessageBrokerRegistry singletone class implementation.
  * \author AKara
  */
-
+#ifdef MODIFY_FUNCTION_SIGN
+#include <global_first.h>
+#endif
 #include "CMessageBrokerRegistry.hpp"
 #include "libMBDebugHelper.h"
 
@@ -130,24 +132,50 @@ namespace NsMessageBroker
 
    void CMessageBrokerRegistry::deleteSubscriber(int fd, std::string name)
    {
-       DBG_MSG(("CMessageBrokerRegistry::deleteSubscriber()\n"));
+	   DBG_MSG(("CMessageBrokerRegistry::deleteSubscriber()\n"));
 
-       sync_primitives::AutoLock lock(mSubscribersListLock);
-       std::pair<std::multimap <std::string, int>::iterator, std::multimap <std::string, int>::iterator> p = mSubscribersList.equal_range(name);
-       if (p.first != p.second) {
-           std::multimap <std::string, int>::iterator itr;
-           for (itr = p.first; itr != p.second; ) {
-               DBG_MSG(("My for loop %s, %d", itr->first.c_str() ,itr->second));
-               if (fd == itr->second) {
-                   mSubscribersList.erase(itr++);
-               } else {
-                   ++itr;
-               }
-           }
-       }
-
-       DBG_MSG(("Count of subscribers: %d\n", mSubscribersList.size()));
+	   sync_primitives::AutoLock lock(mSubscribersListLock);
+	   std::pair<std::multimap <std::string, int>::iterator, std::multimap <std::string, int>::iterator> p = mSubscribersList.equal_range(name);
+	   if (p.first != p.second) {
+		   std::multimap <std::string, int>::iterator itr;
+		   for (itr = p.first; itr != p.second;) {
+			   DBG_MSG(("My for loop %s, %d", itr->first.c_str(), itr->second));
+			   if (fd == itr->second) {
+				   mSubscribersList.erase(itr++);
+			   }
+			   else {
+				   ++itr;
+			   }
+		   }
+		   DBG_MSG(("Count of subscribers: %d\n", mSubscribersList.size()));
+	   }
    }
+#ifdef MODIFY_FUNCTION_SIGN
+   void CMessageBrokerRegistry::deleteSubscriber(std::string name)
+   {
+	   DBG_MSG(("CMessageBrokerRegistry::deleteSubscriber()\n"));
+	   std::pair<std::multimap <std::string, int>::iterator, std::multimap <std::string, int>::iterator> p = mSubscribersList.equal_range(name);
+	   if (p.first != p.second)
+	   {
+		   mSubscribersList.erase(p.first, p.second);
+	   }
+	   DBG_MSG(("Count of subscribers: %d\n", mSubscribersList.size()));
+   }
+
+   void CMessageBrokerRegistry::clearSubscriber()
+   {
+	   DBG_MSG(("CMessageBrokerRegistry::clearSubscriber()\n"));
+	   deleteSubscriber("BasicCommunication.OnAppRegistered");
+	   deleteSubscriber("BasicCommunication.OnAppUnregistered");
+	   deleteSubscriber("BasicCommunication.PlayTone");
+	   deleteSubscriber("UI.ShowNotification");
+	   deleteSubscriber("BasicCommunication.SDLLog");
+	   deleteSubscriber("UI.CreateInteractionChoiceSet");
+	   deleteSubscriber("UI.DeleteInteractionChoiceSet");
+	   deleteSubscriber("UI.SubscribeButton");
+	   deleteSubscriber("UI.UnsubscribeButton");
+   }
+#endif
 
    int CMessageBrokerRegistry::getDestinationFd(std::string name)
    {

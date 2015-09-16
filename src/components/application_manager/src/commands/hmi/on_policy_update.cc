@@ -30,6 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef MODIFY_FUNCTION_SIGN
+#include <global_first.h>
+#endif
 #include "application_manager/commands/hmi/on_policy_update.h"
 #include "application_manager/policies/policy_handler.h"
 

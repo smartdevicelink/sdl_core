@@ -38,6 +38,9 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#ifdef OS_WIN32
+#include "utils/logger.h"
+#endif
 
 namespace file_system {
 
@@ -55,7 +58,7 @@ uint64_t GetAvailableDiskSpace(const std::string& path);
  *
  * @param path to directory
  */
-size_t DirectorySize(const std::string& path);
+uint32_t DirectorySize(const std::string& path);
 
 /*
  * @brief Get size of current file
@@ -63,7 +66,7 @@ size_t DirectorySize(const std::string& path);
  * @param path to file
  * @return size of file, return 0 if file not exist
  */
-int64_t FileSize(const std::string& path);
+uint32_t FileSize(const std::string& path);
 
 /**
  * @brief Creates directory
@@ -174,22 +177,6 @@ bool RemoveDirectory(const std::string& directory_name,
 bool IsAccessible(const std::string& name, int32_t how);
 
 /**
-  * @brief Check access rights for writing
-  *
-  * @param name path to file or folder
-  * @return returns true if has access rights.
-  */
-bool IsWritingAllowed(const std::string& name);
-
-/**
-  * @brief Check access rights for reading
-  *
-  * @param name path to file.
-  * @return returns true if file has access rights.
-  */
-bool IsReadingAllowed(const std::string& name);
-
-/**
   * @brief Lists all files in given directory
   *
   * @param name path to directory.
@@ -233,34 +220,6 @@ const std::string ConvertPathForURL(const std::string& path);
   * @return if result success return true
 */
 bool CreateFile(const std::string& path);
-
-/**
- * @brief Get modification time of file
- * @param path Path to file
- * @return Modification time in nanoseconds
- */
-uint64_t GetFileModificationTime(const std::string& path);
-
-/**
-  * @brief Copy file from source to destination
-  *
-  * @param src Source file path
-  * @param dst Destination file path
-  * @return if result success return true
-*/
-bool CopyFile(const std::string& src,
-              const std::string& dst);
-
-/**
-  * @brief Move file from source to destination
-  *
-  * @param src Source file path
-  * @param dst Destination file path
-  * @return if result success return true
-*/
-bool MoveFile(const std::string& src,
-              const std::string& dst);
-void remove_directory_content(const std::string& directory_name);
 
 }  // namespace file_system
 

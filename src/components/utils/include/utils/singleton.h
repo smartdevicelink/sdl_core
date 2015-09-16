@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SINGLETON_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SINGLETON_H_
 
-#include "utils/lock.h"
-#include "utils/memory_barrier.h"
-#include "utils/atomic.h"
+#include "lock.h"
+#include "memory_barrier.h"
+#include "atomic.h"
 
 namespace utils {
 

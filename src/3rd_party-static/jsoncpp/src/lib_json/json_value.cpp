@@ -3,6 +3,9 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
+#ifdef MODIFY_FUNCTION_SIGN
+#include <global_first.h>
+#endif
 #if !defined(JSON_IS_AMALGAMATION)
 # include <json/value.h>
 # include <json/writer.h>
@@ -698,7 +701,11 @@ Value::asInt() const
       JSON_ASSERT_MESSAGE( value_.int_ >= minInt  &&  value_.int_ <= maxInt, "unsigned integer out of signed int range" );
       return Int(value_.int_);
    case uintValue:
-      JSON_ASSERT_MESSAGE( value_.uint_ <= UInt(maxInt), "unsigned integer out of signed int range" );
+#ifdef MODIFY_FUNCTION_SIGN
+		 // do nothing
+#else
+		 JSON_ASSERT_MESSAGE(value_.uint_ <= UInt(maxInt), "unsigned integer out of signed int range");
+#endif
       return Int(value_.uint_);
    case realValue:
       JSON_ASSERT_MESSAGE( value_.real_ >= minInt  &&  value_.real_ <= maxInt, "Real out of signed integer range" );
