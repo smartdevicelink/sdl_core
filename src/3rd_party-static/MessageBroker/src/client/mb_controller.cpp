@@ -13,10 +13,10 @@ namespace NsMessageBroker
 {
    CMessageBrokerController::CMessageBrokerController(const std::string& address, uint16_t port, std::string name):
    TcpClient(address, port),
+   stop(false),
    m_receivingBuffer(""),
    mControllersIdStart(-1),
-   mControllersIdCurrent(0),
-   stop(false)
+   mControllersIdCurrent(0)
    {
       mControllersName = name;
    }
