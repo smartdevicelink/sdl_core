@@ -4975,7 +4975,7 @@
     <param name="url" type="String" maxlength="1000" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>
         Optional URL for HTTP requests.
-	If blank, the binary data shall be forwarded to the app.
+        If blank, the binary data shall be forwarded to the app.
         If not blank, the binary data shall be forwarded to the url with a provided timeout in seconds.
       </description>
     </param>
