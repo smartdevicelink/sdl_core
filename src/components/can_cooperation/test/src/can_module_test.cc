@@ -207,7 +207,7 @@ TEST_F(CanModuleTest, SendResponseToMobile) {
   module->SendResponseToMobile(message);
 }
 
-TEST_F(CanModuleTest, IsAppForPluginSuccess) {
+TEST_F(CanModuleTest, DISABLED_IsAppForPluginSuccess) {
   MockApplication* app = new MockApplication();
   application_manager::ApplicationSharedPtr app_ptr(app);
   smart_objects::SmartObject obj(smart_objects::SmartType::SmartType_Array);
@@ -261,7 +261,7 @@ TEST_F(CanModuleTest, OnAppHMILevelChanged) {
   module->OnAppHMILevelChanged(app_ptr, mobile_apis::HMILevel::eType::HMI_FULL);
 }
 
-TEST_F(CanModuleTest, SetDriverDeviceOnRegister) {
+TEST_F(CanModuleTest, DISABLED_SetDriverDeviceOnRegister) {
   NiceMock<MockApplication>* app = new NiceMock<MockApplication>();
   application_manager::ApplicationSharedPtr app_ptr(app);
 
@@ -283,7 +283,7 @@ TEST_F(CanModuleTest, SetDriverDeviceOnRegister) {
   ASSERT_TRUE(ext->is_on_driver_device());
 }
 
-TEST_F(CanModuleTest, SetDriverDeviceOnRegisterFail) {
+TEST_F(CanModuleTest, DISABLED_SetDriverDeviceOnRegisterFail) {
   NiceMock<MockApplication>* app = new NiceMock<MockApplication>();
   application_manager::ApplicationSharedPtr app_ptr(app);
 
@@ -305,7 +305,7 @@ TEST_F(CanModuleTest, SetDriverDeviceOnRegisterFail) {
   ASSERT_FALSE(ext->is_on_driver_device());
 }
 
-TEST_F(CanModuleTest, ChangeDriverDevice) {
+TEST_F(CanModuleTest, DISABLED_ChangeDriverDevice) {
   Json::Value value(Json::ValueType::objectValue);
   value[json_keys::kMethod] = functional_modules::hmi_api::on_device_rank_changed;
   value[json_keys::kParams] = Json::Value(Json::ValueType::objectValue);
@@ -341,7 +341,7 @@ TEST_F(CanModuleTest, ChangeDriverDevice) {
   ASSERT_TRUE(ext->is_on_driver_device());
 }
 
-TEST_F(CanModuleTest, ChangeDriverDeviceOnOther) {
+TEST_F(CanModuleTest, DISABLED_ChangeDriverDeviceOnOther) {
   Json::Value value(Json::ValueType::objectValue);
   value[json_keys::kMethod] = functional_modules::hmi_api::on_device_rank_changed;
   value[json_keys::kParams] = Json::Value(Json::ValueType::objectValue);
@@ -379,7 +379,7 @@ TEST_F(CanModuleTest, ChangeDriverDeviceOnOther) {
   ASSERT_FALSE(ext->is_on_driver_device());
 }
 
-TEST_F(CanModuleTest, ChangeDriverDeviceToPassenger) {
+TEST_F(CanModuleTest, DISABLED_ChangeDriverDeviceToPassenger) {
   Json::Value value(Json::ValueType::objectValue);
   value[json_keys::kMethod] = functional_modules::hmi_api::on_device_rank_changed;
   value[json_keys::kParams] = Json::Value(Json::ValueType::objectValue);
@@ -417,7 +417,7 @@ TEST_F(CanModuleTest, ChangeDriverDeviceToPassenger) {
   ASSERT_FALSE(ext->is_on_driver_device());
 }
 
-TEST_F(CanModuleTest, ChangePassengerDeviceToPassenger) {
+TEST_F(CanModuleTest, DISABLED_ChangePassengerDeviceToPassenger) {
   Json::Value value(Json::ValueType::objectValue);
   value[json_keys::kMethod] = functional_modules::hmi_api::on_device_rank_changed;
   value[json_keys::kParams] = Json::Value(Json::ValueType::objectValue);
@@ -515,7 +515,7 @@ TEST_F(CanModuleTest, CanAppChangeHMILevelPrimary) {
   ASSERT_TRUE(module->CanAppChangeHMILevel(app_ptr, mobile_apis::HMILevel::eType::HMI_NONE));
 }
 
-TEST_F(CanModuleTest, CanAppChangeHMILevelPassenger) {
+TEST_F(CanModuleTest, DISABLED_CanAppChangeHMILevelPassenger) {
   NiceMock<MockApplication>* app = new NiceMock<MockApplication>();
   application_manager::ApplicationSharedPtr app_ptr(app);
   std::vector<application_manager::ApplicationSharedPtr> apps;
