@@ -31,9 +31,18 @@
  */
 
 #include "transport_manager/tcp/tcp_transport_adapter.h"
-
+#ifdef MODIFY_FUNCTION_SIGN
+#include <global_first.h>
+#endif
+#ifdef OS_WIN32
+#include <WinSock2.h>
+#elif defined(OS_MAC)
+#include <arpa/inet.h>
+#endif
 #include <memory.h>
+#ifndef OS_WINCE
 #include <signal.h>
+#endif
 #include <errno.h>
 #include <stdio.h>
 
@@ -46,6 +55,10 @@
 #include "transport_manager/tcp/tcp_client_listener.h"
 #include "transport_manager/tcp/tcp_connection_factory.h"
 #include "transport_manager/tcp/tcp_device.h"
+
+#ifdef MODIFY_FUNCTION_SIGN
+#include "config_profile/profile.h"
+#endif
 
 #ifdef AVAHI_SUPPORT
 #include "transport_manager/tcp/dnssd_service_browser.h"
@@ -104,7 +117,11 @@ void TcpTransportAdapter::Store() const {
         if (port != -1) {  // don't want to store incoming applications
           Json::Value application_dictionary;
           char port_record[12];
+		  #ifdef OS_WIN32
+		  sprintf(port_record, "%d", port);
+		  #else
           snprintf(port_record, sizeof(port_record), "%d", port);
+		  #endif
           application_dictionary["port"] = std::string(port_record);
           applications_dictionary.append(application_dictionary);
         }

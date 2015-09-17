@@ -30,13 +30,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef MODIFY_FUNCTION_SIGN
+#include <global_first.h>
+#endif
+#ifdef OS_WIN32
+#include <unistd.h>
+#else
 #include <errno.h>
 #include <fcntl.h>
 #include <memory.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-
+#endif
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
 
@@ -89,6 +95,20 @@ void ThreadedSocketConnection::Abort() {
 
 TransportAdapter::Error ThreadedSocketConnection::Start() {
   LOG4CXX_AUTO_TRACE(logger_);
+#ifdef OS_WIN32
+	//LOG4CXX_TRACE_ENTER(logger_);
+
+	//if (-1 == CreatePipe())
+	//	return TransportAdapter::FAIL;
+	//if (0 == pthread_create(&thread_, 0, &StartThreadedSocketConnection, this)) {
+	//	LOG4CXX_TRACE_EXIT(logger_);
+	//	return TransportAdapter::OK;
+	//}
+	//else {
+	//	LOG4CXX_TRACE_EXIT(logger_);
+	//	return TransportAdapter::FAIL;
+	//}
+#else
   int fds[2];
   const int pipe_ret = pipe(fds);
   if (0 == pipe_ret) {
@@ -110,6 +130,7 @@ TransportAdapter::Error ThreadedSocketConnection::Start() {
     LOG4CXX_ERROR(logger_, "thread creation failed");
     return TransportAdapter::FAIL;
   }
+#endif
   LOG4CXX_INFO(logger_, "thread created");
   return TransportAdapter::OK;
 }

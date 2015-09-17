@@ -487,13 +487,25 @@ const std::string& Profile::audio_stream_file() const {
   return audio_stream_file_;
 }
 
+#ifdef OS_WIN32
+const uint32_t Profile::audio_data_stopped_timeout() const {
+	return audio_data_stopped_timeout_;
+}
+#else
 const std::uint32_t Profile::audio_data_stopped_timeout() const {
   return audio_data_stopped_timeout_;
 }
+#endif
 
-const std::uint32_t Profile::video_data_stopped_timeout() const {
+#ifdef OS_WIN32
+const uint32_t Profile::video_data_stopped_timeout() const {
   return video_data_stopped_timeout_;
 }
+#else
+const std::uint32_t Profile::video_data_stopped_timeout() const {
+	return video_data_stopped_timeout_;
+}
+#endif
 
 const uint32_t& Profile::app_time_scale() const {
   return app_requests_time_scale_;

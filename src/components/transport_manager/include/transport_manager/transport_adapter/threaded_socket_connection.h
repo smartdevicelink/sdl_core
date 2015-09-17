@@ -35,7 +35,14 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_THREADED_SOCKET_CONNECTION_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_THREADED_SOCKET_CONNECTION_H_
 
+#ifdef OS_WIN32
+#include "pthread.h"
+#include <WINSOCK2.H> 
+#include <stdio.h> 
+#else
 #include <poll.h>
+#endif
+
 #include <queue>
 
 #include "transport_manager/transport_adapter/connection.h"
@@ -85,6 +92,10 @@ class ThreadedSocketConnection : public Connection {
    */
   void set_socket(int socket) {
     socket_ = socket;
+#ifdef OS_WIN32
+	int iMode = 1;
+	ioctlsocket(socket_, FIONBIO, (u_long FAR*) &iMode);
+#endif
   }
 
  protected:

@@ -31,8 +31,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef MODIFY_FUNCTION_SIGN
+#include <global_first.h>
+#endif
 #include "transport_manager/tcp/tcp_client_listener.h"
 
+#ifdef OS_WIN32
+
+#elif defined(OS_MAC)
 #include <memory.h>
 #include <signal.h>
 #include <errno.h>
@@ -40,6 +46,19 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/sysctl.h>
+#include <sys/socket.h>
+#  include <sys/time.h>
+#  include <netinet/in.h>
+#else
+#include <memory.h>
+#include <signal.h>
+#include <errno.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <sys/types.h>
+#ifndef  OS_ANDROID
+#include <sys/sysctl.h>
+#endif
 #include <sys/socket.h>
 #ifdef __linux__
 #  include <linux/tcp.h>
@@ -49,7 +68,7 @@
 #  include <netinet/tcp.h>
 #  include <netinet/tcp_var.h>
 #endif  // __linux__
-
+#endif
 #include <sstream>
 
 #include "utils/logger.h"
@@ -62,6 +81,15 @@ namespace transport_manager {
 namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+
+#ifdef OS_WIN32
+	typedef int socklen_t;
+	struct TCP_KEEPALIVE {
+		unsigned long onoff;
+		unsigned long keepalivetime;
+		unsigned long keepaliveinterval;
+	};
+#endif
 
 TcpClientListener::TcpClientListener(TransportAdapterController* controller,
                                      const uint16_t port,
@@ -139,19 +167,43 @@ void SetKeepaliveOptions(const int fd) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "fd: " << fd);
   int yes = 1;
+#ifdef OS_WIN32
+	setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, (const char *)&yes, sizeof(yes));
+
+	TCP_KEEPALIVE inKeepAlive = { 0 };	// in parameter
+	unsigned long ulInLen = sizeof(TCP_KEEPALIVE);
+	TCP_KEEPALIVE outKeepAlive = { 0 }; // out parameter
+	unsigned long ulOutLen = sizeof(TCP_KEEPALIVE);
+	unsigned long ulBytesReturn = 0;
+
+	inKeepAlive.onoff = 1;
+	inKeepAlive.keepaliveinterval = 3000;
+	inKeepAlive.keepalivetime = 1000;
+	if (WSAIoctl((unsigned int)fd, SIO_KEEPALIVE_VALS,
+		(LPVOID)&inKeepAlive, ulInLen,
+		(LPVOID)&outKeepAlive, ulOutLen,
+		&ulBytesReturn, NULL, NULL) == SOCKET_ERROR)
+	{
+		printf("WSAIoctl failed. error code(%d)!\n", WSAGetLastError());
+		return;
+	}
+#else
   int keepidle = 3;  // 3 seconds to disconnection detecting
   int keepcnt = 5;
   int keepintvl = 1;
 #ifdef __linux__
   int user_timeout = 7000;  // milliseconds
+#ifdef __linux__
   setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, &keepidle, sizeof(keepidle));
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPCNT, &keepcnt, sizeof(keepcnt));
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPINTVL, &keepintvl, sizeof(keepintvl));
+#ifndef OS_ANDROID
   setsockopt(fd, IPPROTO_TCP, TCP_USER_TIMEOUT, &user_timeout,
              sizeof(user_timeout));
-#elif defined(__QNX__)  // __linux__
-  // TODO(KKolodiy): Out of order!
+#endif
+#elif __QNX__  // __linux__
+  // TODO (KKolodiy): Out of order!
   const int kMidLength = 4;
   int mib[kMidLength];
 
@@ -178,6 +230,7 @@ void SetKeepaliveOptions(const int fd) {
   setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPALIVE, &tval, sizeof(tval));
 #endif  // __QNX__
+#endif
 }
 
 void TcpClientListener::Loop() {

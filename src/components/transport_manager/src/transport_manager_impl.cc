@@ -31,7 +31,10 @@
  */
 
 #include "transport_manager/transport_manager_impl.h"
-
+#ifdef MODIFY_FUNCTION_SIGN
+#include <global_first.h>
+#endif
+#include <pthread.h>
 #include <stdint.h>
 #include <cstring>
 #include <queue>

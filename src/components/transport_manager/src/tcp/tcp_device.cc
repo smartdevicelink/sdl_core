@@ -31,6 +31,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "utils/logger.h"
+#ifdef MODIFY_FUNCTION_SIGN
+#include <global_first.h>
+#endif
 #include "transport_manager/tcp/tcp_device.h"
 
 
@@ -83,7 +86,11 @@ ApplicationHandle TcpDevice::AddIncomingApplication(int socket_fd) {
   app.incoming = true;
   app.socket = socket_fd;
   app.port = 0;  // this line removes compiler warning
+  #ifdef OS_WIN32
+  pthread_mutex_lock(&applications_mutex_);
+  #else
   sync_primitives::AutoLock locker(applications_mutex_);
+  #endif
   const ApplicationHandle app_handle = ++last_handle_;
   applications_[app_handle] = app;
   LOG4CXX_DEBUG(logger_, "App_handle " << app_handle);

@@ -45,7 +45,8 @@ namespace impl {
 #if defined(OS_POSIX)
 typedef pthread_rwlock_t PlatformRWLock;
 #else
-#error Please implement rwlock for your OS
+	typedef pthread_rwlock_t PlatformRWLock;
+//#error Please implement rwlock for your OS
 #endif
 }  // namespace impl
 

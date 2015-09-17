@@ -38,7 +38,9 @@
 #include <map>
 #include <memory>
 #include <string>
-
+#ifdef OS_WIN32
+#include "pthread.h"
+#endif
 #include "utils/lock.h"
 #include "utils/rwlock.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"

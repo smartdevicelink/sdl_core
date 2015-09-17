@@ -35,6 +35,10 @@
 
 #if defined(OS_POSIX)
 #include <pthread.h>
+#else
+#ifdef OS_WIN32
+#include <pthread.h>
+#endif
 #endif
 
 #include <ostream>
@@ -51,7 +55,10 @@ namespace threads {
 #if defined(OS_POSIX)
 typedef pthread_t PlatformThreadHandle;
 #else
-#error Please implement thread for your OS
+#ifdef OS_WIN32
+	typedef pthread_t PlatformThreadHandle;
+//#error Please implement thread for your OS'
+#endif
 #endif
 
 /**

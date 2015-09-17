@@ -35,7 +35,10 @@
 #if defined(OS_POSIX)
 #include <pthread.h>
 #else
-#error Please implement conditional variable for your OS
+#ifdef OS_WIN32
+#include <pthread.h>
+//#error Please implement conditional variable for your OS
+#endif
 #endif
 #include <stdint.h>
 
@@ -47,6 +50,9 @@ class Lock;
 
 namespace impl {
 #if defined(OS_POSIX)
+typedef pthread_cond_t PlatformConditionalVariable;
+#endif
+#ifdef OS_WIN32
 typedef pthread_cond_t PlatformConditionalVariable;
 #endif
 }  // namespace impl

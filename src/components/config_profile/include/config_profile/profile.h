@@ -251,14 +251,20 @@ class Profile : public utils::Singleton<Profile> {
      * @brief Returns timeout for SDL to wait for the next package of raw data
      * over audio service
      */
+#ifdef OS_WIN32
+	const uint32_t audio_data_stopped_timeout() const;
+#else
     const std::uint32_t audio_data_stopped_timeout() const;
-
+#endif
     /**
      * @brief Returns timeout for SDL to wait for the next package of raw data
      * over video service
      */
+#ifdef OS_WIN32
+	const uint32_t video_data_stopped_timeout() const;
+#else
     const std::uint32_t video_data_stopped_timeout() const;
-
+#endif
     /**
      * @brief Returns allowable max amount of requests per time scale for
      * application in hmi level none
@@ -698,8 +704,13 @@ private:
     std::string                     system_files_path_;
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
+#ifdef OS_WIN32
+	uint32_t                   audio_data_stopped_timeout_;
+	uint32_t                   video_data_stopped_timeout_;
+#else
     std::uint32_t                   audio_data_stopped_timeout_;
     std::uint32_t                   video_data_stopped_timeout_;
+#endif
     std::string                     mme_db_name_;
     std::string                     event_mq_name_;
     std::string                     ack_mq_name_;
