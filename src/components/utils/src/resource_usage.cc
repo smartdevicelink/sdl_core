@@ -10,9 +10,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 #endif
-#include <sys/resource.h>
-#include <errno.h>
-#include <sys/types.h>
+//#include <sys/resource.h>
+//#include <errno.h>
+//#include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <sstream>

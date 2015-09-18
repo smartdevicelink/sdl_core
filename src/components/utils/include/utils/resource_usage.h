@@ -33,7 +33,11 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_RESOURCE_USAGE_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_RESOURCE_USAGE_H_
 
+#ifdef OS_WIN32
+	// do nothing
+#else
 #include <sys/resource.h>
+#endif
 #if defined(__QNXNTO__)
 #include <sys/procfs.h>
 #endif

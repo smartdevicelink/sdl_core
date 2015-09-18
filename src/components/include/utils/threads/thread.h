@@ -52,6 +52,7 @@
 
 namespace threads {
 
+namespace impl {
 #if defined(OS_POSIX)
 typedef pthread_t PlatformThreadHandle;
 #else
@@ -60,6 +61,7 @@ typedef pthread_t PlatformThreadHandle;
 //#error Please implement thread for your OS'
 #endif
 #endif
+}
 
 /**
  * @brief Non platform specific thread abstraction that establishes a
@@ -90,12 +92,31 @@ Thread* CreateThread(const char* name, ThreadDelegate* delegate);
 void DeleteThread(Thread* thread);
 
 class Thread {
+ public:
+
+  /*
+   * Class that represents unique in-process thread identifier
+   * due to restriction of pthread API it only allows checks
+   * for equality to different thread id and no ordering.
+   *
+   * ostream<< operator is provided for this class which
+   * outputs thread name associated to an identifier.
+   */
+  class Id {
+   public:
+    explicit Id(const impl::PlatformThreadHandle& id): id_(id) {}
+    bool operator==(const Id that) const;
+   private:
+    impl::PlatformThreadHandle id_;
+    friend class Thread;
+  };
+  
  private:
   const std::string name_;
   // Should be locked to protect delegate_ value
   sync_primitives::Lock delegate_lock_;
   ThreadDelegate* delegate_;
-  PlatformThreadHandle handle_;
+  impl::PlatformThreadHandle handle_;
   ThreadOptions thread_options_;
   // Should be locked to protect isThreadRunning_ and thread_created_ values
   sync_primitives::Lock state_lock_;
@@ -140,10 +161,10 @@ class Thread {
 
  public:
   // Get unique ID of currently executing thread
-  static PlatformThreadHandle CurrentId();
+  static Id CurrentId();
 
   // Give thread thread_id a name, helpful for debugging
-  static void SetNameForId(const PlatformThreadHandle& thread_id,
+  static void SetNameForId(const Id& thread_id,
                            std::string name);
 
   /**
@@ -197,7 +218,7 @@ class Thread {
    * @brief The native thread handle.
    * @return thread handle.
    */
-  PlatformThreadHandle thread_handle() const {
+  impl::PlatformThreadHandle thread_handle() const {
     return handle_;
   }
 

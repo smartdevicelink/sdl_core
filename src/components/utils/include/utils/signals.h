@@ -37,6 +37,7 @@
 typedef void (*sighandler_t) (int);
 #else
 #include <signal.h>
+typedef void(*sighandler_t) (int);
 #endif
 
 namespace utils {

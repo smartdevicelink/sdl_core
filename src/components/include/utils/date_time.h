@@ -35,6 +35,8 @@
 #if defined(OS_POSIX)
 #include <sys/time.h>
 typedef struct timeval TimevalStruct;
+#else
+typedef struct timeval TimevalStruct;
 #endif
 #include <stdint.h>
 

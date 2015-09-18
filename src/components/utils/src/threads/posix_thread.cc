@@ -124,7 +124,7 @@ void* Thread::threadFunc(void* arg) {
   return NULL;
 }
 
-void Thread::SetNameForId(const PlatformThreadHandle& thread_id,
+void Thread::SetNameForId(const impl::PlatformThreadHandle& thread_id,
                           std::string name) {
   if (name.size() > THREAD_NAME_SIZE)
     name.erase(THREAD_NAME_SIZE);

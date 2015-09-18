@@ -35,6 +35,9 @@
 #include <ostream>
 #include <vector>
 #include <string>
+#ifdef OS_WIN32
+#include <stdint.h>
+#endif
 #include "utils/threads/thread.h"
 
 namespace utils {
@@ -61,10 +64,10 @@ class Backtrace {
 
   // Captured symbols in order from topmost stack frame to last captured
   std::vector<std::string> CallStack() const;
-  threads::PlatformThreadHandle ThreadId() const;
+  threads::Thread::Id ThreadId() const;
 
  private:
-  threads::PlatformThreadHandle thread_id_;
+  threads::Thread::Id thread_id_;
   std::vector<void*> backtrace_;
 };
 

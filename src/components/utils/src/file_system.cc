@@ -33,8 +33,7 @@
 #ifdef MODIFY_FUNCTION_SIGN
 #include <global_first.h>
 #endif
-#include "utils/file_system.h"
-#include "utils/logger.h"
+
 #ifdef OS_WIN32 
 #include <sstream>
 #include <Windows.h>
@@ -54,6 +53,10 @@
 #include <dirent.h>
 #include <unistd.h>
 #endif
+
+#include "utils/file_system.h"
+#include "utils/logger.h"
+
 // TODO(VS): lint error: Streams are highly discouraged.
 #include <fstream>
 #include <cstddef>
