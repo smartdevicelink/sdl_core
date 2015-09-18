@@ -32,11 +32,8 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_MACRO_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_MACRO_H_
 
-#ifdef DEBUG
 #include <assert.h>
-#else  // RELEASE
 #include <stdio.h>
-#endif
 #include "logger.h"
 
 
@@ -72,10 +69,10 @@
 
 #define DCHECK(condition) \
   if (!(condition)) { \
-    CREATE_LOGGERPTR_LOCAL(logger_, "assert"); \
-    LOG4CXX_FATAL(logger_,  "DCHECK failed with \"" << #condition \
-       << "\" [" << __FUNCTION__ << "][" << __FILE__ << ':' << __LINE__ << ']'); \
-    ASSERT((condition)); \
+    printf("\nDCHECK  [%s:%d][%s]", __FILE__, __LINE__, __FUNCTION__); \
+    printf("[Check failed: " #condition); \
+    printf("]\n\n"); \
+    assert(false); \
   }
 
 /*
@@ -115,7 +112,17 @@
 #define OVERRIDE
 #define FINAL
 #endif
-
+#ifdef OS_WIN32
+#ifndef snprintf
+#define snprintf _snprintf
+#endif
+#ifndef strcasecmp
+#define strcasecmp _stricmp
+#endif
+#ifdef OS_WINCE
+#define ARRAYSIZE(arr) sizeof (arr) / sizeof(*arr)
+#endif
+#else
 /*
 * @brief Calculate size of na array
 * @param arr  array, which size need to calculate
@@ -126,5 +133,5 @@
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test
 #endif
-
+#endif
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_MACRO_H_

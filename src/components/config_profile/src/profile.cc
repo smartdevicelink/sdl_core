@@ -884,7 +884,7 @@ void Profile::UpdateValues() {
   ReadUIntValue(&stop_streaming_timeout_, kDefaultStopStreamingTimeout,
                 kMediaManagerSection, kStopStreamingTimeout);
 
-  stop_streaming_timeout_ = std::max(kDefaultStopStreamingTimeout, stop_streaming_timeout_);
+  stop_streaming_timeout_ = max(kDefaultStopStreamingTimeout, stop_streaming_timeout_);
 
   LOG_UPDATED_VALUE(stop_streaming_timeout_, kStopStreamingTimeout,
                     kHmiSection);

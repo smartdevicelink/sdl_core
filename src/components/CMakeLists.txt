@@ -31,7 +31,7 @@
 set(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
 
 # --- HMI_API interfaces
-add_subdirectory(./interfaces)
+#add_subdirectory(./interfaces)
 
 # --- ProtocolHandler
 #add_subdirectory(./protocol)
@@ -43,20 +43,20 @@ add_subdirectory(./interfaces)
 #add_subdirectory(./resumption)
 
 # --- formatters
-#add_subdirectory(./formatters)
+add_subdirectory(./formatters)
 
 # --- ProtocolHandler
-add_subdirectory(./protocol_handler)
+#add_subdirectory(./protocol_handler)
 
 # --- ConnectionHandler
-add_subdirectory(./connection_handler)
+#add_subdirectory(./connection_handler)
 
 # --- Utils
 #add_subdirectory(./utils)
 
 # --- Security manager
 if(ENABLE_SECURITY)
-  add_subdirectory(./security_manager)
+#  add_subdirectory(./security_manager)
 endif()
 #
 # --- Policy_impl
@@ -87,7 +87,7 @@ endif()
 
 if (${HMI_DBUS_API})
 # --- DBus
-#    add_subdirectory(./dbus)
+     add_subdirectory(./dbus)
 endif ()
 if (${QT_HMI})
 # --- Qt HMI

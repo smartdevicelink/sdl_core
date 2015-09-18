@@ -32,8 +32,27 @@ cmake_minimum_required(VERSION 2.8.0)
 
 set (PROJECT smartDeviceLinkCore)
 
+#compiler set
+#message(STATUS ${CMAKE_SYSTEM_NAME})
+if(SYSTEM_NAME STREQUAL "Android")
+SET(CMAKE_SYSTEM_NAME Android)
+endif()
+
+#when build on android plat,you should set -DCOMPILER_PATH=your compiler root path
+if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+if(NOT COMPILER_PATH)
+SET(COMPILER_PATH "/opt/android-9-toolchain")
+endif()
+message(STATUS "Current cross compiler path is ${COMPILER_PATH}")
+SET(CMAKE_CXX_COMPILER "${COMPILER_PATH}/bin/arm-linux-androideabi-g++")
+SET(CMAKE_C_COMPILER "${COMPILER_PATH}/bin/arm-linux-androideabi-gcc")
+endif()
+
+message(STATUS "Current build system name is ${CMAKE_SYSTEM_NAME}")
+message(STATUS "Current CMAKE_BUIDL_TYPE is ${CMAKE_BUIDL_TYPE}")
+
 #Jenkins integration section
-#dont modify this section if you dont know details about integration with Jenkins!!!
+#dont modify this section if you don't know details about integration with Jenkins!!!
 set (HMI "web" CACHE STRING "HMI type")
 option(HMI2 "Use Qt HMI" OFF)
 option(EXTENDED_MEDIA_MODE "Turn on and off extended Madia Manager features relates to PulseAudio A2DP and GStreamer" OFF)
@@ -41,10 +60,12 @@ option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OF
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
 option(BUILD_USB_SUPPORT "libusb support" ON)
 option(BUILD_AVAHI_SUPPORT "libavahi support" ON)
+option(BUILD_RWLOCK_SUPPORT "rwlocks support" OFF)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
 option(TIME_TESTER "Enable profiling time test util" OFF)
-option(ENABLE_LOG "Logging feature" OFF)
+option(BUILD_TESTS_WITH_HMI "Possibility to build and run HMI tests" OFF)
+option(ENABLE_LOG "Logging feature" ON)
 option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
@@ -276,12 +297,24 @@ if (BUILD_BT_SUPPORT)
   message(STATUS "Bluetooth support is enabled")
 endif()
 
+if (BUILD_MME_SUPPORT)
+  add_definitions(-DMME_SUPPORT)
+  if (MME_MQ)
+    add_definitions(-DMME_MQ)
+  endif(MME_MQ)
+endif(BUILD_MME_SUPPORT)
 
 if (BUILD_AVAHI_SUPPORT)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL  "Android")
   add_definitions(-DAVAHI_SUPPORT)
 # --- Check libavahi-common, libavahi-client availability
   find_package(Libavahi)
+endif()
   message(STATUS "Avahi support is enabled")
+endif()
+
+if (BUILD_RWLOCK_SUPPORT)
+  add_definitions(-DRWLOCK_SUPPORT)
 endif()
 
 if (BUILD_BACKTRACE_SUPPORT)
@@ -792,7 +825,7 @@ add_subdirectory(./src/3rd_party-static)
 
 
 # --- Components
-#add_subdirectory(./src/components)
+add_subdirectory(./src/components)
 
 # --- Main application
 #add_subdirectory(./src/appMain)
