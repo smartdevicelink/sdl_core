@@ -30,7 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef OS_WIN32
+#else
 #include <dlfcn.h>
+#endif
 
 #include "utils/appenders_loader.h"
 

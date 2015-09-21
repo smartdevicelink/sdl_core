@@ -40,7 +40,7 @@ set(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
 #add_subdirectory(./transport_manager)
 
 # --- Policies
-#add_subdirectory(./resumption)
+add_subdirectory(./resumption)
 
 # --- formatters
 add_subdirectory(./formatters)

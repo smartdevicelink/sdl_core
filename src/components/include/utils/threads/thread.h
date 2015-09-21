@@ -163,9 +163,10 @@ class Thread {
   // Get unique ID of currently executing thread
   static Id CurrentId();
 
+  std::string NameFromId(Id thread_id);
+
   // Give thread thread_id a name, helpful for debugging
-  static void SetNameForId(const Id& thread_id,
-                           std::string name);
+  static void SetNameForId(Id thread_id, const std::string& name);
 
   /**
    * @brief Signals the thread to exit and returns once the thread has exited.
