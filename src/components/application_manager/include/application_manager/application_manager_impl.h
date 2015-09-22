@@ -537,6 +537,36 @@ class ApplicationManagerImpl : public ApplicationManager,
     }
 
     /**
+     * @brief SetState Change regular hmi level
+     * @param app appication to setup regular State
+     * @param hmi_level hmi level of new regular state
+     */
+    void SetState(uint32_t app_id,
+                  mobile_apis::HMILevel::eType hmi_level) {
+      ApplicationSharedPtr app  = application(app_id);
+      if (!app) {
+        LOG4CXX_ERROR(logger_, "Application with appID="<<app_id<<" does not exist");
+        return;
+      }
+      state_ctrl_.SetRegularState(app, hmi_level);
+    }
+
+    /**
+     * @brief SetState Change regular hmi state
+     * @param app appication to setup regular State
+     * @param state new regular hmi state
+     */
+    void SetState(uint32_t app_id,
+                  HmiStatePtr state) {
+      ApplicationSharedPtr app  = application(app_id);
+      if (!app) {
+        LOG4CXX_ERROR(logger_, "Application with appID="<<app_id<<" does not exist");
+        return;
+      }
+      state_ctrl_.SetRegularState(app, state);
+    }
+
+    /**
      * @brief Notification from PolicyHandler about PTU.
      * Compares AppHMIType between saved in app and received from PTU. If they are different method sends:
      * UI_ChangeRegistration with list new AppHMIType;
