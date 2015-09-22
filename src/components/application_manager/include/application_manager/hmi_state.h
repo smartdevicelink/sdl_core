@@ -1,3 +1,35 @@
+/*
+ * Copyright (c) 2015, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMISTATE_H
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMISTATE_H
 
@@ -12,21 +44,19 @@ class HmiState;
 typedef utils::SharedPtr<HmiState> HmiStatePtr;
 typedef std::list<HmiStatePtr> HmiStateList;
 
- /**
+/**
  * @brief The HmiState class
- *  Handle Hmi state of application (hmi level,
- *  audio streaming state, system context)
- *
+ * Handles Hmi state of application
+ * (hmi level, audio streaming state, system context)
  */
 class HmiState {
-
   public:
     /**
      * @brief The StateID enum describes state of application
-     * If no events occured STATE_ID_DEFAULT shuld be presented
      */
     enum StateID {
       STATE_ID_REGULAR,
+      STATE_ID_POSTPONED,
       STATE_ID_PHONE_CALL,
       STATE_ID_SAFETY_MODE,
       STATE_ID_VR_SESSION,
@@ -35,9 +65,8 @@ class HmiState {
     };
 
     HmiState(uint32_t app_id, const StateContext& state_context_);
-    HmiState(uint32_t app_id, const StateContext& state_context_,
-             StateID state_id);
-
+    HmiState(
+        uint32_t app_id, const StateContext& state_context_, StateID state_id);
 
     virtual ~HmiState() {}
 
@@ -120,6 +149,15 @@ class HmiState {
     StateID state_id() const {
       return state_id_;
     }
+
+    /**
+     * @brief set_state_id sets state id
+     * @param state_id state id to setup
+     */
+    virtual void set_state_id(StateID state_id) {
+      state_id_ = state_id;
+    }
+
   protected:
     uint32_t app_id_;
     StateID state_id_;
@@ -138,7 +176,7 @@ class HmiState {
 class VRHmiState : public HmiState {
   public:
     virtual mobile_apis::AudioStreamingState::eType audio_streaming_state() const;
-    VRHmiState(uint32_t app_id, StateContext& state_context);
+    VRHmiState(uint32_t app_id, const StateContext& state_context);
 };
 
 /**
@@ -146,7 +184,7 @@ class VRHmiState : public HmiState {
  */
 class TTSHmiState : public HmiState {
   public:
-    TTSHmiState(uint32_t app_id, StateContext& state_context);
+    TTSHmiState(uint32_t app_id, const StateContext& state_context);
     virtual  mobile_apis::AudioStreamingState::eType audio_streaming_state() const;
 };
 
@@ -155,7 +193,7 @@ class TTSHmiState : public HmiState {
  */
 class NaviStreamingHmiState : public HmiState {
   public:
-    NaviStreamingHmiState(uint32_t app_id, StateContext& state_context);
+    NaviStreamingHmiState(uint32_t app_id, const StateContext& state_context);
     virtual  mobile_apis::AudioStreamingState::eType audio_streaming_state() const;
 };
 
@@ -164,7 +202,7 @@ class NaviStreamingHmiState : public HmiState {
  */
 class PhoneCallHmiState : public HmiState {
   public:
-    PhoneCallHmiState(uint32_t app_id, StateContext& state_context);
+    PhoneCallHmiState(uint32_t app_id, const StateContext& state_context);
     virtual mobile_apis::HMILevel::eType hmi_level() const;
     virtual  mobile_apis::AudioStreamingState::eType audio_streaming_state() const {
       return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
@@ -176,7 +214,7 @@ class PhoneCallHmiState : public HmiState {
  */
 class SafetyModeHmiState : public HmiState {
   public:
-    SafetyModeHmiState(uint32_t app_id, StateContext& state_context);
+    SafetyModeHmiState(uint32_t app_id, const StateContext& state_context);
     virtual  mobile_apis::AudioStreamingState::eType audio_streaming_state() const {
       return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
     }
