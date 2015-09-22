@@ -934,7 +934,7 @@ AppLevel::AppLevel()
   : CompositeType(kUninitialized) {
 }
 
-AppLevel::AppLevel(uint16_t minutes_in_hmi_full, const std::string& app_registration_language_gui, const std::string& app_registration_language_vui, uint16_t minutes_in_hmi_limited, uint16_t minutes_in_hmi_background, uint16_t minutes_in_hmi_none, uint16_t count_of_user_selections, uint16_t count_of_rejections_sync_out_of_memory, uint16_t count_of_rejections_nickname_mismatch, uint16_t count_of_rejections_duplicate_name, uint16_t count_of_rejected_rpc_calls, uint16_t count_of_rpcs_sent_in_hmi_none, uint16_t count_of_removals_for_bad_behavior, uint16_t count_of_tls_error, uint16_t count_of_run_attempts_while_revoked)
+AppLevel::AppLevel(uint16_t minutes_in_hmi_full, const std::string& app_registration_language_gui, const std::string& app_registration_language_vui, uint16_t minutes_in_hmi_limited, uint16_t minutes_in_hmi_background, uint16_t minutes_in_hmi_none, uint16_t count_of_user_selections, uint16_t count_of_rejections_sync_out_of_memory, uint16_t count_of_rejections_nickname_mismatch, uint16_t count_of_rejections_duplicate_name, uint16_t count_of_rejected_rpc_calls, uint16_t count_of_rpcs_sent_in_hmi_none, uint16_t count_of_removals_for_bad_behavior, uint16_t count_of_tls_errors, uint16_t count_of_run_attempts_while_revoked)
   : CompositeType(kUninitialized),
     minutes_in_hmi_full(minutes_in_hmi_full),
     app_registration_language_gui(app_registration_language_gui),
@@ -949,7 +949,7 @@ AppLevel::AppLevel(uint16_t minutes_in_hmi_full, const std::string& app_registra
     count_of_rejected_rpc_calls(count_of_rejected_rpc_calls),
     count_of_rpcs_sent_in_hmi_none(count_of_rpcs_sent_in_hmi_none),
     count_of_removals_for_bad_behavior(count_of_removals_for_bad_behavior),
-    count_of_tls_error(count_of_tls_error),
+    count_of_tls_errors(count_of_tls_errors),
     count_of_run_attempts_while_revoked(count_of_run_attempts_while_revoked) {
 }
 AppLevel::~AppLevel() {
@@ -969,7 +969,7 @@ AppLevel::AppLevel(const Json::Value* value__)
     count_of_rejected_rpc_calls(impl::ValueMember(value__, "count_of_rejected_rpc_calls")),
     count_of_rpcs_sent_in_hmi_none(impl::ValueMember(value__, "count_of_rpcs_sent_in_hmi_none")),
     count_of_removals_for_bad_behavior(impl::ValueMember(value__, "count_of_removals_for_bad_behavior")),
-    count_of_tls_error(impl::ValueMember(value__, "count_of_tls_error")),
+    count_of_tls_errors(impl::ValueMember(value__, "count_of_tls_errors")),
     count_of_run_attempts_while_revoked(impl::ValueMember(value__, "count_of_run_attempts_while_revoked")) {
 }
 Json::Value AppLevel::ToJsonValue() const {
@@ -987,7 +987,7 @@ Json::Value AppLevel::ToJsonValue() const {
   impl::WriteJsonField("count_of_rejected_rpc_calls", count_of_rejected_rpc_calls, &result__);
   impl::WriteJsonField("count_of_rpcs_sent_in_hmi_none", count_of_rpcs_sent_in_hmi_none, &result__);
   impl::WriteJsonField("count_of_removals_for_bad_behavior", count_of_removals_for_bad_behavior, &result__);
-  impl::WriteJsonField("count_of_tls_error", count_of_tls_error, &result__);
+  impl::WriteJsonField("count_of_tls_errors", count_of_tls_errors, &result__);
   impl::WriteJsonField("count_of_run_attempts_while_revoked", count_of_run_attempts_while_revoked, &result__);
   return result__;
 }
@@ -1031,7 +1031,7 @@ bool AppLevel::is_valid() const {
   if (!count_of_removals_for_bad_behavior.is_valid()) {
     return false;
   }
-  if (!count_of_tls_error.is_valid()) {
+  if (!count_of_tls_errors.is_valid()) {
     return false;
   }
   if (!count_of_run_attempts_while_revoked.is_valid()) {
@@ -1089,7 +1089,7 @@ bool AppLevel::struct_empty() const {
   if (count_of_removals_for_bad_behavior.is_initialized()) {
     return false;
   }
-  if (count_of_tls_error.is_initialized()) {
+  if (count_of_tls_errors.is_initialized()) {
     return false;
   }
   if (count_of_run_attempts_while_revoked.is_initialized()) {

@@ -294,11 +294,10 @@ bool SecurityManagerImpl::ProccessHandshakeData(const SecurityMessage &inMessage
     LOG4CXX_DEBUG(logger_, "SSL initialization finished success.");
     NotifyListenersOnHandshakeDone(connection_key,
                                    SSLContext::Handshake_Result_Success);
-  } else if (handshake_result == SSLContext::Handshake_Result_Fail) {
+  } else if (handshake_result != SSLContext::Handshake_Result_Success){
     // On handshake fail
     LOG4CXX_WARN(logger_, "SSL initialization finished with fail.");
-    NotifyListenersOnHandshakeDone(connection_key,
-                                   SSLContext::Handshake_Result_Fail);
+    NotifyListenersOnHandshakeDone(connection_key, handshake_result);
   }
 
   if (out_data && out_data_size) {
