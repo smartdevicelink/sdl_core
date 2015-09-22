@@ -183,8 +183,14 @@ int32_t SmartObject::asInt() const {
   if (invalid_int64_value == convert) {
     return invalid_int_value;
   }
+#ifdef OS_WIN32
+  DCHECK(convert >= INT_MIN);
+  DCHECK(convert <= INT_MAX);
+#else
   DCHECK(convert >= std::numeric_limits<int32_t>::min());
   DCHECK(convert <= std::numeric_limits<int32_t>::max());
+#endif
+
   return static_cast<int32_t>(convert);
 }
 
@@ -239,8 +245,13 @@ uint32_t SmartObject::asUInt() const {
   if (invalid_int64_value == convert) {
     return invalid_unsigned_int_value;
   }
+#ifdef OS_WIN32
+  DCHECK(convert >= 0);
+  DCHECK(convert <= UINT_MAX);
+#else
   DCHECK(convert >= std::numeric_limits<uint32_t>::min());
   DCHECK(convert <= std::numeric_limits<uint32_t>::max());
+#endif
   return static_cast<uint32_t>(convert);
 }
 

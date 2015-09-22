@@ -66,7 +66,7 @@ endif()
 #add_subdirectory(./rpc_base)
 
 # --- SmartObjects
-#add_subdirectory(./smart_objects)
+add_subdirectory(./smart_objects)
 
 # --- Application manager
 #add_subdirectory(./application_manager)
