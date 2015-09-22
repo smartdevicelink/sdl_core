@@ -149,9 +149,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   virtual uint32_t get_grammar_id() const;
   virtual void set_grammar_id(uint32_t value);
 
-
   virtual void set_protocol_version(const ProtocolVersion& protocol_version);
   virtual ProtocolVersion protocol_version() const;
+
+  virtual void set_is_resuming(bool is_resuming);
+  virtual bool is_resuming() const;
 
   bool AddFile(AppFile& file);
   bool UpdateFile(AppFile& file);
@@ -211,12 +213,21 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * @brief Load persistent files from application folder.
    */
   virtual void LoadPersistentFiles();
-  
-  /*
+
+  /**
   * @brief SetRegularState set permanent state of application
+  *
   * @param state state to setup
   */
   virtual void SetRegularState(HmiStatePtr state);
+
+  /**
+  * @brief SetPostponedState sets postponed state to application.
+  * This state could be set as regular later
+  *
+  * @param state state to setup
+  */
+  virtual void SetPostponedState(HmiStatePtr state);
 
   /**
    * @brief AddHMIState the function that will change application's
@@ -249,6 +260,14 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * @return HmiState of application
    */
   virtual const HmiStatePtr RegularHmiState() const;
+
+  /**
+   * @brief PostponedHmiState returns postponed hmi state of application
+   * if it's present
+   *
+   * @return Postponed hmi state of application
+   */
+  virtual const HmiStatePtr PostponedHmiState() const;
 
   uint32_t audio_stream_retry_number() const;
 
@@ -317,6 +336,9 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   UsageStatistics                          usage_report_;
   ProtocolVersion                          protocol_version_;
   bool                                     is_voice_communication_application_;
+
+  bool                                     is_resuming_;
+  mutable sync_primitives::Lock            is_resuming_lock;
 
   uint32_t                                 video_stream_retry_number_;
   uint32_t                                 audio_stream_retry_number_;
