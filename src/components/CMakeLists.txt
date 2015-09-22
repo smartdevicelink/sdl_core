@@ -63,7 +63,7 @@ endif()
 #add_subdirectory(./policy)
 
 # --- Validated types
-#add_subdirectory(./rpc_base)
+add_subdirectory(./rpc_base)
 
 # --- SmartObjects
 add_subdirectory(./smart_objects)

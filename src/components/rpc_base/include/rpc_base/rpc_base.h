@@ -86,8 +86,13 @@ class Range {
   public:
     // Methods
     Range(const T min, const T max);
+#ifdef OS_WIN32
+		T min_rpc() const;
+		T max_rpc() const;
+#else
     T min() const;
     T max() const;
+#endif
     template<typename U>
     bool Includes(U val) const;
   private:
