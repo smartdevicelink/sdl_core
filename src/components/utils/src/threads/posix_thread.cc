@@ -153,13 +153,16 @@ void Thread::SetNameForId(Id thread_id, const std::string& name) {
 	ThreadManager::instance()->RegisterName(thread_id.id_, name);
 }
 
-Thread::Thread(const char* name, ThreadDelegate* delegate) :
-		name_("undefined"), delegate_(delegate),
+Thread::Thread(const char* name, ThreadDelegate* delegate) 
+	: name_("undefined")
+	, delegate_(delegate)
 #ifdef OS_WIN32
 #else
-				thread_handle_(0),
+	, thread_handle_(0)
 #endif
-				thread_options_(), isThreadRunning_(false) {
+	,thread_options_()
+	,isThreadRunning_(false) 
+{
 	if (name) {
 		name_ = name;
 	}
@@ -189,7 +192,7 @@ bool Thread::start(const ThreadOptions& options) {
 	}
 
 	if (isThreadRunning_) {
-		LOG4CXX_TRACE(logger_, "EXIT thread " << name_ << " #" << handle_ << " is already running");
+		LOG4CXX_TRACE(logger_, "EXIT thread " << name_ << " #" << thread_handle_ << " is already running");
 		return true;
 	}
 
@@ -222,10 +225,10 @@ bool Thread::start(const ThreadOptions& options) {
 
 	if (!thread_created_) {
 		// state_lock 1
-		pthread_result = pthread_create(&handle_, &attributes, threadFunc, this);
+		pthread_result = pthread_create(&thread_handle_, &attributes, threadFunc, this);
 		if (pthread_result == EOK) {
 			LOG4CXX_DEBUG(logger_, "Created thread: " << name_);
-			SetNameForId(handle_, name_);
+			SetNameForId(Id(thread_handle_), name_);
 			// state_lock 0
 			// possible concurrencies: stop and threadFunc
 			state_cond_.Wait(auto_lock);
@@ -236,7 +239,7 @@ bool Thread::start(const ThreadOptions& options) {
 	}
 	stopped_ = false;
 	run_cond_.NotifyOne();
-	LOG4CXX_DEBUG(logger_, "Thread " << name_ << " #" << handle_ << " started. pthread_result = " << pthread_result);
+	LOG4CXX_DEBUG(logger_, "Thread " << name_ << " #" << thread_handle_ << " started. pthread_result = " << pthread_result);
 	pthread_attr_destroy(&attributes);
 	return pthread_result == EOK;
 }
@@ -247,25 +250,25 @@ void Thread::stop() {
 
 	stopped_ = true;
 
-	LOG4CXX_DEBUG(logger_, "Stopping thread #" << handle_ << " \"" << name_ << " \"");
+	LOG4CXX_DEBUG(logger_, "Stopping thread #" << thread_handle_ << " \"" << name_ << " \"");
 
 	if (delegate_ && isThreadRunning_) {
 		delegate_->exitThreadMain();
 	}
 
-	LOG4CXX_DEBUG(logger_, "Stopped thread #" << handle_ << " \"" << name_ << " \"");
+	LOG4CXX_DEBUG(logger_, "Stopped thread #" << thread_handle_ << " \"" << name_ << " \"");
 }
 
 void Thread::join() {
 	LOG4CXX_AUTO_TRACE(logger_);
-	DCHECK(!pthread_equal(pthread_self(), handle_));
+	DCHECK(!pthread_equal(pthread_self(), thread_handle_));
 
 	stop();
 
 	sync_primitives::AutoLock auto_lock(state_lock_);
 	run_cond_.NotifyOne();
 	if (isThreadRunning_) {
-		if (!pthread_equal(pthread_self(), handle_)) {
+		if (!pthread_equal(pthread_self(), thread_handle_)) {
 			state_cond_.Wait(auto_lock);
 		}
 	}
@@ -275,7 +278,7 @@ Thread::~Thread() {
 	finalized_ = true;
 	stopped_ = true;
 	join();
-	pthread_join(handle_, NULL);
+	pthread_join(thread_handle_, NULL);
 }
 
 Thread* CreateThread(const char* name, ThreadDelegate* delegate) {

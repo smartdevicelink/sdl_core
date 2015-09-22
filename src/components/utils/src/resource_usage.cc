@@ -16,6 +16,9 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <sstream>
+#ifdef OS_WIN32
+#include <process.h>
+#endif
 #include "utils/file_system.h"
 
 namespace utils {
@@ -131,6 +134,8 @@ bool Resources::GetProcInfo(Resources::PidStats& output) {
   devctl(fd, DCMD_PROC_INFO, &output, sizeof(output), 0);
   close(fd);
   return true;
+#else
+	return true;
 #endif
 }
 

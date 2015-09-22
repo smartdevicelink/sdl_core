@@ -96,10 +96,6 @@ std::vector<std::string> System::argv() const {
   return argv_;
 }
 
-bool System::Execute() {
-  return Execute(false);
-}
-
 #ifdef __QNX__
 
 bool System::Execute(bool wait) {

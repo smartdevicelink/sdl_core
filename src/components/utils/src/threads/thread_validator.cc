@@ -50,7 +50,7 @@ SingleThreadSimpleValidator::~SingleThreadSimpleValidator() {
 
 void SingleThreadSimpleValidator::AssertRunningOnCreationThread() const {
   Thread::Id current_id = Thread::CurrentId();
-  if (creation_thread_id_ != current_id) {
+  if (!(creation_thread_id_ == current_id)) {
 #ifdef OS_WIN32
 # ifdef BACKTRACE_SUPPORT
 		LOG4CXX_ERROR(logger_, "Single-threaded object created at thread "
@@ -95,7 +95,7 @@ void SingleThreadValidator::PassToThread(Thread::Id thread_id) const {
 
 void SingleThreadValidator::AssertRunningOnValidThread() const {
   Thread::Id current_id = Thread::CurrentId();
-  if (owning_thread_id_ != current_id) {
+  if (!(owning_thread_id_ == current_id)) {
 #ifdef OS_WIN32
 # ifdef BACKTRACE_SUPPORT
 		LOG4CXX_ERROR(logger_, "Single-threaded object owned by thread "

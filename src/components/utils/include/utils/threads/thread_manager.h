@@ -56,6 +56,7 @@
 #endif
 
 namespace threads {
+namespace impl {
   class Thread;
 #ifdef OS_WIN32
 	typedef struct tagPlatformThreadStruct

@@ -31,8 +31,11 @@
  */
 
 #include "sqlite_wrapper/sql_database.h"
+#ifdef OS_WIN32
+#include "sqlite3.h"
+#else
 #include <sqlite3.h>
-
+#endif
 namespace utils {
 namespace dbms {
 

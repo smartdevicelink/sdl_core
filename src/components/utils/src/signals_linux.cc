@@ -37,6 +37,35 @@
 
 namespace utils {
 
+#if defined(OS_WIN32) || defined(OS_WINCE)
+bool SubscribeToTerminateSignal(void (*func)(int32_t p)) {
+  void (*prev_func)(int32_t p);
+#ifdef OS_WINCE
+  return true;
+#else
+  prev_func = signal(SIGINT, func);
+  return (SIG_ERR != prev_func);
+#endif
+}
+
+bool ResetSubscribeToTerminateSignal() {
+  void (*prev_func)(int32_t p);
+#ifdef OS_WINCE
+  return true;
+#else
+  prev_func = signal(SIGINT, SIG_DFL);
+  return (SIG_ERR != prev_func);
+#endif
+}
+
+void ForwardSignal() {
+#ifndef OS_WINCE
+  int32_t signal_id = SIGINT;
+  raise(signal_id);
+#endif
+}
+
+#else
 bool SubscribeToTerminateSignal(sighandler_t func) {
   struct sigaction act;
   act.sa_handler = func;
@@ -59,5 +88,5 @@ bool SubscribeToFaultSignal(sighandler_t func) {
 
   return sigsegv_subscribed;
 }
-
+#endif
 }  //  namespace utils

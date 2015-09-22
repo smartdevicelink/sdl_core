@@ -37,6 +37,9 @@
 #include <pthread.h>
 #endif
 
+#ifdef OS_WIN32
+#include "win32/pthread.h"
+#endif
 #include "utils/macro.h"
 
 namespace sync_primitives {

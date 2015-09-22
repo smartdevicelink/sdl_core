@@ -31,28 +31,31 @@
  */
 
 #ifdef OS_WIN32
+#include "arch/aix/apr_arch_dso.h"
 #else
 #include <dlfcn.h>
 #endif
 
 #include "utils/appenders_loader.h"
 
+#define RTLD_LAZY	1
+
 namespace utils {
 
 AppendersLoader appenders_loader;
 
 AppendersLoader::AppendersLoader() {
-  handle_ = dlopen("libappenders.so", RTLD_LAZY);
+	handle_ = dlopen("libappenders.so", RTLD_LAZY);
 }
 
 AppendersLoader::~AppendersLoader() {
-  if (handle_ != 0) {
+	if (handle_ != 0) {
     dlclose(handle_);
   }
 }
 
 bool AppendersLoader::Loaded() const {
-  return handle_ != 0;
+	return handle_ != 0;
 }
 
 }  // namespace utils

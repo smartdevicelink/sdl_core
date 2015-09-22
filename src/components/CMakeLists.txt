@@ -52,7 +52,7 @@ add_subdirectory(./formatters)
 #add_subdirectory(./connection_handler)
 
 # --- Utils
-#add_subdirectory(./utils)
+add_subdirectory(./utils)
 
 # --- Security manager
 if(ENABLE_SECURITY)

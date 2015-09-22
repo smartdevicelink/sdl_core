@@ -42,6 +42,9 @@
 #endif
 #include <stdint.h>
 #include "utils/date_time.h"
+#ifdef OS_WIN32
+#include "os/poll_windows.h"
+#endif
 #ifdef OS_WINCE
 #include "utils/global.h"
 #endif

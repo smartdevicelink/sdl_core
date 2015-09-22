@@ -47,7 +47,7 @@ ThreadDelegate::~ThreadDelegate() {
 
 void ThreadDelegate::exitThreadMain() {
   if (thread_) {
-    if (thread_->thread_handle() == pthread_self()) {
+    if (thread_->thread_handle().p == pthread_self().p) {
       pthread_exit(NULL);
     } else {
       pthread_cancel(thread_->thread_handle());

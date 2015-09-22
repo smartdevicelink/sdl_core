@@ -112,11 +112,11 @@ class Thread {
   };
   
  private:
-  const std::string name_;
+  std::string name_;
   // Should be locked to protect delegate_ value
   sync_primitives::Lock delegate_lock_;
   ThreadDelegate* delegate_;
-  impl::PlatformThreadHandle handle_;
+  impl::PlatformThreadHandle thread_handle_;
   ThreadOptions thread_options_;
   // Should be locked to protect isThreadRunning_ and thread_created_ values
   sync_primitives::Lock state_lock_;
@@ -220,7 +220,7 @@ class Thread {
    * @return thread handle.
    */
   impl::PlatformThreadHandle thread_handle() const {
-    return handle_;
+    return thread_handle_;
   }
 
   /**
@@ -257,5 +257,7 @@ class Thread {
   DISALLOW_COPY_AND_ASSIGN(Thread);
 };
 
+inline bool operator!= (Thread::Id left, Thread::Id right) {return !(left == right); }
+std::ostream& operator<<(std::ostream& os, Thread::Id thread_id);
 }  // namespace threads
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_THREADS_THREAD_H_
