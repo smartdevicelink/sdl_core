@@ -34,7 +34,7 @@ set(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
 #add_subdirectory(./interfaces)
 
 # --- ProtocolHandler
-#add_subdirectory(./protocol)
+add_subdirectory(./protocol)
 
 # --- TransportManager
 #add_subdirectory(./transport_manager)
@@ -46,7 +46,7 @@ add_subdirectory(./resumption)
 add_subdirectory(./formatters)
 
 # --- ProtocolHandler
-#add_subdirectory(./protocol_handler)
+add_subdirectory(./protocol_handler)
 
 # --- ConnectionHandler
 #add_subdirectory(./connection_handler)

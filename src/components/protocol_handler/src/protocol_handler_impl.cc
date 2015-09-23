@@ -1357,7 +1357,12 @@ std::string ConvertPacketDataToString(const uint8_t *data,
   const char *text = reinterpret_cast<const char*>(data);
   // Check data for printability
   for (size_t i = 0; i < data_size; ++i) {
+#ifdef OS_WIN32
+	  //if (!_isprint_l(text[i], loc)){
+	  if (!isprint(text[i])){
+#else
     if (!std::isprint(text[i], loc)) {
+#endif
       is_printable_array = false;
       break;
     }

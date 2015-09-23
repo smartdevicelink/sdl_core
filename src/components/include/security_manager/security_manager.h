@@ -55,6 +55,13 @@ class SecurityManager
    * \brief InternalErrors is 1 byte identifier of internal error
    * Handle as binary data in Ford Protocol
    */
+
+#ifdef OS_WIN32
+#undef ERROR_SUCCESS
+#undef ERROR_NOT_SUPPORTED
+#undef ERROR_DECRYPTION_FAILED
+#undef ERROR_ENCRYPTION_FAILED
+#endif
   enum InternalErrors {
     ERROR_SUCCESS                    = 0x00,
     ERROR_INVALID_QUERY_SIZE         = 0x01,  // wrong size of query data
