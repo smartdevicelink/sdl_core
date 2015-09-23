@@ -29,7 +29,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifdef OS_WIN32
+#else
 #include <strings.h>
+#endif
 
 #include <string>
 #include <list>

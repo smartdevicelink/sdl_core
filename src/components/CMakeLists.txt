@@ -49,7 +49,7 @@ add_subdirectory(./formatters)
 add_subdirectory(./protocol_handler)
 
 # --- ConnectionHandler
-#add_subdirectory(./connection_handler)
+add_subdirectory(./connection_handler)
 
 # --- Utils
 add_subdirectory(./utils)
