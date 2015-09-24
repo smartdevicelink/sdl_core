@@ -47,14 +47,15 @@ const char connection_key[] = "connection_key";
 const char error[] = "error";
 const char error_msg[] = "message";
 const char default_app_id[] = "default";
-
-
 const char msg_params[] = "msg_params";
+const char method_name[] = "methodName";
 const char info[] = "info";
 const char app_id[] = "appID";
 const char hmi_app_id[] = "hmiAppID";
 const char device_mac[] = "deviceMAC";
 const char url[] = "url";
+const char urlScheme[] = "urlScheme";
+const char packageName[] = "packageName";
 const char cmd_icon[] = "cmdIcon";
 const char result_code[] = "resultCode";
 const char success[] = "success";
@@ -66,6 +67,7 @@ const char ngn_media_screen_app_name[] = "ngnMediaScreenAppName";
 const char vr_synonyms[] = "vrSynonyms";
 const char uses_vehicle_data[] = "usesVehicleData";
 const char is_media_application[] = "isMediaApplication";
+const char greyOut[] = "greyOut";
 const char language_desired[] = "languageDesired";
 const char auto_activated_id[] = "autoActivateID";
 const char app_type[] = "appType";
@@ -252,9 +254,14 @@ const char application_subscribtions[] = "subscribtions";
 const char application_files[] = "applicationFiles";
 const char application_show[] = "applicationShow";
 const char resumption[] = "resumption";
+const char resume_app_list[] = "resume_app_list";
+const char last_ign_off_time[] = "last_ign_off_time";
+
 const char resume_vr_grammars[] = "resumeVrGrammars";
 
 const char ign_off_count[] = "ign_off_count";
+const char suspend_count[] = "suspend_count";
+
 const char connection_info[] = "connection_info";
 const char is_download_complete[] = "is_download_complete";
 
@@ -267,8 +274,41 @@ const char location_name[] = "locationName";
 const char location_description[] = "locationDescription";
 const char address_lines[] = "addressLines";
 const char phone_number[] = "phoneNumber";
+const char number[] = "number";
 const char location_image[] = "locationImage";
 }  // namespace strings
+
+namespace json {
+const char appId[] = "appId";
+const char name[] = "name";
+const char ios[] = "ios";
+const char android[] = "android";
+const char appHmiType[] = "appHmiType";
+const char urlScheme[] = "urlScheme";
+const char packageName[] = "packageName";
+const char response[] = "response";
+const char is_media_application[] = "isMediaApplication";
+const char default_[] = "default";
+const char languages[] = "languages";
+const char ttsName[] = "ttsName";
+const char vrSynonyms[] = "vrSynonyms";
+} // namespace json
+
+namespace http_request {
+const char httpRequest[] = "HTTPRequest";
+const char headers[] = "headers";
+const char content_type[] = "ContentType";
+const char connect_timeout[] = "ConnectTimout";
+const char do_output[] = "DoOutput";
+const char do_input[] = "DoInput";
+const char use_caches[] = "UseCaches";
+const char request_method[] = "RequestMethod";
+const char read_timeout[] = "ReadTimeout";
+const char instance_follow_redirect[] = "InstanceFollowRedirect";
+const char charset[] = "charset";
+const char content_lenght[] = "Content_Lenght";
+const char GET[] = "GET";
+} // http_request
 
 namespace mobile_notification {
 const char state[] = "state";
@@ -350,6 +390,7 @@ const char screen_params[] = "screenParams";
 const char num_custom_presets_available[] = "numCustomPresetsAvailable";
 const char urls[] = "urls";
 const char policy_app_id[] = "policyAppId";
+const char interior_module_data[] = "moduleData";
 }  // namespace hmi_response
 
 namespace hmi_notification {

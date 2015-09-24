@@ -58,14 +58,8 @@ list(APPEND testSources
   # ${POLICY_DIR}/test/shared_library_test.cc
 )
 
-if (EXTENDED_POLICY_FLAG)
-  add_definitions(-DEXTENDED_POLICY)
-  include_directories(${POLICY_DIR}/src/policy/policy_table/table_struct_ext)
-  list (APPEND testSources ${POLICY_DIR}/test/sql_pt_ext_representation_test.cc)
-else ()
   include_directories(${POLICY_DIR}/src/policy/policy_table/table_struct)
   list (APPEND testSources ${POLICY_DIR}/test/sql_pt_representation_test.cc)
-endif ()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   list(REMOVE_ITEM test_exec_libraries dl)

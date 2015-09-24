@@ -1,11 +1,41 @@
-// This file is generated, do not edit
+#include <algorithm>
 #include "./types.h"
 
 namespace rpc {
 namespace policy_table_interface_base {
 bool ApplicationParams::Validate() const {
+  return ValidateModuleTypes();
+}
+bool ApplicationParams::ValidateModuleTypes() const {
+  // moduleType is optional so see Optional<T>::is_valid()
+  bool is_initialized = moduleType->is_initialized();
+  if (!is_initialized) {
+    // valid if not initialized
+    return true;
+  }
+  bool is_valid = moduleType->is_valid();
+  if (is_valid) {
+    return true;
+  }
+
+  struct IsInvalid {
+    bool operator()(Enum<ModuleType> item) const {
+      return !item.is_valid();
+    }
+  };
+  // cut invalid items
+  moduleType->erase(std::remove_if(moduleType->begin(), moduleType->end(),
+                                   IsInvalid()),
+              moduleType->end());
+  bool empty = moduleType->empty();
+  if (empty) {
+    // set non initialized value
+    ModuleTypes non_initialized;
+    moduleType = Optional<ModuleTypes>(non_initialized);
+  }
   return true;
 }
+
 bool RpcParameters::Validate() const {
   return true;
 }
@@ -67,6 +97,7 @@ bool UsageAndErrorCounts::Validate() const {
   }
   return true;
 }
+
 bool DeviceParams::Validate() const {
   return true;
 }
@@ -90,6 +121,14 @@ bool PolicyTable::Validate() const {
   return true;
 }
 bool Table::Validate() const {
+  return true;
+}
+
+bool InteriorZone::Validate() const {
+  return true;
+}
+
+bool Equipment::Validate() const {
   return true;
 }
 }  // namespace policy_table_interface_base

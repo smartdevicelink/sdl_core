@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,14 +44,15 @@ template<class T>
 class StlCollectionDeleter {
  public:
   typedef T Collection;
-  StlCollectionDeleter(T* collection): collection_(collection) {
+  StlCollectionDeleter(T* collection)
+      : collection_(collection) {
     DCHECK(collection_);
   }
   ~StlCollectionDeleter() {
-    for (typename Collection::iterator i = collection_->begin(),
-                                       end = collection_->end();
-                                       i != end; ++i) {
+    for (typename Collection::iterator i = collection_->begin(), end =
+        collection_->end(); i != end; ++i) {
       delete *i;
+      *i = NULL;
     }
   }
  private:
@@ -62,20 +63,22 @@ template<class T>
 class StlMapDeleter {
  public:
   typedef T Collection;
-  StlMapDeleter(T* collection): collection_(collection) {
+  StlMapDeleter(T* collection)
+      : collection_(collection) {
     DCHECK(collection_);
   }
   ~StlMapDeleter() {
-    for (typename Collection::iterator i = collection_->begin(),
-                                       end = collection_->end();
-                                       i != end; ++i) {
+    for (typename Collection::iterator i = collection_->begin(), end =
+        collection_->end(); i != end; ++i) {
       delete i->second;
+      i->second = NULL;
     }
+
   }
  private:
   Collection* collection_;
 };
 
-} // namespace utils
+}  // namespace utils
 
-#endif /* SRC_COMPONENTS_UTILS_INCLUDE_UTILS_STL_UTILS_H_ */
+#endif // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_STL_UTILS_H_

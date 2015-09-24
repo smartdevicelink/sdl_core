@@ -114,6 +114,13 @@ typedef std::map<std::string, SmartObject> SmartMap;
  **/
 typedef std::vector<uint8_t> SmartBinary;
 
+typedef utils::SharedPtr<SmartObject> SmartObjectSPtr;
+
+/**
+ * @brief List of SmartObjects
+ */
+typedef std::vector<SmartObjectSPtr> SmartObjectList;
+
 /**
  * @brief Main SmartObject class
  *
@@ -175,6 +182,8 @@ class SmartObject FINAL {
    * @return bool Result of comparison
    **/
   bool operator==(const SmartObject& Other) const;
+
+  bool operator<(const SmartObject& Other) const;
 
   /**
    * @name Support of type: int32_t

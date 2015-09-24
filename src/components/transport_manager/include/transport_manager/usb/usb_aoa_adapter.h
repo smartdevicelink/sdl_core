@@ -1,4 +1,4 @@
-/**
+/*
  * \file usb_aoa_adapter.h
  * \brief UsbAoaAdapter class header file.
  *

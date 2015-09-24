@@ -55,17 +55,9 @@ const std::string kDefaultDeviceConnectionType = "UNKNOWN";
  */
 const std::string kPreDataConsentId = "pre_DataConsent";
 const std::string kDefaultId = "default";
+const std::string kPreConsentPassengersRC = "pre_consent_passengersRC";
 const std::string kDeviceId = "device";
-
-/*
- *@brief Policy Services specifies Users of Updates
- * received from cloud through mobile device
- */
-enum PolicyServiceTypes {
-    SERVICE_NONE = 0,
-    IVSU = 0x04,
-    POLICY = 0x07
-};
+const std::string kPrimary = "rc_primaryDevice";
 
 /*
  * @brief Status of policy table update

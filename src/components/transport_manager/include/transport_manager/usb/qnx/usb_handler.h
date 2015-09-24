@@ -1,4 +1,4 @@
-/**
+/*
  * \file usb_handler.h
  * \brief QNX USB handler class header file.
  *

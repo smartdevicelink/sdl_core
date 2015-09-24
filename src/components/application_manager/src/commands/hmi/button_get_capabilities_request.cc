@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -46,7 +46,7 @@ ButtonGetCapabilitiesRequest::~ButtonGetCapabilitiesRequest() {
 }
 
 void ButtonGetCapabilitiesRequest::Run() {
-  LOG4CXX_INFO(logger_, "ButtonGetCapabilitiesRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   SendRequest();
 }

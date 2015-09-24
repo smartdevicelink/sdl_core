@@ -97,6 +97,13 @@ class EventDispatcher : public utils::Singleton<EventDispatcher> {
    */
   virtual ~EventDispatcher();
 
+  /*
+   * @brief removes observer
+   * when occurs unsubscribe from event
+   * @param observer to be removed
+   */
+  void remove_observer_from_list(EventObserver* const observer);
+
   DISALLOW_COPY_AND_ASSIGN(EventDispatcher);
 
   FRIEND_BASE_SINGLETON_CLASS(EventDispatcher);
@@ -108,7 +115,10 @@ class EventDispatcher : public utils::Singleton<EventDispatcher> {
 
   // Members section
   sync_primitives::Lock                               state_lock_;
+  sync_primitives::Lock                               observer_list_lock_;
   EventObserverMap                                    observers_;
+  ObserverList                                        observers_list_;
+
 };
 
 }

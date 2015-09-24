@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -56,7 +56,8 @@ MessageType MessageTypeFromRpcType(protocol_handler::RpcType rpc_type) {
 }
 
 Message::Message(protocol_handler::MessagePriority priority)
-    : function_id_(0),
+    : function_name_(),
+      function_id_(0),
       correlation_id_(0),
       type_(kUnknownType),
       priority_(priority),
@@ -68,11 +69,13 @@ Message::Message(protocol_handler::MessagePriority priority)
 }
 
 Message::Message(const Message& message)
-    : priority_(message.priority_) {
+    : priority_(message.priority_),
+      binary_data_(NULL) {
   *this = message;
 }
 
 Message& Message::operator=(const Message& message) {
+  set_function_name(message.function_name_);
   set_function_id(message.function_id_);
   set_correlation_id(message.correlation_id_);
   set_connection_key(message.connection_key_);
@@ -112,6 +115,10 @@ Message::~Message() {
   if (binary_data_) {
     delete binary_data_;
   }
+}
+
+std::string Message::function_name() const {
+  return function_name_;
 }
 
 int32_t Message::function_id() const {
@@ -154,6 +161,10 @@ size_t Message::payload_size() const {
   return payload_size_;
 }
 
+void Message::set_function_name(const std::string& name) {
+  function_name_ = name;
+}
+
 void Message::set_function_id(int32_t id) {
   function_id_ = id;
 }
@@ -191,6 +202,7 @@ void Message::set_protocol_version(ProtocolVersion version) {
   version_ = version;
 }
 
+#ifdef HMI_DBUS_API
 const smart_objects::SmartObject &Message::smart_object() const {
   return smart_object_;
 }
@@ -198,6 +210,7 @@ const smart_objects::SmartObject &Message::smart_object() const {
 void Message::set_smart_object(const smart_objects::SmartObject& object) {
   smart_object_ = object;
 }
+#endif
 
 void Message::set_data_size(size_t data_size) {
   data_size_ = data_size;

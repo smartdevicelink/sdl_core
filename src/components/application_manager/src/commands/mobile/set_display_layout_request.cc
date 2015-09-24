@@ -49,7 +49,7 @@ SetDisplayLayoutRequest::~SetDisplayLayoutRequest() {
 }
 
 void SetDisplayLayoutRequest::Run() {
-  LOG4CXX_INFO(logger_, "SetDisplayLayoutRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   ApplicationConstSharedPtr app = ApplicationManagerImpl::instance()
   ->application(connection_key());
 
@@ -66,7 +66,7 @@ void SetDisplayLayoutRequest::Run() {
 }
 
 void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "SetDisplayLayoutRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
@@ -85,16 +85,9 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
                 message[strings::msg_params][hmi_response::display_capabilities]);
         }
 
-        if (message[strings::msg_params].keyExists(
-                                            hmi_response::soft_button_capabilities)) {
-          if (message[strings::msg_params][hmi_response::soft_button_capabilities].getType() ==
-              smart_objects::SmartType_Array) {
+        if (message[strings::msg_params].keyExists(hmi_response::soft_button_capabilities)) {
             hmi_capabilities.set_soft_button_capabilities(
               message[strings::msg_params][hmi_response::soft_button_capabilities][0]);
-          } else {
-            hmi_capabilities.set_soft_button_capabilities(
-              message[strings::msg_params][hmi_response::soft_button_capabilities]);
-          }
         }
 
         if (message[strings::msg_params].keyExists(hmi_response::button_capabilities)) {

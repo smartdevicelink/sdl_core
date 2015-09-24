@@ -85,7 +85,10 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
   TNumberSchemaItem(const TSchemaItemParameter<NumberType>& MinValue,
                     const TSchemaItemParameter<NumberType>& MaxValue,
                     const TSchemaItemParameter<NumberType>& DefaultValue);
-  bool isNumberType(SmartType type);
+  /**
+   * @brief Compares if param value type is correct
+   **/
+  bool isValidNumberType(SmartType type);
 
   /**
    * @brief Minimum and Maximum allowed values.
@@ -105,16 +108,27 @@ TNumberSchemaItem<NumberType>::create(
 }
 
 template<typename NumberType>
-bool TNumberSchemaItem<NumberType>::isNumberType(SmartType type) {
-  return SmartType_Integer == type || SmartType_Double == type;
+bool TNumberSchemaItem<NumberType>::isValidNumberType(SmartType type) {
+  NumberType value(0);
+  if ((SmartType_Double == type) &&
+	  (typeid(double) == typeid(value))) {
+	  return true;
+  } else if ((SmartType_Integer == type) &&
+		     (typeid(int32_t) == typeid(value)  ||
+		      typeid(uint32_t) == typeid(value) ||
+		      typeid(int64_t) == typeid(value))) {
+	  return true;
+  } else {
+	  return false;
+  }
 }
 
 template<typename NumberType>
 Errors::eType TNumberSchemaItem<NumberType>::validate(const SmartObject& Object) {
-  if (!isNumberType(Object.getType())) {
+  if (!isValidNumberType(Object.getType())) {
     return Errors::INVALID_VALUE;
   }
-  NumberType value;
+  NumberType value(0);
   if (typeid(int32_t) == typeid(value)) {
     value = Object.asInt();
   } else if (typeid(uint32_t) == typeid(value)) {

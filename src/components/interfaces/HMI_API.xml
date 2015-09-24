@@ -61,6 +61,8 @@
     <element name="WARNINGS" value="21"/>
     <element name="GENERIC_ERROR" value="22"/>
     <element name="USER_DISALLOWED" value="23"/>
+    <element name="TRUNCATED_DATA" value="24"/>
+    <element name="READ_ONLY " value="25"/>
 </enum>
 
 <enum name="ButtonName">
@@ -81,7 +83,28 @@
     <element name="PRESET_8"/>
     <element name="PRESET_9"/>
     <element name="CUSTOM_BUTTON"/>
-	<element name="SEARCH"/>
+    <element name="SEARCH"/>
+      <!-- Climate Buttons -->
+    <element name="AC_MAX" />
+    <element name="AC" />
+    <element name="RECIRCULATE" />
+    <element name="FAN_UP" />
+    <element name="FAN_DOWN" />
+    <element name="TEMP_UP" />
+    <element name="TEMP_DOWN" />
+    <element name="DEFROST_MAX" />
+    <element name="DEFROST" />
+    <element name="DEFROST_REAR" />
+    <element name="UPPER_VENT" />
+    <element name="LOWER_VENT" />
+
+    <!-- Radio Buttons -->
+    <element name="VOLUME_UP" />
+    <element name="VOLUME_DOWN" />
+    <element name="EJECT" />
+    <element name="SOURCE" />
+    <element name="SHUFFLE" />
+    <element name="REPEAT" />
 </enum>
 
 <enum name="ButtonEventMode">
@@ -209,6 +232,7 @@
   <element name="BACKGROUND_PROCESS" />
   <element name="TESTING" />
   <element name="SYSTEM" />
+  <element name="REMOTE_CONTROL" />
 </enum>
 
 <enum name="LayoutMode">
@@ -451,15 +475,27 @@
   <element name="menuTitle">
     <description> Optional text to label an app menu button (for certain touchscreen platforms).</description>
   </element>
-  <element name="timeToDestination"/>
   <element name="navigationText">
     <description>Navigation text for UpdateTurnList.</description>
   </element>
   <element name="notificationText">
     <description>Text of notification to be displayed on screen.</description>
   </element>
+  <element name="locationName">
+    <description> Optional name / title of intended location for SendLocation.</description>
+  </element>
+  <element name="locationDescription">
+    <description> Optional description of intended location / establishment (if applicable) for SendLocation.</description>
+  </element>
+  <element name="addressLines">
+    <description> Optional location address (if applicable) for SendLocation.</description>
+  </element>
+  <element name="phoneNumber">
+    <description> Optional hone number of intended location / establishment (if applicable) for SendLocation.</description>
+  </element>
+  <element name="timeToDestination"/>
     <!-- TO DO to be removed -->
-  <element name="turnText"/>
+    <element name="turnText"/>
 </enum>
 
 <enum name="ImageFieldName">
@@ -550,7 +586,7 @@
       1|sp : digit "1" or space
       c    : character out of following character set: sp|0-9|[letters
       :|sp : colon or space
-	Is used for CID and NGN head unit
+    Is used for CID and NGN head unit
     </description>
   </element>
   <element name="CLOCKTEXT3">
@@ -1098,10 +1134,11 @@
   <element name="NONE"/>
 </enum>
 
-<enum name="SpeakType">
+<enum name="MethodName">
   <description>Defines the type of the request which causes text-to-speech prompt</description>
   <element name="ALERT" />
   <element name="SPEAK" />
+  <element name="AUDIO_PASS_THRU" />
 </enum>
 
 <enum name="AlertType">
@@ -1167,6 +1204,142 @@
   </struct>
 <!-- End of Policies -->
 
+<!-- Remote Control -->
+<struct name="InteriorZone">
+  <description>Describes the origin and span of a zone in the vehicle. Vehicle zones can be overlapping</description>
+  <param name="col" type="Integer" minvalue="0" maxvalue="100">
+  </param>
+  <param name="row" type="Integer" minvalue="0" maxvalue="100">
+  </param>
+  <param name="level" type="Integer" minvalue="0" maxvalue="100">
+  </param>
+  <param name="colspan" type="Integer" minvalue="0" maxvalue="100">
+  </param>
+  <param name="rowspan" type="Integer" minvalue="0" maxvalue="100">
+  </param>
+  <param name="levelspan" type="Integer" minvalue="0" maxvalue="100">
+  </param>
+</struct>
+
+<enum name="ModuleType">
+  <element name="CLIMATE"/>
+  <element name="RADIO"/>
+</enum>
+
+<struct name="ModuleDescription">
+  <param name="moduleZone" type="Common.InteriorZone" mandatory="true">
+  </param>
+  <param name="moduleType" type="Common.ModuleType" mandatory="true">
+  </param>
+</struct>
+
+<enum name="RadioBand">
+  <element name="AM"/>
+  <element name="FM"/>
+  <element name="XM"/>
+</enum>
+
+<struct name="RdsData">
+  <param name="PS" type="String" minlength="0" maxlength="8">
+    <description>Program Service Name</description>
+  </param>
+  <param name="RT" type="String" minlength="0" maxlength="64">
+    <description>Radio Text</description>
+  </param>
+  <param name="CT" type="String" minlength="24" maxlength="24">
+    <description>The clock text in UTC format as YYYY-MM-DDThh:mm:ss.sTZD</description>
+  </param>
+  <param name="PI" type="String" minlength="0" maxlength="6">
+    <description>Program Identification - the call sign for the radio station</description>
+  </param>
+  <param name="PTY" type="Integer" minvalue="0" maxvalue="31">
+    <description>The program type - The region should be used to differentiate between EU and North America program types</description>
+  </param>
+  <param name="TP" type="Boolean">
+    <description>Traffic Program Identification - Identifies a station that offers traffic</description>
+  </param>
+  <param name="TA" type="Boolean">
+    <description>Traffic Announcement Identification - Indicates an ongoing traffic announcement</description>
+  </param>
+  <param name="REG" type="String">
+    <description>Region</description>
+  </param>
+</struct>
+
+<enum name="RadioState">
+  <element name="ACQUIRING"/>
+  <element name="ACQUIRED"/>
+  <element name="MULTICAST"/>
+  <element name="NOT_FOUND"/>
+</enum>
+
+<struct name="RadioControlData">
+  <param name="frequencyInteger" type="Integer" minvalue="0" maxvalue="1710" mandatory="false">
+    <description>The integer part of the frequency ie for 101.7 this value should be 101</description>
+  </param>
+  <param name="frequencyFraction" type="Integer" minvalue="0" maxvalue="9" mandatory="false">
+    <description>The fractional part of the frequency for 101.7 is 7</description>
+  </param>
+  <param name="band" type="Common.RadioBand" mandatory="false">
+  </param>
+  <param name="rdsData" type="Common.RdsData" mandatory="false">
+  </param>
+  <param name="availableHDs" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
+    <description>number of HD sub-channels if available</description>
+  </param>
+  <param name="hdChannel" type="Integer" minvalue="1" maxvalue="3" mandatory="false">
+    <description>Current HD sub-channel if available</description>
+  </param>
+  <param name="signalStrength" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+  </param>
+  <param name="signalChangeThreshold" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+    <description>If the signal strength falls below the set value for this parameter, the radio will tune to an alternative frequency</description>
+  </param>
+  <param name="radioEnable" type="Boolean" mandatory="false">
+    <description> True if the radio is on, false is the radio is off</description>
+  </param>
+  <param name="state" type="Common.RadioState" mandatory="false">
+  </param>
+</struct>
+
+<enum name="DefrostZone">
+  <element name="FRONT"/>
+  <element name="REAR"/>
+  <element name="ALL"/>
+</enum>
+
+<struct name="ClimateControlData">
+  <param name="fanSpeed" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+  </param>
+  <param name="currentTemp" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+  </param>
+  <param name="desiredTemp" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+  </param>
+  <param name="acEnable" type="Boolean" mandatory="false">
+  </param>
+  <param name="recirculateAirEnable" type="Boolean" mandatory="false">
+  </param>
+  <param name="autoModeEnable" type="Boolean" mandatory="false">
+  </param>
+  <param name="defrostZone" type="Common.DefrostZone" mandatory="false">
+  </param>
+  <param name="dualModeEnable" type="Boolean" mandatory="false">
+  </param>
+</struct>
+
+<struct name="ModuleData">
+  <description>The moduleType indicates which type of data should be changed and identifies which data object exists in this struct. For example, if the moduleType is CLIMATE then a "climateControlData" should exist</description>
+  <param name="moduleType" type="Common.ModuleType">
+  </param>
+  <param name="moduleZone" type="Common.InteriorZone">
+  </param>
+  <param name="radioControlData" type="Common.RadioControlData" mandatory="false">
+  </param>
+  <param name="climateControlData" type="Common.ClimateControlData" mandatory="false">
+  </param>
+</struct>
+
+<!-- End Remote Control -->
 <struct name="TextField">
   <param name="name" type="Common.TextFieldName">
     <description>The name that identifies the field. See TextFieldName.</description>
@@ -1300,18 +1473,37 @@
     <param name="deviceName" type="String" mandatory="true">
       <description>The name of device which the provided application is running on.</description>
     </param>
+    <param name="ttsName" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
+      <description>
+        TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green".
+        Meant to overcome any failing on speech engine in properly pronouncing / understanding app name.
+        May not be empty.
+        May not start with a new line character.
+        Not unique value
+      </description>
+    </param>
+    <param name="vrSynonyms" type="String" maxlength="40" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>
+        Defines an additional voice recognition command.
+        Must not interfere with any name of previously registered applications(SDL makes check).
+      </description>
+    </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>Unique (during ignition cycle) id of the application. To be used in all RPCs sent by both HU system and SDL</description>
     </param>
-    <param name="hmiDisplayLanguageDesired" type="Common.Language" mandatory="true">
+    <param name="hmiDisplayLanguageDesired" type="Common.Language" mandatory="false">
       <description>The language the application intends to use on HU  </description>
     </param>
-    <param name="isMediaApplication" type="Boolean" mandatory="true">
+    <param name="isMediaApplication" type="Boolean" mandatory="false">
       <description>Indicates whether it is a media or a non-media application.</description>
     </param>
     <param name="appType" type="Common.AppHMIType" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>List of all applicable app types stating which classifications to be given to the app.</description>
       <description>e.g. for platforms like GEN2, this determines which "corner(s)" the app can populate.</description>
+    </param>
+    <param name="greyOut" type="Boolean" mandatory="false">
+      <description>Indicates whether application should be dimmed on the screen.</description>
+      <description>Applicable only for apps received through QueryApps and still not registered.</description>
     </param>
 </struct>
 
@@ -1465,6 +1657,15 @@
   </param>
 </struct>
 
+<struct name="HMICapabilities">
+  <param name="navigation" type="Boolean" mandatory="false">
+    <description>Availability of build in Nav. True: Available, False: Not Available</description>
+  </param>
+  <param name="phoneCall" type="Boolean" mandatory="false">
+    <description>Availability of build in phone. True: Available, False: Not Available</description>
+  </param>
+</struct>
+
 <struct name="AudioPassThruCapabilities">
   <description>
     Describes different audio type configurations for PerformAudioPassThru.
@@ -1494,8 +1695,8 @@
   </param>
   <param name="keypressMode" type="Common.KeypressMode" mandatory="false" >
     <description>
-    	Desired keypress mode.
-    	If omitted, this value will be set to RESEND_CURRENT_ENTRY.
+        Desired keypress mode.
+        If omitted, this value will be set to RESEND_CURRENT_ENTRY.
     </description>
   </param>
   <param name="limitedCharacterList" type="String" maxlength="1" minsize="1" maxsize="100" array="true" mandatory="false">
@@ -1852,6 +2053,47 @@
 
 </interface>
 
+<interface name="RC" version="1.0" date="2015-05-01">
+  <function name="GetInteriorVehicleDataCapabilities" messagetype="request">
+    <param name="zone" type="Common.InteriorZone" mandatory="false">
+    </param>
+    <param name="moduleTypes" type="Common.ModuleType" array="true" mandatory="false" minsize="1" maxsize="1000">
+    </param>
+  </function>
+  <function name="GetInteriorVehicleDataCapabilities" messagetype="response">
+    <param name="interiorVehicleDataCapabilities" type="Common.ModuleDescription" array="true" minsize="1" maxsize="1000" mandatory="false">
+  </param>
+  </function>
+  <function name="SetInteriorVehicleData" messagetype="request">
+    <param name="moduleData" type="Common.ModuleData">
+      <description>The data to set for the (zone, module) pair</description>
+    </param>
+  </function>
+  <function name="SetInteriorVehicleData" messagetype="response">
+    <param name="moduleData" type="Common.ModuleData">
+      <description>The updated data to set for the (zone, module) pair</description>
+    </param>
+  </function>
+  <function name="GetInteriorVehicleData" messagetype="request">
+    <param name="moduleDescription" type="Common.ModuleDescription">
+      <description>The zone and module data to retrieve from the vehicle for that zone</description>
+    </param>
+    <param name="subscribe" type="Boolean" mandatory="false" defvalue="false">
+      <description>If subscribe is true, the array values in requestedDataTypes override the current subscriptions for the zones requested, ie if the developer subscribes to A and B and then subscribes to A, the developer will no longer be subscribed to B. If the array is empty, data for all supported data types is returned</description>
+    </param>
+  </function>
+  <function name="GetInteriorVehicleData" messagetype="response">
+    <param name="moduleData" type="Common.ModuleData">
+      <description>The updated data to set for the (zone, module) pair</description>
+    </param>
+  </function>
+
+  <function name="OnInteriorVehicleData" messagetype="notification">
+    <param name="moduleData" type="Common.ModuleData" mandatory="true">
+    </param>
+  </function>
+</interface>
+
 <interface name="Buttons" version="1.0" date="2013-04-12">
     <function name="GetCapabilities" messagetype="request">
       <description>Method is invoked at system start-up. SDL requests the information about all supported hardware buttons and their capabilities</description>
@@ -1864,6 +2106,23 @@
         <description>Must be returned if the platform supports custom on-screen Presets</description>
       </param>
     </function>
+
+    <function name="ButtonPress" messagetype="request">
+      <description>Method is invoked when the application tries to press a button</description>
+      <param name="name" type="Common.ButtonName" mandatory="true"/>
+      <param name="mode" type="Common.ButtonPressMode" mandatory="true">
+          <description>Indicates whether this is a LONG or SHORT button press event.</description>
+      </param>
+      <param name="moduleType" type="Common.ModuleType" mandatory="true">
+        <description>The module where this command is being directed</description>
+      </param>
+      <param name="interiorZone" type="Common.InteriorZone" mandatory="true">
+        <description>The interior zone where this command is being directed</description>
+      </param>
+    </function>
+    <function name="ButtonPress" messagetype="response">
+    </function>
+
     <function name="OnButtonEvent" messagetype="notification">
       <description>HU system must notify about every UP/DOWN event for buttons</description>
       <param name="name" type="Common.ButtonName" mandatory="true"/>
@@ -1913,6 +2172,15 @@
             <description>Must be 'true' - when the phone call is started on HMI. Must be 'false' when the phone call is ended on HMI</description>
         </param>
     </function>
+    <function name="OnEmergencyEvent" messagetype="notification">
+        <description>
+            "Sender: HMI->SDL. Conditions: when HMI enters the mode of "911 Assist", or other rear view camera,
+            or something else in the future. Purpose: for SDL to change the audioStreamingState of the related apps to
+            NOT_AUDIBLE when "enabled:true" and back to AUDIBLE when "enabled:false""
+        </description>
+        <param name="enabled" type="Boolean" mandatory="true">
+        </param>
+    </function>
     <function name="OnResumeAudioSource" messagetype="notification">
       <description>This method must be invoked by SDL to update audio state.</description>
       <param name="appID" type="Integer" mandatory="true">
@@ -1923,7 +2191,7 @@
     </function>
     <function name="UpdateAppList" messagetype="request">
       <description>Issued by SDL to notify HMI about new applications registered.</description>
-      <param name="applications" type="Common.HMIApplication" mandatory="true" array="true" minsize="1" maxsize="100"/>
+      <param name="applications" type="Common.HMIApplication" mandatory="true" array="true" minsize="0" maxsize="100"/>
     </function>
     <function name="UpdateAppList" messagetype="response">
     </function>
@@ -2052,6 +2320,11 @@
         <description>Specifies reason for exiting all apllications.</description>
       </param>
     </function>
+    <function name="OnAwakeSDL" messagetype="notification">
+        <description>
+            Sender: HMI->SDL. Must be sent to return SDL to normal operation after 'Suspend' or 'LowVoltage' events
+        </description>
+    </function>
     <function name="MixingAudioSupported" messagetype="request">
       <description>Request from SDL to HMI to find out if the last one supports mixing audio (i.e. recording TTS command and playing audio).</description>
     </function>
@@ -2063,7 +2336,26 @@
     </function>
     <function name="PlayTone" messagetype="notification">
       <description>Sent by SDL to HMI to notify that the tone should be played.</description>
+      <param name="appID" type="Integer" mandatory="true">
+         <description>ID of the application that invoked this notification</description>
+      </param>
+      <param name="methodName" type="Common.MethodName" mandatory="true">
+         <description>Defines the name of app's request that initiates playing a tone</description>
+      </param>
     </function>
+    <function name="DialNumber" messagetype="request">
+      <description>Request from SDL to call a specific number.</description>
+      <param name="number" type="String" maxlength="40">
+        <description>The number to dial. Only the character + and numbers are allowed.</description>
+      </param>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that concerns this RPC.</description>
+      </param>
+    </function>
+
+    <function name="DialNumber" messagetype="response">
+    </function>
+
     <!-- Policies -->
 
     <!-- SyncP RPC-->
@@ -2154,8 +2446,8 @@
 
     <param name="fileSize" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
       <description>Full Size of file. sends in first OnPutFile notification if file is splited
-		     	   into many PutFiles
-	  </description>
+                   into many PutFiles
+      </description>
     </param>
 
     <param name="FileName" type="String" maxlength="255" mandatory="true">
@@ -2387,7 +2679,7 @@
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>
     </param>
-    <param name="speakType" type="Common.SpeakType" mandatory="false">
+    <param name="speakType" type="Common.MethodName" mandatory="false">
       <description>Defines the type of the request which causes text-to-speech</description>
     </param>
   </function>
@@ -2626,8 +2918,8 @@
     </param>
     <param name="manualTextEntry" type="String" minlength="0" maxlength="500" mandatory="false">
       <description>
-	       	Manually entered text selection, e.g. through keyboard
-        	Can be returned in lieu of choiceID, depending on trigger source
+            Manually entered text selection, e.g. through keyboard
+            Can be returned in lieu of choiceID, depending on trigger source
       </description>
     </param>
   </function>
@@ -2639,9 +2931,9 @@
     <param name="endTime" type="Common.TimeFormat" mandatory="false">
       <description>
           See TimeFormat.
-      	  endTime can be provided for "COUNTUP" and "COUNTDOWN"; to be used to calculate any visual progress bar (if not provided, this feature is ignored)
-      	  If endTime is greater then startTime for COUNTDOWN or less than startTime for COUNTUP, then the request will return an INVALID_DATA.
-      	  endTime will be ignored for "PAUSE", "RESUME", and "CLEAR"
+          endTime can be provided for "COUNTUP" and "COUNTDOWN"; to be used to calculate any visual progress bar (if not provided, this feature is ignored)
+          If endTime is greater then startTime for COUNTDOWN or less than startTime for COUNTUP, then the request will return an INVALID_DATA.
+          endTime will be ignored for "PAUSE", "RESUME", and "CLEAR"
       </description>
     </param>
     <param name="updateMode" type="Common.ClockUpdateMode" mandatory="true">
@@ -2708,8 +3000,11 @@
     </param>
     <param name="audioPassThruCapabilities" type="Common.AudioPassThruCapabilities" mandatory="true"/>
     <param name="hmiZoneCapabilities" type="Common.HmiZoneCapabilities" mandatory="true"/>
-    <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" mandatory="false">
+    <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>Must be returned if the platform supports on-screen SoftButtons.</description>
+    </param>
+    <param name="hmiCapabilities" type="Common.HMICapabilities" mandatory="false">
+      <description>Specifies the HMI’s capabilities. See HMICapabilities.</description>
     </param>
   </function>
   <function name="ChangeRegistration" messagetype="request">
@@ -2728,6 +3023,11 @@
     </param>
     <param name="language" type="Common.Language" mandatory="true">
       <description>The language application wants to switch to.</description>
+    </param>
+    <param name="appHMIType" type="Common.AppHMIType" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>
+       Sent when app's requested-during-registration AppHMIType is changed to different one due to Policies update. Contains the updated list of all allowed app's AppHMITypes.
+      </description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that concerns this RPC.</description>
@@ -2775,8 +3075,8 @@
   <function name="SetDisplayLayout" messagetype="request">
     <param name="displayLayout" type="String" maxlength="500" mandatory="true">
       <description>
-      	Predefined or dynamically created screen layout.
-      	Currently only predefined screen layouts are defined.
+        Predefined or dynamically created screen layout.
+        Currently only predefined screen layouts are defined.
       </description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
@@ -2801,27 +3101,27 @@
     <description>Used to show a custom form; it can be a parent or child screen. If no parent screen is designated, it is set as a parent screen.</description>
     <param name="customFormID" type="String" maxlength="500" mandatory="true">
       <description>
-			Predefined or dynamically created screen layout.
-			Currently only predefined forms are defined.
-			Predefined layouts include:
-				"DEFAULT" - Default media / non-media screen
-				"ONSCREEN_PRESETS" - Custom root media screen containing app-defined onscreen presets.
-				"KEYBOARD_SEARCH" - Custom template containing app-configured on-screen keyboard with active search updating; user also can trigger voice search.
-				"NAV_FULLSCREEN_MAP" - Custom root template screen containing full screen map with navigation controls.
-				"NAV_POI_MENU" - Custom template containing app-defined POI options.
-				"NAV_SEARCH_RESULTS" - Custom template containing a list of app-defined search results
-				"NAV_POI_INFO" - Custom template containing app-defined POI information (and potentially map data).
+            Predefined or dynamically created screen layout.
+            Currently only predefined forms are defined.
+            Predefined layouts include:
+                "DEFAULT" - Default media / non-media screen
+                "ONSCREEN_PRESETS" - Custom root media screen containing app-defined onscreen presets.
+                "KEYBOARD_SEARCH" - Custom template containing app-configured on-screen keyboard with active search updating; user also can trigger voice search.
+                "NAV_FULLSCREEN_MAP" - Custom root template screen containing full screen map with navigation controls.
+                "NAV_POI_MENU" - Custom template containing app-defined POI options.
+                "NAV_SEARCH_RESULTS" - Custom template containing a list of app-defined search results
+                "NAV_POI_INFO" - Custom template containing app-defined POI information (and potentially map data).
       </description>
     </param>
     <param name="parentFormID" type="String" maxlength="500" defvalue="DEFAULT" mandatory="false">
       <description>
-			Parent screen of predefined form to display.
-			Currently only predefined forms are defined.
-			If not provided, then set to "DEFAULT".
-			Predefined layouts include:
-				"DEFAULT" - Default media / non-media screen
-				"ONSCREEN_PRESETS" - Custom root media screen containing app-defined onscreen presets.
-				"NAV_FULLSCREEN_MAP" - Custom template containing full screen map with navigation controls.
+            Parent screen of predefined form to display.
+            Currently only predefined forms are defined.
+            If not provided, then set to "DEFAULT".
+            Predefined layouts include:
+                "DEFAULT" - Default media / non-media screen
+                "ONSCREEN_PRESETS" - Custom root media screen containing app-defined onscreen presets.
+                "NAV_FULLSCREEN_MAP" - Custom template containing full screen map with navigation controls.
       </description>
     </param>
   </function>
@@ -3164,7 +3464,7 @@
     </param>
     <param name="messageData" type="Integer" minvalue="0" maxvalue="255" minsize="1" maxsize="65535" array="true" mandatory="true">
       <description>
-      	Array of bytes comprising CAN message.
+        Array of bytes comprising CAN message.
       </description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
@@ -3174,16 +3474,16 @@
   <function name="DiagnosticMessage" messagetype="response">
     <param name="messageDataResult" type="Integer" minvalue="0" maxvalue="255" minsize="1" maxsize="65535" array="true" mandatory="true">
       <description>
-      	Array of bytes comprising CAN message result.
+        Array of bytes comprising CAN message result.
       </description>
     </param>
   </function>
   <function name="SubscribeVehicleData" messagetype="request">
     <description>
-    	Subscribes for specific published data items.
-    	The data will be only sent if it has changed.
-    	The application will be notified by the onVehicleData notification whenever new data is available.
-    	To unsubscribe the notifications, use unsubscribe with the same subscriptionType.
+        Subscribes for specific published data items.
+        The data will be only sent if it has changed.
+        The application will be notified by the onVehicleData notification whenever new data is available.
+        To unsubscribe the notifications, use unsubscribe with the same subscriptionType.
     </description>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that requested this RPC.</description>

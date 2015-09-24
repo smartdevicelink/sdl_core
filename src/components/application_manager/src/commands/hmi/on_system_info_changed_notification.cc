@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -47,7 +47,7 @@ OnSystemInfoChangedNotification::~OnSystemInfoChangedNotification() {
 }
 
 void OnSystemInfoChangedNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnSystemInfoChangedNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   uint32_t lang_code =
       (*message_)[strings::msg_params][strings::language].asUInt();
   const std::string language =

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -55,6 +55,12 @@ class HMIMessageAdapter : public HMIMessageSender {
    * \brief Destructor
    */
   virtual ~HMIMessageAdapter();
+  /**
+   * @brief Subscribes to notification from HMI
+   * @param hmi_notification string with notification name
+   */
+  virtual void SubscribeToHMINotification(
+      const std::string& hmi_notification) = 0;
 
  protected:
   /**

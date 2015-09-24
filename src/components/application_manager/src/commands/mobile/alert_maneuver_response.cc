@@ -47,7 +47,7 @@ AlertManeuverResponse::~AlertManeuverResponse() {
 }
 
 void AlertManeuverResponse::Run() {
-  LOG4CXX_INFO(logger_, "AlertManeuverResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }

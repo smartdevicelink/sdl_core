@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -46,7 +46,7 @@ OnAllowSDLFunctionalityNotification::~OnAllowSDLFunctionalityNotification() {
 }
 
 void OnAllowSDLFunctionalityNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnAllowSDLFunctionalityNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   uint32_t device_id = 0;
   if ((*message_)[strings::msg_params].keyExists("device")) {
     device_id = (*message_)[strings::msg_params]["device"]["id"].asUInt();
