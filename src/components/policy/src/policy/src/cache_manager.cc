@@ -43,7 +43,9 @@
 #include "json/writer.h"
 #include "utils/logger.h"
 
-#  include "policy/sql_pt_representation.h"
+#include "policy/sql_pt_representation.h"
+
+#undef max
 
 namespace policy_table = rpc::policy_table_interface_base;
 

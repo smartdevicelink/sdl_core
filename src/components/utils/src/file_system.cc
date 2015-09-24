@@ -51,8 +51,10 @@
 #include <sstream>
 
 #include <dirent.h>
-#include <unistd.h>
 #endif
+
+#include <unistd.h>
+
 
 #include "utils/file_system.h"
 #include "utils/logger.h"
@@ -452,6 +454,13 @@ bool file_system::IsAccessible(const std::string& name, int32_t how) {
 #endif
 }
 
+bool file_system::IsWritingAllowed(const std::string& name) {
+  return IsAccessible(name, W_OK);
+}
+
+bool file_system::IsReadingAllowed(const std::string& name) {
+  return IsAccessible(name, R_OK);
+}
 std::vector<std::string> file_system::ListFiles(
   const std::string& directory_name) {
   std::vector<std::string> listFiles;

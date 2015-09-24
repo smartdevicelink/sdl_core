@@ -320,36 +320,10 @@ bool SQLPTRepresentation::GetPriority(const std::string& policy_app_id,
 }
 
 InitResult SQLPTRepresentation::Init() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "SQLPTRepresentation::Init");
 
   if (!db_->Open()) {
     LOG4CXX_ERROR(logger_, "Failed opening database.");
-    LOG4CXX_INFO(logger_, "Starting opening retries.");
-    const uint16_t attempts =
-        profile::Profile::instance()->attempts_to_open_policy_db();
-    LOG4CXX_DEBUG(logger_, "Total attempts number is: " << attempts);
-    bool is_opened = false;
-    const uint16_t open_attempt_timeout_ms =
-        profile::Profile::instance()->open_attempt_timeout_ms();
-    const useconds_t sleep_interval_mcsec = open_attempt_timeout_ms * 1000;
-    LOG4CXX_DEBUG(logger_, "Open attempt timeout(ms) is: "
-                  << open_attempt_timeout_ms);
-    for (int i = 0; i < attempts; ++i) {
-      usleep(sleep_interval_mcsec);
-      LOG4CXX_INFO(logger_, "Attempt: " << i+1);
-      if (db_->Open()){
-        LOG4CXX_INFO(logger_, "Database opened.");
-        is_opened = true;
-        break;
-      }
-    }
-    if (!is_opened) {
-      LOG4CXX_ERROR(logger_, "Open retry sequence failed. Tried "
-                    << attempts << " attempts with "
-                    << open_attempt_timeout_ms
-                    << " open timeout(ms) for each.");
-      return InitResult::FAIL;
-    }
   }
 #ifndef __QNX__
   if (!db_->IsReadWrite()) {

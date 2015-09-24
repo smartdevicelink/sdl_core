@@ -38,6 +38,7 @@
 namespace utils {
 namespace dbms {
 
+#undef ERROR
 typedef enum Error {
   OK          = 0,    /* Successful result */
   ERROR,              /* SQL error or missing database */

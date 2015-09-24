@@ -46,8 +46,23 @@ namespace policy {
  * @struct Data about vehicle
  */
 struct VehicleData {
+#ifdef OS_WIN32
+	VehicleData(){
+		vehicle_make = "";
+		vehicle_model = "";
+		vehicle_year = 0;
+	}
+	VehicleData(const std::string &vehicle_make_data, const std::string &vehicle_model_data, int vehicle_year_data){
+		vehicle_make = vehicle_make_data;
+		vehicle_model = vehicle_model_data;
+		vehicle_year = vehicle_year_data;
+	}
+	std::string vehicle_make;
+	std::string vehicle_model;
+#else
   const std::string vehicle_make;
   const std::string vehicle_model;
+#endif
   int vehicle_year;
 };
 

@@ -213,7 +213,8 @@ class TimerThread {
      */
     inline int32_t get_timeout() const {
       return std::min(
-            static_cast<uint32_t>(std::numeric_limits<int32_t>::max()),
+            // static_cast<uint32_t>(std::numeric_limits<int32_t>::max()),
+			static_cast<uint32_t>(INT_MAX),
             timeout_milliseconds_);
     }
 
