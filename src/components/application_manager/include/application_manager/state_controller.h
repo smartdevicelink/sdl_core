@@ -64,7 +64,8 @@ class StateController : public event_engine::EventObserver {
       DCHECK_OR_RETURN_VOID(state);
       DCHECK_OR_RETURN_VOID(state->state_id() == HmiState::STATE_ID_REGULAR);
 
-      if (!ResolveHmiState(app, state)) {
+      HmiStatePtr resolved_state = ResolveHmiState(app, state);
+      if (!resolved_state) {
         state->set_state_id(HmiState::STATE_ID_POSTPONED);
         app->SetPostponedState(state);
         return;
@@ -73,12 +74,12 @@ class StateController : public event_engine::EventObserver {
       if (SendActivateApp) {
         uint32_t corr_id = MessageHelper::SendActivateAppToHMI(app->app_id(),
             static_cast<hmi_apis::Common_HMILevel::eType>(
-                state->hmi_level()));
+                resolved_state->hmi_level()));
         subscribe_on_event(
             hmi_apis::FunctionID::BasicCommunication_ActivateApp, corr_id);
-        waiting_for_activate[app->app_id()] = state;
+        waiting_for_activate[app->app_id()] = resolved_state;
       } else {
-        ApplyRegularState(app, state);
+        ApplyRegularState(app, resolved_state);
       }
     }
 
