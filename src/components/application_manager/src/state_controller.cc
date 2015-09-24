@@ -166,16 +166,11 @@ bool StateController::IsStateAvailable(ApplicationSharedPtr app,
                 << ", audio_state " << state->audio_streaming_state()
                 << ", system_context " << state->system_context());
 
-  if (!app->is_resuming()) {
+  if (!app->is_resuming() ||
+      !Compare<HMILevel::eType, EQ, ONE>(state->hmi_level(),
+               HMILevel::HMI_FULL, HMILevel::HMI_LIMITED)) {
     LOG4CXX_DEBUG(logger_, "Application is not in resuming mode."
                   << " Requested state is available");
-    return true;
-  }
-
-  if (!Compare<HMILevel::eType, EQ, ONE>(state->hmi_level(),
-          HMILevel::HMI_FULL, HMILevel::HMI_LIMITED)) {
-    LOG4CXX_WARN(logger_, "Application is going to resume to background."
-                 << " Requested state is available");
     return true;
   }
 

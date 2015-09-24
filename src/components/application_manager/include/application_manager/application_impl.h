@@ -48,6 +48,7 @@
 #include "connection_handler/device.h"
 #include "utils/timer_thread.h"
 #include "utils/lock.h"
+#include "utils/atomic_object.h"
 
 namespace usage_statistics {
 
@@ -253,13 +254,13 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * @brief HmiState of application within active events PhoneCall, TTS< etc ...
    * @return Active HmiState of application
    */
-  virtual const HmiStatePtr CurrentHmiState() const;
+  virtual HmiStatePtr CurrentHmiState() const;
 
   /**
    * @brief RegularHmiState of application without active events VR, TTS etc ...
    * @return HmiState of application
    */
-  virtual const HmiStatePtr RegularHmiState() const;
+  virtual HmiStatePtr RegularHmiState() const;
 
   /**
    * @brief PostponedHmiState returns postponed hmi state of application
@@ -267,7 +268,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    *
    * @return Postponed hmi state of application
    */
-  virtual const HmiStatePtr PostponedHmiState() const;
+  virtual HmiStatePtr PostponedHmiState() const;
 
   uint32_t audio_stream_retry_number() const;
 
@@ -336,9 +337,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   UsageStatistics                          usage_report_;
   ProtocolVersion                          protocol_version_;
   bool                                     is_voice_communication_application_;
-
-  bool                                     is_resuming_;
-  mutable sync_primitives::Lock            is_resuming_lock;
+  sync_primitives::atomic_bool             is_resuming_;
 
   uint32_t                                 video_stream_retry_number_;
   uint32_t                                 audio_stream_retry_number_;

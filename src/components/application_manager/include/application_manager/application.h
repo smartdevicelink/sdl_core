@@ -632,13 +632,13 @@ class Application : public virtual InitialApplicationData,
      * @brief HmiState of application within active events PhoneCall, TTS< etc ...
      * @return Active HmiState of application
      */
-    virtual const HmiStatePtr CurrentHmiState() const = 0;
+    virtual HmiStatePtr CurrentHmiState() const = 0;
 
     /**
      * @brief RegularHmiState of application without active events VR, TTS etc ...
      * @return HmiState of application
      */
-    virtual const HmiStatePtr RegularHmiState() const = 0;
+    virtual HmiStatePtr RegularHmiState() const = 0;
 
     /**
      * @brief PostponedHmiState returns postponed hmi state of application
@@ -646,7 +646,7 @@ class Application : public virtual InitialApplicationData,
      *
      * @return Postponed hmi state of application
      */
-    virtual const HmiStatePtr PostponedHmiState() const = 0;
+    virtual HmiStatePtr PostponedHmiState() const = 0;
 
     /**
      * @brief Keeps id of softbuttons which is created in commands:
