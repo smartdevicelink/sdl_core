@@ -116,7 +116,19 @@ ValidationResult ClimateControlDataValidator::Validate(const Json::Value& json,
     return INVALID_DATA;
   }
 
-  return ValidateSimpleValues(json, outgoing_json);
+  ValidationResult result = ValidateSimpleValues(json, outgoing_json);
+
+  if (!outgoing_json.size()) {
+    return INVALID_DATA;
+  }
+
+  return result;
+}
+
+void ClimateControlDataValidator::RemoveReadOnlyParams(Json::Value& json) {
+  if (json.isMember(kCurrentTemp)) {
+    json.removeMember(kCurrentTemp);
+  }
 }
 
 }  // namespace valdiators

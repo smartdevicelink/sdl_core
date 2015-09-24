@@ -78,33 +78,28 @@ ValidationResult ModuleDataValidator::Validate(const Json::Value& json,
     return result;
   }
 
-  if (IsMember(json, kRadioControlData)) {
-    result = RadioControlDataValidator::instance()->Validate(
-                                              json[kRadioControlData],
-                                              outgoing_json[kRadioControlData]);
-  } else {
-    if (enums_value::kRadio == outgoing_json[kModuleType].asString()) {
+  if (enums_value::kRadio == outgoing_json[kModuleType].asString()) {
+    if (IsMember(json, kRadioControlData)) {
+      return RadioControlDataValidator::instance()->Validate(
+                                                json[kRadioControlData],
+                                                outgoing_json[kRadioControlData]);
+    } else {
       LOG4CXX_ERROR(logger_, "Radio control data missed!" );
       return ValidationResult::INVALID_DATA;
     }
-  }
-
-  if (result != ValidationResult::SUCCESS) {
-    return result;
-  }
-
-  if (IsMember(json, kClimateControlData)) {
-    result = ClimateControlDataValidator::instance()->Validate(
-                                             json[kClimateControlData],
-                                             outgoing_json[kClimateControlData]);
-  } else {
-    if (enums_value::kClimate == outgoing_json[kModuleType].asString()) {
+  } else  if (enums_value::kClimate == outgoing_json[kModuleType].asString()) {
+    if (IsMember(json, kClimateControlData)) {
+      return ClimateControlDataValidator::instance()->Validate(
+                                               json[kClimateControlData],
+                                               outgoing_json[kClimateControlData]);
+    } else {
       LOG4CXX_ERROR(logger_, "Climate control data missed!" );
       return ValidationResult::INVALID_DATA;
     }
+  } else {
+    LOG4CXX_ERROR(logger_, "Wrong module type!" );
+    return ValidationResult::INVALID_DATA;
   }
-
-  return result;
 }
 
 }  // namespace valdiators

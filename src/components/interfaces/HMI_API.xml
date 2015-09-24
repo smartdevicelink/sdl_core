@@ -62,6 +62,7 @@
     <element name="GENERIC_ERROR" value="22"/>
     <element name="USER_DISALLOWED" value="23"/>
     <element name="TRUNCATED_DATA" value="24"/>
+    <element name="READ_ONLY " value="25"/>
 </enum>
 
 <enum name="ButtonName">

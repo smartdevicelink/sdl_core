@@ -134,7 +134,27 @@ ValidationResult RadioControlDataValidator::Validate(const Json::Value& json,
                                                     outgoing_json[kRdsData]);
   }
 
+  if (!outgoing_json.size()) {
+    return INVALID_DATA;
+  }
+
   return result;
+}
+
+void RadioControlDataValidator::RemoveReadOnlyParams(Json::Value& json) {
+  RemoveReadOnlyParam(json, kRdsData);
+  RemoveReadOnlyParam(json, kAvailableHDs);
+  RemoveReadOnlyParam(json, kSignalStrength);
+  RemoveReadOnlyParam(json, kSignalChangeThreshold);
+  RemoveReadOnlyParam(json, kState);
+  RemoveReadOnlyParam(json, kRadioEnable);
+}
+
+void RadioControlDataValidator::RemoveReadOnlyParam(
+    Json::Value& json, const char* param_name) {
+  if (json.isMember(param_name)) {
+    json.removeMember(param_name);
+  }
 }
 
 }  // namespace valdiators

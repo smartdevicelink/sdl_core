@@ -56,6 +56,12 @@ class ClimateControlDataValidator : public Validator, public utils::Singleton<Cl
    */
   ValidationResult Validate(const Json::Value& json,
                             Json::Value& outgoing_json);
+  /**
+   * @brief Remove read only params from json
+   *
+   * @param json incoming json. Read only params will be cut off.
+   */
+  void RemoveReadOnlyParams(Json::Value& json);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ClimateControlDataValidator);
