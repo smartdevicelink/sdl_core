@@ -1212,10 +1212,8 @@ ApplicationManagerImpl::GetHandshakeContext(uint32_t key) const {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationConstSharedPtr app = application(key);
   security_manager::SSLContext::HandshakeContext res;
-  res.expected_cn = app->mobile_app_id();
-  res.expected_sn = app->name();
-
-  return res;
+  DCHECK_OR_RETURN(app.valid(), res);
+  return res.make_context(app->mobile_app_id(), app->name());
 }
 #endif // ENABLE_SECURITY
 

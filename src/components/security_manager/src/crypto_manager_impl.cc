@@ -116,11 +116,13 @@ bool CryptoManagerImpl::Init(Mode mode, Protocol protocol,
                              const std::string &cert_data,
                              const std::string &ciphers_list,
                              const bool verify_peer,
-                             const std::string &ca_certificate_file) {
+                             const std::string &ca_certificate_file,
+                             const size_t hours_before_update) {
   LOG4CXX_AUTO_TRACE(logger_);
   mode_ = mode;
   verify_peer_ = verify_peer;
   certificate_data_ = cert_data;
+  hours_before_update_ = hours_before_update;
   LOG4CXX_DEBUG(logger_, (mode_ == SERVER ? "Server" : "Client") << " mode");
   LOG4CXX_DEBUG(logger_, "Peer verification " << (verify_peer_? "enabled" : "disabled"));
   LOG4CXX_DEBUG(logger_, "CA certificate file is \"" << ca_certificate_file << '"');
@@ -262,10 +264,18 @@ std::string CryptoManagerImpl::LastError() const {
 }
 
 bool CryptoManagerImpl::IsCertificateUpdateRequired() const {
-  const double seconds = difftime(time(NULL), mktime(&expiration_time_));
+  LOG4CXX_AUTO_TRACE(logger_);
 
-  return (seconds <= (
-            profile::Profile::instance()->update_before_hours() * 60 * 60));
+  const time_t now = time(NULL);
+  const time_t cert_date = mktime(&expiration_time_);
+
+  const double seconds = difftime(cert_date, now);
+
+  LOG4CXX_DEBUG(logger_, "Certificate time: " << asctime(&expiration_time_));
+  LOG4CXX_DEBUG(logger_, "Host time: " << asctime(localtime(&now)));
+  LOG4CXX_DEBUG(logger_, "Seconds before expiration: " << seconds);
+
+  return seconds <= hours_before_update_;
 }
 
 

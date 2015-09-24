@@ -35,6 +35,8 @@
 
 #include <cstddef>  // for size_t typedef
 #include <string>
+#include <ctype.h>
+#include <algorithm>
 
 // TODO(EZamakhov): update brief info
 /**
@@ -79,6 +81,12 @@ class SSLContext {
                                   const std::string& cn) {
       expected_sn = sn;
       expected_cn = cn;
+
+      std::transform(expected_sn.begin(), expected_sn.end(),
+                     expected_sn.begin(), ::tolower);
+
+      std::transform(expected_cn.begin(), expected_cn.end(),
+                     expected_cn.begin(), ::tolower);
       return *this;
     }
   };

@@ -169,7 +169,9 @@ bool LifeCycle::StartComponents() {
         policy::PolicyHandler::instance()->RetrieveCertificate(),
         profile::Profile::instance()->ciphers_list(),
         profile::Profile::instance()->verify_peer(),
-        profile::Profile::instance()->ca_cert_path())) {
+        profile::Profile::instance()->ca_cert_path(),
+        profile::Profile::instance()->update_before_hours())
+        ) {
     LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
     return false;
   }
@@ -195,13 +197,6 @@ bool LifeCycle::StartComponents() {
   connection_handler_->set_protocol_handler(protocol_handler_);
   connection_handler_->set_connection_handler_observer(app_manager_);
 
-#ifdef ENABLE_SECURITY
-  security_manager_->set_session_observer(connection_handler_);
-  security_manager_->set_protocol_handler(protocol_handler_);
-  security_manager_->AddListener(app_manager_);
-  security_manager_->set_crypto_manager(crypto_manager_);
-#endif  // ENABLE_SECURITY
-
   // it is important to initialise TimeTester before TM to listen TM Adapters
 #ifdef TIME_TESTER
   time_tester_ = new time_tester::TimeManager();
@@ -212,6 +207,14 @@ bool LifeCycle::StartComponents() {
   app_manager_->set_protocol_handler(protocol_handler_);
   app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
+
+#ifdef ENABLE_SECURITY
+  security_manager_->set_session_observer(connection_handler_);
+  security_manager_->set_protocol_handler(protocol_handler_);
+  security_manager_->AddListener(app_manager_);
+  security_manager_->set_crypto_manager(crypto_manager_);
+  app_manager_->AddPolicyObserver(crypto_manager_);
+#endif  // ENABLE_SECURITY
 
   transport_manager_->Init();
   // start transport manager

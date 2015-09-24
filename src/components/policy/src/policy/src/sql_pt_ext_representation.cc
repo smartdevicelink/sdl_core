@@ -905,7 +905,7 @@ bool SQLPTExtRepresentation::GatherAppLevels(
     level.count_of_run_attempts_while_revoked = query.GetInteger(12);
     level.app_registration_language_gui = query.GetString(13);
     level.app_registration_language_vui = query.GetString(14);
-    level.count_of_tls_errors = query.GetString(15);
+    level.count_of_tls_errors = query.GetInteger(15);
     (*apps)[query.GetString(0)] = level;
   }
 

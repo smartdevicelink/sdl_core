@@ -68,7 +68,15 @@ class CryptoManagerImpl : public CryptoManager {
     void ResetConnection() OVERRIDE;
     void SetHandshakeContext(const HandshakeContext& hsh_ctx) OVERRIDE;
     ~SSLContextImpl();
-   private:
+
+    void PrintCertData(X509* cert, const std::string& cert_owner);
+    private:
+    void PrintCertInfo();
+    HandshakeResult CheckCertContext();
+    bool ReadHandshakeData(const uint8_t** const out_data,
+                                      size_t* out_data_size);
+    bool WriteHandshakeData(const uint8_t*  const in_data, size_t in_data_size);
+    HandshakeResult PerformHandshake();
     typedef size_t(*BlockSizeGetter)(size_t);
     void EnsureBufferSizeEnough(size_t size);
     void SetHandshakeError(const int error);
@@ -102,7 +110,8 @@ class CryptoManagerImpl : public CryptoManager {
             const std::string &cert_data,
             const std::string &ciphers_list,
             const bool verify_peer,
-            const std::string &ca_certificate_file) OVERRIDE;
+            const std::string &ca_certificate_file,
+            const size_t hours_before_update) OVERRIDE;
   bool OnCertificateUpdated(const std::string &data) OVERRIDE;
   SSLContext *CreateSSLContext() OVERRIDE;
   void ReleaseSSLContext(SSLContext *context) OVERRIDE;
@@ -122,6 +131,7 @@ private:
   static sync_primitives::Lock instance_lock_;
   std::string certificate_data_;
   bool verify_peer_;
+  size_t hours_before_update_;
   DISALLOW_COPY_AND_ASSIGN(CryptoManagerImpl);
 };
 }  // namespace security_manager
