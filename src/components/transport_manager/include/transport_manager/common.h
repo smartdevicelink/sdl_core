@@ -39,7 +39,7 @@
 #include <vector>
 #include <string>
 
-#include "protocol_handler/raw_message.h"
+#include "protocol/raw_message.h"
 #include "utils/shared_ptr.h"
 
 /**

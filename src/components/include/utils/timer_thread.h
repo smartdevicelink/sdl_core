@@ -47,6 +47,8 @@
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 
+#undef min
+
 namespace timer {
 // TODO(AKutsan): Remove this logger after bugfix
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")

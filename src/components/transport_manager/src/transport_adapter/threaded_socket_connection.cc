@@ -48,6 +48,7 @@
 
 #include "transport_manager/transport_adapter/threaded_socket_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#include "include/transport_manager/common.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -205,37 +206,87 @@ void ThreadedSocketConnection::threadMain() {
 }
 
 void ThreadedSocketConnection::Transmit() {
-  LOG4CXX_AUTO_TRACE(logger_);
+#ifdef OS_WIN32
+	//LOG4CXX_INFO(logger, "begin while(!terminate_flag_)");
+	fd_set fdread;
+	timeval tv;
+	int nSize;
+	tv.tv_sec = 0;// 1000;
+	tv.tv_usec = 0;
 
-  const nfds_t kPollFdsSize = 2;
-  pollfd poll_fds[kPollFdsSize];
+	FD_ZERO(&fdread);
+	FD_SET(socket_, &fdread);
+	FD_SET(read_fd_, &fdread);
+	int ret = select(0, &fdread, NULL, NULL, NULL);
+	if (ret == SOCKET_ERROR){
+		Abort();
+		LOG4CXX_INFO(logger_, "if (ret == SOCKET_ERROR) exit");
+		return;
+	}
+	//if (ret == 0)
+	//	continue;
+
+	if (FD_ISSET(read_fd_, &fdread))	//need to send
+	{
+		//LOG4CXX_INFO(logger, "if (FD_ISSET(read_fd_, &fdread))");
+		char buffer[256];
+		ssize_t bytes_read = -1;
+		do {
+			bytes_read = ::recv(read_fd_, buffer, sizeof(buffer), 0);
+		} while (bytes_read > 0);
+		// send data
+		const bool send_ok = Send();
+		if (!send_ok) {
+			Abort();
+			LOG4CXX_INFO(logger_, "if (!send_ok) exit");
+			return;
+		}
+	}
+
+	if (FD_ISSET(socket_, &fdread))	//need to recv
+	{
+		const bool receive_ok = Receive();
+		if (!receive_ok) {
+			Abort();
+			LOG4CXX_INFO(logger_, "if (!receive_ok) exit");
+			return;
+		}
+		//LOG4CXX_INFO(logger, "if (FD_ISSET(socket_, &fdread))");
+	}
+	//LOG4CXX_INFO(logger, "end while(!terminate_flag_)");
+#else
+  LOG4CXX_TRACE_ENTER(logger_);
+  bool pipe_notified = false;
+  bool pipe_terminated = false;
+
+  const nfds_t poll_fds_size = 2;
+  pollfd poll_fds[poll_fds_size];
   poll_fds[0].fd = socket_;
-  poll_fds[0].events = POLLIN | POLLPRI
-      | (frames_to_send_.empty() ? 0 : POLLOUT);
+  poll_fds[0].events = POLLIN | POLLPRI | (frames_to_send_.empty() ? 0 : POLLOUT);
   poll_fds[1].fd = read_fd_;
   poll_fds[1].events = POLLIN | POLLPRI;
 
-  LOG4CXX_DEBUG(logger_, "poll " << this);
-  if (-1 == poll(poll_fds, kPollFdsSize, -1)) {
+  LOG4CXX_INFO(logger_, "poll (#" << pthread_self() << ") " << this);
+  if (-1 == poll(poll_fds, poll_fds_size, -1)) {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "poll failed for connection " << this);
     Abort();
+    LOG4CXX_INFO(logger_, "exit");
     return;
   }
-  LOG4CXX_DEBUG(
-      logger_,
-      "poll is ok " << this << " revents0: " << std::hex << poll_fds[0].revents <<
-      " revents1:" << std::hex << poll_fds[1].revents);
+  LOG4CXX_INFO(logger_, "poll is ok (#" << pthread_self() << ") " << this << " revents0:" << std::hex << poll_fds[0].revents << " revents1:" << std::hex << poll_fds[1].revents);
   // error check
   if (0 != (poll_fds[1].revents & (POLLERR | POLLHUP | POLLNVAL))) {
     LOG4CXX_ERROR(logger_,
                   "Notification pipe for connection " << this << " terminated");
     Abort();
+    LOG4CXX_INFO(logger_, "exit");
     return;
   }
 
-  if (poll_fds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
-    LOG4CXX_WARN(logger_, "Connection " << this << " terminated");
+  if (0 != (poll_fds[0].revents & (POLLERR | POLLHUP | POLLNVAL))) {
+    LOG4CXX_INFO(logger_, "Connection " << this << " terminated");
     Abort();
+    LOG4CXX_INFO(logger_, "exit");
     return;
   }
 
@@ -249,35 +300,77 @@ void ThreadedSocketConnection::Transmit() {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to clear notification pipe");
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "poll failed for connection " << this);
     Abort();
+    LOG4CXX_INFO(logger_, "exit");
     return;
   }
 
   // send data if possible
   if (!frames_to_send_.empty() && (poll_fds[0].revents | POLLOUT)) {
-    LOG4CXX_DEBUG(logger_, "frames_to_send_ not empty() ");
+    LOG4CXX_INFO(logger_, "frames_to_send_ not empty()  (#" << pthread_self() << ")");
 
     // send data
     const bool send_ok = Send();
     if (!send_ok) {
-      LOG4CXX_ERROR(logger_, "Send() failed ");
+      LOG4CXX_INFO(logger_, "Send() failed  (#" << pthread_self() << ")");
       Abort();
+      LOG4CXX_INFO(logger_, "exit");
       return;
     }
   }
 
   // receive data
-  if (poll_fds[0].revents & (POLLIN | POLLPRI)) {
+#ifdef OS_WIN32
+    if (0 != poll_fds[0].revents & (POLLIN | POLLPRI)) {
+#elif defined(OS_MAC)
+    if (0 != (poll_fds[0].revents & (POLLIN | POLLPRI))) {
+#else
+  if (0 != poll_fds[0].revents & (POLLIN | POLLPRI)) {
+#endif
     const bool receive_ok = Receive();
     if (!receive_ok) {
-      LOG4CXX_ERROR(logger_, "Receive() failed ");
+      LOG4CXX_INFO(logger_, "Receive() failed  (#" << pthread_self() << ")");
       Abort();
+      LOG4CXX_INFO(logger_, "exit");
       return;
     }
   }
+  LOG4CXX_TRACE_EXIT(logger_);
+#endif
 }
 
 bool ThreadedSocketConnection::Receive() {
-  LOG4CXX_AUTO_TRACE(logger_);
+#ifdef OS_WIN32
+	unsigned char buffer[4096];
+	ssize_t bytes_read = 0;
+	int times = 1;// 30;
+	int i = 0;
+	do {
+		bytes_read = recv(socket_, (char *)buffer, sizeof(buffer), 0);
+		if (bytes_read > 0){
+			break;
+		}
+		i++;
+		Sleep(100);
+	} while (i < times);
+	if (bytes_read > 0) {
+		LOG4CXX_INFO(
+			logger_,
+			"Received " << bytes_read << " bytes for connection " << this);
+		RawMessageSptr frame(
+			new protocol_handler::RawMessage(0, 0, buffer, bytes_read));
+		controller_->DataReceiveDone(device_handle(), application_handle(),
+			frame);
+	}
+	else if (bytes_read < 0) {
+		return false;
+	}
+	else {
+		return false;
+	}
+
+	return true;
+#else
+  LOG4CXX_TRACE_ENTER(logger_);
   uint8_t buffer[4096];
   ssize_t bytes_read = -1;
 
@@ -305,6 +398,7 @@ bool ThreadedSocketConnection::Receive() {
   } while (bytes_read > 0);
 
   return true;
+#endif
 }
 
 bool ThreadedSocketConnection::Send() {
@@ -317,8 +411,8 @@ bool ThreadedSocketConnection::Send() {
   size_t offset = 0;
   while (!frames_to_send.empty()) {
     LOG4CXX_INFO(logger_, "frames_to_send is not empty");
-    ::protocol_handler::RawMessagePtr frame = frames_to_send.front();
-    const ssize_t bytes_sent = ::send(socket_, frame->data() + offset,
+    RawMessageSptr frame = frames_to_send.front();
+    const ssize_t bytes_sent = ::send(socket_, (char*)frame->data() + offset,
                                       frame->data_size() - offset, 0);
 
     if (bytes_sent >= 0) {

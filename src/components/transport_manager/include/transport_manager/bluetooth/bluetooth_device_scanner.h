@@ -36,17 +36,31 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_SCANNER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_SCANNER_H_
 
+#ifdef OS_WIN32
+#ifdef OS_WINCE
+#include <objbase.h>
+#endif
+#include <initguid.h>
+#include <winsock2.h>
+#include <ws2bth.h>
+#include <map>
+#else
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
 #include <bluetooth/rfcomm.h>
+#endif
 
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
+
 #include "utils/threads/thread_delegate.h"
+#ifdef OS_WIN32
+#include "transport_manager/bluetooth/bluetooth_device.h"
+#endif
 
 class Thread;
 
@@ -155,6 +169,10 @@ class BluetoothDeviceScanner : public DeviceScanner {
   void CheckSDLServiceOnDevices(const std::vector<bdaddr_t>& bd_address,
                                 int device_handle,
                                 DeviceVector* discovered_devices);
+
+#ifdef OS_WIN32
+  std::map<BTH_ADDR, std::string> map_found_devices_;
+#endif
 
   TransportAdapterController* controller_;
   threads::Thread* thread_;

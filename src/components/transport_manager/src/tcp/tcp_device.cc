@@ -70,12 +70,13 @@ bool TcpDevice::IsSameAs(const Device* other) const {
 
 ApplicationList TcpDevice::GetApplicationList() const {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock locker(applications_mutex_);
+  pthread_mutex_lock(&applications_mutex_);
   ApplicationList app_list;
   for (std::map<ApplicationHandle, Application>::const_iterator it =
       applications_.begin(); it != applications_.end(); ++it) {
     app_list.push_back(it->first);
   }
+  pthread_mutex_unlock(&applications_mutex_);
   return app_list;
 }
 
@@ -93,7 +94,7 @@ ApplicationHandle TcpDevice::AddIncomingApplication(int socket_fd) {
   #endif
   const ApplicationHandle app_handle = ++last_handle_;
   applications_[app_handle] = app;
-  LOG4CXX_DEBUG(logger_, "App_handle " << app_handle);
+  pthread_mutex_unlock(&applications_mutex_);
   return app_handle;
 }
 
@@ -104,22 +105,24 @@ ApplicationHandle TcpDevice::AddDiscoveredApplication(int port) {
   app.incoming = false;
   app.socket = 0;  // this line removes compiler warning
   app.port = port;
-  sync_primitives::AutoLock locker(applications_mutex_);
+  pthread_mutex_lock(&applications_mutex_);
   const ApplicationHandle app_handle = ++last_handle_;
   applications_[app_handle] = app;
-  LOG4CXX_DEBUG(logger_, "App_handle " << app_handle);
+  pthread_mutex_unlock(&applications_mutex_);
   return app_handle;
 }
 
 void TcpDevice::RemoveApplication(const ApplicationHandle app_handle) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "ApplicationHandle: " << app_handle);
-  sync_primitives::AutoLock locker(applications_mutex_);
+  pthread_mutex_lock(&applications_mutex_);
   applications_.erase(app_handle);
+  pthread_mutex_unlock(&applications_mutex_);
 }
 
 TcpDevice::~TcpDevice() {
   LOG4CXX_AUTO_TRACE(logger_);
+  pthread_mutex_destroy(&applications_mutex_);
 }
 
 int TcpDevice::GetApplicationSocket(const ApplicationHandle app_handle) const {

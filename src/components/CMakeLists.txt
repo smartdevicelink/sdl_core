@@ -30,6 +30,9 @@
 
 set(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
 
+include_directories (
+  ${CMAKE_SOURCE_DIR}/include
+)
 # --- HMI_API interfaces
 #add_subdirectory(./interfaces)
 
@@ -37,7 +40,7 @@ set(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
 add_subdirectory(./protocol)
 
 # --- TransportManager
-#add_subdirectory(./transport_manager)
+add_subdirectory(./transport_manager)
 
 # --- Policies
 add_subdirectory(./resumption)

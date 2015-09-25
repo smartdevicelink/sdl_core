@@ -77,6 +77,10 @@
 #include "transport_manager/tcp/tcp_device.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
 
+#ifdef OS_WIN32
+#define SIO_KEEPALIVE_VALS _WSAIOW(IOC_VENDOR,4)  
+#endif
+
 namespace transport_manager {
 namespace transport_adapter {
 
@@ -105,6 +109,8 @@ TcpClientListener::TcpClientListener(TransportAdapterController* controller,
 }
 
 TransportAdapter::Error TcpClientListener::Init() {
+#ifdef OS_WIN32
+#else
   LOG4CXX_AUTO_TRACE(logger_);
   thread_stop_requested_ = false;
 
@@ -133,6 +139,7 @@ TransportAdapter::Error TcpClientListener::Init() {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "listen() failed");
     return TransportAdapter::FAIL;
   }
+#endif
   return TransportAdapter::OK;
 }
 
@@ -142,12 +149,23 @@ void TcpClientListener::Terminate() {
     LOG4CXX_WARN(logger_, "Socket has been closed");
     return;
   }
+
+#ifdef OS_WIN32
+  if (shutdown(socket_, 2) != 0) {
+	  LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to shutdown socket");
+  }
+  if (closesocket(socket_) != 0) {
+	  LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to close socket");
+  }
+#else
   if (shutdown(socket_, SHUT_RDWR) != 0) {
-    LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to shutdown socket");
+	  LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to shutdown socket");
   }
   if (close(socket_) != 0) {
-    LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to close socket");
+	  LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to close socket");
   }
+#endif
+
   socket_ = -1;
 }
 
@@ -191,7 +209,6 @@ void SetKeepaliveOptions(const int fd) {
   int keepidle = 3;  // 3 seconds to disconnection detecting
   int keepcnt = 5;
   int keepintvl = 1;
-#ifdef __linux__
   int user_timeout = 7000;  // milliseconds
 #ifdef __linux__
   setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
@@ -241,11 +258,7 @@ void TcpClientListener::Loop() {
     const int connection_fd = accept(socket_,
                                      (struct sockaddr*) &client_address,
                                      &client_address_size);
-    if (thread_stop_requested_) {
-      LOG4CXX_DEBUG(logger_, "thread_stop_requested_");
-      close(connection_fd);
-      break;
-    }
+    if (thread_stop_requested_) break;
 
     if (connection_fd < 0) {
       LOG4CXX_ERROR_WITH_ERRNO(logger_, "accept() failed");
@@ -254,7 +267,6 @@ void TcpClientListener::Loop() {
 
     if (AF_INET != client_address.sin_family) {
       LOG4CXX_DEBUG(logger_, "Address of connected client is invalid");
-      close(connection_fd);
       continue;
     }
 
@@ -296,8 +308,13 @@ void TcpClientListener::StopLoop() {
   server_address.sin_addr.s_addr = INADDR_ANY;
   connect(byesocket, reinterpret_cast<sockaddr*>(&server_address),
           sizeof(server_address));
+#ifdef OS_WIN32
+  shutdown(byesocket, 2);
+  closesocket(byesocket);
+#else
   shutdown(byesocket, SHUT_RDWR);
   close(byesocket);
+#endif
 }
 
 TransportAdapter::Error TcpClientListener::StartListening() {
