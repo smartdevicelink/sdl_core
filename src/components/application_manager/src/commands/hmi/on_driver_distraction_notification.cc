@@ -64,7 +64,7 @@ void OnDriverDistractionNotification::Run() {
       new smart_objects::SmartObject();
 
   if (!on_driver_distraction) {
-    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
+    LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
 

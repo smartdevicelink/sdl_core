@@ -59,7 +59,7 @@ void ReadDIDRequest::Run() {
                .asUInt());
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "An application is not registered.");
+    LOG4CXX_ERROR(logger_, "An application is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -73,7 +73,7 @@ void ReadDIDRequest::Run() {
   }
 
   if ((*message_)[strings::msg_params][strings::did_location].empty()) {
-    LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
+    LOG4CXX_ERROR(logger_, "INVALID_DATA");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }

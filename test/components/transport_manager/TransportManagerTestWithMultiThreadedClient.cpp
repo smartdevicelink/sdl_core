@@ -107,7 +107,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
 
         void doScanForNewDevices()
         {
-            LOG4CXX_INFO_EXT(mLogger, "\n-------------- Scanning new devices -----------------");
+            LOG4CXX_INFO(mLogger, "\n-------------- Scanning new devices -----------------");
             SInternalDeviceInfo deviceInfo;
             deviceInfo.mDeviceHandle = Data::DeviceHandle;
             deviceInfo.mUniqueDeviceId = Data::UniqueDeviceId;
@@ -116,13 +116,13 @@ namespace test { namespace components { namespace TransportManager { namespace T
             tInternalDeviceList list;
             list.push_back(deviceInfo);
 
-            LOG4CXX_INFO_EXT(mLogger, "\n-------------- Sending device list update -----------------");
+            LOG4CXX_INFO(mLogger, "\n-------------- Sending device list update -----------------");
             mListener.onDeviceListUpdated(this, list);
         }
 
         void doConnectDevice(const tDeviceHandle DeviceHandle)
         {
-            LOG4CXX_INFO_EXT(mLogger, "\n-------------- Connecting device -----------------");
+            LOG4CXX_INFO(mLogger, "\n-------------- Connecting device -----------------");
             // Application connect
 
             SDeviceInfo deviceInfo;
@@ -130,33 +130,33 @@ namespace test { namespace components { namespace TransportManager { namespace T
             deviceInfo.mUniqueDeviceId = Data::UniqueDeviceId;
             deviceInfo.mUserFriendlyName = Data::UserFriendlyName;
 
-            LOG4CXX_INFO_EXT(mLogger, "\n-------------- Sending ApplicationConnected -----------------");
+            LOG4CXX_INFO(mLogger, "\n-------------- Sending ApplicationConnected -----------------");
             mListener.onApplicationConnected(this, deviceInfo, Data::ConnectionHandle);
         }
 
         void doSendFrame(tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize, int UserData)
         {
-            LOG4CXX_INFO_EXT(mLogger, "\n-------------- doSendFrame called -----------------");
+            LOG4CXX_INFO(mLogger, "\n-------------- doSendFrame called -----------------");
 
-            LOG4CXX_INFO_EXT(mLogger, "\n-------------- Sending frame back to TransportManager. DataSize: " << DataSize << "--------------");
+            LOG4CXX_INFO(mLogger, "\n-------------- Sending frame back to TransportManager. DataSize: " << DataSize << "--------------");
 
             // Loop back. Each recevied frame is sent back.
             mListener.onFrameReceived(this, ConnectionHandle, Data, DataSize);
 
-            LOG4CXX_INFO_EXT(mLogger, "\n-------------- Calling onFrameSendCompleted. UserData: " << UserData << "--------------");
+            LOG4CXX_INFO(mLogger, "\n-------------- Calling onFrameSendCompleted. UserData: " << UserData << "--------------");
 
             mListener.onFrameSendCompleted(this, Data::ConnectionHandle, UserData, SendStatusOK);
         }
 
         void doDisconnectDevice(const tDeviceHandle DeviceHandle)
         {
-            LOG4CXX_INFO_EXT(mLogger, "\n-------------- doDisconnectDevice -----------------");
+            LOG4CXX_INFO(mLogger, "\n-------------- doDisconnectDevice -----------------");
             SDeviceInfo deviceInfo;
             deviceInfo.mDeviceHandle = Data::DeviceHandle;
             deviceInfo.mUniqueDeviceId = Data::UniqueDeviceId;
             deviceInfo.mUserFriendlyName = Data::UserFriendlyName;
 
-            LOG4CXX_INFO_EXT(mLogger, "\n-------------- sending ApplicationDisconnected -----------------");
+            LOG4CXX_INFO(mLogger, "\n-------------- sending ApplicationDisconnected -----------------");
             mListener.onApplicationDisconnected(this, deviceInfo, Data::ConnectionHandle);
         }
 
@@ -200,7 +200,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
 
         void doDeviceListUpdated(const tDeviceList& DeviceList)
         {
-            LOG4CXX_INFO_EXT(mLogger, "\n-------------- doDeviceListUpdated -----------------");
+            LOG4CXX_INFO(mLogger, "\n-------------- doDeviceListUpdated -----------------");
             mDeviceList = DeviceList;
 
             tDeviceList::const_iterator device;
@@ -212,7 +212,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
 
         void doApplicationConnected(const SDeviceInfo& ConnectedDevice, const tConnectionHandle Connection)
         {
-            LOG4CXX_INFO_EXT(mLogger, "\n-------------- doApplicationConnected -----------------");
+            LOG4CXX_INFO(mLogger, "\n-------------- doApplicationConnected -----------------");
 
             for (int i = 0; i < Data::NumberOfThreads; ++i)
             {
@@ -224,7 +224,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
 
         void doFrameSendCompleted(tConnectionHandle ConnectionHandle, int UserData, ESendStatus SendStatus)
         {
-            LOG4CXX_INFO_EXT(mLogger, "\n-------------- doFrameSendCompleted -----------------");
+            LOG4CXX_INFO(mLogger, "\n-------------- doFrameSendCompleted -----------------");
 
             pthread_mutex_lock(&mFrameSendCompletedMutex);
 
@@ -237,13 +237,13 @@ namespace test { namespace components { namespace TransportManager { namespace T
 
             pthread_mutex_unlock(&mFrameSendCompletedMutex);
 
-            LOG4CXX_INFO_EXT(mLogger, "\n-------------- Number of completely sent frames: "
+            LOG4CXX_INFO(mLogger, "\n-------------- Number of completely sent frames: "
                 << mNumberOfCompletelySentFrames << " -----------------");
         }
 
         void doFrameReceived(tConnectionHandle ConnectionHandle, const uint8_t* Data, size_t DataSize)
         {
-            LOG4CXX_INFO_EXT(mLogger, "\n-------------- doFrameReceived -----------------");
+            LOG4CXX_INFO(mLogger, "\n-------------- doFrameReceived -----------------");
 
             pthread_mutex_lock(&mFrameReceivedNumberMutex);
 
@@ -251,7 +251,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
 
             pthread_mutex_unlock(&mFrameReceivedNumberMutex);
 
-            LOG4CXX_INFO_EXT(mLogger, "\n-------------- Number of received frames: " << mNumberOfReceivedFrames << " -----------------");
+            LOG4CXX_INFO(mLogger, "\n-------------- Number of received frames: " << mNumberOfReceivedFrames << " -----------------");
         }
 
         void disconnectAllDevices(void)
@@ -303,7 +303,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
         {
             MockTransportManagerClient *pTMClient = static_cast<MockTransportManagerClient*>(Data);
 
-            LOG4CXX_INFO_EXT(pTMClient->mLogger, "\n-------------- Frame Send Thread Started -----------------");
+            LOG4CXX_INFO(pTMClient->mLogger, "\n-------------- Frame Send Thread Started -----------------");
 
             for (int i = 0; i < Data::NumberOfFramesPerThread; ++i)
             {
@@ -407,7 +407,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
             ;
 
             addTransportAdapter(mpTransportAdapter);
-            LOG4CXX_INFO_EXT(mLogger, "Transport adapters initialized");
+            LOG4CXX_INFO(mLogger, "Transport adapters initialized");
         }
 
     protected:
@@ -421,7 +421,7 @@ namespace test { namespace components { namespace TransportManager { namespace T
     {
         Logger logger = LOG4CXX::Logger::getInstance(LOG4CXX_TEXT("TransportManagerTest"));
 
-        LOG4CXX_INFO_EXT(logger, "\n*************************** Starting test *****************************");
+        LOG4CXX_INFO(logger, "\n*************************** Starting test *****************************");
         // All expectations must be sequenced
         //InSequence dummy;
 
@@ -468,23 +468,23 @@ namespace test { namespace components { namespace TransportManager { namespace T
         pTm->addDataListener(&tmClient);
         pTm->addDeviceListener(&tmClient);
 
-        LOG4CXX_INFO_EXT(logger, "\n*************************** Calling RUN *****************************");
+        LOG4CXX_INFO(logger, "\n*************************** Calling RUN *****************************");
         pTm->run();
 
         sleep(1);
 
-        LOG4CXX_INFO_EXT(logger, "\n*************************** Calling SCAN FOR DEVICES *****************************");
+        LOG4CXX_INFO(logger, "\n*************************** Calling SCAN FOR DEVICES *****************************");
         pTm->scanForNewDevices();
 
-        LOG4CXX_INFO_EXT(logger, "\n******************* Waiting for all client thread to finish ********************");
+        LOG4CXX_INFO(logger, "\n******************* Waiting for all client thread to finish ********************");
         tmClient.waitForAllThreads();
 
-        LOG4CXX_INFO_EXT(logger, "\n******************* Disconnecting all devices ********************");
+        LOG4CXX_INFO(logger, "\n******************* Disconnecting all devices ********************");
         tmClient.disconnectAllDevices();
 
         sleep(1);
 
-        LOG4CXX_INFO_EXT(logger, "\n*************************** Deleting TM and shutting down *****************************");
+        LOG4CXX_INFO(logger, "\n*************************** Deleting TM and shutting down *****************************");
 
         // Shutdown transport manager
         delete pTm;

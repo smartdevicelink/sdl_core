@@ -172,7 +172,7 @@ void DBusMessageAdapter::SendMessageToCore(const smart_objects::SmartObject& obj
 }
 
 void DBusMessageAdapter::Request(const smart_objects::SmartObject& obj) {
-  LOG4CXX_DEBUG(logger_, "Request");
+  LOG4CXX_AUTO_TRACE(logger_);
   dbus::MessageId func_id = static_cast<dbus::MessageId>(
       obj[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt());
   dbus::MessageName name = get_schema().getMessageName(func_id);
@@ -181,7 +181,7 @@ void DBusMessageAdapter::Request(const smart_objects::SmartObject& obj) {
 }
 
 void DBusMessageAdapter::Notification(const smart_objects::SmartObject &obj) {
-  LOG4CXX_DEBUG(logger_, "Notification");
+  LOG4CXX_AUTO_TRACE(logger_);
   dbus::MessageId func_id = static_cast<dbus::MessageId>(
       obj[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt());
   dbus::MessageName name = get_schema().getMessageName(func_id);
@@ -189,7 +189,7 @@ void DBusMessageAdapter::Notification(const smart_objects::SmartObject &obj) {
 }
 
 void DBusMessageAdapter::Response(const smart_objects::SmartObject& obj) {
-  LOG4CXX_DEBUG(logger_, "Response");
+  LOG4CXX_AUTO_TRACE(logger_);
   dbus::MessageId func_id = static_cast<dbus::MessageId>(
         obj[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt());
   dbus::MessageName name = get_schema().getMessageName(func_id);

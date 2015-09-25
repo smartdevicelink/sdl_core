@@ -57,7 +57,7 @@ void SpeakRequest::Run() {
         connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
+    LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }

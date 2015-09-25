@@ -75,11 +75,11 @@ void OnAppDeactivatedNotification::Run() {
     app = ApplicationManagerImpl::instance()->active_application();
 
     if (!app.valid()) {
-      LOG4CXX_ERROR_EXT(logger_, "No active application");
+      LOG4CXX_ERROR(logger_, "No active application");
       return;
     }
     if (app_id != app->app_id()) {
-      LOG4CXX_ERROR_EXT(logger_, "Wrong application id");
+      LOG4CXX_ERROR(logger_, "Wrong application id");
       return;
     }
   }

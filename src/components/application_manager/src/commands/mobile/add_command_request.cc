@@ -69,7 +69,7 @@ void AddCommandRequest::Run() {
       (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
+    LOG4CXX_ERROR(logger_, "No application associated with session key");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -80,7 +80,7 @@ void AddCommandRequest::Run() {
                                                [strings::cmd_icon], app);
 
     if (mobile_apis::Result::SUCCESS != verification_result) {
-      LOG4CXX_ERROR_EXT(
+      LOG4CXX_ERROR(
           logger_,
           "MessageHelper::VerifyImage return " << verification_result);
       SendResponse(false, verification_result);
@@ -89,14 +89,14 @@ void AddCommandRequest::Run() {
   }
 
   if (!((*message_)[strings::msg_params].keyExists(strings::cmd_id))) {
-    LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
+    LOG4CXX_ERROR(logger_, "INVALID_DATA");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
   if (app->FindCommand(
       (*message_)[strings::msg_params][strings::cmd_id].asUInt())) {
-    LOG4CXX_ERROR_EXT(logger_, "INVALID_ID");
+    LOG4CXX_ERROR(logger_, "INVALID_ID");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
@@ -133,7 +133,7 @@ void AddCommandRequest::Run() {
   }
 
   if (!data_exist) {
-    LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
+    LOG4CXX_ERROR(logger_, "INVALID_DATA");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }

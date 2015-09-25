@@ -198,7 +198,7 @@ void RegisterAppInterfaceRequest::Run() {
   mobile_apis::Result::eType coincidence_result = CheckCoincidence();
 
   if (mobile_apis::Result::SUCCESS != coincidence_result) {
-    LOG4CXX_ERROR_EXT(logger_, "Coincidence check failed.");
+    LOG4CXX_ERROR(logger_, "Coincidence check failed.");
     if (mobile_apis::Result::DUPLICATE_NAME == coincidence_result) {
       usage_statistics::AppCounter count_of_rejections_duplicate_name(
         policy::PolicyHandler::instance()->GetStatisticManager(), mobile_app_id,
@@ -223,7 +223,7 @@ void RegisterAppInterfaceRequest::Run() {
     ApplicationManagerImpl::instance()->RegisterApplication(message_);
 
   if (!application) {
-    LOG4CXX_ERROR_EXT(logger_, "Application " <<
+    LOG4CXX_ERROR(logger_, "Application " <<
                       msg_params[strings::app_name].asString() <<
                       "  hasn't been registered!");
   } else {
@@ -336,11 +336,11 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
       msg_params[strings::hmi_display_language_desired].asInt() !=
       hmi_capabilities.active_ui_language()) {
 
-    LOG4CXX_WARN_EXT(
+    LOG4CXX_WARN(
       logger_,
       "Wrong language on registering application " << application->name());
 
-    LOG4CXX_ERROR_EXT(
+    LOG4CXX_ERROR(
       logger_,
       "vr "
       << msg_params[strings::language_desired].asInt()
@@ -583,7 +583,7 @@ RegisterAppInterfaceRequest::CheckCoincidence() {
 }  // method end
 
 mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
-  LOG4CXX_INFO(logger_, "CheckWithPolicyData");
+  LOG4CXX_AUTO_TRACE(logger_);
   // TODO(AOleynik): Check is necessary to allow register application in case
   // of disabled policy
   // Remove this check, when HMI will support policy

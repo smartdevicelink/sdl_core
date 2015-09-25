@@ -727,7 +727,7 @@ void CacheManager::PersistData() {
 }
 
 void CacheManager::ResetCalculatedPermissions() {
-  LOG4CXX_TRACE(logger_, "ResetCalculatedPermissions");
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(calculated_permissions_lock_);
   calculated_permissions_.clear();
 }

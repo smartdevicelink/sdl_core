@@ -409,7 +409,7 @@ smart_objects::SmartObject* MessageHelper::GetLockScreenIconUrlNotification(cons
 }
 
 void MessageHelper::SendLockScreenIconUrlNotification(const uint32_t connection_key) {
-  LOG4CXX_INFO(logger_, "SendLockScreenIconUrlNotification");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   smart_objects::SmartObject* so = GetLockScreenIconUrlNotification(connection_key);
   PrintSmartObject(*so);
@@ -423,7 +423,7 @@ void MessageHelper::SendHashUpdateNotification(const uint32_t app_id) {
   if (so) {
     PrintSmartObject(*so);
     if (!ApplicationManagerImpl::instance()->ManageMobileCommand(so)) {
-      LOG4CXX_ERROR_EXT(logger_, "Failed to send HashUpdate notification.");
+      LOG4CXX_ERROR(logger_, "Failed to send HashUpdate notification.");
     } else {
       ApplicationManagerImpl::instance()->resume_controller().ApplicationsDataUpdated();
     }
