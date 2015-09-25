@@ -4,6 +4,7 @@
  * \author AKara
  */
 
+#include <cassert>
 #include <stdio.h>
 #include <vector>
 
@@ -216,6 +217,31 @@ class CMessageBroker_Private {
     int popMessageFromWaitQue(CMessage* pMessage);
 
     /**
+     * \brief Tries to remove the parsed part of the buffer
+     * \param root Parsed JSON value
+     * \param aJSONData The string buffer
+     * \return true on success, false on failure
+     */
+    bool cutParsedJSON(const Json::Value& root, std::string& aJSONData);
+
+    /**
+     * \brief Finds the position just after a JSON object or array in a buffer
+     * \param isObject Must be true for object, false for array
+     * \param aJSONData The string buffer
+     * \return The position in the buffer after the object or array on success,
+     *         std::strin::npos on failure
+     */
+    size_t jumpOverJSONObjectOrArray(bool isObject, const std::string& aJSONData);
+
+    /**
+     * \brief Finds the position just after a JSON string in a buffer
+     * \param aJSONData The string buffer
+     * \return The position in the buffer after the string on success,
+     *         std::strin::npos on failure
+     */
+    size_t jumpOverJSONString(const std::string& aJSONData);
+
+    /**
      * \brief Que of messages.
      */
     std::deque<CMessage*> mMessagesQueue;
@@ -288,35 +314,183 @@ CMessageBroker* CMessageBroker::getInstance() {
   return &instance;
 }
 
-void CMessageBroker::onMessageReceived(int fd, std::string& aJSONData) {
-  DBG_MSG(("CMessageBroker::onMessageReceived()\n"));
-  while (!aJSONData.empty()) {
+
+size_t CMessageBroker_Private::jumpOverJSONObjectOrArray(bool isObject,
+                                                 const std::string& aJSONData) {
+  const char openBracket  = isObject? '{' : '[';
+  const char closeBracket = isObject? '}' : ']';
+  int open_minus_close_brackets(1);
+  size_t position = aJSONData.find(openBracket);  // Find the beginning of the object
+
+  while ((position != std::string::npos) && (open_minus_close_brackets > 0)) {
+    position = aJSONData.find_first_of(std::string("\"")+openBracket+closeBracket,
+                                       position+1);
+    if (std::string::npos == position) {
+      break;
+    }
+    if ('"' == aJSONData[position]) {
+      // Ignore string interior, which might contain brackets and escaped "-s
+      do {
+        position = aJSONData.find('"', position+1);  // Find the closing quote
+      } while ((std::string::npos != position) && ('\\' == aJSONData[position-1]));
+    } else if (openBracket == aJSONData[position]) {
+      ++open_minus_close_brackets;
+    } else if (closeBracket == aJSONData[position]) {
+      --open_minus_close_brackets;
+    }
+  }
+
+  if ((0 == open_minus_close_brackets) && (std::string::npos != position)) {
+    ++position;  // Move after the closing bracket
+  } else {
+    position = std::string::npos;
+  }
+
+  return position;
+}
+
+
+size_t CMessageBroker_Private::jumpOverJSONString(const std::string& aJSONData) {
+  size_t position = aJSONData.find('"');  // Find the beginning of the string
+
+  do {
+    position = aJSONData.find('"', position+1);  // Find the closing quote
+  } while ((std::string::npos != position) && ('\\' == aJSONData[position-1]));
+
+  if (std::string::npos != position) {
+    ++position;  // Move after the closing quote
+  }
+
+  return position;
+}
+
+
+bool CMessageBroker_Private::cutParsedJSON(const Json::Value& root,
+                                           std::string& aJSONData) {
+  if (root.isNull() || aJSONData.empty()) {
+    DBG_MSG_ERROR(("JSON is null or the buffer is empty!\n"));
+    return false;
+  }
+
+  std::string parsed_json_str = m_recieverWriter.write(root);
+  DBG_MSG(("Parsed JSON string: '%s'\n", parsed_json_str.c_str()));
+
+  // Trim front spaces (if any)
+  const size_t nonempty_position = aJSONData.find_first_not_of(" \t\n\v\f\r");
+  aJSONData.erase(0, nonempty_position);
+  if (std::string::npos == nonempty_position) {
+    DBG_MSG_ERROR(("Buffer contains only blanks!\n"));
+    return false;
+  }
+
+  // JSON writer puts '\n' at the end. Remove it.
+  const size_t final_lf_pos = parsed_json_str.rfind('\n');
+  if (final_lf_pos == parsed_json_str.length()-1) {
+    parsed_json_str.erase(final_lf_pos, 1);
+  }
+
+  /* RFC 4627: "A JSON value MUST be an object, array, number, or string, or
+   * one of the following three literal names: false null true"
+   * So we will try to find the borders of the parsed part based on its type. */
+
+  size_t position(std::string::npos);
+
+  if (0 == aJSONData.find(parsed_json_str)) {
+    // If by chance parsed JSON is the same in the buffer and is at the beginning
+    position = parsed_json_str.length();
+  } else if (root.isObject() || root.isArray()) {
+    position = jumpOverJSONObjectOrArray(root.isObject(), aJSONData);
+  } else if (root.isString()) {
+    position = jumpOverJSONString(aJSONData);
+  } else if (root.isNumeric()) {
+    position = aJSONData.find_first_not_of("+-0123456789.eE");
+  } else if (root.isBool() || ("null" == parsed_json_str)) {
+    position = aJSONData.find(parsed_json_str);
+    if (std::string::npos != position) {
+      position += parsed_json_str.length();
+    }
+  } else {
+    DBG_MSG_ERROR(("Unknown JSON type!\n"));
+  }
+
+  if (std::string::npos == position) {
+    DBG_MSG_ERROR(("Error finding JSON object boundaries!\n"));
+    /* This should not happen, because the string is already parsed as a
+     * valid JSON. If this happens then above code is wrong. It is better
+     * to assert() than just return here, because otherwise we may enter an
+     * endless cycle - fail to process one and the same message again and
+     * again. Or we may clear the buffer and return, but in this way we will
+     * loose the next messages, miss a bug here, and create another bug. */
+    assert(std::string::npos != position);
+    return false;  // For release version
+  }
+
+  if ((position >= aJSONData.length()) ||
+      ((position == aJSONData.length()-1) && isspace(aJSONData[position]))) {
+    // No next object. Clear entire aJSONData.
+    aJSONData = "";
+  } else {
+    // There is another object. Clear the current one.
+    aJSONData.erase(0, position);
+  }
+
+  return true;
+}
+
+
+void CMessageBroker::onMessageReceived(int fd, std::string& aJSONData, bool tryHard) {
+  DBG_MSG(("CMessageBroker::onMessageReceived(%d, '%s')\n", fd, aJSONData.c_str()));
+
+  while (! aJSONData.empty()) {
     Json::Value root;
-    if (!p->m_reader.parse(aJSONData, root)) {
-      DBG_MSG(("Received not JSON string! %s\n", aJSONData.c_str()));
-      return;
-    }
-    if(root["jsonrpc"]!="2.0") {
-      DBG_MSG(("\t Json::Reader::parce didn't set up jsonrpc!  jsonrpc = '%s'\n", root["jsonrpc"].asString().c_str()));
-      return;
-    }
-    std::string wmes = p->m_recieverWriter.write(root);
-    DBG_MSG(("Parsed JSON string %d : %s\n", wmes.length(),
-             wmes.c_str()));
-    DBG_MSG(("Buffer is:%s\n", aJSONData.c_str()));
-    if (aJSONData.length() > wmes.length()) {
-      // wmes string length can differ from buffer substr length
-      size_t offset = wmes.length();
-      char msg_begin = '{';
-      if (aJSONData.at(offset) != msg_begin) {
-        offset -= 1; // wmes can contain redudant \n in the tail.
+    if ((! p->m_reader.parse(aJSONData, root)) || root.isNull()) {
+      DBG_MSG_ERROR(("Unable to parse JSON!"));
+      if (! tryHard) {
+        return;
       }
-      aJSONData.erase(aJSONData.begin(), aJSONData.begin() + offset);
-      DBG_MSG(("Buffer after cut is:%s\n", aJSONData.c_str()));
+      uint8_t first_byte = static_cast<uint8_t>(aJSONData[0]);
+      if ((first_byte <= 0x08) || ((first_byte >= 0x80) && (first_byte <= 0x88))) {
+        DBG_MSG((" There is an unparsed websocket header probably.\n"));
+        /* Websocket headers can have FIN flag set in the first byte (0x80).
+         * Then there are 3 zero bits and 4 bits for opcode (from 0x00 to 0x0A).
+         * But actually we don't use opcodes above 0x08.
+         * Use this fact to distinguish websocket header from payload text data.
+         * It can be a coincidence of course, but we have to give it a try. */
+        return;
+      } else if ('{' == aJSONData[0]) {
+        DBG_MSG_ERROR((" Incomplete JSON object probably.\n"));
+        return;
+      } else {
+        DBG_MSG_ERROR((" Step in the buffer and try again...\n"));
+        aJSONData.erase(0, 1);
+        DBG_MSG_ERROR(("Buffer after cut is: '%s'\n", aJSONData.c_str()));
+        continue;
+      }
+
+    } else if (! root.isObject()) {
+      /* JSON RPC 2.0 messages are objects. Batch calls must be pre-rpocessed,
+       * so no need for "and !root.isArray()" */
+      DBG_MSG_ERROR(("Parsed JSON is not an object!\n"));
+      if (! tryHard) {
+        return;
+      }
+      // Cut parsed data from the buffer below and continue
+
+    } else if ((!root.isMember("jsonrpc")) || (root["jsonrpc"]!="2.0")) {
+      DBG_MSG_ERROR(("'jsonrpc' is not set correctly in parsed JSON!\n"));
+      if (! tryHard) {
+        return;
+      }
+      // Cut parsed object from the buffer below and continue
+
     } else {
-      aJSONData = "";
+      // Parsing successful. Pass the message up.
+      p->pushMessage(new CMessage(fd, root));
     }
-    p->pushMessage(new CMessage(fd, root));
+
+    p->cutParsedJSON(root, aJSONData);
+
+    DBG_MSG(("Buffer after cut is: '%s'\n", aJSONData.c_str()));
   }
 }
 
