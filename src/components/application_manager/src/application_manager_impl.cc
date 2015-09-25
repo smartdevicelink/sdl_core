@@ -2011,28 +2011,28 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
       continue;
     }
 
+    // AppId = 0 because this is query_app(provided by hmi for download, but not yet registered)
     ApplicationSharedPtr app(
           new ApplicationImpl(0,
                               mobile_app_id,
                               appName,
                               PolicyHandler::instance()->GetStatisticManager()));
-    if (app) {
-      app->SetShemaUrl(url_scheme);
-      app->SetPackageName(package_name);
-      app->set_app_icon_path(full_icon_path);
-      app->set_hmi_application_id(hmi_app_id);
-      app->set_device(device_id);
+    DCHECK_OR_RETURN_VOID(app);
+    app->SetShemaUrl(url_scheme);
+    app->SetPackageName(package_name);
+    app->set_app_icon_path(full_icon_path);
+    app->set_hmi_application_id(hmi_app_id);
+    app->set_device(device_id);
 
-      app->set_vr_synonyms(vrSynonym);
-      app->set_tts_name(ttsName);
+    app->set_vr_synonyms(vrSynonym);
+    app->set_tts_name(ttsName);
 
-      sync_primitives::AutoLock lock(apps_to_register_list_lock_);
-      LOG4CXX_DEBUG(logger_, "apps_to_register_ size before: "
-                    << apps_to_register_.size());
-      apps_to_register_.insert(app);
-      LOG4CXX_DEBUG(logger_, "apps_to_register_ size after: "
-                    << apps_to_register_.size());
-    }
+    sync_primitives::AutoLock lock(apps_to_register_list_lock_);
+    LOG4CXX_DEBUG(logger_, "apps_to_register_ size before: "
+                  << apps_to_register_.size());
+    apps_to_register_.insert(app);
+    LOG4CXX_DEBUG(logger_, "apps_to_register_ size after: "
+                  << apps_to_register_.size());
   }
 }
 
