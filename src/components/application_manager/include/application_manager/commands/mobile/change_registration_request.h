@@ -130,6 +130,13 @@ class ChangeRegistrationRequest : public CommandRequestImpl  {
    mobile_apis::Result::eType CheckCoincidence();
 
    /**
+    * @brief Checks if requested name is allowed by policy
+    * @param app_name Application name
+    * @return true, if allowed, otherwise - false
+    */
+   bool IsNicknameAllowed(const std::string& app_name) const;
+
+   /**
     * @brief Predicate for using with CheckCoincidence method to compare with VR synonym SO
     *
     * @return TRUE if there is coincidence of VR, otherwise FALSE
