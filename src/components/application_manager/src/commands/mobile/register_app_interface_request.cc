@@ -477,6 +477,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
       hmi_capabilities.navigation_supported();
   response_params[strings::hmi_capabilities][strings::phone_call] =
       hmi_capabilities.phone_call_supported();
+  response_params[strings::sdl_version] =
+      profile::Profile::instance()->sdl_version();
+  response_params[strings::system_software_version] =
+      hmi_capabilities.ccpu_version();
 
   resumption::ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
   std::string hash_id = "";
@@ -513,23 +517,21 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
         MessageHelper::GetDeviceMacAddressForHandle(application->device()));
   }
 
-
-  // By default app subscribed to CUSTOM_BUTTON
-  // Need to send notification to HMI
-  SendSubscribeCustomButtonNotification();
-
-  MessageHelper::SendChangeRegistrationRequestToHMI(application);
-
   bool is_success = true;
-  SendResponse(is_success, result_code, add_info.c_str(), &response_params);
   MessageHelper::SendOnAppRegisteredNotificationToHMI(*(application.get()),
                                                       resumption,
                                                       need_restore_vr);
+  SendResponse(is_success, result_code, add_info.c_str(), &response_params);
   if (result_code != mobile_apis::Result::RESUME_FAILED) {
     resumer.StartResumption(application, hash_id);
   } else {
     resumer.StartResumptionOnlyHMILevel(application);
   }
+
+  // By default app subscribed to CUSTOM_BUTTON
+  // Need to send notification to HMI
+  SendSubscribeCustomButtonNotification();
+  MessageHelper::SendChangeRegistrationRequestToHMI(application);
 }
 
 mobile_apis::Result::eType

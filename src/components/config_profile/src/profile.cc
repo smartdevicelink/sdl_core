@@ -246,7 +246,8 @@ namespace profile {
 CREATE_LOGGERPTR_GLOBAL(logger_, "Profile")
 
 Profile::Profile()
-    : launch_hmi_(true),
+    : sdl_version_(kDefaultSDLVersion),
+      launch_hmi_(true),
 #ifdef WEB_HMI
       link_to_web_hmi_(kDefaultLinkToWebHMI),
 #endif // WEB_HMI
@@ -315,8 +316,9 @@ Profile::Profile()
       use_db_for_resumption_(false),
       attempts_to_open_resumption_db_(kDefaultAttemptsToOpenResumptionDB),
       open_attempt_timeout_ms_resumption_db_(kDefaultOpenAttemptTimeoutMsResumptionDB){
-
 }
+
+
 
 Profile::~Profile() {
 }
@@ -1402,7 +1404,7 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_VALUE(iap_hub_connection_wait_timeout_,
                     kIAPHubConnectionWaitTimeoutKey, kIAPSection);
- 
+
   ReadUIntValue(&default_hub_protocol_index_, kDefaultHubProtocolIndex, kIAPSection, kDefaultHubProtocolIndexKey);
 
   LOG_UPDATED_VALUE(default_hub_protocol_index_, kDefaultHubProtocolIndexKey, kIAPSection);

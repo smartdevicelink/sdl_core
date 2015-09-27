@@ -504,8 +504,9 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   application->MarkRegistered();
   app_list_accesor.Insert(application);
 
-  policy::PolicyHandler::instance()->AddApplication(application->mobile_app_id())
-	  ;
+  policy::PolicyHandler::instance()->AddApplication(
+        application->mobile_app_id());
+
   return application;
 }
 
@@ -580,6 +581,8 @@ void ApplicationManagerImpl::ConnectToDevice(const std::string& device_mac) {
 void ApplicationManagerImpl::OnHMIStartedCooperation() {
   hmi_cooperating_ = true;
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnHMIStartedCooperation()");
+
+  MessageHelper::SendGetSystemInfoRequest();
 
   utils::SharedPtr<smart_objects::SmartObject> is_vr_ready(
       MessageHelper::CreateModuleInfoSO(
@@ -2054,7 +2057,6 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
                               policy_app_id,
                               appName,
                               PolicyHandler::instance()->GetStatisticManager()));
-
     DCHECK_OR_RETURN_VOID(app);
     app->SetShemaUrl(url_scheme);
     app->SetPackageName(package_name);
