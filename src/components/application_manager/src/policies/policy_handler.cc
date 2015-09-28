@@ -775,7 +775,7 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
       "Update url is "
           << url
           << " for application "
-          << ApplicationManagerImpl::instance()->application(app_id)->name());
+          << ApplicationManagerImpl::instance()->application(app_id)->name().c_str());
 
   MessageHelper::SendPolicySnapshotNotification(app_id, pt_string, url, 0);
 
@@ -1183,7 +1183,7 @@ void PolicyHandler::OnSystemError(int code) {
   }
 }
 
-std::string PolicyHandler::GetAppName(const std::string& policy_app_id) {
+custom_str::CustomString PolicyHandler::GetAppName(const std::string& policy_app_id) {
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application_by_policy_id(
           policy_app_id);
@@ -1192,7 +1192,7 @@ std::string PolicyHandler::GetAppName(const std::string& policy_app_id) {
     LOG4CXX_WARN(
         logger_,
         "Connection_key not found for application_id:" << policy_app_id);
-    return "";
+    return custom_str::CustomString("");
   }
   return app->name();
 }

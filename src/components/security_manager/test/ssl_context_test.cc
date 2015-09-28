@@ -69,15 +69,25 @@ class SSLTest : public testing::Test {
     ss << file.rdbuf();
     file.close();
     crypto_manager = new security_manager::CryptoManagerImpl();
-    const bool crypto_manager_initialization = crypto_manager->Init(
-        security_manager::SERVER, security_manager::TLSv1_2, ss.str(),
-        FORD_CIPHER, false, "", updates_before_hour);
+    const bool crypto_manager_initialization =
+        crypto_manager->Init(security_manager::SERVER,
+                             security_manager::TLSv1_2,
+                             ss.str(),
+                             FORD_CIPHER,
+                             false,
+                             "",
+                             updates_before_hour);
     EXPECT_TRUE(crypto_manager_initialization);
 
     client_manager = new security_manager::CryptoManagerImpl();
-    const bool client_manager_initialization = client_manager->Init(
-        security_manager::CLIENT, security_manager::TLSv1_2, "", FORD_CIPHER,
-        false, "", updates_before_hour);
+    const bool client_manager_initialization =
+        client_manager->Init(security_manager::CLIENT,
+                             security_manager::TLSv1_2,
+                             "",
+                             FORD_CIPHER,
+                             false,
+                             "",
+                             updates_before_hour);
     EXPECT_TRUE(client_manager_initialization);
   }
 
@@ -91,7 +101,8 @@ class SSLTest : public testing::Test {
     client_ctx = client_manager->CreateSSLContext();
 
     security_manager::SSLContext::HandshakeContext ctx;
-    ctx.make_context("SPT", "client");
+    ctx.make_context(custom_str::CustomString("SPT"),
+                     custom_str::CustomString("client"));
     server_ctx->SetHandshakeContext(ctx);
 
     ctx.expected_cn = "server";
@@ -128,8 +139,8 @@ TEST_F(SSLTest, BrokenHandshake) {
   const_cast<uint8_t*>(client_buf)[client_buf_len / 2] ^= 0xFF;
   const_cast<uint8_t*>(client_buf)[client_buf_len - 1] ^= 0xFF;
   ASSERT_EQ(security_manager::SSLContext::Handshake_Result_AbnormalFail,
-            server_ctx->DoHandshakeStep(client_buf, client_buf_len, &server_buf,
-                                        &server_buf_len));
+            server_ctx->DoHandshakeStep(
+                client_buf, client_buf_len, &server_buf, &server_buf_len));
 }
 
 TEST_F(SSLTest, Positive) {
@@ -145,14 +156,14 @@ TEST_F(SSLTest, Positive) {
 
   for (;;) {
     ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
-              server_ctx->DoHandshakeStep(client_buf, client_buf_len,
-                                          &server_buf, &server_buf_len));
+              server_ctx->DoHandshakeStep(
+                  client_buf, client_buf_len, &server_buf, &server_buf_len));
     ASSERT_FALSE(server_buf == NULL);
     ASSERT_GT(server_buf_len, 0u);
 
     ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
-              client_ctx->DoHandshakeStep(server_buf, server_buf_len,
-                                          &client_buf, &client_buf_len));
+              client_ctx->DoHandshakeStep(
+                  server_buf, server_buf_len, &client_buf, &client_buf_len));
     if (server_ctx->IsInitCompleted()) {
       break;
     }
@@ -172,15 +183,15 @@ TEST_F(SSLTest, Positive) {
   const uint8_t* encrypted_text = 0;
   size_t text_len = 4;
   size_t encrypted_text_len;
-  EXPECT_TRUE(client_ctx->Encrypt(text, text_len, &encrypted_text,
-                                  &encrypted_text_len));
+  EXPECT_TRUE(client_ctx->Encrypt(
+      text, text_len, &encrypted_text, &encrypted_text_len));
 
   ASSERT_NE(encrypted_text, reinterpret_cast<void*>(NULL));
   ASSERT_GT(encrypted_text_len, 0u);
 
   // Decrypt text on server side
-  EXPECT_TRUE(server_ctx->Decrypt(encrypted_text, encrypted_text_len, &text,
-                                  &text_len));
+  EXPECT_TRUE(server_ctx->Decrypt(
+      encrypted_text, encrypted_text_len, &text, &text_len));
   ASSERT_NE(text, reinterpret_cast<void*>(NULL));
   ASSERT_GT(text_len, 0u);
 
@@ -199,14 +210,14 @@ TEST_F(SSLTest, EcncryptionFail) {
     ASSERT_FALSE(client_buf == NULL);
     ASSERT_GT(client_buf_len, 0u);
     ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
-              server_ctx->DoHandshakeStep(client_buf, client_buf_len,
-                                          &server_buf, &server_buf_len));
+              server_ctx->DoHandshakeStep(
+                  client_buf, client_buf_len, &server_buf, &server_buf_len));
     ASSERT_FALSE(server_buf == NULL);
     ASSERT_GT(server_buf_len, 0u);
 
     ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
-              client_ctx->DoHandshakeStep(server_buf, server_buf_len,
-                                          &client_buf, &client_buf_len));
+              client_ctx->DoHandshakeStep(
+                  server_buf, server_buf_len, &client_buf, &client_buf_len));
   }
   // expect empty buffers after init complete
   ASSERT_TRUE(client_buf == NULL);
@@ -220,8 +231,8 @@ TEST_F(SSLTest, EcncryptionFail) {
   const uint8_t* encrypted_text = 0;
   size_t text_len = 4;
   size_t encrypted_text_len;
-  EXPECT_TRUE(client_ctx->Encrypt(text, text_len, &encrypted_text,
-                                  &encrypted_text_len));
+  EXPECT_TRUE(client_ctx->Encrypt(
+      text, text_len, &encrypted_text, &encrypted_text_len));
   ASSERT_NE(encrypted_text, reinterpret_cast<void*>(NULL));
   ASSERT_GT(encrypted_text_len, 0u);
 
@@ -233,15 +244,15 @@ TEST_F(SSLTest, EcncryptionFail) {
   const uint8_t* out_text;
   size_t out_text_size;
   // Decrypt broken text on server side
-  EXPECT_FALSE(server_ctx->Decrypt(&broken[0], broken.size(), &out_text,
-                                   &out_text_size));
+  EXPECT_FALSE(server_ctx->Decrypt(
+      &broken[0], broken.size(), &out_text, &out_text_size));
 
   // Check after broken message that server encryption and decryption fail
   // Encrypte message on server side
-  EXPECT_FALSE(server_ctx->Decrypt(encrypted_text, encrypted_text_len,
-                                   &out_text, &out_text_size));
-  EXPECT_FALSE(server_ctx->Encrypt(text, text_len, &encrypted_text,
-                                   &encrypted_text_len));
+  EXPECT_FALSE(server_ctx->Decrypt(
+      encrypted_text, encrypted_text_len, &out_text, &out_text_size));
+  EXPECT_FALSE(server_ctx->Encrypt(
+      text, text_len, &encrypted_text, &encrypted_text_len));
 }
 
 }  // namespace ssl_context_test

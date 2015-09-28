@@ -46,6 +46,8 @@
 
 namespace {
 
+namespace custom_str = utils::custom_string;
+
 mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string& str) {
   if ("DEFAULT" == str) {
     return mobile_apis::AppHMIType::DEFAULT;
@@ -93,7 +95,7 @@ struct CheckMissedTypes {
       : policy_app_types_(policy_app_types), log_(log) {}
 
   bool operator()(const smart_objects::SmartArray::value_type& value) {
-    std::string app_type_str = value.asString();
+    const std::string app_type_str = value.asString();
     policy::StringArray::const_iterator it = policy_app_types_.begin();
     policy::StringArray::const_iterator it_end = policy_app_types_.end();
     for (; it != it_end; ++it) {
@@ -114,13 +116,13 @@ struct CheckMissedTypes {
 };
 
 struct IsSameNickname {
-  IsSameNickname(const std::string& app_id) : app_id_(app_id) {}
-  bool operator()(const policy::StringArray::value_type nickname) const {
-    return !strcasecmp(app_id_.c_str(), nickname.c_str());
+  IsSameNickname(const custom_str::CustomString& app_id) : app_id_(app_id) {}
+  bool operator()(const policy::StringArray::value_type& nickname) const {
+    return app_id_.CompareIgnoreCase(nickname.c_str());
   }
 
  private:
-  const std::string& app_id_;
+  const custom_str::CustomString& app_id_;
 };
 }
 
@@ -352,7 +354,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
           hmi_capabilities.active_ui_language()) {
     LOG4CXX_WARN(logger_,
                  "Wrong language on registering application "
-                     << application->name());
+                     << application->name().c_str());
 
     LOG4CXX_ERROR(
         logger_,
@@ -564,11 +566,11 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
   ApplicationManagerImpl::ApplicationListAccessor accessor;
 
   ApplicationSetConstIt it = accessor.begin();
-  const std::string app_name = msg_params[strings::app_name].asString();
+  const custom_str::CustomString app_name = msg_params[strings::app_name].asCustomString();
 
   for (; accessor.end() != it; ++it) {
     // name check
-    const std::string& cur_name = (*it)->name();
+    const custom_str::CustomString& cur_name = (*it)->name();
     if (!strcasecmp(app_name.c_str(), cur_name.c_str())) {
       LOG4CXX_ERROR(logger_, "Application name is known already.");
       return mobile_apis::Result::DUPLICATE_NAME;
@@ -628,7 +630,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
 
   if (!app_nicknames.empty()) {
     IsSameNickname compare(
-        message[strings::msg_params][strings::app_name].asString());
+        message[strings::msg_params][strings::app_name].asCustomString());
     policy::StringArray::const_iterator it =
         std::find_if(app_nicknames.begin(), app_nicknames.end(), compare);
     if (app_nicknames.end() == it) {
@@ -723,8 +725,8 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
                "RegisterAppInterfaceRequest::"
                "IsApplicationWithSameAppIdRegistered");
 
-  const std::string mobile_app_id =
-      (*message_)[strings::msg_params][strings::app_id].asString();
+  const custom_string::CustomString mobile_app_id =
+      (*message_)[strings::msg_params][strings::app_id].asCustomString();
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
   const ApplicationSet applications = accessor.applications();
@@ -733,7 +735,7 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   ApplicationSetConstIt it_end = applications.end();
 
   for (; it != it_end; ++it) {
-    if (!strcasecmp(mobile_app_id.c_str(), (*it)->mobile_app_id().c_str())) {
+    if (mobile_app_id.CompareIgnoreCase((*it)->mobile_app_id().c_str())) {
       return true;
     }
   }

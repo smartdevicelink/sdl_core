@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -437,8 +437,8 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   smart_objects::SmartObject& params = message[strings::msg_params];
   const std::string& policy_app_id = params[strings::app_id].asString();
-  const std::string& app_name =
-      message[strings::msg_params][strings::app_name].asString();
+  const custom_str::CustomString& app_name =
+      message[strings::msg_params][strings::app_name].asCustomString();
 
   LOG4CXX_DEBUG(logger_,
                 "App with connection key: " << connection_key
@@ -1265,7 +1265,8 @@ ApplicationManagerImpl::GetHandshakeContext(uint32_t key) const {
   ApplicationConstSharedPtr app = application(key);
   security_manager::SSLContext::HandshakeContext res;
   DCHECK_OR_RETURN(app.valid(), res);
-  return res.make_context(app->mobile_app_id(), app->name());
+  return res.make_context(custom_str::CustomString(app->mobile_app_id()),
+                          app->name());
 }
 #endif  // ENABLE_SECURITY
 
@@ -2133,7 +2134,7 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     SmartObject vrSynonym;
     SmartObject ttsName;
 
-    const std::string appName(app_data[json::name].asString());
+    const custom_str::CustomString appName(app_data[json::name].asCustomString());
 
     if (app_data.keyExists(json::ios)) {
       os_type = json::ios;
@@ -2415,7 +2416,7 @@ void ApplicationManagerImpl::RemoveAppsWaitingForRegistration(
 
   while (apps_to_register_.end() != it_app) {
     LOG4CXX_DEBUG(logger_,
-                  "Waiting app: " << (*it_app)->name() << " is removed.");
+                  "Waiting app: " << (*it_app)->name().c_str() << " is removed.");
     apps_to_register_.erase(it_app);
     it_app = std::find_if(
         apps_to_register_.begin(), apps_to_register_.end(), device_finder);

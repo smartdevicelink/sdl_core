@@ -39,11 +39,9 @@ namespace commands {
 
 OnAllowSDLFunctionalityNotification::OnAllowSDLFunctionalityNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnAllowSDLFunctionalityNotification::~OnAllowSDLFunctionalityNotification() {
-}
+OnAllowSDLFunctionalityNotification::~OnAllowSDLFunctionalityNotification() {}
 
 void OnAllowSDLFunctionalityNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -59,4 +57,3 @@ void OnAllowSDLFunctionalityNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

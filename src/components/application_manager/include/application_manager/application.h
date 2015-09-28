@@ -58,6 +58,9 @@ namespace application_manager {
 namespace mobile_api = mobile_apis;
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+
+namespace custom_str = utils::custom_string;
+
 typedef int32_t ErrorCode;
 
 class UsageStatistics;
@@ -452,7 +455,7 @@ class Application : public virtual InitialApplicationData,
   virtual void set_hmi_application_id(uint32_t hmi_app_id) = 0;
   virtual uint32_t hmi_app_id() const = 0;
   virtual uint32_t app_id() const = 0;
-  virtual const std::string& name() const = 0;
+  virtual const custom_str::CustomString& name() const = 0;
   /**
    * @brief Sets application folder name, which is used for storing of related
    * files, e.g. icons
@@ -500,7 +503,7 @@ class Application : public virtual InitialApplicationData,
    */
   virtual bool tts_properties_in_full() = 0;
   virtual void set_version(const Version& version) = 0;
-  virtual void set_name(const std::string& name) = 0;
+  virtual void set_name(const custom_str::CustomString& name) = 0;
   virtual void set_is_media_application(bool is_media) = 0;
   virtual void increment_put_file_in_none_count() = 0;
   virtual void increment_delete_file_in_none_count() = 0;

@@ -50,19 +50,14 @@ namespace commands {
 namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
 
 class CommandRequestImpl : public CommandImpl,
-    public event_engine::EventObserver   {
+                           public event_engine::EventObserver {
  public:
-
-  enum RequestState {
-    kAwaitingHMIResponse = 0,
-    kTimedOut,
-    kCompleted
-  };
+  enum RequestState { kAwaitingHMIResponse = 0, kTimedOut, kCompleted };
 
   explicit CommandRequestImpl(const MessageSharedPtr& message);
   virtual ~CommandRequestImpl();
   virtual bool CheckPermissions();
-  virtual bool Init();  
+  virtual bool Init();
   virtual bool CleanUp();
   virtual void Run();
 
@@ -99,7 +94,7 @@ class CommandRequestImpl : public CommandImpl,
    * @param allow_empty_string if true methods allow empty sting
    * @return true if success otherwise return false
    */
-  bool CheckSyntax(std::string str, bool allow_empty_line = false);
+  bool CheckSyntax(const std::string& str, bool allow_empty_line = false);
 
   /*
    * @brief Sends HMI request
@@ -110,8 +105,8 @@ class CommandRequestImpl : public CommandImpl,
    * @return hmi correlation id
    */
   uint32_t SendHMIRequest(const hmi_apis::FunctionID::eType& function_id,
-                      const smart_objects::SmartObject* msg_params = NULL,
-                      bool use_events = false);
+                          const smart_objects::SmartObject* msg_params = NULL,
+                          bool use_events = false);
 
   /*
    * @brief Creates HMI request
@@ -131,8 +126,7 @@ class CommandRequestImpl : public CommandImpl,
   mobile_apis::Result::eType GetMobileResultCode(
       const hmi_apis::Common_Result::eType& hmi_code) const;
 
-protected:
-
+ protected:
   /**
    * @brief Checks message permissions and parameters according to policy table
    * permissions
@@ -161,13 +155,12 @@ protected:
   bool HasDisallowedParams() const;
 
  protected:
-  RequestState                  current_state_;
-  sync_primitives::Lock         state_lock_;
-  CommandParametersPermissions  parameters_permissions_;
+  RequestState current_state_;
+  sync_primitives::Lock state_lock_;
+  CommandParametersPermissions parameters_permissions_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);
-
 
   /**
    * @brief Adds param to disallowed parameters enumeration
@@ -181,7 +174,8 @@ protected:
    * @brief Adds disallowed parameters to response info
    * @param response Response message, which info should be extended
    */
-  void AddDisallowedParametersToInfo(smart_objects::SmartObject& response) const;
+  void AddDisallowedParametersToInfo(
+      smart_objects::SmartObject& response) const;
 };
 
 }  // namespace commands

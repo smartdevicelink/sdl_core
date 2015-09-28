@@ -36,12 +36,15 @@
 #include <queue>
 
 #include "policy/policy_types.h"
+#include "utils/custom_string.h"
 
 namespace policy {
+
+namespace custom_str = utils::custom_string;
+
 class PolicyListener {
  public:
-  virtual ~PolicyListener() {
-  }
+  virtual ~PolicyListener() {}
   virtual void OnPermissionsUpdated(const std::string& policy_app_id,
                                     const Permissions& permissions,
                                     const policy::HMILevel& default_hmi) = 0;
@@ -52,16 +55,18 @@ class PolicyListener {
   virtual std::string OnCurrentDeviceIdUpdateRequired(
       const std::string& policy_app_id) = 0;
   virtual void OnSystemInfoUpdateRequired() = 0;
-  virtual std::string GetAppName(const std::string& policy_app_id) = 0;
-  virtual void OnUpdateHMIAppType(std::map<std::string, StringArray> app_hmi_types) = 0;
+  virtual custom_str::CustomString GetAppName(
+      const std::string& policy_app_id) = 0;
+  virtual void OnUpdateHMIAppType(
+      std::map<std::string, StringArray> app_hmi_types) = 0;
 
-    /**
-   * @brief CanUpdate allows to find active application
-   * and check whether related device consented.
-   *
-   * @return true if there are at least one application has been registered
-   * with consented device.
-   */
+  /**
+ * @brief CanUpdate allows to find active application
+ * and check whether related device consented.
+ *
+ * @return true if there are at least one application has been registered
+ * with consented device.
+ */
   virtual bool CanUpdate() = 0;
 
   /**

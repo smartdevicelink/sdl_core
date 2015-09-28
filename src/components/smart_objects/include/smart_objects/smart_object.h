@@ -39,9 +39,13 @@
 #include <map>
 
 #include "smart_objects/smart_schema.h"
+#include "utils/custom_string.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
+
+namespace custom_str = utils::custom_string;
+
 class SmartObject;
 
 /**
@@ -89,7 +93,8 @@ enum SmartType {
   SmartType_Array = 7,
 
   /**
-   * @brief Binary data value. Gives possibility for object to store binary data.
+   * @brief Binary data value. Gives possibility for object to store binary
+   *data.
    **/
   SmartType_Binary = 8,
 
@@ -99,7 +104,8 @@ enum SmartType {
   SmartType_UInteger = 9,
 
   /**
-   * @brief Invalid value. Represents invalid object that cannot change his type.
+   * @brief Invalid value. Represents invalid object that cannot change his
+   *type.
    **/
   SmartType_Invalid = -1
 };
@@ -129,8 +135,10 @@ typedef std::vector<SmartObjectSPtr> SmartObjectList;
 /**
  * @brief Main SmartObject class
  *
- * This class act as Variant type from other languages and can be used as primitive type
- * like bool, int32_t, char, double, string and as complex type like array and map.
+ * This class act as Variant type from other languages and can be used as
+ *primitive type
+ * like bool, int32_t, char, double, string and as complex type like array and
+ *map.
  **/
 
 class SmartObject FINAL {
@@ -155,7 +163,7 @@ class SmartObject FINAL {
    *
    * @param pointer
    **/
-  template<typename UnknownType>
+  template <typename UnknownType>
   SmartObject(const UnknownType&);
 
   /**
@@ -293,13 +301,13 @@ class SmartObject FINAL {
     * @{
    **/
 
-   /**
-    * @brief Assignment operator for type: uint64_t
-    *
-    * @param  NewValue New object value
-    * @return SmartObject&
-    **/
-   SmartObject& operator=(const uint64_t NewValue);
+  /**
+   * @brief Assignment operator for type: uint64_t
+   *
+   * @param  NewValue New object value
+   * @return SmartObject&
+   **/
+  SmartObject& operator=(const uint64_t NewValue);
 
   /** @} */
 
@@ -420,11 +428,25 @@ class SmartObject FINAL {
   explicit SmartObject(const std::string& InitialValue);
 
   /**
+   * @brief Constructor for creating object of type: CustomString
+   *
+   * @param InitialValue Initial object value
+   **/
+  explicit SmartObject(const custom_str::CustomString& InitialValue);
+
+  /**
    * @brief Constructor for creating object of type: string
    *
    * @param InitialValue Initial object value
    **/
   explicit SmartObject(const char* InitialValue);
+
+  /**
+   * @brief Returns current object converted to CustomString
+   *
+   * @return custom_str::CustomString
+   **/
+  custom_str::CustomString asCustomString() const;
 
   /**
    * @brief Returns current object converted to string
@@ -440,6 +462,14 @@ class SmartObject FINAL {
    * @return const char*
    **/
   const char* asCharArray() const;
+
+  /**
+   * @brief Assignment operator for type: CustomString
+   *
+   * @param  NewValue New object value
+   * @return SmartObject&
+   **/
+  SmartObject& operator=(const custom_str::CustomString& NewValue);
 
   /**
    * @brief Assignment operator for type: string
@@ -692,7 +722,7 @@ class SmartObject FINAL {
    * @param  Other value to be compared with
    * @return bool Result of nequation
    **/
-  template<typename Type>
+  template <typename Type>
   bool operator!=(const Type& Other) const {
     return !(*this == Other);
   }
@@ -716,7 +746,8 @@ class SmartObject FINAL {
   /**
    * @brief Converts object to int32_t type
    *
-   * @return int32_t Converted value or invalid_int_value if conversion not possible
+   * @return int32_t Converted value or invalid_int_value if conversion not
+   *possible
    **/
   inline int64_t convert_int() const;
   /** @} */
@@ -738,7 +769,8 @@ class SmartObject FINAL {
   /**
    * @brief Converts object to char type
    *
-   * @return int32_t Converted value or invalid_char_value if conversion not possible
+   * @return int32_t Converted value or invalid_char_value if conversion not
+   *possible
    **/
   inline char convert_char() const;
   /** @} */
@@ -760,7 +792,8 @@ class SmartObject FINAL {
   /**
    * @brief Converts object to double type
    *
-   * @return int32_t Converted value or invalid_double_value if conversion not possible
+   * @return int32_t Converted value or invalid_double_value if conversion not
+   *possible
    **/
   inline double convert_double() const;
   /** @} */
@@ -782,15 +815,12 @@ class SmartObject FINAL {
   /**
    * @brief Converts object to bool type
    *
-   * @return int32_t Converted value or invalid_bool_value if conversion not possible
+   * @return int32_t Converted value or invalid_bool_value if conversion not
+   *possible
    **/
   inline bool convert_bool() const;
   /** @} */
 
-  /**
-   * @name Support of type: string (internal)
-   * @{
-   */
   /**
    * @brief Sets new string value to the object.
    *
@@ -799,10 +829,10 @@ class SmartObject FINAL {
    * @param  NewValue New object value
    * @return void
    **/
-  inline void set_value_string(const std::string& NewValue);
+  inline void set_value_string(const custom_str::CustomString& NewValue);
 
   /**
-   * @brief Sets new string value to the object.
+   * @brief Sets new CustomString value to the object.
    *
    * This method changes also internal object type
    *
@@ -814,10 +844,19 @@ class SmartObject FINAL {
   /**
    * @brief Converts object to string type
    *
-   * @return int32_t Converted value or invalid_string_value if conversion not possible
+   * @return int32_t Converted value or invalid_string_value if conversion not
+   *possible
    **/
   inline std::string convert_string() const;
   /** @} */
+
+  /**
+   * @brief Converts object to CustomString type
+   *
+   * @return CustomString Converted value or
+   * invalid_string_value if conversion not possible
+   **/
+  inline custom_str::CustomString convert_custom_string() const;
 
   /**
    * @name Support of type: binary (internal)
@@ -836,7 +875,8 @@ class SmartObject FINAL {
   /**
    * @brief Converts object to binary type
    *
-   * @return int32_t Converted value or invalid_binary_value if conversion not possible
+   * @return int32_t Converted value or invalid_binary_value if conversion not
+   *possible
    **/
   inline SmartBinary convert_binary() const;
 
@@ -862,7 +902,7 @@ class SmartObject FINAL {
    * @param Value Pointer to string to convert
    * @return double
    **/
-  static double convert_string_to_double(const std::string* Value);
+  static double convert_string_to_double(const custom_str::CustomString* Value);
 
   /**
    * @brief Converts string to int64_t
@@ -870,7 +910,8 @@ class SmartObject FINAL {
    * @param Value Pointer to string to convert
    * @return int64_t int64_t
    **/
-  static uint64_t convert_string_to_integer(const std::string* Value);
+  static uint64_t convert_string_to_integer(
+      const custom_str::CustomString* Value);
 
   /**
    * @brief Converts double value to string
@@ -920,7 +961,7 @@ class SmartObject FINAL {
     bool bool_value;
     char char_value;
     int64_t int_value;
-    std::string* str_value;
+    custom_str::CustomString* str_value;
     SmartArray* array_value;
     SmartMap* map_value;
     SmartBinary* binary_value;

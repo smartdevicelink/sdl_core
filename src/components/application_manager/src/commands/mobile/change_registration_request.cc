@@ -1,6 +1,6 @@
 /*
 
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -41,14 +41,15 @@
 #include "interfaces/HMI_API.h"
 
 namespace {
+namespace custom_str = utils::custom_string;
 struct IsSameNickname {
-  IsSameNickname(const std::string& app_id) : app_id_(app_id) {}
+  IsSameNickname(const custom_str::CustomString& app_id) : app_id_(app_id) {}
   bool operator()(const policy::StringArray::value_type& nickname) const {
-    return !strcasecmp(app_id_.c_str(), nickname.c_str());
+    return app_id_.CompareIgnoreCase(nickname.c_str());
   }
 
  private:
-  const std::string& app_id_;
+  const custom_str::CustomString& app_id_;
 };
 }
 
@@ -119,7 +120,7 @@ void ChangeRegistrationRequest::Run() {
   }
 
   if (msg_params.keyExists(strings::app_name) &&
-      !IsNicknameAllowed(msg_params[strings::app_name].asString())) {
+      !IsNicknameAllowed(msg_params[strings::app_name].asCustomString())) {
     LOG4CXX_ERROR(logger_, "Nickname is not allowed.");
     SendResponse(false, mobile_apis::Result::DISALLOWED);
     return;
@@ -136,7 +137,7 @@ void ChangeRegistrationRequest::Run() {
   ui_params[strings::app_id] = app->app_id();
   if (msg_params.keyExists(strings::app_name)) {
     ui_params[strings::app_name] = msg_params[strings::app_name];
-    app->set_name(msg_params[strings::app_name].asString());
+    app->set_name(msg_params[strings::app_name].asCustomString());
   }
   if (msg_params.keyExists(strings::ngn_media_screen_app_name)) {
     ui_params[strings::ngn_media_screen_app_name] =
@@ -387,10 +388,10 @@ mobile_apis::Result::eType ChangeRegistrationRequest::CheckCoincidence() {
       (*message_)[strings::msg_params];
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
-  std::string app_name;
+  custom_str::CustomString app_name;
   uint32_t app_id = connection_key();
   if (msg_params.keyExists(strings::app_name)) {
-    app_name = msg_params[strings::app_name].asString();
+    app_name = msg_params[strings::app_name].asCustomString();
   }
 
   ApplicationSetConstIt it = accessor.begin();
@@ -399,9 +400,9 @@ mobile_apis::Result::eType ChangeRegistrationRequest::CheckCoincidence() {
       continue;
     }
 
-    const std::string& cur_name = (*it)->name();
+    const custom_str::CustomString& cur_name = (*it)->name();
     if (msg_params.keyExists(strings::app_name)) {
-      if (!strcasecmp(app_name.c_str(), cur_name.c_str())) {
+      if (app_name.CompareIgnoreCase(cur_name)) {
         LOG4CXX_ERROR(logger_, "Application name is known already.");
         return mobile_apis::Result::DUPLICATE_NAME;
       }
@@ -435,7 +436,7 @@ mobile_apis::Result::eType ChangeRegistrationRequest::CheckCoincidence() {
 }
 
 bool ChangeRegistrationRequest::IsNicknameAllowed(
-    const std::string& app_name) const {
+    const custom_str::CustomString& app_name) const {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app =
       application_manager::ApplicationManagerImpl::instance()->application(

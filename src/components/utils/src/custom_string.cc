@@ -36,76 +36,102 @@
 #include <clocale>
 #include <cwctype>
 #include <new>
+#include <algorithm>
 #include "utils/logger.h"
+#include "utils/macro.h"
+
+namespace {
+namespace custom_str = utils::custom_string;
+
+// Calculates amount of characters in UTF string
+size_t CalculateLengthOfString(const char* str) {
+  size_t length_of_string = 0;
+  for (size_t i = 0; str[i] != '\0'; ++i) {
+    if ((str[i] & custom_str::kHigestByteOfUTF8Byte2) !=
+        custom_str::kByteOfUTF8) {
+      ++length_of_string;
+    }
+  }
+  return length_of_string;
+}
+
+// Converts string to unicode string.
+std::wstring ConvertUTFToWString(const char* str) {
+  size_t size = CalculateLengthOfString(str);
+  std::vector<wchar_t> wchar_array(size + 1, L'\0');
+
+  std::string current_locale = setlocale(LC_ALL, NULL);
+  setlocale(LC_ALL, "");  // system locale
+  mbstowcs(&(wchar_array.front()), str, size);
+  setlocale(LC_ALL, current_locale.c_str());
+  return std::wstring(&(wchar_array.front()));
+}
+
+// Converts string to lower case unicode string.
+void ConvertWStringToLowerCase(std::wstring& str) {
+  const std::string current_locale = setlocale(LC_ALL, NULL);
+  setlocale(LC_ALL, "");
+  std::transform(str.begin(), str.end(), str.begin(), towlower);
+  setlocale(LC_ALL, current_locale.c_str());
+}
+}
 
 namespace utils {
 namespace custom_string {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "CustomString")
-
-CustomString::CustomString() : size_(0), is_ascii_string_(true) {
-  LOG4CXX_AUTO_TRACE(logger_);
-}
+CustomString::CustomString() : amount_characters_(0), is_ascii_string_(true) {}
 
 CustomString::CustomString(const std::string& str)
-    : mb_string_(str), size_(0), is_ascii_string_(true) {
-  LOG4CXX_AUTO_TRACE(logger_);
+    : mb_string_(str), amount_characters_(0), is_ascii_string_(true) {
   InitData();
 }
 
 CustomString::CustomString(const char* str)
-    : mb_string_(str), size_(0), is_ascii_string_(true) {
-  LOG4CXX_AUTO_TRACE(logger_);
+    : mb_string_(str), amount_characters_(0), is_ascii_string_(true) {
   InitData();
 }
 
 CustomString::CustomString(size_t n, char c)
-    : mb_string_(n, c), size_(0), is_ascii_string_(true) {
-  LOG4CXX_AUTO_TRACE(logger_);
+    : mb_string_(n, c), amount_characters_(0), is_ascii_string_(true) {
   InitData();
 }
 
 size_t CustomString::size() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return size_;
+  return amount_characters_;
 }
 
 size_t CustomString::length() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return size_;
+  return amount_characters_;
 }
 
 size_t CustomString::length_bytes() const {
-  LOG4CXX_AUTO_TRACE(logger_);
   return mb_string_.size();
 }
 
 bool CustomString::is_ascii_string() const {
-  LOG4CXX_AUTO_TRACE(logger_);
   return is_ascii_string_;
 }
 
 bool CustomString::empty() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return 0 == size_;
+  return 0 == amount_characters_;
 }
 
 bool CustomString::operator==(const CustomString& str) const {
-  LOG4CXX_AUTO_TRACE(logger_);
   return mb_string_ == str.mb_string_;
 }
 
 bool CustomString::operator==(const std::string& str) const {
-  LOG4CXX_AUTO_TRACE(logger_);
   return mb_string_ == str;
 }
 
-CustomString CustomString::operator+(const CustomString& str) const {
-  if (!str.empty()) {
-    CustomString result_str(mb_string_ + str.AsMBString());
-    return result_str;
-  }
+CustomString& CustomString::operator=(const char* str) {
+  mb_string_ = str;
+  InitData();
   return *this;
+}
+
+CustomString CustomString::operator+(const CustomString& str) const {
+  return *this + str.AsMBString();
 }
 
 CustomString CustomString::operator+(const std::string& str) const {
@@ -116,113 +142,58 @@ CustomString CustomString::operator+(const std::string& str) const {
   return *this;
 }
 
-char& CustomString::at(size_t pos) {
+char CustomString::at(size_t pos) const {
+  DCHECK_OR_RETURN((is_ascii_string_ && pos < amount_characters_), '\0');
   return mb_string_.at(pos);
 }
 
 int CustomString::compare(const char* str) const {
-  LOG4CXX_AUTO_TRACE(logger_);
   return mb_string_.compare(str);
 }
 
 int CustomString::compare(const std::string& str) const {
-  LOG4CXX_AUTO_TRACE(logger_);
   return mb_string_.compare(str);
 }
 
 bool CustomString::CompareIgnoreCase(const CustomString& str) const {
-  LOG4CXX_AUTO_TRACE(logger_);
   if (is_ascii_string() && str.is_ascii_string()) {
     return !strcasecmp(c_str(), str.c_str());
-  } else {
-    std::wstring wstr_first(AsWString()), wstr_second(str.AsWString());
-    ConvertWStringToLowerCase(wstr_first);
-    ConvertWStringToLowerCase(wstr_second);
-    return wstr_first == wstr_second;
   }
+  std::wstring wstr_first(ConvertUTFToWString(mb_string_.c_str()));
+  std::wstring wstr_second(ConvertUTFToWString(str.c_str()));
+  ConvertWStringToLowerCase(wstr_first);
+  ConvertWStringToLowerCase(wstr_second);
+  return wstr_first == wstr_second;
 }
 
 bool CustomString::CompareIgnoreCase(const char* str) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  size_t amount_of_byte = strlen(str);
-  size_t amount_of_symbols = CalculateLengthOfString(str);
-  if (is_ascii_string() && (amount_of_byte == amount_of_symbols)) {
-    return !strcasecmp(c_str(), str);
-  } else {
-    std::wstring wstr_first(AsWString()), wstr_second(AsWString(str));
-    ConvertWStringToLowerCase(wstr_first);
-    ConvertWStringToLowerCase(wstr_second);
-    return wstr_first == wstr_second;
-  }
+  return CompareIgnoreCase(CustomString(str));
 }
+
 const char* CustomString::c_str() const {
-  LOG4CXX_AUTO_TRACE(logger_);
   return mb_string_.c_str();
 }
 
-std::wstring CustomString::AsWString() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return AsWString(mb_string_.c_str());
+std::wstring CustomString::ToWString() const {
+  return ConvertUTFToWString(mb_string_.c_str());
 }
 
 std::string CustomString::AsMBString() const {
-  LOG4CXX_AUTO_TRACE(logger_);
   return mb_string_;
 }
 
-std::wstring CustomString::AsWStringLowerCase() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  std::wstring wstr(AsWString(mb_string_.c_str()));
+std::wstring CustomString::ToWStringLowerCase() const {
+  std::wstring wstr(ConvertUTFToWString(mb_string_.c_str()));
   ConvertWStringToLowerCase(wstr);
   return wstr;
 }
 
-void CustomString::ConvertWStringToLowerCase(std::wstring& str) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  std::string current_locale = setlocale(LC_ALL, NULL);
-  setlocale(LC_ALL, "");
-  for (size_t i = 0; i < str.size(); ++i) {
-    str[i] = towlower(str[i]);
-  }
-  setlocale(LC_ALL, current_locale.c_str());
-}
-
-std::wstring CustomString::AsWString(const char* str) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  std::wstring wstr;
-  size_t size = strlen(str);
-  wchar_t* wchar_buff = new (std::nothrow) wchar_t[size + 1];
-  if (NULL == wchar_buff) {
-    return wstr;
-  }
-  wchar_buff[size] = L'\0';
-  std::string current_locale = setlocale(LC_ALL, NULL);
-  setlocale(LC_ALL, "");  // system locale
-  mbstowcs(wchar_buff, str, size);
-  setlocale(LC_ALL, current_locale.c_str());
-  wstr = wchar_buff;
-  delete[] wchar_buff;
-  return wstr;
-}
-
-size_t CustomString::CalculateLengthOfString(const char* str) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  size_t lenght_of_string = 0;
-  for (size_t i = 0; str[i] != '\0'; ++i) {
-    if ((str[i] & kHigestByteOfUTF8Byte2) != kByteOfUTF8) {
-      ++lenght_of_string;
-    }
-  }
-  return lenght_of_string;
-}
-
 void CustomString::InitData() {
-  LOG4CXX_AUTO_TRACE(logger_);
   if (mb_string_.empty()) {
     return;
   }
-  size_ = CalculateLengthOfString(mb_string_.c_str());
-  is_ascii_string_ = size_ == mb_string_.size() ? true : false;
+  amount_characters_ = CalculateLengthOfString(mb_string_.c_str());
+  is_ascii_string_ = amount_characters_ == mb_string_.size();
 }
 
 }  // namespace custom_string

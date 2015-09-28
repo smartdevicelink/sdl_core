@@ -32,169 +32,286 @@
 
 #include <iostream>
 #include <string>
-#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "custom_string.h"
 
-namespace custom_string = utils::custom_string;
+namespace custom_str = utils::custom_string;
 
 namespace test {
 namespace components {
 namespace utils {
 
-void CreateMultibyteString(std::string& mbstr) {
-  const int kSizeStr = 9;
-  uint8_t array[] = {
-      0xD0, 0xA2, 0xD0, 0xB5, 0xD1, 0x81, 0xD1, 0x82, 0x0};  //Тест
-  char str[kSizeStr];
-  memcpy(str, array, kSizeStr);
-  mbstr = str;
+std::string CreateMultibyteString(uint8_t* array, size_t array_size) {
+  return std::string(array, array + array_size);
 }
 
-void CreateMultibyteStringWithASCII(std::string& mbstr) {
-  const int kSizeStr = 12;
-  uint8_t array[] = {0xD0,
-                     0xA2,
+class CustomStringTest : public ::testing::TestWithParam<std::string> {
+ protected:
+  static void SetUpTestCase() {
+    const size_t kSizeStr = 8;
+    uint8_t array[] = {0xD0,
+                       0xA2,
+                       0xD0,
+                       0xB5,
+                       0xD1,
+                       0x81,
+                       0xD1,
+                       0x82};  // Array contains russian word "Тест"
+    mbstring1_ = CreateMultibyteString(array, kSizeStr);
+    mbstring2_ = mbstring1_ + "abc";
+    amount_symbols_mbstring1_ = 4;  // amount of symbols from string mbstring1_
+    amount_symbols_mbstring2_ = 7;  // amount of symbols from string mbstring2_
+    amount_bytes_mbstring1_ = mbstring1_.size();
+    amount_bytes_mbstring2_ = mbstring2_.size();
+  }
+
+ public:
+  static std::string mbstring1_;  // String contains russian word "Тест"
+  static std::string
+      mbstring2_;  // String contains russian word with ASCII symbols "Тестabc"
+  static size_t amount_symbols_mbstring1_;
+  static size_t amount_symbols_mbstring2_;
+  static size_t amount_bytes_mbstring1_;
+  static size_t amount_bytes_mbstring2_;
+};
+
+std::string CustomStringTest::mbstring1_ = "";
+std::string CustomStringTest::mbstring2_ = "";
+size_t CustomStringTest::amount_symbols_mbstring1_ = 0;
+size_t CustomStringTest::amount_symbols_mbstring2_ = 0;
+size_t CustomStringTest::amount_bytes_mbstring1_ = 0;
+size_t CustomStringTest::amount_bytes_mbstring2_ = 0;
+
+TEST_F(CustomStringTest,
+       AddASCIIStringToCustomString_ExpectCorrectSizeAndIsASCIIStringEQTrue) {
+  std::string str("Test string");
+  custom_str::CustomString obj(str);
+
+  EXPECT_EQ(str.size(), obj.size());
+  EXPECT_EQ(str.length(), obj.length());
+  EXPECT_EQ(str.size(), obj.length_bytes());
+  EXPECT_TRUE(obj.is_ascii_string());
+  EXPECT_FALSE(obj.empty());
+}
+
+TEST_F(CustomStringTest,
+       AddEmptyToCustomString_ExpectCorrectSizeAndIsASCIIStringEQTrue) {
+  std::string str;
+  custom_str::CustomString obj(str);
+
+  EXPECT_EQ(str.size(), obj.size());
+  EXPECT_EQ(str.length(), obj.length());
+  EXPECT_EQ(str.size(), obj.length_bytes());
+  EXPECT_TRUE(obj.is_ascii_string());
+  EXPECT_TRUE(obj.empty());
+}
+
+TEST_F(CustomStringTest,
+       AddEmptyToCustomString_ExpectCorrectWorkOfMethodAsMBString) {
+  std::string str;
+  custom_str::CustomString obj(str);
+  EXPECT_TRUE(str == obj.AsMBString());
+}
+
+TEST_F(CustomStringTest,
+       AddASCIIStringToCustomString_ExpectCorrectWorkOfMethodAsMBString) {
+  std::string str("Test string");
+  custom_str::CustomString obj(str);
+  EXPECT_TRUE(str == obj.AsMBString());
+}
+
+TEST_F(CustomStringTest,
+       AddASCIIStringToCustomString_ExpectCorrectWorkOfAppendOperator) {
+  custom_str::CustomString obj("Test string");
+  custom_str::CustomString obj1("abc");
+  custom_str::CustomString obj_empty;
+  std::string str("abc");
+  std::string str_empty;
+  std::string str_result("Test stringabc");
+  std::string str_result1("Test string");
+  custom_str::CustomString obj_result;
+  obj_result = obj + obj1;
+  EXPECT_TRUE(str_result == obj_result.AsMBString());
+  obj_result = obj + obj_empty;
+  EXPECT_TRUE(str_result1 == obj_result.AsMBString());
+  obj_result = obj + str;
+  EXPECT_TRUE(str_result == obj_result.AsMBString());
+  obj_result = obj + str_empty;
+  EXPECT_TRUE(str_result1 == obj_result.AsMBString());
+}
+
+TEST_F(CustomStringTest,
+       AddEmptyStringToCustomString_ExpectCorrectWorkOfAppendOperator) {
+  custom_str::CustomString obj_empty;
+  custom_str::CustomString obj("abc");
+  custom_str::CustomString obj_empty1;
+  std::string str("abc");
+  std::string str_empty;
+  custom_str::CustomString obj_result;
+  obj_result = obj_empty + obj;
+  EXPECT_TRUE(str == obj_result.AsMBString());
+  obj_result = obj_empty + obj_empty1;
+  EXPECT_TRUE(str_empty == obj_result.AsMBString());
+  obj_result = obj_empty + str;
+  EXPECT_TRUE(str == obj_result.AsMBString());
+  obj_result = obj_empty + str_empty;
+  EXPECT_TRUE(str_empty == obj_result.AsMBString());
+}
+
+TEST_F(
+    CustomStringTest,
+    AddASCIIAndEmptyStringToCustomString_ExpectCorrectWorkOfCompareOperator) {
+  custom_str::CustomString obj_empty;
+  custom_str::CustomString obj_empty1;
+  custom_str::CustomString obj("abc");
+  custom_str::CustomString obj1("abc");
+  std::string str_empty;
+  std::string str("abc");
+
+  EXPECT_TRUE(obj_empty == obj_empty1);
+  EXPECT_FALSE(obj_empty == obj1);
+  EXPECT_TRUE(obj_empty == str_empty);
+  EXPECT_FALSE(obj_empty == str);
+  EXPECT_TRUE(obj == obj1);
+  EXPECT_TRUE(obj == str);
+  EXPECT_FALSE(obj == str_empty);
+}
+
+TEST_F(CustomStringTest,
+       AddASCIIAndEmptyStringToCustomString_ExpectCorrectWorkOfCompareMethod) {
+  custom_str::CustomString obj_empty;
+  custom_str::CustomString obj("abc");
+  std::string str_empty;
+  std::string str("abc");
+
+  EXPECT_TRUE(obj_empty.compare(str_empty) == 0);
+  EXPECT_TRUE(obj_empty.compare(str) != 0);
+  EXPECT_TRUE(obj_empty.compare("") == 0);
+  EXPECT_TRUE(obj_empty.compare("abc") != 0);
+  EXPECT_TRUE(obj.compare(str_empty) != 0);
+  EXPECT_TRUE(obj.compare(str) == 0);
+  EXPECT_TRUE(obj.compare("") != 0);
+  EXPECT_TRUE(obj.compare("abc") == 0);
+}
+
+TEST_F(CustomStringTest,
+       AddASCIIStringToCustomString_ExpectCorrectWorkOfAtMethod) {
+  std::string str("abc");
+  custom_str::CustomString obj(str);
+  for (size_t i = 0; i < obj.size(); ++i) {
+    EXPECT_TRUE(obj.at(i) == str[i]);
+  }
+}
+
+TEST_F(
+    CustomStringTest,
+    AddASCIIAndEmptyStringToCustomString_ExpectCorrectWorkOfCompareIgnoreCaseMethod) {
+  custom_str::CustomString obj_empty;
+  custom_str::CustomString obj_empty1;
+  custom_str::CustomString obj("abc");
+  custom_str::CustomString obj1("AbC");
+  custom_str::CustomString obj2("AbCd");
+
+  EXPECT_TRUE(obj_empty.CompareIgnoreCase(obj_empty1));
+  EXPECT_FALSE(obj_empty.CompareIgnoreCase(obj));
+  EXPECT_TRUE(obj.CompareIgnoreCase(obj1));
+  EXPECT_TRUE(obj.CompareIgnoreCase(obj));
+  EXPECT_FALSE(obj.CompareIgnoreCase(obj2));
+  EXPECT_FALSE(obj.CompareIgnoreCase(obj_empty));
+}
+
+TEST_F(CustomStringTest,
+       AddASCIIStringToCustomString_ExpectCorrectWorkOfToWStringMethod) {
+  custom_str::CustomString obj("abc");
+  std::wstring wstr(L"abc");
+  EXPECT_TRUE(wstr == obj.ToWString());
+}
+
+TEST_F(CustomStringTest,
+       AddUTF8StringToCustomString_ExpectCorrectSizeAndIsASCIIStringEQFalse) {
+  custom_str::CustomString obj(CustomStringTest::mbstring1_);
+  EXPECT_EQ(obj.size(), CustomStringTest::amount_symbols_mbstring1_);
+  EXPECT_EQ(obj.length(), CustomStringTest::amount_symbols_mbstring1_);
+  EXPECT_EQ(obj.length_bytes(), CustomStringTest::amount_bytes_mbstring1_);
+  EXPECT_FALSE(obj.is_ascii_string());
+}
+
+TEST_F(
+    CustomStringTest,
+    AddMixingUTF8WithASCIIStringToCustomString_ExpectCorrectSizeAndIsASCIIStringEQFalse) {
+  custom_str::CustomString obj(CustomStringTest::mbstring2_);
+  EXPECT_EQ(obj.size(), CustomStringTest::amount_symbols_mbstring2_);
+  EXPECT_EQ(obj.length(), CustomStringTest::amount_symbols_mbstring2_);
+  EXPECT_EQ(obj.length_bytes(), CustomStringTest::amount_bytes_mbstring2_);
+  EXPECT_FALSE(obj.is_ascii_string());
+}
+
+TEST_F(
+    CustomStringTest,
+    AddUTF8StringAndMixingUTF8WithASCIIToCustomString_ExpectCorrectWorkOfMethodAsMBString) {
+  custom_str::CustomString obj(CustomStringTest::mbstring1_);
+  custom_str::CustomString obj1(CustomStringTest::mbstring2_);
+  EXPECT_TRUE(CustomStringTest::mbstring1_ == obj.AsMBString());
+  EXPECT_TRUE(CustomStringTest::mbstring2_ == obj1.AsMBString());
+}
+
+TEST_F(CustomStringTest,
+       AddUTF8StringToCustomString_ExpectCorrectConvertingToWString) {
+  custom_str::CustomString obj(CustomStringTest::mbstring1_);
+  custom_str::CustomString obj1(CustomStringTest::mbstring2_);
+  std::wstring wstr1(L"Тест");
+  std::wstring wstr2(L"Тестabc");
+  EXPECT_TRUE(wstr1 == obj.ToWString());
+  EXPECT_TRUE(wstr2 == obj1.ToWString());
+}
+
+TEST_F(
+    CustomStringTest,
+    AddSameMultiByteStringsToCustomString_ExpectCorrectCaseSensetiveComparing) {
+  custom_str::CustomString obj(CustomStringTest::mbstring1_);
+  custom_str::CustomString obj_1(CustomStringTest::mbstring1_);
+  EXPECT_TRUE(obj == obj_1);
+  EXPECT_TRUE(obj == CustomStringTest::mbstring1_);
+  EXPECT_EQ(0, obj.compare(CustomStringTest::mbstring1_.c_str()));
+  EXPECT_EQ(0, obj.compare(CustomStringTest::mbstring1_));
+}
+
+TEST_F(
+    CustomStringTest,
+    AddDiferenceMultiByteStringsToCustomString_ExpectCorrectCaseSensetiveComparing) {
+  custom_str::CustomString obj(CustomStringTest::mbstring1_);
+  custom_str::CustomString obj1(CustomStringTest::mbstring2_);
+  EXPECT_FALSE(obj == obj1);
+  EXPECT_FALSE(obj == CustomStringTest::mbstring2_);
+  EXPECT_TRUE(obj.compare(CustomStringTest::mbstring2_) != 0);
+}
+
+TEST_F(
+    CustomStringTest,
+    AddDiferenceMultiByteStringsToCustomString_ExpectCorrectCaseInsensitiveComparing) {
+  custom_str::CustomString obj(CustomStringTest::mbstring1_);
+  custom_str::CustomString obj1(CustomStringTest::mbstring2_);
+  EXPECT_FALSE(obj.CompareIgnoreCase(obj1));
+  EXPECT_FALSE(obj.CompareIgnoreCase(CustomStringTest::mbstring2_.c_str()));
+}
+
+TEST_F(
+    CustomStringTest,
+    AddSameMultiByteStringsToCustomString_ExpectCorrectCaseInsensitiveComparing) {
+  const size_t kSizeStr = 8;
+  uint8_t array[] = {0xD1,
+                     0x82,
                      0xD0,
                      0xB5,
                      0xD1,
                      0x81,
-                     0xD1,
-                     0x82,
-                     0x61,
-                     0x62,
-                     0x63,
-                     0x0};  //Тестabc
-  char str[kSizeStr];
-  memcpy(str, array, kSizeStr);
-  mbstr = str;
-}
-
-TEST(CustomStringTest,
-     AddASCIIStringToCustomString_ExpectCorrectSizeAndIsASCIIStringEQTrue) {
-  std::string str("Test string");
-  custom_string::CustomString obj(str);
-  ASSERT_EQ(str.size(), obj.size());
-  ASSERT_EQ(str.length(), obj.length());
-  ASSERT_TRUE(obj.is_ascii_string());
-}
-
-TEST(CustomStringTest,
-     AddEmptyToCustomString_ExpectCorrectSizeAndIsASCIIStringEQTrue) {
-  std::string str;
-  custom_string::CustomString obj(str);
-  ASSERT_EQ(str.size(), obj.size());
-  ASSERT_EQ(str.length(), obj.length());
-  ASSERT_TRUE(obj.is_ascii_string());
-  ASSERT_TRUE(obj.empty());
-}
-
-TEST(CustomStringTest,
-     AddUTF8StringToCustomString_ExpectCorrectSizeAndIsASCIIStringEQFalse) {
-  std::string utf_str;
-  CreateMultibyteString(utf_str);
-  custom_string::CustomString obj(utf_str);
-  ASSERT_EQ(obj.size(), 4);
-  ASSERT_EQ(obj.length(), 4);
-  ASSERT_FALSE(obj.is_ascii_string());
-}
-
-TEST(
-    CustomStringTest,
-    AddMixingUTF8WithASCIIStringToCustomString_ExpectCorrectSizeAndIsASCIIStringEQFalse) {
-  std::string utf_str;
-  CreateMultibyteStringWithASCII(utf_str);
-  custom_string::CustomString obj(utf_str);
-  ASSERT_EQ(obj.size(), 7);
-  ASSERT_EQ(obj.length(), 7);
-  ASSERT_FALSE(obj.is_ascii_string());
-}
-
-TEST(CustomStringTest,
-     AddUTF8StringToCustomString_ExpectCorrectConvertingToWString) {
-  std::string utf_str;
-  CreateMultibyteString(utf_str);
-  custom_string::CustomString obj(utf_str);
-  std::wstring wstr_first(obj.AsWString());
-  std::wstring wstr_second(L"Тест");
-  ASSERT_TRUE(wstr_first == wstr_second);
-}
-
-TEST(
-    CustomStringTest,
-    AddMixingUTF8WithASCIIStringToCustomString_ExpectCorrectConvertingToWString) {
-  std::string utf_str;
-  CreateMultibyteStringWithASCII(utf_str);
-  custom_string::CustomString obj(utf_str);
-  std::wstring wstr_first(obj.AsWString());
-  std::wstring wstr_second(L"Тестabc");
-  ASSERT_TRUE(wstr_first == wstr_second);
-}
-
-TEST(
-    CustomStringTest,
-    AddSameMultiByteStringsToCustomString_ExpectCorrectCaseSensetiveComparing) {
-  std::string utf_str;
-  CreateMultibyteString(utf_str);
-  custom_string::CustomString obj(utf_str), obj_1(utf_str);
-  ASSERT_TRUE(obj == obj_1);
-  ASSERT_TRUE(obj == utf_str);
-  ASSERT_EQ(0, obj.compare(utf_str.c_str()));
-}
-
-TEST(
-    CustomStringTest,
-    AddDiferenceMultiByteStringsToCustomString_ExpectCorrectCaseSensetiveComparing) {
-  std::string utf_str, utf_str1;
-  CreateMultibyteStringWithASCII(utf_str);
-  CreateMultibyteString(utf_str1);
-  custom_string::CustomString obj(utf_str), obj_1(utf_str1);
-  ASSERT_FALSE(obj == obj_1);
-  ASSERT_FALSE(obj == utf_str1);
-  ASSERT_TRUE(obj.compare(utf_str1.c_str()) != 0);
-}
-
-TEST(CustomStringTest,
-     AddSameAsciiStringsToCustomString_ExpectCorrectCaseInsensitiveComparing) {
-  std::string str("hello"), str1("HellO");
-  custom_string::CustomString obj(str), obj_1(str1);
-  ASSERT_TRUE(obj.CompareIgnoreCase(obj_1));
-  ASSERT_TRUE(obj.CompareIgnoreCase(str1.c_str()));
-}
-
-TEST(
-    CustomStringTest,
-    AddDiferenceAsciiStringsToCustomString_ExpectCorrectCaseInsensitiveComparing) {
-  std::string str("hello"), str1("HellO12");
-  custom_string::CustomString obj(str), obj_1(str1);
-  ASSERT_FALSE(obj.CompareIgnoreCase(obj_1));
-  ASSERT_FALSE(obj.CompareIgnoreCase(str1.c_str()));
-}
-
-TEST(
-    CustomStringTest,
-    AddDiferenceMultiByteStringsToCustomString_ExpectCorrectCaseInsensitiveComparing) {
-  std::string str, str1;
-  CreateMultibyteStringWithASCII(str);
-  CreateMultibyteString(str1);
-  custom_string::CustomString obj(str), obj_1(str1);
-  ASSERT_FALSE(obj.CompareIgnoreCase(obj_1));
-  ASSERT_FALSE(obj.CompareIgnoreCase(str1.c_str()));
-}
-
-TEST(
-    CustomStringTest,
-    AddSameMultiByteStringsToCustomString_ExpectCorrectCaseInsensitiveComparing) {
-  std::string utf_str, utf_str1;
-  CreateMultibyteString(utf_str);
-  const int kSizeStr = 9;
-  uint8_t array[] = {
-      0xD1, 0x82, 0xD0, 0xB5, 0xD1, 0x81, 0xD0, 0xA2, 0x0};  //тесТ
-  char str[kSizeStr];
-  memcpy(str, array, kSizeStr);
-  utf_str1 = str;
-  custom_string::CustomString obj(utf_str), obj_1(utf_str1);
-  ASSERT_TRUE(obj.CompareIgnoreCase(obj_1));
-  ASSERT_TRUE(obj.CompareIgnoreCase(str));
+                     0xD0,
+                     0xA2};  // String contains russian word "тесТ"
+  std::string mbstring = CreateMultibyteString(array, kSizeStr);
+  custom_str::CustomString obj(CustomStringTest::mbstring1_);
+  custom_str::CustomString obj1(mbstring);
+  EXPECT_TRUE(obj.CompareIgnoreCase(obj1));
+  EXPECT_TRUE(obj.CompareIgnoreCase(mbstring.c_str()));
 }
 
 }  // namespace utils

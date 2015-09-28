@@ -55,11 +55,9 @@ const std::string kSYNC = "SYNC";
 const std::string kIVSU = "IVSU";
 
 SystemRequest::SystemRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+    : CommandRequestImpl(message) {}
 
-SystemRequest::~SystemRequest() {
-}
+SystemRequest::~SystemRequest() {}
 
 void SystemRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -78,7 +76,7 @@ void SystemRequest::Run() {
           (*message_)[strings::msg_params][strings::request_type].asInt());
 
   if (!policy::PolicyHandler::instance()->IsRequestTypeAllowed(
-           application->mobile_app_id(), request_type)) {
+          application->mobile_app_id(), request_type)) {
     SendResponse(false, mobile_apis::Result::DISALLOWED);
     return;
   }
@@ -90,15 +88,14 @@ void SystemRequest::Run() {
     file_name = kSYNC;
   }
 
-  bool is_system_file =
-      std::string::npos != file_name.find(kSYNC) ||
-      std::string::npos != file_name.find(kIVSU);
+  bool is_system_file = std::string::npos != file_name.find(kSYNC) ||
+                        std::string::npos != file_name.find(kIVSU);
 
   // to avoid override existing file
   if (is_system_file) {
     const uint8_t max_size = 255;
     char buf[max_size] = {'\0'};
-    snprintf(buf, sizeof(buf)/sizeof(buf[0]), "%d%s", index++, file_name.c_str());
+    snprintf(buf, max_size - 1, "%d%s", index++, file_name.c_str());
     file_name = buf;
   }
 
@@ -119,9 +116,10 @@ void SystemRequest::Run() {
   file_dst_path += file_name;
 
   if ((*message_)[strings::params].keyExists(strings::binary_data)) {
-    LOG4CXX_DEBUG(logger_, "Binary data is present. Trying to save it to: "
-                  << binary_data_folder);
-    if (mobile_apis::Result::SUCCESS  !=
+    LOG4CXX_DEBUG(
+        logger_,
+        "Binary data is present. Trying to save it to: " << binary_data_folder);
+    if (mobile_apis::Result::SUCCESS !=
         (ApplicationManagerImpl::instance()->SaveBinary(
             binary_data, binary_data_folder, file_name, 0))) {
       LOG4CXX_DEBUG(logger_, "Binary data can't be saved.");
@@ -132,9 +130,11 @@ void SystemRequest::Run() {
     std::string app_full_file_path = binary_data_folder;
     app_full_file_path += file_name;
 
-    LOG4CXX_DEBUG(logger_, "Binary data is not present. Trying to find file "
-                  << file_name << " within previously saved app file in "
-                  << binary_data_folder);
+    LOG4CXX_DEBUG(logger_,
+                  "Binary data is not present. Trying to find file "
+                      << file_name
+                      << " within previously saved app file in "
+                      << binary_data_folder);
 
     const AppFile* file = application->GetFile(app_full_file_path);
     if (!file || !file->is_download_complete ||
@@ -147,7 +147,7 @@ void SystemRequest::Run() {
             (*message_)[strings::msg_params][strings::file_name].asString();
       }
       if (!(mobile_apis::RequestType::HTTP == request_type &&
-          0 == origin_file_name.compare(kIVSU))) {
+            0 == origin_file_name.compare(kIVSU))) {
         LOG4CXX_DEBUG(logger_, "Binary data required. Reject");
         SendResponse(false, mobile_apis::Result::REJECTED);
         return;
@@ -184,10 +184,10 @@ void SystemRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
   if (std::string::npos != file_name.find(kIVSU)) {
-    msg_params[strings::file_name] = file_name.c_str();
+    msg_params[strings::file_name] = file_name;
   } else {
     msg_params[strings::file_name] = file_dst_path;
   }
@@ -198,8 +198,8 @@ void SystemRequest::Run() {
   msg_params[strings::request_type] =
       (*message_)[strings::msg_params][strings::request_type];
   SendHMIRequest(hmi_apis::FunctionID::BasicCommunication_SystemRequest,
-                 &msg_params, true);
-
+                 &msg_params,
+                 true);
 }
 
 void SystemRequest::on_event(const event_engine::Event& event) {
@@ -214,14 +214,13 @@ void SystemRequest::on_event(const event_engine::Event& event) {
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asUInt()));
 
-      const bool result =
-          Compare<mobile_api::Result::eType, EQ, ONE>(
-            result_code,
-            mobile_api::Result::SUCCESS,
-            mobile_api::Result::WARNINGS);
+      const bool result = Compare<mobile_api::Result::eType, EQ, ONE>(
+          result_code,
+          mobile_api::Result::SUCCESS,
+          mobile_api::Result::WARNINGS);
 
       ApplicationSharedPtr application =
-             ApplicationManagerImpl::instance()->application(connection_key());
+          ApplicationManagerImpl::instance()->application(connection_key());
 
       if (!(application.valid())) {
         LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -243,15 +242,15 @@ void SystemRequest::on_event(const event_engine::Event& event) {
 }
 
 bool SystemRequest::ValidateQueryAppData(
-    const smart_objects::SmartObject& data) const  {
+    const smart_objects::SmartObject& data) const {
   if (!data.isValid()) {
     LOG4CXX_ERROR(logger_, "QueryApps response is not valid.");
     return false;
   }
   if (!data.keyExists(json::response)) {
     LOG4CXX_ERROR(logger_,
-                  "QueryApps response does not contain '"
-                  << json::response << "' parameter.");
+                  "QueryApps response does not contain '" << json::response
+                                                          << "' parameter.");
     return false;
   }
   smart_objects::SmartArray* obj_array = data[json::response].asArray();
