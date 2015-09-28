@@ -166,7 +166,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
         result_code = static_cast<mobile_apis::Result::eType>(vr_result_);
       } else {
         result_code = static_cast<mobile_apis::Result::eType>(
-            std::max(ui_result_, vr_result_));
+            max(ui_result_, vr_result_));
       }
 
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));

@@ -96,14 +96,14 @@
 #define APR_HAVE_SYS_IOCTL_H     1
 #define APR_HAVE_SYS_SENDFILE_H  1
 #define APR_HAVE_SYS_SIGNAL_H    1
-#define APR_HAVE_SYS_SOCKET_H    1
+#define APR_HAVE_SYS_SOCKET_H    0
 #define APR_HAVE_SYS_SOCKIO_H    0
 #define APR_HAVE_SYS_SYSLIMITS_H 0
 #define APR_HAVE_SYS_TIME_H      1
 #define APR_HAVE_SYS_TYPES_H     1
 #define APR_HAVE_SYS_UIO_H       1
 #define APR_HAVE_SYS_UN_H        1
-#define APR_HAVE_SYS_WAIT_H      1
+#define APR_HAVE_SYS_WAIT_H      0
 #define APR_HAVE_TIME_H          1
 #define APR_HAVE_UNISTD_H        1
 #define APR_HAVE_WINDOWS_H       0
@@ -276,9 +276,9 @@ extern "C" {
 #define APR_HAS_UNICODE_FS        0
 #define APR_HAS_PROC_INVOKED      0
 #define APR_HAS_USER              1
-#define APR_HAS_LARGE_FILES       0
+#define APR_HAS_LARGE_FILES       1
 #define APR_HAS_XTHREAD_FILES     0
-#define APR_HAS_OS_UUID           0
+#define APR_HAS_OS_UUID           1
 
 #define APR_PROCATTR_USER_SET_REQUIRES_PASSWORD 0
 
@@ -313,6 +313,7 @@ typedef  unsigned short  apr_uint16_t;
 
 typedef  int             apr_int32_t;
 typedef  unsigned int    apr_uint32_t;
+typedef int socklen_t;
 
 #define APR_SIZEOF_VOIDP 8
 
@@ -610,7 +611,7 @@ typedef int apr_wait_t;
 #elif defined(_POSIX_PATH_MAX)
 #define APR_PATH_MAX       _POSIX_PATH_MAX
 #else
-#error no decision has been made on APR_PATH_MAX for your platform
+//#error no decision has been made on APR_PATH_MAX for your platform
 #endif
 
 #define APR_DSOPATH "LD_LIBRARY_PATH"

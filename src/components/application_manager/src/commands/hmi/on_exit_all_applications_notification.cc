@@ -30,6 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef MODIFY_FUNCTION_SIGN
+#include <global_first.h>
+#endif
 #include "application_manager/commands/hmi/on_exit_all_applications_notification.h"
 
 #include <sys/types.h>
@@ -93,7 +96,12 @@ void OnExitAllApplicationsNotification::Run() {
       mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS == mob_reason) {
     app_manager->HeadUnitReset(mob_reason);
   }
+#ifdef OS_WIN32
+    ApplicationManagerImpl::instance()->SetUnregisterAllApplicationsReason(
+      mob_reason);
+#else
   kill(getpid(), SIGINT);
+#endif
 }
 
 void OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete() {

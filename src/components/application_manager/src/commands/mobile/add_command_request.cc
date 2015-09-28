@@ -365,7 +365,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
 #ifdef OS_WIN32
 			max(ui_result_, vr_result_));
 #else
-            std::max(ui_result_, vr_result_));
+            max(ui_result_, vr_result_));
 #endif
     }
 

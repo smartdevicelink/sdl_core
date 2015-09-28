@@ -34,7 +34,7 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/include
 )
 # --- HMI_API interfaces
-#add_subdirectory(./interfaces)
+add_subdirectory(./interfaces)
 
 # --- ProtocolHandler
 add_subdirectory(./protocol)

@@ -73,11 +73,19 @@ bool ResumptionDataDB::Init() {
     bool is_opened = false;
     const uint16_t open_attempt_timeout_ms =
         profile::Profile::instance()->open_attempt_timeout_ms_resumption_db();
+#ifdef OS_WIN32
+	// const uint32_t sleep_interval_mcsec = open_attempt_timeout_ms * 1000;
+#else
     const useconds_t sleep_interval_mcsec = open_attempt_timeout_ms * 1000;
+#endif
     LOG4CXX_DEBUG(logger_, "Open attempt timeout(ms) is: "
                   << open_attempt_timeout_ms);
     for (int i = 0; i < attempts; ++i) {
+#ifdef OS_WIN32
+		Sleep(open_attempt_timeout_ms);
+#else
       usleep(sleep_interval_mcsec);
+#endif
       LOG4CXX_INFO(logger_, "Attempt: " << i+1);
       if (db_->Open()){
         LOG4CXX_INFO(logger_, "Database opened.");

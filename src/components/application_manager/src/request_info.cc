@@ -35,7 +35,20 @@
 
 #include "application_manager/request_info.h"
 
+#ifdef OS_WIN32
+#include <vector>
 #include <algorithm>
+#include <functional>
+#endif
+
+#include "utils/logger.h"
+
+#ifdef _WIN64
+typedef __int64 ssize_t;
+#else
+typedef int ssize_t;
+#endif /* _WIN64 */
+
 namespace application_manager {
 
 namespace request_controller {

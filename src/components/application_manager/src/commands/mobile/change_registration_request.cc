@@ -231,7 +231,7 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
           (*message_)[strings::msg_params][strings::language].asInt()));
     }
 
-    int32_t greates_result_code = std::max(std::max(ui_result_, vr_result_),
+    int32_t greates_result_code = max(max(ui_result_, vr_result_),
                                        tts_result_);
 
     (*message_)[strings::params][strings::function_id] =

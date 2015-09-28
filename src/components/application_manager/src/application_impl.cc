@@ -32,7 +32,10 @@
 
 #include "application_manager/application_impl.h"
 #include <string>
+#ifdef OS_WIN32
+#else
 #include <strings.h>
+#endif
 #include "application_manager/message_helper.h"
 #include "application_manager/application_manager_impl.h"
 #include "protocol_handler/protocol_handler.h"

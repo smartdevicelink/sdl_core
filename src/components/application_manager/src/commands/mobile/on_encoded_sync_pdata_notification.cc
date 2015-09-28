@@ -50,7 +50,7 @@ namespace commands {
 OnEncodedSyncPDataNotification::OnEncodedSyncPDataNotification(
     const MessageSharedPtr& message)
  : CommandResponseImpl(message),
-   timer_(this, &OnEncodedSyncPDataNotification::onTimer) {
+   timer_("", this, &OnEncodedSyncPDataNotification::onTimer) {
 }
 
 OnEncodedSyncPDataNotification::~OnEncodedSyncPDataNotification() {

@@ -30,6 +30,11 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef OS_WIN32
+#include <vector>
+#include <algorithm>
+#include <functional>
+#endif
 #include "application_manager/state_controller.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"

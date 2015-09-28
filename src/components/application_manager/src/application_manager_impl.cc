@@ -124,10 +124,10 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     std::srand(std::time(0));
     AddPolicyObserver(this);
 
-    dir_type_to_string_map_ = {
-      {TYPE_STORAGE, "Storage"},
-      {TYPE_SYSTEM, "System"},
-      {TYPE_ICONS, "Icons"}
+	dir_type_to_string_map_ = {
+		{ TYPE_STORAGE, std::string("Storage") },
+		{ TYPE_SYSTEM, std::string("System") },
+		{ TYPE_ICONS, std::string("Icons") }
     };
 
     sync_primitives::AutoLock lock(timer_pool_lock_);

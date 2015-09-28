@@ -38,8 +38,6 @@
 
 #include "utils/appenders_loader.h"
 
-#define RTLD_LAZY	1
-
 namespace utils {
 
 AppendersLoader appenders_loader;

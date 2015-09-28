@@ -1930,8 +1930,8 @@ void MessageHelper::SendSystemRequestNotification (uint32_t connection_key,
 
   content[strings::params][strings::function_id] = FunctionID::OnSystemRequestID;
   content[strings::params][strings::message_type] = messageType::notification;
-  content[strings::params][strings::protocol_type] = CommandImpl::mobile_protocol_type_;
-  content[strings::params][strings::protocol_version] = CommandImpl::protocol_version_;
+  content[strings::params][strings::protocol_type] = commands::CommandImpl::mobile_protocol_type_;
+  content[strings::params][strings::protocol_version] = commands::CommandImpl::protocol_version_;
 
   content[strings::params][strings::connection_key] = connection_key;
 

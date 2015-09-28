@@ -79,6 +79,9 @@
  * Will cauch assert on debug version,
  * Will return return_value in release build
  */
+#ifdef OS_WIN32
+#define DCHECK_OR_RETURN(condition, return_value)
+#else
 #define DCHECK_OR_RETURN(condition, return_value) \
   if (!(condition)) { \
     CREATE_LOGGERPTR_LOCAL(logger_, "assert"); \
@@ -87,10 +90,14 @@
     ASSERT((condition)); \
     return (return_value); \
   }
+#endif
 /*
  * Will cauch assert on debug version,
  * Will return return_value in release build
  */
+#ifdef OS_WIN32
+#define DCHECK_OR_RETURN_VOID(condition)
+#else
 #define DCHECK_OR_RETURN_VOID(condition) \
   if (!(condition)) { \
     CREATE_LOGGERPTR_LOCAL(logger_, "assert"); \
@@ -99,7 +106,7 @@
     ASSERT((condition)); \
     return ; \
   }
-
+#endif
 
 #define NOTREACHED() DCHECK(!"Unreachable code")
 

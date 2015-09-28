@@ -635,3 +635,43 @@ bool file_system::CreateFile(const std::string& path) {
     return true;
   }
 }
+
+
+uint64_t file_system::GetFileModificationTime(const std::string& path) {
+#ifdef OS_WIN32
+	return 0;
+#else
+  struct stat info;
+  stat(path.c_str(), &info);
+#ifndef __QNXNTO__
+  return static_cast<uint64_t>(info.st_mtim.tv_nsec);
+#else
+  return static_cast<uint64_t>(info.st_mtime);
+#endif
+#endif
+}
+
+bool file_system::CopyFile(const std::string& src,
+                           const std::string& dst) {
+  if (!FileExists(src) || FileExists(dst) || !CreateFile(dst)) {
+    return false;
+  }
+  std::vector<uint8_t> data;
+  if (!ReadBinaryFile(src, data) || !WriteBinaryFile(dst, data)) {
+    DeleteFile(dst);
+    return false;
+  }
+  return true;
+}
+
+bool file_system::MoveFile(const std::string& src,
+                           const std::string& dst) {
+  if (!CopyFile(src, dst)) {
+    return false;
+  }
+  if (!DeleteFile(src)) {
+    DeleteFile(dst);
+    return false;
+  }
+  return true;
+}
