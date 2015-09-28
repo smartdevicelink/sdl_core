@@ -57,6 +57,7 @@ set (SOURCES
     ${UTILS_SRC_DIR}/appenders_loader.cc
     ${UTILS_SRC_DIR}/gen_hash.cc
     ${UTILS_SRC_DIR}/convert_utils.cc
+    ${UTILS_SRC_DIR}/custom_string.cc
 )
 
 if(ENABLE_LOG)
