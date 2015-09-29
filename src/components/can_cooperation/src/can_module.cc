@@ -442,7 +442,7 @@ void CANModule::SetScanStarted(bool is_scan_started) {
 
 void CANModule::RemoveAppExtensions() {
   std::vector<application_manager::ApplicationSharedPtr> applications =
-    service()->GetApplications(this->GetModuleID());
+    service()->GetApplications(GetModuleID());
 
   std::vector<application_manager::ApplicationSharedPtr>::iterator it =
     applications.begin();
@@ -451,7 +451,7 @@ void CANModule::RemoveAppExtensions() {
     application_manager::ApplicationSharedPtr app = *it;
     if (app) {
       service()->ResetAccess(app->app_id());
-      app->RemoveExtension(CANModule::instance()->GetModuleID());
+      app->RemoveExtension(GetModuleID());
     }
   }
 }
@@ -462,7 +462,7 @@ void CANModule::RemoveAppExtension(uint32_t app_id) {
 
   if (app) {
     service()->ResetAccess(app->app_id());
-    app->RemoveExtension(kCANModuleID);
+    app->RemoveExtension(GetModuleID());
   }
 }
 
