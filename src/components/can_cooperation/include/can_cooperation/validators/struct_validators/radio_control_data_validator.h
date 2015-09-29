@@ -45,7 +45,6 @@ namespace validators {
  */
 class RadioControlDataValidator : public Validator, public utils::Singleton<RadioControlDataValidator> {
  public:
-
   /**
    * @brief Validate json with message params
    *
@@ -57,10 +56,25 @@ class RadioControlDataValidator : public Validator, public utils::Singleton<Radi
   ValidationResult Validate(const Json::Value& json,
                             Json::Value& outgoing_json);
 
+ /**
+  * @brief Remove read only params from json
+  *
+  * @param json incoming json. Read only params will be cut off.
+  */
+  void RemoveReadOnlyParams(Json::Value& json);
+
  private:
   DISALLOW_COPY_AND_ASSIGN(RadioControlDataValidator);
   FRIEND_BASE_SINGLETON_CLASS(RadioControlDataValidator);
   RadioControlDataValidator();
+
+  /**
+   * @brief Remove read only param from json if exist
+   *
+   * @param json incoming json. Read only param will be cut off.
+   * @param param_name param name
+   */
+  void RemoveReadOnlyParam(Json::Value& json, const char* param_name);
 
   ValidationScope frequency_integer_;
   ValidationScope frequency_fraction_;

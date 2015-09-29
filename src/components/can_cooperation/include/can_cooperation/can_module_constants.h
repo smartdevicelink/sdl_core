@@ -62,6 +62,7 @@ const char kWarnings[] = "WARNINGS";
 const char kWrongLanguage[] = "WRONG_LANGUAGE";
 const char kGenericError[] = "GENERIC_ERROR";
 const char kUserDisallowed[] = "USER_DISALLOWED";
+const char kReadOnly[] = "READ_ONLY";
 } //  result_codes
 
 namespace json_keys {

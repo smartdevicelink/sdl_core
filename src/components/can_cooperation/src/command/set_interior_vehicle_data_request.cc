@@ -34,6 +34,8 @@
 #include <algorithm>
 #include "can_cooperation/validators/set_interior_vehicle_data_request_validator.h"
 #include "can_cooperation/validators/struct_validators/module_data_validator.h"
+#include "can_cooperation/validators/struct_validators/radio_control_data_validator.h"
+#include "can_cooperation/validators/struct_validators/climate_control_data_validator.h"
 #include "can_cooperation/can_module_constants.h"
 #include "can_cooperation/message_helper.h"
 #include "functional_module/function_ids.h"
@@ -64,6 +66,28 @@ void SetInteriorVehicleDataRequest::Execute() {
   Json::Reader reader;
   reader.parse(message_->json_message(), params);
 
+  // TODO(VS): Create function for read only validation and move there similar code
+  if (params[kModuleData].isMember(kRadioControlData)) {
+    validators::RadioControlDataValidator::instance()->RemoveReadOnlyParams(
+        params[kModuleData][kRadioControlData]);
+
+    if (0 == params[kModuleData][kRadioControlData].size()) {
+      SendResponse(false, result_codes::kReadOnly,
+                  "Request contains just read only params!");
+      return;
+    }
+  } else if (params[kModuleData].isMember(kClimateControlData)) {
+    validators::ClimateControlDataValidator::instance()->RemoveReadOnlyParams(
+        params[kModuleData][kClimateControlData]);
+    if (0 == params[kModuleData][kClimateControlData].size()) {
+      SendResponse(false, result_codes::kReadOnly,
+                  "Request contains just read only params!");
+      return;
+    }
+  } else {
+    DCHECK(false);
+  }
+
   SendRequest(
       functional_modules::hmi_api::set_interior_vehicle_data, params, true);
 }
@@ -81,7 +105,17 @@ void SetInteriorVehicleDataRequest::OnEvent(
     Json::Reader reader;
     reader.parse(event.event_message()->json_message(), value);
 
-    bool success = ParseResultCode(value, result_code, info);
+    bool success = false;
+    if (IsMember(value, kError) && IsMember(value[kError], kCode) &&
+        (hmi_apis::Common_Result::READ_ONLY == value[kError][kCode].asInt())) {
+        result_code = result_codes::kReadOnly;
+
+        if (IsMember(value[kError], kMessage)) {
+          info = value[kError][kMessage].asCString();
+        }
+    } else {
+      success = ParseResultCode(value, result_code, info);
+    }
 
     // TOD(VS): Create SetInteriorVehicleDataResponseValidator
     validators::ValidationResult validation_result = validators::SUCCESS;
