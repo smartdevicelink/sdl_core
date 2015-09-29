@@ -38,7 +38,7 @@
 
 #include "utils/shared_ptr.h"
 #include "protocol/message_priority.h"
-#include "protocol/rpc_type.h"
+#include "protocol_handler/rpc_type.h"
 #include "smart_objects/smart_object.h"
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;

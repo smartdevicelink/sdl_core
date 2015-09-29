@@ -77,6 +77,8 @@ class TimerThread {
   friend class TimerDelegate;
   friend class TimerLooperDelegate;
 
+  TimerThread();
+
   /**
    * @brief Default constructor
    *

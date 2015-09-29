@@ -32,6 +32,7 @@
 include_directories(
   ./include
   ${APR_INCLUDE_DIRECTORY}
+  ${COMPONENTS_DIR}/protocol_handler/include
 )
 
 set(SOURCES

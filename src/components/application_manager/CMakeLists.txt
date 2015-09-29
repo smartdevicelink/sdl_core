@@ -48,6 +48,7 @@ include_directories (
   ${COMPONENTS_DIR}/resumption/include/
   ${COMPONENTS_DIR}/rpc_base/include/
   ${COMPONENTS_DIR}/interfaces
+  ${COMPONENTS_DIR}/protocol_handler/include/
   ${CMAKE_BINARY_DIR}/src/components/
   ${COMPONENTS_DIR}/include/
   ${COMPONENTS_DIR}/policy/src/policy/include/

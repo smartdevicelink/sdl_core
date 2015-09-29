@@ -37,7 +37,9 @@
 #include <map>
 #include <set>
 #include <list>
+#ifdef OS_WIN32
 #include <unistd.h>
+#endif
 #include "utils/shared_ptr.h"
 #include "utils/data_accessor.h"
 #include "interfaces/MOBILE_API.h"
@@ -45,12 +47,6 @@
 #include "application_manager/message.h"
 #include "application_manager/hmi_state.h"
 #include "protocol_handler/protocol_handler.h"
-
-//#ifdef _WIN64
-//typedef __int64 ssize_t;
-//#else
-//typedef int ssize_t;
-//#endif /* _WIN64 */
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {

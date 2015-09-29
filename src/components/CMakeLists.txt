@@ -72,7 +72,7 @@ add_subdirectory(./rpc_base)
 add_subdirectory(./smart_objects)
 
 # --- Application manager
-#add_subdirectory(./application_manager)
+add_subdirectory(./application_manager)
 
 # --- HMI Message Handler
 #add_subdirectory(./hmi_message_handler)
