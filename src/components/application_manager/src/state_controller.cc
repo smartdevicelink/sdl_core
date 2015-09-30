@@ -441,13 +441,9 @@ void StateController::OnActivateAppResponse(
                               application_id(correlation_id);
   ApplicationSharedPtr application = ApplicationManagerImpl::instance()->
                                      application_by_hmi_app(hmi_app_id);
-  if (application) {
+  if (application && hmi_apis::Common_Result::SUCCESS == code) {
     HmiStatePtr pending_state = waiting_for_activate[application->app_id()];
     DCHECK_OR_RETURN_VOID(pending_state);
-    if (code != hmi_apis::Common_Result::SUCCESS) {
-      const HmiStatePtr cur = application->RegularHmiState();
-      pending_state->set_hmi_level(cur->hmi_level());
-    }
     ApplyRegularState(application, pending_state);
   }
 }
