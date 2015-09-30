@@ -32,7 +32,7 @@
 
 #include "utils/threads/thread_delegate.h"
 
-#include <pthread.h>
+#include "pthread.h"
 
 #include "utils/threads/thread.h"
 #include "utils/lock.h"

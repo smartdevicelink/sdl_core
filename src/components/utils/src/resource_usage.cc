@@ -2,7 +2,7 @@
 #if defined(__QNXNTO__)
 #include <dirent.h>
 #include <fcntl.h>
-#include <pthread.h>
+#include "pthread.h"
 #include <sys/neutrino.h>
 #include <sys/procfs.h>
 #include <sys/stat.h>

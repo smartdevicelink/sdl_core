@@ -49,6 +49,7 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/components
   ${CMAKE_SOURCE_DIR}/src/components/config_profile/include
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${CMAKE_SOURCE_DIR}/src/3rd_party/pthread-win32-2.9.1
 )
 
 set(SOURCES
@@ -68,7 +69,12 @@ add_subdirectory(usage_statistics)
 include_directories(./policy_table/table_struct)
 add_subdirectory(policy_table/table_struct)
 
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+set(LIBRARIES ConfigProfile policy_struct dbms jsoncpp Utils pthread)
+else ()
 set(LIBRARIES ConfigProfile policy_struct dbms jsoncpp Utils)
+endif ()
+
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   # --- QDB Wrapper 
   include_directories (${COMPONENTS_DIR}/utils/include/utils)

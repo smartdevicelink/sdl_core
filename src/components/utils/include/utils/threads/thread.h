@@ -40,7 +40,7 @@
 #include <pthread.h>
 #else
 #ifdef OS_WIN32
-#include <pthread.h>
+#include "pthread.h"
 #endif
 #endif
 
@@ -50,7 +50,7 @@
 #include "utils/macro.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/threads/thread_options.h"
-
+#include "utils/conditional_variable.h"
 namespace threads {
 
 namespace impl {
@@ -85,7 +85,22 @@ typedef pthread_t PlatformThreadHandle;
  * thread.join();
  * printf("ok!\n");
  */
+
+class Thread;
+void enqueue_to_join(Thread* thread);
+
+Thread* CreateThread(const char* name, ThreadDelegate* delegate);
+void DeleteThread(Thread* thread);
+
 class Thread {
+ private:
+  // Should be locked to protect isThreadRunning_ and thread_created_ values
+  sync_primitives::Lock state_lock_;
+  volatile bool stopped_;
+  volatile bool finalized_;
+  bool thread_created_;
+  // Signalled when Thread::start() is called
+  sync_primitives::ConditionalVariable run_cond_;
  public:
 
   /*
@@ -143,6 +158,13 @@ class Thread {
    */
   bool startWithOptions(const ThreadOptions& options);
 
+  ThreadDelegate *delegate() const {
+    return delegate_;
+  }
+  void set_delegate(ThreadDelegate *delegate) {
+    DCHECK(!isThreadRunning_);
+    delegate_ = delegate;
+  }
   /**
    * Signals the thread to exit and returns once the thread has exited.
    * After this method returns, the Thread object is completely reset and may
@@ -228,8 +250,10 @@ class Thread {
   impl::PlatformThreadHandle thread_handle_;
   ThreadOptions thread_options_;
   bool isThreadRunning_;
-
+  sync_primitives::ConditionalVariable state_cond_;
  private:
+  static void* threadFunc(void* arg);
+  static void cleanup(void* arg);
   DISALLOW_COPY_AND_ASSIGN(Thread);
 };
 

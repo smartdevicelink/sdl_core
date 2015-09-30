@@ -123,7 +123,7 @@ MessageLoopThread<Q>::MessageLoopThread(const std::string&   name,
     : thread_delegate_(new LoopThreadDelegate(&message_queue_, handler)),
       thread_(threads::CreateThread(name.c_str(),
                                     thread_delegate_)) {
-  const bool started = thread_->start(thread_opts);
+	const bool started = thread_->startWithOptions(thread_opts);
   if (!started) {
     CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
     LOG4CXX_ERROR(logger_, "Failed to start thread " << name);

@@ -12,6 +12,12 @@ include_directories (
 )
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+include_directories (
+  ${CMAKE_SOURCE_DIR}/src/3rd_party/pthread-win32-2.9.1
+)
+endif()
+
 set (MESSAGE_BROKER_SOURCES
   ./src/lib_messagebroker/CMessageBroker.cpp
   ./src/lib_messagebroker/CMessageBrokerRegistry.cpp

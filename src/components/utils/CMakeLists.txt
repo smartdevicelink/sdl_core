@@ -38,6 +38,7 @@ include_directories (
   ${COMPONENTS_DIR}/media_manager/include
   ${COMPONENTS_DIR}/protocol_handler/include
   ${CMAKE_SOURCE_DIR}/include
+  ${CMAKE_SOURCE_DIR}/src/3rd_party/pthread-win32-2.9.1
   ${CMAKE_SOURCE_DIR}/src/3rd_party/apache-log4cxx-win32-0.10.0/apr/include
   ${CMAKE_SOURCE_DIR}/src/3rd_party-static/libusbx-1.0.16/libusb
   ${CMAKE_SOURCE_DIR}/src/3rd_party/sqlite3

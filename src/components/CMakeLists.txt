@@ -30,9 +30,6 @@
 
 set(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
 
-include_directories (
-  ${CMAKE_SOURCE_DIR}/include
-)
 # --- HMI_API interfaces
 add_subdirectory(./interfaces)
 
@@ -63,7 +60,7 @@ if(ENABLE_SECURITY)
 endif()
 #
 # --- Policy_impl
-#add_subdirectory(./policy)
+add_subdirectory(./policy)
 
 # --- Validated types
 add_subdirectory(./rpc_base)

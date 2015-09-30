@@ -70,9 +70,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "CacheManager")
 
 CacheManager::CacheManager()
   : CacheManagerInterface(),
-    backup_(
-                     new SQLPTRepresentation()
-    ),
+    backup_(new SQLPTRepresentation()),
     update_required(false) {
 
   LOG4CXX_AUTO_TRACE(logger_);

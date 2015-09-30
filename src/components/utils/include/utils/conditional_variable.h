@@ -36,13 +36,14 @@
 #include <pthread.h>
 #else
 #ifdef OS_WIN32
-#include <pthread.h>
+#include "pthread.h"
 //#error Please implement conditional variable for your OS
 #endif
 #endif
 #include <stdint.h>
 
 #include "utils/macro.h"
+#include "utils/lock.h"
 
 namespace sync_primitives {
 class AutoLock;
@@ -86,8 +87,9 @@ class ConditionalVariable {
   void Broadcast();
 
   // Wait forever or up to milliseconds time limit
-  void Wait(AutoLock& auto_lock);
-  WaitStatus WaitFor(AutoLock& auto_lock, int32_t milliseconds );
+  bool Wait(AutoLock& auto_lock);
+  bool Wait(Lock& lock);
+  WaitStatus WaitFor(AutoLock& auto_lock, int32_t milliseconds);
  private:
   impl::PlatformConditionalVariable cond_var_;
 

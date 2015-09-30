@@ -33,6 +33,7 @@ include_directories (
   include
   ${COMPONENTS_DIR}/utils/include/
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${CMAKE_SOURCE_DIR}/src/3rd_party/pthread-win32-2.9.1
 )
 
 set (SOURCES

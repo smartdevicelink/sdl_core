@@ -32,7 +32,7 @@
 
 #include "utils/rwlock.h"
 #include "utils/logger.h"
-#include "win32/pthread.h"
+#include "pthread.h"
 
 namespace sync_primitives {
 

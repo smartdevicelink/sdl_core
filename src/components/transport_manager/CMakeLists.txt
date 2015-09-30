@@ -42,6 +42,7 @@ include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LIBUSB_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${CMAKE_SOURCE_DIR}/src/3rd_party/pthread-win32-2.9.1
 )
 if (BUILD_BT_SUPPORT)
   include_directories(

@@ -174,10 +174,10 @@ Thread::Thread(const char* name, ThreadDelegate* delegate)
 
 
 bool Thread::start() {
-	return start(thread_options_);
+  return startWithOptions(thread_options_);
 }
 
-bool Thread::start(const ThreadOptions& options) {
+bool Thread::startWithOptions(const ThreadOptions& options) {
 	LOG4CXX_AUTO_TRACE(logger_);
 
 	sync_primitives::AutoLock auto_lock(state_lock_);

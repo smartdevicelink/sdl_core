@@ -39,6 +39,9 @@ endif()
 # --- sqlite3
   add_subdirectory(sqlite3)
   
+# --- pthread-win32-2.9.1
+  add_subdirectory(pthread-win32-2.9.1)
+  
 if(ENABLE_LOG)
   set(APR_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
   set(APR_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include PARENT_SCOPE)
@@ -56,6 +59,7 @@ if(ENABLE_LOG)
 
   # --- log4cxx
   add_subdirectory(apache-log4cxx-cmake)
+  
 endif()
 
 # --- D-Bus

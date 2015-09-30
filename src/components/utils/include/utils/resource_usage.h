@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_RESOURCE_USAGE_H_
 
 #ifdef OS_WIN32
-#include "win32/sched.h"
+#include "sched.h"
 #include <stdint.h>
 #else
 #include <sys/resource.h>

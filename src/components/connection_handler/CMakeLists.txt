@@ -33,6 +33,7 @@ set(CH_SRC_DIR ${COMPONENTS_DIR}/connection_handler/src)
 
 include_directories (
     include
+    ${CMAKE_SOURCE_DIR}/src/3rd_party/pthread-win32-2.9.1
     ${COMPONENTS_DIR}/protocol_handler/include/
     ${COMPONENTS_DIR}/config_profile/include/
     ${COMPONENTS_DIR}/utils/include/
