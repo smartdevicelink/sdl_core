@@ -140,7 +140,7 @@ functional_modules::ProcessResult ProcessSDLActivateApp(
             // Do not change HMI Level of app on passenger's device
             application_manager::MessagePtr msg = ResponseToHMI(
               value[json_keys::kId].asUInt(),
-              hmi_apis::Common_Result::GENERIC_ERROR,
+              hmi_apis::Common_Result::REJECTED,
               functional_modules::hmi_api::sdl_activate_app);
 
             CANModule::instance()->service()->SendMessageToHMI(msg);
