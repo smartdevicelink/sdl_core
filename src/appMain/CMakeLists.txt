@@ -122,6 +122,7 @@ include_directories (
   ${COMPONENTS_DIR}/media_manager/include/
   ${COMPONENTS_DIR}/time_tester/include
   ${COMPONENTS_DIR}/policy/src/policy/include/
+  ${COMPONENTS_DIR}/policy/src/policy/usage_statistics/include/
   ${COMPONENTS_DIR}/resumption/include/
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${ENCRYPTION_INCLUDE_DIRECTORY}

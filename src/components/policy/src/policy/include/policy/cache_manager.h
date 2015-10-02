@@ -44,6 +44,7 @@
 #include "utils/lock.h"
 #include "utils/timer_thread.h"
 #include "utils/conditional_variable.h"
+#include "policy/policy_types.h"
 
 namespace policy {
 
@@ -544,7 +545,7 @@ class CacheManager : public CacheManagerInterface {
    * @param file_name preloaded
    * @return
    */
-  bool LoadFromFile(const std::string& file_name);
+  bool LoadFromFile(const std::string& file_name, policy_table::Table& table);
 
   /**
    * @brief Backup allows to save cache onto hard drive.
@@ -575,6 +576,101 @@ class CacheManager : public CacheManagerInterface {
    */
   void GetAppRequestTypes(const std::string& policy_app_id,
                           std::vector<std::string>& request_types) const;
+
+  /**
+   * @brief GetCertificate allows to obtain certificate in order to
+   * make secure connection
+   *
+   * @return The certificate in PKCS#7.
+   */
+  virtual std::string GetCertificate() const OVERRIDE;
+
+  /**
+   * @brief MergePreloadPT allows to load policy table from certain JSON file,
+   * and then decide if merge is needed. The merge is needed in case when preload
+   * JSON date is different than current database.
+   *
+   * @param file_name the preloaded policy table JSON file.
+   */
+  void MergePreloadPT(const std::string& file_name);
+
+  /**
+   * @brief MergeMC allows to merge ModuleConfig section by definite rules.
+   *
+   * The rules are:
+   * 1. Add new fields (known to PoliciesManager) & sub-sections if such are
+   * present in the updated Preloaded PT
+   * 2. "vehicle_make", “model”, “year” – leave the fields & values as they were
+   * in the database
+   * 3. For all other fields – overwrite the values with the new ones from preloaded PT.
+   *
+   * @param new_pt the policy table loaded from updated preload JSON file.
+   *
+   * @param pt the exists database.
+   */
+  void MergeMC(const policy_table::PolicyTable& new_pt,
+               policy_table::PolicyTable& pt);
+
+  /**
+   * @brief MergeFG allows to merge FunctionalGroupings sections by definite rules.
+   *
+   * The rules are:
+   * 1. If functional_group_name exists in both database (LocalPT) and updated
+   * PreloadedPT -> PoliciesManager must overwrite it (that is, replace such
+   * functional_group_name in the database by the one from Pre-PT).
+   * 2. If functional_group_name exists in updated PreloadedPT and does not
+   * exist in database (LocalPT), PoliciesManager must add such group to the database.
+   * 3. If functional_group_name does not exist in updated PreloadedPT and
+   * exists in the database (LocalPT), PoliciesManager must leave such group in
+   * the database without changes.
+   *
+   * @param new_pt the policy table loaded from updated preload JSON file.
+   *
+   * @param pt the exists database.
+   */
+  void MergeFG(const policy_table::PolicyTable& new_pt,
+               policy_table::PolicyTable& pt);
+
+  /**
+   * @brief MergeAP Allows to merge ApplicationPolicies section by definite relues.
+   * The rules are:
+   * 1. Leave “<appID>” sub-sections as they were in the database (fields & their values).
+   * 2. Over-write "default", "device", "pre_DataConsent" subsections.
+   *
+   * @param new_pt the policy table loaded from updated preload JSON file.
+   *
+   * @param pt the exists database.
+   */
+  void MergeAP(const policy_table::PolicyTable& new_pt,
+               policy_table::PolicyTable& pt);
+
+  /**
+   * @brief MergeCFM allows to merge ConsumerFriendlyMessages section by definite rules.
+   *
+   * The rules are:
+   * 1. If friendly_message_name exists in both database (LocalPT) and updated
+   * Preloaded PT -> PoliciesManager must overwrite it.
+   * 2. If friendly_message_name exists in updated Preloaded PT and does not
+   * exist in database (LocalPT), PoliciesManager must add such
+   * friendly_message_name to the database (LocalPT).
+   * 3. If friendly_message_name does not exist in updated Preloaded PT and
+   * exists in the database (LocalPT), PoliciesManager must leave such
+   * friendly_message_name in the database without changes.
+   *
+   * @param new_pt the policy table loaded from updated preload JSON file.
+   *
+   * @param pt the exists database
+   */
+  void MergeCFM(const policy_table::PolicyTable& new_pt,
+                policy_table::PolicyTable& pt);
+
+
+#ifdef BUILD_TESTS
+ utils::SharedPtr<policy_table::Table> GetPT() const {
+     return pt_;
+ }
+#endif
+
 private:
   std::string currentDateTime();
   struct AppHMITypeToString {
@@ -622,7 +718,6 @@ private:
   utils::SharedPtr<policy_table::Table> pt_;
   utils::SharedPtr<policy_table::Table> snapshot_;
   utils::SharedPtr<PTRepresentation> backup_;
-  utils::SharedPtr<PTExtRepresentation> ex_backup_;
   bool update_required;
   typedef std::set<std::string> UnpairedDevices;
   UnpairedDevices is_unpaired_;

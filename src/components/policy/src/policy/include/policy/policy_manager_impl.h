@@ -33,7 +33,8 @@
 #ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_IMPL_H_
 
-#include <list>
+#include <string>
+
 #include "utils/shared_ptr.h"
 #include "utils/lock.h"
 #include "policy/policy_manager.h"
@@ -42,6 +43,7 @@
 #include "policy/update_status_manager.h"
 #include "./functions.h"
 #include "usage_statistics/statistics_manager.h"
+#include "policy/policy_helper.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -172,11 +174,13 @@ class PolicyManagerImpl : public PolicyManager {
 
     virtual void OnAppsSearchCompleted();
 
-    void OnAppRegisteredOnMobile(const std::string& application_id);
-    
     virtual const std::vector<std::string> GetAppRequestTypes(
       const std::string policy_app_id) const;
-  
+
+    virtual void OnAppRegisteredOnMobile(const std::string& application_id) OVERRIDE;
+
+    virtual std::string RetrieveCertificate() const OVERRIDE;
+
   protected:
     #ifdef USE_HMI_PTU_DECRYPTION
     virtual utils::SharedPtr<policy_table::Table> Parse(

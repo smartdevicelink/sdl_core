@@ -1057,12 +1057,10 @@ bool CacheManager::Init(const std::string& file_name) {
     } break;
     case InitResult::SUCCESS: {
       LOG4CXX_INFO(logger_, "Policy Table was inited successfully");
-      result = LoadFromFile(file_name);
+      result = LoadFromFile(file_name, *pt_);
       backup_->UpdateDBVersion();
       if (result) {
         Backup();
-      } else {
-        ex_backup_->RemoveDB();
       }
     } break;
     default: {
@@ -1087,7 +1085,8 @@ bool CacheManager::LoadFromBackup() {
   return true;
 }
 
-bool CacheManager::LoadFromFile(const std::string& file_name) {
+bool CacheManager::LoadFromFile(const std::string& file_name,
+                                policy_table::Table& table) {
   LOG4CXX_AUTO_TRACE(logger_);
   BinaryMessage json_string;
   if (!file_system::ReadBinaryFile(file_name, json_string)) {
@@ -1107,24 +1106,21 @@ bool CacheManager::LoadFromFile(const std::string& file_name) {
 
   LOG4CXX_TRACE(logger_, "Start create PT");
   sync_primitives::AutoLock locker(cache_lock_);
-  backup_->Clear();
 
-  pt_ = new policy_table::Table(&value);
-  if (pt_->is_valid()) {
-    if (backup_->Save(*pt_)) {
-      backup_->WriteDb();
-      return true;
-    } else {
-      LOG4CXX_FATAL(logger_, "Failed to save PT");
-      return false;
-    }
-  } else {
+  table = policy_table::Table(&value);
+
+  Json::StyledWriter s_writer;
+  LOG4CXX_DEBUG(logger_, "PT out:");
+  LOG4CXX_DEBUG(logger_, s_writer.write(table.ToJsonValue()));
+
+  if (!table.is_valid()) {
     rpc::ValidationReport report("policy_table");
-    pt_->ReportErrors(&report);
+    table.ReportErrors(&report);
     LOG4CXX_FATAL(logger_,
                   "Parsed table is not valid " << rpc::PrettyFormat(report));
     return false;
   }
+  return true;
 }
 
 bool CacheManager::ResetPT(const std::string& file_name) {
@@ -1178,6 +1174,96 @@ void CacheManager::GetAppRequestTypes(
     request_types.push_back(EnumToJsonString(*it_request_type));
   }
   return;
+}
+
+std::string CacheManager::GetCertificate() const {
+  CACHE_MANAGER_CHECK(std::string(""));
+  if (pt_->policy_table.module_config.certificate.is_initialized()) {
+    return *pt_->policy_table.module_config.certificate;
+  }
+  return std::string("");
+}
+
+void CacheManager::MergePreloadPT(const std::string& file_name) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  policy_table::Table table;
+  if (!LoadFromFile(file_name, table)) {
+    LOG4CXX_DEBUG(logger_, "Unable to load preloaded PT.");
+    return;
+  }
+
+  sync_primitives::AutoLock lock(cache_lock_);
+  policy_table::PolicyTable& current = pt_->policy_table;
+  policy_table::PolicyTable& new_table = table.policy_table;
+  const std::string date_current = *current.module_config.preloaded_date;
+  const std::string date_new = *new_table.module_config.preloaded_date;
+  if (date_current != date_new) {
+    MergeMC(new_table, current);
+    MergeFG(new_table, current);
+    MergeAP(new_table, current);
+    MergeCFM(new_table, current);
+    Backup();
+  }
+}
+
+void CacheManager::MergeMC(const policy_table::PolicyTable& new_pt,
+                           policy_table::PolicyTable& pt) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  policy_table::ModuleConfig copy(pt.module_config);
+
+  pt.module_config = new_pt.module_config;
+  pt.module_config.vehicle_make = copy.vehicle_make;
+  pt.module_config.vehicle_year = copy.vehicle_year;
+  pt.module_config.vehicle_model = copy.vehicle_model;
+}
+
+void CacheManager::MergeFG(const policy_table::PolicyTable& new_pt,
+                           policy_table::PolicyTable& pt) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  policy_table::FunctionalGroupings::const_iterator it = new_pt.functional_groupings.begin();
+
+  for (; it != new_pt.functional_groupings.end(); ++it) {
+    LOG4CXX_DEBUG(logger_, "Merge functional group: " << it->first);
+    pt.functional_groupings[it->first] = it->second;
+  }
+}
+
+void CacheManager::MergeAP(const policy_table::PolicyTable& new_pt,
+                           policy_table::PolicyTable& pt) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  pt.app_policies_section.device = const_cast<policy_table::PolicyTable&>
+      (new_pt).app_policies_section.device;
+
+  pt.app_policies_section.apps[kDefaultId] =
+      const_cast<policy_table::PolicyTable&>
+      (new_pt).app_policies_section.apps[kDefaultId];
+
+  pt.app_policies_section.apps[kPreDataConsentId] =
+      const_cast<policy_table::PolicyTable&>
+      (new_pt).app_policies_section.apps[kPreDataConsentId];
+}
+
+void CacheManager::MergeCFM(const policy_table::PolicyTable& new_pt,
+                            policy_table::PolicyTable& pt) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (new_pt.consumer_friendly_messages.is_initialized()) {
+    if (!pt.consumer_friendly_messages.is_initialized()) {
+      pt.consumer_friendly_messages = new_pt.consumer_friendly_messages;
+    } else {
+      policy_table::Messages::const_iterator it = new_pt.consumer_friendly_messages->messages->begin();
+
+      pt.consumer_friendly_messages->version =
+          new_pt.consumer_friendly_messages->version;
+      for (; it != new_pt.consumer_friendly_messages->messages->end(); ++it) {
+        LOG4CXX_DEBUG(logger_, "Merge CFM: " << it->first);
+        if (!(pt.consumer_friendly_messages->messages.is_initialized())) {
+          LOG4CXX_DEBUG(logger_, "CFM not initialized.");
+        }
+        (*pt.consumer_friendly_messages->messages)[it->first] = it->second;
+      }
+
+    }
+  }
 }
 
 CacheManager::BackgroundBackuper::BackgroundBackuper(CacheManager* cache_manager)

@@ -43,6 +43,11 @@
 #include "utils/threads/thread.h"
 #include "utils/file_system.h"
 
+#ifdef ENABLE_SECURITY
+#include <openssl/ssl.h>
+#endif  // ENABLE_SECURITY
+
+
 namespace {
 #define LOG_UPDATED_VALUE(value, key, section) {\
   LOG4CXX_INFO(logger_, "Setting value '" << value\
@@ -59,6 +64,9 @@ namespace {
 const char* kDefaultConfigFileName = "smartDeviceLink.ini";
 
 const char* kMainSection = "MAIN";
+#ifdef ENABLE_SECURITY
+const char* kSecuritySection = "Security Manager";
+#endif
 const char* kPolicySection = "Policy";
 const char* kHmiSection = "HMI";
 const char* kAppInfoSection = "AppInfo";
@@ -191,6 +199,13 @@ const char* kDefaultPoolProtocolMask = "com.smartdevicelink.prot";
 const char* kDefaultIAPSystemConfig = "/fs/mp/etc/mm/ipod.cfg";
 const char* kDefaultIAP2SystemConfig = "/fs/mp/etc/mm/iap2.cfg";
 
+#ifdef ENABLE_SECURITY
+const char* kDefaultSecurityProtocol = "TLSv1.2";
+const char* kDefaultSSLMode = "CLIENT";
+const bool kDefaultVerifyPeer = false;
+const uint32_t kDefaultBeforeUpdateHours = 24;
+#endif // ENABLE_SECURITY
+
 const uint32_t kDefaultHubProtocolIndex = 0;
 const uint32_t kDefaultHeartBeatTimeout = 0;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
@@ -239,6 +254,18 @@ const uint32_t kDefaultAppIconsFolderMaxSize = 104857600;
 const uint32_t kDefaultAppIconsAmountToRemove = 1;
 const uint16_t kDefaultAttemptsToOpenResumptionDB = 5;
 const uint16_t kDefaultOpenAttemptTimeoutMsResumptionDB = 500;
+
+#ifdef ENABLE_SECURITY
+const char* kSecurityProtocolKey = "Protocol";
+const char* kSecurityCertificatePathKey = "CertificatePath";
+const char* kSecurityCACertificatePathKey = "CACertificatePath";
+const char* kSecuritySSLModeKey = "SSLMode";
+const char* kSecurityKeyPathKey = "KeyPath";
+const char* kSecurityCipherListKey = "CipherList";
+const char* kSecurityVerifyPeerKey = "VerifyPeer";
+const char* kBeforeUpdateHours = "UpdateBeforeHours";
+#endif
+
 }  // namespace
 
 namespace profile {
@@ -694,6 +721,42 @@ uint16_t Profile::tts_global_properties_timeout() const {
   return tts_global_properties_timeout_;
 }
 
+#ifdef ENABLE_SECURITY
+
+const std::string& Profile::cert_path() const {
+  return cert_path_;
+}
+
+const std::string& Profile::ca_cert_path() const {
+  return ca_cert_path_;
+}
+
+const std::string& Profile::ssl_mode() const {
+  return ssl_mode_;
+}
+
+const std::string& Profile::key_path() const {
+  return key_path_;
+}
+
+const std::string& Profile::ciphers_list() const {
+  return ciphers_list_;
+}
+
+bool Profile::verify_peer() const {
+  return verify_peer_;
+}
+
+uint32_t Profile::update_before_hours() const {
+  return update_before_hours_;
+}
+
+const std::string& Profile::security_manager_protocol_name() const {
+  return security_manager_protocol_name_;
+}
+
+#endif // ENABLE_SECURITY
+
 bool Profile::logs_enabled() const {
   return logs_enabled_;
 }
@@ -736,6 +799,30 @@ void Profile::UpdateValues() {
                   kHmiSection, kLinkToWebHMI);
   LOG_UPDATED_BOOL_VALUE(link_to_web_hmi_, kLinkToWebHMI, kHmiSection);
 #endif // WEB_HMI
+
+#ifdef ENABLE_SECURITY
+
+  ReadStringValue(&security_manager_protocol_name_, kDefaultSecurityProtocol, kSecuritySection,
+      kSecurityProtocolKey);
+
+  ReadStringValue(&cert_path_,   "", kSecuritySection, kSecurityCertificatePathKey);
+  ReadStringValue(&ca_cert_path_, "", kSecuritySection, kSecurityCACertificatePathKey);
+
+  ReadStringValue(&ssl_mode_, kDefaultSSLMode, kSecuritySection,
+      kSecuritySSLModeKey);
+
+  ReadStringValue(&key_path_, "", kSecuritySection, kSecurityKeyPathKey);
+
+  ReadStringValue(&ciphers_list_, SSL_TXT_ALL, kSecuritySection,
+      kSecurityCipherListKey);
+
+  ReadBoolValue(&verify_peer_, kDefaultVerifyPeer, kSecuritySection,
+      kSecurityVerifyPeerKey);
+
+  ReadUIntValue(&update_before_hours_, kDefaultBeforeUpdateHours,
+                kSecuritySection, kBeforeUpdateHours);
+
+#endif  // ENABLE_SECURITY
 
   // Logs enabled
   ReadBoolValue(&logs_enabled_, false, kMainSection, kLogsEnabledKey);

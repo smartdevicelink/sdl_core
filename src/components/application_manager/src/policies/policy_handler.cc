@@ -511,6 +511,13 @@ void PolicyHandler::OnAppPermissionConsentInternal(
   }
 }
 
+#ifdef ENABLE_SECURITY
+std::string PolicyHandler::RetrieveCertificate() const {
+  POLICY_LIB_CHECK(std::string(""));
+  return policy_manager_->RetrieveCertificate();
+}
+#endif // ENABLE_SECURITY
+
 void PolicyHandler::OnGetUserFriendlyMessage(
   const std::vector<std::string>& message_codes, const std::string& language,
   uint32_t correlation_id) {
