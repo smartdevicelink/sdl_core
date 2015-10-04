@@ -187,6 +187,10 @@ void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
     return;
   }
 
+  if(crypto_manager_->IsCertificateUpdateRequired()) {
+    NotifyOnCertififcateUpdateRequired();
+  }
+
   if (ssl_context->IsInitCompleted()) {
     NotifyListenersOnHandshakeDone(connection_key,
                                    SSLContext::Handshake_Result_Success);
