@@ -670,6 +670,10 @@ void CacheManager::CheckSnapshotInitialization() {
   }
 
   *(snapshot_->policy_table.module_config.preloaded_pt) = false;
+
+  // SDL must not send certificate in snapshot
+  snapshot_->policy_table.module_config.certificate =
+      rpc::Optional<rpc::String<0, 65535> >();
 }
 
 void CacheManager::PersistData() {
