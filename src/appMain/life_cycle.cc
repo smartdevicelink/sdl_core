@@ -85,7 +85,6 @@ LifeCycle::LifeCycle()
   , mb_server_thread_(NULL)
   , mb_adapter_thread_(NULL)
 #endif  // MESSAGEBROKER_HMIADAPTER
-  , components_started_(false)
 { }
 
 bool LifeCycle::StartComponents() {

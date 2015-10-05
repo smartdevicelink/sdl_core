@@ -351,7 +351,7 @@ bool ResumeCtrl::StartResumptionOnlyHMILevel(ApplicationSharedPtr application) {
   LOG4CXX_DEBUG(logger_, "HMI level resumption requested for application id "
                 << application->app_id()
                 << "with hmi_app_id " << application->hmi_app_id()
-                << ", policy_app_id " << application->policy_app_id());
+                << ", policy_app_id " << application->mobile_app_id());
   SetupDefaultHMILevel(application);
   smart_objects::SmartObject saved_app;
   bool result = resumption_storage_->GetSavedApplication(application->mobile_app_id(),

@@ -23,6 +23,7 @@
  */
 
 #include <time.h>
+#include <signal.h>
 
 #include "system.h"
 

@@ -68,10 +68,10 @@ void RegisterAppInterfaceResponse::Run() {
       application_manager::ApplicationManagerImpl::instance()->application(
           connection_key);
   if (app) {
-    std::string policy_app_id = app->policy_app_id();
-    policy::PolicyHandler::instance()->OnAppRegisteredOnMobile(policy_app_id);
+    std::string mobile_app_id = app->mobile_app_id();
+    policy::PolicyHandler::instance()->OnAppRegisteredOnMobile(mobile_app_id);
 
-    SetHeartBeatTimeout(connection_key, policy_app_id);
+    SetHeartBeatTimeout(connection_key, mobile_app_id);
   }
 }
 
