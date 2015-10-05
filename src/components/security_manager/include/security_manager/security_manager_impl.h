@@ -150,6 +150,13 @@ class SecurityManagerImpl
    */
   void NotifyListenersOnHandshakeDone(const uint32_t &connection_key,
                                       SSLContext::HandshakeResult error);
+
+  /**
+   * @brief Notifiers for listeners.
+   * Allows to notify that certificate should be updated
+   */
+  void NotifyOnCertififcateUpdateRequired();
+
   /**
    * @brief SecurityConfigSection
    * @return Session name in config file

@@ -247,6 +247,15 @@ void SecurityManagerImpl::NotifyListenersOnHandshakeDone(
   }
 }
 
+void SecurityManagerImpl::NotifyOnCertififcateUpdateRequired() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
+  while (it != listeners_.end()) {
+    (*it)->OnCertificateUpdateRequired();
+    ++it;
+  }
+}
+
 bool SecurityManagerImpl::ProccessHandshakeData(const SecurityMessage &inMessage) {
   LOG4CXX_INFO(logger_, "SendHandshakeData processing");
   DCHECK(inMessage);
