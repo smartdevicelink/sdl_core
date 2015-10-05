@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2014-2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,50 +30,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/push_log.h"
-#include "utils/log_message_loop_thread.h"
-#include "utils/logger_status.h"
+#include "media_manager/audio/file_audio_streamer_adapter.h"
 #include "config_profile/profile.h"
 
-namespace logger {
+namespace media_manager {
 
-static bool logs_enabled_ = false;
-
-bool push_log(log4cxx::LoggerPtr logger,
-              log4cxx::LevelPtr level,
-              const std::string& entry,
-              log4cxx_time_t timeStamp,
-              const log4cxx::spi::LocationInfo& location,
-              const log4cxx::LogString& threadName
-              ) {
-  if (LoggerThreadCreated == logger_status) {
-    LogMessage message = {logger, level, entry, timeStamp, location, threadName};
-    LogMessageLoopThread::instance()->PostMessage(message);
-    return true;
-  }
-
-  if (LoggerThreadNotCreated == logger_status) {
-    logger_status = CreatingLoggerThread;
-// we'll have to drop messages
-// while creating logger thread
-    LogMessage message = {logger, level, entry, timeStamp, location, threadName};
-    LogMessageLoopThread::instance()->PostMessage(message);
-    logger_status = LoggerThreadCreated;
-    return true;
-  }
-
-// also we drop messages
-// while deleting logger thread
-
-  return false;
+FileAudioStreamerAdapter::FileAudioStreamerAdapter()
+  : FileStreamerAdapter(profile::Profile::instance()->audio_stream_file()) {
 }
 
-bool logs_enabled() {
-  return logs_enabled_;
+FileAudioStreamerAdapter::~FileAudioStreamerAdapter() {
 }
 
-void set_logs_enabled(bool state) {
-  logs_enabled_ = state;
-}
-
-}  // namespace logger
+}  // namespace media_manager

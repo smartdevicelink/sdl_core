@@ -126,6 +126,7 @@ using namespace threads;
  * when we have them.
  */
 struct MessageFromMobile: public utils::SharedPtr<Message> {
+  MessageFromMobile() {}
   explicit MessageFromMobile(const utils::SharedPtr<Message>& message)
       : utils::SharedPtr<Message>(message) {
   }
@@ -136,6 +137,7 @@ struct MessageFromMobile: public utils::SharedPtr<Message> {
 };
 
 struct MessageToMobile: public utils::SharedPtr<Message> {
+  MessageToMobile() : is_final(false) {}
   explicit MessageToMobile(const utils::SharedPtr<Message>& message,
                            bool final_message)
       : utils::SharedPtr<Message>(message),
@@ -150,6 +152,7 @@ struct MessageToMobile: public utils::SharedPtr<Message> {
 };
 
 struct MessageFromHmi: public utils::SharedPtr<Message> {
+  MessageFromHmi() {}
   explicit MessageFromHmi(const utils::SharedPtr<Message>& message)
       : utils::SharedPtr<Message>(message) {
   }
@@ -160,6 +163,7 @@ struct MessageFromHmi: public utils::SharedPtr<Message> {
 };
 
 struct MessageToHmi: public utils::SharedPtr<Message> {
+  MessageToHmi() {}
   explicit MessageToHmi(const utils::SharedPtr<Message>& message)
       : utils::SharedPtr<Message>(message) {
   }

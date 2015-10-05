@@ -68,14 +68,19 @@ void OnExitApplicationNotification::Run() {
       ((*message_)[strings::msg_params][strings::reason].asInt());
 
   switch (reason) {
+    case Common_ApplicationExitReason::DRIVER_DISTRACTION_VIOLATION: {
+      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+          app_impl->app_id(),
+              AppInterfaceUnregisteredReason::DRIVER_DISTRACTION_VIOLATION);
+      break;
+    }
     case Common_ApplicationExitReason::USER_EXIT: {
       break;
     }
     case Common_ApplicationExitReason::UNAUTHORIZED_TRANSPORT_REGISTRATION: {
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-          app_impl->app_id(), 
-          AppInterfaceUnregisteredReason::APP_UNAUTHORIZED);
-      app_mgr->UnregisterApplication(app_impl->app_id(), Result::SUCCESS);
+          app_id, AppInterfaceUnregisteredReason::APP_UNAUTHORIZED);
+      app_mgr->UnregisterApplication(app_id, Result::SUCCESS);
       return;
     }
     default: {
@@ -83,11 +88,9 @@ void OnExitApplicationNotification::Run() {
       return;
     }
   }
-  using namespace mobile_apis;
-  ApplicationManagerImpl::instance()->SetState<false>(app_impl->app_id(),
-                                                      HMILevel::HMI_NONE,
-                                                      AudioStreamingState::NOT_AUDIBLE,
-                                                      SystemContext::SYSCTXT_MAIN);
+
+  ApplicationManagerImpl::instance()->SetState<false>(
+      app_id, HMILevel::HMI_NONE, AudioStreamingState::NOT_AUDIBLE);
 }
 
 }  // namespace commands

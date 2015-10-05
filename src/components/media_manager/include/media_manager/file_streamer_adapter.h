@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2014-2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,50 +30,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/push_log.h"
-#include "utils/log_message_loop_thread.h"
-#include "utils/logger_status.h"
-#include "config_profile/profile.h"
+#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_FILE_STREAMER_ADAPTER_H_
+#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_FILE_STREAMER_ADAPTER_H_
 
-namespace logger {
+#include <string>
+#include <fstream>
+#include "media_manager/streamer_adapter.h"
+#include "utils/threads/thread_delegate.h"
 
-static bool logs_enabled_ = false;
+namespace media_manager {
 
-bool push_log(log4cxx::LoggerPtr logger,
-              log4cxx::LevelPtr level,
-              const std::string& entry,
-              log4cxx_time_t timeStamp,
-              const log4cxx::spi::LocationInfo& location,
-              const log4cxx::LogString& threadName
-              ) {
-  if (LoggerThreadCreated == logger_status) {
-    LogMessage message = {logger, level, entry, timeStamp, location, threadName};
-    LogMessageLoopThread::instance()->PostMessage(message);
-    return true;
-  }
+class FileStreamerAdapter : public StreamerAdapter {
+ public:
+  explicit FileStreamerAdapter(const std::string& file_name);
+  virtual ~FileStreamerAdapter();
 
-  if (LoggerThreadNotCreated == logger_status) {
-    logger_status = CreatingLoggerThread;
-// we'll have to drop messages
-// while creating logger thread
-    LogMessage message = {logger, level, entry, timeStamp, location, threadName};
-    LogMessageLoopThread::instance()->PostMessage(message);
-    logger_status = LoggerThreadCreated;
-    return true;
-  }
+ protected:
+  class FileStreamer : public StreamerAdapter::Streamer {
+   public:
+    FileStreamer(FileStreamerAdapter* const adapter,
+                 const std::string& file_name);
+    virtual ~FileStreamer();
 
-// also we drop messages
-// while deleting logger thread
+   protected:
+    virtual bool Connect();
+    virtual void Disconnect();
+    virtual bool Send(protocol_handler::RawMessagePtr msg);
 
-  return false;
-}
+   private:
+    std::string    file_name_;
+    std::ofstream* file_stream_;
+  };
+};
 
-bool logs_enabled() {
-  return logs_enabled_;
-}
+}  //  namespace media_manager
 
-void set_logs_enabled(bool state) {
-  logs_enabled_ = state;
-}
-
-}  // namespace logger
+#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_FILE_STREAMER_ADAPTER_H_

@@ -1766,7 +1766,7 @@ void MessageHelper::SendNaviStartStream(int32_t connection_key) {
 
   uint32_t app_id = 0;
   connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
-    connection_key, &app_id);
+    connection_key, &app_id, NULL, NULL);
 
   char url[100] = {'\0'};
   if ("socket" == profile::Profile::instance()->video_server_type()) {
@@ -1804,7 +1804,7 @@ void MessageHelper::SendNaviStopStream(int32_t connection_key) {
 
   uint32_t app_id = 0;
   connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
-    connection_key, &app_id);
+    connection_key, &app_id, NULL, NULL);
 
   msg_params[strings::app_id] = app_id;
 
@@ -1828,7 +1828,7 @@ void MessageHelper::SendAudioStartStream(int32_t connection_key) {
 
   uint32_t app_id = 0;
   connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
-    connection_key, &app_id);
+    connection_key, &app_id, NULL, NULL);
 
   char url[100] = {'\0'};
   if ("socket" == profile::Profile::instance()->audio_server_type()) {
@@ -1867,7 +1867,7 @@ void MessageHelper::SendAudioStopStream(int32_t connection_key) {
 
   uint32_t app_id = 0;
   connection_handler::ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
-    connection_key, &app_id);
+    connection_key, &app_id, NULL, NULL);
 
   msg_params[strings::app_id] = app_id;
 

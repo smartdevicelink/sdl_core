@@ -41,6 +41,7 @@ namespace transport_manager {
 
 class TransportAdapterEvent {
  public:
+  TransportAdapterEvent() {}
   /**
    * @brief Constructor.
    *

@@ -55,7 +55,8 @@
       log4cxx::LoggerPtr logger_var = log4cxx::LoggerPtr(log4cxx::Logger::getLogger(logger_name));
 
     #define INIT_LOGGER(file_name) \
-      log4cxx::PropertyConfigurator::configure(file_name);
+      log4cxx::PropertyConfigurator::configure(file_name); \
+      logger::set_logs_enabled(profile::Profile::instance()->logs_enabled());
 
     // Logger deinitilization function and macro, need to stop log4cxx writing
     // without this deinitilization log4cxx threads continue using some instances destroyed by exit()

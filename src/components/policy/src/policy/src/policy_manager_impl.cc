@@ -150,43 +150,43 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
   update_status_manager_.OnValidUpdateReceived();
   cache_->SaveUpdateRequired(false);
 
-  apps_registration_lock_.Acquire();
+  {
+    sync_primitives::AutoLock lock(apps_registration_lock_);
 
-  // Get current DB data, since it could be updated during awaiting of PTU
-  utils::SharedPtr<policy_table::Table> policy_table_snapshot =
-      cache_->GenerateSnapshot();
-  if (!policy_table_snapshot) {
-    LOG4CXX_ERROR(logger_, "Failed to create snapshot of policy table");
-    return false;
+    // Get current DB data, since it could be updated during awaiting of PTU
+    utils::SharedPtr<policy_table::Table> policy_table_snapshot =
+        cache_->GenerateSnapshot();
+    if (!policy_table_snapshot) {
+      LOG4CXX_ERROR(logger_, "Failed to create snapshot of policy table");
+      return false;
+    }
+
+    // Checking of difference between PTU and current policy state
+    // Must to be done before PTU applying since it is possible, that functional
+    // groups, which had been present before are absent in PTU and will be
+    // removed after update. So in case of revoked groups system has to know
+    // names and ids of revoked groups before they will be removed.
+    CheckPermissionsChanges(pt_update, policy_table_snapshot);
+
+    // Replace current data with updated
+    if (!cache_->ApplyUpdate(*pt_update)) {
+      LOG4CXX_WARN(logger_, "Unsuccessful save of updated policy table.");
+      return false;
+    }
+
+    if (pt_update->policy_table.module_config.certificate.is_initialized()) {
+      listener_->OnCertificateUpdated(*(pt_update->policy_table.module_config.certificate));
+    }
+
+    std::map<std::string, StringArray> app_hmi_types;
+    cache_->GetHMIAppTypeAfterUpdate(app_hmi_types);
+    if (!app_hmi_types.empty()) {
+      LOG4CXX_INFO(logger_, "app_hmi_types is full calling OnUpdateHMIAppType");
+      listener_->OnUpdateHMIAppType(app_hmi_types);
+    } else {
+      LOG4CXX_INFO(logger_, "app_hmi_types empty" << pt_content.size());
+    }
   }
-
-  // Checking of difference between PTU and current policy state
-  // Must to be done before PTU applying since it is possible, that functional
-  // groups, which had been present before are absent in PTU and will be
-  // removed after update. So in case of revoked groups system has to know
-  // names and ids of revoked groups before they will be removed.
-  CheckPermissionsChanges(pt_update, policy_table_snapshot);
-
-  // Replace current data with updated
-  if (!cache_->ApplyUpdate(*pt_update)) {
-    LOG4CXX_WARN(logger_, "Unsuccessful save of updated policy table.");
-    return false;
-  }
-
-  if (pt_update->policy_table.module_config.certificate.is_initialized()) {
-    listener_->OnCertificateUpdated(*(pt_update->policy_table.module_config.certificate));
-  }
-
-  std::map<std::string, StringArray> app_hmi_types;
-  cache_->GetHMIAppTypeAfterUpdate(app_hmi_types);
-  if (!app_hmi_types.empty()) {
-    LOG4CXX_INFO(logger_, "app_hmi_types is full calling OnUpdateHMIAppType");
-    listener_->OnUpdateHMIAppType(app_hmi_types);
-  } else {
-    LOG4CXX_INFO(logger_, "app_hmi_types empty" << pt_content.size());
-  }
-
-  apps_registration_lock_.Release();
 
   // If there was a user request for policy table update, it should be started
   // right after current update is finished

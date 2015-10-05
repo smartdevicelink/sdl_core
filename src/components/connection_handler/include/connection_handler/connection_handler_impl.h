@@ -225,18 +225,6 @@ class ConnectionHandlerImpl : public ConnectionHandler,
                            uint8_t *session_id);
 
   /**
-   * \brief information about given Connection Key.
-   * \param key Unique key used by other components as session identifier
-   * \param app_id Returned: ApplicationID
-   * \param sessions_list Returned: List of session keys
-   * \param device_id Returned: DeviceID
-   * \return int32_t -1 in case of error or 0 in case of success
-   */
-  virtual int32_t GetDataOnSessionKey(uint32_t key, uint32_t *app_id = 0,
-                                      std::list<int32_t> *sessions_list = NULL,
-                                      uint32_t *device_id = 0);
-
-  /**
    * \brief information about device
    * \param device_handle
    * \param device_name Returned: name of device
@@ -414,7 +402,12 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * @return TRUE if session and connection exist otherwise returns FALSE
    */
   virtual bool ProtocolVersionUsed(uint32_t connection_id,
-                  uint8_t session_id, uint8_t& protocol_version);
+  		  uint8_t session_id, uint8_t& protocol_version);
+
+  virtual int32_t GetDataOnSessionKey(uint32_t key, uint32_t* app_id,
+                                      std::list<int32_t>* sessions_list,
+                                      uint32_t* device_id);
+
   private:
   /**
    * \brief Default class constructor

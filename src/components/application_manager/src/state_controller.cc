@@ -34,6 +34,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
 #include "utils/helpers.h"
+#include "utils/make_shared.h"
 
 namespace application_manager {
 
@@ -50,6 +51,8 @@ bool IsStatusChanged(HmiStatePtr old_state,
 }
 
 StateController::StateController():EventObserver() {
+  subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnAppActivated);
+  subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated);
   subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnEmergencyEvent);
   subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnPhoneCall);
   subscribe_on_event(hmi_apis::FunctionID::TTS_Started);
@@ -188,6 +191,14 @@ void StateController::on_event(const event_engine::Event& event) {
       OnActivateAppResponse(message);
       break;
     }
+    case FunctionID::BasicCommunication_OnAppActivated: {
+      OnAppActivated(message);
+      break;
+    }
+    case FunctionID::BasicCommunication_OnAppDeactivated: {
+      OnAppDeactivated(message);
+      break;
+    }
     case FunctionID::BasicCommunication_OnEmergencyEvent: {
       bool is_active =
           message[strings::msg_params][hmi_response::enabled].asBool();
@@ -280,6 +291,45 @@ void StateController::TempStateStopped(HmiState::StateID ID) {
   sync_primitives::AutoLock autolock(active_states_lock_);
   active_states_.remove(ID);
 }
+
+void StateController::DeactivateAppWithGeneralReason(ApplicationSharedPtr app) {
+  using namespace mobile_apis;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  DCHECK_OR_RETURN_VOID(app);
+  HmiStatePtr regular = app->RegularHmiState();
+  DCHECK_OR_RETURN_VOID(regular);
+  HmiStatePtr new_regular = utils::MakeShared<HmiState>(*regular);
+
+  if (app->IsAudioApplication()) {
+    new_regular->set_hmi_level(mobile_api::HMILevel::HMI_LIMITED);
+  } else {
+    new_regular->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
+  }
+
+  SetRegularState<false>(app, new_regular);
+}
+
+void StateController::DeactivateAppWithAudioReason(ApplicationSharedPtr app) {
+  using namespace mobile_apis;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  DCHECK_OR_RETURN_VOID(app);
+  HmiStatePtr regular = app->RegularHmiState();
+  DCHECK_OR_RETURN_VOID(regular);
+  HmiStatePtr new_regular = utils::MakeShared<HmiState>(*regular);
+
+  if (app->is_navi()) {
+    new_regular->set_hmi_level(HMILevel::HMI_LIMITED);
+  } else {
+    new_regular->set_audio_streaming_state(
+        AudioStreamingState::NOT_AUDIBLE);
+    new_regular->set_hmi_level(HMILevel::HMI_BACKGROUND);
+  }
+
+  SetRegularState<false>(app, new_regular);
+}
+
 void StateController::OnActivateAppResponse(
     const smart_objects::SmartObject& message) {
   const hmi_apis::Common_Result::eType code =
@@ -302,6 +352,68 @@ void StateController::OnActivateAppResponse(
   }
 }
 
+void StateController::OnAppActivated(
+    const smart_objects::SmartObject& message) {
+  using namespace mobile_apis;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  uint32_t app_id = message[strings::msg_params][strings::app_id].asUInt();
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(app_id);
+
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Application with id " << app_id << " not found");
+    return;
+  }
+
+  SetRegularState<true>(app, HMILevel::HMI_FULL);
+}
+
+void StateController::OnAppDeactivated(
+    const smart_objects::SmartObject& message) {
+  using namespace hmi_apis;
+  using namespace mobile_apis;
+  using namespace helpers;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  uint32_t app_id = message[strings::msg_params][strings::app_id].asUInt();
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(app_id);
+
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Application with id " << app_id << " not found");
+    return;
+  }
+
+  if (Compare<HMILevel::eType, EQ, ONE>(
+          app->hmi_level(), HMILevel::HMI_NONE, HMILevel::HMI_BACKGROUND)) {
+    return;
+  }
+
+  Common_DeactivateReason::eType deactivate_reason =
+      static_cast<Common_DeactivateReason::eType>
+          (message[strings::msg_params][hmi_request::reason].asInt());
+
+  switch (deactivate_reason) {
+    case Common_DeactivateReason::AUDIO: {
+      ForEachApplication(std::bind1st(
+                           std::mem_fun(
+                             &StateController::DeactivateAppWithAudioReason),
+                           this)
+                         );
+      break;
+    }
+    case Common_DeactivateReason::NAVIGATIONMAP:
+    case Common_DeactivateReason::PHONEMENU:
+    case Common_DeactivateReason::SYNCSETTINGS:
+    case Common_DeactivateReason::GENERAL: {
+      DeactivateAppWithGeneralReason(app);
+      break;
+    }
+    default:
+      break;
+  }
+}
 
 void StateController::OnPhoneCallStarted() {
   LOG4CXX_AUTO_TRACE(logger_);

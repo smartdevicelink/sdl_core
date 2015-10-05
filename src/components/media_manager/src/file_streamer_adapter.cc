@@ -30,39 +30,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include "utils/logger.h"
 #include "utils/file_system.h"
 #include "config_profile/profile.h"
-#include "media_manager/pipe_streamer_adapter.h"
+#include "media_manager/file_streamer_adapter.h"
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger, "PipeStreamerAdapter")
+CREATE_LOGGERPTR_GLOBAL(logger, "FileStreamerAdapter")
 
-PipeStreamerAdapter::PipeStreamerAdapter(
-    const std::string& named_pipe_path)
-  : StreamerAdapter(new PipeStreamer(this, named_pipe_path)) {
+FileStreamerAdapter::FileStreamerAdapter(
+    const std::string& file_name)
+  : StreamerAdapter(new FileStreamer(this, file_name)) {
 }
 
-PipeStreamerAdapter::~PipeStreamerAdapter() {
+FileStreamerAdapter::~FileStreamerAdapter() {
 }
 
-PipeStreamerAdapter::PipeStreamer::PipeStreamer(
-    PipeStreamerAdapter* const adapter,
-    const std::string& named_pipe_path)
+FileStreamerAdapter::FileStreamer::FileStreamer(
+    FileStreamerAdapter* const adapter,
+    const std::string& file_name)
   : Streamer(adapter),
-    named_pipe_path_(named_pipe_path),
-    pipe_fd_(0) {
+    file_name_(file_name),
+    file_stream_(NULL) {
 }
 
-PipeStreamerAdapter::PipeStreamer::~PipeStreamer() {
+FileStreamerAdapter::FileStreamer::~FileStreamer() {
 }
 
-bool PipeStreamerAdapter::PipeStreamer::Connect() {
+bool FileStreamerAdapter::FileStreamer::Connect() {
   LOG4CXX_AUTO_TRACE(logger);
   if (!file_system::CreateDirectoryRecursively(
       profile::Profile::instance()->app_storage_folder())) {
@@ -70,45 +66,42 @@ bool PipeStreamerAdapter::PipeStreamer::Connect() {
     return false;
   }
 
-  if ((mkfifo(named_pipe_path_.c_str(),
-              S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) < 0)
-      && (errno != EEXIST)) {
-    LOG4CXX_ERROR(logger, "Cannot create pipe "
-                  << named_pipe_path_);
+  file_stream_ = file_system::Open(file_name_);
+  if (!file_stream_) {
+    LOG4CXX_ERROR(logger, "Cannot open file stream "
+                  << file_name_);
     return false;
   }
 
-  pipe_fd_ = open(named_pipe_path_.c_str(), O_RDWR, 0);
-  if (-1 == pipe_fd_) {
-    LOG4CXX_ERROR(logger, "Cannot open pipe for writing "
-                  << named_pipe_path_);
-    return false;
-  }
-
-  LOG4CXX_INFO(logger, "Pipe " << named_pipe_path_
-                << " was successfuly created");
+  LOG4CXX_INFO(logger, "File " << file_name_
+                << " was successfuly opened");
   return true;
 }
 
-void PipeStreamerAdapter::PipeStreamer::Disconnect() {
+void FileStreamerAdapter::FileStreamer::Disconnect() {
   LOG4CXX_AUTO_TRACE(logger);
-  close(pipe_fd_);
-  unlink(named_pipe_path_.c_str());
+  if (file_stream_) {
+    file_system::Close(file_stream_);
+    delete file_stream_;
+    file_stream_ = NULL;
+  }
+  file_system::DeleteFile(file_name_);
 }
 
-bool PipeStreamerAdapter::PipeStreamer::Send(
+bool FileStreamerAdapter::FileStreamer::Send(
     protocol_handler::RawMessagePtr msg) {
   LOG4CXX_AUTO_TRACE(logger);
-  ssize_t ret = write(pipe_fd_, msg->data(), msg->data_size());
-  if (-1 == ret) {
-    LOG4CXX_ERROR(logger, "Failed writing data to pipe "
-                  << named_pipe_path_);
+  if (!file_stream_) {
+    LOG4CXX_ERROR(logger, "File stream not found "
+                  << file_name_);
     return false;
   }
 
-  if (static_cast<uint32_t>(ret) != msg->data_size()) {
-    LOG4CXX_WARN(logger, "Couldn't write all the data to pipe "
-                 << named_pipe_path_);
+  if (!file_system::Write(file_stream_, msg->data(),
+                          msg->data_size())) {
+    LOG4CXX_ERROR(logger, "Failed writing data to file "
+                  << file_name_);
+    return false;
   }
 
   LOG4CXX_INFO(logger, "Streamer::sent " << msg->data_size());

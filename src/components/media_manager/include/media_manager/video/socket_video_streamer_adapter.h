@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2014-2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,19 +33,16 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_SOCKET_VIDEO_STREAMER_ADAPTER_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_SOCKET_VIDEO_STREAMER_ADAPTER_H_
 
-#include <string>
 #include "media_manager/socket_streamer_adapter.h"
 
 namespace media_manager {
+
 class SocketVideoStreamerAdapter : public SocketStreamerAdapter {
-  public:
-    SocketVideoStreamerAdapter();
-    virtual ~SocketVideoStreamerAdapter();
-
-  private:
-    DISALLOW_COPY_AND_ASSIGN(SocketVideoStreamerAdapter);
+ public:
+  SocketVideoStreamerAdapter();
+  virtual ~SocketVideoStreamerAdapter();
 };
-}  //  namespace media_manager
 
+}  //  namespace media_manager
 
 #endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_SOCKET_VIDEO_STREAMER_ADAPTER_H_

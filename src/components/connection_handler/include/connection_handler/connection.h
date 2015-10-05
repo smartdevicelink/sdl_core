@@ -146,7 +146,7 @@ class Connection {
    * @brief Returns connection device handle
    * @return ConnectionDeviceHandle
    */
-  DeviceHandle connection_device_handle();
+  DeviceHandle connection_device_handle() const;
 
   /**
    * @brief Adds session to connection
