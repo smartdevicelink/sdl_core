@@ -50,7 +50,7 @@ class StateController : public event_engine::EventObserver {
     StateController();
 
     /**
-     * @brief SetRegularState setup regular hmi state, tha will appear if no
+     * @brief SetRegularState setup regular hmi state, that will appear if no
      * specific events are active
      * @param app appication to setup regular State
      * @param state state of new regular state
@@ -64,23 +64,24 @@ class StateController : public event_engine::EventObserver {
       DCHECK_OR_RETURN_VOID(state);
       DCHECK_OR_RETURN_VOID(state->state_id() == HmiState::STATE_ID_REGULAR);
 
+      HmiStatePtr resolved_state = ResolveHmiState(app, state);
+      if (!resolved_state) {
+        state->set_state_id(HmiState::STATE_ID_POSTPONED);
+        app->SetPostponedState(state);
+        return;
+      }
+
       if (SendActivateApp) {
-        uint32_t corr_id = MessageHelper::SendActivateAppToHMI(app->app_id());
-        subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_ActivateApp,
-                           corr_id);
-        waiting_for_activate[app->app_id()] = state;
+        uint32_t corr_id = MessageHelper::SendActivateAppToHMI(app->app_id(),
+            static_cast<hmi_apis::Common_HMILevel::eType>(
+                resolved_state->hmi_level()));
+        subscribe_on_event(
+            hmi_apis::FunctionID::BasicCommunication_ActivateApp, corr_id);
+        waiting_for_activate[app->app_id()] = resolved_state;
       } else {
-        ApplyRegularState(app, state);
+        ApplyRegularState(app, resolved_state);
       }
     }
-
-    /**
-     * @brief SetRegularState Change regular audio state
-     * @param app appication to setup regular State
-     * @param audio_state of new regular state
-     */
-    void SetRegularState(ApplicationSharedPtr app,
-                         const mobile_apis::AudioStreamingState::eType audio_state);
 
     /**
      * @brief SetRegularState Change regular hmi level and audio state
@@ -98,14 +99,13 @@ class StateController : public event_engine::EventObserver {
       HmiStatePtr prev_regular = app->RegularHmiState();
       DCHECK_OR_RETURN_VOID(prev_regular);
       HmiStatePtr hmi_state = CreateHmiState(app->app_id(),
-                                             HmiState::StateID::STATE_ID_REGULAR);
+          HmiState::StateID::STATE_ID_REGULAR);
       DCHECK_OR_RETURN_VOID(hmi_state);
       hmi_state->set_hmi_level(hmi_level);
       hmi_state->set_audio_streaming_state(audio_state);
       hmi_state->set_system_context(prev_regular->system_context());
       SetRegularState<SendActivateApp>(app, hmi_state);
     }
-
 
     /**
      * @brief SetRegularState Change regular hmi level
@@ -118,14 +118,12 @@ class StateController : public event_engine::EventObserver {
       if (!app) {
         return;
       }
-      HmiStatePtr prev_regular = app->RegularHmiState();
-      DCHECK_OR_RETURN_VOID(prev_regular);
       HmiStatePtr hmi_state = CreateHmiState(app->app_id(),
-                                             HmiState::StateID::STATE_ID_REGULAR);
+          HmiState::StateID::STATE_ID_REGULAR);
       DCHECK_OR_RETURN_VOID(hmi_state);
       hmi_state->set_hmi_level(hmi_level);
-      hmi_state->set_audio_streaming_state(prev_regular->audio_streaming_state());
-      hmi_state->set_system_context(prev_regular->system_context());
+      hmi_state->set_audio_streaming_state(CalcAudioState(app, hmi_level));
+      hmi_state->set_system_context(mobile_apis::SystemContext::SYSCTXT_MAIN);
       SetRegularState<SendActivateApp>(app, hmi_state);
     }
 
@@ -144,9 +142,8 @@ class StateController : public event_engine::EventObserver {
       if (!app) {
         return;
       }
-
       HmiStatePtr hmi_state = CreateHmiState(app->app_id(),
-                                             HmiState::StateID::STATE_ID_REGULAR);
+          HmiState::StateID::STATE_ID_REGULAR);
       DCHECK_OR_RETURN_VOID(hmi_state);
       hmi_state->set_hmi_level(hmi_level);
       hmi_state->set_audio_streaming_state(audio_state);
@@ -155,7 +152,51 @@ class StateController : public event_engine::EventObserver {
     }
 
     /**
-     * @brief SetRegularState Change regular  system context
+     * @brief SetRegularState Sets regular state with new hmi level
+     * to application
+     * @param app appication to setup regular state
+     * @param hmi_level new hmi level for application
+     */
+    void SetRegularState(ApplicationSharedPtr app,
+                         const mobile_apis::HMILevel::eType hmi_level) {
+      if (!app) {
+        return;
+      }
+      HmiStatePtr prev_state = app->RegularHmiState();
+      HmiStatePtr hmi_state = CreateHmiState(app->app_id(),
+          HmiState::StateID::STATE_ID_REGULAR);
+      DCHECK_OR_RETURN_VOID(hmi_state);
+      hmi_state->set_hmi_level(hmi_level);
+      hmi_state->set_audio_streaming_state(CalcAudioState(app, hmi_level));
+      hmi_state->set_system_context(
+           prev_state ? prev_state->system_context()
+                      : mobile_apis::SystemContext::SYSCTXT_MAIN);
+      SetRegularState(app, hmi_state);
+    }
+
+    /**
+     * @brief SetRegularState Change regular audio state
+     * @param app appication to setup regular State
+     * @param audio_state of new regular state
+     */
+    void SetRegularState(ApplicationSharedPtr app,
+                         const mobile_apis::AudioStreamingState::eType audio_state) {
+      if (!app) {
+        return;
+      }
+      HmiStatePtr prev_state = app->RegularHmiState();
+      DCHECK_OR_RETURN_VOID(prev_state);
+      HmiStatePtr hmi_state = CreateHmiState(app->app_id(),
+          HmiState::StateID::STATE_ID_REGULAR);
+      DCHECK_OR_RETURN_VOID(hmi_state);
+      hmi_state->set_hmi_level(prev_state->hmi_level());
+      hmi_state->set_audio_streaming_state(audio_state);
+      hmi_state->set_system_context(prev_state->system_context());
+      SetRegularState<false>(app, hmi_state);
+    }
+
+    /**
+     * @brief SetRegularState Change regular system context
      * @param app appication to setup regular State
      * @param system_context of new regular state
      */
@@ -167,32 +208,35 @@ class StateController : public event_engine::EventObserver {
       HmiStatePtr prev_regular = app->RegularHmiState();
       DCHECK_OR_RETURN_VOID(prev_regular);
       HmiStatePtr hmi_state = CreateHmiState(app->app_id(),
-                                             HmiState::StateID::STATE_ID_REGULAR);
+          HmiState::StateID::STATE_ID_REGULAR);
       DCHECK_OR_RETURN_VOID(hmi_state);
       hmi_state->set_hmi_level(prev_regular->hmi_level());
-      hmi_state->set_audio_streaming_state(prev_regular->audio_streaming_state());
+      hmi_state->set_audio_streaming_state(
+           CalcAudioState(app, prev_regular->hmi_level()));
       hmi_state->set_system_context(system_context);
       SetRegularState<false>(app, hmi_state);
     }
 
+    /**
+     * @brief SetRegularState Sets new regular state to application
+     * @param app appication to setup regular state
+     * @param state new hmi state for application
+     */
+    void SetRegularState(ApplicationSharedPtr app,
+                         HmiStatePtr state) {
+      if (!app) {
+        return;
+      }
+      DCHECK_OR_RETURN_VOID(state);
+      if (mobile_apis::HMILevel::HMI_FULL == state->hmi_level()) {
+        SetRegularState<true>(app, state);
+      } else {
+        SetRegularState<false>(app, state);
+      }
+    }
+
     // EventObserver interface
     void on_event(const event_engine::Event& event);
-
-    /**
-     * @brief OnStateChanged send HMIStatusNotification if neded
-     * @param app application
-     * @param old_state state before change
-     * @param new_state state after change
-     */
-    void OnStateChanged(ApplicationSharedPtr app, HmiStatePtr old_state,
-                        HmiStatePtr new_state);
-    /**
-     * @brief state_context getter for state_context
-     * @return
-     */
-    const StateContext& state_context() const {
-      return state_context_;
-    }
 
     /**
      * @brief ApplyStatesForApp apply active HMI states for new App without s
@@ -210,6 +254,14 @@ class StateController : public event_engine::EventObserver {
      * @brief OnNaviStreamingStopped process Navi streaming stopped
      */
     void OnNaviStreamingStopped();
+
+    /**
+     * @brief state_context getter for state_context
+     * @return
+     */
+    const StateContext& state_context() const {
+      return state_context_;
+    }
 
   private:
     /**
@@ -231,7 +283,8 @@ class StateController : public event_engine::EventObserver {
 
     /**
      * @brief The HmiLevelConflictResolver struct
-     * Move other application to HmiStates if applied moved to FULL or LIMITED
+     * Resolves conflicts and moves OTHER applications to appropriate
+     * hmi states AFTER changing hmi state for some application
      */
     struct HmiLevelConflictResolver {
       ApplicationSharedPtr applied_;
@@ -243,6 +296,70 @@ class StateController : public event_engine::EventObserver {
         applied_(app), state_(state) {}
       void operator()(ApplicationSharedPtr to_resolve);
     };
+
+    /**
+     * @brief ResolveHmiState Checks if requested hmi state is
+     * allowed by current states context and correct it if it possible
+     *
+     * @param app application to apply state
+     *
+     * @param state state to be checked
+     *
+     * @return Resolved hmi state or empty pointer in case requested
+     * hmi state is not allowed
+     */
+    HmiStatePtr ResolveHmiState(
+        ApplicationSharedPtr app, HmiStatePtr state) const;
+
+    /**
+     * @brief GetAvailableHmiLevel Returns closest to requested
+     * available hmi level for application
+     *
+     * @param app application to apply state
+     *
+     * @param hmi_level requested hmi level
+     *
+     * @return Resolved hmi state or empty pointer in case requested
+     * hmi state is not allowed
+     */
+    mobile_apis::HMILevel::eType GetAvailableHmiLevel(
+        ApplicationSharedPtr app, mobile_apis::HMILevel::eType hmi_level) const;
+
+    /**
+     * @brief IsStateAvailable Checks if hmi state is available
+     * to apply for specified application
+     *
+     * @param app application to apply state
+     *
+     * @param state state to be checked
+     *
+     * @return true if state is available, false otherwise
+     */
+    bool IsStateAvailable(
+        ApplicationSharedPtr app, HmiStatePtr state) const;
+
+    /**
+     * @brief OnStateChanged send HMIStatusNotification if neded
+     * @param app application
+     * @param old_state state before change
+     * @param new_state state after change
+     */
+    void OnStateChanged(ApplicationSharedPtr app, HmiStatePtr old_state,
+                        HmiStatePtr new_state);
+
+    /**
+     * @brief ApplyPostponedStateForApp tries to apply postponed state
+     * to application if it's allowed by current active states
+     */
+    void ApplyPostponedStateForApp(ApplicationSharedPtr app);
+
+    /**
+     * @brief IsTempStateActive Checks if specified temp state
+     * is currently active
+     *
+     * @return true if state is active, false otherwise
+     */
+    bool IsTempStateActive(HmiState::StateID ID) const;
 
     /**
      *  Function to add new temporary HmiState for application
@@ -418,11 +535,16 @@ class StateController : public event_engine::EventObserver {
      * @param state_id state id
      * @return
      */
-    HmiStatePtr CreateHmiState(uint32_t app_id, HmiState::StateID state_id);
+    HmiStatePtr CreateHmiState(
+        uint32_t app_id, HmiState::StateID state_id) const;
+
+    mobile_apis::AudioStreamingState::eType
+    CalcAudioState(ApplicationSharedPtr app,
+        const mobile_apis::HMILevel::eType hmi_level) const;
 
     typedef std::list<HmiState::StateID> StateIDList;
     StateIDList active_states_;
-    sync_primitives::Lock active_states_lock_;
+    mutable sync_primitives::Lock active_states_lock_;
     std::map<uint32_t, HmiStatePtr> waiting_for_activate;
     StateContext state_context_;
 };

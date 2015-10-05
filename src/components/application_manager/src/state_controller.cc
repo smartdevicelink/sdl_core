@@ -61,22 +61,6 @@ StateController::StateController():EventObserver() {
   subscribe_on_event(hmi_apis::FunctionID::VR_Stopped);
 }
 
-void StateController::SetRegularState(ApplicationSharedPtr app,
-                                      const mobile_apis::AudioStreamingState::eType audio_state) {
-  if (!app) {
-    return;
-  }
-  HmiStatePtr prev_state = app->RegularHmiState();
-  DCHECK_OR_RETURN_VOID(prev_state);
-  HmiStatePtr hmi_state = CreateHmiState(app->app_id(),
-                                         HmiState::StateID::STATE_ID_REGULAR);
-  DCHECK_OR_RETURN_VOID(hmi_state);
-  hmi_state->set_hmi_level(prev_state->hmi_level());
-  hmi_state->set_audio_streaming_state(audio_state);
-  hmi_state->set_system_context(prev_state->system_context());
-  SetRegularState<false>(app, hmi_state);
-}
-
 void StateController::HmiLevelConflictResolver::operator ()
     (ApplicationSharedPtr to_resolve) {
   using namespace mobile_apis;
@@ -108,6 +92,105 @@ void StateController::HmiLevelConflictResolver::operator ()
   }
 }
 
+HmiStatePtr StateController::ResolveHmiState(ApplicationSharedPtr app,
+                                             HmiStatePtr state) const {
+  using namespace mobile_apis;
+  using namespace helpers;
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "State to resolve: hmi_level " << state->hmi_level()
+                << ", audio_state " << state->audio_streaming_state()
+                << ", system_context " << state->system_context());
+
+  HmiStatePtr available_state = CreateHmiState(app->app_id(),
+      HmiState::StateID::STATE_ID_REGULAR);
+  DCHECK_OR_RETURN(available_state, HmiStatePtr());
+  available_state->set_hmi_level(state->hmi_level());
+  available_state->set_audio_streaming_state(state->audio_streaming_state());
+  available_state->set_system_context(state->system_context());
+
+  if (app->is_resuming()) {
+    HMILevel::eType available_level = GetAvailableHmiLevel(
+        app, state->hmi_level());
+    available_state->set_hmi_level(available_level);
+    available_state->set_audio_streaming_state(
+        CalcAudioState(app, available_level));
+  }
+  return IsStateAvailable(app, available_state) ? available_state
+                                                : HmiStatePtr();
+}
+
+mobile_apis::HMILevel::eType
+StateController::GetAvailableHmiLevel(
+    ApplicationSharedPtr app, mobile_apis::HMILevel::eType hmi_level) const {
+  using namespace mobile_apis;
+  using namespace helpers;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  mobile_apis::HMILevel::eType result = hmi_level;
+  if (!Compare<HMILevel::eType, EQ, ONE>(hmi_level,
+          HMILevel::HMI_FULL, HMILevel::HMI_LIMITED)) {
+    return result;
+  }
+
+  const bool is_audio_app = app->IsAudioApplication();
+  const bool does_audio_app_with_same_type_exist =
+      ApplicationManagerImpl::instance()->IsAppTypeExistsInFullOrLimited(app);
+  if (HMILevel::HMI_LIMITED == hmi_level) {
+    if (!is_audio_app || does_audio_app_with_same_type_exist) {
+      result = ApplicationManagerImpl::instance()->GetDefaultHmiLevel(app);
+    }
+    return result;
+  }
+
+  const bool is_active_app_exist =
+      ApplicationManagerImpl::instance()->active_application();
+  if (is_audio_app) {
+    if (does_audio_app_with_same_type_exist) {
+      result = ApplicationManagerImpl::instance()->GetDefaultHmiLevel(app);
+    } else if (is_active_app_exist) {
+      result = mobile_apis::HMILevel::HMI_LIMITED;
+    }
+  } else if (is_active_app_exist) {
+    result = ApplicationManagerImpl::instance()->GetDefaultHmiLevel(app);
+  }
+
+  return result;
+}
+
+bool StateController::IsStateAvailable(ApplicationSharedPtr app,
+                                       HmiStatePtr state) const {
+  using namespace mobile_apis;
+  using namespace helpers;
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Checking state: hmi_level " << state->hmi_level()
+                << ", audio_state " << state->audio_streaming_state()
+                << ", system_context " << state->system_context());
+
+  if (!app->is_resuming() ||
+      !Compare<HMILevel::eType, EQ, ONE>(state->hmi_level(),
+               HMILevel::HMI_FULL, HMILevel::HMI_LIMITED)) {
+    LOG4CXX_DEBUG(logger_, "Application is not in resuming mode."
+                  << " Requested state is available");
+    return true;
+  }
+
+  if (IsTempStateActive(HmiState::StateID::STATE_ID_VR_SESSION) ||
+      IsTempStateActive(HmiState::StateID::STATE_ID_SAFETY_MODE)) {
+    LOG4CXX_DEBUG(logger_, "Requested state is not available. "
+                  << "VR session or emergency event is active");
+    return false;
+  }
+  if (IsTempStateActive(HmiState::StateID::STATE_ID_PHONE_CALL) &&
+      app->is_media_application()) {
+    LOG4CXX_DEBUG(logger_, "Requested state for media application "
+                  << "is not available. Phone call is active");
+    return false;
+  }
+
+  LOG4CXX_DEBUG(logger_, "Requested state is available");
+  return true;
+}
+
 void StateController::SetupRegularHmiState(ApplicationSharedPtr app,
                                            HmiStatePtr state) {
   using namespace mobile_apis;
@@ -118,26 +201,21 @@ void StateController::SetupRegularHmiState(ApplicationSharedPtr app,
                 ", system_context " << state->system_context());
   HmiStatePtr curr_state = app->CurrentHmiState();
   HmiStatePtr old_state = CreateHmiState(app->app_id(),
-                                         HmiState::StateID::STATE_ID_REGULAR);
+      HmiState::StateID::STATE_ID_REGULAR);
   DCHECK_OR_RETURN_VOID(old_state);
   old_state->set_hmi_level(curr_state->hmi_level());
   old_state->set_audio_streaming_state(curr_state->audio_streaming_state());
   old_state->set_system_context(curr_state->system_context());
   app->SetRegularState(state);
-  if (state->hmi_level() == mobile_apis::HMILevel::HMI_NONE) {
-    app->ResetDataInNone();
+
+  if (HMILevel::HMI_LIMITED == state->hmi_level() &&
+          app->is_resuming()) {
+    LOG4CXX_DEBUG(logger_, "Resuming to LIMITED level. "
+                  << "Send OnResumeAudioSource notification");
+    MessageHelper::SendOnResumeAudioSourceToHMI(app->app_id());
   }
-  if (!app->IsAudioApplication()) {
-    if (state->hmi_level() == HMILevel::HMI_LIMITED) {
-      LOG4CXX_ERROR(logger_, "Trying to setup LIMITED to non audio app");
-      state->set_hmi_level(HMILevel::HMI_BACKGROUND);
-    }
-    if (state->audio_streaming_state() != AudioStreamingState::NOT_AUDIBLE) {
-      LOG4CXX_ERROR(logger_, "Trying to setup audio state " <<
-                    state->audio_streaming_state() <<" to non audio app");
-      state->set_audio_streaming_state(AudioStreamingState::NOT_AUDIBLE);
-    }
-  }
+  app->set_is_resuming(false);
+
   HmiStatePtr new_state = app->CurrentHmiState();
   OnStateChanged(app, old_state, new_state);
 }
@@ -152,7 +230,7 @@ void StateController::SetupRegularHmiState(ApplicationSharedPtr app,
   HmiStatePtr prev_state = app->RegularHmiState();
   DCHECK_OR_RETURN_VOID(prev_state);
   HmiStatePtr new_state = CreateHmiState(app->app_id(),
-                                         HmiState::StateID::STATE_ID_REGULAR);
+      HmiState::StateID::STATE_ID_REGULAR);
   DCHECK_OR_RETURN_VOID(new_state);
   new_state->set_hmi_level(hmi_level);
   new_state->set_audio_streaming_state(audio_state);
@@ -161,7 +239,7 @@ void StateController::SetupRegularHmiState(ApplicationSharedPtr app,
 }
 
 void StateController::ApplyRegularState(ApplicationSharedPtr app,
-                                                  HmiStatePtr state) {
+                                        HmiStatePtr state) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
   DCHECK_OR_RETURN_VOID(state);
@@ -258,6 +336,13 @@ void StateController::OnStateChanged(ApplicationSharedPtr app,
   }
 }
 
+bool StateController::IsTempStateActive(HmiState::StateID ID) const {
+  sync_primitives::AutoLock autolock(active_states_lock_);
+  StateIDList::const_iterator itr =
+      std::find(active_states_.begin(), active_states_.end(), ID);
+  return active_states_.end() != itr;
+}
+
 void StateController::ApplyStatesForApp(ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(active_states_lock_);
@@ -271,7 +356,15 @@ void StateController::ApplyStatesForApp(ApplicationSharedPtr app) {
     new_state->set_parent(old_hmi_state);
     app->AddHMIState(new_state);
   }
+}
 
+void StateController::ApplyPostponedStateForApp(ApplicationSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  HmiStatePtr state = app->PostponedHmiState();
+  if (state) {
+    state->set_state_id(HmiState::STATE_ID_REGULAR);
+    SetRegularState(app, state);
+  }
 }
 
 void StateController::TempStateStarted(HmiState::StateID ID) {
@@ -288,8 +381,15 @@ void StateController::TempStateStarted(HmiState::StateID ID) {
 
 void StateController::TempStateStopped(HmiState::StateID ID) {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock autolock(active_states_lock_);
-  active_states_.remove(ID);
+  {
+    sync_primitives::AutoLock autolock(active_states_lock_);
+    active_states_.remove(ID);
+  }
+  ForEachApplication(std::bind1st(
+                       std::mem_fun(
+                         &StateController::ApplyPostponedStateForApp),
+                       this)
+                     );
 }
 
 void StateController::DeactivateAppWithGeneralReason(ApplicationSharedPtr app) {
@@ -341,13 +441,9 @@ void StateController::OnActivateAppResponse(
                               application_id(correlation_id);
   ApplicationSharedPtr application = ApplicationManagerImpl::instance()->
                                      application_by_hmi_app(hmi_app_id);
-  if (application) {
+  if (application && hmi_apis::Common_Result::SUCCESS == code) {
     HmiStatePtr pending_state = waiting_for_activate[application->app_id()];
     DCHECK_OR_RETURN_VOID(pending_state);
-    if (code != hmi_apis::Common_Result::SUCCESS) {
-      const HmiStatePtr cur = application->RegularHmiState();
-      pending_state->set_hmi_level(cur->hmi_level());
-    }
     ApplyRegularState(application, pending_state);
   }
 }
@@ -516,32 +612,38 @@ void StateController::OnNaviStreamingStopped() {
   TempStateStopped(HmiState::STATE_ID_NAVI_STREAMING);
 }
 
-HmiStatePtr StateController::CreateHmiState(uint32_t app_id, HmiState::StateID state_id) {
+HmiStatePtr StateController::CreateHmiState(
+    uint32_t app_id, HmiState::StateID state_id) const {
+  using namespace utils;
   LOG4CXX_AUTO_TRACE(logger_);
   HmiStatePtr new_state;
   switch (state_id) {
     case HmiState::STATE_ID_PHONE_CALL: {
-      new_state.reset(new PhoneCallHmiState(app_id, state_context_));
+      new_state = MakeShared<PhoneCallHmiState>(app_id, state_context_);
       break;
     }
     case HmiState::STATE_ID_SAFETY_MODE: {
-      new_state.reset(new SafetyModeHmiState(app_id, state_context_));
+      new_state = MakeShared<SafetyModeHmiState>(app_id, state_context_);
       break;
     }
     case HmiState::STATE_ID_VR_SESSION: {
-      new_state.reset(new VRHmiState(app_id, state_context_));
+      new_state = MakeShared<VRHmiState>(app_id, state_context_);
       break;
     }
     case HmiState::STATE_ID_TTS_SESSION: {
-      new_state.reset(new TTSHmiState(app_id, state_context_));
+      new_state = MakeShared<TTSHmiState>(app_id, state_context_);
       break;
     }
     case HmiState::STATE_ID_NAVI_STREAMING: {
-      new_state.reset(new NaviStreamingHmiState(app_id, state_context_));
+      new_state = MakeShared<NaviStreamingHmiState>(app_id, state_context_);
       break;
     }
     case HmiState::STATE_ID_REGULAR: {
-      new_state.reset(new HmiState(app_id, state_context_));
+      new_state = MakeShared<HmiState>(app_id, state_context_);
+      break;
+    }
+    case HmiState::STATE_ID_POSTPONED: {
+      new_state = MakeShared<HmiState>(app_id, state_context_, state_id);
       break;
     }
     default:
@@ -550,6 +652,22 @@ HmiStatePtr StateController::CreateHmiState(uint32_t app_id, HmiState::StateID s
       break;
   }
   return new_state;
+}
+
+mobile_apis::AudioStreamingState::eType
+StateController::CalcAudioState(ApplicationSharedPtr app,
+    const mobile_apis::HMILevel::eType hmi_level) const {
+  using namespace mobile_apis;
+  using namespace helpers;
+
+  AudioStreamingState::eType audio_state = AudioStreamingState::NOT_AUDIBLE;
+  if (Compare<HMILevel::eType, EQ, ONE>(hmi_level, HMILevel::HMI_FULL,
+                                        HMILevel::HMI_LIMITED)) {
+    if (app->IsAudioApplication()) {
+      audio_state = AudioStreamingState::AUDIBLE;
+    }
+  }
+  return audio_state;
 }
 
 }
