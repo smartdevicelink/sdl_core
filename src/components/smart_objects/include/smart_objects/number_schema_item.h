@@ -111,12 +111,13 @@ template<typename NumberType>
 bool TNumberSchemaItem<NumberType>::isValidNumberType(SmartType type) {
   NumberType value(0);
   if ((SmartType_Double == type) &&
-	  (typeid(double) == typeid(value))) {
+      (typeid(double) == typeid(value))) {
 	  return true;
   } else if ((SmartType_Integer == type) &&
 		     (typeid(int32_t) == typeid(value)  ||
 		      typeid(uint32_t) == typeid(value) ||
-		      typeid(int64_t) == typeid(value))) {
+              typeid(int64_t) == typeid(value)  ||
+              typeid(double) == typeid(value))) {
 	  return true;
   } else {
 	  return false;
