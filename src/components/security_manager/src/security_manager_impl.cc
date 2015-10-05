@@ -182,23 +182,31 @@ void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
                                  "connection is not protected");
     LOG4CXX_ERROR(logger_, error_text);
     SendInternalError(connection_key, ERROR_INTERNAL, error_text);
-    NotifyListenersOnHandshakeDone(connection_key, false);
+    NotifyListenersOnHandshakeDone(connection_key,
+                                   SSLContext::Handshake_Result_Fail);
     return;
   }
 
   if (ssl_context->IsInitCompleted()) {
-    NotifyListenersOnHandshakeDone(connection_key, true);
+    NotifyListenersOnHandshakeDone(connection_key,
+                                   SSLContext::Handshake_Result_Success);
     return;
   }
+
+  ssl_context->SetHandshakeContext(
+        session_observer_->GetHandshakeContext(connection_key));
+
   size_t data_size = 0;
   const uint8_t *data = NULL;
+
   const security_manager::SSLContext::HandshakeResult result =
       ssl_context->StartHandshake(&data, &data_size);
   if (security_manager::SSLContext::Handshake_Result_Success != result) {
     const std::string error_text("StartHandshake failed, handshake step fail");
     LOG4CXX_ERROR(logger_, error_text);
     SendInternalError(connection_key, ERROR_INTERNAL, error_text);
-    NotifyListenersOnHandshakeDone(connection_key, false);
+    NotifyListenersOnHandshakeDone(connection_key,
+                                   SSLContext::Handshake_Result_Fail);
     return;
   }
   // for client mode will be generated output data
@@ -220,12 +228,13 @@ void SecurityManagerImpl::RemoveListener(SecurityManagerListener *const listener
   }
   listeners_.remove(listener);
 }
-void SecurityManagerImpl::NotifyListenersOnHandshakeDone(const uint32_t &connection_key,
-                                                     const bool success) {
+void SecurityManagerImpl::NotifyListenersOnHandshakeDone(
+    const uint32_t &connection_key,
+    SSLContext::HandshakeResult error) {
   LOG4CXX_AUTO_TRACE(logger_);
   std::list<SecurityManagerListener*>::iterator it = listeners_.begin();
   while (it != listeners_.end()) {
-    if ((*it)->OnHandshakeDone(connection_key, success)) {
+    if ((*it)->OnHandshakeDone(connection_key, error)) {
       // On get notification remove listener
       it = listeners_.erase(it);
     } else {
@@ -260,7 +269,8 @@ bool SecurityManagerImpl::ProccessHandshakeData(const SecurityMessage &inMessage
     LOG4CXX_ERROR(logger_, error_text);
     SendInternalError(connection_key, ERROR_SERVICE_NOT_PROTECTED,
                       error_text, seqNumber);
-    NotifyListenersOnHandshakeDone(connection_key, false);
+    NotifyListenersOnHandshakeDone(connection_key,
+                                   SSLContext::Handshake_Result_Fail);
     return false;
   }
   size_t out_data_size;
@@ -274,18 +284,20 @@ bool SecurityManagerImpl::ProccessHandshakeData(const SecurityMessage &inMessage
     LOG4CXX_ERROR(logger_, "SendHandshakeData: Handshake failed: " << erorr_text);
     SendInternalError(connection_key,
                       ERROR_SSL_INVALID_DATA, erorr_text, seqNumber);
-    NotifyListenersOnHandshakeDone(connection_key, false);
+    NotifyListenersOnHandshakeDone(connection_key,
+                                   SSLContext::Handshake_Result_Fail);
     // no handshake data to send
     return false;
   }
   if (sslContext->IsInitCompleted()) {
     // On handshake success
     LOG4CXX_DEBUG(logger_, "SSL initialization finished success.");
-    NotifyListenersOnHandshakeDone(connection_key, true);
-  } else if (handshake_result == SSLContext::Handshake_Result_Fail) {
+    NotifyListenersOnHandshakeDone(connection_key,
+                                   SSLContext::Handshake_Result_Success);
+  } else if (handshake_result != SSLContext::Handshake_Result_Success){
     // On handshake fail
     LOG4CXX_WARN(logger_, "SSL initialization finished with fail.");
-    NotifyListenersOnHandshakeDone(connection_key, false);
+    NotifyListenersOnHandshakeDone(connection_key, handshake_result);
   }
 
   if (out_data && out_data_size) {

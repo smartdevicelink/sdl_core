@@ -289,6 +289,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
   void SetProtectionFlag(
     const uint32_t &key,
     const protocol_handler::ServiceType &service_type) OVERRIDE;
+
+  security_manager::SSLContext::HandshakeContext
+    GetHandshakeContext(uint32_t key) const OVERRIDE;
 #endif  // ENABLE_SECURITY
 
   /**

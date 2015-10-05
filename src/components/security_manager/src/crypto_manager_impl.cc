@@ -46,6 +46,7 @@
 #include "utils/atomic.h"
 #include "utils/macro.h"
 #include "utils/scope_guard.h"
+#include "config_profile/profile.h"
 
 #define TLS1_1_MINIMAL_VERSION            0x1000103fL
 #define CONST_SSL_METHOD_MINIMAL_VERSION  0x00909000L
@@ -115,11 +116,13 @@ bool CryptoManagerImpl::Init(Mode mode, Protocol protocol,
                              const std::string &cert_data,
                              const std::string &ciphers_list,
                              const bool verify_peer,
-                             const std::string &ca_certificate_file) {
+                             const std::string &ca_certificate_file,
+                             const size_t hours_before_update) {
   LOG4CXX_AUTO_TRACE(logger_);
   mode_ = mode;
   verify_peer_ = verify_peer;
   certificate_data_ = cert_data;
+  hours_before_update_ = hours_before_update;
   LOG4CXX_DEBUG(logger_, (mode_ == SERVER ? "Server" : "Client") << " mode");
   LOG4CXX_DEBUG(logger_, "Peer verification " << (verify_peer_? "enabled" : "disabled"));
   LOG4CXX_DEBUG(logger_, "CA certificate file is \"" << ca_certificate_file << '"');
@@ -260,6 +263,21 @@ std::string CryptoManagerImpl::LastError() const {
   return std::string(reason ? reason : "");
 }
 
+bool CryptoManagerImpl::IsCertificateUpdateRequired() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const time_t now = time(NULL);
+  const time_t cert_date = mktime(&expiration_time_);
+
+  const double seconds = difftime(cert_date, now);
+
+  LOG4CXX_DEBUG(logger_, "Certificate time: " << asctime(&expiration_time_));
+  LOG4CXX_DEBUG(logger_, "Host time: " << asctime(localtime(&now)));
+  LOG4CXX_DEBUG(logger_, "Seconds before expiration: " << seconds);
+
+  return seconds <= hours_before_update_;
+}
+
 
 bool CryptoManagerImpl::set_certificate(const std::string &cert_data) {
   if (cert_data.empty()) {
@@ -309,6 +327,8 @@ bool CryptoManagerImpl::set_certificate(const std::string &cert_data) {
     return false;
   }
 
+  asn1_time_to_tm(X509_get_notAfter(cert));
+
   if (!SSL_CTX_use_PrivateKey(context_, pkey)) {
     LOG4CXX_ERROR(logger_, "Could not use key");
     return false;
@@ -318,6 +338,46 @@ bool CryptoManagerImpl::set_certificate(const std::string &cert_data) {
     return false;
   }
   return true;
+}
+
+int CryptoManagerImpl::pull_number_from_buf(char *buf, int *idx) {
+  if (!idx) { return 0; }
+  const int val = ((buf[*idx] - '0') * 10) + buf[(*idx) + 1] - '0';
+  *idx = *idx + 2;
+  return val;
+}
+
+void CryptoManagerImpl::asn1_time_to_tm(ASN1_TIME *time) {
+  char* buf = (char *)time->data;
+  int index = 0;
+  const int year = pull_number_from_buf(buf, &index);
+  if (V_ASN1_GENERALIZEDTIME == time->type) {
+    expiration_time_.tm_year = (year * 100 -1900) + pull_number_from_buf(buf, &index);
+  } else {
+    expiration_time_.tm_year = year < 50 ? year + 100 : year;
+  }
+
+  const int mon = pull_number_from_buf(buf, &index);
+  const int day = pull_number_from_buf(buf, &index);
+  const int hour = pull_number_from_buf(buf, &index);
+  const int mn = pull_number_from_buf(buf, &index);
+
+  expiration_time_.tm_mon = mon -1;
+  expiration_time_.tm_mday = day;
+  expiration_time_.tm_hour = hour;
+  expiration_time_.tm_min = mn;
+
+  if (buf[index] == 'Z') {
+    expiration_time_.tm_sec = 0;
+  }
+  if ((buf[index] == '+') || (buf[index] == '-')) {
+    const int mn = pull_number_from_buf(buf, &index);
+    const int mn1 = pull_number_from_buf(buf, &index);
+    expiration_time_.tm_sec = (mn * 3600) + (mn1 * 60);
+  } else {
+    const int sec =  pull_number_from_buf(buf, &index);
+    expiration_time_.tm_sec = sec;
+  }
 }
 
 }  // namespace security_manager

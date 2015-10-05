@@ -66,6 +66,12 @@
 
 #include "interfaces/v4_protocol_v1_2_no_extra.h"
 #include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
+
+#ifdef ENABLE_SECURITY
+#include "security_manager/security_manager_listener.h"
+#include "security_manager/ssl_context.h"
+#endif // ENABLE_SECURITY
+
 #ifdef TIME_TESTER
 #include "time_metric_observer.h"
 #endif  // TIME_TESTER
@@ -179,12 +185,14 @@ typedef threads::MessageLoopThread<RawAudioDataQueue>  AudioPassThruQueue;
 }
 
 typedef std::vector<std::string> RPCParams;
-
 class ApplicationManagerImpl : public ApplicationManager,
   public hmi_message_handler::HMIMessageObserver,
   public protocol_handler::ProtocolObserver,
   public connection_handler::ConnectionHandlerObserver,
   public policy::PolicyHandlerObserver,
+#ifdef ENABLE_SECURITY
+  public security_manager::SecurityManagerListener,
+#endif // ENABLE_SECURITY
   public impl::FromMobileQueue::Handler, public impl::ToMobileQueue::Handler,
   public impl::FromHmiQueue::Handler, public impl::ToHmiQueue::Handler,
   public impl::AudioPassThruQueue::Handler,
@@ -637,6 +645,17 @@ class ApplicationManagerImpl : public ApplicationManager,
         const protocol_handler::ServiceType& type,
         const connection_handler::CloseSessionReason& close_reason) OVERRIDE;
 
+#ifdef ENABLE_SECURITY
+    //Overriden SecurityManagerListener method
+    bool OnHandshakeDone(
+        uint32_t connection_key,
+        security_manager::SSLContext::HandshakeResult result) OVERRIDE FINAL;
+
+    void OnCertificateUpdateRequired() OVERRIDE FINAL;
+
+    security_manager::SSLContext::HandshakeContext
+    GetHandshakeContext(uint32_t key) const OVERRIDE FINAL;
+#endif // ENABLE_SECURITY
     /**
      * @ Add notification to collection
      *

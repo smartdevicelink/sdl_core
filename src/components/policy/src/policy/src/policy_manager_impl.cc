@@ -775,7 +775,7 @@ void PolicyManagerImpl::Increment(usage_statistics::GlobalCounterId type) {
 
 void PolicyManagerImpl::Increment(const std::string& app_id,
                                   usage_statistics::AppCounterId type){
-  LOG4CXX_INFO(logger_, "Increment " << app_id);
+  LOG4CXX_DEBUG(logger_, "Increment " << app_id << " AppCounter: " << type);
   sync_primitives::AutoLock locker(statistics_lock_);
 }
 

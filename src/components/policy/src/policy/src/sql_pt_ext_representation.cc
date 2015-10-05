@@ -1,5 +1,5 @@
-﻿/*
- Copyright (c) 2013, Ford Motor Company
+/*
+ Copyright (c) 2015, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -905,6 +905,7 @@ bool SQLPTExtRepresentation::GatherAppLevels(
     level.count_of_run_attempts_while_revoked = query.GetInteger(12);
     level.app_registration_language_gui = query.GetString(13);
     level.app_registration_language_vui = query.GetString(14);
+    level.count_of_tls_errors = query.GetInteger(15);
     (*apps)[query.GetString(0)] = level;
   }
 
@@ -1497,6 +1498,8 @@ bool SQLPTExtRepresentation::SaveAppCounters(
     query.Bind(12, it->second.count_of_run_attempts_while_revoked);
     query.Bind(13, it->second.app_registration_language_gui);
     query.Bind(14, it->second.app_registration_language_vui);
+    query.Bind(15, it->second.count_of_tls_errors);
+
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into app level.");
       return false;

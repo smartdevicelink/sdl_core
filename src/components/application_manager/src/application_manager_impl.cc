@@ -1176,8 +1176,46 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
   if (Compare<ServiceType, EQ, ONE>(type,
           ServiceType::kMobileNav, ServiceType::kAudio)) {
     StopNaviService(session_key, type);
-  }
+    }
 }
+
+#ifdef ENABLE_SECURITY
+bool ApplicationManagerImpl::OnHandshakeDone(
+    uint32_t connection_key,
+    security_manager::SSLContext::HandshakeResult result) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  using security_manager::SSLContext;
+  using namespace helpers;
+
+  ApplicationSharedPtr app = application(connection_key);
+  DCHECK_OR_RETURN(app, false);
+  if (Compare<SSLContext::HandshakeResult, EQ, ONE> (
+       result,
+       SSLContext::Handshake_Result_CertExpired,
+       SSLContext::Handshake_Result_CertNotSigned,
+       SSLContext::Handshake_Result_AppIDMismatch,
+       SSLContext::Handshake_Result_AppNameMismatch,
+       SSLContext::Handshake_Result_NotYetValid)) {
+      app->usage_report().RecordTLSError();
+  }
+  return false;
+}
+
+void ApplicationManagerImpl::OnCertificateUpdateRequired() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  policy::PolicyHandler::instance()->OnPTExchangeNeeded();
+}
+
+security_manager::SSLContext::HandshakeContext
+ApplicationManagerImpl::GetHandshakeContext(uint32_t key) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ApplicationConstSharedPtr app = application(key);
+  security_manager::SSLContext::HandshakeContext res;
+  DCHECK_OR_RETURN(app.valid(), res);
+  return res.make_context(app->mobile_app_id(), app->name());
+}
+#endif // ENABLE_SECURITY
 
 void ApplicationManagerImpl::set_hmi_message_handler(
   hmi_message_handler::HMIMessageHandler* handler) {

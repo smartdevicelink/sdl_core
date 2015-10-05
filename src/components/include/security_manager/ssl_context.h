@@ -35,6 +35,8 @@
 
 #include <cstddef>  // for size_t typedef
 #include <string>
+#include <ctype.h>
+#include <algorithm>
 
 // TODO(EZamakhov): update brief info
 /**
@@ -61,10 +63,34 @@ namespace security_manager {
 class SSLContext {
  public:
   enum HandshakeResult {
-    Handshake_Result_Success      = 0x0,
-    Handshake_Result_Fail         = 0x1,
-    Handshake_Result_AbnormalFail = 0x2
+    Handshake_Result_Success,
+    Handshake_Result_Fail,
+    Handshake_Result_AbnormalFail,
+    Handshake_Result_CertExpired,
+    Handshake_Result_NotYetValid,
+    Handshake_Result_CertNotSigned,
+    Handshake_Result_AppIDMismatch,
+    Handshake_Result_AppNameMismatch,
   };
+
+  struct HandshakeContext {
+    std::string expected_sn;
+    std::string expected_cn;
+
+    HandshakeContext& make_context(const std::string& sn,
+                                  const std::string& cn) {
+      expected_sn = sn;
+      expected_cn = cn;
+
+      std::transform(expected_sn.begin(), expected_sn.end(),
+                     expected_sn.begin(), ::tolower);
+
+      std::transform(expected_cn.begin(), expected_cn.end(),
+                     expected_cn.begin(), ::tolower);
+      return *this;
+    }
+  };
+
   virtual HandshakeResult StartHandshake(const uint8_t** const out_data,
                                          size_t *out_data_size) = 0;
   virtual HandshakeResult DoHandshakeStep(const uint8_t *const in_data,
@@ -79,7 +105,11 @@ class SSLContext {
   virtual bool  IsHandshakePending() const = 0;
   virtual size_t get_max_block_size(size_t mtu) const = 0;
   virtual std::string LastError() const = 0;
+
+  virtual void ResetConnection() = 0;
+  virtual void SetHandshakeContext(const HandshakeContext& hsh_ctx) = 0;
   virtual ~SSLContext() { }
+
 };
 }  // namespace security_manager
 #endif  // SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SSL_CONTEXT_H_

@@ -410,7 +410,7 @@ void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
 
 void PolicyHandler::OnPTExchangeNeeded() {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->ForcePTExchange();
+  MessageHelper::SendOnStatusUpdate(policy_manager_->ForcePTExchange());
 }
 
 void PolicyHandler::GetAvailableApps(std::queue<std::string>& apps) {

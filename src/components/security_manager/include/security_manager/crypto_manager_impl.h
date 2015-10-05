@@ -56,20 +56,34 @@ class CryptoManagerImpl : public CryptoManager {
     virtual HandshakeResult DoHandshakeStep(const uint8_t *const in_data,
                                             size_t in_data_size,
                                             const uint8_t** const out_data,
-                                            size_t *out_data_size);
-    virtual bool Encrypt(const uint8_t *const in_data,    size_t in_data_size,
-                         const uint8_t ** const out_data, size_t *out_data_size);
-    virtual bool Decrypt(const uint8_t *const in_data,    size_t in_data_size,
-                         const uint8_t ** const out_data, size_t *out_data_size);
-    virtual bool IsInitCompleted() const;
-    virtual bool IsHandshakePending() const;
-    virtual size_t get_max_block_size(size_t mtu) const;
-    virtual std::string LastError() const;
-    virtual ~SSLContextImpl();
+                                            size_t *out_data_size) OVERRIDE;
+    bool Encrypt(const uint8_t *const in_data,    size_t in_data_size,
+                         const uint8_t ** const out_data, size_t *out_data_size) OVERRIDE;
+    bool Decrypt(const uint8_t *const in_data,    size_t in_data_size,
+                         const uint8_t ** const out_data, size_t *out_data_size) OVERRIDE;
+    bool IsInitCompleted() const OVERRIDE;
+    bool IsHandshakePending() const OVERRIDE;
+    size_t get_max_block_size(size_t mtu) const OVERRIDE;
+    std::string LastError() const OVERRIDE;
+    void ResetConnection() OVERRIDE;
+    void SetHandshakeContext(const HandshakeContext& hsh_ctx) OVERRIDE;
+    ~SSLContextImpl();
 
-   private:
+    void PrintCertData(X509* cert, const std::string& cert_owner);
+    private:
+    void PrintCertInfo();
+    HandshakeResult CheckCertContext();
+    bool ReadHandshakeData(const uint8_t** const out_data,
+                                      size_t* out_data_size);
+    bool WriteHandshakeData(const uint8_t*  const in_data, size_t in_data_size);
+    HandshakeResult PerformHandshake();
     typedef size_t(*BlockSizeGetter)(size_t);
     void EnsureBufferSizeEnough(size_t size);
+    void SetHandshakeError(const int error);
+    HandshakeResult openssl_error_convert_to_internal(const long error);
+
+    std::string GetTextBy(X509_NAME* name, int object) const;
+
     SSL *connection_;
     BIO *bioIn_;
     BIO *bioOut_;
@@ -79,9 +93,11 @@ class CryptoManagerImpl : public CryptoManager {
     uint8_t *buffer_;
     bool is_handshake_pending_;
     Mode mode_;
+    mutable std::string last_error_;
     BlockSizeGetter max_block_size_;
     static std::map<std::string, BlockSizeGetter> max_block_sizes;
     static std::map<std::string, BlockSizeGetter> create_max_block_sizes();
+    HandshakeContext hsh_context_;
     DISALLOW_COPY_AND_ASSIGN(SSLContextImpl);
   };
 
@@ -94,21 +110,28 @@ class CryptoManagerImpl : public CryptoManager {
             const std::string &cert_data,
             const std::string &ciphers_list,
             const bool verify_peer,
-            const std::string &ca_certificate_file) OVERRIDE;
+            const std::string &ca_certificate_file,
+            const size_t hours_before_update) OVERRIDE;
   bool OnCertificateUpdated(const std::string &data) OVERRIDE;
   SSLContext *CreateSSLContext() OVERRIDE;
   void ReleaseSSLContext(SSLContext *context) OVERRIDE;
   std::string LastError() const OVERRIDE;
+  virtual bool IsCertificateUpdateRequired() const OVERRIDE;
 
 private:
   bool set_certificate(const std::string &cert_data);
 
+  int pull_number_from_buf(char* buf, int* idx);
+  void asn1_time_to_tm(ASN1_TIME* time);
+
   SSL_CTX *context_;
+  mutable struct tm expiration_time_;
   Mode mode_;
   static uint32_t instance_count_;
   static sync_primitives::Lock instance_lock_;
   std::string certificate_data_;
   bool verify_peer_;
+  size_t hours_before_update_;
   DISALLOW_COPY_AND_ASSIGN(CryptoManagerImpl);
 };
 }  // namespace security_manager

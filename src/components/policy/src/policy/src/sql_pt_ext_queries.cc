@@ -111,7 +111,8 @@ const std::string kSelectAppLevels =
   "  `count_of_removals_for_bad_behavior`, "
   "  `count_of_run_attempts_while_revoked`, "
   "  `app_registration_language_gui`, "
-  "  `app_registration_language_vui` "
+  "  `app_registration_language_vui`, "
+  "  `count_of_tls_errors` "
   "FROM `app_level`";
 
 const std::string kUpdateGlobalCounters = "UPDATE `usage_and_error_count` SET "

@@ -959,7 +959,9 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
       hash_id_(hash_id),
       service_type_(service_type) {
   }
-  bool OnHandshakeDone(const uint32_t connection_key, const bool success) OVERRIDE {
+  bool OnHandshakeDone(
+      const uint32_t connection_key,
+      security_manager::SSLContext::HandshakeResult result) OVERRIDE {
     if (connection_key != connection_key_) {
       return false;
     }
@@ -967,8 +969,7 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
     const bool was_service_protection_enabled =
         session_observer_->GetSSLContext(connection_key_, service_type_) != NULL;
     if (was_service_protection_enabled) {
-      // On Success handshake
-      if (success) {
+      if (result != security_manager::SSLContext::Handshake_Result_Success) {
 //        const std::string error_text("Connection is already protected");
 //        LOG4CXX_WARN(logger_, error_text << ", key " << connection_key);
 //        security_manager_->SendInternalError(
@@ -980,14 +981,20 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
         NOTREACHED();
       }
     } else {
-      if (success) {
+      if (result == security_manager::SSLContext::Handshake_Result_Success) {
         session_observer_->SetProtectionFlag(connection_key_, service_type_);
       }
-      protocol_handler_->SendStartSessionAck(connection_id_, session_id_,
-                                             protocol_version_, hash_id_, service_type_, success);
+      protocol_handler_->SendStartSessionAck(
+            connection_id_, session_id_,
+            protocol_version_, hash_id_,
+            service_type_,
+            security_manager::SSLContext::Handshake_Result_Success == result);
     }
     delete this;
     return true;
+  }
+
+  void OnCertificateUpdateRequired() OVERRIDE {
   }
 
  private:

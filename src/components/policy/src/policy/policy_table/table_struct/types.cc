@@ -933,18 +933,109 @@ void ModuleMeta::ReportErrors(rpc::ValidationReport* report__) const {
 AppLevel::AppLevel()
   : CompositeType(kUninitialized) {
 }
+
+AppLevel::AppLevel(uint16_t minutes_in_hmi_full, const std::string& app_registration_language_gui, const std::string& app_registration_language_vui, uint16_t minutes_in_hmi_limited, uint16_t minutes_in_hmi_background, uint16_t minutes_in_hmi_none, uint16_t count_of_user_selections, uint16_t count_of_rejections_sync_out_of_memory, uint16_t count_of_rejections_nickname_mismatch, uint16_t count_of_rejections_duplicate_name, uint16_t count_of_rejected_rpc_calls, uint16_t count_of_rpcs_sent_in_hmi_none, uint16_t count_of_removals_for_bad_behavior, uint16_t count_of_tls_errors, uint16_t count_of_run_attempts_while_revoked)
+  : CompositeType(kUninitialized),
+    minutes_in_hmi_full(minutes_in_hmi_full),
+    app_registration_language_gui(app_registration_language_gui),
+    app_registration_language_vui(app_registration_language_vui),
+    minutes_in_hmi_limited(minutes_in_hmi_limited),
+    minutes_in_hmi_background(minutes_in_hmi_background),
+    minutes_in_hmi_none(minutes_in_hmi_none),
+    count_of_user_selections(count_of_user_selections),
+    count_of_rejections_sync_out_of_memory(count_of_rejections_sync_out_of_memory),
+    count_of_rejections_nickname_mismatch(count_of_rejections_nickname_mismatch),
+    count_of_rejections_duplicate_name(count_of_rejections_duplicate_name),
+    count_of_rejected_rpc_calls(count_of_rejected_rpc_calls),
+    count_of_rpcs_sent_in_hmi_none(count_of_rpcs_sent_in_hmi_none),
+    count_of_removals_for_bad_behavior(count_of_removals_for_bad_behavior),
+    count_of_tls_errors(count_of_tls_errors),
+    count_of_run_attempts_while_revoked(count_of_run_attempts_while_revoked) {
+}
 AppLevel::~AppLevel() {
 }
 AppLevel::AppLevel(const Json::Value* value__)
-  : CompositeType(InitHelper(value__, &Json::Value::isObject)) {
+  : CompositeType(InitHelper(value__, &Json::Value::isObject)),
+    minutes_in_hmi_full(impl::ValueMember(value__, "minutes_in_hmi_full")),
+    app_registration_language_gui(impl::ValueMember(value__, "app_registration_language_gui")),
+    app_registration_language_vui(impl::ValueMember(value__, "app_registration_language_vui")),
+    minutes_in_hmi_limited(impl::ValueMember(value__, "minutes_in_hmi_limited")),
+    minutes_in_hmi_background(impl::ValueMember(value__, "minutes_in_hmi_background")),
+    minutes_in_hmi_none(impl::ValueMember(value__, "minutes_in_hmi_none")),
+    count_of_user_selections(impl::ValueMember(value__, "count_of_user_selections")),
+    count_of_rejections_sync_out_of_memory(impl::ValueMember(value__, "count_of_rejections_sync_out_of_memory")),
+    count_of_rejections_nickname_mismatch(impl::ValueMember(value__, "count_of_rejections_nickname_mismatch")),
+    count_of_rejections_duplicate_name(impl::ValueMember(value__, "count_of_rejections_duplicate_name")),
+    count_of_rejected_rpc_calls(impl::ValueMember(value__, "count_of_rejected_rpc_calls")),
+    count_of_rpcs_sent_in_hmi_none(impl::ValueMember(value__, "count_of_rpcs_sent_in_hmi_none")),
+    count_of_removals_for_bad_behavior(impl::ValueMember(value__, "count_of_removals_for_bad_behavior")),
+    count_of_tls_errors(impl::ValueMember(value__, "count_of_tls_errors")),
+    count_of_run_attempts_while_revoked(impl::ValueMember(value__, "count_of_run_attempts_while_revoked")) {
 }
 Json::Value AppLevel::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
+  impl::WriteJsonField("minutes_in_hmi_full", minutes_in_hmi_full, &result__);
+  impl::WriteJsonField("app_registration_language_gui", app_registration_language_gui, &result__);
+  impl::WriteJsonField("app_registration_language_vui", app_registration_language_vui, &result__);
+  impl::WriteJsonField("minutes_in_hmi_limited", minutes_in_hmi_limited, &result__);
+  impl::WriteJsonField("minutes_in_hmi_background", minutes_in_hmi_background, &result__);
+  impl::WriteJsonField("minutes_in_hmi_none", minutes_in_hmi_none, &result__);
+  impl::WriteJsonField("count_of_user_selections", count_of_user_selections, &result__);
+  impl::WriteJsonField("count_of_rejections_sync_out_of_memory", count_of_rejections_sync_out_of_memory, &result__);
+  impl::WriteJsonField("count_of_rejections_nickname_mismatch", count_of_rejections_nickname_mismatch, &result__);
+  impl::WriteJsonField("count_of_rejections_duplicate_name", count_of_rejections_duplicate_name, &result__);
+  impl::WriteJsonField("count_of_rejected_rpc_calls", count_of_rejected_rpc_calls, &result__);
+  impl::WriteJsonField("count_of_rpcs_sent_in_hmi_none", count_of_rpcs_sent_in_hmi_none, &result__);
+  impl::WriteJsonField("count_of_removals_for_bad_behavior", count_of_removals_for_bad_behavior, &result__);
+  impl::WriteJsonField("count_of_tls_errors", count_of_tls_errors, &result__);
+  impl::WriteJsonField("count_of_run_attempts_while_revoked", count_of_run_attempts_while_revoked, &result__);
   return result__;
 }
 bool AppLevel::is_valid() const {
-  if (struct_empty()) {
-    return initialization_state__ == kInitialized && Validate();
+  if (!minutes_in_hmi_full.is_valid()) {
+    return false;
+  }
+  if (!app_registration_language_gui.is_valid()) {
+    return false;
+  }
+  if (!app_registration_language_vui.is_valid()) {
+    return false;
+  }
+  if (!minutes_in_hmi_limited.is_valid()) {
+    return false;
+  }
+  if (!minutes_in_hmi_background.is_valid()) {
+    return false;
+  }
+  if (!minutes_in_hmi_none.is_valid()) {
+    return false;
+  }
+  if (!count_of_user_selections.is_valid()) {
+    return false;
+  }
+  if (!count_of_rejections_sync_out_of_memory.is_valid()) {
+    return false;
+  }
+  if (!count_of_rejections_nickname_mismatch.is_valid()) {
+    return false;
+  }
+  if (!count_of_rejections_duplicate_name.is_valid()) {
+    return false;
+  }
+  if (!count_of_rejected_rpc_calls.is_valid()) {
+    return false;
+  }
+  if (!count_of_rpcs_sent_in_hmi_none.is_valid()) {
+    return false;
+  }
+  if (!count_of_removals_for_bad_behavior.is_valid()) {
+    return false;
+  }
+  if (!count_of_tls_errors.is_valid()) {
+    return false;
+  }
+  if (!count_of_run_attempts_while_revoked.is_valid()) {
+    return false;
   }
   return Validate();
 }
@@ -952,6 +1043,58 @@ bool AppLevel::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
 bool AppLevel::struct_empty() const {
+
+  if (minutes_in_hmi_full.is_initialized()) {
+    return false;
+  }
+  if (app_registration_language_gui.is_initialized()) {
+    return false;
+  }
+
+  if (app_registration_language_vui.is_initialized()) {
+    return false;
+  }
+
+  if (minutes_in_hmi_limited.is_initialized()) {
+    return false;
+  }
+  if (minutes_in_hmi_background.is_initialized()) {
+    return false;
+  }
+
+  if (minutes_in_hmi_none.is_initialized()) {
+    return false;
+  }
+  if (count_of_user_selections.is_initialized()) {
+    return false;
+  }
+
+  if (count_of_rejections_sync_out_of_memory.is_initialized()) {
+    return false;
+  }
+  if (count_of_rejections_nickname_mismatch.is_initialized()) {
+    return false;
+  }
+
+  if (count_of_rejections_duplicate_name.is_initialized()) {
+    return false;
+  }
+  if (count_of_rejected_rpc_calls.is_initialized()) {
+    return false;
+  }
+
+  if (count_of_rpcs_sent_in_hmi_none.is_initialized()) {
+    return false;
+  }
+  if (count_of_removals_for_bad_behavior.is_initialized()) {
+    return false;
+  }
+  if (count_of_tls_errors.is_initialized()) {
+    return false;
+  }
+  if (count_of_run_attempts_while_revoked.is_initialized()) {
+    return false;
+  }
   return true;
 }
 void AppLevel::ReportErrors(rpc::ValidationReport* report__) const {

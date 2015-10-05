@@ -654,6 +654,11 @@ void ConnectionHandlerImpl::SetProtectionFlag(
   Connection &connection = *it->second;
   connection.SetProtectionFlag(session_id, service_type);
 }
+
+security_manager::SSLContext::HandshakeContext
+ConnectionHandlerImpl::GetHandshakeContext(uint32_t key) const {
+  return connection_handler_observer_->GetHandshakeContext(key);
+}
 #endif  // ENABLE_SECURITY
 
 void ConnectionHandlerImpl::StartDevicesDiscovery() {

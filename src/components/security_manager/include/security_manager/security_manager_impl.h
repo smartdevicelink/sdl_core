@@ -148,7 +148,7 @@ class SecurityManagerImpl
    * \param success result of connection protection
    */
   void NotifyListenersOnHandshakeDone(const uint32_t &connection_key,
-                                      const bool success);
+                                      SSLContext::HandshakeResult error);
   /**
    * @brief SecurityConfigSection
    * @return Session name in config file
