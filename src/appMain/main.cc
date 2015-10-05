@@ -119,13 +119,14 @@ bool InitHmi() {
 int32_t main(int32_t argc, char** argv) {
 
   // --------------------------------------------------------------------------
+  if ((argc > 1)&&(0 != argv)) {
+    profile::Profile::instance()->config_file_name(argv[1]);
+  } else {
+    profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
+  }
+
   // Logger initialization
   INIT_LOGGER("log4cxx.properties");
-#if defined(__QNXNTO__) and defined(GCOV_ENABLED)
-  LOG4CXX_WARN(logger_,
-                "Attention! This application was built with unsupported "
-                "configuration (gcov + QNX). Use it at your own risk.");
-#endif
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
@@ -137,29 +138,8 @@ int32_t main(int32_t argc, char** argv) {
   LOG4CXX_INFO(logger_, "SDL version: "
                          << profile::Profile::instance()->sdl_version());
 
-  // Initialize gstreamer. Needed to activate debug from the command line.
-#if defined(EXTENDED_MEDIA_MODE)
-  gst_init(&argc, &argv);
-#endif
-
   // --------------------------------------------------------------------------
   // Components initialization
-  if ((argc > 1)&&(0 != argv)) {
-      profile::Profile::instance()->config_file_name(argv[1]);
-  } else {
-      profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
-  }
-
-#ifdef __QNX__
-  if (profile::Profile::instance()->enable_policy()) {
-    if (!utils::System("./init_policy.sh").Execute(true)) {
-      LOG4CXX_FATAL(logger_, "Failed to init policy database");
-      DEINIT_LOGGER();
-      exit(EXIT_FAILURE);
-    }
-  }
-#endif  // __QNX__
-
   if (!main_namespace::LifeCycle::instance()->StartComponents()) {
     LOG4CXX_FATAL(logger_, "Failed to start components");
     main_namespace::LifeCycle::instance()->StopComponents();
