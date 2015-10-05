@@ -215,7 +215,7 @@ bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
   ApplicationManagerImpl::instance()->SetState(
       application->app_id(), hmi_level);
   LOG4CXX_INFO(logger_, "Application with policy id "
-               << application->policy_app_id()
+               << application->mobile_app_id()
                << " got HMI level " << hmi_level);
   return true;
 }

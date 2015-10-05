@@ -107,7 +107,6 @@ class StateController : public event_engine::EventObserver {
       SetRegularState<SendActivateApp>(app, hmi_state);
     }
 
-
     /**
      * @brief SetRegularState Change regular hmi level
      * @param app appication to setup regular State
@@ -123,8 +122,8 @@ class StateController : public event_engine::EventObserver {
           HmiState::StateID::STATE_ID_REGULAR);
       DCHECK_OR_RETURN_VOID(hmi_state);
       hmi_state->set_hmi_level(hmi_level);
-      hmi_state->set_audio_streaming_state(prev_regular->audio_streaming_state());
-      hmi_state->set_system_context(prev_regular->system_context());
+      hmi_state->set_audio_streaming_state(CalcAudioState(app, hmi_level));
+      hmi_state->set_system_context(mobile_apis::SystemContext::SYSCTXT_MAIN);
       SetRegularState<SendActivateApp>(app, hmi_state);
     }
 
