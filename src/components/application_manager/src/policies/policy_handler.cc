@@ -1027,6 +1027,11 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
                                       int timeout_exchange) {
   EndpointUrls urls;
   policy_manager_->GetServiceUrls("0x07", urls);
+
+  if (urls.empty()) {
+    return;
+  }
+
   SendMessageToSDK(pt_string, urls.front().url.front());
 }
 
