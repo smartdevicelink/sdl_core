@@ -152,8 +152,9 @@ int32_t main(int32_t argc, char** argv) {
 
   if (!main_namespace::LifeCycle::instance()->InitMessageSystem()) {
     LOG4CXX_FATAL(logger_, "Failed to init message system");
+    main_namespace::LifeCycle::instance()->StopComponents();
     DEINIT_LOGGER();
-    exit(EXIT_FAILURE);
+    _exit(EXIT_FAILURE);
   }
   LOG4CXX_INFO(logger_, "InitMessageBroker successful");
 
