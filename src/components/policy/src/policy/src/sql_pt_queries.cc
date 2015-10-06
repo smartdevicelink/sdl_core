@@ -72,6 +72,7 @@ const std::string kCreateSchema =
   "  `exchange_after_x_kilometers` INTEGER NOT NULL, "
   "  `exchange_after_x_days` INTEGER NOT NULL, "
   "  `timeout_after_x_seconds` INTEGER NOT NULL, "
+  "  `certificate` INTEGER NOT NULL, "
   "  `vehicle_make` VARCHAR(45), "
   "  `vehicle_model` VARCHAR(45), "
   "  `vehicle_year` VARCHAR(4) "
@@ -502,7 +503,7 @@ const std::string kUpdateModuleConfig =
   "UPDATE `module_config` SET `preloaded_pt` = ?, "
   "  `exchange_after_x_ignition_cycles` = ?,"
   "  `exchange_after_x_kilometers` = ?, `exchange_after_x_days` = ?, "
-  "  `timeout_after_x_seconds` = ?, `vehicle_make` = ?, "
+  "  `timeout_after_x_seconds` = ?, `certificate` = ?, `vehicle_make` = ?, "
   "  `vehicle_model` = ?, `vehicle_year` = ?";
 
 const std::string kInsertEndpoint =
@@ -548,7 +549,7 @@ const std::string kDeleteAppGroup = "DELETE FROM `app_group`";
 const std::string kSelectModuleConfig =
   "SELECT `preloaded_pt`, `exchange_after_x_ignition_cycles`, "
   " `exchange_after_x_kilometers`, `exchange_after_x_days`, "
-  " `timeout_after_x_seconds`, `vehicle_make`,"
+  " `timeout_after_x_seconds`, `certificate`, `vehicle_make`,"
   " `vehicle_model`, `vehicle_year` "
   " FROM `module_config`";
 
