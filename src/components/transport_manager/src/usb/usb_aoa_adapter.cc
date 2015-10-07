@@ -42,7 +42,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "UsbTransportAdapter")
 UsbAoaAdapter::UsbAoaAdapter()
   : TransportAdapterImpl(new UsbDeviceScanner(this),
                          new UsbConnectionFactory(this), 0),
