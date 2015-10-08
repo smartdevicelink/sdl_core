@@ -130,9 +130,9 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
   hmi_states_.push_back(initial_state);
 
   video_stream_suspend_timeout_ =
-      profile::Profile::instance()->video_data_stopped_timeout() / 1000;
+      profile::Profile::instance()->video_data_stopped_timeout();
   audio_stream_suspend_timeout_ =
-      profile::Profile::instance()->audio_data_stopped_timeout() / 1000;
+      profile::Profile::instance()->audio_data_stopped_timeout();
 
   video_stream_suspend_timer_ = ApplicationTimerPtr(
           new timer::TimerThread<ApplicationImpl>(

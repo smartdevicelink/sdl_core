@@ -42,7 +42,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
 namespace {
 DeviceTypes devicesType = {
   std::make_pair(AOA, std::string("USB_AOA")),
