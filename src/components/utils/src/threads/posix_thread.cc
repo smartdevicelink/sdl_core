@@ -105,8 +105,7 @@ void* Thread::threadFunc(void* arg) {
 	threads::Thread* thread = reinterpret_cast<Thread*>(arg);
 	DCHECK(thread);
 
-	pthread_cleanup_push(&cleanup, thread)
-	;
+	pthread_cleanup_push(&cleanup, thread);
 
 	thread->state_lock_.Acquire();
 	thread->state_cond_.Broadcast();

@@ -37,7 +37,7 @@
 #include <sched.h>
 #else
 #ifdef OS_WIN32
-#include "pthread.h"
+#include <pthread.h>
 //#error Please implement lock for your OS
 #endif
 #endif

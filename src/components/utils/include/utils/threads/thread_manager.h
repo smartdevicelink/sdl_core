@@ -104,7 +104,8 @@ class ThreadManager : public utils::Singleton<ThreadManager> {
     pthread_t handle;
     ThreadDelegate* delegate;
   };
-  ThreadManager() {}
+  ThreadManager();
+  ~ThreadManager();
 #ifndef OS_WIN32
   MessageQueue<ThreadDesc> threads_to_terminate;
 #endif

@@ -60,7 +60,7 @@ if(ENABLE_SECURITY)
 endif()
 #
 # --- Policy_impl
-add_subdirectory(./policy)
+#add_subdirectory(./policy)
 
 # --- Validated types
 add_subdirectory(./rpc_base)
@@ -72,7 +72,7 @@ add_subdirectory(./smart_objects)
 add_subdirectory(./application_manager)
 
 # --- HMI Message Handler
-#add_subdirectory(./hmi_message_handler)
+add_subdirectory(./hmi_message_handler)
 
 # --- Config
 add_subdirectory(./config_profile)

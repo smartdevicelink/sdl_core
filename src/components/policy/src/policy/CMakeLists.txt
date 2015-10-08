@@ -70,7 +70,7 @@ include_directories(./policy_table/table_struct)
 add_subdirectory(policy_table/table_struct)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-set(LIBRARIES ConfigProfile policy_struct dbms jsoncpp Utils pthread)
+set(LIBRARIES ConfigProfile policy_struct dbms jsoncpp Utils pthreadVC2)
 else ()
 set(LIBRARIES ConfigProfile policy_struct dbms jsoncpp Utils)
 endif ()

@@ -52,6 +52,7 @@ set (SOURCES
     ${UTILS_SRC_DIR}/threads/posix_thread.cc   
     ${UTILS_SRC_DIR}/threads/thread_delegate.cc
     ${UTILS_SRC_DIR}/threads/thread_validator.cc
+    ${UTILS_SRC_DIR}/threads/thread_manager.cc
     ${UTILS_SRC_DIR}/threads/async_runner.cc
     ${UTILS_SRC_DIR}/lock_posix.cc
     ${UTILS_SRC_DIR}/rwlock_posix.cc
@@ -111,6 +112,11 @@ endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   target_link_libraries("Utils" pthread ${RTLIB})
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  list(APPEND LIBRARIES pthreadVC2)
+#ADD_DEPENDENCIES(Utils "pthreadVC2.lib")
 endif()
 
 target_link_libraries("Utils" ${LIBRARIES})

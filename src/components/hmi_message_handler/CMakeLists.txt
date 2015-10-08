@@ -45,6 +45,7 @@ include_directories (
     ${COMPONENTS_DIR}/dbus/include/
     ${CMAKE_SOURCE_DIR}/
     ${LOG4CXX_INCLUDE_DIRECTORY}
+    ${CMAKE_SOURCE_DIR}/src/3rd_party/pthread-win32-2.9.1
 )
 
 IF (HMIADAPTER STREQUAL "dbus")
@@ -52,13 +53,22 @@ IF (HMIADAPTER STREQUAL "dbus")
     set (DBUS_ADAPTER DBus)
 ENDIF ()
 
+if(MODIFY_FUNCTION_FLAGS)
 set (SOURCES
     ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_handler_impl.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/messagebroker_adapter.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_adapter.cc
-    ${COMPONENTS_DIR}/hmi_message_handler/src/mqueue_adapter.cc
     ${DBUS_SOURCE}
 )
+else()
+set (SOURCES
+    ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_handler_impl.cc
+    ${COMPONENTS_DIR}/hmi_message_handler/src/messagebroker_adapter.cc
+    ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_adapter.cc
+	${COMPONENTS_DIR}/hmi_message_handler/src/mqueue_adapter.cc
+    ${DBUS_SOURCE}
+)
+endif()
 
 set(LIBRARIES
     Utils
