@@ -35,6 +35,8 @@ namespace application_manager {
 
 namespace commands {
 
+namespace hmi {
+
 DialNumberResponse::DialNumberResponse(const MessageSharedPtr& message)
     : ResponseFromHMI(message) {
 }
@@ -47,6 +49,8 @@ void DialNumberResponse::Run() {
   event.set_smart_object(*message_);
   event.raise();
 }
+
+} // namespace hmi
 
 }  // namespace commands
 

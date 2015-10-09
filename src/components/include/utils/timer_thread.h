@@ -418,7 +418,12 @@ void TimerThread<T>::TimerDelegate::exitThreadMain() {
 template<class T>
 void TimerThread<T>::TimerDelegate::setTimeOut(
     const uint32_t timeout_milliseconds) {
-  timeout_milliseconds_ = timeout_milliseconds;
+  if (0 == timeout_milliseconds ){
+    timeout_milliseconds_ = 1;
+    // There would be no way to stop thread if timeout in lopper will be 0.....
+   } else{
+    timeout_milliseconds_ = timeout_milliseconds;
+   }
   termination_condition_.NotifyOne();
 }
 

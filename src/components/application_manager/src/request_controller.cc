@@ -78,7 +78,7 @@ void RequestController::InitializeThreadpool() {
 void RequestController::DestroyThreadpool() {
   LOG4CXX_AUTO_TRACE(logger_);
   {
-    AutoLock auto_lock(mobile_request_info_list_lock_);
+    AutoLock auto_lock(mobile_request_list_lock_);
     pool_state_ = TPoolState::STOPPED;
     LOG4CXX_DEBUG(logger_, "Broadcasting STOP signal to all threads...");
     cond_var_.Broadcast();  // notify all threads we are shutting down
@@ -137,7 +137,7 @@ bool RequestController::CheckPendingRequestsAmount(
     const uint32_t& pending_requests_amount) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (pending_requests_amount > 0) {
-    const size_t pending_requests_size = mobile_request_info_list_.size();
+    const size_t pending_requests_size = mobile_request_list_.size();
     const bool available_to_add =
         pending_requests_amount > pending_requests_size;
     if (!available_to_add) {
@@ -163,14 +163,10 @@ RequestController::TResult RequestController::addMobileRequest(
                 << "connection_key : " << request->connection_key());
   RequestController::TResult result = CheckPosibilitytoAdd(request);
   if (SUCCESS ==result) {
-    // Temporary set timeout to zero. Correct value will be set at the moment
-    // of processing start - in threadMain()
-    RequestInfoPtr request_info_ptr(utils::MakeShared<MobileRequestInfo>(request, 0u));
-    request_info_ptr->set_hmi_level(hmi_level);
-    AutoLock auto_lock_list(mobile_request_info_list_lock_);
-    mobile_request_info_list_.push_back(request_info_ptr);
+    AutoLock auto_lock_list(mobile_request_list_lock_);
+    mobile_request_list_.push_back(request);
     LOG4CXX_DEBUG(logger_, "Waiting for execution: "
-                  << mobile_request_info_list_.size());
+                  << mobile_request_list_.size());
   // wake up one thread that is waiting for a task to be available
   }
   cond_var_.NotifyOne();
@@ -187,19 +183,17 @@ RequestController::TResult RequestController::addHMIRequest(
   }
   LOG4CXX_DEBUG(logger_, " correlation_id : " << request->correlation_id());
 
-  const uint32_t timeout_in_seconds =
-      request->default_timeout() / date_time::DateTime::MILLISECONDS_IN_SECOND;
+  const uint64_t timeout_in_mseconds = static_cast<uint64_t>(request->default_timeout());
   RequestInfoPtr request_info_ptr(new HMIRequestInfo(request,
-                                                     timeout_in_seconds));
+                                                     timeout_in_mseconds));
 
-  if (0 != timeout_in_seconds) {
-    waiting_for_response_.Add(request_info_ptr);
-    LOG4CXX_INFO(logger_, "Waiting for response cont:"
-                 << waiting_for_response_.Size());
-  } else {
+  if (0 == timeout_in_mseconds) {
     LOG4CXX_INFO(logger_, "Default timeout was set to 0."
                  "RequestController will not track timeout of this request.");
   }
+  waiting_for_response_.Add(request_info_ptr);
+  LOG4CXX_INFO(logger_, "Waiting for response cont:"  << waiting_for_response_.Size());
+
   UpdateTimer();
   return RequestController::SUCCESS;
 }
@@ -263,21 +257,20 @@ void RequestController::terminateWaitingForExecutionAppRequests(
     const uint32_t& app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "app_id: "  << app_id
-                << "Waiting for execution" << mobile_request_info_list_.size());
-  AutoLock auto_lock(mobile_request_info_list_lock_);
-  std::list<RequestInfoPtr>::iterator request_it =
-      mobile_request_info_list_.begin();
-  while (mobile_request_info_list_.end() != request_it) {
-    RequestInfoPtr request_info = (*request_it);
-    if ((request_info.valid()) &&
-        (request_info->request()->connection_key() == app_id)) {
-      mobile_request_info_list_.erase(request_it++);
+                << "Waiting for execution" << mobile_request_list_.size());
+  AutoLock auto_lock(mobile_request_list_lock_);
+  std::list<RequestPtr>::iterator request_it =
+      mobile_request_list_.begin();
+  while (mobile_request_list_.end() != request_it) {
+    RequestPtr request = (*request_it);
+    if ((request.valid()) &&  (request->connection_key() == app_id)) {
+      mobile_request_list_.erase(request_it++);
     } else {
       ++request_it;
     }
   }
   LOG4CXX_DEBUG(logger_, "Waiting for execution "
-                << mobile_request_info_list_.size());
+                << mobile_request_list_.size());
 }
 
 void RequestController::terminateWaitingForResponseAppRequests(
@@ -293,7 +286,7 @@ void RequestController::terminateAppRequests(
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "app_id : " << app_id
                 << "Requests waiting for execution count : "
-                << mobile_request_info_list_.size()
+                << mobile_request_list_.size()
                 << "Requests waiting for response count : "
                 << waiting_for_response_.Size());
 
@@ -311,8 +304,8 @@ void RequestController::terminateAllMobileRequests() {
   LOG4CXX_AUTO_TRACE(logger_);
   waiting_for_response_.RemoveMobileRequests();
   LOG4CXX_DEBUG(logger_, "Mobile Requests waiting for response cleared");
-  AutoLock waiting_execution_auto_lock(mobile_request_info_list_lock_);
-  mobile_request_info_list_.clear();
+  AutoLock waiting_execution_auto_lock(mobile_request_list_lock_);
+  mobile_request_list_.clear();
   LOG4CXX_DEBUG(logger_, "Mobile Requests waiting for execution cleared");
   UpdateTimer();
 }
@@ -332,10 +325,8 @@ void RequestController::updateRequestTimeout(
   RequestInfoPtr request_info =
       waiting_for_response_.Find(app_id, correlation_id);
   if (request_info) {
-    uint32_t timeout_in_seconds =
-        new_timeout/date_time::DateTime::MILLISECONDS_IN_SECOND;
     waiting_for_response_.RemoveRequest(request_info);
-    request_info->updateTimeOut(timeout_in_seconds);
+    request_info->updateTimeOut(new_timeout);
     waiting_for_response_.Add(request_info);
     UpdateTimer();
     LOG4CXX_INFO(logger_, "Timeout updated for "
@@ -417,10 +408,10 @@ void RequestController::Worker::threadMain() {
   AutoLock auto_lock(thread_lock_);
   while (!stop_flag_) {
     // Try to pick a request
-    AutoLock auto_lock(request_controller_->mobile_request_info_list_lock_);
+    AutoLock auto_lock(request_controller_->mobile_request_list_lock_);
 
     while ((request_controller_->pool_state_ != TPoolState::STOPPED) &&
-           (request_controller_->mobile_request_info_list_.empty())) {
+           (request_controller_->mobile_request_list_.empty())) {
       // Wait until there is a task in the queue
       // Unlock mutex while wait, then lock it back when signaled
       LOG4CXX_INFO(logger_, "Unlocking and waiting");
@@ -433,26 +424,25 @@ void RequestController::Worker::threadMain() {
       break;
     }
 
-    if (request_controller_->mobile_request_info_list_.empty()) {
+    if (request_controller_->mobile_request_list_.empty()) {
       LOG4CXX_WARN(logger_, "Mobile request list is empty");
       break;
     }
 
-    RequestInfoPtr request_info_ptr(
-        request_controller_->mobile_request_info_list_.front());
-    request_controller_->mobile_request_info_list_.pop_front();
-    bool init_res = request_info_ptr->request()->Init();  // to setup specific
+   RequestPtr request_ptr( request_controller_->mobile_request_list_.front());
+   request_controller_->mobile_request_list_.pop_front();
+
+    bool init_res = request_ptr->Init();  // to setup specific
                                                           // default timeout
 
-    const uint32_t timeout_in_seconds =
-        request_info_ptr->request()->default_timeout() /
-        date_time::DateTime::MILLISECONDS_IN_SECOND;
-    // Start time, end time and timeout need to be updated to appropriate values
-    request_info_ptr->update_start_time(date_time::DateTime::getCurrentTime());
-    request_info_ptr->updateTimeOut(timeout_in_seconds);
+    const uint32_t timeout_in_mseconds = request_ptr->default_timeout();
+    RequestInfoPtr request_info_ptr(new MobileRequestInfo(request_ptr,
+                                                          timeout_in_mseconds));
 
     request_controller_->waiting_for_response_.Add(request_info_ptr);
-    if (0 != timeout_in_seconds) {
+    LOG4CXX_DEBUG(logger_, "timeout_in_mseconds " << timeout_in_mseconds);
+
+    if (0 != timeout_in_mseconds) {
       request_controller_->UpdateTimer();
     } else {
       LOG4CXX_DEBUG(logger_, "Default timeout was set to 0. "
@@ -464,11 +454,11 @@ void RequestController::Worker::threadMain() {
 
     // execute
     if ((false == request_controller_->IsLowVoltage()) &&
-        request_info_ptr->request()->CheckPermissions() && init_res) {
+        request_ptr->CheckPermissions() && init_res) {
       LOG4CXX_DEBUG(logger_, "Execute MobileRequest corr_id = "
                              << request_info_ptr->requestId()
-                             << " with timeout: " << timeout_in_seconds);
-      request_info_ptr->request()->Run();
+                             << " with timeout: " << timeout_in_mseconds);
+      request_ptr->Run();
     }
   }
 }
@@ -486,26 +476,23 @@ void RequestController::UpdateTimer() {
     const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
     const TimevalStruct end_time = front->end_time();
     if (current_time < end_time) {
-      const uint64_t secs = end_time.tv_sec - current_time.tv_sec;
-      LOG4CXX_DEBUG(logger_, "Sleep for " << secs << " secs");
+      const uint32_t msecs =static_cast<uint32_t>(date_time::DateTime::getmSecs(end_time - current_time) );
+      LOG4CXX_DEBUG(logger_, "Sleep for " << msecs << " millisecs" );
       // Timeout for bigger than 5 minutes is a mistake
 
-      const uint32_t timeout_ms =
-          secs * date_time::DateTime::MILLISECONDS_IN_SECOND;
-
-      timer_.updateTimeOut(timeout_ms);
+      timer_.updateTimeOut(msecs);
     } else {
       LOG4CXX_WARN(logger_, "Request app_id: " << front->app_id()
                    << " correlation_id: " << front->requestId()
                    << " is expired. "
-                   << "End time: "
-                   << end_time.tv_sec
-                   << " Current time: "
-                   << current_time.tv_sec
-                   << " Diff (current - end): "
-                   << current_time.tv_sec - end_time.tv_sec
+                   << "End time (ms): "
+                   << date_time::DateTime::getmSecs(end_time)
+                   << " Current time (ms): "
+                   << date_time::DateTime::getmSecs(current_time)
+                   << " Diff (current - end) (ms): "
+                   << date_time::DateTime::getmSecs(current_time - end_time)
                    << " Request timeout (sec): "
-                   << front->timeout_sec());
+                   << front->timeout_msec()/date_time::DateTime::MILLISECONDS_IN_SECOND);
       timer_.updateTimeOut(0);
     }
   } else {
