@@ -42,6 +42,10 @@
 
 
 namespace can_cooperation {
+
+class CANAppExtension;
+typedef utils::SharedPtr<CANAppExtension> CANAppExtensionPtr;
+
 struct MessageFromCAN : public Json::Value {
   explicit MessageFromCAN(const Json::Value& other): Json::Value(other) {}
 };
@@ -130,10 +134,10 @@ class CANModule : public functional_modules::GenericModule,
    */
   void OnDeviceRemoved(const connection_handler::DeviceHandle& device);
 
-  void SendHmiStatusNotifications(const uint32_t device_handle,
-                                  const std::string& rank);
-
   void SendHmiStatusNotification(application_manager::ApplicationSharedPtr app);
+
+  void UnsubscribeAppForAllZones(uint32_t hmi_app_id,
+                                 CANAppExtensionPtr app);
 
  protected:
   /**

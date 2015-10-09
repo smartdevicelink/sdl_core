@@ -172,6 +172,7 @@ const char kSubscribe[]         = "subscribe";
 
 // GetInteriorVehicleData response
 //const char kModuleData[] = "moduleData";
+const char kIsSubscribed[] = "isSubscribed";
 // GetInteriorVehicleData response
 
 // OnInteriorVehicleData notification

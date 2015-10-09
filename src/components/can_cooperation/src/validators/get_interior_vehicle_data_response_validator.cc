@@ -30,61 +30,52 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GET_INTERIOR_VEHICLE_DATA_REQUEST_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GET_INTERIOR_VEHICLE_DATA_REQUEST_H_
-
-#include "can_cooperation/commands/base_command_request.h"
-#include "can_cooperation/event_engine/event.h"
+#include "can_cooperation/validators/get_interior_vehicle_data_response_validator.h"
+#include "can_cooperation/validators/struct_validators/module_description_validator.h"
+#include "can_cooperation/can_module_constants.h"
+#include "can_cooperation/message_helper.h"
 
 namespace can_cooperation {
 
-namespace commands {
+namespace validators {
 
-/**
- * @brief GetInteriorVehicleDataRequest command class
- */
-class GetInteriorVehicleDataRequest : public BaseCommandRequest {
- public:
-  /**
-   * @brief GetInteriorVehicleDataRequest class constructor
-   *
-   * @param message Message from mobile
-   **/
-  explicit GetInteriorVehicleDataRequest(const application_manager::MessagePtr& message);
+CREATE_LOGGERPTR_GLOBAL(logger_, "GetInteriorVehicleDataResponseValidator")
 
-  /**
-   * @brief Execute command
-   */
-  virtual void Execute();
+using namespace message_params;
 
-  /**
-   * @brief executes specific message validation
-   */
-  virtual bool Validate();
+GetInteriorVehicleDataResponseValidator::
+GetInteriorVehicleDataResponseValidator() {
+  // name="moduleType"
+  is_subscribed_[ValidationParams::TYPE] = ValueType::BOOL;
+  is_subscribed_[ValidationParams::ARRAY] = 0;
+  is_subscribed_[ValidationParams::MANDATORY] = 0;
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
-  void OnEvent(const event_engine::Event<application_manager::MessagePtr,
-                std::string>& event);
-
- protected:
-  virtual std::string ModuleType(const Json::Value& message);
-  virtual Json::Value GetInteriorZone(const Json::Value& message);
-  virtual SeatLocation InteriorZone(const Json::Value& message);
-
- private:
-  /**
-    * @brief Handle subscription to vehicle data
-    *
-    */
-  void ProccessSubscription();
+  validation_scope_map_[kIsSubscribed] = &is_subscribed_;
 };
 
-}  // namespace commands
+ValidationResult GetInteriorVehicleDataResponseValidator::Validate(
+                                                   const Json::Value& json,
+                                                   Json::Value& outgoing_json) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ValidationResult result = ValidateSimpleValues(json, outgoing_json);
+
+  if (result != ValidationResult::SUCCESS) {
+    return result;
+  }
+
+  if (IsMember(json, kModuleData)) {
+    result = ModuleDescriptionValidator::instance()->
+        Validate(json[kModuleData], outgoing_json[kModuleData]);
+  } else {
+    result = ValidationResult::INVALID_DATA;
+    LOG4CXX_ERROR(logger_, "Mandatory param " <<kModuleData <<" missing!" );
+  }
+
+  return result;
+}
+
+}  // namespace valdiators
 
 }  // namespace can_cooperation
 
-#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GET_INTERIOR_VEHICLE_DATA_REQUEST_H_

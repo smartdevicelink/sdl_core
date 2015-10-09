@@ -111,6 +111,8 @@ void  BaseCommandRequest::SendRequest(const char* function_id,
     msg[kParams] = message_params;
   }
 
+  msg[kParams][json_keys::kAppId] = app_->hmi_app_id();
+
   Json::FastWriter writer;
   if (is_hmi_request) {
     application_manager::MessagePtr message_to_send(
@@ -307,7 +309,7 @@ void BaseCommandRequest::Run() {
   if (Validate()) {
     LOG4CXX_INFO(logger_, "Request message validated successfully!");
     if (CheckPolicy()) {
-       Execute();  // run child's logic
+      Execute();  // run child's logic
     }
   }
 }
