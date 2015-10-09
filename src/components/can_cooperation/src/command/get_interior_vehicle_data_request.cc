@@ -32,7 +32,7 @@
 
 #include "can_cooperation/commands/get_interior_vehicle_data_request.h"
 #include "can_cooperation/validators/get_interior_vehicle_data_request_validator.h"
-#include "can_cooperation/validators/struct_validators/module_data_validator.h"
+#include "can_cooperation/validators/get_interior_vehicle_data_response_validator.h"
 #include "can_cooperation/can_module_constants.h"
 #include "can_cooperation/message_helper.h"
 #include "can_cooperation/can_module.h"
@@ -56,32 +56,9 @@ GetInteriorVehicleDataRequest::GetInteriorVehicleDataRequest(
 void GetInteriorVehicleDataRequest::Execute() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  Json::Value params;
-
-  Json::Reader reader;
-  reader.parse(message_->json_message(), params);
-
-  if (IsMember(params, kSubscribe)){
-    application_manager::ApplicationSharedPtr app =
-        service_->GetApplication(message_->connection_key());
-
-    if (!app) {
-      LOG4CXX_ERROR(logger_, "Application doesn't registered!");
-      SendResponse(false, result_codes::kApplicationNotRegistered, "");
-      return;
-    }
-
-    CANAppExtensionPtr extension = GetAppExtension(app);
-
-    if (params[kSubscribe].asBool()){
-      extension->SubscribeToInteriorVehicleData(params[kModuleDescription]);
-    } else {
-      extension->UnsubscribeFromInteriorVehicleData(params[kModuleDescription]);
-    }
-  }
-
   SendRequest(
-      functional_modules::hmi_api::get_interior_vehicle_data, params, true);
+      functional_modules::hmi_api::get_interior_vehicle_data,
+      MessageHelper::StringToValue(message_->json_message()), true);
 }
 
 void GetInteriorVehicleDataRequest::OnEvent(
@@ -93,23 +70,17 @@ void GetInteriorVehicleDataRequest::OnEvent(
     std::string result_code;
     std::string info;
 
-    Json::Value value;
-    Json::Reader reader;
-    reader.parse(event.event_message()->json_message(), value);
+    Json::Value value  = MessageHelper::StringToValue(event.event_message()->json_message());
 
     bool success = ParseResultCode(value, result_code, info);
 
-    // TOD(VS): Create GetInteriorVehicleDataResponseValidator
     validators::ValidationResult validation_result = validators::SUCCESS;
 
     if (success) {
       if (IsMember(value[kResult], kModuleData)) {
         validation_result =
-            validators::ModuleDataValidator::instance()->Validate(
-                                              value[kResult][kModuleData],
-                                              response_params_[kModuleData]);
-      } else {
-        validation_result = validators::INVALID_DATA;
+            validators::GetInteriorVehicleDataResponseValidator::instance()
+                ->Validate(value[kResult], response_params_);
       }
 
       if (validators::SUCCESS != validation_result) {
@@ -117,11 +88,47 @@ void GetInteriorVehicleDataRequest::OnEvent(
         info = "Invalid response from the vehicle";
         result_code = result_codes::kGenericError;
       }
+
+      ProccessSubscription();
     }
 
     SendResponse(success, result_code.c_str(), info);
   } else {
     LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
+  }
+}
+
+
+void GetInteriorVehicleDataRequest::ProccessSubscription() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  Json::Value params;
+
+  Json::Reader reader;
+  reader.parse(message_->json_message(), params);
+
+  if (IsMember(params, kSubscribe)){
+    bool subscribe = params[kSubscribe].asBool();
+
+    if (!response_params_.isMember(kIsSubscribed)) {
+      if (subscribe){
+        response_params_[kIsSubscribed] = false;
+      } else {
+        response_params_[kIsSubscribed] = true;
+      }
+    } else {
+      CANAppExtensionPtr extension = GetAppExtension(app());
+
+      bool isSubscribed = params[kIsSubscribed].asBool();
+
+      if (subscribe && isSubscribed) {
+        extension->SubscribeToInteriorVehicleData(params[kModuleDescription]);
+      } else if ((!subscribe) && (!isSubscribed)) {
+        extension->UnsubscribeFromInteriorVehicleData(params[kModuleDescription]);
+      }
+    }
+  } else {
+    response_params_.removeMember(kIsSubscribed);
   }
 }
 

@@ -37,11 +37,15 @@
 #include <set>
 #include "application_manager/service.h"
 #include "application_manager/app_extension.h"
+#include "can_cooperation/can_module.h"
 #include "json/json.h"
 
 using application_manager::SeatLocation;
 
+
+
 namespace can_cooperation {
+
 class CANAppExtension : public application_manager::AppExtension {
   public:
     explicit CANAppExtension(application_manager::AppExtensionUID uid);
@@ -94,6 +98,9 @@ class CANAppExtension : public application_manager::AppExtension {
      */
     bool IsSubscibedToInteriorVehicleData(const Json::Value& moduleDescription);
 
+    friend void CANModule::UnsubscribeAppForAllZones(uint32_t hmi_app_id,
+                                                     CANAppExtensionPtr app);
+
   private:
     bool is_control_given_;
     SeatLocation seat_;
@@ -103,6 +110,7 @@ class CANAppExtension : public application_manager::AppExtension {
 };
 
 typedef utils::SharedPtr<CANAppExtension> CANAppExtensionPtr;
+
 }  //  namespace can_cooperation
 
 #endif  //  SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_APP_EXTENSION_H_

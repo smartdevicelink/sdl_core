@@ -30,61 +30,45 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GET_INTERIOR_VEHICLE_DATA_REQUEST_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GET_INTERIOR_VEHICLE_DATA_REQUEST_H_
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_GET_INTERIOR_VEHICLE_DATA_RESPONSE_VALIDATOR_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_GET_INTERIOR_VEHICLE_DATA_RESPONSE_VALIDATOR_H_
 
-#include "can_cooperation/commands/base_command_request.h"
-#include "can_cooperation/event_engine/event.h"
+#include "can_cooperation/validators/validator.h"
+#include "utils/singleton.h"
 
 namespace can_cooperation {
 
-namespace commands {
+namespace validators {
 
 /**
- * @brief GetInteriorVehicleDataRequest command class
+ * @brief GetInteriorVehicleDataResponseValidator class
  */
-class GetInteriorVehicleDataRequest : public BaseCommandRequest {
+class GetInteriorVehicleDataResponseValidator : public Validator,
+   public utils::Singleton<GetInteriorVehicleDataResponseValidator> {
  public:
+
   /**
-   * @brief GetInteriorVehicleDataRequest class constructor
+   * @brief Validate json with message params
    *
-   * @param message Message from mobile
-   **/
-  explicit GetInteriorVehicleDataRequest(const application_manager::MessagePtr& message);
-
-  /**
-   * @brief Execute command
-   */
-  virtual void Execute();
-
-  /**
-   * @brief executes specific message validation
-   */
-  virtual bool Validate();
-
-  /**
-   * @brief Interface method that is called whenever new event received
+   * @param json_string string with message params(fake params will be cut off)
+   * @param outgoing_json outgoing json
    *
-   * @param event The received event
+   * @return validation result
    */
-  void OnEvent(const event_engine::Event<application_manager::MessagePtr,
-                std::string>& event);
-
- protected:
-  virtual std::string ModuleType(const Json::Value& message);
-  virtual Json::Value GetInteriorZone(const Json::Value& message);
-  virtual SeatLocation InteriorZone(const Json::Value& message);
+  ValidationResult Validate(const Json::Value& json,
+                            Json::Value& outgoing_json);
 
  private:
-  /**
-    * @brief Handle subscription to vehicle data
-    *
-    */
-  void ProccessSubscription();
+  DISALLOW_COPY_AND_ASSIGN(GetInteriorVehicleDataResponseValidator);
+  FRIEND_BASE_SINGLETON_CLASS(GetInteriorVehicleDataResponseValidator);
+  GetInteriorVehicleDataResponseValidator();
+  ~GetInteriorVehicleDataResponseValidator() {};
+
+  ValidationScope is_subscribed_;
 };
 
-}  // namespace commands
+}  // namespace valdiators
 
 }  // namespace can_cooperation
 
-#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GET_INTERIOR_VEHICLE_DATA_REQUEST_H_
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_GET_INTERIOR_VEHICLE_DATA_RESPONSE_VALIDATOR_H_

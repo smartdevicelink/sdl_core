@@ -35,11 +35,11 @@
 #include "can_cooperation/can_module_event.h"
 #include "can_cooperation/event_engine/event_dispatcher.h"
 #include "can_cooperation/can_module_constants.h"
+#include "can_cooperation/can_app_extension.h"
 
 #include "can_cooperation/can_tcp_connection.h"
 #include "can_cooperation/message_helper.h"
 #include "can_cooperation/policy_helper.h"
-#include "can_cooperation/can_app_extension.h"
 #include "can_cooperation/module_helper.h"
 #include "utils/logger.h"
 #include "interfaces/MOBILE_API.h"
@@ -52,6 +52,8 @@ using functional_modules::PluginInfo;
 using functional_modules::MobileFunctionID;
 using event_engine::EventDispatcher;
 namespace hmi_api = functional_modules::hmi_api;
+
+using namespace json_keys;
 
 EXPORT_FUNCTION_IMPL(CANModule);
 CREATE_LOGGERPTR_GLOBAL(logger_, "CanModule")
@@ -239,17 +241,17 @@ functional_modules::ProcessResult CANModule::HandleMessage(
       if (functional_modules::hmi_api::on_interior_vehicle_data
                        == function_name) {
         msg->set_function_id(MobileFunctionID::ON_INTERIOR_VEHICLE_DATA);
-/*     } else if (functional_modules::can_api::on_preset_changed == function_name) {
-        msg->set_function_id(MobileFunctionID::ON_PRESETS_CHANGED);
-      } else if (functional_modules::can_api::on_radio_details
-                 == function_name) {
-        msg->set_function_id(MobileFunctionID::ON_RADIO_DETAILS);*/
       } else if (functional_modules::hmi_api::on_reverse_apps_allowing
                  == function_name) {
         if (value.isMember(json_keys::kParams)) {
+          // TODO(VS): Create commands for notifications
           // TODO(VS): move validation to separate class
           if (value[json_keys::kParams].isMember(message_params::kAllowed)
                 && value[json_keys::kParams][message_params::kAllowed].isBool()) {
+            if ((!value[json_keys::kParams][message_params::kAllowed].isBool()) &&
+                CANModule::instance()->service()->IsRemoteControlAllowed()) {
+              ModuleHelper::ProccessOnReverseAppsDisallowed();
+            }
             PolicyHelper::OnRSDLFunctionalityAllowing(
               value[json_keys::kParams][message_params::kAllowed].asBool());
           } else {
@@ -276,7 +278,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
             std::string rank = value[json_keys::kParams]
                                      [message_params::kRank].asString();
             PolicyHelper::ChangeDeviceRank(device_id, rank);
-            SendHmiStatusNotifications(device_id, rank);
+            ModuleHelper::ProccessDeviceRankChanged(device_id, rank);
           } else {
             LOG4CXX_ERROR(logger_,
                           "Invalid RC.OnDeviceRankChanged notification");
@@ -285,7 +287,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
         return ProcessResult::PROCESSED;
       } else if (functional_modules::hmi_api::on_app_deactivated ==
                  function_name) {
-        return ProcessOnAppDeactivation(value);
+        return ModuleHelper::ProcessOnAppDeactivation(value);
       }
 
       int32_t func_id = msg->function_id();
@@ -300,7 +302,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     case application_manager::MessageType::kRequest: {
       if (function_name == functional_modules::hmi_api::sdl_activate_app) {
         msg->set_protocol_version(application_manager::ProtocolVersion::kHMI);
-        return ProcessSDLActivateApp(value);
+        return ModuleHelper::ProcessSDLActivateApp(value);
       }
       return ProcessResult::CANNOT_PROCESS;
     }
@@ -310,68 +312,6 @@ functional_modules::ProcessResult CANModule::HandleMessage(
   }
 
   return ProcessResult::PROCESSED;
-}
-
-void CANModule::SendHmiStatusNotifications(const uint32_t device_handle,
-                                           const std::string& rank) {
-  std::vector<application_manager::ApplicationSharedPtr> applications =
-    CANModule::instance()->service()->GetApplications(GetModuleID());
-
-  if (rank == "DRIVER") {
-    bool is_rank_actually_changed = false;
-
-    for (uint32_t i = 0; i < applications.size(); ++i) {
-      if (applications[i]->device() == device_handle) {
-        application_manager::AppExtensionPtr app_extension = applications[i]->QueryInterface(
-            GetModuleID());
-        if (app_extension) {
-          CANAppExtensionPtr can_app_extension =
-              application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-                  app_extension);
-          if (!can_app_extension->is_on_driver_device()) {
-            can_app_extension->set_is_on_driver_device(true);
-            is_rank_actually_changed = true;
-            SendHmiStatusNotification(applications[i]);
-          }
-        }
-      }
-    }
-
-    if (is_rank_actually_changed) {
-      for (uint32_t i = 0; i < applications.size(); ++i) {
-        if (applications[i]->device() != device_handle) {
-          application_manager::AppExtensionPtr app_extension = applications[i]->QueryInterface(
-              GetModuleID());
-          if (app_extension) {
-            CANAppExtensionPtr can_app_extension =
-              application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-                  app_extension);
-            if (can_app_extension->is_on_driver_device()) {
-              can_app_extension->set_is_on_driver_device(false);
-              SendHmiStatusNotification(applications[i]);
-            }
-          }
-        }
-      }
-    }
-
-  } else if (rank == "PASSENGER") {
-    for (uint32_t i = 0; i < applications.size(); ++i) {
-      if (applications[i]->device() == device_handle) {
-        application_manager::AppExtensionPtr app_extension = applications[i]->QueryInterface(
-            GetModuleID());
-        if (app_extension) {
-          CANAppExtensionPtr can_app_extension =
-               application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-                   app_extension);
-           if (can_app_extension->is_on_driver_device()) {
-             can_app_extension->set_is_on_driver_device(false);
-             SendHmiStatusNotification(applications[i]);
-           }
-         }
-       }
-     }
-   }
 }
 
 void CANModule::SendHmiStatusNotification(
@@ -525,6 +465,39 @@ void CANModule::OnDeviceRemoved(
   bool is_driver = service()->PrimaryDevice() == device;
   if (is_driver) {
     service()->ResetPrimaryDevice();
+  }
+}
+
+void CANModule::UnsubscribeAppForAllZones(uint32_t hmi_app_id,
+                                          CANAppExtensionPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::set<Json::Value>::iterator iter =
+      app->subscribed_interior_vehicle_data_.begin();
+  for (;iter != app->subscribed_interior_vehicle_data_.end();) {
+
+    Json::Value msg;
+
+    msg[kJsonrpc] = "2.0";
+    msg[kMethod] =
+        hmi_api::get_interior_vehicle_data_capabilities;
+
+    msg[kParams] = *iter;
+
+    msg[kParams][json_keys::kAppId] = hmi_app_id;
+
+    application_manager::MessagePtr message_to_send(
+        new application_manager::Message(
+            protocol_handler::MessagePriority::kDefault));
+    message_to_send->set_protocol_version(
+        application_manager::ProtocolVersion::kHMI);
+    message_to_send->set_correlation_id(msg[kId].asInt());
+    message_to_send->set_json_message(MessageHelper::ValueToString(msg));
+    message_to_send->set_message_type(
+        application_manager::MessageType::kRequest);
+
+    service()->SendMessageToHMI(message_to_send);
+
+    app->subscribed_interior_vehicle_data_.erase(iter++);
   }
 }
 
