@@ -35,6 +35,8 @@
 #include "config_profile/profile.h"
 #include "media_manager/video/video_stream_to_file_adapter.h"
 
+#undef DeleteFile
+
 namespace media_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger, "VideoStreamToFileAdapter")
@@ -61,7 +63,7 @@ void VideoStreamToFileAdapter::Init() {
   if (thread_->is_running()) {
     LOG4CXX_DEBUG(logger, "Start sending thread");
     const size_t kStackSize = 16384;
-    thread_->start(threads::ThreadOptions(kStackSize));
+	thread_->startWithOptions(threads::ThreadOptions(kStackSize));
   } else {
     LOG4CXX_WARN(logger, "thread is already running");
   }

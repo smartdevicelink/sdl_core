@@ -39,6 +39,7 @@ set(default_includes
     ${GSTREAMER_gst_INCLUDE_DIR}
     ${GLIB_glib_2_INCLUDE_DIR}
 )
+
 set(default_sources
     ${COMPONENTS_DIR}/media_manager/src/audio/a2dp_source_player_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/audio/from_mic_recorder_adapter.cc
@@ -62,6 +63,12 @@ set(LIBRARIES
 else(EXTENDED_MEDIA_MODE)
 set(default_includes
 )
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+set(default_sources
+  ./src/video/video_stream_to_file_adapter.cc
+)
+else()
 set(default_sources
     ${COMPONENTS_DIR}/media_manager/src/video/video_stream_to_file_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/audio/socket_audio_streamer_adapter.cc
@@ -72,6 +79,8 @@ set(default_sources
     ${COMPONENTS_DIR}/media_manager/src/pipe_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/socket_streamer_adapter.cc
 )
+endif()
+
 set(LIBRARIES
     ProtocolLibrary
 )
@@ -95,6 +104,7 @@ include_directories (
     ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/usage_statistics/include/
     ${default_includes}
     ${LOG4CXX_INCLUDE_DIRECTORY}
+    ${CMAKE_SOURCE_DIR}/src/3rd_party/pthread-win32-2.9.1
 )
 
 set (SOURCES

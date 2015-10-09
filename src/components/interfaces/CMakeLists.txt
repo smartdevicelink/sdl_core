@@ -41,7 +41,10 @@ IF (${HMI_JSON_API})
   GenerateInterface("HMI_API.xml" "hmi_apis" "jsonrpc")
 ENDIF (${HMI_JSON_API})
 
+message(STATUS "INTERFACES executing...")
+
 IF (${HMI_DBUS_API})
+    message(STATUS "HMI_DBUS_API executing...")
     set(hpp_file
       "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API.h"
       "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API_schema.h"
