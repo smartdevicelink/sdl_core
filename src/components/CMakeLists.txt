@@ -56,7 +56,7 @@ add_subdirectory(./utils)
 
 # --- Security manager
 if(ENABLE_SECURITY)
-#  add_subdirectory(./security_manager)
+  add_subdirectory(./security_manager)
 endif()
 #
 # --- Policy_impl
@@ -80,8 +80,9 @@ add_subdirectory(./config_profile)
 # --- AudioManager
 add_subdirectory(./media_manager)
 
+message(STATUS "TIME_TESTER:" ${TIME_TESTER})
 if (TIME_TESTER)
-#    add_subdirectory(./time_tester)
+    add_subdirectory(./time_tester)
 endif()
 
 
@@ -89,8 +90,10 @@ if (${HMI_DBUS_API})
 # --- DBus
      add_subdirectory(./dbus)
 endif ()
+
+message(STATUS "QT_HMI:" ${QT_HMI})
 if (${QT_HMI})
 # --- Qt HMI
-#    add_subdirectory(./qt_hmi)
+    add_subdirectory(./qt_hmi)
 endif ()
 

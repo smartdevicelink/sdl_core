@@ -28,6 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+message(STATUS "time_tester executing.")
 
 set(TIME_TESTER_SRC_DIR ${COMPONENTS_DIR}/time_tester/src)
 
@@ -47,6 +48,7 @@ include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${CMAKE_SOURCE_DIR}/src/3rd_party/pthread-win32-2.9.1
 )
 
 set (SOURCES
