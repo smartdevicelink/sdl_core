@@ -7,6 +7,7 @@
 #ifndef CSENDER_H
 #define CSENDER_H
 
+#undef ssize_t
 #if _MSC_VER >= 1400 // VC++ 8.0
 typedef int ssize_t;
 #endif

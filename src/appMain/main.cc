@@ -134,6 +134,7 @@ LOG4CXX_INFO(logger,
 #ifdef OS_WIN32
 #ifdef close
 #undef close
+#undef closesocket
 file_str.close();
 #define close closesocket
 #endif
@@ -202,7 +203,7 @@ int32_t sdl_start(int32_t argc,char** argv){
                 "Attention! This application was built with unsupported "
                 "configuration (gcov + QNX). Use it at your own risk.");
 #endif
-
+#endif
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
   if (!utils::appenders_loader.Loaded()) {

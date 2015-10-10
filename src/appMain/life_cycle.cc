@@ -55,7 +55,14 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "appMain")
 namespace {
 void NameMessageBrokerThread(const System::Thread& thread,
                              const std::string& name) {
-  Thread::SetNameForId(thread.GetId(), name);
+#ifdef OS_WIN32
+	pthread_t pt;
+	pt.p = thread.GetId();
+	pt.x = 0;
+	Thread::SetNameForId(Thread::Id(pt), name);
+#else
+	Thread::SetNameForId(Thread::Id(thread.GetId()), name);
+#endif
 }
 }  // namespace
 
@@ -370,7 +377,13 @@ void LifeCycle::Run() {
   ::utils::SubscribeToTerminateSignal(&sig_handler);
   ::utils::SubscribeToFaultSignal(&agony);
   // Now wait for any signal
+#ifdef OS_WIN32
+  while (true) {
+	  Sleep(100500 * 1000);
+  }
+#else
   pause();
+#endif
 }
 
 

@@ -134,6 +134,8 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${CMAKE_SOURCE_DIR}/src/3rd_party/dbus-1.7.8
   ${CMAKE_SOURCE_DIR}/src/3rd_party/dbus-1.7.8/dbus/
+  ${CMAKE_SOURCE_DIR}/src/3rd_party/pthread-win32-2.9.1
+  ${CMAKE_SOURCE_DIR}/src/LibVrMsp
 )
 
 set (SOURCES

@@ -85,7 +85,8 @@ else ()
 endif ()
 
 add_library(${target} SHARED ${SOURCES})
-target_link_libraries(${target} ${LIBRARIES} )
+message(STATUS "Policy->LIBRARIES:" ${LIBRARIES})
+target_link_libraries(${target} ${LIBRARIES})
 
 if(ENABLE_LOG)
   target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
