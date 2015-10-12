@@ -135,8 +135,11 @@
 
     #define INIT_LOGGER(file_name)
 
+#ifdef OS_WIN32
+	#define DEINIT_LOGGER()
+#else
     #define DEINIT_LOGGER(file_name)
-
+#endif
     #define LOG4CXX_IS_TRACE_ENABLED(logger) false
 
     #undef LOG4CXX_INFO

@@ -65,7 +65,9 @@
 #endif //(_WIN32_WINNT != OLD_WIN32_WINNT)
 
 typedef int socklen_t;
+#ifndef OS_WIN32
 #define close closesocket
+#endif
 
 #else //_WIN32
 

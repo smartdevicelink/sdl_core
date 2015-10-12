@@ -134,7 +134,6 @@ LOG4CXX_INFO(logger,
 #ifdef OS_WIN32
 #ifdef close
 #undef close
-#undef closesocket
 file_str.close();
 #define close closesocket
 #endif
@@ -198,7 +197,7 @@ int32_t sdl_start(int32_t argc,char** argv){
 	INIT_LOGGER(file_system::CurrentWorkingDirectory() + "/" + "log4cxx.properties");
 #else
   INIT_LOGGER("log4cxx.properties");
-#if defined(__QNXNTO__) and defined(GCOV_ENABLED)
+#if defined(__QNXNTO__) && defined(GCOV_ENABLED)
   LOG4CXX_WARN(logger_,
                 "Attention! This application was built with unsupported "
                 "configuration (gcov + QNX). Use it at your own risk.");

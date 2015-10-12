@@ -60,7 +60,7 @@ if(ENABLE_SECURITY)
 endif()
 #
 # --- Policy_impl
-#add_subdirectory(./policy)
+add_subdirectory(./policy)
 
 # --- Validated types
 add_subdirectory(./rpc_base)

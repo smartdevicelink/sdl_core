@@ -81,10 +81,18 @@ ThreadedSocketConnection::~ThreadedSocketConnection() {
   threads::DeleteThread(thread_);
 
   if (-1 != read_fd_) {
+#ifdef OS_WIN32
+	closesocket(read_fd_);
+#else
     close(read_fd_);
+#endif
   }
   if (-1 != write_fd_) {
-    close(write_fd_);
+#ifdef OS_WIN32
+		closesocket(write_fd_);
+#else
+		close(write_fd_);
+#endif
   }
 }
 
@@ -146,7 +154,13 @@ void ThreadedSocketConnection::Finalize() {
     LOG4CXX_DEBUG(logger_, "not unexpected_disconnect");
     controller_->ConnectionFinished(device_handle(), application_handle());
   }
+#ifdef OS_WIN32
+  closesocket(socket_);
+  closesocket(read_fd_);
+  closesocket(write_fd_);
+#else
   close(socket_);
+#endif
 }
 
 TransportAdapter::Error ThreadedSocketConnection::Notify() const {

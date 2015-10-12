@@ -314,7 +314,11 @@ void TcpServer::Close() {
   /* close all client sockets */
   for (std::map<int, std::string*>::iterator it = m_receivingBuffers.begin();
        it != m_receivingBuffers.end() ; it++) {
+#ifdef OS_WIN32
+	closesocket((*it).first);
+#else
     ::close((*it).first);
+#endif
     if ((*it).second) {
       delete(*it).second;
     }

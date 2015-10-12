@@ -829,17 +829,17 @@ add_subdirectory(./src/3rd_party-static)
 add_subdirectory(./src/components)
 
 # --- Main application
-#add_subdirectory(./src/appMain)
+add_subdirectory(./src/appMain)
 
 # --- Plugins
-#add_subdirectory(./src/plugins)
+add_subdirectory(./src/plugins)
 
 
 # Building tests
 if(BUILD_TESTS)
     # Directory test is deprecated. Use src/components/<name>/test
     include(Dart)
-    #add_subdirectory(./test)
+    add_subdirectory(./test)
 endif()
                                                                                                                                                                                        
 # Building documentation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
