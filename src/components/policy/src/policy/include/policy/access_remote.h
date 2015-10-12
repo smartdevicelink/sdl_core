@@ -261,6 +261,15 @@ class AccessRemote {
    * @return true if application uses remote control
    */
   virtual bool IsAppReverse(const PTString& app_id) = 0;
+
+  /**
+   * Gets device zone
+   * @param device_id
+   * @param default_seat seat will be used if device doesn't have zone
+   * @return device zone
+   */
+  virtual SeatLocation GetDeviceZone(const std::string& device_id,
+                                     SeatLocation default_seat) const = 0;
 };
 
 }  // namespace policy

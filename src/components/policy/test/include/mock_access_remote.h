@@ -87,6 +87,8 @@ class MockAccessRemote : public AccessRemote {
                  const RemoteControlParams& params));
   MOCK_METHOD1(IsAppReverse, bool(const PTString& app_id));
   MOCK_METHOD0(Reset, void());
+  MOCK_CONST_METHOD2(GetDeviceZone, SeatLocation(const std::string& device_id,
+                                                 SeatLocation default_seat));
 };
 
 }  // namespace policy

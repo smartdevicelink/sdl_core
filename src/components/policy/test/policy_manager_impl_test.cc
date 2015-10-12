@@ -440,6 +440,7 @@ TEST_F(PolicyManagerImplTest, CheckAccess_Result) {
       WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(false));
   EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(true));
+  EXPECT_CALL(*access_remote, GetDeviceZone("dev1", zone)).WillOnce(Return(zone));
   EXPECT_CALL(*access_remote, CheckParameters(_,_,_)).WillOnce(Return(kManual));
   EXPECT_CALL(*access_remote, Check(who, what)).
       WillOnce(Return(TypeAccess::kAllowed));
@@ -471,6 +472,7 @@ TEST_F(PolicyManagerImplTest, TwoDifferentDevice) {
       WillOnce(Return("dev2"));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev2")).WillOnce(Return(false));
   EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(true));
+  EXPECT_CALL(*access_remote, GetDeviceZone("dev2", zone)).WillOnce(Return(zone));
   EXPECT_CALL(*access_remote, CheckParameters(_,_,_)).WillOnce(Return(kManual));
   EXPECT_CALL(*access_remote, Check(who2, what)).
         WillOnce(Return(TypeAccess::kDisallowed));
