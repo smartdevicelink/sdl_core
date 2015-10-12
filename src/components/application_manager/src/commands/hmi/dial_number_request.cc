@@ -36,6 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
+namespace hmi {
+
 DialNumberRequest::DialNumberRequest(const MessageSharedPtr& message)
     : RequestToHMI(message) {
 }
@@ -46,6 +48,8 @@ DialNumberRequest::~DialNumberRequest() {
 void DialNumberRequest::Run() {
   SendRequest();
 }
+
+} // namespace hmi
 
 }  // namespace commands
 

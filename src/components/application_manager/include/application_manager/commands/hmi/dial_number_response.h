@@ -39,6 +39,8 @@ namespace application_manager {
 
 namespace commands {
 
+namespace hmi {
+
 /**
  * @brief DialNumberResponse command class
  **/
@@ -64,6 +66,8 @@ class DialNumberResponse : public ResponseFromHMI {
  private:
   DISALLOW_COPY_AND_ASSIGN(DialNumberResponse);
 };
+
+} // namespace hmi
 
 }  // namespace commands
 
