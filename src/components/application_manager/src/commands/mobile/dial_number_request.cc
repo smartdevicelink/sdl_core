@@ -75,7 +75,7 @@ void DialNumberRequest::Run() {
   }
   StripNumberParam(number);
   if (number.empty()) {
-    LOG4CXX_ERROR(logger_, "After strip number param is empty. Invalid incoming data");
+    LOG4CXX_WARN(logger_, "After strip number param is empty. Invalid incoming data");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }

@@ -188,11 +188,11 @@ RequestController::TResult RequestController::addHMIRequest(
                                                      timeout_in_mseconds));
 
   if (0 == timeout_in_mseconds) {
-    LOG4CXX_INFO(logger_, "Default timeout was set to 0."
+    LOG4CXX_DEBUG   (logger_, "Default timeout was set to 0."
                  "RequestController will not track timeout of this request.");
   }
   waiting_for_response_.Add(request_info_ptr);
-  LOG4CXX_INFO(logger_, "Waiting for response cont:"  << waiting_for_response_.Size());
+  LOG4CXX_DEBUG(logger_, "Waiting for response count:"  << waiting_for_response_.Size());
 
   UpdateTimer();
   return RequestController::SUCCESS;
