@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,69 +30,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <unistd.h>
+#include "utils/atomic_object.h"
 #include "gtest/gtest.h"
-#include "utils/macro.h"
-
-#include "utils/resource_usage.h"
-#include "utils/file_system.h"
-
-namespace utils {
-
-class ResourceUsagePrivateTest : public ::testing::Test {
- protected:
-  Resources res;
-};
-
-TEST_F(ResourceUsagePrivateTest, ReadStatFileTest) {
-  std::string proc_buf;
-  EXPECT_TRUE(res.ReadStatFile(proc_buf));
-}
-
-TEST_F(ResourceUsagePrivateTest, GetProcInfoTest) {
-  Resources::PidStats pid_stat;
-  EXPECT_TRUE(res.GetProcInfo(pid_stat));
-}
-
-TEST_F(ResourceUsagePrivateTest, GetMemInfoTest) {
-  Resources::MemInfo mem_info;
-  EXPECT_TRUE(res.GetMemInfo(mem_info));
-}
-
-TEST_F(ResourceUsagePrivateTest, GetStatPathTest_FileExists) {
-  //arrange
-  std::string filename = res.GetStatPath();
-  //assert
-  EXPECT_TRUE(file_system::FileExists(filename));
-}
-
-TEST_F(ResourceUsagePrivateTest, GetStatPathTest_ReadFile) {
-  //arrange
-  std::string filename = res.GetStatPath();
-  std::string output;
-  //assert
-  EXPECT_TRUE(file_system::ReadFile(filename, output));
-
-}
-TEST_F(ResourceUsagePrivateTest, GetProcPathTest) {
-  ///arrange
-  std::string fd = res.GetProcPath();
-  std::string filename = res.GetStatPath();
-  //assert
-  EXPECT_EQ(filename, fd + "/stat");
-}
-}
 
 namespace test {
-namespace components {
-namespace utils_test {
+namespace utils {
 
-TEST(ResourceUsageTest, SuccesfulGrabResources) {
-  ::utils::ResourseUsage* resources = ::utils::Resources::getCurrentResourseUsage();
-  EXPECT_TRUE(resources != NULL);
-  delete resources;
+TEST(AtomicObjectTest, Construct) {
+  sync_primitives::atomic_int var(5);
+  EXPECT_EQ(5, var);
+
+  var = 8;
+  EXPECT_EQ(8, var);
+
+  sync_primitives::atomic_bool flag = true;
+
+  EXPECT_TRUE(flag == true);
+
+  flag = false;
+  EXPECT_FALSE(flag == true);
 }
 
-}  // namespace utils_test
-}  // namespace components
-}  // namespace test
+}  // utils
+}  // test
