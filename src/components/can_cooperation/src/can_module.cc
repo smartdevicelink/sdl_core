@@ -128,7 +128,7 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
                           static_cast<functional_modules::MobileFunctionID>(
                             msg->function_id())));
 
-  LOG4CXX_INFO(logger_, "Mobile message: " << msg->json_message());
+  LOG4CXX_DEBUG(logger_, "Mobile message: " << msg->json_message());
 
   commands::Command* command = MobileCommandFactory::CreateCommand(msg);
   if (command) {
@@ -148,7 +148,7 @@ void CANModule::SendMessageToCan(const MessageFromMobile& msg) {
 
 ProcessResult CANModule::ProcessHMIMessage(
   application_manager::MessagePtr msg) {
-  LOG4CXX_INFO(logger_, "HMI message: " << msg->json_message());
+  LOG4CXX_DEBUG(logger_, "HMI message: " << msg->json_message());
   return HandleMessage(msg);
 }
 
@@ -366,7 +366,7 @@ void CANModule::NotifyMobiles(application_manager::MessagePtr message) {
 }
 
 void CANModule::SendResponseToMobile(application_manager::MessagePtr msg) {
-  LOG4CXX_INFO(logger_, "Response to mobile: " << msg->json_message());
+  LOG4CXX_DEBUG(logger_, "Response to mobile: " << msg->json_message());
   service()->SendMessageToMobile(msg);
   request_controller_.DeleteRequest(msg->correlation_id());
 }

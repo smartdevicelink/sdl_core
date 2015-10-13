@@ -126,7 +126,7 @@ void  BaseCommandRequest::SendRequest(const char* function_id,
     message_to_send->set_message_type(
       application_manager::MessageType::kRequest);
 
-    LOG4CXX_INFO(logger_, "Request to HMI: " << json_msg);
+    LOG4CXX_DEBUG(logger_, "Request to HMI: " << json_msg);
     service_->SendMessageToHMI(message_to_send);
   } else {
     CANModule::instance()->SendMessageToCan(msg);
