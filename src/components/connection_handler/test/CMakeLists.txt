@@ -38,7 +38,6 @@ include_directories(
     ${COMPONENTS_DIR}/security_manager/test/include
     ${COMPONENTS_DIR}/protocol_handler/test/include
     ${COMPONENTS_DIR}/security_manager/include
-    ${COMPONENTS_DIR}/application_manager/include
     ${COMPONENTS_DIR}/connection_handler/test/include
     ${COMPONENTS_DIR}/transport_manager/test/include
 )
@@ -52,9 +51,10 @@ set(LIBRARIES
 )
 
 set(SOURCES
-    #connection_handler_impl_test.cc
-    connection_test.cc
-    #heart_beat_monitor_test.cc
+#    connection_handler_impl_test.cc
+#    connection_test.cc
+    device_test.cc
+    heart_beat_monitor_test.cc
 )
 
 file(COPY ${appMain_DIR}/smartDeviceLink.ini DESTINATION "./")
