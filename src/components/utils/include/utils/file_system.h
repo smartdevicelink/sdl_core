@@ -147,6 +147,13 @@ void Close(std::ofstream* file_stream);
 std::string CurrentWorkingDirectory();
 
 /**
+ * @brief Allows to obtaine absolute path for certain path.
+ * @param path the file name for which absolute path have to be calculated.
+ * @return absolute path for certain path.
+ */
+std::string GetAbsolutePath(const std::string& path);
+
+/**
   * @brief Removes file
   *
   * @param name path to file
@@ -260,6 +267,7 @@ bool CopyFile(const std::string& src,
 */
 bool MoveFile(const std::string& src,
               const std::string& dst);
+
 void remove_directory_content(const std::string& directory_name);
 
 }  // namespace file_system

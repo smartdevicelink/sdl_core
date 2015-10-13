@@ -31,7 +31,7 @@
  */
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_HELPERS_H
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_HELPERS_H
-
+#include<algorithm>
 /**
  * These helpers allows to simplify compare strategy between some objects.
  * Suppose user has some enum with value E with some numbers of possible values
@@ -113,6 +113,13 @@ namespace helpers {
   bool Compare(T what, T to, T to1, T to2, T to3, T to4) {
     return CmpStrategy(Compare<T, CompareType, CmpStrategy>(what, to, to1, to2, to3),
                        Compare<T, CompareType, CmpStrategy>(what, to4));
+  }
+
+
+  template<typename Container>
+  bool in_range(const Container& container,  const typename Container::value_type& value) {
+    return
+        std::find(container.begin(), container.end(), value) != container.end();
   }
 }
 

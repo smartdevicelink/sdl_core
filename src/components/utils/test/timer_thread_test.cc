@@ -79,7 +79,7 @@ TEST_F(TimerThreadTest, StartTimerThreadWithTimeoutOneSec_ExpectSuccessfullInvok
   EXPECT_EQ(0u, check_val);
   timer.start(100);
   condvar_.WaitFor(alock, wait_val);
-  EXPECT_EQ(1, check_val);
+  EXPECT_EQ(1u, check_val);
 }
 
 TEST_F(TimerThreadTest, StartTimerThreadWithTimeoutOneSecInLoop_ExpectSuccessfullInvokeCallbackFuncOnEveryTimeout) {

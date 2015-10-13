@@ -30,45 +30,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_GEN_HASH_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_GEN_HASH_H_
+#include "utils/atomic_object.h"
+#include "gtest/gtest.h"
 
-#include <string>
-
+namespace test {
 namespace utils {
 
-/**
- * @brief generate random alphanumeric string of specified length
- * @param size length of random string
- * @return random string
- */
+TEST(AtomicObjectTest, Construct) {
+  sync_primitives::atomic_int var(5);
+  EXPECT_EQ(5, var);
 
-const std::string gen_hash(size_t size);
+  var = 8;
+  EXPECT_EQ(8, var);
 
-/**
- * @brief Allows to generate hash from the specified string.
- * The djb2 algorithm uses for hash generation.
- * @param str_to_hash - the string from which hash should be generated.
- * @return integer hash for the specified string.
- */
-int32_t Djb2HashFromString(const std::string& str_to_hash);
+  sync_primitives::atomic_bool flag = true;
 
-/**
- * @brief Allows to generate hash from the specified string.
- * The faq6 algorithm uses for hash generation.
- * @param str_to_hash - the string from which hash should be generated.
- * @return uint32_t hash for the specified string.
- */
-uint32_t Faq6HashFromString(const std::string& str_to_hash);
+  EXPECT_TRUE(flag == true);
 
-/**
- * @brief Transforms input string to lower case and then generates hash.
- * The faq6 algorithm uses for hash generation.
- * @param str_to_hash - the string from which hash should be generated.
- * @return uint32_t hash for the specified string.
- */
-uint32_t CaseInsensitiveFaq6HashFromString(const std::string& str_to_hash);
+  flag = false;
+  EXPECT_FALSE(flag == true);
+}
 
-}  // namespace utils
-
-#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_GEN_HASH_H_
+}  // utils
+}  // test
