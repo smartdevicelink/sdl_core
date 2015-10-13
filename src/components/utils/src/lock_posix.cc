@@ -31,12 +31,11 @@
  */
 
 #include "utils/lock.h"
-
 #include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <cstring>
 #include "utils/logger.h"
 
 namespace sync_primitives {
@@ -49,34 +48,16 @@ Lock::Lock()
       is_mutex_recursive_(false)
 #endif // NDEBUG
 {
-  const int32_t status = pthread_mutex_init(&mutex_, NULL);
-  if (status != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to initialize mutex");
-  }
+  Init(false);
 }
 
-Lock::Lock(bool is_mutex_recursive)
+Lock::Lock(bool is_recursive)
 #ifndef NDEBUG
     : lock_taken_(0),
-      is_mutex_recursive_(is_mutex_recursive)
+      is_mutex_recursive_(is_recursive)
 #endif // NDEBUG
 {
-  int32_t status;
-
-  if (is_mutex_recursive) {
-    pthread_mutexattr_t attr;
-
-    pthread_mutexattr_init(&attr);
-    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-    status = pthread_mutex_init(&mutex_, &attr);
-    pthread_mutexattr_destroy(&attr);
-  } else {
-    status = pthread_mutex_init(&mutex_, NULL);
-  }
-
-  if (status != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to initialize mutex");
-  }
+  Init(is_recursive);
 }
 
 Lock::~Lock() {
@@ -87,14 +68,17 @@ Lock::~Lock() {
 #endif
   int32_t status = pthread_mutex_destroy(&mutex_);
   if (status != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to destroy mutex " << &mutex_ << ": " << strerror(status));
+    LOG4CXX_ERROR(logger_, "Failed to destroy mutex " << &mutex_ << ": "
+                  << strerror(status));
   }
 }
 
 void Lock::Acquire() {
   const int32_t status = pthread_mutex_lock(&mutex_);
   if (status != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to acquire mutex " << &mutex_ << ": " << strerror(status));
+    LOG4CXX_FATAL(logger_, "Failed to acquire mutex " << &mutex_ << ": "
+                  << strerror(status));
+    DCHECK(status != 0);
   } else {
     AssertFreeAndMarkTaken();
   }
@@ -104,7 +88,8 @@ void Lock::Release() {
   AssertTakenAndMarkFree();
   const int32_t status = pthread_mutex_unlock(&mutex_);
   if (status != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to unlock mutex" << &mutex_ << ": " << strerror(status));
+    LOG4CXX_ERROR(logger_, "Failed to unlock mutex" << &mutex_ << ": "
+                  << strerror(status));
   }
 }
 
@@ -135,5 +120,25 @@ void Lock::AssertTakenAndMarkFree() {
   lock_taken_--;
 }
 #endif
+
+void Lock::Init(bool is_recursive) {
+  pthread_mutexattr_t attr;
+  pthread_mutexattr_init(&attr);
+
+  const int32_t mutex_type = is_recursive
+                             ? PTHREAD_MUTEX_RECURSIVE
+                             : PTHREAD_MUTEX_ERRORCHECK;
+
+  pthread_mutexattr_settype(&attr, mutex_type);
+  const int32_t status = pthread_mutex_init(&mutex_, &attr);
+
+  pthread_mutexattr_destroy(&attr);
+
+  if (status != 0) {
+    LOG4CXX_FATAL(logger_, "Failed to initialize mutex. "
+                  << std::strerror(status));
+    DCHECK(status != 0);
+  }
+}
 
 }  // namespace sync_primitives
