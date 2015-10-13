@@ -85,7 +85,7 @@ void DeinitLogger() {
   DEINIT_LOGGER();
 }
 
-//TODO(VVeremjova) APPLINK-12832 Logger does not write debug information in file
+//TODO(VVeremjova) Logger does not write debug information in file
 TEST(AutoTraceTest, DISABLED_Basic) {
   const std::string testlog =
       "Test trace is working!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
