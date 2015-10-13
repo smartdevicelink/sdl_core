@@ -263,20 +263,15 @@ functional_modules::ProcessResult CANModule::HandleMessage(
       } else if (functional_modules::hmi_api::on_device_rank_changed
           == function_name) {
         if (value.isMember(json_keys::kParams)) {
-          // TODO(VS): move validation to separate class
-          if (value[json_keys::kParams].isMember(message_params::kDevice)
-            && value[json_keys::kParams][message_params::kDevice].isObject()
-            && value[json_keys::kParams][message_params::kDevice].isMember(json_keys::kId)
-            && value[json_keys::kParams][message_params::kDevice][json_keys::kId].isIntegral()
-            && value[json_keys::kParams][message_params::kDevice].isMember(message_params::kName)
-            && value[json_keys::kParams][message_params::kDevice][message_params::kName].isString()
-            && value[json_keys::kParams].isMember(message_params::kRank)
-            && value[json_keys::kParams][message_params::kRank].isString()) {
-            uint32_t device_id = value[json_keys::kParams]
-                                       [message_params::kDevice]
+          Json::Value& params = value[json_keys::kParams];
+          bool valid = MessageHelper::ValidateDeviceInfo(
+              params.get(message_params::kDevice, Json::Value(Json::nullValue)))
+            && params.isMember(message_params::kRank)
+            && params[message_params::kRank].isString();
+          if (valid) {
+            uint32_t device_id = params[message_params::kDevice]
                                         [json_keys::kId].asUInt();
-            std::string rank = value[json_keys::kParams]
-                                     [message_params::kRank].asString();
+            std::string rank = params[message_params::kRank].asString();
             PolicyHelper::ChangeDeviceRank(device_id, rank);
             ModuleHelper::ProccessDeviceRankChanged(device_id, rank);
           } else {
@@ -288,6 +283,28 @@ functional_modules::ProcessResult CANModule::HandleMessage(
       } else if (functional_modules::hmi_api::on_app_deactivated ==
                  function_name) {
         return ModuleHelper::ProcessOnAppDeactivation(value);
+      } else if (function_name ==
+          functional_modules::hmi_api::on_device_location_changed) {
+        if (value.isMember(json_keys::kParams)) {
+          Json::Value& params = value[json_keys::kParams];
+          bool valid = MessageHelper::ValidateDeviceInfo(
+              params.get(message_params::kDevice, Json::Value(Json::nullValue)))
+              && MessageHelper::ValidateInteriorZone(params.get(
+                  message_params::kDeviceLocation, Json::Value(Json::nullValue)));
+          if (valid) {
+            uint32_t device_id = params[message_params::kDevice]
+                                        [json_keys::kId].asUInt();
+            int col = params[message_params::kDeviceLocation][message_params::kCol].asInt();
+            int row = params[message_params::kDeviceLocation][message_params::kRow].asInt();
+            int level = params[message_params::kDeviceLocation][message_params::kLevel].asInt();
+            SeatLocation zone = { col, row, level };
+            service()->SetDeviceZone(device_id, zone);
+          } else {
+            LOG4CXX_ERROR(logger_,
+                          "Invalid RC.OnDeviceLocationChanged notification");
+          }
+        }
+        return ProcessResult::PROCESSED;
       }
 
       int32_t func_id = msg->function_id();

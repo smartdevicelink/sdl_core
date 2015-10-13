@@ -32,6 +32,7 @@
 
 #include <string>
 #include "can_cooperation/message_helper.h"
+#include "can_cooperation/can_module_constants.h"
 
 namespace can_cooperation {
 using functional_modules::MobileFunctionID;
@@ -98,6 +99,24 @@ bool IsMember(const Json::Value& value, const std::string& key) {
   }
 
   return value.isMember(key);
+}
+
+// TODO(KKolodiy): after creating commands for notification from HMI
+// this validate methods may move to commands
+bool MessageHelper::ValidateDeviceInfo(const Json::Value& value) {
+  return value.isObject() && value.isMember(json_keys::kId)
+      && value[json_keys::kId].isIntegral()
+      && value.isMember(message_params::kName)
+      && value[message_params::kName].isString();
+}
+
+bool MessageHelper::ValidateInteriorZone(const Json::Value& value) {
+  return value.isObject() && value.isMember(message_params::kCol)
+      && value[message_params::kCol].isInt()
+      && value.isMember(message_params::kRow)
+      && value[message_params::kRow].isInt()
+      && value.isMember(message_params::kLevel)
+      && value[message_params::kLevel].isInt();
 }
 
 }  // namespace can_cooperation

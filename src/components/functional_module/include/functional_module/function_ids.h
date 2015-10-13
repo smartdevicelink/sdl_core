@@ -68,6 +68,7 @@ namespace hmi_api {
   const char on_app_deactivated[]        = "BasicCommunication.OnAppDeactivated";
   const char sdl_activate_app[]          = "SDL.ActivateApp";
   const char on_device_rank_changed[]    = "RC.OnDeviceRankChanged";
+  const char on_device_location_changed[] = "RC.OnDeviceLocationChanged";
 }
 
 /*namespace can_api {
