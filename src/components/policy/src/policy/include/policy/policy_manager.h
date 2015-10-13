@@ -482,6 +482,14 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     virtual PTString PrimaryDevice() const = 0;
 
     /**
+     * Sets device zone
+     * @param dev_id unique identifier of device
+     * @param zone device zone
+     */
+    virtual void SetDeviceZone(const PTString& dev_id,
+                               const SeatLocation& zone) = 0;
+
+    /**
      * Sets mode of remote control (on/off)
      * @param enabled true if remote control is turned on
      */

@@ -264,12 +264,20 @@ class AccessRemote {
 
   /**
    * Gets device zone
-   * @param device_id
-   * @param default_seat seat will be used if device doesn't have zone
+   * @param device_id unique identifier of device
+   * @param default_zone zone will be used if policy doesn't have zone of this device
    * @return device zone
    */
   virtual SeatLocation GetDeviceZone(const std::string& device_id,
-                                     SeatLocation default_seat) const = 0;
+                                     SeatLocation default_zone) const = 0;
+
+  /**
+   * Sets device zone
+   * @param device_id unique identifier of device
+   * @param zone device zone
+   */
+  virtual void SetDeviceZone(const std::string& device_id,
+                             const SeatLocation& zone) = 0;
 };
 
 }  // namespace policy

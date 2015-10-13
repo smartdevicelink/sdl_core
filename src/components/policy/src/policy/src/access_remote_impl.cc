@@ -400,12 +400,17 @@ void AccessRemoteImpl::GetGroupsIds(const std::string &device_id,
 }
 
 SeatLocation AccessRemoteImpl::GetDeviceZone(
-    const std::string& device_id, const SeatLocation default_seat) const {
+    const std::string& device_id, SeatLocation default_zone) const {
   SeatList::const_iterator i = seats_.find(device_id);
   if (i != seats_.end()) {
     return i->second;
   }
-  return default_seat;
+  return default_zone;
+}
+
+void AccessRemoteImpl::SetDeviceZone(const std::string& device_id,
+                                     const SeatLocation& zone) {
+  seats_[device_id] = zone;
 }
 
 }  // namespace policy

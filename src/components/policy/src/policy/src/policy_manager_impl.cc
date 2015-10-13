@@ -1086,6 +1086,11 @@ PTString PolicyManagerImpl::PrimaryDevice() const {
   return access_remote_->PrimaryDevice();
 }
 
+void PolicyManagerImpl::SetDeviceZone(const PTString& dev_id,
+                                      const SeatLocation& zone) {
+  access_remote_->SetDeviceZone(dev_id, zone);
+}
+
 void PolicyManagerImpl::SetRemoteControl(bool enabled) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (enabled) {
