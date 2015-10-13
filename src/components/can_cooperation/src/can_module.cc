@@ -118,6 +118,7 @@ functional_modules::PluginInfo CANModule::GetPluginInfo() const {
 
 ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
   DCHECK(msg);
+
   if (!msg) {
     LOG4CXX_ERROR(logger_, "Null pointer message received.");
     return ProcessResult::FAILED;
@@ -126,6 +127,8 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
   msg->set_function_name(MessageHelper::GetMobileAPIName(
                           static_cast<functional_modules::MobileFunctionID>(
                             msg->function_id())));
+
+  LOG4CXX_INFO(logger_, "Mobile message: " << msg->json_message());
 
   commands::Command* command = MobileCommandFactory::CreateCommand(msg);
   if (command) {
@@ -363,6 +366,7 @@ void CANModule::NotifyMobiles(application_manager::MessagePtr message) {
 }
 
 void CANModule::SendResponseToMobile(application_manager::MessagePtr msg) {
+  LOG4CXX_INFO(logger_, "Response to mobile: " << msg->json_message());
   service()->SendMessageToMobile(msg);
   request_controller_.DeleteRequest(msg->correlation_id());
 }
