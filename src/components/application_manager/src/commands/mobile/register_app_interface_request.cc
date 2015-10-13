@@ -521,6 +521,15 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
       *(application.get()), resumption, need_restore_vr);
   SendResponse(true, result_code, add_info.c_str(), &response_params);
 
+  // Default HMI level should be set before any permissions validation, since it
+  // relies on HMI level.
+  resumer.SetupDefaultHMILevel(application);
+
+  // Sends OnPermissionChange notification to mobile right after RAI response
+  // and HMI level set-up
+  policy::PolicyHandler::instance()->OnAppRegisteredOnMobile(
+        application->mobile_app_id());
+
   if (result_code != mobile_apis::Result::RESUME_FAILED) {
     resumer.StartResumption(application, hash_id);
   } else {

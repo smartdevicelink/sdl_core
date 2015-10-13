@@ -1951,7 +1951,12 @@ void MessageHelper::SendSystemRequestNotification (uint32_t connection_key,
 
   content[strings::params][strings::connection_key] = connection_key;
 
-  ApplicationManagerImpl::instance()->ManageMobileCommand(new SmartObject(content));
+  SmartObject* so = new SmartObject(content);
+#ifdef DEBUG
+  PrintSmartObject(*so);
+#endif
+
+  DCHECK(ApplicationManagerImpl::instance()->ManageMobileCommand(so));
 }
 
 void MessageHelper::SendLaunchApp(uint32_t connection_key,
