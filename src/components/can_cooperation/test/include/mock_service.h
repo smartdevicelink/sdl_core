@@ -78,6 +78,8 @@ class MockService : public Service {
   MOCK_CONST_METHOD0(PrimaryDevice, uint32_t());
   MOCK_METHOD1(SetRemoteControl, void(bool enabled));
   MOCK_CONST_METHOD0(IsRemoteControlAllowed, bool());
+  MOCK_METHOD2(SetDeviceZone, void(const uint32_t dev_id,
+                                   const SeatLocation& zone));
 };
 
 }

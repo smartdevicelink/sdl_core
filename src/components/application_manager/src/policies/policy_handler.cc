@@ -1476,6 +1476,12 @@ uint32_t PolicyHandler::PrimaryDevice() const {
   }
 }
 
+void PolicyHandler::SetDeviceZone(const std::string& device_id,
+                     const application_manager::SeatLocation& zone) {
+  policy::SeatLocation policy_zone = {zone.col, zone.row, zone.level};
+  policy_manager_->SetDeviceZone(device_id, policy_zone);
+}
+
 void PolicyHandler::SetRemoteControl(bool enabled) {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->SetRemoteControl(enabled);

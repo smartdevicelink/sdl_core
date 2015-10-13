@@ -89,6 +89,8 @@ class MockAccessRemote : public AccessRemote {
   MOCK_METHOD0(Reset, void());
   MOCK_CONST_METHOD2(GetDeviceZone, SeatLocation(const std::string& device_id,
                                                  SeatLocation default_seat));
+  MOCK_METHOD2(SetDeviceZone, void(const std::string& device_id,
+                                   const SeatLocation& zone));
 };
 
 }  // namespace policy

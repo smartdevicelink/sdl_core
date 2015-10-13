@@ -159,6 +159,14 @@ class PolicyHandler :
   uint32_t PrimaryDevice() const;
 
   /**
+   * Sets device zone
+   * @param device_id unique identifier of device
+   * @param zone device zone
+   */
+  void SetDeviceZone(const std::string& device_id,
+                     const application_manager::SeatLocation& zone);
+
+  /**
    * Sets mode of remote control (on/off)
    * @param enabled true if remote control is turned on
    */
