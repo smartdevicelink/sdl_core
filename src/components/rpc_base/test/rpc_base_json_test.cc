@@ -45,10 +45,6 @@ enum TestEnum {
   kInvalidValue
 };
 
-bool IsValidEnum(TestEnum val) {
-  return val == kValue0 || val == kValue1;
-}
-
 bool EnumFromJsonString(const std::string& value, TestEnum* enm) {
   if (value == "kValue0") {
     *enm = kValue0;
