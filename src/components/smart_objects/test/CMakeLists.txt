@@ -50,7 +50,6 @@ set(SOURCES
   ${COMPONENTS_DIR}/smart_objects/test/SmartObjectInvalid_test.cc
   ${COMPONENTS_DIR}/smart_objects/test/SmartObjectStress_test.cc
   ${COMPONENTS_DIR}/smart_objects/test/SmartObjectUnit_test.cc
-  ${COMPONENTS_DIR}/smart_objects/test/TSharedPtr_test.cc
   ${COMPONENTS_DIR}/smart_objects/test/smart_object_performance_test.cc
   ${COMPONENTS_DIR}/smart_objects/test/map_performance_test.cc
   ${COMPONENTS_DIR}/smart_objects/test/BoolSchemaItem_test.cc
