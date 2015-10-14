@@ -116,13 +116,12 @@ endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
   message(STATUS "Utils->CMAKE_SYSTEM_NAME STREQUAL: Windows")
-  list(APPEND LIBRARIES pthreadVC2)
+  #list(APPEND LIBRARIES pthreadVC2)
   #ADD_DEPENDENCIES(Utils pthreadVC2)
 endif()
 
 message(STATUS "Utils->LIBRARIES:" ${LIBRARIES})
 target_link_libraries("Utils" ${LIBRARIES})
-
 
 if(BUILD_TESTS)
   add_subdirectory(test)

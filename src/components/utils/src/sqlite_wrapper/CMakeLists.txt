@@ -41,4 +41,4 @@ set(SOURCES
 )
 
 add_library(${target} ${SOURCES})
-target_link_libraries(${target} Utils)
+target_link_libraries(${target} Utils sqlite3)

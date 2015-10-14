@@ -373,9 +373,13 @@ namespace {
 }  //  namespace
 
 void LifeCycle::Run() {
+#ifdef OS_WIN32
+
+#else
   // First, register signal handlers
   ::utils::SubscribeToTerminateSignal(&sig_handler);
   ::utils::SubscribeToFaultSignal(&agony);
+#endif
   // Now wait for any signal
 #ifdef OS_WIN32
   while (true) {

@@ -56,10 +56,8 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ResumeCtrl")
 
 ResumeCtrl::ResumeCtrl():
   queue_lock_(false),
-  restore_hmi_level_timer_("RsmCtrlRstore",
-                           this, &ResumeCtrl::ApplicationResumptiOnTimer),
-  save_persistent_data_timer_("RsmCtrlPercist",
-                              this, &ResumeCtrl::SaveDataOnTimer, true),
+  restore_hmi_level_timer_("RsmCtrlRstore", this, &ResumeCtrl::ApplicationResumptiOnTimer),
+  save_persistent_data_timer_("RsmCtrlPercist", this, &ResumeCtrl::SaveDataOnTimer, true),
   is_resumption_active_(false),
   is_data_saved_(false),
   launch_time_(time(NULL)) {

@@ -91,8 +91,8 @@ namespace NsMessageBroker
       void* MethodForThread(void * arg);
 
 #ifdef MODIFY_FUNCTION_SIGN
-			// clear Controller and Subscriber
-			void clearController();
+	  // clear Controller and Subscriber
+	  void clearController();
 #endif
 
    private:

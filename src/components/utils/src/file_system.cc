@@ -368,7 +368,7 @@ bool file_system::DeleteFile(const std::string& name) {
 #endif
 }
 
-void remove_directory_content(const std::string& directory_name) {
+void file_system::remove_directory_content(const std::string& directory_name) {
 #ifdef OS_WIN32
 #ifdef OS_WINCE
 	wchar_string strUnicodeData;

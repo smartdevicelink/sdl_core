@@ -35,6 +35,9 @@ set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_S
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
+if (EXTENDED_POLICY_FLAG)
+  add_definitions(-DEXTENDED_POLICY)
+endif()
 
 #Generation of policy table interface...
 #include(${CMAKE_SOURCE_DIR}/tools/intergen/GenerateInterfaceLibrary.cmake)
@@ -69,15 +72,16 @@ add_subdirectory(usage_statistics)
 include_directories(./policy_table/table_struct)
 add_subdirectory(policy_table/table_struct)
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-set(LIBRARIES ConfigProfile policy_struct dbms jsoncpp Utils pthreadVC2)
-else ()
 set(LIBRARIES ConfigProfile policy_struct dbms jsoncpp Utils)
-endif ()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   # --- QDB Wrapper 
   include_directories (${COMPONENTS_DIR}/utils/include/utils)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  # --- SQLite Wrapper
+  include_directories (${COMPONENTS_DIR}/utils/include/utils)
+  list(APPEND LIBRARIES sqlite3)
+  list(APPEND LIBRARIES pthreadVC2)
 else ()
   # --- SQLite Wrapper
   include_directories (${COMPONENTS_DIR}/utils/include/utils)
@@ -89,15 +93,29 @@ message(STATUS "Policy->LIBRARIES:" ${LIBRARIES})
 target_link_libraries(${target} ${LIBRARIES})
 
 if(ENABLE_LOG)
+if(MODIFY_FUNCTION_FLAGS)
+else()
+  add_dependencies(${target} liblog4cxx)
   target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
+endif()
 
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+add_custom_target(copy_library_${target} ALL
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${library_name}
+    ${copy_destination}
+    DEPENDS ${target}
+    COMMENT "Copying library ${library_name}")
+else()
 add_custom_target(copy_library_${target} ALL
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_BINARY_DIR}/${library_name}
     ${copy_destination}
     DEPENDS ${target}
     COMMENT "Copying library ${library_name}")
+endif()
 
 install(TARGETS ${target}
   DESTINATION ${install_destination}
@@ -105,3 +123,4 @@ install(TARGETS ${target}
     GROUP_READ GROUP_EXECUTE
     WORLD_READ WORLD_EXECUTE
 )
+endif()

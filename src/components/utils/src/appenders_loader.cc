@@ -43,13 +43,17 @@ namespace utils {
 AppendersLoader appenders_loader;
 
 AppendersLoader::AppendersLoader() {
+#ifndef OS_WIN32
 	handle_ = dlopen("libappenders.so", RTLD_LAZY);
+#endif
 }
 
 AppendersLoader::~AppendersLoader() {
+#ifndef OS_WIN32
 	if (handle_ != 0) {
     dlclose(handle_);
   }
+#endif
 }
 
 bool AppendersLoader::Loaded() const {

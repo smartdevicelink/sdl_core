@@ -70,7 +70,17 @@ namespace NsMessageBroker
       }
       removeSubscribersByDescriptor(fd);
    }
-
+#ifdef MODIFY_FUNCTION_SIGN
+   /**
+   * \brief clear controller from the registry.
+   * \param name name of controller.
+   */
+   void CMessageBrokerRegistry::clearController()
+   {
+	   DBG_MSG(("CMessageBrokerRegistry::clearController()\n"));
+	   mControllersList.clear();
+   }
+#endif
    void CMessageBrokerRegistry::removeControllersByDescriptor(const int fd) {
       DBG_MSG(("CMessageBrokerRegistry::removeControllersByDescriptor(%d)\n",
                fd));

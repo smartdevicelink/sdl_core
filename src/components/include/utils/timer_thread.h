@@ -91,8 +91,7 @@ class TimerThread {
    *  if true, TimerThread will call "f()" function every time out
    *  until stop()
    */
-  TimerThread(const char* name, T* callee, void (T::*f)(), bool is_looper =
-                  false);
+  TimerThread(const char* name, T* callee, void (T::*f)(), bool is_looper = false);
 
   /**
    * @brief Destructor
@@ -260,8 +259,11 @@ class TimerThread {
 };
 
 template<class T>
-TimerThread<T>::TimerThread(const char* name, T* callee, void (T::*f)(),
-                            bool is_looper)
+TimerThread<T>::TimerThread(){
+}
+
+template<class T>
+TimerThread<T>::TimerThread(const char* name, T* callee, void (T::*f)(), bool is_looper)
     : thread_(NULL),
       callback_(f),
       callee_(callee),

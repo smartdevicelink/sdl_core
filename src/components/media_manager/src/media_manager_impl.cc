@@ -82,12 +82,19 @@ void MediaManagerImpl::Init() {
   using namespace protocol_handler;
   LOG4CXX_INFO(logger_, "MediaManagerImpl::Init()");
 
+#if defined(MODIFY_FUNCTION_SIGN) || defined(OS_WIN32)
+	// do nothing
+#else
 #if defined(EXTENDED_MEDIA_MODE)
   LOG4CXX_INFO(logger_, "Called Init with default configuration.");
   a2dp_player_ = new A2DPSourcePlayerAdapter();
   from_mic_recorder_ = new FromMicRecorderAdapter();
 #endif
+#endif
 
+#if /*defined(MODIFY_FUNCTION_SIGN) || */defined(OS_WIN32)
+
+#else
   if ("socket" == profile::Profile::instance()->video_server_type()) {
     streamer_[ServiceType::kMobileNav] = new SocketVideoStreamerAdapter();
   } else if ("pipe" == profile::Profile::instance()->video_server_type()) {
@@ -105,7 +112,7 @@ void MediaManagerImpl::Init() {
     streamer_[ServiceType::kAudio] = new VideoStreamToFileAdapter(
         profile::Profile::instance()->audio_stream_file());
   }
-
+#endif
   streamer_listener_[ServiceType::kMobileNav] = new StreamerListener();
   streamer_listener_[ServiceType::kAudio] = new StreamerListener();
 

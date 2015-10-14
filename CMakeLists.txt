@@ -804,9 +804,12 @@ if(ENABLE_SECURITY)
   #set(SecurityManagerTestIncludeDir ${CMAKE_SOURCE_DIR}/test/components/security_manager/include)
 endif()
 
-set(RTLIB rt)
 if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
 set(RTLIB )
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+set(RTLIB )
+else()
+set(RTLIB rt)
 endif()
 
 # Building tests

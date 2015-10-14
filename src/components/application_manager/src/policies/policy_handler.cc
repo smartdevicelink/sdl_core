@@ -292,9 +292,26 @@ bool PolicyHandler::LoadPolicyLibrary() {
     policy_manager_ = NULL;
     return NULL;
   }
-  dl_handle_ = dlopen(kLibrary.c_str(), RTLD_LAZY);
 
-  const char* error_string = dlerror();
+#ifdef OS_WIN32
+#ifdef OS_WINCE
+	wchar_string strUnicodeData;
+	Global::toUnicode(kLibrary, CP_ACP, strUnicodeData);
+	dl_handle_ = LoadLibrary(strUnicodeData.c_str());
+#else
+	dl_handle_ = LoadLibrary(kLibrary.c_str());
+#endif
+#else
+  dl_handle_ = dlopen(kLibrary.c_str(), RTLD_LAZY);
+#endif
+
+#ifdef OS_WIN32
+	DWORD error_string = GetLastError();
+#elif defined(OS_ANDROID)
+	const char* error_string = dlerror();
+#else
+  char* error_string = dlerror();
+#endif
   if (error_string == NULL) {
     if (CreateManager()) {
       policy_manager_->set_listener(this);
@@ -304,23 +321,40 @@ bool PolicyHandler::LoadPolicyLibrary() {
     LOG4CXX_ERROR(logger_, error_string);
   }
 
-  return policy_manager_.valid();
+  return policy_manager_;
 }
 
 bool PolicyHandler::PolicyEnabled() {
   return profile::Profile::instance()->enable_policy();
 }
 
-bool PolicyHandler::CreateManager() {
+PolicyManager* PolicyHandler::CreateManager() {
   typedef PolicyManager* (*CreateManager)();
-  CreateManager create_manager = reinterpret_cast<CreateManager>(dlsym(dl_handle_, "CreateManager"));
-  const char* error_string = dlerror();
+  CreateManager create_manager = 0;
+#ifdef OS_WIN32
+#ifdef OS_WINCE
+	*(void**)(&create_manager) = GetProcAddress(dl_handle_, L"CreateManager");
+#else
+	*(void**)(&create_manager) = GetProcAddress(dl_handle_, "CreateManager");
+#endif
+#else
+  *(void**)(&create_manager) = dlsym(dl_handle_, "CreateManager");
+#endif
+#ifdef OS_ANDROID
+	const char* error_string = dlerror();
+#else
+#ifdef OS_WIN32
+	DWORD error_string = GetLastError();
+#else
+  char* error_string = dlerror();
+#endif
+#endif
   if (error_string == NULL) {
-    policy_manager_ = create_manager();
+    policy_manager_ = (*create_manager)();
   } else {
     LOG4CXX_WARN(logger_, error_string);
   }
-  return policy_manager_.valid();
+  return policy_manager_;
 }
 
 bool PolicyHandler::InitPolicyTable() {
@@ -821,11 +855,21 @@ bool PolicyHandler::UnloadPolicyLibrary() {
   bool ret = true;
   AsyncRunner::Stop();
   sync_primitives::AutoWriteLock lock(policy_manager_lock_);
+#ifdef OS_WIN32
+  delete policy_manager_;
+  policy_manager_ = 0;
+#else
   if (policy_manager_) {
     policy_manager_.reset();
   }
+#endif
+
   if (dl_handle_) {
+#ifdef OS_WIN32
+		ret = FreeLibrary(dl_handle_);
+#else
     ret = (dlclose(dl_handle_) == 0);
+#endif
     dl_handle_ = 0;
   }
   LOG4CXX_TRACE(logger_, "exit");
