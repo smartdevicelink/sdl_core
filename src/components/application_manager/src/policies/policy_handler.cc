@@ -1477,9 +1477,28 @@ uint32_t PolicyHandler::PrimaryDevice() const {
 }
 
 void PolicyHandler::SetDeviceZone(const std::string& device_id,
-                     const application_manager::SeatLocation& zone) {
+                                  const application_manager::SeatLocation& zone) {
+  POLICY_LIB_CHECK_VOID();
   policy::SeatLocation policy_zone = {zone.col, zone.row, zone.level};
   policy_manager_->SetDeviceZone(device_id, policy_zone);
+
+  connection_handler::DeviceHandle device_handle;
+  ApplicationManagerImpl::instance()->connection_handler()
+      ->GetDeviceID(device_id, &device_handle);
+
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  for (ApplicationManagerImpl::ApplictionSetConstIt i = accessor.begin();
+      i != accessor.end(); ++i) {
+    const ApplicationSharedPtr app = *i;
+    LOG4CXX_DEBUG(logger_,
+                  "Item: " << app->device() << " - " << app->mobile_app_id());
+    if (app->device() == device_handle) {
+      LOG4CXX_DEBUG(
+          logger_,
+          "Send notify " << app->device() << " - " << app->mobile_app_id());
+      policy_manager_->OnChangedDeviceZone(app->mobile_app_id());
+    }
+  }
 }
 
 void PolicyHandler::SetRemoteControl(bool enabled) {

@@ -513,6 +513,12 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      */
     virtual void OnChangedRemoteControl(const std::string& application_id) = 0;
 
+    /**
+     * Handles changed device zone event for a application
+     * @param application_id ID application
+     */
+    virtual void OnChangedDeviceZone(const std::string& application_id) = 0;
+
     /*
      * Send OnPermissionsChange notification to mobile app
      * when it's permissions are changed.

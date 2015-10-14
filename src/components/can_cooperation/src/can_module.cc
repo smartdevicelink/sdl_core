@@ -104,6 +104,7 @@ void CANModule::SubscribeOnFunctions() {
   plugin_info_.hmi_function_list.push_back(hmi_api::get_user_consent);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_reverse_apps_allowing);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_device_rank_changed);
+  plugin_info_.hmi_function_list.push_back(hmi_api::on_device_location_changed);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_app_deactivated);
   plugin_info_.hmi_function_list.push_back(hmi_api::sdl_activate_app);
 }

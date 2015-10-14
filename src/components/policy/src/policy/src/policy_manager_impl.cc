@@ -1119,19 +1119,29 @@ void PolicyManagerImpl::OnChangedPrimaryDevice(
   }
 
   if (!access_remote_->IsPrimaryDevice(device_id)) {
-    std::string default_hmi;
-    if (GetDefaultHmi(application_id, &default_hmi)) {
-      Subject who = { device_id, application_id };
-      access_remote_->Reset(who);
-      listener()->OnUpdateHMILevel(application_id, default_hmi);
-    } else {
-      LOG4CXX_WARN(
-          logger_,
-          "Couldn't get default HMI level for application " << application_id);
-    }
+    SendHMILevelChanged(device_id, application_id);
   }
 
   SendAppPermissionsChanged(device_id, application_id);
+}
+
+void PolicyManagerImpl::OnChangedDeviceZone(
+    const std::string& application_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!access_remote_->IsAppReverse(application_id)) {
+    LOG4CXX_INFO(logger_, "Application " << application_id << " isn't reverse");
+    return;
+  }
+  const std::string device_id = GetCurrentDeviceId(application_id);
+  if (device_id.empty()) {
+    LOG4CXX_WARN(logger_, "Couldn't find device info for application id "
+                 "'" << application_id << "'");
+    return;
+  }
+
+  if (!access_remote_->IsPrimaryDevice(device_id)) {
+    SendHMILevelChanged(device_id, application_id);
+  }
 }
 
 void PolicyManagerImpl::OnChangedRemoteControl(
@@ -1153,19 +1163,24 @@ void PolicyManagerImpl::OnChangedRemoteControl(
   }
 
   if (!access_remote_->IsEnabled()) {
-    std::string default_hmi;
-    if (GetDefaultHmi(application_id, &default_hmi)) {
-      Subject who = { device_id, application_id };
-      access_remote_->Reset(who);
-      listener()->OnUpdateHMILevel(application_id, default_hmi);
-    } else {
-      LOG4CXX_WARN(
-          logger_,
-          "Couldn't get default HMI level for application " << application_id);
-    }
+    SendHMILevelChanged(device_id, application_id);
   }
 
   SendAppPermissionsChanged(device_id, application_id);
+}
+
+void PolicyManagerImpl::SendHMILevelChanged(const std::string& device_id,
+                                            const std::string& application_id) {
+  std::string default_hmi;
+  if (GetDefaultHmi(application_id, &default_hmi)) {
+    Subject who = { device_id, application_id };
+    access_remote_->Reset(who);
+    listener()->OnUpdateHMILevel(application_id, default_hmi);
+  } else {
+    LOG4CXX_WARN(
+        logger_,
+        "Couldn't get default HMI level for application " << application_id);
+  }
 }
 
 void PolicyManagerImpl::SendAppPermissionsChanged(const std::string& device_id,
