@@ -774,6 +774,39 @@ TEST(test_double_array_validate, test_NumberSchemaItemTest) {
   EXPECT_EQ(NsSmartDeviceLink::NsSmartObjects::Errors::INVALID_VALUE,
             resultType);
 }
+
+TEST(test_int_double_value, test_NumberSchemaItemTest) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+
+  ISchemaItemPtr item = TNumberSchemaItem<int>::create(
+      TSchemaItemParameter<int>(10),
+      TSchemaItemParameter<int>(100));  // No default value
+
+  SmartObject obj;
+  const double value = 10.0001;
+  obj = value;
+  ASSERT_EQ(value, obj.asDouble());
+
+  int resultType = item->validate(obj);
+  EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+}
+
+TEST(test_double_int_value, test_NumberSchemaItemTest) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+
+  ISchemaItemPtr item = TNumberSchemaItem<double>::create(
+      TSchemaItemParameter<double>(10.0),
+      TSchemaItemParameter<double>(100.0));  // No default value
+
+  SmartObject obj;
+  const int value = 99;
+  obj = value;
+  ASSERT_EQ(value, obj.asInt());
+
+  int resultType = item->validate(obj);
+  EXPECT_EQ(Errors::OK, resultType);
+}
+
 }  // namespace SchemaItem
 }  // namespace SmartObjects
 }  // namespace components
