@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,56 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "include/mock_device.h"
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_SERVER_CONNECTION_FACTORY_MOCK_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_SERVER_CONNECTION_FACTORY_MOCK_H_
+
+#include "gmock/gmock.h"
+#include "transport_manager/transport_adapter/server_connection_factory.h"
 
 namespace test {
 namespace components {
-namespace transport_manager {
+namespace transport_manager_test {
 
-const ApplicationHandle MockDevice::addApplication() {
-  MockApplication app(this, applications_cnt_++);
-  app.device = this;
-  app.active = false;
-  applications_.push_back(app);
-  return app.handle;
-}
+class ServerConnectionFactoryMock : public ::transport_manager::transport_adapter::ServerConnectionFactory {
+ public:
+  MOCK_METHOD0(Init, ::transport_manager::transport_adapter::TransportAdapter::Error());
+  MOCK_METHOD0(Terminate, void());
+  MOCK_CONST_METHOD0(IsInitialised, bool());
+  MOCK_METHOD2(CreateConnection,
+               ::transport_manager::transport_adapter::TransportAdapter::Error(const std::string&,
+                                       const int& app_handle));
+};
 
-void MockDevice::Start() {
-  for (std::vector<MockApplication>::iterator it = applications_.begin();
-      it != applications_.end();
-      ++it) {
-    it->Start();
-  }
-}
-
-void MockDevice::Stop() {
-  for (std::vector<MockApplication>::iterator it = applications_.begin();
-      it != applications_.end();
-      ++it) {
-    it->Stop();
-  }
-}
-
-bool MockDevice::IsSameAs(const Device* other) const {
-  return unique_device_id() == other->unique_device_id();
-}
-
-static ApplicationHandle get_handle(const MockApplication& app) {
-  return app.handle;
-}
-
-ApplicationList MockDevice::GetApplicationList() const {
-  ApplicationList rc(applications_.size());
-  std::transform(
-      applications_.begin(), applications_.end(), rc.begin(),
-      &get_handle);
-  return rc;
-}
-
-bool MockDevice::operator ==(const MockDevice& other) {
-  return IsSameAs(&other);
-}
-
-}  // namespace transport_manager
+}  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test
+
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_SERVER_CONNECTION_FACTORY_MOCK_H_

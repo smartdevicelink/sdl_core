@@ -32,90 +32,115 @@
 
 #include "gmock/gmock.h"
 
-#include <netinet/in.h>
-#include <sys/types.h>
-#include <ifaddrs.h>
-
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/tcp/dnssd_service_browser.h"
-#include "transport_manager/tcp/tcp_device.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-class MockTransportAdapterController: public TransportAdapterController {
-public:
- MOCK_METHOD1(AddDevice,DeviceSptr(DeviceSptr device));
- MOCK_METHOD1(SearchDeviceDone, void(const DeviceVector& devices));
- MOCK_METHOD1(SearchDeviceFailed, void(const SearchDeviceError& error));
- MOCK_CONST_METHOD1(FindDevice, DeviceSptr(const DeviceUID& device_handle));
- MOCK_METHOD3(ConnectionCreated, void(ConnectionSPtr connection, const DeviceUID& device_handle, const ApplicationHandle& app_handle));
- MOCK_METHOD2(ConnectDone, void(const DeviceUID& device_handle, const ApplicationHandle& app_handle));
- MOCK_METHOD3(ConnectFailed, void(const DeviceUID& device_handle, const ApplicationHandle& app_handle, const ConnectError& error));
- MOCK_METHOD2(ConnectionFinished, void(const DeviceUID& device_handle, const ApplicationHandle& app_handle));
- MOCK_METHOD3(ConnectionAborted,void(const DeviceUID& device_handle, const ApplicationHandle& app_handle, const CommunicationError& error));
- MOCK_METHOD2(DisconnectDone, void(const DeviceUID& device_handle, const ApplicationHandle& app_handle));
- MOCK_METHOD3(DataReceiveDone, void(const DeviceUID& device_handle, const ApplicationHandle& app_handle, const ::protocol_handler::RawMessagePtr message));
- MOCK_METHOD3(DataReceiveFailed, void(const DeviceUID& device_handle, const ApplicationHandle& app_handle, const DataReceiveError& error));
- MOCK_METHOD3(DataSendDone, void(const DeviceUID& device_handle, const ApplicationHandle& app_handle, const ::protocol_handler::RawMessagePtr message));
- MOCK_METHOD4(DataSendFailed, void(const DeviceUID& device_handle, const ApplicationHandle& app_handle, const ::protocol_handler::RawMessagePtr message, const DataSendError& error));
- MOCK_METHOD0(FindNewApplicationsRequest, void());
- MOCK_METHOD1(ApplicationListUpdated, void(const DeviceUID& device_handle));
- MOCK_METHOD2(DeviceDisconnected, void (const DeviceUID& device_handle,const DisconnectDeviceError& error));
+class MockTransportAdapterController : public TransportAdapterController {
+ public:
+  MOCK_METHOD1(AddDevice, DeviceSptr(DeviceSptr device));
+  MOCK_METHOD1(SearchDeviceDone, void(const DeviceVector& devices));
+  MOCK_METHOD1(SearchDeviceFailed, void(const SearchDeviceError& error));
+  MOCK_CONST_METHOD1(FindDevice, DeviceSptr(const DeviceUID& device_handle));
+  MOCK_METHOD3(ConnectionCreated,
+               void(ConnectionSPtr connection, const DeviceUID& device_handle,
+                    const ApplicationHandle& app_handle));
+  MOCK_METHOD2(ConnectDone, void(const DeviceUID& device_handle,
+                                 const ApplicationHandle& app_handle));
+  MOCK_METHOD3(ConnectFailed, void(const DeviceUID& device_handle,
+                                   const ApplicationHandle& app_handle,
+                                   const ConnectError& error));
+  MOCK_METHOD2(ConnectionFinished, void(const DeviceUID& device_handle,
+                                        const ApplicationHandle& app_handle));
+  MOCK_METHOD3(ConnectionAborted, void(const DeviceUID& device_handle,
+                                       const ApplicationHandle& app_handle,
+                                       const CommunicationError& error));
+  MOCK_METHOD2(DisconnectDone, void(const DeviceUID& device_handle,
+                                    const ApplicationHandle& app_handle));
+  MOCK_METHOD3(DataReceiveDone,
+               void(const DeviceUID& device_handle,
+                    const ApplicationHandle& app_handle,
+                    const ::protocol_handler::RawMessagePtr message));
+  MOCK_METHOD3(DataReceiveFailed, void(const DeviceUID& device_handle,
+                                       const ApplicationHandle& app_handle,
+                                       const DataReceiveError& error));
+  MOCK_METHOD3(DataSendDone,
+               void(const DeviceUID& device_handle,
+                    const ApplicationHandle& app_handle,
+                    const ::protocol_handler::RawMessagePtr message));
+  MOCK_METHOD4(DataSendFailed,
+               void(const DeviceUID& device_handle,
+                    const ApplicationHandle& app_handle,
+                    const ::protocol_handler::RawMessagePtr message,
+                    const DataSendError& error));
+  MOCK_METHOD0(FindNewApplicationsRequest, void());
+  MOCK_METHOD0(AckDevices, void());
+  MOCK_METHOD1(ApplicationListUpdated, void(const DeviceUID& device_handle));
+  MOCK_METHOD2(DeviceDisconnected, void(const DeviceUID& device_handle,
+                                        const DisconnectDeviceError& error));
 };
 
-in_addr_t GetIfaceAddress() {
-  in_addr_t result = 0;
-  ifaddrs* if_addrs = NULL;
-//  void * tmpAddrPtr = NULL;
-
-  getifaddrs(&if_addrs);
-  for (ifaddrs* ifa = if_addrs; ifa != NULL; ifa = ifa->ifa_next) {
-    if (ifa->ifa_addr->sa_family == AF_INET) {
-      result = ((struct sockaddr_in *) ifa->ifa_addr)->sin_addr.s_addr;
-      if (result != htonl(INADDR_LOOPBACK)) {
-        break;
-      }
-    }
-  }
-  if (if_addrs)
-    freeifaddrs(if_addrs);
-  return result;
-}
-static in_addr_t iface_address = GetIfaceAddress();
-
-MATCHER_P(HasService, service_port, ""){
-for(DeviceVector::const_iterator it = arg.begin(); it != arg.end(); ++it) {
-  TcpDevice* tcp_device = dynamic_cast<TcpDevice*>(it->get());
-  if(tcp_device && tcp_device->in_addr() == iface_address) {
-    ApplicationList app_list = tcp_device->GetApplicationList();
-    for(ApplicationList::const_iterator it = app_list.begin(); it != app_list.end(); ++it) {
-      if(tcp_device->GetApplicationPort(*it) == service_port) {
-        return true;
-      }
-    }
-  }
-}
-return false;
-}
-
-// TODO{ALeshin} APPLINK-11090 - Infinite loop
-TEST(DnssdServiceBrowser, DISABLED_Basic) {
+TEST(DnssdServiceBrowser, DISABLED_Init) {
+  // Arrange
   MockTransportAdapterController controller;
-
   DnssdServiceBrowser dnssd_service_browser(&controller);
-  DeviceScanner& device_scanner = dnssd_service_browser;
-
-  const TransportAdapter::Error error = device_scanner.Init();
+  // Check values after creation. Nothing is initialized
+  EXPECT_TRUE(NULL == dnssd_service_browser.avahi_service_browser());
+  EXPECT_TRUE(NULL == dnssd_service_browser.avahi_threaded_poll());
+  EXPECT_TRUE(NULL == dnssd_service_browser.avahi_client());
+  // Act
+  const TransportAdapter::Error error = dnssd_service_browser.Init();
   ASSERT_EQ(TransportAdapter::OK, error);
 
-  while (!device_scanner.IsInitialised()) {
+  while (!dnssd_service_browser.IsInitialised()) {
     sleep(0);
   }
-  ASSERT_TRUE(device_scanner.IsInitialised());
+  ASSERT_TRUE(dnssd_service_browser.IsInitialised());
+  // Check values are initialized and threaded poll started
+  EXPECT_FALSE(NULL == dnssd_service_browser.avahi_service_browser());
+  EXPECT_FALSE(NULL == dnssd_service_browser.avahi_threaded_poll());
+  EXPECT_FALSE(NULL == dnssd_service_browser.avahi_client());
+}
 
-  EXPECT_EQ(TransportAdapter::NOT_SUPPORTED, device_scanner.Scan());  //method Scan now returns only NOT_SUPPORTED value
+TEST(DnssdServiceBrowser, DISABLED_IsInitialized_ExpectFalse) {
+  // Arrange
+  MockTransportAdapterController controller;
+  DnssdServiceBrowser dnssd_service_browser(&controller);
+  // Check
+  EXPECT_FALSE(dnssd_service_browser.IsInitialised());
+}
 
+TEST(DnssdServiceBrowser, DISABLED_Terminate_ExpectTerminated) {
+  // Arrange
+  MockTransportAdapterController controller;
+  DnssdServiceBrowser dnssd_service_browser(&controller);
+  // Init service browser and client
+  const TransportAdapter::Error error = dnssd_service_browser.Init();
+  ASSERT_EQ(TransportAdapter::OK, error);
+
+  while (!dnssd_service_browser.IsInitialised()) {
+    sleep(0);
+  }
+  ASSERT_TRUE(dnssd_service_browser.IsInitialised());
+  // Client & browser are initialized and successfully started
+  EXPECT_FALSE(NULL == dnssd_service_browser.avahi_service_browser());
+  EXPECT_FALSE(NULL == dnssd_service_browser.avahi_threaded_poll());
+  EXPECT_FALSE(NULL == dnssd_service_browser.avahi_client());
+  dnssd_service_browser.Terminate();
+  // Checks everything successfully terminated
+  EXPECT_TRUE(NULL == dnssd_service_browser.avahi_service_browser());
+  EXPECT_TRUE(NULL == dnssd_service_browser.avahi_threaded_poll());
+  EXPECT_TRUE(NULL == dnssd_service_browser.avahi_client());
+}
+
+TEST(DnssdServiceBrowser, DISABLED_Scan_ExpectNotSupported) {
+  // Arrange
+  MockTransportAdapterController controller;
+  DnssdServiceBrowser dnssd_service_browser(&controller);
+  // At this moment Scan() can only return NOT SUPPORTED value
+  EXPECT_EQ(TransportAdapter::NOT_SUPPORTED, dnssd_service_browser.Scan());
 }
 
 }  // namespace transport_adapter

@@ -1,8 +1,5 @@
 /*
- * \file mock_device_scanner.h
- * \brief
- *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,44 +30,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICESCANNER_H_
-#define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICESCANNER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_DEVICE_MOCK_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_DEVICE_MOCK_H_
 
-#include "transport_manager/transport_adapter/device_scanner.h"
-
-using ::transport_manager::transport_adapter::TransportAdapter;
-using ::transport_manager::transport_adapter::DeviceScanner;
-using ::transport_manager::transport_adapter::DeviceVector;
+#include "gmock/gmock.h"
+#include "transport_manager/transport_adapter/device.h"
+#include "transport_manager/common.h"
+#include "transport_manager/tcp/tcp_device.h"
 
 namespace test {
 namespace components {
-namespace transport_manager {
+namespace transport_manager_test {
 
-class MockTransportAdapter;
-
-class MockDeviceScanner : public DeviceScanner {
+class DeviceMock : public ::transport_manager::transport_adapter::Device {
  public:
-  MockDeviceScanner(MockTransportAdapter *adapter);
-  void reset();
-  void AddDevice(const std::string& name, const std::string& unique_id, bool start = true);
-  void RemoveDevice(const std::string& name);
-  void fail_further_search() { is_search_failed_ = true; }
-
- protected:
-  TransportAdapter::Error Init();
-  TransportAdapter::Error Scan();
-  void Terminate();
-  bool IsInitialised() const;
-
- private:
-  MockTransportAdapter *controller_;
-  DeviceVector devices_;
-  bool is_initialized_;
-  bool is_search_failed_;
+  DeviceMock(const std::string& name, const std::string& unique_device_id)
+      : Device(name, unique_device_id) {}
+  MOCK_CONST_METHOD1(IsSameAs, bool(const Device* other_device));
+  MOCK_CONST_METHOD0(GetApplicationList, std::vector<int>());
+  MOCK_METHOD0(Stop, void());
 };
 
-}  // namespace transport_manager
+class TCPDeviceMock : public ::transport_manager::transport_adapter::TcpDevice {
+ public:
+  TCPDeviceMock(const uint32_t& in_addr_t, const std::string& name)
+      : TcpDevice(in_addr_t, name) {}
+  MOCK_CONST_METHOD1(IsSameAs, bool(const Device* other_device));
+  MOCK_CONST_METHOD0(GetApplicationList, std::vector<int>());
+  MOCK_METHOD0(Stop, void());
+  MOCK_CONST_METHOD1(
+      GetApplicationPort,
+      int(const ::transport_manager::ApplicationHandle app_handle));
+};
+
+}  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test
 
-#endif /* APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_MOCKDEVICESCANNER_H_ */
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_DEVICE_MOCK_H_

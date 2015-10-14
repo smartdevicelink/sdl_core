@@ -2,7 +2,7 @@
  * \file dnssd_service_browser.h
  * \brief DnssdServiceBrowser class header file.
  *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,18 +78,27 @@ class DnssdServiceBrowser : public DeviceScanner {
   explicit DnssdServiceBrowser(class TransportAdapterController* controller);
   virtual ~DnssdServiceBrowser();
 
- protected:
   virtual TransportAdapter::Error Init();
   virtual TransportAdapter::Error Scan();
   virtual void Terminate();
   virtual bool IsInitialised() const;
 
+#ifdef BUILD_TESTS
+  AvahiServiceBrowser* avahi_service_browser() const {
+    return avahi_service_browser_;
+  }
+  AvahiThreadedPoll* avahi_threaded_poll() const {
+    return avahi_threaded_poll_;
+  }
+  AvahiClient* avahi_client() const { return avahi_client_; }
+#endif  // BUILD_TESTS
+
  private:
   TransportAdapter::Error CreateAvahiClientAndBrowser();
   void AddService(AvahiIfIndex interface, AvahiProtocol protocol,
-                  const char *name, const char *type, const char *domain);
+                  const char* name, const char* type, const char* domain);
   void RemoveService(AvahiIfIndex interface, AvahiProtocol protocol,
-                     const char *name, const char *type, const char *domain);
+                     const char* name, const char* type, const char* domain);
 
   void OnClientConnected();
   void OnClientFailure();
@@ -99,13 +108,13 @@ class DnssdServiceBrowser : public DeviceScanner {
   void ServiceResolved(const DnssdServiceRecord& service_record);
   void ServiceResolveFailed(const DnssdServiceRecord& service_record);
 
-  friend void AvahiClientCallback(AvahiClient *avahi_client,
+  friend void AvahiClientCallback(AvahiClient* avahi_client,
                                   AvahiClientState avahi_client_state,
                                   void* data);
   friend void AvahiServiceBrowserCallback(
-      AvahiServiceBrowser *avahi_service_browser, AvahiIfIndex interface,
-      AvahiProtocol protocol, AvahiBrowserEvent event, const char *name,
-      const char *type, const char *domain, AvahiLookupResultFlags flags,
+      AvahiServiceBrowser* avahi_service_browser, AvahiIfIndex interface,
+      AvahiProtocol protocol, AvahiBrowserEvent event, const char* name,
+      const char* type, const char* domain, AvahiLookupResultFlags flags,
       void* data);
 
   friend void AvahiServiceResolverCallback(
@@ -113,7 +122,7 @@ class DnssdServiceBrowser : public DeviceScanner {
       AvahiProtocol protocol, AvahiResolverEvent event, const char* name,
       const char* type, const char* domain, const char* host_name,
       const AvahiAddress* avahi_address, uint16_t port, AvahiStringList* txt,
-      AvahiLookupResultFlags flags, void *data);
+      AvahiLookupResultFlags flags, void* data);
 
   TransportAdapterController* controller_;
 

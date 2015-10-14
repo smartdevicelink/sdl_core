@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,49 +30,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <cstring>
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_DEVICE_SCANNER_MOCK_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_DEVICE_SCANNER_MOCK_H_
 
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <sstream>
-#include "transport_manager/common.h"
-#include "include/mock_connection.h"
-
-#include <algorithm>
-
-#include "include/mock_transport_adapter.h"
-
-using ::transport_manager::transport_adapter::TransportAdapterController;
+#include "gmock/gmock.h"
+#include "transport_manager/transport_adapter/device_scanner.h"
 
 namespace test {
 namespace components {
-namespace transport_manager {
+namespace transport_manager_test {
 
-MockConnection::MockConnection(const ::transport_manager::DeviceUID& device_handle,
-                               const ApplicationHandle& app_handle,
-                               TransportAdapterController* controller)
-    : ThreadedSocketConnection(device_handle, app_handle, controller) {
-}
+class DeviceScannerMock
+    : public ::transport_manager::transport_adapter::DeviceScanner {
+ public:
+  MOCK_METHOD0(
+      Init, ::transport_manager::transport_adapter::TransportAdapter::Error());
+  MOCK_METHOD0(
+      Scan, ::transport_manager::transport_adapter::TransportAdapter::Error());
+  MOCK_METHOD0(Terminate, void());
+  MOCK_CONST_METHOD0(IsInitialised, bool());
+};
 
-bool MockConnection::Establish(ConnectError **error) {
-  int peer_sock = socket(AF_UNIX, SOCK_STREAM, 0);
-  sockaddr_un my_addr;
-  memset(&my_addr, 0, sizeof(my_addr));
-  std::ostringstream iss;
-  iss << "mockDevice" << device_handle() << "-" << application_handle();
-  strcpy(my_addr.sun_path, iss.str().c_str());
-  my_addr.sun_family = AF_UNIX;
-  int res = ::connect(peer_sock, reinterpret_cast<sockaddr*>(&my_addr),
-                      sizeof(my_addr));
-  if (res != -1) {
-    set_socket(peer_sock);
-    return true;
-  }
-  *error = new ConnectError();
-  return false;
-}
-
-}  // namespace transport_manager
+}  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test
 
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_DEVICE_SCANNER_MOCK_H_
