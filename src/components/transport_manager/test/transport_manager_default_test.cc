@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,35 +29,18 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-
-#include "include/mock_connection.h"
-#include "include/mock_connection_factory.h"
-
-#include <algorithm>
-
-#include "include/mock_device.h"
-#include "include/mock_transport_adapter.h"
-
-using ::transport_manager::transport_adapter::DeviceSptr;
-using ::transport_manager::ConnectError;
+#include "gtest/gtest.h"
+#include "transport_manager/transport_manager.h"
+#include "transport_manager/transport_manager_default.h"
 
 namespace test {
-namespace components {
-namespace transport_manager {
-
-MockConnectionFactory::MockConnectionFactory(MockTransportAdapter *controller)
-    : controller_(controller) {}
-
-TransportAdapter::Error MockConnectionFactory::CreateConnection(
-    const ::transport_manager::DeviceUID& device_handle,
-    const ApplicationHandle& app_handle) {
-
-  MockConnection *conn = new MockConnection(device_handle, app_handle, controller_);
-  conn->Start();
-  return TransportAdapter::OK;
+namespace test_transport_manager_instance {
+TEST(TestTransportManagerDefault, CreateOnlyInstance) {
+  transport_manager::TransportManager* instance =
+      transport_manager::TransportManagerDefault::instance();
+  ASSERT_EQ(instance, transport_manager::TransportManagerDefault::instance());
+  transport_manager::TransportManagerDefault::destroy();
 }
 
-}  // namespace transport_manager
-}  // namespace components
 }  // namespace test
+}  // namespace test_transport_manager_instance

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,28 +30,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "include/mock_connection.h"
-#include "include/mock_device.h"
-#include "include/mock_transport_adapter.h"
-#include "include/mock_device_scanner.h"
-#include "include/mock_connection_factory.h"
+#ifndef APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_TRANSPORT_MANAGER_IMPL_MOCK_H_
+#define APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_TRANSPORT_MANAGER_IMPL_MOCK_H_
+
+#include "gmock/gmock.h"
+#include "transport_manager/transport_manager_impl.h"
 
 namespace test {
 namespace components {
 namespace transport_manager {
 
-MockTransportAdapter::MockTransportAdapter()
-    : TransportAdapterImpl(new MockDeviceScanner(this),
-                        new MockConnectionFactory(this), NULL) {}
+using namespace ::transport_manager;
 
-void MockTransportAdapter::reset() {
-  get_device_scanner()->reset();
-}
-
-MockDeviceScanner* MockTransportAdapter::get_device_scanner() const {
-  return static_cast<MockDeviceScanner*>(device_scanner_);
-}
+class TransportManagerImplMock : public TransportManagerImpl {
+ public:
+  MOCK_METHOD1(ReceiveEventFromDevice, int(const TransportAdapterEvent& event));
+};
 
 }  // namespace transport_manager
 }  // namespace components
 }  // namespace test
+
+#endif // APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_TRANSPORT_MANAGER_IMPL_MOCK_H_
