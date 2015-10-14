@@ -44,7 +44,6 @@ class ProtocolHandlerMecticWrapper: public MetricWrapper {
 
   public:
     utils::SharedPtr<protocol_handler::PHMetricObserver::MessageMetric> message_metric;
-  protected:
     virtual Json::Value GetJsonMetric();
 };
 }  // namespace time_tester

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,19 +30,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_
-#define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_
+#include "gtest/gtest.h"
+#include "time_manager.h"
+#include "include/time_manager_mock.h"
+#include "protocol_handler/time_metric_observer.h"
 
-#include <string>
-#include "time_tester/metric_wrapper.h"
-#include "time_tester/transport_manager_observer.h"
+namespace test {
+namespace components {
+namespace time_tester_test {
 
-namespace time_tester {
+using namespace time_tester;
+using ::testing::_;
 
-class TransportManagerMecticWrapper: public MetricWrapper {
- public:
-  utils::SharedPtr<transport_manager::TMMetricObserver::MessageMetric> message_metric;
-  virtual Json::Value GetJsonMetric();
-};
+TEST(ProtocolHandlerObserverTest, MessageProcess) {
+  TimeManagerMock time_manager_mock;
+
+  ProtocolHandlerObserver pr_handler(&time_manager_mock);
+  uint32_t message_id = 1;
+  TimevalStruct start_time;
+  start_time.tv_sec = 1;
+  start_time.tv_usec = 0;
+  pr_handler.StartMessageProcess(message_id, start_time);
+
+  typedef protocol_handler::PHMetricObserver::MessageMetric MetricType;
+  utils::SharedPtr<MetricType> message_metric = new MetricType();
+  message_metric->message_id = 1;
+  EXPECT_CALL(time_manager_mock, SendMetric(_));
+  pr_handler.EndMessageProcess(message_metric);
+}
+
+TEST(ProtocolHandlerObserverTest, MessageProcessWithZeroMessageId) {
+  TimeManagerMock time_manager_mock;
+
+  ProtocolHandlerObserver pr_handler(&time_manager_mock);
+  uint32_t message_id = 0;
+  TimevalStruct start_time;
+  start_time.tv_sec = 1;
+  start_time.tv_usec = 0;
+  pr_handler.StartMessageProcess(message_id, start_time);
+
+  typedef protocol_handler::PHMetricObserver::MessageMetric MetricType;
+  utils::SharedPtr<MetricType> message_metric = new MetricType();
+  message_metric->message_id = 0;
+  EXPECT_CALL(time_manager_mock, SendMetric(_)).Times(0);
+  pr_handler.EndMessageProcess(message_metric);
+}
+
 }  // namespace time_tester
-#endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_
+}  // namespace components
+}  // namespace test

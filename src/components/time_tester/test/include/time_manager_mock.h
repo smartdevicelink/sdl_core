@@ -30,19 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_
-#define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_
+#ifndef TEST_COMPONENTS_TIME_MANAGER_INCLUDE_TIME_MANAGER_MOCK_H_
+#define TEST_COMPONENTS_TIME_MANAGER_INCLUDE_TIME_MANAGER_MOCK_H_
 
-#include <string>
-#include "time_tester/metric_wrapper.h"
-#include "time_tester/transport_manager_observer.h"
+#include <gmock/gmock.h>
+#include "time_manager.h"
+#include "metric_wrapper.h"
+namespace test {
+namespace components {
+namespace time_tester_test {
 
-namespace time_tester {
-
-class TransportManagerMecticWrapper: public MetricWrapper {
+using namespace time_tester;
+/*
+ * MOCK implementation of ::security_manager::SecurityManager
+ */
+class TimeManagerMock : public time_tester::TimeManager {
  public:
-  utils::SharedPtr<transport_manager::TMMetricObserver::MessageMetric> message_metric;
-  virtual Json::Value GetJsonMetric();
+  MOCK_METHOD1(Init, void(protocol_handler::ProtocolHandlerImpl* ph));
+  MOCK_METHOD0(Stop, void());
+  MOCK_METHOD0(Start, void());
+  MOCK_METHOD1(SendMetric, void(utils::SharedPtr<MetricWrapper> metric));
 };
-}  // namespace time_tester
-#endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_
+}  // time_tester_test
+}  // components
+}  // test
+#endif  // TEST_COMPONENTS_TIME_MANAGER_INCLUDE_TIME_MANAGER_MOCK_H_

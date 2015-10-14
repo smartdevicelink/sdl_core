@@ -47,8 +47,6 @@ class ApplicationManagerMetricWrapper: public MetricWrapper {
 
   public:
     utils::SharedPtr<application_manager::AMMetricObserver::MessageMetric> message_metric;
-
-  protected:
     virtual Json::Value GetJsonMetric();
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,19 +30,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_
-#define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_
+#include "gtest/gtest.h"
+#include "include/time_manager_mock.h"
+#include "protocol_handler/time_metric_observer.h"
+#include "transport_manager_metric.h"
+#include "transport_manager_observer.h"
 
-#include <string>
-#include "time_tester/metric_wrapper.h"
-#include "time_tester/transport_manager_observer.h"
+namespace test {
+namespace components {
+namespace time_tester_test {
 
-namespace time_tester {
+using namespace time_tester;
+using ::testing::_;
 
-class TransportManagerMecticWrapper: public MetricWrapper {
- public:
-  utils::SharedPtr<transport_manager::TMMetricObserver::MessageMetric> message_metric;
-  virtual Json::Value GetJsonMetric();
-};
+TEST(TransportManagerObserverTest, MessageProcess) {
+  TimeManagerMock time_manager_mock;
+  TransportManagerObserver tr_observer(&time_manager_mock);
+  protocol_handler::RawMessage* ptr = new ::protocol_handler::RawMessage(0, 0, NULL, 0);
+  tr_observer.StartRawMsg(ptr);
+  EXPECT_CALL(time_manager_mock, SendMetric(_));
+  tr_observer.StopRawMsg(ptr);
+  delete ptr;
+}
+
 }  // namespace time_tester
-#endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_
+}  // namespace components
+}  // namespace test
