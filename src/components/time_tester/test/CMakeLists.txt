@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2015, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,42 +28,66 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-
-set(TIME_TESTER_SRC_DIR ${COMPONENTS_DIR}/time_tester/src)
-
-include_directories(
-  include/time_tester
-  ${COMPONENTS_DIR}/utils/include/
-  ${COMPONENTS_DIR}/protocol_handler/include/
-  ${COMPONENTS_DIR}/connection_handler/include/
-  ${COMPONENTS_DIR}/transport_manager/include/
-  ${COMPONENTS_DIR}/application_manager/include/
-  ${COMPONENTS_DIR}/policy/src/policy/include/
-  ${COMPONENTS_DIR}/hmi_message_handler/include/
-  ${COMPONENTS_DIR}/formatters/include/
-  ${COMPONENTS_DIR}/media_manager/include/
-  ${COMPONENTS_DIR}/smart_objects/include/
-  ${COMPONENTS_DIR}/config_profile/include/
-  ${JSONCPP_INCLUDE_DIRECTORY}
-  ${CMAKE_BINARY_DIR}/src/components/
-  ${LOG4CXX_INCLUDE_DIRECTORY}
-)
-
-set(SOURCES
-    ${TIME_TESTER_SRC_DIR}/metric_wrapper.cc
-    ${TIME_TESTER_SRC_DIR}/time_manager.cc
-    ${TIME_TESTER_SRC_DIR}/application_manager_observer.cc
-    ${TIME_TESTER_SRC_DIR}/transport_manager_observer.cc
-    ${TIME_TESTER_SRC_DIR}/protocol_handler_observer.cc
-    ${TIME_TESTER_SRC_DIR}/application_manager_metric.cc
-    ${TIME_TESTER_SRC_DIR}/transport_manager_metric.cc
-    ${TIME_TESTER_SRC_DIR}/protocol_handler_metric.cc
-)
-
-add_library("TimeTester" ${SOURCES})
-target_link_libraries("TimeTester" ${LIBRARIES})
-add_dependencies("TimeTester" HMI_API MOBILE_API)
-
 if(BUILD_TESTS)
-  add_subdirectory(test)
+
+include_directories (
+  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/include
+  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/gtest/include
+  ${COMPONENTS_DIR}/include/utils
+  ${COMPONENTS_DIR}/include/protocol_handler
+  ${COMPONENTS_DIR}/time_tester/include
+  ${COMPONENTS_DIR}/utils/include
+  ${COMPONENTS_DIR}/protocol_handler/include
+  ${COMPONENTS_DIR}/application_manager/include
+  ${COMPONENTS_DIR}/protocol_handler/test
+  )
+  
+
+set(testSources
+  metric_wrapper_test.cc
+  time_manager_test.cc
+  protocol_handler_metric_test.cc
+  protocol_handler_observer_test.cc
+  transport_manager_metric_test.cc
+  transport_manager_observer_test.cc
+  application_manager_metric_test.cc
+  application_manager_observer_test.cc
+)
+
+set(testLibraries
+  gmock
+  TimeTester
+  jsoncpp
+  Utils  
+  MediaManager
+  ProtocolHandler   
+  v4_protocol_v1_2_no_extra
+  SmartObjects  
+  ProtocolLibrary
+  ConfigProfile
+  connectionHandler
+  ApplicationManager
+  Resumption
+  jsoncpp
+  transport_manager
+  MediaManager
+  ProtocolHandler  
+)
+
+if (BUILD_USB_SUPPORT)
+  list(APPEND testLibraries Libusb-1.0.16)
+endif()
+
+if (BUILD_BT_SUPPORT)
+  list(APPEND testLibraries bluetooth)
+endif()
+
+if (BUILD_AVAHI_SUPPORT)
+  list(APPEND testLibraries avahi-client avahi-common)
+endif()
+
+file(COPY log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+create_test("time_tester_test" "${testSources}" "${testLibraries}")
+
 endif()

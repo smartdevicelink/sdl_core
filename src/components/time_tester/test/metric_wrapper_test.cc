@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,21 +30,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_PROTOCOL_HANDLER_MECTRIC_H_
-#define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_PROTOCOL_HANDLER_MECTRIC_H_
-
-#include <string>
-#include "utils/shared_ptr.h"
+#include "gtest/gtest.h"
 #include "metric_wrapper.h"
-#include "protocol_handler_observer.h"
+#include "json_keys.h"
+#include "json/json.h"
+#include "utils/resource_usage.h"
 
-namespace time_tester {
+namespace test {
+namespace components {
+namespace time_tester_test {
 
-class ProtocolHandlerMecticWrapper: public MetricWrapper {
+using namespace ::time_tester;
 
-  public:
-    utils::SharedPtr<protocol_handler::PHMetricObserver::MessageMetric> message_metric;
-    virtual Json::Value GetJsonMetric();
-};
+TEST(MetricWrapper, grabResources) {
+  MetricWrapper metric_test;
+  EXPECT_TRUE(metric_test.grabResources());
+}
+
+TEST(MetricWrapper, GetJsonMetricWithoutGrab) {
+  MetricWrapper metric_test;
+  Json::Value jvalue = metric_test.GetJsonMetric();
+
+  EXPECT_EQ("null\n", jvalue[strings::stime].toStyledString());
+  EXPECT_EQ("null\n", jvalue[strings::utime].toStyledString());
+  EXPECT_EQ("null\n", jvalue[strings::memory].toStyledString());
+}
+
+TEST(MetricWrapper, GetJsonMetricWithGrabResources) {
+  MetricWrapper metric_test;
+  utils::ResourseUsage* resources = utils::Resources::getCurrentResourseUsage();
+  EXPECT_TRUE(resources != NULL);
+  EXPECT_TRUE(metric_test.grabResources());
+  Json::Value jvalue = metric_test.GetJsonMetric();
+
+  EXPECT_TRUE(jvalue[strings::stime].isInt());
+  EXPECT_TRUE(jvalue[strings::utime].isInt());
+  EXPECT_TRUE(jvalue[strings::memory].isInt());
+  EXPECT_NE("null/n", jvalue[strings::stime].toStyledString());
+  EXPECT_NE("null/n", jvalue[strings::utime].toStyledString());
+  EXPECT_NE("null/n", jvalue[strings::memory].toStyledString());
+
+  EXPECT_NEAR(resources->stime, jvalue[strings::stime].asInt(),1);
+  EXPECT_NEAR(resources->utime, jvalue[strings::utime].asInt(),1);
+  EXPECT_EQ(resources->memory, jvalue[strings::memory].asInt());
+
+  delete resources;
+}
+
 }  // namespace time_tester
-#endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_PROTOCOL_HANDLER_MECTRIC_H_
+}  // namespace components
+}  // namespace test

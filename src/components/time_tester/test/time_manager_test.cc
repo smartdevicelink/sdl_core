@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,21 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_PROTOCOL_HANDLER_MECTRIC_H_
-#define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_PROTOCOL_HANDLER_MECTRIC_H_
+#include "gtest/gtest.h"
+#include "gmock/gmock.h"
+#include "time_manager.h"
+#include "protocol_handler/time_metric_observer.h"
+#include "protocol_handler.h"
+#include "include/protocol_handler_mock.h"
 
-#include <string>
-#include "utils/shared_ptr.h"
-#include "metric_wrapper.h"
-#include "protocol_handler_observer.h"
+namespace test {
+namespace components {
+namespace time_tester_test {
 
-namespace time_tester {
+using namespace time_tester;
 
-class ProtocolHandlerMecticWrapper: public MetricWrapper {
-
-  public:
-    utils::SharedPtr<protocol_handler::PHMetricObserver::MessageMetric> message_metric;
-    virtual Json::Value GetJsonMetric();
+class StreamerMock : public Streamer {
+ public:
+  StreamerMock(TimeManager* const server)
+      : Streamer(server) {
+    is_client_connected_ = true;
+  }
+  MOCK_METHOD1(PushMessage,void(utils::SharedPtr<MetricWrapper> metric));
 };
+
+TEST(TimeManagerTest, DISABLED_MessageProcess) {
+  //TODO(AK) APPLINK-13351 Disable due to refactor TimeTester
+  protocol_handler_test::TransportManagerMock transport_manager_mock;
+  protocol_handler::ProtocolHandlerImpl protocol_handler_mock(&transport_manager_mock, 0, 0, 0, 0, 0);
+  TimeManager * time_manager = new TimeManager();
+  // Streamer will be deleted by Thread
+  StreamerMock* streamer_mock = new StreamerMock(time_manager);
+  time_manager->set_streamer(streamer_mock);
+  time_manager->Init(&protocol_handler_mock);
+  utils::SharedPtr<MetricWrapper> test_metric;
+  EXPECT_CALL(*streamer_mock, PushMessage(test_metric));
+  time_manager->SendMetric(test_metric);
+  delete time_manager;
+}
+
 }  // namespace time_tester
-#endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_PROTOCOL_HANDLER_MECTRIC_H_
+}  // namespace components
+}  // namespace test
