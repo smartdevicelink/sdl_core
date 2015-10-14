@@ -1,8 +1,5 @@
 /*
- * \file mock_transport_adapter_listener.h
- * \brief 
- *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,71 +30,60 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MOCK_TRANSPORT_MANAGER_LISTENER_H
-#define MOCK_TRANSPORT_MANAGER_LISTENER_H
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_LISTENER_MOCK_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_LISTENER_MOCK_H_
 
+#include <vector>
 #include <gmock/gmock.h>
-
-#include "transport_manager/common.h"
-#include "transport_manager/info.h"
-#include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_manager_listener.h"
-
-using ::transport_manager::ApplicationList;
-using ::transport_manager::ApplicationHandle;
-using ::transport_manager::transport_adapter::TransportAdapter;
-using ::transport_manager::SearchDeviceError;
-using ::transport_manager::ConnectionUID;
-using ::transport_manager::ConnectError;
-using ::transport_manager::DisconnectError;
-using ::transport_manager::DisconnectDeviceError;
-using ::transport_manager::DataSendError;
-using ::transport_manager::DataReceiveError;
-using ::transport_manager::CommunicationError;
-using ::transport_manager::DeviceInfo;
-using ::transport_manager::DeviceHandle;
+#include "protocol/raw_message.h"
 
 namespace test {
 namespace components {
-namespace transport_manager {
+namespace transport_manager_test {
 
-class MockTransportManagerListener :
-    public ::transport_manager::TransportManagerListener {
+using namespace transport_manager;
+using ::protocol_handler::RawMessage;
+using ::protocol_handler::RawMessagePtr;
+
+class TransportManagerListenerMock : public TransportManagerListener {
  public:
   MOCK_METHOD1(OnDeviceListUpdated, void(const std::vector<DeviceInfo>&));
   MOCK_METHOD0(OnFindNewApplicationsRequest, void());
-  MOCK_METHOD1(OnDeviceFound, void(const DeviceInfo &device_info));
-  MOCK_METHOD1(OnDeviceAdded, void(const DeviceInfo &device_info));
-  MOCK_METHOD1(OnDeviceRemoved, void(const DeviceInfo &device_info));
+  MOCK_METHOD1(OnDeviceFound, void(const DeviceInfo& device_info));
+  MOCK_METHOD1(OnDeviceAdded, void(const DeviceInfo& device_info));
+  MOCK_METHOD1(OnDeviceRemoved, void(const DeviceInfo& device_info));
   MOCK_METHOD0(OnNoDeviceFound, void());
   MOCK_METHOD0(OnScanDevicesFinished, void());
   MOCK_METHOD1(OnScanDevicesFailed, void(const SearchDeviceError& error));
 
-  MOCK_METHOD2(OnConnectionEstablished, void(const DeviceInfo& device_info,
-          const ConnectionUID &connection_id));
-  MOCK_METHOD2(OnConnectionFailed, void(const DeviceInfo& device_info,
-          const ConnectError& error));
+  MOCK_METHOD2(OnConnectionEstablished,
+               void(const DeviceInfo& device_info,
+                    const ConnectionUID& connection_id));
+  MOCK_METHOD2(OnConnectionFailed,
+               void(const DeviceInfo& device_info, const ConnectError& error));
 
   MOCK_METHOD1(OnConnectionClosed, void(ConnectionUID connection_id));
-  MOCK_METHOD2(OnConnectionClosedFailure, void (ConnectionUID connection_id,
-          const DisconnectError& error));
-  MOCK_METHOD2(OnUnexpectedDisconnect, void (ConnectionUID connection_id,
-          const CommunicationError& error));
-  MOCK_METHOD2(OnDeviceConnectionLost, void (const DeviceHandle& device,
-          const DisconnectDeviceError& error));
-  MOCK_METHOD2(OnDisconnectFailed, void (const DeviceHandle& device,
-          const DisconnectDeviceError& error));
+  MOCK_METHOD2(OnConnectionClosedFailure,
+               void(ConnectionUID connection_id, const DisconnectError& error));
+  MOCK_METHOD2(OnUnexpectedDisconnect, void(ConnectionUID connection_id,
+                                            const CommunicationError& error));
+  MOCK_METHOD2(OnDeviceConnectionLost,
+               void(const DeviceHandle& device,
+                    const DisconnectDeviceError& error));
+  MOCK_METHOD2(OnDisconnectFailed, void(const DeviceHandle& device,
+                                        const DisconnectDeviceError& error));
 
   MOCK_METHOD1(OnTMMessageReceived, void(const RawMessagePtr data_container));
   MOCK_METHOD2(OnTMMessageReceiveFailed, void(ConnectionUID connection_id,
-          const DataReceiveError& error));
+                                              const DataReceiveError& error));
   MOCK_METHOD1(OnTMMessageSend, void(const RawMessagePtr message));
-  MOCK_METHOD2(OnTMMessageSendFailed, void(const DataSendError& error,
-          const RawMessagePtr message));
+  MOCK_METHOD2(OnTMMessageSendFailed,
+               void(const DataSendError& error, const RawMessagePtr message));
 };
 
-}  // namespace transport_manager
+}  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test
 
-#endif /* MOCK_TRANSPORT_MANAGER_LISTENER_H */
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_LISTENER_MOCK_H_
