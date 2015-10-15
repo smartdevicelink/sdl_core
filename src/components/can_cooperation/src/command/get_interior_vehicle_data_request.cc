@@ -119,7 +119,7 @@ void GetInteriorVehicleDataRequest::ProccessSubscription() {
     } else {
       CANAppExtensionPtr extension = GetAppExtension(app());
 
-      bool isSubscribed = params[kIsSubscribed].asBool();
+      bool isSubscribed = response_params_[kIsSubscribed].asBool();
 
       if (subscribe && isSubscribed) {
         extension->SubscribeToInteriorVehicleData(params[kModuleDescription]);

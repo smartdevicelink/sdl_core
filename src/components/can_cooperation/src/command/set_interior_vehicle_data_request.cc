@@ -144,7 +144,6 @@ void SetInteriorVehicleDataRequest::OnEvent(
 }
 
 bool SetInteriorVehicleDataRequest::Validate() {
-
   Json::Value json;
   if (!this->ParseJsonString(&json)) {
     return false;
