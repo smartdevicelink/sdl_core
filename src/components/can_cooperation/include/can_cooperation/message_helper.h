@@ -75,6 +75,20 @@ class MessageHelper {
    */
   static Json::Value StringToValue(const std::string& string);
 
+  /**
+   * Validates structure DeviceInfo
+   * @param value json of DeviceInfo
+   * @return true if json is valid
+   */
+  static bool ValidateDeviceInfo(const Json::Value& value);
+
+  /**
+   * Validates structure InteriorZone
+   * @param value json of InteriorZone
+   * @return true if json is valid
+   */
+  static bool ValidateInteriorZone(const Json::Value& value);
+
  private:
   DISALLOW_COPY_AND_ASSIGN(MessageHelper);
 

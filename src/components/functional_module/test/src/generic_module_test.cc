@@ -41,7 +41,7 @@ TEST(GenericModuleTest, OnServiceStateChangedPass) {
   ServicePtr exp_service(mock_service);
   module.set_service(exp_service);
 
-  EXPECT_CALL(*mock_service, SubscribeToHMINotification(_)).Times(3);
+  EXPECT_CALL(*mock_service, SubscribeToHMINotification(_)).Times(4);
 
   module.OnServiceStateChanged(HMI_ADAPTER_INITIALIZED);
 }

@@ -186,10 +186,12 @@ class PolicyManagerImpl : public PolicyManager {
     virtual void SetPrimaryDevice(const PTString& dev_id);
     virtual void ResetPrimaryDevice();
     virtual PTString PrimaryDevice() const;
+    virtual void SetDeviceZone(const PTString& dev_id, const SeatLocation& zone);
     virtual void SetRemoteControl(bool enabled);
     virtual bool GetRemoteControl() const;
     virtual void OnChangedPrimaryDevice(const std::string& application_id);
     virtual void OnChangedRemoteControl(const std::string& application_id);
+    virtual void OnChangedDeviceZone(const std::string& application_id);
     virtual void SendAppPermissionsChanged(const std::string& device_id,
       const std::string& application_id);
 #endif  // SDL_REMOTE_CONTROL
@@ -315,6 +317,9 @@ private:
       const utils::SharedPtr<policy_table::Table> pt_update,
       const utils::SharedPtr<policy_table::Table> snapshot);
     utils::SharedPtr<AccessRemote> access_remote_;
+
+    void SendHMILevelChanged(const std::string& device_id,
+                                 const std::string& application_id);
 #endif  // SDL_REMOTE_CONTROL
     sync_primitives::Lock apps_registration_lock_;
     sync_primitives::Lock app_permissions_diff_lock_;

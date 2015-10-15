@@ -482,6 +482,14 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     virtual PTString PrimaryDevice() const = 0;
 
     /**
+     * Sets device zone
+     * @param dev_id unique identifier of device
+     * @param zone device zone
+     */
+    virtual void SetDeviceZone(const PTString& dev_id,
+                               const SeatLocation& zone) = 0;
+
+    /**
      * Sets mode of remote control (on/off)
      * @param enabled true if remote control is turned on
      */
@@ -504,6 +512,12 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @param application_id ID application
      */
     virtual void OnChangedRemoteControl(const std::string& application_id) = 0;
+
+    /**
+     * Handles changed device zone event for a application
+     * @param application_id ID application
+     */
+    virtual void OnChangedDeviceZone(const std::string& application_id) = 0;
 
     /*
      * Send OnPermissionsChange notification to mobile app

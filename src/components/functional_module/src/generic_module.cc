@@ -54,6 +54,7 @@ void GenericModule::OnServiceStateChanged(ServiceState state) {
     service_->SubscribeToHMINotification(hmi_api::on_interior_vehicle_data);
     service_->SubscribeToHMINotification(hmi_api::on_reverse_apps_allowing);
     service_->SubscribeToHMINotification(hmi_api::on_device_rank_changed);
+    service_->SubscribeToHMINotification(hmi_api::on_device_location_changed);
   }
 }
 

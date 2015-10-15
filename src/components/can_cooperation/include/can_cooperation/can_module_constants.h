@@ -189,6 +189,10 @@ const char kName[]       = "name";
 const char kRank[]       = "deviceRank";
 // RC.OnDriverRankChanged notification
 
+// RC.OnDriverLocationChanged notification
+const char kDeviceLocation[] = "deviceLocation";
+// RC.OnDriverLocationChanged notification
+
 // ButtonPress request
 //const char kZone[]          = "zone";
 const char kModuleType[]      = "moduleType";

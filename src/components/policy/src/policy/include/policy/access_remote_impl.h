@@ -76,11 +76,17 @@ class AccessRemoteImpl : public AccessRemote {
                                     const std::string &app_id,
                                     FunctionalIdType& group_types);
   virtual bool IsAppReverse(const PTString& app_id);
+  virtual SeatLocation GetDeviceZone(
+      const std::string& device_id,
+      const SeatLocation default_zone = { }) const;
+  virtual void SetDeviceZone(const std::string& device_id,
+                             const SeatLocation& zone);
 
  private:
   typedef std::map<Subject, TypeAccess> AccessControlRow;
   typedef std::map<Object, AccessControlRow> AccessControlList;
   typedef std::map<std::string, policy_table::AppHMITypes> HMIList;
+  typedef std::map<std::string, SeatLocation> SeatList;
   inline void set_enabled(bool value);
   inline bool country_consent() const;
   const policy_table::AppHMITypes& HmiTypes(const std::string& app_id);
@@ -96,6 +102,7 @@ class AccessRemoteImpl : public AccessRemote {
   bool enabled_;
   AccessControlList acl_;
   HMIList hmi_types_;
+  SeatList seats_;
 
   friend struct Erase;
   friend struct IsTypeAccess;
@@ -114,6 +121,7 @@ class AccessRemoteImpl : public AccessRemote {
   FRIEND_TEST(AccessRemoteImplTest, SetDefaultHmiTypes);
   FRIEND_TEST(AccessRemoteImplTest, GetGroups);
   FRIEND_TEST(AccessRemoteImplTest, CheckParameters);
+  FRIEND_TEST(AccessRemoteImplTest, GetDeviceZone);
 };
 
 }  // namespace policy
