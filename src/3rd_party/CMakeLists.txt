@@ -39,7 +39,7 @@ endif()
 # --- sqlite3
   add_subdirectory(sqlite3)
   
-if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
 # --- pthread-win32-2.9.1
   add_subdirectory(pthread-win32-2.9.1)
 endif()
