@@ -903,7 +903,7 @@ void CacheManager::Increment(usage_statistics::GlobalCounterId type) {
 void CacheManager::Increment(const std::string &app_id,
                              usage_statistics::AppCounterId type) {
   CACHE_MANAGER_CHECK_VOID();
-
+  sync_primitives::AutoLock lock (cache_lock_);
   switch (type) {
     case usage_statistics::USER_SELECTIONS:
       ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
