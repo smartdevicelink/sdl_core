@@ -39,6 +39,7 @@ include_directories(
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
+  ${COMPONENTS_DIR}/policy/src/policy/policy_table/
 )
 
 set(testLibraries
@@ -49,19 +50,15 @@ set(testLibraries
 )
 
 set(testSources
-#  usage_statistics_test.cc
-#  shared_library_test.cc
-#  generated_code_test.cc
-#  policy_manager_impl_test.cc
-#  update_status_manager_test.cc
+  usage_statistics_test.cc
+  shared_library_test.cc
+  generated_code_test.cc
+  policy_manager_impl_test.cc
+  update_status_manager_test.cc
 )
 
 list (APPEND testSources
- # sql_pt_ext_representation_test.cc
-)
-
-list (APPEND testSources
-  sql_pt_representation_test.cc
+ sql_pt_representation_test.cc
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
@@ -69,8 +66,8 @@ if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   # --- Tests for QDB Wrapper
   include_directories(../../utils/include/utils)
   list (APPEND testSources
-#        ../../utils/test/qdb_wrapper/sql_database_test.cc
-#        ../../utils/test/qdb_wrapper/sql_query_test.cc
+        ../../utils/test/qdb_wrapper/sql_database_test.cc
+        ../../utils/test/qdb_wrapper/sql_query_test.cc
   )
   file(COPY qdbserver.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
   file(COPY test-qdb.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -84,9 +81,7 @@ else ()
 #    ../../utils/test/sqlite_wrapper/sql_database_test.cc
 #    ../../utils/test/sqlite_wrapper/sql_query_test.cc
 #    ../../utils/test/generated_code_with_sqlite_test.cc
-    
-    # TODO{ALeshin} APPLINK-11132 AssertTrue in SetUpTestCase() return false
-    #policy_manager_impl_stress_test.cc
+#   policy_manager_impl_stress_test.cc
   )
   list (APPEND testLibraries sqlite3)
 endif()
@@ -105,3 +100,6 @@ file(COPY log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY smartDeviceLink2.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY smartDeviceLink3.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY sdl_pt_first_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY sdl_pt_second_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY sdl_pt_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

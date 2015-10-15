@@ -154,7 +154,7 @@ if (BUILD_TESTS)
   )
 
   include_directories(
-    ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct_ext
+    ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
   )
 
   set(testLibraries
