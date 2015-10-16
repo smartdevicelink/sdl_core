@@ -21,5 +21,5 @@ add_definitions(-DUNICODE)
 #add_definitions(-DWINCE)
 add_definitions(-D_WIN32)
 
-add_library(pthreadVC2 SHARED ${HEADERS} ${SOURCES})
+add_library(pthreadVC2 ${HEADERS} ${SOURCES})
 
