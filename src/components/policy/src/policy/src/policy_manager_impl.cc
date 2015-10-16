@@ -141,6 +141,7 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     return false;
   }
 
+  file_system::DeleteFile(file);
 
   if (!IsPTValid(pt_update, policy_table::PT_UPDATE)) {
     update_status_manager_.OnWrongUpdateReceived();
@@ -311,6 +312,11 @@ const std::vector<std::string> PolicyManagerImpl::GetAppRequestTypes(
   cache_->GetAppRequestTypes(policy_app_id, request_types);
   return request_types;
 }
+
+const VehicleInfo PolicyManagerImpl::GetVehicleInfo() const {
+  return cache_->GetVehicleInfo();
+}
+
 void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
                                          const PTString& hmi_level,
                                           const PTString& rpc,
@@ -507,7 +513,12 @@ void PolicyManagerImpl::SetUserConsentForApp(
 bool PolicyManagerImpl::GetDefaultHmi(const std::string& policy_app_id,
                                       std::string* default_hmi) {
   LOG4CXX_AUTO_TRACE(logger_);
-  return false;
+  const std::string device_id = GetCurrentDeviceId(policy_app_id);
+  DeviceConsent device_consent = GetUserConsentForDevice(device_id);
+  const std::string app_id =
+      policy::kDeviceAllowed != device_consent ?  kPreDataConsentId :
+                                                  policy_app_id;
+  return cache_->GetDefaultHMI(app_id, *default_hmi);
 }
 
 bool PolicyManagerImpl::GetPriority(const std::string& policy_app_id,
@@ -695,6 +706,7 @@ void PolicyManagerImpl::KmsChanged(int kilometers) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (0 == cache_->KilometersBeforeExchange(kilometers)) {
     LOG4CXX_INFO(logger_, "Enough kilometers passed to send for PT update.");
+    update_status_manager_.ScheduleUpdate();
     StartPTExchange();
   }
 }
@@ -759,12 +771,10 @@ void PolicyManagerImpl::OnUpdateStarted() {
   cache_->SaveUpdateRequired(true);
 }
 
-void PolicyManagerImpl::PTUpdatedAt(int kilometers, int days_after_epoch) {
+void PolicyManagerImpl::PTUpdatedAt(Counters counter, int value) {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_INFO(logger_,
-               "Kilometers: " << kilometers << " Days: " << days_after_epoch);
   cache_->SetCountersPassedForSuccessfulUpdate(
-    kilometers, days_after_epoch);
+    counter, value);
   cache_->ResetIgnitionCycles();
 }
 

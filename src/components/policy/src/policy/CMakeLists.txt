@@ -48,6 +48,7 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/utils/include/
   ${CMAKE_SOURCE_DIR}/src/components
   ${CMAKE_SOURCE_DIR}/src/components/config_profile/include
+  ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/table_struct
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
