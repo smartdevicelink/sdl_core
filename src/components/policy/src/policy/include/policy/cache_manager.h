@@ -88,11 +88,10 @@ class CacheManager : public CacheManagerInterface {
   virtual int KilometersBeforeExchange(int current);
 
   /**
-   * @brief Sets kilometers and days after epoch, that passed for recieved
-   * successful PT UPdate
+   * @brief Sets counter value that passed for recieved successful PT UPdate
    */
-  virtual bool SetCountersPassedForSuccessfulUpdate(int kilometers,
-                                                    int days_after_epoch);
+  virtual bool SetCountersPassedForSuccessfulUpdate(Counters counter,
+                                                    int value);
 
   /**
    * Gets value in days before next update policy table
@@ -127,7 +126,7 @@ class CacheManager : public CacheManagerInterface {
   /**
    * @brief Get information about vehicle
    */
-  virtual VehicleData GetVehicleData();
+  virtual const VehicleInfo GetVehicleInfo() const;
 
   /**
    * @brief Allows to update 'vin' field in module_meta table.

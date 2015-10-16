@@ -39,6 +39,7 @@
 #include "utils/shared_ptr.h"
 #include "usage_statistics/counter.h"
 #include "policy/policy_types.h"
+
 namespace policy_table = rpc::policy_table_interface_base;
 
 namespace policy {
@@ -82,11 +83,10 @@ class CacheManagerInterface {
   virtual int KilometersBeforeExchange(int current) = 0;
 
   /**
-   * @brief Sets kilometers and days after epoch, that passed for recieved
-   * successful PT UPdate
+   * @brief Sets counter value that passed for recieved successful PT UPdate
    */
-  virtual bool SetCountersPassedForSuccessfulUpdate(int kilometers,
-                                                    int days_after_epoch) = 0;
+  virtual bool SetCountersPassedForSuccessfulUpdate(Counters counter,
+                                                    int value) = 0;
 
   /**
    * Gets value in days before next update policy table
@@ -121,7 +121,7 @@ class CacheManagerInterface {
   /**
    * @brief Get information about vehicle
    */
-  virtual VehicleData GetVehicleData() = 0;
+  virtual const VehicleInfo GetVehicleInfo() const = 0;
 
   /**
    * @brief Allows to update 'vin' field in module_meta table.
@@ -536,10 +536,10 @@ class CacheManagerInterface {
   /**
    * @brief LoadFromFile allows to load policy cache from preloaded table.
    * @param file_name preloaded
-   * @return
+   * @param table object which will be filled during file parsing.
+   * @return true in case file was successfuly loaded, false otherwise.
    */
-  virtual bool LoadFromFile(const std::string& file_name,
-                            policy_table::Table& table) = 0;
+  virtual bool LoadFromFile(const std::string& file_name, policy_table::Table& table) = 0;
 
   /**
    * @brief Backup allows to save cache onto hard drive.
