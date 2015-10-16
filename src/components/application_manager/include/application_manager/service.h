@@ -51,6 +51,7 @@ enum TypeAccess {
 struct SeatLocation {
   int col, row, level;
 };
+typedef utils::SharedPtr<SeatLocation> SeatLocationPtr;
 
 typedef std::string PluginFunctionID;
 /**
@@ -143,6 +144,13 @@ class Service {
    */
   virtual void SetDeviceZone(const uint32_t dev_id,
                              const SeatLocation& zone) = 0;
+
+  /**
+   * Gets device zone
+   * @param dev_id ID device
+   * @return device zone is unknown otherwise 0
+   */
+  virtual const SeatLocationPtr GetDeviceZone(const uint32_t dev_id) const = 0;
 
   /**
    * Sets mode of remote control (on/off)

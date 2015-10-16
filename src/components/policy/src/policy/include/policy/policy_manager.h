@@ -490,6 +490,15 @@ class PolicyManager : public usage_statistics::StatisticsManager {
                                const SeatLocation& zone) = 0;
 
     /**
+     * Gets device zone
+     * @param dev_id unique identifier of device
+     * @param zone value to return zone if device has zone
+     * @return true if device has zone
+     */
+    virtual bool GetDeviceZone(const PTString& dev_id,
+                               SeatLocation* zone) const = 0;
+
+    /**
      * Sets mode of remote control (on/off)
      * @param enabled true if remote control is turned on
      */

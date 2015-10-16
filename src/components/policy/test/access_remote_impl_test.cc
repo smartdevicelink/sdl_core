@@ -417,22 +417,15 @@ TEST(AccessRemoteImplTest, CheckParameters) {
 TEST(AccessRemoteImplTest, GetDeviceZone) {
   AccessRemoteImpl access_remote;
 
-  // Default zone
-  SeatLocation expect = {};
-  SeatLocation zone = access_remote.GetDeviceZone("dev_1");
-  EXPECT_EQ(expect, zone);
-
-  // Specific default zone
-  SeatLocation default_zone = { 0, 1, 0 };
-  zone = access_remote.GetDeviceZone("dev_1", default_zone);
-  EXPECT_EQ(default_zone, zone);
+  // No zone
+  const SeatLocation* zone1 = access_remote.GetDeviceZone("dev_1");
+  EXPECT_EQ(0, zone1);
 
   // Device has zone
-  default_zone = { 1, 1, 1 };
-  expect = { 0, 1, 0 };
+  SeatLocation expect = { 0, 1, 0 };
   access_remote.seats_["dev_2"] = expect;
-  zone = access_remote.GetDeviceZone("dev_2", default_zone);
-  EXPECT_EQ(expect, zone);
+  const SeatLocation* zone2 = access_remote.GetDeviceZone("dev_2");
+  EXPECT_EQ(expect, *zone2);
 }
 
 }  // namespace policy

@@ -46,6 +46,7 @@
 
 namespace can_cooperation {
 
+using application_manager::SeatLocation;
 using functional_modules::ProcessResult;
 using functional_modules::GenericModule;
 using functional_modules::PluginInfo;

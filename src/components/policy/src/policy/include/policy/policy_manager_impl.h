@@ -187,6 +187,7 @@ class PolicyManagerImpl : public PolicyManager {
     virtual void ResetPrimaryDevice();
     virtual PTString PrimaryDevice() const;
     virtual void SetDeviceZone(const PTString& dev_id, const SeatLocation& zone);
+    virtual bool GetDeviceZone(const PTString& dev_id, SeatLocation* zone) const;
     virtual void SetRemoteControl(bool enabled);
     virtual bool GetRemoteControl() const;
     virtual void OnChangedPrimaryDevice(const std::string& application_id);

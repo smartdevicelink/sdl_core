@@ -167,6 +167,14 @@ class PolicyHandler :
                      const application_manager::SeatLocation& zone);
 
   /**
+   * Gets device zone
+   * @param dev_id ID device
+   * @return device zone is unknown otherwise 0
+   */
+  const application_manager::SeatLocationPtr GetDeviceZone(
+      const std::string& device_id) const;
+
+  /**
    * Sets mode of remote control (on/off)
    * @param enabled true if remote control is turned on
    */

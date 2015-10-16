@@ -43,6 +43,8 @@ namespace Json {
 class Value;
 }
 
+using application_manager::SeatLocation;
+
 namespace can_cooperation {
 
 namespace commands {

@@ -1501,6 +1501,21 @@ void PolicyHandler::SetDeviceZone(const std::string& device_id,
   }
 }
 
+const application_manager::SeatLocationPtr PolicyHandler::GetDeviceZone(
+    const std::string& device_id) const {
+  POLICY_LIB_CHECK(0);
+  policy::SeatLocation policy_zone;
+  if (policy_manager_->GetDeviceZone(device_id, &policy_zone)) {
+    application_manager::SeatLocationPtr zone =
+        new application_manager::SeatLocation();
+    zone->col = policy_zone.col;
+    zone->row = policy_zone.row;
+    zone->level = policy_zone.level;
+    return zone;
+  }
+  return 0;
+}
+
 void PolicyHandler::SetRemoteControl(bool enabled) {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->SetRemoteControl(enabled);

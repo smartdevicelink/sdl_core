@@ -35,6 +35,8 @@
 #include "can_cooperation/can_module.h"
 #include "can_cooperation/can_module_constants.h"
 
+using application_manager::SeatLocation;
+
 namespace can_cooperation {
 
 namespace commands {
