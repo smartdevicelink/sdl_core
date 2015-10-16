@@ -252,7 +252,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
           // TODO(VS): move validation to separate class
           if (value[json_keys::kParams].isMember(message_params::kAllowed)
                 && value[json_keys::kParams][message_params::kAllowed].isBool()) {
-            if ((!value[json_keys::kParams][message_params::kAllowed].isBool()) &&
+            if ((!value[json_keys::kParams][message_params::kAllowed].asBool()) &&
                 CANModule::instance()->service()->IsRemoteControlAllowed()) {
               ModuleHelper::ProccessOnReverseAppsDisallowed();
             }
@@ -497,7 +497,10 @@ void CANModule::UnsubscribeAppForAllZones(uint32_t hmi_app_id,
       app->subscribed_interior_vehicle_data_.begin();
   for (;iter != app->subscribed_interior_vehicle_data_.end();) {
 
+    // TODO(VS): Move headers initialization out of loop(only params must be changed in loop)
     Json::Value msg;
+
+    msg[kId] = service()->GetNextCorrelationID();
 
     msg[kJsonrpc] = "2.0";
     msg[kMethod] =
