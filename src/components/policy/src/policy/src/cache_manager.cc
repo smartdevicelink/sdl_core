@@ -42,6 +42,8 @@
 #include "json/features.h"
 #include "json/writer.h"
 #include "utils/logger.h"
+#include "utils/gen_hash.h"
+#include "utils/macro.h"
 
 #  include "policy/sql_pt_representation.h"
 
@@ -80,9 +82,7 @@ private:
 CacheManager::CacheManager()
   : CacheManagerInterface(),
     pt_(new policy_table::Table),
-    backup_(
-                     new SQLPTRepresentation()
-    ),
+    backup_(new SQLPTRepresentation()),
     update_required(false) {
 
   LOG4CXX_AUTO_TRACE(logger_);
@@ -483,9 +483,11 @@ int CacheManager::KilometersBeforeExchange(int current) {
   return std::max(limit - actual, 0);
 }
 
-bool CacheManager::SetCountersPassedForSuccessfulUpdate(int kilometers,
-                                                        int days_after_epoch) {
+bool CacheManager::SetCountersPassedForSuccessfulUpdate(policy::Counters counter,
+                                                        int value) {
   CACHE_MANAGER_CHECK(false);
+  UNUSED(counter);
+  UNUSED(value);
   Backup();
   return true;
 }
@@ -535,13 +537,23 @@ bool CacheManager::SecondsBetweenRetries(std::vector<int>& seconds) {
   return true;
 }
 
-VehicleData CacheManager::GetVehicleData() {
-  // TODO(AGaliuzov): maybe should be removed.
-  return VehicleData();
+const policy::VehicleInfo CacheManager::GetVehicleInfo() const {
+  CACHE_MANAGER_CHECK(VehicleInfo());
+  policy_table::ModuleConfig& module_config =
+      pt_->policy_table.module_config;
+  VehicleInfo vehicle_info;
+  vehicle_info.vehicle_make = *module_config.vehicle_make;
+  vehicle_info.vehicle_model = *module_config.vehicle_model;
+  vehicle_info.vehicle_year = *module_config.vehicle_year;
+  LOG4CXX_DEBUG(logger_, "Vehicle info (make, model, year):"
+                << vehicle_info.vehicle_make << ","
+                << vehicle_info.vehicle_model << ","
+                << vehicle_info.vehicle_year );
+  return vehicle_info;
 }
 
 std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
-    const std::vector<std::string> &msg_codes, const std::string &language) {
+    const std::vector<std::string>& msg_codes, const std::string& language) {
 
   LOG4CXX_AUTO_TRACE(logger_);
   std::vector<UserFriendlyMessage> result;
