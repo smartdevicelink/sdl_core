@@ -43,6 +43,7 @@ namespace commands {
 
 using event_engine::EventDispatcher;
 using application_manager::SeatLocation;
+using application_manager::SeatLocationPtr;
 
 using namespace json_keys;
 

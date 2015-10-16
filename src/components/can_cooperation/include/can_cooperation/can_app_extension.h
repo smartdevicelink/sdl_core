@@ -40,7 +40,7 @@
 #include "can_cooperation/can_module.h"
 #include "json/json.h"
 
-using application_manager::SeatLocationPtr;
+using application_manager::SeatLocation;
 
 namespace can_cooperation {
 
@@ -61,11 +61,11 @@ class CANAppExtension : public application_manager::AppExtension {
      */
     void GiveControl(bool is_control_given);
 
-    void set_seat(const SeatLocationPtr seat) {
+    void set_seat(const SeatLocation& seat) {
       seat_ = seat;
     }
 
-    const SeatLocationPtr seat() const {
+    const SeatLocation seat() const {
       return seat_;
     }
 
@@ -101,7 +101,7 @@ class CANAppExtension : public application_manager::AppExtension {
 
   private:
     bool is_control_given_;
-    SeatLocationPtr seat_;
+    SeatLocation seat_;
     bool is_on_driver_device_;
     std::set<Json::Value> subscribed_interior_vehicle_data_;
 
