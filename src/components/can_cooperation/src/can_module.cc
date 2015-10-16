@@ -486,7 +486,7 @@ void CANModule::UnsubscribeAppForAllZones(uint32_t hmi_app_id,
 
     msg[kJsonrpc] = "2.0";
     msg[kMethod] =
-        hmi_api::get_interior_vehicle_data_capabilities;
+        hmi_api::get_interior_vehicle_data;
 
     msg[kParams] = *iter;
 
