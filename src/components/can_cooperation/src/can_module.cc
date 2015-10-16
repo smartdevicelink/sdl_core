@@ -482,6 +482,8 @@ void CANModule::UnsubscribeAppForAllZones(uint32_t hmi_app_id,
     // TODO(VS): Move headers initialization out of loop(only params must be changed in loop)
     Json::Value msg;
 
+    msg[kId] = service()->GetNextCorrelationID();
+
     msg[kJsonrpc] = "2.0";
     msg[kMethod] =
         hmi_api::get_interior_vehicle_data_capabilities;
