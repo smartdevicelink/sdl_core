@@ -510,6 +510,8 @@ void CANModule::UnsubscribeAppForAllZones(uint32_t hmi_app_id,
 
     msg[kParams][json_keys::kAppId] = hmi_app_id;
 
+    msg[kParams][message_params::kSubscribe] = false;
+
     application_manager::MessagePtr message_to_send(
         new application_manager::Message(
             protocol_handler::MessagePriority::kDefault));
