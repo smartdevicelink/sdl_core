@@ -346,8 +346,10 @@ bool BaseCommandRequest::CheckAccess() {
   Json::Reader reader;
   LOG4CXX_DEBUG(logger_, "Request: " << message_->json_message());
   reader.parse(message_->json_message(), value);
+
+  device_location_ = GetDeviceLocation(value);
   application_manager::TypeAccess access = service_->CheckAccess(
-      app_->app_id(), InteriorZone(value), ModuleType(value),
+      app_->app_id(), device_location_, ModuleType(value),
       message_->function_name(), ControlData(value));
 
   switch (access) {
@@ -364,7 +366,7 @@ bool BaseCommandRequest::CheckAccess() {
       Json::Value params;
       params[json_keys::kAppId] = app_->hmi_app_id();
       params[message_params::kModuleType] = ModuleType(value);
-      params[message_params::kZone] = GetInteriorZone(value);
+      params[message_params::kZone] = JsonDeviceLocation(GetInteriorZone(value));
       SendRequest(functional_modules::hmi_api::get_user_consent, params, true);
       break;
     }
@@ -377,6 +379,25 @@ bool BaseCommandRequest::CheckAccess() {
       SendResponse(false, result_codes::kDisallowed, "Unknown issue");
   }
   return false;
+}
+
+SeatLocation BaseCommandRequest::GetDeviceLocation(const Json::Value& value) {
+  SeatLocation zone = InteriorZone(value);
+  SeatLocationPtr device = service_->GetDeviceZone(app_->device());
+  if (device) {
+    zone.col = device->col;
+    zone.row = device->row;
+    zone.level = device->level;
+  }
+  return zone;
+}
+
+Json::Value BaseCommandRequest::JsonDeviceLocation(const Json::Value& value) {
+  Json::Value json = value;
+  json[message_params::kCol] = device_location_.col;
+  json[message_params::kRow] = device_location_.row;
+  json[message_params::kLevel] = device_location_.level;
+  return json;
 }
 
 std::string BaseCommandRequest::ModuleType(const Json::Value& message) {
@@ -447,11 +468,10 @@ void BaseCommandRequest::ProcessAccessResponse(
     Json::Value request;
     reader.parse(message_->json_message(), request);
     std::string module = ModuleType(request);
-    SeatLocation zone = InteriorZone(request);
     LOG4CXX_DEBUG(
         logger_,
         "Setting allowed access for " << app_->app_id() << " for " << module);
-    service_->SetAccess(app_->app_id(), zone, module, allowed);
+    service_->SetAccess(app_->app_id(), device_location_, module, allowed);
     CheckHMILevel(application_manager::kManual, allowed);
     Execute();  // run child's logic
   } else {

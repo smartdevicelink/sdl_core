@@ -174,7 +174,10 @@ class BaseCommandRequest : public Command,
   void ProcessAccessResponse(
       const event_engine::Event<application_manager::MessagePtr,
       std::string>& event);
+  SeatLocation GetDeviceLocation(const Json::Value& value);
+  Json::Value JsonDeviceLocation(const Json::Value& value);
   application_manager::ApplicationSharedPtr app_;
+  SeatLocation device_location_;
 };
 
 }  // namespace commands
