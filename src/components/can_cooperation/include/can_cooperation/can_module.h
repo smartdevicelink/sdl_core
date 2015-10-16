@@ -40,7 +40,6 @@
 #include "can_cooperation/request_controller.h"
 #include "utils/threads/message_loop_thread.h"
 
-
 namespace can_cooperation {
 
 class CANAppExtension;

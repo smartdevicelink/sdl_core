@@ -145,6 +145,13 @@ class CoreService : public Service {
   void SetDeviceZone(const uint32_t dev_id,const SeatLocation& zone);
 
   /**
+   * Gets device zone
+   * @param dev_id ID device
+   * @return device zone is unknown otherwise 0
+   */
+  const SeatLocationPtr GetDeviceZone(const uint32_t dev_id) const;
+
+  /**
    * Sets mode of remote control (on/off)
    * @param enabled true if remote control is turned on
    */

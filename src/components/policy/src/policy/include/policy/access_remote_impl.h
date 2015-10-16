@@ -76,9 +76,7 @@ class AccessRemoteImpl : public AccessRemote {
                                     const std::string &app_id,
                                     FunctionalIdType& group_types);
   virtual bool IsAppReverse(const PTString& app_id);
-  virtual SeatLocation GetDeviceZone(
-      const std::string& device_id,
-      const SeatLocation default_zone = { }) const;
+  virtual const SeatLocation* GetDeviceZone(const std::string& device_id) const;
   virtual void SetDeviceZone(const std::string& device_id,
                              const SeatLocation& zone);
 

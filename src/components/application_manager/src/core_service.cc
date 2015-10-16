@@ -167,6 +167,15 @@ void CoreService::SetDeviceZone(const uint32_t dev_id,
 #endif  // SDL_REMOTE_CONTROL
 }
 
+const SeatLocationPtr CoreService::GetDeviceZone(const uint32_t dev_id) const {
+#ifdef SDL_REMOTE_CONTROL
+  std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
+      dev_id);
+  return policy::PolicyHandler::instance()->GetDeviceZone(device_handle);
+#endif  // SDL_REMOTE_CONTROL
+  return 0;
+}
+
 void CoreService::SetRemoteControl(bool enabled) {
 #ifdef SDL_REMOTE_CONTROL
   policy::PolicyHandler::instance()->SetRemoteControl(enabled);

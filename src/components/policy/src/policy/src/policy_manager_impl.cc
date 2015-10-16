@@ -1016,10 +1016,7 @@ TypeAccess PolicyManagerImpl::CheckDriverConsent(
     return TypeAccess::kDisallowed;
   }
 
-  const SeatLocation device_zone = access_remote_->GetDeviceZone(who.dev_id,
-                                                                 what.zone);
-  const Object resource = { what.module, device_zone };
-  TypeAccess access = access_remote_->CheckParameters(resource, rpc, params);
+  TypeAccess access = access_remote_->CheckParameters(what, rpc, params);
   if (access == TypeAccess::kManual) {
     return access_remote_->Check(who, what);
   }
@@ -1089,6 +1086,18 @@ PTString PolicyManagerImpl::PrimaryDevice() const {
 void PolicyManagerImpl::SetDeviceZone(const PTString& dev_id,
                                       const SeatLocation& zone) {
   access_remote_->SetDeviceZone(dev_id, zone);
+}
+
+bool PolicyManagerImpl::GetDeviceZone(const PTString& dev_id,
+                                      SeatLocation* zone) const {
+  const SeatLocation* seat = access_remote_->GetDeviceZone(dev_id);
+  if (seat) {
+    zone->col = seat->col;
+    zone->row = seat->row;
+    zone->level = seat->level;
+    return true;
+  }
+  return false;
 }
 
 void PolicyManagerImpl::SetRemoteControl(bool enabled) {

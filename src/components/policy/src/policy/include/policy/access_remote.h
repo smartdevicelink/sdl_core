@@ -265,11 +265,10 @@ class AccessRemote {
   /**
    * Gets device zone
    * @param device_id unique identifier of device
-   * @param default_zone zone will be used if policy doesn't have zone of this device
-   * @return device zone
+   * @return device zone if device has zone otherwise 0
    */
-  virtual SeatLocation GetDeviceZone(const std::string& device_id,
-                                     SeatLocation default_zone) const = 0;
+  virtual const SeatLocation* GetDeviceZone(
+      const std::string& device_id) const = 0;
 
   /**
    * Sets device zone

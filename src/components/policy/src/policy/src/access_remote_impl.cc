@@ -399,13 +399,13 @@ void AccessRemoteImpl::GetGroupsIds(const std::string &device_id,
   LOG4CXX_DEBUG(logger_, "Groups Ids: " << groups_ids);
 }
 
-SeatLocation AccessRemoteImpl::GetDeviceZone(
-    const std::string& device_id, SeatLocation default_zone) const {
+const SeatLocation* AccessRemoteImpl::GetDeviceZone(
+    const std::string& device_id) const {
   SeatList::const_iterator i = seats_.find(device_id);
   if (i != seats_.end()) {
-    return i->second;
+    return &i->second;
   }
-  return default_zone;
+  return 0;
 }
 
 void AccessRemoteImpl::SetDeviceZone(const std::string& device_id,

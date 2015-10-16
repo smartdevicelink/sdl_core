@@ -42,6 +42,8 @@
 #include "can_cooperation/can_app_extension.h"
 #include "json/json.h"
 
+using application_manager::SeatLocation;
+
 namespace can_cooperation {
 
 namespace commands {
