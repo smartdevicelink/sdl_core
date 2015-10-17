@@ -9,7 +9,7 @@ Pull Requests Welcome!
   * [Software Architecture Document](https://app.box.com/s/v5ymu5kathzkwfx8iigxxdpr7d5a2xhh)
   * [Transport Manager Programming Guide](https://app.box.com/s/1pjquttvmhf19uujtw4x4fv4t1leqasa)
   * [Software Detailed Design](https://app.box.com/s/ohgrvemtx39f8hfea1ab676xxrzvyx1y)
-  * [Integration Guidelines](https://app.box.com/s/uikmmpeozq6j902uzl1he43n6ct010jp)
+  * [Integration Guidelines](https://app.box.com/s/ohcgjv61cykgkuhycglju6cc4efr0ym3)
 
 ## SDL Core
 
