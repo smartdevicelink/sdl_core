@@ -476,7 +476,8 @@ void BaseCommandRequest::ProcessAccessResponse(
     CheckHMILevel(application_manager::kManual, allowed);
     Execute();  // run child's logic
   } else {
-    SendResponse(false, result_codes::kUserDisallowed, "");
+    SendResponse(false, result_codes::kUserDisallowed,
+                 "The driver disallows this remote-control RPC");
   }
 }
 
