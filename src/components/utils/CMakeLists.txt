@@ -114,12 +114,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   target_link_libraries("Utils" pthread ${RTLIB})
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-  message(STATUS "Utils->CMAKE_SYSTEM_NAME STREQUAL: Windows")
-  list(APPEND LIBRARIES pthreadVC2)
-  ADD_DEPENDENCIES(Utils pthreadVC2)
-endif()
-
 message(STATUS "Utils->LIBRARIES:" ${LIBRARIES})
 target_link_libraries("Utils" ${LIBRARIES})
 

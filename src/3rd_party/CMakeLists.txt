@@ -38,10 +38,10 @@ endif()
 
 # --- sqlite3
   add_subdirectory(sqlite3)
-  
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-# --- pthread-win32-2.9.1
-  add_subdirectory(pthread-win32-2.9.1)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+# --- pthread-win32
+add_subdirectory(./pthread-win32-2.9.1)
 endif()
 
 if(ENABLE_LOG)
