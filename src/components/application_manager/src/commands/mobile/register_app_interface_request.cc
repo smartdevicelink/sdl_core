@@ -297,6 +297,8 @@ void RegisterAppInterfaceRequest::Run() {
 
     SendRegisterAppInterfaceResponseToMobile();
 
+    MessageHelper::SendQueryApps( (*message_)[strings::params][strings::connection_key].asInt());
+
     MessageHelper::SendLockScreenIconUrlNotification(
         (*message_)[strings::params][strings::connection_key].asInt());
   }
