@@ -44,7 +44,7 @@ namespace commands {
 void RegisterAppInterfaceResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
+  mobile_apis::Result::eType result_code = mobile_apis::Result::SUCCESS;
   bool success = (*message_)[strings::msg_params][strings::success].asBool();
   bool last_message = !success;
   // Do not close connection in case of APPLICATION_NOT_REGISTERED despite it is an error
