@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2015, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,27 +27,59 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-
-# --- jsoncpp
-add_subdirectory(./jsoncpp)
-set(JSONCPP_INCLUDE_DIRECTORY ${JSONCPP_INCLUDE_DIRECTORY} PARENT_SCOPE)
-
-# --- MessageBroker
-add_subdirectory(./MessageBroker)
-set(MESSAGE_BROKER_INCLUDE_DIRECTORY ${MESSAGE_BROKER_INCLUDE_DIRECTORY} PARENT_SCOPE)
-
-# --- encryption
-add_subdirectory(./encryption)
-set(ENCRYPTION_INCLUDE_DIRECTORY ${ENCRYPTION_INCLUDE_DIRECTORY} PARENT_SCOPE)
-
-if (BUILD_USB_SUPPORT)
-  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    add_subdirectory(./libusbx-1.0.16)
-    set(LIBUSB_INCLUDE_DIRECTORY ${LIBUSB_INCLUDE_DIRECTORY} PARENT_SCOPE)
-    set(LIBUSB_LIBS_DIRECTORY ${LIBUSB_LIBS_DIRECTORY} PARENT_SCOPE)
-  endif()
-endif()
-
 if(BUILD_TESTS)
-  add_subdirectory(test)
+include(${CMAKE_SOURCE_DIR}/tools/intergen/GenerateInterfaceLibrary.cmake)
+
+if (${HMI_DBUS_API})
+  GenerateInterfaceLibrary("test_interface.xml" test_rpc_interface DBUS_SUPPORT)
+else()
+  GenerateInterfaceLibrary("test_interface.xml" test_rpc_interface)
 endif()
+
+set (TEST_HMI_INTERFACES
+  common
+  buttons
+  navigation
+  basic_communication
+  tts
+  ui
+)
+
+if (${HMI_DBUS_API})
+  GenerateInterfaceLibrary("test_hmi_interface.xml" "${TEST_HMI_INTERFACES}" AUTO_FUNC_IDS DBUS_SUPPORT)
+else()
+  GenerateInterfaceLibrary("test_hmi_interface.xml" "${TEST_HMI_INTERFACES}" AUTO_FUNC_IDS)
+endif()
+
+include_directories (
+  ${CMAKE_SOURCE_DIR}/src/components/rpc_base/include
+  ${GMOCK_INCLUDE_DIRECTORY}
+  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+set (LIBRARIES
+    gtest
+    gtest_main
+    gmock
+    gmock_main
+    test_rpc_interface
+)
+
+set (SOURCES
+  generated_interface_json_tests.cc
+)
+
+if (${HMI_DBUS_API})
+  # Build dbus tests
+  include_directories(
+      ${CMAKE_SOURCE_DIR}/src/components/dbus/include
+      ${DBUS_INCLUDE_DIRS}
+  )
+  set (LIBRARIES ${LIBRARIES} DBus)
+  set (SOURCES ${SOURCES} generated_interface_dbus_tests.cc)
+endif ()
+
+
+create_test(test_generated_interface "${SOURCES}" "${LIBRARIES}")
+endif()  
