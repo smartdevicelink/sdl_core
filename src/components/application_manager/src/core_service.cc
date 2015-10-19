@@ -173,7 +173,7 @@ const SeatLocationPtr CoreService::GetDeviceZone(const uint32_t dev_id) const {
       dev_id);
   return policy::PolicyHandler::instance()->GetDeviceZone(device_handle);
 #endif  // SDL_REMOTE_CONTROL
-  return 0;
+  return SeatLocationPtr();
 }
 
 void CoreService::SetRemoteControl(bool enabled) {
