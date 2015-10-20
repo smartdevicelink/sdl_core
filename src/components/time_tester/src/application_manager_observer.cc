@@ -29,10 +29,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager_observer.h"
+#include "time_tester/application_manager_observer.h"
 #include "utils/shared_ptr.h"
-#include "time_manager.h"
-#include "application_manager_metric.h"
+#include "time_tester/time_manager.h"
+#include "time_tester/application_manager_metric.h"
 
 namespace time_tester {
 

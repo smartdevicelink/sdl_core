@@ -90,7 +90,8 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
 
 {
   LOG4CXX_AUTO_TRACE(logger_);
-  protocol_header_validator_.set_max_payload_size(profile::Profile::instance()->maximum_payload_size());
+  protocol_header_validator_.set_max_payload_size(
+        profile::Profile::instance()->maximum_payload_size());
   incoming_data_handler_.set_validator(&protocol_header_validator_);
 
   if (message_frequency_time_ > 0u &&
@@ -103,11 +104,12 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
   }
 
   if (malformed_message_filtering_) {
-    if(malformed_message_frequency_time_ > 0u &&
-       malformed_message_max_frequency_ > 0u) {
+    if (malformed_message_frequency_time_ > 0u &&
+        malformed_message_max_frequency_ > 0u) {
       malformed_message_meter_.set_time_range(malformed_message_frequency_time_);
-      LOG4CXX_DEBUG(logger_, "Malformed frequency meter is enabled ( " << malformed_message_max_frequency_
-                    << " per " << malformed_message_frequency_time_ << " mSecond)");
+      LOG4CXX_DEBUG(logger_, "Malformed frequency meter is enabled ( "
+                    << malformed_message_max_frequency_ << " per "
+                    << malformed_message_frequency_time_ << " mSecond)");
     } else {
       LOG4CXX_WARN(logger_, "Malformed frequency meter is disabled");
     }
@@ -296,15 +298,15 @@ RESULT_CODE ProtocolHandlerImpl::SendHeartBeatAck(ConnectionID connection_id,
 
   uint8_t protocol_version;
   if (session_observer_->ProtocolVersionUsed(connection_id,
-	session_id, protocol_version)) {
-	ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
+  session_id, protocol_version)) {
+  ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
         protocol_version, PROTECTION_OFF, FRAME_TYPE_CONTROL,
-	    SERVICE_TYPE_CONTROL, FRAME_DATA_HEART_BEAT_ACK, session_id,
-	    0u, message_id));
+      SERVICE_TYPE_CONTROL, FRAME_DATA_HEART_BEAT_ACK, session_id,
+      0u, message_id));
 
-	raw_ford_messages_to_mobile_.PostMessage(
-	    impl::RawFordMessageToMobile(ptr, false));
-	return RESULT_OK;
+  raw_ford_messages_to_mobile_.PostMessage(
+      impl::RawFordMessageToMobile(ptr, false));
+  return RESULT_OK;
   }
   LOG4CXX_WARN(logger_, "SendHeartBeatAck is failed connection or session does not exist");
   return RESULT_FAIL;
@@ -315,9 +317,9 @@ void ProtocolHandlerImpl::SendHeartBeat(int32_t connection_id,
   LOG4CXX_AUTO_TRACE(logger_);
   uint8_t protocol_version;
   if (session_observer_->ProtocolVersionUsed(connection_id,
-			session_id, protocol_version)) {
+      session_id, protocol_version)) {
     ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-	    protocol_version, PROTECTION_OFF, FRAME_TYPE_CONTROL,
+      protocol_version, PROTECTION_OFF, FRAME_TYPE_CONTROL,
         SERVICE_TYPE_CONTROL, FRAME_DATA_HEART_BEAT, session_id,
         0u, message_counters_[session_id]++));
 
@@ -442,10 +444,10 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
     " msg data_size "      << tm_message->data_size());
 
   RESULT_CODE result;
-  size_t malformed_occurs = false;
+  size_t malformed_occurs = 0u;
   const std::list<ProtocolFramePtr> protocol_frames =
       incoming_data_handler_.ProcessData(*tm_message, &result, &malformed_occurs);
-  LOG4CXX_DEBUG(logger_, "Proccessed " << protocol_frames.size() << "frames");
+  LOG4CXX_DEBUG(logger_, "Proccessed " << protocol_frames.size() << " frames");
   if (result != RESULT_OK) {
     if (result == RESULT_MALFORMED_OCCURS) {
       LOG4CXX_WARN(logger_, "Malformed message occurs, connection id "
@@ -557,9 +559,11 @@ void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
 void ProtocolHandlerImpl::OnTMMessageSendFailed(
     const transport_manager::DataSendError &error,
     const RawMessagePtr message) {
+  DCHECK_OR_RETURN_VOID(message);
   // TODO(PV): implement
   LOG4CXX_ERROR(logger_, "Sending message " << message->data_size()
-                << " bytes failed: " << error.text());
+                << "bytes failed, connection_key " << message->connection_key()
+                << "Error_text: " << error.text());
 }
 
 void ProtocolHandlerImpl::OnConnectionEstablished(
@@ -597,7 +601,7 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
   if (!message_to_send) {
     LOG4CXX_ERROR(logger_, "Serialization error");
         return RESULT_FAIL;
-  };
+  }
   LOG4CXX_DEBUG(logger_,
                "Message to send with connection id " <<
                static_cast<int>(packet->connection_id()));
@@ -610,7 +614,7 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
       transport_manager_->SendMessageToDevice(message_to_send)) {
     LOG4CXX_WARN(logger_, "Can't send message to device");
     return RESULT_FAIL;
-  };
+  }
   return RESULT_OK;
 }
 
@@ -703,20 +707,21 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
 
 RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
                                                const ProtocolFramePtr packet) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN(packet, RESULT_UNKNOWN);
+  LOG4CXX_DEBUG(logger_, "Handling message " << packet);
   switch (packet->frame_type()) {
     case FRAME_TYPE_CONTROL:
-      LOG4CXX_TRACE(logger_, "handleMessage() - case FRAME_TYPE_CONTROL");
+      LOG4CXX_TRACE(logger_, "FRAME_TYPE_CONTROL");
       return HandleControlMessage(connection_id, packet);
     case FRAME_TYPE_SINGLE:
-      LOG4CXX_TRACE(logger_, "handleMessage() - case FRAME_TYPE_SINGLE");
+      LOG4CXX_TRACE(logger_, "FRAME_TYPE_SINGLE");
       return HandleSingleFrameMessage(connection_id, packet);
     case FRAME_TYPE_FIRST:
     case FRAME_TYPE_CONSECUTIVE:
-      LOG4CXX_TRACE(logger_, "handleMessage() - case FRAME_TYPE_FIRST or FRAME_TYPE_CONSECUTIVE");
+      LOG4CXX_TRACE(logger_, "FRAME_TYPE_FIRST or FRAME_TYPE_CONSECUTIVE");
       return HandleMultiFrameMessage(connection_id, packet);
     default: {
-      LOG4CXX_WARN(logger_, "handleMessage() - case unknown frame type"
+      LOG4CXX_WARN(logger_, "Unknown frame type"
                    << packet->frame_type());
       return RESULT_FAIL;
     }
@@ -784,78 +789,87 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
       "Packet " << packet << "; session id " << static_cast<int32_t>(key));
 
   if (packet->frame_type() == FRAME_TYPE_FIRST) {
-    LOG4CXX_DEBUG(logger_, "handleMultiFrameMessage() - FRAME_TYPE_FIRST "
-                 << packet->data_size());
+    LOG4CXX_TRACE(logger_, "FRAME_TYPE_FIRST");
+    // First frame has no data
+    DCHECK_OR_RETURN(packet->frame_data() == 0u, RESULT_FAIL);
+    // We can not handle more than one multiframe with the same key
+    DCHECK_OR_RETURN(incomplete_multi_frame_messages_.count(key) == 0,
+                     RESULT_FAIL);
     incomplete_multi_frame_messages_[key] = packet;
-  } else {
-    LOG4CXX_DEBUG(logger_, "handleMultiFrameMessage() - Consecutive frame");
+    return RESULT_OK;
+  }
+  DCHECK_OR_RETURN(packet->frame_type() == FRAME_TYPE_CONSECUTIVE, RESULT_FAIL)
 
-    std::map<int32_t, ProtocolFramePtr>::iterator it =
-        incomplete_multi_frame_messages_.find(key);
+  MultiFrameMap::iterator it = incomplete_multi_frame_messages_.find(key);
+  if (it == incomplete_multi_frame_messages_.end()) {
+    LOG4CXX_ERROR(logger_,
+       "Frame of multiframe message for non-existing session id " << key);
+    return RESULT_FAIL;
+  }
 
-    if (it == incomplete_multi_frame_messages_.end()) {
-      LOG4CXX_ERROR(
-          logger_, "Frame of multiframe message for non-existing session id");
-      return RESULT_FAIL;
-    }
+  ProtocolFramePtr& assembling_frame = it->second;
+  const uint8_t previous_frame_data = assembling_frame->frame_data();
+  const uint8_t new_frame_data = packet->frame_data();
 
-    if (it->second->appendData(packet->data(), packet->data_size())
-        != RESULT_OK) {
-      LOG4CXX_ERROR(logger_,
-          "Failed to append frame for multiframe message.");
-      return RESULT_FAIL;
-    }
+  const bool is_last_consecutive = (new_frame_data == FRAME_DATA_LAST_CONSECUTIVE);
+  // The next frame data is bigger at 1
+  DCHECK_OR_RETURN((new_frame_data == (previous_frame_data + 1)) ||
+  // except the last consecutive frame
+                   is_last_consecutive, RESULT_FAIL);
 
-    if (packet->frame_data() == FRAME_DATA_LAST_CONSECUTIVE) {
-      LOG4CXX_DEBUG(
-          logger_,
-          "Last frame of multiframe message size " << packet->data_size()
-              << "; connection key " << key);
-      {
-        sync_primitives::AutoLock lock(protocol_observers_lock_);
-        if (protocol_observers_.empty()) {
-          LOG4CXX_ERROR(
-              logger_,
-              "Cannot handle multiframe message: no IProtocolObserver is set.");
-          return RESULT_FAIL;
-        }
-      }
+  assembling_frame->set_frame_data(new_frame_data);
 
-      ProtocolFramePtr completePacket = it->second;
-      const uint32_t connection_key =
-          session_observer_->KeyFromPair(connection_id,
-                                         completePacket->session_id());
-      const RawMessagePtr rawMessage(
-            new RawMessage(connection_key,
-                           completePacket->protocol_version(),
-                           completePacket->data(),
-                           completePacket->total_data_bytes(),
-                           completePacket->service_type(),
-                           completePacket->payload_size()));
+  LOG4CXX_DEBUG(logger_,
+                "Appending " << packet->data_size() << " bytes "
+                << "; frame_data " << static_cast<int>(new_frame_data)
+                << "; connection key " << key);
 
-      LOG4CXX_DEBUG(logger_,
-                    "total_data_bytes " << completePacket->total_data_bytes() <<
-                    " packet_size " << completePacket->packet_size() <<
-                    " data size " <<  completePacket->data_size() <<
-                    " payload_size " << completePacket->payload_size());
+  DCHECK_OR_RETURN(packet->message_id() == assembling_frame->message_id(), RESULT_FAIL);
+  if (assembling_frame->appendData(packet->data(), packet->data_size()) != RESULT_OK) {
+    LOG4CXX_ERROR(logger_, "Failed to append frame for multiframe message.");
+    return RESULT_FAIL;
+  }
 
-      if (!rawMessage) {
+  if (is_last_consecutive) {
+    LOG4CXX_DEBUG(
+        logger_,
+        "Last frame of multiframe message size " << packet->data_size()
+            << "; connection key " << key);
+    {
+      sync_primitives::AutoLock lock(protocol_observers_lock_);
+      if (protocol_observers_.empty()) {
+        LOG4CXX_ERROR(
+            logger_,
+            "Cannot handle multiframe message: no IProtocolObserver is set.");
         return RESULT_FAIL;
       }
+    }
+    const uint32_t connection_key =
+        session_observer_->KeyFromPair(connection_id,
+                                       assembling_frame->session_id());
+    LOG4CXX_DEBUG(logger_, "Result frame" << assembling_frame <<
+                  "for connection "<< connection_key);
+    const RawMessagePtr rawMessage(
+          new RawMessage(connection_key,
+                         assembling_frame->protocol_version(),
+                         assembling_frame->data(),
+                         assembling_frame->total_data_bytes(),
+                         assembling_frame->service_type(),
+                         assembling_frame->payload_size()));
+    DCHECK_OR_RETURN(rawMessage, RESULT_FAIL);
 
 #ifdef TIME_TESTER
-      if (metric_observer_) {
-        PHMetricObserver::MessageMetric *metric =
-            new PHMetricObserver::MessageMetric();
-        metric->raw_msg = rawMessage;
-        metric_observer_->EndMessageProcess(metric);
-      }
-#endif  // TIME_TESTER
-      // TODO(EZamakhov): check service in session
-      NotifySubscribers(rawMessage);
-
-      incomplete_multi_frame_messages_.erase(it);
+    if (metric_observer_) {
+      PHMetricObserver::MessageMetric *metric =
+          new PHMetricObserver::MessageMetric();
+      metric->raw_msg = rawMessage;
+      metric_observer_->EndMessageProcess(metric);
     }
+#endif  // TIME_TESTER
+    // TODO(EZamakhov): check service in session
+    NotifySubscribers(rawMessage);
+
+    incomplete_multi_frame_messages_.erase(it);
   }
   return RESULT_OK;
 }
@@ -921,8 +935,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
 
   // TODO(EZamakhov): add clean up output queue (for removed service)
   if (session_key != 0) {
-    SendEndSessionAck( connection_id, current_session_id,
-                       packet.protocol_version(), service_type);
+    SendEndSessionAck(connection_id, current_session_id,
+                      packet.protocol_version(), service_type);
     message_counters_.erase(current_session_id);
   } else {
     LOG4CXX_WARN(
@@ -1014,7 +1028,7 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     ConnectionID connection_id, const ProtocolPacket &packet) {
   LOG4CXX_DEBUG(logger_,
-                "Protocol version: " <<
+                "Protocol version:" <<
                 static_cast<int>(packet.protocol_version()));
   const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
   const uint8_t protocol_version = packet.protocol_version();
@@ -1099,8 +1113,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
         PROTOCOL_VERSION_4 == protocol_version) {
       return SendHeartBeatAck(connection_id, packet.session_id(),
                               packet.message_id());
-    }
-    else {
+    } else {
       LOG4CXX_WARN(logger_, "HeartBeat is not supported");
       return RESULT_HEARTBEAT_IS_NOT_SUPPORTED;
     }
@@ -1264,7 +1277,7 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
           packet->connection_id(), packet->session_id(),
           packet->message_id(),    kRpc);
     return RESULT_OK;
-  };
+  }
   LOG4CXX_DEBUG(logger_, "Encrypted " << packet->data_size() << " bytes to "
                 << out_data_size << " bytes");
   DCHECK(out_data);
@@ -1314,7 +1327,7 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
           packet->connection_id(), packet->session_id(),
           packet->message_id(),    kRpc);
     return RESULT_ENCRYPTION_FAILED;
-  };
+  }
   LOG4CXX_DEBUG(logger_, "Decrypted " << packet->data_size() << " bytes to "
                 << out_data_size << " bytes");
   DCHECK(out_data);
@@ -1335,24 +1348,23 @@ void ProtocolHandlerImpl::SendFramesNumber(uint32_t connection_key,
   session_observer_->PairFromKey(connection_key, &connection_id, &session_id);
   uint8_t protocol_version;
   if (session_observer_->ProtocolVersionUsed(connection_id, session_id,
-		  protocol_version)) {
+      protocol_version)) {
     ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-	  	  protocol_version, PROTECTION_OFF, FRAME_TYPE_CONTROL,
-	        SERVICE_TYPE_NAVI, FRAME_DATA_SERVICE_DATA_ACK,
-	        session_id, 0, message_counters_[session_id]++));
+        protocol_version, PROTECTION_OFF, FRAME_TYPE_CONTROL,
+          SERVICE_TYPE_NAVI, FRAME_DATA_SERVICE_DATA_ACK,
+          session_id, 0, message_counters_[session_id]++));
 
     // Flow control data shall be 4 bytes according Ford Protocol
     DCHECK(sizeof(number_of_frames) == 4);
     number_of_frames = LE_TO_BE32(number_of_frames);
     ptr->set_data(reinterpret_cast<const uint8_t*>(&number_of_frames),
-	                  sizeof(number_of_frames));
-	raw_ford_messages_to_mobile_.PostMessage(
-	     impl::RawFordMessageToMobile(ptr, false));
-	LOG4CXX_DEBUG(logger_, "SendFramesNumber finished successfully");
+                    sizeof(number_of_frames));
+  raw_ford_messages_to_mobile_.PostMessage(
+       impl::RawFordMessageToMobile(ptr, false));
+  LOG4CXX_DEBUG(logger_, "SendFramesNumber finished successfully");
   } else {
-	  LOG4CXX_WARN(logger_, "SendFramesNumber is failed connection or session does not exist");
+    LOG4CXX_WARN(logger_, "SendFramesNumber is failed connection or session does not exist");
   }
-
 }
 
 #ifdef TIME_TESTER

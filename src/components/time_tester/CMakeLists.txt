@@ -31,8 +31,8 @@
 
 set(TIME_TESTER_SRC_DIR ${COMPONENTS_DIR}/time_tester/src)
 
-include_directories (
-  include/time_tester
+include_directories(
+  include
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/protocol_handler/include/
   ${COMPONENTS_DIR}/connection_handler/include/
