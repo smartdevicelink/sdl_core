@@ -163,6 +163,8 @@ class SessionObserverMock : public protocol_handler::SessionObserver {
   MOCK_METHOD3(ProtocolVersionUsed,
       bool( uint32_t connection_id,
           uint8_t session_id, uint8_t& protocol_version));
+  MOCK_CONST_METHOD1(GetHandshakeContext,
+               security_manager::SSLContext::HandshakeContext (const uint32_t key) );
 };
 
 #ifdef ENABLE_SECURITY
@@ -218,7 +220,10 @@ class SSLContextMock : public security_manager::SSLContext {
   MOCK_CONST_METHOD0(IsInitCompleted, bool());
   MOCK_CONST_METHOD0(IsHandshakePending, bool());
   MOCK_CONST_METHOD0(LastError,
-      std::string());
+                     std::string());
+  MOCK_METHOD0(ResetConnection,
+               void());
+  MOCK_METHOD1(SetHandshakeContext, void (const HandshakeContext& hsh_ctx));
 };
 #endif  // ENABLE_SECURITY
 }

@@ -77,7 +77,7 @@ void MessageQueueTest::add_one_element_to_queue() {
 // Thread function - removes 1 element from beginning of queue
 void MessageQueueTest::extract_from_queue() {
   test_queue.wait();
-  test_line = test_queue.pop();
+  test_queue.pop(test_line);
   pthread_exit(NULL);
 }
 
