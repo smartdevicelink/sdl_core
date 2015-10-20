@@ -838,8 +838,8 @@ void PolicyManagerImpl::MarkUnpairedDevice(const std::string& device_id) {
 
 void PolicyManagerImpl::OnAppRegisteredOnMobile(
     const std::string& application_id) {
-  StartPTExchange();
   SendNotificationOnPermissionsUpdated(application_id);
+  StartPTExchange();
 }
 
 std::string PolicyManagerImpl::RetrieveCertificate() const {

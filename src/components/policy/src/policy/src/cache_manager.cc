@@ -79,6 +79,7 @@ private:
 
 CacheManager::CacheManager()
   : CacheManagerInterface(),
+    pt_(new policy_table::Table),
     backup_(
                      new SQLPTRepresentation()
     ),

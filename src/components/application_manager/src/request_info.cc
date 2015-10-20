@@ -46,8 +46,8 @@ uint32_t RequestInfo::HmiConnectoinKey = 0;
 
 HMIRequestInfo::HMIRequestInfo(
     RequestPtr request,
-    const uint64_t timeout_sec):
-  RequestInfo(request, HMIRequest, timeout_sec) {
+    const uint64_t timeout_msec):
+  RequestInfo(request, HMIRequest, timeout_msec) {
     correlation_id_ = request_->correlation_id();
     app_id_ = RequestInfo::HmiConnectoinKey;
 }
@@ -55,16 +55,16 @@ HMIRequestInfo::HMIRequestInfo(
 HMIRequestInfo::HMIRequestInfo(
     RequestPtr request,
     const TimevalStruct &start_time,
-    const uint64_t timeout_sec):
-  RequestInfo(request, HMIRequest, start_time, timeout_sec) {
+    const uint64_t timeout_msec):
+  RequestInfo(request, HMIRequest, start_time, timeout_msec) {
     correlation_id_ = request_->correlation_id();
     app_id_ = RequestInfo::HmiConnectoinKey;
 }
 
 MobileRequestInfo::MobileRequestInfo(
     RequestPtr request,
-    const uint64_t timeout_sec):
-  RequestInfo(request, MobileRequest, timeout_sec) {
+    const uint64_t timeout_msec):
+  RequestInfo(request, MobileRequest, timeout_msec) {
     correlation_id_ = request_.get()->correlation_id();
     app_id_ = request_.get()->connection_key();
 }
@@ -72,8 +72,8 @@ MobileRequestInfo::MobileRequestInfo(
 MobileRequestInfo::MobileRequestInfo(
     RequestPtr request,
     const TimevalStruct &start_time,
-    const uint64_t timeout_sec):
-  RequestInfo(request, MobileRequest, start_time, timeout_sec) {
+    const uint64_t timeout_msec):
+  RequestInfo(request, MobileRequest, start_time, timeout_msec) {
     correlation_id_ = request_.get()->correlation_id();
     app_id_ = request_.get()->connection_key();
 }
@@ -81,10 +81,10 @@ MobileRequestInfo::MobileRequestInfo(
 RequestInfo::RequestInfo(RequestPtr request,
                          const RequestInfo::RequestType requst_type,
                          const TimevalStruct& start_time,
-                         const uint64_t timeout_sec):
+                         const uint64_t timeout_msec):
   request_(request),
   start_time_(start_time),
-  timeout_sec_(timeout_sec) {
+  timeout_msec_(timeout_msec) {
   updateEndTime();
   requst_type_ = requst_type;
   correlation_id_ = request_->correlation_id();
@@ -93,23 +93,17 @@ RequestInfo::RequestInfo(RequestPtr request,
 
 void application_manager::request_controller::RequestInfo::updateEndTime() {
   end_time_ = date_time::DateTime::getCurrentTime();
-  end_time_.tv_sec += timeout_sec_;
-
-  // possible delay during IPC
-  const uint32_t hmi_delay_sec = 1;
-  end_time_.tv_sec += hmi_delay_sec;
+  date_time::DateTime::AddMilliseconds( end_time_, timeout_msec_  );
 }
 
-void RequestInfo::updateTimeOut(const uint64_t& timeout_sec)  {
-  timeout_sec_ = timeout_sec;
+void RequestInfo::updateTimeOut(const uint64_t& timeout_msec)  {
+  timeout_msec_ = timeout_msec;
   updateEndTime();
 }
 
 bool RequestInfo::isExpired() {
   TimevalStruct curr_time = date_time::DateTime::getCurrentTime();
-  return end_time_.tv_sec <= curr_time.tv_sec;
-  // TODO(EZamakhov) APPLINK-15219 Need to use compareTime method when timer will support milliseconds
-  // return date_time::GREATER == date_time::DateTime::compareTime(end_time_, curr_time);
+  return date_time::DateTime::getmSecs(end_time_) <=  date_time::DateTime::getmSecs(curr_time);
 }
 
 uint64_t RequestInfo::hash() {
@@ -189,7 +183,7 @@ RequestInfoPtr RequestInfoSet::FrontWithNotNullTimeout() {
   TimeSortedRequestInfoSet::iterator it = time_sorted_pending_requests_.begin();
   while (it != time_sorted_pending_requests_.end()) {
     RequestInfoPtr tmp = *it;
-    if (0 == tmp ->timeout_sec()) {
+    if (0 == tmp ->timeout_msec()) {
       ++it;
     } else {
       result = tmp;

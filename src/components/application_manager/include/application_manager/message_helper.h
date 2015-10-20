@@ -405,7 +405,7 @@ class MessageHelper {
 
     static void SendSystemRequestNotification(
         uint32_t connection_key,
-        NsSmartDeviceLink::NsSmartObjects::SmartObject& content);
+        NsSmartDeviceLink::NsSmartObjects::SmartObject*& content);
 
     /**
      * @brief SendLaunchApp allows to send OnSystemRequest with LAUNCH_UP.

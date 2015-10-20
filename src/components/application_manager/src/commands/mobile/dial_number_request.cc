@@ -48,6 +48,14 @@ DialNumberRequest::DialNumberRequest(const MessageSharedPtr& message)
 DialNumberRequest::~DialNumberRequest() {
 }
 
+bool DialNumberRequest::Init(){
+    LOG4CXX_AUTO_TRACE(logger_);
+
+    default_timeout_ = 0;
+
+    return true;
+}
+
 void DialNumberRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -59,9 +67,18 @@ void DialNumberRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
-
-  StripNumberParam();
-
+  std::string number = (*message_)[strings::msg_params][strings::number].asString();
+  if (!CheckSyntax(number)) {
+      LOG4CXX_ERROR(logger_, "Invalid incoming data");
+      SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      return;
+  }
+  StripNumberParam(number);
+  if (number.empty()) {
+    LOG4CXX_WARN(logger_, "After strip number param is empty. Invalid incoming data");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
   msg_params[strings::number] =
@@ -101,15 +118,12 @@ void DialNumberRequest::on_event(const event_engine::Event& event) {
   SendResponse((mobile_apis::Result::SUCCESS == result_code), result_code);
 }
 
-void DialNumberRequest::StripNumberParam() {
-  if ((*message_)[strings::msg_params].keyExists(strings::number)) {
-    std::string number = (*message_)[strings::msg_params][strings::number].asString();
+void DialNumberRequest::StripNumberParam(std::string &number) {
     std::size_t found = 0;
     while (std::string::npos != (found = number.find_first_not_of("+0123456789"))) {
       number.erase(number.begin() + found);
     }
     (*message_)[strings::msg_params][strings::number] = number;
-  }
 }
 
 }  // namespace commands
