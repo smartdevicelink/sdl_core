@@ -1921,37 +1921,40 @@ bool MessageHelper::SendStopAudioPathThru() {
 void MessageHelper::SendPolicySnapshotNotification(
   unsigned int connection_key, const std::vector<uint8_t>& policy_data,
   const std::string& url, int timeout) {
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(connection_key);
+   DCHECK(app.get());
 
-  using namespace mobile_apis;
-  using namespace smart_objects;
-
-  SmartObject content (SmartType_Map);
+  smart_objects::SmartObject * content   = new smart_objects::SmartObject(smart_objects::SmartType_Map);
   if (!url.empty()) {
-    content[strings::msg_params][mobile_notification::syncp_url] = url;
+    (*content)[strings::msg_params][mobile_notification::syncp_url] = url;
   }
 
-  content[strings::msg_params][strings::request_type] = RequestType::HTTP;
-  content[strings::params][strings::binary_data] = SmartObject(policy_data);
-  content[strings::msg_params][strings::file_type] = FileType::BINARY;
+  (*content)[strings::msg_params][strings::request_type] = mobile_apis::RequestType::PROPRIETARY;
+  (*content)[strings::params][strings::binary_data] = smart_objects::SmartObject(policy_data);
+  (*content)[strings::msg_params][strings::file_type] = mobile_apis::FileType::BINARY;
 
-  SendSystemRequestNotification(connection_key, content);
+SendSystemRequestNotification(connection_key, content);
 }
 
 void MessageHelper::SendSystemRequestNotification (uint32_t connection_key,
-    smart_objects::SmartObject& content) {
+    smart_objects::SmartObject*& content) {
 
   using namespace mobile_apis;
   using namespace commands;
-  using namespace smart_objects;
 
-  content[strings::params][strings::function_id] = FunctionID::OnSystemRequestID;
-  content[strings::params][strings::message_type] = messageType::notification;
-  content[strings::params][strings::protocol_type] = CommandImpl::mobile_protocol_type_;
-  content[strings::params][strings::protocol_version] = CommandImpl::protocol_version_;
+  (*content)[strings::params][strings::function_id] = mobile_apis::FunctionID::OnSystemRequestID;
+  (*content)[strings::params][strings::message_type] = mobile_apis::messageType::notification;
+  (*content)[strings::params][strings::protocol_type] =commands::CommandImpl::mobile_protocol_type_;
+  (*content)[strings::params][strings::protocol_version] = commands::CommandImpl::protocol_version_;
 
-  content[strings::params][strings::connection_key] = connection_key;
+  (*content)[strings::params][strings::connection_key] = connection_key;
 
-  ApplicationManagerImpl::instance()->ManageMobileCommand(new SmartObject(content));
+  smart_objects::SmartObject* so = new smart_objects::SmartObject(*content);
+#ifdef DEBUG
+  PrintSmartObject(*so);
+#endif
+
+  DCHECK(ApplicationManagerImpl::instance()->ManageMobileCommand(so));
 }
 
 void MessageHelper::SendLaunchApp(uint32_t connection_key,
@@ -1961,13 +1964,13 @@ void MessageHelper::SendLaunchApp(uint32_t connection_key,
   using namespace mobile_apis;
   using namespace smart_objects;
 
-  SmartObject content (SmartType_Map);
-  content[strings::msg_params][strings::request_type] = RequestType::LAUNCH_APP;
-  content[strings::msg_params][strings::app_id] = connection_key;
+  SmartObject * content = new SmartObject(SmartType_Map);
+  (*content)[strings::msg_params][strings::request_type] = RequestType::LAUNCH_APP;
+  (*content)[strings::msg_params][strings::app_id] = connection_key;
   if (!urlSchema.empty()) {
-    content[strings::msg_params][strings::url] = urlSchema;
+    (*content)[strings::msg_params][strings::url] = urlSchema;
   } else if (!packageName.empty()) {
-    content[strings::msg_params][strings::url] = packageName;
+    (*content)[strings::msg_params][strings::url] = packageName;
   }
 
   SendSystemRequestNotification(connection_key, content);
@@ -1980,10 +1983,10 @@ void application_manager::MessageHelper::SendQueryApps(
 
   policy::PolicyHandler* policy_handler = policy::PolicyHandler::instance();
 
-  SmartObject content (SmartType_Map);
-  content[strings::msg_params][strings::request_type] = RequestType::QUERY_APPS;
-  content[strings::msg_params][strings::url] = policy_handler->RemoteAppsUrl();
-  content[strings::msg_params][strings::timeout] =
+  SmartObject  *content  = new SmartObject(SmartType_Map);
+  (*content)[strings::msg_params][strings::request_type] = RequestType::QUERY_APPS;
+  (*content)[strings::msg_params][strings::url] = policy_handler->RemoteAppsUrl();
+  (*content)[strings::msg_params][strings::timeout] =
       policy_handler->TimeoutExchange();
 
   Json::Value http;
@@ -2005,8 +2008,8 @@ void application_manager::MessageHelper::SendQueryApps(
   std::string data = http_header.toStyledString();
   std::vector<uint8_t> binary_data(data.begin(), data.end());
 
-  content[strings::params][strings::binary_data] = SmartObject(binary_data);
-  content[strings::msg_params][strings::file_type] = FileType::BINARY;
+  (*content)[strings::params][strings::binary_data] = SmartObject(binary_data);
+  (*content)[strings::msg_params][strings::file_type] = FileType::BINARY;
 
   SendSystemRequestNotification(connection_key, content);
 }

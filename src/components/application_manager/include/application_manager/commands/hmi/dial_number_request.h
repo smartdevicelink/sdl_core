@@ -39,6 +39,7 @@ namespace application_manager {
 
 namespace commands {
 
+namespace hmi {
 /**
  * @brief DialNumberRequest command class
  **/
@@ -64,6 +65,8 @@ class DialNumberRequest : public RequestToHMI {
  private:
   DISALLOW_COPY_AND_ASSIGN(DialNumberRequest);
 };
+
+} // namespace hmi
 
 }  // namespace commands
 
