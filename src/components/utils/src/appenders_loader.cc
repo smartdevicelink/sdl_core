@@ -30,13 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utils/appenders_loader.h"
+
 #ifdef OS_WIN32
-#include "arch/aix/apr_arch_dso.h"
+#include "unistd.h"
+#include "apr_arch_dso.h"
 #else
 #include <dlfcn.h>
 #endif
-
-#include "utils/appenders_loader.h"
 
 namespace utils {
 

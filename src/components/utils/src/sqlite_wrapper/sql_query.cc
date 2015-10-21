@@ -31,11 +31,7 @@
  */
 
 #include "sqlite_wrapper/sql_query.h"
-#ifdef OS_WIN32
-#include "sqlite3.h"
-#else
 #include <sqlite3.h>
-#endif
 #include <cassert>
 #include "sqlite_wrapper/sql_database.h"
 

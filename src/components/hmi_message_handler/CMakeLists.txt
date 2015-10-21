@@ -45,8 +45,13 @@ include_directories (
     ${COMPONENTS_DIR}/dbus/include/
     ${CMAKE_SOURCE_DIR}/
     ${LOG4CXX_INCLUDE_DIRECTORY}
-    ${CMAKE_SOURCE_DIR}/src/3rd_party/pthread-win32-2.9.1
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	include_directories (
+		${CMAKE_SOURCE_DIR}/include/win32
+	)
+endif()
 
 IF (HMIADAPTER STREQUAL "dbus")
     set (DBUS_SOURCE ./src/dbus_message_adapter.cc)

@@ -58,8 +58,15 @@ include_directories (
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include
-  ${CMAKE_SOURCE_DIR}/src/3rd_party/pthread-win32-2.9.1
+  ${CMAKE_SOURCE_DIR}/include
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	include_directories (
+		${CMAKE_SOURCE_DIR}/include/win32
+		${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include/arch/win32
+	)
+endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 include_directories(
@@ -350,7 +357,7 @@ SET (LIBRARIES
   ProtocolLibrary
   SmartObjects
   UsageStatistics
-#  dl
+  dl
   formatters
   dbms
 )
@@ -359,7 +366,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES sqlite3)
 endif ()
 
-IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
+IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX" OR CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
   list(REMOVE_ITEM LIBRARIES dl)
 endif()
 

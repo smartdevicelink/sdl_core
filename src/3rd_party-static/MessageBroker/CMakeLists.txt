@@ -6,16 +6,11 @@ include_directories (
   ../jsoncpp/include
   ../../components/utils/include
 )
-if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
-include_directories (
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/pthread-win32-2.9.1
-)
-endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-include_directories (
-  ${CMAKE_SOURCE_DIR}/src/3rd_party/pthread-win32-2.9.1
-)
+	include_directories (
+		${CMAKE_SOURCE_DIR}/include/win32
+	)
 endif()
 
 set (MESSAGE_BROKER_SOURCES

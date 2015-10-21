@@ -62,7 +62,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "utils/appenders_loader.h"
-#include "arch/aix/apr_arch_dso.h"
+#include "apr_arch_dso.h"
 
 namespace policy {
 

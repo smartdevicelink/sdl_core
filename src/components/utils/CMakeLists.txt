@@ -38,12 +38,19 @@ include_directories (
   ${COMPONENTS_DIR}/media_manager/include
   ${COMPONENTS_DIR}/protocol_handler/include
   ${CMAKE_SOURCE_DIR}/include
-  ${CMAKE_SOURCE_DIR}/src/3rd_party/pthread-win32-2.9.1
   ${CMAKE_SOURCE_DIR}/src/3rd_party/apache-log4cxx-win32-0.10.0/apr/include
   ${CMAKE_SOURCE_DIR}/src/3rd_party-static/libusbx-1.0.16/libusb
   ${CMAKE_SOURCE_DIR}/src/3rd_party/sqlite3
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	include_directories (
+		${CMAKE_SOURCE_DIR}/include/win32
+		${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include
+		${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include/arch/win32
+	)
+endif()
 
 set (SOURCES
     ${UTILS_SRC_DIR}/bitstream.cc

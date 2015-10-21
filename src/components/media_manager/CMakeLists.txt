@@ -101,8 +101,13 @@ include_directories (
     ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/usage_statistics/include/
     ${default_includes}
     ${LOG4CXX_INCLUDE_DIRECTORY}
-    ${CMAKE_SOURCE_DIR}/src/3rd_party/pthread-win32-2.9.1
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	include_directories (
+		${CMAKE_SOURCE_DIR}/include/win32
+	)
+endif()
 
 set (SOURCES
     ${COMPONENTS_DIR}/media_manager/src/media_adapter_impl.cc

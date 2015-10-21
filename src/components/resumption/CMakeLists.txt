@@ -35,8 +35,13 @@ include_directories (
   ${COMPONENTS_DIR}/config_profile/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
-  ${CMAKE_SOURCE_DIR}/src/3rd_party/pthread-win32-2.9.1
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	include_directories (
+		${CMAKE_SOURCE_DIR}/include/win32
+	)
+endif()
 
 set (SOURCES
   ${COMPONENTS_DIR}/resumption/src/last_state.cc
