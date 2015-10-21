@@ -31,12 +31,19 @@
  */
 
 #include <string>
+#include <iostream>
 //#include <stdio.h>
 #include "gmock/gmock.h"
 #include "connection_handler/heartbeat_monitor.h"
 #include "connection_handler/connection.h"
 #include "connection_handler/connection_handler.h"
 #include "config_profile/profile.h"
+
+namespace {
+const int32_t MILLISECONDS_IN_SECOND = 1000;
+const int32_t MICROSECONDS_IN_MILLISECONDS = 1000;
+const int32_t MICROSECONDS_IN_SECOND = 1000 * 1000;
+}
 
 namespace test {
 namespace components {
@@ -62,6 +69,7 @@ class ConnectionHandlerMock : public connection_handler::ConnectionHandler {
   MOCK_METHOD2(GetDeviceID,
       bool(const std::string& mac_address,
           connection_handler::DeviceHandle* device_handle));
+  MOCK_CONST_METHOD1(GetConnectedDevicesMAC, void(std::vector<std::string> &device_macs));
   MOCK_METHOD2(CloseSession,
             void(uint32_t key,
                  connection_handler::CloseSessionReason close_reason));
@@ -78,10 +86,14 @@ class ConnectionHandlerMock : public connection_handler::ConnectionHandler {
       void(connection_handler::ConnectionHandle connection_handle,
           uint8_t session_id));
   MOCK_METHOD2(SetHeartBeatTimeout, void(uint32_t connection_key,
-          int32_t timeout));
+          uint32_t timeout));
   MOCK_METHOD2(BindProtocolVersionWithSession,
       void(uint32_t connection_key,
           uint8_t protocol_version));
+  MOCK_METHOD4(GetDataOnSessionKey,
+      int32_t(uint32_t key, uint32_t* app_id,
+              std::list<int32_t>* sessions_list,
+              uint32_t* device_id));
 };
 
 class HeartBeatMonitorTest : public testing::Test {
@@ -95,7 +107,7 @@ public:
 protected:
   testing::NiceMock<ConnectionHandlerMock> connection_handler_mock;
   connection_handler::Connection* conn;
-  int32_t kTimeout;
+  uint32_t kTimeout;
   static const connection_handler::ConnectionHandle kConnectionHandle = 0xABCDEF;
 
   virtual void SetUp() {
@@ -122,7 +134,7 @@ TEST_F(HeartBeatMonitorTest, TimerNotStarted) {
   EXPECT_CALL(connection_handler_mock, SendHeartBeat(_, _)).Times(0);
 
   conn->AddNewSession();
-  sleep(kTimeout + 1);
+  usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS + MICROSECONDS_IN_SECOND);
 }
 
 TEST_F(HeartBeatMonitorTest, TimerNotElapsed) {
@@ -132,7 +144,7 @@ TEST_F(HeartBeatMonitorTest, TimerNotElapsed) {
 
   const uint32_t session = conn->AddNewSession();
   conn->StartHeartBeat(session);
-  sleep(kTimeout - 1);
+  usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
 }
 
 TEST_F(HeartBeatMonitorTest, TimerElapsed) {
@@ -144,7 +156,7 @@ TEST_F(HeartBeatMonitorTest, TimerElapsed) {
   EXPECT_CALL(connection_handler_mock, SendHeartBeat(_, session));
 
   conn->StartHeartBeat(session);
-  sleep(2 * kTimeout + 1);
+  usleep(2 * kTimeout * MICROSECONDS_IN_MILLISECONDS + MICROSECONDS_IN_SECOND);
 }
 
 TEST_F(HeartBeatMonitorTest, KeptAlive) {
@@ -154,13 +166,13 @@ TEST_F(HeartBeatMonitorTest, KeptAlive) {
 
   const uint32_t session = conn->AddNewSession();
   conn->StartHeartBeat(session);
-  sleep(kTimeout - 1);
+  usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
   conn->KeepAlive(session);
-  sleep(kTimeout - 1);
+  usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
   conn->KeepAlive(session);
-  sleep(kTimeout - 1);
+  usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
   conn->KeepAlive(session);
-  sleep(kTimeout - 1);
+  usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
 }
 
 TEST_F(HeartBeatMonitorTest, NotKeptAlive) {
@@ -172,13 +184,13 @@ TEST_F(HeartBeatMonitorTest, NotKeptAlive) {
   EXPECT_CALL(connection_handler_mock, CloseConnection(_));
 
   conn->StartHeartBeat(session);
-  sleep(kTimeout - 1);
+  usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
   conn->KeepAlive(session);
-  sleep(kTimeout - 1);
+  usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
   conn->KeepAlive(session);
-  sleep(kTimeout - 1);
+  usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS - MICROSECONDS_IN_SECOND);
   conn->KeepAlive(session);
-  sleep(2 * kTimeout + 1);
+  usleep(2 * kTimeout * MICROSECONDS_IN_MILLISECONDS + MICROSECONDS_IN_SECOND);
 }
 
 TEST_F(HeartBeatMonitorTest, TwoSessionsElapsed) {
@@ -195,7 +207,7 @@ TEST_F(HeartBeatMonitorTest, TwoSessionsElapsed) {
 
   conn->StartHeartBeat(kSession1);
   conn->StartHeartBeat(kSession2);
-  sleep(2 * kTimeout + 1);
+  usleep(2 * kTimeout * MICROSECONDS_IN_MILLISECONDS + MICROSECONDS_IN_SECOND);
 }
 
 TEST_F(HeartBeatMonitorTest, IncreaseHeartBeatTimeout) {
@@ -206,25 +218,26 @@ TEST_F(HeartBeatMonitorTest, IncreaseHeartBeatTimeout) {
   EXPECT_CALL(connection_handler_mock, SendHeartBeat(_, _)).Times(0);
 
 
-  const int32_t kNewTimeout = kTimeout + 1;
+  const uint32_t kNewTimeout = kTimeout + MICROSECONDS_IN_MILLISECONDS;
   conn->StartHeartBeat(kSession);
   conn->SetHeartBeatTimeout(kNewTimeout, kSession);
   // new timeout greater by old timeout so mock object shouldn't be invoked
-  sleep(kTimeout);
+  usleep(kTimeout * MICROSECONDS_IN_MILLISECONDS);
 }
 
 TEST_F(HeartBeatMonitorTest, DecreaseHeartBeatTimeout) {
   const uint32_t kSession = conn->AddNewSession();
-  EXPECT_CALL(connection_handler_mock, SendHeartBeat(_, kSession));
+
   EXPECT_CALL(connection_handler_mock, CloseSession(_, kSession,_))
   .WillOnce(RemoveSession(conn, kSession));
   EXPECT_CALL(connection_handler_mock, CloseConnection(_));
+  EXPECT_CALL(connection_handler_mock, SendHeartBeat(_, kSession));
 
-  const int32_t kNewTimeout = kTimeout - 1;
+  const uint32_t kNewTimeout = kTimeout - MICROSECONDS_IN_MILLISECONDS;
   conn->StartHeartBeat(kSession);
   conn->SetHeartBeatTimeout(kNewTimeout, kSession);
   // new timeout less than old timeout so mock object should be invoked
-  sleep(kTimeout*2);
+  usleep(kTimeout * 2 * MICROSECONDS_IN_MILLISECONDS);
 }
 
 } // namespace connection_handler_test

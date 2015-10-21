@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2014, Ford Motor Company
+# Copyright (c) 2015, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -39,11 +39,10 @@ include_directories(
   ${COMPONENTS_DIR}/rpc_base/include
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/utils/include/
-
+  ${COMPONENTS_DIR}/policy/src/policy/policy_table/
 )
 
 set(testLibraries
-  gtest
   gmock
   Utils
   Policy
@@ -53,8 +52,8 @@ set(testLibraries
 set(testSources
   usage_statistics_test.cc    
   shared_library_test.cc    
-  generated_code_test.cc #APPLINK-10657
-  policy_manager_impl_test.cc
+  generated_code_test.cc 
+  #policy_manager_impl_test.cc
 )
 
   include_directories(${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct)
@@ -82,7 +81,7 @@ else ()
     sqlite_wrapper/sql_query_test.cc   
     generated_code_with_sqlite_test.cc   
 
-    # TODO{ALeshin} APPLINK-11132 AssertTrue in SetUpTestCase() return false
+    # TODO{ALeshin} AssertTrue in SetUpTestCase() return false
     #policy_manager_impl_stress_test.cc
   )
   list (APPEND testLibraries sqlite3)

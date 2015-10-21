@@ -31,7 +31,7 @@
 
 set(TIME_TESTER_SRC_DIR ${COMPONENTS_DIR}/time_tester/src)
 
-include_directories (
+include_directories(
   include/time_tester
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/protocol_handler/include/
@@ -49,7 +49,7 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-set (SOURCES
+set(SOURCES
     ${TIME_TESTER_SRC_DIR}/metric_wrapper.cc
     ${TIME_TESTER_SRC_DIR}/time_manager.cc
     ${TIME_TESTER_SRC_DIR}/application_manager_observer.cc
@@ -63,3 +63,7 @@ set (SOURCES
 add_library("TimeTester" ${SOURCES})
 target_link_libraries("TimeTester" ${LIBRARIES})
 add_dependencies("TimeTester" HMI_API MOBILE_API)
+
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()

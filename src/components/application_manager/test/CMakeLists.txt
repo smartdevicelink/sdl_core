@@ -48,9 +48,9 @@ include_directories(
 )
 
 set(testSources
-  ${AM_TEST_DIR}/command_impl_test.cc  
+  #${AM_TEST_DIR}/command_impl_test.cc
   ${COMPONENTS_DIR}/application_manager/test/mobile_message_handler_test.cc
-  ${AM_TEST_DIR}/request_info_test.cc
+  #${AM_TEST_DIR}/request_info_test.cc
 )
 
 set(mockedSources

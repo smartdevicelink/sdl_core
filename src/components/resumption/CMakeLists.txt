@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2015, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -42,3 +42,7 @@ set (SOURCES
 )
 
 add_library("Resumption" ${SOURCES})
+
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()
