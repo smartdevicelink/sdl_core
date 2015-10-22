@@ -41,6 +41,10 @@ namespace resumption_test {
 
 class ApplicationMock : public ::application_manager::Application {
  public:
+  MOCK_CONST_METHOD0(mobile_app_id, std::string());
+  MOCK_CONST_METHOD0(is_foreground, bool());
+  MOCK_METHOD1(set_foreground, void(bool is_foreground));
+  MOCK_METHOD1(set_mobile_app_id, void (const std::string& mobile_app_id));
   MOCK_CONST_METHOD0(active_message, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(curHash, const std::string&());
   MOCK_METHOD0(UpdateHash, void());
@@ -121,9 +125,9 @@ class ApplicationMock : public ::application_manager::Application {
                      ::application_manager::ProtocolVersion());
   MOCK_METHOD1(set_is_resuming, void(bool));
   MOCK_CONST_METHOD0(is_resuming, bool());
-  MOCK_METHOD1(AddFile, bool(const ::application_manager::AppFile& file));
+  MOCK_METHOD1(AddFile, bool(::application_manager::AppFile& file));
   MOCK_CONST_METHOD0(getAppFiles, const ::application_manager::AppFilesMap&());
-  MOCK_METHOD1(UpdateFile, bool(const ::application_manager::AppFile& file));
+  MOCK_METHOD1(UpdateFile, bool(::application_manager::AppFile& file));
   MOCK_METHOD1(DeleteFile, bool(const std::string& file_name));
   MOCK_METHOD1(GetFile, const ::application_manager::AppFile*(
                             const std::string& file_name));

@@ -212,7 +212,7 @@ bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
     return false;
   }
   application->set_is_resuming(true);
-  ApplicationManagerImpl::instance()->SetState(
+  ApplicationManagerImpl::instance()->SetHmiState(
       application->app_id(), hmi_level);
   LOG4CXX_INFO(logger_, "Application with policy id "
                << application->mobile_app_id()
