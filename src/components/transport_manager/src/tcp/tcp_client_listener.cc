@@ -31,35 +31,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
 #include "transport_manager/tcp/tcp_client_listener.h"
 
 #ifdef OS_WIN32
-
-#elif defined(OS_MAC)
 #include <memory.h>
 #include <signal.h>
 #include <errno.h>
-#include <arpa/inet.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/sysctl.h>
-#include <sys/socket.h>
-#  include <sys/time.h>
-#  include <netinet/in.h>
 #else
-#include <memory.h>
-#include <signal.h>
-#include <errno.h>
 #include <arpa/inet.h>
-#include <unistd.h>
 #include <sys/types.h>
-#ifndef  OS_ANDROID
 #include <sys/sysctl.h>
-#endif
 #include <sys/socket.h>
+
 #ifdef __linux__
 #  include <linux/tcp.h>
 #else  // __linux__
@@ -109,8 +93,6 @@ TcpClientListener::TcpClientListener(TransportAdapterController* controller,
 }
 
 TransportAdapter::Error TcpClientListener::Init() {
-#ifdef OS_WIN32
-#else
   LOG4CXX_AUTO_TRACE(logger_);
   thread_stop_requested_ = false;
 
@@ -125,7 +107,11 @@ TransportAdapter::Error TcpClientListener::Init() {
   server_address.sin_port = htons(port_);
   server_address.sin_addr.s_addr = INADDR_ANY;
 
+#ifdef OS_WIN32
+  char optval = 0;
+#else
   int optval = 1;
+#endif
   setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval));
 
   if (bind(socket_, reinterpret_cast<sockaddr*>(&server_address),
@@ -139,7 +125,6 @@ TransportAdapter::Error TcpClientListener::Init() {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "listen() failed");
     return TransportAdapter::FAIL;
   }
-#endif
   return TransportAdapter::OK;
 }
 

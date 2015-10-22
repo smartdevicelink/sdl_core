@@ -31,9 +31,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "utils/logger.h"
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
 #include "transport_manager/tcp/tcp_device.h"
 
 

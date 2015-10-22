@@ -31,9 +31,7 @@
  */
 
 #include "transport_manager/tcp/tcp_transport_adapter.h"
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
+
 #ifdef OS_WIN32
 #include <WinSock2.h>
 #elif defined(OS_MAC)

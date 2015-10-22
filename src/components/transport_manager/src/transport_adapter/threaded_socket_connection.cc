@@ -30,16 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
 #ifdef OS_WIN32
-#include <unistd.h>
-#else
 #include <errno.h>
 #include <fcntl.h>
 #include <memory.h>
 #include <unistd.h>
+#else
 #include <sys/types.h>
 #include <sys/socket.h>
 #endif
