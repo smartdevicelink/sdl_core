@@ -215,7 +215,6 @@ const std::string kCreateSchema =
   "  `hmiAppID` INTEGER, "
   "  `hmiLevel` INTEGER, "
   "  `ign_off_count` INTEGER, "
-  "  `suspend_count` INTEGER, "
   "  `timeStamp` INTEGER, "
   "  `deviceID` TEXT, "
   "  `idglobalProperties` INTEGER, "
@@ -421,7 +420,7 @@ const std::string kUpdateHMILevel =
 
 const std::string kUpdateIgnOffCount =
     "UPDATE `application` "
-    "SET `ign_off_count` = `ign_off_count` - 1"
+    "SET `ign_off_count` = `ign_off_count` - 1 "
     "WHERE `ign_off_count` > 0";
 
 const std::string kCountApplicationsIgnOff =
@@ -436,8 +435,7 @@ const std::string kSelectApplicationsIgnOffCount =
 
 const std::string kUpdateSuspendData =
     "UPDATE `application` "
-    "SET `ign_off_count` = `ign_off_count` + 1, "
-    "`suspend_count` = `suspend_count` + 1";
+    "SET `ign_off_count` = `ign_off_count` + 1";
 
 const std::string KUpdateLastIgnOffTime =
     "UPDATE `resumption` "
@@ -789,10 +787,10 @@ const std::string kInsertApplication =
     "INSERT INTO `application` "
     "(`connection_key`, `grammarID`, `hashID`, "
     "`hmiAppID`, `hmiLevel`, `ign_off_count`, "
-    "`suspend_count`, `timeStamp`, `idglobalProperties`, "
+    "`timeStamp`, `idglobalProperties`, "
     "`isMediaApplication`, `appID`, `deviceID`) "
     "VALUES "
-    "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
 const std::string kSelectCountFiles =
     "SELECT COUNT (`idfile`) "
@@ -930,7 +928,7 @@ const std::string kSelectTTSChunk =
 
 const std::string kSelectAppTable =
     "SELECT `appID`,  `connection_key`, `grammarID`, `hashID`,   `hmiAppID`, `hmiLevel`, `ign_off_count`, "
-    "`suspend_count`,  `timeStamp`,  `deviceID`, `isMediaApplication` "
+    "`timeStamp`,  `deviceID`, `isMediaApplication` "
     "FROM `application` "
     "WHERE `appID` = ? AND `deviceID` = ?;";
 

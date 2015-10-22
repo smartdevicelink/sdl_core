@@ -116,8 +116,8 @@ protocol_handler::RawMessage* MobileMessageHandler::HandleOutgoingMessageProtoco
     return MobileMessageHandler::HandleOutgoingMessageProtocolV1(message);
   }
   if ((message->protocol_version() == application_manager::kV2) ||
-	  (message->protocol_version() == application_manager::kV3) ||
-	  (message->protocol_version() == application_manager::kV4)) {
+      (message->protocol_version() == application_manager::kV3) ||
+      (message->protocol_version() == application_manager::kV4)) {
     return MobileMessageHandler::HandleOutgoingMessageProtocolV2(message);
   }
   return NULL;
