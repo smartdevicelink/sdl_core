@@ -31,7 +31,7 @@
  */
 
 #include "can_cooperation/validators/get_interior_vehicle_data_response_validator.h"
-#include "can_cooperation/validators/struct_validators/module_description_validator.h"
+#include "can_cooperation/validators/struct_validators/module_data_validator.h"
 #include "can_cooperation/can_module_constants.h"
 #include "can_cooperation/message_helper.h"
 
@@ -65,7 +65,7 @@ ValidationResult GetInteriorVehicleDataResponseValidator::Validate(
   }
 
   if (IsMember(json, kModuleData)) {
-    result = ModuleDescriptionValidator::instance()->
+    result = ModuleDataValidator::instance()->
         Validate(json[kModuleData], outgoing_json[kModuleData]);
   } else {
     result = ValidationResult::INVALID_DATA;
