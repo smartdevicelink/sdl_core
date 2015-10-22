@@ -77,11 +77,9 @@ void GetInteriorVehicleDataRequest::OnEvent(
     validators::ValidationResult validation_result = validators::SUCCESS;
 
     if (success) {
-      if (IsMember(value[kResult], kModuleData)) {
-        validation_result =
-            validators::GetInteriorVehicleDataResponseValidator::instance()
-                ->Validate(value[kResult], response_params_);
-      }
+      validation_result =
+          validators::GetInteriorVehicleDataResponseValidator::instance()
+              ->Validate(value[kResult], response_params_);
 
       if (validators::SUCCESS != validation_result) {
         success = false;
