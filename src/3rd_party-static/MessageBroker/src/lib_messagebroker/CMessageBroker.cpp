@@ -3,9 +3,7 @@
  * \brief CMessageBroker singletone class implementation.
  * \author AKara
  */
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
+
 #include <stdio.h>
 #include <vector>
 
@@ -509,14 +507,6 @@ void CMessageBroker_Private::processInternalMessage(CMessage* pMessage) {
       Json::Value params = root["params"];
       if (params.isMember("componentName") && params["componentName"].isString()) {
         std::string controllerName = params["componentName"].asString();
-#ifdef MODIFY_FUNCTION_SIGN
-				int nControllerFd = mpRegistry->getDestinationFd(controllerName);
-				bool isExistController = nControllerFd != -1 ? true : false;
-				if (isExistController){
-					// there is not the controller
-					mpRegistry->deleteController(controllerName);
-				}
-#endif
         if (mpRegistry->addController(pMessage->getSenderFd(), controllerName)) {
           Json::Value response;
           response["id"] = root["id"];
@@ -545,15 +535,6 @@ void CMessageBroker_Private::processInternalMessage(CMessage* pMessage) {
       Json::Value params = root["params"];
       if (params.isMember("propertyName") && params["propertyName"].isString()) {
         std::string propertyName = params["propertyName"].asString();
-#ifdef MODIFY_FUNCTION_SIGN
-				std::vector<int> vecSubscriber;
-				int nSubscriberFd = mpRegistry->getSubscribersFd(propertyName, vecSubscriber);
-				bool isExistSubscriber = nSubscriberFd > 0 ? true : false;
-				if (isExistSubscriber){
-					// there is not the subscriber
-					mpRegistry->deleteSubscriber(propertyName);
-				}
-#endif
         if (mpRegistry->addSubscriber(pMessage->getSenderFd(), propertyName)) {
           Json::Value response;
           response["id"] = root["id"];

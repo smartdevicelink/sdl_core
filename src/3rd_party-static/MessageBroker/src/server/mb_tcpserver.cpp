@@ -3,9 +3,7 @@
  * \brief MessageBroker TCP server.
  * \author AKara
  */
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
+
 #include <cstring>
 #ifdef OS_WINCE
 #include <errno.h>
@@ -54,10 +52,8 @@ ssize_t TcpServer::Send(int fd, const std::string& data) {
 #else
 	int retVal = send(fd, ptrBuffer, bytesToSend, MSG_NOSIGNAL);
 #endif
-    if (retVal == -1) {
-      if (EPIPE == errno) {
-        m_purge.push_back(fd);
-      }
+	if(retVal == -1)
+	{
       return -1;
     }
     bytesToSend -= retVal;
@@ -146,8 +142,7 @@ bool TcpServer::Recv(int fd) {
         handshakeResponse += wsKey;
         handshakeResponse += "\r\n\r\n";
         pReceivingBuffer->clear();
-        std::list<int>::iterator acceptedClientIt =
-            find(m_AcceptedClients.begin(), m_AcceptedClients.end(), fd);
+        std::list<int>::iterator acceptedClientIt = find(m_AcceptedClients.begin(), m_AcceptedClients.end(), fd);
         if (m_AcceptedClients.end() != acceptedClientIt) {
           m_AcceptedClients.erase(acceptedClientIt);
         }
@@ -259,7 +254,6 @@ void TcpServer::WaitMessage(uint32_t ms) {
       { // delete receiving buffer of disconnected client
         delete itr->second;
         m_receivingBuffers.erase(itr);
-        mpMessageBroker->OnSocketClosed(itr->first);
       }
     }
 

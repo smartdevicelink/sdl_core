@@ -105,16 +105,16 @@ void ThreadedSocketConnection::Abort() {
 TransportAdapter::Error ThreadedSocketConnection::Start() {
   LOG4CXX_AUTO_TRACE(logger_);
 #ifdef OS_WIN32
-	//LOG4CXX_TRACE_ENTER(logger_);
+	// LOG4CXX_TRACE_ENTER(logger_);
 
 	//if (-1 == CreatePipe())
 	//	return TransportAdapter::FAIL;
 	//if (0 == pthread_create(&thread_, 0, &StartThreadedSocketConnection, this)) {
-	//	LOG4CXX_TRACE_EXIT(logger_);
+	//	// LOG4CXX_TRACE_EXIT(logger_);
 	//	return TransportAdapter::OK;
 	//}
 	//else {
-	//	LOG4CXX_TRACE_EXIT(logger_);
+	//	// LOG4CXX_TRACE_EXIT(logger_);
 	//	return TransportAdapter::FAIL;
 	//}
 #else

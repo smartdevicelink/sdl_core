@@ -3,9 +3,7 @@
  * \brief MessageBroker server.
  * \author AKara
  */
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
+
 #include "mb_server.hpp"
 
 namespace NsMessageBroker {
