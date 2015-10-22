@@ -74,8 +74,8 @@ void SliderRequest::Run() {
     return;
   }
 
-  if ((*message_)[strings::msg_params][strings::num_ticks].asInt()
-      < (*message_)[strings::msg_params][strings::position].asInt()) {
+  if ((*message_)[strings::msg_params][strings::num_ticks].asInt() <
+      (*message_)[strings::msg_params][strings::position].asInt()) {
     LOG4CXX_ERROR(logger_, "INVALID_DATA");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
@@ -114,40 +114,56 @@ void SliderRequest::Run() {
 void SliderRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
-  const smart_objects::SmartObject& message = event.smart_object();
+  using namespace smart_objects;
+  using namespace hmi_apis;
+
+  const SmartObject& message = event.smart_object();
 
   const event_engine::Event::EventID event_id = event.id();
-  if (event_id == hmi_apis::FunctionID::UI_OnResetTimeout) {
+  if (event_id == FunctionID::UI_OnResetTimeout) {
     LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
     ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
       correlation_id(),
       default_timeout());
     return;
   }
-  if (event_id != hmi_apis::FunctionID::UI_Slider) {
+
+  if (event_id != FunctionID::UI_Slider) {
     LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
     return;
   }
 
-  LOG4CXX_INFO(logger_, "Received UI_Slider event");
+  LOG4CXX_DEBUG(logger_, "Received UI_Slider event");
 
-  const hmi_apis::Common_Result::eType response_code =
-      static_cast<hmi_apis::Common_Result::eType>(
+  const Common_Result::eType response_code = static_cast<Common_Result::eType>(
       message[strings::params][hmi_response::code].asInt());
 
-  smart_objects::SmartObject response_msg_params = message[strings::msg_params];
-  if (response_code == hmi_apis::Common_Result::ABORTED &&
-      response_msg_params[strings::data].keyExists(strings::slider_position)) {
-    //Copy slider_position info to msg_params section
-        response_msg_params[strings::slider_position] =
-        message[strings::params][strings::data][strings::slider_position];
+  SmartObject response_msg_params = message[strings::msg_params];
+
+  const bool is_timeout_aborted =
+      Compare<Common_Result::eType, EQ, ONE>(
+        response_code,
+        Common_Result::TIMED_OUT,
+        Common_Result::ABORTED);
+
+  if (is_timeout_aborted) {
+    if (message[strings::params][strings::data]
+        .keyExists(strings::slider_position)) {
+      //Copy slider_position info to msg_params section
+      response_msg_params[strings::slider_position] =
+          message[strings::params][strings::data][strings::slider_position];
+    } else {
+      LOG4CXX_ERROR(logger_, strings::slider_position << " field is absent"
+                    " in response.");
+      response_msg_params[strings::slider_position] = 0;
+    }
   }
 
   const bool is_response_success =
-      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+      Compare<Common_Result::eType, EQ, ONE>(
         response_code,
-        hmi_apis::Common_Result::SUCCESS,
-        hmi_apis::Common_Result::WARNINGS);
+        Common_Result::SUCCESS,
+        Common_Result::WARNINGS);
 
   SendResponse(is_response_success,
                MessageHelper::HMIToMobileResult(response_code),
