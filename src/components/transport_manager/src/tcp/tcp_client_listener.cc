@@ -96,6 +96,14 @@ TransportAdapter::Error TcpClientListener::Init() {
   LOG4CXX_AUTO_TRACE(logger_);
   thread_stop_requested_ = false;
 
+#ifdef OS_WIN32
+  WSADATA WSAData;
+  if (WSAStartup(MAKEWORD(2, 0), &WSAData) != 0)
+  {
+	  TransportAdapter::FAIL;
+  }
+#endif
+
   socket_ = socket(AF_INET, SOCK_STREAM, 0);
   if (-1 == socket_) {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to create socket");

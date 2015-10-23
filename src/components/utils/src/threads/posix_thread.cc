@@ -61,13 +61,6 @@ const int EOK = 0;
 const size_t THREAD_NAME_SIZE = 15;
 #endif
 
-namespace {
-static void* threadFunc(void* closure) {
-	threads::ThreadDelegate* delegate = static_cast<threads::ThreadDelegate*>(closure);
-	delegate->threadMain();
-	return NULL;
-}
-}
 namespace threads {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "threads::Thread")
@@ -155,6 +148,8 @@ void Thread::SetNameForId(Id thread_id, const std::string& name) {
 Thread::Thread(const char* name, ThreadDelegate* delegate) 
 	: name_("undefined")
 	, delegate_(delegate)
+	, thread_created_(false)
+	, finalized_(false)
 #ifdef OS_WIN32
 #else
 	, thread_handle_(0)
