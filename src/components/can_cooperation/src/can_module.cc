@@ -488,7 +488,7 @@ void CANModule::UnsubscribeAppForAllZones(uint32_t hmi_app_id,
     msg[kMethod] =
         hmi_api::get_interior_vehicle_data;
 
-    msg[kParams] = *iter;
+    msg[kParams][message_params::kModuleDescription] = *iter;
 
     msg[kParams][json_keys::kAppId] = hmi_app_id;
 
