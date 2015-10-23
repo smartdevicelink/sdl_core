@@ -54,6 +54,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #endif
+#include "utils/lock.h"
 
 #ifdef OS_WIN32
 typedef __int32 in_addr_t;
@@ -149,11 +150,7 @@ class TcpDevice : public Device {
     uint16_t port;
   };
   std::map<ApplicationHandle, Application> applications_;
-  #ifdef OS_WIN32
-  mutable pthread_mutex_t applications_mutex_;
-  #else
   mutable sync_primitives::Lock applications_mutex_;
-  #endif
   const in_addr_t in_addr_;
   const std::string name_;
   ApplicationHandle last_handle_;

@@ -147,6 +147,10 @@ class ThreadedSocketConnection : public Connection {
    private:
     ThreadedSocketConnection* connection_;
   };
+  
+#ifdef OS_WIN32
+	int CreatePipe();
+#endif
 
   int read_fd_;
   int write_fd_;
@@ -157,6 +161,10 @@ class ThreadedSocketConnection : public Connection {
   bool Receive();
   bool Send();
   void Abort();
+
+#ifdef OS_WIN32
+  friend void* StartThreadedSocketConnection(void*);
+#endif
 
   TransportAdapterController* controller_;
   /**
@@ -171,6 +179,7 @@ class ThreadedSocketConnection : public Connection {
   bool unexpected_disconnect_;
   const DeviceUID device_uid_;
   const ApplicationHandle app_handle_;
+
   threads::Thread* thread_;
 };
 }  // namespace transport_adapter

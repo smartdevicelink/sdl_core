@@ -91,22 +91,20 @@
 #define atomic_post_set(dst) atomic_set_value(dst, 1)
 #elif defined(__GNUG__)
 #define atomic_post_set(dst) __sync_val_compare_and_swap((dst), 0, 1)
-#else
-#ifdef OS_WIN32
+#elif defined(_MSC_VER) && (_MSC_VER >= 1200)
+#define atomic_post_set(dst) InterlockedCompareExchange((dst), 0, 1)
 #else
 #erro "atomic post set operation not defined"
-#endif
 #endif
 
 #if defined(__QNXNTO__)
 #define atomic_post_clr(dst) atomic_clr_value(dst, 1)
 #elif defined(__GNUG__)
 #define atomic_post_clr(dst) __sync_val_compare_and_swap((dst), 1, 0)
-#else
-#ifdef OS_WIN32
+#elif defined(_MSC_VER) && (_MSC_VER >= 1200)
+#define atomic_post_clr(dst) InterlockedCompareExchange((dst), 1, 0)
 #else
 #error "atomic post clear operation not defined"
-#endif
 #endif
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_ATOMIC_H_

@@ -65,6 +65,9 @@ const std::string SQLPTRepresentation::kDatabaseName = "policy";
 SQLPTRepresentation::SQLPTRepresentation()
   : db_(new utils::dbms::SQLDatabase(kDatabaseName)) {
 #ifndef __QNX__
+#ifdef OS_WIN32
+  profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
+#endif
   std::string path = profile::Profile::instance()->app_storage_folder();
   if (!path.empty()) {
     db_->set_path(path + "/");

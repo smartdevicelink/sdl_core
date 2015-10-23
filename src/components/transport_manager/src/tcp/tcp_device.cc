@@ -30,9 +30,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "utils/logger.h"
 #include "transport_manager/tcp/tcp_device.h"
 
+#include "utils/logger.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -67,13 +67,12 @@ bool TcpDevice::IsSameAs(const Device* other) const {
 
 ApplicationList TcpDevice::GetApplicationList() const {
   LOG4CXX_AUTO_TRACE(logger_);
-  pthread_mutex_lock(&applications_mutex_);
+  sync_primitives::AutoLock locker(applications_mutex_);
   ApplicationList app_list;
   for (std::map<ApplicationHandle, Application>::const_iterator it =
       applications_.begin(); it != applications_.end(); ++it) {
     app_list.push_back(it->first);
   }
-  pthread_mutex_unlock(&applications_mutex_);
   return app_list;
 }
 
@@ -84,14 +83,10 @@ ApplicationHandle TcpDevice::AddIncomingApplication(int socket_fd) {
   app.incoming = true;
   app.socket = socket_fd;
   app.port = 0;  // this line removes compiler warning
-  #ifdef OS_WIN32
-  pthread_mutex_lock(&applications_mutex_);
-  #else
   sync_primitives::AutoLock locker(applications_mutex_);
-  #endif
   const ApplicationHandle app_handle = ++last_handle_;
   applications_[app_handle] = app;
-  pthread_mutex_unlock(&applications_mutex_);
+  LOG4CXX_DEBUG(logger_, "App_handle " << app_handle);
   return app_handle;
 }
 
@@ -102,24 +97,22 @@ ApplicationHandle TcpDevice::AddDiscoveredApplication(int port) {
   app.incoming = false;
   app.socket = 0;  // this line removes compiler warning
   app.port = port;
-  pthread_mutex_lock(&applications_mutex_);
+  sync_primitives::AutoLock locker(applications_mutex_);
   const ApplicationHandle app_handle = ++last_handle_;
   applications_[app_handle] = app;
-  pthread_mutex_unlock(&applications_mutex_);
+  LOG4CXX_DEBUG(logger_, "App_handle " << app_handle);
   return app_handle;
 }
 
 void TcpDevice::RemoveApplication(const ApplicationHandle app_handle) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "ApplicationHandle: " << app_handle);
-  pthread_mutex_lock(&applications_mutex_);
+  sync_primitives::AutoLock locker(applications_mutex_);
   applications_.erase(app_handle);
-  pthread_mutex_unlock(&applications_mutex_);
 }
 
 TcpDevice::~TcpDevice() {
   LOG4CXX_AUTO_TRACE(logger_);
-  pthread_mutex_destroy(&applications_mutex_);
 }
 
 int TcpDevice::GetApplicationSocket(const ApplicationHandle app_handle) const {

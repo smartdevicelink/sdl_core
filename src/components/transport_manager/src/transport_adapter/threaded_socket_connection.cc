@@ -98,21 +98,82 @@ void ThreadedSocketConnection::Abort() {
   terminate_flag_ = true;
 }
 
+#ifdef OS_WIN32
+void* StartThreadedSocketConnection(void* v) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ThreadedSocketConnection* connection =
+      static_cast<ThreadedSocketConnection*>(v);
+  connection->threadMain();
+  return 0;
+}
+
+int ThreadedSocketConnection::CreatePipe()
+{
+	int tcp1, tcp2;
+	sockaddr_in name;
+	memset(&name, 0, sizeof(name));
+	name.sin_family = AF_INET;
+	name.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+	int namelen = sizeof(name);
+	tcp1 = tcp2 = -1;
+	int tcp = socket(AF_INET, SOCK_STREAM, 0);
+	if (tcp == -1){
+		goto clean;
+	}
+	if (bind(tcp, (sockaddr*)&name, namelen) == -1){
+		goto clean;
+	}
+	if (::listen(tcp, 5) == -1){
+		goto clean;
+	}
+	if (getsockname(tcp, (sockaddr*)&name, &namelen) == -1){
+		goto clean;
+	}
+	tcp1 = socket(AF_INET, SOCK_STREAM, 0);
+	if (tcp1 == -1){
+		goto clean;
+	}
+	if (-1 == connect(tcp1, (sockaddr*)&name, namelen)){
+		goto clean;
+	}
+	tcp2 = accept(tcp, (sockaddr*)&name, &namelen);
+	if (tcp2 == -1){
+		goto clean;
+	}
+	if (closesocket(tcp) == -1){
+		goto clean;
+	}
+	write_fd_ = tcp1;
+	read_fd_ = tcp2;
+	int iMode = 1;
+	ioctlsocket(read_fd_, FIONBIO, (u_long FAR*) &iMode);
+	return 0;
+clean:
+	if (tcp != -1){
+		closesocket(tcp);
+	}
+	if (tcp2 != -1){
+		closesocket(tcp2);
+	}
+	if (tcp1 != -1){
+		closesocket(tcp1);
+	}
+	return -1;
+}
+#endif
+
 TransportAdapter::Error ThreadedSocketConnection::Start() {
   LOG4CXX_AUTO_TRACE(logger_);
 #ifdef OS_WIN32
-	// LOG4CXX_TRACE_ENTER(logger_);
-
-	//if (-1 == CreatePipe())
-	//	return TransportAdapter::FAIL;
-	//if (0 == pthread_create(&thread_, 0, &StartThreadedSocketConnection, this)) {
-	//	// LOG4CXX_TRACE_EXIT(logger_);
-	//	return TransportAdapter::OK;
-	//}
-	//else {
-	//	// LOG4CXX_TRACE_EXIT(logger_);
-	//	return TransportAdapter::FAIL;
-	//}
+  if (-1 == CreatePipe())
+	  return TransportAdapter::FAIL;
+  if (!thread_->start()) {
+	  LOG4CXX_ERROR(logger_, "thread creation failed");
+	  return TransportAdapter::FAIL;
+  }
+  else {
+  	  return TransportAdapter::OK;
+  }
 #else
   int fds[2];
   const int pipe_ret = pipe(fds);
@@ -168,7 +229,11 @@ TransportAdapter::Error ThreadedSocketConnection::Notify() const {
     return TransportAdapter::BAD_STATE;
   }
   uint8_t c = 0;
+#ifdef OS_WIN32
+  if (1 == ::send(write_fd_, (const char *)&c, 1, 0)) {
+#else
   if (1 != write(write_fd_, &c, 1)) {
+#endif
     LOG4CXX_ERROR_WITH_ERRNO(
         logger_, "Failed to wake up connection thread for connection " << this);
     return TransportAdapter::FAIL;

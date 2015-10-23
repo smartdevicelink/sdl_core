@@ -766,9 +766,11 @@ void Profile::UpdateValues() {
                   file_system::CurrentWorkingDirectory().c_str(),
                   kMainSection, kAppConfigFolderKey);
 
+#ifndef OS_WIN32
   if (IsRelativePath(app_config_folder_)) {
     MakeAbsolutePath(app_config_folder_);
   }
+#endif
 
   LOG_UPDATED_VALUE(app_config_folder_, kAppConfigFolderKey, kMainSection);
 
@@ -788,9 +790,11 @@ void Profile::UpdateValues() {
                   file_system::CurrentWorkingDirectory().c_str(),
                   kMainSection, kAppResourseFolderKey);
 
+#ifndef OS_WIN32
   if (IsRelativePath(app_resourse_folder_)) {
     MakeAbsolutePath(app_resourse_folder_);
   }
+#endif
 
   LOG_UPDATED_VALUE(app_resourse_folder_, kAppResourseFolderKey,
                     kMainSection);

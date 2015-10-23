@@ -451,6 +451,10 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
 }  // namespace policy
 
+#ifdef OS_WIN32
+extern "C" __declspec(dllexport) policy::PolicyManager* CreateManager();
+#else
 extern "C" policy::PolicyManager* CreateManager();
+#endif
 
 #endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_H_

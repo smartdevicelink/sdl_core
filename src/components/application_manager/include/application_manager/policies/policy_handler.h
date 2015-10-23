@@ -447,9 +447,9 @@ private:
   static PolicyHandler* instance_;
   static const std::string kLibrary;
   mutable sync_primitives::RWLock policy_manager_lock_;
-  PolicyManager* policy_manager_;
+  utils::SharedPtr<PolicyManager> policy_manager_;
 #ifdef OS_WIN32
-	HINSTANCE dl_handle_;
+  HINSTANCE dl_handle_;
 #else
   void* dl_handle_;
 #endif
@@ -462,7 +462,7 @@ private:
    */
   DeviceHandles pending_device_handles_;
 
-  inline PolicyManager* CreateManager();
+  inline bool CreateManager();
 
   typedef std::list <PolicyHandlerObserver*> HandlersCollection;
   HandlersCollection listeners_;
