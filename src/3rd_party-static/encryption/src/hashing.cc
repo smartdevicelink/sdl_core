@@ -1,6 +1,3 @@
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
 #include "encryption/hashing.h"
 #include <sstream>
 #include <iomanip>
@@ -9,10 +6,6 @@ namespace encryption {
 
 std::string MakeHash(const std::string& input) {
 #ifdef OS_WIN32
-	return input;
-#elif defined(OS_ANDROID)
-	return input;
-#elif defined(OS_MAC)
 	return input;
 #else
     unsigned char hash[SHA256_DIGEST_LENGTH];

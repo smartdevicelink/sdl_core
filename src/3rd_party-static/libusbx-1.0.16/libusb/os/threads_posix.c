@@ -65,7 +65,7 @@ int usbi_get_tid(void)
 	int ret = -1;
 #if defined(__linux__)
 #ifdef OS_ANDROID
-  ret = syscall(__NR_gettid);
+    ret = syscall(__NR_gettid);
 #else
 	ret = syscall(SYS_gettid);
 #endif // OS_ANDROID

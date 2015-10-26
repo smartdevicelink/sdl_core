@@ -126,7 +126,7 @@ bool TcpServer::Recv(int fd) {
     if (!checkWebSocketHandShake(fd, pReceivingBuffer))
     { //JSON MESSAGE received. Send data in CMessageBroker.
       if (mpMessageBroker) {
-        mpMessageBroker->onMessageReceived(fd, *pReceivingBuffer);
+        mpMessageBroker->onMessageReceived(fd, *pReceivingBuffer, true);
       } else {
         return false;
       }

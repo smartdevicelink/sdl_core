@@ -47,10 +47,10 @@ namespace NsMessageBroker
       void deleteController(std::string name);
 
 #ifdef MODIFY_FUNCTION_SIGN
-			/**
-			* \brief clear controller from the registry.
-			*/
-			void clearController();
+		/**
+		* \brief clear controller from the registry.
+		*/
+		void clearController();
 #endif
 
       /**
