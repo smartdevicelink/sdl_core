@@ -37,10 +37,6 @@
 #if _MSC_VER >= 1400 // VC++ 8.0
 #ifdef OS_WIN32
 #include <stdint.h>
-//typedef unsigned short uint16_t;
-//typedef unsigned long  uint32_t;
-#endif
-#ifdef OS_WIN32
 #ifndef snprintf
 #define snprintf _snprintf
 #endif

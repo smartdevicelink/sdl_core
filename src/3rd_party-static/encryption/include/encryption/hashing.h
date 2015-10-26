@@ -4,8 +4,6 @@
 #include <string>
 #ifdef OS_WIN32
 // do nothing
-#elif defined(OS_ANDROID)
-// do nothing
 #else
 #include <openssl/sha.h>
 #endif

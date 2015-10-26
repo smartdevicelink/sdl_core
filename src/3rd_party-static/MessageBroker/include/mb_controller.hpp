@@ -192,7 +192,7 @@ namespace NsMessageBroker
         stop = true;
         while (is_active) {
 #ifdef OS_WIN32
-					Sleep(1000);
+		  Sleep(1000);
 #else
           sleep(1);
 #endif

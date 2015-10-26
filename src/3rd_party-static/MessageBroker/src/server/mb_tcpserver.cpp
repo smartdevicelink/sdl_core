@@ -63,23 +63,22 @@ ssize_t TcpServer::Send(int fd, const std::string& data) {
 }
 
 #ifdef MODIFY_FUNCTION_SIGN
-	 ssize_t TcpServer::Send(int fd, const char *data, int size)
-	 {
-		 DBG_MSG(("Send to %d: %s\n", fd, data));
-		 int bytesToSend = size;
-		 const char* ptrBuffer = data;
-		 do
-		 {
-			 int retVal = send(fd, ptrBuffer, bytesToSend, 0);
-			 if (retVal == -1)
-			 {
-				 return -1;
-			 }
-			 bytesToSend -= retVal;
-			 ptrBuffer += retVal;
-		 } while (bytesToSend > 0);
-		 return size;
-	 }
+ssize_t TcpServer::Send(int fd, const char *data, int size) {
+	DBG_MSG(("Send to %d: %s\n", fd, data));
+	int bytesToSend = size;
+	const char* ptrBuffer = data;
+	do
+	{
+		int retVal = send(fd, ptrBuffer, bytesToSend, 0);
+		if (retVal == -1)
+		{
+			return -1;
+		}
+		bytesToSend -= retVal;
+		ptrBuffer += retVal;
+	} while (bytesToSend > 0);
+	return size;
+}
 #endif
 bool TcpServer::Recv(int fd) {
   DBG_MSG(("TcpServer::Recv(%d)\n", fd));
