@@ -3,9 +3,7 @@
  * \brief MessageBroker client.
  * \author AKara
  */
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
+
 #include <cstring>
 
 #include "mb_client.hpp"

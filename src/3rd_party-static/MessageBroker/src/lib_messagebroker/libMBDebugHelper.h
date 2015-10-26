@@ -13,9 +13,6 @@
 * \def DEBUG_MB_ON
 * \brief Switches on MessageBroker debug messages.
 */
-#ifdef MODIFY_FUNCTION_SIGN
-// #define DEBUG_MB_ON
-#endif
 #ifdef DEBUG_MB_ON
 
 /**

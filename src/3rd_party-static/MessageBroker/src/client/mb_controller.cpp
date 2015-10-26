@@ -3,9 +3,7 @@
  * \brief MessageBroker Controller.
  * \author AKara
  */
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
+
 #include "mb_controller.hpp"
 
 #include "MBDebugHelper.h" 
@@ -15,13 +13,13 @@ namespace NsMessageBroker
 {
    CMessageBrokerController::CMessageBrokerController(const std::string& address, uint16_t port, std::string name):
    TcpClient(address, port),
+   stop(false),
    m_receivingBuffer(""),
    mControllersIdStart(-1),
    mControllersIdCurrent(0)
    {
       mControllersName = name;
    }
-
 
    std::string CMessageBrokerController::getControllersName()
    {
@@ -274,16 +272,13 @@ namespace NsMessageBroker
 
    void* CMessageBrokerController::MethodForReceiverThread(void * arg)
    {
-      sync_primitives::AutoLock auto_lock(receiving_thread_lock_);
       stop = false;
-      is_active = true;
       arg = arg; // to avoid compiler warnings
       while(!stop)
       {
          std::string data = "";
          Recv(data);
       }
-      is_active = false;
       return NULL;
    }
 

@@ -15,9 +15,9 @@
 #include "CSender.hpp"
 #include "websocket_handler.hpp"
 
-#define RECV_BUFFER_LENGTH 4097
+#define RECV_BUFFER_LENGTH 8193
 #define MAX_RECV_BUFFER_LENGTH 100000
-#define MAX_RECV_DATA 4096
+#define MAX_RECV_DATA 8192
 
 /**
  * \namespace NsMessageBroker
@@ -63,13 +63,13 @@ namespace NsMessageBroker
          virtual ssize_t Send(int fd, const std::string& data);
 
 #ifdef MODIFY_FUNCTION_SIGN
-				 /**
-				 * \brief Send data.
-				 * \param fd file descriptor of the client TCP socket
-				 * \param data data to send
-				 * \return number of bytes sent or -1 if error
-				 */
-				 virtual ssize_t Send(int fd, const char *data, int len);
+		 /**
+		 * \brief Send data.
+		 * \param fd file descriptor of the client TCP socket
+		 * \param data data to send
+		 * \return number of bytes sent or -1 if error
+		 */
+		 virtual ssize_t Send(int fd, const char *data, int len);
 #endif
 
          /**

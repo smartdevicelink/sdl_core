@@ -29,9 +29,7 @@
  documentation and/or software.
  
  */
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
+
 /* interface header */
 #include "md5.h"
 

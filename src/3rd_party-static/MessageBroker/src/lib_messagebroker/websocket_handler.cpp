@@ -3,15 +3,12 @@
  * \brief WebSocket Handler.
  * \author AKara
  */
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
+
 #include <cstdio>
 
 #include <cstring>
 #include <sstream>
-#ifdef OS_WIN32
-#else
+#ifndef OS_WIN32
 #include <netinet/in.h>
 #endif
 
@@ -192,8 +189,8 @@ namespace NsMessageBroker
       if (b_size <= 125)
       {
 #ifdef OS_WIN32
-		  payload = (unsigned char)b_size;
-		  Buffer[1] = (unsigned char)b_size;
+        payload = (unsigned char)b_size;
+		Buffer[1] = (unsigned char)b_size;
 #else
         payload = b_size;
         Buffer[1] = b_size;      // string length

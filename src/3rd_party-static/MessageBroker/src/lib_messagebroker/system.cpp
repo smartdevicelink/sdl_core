@@ -21,10 +21,9 @@
  * \brief System utils.
  * \author Sebastien Vincent
  */
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
+
 #include <time.h>
+#include <signal.h>
 
 #include "system.h"
 
@@ -205,7 +204,7 @@ bool Thread::Start(bool detach) {
 
 bool Thread::Stop() {
 #ifdef OS_WIN32
-	return TerminateThread(m_id, (DWORD)-1) == TRUE ? true : false; 
+  return TerminateThread(m_id, (DWORD)-1) == TRUE;
 #else
   return TerminateThread(m_id, (DWORD) - 1);
 #endif
@@ -259,7 +258,7 @@ bool Mutex::Unlock() {
   }
 
 #ifdef OS_WIN32
-  return ReleaseMutex(m_mutex) == TRUE ? true : false;
+  return ReleaseMutex(m_mutex) == TRUE;
 #else
   return ReleaseMutex(m_mutex);
 #endif

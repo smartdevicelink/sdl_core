@@ -29,9 +29,7 @@
 * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 */
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
+
 #include "./life_cycle.h"
 #include "utils/signals.h"
 #include "config_profile/profile.h"
@@ -40,6 +38,7 @@
 #ifdef ENABLE_SECURITY
 #include "security_manager/security_manager_impl.h"
 #include "security_manager/crypto_manager_impl.h"
+#include "application_manager/policies/policy_handler.h"
 #endif  // ENABLE_SECURITY
 
 #ifdef ENABLE_LOG
@@ -97,7 +96,7 @@ LifeCycle::LifeCycle()
 { }
 
 bool LifeCycle::StartComponents() {
-  LOG4CXX_INFO(logger_, "LifeCycle::StartComponents()");
+  LOG4CXX_AUTO_TRACE(logger_);
   transport_manager_ =
     transport_manager::TransportManagerDefault::instance();
   DCHECK(transport_manager_ != NULL);
@@ -203,12 +202,6 @@ bool LifeCycle::StartComponents() {
   connection_handler_->set_protocol_handler(protocol_handler_);
   connection_handler_->set_connection_handler_observer(app_manager_);
 
-#ifdef ENABLE_SECURITY
-  security_manager_->set_session_observer(connection_handler_);
-  security_manager_->set_protocol_handler(protocol_handler_);
-  security_manager_->set_crypto_manager(crypto_manager_);
-#endif  // ENABLE_SECURITY
-
   // it is important to initialise TimeTester before TM to listen TM Adapters
 #ifdef TIME_TESTER
   time_tester_ = new time_tester::TimeManager();
@@ -219,6 +212,14 @@ bool LifeCycle::StartComponents() {
   app_manager_->set_protocol_handler(protocol_handler_);
   app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
+
+#ifdef ENABLE_SECURITY
+  security_manager_->set_session_observer(connection_handler_);
+  security_manager_->set_protocol_handler(protocol_handler_);
+  security_manager_->AddListener(app_manager_);
+  security_manager_->set_crypto_manager(crypto_manager_);
+  app_manager_->AddPolicyObserver(crypto_manager_);
+#endif  // ENABLE_SECURITY
 
   transport_manager_->Init();
   // start transport manager
@@ -352,24 +353,33 @@ bool LifeCycle::InitMessageSystem() {
 #endif  // MQUEUE_HMIADAPTER
 
 namespace {
-
+  pthread_t main_thread;
   void sig_handler(int sig) {
-    // Do nothing
+    switch(sig) {
+      case SIGINT:
+        LOG4CXX_DEBUG(logger_, "SIGINT signal has been caught");
+        break;
+      case SIGTERM:
+        LOG4CXX_DEBUG(logger_, "SIGTERM signal has been caught");
+        break;
+      case SIGSEGV:
+        LOG4CXX_DEBUG(logger_, "SIGSEGV signal has been caught");
+        break;
+      default:
+        LOG4CXX_DEBUG(logger_, "Unexpected signal has been caught");
+        break;
+    }
+    /*
+     * Resend signal to the main thread in case it was
+     * caught by another thread
+     */
+    if(pthread_equal(pthread_self(), main_thread) == 0) {
+      LOG4CXX_DEBUG(logger_, "Resend signal to the main thread");
+      if(pthread_kill(main_thread, sig) != 0) {
+        LOG4CXX_FATAL(logger_, "Send signal to thread error");
+      }
+    }
   }
-
-  void agony(int sig) {
-// these actions are not signal safe
-// (in case logger is on)
-// but they cannot be moved to a separate thread
-// because the application most probably will crash as soon as this handler returns
-//
-// the application is anyway about to crash
-    LOG4CXX_FATAL(logger_, "Stopping application due to segmentation fault");
-#ifdef ENABLE_LOG
-    logger::LogMessageLoopThread::destroy();
-#endif
-  }
-
 }  //  namespace
 
 void LifeCycle::Run() {
