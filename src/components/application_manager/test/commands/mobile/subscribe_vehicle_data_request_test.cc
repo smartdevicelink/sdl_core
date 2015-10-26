@@ -347,9 +347,7 @@ TEST_F(SubscribeVehicleDataRequestTest,
   command->on_event(event);
 }
 
-// TODO(LevchenkoS): Fix broken test case APPLINK-28059
-TEST_F(SubscribeVehicleDataRequestTest,
-       DISABLED_OnEvent_AppAlreadySubscribed_Ignored) {
+TEST_F(SubscribeVehicleDataRequestTest, OnEvent_AppAlreadySubscribed_Ignored) {
   (*msg_)[am::strings::params][am::strings::connection_key] = kKey;
   (*msg_)[am::strings::msg_params][kKeyName] = true;
   CommandPtr command(CreateCommand<SubscribeVehicleDataRequest>(msg_));

@@ -31,6 +31,11 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <set>
+#include <map>
+#include <algorithm>
+#include <functional>
+
 #include "application_manager/commands/mobile/subscribe_vehicle_data_request.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
@@ -357,25 +362,51 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
 #endif  // #ifdef HMI_DBUS_API
 }
 
+struct AddSubscribedVI {
+  AddSubscribedVI(smart_objects::SmartObject& msg_params,
+                  const mobile_apis::VehicleDataResultCode::eType result_code)
+      : msg_params_(msg_params)
+      , result_code_(result_code)
+      , vehicle_data_(MessageHelper::vehicle_data()) {}
+
+  void operator()(const uint32_t subscribed_vi) {
+    VehicleData::const_iterator search_result = std::find_if(
+        vehicle_data_.begin(),
+        vehicle_data_.end(),
+        std::bind2nd(std::ptr_fun(CompareVehicleDataType), subscribed_vi));
+
+    if (search_result != vehicle_data_.end()) {
+      msg_params_[search_result->first][strings::data_type] =
+          search_result->second;
+      msg_params_[search_result->first][strings::result_code] = result_code_;
+    }
+  }
+
+  smart_objects::SmartObject& msg_params_;
+  const mobile_apis::VehicleDataResultCode::eType result_code_;
+  const VehicleData& vehicle_data_;
+
+ private:
+  static bool CompareVehicleDataType(VehicleData::value_type vd_pair,
+                                     uint32_t vd_type) {
+    return vd_pair.second == vd_type;
+  }
+};
+
 void SubscribeVehicleDataRequest::AddAlreadySubscribedVI(
     smart_objects::SmartObject& msg_params) const {
   SDL_AUTO_TRACE();
   using namespace mobile_apis;
-  VehicleInfoSubscriptions::const_iterator it_same_app =
-      vi_already_subscribed_by_this_app_.begin();
-  for (; vi_already_subscribed_by_this_app_.end() != it_same_app;
-       ++it_same_app) {
-    msg_params[*it_same_app][strings::result_code] =
-        VehicleDataResultCode::VDRC_DATA_ALREADY_SUBSCRIBED;
-  }
+  std::for_each(
+      vi_already_subscribed_by_this_app_.begin(),
+      vi_already_subscribed_by_this_app_.end(),
+      AddSubscribedVI(msg_params,
+                      VehicleDataResultCode::VDRC_DATA_ALREADY_SUBSCRIBED));
 
-  VehicleInfoSubscriptions::const_iterator it_another_app =
-      vi_already_subscribed_by_another_apps_.begin();
-  for (; vi_already_subscribed_by_another_apps_.end() != it_another_app;
-       ++it_another_app) {
-    msg_params[*it_another_app][strings::result_code] =
-        VehicleDataResultCode::VDRC_SUCCESS;
-  }
+  std::for_each(
+      vi_already_subscribed_by_another_apps_.begin(),
+      vi_already_subscribed_by_another_apps_.end(),
+      AddSubscribedVI(msg_params, VehicleDataResultCode::VDRC_SUCCESS));
 }
 
 void SubscribeVehicleDataRequest::UnsubscribeFailedSubscriptions(
