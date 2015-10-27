@@ -125,6 +125,20 @@ bool Table::Validate() const {
 }
 
 bool InteriorZone::Validate() const {
+  for (AccessModules::const_iterator i = auto_allow.begin();
+      i != auto_allow.end(); ++i) {
+    ModuleType module;
+    if (!EnumFromJsonString(i->first, &module)) {
+      return false;
+    }
+  }
+  for (AccessModules::const_iterator i = driver_allow.begin();
+      i != driver_allow.end(); ++i) {
+    ModuleType module;
+    if (!EnumFromJsonString(i->first, &module)) {
+      return false;
+    }
+  }
   return true;
 }
 

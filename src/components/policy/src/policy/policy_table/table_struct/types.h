@@ -57,7 +57,7 @@ typedef Map< Rpcs, 1, 255 > FunctionalGroupings;
 
 typedef Map< DeviceParams, 0, 255 > DeviceData;
 
-typedef Map< InteriorZone, 0, 255 > Zones;
+typedef Map< InteriorZone, 2, 255 > Zones;
 
 typedef Map<Strings, 0, 255> RemoteRpcs;
 
@@ -131,9 +131,9 @@ struct Rpcs : CompositeType {
 
 struct InteriorZone: CompositeType {
   public:
-    Integer<uint16_t, 0, 65225> col;
-    Integer<uint16_t, 0, 65225> row;
-    Integer<uint16_t, 0, 65225> level;
+    Integer<uint16_t, 0, 100> col;
+    Integer<uint16_t, 0, 100> row;
+    Integer<uint16_t, 0, 100> level;
     AccessModules auto_allow;
     AccessModules driver_allow;
   public:
