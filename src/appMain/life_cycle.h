@@ -120,8 +120,9 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     System::Thread* mb_adapter_thread_;
 #endif  // MESSAGEBROKER_HMIADAPTER
 
-
+#ifdef OS_WIN32
     bool components_started_;
+#endif
     FRIEND_BASE_SINGLETON_CLASS(LifeCycle);
     DISALLOW_COPY_AND_ASSIGN(LifeCycle);
 };

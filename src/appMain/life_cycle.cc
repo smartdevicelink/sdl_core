@@ -60,7 +60,7 @@ void NameMessageBrokerThread(const System::Thread& thread,
 	pt.x = 0;
 	Thread::SetNameForId(Thread::Id(pt), name);
 #else
-	Thread::SetNameForId(Thread::Id(thread.GetId()), name);
+  Thread::SetNameForId(thread.GetId(), name);
 #endif
 }
 }  // namespace
@@ -92,7 +92,9 @@ LifeCycle::LifeCycle()
   , mb_server_thread_(NULL)
   , mb_adapter_thread_(NULL)
 #endif  // MESSAGEBROKER_HMIADAPTER
+#ifdef OS_WIN32
   , components_started_(false)
+#endif
 { }
 
 bool LifeCycle::StartComponents() {
@@ -170,13 +172,26 @@ bool LifeCycle::StartComponents() {
     return false;
   }
 
+#ifdef MODIFY_FUNCTION_SIGN
   if (!crypto_manager_->Init(
       ssl_mode == "SERVER" ? security_manager::SERVER : security_manager::CLIENT,
           protocol,
           cert_filename,
           key_filename,
           ciphers_list,
-          verify_peer)) {
+          verify_peer)
+		  ) {
+#else
+  if (!crypto_manager_->Init(
+        ssl_mode == "SERVER" ? security_manager::SERVER : security_manager::CLIENT,
+        protocol,
+        policy::PolicyHandler::instance()->RetrieveCertificate(),
+        profile::Profile::instance()->ciphers_list(),
+        profile::Profile::instance()->verify_peer(),
+        profile::Profile::instance()->ca_cert_path(),
+        profile::Profile::instance()->update_before_hours())
+        ) {
+#endif
     LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
     return false;
   }
@@ -225,7 +240,9 @@ bool LifeCycle::StartComponents() {
   // start transport manager
   transport_manager_->Visibility(true);
 
+#ifdef OS_WIN32
   components_started_ = true;
+#endif
   return true;
 }
 
@@ -383,18 +400,19 @@ namespace {
 }  //  namespace
 
 void LifeCycle::Run() {
-#ifdef OS_WIN32
-
-#else
+  LOG4CXX_AUTO_TRACE(logger_);
+  main_thread = pthread_self();
+#ifndef OS_WIN32
   // First, register signal handlers
-  ::utils::SubscribeToTerminateSignal(&sig_handler);
-  ::utils::SubscribeToFaultSignal(&agony);
+  if(!::utils::SubscribeToInterruptSignal(&sig_handler) ||
+     !::utils::SubscribeToTerminateSignal(&sig_handler) ||
+     !::utils::SubscribeToFaultSignal(&sig_handler)) {
+    LOG4CXX_FATAL(logger_, "Subscribe to system signals error");
+  }
 #endif
   // Now wait for any signal
 #ifdef OS_WIN32
-  while (true) {
-	  Sleep(100500 * 1000);
-  }
+  Sleep(INFINITE);
 #else
   pause();
 #endif
@@ -402,11 +420,15 @@ void LifeCycle::Run() {
 
 
 void LifeCycle::StopComponents() {
+#ifdef OS_WIN32
   if (!components_started_) {
     LOG4CXX_TRACE(logger_, "exit");
     LOG4CXX_ERROR(logger_, "Components wasn't started");
     return;
   }
+#else
+  LOG4CXX_AUTO_TRACE(logger_);
+#endif
   hmi_handler_->set_message_observer(NULL);
   connection_handler_->set_connection_handler_observer(NULL);
   protocol_handler_->RemoveProtocolObserver(app_manager_);
@@ -416,6 +438,7 @@ void LifeCycle::StopComponents() {
   protocol_handler_->RemoveProtocolObserver(media_manager_);
 #ifdef ENABLE_SECURITY
   protocol_handler_->RemoveProtocolObserver(security_manager_);
+  security_manager_->RemoveListener(app_manager_);
 #endif  // ENABLE_SECURITY
   protocol_handler_->Stop();
 
@@ -439,7 +462,6 @@ void LifeCycle::StopComponents() {
 
 #ifdef ENABLE_SECURITY
   LOG4CXX_INFO(logger_, "Destroying Crypto Manager");
-  crypto_manager_->Finish();
   delete crypto_manager_;
 
   LOG4CXX_INFO(logger_, "Destroying Security Manager");
@@ -453,6 +475,7 @@ void LifeCycle::StopComponents() {
   application_manager::ApplicationManagerImpl::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
+
 #ifdef DBUS_HMIADAPTER
   if (dbus_adapter_) {
     if (hmi_handler_) {
@@ -467,22 +490,20 @@ void LifeCycle::StopComponents() {
     delete dbus_adapter_;
   }
 #endif  // DBUS_HMIADAPTER
+
 #ifdef MESSAGEBROKER_HMIADAPTER
-  hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
   if (mb_adapter_) {
+    hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
     mb_adapter_->unregisterController();
-    mb_adapter_->Close();
     mb_adapter_->exitReceivingThread();
     if (mb_adapter_thread_) {
+      mb_adapter_thread_->Stop();
       mb_adapter_thread_->Join();
+      delete mb_adapter_thread_;
     }
     delete mb_adapter_;
   }
   hmi_message_handler::HMIMessageHandlerImpl::destroy();
-  if (mb_adapter_thread_) {
-    mb_adapter_thread_->Stop();
-    delete mb_adapter_thread_;
-  }
 
 #endif  // MESSAGEBROKER_HMIADAPTER
 
@@ -517,8 +538,10 @@ void LifeCycle::StopComponents() {
     time_tester_ = NULL;
   }
 #endif  // TIME_TESTER
+#ifdef OS_WIN32
   components_started_ = false;
   LOG4CXX_TRACE(logger_, "exit");
+#endif
 }
 
 }  //  namespace main_namespace

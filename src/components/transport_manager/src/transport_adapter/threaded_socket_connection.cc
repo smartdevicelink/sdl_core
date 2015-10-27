@@ -76,20 +76,21 @@ ThreadedSocketConnection::~ThreadedSocketConnection() {
   delete thread_->delegate();
   threads::DeleteThread(thread_);
 
-  if (-1 != read_fd_) {
 #ifdef OS_WIN32
+  if (-1 != read_fd_) { 
 	closesocket(read_fd_);
-#else
-    close(read_fd_);
-#endif
   }
   if (-1 != write_fd_) {
-#ifdef OS_WIN32
-		closesocket(write_fd_);
-#else
-		close(write_fd_);
-#endif
+    closesocket(write_fd_);
   }
+#else
+  if (-1 != read_fd_) {
+    close(read_fd_);
+  }
+  if (-1 != write_fd_) {
+    close(write_fd_);
+  }
+#endif
 }
 
 void ThreadedSocketConnection::Abort() {
