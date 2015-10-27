@@ -1,5 +1,6 @@
 #include <algorithm>
 #include "./types.h"
+#include "utils/macro.h"
 
 namespace rpc {
 namespace policy_table_interface_base {
@@ -126,6 +127,28 @@ bool Table::Validate() const {
 
 bool InteriorZone::ValidateParameters(ModuleType module,
                                       const Strings& parameters) const {
+  const std::string *begin = 0;
+  const std::string *end = 0;
+  switch (module) {
+    case MT_RADIO:
+      begin = kRadioParameters;
+      end = kRadioParameters + length_radio;
+      break;
+    case MT_CLIMATE:
+      begin = kClimateParameters;
+      end = kClimateParameters + length_climate;
+      break;
+  }
+  DCHECK(begin);
+  DCHECK(end);
+  for (Strings::const_iterator i = parameters.begin();
+      i != parameters.end(); ++i) {
+    std::string name = *i;
+    bool found = std::find(begin, end, name) != end;
+    if (!found) {
+      return false;
+    }
+  }
   return true;
 }
 

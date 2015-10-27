@@ -1167,6 +1167,29 @@ const std::string InteriorZone::kRemoteRpcs[] = {
     "GetInteriorVehicleData",
     "SetInteriorVehicleData"
 };
+const std::string InteriorZone::kRadioParameters[] = {
+    "frequencyInteger",
+    "frequencyFraction",
+    "band",
+    "rdsData",
+    "availableHDs",
+    "hdChannel",
+    "signalStrength",
+    "signalChangeThreshold",
+    "radioEnable",
+    "state"
+};
+const std::string InteriorZone::kClimateParameters[] = {
+    "fanSpeed",
+    "currentTemp",
+    "desiredTemp",
+    "temperatureUnit",
+    "acEnable",
+    "circulateAirEnable",
+    "autoModeEnable",
+    "defrostZone",
+    "dualModeEnable"
+};
 InteriorZone::InteriorZone()
   : CompositeType(kUninitialized) {
 }

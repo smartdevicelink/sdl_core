@@ -150,6 +150,10 @@ struct InteriorZone: CompositeType {
   private:
     static const int length = 4;
     static const std::string kRemoteRpcs[length];
+    static const int length_radio = 10;
+    static const std::string kRadioParameters[length_radio];
+    static const int length_climate = 9;
+    static const std::string kClimateParameters[length_climate];
     void FillRemoteRpcs();
     bool Validate() const;
     inline bool ValidateAllow(const AccessModules& modules) const;
