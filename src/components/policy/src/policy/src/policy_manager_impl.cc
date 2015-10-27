@@ -80,7 +80,7 @@ utils::SharedPtr<policy_table::Table> PolicyManagerImpl::Parse(
     return new policy_table::Table(&value);
   } else {
     return utils::SharedPtr<policy_table::Table>();
-  } 
+  }
 }
 
 #else
@@ -94,7 +94,7 @@ utils::SharedPtr<policy_table::Table> PolicyManagerImpl::ParseArray(
     //For PT Update received from SDL Server.
     if (value["data"].size()!=0) {
       Json::Value data = value["data"];
-      //First Element in 
+      //First Element in
       return new policy_table::Table(&data[0]);
     } else {
       return new policy_table::Table(&value);
@@ -131,9 +131,9 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
   // Parse message into table struct
   utils::SharedPtr<policy_table::Table> pt_update = Parse(pt_content);
   #else
-  //Message Received from server unecnrypted with PTU in first element 
+  //Message Received from server unecnrypted with PTU in first element
   //of 'data' array. No Parsing was done by HMI.
-  utils::SharedPtr<policy_table::Table> pt_update = ParseArray(pt_content); 
+  utils::SharedPtr<policy_table::Table> pt_update = ParseArray(pt_content);
   #endif
   if (!pt_update) {
     LOG4CXX_WARN(logger_, "Parsed table pointer is 0.");
@@ -770,27 +770,27 @@ void PolicyManagerImpl::PTUpdatedAt(int kilometers, int days_after_epoch) {
 
 void PolicyManagerImpl::Increment(usage_statistics::GlobalCounterId type) {
   LOG4CXX_INFO(logger_, "Increment without app id" );
-  sync_primitives::AutoLock locker(statistics_lock_);
+  cache_->Increment(type);
 }
 
 void PolicyManagerImpl::Increment(const std::string& app_id,
                                   usage_statistics::AppCounterId type){
   LOG4CXX_DEBUG(logger_, "Increment " << app_id << " AppCounter: " << type);
-  sync_primitives::AutoLock locker(statistics_lock_);
+  cache_->Increment(app_id, type);
 }
 
 void PolicyManagerImpl::Set(const std::string& app_id,
                             usage_statistics::AppInfoId type,
                             const std::string& value) {
   LOG4CXX_INFO(logger_, "Set " << app_id);
-  sync_primitives::AutoLock locker(statistics_lock_);
+  cache_->Set(app_id, type, value);
 }
 
 void PolicyManagerImpl::Add(const std::string& app_id,
                             usage_statistics::AppStopwatchId type,
                             int32_t timespan_seconds) {
   LOG4CXX_INFO(logger_, "Add " << app_id);
-  sync_primitives::AutoLock locker(statistics_lock_);
+  cache_->Add(app_id, type, timespan_seconds);
 }
 
 bool PolicyManagerImpl::IsApplicationRevoked(const std::string& app_id) const {
