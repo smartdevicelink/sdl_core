@@ -109,7 +109,7 @@ int TransportManagerImpl::ConnectDevice(const DeviceHandle& device_handle) {
   }
 
   DeviceUID device_id = converter_.HandleToUid(device_handle);
-  LOG4CXX_DEBUG(logger_, "Convert handle to id " << device_id);
+  LOG4CXX_DEBUG(logger_, "Convert handle to id:" << device_id);
 
   sync_primitives::AutoReadLock lock(device_to_adapter_map_lock_);
   DeviceToAdapterMap::iterator it  = device_to_adapter_map_.find(device_id);
@@ -135,7 +135,7 @@ int TransportManagerImpl::DisconnectDevice(const DeviceHandle& device_handle) {
     return E_TM_IS_NOT_INITIALIZED;
   }
   DeviceUID device_id = converter_.HandleToUid(device_handle);
-  LOG4CXX_DEBUG(logger_, "Convert handle to id" << device_id);
+  LOG4CXX_DEBUG(logger_, "Convert handle to id:" << device_id);
 
   sync_primitives::AutoReadLock lock(device_to_adapter_map_lock_);
   DeviceToAdapterMap::iterator it  = device_to_adapter_map_.find(device_id);

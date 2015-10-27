@@ -35,7 +35,7 @@
 
 #include <string>
 #include "utils/shared_ptr.h"
-#include "metric_wrapper.h"
+#include "time_tester/metric_wrapper.h"
 #include "protocol_handler_observer.h"
 
 namespace time_tester {

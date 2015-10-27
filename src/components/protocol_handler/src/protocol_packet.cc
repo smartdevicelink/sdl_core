@@ -109,7 +109,7 @@ void ProtocolPacket::ProtocolHeader::deserialize(
   switch (version) {
     case PROTOCOL_VERSION_2:
     case PROTOCOL_VERSION_3:
-    case PROTOCOL_VERSION_4:{
+    case PROTOCOL_VERSION_4: {
         if (messageSize < PROTOCOL_HEADER_V2_SIZE) {
           LOG4CXX_DEBUG(logger_, "Message size less " << PROTOCOL_HEADER_V2_SIZE << " bytes");
           return;
@@ -118,7 +118,8 @@ void ProtocolPacket::ProtocolHeader::deserialize(
       }
       break;
     default:
-      LOG4CXX_WARN(logger_, "Unknown version");
+      LOG4CXX_WARN(logger_, "Unknown version:" <<
+                   static_cast<int>(version));
       messageId = 0;
       break;
   }
@@ -140,7 +141,7 @@ size_t ProtocolPacket::ProtocolHeaderValidator::max_payload_size() const {
 
 RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
     const ProtocolHeader& header) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Validating header - " << header);
   // expected payload size will be calculated depending
   // on used protocol version
   size_t payload_size = MAXIMUM_FRAME_DATA_V2_SIZE;
@@ -155,7 +156,7 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
                      max_payload_size_ : MAXIMUM_FRAME_DATA_V2_SIZE;
       break;
     default:
-      LOG4CXX_WARN(logger_, "Unknown version " <<
+      LOG4CXX_WARN(logger_, "Unknown version:" <<
                    static_cast<int>(header.version));
       return RESULT_FAIL;
   }
@@ -217,8 +218,7 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
   // and shall be less than payload size
   if (header.dataSize > payload_size) {
     LOG4CXX_WARN(logger_, "Packet data size is " << header.dataSize <<
-                 "and biger than allowed payload size " <<
-                 payload_size << " bytes");
+                 " and bigger than allowed payload size " << payload_size << " bytes");
     return RESULT_FAIL;
   }
   switch (header.frameType) {
@@ -234,7 +234,7 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
       break;
   }
   // Message ID be equal or greater than 0x01 (not actual for 1 protocol version and Control frames)
-  if(header.messageId <= 0) {
+  if (header.messageId <= 0) {
     if (FRAME_TYPE_CONTROL != header.frameType &&
         PROTOCOL_VERSION_1 != header.version) {
       LOG4CXX_WARN(logger_, "Message ID shall be greater than 0x00");
@@ -242,7 +242,7 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
       return RESULT_FAIL;
     }
   }
-  LOG4CXX_DEBUG(logger_, "Message is complitly correct.");
+  LOG4CXX_DEBUG(logger_, "Message header is completely correct.");
   return RESULT_OK;
 }
 
@@ -300,7 +300,7 @@ RawMessagePtr ProtocolPacket::serializePacket() const {
     header[offset++] = packet_header_.messageId >> 16;
     header[offset++] = packet_header_.messageId >> 8;
     header[offset++] = packet_header_.messageId;
-  };
+  }
 
   size_t total_packet_size = offset + (packet_data_.data ? packet_data_.totalDataBytes : 0);
 
@@ -435,6 +435,10 @@ uint8_t ProtocolPacket::frame_data() const {
   return packet_header_.frameData;
 }
 
+void ProtocolPacket::set_frame_data(const uint8_t frame_data) {
+  packet_header_.frameData = frame_data;
+}
+
 uint8_t ProtocolPacket::session_id() const {
   return packet_header_.sessionId;
 }
@@ -484,6 +488,10 @@ uint8_t ProtocolPacket::connection_id() const {
 
 uint32_t ProtocolPacket::payload_size() const {
   return payload_size_;
+}
+
+const ProtocolPacket::ProtocolHeader& ProtocolPacket::packet_header() const {
+  return packet_header_;
 }
 
 }  // namespace protocol_handler

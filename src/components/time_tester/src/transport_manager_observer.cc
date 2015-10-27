@@ -29,12 +29,12 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "transport_manager_observer.h"
+#include "time_tester/transport_manager_observer.h"
 
 #include <time.h>
 
-#include "transport_manager_metric.h"
-#include "time_manager.h"
+#include "time_tester/transport_manager_metric.h"
+#include "time_tester/time_manager.h"
 
 namespace time_tester {
 

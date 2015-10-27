@@ -30,9 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager_metric.h"
+#include "time_tester/transport_manager_metric.h"
 #include "json/json.h"
-#include "json_keys.h"
+#include "time_tester/json_keys.h"
 #include "application_manager/smart_object_keys.h"
 
 namespace time_tester {

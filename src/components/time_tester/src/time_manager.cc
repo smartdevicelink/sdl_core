@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "time_manager.h"
+#include "time_tester/time_manager.h"
 
 #include <sys/socket.h>
 #include <sys/types.h>

@@ -37,6 +37,8 @@
 #include <memory>
 #include <set>
 #include <list>
+#include <cstdint>
+#include <utility>  // std::make_pair
 #include "utils/prioritized_queue.h"
 #include "utils/message_queue.h"
 #include "utils/threads/message_loop_thread.h"
@@ -493,9 +495,10 @@ class ProtocolHandlerImpl
   transport_manager::TransportManager *transport_manager_;
 
   /**
-   *\brief Map of frames for messages received in multiple frames.
+   *\brief Map of frames with last frame data for messages received in multiple frames.
    */
-  std::map<int32_t, ProtocolFramePtr> incomplete_multi_frame_messages_;
+  typedef std::map<int32_t, ProtocolFramePtr> MultiFrameMap;
+  MultiFrameMap incomplete_multi_frame_messages_;
 
   /**
    * \brief Map of messages (frames) received over mobile nave session

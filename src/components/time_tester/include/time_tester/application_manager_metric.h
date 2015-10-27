@@ -35,8 +35,8 @@
 
 #include <string>
 
-#include "metric_wrapper.h"
-#include "application_manager_observer.h"
+#include "time_tester/metric_wrapper.h"
+#include "time_tester/application_manager_observer.h"
 
 
 namespace time_tester {
