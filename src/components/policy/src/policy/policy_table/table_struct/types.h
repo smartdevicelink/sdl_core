@@ -148,7 +148,15 @@ struct InteriorZone: CompositeType {
     void ReportErrors(rpc::ValidationReport* report__) const;
     virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
+    static const int length = 4;
+    static const std::string kRemoteRpcs[length];
+    void FillRemoteRpcs();
     bool Validate() const;
+    inline bool ValidateAllow(const AccessModules& modules) const;
+    inline bool ValidateRemoteRpcs(ModuleType module,
+                                   const RemoteRpcs& rpcs) const;
+    inline bool ValidateParameters(ModuleType module,
+                                   const Strings& rpcs) const;
 };
 
 struct Equipment : CompositeType {

@@ -124,22 +124,43 @@ bool Table::Validate() const {
   return true;
 }
 
-bool InteriorZone::Validate() const {
-  for (AccessModules::const_iterator i = auto_allow.begin();
-      i != auto_allow.end(); ++i) {
-    ModuleType module;
-    if (!EnumFromJsonString(i->first, &module)) {
-      return false;
-    }
-  }
-  for (AccessModules::const_iterator i = driver_allow.begin();
-      i != driver_allow.end(); ++i) {
-    ModuleType module;
-    if (!EnumFromJsonString(i->first, &module)) {
+bool InteriorZone::ValidateParameters(ModuleType module,
+                                      const Strings& parameters) const {
+  return true;
+}
+
+bool InteriorZone::ValidateRemoteRpcs(ModuleType module,
+                                      const RemoteRpcs& rpcs) const {
+  for (RemoteRpcs::const_iterator i = rpcs.begin();
+      i != rpcs.end(); ++i) {
+    const std::string& name = i->first;
+    const Strings& parameters = i->second;
+    const std::string *begin = kRemoteRpcs;
+    const std::string *end = kRemoteRpcs + length;
+    bool found = std::find(begin, end, name) != end;
+    if (!found || !ValidateParameters(module, parameters)) {
       return false;
     }
   }
   return true;
+}
+
+bool InteriorZone::ValidateAllow(const AccessModules& modules) const {
+  for (AccessModules::const_iterator i = modules.begin();
+      i != modules.end(); ++i) {
+    const std::string& name = i->first;
+    const RemoteRpcs& rpcs = i->second;
+    ModuleType module;
+    if (!EnumFromJsonString(name, &module)
+        || !ValidateRemoteRpcs(module, rpcs)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool InteriorZone::Validate() const {
+  return ValidateAllow(auto_allow) && ValidateAllow(driver_allow);
 }
 
 bool Equipment::Validate() const {

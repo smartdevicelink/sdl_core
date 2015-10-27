@@ -1161,6 +1161,12 @@ void Equipment::SetPolicyTableType(PolicyTableType pt_type) {
 }
 
 // InteriorZone methods
+const std::string InteriorZone::kRemoteRpcs[] = {
+    "ButtonPress",
+    "GetInteriorVehicleDataCapabilities",
+    "GetInteriorVehicleData",
+    "SetInteriorVehicleData"
+};
 InteriorZone::InteriorZone()
   : CompositeType(kUninitialized) {
 }
