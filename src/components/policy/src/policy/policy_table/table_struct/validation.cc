@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cctype>
 #include "./types.h"
 #include "utils/macro.h"
 
@@ -186,7 +187,24 @@ bool InteriorZone::Validate() const {
   return ValidateAllow(auto_allow) && ValidateAllow(driver_allow);
 }
 
+namespace {
+struct IsDeniedChar {
+  bool operator() (char c) {
+    return c != '_' && !std::isalnum(c);
+  }
+};
+}  // namespace
+
+bool Equipment::ValidateNameZone(const std::string& name) const {
+  return std::find_if(name.begin(), name.end(), IsDeniedChar()) == name.end();
+}
+
 bool Equipment::Validate() const {
+  for (Zones::const_iterator i = zones.begin(); i != zones.end(); ++i) {
+    if (!ValidateNameZone(i->first)) {
+      return false;
+    }
+  }
   return true;
 }
 }  // namespace policy_table_interface_base

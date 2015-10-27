@@ -178,6 +178,7 @@ struct Equipment : CompositeType {
     virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
+    inline bool ValidateNameZone(const std::string& name) const;
 };
 
 struct ModuleConfig : CompositeType {
