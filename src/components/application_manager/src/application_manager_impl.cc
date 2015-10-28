@@ -483,8 +483,12 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   ApplicationListAccessor app_list_accesor;
   application->MarkRegistered();
+  const smart_objects::SmartObject *app_hmi_types = 0;
+  if (message[strings::msg_params].keyExists(strings::app_hmi_type)) {
+    app_hmi_types = &message[strings::msg_params][strings::app_hmi_type];
+  }
   policy::PolicyHandler::instance()->AddApplication(application->mobile_app_id(),
-      &message[strings::msg_params][strings::app_hmi_type]);
+      app_hmi_types);
   application->set_hmi_level(GetDefaultHmiLevel(application));
   app_list_accesor.Insert(application);
 
