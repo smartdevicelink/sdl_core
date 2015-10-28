@@ -103,8 +103,13 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
           LOG4CXX_DEBUG(logger_,
                        "NaviStartStreamRequest aborted. Application can not stream");
         }
+        break;
       }
-      break;
+      if (hmi_apis::Common_Result::REJECTED == code) {
+        LOG4CXX_DEBUG(logger_, "StartStreamResponse ?!?!?!");
+        SendRequest();
+        break;
+      }
     }
     default: {
       LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
@@ -130,6 +135,12 @@ void NaviStartStreamRequest::RetryStartSession() {
         "NaviStartStreamRequest aborted. Application not found");
     return;
   }
+
+  if (!app->video_streaming_allowed()) {
+    LOG4CXX_DEBUG(logger_, "Video streaming not allowed");
+    return;
+  }
+
   if (app->video_streaming_approved()) {
     LOG4CXX_DEBUG(logger_, "NaviStartStream retry sequence stopped. "
                  << "SUCCESS received");
@@ -146,7 +157,7 @@ void NaviStartStreamRequest::RetryStartSession() {
   } else {
     LOG4CXX_DEBUG(logger_, "NaviStartStream retry sequence stopped. "
                  << "Attempts expired");
-    app->set_video_stream_retry_number(0);
+
     ApplicationManagerImpl::instance()->EndNaviServices(app->app_id());
   }
 }

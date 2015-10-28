@@ -477,7 +477,7 @@ void ApplicationImpl::StartStreaming(
   } else if (ServiceType::kAudio == service_type) {
     if (!audio_streaming_approved()) {
       MessageHelper::SendAudioStartStream(app_id());
-      set_video_stream_retry_number(0);
+      set_audio_stream_retry_number(0);
     }
   }
 }
