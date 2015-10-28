@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2015, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,14 +28,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if(BUILD_TESTS)
-include_directories (
-  ${COMPONENTS_DIR}/dbus/include
-  ${COMPONENTS_DIR}/dbus/src
-  ${COMPONENTS_DIR}/rpc_base/include
-  ${CMAKE_SOURCE_DIR}/src/3rd_party/dbus-1.7.8
-  ${GMOCK_INCLUDE_DIRECTORY}
-  ${JSONCPP_INCLUDE_DIRECTORY}
+if (BUILD_TESTS)
+  include_directories (
+    ${COMPONENTS_DIR}/dbus/include
+    ${COMPONENTS_DIR}/dbus/src
+    ${COMPONENTS_DIR}/rpc_base/include
+    ${CMAKE_SOURCE_DIR}/src/3rd_party/dbus-1.7.8
+    ${GMOCK_INCLUDE_DIRECTORY}
+    ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
 set(LIBRARIES
@@ -46,6 +46,7 @@ set(LIBRARIES
 set(SOURCES
   rpc_base_json_test.cc
   rpc_base_test.cc
+  validation_report_test.cc
 )
 
 if (${HMI_DBUS_API})

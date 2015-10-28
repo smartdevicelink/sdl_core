@@ -53,7 +53,7 @@ namespace utils {
 template<typename ObjectType>
 class SharedPtr {
   public:
-    //std smart pointer compability
+    //std smart pointer compatibility
     typedef ObjectType element_type;
     /**
      * @brief Constructor.
@@ -120,7 +120,7 @@ class SharedPtr {
 
     bool operator ==(const SharedPtr<ObjectType>& Other) const;
 
-    bool operator< (const SharedPtr<ObjectType>& other) const;
+    bool operator <(const SharedPtr<ObjectType>& other) const;
 
     /**
      * @brief Assignment operator.
@@ -165,6 +165,12 @@ class SharedPtr {
     void reset();
     void reset(ObjectType* other);
     ObjectType* get() const;
+
+#ifdef BUILD_TESTS
+   inline const uint32_t* get_ReferenceCounter() const {
+     return mReferenceCounter;
+   }
+#endif // BUILD_TESTS
 
     /**
      * @return true if mObject not NULL
@@ -249,7 +255,7 @@ inline bool utils::SharedPtr<ObjectType>::operator ==(
 }
 
 template<typename ObjectType>
-inline bool utils::SharedPtr<ObjectType>::operator< (
+inline bool utils::SharedPtr<ObjectType>::operator <(
   const SharedPtr<ObjectType>& other) const {
   return (mObject < other.mObject);
 }

@@ -51,6 +51,7 @@ set(testSources
   message_queue_test.cc
   resource_usage_test.cc
   bitstream_test.cc
+  prioritized_queue_test.cc
   data_accessor_test.cc
   lock_posix_test.cc
   singleton_test.cc
@@ -59,6 +60,9 @@ set(testSources
   timer_thread_test.cc
   rwlock_posix_test.cc
   async_runner_test.cc
+  shared_ptr_test.cc
+  scope_guard_test.cc
+  atomic_object_test.cc
 )
 
 set(testLibraries
@@ -67,11 +71,7 @@ set(testLibraries
   Policy
 )
 
-if(EXTENDED_POLICY_FLAG)
-  include_directories(${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct_ext)
-else()
-  include_directories(${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct)
-endif()
+include_directories(${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   # --- Tests for QDB Wrapper

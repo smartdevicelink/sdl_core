@@ -48,7 +48,7 @@ bool push_log(
         );
 
 bool logs_enabled();
-void set_logs_enabled(bool state);
+void set_logs_enabled();
 
 }  // namespace logger
 

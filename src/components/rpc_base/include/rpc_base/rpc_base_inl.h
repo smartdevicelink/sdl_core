@@ -187,7 +187,10 @@ Integer<T, minval, maxval>& Integer<T, minval, maxval>::operator=(IntType new_va
 template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>& Integer<T, minval, maxval>::operator=(const Integer& new_val) {
   this->value_ = new_val.value_;
-  this->value_state_= range_.Includes(new_val.value_) ? kValid : kInvalid;
+  if (new_val.is_initialized()) {
+    this->value_state_= range_.Includes(new_val.value_) ? kValid : kInvalid;
+  }
+
   return *this;
 }
 
@@ -266,7 +269,7 @@ String<minlen, maxlen>::String(const char* value)
 }
 
 template<size_t minlen, size_t maxlen>
-bool String<minlen, maxlen>::operator<(String new_val) {
+bool String<minlen, maxlen>::operator<(const String& new_val) const {
   return value_ < new_val.value_;
 }
 
@@ -279,13 +282,16 @@ String<minlen, maxlen>& String<minlen, maxlen>::operator=(const std::string& new
 
 template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>& String<minlen, maxlen>::operator=(const String& new_val) {
+  if(*this == new_val) {
+    return *this;
+  }
   value_.assign(new_val.value_);
   value_state_ = new_val.value_state_;
   return *this;
 }
 
 template<size_t minlen, size_t maxlen>
-bool String<minlen, maxlen>::operator==(const String& rhs) {
+bool String<minlen, maxlen>::operator==(const String& rhs) const {
   return value_ == rhs.value_;
 }
 
@@ -310,7 +316,7 @@ Enum<T>::Enum(EnumType value)
 }
 
 template<typename T>
-Enum<T>& Enum<T>::operator=(EnumType new_val) {
+Enum<T>& Enum<T>::operator=(const EnumType& new_val) {
   value_ = new_val;
   value_state_ = IsValidEnum(value_) ? kValid : kInvalid;
   return *this;
@@ -601,6 +607,13 @@ T* Optional<T>::operator->() {
 template<typename T>
 const T* Optional<T>::operator->() const {
   return &value_;
+}
+
+template<typename T>
+void Optional<T>::assign_if_valid(const Optional<T>& value) {
+  if (value.is_initialized()) {
+    value_ = value.value_;
+  }
 }
 
 template<typename T>

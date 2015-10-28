@@ -46,19 +46,10 @@ namespace protocol_handler_test {
  */
 class ProtocolObserverMock : public ::protocol_handler::ProtocolObserver {
  public:
-  MOCK_METHOD1(OnDeviceListUpdated,
-      void(const connection_handler::DeviceMap &device_list));
-  MOCK_METHOD0(OnFindNewApplicationsRequest,void());
-  MOCK_METHOD1(RemoveDevice,
-      void(const connection_handler::DeviceHandle &device_handle));
-  MOCK_METHOD3(OnServiceStartedCallback,
-      bool(const connection_handler::DeviceHandle &device_handle,
-           const int32_t &session_key,
-           const protocol_handler::ServiceType &type));
-  MOCK_METHOD3(OnServiceEndedCallback,
-      void(const int32_t &session_key,
-           const protocol_handler::ServiceType &type,
-           const connection_handler::CloseSessionReason& close_reason));
+  MOCK_METHOD1(OnMessageReceived,
+      void(const ::protocol_handler::RawMessagePtr));
+  MOCK_METHOD1(OnMobileMessageSent,
+      void(const ::protocol_handler::RawMessagePtr));
 };
 } // namespace protocol_handler_test
 } // namespace components

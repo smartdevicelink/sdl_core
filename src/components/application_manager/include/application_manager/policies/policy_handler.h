@@ -108,7 +108,7 @@ class PolicyHandler :
   int TimeoutExchange();
   void OnExceededTimeout();
   void OnSystemReady();
-  void PTUpdatedAt(int kilometers, int days_after_epoch);
+  void PTUpdatedAt(Counters counter, int value);
   void add_listener(PolicyHandlerObserver* listener);
   void remove_listener(PolicyHandlerObserver* listener);
 
@@ -352,6 +352,12 @@ class PolicyHandler :
       const std::string& policy_app_id) const;
 
   /**
+   * @brief Gets vehicle information
+   * @return Structure with vehicle information
+   */
+  const VehicleInfo GetVehicleInfo() const;
+
+  /**
    * @brief OnAppRegisteredOnMobile alows to handle event when application were
    * succesfully registered on mobile device.
    * It will send OnAppPermissionSend notification and will try to start PTU.
@@ -416,6 +422,12 @@ protected:
    */
   void OnAppPermissionConsentInternal(const uint32_t connection_key,
                                       PermissionConsent& permissions);
+
+  /**
+   * @brief Sets days after epoch on successful policy update
+   */
+  void SetDaysAfterEpoch();
+
 private:
   class StatisticManagerImpl: public usage_statistics::StatisticsManager {
       //TODO(AKutsan) REMOVE THIS UGLY HOTFIX

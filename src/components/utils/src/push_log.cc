@@ -72,8 +72,8 @@ bool logs_enabled() {
   return logs_enabled_;
 }
 
-void set_logs_enabled(bool state) {
-  logs_enabled_ = state;
+void set_logs_enabled() {
+  logs_enabled_ = profile::Profile::instance()->logs_enabled();
 }
 
 }  // namespace logger

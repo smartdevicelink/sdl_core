@@ -70,7 +70,7 @@ const std::string GeneratedCodeTest::kEndpointsCreation =
 
 const std::string GeneratedCodeTest::kEndpointsContent =
     "INSERT INTO Endpoints "
-        "VALUES (1, '0x07', null, 'http://test.example.com', 1)";
+        "VALUES (1, '0x07', null, 'http://url.example.com', 1)";
 
 const std::string GeneratedCodeTest::kAppPoliciesCreation =
     "CREATE TABLE AppPolicies ("
@@ -101,7 +101,7 @@ TEST_F(GeneratedCodeTest, FindSectionEndpoints_OpenDBSetDefaultUrl_ExpectDefault
   std::string url = ep["0x07"]["default"].front();
 
   //assert
-  EXPECT_EQ("http://test.example.com", url);
+  EXPECT_EQ("http://url.example.com", url);
 }
 
 TEST_F(GeneratedCodeTest, RemoveSectionEndpoints_RemoveSectionEndpoints_Expect0EndPoints) {
