@@ -33,11 +33,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/mock_connection.h"
-#include "transport_manager/mock_device.h"
-#include "transport_manager/mock_transport_adapter.h"
-#include "transport_manager/mock_device_scanner.h"
-#include "transport_manager/mock_connection_factory.h"
+#include "gtest/gtest.h"
+#include "include/time_manager_mock.h"
+#include "protocol_handler/time_metric_observer.h"
+#include "time_tester/transport_manager_metric.h"
+#include "time_tester/transport_manager_observer.h"
 
 namespace test {
 namespace components {
