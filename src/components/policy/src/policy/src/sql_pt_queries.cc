@@ -72,7 +72,7 @@ const std::string kCreateSchema =
   "  `exchange_after_x_kilometers` INTEGER NOT NULL, "
   "  `exchange_after_x_days` INTEGER NOT NULL, "
   "  `timeout_after_x_seconds` INTEGER NOT NULL, "
-  "  `certificate` INTEGER NOT NULL, "
+  "  `certificate` TEXT, "
   "  `vehicle_make` VARCHAR(45), "
   "  `vehicle_model` VARCHAR(45), "
   "  `vehicle_year` VARCHAR(4) "

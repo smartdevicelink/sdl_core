@@ -1065,13 +1065,13 @@ bool SQLPTRepresentation::SaveModuleConfig(
   query.Bind(2, config.exchange_after_x_kilometers);
   query.Bind(3, config.exchange_after_x_days);
   query.Bind(4, config.timeout_after_x_seconds);
-  query.Bind(5, config.certificate);
+  query.Bind(5, (*config.certificate));
   config.vehicle_make.is_initialized() ?
-  query.Bind(6, *(config.vehicle_make)) : query.Bind(5);
+  query.Bind(6, *(config.vehicle_make)) : query.Bind(6);
   config.vehicle_model.is_initialized() ?
-  query.Bind(7, *(config.vehicle_model)) : query.Bind(6);
+  query.Bind(7, *(config.vehicle_model)) : query.Bind(7);
   config.vehicle_year.is_initialized() ?
-  query.Bind(8, *(config.vehicle_year)) : query.Bind(7);
+  query.Bind(8, *(config.vehicle_year)) : query.Bind(8);
 
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Incorrect update module config");
