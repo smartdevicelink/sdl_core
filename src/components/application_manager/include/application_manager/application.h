@@ -509,18 +509,6 @@ class Application : public virtual InitialApplicationData,
     }
 
     /**
-     * @brief Current hmi state
-     */
-    virtual const HmiStatePtr CurrentHmiState() const = 0;
-
-
-    /**
-     * @brief RegularHmiState of application without active events VR, TTS etc ...
-     * @return HmiState of application
-     */
-    virtual const HmiStatePtr RegularHmiState() const = 0;
-
-    /**
      * @brief sets true if application has sent TTS GlobalProperties
      * request with empty array help_prompt to HMI with level
      * NONE BACKGROUND
@@ -562,6 +550,9 @@ class Application : public virtual InitialApplicationData,
     virtual void set_protocol_version(
         const ProtocolVersion& protocol_version) = 0;
     virtual ProtocolVersion protocol_version() const = 0;
+
+    virtual void set_is_resuming(bool is_resuming) = 0;
+    virtual bool is_resuming() const = 0;
 
     virtual bool AddFile(AppFile& file) = 0;
     virtual const AppFilesMap& getAppFiles() const = 0;
@@ -607,9 +598,18 @@ class Application : public virtual InitialApplicationData,
 
     /**
      * @brief SetRegularState set permanent state of application
+     *
      * @param state state to setup
      */
     virtual void SetRegularState(HmiStatePtr state)  = 0;
+
+    /**
+    * @brief SetPostponedState sets postponed state to application.
+    * This state could be set as regular later
+    *
+    * @param state state to setup
+    */
+    virtual void SetPostponedState(HmiStatePtr state) = 0;
 
     /**
      * @brief AddHMIState the function that will change application's
@@ -630,6 +630,26 @@ class Application : public virtual InitialApplicationData,
      * @param state_id that should be removed
      */
     virtual void RemoveHMIState(HmiState::StateID state_id) = 0;
+
+    /**
+     * @brief HmiState of application within active events PhoneCall, TTS< etc ...
+     * @return Active HmiState of application
+     */
+    virtual HmiStatePtr CurrentHmiState() const = 0;
+
+    /**
+     * @brief RegularHmiState of application without active events VR, TTS etc ...
+     * @return HmiState of application
+     */
+    virtual HmiStatePtr RegularHmiState() const = 0;
+
+    /**
+     * @brief PostponedHmiState returns postponed hmi state of application
+     * if it's present
+     *
+     * @return Postponed hmi state of application
+     */
+    virtual HmiStatePtr PostponedHmiState() const = 0;
 
     /**
      * @brief Keeps id of softbuttons which is created in commands:

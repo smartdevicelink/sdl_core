@@ -58,7 +58,6 @@ include_directories (
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include
-  ${CMAKE_SOURCE_DIR}/include
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")

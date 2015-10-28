@@ -32,8 +32,7 @@
 
 #include "application_manager/application_impl.h"
 #include <string>
-#ifdef OS_WIN32
-#else
+#ifndef OS_WIN32
 #include <strings.h>
 #endif
 #include "application_manager/message_helper.h"
@@ -107,6 +106,7 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
       usage_report_(mobile_app_id, statistics_manager),
       protocol_version_(ProtocolVersion::kV3),
       is_voice_communication_application_(false),
+      is_resuming_(false),
       video_stream_retry_number_(0),
       audio_stream_retry_number_(0) {
 
@@ -132,9 +132,9 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
   hmi_states_.push_back(initial_state);
 
   video_stream_suspend_timeout_ =
-      profile::Profile::instance()->video_data_stopped_timeout() / 1000;
+      profile::Profile::instance()->video_data_stopped_timeout();
   audio_stream_suspend_timeout_ =
-      profile::Profile::instance()->audio_data_stopped_timeout() / 1000;
+      profile::Profile::instance()->audio_data_stopped_timeout();
 
   video_stream_suspend_timer_ = ApplicationTimerPtr(
           new timer::TimerThread<ApplicationImpl>(
@@ -208,26 +208,42 @@ void ApplicationImpl::set_voice_communication_supported(
 bool ApplicationImpl::IsAudioApplication() const {
   return is_media_ ||
          is_voice_communication_application_ ||
-      is_navi_;
+         is_navi_;
 }
 
 void ApplicationImpl::SetRegularState(HmiStatePtr state) {
+  LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(state);
+  DCHECK_OR_RETURN_VOID(state->state_id() ==
+      HmiState::StateID::STATE_ID_REGULAR);
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
   DCHECK_OR_RETURN_VOID(!hmi_states_.empty());
-  hmi_states_.erase(hmi_states_.begin());
-  if (hmi_states_.begin() != hmi_states_.end()) {
-    HmiStatePtr first_temp = hmi_states_.front();
-    DCHECK_OR_RETURN_VOID(first_temp);
-    first_temp->set_parent(state);
+  hmi_states_.pop_front();
+  if (!hmi_states_.empty()) {
+    HmiStatePtr front_state = hmi_states_.front();
+    if (front_state->state_id() == HmiState::StateID::STATE_ID_REGULAR) {
+      hmi_states_.pop_front();
+    }
+  }
+  if (!hmi_states_.empty()) {
+    HmiStatePtr front_state = hmi_states_.front();
+    front_state->set_parent(state);
   }
   hmi_states_.push_front(state);
 }
 
-void ApplicationImpl::AddHMIState(HmiStatePtr state) {
+void ApplicationImpl::SetPostponedState(HmiStatePtr state) {
+  LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(state);
+  DCHECK_OR_RETURN_VOID(state->state_id() ==
+      HmiState::StateID::STATE_ID_POSTPONED);
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-  hmi_states_.push_back(state);
+  DCHECK_OR_RETURN_VOID(!hmi_states_.empty());
+  HmiStatePtr front_state = hmi_states_.front();
+  if (front_state->state_id() == HmiState::StateID::STATE_ID_POSTPONED) {
+    hmi_states_.pop_front();
+  }
+  hmi_states_.push_front(state);
 }
 
 struct StateIdFindPredicate {
@@ -238,6 +254,21 @@ struct StateIdFindPredicate {
       return cur->state_id() == state_id_;
     }
 };
+
+void ApplicationImpl::AddHMIState(HmiStatePtr state) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN_VOID(state);
+  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
+  HmiStateList::iterator it =
+      std::find_if(hmi_states_.begin(), hmi_states_.end(),
+                   StateIdFindPredicate(state->state_id()));
+  if (hmi_states_.end() == it) {
+    hmi_states_.push_back(state);
+  } else {
+    LOG4CXX_WARN(logger_, "Hmi state with ID " << state->state_id()
+                 << "has been already applied to this application. Ignoring");
+  }
+}
 
 void ApplicationImpl::RemoveHMIState(HmiState::StateID state_id) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -263,17 +294,32 @@ void ApplicationImpl::RemoveHMIState(HmiState::StateID state_id) {
   }
 }
 
-const HmiStatePtr ApplicationImpl::CurrentHmiState() const {
+HmiStatePtr ApplicationImpl::CurrentHmiState() const {
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
   DCHECK_OR_RETURN(!hmi_states_.empty(), HmiStatePtr());
-  //TODO(APPLINK-11448) Need implement
-  return hmi_states_.back();
+  HmiStatePtr back_state = hmi_states_.back();
+  DCHECK_OR_RETURN(back_state->state_id() !=
+      HmiState::StateID::STATE_ID_POSTPONED,
+          HmiStatePtr());
+  return back_state;
 }
 
-const HmiStatePtr ApplicationImpl::RegularHmiState() const{
-  //sync_primitives::AutoLock auto_lock(hmi_states_lock_);
+HmiStatePtr ApplicationImpl::RegularHmiState() const {
+  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
   DCHECK_OR_RETURN(!hmi_states_.empty(), HmiStatePtr());
-  return hmi_states_.front();
+  HmiStateList::const_iterator front_itr = hmi_states_.begin();
+  if ((*front_itr)->state_id() == HmiState::StateID::STATE_ID_POSTPONED) {
+    ++front_itr;
+  }
+  return *front_itr;
+}
+
+HmiStatePtr ApplicationImpl::PostponedHmiState() const {
+  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
+  DCHECK_OR_RETURN(!hmi_states_.empty(), HmiStatePtr());
+  HmiStatePtr front_state = hmi_states_.front();
+  return front_state->state_id() == HmiState::StateID::STATE_ID_POSTPONED ?
+         front_state : HmiStatePtr();
 }
 
 const smart_objects::SmartObject* ApplicationImpl::active_message() const {
@@ -597,6 +643,14 @@ void ApplicationImpl::set_protocol_version(
 
 ProtocolVersion ApplicationImpl::protocol_version() const {
   return protocol_version_;
+}
+
+void ApplicationImpl::set_is_resuming(bool is_resuming) {
+  is_resuming_ = is_resuming;
+}
+
+bool ApplicationImpl::is_resuming() const {
+  return is_resuming_;
 }
 
 bool ApplicationImpl::AddFile(AppFile& file) {

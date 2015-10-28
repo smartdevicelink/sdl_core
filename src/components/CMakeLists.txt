@@ -80,7 +80,6 @@ add_subdirectory(./config_profile)
 # --- AudioManager
 add_subdirectory(./media_manager)
 
-message(STATUS "TIME_TESTER:" ${TIME_TESTER})
 if (TIME_TESTER)
     add_subdirectory(./time_tester)
 endif()
@@ -88,10 +87,8 @@ endif()
 
 if (${HMI_DBUS_API})
 # --- DBus
-     add_subdirectory(./dbus)
+    add_subdirectory(./dbus)
 endif ()
-
-message(STATUS "QT_HMI:" ${QT_HMI})
 if (${QT_HMI})
 # --- Qt HMI
     add_subdirectory(./qt_hmi)

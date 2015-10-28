@@ -30,20 +30,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
 #include "smart_objects/smart_object.h"
 
 #include <errno.h>
 #include <inttypes.h>
 #include <limits>
 #include <stdlib.h>
-#include <cstdio>
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
 #include <iterator>
+#include <limits>
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -870,11 +867,7 @@ bool SmartObject::keyExists(const std::string& Key) const {
   if (m_type != SmartType_Map) {
     return false;
   }
-#ifdef OS_WIN32
-  return m_data.map_value->count(Key) > 0 ? true : false;
-#else
-  return m_data.map_value->count(Key);
-#endif
+  return m_data.map_value->find(Key) != m_data.map_value->end();
 }
 
 bool SmartObject::erase(const std::string& Key) {
