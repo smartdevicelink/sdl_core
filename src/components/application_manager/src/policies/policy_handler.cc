@@ -416,9 +416,11 @@ void PolicyHandler::AddApplication(const std::string& application_id,
                                    const smart_objects::SmartObject* app_types) {
   POLICY_LIB_CHECK_VOID();
   size_t count = 0;
-  smart_objects::SmartArray* hmi_list;
+  smart_objects::SmartArray* hmi_list = 0;
   if (app_types) {
     hmi_list = app_types->asArray();
+  }
+  if (hmi_list) {
     count = hmi_list->size();
   }
   std::vector<int> hmi_types(count);
