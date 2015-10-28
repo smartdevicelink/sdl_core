@@ -131,9 +131,9 @@ struct Rpcs : CompositeType {
 
 struct InteriorZone: CompositeType {
   public:
-    Integer<uint16_t, 0, 100> col;
-    Integer<uint16_t, 0, 100> row;
-    Integer<uint16_t, 0, 100> level;
+    Integer<uint8_t, 0, 100> col;
+    Integer<uint8_t, 0, 100> row;
+    Integer<uint8_t, 0, 100> level;
     AccessModules auto_allow;
     AccessModules driver_allow;
   public:

@@ -526,10 +526,6 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
       ommited_field_report = &report__->ReportSubobject("user_consent_passengersRC");
       ommited_field_report->set_validation_info(validation_info);
     }
-    if (country_consent_passengersRC.is_initialized()) {
-      ommited_field_report = &report__->ReportSubobject("country_consent_passengersRC");
-      ommited_field_report->set_validation_info(validation_info);
-    }
   }
 }
 

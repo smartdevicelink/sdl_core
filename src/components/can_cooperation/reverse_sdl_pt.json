@@ -13,7 +13,7 @@
                   },
                   "driver_allow": {}
                 },
-                "Front Passenger": {
+                "Front_Passenger": {
                   "col": 1,
                   "row": 0,
                   "level": 0,
@@ -24,7 +24,7 @@
                     "RADIO": {}
                   }
                 },
-                "Left Rare Passenger": {
+                "Left_Rare_Passenger": {
                   "col": 0,
                   "row": 1,
                   "level": 0,
@@ -45,7 +45,7 @@
                     }
                   }
                 },
-                "Right Rare Passenger": {
+                "Right_Rare_Passenger": {
                   "col": 1,
                   "row": 1,
                   "level": 0,
