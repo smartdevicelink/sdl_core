@@ -138,7 +138,7 @@ struct InteriorZone: CompositeType {
     AccessModules driver_allow;
   public:
     InteriorZone();
-    explicit InteriorZone(const InteriorZone& zone);
+    InteriorZone(uint8_t col, uint8_t row, uint8_t level, const AccessModules& auto_allow, const AccessModules& driver_allow);
     ~InteriorZone();
     explicit InteriorZone(const Json::Value* value__);
     Json::Value ToJsonValue() const;

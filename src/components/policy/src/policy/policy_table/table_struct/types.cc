@@ -1189,13 +1189,13 @@ const std::string InteriorZone::kClimateParameters[] = {
 InteriorZone::InteriorZone()
   : CompositeType(kUninitialized) {
 }
-InteriorZone::InteriorZone(const InteriorZone& zone)
+InteriorZone::InteriorZone(uint8_t col, uint8_t row, uint8_t level, const AccessModules& auto_allow, const AccessModules& driver_allow)
   : CompositeType(kUninitialized),
-    col(zone.col),
-    row(zone.row),
-    level(zone.level),
-    auto_allow(zone.auto_allow),
-    driver_allow(zone.driver_allow) {
+    col(col),
+    row(row),
+    level(level),
+    auto_allow(auto_allow),
+    driver_allow(driver_allow) {
 }
 InteriorZone::~InteriorZone() {
 }
