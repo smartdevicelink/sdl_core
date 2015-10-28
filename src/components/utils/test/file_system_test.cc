@@ -759,7 +759,7 @@ TEST(FileSystemTest, WriteFileReadFile) {
   std::string result;
   std::string check = "test";
   EXPECT_TRUE(ReadFile("./test file", result));
-  EXPECT_NE(0, result.size());
+  EXPECT_NE(0u, result.size());
   EXPECT_EQ(check, result);
 
   EXPECT_TRUE(DeleteFile("./test file"));
@@ -1005,17 +1005,16 @@ TEST(FileSystemTest, GetFileModificationTime) {
   EXPECT_TRUE(CreateFile("./test file"));
 
   uint64_t modif_time = GetFileModificationTime("./test file");
-  EXPECT_LE(0, modif_time);
+  EXPECT_LE(0ul, modif_time);
 
   std::vector < uint8_t > data(1, 1);
   EXPECT_TRUE(WriteBinaryFile("./test file", data));
 
-  EXPECT_LE(0, GetFileModificationTime("./test file"));
+  EXPECT_LE(0ul, GetFileModificationTime("./test file"));
   EXPECT_LE(modif_time, GetFileModificationTime("./test file"));
 
   EXPECT_TRUE(DeleteFile("./test file"));
   EXPECT_FALSE(FileExists("./test file"));
-
 }
 
 TEST(FileSystemTest, ListFiles) {
@@ -1050,7 +1049,7 @@ TEST(FileSystemTest, ListFilesIncludeSubdirectory) {
   std::vector < std::string > list;
   list = ListFiles("./Test directory");
   EXPECT_FALSE(list.empty());
-  EXPECT_EQ(1, list.size());
+  EXPECT_EQ(1u, list.size());
   EXPECT_EQ("Test directory 2", list[0]);
 
   EXPECT_TRUE(RemoveDirectory("./Test directory", true));
@@ -1073,7 +1072,7 @@ TEST(FileSystemTest, ListFilesDoesNotIncludeFilesInSubdirectory) {
 
   std::sort(list.begin(), list.end());
   EXPECT_EQ("Test directory 2", list[0]);
-  EXPECT_EQ(1, list.size());
+  EXPECT_EQ(1u, list.size());
 
   EXPECT_TRUE(RemoveDirectory("./Test directory", true));
   EXPECT_FALSE(DirectoryExists("./Test directory"));
@@ -1083,7 +1082,7 @@ TEST(FileSystemTest, GetAvailableDiskSpace) {
 
   // Get available disk space before directory with file creaction and after
   uint64_t available_space = GetAvailableDiskSpace(".");
-  EXPECT_NE(0, available_space);
+  EXPECT_NE(0u, available_space);
   ASSERT_FALSE(DirectoryExists("./Test directory"));
   CreateDirectory("./Test directory");
 
@@ -1110,21 +1109,21 @@ TEST(FileSystemTest, DirectorySize) {
   CreateDirectory("./Test directory");
   EXPECT_TRUE(DirectoryExists("./Test directory"));
   // Get size of empty directory
-  EXPECT_EQ(0, DirectorySize("./Test directory"));
+  EXPECT_EQ(0u, DirectorySize("./Test directory"));
   EXPECT_TRUE(CreateFile("./Test directory/test file"));
 
   // Get size of nonempty directory with empty file
-  EXPECT_EQ(0, DirectorySize("./Test directory"));
+  EXPECT_EQ(0u, DirectorySize("./Test directory"));
 
   unsigned char tmp[] = { 't', 'e', 's', 't' };
   std::vector<unsigned char> data(tmp, tmp + 4);
 
   EXPECT_TRUE(Write("./Test directory/test file", data));
   // Get size of nonempty directory with nonempty file
-  EXPECT_NE(0, DirectorySize("./Test directory"));
+  EXPECT_NE(0u, DirectorySize("./Test directory"));
 
   EXPECT_TRUE(DeleteFile("./Test directory/test file"));
-  EXPECT_EQ(0, DirectorySize("./Test directory"));
+  EXPECT_EQ(0u, DirectorySize("./Test directory"));
   EXPECT_TRUE(RemoveDirectory("./Test directory"));
   EXPECT_FALSE(DirectoryExists("./Test directory"));
 }
@@ -1168,6 +1167,11 @@ TEST(FileSystemTest, DeleteAllContentInDirectory) {
 
   EXPECT_TRUE(RemoveDirectory("./Test directory", true));
   EXPECT_FALSE(DirectoryExists("./Test directory"));
+}
+
+TEST(FileSystemTest, GetAbsolutePath) {
+  const std::string& abs_path = GetAbsolutePath(".");
+  EXPECT_EQ(*abs_path.begin(), '/');
 }
 
 }  // namespace utils

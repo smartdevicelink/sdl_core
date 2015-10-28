@@ -37,6 +37,7 @@
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol/service_type.h"
 #include "utils/shared_ptr.h"
+#include "security_manager_mock.h"
 
 #define EXPECT_RETURN_TRUE true
 #define EXPECT_RETURN_FALSE false
@@ -46,10 +47,10 @@
 namespace test {
 namespace components {
 namespace connection_handle {
-  using namespace ::connection_handler;
-  using namespace ::protocol_handler;
+using namespace ::connection_handler;
+using namespace ::protocol_handler;
 
-class ConnectionTest: public ::testing::Test {
+class ConnectionTest : public ::testing::Test {
  protected:
   void SetUp() OVERRIDE {
     connection_handler_ = ConnectionHandlerImpl::instance();
@@ -71,15 +72,15 @@ class ConnectionTest: public ::testing::Test {
     const ServiceList serviceList = sessionMap.begin()->second.service_list;
     EXPECT_FALSE(serviceList.empty());
     const ServiceList::const_iterator it =
-        std::find(serviceList.begin(), serviceList.end(), protocol_handler::kRpc);
-    EXPECT_NE(it, serviceList.end());
+        std::find(serviceList.begin(), serviceList.end(), kRpc);
+    const bool found_result = (it != serviceList.end());
+    EXPECT_TRUE(found_result);
   }
-  void AddNewService(const protocol_handler::ServiceType service_type,
-                    const bool protection,
-                    const bool expect_add_new_service_call_result,
-                    const bool expect_exist_service) {
-    const bool result = connection_->
-        AddNewService(session_id, service_type, protection);
+  void AddNewService(const ServiceType service_type, const bool protection,
+                     const bool expect_add_new_service_call_result,
+                     const bool expect_exist_service) {
+    const bool result =
+        connection_->AddNewService(session_id, service_type, protection);
     EXPECT_EQ(result, expect_add_new_service_call_result);
 
 #ifdef ENABLE_SECURITY
@@ -103,20 +104,20 @@ class ConnectionTest: public ::testing::Test {
 #endif  // ENABLE_SECURITY
   }
 
-  void RemoveService(const protocol_handler::ServiceType service_type,
+  void RemoveService(const ServiceType service_type,
                      const bool expect_remove_service_result,
                      const bool expect_exist_service) {
-    const bool result = connection_->
-        RemoveService(session_id, service_type);
+    const bool result = connection_->RemoveService(session_id, service_type);
     EXPECT_EQ(result, expect_remove_service_result);
 
     const SessionMap newSessionMap = connection_->session_map();
     EXPECT_FALSE(newSessionMap.empty());
-    const ServiceList newServiceList = newSessionMap.begin()->second.service_list;
+    const ServiceList newServiceList =
+        newSessionMap.begin()->second.service_list;
     EXPECT_FALSE(newServiceList.empty());
     const ServiceList::const_iterator it =
         std::find(newServiceList.begin(), newServiceList.end(), service_type);
-    const bool found_result = it != newServiceList.end();
+    const bool found_result = (it != newServiceList.end());
     EXPECT_EQ(expect_exist_service, found_result);
   }
 
@@ -125,50 +126,79 @@ class ConnectionTest: public ::testing::Test {
   uint32_t session_id;
 };
 
+TEST_F(ConnectionTest, Session_TryGetProtocolVersionWithoutSession) {
+  uint8_t protocol_version;
+  EXPECT_FALSE(connection_->ProtocolVersion(session_id, protocol_version));
+}
+
+TEST_F(ConnectionTest, Session_GetDefaultProtocolVersion) {
+  StartSession();
+  uint8_t protocol_version;
+  EXPECT_TRUE(connection_->ProtocolVersion(session_id, protocol_version));
+  EXPECT_EQ(static_cast<uint8_t>(PROTOCOL_VERSION_2), protocol_version);
+}
+TEST_F(ConnectionTest, Session_UpdateProtocolVersion) {
+  StartSession();
+  uint8_t protocol_version = static_cast<uint8_t>(PROTOCOL_VERSION_3);
+  connection_->UpdateProtocolVersionSession(session_id, protocol_version);
+  EXPECT_TRUE(connection_->ProtocolVersion(session_id, protocol_version));
+  EXPECT_EQ(static_cast<uint8_t>(PROTOCOL_VERSION_3), protocol_version);
+}
+
+TEST_F(ConnectionTest, HeartBeat_NotSupported) {
+  // Arrange
+  StartSession();
+  uint8_t protocol_version;
+  EXPECT_TRUE(connection_->ProtocolVersion(session_id, protocol_version));
+  EXPECT_EQ(static_cast<uint8_t>(PROTOCOL_VERSION_2), protocol_version);
+
+  // Assert
+  EXPECT_FALSE(connection_->SupportHeartBeat(session_id));
+}
+
+TEST_F(ConnectionTest, HeartBeat_Supported) {
+  // Arrange
+  StartSession();
+
+  // Check if protocol version is 3
+  const uint8_t protocol_version = static_cast<uint8_t>(PROTOCOL_VERSION_3);
+  connection_->UpdateProtocolVersionSession(session_id, protocol_version);
+  // Assert
+  EXPECT_TRUE(connection_->SupportHeartBeat(session_id));
+}
+
 // Try to add service without session
 TEST_F(ConnectionTest, Session_AddNewServiceWithoutSession) {
-  EXPECT_EQ(connection_->
-            AddNewService(session_id, protocol_handler::kAudio, true),
+  EXPECT_EQ(connection_->AddNewService(session_id, kAudio, true),
             EXPECT_RETURN_FALSE);
-  EXPECT_EQ(connection_->
-            AddNewService(session_id, protocol_handler::kAudio, false),
+  EXPECT_EQ(connection_->AddNewService(session_id, kAudio, false),
             EXPECT_RETURN_FALSE);
-  EXPECT_EQ(connection_->
-            AddNewService(session_id, protocol_handler::kMobileNav, true),
+  EXPECT_EQ(connection_->AddNewService(session_id, kMobileNav, true),
             EXPECT_RETURN_FALSE);
-  EXPECT_EQ(connection_->
-            AddNewService(session_id, protocol_handler::kMobileNav, false),
+  EXPECT_EQ(connection_->AddNewService(session_id, kMobileNav, false),
             EXPECT_RETURN_FALSE);
 }
 
 // Try to remove service without session
 TEST_F(ConnectionTest, Session_RemoveServiceWithoutSession) {
-  EXPECT_EQ(connection_->
-            RemoveService(session_id, protocol_handler::kAudio),
+  EXPECT_EQ(connection_->RemoveService(session_id, kAudio),
             EXPECT_RETURN_FALSE);
-  EXPECT_EQ(connection_->
-            RemoveService(session_id, protocol_handler::kMobileNav),
+  EXPECT_EQ(connection_->RemoveService(session_id, kMobileNav),
             EXPECT_RETURN_FALSE);
 }
 // Try to remove RPC
 TEST_F(ConnectionTest, Session_RemoveRPCBulk) {
   StartSession();
-  EXPECT_EQ(connection_->
-            RemoveService(session_id, protocol_handler::kRpc),
-            EXPECT_RETURN_FALSE);
-  EXPECT_EQ(connection_->
-            RemoveService(session_id, protocol_handler::kBulk),
-            EXPECT_RETURN_FALSE);
+  EXPECT_EQ(connection_->RemoveService(session_id, kRpc), EXPECT_RETURN_FALSE);
+  EXPECT_EQ(connection_->RemoveService(session_id, kBulk), EXPECT_RETURN_FALSE);
 }
 // Control Service could not be started anyway
 TEST_F(ConnectionTest, Session_AddControlService) {
   StartSession();
 
-  AddNewService(protocol_handler::kControl, PROTECTION_OFF,
-                EXPECT_RETURN_FALSE,
+  AddNewService(kControl, PROTECTION_OFF, EXPECT_RETURN_FALSE,
                 EXPECT_SERVICE_NOT_EXISTS);
-  AddNewService(protocol_handler::kControl, PROTECTION_ON,
-                EXPECT_RETURN_FALSE,
+  AddNewService(kControl, PROTECTION_ON, EXPECT_RETURN_FALSE,
                 EXPECT_SERVICE_NOT_EXISTS);
 }
 
@@ -176,89 +206,104 @@ TEST_F(ConnectionTest, Session_AddControlService) {
 TEST_F(ConnectionTest, Session_AddInvalidService) {
   StartSession();
 
-  AddNewService(protocol_handler::kInvalidServiceType, PROTECTION_OFF,
-                EXPECT_RETURN_FALSE,
+  AddNewService(kInvalidServiceType, PROTECTION_OFF, EXPECT_RETURN_FALSE,
                 EXPECT_SERVICE_NOT_EXISTS);
-  AddNewService(protocol_handler::kInvalidServiceType, PROTECTION_ON,
-                EXPECT_RETURN_FALSE,
+  AddNewService(kInvalidServiceType, PROTECTION_ON, EXPECT_RETURN_FALSE,
                 EXPECT_SERVICE_NOT_EXISTS);
 }
 
 // RPC and Bulk Services could be only delay protected
 TEST_F(ConnectionTest, Session_AddRPCBulkServices) {
   StartSession();
-  AddNewService(protocol_handler::kRpc, PROTECTION_OFF,
-                EXPECT_RETURN_FALSE,
+  AddNewService(kRpc, PROTECTION_OFF, EXPECT_RETURN_FALSE,
                 EXPECT_SERVICE_EXISTS);
 
   //  Bulk shall not be added and shall be PROTECTION_OFF
-  AddNewService(protocol_handler::kBulk, PROTECTION_OFF,
-                EXPECT_RETURN_FALSE,
+  AddNewService(kBulk, PROTECTION_OFF, EXPECT_RETURN_FALSE,
                 EXPECT_SERVICE_EXISTS);
 #ifdef ENABLE_SECURITY
-  AddNewService(protocol_handler::kRpc, PROTECTION_ON,
-                EXPECT_RETURN_TRUE,
-                EXPECT_SERVICE_EXISTS);
+  AddNewService(kRpc, PROTECTION_ON, EXPECT_RETURN_TRUE, EXPECT_SERVICE_EXISTS);
 #else
-  AddNewService(protocol_handler::kRpc, PROTECTION_ON,
-                EXPECT_RETURN_FALSE,
+  AddNewService(kRpc, PROTECTION_ON, EXPECT_RETURN_FALSE,
                 EXPECT_SERVICE_EXISTS);
 #endif  // ENABLE_SECURITY
 
   //  Bulk shall not be added and shall be PROTECTION_ON
-  AddNewService(protocol_handler::kBulk, PROTECTION_ON,
-                EXPECT_RETURN_FALSE,
+  AddNewService(kBulk, PROTECTION_ON, EXPECT_RETURN_FALSE,
                 EXPECT_SERVICE_EXISTS);
 }
 
 TEST_F(ConnectionTest, Session_AddAllOtherService_Unprotected) {
   StartSession();
 
-  AddNewService(protocol_handler::kAudio, PROTECTION_OFF,
-                EXPECT_RETURN_TRUE,
+  AddNewService(kAudio, PROTECTION_OFF, EXPECT_RETURN_TRUE,
                 EXPECT_SERVICE_EXISTS);
-  AddNewService(protocol_handler::kMobileNav, PROTECTION_OFF,
-                EXPECT_RETURN_TRUE,
+  AddNewService(kMobileNav, PROTECTION_OFF, EXPECT_RETURN_TRUE,
                 EXPECT_SERVICE_EXISTS);
 }
 
 TEST_F(ConnectionTest, Session_AddAllOtherService_Protected) {
   StartSession();
 
-  AddNewService(protocol_handler::kAudio, PROTECTION_ON,
-                EXPECT_RETURN_TRUE,
+  AddNewService(kAudio, PROTECTION_ON, EXPECT_RETURN_TRUE,
                 EXPECT_SERVICE_EXISTS);
-  AddNewService(protocol_handler::kMobileNav, PROTECTION_ON,
-                EXPECT_RETURN_TRUE,
+  AddNewService(kMobileNav, PROTECTION_ON, EXPECT_RETURN_TRUE,
                 EXPECT_SERVICE_EXISTS);
+}
+
+TEST_F(ConnectionTest, FindAddedService) {
+  StartSession();
+
+  // Arrange
+  SessionMap currentSessionMap = connection_->session_map();
+  Service* sessionWithService =
+      currentSessionMap.find(session_id)->second.FindService(kAudio);
+  EXPECT_EQ(NULL, sessionWithService);
+
+  // Act
+  AddNewService(kAudio, PROTECTION_OFF, EXPECT_RETURN_TRUE,
+                EXPECT_SERVICE_EXISTS);
+
+  currentSessionMap = connection_->session_map();
+
+  // Expect that service is existing
+  sessionWithService =
+      currentSessionMap.find(session_id)->second.FindService(kAudio);
+  EXPECT_TRUE(sessionWithService != NULL);
+}
+
+TEST_F(ConnectionTest, Session_RemoveAddedService) {
+  StartSession();
+  AddNewService(kAudio, PROTECTION_OFF, EXPECT_RETURN_TRUE,
+                EXPECT_SERVICE_EXISTS);
+
+  EXPECT_EQ(connection_->RemoveService(session_id, kAudio), EXPECT_RETURN_TRUE);
+
+  // Try delete nonexisting service
+  EXPECT_EQ(connection_->RemoveService(session_id, kAudio),
+            EXPECT_RETURN_FALSE);
 }
 
 TEST_F(ConnectionTest, Session_AddAllOtherService_DelayProtected1) {
   StartSession();
 
-  AddNewService(protocol_handler::kAudio, PROTECTION_OFF,
-                EXPECT_RETURN_TRUE,
+  AddNewService(kAudio, PROTECTION_OFF, EXPECT_RETURN_TRUE,
                 EXPECT_SERVICE_EXISTS);
 
-  AddNewService(protocol_handler::kMobileNav, PROTECTION_OFF,
-                EXPECT_RETURN_TRUE,
+  AddNewService(kMobileNav, PROTECTION_OFF, EXPECT_RETURN_TRUE,
                 EXPECT_SERVICE_EXISTS);
 
 #ifdef ENABLE_SECURITY
-  AddNewService(protocol_handler::kAudio, PROTECTION_ON,
-                EXPECT_RETURN_TRUE,
+  AddNewService(kAudio, PROTECTION_ON, EXPECT_RETURN_TRUE,
                 EXPECT_SERVICE_EXISTS);
 
-  AddNewService(protocol_handler::kMobileNav, PROTECTION_ON,
-                EXPECT_RETURN_TRUE,
+  AddNewService(kMobileNav, PROTECTION_ON, EXPECT_RETURN_TRUE,
                 EXPECT_SERVICE_EXISTS);
 #else
-  AddNewService(protocol_handler::kAudio, PROTECTION_ON,
-                EXPECT_RETURN_FALSE,
+  AddNewService(kAudio, PROTECTION_ON, EXPECT_RETURN_FALSE,
                 EXPECT_SERVICE_EXISTS);
 
-  AddNewService(protocol_handler::kMobileNav, PROTECTION_ON,
-                EXPECT_RETURN_FALSE,
+  AddNewService(kMobileNav, PROTECTION_ON, EXPECT_RETURN_FALSE,
                 EXPECT_SERVICE_EXISTS);
 #endif  // ENABLE_SECURITY
 }
@@ -267,34 +312,119 @@ TEST_F(ConnectionTest, Session_AddAllOtherService_DelayProtected1) {
 TEST_F(ConnectionTest, Session_AddAllOtherService_DelayProtected2) {
   StartSession();
 
-  AddNewService(protocol_handler::kAudio, PROTECTION_OFF,
-                EXPECT_RETURN_TRUE,
+  AddNewService(kAudio, PROTECTION_OFF, EXPECT_RETURN_TRUE,
                 EXPECT_SERVICE_EXISTS);
 #ifdef ENABLE_SECURITY
-  AddNewService(protocol_handler::kAudio, PROTECTION_ON,
-                EXPECT_RETURN_TRUE,
+  AddNewService(kAudio, PROTECTION_ON, EXPECT_RETURN_TRUE,
                 EXPECT_SERVICE_EXISTS);
 #else
-  AddNewService(protocol_handler::kAudio, PROTECTION_ON,
-                EXPECT_RETURN_FALSE,
+  AddNewService(kAudio, PROTECTION_ON, EXPECT_RETURN_FALSE,
                 EXPECT_SERVICE_EXISTS);
 #endif  // ENABLE_SECURITY
 
-  AddNewService(protocol_handler::kMobileNav, PROTECTION_OFF,
-                EXPECT_RETURN_TRUE,
+  AddNewService(kMobileNav, PROTECTION_OFF, EXPECT_RETURN_TRUE,
                 EXPECT_SERVICE_EXISTS);
 #ifdef ENABLE_SECURITY
-  AddNewService(protocol_handler::kMobileNav, PROTECTION_ON,
-                EXPECT_RETURN_TRUE,
+  AddNewService(kMobileNav, PROTECTION_ON, EXPECT_RETURN_TRUE,
                 EXPECT_SERVICE_EXISTS);
 #else
-  AddNewService(protocol_handler::kMobileNav, PROTECTION_ON,
-                EXPECT_RETURN_FALSE,
+  AddNewService(kMobileNav, PROTECTION_ON, EXPECT_RETURN_FALSE,
                 EXPECT_SERVICE_EXISTS);
 #endif  // ENABLE_SECURITY
 }
 
+TEST_F(ConnectionTest, RemoveSession) {
+  StartSession();
+  EXPECT_EQ(session_id, connection_->RemoveSession(session_id));
+  EXPECT_EQ(0u, connection_->RemoveSession(session_id));
+}
+
+#ifdef ENABLE_SECURITY
+
+TEST_F(ConnectionTest, SetSSLContextWithoutSession) {
+  // random value. Session was not started
+  uint8_t session_id = 10;
+  security_manager_test::SSLContextMock mock_ssl_context;
+  int setResult = connection_->SetSSLContext(session_id, &mock_ssl_context);
+  EXPECT_EQ(security_manager::SecurityManager::ERROR_INTERNAL, setResult);
+}
+
+TEST_F(ConnectionTest, GetSSLContextWithoutSession) {
+  // random value. Session was not started
+  uint8_t session_id = 10;
+
+  EXPECT_EQ(NULL, connection_->GetSSLContext(session_id, kMobileNav));
+}
+
+TEST_F(ConnectionTest, SetGetSSLContext) {
+  StartSession();
+
+  EXPECT_EQ(NULL, connection_->GetSSLContext(session_id, kMobileNav));
+  AddNewService(kMobileNav, PROTECTION_ON, EXPECT_RETURN_TRUE,
+                EXPECT_SERVICE_EXISTS);
+
+  EXPECT_EQ(NULL, connection_->GetSSLContext(session_id, kMobileNav));
+
+  security_manager_test::SSLContextMock mock_ssl_context;
+  // Set SSLContext
+  int setResult = connection_->SetSSLContext(session_id, &mock_ssl_context);
+  EXPECT_EQ(security_manager::SecurityManager::ERROR_SUCCESS, setResult);
+
+  security_manager::SSLContext* result =
+      connection_->GetSSLContext(session_id, kMobileNav);
+  EXPECT_EQ(result, &mock_ssl_context);
+}
+
+TEST_F(ConnectionTest, SetProtectionFlagForRPC) {
+  StartSession();
+  // Arrange
+  SessionMap currentSessionMap = connection_->session_map();
+  Service* service_rpc =
+      currentSessionMap.find(session_id)->second.FindService(kRpc);
+
+  EXPECT_FALSE(service_rpc->is_protected_);
+
+  Service* service_bulk =
+      currentSessionMap.find(session_id)->second.FindService(kBulk);
+  EXPECT_FALSE(service_bulk->is_protected_);
+
+  // Expect that service protection is enabled
+  connection_->SetProtectionFlag(session_id, kRpc);
+
+  currentSessionMap = connection_->session_map();
+  service_bulk = currentSessionMap.find(session_id)->second.FindService(kBulk);
+  EXPECT_TRUE(service_bulk->is_protected_);
+
+  service_rpc = currentSessionMap.find(session_id)->second.FindService(kRpc);
+  EXPECT_TRUE(service_rpc->is_protected_);
+}
+
+TEST_F(ConnectionTest, SetProtectionFlagForBulk) {
+  StartSession();
+  // Arrange
+  SessionMap currentSessionMap = connection_->session_map();
+  Service* service_rpc =
+      currentSessionMap.find(session_id)->second.FindService(kRpc);
+
+  EXPECT_FALSE(service_rpc->is_protected_);
+
+  Service* service_bulk =
+      currentSessionMap.find(session_id)->second.FindService(kBulk);
+  EXPECT_FALSE(service_bulk->is_protected_);
+
+  // Expect that service protection is enabled
+  connection_->SetProtectionFlag(session_id, kBulk);
+
+  currentSessionMap = connection_->session_map();
+  service_bulk = currentSessionMap.find(session_id)->second.FindService(kBulk);
+  EXPECT_TRUE(service_bulk->is_protected_);
+
+  service_rpc = currentSessionMap.find(session_id)->second.FindService(kRpc);
+  EXPECT_TRUE(service_rpc->is_protected_);
+}
+
+#endif  // ENABLE_SECURITY
+
 }  // namespace connection_handle
 }  // namespace components
 }  // namespace test
-

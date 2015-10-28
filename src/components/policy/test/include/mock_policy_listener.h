@@ -39,7 +39,7 @@
 
 #include "policy/policy_listener.h"
 #include "rpc_base/rpc_base.h"
-#include "./types.h"
+#include "table_struct/types.h"
 
 namespace policy_table = ::rpc::policy_table_interface_base;
 
@@ -80,6 +80,7 @@ class MockPolicyListener : public PolicyListener {
   MOCK_METHOD0(CanUpdate,
                bool());
   MOCK_METHOD1(OnCertificateUpdated, void (const std::string&));
+  MOCK_CONST_METHOD2(SendOnAppPermissionsChanged, void (const AppPermissions&, const std::string&));
 };
 
 }  // namespace policy

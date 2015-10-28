@@ -43,6 +43,7 @@
 // TODO(VS): lint error: Streams are highly discouraged.
 #include <fstream>
 #include <cstddef>
+#include <cstdio>
 #include <algorithm>
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
@@ -216,6 +217,15 @@ std::string file_system::CurrentWorkingDirectory() {
   return std::string(path);
 }
 
+std::string file_system::GetAbsolutePath(const std::string &path) {
+  char abs_path[PATH_MAX];
+  if (NULL == realpath(path.c_str(), abs_path)) {
+    return std::string();
+  }
+
+  return std::string(abs_path);
+}
+
 bool file_system::DeleteFile(const std::string& name) {
   if (FileExists(name) && IsAccessible(name, W_OK)) {
     return !remove(name.c_str());
@@ -354,7 +364,7 @@ bool file_system::ReadBinaryFile(const std::string& name,
   std::ifstream file(name.c_str(), std::ios_base::binary);
   std::ostringstream ss;
   ss << file.rdbuf();
-  const std::string& s = ss.str();
+  const std::string s = ss.str();
 
   result.resize(s.length());
   std::copy(s.begin(), s.end(), result.begin());
@@ -440,12 +450,26 @@ bool file_system::CopyFile(const std::string& src,
 
 bool file_system::MoveFile(const std::string& src,
                            const std::string& dst) {
-  if (!CopyFile(src, dst)) {
-    return false;
+  if (std::rename(src.c_str(), dst.c_str()) == 0) {
+    return true;
+  } else {
+    // In case of src and dst on different file systems std::rename returns
+    // an error (at least on QNX).
+    // Seems, streams are not recommended for use, so have
+    // to find another way to do this.
+    std::ifstream s_src(src, std::ios::binary);
+    if (!s_src.good()) {
+      return false;
+    }
+    std::ofstream s_dst(dst, std::ios::binary);
+    if (!s_dst.good()) {
+      return false;
+    }
+    s_dst << s_src.rdbuf();
+    s_dst.close();
+    s_src.close();
+    DeleteFile(src);
+    return true;
   }
-  if (!DeleteFile(src)) {
-    DeleteFile(dst);
-    return false;
-  }
-  return true;
+  return false;
 }

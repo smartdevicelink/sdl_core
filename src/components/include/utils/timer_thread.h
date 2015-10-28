@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_INCLUDE_UTILS_TIMER_THREAD_H_
 
 #include <time.h>
+#include <inttypes.h>
 #include <cstdint>
 #include <limits>
 #include <string>
@@ -203,7 +204,6 @@ class TimerThread {
     sync_primitives::Lock state_lock_;
     sync_primitives::ConditionalVariable termination_condition_;
     volatile bool stop_flag_;
-
     sync_primitives::Lock restart_flag_lock_;
     volatile bool restart_flag_;
 
@@ -367,12 +367,12 @@ void TimerThread<T>::TimerDelegate::threadMain() {
     // Quit sleeping or continue sleeping in case of spurious wake up
     if (ConditionalVariable::kTimeout == wait_status
         || wait_milliseconds_left <= 0) {
-      LOG4CXX_TRACE(logger_,
-                    "Timer timeout (ms): " << wait_milliseconds_left);
+      LOG4CXX_DEBUG(logger_,
+                    "Timer has finished counting. Timeout(ms): " << wait_milliseconds_left);
       timer_thread_->onTimeOut();
     } else {
-      LOG4CXX_DEBUG(logger_,
-                    "Timeout reset force: " << TimerDelegate::timeout_milliseconds_);
+      LOG4CXX_DEBUG(logger_, "Timeout reset force (ms): "
+                    << TimerDelegate::timeout_milliseconds_);
     }
     {
       sync_primitives::AutoLock auto_lock(restart_flag_lock_);
@@ -418,8 +418,13 @@ void TimerThread<T>::TimerDelegate::exitThreadMain() {
 template<class T>
 void TimerThread<T>::TimerDelegate::setTimeOut(
     const uint32_t timeout_milliseconds) {
-    timeout_milliseconds_ = (0 == timeout_milliseconds )? 1: timeout_milliseconds ;
-    termination_condition_.NotifyOne();
+  if(timeout_milliseconds == 0) {
+    timeout_milliseconds_ = 1;
+    // There would be no way to stop thread if timeout in lopper will be 0     
+  } else {
+    timeout_milliseconds_ = timeout_milliseconds;
+  }
+  termination_condition_.NotifyOne();
 }
 
 template<class T>

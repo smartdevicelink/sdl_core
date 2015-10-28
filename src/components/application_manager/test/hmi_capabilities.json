@@ -1,0 +1,460 @@
+{
+    "UI":
+    {
+        "language":"EN_US",
+        "languages":[ 
+          "EN_US","ES_MX","FR_CA","DE_DE","ES_ES","EN_GB","RU_RU","TR_TR","PL_PL","FR_FR","IT_IT","SV_SE","PT_PT","NL_NL","ZH_TW",
+"JA_JP","AR_SA","KO_KR","PT_BR","CS_CZ","DA_DK","NO_NO"
+        ],
+        "displayCapabilities":
+        {
+            "displayType":"GEN2_8_DMA",
+            "textFields": [{
+                                            "name": "mainField1",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "mainField2",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "mainField3",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "mainField4",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "statusBar",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "mediaClock",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "mediaTrack",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "alertText1",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "alertText2",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "alertText3",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "scrollableMessageBody",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "initialInteractionText",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "navigationText1",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "navigationText2",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "ETA",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "totalDistance",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "navigationText",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "audioPassThruDisplayText1",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "audioPassThruDisplayText2",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "sliderHeader",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "sliderFooter",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "notificationText",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "menuName",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "secondaryText",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "tertiaryText",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "timeToDestination",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "turnText",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        },
+                                        {
+                                            "name": "menuTitle",
+                                            "characterSet": "TYPE2SET",
+                                            "width": 500,
+                                            "rows": 1
+                                        }
+                                    ],
+                    "imageFields":
+            [
+                            {
+                    "name":"softButtonImage",
+                                "imageTypeSupported":
+                                    [
+                                    ],
+                                "imageResolution":
+                                         {
+                                            "resolutionWidth":35,
+                        "resolutionHeight":35
+                                         }
+                            },
+                                {
+                    "name":"choiceImage",
+                                "imageTypeSupported":
+                                    [
+                                    ],
+                                "imageResolution":
+                                         {
+                                            "resolutionWidth":35,
+                        "resolutionHeight":35
+                                         }
+                            },
+                            {
+                    "name":"choiceSecondaryImage",
+                                "imageTypeSupported":
+                                    [
+                                    ],
+                                "imageResolution":
+                                         {
+                                            "resolutionWidth":35,
+                        "resolutionHeight":35
+                                         }
+                            },
+                                {
+                    "name":"menuIcon",
+                                "imageTypeSupported":
+                                    [
+                                    ],
+                                "imageResolution":
+                                         {
+                                            "resolutionWidth":35,
+                        "resolutionHeight":35
+                                         }
+                            },
+                            {
+                    "name":"cmdIcon",
+                                "imageTypeSupported":
+                                    [
+                                    ],
+                                "imageResolution":
+                                         {
+                                            "resolutionWidth":35,
+                        "resolutionHeight":35
+                                         }
+                            },
+                            {
+                    "name":"appIcon",
+                                "imageTypeSupported":
+                                    [
+                                    ],
+                                "imageResolution":
+                                         {
+                                            "resolutionWidth":35,
+                                                "resolutionHeight":35
+                                         }
+                            },
+                                {
+                                        "name":"graphic",
+                                        "imageTypeSupported":
+                                         [
+                        
+                                         ],
+                                        "imageResolution":
+                                         {
+                                                "resolutionWidth":35,
+                                                "resolutionHeight":35
+                                         }
+                            },
+                                {
+                                        "name":"locationImage",
+                                        "imageTypeSupported":
+                                         [
+                                            "GRAPHIC_PNG"
+                                         ],
+                                        "imageResolution":
+                                         {
+                                                "resolutionWidth":35,
+                                                "resolutionHeight":35
+                                         }
+                            }
+                            
+                        ],
+            "mediaClockFormats":
+            [
+                "CLOCK1","CLOCK2","CLOCK3","CLOCKTEXT1","CLOCKTEXT2","CLOCKTEXT3","CLOCKTEXT4"
+            ],
+            "graphicSupported":true,
+                        "templatesAvailable":
+                        [
+                          
+                            "DEFAULT","MEDIA","NON-MEDIA","ONSCREEN_PRESETS","NAV_FULLSCREEN_MAP","NAV_KEYBOARD",
+                            "GRAPHIC_WITH_TEXT","TEXT_WITH_GRAPHIC","TILES_ONLY","TEXTBUTTONS_ONLY",
+                                "GRAPHIC_WITH_TILES","TILES_WITH_GRAPHIC","GRAPHIC_WITH_TEXT_AND_SOFTBUTTONS",
+                            "TEXT_AND_SOFTBUTTONS_WITH_GRAPHIC","GRAPHIC_WITH_TEXTBUTTONS",
+                            "TEXTBUTTONS_WITH_GRAPHIC","LARGE_GRAPHIC_WITH_SOFTBUTTONS",
+                            "DOUBLE_GRAPHIC_WITH_SOFTBUTTONS","LARGE_GRAPHIC_ONLY"
+                        ],
+                        "screenParams":
+                        {
+                            "resolution":
+                                {
+                                    "resolutionWidth":800,
+                    "resolutionHeight":350
+                                },
+                            "touchEventAvailable":
+                            {
+                                "pressAvailable":true,
+                                    "multiTouchAvailable":false,
+                                    "doublePressAvailable":false
+                                }
+                        },
+                        "numCustomPresetsAvailable":8,
+            "imageCapabilities":
+            [
+                "DYNAMIC",
+                "STATIC"
+            ]
+        },
+        "audioPassThruCapabilities":
+        {
+            "samplingRate"  : "44KHZ",
+            "bitsPerSample" : "RATE_8_BIT",
+            "audioType"     : "PCM"
+        },
+        "hmiZoneCapabilities":"FRONT",
+        "softButtonCapabilities":
+        [
+            {
+                "shortPressAvailable":true,
+                "longPressAvailable" :true,
+                "upDownAvailable"    :true,
+                "imageSupported"     :true
+            }
+        ]
+    },
+    "VR":
+    {
+        "capabilities":["TEXT"],
+        "language":"ES_MX",
+        "languages":    
+            [ 
+         "AR_SA", "EN_US","ES_MX","FR_CA","DE_DE","ES_ES","EN_GB","RU_RU","TR_TR","PL_PL","FR_FR","IT_IT","SV_SE","PT_PT","NL_NL","ZH_TW",
+"JA_JP","KO_KR","PT_BR","CS_CZ","DA_DK","NO_NO"
+            ]       
+},
+    "TTS":
+    {
+        "capabilities":"TEXT",
+        "language":"DE_DE",
+        "languages":
+        [
+      "DA_DK","CS_CZ","KO_KR","EN_US","ES_MX","FR_CA","DE_DE","ES_ES","EN_GB","RU_RU","TR_TR","PL_PL","FR_FR","IT_IT","SV_SE","PT_PT","NL_NL","ZH_TW",
+"JA_JP","AR_SA","PT_BR","NO_NO"
+        ]
+    },
+    "Buttons":
+    {
+        "capabilities":
+        [
+            {
+                "name":"PRESET_0",
+                "shortPressAvailable":true,
+                "longPressAvailable" :true,
+                "upDownAvailable"    :true
+            },
+            {
+                "name":"PRESET_1",
+                "shortPressAvailable":true,
+                "longPressAvailable" :true,
+                "upDownAvailable"    :true
+            },
+            {
+                "name":"PRESET_2",
+                "shortPressAvailable":true,
+                "longPressAvailable" :true,
+                "upDownAvailable"    :true
+            },
+            {
+                "name":"PRESET_3",
+                "shortPressAvailable":true,
+                "longPressAvailable" :true,
+                "upDownAvailable"    :true
+            },
+            {
+                "name":"PRESET_4",
+                "shortPressAvailable":true,
+                "longPressAvailable" :true,
+                "upDownAvailable"    :true
+            },
+            {
+                "name":"PRESET_5",
+                "shortPressAvailable":true,
+                "longPressAvailable" :true,
+                "upDownAvailable"    :true
+            },
+            {
+                "name":"PRESET_6",
+                "shortPressAvailable":true,
+                "longPressAvailable" :true,
+                "upDownAvailable"    :true
+            },
+            {
+                "name":"PRESET_7",
+                "shortPressAvailable":true,
+                "longPressAvailable" :true,
+                "upDownAvailable"    :true
+            },
+            {
+                "name":"PRESET_8",
+                "shortPressAvailable":true,
+                "longPressAvailable" :true,
+                "upDownAvailable"    :true
+            },
+            {
+                "name":"PRESET_9",
+                "shortPressAvailable":true,
+                "longPressAvailable" :true,
+                "upDownAvailable"    :true
+            },
+            {
+                "name":"OK",
+                "shortPressAvailable":true,
+                "longPressAvailable" :true,
+                "upDownAvailable"    :true
+            },
+            {
+                "name":"SEEKLEFT",
+                "shortPressAvailable":true,
+                "longPressAvailable" :true,
+                "upDownAvailable"    :true
+            },
+            {
+                "name":"SEEKRIGHT",
+                "shortPressAvailable":true,
+                "longPressAvailable" :true,
+                "upDownAvailable"    :true
+            },
+            {
+                "name":"TUNEUP",
+                "shortPressAvailable":true,
+                "longPressAvailable" :true,
+                "upDownAvailable"    :true
+            },
+            {
+                "name":"TUNEDOWN",
+                "shortPressAvailable":true,
+                "longPressAvailable" :true,
+                "upDownAvailable"    :true
+            }
+        ],
+        "presetBankCapabilities":
+        {
+            "onScreenPresetsAvailable":true
+        }
+    },
+    "VehicleInfo":
+    {
+        "make"      :"Ford",
+        "model"     :"Fiesta",
+        "modelYear" :"2013",
+        "trim"      :"SE"
+    },
+    "SyncMessageVersion":
+    {
+        "majorVersion": 3,
+        "minorVersion": 0
+    }
+}

@@ -43,6 +43,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
 #include "policy/policy_manager_impl.h"
+#include "./types.h"
 #include "connection_handler/connection_handler.h"
 #include "utils/macro.h"
 #include "utils/date_time.h"
@@ -53,6 +54,8 @@
 #include "policy/policy_types.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
+#include "utils/scope_guard.h"
+#include "utils/make_shared.h"
 
 namespace policy {
 
@@ -261,7 +264,7 @@ PolicyHandler::PolicyHandler()
     dl_handle_(0),
     last_activated_app_id_(0),
     app_to_device_link_lock_(true),
-    statistic_manager_impl_(new StatisticManagerImpl()) {
+    statistic_manager_impl_(utils::MakeShared<StatisticManagerImpl>()) {
 }
 
 PolicyHandler::~PolicyHandler() {
@@ -274,19 +277,19 @@ bool PolicyHandler::LoadPolicyLibrary() {
   if (!PolicyEnabled()) {
     LOG4CXX_WARN(logger_, "System is configured to work without policy "
                  "functionality.");
-    policy_manager_ = NULL;
+    policy_manager_.reset();
     return NULL;
   }
   dl_handle_ = dlopen(kLibrary.c_str(), RTLD_LAZY);
 
-  char* error_string = dlerror();
-  if (error_string == NULL) {
+  char* error = dlerror();
+  if (!error) {
     if (CreateManager()) {
       policy_manager_->set_listener(this);
-      event_observer_= new PolicyEventObserver(this);
+      event_observer_= utils::MakeShared<PolicyEventObserver>(this);
     }
   } else {
-    LOG4CXX_ERROR(logger_, error_string);
+    LOG4CXX_ERROR(logger_, error);
   }
 
   return policy_manager_.valid();
@@ -300,7 +303,7 @@ bool PolicyHandler::CreateManager() {
   typedef PolicyManager* (*CreateManager)();
   CreateManager create_manager = reinterpret_cast<CreateManager>(dlsym(dl_handle_, "CreateManager"));
   char* error_string = dlerror();
-  if (error_string == NULL) {
+  if (NULL == error_string) {
     policy_manager_ = create_manager();
   } else {
     LOG4CXX_WARN(logger_, error_string);
@@ -511,6 +514,14 @@ void PolicyHandler::OnAppPermissionConsentInternal(
   }
 }
 
+void policy::PolicyHandler::SetDaysAfterEpoch() {
+  POLICY_LIB_CHECK_VOID();
+  TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+  const int kSecondsInDay = 60 * 60 * 24;
+  int days_after_epoch = current_time.tv_sec / kSecondsInDay;
+  PTUpdatedAt(Counters::DAYS_AFTER_EPOCH, days_after_epoch);
+}
+
 #ifdef ENABLE_SECURITY
 std::string PolicyHandler::RetrieveCertificate() const {
   POLICY_LIB_CHECK(std::string(""));
@@ -650,9 +661,7 @@ void PolicyHandler::OnVIIsReady() {
   std::vector<std::string> params;
   params.push_back(strings::vin);
 
-  MessageHelper::CreateGetVehicleDataRequest(
-        correlation_id, params);
-
+  MessageHelper::CreateGetVehicleDataRequest(correlation_id, params);
 }
 
 void PolicyHandler::OnVehicleDataUpdated(
@@ -784,6 +793,8 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
     int32_t correlation_id =
       ApplicationManagerImpl::instance()
       ->GetNextHMICorrelationID();
+
+    SetDaysAfterEpoch();
 
     event_observer_->subscribe_on_event(
 #ifdef HMI_DBUS_API
@@ -1105,17 +1116,23 @@ void PolicyHandler::OnSystemReady() {
   policy_manager_->OnSystemReady();
 }
 
-void PolicyHandler::PTUpdatedAt(int kilometers, int days_after_epoch) {
+void PolicyHandler::PTUpdatedAt(Counters counter, int value) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->PTUpdatedAt(kilometers, days_after_epoch);
+  policy_manager_->PTUpdatedAt(counter, value);
 }
 
 void PolicyHandler::add_listener(PolicyHandlerObserver* listener) {
+  if (NULL == listener) {
+    return;
+  }
   sync_primitives::AutoLock lock(listeners_lock_);
   listeners_.push_back(listener);
 }
 
 void PolicyHandler::remove_listener(PolicyHandlerObserver* listener) {
+  if (NULL == listener) {
+    return;
+  }
   sync_primitives::AutoLock lock(listeners_lock_);
   listeners_.remove(listener);
 }
@@ -1309,6 +1326,11 @@ const std::vector<std::string> PolicyHandler::GetAppRequestTypes(
     const std::string& policy_app_id) const {
   POLICY_LIB_CHECK(std::vector<std::string>());
   return policy_manager_->GetAppRequestTypes(policy_app_id);
+}
+
+const VehicleInfo policy::PolicyHandler::GetVehicleInfo() const {
+  POLICY_LIB_CHECK(VehicleInfo());
+  return policy_manager_->GetVehicleInfo();
 }
 
 void PolicyHandler::Increment(usage_statistics::GlobalCounterId type) {

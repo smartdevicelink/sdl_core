@@ -55,7 +55,7 @@ class MockCacheManagerInterface : public CacheManagerInterface {
   MOCK_METHOD1(KilometersBeforeExchange,
       int(int current));
   MOCK_METHOD2(SetCountersPassedForSuccessfulUpdate,
-      bool(int kilometers, int days_after_epoch));
+      bool(Counters counter, int value));
   MOCK_METHOD1(DaysBeforeExchange,
       int(int current));
   MOCK_METHOD0(IncrementIgnitionCycles,
@@ -66,20 +66,22 @@ class MockCacheManagerInterface : public CacheManagerInterface {
       int());
   MOCK_METHOD1(SecondsBetweenRetries,
       bool(std::vector<int> &seconds));
-  MOCK_METHOD0(GetVehicleData,
-      VehicleData());
+  MOCK_CONST_METHOD0(GetVehicleInfo,
+      const VehicleInfo());
   MOCK_METHOD1(SetVINValue,
       bool(const std::string& value));
   MOCK_METHOD2(GetUserFriendlyMsg,
       std::vector<UserFriendlyMessage>(const std::vector<std::string>& msg_codes, const std::string& language));
-  MOCK_METHOD2(GetServiceUrls,
-      void(const std::string& service_type, EndpointUrls& end_points));
-  MOCK_CONST_METHOD0(GetLockScreenIconUrl,
-      std::string());
+  MOCK_METHOD2(GetUpdateUrls,
+      void(int service_type, EndpointUrls& end_points));
   MOCK_METHOD1(GetNotificationsNumber,
       int(const std::string& priority));
   MOCK_METHOD2(GetPriority,
       bool(const std::string& policy_app_id, std::string& priority));
+  MOCK_METHOD2(GetServiceUrls,
+      void(const std::string& service_type, EndpointUrls& end_points));
+  MOCK_CONST_METHOD0(GetLockScreenIconUrl,
+      std::string());
   MOCK_METHOD1(Init,
       bool(const std::string& file_name));
   MOCK_METHOD0(GenerateSnapshot,
@@ -172,8 +174,8 @@ class MockCacheManagerInterface : public CacheManagerInterface {
       bool(const std::string& file_name));
   MOCK_METHOD0(LoadFromBackup,
       bool());
-  MOCK_METHOD1(LoadFromFile,
-      bool(const std::string& file_name));
+  MOCK_METHOD2(LoadFromFile,
+      bool(const std::string& file_name, policy_table::Table&));
   MOCK_METHOD0(Backup,
       void());
   MOCK_CONST_METHOD1(HeartBeatTimeout,
@@ -189,7 +191,9 @@ class MockCacheManagerInterface : public CacheManagerInterface {
                void(const std::string& device_id, const std::string& policy_app_id, const policy::Permissions& permissions));
   MOCK_METHOD3(IsPermissionsCalculated,
                bool(const std::string& device_id, const std::string& policy_app_id, policy::Permissions& permission));
-  MOCK_CONST_METHOD0(RemoteAppsUrl, std::string());
+  MOCK_CONST_METHOD0(GetPT, utils::SharedPtr<policy_table::Table>());
+  MOCK_CONST_METHOD0(GetCertificate, std::string());
+  MOCK_METHOD1(SetDecryptedCertificate, void(const std::string&));
 };
 
 }  // namespace policy

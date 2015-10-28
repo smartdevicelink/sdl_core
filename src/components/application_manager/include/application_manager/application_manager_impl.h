@@ -541,7 +541,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param app appication to setup regular State
      * @param hmi_level hmi level of new regular state
      */
-    void SetState(uint32_t app_id,
+    void SetHmiState(uint32_t app_id,
                   mobile_apis::HMILevel::eType hmi_level) {
       ApplicationSharedPtr app  = application(app_id);
       if (!app) {

@@ -112,6 +112,7 @@ std::map<std::string, hmi_apis::Common_TextFieldName::eType> text_fields_enum_na
     {"phoneNumber"         , hmi_apis::Common_TextFieldName::phoneNumber},
     {"turnText"         , hmi_apis::Common_TextFieldName::turnText},
     {"menuTitle"        , hmi_apis::Common_TextFieldName::menuTitle},
+    {"navigationText"       , hmi_apis::Common_TextFieldName::navigationText},
 };
 
 std::map<std::string, hmi_apis::Common_MediaClockFormat::eType> media_clock_enum_name =
@@ -170,7 +171,9 @@ image_field_name_enum =
     {"graphic", hmi_apis::Common_ImageFieldName::graphic},
     {"showConstantTBTIcon", hmi_apis::Common_ImageFieldName::showConstantTBTIcon},
     {"showConstantTBTNextTurnIcon",
-        hmi_apis::Common_ImageFieldName::showConstantTBTNextTurnIcon}
+        hmi_apis::Common_ImageFieldName::showConstantTBTNextTurnIcon},
+    {"locationImage",
+           hmi_apis::Common_ImageFieldName::locationImage}
 };
 
 const std::map<std::string, hmi_apis::Common_FileType::eType> file_type_enum =
@@ -708,21 +711,20 @@ bool HMICapabilities::load_capabilities_from_file() {
         Json::Value audio_capabilities = ui.get("audioPassThruCapabilities", "");
         smart_objects::SmartObject audio_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
-        int32_t i = 0;
-        audio_capabilities_so[i] =
+        audio_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Map);
         if (check_existing_json_member(audio_capabilities, "samplingRate")) {
-          audio_capabilities_so[i]["samplingRate"] =
+          audio_capabilities_so["samplingRate"] =
               sampling_rate_enum.find(
                   audio_capabilities.get("samplingRate", "").asString())->second;
         }
         if (check_existing_json_member(audio_capabilities, "bitsPerSample")) {
-          audio_capabilities_so[i]["bitsPerSample"] =
+          audio_capabilities_so["bitsPerSample"] =
               bit_per_sample_enum.find(
                   audio_capabilities.get("bitsPerSample", "").asString())->second;
         }
         if (check_existing_json_member(audio_capabilities, "audioType")) {
-          audio_capabilities_so[i]["audioType"] =
+          audio_capabilities_so["audioType"] =
               audio_type_enum.find(
                   audio_capabilities.get("audioType", "").asString())->second;
         }
@@ -732,8 +734,7 @@ bool HMICapabilities::load_capabilities_from_file() {
       if (check_existing_json_member(ui, "hmiZoneCapabilities")) {
         smart_objects::SmartObject hmi_zone_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
-        int32_t index = 0;
-        hmi_zone_capabilities_so[index] =
+        hmi_zone_capabilities_so =
             hmi_zone_enum.find(ui.get("hmiZoneCapabilities", "").asString())->second;
         set_hmi_zone_capabilities(hmi_zone_capabilities_so);
       }

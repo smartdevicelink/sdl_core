@@ -42,3 +42,7 @@ set (SOURCES
 
 add_library("ConfigProfile" ${SOURCES})
 target_link_libraries("ConfigProfile" Utils)
+
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()

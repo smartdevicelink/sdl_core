@@ -57,11 +57,15 @@ class SpinMutex {
   SpinMutex()
     : state_(0) { }
   void Lock() {
+    // Comment below add exception for lint error
+    // Reason: FlexeLint doesn't know about compiler's built-in instructions
+    /*lint -e1055*/
     if (atomic_post_set(&state_) == 0) {
       return;
     }
     for(;;) {
       sched_yield();
+      /*lint -e1055*/
       if (state_ == 0 && atomic_post_set(&state_) == 0) {
         return;
       }

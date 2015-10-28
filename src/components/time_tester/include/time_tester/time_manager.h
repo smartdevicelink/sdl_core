@@ -52,36 +52,49 @@ namespace time_tester {
 
 using ::utils::MessageQueue;
 
+class Streamer : public threads::ThreadDelegate {
+ public:
+  explicit Streamer(TimeManager* const server);
+  ~Streamer();
+  void threadMain() OVERRIDE;
+  void exitThreadMain() OVERRIDE;
+
+  virtual void PushMessage(utils::SharedPtr<MetricWrapper> metric);
+  volatile bool is_client_connected_;
+ private:
+  void Start();
+  void Stop();
+  bool IsReady() const;
+  bool Send(const std::string &msg);
+  void ShutDownAndCloseSocket(int32_t socket_fd);
+  TimeManager* const kserver_;
+  int32_t server_socket_fd_;
+  int32_t client_socket_fd_;
+  volatile bool stop_flag_;
+  MessageQueue<utils::SharedPtr<MetricWrapper> > messages_;
+  DISALLOW_COPY_AND_ASSIGN(Streamer);
+};
+
 class TimeManager {
  public:
   TimeManager();
-  ~TimeManager();
-  void Init(protocol_handler::ProtocolHandlerImpl* ph);
-  void Stop();
-  void SendMetric(utils::SharedPtr<MetricWrapper> metric);
- private:
+  virtual ~TimeManager();
+  virtual void Init(protocol_handler::ProtocolHandlerImpl* ph);
+  virtual void Stop();
+  virtual void Start();
+  virtual void SendMetric(utils::SharedPtr<MetricWrapper> metric);
+  void set_streamer(Streamer* streamer);
 
-  class Streamer : public threads::ThreadDelegate {
-   public:
-    explicit Streamer(TimeManager* const server);
-    ~Streamer();
-    void threadMain() OVERRIDE;
-    void exitThreadMain() OVERRIDE;
-    bool IsReady() const;
-    void Start();
-    void Stop();
-    bool Send(const std::string &msg);
-    void PushMessage(utils::SharedPtr<MetricWrapper> metric);
-    volatile bool is_client_connected_;
-    private:
-    void ShutDownAndCloseSocket(int32_t socket_fd);
-    TimeManager* const server_;
-    int32_t server_socket_fd_;
-    int32_t client_socket_fd_;
-    volatile bool stop_flag_;
-    MessageQueue<utils::SharedPtr<MetricWrapper> > messages_;
-    DISALLOW_COPY_AND_ASSIGN(Streamer);
-  };
+#ifdef BUILD_TESTS
+  const std::string ip() const{
+    return ip_;
+  }
+  const int16_t port() const {
+    return port_;
+  }
+#endif  // BUILD_TESTS
+
+ private:
 
   int16_t port_;
   std::string ip_;

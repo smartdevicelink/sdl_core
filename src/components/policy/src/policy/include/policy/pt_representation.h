@@ -42,15 +42,6 @@ namespace policy_table = rpc::policy_table_interface_base;
 
 namespace policy {
 
-/**
- * @struct Data about vehicle
- */
-struct VehicleData {
-  const std::string vehicle_make;
-  const std::string vehicle_model;
-  int vehicle_year;
-};
-
 enum InitResult {
   NONE = 0,
   EXISTS,
@@ -138,7 +129,7 @@ class PTRepresentation {
     /**
      * @brief Get information about vehicle
      */
-    virtual VehicleData GetVehicleData() = 0;
+    virtual const VehicleInfo GetVehicleInfo() const = 0;
 
     /**
      * @brief Allows to update 'vin' field in module_meta table.

@@ -182,10 +182,10 @@ struct DeviceInfo {
     void AdoptDeviceType(const std::string& deviceType) {
       connection_type = "USB_serial_number";
       using namespace helpers;
-      if (Compare<std::string, EQ, ONE> (deviceType,
-                                         "BLUETOOTH",
-                                         "WIFI")) {
-          connection_type.assign("BTMAC");
+      static const std::string bluetooth("BLUETOOTH");
+      static const std::string wifi("WIFI");
+      if (Compare<std::string, EQ, ONE>(deviceType, bluetooth, wifi)) {
+        connection_type.assign("BTMAC");
       }
     }
 };
@@ -312,6 +312,15 @@ typedef std::vector<std::string> DeviceIds;
 enum Counters {
   KILOMETERS,
   DAYS_AFTER_EPOCH
+};
+
+/**
+ * @struct Vehicle information
+ */
+struct VehicleInfo {
+  std::string vehicle_make;
+  std::string vehicle_model;
+  std::string vehicle_year;
 };
 
 }  //  namespace policy

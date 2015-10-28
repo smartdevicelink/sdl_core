@@ -51,6 +51,7 @@ include_directories (
   ${CMAKE_BINARY_DIR}/src/components/
   ${COMPONENTS_DIR}/include/
   ${COMPONENTS_DIR}/policy/src/policy/include/
+  ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct/
   ${COMPONENTS_DIR}/policy/src/policy/usage_statistics/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${ENCRYPTION_INCLUDE_DIRECTORY}

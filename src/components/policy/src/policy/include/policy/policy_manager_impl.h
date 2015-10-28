@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_IMPL_H_
 
 #include <string>
+#include <list>
 
 #include "utils/shared_ptr.h"
 #include "utils/lock.h"
@@ -41,7 +42,7 @@
 #include "policy/policy_table.h"
 #include "policy/cache_manager_interface.h"
 #include "policy/update_status_manager.h"
-#include "./functions.h"
+#include "functions.h"
 #include "usage_statistics/statistics_manager.h"
 #include "policy/policy_helper.h"
 
@@ -82,7 +83,7 @@ class PolicyManagerImpl : public PolicyManager {
     virtual const std::vector<int> RetrySequenceDelaysSeconds();
     virtual void OnExceededTimeout();
     virtual void OnUpdateStarted();
-    virtual void PTUpdatedAt(int kilometers, int days_after_epoch);
+    virtual void PTUpdatedAt(Counters counter, int value);
 
     /**
      * Refresh data about retry sequence from policy table
@@ -174,8 +175,13 @@ class PolicyManagerImpl : public PolicyManager {
 
     virtual void OnAppsSearchCompleted();
 
+#ifdef BUILD_TESTS
+    inline CacheManagerInterfaceSPtr GetCache() { return cache_; }
+#endif  // BUILD_TESTS
     virtual const std::vector<std::string> GetAppRequestTypes(
       const std::string policy_app_id) const;
+
+    virtual const VehicleInfo GetVehicleInfo() const;
 
     virtual void OnAppRegisteredOnMobile(const std::string& application_id) OVERRIDE;
 
