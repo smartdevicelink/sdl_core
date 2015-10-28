@@ -45,7 +45,7 @@ UISetIconResponse::~UISetIconResponse() {
 }
 
 void UISetIconResponse::Run() {
-  LOG4CXX_INFO(logger_, "UISetIconResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::UI_SetAppIcon);
   event.set_smart_object(*message_);

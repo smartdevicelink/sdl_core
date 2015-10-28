@@ -133,6 +133,57 @@ class MessageHelper {
     static const VehicleData& vehicle_data();
 
     /**
+     * @brief Converts HMI Result enum value to string
+     * @param hmi_result HMI Result enum value
+     * @return stringified value for enum if succedeed, otherwise - empty string
+     */
+    static std::string HMIResultToString(
+      hmi_apis::Common_Result::eType hmi_result);
+
+    /**
+     * @brief Converts string to HMI Result enum value
+     * @param hmi_result stringified value
+     * @return HMI Result enum value if succedeed, otherwise - INVALID_ENUM
+     * value
+     */
+    static hmi_apis::Common_Result::eType HMIResultFromString(
+      const std::string& hmi_result);
+
+    /**
+     * @brief Converts mobile Result enum value to string
+     * @param mobile_result mobile Result enum value
+     * @return stringified value for enum if succedeed, otherwise - empty string
+     */
+    static std::string MobileResultToString(
+      mobile_apis::Result::eType mobile_result);
+
+    /**
+     * @brief Converts string to mobile Result enum value
+     * @param mobile_result stringified value
+     * @return mobile Result enum value if succedeed, otherwise - INVALID_ENUM
+     * value
+     */
+    static mobile_api::Result::eType MobileResultFromString(
+      const std::string& mobile_result);
+
+    /**
+     * @brief Converts HMI Result enum value to mobile Result enum value
+     * @param hmi_result HMI Result enum value
+     * @return mobile Result enum value if succedeed, otherwise - INVALID_ENUM
+     * value
+     */
+    static mobile_api::Result::eType HMIToMobileResult(
+            const hmi_apis::Common_Result::eType hmi_result);
+
+    /**
+     * @brief Converts mobile Result enum value to HMI Result enum value
+     * @param mobile_result mobile Result enum value
+     * @return HMI Result enum value
+     */
+    static hmi_apis::Common_Result::eType MobileToHMIResult(
+            const mobile_api::Result::eType mobile_result);
+
+    /**
      * @brief Convert string to HMI level, if possible
      * @param hmi_level Stringified HMI level
      * @return Appropriate enum from HMI level, or INVALID_ENUM, if conversiion
@@ -260,10 +311,27 @@ class MessageHelper {
     static std::string GetDeviceMacAddressForHandle(
       const uint32_t device_handle);
 
+    /**
+     * @brief GetDeviceHandleForMac allows to obtain device handle by device mac
+     *
+     * @param device_mac devices mac address.
+     *
+     * @return device handle if appropriate devcice exists, 0 otherwise.
+     */
+    static uint32_t GetDeviceHandleForMac(const std::string& device_mac);
+
     static void GetDeviceInfoForHandle(const uint32_t device_handle,
                                        policy::DeviceParams* device_info);
     static void GetDeviceInfoForApp(uint32_t connection_key,
                                     policy::DeviceParams* device_info);
+
+    /**
+     * @brief GetConnectedDevicesMAC allows to obtain MAC adresses for all
+     * currently connected devices.
+     *
+     * @param device_macs collection of MAC adresses for connected devices.
+     */
+    static void GetConnectedDevicesMAC(std::vector<std::string>& device_macs);
 
     /**
     * @brief Send SDL_ActivateApp response to HMI
@@ -337,7 +405,7 @@ class MessageHelper {
 
     static void SendSystemRequestNotification(
         uint32_t connection_key,
-        NsSmartDeviceLink::NsSmartObjects::SmartObject& content);
+        NsSmartDeviceLink::NsSmartObjects::SmartObject*& content);
 
     /**
      * @brief SendLaunchApp allows to send OnSystemRequest with LAUNCH_UP.
@@ -515,6 +583,14 @@ class MessageHelper {
      */
     static std::string CommonLanguageToString(
       hmi_apis::Common_Language::eType language);
+
+    /**
+     * @brief Converts string to common language enum value
+     * @param language language as string
+     * @return Common language enum value
+     */
+    static hmi_apis::Common_Language::eType CommonLanguageFromString(
+       const std::string& language);
 
     /**
      * @brief Gets command limit number per minute for specific application

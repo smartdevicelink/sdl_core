@@ -30,9 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
 #include "application_manager/commands/hmi/on_exit_all_applications_notification.h"
 
 #include <sys/types.h>

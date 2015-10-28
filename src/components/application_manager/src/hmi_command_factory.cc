@@ -2064,9 +2064,9 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::BasicCommunication_DialNumber: {
       if (is_response) {
-        command.reset(new commands::DialNumberResponse(message));
+        command.reset(new commands::hmi::DialNumberResponse(message));
       } else {
-        command.reset(new commands::DialNumberRequest(message));
+        command.reset(new commands::hmi::DialNumberRequest(message));
       }
 	  break;
     }

@@ -139,11 +139,11 @@ class PolicyHandler :
 
   /**
    * @brief Process user consent on mobile data connection access
-   * @param Device id or 0, if concern to all SDL functionality
+   * @param Device id or empty string, if concern to all SDL functionality
    * @param User consent from response
    */
   void OnAllowSDLFunctionalityNotification(bool is_allowed,
-                                           uint32_t device_id = 0);
+                                           const std::string& device_id);
 
   /**
    * @brief Increment counter for ignition cycles

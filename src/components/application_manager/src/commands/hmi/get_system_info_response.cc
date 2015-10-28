@@ -63,7 +63,7 @@ void GetSystemInfoResponse::Run() {
     uint32_t lang_code = (*message_)[strings::msg_params]["language"].asUInt();
     language = application_manager::MessageHelper::CommonLanguageToString(
         static_cast<hmi_apis::Common_Language::eType>(lang_code));
-    
+
     HMICapabilities& hmi_capabilities =
       ApplicationManagerImpl::instance()->hmi_capabilities();
     hmi_capabilities.set_ccpu_version(ccpu_version);

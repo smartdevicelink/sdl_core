@@ -30,9 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
 #include "application_manager/commands/hmi/on_play_tone_notification.h"
 
 namespace application_manager {
