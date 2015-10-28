@@ -526,10 +526,6 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
       ommited_field_report = &report__->ReportSubobject("user_consent_passengersRC");
       ommited_field_report->set_validation_info(validation_info);
     }
-    if (country_consent_passengersRC.is_initialized()) {
-      ommited_field_report = &report__->ReportSubobject("country_consent_passengersRC");
-      ommited_field_report->set_validation_info(validation_info);
-    }
   }
 }
 
@@ -1161,16 +1157,45 @@ void Equipment::SetPolicyTableType(PolicyTableType pt_type) {
 }
 
 // InteriorZone methods
+const std::string InteriorZone::kRemoteRpcs[] = {
+    "ButtonPress",
+    "GetInteriorVehicleDataCapabilities",
+    "GetInteriorVehicleData",
+    "SetInteriorVehicleData"
+};
+const std::string InteriorZone::kRadioParameters[] = {
+    "frequencyInteger",
+    "frequencyFraction",
+    "band",
+    "rdsData",
+    "availableHDs",
+    "hdChannel",
+    "signalStrength",
+    "signalChangeThreshold",
+    "radioEnable",
+    "state"
+};
+const std::string InteriorZone::kClimateParameters[] = {
+    "fanSpeed",
+    "currentTemp",
+    "desiredTemp",
+    "temperatureUnit",
+    "acEnable",
+    "circulateAirEnable",
+    "autoModeEnable",
+    "defrostZone",
+    "dualModeEnable"
+};
 InteriorZone::InteriorZone()
   : CompositeType(kUninitialized) {
 }
-InteriorZone::InteriorZone(const InteriorZone& zone)
+InteriorZone::InteriorZone(uint8_t col, uint8_t row, uint8_t level, const AccessModules& auto_allow, const AccessModules& driver_allow)
   : CompositeType(kUninitialized),
-    col(zone.col),
-    row(zone.row),
-    level(zone.level),
-    auto_allow(zone.auto_allow),
-    driver_allow(zone.driver_allow) {
+    col(col),
+    row(row),
+    level(level),
+    auto_allow(auto_allow),
+    driver_allow(driver_allow) {
 }
 InteriorZone::~InteriorZone() {
 }

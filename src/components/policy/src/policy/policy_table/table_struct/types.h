@@ -57,7 +57,7 @@ typedef Map< Rpcs, 1, 255 > FunctionalGroupings;
 
 typedef Map< DeviceParams, 0, 255 > DeviceData;
 
-typedef Map< InteriorZone, 0, 255 > Zones;
+typedef Map< InteriorZone, 2, 255 > Zones;
 
 typedef Map<Strings, 0, 255> RemoteRpcs;
 
@@ -131,14 +131,14 @@ struct Rpcs : CompositeType {
 
 struct InteriorZone: CompositeType {
   public:
-    Integer<uint16_t, 0, 65225> col;
-    Integer<uint16_t, 0, 65225> row;
-    Integer<uint16_t, 0, 65225> level;
+    Integer<uint8_t, 0, 100> col;
+    Integer<uint8_t, 0, 100> row;
+    Integer<uint8_t, 0, 100> level;
     AccessModules auto_allow;
     AccessModules driver_allow;
   public:
     InteriorZone();
-    explicit InteriorZone(const InteriorZone& zone);
+    InteriorZone(uint8_t col, uint8_t row, uint8_t level, const AccessModules& auto_allow, const AccessModules& driver_allow);
     ~InteriorZone();
     explicit InteriorZone(const Json::Value* value__);
     Json::Value ToJsonValue() const;
@@ -148,7 +148,19 @@ struct InteriorZone: CompositeType {
     void ReportErrors(rpc::ValidationReport* report__) const;
     virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
+    static const int length = 4;
+    static const std::string kRemoteRpcs[length];
+    static const int length_radio = 10;
+    static const std::string kRadioParameters[length_radio];
+    static const int length_climate = 9;
+    static const std::string kClimateParameters[length_climate];
+    void FillRemoteRpcs();
     bool Validate() const;
+    inline bool ValidateAllow(const AccessModules& modules) const;
+    inline bool ValidateRemoteRpcs(ModuleType module,
+                                   const RemoteRpcs& rpcs) const;
+    inline bool ValidateParameters(ModuleType module,
+                                   const Strings& rpcs) const;
 };
 
 struct Equipment : CompositeType {
@@ -166,6 +178,7 @@ struct Equipment : CompositeType {
     virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
+    inline bool ValidateNameZone(const std::string& name) const;
 };
 
 struct ModuleConfig : CompositeType {
