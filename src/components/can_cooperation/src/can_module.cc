@@ -303,7 +303,22 @@ functional_modules::ProcessResult CANModule::HandleMessage(
             int row = params[message_params::kDeviceLocation][message_params::kRow].asInt();
             int level = params[message_params::kDeviceLocation][message_params::kLevel].asInt();
             SeatLocation zone = { col, row, level };
+            application_manager::SeatLocationPtr previous_zone =
+                service()->GetDeviceZone(device_id);
+
+            if (previous_zone.get() &&
+                device_id != service()->PrimaryDevice()) {
+              // TODO(VS): operator != in SeatLocation?
+              if ((zone.col != previous_zone->col) ||
+                  (zone.row != previous_zone->row) ||
+                  (zone.level != previous_zone->level)) {
+                UnsubscribeAppsFromInteriorZone(device_id,
+                                       params[message_params::kDeviceLocation]);
+              }
+            }
+
             service()->SetDeviceZone(device_id, zone);
+
           } else {
             LOG4CXX_ERROR(logger_,
                           "Invalid RC.OnDeviceLocationChanged notification");
@@ -527,6 +542,79 @@ void CANModule::UnsubscribeAppForAllZones(uint32_t hmi_app_id,
 
     app->subscribed_interior_vehicle_data_.erase(iter++);
   }
+}
+
+void CANModule::UnsubscribeAppsFromInteriorZone(uint32_t  device_id,
+                                          const Json::Value& interior_zone) {
+  std::vector<application_manager::ApplicationSharedPtr> applications =
+    CANModule::instance()->service()->GetApplications(
+        CANModule::instance()->GetModuleID());
+
+  for (uint32_t i = 0; i < applications.size(); ++i) {
+    if (applications[i]->device() == device_id) {
+      application_manager::AppExtensionPtr app_extension = applications[i]->QueryInterface(
+          CANModule::instance()->GetModuleID());
+      if (app_extension) {
+        CANAppExtensionPtr can_app_extension =
+            application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
+                app_extension);
+
+        Json::Value module_description;
+
+        module_description[message_params::kModuleZone] = interior_zone;
+        module_description[message_params::kModuleType] = enums_value::kClimate;
+
+        if (can_app_extension->
+            IsSubscibedToInteriorVehicleData(module_description)) {
+          NotifyHMIAboutUnsubscription(applications[i]->hmi_app_id(),
+                                       module_description);
+          can_app_extension->UnsubscribeFromInteriorVehicleData(
+              module_description);
+        }
+
+        module_description[message_params::kModuleType] = enums_value::kRadio;
+
+        // TODO(VS): duplicated code to separate fucntion
+        if (can_app_extension->
+            IsSubscibedToInteriorVehicleData(module_description)) {
+          NotifyHMIAboutUnsubscription(applications[i]->hmi_app_id(),
+                                       module_description);
+          can_app_extension->UnsubscribeFromInteriorVehicleData(
+              module_description);
+        }
+      }
+    }
+  }
+}
+
+// TODO(VS); use this function in UnsubscribeAppForAllZones
+void CANModule::NotifyHMIAboutUnsubscription(uint32_t hmi_app_id,
+                                   const Json::Value& module_description) {
+  Json::Value msg;
+
+  msg[kId] = service()->GetNextCorrelationID();
+
+  msg[kJsonrpc] = "2.0";
+  msg[kMethod] =
+      hmi_api::get_interior_vehicle_data;
+
+  msg[kParams][message_params::kModuleDescription] = module_description;
+
+  msg[kParams][json_keys::kAppId] = hmi_app_id;
+
+  msg[kParams][message_params::kSubscribe] = false;
+
+  application_manager::MessagePtr message_to_send(
+      new application_manager::Message(
+          protocol_handler::MessagePriority::kDefault));
+  message_to_send->set_protocol_version(
+      application_manager::ProtocolVersion::kHMI);
+  message_to_send->set_correlation_id(msg[kId].asInt());
+  message_to_send->set_json_message(MessageHelper::ValueToString(msg));
+  message_to_send->set_message_type(
+      application_manager::MessageType::kRequest);
+
+  service()->SendMessageToHMI(message_to_send);
 }
 
 }  //  namespace can_cooperation
