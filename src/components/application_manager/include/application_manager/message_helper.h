@@ -305,7 +305,20 @@ class MessageHelper {
       uint32_t const app_id,
       hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL,
       bool send_policy_priority = true);
-
+#ifdef MODIFY_FUNCTION_SIGN
+    static void SendDeleteInteractionChoiseSetNotificationToHMI(ApplicationConstSharedPtr app);
+    static void SendUnsubscribeButtonNotificationToHMI(ApplicationConstSharedPtr app);
+#endif
+#ifdef MODIFY_FUNCTION_SIGN
+	static void SendVRStatusToHMI(const std::string &status);
+	static void SendVRCancelToHMI();
+	static void SendVRCommandHelpToHMI(const std::string &vr_content);
+	static void SendVRExitAppToHMI();
+	static void SendVRSwitchAppToHMI(int app_id, const std::string &app_vr_name);
+	static void SendVRCommandTTSToHMI();
+	static void SendVRResultToHMI(int cmd_id, const std::string &vr_name);
+	static void SendVROnCommandToMobile(int cmd_id, int app_id);
+#endif
     static void SendOnResumeAudioSourceToHMI(const uint32_t app_id);
 
     static std::string GetDeviceMacAddressForHandle(

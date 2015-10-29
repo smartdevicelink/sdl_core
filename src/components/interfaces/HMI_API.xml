@@ -1135,6 +1135,28 @@
   </element>
 </enum>
 
+<enum name="VRStatus">
+  <description>VR status</description>
+  <element name="SUCCESS">
+  </element>
+  <element name="FAIL">
+  </element>
+  <element name="TIME_OVER">
+  </element>
+</enum>
+
+<enum name="AudioPassThruType">
+  <description>AudioPassThruType</description>
+  <element name="RECORD_SEND">
+  </element>
+  <element name="READ_FILE_SEND">
+  </element>
+  <element name="RECORD_SAVE_SEND">
+  </element>
+  <element name="SAVE_ONLY">
+  </element>
+</enum>
+
 <!-- End of IVI part-->
 
 <enum name="AppPriority">
@@ -2345,6 +2367,22 @@
   <function name="OnIgnitionCycleOver" messagetype="notification">
     <description>Notification from system to SDL to let it know that ignition cycle is over.</description>
   </function>
+
+    <function name="SDLLog" messagetype="notification">
+      <description>Method is sent from SDL to HMI when the mobile RPC invoked.</description>
+      <param name="app_id" type="Integer" mandatory="true" />
+      <param name="correlation_id" type="Integer" mandatory="true" />
+      <param name="function" type="String" maxlength="80" mandatory="true" />
+      <param name="type" type="String" maxlength="20" mandatory="true" />
+      <param name="data" type="String" maxlength="10000" mandatory="true" />
+    </function>
+    <function name="OnSearchAppList" messagetype="notification">
+      <description>SearchAppList</description>
+    </function>
+    <function name="OnFindAppList" messagetype="notification">
+      <description>SearchAppList</description>
+      <param name="applications" type="Common.HMIApplication" mandatory="true" array="true" minsize="1" maxsize="100"/>
+    </function>
   <!-- End of Policies -->
 </interface>
 
@@ -2492,6 +2530,59 @@
       <description>Types of input recognized by VR module.</description>
     </param>
   </function>
+  
+  <function name="StartRecord" messagetype="notification">
+    <description>Method is sent from HMI to SDL when start record.</description>
+  </function>
+  <function name="CancelRecord" messagetype="notification">
+    <description>Method is sent from HMI to SDL when cancel record.</description>
+  </function>
+  <function name="VRStatus" messagetype="notification">
+    <description>Method is sent from SDL to HMI when VR's status is changed.</description>
+    <param name="status" type="Common.VRStatus" mandatory="true">
+      <description>Types of status of VR.</description>
+    </param>
+  </function>
+  <function name="VRCancel" messagetype="notification">
+    <description>Method is sent from SDL to HMI when VR is cancel.</description>
+  </function>
+  <function name="VRCommandHelp" messagetype="notification">
+    <description>Method is sent from SDL to HMI when VR is help.</description>
+    <param name="vrContent" type="String" maxlength="100" mandatory="true">
+      <description>VR content.</description>
+    </param>
+  </function>
+  <function name="VRExitApp" messagetype="notification">
+    <description>Method is sent from SDL to HMI when VR is exit app.</description>
+  </function>
+  <function name="VRSwitchApp" messagetype="notification">
+    <description>Method is sent from SDL to HMI when VR is selecting other app.</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that concerns this RPC.</description>
+    </param>
+    <param name="appName" type="String" maxlength="100" mandatory="false">
+      <description>The mobile application name, e.g. "Ford Drive Green".</description>
+    </param>
+    <param name="appVRName" type="String" maxlength="100" mandatory="true">
+      <description>app vr content.</description>
+    </param>
+  </function>
+  <function name="VRCommandTTS" messagetype="notification">
+    <description>Method is sent from SDL to HMI when VR is help.</description>
+    <param name="vrCommands" type="String" mandatory="true" maxlength="99" minsize="1" maxsize="1000" array="true">
+      <description>List of strings to be used as VR commands.</description>
+    </param>
+  </function>
+  <function name="VRResult" messagetype="notification">
+    <description>Method is sent from SDL to HMI when VR command is sent.</description>
+    <param name="cmdID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+      <description>ID of the command to be sent.</description>
+    </param>
+    <param name="vrName" type="String" maxlength="100" mandatory="true">
+      <description>vr content.</description>
+    </param>
+  </function>
+
 </interface>
 
 <interface name="TTS" version="1.0" date="2013-04-18">
@@ -3108,6 +3199,71 @@
       <description>ID of application related to this RPC.</description>
     </param>
   </function>
+  <function name="CreateInteractionChoiceSet" messagetype="notification">
+    <description>CreateInteractionChoiceSet</description>
+		<param name="interactionChoiceSetID" type="Integer" minvalue="0" maxvalue="2000000000">
+      <description>Unique ID used for this interaction choice set.</description>
+    </param>
+    <param name="choiceSet" type="Common.Choice" minsize="1" maxsize="100" array="true" />
+  </function>
+  <function name="DeleteInteractionChoiceSet" messagetype="notification">
+    <description>DeleteInteractionChoiceSet</description>
+    <param name="interactionChoiceSetID" type="Integer" minvalue="0" maxvalue="2000000000">
+      <description>ID of the interaction choice set to delete.</description>
+    </param>
+  </function>
+  <function name="SubscribeButton" messagetype="notification">
+    <description>SubscribeButton</description>
+    <param name="buttonName" type="Common.ButtonName">
+      <description>Name of the button to subscribe.</description>
+    </param>
+  </function>
+  <function name="UnsubscribeButton" messagetype="notification">
+    <description>UnsubscribeButton</description>
+    <param name="buttonName" type="Common.ButtonName">
+      <description>Name of the button to unsubscribe.</description>
+    </param>
+  </function>
+  <function name="OnMicrophoneRecording" messagetype="notification">
+    <description>OnMicrophoneRecording</description>
+    <param name="appID" type="Integer" mandatory="true" />
+    <param name="binary_data" type="String" mandatory="true">
+      <description>microphone record data</description>
+    </param>
+  </function>
+  <function name="PerformAudioPassThruStart" messagetype="notification">
+    <description>PerformAudioPassThruStart</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
+    <param name="maxDuration" type="Integer" minvalue="1" maxvalue="1000000" mandatory="true">
+      <description>The maximum duration of audio recording in milliseconds. If not provided, the recording should be performed until EndAudioPassThru arrives.</description>
+    </param>
+    <param name="samplingRate" type="Common.SamplingRate" mandatory="false">
+      <description> This value shall be allowed at 8 khz or 16 or 22 or 44 khz.</description>
+    </param>
+    <param name="bitsPerSample" type="Common.BitsPerSample" mandatory="false">
+      <description>Specifies the quality the audio is recorded. Currently 8 bit or 16 bit.</description>
+    </param>
+    <param name="audioType" type="Common.AudioType" mandatory="false">
+      <description>Specifies the type of audio data being requested.</description>
+    </param>
+    <param name="audioPassThruType" type="Common.AudioPassThruType" mandatory="true">
+      <description>audioPassThruType.</description>
+    </param>
+    <param name="saveAudioPassThruFile" type="String" mandatory="true">
+      <description>audioPassThruType.</description>
+    </param>
+    <param name="sendAudioPassThruFile" type="String" mandatory="true">
+      <description>sendAudioPassThruFile.</description>
+    </param>
+  </function>
+  <function name="PerformAudioPassThruStop" messagetype="notification">
+    <description>PerformAudioPassThruStop</description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
+  </function>
 </interface>
 
 <interface name="Navigation" version="1.0" date="2013-05-22">
@@ -3353,6 +3509,9 @@
         The application will be notified by the onVehicleData notification whenever new data is available.
         To unsubscribe the notifications, use unsubscribe with the same subscriptionType.
     </description>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that requested this RPC.</description>
+    </param>
     <param name="gps" type="Boolean" mandatory="false">
       <description>See GPSData</description>
     </param>
