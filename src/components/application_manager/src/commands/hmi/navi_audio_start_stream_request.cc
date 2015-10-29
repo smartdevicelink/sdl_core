@@ -95,18 +95,18 @@ void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
               message[strings::params][hmi_response::code].asInt());
 
       if (hmi_apis::Common_Result::SUCCESS == code) {
-        LOG4CXX_DEBUG(logger_, "StartAudioStream response SUCCESS");
+        LOG4CXX_INFO(logger_, "StartAudioStream response SUCCESS");
         if (ApplicationManagerImpl::instance()->
                 HMILevelAllowsStreaming(app->app_id(), ServiceType::kAudio)) {
           app->set_audio_streaming_approved(true);
         } else {
-          LOG4CXX_DEBUG(logger_,
+          LOG4CXX_WARN(logger_,
                        "StartAudioStreamRequest aborted. Application can not stream");
         }
         break;
       }
       if (hmi_apis::Common_Result::REJECTED == code) {
-        LOG4CXX_DEBUG(logger_, "StartAudioStream response REJECTED");
+        LOG4CXX_INFO(logger_, "StartAudioStream response REJECTED");
         RetryStartSession();
         break;
       }

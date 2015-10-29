@@ -95,7 +95,7 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
               message[strings::params][hmi_response::code].asInt());
 
       if (hmi_apis::Common_Result::SUCCESS == code) {
-        LOG4CXX_DEBUG(logger_, "NaviStartStreamResponse SUCCESS");
+        LOG4CXX_INFO(logger_, "NaviStartStreamResponse SUCCESS");
         if (ApplicationManagerImpl::instance()->
                 HMILevelAllowsStreaming(app->app_id(), ServiceType::kMobileNav)) {
           app->set_video_streaming_approved(true);
@@ -106,7 +106,7 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
         break;
       }
       if (hmi_apis::Common_Result::REJECTED == code) {
-        LOG4CXX_DEBUG(logger_, "StartStreamResponse ?!?!?!");
+        LOG4CXX_INFO(logger_, "StartStream response REJECTED ");
         SendRequest();
         break;
       }

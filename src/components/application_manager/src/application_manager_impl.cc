@@ -1084,6 +1084,8 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   using namespace helpers;
   using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "ServiceType = " << type <<
+                         ". Session = " << std::hex << session_key);
 
   if (type == kRpc) {
     LOG4CXX_INFO(logger_, "RPC service is about to be started.");
@@ -1091,8 +1093,8 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   }
   ApplicationSharedPtr app = application(session_key);
   if (!app) {
-    LOG4CXX_DEBUG(logger_, "The application with id:" << session_key <<
-                  " doesn't exists.");
+    LOG4CXX_WARN(logger_, "The application with id:" << session_key
+                                                     << " doesn't exists.");
     return false;
   }
 
