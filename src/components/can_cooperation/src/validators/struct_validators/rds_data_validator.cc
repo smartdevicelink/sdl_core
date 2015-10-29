@@ -90,7 +90,7 @@ RdsDataValidator::RdsDataValidator() {
   // name="REG"
   reg_[ValidationParams::TYPE] = ValueType::STRING;
   reg_[ValidationParams::MIN_LENGTH] = 0;
-  reg_[ValidationParams::MAX_LENGTH] = 100;
+  reg_[ValidationParams::MAX_LENGTH] = 255;
   reg_[ValidationParams::ARRAY] = 0;
   reg_[ValidationParams::MANDATORY] = 1;
 
