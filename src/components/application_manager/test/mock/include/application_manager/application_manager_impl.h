@@ -316,6 +316,7 @@ class ApplicationManagerImpl : public ApplicationManager,
   MOCK_METHOD3(set_state, void(ApplicationSharedPtr app,
                                mobile_apis::HMILevel::eType,
                                mobile_apis::AudioStreamingState::eType));
+MOCK_CONST_METHOD0(IsStopping, bool());
 
   struct ApplicationsAppIdSorter {
     bool operator() (const ApplicationSharedPtr lhs,

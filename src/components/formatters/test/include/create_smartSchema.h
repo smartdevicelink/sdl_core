@@ -30,73 +30,63 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "utils/auto_trace.h"
-#include "logger.h"
-#include <fstream>
+#ifndef SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_CREATESMARTSCHEMA_H_
+#define SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_CREATESMARTSCHEMA_H_
+
+#include "formatters/CFormatterJsonSDLRPCv1.hpp"
+#include "SmartFactoryTestHelper.h"
 
 namespace test {
 namespace components {
-namespace utils {
+namespace formatters {
 
-using namespace ::logger;
+using namespace NsSmartDeviceLink::NsJSONHandler::strings;
+using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
+using namespace NsSmartDeviceLink::NsSmartObjects;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "AutoTraceTestLog");
-
-void Preconditions() {
-  //delete file with previous logs
-  const char* file_name = "AutoTraceTestLogFile.log";
-  std::remove(file_name);
+namespace FunctionIDTest {
+enum eType {
+  INVALID_ENUM = -1,
+  RegisterAppInterface,
+  UnregisterAppInterface,
+  SetGlobalProperties,
+};
 }
 
-void InitLogger() {
-  INIT_LOGGER("log4cxx.properties");
+namespace Language {
+enum eType {
+  INVALID_ENUM = -1,
+  EN_EU,
+  RU_RU
+};
+}
+namespace AppTypeTest {
+enum eType {
+  INVALID_ENUM = -1,
+  SYSTEM,
+  MEDIA
+};
+}
+namespace SpeechCapabilities {
+enum eType {
+  INVALID_ENUM = -1,
+  SC_TEXT,
+};
 }
 
-void CreateDeleteAutoTrace(const std::string & testlog) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, testlog);
+namespace StructIdentifiers {
+enum eType {
+  INVALID_ENUM = -1,
+  Struct1,
+  Struct2
+};
 }
 
-bool CheckTraceInFile(const std::string & testlog) {
+CSmartSchema initObjectSchema();
+CSmartSchema initSchemaForMetaFormatter();
 
-  bool isLogFound = false;
-  std::string line;
-
-  std::ifstream file_log("AutoTraceTestLogFile.log");
-
-  if (file_log.is_open()) {
-    while (getline(file_log, line)) {
-      std::size_t found = line.find(testlog);
-      std::size_t founddebug = line.find("DEBUG");
-      if ((found != std::string::npos) && (founddebug != std::string::npos)) {
-        isLogFound = true;
-        break;
-      }
-    }
-    file_log.close();
-  } else {
-    std::cout << "file cannot be opened \n";
-  }
-  return isLogFound;
-}
-
-void DeinitLogger() {
-  DEINIT_LOGGER();
-}
-
-//TODO(VVeremjova) APPLINK-12832 Logger does not write debug information in file
-TEST(AutoTraceTest, DISABLED_Basic) {
-  const std::string testlog =
-      "Test trace is working!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-  Preconditions();
-  InitLogger();
-  CreateDeleteAutoTrace(testlog);
-  DeinitLogger();
-
-  ASSERT_TRUE(CheckTraceInFile(testlog));
-}
-
-}  // namespace utils
+}  // namespace formatters
 }  // namespace components
 }  // namespace test
+
+#endif  // SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_CREATESMARTSCHEMA_H_

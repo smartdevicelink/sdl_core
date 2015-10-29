@@ -43,12 +43,12 @@ include_directories (
 set(testSources
   messagemeter_test.cc
   file_system_test.cc
-  date_time_test.cc
+  #date_time_test.cc
   system_test.cc
   signals_linux_test.cc
   thread_validator_test.cc
   conditional_variable_test.cc
-  message_queue_test.cc
+  #message_queue_test.cc
   resource_usage_test.cc
   bitstream_test.cc
   prioritized_queue_test.cc
@@ -57,7 +57,7 @@ set(testSources
   singleton_test.cc
   #posix_thread_test.cc
   stl_utils_test.cc
-  timer_thread_test.cc
+  #timer_thread_test.cc
   rwlock_posix_test.cc
   async_runner_test.cc
   shared_ptr_test.cc

@@ -30,73 +30,51 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "utils/auto_trace.h"
-#include "logger.h"
-#include <fstream>
+#include <gtest/gtest.h>
+#include "encryption/hashing.h"
+#include "connection_handler/device.h"
 
 namespace test {
 namespace components {
-namespace utils {
+namespace connection_handle {
 
-using namespace ::logger;
+using namespace connection_handler;
+TEST(ConnectionDevice, CompareDevicesWithDifferentMacAddresses) {
+  DeviceHandle device_handle = 0;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "AutoTraceTestLog");
+  std::string connection_type = "BTMAC";
+  std::string device_name = "test_name";
+  std::string mac_address = "test_address";
 
-void Preconditions() {
-  //delete file with previous logs
-  const char* file_name = "AutoTraceTestLogFile.log";
-  std::remove(file_name);
+  Device test_device(device_handle, device_name, mac_address, connection_type);
+
+  EXPECT_EQ(device_handle, test_device.device_handle());
+  EXPECT_EQ(device_name, test_device.user_friendly_name());
+  EXPECT_NE(mac_address, test_device.mac_address());
+  EXPECT_EQ(connection_type, test_device.connection_type());
+  std::string hash_mac_address = test_device.mac_address();
+
+  std::string test_next_mac_address = "test_address_";
+  Device next_test_device(device_handle, device_name, test_next_mac_address, connection_type);
+  EXPECT_NE(test_next_mac_address, next_test_device.mac_address());
+  std::string hash_next_mac_address = next_test_device.mac_address();
+
+  EXPECT_NE(hash_mac_address, hash_next_mac_address);
 }
 
-void InitLogger() {
-  INIT_LOGGER("log4cxx.properties");
+TEST(ConnectionDevice, MacAddressHash) {
+  DeviceHandle device_handle = 0;
+  std::string connection_type = "BTMAC";
+  std::string device_name = "test_name";
+  std::string mac_address = "test_address";
+
+  Device test_device(device_handle, device_name, mac_address, connection_type);
+
+  std::string hashed_mac_address = encryption::MakeHash(mac_address);
+  EXPECT_EQ(hashed_mac_address, test_device.mac_address());
 }
 
-void CreateDeleteAutoTrace(const std::string & testlog) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, testlog);
-}
-
-bool CheckTraceInFile(const std::string & testlog) {
-
-  bool isLogFound = false;
-  std::string line;
-
-  std::ifstream file_log("AutoTraceTestLogFile.log");
-
-  if (file_log.is_open()) {
-    while (getline(file_log, line)) {
-      std::size_t found = line.find(testlog);
-      std::size_t founddebug = line.find("DEBUG");
-      if ((found != std::string::npos) && (founddebug != std::string::npos)) {
-        isLogFound = true;
-        break;
-      }
-    }
-    file_log.close();
-  } else {
-    std::cout << "file cannot be opened \n";
-  }
-  return isLogFound;
-}
-
-void DeinitLogger() {
-  DEINIT_LOGGER();
-}
-
-//TODO(VVeremjova) APPLINK-12832 Logger does not write debug information in file
-TEST(AutoTraceTest, DISABLED_Basic) {
-  const std::string testlog =
-      "Test trace is working!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-  Preconditions();
-  InitLogger();
-  CreateDeleteAutoTrace(testlog);
-  DeinitLogger();
-
-  ASSERT_TRUE(CheckTraceInFile(testlog));
-}
-
-}  // namespace utils
+}  // namespace connection_handle
 }  // namespace components
 }  // namespace test
+

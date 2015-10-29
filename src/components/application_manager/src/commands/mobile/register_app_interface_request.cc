@@ -157,12 +157,26 @@ void RegisterAppInterfaceRequest::Run() {
   // FIXME(EZamakhov): on shutdown - get freez
 
   // wait till HMI started
-  while (!ApplicationManagerImpl::instance()->IsHMICooperating()) {
-    sleep(1);
-    // TODO(DK): timer_->StartWait(1);
+  while (ApplicationManagerImpl::exists() &&
+         !ApplicationManagerImpl::instance()->IsStopping() &&
+         !ApplicationManagerImpl::instance()->IsHMICooperating()) {
+    LOG4CXX_DEBUG(logger_, "Waiting for the HMI... conn_key="
+                 << connection_key() << ", correlation_id=" << correlation_id()
+                 << ", default_timeout=" << default_timeout()
+                 << ", thread=" << pthread_self());
     ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
                                                              correlation_id(),
                                                              default_timeout());
+    sleep(1);
+    // TODO(DK): timer_->StartWait(1);
+  }
+
+  if (!ApplicationManagerImpl::exists()) {
+    LOG4CXX_WARN(logger_, "The ApplicationManager doesn't exist!");
+    return;
+  } else if (ApplicationManagerImpl::instance()->IsStopping()) {
+    LOG4CXX_WARN(logger_, "The ApplicationManager is stopping!");
+    return;
   }
 
   const std::string mobile_app_id = (*message_)[strings::msg_params][strings::app_id]

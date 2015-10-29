@@ -57,10 +57,6 @@ set(testSources
 )
 
 list (APPEND testSources
- # sql_pt_ext_representation_test.cc
-)
-
-list (APPEND testSources
   sql_pt_representation_test.cc
 )
 

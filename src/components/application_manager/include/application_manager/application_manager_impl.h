@@ -1146,6 +1146,10 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     bool IsAppsQueriedFrom(const connection_handler::DeviceHandle handle) const;
 
+    bool IsStopping() const {
+      return is_stopping_;
+    }
+
   private:
     /**
      * @brief PullLanguagesInfo allows to pull information about languages.
@@ -1480,6 +1484,8 @@ class ApplicationManagerImpl : public ApplicationManager,
     timer::TimerThread<ApplicationManagerImpl>  tts_global_properties_timer_;
 
     bool is_low_voltage_;
+
+    bool is_stopping_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 

@@ -250,7 +250,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_Version) {
 }
 
 // ServiceType shall be equal 0x0 (Control), 0x07 (RPC), 0x0A (PCM), 0x0B (Video), 0x0F (Bulk)
-TEST_F(IncomingDataHandlerTest, MalformedPacket_ServiceType) {
+TEST_F(IncomingDataHandlerTest, DISABLED_MalformedPacket_ServiceType) {
   FrameList malformed_packets;
   std::vector<uint8_t> malformed_serv_types;
   for (uint8_t service_type = kControl + 1; service_type < kRpc; ++service_type) {
@@ -290,7 +290,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_ServiceType) {
 }
 
 // Frame type shall be 0x00 (Control), 0x01 (Single), 0x02 (First), 0x03 (Consecutive)
-TEST_F(IncomingDataHandlerTest, MalformedPacket_FrameType) {
+TEST_F(IncomingDataHandlerTest, DISABLED_MalformedPacket_FrameType) {
   FrameList malformed_packets;
   std::vector<uint8_t> malformed_frame_types;
   for (uint8_t frame_type = FRAME_TYPE_CONSECUTIVE + 1;
@@ -325,7 +325,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_FrameType) {
 }
 
 // For Control frames Frame info value shall be from 0x00 to 0x06 or 0xFE(Data Ack), 0xFF(HB Ack)
-TEST_F(IncomingDataHandlerTest, MalformedPacket_ControlFrame) {
+TEST_F(IncomingDataHandlerTest, DISABLED_MalformedPacket_ControlFrame) {
   FrameList malformed_packets;
   std::vector<uint8_t> malformed_frame_data;
   for (uint8_t frame_type = FRAME_DATA_END_SERVICE_NACK + 1;
@@ -360,7 +360,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_ControlFrame) {
 }
 
 // For Single and First frames Frame info value shall be equal 0x00
-TEST_F(IncomingDataHandlerTest, MalformedPacket_SingleFrame) {
+TEST_F(IncomingDataHandlerTest, DISABLED_MalformedPacket_SingleFrame) {
   FrameList malformed_packets;
   std::vector<uint8_t> malformed_frame_data;
   for (uint8_t frame_type = FRAME_DATA_SINGLE + 1;
@@ -396,7 +396,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_SingleFrame) {
 }
 
 // For Single and First frames Frame info value shall be equal 0x00
-TEST_F(IncomingDataHandlerTest, MalformedPacket_FirstFrame) {
+TEST_F(IncomingDataHandlerTest, DISABLED_MalformedPacket_FirstFrame) {
   FrameList malformed_packets;
   std::vector<uint8_t> malformed_frame_data;
   for (uint8_t frame_type = FRAME_DATA_FIRST + 1;

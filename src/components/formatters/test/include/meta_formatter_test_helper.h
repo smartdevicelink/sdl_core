@@ -30,73 +30,54 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_METAFORMATTERTESTHELPER_H_
+#define SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_METAFORMATTERTESTHELPER_H_
+
 #include "gtest/gtest.h"
-#include "utils/auto_trace.h"
-#include "logger.h"
-#include <fstream>
+
+#include "smart_objects/smart_object.h"
+#include "formatters/CFormatterJsonSDLRPCv1.hpp"
+#include "formatters/CSmartFactory.hpp"
+#include "create_smartSchema.h"
 
 namespace test {
 namespace components {
-namespace utils {
+namespace formatters {
 
-using namespace ::logger;
+class CMetaFormatterTestHelper : public ::testing::Test {
+ protected:
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "AutoTraceTestLog");
+  virtual void SetUp();
 
-void Preconditions() {
-  //delete file with previous logs
-  const char* file_name = "AutoTraceTestLogFile.log";
-  std::remove(file_name);
-}
+  virtual void TearDown();
 
-void InitLogger() {
-  INIT_LOGGER("log4cxx.properties");
-}
+  void AnyObjectToJsonString(
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject& obj,
+      std::string& result_string);
 
-void CreateDeleteAutoTrace(const std::string & testlog) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, testlog);
-}
+  void FillObjectIdenticalToSchema(
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
 
-bool CheckTraceInFile(const std::string & testlog) {
+  void FillObjectIdenticalToSchemaWithoutNoMandatoriesParams(
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
 
-  bool isLogFound = false;
-  std::string line;
+  void CompareObjects(
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject& first,
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject& second);
 
-  std::ifstream file_log("AutoTraceTestLogFile.log");
+  void FillObjectWithDefaultValues(
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
 
-  if (file_log.is_open()) {
-    while (getline(file_log, line)) {
-      std::size_t found = line.find(testlog);
-      std::size_t founddebug = line.find("DEBUG");
-      if ((found != std::string::npos) && (founddebug != std::string::npos)) {
-        isLogFound = true;
-        break;
-      }
-    }
-    file_log.close();
-  } else {
-    std::cout << "file cannot be opened \n";
-  }
-  return isLogFound;
-}
+  void FillObjectWithoutSomeMandatoryFields(
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
 
-void DeinitLogger() {
-  DEINIT_LOGGER();
-}
+  // Members
+  std::set<FunctionIDTest::eType> function_id_items_;
+  std::set<MessageTypeTest::eType> message_type_items_;
+};
 
-//TODO(VVeremjova) APPLINK-12832 Logger does not write debug information in file
-TEST(AutoTraceTest, DISABLED_Basic) {
-  const std::string testlog =
-      "Test trace is working!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-  Preconditions();
-  InitLogger();
-  CreateDeleteAutoTrace(testlog);
-  DeinitLogger();
-
-  ASSERT_TRUE(CheckTraceInFile(testlog));
-}
-
-}  // namespace utils
+}  // namespace formatters
 }  // namespace components
 }  // namespace test
+
+#endif // SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_METAFORMATTERTESTHELPER_H_

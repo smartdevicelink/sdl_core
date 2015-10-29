@@ -30,73 +30,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gtest/gtest.h"
-#include "utils/auto_trace.h"
-#include "logger.h"
-#include <fstream>
+#ifndef SRC_COMPONENTS_CONNECTION_HANDLER_TEST_INCLUDE_CONNECTION_HANDLER_OBSERVER_MOCK_H_
+#define SRC_COMPONENTS_CONNECTION_HANDLER_TEST_INCLUDE_CONNECTION_HANDLER_OBSERVER_MOCK_H_
+
+#include <gmock/gmock.h>
+#include <string>
+#include "connection_handler/connection_handler_observer.h"
 
 namespace test {
 namespace components {
-namespace utils {
+namespace connection_handler_test {
 
-using namespace ::logger;
+/*
+ * MOCK implementation of ::connection_handler::ConnectionHandlerObserver interface
+ */
+class ConnectionHandlerObserverMock : public ::connection_handler::ConnectionHandlerObserver {
+ public:
+  MOCK_METHOD1(OnDeviceListUpdated,
+      void(const connection_handler::DeviceMap &device_list));
+  MOCK_METHOD0(OnFindNewApplicationsRequest,void());
+  MOCK_METHOD1(RemoveDevice,
+      void(const connection_handler::DeviceHandle &device_handle));
+  MOCK_METHOD3(OnServiceStartedCallback,
+      bool(const connection_handler::DeviceHandle &device_handle,
+           const int32_t &session_key,
+           const protocol_handler::ServiceType &type));
+  MOCK_METHOD3(OnServiceEndedCallback,
+      void(const int32_t &session_key,
+           const protocol_handler::ServiceType &type,
+           const connection_handler::CloseSessionReason& close_reason));
+  MOCK_CONST_METHOD1(GetHandshakeContext,
+                     security_manager::SSLContext::HandshakeContext(
+                       uint32_t key));
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "AutoTraceTestLog");
-
-void Preconditions() {
-  //delete file with previous logs
-  const char* file_name = "AutoTraceTestLogFile.log";
-  std::remove(file_name);
-}
-
-void InitLogger() {
-  INIT_LOGGER("log4cxx.properties");
-}
-
-void CreateDeleteAutoTrace(const std::string & testlog) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, testlog);
-}
-
-bool CheckTraceInFile(const std::string & testlog) {
-
-  bool isLogFound = false;
-  std::string line;
-
-  std::ifstream file_log("AutoTraceTestLogFile.log");
-
-  if (file_log.is_open()) {
-    while (getline(file_log, line)) {
-      std::size_t found = line.find(testlog);
-      std::size_t founddebug = line.find("DEBUG");
-      if ((found != std::string::npos) && (founddebug != std::string::npos)) {
-        isLogFound = true;
-        break;
-      }
-    }
-    file_log.close();
-  } else {
-    std::cout << "file cannot be opened \n";
-  }
-  return isLogFound;
-}
-
-void DeinitLogger() {
-  DEINIT_LOGGER();
-}
-
-//TODO(VVeremjova) APPLINK-12832 Logger does not write debug information in file
-TEST(AutoTraceTest, DISABLED_Basic) {
-  const std::string testlog =
-      "Test trace is working!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-  Preconditions();
-  InitLogger();
-  CreateDeleteAutoTrace(testlog);
-  DeinitLogger();
-
-  ASSERT_TRUE(CheckTraceInFile(testlog));
-}
-
-}  // namespace utils
-}  // namespace components
-}  // namespace test
+};
+} // namespace connection_handler_test
+} // namespace components
+} // namespace test
+#endif  //SRC_COMPONENTS_CONNECTION_HANDLER_TEST_INCLUDE_CONNECTION_HANDLER_OBSERVER_MOCK_H_

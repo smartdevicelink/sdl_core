@@ -30,35 +30,30 @@
 
 if(BUILD_TESTS)
 
-set(appMain_DIR ${CMAKE_SOURCE_DIR}/src/appMain)
+include_directories (
+  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/include
+  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/gtest/include
+  ${COMPONENTS_DIR}/include/utils
+  ${COMPONENTS_DIR}/config_profile/include
+  )
+  
 
-include_directories(
-    ${GMOCK_INCLUDE_DIRECTORY}
-    ${COMPONENTS_DIR}/connection_handler/include
-    ${COMPONENTS_DIR}/security_manager/test/include
-    ${COMPONENTS_DIR}/protocol_handler/test/include
-    ${COMPONENTS_DIR}/security_manager/include
-    ${COMPONENTS_DIR}/application_manager/include
-    ${COMPONENTS_DIR}/connection_handler/test/include
-    ${COMPONENTS_DIR}/transport_manager/test/include
+set(testSources
+  profile_test.cc
+  ini_file_test.cc
 )
 
-set(LIBRARIES
-    gmock
-    connectionHandler
-    ConfigProfile
-    ProtocolHandler
-    TransportManager
+set(testLibraries
+  gmock
+  ConfigProfile
 )
-
-set(SOURCES
-    #connection_handler_impl_test.cc
-    connection_test.cc
-    #heart_beat_monitor_test.cc
-)
-
-file(COPY ${appMain_DIR}/smartDeviceLink.ini DESTINATION "./")
-
-create_test("connection_handler_test" "${SOURCES}" "${LIBRARIES}")
+ 
+file(COPY smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY smartDeviceLink_invalid_pairs.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY smartDeviceLink_invalid_string.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY smartDeviceLink_invalid_int.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR}) 
+file(COPY smartDeviceLink_invalid_boolean.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR}) 
+create_test("config_profile_test" "${testSources}" "${testLibraries}")
 
 endif()
