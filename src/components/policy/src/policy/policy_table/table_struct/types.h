@@ -57,7 +57,7 @@ typedef Map< Rpcs, 1, 255 > FunctionalGroupings;
 
 typedef Map< DeviceParams, 0, 255 > DeviceData;
 
-typedef Map< InteriorZone, 2, 255 > Zones;
+typedef Map< InteriorZone, 2, 1000000 > Zones;
 
 typedef Map<Strings, 0, 255> RemoteRpcs;
 
