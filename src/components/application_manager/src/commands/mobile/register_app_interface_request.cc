@@ -41,6 +41,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/policies/policy_handler.h"
+#include "functional_module/plugin_manager.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -186,11 +187,6 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
-  if (IsApplicationWithSameAppIdRegistered()) {
-    SendResponse(false, mobile_apis::Result::DISALLOWED);
-    return;
-  }
-
   mobile_apis::Result::eType policy_result = CheckWithPolicyData();
   if (mobile_apis::Result::SUCCESS != policy_result
       && mobile_apis::Result::WARNINGS != policy_result) {
@@ -209,6 +205,11 @@ void RegisterAppInterfaceRequest::Run() {
       ++count_of_rejections_duplicate_name;
     }
     SendResponse(false, coincidence_result);
+    return;
+  }
+
+  if (IsApplicationWithSameAppIdRegistered()) {
+    SendResponse(false, mobile_apis::Result::DISALLOWED);
     return;
   }
 
@@ -649,6 +650,48 @@ void RegisterAppInterfaceRequest::FillDeviceInfo(
   }
 }
 
+namespace {
+#ifdef SDL_REMOTE_CONTROL
+struct IsSameAppId {
+  IsSameAppId(const std::string& app_id, bool is_remote_control, bool is_driver):
+      app_id_(app_id),
+      is_remote_control_(is_remote_control),
+      is_driver_(is_driver) {
+  }
+  bool operator() (ApplicationSharedPtr other) const {
+    if (!is_remote_control_ || !IsOtherRemoteControl(other) ||
+        IsSameDeviceType(other)) {
+      return strcasecmp(app_id_.c_str(), other->mobile_app_id().c_str()) == 0;
+    }
+    return false;
+  }
+ private:
+  static const functional_modules::ModuleID kCANModuleID = 153;
+  bool IsOtherRemoteControl(ApplicationSharedPtr other) const {
+    return functional_modules::PluginManager::instance()->IsAppForPlugin(other, kCANModuleID);
+  }
+  bool IsSameDeviceType(ApplicationSharedPtr other) const {
+    bool other_is_driver = other->device() == policy::PolicyHandler::instance()->PrimaryDevice();
+    return is_driver_ == other_is_driver;
+  }
+  const std::string& app_id_;
+  bool is_remote_control_;
+  bool is_driver_;
+};
+#else  // SDL_REMOTE_CONTROL
+struct IsSameAppId {
+  explicit IsSameAppId(const std::string& app_id):
+      app_id_(app_id) {
+  }
+  bool operator() (ApplicationSharedPtr other) const {
+    return strcasecmp(app_id_.c_str(), other->mobile_app_id().c_str()) == 0;
+  }
+ private:
+  const std::string& app_id_;
+};
+#endif  // SDL_REMOTE_CONTROL
+}  // namespace
+
 bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
 
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::"
@@ -657,20 +700,35 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   const std::string mobile_app_id = (*message_)[strings::msg_params]
                                          [strings::app_id].asString();
 
+#ifdef SDL_REMOTE_CONTROL
+  IsSameAppId matcher(mobile_app_id, IsRemoteControl(mobile_app_id), IsDriverDevice());
+#else  // SDL_REMOTE_CONTROL
+  IsSameAppId matcher(mobile_app_id);
+#endif  // SDL_REMOTE_CONTROL
+
   ApplicationManagerImpl::ApplicationListAccessor accessor;
   const ApplicationManagerImpl::ApplictionSet applications = accessor.applications();
 
- ApplicationManagerImpl::ApplictionSetConstIt it = applications.begin();
- ApplicationManagerImpl::ApplictionSetConstIt it_end = applications.end();
-
-  for (; it != it_end; ++it) {
-    if (!strcasecmp(mobile_app_id.c_str(),(*it)->mobile_app_id().c_str())) {
-      return true;
-    }
-  }
-
-  return false;
+  return std::find_if(applications.begin(), applications.end(), matcher)
+      != applications.end();
 }
+#ifdef SDL_REMOTE_CONTROL
+bool RegisterAppInterfaceRequest::IsRemoteControl(const std::string& mobile_app_id) const {
+  const smart_objects::SmartObject *hmi_types = 0;
+  if ((*message_)[strings::msg_params].keyExists(strings::app_hmi_type)) {
+    hmi_types = &(*message_)[strings::msg_params][strings::app_hmi_type];
+  }
+  return policy::PolicyHandler::instance()->CheckHMIType(
+      mobile_app_id, mobile_apis::AppHMIType::eType::REMOTE_CONTROL, hmi_types);
+}
+
+bool RegisterAppInterfaceRequest::IsDriverDevice() const {
+  uint32_t connection_key =
+      (*message_)[strings::params][strings::connection_key].asInt();
+  uint32_t device_handle = ApplicationManagerImpl::instance()->GetDeviceHandle(connection_key);
+  return device_handle == policy::PolicyHandler::instance()->PrimaryDevice();
+}
+#endif  // SDL_REMOTE_CONTROL
 
 bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -189,6 +189,14 @@ bool CoreService::IsRemoteControlAllowed() const {
   return false;
 }
 
+bool CoreService::IsRemoteControlApplication(ApplicationSharedPtr app) const {
+#ifdef SDL_REMOTE_CONTROL
+  return policy::PolicyHandler::instance()->CheckHMIType(
+      app->mobile_app_id(), mobile_apis::AppHMIType::eType::REMOTE_CONTROL, app->app_types());
+#endif  // SDL_REMOTE_CONTROL
+  return false;
+}
+
 ApplicationSharedPtr CoreService::GetApplication(ApplicationId app_id) {
   return ApplicationManagerImpl::instance()->application(app_id);
 }

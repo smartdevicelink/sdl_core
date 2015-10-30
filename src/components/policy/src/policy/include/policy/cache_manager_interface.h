@@ -307,6 +307,13 @@ class CacheManagerInterface {
                              std::string &default_hmi) = 0;
 
   /**
+   * Gets HMI types from specific policy
+   * @param app_id ID application
+   * @return list of HMI types
+   */
+  virtual const policy_table::AppHMITypes* GetHMITypes(const std::string &app_id) = 0;
+
+  /**
    * @brief Reset user consent for device data and applications permissions
    * @return
    */

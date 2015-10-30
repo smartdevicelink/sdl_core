@@ -137,6 +137,11 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
    */
   bool IsWhiteSpaceExist();
 
+#ifdef SDL_REMOTE_CONTROL
+  bool IsRemoteControl(const std::string& mobile_app_id) const;
+  bool IsDriverDevice() const;
+#endif  // SDL_REMOTE_CONTROL
+
   std::string response_info_;
   mobile_apis::Result::eType result_checking_app_hmi_type_;
 

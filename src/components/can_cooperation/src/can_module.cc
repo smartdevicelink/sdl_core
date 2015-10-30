@@ -433,28 +433,20 @@ bool CANModule::IsAppForPlugin(
     application_manager::ApplicationSharedPtr app) {
   application_manager::AppExtensionPtr app_extension = app->QueryInterface(
     GetModuleID());
-  if (!app_extension) {
-    if (app->app_types()) {
-      std::vector<int> hmi_types =
-        application_manager::SmartObjToArrayInt(app->app_types());
-      if (hmi_types.end() !=
-                  std::find(hmi_types.begin(), hmi_types.end(),
-                            mobile_apis::AppHMIType::eType::REMOTE_CONTROL)) {
-        CANAppExtensionPtr can_app_extension = new CANAppExtension(
-          GetModuleID());
-        app->AddExtension(can_app_extension);
-        service()->NotifyHMIAboutHMILevel(app, app->hmi_level());
-        PolicyHelper::SetIsAppOnPrimaryDevice(app);
-        SendHmiStatusNotification(app);
-        return true;
-      }
-    }
-    return false;
+  if (app_extension) {
+    return true;
   }
-  return true;
+
+  if (service()->IsRemoteControlApplication(app)) {
+    CANAppExtensionPtr can_app_extension = new CANAppExtension(GetModuleID());
+    app->AddExtension(can_app_extension);
+    service()->NotifyHMIAboutHMILevel(app, app->hmi_level());
+    PolicyHelper::SetIsAppOnPrimaryDevice(app);
+    SendHmiStatusNotification(app);
+    return true;
+  }
+  return false;
 }
-
-
 
 void CANModule::OnAppHMILevelChanged(
     application_manager::ApplicationSharedPtr app,

@@ -455,6 +455,8 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     std::string GetDeviceName(connection_handler::DeviceHandle handle);
 
+    uint32_t GetDeviceHandle(uint32_t connection_key);
+
     /////////////////////////////////////////////////////
 
     void set_hmi_message_handler(hmi_message_handler::HMIMessageHandler* handler);

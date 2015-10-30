@@ -94,12 +94,14 @@ class PolicyManagerImplTest : public ::testing::Test {
     }
   }
 
+#ifdef SDL_REMOTE_CONTROL
  public:
   bool CheckPTURemoteCtrlChange(
       const utils::SharedPtr<policy_table::Table> pt_update,
       const utils::SharedPtr<policy_table::Table> snapshot) {
     return manager->CheckPTURemoteCtrlChange(pt_update, snapshot);
   }
+#endif  // SDL_REMOTE_CONTROL
 };
 
 TEST_F(PolicyManagerImplTest, RefreshRetrySequence_SetSecondsBetweenRetries_ExpectRetryTimeoutSequenceWithSameSeconds) {

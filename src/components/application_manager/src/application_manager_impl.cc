@@ -2586,6 +2586,14 @@ bool ApplicationManagerImpl::IsLowVoltage() {
   return is_low_voltage_;
 }
 
+uint32_t ApplicationManagerImpl::GetDeviceHandle(uint32_t connection_key) {
+  using namespace connection_handler;
+  uint32_t device_handle = 0;
+  ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
+        connection_key, 0, NULL, &device_handle);
+  return device_handle;
+}
+
 std::string ApplicationManagerImpl::GetHashedAppID(uint32_t connection_key,
                                              const std::string& mobile_app_id) {
   using namespace connection_handler;

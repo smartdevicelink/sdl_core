@@ -879,6 +879,26 @@ bool PolicyManagerImpl::IsPredataPolicy(const std::string &policy_app_id) {
     return cache_->IsPredataPolicy(policy_app_id);
 }
 
+struct HMITypeToInt {
+  int operator() (const policy_table::AppHMITypes::value_type item) {
+    return policy_table::AppHMIType(item);
+  }
+};
+
+bool PolicyManagerImpl::GetHMITypes(const std::string& application_id,
+                                     std::vector<int> *app_types) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (cache_->IsDefaultPolicy(application_id)) {
+    return false;
+  }
+  const policy_table::AppHMITypes* hmi_types = cache_->GetHMITypes(application_id);
+  if (hmi_types) {
+    std::transform(hmi_types->begin(), hmi_types->end(),
+                   std::back_inserter(*app_types), HMITypeToInt());
+  }
+  return true;
+}
+
 void PolicyManagerImpl::AddNewApplication(const std::string& application_id,
                                           DeviceConsent device_consent) {
   LOG4CXX_AUTO_TRACE(logger_);

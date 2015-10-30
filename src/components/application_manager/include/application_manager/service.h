@@ -220,16 +220,16 @@ class Service {
    */
   virtual void NotifyHMIAboutHMILevel(ApplicationSharedPtr app,
       mobile_apis::HMILevel::eType level) = 0;
+
+  /**
+   * Checks if application has remote control functions
+   * @param app application
+   * @return true if application has remote control functions
+   */
+  virtual bool IsRemoteControlApplication(ApplicationSharedPtr app) const = 0;
 };
 
 typedef utils::SharedPtr<Service> ServicePtr;
-
-/**
- * @brief Helper function with smart objects.
- * @param data Pointer to SmartObject for convertion
- */
-std::vector<int> SmartObjToArrayInt(
-  const smart_objects::SmartObject* data);
 
 }  // namespace application_manager
 
