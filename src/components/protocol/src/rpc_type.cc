@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "protocol_handler/rpc_type.h"
+#include "protocol/rpc_type.h"
 
 #include "utils/logger.h"
 #include "utils/macro.h"

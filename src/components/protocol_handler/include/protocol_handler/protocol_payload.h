@@ -37,11 +37,8 @@
 #include <string>
 #include <vector>
 
-#ifdef OS_WIN32
-#include "protocol_handler/rpc_type.h"
-#else
 #include "protocol/rpc_type.h"
-#endif
+
 namespace utils {
 class BitStream;
 }

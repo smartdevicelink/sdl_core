@@ -85,6 +85,7 @@ namespace impl {
  * when we have them.
  */
 struct RawFordMessageFromMobile: public ProtocolFramePtr {
+  RawFordMessageFromMobile() {}
   explicit RawFordMessageFromMobile(const ProtocolFramePtr message)
     : ProtocolFramePtr(message) {}
   // PrioritizedQueue requires this method to decide which priority to assign
@@ -95,6 +96,7 @@ struct RawFordMessageFromMobile: public ProtocolFramePtr {
 };
 
 struct RawFordMessageToMobile: public ProtocolFramePtr {
+  RawFordMessageToMobile() : is_final(false) {}
   explicit RawFordMessageToMobile(const ProtocolFramePtr message,
                                   bool final_message)
     : ProtocolFramePtr(message), is_final(final_message) {}

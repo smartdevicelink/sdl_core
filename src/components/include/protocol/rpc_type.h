@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,10 +29,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_RPC_TYPE_H_
-#define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_RPC_TYPE_H_
+#ifndef SRC_COMPONENTS_INCLUDE_PROTOCOL_RPC_TYPE_H_
+#define SRC_COMPONENTS_INCLUDE_PROTOCOL_RPC_TYPE_H_
 
 #include <stdint.h>
+
 #include <ostream>
 
 namespace protocol_handler {
@@ -50,11 +51,8 @@ RpcType RpcTypeFromByte(uint8_t byte);
 // Check and convert RpcType to byte value ready to be transmitted
 uint8_t RpcTypeToByte(RpcType type);
 
-const char* RpcTypeToString(RpcType type);
+const char *RpcTypeToString(RpcType type);
 
-std::ostream& operator<<(std::ostream& os, RpcType rpc_type);
-
-} // namespace protocol_handler
-
-
-#endif // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_RPC_TYPE_H_
+std::ostream &operator<<(std::ostream &os, RpcType rpc_type);
+}  // namespace protocol_handler
+#endif  // SRC_COMPONENTS_INCLUDE_PROTOCOL_RPC_TYPE_H_

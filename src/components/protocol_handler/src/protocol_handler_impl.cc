@@ -37,6 +37,7 @@
 #include "connection_handler/connection_handler_impl.h"
 #include "config_profile/profile.h"
 #include "utils/byte_order.h"
+#include "protocol/common.h"
 
 #ifdef ENABLE_SECURITY
 #include "security_manager/ssl_context.h"
@@ -340,7 +341,6 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
     return;
   }
 
-
   if (!session_observer_) {
     LOG4CXX_ERROR(
         logger_,
@@ -358,29 +358,35 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
     metric_observer_->StartMessageProcess(message_id, start_time);
   }
 #endif  // TIME_TESTER
-
-  const uint32_t header_size = (PROTOCOL_VERSION_1 == message->protocol_version())
-      ? PROTOCOL_HEADER_V1_SIZE : PROTOCOL_HEADER_V2_SIZE;
-  uint32_t max_frame_size = MAXIMUM_FRAME_DATA_SIZE - header_size;
+  const size_t max_frame_size =
+      profile::Profile::instance()->maximum_payload_size();
+  size_t frame_size = MAXIMUM_FRAME_DATA_V2_SIZE;
+  switch (message->protocol_version()) {
+    case PROTOCOL_VERSION_3:
+    case PROTOCOL_VERSION_4:
+      frame_size = max_frame_size > MAXIMUM_FRAME_DATA_V2_SIZE ?
+                   max_frame_size : MAXIMUM_FRAME_DATA_V2_SIZE;
+      break;
+    default:
+      break;
+  }
 #ifdef ENABLE_SECURITY
   const security_manager::SSLContext *ssl_context = session_observer_->
       GetSSLContext(message->connection_key(), message->service_type());
   if (ssl_context && ssl_context->IsInitCompleted()) {
-    const size_t max_block_size = ssl_context->get_max_block_size(max_frame_size);
+    const size_t max_block_size = ssl_context->get_max_block_size(frame_size);
     DCHECK(max_block_size > 0);
     if (max_block_size > 0) {
-      max_frame_size = max_block_size;
-      LOG4CXX_DEBUG(logger_, "Security set new optimal packet size " << max_frame_size);
+      frame_size = max_block_size;
+      LOG4CXX_DEBUG(logger_, "Security set new optimal packet size " << frame_size);
     } else {
       LOG4CXX_ERROR(logger_, "Security could not return max block size, use the origin one");
     }
   }
-  LOG4CXX_DEBUG(logger_, "Optimal packet size is " << max_frame_size);
+  LOG4CXX_DEBUG(logger_, "Optimal packet size is " << frame_size);
 #endif  // ENABLE_SECURITY
-  DCHECK(MAXIMUM_FRAME_DATA_SIZE > max_frame_size);
 
-
-  if (message->data_size() <= max_frame_size) {
+  if (message->data_size() <= frame_size) {
     RESULT_CODE result = SendSingleFrameMessage(connection_handle, sessionID,
                                                 message->protocol_version(),
                                                 message->service_type(),
@@ -394,14 +400,14 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
   } else {
     LOG4CXX_DEBUG(
         logger_,
-        "Message will be sent in multiple frames; max frame size is " << max_frame_size);
+        "Message will be sent in multiple frames; max frame size is " << frame_size);
 
     RESULT_CODE result = SendMultiFrameMessage(connection_handle, sessionID,
                                                message->protocol_version(),
                                                message->service_type(),
                                                message->data_size(),
                                                message->data(),
-                                               max_frame_size, final_message);
+                                               frame_size, final_message);
     if (result != RESULT_OK) {
       LOG4CXX_ERROR(logger_,
           "ProtocolHandler failed to send multiframe messages.");
@@ -953,7 +959,9 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
       hash_id_(hash_id),
       service_type_(service_type) {
   }
-  bool OnHandshakeDone(const uint32_t connection_key, const bool success) OVERRIDE {
+  bool OnHandshakeDone(
+      const uint32_t connection_key,
+      security_manager::SSLContext::HandshakeResult result) OVERRIDE {
     if (connection_key != connection_key_) {
       return false;
     }
@@ -961,8 +969,7 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
     const bool was_service_protection_enabled =
         session_observer_->GetSSLContext(connection_key_, service_type_) != NULL;
     if (was_service_protection_enabled) {
-      // On Success handshake
-      if (success) {
+      if (result != security_manager::SSLContext::Handshake_Result_Success) {
 //        const std::string error_text("Connection is already protected");
 //        LOG4CXX_WARN(logger_, error_text << ", key " << connection_key);
 //        security_manager_->SendInternalError(
@@ -974,14 +981,20 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
         NOTREACHED();
       }
     } else {
-      if (success) {
+      if (result == security_manager::SSLContext::Handshake_Result_Success) {
         session_observer_->SetProtectionFlag(connection_key_, service_type_);
       }
-      protocol_handler_->SendStartSessionAck(connection_id_, session_id_,
-                                             protocol_version_, hash_id_, service_type_, success);
+      protocol_handler_->SendStartSessionAck(
+            connection_id_, session_id_,
+            protocol_version_, hash_id_,
+            service_type_,
+            security_manager::SSLContext::Handshake_Result_Success == result);
     }
     delete this;
     return true;
+  }
+
+  void OnCertificateUpdateRequired() OVERRIDE {
   }
 
  private:
@@ -1020,7 +1033,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
         connection_id, packet.session_id(), service_type, protection, &hash_id);
 
   if (0 == session_id) {
-    LOG4CXX_WARN_EXT(logger_, "Refused to create service " <<
+    LOG4CXX_WARN(logger_, "Refused to create service " <<
                      static_cast<int32_t>(service_type) << " type.");
     SendStartSessionNAck(connection_id, packet.session_id(),
                          protocol_version, packet.service_type());
@@ -1358,8 +1371,7 @@ std::string ConvertPacketDataToString(const uint8_t *data,
   // Check data for printability
   for (size_t i = 0; i < data_size; ++i) {
 #ifdef OS_WIN32
-	  //if (!_isprint_l(text[i], loc)){
-	  if (!isprint(text[i])){
+    if (!isprint(text[i])){
 #else
     if (!std::isprint(text[i], loc)) {
 #endif
