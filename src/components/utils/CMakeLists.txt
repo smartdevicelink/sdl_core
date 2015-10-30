@@ -87,6 +87,12 @@ if (BUILD_BACKTRACE_SUPPORT)
     )
 endif()
 
+if(MODIFY_FUNCTION_FLAGS)
+		list(APPEND SOURCES
+		./src/global.cc
+		)
+endif()
+
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
     list(APPEND SOURCES
     ${UTILS_SRC_DIR}/threads/pulse_thread_delegate.cc

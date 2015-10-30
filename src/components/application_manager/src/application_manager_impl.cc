@@ -668,7 +668,12 @@ HmiStatePtr ApplicationManagerImpl::CreateRegularState(uint32_t app_id,
 
 void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
     int32_t correlation_id, int32_t max_duration, int32_t sampling_rate,
-    int32_t bits_per_sample, int32_t audio_type) {
+    int32_t bits_per_sample, int32_t audio_type
+#ifdef MODIFY_FUNCTION_SIGN
+		,bool is_save, bool is_send
+		,const std::string &save_path
+#endif
+		) {
   LOG4CXX_INFO(logger_, "START MICROPHONE RECORDER");
   if (NULL != media_manager_) {
     media_manager_->StartMicrophoneRecording(
@@ -678,6 +683,19 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
   }
 }
 
+#ifdef MODIFY_FUNCTION_SIGN
+void ApplicationManagerImpl::StartAudioPassThruReadFileThread(const std::string &read_path)
+{
+	Global::utf8MultiToAnsiMulti(read_path, read_path_);
+	audio_pass_thru_read_file_thread_->start();
+}
+
+
+void ApplicationManagerImpl::StopAudioPassThruReadFileThread()
+{
+	audio_pass_thru_read_file_thread_->stop();
+}
+#endif
 void ApplicationManagerImpl::SendAudioPassThroughNotification(
   uint32_t session_key,
   std::vector<uint8_t>& binary_data) {
@@ -2156,6 +2174,93 @@ void ApplicationManagerImpl::updateRequestTimeout(uint32_t connection_key,
   request_ctrl_.updateRequestTimeout(connection_key, mobile_correlation_id,
                                      new_timeout_value);
 }
+#ifdef MODIFY_FUNCTION_SIGN
+VRStatus ApplicationManagerImpl::handleVRCommand(const int vrCommandId, const std::string& vrCommandName)
+{
+	LOG4CXX_INFO(logger_, "vrCommandId is " << vrCommandId);
+	ApplicationSharedPtr active_app = active_application();
+	int max_cmd_id = profile::Profile::instance()->max_cmd_id();
+	if(vrCommandId >= VRASSISTCOMMAND_HELP && vrCommandId <= VRASSISTCOMMAND_HELP_MAX){
+		// handle help
+		if(vrCommandId == VRASSISTCOMMAND_HELP){
+			return VRSTATUS_FAIL;
+		}
+		int app_id = vrCommandId - VRASSISTCOMMAND_HELP;
+		if(app_id == active_app->app_id()){
+			MessageHelper::SendVRCommandHelpToHMI(vrCommandName);
+			MessageHelper::SendVRCommandTTSToHMI();
+		}
+		return VRSTATUS_NULL;
+	}else if(vrCommandId >= VRASSISTCOMMAND_EXIT && vrCommandId <= VRASSISTCOMMAND_EXIT_MAX){
+		// handle exit
+		if(vrCommandId == VRASSISTCOMMAND_EXIT){
+			MessageHelper::SendVRCancelToHMI();
+			return VRSTATUS_SUCCESS;
+		}
+		int app_id = vrCommandId - VRASSISTCOMMAND_EXIT;
+		if(app_id == active_app->app_id()){
+			MessageHelper::SendVRExitAppToHMI();
+			return VRSTATUS_SUCCESS;
+		}
+		return VRSTATUS_FAIL;
+	}else if(vrCommandId == VRASSISTCOMMAND_CANCEL){
+		// handle cancel
+		MessageHelper::SendVRCancelToHMI();
+		return VRSTATUS_SUCCESS;
+	}else{
+		if(active_app){
+			if(vrCommandId > max_cmd_id + 1){
+				// handle switch app vr
+				int app_id = vrCommandId - max_cmd_id;
+				//if(active_app->app_id() != app_id){
+					MessageHelper::SendVRSwitchAppToHMI(app_id, vrCommandName);
+				//}
+				return VRSTATUS_SUCCESS;
+			}else{
+				// handle app's vr
+	// 			MessageHelper::SendVROnCommandToMobile(vrCommandId, active_app->app_id());
+				MessageHelper::SendVRResultToHMI(vrCommandId, vrCommandName);
+				return VRSTATUS_SUCCESS;
+			}
+		}else{
+			if(vrCommandId > max_cmd_id + 1){
+				// handle switch app vr
+				int app_id = vrCommandId - max_cmd_id;
+				MessageHelper::SendVRSwitchAppToHMI(app_id, vrCommandName);
+				return VRSTATUS_SUCCESS;
+			}else{
+				return VRSTATUS_FAIL;
+			}
+		}
+	}
+}
+		
+ApplicationSharedPtr ApplicationManagerImpl::fetchAppliation(const std::string& vrCommandName)
+{
+	ApplicationManagerImpl::ApplicationListAccessor accessor;
+	const ApplicationManagerImpl::ApplictionSet applications = accessor.applications();
+
+	ApplicationManagerImpl::ApplictionSetConstIt it = applications.begin();
+	for (; applications.end() != it; ++it){
+		if ((*it)->vr_synonyms()) {
+			const smart_objects::SmartArray* vr_synonyms = (*it)->vr_synonyms()->asArray();
+			smart_objects::SmartArray::const_iterator it_array =
+					vr_synonyms->begin();
+			smart_objects::SmartArray::const_iterator it_array_end =
+					vr_synonyms->end();
+			for (; it_array != it_array_end; ++it_array) {
+// 					LOG4CXX_INFO(logger_, (*it_array).asString().c_str());
+				LOG4CXX_INFO(logger_, "my_app_id = " << (*it)->app_id());
+				if(std::string::npos != vrCommandName.find((*it_array).asString())){
+					return (*it);
+				}
+			}
+		}
+	}
+	return ApplicationSharedPtr();
+}
+
+#endif
 
 const uint32_t ApplicationManagerImpl::application_id
 (const int32_t correlation_id) {

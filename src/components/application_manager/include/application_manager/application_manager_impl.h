@@ -70,6 +70,7 @@
 #include "time_metric_observer.h"
 #endif  // TIME_TESTER
 
+#include "utils/global.h"
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
 #include "utils/message_queue.h"
@@ -180,6 +181,23 @@ typedef threads::MessageLoopThread<RawAudioDataQueue>  AudioPassThruQueue;
 
 typedef std::vector<std::string> RPCParams;
 
+#ifdef MODIFY_FUNCTION_SIGN
+enum VRStatus
+{
+	VRSTATUS_NULL = 0,
+	VRSTATUS_SUCCESS,
+	VRSTATUS_FAIL
+};
+enum VRAssistCommand
+{
+	VRASSISTCOMMAND_CANCEL = 2100000,
+	VRASSISTCOMMAND_HELP = 2200000,
+	VRASSISTCOMMAND_HELP_MAX = 2299999,
+	VRASSISTCOMMAND_EXIT = 2300000,
+	VRASSISTCOMMAND_EXIT_MAX = 2399999
+};
+#endif
+
 class ApplicationManagerImpl : public ApplicationManager,
   public hmi_message_handler::HMIMessageObserver,
   public protocol_handler::ProtocolObserver,
@@ -212,7 +230,7 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     ApplicationSharedPtr application(uint32_t app_id) const;
     ApplicationSharedPtr application_by_policy_id(
-        const std::string& policy_app_id) const;
+    const std::string& policy_app_id) const;
     ApplicationSharedPtr active_application() const;
     std::vector<ApplicationSharedPtr> applications_by_button(uint32_t button);
     std::vector<ApplicationSharedPtr> applications_by_ivi(uint32_t vehicle_info);
@@ -549,8 +567,17 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     void StartAudioPassThruThread(int32_t session_key, int32_t correlation_id,
                                   int32_t max_duration, int32_t sampling_rate,
-                                  int32_t bits_per_sample, int32_t audio_type);
+                                  int32_t bits_per_sample, int32_t audio_type,
+#ifdef MODIFY_FUNCTION_SIGN
+								  bool is_save = false, bool is_send = true,
+								  const std::string &save_path = ""
+#endif
+						 );
 
+#ifdef MODIFY_FUNCTION_SIGN
+	void StartAudioPassThruReadFileThread(const std::string &read_path);
+	void StopAudioPassThruReadFileThread();
+#endif
     /*
      * @brief Terminates audio pass thru thread
      * @param application_key Id of application for which
@@ -661,6 +688,22 @@ class ApplicationManagerImpl : public ApplicationManager,
     void updateRequestTimeout(uint32_t connection_key,
                               uint32_t mobile_correlation_id,
                               uint32_t new_timeout_value);
+
+#ifdef MODIFY_FUNCTION_SIGN
+		void getAudioPassThruData(std::vector<unsigned char>& data);
+		void appendAudioPassThruData(std::vector<unsigned char> &data);
+		void clearAudioPassThruData();
+		static void onAudioPassThruDataSend(char *data, int len);
+		bool is_save();
+		bool is_send();
+		const std::string &save_path();
+		const std::string &read_path();
+#endif
+		
+#ifdef MODIFY_FUNCTION_SIGN
+		VRStatus handleVRCommand(const int vrCommandId, const std::string& vrCommandName);
+		ApplicationSharedPtr fetchAppliation(const std::string& vrCommandName);
+#endif
 
     /*
      * @brief Retrieves application id associated whith correlation id
@@ -1385,6 +1428,17 @@ class ApplicationManagerImpl : public ApplicationManager,
     // Thread that pumps messages being passed to HMI.
     impl::ToHmiQueue messages_to_hmi_;
     // Thread that pumps messages audio pass thru to mobile.
+
+#ifdef MODIFY_FUNCTION_SIGN
+		std::vector<unsigned char> audio_pass_thru_data_;
+		//timer::TimerThread<ApplicationManagerImpl> timer_;
+		bool is_send_;		// is send audio_pass_thru_data to mobile
+		bool is_save_;		// is save audio_pass_thru_data to file
+		std::string save_path_;		// save file path
+		std::string read_path_;		// read file path
+		threads::Thread* audio_pass_thru_read_file_thread_;
+#endif
+
     impl::AudioPassThruQueue audio_pass_thru_messages_;
 
 
