@@ -127,7 +127,7 @@ class AlertRequest : public CommandRequestImpl {
   bool                        awaiting_ui_alert_response_;
   bool                        awaiting_tts_speak_response_;
   bool                        awaiting_tts_stop_speaking_response_;
-  bool                        response_success_;
+  bool                        is_alert_succeeded_;
   bool                        flag_other_component_sent_;
   mobile_apis::Result::eType  response_result_;
   smart_objects::SmartObject  response_params_;

@@ -51,7 +51,7 @@ AlertRequest::AlertRequest(const MessageSharedPtr& message)
       awaiting_ui_alert_response_(false),
       awaiting_tts_speak_response_(false),
       awaiting_tts_stop_speaking_response_(false),
-      response_success_(false),
+      is_alert_succeeded_(false),
       flag_other_component_sent_(false),
       response_result_(mobile_apis::Result::INVALID_ENUM),
       tts_speak_response_(mobile_apis::Result::INVALID_ENUM) {
@@ -146,7 +146,7 @@ void AlertRequest::on_event(const event_engine::Event& event) {
           static_cast<mobile_apis::Result::eType>(
               message[strings::params][hmi_response::code].asInt());
       // Mobile Alert request is successful when UI_Alert is successful
-      response_success_ = (mobile_apis::Result::SUCCESS == result_code ||
+      is_alert_succeeded_ = (mobile_apis::Result::SUCCESS == result_code ||
           mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code);
       response_result_ = result_code;
       response_params_ = message[strings::msg_params];
@@ -177,7 +177,7 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     std::string response_info("");
     if ((mobile_apis::Result::UNSUPPORTED_RESOURCE == tts_speak_response_) &&
         (!flag_other_component_sent_)) {
-      response_success_ = false;
+      is_alert_succeeded_ = false;
       response_result_ = mobile_apis::Result::WARNINGS;
       response_info = "Unsupported phoneme type sent in a prompt";
     } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE ==
@@ -195,16 +195,16 @@ void AlertRequest::on_event(const event_engine::Event& event) {
               ((mobile_apis::Result::INVALID_ENUM == response_result_) &&
               (!flag_other_component_sent_))) {
       response_result_ = mobile_apis::Result::SUCCESS;
-      response_success_ = true;
+      is_alert_succeeded_ = true;
     }
 
     if (((mobile_apis::Result::ABORTED == tts_speak_response_ )||
         (mobile_apis::Result::REJECTED == tts_speak_response_)) &&
         (!flag_other_component_sent_)) {
-      response_success_ = false;
+      is_alert_succeeded_ = false;
       response_result_ = tts_speak_response_;
     }
-    SendResponse(response_success_, response_result_,
+    SendResponse(is_alert_succeeded_, response_result_,
                  response_info.empty() ? NULL : response_info.c_str(),
                      &response_params_);
   }

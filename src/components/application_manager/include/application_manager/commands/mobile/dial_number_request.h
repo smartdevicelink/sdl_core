@@ -57,6 +57,11 @@ class DialNumberRequest : public CommandRequestImpl {
   virtual ~DialNumberRequest();
 
   /**
+    * @brief Initialize request params
+   **/
+   virtual bool Init();
+
+  /**
    * @brief Execute command
    **/
   virtual void Run();
@@ -75,7 +80,7 @@ class DialNumberRequest : public CommandRequestImpl {
    * except the + character and digits.
    *
    */
-  void StripNumberParam();
+  void StripNumberParam(std::string &number);
 
   DISALLOW_COPY_AND_ASSIGN(DialNumberRequest);
 };
