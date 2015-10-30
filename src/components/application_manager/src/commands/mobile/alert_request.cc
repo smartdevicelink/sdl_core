@@ -52,9 +52,9 @@ AlertRequest::AlertRequest(const MessageSharedPtr& message)
       awaiting_tts_speak_response_(false),
       awaiting_tts_stop_speaking_response_(false),
       is_alert_succeeded_(false),
-      flag_other_component_sent_(false),
-      response_result_(mobile_apis::Result::INVALID_ENUM),
-      tts_speak_response_(mobile_apis::Result::INVALID_ENUM) {
+      is_ui_alert_sent_(false),
+      alert_result_(mobile_apis::Result::INVALID_ENUM),
+      tts_speak_result_(mobile_apis::Result::INVALID_ENUM) {
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
   subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
 }
@@ -148,8 +148,8 @@ void AlertRequest::on_event(const event_engine::Event& event) {
       // Mobile Alert request is successful when UI_Alert is successful
       is_alert_succeeded_ = (mobile_apis::Result::SUCCESS == result_code ||
           mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code);
-      response_result_ = result_code;
-      response_params_ = message[strings::msg_params];
+      alert_result_ = result_code;
+      alert_response_params_ = message[strings::msg_params];
       break;
     }
     case hmi_apis::FunctionID::TTS_Speak: {
@@ -157,7 +157,7 @@ void AlertRequest::on_event(const event_engine::Event& event) {
       // Unsubscribe from event to avoid unwanted messages
       unsubscribe_from_event(hmi_apis::FunctionID::TTS_Speak);
       awaiting_tts_speak_response_ = false;
-      tts_speak_response_ = static_cast<mobile_apis::Result::eType>(
+      tts_speak_result_ = static_cast<mobile_apis::Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       break;
     }
@@ -175,38 +175,38 @@ void AlertRequest::on_event(const event_engine::Event& event) {
   }
   if (!HasHmiResponsesToWait()) {
     std::string response_info("");
-    if ((mobile_apis::Result::UNSUPPORTED_RESOURCE == tts_speak_response_) &&
-        (!flag_other_component_sent_)) {
+    if ((mobile_apis::Result::UNSUPPORTED_RESOURCE == tts_speak_result_) &&
+        (!is_ui_alert_sent_)) {
       is_alert_succeeded_ = false;
-      response_result_ = mobile_apis::Result::WARNINGS;
+      alert_result_ = mobile_apis::Result::WARNINGS;
       response_info = "Unsupported phoneme type sent in a prompt";
     } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE ==
-        tts_speak_response_) && (mobile_apis::Result::UNSUPPORTED_RESOURCE ==
-            response_result_)) {
-      response_result_ = mobile_apis::Result::WARNINGS;
+        tts_speak_result_) && (mobile_apis::Result::UNSUPPORTED_RESOURCE ==
+            alert_result_)) {
+      alert_result_ = mobile_apis::Result::WARNINGS;
       response_info = "Unsupported phoneme type sent in a prompt and "
           "unsupported image sent in soft buttons";
     } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE ==
-        tts_speak_response_) && (mobile_apis::Result::SUCCESS ==
-            response_result_)) {
-      response_result_ = mobile_apis::Result::WARNINGS;
+        tts_speak_result_) && (mobile_apis::Result::SUCCESS ==
+            alert_result_)) {
+      alert_result_ = mobile_apis::Result::WARNINGS;
       response_info = "Unsupported phoneme type sent in a prompt";
-    } else if ((mobile_apis::Result::SUCCESS == tts_speak_response_) &&
-              ((mobile_apis::Result::INVALID_ENUM == response_result_) &&
-              (!flag_other_component_sent_))) {
-      response_result_ = mobile_apis::Result::SUCCESS;
+    } else if ((mobile_apis::Result::SUCCESS == tts_speak_result_) &&
+              ((mobile_apis::Result::INVALID_ENUM == alert_result_) &&
+              (!is_ui_alert_sent_))) {
+      alert_result_ = mobile_apis::Result::SUCCESS;
       is_alert_succeeded_ = true;
     }
 
-    if (((mobile_apis::Result::ABORTED == tts_speak_response_ )||
-        (mobile_apis::Result::REJECTED == tts_speak_response_)) &&
-        (!flag_other_component_sent_)) {
+    if (((mobile_apis::Result::ABORTED == tts_speak_result_ )||
+        (mobile_apis::Result::REJECTED == tts_speak_result_)) &&
+        (!is_ui_alert_sent_)) {
       is_alert_succeeded_ = false;
-      response_result_ = tts_speak_response_;
+      alert_result_ = tts_speak_result_;
     }
-    SendResponse(is_alert_succeeded_, response_result_,
+    SendResponse(is_alert_succeeded_, alert_result_,
                  response_info.empty() ? NULL : response_info.c_str(),
-                     &response_params_);
+                     &alert_response_params_);
   }
 }
 
@@ -318,7 +318,7 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
       msg_params.keyExists(hmi_request::soft_buttons)) {
 
     awaiting_ui_alert_response_ = true;
-    flag_other_component_sent_ = true;
+    is_ui_alert_sent_ = true;
     SendHMIRequest(hmi_apis::FunctionID::UI_Alert, &msg_params, true);
   }
 }

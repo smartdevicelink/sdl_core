@@ -34,7 +34,9 @@
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_GEN_HASH_H_
 
 #include <string>
-
+#ifdef OS_WIN32
+#include <stdint.h>
+#endif
 namespace utils {
 
 /**
@@ -44,6 +46,14 @@ namespace utils {
  */
 
 const std::string gen_hash(size_t size);
+
+/**
+ * @brief Allows to generate hash from the specified string.
+ * The djb2 algorithm uses for hash generation.
+ * @param str_to_hash - the string from which hash should be generated.
+ * @return integer hash for the specified string.
+ */
+int32_t Djb2HashFromString(const std::string& str_to_hash);
 
 }  // namespace utils
 

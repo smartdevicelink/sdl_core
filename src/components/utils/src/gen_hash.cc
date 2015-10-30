@@ -37,9 +37,13 @@
 namespace utils {
 
 const std::string gen_hash(size_t size) {
+#ifdef OS_WIN32
+	static const char symbols[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+#else
   static const char symbols[] = "0123456789"
                                 "abcdefghijklmnopqrstuvwxyz"
                                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+#endif
   static const size_t capacity = sizeof(symbols) - 1;
 
   std::string hash(size, '\0');
@@ -48,6 +52,21 @@ const std::string gen_hash(size_t size) {
     *i = symbols[index];
   }
   return hash;
+}
+
+int32_t Djb2HashFromString(const std::string& str_to_hash) {
+  uint32_t hash = 5381U;
+  std::string::const_iterator it = str_to_hash.begin();
+  std::string::const_iterator it_end = str_to_hash.end();
+
+  for (;it != it_end; ++it) {
+    hash = ((hash << 5) + hash) + (*it);
+  }
+
+  // Reset sign bit in case it has been set.
+  // This is needed to avoid overflow for signed int.
+  const int32_t result = hash & 0x7FFFFFFF;
+  return result;
 }
 
 }  // namespace utils

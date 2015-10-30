@@ -159,7 +159,7 @@ void RegisterAppInterfaceRequest::Run() {
   // wait till HMI started
   while (!ApplicationManagerImpl::instance()->IsHMICooperating()) {
 #ifdef OS_WIN32
-	  Sleep(1);
+    Sleep(1);
 #else
     sleep(1);
 #endif
@@ -202,7 +202,7 @@ void RegisterAppInterfaceRequest::Run() {
   mobile_apis::Result::eType coincidence_result = CheckCoincidence();
 
   if (mobile_apis::Result::SUCCESS != coincidence_result) {
-    LOG4CXX_ERROR_EXT(logger_, "Coincidence check failed.");
+    LOG4CXX_ERROR(logger_, "Coincidence check failed.");
     if (mobile_apis::Result::DUPLICATE_NAME == coincidence_result) {
       usage_statistics::AppCounter count_of_rejections_duplicate_name(
         policy::PolicyHandler::instance()->GetStatisticManager(), mobile_app_id,
@@ -227,7 +227,7 @@ void RegisterAppInterfaceRequest::Run() {
     ApplicationManagerImpl::instance()->RegisterApplication(message_);
 
   if (!application) {
-    LOG4CXX_ERROR_EXT(logger_, "Application " <<
+    LOG4CXX_ERROR(logger_, "Application " <<
                       msg_params[strings::app_name].asString() <<
                       "  hasn't been registered!");
   } else {
@@ -301,14 +301,17 @@ void RegisterAppInterfaceRequest::Run() {
 
     SendRegisterAppInterfaceResponseToMobile();
 
+    MessageHelper::SendQueryApps( (*message_)[strings::params][strings::connection_key].asInt());
+
     MessageHelper::SendLockScreenIconUrlNotification(
         (*message_)[strings::params][strings::connection_key].asInt());
   }
 }
 
-void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
-  mobile_apis::Result::eType result) {
+void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
   smart_objects::SmartObject response_params(smart_objects::SmartType_Map);
+
+  mobile_apis::Result::eType result_code = mobile_apis::Result::SUCCESS;
 
   ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
   const HMICapabilities& hmi_capabilities = app_manager->hmi_capabilities();
@@ -339,11 +342,11 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       msg_params[strings::hmi_display_language_desired].asInt() !=
       hmi_capabilities.active_ui_language()) {
 
-    LOG4CXX_WARN_EXT(
+    LOG4CXX_WARN(
       logger_,
       "Wrong language on registering application " << application->name());
 
-    LOG4CXX_ERROR_EXT(
+    LOG4CXX_ERROR(
       logger_,
       "vr "
       << msg_params[strings::language_desired].asInt()
@@ -354,7 +357,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       << " - "
       << hmi_capabilities.active_ui_language());
 
-    result = mobile_apis::Result::WRONG_LANGUAGE;
+    result_code = mobile_apis::Result::WRONG_LANGUAGE;
   }
 
   if (hmi_capabilities.display_capabilities()) {
@@ -480,6 +483,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       hmi_capabilities.navigation_supported();
   response_params[strings::hmi_capabilities][strings::phone_call] =
       hmi_capabilities.phone_call_supported();
+  response_params[strings::sdl_version] =
+      profile::Profile::instance()->sdl_version();
+  response_params[strings::system_software_version] =
+      hmi_capabilities.ccpu_version();
 
   resumption::ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
   std::string hash_id = "";
@@ -491,22 +498,22 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     hash_id = (*message_)[strings::msg_params][strings::hash_id].asString();
     if (!resumer.CheckApplicationHash(application, hash_id)) {
       LOG4CXX_WARN(logger_, "Hash does not match");
-      result = mobile_apis::Result::RESUME_FAILED;
+      result_code = mobile_apis::Result::RESUME_FAILED;
       add_info = "Hash does not match";
       need_restore_vr = false;
     } else if (!resumer.CheckPersistenceFilesForResumption(application)) {
       LOG4CXX_WARN(logger_, "Persistent data is missed");
-      result = mobile_apis::Result::RESUME_FAILED;
+      result_code = mobile_apis::Result::RESUME_FAILED;
       add_info = "Persistent data is missed";
       need_restore_vr = false;
     } else {
       add_info = " Resume Succeed";
     }
   }
-  if ((mobile_apis::Result::SUCCESS == result) &&
+  if ((mobile_apis::Result::SUCCESS == result_code) &&
       (mobile_apis::Result::INVALID_ENUM != result_checking_app_hmi_type_)) {
     add_info += response_info_;
-    result = result_checking_app_hmi_type_;
+    result_code = result_checking_app_hmi_type_;
   }
 
   // in case application exist in resumption we need to send resumeVrgrammars
@@ -516,22 +523,28 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
         MessageHelper::GetDeviceMacAddressForHandle(application->device()));
   }
 
+  MessageHelper::SendOnAppRegisteredNotificationToHMI(
+      *(application.get()), resumption, need_restore_vr);
+  SendResponse(true, result_code, add_info.c_str(), &response_params);
 
-  // By default app subscribed to CUSTOM_BUTTON
-  // Need to send notification to HMI
-  SendSubscribeCustomButtonNotification();
+  // Default HMI level should be set before any permissions validation, since it
+  // relies on HMI level.
+  resumer.SetupDefaultHMILevel(application);
 
-  MessageHelper::SendChangeRegistrationRequestToHMI(application);
+  // Sends OnPermissionChange notification to mobile right after RAI response
+  // and HMI level set-up
+  policy::PolicyHandler::instance()->OnAppRegisteredOnMobile(
+        application->mobile_app_id());
 
-  SendResponse(true, result, add_info.c_str(), &response_params);
-  MessageHelper::SendOnAppRegisteredNotificationToHMI(*(application.get()),
-                                                      resumption,
-                                                      need_restore_vr);
-  if (result != mobile_apis::Result::RESUME_FAILED) {
+  if (result_code != mobile_apis::Result::RESUME_FAILED) {
     resumer.StartResumption(application, hash_id);
   } else {
     resumer.StartResumptionOnlyHMILevel(application);
   }
+
+  // By default app subscribed to CUSTOM_BUTTON
+  SendSubscribeCustomButtonNotification();
+  MessageHelper::SendChangeRegistrationRequestToHMI(application);
 }
 
 mobile_apis::Result::eType
@@ -585,7 +598,7 @@ RegisterAppInterfaceRequest::CheckCoincidence() {
 }  // method end
 
 mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
-  LOG4CXX_INFO(logger_, "CheckWithPolicyData");
+  LOG4CXX_AUTO_TRACE(logger_);
   // TODO(AOleynik): Check is necessary to allow register application in case
   // of disabled policy
   // Remove this check, when HMI will support policy

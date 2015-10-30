@@ -30,6 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "policy/sql_pt_representation.h"
+
 #include <sstream>
 #include <stdlib.h>
 #include <stdint.h>
@@ -37,7 +39,8 @@
 #include <unistd.h>
 
 #include "utils/logger.h"
-#include "policy/sql_pt_representation.h"
+#include "utils/file_system.h"
+#include "utils/gen_hash.h"
 #include "policy/sql_wrapper.h"
 #include "policy/sql_pt_queries.h"
 #include "policy/policy_helper.h"
@@ -272,7 +275,7 @@ std::string SQLPTRepresentation::GetLockScreenIconUrl() const {
 
 
 int SQLPTRepresentation::GetNotificationsNumber(const std::string& priority) {
-  LOG4CXX_INFO(logger_, "GetNotificationsNumber");
+  LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kSelectNotificationsPerPriority)) {
     LOG4CXX_WARN(logger_, "Incorrect select statement for priority "
@@ -294,7 +297,7 @@ int SQLPTRepresentation::GetNotificationsNumber(const std::string& priority) {
 
 bool SQLPTRepresentation::GetPriority(const std::string& policy_app_id,
                                       std::string* priority) {
-  LOG4CXX_INFO(logger_, "GetPriority");
+  LOG4CXX_AUTO_TRACE(logger_);
   if (NULL == priority) {
     LOG4CXX_WARN(logger_, "Input priority parameter is null.");
     return false;
@@ -323,10 +326,42 @@ bool SQLPTRepresentation::GetPriority(const std::string& policy_app_id,
 }
 
 InitResult SQLPTRepresentation::Init() {
-  LOG4CXX_INFO(logger_, "SQLPTRepresentation::Init");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   if (!db_->Open()) {
     LOG4CXX_ERROR(logger_, "Failed opening database.");
+    LOG4CXX_INFO(logger_, "Starting opening retries.");
+    const uint16_t attempts =
+        profile::Profile::instance()->attempts_to_open_policy_db();
+    LOG4CXX_DEBUG(logger_, "Total attempts number is: " << attempts);
+    bool is_opened = false;
+    const uint16_t open_attempt_timeout_ms =
+        profile::Profile::instance()->open_attempt_timeout_ms();
+#ifndef OS_WIN32
+	const useconds_t sleep_interval_mcsec = open_attempt_timeout_ms * 1000;
+#endif
+    LOG4CXX_DEBUG(logger_, "Open attempt timeout(ms) is: "
+                  << open_attempt_timeout_ms);
+	for (int i = 0; i < attempts; ++i) {
+#ifdef OS_WIN32
+		Sleep(open_attempt_timeout_ms);
+#else
+		usleep(sleep_interval_mcsec);
+#endif
+      LOG4CXX_INFO(logger_, "Attempt: " << i+1);
+      if (db_->Open()){
+        LOG4CXX_INFO(logger_, "Database opened.");
+        is_opened = true;
+        break;
+      }
+    }
+    if (!is_opened) {
+      LOG4CXX_ERROR(logger_, "Open retry sequence failed. Tried "
+                    << attempts << " attempts with "
+                    << open_attempt_timeout_ms
+                    << " open timeout(ms) for each.");
+      return InitResult::FAIL;
+    }
   }
 #ifndef __QNX__
   if (!db_->IsReadWrite()) {
@@ -448,7 +483,7 @@ bool SQLPTRepresentation::RefreshDB() {
 
 utils::SharedPtr<policy_table::Table>
 SQLPTRepresentation::GenerateSnapshot() const {
-  LOG4CXX_INFO(logger_, "GenerateSnapshot");
+  LOG4CXX_AUTO_TRACE(logger_);
   utils::SharedPtr<policy_table::Table> table = new policy_table::Table();
   GatherModuleMeta(&*table->policy_table.module_meta);
   GatherModuleConfig(&table->policy_table.module_config);
@@ -480,9 +515,10 @@ void SQLPTRepresentation::GatherModuleConfig(
     config->exchange_after_x_kilometers = query.GetInteger(2);
     config->exchange_after_x_days = query.GetInteger(3);
     config->timeout_after_x_seconds = query.GetInteger(4);
-    *config->vehicle_make = query.GetString(5);
-    *config->vehicle_model = query.GetString(6);
-    *config->vehicle_year = query.GetString(7);
+    *config->certificate = query.GetString(5);
+    *config->vehicle_make = query.GetString(6);
+    *config->vehicle_model = query.GetString(7);
+    *config->vehicle_year = query.GetString(8);
   }
 
   utils::dbms::SQLQuery endpoints(db());
@@ -634,7 +670,8 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     params.priority = priority;
 
     *params.memory_kb = query.GetInteger(2);
-    *params.heart_beat_timeout_ms = query.GetInteger(3);
+
+    *params.heart_beat_timeout_ms = query.GetUInteger(3);
     if (!query.IsNull(3)) {
       *params.certificate = query.GetString(4);
     }
@@ -851,10 +888,9 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   app_query.Bind(1, std::string(policy_table::EnumToJsonString(app.second.priority)));
   app_query.Bind(2, app.second.is_null());
   app_query.Bind(3, *app.second.memory_kb);
-  app_query.Bind(4, *app.second.heart_beat_timeout_ms);
+  app_query.Bind(4, static_cast<int64_t>(*app.second.heart_beat_timeout_ms));
   app.second.certificate.is_initialized() ?
   app_query.Bind(5, *app.second.certificate) : app_query.Bind(5);
-
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
     return false;
@@ -1024,12 +1060,13 @@ bool SQLPTRepresentation::SaveModuleConfig(
   query.Bind(2, config.exchange_after_x_kilometers);
   query.Bind(3, config.exchange_after_x_days);
   query.Bind(4, config.timeout_after_x_seconds);
+  query.Bind(5, config.certificate);
   config.vehicle_make.is_initialized() ?
-  query.Bind(5, *(config.vehicle_make)) : query.Bind(5);
+  query.Bind(6, *(config.vehicle_make)) : query.Bind(5);
   config.vehicle_model.is_initialized() ?
-  query.Bind(6, *(config.vehicle_model)) : query.Bind(6);
+  query.Bind(7, *(config.vehicle_model)) : query.Bind(6);
   config.vehicle_year.is_initialized() ?
-  query.Bind(7, *(config.vehicle_year)) : query.Bind(7);
+  query.Bind(8, *(config.vehicle_year)) : query.Bind(7);
 
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Incorrect update module config");
@@ -1276,7 +1313,7 @@ void SQLPTRepresentation::IncrementIgnitionCycles() {
 }
 
 void SQLPTRepresentation::ResetIgnitionCycles() {
-  LOG4CXX_INFO(logger_, "ResetIgnitionCycles");
+  LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Exec(sql_pt::kResetIgnitionCycles)) {
     LOG4CXX_WARN(logger_, "Failed to reset ignition cycles number.");
@@ -1338,7 +1375,7 @@ bool SQLPTRepresentation::GetInitialAppData(const std::string& app_id,
 
 bool SQLPTRepresentation::GetFunctionalGroupings(
   policy_table::FunctionalGroupings& groups) {
-  LOG4CXX_INFO(logger_, "GetFunctionalGroupings");
+  LOG4CXX_AUTO_TRACE(logger_);
   return GatherFunctionalGroupings(&groups);
 }
 
@@ -1527,6 +1564,53 @@ bool SQLPTRepresentation::SetIsDefault(const std::string& app_id,
     return false;
   }
   return true;
+}
+
+void SQLPTRepresentation::RemoveDB() const {
+  file_system::DeleteFile(db_->get_path());
+}
+
+bool SQLPTRepresentation::IsDBVersionActual() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectDBVersion) || !query.Exec()) {
+    LOG4CXX_ERROR(logger_, "Failed to get DB version: "
+                 << query.LastError().text());
+    return false;
+  }
+
+  const int32_t saved_db_version = query.GetInteger(0);
+  const int32_t current_db_version = GetDBVersion();
+  LOG4CXX_DEBUG(logger_, "Saved DB version is: " << saved_db_version
+                << ". Current DB vesion is: " << current_db_version);
+
+  return current_db_version == saved_db_version;
+}
+
+bool SQLPTRepresentation::UpdateDBVersion() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kUpdateDBVersion)) {
+    LOG4CXX_ERROR(logger_, "Incorrect DB version query: "
+                 << query.LastError().text());
+    return false;
+  }
+
+  const int32_t db_version = GetDBVersion();
+  LOG4CXX_DEBUG(logger_, "DB version will be updated to: " << db_version);
+  query.Bind(0, db_version);
+
+  if (!query.Exec()) {
+    LOG4CXX_ERROR(logger_, "DB version getting failed: "
+                 << query.LastError().text());
+    return false;
+  }
+
+  return true;
+}
+
+const int32_t SQLPTRepresentation::GetDBVersion() const {
+  return utils::Djb2HashFromString(sql_pt::kCreateSchema);
 }
 
 utils::dbms::SQLDatabase* SQLPTRepresentation::db() const {

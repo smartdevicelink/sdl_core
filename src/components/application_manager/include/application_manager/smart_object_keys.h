@@ -255,6 +255,8 @@ const char supported_diag_modes[] = "supportedDiagModes";
 const char hmi_capabilities[] = "hmiCapabilities";
 const char navigation[] = "navigation";
 const char phone_call[] = "phoneCall";
+const char sdl_version[] = "sdlVersion";
+const char system_software_version[] = "systemSoftwareVersion";
 const char priority[] = "priority";
 
 //resuming

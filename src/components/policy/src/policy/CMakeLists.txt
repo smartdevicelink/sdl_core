@@ -102,8 +102,7 @@ else ()
 endif ()
 
 add_library(${target} SHARED ${SOURCES})
-message(STATUS "Policy->LIBRARIES:" ${LIBRARIES})
-target_link_libraries(${target} ${LIBRARIES})
+target_link_libraries(${target} ${LIBRARIES} )
 
 if(ENABLE_LOG)
 if(MODIFY_FUNCTION_FLAGS)
