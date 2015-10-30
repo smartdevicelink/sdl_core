@@ -472,14 +472,14 @@ void ApplicationImpl::StartStreaming(
   if (ServiceType::kMobileNav == service_type) {
     LOG4CXX_TRACE(logger_, "Service type = Video");
     if (!video_streaming_approved()) {
-      LOG4CXX_TRACE(logger_, "Video streaming approved");
+      LOG4CXX_TRACE(logger_, "Video streaming not approved");
       MessageHelper::SendNaviStartStream(app_id());
       set_video_stream_retry_number(0);
     }
   } else if (ServiceType::kAudio == service_type) {
     LOG4CXX_TRACE(logger_, "Service type = Audio");
     if (!audio_streaming_approved()) {
-      LOG4CXX_TRACE(logger_, "Audio streaming approved");
+      LOG4CXX_TRACE(logger_, "Audio streaming not approved");
       MessageHelper::SendAudioStartStream(app_id());
       set_audio_stream_retry_number(0);
     }
