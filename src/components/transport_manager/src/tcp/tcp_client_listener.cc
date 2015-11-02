@@ -251,7 +251,11 @@ void TcpClientListener::Loop() {
     const int connection_fd = accept(socket_,
                                      (struct sockaddr*) &client_address,
                                      &client_address_size);
-    if (thread_stop_requested_) break;
+    if (thread_stop_requested_) {
+      LOG4CXX_DEBUG(logger_, "thread_stop_requested_");
+      close(connection_fd);
+      break;
+    }
 
     if (connection_fd < 0) {
       LOG4CXX_ERROR_WITH_ERRNO(logger_, "accept() failed");
@@ -260,6 +264,7 @@ void TcpClientListener::Loop() {
 
     if (AF_INET != client_address.sin_family) {
       LOG4CXX_DEBUG(logger_, "Address of connected client is invalid");
+      close(connection_fd);
       continue;
     }
 

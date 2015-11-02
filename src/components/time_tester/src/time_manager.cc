@@ -149,7 +149,7 @@ void TimeManager::Streamer::Start() {
   server_socket_fd_ = socket(AF_INET, SOCK_STREAM, 0);
 
   if (0 >= server_socket_fd_) {
-    LOG4CXX_ERROR_EXT(logger_, "Server open error");
+    LOG4CXX_ERROR(logger_, "Server open error");
     return;
   } else {
     LOG4CXX_DEBUG(logger_, "Server socket : " << server_socket_fd_);
@@ -158,7 +158,7 @@ void TimeManager::Streamer::Start() {
   int32_t optval = 1;
   if (-1 == setsockopt(server_socket_fd_, SOL_SOCKET, SO_REUSEADDR,
                        &optval, sizeof optval)) {
-    LOG4CXX_ERROR_EXT(logger_, "Unable to set sockopt");
+    LOG4CXX_ERROR(logger_, "Unable to set sockopt");
     return;
   }
 
@@ -225,10 +225,10 @@ bool TimeManager::Streamer::IsReady() const {
   const int retval = select(client_socket_fd_ + 1, 0, &fds, 0, &tv);
 
   if (-1 == retval) {
-    LOG4CXX_ERROR_EXT(logger_, "An error occurred");
+    LOG4CXX_ERROR(logger_, "An error occurred");
     result = false;
   } else if (0 == retval) {
-    LOG4CXX_ERROR_EXT(logger_, "The timeout expired");
+    LOG4CXX_ERROR(logger_, "The timeout expired");
     result = false;
   }
 
@@ -238,13 +238,13 @@ bool TimeManager::Streamer::IsReady() const {
 bool TimeManager::Streamer::Send(const std::string& msg) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!IsReady()) {
-    LOG4CXX_ERROR_EXT(logger_, " Socket is not ready");
+    LOG4CXX_ERROR(logger_, " Socket is not ready");
     return false;
   }
 
   if (-1 == ::send(client_socket_fd_, msg.c_str(),
                    msg.size(), MSG_NOSIGNAL)) {
-    LOG4CXX_ERROR_EXT(logger_, " Unable to send");
+    LOG4CXX_ERROR(logger_, " Unable to send");
     return false;
   }
   return true;

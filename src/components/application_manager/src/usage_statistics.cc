@@ -66,7 +66,8 @@ UsageStatistics::UsageStatistics(const std::string& app_id,
       count_of_run_attempts_while_revoked_(statistics_manager, app_id,
                                            RUN_ATTEMPTS_WHILE_REVOKED),
       count_of_removals_for_bad_behavior_(statistics_manager, app_id,
-                                          REMOVALS_MISBEHAVED) {
+                                          REMOVALS_MISBEHAVED),
+      count_of_tls_error_(statistics_manager, app_id, COUNT_OF_TLS_ERRORS) {
   time_in_hmi_state_.Start(SECONDS_HMI_NONE);
 }
 
@@ -120,6 +121,10 @@ void UsageStatistics::RecordRunAttemptsWhileRevoked() {
 
 void UsageStatistics::RecordRemovalsForBadBehavior() {
   ++count_of_removals_for_bad_behavior_;
+}
+
+void UsageStatistics::RecordTLSError() {
+  ++count_of_tls_error_;
 }
 
 }  // namespace application_manager

@@ -54,6 +54,7 @@ class UsageStatistics {
   void RecordAppUserSelection();
   void RecordRunAttemptsWhileRevoked();
   void RecordRemovalsForBadBehavior();
+  void RecordTLSError();
 
  private:
   usage_statistics::AppStopwatch time_in_hmi_state_;
@@ -64,6 +65,7 @@ class UsageStatistics {
   usage_statistics::AppCounter count_of_user_selections_;
   usage_statistics::AppCounter count_of_run_attempts_while_revoked_;
   usage_statistics::AppCounter count_of_removals_for_bad_behavior_;
+  usage_statistics::AppCounter count_of_tls_error_;
 };
 
 }  // namespace application_manager

@@ -36,6 +36,9 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_REQUEST_INFO_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_REQUEST_INFO_H_
 
+#ifdef OS_WIN32
+#include <unistd.h>
+#endif
 #include <stdint.h>
 #include <set>
 
@@ -62,20 +65,20 @@ namespace request_controller {
 
     RequestInfo(RequestPtr request,
                 const RequestType requst_type,
-                const uint64_t timeout_sec)
+                const uint64_t timeout_msec)
       : request_(request),
-        timeout_sec_(timeout_sec) {
+        timeout_msec_(timeout_msec) {
         start_time_ = date_time::DateTime::getCurrentTime();
         updateEndTime();
         requst_type_ = requst_type;
       }
 
     RequestInfo(RequestPtr request, const RequestType requst_type,
-                const TimevalStruct& start_time, const  uint64_t timeout_sec);
+                const TimevalStruct& start_time, const  uint64_t timeout_msec);
 
     void updateEndTime();
 
-    void updateTimeOut(const uint64_t& timeout_sec);
+    void updateTimeOut(const uint64_t& timeout_msec);
 
     bool isExpired();
 
@@ -83,8 +86,16 @@ namespace request_controller {
       return start_time_;
     }
 
-    uint64_t timeout_sec() {
-      return timeout_sec_;
+    void update_start_time(TimevalStruct start_time) {
+      start_time_ = start_time;
+    }
+
+    uint64_t timeout_msec() {
+      return timeout_msec_;
+    }
+
+    void set_timeout_msec(uint64_t timeout) {
+      timeout_msec_ = timeout;
     }
 
     TimevalStruct end_time() {
@@ -97,6 +108,10 @@ namespace request_controller {
 
     mobile_apis::HMILevel::eType hmi_level() {
       return hmi_level_;
+    }
+
+    void set_hmi_level(const mobile_apis::HMILevel::eType& level) {
+      hmi_level_ = level;
     }
 
     RequestType requst_type() const {
@@ -116,7 +131,7 @@ namespace request_controller {
   protected:
     RequestPtr request_;
     TimevalStruct                 start_time_;
-    uint64_t                      timeout_sec_;
+    uint64_t                      timeout_msec_;
     TimevalStruct                 end_time_;
     uint32_t                      app_id_;
     mobile_apis::HMILevel::eType  hmi_level_;
@@ -124,20 +139,20 @@ namespace request_controller {
     uint32_t                      correlation_id_;
   };
 
-  typedef utils::SharedPtr<RequestInfo> RequestInfoPtr;
+ typedef utils::SharedPtr<RequestInfo> RequestInfoPtr;
 
   struct MobileRequestInfo: public RequestInfo {
       MobileRequestInfo(RequestPtr request,
-                      const uint64_t timeout_sec);
+                      const uint64_t timeout_msec);
     MobileRequestInfo(RequestPtr request,
                       const TimevalStruct& start_time,
-                      const uint64_t timeout_sec);
+                      const uint64_t timeout_msec);
   };
 
   struct HMIRequestInfo: public RequestInfo {
-    HMIRequestInfo(RequestPtr request, const uint64_t timeout_sec);
+    HMIRequestInfo(RequestPtr request, const uint64_t timeout_msec);
     HMIRequestInfo(RequestPtr request, const TimevalStruct& start_time,
-                     const  uint64_t timeout_sec);
+                     const  uint64_t timeout_msec);
   };
 
   // Request info, for searching in request info set by log_n time

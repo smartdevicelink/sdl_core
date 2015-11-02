@@ -677,6 +677,17 @@ class ApplicationManagerImpl : public ApplicationManager,
         const protocol_handler::ServiceType& type,
         const connection_handler::CloseSessionReason& close_reason) OVERRIDE;
 
+#ifdef ENABLE_SECURITY
+    //Overriden SecurityManagerListener method
+    bool OnHandshakeDone(
+        uint32_t connection_key,
+        security_manager::SSLContext::HandshakeResult result) OVERRIDE FINAL;
+
+    void OnCertificateUpdateRequired() OVERRIDE FINAL;
+
+    security_manager::SSLContext::HandshakeContext
+    GetHandshakeContext(uint32_t key) const OVERRIDE FINAL;
+#endif // ENABLE_SECURITY
     /**
      * @ Add notification to collection
      *

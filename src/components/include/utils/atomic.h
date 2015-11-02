@@ -48,10 +48,12 @@
 #define atomic_post_inc(ptr) __sync_fetch_and_add((ptr), 1)
 #elif defined(_MSC_VER) && (_MSC_VER >= 1200)
 //#define atomic_post_inc(ptr) ::InterlockedIncrement(ptr)
+#ifdef MODIFY_FUNCTION_SIGN
 #ifdef OS_WINCE
 #define atomic_post_inc(ptr) ::InterlockedExchangeAdd((volatile LONG*)(ptr), 1)
 #else
 #define atomic_post_inc(ptr) ::InterlockedExchangeAdd((ptr), 1)
+#endif
 #endif
 #else
 #warning "atomic_post_inc() implementation is not atomic"
@@ -63,11 +65,13 @@
 #elif defined(__GNUG__)
 #define atomic_post_dec(ptr) __sync_fetch_and_sub((ptr), 1)
 #elif defined(_MSC_VER) && (_MSC_VER >= 1200)
+#ifdef MODIFY_FUNCTION_SIGN
 //#define atomic_post_dec(ptr) ::InterlockedDecrement(ptr)
 #ifdef OS_WINCE
 #define atomic_post_dec(ptr) ::InterlockedExchangeAdd((volatile LONG*)(ptr), -1)
 #else
 #define atomic_post_dec(ptr) ::InterlockedExchangeSubtract((ptr), 1)
+#endif
 #endif
 #else
 #warning "atomic_post_dec() implementation is not atomic"
@@ -81,7 +85,9 @@
 // with g++ pointer assignment is believed to be atomic
 #define atomic_pointer_assign(dst, src) (dst) = (src)
 #elif defined(_MSC_VER) && (_MSC_VER >= 1200)
+#ifdef MODIFY_FUNCTION_SIGN
 #define atomic_pointer_assign(dst, src) (dst) = (src)
+#endif
 #else
 #warning atomic_pointer_assign() implementation may be non-atomic
 #define atomic_pointer_assign(dst, src) (dst) = (src)
@@ -92,9 +98,11 @@
 #elif defined(__GNUG__)
 #define atomic_post_set(dst) __sync_val_compare_and_swap((dst), 0, 1)
 #elif defined(_MSC_VER) && (_MSC_VER >= 1200)
+#ifdef MODIFY_FUNCTION_SIGN
 #define atomic_post_set(dst) InterlockedCompareExchange((dst), 0, 1)
+#endif
 #else
-#erro "atomic post set operation not defined"
+#error "atomic post set operation not defined"
 #endif
 
 #if defined(__QNXNTO__)
@@ -102,7 +110,9 @@
 #elif defined(__GNUG__)
 #define atomic_post_clr(dst) __sync_val_compare_and_swap((dst), 1, 0)
 #elif defined(_MSC_VER) && (_MSC_VER >= 1200)
+#ifdef MODIFY_FUNCTION_SIGN
 #define atomic_post_clr(dst) InterlockedCompareExchange((dst), 1, 0)
+#endif
 #else
 #error "atomic post clear operation not defined"
 #endif

@@ -600,9 +600,9 @@ class CacheManager : public CacheManagerInterface {
    * The rules are:
    * 1. Add new fields (known to PoliciesManager) & sub-sections if such are
    * present in the updated Preloaded PT
-   * 2. "vehicle_make", ¡°model¡±, ¡°year¡± ¨C leave the fields & values as they were
+   * 2. "vehicle_make", “model”, “year” – leave the fields & values as they were
    * in the database
-   * 3. For all other fields ¨C overwrite the values with the new ones from preloaded PT.
+   * 3. For all other fields – overwrite the values with the new ones from preloaded PT.
    *
    * @param new_pt the policy table loaded from updated preload JSON file.
    *
@@ -634,7 +634,7 @@ class CacheManager : public CacheManagerInterface {
   /**
    * @brief MergeAP Allows to merge ApplicationPolicies section by definite relues.
    * The rules are:
-   * 1. Leave ¡°<appID>¡± sub-sections as they were in the database (fields & their values).
+   * 1. Leave “<appID>” sub-sections as they were in the database (fields & their values).
    * 2. Over-write "default", "device", "pre_DataConsent" subsections.
    *
    * @param new_pt the policy table loaded from updated preload JSON file.

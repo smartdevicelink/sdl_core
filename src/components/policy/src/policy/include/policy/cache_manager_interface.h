@@ -600,6 +600,16 @@ class CacheManagerInterface {
      * @return The certificate in PKCS#7.
      */
     virtual std::string GetCertificate() const = 0;
+
+#ifdef BUILD_TESTS
+  /**
+   * @brief GetPT allows to obtain SharedPtr to PT.
+   * Used ONLY in Unit tests
+   * @return SharedPTR to PT
+   *
+   */
+  virtual utils::SharedPtr<policy_table::Table> GetPT() const  = 0;
+#endif
 };
 
 typedef utils::SharedPtr<CacheManagerInterface> CacheManagerInterfaceSPtr;

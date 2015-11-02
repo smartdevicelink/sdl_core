@@ -175,6 +175,10 @@ class SQLPTRepresentation : public virtual PTRepresentation {
     static const std::string kDatabaseName;
     utils::dbms::SQLDatabase* db_;
 
+#ifdef BUILD_TESTS
+    uint32_t open_counter_;
+#endif // BUILD_TESTS
+
     /**
      * @brief Calculates DB version from current schema
      * @return version

@@ -34,10 +34,10 @@
 #define SRC_COMPONENTS_INCLUDE_UTILS_MESSAGE_QUEUE_H_
 
 #include <queue>
+#include <algorithm>
 
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
-#include "utils/logger.h"
 #include "utils/prioritized_queue.h"
 
 /**
@@ -127,10 +127,6 @@ template<typename T, class Q> MessageQueue<T, Q>::MessageQueue()
 }
 
 template<typename T, class Q> MessageQueue<T, Q>::~MessageQueue() {
-  if (!queue_.empty()) {
-    CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-    LOG4CXX_ERROR(logger_, "Destruction of non-drained queue");
-  }
 }
 
 template<typename T, class Q> void MessageQueue<T, Q>::wait() {
@@ -158,9 +154,7 @@ template<typename T, class Q> void MessageQueue<T, Q>::push(const T& element) {
   {
     sync_primitives::AutoLock auto_lock(queue_lock_);
     if (shutting_down_) {
-      CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-      LOG4CXX_ERROR(logger_, "Runtime error, pushing into queue"
-                           " that is being shut down");
+      return;
     }
     queue_.push(element);
   }
