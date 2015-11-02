@@ -2361,12 +2361,11 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromMobile message) {
     LOG4CXX_ERROR(logger_, "Null-pointer message received.");
     return;
   }
-  {
-    sync_primitives::AutoLock lock(stopping_flag_lock_);
-    if (is_stopping_) {
-      LOG4CXX_INFO(logger_, "Application manager is stopping");
-      return;
-    }
+
+  sync_primitives::AutoLock lock(stopping_flag_lock_);
+  if (is_stopping_) {
+    LOG4CXX_INFO(logger_, "Application manager is stopping");
+    return;
   }
   ProcessMessageFromMobile(message);
 }
