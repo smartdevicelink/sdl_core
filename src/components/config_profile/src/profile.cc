@@ -29,9 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
+
 #include "config_profile/profile.h"
 
 #include <errno.h>
@@ -44,6 +42,11 @@
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
 #include "utils/file_system.h"
+
+#ifdef ENABLE_SECURITY
+#include <openssl/ssl.h>
+#endif  // ENABLE_SECURITY
+
 
 namespace {
 #define LOG_UPDATED_VALUE(value, key, section) {\
@@ -61,6 +64,9 @@ namespace {
 const char* kDefaultConfigFileName = "smartDeviceLink.ini";
 
 const char* kMainSection = "MAIN";
+#ifdef ENABLE_SECURITY
+const char* kSecuritySection = "Security Manager";
+#endif
 const char* kPolicySection = "Policy";
 const char* kHmiSection = "HMI";
 const char* kAppInfoSection = "AppInfo";
@@ -105,6 +111,31 @@ const char* kNamedVideoPipePathKey = "NamedVideoPipePath";
 const char* kNamedAudioPipePathKey = "NamedAudioPipePath";
 const char* kVideoStreamFileKey = "VideoStreamFile";
 const char* kAudioStreamFileKey = "AudioStreamFile";
+
+#ifdef ENABLE_SECURITY
+const char* kSecurityProtocolKey = "Protocol";
+const char* kSecurityCertificatePathKey = "CertificatePath";
+const char* kSecurityCACertificatePathKey = "CACertificatePath";
+const char* kSecuritySSLModeKey = "SSLMode";
+const char* kSecurityKeyPathKey = "KeyPath";
+const char* kSecurityCipherListKey = "CipherList";
+const char* kSecurityVerifyPeerKey = "VerifyPeer";
+const char* kBeforeUpdateHours = "UpdateBeforeHours";
+#endif
+
+#ifdef CUSTOMER_PASA
+const char* kHMIHeartBeatTimeoutKey = "HMIHeartBeatTimeout";
+const char* kLoggerSection = "LOGGING";
+const char* kAudioMQPath = "MQAudioPath";
+const char* kLoggerConfigFileKey = "LoggerConfigFile";
+const char* kRemoteLoggingFlagFileKey = "RemoteLoggingFlagFile";
+const char* kRemoteLoggingFlagFilePathKey = "RemoteLoggingFlagFilePath";
+const char* kTargetLogFileHomeDirKey = "TargetLogFileHomeDir";
+const char* kTargetLogFileNamePatternKey = "TargetLogFileNamePattern";
+const char* kTargetBootCountFileKey = "TargetBootCountFile";
+const char* kTargetTmpDirKey = "TargetTmpDir";
+const char* kLogFileMaxSizeKey = "LogFileMaxSize";
+#endif
 const char* kAudioDataStoppedTimeoutKey = "AudioDataStoppedTimeout";
 const char* kVideoDataStoppedTimeoutKey = "VideoDataStoppedTimeout";
 const char* kMixingAudioSupportedKey = "MixingAudioSupported";
@@ -195,6 +226,13 @@ const char* kDefaultPoolProtocolMask = "com.smartdevicelink.prot";
 const char* kDefaultIAPSystemConfig = "/fs/mp/etc/mm/ipod.cfg";
 const char* kDefaultIAP2SystemConfig = "/fs/mp/etc/mm/iap2.cfg";
 
+#ifdef ENABLE_SECURITY
+const char* kDefaultSecurityProtocol = "TLSv1.2";
+const char* kDefaultSSLMode = "CLIENT";
+const bool kDefaultVerifyPeer = false;
+const uint32_t kDefaultBeforeUpdateHours = 24;
+#endif // ENABLE_SECURITY
+
 const uint32_t kDefaultHubProtocolIndex = 0;
 const uint32_t kDefaultHeartBeatTimeout = 0;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
@@ -250,7 +288,8 @@ namespace profile {
 CREATE_LOGGERPTR_GLOBAL(logger_, "Profile")
 
 Profile::Profile()
-    : launch_hmi_(true),
+    : sdl_version_(kDefaultSDLVersion),
+      launch_hmi_(true),
 #ifdef WEB_HMI
       link_to_web_hmi_(kDefaultLinkToWebHMI),
 #endif // WEB_HMI
@@ -320,8 +359,9 @@ Profile::Profile()
       use_db_for_resumption_(false),
       attempts_to_open_resumption_db_(kDefaultAttemptsToOpenResumptionDB),
       open_attempt_timeout_ms_resumption_db_(kDefaultOpenAttemptTimeoutMsResumptionDB){
-
 }
+
+
 
 Profile::~Profile() {
 }
@@ -487,25 +527,13 @@ const std::string& Profile::audio_stream_file() const {
   return audio_stream_file_;
 }
 
-#ifdef OS_WIN32
 const uint32_t Profile::audio_data_stopped_timeout() const {
-	return audio_data_stopped_timeout_;
-}
-#else
-const std::uint32_t Profile::audio_data_stopped_timeout() const {
   return audio_data_stopped_timeout_;
 }
-#endif
 
-#ifdef OS_WIN32
 const uint32_t Profile::video_data_stopped_timeout() const {
   return video_data_stopped_timeout_;
 }
-#else
-const std::uint32_t Profile::video_data_stopped_timeout() const {
-	return video_data_stopped_timeout_;
-}
-#endif
 
 const uint32_t& Profile::app_time_scale() const {
   return app_requests_time_scale_;
@@ -535,7 +563,7 @@ const std::string& Profile::app_info_storage() const {
   return app_info_storage_;
 }
 
-int32_t Profile::heart_beat_timeout() const {
+uint32_t Profile::heart_beat_timeout() const {
   return heart_beat_timeout_;
 }
 
@@ -713,6 +741,42 @@ uint16_t Profile::tts_global_properties_timeout() const {
   return tts_global_properties_timeout_;
 }
 
+#ifdef ENABLE_SECURITY
+
+const std::string& Profile::cert_path() const {
+  return cert_path_;
+}
+
+const std::string& Profile::ca_cert_path() const {
+  return ca_cert_path_;
+}
+
+const std::string& Profile::ssl_mode() const {
+  return ssl_mode_;
+}
+
+const std::string& Profile::key_path() const {
+  return key_path_;
+}
+
+const std::string& Profile::ciphers_list() const {
+  return ciphers_list_;
+}
+
+bool Profile::verify_peer() const {
+  return verify_peer_;
+}
+
+uint32_t Profile::update_before_hours() const {
+  return update_before_hours_;
+}
+
+const std::string& Profile::security_manager_protocol_name() const {
+  return security_manager_protocol_name_;
+}
+
+#endif // ENABLE_SECURITY
+
 bool Profile::logs_enabled() const {
   return logs_enabled_;
 }
@@ -755,6 +819,30 @@ void Profile::UpdateValues() {
                   kHmiSection, kLinkToWebHMI);
   LOG_UPDATED_BOOL_VALUE(link_to_web_hmi_, kLinkToWebHMI, kHmiSection);
 #endif // WEB_HMI
+
+#ifdef ENABLE_SECURITY
+
+  ReadStringValue(&security_manager_protocol_name_, kDefaultSecurityProtocol, kSecuritySection,
+      kSecurityProtocolKey);
+
+  ReadStringValue(&cert_path_,   "", kSecuritySection, kSecurityCertificatePathKey);
+  ReadStringValue(&ca_cert_path_, "", kSecuritySection, kSecurityCACertificatePathKey);
+
+  ReadStringValue(&ssl_mode_, kDefaultSSLMode, kSecuritySection,
+      kSecuritySSLModeKey);
+
+  ReadStringValue(&key_path_, "", kSecuritySection, kSecurityKeyPathKey);
+
+  ReadStringValue(&ciphers_list_, SSL_TXT_ALL, kSecuritySection,
+      kSecurityCipherListKey);
+
+  ReadBoolValue(&verify_peer_, kDefaultVerifyPeer, kSecuritySection,
+      kSecurityVerifyPeerKey);
+
+  ReadUIntValue(&update_before_hours_, kDefaultBeforeUpdateHours,
+                kSecuritySection, kBeforeUpdateHours);
+
+#endif  // ENABLE_SECURITY
 
   // Logs enabled
   ReadBoolValue(&logs_enabled_, false, kMainSection, kLogsEnabledKey);
@@ -888,7 +976,11 @@ void Profile::UpdateValues() {
   ReadUIntValue(&stop_streaming_timeout_, kDefaultStopStreamingTimeout,
                 kMediaManagerSection, kStopStreamingTimeout);
 
+#ifdef OS_WIN32
   stop_streaming_timeout_ = max(kDefaultStopStreamingTimeout, stop_streaming_timeout_);
+#else
+  stop_streaming_timeout_ = std::max(kDefaultStopStreamingTimeout, stop_streaming_timeout_);
+#endif
 
   LOG_UPDATED_VALUE(stop_streaming_timeout_, kStopStreamingTimeout,
                     kHmiSection);
@@ -1278,6 +1370,7 @@ void Profile::UpdateValues() {
                   kMmeDatabaseNameKey);
 
   LOG_UPDATED_VALUE(mme_db_name_, kMmeDatabaseNameKey, kTransportManagerSection);
+  
   // Event MQ
   ReadStringValue(&event_mq_name_,
                   kDefaultEventMQ,
@@ -1434,7 +1527,7 @@ void Profile::UpdateValues() {
 
   LOG_UPDATED_VALUE(iap_hub_connection_wait_timeout_,
                     kIAPHubConnectionWaitTimeoutKey, kIAPSection);
- 
+
   ReadUIntValue(&default_hub_protocol_index_, kDefaultHubProtocolIndex, kIAPSection, kDefaultHubProtocolIndexKey);
 
   LOG_UPDATED_VALUE(default_hub_protocol_index_, kDefaultHubProtocolIndexKey, kIAPSection);

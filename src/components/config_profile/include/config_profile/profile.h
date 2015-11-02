@@ -251,20 +251,14 @@ class Profile : public utils::Singleton<Profile> {
      * @brief Returns timeout for SDL to wait for the next package of raw data
      * over audio service
      */
-#ifdef OS_WIN32
-	const uint32_t audio_data_stopped_timeout() const;
-#else
-    const std::uint32_t audio_data_stopped_timeout() const;
-#endif
+    const uint32_t audio_data_stopped_timeout() const;
+
     /**
      * @brief Returns timeout for SDL to wait for the next package of raw data
      * over video service
      */
-#ifdef OS_WIN32
-	const uint32_t video_data_stopped_timeout() const;
-#else
-    const std::uint32_t video_data_stopped_timeout() const;
-#endif
+    const uint32_t video_data_stopped_timeout() const;
+
     /**
      * @brief Returns allowable max amount of requests per time scale for
      * application in hmi level none
@@ -314,7 +308,7 @@ class Profile : public utils::Singleton<Profile> {
     /*
      * @brief Heartbeat timeout before closing connection
      */
-    int32_t heart_beat_timeout() const;
+	uint32_t heart_beat_timeout() const;
 
     /*
      * @brief Path to preloaded policy file
@@ -364,6 +358,48 @@ class Profile : public utils::Singleton<Profile> {
      */
     uint16_t tts_global_properties_timeout() const;
 
+#ifdef ENABLE_SECURITY
+  /**
+   * @brief Returns name of Security Manager protocol
+   */
+  const std::string& security_manager_protocol_name() const;
+
+  /**
+   * @brief Returns SSL mode
+   */
+  const std::string& ssl_mode() const;
+
+  /**
+   * @brief Returns key path to pem file
+   */
+  const std::string& key_path() const;
+
+  /**
+   * @brief Returns certificate path to pem file
+   */
+  const std::string& cert_path() const;
+
+  /**
+   * @brief Returns ca certificate path to pem file
+   */
+  const std::string& ca_cert_path() const;
+
+  /**
+   * @brief Returns ciphers
+   */
+  const std::string& ciphers_list() const;
+
+  /**
+   * @brief Returns true if Mobile app certificate is verified
+   */
+  bool verify_peer() const;
+
+  /**
+   * @brief Return hours amount when PTU should be triggered
+   */
+  uint32_t update_before_hours() const;
+
+#endif //ENABLE_SECURITY
     /**
      * @brief Reads a string value from the profile
      *
@@ -719,6 +755,16 @@ private:
     uint32_t                        application_list_update_timeout_;
     uint32_t                        max_thread_pool_size_;
     uint32_t                        default_hub_protocol_index_;
+#ifdef ENABLE_SECURITY
+  std::string                       cert_path_;
+  std::string                       ca_cert_path_;
+  std::string                       ssl_mode_;
+  std::string                       key_path_;
+  std::string                       ciphers_list_;
+  bool                              verify_peer_;
+  uint32_t                          update_before_hours_;
+  std::string                       security_manager_protocol_name_;
+#endif
 
     /*
      * first value is count of request

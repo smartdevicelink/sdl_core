@@ -348,7 +348,7 @@ bool DBusAdapter::ProcessMethodCall(DBusMessage* msg,
 
 bool DBusAdapter::ProcessMethodReturn(DBusMessage* msg,
                                       smart_objects::SmartObject& obj) {
-  LOG4CXX_INFO(logger_, "ProcessMethodReturn");
+  LOG4CXX_AUTO_TRACE(logger_);
   dbus_uint32_t reply_serial = dbus_message_get_reply_serial(msg);
   std::pair<uint, MessageId> ids = GetRequestToHMI(reply_serial);
   if (ids.second == hmi_apis::FunctionID::INVALID_ENUM) {
@@ -675,7 +675,7 @@ bool DBusAdapter::GetHeader(DBusMessageIter* iter, int* code,
 
 bool DBusAdapter::GetArguments(DBusMessageIter* iter, const ListArgs& rules,
                                smart_objects::SmartObject& args) {
-  LOG4CXX_TRACE(logger_, "GetArguments");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   size_t size = rules.size();
   for (size_t i = 0; i < size; ++i) {

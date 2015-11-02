@@ -81,11 +81,7 @@ void HeartBeatMonitor::threadMain() {
       logger_,
       "Start heart beat monitor. Timeout is " << default_heartbeat_timeout_);
   while (run_) {
-#ifdef OS_WIN32
-	  Sleep(kDefaultCycleTimeout / 1000);
-#else
-    usleep(kDefaultCycleTimeout);
-#endif
+    heartbeat_monitor_.WaitFor(main_lock, kDefaultCycleTimeout);
     Process();
   }
 }

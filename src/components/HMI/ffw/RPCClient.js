@@ -42,9 +42,8 @@ FFW.RPCClient = Em.Object
         /*
          * url for message broker
          */
-        // url: FLAGS.WEBSOCKET_URL,
-	    url: "ws://localhost:12346",
-		
+        url: FLAGS.WEBSOCKET_URL,
+
         /*
          * Component name in RPC system It is unique.
          */
@@ -81,7 +80,7 @@ FFW.RPCClient = Em.Object
             var self = this;
 
             this.socket.onopen = function(evt) {
-				console.log("open...");
+
                 self.onWSOpen(evt)
             };
             this.socket.onclose = function(evt) {

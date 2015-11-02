@@ -66,6 +66,12 @@
 
 #include "interfaces/v4_protocol_v1_2_no_extra.h"
 #include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
+
+#ifdef ENABLE_SECURITY
+#include "security_manager/security_manager_listener.h"
+#include "security_manager/ssl_context.h"
+#endif // ENABLE_SECURITY
+
 #ifdef TIME_TESTER
 #include "time_metric_observer.h"
 #endif  // TIME_TESTER
@@ -121,6 +127,7 @@ using namespace threads;
  * when we have them.
  */
 struct MessageFromMobile: public utils::SharedPtr<Message> {
+  MessageFromMobile() {}
   explicit MessageFromMobile(const utils::SharedPtr<Message>& message)
       : utils::SharedPtr<Message>(message) {
   }
@@ -131,6 +138,7 @@ struct MessageFromMobile: public utils::SharedPtr<Message> {
 };
 
 struct MessageToMobile: public utils::SharedPtr<Message> {
+  MessageToMobile() : is_final(false) {}
   explicit MessageToMobile(const utils::SharedPtr<Message>& message,
                            bool final_message)
       : utils::SharedPtr<Message>(message),
@@ -145,6 +153,7 @@ struct MessageToMobile: public utils::SharedPtr<Message> {
 };
 
 struct MessageFromHmi: public utils::SharedPtr<Message> {
+  MessageFromHmi() {}
   explicit MessageFromHmi(const utils::SharedPtr<Message>& message)
       : utils::SharedPtr<Message>(message) {
   }
@@ -155,6 +164,7 @@ struct MessageFromHmi: public utils::SharedPtr<Message> {
 };
 
 struct MessageToHmi: public utils::SharedPtr<Message> {
+  MessageToHmi() {}
   explicit MessageToHmi(const utils::SharedPtr<Message>& message)
       : utils::SharedPtr<Message>(message) {
   }
@@ -203,6 +213,9 @@ class ApplicationManagerImpl : public ApplicationManager,
   public protocol_handler::ProtocolObserver,
   public connection_handler::ConnectionHandlerObserver,
   public policy::PolicyHandlerObserver,
+#ifdef ENABLE_SECURITY
+  public security_manager::SecurityManagerListener,
+#endif // ENABLE_SECURITY
   public impl::FromMobileQueue::Handler, public impl::ToMobileQueue::Handler,
   public impl::FromHmiQueue::Handler, public impl::ToHmiQueue::Handler,
   public impl::AudioPassThruQueue::Handler,

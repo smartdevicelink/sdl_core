@@ -30,9 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
+#include "application_manager/policies/policy_handler.h"
+
 #ifdef OS_WIN32
 #include <Windows.h>
 #else
@@ -44,10 +43,7 @@
 #include "application_manager/smart_object_keys.h"
 
 #include "application_manager/policies/delegates/app_permission_delegate.h"
-#include "application_manager/policies/policy_handler.h"
-#include "application_manager/policies/policy_retry_sequence.h"
-#include "application_manager/policies/pt_exchange_handler_impl.h"
-#include "application_manager/policies/pt_exchange_handler_ext.h"
+
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
 #include "policy/policy_manager_impl.h"
@@ -61,8 +57,6 @@
 #include "policy/policy_types.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
-#include "utils/appenders_loader.h"
-#include "apr_arch_dso.h"
 
 namespace policy {
 
@@ -543,6 +537,13 @@ void PolicyHandler::OnAppPermissionConsentInternal(
   }
 }
 
+#ifdef ENABLE_SECURITY
+std::string PolicyHandler::RetrieveCertificate() const {
+  POLICY_LIB_CHECK(std::string(""));
+  return policy_manager_->RetrieveCertificate();
+}
+#endif // ENABLE_SECURITY
+
 void PolicyHandler::OnGetUserFriendlyMessage(
   const std::vector<std::string>& message_codes, const std::string& language,
   uint32_t correlation_id) {
@@ -709,7 +710,7 @@ void PolicyHandler::OnPendingPermissionChange(
       app_id, permissions);
     ApplicationManagerImpl::instance()->SetState<true>(app->app_id(),
                                                  mobile_apis::HMILevel::HMI_NONE,
-                                                 mobile_apis::AudioStreamingState::NOT_AUDIBLE);    
+                                                 mobile_apis::AudioStreamingState::NOT_AUDIBLE);
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);
     return;
   }
@@ -833,6 +834,8 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
 }
 
 bool PolicyHandler::UnloadPolicyLibrary() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "policy_manager_ = " << policy_manager_);
   bool ret = true;
 #ifdef OS_WIN32
 #else
@@ -1053,6 +1056,11 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
                                       int timeout_exchange) {
   EndpointUrls urls;
   policy_manager_->GetServiceUrls("0x07", urls);
+
+  if (urls.empty()) {
+    return;
+  }
+
   SendMessageToSDK(pt_string, urls.front().url.front());
 }
 
@@ -1231,7 +1239,7 @@ void PolicyHandler::RemoveDevice(const std::string& device_id) {
 }
 
 bool PolicyHandler::IsApplicationRevoked(const std::string& app_id) {
-  LOG4CXX_TRACE(logger_, "PolicyHandler::IsApplicationRevoked");
+  LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK(false);
 
   return policy_manager_->IsApplicationRevoked(app_id);
