@@ -106,13 +106,6 @@ class AlertRequest : public CommandRequestImpl {
   void SendSpeakRequest(int32_t app_id);
 
   /*
-   * @brief Sends Basic communication playtone notification
-   *
-   * @param app_id Id of application requested this RPC
-   */
-  void SendPlayToneNotification(int32_t app_id);
-
-  /*
    * @brief Tells if there are sent requests without responses
    */
   bool HasHmiResponsesToWait();

@@ -216,7 +216,6 @@
 #include "application_manager/commands/hmi/on_app_registered_notification.h"
 #include "application_manager/commands/hmi/on_app_unregistered_notification.h"
 #include "application_manager/commands/hmi/on_driver_distraction_notification.h"
-#include "application_manager/commands/hmi/on_play_tone_notification.h"
 #include "application_manager/commands/hmi/on_tts_started_notification.h"
 #include "application_manager/commands/hmi/on_tts_stopped_notification.h"
 #include "application_manager/commands/hmi/on_vr_started_notification.h"
@@ -1093,10 +1092,6 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::BasicCommunication_OnEmergencyEvent: {
       command.reset(new commands::OnEmergencyEventNotification(message));
-      break;
-    }
-    case hmi_apis::FunctionID::BasicCommunication_PlayTone: {
-      command.reset(new commands::OnPlayToneNotification(message));
       break;
     }
     case hmi_apis::FunctionID::BasicCommunication_OnReady: {
