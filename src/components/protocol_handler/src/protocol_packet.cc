@@ -125,8 +125,11 @@ void ProtocolPacket::ProtocolHeader::deserialize(
 }
 
 ProtocolPacket::ProtocolHeaderValidator::ProtocolHeaderValidator()
+#ifdef MODIFY_FUNCTION_SIGN
 	: max_payload_size_(UINT_MAX) {}
+#else
   //: max_payload_size_(std::numeric_limits<size_t>::max()) {}
+#endif
 
 void ProtocolPacket::ProtocolHeaderValidator::set_max_payload_size(
     const size_t max_payload_size) {
@@ -138,14 +141,21 @@ size_t ProtocolPacket::ProtocolHeaderValidator::max_payload_size() const {
   return max_payload_size_;
 }
 
-RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(const ProtocolHeader& header) const {
+RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
+    const ProtocolHeader& header) const {
   LOG4CXX_AUTO_TRACE(logger_);
+  // expected payload size will be calculated depending
+  // on used protocol version
+  size_t payload_size = MAXIMUM_FRAME_DATA_V2_SIZE;
   // Protocol version shall be from 1 to 4
   switch (header.version) {
     case PROTOCOL_VERSION_1:
     case PROTOCOL_VERSION_2:
+      break;
     case PROTOCOL_VERSION_3:
     case PROTOCOL_VERSION_4:
+      payload_size = max_payload_size_ > MAXIMUM_FRAME_DATA_V2_SIZE ?
+                     max_payload_size_ : MAXIMUM_FRAME_DATA_V2_SIZE;
       break;
     default:
       LOG4CXX_WARN(logger_, "Unknown version " <<
@@ -207,8 +217,8 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(const ProtocolHead
   }
   // For Control frames Data Size value shall be less than MTU header
   // For Single and Consecutive Data Size value shall be greater than 0x00
-  // and shall be less than N (this value will be defined in .ini file)
-  if (header.dataSize > max_payload_size_) {
+  // and shall be less than payload size
+  if (header.dataSize > payload_size) {
     LOG4CXX_WARN(logger_, "Packet data size is " << header.dataSize <<
                  "and biger than allowed payload size " <<
                  payload_size << " bytes");

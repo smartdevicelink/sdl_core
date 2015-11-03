@@ -89,7 +89,8 @@ void HMIMessageHandlerImpl::OnErrorSending(MessageSharedPointer message) {
   observer_->OnErrorSending(message);
 }
 
-void HMIMessageHandlerImpl::AddHMIMessageAdapter(HMIMessageAdapter* adapter) {
+void HMIMessageHandlerImpl::AddHMIMessageAdapter(
+    HMIMessageAdapter* adapter) {
   LOG4CXX_AUTO_TRACE(logger_);
   message_adapters_.insert(adapter);
 }

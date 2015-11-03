@@ -44,8 +44,9 @@ inline void memory_barrier() {
   __cpu_membarrier();
 #elif defined(__GNUG__)
   __sync_synchronize();
+#elif defined(_WIN32)
 #else
-//#warning "memory_barrier() implementation does nothing"
+#warning "memory_barrier() implementation does nothing"
 #endif
 }
 

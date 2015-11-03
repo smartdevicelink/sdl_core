@@ -30,10 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_H_
+#define SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_H_
 
 #ifdef ENABLE_LOG
   #include <errno.h>
@@ -57,11 +55,12 @@
       log4cxx::LoggerPtr logger_var = log4cxx::LoggerPtr(log4cxx::Logger::getLogger(logger_name));
 
     #define INIT_LOGGER(file_name) \
-      log4cxx::PropertyConfigurator::configure(file_name);
+      log4cxx::PropertyConfigurator::configure(file_name); \
+      logger::set_logs_enabled(profile::Profile::instance()->logs_enabled());
 
     // Logger deinitilization function and macro, need to stop log4cxx writing
     // without this deinitilization log4cxx threads continue using some instances destroyed by exit()
-    void deinit_logger ();
+    void deinit_logger();
     #define DEINIT_LOGGER() deinit_logger()
 
     #define LOG4CXX_IS_TRACE_ENABLED(logger) logger->isTraceEnabled()
@@ -127,7 +126,7 @@
      #define LOG4CXX_WARN_WITH_ERRNO(logger, message) \
        LOG4CXX_WARN(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
 
-#else // ENABLE_LOG is OFF
+#else  // ENABLE_LOG is OFF
 
     #define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name)
 
@@ -143,19 +142,19 @@
     #define LOG4CXX_IS_TRACE_ENABLED(logger) false
 
     #undef LOG4CXX_INFO
-    #define LOG4CXX_INFO(x,y)
+    #define LOG4CXX_INFO(x, y)
 
     #undef LOG4CXX_WARN
-    #define LOG4CXX_WARN(x,y)
+    #define LOG4CXX_WARN(x, y)
 
     #undef LOG4CXX_ERROR
-    #define LOG4CXX_ERROR(x,y)
+    #define LOG4CXX_ERROR(x, y)
 
     #undef LOG4CXX_ERROR_WITH_ERRNO
-    #define LOG4CXX_ERROR_WITH_ERRNO(x,y)
+    #define LOG4CXX_ERROR_WITH_ERRNO(x, y)
 
     #undef LOG4CXX_WARN_WITH_ERRNO
-    #define LOG4CXX_WARN_WITH_ERRNO(x,y)
+    #define LOG4CXX_WARN_WITH_ERRNO(x, y)
 
     #undef LOG4CXX_TRACE
     #define LOG4CXX_TRACE(x,y)
@@ -164,7 +163,7 @@
     #define LOG4CXX_DEBUG(x,y)
 
     #undef LOG4CXX_FATAL
-    #define LOG4CXX_FATAL(x,y)
+    #define LOG4CXX_FATAL(x, y)
 
     #define LOG4CXX_INFO_EXT(logger, logEvent)
     #define LOG4CXX_INFO_STR_EXT(logger, logEvent)
@@ -188,4 +187,4 @@
     #define LOG4CXX_AUTO_TRACE(loggerPtr)
 #endif  // ENABLE_LOG
 
-#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_H_
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_H_

@@ -34,10 +34,7 @@
 #define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_MQUEUE_ADAPTER_H_
 
 #include <memory>
-#if defined(__linux__) && !defined(SD_DAEMON_DISABLE_MQ)
 #include <mqueue.h>
-#endif
-
 #include "utils/threads/thread.h"
 #include "hmi_message_handler/hmi_message_adapter.h"
 

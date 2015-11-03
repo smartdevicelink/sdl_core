@@ -92,7 +92,7 @@ class SpinMutex {
 class Lock {
  public:
   Lock();
-  Lock(bool is_mutex_recursive);
+  Lock(bool is_recursive);
   ~Lock();
 
   // Ackquire the lock. Must be called only once on a thread.
@@ -130,6 +130,7 @@ class Lock {
   void AssertTakenAndMarkFree() {}
 #endif
 
+  void Init(bool is_recursive);
 
   friend class ConditionalVariable;
   DISALLOW_COPY_AND_ASSIGN(Lock);
