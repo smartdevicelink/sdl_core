@@ -1791,6 +1791,7 @@ void MessageHelper::SendNaviStartStream(int32_t connection_key) {
 }
 
 void MessageHelper::SendNaviStopStream(int32_t connection_key) {
+  LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr stop_stream = CreateRequestObject();
   if (!stop_stream) {
     return;
@@ -1814,7 +1815,7 @@ void MessageHelper::SendNaviStopStream(int32_t connection_key) {
 }
 
 void MessageHelper::SendAudioStartStream(int32_t connection_key) {
-
+  LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr start_stream = CreateRequestObject();
   if (!start_stream) {
     return;
@@ -1854,6 +1855,7 @@ void MessageHelper::SendAudioStartStream(int32_t connection_key) {
 }
 
 void MessageHelper::SendAudioStopStream(int32_t connection_key) {
+  LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr stop_stream = CreateRequestObject();
   if (!stop_stream) {
     return;

@@ -1088,18 +1088,18 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   const protocol_handler::ServiceType& type) {
   using namespace helpers;
   using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "ServiceType = " << type <<
+                         ". Session = " << std::hex << session_key);
 
-  LOG4CXX_DEBUG(logger_,
-               "OnServiceStartedCallback " << type
-                << " in session 0x" << std::hex << session_key);
   if (type == kRpc) {
     LOG4CXX_INFO(logger_, "RPC service is about to be started.");
     return true;
   }
   ApplicationSharedPtr app = application(session_key);
   if (!app) {
-    LOG4CXX_DEBUG(logger_, "The application with id:" << session_key <<
-                  " doesn't exists.");
+    LOG4CXX_WARN(logger_, "The application with id:" << session_key
+                                                     << " doesn't exists.");
     return false;
   }
 
@@ -2731,14 +2731,18 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
     if (it->second.first) {
       LOG4CXX_DEBUG(logger_, "Going to end video service");
       connection_handler_->SendEndService(app_id, ServiceType::kMobileNav);
+      MessageHelper::SendNaviStopStream(app->app_id());
       app->set_video_streaming_approved(false);
       app->set_video_streaming_allowed(false);
+      app->set_video_stream_retry_number(0);
     }
     if (it->second.second) {
       LOG4CXX_DEBUG(logger_, "Going to end audio service");
       connection_handler_->SendEndService(app_id, ServiceType::kAudio);
+      MessageHelper::SendAudioStopStream(app->app_id());
       app->set_audio_streaming_approved(false);
       app->set_audio_streaming_allowed(false);
+      app->set_audio_stream_retry_number(0);
     }
     navi_app_to_stop_.push_back(app_id);
 
