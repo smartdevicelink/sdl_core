@@ -199,6 +199,7 @@ bool LifeCycle::StartComponents() {
   // it is important to initialise TimeTester before TM to listen TM Adapters
 #ifdef TIME_TESTER
   time_tester_ = new time_tester::TimeManager();
+  time_tester_->Start();
   time_tester_->Init(protocol_handler_);
 #endif  // TIME_TESTER
   // It's important to initialise TM after setting up listener chain
