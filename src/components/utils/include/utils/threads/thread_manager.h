@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_THREADS_THREAD_MANAGER_H_
 
 #include "utils/threads/thread.h"
-#include "utils/lock.h"
+
 #include <pthread.h>
 
 #include <map>
@@ -64,7 +64,6 @@ namespace impl {
 		PlatformThreadHandle	id;
 		std::string				name;
 	} PlatformThreadStruct;
-#endif
 /*
  * Generates short and unique names for unnamed threads
  * and remembers association between thread handle and that short name
@@ -89,7 +88,7 @@ class UnnamedThreadRegistry {
   int32_t last_thread_number_;
   sync_primitives::Lock state_lock_;
 };
-
+#endif
 /*
  * This class is here currently to remember names associated to threads.
  * It manages raw impl::PlatformHandles because Thread::Id's do not provide
@@ -108,7 +107,7 @@ class ThreadManager : public utils::Singleton<ThreadManager> {
   ~ThreadManager();
 #ifndef OS_WIN32
   MessageQueue<ThreadDesc> threads_to_terminate;
-#endif
+#else
   // Name a thread. Should be called only once for every thread.
   // Threads can't be renamed
   void RegisterName(PlatformThreadHandle id, const std::string& name);
@@ -120,7 +119,7 @@ class ThreadManager : public utils::Singleton<ThreadManager> {
   // Make sure to call it after thread is finished
   // Because thread id's can be recycled
   void Unregister(PlatformThreadHandle id);
- private:
+private:
   typedef std::set<std::string> NamesSet;
 #ifdef OS_WIN32
   typedef std::vector<PlatformThreadStruct> IdNamesMap;
@@ -136,6 +135,7 @@ class ThreadManager : public utils::Singleton<ThreadManager> {
   // Generator of shorter sequental names for unnamed threads
   // Has to memorize every generated name this is why it is mutable
   mutable UnnamedThreadRegistry unnamed_thread_namer_;
+#endif
 
  private:
   DISALLOW_COPY_AND_ASSIGN(ThreadManager);

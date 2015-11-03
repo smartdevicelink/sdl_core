@@ -88,6 +88,7 @@ enum eType {
    **/
   MISSING_MANDATORY_PARAMETER,
 
+#ifdef MODIFY_FUNCTION_SIGN
   /**
     * @brief Mandatory untitled (with any name) parameter is missing.
     **/
@@ -97,6 +98,7 @@ enum eType {
     * @brief Unexpected parameter.
     **/
   UNEXPECTED_PARAMETER,
+#endif
 
   /**
    * @brief General validation error

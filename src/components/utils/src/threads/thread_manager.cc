@@ -30,9 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
-#endif
 #include "utils/threads/thread_manager.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/lock.h"
