@@ -52,6 +52,7 @@ set(SOURCES
   protocol_handler_tm_test.cc
   protocol_packet_test.cc
   protocol_payload_test.cc
+  multiframe_builder_test.cc
 )
 
 create_test("protocol_handler_test" "${SOURCES}" "${LIBRARIES}")

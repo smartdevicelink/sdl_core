@@ -33,6 +33,7 @@
 #include <stdint.h>
 #include <memory.h>
 #include <new>
+#include <memory>
 #include <cstring>
 #include <limits>
 
@@ -247,7 +248,7 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
 }
 
 ProtocolPacket::ProtocolPacket()
-  : payload_size_(0), connection_id_(0)  {
+  : payload_size_(0u), connection_id_(0u)  {
 }
 
 ProtocolPacket::ProtocolPacket(ConnectionID connection_id,
@@ -382,7 +383,7 @@ RESULT_CODE ProtocolPacket::deserializePacket(
     dataPayloadSize = messageSize - offset;
   }
 
-  uint8_t *data = NULL;
+  uint8_t* data = NULL;
   if (dataPayloadSize) {
     data = new (std::nothrow) uint8_t[dataPayloadSize];
     if (!data) {
@@ -401,6 +402,7 @@ RESULT_CODE ProtocolPacket::deserializePacket(
     total_data_bytes |= data[3];
     set_total_data_bytes(total_data_bytes);
     if (0 == packet_data_.data) {
+      delete[] data;
       return RESULT_FAIL;
     }
   } else {
@@ -482,7 +484,7 @@ uint32_t ProtocolPacket::total_data_bytes() const {
   return packet_data_.totalDataBytes;
 }
 
-uint8_t ProtocolPacket::connection_id() const {
+ConnectionID ProtocolPacket::connection_id() const {
   return connection_id_;
 }
 

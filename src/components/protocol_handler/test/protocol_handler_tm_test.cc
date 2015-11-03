@@ -64,12 +64,15 @@ class ProtocolHandlerImplTest : public ::testing::Test {
       const size_t period_msec, const size_t max_messages,
       bool malformed_message_filtering = false,
       const size_t malformd_period_msec = 0u,
-      const size_t malformd_max_messages = 0u) {
+      const size_t malformd_max_messages = 0u,
+      const int32_t multiframe_waiting_timeout = 0) {
     protocol_handler_impl.reset(
         new ProtocolHandlerImpl(&transport_manager_mock,
                                 period_msec, max_messages,
                                 malformed_message_filtering,
-                                malformd_period_msec, malformd_max_messages));
+                                malformd_period_msec,
+                                malformd_max_messages,
+                                multiframe_waiting_timeout));
     protocol_handler_impl->set_session_observer(&session_observer_mock);
     tm_listener = protocol_handler_impl.get();
   }
@@ -249,7 +252,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
   // For enabled protection callback shall use protection ON
   const bool callback_protection_flag = PROTECTION_ON;
 #else
-  // For disabled protection callback shall ignore protection income flad and use protection OFF
+  // For disabled protection callback shall ignore protection income flag and use protection OFF
   const bool callback_protection_flag = PROTECTION_OFF;
 #endif  // ENABLE_SECURITY
   // expect ConnectionHandler check
