@@ -97,13 +97,15 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @brief Check if specified RPC for specified application
      * has permission to be executed in specified HMI Level
      * and also its permitted params.
+     * @param device_id unique identifier of device
      * @param app_id Id of application provided during registration
      * @param hmi_level Current HMI Level of application
      * @param rpc Name of RPC
      * @param CheckPermissionResult containing flag if HMI Level is allowed
      * and list of allowed params.
      */
-    virtual void CheckPermissions(const PTString& app_id,
+    virtual void CheckPermissions(const PTString& device_id,
+        const PTString& app_id,
         const PTString& hmi_level,
         const PTString& rpc,
         const RPCParams& rpc_params,
@@ -521,21 +523,27 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
     /**
      * Handles changed primary device event for a application
+     * @param device_id Device on which app is running
      * @param application_id ID application
      */
-    virtual void OnChangedPrimaryDevice(const std::string& application_id) = 0;
+    virtual void OnChangedPrimaryDevice(const std::string& device_id,
+                                        const std::string& application_id) = 0;
 
     /**
      * Handles changed remote control event for a application
+     * @param device_id Device on which app is running
      * @param application_id ID application
      */
-    virtual void OnChangedRemoteControl(const std::string& application_id) = 0;
+    virtual void OnChangedRemoteControl(const std::string& device_id,
+                                        const std::string& application_id) = 0;
 
     /**
      * Handles changed device zone event for a application
+     * @param device_id Device on which app is running
      * @param application_id ID application
      */
-    virtual void OnChangedDeviceZone(const std::string& application_id) = 0;
+    virtual void OnChangedDeviceZone(const std::string& device_id,
+                                     const std::string& application_id) = 0;
 
     /*
      * Send OnPermissionsChange notification to mobile app

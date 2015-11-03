@@ -185,7 +185,7 @@ TEST_F(PolicyManagerImplTest, CheckPermissions_SetHmiLevelFullForAlert_ExpectAll
   //act
   ::policy::RPCParams input_params;
   ::policy::CheckPermissionResult output;
-  manager->CheckPermissions("12345678", "FULL", "Alert", input_params, output);
+  manager->CheckPermissions("device_1", "12345678", "FULL", "Alert", input_params, output);
 
   //assert
   EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);

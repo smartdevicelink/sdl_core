@@ -88,8 +88,7 @@ class PolicyHandler :
                                  int timeout_exchange);
 
   bool GetPriority(const std::string& policy_app_id, std::string* priority);
-  void CheckPermissions(const PTString& app_id,
-                   const PTString& hmi_level,
+  void CheckPermissions(const application_manager::ApplicationSharedPtr app,
                    const PTString& rpc,
                    const RPCParams& rpc_params,
                    CheckPermissionResult& result);

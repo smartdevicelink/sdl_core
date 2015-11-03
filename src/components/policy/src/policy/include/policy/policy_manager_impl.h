@@ -65,7 +65,8 @@ class PolicyManagerImpl : public PolicyManager {
 
     virtual std::string GetLockScreenIconUrl() const;
     virtual void RequestPTUpdate();
-    virtual void CheckPermissions(const PTString& app_id,
+    virtual void CheckPermissions(const PTString& device_id,
+        const PTString& app_id,
         const PTString& hmi_level,
         const PTString& rpc,
         const RPCParams& rpc_params,
@@ -192,9 +193,12 @@ class PolicyManagerImpl : public PolicyManager {
     virtual bool GetDeviceZone(const PTString& dev_id, SeatLocation* zone) const;
     virtual void SetRemoteControl(bool enabled);
     virtual bool GetRemoteControl() const;
-    virtual void OnChangedPrimaryDevice(const std::string& application_id);
-    virtual void OnChangedRemoteControl(const std::string& application_id);
-    virtual void OnChangedDeviceZone(const std::string& application_id);
+    virtual void OnChangedPrimaryDevice(const std::string& device_id,
+                                        const std::string& application_id);
+    virtual void OnChangedRemoteControl(const std::string& device_id,
+                                        const std::string& application_id);
+    virtual void OnChangedDeviceZone(const std::string& device_id,
+                                     const std::string& application_id);
     virtual void SendAppPermissionsChanged(const std::string& device_id,
       const std::string& application_id);
 #endif  // SDL_REMOTE_CONTROL

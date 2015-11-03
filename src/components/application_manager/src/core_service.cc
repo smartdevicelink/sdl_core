@@ -65,8 +65,7 @@ mobile_apis::Result::eType CoreService::CheckPolicyPermissions(MessagePtr msg) {
   const RPCParams rpc_params;
   CommandParametersPermissions params;
   const mobile_apis::Result::eType ret = ApplicationManagerImpl::instance()
-      ->CheckPolicyPermissions(app->mobile_app_id(), app->hmi_level(),
-                               msg->function_name(), rpc_params, &params);
+      ->CheckPolicyPermissions(app, msg->function_name(), rpc_params, &params);
 
   if (ret != mobile_apis::Result::eType::SUCCESS) {
     return ret;

@@ -282,7 +282,7 @@ TEST_F(PolicyManagerImplStressTest, OneCheck_AppAndFunctuionExisting_RpcAllowed)
 #ifdef SDL_REMOTE_CONTROL
   EXPECT_CALL(*mock_listener, OnCurrentDeviceIdUpdateRequired("2"));
 #endif  // SDL_REMOTE_CONTROL
-  manager->CheckPermissions("2", "FULL", "Func-0", input_params, output);
+  manager->CheckPermissions("dev_1", "2", "FULL", "Func-0", input_params, output);
   EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
 }
 
@@ -292,7 +292,7 @@ TEST_F(PolicyManagerImplStressTest, NoApp_AppDoesNotExisted_RpcDissallowed) {
 #ifdef SDL_REMOTE_CONTROL
   EXPECT_CALL(*mock_listener, OnCurrentDeviceIdUpdateRequired("1500")).Times(0);
 #endif  // SDL_REMOTE_CONTROL
-  manager->CheckPermissions("1500", "FULL", "Func-88", input_params, output);
+  manager->CheckPermissions("dev_1", "1500", "FULL", "Func-88", input_params, output);
   EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
 }
 
@@ -302,7 +302,7 @@ TEST_F(PolicyManagerImplStressTest, NoFunc_FuncDoesNotExisted_RpcDissallowed) {
 #ifdef SDL_REMOTE_CONTROL
   EXPECT_CALL(*mock_listener, OnCurrentDeviceIdUpdateRequired("2"));
 #endif  // SDL_REMOTE_CONTROL
-  manager->CheckPermissions("2", "FULL", "Func-1500", input_params, output);
+  manager->CheckPermissions("dev_1", "2", "FULL", "Func-1500", input_params, output);
   EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
 }
 
@@ -312,7 +312,7 @@ TEST_F(PolicyManagerImplStressTest, NoHmi_HMIInLevelNone_RpcDissallowed) {
 #ifdef SDL_REMOTE_CONTROL
   EXPECT_CALL(*mock_listener, OnCurrentDeviceIdUpdateRequired("2"));
 #endif  // SDL_REMOTE_CONTROL
-  manager->CheckPermissions("2", "NONE", "Func-88", input_params, output);
+  manager->CheckPermissions("dev_1", "2", "NONE", "Func-88", input_params, output);
   EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
 }
 
@@ -335,7 +335,7 @@ TEST_F(PolicyManagerImplStressTest, FewChecks_CheckSeveralFunctions) {
 
     ::policy::RPCParams input_params;
     ::policy::CheckPermissionResult output;
-    manager->CheckPermissions(app_number, "FULL", "Func-" + func_number,
+    manager->CheckPermissions("dev_1", app_number, "FULL", "Func-" + func_number,
                               input_params, output);
     // This test always pass. It is needed only for measure performance.
   }
