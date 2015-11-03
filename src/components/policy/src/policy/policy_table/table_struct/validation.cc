@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cctype>
+#include <cstdlib>
 #include "./types.h"
 #include "utils/macro.h"
 
@@ -189,14 +190,18 @@ bool InteriorZone::Validate() const {
 
 namespace {
 struct IsDeniedChar {
-  bool operator() (char c) {
+  bool operator() (wchar_t c) {
+    assert(c == '_' || std::isalnum(c));
     return c != '_' && !std::isalnum(c);
   }
 };
 }  // namespace
 
 bool Equipment::ValidateNameZone(const std::string& name) const {
-  return std::find_if(name.begin(), name.end(), IsDeniedChar()) == name.end();
+  std::vector<wchar_t> wchars(name.length() + 1, L'\0');
+  size_t n = mbstowcs(&(wchars.front()), name.c_str(), name.length());
+  std::vector<wchar_t>::iterator real_end = wchars.begin() + n;
+  return std::find_if(wchars.begin(), real_end, IsDeniedChar()) == real_end;
 }
 
 bool Equipment::Validate() const {
