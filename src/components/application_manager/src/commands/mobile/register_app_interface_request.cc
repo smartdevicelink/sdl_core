@@ -159,84 +159,81 @@ namespace application_manager {
 namespace commands {
 
 #ifdef SDL_REMOTE_CONTROL
-struct IsSameAppId {
-  IsSameAppId(const std::string& app_id, bool is_remote_control, bool is_driver):
-      app_id_(app_id),
+struct IsSameApp {
+  IsSameApp(bool is_remote_control, bool is_driver):
       is_remote_control_(is_remote_control),
       is_driver_(is_driver) {
   }
-  bool operator() (ApplicationSharedPtr other) const {
-    if (!is_remote_control_ || !IsOtherRemoteControl(other) ||
-        IsSameDeviceType(other)) {
-      return strcasecmp(app_id_.c_str(), other->mobile_app_id().c_str()) == 0;
-    }
-    return false;
-  }
- private:
-  static const functional_modules::ModuleID kCANModuleID = 153;
-  bool IsOtherRemoteControl(ApplicationSharedPtr other) const {
-    return functional_modules::PluginManager::instance()->IsAppForPlugin(other, kCANModuleID);
+  virtual bool operator() (ApplicationSharedPtr other) const = 0;
+ protected:
+  bool AreBothRemoteControl(ApplicationSharedPtr other) const {
+    return is_remote_control_
+        && functional_modules::PluginManager::instance()->IsAppForPlugin(other, kCANModuleID);
   }
   bool IsSameDeviceType(ApplicationSharedPtr other) const {
     bool other_is_driver = other->device() == policy::PolicyHandler::instance()->PrimaryDevice();
     return is_driver_ == other_is_driver;
   }
-  const std::string& app_id_;
+ private:
+  static const functional_modules::ModuleID kCANModuleID = 153;
   bool is_remote_control_;
   bool is_driver_;
 };
-struct IsSameAppName {
-  IsSameAppName(const std::string& name,
-                         const smart_objects::SmartArray *vr_synonyms,
-                         bool is_remote_control, bool is_driver):
-      name_(name),
-      matcher_(name_),
-      vr_synonyms_(vr_synonyms),
-      is_remote_control_(is_remote_control),
-      is_driver_(is_driver) {
+struct IsSameAppId: public IsSameApp {
+  IsSameAppId(const std::string& app_id, bool is_remote_control, bool is_driver):
+      IsSameApp(is_remote_control, is_driver),
+      app_id_(app_id) {
   }
   bool operator() (ApplicationSharedPtr other) const {
-    if (!is_remote_control_ || !IsOtherRemoteControl(other) ||
-        IsSameDeviceType(other)) {
-      bool same = strcasecmp(name_.c_str(), other->name().c_str()) == 0;
-      if (same) {
+    if (AreBothRemoteControl(other) && !IsSameDeviceType(other)) {
+      return false;
+    }
+    return strcasecmp(app_id_.c_str(), other->mobile_app_id().c_str()) == 0;
+  }
+ private:
+  const std::string& app_id_;
+};
+struct IsSameAppName: public IsSameApp {
+  IsSameAppName(const std::string& name,
+                const smart_objects::SmartArray *vr_synonyms,
+                bool is_remote_control, bool is_driver):
+      IsSameApp(is_remote_control, is_driver),
+      name_(name),
+      matcher_(name_),
+      vr_synonyms_(vr_synonyms) {
+  }
+  bool operator() (ApplicationSharedPtr other) const {
+    if (AreBothRemoteControl(other) && !IsSameDeviceType(other)) {
+      return false;
+    }
+    bool same = strcasecmp(name_.c_str(), other->name().c_str()) == 0;
+    if (same) {
+      LOG4CXX_ERROR(logger_, "Application name is known already.");
+      return true;
+    }
+
+    if (other->vr_synonyms() && other->vr_synonyms()->asArray()) {
+      smart_objects::SmartArray *other_vr_synonyms = other->vr_synonyms()->asArray();
+      if (std::find_if(other_vr_synonyms->begin(), other_vr_synonyms->end(),
+                       matcher_) != other_vr_synonyms->end()) {
         LOG4CXX_ERROR(logger_, "Application name is known already.");
         return true;
       }
+    }
 
-      if (other->vr_synonyms() && other->vr_synonyms()->asArray()) {
-        smart_objects::SmartArray *other_vr_synonyms = other->vr_synonyms()->asArray();
-        if (std::find_if(other_vr_synonyms->begin(), other_vr_synonyms->end(),
-                         matcher_) != other_vr_synonyms->end()) {
-          LOG4CXX_ERROR(logger_, "Application name is known already.");
-          return true;
-        }
-      }
-
-      if (vr_synonyms_) {
-        if (std::find_if(vr_synonyms_->begin(), vr_synonyms_->end(),
-                         matcher_) != vr_synonyms_->end()) {
-          LOG4CXX_ERROR(logger_, "vr_synonyms duplicated with app_name .");
-          return true;
-        }
+    if (vr_synonyms_) {
+      if (std::find_if(vr_synonyms_->begin(), vr_synonyms_->end(),
+                       matcher_) != vr_synonyms_->end()) {
+        LOG4CXX_ERROR(logger_, "vr_synonyms duplicated with app_name .");
+        return true;
       }
     }
     return false;
   }
  private:
-  static const functional_modules::ModuleID kCANModuleID = 153;
-  bool IsOtherRemoteControl(ApplicationSharedPtr other) const {
-    return functional_modules::PluginManager::instance()->IsAppForPlugin(other, kCANModuleID);
-  }
-  bool IsSameDeviceType(ApplicationSharedPtr other) const {
-    bool other_is_driver = other->device() == policy::PolicyHandler::instance()->PrimaryDevice();
-    return is_driver_ == other_is_driver;
-  }
   const std::string& name_;
   CoincidencePredicateVR matcher_;
   const smart_objects::SmartArray *vr_synonyms_;
-  bool is_remote_control_;
-  bool is_driver_;
 };
 #else  // SDL_REMOTE_CONTROL
 struct IsSameAppId {
@@ -251,7 +248,7 @@ struct IsSameAppId {
 };
 struct IsSameAppName {
   IsSameAppName(const std::string& name,
-                         const smart_objects::SmartArray *vr_synonyms):
+                const smart_objects::SmartArray *vr_synonyms):
       name_(name),
       matcher_(name_),
       vr_synonyms_(vr_synonyms) {
