@@ -40,32 +40,32 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
 IncomingDataHandler::IncomingDataHandler()
   : header_(),
     validator_(NULL),
-    last_portion_of_data_was_malformed_(false)
-    {}
+    last_portion_of_data_was_malformed_(false) {
+}
 
 void IncomingDataHandler::set_validator(
-  const ProtocolPacket::ProtocolHeaderValidator *const validator) {
+  const ProtocolPacket::ProtocolHeaderValidator* const validator) {
   validator_ = validator;
 }
 
 static const size_t MIN_HEADER_SIZE = std::min(PROTOCOL_HEADER_V1_SIZE,
                                                PROTOCOL_HEADER_V2_SIZE);
 
-std::list<ProtocolFramePtr> IncomingDataHandler::ProcessData(
-    const RawMessage &tm_message,
-    RESULT_CODE *result,
-    size_t *malformed_occurrence) {
+ProtocolFramePtrList IncomingDataHandler::ProcessData(
+    const RawMessage& tm_message,
+    RESULT_CODE* result,
+    size_t* malformed_occurrence) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(result);
   DCHECK(malformed_occurrence);
   const transport_manager::ConnectionUID connection_id =
     tm_message.connection_key();
-  const uint8_t *data = tm_message.data();
+  const uint8_t* data = tm_message.data();
   const size_t tm_message_size = tm_message.data_size();
   if (tm_message_size == 0 || data == NULL) {
     LOG4CXX_WARN(logger_, "Wrong raw message " << tm_message_size << " bytes");
     *result = RESULT_FAIL;
-    return std::list<ProtocolFramePtr>();
+    return ProtocolFramePtrList();
   }
   LOG4CXX_DEBUG(logger_, "Processing incoming data of size "
                 << tm_message_size << " for connection " << connection_id);
@@ -73,13 +73,13 @@ std::list<ProtocolFramePtr> IncomingDataHandler::ProcessData(
   if (connections_data_.end() == it) {
     LOG4CXX_WARN(logger_, "ProcessData requested for unknown connection");
     *result = RESULT_FAIL;
-    return std::list<ProtocolFramePtr>();
+    return ProtocolFramePtrList();
   }
-  std::vector<uint8_t> &connection_data = it->second;
+  std::vector<uint8_t>& connection_data = it->second;
   connection_data.insert(connection_data.end(), data, data + tm_message_size);
   LOG4CXX_DEBUG(logger_, "Total data size for connection "
                 << connection_id << " is " << connection_data.size());
-  std::list<ProtocolFramePtr> out_frames;
+  ProtocolFramePtrList out_frames;
   *malformed_occurrence = 0;
   *result = CreateFrame(connection_data, out_frames, *malformed_occurrence, connection_id);
   LOG4CXX_DEBUG(logger_, "New data size for connection " << connection_id
@@ -117,7 +117,7 @@ void IncomingDataHandler::RemoveConnection(
 }
 
 uint32_t IncomingDataHandler::GetPacketSize(
-  const ProtocolPacket::ProtocolHeader &header) {
+  const ProtocolPacket::ProtocolHeader& header) {
   switch (header.version) {
     case PROTOCOL_VERSION_1:
       return header.dataSize + PROTOCOL_HEADER_V1_SIZE;
@@ -134,9 +134,9 @@ uint32_t IncomingDataHandler::GetPacketSize(
 }
 
 RESULT_CODE IncomingDataHandler::CreateFrame(
-    std::vector<uint8_t> &incoming_data,
-    std::list<ProtocolFramePtr> &out_frames,
-    size_t &malformed_occurrence,
+    std::vector<uint8_t>& incoming_data,
+    ProtocolFramePtrList& out_frames,
+    size_t& malformed_occurrence,
     const transport_manager::ConnectionUID connection_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   std::vector<uint8_t>::iterator data_it = incoming_data.begin();
@@ -157,7 +157,7 @@ RESULT_CODE IncomingDataHandler::CreateFrame(
       ++data_it;
       --data_size;
       LOG4CXX_DEBUG(logger_, "Moved to the next byte " << std::hex
-                    << static_cast<const void *>(&*data_it));
+                    << static_cast<const void*>(&*data_it));
       continue;
     }
     LOG4CXX_DEBUG(logger_, "Payload size " << header_.dataSize);
@@ -167,7 +167,7 @@ RESULT_CODE IncomingDataHandler::CreateFrame(
       ++data_it;
       --data_size;
       LOG4CXX_DEBUG(logger_, "Moved to the next byte " << std::hex
-                    << static_cast<const void *>(&*data_it));
+                    << static_cast<const void*>(&*data_it));
       continue;
     }
     if (data_size < packet_size) {
@@ -179,7 +179,7 @@ RESULT_CODE IncomingDataHandler::CreateFrame(
     const RESULT_CODE deserialize_result =
       frame->deserializePacket(&*data_it, packet_size);
     LOG4CXX_DEBUG(
-          logger_, "Deserialized frame " << frame);
+      logger_, "Deserialized frame " << frame);
     if (deserialize_result != RESULT_OK) {
       LOG4CXX_WARN(logger_, "Packet deserialization failed");
       incoming_data.erase(incoming_data.begin(), data_it);

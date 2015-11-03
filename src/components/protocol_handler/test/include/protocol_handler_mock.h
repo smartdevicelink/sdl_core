@@ -163,8 +163,10 @@ class SessionObserverMock : public protocol_handler::SessionObserver {
   MOCK_METHOD3(ProtocolVersionUsed,
       bool( uint32_t connection_id,
           uint8_t session_id, uint8_t& protocol_version));
+#ifdef ENABLE_SECURITY
   MOCK_CONST_METHOD1(GetHandshakeContext,
                security_manager::SSLContext::HandshakeContext (const uint32_t key) );
+#endif  // ENABLE_SECURITY
 };
 
 #ifdef ENABLE_SECURITY
