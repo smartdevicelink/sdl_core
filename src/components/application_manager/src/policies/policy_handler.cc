@@ -384,7 +384,7 @@ void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
       policy_manager_->ReactOnUserDevConsentForApp(policy_app_id,
                                                    is_allowed);
 
-      policy_manager_->SendNotificationOnPermissionsUpdated(policy_app_id);
+      policy_manager_->SendNotificationOnPermissionsUpdated(device_id, policy_app_id);
     }
   }
 }
@@ -1343,9 +1343,11 @@ void policy::PolicyHandler::OnAppsSearchCompleted() {
   policy_manager_->OnAppsSearchCompleted();
 }
 
-void PolicyHandler::OnAppRegisteredOnMobile(const std::string& application_id) {
+void PolicyHandler::OnAppRegisteredOnMobile(connection_handler::DeviceHandle device_handle,
+    const std::string& application_id) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->OnAppRegisteredOnMobile(application_id);
+  std::string mac = MessageHelper::GetDeviceMacAddressForHandle(device_handle);
+  policy_manager_->OnAppRegisteredOnMobile(mac, application_id);
 }
 
 void PolicyHandler::Increment(usage_statistics::GlobalCounterId type) {

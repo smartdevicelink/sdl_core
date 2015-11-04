@@ -147,7 +147,8 @@ class PolicyManagerImpl : public PolicyManager {
     AppPermissions GetAppPermissionsChanges(const std::string& policy_app_id);
     void RemovePendingPermissionChanges(const std::string& app_id);
 
-    void SendNotificationOnPermissionsUpdated(const std::string& application_id);
+    void SendNotificationOnPermissionsUpdated(const std::string& device_id,
+                                              const std::string& application_id);
 
     bool CleanupUnpairedDevices();
 
@@ -174,7 +175,8 @@ class PolicyManagerImpl : public PolicyManager {
 
     virtual void OnAppsSearchCompleted();
 
-    void OnAppRegisteredOnMobile(const std::string& application_id);
+    void OnAppRegisteredOnMobile(const std::string& device_id,
+        const std::string& application_id);
 #ifdef SDL_REMOTE_CONTROL
     virtual TypeAccess CheckAccess(const PTString& app_id,
                                    const SeatLocation& zone,

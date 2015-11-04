@@ -322,10 +322,11 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
     /**
      * @brief Send OnPermissionsUpdated for choosen application
+     * @param device_id
      * @param application_id
      */
     virtual void SendNotificationOnPermissionsUpdated(
-      const std::string& application_id) = 0;
+       const std::string& device_id, const std::string& application_id) = 0;
 
     /**
      * Marks device as upaired
@@ -422,10 +423,11 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @brief OnAppRegisteredOnMobile alows to handle event when application were
      * succesfully registered on mobile device.
      * It will send OnAppPermissionSend notification and will try to start PTU.
-     *
+     * @param device_id unique identifier of device
      * @param application_id registered application.
      */
-    virtual void OnAppRegisteredOnMobile(const std::string& application_id) = 0;
+    virtual void OnAppRegisteredOnMobile(const std::string& device_id,
+        const std::string& application_id) = 0;
 
 #ifdef SDL_REMOTE_CONTROL
     /**

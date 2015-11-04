@@ -348,14 +348,8 @@ void PolicyManagerImpl::GetPermissions(const std::string device_id,
 }
 
 void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
-  const std::string& application_id) {
+    const std::string& device_id, const std::string& application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const std::string device_id = GetCurrentDeviceId(application_id);
-  if (device_id.empty()) {
-    LOG4CXX_WARN(logger_, "Couldn't find device info for application id "
-                 "'" << application_id << "'");
-    return;
-  }
 
   Permissions notification_data;
   GetPermissions(device_id, application_id, &notification_data);
@@ -846,9 +840,10 @@ void PolicyManagerImpl::MarkUnpairedDevice(const std::string& device_id) {
 }
 
 void PolicyManagerImpl::OnAppRegisteredOnMobile(
+    const std::string& device_id,
     const std::string& application_id) {
   StartPTExchange();
-  SendNotificationOnPermissionsUpdated(application_id);
+  SendNotificationOnPermissionsUpdated(device_id, application_id);
 }
 
 void PolicyManagerImpl::AddApplication(const std::string& application_id,
