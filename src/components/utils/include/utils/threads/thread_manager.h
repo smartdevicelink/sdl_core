@@ -79,11 +79,7 @@ class UnnamedThreadRegistry {
    */
   std::string GetUniqueName(PlatformThreadHandle id);
  private:
-#ifdef OS_WIN32
-	 typedef std::vector<PlatformThreadStruct> IdNameMap;
-#else
-  typedef std::map<PlatformThreadHandle, std::string> IdNameMap;
-#endif
+  typedef std::vector<PlatformThreadStruct> IdNameMap;
   IdNameMap id_number_;
   int32_t last_thread_number_;
   sync_primitives::Lock state_lock_;
@@ -103,11 +99,10 @@ class ThreadManager : public utils::Singleton<ThreadManager> {
     pthread_t handle;
     ThreadDelegate* delegate;
   };
+#ifdef OS_WIN32
   ThreadManager();
   ~ThreadManager();
-#ifndef OS_WIN32
-  MessageQueue<ThreadDesc> threads_to_terminate;
-#else
+
   // Name a thread. Should be called only once for every thread.
   // Threads can't be renamed
   void RegisterName(PlatformThreadHandle id, const std::string& name);
@@ -121,11 +116,9 @@ class ThreadManager : public utils::Singleton<ThreadManager> {
   void Unregister(PlatformThreadHandle id);
 private:
   typedef std::set<std::string> NamesSet;
-#ifdef OS_WIN32
+
   typedef std::vector<PlatformThreadStruct> IdNamesMap;
-#else
-  typedef std::map<PlatformThreadHandle, std::string> IdNamesMap;
-#endif
+
   // Set of thread names for fast checking if name is unique
   NamesSet names_;
   // Map from system handle to the thread name
@@ -135,8 +128,10 @@ private:
   // Generator of shorter sequental names for unnamed threads
   // Has to memorize every generated name this is why it is mutable
   mutable UnnamedThreadRegistry unnamed_thread_namer_;
+#else
+  ThreadManager() {}
+  MessageQueue<ThreadDesc> threads_to_terminate;
 #endif
-
  private:
   DISALLOW_COPY_AND_ASSIGN(ThreadManager);
 

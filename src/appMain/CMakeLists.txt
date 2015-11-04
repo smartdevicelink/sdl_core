@@ -251,6 +251,9 @@ if (${QT_HMI})
 
   file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/start_hmi.sh
     "#!/bin/sh\n${start_command} ${command_arguments}\n")
+elseif (${WEB_HMI})
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/hmi_link
+    "${CMAKE_HOME_DIRECTORY}/src/components/HMI/index.html")
 endif ()
 
 # Install rules
