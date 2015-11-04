@@ -3297,7 +3297,7 @@ bool ApplicationManagerImpl::InitDirectory(
     if (!file_system::CreateDirectoryRecursively(path)) {
       LOG4CXX_ERROR(logger_, "Unable to create " << directory_type
                     << " directory " << path);
-      return false;
+	  return true;
     }
     LOG4CXX_DEBUG(logger_, directory_type << " directory has been created: "
                   << path);
