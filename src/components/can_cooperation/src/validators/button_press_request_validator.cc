@@ -86,6 +86,10 @@ ValidationResult ButtonPressRequestValidator::Validate(const Json::Value& json,
     LOG4CXX_ERROR(logger_, "Mandatory param " <<kZone <<" missing!" );
   }
 
+  if (result != ValidationResult::SUCCESS) {
+    return result;
+  }
+
   if ((json[kModuleType].asString() == enums_value::kRadio) &&
       (json[kButtonName].asString() != enums_value::kVolumeUp)    &&
       (json[kButtonName].asString() != enums_value::kVolumeDown)  &&
@@ -113,9 +117,6 @@ ValidationResult ButtonPressRequestValidator::Validate(const Json::Value& json,
     result = ValidationResult::INVALID_DATA;
     LOG4CXX_ERROR(logger_,
        "Button " << json[kButtonName].asCString() <<" is not climate button!" );
-
-  } else {
-    DCHECK(false);
   }
 
   return result;
