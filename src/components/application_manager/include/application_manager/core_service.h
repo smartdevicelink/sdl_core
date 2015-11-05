@@ -163,6 +163,13 @@ class CoreService : public Service {
   virtual bool IsRemoteControlAllowed() const;
 
   /**
+   * Checks if application has remote control functions
+   * @param app application
+   * @return true if application has remote control functions
+   */
+  virtual bool IsRemoteControlApplication(ApplicationSharedPtr app) const;
+
+  /**
    * @brief Get pointer to application by application id
    * @param app_id application id
    * return pointer to application

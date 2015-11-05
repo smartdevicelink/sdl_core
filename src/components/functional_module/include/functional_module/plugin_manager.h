@@ -73,6 +73,15 @@ class PluginManager : public utils::Singleton<PluginManager>,
   bool IsAppForPlugins(application_manager::ApplicationSharedPtr app);
 
   /**
+   * Check if app cooperates with plugin
+   * @param app application
+   * @param module_id unique identifier of plugin
+   * @return true if application cooperates with this plugin
+   */
+  bool IsAppForPlugin(application_manager::ApplicationSharedPtr app,
+                      ModuleID module_id) const;
+
+  /**
    * @brief Notify plugins about change of HMILevel of app
    * if app is related to plugin
    * @param app App with new HMILevel

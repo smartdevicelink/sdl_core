@@ -81,6 +81,7 @@ class MockService : public Service {
   MOCK_METHOD2(SetDeviceZone, void(const uint32_t dev_id,
                                    const SeatLocation& zone));
   MOCK_CONST_METHOD1(GetDeviceZone, const SeatLocationPtr(const uint32_t dev_id));
+  MOCK_CONST_METHOD1(IsRemoteControlApplication, bool(ApplicationSharedPtr app));
 };
 
 }
