@@ -172,8 +172,8 @@ TEST_F(PolicyManagerImplTest, CheckPermissions_SetHmiLevelFullForAlert_ExpectAll
 #ifdef SDL_REMOTE_CONTROL
   EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345678")).
       WillOnce(Return("dev1"));
-  EXPECT_CALL(*access_remote, GetGroups("dev1", "12345678")).
-      WillOnce(ReturnRef(groups));
+  Subject who = { "dev1", "12345678" };
+  EXPECT_CALL(*access_remote, GetGroups(who)).WillOnce(ReturnRef(groups));
 #else  // SDL_REMOTE_CONTROL
   EXPECT_CALL(*cache_manager, GetGroups("12345678")).
       WillOnce(ReturnRef(groups));

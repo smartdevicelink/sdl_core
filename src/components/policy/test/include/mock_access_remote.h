@@ -75,9 +75,9 @@ class MockAccessRemote : public AccessRemote {
   MOCK_CONST_METHOD3(FindGroup,
       PTString(const Subject& who, const PTString& rpc, const RemoteControlParams& params));
   MOCK_METHOD2(SetDefaultHmiTypes,
-      void(const std::string& app_id, const std::vector<int>& hmi_types));
-  MOCK_METHOD2(GetGroups,
-      const policy_table::Strings&(const PTString& device_id, const PTString& app_id));
+      void(const Subject& who, const std::vector<int>& hmi_types));
+  MOCK_METHOD1(GetGroups,
+      const policy_table::Strings&(const Subject& who));
   MOCK_METHOD3(GetPermissionsForApp,
       bool (const std::string& device_id, const std::string& app_id, policy::FunctionalIdType& group_types));
   MOCK_CONST_METHOD2(CheckModuleType, bool(const PTString& app_id,
@@ -85,7 +85,7 @@ class MockAccessRemote : public AccessRemote {
   MOCK_CONST_METHOD3(CheckParameters,
       TypeAccess(const Object& what, const std::string& rpc,
                  const RemoteControlParams& params));
-  MOCK_METHOD1(IsAppReverse, bool(const PTString& app_id));
+  MOCK_METHOD1(IsAppReverse, bool(const Subject& who));
   MOCK_METHOD0(Reset, void());
   MOCK_CONST_METHOD1(GetDeviceZone, const SeatLocation*(const std::string& device_id));
   MOCK_METHOD2(SetDeviceZone, void(const std::string& device_id,

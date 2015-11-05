@@ -487,8 +487,10 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   if (message[strings::msg_params].keyExists(strings::app_hmi_type)) {
     app_hmi_types = &message[strings::msg_params][strings::app_hmi_type];
   }
-  policy::PolicyHandler::instance()->AddApplication(application->mobile_app_id(),
-      app_hmi_types);
+  std::string mac = MessageHelper::GetDeviceMacAddressForHandle(application->device());
+  policy::PolicyHandler::instance()->AddApplication(mac,
+                                                    application->mobile_app_id(),
+                                                    app_hmi_types);
   application->set_hmi_level(GetDefaultHmiLevel(application));
   app_list_accesor.Insert(application);
 

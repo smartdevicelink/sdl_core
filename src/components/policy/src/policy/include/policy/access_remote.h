@@ -229,20 +229,18 @@ class AccessRemote {
 
   /**
    * Sets HMI types if application has default policy permissions
-   * @param app_id ID application
+   * @param who subject
    * @param hmi_types list of HMI types
    */
-  virtual void SetDefaultHmiTypes(const std::string& app_id,
+  virtual void SetDefaultHmiTypes(const Subject& who,
                                   const std::vector<int>& hmi_types) = 0;
 
   /**
    * Gets groups
-   * @param device_id ID device
-   * @param app_id ID application
+   * @param who subject
    * @return list of groups
    */
-  virtual const policy_table::Strings& GetGroups(const PTString& device_id,
-                                                 const PTString& app_id) = 0;
+  virtual const policy_table::Strings& GetGroups(const Subject& who) = 0;
 
   /**
    * Gets permissions for application
@@ -257,10 +255,10 @@ class AccessRemote {
 
   /**
    * Checks if application has reverse functionality
-   * @param app_id ID application
+   * @param who subject
    * @return true if application uses remote control
    */
-  virtual bool IsAppReverse(const PTString& app_id) = 0;
+  virtual bool IsAppReverse(const Subject& who) = 0;
 
   /**
    * Gets device zone

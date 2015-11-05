@@ -412,23 +412,17 @@ struct SmartObjectToInt {
   }
 };
 
-void PolicyHandler::AddApplication(const std::string& application_id,
+void PolicyHandler::AddApplication(const std::string& device_id,
+                                   const std::string& application_id,
                                    const smart_objects::SmartObject* app_types) {
   POLICY_LIB_CHECK_VOID();
-  size_t count = 0;
-  smart_objects::SmartArray* hmi_list = 0;
-  if (app_types) {
-    hmi_list = app_types->asArray();
+  std::vector<int> hmi_types;
+  if (app_types && app_types->asArray()) {
+    smart_objects::SmartArray* hmi_list = app_types->asArray();
+    std::transform(hmi_list->begin(), hmi_list->end(),
+                   std::back_inserter(hmi_types), SmartObjectToInt());
   }
-  if (hmi_list) {
-    count = hmi_list->size();
-  }
-  std::vector<int> hmi_types(count);
-  if (count) {
-    std::transform(hmi_list->begin(), hmi_list->end(), hmi_types.begin(),
-                   SmartObjectToInt());
-  }
-  policy_manager_->AddApplication(application_id, hmi_types);
+  policy_manager_->AddApplication(device_id, application_id, hmi_types);
 }
 
 bool PolicyHandler::CheckHMIType(const std::string& application_id,

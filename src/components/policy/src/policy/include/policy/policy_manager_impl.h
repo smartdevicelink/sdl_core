@@ -47,6 +47,7 @@ namespace policy_table = rpc::policy_table_interface_base;
 
 namespace policy {
 class AccessRemote;
+struct Subject;
 struct CheckAppPolicy;
 
 class PolicyManagerImpl : public PolicyManager {
@@ -156,7 +157,8 @@ class PolicyManagerImpl : public PolicyManager {
     bool CanAppStealFocus(const std::string& app_id);
     void MarkUnpairedDevice(const std::string& device_id);
 
-    void AddApplication(const std::string& application_id,
+    void AddApplication(const std::string& device_id,
+                        const std::string& application_id,
                         const std::vector<int>& hmi_types);
 
     virtual void RemoveAppConsentForGroup(const std::string& app_id,
@@ -327,8 +329,7 @@ private:
       const utils::SharedPtr<policy_table::Table> snapshot);
     utils::SharedPtr<AccessRemote> access_remote_;
 
-    void SendHMILevelChanged(const std::string& device_id,
-                                 const std::string& application_id);
+    void SendHMILevelChanged(const Subject& who);
 #endif  // SDL_REMOTE_CONTROL
     sync_primitives::Lock apps_registration_lock_;
     sync_primitives::Lock app_permissions_diff_lock_;

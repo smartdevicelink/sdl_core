@@ -309,8 +309,8 @@ void PolicyManagerImpl::CheckPermissions(const PTString& device_id,
     << hmi_level << " level.");
 
 #ifdef SDL_REMOTE_CONTROL
-  const policy_table::Strings& groups =
-      access_remote_->GetGroups(device_id, app_id);
+  Subject who = { device_id, app_id };
+  const policy_table::Strings& groups = access_remote_->GetGroups(who);
 #else  // SDL_REMOTE_CONTROL
   const policy_table::Strings& groups = cache_->GetGroups(app_id);
 #endif  // SDL_REMOTE_CONTROL
@@ -846,10 +846,9 @@ void PolicyManagerImpl::OnAppRegisteredOnMobile(
   SendNotificationOnPermissionsUpdated(device_id, application_id);
 }
 
-void PolicyManagerImpl::AddApplication(const std::string& application_id,
-                                       const std::vector<int>& hmi_types) {
+void PolicyManagerImpl::AddApplication(const std::string& device_id,
+    const std::string& application_id, const std::vector<int>& hmi_types) {
   LOG4CXX_INFO(logger_, "AddApplication");
-  const std::string device_id = GetCurrentDeviceId(application_id);
   DeviceConsent device_consent = GetUserConsentForDevice(device_id);
   sync_primitives::AutoLock lock(apps_registration_lock_);
 
@@ -860,7 +859,8 @@ void PolicyManagerImpl::AddApplication(const std::string& application_id,
     PromoteExistedApplication(application_id, device_consent);
   }
 #if SDL_REMOTE_CONTROL
-  access_remote_->SetDefaultHmiTypes(application_id, hmi_types);
+  Subject who = { device_id, application_id };
+  access_remote_->SetDefaultHmiTypes(who, hmi_types);
 #endif  // SDL_REMOTE_CONTROL
 }
 
@@ -1131,62 +1131,63 @@ bool PolicyManagerImpl::GetRemoteControl() const {
 void PolicyManagerImpl::OnChangedPrimaryDevice(const std::string& device_id,
     const std::string& application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!access_remote_->IsAppReverse(application_id)) {
-    LOG4CXX_INFO(logger_, "Application " << application_id << " isn't reverse");
+  Subject who = { device_id, application_id };
+  if (!access_remote_->IsAppReverse(who)) {
+    LOG4CXX_INFO(logger_, "Application " << who << " isn't reverse");
     return;
   }
 
-  if (!access_remote_->IsPrimaryDevice(device_id)) {
-    SendHMILevelChanged(device_id, application_id);
+  if (!access_remote_->IsPrimaryDevice(who.dev_id)) {
+    SendHMILevelChanged(who);
   }
 
-  SendAppPermissionsChanged(device_id, application_id);
+  SendAppPermissionsChanged(who.dev_id, who.app_id);
 }
 
 void PolicyManagerImpl::OnChangedDeviceZone(const std::string& device_id,
     const std::string& application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!access_remote_->IsAppReverse(application_id)) {
-    LOG4CXX_INFO(logger_, "Application " << application_id << " isn't reverse");
+  Subject who = { device_id, application_id };
+  if (!access_remote_->IsAppReverse(who)) {
+    LOG4CXX_INFO(logger_, "Application " << who << " isn't reverse");
     return;
   }
 
-  if (!access_remote_->IsPrimaryDevice(device_id)) {
-    SendHMILevelChanged(device_id, application_id);
+  if (!access_remote_->IsPrimaryDevice(who.dev_id)) {
+    SendHMILevelChanged(who);
   }
 }
 
 void PolicyManagerImpl::OnChangedRemoteControl(const std::string& device_id,
     const std::string& application_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!access_remote_->IsAppReverse(application_id)) {
-    LOG4CXX_INFO(logger_, "Application " << application_id << " isn't reverse");
+  Subject who = { device_id, application_id };
+  if (!access_remote_->IsAppReverse(who)) {
+    LOG4CXX_INFO(logger_, "Application " << who << " isn't reverse");
     return;
   }
 
-  if (access_remote_->IsPrimaryDevice(device_id)) {
-    LOG4CXX_INFO(logger_, "Device " << device_id << " is primary");
+  if (access_remote_->IsPrimaryDevice(who.dev_id)) {
+    LOG4CXX_INFO(logger_, "Device " << who.dev_id << " is primary");
     return;
   }
 
   if (!access_remote_->IsEnabled()) {
-    SendHMILevelChanged(device_id, application_id);
+    SendHMILevelChanged(who);
   }
 
-  SendAppPermissionsChanged(device_id, application_id);
+  SendAppPermissionsChanged(who.dev_id, who.app_id);
 }
 
-void PolicyManagerImpl::SendHMILevelChanged(const std::string& device_id,
-                                            const std::string& application_id) {
+void PolicyManagerImpl::SendHMILevelChanged(const Subject& who) {
   std::string default_hmi;
-  if (GetDefaultHmi(application_id, &default_hmi)) {
-    Subject who = { device_id, application_id };
+  if (GetDefaultHmi(who.app_id, &default_hmi)) {
     access_remote_->Reset(who);
-    listener()->OnUpdateHMILevel(application_id, default_hmi);
+    listener()->OnUpdateHMILevel(who.app_id, default_hmi);
   } else {
     LOG4CXX_WARN(
         logger_,
-        "Couldn't get default HMI level for application " << application_id);
+        "Couldn't get default HMI level for application " << who.app_id);
   }
 }
 
