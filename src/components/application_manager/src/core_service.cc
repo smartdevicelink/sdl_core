@@ -88,7 +88,9 @@ TypeAccess CoreService::CheckAccess(const ApplicationId& app_id,
 #ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
-    return policy::PolicyHandler::instance()->CheckAccess(
+    std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
+        app->device());
+    return policy::PolicyHandler::instance()->CheckAccess(device_handle,
         app->mobile_app_id(), zone, module, rpc, params);
   }
 #endif  // SDL_REMOTE_CONTROL
@@ -114,7 +116,9 @@ void CoreService::SetAccess(const ApplicationId& app_id,
 #ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
-    policy::PolicyHandler::instance()->SetAccess(
+    std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
+        app->device());
+    policy::PolicyHandler::instance()->SetAccess(device_handle,
         app->mobile_app_id(), zone, module, allowed);
   }
 #endif  // SDL_REMOTE_CONTROL
@@ -124,7 +128,9 @@ void CoreService::ResetAccess(const ApplicationId& app_id) {
 #ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
-    policy::PolicyHandler::instance()->ResetAccess(app->mobile_app_id());
+    std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
+        app->device());
+    policy::PolicyHandler::instance()->ResetAccess(device_handle, app->mobile_app_id());
   }
 #endif  // SDL_REMOTE_CONTROL
 }

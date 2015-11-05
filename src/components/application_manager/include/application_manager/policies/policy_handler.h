@@ -96,6 +96,7 @@ class PolicyHandler :
 #ifdef SDL_REMOTE_CONTROL
   /**
    * Checks access to equipment of vehicle for application by RPC
+   * @param device_id unique identifier of device
    * @param app_id policy id application
    * @param zone interior zone
    * @param module type
@@ -103,7 +104,8 @@ class PolicyHandler :
    * @param params parameters list
    */
   application_manager::TypeAccess CheckAccess(
-      const PTString& app_id, const application_manager::SeatLocation& zone,
+      const PTString& device_id, const PTString& app_id,
+      const application_manager::SeatLocation& zone,
       const PTString& module, const std::string& rpc,
       const std::vector<PTString>& params);
 
@@ -117,21 +119,23 @@ class PolicyHandler :
 
   /**
    * Sets access to equipment of vehicle for application by RPC
+   * @param device_id unique identifier of device
    * @param app_id policy id application
    * @param zone interior zone
    * @param module type
    * @param allowed true if access is allowed
    */
-  void SetAccess(const PTString& app_id,
+  void SetAccess(const PTString& device_id, const PTString& app_id,
                  const application_manager::SeatLocation& zone,
                  const PTString& module,
                  bool allowed);
 
   /**
    * Resets access application to all resources
+   * @param device_id unique identifier of device
    * @param app_id policy id application
    */
-  void ResetAccess(const PTString& app_id);
+  void ResetAccess(const PTString& device_id, const PTString& app_id);
 
   /**
    * Resets access by group name for all applications

@@ -49,6 +49,12 @@ class PolicyListener {
                                     const Permissions& permissions) = 0;
   virtual void OnPendingPermissionChange(const std::string& policy_app_id) = 0;
   virtual void OnUpdateStatusChanged(const std::string&) = 0;
+  /**
+   * Gets device ID
+   * @param policy_app_id
+   * @return device ID
+   * @deprecated
+   */
   virtual std::string OnCurrentDeviceIdUpdateRequired(
       const std::string& policy_app_id) = 0;
   virtual void OnSystemInfoUpdateRequired() = 0;

@@ -73,7 +73,10 @@ void OnExitApplicationNotification::Run() {
   }
 
 #ifdef SDL_REMOTE_CONTROL
-  policy::PolicyHandler::instance()->ResetAccess(app_impl->mobile_app_id());
+  std::string device_handle = MessageHelper::GetDeviceMacAddressForHandle(
+      app_impl->device());
+  policy::PolicyHandler::instance()->ResetAccess(device_handle,
+                                                 app_impl->mobile_app_id());
 #endif  // SDL_REMOTE_CONTROL
 
   ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app_impl->app_id(),

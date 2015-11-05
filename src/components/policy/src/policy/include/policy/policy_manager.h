@@ -301,6 +301,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     /**
      * @brief Return device id, which hosts specific application
      * @param Application id, which is required to update device id
+     * @deprecated
      */
     virtual std::string& GetCurrentDeviceId(const std::string& policy_app_id) = 0;
 
@@ -434,13 +435,15 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 #ifdef SDL_REMOTE_CONTROL
     /**
      * Checks access to equipment of vehicle for application by RPC
+     * @param device_id unique identifier of device
      * @param app_id policy id application
      * @param zone control
      * @param module
      * @param rpc name of rpc
      * @param params parameters list
      */
-    virtual TypeAccess CheckAccess(const PTString& app_id,
+    virtual TypeAccess CheckAccess(const PTString& device_id,
+                                   const PTString& app_id,
                                    const SeatLocation& zone,
                                    const PTString& module,
                                    const PTString& rpc,
@@ -457,19 +460,23 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
     /**
      * Sets access to equipment of vehicle for application by RPC
+     * @param dev_id unique identifier of device
      * @param app_id policy id application
      * @param zone control
      * @param module type
      * @param allowed true if access is allowed
      */
-    virtual void SetAccess(const PTString& app_id, const SeatLocation& zone,
+    virtual void SetAccess(const PTString& dev_id, const PTString& app_id,
+                           const SeatLocation& zone,
                            const PTString& module, bool allowed) = 0;
 
     /**
      * Resets access application to all resources
+     * @param dev_id unique identifier of device
      * @param app_id policy id application
      */
-    virtual void ResetAccess(const PTString& app_id) = 0;
+    virtual void ResetAccess(const PTString& dev_id,
+                             const PTString& app_id) = 0;
 
     /**
      * Resets access by functional group for all applications

@@ -349,7 +349,7 @@ TEST_F(PolicyManagerImplTest, ResetAccessBySubject) {
       WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote, Reset(sub));
 
-  manager->ResetAccess("12345");
+  manager->ResetAccess("dev1", "12345");
 }
 
 TEST_F(PolicyManagerImplTest, ResetAccessByObject) {
@@ -382,7 +382,7 @@ TEST_F(PolicyManagerImplTest, SetAccess_Allow) {
       WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote, Allow(who, what));
 
-  manager->SetAccess("12345", zone, "CLIMATE", true);
+  manager->SetAccess("dev1", "12345", zone, "CLIMATE", true);
 }
 
 TEST_F(PolicyManagerImplTest, SetAccess_Deny) {
@@ -394,7 +394,7 @@ TEST_F(PolicyManagerImplTest, SetAccess_Deny) {
       WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote, Deny(who, what));
 
-  manager->SetAccess("12345", zone, "RADIO", false);
+  manager->SetAccess("dev1", "12345", zone, "RADIO", false);
 }
 
 TEST_F(PolicyManagerImplTest, CheckAccess_PrimaryDevice) {
@@ -413,7 +413,8 @@ TEST_F(PolicyManagerImplTest, CheckAccess_PrimaryDevice) {
   EXPECT_CALL(*access_remote, Allow(who, what));
 
   EXPECT_EQ(TypeAccess::kAllowed,
-            manager->CheckAccess("12345", zone, "CLIMATE", "AnyRpc", RemoteControlParams()));
+            manager->CheckAccess("dev1", "12345", zone, "CLIMATE", "AnyRpc",
+                                 RemoteControlParams()));
 }
 
 TEST_F(PolicyManagerImplTest, CheckAccess_DisabledRremoteControl) {
@@ -427,7 +428,8 @@ TEST_F(PolicyManagerImplTest, CheckAccess_DisabledRremoteControl) {
 
   SeatLocation zone {0,0,0};
   EXPECT_EQ(TypeAccess::kDisallowed,
-            manager->CheckAccess("12345", zone, "RADIO", "", RemoteControlParams()));
+            manager->CheckAccess("dev1", "12345", zone, "RADIO", "",
+                                 RemoteControlParams()));
 }
 
 TEST_F(PolicyManagerImplTest, CheckAccess_Result) {
@@ -447,7 +449,8 @@ TEST_F(PolicyManagerImplTest, CheckAccess_Result) {
       WillOnce(Return(TypeAccess::kAllowed));
 
   EXPECT_EQ(TypeAccess::kAllowed,
-            manager->CheckAccess("12345", zone, "RADIO", "", RemoteControlParams()));
+            manager->CheckAccess("dev1", "12345", zone, "RADIO", "",
+                                 RemoteControlParams()));
 }
 
 TEST_F(PolicyManagerImplTest, TwoDifferentDevice) {
@@ -478,9 +481,11 @@ TEST_F(PolicyManagerImplTest, TwoDifferentDevice) {
         WillOnce(Return(TypeAccess::kDisallowed));
 
   EXPECT_EQ(TypeAccess::kAllowed,
-            manager->CheckAccess("12345", zone, "RADIO", "", RemoteControlParams()));
+            manager->CheckAccess("dev1", "12345", zone, "RADIO", "",
+                                 RemoteControlParams()));
   EXPECT_EQ(TypeAccess::kDisallowed,
-              manager->CheckAccess("123456", zone, "RADIO", "", RemoteControlParams()));
+              manager->CheckAccess("dev2", "123456", zone, "RADIO", "",
+                                   RemoteControlParams()));
 }
 
 TEST_F(PolicyManagerImplTest, CheckPTURemoteCtrlChange) {

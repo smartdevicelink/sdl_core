@@ -978,7 +978,7 @@ void PolicyManagerImpl::set_cache_manager(
 }
 
 #ifdef SDL_REMOTE_CONTROL
-TypeAccess PolicyManagerImpl::CheckAccess(
+TypeAccess PolicyManagerImpl::CheckAccess(const PTString& device_id,
     const PTString& app_id, const SeatLocation& zone, const PTString& module,
     const PTString& rpc, const RemoteControlParams& params) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -988,9 +988,8 @@ TypeAccess PolicyManagerImpl::CheckAccess(
   policy_table::ModuleType module_type;
   bool is_valid = EnumFromJsonString(module, &module_type);
   if (is_valid && access_remote_->CheckModuleType(app_id, module_type)) {
-    std::string dev_id = GetCurrentDeviceId(app_id);
-    Subject who = {dev_id, app_id};
-    Object what = {module_type, zone};
+    Subject who = { device_id, app_id };
+    Object what = { module_type, zone };
     if (access_remote_->IsPrimaryDevice(who.dev_id)) {
       return TryOccupy(who, what);
     } else {
@@ -1039,7 +1038,8 @@ TypeAccess PolicyManagerImpl::CheckDriverConsent(
   return access;
 }
 
-void PolicyManagerImpl::SetAccess(const PTString& app_id,
+void PolicyManagerImpl::SetAccess(const PTString& dev_id,
+                                  const PTString& app_id,
                                   const SeatLocation& zone,
                                   const PTString& module,
                                   bool allowed) {
@@ -1050,7 +1050,6 @@ void PolicyManagerImpl::SetAccess(const PTString& app_id,
     return;
   }
 
-  std::string dev_id = GetCurrentDeviceId(app_id);
   Subject who = {dev_id, app_id};
   Object what = {module_type, zone};
   LOG4CXX_DEBUG(logger_,
@@ -1063,9 +1062,9 @@ void PolicyManagerImpl::SetAccess(const PTString& app_id,
   }
 }
 
-void PolicyManagerImpl::ResetAccess(const PTString& app_id) {
+void PolicyManagerImpl::ResetAccess(const PTString& dev_id,
+                                    const PTString& app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::string dev_id = GetCurrentDeviceId(app_id);
   Subject who = {dev_id, app_id};
   access_remote_->Reset(who);
 }

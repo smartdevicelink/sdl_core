@@ -1391,12 +1391,14 @@ application_manager::TypeAccess ConvertTypeAccess(
 }  // namespace
 
 application_manager::TypeAccess PolicyHandler::CheckAccess(
-    const PTString& app_id, const application_manager::SeatLocation& zone,
+    const PTString& device_id, const PTString& app_id,
+    const application_manager::SeatLocation& zone,
     const PTString& module, const std::string& rpc,
     const std::vector<PTString>& params) {
   POLICY_LIB_CHECK(application_manager::TypeAccess::kNone);
   policy::SeatLocation policy_zone = {zone.col, zone.row, zone.level};
-  policy::TypeAccess access = policy_manager_->CheckAccess(app_id, policy_zone,
+  policy::TypeAccess access = policy_manager_->CheckAccess(device_id,
+                                                           app_id, policy_zone,
                                                            module, rpc, params);
   return ConvertTypeAccess(access);
 }
@@ -1407,18 +1409,20 @@ bool PolicyHandler::CheckModule(const PTString& app_id,
   return policy_manager_->CheckModule(app_id, module);
 }
 
-void PolicyHandler::SetAccess(const PTString& app_id,
+void PolicyHandler::SetAccess(const PTString& device_id,
+                              const PTString& app_id,
                               const application_manager::SeatLocation& zone,
                               const PTString& module,
                               bool allowed) {
   POLICY_LIB_CHECK_VOID();
   policy::SeatLocation policy_zone = {zone.col, zone.row, zone.level};
-  policy_manager_->SetAccess(app_id, policy_zone, module, allowed);
+  policy_manager_->SetAccess(device_id, app_id, policy_zone, module, allowed);
 }
 
-void PolicyHandler::ResetAccess(const PTString& app_id) {
+void PolicyHandler::ResetAccess(const PTString& device_id,
+                                const PTString& app_id) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->ResetAccess(app_id);
+  policy_manager_->ResetAccess(device_id, app_id);
 }
 
 void PolicyHandler::ResetAccess(const application_manager::SeatLocation& zone,

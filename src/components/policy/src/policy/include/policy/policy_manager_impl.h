@@ -180,15 +180,17 @@ class PolicyManagerImpl : public PolicyManager {
     void OnAppRegisteredOnMobile(const std::string& device_id,
         const std::string& application_id);
 #ifdef SDL_REMOTE_CONTROL
-    virtual TypeAccess CheckAccess(const PTString& app_id,
+    virtual TypeAccess CheckAccess(const PTString& device_id,
+                                   const PTString& app_id,
                                    const SeatLocation& zone,
                                    const PTString& module,
                                    const PTString& rpc,
                                    const RemoteControlParams& params);
     virtual bool CheckModule(const PTString& app_id, const PTString& module);
-    virtual void SetAccess(const PTString& app_id, const SeatLocation& zone,
+    virtual void SetAccess(const PTString& dev_id, const PTString& app_id,
+                           const SeatLocation& zone,
                            const PTString& module, bool allowed);
-    virtual void ResetAccess(const PTString& app_id);
+    virtual void ResetAccess(const PTString& dev_id, const PTString& app_id);
     virtual void ResetAccess(const SeatLocation& zone, const PTString& module);
     virtual void SetPrimaryDevice(const PTString& dev_id);
     virtual void ResetPrimaryDevice();

@@ -765,7 +765,8 @@ bool HaveGroupsChanged(const rpc::Optional<policy_table::Strings>& old_groups,
 
 void ProccessAppGroups::operator() (
     const policy_table::ApplicationPolicies::value_type & app) {
-// странная фигня надо разобраться как тут определять что приложение ремоут
+// TODO(KKolodiy): it brakes build. Need to understand for what it
+// and investigate issues with update PT about notify mobile side
 //  if (!pm_->access_remote_->IsAppReverse(app.first)) {
 //    LOG4CXX_DEBUG(logger_, "Ignore non-reverse app");
 //    return;
