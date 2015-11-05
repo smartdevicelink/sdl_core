@@ -183,7 +183,6 @@ class Integer : public PrimitiveType {
     // Methods
     Integer();
     explicit Integer(IntType value);
-    Integer(const Integer& value);
     explicit Integer(const Json::Value* value);
     explicit Integer(dbus::MessageReader* reader);
     Integer(const Json::Value* value, IntType def_value);
