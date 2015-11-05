@@ -210,9 +210,6 @@ TEST_F(CanModuleTest, SendResponseToMobile) {
 TEST_F(CanModuleTest, IsAppForPluginSuccess) {
   MockApplication* app = new MockApplication();
   application_manager::ApplicationSharedPtr app_ptr(app);
-  smart_objects::SmartObject obj(smart_objects::SmartType::SmartType_Array);
-  obj[0] = 10;  //  REMOTE_CONTROL
-  EXPECT_CALL(*app, app_types()).Times(2).WillRepeatedly(Return(&obj));
   application_manager::AppExtensionPtr ext;
   CANAppExtension* valid_ext = new CANAppExtension(module->GetModuleID());
   EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).Times(3).
@@ -231,6 +228,8 @@ TEST_F(CanModuleTest, IsAppForPluginSuccess) {
   EXPECT_CALL(*mock_service, NotifyHMIAboutHMILevel(app_ptr, _)).Times(1);
   EXPECT_CALL(*mock_service, PrimaryDevice()).Times(1);
   EXPECT_CALL(*mock_service, SendMessageToMobile(_)).Times(1);
+  EXPECT_CALL(*mock_service, IsRemoteControlApplication(app_ptr)).Times(1)
+      .WillOnce(Return(true));
   ASSERT_TRUE(module->IsAppForPlugin(app_ptr));
 }
 
@@ -247,13 +246,11 @@ TEST_F(CanModuleTest, IsAppForPluginNotNew) {
 TEST_F(CanModuleTest, IsAppForPluginFail) {
   MockApplication* app = new MockApplication();
   application_manager::ApplicationSharedPtr app_ptr(app);
-  smart_objects::SmartObject obj(smart_objects::SmartType::SmartType_Array);
-  obj[0] = 9;
-  obj[1] = 8;
   application_manager::AppExtensionPtr ext;
   EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).
       WillOnce(Return(ext));
-  EXPECT_CALL(*app, app_types()).Times(2).WillRepeatedly(Return(&obj));
+  EXPECT_CALL(*mock_service, IsRemoteControlApplication(app_ptr)).Times(1)
+      .WillOnce(Return(false));
   ASSERT_FALSE(module->IsAppForPlugin(app_ptr));
 }
 
@@ -272,10 +269,6 @@ TEST_F(CanModuleTest, OnAppHMILevelChanged) {
 TEST_F(CanModuleTest, SetDriverDeviceOnRegister) {
   NiceMock<MockApplication>* app = new NiceMock<MockApplication>();
   application_manager::ApplicationSharedPtr app_ptr(app);
-
-  smart_objects::SmartObject obj(smart_objects::SmartType::SmartType_Array);
-  obj[0] = 10;
-  EXPECT_CALL(*app, app_types()).Times(2).WillRepeatedly(Return(&obj));
   application_manager::AppExtensionPtr invalid_ext;
   CANAppExtension* ext = new CANAppExtension(module->GetModuleID());
   EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).Times(3).
@@ -294,6 +287,8 @@ TEST_F(CanModuleTest, SetDriverDeviceOnRegister) {
   EXPECT_CALL(*mock_service, NotifyHMIAboutHMILevel(app_ptr, _)).Times(1);
   EXPECT_CALL(*mock_service, PrimaryDevice()).Times(1).WillOnce(Return(12));
   EXPECT_CALL(*mock_service, SendMessageToMobile(_)).Times(1);
+  EXPECT_CALL(*mock_service, IsRemoteControlApplication(app_ptr)).Times(1)
+      .WillOnce(Return(true));
 
   ASSERT_TRUE(module->IsAppForPlugin(app_ptr));
   ASSERT_TRUE(ext->is_on_driver_device());
@@ -302,10 +297,6 @@ TEST_F(CanModuleTest, SetDriverDeviceOnRegister) {
 TEST_F(CanModuleTest, SetDriverDeviceOnRegisterFail) {
   NiceMock<MockApplication>* app = new NiceMock<MockApplication>();
   application_manager::ApplicationSharedPtr app_ptr(app);
-
-  smart_objects::SmartObject obj(smart_objects::SmartType::SmartType_Array);
-  obj[0] = 10;
-  EXPECT_CALL(*app, app_types()).Times(2).WillRepeatedly(Return(&obj));
   application_manager::AppExtensionPtr invalid_ext;
   CANAppExtension* ext = new CANAppExtension(module->GetModuleID());
   EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).Times(3).
@@ -324,6 +315,8 @@ TEST_F(CanModuleTest, SetDriverDeviceOnRegisterFail) {
   EXPECT_CALL(*mock_service, NotifyHMIAboutHMILevel(app_ptr, _)).Times(1);
   EXPECT_CALL(*mock_service, PrimaryDevice()).Times(1).WillOnce(Return(3));
   EXPECT_CALL(*mock_service, SendMessageToMobile(_)).Times(1);
+  EXPECT_CALL(*mock_service, IsRemoteControlApplication(app_ptr)).Times(1)
+      .WillOnce(Return(true));
 
   ASSERT_TRUE(module->IsAppForPlugin(app_ptr));
   ASSERT_FALSE(ext->is_on_driver_device());
