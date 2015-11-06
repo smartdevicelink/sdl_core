@@ -763,7 +763,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     /**
      * @brief Checks, if given RPC is allowed at current HMI level for specific
      * application in policy table
-     * @param policy_app_id Application id
+     * @param app Application
      * @param hmi_level Current HMI level of application
      * @param function_id FunctionID of RPC
      * @param params_permissions Permissions for RPC parameters (e.g.
@@ -771,8 +771,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @return SUCCESS, if allowed, otherwise result code of check
      */
     mobile_apis::Result::eType CheckPolicyPermissions(
-        const std::string& policy_app_id,
-        mobile_apis::HMILevel::eType hmi_level,
+        const ApplicationSharedPtr app,
         const std::string& function_id,
         const RPCParams& rpc_params,
         CommandParametersPermissions* params_permissions = NULL);

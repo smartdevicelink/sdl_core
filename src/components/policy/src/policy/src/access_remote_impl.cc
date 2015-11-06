@@ -326,43 +326,41 @@ bool AccessRemoteImpl::IsEnabled() const {
   return enabled_;
 }
 
-void AccessRemoteImpl::SetDefaultHmiTypes(const std::string& app_id,
+void AccessRemoteImpl::SetDefaultHmiTypes(const Subject& who,
                                           const std::vector<int>& hmi_types) {
   LOG4CXX_AUTO_TRACE(logger_);
   HMIList::mapped_type types;
   std::transform(hmi_types.begin(), hmi_types.end(), std::back_inserter(types),
                  ToHMIType());
-  hmi_types_[app_id] = types;
+  hmi_types_[who] = types;
 }
 
-const policy_table::AppHMITypes& AccessRemoteImpl::HmiTypes(
-    const std::string& app_id) {
+const policy_table::AppHMITypes& AccessRemoteImpl::HmiTypes(const Subject& who) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (cache_->IsDefaultPolicy(app_id)) {
-    return hmi_types_[app_id];
+  if (cache_->IsDefaultPolicy(who.app_id)) {
+    return hmi_types_[who];
   } else {
-    return *cache_->pt_->policy_table.app_policies[app_id].AppHMIType;
+    return *cache_->pt_->policy_table.app_policies[who.app_id].AppHMIType;
   }
 }
 
-const policy_table::Strings& AccessRemoteImpl::GetGroups(
-    const PTString& device_id, const PTString& app_id) {
+const policy_table::Strings& AccessRemoteImpl::GetGroups(const Subject& who) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (IsAppReverse(app_id)) {
-    if (IsPrimaryDevice(device_id)) {
-      return *cache_->pt_->policy_table.app_policies[app_id].groups_primaryRC;
+  if (IsAppReverse(who)) {
+    if (IsPrimaryDevice(who.dev_id)) {
+      return *cache_->pt_->policy_table.app_policies[who.app_id].groups_primaryRC;
     } else if (IsEnabled()) {
       return
-        *cache_->pt_->policy_table.app_policies[app_id].groups_nonPrimaryRC;
+        *cache_->pt_->policy_table.app_policies[who.app_id].groups_nonPrimaryRC;
     } else {
       return cache_->GetGroups(kPreConsentPassengersRC);
     }
   }
-  return cache_->GetGroups(app_id);
+  return cache_->GetGroups(who.app_id);
 }
 
-bool AccessRemoteImpl::IsAppReverse(const PTString& app_id) {
-  const policy_table::AppHMITypes& hmi_types = HmiTypes(app_id);
+bool AccessRemoteImpl::IsAppReverse(const Subject& who) {
+  const policy_table::AppHMITypes& hmi_types = HmiTypes(who);
   return std::find(hmi_types.begin(), hmi_types.end(),
                    policy_table::AHT_REMOTE_CONTROL) != hmi_types.end();
 }
@@ -391,7 +389,8 @@ extern std::ostream& operator <<(std::ostream& output,
 void AccessRemoteImpl::GetGroupsIds(const std::string &device_id,
                                     const std::string &app_id,
                                     FunctionalGroupIDs& groups_ids) {
-  const policy_table::Strings& groups = GetGroups(device_id, app_id);
+  Subject who = { device_id, app_id };
+  const policy_table::Strings& groups = GetGroups(who);
   LOG4CXX_DEBUG(logger_, "Groups Names: " << groups);
   groups_ids.resize(groups.size());
   std::transform(groups.begin(), groups.end(), groups_ids.begin(),

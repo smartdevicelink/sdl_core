@@ -170,10 +170,8 @@ TEST_F(PolicyManagerImplTest, CheckPermissions_SetHmiLevelFullForAlert_ExpectAll
   EXPECT_CALL(*cache_manager, IsApplicationRepresented("12345678")).
       WillOnce(Return(true));
 #ifdef SDL_REMOTE_CONTROL
-  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345678")).
-      WillOnce(Return("dev1"));
-  EXPECT_CALL(*access_remote, GetGroups("dev1", "12345678")).
-      WillOnce(ReturnRef(groups));
+  Subject who = { "dev1", "12345678" };
+  EXPECT_CALL(*access_remote, GetGroups(who)).WillOnce(ReturnRef(groups));
 #else  // SDL_REMOTE_CONTROL
   EXPECT_CALL(*cache_manager, GetGroups("12345678")).
       WillOnce(ReturnRef(groups));
@@ -185,7 +183,7 @@ TEST_F(PolicyManagerImplTest, CheckPermissions_SetHmiLevelFullForAlert_ExpectAll
   //act
   ::policy::RPCParams input_params;
   ::policy::CheckPermissionResult output;
-  manager->CheckPermissions("12345678", "FULL", "Alert", input_params, output);
+  manager->CheckPermissions("dev1", "12345678", "FULL", "Alert", input_params, output);
 
   //assert
   EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
@@ -345,11 +343,9 @@ TEST_F(PolicyManagerImplTest, SetPrimaryDevice) {
 TEST_F(PolicyManagerImplTest, ResetAccessBySubject) {
   Subject sub = {"dev1", "12345"};
 
-  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
-      WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote, Reset(sub));
 
-  manager->ResetAccess("12345");
+  manager->ResetAccess("dev1", "12345");
 }
 
 TEST_F(PolicyManagerImplTest, ResetAccessByObject) {
@@ -378,11 +374,9 @@ TEST_F(PolicyManagerImplTest, SetAccess_Allow) {
   SeatLocation zone = {0, 0, 0};
   Object what = {policy_table::MT_CLIMATE, zone};
 
-  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
-      WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote, Allow(who, what));
 
-  manager->SetAccess("12345", zone, "CLIMATE", true);
+  manager->SetAccess("dev1", "12345", zone, "CLIMATE", true);
 }
 
 TEST_F(PolicyManagerImplTest, SetAccess_Deny) {
@@ -390,11 +384,9 @@ TEST_F(PolicyManagerImplTest, SetAccess_Deny) {
   SeatLocation zone = {0, 0, 0};
   Object what = {policy_table::MT_RADIO, zone};
 
-  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
-      WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote, Deny(who, what));
 
-  manager->SetAccess("12345", zone, "RADIO", false);
+  manager->SetAccess("dev1", "12345", zone, "RADIO", false);
 }
 
 TEST_F(PolicyManagerImplTest, CheckAccess_PrimaryDevice) {
@@ -405,29 +397,27 @@ TEST_F(PolicyManagerImplTest, CheckAccess_PrimaryDevice) {
   EXPECT_CALL(*access_remote,
               CheckModuleType("12345", policy_table::MT_CLIMATE)).
       WillOnce(Return(true));
-  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
-      WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(true));
   EXPECT_CALL(*access_remote, Check(who, what)).
       WillOnce(Return(TypeAccess::kManual));
   EXPECT_CALL(*access_remote, Allow(who, what));
 
   EXPECT_EQ(TypeAccess::kAllowed,
-            manager->CheckAccess("12345", zone, "CLIMATE", "AnyRpc", RemoteControlParams()));
+            manager->CheckAccess("dev1", "12345", zone, "CLIMATE", "AnyRpc",
+                                 RemoteControlParams()));
 }
 
 TEST_F(PolicyManagerImplTest, CheckAccess_DisabledRremoteControl) {
   EXPECT_CALL(*access_remote,
               CheckModuleType("12345", policy_table::MT_RADIO)).
       WillOnce(Return(true));
-  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
-      WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(false));
   EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(false));
 
   SeatLocation zone {0,0,0};
   EXPECT_EQ(TypeAccess::kDisallowed,
-            manager->CheckAccess("12345", zone, "RADIO", "", RemoteControlParams()));
+            manager->CheckAccess("dev1", "12345", zone, "RADIO", "",
+                                 RemoteControlParams()));
 }
 
 TEST_F(PolicyManagerImplTest, CheckAccess_Result) {
@@ -438,8 +428,6 @@ TEST_F(PolicyManagerImplTest, CheckAccess_Result) {
   EXPECT_CALL(*access_remote,
               CheckModuleType("12345", policy_table::MT_RADIO)).
       WillOnce(Return(true));
-  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
-      WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(false));
   EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(true));
   EXPECT_CALL(*access_remote, CheckParameters(_,_,_)).WillOnce(Return(kManual));
@@ -447,7 +435,8 @@ TEST_F(PolicyManagerImplTest, CheckAccess_Result) {
       WillOnce(Return(TypeAccess::kAllowed));
 
   EXPECT_EQ(TypeAccess::kAllowed,
-            manager->CheckAccess("12345", zone, "RADIO", "", RemoteControlParams()));
+            manager->CheckAccess("dev1", "12345", zone, "RADIO", "",
+                                 RemoteControlParams()));
 }
 
 TEST_F(PolicyManagerImplTest, TwoDifferentDevice) {
@@ -459,8 +448,6 @@ TEST_F(PolicyManagerImplTest, TwoDifferentDevice) {
   EXPECT_CALL(*access_remote,
               CheckModuleType("12345", policy_table::MT_RADIO)).
       WillOnce(Return(true));
-  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("12345")).
-      WillOnce(Return("dev1"));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(true));
   EXPECT_CALL(*access_remote, Check(who1, what)).
       WillOnce(Return(TypeAccess::kManual));
@@ -469,8 +456,6 @@ TEST_F(PolicyManagerImplTest, TwoDifferentDevice) {
   EXPECT_CALL(*access_remote,
               CheckModuleType("123456", policy_table::MT_RADIO)).
       WillOnce(Return(true));
-  EXPECT_CALL(*listener, OnCurrentDeviceIdUpdateRequired("123456")).
-      WillOnce(Return("dev2"));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev2")).WillOnce(Return(false));
   EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(true));
   EXPECT_CALL(*access_remote, CheckParameters(_,_,_)).WillOnce(Return(kManual));
@@ -478,9 +463,11 @@ TEST_F(PolicyManagerImplTest, TwoDifferentDevice) {
         WillOnce(Return(TypeAccess::kDisallowed));
 
   EXPECT_EQ(TypeAccess::kAllowed,
-            manager->CheckAccess("12345", zone, "RADIO", "", RemoteControlParams()));
+            manager->CheckAccess("dev1", "12345", zone, "RADIO", "",
+                                 RemoteControlParams()));
   EXPECT_EQ(TypeAccess::kDisallowed,
-              manager->CheckAccess("123456", zone, "RADIO", "", RemoteControlParams()));
+              manager->CheckAccess("dev2", "123456", zone, "RADIO", "",
+                                   RemoteControlParams()));
 }
 
 TEST_F(PolicyManagerImplTest, CheckPTURemoteCtrlChange) {

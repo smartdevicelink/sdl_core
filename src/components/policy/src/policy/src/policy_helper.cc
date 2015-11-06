@@ -765,10 +765,12 @@ bool HaveGroupsChanged(const rpc::Optional<policy_table::Strings>& old_groups,
 
 void ProccessAppGroups::operator() (
     const policy_table::ApplicationPolicies::value_type & app) {
-  if (!pm_->access_remote_->IsAppReverse(app.first)) {
-    LOG4CXX_DEBUG(logger_, "Ignore non-reverse app");
-    return;
-  }
+// TODO(KKolodiy): it brakes build. Need to understand for what it
+// and investigate issues with update PT about notify mobile side
+//  if (!pm_->access_remote_->IsAppReverse(app.first)) {
+//    LOG4CXX_DEBUG(logger_, "Ignore non-reverse app");
+//    return;
+//  }
 
   policy_table::ApplicationPolicies::const_iterator it;
   if (pm_->cache_->IsDefaultPolicy(app.first)) {

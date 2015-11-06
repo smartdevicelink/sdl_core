@@ -68,14 +68,13 @@ class AccessRemoteImpl : public AccessRemote {
   virtual TypeAccess CheckParameters(const Object& what,
                                      const std::string& rpc,
                                      const RemoteControlParams& params) const;
-  virtual void SetDefaultHmiTypes(const std::string& app_id,
+  virtual void SetDefaultHmiTypes(const Subject& who,
                                   const std::vector<int>& hmi_types);
-  virtual const policy_table::Strings& GetGroups(const PTString& device_id,
-                                                 const PTString& app_id);
+  virtual const policy_table::Strings& GetGroups(const Subject& who);
   virtual bool GetPermissionsForApp(const std::string &device_id,
                                     const std::string &app_id,
                                     FunctionalIdType& group_types);
-  virtual bool IsAppReverse(const PTString& app_id);
+  virtual bool IsAppReverse(const Subject& who);
   virtual const SeatLocation* GetDeviceZone(const std::string& device_id) const;
   virtual void SetDeviceZone(const std::string& device_id,
                              const SeatLocation& zone);
@@ -83,11 +82,11 @@ class AccessRemoteImpl : public AccessRemote {
  private:
   typedef std::map<Subject, TypeAccess> AccessControlRow;
   typedef std::map<Object, AccessControlRow> AccessControlList;
-  typedef std::map<std::string, policy_table::AppHMITypes> HMIList;
+  typedef std::map<Subject, policy_table::AppHMITypes> HMIList;
   typedef std::map<std::string, SeatLocation> SeatList;
   inline void set_enabled(bool value);
   inline bool country_consent() const;
-  const policy_table::AppHMITypes& HmiTypes(const std::string& app_id);
+  const policy_table::AppHMITypes& HmiTypes(const Subject& who);
   void GetGroupsIds(const std::string &device_id, const std::string &app_id,
                     FunctionalGroupIDs& grops_ids);
   bool IsAllowed(const policy_table::AccessModules& modules,

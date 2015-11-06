@@ -384,7 +384,7 @@ void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
       policy_manager_->ReactOnUserDevConsentForApp(policy_app_id,
                                                    is_allowed);
 
-      policy_manager_->SendNotificationOnPermissionsUpdated(policy_app_id);
+      policy_manager_->SendNotificationOnPermissionsUpdated(device_id, policy_app_id);
     }
   }
 }
@@ -412,23 +412,17 @@ struct SmartObjectToInt {
   }
 };
 
-void PolicyHandler::AddApplication(const std::string& application_id,
+void PolicyHandler::AddApplication(const std::string& device_id,
+                                   const std::string& application_id,
                                    const smart_objects::SmartObject* app_types) {
   POLICY_LIB_CHECK_VOID();
-  size_t count = 0;
-  smart_objects::SmartArray* hmi_list = 0;
-  if (app_types) {
-    hmi_list = app_types->asArray();
+  std::vector<int> hmi_types;
+  if (app_types && app_types->asArray()) {
+    smart_objects::SmartArray* hmi_list = app_types->asArray();
+    std::transform(hmi_list->begin(), hmi_list->end(),
+                   std::back_inserter(hmi_types), SmartObjectToInt());
   }
-  if (hmi_list) {
-    count = hmi_list->size();
-  }
-  std::vector<int> hmi_types(count);
-  if (count) {
-    std::transform(hmi_list->begin(), hmi_list->end(), hmi_types.begin(),
-                   SmartObjectToInt());
-  }
-  policy_manager_->AddApplication(application_id, hmi_types);
+  policy_manager_->AddApplication(device_id, application_id, hmi_types);
 }
 
 bool PolicyHandler::CheckHMIType(const std::string& application_id,
@@ -1080,13 +1074,21 @@ bool PolicyHandler::GetPriority(const std::string& policy_app_id,
   return policy_manager_->GetPriority(policy_app_id, priority);
 }
 
-void PolicyHandler::CheckPermissions(const PTString& app_id,
-                                     const PTString& hmi_level,
+void PolicyHandler::CheckPermissions(const ApplicationSharedPtr app,
                                      const PTString& rpc,
                                      const RPCParams& rpc_params,
                                      CheckPermissionResult& result) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->CheckPermissions(app_id, hmi_level, rpc, rpc_params, result);
+  const std::string hmi_level = MessageHelper::StringifiedHMILevel(app->hmi_level());
+  const std::string device_id = MessageHelper::GetDeviceMacAddressForHandle(app->device());
+  LOG4CXX_INFO(
+    logger_,
+    "Checking permissions for  " << app->mobile_app_id()  <<
+    " in " << hmi_level <<
+    " on device " << device_id <<
+    " rpc " << rpc);
+  policy_manager_->CheckPermissions(device_id, app->mobile_app_id(), hmi_level,
+                                    rpc, rpc_params, result);
 }
 
 uint32_t PolicyHandler::GetNotificationsNumber(const std::string& priority) {
@@ -1335,9 +1337,11 @@ void policy::PolicyHandler::OnAppsSearchCompleted() {
   policy_manager_->OnAppsSearchCompleted();
 }
 
-void PolicyHandler::OnAppRegisteredOnMobile(const std::string& application_id) {
+void PolicyHandler::OnAppRegisteredOnMobile(connection_handler::DeviceHandle device_handle,
+    const std::string& application_id) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->OnAppRegisteredOnMobile(application_id);
+  std::string mac = MessageHelper::GetDeviceMacAddressForHandle(device_handle);
+  policy_manager_->OnAppRegisteredOnMobile(mac, application_id);
 }
 
 void PolicyHandler::Increment(usage_statistics::GlobalCounterId type) {
@@ -1387,12 +1391,14 @@ application_manager::TypeAccess ConvertTypeAccess(
 }  // namespace
 
 application_manager::TypeAccess PolicyHandler::CheckAccess(
-    const PTString& app_id, const application_manager::SeatLocation& zone,
+    const PTString& device_id, const PTString& app_id,
+    const application_manager::SeatLocation& zone,
     const PTString& module, const std::string& rpc,
     const std::vector<PTString>& params) {
   POLICY_LIB_CHECK(application_manager::TypeAccess::kNone);
   policy::SeatLocation policy_zone = {zone.col, zone.row, zone.level};
-  policy::TypeAccess access = policy_manager_->CheckAccess(app_id, policy_zone,
+  policy::TypeAccess access = policy_manager_->CheckAccess(device_id,
+                                                           app_id, policy_zone,
                                                            module, rpc, params);
   return ConvertTypeAccess(access);
 }
@@ -1403,18 +1409,20 @@ bool PolicyHandler::CheckModule(const PTString& app_id,
   return policy_manager_->CheckModule(app_id, module);
 }
 
-void PolicyHandler::SetAccess(const PTString& app_id,
+void PolicyHandler::SetAccess(const PTString& device_id,
+                              const PTString& app_id,
                               const application_manager::SeatLocation& zone,
                               const PTString& module,
                               bool allowed) {
   POLICY_LIB_CHECK_VOID();
   policy::SeatLocation policy_zone = {zone.col, zone.row, zone.level};
-  policy_manager_->SetAccess(app_id, policy_zone, module, allowed);
+  policy_manager_->SetAccess(device_id, app_id, policy_zone, module, allowed);
 }
 
-void PolicyHandler::ResetAccess(const PTString& app_id) {
+void PolicyHandler::ResetAccess(const PTString& device_id,
+                                const PTString& app_id) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->ResetAccess(app_id);
+  policy_manager_->ResetAccess(device_id, app_id);
 }
 
 void PolicyHandler::ResetAccess(const application_manager::SeatLocation& zone,
@@ -1441,17 +1449,20 @@ void PolicyHandler::SetPrimaryDevice(const PTString& dev_id) {
       logger_,
       "Old: " << old_dev_id << "(" << old_device_handle << ")" <<
       "New: " << dev_id << "(" << device_handle << ")");
+  std::map<connection_handler::DeviceHandle, PTString> devices;
+  devices[device_handle] = dev_id;
+  devices[old_device_handle] = old_dev_id;
   ApplicationManagerImpl::ApplicationListAccessor accessor;
   for (ApplicationManagerImpl::ApplictionSetConstIt i = accessor.begin();
       i != accessor.end(); ++i) {
     const ApplicationSharedPtr app = *i;
     LOG4CXX_DEBUG(logger_,
                   "Item: " << app->device() << " - " << app->mobile_app_id());
-    if (app->device() == device_handle || app->device() == old_device_handle) {
+    if (devices.find(app->device()) != devices.end()) {
       LOG4CXX_DEBUG(
           logger_,
           "Send notify " << app->device() << " - " << app->mobile_app_id());
-      policy_manager_->OnChangedPrimaryDevice(app->mobile_app_id());
+      policy_manager_->OnChangedPrimaryDevice(devices[app->device()], app->mobile_app_id());
     }
   }
 }
@@ -1479,7 +1490,7 @@ void PolicyHandler::ResetPrimaryDevice() {
       LOG4CXX_DEBUG(
           logger_,
           "Send notify " << app->device() << " - " << app->mobile_app_id());
-      policy_manager_->OnChangedPrimaryDevice(app->mobile_app_id());
+      policy_manager_->OnChangedPrimaryDevice(old_dev_id, app->mobile_app_id());
     }
   }
 }
@@ -1516,7 +1527,7 @@ void PolicyHandler::SetDeviceZone(const std::string& device_id,
       LOG4CXX_DEBUG(
           logger_,
           "Send notify " << app->device() << " - " << app->mobile_app_id());
-      policy_manager_->OnChangedDeviceZone(app->mobile_app_id());
+      policy_manager_->OnChangedDeviceZone(device_id, app->mobile_app_id());
     }
   }
 }
@@ -1562,7 +1573,8 @@ void PolicyHandler::OnRemoteAllowedChanged(bool /*new_consent*/) {
       LOG4CXX_DEBUG(
           logger_,
           "Send notify " << app->device() << " - " << app->mobile_app_id());
-      policy_manager_->OnChangedRemoteControl(app->mobile_app_id());
+      std::string mac = MessageHelper::GetDeviceMacAddressForHandle(app->device());
+      policy_manager_->OnChangedRemoteControl(mac, app->mobile_app_id());
     }
   }
 }

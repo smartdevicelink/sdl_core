@@ -223,11 +223,12 @@ TEST(AccessRemoteImplTest, SetDefaultHmiTypes) {
   std::vector<int> hmi_expected;
   hmi_expected.push_back(2);
   hmi_expected.push_back(6);
-  access_remote.SetDefaultHmiTypes("1234", hmi_expected);
+  Subject who = { "dev1", "1234" };
+  access_remote.SetDefaultHmiTypes(who, hmi_expected);
 
   EXPECT_NE(access_remote.hmi_types_.end(),
-            access_remote.hmi_types_.find("1234"));
-  policy_table::AppHMITypes& hmi_output = access_remote.hmi_types_["1234"];
+            access_remote.hmi_types_.find(who));
+  policy_table::AppHMITypes& hmi_output = access_remote.hmi_types_[who];
   EXPECT_EQ(2, hmi_output.size());
   EXPECT_EQ(policy_table::AHT_MEDIA, hmi_output[0]);
   EXPECT_EQ(policy_table::AHT_SOCIAL, hmi_output[1]);
@@ -237,7 +238,8 @@ TEST(AccessRemoteImplTest, GetGroups) {
   AccessRemoteImpl access_remote;
   access_remote.primary_device_ = "dev1";
   access_remote.enabled_ = true;
-  access_remote.hmi_types_["1234"].push_back(policy_table::AHT_REMOTE_CONTROL);
+  Subject who = { "dev1", "1234" };
+  access_remote.hmi_types_[who].push_back(policy_table::AHT_REMOTE_CONTROL);
 
   access_remote.cache_->pt_ = new policy_table::Table();
   policy_table::ApplicationPolicies& apps = access_remote.cache_->pt_
@@ -248,27 +250,25 @@ TEST(AccessRemoteImplTest, GetGroups) {
   apps["1234"].AppHMIType->push_back(policy_table::AHT_MEDIA);
 
   // Default groups
-  const policy_table::Strings& groups1 = access_remote.GetGroups("dev1",
-                                                                 "1234");
+  const policy_table::Strings& groups1 = access_remote.GetGroups(who);
   EXPECT_EQ(std::string("group_default"), std::string(groups1[0]));
 
   // Primary groups
   apps["1234"].set_to_string(policy::kDefaultId);
-  const policy_table::Strings& groups2 = access_remote.GetGroups("dev1",
-                                                                 "1234");
+  const policy_table::Strings& groups2 = access_remote.GetGroups(who);
   EXPECT_EQ(std::string("group_primary"), std::string(groups2[0]));
 
   // Non primary groups
   apps["1234"].set_to_string(policy::kDefaultId);
-  const policy_table::Strings& groups3 = access_remote.GetGroups("dev2",
-                                                                 "1234");
+  Subject who2 = { "dev2", "1234" };
+  access_remote.hmi_types_[who2].push_back(policy_table::AHT_REMOTE_CONTROL);
+  const policy_table::Strings& groups3 = access_remote.GetGroups(who2);
   EXPECT_EQ(std::string("group_non_primary"), std::string(groups3[0]));
 
   // Empty groups
   access_remote.enabled_ = false;
   apps["1234"].set_to_string(policy::kDefaultId);
-  const policy_table::Strings& groups4 = access_remote.GetGroups("dev2",
-                                                                 "1234");
+  const policy_table::Strings& groups4 = access_remote.GetGroups(who2);
   EXPECT_TRUE(groups4.empty());
 }
 

@@ -47,6 +47,7 @@ namespace policy_table = rpc::policy_table_interface_base;
 
 namespace policy {
 class AccessRemote;
+struct Subject;
 struct CheckAppPolicy;
 
 class PolicyManagerImpl : public PolicyManager {
@@ -65,7 +66,8 @@ class PolicyManagerImpl : public PolicyManager {
 
     virtual std::string GetLockScreenIconUrl() const;
     virtual void RequestPTUpdate();
-    virtual void CheckPermissions(const PTString& app_id,
+    virtual void CheckPermissions(const PTString& device_id,
+        const PTString& app_id,
         const PTString& hmi_level,
         const PTString& rpc,
         const RPCParams& rpc_params,
@@ -146,7 +148,8 @@ class PolicyManagerImpl : public PolicyManager {
     AppPermissions GetAppPermissionsChanges(const std::string& policy_app_id);
     void RemovePendingPermissionChanges(const std::string& app_id);
 
-    void SendNotificationOnPermissionsUpdated(const std::string& application_id);
+    void SendNotificationOnPermissionsUpdated(const std::string& device_id,
+                                              const std::string& application_id);
 
     bool CleanupUnpairedDevices();
 
@@ -154,7 +157,8 @@ class PolicyManagerImpl : public PolicyManager {
     bool CanAppStealFocus(const std::string& app_id);
     void MarkUnpairedDevice(const std::string& device_id);
 
-    void AddApplication(const std::string& application_id,
+    void AddApplication(const std::string& device_id,
+                        const std::string& application_id,
                         const std::vector<int>& hmi_types);
 
     virtual void RemoveAppConsentForGroup(const std::string& app_id,
@@ -173,17 +177,20 @@ class PolicyManagerImpl : public PolicyManager {
 
     virtual void OnAppsSearchCompleted();
 
-    void OnAppRegisteredOnMobile(const std::string& application_id);
+    void OnAppRegisteredOnMobile(const std::string& device_id,
+        const std::string& application_id);
 #ifdef SDL_REMOTE_CONTROL
-    virtual TypeAccess CheckAccess(const PTString& app_id,
+    virtual TypeAccess CheckAccess(const PTString& device_id,
+                                   const PTString& app_id,
                                    const SeatLocation& zone,
                                    const PTString& module,
                                    const PTString& rpc,
                                    const RemoteControlParams& params);
     virtual bool CheckModule(const PTString& app_id, const PTString& module);
-    virtual void SetAccess(const PTString& app_id, const SeatLocation& zone,
+    virtual void SetAccess(const PTString& dev_id, const PTString& app_id,
+                           const SeatLocation& zone,
                            const PTString& module, bool allowed);
-    virtual void ResetAccess(const PTString& app_id);
+    virtual void ResetAccess(const PTString& dev_id, const PTString& app_id);
     virtual void ResetAccess(const SeatLocation& zone, const PTString& module);
     virtual void SetPrimaryDevice(const PTString& dev_id);
     virtual void ResetPrimaryDevice();
@@ -192,9 +199,12 @@ class PolicyManagerImpl : public PolicyManager {
     virtual bool GetDeviceZone(const PTString& dev_id, SeatLocation* zone) const;
     virtual void SetRemoteControl(bool enabled);
     virtual bool GetRemoteControl() const;
-    virtual void OnChangedPrimaryDevice(const std::string& application_id);
-    virtual void OnChangedRemoteControl(const std::string& application_id);
-    virtual void OnChangedDeviceZone(const std::string& application_id);
+    virtual void OnChangedPrimaryDevice(const std::string& device_id,
+                                        const std::string& application_id);
+    virtual void OnChangedRemoteControl(const std::string& device_id,
+                                        const std::string& application_id);
+    virtual void OnChangedDeviceZone(const std::string& device_id,
+                                     const std::string& application_id);
     virtual void SendAppPermissionsChanged(const std::string& device_id,
       const std::string& application_id);
 #endif  // SDL_REMOTE_CONTROL
@@ -321,8 +331,7 @@ private:
       const utils::SharedPtr<policy_table::Table> snapshot);
     utils::SharedPtr<AccessRemote> access_remote_;
 
-    void SendHMILevelChanged(const std::string& device_id,
-                                 const std::string& application_id);
+    void SendHMILevelChanged(const Subject& who);
 #endif  // SDL_REMOTE_CONTROL
     sync_primitives::Lock apps_registration_lock_;
     sync_primitives::Lock app_permissions_diff_lock_;

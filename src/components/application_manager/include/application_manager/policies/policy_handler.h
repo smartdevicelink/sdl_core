@@ -88,8 +88,7 @@ class PolicyHandler :
                                  int timeout_exchange);
 
   bool GetPriority(const std::string& policy_app_id, std::string* priority);
-  void CheckPermissions(const PTString& app_id,
-                   const PTString& hmi_level,
+  void CheckPermissions(const application_manager::ApplicationSharedPtr app,
                    const PTString& rpc,
                    const RPCParams& rpc_params,
                    CheckPermissionResult& result);
@@ -97,6 +96,7 @@ class PolicyHandler :
 #ifdef SDL_REMOTE_CONTROL
   /**
    * Checks access to equipment of vehicle for application by RPC
+   * @param device_id unique identifier of device
    * @param app_id policy id application
    * @param zone interior zone
    * @param module type
@@ -104,7 +104,8 @@ class PolicyHandler :
    * @param params parameters list
    */
   application_manager::TypeAccess CheckAccess(
-      const PTString& app_id, const application_manager::SeatLocation& zone,
+      const PTString& device_id, const PTString& app_id,
+      const application_manager::SeatLocation& zone,
       const PTString& module, const std::string& rpc,
       const std::vector<PTString>& params);
 
@@ -118,21 +119,23 @@ class PolicyHandler :
 
   /**
    * Sets access to equipment of vehicle for application by RPC
+   * @param device_id unique identifier of device
    * @param app_id policy id application
    * @param zone interior zone
    * @param module type
    * @param allowed true if access is allowed
    */
-  void SetAccess(const PTString& app_id,
+  void SetAccess(const PTString& device_id, const PTString& app_id,
                  const application_manager::SeatLocation& zone,
                  const PTString& module,
                  bool allowed);
 
   /**
    * Resets access application to all resources
+   * @param device_id unique identifier of device
    * @param app_id policy id application
    */
-  void ResetAccess(const PTString& app_id);
+  void ResetAccess(const PTString& device_id, const PTString& app_id);
 
   /**
    * Resets access by group name for all applications
@@ -399,10 +402,12 @@ class PolicyHandler :
   /**
    * @brief Allows to add new or update existed application during
    * registration process
+   * @param device_id unique identifier of device
    * @param application_id The policy aplication id.
    * @param app_types list of hmi types
    */
-  void AddApplication(const std::string& application_id,
+  void AddApplication(const std::string& device_id,
+                      const std::string& application_id,
                       const smart_objects::SmartObject* app_types);
 
   /**
@@ -455,10 +460,11 @@ class PolicyHandler :
    * @brief OnAppRegisteredOnMobile alows to handle event when application were
    * succesfully registered on mobile device.
    * It will send OnAppPermissionSend notification and will try to start PTU.
-   *
+   * @param device_handle unique indetifier of device
    * @param application_id registered application.
    */
-  void OnAppRegisteredOnMobile(const std::string& application_id);
+  void OnAppRegisteredOnMobile(connection_handler::DeviceHandle device_handle,
+      const std::string& application_id);
 
 //TODO(AKutsan) REMOVE THIS UGLY HOTFIX
   virtual void Increment(usage_statistics::GlobalCounterId type);

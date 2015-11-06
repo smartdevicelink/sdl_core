@@ -97,13 +97,15 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @brief Check if specified RPC for specified application
      * has permission to be executed in specified HMI Level
      * and also its permitted params.
+     * @param device_id unique identifier of device
      * @param app_id Id of application provided during registration
      * @param hmi_level Current HMI Level of application
      * @param rpc Name of RPC
      * @param CheckPermissionResult containing flag if HMI Level is allowed
      * and list of allowed params.
      */
-    virtual void CheckPermissions(const PTString& app_id,
+    virtual void CheckPermissions(const PTString& device_id,
+        const PTString& app_id,
         const PTString& hmi_level,
         const PTString& rpc,
         const RPCParams& rpc_params,
@@ -299,6 +301,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     /**
      * @brief Return device id, which hosts specific application
      * @param Application id, which is required to update device id
+     * @deprecated
      */
     virtual std::string& GetCurrentDeviceId(const std::string& policy_app_id) = 0;
 
@@ -320,10 +323,11 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
     /**
      * @brief Send OnPermissionsUpdated for choosen application
+     * @param device_id
      * @param application_id
      */
     virtual void SendNotificationOnPermissionsUpdated(
-      const std::string& application_id) = 0;
+       const std::string& device_id, const std::string& application_id) = 0;
 
     /**
      * Marks device as upaired
@@ -334,10 +338,12 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     /**
      * @brief Adds, application to the db or update existed one
      * run PTU if policy update is necessary for application.
+     * @param device_id unique identifier of device
      * @param Application id assigned by Ford to the application
      * @param hmi_types list of hmi types
      */
-    virtual void AddApplication(const std::string& application_id,
+    virtual void AddApplication(const std::string& device_id,
+                                const std::string& application_id,
                                 const std::vector<int>& hmi_types) = 0;
 
     /**
@@ -420,21 +426,24 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @brief OnAppRegisteredOnMobile alows to handle event when application were
      * succesfully registered on mobile device.
      * It will send OnAppPermissionSend notification and will try to start PTU.
-     *
+     * @param device_id unique identifier of device
      * @param application_id registered application.
      */
-    virtual void OnAppRegisteredOnMobile(const std::string& application_id) = 0;
+    virtual void OnAppRegisteredOnMobile(const std::string& device_id,
+        const std::string& application_id) = 0;
 
 #ifdef SDL_REMOTE_CONTROL
     /**
      * Checks access to equipment of vehicle for application by RPC
+     * @param device_id unique identifier of device
      * @param app_id policy id application
      * @param zone control
      * @param module
      * @param rpc name of rpc
      * @param params parameters list
      */
-    virtual TypeAccess CheckAccess(const PTString& app_id,
+    virtual TypeAccess CheckAccess(const PTString& device_id,
+                                   const PTString& app_id,
                                    const SeatLocation& zone,
                                    const PTString& module,
                                    const PTString& rpc,
@@ -451,19 +460,23 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
     /**
      * Sets access to equipment of vehicle for application by RPC
+     * @param dev_id unique identifier of device
      * @param app_id policy id application
      * @param zone control
      * @param module type
      * @param allowed true if access is allowed
      */
-    virtual void SetAccess(const PTString& app_id, const SeatLocation& zone,
+    virtual void SetAccess(const PTString& dev_id, const PTString& app_id,
+                           const SeatLocation& zone,
                            const PTString& module, bool allowed) = 0;
 
     /**
      * Resets access application to all resources
+     * @param dev_id unique identifier of device
      * @param app_id policy id application
      */
-    virtual void ResetAccess(const PTString& app_id) = 0;
+    virtual void ResetAccess(const PTString& dev_id,
+                             const PTString& app_id) = 0;
 
     /**
      * Resets access by functional group for all applications
@@ -521,21 +534,27 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
     /**
      * Handles changed primary device event for a application
+     * @param device_id Device on which app is running
      * @param application_id ID application
      */
-    virtual void OnChangedPrimaryDevice(const std::string& application_id) = 0;
+    virtual void OnChangedPrimaryDevice(const std::string& device_id,
+                                        const std::string& application_id) = 0;
 
     /**
      * Handles changed remote control event for a application
+     * @param device_id Device on which app is running
      * @param application_id ID application
      */
-    virtual void OnChangedRemoteControl(const std::string& application_id) = 0;
+    virtual void OnChangedRemoteControl(const std::string& device_id,
+                                        const std::string& application_id) = 0;
 
     /**
      * Handles changed device zone event for a application
+     * @param device_id Device on which app is running
      * @param application_id ID application
      */
-    virtual void OnChangedDeviceZone(const std::string& application_id) = 0;
+    virtual void OnChangedDeviceZone(const std::string& device_id,
+                                     const std::string& application_id) = 0;
 
     /*
      * Send OnPermissionsChange notification to mobile app

@@ -285,9 +285,12 @@ class PolicyHandler :
   /**
    * @brief Allows to add new or update existed application during
    * registration process
+   * @param device_id unique identifier of device
    * @param application_id The policy aplication id.
+   * @param app_types sent by mobile side
    */
-  void AddApplication(const std::string& application_id,
+  void AddApplication(const std::string& device_id,
+                      const std::string& application_id,
                       const smart_objects::SmartObject* app_types);
 
   /**
