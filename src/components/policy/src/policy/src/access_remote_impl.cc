@@ -338,7 +338,6 @@ void AccessRemoteImpl::SetDefaultHmiTypes(const Subject& who,
 const policy_table::AppHMITypes& AccessRemoteImpl::HmiTypes(const Subject& who) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (cache_->IsDefaultPolicy(who.app_id)) {
-
     return hmi_types_[who];
   } else {
     return *cache_->pt_->policy_table.app_policies[who.app_id].AppHMIType;
