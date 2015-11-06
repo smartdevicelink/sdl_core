@@ -191,16 +191,22 @@ bool InteriorZone::Validate() const {
 namespace {
 struct IsDeniedChar {
   bool operator() (wchar_t c) {
-    return c != '_' && !std::isalnum(c);
+    return c != '_' && !std::isalnum(c, std::locale(""));
   }
 };
 }  // namespace
 
 bool Equipment::ValidateNameZone(const std::string& name) const {
   std::vector<wchar_t> wchars(name.length() + 1, L'\0');
-  size_t n = mbstowcs(&(wchars.front()), name.c_str(), name.length());
-  std::vector<wchar_t>::iterator real_end = wchars.begin() + n;
-  return std::find_if(wchars.begin(), real_end, IsDeniedChar()) == real_end;
+  std::string current_locale = setlocale(LC_ALL, NULL);
+  setlocale(LC_ALL, "");
+  int n = mbstowcs(&(wchars.front()), name.c_str(), name.length());
+  setlocale(LC_ALL, current_locale.c_str());
+  if (n != -1) {
+    std::vector<wchar_t>::iterator real_end = wchars.begin() + n;
+    return std::find_if(wchars.begin(), real_end, IsDeniedChar()) == real_end;
+  }
+  return false;
 }
 
 bool Equipment::Validate() const {
