@@ -891,7 +891,7 @@ bool PolicyManagerImpl::GetHMITypes(const std::string& application_id,
     std::transform(hmi_types->begin(), hmi_types->end(),
                    std::back_inserter(*app_types), HMITypeToInt());
   }
-  return true;
+  return hmi_types;
 }
 
 void PolicyManagerImpl::AddNewApplication(const std::string& application_id,
