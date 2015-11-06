@@ -191,7 +191,6 @@ bool InteriorZone::Validate() const {
 namespace {
 struct IsDeniedChar {
   bool operator() (wchar_t c) {
-    assert(c == '_' || std::isalnum(c));
     return c != '_' && !std::isalnum(c);
   }
 };
