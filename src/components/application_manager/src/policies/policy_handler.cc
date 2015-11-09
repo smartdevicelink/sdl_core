@@ -962,15 +962,15 @@ void PolicyHandler::PTExchangeAtUserRequest(uint32_t correlation_id) {
                                                             correlation_id);
 }
 
-void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
+void PolicyHandler::OnPermissionsUpdated(const std::string& device_id,
+                                         const std::string& policy_app_id,
                                          const Permissions& permissions,
                                          const HMILevel& default_hmi) {
   LOG4CXX_AUTO_TRACE(logger_);
-  OnPermissionsUpdated(policy_app_id, permissions);
+  OnPermissionsUpdated(device_id, policy_app_id, permissions);
 
-  ApplicationSharedPtr app =
-    ApplicationManagerImpl::instance()
-    ->application_by_policy_id(policy_app_id);
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+      device_id, policy_app_id);
   if (!app.valid()) {
     LOG4CXX_WARN(
       logger_,
@@ -1018,12 +1018,12 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
   }
 }
 
-void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
+void PolicyHandler::OnPermissionsUpdated(const std::string& device_id,
+                                         const std::string& policy_app_id,
                                          const Permissions& permissions) {
   LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationSharedPtr app =
-    ApplicationManagerImpl::instance()
-    ->application_by_policy_id(policy_app_id);
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+      device_id, policy_app_id);
   if (!app.valid()) {
     LOG4CXX_WARN(
       logger_,
