@@ -359,7 +359,7 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
   std::string default_hmi;
   default_hmi = "NONE";
 
-  listener()->OnPermissionsUpdated(application_id, notification_data,
+  listener()->OnPermissionsUpdated(device_id, application_id, notification_data,
                                    default_hmi);
 }
 
@@ -1194,7 +1194,7 @@ void PolicyManagerImpl::SendAppPermissionsChanged(const std::string& device_id,
       const std::string& application_id) {
   Permissions notification_data;
   GetPermissions(device_id, application_id, &notification_data);
-  listener()->OnPermissionsUpdated(application_id, notification_data);
+  listener()->OnPermissionsUpdated(device_id, application_id, notification_data);
 }
 
 void PolicyManagerImpl::CheckPTUUpdatesChange(

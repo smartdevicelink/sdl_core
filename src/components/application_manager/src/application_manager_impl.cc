@@ -187,6 +187,16 @@ ApplicationSharedPtr ApplicationManagerImpl::application_by_policy_id(
   return app;
 }
 
+ApplicationSharedPtr ApplicationManagerImpl::application(
+    const std::string& device_id, const std::string& policy_app_id) const {
+  connection_handler::DeviceHandle device_handle;
+  connection_handler()->GetDeviceID(device_id, &device_handle);
+  ApplicationSharedPtr app = ApplicationListAccessor().Find(
+      IsApplication(device_handle, policy_app_id));
+  LOG4CXX_DEBUG(logger_, " policy_app_id << " << policy_app_id << "Found = " << app);
+  return app;
+}
+
 bool ActiveAppPredicate (const ApplicationSharedPtr app) {
   return app ? app->IsFullscreen() : false;
 }
@@ -1202,7 +1212,7 @@ void ApplicationManagerImpl::set_connection_handler(
   connection_handler_ = handler;
 }
 
-connection_handler::ConnectionHandler* ApplicationManagerImpl::connection_handler() {
+connection_handler::ConnectionHandler* ApplicationManagerImpl::connection_handler() const {
   return connection_handler_;
 }
 

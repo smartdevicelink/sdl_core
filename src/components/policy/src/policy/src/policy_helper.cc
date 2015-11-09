@@ -275,7 +275,8 @@ void CheckAppPolicy::SendPermissionsToApp(
   LOG4CXX_INFO(logger_, "Send notification for application_id: " << app_id);
   // Default_hmi is Ford-specific and should not be used with basic policy
   const std::string default_hmi;
-  pm_->listener()->OnPermissionsUpdated(app_id, notification_data, default_hmi);
+  pm_->listener()->OnPermissionsUpdated(device_id, app_id, notification_data,
+                                        default_hmi);
 }
 
 bool CheckAppPolicy::IsAppRevoked(

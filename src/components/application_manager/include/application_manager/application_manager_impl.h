@@ -206,7 +206,15 @@ class ApplicationManagerImpl : public ApplicationManager,
     /////////////////////////////////////////////////////
 
     ApplicationSharedPtr application(uint32_t app_id) const;
+    /**
+     * Gets application by policy id
+     * @param policy_app_id
+     * @return application
+     * @deprecated see application(const std::string&, const std::string&) const
+     */
     ApplicationSharedPtr application_by_policy_id(
+        const std::string& policy_app_id) const;
+    ApplicationSharedPtr application(const std::string& device_id,
         const std::string& policy_app_id) const;
     ApplicationSharedPtr active_application() const;
     std::vector<ApplicationSharedPtr> applications_by_button(uint32_t button);
@@ -758,7 +766,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     ApplicationSharedPtr application_by_hmi_app(uint32_t hmi_app_id) const;
 
     // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
-    connection_handler::ConnectionHandler* connection_handler();
+    connection_handler::ConnectionHandler* connection_handler() const;
 
     /**
      * @brief Checks, if given RPC is allowed at current HMI level for specific
@@ -948,6 +956,20 @@ class ApplicationManagerImpl : public ApplicationManager,
       bool operator () (const ApplicationSharedPtr app) const {
         return app ? policy_app_id_ == app->mobile_app_id() : false;
       }
+    };
+
+    struct IsApplication {
+      IsApplication(connection_handler::DeviceHandle device_handle,
+                    const std::string& policy_app_id):
+        device_handle_(device_handle),
+        policy_app_id_(policy_app_id) {}
+      bool operator () (const ApplicationSharedPtr app) const {
+        return app && app->device() == device_handle_
+            && app->mobile_app_id() == policy_app_id_;
+      }
+     private:
+      connection_handler::DeviceHandle device_handle_;
+      const std::string& policy_app_id_;
     };
 
     struct SubscribedToButtonPredicate {
