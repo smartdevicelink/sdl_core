@@ -78,13 +78,22 @@ void ResumeCtrl::SaveAllApplications() {
     // remove old
 }
 
-void ResumeCtrl::SaveApplication(ApplicationConstSharedPtr application) {
+void ResumeCtrl::SaveApplication(ApplicationSharedPtr application) {
   DCHECK(application.get());
 
   if (!application) {
     LOG4CXX_FATAL(logger_, "Application object is NULL.");
     return;
   }
+
+#ifdef SDL_REMOTE_CONTROL
+  const functional_modules::ModuleID kCANModuleID = 153;
+  if (functional_modules::PluginManager::instance()->IsAppForPlugin(application,
+                                                                    kCANModuleID)) {
+    LOG4CXX_INFO(logger_, "Remote control applications do not have resumption.");
+    return;
+  }
+#endif  // SDL_REMOTE_CONTROL
 
   const std::string& m_app_id = application->mobile_app_id();
   LOG4CXX_TRACE(logger_, "ENTER app_id : " << application->app_id()

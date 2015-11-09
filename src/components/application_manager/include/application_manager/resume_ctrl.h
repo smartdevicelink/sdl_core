@@ -81,7 +81,7 @@ class ResumeCtrl: public event_engine::EventObserver {
      * @brief Save application persistent info for future resuming
      * @param application is application witch need to be saved
      */
-    void SaveApplication(ApplicationConstSharedPtr application);
+    void SaveApplication(ApplicationSharedPtr application);
 
     /**
      * @brief Set application HMI Level as saved
