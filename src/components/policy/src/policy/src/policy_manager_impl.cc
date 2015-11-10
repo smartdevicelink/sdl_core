@@ -1182,7 +1182,7 @@ void PolicyManagerImpl::SendHMILevelChanged(const Subject& who) {
   std::string default_hmi;
   if (GetDefaultHmi(who.app_id, &default_hmi)) {
     access_remote_->Reset(who);
-    listener()->OnUpdateHMILevel(who.app_id, default_hmi);
+    listener()->OnUpdateHMILevel(who.dev_id, who.app_id, default_hmi);
   } else {
     LOG4CXX_WARN(
         logger_,
@@ -1265,6 +1265,31 @@ void PolicyManagerImpl::CheckRemoteGroupsChange(
       snapshot->policy_table.app_policies;
   std::for_each(old_apps.begin(), old_apps.end(),
       ProccessAppGroups(new_apps, this));
+}
+
+void PolicyManagerImpl::OnPrimaryGroupsChanged(const std::string& application_id) {
+  const std::vector<std::string> devices = listener()->GetDevicesIds(application_id);
+  for (std::vector<std::string>::const_iterator i = devices.begin();
+      i != devices.end(); ++i) {
+    const Subject who = { *i, application_id };
+    if (access_remote_->IsAppReverse(who) &&
+        access_remote_->IsPrimaryDevice(who.dev_id)) {
+      SendAppPermissionsChanged(who.dev_id, who.app_id);
+    }
+  }
+}
+
+void PolicyManagerImpl::OnNonPrimaryGroupsChanged(const std::string& application_id) {
+  const std::vector<std::string> devices = listener()->GetDevicesIds(application_id);
+  for (std::vector<std::string>::const_iterator i = devices.begin();
+      i != devices.end(); ++i) {
+    const Subject who = { *i, application_id };
+    if (access_remote_->IsAppReverse(who) &&
+        !access_remote_->IsPrimaryDevice(who.dev_id) &&
+        access_remote_->IsEnabled()) {
+      SendAppPermissionsChanged(who.dev_id, who.app_id);
+    }
+  }
 }
 
 #endif  // SDL_REMOTE_CONTROL

@@ -169,6 +169,22 @@ ApplicationSharedPtr ApplicationManagerImpl::application(uint32_t app_id) const 
   return app;
 }
 
+struct TakeDeviceHandle {
+  std::string operator() (ApplicationSharedPtr& app) {
+    return MessageHelper::GetDeviceMacAddressForHandle(app->device());
+  }
+};
+
+std::vector<std::string> ApplicationManagerImpl::devices(
+    const std::string& policy_app_id) const {
+  MobileAppIdPredicate matcher(policy_app_id);
+  std::vector<ApplicationSharedPtr> apps = ApplicationListAccessor().FindAll(matcher);
+  std::vector<std::string> devices;
+  std::transform(apps.begin(), apps.end(), std::back_inserter(devices),
+                 TakeDeviceHandle());
+  return devices;
+}
+
 ApplicationSharedPtr ApplicationManagerImpl::application_by_hmi_app(
   uint32_t hmi_app_id) const {
   HmiAppIdPredicate finder(hmi_app_id);

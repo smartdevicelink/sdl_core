@@ -332,6 +332,9 @@ private:
     utils::SharedPtr<AccessRemote> access_remote_;
 
     void SendHMILevelChanged(const Subject& who);
+
+    void OnPrimaryGroupsChanged(const std::string& application_id);
+    void OnNonPrimaryGroupsChanged(const std::string& application_id);
 #endif  // SDL_REMOTE_CONTROL
     sync_primitives::Lock apps_registration_lock_;
     sync_primitives::Lock app_permissions_diff_lock_;

@@ -213,6 +213,8 @@ class PolicyHandler :
    */
     std::string OnCurrentDeviceIdUpdateRequired(const std::string& policy_app_id);
 
+  std::vector<std::string> GetDevicesIds(const std::string& policy_app_id);
+
   /**
    * @brief Set parameters from OnSystemInfoChanged to policy table
    * @param language System language
