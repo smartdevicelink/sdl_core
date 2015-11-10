@@ -237,15 +237,17 @@ bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies);
 #ifdef SDL_REMOTE_CONTROL
 
 struct ProccessAppGroups {
-  ProccessAppGroups(const policy_table::ApplicationPolicies& ref,
+  ProccessAppGroups(const policy_table::ApplicationPolicies& apps,
                     PolicyManagerImpl* pm)
-    : reference_(ref),
-      pm_(pm) {
+    : new_apps_(apps),
+      pm_(pm),
+      default_(new_apps_.find(kDefaultId)) {
   }
   void operator() (const policy_table::ApplicationPolicies::value_type & app);
  private:
-  const policy_table::ApplicationPolicies& reference_;
+  const policy_table::ApplicationPolicies& new_apps_;
   PolicyManagerImpl* pm_;
+  policy_table::ApplicationPolicies::const_iterator default_;
 };
 
 #endif  // SDL_REMOTE_CONTROL

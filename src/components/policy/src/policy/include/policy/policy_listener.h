@@ -55,14 +55,21 @@ class PolicyListener {
    * Gets device ID
    * @param policy_app_id
    * @return device ID
-   * @deprecated
+   * @deprecated see std::vector<std::string> GetDevicesIds(const std::string&)
    */
   virtual std::string OnCurrentDeviceIdUpdateRequired(
       const std::string& policy_app_id) = 0;
+  /**
+   * Gets devices ids by policy application id
+   * @param policy_app_id
+   * @return list devices ids
+   */
+  virtual std::vector<std::string> GetDevicesIds(const std::string policy_app_id) = 0;
   virtual void OnSystemInfoUpdateRequired() = 0;
   virtual std::string GetAppName(const std::string& policy_app_id) = 0;
   virtual void OnUpdateHMIAppType(std::map<std::string, StringArray> app_hmi_types) = 0;
-  virtual void OnUpdateHMILevel(const std::string& policy_app_id,
+  virtual void OnUpdateHMILevel(const std::string& device_id,
+                                const std::string& policy_app_id,
                                 const std::string& hmi_level) = 0;
 
     /**

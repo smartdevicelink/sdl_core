@@ -325,8 +325,16 @@ class PolicyHandler :
    * @brief Update currently used device id in policies manager for given
    * application
    * @param policy_app_id Application id
+   * @deprecated see std::vector<std::string> GetDevicesIds(const std::string&)
    */
     std::string OnCurrentDeviceIdUpdateRequired(const std::string& policy_app_id);
+
+  /**
+   * Gets devices ids by policy application id
+   * @param policy_app_id
+   * @return list devices ids
+   */
+  std::vector<std::string> GetDevicesIds(const std::string policy_app_id);
 
   /**
    * @brief Set parameters from OnSystemInfoChanged to policy table
@@ -387,7 +395,8 @@ class PolicyHandler :
   std::string GetAppName(const std::string& policy_app_id);
 
   virtual void OnUpdateHMIAppType(std::map<std::string, StringArray> app_hmi_types);
-  virtual void OnUpdateHMILevel(const std::string& policy_app_id,
+  virtual void OnUpdateHMILevel(const std::string& device_id,
+                                const std::string& policy_app_id,
                                   const std::string& hmi_level);
 
   virtual void OnCertificateUpdated(const std::string& certificate_data);

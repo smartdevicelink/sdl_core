@@ -216,6 +216,8 @@ class ApplicationManagerImpl : public ApplicationManager,
         const std::string& policy_app_id) const;
     ApplicationSharedPtr application(const std::string& device_id,
         const std::string& policy_app_id) const;
+    std::vector<std::string> devices(
+        const std::string& policy_app_id) const;
     ApplicationSharedPtr active_application() const;
     std::vector<ApplicationSharedPtr> applications_by_button(uint32_t button);
     std::vector<ApplicationSharedPtr> applications_by_ivi(uint32_t vehicle_info);

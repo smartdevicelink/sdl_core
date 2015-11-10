@@ -766,51 +766,23 @@ bool HaveGroupsChanged(const rpc::Optional<policy_table::Strings>& old_groups,
 
 void ProccessAppGroups::operator() (
     const policy_table::ApplicationPolicies::value_type & app) {
-// TODO(KKolodiy): it brakes build. Need to understand for what it
-// and investigate issues with update PT about notify mobile side
-//  if (!pm_->access_remote_->IsAppReverse(app.first)) {
-//    LOG4CXX_DEBUG(logger_, "Ignore non-reverse app");
-//    return;
-//  }
-
-  policy_table::ApplicationPolicies::const_iterator it;
-  if (pm_->cache_->IsDefaultPolicy(app.first)) {
-    LOG4CXX_DEBUG(logger_, "App remained with default policies;"
-        << " comparing accordingly.");
-    it = reference_.find(kDefaultId);
-  } else {
-    it = reference_.find(app.first);
+  policy_table::ApplicationPolicies::const_iterator i = new_apps_.find(app.first);
+  if (i == new_apps_.end() && default_ != new_apps_.end()) {
+    i = default_;
   }
-
-  if (reference_.end() != it) {
-    bool is_primary = false;
-    const std::string device_id =
-      pm_->listener()->OnCurrentDeviceIdUpdateRequired(app.first);
-    if (device_id.empty()) {
-      LOG4CXX_DEBUG(logger_, "Couldn't find device info for application id "
-                   "'" << app.first << "'; app is not currently registered.");
-      return;
-    }
-    is_primary = pm_->access_remote_->IsPrimaryDevice(device_id);
-
-    if (HaveGroupsChanged(it->second.groups_primaryRC,
+  if (i != new_apps_.end() ) {
+    if (HaveGroupsChanged(i->second.groups_primaryRC,
                           app.second.groups_primaryRC)) {
       LOG4CXX_DEBUG(logger_, "Primary groups for " << app.first
           << " have changed");
 
-      if (is_primary) {
-        pm_->listener()->OnRemoteAppPermissionsChanged(device_id,
-            app.first);
-      }
+      pm_->OnPrimaryGroupsChanged(app.first);
     }
-    if (HaveGroupsChanged(it->second.groups_nonPrimaryRC,
+    if (HaveGroupsChanged(i->second.groups_nonPrimaryRC,
                           app.second.groups_nonPrimaryRC)) {
       LOG4CXX_DEBUG(logger_, "Non-primary groups for " << app.first
           << " have changed");
-      if (!is_primary && pm_->access_remote_->IsEnabled()) {
-        pm_->listener_->OnRemoteAppPermissionsChanged(device_id,
-            app.first);
-      }
+      pm_->OnNonPrimaryGroupsChanged(app.first);
     }
   }
 }

@@ -304,6 +304,9 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   EXPECT_CALL(*cache_manager, SaveUpdateRequired(false));
   EXPECT_CALL(*cache_manager, TimeoutResponse());
   EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_));
+#ifdef SDL_REMOTE_CONTROL
+  EXPECT_CALL(*access_remote, Init());
+#endif  // SDL_REMOTE_CONTROL
 
   EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
 }
@@ -477,6 +480,8 @@ TEST_F(PolicyManagerImplTest, CheckPTURemoteCtrlChange) {
       .country_consent_passengersRC;
   rpc::Optional<rpc::Boolean>& old_consent = snapshot->policy_table
       .module_config.country_consent_passengersRC;
+
+  EXPECT_CALL(*listener, OnRemoteAllowedChanged(true)).Times(4);
 
   // Both are not initialized
   EXPECT_FALSE(CheckPTURemoteCtrlChange(update, snapshot));

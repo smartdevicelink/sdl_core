@@ -622,6 +622,11 @@ std::string PolicyHandler::OnCurrentDeviceIdUpdateRequired(
   return device_param.device_mac_address;
 }
 
+std::vector<std::string> PolicyHandler::GetDevicesIds(
+    const std::string policy_app_id) {
+  return ApplicationManagerImpl::instance()->devices(policy_app_id);
+}
+
 void PolicyHandler::OnSystemInfoChanged(const std::string& language) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
@@ -1229,11 +1234,12 @@ void PolicyHandler::OnUpdateHMIAppType(std::map<std::string, StringArray> app_hm
   }
 }
 
-void PolicyHandler::OnUpdateHMILevel(const std::string& policy_app_id,
+void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
+                                     const std::string& policy_app_id,
                                      const std::string& hmi_level) {
   LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()
-      ->application_by_policy_id(policy_app_id);
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+      device_id, policy_app_id);
   if (app) {
     mobile_apis::HMILevel::eType level =
         MessageHelper::StringToHMILevel(hmi_level);
