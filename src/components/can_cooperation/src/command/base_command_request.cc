@@ -355,9 +355,6 @@ bool BaseCommandRequest::CheckAccess() {
 
   switch (access) {
     case application_manager::kAllowed:
-      if (!extension->is_on_driver_device()) {
-        CheckHMILevel(access);
-      }
       return true;
     case application_manager::kDisallowed:
       SendResponse(false, result_codes::kDisallowed,
@@ -434,6 +431,23 @@ void BaseCommandRequest::on_event(
     ProcessAccessResponse(event);
   } else {
     OnEvent(event);  // run child's logic
+    UpdateHMILevel(event);
+  }
+}
+
+void BaseCommandRequest::UpdateHMILevel(
+    const event_engine::Event<application_manager::MessagePtr, std::string>& event) {
+  CANAppExtensionPtr extension = GetAppExtension(app_);
+  if (!extension) {
+    return;
+  }
+  if (!extension->is_on_driver_device()) {
+    Json::Value value  = MessageHelper::StringToValue(
+        event.event_message()->json_message());
+    std::string result_code;
+    std::string info;
+    bool success = ParseResultCode(value, result_code, info);
+    CheckHMILevel(application_manager::kAllowed, success);
   }
 }
 
@@ -485,19 +499,21 @@ void BaseCommandRequest::CheckHMILevel(application_manager::TypeAccess access,
   bool user_consented) {
   switch (access) {
     case application_manager::kAllowed:
-      if (app_->hmi_level() == mobile_apis::HMILevel::eType::HMI_NONE) {
+      if (user_consented) {
+        if (app_->hmi_level() == mobile_apis::HMILevel::eType::HMI_NONE) {
         LOG4CXX_DEBUG(logger_, "RSDL functionality for "
           << app_->name() << " is auto allowed; setting BACKGROUND level.");
         service_->ChangeNotifyHMILevel(app_,
           mobile_apis::HMILevel::eType::HMI_BACKGROUND);
+        }
       }
       break;
     case application_manager::kManual: {
       if (user_consented) {
-        LOG4CXX_DEBUG(logger_, "User consented RSDL functionality for "
-                      << app_->name() << "; setting LIMITED level.");
         if (app_->hmi_level() == mobile_apis::HMILevel::eType::HMI_NONE ||
             app_->hmi_level() == mobile_apis::HMILevel::eType::HMI_BACKGROUND) {
+          LOG4CXX_DEBUG(logger_, "User consented RSDL functionality for "
+                        << app_->name() << "; setting LIMITED level.");
           service_->ChangeNotifyHMILevel(app_,
                                     mobile_apis::HMILevel::eType::HMI_LIMITED);
         }
