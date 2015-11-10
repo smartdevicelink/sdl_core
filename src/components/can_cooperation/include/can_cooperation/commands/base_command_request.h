@@ -166,10 +166,12 @@ class BaseCommandRequest : public Command,
   virtual bool CheckAccess();
 
   SeatLocation CreateInteriorZone(const Json::Value& zone);
-  void CheckHMILevel(application_manager::TypeAccess access,
-                     bool user_consented = false);
 
  private:
+  void CheckHMILevel(application_manager::TypeAccess access,
+                     bool hmi_consented = false);
+  void UpdateHMILevel(const event_engine::Event<application_manager::MessagePtr,
+                      std::string>& event);
   bool CheckPolicy();
   void ProcessAccessResponse(
       const event_engine::Event<application_manager::MessagePtr,
