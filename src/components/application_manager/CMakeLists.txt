@@ -411,9 +411,11 @@ target_link_libraries("ApplicationManager" ${LIBRARIES} AMHMICommandsLibrary
                                                         AMMobileCommandsLibrary
                                                         AMEventEngine
                                                         AMPolicyLibrary)
-
 if(ENABLE_LOG)
+if(MODIFY_FUNCTION_FLAGS)
+else()
   target_link_libraries("ApplicationManager" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+endif()
 endif()
 
 if(BUILD_TESTS)

@@ -159,7 +159,12 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
       }
     }
 
-    CoincidencePredicateMenuName m((*it_array)[strings::menu_name].asString());
+#ifdef OS_WIN32
+		std::string &it_menu_name = (*it_array)[strings::menu_name].asString();
+		CoincidencePredicateMenuName m(it_menu_name);
+#else
+		CoincidencePredicateMenuName m((*it_array)[strings::menu_name].asString());
+#endif
     if (1 != std::count_if(
           new_choice_set_array->begin(),
           new_choice_set_array->end(),

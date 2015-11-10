@@ -101,6 +101,14 @@ else ()
   list(APPEND LIBRARIES sqlite3)
 endif ()
 
+if(MODIFY_FUNCTION_FLAGS)
+if(ENABLE_LOG)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "Android" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND LIBRARIES log4cxx)
+endif()
+endif()
+endif()
+
 add_library(${target} SHARED ${SOURCES})
 target_link_libraries(${target} ${LIBRARIES} )
 

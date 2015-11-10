@@ -115,12 +115,15 @@ endif()
 
 
 if(ENABLE_LOG)
+if(MODIFY_FUNCTION_FLAGS)
+else()
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
   list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
   list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
+  ADD_DEPENDENCIES(Utils install-3rd_party_logger)
+endif()
   list(APPEND LIBRARIES ConfigProfile)
 
-  ADD_DEPENDENCIES(Utils install-3rd_party_logger)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")

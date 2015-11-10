@@ -126,10 +126,12 @@ endif()
 endif()
 
 if(ENABLE_LOG)
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
   list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
   list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
   list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
+endif()
 endif()
 
 include_directories (
@@ -163,7 +165,6 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${CMAKE_SOURCE_DIR}/src/3rd_party/dbus-1.7.8
   ${CMAKE_SOURCE_DIR}/src/3rd_party/dbus-1.7.8/dbus/
-  ${CMAKE_SOURCE_DIR}/src/3rd_party/pthread-win32-2.9.1
   ${CMAKE_SOURCE_DIR}/src/LibVrMsp
 )
 

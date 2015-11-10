@@ -93,7 +93,11 @@ void* Thread::threadFunc(void* arg) {
 	//     running = 1
 	//     finalized = 1
 	pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+#ifdef OS_WIN32
+	LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self().x << " started successfully");
+#else
 	LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self() << " started successfully");
+#endif
 
 	threads::Thread* thread = reinterpret_cast<Thread*>(arg);
 	DCHECK(thread);
@@ -104,9 +108,17 @@ void* Thread::threadFunc(void* arg) {
 	thread->state_cond_.Broadcast();
 
 	while (!thread->finalized_) {
+#ifdef OS_WIN32
+		LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self().x << " iteration");
+#else
 		LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self() << " iteration");
+#endif
 		thread->run_cond_.Wait(thread->state_lock_);
+#ifdef OS_WIN32
+		LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self().x << " execute. " << "stopped_ = " << thread->stopped_ << "; finalized_ = " << thread->finalized_);
+#else
 		LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self() << " execute. " << "stopped_ = " << thread->stopped_ << "; finalized_ = " << thread->finalized_);
+#endif
 		if (!thread->stopped_ && !thread->finalized_) {
 			thread->isThreadRunning_ = true;
 			pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
@@ -120,13 +132,21 @@ void* Thread::threadFunc(void* arg) {
 			thread->isThreadRunning_ = false;
 		}
 		thread->state_cond_.Broadcast();
+#ifdef OS_WIN32
+		LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self().x << " finished iteration");
+#else
 		LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self() << " finished iteration");
+#endif
 	}
 
 	thread->state_lock_.Release();
 	pthread_cleanup_pop(1);
 
+#ifdef OS_WIN32
+	LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self().x << " exited successfully");
+#else
 	LOG4CXX_DEBUG(logger_, "Thread #" << pthread_self() << " exited successfully");
+#endif
 	return NULL;
 }
 
@@ -186,7 +206,11 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
 	}
 
 	if (isThreadRunning_) {
+#ifdef OS_WIN32
+		LOG4CXX_TRACE(logger_, "EXIT thread " << name_ << " #" << thread_handle_.x << " is already running");
+#else
 		LOG4CXX_TRACE(logger_, "EXIT thread " << name_ << " #" << thread_handle_ << " is already running");
+#endif
 		return true;
 	}
 
@@ -233,7 +257,11 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
 	}
 	stopped_ = false;
 	run_cond_.NotifyOne();
+#ifdef OS_WIN32
+	LOG4CXX_DEBUG(logger_, "Thread " << name_ << " #" << thread_handle_.x << " started. pthread_result = " << pthread_result);
+#else
 	LOG4CXX_DEBUG(logger_, "Thread " << name_ << " #" << thread_handle_ << " started. pthread_result = " << pthread_result);
+#endif
 	pthread_attr_destroy(&attributes);
 	return pthread_result == EOK;
 }
@@ -244,13 +272,20 @@ void Thread::stop() {
 
 	stopped_ = true;
 
+#ifdef OS_WIN32
+	LOG4CXX_DEBUG(logger_, "Stopping thread #" << thread_handle_.x << " \"" << name_ << " \"");
+#else
 	LOG4CXX_DEBUG(logger_, "Stopping thread #" << thread_handle_ << " \"" << name_ << " \"");
+#endif
 
 	if (delegate_ && isThreadRunning_) {
 		delegate_->exitThreadMain();
 	}
-
+#ifdef OS_WIN32
+	LOG4CXX_DEBUG(logger_, "Stopped thread #" << thread_handle_.x << " \"" << name_ << " \"");
+#else
 	LOG4CXX_DEBUG(logger_, "Stopped thread #" << thread_handle_ << " \"" << name_ << " \"");
+#endif
 }
 
 void Thread::join() {

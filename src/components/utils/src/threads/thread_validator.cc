@@ -49,36 +49,26 @@ SingleThreadSimpleValidator::~SingleThreadSimpleValidator() {
 }
 
 void SingleThreadSimpleValidator::AssertRunningOnCreationThread() const {
-  Thread::Id current_id = Thread::CurrentId();
-  if (!(creation_thread_id_ == current_id)) {
 #ifdef OS_WIN32
-# ifdef BACKTRACE_SUPPORT
+	Thread::Id current_id = Thread::CurrentId();
+#else
+	PlatformThreadHandle current_id = Thread::CurrentId();
+#endif
+	if (creation_thread_id_ != current_id) {
+#ifdef OS_WIN32
+		LOG4CXX_ERROR(logger_, "Single-threaded object created at thread ");
+#else
 		LOG4CXX_ERROR(logger_, "Single-threaded object created at thread "
 			<< creation_thread_id_
-			<< " is accessed from thread "
-			<< current_id
-			<< "\n"
-			<< utils::Backtrace()
-			);
-# else 
-		LOG4CXX_ERROR(logger_, "Single-threaded object created at thread "
-			<< creation_thread_id_
-			<< " is accessed from thread "
-			<< current_id
-			);
-# endif
-#else // OS_WIN32
-		LOG4CXX_ERROR(logger_, "Single-threaded object created at thread "
-			<< creation_thread_id_
-			<< " is accessed from thread "
+			<<" is accessed from thread "
 			<< current_id
 #ifdef BACKTRACE_SUPPORT
 			<< "\n"
 			<< utils::Backtrace()
 #endif
 			);
-#endif  // OS_WIN32
-  }
+#endif
+	}
 }
 
 
@@ -94,34 +84,25 @@ void SingleThreadValidator::PassToThread(Thread::Id thread_id) const {
 }
 
 void SingleThreadValidator::AssertRunningOnValidThread() const {
-  Thread::Id current_id = Thread::CurrentId();
-  if (!(owning_thread_id_ == current_id)) {
 #ifdef OS_WIN32
-# ifdef BACKTRACE_SUPPORT
-		LOG4CXX_ERROR(logger_, "Single-threaded object owned by thread "
-			<< owning_thread_id_
-			<< " is accessed from thread "
-			<< current_id << "\n"
-			<< utils::Backtrace()
-			);
-# else 
-		LOG4CXX_ERROR(logger_, "Single-threaded object owned by thread "
-			<< owning_thread_id_
-			<< " is accessed from thread "
-			<< current_id << "\n"
-			);
-# endif
-#else // OS_WIN32
+  Thread::Id current_id = Thread::CurrentId();
+#else
+	PlatformThreadHandle current_id = Thread::CurrentId();
+#endif
+	if (owning_thread_id_ != current_id) {
+#ifdef OS_WIN32
+		LOG4CXX_ERROR(logger_, "Single-threaded object owned by thread ");
+#else
 		LOG4CXX_ERROR(logger_, "Single-threaded object owned by thread "
 			<< owning_thread_id_
 			<< " is accessed from thread "
 			<< current_id << "\n"
 #ifdef BACKTRACE_SUPPORT
-                         << utils::Backtrace()
+			<< utils::Backtrace()
 #endif
 			);
-#endif // OS_WIN32
-  }
+#endif
+	}
 }
 
 

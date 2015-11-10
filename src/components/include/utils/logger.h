@@ -42,6 +42,13 @@
   #include "utils/push_log.h"
   #include "utils/logger_status.h"
   #include "utils/auto_trace.h"
+#if defined(OS_WIN32) 
+#	if defined(DEBUG)
+#		define __PRETTY_FUNCTION__ __FUNCTION__
+#	else
+#		define __PRETTY_FUNCTION__ __FUNCTION__
+#	endif
+#endif
 #endif  // ENABLE_LOG
 
 #ifdef ENABLE_LOG
@@ -54,9 +61,14 @@
     #define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name) \
       log4cxx::LoggerPtr logger_var = log4cxx::LoggerPtr(log4cxx::Logger::getLogger(logger_name));
 
+#ifdef OS_WIN32
+#define INIT_LOGGER(file_name) \
+	log4cxx::PropertyConfigurator::configure(file_name);
+#else
     #define INIT_LOGGER(file_name) \
       log4cxx::PropertyConfigurator::configure(file_name); \
       logger::set_logs_enabled(profile::Profile::instance()->logs_enabled());
+#endif
 
     // Logger deinitilization function and macro, need to stop log4cxx writing
     // without this deinitilization log4cxx threads continue using some instances destroyed by exit()
@@ -66,6 +78,7 @@
     #define LOG4CXX_IS_TRACE_ENABLED(logger) logger->isTraceEnabled()
 
     log4cxx_time_t time_now();
+
 
     #define LOG_WITH_LEVEL(loggerPtr, logLevel, logEvent) \
     do { \
@@ -81,8 +94,10 @@
       } \
     } while (false)
 
+#ifndef OS_WIN32
     #undef LOG4CXX_INFO
     #define LOG4CXX_INFO(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getInfo(), logEvent)
+#endif
 
     #define LOG4CXX_INFO_EXT(logger, logEvent) LOG4CXX_INFO(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
     #define LOG4CXX_INFO_STR_EXT(logger, logEvent) LOG4CXX_INFO_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
@@ -90,33 +105,42 @@
     #define LOG4CXX_TRACE_EXT(logger, logEvent) LOG4CXX_TRACE(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
     #define LOG4CXX_TRACE_STR_EXT(logger, logEvent) LOG4CXX_TRACE_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
 
+#ifndef OS_WIN32
     #undef LOG4CXX_DEBUG
     #define LOG4CXX_DEBUG(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getDebug(), logEvent)
+#endif
 
     #define LOG4CXX_DEBUG_EXT(logger, logEvent) LOG4CXX_DEBUG(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
     #define LOG4CXX_DEBUG_STR_EXT(logger, logEvent) LOG4CXX_DEBUG_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
 
+#ifndef OS_WIN32
     #undef LOG4CXX_WARN
     #define LOG4CXX_WARN(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getWarn(), logEvent)
+#endif
 
     #define LOG4CXX_WARN_EXT(logger, logEvent) LOG4CXX_WARN(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
     #define LOG4CXX_WARN_STR_EXT(logger, logEvent) LOG4CXX_WARN_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
 
+#ifndef OS_WIN32
     #undef LOG4CXX_ERROR
     #define LOG4CXX_ERROR(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getError(), logEvent)
+#endif
 
     #define LOG4CXX_ERROR_EXT(logger, logEvent) LOG4CXX_ERROR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
     #define LOG4CXX_ERROR_STR_EXT(logger, logEvent) LOG4CXX_ERROR_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
 
+#ifndef OS_WIN32
     #undef LOG4CXX_FATAL
     #define LOG4CXX_FATAL(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getFatal(), logEvent)
+#endif
 
     #define LOG4CXX_FATAL_EXT(logger, logEvent) LOG4CXX_FATAL(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
     #define LOG4CXX_FATAL_STR_EXT(logger, logEvent) LOG4CXX_FATAL_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
 
+#ifndef OS_WIN32
     #undef LOG4CXX_TRACE
     #define LOG4CXX_TRACE(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getTrace(), logEvent)
-
+#endif
     #define LOG4CXX_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, auto_trace) logger::AutoTrace auto_trace(loggerPtr, LOG4CXX_LOCATION)
     #define LOG4CXX_AUTO_TRACE(loggerPtr) LOG4CXX_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, SDL_local_auto_trace_object)
 

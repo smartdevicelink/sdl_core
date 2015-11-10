@@ -71,6 +71,15 @@
                     __FILE__, __LINE__, __FUNCTION__)
 #endif
 
+#ifdef OS_WIN32
+#define DCHECK(condition) \
+if (!(condition)) { \
+	printf("\nDCHECK  [%s:%d][%s]", __FILE__, __LINE__, __FUNCTION__); \
+	printf("[Check failed: " #condition); \
+	printf("]\n\n"); \
+	assert(false); \
+}
+#else
 #define DCHECK(condition) \
   if (!(condition)) { \
     CREATE_LOGGERPTR_LOCAL(logger_, "assert"); \
@@ -78,6 +87,7 @@
        << "\" [" << __FUNCTION__ << "][" << __FILE__ << ':' << __LINE__ << ']'); \
     ASSERT((condition)); \
   }
+#endif
 
 /*
  * Will cauch assert on debug version,

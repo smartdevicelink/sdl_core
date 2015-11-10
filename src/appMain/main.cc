@@ -108,7 +108,7 @@ bool InitHmi() {
 #else
 struct stat sb;
 if (stat("hmi_link", &sb) == -1) {
-  LOG4CXX_FATAL(logger, "File with HMI link doesn't exist!");
+  LOG4CXX_FATAL(logger_, "File with HMI link doesn't exist!");
   return false;
 }
 #endif
@@ -117,7 +117,7 @@ std::ifstream file_str;
 file_str.open("hmi_link");
 
 if (!file_str.is_open()) {
-  LOG4CXX_FATAL(logger, "File with HMI link was not opened!");
+  LOG4CXX_FATAL(logger_, "File with HMI link was not opened!");
   return false;
 }
 
@@ -129,7 +129,7 @@ std::string hmi_link;
 std::getline(file_str, hmi_link);
 
 
-LOG4CXX_INFO(logger,
+LOG4CXX_INFO(logger_,
              "Input string:" << hmi_link << " length = " << hmi_link.size());
 #ifdef OS_WIN32
 #ifdef close
