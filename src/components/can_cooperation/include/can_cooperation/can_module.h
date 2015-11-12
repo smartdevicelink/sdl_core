@@ -152,9 +152,6 @@ class CANModule : public functional_modules::GenericModule,
 
   void UnsubscribeAppsFromAllInteriorZones(uint32_t  device_id);
 
-  void NotifyHMIAboutUnsubscription(uint32_t hmi_app_id,
-                                    const Json::Value& module_description);
-
   functional_modules::ProcessResult HandleMessage(
     application_manager::MessagePtr msg);
   // TODO(VS): must be uid

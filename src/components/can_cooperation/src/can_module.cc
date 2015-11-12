@@ -563,35 +563,5 @@ void CANModule::UnsubscribeAppsFromAllInteriorZones(uint32_t  device_id) {
   }
 }
 
-// TODO(VS); use this function in UnsubscribeAppForAllZones
-void CANModule::NotifyHMIAboutUnsubscription(uint32_t hmi_app_id,
-                                   const Json::Value& module_description) {
-  Json::Value msg;
-
-  msg[kId] = service()->GetNextCorrelationID();
-
-  msg[kJsonrpc] = "2.0";
-  msg[kMethod] =
-      hmi_api::get_interior_vehicle_data;
-
-  msg[kParams][message_params::kModuleDescription] = module_description;
-
-  msg[kParams][json_keys::kAppId] = hmi_app_id;
-
-  msg[kParams][message_params::kSubscribe] = false;
-
-  application_manager::MessagePtr message_to_send(
-      new application_manager::Message(
-          protocol_handler::MessagePriority::kDefault));
-  message_to_send->set_protocol_version(
-      application_manager::ProtocolVersion::kHMI);
-  message_to_send->set_correlation_id(msg[kId].asInt());
-  message_to_send->set_json_message(MessageHelper::ValueToString(msg));
-  message_to_send->set_message_type(
-      application_manager::MessageType::kRequest);
-
-  service()->SendMessageToHMI(message_to_send);
-}
-
 }  //  namespace can_cooperation
 
