@@ -82,9 +82,10 @@ class MockPolicyListener : public PolicyListener {
   MOCK_METHOD0(CanUpdate,
                bool());
   MOCK_METHOD1(OnCertificateUpdated, void (const std::string&));
-  MOCK_METHOD3(OnUpdateHMILevel, void(const std::string& device_id,
+  MOCK_METHOD4(OnUpdateHMILevel, void(const std::string& device_id,
                                       const std::string& policy_app_id,
-                                      const std::string& hmi_level));
+                                      const std::string& hmi_level,
+                                      const std::string& device_rank));
   MOCK_METHOD1(OnRemoteAllowedChanged, void(bool new_consent));
   MOCK_METHOD2(OnRemoteAppPermissionsChanged, void(
       const std::string& device_id,

@@ -81,7 +81,7 @@ class PolicyListener {
   virtual void OnUpdateHMILevel(const std::string& device_id,
                                 const std::string& policy_app_id,
                                 const std::string& hmi_level,
-                                const std::string& device_rank) = 0;
+                                const std::string& device_rank = "") = 0;
 
     /**
    * @brief CanUpdate allows to find active application
