@@ -306,14 +306,13 @@ functional_modules::ProcessResult CANModule::HandleMessage(
             application_manager::SeatLocationPtr previous_zone =
                 service()->GetDeviceZone(device_id);
 
-            if (previous_zone.get() &&
-                device_id != service()->PrimaryDevice()) {
+            if (device_id != service()->PrimaryDevice()) {
               // TODO(VS): operator != in SeatLocation?
-              if ((zone.col != previous_zone->col) ||
+              if ((!previous_zone.get()) ||  // If it first device location changing or if device location actually changed
+                  ((zone.col != previous_zone->col) ||
                   (zone.row != previous_zone->row) ||
-                  (zone.level != previous_zone->level)) {
-                UnsubscribeAppsFromInteriorZone(device_id,
-                                       params[message_params::kDeviceLocation]);
+                  (zone.level != previous_zone->level))) {
+                UnsubscribeAppsFromAllInteriorZones(device_id);
               }
             }
 
@@ -544,8 +543,7 @@ void CANModule::UnsubscribeAppForAllZones(uint32_t hmi_app_id,
   }
 }
 
-void CANModule::UnsubscribeAppsFromInteriorZone(uint32_t  device_id,
-                                          const Json::Value& interior_zone) {
+void CANModule::UnsubscribeAppsFromAllInteriorZones(uint32_t  device_id) {
   std::vector<application_manager::ApplicationSharedPtr> applications =
     CANModule::instance()->service()->GetApplications(
         CANModule::instance()->GetModuleID());
@@ -558,30 +556,8 @@ void CANModule::UnsubscribeAppsFromInteriorZone(uint32_t  device_id,
         CANAppExtensionPtr can_app_extension =
             application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
                 app_extension);
-
-        Json::Value module_description;
-
-        module_description[message_params::kModuleZone] = interior_zone;
-        module_description[message_params::kModuleType] = enums_value::kClimate;
-
-        if (can_app_extension->
-            IsSubscibedToInteriorVehicleData(module_description)) {
-          NotifyHMIAboutUnsubscription(applications[i]->hmi_app_id(),
-                                       module_description);
-          can_app_extension->UnsubscribeFromInteriorVehicleData(
-              module_description);
-        }
-
-        module_description[message_params::kModuleType] = enums_value::kRadio;
-
-        // TODO(VS): duplicated code to separate fucntion
-        if (can_app_extension->
-            IsSubscibedToInteriorVehicleData(module_description)) {
-          NotifyHMIAboutUnsubscription(applications[i]->hmi_app_id(),
-                                       module_description);
-          can_app_extension->UnsubscribeFromInteriorVehicleData(
-              module_description);
-        }
+        UnsubscribeAppForAllZones(applications[i]->hmi_app_id(),
+                                  can_app_extension);
       }
     }
   }
