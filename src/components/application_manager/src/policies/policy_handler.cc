@@ -1236,7 +1236,8 @@ void PolicyHandler::OnUpdateHMIAppType(std::map<std::string, StringArray> app_hm
 
 void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
                                      const std::string& policy_app_id,
-                                     const std::string& hmi_level) {
+                                     const std::string& hmi_level,
+                                     const std::string& device_rank) {
   LOG4CXX_AUTO_TRACE(logger_);
   mobile_apis::HMILevel::eType level = MessageHelper::StringToHMILevel(hmi_level);
   if (mobile_apis::HMILevel::INVALID_ENUM == level) {
@@ -1259,8 +1260,17 @@ void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
         // Set application hmi level
         ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
                                                                level);
+#ifdef SDL_REMOTE_CONTROL
+        mobile_apis::DeviceRank::eType rank = MessageHelper::StringToDeviceRank(device_rank);
+        if (mobile_apis::DeviceRank::INVALID_ENUM == rank) {
+          LOG4CXX_WARN(logger_, "Couldn't convert device rank "
+                       << device_rank << " to enum.");
+        }
+        MessageHelper::SendHMIStatusNotification(*app, rank);
+#else  // SDL_REMOTE_CONTROL
         // If hmi Level is full, it will be seted after ActivateApp response
         MessageHelper::SendHMIStatusNotification(*app);
+#endif  // SDL_REMOTE_CONTROL
       }
     }
   } else {

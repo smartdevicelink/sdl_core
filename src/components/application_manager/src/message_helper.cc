@@ -245,11 +245,11 @@ uint32_t MessageHelper::GetAppCommandLimit(const std::string& policy_app_id) {
 }
 
 void MessageHelper::SendHMIStatusNotification(
-  const Application& application_impl) {
+    const Application& application_impl, mobile_apis::DeviceRank::eType rank) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr notification = new smart_objects::SmartObject;
   if (!notification) {
-    // TODO(VS): please add logger.
+    LOG4CXX_ERROR(logger_, "Failed to create smart object");
     return;
   }
   smart_objects::SmartObject& message = *notification;
@@ -271,6 +271,10 @@ void MessageHelper::SendHMIStatusNotification(
 
   message[strings::msg_params][strings::system_context] =
     static_cast<int32_t>(application_impl.system_context());
+
+  if (rank != mobile_apis::DeviceRank::eType::INVALID_ENUM) {
+    message[strings::msg_params][strings::device_rank] = static_cast<int32_t>(rank);
+  }
 
   ApplicationManagerImpl::instance()->ManageMobileCommand(notification);
 }
@@ -452,6 +456,17 @@ mobile_apis::HMILevel::eType MessageHelper::StringToHMILevel(
     return value;
   }
   return mobile_apis::HMILevel::INVALID_ENUM;
+}
+
+mobile_apis::DeviceRank::eType MessageHelper::StringToDeviceRank(
+  const std::string& device_rank) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+  mobile_apis::DeviceRank::eType value;
+  if (EnumConversionHelper<mobile_apis::DeviceRank::eType>::StringToEnum(
+      device_rank, &value)) {
+    return value;
+  }
+  return mobile_apis::DeviceRank::INVALID_ENUM;
 }
 
 std::string MessageHelper::StringifiedHMILevel(

@@ -359,7 +359,13 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
   std::string default_hmi;
   GetDefaultHmi(application_id, &default_hmi);
   listener()->OnPermissionsUpdated(device_id, application_id, notification_data);
+#ifdef SDL_REMOTE_CONTROL
+  const std::string rank = access_remote_->IsPrimaryDevice(device_id) ?
+      "DRIVER" : "PASSENGER";
+  listener()->OnUpdateHMILevel(device_id, application_id, default_hmi, rank);
+#else  // SDL_REMOTE_CONTROL
   listener()->OnUpdateHMILevel(device_id, application_id, default_hmi);
+#endif  // SDL_REMOTE_CONTROL
 }
 
 bool PolicyManagerImpl::CleanupUnpairedDevices() {

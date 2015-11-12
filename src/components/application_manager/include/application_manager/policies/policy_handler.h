@@ -407,7 +407,8 @@ class PolicyHandler :
   virtual void OnUpdateHMIAppType(std::map<std::string, StringArray> app_hmi_types);
   virtual void OnUpdateHMILevel(const std::string& device_id,
                                 const std::string& policy_app_id,
-                                  const std::string& hmi_level);
+                                const std::string& hmi_level,
+                                const std::string& device_rank = "");
 
   virtual void OnCertificateUpdated(const std::string& certificate_data);
 
