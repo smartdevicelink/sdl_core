@@ -76,6 +76,16 @@ class PolicyHandler :
   bool ReceiveMessageFromSDK(const std::string& file,
                              const BinaryMessage& pt_string);
   bool UnloadPolicyLibrary();
+  /**
+   *
+   * @param device_id
+   * @param policy_app_id
+   * @param permissions
+   * @param default_hmi
+   * @deprecated see OnPermissionsUpdated(const std::string&, const std::string&,
+   * const Permissions&) and OnUpdateHMILevel(const std::string&,
+   * const std::string& policy_app_id, const std::string& hmi_level)
+   */
   virtual void OnPermissionsUpdated(const std::string& device_id,
                                     const std::string& policy_app_id,
                                     const Permissions& permissions,

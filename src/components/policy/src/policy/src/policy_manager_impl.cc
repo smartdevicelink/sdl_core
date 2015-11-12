@@ -357,10 +357,9 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
   LOG4CXX_INFO(logger_, "Send notification for application_id:" << application_id);
 
   std::string default_hmi;
-  default_hmi = "NONE";
-
-  listener()->OnPermissionsUpdated(device_id, application_id, notification_data,
-                                   default_hmi);
+  GetDefaultHmi(application_id, &default_hmi);
+  listener()->OnPermissionsUpdated(device_id, application_id, notification_data);
+  listener()->OnUpdateHMILevel(device_id, application_id, default_hmi);
 }
 
 bool PolicyManagerImpl::CleanupUnpairedDevices() {

@@ -1238,12 +1238,16 @@ void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
                                      const std::string& policy_app_id,
                                      const std::string& hmi_level) {
   LOG4CXX_AUTO_TRACE(logger_);
+  mobile_apis::HMILevel::eType level = MessageHelper::StringToHMILevel(hmi_level);
+  if (mobile_apis::HMILevel::INVALID_ENUM == level) {
+    LOG4CXX_WARN(logger_, "Couldn't convert default hmi level "
+                 << hmi_level << " to enum.");
+    return;
+  }
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       device_id, policy_app_id);
   if (app) {
     if (app->hmi_level() == mobile_apis::HMILevel::HMI_NONE) {
-      mobile_apis::HMILevel::eType level =
-          MessageHelper::StringToHMILevel(hmi_level);
       // If default is FULL, send request to HMI. Notification to mobile will be
       // sent on response receiving.
       if (mobile_apis::HMILevel::HMI_FULL == level) {
