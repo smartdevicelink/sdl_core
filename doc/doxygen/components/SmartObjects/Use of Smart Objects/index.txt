@@ -1,6 +1,0 @@
-/*! \page components_smartobjects_usage Use Smart Objects
-
-There are lots of useful applications for the Smart Objects. They allow building complex dynamic data 
-structures in runtime and can be used to store and provide almost any data. For example any array can contain an item which is other array and so on.
-
-*/

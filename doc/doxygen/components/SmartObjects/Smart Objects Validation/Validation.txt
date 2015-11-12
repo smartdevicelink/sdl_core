@@ -1,9 +1,0 @@
-/*! \page components_smartobjects_validation_use Using Schema for validation
-
-The main purpose of Schema is validation of existing Smart Object. This process includes type and value validation. The client can use results of validation to determine if given Smart Object is valid or not. Validation of specific Smart Object can be triggered by using NsSmartDeviceLink::NsSmartObjects::CSmartSchema::validate method. Internally Schema triggers respective validate method of every Schema Item in order to perform validation.
-
-Another feature of Schema is capability to be applied to the Smart Object. Applying means that Schema tries to modify object to "normalize" data. Currently this "normalization" effects on string representation of enums. Applying of the Schema can be triggered by using NsSmartDeviceLink::NsSmartObjects::CSmartSchema::applySchema method. Internally Schema triggers respective apply method of every Schema Item and at the moment only enum Schema Items try to covert string representation to enum values.
-
-To "unapply" modifications done by apply feature Schema has NsSmartDeviceLink::NsSmartObjects::CSmartSchema::unapplySchema method. It can be used to make string representations of enums.
-
-*/
