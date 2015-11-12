@@ -1241,11 +1241,24 @@ void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       device_id, policy_app_id);
   if (app) {
-    mobile_apis::HMILevel::eType level =
-        MessageHelper::StringToHMILevel(hmi_level);
-    ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
-                                                           level);
-    MessageHelper::SendHMIStatusNotification(*app);
+    if (app->hmi_level() == mobile_apis::HMILevel::HMI_NONE) {
+      mobile_apis::HMILevel::eType level =
+          MessageHelper::StringToHMILevel(hmi_level);
+      // If default is FULL, send request to HMI. Notification to mobile will be
+      // sent on response receiving.
+      if (mobile_apis::HMILevel::HMI_FULL == level) {
+          MessageHelper::SendActivateAppToHMI(app->app_id());
+      } else {
+        LOG4CXX_INFO(logger_, "Changing hmi level of application "
+                               << policy_app_id
+                               << " to default hmi level " << hmi_level);
+        // Set application hmi level
+        ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
+                                                               level);
+        // If hmi Level is full, it will be seted after ActivateApp response
+        MessageHelper::SendHMIStatusNotification(*app);
+      }
+    }
   } else {
     LOG4CXX_WARN(
         logger_,
