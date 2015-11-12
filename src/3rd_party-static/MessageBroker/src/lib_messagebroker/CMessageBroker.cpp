@@ -4,6 +4,7 @@
  * \author AKara
  */
 
+#include <cassert>
 #include <stdio.h>
 #include <vector>
 
