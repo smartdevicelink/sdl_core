@@ -212,22 +212,14 @@ TEST_F(CanModuleTest, IsAppForPluginSuccess) {
   application_manager::ApplicationSharedPtr app_ptr(app);
   application_manager::AppExtensionPtr ext;
   CANAppExtension* valid_ext = new CANAppExtension(module->GetModuleID());
-  EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).Times(3).
+  EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).
       WillOnce(Return(ext)).WillRepeatedly(Return(valid_ext));
   EXPECT_CALL(*app, AddExtension(_)).WillOnce(Return(true));
   mobile_apis::HMILevel::eType hmi = mobile_apis::HMILevel::eType::HMI_FULL;
   EXPECT_CALL(*app, hmi_level()).WillRepeatedly(ReturnRef(hmi));
   EXPECT_CALL(*app, device()).WillOnce(Return(1));
-  EXPECT_CALL(*app, app_id()).WillOnce(Return(1));
-  mobile_apis::AudioStreamingState::eType stream =
-      mobile_apis::AudioStreamingState::eType::NOT_AUDIBLE;
-  EXPECT_CALL(*app, audio_streaming_state()).WillOnce(ReturnRef(stream));
-  mobile_apis::SystemContext::eType context =
-      mobile_apis::SystemContext::eType::SYSCTXT_MAIN;
-  EXPECT_CALL(*app, system_context()).WillOnce(ReturnRef(context));
   EXPECT_CALL(*mock_service, NotifyHMIAboutHMILevel(app_ptr, _)).Times(1);
   EXPECT_CALL(*mock_service, PrimaryDevice()).Times(1);
-  EXPECT_CALL(*mock_service, SendMessageToMobile(_)).Times(1);
   EXPECT_CALL(*mock_service, IsRemoteControlApplication(app_ptr)).Times(1)
       .WillOnce(Return(true));
   ASSERT_TRUE(module->IsAppForPlugin(app_ptr));
@@ -271,22 +263,14 @@ TEST_F(CanModuleTest, SetDriverDeviceOnRegister) {
   application_manager::ApplicationSharedPtr app_ptr(app);
   application_manager::AppExtensionPtr invalid_ext;
   CANAppExtension* ext = new CANAppExtension(module->GetModuleID());
-  EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).Times(3).
+  EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).Times(2).
       WillOnce(Return(invalid_ext)).WillRepeatedly(Return(ext));
   EXPECT_CALL(*app, AddExtension(_)).WillOnce(Return(true));
-  mobile_apis::HMILevel::eType hmi = mobile_apis::HMILevel::eType::HMI_FULL;
-  EXPECT_CALL(*app, hmi_level()).WillRepeatedly(ReturnRef(hmi));
   EXPECT_CALL(*app, device()).WillOnce(Return(12));
-  EXPECT_CALL(*app, app_id()).WillOnce(Return(1));
-  mobile_apis::AudioStreamingState::eType stream =
-      mobile_apis::AudioStreamingState::eType::NOT_AUDIBLE;
-  EXPECT_CALL(*app, audio_streaming_state()).WillOnce(ReturnRef(stream));
-  mobile_apis::SystemContext::eType context =
-      mobile_apis::SystemContext::eType::SYSCTXT_MAIN;
-  EXPECT_CALL(*app, system_context()).WillOnce(ReturnRef(context));
+  mobile_apis::HMILevel::eType hmi = mobile_apis::HMILevel::eType::HMI_NONE;
+    EXPECT_CALL(*app, hmi_level()).Times(1).WillRepeatedly(ReturnRef(hmi));
   EXPECT_CALL(*mock_service, NotifyHMIAboutHMILevel(app_ptr, _)).Times(1);
   EXPECT_CALL(*mock_service, PrimaryDevice()).Times(1).WillOnce(Return(12));
-  EXPECT_CALL(*mock_service, SendMessageToMobile(_)).Times(1);
   EXPECT_CALL(*mock_service, IsRemoteControlApplication(app_ptr)).Times(1)
       .WillOnce(Return(true));
 
@@ -299,22 +283,14 @@ TEST_F(CanModuleTest, SetDriverDeviceOnRegisterFail) {
   application_manager::ApplicationSharedPtr app_ptr(app);
   application_manager::AppExtensionPtr invalid_ext;
   CANAppExtension* ext = new CANAppExtension(module->GetModuleID());
-  EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).Times(3).
+  EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).Times(2).
       WillOnce(Return(invalid_ext)).WillRepeatedly(Return(ext));
   EXPECT_CALL(*app, AddExtension(_)).WillOnce(Return(true));
   mobile_apis::HMILevel::eType hmi = mobile_apis::HMILevel::eType::HMI_FULL;
   EXPECT_CALL(*app, hmi_level()).WillRepeatedly(ReturnRef(hmi));
   EXPECT_CALL(*app, device()).WillOnce(Return(12));
-  EXPECT_CALL(*app, app_id()).WillOnce(Return(1));
-  mobile_apis::AudioStreamingState::eType stream =
-      mobile_apis::AudioStreamingState::eType::NOT_AUDIBLE;
-  EXPECT_CALL(*app, audio_streaming_state()).WillOnce(ReturnRef(stream));
-  mobile_apis::SystemContext::eType context =
-      mobile_apis::SystemContext::eType::SYSCTXT_MAIN;
-  EXPECT_CALL(*app, system_context()).WillOnce(ReturnRef(context));
   EXPECT_CALL(*mock_service, NotifyHMIAboutHMILevel(app_ptr, _)).Times(1);
   EXPECT_CALL(*mock_service, PrimaryDevice()).Times(1).WillOnce(Return(3));
-  EXPECT_CALL(*mock_service, SendMessageToMobile(_)).Times(1);
   EXPECT_CALL(*mock_service, IsRemoteControlApplication(app_ptr)).Times(1)
       .WillOnce(Return(true));
 
@@ -348,20 +324,12 @@ TEST_F(CanModuleTest, ChangeDriverDevice) {
   mobile_apis::HMILevel::eType hmi = mobile_apis::HMILevel::eType::HMI_FULL;
   EXPECT_CALL(*app, hmi_level()).WillRepeatedly(ReturnRef(hmi));
   EXPECT_CALL(*app, device()).WillRepeatedly(Return(1));
-  EXPECT_CALL(*app, app_id()).WillOnce(Return(1));
-  mobile_apis::AudioStreamingState::eType stream =
-      mobile_apis::AudioStreamingState::eType::NOT_AUDIBLE;
-  EXPECT_CALL(*app, audio_streaming_state()).WillOnce(ReturnRef(stream));
-  mobile_apis::SystemContext::eType context =
-      mobile_apis::SystemContext::eType::SYSCTXT_MAIN;
-  EXPECT_CALL(*app, system_context()).WillOnce(ReturnRef(context));
   EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).
       WillRepeatedly(Return(ext));
   EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID())).
       WillOnce(Return(apps));
   EXPECT_CALL(*mock_service, SetPrimaryDevice(1)).Times(1);
   EXPECT_CALL(*mock_service, ResetPrimaryDevice()).Times(0);
-  EXPECT_CALL(*mock_service, SendMessageToMobile(_)).Times(1);
 
   CanModuleTest::HandleMessage(message);
   ASSERT_TRUE(ext->is_on_driver_device());
@@ -442,20 +410,12 @@ TEST_F(CanModuleTest, ChangeDriverDeviceToPassenger) {
   mobile_apis::HMILevel::eType hmi = mobile_apis::HMILevel::eType::HMI_FULL;
   EXPECT_CALL(*app, hmi_level()).WillRepeatedly(ReturnRef(hmi));
   EXPECT_CALL(*app, device()).WillOnce(Return(1));
-  EXPECT_CALL(*app, app_id()).WillOnce(Return(1));
-  mobile_apis::AudioStreamingState::eType stream =
-      mobile_apis::AudioStreamingState::eType::NOT_AUDIBLE;
-  EXPECT_CALL(*app, audio_streaming_state()).WillOnce(ReturnRef(stream));
-  mobile_apis::SystemContext::eType context =
-      mobile_apis::SystemContext::eType::SYSCTXT_MAIN;
-  EXPECT_CALL(*app, system_context()).WillOnce(ReturnRef(context));
   EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).
       WillRepeatedly(Return(ext));
   EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID())).
       WillRepeatedly(Return(apps));
   EXPECT_CALL(*mock_service, PrimaryDevice()).Times(1).WillOnce(Return(1));
   EXPECT_CALL(*mock_service, ResetPrimaryDevice()).Times(1);
-  EXPECT_CALL(*mock_service, SendMessageToMobile(_)).Times(1);
 
   CanModuleTest::HandleMessage(message);
   ASSERT_FALSE(ext->is_on_driver_device());
