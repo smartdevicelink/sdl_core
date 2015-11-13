@@ -54,7 +54,7 @@ void SubscribeButtonRequest::Run() {
       ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
+    LOG4CXX_ERROR(logger_, "APPLICATION_NOT_REGISTERED");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -64,30 +64,34 @@ void SubscribeButtonRequest::Run() {
           (*message_)[str::msg_params][str::button_name].asUInt());
 
   if (!IsSubscriptionAllowed(app, btn_id)) {
-    LOG4CXX_ERROR_EXT(logger_, "Subscribe on button " << btn_id
+    LOG4CXX_ERROR(logger_, "Subscribe on button " << btn_id
                       << " isn't allowed");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
 
   if (!CheckHMICapabilities(btn_id)) {
-    LOG4CXX_ERROR_EXT(logger_, "Subscribe on button " << btn_id
+    LOG4CXX_ERROR(logger_, "Subscribe on button " << btn_id
                       << " isn't allowed by HMI capabilities");
     SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
     return;
   }
 
   if (app->IsSubscribedToButton(btn_id)) {
-    LOG4CXX_ERROR_EXT(logger_, "Already subscribed to button " << btn_id);
+    LOG4CXX_ERROR(logger_, "Already subscribed to button " << btn_id);
     SendResponse(false, mobile_apis::Result::IGNORED);
     return;
   }
 
   app->SubscribeToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id));
   SendSubscribeButtonNotification();
-  SendResponse(true, mobile_apis::Result::SUCCESS);
 
-  app->UpdateHash();
+  const bool is_succedeed = true;
+  SendResponse(is_succedeed, mobile_apis::Result::SUCCESS);
+
+  if (is_succedeed) {
+    app->UpdateHash();
+  }
 }
 
 bool SubscribeButtonRequest::IsSubscriptionAllowed(
@@ -115,7 +119,7 @@ bool SubscribeButtonRequest::CheckHMICapabilities(
 
   const HMICapabilities& hmi_caps = app_mgr->hmi_capabilities();
   if (!hmi_caps.is_ui_cooperating()) {
-    LOG4CXX_ERROR_EXT(logger_, "UI is not supported by HMI.");
+    LOG4CXX_ERROR(logger_, "UI is not supported by HMI.");
     return false;
   }
 

@@ -213,9 +213,8 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
       LOG4CXX_DEBUG(logger_, "Received UI_OnResetTimeout event");
-      ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
-                                                               correlation_id(),
-                                                               default_timeout());
+      ApplicationManagerImpl::instance()->updateRequestTimeout(
+            connection_key(), correlation_id(), default_timeout());
       break;
     }
     case hmi_apis::FunctionID::UI_PerformInteraction: {
@@ -247,16 +246,14 @@ void PerformInteractionRequest::onTimeOut() {
         DisablePerformInteraction();
         CommandRequestImpl::onTimeOut();
       } else {
-        ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
-                                                                 correlation_id(),
-                                                                 default_timeout());
+        ApplicationManagerImpl::instance()->updateRequestTimeout(
+              connection_key(), correlation_id(), default_timeout());
       }
       break;
     }
     case mobile_apis::InteractionMode::VR_ONLY: {
-      ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
-                                                               correlation_id(),
-                                                               default_timeout());
+      ApplicationManagerImpl::instance()->updateRequestTimeout(
+            connection_key(), correlation_id(), default_timeout());
       break;
     }
     case mobile_apis::InteractionMode::MANUAL_ONLY: {
@@ -284,7 +281,7 @@ void PerformInteractionRequest::ProcessVRResponse(
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(connection_key());
 
-  if (!app.get()) {
+  if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
@@ -377,7 +374,7 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
 
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(connection_key());
-  if (!app.get()) {
+  if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
@@ -522,25 +519,24 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
         (*message_)[strings::msg_params][hmi_request::interaction_layout].
         asInt();
   }
-  CreateUIPerformInteraction(msg_params, app);
-}
-
-void PerformInteractionRequest::CreateUIPerformInteraction(
-    const smart_objects::SmartObject& msg_params,
-    application_manager::ApplicationSharedPtr const app) {
   SendHMIRequest(hmi_apis::FunctionID::UI_PerformInteraction,
-                     &msg_params, true);
+                 &msg_params, true);
 }
 
 void PerformInteractionRequest::SendVRPerformInteractionRequest(
     application_manager::ApplicationSharedPtr const app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
+
   smart_objects::SmartObject& choice_list =
     (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
 
   if (mobile_apis::InteractionMode::MANUAL_ONLY != interaction_mode_) {
-    msg_params[strings::grammar_id] = smart_objects::SmartObject(smart_objects::SmartType_Array);
+    msg_params[strings::grammar_id] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+
     int32_t grammar_id_index = 0;
     for (uint32_t i = 0; i < choice_list.length(); ++i) {
       smart_objects::SmartObject* choice_set =

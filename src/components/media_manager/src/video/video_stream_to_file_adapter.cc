@@ -147,7 +147,8 @@ void VideoStreamToFileAdapter::Streamer::threadMain() {
 
   while (!stop_flag_) {
     while (!server_->messages_.empty()) {
-      ::protocol_handler::RawMessagePtr msg = server_->messages_.pop();
+		::protocol_handler::RawMessagePtr msg;
+		server_->messages_.pop(msg);
       if (!msg) {
         LOG4CXX_ERROR(logger, "Null pointer message");
         continue;

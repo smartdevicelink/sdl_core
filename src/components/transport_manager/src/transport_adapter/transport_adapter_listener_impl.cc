@@ -39,7 +39,7 @@
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 
 namespace transport_manager {
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterListenerImpl")
 
 TransportAdapterListenerImpl::TransportAdapterListenerImpl(
   TransportManagerImpl* manager, TransportAdapter* adapter) :

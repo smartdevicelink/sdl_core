@@ -30,13 +30,13 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
+#include <string.h>
 #include "application_manager/commands/mobile/show_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application.h"
 #include "application_manager/message_helper.h"
 #include "utils/file_system.h"
-
-#include <string.h>
+#include "utils/helpers.h"
 
 namespace application_manager {
 
@@ -52,19 +52,18 @@ ShowRequest::~ShowRequest() {
 void ShowRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = application_manager::ApplicationManagerImpl::instance()
-      ->application(
-      (*message_)[strings::params][strings::connection_key].asInt());
+  ApplicationSharedPtr app =
+      application_manager::ApplicationManagerImpl::instance()->application(
+      connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(
-        logger_, "Application is not registered");
+    LOG4CXX_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
   //SDLAQ-CRS-494, VC3.1
   if ((*message_)[strings::msg_params].empty()) {
-    LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+    LOG4CXX_ERROR(logger_, strings::msg_params << " is empty.");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -81,11 +80,12 @@ void ShowRequest::Run() {
   if(((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) &&
       ((*message_)[strings::msg_params][strings::soft_buttons].length() > 0)) {
     processing_result =
-        MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
+        MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params],
+        app);
   }
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
-    LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+    LOG4CXX_ERROR(logger_, "Processing of soft buttons failed.");
     SendResponse(false, processing_result);
     return;
   }
@@ -98,7 +98,7 @@ void ShowRequest::Run() {
     verification_result = MessageHelper::VerifyImage(
         (*message_)[strings::msg_params][strings::graphic], app);
     if (mobile_apis::Result::SUCCESS != verification_result) {
-      LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
+      LOG4CXX_ERROR(logger_, "Image verification failed.");
       SendResponse(false, verification_result);
       return;
     }
@@ -108,7 +108,7 @@ void ShowRequest::Run() {
     verification_result = MessageHelper::VerifyImage(
         (*message_)[strings::msg_params][strings::secondary_graphic], app);
     if (mobile_apis::Result::SUCCESS != verification_result) {
-      LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
+      LOG4CXX_ERROR(logger_, "Image verification failed.");
       SendResponse(false, verification_result);
       return;
     }
@@ -217,34 +217,37 @@ void ShowRequest::Run() {
 
 void ShowRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
+
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_Show: {
-      LOG4CXX_INFO(logger_, "Received UI_Show event");
-      std::string response_info("");
+      LOG4CXX_DEBUG(logger_, "Received UI_Show event.");
+      std::string response_info;
       mobile_apis::Result::eType result_code =
           static_cast<mobile_apis::Result::eType>(
           message[strings::params][hmi_response::code].asInt());
 
-      bool result = false;
+      const bool result =
+          Compare<mobile_api::Result::eType, EQ, ONE>(
+            result_code,
+            mobile_api::Result::SUCCESS,
+            mobile_api::Result::WARNINGS);
 
-      if (mobile_apis::Result::SUCCESS == result_code) {
-        result = true;
-      } else if (mobile_apis::Result::WARNINGS == result_code) {
-        result = true;
-        if (message[strings::params].keyExists(hmi_response::message)) {
-          response_info = message[strings::params][hmi_response::message].asString();
-        }
+      if (mobile_apis::Result::WARNINGS == result_code &&
+          message[strings::params].keyExists(hmi_response::message)) {
+        response_info =
+            message[strings::params][hmi_response::message].asString();
       }
 
       SendResponse(result, result_code,
                    response_info.empty() ? NULL : response_info.c_str(),
-                       &(message[strings::msg_params]));
+                   &(message[strings::msg_params]));
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      LOG4CXX_ERROR(logger_,"Received unknown event " << event.id());
       break;
     }
   }

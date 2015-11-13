@@ -69,8 +69,26 @@ bool ResumeCtrl::Init() {
   bool use_db = Profile::instance()->use_db_for_resumption();
   if (use_db) {
     resumption_storage_.reset(new ResumptionDataDB());
-    if (!(resumption_storage_->Init())) {
+    if (!resumption_storage_->Init()) {
       return false;
+    }
+
+    ResumptionDataDB* db =
+        dynamic_cast<ResumptionDataDB*>(resumption_storage_.get());
+
+    if (!db->IsDBVersionActual()) {
+      LOG4CXX_INFO(logger_, "DB version had been changed. "
+                            "Rebuilding resumption DB.");
+
+      smart_objects::SmartObject data;
+      db->GetAllData(data);
+
+      if (!db->RefreshDB()) {
+        return false;
+      }
+
+      db->SaveAllData(data);
+      db->UpdateDBVersion();
     }
   } else {
     resumption_storage_.reset(new ResumptionDataJson());
@@ -142,42 +160,6 @@ bool ResumeCtrl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
   return SetAppHMIState(application, default_hmi, false);
 }
 
-bool ResumeCtrl::IsLimitedAllowed() {
-  using namespace mobile_apis;
-  ApplicationManagerImpl::ApplicationListAccessor accessor;
-  ApplicationManagerImpl::ApplictionSetConstIt it = accessor.begin();
-  for (; accessor.end() != it ; ++it) {
-    const ApplicationSharedPtr curr_app = *it;
-    if (curr_app->is_media_application()) {
-      if (curr_app->hmi_level() == HMILevel::HMI_FULL ||
-          curr_app->hmi_level() == HMILevel::HMI_LIMITED) {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-mobile_apis::HMILevel::eType
-ResumeCtrl::ResolveHMILevelConflicts(ApplicationSharedPtr application,
-                                     const mobile_apis::HMILevel::eType hmi_level) {
-  using namespace mobile_apis;
-  LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK_OR_RETURN(application, HMILevel::INVALID_ENUM);
-  HMILevel::eType restored_hmi_level = hmi_level;
-  if (HMILevel::HMI_FULL == hmi_level) {
-    restored_hmi_level = IsHmiLevelFullAllowed(application);
-  } else if (HMILevel::HMI_LIMITED == hmi_level) {
-    restored_hmi_level = IsLimitedAllowed() ?
-                           HMILevel::HMI_LIMITED:
-                           appMngr()->GetDefaultHmiLevel(application);
-  }
-  if (HMILevel::HMI_LIMITED == restored_hmi_level) {
-    MessageHelper::SendOnResumeAudioSourceToHMI(application->app_id());
-  }
-  return restored_hmi_level;
-}
-
 void ResumeCtrl::ApplicationResumptiOnTimer() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(queue_lock_);
@@ -210,8 +192,8 @@ void ResumeCtrl::RemoveFromResumption(uint32_t app_id) {
 }
 
 bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
-                               const mobile_apis::HMILevel::eType hmi_level,
-                               bool check_policy) {
+                                const mobile_apis::HMILevel::eType hmi_level,
+                                bool check_policy) {
   using namespace mobile_apis;
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(application, false);
@@ -227,25 +209,12 @@ bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
     SetupDefaultHMILevel(application);
     return false;
   }
-  const HMILevel::eType restored_hmi_level =
-      ResolveHMILevelConflicts(application, hmi_level);
-  const AudioStreamingState::eType restored_audio_state =
-      application->is_media_application() &&
-      (HMILevel::HMI_FULL == restored_hmi_level ||
-      HMILevel::HMI_LIMITED == restored_hmi_level) ? AudioStreamingState::AUDIBLE:
-                                                    AudioStreamingState::NOT_AUDIBLE;
-  if (restored_hmi_level == HMILevel::HMI_FULL) {
-    ApplicationManagerImpl::instance()->SetState<true>(application->app_id(),
-                                                       restored_hmi_level,
-                                                       restored_audio_state);
-  } else {
-    ApplicationManagerImpl::instance()->SetState<false>(application->app_id(),
-                                                        restored_hmi_level,
-                                                        restored_audio_state);
-  }
-  LOG4CXX_INFO(logger_, "Set up application "
+  application->set_is_resuming(true);
+  ApplicationManagerImpl::instance()->SetState(
+      application->app_id(), hmi_level);
+  LOG4CXX_INFO(logger_, "Application with policy id "
                << application->mobile_app_id()
-               << " to HMILevel " << restored_hmi_level);
+               << " got HMI level " << hmi_level);
   return true;
 }
 
@@ -324,10 +293,14 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
 bool ResumeCtrl::StartResumptionOnlyHMILevel(ApplicationSharedPtr application) {
   //sync_primitives::AutoLock lock(resumtion_lock_);
   LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK_OR_RETURN(application, false);
-  LOG4CXX_DEBUG(logger_, " Resume app_id = " << application->app_id()
-                << " hmi_app_id = " << application->hmi_app_id()
-                << " policy_id = " << application->mobile_app_id());
+  if (!application) {
+    LOG4CXX_WARN(logger_, "Application does not exist.");
+    return false;
+  }
+  LOG4CXX_DEBUG(logger_, "HMI level resumption requested for application id "
+                << application->app_id()
+                << "with hmi_app_id " << application->hmi_app_id()
+                << ", policy_app_id " << application->mobile_app_id());
   SetupDefaultHMILevel(application);
   smart_objects::SmartObject saved_app;
   bool result = resumption_storage_->GetSavedApplication(application->mobile_app_id(),
@@ -571,6 +544,7 @@ void ResumeCtrl::AddSubscriptions(ApplicationSharedPtr application,
         application->SubscribeToButton(btn);
       }
     }
+    MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(application);
 
     if (subscribtions.keyExists(strings::application_vehicle_info)) {
       const smart_objects::SmartObject& subscribtions_ivi =
@@ -714,35 +688,6 @@ void ResumeCtrl::AddToResumptionTimerQueue(uint32_t app_id) {
   }
 }
 
-mobile_apis::HMILevel::eType
-ResumeCtrl::IsHmiLevelFullAllowed(ApplicationConstSharedPtr app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK_OR_RETURN(app, mobile_api::HMILevel::INVALID_ENUM);
-
-  bool is_audio_app = app->IsAudioApplication();
-  bool does_audio_app_with_same_type_exist =
-      appMngr()->IsAppTypeExistsInFullOrLimited(app);
-  bool is_active_app_exist = appMngr()->active_application().valid();
-
-  mobile_api::HMILevel::eType result = mobile_api::HMILevel::HMI_FULL;
-  if (is_audio_app) {
-    if (does_audio_app_with_same_type_exist) {
-      result = appMngr()->GetDefaultHmiLevel(app);
-    } else if (is_active_app_exist) {
-      result = mobile_apis::HMILevel::HMI_LIMITED;
-    }
-  } else if (is_active_app_exist) {
-    result = appMngr()->GetDefaultHmiLevel(app);
-  }
-
-  LOG4CXX_DEBUG(logger_, "is_audio_app : " << is_audio_app
-                << "; does_audio_app_with_same_type_exist : "
-                << does_audio_app_with_same_type_exist
-                << "; is_active_app_exist : " << is_active_app_exist
-                << "; result : " << result);
-  return result;
-}
-
 void ResumeCtrl::LoadResumeData() {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject so_applications_data;
@@ -792,10 +737,6 @@ void ResumeCtrl::LoadResumeData() {
         (*limited_app)[strings::device_id].asString(),
         static_cast<int32_t>(mobile_apis::HMILevel::HMI_LIMITED));
   }
-}
-
-ApplicationManagerImpl* ResumeCtrl::appMngr() {
-  return ::application_manager::ApplicationManagerImpl::instance();
 }
 
 }  // namespce resumption

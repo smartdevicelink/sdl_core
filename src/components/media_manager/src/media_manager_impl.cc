@@ -50,7 +50,8 @@
 #include "media_manager/audio/socket_audio_streamer_adapter.h"
 #include "media_manager/video/pipe_video_streamer_adapter.h"
 #include "media_manager/audio/pipe_audio_streamer_adapter.h"
-#include "media_manager/video/video_stream_to_file_adapter.h"
+#include "media_manager/video/file_video_streamer_adapter.h"
+#include "media_manager/audio/file_audio_streamer_adapter.h"
 
 namespace media_manager {
 
@@ -100,8 +101,7 @@ void MediaManagerImpl::Init() {
   } else if ("pipe" == profile::Profile::instance()->video_server_type()) {
     streamer_[ServiceType::kMobileNav] = new PipeVideoStreamerAdapter();
   } else if ("file" == profile::Profile::instance()->video_server_type()) {
-    streamer_[ServiceType::kMobileNav] = new VideoStreamToFileAdapter(
-        profile::Profile::instance()->video_stream_file());
+    streamer_[ServiceType::kMobileNav] = new FileVideoStreamerAdapter();
   }
 
   if ("socket" == profile::Profile::instance()->audio_server_type()) {
@@ -109,8 +109,7 @@ void MediaManagerImpl::Init() {
   } else if ("pipe" == profile::Profile::instance()->audio_server_type()) {
     streamer_[ServiceType::kAudio] = new PipeAudioStreamerAdapter();
   } else if ("file" == profile::Profile::instance()->audio_server_type()) {
-    streamer_[ServiceType::kAudio] = new VideoStreamToFileAdapter(
-        profile::Profile::instance()->audio_stream_file());
+    streamer_[ServiceType::kAudio] = new FileAudioStreamerAdapter();
   }
 #endif
   streamer_listener_[ServiceType::kMobileNav] = new StreamerListener();

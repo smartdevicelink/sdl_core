@@ -76,6 +76,7 @@ endif()
 if(MODIFY_FUNCTION_FLAGS)
 option(BUILD_TARGET_LIBRARY    "build target as library" OFF)
 endif()
+option(ENABLE_HMI_PTU_DECRYPTION "Policy table update parsed by hmi" ON)
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
 set(DEBUG_OPTION 	"$ENV{DEBUG}")
@@ -375,6 +376,7 @@ pkg_check_modules(GLIB2 REQUIRED glib-2.0)
 add_definitions(${GLIB2_CFLAGS})
 endif()
 endif()
+
 
 # --- Interface generator
 
@@ -807,6 +809,12 @@ if(ENABLE_SECURITY)
   #set(SecurityManagerTestIncludeDir ${CMAKE_SOURCE_DIR}/test/components/security_manager/include)
 endif()
 
+if(ENABLE_HMI_PTU_DECRYPTION)
+  MESSAGE("USE DHMI_PTU_PARSER")
+  add_definitions(-DUSE_HMI_PTU_DECRYPTION)
+endif()
+
+set(RTLIB rt)
 if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
 set(RTLIB )
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Windows")

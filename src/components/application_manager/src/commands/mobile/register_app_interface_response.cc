@@ -44,7 +44,7 @@ namespace commands {
 void RegisterAppInterfaceResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
+  mobile_apis::Result::eType result_code = mobile_apis::Result::SUCCESS;
   bool success = (*message_)[strings::msg_params][strings::success].asBool();
   bool last_message = !success;
   // Do not close connection in case of APPLICATION_NOT_REGISTERED despite it is an error
@@ -64,13 +64,13 @@ void RegisterAppInterfaceResponse::Run() {
   // mobile to be able to check all other API according to app permissions
   uint32_t connection_key =
       (*message_)[strings::params][strings::connection_key].asUInt();
-  application_manager::ApplicationConstSharedPtr app =
-      application_manager::ApplicationManagerImpl::instance()->
-      application(connection_key);
-  if (app.valid()) {
-    policy::PolicyHandler *policy_handler = policy::PolicyHandler::instance();
+  application_manager::ApplicationSharedPtr app =
+      application_manager::ApplicationManagerImpl::instance()->application(
+          connection_key);
+  if (app) {
     std::string mobile_app_id = app->mobile_app_id();
-    policy_handler->OnAppRegisteredOnMobile(mobile_app_id);
+    policy::PolicyHandler::instance()->OnAppRegisteredOnMobile(mobile_app_id);
+
     SetHeartBeatTimeout(connection_key, mobile_app_id);
   }
 }
@@ -80,8 +80,7 @@ void RegisterAppInterfaceResponse::SetHeartBeatTimeout(
   LOG4CXX_AUTO_TRACE(logger_);
   policy::PolicyHandler *policy_handler = policy::PolicyHandler::instance();
   if (policy_handler->PolicyEnabled()) {
-    const int32_t timeout = policy_handler->HeartBeatTimeout(mobile_app_id) /
-        date_time::DateTime::MILLISECONDS_IN_SECOND;
+    const uint32_t timeout = policy_handler->HeartBeatTimeout(mobile_app_id);
     if (timeout > 0) {
       application_manager::ApplicationManagerImpl::instance()->
           connection_handler()->SetHeartBeatTimeout(connection_key, timeout);

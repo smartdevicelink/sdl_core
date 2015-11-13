@@ -308,4 +308,4 @@ TEST_F(PolicyManagerImplTest, DISABLED_GetPolicyTableStatus) {
 }
 // namespace policy
 }// namespace components
-}  // namespace test
+}// namespace test

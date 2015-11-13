@@ -64,7 +64,7 @@ void ResetGlobalPropertiesRequest::Run() {
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "No application associated with session key");
+    LOG4CXX_ERROR(logger_, "No application associated with session key");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -185,7 +185,7 @@ void ResetGlobalPropertiesRequest::Run() {
 bool ResetGlobalPropertiesRequest::ResetHelpPromt(
     application_manager::ApplicationSharedPtr app) {
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "Null pointer");
+    LOG4CXX_ERROR(logger_, "Null pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return false;
   }
@@ -198,7 +198,7 @@ bool ResetGlobalPropertiesRequest::ResetHelpPromt(
 bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(
     application_manager::ApplicationSharedPtr const app) {
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "Null pointer");
+    LOG4CXX_ERROR(logger_, "Null pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return false;
   }
@@ -225,7 +225,7 @@ bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(
 bool ResetGlobalPropertiesRequest::ResetVrHelpTitleItems(
     application_manager::ApplicationSharedPtr const app) {
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "Null pointer");
+    LOG4CXX_ERROR(logger_, "Null pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return false;
   }
@@ -239,35 +239,38 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
+  ApplicationSharedPtr application =
+      ApplicationManagerImpl::instance()->application(connection_key());
+
   switch (event.id()) {
-    case hmi_apis::FunctionID::UI_SetGlobalProperties: {
-      LOG4CXX_INFO(logger_, "Received UI_SetGlobalProperties event");
-      is_ui_received_ = true;
-      ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
-      break;
-    }
-    case hmi_apis::FunctionID::TTS_SetGlobalProperties: {
-      LOG4CXX_INFO(logger_, "Received TTS_SetGlobalProperties event");
-      is_tts_received_ = true;
-      tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
-      break;
-    }
-    default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
-      return;
-    }
+  case hmi_apis::FunctionID::UI_SetGlobalProperties: {
+    LOG4CXX_INFO(logger_, "Received UI_SetGlobalProperties event");
+    is_ui_received_ = true;
+    ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
+                   message[strings::params][hmi_response::code].asInt());
+    break;
+  }
+  case hmi_apis::FunctionID::TTS_SetGlobalProperties: {
+    LOG4CXX_INFO(logger_, "Received TTS_SetGlobalProperties event");
+    is_tts_received_ = true;
+    tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
+                    message[strings::params][hmi_response::code].asInt());
+    break;
+  }
+  default: {
+    LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+    return;
+  }
   }
 
   if (!IsPendingResponseExist()) {
     bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_)
-          && (hmi_apis::Common_Result::SUCCESS == tts_result_ ||
-              hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_))
-          || ((hmi_apis::Common_Result::SUCCESS == ui_result_)
-              && (hmi_apis::Common_Result::INVALID_ENUM == tts_result_))
-          || ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_)
-              && (hmi_apis::Common_Result::SUCCESS == tts_result_));
+                   && (hmi_apis::Common_Result::SUCCESS == tts_result_ ||
+                       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_))
+                  || ((hmi_apis::Common_Result::SUCCESS == ui_result_)
+                      && (hmi_apis::Common_Result::INVALID_ENUM == tts_result_))
+                  || ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_)
+                      && (hmi_apis::Common_Result::SUCCESS == tts_result_));
 
     mobile_apis::Result::eType result_code;
     const char* return_info = NULL;
@@ -278,24 +281,38 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
         return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
       } else {
         result_code = static_cast<mobile_apis::Result::eType>(
-        max(ui_result_, tts_result_));
+#ifdef OS_WIN32
+			                 max(ui_result_, tts_result_));
+#else
+                        std::max(ui_result_, tts_result_));
+#endif
       }
     } else {
+#ifdef OS_WIN32
       result_code = static_cast<mobile_apis::Result::eType>(
-          max(ui_result_, tts_result_));
+                      max(ui_result_, tts_result_));
+#else
+		result_code = static_cast<mobile_apis::Result::eType>(
+			std::max(ui_result_, tts_result_));
+#endif
     }
 
-    ApplicationSharedPtr application =
-        ApplicationManagerImpl::instance()->application(connection_key());
-    if (application) {
-      SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
-                       return_info, &(message[strings::msg_params]));
-      application->UpdateHash();
-    } else {
-      LOG4CXX_WARN(logger_, "unable to find application: " << connection_key());
+    SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
+                 return_info, &(message[strings::msg_params]));
+
+    if (!application) {
+      LOG4CXX_DEBUG(logger_, "NULL pointer");
+      return;
     }
+
+    if (result) {
+      application->UpdateHash();
+    }
+  } else {
+    LOG4CXX_WARN(logger_, "unable to find application: " << connection_key());
   }
 }
+
 
 bool ResetGlobalPropertiesRequest::IsPendingResponseExist() {
   return is_ui_send_ != is_ui_received_ || is_tts_send_ != is_tts_received_;

@@ -263,7 +263,7 @@ class RequestController {
     uint32_t pool_size_;
     sync_primitives::ConditionalVariable cond_var_;
 
-    std::list<RequestPtr> mobile_request_list_;
+    std::list<RequestPtr>   mobile_request_list_;
     sync_primitives::Lock mobile_request_list_lock_;
 
     /*

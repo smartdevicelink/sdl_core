@@ -425,8 +425,8 @@ void TimerThread<T>::TimerDelegate::exitThreadMain() {
 template<class T>
 void TimerThread<T>::TimerDelegate::setTimeOut(
     const uint32_t timeout_milliseconds) {
-  timeout_milliseconds_ = timeout_milliseconds;
-  termination_condition_.NotifyOne();
+    timeout_milliseconds_ = (0 == timeout_milliseconds )? 1: timeout_milliseconds ;
+    termination_condition_.NotifyOne();
 }
 
 template<class T>

@@ -31,12 +31,11 @@
  */
 
 #include "utils/lock.h"
-
 #include <errno.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <cstring>
 #include "utils/logger.h"
 
 namespace sync_primitives {
@@ -69,14 +68,17 @@ Lock::~Lock() {
 #endif
   int32_t status = pthread_mutex_destroy(&mutex_);
   if (status != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to destroy mutex " << &mutex_ << ": " << strerror(status));
+    LOG4CXX_ERROR(logger_, "Failed to destroy mutex " << &mutex_ << ": "
+                  << strerror(status));
   }
 }
 
 void Lock::Acquire() {
   const int32_t status = pthread_mutex_lock(&mutex_);
   if (status != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to acquire mutex " << &mutex_ << ": " << strerror(status));
+    LOG4CXX_FATAL(logger_, "Failed to acquire mutex " << &mutex_ << ": "
+                  << strerror(status));
+    DCHECK(status != 0);
   } else {
     AssertFreeAndMarkTaken();
   }
@@ -86,7 +88,8 @@ void Lock::Release() {
   AssertTakenAndMarkFree();
   const int32_t status = pthread_mutex_unlock(&mutex_);
   if (status != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to unlock mutex" << &mutex_ << ": " << strerror(status));
+    LOG4CXX_ERROR(logger_, "Failed to unlock mutex" << &mutex_ << ": "
+                  << strerror(status));
   }
 }
 

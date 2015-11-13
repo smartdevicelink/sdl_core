@@ -371,6 +371,15 @@ class PolicyHandler :
                    usage_statistics::AppStopwatchId type,
                    int32_t timespan_seconds);
 
+#ifdef BUILD_TESTS
+  void SetPolicyManager(utils::SharedPtr<PolicyManager> pm) {
+    policy_manager_ = pm;
+  }
+#endif // BUILD_TESTS
+#ifdef ENABLE_SECURITY
+  std::string RetrieveCertificate() const;
+#endif // ENABLE_SECURITY
+
 protected:
 
   /**

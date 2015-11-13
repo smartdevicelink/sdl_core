@@ -43,6 +43,7 @@ Copyright (c) 2013, Ford Motor Company
 #include "utils/file_system.h"
 #include "formatters/CFormatterJsonBase.hpp"
 #include "json/json.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 
@@ -139,8 +140,19 @@ void SystemRequest::Run() {
     if (!file || !file->is_download_complete ||
         !file_system::MoveFile(app_full_file_path, file_dst_path)) {
       LOG4CXX_DEBUG(logger_, "Binary data not found.");
-      SendResponse(false, mobile_apis::Result::REJECTED);
-      return;
+
+      std::string origin_file_name;
+      if ((*message_)[strings::msg_params].keyExists(strings::file_name)) {
+        origin_file_name =
+            (*message_)[strings::msg_params][strings::file_name].asString();
+      }
+      if (!(mobile_apis::RequestType::HTTP == request_type &&
+          0 == origin_file_name.compare(kIVSU))) {
+        LOG4CXX_DEBUG(logger_, "Binary data required. Reject");
+        SendResponse(false, mobile_apis::Result::REJECTED);
+        return;
+      }
+      LOG4CXX_DEBUG(logger_, "IVSU does not require binary data. Continue");
     }
     processing_file_ = file_dst_path;
   }
@@ -191,7 +203,9 @@ void SystemRequest::Run() {
 }
 
 void SystemRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "AddSubMenuRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
+
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -199,7 +213,12 @@ void SystemRequest::on_event(const event_engine::Event& event) {
       mobile_apis::Result::eType result_code =
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asUInt()));
-      bool result = mobile_apis::Result::SUCCESS == result_code;
+
+      const bool result =
+          Compare<mobile_api::Result::eType, EQ, ONE>(
+            result_code,
+            mobile_api::Result::SUCCESS,
+            mobile_api::Result::WARNINGS);
 
       ApplicationSharedPtr application =
              ApplicationManagerImpl::instance()->application(connection_key());

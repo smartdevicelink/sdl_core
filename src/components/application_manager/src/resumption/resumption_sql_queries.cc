@@ -305,11 +305,68 @@ const std::string kCreateSchema =
   "CREATE INDEX IF NOT EXISTS "
   "`applicationSubscribtionsArray.fk_Application_idx` "
   "  ON `applicationSubscribtionsArray`(`idApplication`); "
+  "CREATE TABLE IF NOT EXISTS `_internal_data`( "
+  "   `db_version_hash` INTEGER "
+  "  ); "
   "COMMIT;";
 
+const std::string kDropSchema =
+  "BEGIN; "
+  "DROP INDEX IF EXISTS `message.fk_message_consumer_friendly_messages1_idx`; "
+  "DROP TABLE IF EXISTS `resumption`; "
+  "DROP TABLE IF EXISTS `resumption`; "
+  "DROP TABLE IF EXISTS `image`; "
+  "DROP TABLE IF EXISTS `applicationChoiceSet`; "
+  "DROP TABLE IF EXISTS `file`; "
+  "DROP TABLE IF EXISTS `subMenu`; "
+  "DROP TABLE IF EXISTS `TTSChunk`; "
+  "DROP TABLE IF EXISTS `vrHelpItem`; "
+  "DROP INDEX IF EXISTS `vrHelpItem.fk_image_idx`; "
+  "DROP TABLE IF EXISTS `tableLimitedCharacterList`; "
+  "DROP TABLE IF EXISTS `characterArray`; "
+  "DROP INDEX IF EXISTS `characterArray.fk_globalProperties_idx`; "
+  "DROP INDEX IF EXISTS `characterArray.fk_tableLimitedCharacterList_idx`; "
+  "DROP TABLE IF EXISTS `choice`; "
+  "DROP INDEX IF EXISTS `choice.fk_image_idx`; "
+  "DROP TABLE IF EXISTS `command`; "
+  "DROP INDEX IF EXISTS `command.fk_image_idx`; "
+  "DROP TABLE IF EXISTS `globalProperties`; "
+  "DROP INDEX IF EXISTS `globalProperties.fk_image_idx`; "
+  "DROP TABLE IF EXISTS `choiceArray`; "
+  "DROP INDEX IF EXISTS `choiceArray.fk_applicationChoiceSet_idx`; "
+  "DROP INDEX IF EXISTS `choiceArray.fk_choice_idx`; "
+  "DROP TABLE IF EXISTS `vrCommandsArray`; "
+  "DROP INDEX IF EXISTS `vrCommandsArray.fk_choice_idx`; "
+  "DROP INDEX IF EXISTS `vrCommandsArray.fk_command_idx`; "
+  "DROP TABLE IF EXISTS `helpTimeoutPromptArray`; "
+  "DROP INDEX IF EXISTS `helpTimeoutPromptArray.fk_globalProperties_idx`; "
+  "DROP INDEX IF EXISTS `helpTimeoutPromptArray.fk_TTSChunk_idx`; "
+  "DROP TABLE IF EXISTS `vrHelpItemArray`; "
+  "DROP INDEX IF EXISTS `vrHelpItemArray.fk_vrHelpItem_idx`; "
+  "DROP INDEX IF EXISTS `vrHelpItemArray.fk_vrglobalProperties_idx`; "
+  "DROP TABLE IF EXISTS `application`; "
+  "DROP INDEX IF EXISTS `application.fk_globalProperties_idx`; "
+  "DROP TABLE IF EXISTS `applicationChoiceSetArray`; "
+  "DROP INDEX IF EXISTS `applicationChoiceSetArray.fk_applicationChoiceSet_idx`; "
+  "DROP INDEX IF EXISTS `applicationChoiceSetArray.fk_Aplication_idx`; "
+  "DROP TABLE IF EXISTS `applicationCommandsArray`; "
+  "DROP INDEX IF EXISTS `applicationCommandsArray.fk_Application_idx`; "
+  "DROP INDEX IF EXISTS `applicationCommandsArray.fk_command_idx`; "
+  "DROP TABLE IF EXISTS `applicationFilesArray`; "
+  "DROP INDEX IF EXISTS `applicationFilesArray.fk_Application_idx`; "
+  "DROP INDEX IF EXISTS `applicationFilesArray.fk_file_idx`; "
+  "DROP TABLE IF EXISTS `applicationSubMenuArray`; "
+  "DROP INDEX IF EXISTS `applicationSubMenuArray.fk_subMenu_idx`; "
+  "DROP INDEX IF EXISTS `applicationSubMenuArray.fk_Application_idx`; "
+  "DROP TABLE IF EXISTS `applicationSubscribtionsArray`; "
+  "DROP INDEX IF EXISTS `applicationSubscribtionsArray.fk_Application_idx`; "
+  "DROP TABLE IF EXISTS `_internal_data`; "
+  "COMMIT; "
+  "VACUUM;";
+
 const std::string kInsertInitData =
-    "INSERT OR IGNORE INTO `resumption` (`last_ign_off_time`) "
-    " VALUES (0); ";
+    "INSERT OR IGNORE INTO `resumption` (`last_ign_off_time`) VALUES (0); "
+    "INSERT OR IGNORE INTO `_internal_data` (`db_version_hash`) VALUES(0); ";
 
 const std::string kChecksResumptionData =
     " SELECT COUNT(`idresumption`) "
@@ -877,9 +934,16 @@ const std::string kSelectAppTable =
     "FROM `application` "
     "WHERE `appID` = ? AND `deviceID` = ?;";
 
+const std::string kSelectAllApps =
+    "SELECT `appID`, `deviceID` FROM `application`;";
+
 const std::string kUpdateApplicationData =
     "UPDATE `application` "
     "SET `hmiLevel` = ?, `timeStamp` = ? "
     "WHERE `appID` = ? AND `deviceID` = ?;";
+
+const std::string kSelectDBVersion = "SELECT `db_version_hash` from `_internal_data`; ";
+
+const std::string kUpdateDBVersion = "UPDATE `_internal_data` SET `db_version_hash` = ? ; ";
 
 }  // namespace resumption

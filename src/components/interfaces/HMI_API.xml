@@ -184,6 +184,21 @@
      <element name="NO-NO" internal_name="NO_NO">
       <description>Norwegian - Norway</description>
     </element>
+    <element name="NL-BE" internal_name="NL_BE">
+      <description>Dutch (Flemish) - Belgium</description>
+    </element>
+    <element name="EL-GR" internal_name="EL_GR">
+      <description>Greek - Greece</description>
+    </element>
+    <element name="HU-HU" internal_name="HU_HU">
+      <description>Hungarian - Hungary</description>
+    </element>
+    <element name="FI-FI" internal_name="FI_FI">
+      <description>Finnish - Finland</description>
+    </element>
+    <element name="SK-SK" internal_name="SK_SK">
+      <description>Slovak - Slovakia</description>
+    </element>
 </enum>
 
 <enum name="SoftButtonType">
@@ -3370,7 +3385,7 @@
     </param>
   </function>
   <function name="StartStream" messagetype="request">
-    <description>Notification from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
+    <description>Request from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
     <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
       <description>URL that HMI start playing.</description>
     </param>
@@ -3381,7 +3396,7 @@
   <function name="StartStream" messagetype="response">
   </function>
   <function name="StopStream" messagetype="request">
-    <description>Notification from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
+    <description>Request from SmartDeviceLinkCore to HMI to stop playing video streaming.</description>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application related to this RPC.</description>
     </param>
@@ -3389,7 +3404,7 @@
   <function name="StopStream" messagetype="response">
   </function>
   <function name="StartAudioStream" messagetype="request">
-    <description>Notification from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
+    <description>Request from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
     <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
       <description>URL that HMI start playing.</description>
     </param>
@@ -3400,7 +3415,7 @@
   <function name="StartAudioStream" messagetype="response">
   </function>
   <function name="StopAudioStream" messagetype="request">
-    <description>Notification from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
+    <description>Request from SmartDeviceLinkCore to HMI to stop playing audio streaming.</description>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application related to this RPC.</description>
     </param>

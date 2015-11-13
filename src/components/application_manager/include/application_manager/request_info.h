@@ -319,10 +319,7 @@ namespace request_controller {
         return false;
       }
 
-      if (date_time::DateTime::getmSecs(setEntry->start_time())
-          < date_time::DateTime::getmSecs(start_) ||
-          date_time::DateTime::getmSecs(setEntry->start_time())
-          > date_time::DateTime::getmSecs(end_)) {
+      if ((setEntry->start_time() < start_) ||  (end_ < setEntry->start_time() )) {
         return false;
       }
 

@@ -361,7 +361,7 @@ mobile_apis::Result::eType CommandRequestImpl::GetMobileResultCode(
 }
 
 bool CommandRequestImpl::CheckAllowedParameters() {
-  LOG4CXX_INFO(logger_, "CheckAllowedParameters");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   // RegisterAppInterface should always be allowed
   if (mobile_apis::FunctionID::RegisterAppInterfaceID ==
@@ -429,7 +429,7 @@ bool CommandRequestImpl::CheckAllowedParameters() {
 
 void CommandRequestImpl::RemoveDisallowedParameters(
     const CommandParametersPermissions& params_permissions) {
-  LOG4CXX_INFO(logger_, "RemoveDisallowedParameters");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   smart_objects::SmartObject& params = (*message_)[strings::msg_params];
 

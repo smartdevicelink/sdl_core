@@ -87,7 +87,7 @@ void UpdateTurnListRequest::Run() {
       if((turn_list_array[i].keyExists(strings::turn_icon)) &&
           (mobile_apis::Result::SUCCESS != MessageHelper::VerifyImage(
               turn_list_array[i][strings::turn_icon], app))) {
-        LOG4CXX_ERROR_EXT(
+        LOG4CXX_ERROR(
             logger_,
             "MessageHelper::VerifyImage return INVALID_DATA");
         SendResponse(false, mobile_apis::Result::INVALID_DATA);

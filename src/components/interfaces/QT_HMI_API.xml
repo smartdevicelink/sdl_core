@@ -176,6 +176,21 @@
       <element name="NO-NO" internal_name="NO_NO">
         <description>Norwegian - Norway</description>
       </element>
+      <element name="NL-BE" internal_name="NL_BE">
+        <description>Dutch (Flemish) - Belgium</description>
+      </element>
+      <element name="EL-GR" internal_name="EL_GR">
+        <description>Greek - Greece</description>
+      </element>
+      <element name="HU-HU" internal_name="HU_HU">
+        <description>Hungarian - Hungary</description>
+      </element>
+      <element name="FI-FI" internal_name="FI_FI">
+        <description>Finnish - Finland</description>
+      </element>
+      <element name="SK-SK" internal_name="SK_SK">
+        <description>Slovak - Slovakia</description>
+      </element>
     </enum>
     <enum name="SoftButtonType">
       <description>Contains information about the SoftButton capabilities.</description>
@@ -1117,6 +1132,20 @@
       <element name="UNKNOWN"/>
       <element name="UNPAIRED"/>
     </enum>
+     <struct name="DeviceInfo">
+      <param name="name" type="String" mandatory="true">
+        <description>The name of the device connected.</description>
+      </param>
+      <param name="id" type="String" mandatory="true">
+        <description>The ID of the device connected</description>
+      </param>
+      <param name="transportType" type="Common.TransportType" mandatory="false">
+        <description>The transport type the named-app's-device is connected over HU(BlueTooth, USB or  WiFi). It must be provided in OnAppRegistered and in UpdateDeviceList</description>
+      </param>
+      <param name="isSDLAllowed" type="Boolean" mandatory="false">
+        <description>Sent by SDL in UpdateDeviceList. ’true’ – if device is allowed for PolicyTable Exchange; ‘false’ – if device is NOT allowed for PolicyTable Exchange </description>
+      </param>
+    </struct>
     <struct name="UserFriendlyMessage" scope="internal">
     <param name="messageCode" type="String" mandatory="true"/>
       <param name="ttsString" type="String" mandatory="false"/>
@@ -3102,7 +3131,7 @@
       </param>
     </function>
     <function name="StartStream" messagetype="request" provider="hmi">
-      <description>Notification from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
+      <description>Request from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
       <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
         <description>URL that HMI start playing.</description>
       </param>
@@ -3113,7 +3142,7 @@
     <function name="StartStream" messagetype="response">
   </function>
     <function name="StopStream" messagetype="request" provider="hmi">
-      <description>Notification from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
+      <description>Request from SmartDeviceLinkCore to HMI to stop playing video streaming.</description>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of application related to this RPC.</description>
       </param>
@@ -3121,7 +3150,7 @@
     <function name="StopStream" messagetype="response">
   </function>
     <function name="StartAudioStream" messagetype="request" provider="hmi">
-      <description>Notification from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
+      <description>Request from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
       <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
         <description>URL that HMI start playing.</description>
       </param>
@@ -3132,7 +3161,7 @@
     <function name="StartAudioStream" messagetype="response">
   </function>
     <function name="StopAudioStream" messagetype="request" provider="hmi">
-      <description>Notification from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
+      <description>Request from SmartDeviceLinkCore to HMI to stop playing audio streaming.</description>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of application related to this RPC.</description>
       </param>

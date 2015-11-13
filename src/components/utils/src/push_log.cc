@@ -37,6 +37,8 @@
 
 namespace logger {
 
+static bool logs_enabled_ = false;
+
 bool push_log(log4cxx::LoggerPtr logger,
               log4cxx::LevelPtr level,
               const std::string& entry,
@@ -67,7 +69,11 @@ bool push_log(log4cxx::LoggerPtr logger,
 }
 
 bool logs_enabled() {
-  return profile::Profile::instance()->logs_enabled();
+  return logs_enabled_;
+}
+
+void set_logs_enabled(bool state) {
+  logs_enabled_ = state;
 }
 
 }  // namespace logger

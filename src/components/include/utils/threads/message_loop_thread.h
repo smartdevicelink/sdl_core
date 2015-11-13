@@ -180,7 +180,10 @@ void MessageLoopThread<Q>::LoopThreadDelegate::exitThreadMain() {
 template<class Q>
 void MessageLoopThread<Q>::LoopThreadDelegate::DrainQue() {
   while (!message_queue_.empty()) {
-    handler_.Handle(message_queue_.pop());
+    Message msg;
+    if (message_queue_.pop(msg)) {
+      handler_.Handle(msg);
+    }
   }
 }
 }  // namespace threads

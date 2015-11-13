@@ -46,7 +46,7 @@ SetIconResponse::~SetIconResponse() {
 }
 
 void SetIconResponse::Run() {
-  LOG4CXX_INFO(logger_, "SetIconResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }

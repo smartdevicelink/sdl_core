@@ -128,7 +128,7 @@ ProtocolPacket::ProtocolHeaderValidator::ProtocolHeaderValidator()
 #ifdef MODIFY_FUNCTION_SIGN
 	: max_payload_size_(UINT_MAX) {}
 #else
-  //: max_payload_size_(std::numeric_limits<size_t>::max()) {}
+    : max_payload_size_(std::numeric_limits<size_t>::max()) {}
 #endif
 
 void ProtocolPacket::ProtocolHeaderValidator::set_max_payload_size(
@@ -237,12 +237,13 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
       break;
   }
   // Message ID be equal or greater than 0x01 (not actual for 1 protocol version and Control frames)
-  if (FRAME_TYPE_CONTROL != header.frameType && PROTOCOL_VERSION_1 != header.version
-     && header.messageId <= 0) {
+  if(header.messageId <= 0) {
+    if (FRAME_TYPE_CONTROL != header.frameType &&
+        PROTOCOL_VERSION_1 != header.version) {
       LOG4CXX_WARN(logger_, "Message ID shall be greater than 0x00");
-    // Message ID shall be greater than 0x00, but not implemented in SPT
-    // TODO(EZamakhov): return on fix on mobile side - APPLINK-9990
-    return RESULT_FAIL;
+      // Message ID shall be greater than 0x00, but not implemented in SPT
+      return RESULT_FAIL;
+    }
   }
   LOG4CXX_DEBUG(logger_, "Message is complitly correct.");
   return RESULT_OK;
@@ -488,5 +489,4 @@ uint32_t ProtocolPacket::payload_size() const {
   return payload_size_;
 }
 
-// End of Deserialization
 }  // namespace protocol_handler

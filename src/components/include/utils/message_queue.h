@@ -84,10 +84,11 @@ template<typename T, class Q = std::queue<T> > class MessageQueue {
     void push(const T& element);
 
     /**
-     * \brief Removes element from the queue and returns it.
-     * \return To element of the queue.
+     * \brief Removes element from the queue and returns it
+     * \param element Element to be returned
+     * \return True on success, false if queue is empty
      */
-    T pop();
+    bool pop(T& element);
 
     /**
      * \brief Conditional wait.
@@ -161,21 +162,23 @@ template<typename T, class Q> void MessageQueue<T, Q>::push(const T& element) {
   queue_new_items_.Broadcast();
 }
 
-template<typename T, class Q> T MessageQueue<T, Q>::pop() {
+template<typename T, class Q> bool MessageQueue<T, Q>::pop(T& element) {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   if (queue_.empty()) {
-    CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-    LOG4CXX_ERROR(logger_, "Runtime error, popping out of empty queue");
-    NOTREACHED();
+    return false;
   }
-  T result = queue_.front();
+  element = queue_.front();
   queue_.pop();
-  return result;
+  return true;
 }
 
 template<typename T, class Q> void MessageQueue<T, Q>::Shutdown() {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   shutting_down_ = true;
+  if (!queue_.empty()) {
+    Queue empty_queue;
+    std::swap(queue_, empty_queue);
+  }
   queue_new_items_.Broadcast();
 }
 
@@ -184,7 +187,7 @@ template<typename T, class Q> void MessageQueue<T, Q>::Reset() {
   shutting_down_ = false;
   if (!queue_.empty()) {
     Queue empty_queue;
-    queue_.swap(empty_queue);
+    std::swap(queue_, empty_queue);
   }
 }
 

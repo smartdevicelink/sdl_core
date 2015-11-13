@@ -42,7 +42,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
 namespace {
 DeviceTypes devicesType = {
   std::make_pair(AOA, std::string("USB_AOA")),
@@ -114,8 +114,8 @@ void TransportAdapterImpl::Terminate() {
 
   LOG4CXX_DEBUG(logger_, "Connections deleted");
 
-  devices_mutex_.Acquire();
   DeviceMap devices;
+  devices_mutex_.Acquire();
   std::swap(devices, devices_);
   devices_mutex_.Release();
   devices.clear();
@@ -315,6 +315,7 @@ TransportAdapter::Error TransportAdapterImpl::StopClientListening() {
     return BAD_STATE;
   }
   TransportAdapter::Error err = client_connection_listener_->StopListening();
+  sync_primitives::AutoLock locker(devices_mutex_);
   for(DeviceMap::iterator it = devices_.begin();
       it != devices_.end();
       ++it) {
@@ -479,7 +480,7 @@ bool TransportAdapterImpl::IsServerOriginatedConnectSupported() const {
 }
 
 bool TransportAdapterImpl::IsClientOriginatedConnectSupported() const {
-  LOG4CXX_TRACE(logger_, "IsClientOriginatedConnectSupported");
+  LOG4CXX_AUTO_TRACE(logger_);
   return client_connection_listener_ != 0;
 }
 
@@ -636,8 +637,8 @@ void TransportAdapterImpl::DataSendFailed(const DeviceUID& device_id,
 DeviceSptr TransportAdapterImpl::FindDevice(const DeviceUID& device_id) const {
   LOG4CXX_TRACE(logger_, "enter. device_id: " << &device_id);
   DeviceSptr ret;
-  LOG4CXX_DEBUG(logger_, "devices_.size() = " << devices_.size());
   sync_primitives::AutoLock locker(devices_mutex_);
+  LOG4CXX_DEBUG(logger_, "devices_.size() = " << devices_.size());
   DeviceMap::const_iterator it = devices_.find(device_id);
   if (it != devices_.end()) {
     ret = it->second;

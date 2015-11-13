@@ -35,6 +35,7 @@
 #include "application_manager/request_controller.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/commands/hmi/request_to_hmi.h"
+#include "utils/make_shared.h"
 
 namespace application_manager {
 
@@ -182,19 +183,17 @@ RequestController::TResult RequestController::addHMIRequest(
   }
   LOG4CXX_DEBUG(logger_, " correlation_id : " << request->correlation_id());
 
-  const uint32_t timeout_in_seconds =
-      request->default_timeout() / date_time::DateTime::MILLISECONDS_IN_SECOND;
+  const uint64_t timeout_in_mseconds = static_cast<uint64_t>(request->default_timeout());
   RequestInfoPtr request_info_ptr(new HMIRequestInfo(request,
-                                                     timeout_in_seconds));
+                                                     timeout_in_mseconds));
 
-  if (0 != timeout_in_seconds) {
-    waiting_for_response_.Add(request_info_ptr);
-    LOG4CXX_INFO(logger_, "Waiting for response cont:"
-                 << waiting_for_response_.Size());
-  } else {
-    LOG4CXX_INFO(logger_, "Default timeout was set to 0."
+  if (0 == timeout_in_mseconds) {
+    LOG4CXX_DEBUG   (logger_, "Default timeout was set to 0."
                  "RequestController will not track timeout of this request.");
   }
+  waiting_for_response_.Add(request_info_ptr);
+  LOG4CXX_DEBUG(logger_, "Waiting for response count:"  << waiting_for_response_.Size());
+
   UpdateTimer();
   return RequestController::SUCCESS;
 }
@@ -259,12 +258,12 @@ void RequestController::terminateWaitingForExecutionAppRequests(
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "app_id: "  << app_id
                 << "Waiting for execution" << mobile_request_list_.size());
-  AutoLock
-      auto_lock(mobile_request_list_lock_);
-  std::list<RequestPtr>::iterator request_it = mobile_request_list_.begin();
+  AutoLock auto_lock(mobile_request_list_lock_);
+  std::list<RequestPtr>::iterator request_it =
+      mobile_request_list_.begin();
   while (mobile_request_list_.end() != request_it) {
     RequestPtr request = (*request_it);
-    if ((request.valid()) && (request->connection_key() == app_id)) {
+    if ((request.valid()) &&  (request->connection_key() == app_id)) {
       mobile_request_list_.erase(request_it++);
     } else {
       ++request_it;
@@ -326,10 +325,8 @@ void RequestController::updateRequestTimeout(
   RequestInfoPtr request_info =
       waiting_for_response_.Find(app_id, correlation_id);
   if (request_info) {
-    uint32_t timeout_in_seconds =
-        new_timeout/date_time::DateTime::MILLISECONDS_IN_SECOND;
     waiting_for_response_.RemoveRequest(request_info);
-    request_info->updateTimeOut(timeout_in_seconds);
+    request_info->updateTimeOut(new_timeout);
     waiting_for_response_.Add(request_info);
     UpdateTimer();
     LOG4CXX_INFO(logger_, "Timeout updated for "
@@ -432,32 +429,36 @@ void RequestController::Worker::threadMain() {
       break;
     }
 
-    RequestPtr request(request_controller_->mobile_request_list_.front());
-    request_controller_->mobile_request_list_.pop_front();
-    bool init_res = request->Init();  // to setup specific default timeout
+   RequestPtr request_ptr( request_controller_->mobile_request_list_.front());
+   request_controller_->mobile_request_list_.pop_front();
 
-    const uint32_t timeout_in_seconds =
-       request->default_timeout() / date_time::DateTime::MILLISECONDS_IN_SECOND;
-    RequestInfoPtr request_info_ptr(new MobileRequestInfo(request,
-                                                          timeout_in_seconds));
+    bool init_res = request_ptr->Init();  // to setup specific
+                                                          // default timeout
+
+    const uint32_t timeout_in_mseconds = request_ptr->default_timeout();
+    RequestInfoPtr request_info_ptr(new MobileRequestInfo(request_ptr,
+                                                          timeout_in_mseconds));
 
     request_controller_->waiting_for_response_.Add(request_info_ptr);
-    if (0 != timeout_in_seconds) {
-      LOG4CXX_INFO(logger_, "Execute MobileRequest corr_id = "
-                   << request_info_ptr->requestId() <<
-                            " with timeout: " << timeout_in_seconds);
+    LOG4CXX_DEBUG(logger_, "timeout_in_mseconds " << timeout_in_mseconds);
+
+    if (0 != timeout_in_mseconds) {
       request_controller_->UpdateTimer();
     } else {
-      LOG4CXX_INFO(logger_, "Default timeout was set to 0."
-                   "RequestController will not track timeout of this request.");
+      LOG4CXX_DEBUG(logger_, "Default timeout was set to 0. "
+                    "RequestController will not track timeout "
+                    "of this request.");
     }
 
     AutoUnlock unlock(auto_lock);
 
     // execute
     if ((false == request_controller_->IsLowVoltage()) &&
-        request->CheckPermissions() && init_res) {
-      request->Run();
+        request_ptr->CheckPermissions() && init_res) {
+      LOG4CXX_DEBUG(logger_, "Execute MobileRequest corr_id = "
+                             << request_info_ptr->requestId()
+                             << " with timeout: " << timeout_in_mseconds);
+      request_ptr->Run();
     }
   }
 }
@@ -475,14 +476,11 @@ void RequestController::UpdateTimer() {
     const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
     const TimevalStruct end_time = front->end_time();
     if (current_time < end_time) {
-      const uint64_t secs = end_time.tv_sec - current_time.tv_sec;
-      LOG4CXX_DEBUG(logger_, "Sleep for " << secs << " secs");
+      const uint32_t msecs =static_cast<uint32_t>(date_time::DateTime::getmSecs(end_time - current_time) );
+      LOG4CXX_DEBUG(logger_, "Sleep for " << msecs << " millisecs" );
       // Timeout for bigger than 5 minutes is a mistake
 
-      const uint32_t timeout_ms =
-          secs * date_time::DateTime::MILLISECONDS_IN_SECOND;
-
-      timer_.updateTimeOut(timeout_ms);
+      timer_.updateTimeOut(msecs);
     } else {
 #ifdef OS_WIN32
 			LOG4CXX_WARN(logger_, "Request app_id: " << front->app_id()
@@ -499,14 +497,14 @@ void RequestController::UpdateTimer() {
       LOG4CXX_WARN(logger_, "Request app_id: " << front->app_id()
                    << " correlation_id: " << front->requestId()
                    << " is expired. "
-                   << "End time: "
-                   << end_time.tv_sec
-                   << " Current time: "
-                   << current_time.tv_sec
-                   << " Diff (current - end): "
-                   << current_time.tv_sec - end_time.tv_sec
+                   << "End time (ms): "
+                   << date_time::DateTime::getmSecs(end_time)
+                   << " Current time (ms): "
+                   << date_time::DateTime::getmSecs(current_time)
+                   << " Diff (current - end) (ms): "
+                   << date_time::DateTime::getmSecs(current_time - end_time)
                    << " Request timeout (sec): "
-                   << front->timeout_sec());
+                   << front->timeout_msec()/date_time::DateTime::MILLISECONDS_IN_SECOND);
 #endif
       timer_.updateTimeOut(0);
     }

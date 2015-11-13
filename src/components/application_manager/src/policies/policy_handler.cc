@@ -436,7 +436,7 @@ void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
 
 void PolicyHandler::OnPTExchangeNeeded() {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->ForcePTExchange();
+  MessageHelper::SendOnStatusUpdate(policy_manager_->ForcePTExchange());
 }
 
 void PolicyHandler::GetAvailableApps(std::queue<std::string>& apps) {
@@ -770,11 +770,7 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK(false);
 
-  if (last_used_app_ids_.empty()) {
-    LOG4CXX_WARN(logger_, "last_used_app_ids_ is empty");
-    return false;
-  }
-  uint32_t app_id = last_used_app_ids_.back();
+  uint32_t app_id = GetAppIdForSending();/*last_used_app_ids_.back();*/
 
   ApplicationSharedPtr app =
     ApplicationManagerImpl::instance()->application(app_id);

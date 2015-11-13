@@ -271,8 +271,13 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV2(
   dataForSending[offset++] = jsonSize;
 
   memcpy(dataForSending + offset, message->json_message().c_str(), jsonSize);
-
+  
+  // Default the service type to RPC Service
+  uint8_t type = 0x07;  
+    
   if (message->has_binary_data()) {
+    // Change the service type to Hybrid Service
+    type = 0x0F;
     const std::vector<uint8_t>& binaryData = *(message->binary_data());
     uint8_t* currentPointer = dataForSending + offset + jsonSize;
     for (uint32_t i = 0; i < binarySize; ++i) {
@@ -284,7 +289,8 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV2(
     new protocol_handler::RawMessage(message->connection_key(),
                                      message->protocol_version(),
                                      dataForSending,
-                                     dataForSendingSize);
+                                     dataForSendingSize,
+                                     type);
 
   delete [] dataForSending;
 

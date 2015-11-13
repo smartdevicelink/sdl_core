@@ -162,7 +162,6 @@ class Thread {
     return delegate_;
   }
   void set_delegate(ThreadDelegate *delegate) {
-    DCHECK(!isThreadRunning_);
     delegate_ = delegate;
   }
   /**

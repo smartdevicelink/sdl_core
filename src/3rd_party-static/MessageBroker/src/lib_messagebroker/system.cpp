@@ -94,6 +94,15 @@ bool Thread::Join(void** ret) {
 }
 
 void* Thread::Call(void* arg) {
+#ifndef OS_WIN32
+  // Disable system signals receiving in thread
+  // by setting empty signal mask
+  // (system signals processes only in the main thread)
+  sigset_t set;
+  sigfillset(&set);
+  pthread_sigmask(SIG_SETMASK, &set, NULL);
+#endif
+
   Thread* thread = static_cast<Thread*>(arg);
 
   /* call our specific object method */
