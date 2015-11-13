@@ -40,6 +40,7 @@ include_directories(
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
   ${COMPONENTS_DIR}/policy/src/policy/policy_table/
+  ${COMPONENTS_DIR}/policy/test/include/
 )
 
 set(testLibraries
@@ -78,10 +79,9 @@ else ()
   include_directories(../../utils/include/utils
                       ../../utils/test/include )
   list (APPEND testSources
-#    ../../utils/test/sqlite_wrapper/sql_database_test.cc
-#    ../../utils/test/sqlite_wrapper/sql_query_test.cc
-#    ../../utils/test/generated_code_with_sqlite_test.cc
-#   policy_manager_impl_stress_test.cc
+    ../../utils/test/sqlite_wrapper/sql_database_test.cc
+    ../../utils/test/sqlite_wrapper/sql_query_test.cc
+    ../../utils/test/generated_code_with_sqlite_test.cc
   )
   list (APPEND testLibraries sqlite3)
 endif()
