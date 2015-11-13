@@ -276,7 +276,9 @@ void PerformAudioPassThruRequest::SendRecordStartNotification() {
 
 void PerformAudioPassThruRequest::StartMicrophoneRecording() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+#ifdef MODIFY_FUNCTION_SIGN
+	// do nothing
+#else
   ApplicationManagerImpl::instance()->begin_audio_pass_thru();
 
   ApplicationManagerImpl::instance()->StartAudioPassThruThread(
@@ -285,6 +287,7 @@ void PerformAudioPassThruRequest::StartMicrophoneRecording() {
       (*message_)[str::msg_params][str::sampling_rate].asInt(),
       (*message_)[str::msg_params][str::bits_per_sample].asInt(),
       (*message_)[str::msg_params][str::audio_type].asInt());
+#endif
 }
 
 bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {

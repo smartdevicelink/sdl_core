@@ -35,6 +35,9 @@ set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_S
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
+if (EXTENDED_POLICY_FLAG)
+  add_definitions(-DEXTENDED_POLICY)
+endif()
 
 #Generation of policy table interface...
 #include(${CMAKE_SOURCE_DIR}/tools/intergen/GenerateInterfaceLibrary.cmake)
@@ -50,6 +53,12 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/config_profile/include
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	include_directories (
+		${CMAKE_SOURCE_DIR}/include/win32
+	)
+endif()
 
 set(SOURCES
   ./src/policy_manager_impl.cc
@@ -69,28 +78,64 @@ include_directories(./policy_table/table_struct)
 add_subdirectory(policy_table/table_struct)
 
 set(LIBRARIES ConfigProfile policy_struct dbms jsoncpp Utils)
+
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   # --- QDB Wrapper 
   include_directories (${COMPONENTS_DIR}/utils/include/utils)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  # --- SQLite Wrapper
+  include_directories (${COMPONENTS_DIR}/utils/include/utils)
+  list(APPEND LIBRARIES sqlite3)
+  list(APPEND LIBRARIES pthreadVC2)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  include_directories (sqlite_wrapper/include)
+  add_subdirectory(sqlite_wrapper)
+  list(APPEND LIBRARIES sqlite3)
+  list(APPEND LIBRARIES pthread)
+  list(APPEND LIBRARIES Utils)
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Android")
+  include_directories (sqlite_wrapper/include)
 else ()
   # --- SQLite Wrapper
   include_directories (${COMPONENTS_DIR}/utils/include/utils)
   list(APPEND LIBRARIES sqlite3)
 endif ()
 
+if(MODIFY_FUNCTION_FLAGS)
+if(ENABLE_LOG)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "Android" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND LIBRARIES log4cxx)
+endif()
+endif()
+endif()
+
 add_library(${target} SHARED ${SOURCES})
 target_link_libraries(${target} ${LIBRARIES} )
 
 if(ENABLE_LOG)
+if(MODIFY_FUNCTION_FLAGS)
+else()
+  add_dependencies(${target} liblog4cxx)
   target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
+endif()
 
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+add_custom_target(copy_library_${target} ALL
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${library_name}
+    ${copy_destination}
+    DEPENDS ${target}
+    COMMENT "Copying library ${library_name}")
+else()
 add_custom_target(copy_library_${target} ALL
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_BINARY_DIR}/${library_name}
     ${copy_destination}
     DEPENDS ${target}
     COMMENT "Copying library ${library_name}")
+endif()
 
 install(TARGETS ${target}
   DESTINATION ${install_destination}
@@ -98,3 +143,4 @@ install(TARGETS ${target}
     GROUP_READ GROUP_EXECUTE
     WORLD_READ WORLD_EXECUTE
 )
+endif()

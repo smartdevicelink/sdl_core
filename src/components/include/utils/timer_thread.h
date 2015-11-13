@@ -47,6 +47,8 @@
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 
+#undef min
+
 namespace timer {
 // TODO(AKutsan): Remove this logger after bugfix
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
@@ -75,6 +77,8 @@ class TimerThread {
   friend class TimerDelegate;
   friend class TimerLooperDelegate;
 
+  TimerThread();
+
   /**
    * @brief Default constructor
    *
@@ -87,8 +91,7 @@ class TimerThread {
    *  if true, TimerThread will call "f()" function every time out
    *  until stop()
    */
-  TimerThread(const char* name, T* callee, void (T::*f)(), bool is_looper =
-                  false);
+  TimerThread(const char* name, T* callee, void (T::*f)(), bool is_looper = false);
 
   /**
    * @brief Destructor
@@ -213,7 +216,8 @@ class TimerThread {
      */
     inline int32_t get_timeout() const {
       return std::min(
-            static_cast<uint32_t>(std::numeric_limits<int32_t>::max()),
+            // static_cast<uint32_t>(std::numeric_limits<int32_t>::max()),
+			static_cast<uint32_t>(INT_MAX),
             timeout_milliseconds_);
     }
 
@@ -255,8 +259,11 @@ class TimerThread {
 };
 
 template<class T>
-TimerThread<T>::TimerThread(const char* name, T* callee, void (T::*f)(),
-                            bool is_looper)
+TimerThread<T>::TimerThread(){
+}
+
+template<class T>
+TimerThread<T>::TimerThread(const char* name, T* callee, void (T::*f)(), bool is_looper)
     : thread_(NULL),
       callback_(f),
       callee_(callee),

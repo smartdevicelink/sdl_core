@@ -36,6 +36,25 @@
 #include <sys/time.h>
 typedef struct timeval TimevalStruct;
 #endif
+
+#ifdef OS_WIN32
+#include <stdint.h>
+#include <pthread.h>
+#include <winsock.h>
+typedef struct timeval TimevalStruct;
+
+#define CLOCK_REALTIME 0
+#define CLOCK_MONOTONIC 1
+void clock_gettime(int i, timespec * tm);
+
+#elif defined(OS_MAC)
+
+#include <mach/clock.h>
+#include <mach/mach.h>
+#define CLOCK_REALTIME CALENDAR_CLOCK
+#define CLOCK_MONOTONIC SYSTEM_CLOCK
+void clock_gettime(int i, timespec * tm);
+#endif
 #include <stdint.h>
 
 namespace date_time {

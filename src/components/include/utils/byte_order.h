@@ -37,6 +37,19 @@
 #include <gulliver.h>
 #define BE_TO_LE32(x) ENDIAN_SWAP32(&(x));
 #define LE_TO_BE32(x) ENDIAN_SWAP32(&(x));
+#elif defined(OS_WIN32)
+#define bswap_16(x) \
+	(UINT16)(((((UINT16)(x)) & 0x00ff) << 8) | \
+	((((UINT16)(x)) & 0xff00) >> 8) \
+	)
+#define bswap_32(x) \
+	(UINT32)(((((UINT32)(x)) & 0xff000000) >> 24) | \
+	((((UINT32)(x)) & 0x00ff0000) >> 8) | \
+	((((UINT32)(x)) & 0x0000ff00) << 8) | \
+	((((UINT32)(x)) & 0x000000ff) << 24) \
+	)
+#define BE_TO_LE32(x) bswap_32(x)
+#define LE_TO_BE32(x) bswap_32(x)
 #else
 #include <byteswap.h>
 #define BE_TO_LE32(x) bswap_32(x)

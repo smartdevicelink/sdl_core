@@ -29,14 +29,26 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifdef MODIFY_FUNCTION_SIGN
+#include <global_first.h>
+#endif
+#include "utils/system.h"
+
 #ifdef __QNX__
 #  include <process.h>
 #else  // __QNX__
+#ifndef OS_WINCE
 #  include <sys/types.h>
+#endif
+#ifdef OS_WIN32
+#else
 #  include <sys/wait.h>
+#endif
+#ifndef OS_WINCE
 #  include <sys/stat.h>
 #  include <fcntl.h>
 #  include <unistd.h>
+#endif
 #endif  // __QNX__
 
 #include <algorithm>
@@ -67,6 +79,10 @@ System::System(const std::string& file, const std::string& command)
   argv_.push_back(command);
 }
 
+bool System::Execute() {
+  return Execute(false);
+}
+
 System& System::Add(const std::string& arg) {
   argv_.push_back(arg);
   return *this;
@@ -78,10 +94,6 @@ std::string System::command() const {
 
 std::vector<std::string> System::argv() const {
   return argv_;
-}
-
-bool System::Execute() {
-  return Execute(false);
 }
 
 #ifdef __QNX__
@@ -110,7 +122,17 @@ bool System::Execute(bool wait) {
 }
 
 #else  // __QNX__
-
+#ifdef OS_WIN32
+bool System::Execute(bool wait) {
+	wait;
+	return true;
+}
+#elif defined(OS_MAC)
+bool System::Execute(bool wait) {
+	wait;
+	return true;
+}
+#else
 bool System::Execute(bool wait) {
   // Create a child process.
   pid_t pid_command = fork();
@@ -121,7 +143,11 @@ bool System::Execute(bool wait) {
       return false;
     }
     case 0: {  // Child process
+#ifdef OS_ANDROID
+      int32_t fd_dev0 = open("/dev/null", O_RDWR,S_IWUSR);// S_IWRITE
+#else
       int32_t fd_dev0 = open("/dev/null", O_RDWR, S_IWRITE);
+#endif
       if (0 > fd_dev0) {
         LOG4CXX_FATAL(logger_, "Open dev0 failed!");
         return false;
@@ -170,7 +196,7 @@ bool System::Execute(bool wait) {
     }
   }
 }
-
+#endif
 #endif  // __QNX__
 
 }  // utils

@@ -50,9 +50,12 @@ HMIMessageHandlerImpl::HMIMessageHandlerImpl()
 
 HMIMessageHandlerImpl::~HMIMessageHandlerImpl() {
   LOG4CXX_AUTO_TRACE(logger_);
-  messages_to_hmi_.Shutdown();
-  messages_from_hmi_.Shutdown();
-  set_message_observer(NULL);
+  sync_primitives::AutoLock lock(observer_locker_);
+  observer_ = NULL;
+  if (!message_adapters_.empty()) {
+    LOG4CXX_WARN(logger_, "Not all HMIMessageAdapter have unsubscribed from"
+                         " HMIMessageHandlerImpl");
+  }
 }
 
 void HMIMessageHandlerImpl::OnMessageReceived(MessageSharedPointer message) {

@@ -32,12 +32,15 @@
 
 #include "time_manager.h"
 
+#ifdef OS_WIN32
+#else
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/select.h>
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#endif
 #include <unistd.h>
 #include <string.h>
 

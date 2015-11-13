@@ -54,8 +54,11 @@ int linux_netlink_start_event_monitor(void)
 	int ret;
 
 	snl.nl_groups = KERNEL;
-
+#ifdef OS_ANDROID
+  linux_netlink_socket = socket(PF_NETLINK, SOCK_RAW, NETLINK_KOBJECT_UEVENT);
+#else
 	linux_netlink_socket = socket(PF_NETLINK, SOCK_RAW|SOCK_CLOEXEC|SOCK_NONBLOCK, NETLINK_KOBJECT_UEVENT);
+#endif
 	if (-1 == linux_netlink_socket) {
 		return LIBUSB_ERROR_OTHER;
 	}
@@ -91,7 +94,9 @@ int linux_netlink_stop_event_monitor(void)
 		return LIBUSB_ERROR_OTHER;
 	}
 
+#ifndef OS_ANDROID
 	pthread_cancel(libusb_linux_event_thread);
+#endif
 
 	linux_netlink_socket = -1;
 

@@ -92,7 +92,11 @@ int connect(enum TransportProtocol protocol,
     }
 
     if (protocol == TCP && ::connect(sock, (struct sockaddr*)p->ai_addr, p->ai_addrlen) == -1) {
-      ::close(sock);
+#ifdef OS_WIN32
+	  closesocket(sock);
+#else
+	  ::close(sock);
+#endif
       sock = -1;
       continue;
     }
@@ -161,11 +165,28 @@ int bind(enum TransportProtocol protocol,
     on = 0;
 #endif
 
-    if (::bind(sock, p->ai_addr, p->ai_addrlen) == -1) {
-      ::close(sock);
-      sock = -1;
-      continue;
-    }
+#ifdef MODIFY_FUNCTION_SIGN
+	  // add INADDR_ANY...
+
+	  ::sockaddr *psockaddr = NULL;
+	  ::sockaddr_in *psockaddrin = (sockaddr_in*)p->ai_addr;
+	  psockaddrin->sin_addr.s_addr = INADDR_ANY;
+	  psockaddr = (::sockaddr*) psockaddrin;
+	  psockaddr = p->ai_addr;
+
+	  if (::bind(sock, psockaddr, p->ai_addrlen) == -1)
+#else
+      if(::bind(sock, p->ai_addr, p->ai_addrlen) == -1)
+#endif
+      {
+#ifdef OS_WIN32
+		closesocket(sock);
+#else
+		::close(sock);
+#endif
+        sock = -1;
+        continue;
+      }
 
     if (sockaddr) {
       memcpy(sockaddr, p->ai_addr, p->ai_addrlen);

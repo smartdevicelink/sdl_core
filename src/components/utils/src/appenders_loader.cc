@@ -30,26 +30,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <dlfcn.h>
-
 #include "utils/appenders_loader.h"
+
+#ifdef OS_WIN32
+#include "unistd.h"
+#include "apr_arch_dso.h"
+#else
+#include <dlfcn.h>
+#endif
 
 namespace utils {
 
 AppendersLoader appenders_loader;
 
 AppendersLoader::AppendersLoader() {
-  handle_ = dlopen("libappenders.so", RTLD_LAZY);
+#ifndef OS_WIN32
+	handle_ = dlopen("libappenders.so", RTLD_LAZY);
+#endif
 }
 
 AppendersLoader::~AppendersLoader() {
-  if (handle_ != 0) {
+#ifndef OS_WIN32
+	if (handle_ != 0) {
     dlclose(handle_);
   }
+#endif
 }
 
 bool AppendersLoader::Loaded() const {
-  return handle_ != 0;
+	return handle_ != 0;
 }
 
 }  // namespace utils

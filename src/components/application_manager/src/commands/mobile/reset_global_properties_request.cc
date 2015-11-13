@@ -281,11 +281,20 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
         return_info = std::string("Unsupported phoneme type sent in a prompt").c_str();
       } else {
         result_code = static_cast<mobile_apis::Result::eType>(
+#ifdef OS_WIN32
+			                 max(ui_result_, tts_result_));
+#else
                         std::max(ui_result_, tts_result_));
+#endif
       }
     } else {
+#ifdef OS_WIN32
       result_code = static_cast<mobile_apis::Result::eType>(
-                      std::max(ui_result_, tts_result_));
+                      max(ui_result_, tts_result_));
+#else
+		result_code = static_cast<mobile_apis::Result::eType>(
+			std::max(ui_result_, tts_result_));
+#endif
     }
 
     SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),

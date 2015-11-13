@@ -78,4 +78,6 @@ IF (${HMI_DBUS_API})
   add_library(HMI_API "${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.cc")
 ENDIF (${HMI_DBUS_API})
 
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
 add_dependencies(HMI_API Utils)
+endif()

@@ -2,7 +2,7 @@
 #if defined(__QNXNTO__)
 #include <dirent.h>
 #include <fcntl.h>
-#include <pthread.h>
+#include "pthread.h"
 #include <sys/neutrino.h>
 #include <sys/procfs.h>
 #include <sys/stat.h>
@@ -10,12 +10,15 @@
 #include <sys/types.h>
 #include <unistd.h>
 #endif
-#include <sys/resource.h>
-#include <errno.h>
-#include <sys/types.h>
+//#include <sys/resource.h>
+//#include <errno.h>
+//#include <sys/types.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <sstream>
+#ifdef OS_WIN32
+#include <process.h>
+#endif
 #include "utils/file_system.h"
 
 namespace utils {
@@ -131,6 +134,8 @@ bool Resources::GetProcInfo(Resources::PidStats& output) {
   devctl(fd, DCMD_PROC_INFO, &output, sizeof(output), 0);
   close(fd);
   return true;
+#else
+	return true;
 #endif
 }
 

@@ -1434,6 +1434,256 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(
   ApplicationManagerImpl::instance()->ManageHMICommand(notification);
 }
 
+#ifdef MODIFY_FUNCTION_SIGN
+void MessageHelper::SendDeleteInteractionChoiseSetNotificationToHMI(ApplicationConstSharedPtr app) {
+	if (!app) {
+		return;
+	}
+
+	const DataAccessor<ChoiceSetMap>& choice_set = app->choice_set_map();
+	ChoiceSetMap ChoiceSet = choice_set.GetData();
+	ChoiceSetMap::const_iterator i = ChoiceSet.begin();
+	for (; ChoiceSet.end() != i; ++i) {
+		smart_objects::SmartObject* ui_choice_set = new smart_objects::SmartObject(
+			smart_objects::SmartType_Map);
+
+		if (!ui_choice_set) {
+			return;
+		}
+
+		(*ui_choice_set)[strings::params][strings::function_id] =
+			hmi_apis::FunctionID::UI_DeleteInteractionChoiceSet;
+		(*ui_choice_set)[strings::params][strings::message_type] =
+			hmi_apis::messageType::notification;
+		(*ui_choice_set)[strings::params][strings::protocol_version] =
+			commands::CommandImpl::protocol_version_;
+		(*ui_choice_set)[strings::params][strings::protocol_type] =
+			commands::CommandImpl::hmi_protocol_type_;
+
+		smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+			smart_objects::SmartType_Map);
+
+		msg_params[strings::interaction_choice_set_id] = i->first;
+		msg_params[strings::app_id] = app->app_id();
+
+		(*ui_choice_set)[strings::msg_params] = msg_params;
+
+		ApplicationManagerImpl::instance()->ManageHMICommand(ui_choice_set);
+	}
+}
+
+void MessageHelper::SendUnsubscribeButtonNotificationToHMI(ApplicationConstSharedPtr app)
+{
+	if (!app) {
+		return;
+	}
+
+	const DataAccessor<ButtonSubscriptions>& subscribed_buttons = app->SubscribedButtons();
+	ButtonSubscriptions Subscriptions = subscribed_buttons.GetData();
+	std::set<mobile_apis::ButtonName::eType>::const_iterator i = Subscriptions.begin();
+	for (; Subscriptions.end() != i; ++i) {
+		smart_objects::SmartObject* ui_subscribed_button = new smart_objects::SmartObject(
+			smart_objects::SmartType_Map);
+
+		if (!ui_subscribed_button) {
+			return;
+		}
+
+		(*ui_subscribed_button)[strings::params][strings::function_id] =
+			hmi_apis::FunctionID::UI_UnsubscribeButton;
+		(*ui_subscribed_button)[strings::params][strings::message_type] =
+			hmi_apis::messageType::notification;
+		(*ui_subscribed_button)[strings::params][strings::protocol_version] =
+			commands::CommandImpl::protocol_version_;
+		(*ui_subscribed_button)[strings::params][strings::protocol_type] =
+			commands::CommandImpl::hmi_protocol_type_;
+
+		smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+			smart_objects::SmartType_Map);
+
+		msg_params[strings::button_name] = *i;
+
+		(*ui_subscribed_button)[strings::msg_params] = msg_params;
+
+		ApplicationManagerImpl::instance()->ManageHMICommand(ui_subscribed_button);
+	}
+}
+#endif
+
+#ifdef MODIFY_FUNCTION_SIGN
+void MessageHelper::SendVRStatusToHMI(const std::string &status)
+{
+	smart_objects::SmartObject* notification = new smart_objects::SmartObject;
+	if (!notification) {
+		// TODO(VS): please add logger.
+		return;
+	}
+	smart_objects::SmartObject& message = *notification;
+	message[strings::params][strings::function_id] =
+		static_cast<int32_t>(hmi_apis::FunctionID::VR_VRStatus);
+	message[strings::params][strings::message_type] =
+		static_cast<int32_t>(application_manager::MessageType::kNotification);
+
+	message[strings::msg_params][strings::status] = status;
+	
+	DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
+}
+
+void MessageHelper::SendVRCancelToHMI()
+{
+	smart_objects::SmartObject* notification = new smart_objects::SmartObject;
+	if (!notification) {
+		// TODO(VS): please add logger.
+		return;
+	}
+	smart_objects::SmartObject& message = *notification;
+	message[strings::params][strings::function_id] =
+		static_cast<int32_t>(hmi_apis::FunctionID::VR_VRCancel);
+	message[strings::params][strings::message_type] =
+		static_cast<int32_t>(application_manager::MessageType::kNotification);
+
+	DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
+}
+
+void MessageHelper::SendVRCommandHelpToHMI(const std::string &vr_content)
+{
+	smart_objects::SmartObject* notification = new smart_objects::SmartObject;
+	if (!notification) {
+		// TODO(VS): please add logger.
+		return;
+	}
+	smart_objects::SmartObject& message = *notification;
+	message[strings::params][strings::function_id] =
+		static_cast<int32_t>(hmi_apis::FunctionID::VR_VRCommandHelp);
+	message[strings::params][strings::message_type] =
+		static_cast<int32_t>(application_manager::MessageType::kNotification);
+
+	message[strings::msg_params][strings::vr_content] = vr_content;
+	
+	DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
+}
+
+void MessageHelper::SendVRExitAppToHMI()
+{
+	smart_objects::SmartObject* notification = new smart_objects::SmartObject;
+	if (!notification) {
+		// TODO(VS): please add logger.
+		return;
+	}
+	smart_objects::SmartObject& message = *notification;
+	message[strings::params][strings::function_id] =
+		static_cast<int32_t>(hmi_apis::FunctionID::VR_VRExitApp);
+	message[strings::params][strings::message_type] =
+		static_cast<int32_t>(application_manager::MessageType::kNotification);
+
+	DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
+}
+
+void MessageHelper::SendVRSwitchAppToHMI(int app_id, const std::string &app_vr_name)
+{
+	smart_objects::SmartObject* notification = new smart_objects::SmartObject;
+	if (!notification) {
+		// TODO(VS): please add logger.
+		return;
+	}
+	smart_objects::SmartObject& message = *notification;
+	message[strings::params][strings::function_id] =
+		static_cast<int32_t>(hmi_apis::FunctionID::VR_VRSwitchApp);
+	message[strings::params][strings::message_type] =
+		static_cast<int32_t>(application_manager::MessageType::kNotification);
+
+	message[strings::msg_params][strings::app_id] = app_id;
+	message[strings::msg_params][strings::app_vr_name] = app_vr_name;
+		
+	DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
+}
+
+void MessageHelper::SendVRCommandTTSToHMI()
+{
+	smart_objects::SmartObject* notification = new smart_objects::SmartObject;
+	if (!notification) {
+		// TODO(VS): please add logger.
+		return;
+	}
+	smart_objects::SmartObject& message = *notification;
+	message[strings::params][strings::function_id] =
+		static_cast<int32_t>(hmi_apis::FunctionID::VR_VRCommandTTS);
+	message[strings::params][strings::message_type] =
+		static_cast<int32_t>(application_manager::MessageType::kNotification);
+
+	// add app's vr
+	ApplicationSharedPtr active_app = ApplicationManagerImpl::instance()->active_application();
+	if(active_app){
+		const smart_objects::SmartObject* help_promt = active_app->help_prompt();
+		if(help_promt && help_promt->getType() != smart_objects::SmartType_Null){
+			smart_objects::SmartArray::const_iterator it_help_promt_array = help_promt->asArray()->begin();
+			smart_objects::SmartArray::const_iterator it_help_promt_array_end = help_promt->asArray()->end();
+			int index = 0;
+			for (; it_help_promt_array != it_help_promt_array_end; ++it_help_promt_array) {
+				message[strings::msg_params][strings::vr_commands][index] = (*it_help_promt_array)[strings::text].asString();
+				++index;
+			}
+		}else{
+			const DataAccessor<CommandsMap>& commands = active_app->commands_map();
+			CommandsMap SubCommands = commands.GetData();
+			CommandsMap::const_iterator i = SubCommands.begin();
+			int index = 0;
+			for (; SubCommands.end() != i; ++i) {
+				if ((*i->second).keyExists(strings::vr_commands)) {
+					const smart_objects::SmartArray* vr_commands =(*i->second)[strings::vr_commands].asArray();
+					smart_objects::SmartArray::const_iterator it_array = vr_commands->begin();
+					smart_objects::SmartArray::const_iterator it_array_end = vr_commands->end();
+					for (; it_array != it_array_end; ++it_array) {
+						message[strings::msg_params][strings::vr_commands][index] = (*it_array).asString();
+						++index;
+					}
+				}
+			}
+		}
+		
+	}
+
+	// add applist vr and cancel and exitapp and help vr...
+
+	DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
+}
+
+void MessageHelper::SendVRResultToHMI(int cmd_id, const std::string &vr_name)
+{
+	smart_objects::SmartObject* notification = new smart_objects::SmartObject;
+	if (!notification) {
+		// TODO(VS): please add logger.
+		return;
+	}
+	smart_objects::SmartObject& message = *notification;
+	message[strings::params][strings::function_id] =
+		static_cast<int32_t>(hmi_apis::FunctionID::VR_VRResult);
+	message[strings::params][strings::message_type] =
+		static_cast<int32_t>(application_manager::MessageType::kNotification);
+
+	message[strings::msg_params][strings::cmd_id] = cmd_id;
+	message[strings::msg_params][strings::vr_name] = vr_name;
+		
+	DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
+}
+
+void MessageHelper::SendVROnCommandToMobile(int cmd_id, int app_id)
+{
+	smart_objects::SmartObject* notification = new smart_objects::SmartObject;
+	if (!notification) {
+		// TODO(VS): please add logger.
+		return;
+	}
+	smart_objects::SmartObject& message = *notification;
+	message[strings::params][strings::function_id] =
+		static_cast<int32_t>(hmi_apis::FunctionID::VR_OnCommand);
+	message[strings::params][strings::message_type] =
+		static_cast<int32_t>(application_manager::MessageType::kNotification);
+	message[strings::msg_params][strings::cmd_id] = cmd_id;
+	message[strings::msg_params][strings::app_id] = app_id;
+	DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
+}
+#endif
 uint32_t MessageHelper::SendActivateAppToHMI(uint32_t const app_id,
     hmi_apis::Common_HMILevel::eType level,
     bool send_policy_priority) {

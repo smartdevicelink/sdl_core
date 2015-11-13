@@ -205,10 +205,15 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
       (is_tts_ok && is_no_navi_error) ||
       (hmi_apis::Common_Result::SUCCESS == tts_result &&
        hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == navi_result );
-
+#ifdef OS_WIN32
+  mobile_apis::Result::eType result_code =
+      static_cast<mobile_apis::Result::eType>(
+	         max(tts_speak_result_code_, navi_alert_maneuver_result_code_));
+#else
   mobile_apis::Result::eType result_code =
       static_cast<mobile_apis::Result::eType>(
         std::max(tts_speak_result_code_, navi_alert_maneuver_result_code_));
+#endif
 
   const char* return_info = NULL;
 

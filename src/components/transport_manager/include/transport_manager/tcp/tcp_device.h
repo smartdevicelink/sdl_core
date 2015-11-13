@@ -36,6 +36,16 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_DEVICE_H_
 
+#include "transport_manager/transport_adapter/device.h"
+
+#include <map>
+#ifdef OS_WIN32
+#include "pthread.h"
+#include <stdint.h>
+#elif defined(OS_MAC)
+#include <pthread.h>
+#include <netinet/in.h>
+#else
 #include <memory.h>
 #include <signal.h>
 #include <errno.h>
@@ -43,11 +53,12 @@
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-
-#include <map>
-#include <string>
-
+#endif
 #include "utils/lock.h"
+
+#ifdef OS_WIN32
+typedef __int32 in_addr_t;
+#endif
 #include "transport_manager/transport_adapter/device.h"
 
 namespace transport_manager {

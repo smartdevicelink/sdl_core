@@ -30,6 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "policy/sql_pt_representation.h"
+
 #include <sstream>
 #include <stdlib.h>
 #include <stdint.h>
@@ -67,6 +69,9 @@ const std::string SQLPTRepresentation::kDatabaseName = "policy";
 SQLPTRepresentation::SQLPTRepresentation()
   : db_(new utils::dbms::SQLDatabase(kDatabaseName)) {
 #ifndef __QNX__
+#ifdef OS_WIN32
+  profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
+#endif
   std::string path = profile::Profile::instance()->app_storage_folder();
   if (!path.empty()) {
     db_->set_path(path + "/");
@@ -333,11 +338,17 @@ InitResult SQLPTRepresentation::Init() {
     bool is_opened = false;
     const uint16_t open_attempt_timeout_ms =
         profile::Profile::instance()->open_attempt_timeout_ms();
-    const useconds_t sleep_interval_mcsec = open_attempt_timeout_ms * 1000;
+#ifndef OS_WIN32
+	const useconds_t sleep_interval_mcsec = open_attempt_timeout_ms * 1000;
+#endif
     LOG4CXX_DEBUG(logger_, "Open attempt timeout(ms) is: "
                   << open_attempt_timeout_ms);
-    for (int i = 0; i < attempts; ++i) {
-      usleep(sleep_interval_mcsec);
+	for (int i = 0; i < attempts; ++i) {
+#ifdef OS_WIN32
+		Sleep(open_attempt_timeout_ms);
+#else
+		usleep(sleep_interval_mcsec);
+#endif
       LOG4CXX_INFO(logger_, "Attempt: " << i+1);
       if (db_->Open()){
         LOG4CXX_INFO(logger_, "Database opened.");

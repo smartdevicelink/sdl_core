@@ -32,8 +32,10 @@
 
 #ifndef SRC_APPMAIN_LIFE_CYCLE_H_
 #define SRC_APPMAIN_LIFE_CYCLE_H_
+#ifndef OS_WIN32
 #include "utils/macro.h"
 #include "unistd.h"
+#endif
 
 #include "hmi_message_handler/hmi_message_handler_impl.h"
 #ifdef DBUS_HMIADAPTER
@@ -118,7 +120,9 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     System::Thread* mb_adapter_thread_;
 #endif  // MESSAGEBROKER_HMIADAPTER
 
-
+#ifdef OS_WIN32
+    bool components_started_;
+#endif
     FRIEND_BASE_SINGLETON_CLASS(LifeCycle);
     DISALLOW_COPY_AND_ASSIGN(LifeCycle);
 };

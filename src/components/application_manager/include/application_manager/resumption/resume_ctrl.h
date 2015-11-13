@@ -39,6 +39,11 @@
 #include <set>
 #include <list>
 
+#ifdef OS_WIN32
+#include <vector>
+#include <algorithm>
+#include <functional>
+#endif
 #include "interfaces/HMI_API.h"
 #include "interfaces/HMI_API_schema.h"
 #include "interfaces/MOBILE_API_schema.h"
@@ -49,6 +54,7 @@
 #include "resumption_data.h"
 
 namespace application_manager {
+class ApplicationManagerImpl;
 class Application;
 }
 
@@ -223,6 +229,12 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    */
   void SaveDataOnTimer();
 
+    /**
+     * @brief Timer callback function
+     *
+     */
+    void onTimer();
+	
   /**
    * @brief Updates flag for saving application data
    */
@@ -241,6 +253,24 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @brief Update launch_time_ to current
    */
   void ResetLaunchTime();
+
+  /**
+   * @brief IsLimitedAllowed return true if it is allowed to setup
+   * LIMITTED HmiLevel
+   * (if there are no app with the same type in FULL ot LIMITED))
+   * @return true if allowed otherwise false
+   */
+  bool IsLimitedAllowed();
+
+  /**
+   * @brief ResolveHMILevelConflicts found maximum allowed HMILevel
+   * @param application application to setup  hmi level
+   * @param hmi_level requested to setup
+   * @return maximum allowed HMILevel
+   */
+  mobile_apis::HMILevel::eType ResolveHMILevelConflicts(
+      app_mngr::ApplicationSharedPtr application,
+      const mobile_apis::HMILevel::eType hmi_level);
 
   /**
    * @brief Timer callback for  restoring HMI Level
@@ -420,7 +450,11 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
 
   void AddToResumptionTimerQueue(uint32_t app_id);
 
+  mobile_apis::HMILevel::eType IsHmiLevelFullAllowed(
+      app_mngr::ApplicationConstSharedPtr app);
+
   void LoadResumeData();
+  app_mngr::ApplicationManagerImpl* appMngr();
 
   /**
    *@brief Mapping applications to time_stamps
@@ -436,6 +470,8 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
   bool                            is_data_saved_;
   time_t                          launch_time_;
   utils::SharedPtr<ResumptionData>    resumption_storage_;
+  timer::TimerThread<ResumeCtrl>  timer_;
+  application_manager::ApplicationManagerImpl*         app_mngr_;
 };
 
 }  // namespace resumption

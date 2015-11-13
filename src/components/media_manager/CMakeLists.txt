@@ -65,6 +65,11 @@ set(LIBRARIES
 else(EXTENDED_MEDIA_MODE)
 set(default_includes
 )
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+set(default_sources
+  ./src/video/video_stream_to_file_adapter.cc
+)
+else()
 set(default_sources
     ${COMPONENTS_DIR}/media_manager/src/audio/socket_audio_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/audio/pipe_audio_streamer_adapter.cc
@@ -77,6 +82,7 @@ set(default_sources
     ${COMPONENTS_DIR}/media_manager/src/socket_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/file_streamer_adapter.cc
 )
+endif()
 set(LIBRARIES
     ProtocolLibrary
 )
@@ -101,6 +107,12 @@ include_directories (
     ${default_includes}
     ${LOG4CXX_INCLUDE_DIRECTORY}
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	include_directories (
+		${CMAKE_SOURCE_DIR}/include/win32
+	)
+endif()
 
 set (SOURCES
     ${COMPONENTS_DIR}/media_manager/src/media_adapter_impl.cc

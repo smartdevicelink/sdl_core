@@ -30,18 +30,79 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef MODIFY_FUNCTION_SIGN
+#include <global_first.h>
+#endif
+#ifdef OS_WIN32
+#include <time.h>
+#include <assert.h>
+#elif defined(OS_MAC)
+#else
 #include <sys/time.h>
+#endif
 #include <stdint.h>
 #include "utils/date_time.h"
-
+#ifdef OS_WIN32
+#include "os/poll_windows.h"
+#endif
+#ifdef OS_WINCE
+#include "utils/global.h"
+#endif
+#ifdef OS_WIN32
+void clock_gettime(int i, timespec * tm)
+{
+	if (i == CLOCK_MONOTONIC)
+	{
+		unsigned _int64 cur = GetTickCount();
+		tm->tv_sec = cur / 1000;
+		tm->tv_nsec = (cur % 1000) * 1000;
+	}
+	else if (i == CLOCK_REALTIME)
+	{
+		time_t t;
+		::time(&t);
+		tm->tv_sec = t;
+		tm->tv_nsec = 0;
+	}
+	else
+		assert(false);
+}
+#elif defined(OS_MAC)
+void clock_gettime(int i, timespec * tm)
+{
+	clock_serv_t cclock;
+    mach_timespec_t mts;
+    host_get_clock_service(mach_host_self(), i, &cclock);
+    clock_get_time(cclock, &mts);
+    mach_port_deallocate(mach_task_self(), cclock);
+    tm->tv_sec = mts.tv_sec;
+    tm->tv_nsec = mts.tv_nsec;
+}
+#endif
 
 namespace date_time {
 
-  TimevalStruct DateTime::getCurrentTime() {
-    TimevalStruct currentTime;
-    timezone timeZone;
+#ifdef OS_WIN32
+#else
+int32_t const DateTime::MILLISECONDS_IN_SECOND;
+int32_t const DateTime::MICROSECONDS_IN_MILLISECONDS;
+#endif
 
-    gettimeofday(&currentTime, &timeZone);
+TimevalStruct DateTime::getCurrentTime() {
+  TimevalStruct currentTime;
+#ifdef OS_WIN32
+  timespec tm;
+  clock_gettime(CLOCK_REALTIME, &tm);
+  currentTime.tv_sec = (long)tm.tv_sec;
+  currentTime.tv_usec = tm.tv_nsec;
+#else
+#ifdef OS_MAC
+    struct timezone timeZone;
+#else
+  timezone timeZone;
+#endif
+  gettimeofday(&currentTime, &timeZone);
+#endif
 
     return currentTime;
   }

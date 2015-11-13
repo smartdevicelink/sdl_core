@@ -66,8 +66,12 @@ bool AlertRequest::Init() {
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
   if ((*message_)[strings::msg_params].keyExists(strings::duration)) {
-    default_timeout_ =
-        (*message_)[strings::msg_params][strings::duration].asUInt();
+		default_timeout_ =
+#ifdef MODIFY_FUNCTION_SIGN
+			10000000;
+#else
+			(*message_)[strings::msg_params][strings::duration].asUInt();
+#endif
   } else {
     const int32_t def_value = 5000;
     default_timeout_ = def_value;
@@ -329,7 +333,11 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   }
   // app_id
   msg_params[strings::app_id] = app_id;
-  msg_params[strings::duration] = default_timeout_;
+#ifdef MODIFY_FUNCTION_SIGN
+	msg_params[strings::duration] = (*message_)[strings::msg_params][strings::duration];
+#else
+	msg_params[strings::duration] = default_timeout_;
+#endif
 
   // NAVI platform progressIndicator
   if ((*message_)[strings::msg_params].keyExists(strings::progress_indicator)) {

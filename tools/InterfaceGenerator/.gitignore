@@ -1,0 +1,9 @@
+*.pyc
+generator/*.pyc
+generator/generators/*.pyc
+generator/parsers/*.pyc
+
+test/*.pyc
+test/generator/*.pyc
+test/generator/generators/*.pyc
+test/generator/parsers/*.pyc

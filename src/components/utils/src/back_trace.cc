@@ -36,8 +36,11 @@
 #include <vector>
 #include <sstream>
 
+#ifdef OS_WIN32
+#else
 #include <cxxabi.h>
 #include <execinfo.h>
+#endif
 
 #include "utils/macro.h"
 
@@ -50,6 +53,9 @@ namespace utils {
 
 namespace {
 string demangle(const char* symbol) {
+#ifdef OS_WIN32
+	return "";
+#else
   char temp[2048];
   if (1 == sscanf(symbol, "%*[^(]%*[^_]%2047[^)+]", temp)) {
     size_t size;
@@ -62,17 +68,21 @@ string demangle(const char* symbol) {
     }
   }
   return symbol;
+#endif
 }
 }
 
 Backtrace::Backtrace(int32_t count, int32_t skip_top)
     : thread_id_(threads::Thread::CurrentId()) {
+#ifdef OS_WIN32
+#else
   int32_t skip = skip_top + 1; // Skip this constructor
   vector<void*> full_trace (count + skip);
   int32_t captured = backtrace(&full_trace.front(), count + skip);
   int32_t first_call = std::min(captured, skip);
   int32_t last_call = std::min(first_call + count, captured);
   backtrace_.assign(full_trace.begin() + first_call, full_trace.begin() + last_call);
+#endif
 }
 
 Backtrace::~Backtrace() {
@@ -80,16 +90,19 @@ Backtrace::~Backtrace() {
 
 vector<string> Backtrace::CallStack() const {
   vector<string> callstack;
+#ifdef OS_WIN32
+#else
   callstack.reserve(backtrace_.size());
   char** mangled = backtrace_symbols(&backtrace_.front(), backtrace_.size());
   for (size_t i = 0; i != backtrace_.size(); ++i) {
     callstack.push_back(demangle(mangled[i]));
   }
   free(mangled);
+#endif
   return callstack;
 }
 
-threads::PlatformThreadHandle Backtrace::ThreadId() const {
+Thread::Id Backtrace::ThreadId() const {
   return thread_id_;
 }
 

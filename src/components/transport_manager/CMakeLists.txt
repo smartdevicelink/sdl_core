@@ -38,10 +38,19 @@ include_directories (
   ${COMPONENTS_DIR}/connection_handler/include
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/resumption/include
+  ${COMPONENTS_DIR}/transport_manager
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LIBUSB_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	include_directories (
+		${CMAKE_SOURCE_DIR}/include/win32
+	)
+endif()
+
+
 if (BUILD_BT_SUPPORT)
   include_directories(
   )
@@ -115,7 +124,10 @@ if (BUILD_AVAHI_SUPPORT)
 endif()
 
 if(ENABLE_LOG)
+if(MODIFY_FUNCTION_FLAGS)
+else()
   target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+endif()
 endif()
 
 if (BUILD_BT_SUPPORT)

@@ -32,8 +32,12 @@
 
 #include "application_manager/policies/policy_handler.h"
 
+#ifdef OS_WIN32
+#include <Windows.h>
+#else
 #include <unistd.h>
 #include <dlfcn.h>
+#endif
 #include <algorithm>
 #include <vector>
 #include "application_manager/smart_object_keys.h"
@@ -253,7 +257,12 @@ private:
 };
 
 PolicyHandler* PolicyHandler::instance_ = NULL;
+
+#ifdef OS_WIN32
+const std::string PolicyHandler::kLibrary = "Policy.dll";
+#else
 const std::string PolicyHandler::kLibrary = "libPolicy.so";
+#endif
 
 PolicyHandler::PolicyHandler()
 
@@ -277,9 +286,20 @@ bool PolicyHandler::LoadPolicyLibrary() {
     policy_manager_ = NULL;
     return NULL;
   }
-  dl_handle_ = dlopen(kLibrary.c_str(), RTLD_LAZY);
 
+#ifdef OS_WIN32
+  dl_handle_ = LoadLibrary(kLibrary.c_str());
+#else
+  dl_handle_ = dlopen(kLibrary.c_str(), RTLD_LAZY);
+#endif
+
+#ifdef OS_WIN32
+	DWORD error_string = GetLastError();
+#elif defined(OS_ANDROID)
+	const char* error_string = dlerror();
+#else
   char* error_string = dlerror();
+#endif
   if (error_string == NULL) {
     if (CreateManager()) {
       policy_manager_->set_listener(this);
@@ -297,9 +317,15 @@ bool PolicyHandler::PolicyEnabled() {
 }
 
 bool PolicyHandler::CreateManager() {
-  typedef PolicyManager* (*CreateManager)();
+  typedef policy::PolicyManager* (*CreateManager)();
+
+#ifdef OS_WIN32
+  CreateManager create_manager = (CreateManager)GetProcAddress(dl_handle_, "CreateManager");
+  DWORD error_string = GetLastError();
+#else
   CreateManager create_manager = reinterpret_cast<CreateManager>(dlsym(dl_handle_, "CreateManager"));
   char* error_string = dlerror();
+#endif
   if (error_string == NULL) {
     policy_manager_ = create_manager();
   } else {
@@ -807,16 +833,19 @@ bool PolicyHandler::UnloadPolicyLibrary() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "policy_manager_ = " << policy_manager_);
   bool ret = true;
-  AsyncRunner::Stop();
-  sync_primitives::AutoWriteLock lock(policy_manager_lock_);
-  if (policy_manager_) {
-    policy_manager_.reset();
-  }
+#ifdef OS_WIN32
+#else
+  delete policy_manager_;
+  policy_manager_ = 0;
+#endif
   if (dl_handle_) {
+#ifdef OS_WIN32
+	ret = FreeLibrary(dl_handle_);
+#else
     ret = (dlclose(dl_handle_) == 0);
+#endif
     dl_handle_ = 0;
   }
-  LOG4CXX_TRACE(logger_, "exit");
   return ret;
 }
 
@@ -1047,7 +1076,7 @@ void PolicyHandler::CheckPermissions(const PTString& app_id,
 }
 
 uint32_t PolicyHandler::GetNotificationsNumber(const std::string& priority) {
-  POLICY_LIB_CHECK(0);
+  POLICY_LIB_CHECK(false);
  return policy_manager_->GetNotificationsNumber(priority);
 }
 
@@ -1086,12 +1115,12 @@ void PolicyHandler::ResetRetrySequence() {
 }
 
 int PolicyHandler::NextRetryTimeout() {
-  POLICY_LIB_CHECK(0);
+  POLICY_LIB_CHECK(false);
   return policy_manager_->NextRetryTimeout();
 }
 
 int PolicyHandler::TimeoutExchange() {
-  POLICY_LIB_CHECK(0);
+  POLICY_LIB_CHECK(false);
   return policy_manager_->TimeoutExchange();
 }
 
@@ -1265,12 +1294,12 @@ const std::string PolicyHandler::RemoteAppsUrl() const {
 }
 
 void policy::PolicyHandler::OnAppsSearchStarted() {
-  POLICY_LIB_CHECK();
+  POLICY_LIB_CHECK_VOID();
   policy_manager_->OnAppsSearchStarted();
 }
 
 void policy::PolicyHandler::OnAppsSearchCompleted() {
-  POLICY_LIB_CHECK();
+  POLICY_LIB_CHECK_VOID();
   policy_manager_->OnAppsSearchCompleted();
 }
 
@@ -1312,26 +1341,26 @@ const std::vector<std::string> PolicyHandler::GetAppRequestTypes(
 }
 
 void PolicyHandler::Increment(usage_statistics::GlobalCounterId type) {
-  POLICY_LIB_CHECK();
+  POLICY_LIB_CHECK_VOID();
   policy_manager_->Increment(type);
 }
 
 void PolicyHandler::Increment(const std::string& app_id, usage_statistics::AppCounterId type) {
-  POLICY_LIB_CHECK();
+  POLICY_LIB_CHECK_VOID();
   policy_manager_->Increment(app_id, type);
 }
 
 void PolicyHandler::Set(const std::string& app_id,
                         usage_statistics::AppInfoId type,
                         const std::string& value) {
-  POLICY_LIB_CHECK();
+  POLICY_LIB_CHECK_VOID();
   policy_manager_->Set(app_id, type, value);
 }
 
 void PolicyHandler::Add(const std::string& app_id,
                         usage_statistics::AppStopwatchId type,
                         int32_t timespan_seconds) {
-  POLICY_LIB_CHECK();
+  POLICY_LIB_CHECK_VOID();
   policy_manager_->Add(app_id, type, timespan_seconds);
 }
 

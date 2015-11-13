@@ -251,13 +251,13 @@ class Profile : public utils::Singleton<Profile> {
      * @brief Returns timeout for SDL to wait for the next package of raw data
      * over audio service
      */
-    const std::uint32_t audio_data_stopped_timeout() const;
+    const uint32_t audio_data_stopped_timeout() const;
 
     /**
      * @brief Returns timeout for SDL to wait for the next package of raw data
      * over video service
      */
-    const std::uint32_t video_data_stopped_timeout() const;
+    const uint32_t video_data_stopped_timeout() const;
 
     /**
      * @brief Returns allowable max amount of requests per time scale for
@@ -308,7 +308,7 @@ class Profile : public utils::Singleton<Profile> {
     /*
      * @brief Heartbeat timeout before closing connection
      */
-    uint32_t heart_beat_timeout() const;
+	uint32_t heart_beat_timeout() const;
 
     /*
      * @brief Path to preloaded policy file
@@ -493,6 +493,8 @@ class Profile : public utils::Singleton<Profile> {
      * @brief Returns recording file name
      */
     const std::string& recording_file_name() const;
+
+    const std::string& mme_db_name() const;
 
     const std::string& event_mq_name() const;
 
@@ -738,8 +740,13 @@ private:
     std::string                     system_files_path_;
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
+#ifdef OS_WIN32
+	uint32_t                   audio_data_stopped_timeout_;
+	uint32_t                   video_data_stopped_timeout_;
+#else
     std::uint32_t                   audio_data_stopped_timeout_;
     std::uint32_t                   video_data_stopped_timeout_;
+#endif
     std::string                     mme_db_name_;
     std::string                     event_mq_name_;
     std::string                     ack_mq_name_;

@@ -83,6 +83,9 @@
  * Will cauch assert on debug version,
  * Will return return_value in release build
  */
+#ifdef OS_WIN32
+#define DCHECK_OR_RETURN(condition, return_value)
+#else
 #define DCHECK_OR_RETURN(condition, return_value) \
   if (!(condition)) { \
     CREATE_LOGGERPTR_LOCAL(logger_, "assert"); \
@@ -91,10 +94,14 @@
     ASSERT((condition)); \
     return (return_value); \
   }
+#endif
 /*
  * Will cauch assert on debug version,
  * Will return return_value in release build
  */
+#ifdef OS_WIN32
+#define DCHECK_OR_RETURN_VOID(condition)
+#else
 #define DCHECK_OR_RETURN_VOID(condition) \
   if (!(condition)) { \
     CREATE_LOGGERPTR_LOCAL(logger_, "assert"); \
@@ -103,7 +110,7 @@
     ASSERT((condition)); \
     return ; \
   }
-
+#endif
 
 #define NOTREACHED() DCHECK(!"Unreachable code")
 
@@ -116,7 +123,17 @@
 #define OVERRIDE
 #define FINAL
 #endif
-
+#ifdef OS_WIN32
+#ifndef snprintf
+#define snprintf _snprintf
+#endif
+#ifndef strcasecmp
+#define strcasecmp _stricmp
+#endif
+#ifdef OS_WINCE
+#define ARRAYSIZE(arr) sizeof (arr) / sizeof(*arr)
+#endif
+#else
 /*
 * @brief Calculate size of na array
 * @param arr  array, which size need to calculate
@@ -127,5 +144,5 @@
 #define FRIEND_TEST(test_case_name, test_name)\
 friend class test_case_name##_##test_name##_Test
 #endif
-
+#endif
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_MACRO_H_

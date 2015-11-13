@@ -37,9 +37,13 @@
 namespace utils {
 
 const std::string gen_hash(size_t size) {
+#ifdef OS_WIN32
+	static const char symbols[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+#else
   static const char symbols[] = "0123456789"
                                 "abcdefghijklmnopqrstuvwxyz"
                                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+#endif
   static const size_t capacity = sizeof(symbols) - 1;
 
   std::string hash(size, '\0');

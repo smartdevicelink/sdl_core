@@ -83,7 +83,9 @@ bool Thread::Start(bool detach) {
 }
 
 bool Thread::Stop() {
+#ifndef  OS_ANDROID
   pthread_cancel(m_id);
+#endif
   return false;// Android does not support 'pthread_cancel';
 }
 
@@ -92,12 +94,14 @@ bool Thread::Join(void** ret) {
 }
 
 void* Thread::Call(void* arg) {
+#ifndef OS_WIN32
   // Disable system signals receiving in thread
   // by setting empty signal mask
   // (system signals processes only in the main thread)
   sigset_t set;
   sigfillset(&set);
   pthread_sigmask(SIG_SETMASK, &set, NULL);
+#endif
 
   Thread* thread = static_cast<Thread*>(arg);
 
@@ -208,7 +212,11 @@ bool Thread::Start(bool detach) {
 }
 
 bool Thread::Stop() {
+#ifdef OS_WIN32
+  return TerminateThread(m_id, (DWORD)-1) == TRUE;
+#else
   return TerminateThread(m_id, (DWORD) - 1);
+#endif
 }
 
 bool Thread::Join(void** ret) {
@@ -258,7 +266,12 @@ bool Mutex::Unlock() {
     return false;
   }
 
+#ifdef OS_WIN32
+  return ReleaseMutex(m_mutex) == TRUE;
+#else
   return ReleaseMutex(m_mutex);
+#endif
+
 }
 
 #endif

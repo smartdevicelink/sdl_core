@@ -34,7 +34,9 @@
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_GEN_HASH_H_
 
 #include <string>
-
+#ifdef OS_WIN32
+#include <stdint.h>
+#endif
 namespace utils {
 
 /**

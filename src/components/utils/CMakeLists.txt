@@ -37,8 +37,20 @@ include_directories (
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/media_manager/include
   ${COMPONENTS_DIR}/protocol_handler/include
+  ${CMAKE_SOURCE_DIR}/include
+  ${CMAKE_SOURCE_DIR}/src/3rd_party/apache-log4cxx-win32-0.10.0/apr/include
+  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/libusbx-1.0.16/libusb
+  ${CMAKE_SOURCE_DIR}/src/3rd_party/sqlite3
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	include_directories (
+		${CMAKE_SOURCE_DIR}/include/win32
+		${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include
+		${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include/arch/win32
+	)
+endif()
 
 set (SOURCES
     ${UTILS_SRC_DIR}/bitstream.cc
@@ -47,6 +59,7 @@ set (SOURCES
     ${UTILS_SRC_DIR}/threads/posix_thread.cc   
     ${UTILS_SRC_DIR}/threads/thread_delegate.cc
     ${UTILS_SRC_DIR}/threads/thread_validator.cc
+    ${UTILS_SRC_DIR}/threads/thread_manager.cc
     ${UTILS_SRC_DIR}/threads/async_runner.cc
     ${UTILS_SRC_DIR}/lock_posix.cc
     ${UTILS_SRC_DIR}/rwlock_posix.cc
@@ -74,6 +87,12 @@ if (BUILD_BACKTRACE_SUPPORT)
     )
 endif()
 
+if(MODIFY_FUNCTION_FLAGS)
+		list(APPEND SOURCES
+		./src/global.cc
+		)
+endif()
+
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
     list(APPEND SOURCES
     ${UTILS_SRC_DIR}/threads/pulse_thread_delegate.cc
@@ -96,20 +115,23 @@ endif()
 
 
 if(ENABLE_LOG)
+if(MODIFY_FUNCTION_FLAGS)
+else()
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
   list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
   list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
+  ADD_DEPENDENCIES(Utils install-3rd_party_logger)
+endif()
   list(APPEND LIBRARIES ConfigProfile)
 
-  ADD_DEPENDENCIES(Utils install-3rd_party_logger)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   target_link_libraries("Utils" pthread ${RTLIB})
 endif()
 
+message(STATUS "Utils->LIBRARIES:" ${LIBRARIES})
 target_link_libraries("Utils" ${LIBRARIES})
-
 
 if(BUILD_TESTS)
   add_subdirectory(test)

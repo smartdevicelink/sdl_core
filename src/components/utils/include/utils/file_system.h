@@ -38,6 +38,9 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#ifdef OS_WIN32
+#include "utils/logger.h"
+#endif
 
 namespace file_system {
 
@@ -55,7 +58,7 @@ uint64_t GetAvailableDiskSpace(const std::string& path);
  *
  * @param path to directory
  */
-size_t DirectorySize(const std::string& path);
+uint32_t DirectorySize(const std::string& path);
 
 /*
  * @brief Get size of current file
@@ -63,7 +66,7 @@ size_t DirectorySize(const std::string& path);
  * @param path to file
  * @return size of file, return 0 if file not exist
  */
-int64_t FileSize(const std::string& path);
+uint32_t FileSize(const std::string& path);
 
 /**
  * @brief Creates directory

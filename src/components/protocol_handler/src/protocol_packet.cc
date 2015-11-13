@@ -125,8 +125,11 @@ void ProtocolPacket::ProtocolHeader::deserialize(
 }
 
 ProtocolPacket::ProtocolHeaderValidator::ProtocolHeaderValidator()
-  : max_payload_size_(std::numeric_limits<size_t>::max()) {
-}
+#ifdef MODIFY_FUNCTION_SIGN
+	: max_payload_size_(UINT_MAX) {}
+#else
+    : max_payload_size_(std::numeric_limits<size_t>::max()) {}
+#endif
 
 void ProtocolPacket::ProtocolHeaderValidator::set_max_payload_size(
     const size_t max_payload_size) {

@@ -187,6 +187,15 @@ const char isSDLAllowed[] = "isSDLAllowed";
 const char transport_type[] = "transportType";
 const char application[] = "application";
 const char applications[] = "applications";
+#ifdef MODIFY_FUNCTION_SIGN
+const char status[] = "status";
+const char vr_content[] = "vrContent";
+const char app_vr_name[] = "appVRName";
+const char vr_name[] = "vrName";
+const char audio_pass_thru_type[] = "audioPassThruType";
+const char save_audio_pass_thru_file[] = "saveAudioPassThruFile";
+const char send_audio_pass_thru_file[] = "sendAudioPassThruFile";
+#endif
 const char icon[] = "icon";
 const char device_name[] = "deviceName";
 const char reason[] = "reason";
@@ -342,6 +351,11 @@ const char soft_buttons[] = "softButtons";
 const char tts_chunks[] = "ttsChunks";
 const char speak_type[] = "speakType";
 const char audio_pass_display_texts[] = "audioPassThruDisplayTexts";
+#ifdef MODIFY_FUNCTION_SIGN
+const char sampling_rate[] = "samplingRate";
+const char bits_per_sample[] = "bitsPerSample";
+const char audio_type[] = "audioType";
+#endif
 const char max_duration[] = "maxDuration";
 const char reason[] = "reason";
 const char message_text[] = "messageText";

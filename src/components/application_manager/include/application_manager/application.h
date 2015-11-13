@@ -37,6 +37,9 @@
 #include <map>
 #include <set>
 #include <list>
+#ifdef OS_WIN32
+#include <unistd.h>
+#endif
 #include "utils/shared_ptr.h"
 #include "utils/data_accessor.h"
 #include "interfaces/MOBILE_API.h"

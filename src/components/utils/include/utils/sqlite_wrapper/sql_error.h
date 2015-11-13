@@ -38,6 +38,10 @@
 namespace utils {
 namespace dbms {
 
+#ifdef OS_WIN32
+#undef ERROR
+#endif
+
 typedef enum Error {
   OK          = 0,    /* Successful result */
   ERROR,              /* SQL error or missing database */

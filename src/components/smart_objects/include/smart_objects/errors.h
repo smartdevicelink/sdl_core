@@ -31,6 +31,36 @@
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ERRORS_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ERRORS_H_
 
+#ifdef OS_WIN32
+#ifdef ERROR
+#undef ERROR
+#endif // ERROR
+//>>>>>>>>>> DECLARE_ENUM >>>>>>>>>>
+#define DECLARE_ENUM(E) \
+struct E \
+{ \
+public: \
+	E(int value = 0) : _value((__Enum)value) { \
+	} \
+	E& operator=(int value) { \
+	this->_value = (__Enum)value; \
+	return *this; \
+	} \
+	operator int() const { 	\
+	return this->_value; \
+	} \
+	\
+enum __Enum {
+
+#define END_ENUM() \
+}; \
+	\
+private: \
+	__Enum _value; \
+};
+//<<<<<<<<<< DECLARE_ENUM <<<<<<<<<<
+#endif // OS_WIN32
+
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 namespace Errors {
@@ -57,6 +87,18 @@ enum eType {
    * @brief Mandatory parameter is missing.
    **/
   MISSING_MANDATORY_PARAMETER,
+
+#ifdef MODIFY_FUNCTION_SIGN
+  /**
+    * @brief Mandatory untitled (with any name) parameter is missing.
+    **/
+  MISSING_MANDATORY_UNTITLED_PARAMETER,
+
+  /**
+    * @brief Unexpected parameter.
+    **/
+  UNEXPECTED_PARAMETER,
+#endif
 
   /**
    * @brief General validation error

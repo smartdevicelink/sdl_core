@@ -46,6 +46,13 @@ namespace NsMessageBroker
       */
       void deleteController(std::string name);
 
+#ifdef MODIFY_FUNCTION_SIGN
+		/**
+		* \brief clear controller from the registry.
+		*/
+		void clearController();
+#endif
+
       /**
       * \brief Remove all controllers by descriptor
       * \param fd descriptor
@@ -72,6 +79,21 @@ namespace NsMessageBroker
       * \param name name of property which should be observed.
       */
       void deleteSubscriber(int fd, std::string name);
+#ifdef MODIFY_FUNCTION_SIGN
+			/**
+			* \brief deletes notification subscriber from the registry.
+			* \param fd file descriptor of controller.
+			* \param name name of property which should be observed.
+			*/
+			void deleteSubscriber(std::string name);
+
+			/**
+			* \brief clear notification subscriber from the registry.
+			* \param fd file descriptor of controller.
+			* \param name name of property which should be observed.
+			*/
+			void clearSubscriber();
+#endif
 
       /**
       * \brief gets controller fd from the registry by name.

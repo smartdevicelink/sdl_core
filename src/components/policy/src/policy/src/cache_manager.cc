@@ -43,7 +43,9 @@
 #include "json/writer.h"
 #include "utils/logger.h"
 
-#  include "policy/sql_pt_representation.h"
+#include "policy/sql_pt_representation.h"
+
+#undef max
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -80,9 +82,7 @@ private:
 CacheManager::CacheManager()
   : CacheManagerInterface(),
     pt_(new policy_table::Table),
-    backup_(
-                     new SQLPTRepresentation()
-    ),
+    backup_(new SQLPTRepresentation()),
     update_required(false) {
 
   LOG4CXX_AUTO_TRACE(logger_);

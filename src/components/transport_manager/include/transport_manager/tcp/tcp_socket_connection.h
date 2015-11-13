@@ -36,10 +36,13 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_SOCKET_CONNECTION_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TCP_TCP_SOCKET_CONNECTION_H_
 
+#ifdef OS_WIN32
+#else
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#endif
 
 #include "transport_manager/transport_adapter/threaded_socket_connection.h"
 

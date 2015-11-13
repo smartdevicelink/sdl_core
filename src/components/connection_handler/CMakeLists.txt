@@ -40,6 +40,12 @@ include_directories (
     ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	include_directories (
+		${CMAKE_SOURCE_DIR}/include/win32
+	)
+endif()
+
 set (SOURCES
     ${CH_SRC_DIR}/connection_handler_impl.cc
     ${CH_SRC_DIR}/connection.cc

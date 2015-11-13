@@ -246,8 +246,13 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
           (*message_)[strings::msg_params][strings::language].asInt()));
     }
 
+#ifdef OS_WIN32
+    int32_t greates_result_code = max(max(ui_result_, vr_result_),
+                                       tts_result_);
+#else
     int32_t greates_result_code = std::max(std::max(ui_result_, vr_result_),
                                        tts_result_);
+#endif									   
 
     (*message_)[strings::params][strings::function_id] =
           mobile_apis::FunctionID::eType::ChangeRegistrationID;

@@ -576,7 +576,11 @@ Reader::decodeNumber( Token &token )
                                                    : Value::maxLargestUInt;
    Value::LargestUInt threshold = maxIntegerValue / 10;
    Value::UInt lastDigitThreshold = Value::UInt( maxIntegerValue % 10 );
+#ifdef MODIFY_FUNCTION_SIGN
+   assert( lastDigitThreshold >=0  &&  lastDigitThreshold <= 9 );
+#else
    assert(lastDigitThreshold <= 9 );
+#endif
    Value::LargestUInt value = 0;
    while ( current < token.end_ )
    {

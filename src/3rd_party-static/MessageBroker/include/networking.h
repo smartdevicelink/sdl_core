@@ -35,9 +35,12 @@
 #include <windows.h>
 
 #if _MSC_VER >= 1400 // VC++ 8.0
-typedef unsigned short uint16_t;
-typedef unsigned long  uint32_t;
+#ifdef OS_WIN32
+#include <stdint.h>
+#ifndef snprintf
 #define snprintf _snprintf
+#endif
+#endif
 #endif //_MSC_VER >= 1400
 
 /* to use getaddrinfo, _WIN32_WINNT have to
@@ -58,7 +61,9 @@ typedef unsigned long  uint32_t;
 #endif //(_WIN32_WINNT != OLD_WIN32_WINNT)
 
 typedef int socklen_t;
+#ifndef OS_WIN32
 #define close closesocket
+#endif
 
 #else //_WIN32
 

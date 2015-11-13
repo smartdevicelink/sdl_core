@@ -32,7 +32,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_LOCK_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_LOCK_H_
 
-#if defined(OS_POSIX)
+#if defined(OS_POSIX) || defined(OS_WIN32)
 #include <pthread.h>
 #include <sched.h>
 #else
@@ -46,7 +46,7 @@
 namespace sync_primitives {
 
 namespace impl {
-#if defined(OS_POSIX)
+#if defined(OS_POSIX) || defined(OS_WIN32)
 typedef pthread_mutex_t PlatformMutex;
 #endif
 } // namespace impl

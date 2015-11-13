@@ -37,6 +37,12 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	include_directories (
+		${CMAKE_SOURCE_DIR}/include/win32
+	)
+endif()
+
 set (SOURCES
   ${COMPONENTS_DIR}/resumption/src/last_state.cc
 )

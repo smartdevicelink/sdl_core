@@ -93,7 +93,12 @@ void OnExitAllApplicationsNotification::Run() {
       mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS == mob_reason) {
     app_manager->HeadUnitReset(mob_reason);
   }
+#ifdef OS_WIN32
+    ApplicationManagerImpl::instance()->SetUnregisterAllApplicationsReason(
+      mob_reason);
+#else
   kill(getpid(), SIGINT);
+#endif
 }
 
 void OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete() {

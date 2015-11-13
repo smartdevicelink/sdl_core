@@ -37,6 +37,9 @@
 #include <pthread.h>
 #endif
 
+#ifdef OS_WIN32
+#include "pthread.h"
+#endif
 #include "utils/macro.h"
 
 namespace sync_primitives {
@@ -45,7 +48,10 @@ namespace impl {
 #if defined(OS_POSIX)
 typedef pthread_rwlock_t PlatformRWLock;
 #else
-#error Please implement rwlock for your OS
+//#error Please implement rwlock for your OS
+#endif
+#ifdef OS_WIN32
+	typedef pthread_rwlock_t PlatformRWLock;
 #endif
 }  // namespace impl
 

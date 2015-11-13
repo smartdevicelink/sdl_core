@@ -54,7 +54,10 @@ set (SOURCES
 add_library("SmartObjects" ${SOURCES})
 
 if(ENABLE_LOG)
+if(MODIFY_FUNCTION_FLAGS)
+else()
   target_link_libraries("SmartObjects" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+endif()
 endif()
 
 if(BUILD_TESTS)

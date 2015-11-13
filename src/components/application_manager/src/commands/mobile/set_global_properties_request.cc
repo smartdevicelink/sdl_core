@@ -374,7 +374,11 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
         std::string("Unsupported phoneme type sent in a prompt").c_str();
   } else {
     result_code = MessageHelper::HMIToMobileResult(
-          std::max(ui_result_, tts_result_));
+#ifdef OS_WIN32
+          max(ui_result_, tts_result_));
+#else
+		std::max(ui_result_, tts_result_));
+#endif
   }
 
   SendResponse(result, result_code, return_info,

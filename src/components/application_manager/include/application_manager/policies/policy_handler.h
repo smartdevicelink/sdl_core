@@ -457,7 +457,11 @@ private:
   static const std::string kLibrary;
   mutable sync_primitives::RWLock policy_manager_lock_;
   utils::SharedPtr<PolicyManager> policy_manager_;
+#ifdef OS_WIN32
+  HINSTANCE dl_handle_;
+#else
   void* dl_handle_;
+#endif
   AppIds last_used_app_ids_;
   utils::SharedPtr<PolicyEventObserver> event_observer_;
   uint32_t last_activated_app_id_;

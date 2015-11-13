@@ -79,9 +79,38 @@ set(LIBRARIES
   Resumption
 )
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(MODIFY_FUNCTION_FLAGS)
+  #list(APPEND LIBRARIES  lib_msp_vr)
+endif()
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  list(APPEND LIBRARIES pthreadVC2 ws2_32)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND LIBRARIES pthreadVC2 ws2)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  #list(APPEND LIBRARIES pthread)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES pthread)
   list(APPEND LIBRARIES dl)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
+  list(APPEND LIBRARIES apr-1 aprutil-1)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
+  if(ENABLE_LOG)
+    list(APPEND LIBRARIES dl apr-1 aprutil-1)
+  else()
+    list(APPEND LIBRARIES dl)
+  endif()
+else()
+  list(APPEND LIBRARIES pthread)
+endif()
+
+if(MODIFY_FUNCTION_FLAGS)
+if(ENABLE_LOG)
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CMAKE_SYSTEM_NAME STREQUAL "Windows"  OR CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "Android")
+  list(APPEND LIBRARIES log4cxx)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  list(APPEND LIBRARIES log4cxx apr-1 aprutil-1 expat winsock)
+endif()
+endif()
 endif()
 
 if (BUILD_BT_SUPPORT)
@@ -97,10 +126,12 @@ endif()
 endif()
 
 if(ENABLE_LOG)
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
   list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
   list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
   list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
+endif()
 endif()
 
 include_directories (
@@ -135,6 +166,7 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${CMAKE_SOURCE_DIR}/src/3rd_party/dbus-1.7.8
   ${CMAKE_SOURCE_DIR}/src/3rd_party/dbus-1.7.8/dbus/
+  ${CMAKE_SOURCE_DIR}/src/LibVrMsp
 )
 
 set (SOURCES
@@ -147,9 +179,20 @@ if( NOT CMAKE_BUILD_TYPE )
   set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build. Options are: None, Debug, Release, RelWithDebInfo, MinSizeRel." FORCE)
 endif()
 
+if(BUILD_TARGET_LIBRARY)
+add_library(${PROJECT} SHARED ${HEADERS} ${SOURCES})
+else()
 add_executable(${PROJECT} ${SOURCES})
+endif()
 target_link_libraries(${PROJECT} ${LIBRARIES})
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+SET_TARGET_PROPERTIES(${PROJECT} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_CURRENT_BINARY_DIR}")
+else()
+SET_TARGET_PROPERTIES(${PROJECT} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_CURRENT_BINARY_DIR}")
+endif()
+endif()
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/audio.8bit.wav DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -160,6 +203,16 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/sdl_preloaded_pt.json DESTINATION ${CMAKE_
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/init_policy.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endif ()
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	file(COPY ${CMAKE_SOURCE_DIR}/lib/win32/log4cxx.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+	file(COPY ${CMAKE_SOURCE_DIR}/lib/win32/pthreadVC2.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+	file(COPY ${CMAKE_SOURCE_DIR}/lib/win32/msc.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+elseif (CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+	file(COPY ${CMAKE_SOURCE_DIR}/lib/wince/msvcr90.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
+endif()
 
 # Replace commit in ini file
 set(GITCOMMIT "")
@@ -200,6 +253,9 @@ if (${QT_HMI})
 
   file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/start_hmi.sh
     "#!/bin/sh\n${start_command} ${command_arguments}\n")
+elseif (${WEB_HMI})
+  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/hmi_link
+    "${CMAKE_HOME_DIRECTORY}/src/components/HMI/index.html")
 endif ()
 
 # Install rules

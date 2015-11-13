@@ -5,8 +5,13 @@ include_directories (
   ./include/
   ../jsoncpp/include
   ../../components/utils/include
-
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	include_directories (
+		${CMAKE_SOURCE_DIR}/include/win32
+	)
+endif()
 
 set (MESSAGE_BROKER_SOURCES
   ./src/lib_messagebroker/CMessageBroker.cpp

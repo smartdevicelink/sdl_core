@@ -482,6 +482,18 @@ void RequestController::UpdateTimer() {
 
       timer_.updateTimeOut(msecs);
     } else {
+#ifdef OS_WIN32
+			LOG4CXX_WARN(logger_, "Request app_id: " << front->app_id()
+				<< " correlation_id: " << front->requestId()
+				<< " is expired. "
+				<< "End time: "
+				<< end_time.tv_sec
+				<< " Current time: "
+				<< current_time.tv_sec
+				<< " Diff (current - end): "
+				<< current_time.tv_sec - end_time.tv_sec
+				<< " Request timeout (sec): ");
+#else
       LOG4CXX_WARN(logger_, "Request app_id: " << front->app_id()
                    << " correlation_id: " << front->requestId()
                    << " is expired. "
@@ -493,6 +505,7 @@ void RequestController::UpdateTimer() {
                    << date_time::DateTime::getmSecs(current_time - end_time)
                    << " Request timeout (sec): "
                    << front->timeout_msec()/date_time::DateTime::MILLISECONDS_IN_SECOND);
+#endif
       timer_.updateTimeOut(0);
     }
   } else {

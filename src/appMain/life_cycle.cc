@@ -54,7 +54,14 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "appMain")
 namespace {
 void NameMessageBrokerThread(const System::Thread& thread,
                              const std::string& name) {
+#ifdef OS_WIN32
+	pthread_t pt;
+	pt.p = thread.GetId();
+	pt.x = 0;
+	Thread::SetNameForId(Thread::Id(pt), name);
+#else
   Thread::SetNameForId(thread.GetId(), name);
+#endif
 }
 }  // namespace
 
@@ -85,6 +92,9 @@ LifeCycle::LifeCycle()
   , mb_server_thread_(NULL)
   , mb_adapter_thread_(NULL)
 #endif  // MESSAGEBROKER_HMIADAPTER
+#ifdef OS_WIN32
+  , components_started_(false)
+#endif
 { }
 
 bool LifeCycle::StartComponents() {
@@ -162,6 +172,16 @@ bool LifeCycle::StartComponents() {
     return false;
   }
 
+#ifdef MODIFY_FUNCTION_SIGN
+  if (!crypto_manager_->Init(
+      ssl_mode == "SERVER" ? security_manager::SERVER : security_manager::CLIENT,
+          protocol,
+          cert_filename,
+          key_filename,
+          ciphers_list,
+          verify_peer)
+		  ) {
+#else
   if (!crypto_manager_->Init(
         ssl_mode == "SERVER" ? security_manager::SERVER : security_manager::CLIENT,
         protocol,
@@ -171,6 +191,7 @@ bool LifeCycle::StartComponents() {
         profile::Profile::instance()->ca_cert_path(),
         profile::Profile::instance()->update_before_hours())
         ) {
+#endif
     LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
     return false;
   }
@@ -219,6 +240,9 @@ bool LifeCycle::StartComponents() {
   // start transport manager
   transport_manager_->Visibility(true);
 
+#ifdef OS_WIN32
+  components_started_ = true;
+#endif
   return true;
 }
 
@@ -378,20 +402,33 @@ namespace {
 void LifeCycle::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   main_thread = pthread_self();
+#ifndef OS_WIN32
   // First, register signal handlers
   if(!::utils::SubscribeToInterruptSignal(&sig_handler) ||
      !::utils::SubscribeToTerminateSignal(&sig_handler) ||
      !::utils::SubscribeToFaultSignal(&sig_handler)) {
     LOG4CXX_FATAL(logger_, "Subscribe to system signals error");
   }
+#endif
   // Now wait for any signal
+#ifdef OS_WIN32
+  Sleep(INFINITE);
+#else
   pause();
+#endif
 }
 
 
 void LifeCycle::StopComponents() {
+#ifdef OS_WIN32
+  if (!components_started_) {
+    LOG4CXX_TRACE(logger_, "exit");
+    LOG4CXX_ERROR(logger_, "Components wasn't started");
+    return;
+  }
+#else
   LOG4CXX_AUTO_TRACE(logger_);
-
+#endif
   hmi_handler_->set_message_observer(NULL);
   connection_handler_->set_connection_handler_observer(NULL);
   protocol_handler_->RemoveProtocolObserver(app_manager_);
@@ -501,6 +538,10 @@ void LifeCycle::StopComponents() {
     time_tester_ = NULL;
   }
 #endif  // TIME_TESTER
+#ifdef OS_WIN32
+  components_started_ = false;
+  LOG4CXX_TRACE(logger_, "exit");
+#endif
 }
 
 }  //  namespace main_namespace

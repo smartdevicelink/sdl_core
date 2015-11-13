@@ -48,6 +48,7 @@ include_directories (
   ${COMPONENTS_DIR}/resumption/include/
   ${COMPONENTS_DIR}/rpc_base/include/
   ${COMPONENTS_DIR}/interfaces
+  ${COMPONENTS_DIR}/protocol_handler/include/
   ${CMAKE_BINARY_DIR}/src/components/
   ${COMPONENTS_DIR}/include/
   ${COMPONENTS_DIR}/policy/src/policy/include/
@@ -56,7 +57,16 @@ include_directories (
   ${ENCRYPTION_INCLUDE_DIRECTORY}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include
 )
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	include_directories (
+		${CMAKE_SOURCE_DIR}/include/win32
+		${CMAKE_SOURCE_DIR}/src/3rd_party/apr-1.5.0/include/arch/win32
+		${CMAKE_SOURCE_DIR}/src/LibVrMsp/
+	)
+endif()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 include_directories(
@@ -298,6 +308,29 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/dial_number_request.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/dial_number_response.cc
 )
+if(MODIFY_FUNCTION_FLAGS)
+list(APPEND HMI_COMMANDS_SOURCES
+  ${AM_SOURCE_DIR}/src/commands/hmi/sdl_log_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_unsubscribebutton_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_subscribebutton_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_microphone_recording_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_deleteinteractionchoiceset_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_createinteractionchoiceset_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_search_applist_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_find_applist_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_start_record_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_cancel_record_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_status_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_cancel_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_help_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_exit_app_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_switch_app_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_command_tts_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_result_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_ui_perform_audio_pass_thru_start_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_ui_perform_audio_pass_thru_stop_notification.cc
+)
+endif()
 
 set (HMI_COMMANDS_SOURCES_JSON
   ${AM_SOURCE_DIR}/src/commands/hmi/vi_get_vehicle_data_request.cc
@@ -356,7 +389,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES sqlite3)
 endif ()
 
-IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
+IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX" OR CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
   list(REMOVE_ITEM LIBRARIES dl)
 endif()
 
@@ -378,9 +411,11 @@ target_link_libraries("ApplicationManager" ${LIBRARIES} AMHMICommandsLibrary
                                                         AMMobileCommandsLibrary
                                                         AMEventEngine
                                                         AMPolicyLibrary)
-
 if(ENABLE_LOG)
+if(MODIFY_FUNCTION_FLAGS)
+else()
   target_link_libraries("ApplicationManager" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+endif()
 endif()
 
 if(BUILD_TESTS)

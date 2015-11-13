@@ -36,11 +36,17 @@
 namespace logger {
 
 void LogMessageHandler::Handle(const LogMessage message) {
+#ifdef OS_WIN32
+	message.logger->forcedLog(message.level,
+		message.entry,
+		message.location);
+#else
   message.logger->forcedLog(message.level,
                             message.entry,
                             message.timeStamp,
                             message.location,
                             message.threadName);
+#endif
 }
 
 LogMessageLoopThread::LogMessageLoopThread() :

@@ -158,7 +158,11 @@ void RegisterAppInterfaceRequest::Run() {
 
   // wait till HMI started
   while (!ApplicationManagerImpl::instance()->IsHMICooperating()) {
+#ifdef OS_WIN32
+    Sleep(1);
+#else
     sleep(1);
+#endif
     // TODO(DK): timer_->StartWait(1);
     ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
                                                              correlation_id(),

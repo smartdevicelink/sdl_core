@@ -39,7 +39,9 @@
 #include <cstdio>
 
 #include "rpc_base/validation_report.h"
-
+#ifdef OS_WIN32
+#include "utils/macro.h"
+#endif
 namespace rpc {
 
 /*
@@ -52,19 +54,31 @@ Range<T>::Range(T min, T max)
 }
 
 template <typename T>
+#ifdef OS_WIN32
+T Range<T>::min_rpc() const {
+#else
 T Range<T>::min() const {
+#endif
   return min_;
 }
 
 template <typename T>
+#ifdef OS_WIN32
+T Range<T>::max_rpc() const {
+#else
 T Range<T>::max() const {
+#endif
   return max_;
 }
 
 template <typename T>
 template <typename U>
 bool Range<T>::Includes(U val) const {
-  return min() <= val && val <= max();
+#ifdef OS_WIN32
+	return min_rpc() <= val && val <= max_rpc();
+#else
+	return min() <= val && val <= max();
+#endif
 }
 
 
@@ -168,7 +182,11 @@ const Range<T> Integer<T, minval, maxval>::range_(minval, maxval);
 template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer()
     : PrimitiveType(kUninitialized),
+#ifdef OS_WIN32
+		value_(range_.min_rpc()) {
+#else
       value_(range_.min()) {
+#endif
 }
 
 template<typename T, T minval, T maxval>
@@ -213,13 +231,21 @@ Integer<T, minval, maxval>::operator IntType() const {
  */
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 const Range<double> Float<minnum, maxnum, minden, maxden>::range_(
-    (double(minnum)/minden), (double(maxnum)/maxden));
+#ifdef OS_WIN32
+	double(minnum) / minden, double(maxnum) / maxden);
+#else
+	(double(minnum)/minden), (double(maxnum)/maxden));
+#endif
 
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float()
     : PrimitiveType(kUninitialized),
+#ifdef OS_WIN32
+		value_(range_.min_rpc()) {
+#else
       value_(range_.min()) {
+#endif
 }
 
 template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>

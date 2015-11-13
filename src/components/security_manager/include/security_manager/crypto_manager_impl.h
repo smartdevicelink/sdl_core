@@ -34,9 +34,11 @@
 #define SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_IMPL_H_
 
 #include <stdint.h>
+#ifndef OS_WIN32
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#endif
 #include <string>
 #include <map>
 

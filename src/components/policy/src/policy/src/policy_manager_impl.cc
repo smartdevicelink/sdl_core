@@ -47,8 +47,12 @@
 #include "policy/update_status_manager.h"
 #include "config_profile/profile.h"
 
+#ifdef OS_WIN32
+__declspec(dllexport) policy::PolicyManager* CreateManager() {
+#else
 policy::PolicyManager* CreateManager() {
-  return new policy::PolicyManagerImpl();
+#endif
+return new policy::PolicyManagerImpl();
 }
 
 namespace policy {

@@ -36,7 +36,22 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_H_
 
+#ifdef OS_WIN32
+#ifdef OS_WINCE
+#include <objbase.h>
+#endif
+#include <initguid.h>
+#include <winsock2.h>  
+#include <ws2bth.h>
+#include <stdint.h>
+#else
 #include <bluetooth/bluetooth.h>
+#include <bluetooth/hci.h>
+#include <bluetooth/hci_lib.h>
+#include <bluetooth/sdp.h>
+#include <bluetooth/sdp_lib.h>
+#include <bluetooth/rfcomm.h>
+#endif
 
 #include <vector>
 
@@ -45,6 +60,16 @@
 
 namespace transport_manager {
 namespace transport_adapter {
+
+#ifdef OS_WIN32
+	// Bluetooth device address define
+	typedef SOCKADDR_BTH bdaddr_t;
+#endif
+
+#ifdef OS_WINCE
+	// Bluetooth device address define
+	typedef BT_ADDR BTH_ADDR;
+#endif
 
 /**
  * @brief Type definition for vector that holds uint8_t variables.
@@ -56,7 +81,10 @@ typedef std::vector<uint8_t> RfcommChannelVector;
  */
 class BluetoothDevice : public Device {
  public:
-
+#ifdef OS_WIN32
+	 static void GetAddressString(const bdaddr_t& device_address, char *device_address_string, int address_size);
+	 static void GetAddressInfo(const char *device_address_string, bdaddr_t& device_address);
+#endif
   /**
    * @brief Return device unique identifier.
    *

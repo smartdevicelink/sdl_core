@@ -47,18 +47,33 @@ include_directories (
     ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	include_directories (
+		${CMAKE_SOURCE_DIR}/include/win32
+	)
+endif()
+
 IF (HMIADAPTER STREQUAL "dbus")
     set (DBUS_SOURCE ./src/dbus_message_adapter.cc)
     set (DBUS_ADAPTER DBus)
 ENDIF ()
 
+if(MODIFY_FUNCTION_FLAGS)
 set (SOURCES
     ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_handler_impl.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/messagebroker_adapter.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_adapter.cc
-    ${COMPONENTS_DIR}/hmi_message_handler/src/mqueue_adapter.cc
     ${DBUS_SOURCE}
 )
+else()
+set (SOURCES
+    ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_handler_impl.cc
+    ${COMPONENTS_DIR}/hmi_message_handler/src/messagebroker_adapter.cc
+    ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_adapter.cc
+	${COMPONENTS_DIR}/hmi_message_handler/src/mqueue_adapter.cc
+    ${DBUS_SOURCE}
+)
+endif()
 
 set(LIBRARIES
     Utils

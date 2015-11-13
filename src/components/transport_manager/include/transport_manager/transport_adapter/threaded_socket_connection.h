@@ -35,7 +35,14 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_THREADED_SOCKET_CONNECTION_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_THREADED_SOCKET_CONNECTION_H_
 
+#ifdef OS_WIN32
+#include "pthread.h"
+#include <WINSOCK2.H> 
+#include <stdio.h> 
+#else
 #include <poll.h>
+#endif
+
 #include <queue>
 
 #include "transport_manager/transport_adapter/connection.h"
@@ -85,6 +92,10 @@ class ThreadedSocketConnection : public Connection {
    */
   void set_socket(int socket) {
     socket_ = socket;
+#ifdef OS_WIN32
+	int iMode = 1;
+	ioctlsocket(socket_, FIONBIO, (u_long FAR*) &iMode);
+#endif
   }
 
  protected:
@@ -136,6 +147,10 @@ class ThreadedSocketConnection : public Connection {
    private:
     ThreadedSocketConnection* connection_;
   };
+  
+#ifdef OS_WIN32
+	int CreatePipe();
+#endif
 
   int read_fd_;
   int write_fd_;
@@ -146,6 +161,10 @@ class ThreadedSocketConnection : public Connection {
   bool Receive();
   bool Send();
   void Abort();
+
+#ifdef OS_WIN32
+  friend void* StartThreadedSocketConnection(void*);
+#endif
 
   TransportAdapterController* controller_;
   /**
@@ -160,6 +179,7 @@ class ThreadedSocketConnection : public Connection {
   bool unexpected_disconnect_;
   const DeviceUID device_uid_;
   const ApplicationHandle app_handle_;
+
   threads::Thread* thread_;
 };
 }  // namespace transport_adapter

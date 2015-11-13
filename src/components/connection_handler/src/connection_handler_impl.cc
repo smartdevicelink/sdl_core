@@ -29,7 +29,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef OS_WIN32
 #include <strings.h>
+#endif
 
 #include <string>
 #include <list>
@@ -328,12 +330,16 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     }
   } else {  // Could be create new service or protected exists one
     if (!connection->AddNewService(session_id, service_type, is_protected)) {
+#ifdef OS_WIN32
+			LOG4CXX_ERROR(logger_, "Couldn't establish ");
+#else
       LOG4CXX_ERROR(logger_, "Couldn't establish "
 #ifdef ENABLE_SECURITY
                     << (is_protected ? "protected" : "non-protected")
 #endif  // ENABLE_SECURITY
                     << " service " << static_cast<int>(service_type)
                     << " for session " << static_cast<int>(session_id));
+#endif
       return 0;
     }
     new_session_id = session_id;

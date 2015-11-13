@@ -50,9 +50,41 @@
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 
-namespace threads {
-  class Thread;
+#ifdef OS_WIN32
+#include <vector>
+#include <stdint.h>
+#endif
 
+namespace threads {
+namespace impl {
+  class Thread;
+#ifdef OS_WIN32
+	typedef struct tagPlatformThreadStruct
+	{
+		PlatformThreadHandle	id;
+		std::string				name;
+	} PlatformThreadStruct;
+/*
+ * Generates short and unique names for unnamed threads
+ * and remembers association between thread handle and that short name
+ */
+class UnnamedThreadRegistry {
+ public:
+  UnnamedThreadRegistry();
+  ~UnnamedThreadRegistry();
+  /*
+   * Returns a name for given unnamed thread id.
+   * If id is first seen, new name is generated and memorized
+   * If id is already known, previously generated name is returned
+   */
+  std::string GetUniqueName(PlatformThreadHandle id);
+ private:
+  typedef std::vector<PlatformThreadStruct> IdNameMap;
+  IdNameMap id_number_;
+  int32_t last_thread_number_;
+  sync_primitives::Lock state_lock_;
+};
+#endif
 /*
  * This class is here currently to remember names associated to threads.
  * It manages raw impl::PlatformHandles because Thread::Id's do not provide
@@ -67,14 +99,46 @@ class ThreadManager : public utils::Singleton<ThreadManager> {
     pthread_t handle;
     ThreadDelegate* delegate;
   };
+#ifdef OS_WIN32
+  ThreadManager();
+  ~ThreadManager();
+
+  // Name a thread. Should be called only once for every thread.
+  // Threads can't be renamed
+  void RegisterName(PlatformThreadHandle id, const std::string& name);
+
+  // Get a name for previously registered thread
+  std::string GetName(PlatformThreadHandle id) const;
+
+  // Forget a name of (possibly destroyed) thread
+  // Make sure to call it after thread is finished
+  // Because thread id's can be recycled
+  void Unregister(PlatformThreadHandle id);
+private:
+  typedef std::set<std::string> NamesSet;
+
+  typedef std::vector<PlatformThreadStruct> IdNamesMap;
+
+  // Set of thread names for fast checking if name is unique
+  NamesSet names_;
+  // Map from system handle to the thread name
+  IdNamesMap id_names_;
+  mutable sync_primitives::Lock state_lock_;
+
+  // Generator of shorter sequental names for unnamed threads
+  // Has to memorize every generated name this is why it is mutable
+  mutable UnnamedThreadRegistry unnamed_thread_namer_;
+#else
   ThreadManager() {}
   MessageQueue<ThreadDesc> threads_to_terminate;
+#endif
  private:
   DISALLOW_COPY_AND_ASSIGN(ThreadManager);
 
   FRIEND_BASE_SINGLETON_CLASS(ThreadManager);
 };
 
+} // namespace impl
 } // namespace threads
 
 #endif // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_THREADS_THREAD_MANAGER_H_
