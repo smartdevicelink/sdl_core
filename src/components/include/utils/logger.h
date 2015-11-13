@@ -34,20 +34,16 @@
 #define SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_H_
 
 #ifdef ENABLE_LOG
-  #include <errno.h>
-  #include <string.h>
-  #include <sstream>
-  #include <log4cxx/propertyconfigurator.h>
-  #include <log4cxx/spi/loggingevent.h>
-  #include "utils/push_log.h"
-  #include "utils/logger_status.h"
-  #include "utils/auto_trace.h"
-#if defined(OS_WIN32) 
-#	if defined(DEBUG)
-#		define __PRETTY_FUNCTION__ __FUNCTION__
-#	else
-#		define __PRETTY_FUNCTION__ __FUNCTION__
-#	endif
+#include <errno.h>
+#include <string.h>
+#include <sstream>
+#include <log4cxx/propertyconfigurator.h>
+#include <log4cxx/spi/loggingevent.h>
+#include "utils/push_log.h"
+#include "utils/logger_status.h"
+#include "utils/auto_trace.h"
+#ifdef OS_WIN32
+#define __PRETTY_FUNCTION__ __FUNCTION__
 #endif
 #endif  // ENABLE_LOG
 
@@ -79,7 +75,6 @@
 
     log4cxx_time_t time_now();
 
-
     #define LOG_WITH_LEVEL(loggerPtr, logLevel, logEvent) \
     do { \
       if (logger::logs_enabled()) { \
@@ -94,8 +89,10 @@
       } \
     } while (false)
 
+#ifndef OS_WIN32
     #undef LOG4CXX_TRACE
     #define LOG4CXX_TRACE(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getTrace(), logEvent)
+#endif
 
     #define LOG4CXX_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, auto_trace) \
       logger::AutoTrace auto_trace(loggerPtr, LOG4CXX_LOCATION)
@@ -106,19 +103,25 @@
     #define LOG4CXX_DEBUG(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getDebug(), logEvent)
 #endif
 
+#ifndef OS_WIN32
     #undef LOG4CXX_INFO
     #define LOG4CXX_INFO(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getInfo(), logEvent)
+#endif
 
 #ifndef OS_WIN32
     #undef LOG4CXX_WARN
     #define LOG4CXX_WARN(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getWarn(), logEvent)
 #endif
 
+#ifndef OS_WIN32
     #undef LOG4CXX_ERROR
     #define LOG4CXX_ERROR(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getError(), logEvent)
+#endif
 
+#ifndef OS_WIN32
     #undef LOG4CXX_FATAL
     #define LOG4CXX_FATAL(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getFatal(), logEvent)
+#endif
 
     #define LOG4CXX_ERROR_WITH_ERRNO(logger, message) \
       LOG4CXX_ERROR(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
