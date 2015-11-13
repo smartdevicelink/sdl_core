@@ -150,11 +150,7 @@ class CANModule : public functional_modules::GenericModule,
   void SubscribeOnFunctions();
   void NotifyMobiles(application_manager::MessagePtr msg);
 
-  void UnsubscribeAppsFromInteriorZone(uint32_t  device_id,
-                                      const Json::Value& interior_zone);
-
-  void NotifyHMIAboutUnsubscription(uint32_t hmi_app_id,
-                                    const Json::Value& module_description);
+  void UnsubscribeAppsFromAllInteriorZones(uint32_t  device_id);
 
   functional_modules::ProcessResult HandleMessage(
     application_manager::MessagePtr msg);
