@@ -76,6 +76,16 @@ class PolicyHandler :
   bool ReceiveMessageFromSDK(const std::string& file,
                              const BinaryMessage& pt_string);
   bool UnloadPolicyLibrary();
+  /**
+   *
+   * @param device_id
+   * @param policy_app_id
+   * @param permissions
+   * @param default_hmi
+   * @deprecated see OnPermissionsUpdated(const std::string&, const std::string&,
+   * const Permissions&) and OnUpdateHMILevel(const std::string&,
+   * const std::string& policy_app_id, const std::string& hmi_level)
+   */
   virtual void OnPermissionsUpdated(const std::string& device_id,
                                     const std::string& policy_app_id,
                                     const Permissions& permissions,
@@ -397,7 +407,8 @@ class PolicyHandler :
   virtual void OnUpdateHMIAppType(std::map<std::string, StringArray> app_hmi_types);
   virtual void OnUpdateHMILevel(const std::string& device_id,
                                 const std::string& policy_app_id,
-                                  const std::string& hmi_level);
+                                const std::string& hmi_level,
+                                const std::string& device_rank = "");
 
   virtual void OnCertificateUpdated(const std::string& certificate_data);
 
@@ -524,6 +535,10 @@ protected:
    */
   void OnAppPermissionConsentInternal(const uint32_t connection_key,
                                       PermissionConsent& permissions);
+
+  void UpdateHMILevel(application_manager::ApplicationSharedPtr app,
+                      mobile_apis::HMILevel::eType level,
+                      mobile_apis::DeviceRank::eType rank);
 
 private:
   class StatisticManagerImpl: public usage_statistics::StatisticsManager {

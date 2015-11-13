@@ -78,10 +78,13 @@ class MessageHelper {
     /**
      * @brief Sends HMI status notification to mobile
      *
-     *@param application_impl application with changed HMI status
+     * @param application_impl application with changed HMI status
+     * @param rank device rank
      *
      **/
-    static void SendHMIStatusNotification(const Application& application_impl);
+    static void SendHMIStatusNotification(
+        const Application& application_impl,
+        mobile_apis::DeviceRank::eType rank = mobile_apis::DeviceRank::eType::INVALID_ENUM);
 
     /**
      * @brief Sends OnAppRegistered notification to HMI
@@ -141,6 +144,15 @@ class MessageHelper {
      */
     static mobile_api::HMILevel::eType StringToHMILevel(
       const std::string& hmi_level);
+
+    /**
+     * @brief Converts string to device rank, if possible
+     * @param device_rank Stringified device rank
+     * @return Appropriate enum from device rank, or INVALID_ENUM, if conversion
+     * is not possible
+     */
+    static mobile_api::DeviceRank::eType StringToDeviceRank(
+        const std::string& device_ranki);
 
     /*
     * @brief Used to obtain string representation of app's

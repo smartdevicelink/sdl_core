@@ -456,7 +456,6 @@ bool CANModule::IsAppForPlugin(
     app->AddExtension(can_app_extension);
     service()->NotifyHMIAboutHMILevel(app, app->hmi_level());
     PolicyHelper::SetIsAppOnPrimaryDevice(app);
-    SendHmiStatusNotification(app);
     return true;
   }
   return false;
