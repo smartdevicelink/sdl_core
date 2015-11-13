@@ -536,6 +536,10 @@ protected:
   void OnAppPermissionConsentInternal(const uint32_t connection_key,
                                       PermissionConsent& permissions);
 
+  void UpdateHMILevel(application_manager::ApplicationSharedPtr app,
+                      mobile_apis::HMILevel::eType level,
+                      mobile_apis::DeviceRank::eType rank);
+
 private:
   class StatisticManagerImpl: public usage_statistics::StatisticsManager {
       //TODO(AKutsan) REMOVE THIS UGLY HOTFIX

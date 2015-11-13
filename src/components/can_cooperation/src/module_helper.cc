@@ -201,7 +201,6 @@ void ModuleHelper::ProccessDeviceRankChanged(const uint32_t device_handle,
 
             CANModule::instance()->UnsubscribeAppForAllZones(
                 applications[i]->hmi_app_id(), can_app_extension);
-            CANModule::instance()->SendHmiStatusNotification(applications[i]);
           }
         }
       }
@@ -220,7 +219,6 @@ void ModuleHelper::ProccessDeviceRankChanged(const uint32_t device_handle,
               CANModule::instance()->UnsubscribeAppForAllZones(
                   applications[i]->hmi_app_id(), can_app_extension);
               can_app_extension->set_is_on_driver_device(false);
-              CANModule::instance()->SendHmiStatusNotification(applications[i]);
             }
           }
         }
@@ -240,7 +238,6 @@ void ModuleHelper::ProccessDeviceRankChanged(const uint32_t device_handle,
              CANModule::instance()->UnsubscribeAppForAllZones(
                  applications[i]->hmi_app_id(), can_app_extension);
              can_app_extension->set_is_on_driver_device(false);
-             CANModule::instance()->SendHmiStatusNotification(applications[i]);
            }
          }
        }

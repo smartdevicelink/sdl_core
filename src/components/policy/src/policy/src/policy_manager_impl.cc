@@ -356,16 +356,21 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
 
   LOG4CXX_INFO(logger_, "Send notification for application_id:" << application_id);
 
+#ifdef SDL_REMOTE_CONTROL
+  const Subject who = { device_id, application_id };
+  if (access_remote_->IsAppReverse(who)) {
+    const std::string rank = access_remote_->IsPrimaryDevice(who.dev_id) ?
+        "DRIVER" : "PASSENGER";
+    SendHMILevelChanged(who, rank);
+  } else {
+    SendHMILevelChanged(who);
+  }
+#else  // SDL_REMOTE_CONTROL
   std::string default_hmi;
   GetDefaultHmi(application_id, &default_hmi);
-  listener()->OnPermissionsUpdated(device_id, application_id, notification_data);
-#ifdef SDL_REMOTE_CONTROL
-  const std::string rank = access_remote_->IsPrimaryDevice(device_id) ?
-      "DRIVER" : "PASSENGER";
-  listener()->OnUpdateHMILevel(device_id, application_id, default_hmi, rank);
-#else  // SDL_REMOTE_CONTROL
   listener()->OnUpdateHMILevel(device_id, application_id, default_hmi);
 #endif  // SDL_REMOTE_CONTROL
+  listener()->OnPermissionsUpdated(device_id, application_id, notification_data);
 }
 
 bool PolicyManagerImpl::CleanupUnpairedDevices() {
@@ -1141,10 +1146,9 @@ void PolicyManagerImpl::OnChangedPrimaryDevice(const std::string& device_id,
     return;
   }
 
-  if (!access_remote_->IsPrimaryDevice(who.dev_id)) {
-    SendHMILevelChanged(who);
-  }
-
+  const std::string rank = access_remote_->IsPrimaryDevice(who.dev_id) ?
+      "DRIVER" : "PASSENGER";
+  SendHMILevelChanged(who, rank);
   SendAppPermissionsChanged(who.dev_id, who.app_id);
 }
 
@@ -1183,11 +1187,12 @@ void PolicyManagerImpl::OnChangedRemoteControl(const std::string& device_id,
   SendAppPermissionsChanged(who.dev_id, who.app_id);
 }
 
-void PolicyManagerImpl::SendHMILevelChanged(const Subject& who) {
+void PolicyManagerImpl::SendHMILevelChanged(const Subject& who,
+                                            const std::string& rank) {
   std::string default_hmi;
   if (GetDefaultHmi(who.app_id, &default_hmi)) {
     access_remote_->Reset(who);
-    listener()->OnUpdateHMILevel(who.dev_id, who.app_id, default_hmi);
+    listener()->OnUpdateHMILevel(who.dev_id, who.app_id, default_hmi, rank);
   } else {
     LOG4CXX_WARN(
         logger_,

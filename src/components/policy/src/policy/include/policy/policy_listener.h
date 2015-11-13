@@ -78,6 +78,15 @@ class PolicyListener {
   virtual void OnSystemInfoUpdateRequired() = 0;
   virtual std::string GetAppName(const std::string& policy_app_id) = 0;
   virtual void OnUpdateHMIAppType(std::map<std::string, StringArray> app_hmi_types) = 0;
+
+  /**
+   * Notifies about changing HMI level
+   * @param device_id unique identifier of device
+   * @param policy_app_id unique identifier of application in policy
+   * @param hmi_level default HMI level for this application
+   * @param device_rank is used for SDL-RC functionality
+   * no empty value means device_rank was changed
+   */
   virtual void OnUpdateHMILevel(const std::string& device_id,
                                 const std::string& policy_app_id,
                                 const std::string& hmi_level,
@@ -129,17 +138,17 @@ class PolicyListener {
   virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
 
 #ifdef SDL_REMOTE_CONTROL
-  /*
-   * @brief Signal that country_consent field was updated during PTU
-   * @param new_consent New value of country_consent
-   */
+   /**
+    * @brief Signal that country_consent field was updated during PTU
+    * @param new_consent New value of country_consent
+    */
    virtual void OnRemoteAllowedChanged(bool new_consent) = 0;
 
-   /*
-   * @brief Notifies Remote apps about change in permissions
-   * @param device_id Device on which app is running
-   * @param application_id ID of app whose permissions are changed
-   */
+   /**
+    * @brief Notifies Remote apps about change in permissions
+    * @param device_id Device on which app is running
+    * @param application_id ID of app whose permissions are changed
+    */
   virtual void OnRemoteAppPermissionsChanged(const std::string& device_id,
       const std::string& application_id) = 0;
 #endif  // SDL_REMOTE_CONTROL
