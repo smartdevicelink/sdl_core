@@ -363,7 +363,9 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
         "DRIVER" : "PASSENGER";
     SendHMILevelChanged(who, rank);
   } else {
-    SendHMILevelChanged(who);
+    std::string default_hmi;
+    GetDefaultHmi(application_id, &default_hmi);
+    listener()->OnUpdateHMILevel(device_id, application_id, default_hmi);
   }
 #else  // SDL_REMOTE_CONTROL
   std::string default_hmi;
@@ -1198,6 +1200,10 @@ void PolicyManagerImpl::SendHMILevelChanged(const Subject& who,
         logger_,
         "Couldn't get default HMI level for application " << who.app_id);
   }
+}
+
+void PolicyManagerImpl::SendHMILevelChanged(const Subject& who) {
+  SendHMILevelChanged(who, "");
 }
 
 void PolicyManagerImpl::SendAppPermissionsChanged(const std::string& device_id,

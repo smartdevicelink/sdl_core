@@ -1236,8 +1236,7 @@ void PolicyHandler::OnUpdateHMIAppType(std::map<std::string, StringArray> app_hm
 
 void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
                                      const std::string& policy_app_id,
-                                     const std::string& hmi_level,
-                                     const std::string& device_rank) {
+                                     const std::string& hmi_level) {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       device_id, policy_app_id);
@@ -1253,7 +1252,7 @@ void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
                  << hmi_level << " to enum.");
     return;
   }
-  UpdateHMILevel(app, level, MessageHelper::StringToDeviceRank(device_rank));
+  UpdateHMILevel(app, level);
 }
 
 void PolicyHandler::OnCertificateUpdated(const std::string& certificate_data) {
@@ -1378,14 +1377,8 @@ void PolicyHandler::Add(const std::string& app_id,
 }
 
 void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
-                                   mobile_apis::HMILevel::eType level,
-                                   mobile_apis::DeviceRank::eType rank) {
-#ifdef SDL_REMOTE_CONTROL
-  if (rank == mobile_apis::DeviceRank::DRIVER) {
-      MessageHelper::SendHMIStatusNotification(*app, rank);
-      return;
-  }
-#endif  // SDL_REMOTE_CONTROL
+                                   mobile_apis::HMILevel::eType level) {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (app->hmi_level() == mobile_apis::HMILevel::HMI_NONE) {
     // If default is FULL, send request to HMI. Notification to mobile will be
     // sent on response receiving.
@@ -1399,12 +1392,6 @@ void PolicyHandler::UpdateHMILevel(ApplicationSharedPtr app,
       ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
                                                              level);
       // If hmi Level is full, it will be seted after ActivateApp response
-#ifdef SDL_REMOTE_CONTROL
-      if (rank != mobile_apis::DeviceRank::INVALID_ENUM) {
-        MessageHelper::SendHMIStatusNotification(*app, rank);
-        return;
-      }
-#endif  // SDL_REMOTE_CONTROL
       MessageHelper::SendHMIStatusNotification(*app);
     }
   }
@@ -1625,6 +1612,45 @@ void PolicyHandler::OnRemoteAppPermissionsChanged(const std::string& device_id,
       const std::string& application_id) {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->SendAppPermissionsChanged(device_id, application_id);
+}
+
+void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
+                                     const std::string& policy_app_id,
+                                     const std::string& hmi_level,
+                                     const std::string& device_rank) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+      device_id, policy_app_id);
+  if (!app) {
+    LOG4CXX_WARN(
+        logger_,
+        "Could not find application: " << device_id << " - " << policy_app_id);
+    return;
+  }
+  mobile_apis::HMILevel::eType level = MessageHelper::StringToHMILevel(hmi_level);
+  if (mobile_apis::HMILevel::INVALID_ENUM == level) {
+    LOG4CXX_WARN(logger_, "Couldn't convert default hmi level "
+                 << hmi_level << " to enum.");
+    return;
+  }
+  mobile_apis::DeviceRank::eType rank = MessageHelper::StringToDeviceRank(device_rank);
+  if (rank == mobile_apis::DeviceRank::INVALID_ENUM) {
+    LOG4CXX_WARN(logger_, "Couldn't convert device rank "
+                 << device_rank << " to enum.");
+  }
+
+  if (rank == mobile_apis::DeviceRank::DRIVER) {
+      MessageHelper::SendHMIStatusNotification(*app, rank);
+      LOG4CXX_DEBUG(logger_, "Device rank: " << rank);
+      return;
+  }
+  LOG4CXX_INFO(logger_, "Changing hmi level of application "
+                         << app->app_id()
+                         << " to default hmi level " << level);
+  // Set application hmi level
+  ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
+                                                         level);
+  MessageHelper::SendHMIStatusNotification(*app, rank);
 }
 #endif  // SDL_REMOTE_CONTROL
 }  //  namespace policy
