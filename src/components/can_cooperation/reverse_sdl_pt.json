@@ -24,7 +24,7 @@
                     "RADIO": {}
                   }
                 },
-                "Left_Rare_Passenger": {
+                "Left_Rear_Passenger": {
                   "col": 0,
                   "row": 1,
                   "level": 0,
@@ -45,7 +45,7 @@
                     }
                   }
                 },
-                "Right_Rare_Passenger": {
+                "Right_Rear_Passenger": {
                   "col": 1,
                   "row": 1,
                   "level": 0,
