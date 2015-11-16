@@ -197,6 +197,9 @@ struct IsDeniedChar {
 }  // namespace
 
 bool Equipment::ValidateNameZone(const std::string& name) const {
+  if (name.empty()) {
+    return false;
+  }
   std::vector<wchar_t> wchars(name.length() + 1, L'\0');
   std::string current_locale = setlocale(LC_ALL, NULL);
   setlocale(LC_ALL, "");
