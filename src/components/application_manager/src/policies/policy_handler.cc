@@ -1614,10 +1614,38 @@ void PolicyHandler::OnRemoteAppPermissionsChanged(const std::string& device_id,
   policy_manager_->SendAppPermissionsChanged(device_id, application_id);
 }
 
-void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
-                                     const std::string& policy_app_id,
-                                     const std::string& hmi_level,
-                                     const std::string& device_rank) {
+void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
+                                      const std::string& policy_app_id,
+                                      const std::string& hmi_level) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+      device_id, policy_app_id);
+  if (!app) {
+    LOG4CXX_WARN(
+        logger_,
+        "Could not find application: " << device_id << " - " << policy_app_id);
+    return;
+  }
+  mobile_apis::HMILevel::eType level = MessageHelper::StringToHMILevel(hmi_level);
+  if (mobile_apis::HMILevel::INVALID_ENUM == level) {
+    LOG4CXX_WARN(logger_, "Couldn't convert default hmi level "
+                 << hmi_level << " to enum.");
+    return;
+  }
+
+  LOG4CXX_INFO(logger_, "Changing hmi level of application "
+                         << app->app_id()
+                         << " to default hmi level " << level);
+  // Set application hmi level
+  ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
+                                                         level);
+  MessageHelper::SendHMIStatusNotification(*app);
+}
+
+void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
+                                      const std::string& policy_app_id,
+                                      const std::string& hmi_level,
+                                      const std::string& device_rank) {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       device_id, policy_app_id);
@@ -1637,6 +1665,7 @@ void PolicyHandler::OnUpdateHMILevel(const std::string& device_id,
   if (rank == mobile_apis::DeviceRank::INVALID_ENUM) {
     LOG4CXX_WARN(logger_, "Couldn't convert device rank "
                  << device_rank << " to enum.");
+    return;
   }
 
   if (rank == mobile_apis::DeviceRank::DRIVER) {

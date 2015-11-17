@@ -215,10 +215,14 @@ class PolicyHandler :
   void OnRemoteAppPermissionsChanged(const std::string& device_id,
       const std::string& application_id);
 
-  virtual void OnUpdateHMILevel(const std::string& device_id,
-                                const std::string& policy_app_id,
-                                const std::string& hmi_level,
-                                const std::string& device_rank);
+  virtual void OnUpdateHMIStatus(const std::string& device_id,
+                                 const std::string& policy_app_id,
+                                 const std::string& hmi_level);
+
+  virtual void OnUpdateHMIStatus(const std::string& device_id,
+                                 const std::string& policy_app_id,
+                                 const std::string& hmi_level,
+                                 const std::string& device_rank);
 #endif  // SDL_REMOTE_CONTROL
 
   uint32_t GetNotificationsNumber(const std::string& priority);

@@ -361,7 +361,7 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
   if (access_remote_->IsAppReverse(who)) {
     const std::string rank = access_remote_->IsPrimaryDevice(who.dev_id) ?
         "DRIVER" : "PASSENGER";
-    SendHMILevelChanged(who, rank);
+    UpdateDeviceRank(who, rank);
   } else {
     std::string default_hmi;
     GetDefaultHmi(application_id, &default_hmi);
@@ -1150,7 +1150,7 @@ void PolicyManagerImpl::OnChangedPrimaryDevice(const std::string& device_id,
 
   const std::string rank = access_remote_->IsPrimaryDevice(who.dev_id) ?
       "DRIVER" : "PASSENGER";
-  SendHMILevelChanged(who, rank);
+  UpdateDeviceRank(who, rank);
   SendAppPermissionsChanged(who.dev_id, who.app_id);
 }
 
@@ -1189,12 +1189,12 @@ void PolicyManagerImpl::OnChangedRemoteControl(const std::string& device_id,
   SendAppPermissionsChanged(who.dev_id, who.app_id);
 }
 
-void PolicyManagerImpl::SendHMILevelChanged(const Subject& who,
-                                            const std::string& rank) {
+void PolicyManagerImpl::UpdateDeviceRank(const Subject& who,
+                                         const std::string& rank) {
   std::string default_hmi;
   if (GetDefaultHmi(who.app_id, &default_hmi)) {
     access_remote_->Reset(who);
-    listener()->OnUpdateHMILevel(who.dev_id, who.app_id, default_hmi, rank);
+    listener()->OnUpdateHMIStatus(who.dev_id, who.app_id, default_hmi, rank);
   } else {
     LOG4CXX_WARN(
         logger_,
@@ -1203,7 +1203,15 @@ void PolicyManagerImpl::SendHMILevelChanged(const Subject& who,
 }
 
 void PolicyManagerImpl::SendHMILevelChanged(const Subject& who) {
-  SendHMILevelChanged(who, "");
+  std::string default_hmi;
+  if (GetDefaultHmi(who.app_id, &default_hmi)) {
+    access_remote_->Reset(who);
+    listener()->OnUpdateHMIStatus(who.dev_id, who.app_id, default_hmi);
+  } else {
+    LOG4CXX_WARN(
+        logger_,
+        "Couldn't get default HMI level for application " << who.app_id);
+  }
 }
 
 void PolicyManagerImpl::SendAppPermissionsChanged(const std::string& device_id,
