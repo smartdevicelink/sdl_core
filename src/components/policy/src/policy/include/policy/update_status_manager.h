@@ -1,16 +1,21 @@
 #ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_UPDATE_STATUS_MANAGER_H
 #define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_UPDATE_STATUS_MANAGER_H
 
-#include "policy/update_status_manager_interface.h"
 #include "policy/policy_types.h"
 #include "utils/lock.h"
 #include "utils/timer_thread.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
+#include "utils/conditional_variable.h"
+#include "utils/lock.h"
+#include "utils/logger.h"
+#include "utils/macro.h"
 
 namespace policy {
 
 class PolicyListener;
 
-class UpdateStatusManager : public UpdateStatusManagerInterface {
+class UpdateStatusManager {
  public:
   /**
    * @brief Constructor
@@ -69,10 +74,52 @@ class UpdateStatusManager : public UpdateStatusManagerInterface {
   void OnPolicyInit(bool is_update_required);
 
   /**
-   * @brief Returns current policy update status
-   * @return
+   * @brief IsUpdateRequired allows to distiguish if update is required
+   *
+   * @return  true if update required.
    */
-  PolicyTableStatus GetUpdateStatus();
+  bool IsUpdateRequired() const;
+
+  /**
+   * @brief IsUpdatePending allows to distinguish if update is in pending mode.
+   *
+   * @return true if update is in pending mode.
+   */
+  bool IsUpdatePending() const;
+
+  /**
+   * @brief ScheduleUpdate allows to schedule next update.
+   * It will change state to Update_Needed, that's is.
+   */
+  void ScheduleUpdate();
+
+  /**
+   * @brief ResetUpdateSchedule allows to reset all scheduled updates.
+   */
+  void ResetUpdateSchedule();
+
+  /**
+   * @brief StringifiedUpdateStatus allows to obtain update status as a string.
+   *
+   * @return stringified update status.
+   */
+  std::string StringifiedUpdateStatus() const;
+
+  /**
+   * @brief Status handler on applications search started
+   */
+  void OnAppsSearchStarted();
+
+  /**
+   * @brief Status handler on applications search completed
+   */
+  void OnAppsSearchCompleted();
+
+  /**
+   * @brief Returns status is application search in progress
+   * @return true, if in progress, otherwise - false
+   */
+  bool IsAppsSearchInProgress();
 
 private:
   /*
@@ -102,33 +149,46 @@ private:
   void CheckUpdateStatus();
 
 private:
+
+  /**
+   * @brief Returns current policy update status
+   * @return
+   */
+  PolicyTableStatus GetUpdateStatus() const;
+
   PolicyListener* listener_;
   bool exchange_in_progress_;
   bool update_required_;
+  bool update_scheduled_;
   bool exchange_pending_;
+  bool apps_search_in_progress_;
   sync_primitives::Lock exchange_in_progress_lock_;
   sync_primitives::Lock update_required_lock_;
   sync_primitives::Lock exchange_pending_lock_;
+  sync_primitives::Lock apps_search_in_progress_lock_;
   /**
    * @brief Last status of policy table update
    */
   PolicyTableStatus last_update_status_;
 
+  class UpdateThreadDelegate: public threads::ThreadDelegate {
 
-  /**
-   * @brief The Policy update response timer class
-   */
-  class UpdateResponseTimer : public timer::TimerThread<UpdateStatusManager> {
-   public:
-    UpdateResponseTimer(UpdateStatusManager* callee) :
-        timer::TimerThread<UpdateStatusManager>(
-          "Policy UpdResponse",
-          callee,
-          &UpdateStatusManager::OnUpdateTimeoutOccurs) {
-    }
-    ~UpdateResponseTimer();
+  public:
+    UpdateThreadDelegate(UpdateStatusManager* update_status_manager);
+    ~UpdateThreadDelegate();
+    virtual void threadMain();
+    virtual void exitThreadMain();
+    void updateTimeOut(const uint32_t timeout_ms);
+
+    volatile uint32_t                                timeout_;
+    volatile bool                                    stop_flag_;
+    sync_primitives::Lock                            state_lock_;
+    sync_primitives::ConditionalVariable             termination_condition_;
+    UpdateStatusManager*                             update_status_manager_;
   };
-  UpdateResponseTimer update_response_timer_;
+
+  UpdateThreadDelegate*                              update_status_thread_delegate_;
+  threads::Thread*                                   thread_;
 };
 
 }

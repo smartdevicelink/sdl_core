@@ -1,5 +1,5 @@
-﻿/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,13 +32,15 @@
 
 #include <string>
 #include <strings.h>
-#include <stdlib.h>
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/application_manager_impl.h"
+#include "protocol_handler/protocol_handler.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
+#include "utils/gen_hash.h"
 
 namespace {
 
@@ -79,29 +81,28 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
     const std::string& app_name,
     utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager)
     : grammar_id_(0),
+      hmi_app_id_(0),
       app_id_(application_id),
       active_message_(NULL),
       is_media_(false),
-      allowed_support_navigation_(false),
-      hmi_supports_navi_video_streaming_(false),
-      hmi_supports_navi_audio_streaming_(false),
+      is_navi_(false),
+      video_streaming_approved_(false),
+      audio_streaming_approved_(false),
+      video_streaming_allowed_(false),
+      audio_streaming_allowed_(false),
+      video_streaming_suspended_(true),
+      audio_streaming_suspended_(true),
       is_app_allowed_(true),
       has_been_activated_(false),
-      tts_speak_state_(false),
       tts_properties_in_none_(false),
       tts_properties_in_full_(false),
-      hmi_level_(mobile_api::HMILevel::HMI_NONE),
       put_file_in_none_count_(0),
       delete_file_in_none_count_(0),
       list_files_in_none_count_(0),
-      system_context_(mobile_api::SystemContext::SYSCTXT_MAIN),
-      audio_streaming_state_(mobile_api::AudioStreamingState::NOT_AUDIBLE),
       device_(0),
       usage_report_(mobile_app_id, statistics_manager),
       protocol_version_(ProtocolVersion::kV3),
       is_voice_communication_application_(false),
-      is_video_stream_retry_active_(false),
-      is_audio_stream_retry_active_(false),
       video_stream_retry_number_(0),
       audio_stream_retry_number_(0) {
 
@@ -110,15 +111,35 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
   cmd_number_to_time_limits_[mobile_apis::FunctionID::GetVehicleDataID] =
       {date_time::DateTime::getCurrentTime(), 0};
 
-
-  set_mobile_app_id(smart_objects::SmartObject(mobile_app_id));
+  set_mobile_app_id(mobile_app_id);
   set_name(app_name);
 
+  MarkUnregistered();
   // subscribe application to custom button by default
   SubscribeToButton(mobile_apis::ButtonName::CUSTOM_BUTTON);
 
   // load persistent files
   LoadPersistentFiles();
+  HmiStatePtr initial_state =
+      ApplicationManagerImpl::instance()->CreateRegularState(app_id(),
+                                          mobile_apis::HMILevel::INVALID_ENUM,
+                                          mobile_apis::AudioStreamingState::INVALID_ENUM,
+                                          mobile_api::SystemContext::SYSCTXT_MAIN);
+  hmi_states_.push_back(initial_state);
+
+  video_stream_suspend_timeout_ =
+      profile::Profile::instance()->video_data_stopped_timeout() / 1000;
+  audio_stream_suspend_timeout_ =
+      profile::Profile::instance()->audio_data_stopped_timeout() / 1000;
+
+  video_stream_suspend_timer_ = ApplicationTimerPtr(
+          new timer::TimerThread<ApplicationImpl>(
+              "VideoStreamSuspend", this,
+              &ApplicationImpl::OnVideoStreamSuspend, true));
+  audio_stream_suspend_timer_ = ApplicationTimerPtr(
+          new timer::TimerThread<ApplicationImpl>(
+              "AudioStreamSuspend", this,
+              &ApplicationImpl::OnAudioStreamSuspend, true));
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -133,7 +154,6 @@ ApplicationImpl::~ApplicationImpl() {
   if (is_perform_interaction_active()) {
     set_perform_interaction_active(0);
     set_perform_interaction_mode(-1);
-    DeletePerformInteractionChoiceSetMap();
   }
   CleanupFiles();
 }
@@ -144,37 +164,32 @@ void ApplicationImpl::CloseActiveMessage() {
 }
 
 bool ApplicationImpl::IsFullscreen() const {
-  return mobile_api::HMILevel::HMI_FULL == hmi_level_;
+  return mobile_api::HMILevel::HMI_FULL == hmi_level();
 }
 
-bool ApplicationImpl::MakeFullscreen() {
-  hmi_level_ = mobile_api::HMILevel::HMI_FULL;
-  if (is_media_ && !tts_speak_state_) {
-    audio_streaming_state_ = mobile_api::AudioStreamingState::AUDIBLE;
+void ApplicationImpl::ChangeSupportingAppHMIType() {
+  is_navi_ = false;
+  is_voice_communication_application_ = false;
+  const smart_objects::SmartObject& array_app_types = *app_types_;
+  uint32_t lenght_app_types = array_app_types.length();
+
+  for (uint32_t i = 0; i < lenght_app_types; ++i) {
+    if (mobile_apis::AppHMIType::NAVIGATION ==
+        static_cast<mobile_apis::AppHMIType::eType>(
+            array_app_types[i].asUInt())) {
+      is_navi_ = true;
+    }
+    if (mobile_apis::AppHMIType::COMMUNICATION ==
+        static_cast<mobile_apis::AppHMIType::eType>(
+            array_app_types[i].asUInt())) {
+      is_voice_communication_application_ = true;
+    }
   }
-  system_context_ = mobile_api::SystemContext::SYSCTXT_MAIN;
-  if (!has_been_activated_) {
-    has_been_activated_ = true;
-  }
-  return true;
 }
 
-bool ApplicationImpl::IsAudible() const {
-  return mobile_api::HMILevel::HMI_FULL == hmi_level_
-      || mobile_api::HMILevel::HMI_LIMITED == hmi_level_;
-}
 
-void ApplicationImpl::MakeNotAudible() {
-  hmi_level_ = mobile_api::HMILevel::HMI_BACKGROUND;
-  audio_streaming_state_ = mobile_api::AudioStreamingState::NOT_AUDIBLE;
-}
-
-bool ApplicationImpl::allowed_support_navigation() const {
-  return allowed_support_navigation_;
-}
-
-void ApplicationImpl::set_allowed_support_navigation(bool allow) {
-  allowed_support_navigation_ = allow;
+void ApplicationImpl::set_is_navi(bool allow) {
+  is_navi_ = allow;
 }
 
 bool ApplicationImpl::is_voice_communication_supported() const {
@@ -189,7 +204,72 @@ void ApplicationImpl::set_voice_communication_supported(
 bool ApplicationImpl::IsAudioApplication() const {
   return is_media_ ||
          is_voice_communication_application_ ||
-         allowed_support_navigation_;
+      is_navi_;
+}
+
+void ApplicationImpl::SetRegularState(HmiStatePtr state) {
+  DCHECK_OR_RETURN_VOID(state);
+  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
+  DCHECK_OR_RETURN_VOID(!hmi_states_.empty());
+  hmi_states_.erase(hmi_states_.begin());
+  if (hmi_states_.begin() != hmi_states_.end()) {
+    HmiStatePtr first_temp = hmi_states_.front();
+    DCHECK_OR_RETURN_VOID(first_temp);
+    first_temp->set_parent(state);
+  }
+  hmi_states_.push_front(state);
+}
+
+void ApplicationImpl::AddHMIState(HmiStatePtr state) {
+  DCHECK_OR_RETURN_VOID(state);
+  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
+  hmi_states_.push_back(state);
+}
+
+struct StateIdFindPredicate {
+    HmiState::StateID state_id_;
+    StateIdFindPredicate(HmiState::StateID state_id):
+      state_id_(state_id) {}
+    bool operator ()(const HmiStatePtr cur) {
+      return cur->state_id() == state_id_;
+    }
+};
+
+void ApplicationImpl::RemoveHMIState(HmiState::StateID state_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
+  HmiStateList::iterator it =
+      std::find_if(hmi_states_.begin(), hmi_states_.end(),
+                   StateIdFindPredicate(state_id));
+  if (it != hmi_states_.end()) {
+    // unable to remove regular state
+    DCHECK_OR_RETURN_VOID(it != hmi_states_.begin());
+    HmiStateList::iterator next = it;
+    HmiStateList::iterator prev = it;
+    next++;
+    prev--;
+    if (next != hmi_states_.end()) {
+      HmiStatePtr next_state = *next;
+      HmiStatePtr prev_state = *prev;
+      next_state->set_parent(prev_state);
+    }
+    hmi_states_.erase(it);
+  } else {
+    LOG4CXX_ERROR(logger_, "Unsuccesfull remove HmiState: " << state_id);
+  }
+}
+
+const HmiStatePtr ApplicationImpl::CurrentHmiState() const {
+  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
+  DCHECK_OR_RETURN(!hmi_states_.empty(), HmiStatePtr());
+  //TODO(APPLINK-11448) Need implement
+  return hmi_states_.back();
+}
+
+const HmiStatePtr ApplicationImpl::RegularHmiState() const{
+  //sync_primitives::AutoLock auto_lock(hmi_states_lock_);
+  DCHECK_OR_RETURN(!hmi_states_.empty(), HmiStatePtr());
+  return hmi_states_.front();
 }
 
 const smart_objects::SmartObject* ApplicationImpl::active_message() const {
@@ -209,15 +289,25 @@ const std::string& ApplicationImpl::name() const {
 }
 
 const std::string ApplicationImpl::folder_name() const {
-  return name() + mobile_app_id()->asString();
+  return name() + mobile_app_id();
 }
 
 bool ApplicationImpl::is_media_application() const {
   return is_media_;
 }
 
-const mobile_api::HMILevel::eType& ApplicationImpl::hmi_level() const {
-  return hmi_level_;
+const mobile_api::HMILevel::eType ApplicationImpl::hmi_level() const {
+  using namespace mobile_apis;
+  const HmiStatePtr hmi_state = CurrentHmiState();
+  return hmi_state ? hmi_state->hmi_level() : HMILevel::INVALID_ENUM;
+}
+
+bool application_manager::ApplicationImpl::is_foreground() const {
+  return is_foreground_;
+}
+
+void application_manager::ApplicationImpl::set_foreground(bool is_foreground) {
+  is_foreground_ = is_foreground;
 }
 
 const uint32_t ApplicationImpl::put_file_in_none_count() const {
@@ -232,9 +322,12 @@ const uint32_t ApplicationImpl::list_files_in_none_count() const {
   return list_files_in_none_count_;
 }
 
-const mobile_api::SystemContext::eType&
+const mobile_api::SystemContext::eType
 ApplicationImpl::system_context() const {
-  return system_context_;
+  using namespace mobile_apis;
+  const HmiStatePtr hmi_state = CurrentHmiState();
+  return hmi_state ? hmi_state->system_context() :
+                     SystemContext::INVALID_ENUM;;
 }
 
 const std::string& ApplicationImpl::app_icon_path() const {
@@ -255,18 +348,17 @@ void ApplicationImpl::set_name(const std::string& name) {
 
 void ApplicationImpl::set_is_media_application(bool is_media) {
   is_media_ = is_media;
-  // Audio streaming state for non-media application can not be different
-  // from NOT_AUDIBLE
-  if (!is_media)
-    set_audio_streaming_state(mobile_api::AudioStreamingState::NOT_AUDIBLE);
 }
 
-void ApplicationImpl::set_tts_speak_state(bool state_tts_speak) {
-  tts_speak_state_ = state_tts_speak;
+bool IsTTSState(const HmiStatePtr state) {
+  return state->state_id() == HmiState::STATE_ID_TTS_SESSION ;
 }
 
 bool ApplicationImpl::tts_speak_state() {
-  return tts_speak_state_;
+  sync_primitives::AutoLock autolock(hmi_states_lock_);
+  HmiStateList::const_iterator it =
+      std::find_if(hmi_states_.begin(), hmi_states_.end(), IsTTSState);
+  return it != hmi_states_.end();
 }
 
 void ApplicationImpl::set_tts_properties_in_none(
@@ -287,113 +379,155 @@ bool ApplicationImpl::tts_properties_in_full() {
   return tts_properties_in_full_;
 }
 
-void ApplicationImpl::set_hmi_level(
-    const mobile_api::HMILevel::eType& hmi_level) {
-  if (mobile_api::HMILevel::HMI_NONE != hmi_level_ &&
-      mobile_api::HMILevel::HMI_NONE == hmi_level) {
-    put_file_in_none_count_ = 0;
-    delete_file_in_none_count_ = 0;
-    list_files_in_none_count_ = 0;
-  }
-
-  hmi_level_ = hmi_level;
-  usage_report_.RecordHmiStateChanged(hmi_level);
+void ApplicationImpl::set_video_streaming_approved(bool state) {
+  video_streaming_approved_ = state;
 }
 
-void ApplicationImpl::set_hmi_supports_navi_video_streaming(bool supports) {
-  hmi_supports_navi_video_streaming_ = supports;
-
-  if ((!supports) && (!video_stream_retry_active())) {
-    std::pair<uint32_t, int32_t> stream_retry =
-        profile::Profile::instance()->start_stream_retry_amount();
-    set_video_stream_retry_active(true);
-    video_stream_retry_number_ = stream_retry.first;
-    video_stream_retry_timer_ =
-        utils::SharedPtr<timer::TimerThread<ApplicationImpl>>(
-            new timer::TimerThread<ApplicationImpl>(
-                "VideoStreamRetry", this, &ApplicationImpl::OnVideoStreamRetry, true));
-    // start separate pthread for timer without delays
-    video_stream_retry_timer_->start(0);
-  }
+bool ApplicationImpl::video_streaming_approved() const {
+  return video_streaming_approved_;
 }
 
-bool ApplicationImpl::hmi_supports_navi_video_streaming() const {
-  return hmi_supports_navi_video_streaming_;
+void ApplicationImpl::set_audio_streaming_approved(bool state) {
+  audio_streaming_approved_ = state;
 }
 
-void ApplicationImpl::set_hmi_supports_navi_audio_streaming(bool supports) {
-  hmi_supports_navi_audio_streaming_ = supports;
-
-  if ((!supports) && (!audio_stream_retry_active())) {
-    std::pair<uint32_t, int32_t> stream_retry =
-        profile::Profile::instance()->start_stream_retry_amount();
-    set_audio_stream_retry_active(true);
-    audio_stream_retry_number_ = stream_retry.first;
-    audio_stream_retry_timer_ =
-        utils::SharedPtr<timer::TimerThread<ApplicationImpl>>(
-            new timer::TimerThread<ApplicationImpl>(
-                "AudioStreamRetry", this, &ApplicationImpl::OnAudioStreamRetry, true));
-    // start separate pthread for timer without delays
-    audio_stream_retry_timer_->start(0);
-  }
+bool ApplicationImpl::audio_streaming_approved() const {
+  return audio_streaming_approved_;
 }
 
-bool ApplicationImpl::hmi_supports_navi_audio_streaming() const {
-  return hmi_supports_navi_audio_streaming_;
+void ApplicationImpl::set_video_streaming_allowed(bool state) {
+  video_streaming_allowed_ = state;
 }
 
-bool ApplicationImpl::video_stream_retry_active() const {
-  return is_video_stream_retry_active_;
+bool ApplicationImpl::video_streaming_allowed() const {
+  return video_streaming_allowed_;
 }
 
-void ApplicationImpl::set_video_stream_retry_active(bool active) {
-  is_video_stream_retry_active_ = active;
+void ApplicationImpl::set_audio_streaming_allowed(bool state) {
+  audio_streaming_allowed_ = state;
 }
 
-bool ApplicationImpl::audio_stream_retry_active() const {
-  return is_audio_stream_retry_active_;
+bool ApplicationImpl::audio_streaming_allowed() const {
+  return audio_streaming_allowed_;
 }
 
-void ApplicationImpl::set_audio_stream_retry_active(bool active) {
-  is_audio_stream_retry_active_ = active;
-}
+void ApplicationImpl::StartStreaming(
+    protocol_handler::ServiceType service_type) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
 
-void ApplicationImpl::OnVideoStreamRetry() {
-  if (video_stream_retry_number_) {
-    LOG4CXX_INFO(logger_, "Send video stream retry "
-                 << video_stream_retry_number_);
-
-    application_manager::MessageHelper::SendNaviStartStream(app_id());
-    --video_stream_retry_number_;
-
-    std::pair<uint32_t, int32_t> stream_retry =
-        profile::Profile::instance()->start_stream_retry_amount();
-    int32_t time_out = stream_retry.second;
-    video_stream_retry_timer_->updateTimeOut(time_out);
-  } else {
-    LOG4CXX_INFO(logger_, "Stop video streaming retry");
-    video_stream_retry_timer_.release();
-    set_video_stream_retry_active(false);
+  if (ServiceType::kMobileNav == service_type) {
+    if (!video_streaming_approved()) {
+      MessageHelper::SendNaviStartStream(app_id());
+      set_video_stream_retry_number(0);
+    }
+  } else if (ServiceType::kAudio == service_type) {
+    if (!audio_streaming_approved()) {
+      MessageHelper::SendAudioStartStream(app_id());
+      set_video_stream_retry_number(0);
+    }
   }
 }
 
-void ApplicationImpl::OnAudioStreamRetry() {
-  if (audio_stream_retry_number_) {
-    LOG4CXX_INFO(logger_, "Send audio streaming retry "
-                 << audio_stream_retry_number_);
+void ApplicationImpl::StopStreaming(
+    protocol_handler::ServiceType service_type) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
 
-    application_manager::MessageHelper::SendAudioStartStream(app_id());
-    --audio_stream_retry_number_;
+  SuspendStreaming(service_type);
 
-    std::pair<uint32_t, int32_t> stream_retry =
-        profile::Profile::instance()->start_stream_retry_amount();
-    int32_t time_out = stream_retry.second;
-    audio_stream_retry_timer_->updateTimeOut(time_out);
-  } else {
-    LOG4CXX_INFO(logger_, "Stop audio streaming retry");
-    audio_stream_retry_timer_.release();
-    set_audio_stream_retry_active(false);
+  if (ServiceType::kMobileNav == service_type) {
+    if (video_streaming_approved()) {
+      video_stream_suspend_timer_->stop();
+      MessageHelper::SendNaviStopStream(app_id());
+      set_video_streaming_approved(false);
+    }
+  } else if (ServiceType::kAudio == service_type) {
+    if (audio_streaming_approved()) {
+      audio_stream_suspend_timer_->stop();
+      MessageHelper::SendAudioStopStream(app_id());
+      set_audio_streaming_approved(false);
+    }
   }
+}
+
+void ApplicationImpl::SuspendStreaming(
+    protocol_handler::ServiceType service_type) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (ServiceType::kMobileNav == service_type) {
+    video_stream_suspend_timer_->suspend();
+    ApplicationManagerImpl::instance()->OnAppStreaming(
+        app_id(), service_type, false);
+    sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
+    video_streaming_suspended_ = true;
+  } else if (ServiceType::kAudio == service_type) {
+    audio_stream_suspend_timer_->suspend();
+    ApplicationManagerImpl::instance()->OnAppStreaming(
+        app_id(), service_type, false);
+    sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
+    audio_streaming_suspended_ = true;
+  }
+  MessageHelper::SendOnDataStreaming(service_type, false);
+}
+
+void ApplicationImpl::WakeUpStreaming(
+    protocol_handler::ServiceType service_type) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (ServiceType::kMobileNav == service_type) {
+    sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
+    if (video_streaming_suspended_) {
+      ApplicationManagerImpl::instance()->OnAppStreaming(
+          app_id(), service_type, true);
+      MessageHelper::SendOnDataStreaming(ServiceType::kMobileNav, true);
+      video_streaming_suspended_ = false;
+    }
+    video_stream_suspend_timer_->start(video_stream_suspend_timeout_);
+  } else if (ServiceType::kAudio == service_type) {
+    sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
+    if (audio_streaming_suspended_) {
+      ApplicationManagerImpl::instance()->OnAppStreaming(
+          app_id(), service_type, true);
+      MessageHelper::SendOnDataStreaming(ServiceType::kAudio, true);
+      audio_streaming_suspended_ = false;
+    }
+    audio_stream_suspend_timer_->start(audio_stream_suspend_timeout_);
+  }
+}
+
+void ApplicationImpl::OnVideoStreamSuspend() {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "Suspend video streaming by timer");
+  SuspendStreaming(ServiceType::kMobileNav);
+}
+
+void ApplicationImpl::OnAudioStreamSuspend() {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "Suspend audio streaming by timer");
+  SuspendStreaming(ServiceType::kAudio);
+}
+
+uint32_t ApplicationImpl::audio_stream_retry_number() const {
+  return audio_stream_retry_number_;
+}
+
+uint32_t ApplicationImpl::video_stream_retry_number() const {
+  return video_stream_retry_number_;
+}
+
+void ApplicationImpl::set_video_stream_retry_number(
+    const uint32_t& video_stream_retry_number) {
+  video_stream_retry_number_ = video_stream_retry_number;
+}
+
+void ApplicationImpl::set_audio_stream_retry_number(
+    const uint32_t& audio_stream_retry_number) {
+  audio_stream_retry_number_ = audio_stream_retry_number;
 }
 
 void ApplicationImpl::increment_put_file_in_none_count() {
@@ -406,22 +540,6 @@ void ApplicationImpl::increment_delete_file_in_none_count() {
 
 void ApplicationImpl::increment_list_files_in_none_count() {
   ++list_files_in_none_count_;
-}
-
-void ApplicationImpl::set_system_context(
-    const mobile_api::SystemContext::eType& system_context) {
-  system_context_ = system_context;
-}
-
-void ApplicationImpl::set_audio_streaming_state(
-    const mobile_api::AudioStreamingState::eType& state) {
-  if (!is_media_application()
-      && state != mobile_api::AudioStreamingState::NOT_AUDIBLE) {
-    LOG4CXX_WARN(logger_, "Trying to set audio streaming state"
-                  " for non-media application to different from NOT_AUDIBLE");
-    return;
-  }
-  audio_streaming_state_ = state;
 }
 
 bool ApplicationImpl::set_app_icon_path(const std::string& path) {
@@ -448,8 +566,19 @@ void ApplicationImpl::set_grammar_id(uint32_t value) {
   grammar_id_ = value;
 }
 
+void ApplicationImpl::ResetDataInNone() {
+      put_file_in_none_count_ = 0;
+      delete_file_in_none_count_ = 0;
+      list_files_in_none_count_ = 0;
+}
+
 bool ApplicationImpl::has_been_activated() const {
   return has_been_activated_;
+}
+
+bool ApplicationImpl::set_activated(bool is_active) {
+  has_been_activated_ = is_active;
+  return true;
 }
 
 void ApplicationImpl::set_protocol_version(
@@ -599,7 +728,7 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
   // commands per minute, e.g. 10 command per minute i.e. 1 command per 6 sec
   case POLICY_TABLE: {
     uint32_t cmd_limit = application_manager::MessageHelper::GetAppCommandLimit(
-          mobile_app_id_->asString());
+          mobile_app_id_);
 
     if (0 == cmd_limit) {
       return true;
@@ -646,19 +775,14 @@ const std::set<uint32_t>& ApplicationImpl::SubscribesIVI() const {
   return subscribed_vehicle_info_;
 }
 
-uint32_t ApplicationImpl::nextHash() {
-  hash_val_ = rand();
+const std::string& ApplicationImpl::curHash() const {
   return hash_val_;
 }
 
-uint32_t ApplicationImpl::curHash() const {
-  return hash_val_;
-}
-
-uint32_t ApplicationImpl::UpdateHash() {
-  uint32_t new_hash= nextHash();
+void ApplicationImpl::UpdateHash() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  hash_val_ = utils::gen_hash(profile::Profile::instance()->hash_string_size());
   MessageHelper::SendHashUpdateNotification(app_id());
-  return new_hash;
 }
 
 void ApplicationImpl::CleanupFiles() {
@@ -690,8 +814,23 @@ void ApplicationImpl::CleanupFiles() {
 }
 
 void ApplicationImpl::LoadPersistentFiles() {
-  std::string directory_name =
-      profile::Profile::instance()->app_storage_folder();
+  using namespace profile;
+
+  if (kWaitingForRegistration == app_state_) {
+    const std::string app_icon_dir(Profile::instance()->app_icons_folder());
+    const std::string full_icon_path(app_icon_dir + "/" + mobile_app_id_);
+    if (file_system::FileExists(full_icon_path)) {
+      AppFile file;
+      file.is_persistent = true;
+      file.is_download_complete = true;
+      file.file_name = full_icon_path;
+      file.file_type = mobile_apis::FileType::GRAPHIC_PNG;
+      AddFile(file);
+    }
+    return;
+  }
+
+  std::string directory_name = Profile::instance()->app_storage_folder();
   directory_name += "/" + folder_name();
 
   if (file_system::DirectoryExists(directory_name)) {

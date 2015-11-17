@@ -448,6 +448,13 @@ SDL.SDLModel = Em.Object.create({
     unRegisteredApps: [],
 
     /**
+     * List of applications to show on appList view came in BC.UpdateAppList
+     *
+     * @type object
+     */
+    updatedAppsList: [],
+
+    /**
      * List of objects with params for connected devices
      *
      * @type object
@@ -593,7 +600,7 @@ SDL.SDLModel = Em.Object.create({
 
         messageCodes.push("AppPermissionsRevoked");
 
-        FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.SettingsController.simpleParseUserFriendlyMessageData(message)}, appID, messageCodes);
+        FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.simpleParseUserFriendlyMessageData, appID, messageCodes);
 
     },
 
@@ -826,10 +833,33 @@ SDL.SDLModel = Em.Object.create({
      *
      * @param {Object}
      */
-    startStream: function(params) {
+    startStream: function(request) {
 
-        SDL.SDLController.getApplicationModel(params.appID).set('navigationStream', params.url);
-        SDL.SDLModel.playVideo(params.appID);
+        var text = "Would you like to start Video stream?";
+
+        SDL.PopUp.create().appendTo('body').popupActivate(text, function(result){
+            if (result) {
+
+                SDL.SDLController.getApplicationModel(request.params.appID).set('navigationStream', request.params.url);
+                SDL.SDLModel.playVideo(request.params.appID);
+
+                FFW.Navigation.sendNavigationResult(
+                    SDL.SDLModel.resultCode["SUCCESS"],
+                    request.id,
+                    request.method
+                );
+
+            } else if (result === false) {
+
+                FFW.Navigation.sendError(
+                    SDL.SDLModel.resultCode["REJECTED"],
+                    request.id,
+                    request.method,
+                    "Ignored by USER!"
+                );
+            }
+        });
+
     },
 
     /**
@@ -866,8 +896,30 @@ SDL.SDLModel = Em.Object.create({
      */
     startAudioStream: function(params) {
 
-        SDL.SDLController.getApplicationModel(params.appID).set('navigationAudioStream', params.url);
-        SDL.StreamAudio.play(params.url);
+        var text = "Would you like to start Audio stream?";
+
+        SDL.PopUp.create().appendTo('body').popupActivate(text, function(result){
+            if (result) {
+
+                SDL.SDLController.getApplicationModel(params.appID).set('navigationAudioStream', params.url);
+                SDL.StreamAudio.play(params.url);
+
+                FFW.Navigation.sendNavigationResult(
+                    SDL.SDLModel.resultCode["SUCCESS"],
+                    request.id,
+                    request.method
+                );
+
+            } else if (result === false) {
+
+                FFW.Navigation.sendError(
+                    SDL.SDLModel.resultCode["REJECTED"],
+                    request.id,
+                    request.method,
+                    "Ignored by USER!"
+                );
+            }
+        });
     },
 
     /**
@@ -947,10 +999,16 @@ SDL.SDLModel = Em.Object.create({
      *
      * @type {String} lang
      */
-    changeRegistrationUI: function (lang, appID) {
+    changeRegistrationUI: function (lang, appID, appName) {
 
         if (SDL.SDLController.getApplicationModel(appID)) {
             SDL.SDLController.getApplicationModel(appID).set('UILanguage', lang);
+        }
+
+        if (appName) {
+            SDL.SDLMediaController.currentAppId = 0;
+            SDL.SDLController.getApplicationModel(appID).appName = appName;
+            SDL.SDLMediaController.set('currentAppId', appID);
         }
     },
 
@@ -975,28 +1033,52 @@ SDL.SDLModel = Em.Object.create({
      */
     onAppRegistered: function (params) {
 
-        var applicationType = 1;
+        var applicationType = null,//Default value - NonMediaModel see SDL.SDLController.applicationModels
+            app = SDL.SDLController.getApplicationModel(params.appID);
 
-        if (SDL.SDLController.getApplicationModel(params.application.appID)) {
+        if (app != undefined && app.initialized == false) {
+
+            if (app.isMedia != params.isMediaApplication) { // If current not initialized model doe not matches the registered application type
+                this.convertModel(params);                   // then model should be changed
+            } else {
+                app.disabledToActivate = params.disabled;
+            }
             return;
+        } else if (app != undefined && app.initialized == true) {
+            console.error("Application with appID " + params.appID + " already registered!");
+            return; // if application already registered and correctly initialized and BC.UpdateAppList came from SDL than nothing shoul happend
         }
 
         if (params.vrSynonyms) {
 
-            var message = {"cmdID": 0, "vrCommands": params.vrSynonyms, "appID": params.application.appID, "type": "Application"};
+            var message = {"cmdID": 0, "vrCommands": params.vrSynonyms, "appID": params.appID, "type": "Application"};
             this.addCommandVR(message);
         }
 
-        if (params.application.isMediaApplication) {
+        if (params.isMediaApplication === true) {
+
             applicationType = 0;
+        } else if (params.isMediaApplication === false) {
+
+            applicationType = 1;
         }
 
-        SDL.SDLController.registerApplication(params.application, applicationType);
+        SDL.SDLController.registerApplication(params, applicationType);
 
-        if (SDL.SDLModel.unRegisteredApps.indexOf(params.application.appID) >= 0) {
-            setTimeout(function(){ SDL.PopUp.create().appendTo('body').popupActivate("Connection with " + params.application.appName + "  is re-established.")}, 1000);
-            this.unRegisteredApps.pop(params.application.appID);
+        if (SDL.SDLModel.unRegisteredApps.indexOf(params.appID) >= 0) {
+            setTimeout(function(){ SDL.PopUp.create().appendTo('body').popupActivate("Connection with " + params.appName + "  is re-established.")}, 1000);
+            this.unRegisteredApps.pop(params.appID);
         }
+    },
+
+    /**
+     * Method to convert existed model to registered type
+     */
+    convertModel: function(params) {
+
+        SDL.SDLModel.get('registeredApps').removeObjects(SDL.SDLModel.get('registeredApps').filterProperty('appID', params.appID));
+
+        this.onAppRegistered(params);
     },
 
     /**
@@ -1224,7 +1306,6 @@ SDL.SDLModel = Em.Object.create({
         setTimeout(function(){
             if (SDL.SDLModel.vrActiveRequests.vrPerformInteraction) {
                 SDL.SDLModel.onPrompt(message.params.timeoutPrompt);
-                SDL.SDLModel.interactionData.helpPrompt = null;
             }
         }, message.params.timeout - 2000); //Magic numer is a platform depended HMI behavior: -2 seconds for timeout prompt
 

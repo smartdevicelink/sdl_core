@@ -40,7 +40,7 @@ namespace application_manager {
 namespace commands {
 
 void UnregisterAppInterfaceRequest::Run() {
-  LOG4CXX_INFO(logger_, "UnregisterAppInterfaceRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
 
@@ -50,6 +50,9 @@ void UnregisterAppInterfaceRequest::Run() {
     return;
   }
 
+  MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+      connection_key(),
+      mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM);
   app_manager->UnregisterApplication(connection_key(),
                                      mobile_apis::Result::SUCCESS);
   SendResponse(true, mobile_apis::Result::SUCCESS);

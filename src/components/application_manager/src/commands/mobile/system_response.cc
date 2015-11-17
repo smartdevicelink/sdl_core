@@ -46,7 +46,7 @@ SystemResponse::~SystemResponse() {
 }
 
 void SystemResponse::Run() {
-  LOG4CXX_INFO(logger_, "SystemResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }

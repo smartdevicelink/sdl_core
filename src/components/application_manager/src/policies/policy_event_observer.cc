@@ -32,20 +32,31 @@
 
 #include "application_manager/policies/policy_event_observer.h"
 #include "application_manager/smart_object_keys.h"
+#include "application_manager/policies/policy_handler.h"
 #include "utils/date_time.h"
-#include "policy/policy_manager.h"
 #include "smart_objects/smart_object.h"
 
 namespace policy {
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 using namespace application_manager;
+class PolicyHandler;
 
-PolicyEventObserver::PolicyEventObserver(utils::SharedPtr<PolicyManager> policy_manager)
-    : policy_manager_(policy_manager) {
+CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
+
+PolicyEventObserver::PolicyEventObserver(PolicyHandler* const policy_handler)
+  : policy_handler_(policy_handler) {
+}
+
+void PolicyEventObserver::set_policy_handler(policy::PolicyHandler* const policy_handler) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(policy_handler_lock_);
+  LOG4CXX_DEBUG(logger_, "Set policy handler " << policy_handler);
+  policy_handler_ = policy_handler;
 }
 
 void PolicyEventObserver::on_event(const event_engine::Event& event) {
-  if (!policy_manager_) {
+  sync_primitives::AutoLock auto_lock(policy_handler_lock_);
+  if (!policy_handler_) {
     return;
   }
   const smart_objects::SmartObject& message = event.smart_object();
@@ -67,7 +78,7 @@ void PolicyEventObserver::on_event(const event_engine::Event& event) {
       break;
     }
     case hmi_apis::FunctionID::BasicCommunication_OnReady: {
-      policy_manager_->OnSystemReady();
+      policy_handler_->OnSystemReady();
       unsubscribe_from_event(hmi_apis::FunctionID::BasicCommunication_OnReady);
       break;
     }
@@ -88,8 +99,8 @@ void PolicyEventObserver::ProcessOdometerEvent(const smart_objects::SmartObject&
       const int kSecondsInDay = 60 * 60 * 24;
       int days_after_epoch = current_time.tv_sec / kSecondsInDay;
 
-      if(policy_manager_) {
-        policy_manager_->PTUpdatedAt(
+      if (policy_handler_) {
+        policy_handler_->PTUpdatedAt(
               message[strings::msg_params][strings::odometer].asInt(),
             days_after_epoch);
       }

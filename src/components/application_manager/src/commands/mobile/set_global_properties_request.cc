@@ -59,7 +59,7 @@ SetGlobalPropertiesRequest::~SetGlobalPropertiesRequest() {
 }
 
 void SetGlobalPropertiesRequest::Run() {
-  LOG4CXX_INFO(logger_, "SetGlobalPropertiesRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
@@ -197,7 +197,8 @@ void SetGlobalPropertiesRequest::Run() {
     SendHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties,
                        &params, true);
   } else if (!is_vr_help_title_present && !is_vr_help_present) {
-    const CommandsMap& cmdMap = app->commands_map();
+    const DataAccessor<CommandsMap> accessor = app->commands_map();
+    const CommandsMap& cmdMap = accessor.GetData();
     CommandsMap::const_iterator command_it = cmdMap.begin();
 
     int32_t index = 0;
@@ -304,7 +305,7 @@ bool SetGlobalPropertiesRequest::CheckVrHelpItemsOrder() {
 }
 
 void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "SetGlobalPropertiesRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(CommandRequestImpl::connection_key());
@@ -332,14 +333,14 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
 
   if (!IsPendingResponseExist()) {
     bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_)
-          && (hmi_apis::Common_Result::SUCCESS == tts_result_ ||
-              hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_))
-          || ((hmi_apis::Common_Result::SUCCESS == ui_result_ ||
-              hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_)
-              && (hmi_apis::Common_Result::INVALID_ENUM == tts_result_))
-          || ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_ ||
-              hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_)
-              && (hmi_apis::Common_Result::SUCCESS == tts_result_));
+                   && (hmi_apis::Common_Result::SUCCESS == tts_result_ ||
+                       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_))
+                  || ((hmi_apis::Common_Result::SUCCESS == ui_result_ ||
+                       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_)
+                      && (hmi_apis::Common_Result::INVALID_ENUM == tts_result_))
+                  || ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_ ||
+                       hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_)
+                      && (hmi_apis::Common_Result::SUCCESS == tts_result_));
 
     mobile_apis::Result::eType result_code;
     const char* return_info = NULL;
@@ -351,18 +352,28 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
             std::string("Unsupported phoneme type sent in a prompt").c_str();
       } else {
         result_code = static_cast<mobile_apis::Result::eType>(
-        std::max(ui_result_, tts_result_));
+                        std::max(ui_result_, tts_result_));
       }
     } else {
       result_code = static_cast<mobile_apis::Result::eType>(
-          std::max(ui_result_, tts_result_));
+                      std::max(ui_result_, tts_result_));
     }
 
+    // TODO(AOleynik): APPLINK-15858
     ApplicationSharedPtr application =
         ApplicationManagerImpl::instance()->application(connection_key());
-    SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
-                 return_info, &(message[strings::msg_params]));
-    application->UpdateHash();
+
+    SendResponse(result, result_code, return_info,
+                 &(message[strings::msg_params]));
+
+    if (!application) {
+      LOG4CXX_DEBUG(logger_, "NULL pointer.");
+      return;
+    }
+
+    if (result) {
+      application->UpdateHash();
+    }
   }
 }
 
@@ -383,7 +394,7 @@ bool SetGlobalPropertiesRequest::ValidateConditionalMandatoryParameters(
 }
 
 bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
-  LOG4CXX_INFO(logger_, "SetGlobalPropertiesRequest::IsWhiteSpaceExist");
+  LOG4CXX_AUTO_TRACE(logger_);
   const char* str;
 
   const smart_objects::SmartObject& msg_params =

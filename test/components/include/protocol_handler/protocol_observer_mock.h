@@ -47,9 +47,9 @@ namespace protocol_handler_test {
 class ProtocolObserverMock: public ::protocol_handler::ProtocolObserver {
  public:
   MOCK_METHOD1(OnMessageReceived,
-               void(const RawMessagePtr));
+               void(const ::protocol_handler::RawMessagePtr));
   MOCK_METHOD1(OnMobileMessageSent,
-               void(const RawMessagePtr));
+               void(const ::protocol_handler::RawMessagePtr));
 };
 }  // namespace protocol_handler_test
 }  // namespace components

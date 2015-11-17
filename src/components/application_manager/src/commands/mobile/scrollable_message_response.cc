@@ -46,7 +46,7 @@ ScrollableMessageResponse::ScrollableMessageResponse(
 }
 
 void ScrollableMessageResponse::Run() {
-  LOG4CXX_INFO(logger_, "ScrollableMessageResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   mobile_apis::Result::eType result_code = static_cast<mobile_apis::Result::eType>(
       (*message_)[strings::msg_params][strings::result_code].asInt());
   ApplicationSharedPtr application =

@@ -64,6 +64,12 @@ class UnsubscribeButtonRequest : public CommandRequestImpl {
   virtual void Run();
 
  private:
+  /**
+   * @brief Sends ButtonSubscription notification
+   * to notify HMI that app unsubscribed from the button.
+   */
+  void SendUnsubscribeButtonNotification();
+
   DISALLOW_COPY_AND_ASSIGN(UnsubscribeButtonRequest);
 };
 

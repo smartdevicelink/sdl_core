@@ -34,6 +34,7 @@
 
 #include <gmock/gmock.h>
 #include <string>
+#include <vector>
 #include "protocol/raw_message.h"
 #include "protocol_handler/protocol_packet.h"
 
@@ -44,6 +45,40 @@ namespace protocol_handler_test {
  * Matcher for checking RawMessage with ControlMessage
  * Check error id
  */
+MATCHER_P2(ControlMessage, ExpectedFrameData, ExpectedEncryption,
+           (std::string(ExpectedEncryption ? "Protected" : "Unprotected")
+           + " control message ")) {
+  // Nack shall be always with flag protected off
+  DCHECK(ExpectedFrameData  != 0x03 /*FRAME_DATA_START_SERVICE_NACK*/ ||
+         !ExpectedEncryption);
+  const ::protocol_handler::RawMessagePtr message = arg;
+  ::protocol_handler::ProtocolPacket packet(message->connection_key());
+  const protocol_handler::RESULT_CODE result =
+      packet.deserializePacket(message->data(), message->data_size());
+  if (result != protocol_handler::RESULT_OK) {
+    *result_listener <<  "Error while message deserialization.";
+    return false;
+  }
+  if (::protocol_handler::FRAME_TYPE_CONTROL != packet.frame_type()) {
+    *result_listener << "Is not control message";
+    return false;
+  }
+  if (ExpectedFrameData != packet.frame_data()) {
+    *result_listener << "Control message with data 0x"
+                     << std::hex << static_cast<int>(packet.frame_data())
+                     << ", not 0x"
+                     << std::hex << static_cast<int>(ExpectedFrameData);
+    return false;
+  }
+  if (ExpectedEncryption != packet.protection_flag()) {
+    *result_listener << "Control message is " <<
+                     (ExpectedEncryption ? "" : "not ") << "protected";
+    return false;
+  }
+  return true;
+}
+
+
 MATCHER_P4(ControlMessage, ExpectedFrameData, ExpectedEncryption,
            ConnectionKey, VectorMatcher,
            (std::string(ExpectedEncryption ? "Protected" : "Unprotected")
@@ -51,9 +86,14 @@ MATCHER_P4(ControlMessage, ExpectedFrameData, ExpectedEncryption,
   // Nack shall be always with flag protected off
   DCHECK(ExpectedFrameData  != 0x03 /*FRAME_DATA_START_SERVICE_NACK*/ ||
          !ExpectedEncryption);
-  const RawMessagePtr message = arg;
-  const ::protocol_handler::ProtocolPacket packet(
-        message->connection_key(), message->data(), message->data_size());
+  const ::protocol_handler::RawMessagePtr message = arg;
+  ::protocol_handler::ProtocolPacket packet(message->connection_key());
+  const protocol_handler::RESULT_CODE result =
+      packet.deserializePacket(message->data(), message->data_size());
+  if (result != protocol_handler::RESULT_OK) {
+    *result_listener <<  "Error while message deserialization.";
+    return false;
+  }
   if (::protocol_handler::FRAME_TYPE_CONTROL != packet.frame_type()) {
     *result_listener << "Is not control message";
     return false;
@@ -90,6 +130,8 @@ MATCHER_P4(ControlMessage, ExpectedFrameData, ExpectedEncryption,
   }
   return true;
 }
+
+
 }  // namespace protocol_handler_test
 }  // namespace components
 }  // namespace test

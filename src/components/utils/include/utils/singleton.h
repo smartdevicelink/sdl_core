@@ -28,7 +28,7 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SINGLETON_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SINGLETON_H_
@@ -111,18 +111,24 @@ class Singleton {
 
   static T** instance_pointer();
   static Deleter* deleter();
+
+  static sync_primitives::Lock lock_;
 };
+
+
+template<typename T, class Deleter>
+sync_primitives::Lock Singleton<T, Deleter>::lock_;
+
 
 template<typename T, class Deleter>
 T* Singleton<T, Deleter>::instance() {
-  static sync_primitives::Lock lock;
 
   T* local_instance;
   atomic_pointer_assign(local_instance, *instance_pointer());
   memory_barrier();
 
   if (!local_instance) {
-    lock.Acquire();
+    lock_.Acquire();
     local_instance = *instance_pointer();
     if (!local_instance) {
       local_instance = new T();
@@ -130,7 +136,7 @@ T* Singleton<T, Deleter>::instance() {
       atomic_pointer_assign(*instance_pointer(), local_instance);
       deleter()->grab(local_instance);
     }
-    lock.Release();
+    lock_.Release();
   }
 
   return local_instance;
@@ -138,14 +144,13 @@ T* Singleton<T, Deleter>::instance() {
 
 template<typename T, class Deleter>
 void Singleton<T, Deleter>::destroy() {
-  static sync_primitives::Lock lock;
 
   T* local_instance;
   atomic_pointer_assign(local_instance, *instance_pointer());
   memory_barrier();
 
   if (local_instance) {
-    lock.Acquire();
+    lock_.Acquire();
     local_instance = *instance_pointer();
     if (local_instance) {
       atomic_pointer_assign(*instance_pointer(), 0);
@@ -153,7 +158,7 @@ void Singleton<T, Deleter>::destroy() {
       delete local_instance;
       deleter()->grab(0);
     }
-    lock.Release();
+    lock_.Release();
   }
 }
 

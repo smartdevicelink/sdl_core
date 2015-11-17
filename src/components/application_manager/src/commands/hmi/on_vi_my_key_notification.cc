@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -46,7 +46,7 @@ OnVIMyKeyNotification::~OnVIMyKeyNotification() {
 }
 
 void OnVIMyKeyNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnVIMyKeyNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =

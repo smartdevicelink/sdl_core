@@ -33,15 +33,12 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H_
 
-#include <pthread.h>
-
 #include <queue>
 #include <map>
 #include <list>
 #include <algorithm>
 
 #include "utils/timer_thread.h"
-#include "utils/rwlock.h"
 
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener.h"
@@ -102,6 +99,12 @@ class TransportManagerImpl : public TransportManager,
    * @return Code error.
    */
   virtual int Init();
+
+  /**
+   * Reinitializes transport manager
+   * @return Error code
+   */
+  virtual int Reinit();
 
   /**
    * @brief Start scanning for new devices.
@@ -250,22 +253,11 @@ class TransportManagerImpl : public TransportManager,
    **/
   void PostEvent(const TransportAdapterEvent& event);
 
-  /**
-   * @brief flag that indicates that thread is active
-   * if it is false then threads exist main loop
-   **/
-  volatile bool all_thread_active_;
-
   typedef std::list<TransportManagerListener*> TransportManagerListenerList;
   /**
    * @brief listener that would be called when TM's event happened.
    **/
   TransportManagerListenerList transport_manager_listener_;
-
-  /**
-   * @brief Condition variable to wake up event
-   **/
-  pthread_cond_t device_listener_thread_wakeup_;
 
   /**
    * @brief Flag that TM is initialized
@@ -352,6 +344,9 @@ class TransportManagerImpl : public TransportManager,
                 unsigned char** frame);
 
   void OnDeviceListUpdated(TransportAdapter* ta);
+  void DisconnectAllDevices();
+  void TerminateAllAdapters();
+  int InitAllAdapters();
   static Connection convert(const ConnectionInternal& p);
 };
 // class ;

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,14 +35,19 @@
 
 #include <string>
 #include <map>
+#include <set>
+#include <list>
 #include "utils/shared_ptr.h"
+#include "utils/data_accessor.h"
 #include "interfaces/MOBILE_API.h"
 #include "connection_handler/device.h"
 #include "application_manager/message.h"
-#include <set>
+#include "application_manager/hmi_state.h"
+#include "protocol_handler/protocol_handler.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
+
 class SmartObject;
 }
 }
@@ -61,7 +66,8 @@ enum APIVersion {
   kAPIV0 = 0,
   kAPIV1 = 1,
   kAPIV2 = 2,
-  kAPIV3 = 3
+  kAPIV3 = 3,
+  kAPIV4 = 4
 };
 
 enum TLimitSource {
@@ -104,7 +110,7 @@ class InitialApplicationData {
 
     virtual const smart_objects::SmartObject* app_types() const = 0;
     virtual const smart_objects::SmartObject* vr_synonyms() const = 0;
-    virtual const smart_objects::SmartObject* mobile_app_id() const = 0;
+    virtual std::string mobile_app_id() const = 0;
     virtual const smart_objects::SmartObject* tts_name() const = 0;
     virtual const smart_objects::SmartObject* ngn_media_screen_name() const = 0;
     virtual const mobile_api::Language::eType& language() const = 0;
@@ -112,8 +118,7 @@ class InitialApplicationData {
     virtual void set_app_types(const smart_objects::SmartObject& app_types) = 0;
     virtual void set_vr_synonyms(
       const smart_objects::SmartObject& vr_synonyms) = 0;
-    virtual void set_mobile_app_id(
-      const smart_objects::SmartObject& mobile_app_id) = 0;
+    virtual void set_mobile_app_id(const std::string& mobile_app_id) = 0;
     virtual void set_tts_name(const smart_objects::SmartObject& tts_name) = 0;
     virtual void set_ngn_media_screen_name(
       const smart_objects::SmartObject& ngn_name) = 0;
@@ -138,9 +143,18 @@ typedef std::map<uint32_t, smart_objects::SmartObject*> SubMenuMap;
 typedef std::map<uint32_t, smart_objects::SmartObject*> ChoiceSetMap;
 
 /*
- * @brief Typedef for perform interaction choice set
+ * @brief Typedef for perform interaction choice
+ * @param choice id
+ * @param SmartObject choice
  */
-typedef std::map<uint32_t, smart_objects::SmartObject*> PerformChoiceSetMap;
+typedef std::map<uint32_t, smart_objects::SmartObject*> PerformChoice;
+
+/*
+ * @brief Typedef for perform interaction choice set
+ * @param request corellation id
+ * @param map of choices
+ */
+typedef std::map<uint32_t, PerformChoice> PerformChoiceSetMap;
 
 /**
  * @brief Defines id of SoftButton
@@ -164,6 +178,7 @@ class DynamicApplicationData {
     virtual const smart_objects::SmartObject* menu_title() const = 0;
     virtual const smart_objects::SmartObject* menu_icon() const = 0;
 
+    virtual void load_global_properties(const smart_objects::SmartObject& so) = 0;
     virtual void set_help_prompt(
       const smart_objects::SmartObject& help_prompt) = 0;
     virtual void set_timeout_prompt(
@@ -184,6 +199,17 @@ class DynamicApplicationData {
         const smart_objects::SmartObject& menu_title) = 0;
     virtual void set_menu_icon(
         const smart_objects::SmartObject& menu_icon) = 0;
+
+    virtual uint32_t audio_stream_retry_number() const = 0;
+
+    virtual void set_audio_stream_retry_number(
+        const uint32_t& audio_stream_retry_number) = 0;
+
+    virtual uint32_t video_stream_retry_number() const = 0;
+
+    virtual void set_video_stream_retry_number(
+        const uint32_t& video_stream_retry_number) = 0;
+
     /*
      * @brief Adds a command to the in application menu
      */
@@ -250,52 +276,43 @@ class DynamicApplicationData {
     /*
      * @brief Adds perform interaction choice set to the application
      *
-     * @param choice_set_id Unique ID used for this interaction choice set
+     * @param correlation_id Unique ID of the request that added this choice set
+     * @param choice_set_id  Unique ID used for this interaction choice set
      * @param choice_set SmartObject that represents choice set
      */
     virtual void AddPerformInteractionChoiceSet(
-      uint32_t choice_set_id,
+      uint32_t correlation_id, uint32_t choice_set_id,
       const smart_objects::SmartObject& choice_set) = 0;
 
     /*
-     * @brief Deletes entirely perform interaction choice set map
+     * @brief Deletes entirely perform interaction choice set for request
+     * @param correlation_id Unique ID of the request that added this choice set
      *
      */
-    virtual void DeletePerformInteractionChoiceSetMap() = 0;
+    virtual void DeletePerformInteractionChoiceSet(uint32_t correlation_id) = 0;
 
     /*
      * @brief Retrieves entirely ChoiceSet - VR commands map
      *
      * @return ChoiceSet map that is currently in use
      */
-    virtual const PerformChoiceSetMap&
+    virtual DataAccessor<PerformChoiceSetMap>
     performinteraction_choice_set_map() const = 0;
-
-    /*
-     * @brief Retrieves choice set that is currently in use by perform
-     * interaction
-     *
-     * @param choice_set_id Unique ID of the interaction choice set
-     *
-     * @return SmartObject that represents choice set
-     */
-    virtual smart_objects::SmartObject* FindPerformInteractionChoiceSet(
-      uint32_t choice_set_id) const = 0;
 
     /*
      * @brief Retrieve application commands
      */
-    virtual const CommandsMap& commands_map() const = 0;
+    virtual DataAccessor<CommandsMap> commands_map() const = 0;
 
     /*
      * @brief Retrieve application sub menus
      */
-    virtual const SubMenuMap& sub_menu_map() const = 0;
+    virtual DataAccessor<SubMenuMap> sub_menu_map() const = 0;
 
     /*
      * @brief Retrieve application choice set map
      */
-    virtual const ChoiceSetMap& choice_set_map() const = 0;
+    virtual DataAccessor<ChoiceSetMap> choice_set_map() const = 0;
 
     /*
      * @brief Sets perform interaction state
@@ -310,22 +327,6 @@ class DynamicApplicationData {
      * @return TRUE if perform interaction active, otherwise FALSE
      */
     virtual uint32_t is_perform_interaction_active() const = 0;
-
-    /*
-     * @brief Sets the choice that was selected in
-     * response to PerformInteraction
-     *
-     * @param choice Choice that was selected
-     */
-    virtual void set_perform_interaction_ui_corrid(uint32_t choice) = 0;
-
-    /*
-     * @brief Retrieve the choice that was selected in
-     * response to PerformInteraction
-     *
-     * @return Choice that was selected in response to PerformInteraction
-     */
-    virtual uint32_t perform_interaction_ui_corrid() const = 0;
 
     /*
      * @brief Sets the mode for perform interaction: UI/VR/BOTH
@@ -358,7 +359,18 @@ class DynamicApplicationData {
 
 class Application : public virtual InitialApplicationData,
   public virtual DynamicApplicationData {
+
   public:
+    enum ApplicationState {
+      kRegistered = 0,
+      kWaitingForRegistration
+    };
+
+  public:
+    Application() :
+      is_greyed_out_(false) {
+    }
+
     virtual ~Application() {
     }
 
@@ -370,41 +382,69 @@ class Application : public virtual InitialApplicationData,
     virtual const smart_objects::SmartObject* active_message() const = 0;
 
     /**
-     * @brief Change Hash value and return it
-     * @return next Hash value
+     * @brief returns current hash value
+     * @return current hash value
      */
-    virtual uint32_t nextHash() = 0;
-
-    /**
-     * @brief returns cuurent hash value
-     * @return current Hash value
-     */
-    virtual uint32_t curHash() const = 0;
+    virtual const std::string& curHash() const = 0;
 
     /**
      * @brief Change Hash for current application
      * and send notification to mobile
      * @return updated_hash
      */
-    virtual uint32_t UpdateHash() = 0;
+    virtual void UpdateHash() = 0;
 
     virtual void CloseActiveMessage() = 0;
     virtual bool IsFullscreen() const = 0;
-    virtual bool MakeFullscreen() = 0;
-    virtual bool IsAudible() const = 0;
-    virtual void MakeNotAudible() = 0;
-    virtual bool allowed_support_navigation() const = 0;
-    virtual void set_allowed_support_navigation(bool allow) = 0;
-    virtual bool hmi_supports_navi_video_streaming() const = 0;
-    virtual void set_hmi_supports_navi_video_streaming(bool supports) = 0;
-    virtual bool hmi_supports_navi_audio_streaming() const = 0;
-    virtual void set_hmi_supports_navi_audio_streaming(bool supports) = 0;
+    virtual void ChangeSupportingAppHMIType() = 0;
+
+    virtual bool is_navi() const = 0;
+    virtual void set_is_navi(bool allow) = 0;
+
+    virtual bool video_streaming_approved() const = 0;
+    virtual void set_video_streaming_approved(bool state) = 0;
+    virtual bool audio_streaming_approved() const = 0;
+    virtual void set_audio_streaming_approved(bool state) = 0;
+
+    virtual bool video_streaming_allowed() const = 0;
+    virtual void set_video_streaming_allowed(bool state) = 0;
+    virtual bool audio_streaming_allowed() const = 0;
+    virtual void set_audio_streaming_allowed(bool state) = 0;
+
+    /**
+     * @brief Starts streaming service for application
+     * @param service_type Type of streaming service
+     */
+    virtual void StartStreaming(
+        protocol_handler::ServiceType service_type) = 0;
+
+    /**
+     * @brief Stops streaming service for application
+     * @param service_type Type of streaming service
+     */
+    virtual void StopStreaming(
+        protocol_handler::ServiceType service_type) = 0;
+
+    /**
+     * @brief Suspends streaming process for application
+     * @param service_type Type of streaming service
+     */
+    virtual void SuspendStreaming(
+        protocol_handler::ServiceType service_type) = 0;
+
+    /**
+     * @brief Wakes up streaming process for application
+     * @param service_type Type of streaming service
+     */
+    virtual void WakeUpStreaming(
+        protocol_handler::ServiceType service_type) = 0;
 
     virtual bool is_voice_communication_supported() const = 0;
     virtual void set_voice_communication_supported(
         bool is_voice_communication_supported) = 0;
     virtual bool app_allowed() const = 0;
     virtual bool has_been_activated() const = 0;
+    virtual bool set_activated(bool is_active) = 0;
 
     virtual const Version& version() const = 0;
     virtual void set_hmi_application_id(uint32_t hmi_app_id) = 0;
@@ -413,25 +453,47 @@ class Application : public virtual InitialApplicationData,
     virtual const std::string& name() const = 0;
     virtual const std::string folder_name() const = 0;
     virtual bool is_media_application() const = 0;
-    virtual const mobile_api::HMILevel::eType& hmi_level() const = 0;
+    virtual bool is_foreground() const = 0;
+    virtual void set_foreground(bool is_foreground) = 0;
+    virtual const mobile_api::HMILevel::eType hmi_level() const = 0;
     virtual const uint32_t put_file_in_none_count() const = 0;
     virtual const uint32_t delete_file_in_none_count() const = 0;
     virtual const uint32_t list_files_in_none_count() const = 0;
-    virtual const mobile_api::SystemContext::eType& system_context() const = 0;
-    virtual const mobile_api::AudioStreamingState::eType&
+    virtual const mobile_api::SystemContext::eType system_context() const = 0;
+    virtual const mobile_api::AudioStreamingState::eType
     audio_streaming_state() const = 0;
     virtual const std::string& app_icon_path() const = 0;
     virtual connection_handler::DeviceHandle device() const = 0;
-    virtual void set_tts_speak_state(bool state_tts_speak) = 0;
     virtual bool tts_speak_state() = 0;
+
+    /**
+     * @brief Active states of application
+     */
+    DataAccessor<HmiStateList> GetHmiStateListAccessor() {
+      DataAccessor<HmiStateList> hmi_states_da =
+          DataAccessor<HmiStateList>(hmi_states_, hmi_states_lock_);
+      return hmi_states_da;
+    }
+
+    /**
+     * @brief Current hmi state
+     */
+    virtual const HmiStatePtr CurrentHmiState() const = 0;
+
+
+    /**
+     * @brief RegularHmiState of application without active events VR, TTS etc ...
+     * @return HmiState of application
+     */
+    virtual const HmiStatePtr RegularHmiState() const = 0;
+
     /**
      * @brief sets true if application has sent TTS GlobalProperties
      * request with empty array help_prompt to HMI with level
      * NONE BACKGROUND
      * @param active contains state of sending TTS GlobalProperties
      */
-    virtual void set_tts_properties_in_none(
-        bool active) = 0;
+    virtual void set_tts_properties_in_none(bool active) = 0;
     /**
      * @brief returns true if application has sent TTS GlobalProperties
      * otherwise return false
@@ -455,14 +517,9 @@ class Application : public virtual InitialApplicationData,
     virtual void set_version(const Version& version) = 0;
     virtual void set_name(const std::string& name) = 0;
     virtual void set_is_media_application(bool is_media) = 0;
-    virtual void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) = 0;
     virtual void increment_put_file_in_none_count() = 0;
     virtual void increment_delete_file_in_none_count() = 0;
     virtual void increment_list_files_in_none_count() = 0;
-    virtual void set_system_context(
-      const mobile_api::SystemContext::eType& system_context) = 0;
-    virtual void set_audio_streaming_state(
-      const mobile_api::AudioStreamingState::eType& state) = 0;
     virtual bool set_app_icon_path(const std::string& file_name) = 0;
     virtual void set_app_allowed(const bool& allowed) = 0;
     virtual void set_device(connection_handler::DeviceHandle device) = 0;
@@ -496,6 +553,11 @@ class Application : public virtual InitialApplicationData,
     virtual bool UnsubscribeFromIVI(uint32_t vehicle_info_type_) = 0;
 
     /**
+     * @brief ResetDataInNone reset data counters in NONE
+     */
+    virtual void ResetDataInNone() = 0;
+
+    /**
      * @brief Check, if limits for command number per time is exceeded
      * @param cmd_id Unique command id from mobile API
      * @param source Limits source, e.g. policy table, config file etc.
@@ -509,6 +571,32 @@ class Application : public virtual InitialApplicationData,
      * @return object for recording statistics
      */
     virtual UsageStatistics& usage_report() = 0;
+
+    /**
+     * @brief SetRegularState set permanent state of application
+     * @param state state to setup
+     */
+    virtual void SetRegularState(HmiStatePtr state)  = 0;
+
+    /**
+     * @brief AddHMIState the function that will change application's
+     * hmi state.
+     *
+     * @param app_id id of the application whose hmi level should be changed.
+     *
+     * @param state new hmi state for certain application.
+     */
+    virtual void AddHMIState(HmiStatePtr state) = 0;
+
+    /**
+     * @brief RemoveHMIState the function that will turn back hmi_level after end
+     * of some event
+     *
+     * @param app_id id of the application whose hmi level should be changed.
+     *
+     * @param state_id that should be removed
+     */
+    virtual void RemoveHMIState(HmiState::StateID state_id) = 0;
 
     /**
      * @brief Keeps id of softbuttons which is created in commands:
@@ -539,15 +627,88 @@ class Application : public virtual InitialApplicationData,
      */
     virtual bool IsAudioApplication() const = 0;
 
+    /**
+     * @brief IsRegistered allows to distinguish if this
+     * application has been registered.
+     *
+     * @return true if registered, false otherwise.
+     */
+    bool IsRegistered() const { return app_state_ == kRegistered;}
+
+    /**
+     * @brief MarkRegistered allows to mark application as registered.
+     */
+    void MarkRegistered() {app_state_ = kRegistered;}
+
+    /**
+     * @brief MarkUnregistered allows to mark application as unregistered.
+     */
+    void MarkUnregistered() {app_state_ = kWaitingForRegistration;}
+
+    /**
+     * @brief schemaUrl contains application's url (for 4th protocol version)
+     *
+     * @return application's url.
+     */
+    std::string SchemaUrl() const {return url_;}
+
+    /**
+     * @brief SetShemaUrl allows to store schema url for application.
+     *
+     * @param url url to store.
+     */
+    void SetShemaUrl(const std::string& url) {url_ = url;}
+
+    /**
+     * @brief packagName allows to obtain application's package name.
+     *
+     * @return pakage name.
+     */
+    std::string PackageName() const {return package_name_;}
+
+    /**
+     * @brief SetPackageName allows to store package name for application.
+     *
+     * @param packageName package name to store.
+     */
+    void SetPackageName(const std::string& packageName) {
+      package_name_ = packageName;
+    }
+
+    /**
+     * @brief GetDeviceId allows to obtain device id which posseses
+     * by this application.
+     *
+     * @return device the device id.
+     */
+    std::string GetDeviceId() const {return device_id_;}
+
+    /**
+     * @brief Returns is application should be greyed out on HMI
+     */
+    bool is_greyed_out() const {return is_greyed_out_;}
+
+    /**
+     * @brief Sets application as should be greyed out on HMI
+     * @param is_greyed_out True, if should be greyed out on HMI,
+     * otherwise - false
+     */
+    void set_greyed_out(bool is_greyed_out) {is_greyed_out_ = is_greyed_out;}
+
   protected:
 
-    // interfaces for NAVI retry sequence
-    virtual bool video_stream_retry_active() const = 0;
-    virtual void set_video_stream_retry_active(bool active) = 0;
-    virtual bool audio_stream_retry_active() const = 0;
-    virtual void set_audio_stream_retry_active(bool active) = 0;
-    virtual void OnVideoStreamRetry() = 0;
-    virtual void OnAudioStreamRetry() = 0;
+    /**
+     * @brief Active states of application
+     */
+    HmiStateList hmi_states_;
+    mutable sync_primitives::Lock hmi_states_lock_;
+
+    ApplicationState app_state_;
+    std::string url_;
+    std::string package_name_;
+    std::string device_id_;
+    ssize_t connection_id_;
+    bool is_greyed_out_;
 };
 
 typedef utils::SharedPtr<Application> ApplicationSharedPtr;

@@ -1,4 +1,4 @@
-/**
+/*
  * \file transport_adapter.h
  * \brief TransportAdapter class header file.
  *
@@ -57,7 +57,20 @@ namespace transport_adapter {
 class TransportAdapterListener;
 
 // TODO(EZamakhov): cahnge to DeviceUID
-typedef std::string DeviceType;
+//typedef std::string DeviceType;
+
+enum DeviceType {
+  AOA,
+  PASA_AOA,
+  BLUETOOTH,
+  PASA_BLUETOOTH,
+  MME,
+  TCP,
+  UNKNOWN
+};
+
+typedef std::map<DeviceType, std::string> DeviceTypes;
+
 /**
  * @brief Type definition of container(map) that holds device unique
  *identifier(key value) and smart pointer to the device(mapped value).
@@ -121,6 +134,12 @@ class TransportAdapter {
    * @return Error information about possible reason of failure.
    **/
   virtual Error Init() = 0;
+
+  /**
+   * @brief Stops device adapter
+   * Called from transport manager to stop device adapter
+   */
+  virtual void Terminate() = 0;
 
   /**
    * @brief Add listener to the container(list) of device adapter listeners.

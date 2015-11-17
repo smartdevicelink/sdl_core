@@ -84,6 +84,7 @@ class PTRepresentation {
      */
     virtual bool IsPTPreloaded() = 0;
 
+    virtual bool RefreshDB() = 0;
     /**
      * Gets number of ignition cycles before next update policy table
      * @return number of ignition cycles
@@ -165,6 +166,13 @@ class PTRepresentation {
      * return them otherwise default URLs.
      */
     virtual EndpointUrls GetUpdateUrls(int service_type) = 0;
+
+    /**
+     * @brief GetLockScreenIcon allows to obtain lock screen icon url;
+     *
+     * @return url which point to the resourse where lock screen icon could be obtained.
+     */
+    virtual std::string GetLockScreenIconUrl() const = 0;
 
     /**
      * @brief Get allowed number of notifications
@@ -293,6 +301,8 @@ class PTRepresentation {
                                            bool is_revoked,
                                            bool is_default,
                                            bool is_predata) = 0;
+
+    virtual void WriteDb() = 0;
 };
 
 }  //  namespace policy

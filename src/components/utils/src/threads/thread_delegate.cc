@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@
 namespace threads {
 
 ThreadDelegate::~ThreadDelegate() {
-  if(thread_) {
+  if (thread_) {
     thread_->set_delegate(NULL);
   }
 }
@@ -60,4 +60,4 @@ void ThreadDelegate::set_thread(Thread *thread) {
   thread_ = thread;
 }
 
-}
+}  // namespace threads

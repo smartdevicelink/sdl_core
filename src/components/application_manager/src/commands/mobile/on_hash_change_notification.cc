@@ -37,7 +37,6 @@
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include <string>
-#include <sstream>
 
 namespace application_manager {
 
@@ -54,7 +53,7 @@ OnHashChangeNotification::~OnHashChangeNotification() {
 }
 
 void OnHashChangeNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnHashChangeNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
@@ -62,10 +61,13 @@ void OnHashChangeNotification::Run() {
   int32_t app_id;
   app_id = (*message_)[strings::params][strings::connection_key].asInt();
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
-  std::stringstream stream;
-  stream << app->curHash();
-  (*message_)[strings::msg_params][strings::hash_id] = stream.str();
-  SendNotification();
+  if (app) {
+    (*message_)[strings::msg_params][strings::hash_id] = app->curHash();
+    SendNotification();
+  } else {
+    LOG4CXX_WARN(logger_, "Application with app_id " << app_id << " does not exist");
+  }
+
 }
 
 }  //namespace mobile

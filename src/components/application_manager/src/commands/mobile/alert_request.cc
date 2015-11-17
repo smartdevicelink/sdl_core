@@ -84,7 +84,7 @@ bool AlertRequest::Init() {
 }
 
 void AlertRequest::Run() {
-  LOG4CXX_INFO(logger_, "AlertRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   uint32_t app_id = (*message_)[strings::params][strings::connection_key]
       .asInt();
@@ -116,7 +116,7 @@ void AlertRequest::onTimeOut() {
 }
 
 void AlertRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "AlertRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -198,20 +198,12 @@ void AlertRequest::on_event(const event_engine::Event& event) {
       response_success_ = true;
     }
 
-    // If timeout is not set, watchdog will not track request timeout and
-    // HMI is responsible for response returning. In this case, if ABORTED will
-    // be rerurned from HMI, success should be sent to mobile.
-    if (mobile_apis::Result::ABORTED == response_result_ &&
-        0 == default_timeout_) {
-      response_success_ = true;
-    }
-
-    if (mobile_apis::Result::ABORTED == tts_speak_response_ &&
+    if (((mobile_apis::Result::ABORTED == tts_speak_response_ )||
+        (mobile_apis::Result::REJECTED == tts_speak_response_)) &&
         (!flag_other_component_sent_)) {
       response_success_ = false;
       response_result_ = tts_speak_response_;
     }
-
     SendResponse(response_success_, response_result_,
                  response_info.empty() ? NULL : response_info.c_str(),
                      &response_params_);
@@ -332,39 +324,38 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
 }
 
 void AlertRequest::SendSpeakRequest(int32_t app_id) {
-
+  using namespace hmi_apis;
+  using namespace smart_objects;
   // crate HMI speak request
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-    smart_objects::SmartType_Map);
+  SmartObject msg_params = smart_objects::SmartObject(SmartType_Map);
 
-  msg_params[hmi_request::tts_chunks] = smart_objects::SmartObject(
-    smart_objects::SmartType_Array);
+  msg_params[hmi_request::tts_chunks] = smart_objects::SmartObject(SmartType_Array);
   msg_params[hmi_request::tts_chunks] =
     (*message_)[strings::msg_params][strings::tts_chunks];
   msg_params[strings::app_id] = app_id;
-  msg_params[hmi_request::speak_type] =
-      hmi_apis::Common_SpeakType::ALERT;
-  SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
+  msg_params[hmi_request::speak_type] = Common_MethodName::ALERT;
+  SendHMIRequest(FunctionID::TTS_Speak, &msg_params, true);
 }
 
 void AlertRequest::SendPlayToneNotification(int32_t app_id) {
-  LOG4CXX_INFO(logger_, "AlertRequest::SendPlayToneNotification");
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace hmi_apis;
+  using namespace smart_objects;
 
   // check playtone parameter
   if ((*message_)[strings::msg_params].keyExists(strings::play_tone)) {
     if ((*message_)[strings::msg_params][strings::play_tone].asBool()) {
       // crate HMI basic communication playtone request
-      smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-          smart_objects::SmartType_Map);
-
-      CreateHMINotification(hmi_apis::FunctionID::BasicCommunication_PlayTone,
-                            msg_params);
+      SmartObject msg_params = smart_objects::SmartObject(SmartType_Map);
+      msg_params[strings::app_id] = app_id;
+      msg_params[strings::method_name] = Common_MethodName::ALERT;
+      CreateHMINotification(FunctionID::BasicCommunication_PlayTone, msg_params);
     }
   }
 }
 
 bool AlertRequest::CheckStringsOfAlertRequest() {
-  LOG4CXX_INFO(logger_, "AlertRequest::CheckStringsOfAlertRequest");
+  LOG4CXX_AUTO_TRACE(logger_);
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text1)) {

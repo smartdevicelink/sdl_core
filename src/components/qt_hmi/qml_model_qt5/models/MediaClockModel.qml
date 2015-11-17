@@ -73,28 +73,22 @@ QtObject {
     function onTimer () {
         switch (updateMode) {
             case Internal.MediaClockUpdateMode.MCU_COUNTUP:
-                if (endTime !== -1) {
-                    if (startTime < endTime) {
-                        startTime++
-                    } else {
-                        timer.stop()
-                        runningMode = Internal.MediaClockRunningMode.MCR_STOPPED
-                        console.debug("count Up timer stopped")
-                    }
+                console.debug("count up")
+                if (startTime < endTime) {
+                    startTime++
                 } else {
-                    if (startTime < upperTimeLimit) {
-                        startTime++
-                    } else {
-                        startTime = 0
-                    }
+                    timer.stop()
+                    runningMode = Internal.MediaClockRunningMode.MCR_STOPPED
+                    console.debug("count Up timer stopped")
                 }
                 break
             case Internal.MediaClockUpdateMode.MCU_COUNTDOWN:
                 console.debug("count down")
-                if (--startTime === 0) {
+                if (startTime > endTime) {
+                    startTime--
+                } else {
                     timer.stop()
                     runningMode = Internal.MediaClockRunningMode.MCR_STOPPED
-                    startTime = endTime = -1
                     console.debug("count Down timer stopped")
                 }
                 break
@@ -112,13 +106,12 @@ QtObject {
     function onProgress () {
         if (startTime === -1) {
             progress = 0
-        } else {
-            if (updateMode === Internal.MediaClockUpdateMode.MCU_COUNTUP) {
-                progress = (endTime !== -1) ? (startTime / endTime) : (startTime / upperTimeLimit)
-            } else {
-                progress = (endTime !== -1) ? ( (startTime - endTime) / (startTimeForProgress - endTime) )
-                                            : (startTime / startTimeForProgress)
-            }
+        }
+        else if (endTime != -1 && endTime === startTimeForProgress) {
+            progress = 1
+        }
+        else {
+            progress = (startTime - startTimeForProgress) / (endTime - startTimeForProgress)
         }
     }
 }

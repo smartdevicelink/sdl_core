@@ -77,7 +77,7 @@ class Event {
    *
    * @param so The smart_object received in HMI response
    */
-  void set_smart_object(smart_objects::SmartObject& so);
+  void set_smart_object(const smart_objects::SmartObject& so);
 
   /*
    * @brief Retrieves event smart object

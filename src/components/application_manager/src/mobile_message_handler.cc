@@ -50,8 +50,35 @@ const uint8_t kUnknown = 0xF;
 }
 
 namespace application_manager {
+using protocol_handler::Extract;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "MobileMessageHandler")
+
+application_manager::Message* MobileMessageHandler::HandleIncomingMessageProtocol(
+  const protocol_handler::RawMessagePtr message) {
+  if (message->protocol_version() == ProtocolVersion::kV1) {
+    return MobileMessageHandler::HandleIncomingMessageProtocolV1(message);
+  }
+  if ((message->protocol_version() == ProtocolVersion::kV2) ||
+      (message->protocol_version() == ProtocolVersion::kV3) ||
+      (message->protocol_version() == ProtocolVersion::kV4)) {
+    return MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
+  }
+  return NULL;
+}
+
+protocol_handler::RawMessage* MobileMessageHandler::HandleOutgoingMessageProtocol(
+  const MobileMessage& message) {
+  if (message->protocol_version() == application_manager::kV1) {
+    return MobileMessageHandler::HandleOutgoingMessageProtocolV1(message);
+  }
+  if ((message->protocol_version() == application_manager::kV2) ||
+	  (message->protocol_version() == application_manager::kV3) ||
+	  (message->protocol_version() == application_manager::kV4)) {
+    return MobileMessageHandler::HandleOutgoingMessageProtocolV2(message);
+  }
+  return NULL;
+}
 
 
 application_manager::Message*
@@ -78,6 +105,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV1(
                 message->data_size()));
 
   if (outgoing_message->json_message().empty()) {
+    delete outgoing_message;
     return NULL;
   }
 
@@ -112,7 +140,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV2(
   outgoing_message->set_function_id(payload.header.rpc_function_id);
   outgoing_message->set_message_type(
       MessageTypeFromRpcType(payload.header.rpc_type));
-  outgoing_message->set_correlation_id(int32_t(payload.header.corellation_id));
+  outgoing_message->set_correlation_id(int32_t(payload.header.correlation_id));
   outgoing_message->set_connection_key(message->connection_key());
   outgoing_message->set_protocol_version(
     static_cast<application_manager::ProtocolVersion>(message
@@ -144,6 +172,8 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV1(
 
   protocol_handler::RawMessage* result = new protocol_handler::RawMessage(
     message->connection_key(), 1, rawMessage, messageString.length() + 1);
+
+  delete [] rawMessage;
 
   return result;
 }
@@ -201,8 +231,13 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV2(
   dataForSending[offset++] = jsonSize;
 
   memcpy(dataForSending + offset, message->json_message().c_str(), jsonSize);
-
+  
+  // Default the service type to RPC Service
+  uint8_t type = 0x07;  
+    
   if (message->has_binary_data()) {
+    // Change the service type to Hybrid Service
+    type = 0x0F;
     const std::vector<uint8_t>& binaryData = *(message->binary_data());
     uint8_t* currentPointer = dataForSending + offset + jsonSize;
     for (uint32_t i = 0; i < binarySize; ++i) {
@@ -214,7 +249,10 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV2(
     new protocol_handler::RawMessage(message->connection_key(),
                                      message->protocol_version(),
                                      dataForSending,
-                                     dataForSendingSize);
+                                     dataForSendingSize,
+                                     type);
+
+  delete [] dataForSending;
 
   return msgToProtocolHandler;
 }

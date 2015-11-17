@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/get_system_info_response.h"
+#include "application_manager/application_manager_impl.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/message_helper.h"
 
@@ -45,24 +46,41 @@ GetSystemInfoResponse::~GetSystemInfoResponse() {
 }
 
 void GetSystemInfoResponse::Run() {
-  LOG4CXX_INFO(logger_, "GetSystemInfoResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   const hmi_apis::Common_Result::eType code =
       static_cast<hmi_apis::Common_Result::eType>(
           (*message_)[strings::params][hmi_response::code].asInt());
 
-  if (hmi_apis::Common_Result::SUCCESS != code) {
-    LOG4CXX_WARN(logger_, "GetSystemError returns an error code " << code);
-    return;
-  }
-  const std::string ccpu_version =
-      (*message_)[strings::msg_params]["ccpu_version"].asString();
-  const std::string wers_country_code =
-      (*message_)[strings::msg_params]["wersCountryCode"].asString();
-  uint32_t lang_code = (*message_)[strings::msg_params]["language"].asUInt();
-  const std::string language =
-      application_manager::MessageHelper::CommonLanguageToString(
+  std::string ccpu_version;
+  std::string wers_country_code;
+  std::string language;
+
+  if (hmi_apis::Common_Result::SUCCESS == code) {
+    ccpu_version =
+        (*message_)[strings::msg_params]["ccpu_version"].asString();
+    wers_country_code =
+        (*message_)[strings::msg_params]["wersCountryCode"].asString();
+    uint32_t lang_code = (*message_)[strings::msg_params]["language"].asUInt();
+    language = application_manager::MessageHelper::CommonLanguageToString(
         static_cast<hmi_apis::Common_Language::eType>(lang_code));
 
+    HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
+    hmi_capabilities.set_ccpu_version(ccpu_version);
+  } else {
+    LOG4CXX_WARN(logger_, "GetSystemError returns an error code " << code);
+
+    // We have to set preloaded flag as false in policy table on any response
+    // of GetSystemInfo (SDLAQ-CRS-2365)
+    const std::string empty_value;
+    policy::PolicyHandler::instance()->OnGetSystemInfo(empty_value,
+                                                       empty_value,
+                                                       empty_value);
+    return;
+  }
+
+  // We have to set preloaded flag as false in policy table on any response
+  // of GetSystemInfo (SDLAQ-CRS-2365)
   policy::PolicyHandler::instance()->OnGetSystemInfo(ccpu_version,
                                                      wers_country_code,
                                                      language);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,9 +30,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gmock/gmock.h"
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_CLIENT_CONNECTION_LISTENER_MOCK_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_CLIENT_CONNECTION_LISTENER_MOCK_H_
 
-int main(int argc, char** argv) {
- testing::InitGoogleMock(&argc, argv);
- return RUN_ALL_TESTS();
-}
+#include "gmock/gmock.h"
+#include "transport_manager/transport_adapter/client_connection_listener.h"
+
+namespace test {
+namespace components {
+namespace transport_manager_test {
+
+class ClientConnectionListenerMock
+    : public ::transport_manager::transport_adapter::ClientConnectionListener {
+ public:
+  MOCK_METHOD0(
+      Init, ::transport_manager::transport_adapter::TransportAdapter::Error());
+  MOCK_METHOD0(Terminate, void());
+  MOCK_CONST_METHOD0(IsInitialised, bool());
+  MOCK_METHOD0(
+      StartListening,
+      ::transport_manager::transport_adapter::TransportAdapter::Error());
+  MOCK_METHOD0(
+      StopListening,
+      ::transport_manager::transport_adapter::TransportAdapter::Error());
+};
+
+}  // namespace transport_manager_test
+}  // namespace components
+}  // namespace test
+
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_CLIENT_CONNECTION_LISTENER_MOCK_H_

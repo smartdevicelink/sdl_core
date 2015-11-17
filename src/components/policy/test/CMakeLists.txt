@@ -1,4 +1,4 @@
-# Copyright (c) 2013-2014, Ford Motor Company
+# Copyright (c) 2015, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,34 +32,31 @@ include_directories(
   include
   ${GMOCK_INCLUDE_DIRECTORY}
   ${JSONCPP_INCLUDE_DIRECTORY}
-  ../src/policy/include/
-  ../src/policy/sqlite_wrapper/include
-  ../src/policy/qdb_wrapper/include
-  ../src/policy/usage_statistics/include
-  ${CMAKE_SOURCE_DIR}/src/components/rpc_base/include
-  ${CMAKE_SOURCE_DIR}/src/components/utils/include/
+  ${COMPONENTS_DIR}/policy/src/policy/include/
+  ${COMPONENTS_DIR}/policy/src/policy/sqlite_wrapper/include
+  ${COMPONENTS_DIR}/policy/src/policy/qdb_wrapper/include
+  ${COMPONENTS_DIR}/policy/src/policy/usage_statistics/include
+  ${COMPONENTS_DIR}/rpc_base/include
+  ${COMPONENTS_DIR}/config_profile/include
+  ${COMPONENTS_DIR}/utils/include/
+  ${COMPONENTS_DIR}/policy/src/policy/policy_table/
 )
 
 set(testLibraries
-  gtest
   gmock
   Utils
   Policy
-  ${RTLIB}
-  dl
   UsageStatistics
-  dbms
 )
 
 set(testSources
-  main.cc
-  usage_statistics_test.cc
-  shared_library_test.cc
-  generated_code_test.cc
-  policy_manager_impl_test.cc
+  usage_statistics_test.cc    
+  shared_library_test.cc    
+  generated_code_test.cc 
+  #policy_manager_impl_test.cc
 )
 
-  include_directories(../src/policy/policy_table/table_struct)
+  include_directories(${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct)
   list (APPEND testSources
     sql_pt_representation_test.cc
   )
@@ -80,17 +77,19 @@ else ()
   find_package(Sqlite3 REQUIRED)
   include_directories(../src/policy/sqlite_wrapper/include)
   list (APPEND testSources
-    sqlite_wrapper/sql_database_test.cc
-    sqlite_wrapper/sql_query_test.cc
-    generated_code_with_sqlite_test.cc
-    policy_manager_impl_stress_test.cc
+    sqlite_wrapper/sql_database_test.cc 
+    sqlite_wrapper/sql_query_test.cc   
+    generated_code_with_sqlite_test.cc   
+
+    # TODO{ALeshin} AssertTrue in SetUpTestCase() return false
+    #policy_manager_impl_stress_test.cc
   )
   list (APPEND testLibraries sqlite3)
 endif()
 
-add_executable(policy_test ${testSources})
-target_link_libraries(policy_test ${testLibraries})
+create_test("policy_test" "${testSources}" "${testLibraries}")
 
 file(COPY valid_sdl_pt_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

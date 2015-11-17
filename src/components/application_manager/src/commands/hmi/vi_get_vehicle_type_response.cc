@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -45,7 +45,7 @@ VIGetVehicleTypeResponse::~VIGetVehicleTypeResponse() {
 }
 
 void VIGetVehicleTypeResponse::Run() {
-  LOG4CXX_INFO(logger_, "VIGetVehicleTypeResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   HMICapabilities& hmi_capabilities =
       ApplicationManagerImpl::instance()->hmi_capabilities();

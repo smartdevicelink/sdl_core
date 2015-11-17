@@ -66,14 +66,14 @@ class SQLPTRepresentation : public virtual PTRepresentation {
     virtual void ResetIgnitionCycles();
     virtual int TimeoutResponse();
     virtual bool SecondsBetweenRetries(std::vector<int>* seconds);
-
+    virtual bool RefreshDB();
     virtual VehicleData GetVehicleData();
 
     virtual std::vector<UserFriendlyMessage> GetUserFriendlyMsg(
       const std::vector<std::string>& msg_codes, const std::string& language);
 
     virtual EndpointUrls GetUpdateUrls(int service_type);
-
+    virtual std::string GetLockScreenIconUrl() const;
     virtual int GetNotificationsNumber(const std::string& priority);
     virtual bool GetPriority(const std::string& policy_app_id,
                              std::string* priority);
@@ -81,6 +81,7 @@ class SQLPTRepresentation : public virtual PTRepresentation {
     bool Close();
     bool Clear();
     bool Drop();
+    virtual void WriteDb();
     virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot() const;
     virtual bool Save(const policy_table::Table& table);
     bool GetInitialAppData(const std::string& app_id, StringArray* nicknames =
@@ -98,13 +99,15 @@ class SQLPTRepresentation : public virtual PTRepresentation {
       policy_table::FunctionalGroupings* groups) const;
     virtual bool GatherConsumerFriendlyMessages(
       policy_table::ConsumerFriendlyMessages* messages) const;
-    virtual bool GatherApplicationPolicies(
-      policy_table::ApplicationPolicies* apps) const;
+    virtual bool GatherApplicationPoliciesSection(
+      policy_table::ApplicationPoliciesSection* policies) const;
 
     bool GatherAppGroup(const std::string& app_id,
                         policy_table::Strings* app_groups) const;
     bool GatherAppType(const std::string& app_id,
                        policy_table::AppHMITypes* app_types) const;
+    bool GatherRequestType(const std::string& app_id,
+                           policy_table::RequestTypes* request_types) const;
     bool GatherNickName(const std::string& app_id,
                         policy_table::Strings* nicknames) const;
 
@@ -122,10 +125,11 @@ class SQLPTRepresentation : public virtual PTRepresentation {
       const policy_table::FunctionalGroupings& groups);
     virtual bool SaveConsumerFriendlyMessages(
       const policy_table::ConsumerFriendlyMessages& messages);
-    virtual bool SaveApplicationPolicies(
-      const policy_table::ApplicationPolicies& apps);
+    virtual bool SaveApplicationPoliciesSection(
+      const policy_table::ApplicationPoliciesSection& policies);
     virtual bool SaveSpecificAppPolicy(
       const policy_table::ApplicationPolicies::value_type& app);
+    virtual bool SaveDevicePolicy(const policy_table::DevicePolicy& device);
 
     virtual bool SaveMessageString(const std::string& type,
                                    const std::string& lang,
@@ -137,6 +141,8 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                       const policy_table::Strings& nicknames);
     bool SaveAppType(const std::string& app_id,
                      const policy_table::AppHMITypes& types);
+    bool SaveRequestType(const std::string& app_id,
+                         const policy_table::RequestTypes& types);
 
   public:
     bool UpdateRequired() const;

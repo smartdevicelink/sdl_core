@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -362,6 +362,50 @@ class HMICapabilities {
   void set_prerecorded_speech(
        const smart_objects::SmartObject& prerecorded_speech);
 
+  /*
+   * @brief Interface used to store information if navigation
+   * supported by the system
+   *
+   * @param supported Indicates if navigation supported by the system
+   */
+  void set_navigation_supported(bool supported);
+
+  /*
+   * @brief Retrieves information if navi supported by the system
+   *
+   * @return TRUE if it supported, otherwise FALSE
+   */
+  inline bool navigation_supported() const;
+
+  /*
+   * @brief Interface used to store information if phone call
+   * supported by the system
+   *
+   * @param supported Indicates if navigation supported by the sustem
+   */
+  void set_phone_call_supported(bool supported);
+
+  /*
+   * @brief Retrieves information if phone call supported by the system
+   *
+   * @return TRUE if it supported, otherwise FALSE
+   */
+  inline bool phone_call_supported() const;
+
+  /*
+   * @brief Interface used to store information about software version of the target
+   *
+   * @param ccpu_version Received system/hmi software version
+   */
+  void set_ccpu_version(const std::string& ccpu_version);
+
+  /*
+   * @brief Returns software version of the target
+   *
+   * @return TRUE if it supported, otherwise FALSE
+   */
+  inline const std::string& ccpu_version() const;
+
  protected:
 
   /*
@@ -426,6 +470,9 @@ class HMICapabilities {
   smart_objects::SmartObject*      speech_capabilities_;
   smart_objects::SmartObject*      audio_pass_thru_capabilities_;
   smart_objects::SmartObject*      prerecorded_speech_;
+  bool                             is_navigation_supported_;
+  bool                             is_phone_call_supported_;
+  std::string                      ccpu_version_;
 
   ApplicationManagerImpl*          app_mngr_;
 
@@ -531,6 +578,18 @@ const smart_objects::SmartObject* HMICapabilities::vehicle_type() const {
 const smart_objects::SmartObject*
 HMICapabilities::prerecorded_speech() const {
   return prerecorded_speech_;
+}
+
+bool HMICapabilities::navigation_supported() const {
+  return is_navigation_supported_;
+}
+
+bool HMICapabilities::phone_call_supported() const {
+  return is_phone_call_supported_;
+}
+
+const std::string& HMICapabilities::ccpu_version() const {
+  return ccpu_version_;
 }
 
 }  //  namespace application_manager

@@ -67,14 +67,12 @@
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "appMain")
 
-extern const char* gitVersion;
 namespace {
 
 const std::string kBrowser = "/usr/bin/chromium-browser";
 const std::string kBrowserName = "chromium-browser";
 const std::string kBrowserParams = "--auth-schemes=basic,digest,ntlm";
 const std::string kLocalHostAddress = "127.0.0.1";
-const std::string kApplicationVersion = "Develop";
 
 #ifdef WEB_HMI
 /**
@@ -82,33 +80,12 @@ const std::string kApplicationVersion = "Develop";
  * @return true if success otherwise false.
  */
 bool InitHmi() {
-
-struct stat sb;
-if (stat("hmi_link", &sb) == -1) {
-  LOG4CXX_FATAL(logger_, "File with HMI link doesn't exist!");
-  return false;
-}
-
-std::ifstream file_str;
-file_str.open("hmi_link");
-
-if (!file_str.is_open()) {
-  LOG4CXX_FATAL(logger_, "File with HMI link was not opened!");
-  return false;
-}
-
-std::string hmi_link;
-std::getline(file_str, hmi_link);
-
-
-LOG4CXX_INFO(logger_,
-             "Input string:" << hmi_link << " length = " << hmi_link.size());
-file_str.close();
-
-if (stat(hmi_link.c_str(), &sb) == -1) {
-  LOG4CXX_FATAL(logger_, "HMI index.html doesn't exist!");
-  return false;
-}
+  std::string hmi_link = profile::Profile::instance()->link_to_web_hmi();
+  struct stat sb;
+  if (stat(hmi_link.c_str(), &sb) == -1) {
+    LOG4CXX_FATAL(logger_, "HMI index.html doesn't exist!");
+    return false;
+  }
   return utils::System(kBrowser, kBrowserName).Add(kBrowserParams).Add(hmi_link)
       .Execute();
 }
@@ -144,7 +121,6 @@ int32_t main(int32_t argc, char** argv) {
   // --------------------------------------------------------------------------
   // Logger initialization
   INIT_LOGGER("log4cxx.properties");
-  LOG4CXX_INFO(logger_, gitVersion);
 #if defined(__QNXNTO__) and defined(GCOV_ENABLED)
   LOG4CXX_WARN(logger_,
                 "Attention! This application was built with unsupported "
@@ -158,7 +134,8 @@ int32_t main(int32_t argc, char** argv) {
   }
 
   LOG4CXX_INFO(logger_, "Application started!");
-  LOG4CXX_INFO(logger_, "Application version " << kApplicationVersion);
+  LOG4CXX_INFO(logger_, "SDL version: "
+                         << profile::Profile::instance()->sdl_version());
 
   // Initialize gstreamer. Needed to activate debug from the command line.
 #if defined(EXTENDED_MEDIA_MODE)
@@ -176,10 +153,7 @@ int32_t main(int32_t argc, char** argv) {
 #ifdef __QNX__
   if (profile::Profile::instance()->enable_policy()) {
     if (!utils::System("./init_policy.sh").Execute(true)) {
-      LOG4CXX_ERROR(logger_, "Failed initialization of policy database");
-#ifdef ENABLE_LOG
-      logger::LogMessageLoopThread::destroy();
-#endif
+      LOG4CXX_FATAL(logger_, "Failed to init policy database");
       DEINIT_LOGGER();
       exit(EXIT_FAILURE);
     }
@@ -187,10 +161,8 @@ int32_t main(int32_t argc, char** argv) {
 #endif  // __QNX__
 
   if (!main_namespace::LifeCycle::instance()->StartComponents()) {
+    LOG4CXX_FATAL(logger_, "Failed to start components");
     main_namespace::LifeCycle::instance()->StopComponents();
-#ifdef ENABLE_LOG
-    logger::LogMessageLoopThread::destroy();
-#endif
     DEINIT_LOGGER();
     exit(EXIT_FAILURE);
   }
@@ -199,9 +171,10 @@ int32_t main(int32_t argc, char** argv) {
   // Third-Party components initialization.
 
   if (!main_namespace::LifeCycle::instance()->InitMessageSystem()) {
+    LOG4CXX_FATAL(logger_, "Failed to init message system");
     main_namespace::LifeCycle::instance()->StopComponents();
     DEINIT_LOGGER();
-    exit(EXIT_FAILURE);
+    _exit(EXIT_FAILURE);
   }
   LOG4CXX_INFO(logger_, "InitMessageBroker successful");
 
@@ -211,14 +184,10 @@ int32_t main(int32_t argc, char** argv) {
 
 #ifndef NO_HMI
       if (!InitHmi()) {
-        main_namespace::LifeCycle::instance()->StopComponents();
-#ifdef ENABLE_LOG
-        logger::LogMessageLoopThread::destroy();
-#endif
-        DEINIT_LOGGER();
-        exit(EXIT_FAILURE);
+        LOG4CXX_INFO(logger_, "InitHmi successful");
+      } else {
+        LOG4CXX_WARN(logger_, "Failed to init HMI");
       }
-      LOG4CXX_INFO(logger_, "InitHmi successful");
 #endif  // #ifndef NO_HMI
     }
   }
@@ -230,9 +199,6 @@ int32_t main(int32_t argc, char** argv) {
   main_namespace::LifeCycle::instance()->StopComponents();
 
   LOG4CXX_INFO(logger_, "Application successfully stopped");
-#ifdef ENABLE_LOG
-  logger::LogMessageLoopThread::destroy();
-#endif
   DEINIT_LOGGER();
 
   return EXIT_SUCCESS;

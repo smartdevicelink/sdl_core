@@ -121,7 +121,7 @@ class MockPTExtRepresentation : public MockPTRepresentation,
       bool(const std::string& app_id, bool is_device_allowed));
   MOCK_METHOD1(SetPredataPolicy, bool(const std::string& app_id));
   MOCK_METHOD2(SetIsPredata, bool(const std::string& app_id, bool is_predata));
-  MOCK_CONST_METHOD1(SetUnpairedDevice, bool(const std::string& device_id));
+  MOCK_CONST_METHOD2(SetUnpairedDevice, bool(const std::string& device_id, bool unpaired));
   MOCK_CONST_METHOD1(UnpairedDevicesList, bool(DeviceIds* device_ids));
   MOCK_CONST_METHOD2(RemoveAppConsentForGroup, bool(const std::string& policy_app_id,
           const std::string& functional_group));

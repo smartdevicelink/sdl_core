@@ -206,9 +206,13 @@ SDL.SettingsController = Em.Object.create( {
      * @param {Object} message
      *
      */
-    permissionsFriendlyMessageUpdate: function(message, appID) {
+    permissionsFriendlyMessageUpdate: function(message) {
+
+
+        SDL.SettingsController.simpleParseUserFriendlyMessageData(message);
 
         SDL.States.goToStates('settings.policies.appPermissions');
+
     },
 
     updateSDL: function() {
@@ -216,39 +220,28 @@ SDL.SettingsController = Em.Object.create( {
     },
 
     getURLS: function() {
-        FFW.BasicCommunication.GetURLS();
+        FFW.BasicCommunication.GetURLS(7);
     },
 
     AllowSDLFunctionality: function(messages) {
 
-        var str = '';
-
-        if (messages[0].line1) {
-            str += messages[0].line1;
-        }
-
-        if (messages[0].line2) {
-            str += messages[0].line2;
-        }
-
-        if (messages[0].textBody) {
-            str += messages[0].textBody;
-        }
-
-        if (str) {
-            SDL.PopUp.create().appendTo('body').popupActivate(messages[0].textBody, SDL.SettingsController.OnAllowSDLFunctionality);
+        if (messages.length > 0) {
+            SDL.SettingsController.simpleParseUserFriendlyMessageData(messages, SDL.SettingsController.OnAllowSDLFunctionality);
         } else {
-            SDL.PopUp.create().appendTo('body').popupActivate('WARNING!!!!!!!!!!!!!! There is no text from SDL in GetUserFriendlyMessage for DataConsent parameter!!! Please allow the device...', SDL.SettingsController.OnAllowSDLFunctionality);
+            SDL.PopUp.create().appendTo('body').popupActivate(
+                'WARNING!!!!!!!!!!!!!! '
+                + 'There is no text from SDL in GetUserFriendlyMessage for DataConsent parameter!!! Please allow the device...',
+                SDL.SettingsController.OnAllowSDLFunctionality);
         }
 
     },
 
     userFriendlyMessagePopUp: function(appId, messageCode) {
 
-        FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.create().appendTo('body').popupActivate(message)}, appId, messageCode);
+        FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.simpleParseUserFriendlyMessageData, appId, messageCode);
     },
 
-    simpleParseUserFriendlyMessageData: function (messages) {
+    simpleParseUserFriendlyMessageData: function (messages, func) {
         var tts = "",
             text = "";
 
@@ -273,7 +266,7 @@ SDL.SettingsController = Em.Object.create( {
 
 
         if (text) {
-            SDL.PopUp.create().appendTo('body').popupActivate(text);
+            SDL.PopUp.create().appendTo('body').popupActivate(text, func);
         }
     },
 

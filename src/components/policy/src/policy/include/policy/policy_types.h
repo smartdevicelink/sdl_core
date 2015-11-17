@@ -38,7 +38,7 @@
 #include <map>
 #include <set>
 #include "utils/shared_ptr.h"
-
+#include "utils/helpers.h"
 namespace policy {
 
 // TODO(PV): specify errors
@@ -56,16 +56,6 @@ const std::string kDefaultDeviceConnectionType = "UNKNOWN";
 const std::string kPreDataConsentId = "pre_DataConsent";
 const std::string kDefaultId = "default";
 const std::string kDeviceId = "device";
-
-/*
- *@brief Policy Services specifies Users of Updates
- * received from cloud through mobile device
- */
-enum PolicyServiceTypes {
-    SERVICE_NONE = 0,
-    IVSU = 0x04,
-    POLICY = 0x07
-};
 
 /*
  * @brief Status of policy table update
@@ -187,6 +177,16 @@ struct DeviceInfo {
     std::string carrier;
     uint32_t max_number_rfcom_ports;
     std::string connection_type;
+
+    void AdoptDeviceType(const std::string& deviceType) {
+      connection_type = "USB_serial_number";
+      using namespace helpers;
+      if (Compare<std::string, EQ, ONE> (deviceType,
+                                         "BLUETOOTH",
+                                         "WIFI")) {
+          connection_type.assign("BTMAC");
+      }
+    }
 };
 
 /**
@@ -233,7 +233,8 @@ struct AppPermissions {
           isAppPermissionsRevoked(false),
           appRevoked(false),
           appPermissionsConsentNeeded(false),
-          appUnauthorized(false) {
+          appUnauthorized(false),
+          requestTypeChanged(false) {
     }
 
     std::string application_id;
@@ -245,6 +246,8 @@ struct AppPermissions {
     bool isSDLAllowed;
     std::string priority;
     DeviceParams deviceInfo;
+    bool requestTypeChanged;
+    std::vector<std::string> requestType;
 };
 
 /**
@@ -263,11 +266,6 @@ struct PermissionConsent {
  */
 struct UserFriendlyMessage {
     std::string message_code;
-    std::string tts;
-    std::string label;
-    std::string line1;
-    std::string line2;
-    std::string text_body;
 };
 
 /**

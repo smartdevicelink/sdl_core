@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -60,7 +60,16 @@ bool SQLDatabase::Open() {
   return error_ == SQLITE_OK;
 }
 
+bool SQLDatabase::IsReadWrite() {
+  const char* schema = "main";
+  return sqlite3_db_readonly(conn_, schema) == 0;
+}
+
 void SQLDatabase::Close() {
+  if (!conn_) {
+    return;
+  }
+
   sync_primitives::AutoLock auto_lock(conn_lock_);
   error_ = sqlite3_close(conn_);
   if (error_ == SQLITE_OK) {

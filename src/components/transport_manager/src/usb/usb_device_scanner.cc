@@ -47,7 +47,8 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 class AoaInitSequence : public UsbControlTransferSequence {
  public:
   AoaInitSequence();
-  virtual ~AoaInitSequence() {}
+  virtual ~AoaInitSequence() {
+  }
 
  private:
   class AoaGetProtocolRequest;
@@ -56,7 +57,7 @@ class AoaInitSequence : public UsbControlTransferSequence {
 };
 
 void UsbDeviceScanner::OnDeviceArrived(PlatformUsbDevice* device) {
-  LOG4CXX_TRACE(logger_, "enter. PlatformUsbDevice* " << device);
+  LOG4CXX_AUTO_TRACE(logger_);
   if (IsAppleDevice(device)) {
     SupportedDeviceFound(device);
   } else {
@@ -66,13 +67,13 @@ void UsbDeviceScanner::OnDeviceArrived(PlatformUsbDevice* device) {
       TurnIntoAccessoryMode(device);
     }
   }
-  LOG4CXX_TRACE(logger_, "exit");
 }
 
 void UsbDeviceScanner::OnDeviceLeft(PlatformUsbDevice* device) {
-  LOG4CXX_TRACE(logger_, "enter. PlatformUsbDevice " << device);
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "PlatformUsbDevice " << device);
   bool list_changed = false;
-  pthread_mutex_lock(&devices_mutex_);
+  devices_mutex_.Acquire();
   for (Devices::iterator it = devices_.begin(); it != devices_.end(); ++it) {
     if (device == *it) {
       devices_.erase(it);
@@ -80,24 +81,22 @@ void UsbDeviceScanner::OnDeviceLeft(PlatformUsbDevice* device) {
       break;
     }
   }
-  pthread_mutex_unlock(&devices_mutex_);
+  devices_mutex_.Release();
   if (list_changed) {
     UpdateList();
   }
-  LOG4CXX_TRACE(logger_, "exit");
 }
 
 UsbDeviceScanner::UsbDeviceScanner(TransportAdapterController* controller)
-  : controller_(controller) {
-  pthread_mutex_init(&devices_mutex_, 0);
+    : controller_(controller) {
 }
 
 UsbDeviceScanner::~UsbDeviceScanner() {
-  pthread_mutex_destroy(&devices_mutex_);
 }
 
 class AoaInitSequence::AoaGetProtocolRequest : public UsbControlInTransfer {
-  virtual ~AoaGetProtocolRequest() {}
+  virtual ~AoaGetProtocolRequest() {
+  }
   virtual RequestType Type() const {
     return VENDOR;
   }
@@ -115,7 +114,7 @@ class AoaInitSequence::AoaGetProtocolRequest : public UsbControlInTransfer {
   }
   virtual bool OnCompleted(unsigned char* data) const {
     const int protocol_version = data[1] << 8 | data[0];
-    LOG4CXX_INFO(logger_, "AOA protocol version " << protocol_version);
+    LOG4CXX_DEBUG(logger_, "AOA protocol version " << protocol_version);
     if (protocol_version == 0) {
       // AOA protocol not supported
       return false;
@@ -127,10 +126,14 @@ class AoaInitSequence::AoaGetProtocolRequest : public UsbControlInTransfer {
 class AoaInitSequence::AoaSendIdString : public UsbControlOutTransfer {
  public:
   AoaSendIdString(uint16_t index, const char* string, uint16_t length)
-    : index_(index), string_(string), length_(length) {}
+      : index_(index),
+        string_(string),
+        length_(length) {
+  }
 
  private:
-  virtual ~AoaSendIdString() {}
+  virtual ~AoaSendIdString() {
+  }
   virtual RequestType Type() const {
     return VENDOR;
   }
@@ -155,7 +158,8 @@ class AoaInitSequence::AoaSendIdString : public UsbControlOutTransfer {
 };
 
 class AoaInitSequence::AoaTurnIntoAccessoryMode : public UsbControlOutTransfer {
-  virtual ~AoaTurnIntoAccessoryMode() {}
+  virtual ~AoaTurnIntoAccessoryMode() {
+  }
   virtual RequestType Type() const {
     return VENDOR;
   }
@@ -176,14 +180,15 @@ class AoaInitSequence::AoaTurnIntoAccessoryMode : public UsbControlOutTransfer {
   }
 };
 
-static char manufacturer[] = "Ford";
-static char model_name[] = "HMI";
-static char description[] = "Human machine interface";
+static char manufacturer[] = "SDL";
+static char model_name[] = "Core";
+static char description[] = "SmartDeviceLink Core Component USB";
 static char version[] = "1.0";
-static char uri[] = "http://www.ford.com";
+static char uri[] = "http://www.smartdevicelink.org";
 static char serial_num[] = "N000000";
 
-AoaInitSequence::AoaInitSequence() : UsbControlTransferSequence() {
+AoaInitSequence::AoaInitSequence()
+    : UsbControlTransferSequence() {
   AddTransfer(new AoaGetProtocolRequest);
   AddTransfer(new AoaSendIdString(0, manufacturer, sizeof(manufacturer)));
   AddTransfer(new AoaSendIdString(1, model_name, sizeof(model_name)));
@@ -195,25 +200,26 @@ AoaInitSequence::AoaInitSequence() : UsbControlTransferSequence() {
 }
 
 void UsbDeviceScanner::TurnIntoAccessoryMode(PlatformUsbDevice* device) {
-  LOG4CXX_TRACE(logger_, "enter. PlatformUsbDevice: " << device);
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "PlatformUsbDevice: " << device);
   GetUsbHandler()->StartControlTransferSequence(new AoaInitSequence, device);
-  LOG4CXX_TRACE(logger_, "exit");
 }
 
 void UsbDeviceScanner::SupportedDeviceFound(PlatformUsbDevice* device) {
-  LOG4CXX_TRACE(logger_, "enter PlatformUsbDevice: " << device);
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_TRACE(logger_, "PlatformUsbDevice: " << device);
 
-  pthread_mutex_lock(&devices_mutex_);
+  devices_mutex_.Acquire();
   devices_.push_back(device);
-  pthread_mutex_unlock(&devices_mutex_);
-  LOG4CXX_INFO(logger_, "USB device (bus number "
-               << static_cast<int>(device->bus_number())
-               << ", address "
-               << static_cast<int>(device->address())
-               << ") identified as: " << device->GetManufacturer()
-               << ", " << device->GetProductName());
+  devices_mutex_.Release();
+  LOG4CXX_DEBUG(
+      logger_,
+      "USB device (bus number " << static_cast<int>(device->bus_number())
+      << ", address " << static_cast<int>(device->address())
+      << ") identified as: " << device->GetManufacturer()
+      << ", " << device->GetProductName()
+      << ", serial: " << device->GetSerialNumber());
   UpdateList();
-  LOG4CXX_TRACE(logger_, "exit");
 }
 
 TransportAdapter::Error UsbDeviceScanner::Init() {
@@ -225,30 +231,28 @@ TransportAdapter::Error UsbDeviceScanner::Scan() {
 }
 
 void UsbDeviceScanner::UpdateList() {
-  LOG4CXX_TRACE(logger_, "enter");
+  LOG4CXX_AUTO_TRACE(logger_);
   DeviceVector device_vector;
-  pthread_mutex_lock(&devices_mutex_);
+  devices_mutex_.Acquire();
   for (Devices::const_iterator it = devices_.begin(); it != devices_.end();
-       ++it) {
-    const std::string device_name =
-      (*it)->GetManufacturer() + " " + (*it)->GetProductName();
+      ++it) {
+    const std::string device_name = (*it)->GetManufacturer() + " "
+        + (*it)->GetProductName();
     std::ostringstream oss;
     oss << (*it)->GetManufacturer() << ":" << (*it)->GetProductName() << ":"
-        << (*it)->GetSerialNumber() << ":"
-        << static_cast<int>((*it)->bus_number()) << ":"
-        << static_cast<int>((*it)->address());
+        << (*it)->GetSerialNumber();
     const DeviceUID device_uid = oss.str();
     DeviceSptr device(new UsbDevice(*it, device_name, device_uid));
     device_vector.push_back(device);
   }
-  pthread_mutex_unlock(&devices_mutex_);
+  devices_mutex_.Release();
 
-  LOG4CXX_INFO(logger_, "USB search done " << device_vector.size());
+  LOG4CXX_DEBUG(logger_, "USB search done " << device_vector.size());
   controller_->SearchDeviceDone(device_vector);
-  LOG4CXX_TRACE(logger_, "exit");
 }
 
-void UsbDeviceScanner::Terminate() {}
+void UsbDeviceScanner::Terminate() {
+}
 
 bool UsbDeviceScanner::IsInitialised() const {
   return true;

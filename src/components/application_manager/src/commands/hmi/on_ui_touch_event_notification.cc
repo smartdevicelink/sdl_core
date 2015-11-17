@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -47,7 +47,7 @@ OnUITouchEventNotification::~OnUITouchEventNotification() {
 }
 
 void OnUITouchEventNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnUITouchEventNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   //prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
