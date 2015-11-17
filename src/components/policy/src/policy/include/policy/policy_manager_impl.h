@@ -331,7 +331,8 @@ private:
       const utils::SharedPtr<policy_table::Table> snapshot);
     utils::SharedPtr<AccessRemote> access_remote_;
 
-    void SendHMILevelChanged(const Subject& who, const std::string& rank = "");
+    void SendHMILevelChanged(const Subject& who);
+    void UpdateDeviceRank(const Subject& who, const std::string& rank);
 
     void OnPrimaryGroupsChanged(const std::string& application_id);
     void OnNonPrimaryGroupsChanged(const std::string& application_id);

@@ -214,6 +214,15 @@ class PolicyHandler :
    */
   void OnRemoteAppPermissionsChanged(const std::string& device_id,
       const std::string& application_id);
+
+  virtual void OnUpdateHMIStatus(const std::string& device_id,
+                                 const std::string& policy_app_id,
+                                 const std::string& hmi_level);
+
+  virtual void OnUpdateHMIStatus(const std::string& device_id,
+                                 const std::string& policy_app_id,
+                                 const std::string& hmi_level,
+                                 const std::string& device_rank);
 #endif  // SDL_REMOTE_CONTROL
 
   uint32_t GetNotificationsNumber(const std::string& priority);
@@ -407,8 +416,7 @@ class PolicyHandler :
   virtual void OnUpdateHMIAppType(std::map<std::string, StringArray> app_hmi_types);
   virtual void OnUpdateHMILevel(const std::string& device_id,
                                 const std::string& policy_app_id,
-                                const std::string& hmi_level,
-                                const std::string& device_rank = "");
+                                const std::string& hmi_level);
 
   virtual void OnCertificateUpdated(const std::string& certificate_data);
 
@@ -537,8 +545,7 @@ protected:
                                       PermissionConsent& permissions);
 
   void UpdateHMILevel(application_manager::ApplicationSharedPtr app,
-                      mobile_apis::HMILevel::eType level,
-                      mobile_apis::DeviceRank::eType rank);
+                      mobile_apis::HMILevel::eType level);
 
 private:
   class StatisticManagerImpl: public usage_statistics::StatisticsManager {
