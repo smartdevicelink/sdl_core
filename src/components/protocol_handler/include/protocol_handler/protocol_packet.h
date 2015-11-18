@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_PACKET_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_PACKET_H_
 
+#include <list>
 #include "utils/macro.h"
 #include "protocol/common.h"
 #include "transport_manager/common.h"
@@ -245,7 +246,7 @@ class ProtocolPacket {
   /**
     * \brief Getter for Connection Identifier
     */
-  uint8_t connection_id() const;
+  ConnectionID connection_id() const;
 
   /**
     * \brief Getter for data payload size
@@ -286,6 +287,7 @@ class ProtocolPacket {
  * @brief Type definition for variable that hold shared pointer to protocolol packet
  */
 typedef utils::SharedPtr<protocol_handler::ProtocolPacket> ProtocolFramePtr;
+typedef std::list<ProtocolFramePtr>                        ProtocolFramePtrList;
 
 template<typename _CharT>
 std::basic_ostream<_CharT>& operator<<(std::basic_ostream<_CharT>& stream,
@@ -304,7 +306,7 @@ template<typename _CharT>
 std::basic_ostream<_CharT>& operator<<(std::basic_ostream<_CharT>& stream,
                                        const protocol_handler::ProtocolPacket& packet) {
   stream << packet.packet_header() <<
-            ", ConnectionID: "   << (packet.connection_id()) <<
+            ", ConnectionID: "   << static_cast<uint32_t>(packet.connection_id()) <<
             ", TotalDataBytes: " << (packet.total_data_bytes()) <<
             ", Data: "           << static_cast<void*>(packet.data());
   return stream;
@@ -312,7 +314,9 @@ std::basic_ostream<_CharT>& operator<<(std::basic_ostream<_CharT>& stream,
 template<typename _CharT>
 std::basic_ostream<_CharT>& operator<<(std::basic_ostream<_CharT>& stream,
                                        const ProtocolFramePtr packet_ptr) {
-  stream << *packet_ptr;
-  return stream;
+  if(packet_ptr) {
+    return stream << *packet_ptr;
+  }
+  return stream << "empty smart pointer";
 }
 #endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_PACKET_H_

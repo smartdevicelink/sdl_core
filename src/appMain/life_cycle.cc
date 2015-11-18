@@ -99,7 +99,8 @@ bool LifeCycle::StartComponents() {
                                               profile::Profile::instance()->message_frequency_count(),
                                               profile::Profile::instance()->malformed_message_filtering(),
                                               profile::Profile::instance()->malformed_frequency_time(),
-                                              profile::Profile::instance()->malformed_frequency_count());
+                                              profile::Profile::instance()->malformed_frequency_count(),
+                                              profile::Profile::instance()->multiframe_waiting_timeout());
   DCHECK(protocol_handler_ != NULL);
 
   connection_handler_ =

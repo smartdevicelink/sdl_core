@@ -50,6 +50,7 @@
 #include "protocol_handler/session_observer.h"
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/incoming_data_handler.h"
+#include "protocol_handler/multiframe_builder.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_empty.h"
@@ -142,14 +143,17 @@ class ProtocolHandlerImpl
    * \param malformed_message_frequency_time used as time for malformed flood filtering
    * \param malformed_message_frequency_count used as maximum value of malformed
    *        messages per message_frequency_time period
+   * \param multiframe_waiting_timeout used as maximum time of consecutive
+   *        frames handling
    * message exchange.
    */
   explicit ProtocolHandlerImpl(
-    transport_manager::TransportManager *transport_manager_param,
-    size_t message_frequency_time, size_t message_frequency_count,
-    bool malformed_message_filtering,
-    size_t malformed_message_frequency_time,
-    size_t malformed_message_frequency_count);
+      transport_manager::TransportManager *transport_manager_param,
+      size_t message_frequency_time, size_t message_frequency_count,
+      bool malformed_message_filtering,
+      size_t malformed_message_frequency_time,
+      size_t malformed_message_frequency_count,
+      uint32_t multiframe_waiting_timeout);
 
   /**
    * \brief Destructor
@@ -402,59 +406,40 @@ class ProtocolHandlerImpl
 
   /**
    * \brief Handles received message.
-   * \param connection_handle Identifier of connection through which message
-   * is received.
    * \param packet Received message with protocol header.
    * \return \saRESULT_CODE Status of operation
    */
-  RESULT_CODE HandleMessage(
-    ConnectionID connection_id,
-    const ProtocolFramePtr packet);
+  RESULT_CODE HandleMessage(const ProtocolFramePtr packet);
 
   /**
    * \brief Handles message received in single frame.
-   * \param connection_handle Identifier of connection through which message
-   * is received.
    * \param packet Frame of message with protocol header.
    * \return \saRESULT_CODE Status of operation
    */
-  RESULT_CODE HandleSingleFrameMessage(
-    ConnectionID connection_id,
-    const ProtocolFramePtr packet);
+  RESULT_CODE HandleSingleFrameMessage(const ProtocolFramePtr packet);
   /**
    * \brief Handles message received in multiple frames. Collects all frames
    * of message.
-   * \param connection_handle Identifier of connection through which message
-   * is received.
    * \param packet Current frame of message with protocol header.
    * \return \saRESULT_CODE Status of operation
    */
-  RESULT_CODE HandleMultiFrameMessage(
-    ConnectionID connection_id,
-    const ProtocolFramePtr packet);
+  RESULT_CODE HandleMultiFrameMessage(const ProtocolFramePtr packet);
 
   /**
    * \brief Handles message received in single frame.
-   * \param connection_handle Identifier of connection through which message
-   * is received.
    * \param packet Received message with protocol header.
    * \return \saRESULT_CODE Status of operation
    */
   RESULT_CODE HandleControlMessage(
-    ConnectionID connection_id,
     const ProtocolFramePtr packet);
 
-  RESULT_CODE HandleControlMessageEndSession(
-    ConnectionID connection_id,
-    const ProtocolPacket &packet);
+  RESULT_CODE HandleControlMessageEndSession(const ProtocolPacket &packet);
 
-  RESULT_CODE HandleControlMessageStartSession(
-    ConnectionID connection_id,
-    const ProtocolPacket &packet);
+  RESULT_CODE HandleControlMessageStartSession(const ProtocolPacket &packet);
 
-  RESULT_CODE HandleControlMessageHeartBeat(
-    ConnectionID connection_id,
-    const ProtocolPacket &packet);
+  RESULT_CODE HandleControlMessageHeartBeat(const ProtocolPacket &packet);
+
+  void PopValideAndExpirateMultiframes();
 
   // threads::MessageLoopThread<*>::Handler implementations
   // CALLED ON raw_ford_messages_from_mobile_ thread!
@@ -495,10 +480,9 @@ class ProtocolHandlerImpl
   transport_manager::TransportManager *transport_manager_;
 
   /**
-   *\brief Map of frames with last frame data for messages received in multiple frames.
+   *\brief Assembling support class.
    */
-  typedef std::map<int32_t, ProtocolFramePtr> MultiFrameMap;
-  MultiFrameMap incomplete_multi_frame_messages_;
+  MultiFrameBuilder multiframe_builder_;
 
   /**
    * \brief Map of messages (frames) received over mobile nave session
