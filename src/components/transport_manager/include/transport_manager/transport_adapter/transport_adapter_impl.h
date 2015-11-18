@@ -446,7 +446,7 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @return pointer to the connection.
    */
-  ConnectionSPtr FindEstablishedConnection(const DeviceUID& device_handle,
+  virtual ConnectionSPtr FindEstablishedConnection(const DeviceUID& device_handle,
                                            const ApplicationHandle& app_handle) const;
 
  private:

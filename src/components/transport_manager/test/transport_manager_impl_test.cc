@@ -337,18 +337,6 @@ TEST_F(TransportManagerImplTest, DisconnectDevice) {
   EXPECT_EQ(E_SUCCESS, tm.DisconnectDevice(device_handle_));
 }
 
-TEST_F(TransportManagerImplTest, DISABLED_DisconnectDevice_ConnectionFailed) {
-  HandleDeviceListUpdated();
-  EXPECT_CALL(*mock_adapter, ConnectDevice(mac_address_))
-      .WillOnce(Return(TransportAdapter::FAIL));
-  EXPECT_EQ(E_INTERNAL_ERROR, tm.ConnectDevice(device_handle_));
-
-  EXPECT_CALL(*mock_adapter, DisconnectDevice(mac_address_))
-      .WillOnce(Return(TransportAdapter::FAIL));
-
-  EXPECT_EQ(E_INTERNAL_ERROR, tm.DisconnectDevice(device_handle_));
-}
-
 TEST_F(TransportManagerImplTest, DisconnectDevice_DeviceNotConnected) {
   EXPECT_CALL(*mock_adapter, DisconnectDevice(mac_address_)).Times(0);
   EXPECT_EQ(E_INVALID_HANDLE, tm.DisconnectDevice(device_handle_));
@@ -362,16 +350,6 @@ TEST_F(TransportManagerImplTest, Disconnect) {
       .WillOnce(Return(TransportAdapter::OK));
   // Assert
   EXPECT_EQ(E_SUCCESS, tm.Disconnect(connection_key_));
-}
-
-TEST_F(TransportManagerImplTest, DISABLED_Disconnect_DisconnectionFailed) {
-  // Arrange
-  HandleConnection();
-
-  EXPECT_CALL(*mock_adapter, Disconnect(mac_address_, application_id))
-      .WillOnce(Return(TransportAdapter::FAIL));
-  // Assert
-  EXPECT_EQ(E_INTERNAL_ERROR, tm.Disconnect(connection_key_));
 }
 
 TEST_F(TransportManagerImplTest, Disconnect_ConnectionNotExist) {
