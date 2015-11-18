@@ -312,8 +312,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CM
   add_definitions(-DAVAHI_SUPPORT)
 # --- Check libavahi-common, libavahi-client availability
   find_package(Libavahi)
-endif()
   message(STATUS "Avahi support is enabled")
+endif()
+  message(STATUS "Avahi support is disabled")
 endif()
 
 if (BUILD_RWLOCK_SUPPORT)
