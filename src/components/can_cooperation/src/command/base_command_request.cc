@@ -430,8 +430,8 @@ void BaseCommandRequest::on_event(
   if (event.id() == functional_modules::hmi_api::get_user_consent) {
     ProcessAccessResponse(event);
   } else {
-    OnEvent(event);  // run child's logic
     UpdateHMILevel(event);
+    OnEvent(event);  // run child's logic
   }
 }
 
