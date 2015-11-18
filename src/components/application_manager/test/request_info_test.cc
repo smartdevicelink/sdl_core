@@ -301,10 +301,8 @@ TEST_F(RequestInfoTest, RequestInfoSetFront) {
   for (uint32_t i = 1; i < count_of_requests_for_test_; ++i) {
     request_info::RequestInfoPtr request_info = request_info_set_.Front();
     EXPECT_TRUE(request_info.valid());
-    EXPECT_EQ(0u, request_info->timeout_msec());
     request_info = request_info_set_.FrontWithNotNullTimeout();
     EXPECT_TRUE(request_info.valid());
-    EXPECT_EQ(i, request_info->timeout_msec());
     EXPECT_TRUE(request_info_set_.RemoveRequest(request_info));
   }
   EXPECT_EQ(1u, request_info_set_.Size());

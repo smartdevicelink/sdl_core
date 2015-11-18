@@ -114,35 +114,6 @@ class EventEngineTest : public testing::Test {
     delete event_;
   }
 
-  void ExtractObserversListFromObservers(
-      const Event::EventID& event_id,
-      EventDispatcher::ObserverList& observers_list) {
-    const EventDispatcher::EventObserverMap& event_observer_map =
-        event_dispatcher_instance_->get_observers();
-    EventDispatcher::EventObserverMap::const_iterator event_observer_map_iter =
-        event_observer_map.find(event_id);
-    ASSERT_TRUE(event_observer_map_iter != event_observer_map.end());
-    EventDispatcher::ObserversMap observers_map =
-        event_observer_map_iter->second;
-    EventDispatcher::ObserversMap::const_iterator observers_map_iter =
-        observers_map.find(correlation_id);
-    ASSERT_TRUE(observers_map_iter != observers_map.end());
-    observers_list = observers_map_iter->second;
-  }
-
-  void CheckObserverNumberInObserversList(const EventObserver* observer,
-                                          const Event::EventID& event_id,
-                                          const uint32_t observers_number) {
-    EventDispatcher::ObserverList observers_list;
-    ExtractObserversListFromObservers(event_id, observers_list);
-    EXPECT_EQ(observers_number, observers_list.size());
-    if (!observers_list.empty()) {
-      EventDispatcher::ObserverList::const_iterator observer_list_iter =
-          std::find(observers_list.begin(), observers_list.end(), observer);
-      EXPECT_TRUE(observer_list_iter != observers_list.end());
-    }
-  }
-
   void CheckRaiseEvent(const Event::EventID& event_id,
                        const uint32_t calls_number,
                        const smart_objects::SmartObject& so) {
@@ -162,62 +133,6 @@ TEST_F(EventEngineTest, EventObserverTest_ExpectObserversEmpty) {
   // Check
   EXPECT_EQ(reinterpret_cast<unsigned long>(event_observer_ptr),
             event_observer_mock_.id());
-}
-
-TEST_F(EventEngineTest, BasicEventDispatcherInstanceTest_ExpectObserversEmpty) {
-  EXPECT_TRUE(event_dispatcher_instance_->get_observers().empty());
-  EXPECT_TRUE(event_dispatcher_instance_->get_observers_list().empty());
-}
-
-TEST_F(EventEngineTest, EventDispatcher_AddObserverTest_ExpectObserverAdded) {
-  // Arrange
-  // Act - add one observer
-  event_dispatcher_instance_->add_observer(event_id, correlation_id,
-                                           &event_observer_mock_);
-  // Check one observer added
-  CheckObserverNumberInObserversList(&event_observer_mock_, event_id, 1u);
-}
-
-TEST_F(EventEngineTest,
-       EventDispatcher_RemoveObserverForAllEvents_ExpectObserverRemoved) {
-  // Arrange
-  // Add observer for event 1
-  event_dispatcher_instance_->add_observer(event_id, correlation_id,
-                                           &event_observer_mock_);
-  // Add observer for event 2
-  event_dispatcher_instance_->add_observer(event_id2, correlation_id,
-                                           &event_observer_mock_);
-
-  // Check observers added
-  CheckObserverNumberInObserversList(&event_observer_mock_, event_id, 1u);
-  CheckObserverNumberInObserversList(&event_observer_mock_, event_id2, 1u);
-
-  // Act - remove observer for all events
-  event_dispatcher_instance_->remove_observer(&event_observer_mock_);
-  // Check - observer removed for all events
-  CheckObserverNumberInObserversList(&event_observer_mock_, event_id, 0u);
-  CheckObserverNumberInObserversList(&event_observer_mock_, event_id2, 0u);
-}
-
-TEST_F(EventEngineTest,
-       EventDispatcher_RemoveObserverForEvent_ExpectObserverRemoved) {
-  // Arrange
-  // Add observer for event 1
-  event_dispatcher_instance_->add_observer(event_id, correlation_id,
-                                           &event_observer_mock_);
-  // Add observer for event 2
-  event_dispatcher_instance_->add_observer(event_id2, correlation_id,
-                                           &event_observer_mock_);
-
-  CheckObserverNumberInObserversList(&event_observer_mock_, event_id, 1u);
-  CheckObserverNumberInObserversList(&event_observer_mock_, event_id2, 1u);
-
-  // Act - remove observer
-  event_dispatcher_instance_->remove_observer(event_id, &event_observer_mock_);
-  // Check - observer for event 1 is removed
-  CheckObserverNumberInObserversList(&event_observer_mock_, event_id, 0u);
-  // Check - observer for event 2 is not removed
-  CheckObserverNumberInObserversList(&event_observer_mock_, event_id2, 1u);
 }
 
 TEST_F(EventEngineTest,

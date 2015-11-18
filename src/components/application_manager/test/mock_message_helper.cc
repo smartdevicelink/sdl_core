@@ -214,6 +214,11 @@ void MessageHelper::SendUpdateSDLResponse(const std::string& result,
       result, correlation_id);
 }
 
+void MessageHelper::SendDecryptCertificateToHMI(const std::string& file_name) {
+  MockMessageHelper::message_helper_mock()->SendDecryptCertificateToHMI(
+      file_name);
+}
+
 hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(const std::string& language) {
    return MockMessageHelper::message_helper_mock()->CommonLanguageFromString(
         language);
@@ -273,6 +278,17 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
     smart_objects::SmartObject& message, ApplicationConstSharedPtr app) {
   return MockMessageHelper::message_helper_mock()->VerifyImageFiles(message,
                                                                     app);
+}
+std::string MessageHelper::CommonLanguageToString(
+    hmi_apis::Common_Language::eType lang){
+  return MockMessageHelper::message_helper_mock()->CommonLanguageToString(lang);
+}
+
+bool MessageHelper::CheckWithPolicy(
+    mobile_apis::SystemAction::eType system_action,
+    const std::string& app_mobile_id){
+  return MockMessageHelper::message_helper_mock()->CheckWithPolicy(
+      system_action, app_mobile_id);
 }
 
 }  // namespace application_manager
