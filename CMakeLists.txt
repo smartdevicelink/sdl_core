@@ -314,7 +314,6 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX" OR CM
   find_package(Libavahi)
   message(STATUS "Avahi support is enabled")
 endif()
-  message(STATUS "Avahi support is disabled")
 endif()
 
 if (BUILD_RWLOCK_SUPPORT)
