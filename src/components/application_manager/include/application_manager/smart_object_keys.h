@@ -398,7 +398,7 @@ const char templates_available[] = "templatesAvailable";
 const char screen_params[] = "screenParams";
 const char num_custom_presets_available[] = "numCustomPresetsAvailable";
 const char urls[] = "urls";
-const char policy_app_id[] = "policyAppId";
+const char policy_app_id[] = "policyAppID";
 const char enabled[] = "enabled";
 
 }  // namespace hmi_response
