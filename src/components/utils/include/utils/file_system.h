@@ -38,9 +38,6 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#ifdef OS_WIN32
-#include "utils/logger.h"
-#endif
 
 namespace file_system {
 
