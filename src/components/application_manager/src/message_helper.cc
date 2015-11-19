@@ -284,7 +284,6 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
     msg_params[strings::priority] = GetPriorityCode(priority);
   }
 
-  msg_params[strings::msg_params] = SmartObject(SmartType_Map);
   smart_objects::SmartObject& application = msg_params[strings::application];
   application[strings::app_name] = application_impl.name();
   application[strings::app_id] = application_impl.app_id();
