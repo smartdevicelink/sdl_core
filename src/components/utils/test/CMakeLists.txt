@@ -110,4 +110,6 @@ file(COPY smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 create_test("utils_test" "${testSources}" "${testLibraries}")
 
+add_subdirectory(test_generator)
+
 endif()
