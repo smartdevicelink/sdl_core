@@ -79,6 +79,34 @@ MediaManagerImpl::~MediaManagerImpl() {
   }
 }
 
+#ifdef BUILD_TESTS
+  void MediaManagerImpl::set_mock_a2dp_player(MediaAdapter* media_adapter) {
+    a2dp_player_= media_adapter;
+  }
+
+  void MediaManagerImpl::set_mock_mic_listener(MediaListenerPtr media_listener) {
+    from_mic_listener_ = media_listener;
+  }
+
+#ifdef EXTENDED_MEDIA_MODE
+  void MediaManagerImpl::set_mock_mic_recorder(MediaAdapterImpl* media_adapter) {
+    from_mic_recorder_ = media_adapter;
+  }
+
+#endif // EXTENDED_MEDIA_MODE
+
+  void MediaManagerImpl::set_mock_streamer(protocol_handler::ServiceType stype,
+                                           MediaAdapterImpl* mock_stream) {
+    streamer_[stype]=  mock_stream;
+  }
+
+  void MediaManagerImpl::set_mock_streamer_listener(protocol_handler::ServiceType stype,
+                                                    MediaAdapterListener* mock_stream) {
+    streamer_listener_[stype]=  mock_stream;
+  }
+
+#endif // BUILD_TESTS
+
 void MediaManagerImpl::Init() {
   using namespace protocol_handler;
   LOG4CXX_INFO(logger_, "MediaManagerImpl::Init()");

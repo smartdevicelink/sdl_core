@@ -47,3 +47,7 @@ if (BUILD_USB_SUPPORT)
     set(LIBUSB_LIBS_DIRECTORY ${LIBUSB_LIBS_DIRECTORY} PARENT_SCOPE)
   endif()
 endif()
+
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()

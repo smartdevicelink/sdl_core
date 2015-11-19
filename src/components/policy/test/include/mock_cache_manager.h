@@ -78,6 +78,10 @@ class MockCacheManagerInterface : public CacheManagerInterface {
       int(const std::string& priority));
   MOCK_METHOD2(GetPriority,
       bool(const std::string& policy_app_id, std::string& priority));
+  MOCK_METHOD2(GetServiceUrls,
+      void(const std::string& service_type, EndpointUrls& end_points));
+  MOCK_CONST_METHOD0(GetLockScreenIconUrl,
+      std::string());
   MOCK_METHOD1(Init,
       bool(const std::string& file_name));
   MOCK_METHOD0(GenerateSnapshot,
@@ -188,7 +192,6 @@ class MockCacheManagerInterface : public CacheManagerInterface {
   MOCK_METHOD3(IsPermissionsCalculated,
                bool(const std::string& device_id, const std::string& policy_app_id, policy::Permissions& permission));
   MOCK_CONST_METHOD0(GetPT, utils::SharedPtr<policy_table::Table>());
-  MOCK_CONST_METHOD0(GetMetaInfo, const MetaInfo());
   MOCK_CONST_METHOD0(GetCertificate, std::string());
   MOCK_METHOD1(SetDecryptedCertificate, void(const std::string&));
 };

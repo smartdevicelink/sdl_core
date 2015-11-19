@@ -177,9 +177,8 @@ char ini_write_value(const char *fname,
 
 #if USE_MKSTEMP
   {
-    char             *temp_str;
+    const char *temp_str = "./";
     int32_t fd = -1;
-    temp_str = static_cast<char*>(getenv("TMPDIR"));
     if (temp_str) {
       snprintf(temp_fname, PATH_MAX,
                "%s/ini.XXXXXX", temp_str);

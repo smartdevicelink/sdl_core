@@ -36,7 +36,7 @@
 #include <vector>
 #include <string>
 #include "policy/policy_types.h"
-#include "types.h"
+#include "./types.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 

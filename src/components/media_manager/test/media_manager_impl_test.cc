@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,61 +32,93 @@
 
 #include "gmock/gmock.h"
 #include "media_manager/media_manager_impl.h"
+#include "include/media_adapter_mock.h"
+#include "include/media_adapter_listener_mock.h"
+#include "include/media_adapter_impl_mock.h"
 
 namespace test {
 namespace components {
 namespace media_manager_test {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManagerImplTest")
+using namespace ::media_manager;
+using ::testing::_;
 
-class MediaManagerTest : public ::testing::Test {
-  protected:
-    virtual void SetUp();
-    virtual void TearDown();
-};
+TEST(MediaManagerImplTest, PlayA2DPSource) {
+  MediaManagerImpl* mediaManagerImpl = MediaManagerImpl::instance();
+  EXPECT_TRUE(mediaManagerImpl->exists());
+  int32_t application_key = 1;
 
-void MediaManagerTest::SetUp() {
+  MediaAdapterMock media_mock;
+  mediaManagerImpl->set_mock_a2dp_player(&media_mock);
+  EXPECT_CALL(media_mock, StartActivity(application_key));
+  mediaManagerImpl->PlayA2DPSource(application_key);
 }
 
-void MediaManagerTest::TearDown() {
+TEST(MediaManagerImplTest, StopA2DPSource) {
+  MediaManagerImpl* mediaManagerImpl = MediaManagerImpl::instance();
+  EXPECT_TRUE(mediaManagerImpl->exists());
+  int32_t application_key = 1;
+
+  MediaAdapterMock media_mock;
+  mediaManagerImpl->set_mock_a2dp_player(&media_mock);
+  EXPECT_CALL(media_mock, StopActivity(application_key));
+  mediaManagerImpl->StopA2DPSource(application_key);
 }
 
-TEST_F(MediaManagerTest, AddAndPlayStream) {
-  media_manager::MediaManager* mediaManager =
-    media_manager::MediaManagerImpl::instance();
+TEST(MediaManagerImplTest, StopMicrophoneRecording) {
+  MediaManagerImpl* mediaManagerImpl = MediaManagerImpl::instance();
+  int32_t application_key = 1;
+  MediaAdapterListenerMock media_adapter_listener_mock;
 
-  const useconds_t sleeptime = 100;
-
-  mediaManager->PlayA2DPSource(1);
-  LOG4CXX_INFO(logger_, ".Playing stream");
-
-  usleep(sleeptime);
-
-  mediaManager->StopA2DPSource(1);
-
-  usleep(sleeptime);
-
-  mediaManager->PlayA2DPSource(1);
-
-  usleep(sleeptime);
-
-  mediaManager->StopA2DPSource(1);
-
-  usleep(sleeptime);
-
-  mediaManager->PlayA2DPSource(1);
-
-  usleep(sleeptime);
-
-  mediaManager->StopA2DPSource(1);
-
-  usleep(sleeptime);
-
-  mediaManager->StopA2DPSource(1);
+  mediaManagerImpl->set_mock_mic_listener(&media_adapter_listener_mock);
+#ifdef EXTENDED_MEDIA_MODE
+  MediaAdapterImplMock media_adapter_recorder_mock;
+  mediaManagerImpl->set_mock_mic_recorder(&media_adapter_recorder_mock);
+  EXPECT_CALL(media_adapter_recorder_mock, StopActivity(application_key));
+#endif  // EXTENDED_MEDIA_MODE
+  EXPECT_CALL(media_adapter_listener_mock, OnActivityEnded(application_key));
+#ifdef EXTENDED_MEDIA_MODE
+  EXPECT_CALL(media_adapter_recorder_mock, RemoveListener(_));
+#endif  // EXTENDED_MEDIA_MODE
+  mediaManagerImpl->StopMicrophoneRecording(application_key);
 }
 
-}  //  namespace media_manager_test
-}  //  namespace components
-}  //  namespace test
+TEST(MediaManagerImplTest, StartStopStreaming) {
+  MediaManagerImpl* mediaManagerImpl = MediaManagerImpl::instance();
 
+  int32_t application_key = 1;
+  MediaAdapterImplMock mock_audio_media_streamer;
+  mediaManagerImpl->set_mock_streamer(ServiceType::kAudio,
+                                      &mock_audio_media_streamer);
+  MediaAdapterImplMock mock_nav_media_streamer;
+  mediaManagerImpl->set_mock_streamer(ServiceType::kMobileNav,
+                                      &mock_nav_media_streamer);
 
+  EXPECT_CALL(mock_audio_media_streamer, StartActivity(application_key));
+  mediaManagerImpl->StartStreaming(application_key, ServiceType::kAudio);
+
+  EXPECT_CALL(mock_nav_media_streamer, StartActivity(application_key));
+  mediaManagerImpl->StartStreaming(application_key, ServiceType::kMobileNav);
+
+  EXPECT_CALL(mock_audio_media_streamer, StopActivity(application_key));
+  mediaManagerImpl->StopStreaming(application_key, ServiceType::kAudio);
+
+  EXPECT_CALL(mock_nav_media_streamer, StopActivity(application_key));
+  mediaManagerImpl->StopStreaming(application_key, ServiceType::kMobileNav);
+}
+
+TEST(MediaManagerImplTest, CheckFramesProcessed) {
+  MediaManagerImpl* mediaManagerImpl = MediaManagerImpl::instance();
+  ProtocolHandlerMock mock_protocol_handler;
+  mediaManagerImpl->SetProtocolHandler(&mock_protocol_handler);
+  int32_t application_key = 1;
+  int32_t frame_number = 10;
+
+  EXPECT_CALL(mock_protocol_handler,
+              SendFramesNumber(application_key, frame_number));
+  mediaManagerImpl->FramesProcessed(application_key, frame_number);
+}
+
+}  // namespace media_manager_test
+}  // namespace components
+}  // namespace test

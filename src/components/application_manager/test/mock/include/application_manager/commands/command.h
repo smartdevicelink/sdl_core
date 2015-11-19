@@ -1,1 +1,0 @@
-../../../../../include/application_manager/commands/command.h

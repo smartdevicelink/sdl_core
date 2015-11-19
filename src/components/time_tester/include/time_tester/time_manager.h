@@ -85,12 +85,14 @@ class TimeManager {
   virtual void SendMetric(utils::SharedPtr<MetricWrapper> metric);
   void set_streamer(Streamer* streamer);
 
+#ifdef BUILD_TESTS
   const std::string ip() const{
     return ip_;
   }
   const int16_t port() const {
     return port_;
   }
+#endif  // BUILD_TESTS
 
  private:
   int16_t port_;

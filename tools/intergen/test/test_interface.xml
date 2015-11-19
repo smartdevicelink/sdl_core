@@ -1,0 +1,457 @@
+<?xml version="1.0" standalone="no"?>
+
+<!--
+* Copyright (c) 2015, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE. -->
+<?xml-stylesheet type="text/xml" href="protocol2html.xsl"?>
+
+<interface name="test rpc interface" version="42" >
+
+  <enum name="Result" internal_scope="base">
+    <element name="SUCCESS">
+      <description>The request succeeded</description>
+    </element>
+    <element name="INVALID_DATA">
+      <description>
+      	The data sent is invalid. For example:
+		Invalid Json syntax
+      	Parameters out of bounds (number or enum range)
+      	Mandatory parameters not provided
+      	Parameter provided with wrong type
+      	Invalid characters
+      	Empty string
+      </description>
+    </element>
+    <element name="UNSUPPORTED_REQUEST">
+      <description>The request is not supported by Sync</description>
+    </element>
+    <element name="OUT_OF_MEMORY">
+      <description>The system could not process the request because the necessary memory couldn't be allocated</description>
+    </element>
+    <element name="TOO_MANY_PENDING_REQUESTS">
+      <description>There are too many requests pending (means, that the response has not been delivered, yet).</description>
+      <designdescription>There may be a maximum of 1000 pending requests at a time.</designdescription>
+    </element>
+    <element name="INVALID_ID">
+      <description>
+      	One of the provided IDs is not valid. For example
+      	This applies to CorrelationID, SubscriptionID, CommandID, MenuID, etc.
+      </description>
+    </element>
+    <element name="DUPLICATE_NAME">
+      <description>There was a conflict with an registered name (application or menu item) or vr command</description>
+    </element>
+    <element name="TOO_MANY_APPLICATIONS">
+      <description>There are already too many registered applications</description>
+    </element>
+    <element name="APPLICATION_REGISTERED_ALREADY">
+      <description>RegisterApplication has been called again, after a RegisterApplication was successful before.</description>
+    </element>
+    <element name="UNSUPPORTED_VERSION">
+      <description>Sync doesn't support the protocol that is requested by the mobile application</description>
+    </element>
+    <element name="WRONG_LANGUAGE">
+      <description>
+      	The requested language is currently not supported.
+      	Might be because of a mismatch of the currently active language on Sync and the requested language
+      </description>
+    </element>
+    <element name="APPLICATION_NOT_REGISTERED">
+      <description>An command can not be executed because no application has been registered with RegisterApplication.</description>
+    </element>
+    <element name="IN_USE">
+      <description>
+      	The data may not be changed, because it is currently in use.
+      	For example when trying to delete a command set that is currently involved in an interaction.
+      </description>
+    </element>
+    <element name="VEHICLE_DATA_NOT_ALLOWED">
+      <description>The user has turned off access to vehicle data, and it is globally unavailable to mobile applications.</description>
+    </element>
+    <element name="VEHICLE_DATA_NOT_AVAILABLE">
+      <description>The requested vehicle data is not available on this vehicle or is not published.</description>
+    </element>
+    <element name="REJECTED">
+      <description>
+      	The requested command was rejected, e.g. because mobile app is in background and cannot perform any HMI commands.
+      	Or an HMI command (e.g. Speak) is rejected because a higher priority HMI command (e.g. Alert) is playing.
+      </description>
+    </element>
+    <element name="ABORTED">
+      <description>
+      	A command was aborted, for example due to user interaction (e.g. user pressed button).
+      	Or an HMI command (e.g. Speak) is aborted because a higher priority HMI command (e.g. Alert) was requested.
+      </description>
+    </element>
+    <element name="IGNORED">
+      <description>
+      	A command was ignored, because the intended result is already in effect.
+      	For example, SetMediaClockTimer was used to pause the media clock although the clock is paused already.
+      	NOTE: potentially replaces SUBSCRIBED_ALREADY
+      </description>
+    </element>
+    <element name="UNSUPPORTED_RESOURCE">
+      <description>
+      	A button that was requested for subscription is not supported under the current system.
+      	NOTE: could become a more generic UNSUPPORTED_RESOURCE by merging with VEHICLE_DATA_NOT_AVAILABLE.
+      </description>
+    </element>
+    <element name="FILE_NOT_FOUND">
+      <description>A specified file could not be found on Sync.</description>
+    </element>
+    <element name="GENERIC_ERROR">
+      <description>Provided data is valid but something went wrong in the lower layers.</description>
+    </element>
+    <element name="DISALLOWED">
+      <description>RPC is not authorized in local policy table.</description>
+    </element>
+    <element name="USER_DISALLOWED">
+      <description>RPC is included in a functional group explicitly blocked by the user.</description>
+    </element>
+    <element name="TIMED_OUT">
+      <description>Overlay reached the maximum timeout and closed.</description>
+    </element>
+    <element name="CANCEL_ROUTE">
+      <description>User selected to Cancel Route.</description>
+    </element>
+    <element name="TRUNCATED_DATA">
+      <description>The RPC (e.g. ReadDID) executed successfully but the data exceeded the platform maximum threshold and thus, only part of the data is available.</description>
+    </element>
+    <element name="RETRY">
+      <description>The user interrupted the RPC (e.g. PerformAudioPassThru) and indicated to start over.  Note, the app must issue the new RPC.</description>
+    </element>
+    <element name="WARNINGS">
+      <description>The RPC (e.g. SubscribeVehicleData) executed successfully but one or more items have a warning or failure.</description>
+    </element>
+  </enum>
+
+  <enum name="AppInterfaceUnregisteredReason">
+    <description>Error code, which comes from sync side.</description>
+<!-- Deprecate
+    <element name="USER_EXIT" />
+-->
+    <element name="IGNITION_OFF" />
+    <element name="BLUETOOTH_OFF" />
+    <element name="USB_DISCONNECTED" />
+    <element name="REQUEST_WHILE_IN_NONE_HMI_LEVEL" />
+    <element name="TOO_MANY_REQUESTS" />
+    <element name="DRIVER_DISTRACTION_VIOLATION" />
+    <element name="LANGUAGE_CHANGE" />
+    <element name="MASTER_RESET" />
+    <element name="FACTORY_DEFAULTS" />
+    <element name="APP_UNAUTHORIZED" />
+  </enum>
+
+  <enum name="TBTState">
+    <description>Enumeration that describes possible states of turn-by-turn client or AppLink app.</description>
+    <element name="ROUTE_UPDATE_REQUEST" />
+    <element name="ROUTE_ACCEPTED" />
+    <element name="ROUTE_REFUSED" />
+    <element name="ROUTE_CANCELLED" />
+    <element name="ETA_REQUEST" />
+    <element name="NEXT_TURN_REQUEST" />
+    <element name="ROUTE_STATUS_REQUEST" />
+    <element name="ROUTE_SUMMARY_REQUEST" />
+    <element name="TRIP_STATUS_REQUEST" />
+    <element name="ROUTE_UPDATE_REQUEST_TIMEOUT" />
+  </enum>
+
+  <enum name="ImageType">
+    <description>Contains information about the type of image.</description>
+    <element name="STATIC" />
+    <element name="DYNAMIC" />
+  </enum>
+
+  <struct name="Image">
+    <param name="value" maxlength="65535" type="String">
+      <description>Either the static hex icon value or the binary image file name identifier (sent by PutFile).</description>
+    </param>
+    <param name="imageType" type="ImageType">
+      <description>Describes, whether it is a static or dynamic image.</description>
+    </param>
+  </struct>
+
+  <struct name="Choice">
+    <description>A choice is an option given to the user, which can be selected either by menu, or through voice recognition system.</description>
+    <param name="choiceID" type="Integer" minvalue="0" maxvalue="65535" />
+    <param name="menuName" type="String" maxlength="500" />
+    <param name="vrCommands" type="String" minsize="1" maxsize="100" maxlength="99" map="true" />
+    <param name="image" type="Image" mandatory="false"/>
+    <param name="secondaryText" maxlength="500" type="String" mandatory="false" scope="partner">
+      <description>Optional secondary text to display; e.g. address of POI in a search result entry</description>
+    </param>
+    <param name="tertiaryText" maxlength="500" type="String" mandatory="false" scope="partner">
+      <description>Optional tertiary text to display; e.g. distance to POI for a search result entry</description>
+    </param>
+    <param name="secondaryImage" type="Image" mandatory="false" scope="partner">
+      <description>Optional secondary image struct for choice</description>
+    </param>
+  </struct>
+
+  <struct name="TestStructWithNullableParam">
+    <param name="nullableInt" nullable="true" type="Integer" minavlue="0" maxvalue="42" />
+  </struct>
+
+  <struct name="TestStructWithNullableStructParam">
+    <param name="nullableEnum" nullable="true" type="ImageType"/>
+    <param name="nonNullableEnum" nullable="true" type="ImageType"/>
+  </struct>
+
+  <enum name="FunctionID" internal_scope="base">
+    <description>Enumeration linking function names with function IDs in AppLink protocol.</description>
+    <description>Assumes enumeration starts at value 0.</description>
+    <element name="RESERVED" value="0" />
+    <element name="AddSubMenuID" value="7" hexvalue="7" />
+    <element name="DiagnosticMessageID" value="37" hexvalue="25" />
+    <element name="OnAppInterfaceUnregisteredID" value="32769" hexvalue="8001" />
+    <element name="OnTBTClientStateID" value="32774" hexvalue="8006" />
+    <element name="OnAudioPassThruID" value="32777" hexvalue="8009" />
+    <element name="DummyNotificationID" value="42" />
+  </enum>
+
+  <enum name="messageType">
+    <description>
+    	Enumeration linking message types with function types in WiPro protocol.
+    	Assumes enumeration starts at value 0.
+    </description>
+    <element name="request" value="0" />
+    <element name="response" value="1" />
+    <element name="notification" value="2" />
+  </enum>
+
+  <!-- Requests/Responses -->
+
+  <function name="AddSubMenu" functionID="AddSubMenuID" messagetype="request">
+    <description>Adds a sub menu to the in-application menu.</description>
+
+    <param name="menuID" type="Integer" minvalue="1" maxvalue="2000000000">
+      <description>unique ID of the sub menu to add.</description>
+    </param>
+
+    <param name="position" type="Integer" minvalue="0" maxvalue="1000" defvalue="1000" mandatory="false">
+      <description>
+      	Position within the items that are are at top level of the in application menu.
+      	0 will insert at the front.
+      	1 will insert at the second position.
+      	If position is greater or equal than the number of items on top level, the sub menu will be appended to the end.
+      	Position of any submenu will always be located before the return and exit options
+      	If this param was omitted the entry will be added at the end.
+      </description>
+    </param>
+
+    <param name="menuName" maxlength="500" type="String">
+      <description>Text to show in the menu for this sub menu.</description>
+    </param>
+  </function>
+
+  <function name="AddSubMenu" functionID="AddSubMenuID" messagetype="response">
+    <param name="success" type="Boolean" platform="documentation">
+		<description> true if successful; false, if failed </description>
+	  </param>
+
+    <param name="resultCode" type="Result" platform="documentation">
+      <description>See Result</description>
+      <element name="SUCCESS"/>
+      <element name="INVALID_DATA"/>
+      <element name="OUT_OF_MEMORY"/>
+      <element name="TOO_MANY_PENDING_REQUESTS"/>
+      <element name="APPLICATION_NOT_REGISTERED"/>
+      <element name="GENERIC_ERROR"/>
+      <element name="REJECTED"/>
+      <element name="INVALID_ID"/>
+      <element name="DUPLICATE_NAME"/>
+    </param>
+
+    <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+      <description>Provides additional human readable info regarding the result.</description>
+    </param>
+  </function>
+
+
+  <function name="DiagnosticMessage" functionID="DiagnosticMessageID" messagetype="request" scope="internal">
+    <description>Non periodic vehicle diagnostic request</description>
+
+    <param name="targetID" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+      <description>Name of target ECU.</description>
+    </param>
+
+    <param name="messageLength" type="Integer" minvalue="0" maxvalue="65535" mandatory="true">
+      <description>Length of message (in bytes).</description>
+    </param>
+
+    <param name="messageData" type="Integer" minvalue="0" maxvalue="255" minsize="1" maxsize="65535" array="true" mandatory="true">
+      <description>
+      	Array of bytes comprising CAN message.
+      </description>
+    </param>
+  </function>
+
+  <function name="DiagnosticMessage" functionID="DiagnosticMessageID" messagetype="response" scope="internal">
+
+    <param name="success" type="Boolean" platform="documentation">
+      <description> true, if successful; false, if failed </description>
+    </param>
+
+    <param name="resultCode" type="Result" array="true" platform="documentation">
+      <description>See Result</description>
+      <element name="SUCCESS"/>
+      <element name="INVALID_DATA"/>
+      <element name="OUT_OF_MEMORY"/>
+      <element name="TOO_MANY_PENDING_REQUESTS"/>
+      <element name="APPLICATION_NOT_REGISTERED"/>
+      <element name="GENERIC_ERROR"/>
+      <element name="REJECTED"/>
+      <element name="DISALLOWED"/>
+      <element name="USER_DISALLOWED"/>
+      <element name="TRUNCATED_DATA"/>
+    </param>
+
+    <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
+      <description>Provides additional human readable info regarding the result.</description>
+    </param>
+
+    <param name="messageDataResult" type="Integer" minvalue="0" maxvalue="255" minsize="1" maxsize="65535" array="true" mandatory="true">
+      <description>
+      	Array of bytes comprising CAN message result.
+      </description>
+    </param>
+
+  </function>
+
+  <function name="OnAppInterfaceUnregistered" functionID="OnAppInterfaceUnregisteredID" messagetype="notification">
+    <param name="reason" type="AppInterfaceUnregisteredReason">
+      <description>See AppInterfaceUnregisteredReason</description>
+    </param>
+  </function>
+
+  <function name="OnTBTClientState" functionID="OnTBTClientStateID" messagetype="notification" >
+    <description>Provides applications with notifications specific to the current TBT client status on the module</description>
+    <param name="state" type="TBTState">
+      <description>Current State of TBT client</description>
+    </param>
+  </function>
+
+  <function name="OnAudioPassThru" functionID="OnAudioPassThruID" messagetype="notification">
+      <description>Binary data is in binary part of hybrid msg</description>
+  </function>
+
+  <typedef name="TdResult" type="Result">
+    <description>
+      Test typedef over enum
+    </description>
+  </typedef>
+
+  <struct name="EmptyStruct">
+    <description>
+      Completely empty structure
+    </description>
+  </struct>
+
+  <struct name="StructWithOptionalEmptyStructField">
+    <param name="emptyOne" type="EmptyStruct" mandatory="false" />
+  </struct>
+
+  <struct name="StructWithMandatoryEmptyStructField">
+    <param name="emptyOne" type="EmptyStruct" />
+  </struct>
+
+  <struct name="StructWithNullableTypedef">
+    <description>
+      Test struct having nullable typedef as a param
+    </description>
+    <param name="nullableTdResult" type="TdResult" nullable="true"/>
+  </struct>
+
+  <struct name="StructWithOneOptionalIntField" nullable="true" >
+    <param name="optionalInt" type="Integer" minvalue="1" maxvalue="42" mandatory="false" />
+  </struct>
+
+  <struct name="StructWithFieldOfStructThatMightBeEmpty">
+    <param name="fieldThatMightBeEmpty" type="StructWithOneOptionalIntField" mandatory="true" />
+  </struct>
+
+  <struct name="StructWithNullableOptionalMap">
+    <param name="nullableOptionalIntMap" type="Integer" map="true" nullable="true" mandatory="false" minsize="0" maxsize="5" minvalue="2" maxvalue="10" />
+  </struct>
+
+  <struct name="StructWithNullableMapOfNullableInts">
+    <param name="nullableMap" type="Integer" minvalue="0" maxvalue="42" map="true" minsize="1" maxsize="5" nullable="true" null_values_allowed="true" />
+  </struct>
+
+  <struct name="StructWithOptionalIntArray">
+    <param name="optionalIntArray" type="Integer" minvalue="0" maxvalue="42" array="true" minsize="0" maxsize="5" mandatory="false" />
+  </struct>
+
+  <struct name="StructWithMandatoryIntArray">
+    <param name="mandatoryIntArray" type="Integer" minvalue="0" maxvalue="42" array="true" minsize="0" maxsize="5" />
+  </struct>
+
+  <struct name="StructWithOptionalIntMap">
+    <param name="optionalIntMap" type="Integer" minvalue="0" maxvalue="42" map="true" minsize="0" maxsize="5" mandatory="false" />
+  </struct>
+
+  <struct name="StructWithMandatoryIntMap">
+    <param name="mandatoryIntMap" type="Integer" minvalue="0" maxvalue="42" map="true" minsize="0" maxsize="5" />
+  </struct>
+
+  <struct name="FrankenstructOfEmptyStringWithMandatoryInt" type="String" maxlength="15" minsize="0" maxsize="3">
+    <param name="mandatoryInt" type="Integer" minvalue="0" maxvalue="42" />
+  </struct>
+
+  <typedef name="TdResultArray" type="TdResult" array="true" minsize="1" maxsize="10">
+    <description>
+      Test typedef over array
+    </description>
+  </typedef>
+  <typedef name="TdResultArrayMap" type="TdResultArray" map="true" minsize="1" maxsize="5">
+    <description>
+      Test typedef over map of arrays
+    </description>
+  </typedef>
+
+  <struct name="TdStruct" >
+    <description>
+      Test struct containing typedef field
+    </description>
+    <param name="resArrMap" type="TdResultArrayMap" mandatory="true" />
+    <param name="optionalResArrMap" type="TdResultArrayMap" mandatory="false" />
+  </struct>
+
+  <typedef name="TdStructBasedTdef" type="TdStruct" array="true" minsize="1" maxsize="10">
+    <description>
+      Test typedef over struct
+    </description>
+  </typedef>
+
+  <function name="DummyNotification" functionID="DummyNotificationID" messagetype="notification">
+    <param name="tds" type="TdStructBasedTdef" />
+  </function>
+
+  </interface>
