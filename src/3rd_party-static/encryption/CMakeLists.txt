@@ -5,11 +5,18 @@ include_directories (
   ./include
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    include_directories(${CMAKE_SOURCE_DIR}/include/win32/)
+endif()
+
 set (SOURCES
     ./src/Base64.cpp
     ./src/hashing.cc
 )
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "QNX")
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+set (LIBRARIES ssleay32 libeay32)
+else()
 set (LIBRARIES crypto)
 endif()
 
