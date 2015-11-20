@@ -1464,6 +1464,10 @@ void PolicyHandler::ResetAccess(const application_manager::SeatLocation& zone,
 void PolicyHandler::SetPrimaryDevice(const PTString& dev_id) {
   POLICY_LIB_CHECK_VOID();
   PTString old_dev_id = policy_manager_->PrimaryDevice();
+  if (dev_id == old_dev_id) {
+    LOG4CXX_INFO(logger_, "Driver's device has not changed.");
+    return;
+  }
   policy_manager_->SetPrimaryDevice(dev_id);
 
   connection_handler::DeviceHandle old_device_handle;
