@@ -50,7 +50,7 @@
 
 namespace {
 #define LOG_UPDATED_VALUE(value, key, section) {\
-  LOG4CXX_INFO(logger_, "Setting value '" << value\
+  LOG4CXX_INFO(logger_, "Setting value '" << std::noboolalpha << value\
   << "' for key '" << key\
   << "' in section '" << section << "'.");\
 }

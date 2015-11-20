@@ -192,6 +192,15 @@ int32_t sdl_start(int32_t argc,char** argv){
 #endif
 
   // --------------------------------------------------------------------------
+  if ((argc > 1)&&(0 != argv)) {
+      profile::Profile::instance()->config_file_name(argv[1]);
+  } else {
+#ifdef OS_WINCE
+      profile::Profile::instance()->config_file_name(file_system::CurrentWorkingDirectory() + "/" + "smartDeviceLink.ini");
+#else
+      profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
+#endif
+  }
   // Logger initialization
 #ifdef OS_WINCE
 	INIT_LOGGER(file_system::CurrentWorkingDirectory() + "/" + "log4cxx.properties");
@@ -211,7 +220,7 @@ int32_t sdl_start(int32_t argc,char** argv){
 
   LOG4CXX_INFO(logger_, "Application started!");
   LOG4CXX_INFO(logger_, "SDL version: "
-                         << profile::Profile::instance()->sdl_version());
+                         << profile::Profile::instance()->sdl_version().c_str());
 
   // Initialize gstreamer. Needed to activate debug from the command line.
 #if defined(EXTENDED_MEDIA_MODE)
@@ -220,16 +229,6 @@ int32_t sdl_start(int32_t argc,char** argv){
 
   // --------------------------------------------------------------------------
   // Components initialization
-  if ((argc > 1)&&(0 != argv)) {
-      profile::Profile::instance()->config_file_name(argv[1]);
-  } else {
-#ifdef OS_WINCE
-      profile::Profile::instance()->config_file_name(file_system::CurrentWorkingDirectory() + "/" + "smartDeviceLink.ini");
-#else
-      profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
-#endif
-  }
-
 #ifdef __QNX__
   if (profile::Profile::instance()->enable_policy()) {
     if (!utils::System("./init_policy.sh").Execute(true)) {
