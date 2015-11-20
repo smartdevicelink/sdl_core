@@ -51,7 +51,8 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "CANCooperation")
 
 BaseCommandRequest::BaseCommandRequest(
   const application_manager::MessagePtr& message)
-  : message_(message) {
+  : message_(message),
+    auto_allowed_(false) {
   service_ = CANModule::instance()->service();
 }
 
@@ -355,6 +356,7 @@ bool BaseCommandRequest::CheckAccess() {
 
   switch (access) {
     case application_manager::kAllowed:
+      set_auto_allowed(true);
       return true;
     case application_manager::kDisallowed:
       SendResponse(false, result_codes::kDisallowed,
@@ -430,7 +432,9 @@ void BaseCommandRequest::on_event(
   if (event.id() == functional_modules::hmi_api::get_user_consent) {
     ProcessAccessResponse(event);
   } else {
-    UpdateHMILevel(event);
+    if (auto_allowed()) {
+      UpdateHMILevel(event);
+    }
     OnEvent(event);  // run child's logic
   }
 }
