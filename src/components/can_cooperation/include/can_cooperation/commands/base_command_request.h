@@ -167,6 +167,14 @@ class BaseCommandRequest : public Command,
 
   SeatLocation CreateInteriorZone(const Json::Value& zone);
 
+  bool auto_allowed() const {
+    return auto_allowed_;
+  }
+
+  void set_auto_allowed(bool value) {
+    auto_allowed_ = value;
+  }
+
  private:
   void CheckHMILevel(application_manager::TypeAccess access,
                      bool hmi_consented = false);
@@ -180,6 +188,7 @@ class BaseCommandRequest : public Command,
   Json::Value JsonDeviceLocation(const Json::Value& value);
   application_manager::ApplicationSharedPtr app_;
   SeatLocation device_location_;
+  bool auto_allowed_;
 };
 
 }  // namespace commands
