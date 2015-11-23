@@ -209,9 +209,15 @@ bool GetInteriorVehicleDataCapabiliesRequest::Validate() {
   return true;
 }
 
-bool GetInteriorVehicleDataCapabiliesRequest::CheckAccess() {
-  // TODO(KKolodiy): need to clarify how it must work
-  return true;
+application_manager::TypeAccess GetInteriorVehicleDataCapabiliesRequest::GetPermission(
+    const Json::Value& value) {
+  uint32_t current = 0;
+  if (current == service()->PrimaryDevice()) {
+
+  } else {
+
+  }
+  return application_manager::kAllowed;
 }
 
 }  // namespace commands

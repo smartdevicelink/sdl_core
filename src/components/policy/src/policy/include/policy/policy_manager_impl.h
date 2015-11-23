@@ -311,7 +311,6 @@ private:
     UpdateStatusManager update_status_manager_;
     CacheManagerInterfaceSPtr cache_;
 #ifdef SDL_REMOTE_CONTROL
-    TypeAccess TryOccupy(const Subject& who, const Object& what);
     TypeAccess CheckDriverConsent(const Subject& who, const Object& what,
                                   const std::string& rpc,
                                   const RemoteControlParams& params);

@@ -151,29 +151,20 @@ bool AccessRemoteImpl::IsPrimaryDevice(const PTString& dev_id) const {
 TypeAccess AccessRemoteImpl::Check(const Subject& who,
                                    const Object& what) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  TypeAccess ret = TypeAccess::kDisallowed;
   AccessControlList::const_iterator i = acl_.find(what);
   if (i != acl_.end()) {
     const AccessControlRow& row = i->second;
     AccessControlRow::const_iterator j = row.find(who);
     if (j != row.end()) {
       // who has permissions
-      ret = j->second;
+      TypeAccess ret = j->second;
       LOG4CXX_TRACE(
           logger_,
           "Subject " << who << " has permissions " << ret <<
           " to object " << what);
-    } else {
-      LOG4CXX_TRACE(logger_, who << " needs driver permission for " << what);
-      ret = TypeAccess::kManual;
     }
-  } else {
-    // Nobody controls this object
-    LOG4CXX_TRACE(logger_, "Nobody controls " << what);
-    ret = TypeAccess::kManual;
   }
-  LOG4CXX_DEBUG(logger_, ret);
-  return ret;
+  return TypeAccess::kManual;
 }
 
 bool AccessRemoteImpl::CheckModuleType(const PTString& app_id,

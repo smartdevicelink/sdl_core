@@ -78,7 +78,6 @@ class BaseCommandRequest : public Command,
 
  protected:
   application_manager::MessagePtr message_;
-  application_manager::ServicePtr service_;
   Json::Value response_params_;
 
   /**
@@ -163,7 +162,7 @@ class BaseCommandRequest : public Command,
   virtual Json::Value GetInteriorZone(const Json::Value& message);
   virtual SeatLocation InteriorZone(const Json::Value& message);
   virtual std::vector<std::string> ControlData(const Json::Value& message);
-  virtual bool CheckAccess();
+  virtual application_manager::TypeAccess GetPermission(const Json::Value& value);
 
   SeatLocation CreateInteriorZone(const Json::Value& zone);
 
@@ -175,18 +174,28 @@ class BaseCommandRequest : public Command,
     auto_allowed_ = value;
   }
 
+  application_manager::ServicePtr service() {
+    return service_;
+  }
+
  private:
   void CheckHMILevel(application_manager::TypeAccess access,
                      bool hmi_consented = false);
   void UpdateHMILevel(const event_engine::Event<application_manager::MessagePtr,
                       std::string>& event);
   bool CheckPolicy();
+  bool CheckAccess();
+  inline bool IsAutoAllowed(application_manager::TypeAccess access) const;
+  inline bool IsNeededDriverConsent(application_manager::TypeAccess access) const;
+  void SendDisallowed(application_manager::TypeAccess access);
+  void SendGetUserConsent(const Json::Value& value);
   void ProcessAccessResponse(
       const event_engine::Event<application_manager::MessagePtr,
       std::string>& event);
   SeatLocation GetDeviceLocation(const Json::Value& value);
   Json::Value JsonDeviceLocation(const Json::Value& value);
   application_manager::ApplicationSharedPtr app_;
+  application_manager::ServicePtr service_;
   SeatLocation device_location_;
   bool auto_allowed_;
 };

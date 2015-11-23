@@ -311,7 +311,7 @@ void BaseCommandRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (Validate()) {
     LOG4CXX_INFO(logger_, "Request message validated successfully!");
-    if (CheckPolicy()) {
+    if (CheckPolicy() && CheckAccess()) {
       Execute();  // run child's logic
     }
   }
@@ -335,7 +335,14 @@ bool BaseCommandRequest::CheckPolicy() {
     return false;
   }
 
-  return CheckAccess();
+  return true;
+}
+
+application_manager::TypeAccess BaseCommandRequest::GetPermission(
+    const Json::Value& value) {
+  return service_->CheckAccess(app_->app_id(), device_location_,
+                               ModuleType(value), message_->function_name(),
+                               ControlData(value));
 }
 
 bool BaseCommandRequest::CheckAccess() {
@@ -350,35 +357,58 @@ bool BaseCommandRequest::CheckAccess() {
   reader.parse(message_->json_message(), value);
 
   device_location_ = GetDeviceLocation(value);
-  application_manager::TypeAccess access = service_->CheckAccess(
-      app_->app_id(), device_location_, ModuleType(value),
-      message_->function_name(), ControlData(value));
+  application_manager::TypeAccess access = GetPermission(value);
 
-  switch (access) {
-    case application_manager::kAllowed:
-      set_auto_allowed(true);
-      return true;
-    case application_manager::kDisallowed:
-      SendResponse(false, result_codes::kDisallowed,
-                   "Remote control is disallowed");
-      break;
-    case application_manager::kManual: {
-      Json::Value params;
-      params[json_keys::kAppId] = app_->hmi_app_id();
-      params[message_params::kModuleType] = ModuleType(value);
-      params[message_params::kZone] = JsonDeviceLocation(GetInteriorZone(value));
-      SendRequest(functional_modules::hmi_api::get_user_consent, params, true);
-      break;
-    }
-    case application_manager::kNone:
-      LOG4CXX_ERROR(logger_, "Internal issue");
-      SendResponse(false, result_codes::kDisallowed, "Internal issue");
-      break;
-    default:
-      LOG4CXX_ERROR(logger_, "Unknown issue");
-      SendResponse(false, result_codes::kDisallowed, "Unknown issue");
+  if (IsAutoAllowed(access)) {
+    set_auto_allowed(true);
+    return true;
+  }
+  if (IsNeededDriverConsent(access)) {
+    SendGetUserConsent(value);
+  } else {
+    SendDisallowed(access);
   }
   return false;
+}
+
+bool BaseCommandRequest::IsNeededDriverConsent(
+    application_manager::TypeAccess access) const {
+  return access == application_manager::kManual;
+}
+
+bool BaseCommandRequest::IsAutoAllowed(
+    application_manager::TypeAccess access) const {
+  return access == application_manager::kAllowed;
+}
+
+void BaseCommandRequest::SendDisallowed(
+    application_manager::TypeAccess access) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::string info;
+  switch (access) {
+    case application_manager::kAllowed:
+    case application_manager::kManual:
+      return;
+    case application_manager::kDisallowed:
+      info = "Remote control is disallowed";
+      break;
+    case application_manager::kNone:
+      info = "Internal issue";
+      break;
+    default:
+      info = "Unknown issue";
+  }
+  LOG4CXX_ERROR(logger_, info);
+  SendResponse(false, result_codes::kDisallowed, info);
+}
+
+void BaseCommandRequest::SendGetUserConsent(const Json::Value& value) {
+  DCHECK(app_);
+  Json::Value params;
+  params[json_keys::kAppId] = app_->hmi_app_id();
+  params[message_params::kModuleType] = ModuleType(value);
+  params[message_params::kZone] = JsonDeviceLocation(GetInteriorZone(value));
+  SendRequest(functional_modules::hmi_api::get_user_consent, params, true);
 }
 
 SeatLocation BaseCommandRequest::GetDeviceLocation(const Json::Value& value) {

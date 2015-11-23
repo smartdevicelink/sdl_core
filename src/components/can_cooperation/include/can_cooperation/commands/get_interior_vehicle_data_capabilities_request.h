@@ -76,7 +76,7 @@ class GetInteriorVehicleDataCapabiliesRequest : public BaseCommandRequest {
   virtual ~GetInteriorVehicleDataCapabiliesRequest();
 
  protected:
-  virtual bool CheckAccess();
+  virtual application_manager::TypeAccess GetPermission(const Json::Value& value);
   bool ReadCapabilitiesFromFile();
 };
 
