@@ -77,6 +77,9 @@ class GetInteriorVehicleDataCapabiliesRequest : public BaseCommandRequest {
 
  protected:
   virtual application_manager::TypeAccess GetPermission(const Json::Value& value);
+  virtual std::string ModuleType(const Json::Value& message);
+  virtual SeatLocation InteriorZone(const Json::Value& message);
+  virtual Json::Value GetInteriorZone(const Json::Value& message);
   bool ReadCapabilitiesFromFile();
 };
 

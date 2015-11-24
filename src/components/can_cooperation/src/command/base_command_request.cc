@@ -54,6 +54,10 @@ BaseCommandRequest::BaseCommandRequest(
   : message_(message),
     auto_allowed_(false) {
   service_ = CANModule::instance()->service();
+  app_ = service_->GetApplication(message_->connection_key());
+  if (app_) {
+    device_location_ = service_->GetDeviceZone(app_->device());
+  }
 }
 
 
@@ -319,7 +323,6 @@ void BaseCommandRequest::Run() {
 
 bool BaseCommandRequest::CheckPolicy() {
   LOG4CXX_AUTO_TRACE(logger_);
-  app_ = service_->GetApplication(message_->connection_key());
   if (!app_) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
     SendResponse(false, result_codes::kApplicationNotRegistered, "");
@@ -340,7 +343,7 @@ bool BaseCommandRequest::CheckPolicy() {
 
 application_manager::TypeAccess BaseCommandRequest::GetPermission(
     const Json::Value& value) {
-  return service_->CheckAccess(app_->app_id(), device_location_,
+  return service_->CheckAccess(app_->app_id(), PrepareZone(InteriorZone(value)),
                                ModuleType(value), message_->function_name(),
                                ControlData(value));
 }
@@ -356,7 +359,6 @@ bool BaseCommandRequest::CheckAccess() {
   LOG4CXX_DEBUG(logger_, "Request: " << message_->json_message());
   reader.parse(message_->json_message(), value);
 
-  device_location_ = GetDeviceLocation(value);
   application_manager::TypeAccess access = GetPermission(value);
 
   if (IsAutoAllowed(access)) {
@@ -407,26 +409,27 @@ void BaseCommandRequest::SendGetUserConsent(const Json::Value& value) {
   Json::Value params;
   params[json_keys::kAppId] = app_->hmi_app_id();
   params[message_params::kModuleType] = ModuleType(value);
-  params[message_params::kZone] = JsonDeviceLocation(GetInteriorZone(value));
+  params[message_params::kZone] = PrepareJsonZone(GetInteriorZone(value));
   SendRequest(functional_modules::hmi_api::get_user_consent, params, true);
 }
 
-SeatLocation BaseCommandRequest::GetDeviceLocation(const Json::Value& value) {
-  SeatLocation zone = InteriorZone(value);
-  SeatLocationPtr device = service_->GetDeviceZone(app_->device());
-  if (device) {
-    zone.col = device->col;
-    zone.row = device->row;
-    zone.level = device->level;
+SeatLocation BaseCommandRequest::PrepareZone(const SeatLocation& interior_zone) {
+  SeatLocation location = interior_zone;
+  if (device_location_) {
+    location.col = device_location_->col;
+    location.row = device_location_->row;
+    location.level = device_location_->level;
   }
-  return zone;
+  return location;
 }
 
-Json::Value BaseCommandRequest::JsonDeviceLocation(const Json::Value& value) {
+Json::Value BaseCommandRequest::PrepareJsonZone(const Json::Value& value) {
   Json::Value json = value;
-  json[message_params::kCol] = device_location_.col;
-  json[message_params::kRow] = device_location_.row;
-  json[message_params::kLevel] = device_location_.level;
+  if (device_location_) {
+    json[message_params::kCol] = device_location_->col;
+    json[message_params::kRow] = device_location_->row;
+    json[message_params::kLevel] = device_location_->level;
+  }
   return json;
 }
 
@@ -489,7 +492,6 @@ void BaseCommandRequest::ProcessAccessResponse(
     const event_engine::Event<application_manager::MessagePtr,
     std::string>& event) {
   LOG4CXX_AUTO_TRACE(logger_);
-  app_ = service_->GetApplication(message_->connection_key());
   if (!app_) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
     SendResponse(false, result_codes::kApplicationNotRegistered, "");
@@ -520,7 +522,7 @@ void BaseCommandRequest::ProcessAccessResponse(
     LOG4CXX_DEBUG(
         logger_,
         "Setting allowed access for " << app_->app_id() << " for " << module);
-    service_->SetAccess(app_->app_id(), device_location_, module, allowed);
+    service_->SetAccess(app_->app_id(), PrepareZone(InteriorZone(request)), module, allowed);
     CheckHMILevel(application_manager::kManual, allowed);
     Execute();  // run child's logic
   } else {

@@ -211,13 +211,33 @@ bool GetInteriorVehicleDataCapabiliesRequest::Validate() {
 
 application_manager::TypeAccess GetInteriorVehicleDataCapabiliesRequest::GetPermission(
     const Json::Value& value) {
-  uint32_t current = 0;
+  uint32_t current = 10;
   if (current == service()->PrimaryDevice()) {
-
-  } else {
-
+    return application_manager::kAllowed;
   }
-  return application_manager::kAllowed;
+  return BaseCommandRequest::GetPermission(value);
+}
+
+Json::Value GetInteriorVehicleDataCapabiliesRequest::GetInteriorZone(
+  const Json::Value& message) {
+  return message.get(message_params::kZone, Json::Value(Json::objectValue));
+}
+
+SeatLocation GetInteriorVehicleDataCapabiliesRequest::InteriorZone(
+    const Json::Value& message) {
+  Json::Value zone = message.get(message_params::kZone,
+                                 Json::Value(Json::objectValue));
+  return CreateInteriorZone(zone);
+}
+
+std::string GetInteriorVehicleDataCapabiliesRequest::ModuleType(
+    const Json::Value& message) {
+  Json::Value modules = message.get(message_params::kModuleTypes,
+                                    Json::Value(Json::arrayValue));
+  if (modules.size() == 1) {
+    return modules.get(Json::ArrayIndex(0), Json::Value("")).asString();
+  }
+  return "";
 }
 
 }  // namespace commands
