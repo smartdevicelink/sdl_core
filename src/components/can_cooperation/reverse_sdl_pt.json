@@ -1042,8 +1042,7 @@
                     "OnInteriorVehicleData": {
                         "hmi_levels": ["BACKGROUND",
                         "FULL",
-                        "LIMITED",
-                        "NONE"]
+                        "LIMITED"]
                     },
 		    "SystemRequest": {
                         "hmi_levels": ["BACKGROUND",
