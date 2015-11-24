@@ -52,9 +52,9 @@ Device::Device(DeviceHandle device_handle,
       user_friendly_name_(user_friendly_name),
       mac_address_(mac_address),
       connection_type_(connection_type){
-    LOG4CXX_INFO(logger_, "Device MAC address is: " << mac_address_);
+    LOG4CXX_INFO(logger_, "Device MAC address is: " << mac_address_.c_str());
     mac_address_ = encryption::MakeHash(mac_address);
-    LOG4CXX_INFO(logger_, "Device MAC address hash is: " << mac_address_);
+    LOG4CXX_INFO(logger_, "Device MAC address hash is: " << mac_address_.c_str());
 }
 
 DeviceHandle Device::device_handle() const {

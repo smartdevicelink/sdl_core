@@ -206,7 +206,7 @@ ApplicationSharedPtr ApplicationManagerImpl::application_by_policy_id(
   MobileAppIdPredicate finder(policy_app_id);
   ApplicationListAccessor accessor;
   ApplicationSharedPtr app = accessor.Find(finder);
-  LOG4CXX_DEBUG(logger_, " policy_app_id << " << policy_app_id << "Found = " << app);
+  LOG4CXX_DEBUG(logger_, " policy_app_id << " << policy_app_id.c_str() << "Found = " << app);
   return app;
 }
 
@@ -1321,7 +1321,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
 
       for (; iter != iter_end; ++iter) {
         if (true == iter->second.asBool()) {
-          LOG4CXX_INFO(logger_, "Request's param: " << iter->first);
+          LOG4CXX_INFO(logger_, "Request's param: " << iter->first.c_str());
           params.push_back(iter->first);
         }
       }
@@ -1332,7 +1332,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
     if (mobile_apis::Result::SUCCESS != check_result) {
       const std::string string_functionID =
           MessageHelper::StringifiedFunctionID(function_id);
-      LOG4CXX_WARN(logger_, "Function \"" << string_functionID << "\" (#"
+      LOG4CXX_WARN(logger_, "Function \"" << string_functionID.c_str() << "\" (#"
                    << function_id << ") not allowed by policy");
       return;
     }
@@ -1842,7 +1842,7 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
       return false;
   }
 
-  LOG4CXX_INFO(logger_, "Convertion result: " << output_string);
+  LOG4CXX_INFO(logger_, "Convertion result: " << output_string.c_str());
 
   output.set_connection_key(
     message.getElement(jhs::S_PARAMS).getElement(strings::connection_key)
@@ -2642,9 +2642,9 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
       MessageHelper::StringifiedHMILevel(hmi_level);
   LOG4CXX_INFO(
     logger_,
-    "Checking permissions for  " << policy_app_id  <<
-    " in " << stringified_hmi_level <<
-    " rpc " << stringified_functionID);
+    "Checking permissions for  " << policy_app_id.c_str()  <<
+	" in " << stringified_hmi_level.c_str() <<
+	" rpc " << stringified_functionID.c_str());
     policy::CheckPermissionResult result;
     policy::PolicyHandler::instance()->CheckPermissions(
           policy_app_id,
@@ -2694,7 +2694,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
         return mobile_apis::Result::INVALID_ENUM;
     }
   }
-  LOG4CXX_INFO(logger_, "Request is allowed by policies. "+log_msg);
+  LOG4CXX_INFO(logger_, "Request is allowed by policies. " << log_msg.c_str());
   return mobile_api::Result::SUCCESS;
 }
 
@@ -3312,12 +3312,12 @@ bool ApplicationManagerImpl::IsReadWriteAllowed(
   const std::string directory_type = DirectoryTypeToString(type);
   if (!(file_system::IsWritingAllowed(path) &&
         file_system::IsReadingAllowed(path))) {
-    LOG4CXX_ERROR(logger_, directory_type
+    LOG4CXX_ERROR(logger_, directory_type.c_str()
                   << " directory doesn't have read/write permissions.");
     return false;
   }
 
-  LOG4CXX_DEBUG(logger_, directory_type
+  LOG4CXX_DEBUG(logger_, directory_type.c_str()
                 << " directory has read/write permissions.");
 
   return true;

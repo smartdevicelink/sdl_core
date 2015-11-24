@@ -962,7 +962,7 @@ bool SQLPTRepresentation::SaveAppGroup(
   policy_table::Strings::const_iterator it;
   for (it = app_groups.begin(); it != app_groups.end(); ++it) {
     std::string ssss = *it;
-    LOG4CXX_INFO(logger_, "Group: " << ssss);
+    LOG4CXX_INFO(logger_, "Group: " << ssss.c_str());
     query.Bind(0, app_id);
     query.Bind(1, *it);
     if (!query.Exec() || !query.Reset()) {

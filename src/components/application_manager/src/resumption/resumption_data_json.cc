@@ -99,7 +99,7 @@ void ResumptionDataJson::SaveApplication(
       GetApplicationFiles(application), tmp);
   json_app[strings::application_files] = tmp;
   json_app[strings::time_stamp] = time_stamp;
-  LOG4CXX_DEBUG(logger_, "SaveApplication : " << json_app.toStyledString());
+  LOG4CXX_DEBUG(logger_, "SaveApplication : " << json_app.toStyledString().c_str());
 }
 
 int32_t ResumptionDataJson::GetStoredHMILevel(const std::string& policy_app_id,

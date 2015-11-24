@@ -790,7 +790,7 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
 
   LOG4CXX_DEBUG(logger_, "Update url is " << url << " for application "
                << ApplicationManagerImpl::instance()
-               ->application(app_id)->name());
+               ->application(app_id)->name().c_str());
 
   MessageHelper::SendPolicySnapshotNotification(
         app_id, pt_string, url, 0);
@@ -999,7 +999,7 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
       break;
     }
     default:
-      LOG4CXX_WARN(logger_, "Application " << policy_app_id << " is running."
+      LOG4CXX_WARN(logger_, "Application " << policy_app_id.c_str() << " is running."
                    "HMI level won't be changed.");
       break;
   }
@@ -1023,7 +1023,7 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
 
   LOG4CXX_DEBUG(
     logger_,
-    "Notification sent for application_id:" << policy_app_id
+	"Notification sent for application_id:" << policy_app_id.c_str()
     << " and connection_key " << app->app_id());
 }
 

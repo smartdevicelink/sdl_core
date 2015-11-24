@@ -602,7 +602,7 @@ void CacheManager::GetServiceUrls(const std::string& service_type,
     search_value = service_type;
   }
 
-  LOG4CXX_DEBUG(logger_, "Search service value is: " << search_value);
+  LOG4CXX_DEBUG(logger_, "Search service value is: " << search_value.c_str());
 
   policy_table::ServiceEndpoints::const_iterator iter =
       pt_->policy_table.module_config.endpoints.find(search_value);

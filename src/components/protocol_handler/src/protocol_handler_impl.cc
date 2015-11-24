@@ -591,7 +591,7 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
 #endif  // ENABLE_SECURITY
 
   LOG4CXX_DEBUG(logger_, "Packet to be sent: " <<
-                   ConvertPacketDataToString(packet->data(), packet->data_size()) <<
+                   ConvertPacketDataToString(packet->data(), packet->data_size()).c_str() <<
                    " of size: " << packet->data_size());
   const RawMessagePtr message_to_send = packet->serializePacket();
   if (!message_to_send) {
