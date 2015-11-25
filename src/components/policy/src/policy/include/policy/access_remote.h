@@ -275,6 +275,15 @@ class AccessRemote {
    */
   virtual void SetDeviceZone(const std::string& device_id,
                              const SeatLocation& zone) = 0;
+
+  /**
+   * Gets all allowed module types
+   * @param app_id unique identifier of application
+   * @param list of allowed module types
+   * @return true if application has allowed modules
+   */
+  virtual bool GetModuleTypes(const std::string& policy_app_id,
+                              std::vector<std::string>* modules) = 0;
 };
 
 }  // namespace policy

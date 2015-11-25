@@ -86,7 +86,9 @@ class GetInteriorVehicleDataCapabiliesRequest : public BaseCommandRequest {
   application_manager::TypeAccess CheckModuleTypes(const Json::Value& message);
   bool ReadCapabilitiesFromFile();
   inline bool IsDriverDevice();
-  Json::Value modules_;
+  application_manager::TypeAccess GetModuleTypes();
+  application_manager::TypeAccess ProcessRequestedModuleTypes(const Json::Value& modules);
+  Json::Value allowed_modules_;
 };
 
 }  // namespace commands

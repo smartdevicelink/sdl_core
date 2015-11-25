@@ -282,4 +282,13 @@ bool CoreService::IsAllowed(const std::string& name,
       != allowed_params.end();
 }
 
+bool CoreService::GetModuleTypes(const std::string& policy_app_id,
+                                 std::vector<std::string>* modules) const {
+#ifdef SDL_REMOTE_CONTROL
+  return policy::PolicyHandler::instance()->GetModuleTypes(policy_app_id,
+                                                           modules);
+#endif  // SDL_REMOTE_CONTROL
+  return false;
+}
+
 }  // namespace application_manager

@@ -31,6 +31,10 @@
  */
 
 #include "can_cooperation/commands/get_interior_vehicle_data_capabilities_request.h"
+
+#include <string>
+#include <vector>
+
 #include "can_cooperation/validators/get_interior_vehicle_data_capabilities_request_validator.h"
 #include "can_cooperation/validators/struct_validators/module_description_validator.h"
 #include "can_cooperation/can_module_constants.h"
@@ -51,8 +55,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "GetInteriorVehicleDataCapabiliesRequest")
 GetInteriorVehicleDataCapabiliesRequest::
 GetInteriorVehicleDataCapabiliesRequest(
   const application_manager::MessagePtr& message)
-  : BaseCommandRequest(message),
-    modules_(Json::arrayValue) {
+  : BaseCommandRequest(message) {
 }
 
 GetInteriorVehicleDataCapabiliesRequest::
@@ -77,10 +80,12 @@ void GetInteriorVehicleDataCapabiliesRequest::UpdateModules(
     Json::Value* params) {
   DCHECK(params);
   if (IsDriverDevice()) {
-    if (modules_.empty()) {
+    DCHECK(allowed_modules_.isArray());
+    if (allowed_modules_.empty()) {
+      // Empty allowed modules list is all modules
       params->removeMember(message_params::kModuleTypes);
     } else {
-      (*params)[message_params::kModuleTypes] = modules_;
+      (*params)[message_params::kModuleTypes] = allowed_modules_;
     }
   } else {
     // The permissions of passenger's device  were checked by GetPermission.
@@ -240,20 +245,49 @@ application_manager::TypeAccess GetInteriorVehicleDataCapabiliesRequest::CheckAc
 application_manager::TypeAccess GetInteriorVehicleDataCapabiliesRequest::CheckModuleTypes(
     const Json::Value& message) {
   if (IsMember(message, message_params::kModuleTypes)) {
-    const Json::Value& moduleTypes = message[message_params::kModuleTypes];
-    for (Json::ValueConstIterator i = moduleTypes.begin();
-        i != moduleTypes.end(); ++i) {
-      const Json::Value& module = *i;
-      if (service()->CheckModule(app()->app_id(), module.asString())) {
-        modules_.append(module);
-      }
-    }
+    return ProcessRequestedModuleTypes(message[message_params::kModuleTypes]);
   } else {
-    // получить список модулей из политик
+    return GetModuleTypes();
   }
+}
+
+application_manager::TypeAccess GetInteriorVehicleDataCapabiliesRequest::ProcessRequestedModuleTypes(
+    const Json::Value& modules) {
+  DCHECK(!modules.empty());
+  DCHECK(allowed_modules_.isNull());
+  Json::Value moduleTypes(Json::arrayValue);
+  for (Json::ValueConstIterator i = modules.begin(); i != modules.end(); ++i) {
+    const Json::Value& module = *i;
+    if (service()->CheckModule(app()->app_id(), module.asString())) {
+      moduleTypes.append(module);
+    }
+  }
+  allowed_modules_ = moduleTypes;
+  DCHECK(allowed_modules_.isArray());
+  // Empty allowed modules list means requested modules didn't match with allowed by policy
   return
-      modules_.empty() ?
+      allowed_modules_.empty() ?
           application_manager::kDisallowed : application_manager::kAllowed;
+}
+
+application_manager::TypeAccess GetInteriorVehicleDataCapabiliesRequest::GetModuleTypes() {
+  DCHECK(allowed_modules_.isNull());
+  typedef std::vector<std::string> ModuleTypes;
+  ModuleTypes modules;
+  if (service()->GetModuleTypes(app()->mobile_app_id(), &modules)) {
+    Json::Value moduleTypes(Json::arrayValue);
+    for (ModuleTypes::iterator i = modules.begin(); i != modules.end(); ++i) {
+      const std::string& name = *i;
+      moduleTypes.append(Json::Value(name));
+    }
+    allowed_modules_ = moduleTypes;
+    DCHECK(allowed_modules_.isArray());
+    // Empty allowed modules list is all modules
+    return application_manager::kAllowed;
+  }
+  // There aren't allowed modules
+  DCHECK(allowed_modules_.isNull());
+  return application_manager::kDisallowed;
 }
 
 Json::Value GetInteriorVehicleDataCapabiliesRequest::GetInteriorZone(

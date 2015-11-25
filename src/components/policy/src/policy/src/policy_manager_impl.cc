@@ -1302,6 +1302,10 @@ void PolicyManagerImpl::OnNonPrimaryGroupsChanged(const std::string& application
   }
 }
 
+bool PolicyManagerImpl::GetModuleTypes(const std::string& application_id,
+                                       std::vector<std::string>* modules) const {
+  return access_remote_->GetModuleTypes(application_id, modules);
+}
 #endif  // SDL_REMOTE_CONTROL
 
 }  //  namespace policy

@@ -223,6 +223,15 @@ class PolicyHandler :
                                  const std::string& policy_app_id,
                                  const std::string& hmi_level,
                                  const std::string& device_rank);
+
+  /**
+   * Gets all allowed module types
+   * @param app_id unique identifier of application
+   * @param list of allowed module types
+   * @return true if application has allowed modules
+   */
+  bool GetModuleTypes(const std::string& policy_app_id,
+                      std::vector<std::string>* modules) const;
 #endif  // SDL_REMOTE_CONTROL
 
   uint32_t GetNotificationsNumber(const std::string& priority);

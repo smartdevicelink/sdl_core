@@ -564,6 +564,15 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      */
     virtual void SendAppPermissionsChanged(const std::string& device_id,
       const std::string& application_id) = 0;
+
+    /**
+     * Gets all allowed module types
+     * @param app_id unique identifier of application
+     * @param list of allowed module types
+     * @return true if application has allowed modules
+     */
+    virtual bool GetModuleTypes(const std::string& policy_app_id,
+                                std::vector<std::string>* modules) const = 0;
 #endif  // SDL_REMOTE_CONTROL
 
   protected:

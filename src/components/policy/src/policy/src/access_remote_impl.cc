@@ -73,7 +73,7 @@ struct ToHMIType {
   policy_table::AppHMITypes::value_type operator() (int item) const {
     policy_table::AppHMIType type = static_cast<policy_table::AppHMIType>(item);
     if (!IsValidEnum(type)) {
-      LOG4CXX_WARN(logger_, "HMI types isn't known " << item);
+      LOG4CXX_WARN(logger_, "HMI type isn't known " << item);
       type = policy_table::AHT_DEFAULT;
     }
     LOG4CXX_DEBUG(logger_,
@@ -117,6 +117,14 @@ struct Contained {
       return value_ == static_cast<std::string>(item);
     }
   };
+};
+
+
+struct ToModuleType {
+  std::string operator() (policy_table::ModuleTypes::value_type item) const {
+    policy_table::ModuleType type = static_cast<policy_table::ModuleType>(item);
+    return EnumToJsonString(type);
+  }
 };
 
 AccessRemoteImpl::AccessRemoteImpl()
@@ -401,6 +409,23 @@ const SeatLocation* AccessRemoteImpl::GetDeviceZone(
 void AccessRemoteImpl::SetDeviceZone(const std::string& device_id,
                                      const SeatLocation& zone) {
   seats_[device_id] = zone;
+}
+
+bool AccessRemoteImpl::GetModuleTypes(const std::string& application_id,
+                                      std::vector<std::string>* modules) {
+  DCHECK(modules);
+  policy_table::ApplicationPolicies& apps = cache_->pt_->policy_table.app_policies;
+  policy_table::ApplicationPolicies::iterator i = apps.find(application_id);
+  if (i == apps.end()) {
+    return false;
+  }
+  rpc::Optional<policy_table::ModuleTypes> moduleTypes = i->second.moduleType;
+  if (!moduleTypes.is_initialized()) {
+    return false;
+  }
+  std::transform(moduleTypes->begin(), moduleTypes->end(),
+                 std::back_inserter(*modules), ToModuleType());
+  return true;
 }
 
 }  // namespace policy
