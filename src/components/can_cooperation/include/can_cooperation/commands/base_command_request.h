@@ -131,6 +131,7 @@ class BaseCommandRequest : public Command,
                    bool is_hmi_request = false);
 
   application_manager::ApplicationSharedPtr app() {
+    DCHECK(app_);
     return app_;
   }
 
@@ -163,7 +164,7 @@ class BaseCommandRequest : public Command,
   virtual Json::Value GetInteriorZone(const Json::Value& message);
   virtual SeatLocation InteriorZone(const Json::Value& message);
   virtual std::vector<std::string> ControlData(const Json::Value& message);
-  virtual application_manager::TypeAccess GetPermission(const Json::Value& value);
+  virtual application_manager::TypeAccess CheckAccess(const Json::Value& message);
 
   SeatLocation CreateInteriorZone(const Json::Value& zone);
 
@@ -184,8 +185,8 @@ class BaseCommandRequest : public Command,
                      bool hmi_consented = false);
   void UpdateHMILevel(const event_engine::Event<application_manager::MessagePtr,
                       std::string>& event);
-  bool CheckPolicy();
-  bool CheckAccess();
+  bool CheckPolicyPermissions();
+  bool CheckDriverConsent();
   inline bool IsAutoAllowed(application_manager::TypeAccess access) const;
   inline bool IsNeededDriverConsent(application_manager::TypeAccess access) const;
   void SendDisallowed(application_manager::TypeAccess access);

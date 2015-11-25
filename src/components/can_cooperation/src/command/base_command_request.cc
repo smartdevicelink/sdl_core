@@ -315,13 +315,13 @@ void BaseCommandRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (Validate()) {
     LOG4CXX_INFO(logger_, "Request message validated successfully!");
-    if (CheckPolicy() && CheckAccess()) {
+    if (CheckPolicyPermissions() && CheckDriverConsent()) {
       Execute();  // run child's logic
     }
   }
 }
 
-bool BaseCommandRequest::CheckPolicy() {
+bool BaseCommandRequest::CheckPolicyPermissions() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!app_) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
@@ -341,14 +341,14 @@ bool BaseCommandRequest::CheckPolicy() {
   return true;
 }
 
-application_manager::TypeAccess BaseCommandRequest::GetPermission(
-    const Json::Value& value) {
-  return service_->CheckAccess(app_->app_id(), PrepareZone(InteriorZone(value)),
-                               ModuleType(value), message_->function_name(),
-                               ControlData(value));
+application_manager::TypeAccess BaseCommandRequest::CheckAccess(
+    const Json::Value& message) {
+  return service_->CheckAccess(app_->app_id(), PrepareZone(InteriorZone(message)),
+                               ModuleType(message), message_->function_name(),
+                               ControlData(message));
 }
 
-bool BaseCommandRequest::CheckAccess() {
+bool BaseCommandRequest::CheckDriverConsent() {
   LOG4CXX_AUTO_TRACE(logger_);
   CANAppExtensionPtr extension = GetAppExtension(app_);
   if (!extension) {
@@ -359,7 +359,7 @@ bool BaseCommandRequest::CheckAccess() {
   LOG4CXX_DEBUG(logger_, "Request: " << message_->json_message());
   reader.parse(message_->json_message(), value);
 
-  application_manager::TypeAccess access = GetPermission(value);
+  application_manager::TypeAccess access = CheckAccess(value);
 
   if (IsAutoAllowed(access)) {
     set_auto_allowed(true);

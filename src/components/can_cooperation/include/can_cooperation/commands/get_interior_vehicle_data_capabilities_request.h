@@ -76,11 +76,17 @@ class GetInteriorVehicleDataCapabiliesRequest : public BaseCommandRequest {
   virtual ~GetInteriorVehicleDataCapabiliesRequest();
 
  protected:
-  virtual application_manager::TypeAccess GetPermission(const Json::Value& value);
+  virtual application_manager::TypeAccess CheckAccess(const Json::Value& message);
   virtual std::string ModuleType(const Json::Value& message);
   virtual SeatLocation InteriorZone(const Json::Value& message);
   virtual Json::Value GetInteriorZone(const Json::Value& message);
+
+ private:
+  void UpdateModules(Json::Value* params);
+  application_manager::TypeAccess CheckModuleTypes(const Json::Value& message);
   bool ReadCapabilitiesFromFile();
+  inline bool IsDriverDevice();
+  Json::Value modules_;
 };
 
 }  // namespace commands

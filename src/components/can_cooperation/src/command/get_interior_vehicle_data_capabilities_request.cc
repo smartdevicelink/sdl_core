@@ -51,7 +51,8 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "GetInteriorVehicleDataCapabiliesRequest")
 GetInteriorVehicleDataCapabiliesRequest::
 GetInteriorVehicleDataCapabiliesRequest(
   const application_manager::MessagePtr& message)
-  : BaseCommandRequest(message) {
+  : BaseCommandRequest(message),
+    modules_(Json::arrayValue) {
 }
 
 GetInteriorVehicleDataCapabiliesRequest::
@@ -65,10 +66,29 @@ void GetInteriorVehicleDataCapabiliesRequest::Execute() {
 
   Json::Reader reader;
   reader.parse(message_->json_message(), params);
+  UpdateModules(&params);
 
   SendRequest(
       functional_modules::hmi_api::get_interior_vehicle_data_capabilities,
       params, true);
+}
+
+void GetInteriorVehicleDataCapabiliesRequest::UpdateModules(
+    Json::Value* params) {
+  DCHECK(params);
+  if (IsDriverDevice()) {
+    if (modules_.empty()) {
+      params->removeMember(message_params::kModuleTypes);
+    } else {
+      (*params)[message_params::kModuleTypes] = modules_;
+    }
+  } else {
+    // The permissions of passenger's device  were checked by GetPermission.
+    // This request can contain only one module
+    // so we don't have to exclude any module.
+    DCHECK(params->get(message_params::kModuleTypes,
+                       Json::Value(Json::arrayValue)).size() == 1);
+  }
 }
 
 void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
@@ -209,22 +229,44 @@ bool GetInteriorVehicleDataCapabiliesRequest::Validate() {
   return true;
 }
 
-application_manager::TypeAccess GetInteriorVehicleDataCapabiliesRequest::GetPermission(
-    const Json::Value& value) {
-  uint32_t current = 10;
-  if (current == service()->PrimaryDevice()) {
-    return application_manager::kAllowed;
+application_manager::TypeAccess GetInteriorVehicleDataCapabiliesRequest::CheckAccess(
+    const Json::Value& message) {
+  if (IsDriverDevice()) {
+    return CheckModuleTypes(message);
   }
-  return BaseCommandRequest::GetPermission(value);
+  return BaseCommandRequest::CheckAccess(message);
+}
+
+application_manager::TypeAccess GetInteriorVehicleDataCapabiliesRequest::CheckModuleTypes(
+    const Json::Value& message) {
+  if (IsMember(message, message_params::kModuleTypes)) {
+    const Json::Value& moduleTypes = message[message_params::kModuleTypes];
+    for (Json::ValueConstIterator i = moduleTypes.begin();
+        i != moduleTypes.end(); ++i) {
+      const Json::Value& module = *i;
+      if (service()->CheckModule(app()->app_id(), module.asString())) {
+        modules_.append(module);
+      }
+    }
+  } else {
+    // получить список модулей из политик
+  }
+  return
+      modules_.empty() ?
+          application_manager::kDisallowed : application_manager::kAllowed;
 }
 
 Json::Value GetInteriorVehicleDataCapabiliesRequest::GetInteriorZone(
-  const Json::Value& message) {
+    const Json::Value& message) {
+  // This is used only for passenger's devices
+  DCHECK(!IsDriverDevice());
   return message.get(message_params::kZone, Json::Value(Json::objectValue));
 }
 
 SeatLocation GetInteriorVehicleDataCapabiliesRequest::InteriorZone(
     const Json::Value& message) {
+  // This is used only for passenger's devices
+  DCHECK(!IsDriverDevice());
   Json::Value zone = message.get(message_params::kZone,
                                  Json::Value(Json::objectValue));
   return CreateInteriorZone(zone);
@@ -232,6 +274,8 @@ SeatLocation GetInteriorVehicleDataCapabiliesRequest::InteriorZone(
 
 std::string GetInteriorVehicleDataCapabiliesRequest::ModuleType(
     const Json::Value& message) {
+  // This is used only for passenger's devices
+  DCHECK(!IsDriverDevice());
   Json::Value modules = message.get(message_params::kModuleTypes,
                                     Json::Value(Json::arrayValue));
   if (modules.size() == 1) {
@@ -240,6 +284,9 @@ std::string GetInteriorVehicleDataCapabiliesRequest::ModuleType(
   return "";
 }
 
+bool GetInteriorVehicleDataCapabiliesRequest::IsDriverDevice() {
+  return app()->device() == service()->PrimaryDevice();
+}
 }  // namespace commands
 
 }  // namespace can_cooperation
