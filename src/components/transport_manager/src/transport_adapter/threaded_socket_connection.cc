@@ -44,7 +44,7 @@
 
 #include "transport_manager/transport_adapter/threaded_socket_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
-#include "include/transport_manager/common.h"
+#include "transport_manager/common.h"
 
 namespace transport_manager {
 namespace transport_adapter {

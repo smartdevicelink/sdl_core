@@ -41,6 +41,11 @@
 namespace transport_manager {
 
 class TransportAdapterEvent;
+class TransportManagerListener;
+
+namespace transport_adapter {
+class TransportAdapter;
+}  // namespace transport_adapter
 
 /**
  * @brief Interface of transport manager.
@@ -100,7 +105,7 @@ class TransportManager {
   virtual int Disconnect(const ConnectionUID& connection_id) = 0;
 
   /**
-   * @brief Disconnect and clear all unprocessed data.
+   * @brief Disconnect and clear all unreceived data.
    *
    * @param connection Connection unique identifier.
    */
@@ -113,7 +118,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int SendMessageToDevice(const protocol_handler::RawMessagePtr message) = 0;
+  virtual int SendMessageToDevice(const RawMessageSptr message) = 0;
 
   /**
    * @brief Post event in the event queue.
