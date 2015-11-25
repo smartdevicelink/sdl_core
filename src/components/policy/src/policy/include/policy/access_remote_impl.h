@@ -78,6 +78,8 @@ class AccessRemoteImpl : public AccessRemote {
   virtual const SeatLocation* GetDeviceZone(const std::string& device_id) const;
   virtual void SetDeviceZone(const std::string& device_id,
                              const SeatLocation& zone);
+  virtual bool GetModuleTypes(const std::string& policy_app_id,
+                              std::vector<std::string>* modules);
 
  private:
   typedef std::map<Subject, TypeAccess> AccessControlRow;

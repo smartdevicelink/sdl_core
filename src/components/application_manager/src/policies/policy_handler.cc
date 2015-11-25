@@ -1685,5 +1685,12 @@ void PolicyHandler::OnUpdateHMIStatus(const std::string& device_id,
                                                          level);
   MessageHelper::SendHMIStatusNotification(*app, rank);
 }
+
+bool PolicyHandler::GetModuleTypes(const std::string& policy_app_id,
+                                   std::vector<std::string>* modules) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK(false);
+  return policy_manager_->GetModuleTypes(policy_app_id, modules);
+}
 #endif  // SDL_REMOTE_CONTROL
 }  //  namespace policy

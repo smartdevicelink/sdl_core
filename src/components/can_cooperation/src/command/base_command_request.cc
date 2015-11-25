@@ -54,6 +54,10 @@ BaseCommandRequest::BaseCommandRequest(
   : message_(message),
     auto_allowed_(false) {
   service_ = CANModule::instance()->service();
+  app_ = service_->GetApplication(message_->connection_key());
+  if (app_) {
+    device_location_ = service_->GetDeviceZone(app_->device());
+  }
 }
 
 
@@ -311,15 +315,14 @@ void BaseCommandRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (Validate()) {
     LOG4CXX_INFO(logger_, "Request message validated successfully!");
-    if (CheckPolicy()) {
+    if (CheckPolicyPermissions() && CheckDriverConsent()) {
       Execute();  // run child's logic
     }
   }
 }
 
-bool BaseCommandRequest::CheckPolicy() {
+bool BaseCommandRequest::CheckPolicyPermissions() {
   LOG4CXX_AUTO_TRACE(logger_);
-  app_ = service_->GetApplication(message_->connection_key());
   if (!app_) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
     SendResponse(false, result_codes::kApplicationNotRegistered, "");
@@ -335,10 +338,17 @@ bool BaseCommandRequest::CheckPolicy() {
     return false;
   }
 
-  return CheckAccess();
+  return true;
 }
 
-bool BaseCommandRequest::CheckAccess() {
+application_manager::TypeAccess BaseCommandRequest::CheckAccess(
+    const Json::Value& message) {
+  return service_->CheckAccess(app_->app_id(), PrepareZone(InteriorZone(message)),
+                               ModuleType(message), message_->function_name(),
+                               ControlData(message));
+}
+
+bool BaseCommandRequest::CheckDriverConsent() {
   LOG4CXX_AUTO_TRACE(logger_);
   CANAppExtensionPtr extension = GetAppExtension(app_);
   if (!extension) {
@@ -349,54 +359,77 @@ bool BaseCommandRequest::CheckAccess() {
   LOG4CXX_DEBUG(logger_, "Request: " << message_->json_message());
   reader.parse(message_->json_message(), value);
 
-  device_location_ = GetDeviceLocation(value);
-  application_manager::TypeAccess access = service_->CheckAccess(
-      app_->app_id(), device_location_, ModuleType(value),
-      message_->function_name(), ControlData(value));
+  application_manager::TypeAccess access = CheckAccess(value);
 
-  switch (access) {
-    case application_manager::kAllowed:
-      set_auto_allowed(true);
-      return true;
-    case application_manager::kDisallowed:
-      SendResponse(false, result_codes::kDisallowed,
-                   "Remote control is disallowed");
-      break;
-    case application_manager::kManual: {
-      Json::Value params;
-      params[json_keys::kAppId] = app_->hmi_app_id();
-      params[message_params::kModuleType] = ModuleType(value);
-      params[message_params::kZone] = JsonDeviceLocation(GetInteriorZone(value));
-      SendRequest(functional_modules::hmi_api::get_user_consent, params, true);
-      break;
-    }
-    case application_manager::kNone:
-      LOG4CXX_ERROR(logger_, "Internal issue");
-      SendResponse(false, result_codes::kDisallowed, "Internal issue");
-      break;
-    default:
-      LOG4CXX_ERROR(logger_, "Unknown issue");
-      SendResponse(false, result_codes::kDisallowed, "Unknown issue");
+  if (IsAutoAllowed(access)) {
+    set_auto_allowed(true);
+    return true;
+  }
+  if (IsNeededDriverConsent(access)) {
+    SendGetUserConsent(value);
+  } else {
+    SendDisallowed(access);
   }
   return false;
 }
 
-SeatLocation BaseCommandRequest::GetDeviceLocation(const Json::Value& value) {
-  SeatLocation zone = InteriorZone(value);
-  SeatLocationPtr device = service_->GetDeviceZone(app_->device());
-  if (device) {
-    zone.col = device->col;
-    zone.row = device->row;
-    zone.level = device->level;
-  }
-  return zone;
+bool BaseCommandRequest::IsNeededDriverConsent(
+    application_manager::TypeAccess access) const {
+  return access == application_manager::kManual;
 }
 
-Json::Value BaseCommandRequest::JsonDeviceLocation(const Json::Value& value) {
+bool BaseCommandRequest::IsAutoAllowed(
+    application_manager::TypeAccess access) const {
+  return access == application_manager::kAllowed;
+}
+
+void BaseCommandRequest::SendDisallowed(
+    application_manager::TypeAccess access) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::string info;
+  switch (access) {
+    case application_manager::kAllowed:
+    case application_manager::kManual:
+      return;
+    case application_manager::kDisallowed:
+      info = "Remote control is disallowed";
+      break;
+    case application_manager::kNone:
+      info = "Internal issue";
+      break;
+    default:
+      info = "Unknown issue";
+  }
+  LOG4CXX_ERROR(logger_, info);
+  SendResponse(false, result_codes::kDisallowed, info);
+}
+
+void BaseCommandRequest::SendGetUserConsent(const Json::Value& value) {
+  DCHECK(app_);
+  Json::Value params;
+  params[json_keys::kAppId] = app_->hmi_app_id();
+  params[message_params::kModuleType] = ModuleType(value);
+  params[message_params::kZone] = PrepareJsonZone(GetInteriorZone(value));
+  SendRequest(functional_modules::hmi_api::get_user_consent, params, true);
+}
+
+SeatLocation BaseCommandRequest::PrepareZone(const SeatLocation& interior_zone) {
+  SeatLocation location = interior_zone;
+  if (device_location_) {
+    location.col = device_location_->col;
+    location.row = device_location_->row;
+    location.level = device_location_->level;
+  }
+  return location;
+}
+
+Json::Value BaseCommandRequest::PrepareJsonZone(const Json::Value& value) {
   Json::Value json = value;
-  json[message_params::kCol] = device_location_.col;
-  json[message_params::kRow] = device_location_.row;
-  json[message_params::kLevel] = device_location_.level;
+  if (device_location_) {
+    json[message_params::kCol] = device_location_->col;
+    json[message_params::kRow] = device_location_->row;
+    json[message_params::kLevel] = device_location_->level;
+  }
   return json;
 }
 
@@ -459,7 +492,6 @@ void BaseCommandRequest::ProcessAccessResponse(
     const event_engine::Event<application_manager::MessagePtr,
     std::string>& event) {
   LOG4CXX_AUTO_TRACE(logger_);
-  app_ = service_->GetApplication(message_->connection_key());
   if (!app_) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
     SendResponse(false, result_codes::kApplicationNotRegistered, "");
@@ -490,7 +522,7 @@ void BaseCommandRequest::ProcessAccessResponse(
     LOG4CXX_DEBUG(
         logger_,
         "Setting allowed access for " << app_->app_id() << " for " << module);
-    service_->SetAccess(app_->app_id(), device_location_, module, allowed);
+    service_->SetAccess(app_->app_id(), PrepareZone(InteriorZone(request)), module, allowed);
     CheckHMILevel(application_manager::kManual, allowed);
     Execute();  // run child's logic
   } else {

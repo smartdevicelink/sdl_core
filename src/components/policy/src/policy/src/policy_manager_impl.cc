@@ -1000,11 +1000,11 @@ TypeAccess PolicyManagerImpl::CheckAccess(const PTString& device_id,
   policy_table::ModuleType module_type;
   bool is_valid = EnumFromJsonString(module, &module_type);
   if (is_valid && access_remote_->CheckModuleType(app_id, module_type)) {
-    Subject who = { device_id, app_id };
-    Object what = { module_type, zone };
-    if (access_remote_->IsPrimaryDevice(who.dev_id)) {
-      return TryOccupy(who, what);
+    if (access_remote_->IsPrimaryDevice(device_id)) {
+      return TypeAccess::kAllowed;
     } else {
+      Subject who = { device_id, app_id };
+      Object what = { module_type, zone };
       return CheckDriverConsent(who, what, rpc, params);
     }
   }
@@ -1018,20 +1018,6 @@ bool PolicyManagerImpl::CheckModule(const PTString& app_id,
   policy_table::ModuleType module_type;
   return EnumFromJsonString(module, &module_type)
       && access_remote_->CheckModuleType(app_id, module_type);
-}
-
-TypeAccess PolicyManagerImpl::TryOccupy(const Subject& who,
-                                        const Object& what) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  TypeAccess access = access_remote_->Check(who, what);
-  // if nobody controls this module
-  if (access == TypeAccess::kManual) {
-    // driver's application occupies this module
-    access_remote_->Allow(who, what);
-    return TypeAccess::kAllowed;
-  }
-  LOG4CXX_DEBUG(logger_, access);
-  return access;
 }
 
 TypeAccess PolicyManagerImpl::CheckDriverConsent(
@@ -1316,6 +1302,10 @@ void PolicyManagerImpl::OnNonPrimaryGroupsChanged(const std::string& application
   }
 }
 
+bool PolicyManagerImpl::GetModuleTypes(const std::string& application_id,
+                                       std::vector<std::string>* modules) const {
+  return access_remote_->GetModuleTypes(application_id, modules);
+}
 #endif  // SDL_REMOTE_CONTROL
 
 }  //  namespace policy

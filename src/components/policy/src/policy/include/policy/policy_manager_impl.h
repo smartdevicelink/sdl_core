@@ -207,6 +207,8 @@ class PolicyManagerImpl : public PolicyManager {
                                      const std::string& application_id);
     virtual void SendAppPermissionsChanged(const std::string& device_id,
       const std::string& application_id);
+    virtual bool GetModuleTypes(const std::string& policy_app_id,
+                                std::vector<std::string>* modules) const;
 #endif  // SDL_REMOTE_CONTROL
 
   protected:
@@ -311,7 +313,6 @@ private:
     UpdateStatusManager update_status_manager_;
     CacheManagerInterfaceSPtr cache_;
 #ifdef SDL_REMOTE_CONTROL
-    TypeAccess TryOccupy(const Subject& who, const Object& what);
     TypeAccess CheckDriverConsent(const Subject& who, const Object& what,
                                   const std::string& rpc,
                                   const RemoteControlParams& params);

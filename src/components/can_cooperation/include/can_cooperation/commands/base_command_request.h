@@ -43,6 +43,7 @@
 #include "json/json.h"
 
 using application_manager::SeatLocation;
+using application_manager::SeatLocationPtr;
 
 namespace can_cooperation {
 
@@ -78,7 +79,6 @@ class BaseCommandRequest : public Command,
 
  protected:
   application_manager::MessagePtr message_;
-  application_manager::ServicePtr service_;
   Json::Value response_params_;
 
   /**
@@ -131,6 +131,7 @@ class BaseCommandRequest : public Command,
                    bool is_hmi_request = false);
 
   application_manager::ApplicationSharedPtr app() {
+    DCHECK(app_);
     return app_;
   }
 
@@ -163,7 +164,7 @@ class BaseCommandRequest : public Command,
   virtual Json::Value GetInteriorZone(const Json::Value& message);
   virtual SeatLocation InteriorZone(const Json::Value& message);
   virtual std::vector<std::string> ControlData(const Json::Value& message);
-  virtual bool CheckAccess();
+  virtual application_manager::TypeAccess CheckAccess(const Json::Value& message);
 
   SeatLocation CreateInteriorZone(const Json::Value& zone);
 
@@ -175,19 +176,29 @@ class BaseCommandRequest : public Command,
     auto_allowed_ = value;
   }
 
+  application_manager::ServicePtr service() {
+    return service_;
+  }
+
  private:
   void CheckHMILevel(application_manager::TypeAccess access,
                      bool hmi_consented = false);
   void UpdateHMILevel(const event_engine::Event<application_manager::MessagePtr,
                       std::string>& event);
-  bool CheckPolicy();
+  bool CheckPolicyPermissions();
+  bool CheckDriverConsent();
+  inline bool IsAutoAllowed(application_manager::TypeAccess access) const;
+  inline bool IsNeededDriverConsent(application_manager::TypeAccess access) const;
+  void SendDisallowed(application_manager::TypeAccess access);
+  void SendGetUserConsent(const Json::Value& value);
   void ProcessAccessResponse(
       const event_engine::Event<application_manager::MessagePtr,
       std::string>& event);
-  SeatLocation GetDeviceLocation(const Json::Value& value);
-  Json::Value JsonDeviceLocation(const Json::Value& value);
+  SeatLocation PrepareZone(const SeatLocation& interior_zone);
+  Json::Value PrepareJsonZone(const Json::Value& value);
   application_manager::ApplicationSharedPtr app_;
-  SeatLocation device_location_;
+  application_manager::ServicePtr service_;
+  SeatLocationPtr device_location_;
   bool auto_allowed_;
 };
 

@@ -73,7 +73,7 @@ struct ToHMIType {
   policy_table::AppHMITypes::value_type operator() (int item) const {
     policy_table::AppHMIType type = static_cast<policy_table::AppHMIType>(item);
     if (!IsValidEnum(type)) {
-      LOG4CXX_WARN(logger_, "HMI types isn't known " << item);
+      LOG4CXX_WARN(logger_, "HMI type isn't known " << item);
       type = policy_table::AHT_DEFAULT;
     }
     LOG4CXX_DEBUG(logger_,
@@ -119,6 +119,14 @@ struct Contained {
   };
 };
 
+
+struct ToModuleType {
+  std::string operator() (policy_table::ModuleTypes::value_type item) const {
+    policy_table::ModuleType type = static_cast<policy_table::ModuleType>(item);
+    return EnumToJsonString(type);
+  }
+};
+
 AccessRemoteImpl::AccessRemoteImpl()
     : cache_(new CacheManager()),
       primary_device_(),
@@ -151,29 +159,21 @@ bool AccessRemoteImpl::IsPrimaryDevice(const PTString& dev_id) const {
 TypeAccess AccessRemoteImpl::Check(const Subject& who,
                                    const Object& what) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  TypeAccess ret = TypeAccess::kDisallowed;
   AccessControlList::const_iterator i = acl_.find(what);
   if (i != acl_.end()) {
     const AccessControlRow& row = i->second;
     AccessControlRow::const_iterator j = row.find(who);
     if (j != row.end()) {
       // who has permissions
-      ret = j->second;
+      TypeAccess ret = j->second;
       LOG4CXX_TRACE(
           logger_,
           "Subject " << who << " has permissions " << ret <<
           " to object " << what);
-    } else {
-      LOG4CXX_TRACE(logger_, who << " needs driver permission for " << what);
-      ret = TypeAccess::kManual;
+      return ret;
     }
-  } else {
-    // Nobody controls this object
-    LOG4CXX_TRACE(logger_, "Nobody controls " << what);
-    ret = TypeAccess::kManual;
   }
-  LOG4CXX_DEBUG(logger_, ret);
-  return ret;
+  return TypeAccess::kManual;
 }
 
 bool AccessRemoteImpl::CheckModuleType(const PTString& app_id,
@@ -410,6 +410,23 @@ const SeatLocation* AccessRemoteImpl::GetDeviceZone(
 void AccessRemoteImpl::SetDeviceZone(const std::string& device_id,
                                      const SeatLocation& zone) {
   seats_[device_id] = zone;
+}
+
+bool AccessRemoteImpl::GetModuleTypes(const std::string& application_id,
+                                      std::vector<std::string>* modules) {
+  DCHECK(modules);
+  policy_table::ApplicationPolicies& apps = cache_->pt_->policy_table.app_policies;
+  policy_table::ApplicationPolicies::iterator i = apps.find(application_id);
+  if (i == apps.end()) {
+    return false;
+  }
+  rpc::Optional<policy_table::ModuleTypes> moduleTypes = i->second.moduleType;
+  if (!moduleTypes.is_initialized()) {
+    return false;
+  }
+  std::transform(moduleTypes->begin(), moduleTypes->end(),
+                 std::back_inserter(*modules), ToModuleType());
+  return true;
 }
 
 }  // namespace policy
