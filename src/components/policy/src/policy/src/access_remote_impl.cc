@@ -170,6 +170,7 @@ TypeAccess AccessRemoteImpl::Check(const Subject& who,
           logger_,
           "Subject " << who << " has permissions " << ret <<
           " to object " << what);
+      return ret;
     }
   }
   return TypeAccess::kManual;

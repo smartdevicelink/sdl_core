@@ -395,15 +395,11 @@ TEST_F(PolicyManagerImplTest, SetAccess_Deny) {
 TEST_F(PolicyManagerImplTest, CheckAccess_PrimaryDevice) {
   Subject who {"dev1", "12345"};
   SeatLocation zone = {0, 0, 0};
-  Object what {policy_table::MT_CLIMATE, zone};
 
   EXPECT_CALL(*access_remote,
               CheckModuleType("12345", policy_table::MT_CLIMATE)).
       WillOnce(Return(true));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(true));
-  EXPECT_CALL(*access_remote, Check(who, what)).
-      WillOnce(Return(TypeAccess::kManual));
-  EXPECT_CALL(*access_remote, Allow(who, what));
 
   EXPECT_EQ(TypeAccess::kAllowed,
             manager->CheckAccess("dev1", "12345", zone, "CLIMATE", "AnyRpc",
@@ -452,9 +448,6 @@ TEST_F(PolicyManagerImplTest, TwoDifferentDevice) {
               CheckModuleType("12345", policy_table::MT_RADIO)).
       WillOnce(Return(true));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(true));
-  EXPECT_CALL(*access_remote, Check(who1, what)).
-      WillOnce(Return(TypeAccess::kManual));
-  EXPECT_CALL(*access_remote, Allow(who1, what));
 
   EXPECT_CALL(*access_remote,
               CheckModuleType("123456", policy_table::MT_RADIO)).
