@@ -58,6 +58,18 @@ class UsbConnection : public Connection {
   virtual TransportAdapter::Error Disconnect();
 
  private:
+  friend void
+#ifdef OS_WIN32
+LIBUSB_CALL
+#endif
+InTransferCallback(struct libusb_transfer*);
+
+  friend void
+#ifdef OS_WIN32
+LIBUSB_CALL
+#endif
+OutTransferCallback(struct libusb_transfer*);
+  bool FindEndpoints();
   void PopOutMessage();
   bool PostInTransfer();
   bool PostOutTransfer();
@@ -65,7 +77,6 @@ class UsbConnection : public Connection {
   void OnOutTransfer(struct libusb_transfer*);
   void Finalise();
   void AbortConnection();
-  bool FindEndpoints();
 
   const DeviceUID device_uid_;
   const ApplicationHandle app_handle_;
@@ -88,8 +99,6 @@ class UsbConnection : public Connection {
   bool disconnecting_;
   bool waiting_in_transfer_cancel_;
   bool waiting_out_transfer_cancel_;
-  friend void InTransferCallback(struct libusb_transfer*);
-  friend void OutTransferCallback(struct libusb_transfer*);
 };
 }  // namespace transport_adapter
 }  // namespace transport_manager

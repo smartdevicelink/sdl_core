@@ -33,6 +33,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef MODIFY_FUNCTION_SIGN
+#include <global_first.h>
+#endif
 #include <cstring>
 #include <cstdlib>
 
@@ -41,6 +44,10 @@
 
 #include "utils/macro.h"
 #include "utils/logger.h"
+#ifdef OS_WIN32
+#include<vector>
+#include<iostream>
+#endif
 #include "utils/threads/thread.h"
 
 namespace transport_manager {
@@ -216,7 +223,11 @@ void UsbHandler::CloseDeviceHandle(libusb_device_handle* device_handle) {
   device_handles_to_close_.push_back(device_handle);
 }
 
-int ArrivedCallback(libusb_context* context, libusb_device* device,
+int 
+#ifdef OS_WIN32
+LIBUSB_CALL
+#endif
+ArrivedCallback(libusb_context* context, libusb_device* device,
                     libusb_hotplug_event event, void* data) {
   LOG4CXX_TRACE(logger_, "enter. libusb device arrived (bus number "
                 << static_cast<int>(libusb_get_bus_number(device))
@@ -229,7 +240,11 @@ int ArrivedCallback(libusb_context* context, libusb_device* device,
   return 0;
 }
 
-int LeftCallback(libusb_context* context, libusb_device* device,
+int 
+#ifdef OS_WIN32
+LIBUSB_CALL
+#endif
+LeftCallback(libusb_context* context, libusb_device* device,
                  libusb_hotplug_event event, void* data) {
   LOG4CXX_TRACE(logger_, "enter libusb device left (bus number "
                 << static_cast<int>(libusb_get_bus_number(device))
@@ -242,17 +257,145 @@ int LeftCallback(libusb_context* context, libusb_device* device,
   return 0;
 }
 
+#ifdef OS_WIN32
+void* UsbHotPlugThread(void* data) {
+  static_cast<UsbHandler*>(data)->UsbThread();
+	
+  return 0;
+}
+
+bool UsbHandler::IsUsbEqual(libusb_device *devd,libusb_device *devs)
+{
+#if defined(OS_WIN32) && !defined(OS_WINCE)
+	struct libusb_device_descriptor descd;
+	struct libusb_device_descriptor descs;
+	int statusd = libusb_get_device_descriptor(devd, &descd);
+	int statuss = libusb_get_device_descriptor(devs, &descs);
+	if (statusd >= 0 && statuss >= 0) {
+		uint16_t idVendord = descd.idVendor;
+		uint16_t idVendors = descs.idVendor;
+		uint16_t idProductd = descd.idProduct;
+		uint16_t idProducts = descs.idProduct;
+		if (idVendord == 0x18d1 || idVendors == 0x18d1){
+			printf("vid:%d\n", idVendord);
+		}
+		bool bolret = (idVendord == idVendors && idProductd == idProducts);
+		return bolret;
+	}
+	return false;
+#else
+	int bus_number1=libusb_get_bus_number(devd);
+	int device_address1=libusb_get_device_address(devd);
+	int bus_number2=libusb_get_bus_number(devs);
+	int device_address2=libusb_get_device_address(devs);
+	
+	return (bus_number1==bus_number2 && device_address1==device_address2);
+#endif
+}
+
+void UsbHandler::UsbThread(){
+	
+	libusb_set_debug(libusb_context_, LIBUSB_LOG_LEVEL_INFO); 
+	printf("UsbThread");
+	fflush(stdout);
+	while (!shutdown_requested_){
+		libusb_device **devs=NULL;
+		int num=libusb_get_device_list(libusb_context_,&devs);
+
+		//check  exist
+		//LOG4CXX_INFO(logger_,"check exist usb");
+		if(num<0){
+			printf("lisusb_get_device_list:errno=%d\n",num);
+			fflush(stdout);
+		}
+		std::vector<libusb_device*> leftDevs;
+		for (Devices::iterator it = devices_.begin(); it != devices_.end(); ++it) {
+			libusb_device *dev=(*it)->GetLibusbDevice();
+			bool exist=false;
+			for(int j=0;j<num;j++){
+				if(IsUsbEqual(dev,devs[j]))
+					exist=true;
+			}
+			if(!exist){
+				leftDevs.push_back(dev);
+			}
+		}
+
+		for(int i=0;i<leftDevs.size();i++){
+			libusb_device *device=leftDevs[i];
+			std::cout<<"libusb device left (bus number "
+                            << static_cast<int>(libusb_get_bus_number(device))
+                            << ", device address "
+                            << static_cast<int>(
+                                   libusb_get_device_address(device)) << ")";
+			LOG4CXX_INFO(logger_, "libusb device left (bus number "
+                            << static_cast<int>(libusb_get_bus_number(device))
+                            << ", device address "
+                            << static_cast<int>(
+                                   libusb_get_device_address(device)) << ")");
+			DeviceLeft(device);
+		}
+		//device arrive
+		//LOG4CXX_INFO(logger_,"arrive usb check");
+		std::vector<libusb_device*> arriveDevs;
+		for(int i=0;i<num;i++){
+			libusb_device *device=devs[i];
+			bool exist=false;
+			for (Devices::iterator it = devices_.begin(); it != devices_.end(); ++it) {
+				libusb_device *dev=(*it)->GetLibusbDevice();
+				if(IsUsbEqual(device,dev))
+					exist=true;
+			}
+			if(!exist)
+				arriveDevs.push_back(device);
+		}
+		//
+		for(int i=0;i<arriveDevs.size();i++){
+			libusb_device *device=arriveDevs[i];
+			std::cout<< "libusb device arrived (bus number "
+                            << static_cast<int>(libusb_get_bus_number(device))
+                            << ", device address "
+                            << static_cast<int>(
+                                   libusb_get_device_address(device)) << ")";
+			LOG4CXX_INFO(logger_, "libusb device arrived (bus number "
+                            << static_cast<int>(libusb_get_bus_number(device))
+                            << ", device address "
+                            << static_cast<int>(
+                                   libusb_get_device_address(device)) << ")");
+  PRINTMSG(1, (L"\n%s, line:%d, DeviceArrived(device);\n", __FUNCTIONW__, __LINE__));
+			DeviceArrived(device);
+		}
+
+		libusb_free_device_list(devs,1);
+		Sleep(2000);//500ms
+	}
+}
+#endif
+
 TransportAdapter::Error UsbHandler::Init() {
-  LOG4CXX_TRACE(logger_, "enter");
+#ifdef SP_C9_PRIMA1
+	return TransportAdapter::OK;
+#else
   int libusb_ret = libusb_init(&libusb_context_);
 
   if (LIBUSB_SUCCESS != libusb_ret) {
     LOG4CXX_ERROR(logger_, "libusb_init failed: " << libusb_ret);
-    LOG4CXX_TRACE(logger_,
-                  "exit with TransportAdapter::FAIL. Condition: LIBUSB_SUCCESS != libusb_ret");
+    LOG4CXX_TRACE(logger_, "exit with TransportAdapter::FAIL. Condition: LIBUSB_SUCCESS != libusb_ret");
     return TransportAdapter::FAIL;
   }
 
+ 
+#ifdef OS_WIN32
+  pthread_t plug_thread;
+  const int thread_plug_error =
+      pthread_create(&plug_thread, 0, &UsbHotPlugThread, this);
+  if (0 != thread_plug_error) {
+    LOG4CXX_ERROR(logger_, "USB device plug thread start failed, error code "
+                               << thread_plug_error);
+    return TransportAdapter::FAIL;
+  }
+
+#else
   if (!libusb_has_capability(LIBUSB_CAP_HAS_HOTPLUG)) {
     LOG4CXX_ERROR(logger_, "LIBUSB_CAP_HAS_HOTPLUG not supported");
     LOG4CXX_TRACE(logger_,
@@ -281,20 +424,19 @@ TransportAdapter::Error UsbHandler::Init() {
                  &left_callback_handle_);
 
   if (LIBUSB_SUCCESS != libusb_ret) {
-    LOG4CXX_ERROR(logger_,
-                  "libusb_hotplug_register_callback failed: " << libusb_ret);
-    LOG4CXX_TRACE(logger_,
-                  "exit with TransportAdapter::FAIL. Condition: LIBUSB_SUCCESS != libusb_ret");
+    LOG4CXX_ERROR(logger_, "libusb_hotplug_register_callback failed: " << libusb_ret);
+    LOG4CXX_TRACE(logger_, "exit with TransportAdapter::FAIL. Condition: LIBUSB_SUCCESS != libusb_ret");
     return TransportAdapter::FAIL;
   }
+#endif
 
   if (!thread_->start()) {
     LOG4CXX_ERROR(logger_, "USB device scanner thread start failed, error code");
-    LOG4CXX_TRACE(logger_,
-                  "exit with TransportAdapter::FAIL.");
+    LOG4CXX_TRACE(logger_, "exit with TransportAdapter::FAIL.");
     return TransportAdapter::FAIL;
   }
   return TransportAdapter::OK;
+#endif
 }
 
 void UsbHandler::Thread() {
@@ -318,13 +460,18 @@ void UsbHandler::Thread() {
            device_handles_to_close_.begin();
          it != device_handles_to_close_.end();
          it = device_handles_to_close_.erase(it)) {
+			libusb_release_interface(*it,0);
       libusb_close(*it);
     }
   }
   LOG4CXX_TRACE(logger_, "exit");
 }
 
-void UsbTransferSequenceCallback(libusb_transfer* transfer) {
+void 
+#ifdef OS_WIN32
+LIBUSB_CALL
+#endif
+UsbTransferSequenceCallback(libusb_transfer* transfer) {
   LOG4CXX_TRACE(logger_, "enter. libusb_transfer* " << transfer);
   UsbHandler::ControlTransferSequenceState* sequence_state =
     static_cast<UsbHandler::ControlTransferSequenceState*>(transfer->user_data);
@@ -353,9 +500,17 @@ void UsbHandler::SubmitControlTransfer(
   const libusb_request_type request_type = LIBUSB_REQUEST_TYPE_VENDOR;
 
   libusb_endpoint_direction endpoint_direction = LIBUSB_ENDPOINT_IN;
+#ifdef OS_WIN32
+  if (transfer->Direction() == UsbControlTransfer::TD_IN) {
+#else
   if (transfer->Direction() == UsbControlTransfer::IN) {
+#endif
     endpoint_direction = LIBUSB_ENDPOINT_IN;
+#ifdef OS_WIN32
+  } else if (transfer->Direction() == UsbControlTransfer::TD_OUT) {
+#else
   } else if (transfer->Direction() == UsbControlTransfer::OUT) {
+#endif
     endpoint_direction = LIBUSB_ENDPOINT_OUT;
   } else {
     NOTREACHED();
@@ -406,7 +561,11 @@ void UsbHandler::ControlTransferCallback(libusb_transfer* transfer) {
     UsbControlTransfer* current_transfer = sequence_state->CurrentTransfer();
     bool submit_next = true;
     if (current_transfer &&
+#ifdef OS_WIN32
+        current_transfer->Direction() == UsbControlTransfer::TD_IN) {
+#else
         current_transfer->Direction() == UsbControlTransfer::IN) {
+#endif
       submit_next =
         static_cast<UsbControlInTransfer*>(current_transfer)
         ->OnCompleted(libusb_control_transfer_get_data(transfer));

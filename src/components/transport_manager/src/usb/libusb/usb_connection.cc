@@ -84,11 +84,19 @@ UsbConnection::~UsbConnection() {
 }
 
 // Callback for handling income and outcome data from lib_usb
-void InTransferCallback(libusb_transfer* transfer) {
+void 
+#ifdef OS_WIN32
+LIBUSB_CALL
+#endif
+InTransferCallback(libusb_transfer* transfer) {
   static_cast<UsbConnection*>(transfer->user_data)->OnInTransfer(transfer);
 }
 
-void OutTransferCallback(libusb_transfer* transfer) {
+void 
+#ifdef OS_WIN32
+LIBUSB_CALL
+#endif
+OutTransferCallback(libusb_transfer* transfer) {
   static_cast<UsbConnection*>(transfer->user_data)->OnOutTransfer(transfer);
 }
 
@@ -256,9 +264,15 @@ void UsbConnection::Finalise() {
     }
   }
   while (waiting_in_transfer_cancel_ || waiting_out_transfer_cancel_) {
+#ifdef OS_ANDROID
+    usleep(150000);
+#elif defined(OS_WIN32)
+	  ::Sleep(150);
+#else
     pthread_yield();
-  }
+#endif
   LOG4CXX_TRACE(logger_, "exit");
+  }
 }
 
 void UsbConnection::AbortConnection() {

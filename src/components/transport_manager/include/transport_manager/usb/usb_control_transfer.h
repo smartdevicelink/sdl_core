@@ -47,8 +47,13 @@ class UsbControlOutTransfer;
 class UsbControlTransfer {
  public:
   enum TransferDirection {
-    IN,
-    OUT
+#ifdef OS_WIN32
+	TD_IN,
+    TD_OUT
+#else
+	IN,
+	OUT
+#endif
   };
 
   enum RequestType {
@@ -67,14 +72,26 @@ class UsbControlTransfer {
 class UsbControlInTransfer : public UsbControlTransfer {
  public:
   virtual ~UsbControlInTransfer() {}
-  virtual TransferDirection Direction() const { return IN; }
+  virtual TransferDirection Direction() const { 
+#ifdef OS_WIN32
+	  return TD_IN;
+#else
+	  return IN; 
+#endif
+  }
   virtual bool OnCompleted(unsigned char* data) const = 0;
 };
 
 class UsbControlOutTransfer : public UsbControlTransfer {
  public:
   virtual ~UsbControlOutTransfer() {}
-  virtual TransferDirection Direction() const { return OUT; }
+  virtual TransferDirection Direction() const { 
+#ifdef OS_WIN32
+	  return TD_OUT;
+#else
+	  return OUT; 
+#endif
+  }
   virtual const char* Data() const = 0;
 };
 

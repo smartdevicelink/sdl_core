@@ -91,7 +91,7 @@ if (BUILD_USB_SUPPORT)
     ${TM_SRC_DIR}/usb/usb_connection_factory.cc
     ${TM_SRC_DIR}/usb/usb_device_scanner.cc
   )
-  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "Android" OR CMAKE_SYSTEM_NAME STREQUAL "WindowsCE" OR CMAKE_SYSTEM_NAME STREQUAL "Windows")
     list (APPEND SOURCES
     ${TM_SRC_DIR}/usb/libusb/usb_handler.cc
     ${TM_SRC_DIR}/usb/libusb/usb_connection.cc
@@ -116,6 +116,8 @@ target_link_libraries(${target} ProtocolLibrary)
 if (BUILD_USB_SUPPORT)
   if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
     target_link_libraries(${target} usbdi)
+  elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    target_link_libraries(${target} Libusb-1.0.16)
   endif()
 endif(BUILD_USB_SUPPORT)
 
@@ -137,10 +139,6 @@ endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
 endif()
-
-add_library("transport_manager" ${SOURCES}
-        ${TRANSPORT_MANAGER_SOURCES}
-)
 
 if(BUILD_TESTS)
   add_subdirectory(test)
