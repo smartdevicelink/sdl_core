@@ -392,7 +392,9 @@ void BaseCommandRequest::SendDisallowed(
     case application_manager::kManual:
       return;
     case application_manager::kDisallowed:
-      info = "Remote control is disallowed";
+      info =
+          disallowed_info_.empty() ?
+              "Remote control is disallowed" : disallowed_info_;
       break;
     case application_manager::kNone:
       info = "Internal issue";

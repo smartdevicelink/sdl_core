@@ -315,6 +315,7 @@ std::string GetInteriorVehicleDataCapabiliesRequest::ModuleType(
   if (modules.size() == 1) {
     return modules.get(Json::ArrayIndex(0), Json::Value("")).asString();
   }
+  set_disallowed_info("Information: one moduleType must be provided");
   return "";
 }
 
