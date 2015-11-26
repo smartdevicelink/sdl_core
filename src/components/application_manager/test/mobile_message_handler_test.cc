@@ -38,11 +38,10 @@
 #include <iterator>
 #include <vector>
 
+#include "gmock/gmock.h"
 #include "application_manager/message.h"
 #include "protocol/raw_message.h"
 #include "utils/make_shared.h"
-
-#include "gmock/gmock.h"
 
 namespace application_manager {
 namespace test {
@@ -55,6 +54,8 @@ using protocol_handler::PROTOCOL_HEADER_V2_SIZE;
 using application_manager::MobileMessageHandler;
 using application_manager::ProtocolVersion;
 using ::testing::_;
+
+using testing::Return;
 
 namespace {
 
@@ -118,10 +119,10 @@ class MobileMessageHandlerTest : public testing::Test {
 
     // Checks
     EXPECT_EQ(data, message->json_message());
-    EXPECT_EQ(1u, message->connection_key());
-    EXPECT_EQ(247u, message->function_id());
+    EXPECT_EQ(1, message->connection_key());
+    EXPECT_EQ(247, message->function_id());
     EXPECT_EQ(protocol_version, message->protocol_version());
-    EXPECT_EQ((uint32_t)0x5c, message->correlation_id());
+    EXPECT_EQ(0x5c, message->correlation_id());
     EXPECT_EQ(full_data_size, message->data_size());
     EXPECT_EQ(payload_size, message->payload_size());
     EXPECT_TRUE(message->has_binary_data());
@@ -138,10 +139,10 @@ class MobileMessageHandlerTest : public testing::Test {
 
     // Checks
     EXPECT_EQ(data, message->json_message());
-    EXPECT_EQ(1u, message->connection_key());
-    EXPECT_EQ(247u, message->function_id());
+    EXPECT_EQ(1, message->connection_key());
+    EXPECT_EQ(247, message->function_id());
     EXPECT_EQ(protocol_version, (uint32_t)message->protocol_version());
-    EXPECT_EQ((uint32_t)0x5c, message->correlation_id());
+    EXPECT_EQ(0x5c, message->correlation_id());
     EXPECT_EQ(full_data_size, message->data_size());
     EXPECT_EQ(payload_size, message->payload_size());
     EXPECT_FALSE(message->has_binary_data());
@@ -227,7 +228,7 @@ class MobileMessageHandlerTest : public testing::Test {
     for (uint8_t i = 0; i < full_data.size(); ++i) {
       EXPECT_EQ(full_data[i], result_message->data()[i]);
     }
-    EXPECT_EQ(ServiceType::kRpc, result_message->service_type());
+    EXPECT_EQ(0x0F, result_message->service_type());
   }
 };
 
@@ -323,14 +324,14 @@ TEST_F(
 
 TEST_F(
     MobileMessageHandlerTest,
-    DISABLED_Test_HandleOutgoingMessageProtocol_MessageWithProtocolV2_WithBinaryData) {
+    Test_HandleOutgoingMessageProtocol_MessageWithProtocolV2_WithBinaryData) {
   const uint32_t protocol_version = 2u;
   TestHandlingOutgoingMessageProtocolWithBinaryData(protocol_version);
 }
 
 TEST_F(
     MobileMessageHandlerTest,
-    DISABLED_Test_HandleOutgoingMessageProtocol_MessageWithProtocolV3_WithBinaryData) {
+    Test_HandleOutgoingMessageProtocol_MessageWithProtocolV3_WithBinaryData) {
   const uint32_t protocol_version = 3u;
   TestHandlingOutgoingMessageProtocolWithBinaryData(protocol_version);
 }

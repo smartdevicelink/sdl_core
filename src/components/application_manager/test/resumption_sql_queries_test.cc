@@ -41,7 +41,7 @@
 #include "sqlite_wrapper/sql_query.h"
 #include "utils/file_system.h"
 #include "config_profile/profile.h"
-#include "../resumption/resumption_sql_queries.h"
+#include "resumption_sql_queries.h"
 #include "policy/sql_pt_queries.h"
 
 namespace resumption {
@@ -126,7 +126,8 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
     string file_to_delete = kDatabaseName + ".sqlite";
     file_system::DeleteFile(file_to_delete);
   }
-  void TearDown() { DeleteTablesData(); }
+  void TearDown() { DeleteTablesData();
+                  }
 
   void CheckDeleteQuery(const string& count_query, const string& query_to_check,
                         pair<int, string> app_info, pair<int, string> dev_info,
@@ -731,7 +732,6 @@ TEST_F(ResumptionSqlQueriesTest, kChecksResumptionData_ExpectDataCorrect) {
   CheckSelectQuery(kChecksResumptionData, 1, 0);
 }
 
-
 TEST_F(ResumptionSqlQueriesTest, kSelectCountHMILevel_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
@@ -778,7 +778,6 @@ TEST_F(ResumptionSqlQueriesTest, kCheckHMIId_ExpectDataCorrect) {
   // Check
   CheckSelectQuery(kCheckHMIId, p1, p2, 1, 0);
 }
-
 
 TEST_F(ResumptionSqlQueriesTest, kSelectHMIId_ExpectDataCorrect) {
   // Arrange
@@ -2021,7 +2020,9 @@ TEST_F(ResumptionSqlQueriesTest, kSelectSubMenu_ExpectDataCorrect) {
                            hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
                            app_id1, device_id, 9).LastInsertId();
   int64_t submenu_key =
+
       FillSubMenuTable(temp_query, 1, "menu_name", 1).LastInsertId();
+
   FillApplicationSubMenuArrayTable(temp_query, app_key, submenu_key);
   ValToPosPair p1(0, app_id1);
   ValToPosPair p2(1, device_id);

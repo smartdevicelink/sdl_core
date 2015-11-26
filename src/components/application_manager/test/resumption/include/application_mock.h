@@ -261,6 +261,13 @@ class ApplicationMock : public ::application_manager::Application {
   MOCK_METHOD1(set_reset_global_properties_active, void(bool active));
   MOCK_CONST_METHOD0(is_reset_global_properties_active, bool());
   MOCK_CONST_METHOD0(app_id, uint32_t());
+
+  MOCK_CONST_METHOD0(is_foreground, bool());
+  MOCK_CONST_METHOD0(mobile_app_id, std::string());
+  MOCK_METHOD1(set_mobile_app_id, void(const std::string&));
+  MOCK_METHOD1(set_foreground, void(bool));
+  MOCK_METHOD1(AddFile, bool(application_manager::AppFile &));
+  MOCK_METHOD1(UpdateFile, bool (application_manager::AppFile &));
 };
 
 }  // namespace resumption_test

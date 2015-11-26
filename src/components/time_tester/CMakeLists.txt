@@ -32,6 +32,7 @@
 set(TIME_TESTER_SRC_DIR ${COMPONENTS_DIR}/time_tester/src)
 
 include_directories(
+  include
   include/time_tester
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/protocol_handler/include/

@@ -115,7 +115,8 @@ class MockMessageHelper {
                     mobile_apis::AppInterfaceUnregisteredReason::eType reason));
   MOCK_METHOD1(CommonLanguageFromString, hmi_apis::Common_Language::eType(
           const std::string& language)) ;
-
+  MOCK_METHOD1(CommonLanguageToString, std::string(
+          hmi_apis::Common_Language::eType));
   MOCK_METHOD1(CreateModuleInfoSO, smart_objects::SmartObjectSPtr(uint32_t function_id));
   MOCK_METHOD1(SendAllOnButtonSubscriptionNotificationsForApp,
                void(ApplicationConstSharedPtr app));
@@ -132,6 +133,9 @@ class MockMessageHelper {
   MOCK_METHOD2(VerifyImageFiles,
                mobile_apis::Result::eType(smart_objects::SmartObject& message,
                                           ApplicationConstSharedPtr app));
+  MOCK_METHOD2(CheckWithPolicy,
+      bool(mobile_apis::SystemAction::eType, const std::string&));
+
   static MockMessageHelper* message_helper_mock();
 };
 
