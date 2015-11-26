@@ -44,6 +44,7 @@ namespace policy {
 
 struct SeatLocation {
   int col, row, level;
+  int colspan, rowspan, levelspan;
 };
 inline bool operator<(const SeatLocation& x, const SeatLocation& y) {
   return (x.col < y.col) || (x.col == y.col && x.row < y.row) ||

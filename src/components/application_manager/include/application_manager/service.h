@@ -50,7 +50,14 @@ enum TypeAccess {
 
 struct SeatLocation {
   int col, row, level;
+  int colspan, rowspan, levelspan;
 };
+inline bool operator==(const SeatLocation& x, const SeatLocation& y) {
+  return x.col == y.col && x.row == y.row && x.level == y.level;
+}
+inline bool operator!=(const SeatLocation& x, const SeatLocation& y) {
+  return !(x == y);
+}
 typedef utils::SharedPtr<SeatLocation> SeatLocationPtr;
 
 typedef std::string PluginFunctionID;

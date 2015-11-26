@@ -1104,9 +1104,7 @@ bool PolicyManagerImpl::GetDeviceZone(const PTString& dev_id,
                                       SeatLocation* zone) const {
   const SeatLocation* seat = access_remote_->GetDeviceZone(dev_id);
   if (seat) {
-    zone->col = seat->col;
-    zone->row = seat->row;
-    zone->level = seat->level;
+    *zone = *seat;
     return true;
   }
   return false;
