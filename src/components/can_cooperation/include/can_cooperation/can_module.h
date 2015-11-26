@@ -154,6 +154,10 @@ class CANModule : public functional_modules::GenericModule,
 
   functional_modules::ProcessResult HandleMessage(
     application_manager::MessagePtr msg);
+  inline bool DoNeedUnsubscribe(
+      uint32_t device_id, const application_manager::SeatLocation& zone);
+  inline application_manager::SeatLocation GetInteriorZone(
+      const Json::Value& device_location) const;
   // TODO(VS): must be uid
   static const functional_modules::ModuleID kCANModuleID = 153;
   CANConnectionSPtr can_connection_;

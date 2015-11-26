@@ -1543,7 +1543,8 @@ uint32_t PolicyHandler::PrimaryDevice() const {
 void PolicyHandler::SetDeviceZone(const std::string& device_id,
                                   const application_manager::SeatLocation& zone) {
   POLICY_LIB_CHECK_VOID();
-  policy::SeatLocation policy_zone = {zone.col, zone.row, zone.level};
+  policy::SeatLocation policy_zone = { zone.col, zone.row, zone.level,
+      zone.colspan, zone.rowspan, zone.levelspan };
   policy_manager_->SetDeviceZone(device_id, policy_zone);
 
   connection_handler::DeviceHandle device_handle;
@@ -1575,6 +1576,9 @@ const application_manager::SeatLocationPtr PolicyHandler::GetDeviceZone(
     zone->col = policy_zone.col;
     zone->row = policy_zone.row;
     zone->level = policy_zone.level;
+    zone->colspan = policy_zone.colspan;
+    zone->rowspan = policy_zone.rowspan;
+    zone->levelspan = policy_zone.levelspan;
     return zone;
   }
   return application_manager::SeatLocationPtr();

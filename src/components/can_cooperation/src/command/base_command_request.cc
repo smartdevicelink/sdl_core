@@ -414,13 +414,7 @@ void BaseCommandRequest::SendGetUserConsent(const Json::Value& value) {
 }
 
 SeatLocation BaseCommandRequest::PrepareZone(const SeatLocation& interior_zone) {
-  SeatLocation location = interior_zone;
-  if (device_location_) {
-    location.col = device_location_->col;
-    location.row = device_location_->row;
-    location.level = device_location_->level;
-  }
-  return location;
+  return device_location_ ? *device_location_ : interior_zone;
 }
 
 Json::Value BaseCommandRequest::PrepareJsonZone(const Json::Value& value) {
@@ -429,6 +423,9 @@ Json::Value BaseCommandRequest::PrepareJsonZone(const Json::Value& value) {
     json[message_params::kCol] = device_location_->col;
     json[message_params::kRow] = device_location_->row;
     json[message_params::kLevel] = device_location_->level;
+    json[message_params::kColspan] = device_location_->colspan;
+    json[message_params::kRowspan] = device_location_->rowspan;
+    json[message_params::kLevelspan] = device_location_->levelspan;
   }
   return json;
 }
@@ -449,7 +446,10 @@ SeatLocation BaseCommandRequest::CreateInteriorZone(const Json::Value& zone) {
   int col = zone.get(message_params::kCol, Json::Value(-1)).asInt();
   int row = zone.get(message_params::kRow, Json::Value(-1)).asInt();
   int level = zone.get(message_params::kLevel, Json::Value(-1)).asInt();
-  SeatLocation seat = {col, row, level};
+  int colspan = zone.get(message_params::kColspan, Json::Value(-1)).asInt();
+  int rowspan = zone.get(message_params::kRowspan, Json::Value(-1)).asInt();
+  int levelspan = zone.get(message_params::kLevelspan, Json::Value(-1)).asInt();
+  SeatLocation seat = { col, row, level, colspan, rowspan, levelspan };
   return seat;
 }
 

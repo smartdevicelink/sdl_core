@@ -299,21 +299,10 @@ functional_modules::ProcessResult CANModule::HandleMessage(
           if (valid) {
             uint32_t device_id = params[message_params::kDevice]
                                         [json_keys::kId].asUInt();
-            int col = params[message_params::kDeviceLocation][message_params::kCol].asInt();
-            int row = params[message_params::kDeviceLocation][message_params::kRow].asInt();
-            int level = params[message_params::kDeviceLocation][message_params::kLevel].asInt();
-            SeatLocation zone = { col, row, level };
-            application_manager::SeatLocationPtr previous_zone =
-                service()->GetDeviceZone(device_id);
+            SeatLocation zone = GetInteriorZone(params[message_params::kDeviceLocation]);
 
-            if (device_id != service()->PrimaryDevice()) {
-              // TODO(VS): operator != in SeatLocation?
-              if ((!previous_zone.get()) ||  // If it first device location changing or if device location actually changed
-                  ((zone.col != previous_zone->col) ||
-                  (zone.row != previous_zone->row) ||
-                  (zone.level != previous_zone->level))) {
-                UnsubscribeAppsFromAllInteriorZones(device_id);
-              }
+            if (DoNeedUnsubscribe(device_id, zone)) {
+              UnsubscribeAppsFromAllInteriorZones(device_id);
             }
 
             service()->SetDeviceZone(device_id, zone);
@@ -350,6 +339,24 @@ functional_modules::ProcessResult CANModule::HandleMessage(
   return ProcessResult::PROCESSED;
 }
 
+bool CANModule::DoNeedUnsubscribe(uint32_t device_id,
+                                  const SeatLocation& zone) {
+  application_manager::SeatLocationPtr previous_zone =
+      service()->GetDeviceZone(device_id);
+  return device_id != service()->PrimaryDevice()
+      && (!previous_zone || zone != *previous_zone);
+}
+
+SeatLocation CANModule::GetInteriorZone(const Json::Value& device_location) const {
+  int col = device_location[message_params::kCol].asInt();
+  int row = device_location[message_params::kRow].asInt();
+  int level = device_location[message_params::kLevel].asInt();
+  int colspan = device_location[message_params::kColspan].asInt();
+  int rowspan = device_location[message_params::kRowspan].asInt();
+  int levelspan = device_location[message_params::kLevelspan].asInt();
+  SeatLocation zone = { col, row, level, colspan, rowspan, levelspan };
+  return zone;
+}
 void CANModule::SendHmiStatusNotification(
                                 application_manager::ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);

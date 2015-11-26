@@ -159,7 +159,10 @@ SeatLocation BaseCommandNotification::CreateInteriorZone(
   int col = zone.get(message_params::kCol, Json::Value(-1)).asInt();
   int row = zone.get(message_params::kRow, Json::Value(-1)).asInt();
   int level = zone.get(message_params::kLevel, Json::Value(-1)).asInt();
-  SeatLocation seat = {col, row, level};
+  int colspan = zone.get(message_params::kColspan, Json::Value(-1)).asInt();
+  int rowspan = zone.get(message_params::kRowspan, Json::Value(-1)).asInt();
+  int levelspan = zone.get(message_params::kLevelspan, Json::Value(-1)).asInt();
+  SeatLocation seat = { col, row, level, colspan, rowspan, levelspan };
   return seat;
 }
 
