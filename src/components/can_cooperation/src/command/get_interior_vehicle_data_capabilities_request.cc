@@ -303,6 +303,11 @@ SeatLocation GetInteriorVehicleDataCapabiliesRequest::InteriorZone(
   DCHECK(!IsDriverDevice());
   Json::Value zone = message.get(message_params::kZone,
                                  Json::Value(Json::objectValue));
+  if (zone.empty()) {
+    // if SDL-RC has not received app's device location from the vehicle
+    // we will use this message to send response "DISALLOWED"
+    set_disallowed_info("Information: zone must be provided");
+  }
   return CreateInteriorZone(zone);
 }
 

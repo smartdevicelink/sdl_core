@@ -343,8 +343,10 @@ bool BaseCommandRequest::CheckPolicyPermissions() {
 
 application_manager::TypeAccess BaseCommandRequest::CheckAccess(
     const Json::Value& message) {
-  return service_->CheckAccess(app_->app_id(), PrepareZone(InteriorZone(message)),
-                               ModuleType(message), message_->function_name(),
+  const SeatLocation& zone = PrepareZone(InteriorZone(message));
+  const std::string& module = ModuleType(message);
+  return service_->CheckAccess(app_->app_id(), zone, module,
+                               message_->function_name(),
                                ControlData(message));
 }
 
