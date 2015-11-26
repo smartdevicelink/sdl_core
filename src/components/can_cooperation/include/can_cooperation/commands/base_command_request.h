@@ -180,6 +180,10 @@ class BaseCommandRequest : public Command,
     return service_;
   }
 
+  void set_disallowed_info(const std::string& info) {
+    disallowed_info_ = info;
+  }
+
  private:
   void CheckHMILevel(application_manager::TypeAccess access,
                      bool hmi_consented = false);
@@ -200,6 +204,7 @@ class BaseCommandRequest : public Command,
   application_manager::ServicePtr service_;
   SeatLocationPtr device_location_;
   bool auto_allowed_;
+  std::string disallowed_info_;
 };
 
 }  // namespace commands

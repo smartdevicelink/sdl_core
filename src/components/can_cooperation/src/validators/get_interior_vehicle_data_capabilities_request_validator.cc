@@ -72,10 +72,6 @@ ValidationResult GetInteriorVehicleDataCapabilitiesRequestValidator::Validate(
                                                     outgoing_json[kZone]);
   }
 
-  if (!outgoing_json.size()) {
-    return INVALID_DATA;
-  }
-
   return result;
 }
 
