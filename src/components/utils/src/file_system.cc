@@ -160,16 +160,18 @@ bool file_system::CreateDirectoryRecursively(const std::string& path) {
   bool ret_val = true;
 
   while (ret_val == true && pos <= path.length()) {
+#ifdef OS_WIN32
+	pos = path.find('\\', pos + 1);
+#else
     pos = path.find('/', pos + 1);
+#endif
     if (!DirectoryExists(path.substr(0, pos))) {
 #ifdef OS_WIN32
-#ifdef OS_WINCE
-		wchar_string strUnicodeData;
-		Global::toUnicode(path.substr(0, pos), CP_ACP, strUnicodeData);
-	  if (0 != ::CreateDirectory(strUnicodeData.c_str(), NULL)) {
-#else
-      if (0 != ::CreateDirectory(path.substr(0, pos).c_str(), NULL)) {
-#endif
+	if (0 != ::CreateDirectory(path.substr(0, pos).c_str(), NULL)) {
+#elif defined OS_WINCE
+	wchar_string strUnicodeData;
+	Global::toUnicode(path.substr(0, pos), CP_ACP, strUnicodeData);
+	if (0 != ::CreateDirectory(strUnicodeData.c_str(), NULL)) {
 #else
       if (0 != mkdir(path.substr(0, pos).c_str(), S_IRWXU)) {
 #endif
