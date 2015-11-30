@@ -169,9 +169,9 @@ bool GetInteriorVehicleDataCapabiliesRequest::ReadCapabilitiesFromFile() {
   LOG4CXX_INFO(logger_, "Failed to get correct response from HMI; \
       trying to read from file");
   Json::Value request;
-
   Json::Reader reader;
   if (!reader.parse(message_->json_message(), request)) {
+    LOG4CXX_ERROR(logger_, "Failed to read capabilities from file also");
     return false;
   }
 
@@ -183,30 +183,32 @@ bool GetInteriorVehicleDataCapabiliesRequest::ReadCapabilitiesFromFile() {
     zone_capabilities = file_caps.capabilities();
   }
 
-  if (zone_capabilities.type() == Json::ValueType::arrayValue) {
-    LOG4CXX_DEBUG(logger_, "Read vehicle capabilities from file "
-        << zone_capabilities);
-    if (IsMember(request, kModuleTypes)) {
-      response_params_[kInteriorVehicleDataCapabilities] = Json::Value(
-        Json::ValueType::arrayValue);
-      for (unsigned int i = 0; i < zone_capabilities.size(); ++i) {
-        for (unsigned int j = 0; j < request[kModuleTypes].size(); ++j) {
-          if (request[kModuleTypes][j] ==
-                zone_capabilities[i][kModuleType]) {
-            response_params_[kInteriorVehicleDataCapabilities].append(
-              zone_capabilities[i]);
-          }
-        }
-      }
-    } else {
-      response_params_[kInteriorVehicleDataCapabilities] =
-        zone_capabilities;
-    }
-    return !(response_params_[kInteriorVehicleDataCapabilities].empty());
-  } else {
+  if (!zone_capabilities.isArray()) {
     // Failed to read capabilities from file.
     LOG4CXX_ERROR(logger_, "Failed to read capabilities from file also");
     return false;
+  }
+  LOG4CXX_DEBUG(logger_, "Read vehicle capabilities from file "
+      << zone_capabilities);
+  const Json::Value& modules =
+      IsDriverDevice() ? allowed_modules_ : request[kModuleTypes];
+  DCHECK(modules.isArray());
+  CreateCapabilities(zone_capabilities, modules);
+  return !response_params_[kInteriorVehicleDataCapabilities].empty();
+}
+
+void GetInteriorVehicleDataCapabiliesRequest::CreateCapabilities(
+    const Json::Value& zone_capabilities, const Json::Value& modules) {
+  response_params_[kInteriorVehicleDataCapabilities] = Json::Value(
+    Json::ValueType::arrayValue);
+  for (size_t i = 0; i < zone_capabilities.size(); ++i) {
+    for (size_t j = 0; j < modules.size(); ++j) {
+      if (modules[j] ==
+            zone_capabilities[i][kModuleType]) {
+        response_params_[kInteriorVehicleDataCapabilities].append(
+          zone_capabilities[i]);
+      }
+    }
   }
 }
 
