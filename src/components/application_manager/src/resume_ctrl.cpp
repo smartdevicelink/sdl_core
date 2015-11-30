@@ -376,6 +376,7 @@ bool ResumeCtrl::RemoveApplicationFromSaved(const std::string& mobile_app_id) {
 
 void ResumeCtrl::Suspend() {
   LOG4CXX_AUTO_TRACE(logger_);
+  StopRestoreHmiLevelTimer();
   StopSavePersistentDataTimer();
   SaveAllApplications();
   Json::Value to_save;
@@ -439,6 +440,14 @@ void ResumeCtrl::StopSavePersistentDataTimer() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (save_persistent_data_timer_.isRunning()) {
     save_persistent_data_timer_.stop();
+  }
+}
+
+
+void ResumeCtrl::StopRestoreHmiLevelTimer() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (restore_hmi_level_timer_.isRunning()) {
+    restore_hmi_level_timer_.stop();
   }
 }
 
