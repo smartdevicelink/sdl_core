@@ -66,28 +66,6 @@ void SetInteriorVehicleDataRequest::Execute() {
   Json::Reader reader;
   reader.parse(message_->json_message(), params);
 
-  // TODO(VS): Create function for read only validation and move there similar code
-  if (params[kModuleData].isMember(kRadioControlData)) {
-    validators::RadioControlDataValidator::instance()->RemoveReadOnlyParams(
-        params[kModuleData][kRadioControlData]);
-
-    if (0 == params[kModuleData][kRadioControlData].size()) {
-      SendResponse(false, result_codes::kReadOnly,
-                  "Request contains just read only params!");
-      return;
-    }
-  } else if (params[kModuleData].isMember(kClimateControlData)) {
-    validators::ClimateControlDataValidator::instance()->RemoveReadOnlyParams(
-        params[kModuleData][kClimateControlData]);
-    if (0 == params[kModuleData][kClimateControlData].size()) {
-      SendResponse(false, result_codes::kReadOnly,
-                  "Request contains just read only params!");
-      return;
-    }
-  } else {
-    DCHECK(false);
-  }
-
   SendRequest(
       functional_modules::hmi_api::set_interior_vehicle_data, params, true);
 }
@@ -159,9 +137,31 @@ bool SetInteriorVehicleDataRequest::Validate() {
     SendResponse(false, result_codes::kInvalidData,
                  "Mobile request validation failed!");
     return false;
-  } else {
-    message_->set_json_message(MessageHelper::ValueToString(outgoing_json));
   }
+
+  // TODO(VS): Create function for read only validation and move there similar code
+  if (outgoing_json[kModuleData].isMember(kRadioControlData)) {
+    validators::RadioControlDataValidator::instance()->RemoveReadOnlyParams(
+        outgoing_json[kModuleData][kRadioControlData]);
+
+    if (0 == outgoing_json[kModuleData][kRadioControlData].size()) {
+      SendResponse(false, result_codes::kReadOnly,
+                  "Request contains just read only params!");
+      return false;
+    }
+  } else if (outgoing_json[kModuleData].isMember(kClimateControlData)) {
+    validators::ClimateControlDataValidator::instance()->RemoveReadOnlyParams(
+        outgoing_json[kModuleData][kClimateControlData]);
+    if (0 == outgoing_json[kModuleData][kClimateControlData].size()) {
+      SendResponse(false, result_codes::kReadOnly,
+                  "Request contains just read only params!");
+      return false;
+    }
+  } else {
+    DCHECK(false);
+  }
+
+  message_->set_json_message(MessageHelper::ValueToString(outgoing_json));
 
   return true;
 }
