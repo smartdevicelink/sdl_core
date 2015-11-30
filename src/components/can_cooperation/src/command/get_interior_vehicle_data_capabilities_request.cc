@@ -198,15 +198,16 @@ bool GetInteriorVehicleDataCapabiliesRequest::ReadCapabilitiesFromFile() {
 }
 
 void GetInteriorVehicleDataCapabiliesRequest::CreateCapabilities(
-    const Json::Value& zone_capabilities, const Json::Value& modules) {
+    const Json::Value& capabilities, const Json::Value& modules) {
   response_params_[kInteriorVehicleDataCapabilities] = Json::Value(
     Json::ValueType::arrayValue);
-  for (size_t i = 0; i < zone_capabilities.size(); ++i) {
-    for (size_t j = 0; j < modules.size(); ++j) {
-      if (modules[j] ==
-            zone_capabilities[i][kModuleType]) {
-        response_params_[kInteriorVehicleDataCapabilities].append(
-          zone_capabilities[i]);
+  for (Json::ValueConstIterator i = capabilities.begin();
+      i != capabilities.end(); ++i) {
+    for (Json::ValueConstIterator j = modules.begin();
+        j != modules.end(); ++j) {
+      const Json::Value& row = *i;
+      if (row[kModuleType] == *j) {
+        response_params_[kInteriorVehicleDataCapabilities].append(row);
       }
     }
   }
