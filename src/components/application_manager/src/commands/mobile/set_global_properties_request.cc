@@ -381,9 +381,6 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
 #endif
   }
 
-  SendResponse(result, result_code, return_info,
-               &(message[strings::msg_params]));
-
   ApplicationSharedPtr application =
       ApplicationManagerImpl::instance()->application(connection_key());
   if (!application) {
@@ -394,6 +391,9 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
   if (result) {
     application->UpdateHash();
   }
+
+  SendResponse(result, result_code, return_info,
+	  &(message[strings::msg_params]));
 }
 
 bool SetGlobalPropertiesRequest::IsPendingResponseExist() {
