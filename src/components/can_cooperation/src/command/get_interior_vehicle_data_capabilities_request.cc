@@ -127,10 +127,6 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
         success = true;
         result_code = result_codes::kSuccess;
         info = "";
-      } else {
-        response_params_.removeMember(kInteriorVehicleDataCapabilities);
-        result_code = result_codes::kGenericError;
-        info = "Invalid response from the vehicle";
       }
     }
 
