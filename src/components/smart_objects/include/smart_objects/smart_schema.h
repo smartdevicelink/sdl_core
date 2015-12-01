@@ -80,8 +80,11 @@ class CSmartSchema FINAL {
    * @brief Apply schema.
    *
    * @param Object Object to apply schema.
+   *
+   * @param RemoveFakeParameters contains true if need to remove fake parameters
+   * from smart object otherwise contains false.
    **/
-  void applySchema(SmartObject& Object);
+  void applySchema(SmartObject& Object, const bool RemoveFakeParameters);
 
   /**
    * @brief The reverse SmartObject conversion using schema.

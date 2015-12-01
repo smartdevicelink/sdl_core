@@ -87,25 +87,14 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& object) {
   return Errors::OK;
 }
 
-void CObjectSchemaItem::applySchema(SmartObject& Object) {
+void CObjectSchemaItem::applySchema(SmartObject& Object,
+                                    const bool RemoveFakeParameters) {
   if (SmartType_Map != Object.getType()) {
     return;
   }
 
-  for (SmartMap::const_iterator it = Object.map_begin(); it != Object.map_end(); ) {
-    const std::string& key = it->first;
-    if (mMembers.end() == mMembers.find(key)
-        // FIXME(EZamakhov): Remove illegal usage of filed in AM
-        && key.compare(connection_key) != 0
-        && key.compare(binary_data) != 0
-        && key.compare(app_id) != 0
-        ) {
-      ++it;
-      // FIXME(DK): remove fake params. There are error responses with params
-      // Object.erase(key);
-    } else {
-      it++;
-    }
+  if (RemoveFakeParameters) {
+    RemoveFakeParams(Object);
   }
 
   SmartObject default_value;
@@ -115,10 +104,10 @@ void CObjectSchemaItem::applySchema(SmartObject& Object) {
     if (!Object.keyExists(key)) {
       if (member.mSchemaItem->setDefaultValue(default_value)) {
         Object[key] = default_value;
-        member.mSchemaItem->applySchema(Object[key]);
+        member.mSchemaItem->applySchema(Object[key], RemoveFakeParameters);
       }
     } else {
-      member.mSchemaItem->applySchema(Object[key]);
+      member.mSchemaItem->applySchema(Object[key], RemoveFakeParameters);
     }
   }
 }
@@ -168,6 +157,23 @@ size_t CObjectSchemaItem::GetMemberSize() {
 
 CObjectSchemaItem::CObjectSchemaItem(const Members& members)
   : mMembers(members) {}
+
+void CObjectSchemaItem::RemoveFakeParams(SmartObject& Object) {
+  for (SmartMap::const_iterator it = Object.map_begin(); it != Object.map_end(); ) {
+    const std::string& key = it->first;
+    if (mMembers.end() == mMembers.find(key)
+        // FIXME(EZamakhov): Remove illegal usage of filed in AM
+        && key.compare(connection_key) != 0
+        && key.compare(binary_data) != 0
+        && key.compare(app_id) != 0
+    ) {
+      ++it;
+      Object.erase(key);
+    } else {
+      it++;
+    }
+  }
+}
 
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink

@@ -76,8 +76,10 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
    * and tries to convert it to integer according to element-to-string
    * map.
    * @param Object Object to apply schema.
+   * @param RemoveFakeParameters contains true if need to remove fake parameters
+   * from smart object otherwise contains false.
    **/
-  void applySchema(SmartObject& Object) OVERRIDE;
+  void applySchema(SmartObject& Object, const bool RemoveFakeParameters) OVERRIDE;
   /**
    * @brief Unapply schema.
    * @param Object Object to unapply schema.
@@ -214,7 +216,7 @@ Errors::eType TEnumSchemaItem<EnumType>::validate(const SmartObject& Object) {
 }
 
 template<typename EnumType>
-void TEnumSchemaItem<EnumType>::applySchema(SmartObject& Object) {
+void TEnumSchemaItem<EnumType>::applySchema(SmartObject& Object, const bool RemoveFakeParameters) {
   if (SmartType_String == Object.getType()) {
     EnumType enum_val = static_cast<EnumType>(-1);
     if (ConversionHelper::StringToEnum(Object.asString(), &enum_val)) {

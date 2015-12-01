@@ -145,7 +145,7 @@ TEST(CSmartFactoryTest, CreateSmartObj_AttachSchema1_ExpectCreatedObjectCorrespo
   obj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::Function1;
   obj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
   // Attach schema to object
-  EXPECT_TRUE(test_factory.attachSchema(obj));
+  EXPECT_TRUE(test_factory.attachSchema(obj, false));
   EXPECT_TRUE(SmartType::SmartType_Map == obj.getType());
   // Adding necessary fileds to correspond schema
   obj[S_PARAMS][S_CORRELATION_ID] = 444;
@@ -166,7 +166,7 @@ TEST(CSmartFactoryTest, CreateSmartObj_AttachSchema1_MissOneField_ExpectCreatedO
   obj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::Function1;
   obj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
   // Attach schema to object
-  EXPECT_TRUE(test_factory.attachSchema(obj));
+  EXPECT_TRUE(test_factory.attachSchema(obj, false));
   EXPECT_TRUE(SmartType::SmartType_Map == obj.getType());
   // Adding necessary fileds to correspond schema but 1 field is missing
   obj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
@@ -186,7 +186,7 @@ TEST(CSmartFactoryTest, CreateSmartObj_AttachNotExistedSchema_ExpectSmSchemaNotA
   obj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::Function1;
   obj[S_PARAMS][S_MESSAGE_TYPE] = 10;
   // Attach schema to object
-  EXPECT_FALSE(test_factory.attachSchema(obj));
+  EXPECT_FALSE(test_factory.attachSchema(obj, false));
   EXPECT_TRUE(SmartType::SmartType_Map == obj.getType());
 }
 
@@ -198,7 +198,7 @@ TEST(CSmartFactoryTest, CreateSmartObj_AttachSchema1_AddInvalidValue_ExpectCreat
   obj[S_PARAMS][S_FUNCTION_ID] = FunctionIdTest::Function1;
   obj[S_PARAMS][S_MESSAGE_TYPE] = MessageTypeTest::request;
   // Attach schema to object
-  EXPECT_TRUE(test_factory.attachSchema(obj));
+  EXPECT_TRUE(test_factory.attachSchema(obj, false));
   EXPECT_TRUE(SmartType::SmartType_Map == obj.getType());
   // Adding necessary fileds to correspond schema but 1 field is missing
   obj[S_PARAMS][S_PROTOCOL_VERSION] = "string";
