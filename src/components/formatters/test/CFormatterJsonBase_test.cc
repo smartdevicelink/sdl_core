@@ -100,15 +100,15 @@ TEST(CFormatterJsonBaseTest, JSonSignedMaxIntValueToSmartObj_ExpectSuccessful) {
   EXPECT_EQ(ival, object.asInt());
 }
 
-TEST(CFormatterJsonBaseTest, DISABLED_JSonUnsignedMaxIntValueToSmartObj_ExpectSuccessful) {
+TEST(CFormatterJsonBaseTest, JSonUnsignedMaxIntValueToSmartObj_ExpectSuccessful) {
   // Arrange value
-  Json::UInt ui_val = Json::Value::maxUInt;
+  Json::Int ui_val = Json::Value::maxInt;
   Json::Value json_value(ui_val);  // Json value from maximum possible unsigned int
   SmartObject object;
   // Convert json to smart object
   CFormatterJsonBase::jsonValueToObj(json_value, object);
   // Check conversion was successful
-  EXPECT_EQ(ui_val, object.asUInt());
+  EXPECT_EQ(ui_val, object.asInt());
 }
 
 TEST(CFormatterJsonBaseTest, JSonSignedMaxInt64ValueToSmartObj_ExpectFailed) {
@@ -240,15 +240,15 @@ TEST(CFormatterJsonBaseTest, MinIntSmartObjectToJSon_ExpectSuccessful) {
   EXPECT_EQ(ival, json_value.asInt());
 }
 
-TEST(CFormatterJsonBaseTest, DISABLED_UnsignedMaxIntSmartObjectToJSon_ExpectSuccessful) {
+TEST(CFormatterJsonBaseTest, UnsignedMaxIntSmartObjectToJSon_ExpectSuccessful) {
   // Arrange value
-  Json::UInt ui_val = Json::Value::maxUInt;
+  Json::Int ui_val = Json::Value::maxInt;
   Json::Value json_value;  // Json value from maximum unsigned int
   SmartObject object(ui_val);
   // Convert json to smart object
   CFormatterJsonBase::objToJsonValue(object, json_value);
   // Check conversion was successful
-  EXPECT_EQ(ui_val, json_value.asUInt());
+  EXPECT_EQ(ui_val, json_value.asInt());
 }
 
 TEST(CFormatterJsonBaseTest, BoolSmartObjectToJSon_ExpectSuccessful) {
