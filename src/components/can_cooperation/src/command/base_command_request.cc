@@ -396,7 +396,7 @@ void BaseCommandRequest::SendDisallowed(
     case application_manager::kDisallowed:
       info =
           disallowed_info_.empty() ?
-              "Remote control is disallowed" : disallowed_info_;
+              "The RPC is disallowed by vehicle settings" : disallowed_info_;
       break;
     case application_manager::kNone:
       info = "Internal issue";
