@@ -161,7 +161,7 @@ functional_modules::ProcessResult ModuleHelper::ProcessSDLActivateApp(
           }
         }
       }
-      if (active_app == new_app) {
+      if ((!new_app) || (active_app == new_app)) {
         return ProcessResult::CANNOT_PROCESS;
       }
 
