@@ -81,7 +81,9 @@ void OnInteriorVehicleDataNotification::Execute() {
 
     if (extension->IsSubscibedToInteriorVehicleData(moduleDescription)) {
       msg->set_connection_key(applications[i]->app_id());
-      NotifyOneApplication(msg);
+      application_manager::MessagePtr message(
+          new application_manager::Message(*msg));
+      NotifyOneApplication(message);
     }
   }
 }
