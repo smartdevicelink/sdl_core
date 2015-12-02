@@ -37,7 +37,7 @@
 
 namespace resumption {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ResumptionData")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
 ResumptionData::ResumptionData():
   resumption_lock_(true) {

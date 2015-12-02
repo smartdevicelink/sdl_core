@@ -52,7 +52,7 @@
 namespace resumption {
 using namespace application_manager;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ResumeCtrl")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
 ResumeCtrl::ResumeCtrl():
   queue_lock_(false),
