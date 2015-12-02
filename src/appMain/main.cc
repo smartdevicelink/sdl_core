@@ -65,7 +65,7 @@
 // ----------------------------------------------------------------------------
 
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "appMain")
+CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
 
 namespace {
 
