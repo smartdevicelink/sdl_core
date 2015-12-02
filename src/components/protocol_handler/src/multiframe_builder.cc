@@ -266,6 +266,7 @@ RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(const ProtocolFramePtr pac
     LOG4CXX_ERROR(logger_, "Failed to append frame for multiframe message.");
     return RESULT_FAIL;
   }
+  LOG4CXX_INFO(logger_, "Assembled frame with payload size: " << assembling_frame->payload_size());
   frame_data.append_time = date_time::DateTime::getCurrentTime();
   return RESULT_OK;
 }

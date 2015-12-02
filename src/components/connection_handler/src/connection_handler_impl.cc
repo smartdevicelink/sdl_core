@@ -347,6 +347,7 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     const bool success = connection_handler_observer_->OnServiceStartedCallback(
           connection->connection_device_handle(), session_key, service_type);
     if (!success) {
+      LOG4CXX_WARN(logger_, "Service starting forbidden by connection_handler_observer");
       if (protocol_handler::kRpc == service_type) {
         connection->RemoveSession(new_session_id);
       } else {
