@@ -33,7 +33,7 @@
 #include "application_manager/policies/delegates/statistics_delegate.h"
 #include "application_manager/policies/policy_handler.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "StatisticDelegate")
+CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 namespace policy {
   StatisticsDelegate::StatisticsDelegate(usage_statistics::GlobalCounterId type)
     : type_(INCREMENT_GLOBAL),
