@@ -38,6 +38,9 @@
 
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "transport_manager/usb/common.h"
+#ifdef SP_C9_PRIMA1
+#include "transport_manager/usb/SkEAHelper_DLL.h"
+#endif
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -46,16 +49,47 @@ class UsbAoaAdapter : public TransportAdapterImpl {
  public:
   UsbAoaAdapter();
   virtual ~UsbAoaAdapter();
+#ifdef SP_C9_PRIMA1
+  static UsbAoaAdapter* GetInstance()
+  {
+	  if(g_pUsbAoaAdapter_ == NULL){
+		g_pUsbAoaAdapter_ = new UsbAoaAdapter();
+	  }
+	  return g_pUsbAoaAdapter_;
+  }
+
+  static void DelInstance(){
+	  if(g_pUsbAoaAdapter_ != NULL){
+		delete g_pUsbAoaAdapter_;
+	  }
+  }
+	
+  UsbHandlerSptr GetUsbHandlerSptr(){
+	return usb_handler_;
+  }
+
+  SkEAHelperDLL* GetSkEAHelperDLL(){
+	return pEAHelperDLL_;
+  }
+#endif
 
  protected:
   virtual DeviceType GetDeviceType() const;
   virtual bool IsInitialised() const;
   virtual TransportAdapter::Error Init();
   virtual bool ToBeAutoConnected(DeviceSptr device) const;
-
+#ifdef SP_C9_PRIMA1
+  virtual TransportAdapter::Error SendData(const DeviceUID& device_handle,
+                                           const ApplicationHandle& app_handle,
+                                           const RawMessageSptr data);
+#endif
  private:
   bool is_initialised_;
   UsbHandlerSptr usb_handler_;
+#ifdef SP_C9_PRIMA1
+	 static UsbAoaAdapter* g_pUsbAoaAdapter_;
+	SkEAHelperDLL* pEAHelperDLL_;
+#endif
 };
 
 }  // namespace transport_adapter

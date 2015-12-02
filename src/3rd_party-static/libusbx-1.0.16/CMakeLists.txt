@@ -36,6 +36,18 @@ set (LIBUSB_SOURCES
 	./libusb/os/poll_windows.c
 	./libusb/os/threads_windows.c
 )
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+set (LIBUSB_SOURCES
+	./libusb/core.c
+	./libusb/descriptor.c
+	./libusb/hotplug.c
+	./libusb/io.c
+	./libusb/strerror.c
+	./libusb/sync.c
+	./libusb/os/windows_usb.c
+	./libusb/os/poll_windows.c
+	./libusb/os/threads_windows.c
+)
 else()
 set (LIBUSB_SOURCES
 	./libusb/core.c

@@ -245,20 +245,20 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
 		// state_lock 1
 		pthread_result = pthread_create(&thread_handle_, &attributes, threadFunc, this);
 		if (pthread_result == EOK) {
-			LOG4CXX_DEBUG(logger_, "Created thread: " << name_);
-			SetNameForId(Id(thread_handle_), name_);
+			LOG4CXX_DEBUG(logger_, "Created thread: " << name_.c_str());
+			SetNameForId(Id(thread_handle_), name_.c_str());
 			// state_lock 0
 			// possible concurrencies: stop and threadFunc
 			state_cond_.Wait(auto_lock);
 			thread_created_ = true;
 		} else {
-			LOG4CXX_ERROR(logger_, "Couldn't create thread " << name_ << ". Error code = " << pthread_result << " (\"" << strerror(pthread_result) << "\")");
+			LOG4CXX_ERROR(logger_, "Couldn't create thread " << name_.c_str() << ". Error code = " << pthread_result << " (\"" << strerror(pthread_result) << "\")");
 		}
 	}
 	stopped_ = false;
 	run_cond_.NotifyOne();
 #ifdef OS_WIN32
-	LOG4CXX_DEBUG(logger_, "Thread " << name_ << " #" << thread_handle_.x << " started. pthread_result = " << pthread_result);
+	LOG4CXX_DEBUG(logger_, "Thread " << name_.c_str() << " #" << thread_handle_.x << " started. pthread_result = " << pthread_result);
 #else
 	LOG4CXX_DEBUG(logger_, "Thread " << name_ << " #" << thread_handle_ << " started. pthread_result = " << pthread_result);
 #endif

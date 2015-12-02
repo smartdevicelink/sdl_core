@@ -124,7 +124,7 @@ void ThreadManager::RegisterName(PlatformThreadHandle id, const string& name) {
 		pt.name = name;
 		id_names_.push_back(pt);
 	}else{
-		LOG4CXX_ERROR(logger_, "Trying to register thread name " << name
+		LOG4CXX_ERROR(logger_, "Trying to register thread name " << name.c_str()
 			<< ", but it is already registered with name "
 			<< findIter->name);
 	}
@@ -132,13 +132,13 @@ void ThreadManager::RegisterName(PlatformThreadHandle id, const string& name) {
 	pair<IdNamesMap::iterator, bool> inserted =
 		id_names_.insert(make_pair(id, name));
     if (!inserted.second) {
-      LOG4CXX_ERROR(logger_, "Trying to register thread name " << name
+      LOG4CXX_ERROR(logger_, "Trying to register thread name " << name.c_str()
                            <<", but it is already registered with name "
                            <<inserted.first->second);
     }
 #endif
   } else {
-    LOG4CXX_ERROR(logger_, "Ignoring duplicate thread name: " + name);
+    LOG4CXX_ERROR(logger_, "Ignoring duplicate thread name: " << name.c_str());
   }
 }
 

@@ -50,7 +50,7 @@
 
 namespace {
 #define LOG_UPDATED_VALUE(value, key, section) {\
-  LOG4CXX_INFO(logger_, "Setting value '" << value\
+  LOG4CXX_INFO(logger_, "Setting value '" << std::noboolalpha << value\
   << "' for key '" << key\
   << "' in section '" << section << "'.");\
 }
@@ -1761,11 +1761,19 @@ bool Profile::IsRelativePath(const std::string& path) {
     LOG4CXX_ERROR(logger_, "Empty path passed.");
     return false;
   }
+#ifdef OS_WIN32
+  return ':' != path[1];
+#else
   return '/' != path[0];
+#endif
 }
 
 void Profile::MakeAbsolutePath(std::string& path) {
+#ifdef OS_WIN32
+  path = file_system::CurrentWorkingDirectory() + "\\" + path;
+#else
   path = file_system::CurrentWorkingDirectory() + "/" + path;
+#endif
 }
 
 }//  namespace profile

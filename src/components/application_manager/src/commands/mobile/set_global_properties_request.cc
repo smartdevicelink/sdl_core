@@ -381,19 +381,21 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
 #endif
   }
 
-  SendResponse(result, result_code, return_info,
-               &(message[strings::msg_params]));
+    ApplicationSharedPtr application =
+        ApplicationManagerImpl::instance()->application(connection_key());
 
-  ApplicationSharedPtr application =
-      ApplicationManagerImpl::instance()->application(connection_key());
-  if (!application) {
-    LOG4CXX_DEBUG(logger_, "NULL pointer.");
-    return;
-  }
+    SendResponse(result, result_code, return_info,
+                 &(message[strings::msg_params]));
 
-  if (result) {
-    application->UpdateHash();
-  }
+    if (!application) {
+      LOG4CXX_DEBUG(logger_, "NULL pointer.");
+      return;
+    }
+
+    if (result) {
+      application->UpdateHash();
+    }
+
 }
 
 bool SetGlobalPropertiesRequest::IsPendingResponseExist() {

@@ -33,6 +33,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "utils/logger.h"
 #include "transport_manager/usb/usb_aoa_adapter.h"
 #include "transport_manager/usb/usb_device_scanner.h"
 #include "transport_manager/usb/usb_connection_factory.h"
@@ -43,20 +44,60 @@ namespace transport_manager {
 namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "UsbTransportAdapter")
+#ifdef SP_C9_PRIMA1
+UsbAoaAdapter* UsbAoaAdapter::g_pUsbAoaAdapter_ = NULL;
+void DeviceConnect(void)
+{
+  LOG4CXX_INFO(logger_, "sp_c9_prima1 device connect. ");
+  PRINTMSG(1, (L"\nsp_c9_prima1 %s, line:%d\n", __FUNCTIONW__, __LINE__));
+  UsbAoaAdapter::GetInstance()->GetUsbHandlerSptr()->DeviceArrived(NULL);
+  UsbAoaAdapter::GetInstance()->GetSkEAHelperDLL()->SP_EAHelperLaunchSDL();
+	LOG4CXX_INFO(logger_, "pEAHelperDLL_->SP_EAHelperLaunchSDL()");
+  PRINTMSG(1, (L"\nsp_c9_prima1 %s, line:%d\n", __FUNCTIONW__, __LINE__));
+	
+}
+
+void DeviceDisconnect(void)
+{
+	LOG4CXX_INFO(logger_, "sp_c9_prima1 device disconnect. ");
+  PRINTMSG(1, (L"\nsp_c9_prima1 %s, line:%d\n", __FUNCTIONW__, __LINE__));
+	UsbAoaAdapter::GetInstance()->GetUsbHandlerSptr()->DeviceLeft(NULL);
+	UsbAoaAdapter::GetInstance()->DisconnectDone("1", 1);
+}
+
+void ReceiveData(const BYTE* chBuff, int iBufLen)
+{
+	LOG4CXX_INFO(logger_, "sp_c9_prima1 receive data. buflen is " << iBufLen);
+    RawMessageSptr data(new protocol_handler::RawMessage(
+        0, 0, (uint8_t*)chBuff, iBufLen));
+    UsbAoaAdapter::GetInstance()->DataReceiveDone("1", 1, data);
+}
+#endif
+
 UsbAoaAdapter::UsbAoaAdapter()
   : TransportAdapterImpl(new UsbDeviceScanner(this),
                          new UsbConnectionFactory(this), 0),
   is_initialised_(false),
   usb_handler_(new UsbHandler()) {
+#ifdef SP_C9_PRIMA1
+  pEAHelperDLL_ = new SkEAHelperDLL;
+#endif
   static_cast<UsbDeviceScanner*>(device_scanner_)->SetUsbHandler(usb_handler_);
   static_cast<UsbConnectionFactory*>(server_connection_factory_)
   ->SetUsbHandler(usb_handler_);
 }
 
-UsbAoaAdapter::~UsbAoaAdapter() {}
+UsbAoaAdapter::~UsbAoaAdapter() {
+#ifdef SP_C9_PRIMA1
+	if(pEAHelperDLL_ != NULL){
+		delete pEAHelperDLL_;
+		pEAHelperDLL_ = NULL;
+	}
+#endif
+}
 
 DeviceType UsbAoaAdapter::GetDeviceType() const {
-  return PASA_AOA;
+	return PASA_AOA;
 }
 
 bool UsbAoaAdapter::IsInitialised() const {
@@ -64,7 +105,16 @@ bool UsbAoaAdapter::IsInitialised() const {
 }
 
 TransportAdapter::Error UsbAoaAdapter::Init() {
-  LOG4CXX_TRACE(logger_, "enter");
+#ifdef SP_C9_PRIMA1
+	bool ret = pEAHelperDLL_->SP_EAHelperInit(DeviceConnect, DeviceDisconnect, ReceiveData);
+	LOG4CXX_INFO(logger_, "sp_c9_prima1 init, result is " << ret);
+  PRINTMSG(1, (L"\n%s, line:%d, sp_c9_prima1 init()\n", __FUNCTIONW__, __LINE__));
+	if(!ret){
+		LOG4CXX_INFO(logger_, "sp_c9_prima1 init failed");
+		PRINTMSG(1, (L"\n%s, line:%d, sp_c9_prima1 init() fail\n", __FUNCTIONW__, __LINE__));
+		return FAIL;
+	}
+#endif
   TransportAdapter::Error error = usb_handler_->Init();
   if (error != TransportAdapter::OK) {
     LOG4CXX_TRACE(logger_, "exit with error " << error <<
@@ -86,5 +136,21 @@ bool UsbAoaAdapter::ToBeAutoConnected(DeviceSptr device) const {
   return true;
 }
 
+#ifdef SP_C9_PRIMA1
+TransportAdapter::Error UsbAoaAdapter::SendData(
+    const DeviceUID& device_id, const ApplicationHandle& app_handle,
+    const RawMessageSptr data) {
+  if (!is_initialised_) return BAD_STATE;
+
+  ConnectionSptr connection = FindEstablishedConnection(device_id, app_handle);
+  if (connection.get() != 0) {
+	  pEAHelperDLL_->SP_EAHelperWrite(data->data(), data->data_size());
+		LOG4CXX_INFO(logger_, "sp_c9_prima1 send data. buflen is " << data->data_size());
+	  return OK;
+  } else {
+    return BAD_PARAM;
+  }
+}
+#endif
 }  // namespace transport_adapter
 }  // namespace transport_manager

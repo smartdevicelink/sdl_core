@@ -3,6 +3,7 @@
 
 /* Default visibility */
 #ifdef OS_WIN32
+#define OS_WINDOWS
 #define DEFAULT_VISIBILITY /**/
 #else
 #define DEFAULT_VISIBILITY __attribute__((visibility("default")))
@@ -39,12 +40,12 @@
 #define HAVE_MEMORY_H 1
 
 /* Define to 1 if you have the <poll.h> header file. */
-#ifndef OS_WINCE
+#ifndef OS_WIN32
 #define HAVE_POLL_H 1
 #endif
 
 /* Define to 1 if you have the <signal.h> header file. */
-#ifndef OS_WINCE
+#ifndef OS_WIN32
 #define HAVE_SIGNAL_H 1
 #endif
 
@@ -61,27 +62,27 @@
 #define HAVE_STRING_H 1
 
 /* Define to 1 if the system has the type `struct timespec'. */
-#ifndef OS_WINCE
+#ifndef OS_WIN32
 #define HAVE_STRUCT_TIMESPEC 1
 #endif
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
-#ifndef OS_WINCE
+#ifndef OS_WIN32
 #define HAVE_SYS_STAT_H 1
 #endif
 
 /* Define to 1 if you have the <sys/time.h> header file. */
-#ifndef OS_WINCE
+#ifndef OS_WIN32
 #define HAVE_SYS_TIME_H 1
 #endif
 
 /* Define to 1 if you have the <sys/types.h> header file. */
-#ifndef OS_WINCE
+#ifndef OS_WIN32
 #define HAVE_SYS_TYPES_H 1
 #endif
 
 /* Define to 1 if you have the <unistd.h> header file. */
-#ifndef OS_WINCE
+#ifndef OS_WIN32
 #define HAVE_UNISTD_H 1
 #endif
 

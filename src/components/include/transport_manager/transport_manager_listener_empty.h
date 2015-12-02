@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_EMPTY_H_
 
 #include <vector>
-
+#include "transport_manager/info.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "protocol/common.h"
 
@@ -155,7 +155,7 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
    * @param message Smart pointer to the raw massage.
    * @param connection_id Connection unique identifier.
    */
-  virtual void OnTMMessageReceived(const ::protocol_handler::RawMessagePtr message) {
+  virtual void OnTMMessageReceived(const RawMessageSptr message) {
   }
 
   /**
@@ -171,7 +171,7 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
   /**
    * @brief Reaction to the event, when transport manager sent a massage.
    */
-  virtual void OnTMMessageSend(const ::protocol_handler::RawMessagePtr message) {
+  virtual void OnTMMessageSend(const RawMessageSptr message) {
   }
 
   /**
@@ -181,7 +181,7 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
    * @param message Smart pointer to the raw massage.
    */
   virtual void OnTMMessageSendFailed(const DataSendError& error,
-                                     const ::protocol_handler::RawMessagePtr message) {
+                                     const RawMessageSptr message) {
   }
 };
 }  // namespace transport_manager

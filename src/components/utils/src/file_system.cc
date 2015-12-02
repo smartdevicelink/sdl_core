@@ -30,60 +30,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef MODIFY_FUNCTION_SIGN
-#include <global_first.h>
+#ifdef OS_WIN32
+#include <Windows.h>
 #endif
 
-#ifdef OS_WIN32 
-#include <sstream>
-#include <Windows.h>
-#else
-#ifdef OS_ANDROID
-#include <sys/statfs.h>
-#include <sys/stat.h>
+#include "utils/file_system.h"
+#include "utils/logger.h"
+
+#ifdef OS_WIN32
 #include <sstream>
 #else
 #include <sys/statvfs.h>
 #include <sys/stat.h>
-#endif
-
 #include <sys/types.h>
 #include <sstream>
 
 #include <dirent.h>
 #endif
-
 #include <unistd.h>
-
-
-#include "utils/file_system.h"
-#include "utils/logger.h"
-
 // TODO(VS): lint error: Streams are highly discouraged.
 #include <fstream>
 #include <cstddef>
 #include <algorithm>
-#ifdef OS_WINCE
-#include "utils/global.h"
-#endif
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
 #ifdef OS_WIN32
-	return 1024 * 1024 * 1024;
-#else
+	uint64_t i64FreeBytesToCaller;
+	uint64_t i64TotalBytes;
+	uint64_t i64FreeBytes;
+	BOOL fResult = GetDiskFreeSpaceEx(
+		path.c_str(),
+		(PULARGE_INTEGER)&i64FreeBytesToCaller,
+		(PULARGE_INTEGER)&i64TotalBytes,
+		(PULARGE_INTEGER)&i64FreeBytes);
 
-#ifdef OS_ANDROID
-  struct statfs fsInfo;//statvfs
+	return fResult ? i64FreeBytes : 0;
 #else
-	struct statvfs fsInfo;
-#endif
-  memset(reinterpret_cast<void*>(&fsInfo), 0, sizeof(fsInfo));
-#ifdef OS_ANDROID
-  if (statfs(path.c_str(), &fsInfo) == 0) {
-#else
+  struct statvfs fsInfo = { 0 };
   if (statvfs(path.c_str(), &fsInfo) == 0) {
-#endif
     return fsInfo.f_bsize * fsInfo.f_bfree;
   } else {
     return 0;
@@ -174,16 +160,18 @@ bool file_system::CreateDirectoryRecursively(const std::string& path) {
   bool ret_val = true;
 
   while (ret_val == true && pos <= path.length()) {
+#ifdef OS_WIN32
+	pos = path.find('\\', pos + 1);
+#else
     pos = path.find('/', pos + 1);
+#endif
     if (!DirectoryExists(path.substr(0, pos))) {
 #ifdef OS_WIN32
-#ifdef OS_WINCE
-		wchar_string strUnicodeData;
-		Global::toUnicode(path.substr(0, pos), CP_ACP, strUnicodeData);
-	  if (0 != ::CreateDirectory(strUnicodeData.c_str(), NULL)) {
-#else
-      if (0 != ::CreateDirectory(path.substr(0, pos).c_str(), NULL)) {
-#endif
+	if (0 != ::CreateDirectory(path.substr(0, pos).c_str(), NULL)) {
+#elif defined OS_WINCE
+	wchar_string strUnicodeData;
+	Global::toUnicode(path.substr(0, pos), CP_ACP, strUnicodeData);
+	if (0 != ::CreateDirectory(strUnicodeData.c_str(), NULL)) {
 #else
       if (0 != mkdir(path.substr(0, pos).c_str(), S_IRWXU)) {
 #endif

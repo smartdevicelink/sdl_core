@@ -33,8 +33,12 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_COMMON_H_
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_COMMON_H_
 
+#include <set>
 #include <vector>
 #include <string>
+
+#include "protocol/raw_message.h"
+#include "utils/shared_ptr.h"
 
 /**
  * @brief - transport_manager namespace
@@ -54,6 +58,11 @@ enum {
   E_ADAPTERS_FAIL,
   E_INTERNAL_ERROR
 };
+
+/**
+ * @brief Type definition for variable that hold shared pointer to raw message.
+ */
+typedef utils::SharedPtr<protocol_handler::RawMessage> RawMessageSptr;
 
 /**
  * @brief Type definition for variable that hold handle of device.

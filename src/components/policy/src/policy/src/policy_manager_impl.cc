@@ -249,7 +249,7 @@ void PolicyManagerImpl::RequestPTUpdate() {
   Json::FastWriter writer;
   std::string message_string = writer.write(value);
 
-  LOG4CXX_DEBUG(logger_, "Snapshot contents is : " << message_string );
+  LOG4CXX_DEBUG(logger_, "Snapshot contents is : " << message_string.c_str());
 
   BinaryMessage update(message_string.begin(), message_string.end());
 
@@ -322,8 +322,8 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
                                           CheckPermissionResult& result) {
   LOG4CXX_INFO(
     logger_,
-    "CheckPermissions for " << app_id << " and rpc " << rpc << " for "
-    << hmi_level << " level.");
+    "CheckPermissions for " << app_id.c_str() << " and rpc " << rpc.c_str() << " for "
+    << hmi_level.c_str() << " level.");
 
   cache_->CheckPermissions(app_id, hmi_level, rpc, result);
 }
@@ -363,7 +363,7 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
   PrepareNotificationData(functional_groupings, app_groups, app_group_permissions,
                           notification_data);
 
-  LOG4CXX_INFO(logger_, "Send notification for application_id:" << application_id);
+  LOG4CXX_INFO(logger_, "Send notification for application_id:" << application_id.c_str());
 
   std::string default_hmi;
   default_hmi = "NONE";
@@ -418,13 +418,13 @@ bool PolicyManagerImpl::GetInitialAppData(const std::string& application_id,
 void PolicyManagerImpl::AddDevice(const std::string& device_id,
                                   const std::string& connection_type) {
   LOG4CXX_INFO(logger_, "SetDeviceInfo");
-  LOG4CXX_DEBUG(logger_, "Device :" << device_id);
+  LOG4CXX_DEBUG(logger_, "Device :" << device_id.c_str());
 }
 
 void PolicyManagerImpl::SetDeviceInfo(const std::string& device_id,
                                       const DeviceInfo& device_info) {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Device :" << device_id);
+  LOG4CXX_DEBUG(logger_, "Device :" << device_id.c_str());
 }
 
 PermissionConsent PolicyManagerImpl::EnsureCorrectPermissionConsent(
@@ -680,7 +680,7 @@ bool PolicyManagerImpl::IsPTValid(
     rpc::ValidationReport report("policy_table");
     policy_table->ReportErrors(&report);
     LOG4CXX_DEBUG(logger_,
-                 "Errors: " << rpc::PrettyFormat(report));
+                 "Errors: " << rpc::PrettyFormat(report).c_str());
     return false;
   }
   return true;
@@ -779,21 +779,21 @@ void PolicyManagerImpl::Increment(usage_statistics::GlobalCounterId type) {
 
 void PolicyManagerImpl::Increment(const std::string& app_id,
                                   usage_statistics::AppCounterId type){
-  LOG4CXX_DEBUG(logger_, "Increment " << app_id << " AppCounter: " << type);
+  LOG4CXX_DEBUG(logger_, "Increment " << app_id.c_str() << " AppCounter: " << type);
   sync_primitives::AutoLock locker(statistics_lock_);
 }
 
 void PolicyManagerImpl::Set(const std::string& app_id,
                             usage_statistics::AppInfoId type,
                             const std::string& value) {
-  LOG4CXX_INFO(logger_, "Set " << app_id);
+  LOG4CXX_INFO(logger_, "Set " << app_id.c_str());
   sync_primitives::AutoLock locker(statistics_lock_);
 }
 
 void PolicyManagerImpl::Add(const std::string& app_id,
                             usage_statistics::AppStopwatchId type,
                             int32_t timespan_seconds) {
-  LOG4CXX_INFO(logger_, "Add " << app_id);
+  LOG4CXX_INFO(logger_, "Add " << app_id.c_str());
   sync_primitives::AutoLock locker(statistics_lock_);
 }
 
@@ -910,7 +910,7 @@ bool PolicyManagerImpl::CheckAppStorageFolder() const {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string app_storage_folder =
       profile::Profile::instance()->app_storage_folder();
-  LOG4CXX_DEBUG(logger_, "AppStorageFolder " << app_storage_folder);
+  LOG4CXX_DEBUG(logger_, "AppStorageFolder " << app_storage_folder.c_str());
   if (!file_system::DirectoryExists(app_storage_folder)) {
     LOG4CXX_WARN(logger_,
                  "Storage directory doesn't exist " << app_storage_folder);
