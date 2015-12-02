@@ -38,7 +38,7 @@
 
 namespace threads {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Utils");
+CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 AsyncRunner::AsyncRunner(const std::string &thread_name)
   : executor_(new AsyncRunnerDelegate) {

@@ -41,7 +41,7 @@ namespace utils {
 
 using namespace ::logger;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "AutoTraceTestLog");
+CREATE_LOGGERPTR_GLOBAL(logger_, "AutoTraceTestLog")
 
 void Preconditions() {
   //delete file with previous logs
