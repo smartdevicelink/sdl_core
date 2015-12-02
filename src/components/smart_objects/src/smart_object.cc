@@ -72,6 +72,9 @@ SmartObject::SmartObject(SmartType Type)
     case SmartType_Integer:
       set_value_integer(0);
       break;
+    case SmartType_UInteger:
+      set_value_integer(0);
+      break;
     case SmartType_Double:
       set_value_double(0);
       break;
@@ -120,6 +123,8 @@ bool SmartObject::operator==(const SmartObject& Other) const {
 
   switch (m_type) {
     case SmartType_Integer:
+      return m_data.int_value == Other.m_data.int_value;
+    case SmartType_UInteger:
       return m_data.int_value == Other.m_data.int_value;
     case SmartType_Double:
       return m_data.double_value == Other.m_data.double_value;
@@ -201,7 +206,12 @@ bool SmartObject::operator==(const int32_t Value) const {
 }
 
 void SmartObject::set_value_integer(int64_t NewValue) {
-  set_new_type(SmartType_Integer);
+  if (NewValue > std::numeric_limits<int32_t>::max()
+      && NewValue <= std::numeric_limits<uint32_t>::max()) {
+    set_new_type(SmartType_UInteger);
+  } else {
+    set_new_type(SmartType_Integer);
+  }
   m_data.int_value = NewValue;
 }
 
@@ -212,6 +222,8 @@ int64_t SmartObject::convert_int() const {
     case SmartType_Boolean:
       return (m_data.bool_value == true) ? 1 : 0;
     case SmartType_Integer:
+      return m_data.int_value;
+    case SmartType_UInteger:
       return m_data.int_value;
     case SmartType_Double:
       return static_cast<int64_t>(m_data.double_value);
@@ -836,12 +848,9 @@ std::set<std::string> SmartObject::enumerate() const {
   std::set<std::string> keys;
 
   if (m_type == SmartType_Map) {
-        std::transform(
-            m_data.map_value->begin(),
-            m_data.map_value->end(),
-            std::inserter(keys, keys.end()),
-            &SmartObject::OperatorToTransform
-        );
+    std::transform(m_data.map_value->begin(), m_data.map_value->end(),
+                   std::inserter(keys, keys.end()),
+                   &SmartObject::OperatorToTransform);
   }
   return keys;
 }

@@ -94,6 +94,11 @@ enum SmartType {
   SmartType_Binary = 8,
 
   /**
+   * @brief Unsigned Integer value.
+   **/
+  SmartType_UInteger = 9,
+
+  /**
    * @brief Invalid value. Represents invalid object that cannot change his type.
    **/
   SmartType_Invalid = -1
