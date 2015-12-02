@@ -184,7 +184,7 @@ static char manufacturer[] = "SDL";
 static char model_name[] = "Core";
 static char description[] = "SmartDeviceLink Core Component USB";
 static char version[] = "1.0";
-static char uri[] = "http://www.ford.com";
+static char uri[] = "http://www.smartdevicelink.org";
 static char serial_num[] = "N000000";
 
 AoaInitSequence::AoaInitSequence()
