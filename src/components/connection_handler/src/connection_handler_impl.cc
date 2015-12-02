@@ -205,6 +205,7 @@ void ConnectionHandlerImpl::OnConnectionEstablished(
   }
   LOG4CXX_DEBUG(logger_, "Add Connection #" << connection_id << " to the list.");
   sync_primitives::AutoLock lock(connection_list_lock_);
+  // TODO(EZamakhov): APPLINK-19728 - possible memory leak
   connection_list_.insert(
       ConnectionList::value_type(
           connection_id,
