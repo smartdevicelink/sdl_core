@@ -37,7 +37,7 @@
 #include "utils/logger.h"
 
 namespace application_manager {
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationDataImpl")
+CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 InitialApplicationDataImpl::InitialApplicationDataImpl()
     : app_types_(NULL),

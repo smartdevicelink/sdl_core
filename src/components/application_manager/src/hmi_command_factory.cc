@@ -275,7 +275,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     const commands::MessageSharedPtr& message) {
   const int function_id = (*message)[strings::params][strings::function_id]
       .asInt();
-  LOG4CXX_INFO(logger_,
+  LOG4CXX_DEBUG(logger_,
                "HMICommandFactory::CreateCommand function_id: " << function_id);
 
   CommandSharedPtr command(
@@ -285,13 +285,13 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
   const int msg_type = (*message)[strings::params][strings::message_type].asInt();
   if (msg_type == static_cast<int>(application_manager::MessageType::kResponse)) {
     is_response = true;
-    LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand response");
+    LOG4CXX_DEBUG(logger_, "HMICommandFactory::CreateCommand response");
   } else if ((*message)[strings::params][strings::message_type]
       == static_cast<int>(application_manager::MessageType::kErrorResponse)) {
     is_response = true;
-    LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand error response");
+    LOG4CXX_DEBUG(logger_, "HMICommandFactory::CreateCommand error response");
   } else {
-    LOG4CXX_INFO(logger_, "HMICommandFactory::CreateCommand request");
+    LOG4CXX_DEBUG(logger_, "HMICommandFactory::CreateCommand request");
   }
 
   switch (function_id) {

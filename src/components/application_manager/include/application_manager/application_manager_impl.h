@@ -1217,7 +1217,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     template<typename ApplicationList>
     void PrepareApplicationListSO(ApplicationList app_list,
                                   smart_objects::SmartObject& applications) {
-      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicatinManagerImpl");
+      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager");
 
       smart_objects::SmartArray* app_array = applications.asArray();
       uint32_t app_count = NULL == app_array ? 0 : app_array->size();
