@@ -43,7 +43,7 @@ namespace request_controller {
 
 using namespace sync_primitives;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController");
+CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController")
 
 RequestController::RequestController()
   : pool_state_(UNDEFINED),
