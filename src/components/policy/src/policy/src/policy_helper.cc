@@ -41,7 +41,7 @@ namespace policy {
 
 namespace {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyManagerImpl")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
 bool Compare(const StringsValueType& first, const StringsValueType& second) {
   const std::string& first_str = first;

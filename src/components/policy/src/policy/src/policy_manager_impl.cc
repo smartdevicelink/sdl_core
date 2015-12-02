@@ -53,7 +53,7 @@ policy::PolicyManager* CreateManager() {
 
 namespace policy {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyManagerImpl")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
 PolicyManagerImpl::PolicyManagerImpl()
   : PolicyManager(),
