@@ -89,15 +89,21 @@ void HMIMessageHandlerImpl::OnErrorSending(MessageSharedPointer message) {
 void HMIMessageHandlerImpl::AddHMIMessageAdapter(
     HMIMessageAdapter* adapter) {
   LOG4CXX_AUTO_TRACE(logger_);
+  if (!adapter) {
+    LOG4CXX_WARN(logger_, "HMIMessageAdapter is not valid!");
+    return;
+  }
   message_adapters_.insert(adapter);
 }
 
 void HMIMessageHandlerImpl::RemoveHMIMessageAdapter(
     HMIMessageAdapter* adapter) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (adapter != NULL) {
-    message_adapters_.erase(adapter);
+  if (!adapter) {
+    LOG4CXX_WARN(logger_, "HMIMessageAdapter is not valid!");
+    return;
   }
+  message_adapters_.erase(adapter);
 }
 
 void HMIMessageHandlerImpl::Handle(const impl::MessageFromHmi message) {

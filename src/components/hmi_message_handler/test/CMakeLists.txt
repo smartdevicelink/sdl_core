@@ -33,16 +33,21 @@ if(BUILD_TESTS)
 include_directories (
     ${GMOCK_INCLUDE_DIRECTORY}
     ${COMPONENTS_DIR}/hmi_message_handler/include
+    ${COMPONENTS_DIR}/hmi_message_handler/test/include
 )
 
 set(LIBRARIES    
     gmock
     ApplicationManager
     HMIMessageHandler
+    jsoncpp
+    MessageBrokerClient
+    MessageBrokerServer
+    ConfigProfile
 )
 
 set(SOURCES
-    ${COMPONENTS_DIR}/hmi_message_handler/test/mqueue_adapter_test.cc 
+    ${COMPONENTS_DIR}/hmi_message_handler/test/hmi_message_handler_impl_test.cc
 )          
 
 if(${QT_HMI})
