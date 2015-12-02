@@ -32,6 +32,7 @@
 
 #include "config_profile/profile.h"
 #include "utils/logger.h"
+#include "utils/helpers.h"
 
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
@@ -42,7 +43,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 namespace {
 DeviceTypes devicesType = {
   std::make_pair(AOA, std::string("USB_AOA")),
@@ -593,6 +594,7 @@ void TransportAdapterImpl::DataReceiveDone(const DeviceUID& device_id,
     metric_observer_->StartRawMsg(message.get());
   }
 #endif  // TIME_TESTER
+
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end(); ++it) {
     (*it)->OnDataReceiveDone(this, device_id, app_handle, message);
