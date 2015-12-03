@@ -38,6 +38,7 @@
 #include "protocol/service_type.h"
 #include "utils/shared_ptr.h"
 #include "security_manager_mock.h"
+#include "config_profile/profile.h"
 
 #define EXPECT_RETURN_TRUE true
 #define EXPECT_RETURN_FALSE false
@@ -161,7 +162,7 @@ TEST_F(ConnectionTest, HeartBeat_NotSupported) {
 TEST_F(ConnectionTest, HeartBeat_Supported) {
   // Arrange
   StartSession();
-
+  ::profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
   // Check if protocol version is 3
   const uint8_t protocol_version = static_cast<uint8_t>(PROTOCOL_VERSION_3);
   connection_->UpdateProtocolVersionSession(session_id, protocol_version);
