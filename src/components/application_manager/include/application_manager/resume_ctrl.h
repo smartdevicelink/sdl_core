@@ -154,6 +154,11 @@ class ResumeCtrl: public event_engine::EventObserver {
      */
     void StopSavePersistentDataTimer();
 
+  /**
+   * @brief Method stops restore_hmi_level_timer_ "RsmCtrlRstore" in Suspend()
+   */
+  void StopRestoreHmiLevelTimer();
+
     /**
      * @brief Start timer for resumption applications
      *        Restore D1-D5 data
