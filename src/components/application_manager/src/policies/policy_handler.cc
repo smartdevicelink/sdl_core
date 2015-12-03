@@ -294,7 +294,7 @@ bool PolicyHandler::LoadPolicyLibrary() {
 #endif
 
 #ifdef OS_WIN32
-	DWORD error_string = GetLastError();
+  DWORD error_string = dl_handle_ == NULL;
 #elif defined(OS_ANDROID)
 	const char* error_string = dlerror();
 #else
@@ -321,7 +321,7 @@ bool PolicyHandler::CreateManager() {
 
 #ifdef OS_WIN32
   CreateManager create_manager = (CreateManager)GetProcAddress(dl_handle_, "CreateManager");
-  DWORD error_string = GetLastError();
+  DWORD error_string = create_manager == NULL;
 #else
   CreateManager create_manager = reinterpret_cast<CreateManager>(dlsym(dl_handle_, "CreateManager"));
   char* error_string = dlerror();
