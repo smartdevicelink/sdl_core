@@ -1413,7 +1413,7 @@
     </param>
     <param name="greyOut" type="Boolean" mandatory="false">
       <description>Indicates whether application should be dimmed on the screen.</description>
-      <description>Applicable only for apps received through QueryApps and still not registered.</description>
+      <description>In case app is not in foreground SDL must notify HMI to grey out the corresponding apps-available-for-launching and currently not registered</description>
     </param>
     <param name="requestType" type="Common.RequestType" minsize="0" maxsize="100" array="true" mandatory="false">
       <description>The list of SystemRequest's RequestTypes allowed by policies for the named application</description>
