@@ -452,7 +452,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
   /**
    *  \brief Lock for applications list
    */
-  mutable sync_primitives::Lock connection_list_lock_;
+  mutable sync_primitives::RWLock connection_list_lock_;
   mutable sync_primitives::Lock connection_handler_observer_lock_;
 
   /**
