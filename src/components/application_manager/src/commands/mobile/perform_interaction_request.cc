@@ -610,7 +610,7 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
   } else {
     msg_params[strings::timeout] = default_timeout_;
   }
-
+  msg_params[strings::app_id] = app->app_id();
   SendHMIRequest(hmi_apis::FunctionID::VR_PerformInteraction, &msg_params,
                  true);
 }
