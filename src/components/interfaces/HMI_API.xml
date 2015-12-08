@@ -1182,6 +1182,16 @@
   <element name="NONE"/>
 </enum>
 
+<enum name="EventTypes">
+  <description>Reflects the current active event</description>
+  <element name="AUDIO_SOURCE">
+    <description>Navigated to audio(radio, etc)</description>
+  </element>
+  <element name="EMBEDDED_NAVI">
+    <description>Navigated to navigation screen</description>
+  </element>
+</enum>
+
 <!-- Policies -->
 <enum name="UpdateResult">
     <element name="UP_TO_DATE"/>
@@ -2352,6 +2362,25 @@
     <description>Notification from system to SDL to let it know that ignition cycle is over.</description>
   </function>
   <!-- End of Policies -->
+   <function name="OnDeactivateHMI" messagetype="notification">
+        <description>
+          Sender: HMI->SDL. When: in case GAL/DIO is active or disabling
+        </description>
+     <param name="isDeactivated" type="Boolean" mandatory="true">
+        <description>
+          Must be 'true' - GAL/DIO is active. Must be 'false' when GAL/DIO is disabling
+        </description>
+     </param>
+   </function>
+   <function name="OnEventChanged" messagetype="notification">
+     <description>Sender: HMI->SDL. When event is become active</description>
+     <param name="eventName" type="Common.EventTypes" mandatory="true">
+        <description>Specifies the types of active events.</description>
+     </param>
+     <param name="isActive" type="Boolean" mandatory="true">
+        <description>Must be 'true' - when the event is started on HMI. Must be 'false' when the event is ended on HMI</description>
+     </param>
+   </function>
 </interface>
 
 <interface name="VR" version="1.0" date="2013-04-17">
