@@ -57,14 +57,9 @@
     #define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name) \
       log4cxx::LoggerPtr logger_var = log4cxx::LoggerPtr(log4cxx::Logger::getLogger(logger_name));
 
-#ifdef OS_WIN32
-#define INIT_LOGGER(file_name) \
-	log4cxx::PropertyConfigurator::configure(file_name);
-#else
     #define INIT_LOGGER(file_name) \
       log4cxx::PropertyConfigurator::configure(file_name); \
       logger::set_logs_enabled(profile::Profile::instance()->logs_enabled());
-#endif
 
     // Logger deinitilization function and macro, need to stop log4cxx writing
     // without this deinitilization log4cxx threads continue using some instances destroyed by exit()

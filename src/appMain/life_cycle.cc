@@ -371,6 +371,34 @@ bool LifeCycle::InitMessageSystem() {
 
 namespace {
   pthread_t main_thread;
+
+#ifdef OS_WIN32
+  BOOL WINAPI HandlerRoutine(DWORD dwCtrlType)
+  {
+	  switch (dwCtrlType)
+	  {
+	  case CTRL_C_EVENT:
+		  LOG4CXX_DEBUG(logger_, "CTRL_C_EVENT signal has been caught");
+		  break;
+	  case CTRL_BREAK_EVENT:
+		  LOG4CXX_DEBUG(logger_, "CTRL_BREAK_EVENT signal has been caught");
+		  break;
+	  case CTRL_CLOSE_EVENT:
+		  LOG4CXX_DEBUG(logger_, "CTRL_CLOSE_EVENT signal has been caught");
+		  break;
+	  case CTRL_LOGOFF_EVENT:
+		  LOG4CXX_DEBUG(logger_, "CTRL_LOGOFF_EVENT signal has been caught");
+		  break;
+	  case CTRL_SHUTDOWN_EVENT:
+		  LOG4CXX_DEBUG(logger_, "CTRL_SHUTDOWN_EVENT signal has been caught");
+		  break;
+	  default:
+		  break;
+	  }
+
+	  return TRUE;
+  }
+#else
   void sig_handler(int sig) {
     switch(sig) {
       case SIGINT:
@@ -397,12 +425,20 @@ namespace {
       }
     }
   }
+#endif
+
 }  //  namespace
 
 void LifeCycle::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   main_thread = pthread_self();
-#ifndef OS_WIN32
+#ifdef OS_WIN32
+  if (!SetConsoleCtrlHandler(HandlerRoutine, TRUE))
+  {
+	  LOG4CXX_FATAL(logger_, "Subscribe to system signals error");
+	  return;
+  }
+#else
   // First, register signal handlers
   if(!::utils::SubscribeToInterruptSignal(&sig_handler) ||
      !::utils::SubscribeToTerminateSignal(&sig_handler) ||
