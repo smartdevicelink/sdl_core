@@ -59,6 +59,7 @@ StateController::StateController(ApplicationManager* app_mngr)
   subscribe_on_event(hmi_apis::FunctionID::TTS_Stopped);
   subscribe_on_event(hmi_apis::FunctionID::VR_Started);
   subscribe_on_event(hmi_apis::FunctionID::VR_Stopped);
+  subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnEventChanged);
 }
 
 void StateController::HmiLevelConflictResolver::operator()(
