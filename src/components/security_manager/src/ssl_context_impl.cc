@@ -298,12 +298,16 @@ DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
   *out_data_size = 0;
 
   // TODO(Ezamakhov): add test - hanshake fail -> restart StartHandshake
-  sync_primitives::AutoLock locker(bio_locker);
-  if (SSL_is_init_finished(connection_)) {
-    LOG4CXX_DEBUG(logger_, "SSL initilization is finished");
-    is_handshake_pending_ = false;
-    return Handshake_Result_Success;
+  {
+     sync_primitives::AutoLock locker(bio_locker);
+
+     if (SSL_is_init_finished(connection_)) {
+       LOG4CXX_DEBUG(logger_, "SSL initilization is finished");
+       is_handshake_pending_ = false;
+       return Handshake_Result_Success;
+    }
   }
+
 
   if (!WriteHandshakeData(in_data, in_data_size)) {
     return Handshake_Result_AbnormalFail;
