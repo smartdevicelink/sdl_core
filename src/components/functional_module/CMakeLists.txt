@@ -19,15 +19,17 @@ endif()
 set(GCOV gcov)
 
 include_directories (
-  ./include/
-  ../include/
-  ../application_manager/include
-  ../connection_handler/include/
-  ../utils/include
-  ../config_profile/include
+  ${CMAKE_SOURCE_DIR}/src/components/can_cooperation/include/
+  ${CMAKE_SOURCE_DIR}/src/components/include/
+  ${CMAKE_SOURCE_DIR}/src/components/application_manager/include
+  ${CMAKE_SOURCE_DIR}/src/components/connection_handler/include
+  ${CMAKE_SOURCE_DIR}/src/components/utils/include
+  ${CMAKE_SOURCE_DIR}/src/components/config_profile/include
+  ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/usage_statistics/include
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
+  include
 )
 
 set (SOURCES

@@ -39,7 +39,12 @@ namespace validators {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "InteriorZoneValidator")
 
-using namespace message_params;
+using message_params::kCol;
+using message_params::kRow;
+using message_params::kLevel;
+using message_params::kColspan;
+using message_params::kRowspan;
+using message_params::kLevelspan;
 
 InteriorZoneValidator::InteriorZoneValidator() {
   // name="col"
@@ -99,7 +104,7 @@ ValidationResult InteriorZoneValidator::Validate(const Json::Value& json,
   return ValidateSimpleValues(json, outgoing_json);
 }
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

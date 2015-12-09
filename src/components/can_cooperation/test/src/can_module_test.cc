@@ -59,10 +59,11 @@ using ::testing::ReturnRef;
 namespace can_cooperation {
 
 class CanModuleTest : public ::testing::Test {
-public:
-  void static HandleMessage(application_manager::MessagePtr msg) {
+ public:
+  static void HandleMessage(application_manager::MessagePtr msg) {
     module->HandleMessage(msg);
   }
+
  protected:
   static CANModule* module;
   static MockService* mock_service;
@@ -124,8 +125,8 @@ TEST_F(CanModuleTest, ProcessMessageEmptyAppsList) {
 
   std::vector<application_manager::ApplicationSharedPtr> apps;
 
-  EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID())
-    ).WillOnce(Return(apps));
+  EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID()))
+      .WillOnce(Return(apps));
   EXPECT_CALL(*mock_service, SendMessageToMobile(_)).Times(0);
   EXPECT_EQ(ProcessResult::PROCESSED, module->ProcessMessage(message));
 }
@@ -162,8 +163,8 @@ TEST_F(CanModuleTest, ProcessMessagePass) {
   EXPECT_CALL(*app, QueryInterface(module->GetModuleID())).
       WillRepeatedly(Return(ext));
   EXPECT_CALL(*app, app_id()).WillRepeatedly(Return(1));
-  EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID())
-    ).WillRepeatedly(Return(apps));
+  EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID()))
+      .WillRepeatedly(Return(apps));
   EXPECT_CALL(*mock_service, GetApplication(1)).Times(1)
       .WillOnce(Return(app_ptr));
   EXPECT_CALL(*mock_service, CheckPolicyPermissions(_)).Times(1)
@@ -488,7 +489,7 @@ TEST_F(CanModuleTest, DeactivateApp) {
                                    mobile_apis::HMILevel::eType::HMI_LIMITED)).
                                        Times(6);
 
-  for (size_t i = 0; i < 6; ++ i) {
+  for (size_t i = 0; i < 6; ++i) {
     Json::Value value(Json::ValueType::objectValue);
     value[json_keys::kMethod] = functional_modules::hmi_api::on_app_deactivated;
     value[json_keys::kParams] = Json::Value(Json::ValueType::objectValue);

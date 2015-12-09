@@ -41,7 +41,8 @@ namespace validators {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "GetInteriorVehicleDataCapabilitiesRequestValidator")
 
-using namespace message_params;
+using message_params::kModuleTypes;
+using message_params::kZone;
 
 GetInteriorVehicleDataCapabilitiesRequestValidator::
 GetInteriorVehicleDataCapabilitiesRequestValidator() {
@@ -54,7 +55,7 @@ GetInteriorVehicleDataCapabilitiesRequestValidator() {
   module_type_[ValidationParams::MAX_SIZE] = 1000;
 
   validation_scope_map_[kModuleTypes] = &module_type_;
-};
+}
 
 ValidationResult GetInteriorVehicleDataCapabilitiesRequestValidator::Validate(
                                                    const Json::Value& json,
@@ -75,7 +76,7 @@ ValidationResult GetInteriorVehicleDataCapabilitiesRequestValidator::Validate(
   return result;
 }
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

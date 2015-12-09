@@ -46,7 +46,6 @@ namespace validators {
 class ButtonPressRequestValidator : public Validator,
                   public utils::Singleton<ButtonPressRequestValidator> {
  public:
-
   /**
    * @brief Validate json with message params
    *
@@ -59,16 +58,16 @@ class ButtonPressRequestValidator : public Validator,
                             Json::Value& outgoing_json);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(ButtonPressRequestValidator);
   FRIEND_BASE_SINGLETON_CLASS(ButtonPressRequestValidator);
   ButtonPressRequestValidator();
 
   ValidationScope module_type_;
   ValidationScope button_name_;
   ValidationScope button_press_mode_;
+  DISALLOW_COPY_AND_ASSIGN(ButtonPressRequestValidator);
 };
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

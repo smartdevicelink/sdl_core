@@ -33,10 +33,10 @@
 #ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_REQUEST_CONTROLLER_H_
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_REQUEST_CONTROLLER_H_
 
+#include <map>
+
 #include "can_cooperation/commands/command.h"
 #include "can_cooperation/can_module_timer.h"
-
-#include <map>
 
 namespace can_cooperation {
 namespace request_controller {
@@ -49,17 +49,16 @@ typedef uint32_t  correlation_id;
  */
 class RequestController : public functional_modules::TimerObserver<TrackableMessage> {
  public:
-
   /**
-  * @brief Class constructor
-  *
-  */
+   * @brief Class constructor
+   *
+   */
   RequestController();
 
   /**
-  * @brief Class destructor
-  *
-  */
+   * @brief Class destructor
+   *
+   */
   virtual ~RequestController();
 
   /**
@@ -79,10 +78,9 @@ class RequestController : public functional_modules::TimerObserver<TrackableMess
   void OnTimeoutTriggered(const TrackableMessage& expired);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(RequestController);
-
   std::map<correlation_id, MobileRequestPtr> mobile_request_list_;
   functional_modules::ModuleTimer<TrackableMessage> timer_;
+  DISALLOW_COPY_AND_ASSIGN(RequestController);
 };
 
 }  // namespace request_controller

@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_EVENT_ENGINE_CAN_COOPERATION_EVENT_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_EVENT_ENGINE_CAN_COOPERATION_EVENT_H_
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_ENGINE_EVENT_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_ENGINE_EVENT_H_
 
 #include <string>
 
@@ -40,19 +40,18 @@ namespace event_engine {
 template<typename EventMessage, typename EventID>
 class Event {
  public:
-
   /*
    * @brief Constructor with parameters
    *
    * @param id Event ID.
    * @param message Message received in event
    */
-  Event(EventMessage& message, const EventID& id);
+  Event(const EventMessage& message, const EventID& id);
 
   /*
    * @brief Destructor
    */
-  virtual ~Event() {};
+  virtual ~Event() {}
 
   /*
    * @brief Provides event ID
@@ -64,7 +63,7 @@ class Event {
    *
    * @param message The message received in event
    */
-  void set_event_message(EventMessage& message);
+  void set_event_message(const EventMessage& message);
 
   /*
    * @brief Retrieves event message
@@ -89,11 +88,9 @@ class Event {
   virtual int32_t event_message_type() const = 0;
 
  protected:
-
-   EventMessage     event_message_;
+  EventMessage event_message_;
 
  private:
-
   EventID id_;
 };
 
@@ -108,7 +105,7 @@ const EventMessage& Event<EventMessage, EventID>::event_message() const {
 }
 
 template<typename EventMessage, typename EventID>
-Event<EventMessage, EventID>::Event(EventMessage& message, const EventID& id)
+Event<EventMessage, EventID>::Event(const EventMessage& message, const EventID& id)
 : event_message_(message),
   id_(id) {
 }
@@ -118,6 +115,6 @@ void Event<EventMessage, EventID>::raise() {
   EventDispatcher<EventMessage, EventID>::instance()->raise_event(*this);
 }*/
 
-}
+}  // namespace event_engine
 
-#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_EVENT_ENGINE_CAN_COOPERATION_EVENT_H_
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_ENGINE_EVENT_H_

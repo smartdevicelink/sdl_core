@@ -51,6 +51,7 @@ struct Erase {
   explicit Erase(const Subject& who)
       : who_(who) {
   }
+  // NOLINTNEXTLINE
   void operator() (AccessRemoteImpl::AccessControlList::value_type& row) const {
     row.second.erase(who_);
   }

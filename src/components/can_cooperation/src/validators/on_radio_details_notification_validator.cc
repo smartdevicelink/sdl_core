@@ -44,9 +44,6 @@ namespace can_cooperation {
 
 namespace validators {
 
-using namespace message_params;
-using namespace json_keys;
-
 OnRadioDetailsNotificationValidator::OnRadioDetailsNotificationValidator() {
 /*  trigger_source_[kType] = ValueType::ENUM;
   trigger_source_[kEnumType] = EnumType::TRIGGER_SOURCE;
@@ -129,7 +126,7 @@ ValidationResult OnRadioDetailsNotificationValidator::Validate(
   return result;
 }
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

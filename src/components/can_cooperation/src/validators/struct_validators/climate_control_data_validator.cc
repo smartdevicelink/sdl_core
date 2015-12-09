@@ -39,7 +39,15 @@ namespace validators {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ClimateControlDataValidator")
 
-using namespace message_params;
+using message_params::kFanSpeed;
+using message_params::kCurrentTemp;
+using message_params::kDesiredTemp;
+using message_params::kTemperatureUnit;
+using message_params::kACEnable;
+using message_params::kCirculateAirEnable;
+using message_params::kAutoModeEnable;
+using message_params::kDefrostZone;
+using message_params::kDualModeEnable;
 
 ClimateControlDataValidator::ClimateControlDataValidator() {
   // name="fanSpeed"
@@ -104,7 +112,6 @@ ClimateControlDataValidator::ClimateControlDataValidator() {
   validation_scope_map_[kAutoModeEnable] = &auto_mode_enable_;
   validation_scope_map_[kDefrostZone] = &defrost_zone_;
   validation_scope_map_[kDualModeEnable] = &dual_mode_enable_;
-
 }
 
 ValidationResult ClimateControlDataValidator::Validate(const Json::Value& json,
@@ -131,7 +138,7 @@ void ClimateControlDataValidator::RemoveReadOnlyParams(Json::Value& json) {
   }
 }
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

@@ -41,7 +41,8 @@ namespace validators {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ModuleDescriptionValidator")
 
-using namespace message_params;
+using message_params::kModuleType;
+using message_params::kModuleZone;
 
 ModuleDescriptionValidator::ModuleDescriptionValidator() {
   // name="moduleType"
@@ -69,13 +70,13 @@ ValidationResult ModuleDescriptionValidator::Validate(const Json::Value& json,
                                                     outgoing_json[kModuleZone]);
   } else {
     result = ValidationResult::INVALID_DATA;
-    LOG4CXX_ERROR(logger_, "Mandatory param " <<kModuleZone <<" missing!" );
+    LOG4CXX_ERROR(logger_, "Mandatory param " <<kModuleZone <<" missing!");
   }
 
   return result;
 }
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

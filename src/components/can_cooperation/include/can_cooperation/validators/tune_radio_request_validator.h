@@ -46,7 +46,6 @@ namespace validators {
 class TuneRadioRequestValidator : public Validator,
                   public utils::Singleton<TuneRadioRequestValidator> {
  public:
-
   /**
    * @brief Validate json with message params
    *
@@ -59,13 +58,13 @@ class TuneRadioRequestValidator : public Validator,
                             Json::Value& outgoing_json);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(TuneRadioRequestValidator);
   FRIEND_BASE_SINGLETON_CLASS(TuneRadioRequestValidator);
-  TuneRadioRequestValidator() {};
-  ~TuneRadioRequestValidator() {};
+  TuneRadioRequestValidator() {}
+  ~TuneRadioRequestValidator() {}
+  DISALLOW_COPY_AND_ASSIGN(TuneRadioRequestValidator);
 };
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

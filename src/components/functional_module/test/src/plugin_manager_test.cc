@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include "functional_module/plugin_manager.h"
 #include "mock_generic_module.h"
+#include "functional_module/plugin_manager.h"
 #include "mock_service.h"
 #include "mock_application.h"
 
@@ -125,7 +125,7 @@ TEST_F(PluginManagerTest, ProcessHMIMessagePass) {
           protocol_handler::ServiceType::kRpc));
   application_manager::MessagePtr message(msg);
   message->set_protocol_version(ProtocolVersion::kHMI);
-  std::string json = "{\"method\": \"HMI-Func-1\"}"; // see MockGenericModule
+  std::string json = "{\"method\": \"HMI-Func-1\"}";  // see MockGenericModule
   message->set_json_message(json);
   EXPECT_CALL(*module, ProcessHMIMessage(message)).Times(1).WillOnce(
       Return(ProcessResult::PROCESSED));

@@ -39,7 +39,7 @@
 #include "application_manager/application.h"
 
 namespace Json {
-  class Value;
+class Value;
 }
 
 namespace application_manager {
@@ -142,7 +142,7 @@ class CoreService : public Service {
    * @param dev_id ID device
    * @param zone device zone
    */
-  void SetDeviceZone(const uint32_t dev_id,const SeatLocation& zone);
+  void SetDeviceZone(const uint32_t dev_id, const SeatLocation& zone);
 
   /**
    * Gets device zone

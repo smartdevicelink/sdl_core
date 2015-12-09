@@ -44,9 +44,8 @@ namespace validators {
  * @brief GetInteriorVehicleDataCapabilitiesRequestValidator class
  */
 class GetInteriorVehicleDataCapabilitiesRequestValidator : public Validator,
-   public utils::Singleton<GetInteriorVehicleDataCapabilitiesRequestValidator> {
+    public utils::Singleton<GetInteriorVehicleDataCapabilitiesRequestValidator> {
  public:
-
   /**
    * @brief Validate json with message params
    *
@@ -59,14 +58,14 @@ class GetInteriorVehicleDataCapabilitiesRequestValidator : public Validator,
                             Json::Value& outgoing_json);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(GetInteriorVehicleDataCapabilitiesRequestValidator);
   FRIEND_BASE_SINGLETON_CLASS(GetInteriorVehicleDataCapabilitiesRequestValidator);
   GetInteriorVehicleDataCapabilitiesRequestValidator();
 
   ValidationScope module_type_;
+  DISALLOW_COPY_AND_ASSIGN(GetInteriorVehicleDataCapabilitiesRequestValidator);
 };
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

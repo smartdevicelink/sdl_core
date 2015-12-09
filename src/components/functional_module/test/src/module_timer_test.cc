@@ -1,6 +1,7 @@
+#include "module_timer_test.h"
+
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-#include "module_timer_test.h"
 
 namespace functional_modules {
 

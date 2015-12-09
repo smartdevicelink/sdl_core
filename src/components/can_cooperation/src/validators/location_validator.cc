@@ -38,9 +38,6 @@ namespace can_cooperation {
 
 namespace validators {
 
-using namespace message_params;
-
-
 LocationValidator::LocationValidator() {
 /*  // name="gpsCoordinates"
   gps_coordinates_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
@@ -68,7 +65,7 @@ ValidationResult LocationValidator::Validate(const Json::Value& json,
   return result;
 }
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

@@ -37,9 +37,6 @@ namespace can_cooperation {
 
 namespace validators {
 
-using namespace message_params;
-
-
 TimeValidator::TimeValidator() {
 /*  // name="hours"
   hours_[kType] = ValueType::INT;
@@ -105,7 +102,7 @@ ValidationResult TimeValidator::Validate(const Json::Value& json,
   return ValidateSimpleValues(json, outgoing_json);
 }
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_CLIMATE_CONTROL_ON_REQUEST_H_
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_CLIMATE_CONTROL_ON_REQUEST_H_
 
+#include <string>
+
 #include "can_cooperation/commands/base_command_request.h"
 #include "can_cooperation/event_engine/event.h"
 

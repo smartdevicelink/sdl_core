@@ -41,11 +41,11 @@ namespace validators {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "SetInteriorVehicleDataRequestValidator")
 
-using namespace message_params;
+using message_params::kModuleData;
 
 SetInteriorVehicleDataRequestValidator::
 SetInteriorVehicleDataRequestValidator() {
-};
+}
 
 ValidationResult SetInteriorVehicleDataRequestValidator::Validate(
                                                    const Json::Value& json,
@@ -59,13 +59,13 @@ ValidationResult SetInteriorVehicleDataRequestValidator::Validate(
         Validate(json[kModuleData], outgoing_json[kModuleData]);
   } else {
     result = ValidationResult::INVALID_DATA;
-    LOG4CXX_ERROR(logger_, "Mandatory param " <<kModuleData <<" missing!" );
+    LOG4CXX_ERROR(logger_, "Mandatory param " <<kModuleData <<" missing!");
   }
 
   return result;
 }
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

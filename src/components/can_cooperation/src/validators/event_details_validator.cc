@@ -39,9 +39,6 @@ namespace can_cooperation {
 
 namespace validators {
 
-using namespace message_params;
-
-
 EventDetailsValidator::EventDetailsValidator() {
 /*  // name="eventName"
   event_name_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
@@ -78,13 +75,13 @@ ValidationResult EventDetailsValidator::Validate(const Json::Value& json,
   }
 
   if (json.isMember(kEventTime)) {
-     result = TimeValidator::instance()->Validate(json[kEventTime],
-                                                  outgoing_json[kEventTime]);
-   }
+    result = TimeValidator::instance()->Validate(json[kEventTime],
+                                                 outgoing_json[kEventTime]);
+  }
 
-   if (result != ValidationResult::SUCCESS) {
-     return result;
-   }
+  if (result != ValidationResult::SUCCESS) {
+    return result;
+  }
 
   if (json.isMember(kLocation)) {
     result = LocationValidator::instance()->Validate(json[kLocation],
@@ -94,7 +91,7 @@ ValidationResult EventDetailsValidator::Validate(const Json::Value& json,
   return result;
 }
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

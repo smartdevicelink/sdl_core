@@ -32,6 +32,8 @@
 #ifndef SRC_COMPONENTS_POLICY_TEST_INCLUDE_MOCK_ACCESS_REMOTE_H_
 #define SRC_COMPONENTS_POLICY_TEST_INCLUDE_MOCK_ACCESS_REMOTE_H_
 
+#include <string>
+#include <vector>
 #include "gmock/gmock.h"
 #include "policy/access_remote.h"
 
@@ -79,7 +81,7 @@ class MockAccessRemote : public AccessRemote {
   MOCK_METHOD1(GetGroups,
       const policy_table::Strings&(const Subject& who));
   MOCK_METHOD3(GetPermissionsForApp,
-      bool (const std::string& device_id, const std::string& app_id, policy::FunctionalIdType& group_types));
+      bool(const std::string& device_id, const std::string& app_id, policy::FunctionalIdType& group_types));
   MOCK_CONST_METHOD2(CheckModuleType, bool(const PTString& app_id,
                                             policy_table::ModuleType module));
   MOCK_CONST_METHOD3(CheckParameters,

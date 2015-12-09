@@ -33,6 +33,9 @@
 #ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_H_
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_H_
 
+#include <string>
+#include <vector>
+
 #include "can_cooperation/commands/base_command_notification.h"
 
 namespace can_cooperation {
@@ -67,9 +70,9 @@ class OnInteriorVehicleDataNotification : public BaseCommandNotification {
   virtual ~OnInteriorVehicleDataNotification();
 
  protected:
-   virtual std::string ModuleType(const Json::Value& message);
-   virtual SeatLocation InteriorZone(const Json::Value& message);
-   virtual std::vector<std::string> ControlData(const Json::Value& message);
+  virtual std::string ModuleType(const Json::Value& message);
+  virtual SeatLocation InteriorZone(const Json::Value& message);
+  virtual std::vector<std::string> ControlData(const Json::Value& message);
 };
 
 }  // namespace commands

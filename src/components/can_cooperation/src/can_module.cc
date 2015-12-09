@@ -54,7 +54,11 @@ using functional_modules::MobileFunctionID;
 using event_engine::EventDispatcher;
 namespace hmi_api = functional_modules::hmi_api;
 
-using namespace json_keys;
+using json_keys::kId;
+using json_keys::kMessage;
+using json_keys::kParams;
+using json_keys::kMethod;
+using json_keys::kJsonrpc;
 
 EXPORT_FUNCTION_IMPL(CANModule);
 CREATE_LOGGERPTR_GLOBAL(logger_, "CanModule")
@@ -508,8 +512,7 @@ void CANModule::UnsubscribeAppForAllZones(uint32_t hmi_app_id,
   LOG4CXX_AUTO_TRACE(logger_);
   std::set<Json::Value>::iterator iter =
       app->subscribed_interior_vehicle_data_.begin();
-  for (;iter != app->subscribed_interior_vehicle_data_.end();) {
-
+  for (; iter != app->subscribed_interior_vehicle_data_.end();) {
     // TODO(VS): Move headers initialization out of loop(only params must be changed in loop)
     Json::Value msg;
 

@@ -1,5 +1,9 @@
+#include "gmock/gmock.h"
 #include "utils/macro.h"
 #include "functional_module/timer/module_timer.h"
+
+#ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_TEST_INCLUDE_MODULE_TIMER_TEST_H_
+#define SRC_COMPONENTS_FUNCTIONAL_MODULE_TEST_INCLUDE_MODULE_TIMER_TEST_H_
 
 namespace functional_modules {
 
@@ -22,7 +26,7 @@ class TestTrackable : public Trackable {
 
 class ModuleTimerTest {
  public:
-  ModuleTimerTest(ModuleTimer<TestTrackable>& timer)
+  explicit ModuleTimerTest(const ModuleTimer<TestTrackable>& timer)
     : timer_(timer) {}
 
   TimeUnit period() const {
@@ -47,11 +51,13 @@ class ModuleTimerTest {
   }
 
  private:
-  ModuleTimer<TestTrackable>& timer_;
+  const ModuleTimer<TestTrackable>& timer_;
 };
 
 class MockTimerObserver : public TimerObserver<TestTrackable> {
  public:
   MOCK_METHOD1(OnTimeoutTriggered, void(const TestTrackable& expired));
 };
-}  //  namespace functional_modules
+}  // namespace functional_modules
+
+#endif  // SRC_COMPONENTS_FUNCTIONAL_MODULE_TEST_INCLUDE_MODULE_TIMER_TEST_H_

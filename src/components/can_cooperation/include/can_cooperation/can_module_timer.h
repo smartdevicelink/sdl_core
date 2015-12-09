@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_MODULE_INCLUDE_CAN_MODULE_CAN_MODULE_TIMER_H_
-#define SRC_COMPONENTS_CAN_MODULE_INCLUDE_CAN_MODULE_CAN_MODULE_TIMER_H_
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_TIMER_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_TIMER_H_
 
 #include "functional_module/timer/module_timer.h"
 
@@ -66,6 +66,6 @@ class TrackableMessage : public functional_modules::Trackable {
   uint32_t correlation_id_;
 };
 
-}  //  namesapce can_cooperation
+}  // namespace can_cooperation
 
-#endif  //  SRC_COMPONENTS_CAN_MODULE_INCLUDE_CAN_MODULE_CAN_MODULE_TIMER_H_
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_TIMER_H_

@@ -35,10 +35,6 @@
 
 namespace can_cooperation {
 
-namespace strings {
-
-} //  strings
-
 namespace result_codes {
 const char kSuccess[] = "SUCCESS";
 const char kUnsupportedRequest[] = "UNSUPPORTED_REQUEST";
@@ -63,7 +59,7 @@ const char kWrongLanguage[] = "WRONG_LANGUAGE";
 const char kGenericError[] = "GENERIC_ERROR";
 const char kUserDisallowed[] = "USER_DISALLOWED";
 const char kReadOnly[] = "READ_ONLY";
-} //  result_codes
+}  // namespace result_codes
 
 namespace json_keys {
 const char kParams[] = "params";
@@ -79,7 +75,7 @@ const char kMessage[] = "message";
 const char kData[] = "data";
 const char kAppId[] = "appID";
 const char kCode[] = "code";
-} //  json_keys
+}  // namespace json_keys
 
 namespace message_params {
 /*
@@ -162,7 +158,7 @@ const char kModuleData[] = "moduleData";
 // SetInteriorVehicleData request
 
 // SetInteriorVehicleData response
-//const char kModuleData[] = "moduleData";
+// const char kModuleData[] = "moduleData";
 // SetInteriorVehicleData response
 
 // GetInteriorVehicleData request
@@ -171,12 +167,12 @@ const char kSubscribe[]         = "subscribe";
 // GetInteriorVehicleData request
 
 // GetInteriorVehicleData response
-//const char kModuleData[] = "moduleData";
+// const char kModuleData[] = "moduleData";
 const char kIsSubscribed[] = "isSubscribed";
 // GetInteriorVehicleData response
 
 // OnInteriorVehicleData notification
-//const char kModuleData[] = "moduleData";
+// const char kModuleData[] = "moduleData";
 // OnInteriorVehicleData notification
 
 // OnReverseAppsAllowing notification
@@ -194,7 +190,7 @@ const char kDeviceLocation[] = "deviceLocation";
 // RC.OnDriverLocationChanged notification
 
 // ButtonPress request
-//const char kZone[]          = "zone";
+// const char kZone[]          = "zone";
 const char kModuleType[]      = "moduleType";
 const char kButtonName[]      = "buttonName";
 const char kButtonPressMode[] = "buttonPressMode";
@@ -212,7 +208,7 @@ const char kLevelspan[] = "levelspan";
 
 // ModuleDescription struct
 const char kModuleZone[] = "moduleZone";
-//const char kModuleType[] = "moduleType";
+// const char kModuleType[] = "moduleType";
 // ModuleDescription struct
 
 // RdsData struct
@@ -262,72 +258,72 @@ const char kHMIAppID[]   = "appID";
 const char kHmiLevel[]   = "hmiLevel";
 const char kSysContext[] = "systemContext";
 const char kAudioState[] = "audioStreamingState";
-} //  namespace message_params
+}  // namespace message_params
 
 namespace enums_value {
-  // TriggerSource enum
-  //const char kMenu[]              = "MENU";
-  //const char kVR[]                = "VR";
-  // TriggerSource enum
+// TriggerSource enum
+// const char kMenu[]              = "MENU";
+// const char kVR[]                = "VR";
+// TriggerSource enum
 
-  // ModuleType enum
-  const char kClimate[] = "CLIMATE";
-  const char kRadio[]   = "RADIO";
-  // ModuleType enum
+// ModuleType enum
+const char kClimate[] = "CLIMATE";
+const char kRadio[]   = "RADIO";
+// ModuleType enum
 
-  // RadioBand enum
-  const char kAM[] = "AM";
-  const char kFM[] = "FM";
-  const char kXM[] = "XM";
-  // RadioBand enum
+// RadioBand enum
+const char kAM[] = "AM";
+const char kFM[] = "FM";
+const char kXM[] = "XM";
+// RadioBand enum
 
-  // RadioState enum
-  const char kAcquiring[] = "ACQUIRING";
-  const char kAcquired[]  = "ACQUIRED";
-  const char kMulticast[] = "MULTICAST";
-  const char kNotFound[]  = "NOT_FOUND";
-  // RadioState enum
+// RadioState enum
+const char kAcquiring[] = "ACQUIRING";
+const char kAcquired[]  = "ACQUIRED";
+const char kMulticast[] = "MULTICAST";
+const char kNotFound[]  = "NOT_FOUND";
+// RadioState enum
 
-  // DefrostZone enum
-  const char kFront[] = "FRONT";
-  const char kRear[]  = "REAR";
-  const char kAll[]   = "ALL";
-  // DefrostZone enum
+// DefrostZone enum
+const char kFront[] = "FRONT";
+const char kRear[]  = "REAR";
+const char kAll[]   = "ALL";
+// DefrostZone enum
 
-  // TemperatureUnit enum
-  const char kKelvin[]     = "KELVIN";
-  const char kFahrenheit[] = "FAHRENHEIT";
-  const char kCelsius[]    = "CELSIUS";
-  // TemperatureUnit enum
+// TemperatureUnit enum
+const char kKelvin[]     = "KELVIN";
+const char kFahrenheit[] = "FAHRENHEIT";
+const char kCelsius[]    = "CELSIUS";
+// TemperatureUnit enum
 
 
-  // ButtonName enum
-  const char kACMax[]       = "AC_MAX";
-  const char kAC[]          = "AC";
-  const char kRecirculate[] = "RECIRCULATE";
-  const char kFanUp[]       = "FAN_UP";
-  const char kFanDown[]     = "FAN_DOWN";
-  const char kTempUp[]      = "TEMP_UP";
-  const char kTempDown[]    = "TEMP_DOWN";
-  const char kDefrostMax[]  = "DEFROST_MAX";
-  const char kDefrost[]     = "DEFROST";
-  const char kDefrostRear[] = "DEFROST_REAR";
-  const char kUpperVent[]   = "UPPER_VENT";
-  const char kLowerVent[]   = "LOWER_VENT";
-  const char kVolumeUp[]    = "VOLUME_UP";
-  const char kVolumeDown[]  = "VOLUME_DOWN";
-  const char kEject[]       = "EJECT";
-  const char kSource[]      = "SOURCE";
-  const char kShuffle[]     = "SHUFFLE";
-  const char kRepeat[]      = "REPEAT";
-  // ButtonName enum
+// ButtonName enum
+const char kACMax[]       = "AC_MAX";
+const char kAC[]          = "AC";
+const char kRecirculate[] = "RECIRCULATE";
+const char kFanUp[]       = "FAN_UP";
+const char kFanDown[]     = "FAN_DOWN";
+const char kTempUp[]      = "TEMP_UP";
+const char kTempDown[]    = "TEMP_DOWN";
+const char kDefrostMax[]  = "DEFROST_MAX";
+const char kDefrost[]     = "DEFROST";
+const char kDefrostRear[] = "DEFROST_REAR";
+const char kUpperVent[]   = "UPPER_VENT";
+const char kLowerVent[]   = "LOWER_VENT";
+const char kVolumeUp[]    = "VOLUME_UP";
+const char kVolumeDown[]  = "VOLUME_DOWN";
+const char kEject[]       = "EJECT";
+const char kSource[]      = "SOURCE";
+const char kShuffle[]     = "SHUFFLE";
+const char kRepeat[]      = "REPEAT";
+// ButtonName enum
 
-  // ButtonPressMode enum
-  const char kLong[]  = "LONG";
-  const char kShort[] = "SHORT";
-  // ButtonPressMode enum
-} //  namespace enums
+// ButtonPressMode enum
+const char kLong[]  = "LONG";
+const char kShort[] = "SHORT";
+// ButtonPressMode enum
+}  // namespace enums_value
 
-}  //  namespace can_cooperation
+}  // namespace can_cooperation
 
 #endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_CONSTANTS_H_

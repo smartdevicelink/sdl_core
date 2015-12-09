@@ -33,10 +33,10 @@
 #ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_VALIDATOR_H_
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_VALIDATOR_H_
 
-#include "json/json.h"
-
 #include <map>
 #include <string>
+
+#include "json/json.h"
 
 namespace can_cooperation {
 
@@ -72,7 +72,7 @@ enum ValueType {
 };
 
 enum EnumType {
-  //TRIGGER_SOURCE,
+  // TRIGGER_SOURCE,
   BUTTON_NAME,
   MODULE_TYPE,
   RADIO_BAND,
@@ -82,7 +82,7 @@ enum EnumType {
   BUTTON_PRESS_MODE
 };
 
-//validation_scope map with data that will be used for validation(minlength. maxlength, etc.)
+// validation_scope map with data that will be used for validation(minlength. maxlength, etc.)
 typedef std::map<ValidationParams, int> ValidationScope;
 
 typedef std::map<std::string, ValidationScope*> ValidationScopeMap;
@@ -96,20 +96,20 @@ class Validator {
 
  protected:
   /**
-  * @brief Validate simple values(integers, strings, boolean), cut fake params,
-  *        If invalid param will be found, validation stops, error will be returned as result,
-  *        and outgoing_json should not be used.
-  *
-  * @param json incoming json with request-response params
-  * @param outgoing_json outgoing json where is param will be copied after
-  *                 verification(without fake params)
-  *
-  * @return validation result
-  */
- ValidationResult ValidateSimpleValues(const Json::Value& json,
-                                       Json::Value& outgoing_json);
+   * @brief Validate simple values(integers, strings, boolean), cut fake params,
+   *        If invalid param will be found, validation stops, error will be returned as result,
+   *        and outgoing_json should not be used.
+   *
+   * @param json incoming json with request-response params
+   * @param outgoing_json outgoing json where is param will be copied after
+   *                 verification(without fake params)
+   *
+   * @return validation result
+   */
+  ValidationResult ValidateSimpleValues(const Json::Value& json,
+                                        Json::Value& outgoing_json);
 
- ValidationScopeMap validation_scope_map_;
+  ValidationScopeMap validation_scope_map_;
 
  private:
   /**
@@ -180,7 +180,6 @@ class Validator {
    */
   ValidationResult ValidateDoubleValue(double value,
                                        ValidationScope& validation_scope);
-
 };
 
 }  // namespace validators

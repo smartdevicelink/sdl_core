@@ -43,7 +43,7 @@ TEST(VehicleCapabilities, Load) {
 TEST(VehicleCapabilities, GetCapabilities) {
   VehicleCapabilities caps;
   ASSERT_EQ(Json::ValueType::arrayValue, caps.capabilities().type());
-  ASSERT_TRUE(6 == caps.capabilities().size());
+  ASSERT_EQ(6, caps.capabilities().size());
 }
 
 TEST(VehicleCapabilities, GetSpecificCapabilities) {
@@ -56,11 +56,11 @@ TEST(VehicleCapabilities, GetSpecificCapabilities) {
   value["rowspan"] = 2;
   value["levelspan"] = 1;
   ASSERT_EQ(Json::ValueType::arrayValue, caps.capabilities(value).type());
-  ASSERT_TRUE(2 == caps.capabilities(value).size());
+  ASSERT_EQ(2, caps.capabilities(value).size());
 
   value["row"] = 1;
   ASSERT_EQ(Json::ValueType::arrayValue, caps.capabilities(value).type());
-  ASSERT_TRUE(1 == caps.capabilities(value).size());
+  ASSERT_EQ(1, caps.capabilities(value).size());
 }
 
 }  // namespace can_cooperation

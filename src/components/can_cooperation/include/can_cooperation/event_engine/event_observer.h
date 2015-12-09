@@ -40,12 +40,10 @@
 namespace event_engine {
 
 template<typename EventMessage, typename EventID>
-class EventObserver
-{
+class EventObserver {
  public:
-
   // Typedef for possible Observer ID's from mobile_apis functionID enum
-  typedef unsigned long ObserverID;
+  typedef int64_t ObserverID;
 
   /*
    * @brief Constructor
@@ -75,7 +73,6 @@ class EventObserver
   virtual void on_event(const Event<EventMessage, EventID>& event) = 0;
 
  private:
-
   ObserverID id_;
 
   DISALLOW_COPY_AND_ASSIGN(EventObserver);
@@ -83,16 +80,16 @@ class EventObserver
 
 template<typename EventMessage, typename EventID>
 EventObserver<EventMessage, EventID>::EventObserver()
- : id_(0) {
-  //Get unique id based on this
-  id_ = reinterpret_cast<unsigned long>(this);
+    : id_(0) {
+  // Get unique id based on this
+  id_ = reinterpret_cast<ObserverID>(this);
 }
 
 template<typename EventMessage, typename EventID>
 EventObserver<EventMessage, EventID>::~EventObserver() {
-  //unsubscribe_from_all_events();
+  // unsubscribe_from_all_events();
 }
 
-}
+}  // namespace event_engine
 
-#endif // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_ENGINE_EVENT_OBSERVER_H_
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_ENGINE_EVENT_OBSERVER_H_

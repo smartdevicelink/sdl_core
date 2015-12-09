@@ -39,7 +39,14 @@ namespace validators {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RdsDataValidator")
 
-using namespace message_params;
+using message_params::kPS;
+using message_params::kRT;
+using message_params::kCT;
+using message_params::kPI;
+using message_params::kPTY;
+using message_params::kTA;
+using message_params::kTP;
+using message_params::kREG;
 
 RdsDataValidator::RdsDataValidator() {
   // name="PS"
@@ -110,7 +117,7 @@ ValidationResult RdsDataValidator::Validate(const Json::Value& json,
   return ValidateSimpleValues(json, outgoing_json);
 }
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

@@ -29,9 +29,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_SERVICE_H_
-#define TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_SERVICE_H_
+#ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_TEST_INCLUDE_MOCK_SERVICE_H_
+#define SRC_COMPONENTS_FUNCTIONAL_MODULE_TEST_INCLUDE_MOCK_SERVICE_H_
 
+#include <string>
+#include <vector>
 #include "gmock/gmock.h"
 #include "application_manager/service.h"
 
@@ -86,7 +88,6 @@ class MockService : public Service {
                                     std::vector<std::string>* modules));
 };
 
-}
-  // namespace application_manager
+}  // namespace application_manager
 
-#endif  // TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_SERVICE_H_
+#endif  // SRC_COMPONENTS_FUNCTIONAL_MODULE_TEST_INCLUDE_MOCK_SERVICE_H_

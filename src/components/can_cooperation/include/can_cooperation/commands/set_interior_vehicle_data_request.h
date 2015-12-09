@@ -33,6 +33,9 @@
 #ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_SET_INTERIOR_VEHICLE_DATA_REQUEST_H_
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_SET_INTERIOR_VEHICLE_DATA_REQUEST_H_
 
+#include <string>
+#include <vector>
+
 #include "can_cooperation/commands/base_command_request.h"
 #include "can_cooperation/event_engine/event.h"
 

@@ -232,21 +232,21 @@ void ModuleHelper::ProccessDeviceRankChanged(const uint32_t device_handle,
             CANModule::instance()->GetModuleID());
         if (app_extension) {
           CANAppExtensionPtr can_app_extension =
-               application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
-                   app_extension);
-           if (can_app_extension->is_on_driver_device()) {
-             CANModule::instance()->UnsubscribeAppForAllZones(
-                 applications[i]->hmi_app_id(), can_app_extension);
-             can_app_extension->set_is_on_driver_device(false);
-           }
-         }
-       }
-     }
-   }
+              application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
+                  app_extension);
+          if (can_app_extension->is_on_driver_device()) {
+            CANModule::instance()->UnsubscribeAppForAllZones(
+                applications[i]->hmi_app_id(), can_app_extension);
+            can_app_extension->set_is_on_driver_device(false);
+          }
+        }
+      }
+    }
+  }
 }
 
 // (TODO)VS: Replace this functions for separate OnReverseAppsDisallowed notiifcation
-void ModuleHelper::ProccessOnReverseAppsDisallowed () {
+void ModuleHelper::ProccessOnReverseAppsDisallowed() {
   std::vector<application_manager::ApplicationSharedPtr> applications =
     CANModule::instance()->service()->GetApplications(
         CANModule::instance()->GetModuleID());

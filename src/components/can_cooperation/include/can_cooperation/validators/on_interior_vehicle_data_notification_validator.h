@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_VALIDATOR_H_
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_ON_INTERIOR_VEHICLE_DATA_NOTIFICATION_VALIDATOR_H_
 
+#include <string>
+
 #include "can_cooperation/validators/validator.h"
 #include "utils/singleton.h"
 
@@ -46,7 +48,6 @@ namespace validators {
 class OnInteriorVehicleDataNotificationValidator : public Validator,
                   public utils::Singleton<OnInteriorVehicleDataNotificationValidator> {
  public:
-
   /**
    * @brief Validate json with message params
    *
@@ -57,12 +58,12 @@ class OnInteriorVehicleDataNotificationValidator : public Validator,
   ValidationResult Validate(std::string& json_string);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(OnInteriorVehicleDataNotificationValidator);
   FRIEND_BASE_SINGLETON_CLASS(OnInteriorVehicleDataNotificationValidator);
   OnInteriorVehicleDataNotificationValidator();
+  DISALLOW_COPY_AND_ASSIGN(OnInteriorVehicleDataNotificationValidator);
 };
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

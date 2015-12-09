@@ -41,7 +41,16 @@ namespace validators {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RadioControlDataValidator")
 
-using namespace message_params;
+using message_params::kRdsData;
+using message_params::kFrequencyInteger;
+using message_params::kFrequencyFraction;
+using message_params::kBand;
+using message_params::kAvailableHDs;
+using message_params::kHdChannel;
+using message_params::kSignalStrength;
+using message_params::kSignalChangeThreshold;
+using message_params::kRadioEnable;
+using message_params::kState;
 
 RadioControlDataValidator::RadioControlDataValidator() {
   // name="frequencyInteger"
@@ -157,7 +166,7 @@ void RadioControlDataValidator::RemoveReadOnlyParam(
   }
 }
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 
