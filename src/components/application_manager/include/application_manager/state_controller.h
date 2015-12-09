@@ -350,6 +350,15 @@ class StateController : public event_engine::EventObserver {
   bool IsResumptionAllowed(ApplicationSharedPtr app, HmiStatePtr state) const;
 
   /**
+   * @brief IsResumptionAllowed checks, if app is allowed to be resumed in
+   * current state
+   * @param app Application
+   * @param state State to be checked
+   * @return true, if app is allowed to be resumed, otherwise - false
+   */
+  bool IsResumptionAllowed(ApplicationSharedPtr app, HmiStatePtr state) const;
+
+  /**
    * @brief GetAvailableHmiLevel Returns closest to requested
    * available hmi level for application
    *
