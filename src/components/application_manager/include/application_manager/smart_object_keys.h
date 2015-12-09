@@ -400,6 +400,8 @@ const char num_custom_presets_available[] = "numCustomPresetsAvailable";
 const char urls[] = "urls";
 const char policy_app_id[] = "policyAppID";
 const char enabled[] = "enabled";
+const char is_active[] = "isActive";
+const char event_name[] = "eventName";
 
 }  // namespace hmi_response
 

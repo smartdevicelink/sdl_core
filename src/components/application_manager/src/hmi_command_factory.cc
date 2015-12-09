@@ -156,6 +156,7 @@
 #include "application_manager/commands/hmi/sdl_activate_app_request.h"
 #include "application_manager/commands/hmi/sdl_activate_app_response.h"
 #include "application_manager/commands/hmi/on_app_permission_changed_notification.h"
+#include "application_manager/commands/hmi/on_event_changed_notification.h"
 
 #ifdef HMI_DBUS_API
 #include "application_manager/commands/hmi/vi_get_vehicle_data_request_template.h"
@@ -2064,6 +2065,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::hmi::DialNumberRequest(message));
       }
 	  break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnEventChanged: {
+      command = utils::MakeShared<commands::OnEventChangedNotification>(message);
+      break;
     }
   }
 

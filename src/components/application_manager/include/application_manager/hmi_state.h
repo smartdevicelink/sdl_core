@@ -285,8 +285,7 @@ class AudioSource : public HmiState {
 };
 
 /**
- * @brief The EmbeddedNavi class implements logic of
- * OnEventChanged(EMBEDDED_NAVI)
+ * @brief The EmbeddedNavi class implements logic of OnEventChanged(EMBEDDED_NAVI)
  * temporary state
  */
 class EmbeddedNavi : public HmiState {
@@ -298,5 +297,6 @@ class EmbeddedNavi : public HmiState {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
   }
 };
+
 }
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMISTATE_H

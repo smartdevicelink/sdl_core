@@ -439,6 +439,35 @@ void StateController::on_event(const event_engine::Event& event) {
       CancelTempState<HmiState::STATE_ID_TTS_SESSION>();
       break;
     }
+    case FunctionID::BasicCommunication_OnEventChanged: {
+      bool is_active =
+          message[strings::msg_params][hmi_response::is_active].asBool();
+      const uint32_t id =
+          message[strings::msg_params][hmi_response::event_name].asUInt();
+      //TODO(AOleynik): Add verification/conversion check here
+      Common_EventTypes::eType state_id =
+          static_cast<Common_EventTypes::eType>(id);
+      if (is_active) {
+        if (Common_EventTypes::AUDIO_SOURCE == state_id) {
+          ApplyTempState<HmiState::STATE_ID_AUDIO_SOURCE>();
+          break;
+        }
+        if (Common_EventTypes::EMBEDDED_NAVI) {
+          ApplyTempState<HmiState::STATE_ID_EMBEDDED_NAVI>();
+          break;
+        }
+      } else {
+        if (Common_EventTypes::AUDIO_SOURCE == state_id) {
+          CancelTempState<HmiState::STATE_ID_AUDIO_SOURCE>();
+          break;
+        }
+        if (Common_EventTypes::EMBEDDED_NAVI == state_id) {
+          CancelTempState<HmiState::STATE_ID_EMBEDDED_NAVI>();
+          break;
+        }
+      }
+      break;
+    }
     default:
       break;
   }
