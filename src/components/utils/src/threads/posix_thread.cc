@@ -249,6 +249,10 @@ bool Thread::start(const ThreadOptions& options) {
   return pthread_result == EOK;
 }
 
+void Thread::yield() {
+  sched_yield();
+}
+
 void Thread::stop() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(state_lock_);

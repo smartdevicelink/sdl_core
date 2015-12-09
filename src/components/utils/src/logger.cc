@@ -32,6 +32,7 @@
 
 #include "utils/logger.h"
 #include "utils/log_message_loop_thread.h"
+#include "utils/logger_status.h"
 #include <apr_time.h>
 
 void deinit_logger () {
@@ -47,6 +48,7 @@ void deinit_logger () {
     logger->removeAllAppenders();
   }
   rootLogger->removeAllAppenders();
+  logger::logger_status = logger::LoggerThreadNotCreated;
 }
 
 log4cxx_time_t time_now() {
