@@ -53,8 +53,6 @@ StateController::StateController(ApplicationManager* app_mngr)
     : EventObserver(), app_mngr_(app_mngr) {
   subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnAppActivated);
   subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated);
-  subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnEmergencyEvent);
-  subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnPhoneCall);
   subscribe_on_event(hmi_apis::FunctionID::TTS_Started);
   subscribe_on_event(hmi_apis::FunctionID::TTS_Stopped);
   subscribe_on_event(hmi_apis::FunctionID::VR_Started);
@@ -424,29 +422,6 @@ void StateController::on_event(const event_engine::Event& event) {
       OnAppDeactivated(message);
       break;
     }
-    case FunctionID::BasicCommunication_OnEmergencyEvent: {
-      bool is_active =
-          message[strings::msg_params][hmi_response::enabled].asBool();
-      if (is_active) {
-        ApplyTempState<HmiState::STATE_ID_SAFETY_MODE>();
-
-      } else {
-        CancelTempState<HmiState::STATE_ID_SAFETY_MODE>();
-      }
-      break;
-    }
-    case FunctionID::BasicCommunication_OnPhoneCall: {
-      bool is_active =
-          message[strings::msg_params][hmi_notification::is_active].asBool();
-      if (is_active) {
-        ApplyTempState<HmiState::STATE_ID_PHONE_CALL>();
-
-      } else {
-        CancelTempState<HmiState::STATE_ID_PHONE_CALL>();
-      }
-      break;
-    }
-
     case FunctionID::VR_Started: {
       ApplyTempState<HmiState::STATE_ID_VR_SESSION>();
       break;

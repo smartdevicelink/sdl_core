@@ -72,7 +72,6 @@
 #include "application_manager/commands/hmi/on_resume_audio_source_notification.h"
 #include "application_manager/commands/hmi/on_ignition_cycle_over_notification.h"
 #include "application_manager/commands/hmi/on_system_info_changed_notification.h"
-#include "application_manager/commands/hmi/on_emergency_event_notification.h"
 #include "application_manager/commands/hmi/get_system_info_request.h"
 #include "application_manager/commands/hmi/get_system_info_response.h"
 #include "application_manager/commands/hmi/close_popup_request.h"
@@ -263,7 +262,6 @@
 #include "application_manager/commands/hmi/navi_send_location_request.h"
 #include "application_manager/commands/hmi/navi_send_location_response.h"
 #include "application_manager/commands/hmi/on_tts_reset_timeout_notification.h"
-#include "application_manager/commands/hmi/on_phone_call_notification.h"
 #include "application_manager/commands/hmi/dial_number_request.h"
 #include "application_manager/commands/hmi/dial_number_response.h"
 
@@ -1089,10 +1087,6 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::BasicCommunication_OnSystemInfoChanged: {
       command.reset(new commands::OnSystemInfoChangedNotification(message));
-      break;
-    }
-    case hmi_apis::FunctionID::BasicCommunication_OnEmergencyEvent: {
-      command.reset(new commands::OnEmergencyEventNotification(message));
       break;
     }
     case hmi_apis::FunctionID::BasicCommunication_OnReady: {
@@ -2054,17 +2048,13 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       command.reset(new commands::hmi::OnTTSResetTimeoutNotification(message));
       break;
     }
-    case hmi_apis::FunctionID::BasicCommunication_OnPhoneCall: {
-      command.reset(new commands::hmi::OnPhoneCallNotification(message));
-      break;
-    }
     case hmi_apis::FunctionID::BasicCommunication_DialNumber: {
       if (is_response) {
         command.reset(new commands::hmi::DialNumberResponse(message));
       } else {
         command.reset(new commands::hmi::DialNumberRequest(message));
       }
-	  break;
+      break;
     }
     case hmi_apis::FunctionID::BasicCommunication_OnEventChanged: {
       command = utils::MakeShared<commands::OnEventChangedNotification>(message);

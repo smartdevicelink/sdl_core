@@ -251,21 +251,6 @@
 
 <enum name="DeactivateReason">
   <description>Specifies the functionality the User has switched to.</description>
-  <element name="AUDIO">
-      <description>Navigated to audio(radio, etc)</description>
-  </element>
-  <element name="PHONECALL">
-      <description>Navigated to make a call.</description>
-  </element>
-  <element name="NAVIGATIONMAP">
-      <description>Navigated to navigation screen.</description>
-  </element>
-  <element name="PHONEMENU">
-      <description>Navigated to phone menu.</description>
-  </element>
-  <element name="SYNCSETTINGS">
-      <description>Navigated to settings menu.</description>
-  </element>
   <element name="GENERAL">
       <description>Other screens navigation apart from other mobile app.</description>
   </element>
