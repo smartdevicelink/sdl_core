@@ -289,25 +289,47 @@ bool PolicyHandler::LoadPolicyLibrary() {
 
 #ifdef OS_WIN32
   dl_handle_ = LoadLibrary(kLibrary.c_str());
+
+  if (dl_handle_) {
+	  if (CreateManager()) {
+		  policy_manager_->set_listener(this);
+		  event_observer_ = new PolicyEventObserver(this);
+	  }
+  }
+  else {
+	  LOG4CXX_ERROR(logger_, GetLastError());
+  }
+
+#elif defined(OS_ANDROID)
+  dl_handle_ = dlopen(kLibrary.c_str(), RTLD_LAZY);
+
+  const char* error_string = dlerror();
+
+  if (error_string == NULL) {
+	  if (CreateManager()) {
+		  policy_manager_->set_listener(this);
+		  event_observer_ = new PolicyEventObserver(this);
+	  }
+  }
+  else {
+	  LOG4CXX_ERROR(logger_, error_string);
+  }
 #else
   dl_handle_ = dlopen(kLibrary.c_str(), RTLD_LAZY);
+
+  char* error_string = dlerror();
+
+  if (error_string == NULL) {
+	  if (CreateManager()) {
+		  policy_manager_->set_listener(this);
+		  event_observer_ = new PolicyEventObserver(this);
+	  }
+  }
+  else {
+	  LOG4CXX_ERROR(logger_, error_string);
+  }
 #endif
 
-#ifdef OS_WIN32
-	DWORD error_string = GetLastError();
-#elif defined(OS_ANDROID)
-	const char* error_string = dlerror();
-#else
-  char* error_string = dlerror();
-#endif
-  if (error_string == NULL) {
-    if (CreateManager()) {
-      policy_manager_->set_listener(this);
-      event_observer_= new PolicyEventObserver(this);
-    }
-  } else {
-    LOG4CXX_ERROR(logger_, error_string);
-  }
 
   return policy_manager_.valid();
 }
@@ -321,16 +343,24 @@ bool PolicyHandler::CreateManager() {
 
 #ifdef OS_WIN32
   CreateManager create_manager = (CreateManager)GetProcAddress(dl_handle_, "CreateManager");
-  DWORD error_string = GetLastError();
+
+  if (create_manager) {
+	  policy_manager_ = create_manager();
+  } else {
+	  LOG4CXX_WARN(logger_, GetLastError());
+  }
 #else
   CreateManager create_manager = reinterpret_cast<CreateManager>(dlsym(dl_handle_, "CreateManager"));
+
   char* error_string = dlerror();
-#endif
+
   if (error_string == NULL) {
     policy_manager_ = create_manager();
   } else {
     LOG4CXX_WARN(logger_, error_string);
   }
+#endif
+
   return policy_manager_.valid();
 }
 
