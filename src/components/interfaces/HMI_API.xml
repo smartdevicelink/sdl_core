@@ -1190,6 +1190,15 @@
   <element name="EMBEDDED_NAVI">
     <description>Navigated to navigation screen</description>
   </element>
+  <element name="PHONE_CALL">
+    <description>Phone call is active</description>
+  </element>
+  <element name="EMERGENCY_EVENT">
+    <description>Active emergency event, active parking event</description>
+  </element>
+  <element name="DEACTIVATE_HMI">
+    <description> GAL/DIO is active </description>
+  </element>
 </enum>
 
 <!-- Policies -->
