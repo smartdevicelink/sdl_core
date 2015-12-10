@@ -476,8 +476,20 @@ void StateController::on_event(const event_engine::Event& event) {
           ApplyTempState<HmiState::STATE_ID_AUDIO_SOURCE>();
           break;
         }
-        if (Common_EventTypes::EMBEDDED_NAVI) {
+        if (Common_EventTypes::EMBEDDED_NAVI == state_id) {
           ApplyTempState<HmiState::STATE_ID_EMBEDDED_NAVI>();
+          break;
+        }
+        if (Common_EventTypes::PHONE_CALL == state_id) {
+          ApplyTempState<HmiState::STATE_ID_PHONE_CALL>();
+          break;
+        }
+        if (Common_EventTypes::EMERGENCY_EVENT == state_id) {
+          ApplyTempState<HmiState::STATE_ID_SAFETY_MODE>();
+          break;
+        }
+        if (Common_EventTypes::DEACTIVATE_HMI == state_id) {
+          ApplyTempState<HmiState::STATE_ID_DEACTIVATE_HMI>();
           break;
         }
       } else {
@@ -487,6 +499,18 @@ void StateController::on_event(const event_engine::Event& event) {
         }
         if (Common_EventTypes::EMBEDDED_NAVI == state_id) {
           CancelTempState<HmiState::STATE_ID_EMBEDDED_NAVI>();
+          break;
+        }
+        if (Common_EventTypes::PHONE_CALL == state_id) {
+          CancelTempState<HmiState::STATE_ID_PHONE_CALL>();
+          break;
+        }
+        if (Common_EventTypes::EMERGENCY_EVENT == state_id) {
+          CancelTempState<HmiState::STATE_ID_SAFETY_MODE>();
+          break;
+        }
+        if (Common_EventTypes::DEACTIVATE_HMI == state_id) {
+          CancelTempState<HmiState::STATE_ID_DEACTIVATE_HMI>();
           break;
         }
       }
