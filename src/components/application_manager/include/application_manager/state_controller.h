@@ -398,6 +398,19 @@ class StateController : public event_engine::EventObserver {
                                      HmiStatePtr state) const;
 
   /**
+   * @brief IsStateAvailableForResumption Checks if hmi state is available
+   * to apply for specified application during resumption
+   *
+   * @param app application to apply state
+   *
+   * @param state state to be checked
+   *
+   * @return true if state is available, false otherwise
+   */
+  bool IsStateAvailableForResumption(
+      ApplicationSharedPtr app, HmiStatePtr state) const;
+
+  /**
    * @brief ApplyPostponedStateForApp tries to apply postponed state
    * to application if it's allowed by current active states
    */
