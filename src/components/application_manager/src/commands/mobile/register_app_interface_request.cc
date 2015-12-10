@@ -327,9 +327,11 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
   ApplicationSharedPtr application =
       ApplicationManagerImpl::instance()->application(key);
 
+  resumption::ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
   if (!application) {
-    LOG4CXX_ERROR(logger_,
-                  "There is no application for such connection key" << key);
+    LOG4CXX_ERROR(logger_, "There is no application for such connection key" << key);
+    LOG4CXX_DEBUG(logger_, "Need to start resume data persistent timer");
+    resumer.OnAppRegistrationEnd();
     return;
   }
 
@@ -502,9 +504,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
 
   std::string hash_id;
   std::string add_info;
-
-  resumption::ResumeCtrl& resumer =
-      ApplicationManagerImpl::instance()->resume_controller();
 
   if (resumption) {
     hash_id = (*message_)[strings::msg_params][strings::hash_id].asString();

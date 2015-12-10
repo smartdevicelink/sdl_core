@@ -268,6 +268,20 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * returns false
    */
   bool Init();
+
+  /**
+   * @brief Notify resume controller about new application
+   * @param policy_app_id - mobile application id
+   * @param device_id - id of device where application is run
+   */
+  void OnAppRegistrationStart(const std::string& policy_app_id,
+                                const std::string& device_id);
+
+  /**
+   * @brief Notify resume controller about delete new application
+   */
+  void OnAppRegistrationEnd();
+
  private:
 
   /**
