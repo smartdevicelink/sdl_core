@@ -457,21 +457,7 @@ class StateController : public event_engine::EventObserver {
    * depends on application type
    * @param app Application to deactivate
    */
-  void DeactivateAppWithGeneralReason(ApplicationSharedPtr app);
-
-  /**
-   * @brief Sets  application to BACKGROUND for navi application
-   * for other applications calls DeactivateAppWithGeneralReason
-   * @param app application to deactivate
-   */
-  void DeactivateAppWithNaviReason(ApplicationSharedPtr app);
-
-  /**
-   * @brief Sets BACKGROUND or LIMITED hmi level to application
-   * depends on application type
-   * @param app Application to deactivate
-   */
-  void DeactivateAppWithAudioReason(ApplicationSharedPtr app);
+  void DeactivateApp(ApplicationSharedPtr app);
 
   /**
    * Function to remove temporary HmiState for application

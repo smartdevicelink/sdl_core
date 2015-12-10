@@ -603,7 +603,7 @@ void StateController::TempStateStopped(HmiState::StateID ID) {
       std::mem_fun(&StateController::ApplyPostponedStateForApp), this));
 }
 
-void StateController::DeactivateAppWithGeneralReason(ApplicationSharedPtr app) {
+void StateController::DeactivateApp(ApplicationSharedPtr app) {
   using namespace mobile_apis;
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -613,28 +613,11 @@ void StateController::DeactivateAppWithGeneralReason(ApplicationSharedPtr app) {
   HmiStatePtr new_regular = utils::MakeShared<HmiState>(*regular);
 
   if (app->IsAudioApplication()) {
-    new_regular->set_hmi_level(mobile_api::HMILevel::HMI_LIMITED);
-  } else {
-    new_regular->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
-  }
-
-  SetRegularState<false>(app, new_regular);
-}
-
-void StateController::DeactivateAppWithAudioReason(ApplicationSharedPtr app) {
-  using namespace mobile_apis;
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  DCHECK_OR_RETURN_VOID(app);
-  HmiStatePtr regular = app->RegularHmiState();
-  DCHECK_OR_RETURN_VOID(regular);
-  HmiStatePtr new_regular = utils::MakeShared<HmiState>(*regular);
-
-  if (app->is_navi()) {
     new_regular->set_hmi_level(HMILevel::HMI_LIMITED);
+    new_regular->set_audio_streaming_state(AudioStreamingState::AUDIBLE);
   } else {
-    new_regular->set_audio_streaming_state(AudioStreamingState::NOT_AUDIBLE);
     new_regular->set_hmi_level(HMILevel::HMI_BACKGROUND);
+    new_regular->set_audio_streaming_state(AudioStreamingState::NOT_AUDIBLE);
   }
 
   SetRegularState<false>(app, new_regular);
@@ -687,31 +670,13 @@ void StateController::OnAppDeactivated(
     return;
   }
 
-  if (Compare<HMILevel::eType, EQ, ONE>(
-          app->hmi_level(), HMILevel::HMI_NONE, HMILevel::HMI_BACKGROUND)) {
+  if (HMILevel::HMI_FULL != app->hmi_level()) {
     return;
   }
 
-  Common_DeactivateReason::eType deactivate_reason =
-      static_cast<Common_DeactivateReason::eType>(
-          message[strings::msg_params][hmi_request::reason].asInt());
-
-  switch (deactivate_reason) {
-    case Common_DeactivateReason::AUDIO: {
-      ForEachApplication(std::bind1st(
-          std::mem_fun(&StateController::DeactivateAppWithAudioReason), this));
-      break;
-    }
-    case Common_DeactivateReason::NAVIGATIONMAP:
-    case Common_DeactivateReason::PHONEMENU:
-    case Common_DeactivateReason::SYNCSETTINGS:
-    case Common_DeactivateReason::GENERAL: {
-      DeactivateAppWithGeneralReason(app);
-      break;
-    }
-    default:
-      break;
-  }
+  //TODO(AOleynik): Need to delete DeactivateReason and modify OnAppDeactivated
+  // when HMI will support that, otherwise won't be testable
+  DeactivateApp(app);
 }
 
 void StateController::SetAplicationManager(ApplicationManager* app_mngr) {
