@@ -440,9 +440,9 @@ void StateController::on_event(const event_engine::Event& event) {
     }
     case FunctionID::BasicCommunication_OnEventChanged: {
       bool is_active =
-          message[strings::msg_params][hmi_response::is_active].asBool();
+          message[strings::msg_params][hmi_notification::is_active].asBool();
       const uint32_t id =
-          message[strings::msg_params][hmi_response::event_name].asUInt();
+          message[strings::msg_params][hmi_notification::event_name].asUInt();
       //TODO(AOleynik): Add verification/conversion check here
       Common_EventTypes::eType state_id =
           static_cast<Common_EventTypes::eType>(id);

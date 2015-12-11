@@ -400,8 +400,6 @@ const char num_custom_presets_available[] = "numCustomPresetsAvailable";
 const char urls[] = "urls";
 const char policy_app_id[] = "policyAppID";
 const char enabled[] = "enabled";
-const char is_active[] = "isActive";
-const char event_name[] = "eventName";
 
 }  // namespace hmi_response
 
@@ -415,6 +413,8 @@ const char statistic_type[] = "statisticType";
 const char error[] = "error";
 const char policyfile[] = "policyfile";
 const char is_active[] = "isActive";
+const char is_deactivated[] = "isDeactivated";
+const char event_name[] = "eventName";
 
 }  // namespace hmi_notification
 
