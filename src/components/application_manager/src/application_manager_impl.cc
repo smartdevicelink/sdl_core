@@ -102,6 +102,7 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     resume_ctrl_(this),
     navi_close_app_timeout_(profile::Profile::instance()->stop_streaming_timeout()),
     navi_end_stream_timeout_(profile::Profile::instance()->stop_streaming_timeout()),
+    stopping_flag_lock_(true),
 #ifdef TIME_TESTER
     metric_observer_(NULL),
 #endif  // TIME_TESTER
@@ -160,7 +161,9 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 
 bool ApplicationManagerImpl::Stop() {
   LOG4CXX_INFO(logger_, "Stop ApplicationManager.");
+  stopping_flag_lock_.Acquire();
   is_stopping_ = true;
+  stopping_flag_lock_.Release();
   application_list_update_timer_->stop();
   try {
     UnregisterAllApplications();
@@ -2126,6 +2129,9 @@ void ApplicationManagerImpl::SetUnregisterAllApplicationsReason(
 
 void ApplicationManagerImpl::HeadUnitReset(
     mobile_api::AppInterfaceUnregisteredReason::eType reason) {
+  stopping_flag_lock_.Acquire();
+  is_stopping_ = true;
+  stopping_flag_lock_.Release();
   switch (reason) {
     case mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET: {
       UnregisterAllApplications();
@@ -2213,6 +2219,8 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   bool is_unexpected_disconnect =
       Compare<eType, NEQ, ALL>(unregister_reason_,
                                IGNITION_OFF, MASTER_RESET, FACTORY_DEFAULTS);
+
+  {  // A local scope to limit accessor's lifetime and release app list lock.
   ApplicationListAccessor accessor;
   ApplictionSetConstIt it = accessor.begin();
   while (it != accessor.end()) {
@@ -2234,7 +2242,9 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
                                       connection_handler::kCommon);
     it = accessor.begin();
   }
-  if (is_ignition_off) {
+  }
+
+  if (is_ignition_off) {  // Move this block before unregistering apps?
     resume_controller().Suspend();
   }
   request_ctrl_.terminateAllHMIRequests();
@@ -2353,6 +2363,12 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromMobile message) {
 
   if (!message) {
     LOG4CXX_ERROR(logger_, "Null-pointer message received.");
+    return;
+  }
+
+  sync_primitives::AutoLock lock(stopping_flag_lock_);
+  if (is_stopping_) {
+    LOG4CXX_INFO(logger_, "Application manager is stopping");
     return;
   }
   ProcessMessageFromMobile(message);
