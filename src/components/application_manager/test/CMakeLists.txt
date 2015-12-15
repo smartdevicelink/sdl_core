@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2015, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,18 @@
 # TODO{ALeshin}: APPLINK-10792. Do not write tests which use
 # application manager(AM) singleton while refactoring of AM is finished.
 
+if (BUILD_TESTS)
+
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/commands)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/commands/mobile)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/commands/hmi)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/event_engine)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/policies)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/policies/delegates)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/resumption)
 
   file (GLOB_RECURSE AMINCLUDE_TO_BE_MOCKED
     ${AM_SOURCE_DIR}/include/application_manager/*
@@ -190,3 +202,5 @@ target_link_libraries("application_manager_test"
   file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/resumption)
   file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resumption)
   create_test("resumption/data_resumption_test" "${ResumptionData_SOURCES}" "${testLibraries}")
+
+endif()
