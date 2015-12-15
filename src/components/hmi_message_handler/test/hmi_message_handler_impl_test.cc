@@ -36,6 +36,7 @@
 #include "hmi_message_handler/hmi_message_handler_impl.h"
 #include "hmi_message_handler/messagebroker_adapter.h"
 #include "hmi_message_handler/mock_hmi_message_observer.h"
+#include "utils/make_shared.h"
 
 namespace test {
 namespace components {
@@ -87,7 +88,7 @@ TEST_F(HMIMessageHandlerImplTest,
        OnErrorSending_NotEmptyMessage_ExpectOnErrorSendingProceeded) {
   // Arrange
   utils::SharedPtr<application_manager::Message> message(
-      new application_manager::Message(
+      utils::MakeShared<application_manager::Message>(
           protocol_handler::MessagePriority::FromServiceType(
               protocol_handler::ServiceType::kControl)));
 
