@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <algorithm>
 #include <errno.h>
 #include <fcntl.h>
 #include <memory.h>
@@ -231,8 +232,15 @@ void ThreadedSocketConnection::Transmit() {
     return;
   }
 
-  // send data if possible
-  if (!frames_to_send_.empty() && (poll_fds[0].revents | POLLOUT)) {
+    bool is_queue_empty = true;
+  {
+    // Check Frames queue is empty or not
+    sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
+    is_queue_empty = frames_to_send_.empty();
+  }
+
+  // Send data if possible
+  if (!is_queue_empty && (poll_fds[0].revents | POLLOUT)) {
     LOG4CXX_DEBUG(logger_, "frames_to_send_ not empty() ");
 
     // send data
@@ -289,9 +297,11 @@ bool ThreadedSocketConnection::Receive() {
 bool ThreadedSocketConnection::Send() {
   LOG4CXX_AUTO_TRACE(logger_);
   FrameQueue frames_to_send;
-  frames_to_send_mutex_.Acquire();
+
+{
+  sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
   std::swap(frames_to_send, frames_to_send_);
-  frames_to_send_mutex_.Release();
+}
 
   size_t offset = 0;
   while (!frames_to_send.empty()) {
