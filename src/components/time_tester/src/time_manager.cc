@@ -79,6 +79,14 @@ void TimeManager::set_streamer(Streamer* streamer) {
   }
 }
 
+const std::string TimeManager::ip() const  {
+  return ip_;
+}
+
+const int16_t TimeManager::port() const {
+  return port_;
+}
+
 TimeManager::~TimeManager() {
   Stop();
 }
