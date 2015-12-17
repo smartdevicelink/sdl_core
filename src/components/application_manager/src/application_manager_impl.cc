@@ -2767,7 +2767,8 @@ bool ApplicationManagerImpl::CanAppStream(
   } else {
     LOG4CXX_WARN(logger_, "Unsupported service_type " << service_type);
   }
-  return HMILevelAllowsStreaming(app_id, service_type) && is_allowed;
+
+  return HMILevelAllowsStreaming(app_id, service_type) && is_allowed; 
 }
 
 void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
@@ -2840,17 +2841,18 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
     return;
   }
 
+
   if (connection_handler_) {
     if (it->second.first) {
       LOG4CXX_DEBUG(logger_, "Going to end video service");
       connection_handler_->SendEndService(app_id, ServiceType::kMobileNav);
-      StopNaviService(app_id, ServiceType::kMobileNav);
     }
     if (it->second.second) {
       LOG4CXX_DEBUG(logger_, "Going to end audio service");
       connection_handler_->SendEndService(app_id, ServiceType::kAudio);
-      StopNaviService(app_id, ServiceType::kAudio);
     }
+    DisallowStreaming(app_id);
+
     navi_app_to_stop_.push_back(app_id);
 
     ApplicationManagerTimerPtr closeTimer(
@@ -2968,6 +2970,7 @@ void ApplicationManagerImpl::CloseNaviApp() {
   NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
   if (navi_service_status_.end() != it) {
     if (it->second.first || it->second.second) {
+      LOG4CXX_INFO(logger_, "App haven't answered for EndService. Unregister it.");
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
           app_id, PROTOCOL_VIOLATION);
       UnregisterApplication(app_id, ABORTED);

@@ -53,6 +53,7 @@ enum {
   HASH_ID_NOT_SUPPORTED = 0,
   HASH_ID_WRONG = 0xFFFF0000
 };
+
 /**
  * \class SessionObserver
  * \brief Interface for making a bridge between ProtocolHandler and
@@ -79,6 +80,7 @@ class SessionObserver {
     const uint8_t sessionId,
     const protocol_handler::ServiceType &service_type,
     const bool is_protected, uint32_t* hash_id) = 0;
+
   /**
    * \brief Callback function used by ProtocolHandler
    * when Mobile Application initiates session ending.
