@@ -190,8 +190,16 @@ void ThreadedSocketConnection::Transmit() {
   const nfds_t kPollFdsSize = 2;
   pollfd poll_fds[kPollFdsSize];
   poll_fds[0].fd = socket_;
+
+  bool is_queue_empty = true;
+  {
+    // Check Frames queue is empty or not
+    sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
+    is_queue_empty = frames_to_send_.empty();
+  }
+
   poll_fds[0].events = POLLIN | POLLPRI
-      | (frames_to_send_.empty() ? 0 : POLLOUT);
+      | (is_queue_empty ? 0 : POLLOUT);
   poll_fds[1].fd = read_fd_;
   poll_fds[1].events = POLLIN | POLLPRI;
 
@@ -232,7 +240,6 @@ void ThreadedSocketConnection::Transmit() {
     return;
   }
 
-  bool is_queue_empty = true;
   {
     // Check Frames queue is empty or not
     sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
