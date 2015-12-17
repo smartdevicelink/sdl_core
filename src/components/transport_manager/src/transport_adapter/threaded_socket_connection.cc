@@ -232,7 +232,7 @@ void ThreadedSocketConnection::Transmit() {
     return;
   }
 
-    bool is_queue_empty = true;
+  bool is_queue_empty = true;
   {
     // Check Frames queue is empty or not
     sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
@@ -298,10 +298,10 @@ bool ThreadedSocketConnection::Send() {
   LOG4CXX_AUTO_TRACE(logger_);
   FrameQueue frames_to_send;
 
-{
-  sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
-  std::swap(frames_to_send, frames_to_send_);
-}
+  {
+    sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
+    std::swap(frames_to_send, frames_to_send_);
+  }
 
   size_t offset = 0;
   while (!frames_to_send.empty()) {
