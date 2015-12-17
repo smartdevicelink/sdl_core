@@ -84,8 +84,8 @@ class TimeManager {
   virtual void Start();
   virtual void SendMetric(utils::SharedPtr<MetricWrapper> metric);
   void set_streamer(Streamer* streamer);
-  const std::string ip() const;
-  const int16_t port() const;
+  const std::string& ip() const;
+  int16_t port() const;
 
  private:
   int16_t port_;

@@ -39,8 +39,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <string.h>
-
 
 #include "transport_manager/transport_manager_default.h"
 #include "config_profile/profile.h"
@@ -79,11 +77,11 @@ void TimeManager::set_streamer(Streamer* streamer) {
   }
 }
 
-const std::string TimeManager::ip() const  {
+const std::string& TimeManager::ip() const  {
   return ip_;
 }
 
-const int16_t TimeManager::port() const {
+int16_t TimeManager::port() const {
   return port_;
 }
 
