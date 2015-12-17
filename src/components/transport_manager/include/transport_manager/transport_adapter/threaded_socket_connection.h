@@ -81,6 +81,13 @@ class ThreadedSocketConnection : public Connection {
   TransportAdapter::Error Start();
 
   /**
+   * @brief Checks is queue with frames to send empty or not.
+   *
+   * @return Information about queue is empty or not.
+   */
+  bool IsFramesToSendQueueEmpty() const;
+
+  /**
    * @brief Set variable that hold socket No.
    */
   void set_socket(int socket) {
