@@ -47,9 +47,10 @@ typedef std::vector<std::string> StringArray;
 using namespace file_system;
 
 namespace {
-const StringArray GetConstStringArray(const std::string& first,
-                                      const std::string& second) {
+StringArray MergeStringsToArray(const std::string& first,
+                                const std::string& second) {
   StringArray array_of_strings;
+  array_of_strings.reserve(2);
 
   array_of_strings.push_back(first);
   array_of_strings.push_back(second);
@@ -1196,7 +1197,7 @@ TEST(FileSystemTest, GetAbsolutePath) {
 TEST(FileSystemTest,
      GetAbsolutePath_InvalidOrEmptyPathName_EmptyAbsolutePathName) {
   // Array of invalid paths
-  const StringArray rel_path = GetConstStringArray("not_exists_dir", "     ");
+  const StringArray rel_path = MergeStringsToArray("not_exists_dir", "     ");
 
   // Check
   for (size_t i = 0; i < rel_path.size(); ++i) {
@@ -1207,7 +1208,7 @@ TEST(FileSystemTest,
 
 TEST(FileSystemTest, GetAbsolutePath_ValidRelPaths_CorrectAbsolutePath) {
   // Array of relative dirs
-  const StringArray rel_path = GetConstStringArray(
+  const StringArray rel_path = MergeStringsToArray(
       "first_level_path", "first_level_path/second_level_path1");
 
   // Create some directories in current
@@ -1232,7 +1233,7 @@ TEST(FileSystemTest, GetAbsolutePath_ValidRelPaths_CorrectAbsolutePath) {
 TEST(FileSystemTest,
      GetAbsolutePath_ValidRelPathsFromParrentDir_CorrectAbsolutePath) {
   // Array of relative dirs
-  const StringArray rel_path = GetConstStringArray(
+  const StringArray rel_path = MergeStringsToArray(
       "../first_level_path", "../first_level_path/second_level_path1");
 
   // Create some directories in parrent of this
@@ -1259,7 +1260,7 @@ TEST(FileSystemTest,
 TEST(FileSystemTest, GetAbsolutePath_TrickiPath_CorrectAbsolutePath) {
   // Array of relative dirs
   const StringArray rel_path =
-      GetConstStringArray("../src/../../application_manager/../utils/test",
+      MergeStringsToArray("../src/../../application_manager/../utils/test",
                           "../../../components/utils/test");
 
   const std::string& absolute_current_path = CurrentWorkingDirectory();
