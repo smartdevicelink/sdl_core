@@ -32,6 +32,8 @@
 
 #include <algorithm>
 #include <fstream>
+#include <vector>
+#include <string>
 
 #include "gtest/gtest.h"
 #include "utils/file_system.h"
