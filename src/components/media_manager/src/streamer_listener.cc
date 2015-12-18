@@ -36,7 +36,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "StreamerListener")
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
 StreamerListener::StreamerListener()
   : current_application_(0) {

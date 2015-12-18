@@ -58,7 +58,7 @@ namespace media_manager {
 using profile::Profile;
 using timer::TimerThread;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManagerImpl")
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
 MediaManagerImpl::MediaManagerImpl()
   : protocol_handler_(NULL)
