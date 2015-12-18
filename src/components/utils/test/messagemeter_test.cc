@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2014, Ford Motor Company
+* Copyright (c) 2015, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -73,7 +73,6 @@ class MessageMeterTest: public ::testing::TestWithParam<TimePair> {
         << "Wrong test case with null range value";
 
     meter.set_time_range(time_range);
-    // Get range in msec less than original for correct waitng in tests
     time_range_msecs = date_time::DateTime::getmSecs(time_range);
   }
   void TearDown() OVERRIDE {
