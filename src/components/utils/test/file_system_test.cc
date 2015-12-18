@@ -44,6 +44,18 @@ typedef std::vector<std::string> StringArray;
 
 using namespace file_system;
 
+namespace {
+  const StringArray GetConstStringArray(const std::string& first,
+      const std::string& second) {
+    StringArray array_of_strings;
+
+    array_of_strings.push_back(first);
+    array_of_strings.push_back(second);
+
+    return array_of_strings;
+  }
+}
+
 TEST(FileSystemTest, CreateDeleteDirectory) {
   ASSERT_FALSE(DirectoryExists("./Test directory"));
   // Directory creation
@@ -1184,11 +1196,8 @@ TEST(FileSystemTest, GetAbsolutePath) {
 TEST(FileSystemTest,
      GetAbsolutePath_InvalidOrEmptyPathName_EmptyAbsolutePathName) {
   // Array of invalid paths
-  const StringArray rel_path {
-    "not_exists_dir",
-    "     ",
-    ""
-  };
+  const StringArray rel_path = GetConstStringArray("not_exists_dir", "     ");
+
   // Check
   for (size_t i = 0; i < rel_path.size(); ++i) {
     const std::string& path_for_check = GetAbsolutePath(rel_path[i]);
@@ -1199,13 +1208,11 @@ TEST(FileSystemTest,
 TEST(FileSystemTest,
      GetAbsolutePath_ValidRelPaths_CorrectAbsolutePath) {
   // Array of relative dirs
-  const StringArray rel_path {
-    "first_level_path",
-    "first_level_path/second_level_path1"
-  };
+  const StringArray rel_path = GetConstStringArray("first_level_path",
+      "first_level_path/second_level_path1");
+
   // Create some directories in current
-  CreateDirectory(rel_path[0]);
-  CreateDirectory(rel_path[1]);
+  CreateDirectoryRecursively(rel_path[1]);
   // Get absolute current dir
   const std::string& absolute_current_dir = GetAbsolutePath(".");
   // Check
@@ -1226,13 +1233,11 @@ TEST(FileSystemTest,
 TEST(FileSystemTest,
      GetAbsolutePath_ValidRelPathsFromParrentDir_CorrectAbsolutePath) {
   // Array of relative dirs
-  const StringArray rel_path {
-    "../first_level_path",
-    "../first_level_path/second_level_path1"
-  };
+  const StringArray rel_path = GetConstStringArray("../first_level_path",
+      "../first_level_path/second_level_path1");
+
   // Create some directories in parrent of this
-  CreateDirectory(rel_path[0]);
-  CreateDirectory(rel_path[1]);
+  CreateDirectoryRecursively(rel_path[1]);
 
   // Get absolute parrent dir
   const std::string& absolute_parrent_dir = GetAbsolutePath("../");
@@ -1254,10 +1259,10 @@ TEST(FileSystemTest,
 
 TEST(FileSystemTest, GetAbsolutePath_TrickiPath_CorrectAbsolutePath) {
   // Array of relative dirs
-  const StringArray rel_path {
-    "../src/../../application_manager/../utils/test",
-    "../../../components/utils/test"
-  };
+  const StringArray rel_path = GetConstStringArray(
+      "../src/../../application_manager/../utils/test",
+      "../../../components/utils/test");
+
   const std::string& absolute_current_path = CurrentWorkingDirectory();
   for (size_t i = 0; i < rel_path.size(); ++i) {
     // Get absolute path for rel dir
