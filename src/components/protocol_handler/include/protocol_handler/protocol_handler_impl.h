@@ -432,13 +432,13 @@ class ProtocolHandlerImpl
    */
   RESULT_CODE HandleControlMessage(const ProtocolFramePtr packet);
 
-  RESULT_CODE HandleControlMessageEndSession(const ProtocolPacket &packet);
+  RESULT_CODE HandleControlMessageEndSession(const ProtocolPacket& packet);
 
-  RESULT_CODE HandleControlMessageEndServiceACK(const ProtocolPacket &packet);
+  RESULT_CODE HandleControlMessageEndServiceACK(const ProtocolPacket& packet);
 
-  RESULT_CODE HandleControlMessageStartSession(const ProtocolPacket &packet);
+  RESULT_CODE HandleControlMessageStartSession(const ProtocolPacket& packet);
 
-  RESULT_CODE HandleControlMessageHeartBeat(const ProtocolPacket &packet);
+  RESULT_CODE HandleControlMessageHeartBeat(const ProtocolPacket& packet);
 
   void PopValideAndExpirateMultiframes();
 

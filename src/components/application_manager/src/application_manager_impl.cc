@@ -2841,7 +2841,6 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
     return;
   }
 
-
   if (connection_handler_) {
     if (it->second.first) {
       LOG4CXX_DEBUG(logger_, "Going to end video service");

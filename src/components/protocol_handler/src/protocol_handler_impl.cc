@@ -852,7 +852,7 @@ uint32_t get_hash_id(const ProtocolPacket &packet) {
   return hash_le == HASH_ID_NOT_SUPPORTED ? HASH_ID_WRONG : hash_le;
 }
 
-RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(const ProtocolPacket &packet) {
+RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(const ProtocolPacket& packet) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const uint8_t current_session_id = packet.session_id();
@@ -878,7 +878,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(const ProtocolPa
   return RESULT_OK;
 }
 
-RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndServiceACK(const ProtocolPacket &packet) {
+RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndServiceACK(const ProtocolPacket& packet) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!session_observer_) {
@@ -894,7 +894,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndServiceACK(const Protoco
   const uint32_t session_key = session_observer_->OnSessionEndedCallback(
       connection_id, current_session_id, hash_id, service_type);
 
-  if (session_key == 0) {
+  if (0 == session_key) {
     LOG4CXX_WARN(logger_, "Refused to end service");
     return RESULT_FAIL;
   }
@@ -980,7 +980,7 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
 }  // namespace
 #endif  // ENABLE_SECURITY
 
-RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(const ProtocolPacket &packet) {
+RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(const ProtocolPacket& packet) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_,
                 "Protocol version:" <<
@@ -1056,7 +1056,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(const Protocol
   return RESULT_OK;
 }
 
-RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(const ProtocolPacket &packet) {
+RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(const ProtocolPacket& packet) {
   const ConnectionID connection_id = packet.connection_id();
   LOG4CXX_DEBUG(
       logger_,
