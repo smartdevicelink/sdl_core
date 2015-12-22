@@ -102,15 +102,15 @@ class AlertRequest : public CommandRequestImpl {
    * @brief Sends TTS Speak request
    *
    * @param app_id Id of application requested this RPC
-   */
-  void SendSpeakRequest(int32_t app_id);
-
-  /*
-   * @brief Sends Basic communication playtone notification
    *
-   * @param app_id Id of application requested this RPC
+   * @param tts_chunks_exists if tts chunks exists in
+   * message contains true, otherwise contains false
+   *
+   * @param length_tts_chunks contains length of array
+   * tts chunks.
    */
-  void SendPlayToneNotification(int32_t app_id);
+  void SendSpeakRequest(int32_t app_id, bool tts_chunks_exists,
+                        size_t length_tts_chunks);
 
   /*
    * @brief Tells if there are sent requests without responses
