@@ -141,6 +141,17 @@ void PerformInteractionRequest::Run() {
     }
   }
 
+  if (choice_set_id_list_length &&
+      (!CheckChoiceIDFromRequest(
+          app, choice_set_id_list_length,
+          msg_params[strings::interaction_choice_set_id_list]))) {
+
+    LOG4CXX_ERROR(logger_,"PerformInteraction has choice sets with "
+        "duplicated IDs or application does not have choice sets");
+    SendResponse(false, mobile_apis::Result::INVALID_ID);
+    return;
+  }
+
   if (msg_params.keyExists(strings::vr_help)) {
     if (mobile_apis::Result::SUCCESS !=
         MessageHelper::VerifyImageVrHelpItems(msg_params[strings::vr_help],
@@ -148,17 +159,6 @@ void PerformInteractionRequest::Run() {
       LOG4CXX_ERROR(logger_,
                     "Verification of " << strings::vr_help << " failed.");
       SendResponse(false, mobile_apis::Result::INVALID_DATA);
-      return;
-    }
-  }
-
-  smart_objects::SmartObject& choice_list =
-      msg_params[strings::interaction_choice_set_id_list];
-
-  for (size_t i = 0; i < choice_list.length(); ++i) {
-    if (!app->FindChoiceSet(choice_list[i].asInt())) {
-      LOG4CXX_ERROR(logger_, "Invalid ID");
-      SendResponse(false, mobile_apis::Result::INVALID_ID);
       return;
     }
   }
@@ -884,6 +884,40 @@ bool PerformInteractionRequest::CheckChoiceIDFromResponse(
     }
   }
   return false;
+}
+
+bool PerformInteractionRequest::CheckChoiceIDFromRequest(
+    ApplicationSharedPtr app,
+    const size_t choice_set_id_list_length,
+    const smart_objects::SmartObject& choice_set_id_list) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  size_t choice_list_length = 0;
+  std::set<uint32_t> choice_id_set;
+  smart_objects::SmartObject* choice_set = 0;
+  std::pair<std::set<uint32_t>::iterator, bool> ins_res;
+
+  for (size_t i = 0; i < choice_set_id_list_length; ++i) {
+    choice_set = app->FindChoiceSet(choice_set_id_list[i].asInt());
+    if (!choice_set) {
+      LOG4CXX_ERROR(logger_, "Couldn't find choiset_id = "
+                    <<choice_set_id_list[i].asInt());
+      return false;
+    }
+    choice_list_length = (*choice_set)[strings::choice_set].length();
+    const smart_objects::SmartObject& choices_list =
+        (*choice_set)[strings::choice_set];
+    for (size_t k = 0; k < choice_list_length; ++k) {
+      ins_res = choice_id_set.insert(choices_list[k][strings::choice_id].asInt());
+      if (!ins_res.second) {
+        LOG4CXX_ERROR(logger_, "Choise with ID "
+                      << choices_list[k][strings::choice_id].asInt()
+                      << " already exists");
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 }  // namespace commands

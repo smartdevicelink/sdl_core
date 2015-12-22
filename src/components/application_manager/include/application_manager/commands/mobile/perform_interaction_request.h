@@ -191,6 +191,21 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    */
   bool CheckChoiceIDFromResponse(ApplicationSharedPtr app, int32_t choice_id);
 
+  /**
+   * @brief Checks for a match of choice ID, in
+   * choice sets.
+   * @param app contains pointer to application.
+   * @param choice_set_id_list_length contains amount
+   * of choice set ids.
+   * @param choice_set_id_list array of choice set ids
+   * @return If request contains several choice sets with
+   * same choice id returns false, otherwise returns
+   * true.
+   */
+  bool CheckChoiceIDFromRequest(ApplicationSharedPtr app,
+                                const size_t choice_set_id_list_length,
+                                const smart_objects::SmartObject& choice_set_id_list) const;
+
   mobile_apis::InteractionMode::eType interaction_mode_;
   bool                                ui_response_recived_;
   bool                                vr_response_recived_;
