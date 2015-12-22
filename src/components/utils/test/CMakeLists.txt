@@ -63,6 +63,7 @@ set(testSources
   shared_ptr_test.cc
   scope_guard_test.cc
   atomic_object_test.cc
+  message_loop_thread_test.cc
 )
 
 set(testLibraries
