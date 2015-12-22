@@ -99,7 +99,6 @@ void DeinitLogger() {
   DEINIT_LOGGER();
 }
 
-//TODO(VVeremjova) Logger does not write debug information in file
 TEST(AutoTraceTest, AutoTrace_WriteToFile_ReadCorrectString) {
   const std::string testlog =
       "Test trace is working!";
