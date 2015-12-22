@@ -35,11 +35,7 @@
 #include <stddef.h>
 #include <signal.h>
 #include <pthread.h>
-
-#ifdef BUILD_TESTS
-// Temporary fix for UnitTest until APPLINK-9987 is resolved
-#include <unistd.h>
-#endif
+#include <sched.h>
 
 #include "utils/threads/thread.h"
 #include "utils/atomic.h"
