@@ -423,6 +423,14 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
   void LoadResumeData();
 
   /**
+   * @brief Checks, if application data needs to be resumed
+   * @param application Application data from storage
+   * @return true, if data resumption must be skipped, otherwise - false
+   */
+  bool IsAppDataResumptionExpired(
+          const smart_objects::SmartObject& application) const;
+
+  /**
    *@brief Mapping applications to time_stamps
    *       wait for timer to resume HMI Level
    *

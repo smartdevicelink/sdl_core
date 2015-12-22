@@ -196,15 +196,12 @@ void ResumptionDataJson::OnSuspend() {
     }
     if ((*it).isMember(strings::ign_off_count)) {
       const uint32_t ign_off_count = (*it)[strings::ign_off_count].asUInt();
-      const uint32_t application_lifes = 3;     // TODO make profile variable
-      if (ign_off_count < application_lifes) {  // TODO read from profile
-        (*it)[strings::ign_off_count] = ign_off_count + 1;
-        to_save.append(*it);
-      }
+      (*it)[strings::ign_off_count] = ign_off_count + 1;
     } else {
       LOG4CXX_WARN(logger_, "Unknown key among saved applications");
       (*it)[strings::ign_off_count] = 1;
     }
+    to_save.append(*it);
   }
   SetSavedApplication(to_save);
   SetLastIgnOffTime(time(NULL));
@@ -494,4 +491,27 @@ bool ResumptionDataJson::Init() {
   return true;
 }
 
-}  // resumption
+bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
+                                               const std::string& app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace app_mngr;
+  Json::Value& application = GetFromSavedOrAppend(app_id, device_id);
+  if (Json::Value() == application) {
+    LOG4CXX_DEBUG(logger_, "Application " << app_id << " with device_id "
+                  << device_id << " hasn't been found in resumption data.");
+    return false;
+  }
+  application[strings::application_commands].clear();
+  application[strings::application_submenus].clear();
+  application[strings::application_choice_sets].clear();
+  application[strings::application_global_properties].clear();
+  application[strings::application_subscribtions].clear();
+  application[strings::application_files].clear();
+  application.removeMember(strings::grammar_id);
+  LOG4CXX_DEBUG(logger_, "Resumption data for application " << app_id <<
+                " with device_id " << device_id << " has been dropped.");
+  return true;
+}
+
+
+} // resumption

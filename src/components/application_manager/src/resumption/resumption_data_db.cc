@@ -751,6 +751,39 @@ bool ResumptionDataDB::UpdateDBVersion() const {
   return true;
 }
 
+bool ResumptionDataDB::DropAppDataResumption(const std::string& device_id,
+                                             const std::string& app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  db_->BeginTransaction();
+  if (!DeleteSavedFiles(app_id, device_id)) {
+    db_->RollbackTransaction();
+    return false;
+  }
+  if (!DeleteSavedSubMenu(app_id, device_id)) {
+    db_->RollbackTransaction();
+    return false;
+  }
+  if (!DeleteSavedSubscriptions(app_id, device_id)) {
+    db_->RollbackTransaction();
+    return false;
+  }
+  if (!DeleteSavedCommands(app_id, device_id)) {
+    db_->RollbackTransaction();
+    return false;
+  }
+  if (!DeleteSavedChoiceSet(app_id, device_id)) {
+    db_->RollbackTransaction();
+    return false;
+  }
+  if (!DeleteSavedGlobalProperties(app_id, device_id)) {
+    db_->RollbackTransaction();
+    return false;
+  }
+  //TODO(AOleynik): add removal of grammar id
+  db_->CommitTransaction();
+  return true;
+}
+
 const int32_t ResumptionDataDB::GetDBVersion() const {
   return utils::Djb2HashFromString(resumption::kCreateSchema);
 }
