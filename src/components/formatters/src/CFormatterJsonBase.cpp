@@ -55,9 +55,10 @@ void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::jsonValue
       for (uint32_t i = 0; i < value.size(); i++) {
         jsonValueToObj(value[i], obj[i]);
       }
-    } else if (value.type() == Json::intValue
-        || value.type() == Json::uintValue) {
+    } else if (value.type() == Json::intValue) {
       obj = value.asInt();
+    } else if (value.type() == Json::uintValue) {
+      obj = value.asUInt();
     } else if (value.type() == Json::realValue) {
       obj = value.asDouble();
     } else if (value.type() == Json::booleanValue) {
@@ -104,6 +105,9 @@ void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::objToJson
     } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_Integer
         == obj.getType()) {
       item = obj.asInt();
+    } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_UInteger
+        == obj.getType()) {
+      item = obj.asUInt();
     } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_Double
         == obj.getType()) {
       item = obj.asDouble();

@@ -100,7 +100,7 @@ TEST(CFormatterJsonBaseTest, JSonSignedMaxIntValueToSmartObj_ExpectSuccessful) {
   EXPECT_EQ(ival, object.asInt());
 }
 
-TEST(CFormatterJsonBaseTest, DISABLED_JSonUnsignedMaxIntValueToSmartObj_ExpectSuccessful) {
+TEST(CFormatterJsonBaseTest, JSonUnsignedMaxIntValueToSmartObj_ExpectSuccessful) {
   // Arrange value
   Json::UInt ui_val = Json::Value::maxUInt;
   Json::Value json_value(ui_val);  // Json value from maximum possible unsigned int
@@ -240,7 +240,7 @@ TEST(CFormatterJsonBaseTest, MinIntSmartObjectToJSon_ExpectSuccessful) {
   EXPECT_EQ(ival, json_value.asInt());
 }
 
-TEST(CFormatterJsonBaseTest, DISABLED_UnsignedMaxIntSmartObjectToJSon_ExpectSuccessful) {
+TEST(CFormatterJsonBaseTest, UnsignedMaxIntSmartObjectToJSon_ExpectSuccessful) {
   // Arrange value
   Json::UInt ui_val = Json::Value::maxUInt;
   Json::Value json_value;  // Json value from maximum unsigned int
