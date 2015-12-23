@@ -67,7 +67,8 @@ class MessageLoopThread {
      * Method called by MessageLoopThread to process single message
      * from it's queue. After calling this method message is discarded.
      */
-    virtual void Handle(const Message message) = 0; // TODO(dchmerev): Use reference?
+    // TODO (AKozoriz) : change to const reference (APPLINK-20235)
+    virtual void Handle(const Message message) = 0;
 
     virtual ~Handler() {}
   };
