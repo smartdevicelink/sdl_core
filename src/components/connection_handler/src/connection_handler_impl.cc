@@ -797,7 +797,7 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
     }
 
     SessionMap::const_iterator session_map_itr = session_map.find(session_id);
-    if (session_map_itr != session_map.end()) {
+    if (session_map_itr != session_map.end() && connection_handler_observer_) {
       const uint32_t session_key = KeyFromPair(connection_id, session_id);
       const Session &session = session_map_itr->second;
       const ServiceList &service_list = session.service_list;
