@@ -42,6 +42,8 @@ set(SOURCES
   ${COMPONENTS_DIR}/security_manager/test/security_manager_test.cc
   ${COMPONENTS_DIR}/security_manager/test/security_query_test.cc
   ${COMPONENTS_DIR}/security_manager/test/security_query_matcher.cc
+  ${COMPONENTS_DIR}/security_manager/test/ssl_context_test.cc
+  ${COMPONENTS_DIR}/security_manager/test/ssl_certificate_handshake_test.cc
  )
 
 set(LIBRARIES
