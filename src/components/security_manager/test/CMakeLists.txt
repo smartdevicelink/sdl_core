@@ -38,7 +38,7 @@ include_directories(
 )
 
 set(SOURCES
-  #${COMPONENTS_DIR}/security_manager/test/crypto_manager_impl_test.cc
+  ${COMPONENTS_DIR}/security_manager/test/crypto_manager_impl_test.cc
   ${COMPONENTS_DIR}/security_manager/test/security_manager_test.cc
   #${COMPONENTS_DIR}/security_manager/test/security_query_test.cc
   ${COMPONENTS_DIR}/security_manager/test/security_query_matcher.cc
@@ -54,6 +54,12 @@ set(CERT_LIST
   ${CMAKE_SOURCE_DIR}/mykey.pem   
 )
 
+add_custom_target(generate_certificates
+  COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/generate_test_certificates.py
+          -d=${CMAKE_CURRENT_BINARY_DIR} -s
+  WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+)
+
 foreach( file_i ${CERT_LIST})
   file(COPY ${file_i} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endforeach( file_i )
@@ -61,5 +67,6 @@ endforeach( file_i )
 add_library (test_security_manager ${SOURCES})
 target_link_libraries (test_security_manager ${LIBRARIES} )
 create_test (security_manager_test "${SOURCES}" "${LIBRARIES}")
+add_dependencies(security_manager_test generate_certificates)
 
 endif ()
