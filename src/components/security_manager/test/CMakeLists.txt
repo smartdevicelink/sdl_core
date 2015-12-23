@@ -35,12 +35,11 @@ include_directories(
   ${COMPONENTS_DIR}/protocol_handler/test/include
   ${COMPONENTS_DIR}/transport_manager/test/include
   ${COMPONENTS_DIR}/security_manager/include
-  include
 )
 
 set(SOURCES
   #${COMPONENTS_DIR}/security_manager/test/crypto_manager_impl_test.cc
-  #${COMPONENTS_DIR}/security_manager/test/security_manager_test.cc
+  ${COMPONENTS_DIR}/security_manager/test/security_manager_test.cc
   #${COMPONENTS_DIR}/security_manager/test/security_query_test.cc
   ${COMPONENTS_DIR}/security_manager/test/security_query_matcher.cc
  )
