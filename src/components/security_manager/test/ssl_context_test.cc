@@ -32,10 +32,10 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <openssl/ssl.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <fstream>
-#include <openssl/ssl.h>
 
 #include "gtest/gtest.h"
 #include "security_manager/crypto_manager.h"
@@ -103,20 +103,20 @@ class SSLTest : public testing::Test {
     client_manager->ReleaseSSLContext(client_ctx);
   }
 
-  static security_manager::CryptoManager *crypto_manager;
-  static security_manager::CryptoManager *client_manager;
-  security_manager::SSLContext *server_ctx;
-  security_manager::SSLContext *client_ctx;
+  static security_manager::CryptoManager* crypto_manager;
+  static security_manager::CryptoManager* client_manager;
+  security_manager::SSLContext* server_ctx;
+  security_manager::SSLContext* client_ctx;
 };
 
-security_manager::CryptoManager *SSLTest::crypto_manager;
-security_manager::CryptoManager *SSLTest::client_manager;
+security_manager::CryptoManager* SSLTest::crypto_manager;
+security_manager::CryptoManager* SSLTest::client_manager;
 
 // TODO(EZAMAKHOV): Split to SSL/TLS1/TLS1_1/TLS1_2 tests
 
 TEST_F(SSLTest, BrokenHandshake) {
-  const uint8_t *server_buf;
-  const uint8_t *client_buf;
+  const uint8_t* server_buf;
+  const uint8_t* client_buf;
   size_t server_buf_len;
   size_t client_buf_len;
   ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
@@ -124,17 +124,17 @@ TEST_F(SSLTest, BrokenHandshake) {
   ASSERT_FALSE(client_buf == NULL);
   ASSERT_GT(client_buf_len, 0u);
   // Broke 3 bytes for get abnormal fail of handshake
-  const_cast<uint8_t *>(client_buf)[0] ^= 0xFF;
-  const_cast<uint8_t *>(client_buf)[client_buf_len / 2] ^= 0xFF;
-  const_cast<uint8_t *>(client_buf)[client_buf_len - 1] ^= 0xFF;
+  const_cast<uint8_t*>(client_buf)[0] ^= 0xFF;
+  const_cast<uint8_t*>(client_buf)[client_buf_len / 2] ^= 0xFF;
+  const_cast<uint8_t*>(client_buf)[client_buf_len - 1] ^= 0xFF;
   ASSERT_EQ(security_manager::SSLContext::Handshake_Result_AbnormalFail,
             server_ctx->DoHandshakeStep(client_buf, client_buf_len, &server_buf,
                                         &server_buf_len));
 }
 
 TEST_F(SSLTest, Positive) {
-  const uint8_t *server_buf;
-  const uint8_t *client_buf;
+  const uint8_t* server_buf;
+  const uint8_t* client_buf;
   size_t server_buf_len;
   size_t client_buf_len;
 
@@ -168,28 +168,28 @@ TEST_F(SSLTest, Positive) {
   EXPECT_TRUE(server_ctx->IsInitCompleted());
 
   // Encrypt text on client side
-  const uint8_t *text = reinterpret_cast<const uint8_t *>("abra");
-  const uint8_t *encrypted_text = 0;
+  const uint8_t* text = reinterpret_cast<const uint8_t*>("abra");
+  const uint8_t* encrypted_text = 0;
   size_t text_len = 4;
   size_t encrypted_text_len;
   EXPECT_TRUE(client_ctx->Encrypt(text, text_len, &encrypted_text,
                                   &encrypted_text_len));
 
-  ASSERT_NE(encrypted_text, reinterpret_cast<void *>(NULL));
+  ASSERT_NE(encrypted_text, reinterpret_cast<void*>(NULL));
   ASSERT_GT(encrypted_text_len, 0u);
 
   // Decrypt text on server side
   EXPECT_TRUE(server_ctx->Decrypt(encrypted_text, encrypted_text_len, &text,
                                   &text_len));
-  ASSERT_NE(text, reinterpret_cast<void *>(NULL));
+  ASSERT_NE(text, reinterpret_cast<void*>(NULL));
   ASSERT_GT(text_len, 0u);
 
-  ASSERT_EQ(strncmp(reinterpret_cast<const char *>(text), "abra", 4), 0);
+  ASSERT_EQ(strncmp(reinterpret_cast<const char*>(text), "abra", 4), 0);
 }
 
 TEST_F(SSLTest, EcncryptionFail) {
-  const uint8_t *server_buf;
-  const uint8_t *client_buf;
+  const uint8_t* server_buf;
+  const uint8_t* client_buf;
   size_t server_buf_len;
   size_t client_buf_len;
   ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
@@ -216,13 +216,13 @@ TEST_F(SSLTest, EcncryptionFail) {
   EXPECT_TRUE(server_ctx->IsInitCompleted());
 
   // Encrypt text on client side
-  const uint8_t *text = reinterpret_cast<const uint8_t *>("abra");
-  const uint8_t *encrypted_text = 0;
+  const uint8_t* text = reinterpret_cast<const uint8_t*>("abra");
+  const uint8_t* encrypted_text = 0;
   size_t text_len = 4;
   size_t encrypted_text_len;
   EXPECT_TRUE(client_ctx->Encrypt(text, text_len, &encrypted_text,
                                   &encrypted_text_len));
-  ASSERT_NE(encrypted_text, reinterpret_cast<void *>(NULL));
+  ASSERT_NE(encrypted_text, reinterpret_cast<void*>(NULL));
   ASSERT_GT(encrypted_text_len, 0u);
 
   std::vector<uint8_t> broken(encrypted_text,
@@ -230,7 +230,7 @@ TEST_F(SSLTest, EcncryptionFail) {
   // Broke message
   broken[encrypted_text_len / 2] ^= 0xFF;
 
-  const uint8_t *out_text;
+  const uint8_t* out_text;
   size_t out_text_size;
   // Decrypt broken text on server side
   EXPECT_FALSE(server_ctx->Decrypt(&broken[0], broken.size(), &out_text,

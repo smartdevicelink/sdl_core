@@ -30,18 +30,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef __QNXNTO__
+#include <openssl/ssl3.h>
+#else
+#include <openssl/tls1.h>
+#endif
+
 #include <fstream>
 #include <iostream>
 #include <sstream>
 
 #include "gtest/gtest.h"
 #include "security_manager/crypto_manager_impl.h"
-
-#ifdef __QNXNTO__
-#include <openssl/ssl3.h>
-#else
-#include <openssl/tls1.h>
-#endif
 
 #ifdef __QNXNTO__
 #define FORD_CIPHER SSL3_TXT_RSA_DES_192_CBC3_SHA
@@ -115,7 +115,7 @@ TEST_F(CryptoManagerTest, WrongInit) {
   EXPECT_FALSE(crypto_manager->LastError().empty());
 }
 
-//#ifndef __QNXNTO__
+//  #ifndef __QNXNTO__
 TEST_F(CryptoManagerTest, CorrectInit) {
   bool is_initialyzed;
   std::string error_string;
@@ -158,7 +158,7 @@ TEST_F(CryptoManagerTest, CorrectInit) {
   error_string = crypto_manager->LastError();
   EXPECT_TRUE(error_string.empty());
 }
-//#endif  // __QNX__
+// #endif  // __QNX__
 
 TEST_F(CryptoManagerTest, ReleaseSSLContext_Null) {
   EXPECT_NO_THROW(crypto_manager->ReleaseSSLContext(NULL));

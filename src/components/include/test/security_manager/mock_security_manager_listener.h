@@ -41,18 +41,16 @@ namespace test {
 namespace components {
 namespace security_manager_test {
 
-class  MockSecurityManagerListener
+class MockSecurityManagerListener
     : public ::security_manager::SecurityManagerListener {
-  public:
-    MOCK_METHOD2(OnHandshakeDone,
-        bool(
-          uint32_t connection_key,
-          ::security_manager::SSLContext::HandshakeResult result));
-    MOCK_METHOD0(OnCertificateUpdateRequired,
-        void());
+ public:
+  MOCK_METHOD2(OnHandshakeDone,
+               bool(uint32_t connection_key,
+                    ::security_manager::SSLContext::HandshakeResult result));
+  MOCK_METHOD0(OnCertificateUpdateRequired, void());
 };
-}   // namespace security_manager_test
-}   // namespace components
-}   // namespace test
+}  // namespace security_manager_test
+}  // namespace components
+}  // namespace test
 
 #endif  // SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SECURITY_MANAGER_LISTENER_H_

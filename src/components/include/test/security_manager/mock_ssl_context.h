@@ -43,42 +43,28 @@ namespace components {
 namespace security_manager_test {
 
 class MockSSLContext : public ::security_manager::SSLContext {
-  public:
-    MOCK_METHOD2(StartHandshake,
-        HandshakeResult(const uint8_t** const out_data, size_t *out_data_size));
-    MOCK_METHOD4(DoHandshakeStep,
-        HandshakeResult(
-            const uint8_t *const in_data,
-            size_t in_data_size,
-            const uint8_t** const out_data,
-            size_t *out_data_size));
-    MOCK_METHOD4(Encrypt,
-        bool(
-            const uint8_t *const in_data,
-            size_t in_data_size,
-            const uint8_t ** const out_data,
-            size_t *out_data_size));
-    MOCK_METHOD4(Decrypt,
-        bool(
-            const uint8_t *const in_data,
-            size_t in_data_size,
-            const uint8_t ** const out_data,
-            size_t *out_data_size));
-    MOCK_CONST_METHOD0(IsInitCompleted,
-        bool());
-    MOCK_CONST_METHOD0(IsHandshakePending,
-        bool());
-    MOCK_CONST_METHOD1(get_max_block_size,
-        size_t(size_t mtu));
-    MOCK_CONST_METHOD0(LastError,
-        std::string());
-    MOCK_METHOD0(ResetConnection,
-        void());
-    MOCK_METHOD1(SetHandshakeContext,
-        void(const HandshakeContext& hsh_ctx));
+ public:
+  MOCK_METHOD2(StartHandshake, HandshakeResult(const uint8_t** const out_data,
+                                               size_t* out_data_size));
+  MOCK_METHOD4(DoHandshakeStep, HandshakeResult(const uint8_t* const in_data,
+                                                size_t in_data_size,
+                                                const uint8_t** const out_data,
+                                                size_t* out_data_size));
+  MOCK_METHOD4(Encrypt,
+               bool(const uint8_t* const in_data, size_t in_data_size,
+                    const uint8_t** const out_data, size_t* out_data_size));
+  MOCK_METHOD4(Decrypt,
+               bool(const uint8_t* const in_data, size_t in_data_size,
+                    const uint8_t** const out_data, size_t* out_data_size));
+  MOCK_CONST_METHOD0(IsInitCompleted, bool());
+  MOCK_CONST_METHOD0(IsHandshakePending, bool());
+  MOCK_CONST_METHOD1(get_max_block_size, size_t(size_t mtu));
+  MOCK_CONST_METHOD0(LastError, std::string());
+  MOCK_METHOD0(ResetConnection, void());
+  MOCK_METHOD1(SetHandshakeContext, void(const HandshakeContext& hsh_ctx));
 };
-}   // namespace security_manager_test
-}   // namespace components
-}   // namespace test
+}  // namespace security_manager_test
+}  // namespace components
+}  // namespace test
 
 #endif  // SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SSL_CONTEXT_H_

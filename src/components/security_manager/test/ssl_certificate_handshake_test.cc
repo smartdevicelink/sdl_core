@@ -85,10 +85,10 @@ class SSLHandshakeTest : public testing::Test {
   }
 
   bool InitServerManagers(security_manager::Protocol protocol,
-                          const std::string &cert_filename,
-                          const std::string &ciphers_list,
+                          const std::string& cert_filename,
+                          const std::string& ciphers_list,
                           const bool verify_peer,
-                          const std::string &cacertificate_path) {
+                          const std::string& cacertificate_path) {
     std::ifstream cert(cert_filename);
     std::stringstream ss;
     ss << cert.rdbuf();
@@ -113,10 +113,10 @@ class SSLHandshakeTest : public testing::Test {
   }
 
   bool InitClientManagers(security_manager::Protocol protocol,
-                          const std::string &cert_filename,
-                          const std::string &ciphers_list,
+                          const std::string& cert_filename,
+                          const std::string& ciphers_list,
                           const bool verify_peer,
-                          const std::string &cacertificate_path) {
+                          const std::string& cacertificate_path) {
     std::ifstream cert(cert_filename);
     std::stringstream ss;
     ss << cert.rdbuf();
@@ -245,13 +245,13 @@ class SSLHandshakeTest : public testing::Test {
     FAIL() << "Expected client side handshake fail";
   }
 
-  security_manager::CryptoManager *server_manager;
-  security_manager::CryptoManager *client_manager;
-  security_manager::SSLContext *server_ctx;
-  security_manager::SSLContext *client_ctx;
+  security_manager::CryptoManager* server_manager;
+  security_manager::CryptoManager* client_manager;
+  security_manager::SSLContext* server_ctx;
+  security_manager::SSLContext* client_ctx;
 
-  const uint8_t *server_buf;
-  const uint8_t *client_buf;
+  const uint8_t* server_buf;
+  const uint8_t* client_buf;
   size_t server_buf_len;
   size_t client_buf_len;
 };

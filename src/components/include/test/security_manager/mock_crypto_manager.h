@@ -43,26 +43,16 @@ namespace components {
 namespace security_manager_test {
 
 class MockCryptoManager : public ::security_manager::CryptoManager {
-  public:
-    MOCK_METHOD7(Init,
-        bool(
-            ::security_manager::Mode,
-            ::security_manager::Protocol,
-            const std::string&,
-            const std::string&,
-            const bool,
-            const std::string&,
-            const size_t));
-    MOCK_METHOD1(OnCertificateUpdated,
-        bool(const std::string&));
-    MOCK_METHOD0(CreateSSLContext,
-        ::security_manager::SSLContext*());
-    MOCK_METHOD1(ReleaseSSLContext,
-        void(::security_manager::SSLContext*));
-    MOCK_CONST_METHOD0(LastError,
-        std::string());
-    MOCK_CONST_METHOD0(IsCertificateUpdateRequired,
-        bool());
+ public:
+  MOCK_METHOD7(Init,
+               bool(::security_manager::Mode, ::security_manager::Protocol,
+                    const std::string&, const std::string&, const bool,
+                    const std::string&, const size_t));
+  MOCK_METHOD1(OnCertificateUpdated, bool(const std::string&));
+  MOCK_METHOD0(CreateSSLContext, ::security_manager::SSLContext*());
+  MOCK_METHOD1(ReleaseSSLContext, void(::security_manager::SSLContext*));
+  MOCK_CONST_METHOD0(LastError, std::string());
+  MOCK_CONST_METHOD0(IsCertificateUpdateRequired, bool());
 };
 }  // namespace security_manager_test
 }  // namespace components

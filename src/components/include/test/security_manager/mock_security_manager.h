@@ -170,5 +170,4 @@ MATCHER_P(InternalErrorWithErrId, expectedErrorId,
     const ::security_manager::SecurityQuery::QueryHeader& q1,
     const ::security_manager::SecurityQuery::QueryHeader& q2);
 
-
 #endif  // SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SECURITY_MANAGER_H_
