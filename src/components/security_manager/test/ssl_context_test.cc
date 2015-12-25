@@ -86,7 +86,7 @@ class SSLTest : public testing::Test {
     delete client_manager;
   }
 
-  virtual void SetUp() {
+  virtual void SetUp() OVERRIDE {
     server_ctx = crypto_manager->CreateSSLContext();
     client_ctx = client_manager->CreateSSLContext();
 
@@ -98,7 +98,7 @@ class SSLTest : public testing::Test {
     client_ctx->SetHandshakeContext(ctx);
   }
 
-  virtual void TearDown() {
+  virtual void TearDown() OVERRIDE {
     crypto_manager->ReleaseSSLContext(server_ctx);
     client_manager->ReleaseSSLContext(client_ctx);
   }
