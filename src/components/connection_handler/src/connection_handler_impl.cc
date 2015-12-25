@@ -812,8 +812,8 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
                                                                close_reason);
         }
       } else {
-          LOG4CXX_ERROR(logger_, "Session with id: " << session_id << " not found");
-          return;
+        LOG4CXX_ERROR(logger_, "Session with id: " << session_id << " not found");
+        return;
       }
     }
     LOG4CXX_DEBUG(logger_, "Session with id: " << session_id << " has been closed successfully");
