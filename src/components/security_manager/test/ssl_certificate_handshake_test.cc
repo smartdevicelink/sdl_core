@@ -221,8 +221,6 @@ class SSLHandshakeTest : public testing::Test {
                 server_ctx->DoHandshakeStep(client_buf, client_buf_len,
                                             &server_buf, &server_buf_len))
           << ERR_reason_error_string(ERR_get_error());
-      // ASSERT_FALSE(server_ctx->IsInitCompleted()) << "Expected client side
-      // handshake fail";
 
       ASSERT_FALSE(server_buf == NULL);
       ASSERT_GT(server_buf_len, 0u);
