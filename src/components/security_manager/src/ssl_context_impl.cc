@@ -43,7 +43,7 @@
 
 namespace security_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "CryptoManagerImpl")
+CREATE_LOGGERPTR_GLOBAL(logger_, "SecurityManager")
 
 CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL *conn, Mode mode)
   : connection_(conn),

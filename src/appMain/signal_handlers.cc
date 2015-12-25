@@ -35,7 +35,7 @@
 #include "utils/logger.h"
 
 namespace main_namespace {
-CREATE_LOGGERPTR_GLOBAL(logger_, "SmartDeviceLinkMainApp")
+CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
 
 void dummy_signal_handler(int32_t signal) {
 }

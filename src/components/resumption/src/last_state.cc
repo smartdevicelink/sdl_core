@@ -37,7 +37,7 @@
 
 namespace resumption {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "LastState");
+CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
 void LastState::SaveToFileSystem() {
   LOG4CXX_AUTO_TRACE(logger_);

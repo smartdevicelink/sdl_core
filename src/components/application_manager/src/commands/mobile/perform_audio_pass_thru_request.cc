@@ -336,7 +336,7 @@ bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
 void PerformAudioPassThruRequest::FinishTTSSpeak(){
   LOG4CXX_AUTO_TRACE(logger_);
   if (!is_active_tts_speak_) {
-    LOG4CXX_DEBUG(logger_, "TTS Speak is inactive.");
+    LOG4CXX_WARN(logger_, "TTS Speak is inactive.");
     return;
   }
   is_active_tts_speak_ = false;

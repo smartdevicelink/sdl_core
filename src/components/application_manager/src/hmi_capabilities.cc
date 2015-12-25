@@ -49,7 +49,7 @@
 namespace application_manager {
 namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "HMICapabilities")
+CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 std::map<std::string, hmi_apis::Common_VrCapabilities::eType> vr_enum_capabilities =
 {

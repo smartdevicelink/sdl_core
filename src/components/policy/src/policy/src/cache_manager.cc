@@ -51,7 +51,7 @@ namespace policy_table = rpc::policy_table_interface_base;
 
 namespace policy {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "CacheManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
 #define CACHE_MANAGER_CHECK(return_value) {\
   if (!pt_) {\

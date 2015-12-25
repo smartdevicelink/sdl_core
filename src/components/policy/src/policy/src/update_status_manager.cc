@@ -36,7 +36,7 @@
 
 namespace  policy {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "UpdateStatusManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
 UpdateStatusManager::UpdateStatusManager() :
   listener_(NULL),

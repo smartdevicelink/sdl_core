@@ -37,7 +37,7 @@
 namespace utils {
 namespace dbms {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "SQLDatabase")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 SQLDatabase::SQLDatabase(const std::string& db_name)
     : conn_(NULL),

@@ -511,7 +511,8 @@ void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr message) {
   }
   for (ProtocolObservers::iterator it = protocol_observers_.begin();
       protocol_observers_.end() != it; ++it) {
-    (*it)->OnMessageReceived(message);
+    ProtocolObserver* observe = *it;
+    observe->OnMessageReceived(message);
   }
 }
 
@@ -966,7 +967,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(const Protocol
         connection_id, packet.session_id(), service_type, protection, &hash_id);
 
   if (0 == session_id) {
-    LOG4CXX_WARN(logger_, "Refused to create service " <<
+    LOG4CXX_WARN(logger_, "Refused by session_observer to create service " <<
                      static_cast<int32_t>(service_type) << " type.");
     SendStartSessionNAck(connection_id, packet.session_id(),
                          protocol_version, packet.service_type());

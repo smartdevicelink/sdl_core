@@ -137,12 +137,12 @@ void NaviStartStreamRequest::RetryStartSession() {
   }
 
   if (!app->video_streaming_allowed()) {
-    LOG4CXX_DEBUG(logger_, "Video streaming not allowed");
+    LOG4CXX_WARN(logger_, "Video streaming not allowed");
     return;
   }
 
   if (app->video_streaming_approved()) {
-    LOG4CXX_DEBUG(logger_, "NaviStartStream retry sequence stopped. "
+    LOG4CXX_INFO(logger_, "NaviStartStream retry sequence stopped. "
                  << "SUCCESS received");
     app->set_video_stream_retry_number(0);
     return;

@@ -137,12 +137,12 @@ void AudioStartStreamRequest::RetryStartSession() {
   }
 
   if (!app->audio_streaming_allowed()) {
-    LOG4CXX_DEBUG(logger_, "Audio streaming not allowed");
+    LOG4CXX_WARN(logger_, "Audio streaming not allowed");
     return;
   }
 
   if (app->audio_streaming_approved()) {
-    LOG4CXX_DEBUG(logger_, "AudioStartStream retry sequence stopped. "
+    LOG4CXX_INFO(logger_, "AudioStartStream retry sequence stopped. "
                  << "SUCCESS received");
     app->set_audio_stream_retry_number(0);
     return;

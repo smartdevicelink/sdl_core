@@ -41,7 +41,7 @@
 
 namespace policy {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "SQLPTRepresentation")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
 bool SQLPTExtRepresentation::CanAppKeepContext(const std::string& app_id) {
   utils::dbms::SQLQuery query(db());

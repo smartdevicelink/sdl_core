@@ -38,7 +38,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "FromMicRecorderAdapter")
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
 FromMicRecorderAdapter::FromMicRecorderAdapter()
   : recorder_thread_(NULL)

@@ -41,7 +41,7 @@
 namespace utils {
 namespace dbms {
 
-  CREATE_LOGGERPTR_GLOBAL(logger_, "SQL query")
+  CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 class SetBindInteger {
  public:

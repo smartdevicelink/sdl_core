@@ -755,6 +755,7 @@ void ApplicationManagerImpl::OnMessageReceived(
   utils::SharedPtr<Message> outgoing_message = ConvertRawMsgToMessage(message);
 
   if (outgoing_message) {
+    LOG4CXX_DEBUG(logger_, "Posting new message");
     messages_from_mobile_.PostMessage(
       impl::MessageFromMobile(outgoing_message));
   }
@@ -1040,6 +1041,7 @@ bool ApplicationManagerImpl::StartNaviService(
           navi_service_status_.insert(std::pair<uint32_t, std::pair<bool, bool> >(
               app_id, std::make_pair(false, false)));
       if (!res.second) {
+        LOG4CXX_WARN(logger_, "Navi service refused");
         return false;
       }
       it = res.first;
@@ -1052,6 +1054,8 @@ bool ApplicationManagerImpl::StartNaviService(
 
     application(app_id)->StartStreaming(service_type);
     return true;
+  }  else {
+    LOG4CXX_WARN(logger_, "Refused navi service by HMI level");
   }
   return false;
 }
@@ -1107,7 +1111,11 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
           ServiceType::kMobileNav, ServiceType::kAudio)) {
     if (app->is_navi()) {
       return StartNaviService(session_key, type);
+    } else {
+      LOG4CXX_WARN(logger_, "Refuse not navi application");
     }
+  } else {
+    LOG4CXX_WARN(logger_, "Refuse unknows service");
   }
   return false;
 }
@@ -1276,7 +1284,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
   }
 
   mobile_so_factory().attachSchema(*message);
-  LOG4CXX_INFO(
+  LOG4CXX_DEBUG(
     logger_,
     "Attached schema to message, result if valid: " << message->isValid());
 
@@ -1364,7 +1372,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
   MessageHelper::PrintSmartObject(*message);
 #endif
 
-  LOG4CXX_INFO(logger_, "Trying to create message in mobile factory.");
+  LOG4CXX_DEBUG(logger_, "Trying to create message in mobile factory.");
   utils::SharedPtr<commands::Command> command(
           MobileCommandFactory::CreateCommand(message, origin));
 
@@ -1448,7 +1456,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
       request_ctrl_.addMobileRequest(command, app_hmi_level);
 
     if (result == request_controller::RequestController::SUCCESS) {
-      LOG4CXX_INFO(logger_, "Perform request");
+      LOG4CXX_DEBUG(logger_, "Perform request");
     } else if (result ==
                request_controller::RequestController::
                TOO_MANY_PENDING_REQUESTS) {
@@ -1662,7 +1670,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
           ManageMobileCommand(response);
           return false;
         }
-      LOG4CXX_INFO(
+      LOG4CXX_DEBUG(
         logger_,
         "Convertion result for sdl object is true" << " function_id "
         << output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
@@ -1694,7 +1702,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       formatters::FormatterJsonRpc::FromString <
                        hmi_apis::FunctionID::eType, hmi_apis::messageType::eType > (
                          message.json_message(), output);
-      LOG4CXX_INFO(
+      LOG4CXX_DEBUG(
         logger_,
         "Convertion result: " << result << " function id "
         << output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
@@ -1771,7 +1779,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       return false;
   }
 
-  LOG4CXX_INFO(logger_, "Successfully parsed message into smart object");
+  LOG4CXX_DEBUG(logger_, "Successfully parsed message into smart object");
   return true;
 }
 
@@ -1866,7 +1874,7 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
     output.set_binary_data(binaryData);
   }
 
-  LOG4CXX_INFO(logger_, "Successfully parsed smart object into message");
+  LOG4CXX_DEBUG(logger_, "Successfully parsed smart object into message");
   return true;
 }
 
@@ -2485,7 +2493,7 @@ void ApplicationManagerImpl::Handle(const impl::MessageToHmi message) {
   }
 
   hmi_handler_->SendMessageToHMI(message);
-  LOG4CXX_INFO(logger_, "Message to hmi given away.");
+  LOG4CXX_INFO(logger_, "Message for HMI given away");
 }
 
 void ApplicationManagerImpl::Handle(const impl::AudioData message) {

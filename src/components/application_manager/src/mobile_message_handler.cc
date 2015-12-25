@@ -61,7 +61,7 @@ namespace {
     std::make_pair(kNotification, "Notification")
   };
 }
-CREATE_LOGGERPTR_GLOBAL(logger_, "MobileMessageHandler")
+CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 application_manager::Message* MobileMessageHandler::HandleIncomingMessageProtocol(
   const protocol_handler::RawMessagePtr message) {
@@ -198,11 +198,10 @@ MobileMessageHandler::HandleIncomingMessageProtocolV2(
 protocol_handler::RawMessage*
 MobileMessageHandler::HandleOutgoingMessageProtocolV1(
   const MobileMessage& message) {
-  LOG4CXX_INFO(logger_,
-               "MobileMessageHandler HandleOutgoingMessageProtocolV1()");
+  LOG4CXX_AUTO_TRACE(logger_);
   std::string messageString = message->json_message();
   if (messageString.length() == 0) {
-    LOG4CXX_INFO(logger_,
+    LOG4CXX_WARN(logger_,
                  "Drop ill-formed message from mobile");
     return NULL;
   }
@@ -221,8 +220,7 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV1(
 protocol_handler::RawMessage*
 MobileMessageHandler::HandleOutgoingMessageProtocolV2(
   const MobileMessage& message) {
-  LOG4CXX_INFO(logger_,
-               "MobileMessageHandler HandleOutgoingMessageProtocolV2()");
+  LOG4CXX_AUTO_TRACE(logger_);
   if (message->json_message().length() == 0) {
     LOG4CXX_ERROR(logger_, "json string is empty.");
   }

@@ -53,7 +53,7 @@
 
 namespace security_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "CryptoManagerImpl")
+CREATE_LOGGERPTR_GLOBAL(logger_, "SecurityManager")
 
 uint32_t CryptoManagerImpl::instance_count_ = 0;
 sync_primitives::Lock CryptoManagerImpl::instance_lock_;

@@ -63,7 +63,7 @@
     void deinit_logger();
     #define DEINIT_LOGGER() deinit_logger()
 
-    #define LOG4CXX_IS_TRACE_ENABLED(logger) logger->isTraceEnabled()
+    #define LOG4CXX_IS_TRACE_ENABLED(loggerPtr) loggerPtr->isTraceEnabled()
 
     log4cxx_time_t time_now();
 
@@ -103,11 +103,11 @@
     #undef LOG4CXX_FATAL
     #define LOG4CXX_FATAL(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getFatal(), logEvent)
 
-    #define LOG4CXX_ERROR_WITH_ERRNO(logger, message) \
-      LOG4CXX_ERROR(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
+    #define LOG4CXX_ERROR_WITH_ERRNO(loggerPtr, message) \
+      LOG4CXX_ERROR(loggerPtr, message << ", error code " << errno << " (" << strerror(errno) << ")")
 
-     #define LOG4CXX_WARN_WITH_ERRNO(logger, message) \
-       LOG4CXX_WARN(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
+     #define LOG4CXX_WARN_WITH_ERRNO(loggerPtr, message) \
+       LOG4CXX_WARN(loggerPtr, message << ", error code " << errno << " (" << strerror(errno) << ")")
 
 #else  // ENABLE_LOG is OFF
 

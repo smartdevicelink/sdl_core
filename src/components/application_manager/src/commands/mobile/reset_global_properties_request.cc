@@ -292,7 +292,7 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
                  return_info, &(message[strings::msg_params]));
 
     if (!application) {
-      LOG4CXX_DEBUG(logger_, "NULL pointer");
+      LOG4CXX_ERROR(logger_, "NULL pointer");
       return;
     }
 

@@ -48,7 +48,7 @@
 
 namespace policy {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "SQLPTRepresentation")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
 namespace {
 template<typename T, typename K> void InsertUnique(K value, T* array) {

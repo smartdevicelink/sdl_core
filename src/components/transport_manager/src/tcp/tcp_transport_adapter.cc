@@ -54,7 +54,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 TcpTransportAdapter::TcpTransportAdapter(const uint16_t port)
     : TransportAdapterImpl(

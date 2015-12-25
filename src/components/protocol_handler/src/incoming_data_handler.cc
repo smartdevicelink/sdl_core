@@ -67,7 +67,7 @@ ProtocolFramePtrList IncomingDataHandler::ProcessData(
     *result = RESULT_FAIL;
     return ProtocolFramePtrList();
   }
-  LOG4CXX_DEBUG(logger_, "Processing incoming data of size "
+  LOG4CXX_INFO(logger_, "Processing incoming data of size "
                 << tm_message_size << " for connection " << connection_id);
   ConnectionsDataMap::iterator it = connections_data_.find(connection_id);
   if (connections_data_.end() == it) {
@@ -85,7 +85,7 @@ ProtocolFramePtrList IncomingDataHandler::ProcessData(
   LOG4CXX_DEBUG(logger_, "New data size for connection " << connection_id
                 << " is " << connection_data.size());
   if (!out_frames.empty()) {
-    LOG4CXX_DEBUG(logger_, "Created and passed " << out_frames.size() <<
+    LOG4CXX_INFO(logger_, "Created and passed " << out_frames.size() <<
                   " packets");
   } else {
     if (RESULT_DEFERRED == *result) {

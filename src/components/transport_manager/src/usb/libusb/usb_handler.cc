@@ -46,7 +46,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "UsbHandler")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 class UsbHandler::ControlTransferSequenceState {
  public:

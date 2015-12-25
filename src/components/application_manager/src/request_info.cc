@@ -40,7 +40,7 @@ namespace application_manager {
 
 namespace request_controller {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController");
+CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController")
 
 uint32_t RequestInfo::HmiConnectoinKey = 0;
 

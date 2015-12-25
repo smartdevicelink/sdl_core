@@ -44,7 +44,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "UsbConnectionFactory")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 UsbConnectionFactory::UsbConnectionFactory(
   TransportAdapterController* controller)

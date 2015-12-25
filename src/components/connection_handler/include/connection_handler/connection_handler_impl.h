@@ -38,6 +38,13 @@
 #include <string>
 #include <vector>
 
+#include "utils/logger.h"
+#include "utils/macro.h"
+#include "utils/lock.h"
+#include "utils/stl_utils.h"
+#include "utils/singleton.h"
+#include "utils/rwlock.h"
+
 #include "transport_manager/transport_manager_listener_empty.h"
 #include "protocol_handler/session_observer.h"
 #include "protocol_handler/protocol_handler.h"
@@ -46,11 +53,6 @@
 #include "connection_handler/connection.h"
 #include "connection_handler/devices_discovery_starter.h"
 #include "connection_handler/connection_handler.h"
-#include "utils/logger.h"
-#include "utils/macro.h"
-#include "utils/lock.h"
-#include "utils/stl_utils.h"
-#include "utils/singleton.h"
 
 /**
  * \namespace connection_handler
