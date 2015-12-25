@@ -42,6 +42,8 @@
 
 #include "gtest/gtest.h"
 #include "security_manager/crypto_manager_impl.h"
+#include "utils/shared_ptr.h"
+#include "utils/make_shared.h"
 
 #ifdef __QNXNTO__
 #define FORD_CIPHER SSL3_TXT_RSA_DES_192_CBC3_SHA
@@ -61,12 +63,13 @@ namespace components {
 namespace crypto_manager_test {
 
 class CryptoManagerTest : public testing::Test {
+ public:
+  CryptoManagerTest()
+      : crypto_manager(
+            utils::MakeShared<security_manager::CryptoManagerImpl>()) {}
+
  protected:
-  void SetUp() OVERRIDE {
-    crypto_manager = new security_manager::CryptoManagerImpl();
-  }
-  void TearDown() OVERRIDE { delete crypto_manager; }
-  void InitSecurityManger() {
+  void InitSecurityManager() {
     const bool crypto_manager_initialization = crypto_manager->Init(
         security_manager::CLIENT, security_manager::TLSv1_2, "", ALL_CIPHERS,
         false, "/tmp/ca_cert.crt", updates_before_hour);
@@ -83,7 +86,7 @@ class CryptoManagerTest : public testing::Test {
     return cetrificate;
   }
 
-  security_manager::CryptoManager* crypto_manager;
+  utils::SharedPtr<security_manager::CryptoManagerImpl> crypto_manager;
 };
 
 TEST_F(CryptoManagerTest, UsingBeforeInit) {
@@ -174,7 +177,7 @@ TEST_F(CryptoManagerTest, CreateReleaseSSLContext) {
 }
 
 TEST_F(CryptoManagerTest, OnCertificateUpdated) {
-  InitSecurityManger();
+  InitSecurityManager();
 
   const std::string cetrificate = GenerateCertificateString();
   ASSERT_FALSE(cetrificate.empty());
@@ -190,12 +193,12 @@ TEST_F(CryptoManagerTest, OnCertificateUpdated_NotInitialized) {
 }
 
 TEST_F(CryptoManagerTest, OnCertificateUpdated_NullString) {
-  InitSecurityManger();
+  InitSecurityManager();
   EXPECT_FALSE(crypto_manager->OnCertificateUpdated(std::string()));
 }
 
 TEST_F(CryptoManagerTest, OnCertificateUpdated_MalformedSign) {
-  InitSecurityManger();
+  InitSecurityManager();
 
   std::string cetrificate = GenerateCertificateString();
   ASSERT_FALSE(cetrificate.empty());
