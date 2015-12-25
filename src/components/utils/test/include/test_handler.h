@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,27 +30,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/logger.h"
-#include "utils/log_message_loop_thread.h"
-#include "utils/logger_status.h"
-#include <apr_time.h>
+#include <queue>
 
-void deinit_logger () {
-  CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-  LOG4CXX_DEBUG(logger_, "Logger deinitialization");
-  logger::set_logs_enabled();
-  logger::LogMessageLoopThread::destroy();
-  log4cxx::LoggerPtr rootLogger = log4cxx::Logger::getRootLogger();
-  log4cxx::spi::LoggerRepositoryPtr repository = rootLogger->getLoggerRepository();
-  log4cxx::LoggerList loggers = repository->getCurrentLoggers();
-  for (log4cxx::LoggerList::iterator i = loggers.begin(); i != loggers.end(); ++i) {
-    log4cxx::LoggerPtr logger = *i;
-    logger->removeAllAppenders();
-  }
-  rootLogger->removeAllAppenders();
-  logger::logger_status = logger::LoggerThreadNotCreated;
-}
+#include "utils/macro.h"
+#include "utils/threads/message_loop_thread.h"
 
-log4cxx_time_t time_now() {
-  return apr_time_now();
-}
+namespace test {
+namespace components {
+namespace utils_test {
+
+typedef std::queue<bool> BoolQueue;
+typedef threads::MessageLoopThread<BoolQueue> TestLoopThread;
+
+class TestHandler : public TestLoopThread::Handler {
+  virtual void Handle(const BoolQueue::value_type test_value) OVERRIDE {}
+};
+
+}  // namespace utils_test
+}  // namespace components
+}  // namespace test

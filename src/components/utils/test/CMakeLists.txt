@@ -63,12 +63,14 @@ set(testSources
   shared_ptr_test.cc
   scope_guard_test.cc
   atomic_object_test.cc
+  message_loop_thread_test.cc
 )
 
 set(testLibraries
   gmock
   Utils
   Policy
+  ConfigProfile
 )
 
 include_directories(${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct)
@@ -86,12 +88,9 @@ else ()
   # --- Tests for SQLite Wrapper
   find_package(Sqlite3 REQUIRED)
   list (APPEND testSources
-    ./sqlite_wrapper/sql_database_test.cc 
-    ./sqlite_wrapper/sql_query_test.cc   
-    generated_code_with_sqlite_test.cc   
-
-    # TODO{ALeshin} APPLINK-11132 AssertTrue in SetUpTestCase() return false
-    #policy_manager_impl_stress_test.cc
+    ./sqlite_wrapper/sql_database_test.cc
+    ./sqlite_wrapper/sql_query_test.cc
+    generated_code_with_sqlite_test.cc
   )
   list (APPEND testLibraries sqlite3)
 endif()
@@ -107,6 +106,7 @@ endif()
 
 file(COPY testscript.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 create_test("utils_test" "${testSources}" "${testLibraries}")
 

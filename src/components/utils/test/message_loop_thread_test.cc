@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,27 +30,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/logger.h"
-#include "utils/log_message_loop_thread.h"
-#include "utils/logger_status.h"
-#include <apr_time.h>
+#include "gtest/gtest.h"
+#include "test_handler.h"
 
-void deinit_logger () {
-  CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-  LOG4CXX_DEBUG(logger_, "Logger deinitialization");
-  logger::set_logs_enabled();
-  logger::LogMessageLoopThread::destroy();
-  log4cxx::LoggerPtr rootLogger = log4cxx::Logger::getRootLogger();
-  log4cxx::spi::LoggerRepositoryPtr repository = rootLogger->getLoggerRepository();
-  log4cxx::LoggerList loggers = repository->getCurrentLoggers();
-  for (log4cxx::LoggerList::iterator i = loggers.begin(); i != loggers.end(); ++i) {
-    log4cxx::LoggerPtr logger = *i;
-    logger->removeAllAppenders();
-  }
-  rootLogger->removeAllAppenders();
-  logger::logger_status = logger::LoggerThreadNotCreated;
+namespace test {
+namespace components {
+namespace utils_test {
+
+TEST(MessageLoopThreadTest, GetMessageQueueSize_AddValueToQueue_CorrectSize) {
+  TestHandler test_handler;
+  TestLoopThread message_loop_thread("test", &test_handler);
+
+  ASSERT_EQ(0u, message_loop_thread.GetMessageQueueSize());
+
+  message_loop_thread.PostMessage(true);
+  ASSERT_EQ(1u, message_loop_thread.GetMessageQueueSize());
 }
 
-log4cxx_time_t time_now() {
-  return apr_time_now();
-}
+}  // namespace utils_test
+}  // namespace components
+}  // namespace test
