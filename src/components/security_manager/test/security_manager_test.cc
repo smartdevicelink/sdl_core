@@ -30,9 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
 #include <string>
 
+#include "gtest/gtest.h"
 #include "utils/byte_order.h"
 #include "protocol/common.h"
 #include "security_manager/security_manager_impl.h"

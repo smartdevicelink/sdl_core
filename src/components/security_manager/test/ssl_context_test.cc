@@ -30,7 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -38,6 +37,7 @@
 #include <fstream>
 #include <openssl/ssl.h>
 
+#include "gtest/gtest.h"
 #include "security_manager/crypto_manager.h"
 #include "security_manager/crypto_manager_impl.h"
 #include "security_manager/ssl_context.h"

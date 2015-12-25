@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_SESSION_OBSERVER_H_
 #define SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_SESSION_OBSERVER_H_
 
-#include <gmock/gmock.h>
+#include "gmock/gmock.h"
 #include <string>
 #include <list>
 #include "protocol_handler/session_observer.h"

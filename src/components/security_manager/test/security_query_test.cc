@@ -30,9 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
 #include <vector>
 #include <string>
+
+#include "gtest/gtest.h"
 #include "security_manager/security_query.h"
 #include "protocol_handler/protocol_payload.h"
 #include "utils/byte_order.h"

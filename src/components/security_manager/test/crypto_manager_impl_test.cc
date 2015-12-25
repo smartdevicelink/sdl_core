@@ -30,10 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+
+#include "gtest/gtest.h"
 #include "security_manager/crypto_manager_impl.h"
 
 #ifdef __QNXNTO__
