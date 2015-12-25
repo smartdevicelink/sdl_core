@@ -796,23 +796,25 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
       protocol_handler_->SendEndSession(connection_handle, session_id);
     }
 
-    SessionMap::const_iterator session_map_itr = session_map.find(session_id);
-    if (session_map_itr != session_map.end() && connection_handler_observer_) {
-      const uint32_t session_key = KeyFromPair(connection_id, session_id);
-      const Session &session = session_map_itr->second;
-      const ServiceList &service_list = session.service_list;
+    if ( connection_handler_observer_ ) {
+      SessionMap::const_iterator session_map_itr = session_map.find(session_id);
+      if (session_map_itr != session_map.end()) {
+        const uint32_t session_key = KeyFromPair(connection_id, session_id);
+        const Session &session = session_map_itr->second;
+        const ServiceList &service_list = session.service_list;
 
-      ServiceList::const_iterator service_list_itr = service_list.begin();
-      for (;service_list_itr != service_list.end(); ++service_list_itr) {
-        const protocol_handler::ServiceType service_type =
-            service_list_itr->service_type;
-        connection_handler_observer_->OnServiceEndedCallback(session_key,
-                                                             service_type,
-                                                             close_reason);
+        ServiceList::const_iterator service_list_itr = service_list.begin();
+        for (;service_list_itr != service_list.end(); ++service_list_itr) {
+          const protocol_handler::ServiceType service_type =
+              service_list_itr->service_type;
+          connection_handler_observer_->OnServiceEndedCallback(session_key,
+                                                               service_type,
+                                                               close_reason);
+        }
+      } else {
+          LOG4CXX_ERROR(logger_, "Session with id: " << session_id << " not found");
+          return;
       }
-    } else {
-      LOG4CXX_ERROR(logger_, "Session with id: " << session_id << " not found");
-      return;
     }
     LOG4CXX_DEBUG(logger_, "Session with id: " << session_id << " has been closed successfully");
   }
