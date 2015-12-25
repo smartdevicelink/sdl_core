@@ -764,12 +764,6 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Closing session with id: " << session_id);
 
-  // In case of malformed message the connection should be broke up without
-  // any other notification to mobile.
-  if (close_reason != kMalformed && protocol_handler_) {
-    protocol_handler_->SendEndSession(connection_handle, session_id);
-  }
-
   transport_manager::ConnectionUID connection_id =
         ConnectionUIDFromHandle(connection_handle);
 
