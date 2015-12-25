@@ -30,15 +30,88 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SECURITY_MANAGER_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SECURITY_MANAGER_H_
 
+#include <string>
+#include <list>
 #include "gmock/gmock.h"
 #include "utils/byte_order.h"
+#include "security_manager/security_manager.h"
 #include "security_manager/security_query.h"
 
 namespace test {
 namespace components {
 namespace security_manager_test {
+
+class MockSecurityManager : public ::security_manager::SecurityManager {
+ public:
+  MOCK_METHOD1(set_session_observer,
+               void(::protocol_handler::SessionObserver*));
+  MOCK_METHOD1(set_protocol_handler,
+               void(::protocol_handler::ProtocolHandler*));
+  MOCK_METHOD1(set_crypto_manager, void(::security_manager::CryptoManager*));
+  MOCK_METHOD4(SendInternalError, void(const uint32_t, const uint8_t&,
+                                       const std::string&, const uint32_t));
+  MOCK_METHOD1(CreateSSLContext,
+               ::security_manager::SSLContext*(const uint32_t&));
+  MOCK_METHOD1(StartHandshake, void(uint32_t));
+  MOCK_METHOD1(AddListener, void(::security_manager::SecurityManagerListener*));
+  MOCK_METHOD1(RemoveListener,
+               void(::security_manager::SecurityManagerListener*));
+  // protocol_handler::ProtocolObserver part
+  MOCK_METHOD1(OnMessageReceived,
+               void(const ::protocol_handler::RawMessagePtr));
+  MOCK_METHOD1(OnMobileMessageSent,
+               void(const ::protocol_handler::RawMessagePtr));
+};
+
+/*
+ * Matcher for RawMessages
+ * Check binary data of RawMessages
+ */
+MATCHER_P(RawMessageEqSize, exp_data_size,
+          std::string(negation ? "is not" : "is") + " RawMessages ") {
+  const size_t arg_data_size = arg->data_size();
+  if (arg_data_size != exp_data_size) {
+    *result_listener << "Got " << arg_data_size << " bytes "
+                     << " expected " << exp_data_size << " bytes";
+    return false;
+  }
+  return true;
+}
+MATCHER_P2(RawMessageEq, exp_data, exp_data_size,
+           std::string(negation ? "is not" : "is") + " RawMessages ") {
+  const size_t arg_data_size = arg->data_size();
+  if (arg_data_size != exp_data_size) {
+    *result_listener << "Got " << arg_data_size << " bytes "
+                     << " expected " << exp_data_size << " bytes";
+    return false;
+  }
+  const uint8_t* arg_data = arg->data();
+  for (uint32_t i = 0; i < arg_data_size; ++i) {
+    if (arg_data[i] != exp_data[i]) {
+      *result_listener << "Fail in " << i << " byte";
+      return false;
+    }
+  }
+  return true;
+}
+
+/*
+ * Matcher for Handshake data
+ */
+MATCHER_P2(HandshakeStepEq, exp_data, exp_data_size,
+           std::string(negation ? "is not" : "is") + " Handshake ") {
+  const uint8_t* arg_data = arg;
+  for (uint32_t i = 0; i < exp_data_size; ++i) {
+    if (arg_data[i] != exp_data[i]) {
+      *result_listener << "Fail in " << i << " byte";
+      return false;
+    }
+  }
+  return true;
+}
 
 /*
  * Matcher for checking RawMessage with InternalError Query
@@ -97,24 +170,4 @@ MATCHER_P(InternalErrorWithErrId, expectedErrorId,
     const ::security_manager::SecurityQuery::QueryHeader& q1,
     const ::security_manager::SecurityQuery::QueryHeader& q2);
 
-::testing::AssertionResult QueryHeader_EQ(
-    const char* m_expr, const char* n_expr,
-    const ::security_manager::SecurityQuery::QueryHeader& q1,
-    const ::security_manager::SecurityQuery::QueryHeader& q2) {
-  ::testing::AssertionResult fail_result = ::testing::AssertionFailure();
-  fail_result << "(\"" << m_expr << " and \"" << n_expr << "\") are not equal "
-              << " : different ";
-  if (q1.json_size != q2.json_size)
-    return fail_result << "json_size_1=" << q1.json_size
-                       << ", json_size_2=" << q2.json_size;
-  if (q1.query_id != q2.query_id)
-    return fail_result << "query_id_1=" << q1.query_id
-                       << ", query_id_2=" << q2.query_id;
-  if (q1.query_type != q2.query_type)
-    return fail_result << "query_type_1=" << q1.query_type
-                       << ", query_type_2=" << q2.query_type;
-  if (q1.seq_number != q2.seq_number)
-    return fail_result << "seq_number_1=" << q1.seq_number
-                       << ", seq_number_2=" << q2.seq_number;
-  return ::testing::AssertionSuccess();
-}
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SECURITY_MANAGER_H_

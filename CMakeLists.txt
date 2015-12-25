@@ -383,6 +383,9 @@ endif()
 include_directories(
   ${COMPONENTS_DIR}/include
   ${COMPONENTS_DIR}/protocol/include
+if (BUILD_TESTS)
+  ${COMPONENTS_DIR}/include/test
+endif ()
 )
 
 # --- 3rd party libs
