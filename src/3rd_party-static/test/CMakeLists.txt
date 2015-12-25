@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2015, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,26 +28,21 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# --- jsoncpp
-add_subdirectory(./jsoncpp)
-set(JSONCPP_INCLUDE_DIRECTORY ${JSONCPP_INCLUDE_DIRECTORY} PARENT_SCOPE)
-
-# --- MessageBroker
-add_subdirectory(./MessageBroker)
-set(MESSAGE_BROKER_INCLUDE_DIRECTORY ${MESSAGE_BROKER_INCLUDE_DIRECTORY} PARENT_SCOPE)
-
-# --- encryption
-add_subdirectory(./encryption)
-set(ENCRYPTION_INCLUDE_DIRECTORY ${ENCRYPTION_INCLUDE_DIRECTORY} PARENT_SCOPE)
-
-if (BUILD_USB_SUPPORT)
-  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    add_subdirectory(./libusbx-1.0.16)
-    set(LIBUSB_INCLUDE_DIRECTORY ${LIBUSB_INCLUDE_DIRECTORY} PARENT_SCOPE)
-    set(LIBUSB_LIBS_DIRECTORY ${LIBUSB_LIBS_DIRECTORY} PARENT_SCOPE)
-  endif()
-endif()
-
 if(BUILD_TESTS)
-  add_subdirectory(test)
-endif()
+include_directories (
+  ${GMOCK_INCLUDE_DIRECTORY}
+  ${JSONCPP_INCLUDE_DIRECTORY}
+)
+
+set(LIBRARIES
+    gmock 
+    jsoncpp
+)
+
+set (SOURCES
+  json_reader_test.cc
+)
+
+add_library("test_JSONCPPTest" ${SOURCES})
+create_test("test_JSONCPP" "${SOURCES}" "${LIBRARIES}")
+endif()  
