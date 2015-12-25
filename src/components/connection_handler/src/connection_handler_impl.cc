@@ -764,6 +764,12 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Closing session with id: " << session_id);
 
+  // In case of malformed message the connection should be broke up without
+  // any other notification to mobile.
+  if (close_reason != kMalformed && protocol_handler_) {
+      protocol_handler_->SendEndSession(connection_handle, session_id);
+  }
+
   transport_manager::ConnectionUID connection_id =
         ConnectionUIDFromHandle(connection_handle);
 
@@ -783,35 +789,27 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
     }
   }
 
-  // In case of malformed message the connection should be broke up without
-  // any other notification to mobile.
-  if (close_reason != kMalformed) {
-    if (protocol_handler_) {
-      protocol_handler_->SendEndSession(connection_handle, session_id);
-    }
+  if (connection_handler_observer_) {
+    SessionMap::const_iterator session_map_itr = session_map.find(session_id);
+    if (session_map_itr != session_map.end()) {
+      const uint32_t session_key = KeyFromPair(connection_id, session_id);
+      const Session &session = session_map_itr->second;
+      const ServiceList &service_list = session.service_list;
 
-    if ( connection_handler_observer_ ) {
-      SessionMap::const_iterator session_map_itr = session_map.find(session_id);
-      if (session_map_itr != session_map.end()) {
-        const uint32_t session_key = KeyFromPair(connection_id, session_id);
-        const Session &session = session_map_itr->second;
-        const ServiceList &service_list = session.service_list;
-
-        ServiceList::const_iterator service_list_itr = service_list.begin();
-        for (;service_list_itr != service_list.end(); ++service_list_itr) {
-          const protocol_handler::ServiceType service_type =
-              service_list_itr->service_type;
-          connection_handler_observer_->OnServiceEndedCallback(session_key,
-                                                               service_type,
-                                                               close_reason);
-        }
-      } else {
-        LOG4CXX_ERROR(logger_, "Session with id: " << session_id << " not found");
-        return;
+      ServiceList::const_iterator service_list_itr = service_list.begin();
+      for (;service_list_itr != service_list.end(); ++service_list_itr) {
+        const protocol_handler::ServiceType service_type =
+            service_list_itr->service_type;
+        connection_handler_observer_->OnServiceEndedCallback(session_key,
+                                                             service_type,
+                                                             close_reason);
       }
+    } else {
+      LOG4CXX_ERROR(logger_, "Session with id: " << session_id << " not found");
+      return;
     }
-    LOG4CXX_DEBUG(logger_, "Session with id: " << session_id << " has been closed successfully");
   }
+  LOG4CXX_DEBUG(logger_, "Session with id: " << session_id << " has been closed successfully");
 }
 
 void ConnectionHandlerImpl::CloseConnectionSessions(
