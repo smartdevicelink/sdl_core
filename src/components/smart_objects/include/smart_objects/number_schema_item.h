@@ -137,7 +137,7 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(const SmartObject& Object)
   } else if (typeid(double) == typeid(value)) {
     value = Object.asDouble();
   } else if (typeid(int64_t) == typeid(value)) {
-    value = Object.asInt64();
+    value = Object.asInt();
   } else {
     NOTREACHED();
   }

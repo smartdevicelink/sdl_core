@@ -38,6 +38,7 @@ include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/smart_objects/include
+  ${COMPONENTS_DIR}/utils/include
 )
 
 set (SOURCES

@@ -33,6 +33,7 @@
 // POSSIBILITY OF SUCH DAMAGE.
 
 #include "formatters/formatter_json_rpc.h"
+#include "utils/convert_utils.h"
 
 namespace NsSmartDeviceLink {
 namespace NsJSONHandler {
@@ -118,7 +119,7 @@ bool FormatterJsonRpc::ToString(const NsSmartObjects::SmartObject &obj,
               if (NsSmartObjects::SmartType_Integer != code.getType()) {
                 result = false;
               } else {
-                root[kResult][kCode] = code.asInt();
+                root[kResult][kCode] = utils::ConvertInt64ToLongLongInt(code.asInt());
               }
             }
           } else if (kNotification == message_type) {
@@ -134,7 +135,7 @@ bool FormatterJsonRpc::ToString(const NsSmartObjects::SmartObject &obj,
             if (NsSmartObjects::SmartType_Integer != code.getType()) {
               result = false;
             } else {
-              root[kError][kCode] = code.asInt();
+              root[kError][kCode] = utils::ConvertInt64ToLongLongInt(code.asInt());
             }
           }
         }
@@ -174,7 +175,7 @@ bool FormatterJsonRpc::SetId(const NsSmartObjects::SmartObject &params,
         strings::S_CORRELATION_ID);
 
     if (NsSmartObjects::SmartType_Integer == id.getType()) {
-      id_container[kId] = id.asUInt();
+      id_container[kId] = utils::ConvertUInt64ToLongLongUInt(id.asUInt());
       result = true;
     }
   }

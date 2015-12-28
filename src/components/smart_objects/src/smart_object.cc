@@ -180,14 +180,12 @@ SmartObject::SmartObject(int32_t InitialValue)
   set_value_integer(InitialValue);
 }
 
-int32_t SmartObject::asInt() const {
+int64_t SmartObject::asInt() const {
   const int64_t convert = convert_int();
   if (invalid_int64_value == convert) {
     return invalid_int_value;
   }
-  DCHECK(convert >= std::numeric_limits<int32_t>::min());
-  DCHECK(convert <= std::numeric_limits<int32_t>::max());
-  return static_cast<int32_t>(convert);
+  return convert;
 }
 
 SmartObject& SmartObject::operator=(const int32_t NewValue) {
@@ -243,14 +241,12 @@ SmartObject::SmartObject(uint32_t InitialValue)
   set_value_integer(InitialValue);
 }
 
-uint32_t SmartObject::asUInt() const {
+uint64_t SmartObject::asUInt() const {
   const int64_t convert = convert_int();
-  if (invalid_int64_value == convert) {
-    return invalid_unsigned_int_value;
+  if (convert <= invalid_int_value) {
+      return invalid_unsigned_int_value;
   }
-  DCHECK(convert >= std::numeric_limits<uint32_t>::min());
-  DCHECK(convert <= std::numeric_limits<uint32_t>::max());
-  return static_cast<uint32_t>(convert);
+  return static_cast<uint64_t>(convert);
 }
 
 SmartObject& SmartObject::operator=(const uint32_t NewValue) {
@@ -278,10 +274,6 @@ SmartObject::SmartObject(int64_t InitialValue)
   set_value_integer(InitialValue);
 }
 
-int64_t SmartObject::asInt64() const {
-  return convert_int();
-}
-
 SmartObject& SmartObject::operator=(const int64_t NewValue) {
   if (m_type != SmartType_Invalid) {
     set_value_integer(NewValue);
@@ -296,6 +288,17 @@ bool SmartObject::operator==(const int64_t Value) const {
   }
   return comp == Value;
 }
+
+// =============================================================
+// uint64_t TYPE SUPPORT
+// =============================================================
+SmartObject& SmartObject::operator=(const uint64_t NewValue) {
+  if (m_type != SmartType_Invalid) {
+    set_value_integer(NewValue);
+  }
+  return *this;
+}
+
 
 // =============================================================
 // DOUBLE TYPE SUPPORT

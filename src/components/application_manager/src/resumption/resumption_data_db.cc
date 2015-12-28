@@ -2615,11 +2615,11 @@ ApplicationParams::ApplicationParams(
   }
   m_is_valid = true;
   m_hash = application[hash_id].asString();
-  m_grammar_id = application[grammar_id].asInt64();
-  m_connection_key = application[connection_key].asInt64();
-  m_hmi_app_id = application[hmi_app_id].asInt64();
-  m_hmi_level = static_cast<mobile_apis::HMILevel::eType>(
-                  application[hmi_level].asInt());
+  m_grammar_id = application[grammar_id].asInt();
+  m_connection_key = application[connection_key].asInt();
+  m_hmi_app_id = application[hmi_app_id].asInt();
+  m_hmi_level =
+      static_cast<mobile_apis::HMILevel::eType>(application[hmi_level].asInt());
   m_is_media_application = application[is_media_application].asBool();
 }
 
