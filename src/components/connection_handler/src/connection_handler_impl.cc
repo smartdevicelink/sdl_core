@@ -767,7 +767,7 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
   // In case of malformed message the connection should be broke up without
   // any other notification to mobile.
   if (close_reason != kMalformed && protocol_handler_) {
-      protocol_handler_->SendEndSession(connection_handle, session_id);
+    protocol_handler_->SendEndSession(connection_handle, session_id);
   }
 
   transport_manager::ConnectionUID connection_id =
