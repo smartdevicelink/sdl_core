@@ -30,6 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <algorithm>
+#include "formatters/formatter_json_rpc.h"
+#include <string>
+#include <set>
+#include <algorithm>
+#include <json/writer.h>
+#include "gtest/gtest.h"
 #include "formatters/formatter_json_rpc.h"
 #include <string>
 #include <set>
@@ -40,11 +47,26 @@
 
 namespace test {
 namespace components {
-namespace formatters {
+namespace formatters_test {
 
 using namespace NsSmartDeviceLink::NsSmartObjects;
 using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
 using namespace NsSmartDeviceLink::NsJSONHandler::strings;
+
+void CompactJson(std::string& str) {
+  Json::Value root;
+  Json::Reader reader;
+  reader.parse(str, root);
+  Json::FastWriter writer;
+  str = writer.write(root);
+  std::string::iterator end_pos = std::remove(str.begin(), str.end(), '\n');
+  str.erase(end_pos, str.end());
+}
+
+namespace {
+const int64_t big_64int = 100000000000;
+const std::string str_with_big_int64 = "100000000000";
+}  // namespace
 
 TEST(FormatterJsonRPCTest, CorrectRPCv1Request_ToString_Success) {
   // Create SmartObject
@@ -62,10 +84,10 @@ TEST(FormatterJsonRPCTest, CorrectRPCv1Request_ToString_Success) {
   std::string result;
   // Convert SmartObject to Json string
   EXPECT_TRUE(FormatterJsonRpc::ToString(obj, result));
-  EXPECT_EQ(std::string(
-                "{\n   \"id\" : 4444,\n   \"jsonrpc\" : \"2.0\",\n   "
-                "\"method\" : \"VR.IsReady\"\n}\n"),
-            result);
+  CompactJson(result);
+  const std::string json_string(
+      "{\"id\":4444,\"jsonrpc\":\"2.0\",\"method\":\"VR.IsReady\"}");
+  EXPECT_EQ(json_string, result);
 }
 
 TEST(FormatterJsonRPCTest, CorrectRPCv2Request_ToString_Success) {
@@ -82,10 +104,40 @@ TEST(FormatterJsonRPCTest, CorrectRPCv2Request_ToString_Success) {
   std::string result;
   // Convert SmartObject to Json string
   EXPECT_TRUE(FormatterJsonRpc::ToString(obj, result));
-  EXPECT_EQ(std::string(
-                "{\n   \"id\" : 4444,\n   \"jsonrpc\" : \"2.0\",\n   "
-                "\"method\" : \"AddCommandID\"\n}\n"),
-            result);
+  CompactJson(result);
+  const std::string json_string(
+      "{\"id\":4444,\"jsonrpc\":\"2.0\",\"method\":\"AddCommandID\"}");
+  EXPECT_EQ(json_string, result);
+}
+
+TEST(FormatterJsonRPCTest, UpperBoundValuesInSystemRequest_ToString_Success) {
+  // Create SmartObject
+  SmartObject obj;
+  obj[S_PARAMS][S_FUNCTION_ID] =
+      hmi_apis::FunctionID::BasicCommunication_OnSystemRequest;
+  obj[S_PARAMS][S_MESSAGE_TYPE] = hmi_apis::messageType::notification;
+  obj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+  obj[S_PARAMS][S_PROTOCOL_TYPE] = 1;
+  obj[S_PARAMS][S_CORRELATION_ID] = 4444;
+  obj[S_MSG_PARAMS] = SmartObject(SmartType::SmartType_Map);
+  obj[S_MSG_PARAMS]["requestType"] = hmi_apis::Common_RequestType::PROPRIETARY;
+  obj[S_MSG_PARAMS]["fileName"] = "fileName";
+  obj[S_MSG_PARAMS]["length"] = big_64int;
+  obj[S_MSG_PARAMS]["offset"] = big_64int;
+  // Attach Schema
+
+  hmi_apis::HMI_API factory;
+  EXPECT_TRUE(factory.attachSchema(obj));
+  EXPECT_EQ(Errors::OK, obj.validate());
+  std::string result;
+  // Convert SmartObject to Json string
+  EXPECT_TRUE(FormatterJsonRpc::ToString(obj, result));
+  CompactJson(result);
+  const std::string json_string(
+      "{\"jsonrpc\":\"2.0\",\"method\":\"BasicCommunication.OnSystemRequest\","
+      "\"params\":{\"fileName\":\"fileName\",\"length\":100000000000,"
+      "\"offset\":100000000000,\"requestType\":\"PROPRIETARY\"}}");
+  EXPECT_EQ(json_string, result);
 }
 
 TEST(FormatterJsonRPCTest, CorrectRPCv1Notification_ToString_Success) {
@@ -103,10 +155,11 @@ TEST(FormatterJsonRPCTest, CorrectRPCv1Notification_ToString_Success) {
   EXPECT_TRUE(factory.attachSchema(obj));
   // Convert SmartObject to Json string
   EXPECT_TRUE(FormatterJsonRpc::ToString(obj, result));
-  EXPECT_EQ(std::string(
-                "{\n   \"jsonrpc\" : \"2.0\",\n   \"method\" : "
-                "\"Buttons.OnButtonPress\",\n   \"params\" : {}\n}\n"),
-            result);
+  CompactJson(result);
+  const std::string json_string(
+      "{\"jsonrpc\":\"2.0\",\"method\":\"Buttons.OnButtonPress\",\"params\":{}"
+      "}");
+  EXPECT_EQ(json_string, result);
 }
 
 TEST(FormatterJsonRPCTest, CorrectResponseToString_Success) {
@@ -124,11 +177,11 @@ TEST(FormatterJsonRPCTest, CorrectResponseToString_Success) {
   std::string result;
   // Convert SmartObject to Json string
   EXPECT_TRUE(FormatterJsonRpc::ToString(obj, result));
-  EXPECT_EQ(std::string(
-                "{\n   \"id\" : 4440,\n   \"jsonrpc\" : \"2.0\",\n   "
-                "\"result\" : {\n      \"code\" : 0,\n      \"method\" : "
-                "\"VR.AddCommand\"\n   }\n}\n"),
-            result);
+  CompactJson(result);
+  const std::string json_string(
+      "{\"id\":4440,\"jsonrpc\":\"2.0\",\"result\":{\"code\":0,\"method\":\"VR."
+      "AddCommand\"}}");
+  EXPECT_EQ(json_string, result);
 }
 
 TEST(FormatterJsonRPCTest, ErrorResponse_ToString_Success) {
@@ -147,15 +200,15 @@ TEST(FormatterJsonRPCTest, ErrorResponse_ToString_Success) {
   std::string result;
   // Convert SmartObject to Json string
   EXPECT_TRUE(FormatterJsonRpc::ToString(obj, result));
-  EXPECT_EQ(std::string(
-                "{\n   \"error\" : {\n      \"code\" : 22,\n      \"data\" : "
-                "{\n         \"method\" : \"VR.AddCommand\"\n      },\n      "
-                "\"message\" : \"Some error\"\n   },\n   \"id\" : 4440,\n   "
-                "\"jsonrpc\" : \"2.0\"\n}\n"),
-            result);
+  CompactJson(result);
+
+  const std::string json_string(
+      "{\"error\":{\"code\":22,\"data\":{\"method\":\"VR.AddCommand\"},"
+      "\"message\":\"Some error\"},\"id\":4440,\"jsonrpc\":\"2.0\"}");
+  EXPECT_EQ(json_string, result);
 }
 
-TEST(FormatterJsonRPCTest, ResponseWithoutCode_ToString_Success) {
+TEST(FormatterJsonRPCTest, ResponseWithoutCorID_ToString_Fail) {
   // Create SmartObject
   SmartObject obj;
   obj[S_PARAMS][S_FUNCTION_ID] = hmi_apis::FunctionID::VR_AddCommand;
@@ -186,10 +239,10 @@ TEST(FormatterJsonRPCTest, RequestWithoutMSGParams_ToString_Success) {
   std::string result;
   // Convert SmartObject to Json string
   EXPECT_TRUE(FormatterJsonRpc::ToString(obj, result));
-  EXPECT_EQ(std::string(
-                "{\n   \"id\" : 4444,\n   \"jsonrpc\" : \"2.0\",\n   "
-                "\"method\" : \"AddCommandID\"\n}\n"),
-            result);
+  CompactJson(result);
+  const std::string json_string(
+      "{\"id\":4444,\"jsonrpc\":\"2.0\",\"method\":\"AddCommandID\"}");
+  EXPECT_EQ(json_string, result);
 }
 
 TEST(FormatterJsonRPCTest, RequestWithoutCorID_ToString_Fail) {
@@ -205,10 +258,10 @@ TEST(FormatterJsonRPCTest, RequestWithoutCorID_ToString_Fail) {
   std::string result;
   // Converting SmartObject to Json string is failed
   EXPECT_FALSE(FormatterJsonRpc::ToString(obj, result));
-  EXPECT_EQ(std::string(
-                "{\n   \"jsonrpc\" : \"2.0\",\n   \"method\" : "
-                "\"AddCommandID\"\n}\n"),
-            result);
+  CompactJson(result);
+
+  const std::string json_string("{\"jsonrpc\":\"2.0\",\"method\":\"AddCommandID\"}");
+  EXPECT_EQ(json_string, result);
 }
 
 TEST(FormatterJsonRPCTest, RequestWithoutType_ToString_Fail) {
@@ -313,6 +366,28 @@ TEST(FormatterJsonRPCTest, ResponseToSmartObject_Success) {
   std::set<std::string> keys = obj["params"].enumerate();
   EXPECT_EQ(5u, keys.size());
 }
-}  // namespace formatters
+
+TEST(FormatterJsonRPCTest, StringWithUpperBoundValueToSmartObject_Success) {
+  // Source Json string
+  const std::string json_string(
+      "{\"jsonrpc\":\"2.0\",\"method\":\"BasicCommunication.OnSystemRequest\","
+      "\"params\":{\"fileName\":\"filename\",\"length\":100000000000,"
+      "\"requestType\":\"PROPRIETARY\"}}");
+  // Smart Object to keep result
+  SmartObject obj;
+  // Convert json string to smart object
+
+  int32_t res = FormatterJsonRpc::FromString<hmi_apis::FunctionID::eType,
+                                             hmi_apis::messageType::eType>(
+      json_string, obj);
+  // Get keys collection from Smart Object
+  EXPECT_EQ(0, res);
+  EXPECT_EQ(big_64int, obj["msg_params"]["length"].asInt());
+  EXPECT_EQ(str_with_big_int64, obj["msg_params"]["length"].asString());
+  std::set<std::string> keys = obj["params"].enumerate();
+  EXPECT_EQ(4u, keys.size());
+}
+
+}  // namespace formatters_test
 }  // namespace components
 }  // namespace test
