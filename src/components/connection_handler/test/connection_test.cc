@@ -37,7 +37,8 @@
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol/service_type.h"
 #include "utils/shared_ptr.h"
-#include "security_manager_mock.h"
+#include "security_manager/mock_security_manager.h"
+#include "security_manager/mock_ssl_context.h"
 #include "config_profile/profile.h"
 
 #define EXPECT_RETURN_TRUE true
@@ -346,7 +347,7 @@ TEST_F(ConnectionTest, RemoveSession) {
 TEST_F(ConnectionTest, SetSSLContextWithoutSession) {
   // random value. Session was not started
   uint8_t session_id = 10;
-  security_manager_test::SSLContextMock mock_ssl_context;
+  security_manager_test::MockSSLContext mock_ssl_context;
   int setResult = connection_->SetSSLContext(session_id, &mock_ssl_context);
   EXPECT_EQ(security_manager::SecurityManager::ERROR_INTERNAL, setResult);
 }
@@ -367,7 +368,7 @@ TEST_F(ConnectionTest, SetGetSSLContext) {
 
   EXPECT_EQ(NULL, connection_->GetSSLContext(session_id, kMobileNav));
 
-  security_manager_test::SSLContextMock mock_ssl_context;
+  security_manager_test::MockSSLContext mock_ssl_context;
   // Set SSLContext
   int setResult = connection_->SetSSLContext(session_id, &mock_ssl_context);
   EXPECT_EQ(security_manager::SecurityManager::ERROR_SUCCESS, setResult);
