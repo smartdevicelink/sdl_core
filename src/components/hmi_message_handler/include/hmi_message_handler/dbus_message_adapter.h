@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_DBUS_MESSAGE_ADAPTER_H_
 
 #include <string>
-#include "hmi_message_handler/hmi_message_adapter.h"
+#include "hmi_message_handler/hmi_message_adapter_impl.h"
 #include "dbus/dbus_message_controller.h"
 #include "smart_objects/smart_object.h"
 
@@ -46,7 +46,7 @@ namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
  * \brief adapter for DBus
  */
 class DBusMessageAdapter
-    : public HMIMessageAdapter,
+    : public HMIMessageAdapterImpl,
       public dbus::DBusMessageController {
  public:
   typedef utils::SharedPtr<application_manager::Message> MessageSharedPointer;

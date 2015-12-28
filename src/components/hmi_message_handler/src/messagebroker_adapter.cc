@@ -45,7 +45,7 @@ typedef NsMessageBroker::CMessageBrokerController MessageBrokerController;
 MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler_param,
     const std::string& server_address,
     uint16_t port)
-  : HMIMessageAdapter(handler_param),
+  : HMIMessageAdapterImpl(handler_param),
     MessageBrokerController(server_address, port, "SDL") {
   LOG4CXX_INFO(logger_, "Created MessageBrokerAdapter");
 }
