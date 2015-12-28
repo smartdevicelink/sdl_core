@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,15 +30,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_IMPL_H_
+#define SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_IMPL_H_
+
 #include "hmi_message_handler/hmi_message_adapter.h"
+#include "hmi_message_handler/hmi_message_handler.h"
 
 namespace hmi_message_handler {
-HMIMessageAdapter::HMIMessageAdapter(HMIMessageHandler* handler)
-    : handler_(handler) {
-}
 
-HMIMessageAdapter::~HMIMessageAdapter() {
-  handler_ = 0;
-}
+class HMIMessageAdapterImpl : public HMIMessageAdapter {
+ public:
+  /**
+   * \brief Constructor
+   * \param handler Pointer to implementation of HMIMessageHandler abstract
+   * class
+   * to notify it about receiving message or error on sending message.
+   */
+  explicit HMIMessageAdapterImpl(HMIMessageHandler* handler);
+
+  /**
+   * \brief Destructor
+   */
+  virtual ~HMIMessageAdapterImpl();
+
+ protected:
+  inline virtual HMIMessageHandler* handler() const {
+    return handler_;
+  }
+
+ private:
+  /**
+   *\brief Pointer on handler to notify it about receiving message/error.
+   */
+  mutable HMIMessageHandler* handler_;
+};
 
 }  // namespace hmi_message_handler
+
+#endif  // SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_IMPL_H_
