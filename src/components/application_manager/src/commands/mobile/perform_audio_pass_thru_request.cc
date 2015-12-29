@@ -31,7 +31,6 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string.h>
 #include "application_manager/commands/mobile/perform_audio_pass_thru_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -118,8 +117,10 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::UI_PerformAudioPassThru: {
       LOG4CXX_INFO(logger_, "Received UI_PerformAudioPassThru");
 
-      if (!WaitTTSSpeak())
+      if (!WaitTTSSpeak()) {
+        LOG4CXX_AUTO_TRACE(logger_);
         return;
+      }
 
       mobile_apis::Result::eType mobile_code =
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
@@ -329,9 +330,10 @@ bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
   return false;
 }
 
-void PerformAudioPassThruRequest::FinishTTSSpeak(){
+void PerformAudioPassThruRequest::FinishTTSSpeak() {
   LOG4CXX_AUTO_TRACE(logger_);
   if (ApplicationManagerImpl::instance()->end_audio_pass_thru()) {
+    LOG4CXX_DEBUG(logger_, "Stop AudioPassThru.");
     ApplicationManagerImpl::instance()->
         StopAudioPassThru(connection_key());
   }
@@ -345,18 +347,18 @@ void PerformAudioPassThruRequest::FinishTTSSpeak(){
 
 bool PerformAudioPassThruRequest::WaitTTSSpeak() {
   LOG4CXX_AUTO_TRACE(logger_);
-  uint32_t default_timeout_msec =
+  uint64_t default_timeout_msec =
       profile::Profile::instance()->default_timeout();
-  TimevalStruct start_time = date_time::DateTime::getCurrentTime();
+  const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
 
   // Waiting for TTS_Speak
   while (is_active_tts_speak_) {
-    int64_t difference_between_start_current_time
+    uint64_t difference_between_start_current_time
         = date_time::DateTime::calculateTimeSpan(start_time);
     // Send GENERIC_ERROR after default timeout
     if (difference_between_start_current_time > default_timeout_msec) {
-      LOG4CXX_ERROR(logger_, "Expired timeout for TTS.Speak response");
-      // Don't using onTimeOut(), becouse there default time is bigger than
+      LOG4CXX_WARN(logger_, "Expired timeout for TTS.Speak response");
+      // Don't use onTimeOut(), becouse default_timeout_ is bigger than
       // Default time in *.ini file
       FinishTTSSpeak();
       SendResponse(false, mobile_apis::Result::eType::GENERIC_ERROR,
