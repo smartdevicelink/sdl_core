@@ -62,30 +62,6 @@ list (APPEND testSources
   sql_pt_representation_test.cc
 )
 
-if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  list(REMOVE_ITEM testLibraries dl)
-  # --- Tests for QDB Wrapper
-  include_directories(../../utils/include/utils)
-  list (APPEND testSources
-        ../../utils/test/qdb_wrapper/sql_database_test.cc
-        ../../utils/test/qdb_wrapper/sql_query_test.cc
-  )
-  file(COPY qdbserver.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-  file(COPY test-qdb.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-  file(COPY policy.sql DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-else ()
-  # --- Tests for SQLite Wrapper
-  find_package(Sqlite3 REQUIRED)
-  include_directories(../../utils/include/utils
-                      ../../utils/test/include )
-  list (APPEND testSources
-    ../../utils/test/sqlite_wrapper/sql_database_test.cc
-    ../../utils/test/sqlite_wrapper/sql_query_test.cc
-    ../../utils/test/generated_code_with_sqlite_test.cc
-  )
-  list (APPEND testLibraries sqlite3)
-endif()
-
 create_test("policy_test" "${testSources}" "${testLibraries}")
 
 file(COPY valid_sdl_pt_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
