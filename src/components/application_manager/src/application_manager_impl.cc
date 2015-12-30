@@ -532,9 +532,13 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
                  : GenerateNewHMIAppID());
   }
 
-  ApplicationListAccessor app_list_accesor;
+  // Add application to registered app list and set appropriate mark.
+  // Lock has to be released before adding app to policy DB to avoid possible
+  // deadlock with simultaneous PTU processing
+  applications_list_lock_.Acquire();
   application->MarkRegistered();
-  app_list_accesor.Insert(application);
+  applications_.insert(application);
+  applications_list_lock_.Release();
 
   policy::PolicyHandler::instance()->AddApplication(
       application->mobile_app_id());
