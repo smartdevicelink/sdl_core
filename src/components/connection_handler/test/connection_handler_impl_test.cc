@@ -37,7 +37,8 @@
 #include "protocol/common.h"
 #include "config_profile/profile.h"
 // TODO(EZamakhov): move security test
-#include "security_manager_mock.h"
+#include "security_manager/mock_security_manager.h"
+#include "security_manager/mock_ssl_context.h"
 #include "protocol_handler_mock.h"
 #include "connection_handler_observer_mock.h"
 #include "transport_manager_mock.h"
@@ -918,7 +919,7 @@ TEST_F(ConnectionHandlerTest, SetSSLContext) {
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kControl),
       reinterpret_cast<security_manager::SSLContext *>(NULL));
 
-  testing::StrictMock<security_manager_test::SSLContextMock> mock_ssl_context;
+  testing::StrictMock<security_manager_test::MockSSLContext> mock_ssl_context;
   // Error on no connection
   EXPECT_EQ(
       connection_handler_->SetSSLContext(connection_key_, &mock_ssl_context),
@@ -959,7 +960,7 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByProtectedService) {
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kControl),
       reinterpret_cast<security_manager::SSLContext *>(NULL));
 
-  testing::StrictMock<security_manager_test::SSLContextMock> mock_ssl_context;
+  testing::StrictMock<security_manager_test::MockSSLContext> mock_ssl_context;
   AddTestDeviceConnection();
   AddTestSession();
   EXPECT_EQ(
@@ -983,7 +984,7 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByProtectedService) {
       &mock_ssl_context);
 }
 TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtectedRPC) {
-  testing::StrictMock<security_manager_test::SSLContextMock> mock_ssl_context;
+  testing::StrictMock<security_manager_test::MockSSLContext> mock_ssl_context;
   AddTestDeviceConnection();
   AddTestSession();
   EXPECT_EQ(
@@ -1010,7 +1011,7 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtectedRPC) {
       &mock_ssl_context);
 }
 TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtectedBulk) {
-  testing::StrictMock<security_manager_test::SSLContextMock> mock_ssl_context;
+  testing::StrictMock<security_manager_test::MockSSLContext> mock_ssl_context;
   AddTestDeviceConnection();
   AddTestSession();
   EXPECT_EQ(
