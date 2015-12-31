@@ -791,13 +791,7 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
     }
   }
 
-  // In case of malformed message the connection should be broke up without
-  // any other notification to mobile.
-  if (close_reason != kMalformed) {
-    if (protocol_handler_) {
-      protocol_handler_->SendEndSession(connection_handle, session_id);
-    }
-
+  if (connection_handler_observer_) {
     SessionMap::const_iterator session_map_itr = session_map.find(session_id);
     if (session_map_itr != session_map.end()) {
       const uint32_t session_key = KeyFromPair(connection_id, session_id);
@@ -816,8 +810,8 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
       LOG4CXX_ERROR(logger_, "Session with id: " << session_id << " not found");
       return;
     }
-    LOG4CXX_DEBUG(logger_, "Session with id: " << session_id << " has been closed successfully");
   }
+  LOG4CXX_DEBUG(logger_, "Session with id: " << session_id << " has been closed successfully");
 }
 
 void ConnectionHandlerImpl::CloseConnectionSessions(
