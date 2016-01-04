@@ -33,7 +33,6 @@
 #include "gtest/gtest.h"
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
-#include "utils/macro.h"
 
 #include "hmi_message_handler/hmi_message_handler_impl.h"
 #include "hmi_message_handler/hmi_message_adapter_impl_for_testing.h"
@@ -42,14 +41,10 @@ namespace test {
 namespace components {
 namespace hmi_message_handler_test {
 
-using hmi_message_handler::HMIMessageHandler;
 using hmi_message_handler::HMIMessageHandlerImpl;
-using hmi_message_handler::HMIMessageAdapterImpl;
-using hmi_message_handler::MessageSharedPointer;
 
 typedef utils::SharedPtr<HMIMessageAdapterImplForTesting>
     HMIMessageAdapterImplForTestingSPtr;
-
 
 class HMIMessageAdapterImplTest : public ::testing::Test {
  protected:
