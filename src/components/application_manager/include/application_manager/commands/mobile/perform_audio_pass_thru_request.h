@@ -114,6 +114,13 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
   bool IsWhiteSpaceExist();
 
   /**
+   * @brief Waiting for TTS.Speak response, after default timeout send
+   * GENERIC_ERROR response
+   * @return if receive TTS.Speak return TRUE, FALSE otherwise
+   */
+  bool WaitTTSSpeak();
+
+  /**
    * @brief If is_active_tts_speak_ TRUE - set up to FALSE and send request
    * TTS_StopSpeaking to HMI
    */
