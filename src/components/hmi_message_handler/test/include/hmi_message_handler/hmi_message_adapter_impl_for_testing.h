@@ -49,7 +49,9 @@ class HMIMessageAdapterImplForTesting : public HMIMessageAdapterImpl {
   virtual void SubscribeTo() OVERRIDE {}
   virtual void SendMessageToHMI(MessageSharedPointer SPtr) OVERRIDE {}
 
-  friend class HMIMessageAdapterImplTest;
+  inline HMIMessageHandler* get_handler(){
+    return HMIMessageAdapterImpl::handler();
+  }
 };
 
 }  // namespace hmi_message_handler_test
