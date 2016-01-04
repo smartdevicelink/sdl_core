@@ -31,6 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "application_manager/commands/mobile/perform_audio_pass_thru_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -115,10 +116,10 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_PerformAudioPassThru: {
-      LOG4CXX_INFO(logger_, "Received UI_PerformAudioPassThru");
+      LOG4CXX_TRACE(logger_, "Received UI_PerformAudioPassThru");
 
       if (!WaitTTSSpeak()) {
-        LOG4CXX_AUTO_TRACE(logger_);
+        LOG4CXX_DEBUG(logger_, "TTS.Speak is absent");
         return;
       }
 
@@ -358,7 +359,7 @@ bool PerformAudioPassThruRequest::WaitTTSSpeak() {
     // Send GENERIC_ERROR after default timeout
     if (difference_between_start_current_time > default_timeout_msec) {
       LOG4CXX_WARN(logger_, "Expired timeout for TTS.Speak response");
-      // Don't use onTimeOut(), becouse default_timeout_ is bigger than
+      // Don't use onTimeOut(), because default_timeout_ is bigger than
       // Default time in *.ini file
       FinishTTSSpeak();
       SendResponse(false, mobile_apis::Result::eType::GENERIC_ERROR,
