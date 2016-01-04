@@ -47,7 +47,7 @@ MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler_param,
     uint16_t port)
   : HMIMessageAdapterImpl(handler_param),
     MessageBrokerController(server_address, port, "SDL") {
-  LOG4CXX_INFO(logger_, "Created MessageBrokerAdapter");
+  LOG4CXX_TRACE(logger_, "Created MessageBrokerAdapter");
 }
 
 
@@ -56,16 +56,17 @@ MessageBrokerAdapter::~MessageBrokerAdapter() {
 
 void MessageBrokerAdapter::SendMessageToHMI(
   hmi_message_handler::MessageSharedPointer message) {
-  LOG4CXX_INFO(logger_, "MessageBrokerAdapter::sendMessageToHMI");
-  /*if (!message) {
-   // TODO(PV): LOG
-   return;
-   }*/
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!message.valid()) {
+    LOG4CXX_ERROR(logger_, "Can`t send not valid message");
+    return;
+  }
 
   Json::Reader reader;
   Json::Value json_value;
   if (!reader.parse(message->json_message(), json_value, false)) {
-    // TODO(PV): LOG4CXX_ERROR(mLogger, "Received invalid json string.");
+    LOG4CXX_ERROR(logger_, "Received invalid json string.");
     return;
   }
 
