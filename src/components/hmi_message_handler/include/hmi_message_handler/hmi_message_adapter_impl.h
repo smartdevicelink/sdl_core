@@ -54,7 +54,7 @@ class HMIMessageAdapterImpl : public HMIMessageAdapter {
   virtual ~HMIMessageAdapterImpl();
 
  protected:
-  inline virtual HMIMessageHandler* handler() const {
+  virtual HMIMessageHandler* handler() const {
     return handler_;
   }
 
@@ -62,7 +62,7 @@ class HMIMessageAdapterImpl : public HMIMessageAdapter {
   /**
    *\brief Pointer on handler to notify it about receiving message/error.
    */
-  mutable HMIMessageHandler* handler_;
+  HMIMessageHandler* handler_;
 };
 
 }  // namespace hmi_message_handler
