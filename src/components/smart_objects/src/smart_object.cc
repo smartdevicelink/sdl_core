@@ -244,7 +244,7 @@ SmartObject::SmartObject(uint32_t InitialValue)
 uint64_t SmartObject::asUInt() const {
   const int64_t convert = convert_int();
   if (convert <= invalid_int_value) {
-      return invalid_unsigned_int_value;
+    return invalid_unsigned_int_value;
   }
   return static_cast<uint64_t>(convert);
 }
@@ -298,7 +298,6 @@ SmartObject& SmartObject::operator=(const uint64_t NewValue) {
   }
   return *this;
 }
-
 
 // =============================================================
 // DOUBLE TYPE SUPPORT

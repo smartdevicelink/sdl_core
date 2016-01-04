@@ -41,12 +41,12 @@ long long int utils::ConvertInt64ToLongLongInt(const int64_t value) {
 }
 
 int64_t utils::ConvertLongLongIntToInt64(long long int value) {
-  if (value <= std::numeric_limits<int64_t>::min()) {
-    return std::min<int64_t>(value, std::numeric_limits<int64_t>::min());
-  }
-  if (value >= std::numeric_limits<int64_t>::max()) {
-    return std::max<int64_t>(value, std::numeric_limits<int64_t>::max());
-  }
+  DCHECK_OR_RETURN(
+      value >= std::numeric_limits<int64_t>::min(),
+      std::min<int64_t>(value, std::numeric_limits<int64_t>::min()));
+  DCHECK_OR_RETURN(
+      value <= std::numeric_limits<int64_t>::max(),
+      std::max<int64_t>(value, std::numeric_limits<int64_t>::max()));
   return static_cast<int64_t>(value);
 }
 
@@ -55,11 +55,12 @@ unsigned long long int utils::ConvertUInt64ToLongLongUInt(uint64_t value) {
 }
 
 uint64_t utils::ConvertLongLongUIntToUInt64(unsigned long long int value) {
-  if (value <= std::numeric_limits<uint64_t>::min()) {
-    return std::min<uint64_t>(value, std::numeric_limits<uint64_t>::min());
-  }
-  if (value >= std::numeric_limits<uint64_t>::max()) {
-    return std::max<uint64_t>(value, std::numeric_limits<uint64_t>::max());
-  }
+  DCHECK_OR_RETURN(
+      value >= std::numeric_limits<uint64_t>::min(),
+      std::min<uint64_t>(value, std::numeric_limits<uint64_t>::min()));
+  DCHECK_OR_RETURN(
+      value <= std::numeric_limits<uint64_t>::max(),
+      std::max<uint64_t>(value, std::numeric_limits<uint64_t>::max()));
+
   return static_cast<uint64_t>(value);
 }
