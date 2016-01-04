@@ -1,4 +1,4 @@
-##### Note: Please use the [develop](https://github.com/smartdevicelink/sdl_core/tree/develop) or [release candidate](https://github.com/smartdevicelink/sdl_core/tree/release/4.0.0) branches of sdl_core for the most stable versions.
+##### Note: Please use the [develop](https://github.com/smartdevicelink/sdl_core/tree/develop) or [master](https://github.com/smartdevicelink/sdl_core) branches of sdl_core for the most stable versions.
 
 # SmartDeviceLink (SDL)
 
