@@ -46,13 +46,17 @@ using hmi_message_handler::HMIMessageHandlerImpl;
 typedef utils::SharedPtr<HMIMessageAdapterImplForTesting>
     HMIMessageAdapterImplForTestingSPtr;
 
-TEST(HMIMessageAdapterImplTest,
-       Handler_CorrectPointer_CorrectReturnedPointer) {
+TEST(HMIMessageAdapterImplTest, Handler_CorrectPointer_CorrectReturnedPointer) {
   HMIMessageHandler* message_handler = HMIMessageHandlerImpl::instance();
   HMIMessageAdapterImplForTestingSPtr message_adapter_impl =
       utils::MakeShared<HMIMessageAdapterImplForTesting>(message_handler);
 
   EXPECT_EQ(message_handler, message_adapter_impl->get_handler());
+
+  message_handler = NULL;
+  if (HMIMessageHandlerImpl::exists()) {
+    HMIMessageHandlerImpl::destroy();
+  }
 }
 
 TEST(HMIMessageAdapterImplTest, Handler_NULLPointer_CorrectReturnedPointer) {
