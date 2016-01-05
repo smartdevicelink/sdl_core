@@ -30,7 +30,6 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-
 #include "gmock/gmock.h"
 #include "hmi_message_handler/hmi_message_adapter_impl.h"
 #include "hmi_message_handler/hmi_message_handler.h"
@@ -48,12 +47,10 @@ class MockHMIMessageAdapterImpl : public HMIMessageAdapterImpl {
   MockHMIMessageAdapterImpl(HMIMessageHandler* handler)
       : HMIMessageAdapterImpl(handler) {}
 
-  MOCK_METHOD0(SubscribeTo,
-      void());
-  MOCK_METHOD1(SendMessageToHMI,
-      void(MessageSharedPointer SPtr));
+  MOCK_METHOD0(SubscribeTo, void());
+  MOCK_METHOD1(SendMessageToHMI, void(MessageSharedPointer SPtr));
 
-  HMIMessageHandler* get_handler(){
+  HMIMessageHandler* get_handler() {
     return HMIMessageAdapterImpl::handler();
   }
 };

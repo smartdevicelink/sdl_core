@@ -36,7 +36,6 @@
 #include "gmock/gmock.h"
 #include "hmi_message_handler/hmi_message_handler.h"
 
-
 namespace test {
 namespace components {
 namespace hmi_message_handler_test {
