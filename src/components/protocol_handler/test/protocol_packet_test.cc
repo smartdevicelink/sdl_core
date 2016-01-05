@@ -196,6 +196,20 @@ TEST_F(ProtocolPacketTest, DeserializeNonZeroPacket) {
   EXPECT_EQ(RESULT_OK, res);
 }
 
+TEST_F(ProtocolPacketTest, DeserializePacket_FrameTypeFirst_ResultOK) {
+  // Arrange
+  // Set protol version - 2 and frame type - first
+  uint8_t message[] = {0x22};
+  ProtocolPacket protocol_packet;
+  // Act
+  RESULT_CODE res =
+    protocol_packet.deserializePacket(message, PROTOCOL_HEADER_V2_SIZE);
+  uint8_t frame_type = protocol_packet.frame_type();
+  EXPECT_EQ(FRAME_TYPE_FIRST, frame_type);
+  // Assert
+  EXPECT_EQ(RESULT_OK, res);
+}
+
 }  // namespace protocol_handler_test
 }  // namespace components
 }  // namespace test
