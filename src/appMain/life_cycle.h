@@ -99,7 +99,7 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     security_manager::SecurityManager* security_manager_;
 #endif  // ENABLE_SECURITY
     hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
-    hmi_message_handler::HMIMessageAdapter* hmi_message_adapter_;
+    hmi_message_handler::HMIMessageAdapterImpl* hmi_message_adapter_;
     media_manager::MediaManagerImpl* media_manager_;
 #ifdef TIME_TESTER
     time_tester::TimeManager* time_tester_;
