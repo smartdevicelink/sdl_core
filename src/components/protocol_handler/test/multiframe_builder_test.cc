@@ -156,6 +156,10 @@ class MultiFrameBuilderTest : public ::testing::Test {
 
   void VerifyConsecutiveAdd(const MutiframeData& multiframe_data);
 
+  void RemoveConnection(const ConnectionID connection_id);
+
+  void RemoveConnections();
+
   MultiFrameBuilder multiframe_builder_;
   MultiFrameTestMap test_data_map_;
   static size_t mtu_;
@@ -282,6 +286,8 @@ TEST_F(MultiFrameBuilderTest, Add_ConsecutiveFrame) {
   const MutiframeData& multiframe_data = messageId_map.begin()->second;
 
   VerifyConsecutiveAdd(multiframe_data);
+
+  RemoveConnection(connection_id);
 }
 
 TEST_F(MultiFrameBuilderTest, Add_ConsecutiveFrames_OneByOne) {
@@ -302,6 +308,7 @@ TEST_F(MultiFrameBuilderTest, Add_ConsecutiveFrames_OneByOne) {
       }
     }
   }
+  RemoveConnections();
 }
 
 TEST_F(MultiFrameBuilderTest, Add_ConsecutiveFrames_per1) {
@@ -399,6 +406,17 @@ TEST_F(MultiFrameBuilderTest, FrameExpired_OneMSec) {
   ASSERT_FALSE(list.empty());
   EXPECT_EQ(first_frame,
             list.front());
+
+  RemoveConnection(connection_id);
+}
+
+TEST_F(MultiFrameBuilderTest, RemoveConnection_NoConnection_ResultFail) {
+  // Arrange
+  const ConnectionID& connection_id = test_data_map_.begin()->first;
+  // Act
+  const bool connection_result = multiframe_builder_.RemoveConnection(connection_id);
+  // Assert
+  ASSERT_FALSE(connection_result);
 }
 
 /*
@@ -514,6 +532,18 @@ void MultiFrameBuilderTest::AddConnections() {
        connection_it != test_data_map_.end(); ++connection_it) {
     const ConnectionID connection_id = connection_it->first;
     ASSERT_TRUE(multiframe_builder_.AddConnection(connection_id));
+  }
+}
+
+void MultiFrameBuilderTest::RemoveConnection(const ConnectionID connection_id) {
+  ASSERT_TRUE(multiframe_builder_.RemoveConnection(connection_id));
+}
+
+void MultiFrameBuilderTest::RemoveConnections() {
+  for (MultiFrameTestMap::iterator connection_it = test_data_map_.begin();
+      connection_it != test_data_map_.end(); ++connection_it) {
+    const ConnectionID connection_id = connection_it->first;
+    ASSERT_TRUE(multiframe_builder_.RemoveConnection(connection_id));
   }
 }
 

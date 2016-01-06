@@ -205,8 +205,8 @@ TEST_F(ProtocolPacketTest, DeserializePacket_FrameTypeFirst_ResultOK) {
   RESULT_CODE res =
     protocol_packet.deserializePacket(message, PROTOCOL_HEADER_V2_SIZE);
   uint8_t frame_type = protocol_packet.frame_type();
-  EXPECT_EQ(FRAME_TYPE_FIRST, frame_type);
   // Assert
+  EXPECT_EQ(FRAME_TYPE_FIRST, frame_type);
   EXPECT_EQ(RESULT_OK, res);
 }
 
