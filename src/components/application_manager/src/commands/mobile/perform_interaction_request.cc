@@ -419,6 +419,9 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
     } else if (msg_params.keyExists(strings::manual_text_entry)) {
       msg_params[strings::trigger_source] =
           mobile_apis::TriggerSource::TS_KEYBOARD;
+      if (msg_params[strings::manual_text_entry].empty()) {
+        msg_params.erase(strings::manual_text_entry);
+      }
     }
   }
 
