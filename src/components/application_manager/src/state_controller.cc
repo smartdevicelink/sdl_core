@@ -66,29 +66,56 @@ void StateController::HmiLevelConflictResolver::operator ()
   using namespace mobile_apis;
   using namespace helpers;
   DCHECK_OR_RETURN_VOID(state_ctrl_);
-  if (to_resolve == applied_)
-    return;
-  if (Compare<HMILevel::eType, EQ, ONE>(state_->hmi_level(),
-                                        HMILevel::HMI_FULL,
-                                        HMILevel::HMI_LIMITED)) {
-    HmiStatePtr cur_state = to_resolve->RegularHmiState();
-    if (Compare<HMILevel::eType, EQ, ONE>(cur_state->hmi_level(),
-                                          HMILevel::HMI_FULL,
-                                          HMILevel::HMI_LIMITED)) {
-      if (applied_->IsAudioApplication() && state_ctrl_->IsSameAppType(applied_, to_resolve)) {
-        state_ctrl_->SetupRegularHmiState(to_resolve, HMILevel::HMI_BACKGROUND,
-                     AudioStreamingState::NOT_AUDIBLE);
-      } else if (HMILevel::HMI_FULL == state_->hmi_level() &&
-          HMILevel::HMI_FULL == cur_state->hmi_level()) {
-        LOG4CXX_DEBUG(logger_, "HMI level will be changed for application with appID="
-                      <<to_resolve->app_id());
-        state_ctrl_->SetupRegularHmiState(to_resolve, HMILevel::HMI_LIMITED,
-                     AudioStreamingState::AUDIBLE);
-      } else {
-        LOG4CXX_DEBUG(logger_, "HMI will not be changed level for application with appID="
-                      <<to_resolve->app_id());
-      }
-    }
+  if (to_resolve == applied_) return;
+  HmiStatePtr cur_state = to_resolve->RegularHmiState();
+
+  const bool applied_grabs_audio =
+      Compare<HMILevel::eType, EQ, ONE>(state_->hmi_level(), HMILevel::HMI_FULL,
+                                        HMILevel::HMI_LIMITED) &&
+      applied_->IsAudioApplication();
+  const bool applied_grabs_full = state_->hmi_level() == HMILevel::HMI_FULL;
+  const bool to_resolve_handles_full =
+      cur_state->hmi_level() == HMILevel::HMI_FULL;
+  const bool to_resolve_handles_audio =
+      Compare<HMILevel::eType, EQ, ONE>(
+          cur_state->hmi_level(), HMILevel::HMI_FULL, HMILevel::HMI_LIMITED) &&
+      to_resolve->IsAudioApplication();
+  const bool same_app_type = state_ctrl_->IsSameAppType(applied_, to_resolve);
+
+  // If applied Hmi state is FULL:
+  //  all not audio applications will get BACKGROUND
+  //  all applications with same HMI type will get BACKGROUND
+  //  all audio applications with other HMI type(navi, vc, media) in FULL will
+  //  get LIMMITED HMI level
+
+  // If applied Hmi state is LIMITED:
+  //  all applications with other HMI types will save HMI states
+  //  all not audio  applications will save HMI states
+  //  all applications with same HMI type will get BACKGROUND
+
+  // If applied Hmi state is BACKGROUND:
+  //  all applications will save HMI states
+
+  HMILevel::eType result_hmi_level = cur_state->hmi_level();
+  if (applied_grabs_full && to_resolve_handles_audio && !same_app_type)
+    result_hmi_level = HMILevel::HMI_LIMITED;
+
+  if ((applied_grabs_full && to_resolve_handles_full &&
+       !to_resolve->IsAudioApplication()) ||
+      (applied_grabs_audio && to_resolve_handles_audio && same_app_type))
+    result_hmi_level = HMILevel::HMI_BACKGROUND;
+
+  if (cur_state->hmi_level() != result_hmi_level) {
+    LOG4CXX_DEBUG(logger_, "Application " << to_resolve->app_id()
+                                          << " will change HMI level to "
+                                          << result_hmi_level);
+    state_ctrl_->SetupRegularHmiState(to_resolve, result_hmi_level,
+                                      result_hmi_level == HMILevel::HMI_LIMITED
+                                          ? AudioStreamingState::AUDIBLE
+                                          : AudioStreamingState::NOT_AUDIBLE);
+  } else {
+    LOG4CXX_DEBUG(logger_, "Application " << to_resolve->app_id()
+                                          << " will not change HMI level");
   }
 }
 
@@ -250,10 +277,15 @@ void StateController::ApplyRegularState(ApplicationSharedPtr app,
 }
 
 bool StateController::IsSameAppType(ApplicationConstSharedPtr app1,
-                                  ApplicationConstSharedPtr app2) {
-    return app1->is_media_application() == app2->is_media_application() ||
-           app1->is_navi() == app2->is_navi() ||
-           app1->is_voice_communication_supported() == app2->is_voice_communication_supported();
+                                    ApplicationConstSharedPtr app2) {
+  const bool both_media =
+      app1->is_media_application() && app2->is_media_application();
+  const bool both_navi = app1->is_navi() && app2->is_navi();
+  const bool both_vc = app1->is_voice_communication_supported() &&
+                       app2->is_voice_communication_supported();
+  const bool both_simple =
+      !app1->IsAudioApplication() && !app2->IsAudioApplication();
+  return both_simple || both_media || both_navi || both_vc;
 }
 
 void StateController::on_event(const event_engine::Event& event) {
