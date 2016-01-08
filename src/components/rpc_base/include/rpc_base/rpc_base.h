@@ -393,6 +393,8 @@ class Optional {
     const T& operator*() const;
     T* operator->();
     const T* operator->() const;
+
+    void assign_if_valid(const Optional<T>& value);
     // For pointer-like 'if (optional_value)' tests
     // Better than operator bool because bool can be implicitly
     // casted to integral types
