@@ -824,6 +824,17 @@ class ResumptionDataDB : public ResumptionData {
    */
   utils::dbms::SQLDatabase* db() const;
 
+  /**
+   * @brief Updates grammarID for application
+   * @param policy_app_id Application ID
+   * @param device_id Device ID
+   * @param grammar_id GrammarID
+   * @return true if succedeed, otherwise - false
+   */
+  bool UpdateGrammarID(const std::string& policy_app_id,
+                       const std::string& device_id,
+                       const uint32_t grammar_id);
+
   DISALLOW_COPY_AND_ASSIGN(ResumptionDataDB);
 
   utils::dbms::SQLDatabase* db_;
