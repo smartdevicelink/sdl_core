@@ -362,30 +362,21 @@ bool LifeCycle::InitMessageSystem() {
 #endif  // MQUEUE_HMIADAPTER
 
 namespace {
-pthread_t main_thread;
-void sig_handler(int sig) {
-  switch (sig) {
-    case SIGINT:
-      LOG4CXX_DEBUG(logger_, "SIGINT signal has been caught");
-      break;
-    case SIGTERM:
-      LOG4CXX_DEBUG(logger_, "SIGTERM signal has been caught");
-      break;
-    case SIGSEGV:
-      LOG4CXX_DEBUG(logger_, "SIGSEGV signal has been caught");
-      break;
-    default:
-      LOG4CXX_DEBUG(logger_, "Unexpected signal has been caught");
-      break;
-  }
-  /*
-   * Resend signal to the main thread in case it was
-   * caught by another thread
-   */
-  if (pthread_equal(pthread_self(), main_thread) == 0) {
-    LOG4CXX_DEBUG(logger_, "Resend signal to the main thread");
-    if (pthread_kill(main_thread, sig) != 0) {
-      LOG4CXX_FATAL(logger_, "Send signal to thread error");
+  void sig_handler(int sig) {
+    switch(sig) {
+      case SIGINT:
+        LOG4CXX_DEBUG(logger_, "SIGINT signal has been caught");
+        break;
+      case SIGTERM:
+        LOG4CXX_DEBUG(logger_, "SIGTERM signal has been caught");
+        break;
+      case SIGSEGV:
+        LOG4CXX_DEBUG(logger_, "SIGSEGV signal has been caught");
+        exit(EXIT_FAILURE);
+        break;
+      default:
+        LOG4CXX_DEBUG(logger_, "Unexpected signal has been caught");
+        break;
     }
   }
 }
@@ -393,7 +384,6 @@ void sig_handler(int sig) {
 
 void LifeCycle::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  main_thread = pthread_self();
   // First, register signal handlers
   if (!::utils::SubscribeToInterruptSignal(&sig_handler) ||
       !::utils::SubscribeToTerminateSignal(&sig_handler) ||
