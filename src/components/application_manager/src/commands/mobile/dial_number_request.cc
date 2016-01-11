@@ -115,7 +115,18 @@ void DialNumberRequest::on_event(const event_engine::Event& event) {
     }
   }
 
-  SendResponse((mobile_apis::Result::SUCCESS == result_code), result_code);
+  const bool is_success = mobile_apis::Result::SUCCESS == result_code;
+  const bool is_info_valid =
+      message[strings::msg_params].keyExists(strings::info);
+
+  if (is_info_valid) {
+    const char* info_char_array =
+        message[strings::msg_params][strings::info].asCharArray();
+    SendResponse(is_success, result_code, info_char_array);
+    return;
+  }
+
+  SendResponse(is_success, result_code);
 }
 
 void DialNumberRequest::StripNumberParam(std::string &number) {
