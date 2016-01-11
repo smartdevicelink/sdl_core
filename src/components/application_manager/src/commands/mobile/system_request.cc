@@ -41,7 +41,7 @@ Copyright (c) 2013, Ford Motor Company
 #include "interfaces/MOBILE_API.h"
 #include "config_profile/profile.h"
 #include "utils/file_system.h"
-#include "formatters/CFormatterJsonBase.hpp"
+#include "formatters/CFormatterJsonBase.h"
 #include "json/json.h"
 #include "utils/helpers.h"
 

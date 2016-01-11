@@ -35,8 +35,8 @@
 
 #include "smart_objects/smart_object.h"
 
-#include "CFormatterJsonBase.hpp"
-#include "formatters/CSmartFactory.hpp"
+#include "CFormatterJsonBase.h"
+#include "formatters/CSmartFactory.h"
 
 namespace NsSmartDeviceLink {
 namespace NsJSONHandler {

@@ -35,7 +35,7 @@
 #include "json/value.h"
 #include "gtest/gtest.h"
 #include "json/reader.h"
-#include "formatters/CFormatterJsonBase.hpp"
+#include "formatters/CFormatterJsonBase.h"
 #include "formatters/generic_json_formatter.h"
 
 namespace test {

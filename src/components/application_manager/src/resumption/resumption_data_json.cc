@@ -33,7 +33,7 @@
 #include "application_manager/resumption/resumption_data_json.h"
 #include "smart_objects/smart_object.h"
 #include "json/json.h"
-#include "formatters/CFormatterJsonBase.hpp"
+#include "formatters/CFormatterJsonBase.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/smart_object_keys.h"
 #include "resumption/last_state.h"

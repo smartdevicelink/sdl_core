@@ -28,7 +28,7 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#include "formatters/CFormatterJsonSDLRPCv2.hpp"
+#include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "formatters/meta_formatter.h"
 
 namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
