@@ -83,6 +83,7 @@ void ListFilesRequest::Run() {
       //In AppFile to application stored full path to file. In message required
       //to write only name file.
       //Plus one required for move to next letter after '/'.
+    if (i < 1000)
       (*message_)[strings::msg_params][strings::filenames][i++] =
         it->first.substr(it->first.find_last_of('/') + 1);
   }
