@@ -731,7 +731,7 @@ void ResumeCtrl::LoadResumeData() {
     if (IsAppDataResumptionExpired(application)) {
       const std::string device_id = application[strings::device_id].asString();
       const std::string app_id = application[strings::app_id].asString();
-      LOG4CXX_DEBUG(logger_, "Data resumption is expired.");
+      LOG4CXX_INFO(logger_, "Data resumption is expired.");
       LOG4CXX_DEBUG(logger_, "Resumption data for application " << app_id
                     << " and device id " << device_id
                     << " will be dropped.");

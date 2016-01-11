@@ -39,6 +39,7 @@
 #include "application_manager/message_helper.h"
 #include "utils/helpers.h"
 #include "utils/gen_hash.h"
+#include "utils/scope_guard.h"
 
 namespace {
 const std::string kDatabaseName = "resumption";
@@ -754,36 +755,36 @@ bool ResumptionDataDB::UpdateDBVersion() const {
 bool ResumptionDataDB::DropAppDataResumption(const std::string& device_id,
                                              const std::string& app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  utils::ScopeGuard guard = utils::MakeObjGuard(
+                              *db_,
+                              &utils::dbms::SQLDatabase::RollbackTransaction);
+
   db_->BeginTransaction();
   if (!DeleteSavedFiles(app_id, device_id)) {
-    db_->RollbackTransaction();
     return false;
   }
   if (!DeleteSavedSubMenu(app_id, device_id)) {
-    db_->RollbackTransaction();
     return false;
   }
   if (!DeleteSavedSubscriptions(app_id, device_id)) {
-    db_->RollbackTransaction();
     return false;
   }
   if (!DeleteSavedCommands(app_id, device_id)) {
-    db_->RollbackTransaction();
     return false;
   }
   if (!DeleteSavedChoiceSet(app_id, device_id)) {
-    db_->RollbackTransaction();
     return false;
   }
   if (!DeleteSavedGlobalProperties(app_id, device_id)) {
-    db_->RollbackTransaction();
     return false;
   }
   if(!UpdateGrammarID(app_id, device_id, 0)) {
-    db_->RollbackTransaction();
     return false;
   }
   db_->CommitTransaction();
+
+  guard.Dismiss();
   return true;
 }
 
@@ -1459,36 +1460,36 @@ bool ResumptionDataDB::SelectCountFromArray(
 bool ResumptionDataDB::DeleteSavedApplication(const std::string& policy_app_id,
                                               const std::string& device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  utils::ScopeGuard guard = utils::MakeObjGuard(
+                              *db_,
+                              &utils::dbms::SQLDatabase::RollbackTransaction);
+
   db_->BeginTransaction();
   if (!DeleteSavedFiles(policy_app_id, device_id)) {
-    db_->RollbackTransaction();
     return false;
   }
   if (!DeleteSavedSubMenu(policy_app_id, device_id)) {
-    db_->RollbackTransaction();
     return false;
   }
   if (!DeleteSavedSubscriptions(policy_app_id, device_id)) {
-    db_->RollbackTransaction();
     return false;
   }
   if (!DeleteSavedCommands(policy_app_id, device_id)) {
-    db_->RollbackTransaction();
     return false;
   }
   if (!DeleteSavedChoiceSet(policy_app_id, device_id)) {
-    db_->RollbackTransaction();
     return false;
   }
   if (!DeleteSavedGlobalProperties(policy_app_id, device_id)) {
-    db_->RollbackTransaction();
     return false;
   }
   if (!DeleteDataFromApplicationTable(policy_app_id, device_id)) {
-    db_->RollbackTransaction();
     return false;
   }
   db_->CommitTransaction();
+
+  guard.Dismiss();
   return true;
 }
 
