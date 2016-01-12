@@ -306,6 +306,11 @@ class Profile :public protocol_handler::ProtocolHandlerSettings,
      */
     const uint32_t& list_files_in_none() const;
 
+    /**
+     * @brief Return List Files request array size
+     */
+    const uint32_t& list_files_response_size() const;
+
     /*
      * @brief Returns file name for storing applications data
      */
@@ -741,6 +746,7 @@ private:
     uint32_t                        put_file_in_none_;
     uint32_t                        delete_file_in_none_;
     uint32_t                        list_files_in_none_;
+    uint32_t                        list_files_response_size_;
     std::string                     app_info_storage_;
     uint32_t                        heart_beat_timeout_;
     uint16_t                        max_supported_protocol_version_;
