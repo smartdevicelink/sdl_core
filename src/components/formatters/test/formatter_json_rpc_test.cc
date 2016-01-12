@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -348,13 +348,18 @@ TEST(FormatterJsonRPCTest, RequestToSmartObject_Success) {
   // Get keys collection from Smart Object
   std::set<std::string> keys = obj["params"].enumerate();
   EXPECT_EQ(5u, keys.size());
+  EXPECT_EQ(4444, obj["params"]["correlation_id"].asInt());
+  EXPECT_EQ(35, obj["params"]["function_id"].asInt());
+  EXPECT_EQ(0, obj["params"]["message_type"].asInt());
+  EXPECT_EQ(1, obj["params"]["protocol_type"].asInt());
+  EXPECT_EQ(2, obj["params"]["protocol_version"].asInt());
 }
 
 TEST(FormatterJsonRPCTest, ResponseToSmartObject_Success) {
   // Source Json string
   const std::string json_string(
-      "{\n   \"id\" : 4444,\n   \"jsonrpc\" : \"2.0\",\n   \"method\" : "
-      "\"VR.IsReady\"\n}\n");
+      "{\"id\":4440,\"jsonrpc\":\"2.0\",\"result\":{\"code\":0,\"method\":\"VR."
+      "AddCommand\"}}");
   // Smart Object to keep result
   SmartObject obj;
   // Convert json string to smart object
@@ -364,7 +369,13 @@ TEST(FormatterJsonRPCTest, ResponseToSmartObject_Success) {
   EXPECT_EQ(0, result);
   // Get keys collection from Smart Object
   std::set<std::string> keys = obj["params"].enumerate();
-  EXPECT_EQ(5u, keys.size());
+  EXPECT_EQ(6u, keys.size());
+  EXPECT_EQ(0, obj["params"]["code"].asInt());
+  EXPECT_EQ(4440, obj["params"]["correlation_id"].asInt());
+  EXPECT_EQ(38, obj["params"]["function_id"].asInt());
+  EXPECT_EQ(1, obj["params"]["message_type"].asInt());
+  EXPECT_EQ(1, obj["params"]["protocol_type"].asInt());
+  EXPECT_EQ(2, obj["params"]["protocol_version"].asInt());
 }
 
 TEST(FormatterJsonRPCTest, StringWithUpperBoundValueToSmartObject_Success) {
