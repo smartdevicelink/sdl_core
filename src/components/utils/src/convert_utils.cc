@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@ long long int utils::ConvertInt64ToLongLongInt(const int64_t value) {
   return static_cast<long long int>(value);
 }
 
-int64_t utils::ConvertLongLongIntToInt64(long long int value) {
+int64_t utils::ConvertLongLongIntToInt64(const long long int value) {
   DCHECK_OR_RETURN(
       value >= std::numeric_limits<int64_t>::min(),
       std::min<int64_t>(value, std::numeric_limits<int64_t>::min()));
@@ -50,11 +50,11 @@ int64_t utils::ConvertLongLongIntToInt64(long long int value) {
   return static_cast<int64_t>(value);
 }
 
-unsigned long long int utils::ConvertUInt64ToLongLongUInt(uint64_t value) {
+unsigned long long int utils::ConvertUInt64ToLongLongUInt(const uint64_t value) {
   return static_cast<unsigned long long int>(value);
 }
 
-uint64_t utils::ConvertLongLongUIntToUInt64(unsigned long long int value) {
+uint64_t utils::ConvertLongLongUIntToUInt64(const unsigned long long int value) {
   DCHECK_OR_RETURN(
       value >= std::numeric_limits<uint64_t>::min(),
       std::min<uint64_t>(value, std::numeric_limits<uint64_t>::min()));

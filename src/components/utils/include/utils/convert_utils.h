@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,14 +37,28 @@
 
 namespace utils {
 
+/**
+ * Convert int64 value to long long int value
+ * Using when int64 value should be assign to JSON value
+ */
 long long int ConvertInt64ToLongLongInt(const int64_t value);
 
-int64_t ConvertLongLongIntToInt64(long long int value);
+/**
+ * Convert long long int value to int64 value
+ */
+int64_t ConvertLongLongIntToInt64(const long long int value);
 
-unsigned long long int ConvertUInt64ToLongLongUInt(uint64_t value);
+/**
+ * Convert uint64 value to unsigned long long int value
+ * Using when uint64 value should be assign to JSON value
+ */
+unsigned long long int ConvertUInt64ToLongLongUInt(const uint64_t value);
 
-uint64_t ConvertLongLongUIntToUInt64(unsigned long long int value);
+/**
+ * Convert unsigned long long int value to uint64 value
+ */
+uint64_t ConvertLongLongUIntToUInt64(const unsigned long long int value);
 
 }  // namespace utils
 
-#endif // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_CONVERT_UTILS_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_CONVERT_UTILS_H_
