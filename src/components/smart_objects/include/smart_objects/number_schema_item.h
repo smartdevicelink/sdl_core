@@ -124,6 +124,15 @@ bool TNumberSchemaItem<NumberType>::isValidNumberType(SmartType type) {
   }
 }
 
+template <typename InputType, typename OutputType>
+OutputType IntStaticCast(const InputType& value) {
+  DCHECK_OR_RETURN(value >= std::numeric_limits<OutputType>::min(),
+                   std::numeric_limits<OutputType>::min());
+  DCHECK_OR_RETURN(value <= std::numeric_limits<OutputType>::max(),
+                   std::numeric_limits<OutputType>::max());
+  return static_cast<OutputType>(value);
+}
+
 template <typename NumberType>
 Errors::eType TNumberSchemaItem<NumberType>::validate(
     const SmartObject& Object) {
@@ -132,21 +141,9 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(
   }
   NumberType value(0);
   if (typeid(int32_t) == typeid(value)) {
-    DCHECK_OR_RETURN(
-        Object.asInt() >= std::numeric_limits<int32_t>::min(),
-        Errors::OUT_OF_RANGE);
-    DCHECK_OR_RETURN(
-        Object.asInt() <= std::numeric_limits<int32_t>::max(),
-        Errors::OUT_OF_RANGE);
-    value = static_cast<int32_t>(Object.asInt());
+    value = IntStaticCast<int64_t,int32_t>(Object.asInt());
   } else if (typeid(uint32_t) == typeid(value)) {
-    DCHECK_OR_RETURN(
-        Object.asUInt() >= std::numeric_limits<uint32_t>::min(),
-        Errors::OUT_OF_RANGE);
-    DCHECK_OR_RETURN(
-        Object.asUInt() <= std::numeric_limits<uint32_t>::max(),
-        Errors::OUT_OF_RANGE);
-    value = static_cast<uint32_t>(Object.asUInt());
+    value = IntStaticCast<uint64_t,uint32_t>(Object.asUInt());
   } else if (typeid(double) == typeid(value)) {
     value = Object.asDouble();
   } else if (typeid(int64_t) == typeid(value)) {

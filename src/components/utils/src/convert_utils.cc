@@ -37,6 +37,8 @@
 #include "utils/macro.h"
 
 long long int utils::ConvertInt64ToLongLongInt(const int64_t value) {
+  DCHECK(value >= std::numeric_limits<long long int>::min());
+  DCHECK(value <= std::numeric_limits<long long int>::max());
   return static_cast<long long int>(value);
 }
 
@@ -51,6 +53,8 @@ int64_t utils::ConvertLongLongIntToInt64(const long long int value) {
 }
 
 unsigned long long int utils::ConvertUInt64ToLongLongUInt(const uint64_t value) {
+  DCHECK(value >= std::numeric_limits<unsigned long long int>::min());
+  DCHECK(value <= std::numeric_limits<unsigned long long int>::max());
   return static_cast<unsigned long long int>(value);
 }
 
