@@ -157,6 +157,7 @@ const char* kMaxCmdIdKey = "MaxCmdID";
 const char* kPutFileRequestKey = "PutFileRequest";
 const char* kDeleteFileRequestKey = "DeleteFileRequest";
 const char* kListFilesRequestKey = "ListFilesRequest";
+const char* kListFilesResponseSizeKey = "ListFilesResponseSize";
 const char* kDefaultTimeoutKey = "DefaultTimeout";
 const char* kAppResumingTimeoutKey = "ApplicationResumingTimeout";
 const char* kAppSavePersistentDataTimeoutKey = "AppSavePersistentDataTimeout";
@@ -250,6 +251,7 @@ const uint32_t kDefaultAppSavePersistentDataTimeout = 10000;
 const uint32_t kDefaultResumptionDelayBeforeIgn = 30;
 const uint32_t kDefaultResumptionDelayAfterIgn = 30;
 const uint32_t kDefaultHashStringSize = 32;
+const uint32_t kDefaultListFilesResponseSize = 1000;
 
 const uint32_t kDefaultDirQuota = 104857600;
 const uint32_t kDefaultAppTimeScaleMaxRequests = 0;
@@ -326,6 +328,7 @@ Profile::Profile()
       put_file_in_none_(kDefaultPutFileRequestInNone),
       delete_file_in_none_(kDefaultDeleteFileRequestInNone),
       list_files_in_none_(kDefaultListFilesRequestInNone),
+      list_files_response_size_(kDefaultListFilesResponseSize),
       app_info_storage_(kDefaultAppInfoFileName),
       heart_beat_timeout_(kDefaultHeartBeatTimeout),
       policy_snapshot_file_name_(kDefaultPoliciesSnapshotFileName),
@@ -556,6 +559,10 @@ const uint32_t& Profile::delete_file_in_none() const {
 
 const uint32_t& Profile::list_files_in_none() const {
   return list_files_in_none_;
+}
+
+const uint32_t& Profile::list_files_response_size() const {
+  return list_files_response_size_;
 }
 
 const std::string& Profile::app_info_storage() const {
@@ -1108,6 +1115,13 @@ void Profile::UpdateValues() {
                 kFilesystemRestrictionsSection, kListFilesRequestKey);
 
   LOG_UPDATED_VALUE(list_files_in_none_, kListFilesRequestKey,
+                    kFilesystemRestrictionsSection);
+
+  // ListFiles request size
+  ReadUIntValue(&list_files_response_size_, kDefaultListFilesResponseSize,
+                kFilesystemRestrictionsSection, kListFilesResponseSizeKey);
+
+  LOG_UPDATED_VALUE(list_files_response_size_, kListFilesResponseSizeKey,
                     kFilesystemRestrictionsSection);
 
   // Default timeout
