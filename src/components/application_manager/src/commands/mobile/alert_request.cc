@@ -237,6 +237,11 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     is_alert_succeeded_ = false;
     alert_result_ = tts_speak_result_;
   }
+
+  if (mobile_apis::Result::WARNINGS == tts_speak_result_) {
+    alert_result_ = mobile_apis::Result::WARNINGS;
+  }
+
   SendResponse(is_alert_succeeded_, alert_result_,
                response_info.empty() ? NULL : response_info.c_str(),
                &alert_response_params_);
