@@ -65,6 +65,11 @@
 
     #define LOG4CXX_IS_TRACE_ENABLED(loggerPtr) loggerPtr->isTraceEnabled()
 
+    void flush_logger();
+    #define FLUSH_LOGGER() flush_logger()
+
+    #define LOG4CXX_IS_TRACE_ENABLED(logger) logger->isTraceEnabled()
+
     log4cxx_time_t time_now();
 
     #define LOG_WITH_LEVEL(loggerPtr, logLevel, logEvent) \

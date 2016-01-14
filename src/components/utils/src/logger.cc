@@ -51,6 +51,14 @@ void deinit_logger () {
   logger::logger_status = logger::LoggerThreadNotCreated;
 }
 
+void flush_logger() {
+  logger::LoggerStatus snatcher = logger::logger_status;
+  logger::logger_status = logger::DeletingLoggerThread;
+  logger::LogMessageLoopThread::instance()->WaitEmptyQueue();
+  //logger::LogMessageLoopThread::instance()->Shutdown();
+  logger::logger_status = snatcher;
+}
+
 log4cxx_time_t time_now() {
   return apr_time_now();
 }

@@ -41,6 +41,7 @@
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/shared_ptr.h"
+#include "utils/lock.h"
 
 namespace threads {
 
@@ -87,8 +88,12 @@ class MessageLoopThread {
   // Process already posted messages and stop thread processing. Thread-safe.
   void Shutdown();
 
+
   // Added for utils/test/auto_trace_test.cc
   size_t GetMessageQueueSize() const;
+
+  //wait while message queue will be empty
+  void WaitEmptyQueue();
 
  private:
   /*
@@ -110,12 +115,20 @@ class MessageLoopThread {
     Handler& handler_;
     // Message queue that is actually owned by MessageLoopThread
     MessageQueue<Message, Queue>& message_queue_;
+   public:
+    //members for immediate relief MessageQueue
+    sync_primitives::ConditionalVariable relief_notifier;
   };
 
  private:
   MessageQueue<Message, Queue> message_queue_;
   LoopThreadDelegate* thread_delegate_;
   threads::Thread* thread_;
+
+  //members for immediate relief MessageQueue
+  sync_primitives::Lock relief_notifier_lock_;
+  //timeout for wait relief(in miliseconds)
+  static const int32_t kReliefTimeout = 5000;
 };
 
 ///////// Implementation
@@ -156,6 +169,12 @@ void MessageLoopThread<Q>::Shutdown() {
   thread_->join();
 }
 
+template<class Q>
+void MessageLoopThread<Q>::WaitEmptyQueue() {
+  sync_primitives::AutoLock main_lock(relief_notifier_lock_);
+  thread_delegate_->relief_notifier.WaitFor(main_lock, kReliefTimeout);
+}
+
 //////////
 template<class Q>
 MessageLoopThread<Q>::LoopThreadDelegate::LoopThreadDelegate(
@@ -191,6 +210,8 @@ void MessageLoopThread<Q>::LoopThreadDelegate::DrainQue() {
       handler_.Handle(msg);
     }
   }
+  relief_notifier.NotifyOne();
 }
+
 }  // namespace threads
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_THREADS_MESSAGE_LOOP_THREAD_H_
