@@ -798,8 +798,8 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
       const Session &session = session_map_itr->second;
       const ServiceList &service_list = session.service_list;
 
-      ServiceList::const_iterator service_list_itr = service_list.begin();
-      for (;service_list_itr != service_list.end(); ++service_list_itr) {
+      ServiceList::const_reverse_iterator service_list_itr = service_list.rbegin();
+      for (;service_list_itr != service_list.rend(); ++service_list_itr) {
         const protocol_handler::ServiceType service_type =
             service_list_itr->service_type;
         connection_handler_observer_->OnServiceEndedCallback(session_key,
