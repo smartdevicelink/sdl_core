@@ -75,7 +75,7 @@ class MockCacheManagerInterface : public CacheManagerInterface {
   MOCK_METHOD2(GetUpdateUrls,
       void(int service_type, EndpointUrls& end_points));
   MOCK_METHOD1(GetNotificationsNumber,
-      int(const std::string& priority));
+      uint32_t(const std::string& priority));
   MOCK_METHOD2(GetPriority,
       bool(const std::string& policy_app_id, std::string& priority));
   MOCK_METHOD2(GetServiceUrls,

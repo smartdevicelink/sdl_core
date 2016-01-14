@@ -50,6 +50,9 @@
 
 using ::testing::Return;
 using ::testing::NiceMock;
+using ::testing::_;
+using ::testing::SetArgReferee;
+using ::testing::AtLeast;
 
 using ::policy::MockPolicyListener;
 
@@ -69,6 +72,7 @@ namespace custom_str = utils::custom_string;
 
 typedef std::multimap<std::string, policy_table::Rpcs&>
     UserConsentPromptToRpcsConnections;
+
 template <typename T>
 std::string NumberToString(T Number) {
   std::ostringstream ss;
@@ -96,11 +100,21 @@ class PolicyManagerImplTest : public ::testing::Test {
   void SetUp() OVERRIDE {
     manager = new PolicyManagerImpl();
     manager->set_listener(&listener);
+    cache_manager = new MockCacheManagerInterface();
+    manager->set_cache_manager(cache_manager);
   }
 
-  void TearDown() OVERRIDE {
-    delete manager;
-  }
+  void TearDown() OVERRIDE { delete manager; }
+
+  ::testing::AssertionResult IsValid(const policy_table::Table& table) {
+     if (table.is_valid()) {
+       return ::testing::AssertionSuccess();
+     } else {
+       ::rpc::ValidationReport report(" - table");
+       table.ReportErrors(&report);
+       return ::testing::AssertionFailure() << ::rpc::PrettyFormat(report);
+     }
+   }
 };
 
 class PolicyManagerImplTest2 : public ::testing::Test {
@@ -289,6 +303,144 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   }
 };
 
+Json::Value createPTforLoad() {
+  const std::string load_table(
+  "{"
+  "\"policy_table\": {"
+      "\"module_config\": {"
+          "\"preloaded_pt\": true,"
+          "\"exchange_after_x_ignition_cycles\": 10,"
+          "\"exchange_after_x_kilometers\": 100,"
+          "\"exchange_after_x_days\": 5,"
+          "\"timeout_after_x_seconds\": 500,"
+          "\"seconds_between_retries\": [10, 20, 30],"
+          "\"endpoints\": {"
+              "\"0x00\": {"
+                  "\"default\": [\"http://ford.com/cloud/default\"]"
+               "}"
+           "},"
+          "\"notifications_per_minute_by_priority\": {"
+              "\"emergency\": 1,"
+              "\"navigation\": 2,"
+              "\"VOICECOMM\": 3,"
+              "\"communication\": 4,"
+              "\"normal\": 5,"
+              "\"none\": 6"
+           "},"
+          "\"vehicle_make\" : \"MakeT\","
+          "\"vehicle_model\" : \"ModelT\","
+          "\"vehicle_year\": \"2014\""
+       "},"
+      "\"app_policies\": {"
+          "\"default\": {"
+              "\"memory_kb\": 50,"
+              "\"heart_beat_timeout_ms\": 100,"
+              "\"groups\": [\"default\"],"
+              "\"keep_context\": true,"
+              "\"steal_focus\": true,"
+              "\"priority\": \"EMERGENCY\","
+              "\"default_hmi\": \"FULL\","
+              "\"certificate\": \"sign\""
+           "},   "
+          "\"pre_DataConsent\": {"
+              "\"memory_kb\": 50,"
+              "\"heart_beat_timeout_ms\": 100,"
+              "\"groups\": [\"default\"],"
+              "\"keep_context\": true,"
+              "\"steal_focus\": true,"
+              "\"priority\": \"EMERGENCY\","
+              "\"default_hmi\": \"FULL\","
+              "\"certificate\": \"sign\""
+           "},         "
+          "\"device\": {"
+              "\"memory_kb\": 50,"
+              "\"heart_beat_timeout_ms\": 100,"
+              "\"groups\": [\"default\"],"
+              "\"keep_context\": true,"
+              "\"steal_focus\": true,"
+              "\"priority\": \"EMERGENCY\","
+              "\"default_hmi\": \"FULL\","
+              "\"certificate\": \"sign\""
+           "},"
+          "\"1234\": {"
+              "\"memory_kb\": 50,"
+              "\"heart_beat_timeout_ms\": 100,"
+              "\"groups\": [\"default\"],"
+              "\"keep_context\": true,"
+              "\"steal_focus\": true,"
+              "\"priority\": \"EMERGENCY\","
+              "\"default_hmi\": \"FULL\","
+              "\"certificate\": \"sign\""
+           "}"
+       "},"
+      "\"consumer_friendly_messages\": {"
+          "\"version\": \"1.2\""
+       "},"
+      "\"functional_groupings\": {"
+          "\"default\": {"
+              "\"rpcs\": {"
+                  "\"Update\": {"
+                      "\"hmi_levels\": [\"FULL\"],"
+                      "\"parameters\" : [\"speed\"]"
+                  "}"
+              "}"
+          "}"
+      "}"
+    "}"
+  "}");
+
+  Json::Value table(Json::objectValue);
+  Json::Reader reader;
+  EXPECT_TRUE(reader.parse(load_table, table));
+  return table;
+}
+
+TEST_F(PolicyManagerImplTest, GetNotificationsNumber) {
+  std::string priority = "EMERGENCY";
+  uint32_t notif_number = 100;
+  EXPECT_CALL(*cache_manager, GetNotificationsNumber(priority))
+      .WillOnce(Return(notif_number));
+
+  EXPECT_EQ(notif_number, manager->GetNotificationsNumber(priority));
+}
+
+TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
+  // Arrange
+
+  Json::Value table = createPTforLoad();
+  policy_table::Table update(&table);
+  update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
+  // Act
+  std::string json = table.toStyledString();
+  ::policy::BinaryMessage msg(json.begin(), json.end());
+  EXPECT_CALL(listener, OnUpdateStatusChanged(_));
+  EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+
+  std::string priority = "emergency";
+  uint32_t notif_number = manager->GetNotificationsNumber(priority);
+  EXPECT_EQ(1u, notif_number);
+
+  priority = "navigation";
+  notif_number = manager->GetNotificationsNumber(priority);
+  EXPECT_EQ(2u, notif_number);
+
+  priority = "emergency";
+  notif_number = manager->GetNotificationsNumber(priority);
+  EXPECT_EQ(1u, notif_number);
+
+  priority = "VOICECOMM";
+  notif_number = manager->GetNotificationsNumber(priority);
+  EXPECT_EQ(3u, notif_number);
+
+  priority = "normal";
+  notif_number = manager->GetNotificationsNumber(priority);
+  EXPECT_EQ(5u, notif_number);
+
+  priority = "none";
+  notif_number = manager->GetNotificationsNumber(priority);
+  EXPECT_EQ(6u, notif_number);
+}
+
 TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
   // Arrange
   std::ifstream ifile("sdl_preloaded_pt.json");
@@ -304,6 +456,116 @@ TEST_F(PolicyManagerImplTest2, IsAppRevoked_SetRevokedAppID_ExpectAppRevoked) {
   ::policy::BinaryMessage msg(json.begin(), json.end());
   ASSERT_TRUE(manager->LoadPT("file_pt_update.json", msg));
   EXPECT_TRUE(manager->IsApplicationRevoked(app_id1));
+}
+
+TEST_F(PolicyManagerImplTest, IncrementGlobalCounter) {
+  // Assert
+  EXPECT_CALL(*cache_manager, Increment(usage_statistics::SYNC_REBOOTS));
+  manager->Increment(usage_statistics::SYNC_REBOOTS);
+}
+
+TEST_F(PolicyManagerImplTest, IncrementAppCounter) {
+  // Assert
+  EXPECT_CALL(*cache_manager,
+              Increment("12345", usage_statistics::USER_SELECTIONS));
+  manager->Increment("12345", usage_statistics::USER_SELECTIONS);
+}
+
+TEST_F(PolicyManagerImplTest, SetAppInfo) {
+  // Assert
+  EXPECT_CALL(*cache_manager,
+              Set("12345", usage_statistics::LANGUAGE_GUI, "de-de"));
+  manager->Set("12345", usage_statistics::LANGUAGE_GUI, "de-de");
+}
+
+TEST_F(PolicyManagerImplTest, AddAppStopwatch) {
+  // Assert
+  EXPECT_CALL(*cache_manager,
+              Add("12345", usage_statistics::SECONDS_HMI_FULL, 30));
+  manager->Add("12345", usage_statistics::SECONDS_HMI_FULL, 30);
+}
+
+TEST_F(PolicyManagerImplTest, ResetPT) {
+  EXPECT_CALL(*cache_manager, ResetPT("filename"))
+      .WillOnce(Return(true))
+      .WillOnce(Return(false));
+  EXPECT_CALL(*cache_manager, ResetCalculatedPermissions()).Times(AtLeast(1));
+  EXPECT_CALL(*cache_manager, TimeoutResponse());
+  EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_));
+
+  EXPECT_TRUE(manager->ResetPT("filename"));
+  EXPECT_FALSE(manager->ResetPT("filename"));
+}
+
+TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
+  // Arrange
+  Json::Value table = createPTforLoad();
+
+  policy_table::Table update(&table);
+  update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
+
+  // Assert
+  ASSERT_TRUE(IsValid(update));
+
+  EXPECT_CALL(*cache_manager, GetHMIAppTypeAfterUpdate(_)).Times(AtLeast(1));
+
+  // Act
+  std::string json = table.toStyledString();
+  ::policy::BinaryMessage msg(json.begin(), json.end());
+
+  utils::SharedPtr<policy_table::Table> snapshot =
+      new policy_table::Table(update.policy_table);
+  // Assert
+  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
+  EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
+  EXPECT_CALL(listener, GetAppName("1234"))
+      .WillOnce(Return(custom_str::CustomString("")));
+  EXPECT_CALL(listener, OnUpdateStatusChanged(_));
+  EXPECT_CALL(*cache_manager, SaveUpdateRequired(false));
+  EXPECT_CALL(*cache_manager, TimeoutResponse());
+  EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_));
+
+  EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
+}
+
+TEST_F(PolicyManagerImplTest, LoadPT_SetInvalidUpdatePT_PTIsNotLoaded) {
+  // Arrange
+  Json::Value table(Json::objectValue);
+
+  policy_table::Table update(&table);
+  update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
+
+  // Assert update is invalid
+  ASSERT_FALSE(IsValid(update));
+
+  // Act
+  std::string json = table.toStyledString();
+  ::policy::BinaryMessage msg(json.begin(), json.end());
+
+  // Assert
+  EXPECT_CALL(*cache_manager, GenerateSnapshot()).Times(0);
+  EXPECT_CALL(*cache_manager, ApplyUpdate(_)).Times(0);
+  EXPECT_CALL(listener, GetAppName(_)).Times(0);
+  EXPECT_CALL(listener, OnUpdateStatusChanged(_)).Times(1);
+  EXPECT_CALL(*cache_manager, SaveUpdateRequired(false)).Times(0);
+  EXPECT_CALL(*cache_manager, TimeoutResponse()).Times(0);
+  EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_)).Times(0);
+  EXPECT_FALSE(manager->LoadPT("file_pt_update.json", msg));
+}
+
+TEST_F(PolicyManagerImplTest2,
+       KmsChanged_SetExceededKms_ExpectCorrectSchedule) {
+  // Arrange
+  CreateLocalPT("sdl_preloaded_pt.json");
+  ::policy::Counters counter = ::policy::Counters::KILOMETERS;
+  manager->PTUpdatedAt(counter, 50000);
+  EXPECT_EQ("UP_TO_DATE", manager->GetPolicyTableStatus());
+  // Set kms changed but not exceed limit
+  manager->KmsChanged(51500);
+  EXPECT_EQ("UPDATE_NEEDED", manager->GetPolicyTableStatus());
+  // Set kms changed and exceed limit
+  manager->KmsChanged(52500);
+  EXPECT_EQ("UPDATE_NEEDED", manager->GetPolicyTableStatus());
 }
 
 TEST_F(
@@ -501,8 +763,26 @@ TEST_F(PolicyManagerImplTest2,
 
 TEST_F(PolicyManagerImplTest2, GetCurrentDeviceId) {
   // Arrange
-  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(app_id2)).Times(1);
+  EXPECT_CALL(listener, OnCurrentDeviceIdUpdateRequired(app_id2)).Times(2);
   EXPECT_EQ(custom_str::CustomString(""), manager->GetCurrentDeviceId(app_id2));
+  EXPECT_EQ("", manager->GetCurrentDeviceId(app_id2));
+}
+
+TEST_F(PolicyManagerImplTest2,
+       GetVehicleInfo_SetVehicleInfo_ExpectReceivedInfoCorrect) {
+  // Arrange
+  CreateLocalPT("sdl_preloaded_pt.json");
+  GetPTU("valid_sdl_pt_update.json");
+  utils::SharedPtr<policy_table::Table> pt = (manager->GetCache())->GetPT();
+  policy_table::ModuleConfig& module_config = pt->policy_table.module_config;
+  ::policy::VehicleInfo vehicle_info = manager->GetVehicleInfo();
+
+  EXPECT_EQ(static_cast<std::string>(*module_config.vehicle_make),
+            vehicle_info.vehicle_make);
+  EXPECT_EQ(static_cast<std::string>(*module_config.vehicle_model),
+            vehicle_info.vehicle_model);
+  EXPECT_EQ(static_cast<std::string>(*module_config.vehicle_year),
+            vehicle_info.vehicle_year);
 }
 
 }  // namespace policy

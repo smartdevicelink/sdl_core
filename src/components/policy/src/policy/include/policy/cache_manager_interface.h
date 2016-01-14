@@ -164,7 +164,7 @@ class CacheManagerInterface {
    * depending on application priority.
    * @param priority Priority of application
    */
-  virtual int GetNotificationsNumber(const std::string& priority) = 0;
+  virtual uint32_t GetNotificationsNumber(const std::string& priority) = 0;
 
   /**
    * @brief Get priority for given application
