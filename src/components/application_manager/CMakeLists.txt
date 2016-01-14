@@ -75,6 +75,10 @@ file (GLOB SOURCES
   ${AM_SOURCE_DIR}/src/*
 )
 
+set (MESSAGE_HELPER_SOURCES
+  ${AM_SOURCE_DIR}/src/message_helper/message_helper.cc
+)
+
 set (POLICIES_MANAGER
 ${AM_SOURCE_DIR}/src/policies/policy_handler.cc
 ${AM_SOURCE_DIR}/src/policies/policy_event_observer.cc
@@ -368,6 +372,8 @@ target_link_libraries("AMPolicyLibrary" ${LIBRARIES} AMEventEngine)
 
 add_library("AMHMICommandsLibrary" ${HMI_COMMANDS_SOURCES})
 target_link_libraries("AMHMICommandsLibrary" ${LIBRARIES} AMEventEngine)
+
+add_library("MessageHelperLibrary" ${MESSAGE_HELPER_SOURCES})
 
 add_library("AMMobileCommandsLibrary" ${MOBILE_COMMANDS_SOURCES} )
 target_link_libraries("AMMobileCommandsLibrary" ${LIBRARIES} AMEventEngine)

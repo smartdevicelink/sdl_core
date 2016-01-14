@@ -126,6 +126,12 @@ class MockMessageHelper {
                smart_objects::SmartObjectSPtr(uint32_t function_id));
   MOCK_METHOD1(SendAllOnButtonSubscriptionNotificationsForApp,
                void(ApplicationConstSharedPtr app));
+
+  MOCK_METHOD3(SendActivateAppToHMI,
+                     uint32_t(uint32_t const app_id,
+                              hmi_apis::Common_HMILevel::eType level,
+                              bool send_policy_priority));
+
   MOCK_METHOD1(SendOnResumeAudioSourceToHMI, void(uint32_t app_id));
   MOCK_METHOD1(CreateAddSubMenuRequestToHMI,
                smart_objects::SmartObjectList(ApplicationConstSharedPtr app));

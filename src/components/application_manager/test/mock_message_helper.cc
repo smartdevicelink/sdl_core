@@ -217,11 +217,6 @@ void MessageHelper::SendUpdateSDLResponse(const std::string& result,
       result, correlation_id);
 }
 
-void MessageHelper::SendDecryptCertificateToHMI(const std::string& file_name) {
-  MockMessageHelper::message_helper_mock()->SendDecryptCertificateToHMI(
-      file_name);
-}
-
 hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
     const std::string& language) {
   return MockMessageHelper::message_helper_mock()->CommonLanguageFromString(

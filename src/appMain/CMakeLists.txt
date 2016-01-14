@@ -59,6 +59,7 @@ endif()
 set(LIBRARIES
   MediaManager
   ApplicationManager
+  MessageHelperLibrary
   HMI_API
   MOBILE_API
   v4_protocol_v1_2_no_extra

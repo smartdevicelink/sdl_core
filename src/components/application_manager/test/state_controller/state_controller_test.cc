@@ -41,6 +41,7 @@
 #include "utils/data_accessor.h"
 #include "utils/make_shared.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/test/mock_message_helper.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/smart_object_keys.h"
 
@@ -54,16 +55,15 @@ using ::testing::NiceMock;
 using ::testing::InSequence;
 using ::testing::Truly;
 
-class MessageHelperMock {
- public:
-  MOCK_METHOD3(SendActivateAppToHMI,
-               uint32_t(uint32_t const app_id,
-                        hmi_apis::Common_HMILevel::eType level,
-                        bool send_policy_priority));
-};
+static application_manager::MockMessageHelper* message_helper_mock_;
 
-static MessageHelperMock* message_helper_mock_;
-
+uint32_t application_manager::MessageHelper::SendActivateAppToHMI(
+    uint32_t const app_id,
+    hmi_apis::Common_HMILevel::eType level,
+    bool send_policy_priority) {
+  return message_helper_mock_->SendActivateAppToHMI(
+      app_id, level, send_policy_priority);
+}
 
 namespace state_controller_test {
 
@@ -212,7 +212,7 @@ class StateControllerTest : public ::testing::Test {
     namespace AudioStreamingState = mobile_apis::AudioStreamingState;
     namespace SystemContext = mobile_apis::SystemContext;
     // Valid states for not audio app
-    message_helper_mock_ = new MessageHelperMock;
+    message_helper_mock_ = new application_manager::MockMessageHelper;
     valid_states_for_not_audio_app_.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::NOT_AUDIBLE,
