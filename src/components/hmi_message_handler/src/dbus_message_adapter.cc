@@ -33,7 +33,7 @@
 #include "hmi_message_handler/dbus_message_adapter.h"
 #include <sstream>
 #include "utils/logger.h"
-#include "formatters/CSmartFactory.hpp"
+#include "formatters/CSmartFactory.h"
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 namespace sos = NsSmartDeviceLink::NsJSONHandler::strings;
@@ -58,7 +58,7 @@ std::vector<std::string> &split(const std::string &s, char delim,
 }
 
 DBusMessageAdapter::DBusMessageAdapter(HMIMessageHandler* hmi_msg_handler)
-    : HMIMessageAdapter(hmi_msg_handler),
+    : HMIMessageAdapterImpl(hmi_msg_handler),
       DBusMessageController(SDL_SERVICE_NAME, SDL_OBJECT_PATH,
                             HMI_SERVICE_NAME, HMI_OBJECT_PATH) {
   LOG4CXX_INFO(logger_, "Created DBusMessageAdapter");

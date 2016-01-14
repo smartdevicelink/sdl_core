@@ -30,63 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_CREATESMARTSCHEMA_H_
-#define SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_CREATESMARTSCHEMA_H_
+#include "hmi_message_handler/hmi_message_adapter_impl.h"
 
-#include "formatters/CFormatterJsonSDLRPCv1.h"
-#include "SmartFactoryTestHelper.h"
+namespace hmi_message_handler {
+HMIMessageAdapterImpl::HMIMessageAdapterImpl(HMIMessageHandler* handler)
+    : handler_(handler) {}
 
-namespace test {
-namespace components {
-namespace formatters {
+HMIMessageAdapterImpl::~HMIMessageAdapterImpl() { handler_ = 0; }
 
-using namespace NsSmartDeviceLink::NsJSONHandler::strings;
-using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
-using namespace NsSmartDeviceLink::NsSmartObjects;
-
-namespace FunctionIDTest {
-enum eType {
-  INVALID_ENUM = -1,
-  RegisterAppInterface,
-  UnregisterAppInterface,
-  SetGlobalProperties,
-};
-}
-
-namespace Language {
-enum eType {
-  INVALID_ENUM = -1,
-  EN_EU,
-  RU_RU
-};
-}
-namespace AppTypeTest {
-enum eType {
-  INVALID_ENUM = -1,
-  SYSTEM,
-  MEDIA
-};
-}
-namespace SpeechCapabilities {
-enum eType {
-  INVALID_ENUM = -1,
-  SC_TEXT,
-};
-}
-
-namespace StructIdentifiers {
-enum eType {
-  INVALID_ENUM = -1,
-  Struct1,
-  Struct2
-};
-}
-
-CSmartSchema initObjectSchema();
-CSmartSchema initSchemaForMetaFormatter();
-
-}  // namespace formatters
-}  // namespace components
-}  // namespace test
-
-#endif  // SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_CREATESMARTSCHEMA_H_
+}  // namespace hmi_message_handler

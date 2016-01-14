@@ -30,63 +30,41 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_CREATESMARTSCHEMA_H_
-#define SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_CREATESMARTSCHEMA_H_
+#ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_IMPL_H_
+#define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_IMPL_H_
 
-#include "formatters/CFormatterJsonSDLRPCv1.h"
-#include "SmartFactoryTestHelper.h"
+#include "hmi_message_handler/hmi_message_adapter.h"
+#include "hmi_message_handler/hmi_message_handler.h"
 
-namespace test {
-namespace components {
-namespace formatters {
+namespace hmi_message_handler {
 
-using namespace NsSmartDeviceLink::NsJSONHandler::strings;
-using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
-using namespace NsSmartDeviceLink::NsSmartObjects;
+class HMIMessageAdapterImpl : public HMIMessageAdapter {
+ public:
+  /**
+   * \brief Constructor
+   * \param handler Pointer to implementation of HMIMessageHandler abstract
+   * class
+   * to notify it about receiving message or error on sending message.
+   */
+  explicit HMIMessageAdapterImpl(HMIMessageHandler* handler);
 
-namespace FunctionIDTest {
-enum eType {
-  INVALID_ENUM = -1,
-  RegisterAppInterface,
-  UnregisterAppInterface,
-  SetGlobalProperties,
+  /**
+   * \brief Destructor
+   */
+  virtual ~HMIMessageAdapterImpl();
+
+ protected:
+  virtual HMIMessageHandler* handler() const {
+    return handler_;
+  }
+
+ private:
+  /**
+   *\brief Pointer on handler to notify it about receiving message/error.
+   */
+  HMIMessageHandler* handler_;
 };
-}
 
-namespace Language {
-enum eType {
-  INVALID_ENUM = -1,
-  EN_EU,
-  RU_RU
-};
-}
-namespace AppTypeTest {
-enum eType {
-  INVALID_ENUM = -1,
-  SYSTEM,
-  MEDIA
-};
-}
-namespace SpeechCapabilities {
-enum eType {
-  INVALID_ENUM = -1,
-  SC_TEXT,
-};
-}
+}  // namespace hmi_message_handler
 
-namespace StructIdentifiers {
-enum eType {
-  INVALID_ENUM = -1,
-  Struct1,
-  Struct2
-};
-}
-
-CSmartSchema initObjectSchema();
-CSmartSchema initSchemaForMetaFormatter();
-
-}  // namespace formatters
-}  // namespace components
-}  // namespace test
-
-#endif  // SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_CREATESMARTSCHEMA_H_
+#endif  // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_ADAPTER_IMPL_H_

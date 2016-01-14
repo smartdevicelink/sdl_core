@@ -36,7 +36,7 @@
 #include <map>
 #include <set>
 
-#include "formatters/CSmartFactory.hpp"
+#include "formatters/CSmartFactory.h"
 #include "HMI_API_schema.h"
 #include "smart_objects/always_true_schema_item.h"
 #include "smart_objects/always_false_schema_item.h"

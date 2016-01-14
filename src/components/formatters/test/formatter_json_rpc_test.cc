@@ -34,7 +34,7 @@
 #include <string>
 #include <set>
 #include "gtest/gtest.h"
-#include "formatters/CSmartFactory.hpp"
+#include "formatters/CSmartFactory.h"
 #include "HMI_API_schema.h"
 #include "MOBILE_API_schema.h"
 

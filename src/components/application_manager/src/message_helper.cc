@@ -57,8 +57,8 @@
 #include "utils/make_shared.h"
 
 #include "formatters/formatter_json_rpc.h"
-#include "formatters/CFormatterJsonSDLRPCv2.hpp"
-#include "formatters/CFormatterJsonSDLRPCv1.hpp"
+#include "formatters/CFormatterJsonSDLRPCv2.h"
+#include "formatters/CFormatterJsonSDLRPCv1.h"
 
 namespace application_manager {
 

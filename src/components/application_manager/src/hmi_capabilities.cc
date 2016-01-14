@@ -44,7 +44,7 @@
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
-#include "formatters/CFormatterJsonBase.hpp"
+#include "formatters/CFormatterJsonBase.h"
 
 namespace application_manager {
 namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;

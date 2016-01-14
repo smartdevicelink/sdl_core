@@ -60,7 +60,7 @@
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
 
-#include "formatters/CSmartFactory.hpp"
+#include "formatters/CSmartFactory.h"
 
 #include "interfaces/HMI_API.h"
 #include "interfaces/HMI_API_schema.h"

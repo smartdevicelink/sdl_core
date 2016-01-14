@@ -35,9 +35,9 @@
 #include "smart_objects/smart_object.h"
 #include "smart_objects/enum_schema_item.h"
 
-#include "CFormatterJsonBase.hpp"
+#include "CFormatterJsonBase.h"
 
-#include "formatters/CSmartFactory.hpp"
+#include "formatters/CSmartFactory.h"
 #include "formatters/meta_formatter.h"
 
 namespace NsSmartDeviceLink {

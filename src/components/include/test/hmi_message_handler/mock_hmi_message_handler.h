@@ -30,63 +30,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_CREATESMARTSCHEMA_H_
-#define SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_CREATESMARTSCHEMA_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_HMI_MESSAGE_HANDLER_MOCK_HMI_MESSAGE_HANDLER_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_HMI_MESSAGE_HANDLER_MOCK_HMI_MESSAGE_HANDLER_H_
 
-#include "formatters/CFormatterJsonSDLRPCv1.h"
-#include "SmartFactoryTestHelper.h"
+#include "gmock/gmock.h"
+#include "hmi_message_handler/hmi_message_handler.h"
 
 namespace test {
 namespace components {
-namespace formatters {
+namespace hmi_message_handler_test {
 
-using namespace NsSmartDeviceLink::NsJSONHandler::strings;
-using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
-using namespace NsSmartDeviceLink::NsSmartObjects;
+using hmi_message_handler::HMIMessageAdapter;
 
-namespace FunctionIDTest {
-enum eType {
-  INVALID_ENUM = -1,
-  RegisterAppInterface,
-  UnregisterAppInterface,
-  SetGlobalProperties,
+class  MockHMIMessageHandler : public ::hmi_message_handler::HMIMessageHandler {
+  public:
+    MOCK_METHOD1(AddHMIMessageAdapter, void(HMIMessageAdapter* adapter));
+    MOCK_METHOD1(RemoveHMIMessageAdapter, void(HMIMessageAdapter* adapter));
 };
-}
-
-namespace Language {
-enum eType {
-  INVALID_ENUM = -1,
-  EN_EU,
-  RU_RU
-};
-}
-namespace AppTypeTest {
-enum eType {
-  INVALID_ENUM = -1,
-  SYSTEM,
-  MEDIA
-};
-}
-namespace SpeechCapabilities {
-enum eType {
-  INVALID_ENUM = -1,
-  SC_TEXT,
-};
-}
-
-namespace StructIdentifiers {
-enum eType {
-  INVALID_ENUM = -1,
-  Struct1,
-  Struct2
-};
-}
-
-CSmartSchema initObjectSchema();
-CSmartSchema initSchemaForMetaFormatter();
-
-}  // namespace formatters
+}  // namespace hmi_message_handler_test
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_CREATESMARTSCHEMA_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_HMI_MESSAGE_HANDLER_MOCK_HMI_MESSAGE_HANDLER_H_

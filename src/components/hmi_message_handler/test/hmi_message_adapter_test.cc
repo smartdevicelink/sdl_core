@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,15 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "hmi_message_handler/hmi_message_adapter.h"
+#include "gtest/gtest.h"
+#include "utils/shared_ptr.h"
+#include "utils/make_shared.h"
 
-namespace hmi_message_handler {
-HMIMessageAdapter::HMIMessageAdapter(HMIMessageHandler* handler)
-    : handler_(handler) {
+#include "hmi_message_handler/hmi_message_handler_impl.h"
+#include "hmi_message_handler/mock_hmi_message_adapter_impl.h"
+
+namespace test {
+namespace components {
+namespace hmi_message_handler_test {
+
+using hmi_message_handler::HMIMessageHandlerImpl;
+
+typedef utils::SharedPtr<MockHMIMessageAdapterImpl>
+    MockHMIMessageAdapterImplSPtr;
+
+TEST(HMIMessageAdapterImplTest, Handler_CorrectPointer_CorrectReturnedPointer) {
+  HMIMessageHandler* message_handler = HMIMessageHandlerImpl::instance();
+  MockHMIMessageAdapterImplSPtr message_adapter_impl =
+      utils::MakeShared<MockHMIMessageAdapterImpl>(message_handler);
+
+  EXPECT_EQ(message_handler, message_adapter_impl->get_handler());
+
+  message_handler = NULL;
+  if (HMIMessageHandlerImpl::exists()) {
+    HMIMessageHandlerImpl::destroy();
+  }
 }
 
-HMIMessageAdapter::~HMIMessageAdapter() {
-  handler_ = 0;
+TEST(HMIMessageAdapterImplTest, Handler_NULLPointer_CorrectReturnedPointer) {
+  HMIMessageHandler* message_handler = NULL;
+  MockHMIMessageAdapterImplSPtr message_adapter_impl =
+      utils::MakeShared<MockHMIMessageAdapterImpl>(message_handler);
+
+  EXPECT_EQ(NULL, message_adapter_impl->get_handler());
 }
 
-}  // namespace hmi_message_handler
+}  // namespace hmi_message_helper_test
+}  // namespace components
+}  // namespace test

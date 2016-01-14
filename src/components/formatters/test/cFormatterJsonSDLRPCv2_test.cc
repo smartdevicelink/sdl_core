@@ -32,7 +32,7 @@
 
 #include "gtest/gtest.h"
 #include "create_smartSchema.h"
-#include "formatters/CFormatterJsonSDLRPCv2.hpp"
+#include "formatters/CFormatterJsonSDLRPCv2.h"
 
 namespace test {
 namespace components {

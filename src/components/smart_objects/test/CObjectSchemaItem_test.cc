@@ -43,7 +43,7 @@
 #include "smart_objects/schema_item_parameter.h"
 #include "smart_objects/object_schema_item.h"
 #include "formatters/generic_json_formatter.h"
-#include "formatters/CSmartFactory.hpp"
+#include "formatters/CSmartFactory.h"
 
 namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace smartobj = NsSmartDeviceLink::NsSmartObjects;

@@ -27,7 +27,7 @@
 // CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
-#include "formatters/CFormatterJsonSDLRPCv1.hpp"
+#include "formatters/CFormatterJsonSDLRPCv1.h"
 #include "formatters/meta_formatter.h"
 
 namespace strings = NsSmartDeviceLink::NsJSONHandler::strings;

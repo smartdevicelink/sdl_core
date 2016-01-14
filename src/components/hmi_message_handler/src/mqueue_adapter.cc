@@ -75,7 +75,7 @@ class ReceiverThreadDelegate : public threads::ThreadDelegate {
 };
 
 MqueueAdapter::MqueueAdapter(HMIMessageHandler* hmi_message_handler)
-    : HMIMessageAdapter(hmi_message_handler),
+  : HMIMessageAdapterImpl(hmi_message_handler),
       sdl_to_hmi_mqueue_(-1),
       hmi_to_sdl_mqueue_(-1),
       receiver_thread_(NULL) {
