@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/event_engine/event.h"
-#include "application_manager/event_engine/event_dispatcher.h"
+#include "application_manager/event_engine/event_dispatcher_impl.h"
 
 namespace application_manager {
 namespace event_engine {
@@ -45,7 +45,7 @@ Event::~Event() {
 }
 
 void Event::raise() {
-  EventDispatcher::instance()->raise_event(*this);
+  EventDispatcherImpl::instance()->raise_event(*this);
 }
 
 void Event::set_smart_object(const smart_objects::SmartObject& so) {

@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -48,15 +48,15 @@ EventObserver::~EventObserver() {
 
 void EventObserver::subscribe_on_event(const Event::EventID& event_id,
                                        int32_t hmi_correlation_id) {
-  EventDispatcher::instance()->add_observer(event_id, hmi_correlation_id, this);
+  EventDispatcherImpl::instance()->add_observer(event_id, hmi_correlation_id, this);
 }
 
 void EventObserver::unsubscribe_from_event(const Event::EventID& event_id) {
-  EventDispatcher::instance()->remove_observer(event_id, this);
+  EventDispatcherImpl::instance()->remove_observer(event_id, this);
 }
 
 void EventObserver::unsubscribe_from_all_events() {
-  EventDispatcher::instance()->remove_observer(this);
+  EventDispatcherImpl::instance()->remove_observer(this);
 }
 
 }

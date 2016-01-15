@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -32,21 +32,21 @@
 
 #include "interfaces/HMI_API.h"
 #include "application_manager/event_engine/event_observer.h"
-#include "application_manager/event_engine/event_dispatcher.h"
+#include "application_manager/event_engine/event_dispatcher_impl.h"
 
 namespace application_manager {
 namespace event_engine {
 using namespace sync_primitives;
 
-EventDispatcher::EventDispatcher()
+EventDispatcherImpl::EventDispatcherImpl()
     : observer_list_lock_(true),
       observers_() {
 }
 
-EventDispatcher::~EventDispatcher() {
+EventDispatcherImpl::~EventDispatcherImpl() {
 }
 
-void EventDispatcher::raise_event(const Event& event) {
+void EventDispatcherImpl::raise_event(const Event& event) {
   {
     AutoLock auto_lock(state_lock_);
     // check if event is notification
@@ -74,14 +74,14 @@ void EventDispatcher::raise_event(const Event& event) {
   }
 }
 
-void EventDispatcher::add_observer(const Event::EventID& event_id,
+void EventDispatcherImpl::add_observer(const Event::EventID& event_id,
                                    int32_t hmi_correlation_id,
                                    EventObserver* const observer) {
   AutoLock auto_lock(state_lock_);
   observers_[event_id][hmi_correlation_id].push_back(observer);
 }
 
-void EventDispatcher::remove_observer(const Event::EventID& event_id,
+void EventDispatcherImpl::remove_observer(const Event::EventID& event_id,
 		                              EventObserver* const observer) {
   remove_observer_from_list(observer);
   AutoLock auto_lock(state_lock_);
@@ -100,7 +100,7 @@ void EventDispatcher::remove_observer(const Event::EventID& event_id,
   }
 }
 
-void EventDispatcher::remove_observer(EventObserver* const observer) {
+void EventDispatcherImpl::remove_observer(EventObserver* const observer) {
   remove_observer_from_list(observer);
   AutoLock auto_lock(state_lock_);
   EventObserverMap::iterator event_map = observers_.begin();
@@ -121,7 +121,7 @@ void EventDispatcher::remove_observer(EventObserver* const observer) {
   }
 }
 
-void EventDispatcher::remove_observer_from_list(EventObserver* const observer) {
+void EventDispatcherImpl::remove_observer_from_list(EventObserver* const observer) {
   AutoLock auto_lock(observer_list_lock_);
   if (!observers_list_.empty()) {
     ObserverList::iterator it_begin = observers_list_.begin();
