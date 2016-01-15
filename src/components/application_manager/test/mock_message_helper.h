@@ -65,10 +65,12 @@ class MockMessageHelper {
                smart_objects::SmartObjectSPtr(
                    const connection_handler::DeviceMap& devices));
   MOCK_METHOD1(GetDeviceHandleForMac, uint32_t(const std::string& device_mac));
-  MOCK_METHOD2(GetDeviceInfoForHandle, void(const uint32_t device_handle,
-                                            policy::DeviceParams* device_info));
-  MOCK_METHOD2(GetDeviceInfoForApp, void(uint32_t connection_key,
-                                         policy::DeviceParams* device_info));
+  MOCK_METHOD2(GetDeviceInfoForHandle,
+               void(const uint32_t device_handle,
+                    policy::DeviceParams* device_info));
+  MOCK_METHOD2(GetDeviceInfoForApp,
+               void(uint32_t connection_key,
+                    policy::DeviceParams* device_info));
   MOCK_METHOD1(SendNaviStartStream, void(int32_t connection_key));
   MOCK_METHOD1(SendNaviStopStream, void(int32_t connection_key));
   MOCK_METHOD2(SendOnAppPermissionsChangedNotification,
@@ -95,8 +97,10 @@ class MockMessageHelper {
                     uint32_t correlation_id));
   MOCK_METHOD0(SendGetSystemInfoRequest, void());
   MOCK_METHOD1(SendDecryptCertificateToHMI, void(const std::string& file_name));
-  MOCK_METHOD3(SendPolicyUpdate, void(const std::string& file_path, int timeout,
-                                      const std::vector<int>& retries));
+  MOCK_METHOD3(SendPolicyUpdate,
+               void(const std::string& file_path,
+                    int timeout,
+                    const std::vector<int>& retries));
   MOCK_METHOD2(
       SendGetListOfPermissionsResponse,
       void(const std::vector<policy::FunctionalGroupPermission>& permissions,
@@ -109,15 +113,17 @@ class MockMessageHelper {
   MOCK_METHOD4(SendPolicySnapshotNotification,
                void(unsigned int connection_key,
                     const std::vector<uint8_t>& policy_data,
-                    const std::string& url, int timeout));
+                    const std::string& url,
+                    int timeout));
   MOCK_METHOD2(SendOnAppInterfaceUnregisteredNotificationToMobile,
                void(int32_t connection_key,
                     mobile_apis::AppInterfaceUnregisteredReason::eType reason));
-  MOCK_METHOD1(CommonLanguageFromString, hmi_apis::Common_Language::eType(
-          const std::string& language)) ;
-  MOCK_METHOD1(CommonLanguageToString, std::string(
-          hmi_apis::Common_Language::eType));
-  MOCK_METHOD1(CreateModuleInfoSO, smart_objects::SmartObjectSPtr(uint32_t function_id));
+  MOCK_METHOD1(CommonLanguageFromString,
+               hmi_apis::Common_Language::eType(const std::string& language));
+  MOCK_METHOD1(CommonLanguageToString,
+               std::string(hmi_apis::Common_Language::eType));
+  MOCK_METHOD1(CreateModuleInfoSO,
+               smart_objects::SmartObjectSPtr(uint32_t function_id));
   MOCK_METHOD1(SendAllOnButtonSubscriptionNotificationsForApp,
                void(ApplicationConstSharedPtr app));
   MOCK_METHOD1(SendOnResumeAudioSourceToHMI, void(uint32_t app_id));
@@ -134,7 +140,7 @@ class MockMessageHelper {
                mobile_apis::Result::eType(smart_objects::SmartObject& message,
                                           ApplicationConstSharedPtr app));
   MOCK_METHOD2(CheckWithPolicy,
-      bool(mobile_apis::SystemAction::eType, const std::string&));
+               bool(mobile_apis::SystemAction::eType, const std::string&));
 
   static MockMessageHelper* message_helper_mock();
 };

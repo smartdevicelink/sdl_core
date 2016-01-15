@@ -67,14 +67,18 @@ class ApplicationManagerMock : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(get_limited_voice_application, am::ApplicationSharedPtr());
   MOCK_METHOD2(set_application_id, void(const int32_t, const uint32_t));
   MOCK_METHOD1(application_id, uint32_t(const int32_t));
-  MOCK_METHOD3(OnHMILevelChanged, void(uint32_t, mobile_apis::HMILevel::eType,
-                                       mobile_apis::HMILevel::eType));
+  MOCK_METHOD3(OnHMILevelChanged,
+               void(uint32_t,
+                    mobile_apis::HMILevel::eType,
+                    mobile_apis::HMILevel::eType));
   MOCK_METHOD1(SendHMIStatusNotification, void(const am::ApplicationSharedPtr));
-  MOCK_CONST_METHOD1(GetDefaultHmiLevel, mobile_apis::HMILevel::eType(
-                                             am::ApplicationConstSharedPtr));
+  MOCK_CONST_METHOD1(
+      GetDefaultHmiLevel,
+      mobile_apis::HMILevel::eType(am::ApplicationConstSharedPtr));
   MOCK_METHOD0(hmi_capabilities, am::HMICapabilities&());
   MOCK_METHOD0(is_attenuated_supported, bool());
-  MOCK_CONST_METHOD1(IsAppTypeExistsInFullOrLimited, bool(am::ApplicationConstSharedPtr));
+  MOCK_CONST_METHOD1(IsAppTypeExistsInFullOrLimited,
+                     bool(am::ApplicationConstSharedPtr));
 };
 }  // namespace state_controller_test
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_STATE_CONTROLLER_INCLUDE_APPLICATION_MANAGER_MOCK_H_

@@ -55,14 +55,10 @@ mobile_apis::FileType::eType StringToFileType(const char* str) {
     return mobile_apis::FileType::GRAPHIC_PNG;
   } else if (0 == strcasecmp(str, "wave")) {
     return mobile_apis::FileType::AUDIO_WAVE;
-  } else if ((0 == strcasecmp(str, "m4a")) ||
-             (0 == strcasecmp(str, "m4b")) ||
-             (0 == strcasecmp(str, "m4p")) ||
-             (0 == strcasecmp(str, "m4v")) ||
-             (0 == strcasecmp(str, "m4r")) ||
-             (0 == strcasecmp(str, "3gp")) ||
-             (0 == strcasecmp(str, "mp4")) ||
-             (0 == strcasecmp(str, "aac"))) {
+  } else if ((0 == strcasecmp(str, "m4a")) || (0 == strcasecmp(str, "m4b")) ||
+             (0 == strcasecmp(str, "m4p")) || (0 == strcasecmp(str, "m4v")) ||
+             (0 == strcasecmp(str, "m4r")) || (0 == strcasecmp(str, "3gp")) ||
+             (0 == strcasecmp(str, "mp4")) || (0 == strcasecmp(str, "aac"))) {
     return mobile_apis::FileType::AUDIO_AAC;
   } else if (0 == strcasecmp(str, "mp3")) {
     return mobile_apis::FileType::AUDIO_MP3;
@@ -76,42 +72,42 @@ namespace application_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
-ApplicationImpl::ApplicationImpl(uint32_t application_id,
+ApplicationImpl::ApplicationImpl(
+    uint32_t application_id,
     const std::string& mobile_app_id,
     const std::string& app_name,
     utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager)
-    : grammar_id_(0),
-      hmi_app_id_(0),
-      app_id_(application_id),
-      active_message_(NULL),
-      is_media_(false),
-      is_navi_(false),
-      video_streaming_approved_(false),
-      audio_streaming_approved_(false),
-      video_streaming_allowed_(false),
-      audio_streaming_allowed_(false),
-      video_streaming_suspended_(true),
-      audio_streaming_suspended_(true),
-      is_app_allowed_(true),
-      has_been_activated_(false),
-      tts_properties_in_none_(false),
-      tts_properties_in_full_(false),
-      is_application_data_changed_(false),
-      put_file_in_none_count_(0),
-      delete_file_in_none_count_(0),
-      list_files_in_none_count_(0),
-      device_(0),
-      usage_report_(mobile_app_id, statistics_manager),
-      protocol_version_(ProtocolVersion::kV3),
-      is_voice_communication_application_(false),
-      is_resuming_(false),
-      video_stream_retry_number_(0),
-      audio_stream_retry_number_(0) {
-
-  cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] =
-      {date_time::DateTime::getCurrentTime(), 0};
-  cmd_number_to_time_limits_[mobile_apis::FunctionID::GetVehicleDataID] =
-      {date_time::DateTime::getCurrentTime(), 0};
+    : grammar_id_(0)
+    , hmi_app_id_(0)
+    , app_id_(application_id)
+    , active_message_(NULL)
+    , is_media_(false)
+    , is_navi_(false)
+    , video_streaming_approved_(false)
+    , audio_streaming_approved_(false)
+    , video_streaming_allowed_(false)
+    , audio_streaming_allowed_(false)
+    , video_streaming_suspended_(true)
+    , audio_streaming_suspended_(true)
+    , is_app_allowed_(true)
+    , has_been_activated_(false)
+    , tts_properties_in_none_(false)
+    , tts_properties_in_full_(false)
+    , is_application_data_changed_(false)
+    , put_file_in_none_count_(0)
+    , delete_file_in_none_count_(0)
+    , list_files_in_none_count_(0)
+    , device_(0)
+    , usage_report_(mobile_app_id, statistics_manager)
+    , protocol_version_(ProtocolVersion::kV3)
+    , is_voice_communication_application_(false)
+    , is_resuming_(false)
+    , video_stream_retry_number_(0)
+    , audio_stream_retry_number_(0) {
+  cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] = {
+      date_time::DateTime::getCurrentTime(), 0};
+  cmd_number_to_time_limits_[mobile_apis::FunctionID::GetVehicleDataID] = {
+      date_time::DateTime::getCurrentTime(), 0};
 
   set_mobile_app_id(mobile_app_id);
   set_name(app_name);
@@ -123,10 +119,11 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
   // load persistent files
   LoadPersistentFiles();
   HmiStatePtr initial_state =
-      ApplicationManagerImpl::instance()->CreateRegularState(app_id(),
-                                          mobile_apis::HMILevel::INVALID_ENUM,
-                                          mobile_apis::AudioStreamingState::INVALID_ENUM,
-                                          mobile_api::SystemContext::SYSCTXT_MAIN);
+      ApplicationManagerImpl::instance()->CreateRegularState(
+          app_id(),
+          mobile_apis::HMILevel::INVALID_ENUM,
+          mobile_apis::AudioStreamingState::INVALID_ENUM,
+          mobile_api::SystemContext::SYSCTXT_MAIN);
   hmi_states_.push_back(initial_state);
 
   video_stream_suspend_timeout_ =
@@ -134,14 +131,18 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
   audio_stream_suspend_timeout_ =
       profile::Profile::instance()->audio_data_stopped_timeout();
 
-  video_stream_suspend_timer_ = ApplicationTimerPtr(
-          new timer::TimerThread<ApplicationImpl>(
-              "VideoStreamSuspend", this,
-              &ApplicationImpl::OnVideoStreamSuspend, true));
-  audio_stream_suspend_timer_ = ApplicationTimerPtr(
-          new timer::TimerThread<ApplicationImpl>(
-              "AudioStreamSuspend", this,
-              &ApplicationImpl::OnAudioStreamSuspend, true));
+  video_stream_suspend_timer_ =
+      ApplicationTimerPtr(new timer::TimerThread<ApplicationImpl>(
+          "VideoStreamSuspend",
+          this,
+          &ApplicationImpl::OnVideoStreamSuspend,
+          true));
+  audio_stream_suspend_timer_ =
+      ApplicationTimerPtr(new timer::TimerThread<ApplicationImpl>(
+          "AudioStreamSuspend",
+          this,
+          &ApplicationImpl::OnAudioStreamSuspend,
+          true));
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -189,7 +190,6 @@ void ApplicationImpl::ChangeSupportingAppHMIType() {
   }
 }
 
-
 void ApplicationImpl::set_is_navi(bool allow) {
   is_navi_ = allow;
 }
@@ -204,16 +204,14 @@ void ApplicationImpl::set_voice_communication_supported(
 }
 
 bool ApplicationImpl::IsAudioApplication() const {
-  return is_media_ ||
-         is_voice_communication_application_ ||
-         is_navi_;
+  return is_media_ || is_voice_communication_application_ || is_navi_;
 }
 
 void ApplicationImpl::SetRegularState(HmiStatePtr state) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(state);
   DCHECK_OR_RETURN_VOID(state->state_id() ==
-      HmiState::StateID::STATE_ID_REGULAR);
+                        HmiState::StateID::STATE_ID_REGULAR);
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
   DCHECK_OR_RETURN_VOID(!hmi_states_.empty());
   hmi_states_.pop_front();
@@ -234,7 +232,7 @@ void ApplicationImpl::SetPostponedState(HmiStatePtr state) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(state);
   DCHECK_OR_RETURN_VOID(state->state_id() ==
-      HmiState::StateID::STATE_ID_POSTPONED);
+                        HmiState::StateID::STATE_ID_POSTPONED);
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
   DCHECK_OR_RETURN_VOID(!hmi_states_.empty());
   HmiStatePtr front_state = hmi_states_.front();
@@ -245,12 +243,11 @@ void ApplicationImpl::SetPostponedState(HmiStatePtr state) {
 }
 
 struct StateIdFindPredicate {
-    HmiState::StateID state_id_;
-    StateIdFindPredicate(HmiState::StateID state_id):
-      state_id_(state_id) {}
-    bool operator ()(const HmiStatePtr cur) {
-      return cur->state_id() == state_id_;
-    }
+  HmiState::StateID state_id_;
+  StateIdFindPredicate(HmiState::StateID state_id) : state_id_(state_id) {}
+  bool operator()(const HmiStatePtr cur) {
+    return cur->state_id() == state_id_;
+  }
 };
 
 void ApplicationImpl::AddHMIState(HmiStatePtr state) {
@@ -258,22 +255,25 @@ void ApplicationImpl::AddHMIState(HmiStatePtr state) {
   DCHECK_OR_RETURN_VOID(state);
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
   HmiStateList::iterator it =
-      std::find_if(hmi_states_.begin(), hmi_states_.end(),
+      std::find_if(hmi_states_.begin(),
+                   hmi_states_.end(),
                    StateIdFindPredicate(state->state_id()));
   if (hmi_states_.end() == it) {
     hmi_states_.push_back(state);
   } else {
-    LOG4CXX_WARN(logger_, "Hmi state with ID " << state->state_id()
-                 << "has been already applied to this application. Ignoring");
+    LOG4CXX_WARN(
+        logger_,
+        "Hmi state with ID "
+            << state->state_id()
+            << "has been already applied to this application. Ignoring");
   }
 }
 
 void ApplicationImpl::RemoveHMIState(HmiState::StateID state_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-  HmiStateList::iterator it =
-      std::find_if(hmi_states_.begin(), hmi_states_.end(),
-                   StateIdFindPredicate(state_id));
+  HmiStateList::iterator it = std::find_if(
+      hmi_states_.begin(), hmi_states_.end(), StateIdFindPredicate(state_id));
   if (it != hmi_states_.end()) {
     // unable to remove regular state
     DCHECK_OR_RETURN_VOID(it != hmi_states_.begin());
@@ -296,9 +296,9 @@ HmiStatePtr ApplicationImpl::CurrentHmiState() const {
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
   DCHECK_OR_RETURN(!hmi_states_.empty(), HmiStatePtr());
   HmiStatePtr back_state = hmi_states_.back();
-  DCHECK_OR_RETURN(back_state->state_id() !=
-      HmiState::StateID::STATE_ID_POSTPONED,
-          HmiStatePtr());
+  DCHECK_OR_RETURN(
+      back_state->state_id() != HmiState::StateID::STATE_ID_POSTPONED,
+      HmiStatePtr());
   return back_state;
 }
 
@@ -316,8 +316,9 @@ HmiStatePtr ApplicationImpl::PostponedHmiState() const {
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
   DCHECK_OR_RETURN(!hmi_states_.empty(), HmiStatePtr());
   HmiStatePtr front_state = hmi_states_.front();
-  return front_state->state_id() == HmiState::StateID::STATE_ID_POSTPONED ?
-         front_state : HmiStatePtr();
+  return front_state->state_id() == HmiState::StateID::STATE_ID_POSTPONED
+             ? front_state
+             : HmiStatePtr();
 }
 
 const smart_objects::SmartObject* ApplicationImpl::active_message() const {
@@ -375,12 +376,11 @@ const uint32_t ApplicationImpl::list_files_in_none_count() const {
   return list_files_in_none_count_;
 }
 
-const mobile_api::SystemContext::eType
-ApplicationImpl::system_context() const {
+const mobile_api::SystemContext::eType ApplicationImpl::system_context() const {
   using namespace mobile_apis;
   const HmiStatePtr hmi_state = CurrentHmiState();
-  return hmi_state ? hmi_state->system_context() :
-                     SystemContext::INVALID_ENUM;;
+  return hmi_state ? hmi_state->system_context() : SystemContext::INVALID_ENUM;
+  ;
 }
 
 const std::string& ApplicationImpl::app_icon_path() const {
@@ -404,7 +404,7 @@ void ApplicationImpl::set_is_media_application(bool is_media) {
 }
 
 bool IsTTSState(const HmiStatePtr state) {
-  return state->state_id() == HmiState::STATE_ID_TTS_SESSION ;
+  return state->state_id() == HmiState::STATE_ID_TTS_SESSION;
 }
 
 bool ApplicationImpl::tts_speak_state() {
@@ -414,8 +414,7 @@ bool ApplicationImpl::tts_speak_state() {
   return it != hmi_states_.end();
 }
 
-void ApplicationImpl::set_tts_properties_in_none(
-    bool active) {
+void ApplicationImpl::set_tts_properties_in_none(bool active) {
   tts_properties_in_none_ = active;
 }
 
@@ -423,8 +422,7 @@ bool ApplicationImpl::tts_properties_in_none() {
   return tts_properties_in_none_;
 }
 
-void ApplicationImpl::set_tts_properties_in_full(
-    bool active) {
+void ApplicationImpl::set_tts_properties_in_full(bool active) {
   tts_properties_in_full_ = active;
 }
 
@@ -624,9 +622,9 @@ void ApplicationImpl::set_grammar_id(uint32_t value) {
 }
 
 void ApplicationImpl::ResetDataInNone() {
-      put_file_in_none_count_ = 0;
-      delete_file_in_none_count_ = 0;
-      list_files_in_none_count_ = 0;
+  put_file_in_none_count_ = 0;
+  delete_file_in_none_count_ = 0;
+  list_files_in_none_count_ = 0;
 }
 
 bool ApplicationImpl::has_been_activated() const {
@@ -657,8 +655,9 @@ bool ApplicationImpl::is_resuming() const {
 
 bool ApplicationImpl::AddFile(AppFile& file) {
   if (app_files_.count(file.file_name) == 0) {
-    LOG4CXX_INFO(logger_, "AddFile file " << file.file_name
-                           << " File type is " << file.file_type);
+    LOG4CXX_INFO(logger_,
+                 "AddFile file " << file.file_name << " File type is "
+                                 << file.file_type);
     app_files_[file.file_name] = file;
     return true;
   }
@@ -667,8 +666,9 @@ bool ApplicationImpl::AddFile(AppFile& file) {
 
 bool ApplicationImpl::UpdateFile(AppFile& file) {
   if (app_files_.count(file.file_name) != 0) {
-    LOG4CXX_INFO(logger_, "UpdateFile file " << file.file_name
-                           << " File type is " << file.file_type);
+    LOG4CXX_INFO(logger_,
+                 "UpdateFile file " << file.file_name << " File type is "
+                                    << file.file_type);
     app_files_[file.file_name] = file;
     return true;
   }
@@ -678,8 +678,9 @@ bool ApplicationImpl::UpdateFile(AppFile& file) {
 bool ApplicationImpl::DeleteFile(const std::string& file_name) {
   AppFilesMap::iterator it = app_files_.find(file_name);
   if (it != app_files_.end()) {
-    LOG4CXX_INFO(logger_, "DeleteFile file " << it->second.file_name
-                           << " File type is " << it->second.file_type);
+    LOG4CXX_INFO(logger_,
+                 "DeleteFile file " << it->second.file_name << " File type is "
+                                    << it->second.file_type);
     app_files_.erase(it);
     return true;
   }
@@ -691,10 +692,10 @@ const AppFilesMap& ApplicationImpl::getAppFiles() const {
 }
 
 const AppFile* ApplicationImpl::GetFile(const std::string& file_name) {
-   if (app_files_.find(file_name) != app_files_.end()) {
-     return &(app_files_[file_name]);
-   }
-   return NULL;
+  if (app_files_.find(file_name) != app_files_.end()) {
+    return &(app_files_[file_name]);
+  }
+  return NULL;
 }
 
 bool ApplicationImpl::SubscribeToButton(
@@ -724,8 +725,8 @@ bool ApplicationImpl::SubscribeToIVI(uint32_t vehicle_info_type) {
 
 bool ApplicationImpl::IsSubscribedToIVI(uint32_t vehicle_info_type) const {
   sync_primitives::AutoLock lock(vi_lock_);
-  VehicleInfoSubscriptions::const_iterator it = subscribed_vehicle_info_.find(
-      vehicle_info_type);
+  VehicleInfoSubscriptions::const_iterator it =
+      subscribed_vehicle_info_.find(vehicle_info_type);
   return (subscribed_vehicle_info_.end() != it);
 }
 
@@ -739,104 +740,112 @@ UsageStatistics& ApplicationImpl::usage_report() {
 }
 
 bool ApplicationImpl::IsCommandLimitsExceeded(
-    mobile_apis::FunctionID::eType cmd_id,
-    TLimitSource source) {
+    mobile_apis::FunctionID::eType cmd_id, TLimitSource source) {
   TimevalStruct current = date_time::DateTime::getCurrentTime();
   switch (source) {
-  // In case of config file values there is COMMON limitations for number of
-  // commands per certain time in seconds, i.e. 5 requests per 10 seconds with
-  // any interval between them
-  case CONFIG_FILE: {
-    CommandNumberTimeLimit::iterator it =
-        cmd_number_to_time_limits_.find(cmd_id);
-    if (cmd_number_to_time_limits_.end() == it) {
-      LOG4CXX_WARN(logger_, "Limits for command id " << cmd_id
-                   << "had not been set.");
-      return true;
-    }
+    // In case of config file values there is COMMON limitations for number of
+    // commands per certain time in seconds, i.e. 5 requests per 10 seconds with
+    // any interval between them
+    case CONFIG_FILE: {
+      CommandNumberTimeLimit::iterator it =
+          cmd_number_to_time_limits_.find(cmd_id);
+      if (cmd_number_to_time_limits_.end() == it) {
+        LOG4CXX_WARN(logger_,
+                     "Limits for command id " << cmd_id << "had not been set.");
+        return true;
+      }
 
-    TimeToNumberLimit& limit = it->second;
+      TimeToNumberLimit& limit = it->second;
 
-    std::pair<uint32_t, int32_t> frequency_restrictions;
+      std::pair<uint32_t, int32_t> frequency_restrictions;
 
-    if (mobile_apis::FunctionID::ReadDIDID == cmd_id) {
-      frequency_restrictions =
-          profile::Profile::instance()->read_did_frequency();
+      if (mobile_apis::FunctionID::ReadDIDID == cmd_id) {
+        frequency_restrictions =
+            profile::Profile::instance()->read_did_frequency();
 
-    } else if (mobile_apis::FunctionID::GetVehicleDataID == cmd_id) {
-      frequency_restrictions =
-          profile::Profile::instance()->get_vehicle_data_frequency();
-    } else {
-      LOG4CXX_INFO(logger_, "No restrictions for request");
-      return false;
-    }
-
-    LOG4CXX_INFO(logger_, "Time Info: " <<
-                 "\n Current: " << current.tv_sec <<
-                 "\n Limit: (" << limit.first.tv_sec << "," << limit.second << ")"
-                 "\n frequency_restrictions: (" << frequency_restrictions.first << "," << frequency_restrictions.second << ")"
-                 );
-    if (current.tv_sec < limit.first.tv_sec + frequency_restrictions.second) {
-      if (limit.second < frequency_restrictions.first) {
-        ++limit.second;
+      } else if (mobile_apis::FunctionID::GetVehicleDataID == cmd_id) {
+        frequency_restrictions =
+            profile::Profile::instance()->get_vehicle_data_frequency();
+      } else {
+        LOG4CXX_INFO(logger_, "No restrictions for request");
         return false;
       }
-      return true;
-    }
 
-    limit.first = current;
-    limit.second = 1;
+      LOG4CXX_INFO(logger_,
+                   "Time Info: "
+                       << "\n Current: "
+                       << current.tv_sec
+                       << "\n Limit: ("
+                       << limit.first.tv_sec
+                       << ","
+                       << limit.second
+                       << ")"
+                          "\n frequency_restrictions: ("
+                       << frequency_restrictions.first
+                       << ","
+                       << frequency_restrictions.second
+                       << ")");
+      if (current.tv_sec < limit.first.tv_sec + frequency_restrictions.second) {
+        if (limit.second < frequency_restrictions.first) {
+          ++limit.second;
+          return false;
+        }
+        return true;
+      }
 
-    return false;
+      limit.first = current;
+      limit.second = 1;
 
-    break;
-  }
-  // In case of policy table values, there is EVEN limitation for number of
-  // commands per minute, e.g. 10 command per minute i.e. 1 command per 6 sec
-  case POLICY_TABLE: {
-    uint32_t cmd_limit = application_manager::MessageHelper::GetAppCommandLimit(
-          mobile_app_id_);
-
-    if (0 == cmd_limit) {
-      return true;
-    }
-
-    const uint32_t dummy_limit = 1;
-    CommandNumberTimeLimit::iterator it =
-        cmd_number_to_time_limits_.find(cmd_id);
-    // If no command with cmd_id had been executed yet, just add to limits
-    if (cmd_number_to_time_limits_.end() == it) {
-      cmd_number_to_time_limits_[cmd_id] = {current, dummy_limit};
       return false;
+
+      break;
     }
+    // In case of policy table values, there is EVEN limitation for number of
+    // commands per minute, e.g. 10 command per minute i.e. 1 command per 6 sec
+    case POLICY_TABLE: {
+      uint32_t cmd_limit =
+          application_manager::MessageHelper::GetAppCommandLimit(
+              mobile_app_id_);
 
-    const uint32_t minute = 60;
+      if (0 == cmd_limit) {
+        return true;
+      }
 
-    TimeToNumberLimit& limit = it->second;
+      const uint32_t dummy_limit = 1;
+      CommandNumberTimeLimit::iterator it =
+          cmd_number_to_time_limits_.find(cmd_id);
+      // If no command with cmd_id had been executed yet, just add to limits
+      if (cmd_number_to_time_limits_.end() == it) {
+        cmd_number_to_time_limits_[cmd_id] = {current, dummy_limit};
+        return false;
+      }
 
-    // Checking even limitation for command
-    if (static_cast<uint32_t>(current.tv_sec - limit.first.tv_sec) <
-        minute/cmd_limit) {
-      return true;
+      const uint32_t minute = 60;
+
+      TimeToNumberLimit& limit = it->second;
+
+      // Checking even limitation for command
+      if (static_cast<uint32_t>(current.tv_sec - limit.first.tv_sec) <
+          minute / cmd_limit) {
+        return true;
+      }
+
+      cmd_number_to_time_limits_[cmd_id] = {current, dummy_limit};
+
+      return false;
+      break;
     }
-
-    cmd_number_to_time_limits_[cmd_id] = {current, dummy_limit};
-
-    return false;
-    break;
-  }
-  default: {
-    LOG4CXX_WARN(logger_, "Limit source is not implemented.");
-    break;
-  }
+    default: {
+      LOG4CXX_WARN(logger_, "Limit source is not implemented.");
+      break;
+    }
   }
 
   return true;
 }
 
 DataAccessor<ButtonSubscriptions> ApplicationImpl::SubscribedButtons() const {
-  return DataAccessor<ButtonSubscriptions>(subscribed_buttons_,
-                                           button_lock_);
+  return DataAccessor<ButtonSubscriptions>(subscribed_buttons_, button_lock_);
 }
 
 DataAccessor<VehicleInfoSubscriptions> ApplicationImpl::SubscribedIVI() const {
@@ -852,7 +861,8 @@ bool ApplicationImpl::is_application_data_changed() const {
   return is_application_data_changed_;
 }
 
-void ApplicationImpl::set_is_application_data_changed(bool state_application_data) {
+void ApplicationImpl::set_is_application_data_changed(
+    bool state_application_data) {
   is_application_data_changed_ = state_application_data;
 }
 
@@ -869,8 +879,7 @@ void ApplicationImpl::CleanupFiles() {
   directory_name += "/" + folder_name();
 
   if (file_system::DirectoryExists(directory_name)) {
-    std::vector<std::string> files = file_system::ListFiles(
-            directory_name);
+    std::vector<std::string> files = file_system::ListFiles(directory_name);
     AppFilesMap::const_iterator app_files_it;
 
     std::vector<std::string>::const_iterator it = files.begin();
@@ -882,7 +891,7 @@ void ApplicationImpl::CleanupFiles() {
       if ((app_files_it == app_files_.end()) ||
           (!app_files_it->second.is_persistent)) {
         LOG4CXX_INFO(logger_, "DeleteFile file " << file_name);
-          file_system::DeleteFile(file_name);
+        file_system::DeleteFile(file_name);
       }
     }
 
@@ -931,17 +940,20 @@ void ApplicationImpl::LoadPersistentFiles() {
         file.file_type = StringToFileType(file_type.c_str());
       }
 
-      LOG4CXX_INFO(logger_, "Loaded persistent file " << file.file_name
-                             << " File type is " << file.file_type);
+      LOG4CXX_INFO(logger_,
+                   "Loaded persistent file " << file.file_name
+                                             << " File type is "
+                                             << file.file_type);
       AddFile(file);
     }
   }
 }
 
-void ApplicationImpl::SubscribeToSoftButtons(int32_t cmd_id,
-                                        const SoftButtonID& softbuttons_id) {
+void ApplicationImpl::SubscribeToSoftButtons(
+    int32_t cmd_id, const SoftButtonID& softbuttons_id) {
   sync_primitives::AutoLock lock(cmd_softbuttonid_lock_);
-  if (static_cast<int32_t>(mobile_apis::FunctionID::ScrollableMessageID) == cmd_id) {
+  if (static_cast<int32_t>(mobile_apis::FunctionID::ScrollableMessageID) ==
+      cmd_id) {
     CommandSoftButtonID::iterator it = cmd_softbuttonid_.find(cmd_id);
     if (cmd_softbuttonid_.end() == it) {
       cmd_softbuttonid_[cmd_id] = softbuttons_id;
@@ -955,7 +967,7 @@ bool ApplicationImpl::IsSubscribedToSoftButton(const uint32_t softbutton_id) {
   sync_primitives::AutoLock lock(cmd_softbuttonid_lock_);
   CommandSoftButtonID::iterator it = cmd_softbuttonid_.begin();
   for (; it != cmd_softbuttonid_.end(); ++it) {
-    if((it->second).find(softbutton_id) != (it->second).end()) {
+    if ((it->second).find(softbutton_id) != (it->second).end()) {
       return true;
     }
   }
@@ -965,7 +977,7 @@ bool ApplicationImpl::IsSubscribedToSoftButton(const uint32_t softbutton_id) {
 void ApplicationImpl::UnsubscribeFromSoftButtons(int32_t cmd_id) {
   sync_primitives::AutoLock lock(cmd_softbuttonid_lock_);
   CommandSoftButtonID::iterator it = cmd_softbuttonid_.find(cmd_id);
-  if(it != cmd_softbuttonid_.end()) {
+  if (it != cmd_softbuttonid_.end()) {
     cmd_softbuttonid_.erase(it);
   }
 }

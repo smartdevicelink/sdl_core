@@ -213,8 +213,9 @@ class ApplicationMock : public am::Application {
   MOCK_CONST_METHOD0(video_stream_retry_number, uint32_t());
   MOCK_METHOD1(set_video_stream_retry_number,
                void(const uint32_t& video_stream_retry_number));
-  MOCK_METHOD2(AddCommand, void(uint32_t cmd_id,
-                                const smart_objects::SmartObject& command));
+  MOCK_METHOD2(AddCommand,
+               void(uint32_t cmd_id,
+                    const smart_objects::SmartObject& command));
   MOCK_METHOD1(RemoveCommand, void(uint32_t cmd_id));
   MOCK_METHOD1(FindCommand, smart_objects::SmartObject*(uint32_t cmd_id));
   MOCK_METHOD2(AddSubMenu,
@@ -230,7 +231,8 @@ class ApplicationMock : public am::Application {
   MOCK_METHOD1(FindChoiceSet,
                smart_objects::SmartObject*(uint32_t choice_set_id));
   MOCK_METHOD3(AddPerformInteractionChoiceSet,
-               void(uint32_t correlation_id, uint32_t choice_set_id,
+               void(uint32_t correlation_id,
+                    uint32_t choice_set_id,
                     const smart_objects::SmartObject& choice_set));
   MOCK_METHOD1(DeletePerformInteractionChoiceSet,
                void(uint32_t correlation_id));

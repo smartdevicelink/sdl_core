@@ -48,7 +48,6 @@ namespace app_mngr = application_manager;
 
 class ResumptionData {
  public:
-
   /**
    * @brief Constructor of ResumptionData
    */
@@ -63,8 +62,7 @@ class ResumptionData {
    * @brief Save application persistent info for future resuming
    * @param application is application witch need to be saved
    */
-  virtual void SaveApplication(
-      app_mngr::ApplicationSharedPtr application) = 0;
+  virtual void SaveApplication(app_mngr::ApplicationSharedPtr application) = 0;
 
   /**
    * @brief Returns HMI level of application from saved data
@@ -74,7 +72,7 @@ class ResumptionData {
    * returns -1
    */
   virtual int32_t GetStoredHMILevel(const std::string& policy_app_id,
-                                const std::string& device_id) const = 0;
+                                    const std::string& device_id) const = 0;
 
   /**
    * @brief Checks if saved data of applications have hmi app id
@@ -114,7 +112,8 @@ class ResumptionData {
    * and device ID from stored information.
    * @param policy_app_id - policy application id
    * @param device_id - contains id of device on which is running application
-   * @param hash_id - parameter which will contain HASH id from saved application
+   * @param hash_id - parameter which will contain HASH id from saved
+   * application
    * @return TRUE if application will be found in saved data otherwise
    * returns FALSE
    */
@@ -137,9 +136,10 @@ class ResumptionData {
    * @return TRUE if application will be found in saved data otherwise
    * returns FALSE
    */
-  virtual bool GetSavedApplication(const std::string& policy_app_id,
-                                   const std::string& device_id,
-                                   smart_objects::SmartObject& saved_app) const = 0;
+  virtual bool GetSavedApplication(
+      const std::string& policy_app_id,
+      const std::string& device_id,
+      smart_objects::SmartObject& saved_app) const = 0;
 
   /**
    * @brief Remove application from list of saved applications
@@ -163,13 +163,14 @@ class ResumptionData {
    * @return index if data of application exists, otherwise returns -1
    */
   virtual ssize_t IsApplicationSaved(const std::string& policy_app_id,
-                                 const std::string& device_id) const = 0;
+                                     const std::string& device_id) const = 0;
 
   /**
    * @brief Retrieves data from saved application
    * @param saved_data - will be contain data for resume_ctrl
    */
-  virtual void GetDataForLoadResumeData(smart_objects::SmartObject& saved_data) const = 0;
+  virtual void GetDataForLoadResumeData(
+      smart_objects::SmartObject& saved_data) const = 0;
 
   /**
    * @brief Updates HMI level of saved application
@@ -187,7 +188,6 @@ class ResumptionData {
   virtual bool Init();
 
  protected:
-
   /**
    * @brief Retrieves of commands from application
    * @param application contains application of which selection commands
@@ -206,7 +206,8 @@ class ResumptionData {
 
   /**
    * @brief Retrieves of interactionChoiceSet from application
-   * @param application contains application of which selection interactionChoiceSet
+   * @param application contains application of which selection
+   * interactionChoiceSet
    * @return list of interaction choice set
    */
   smart_objects::SmartObject GetApplicationInteractionChoiseSets(
@@ -214,7 +215,8 @@ class ResumptionData {
 
   /**
    * @brief Retrieves of global properties from application
-   * @param application contains application of which selection global properties
+   * @param application contains application of which selection global
+   * properties
    * @return global properties of application
    */
   smart_objects::SmartObject GetApplicationGlobalProperties(
@@ -241,7 +243,8 @@ class ResumptionData {
    * @param ptr - contains pointer which need to check
    * @return smartObject from pointer
    */
-  smart_objects::SmartObject PointerToSmartObj (const smart_objects::SmartObject* ptr) const;
+  smart_objects::SmartObject PointerToSmartObj(
+      const smart_objects::SmartObject* ptr) const;
 
   /**
    * @brief Creates smart array from received data
@@ -250,7 +253,7 @@ class ResumptionData {
    * @param key - contains smart array's name
    * @param result - will contain created array
    */
-  template<typename Iterator>
+  template <typename Iterator>
   void Append(Iterator first,
               Iterator last,
               const std::string& key,
@@ -263,7 +266,7 @@ class ResumptionData {
     }
   }
 
-  mutable sync_primitives::Lock           resumption_lock_;
+  mutable sync_primitives::Lock resumption_lock_;
 };
 }  // namespace resumption
 

@@ -42,11 +42,9 @@ namespace commands {
 
 OnUILanguageChangeNotification::OnUILanguageChangeNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnUILanguageChangeNotification::~OnUILanguageChangeNotification() {
-}
+OnUILanguageChangeNotification::~OnUILanguageChangeNotification() {}
 
 void OnUILanguageChangeNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -75,9 +73,9 @@ void OnUILanguageChangeNotification::Run() {
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);
 
-    if (app->ui_language() != (*message_)[strings::msg_params]
-        [strings::hmi_display_language].asInt()) {
-
+    if (app->ui_language() !=
+        (*message_)[strings::msg_params][strings::hmi_display_language]
+            .asInt()) {
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
           app->app_id(),
           mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE);
@@ -90,4 +88,3 @@ void OnUILanguageChangeNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-
