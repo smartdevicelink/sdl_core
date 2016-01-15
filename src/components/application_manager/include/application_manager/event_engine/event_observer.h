@@ -44,8 +44,6 @@ class EventObserver
 {
  public:
 
-  friend class EventDispatcherImpl;
-
   // Typedef for possible Observer ID's from mobile_apis functionID enum
   typedef unsigned long ObserverID;
 
@@ -102,6 +100,8 @@ class EventObserver
  private:
 
   ObserverID id_;
+
+  EventDispatcher*  pEventDispatcher;
 
   DISALLOW_COPY_AND_ASSIGN(EventObserver);
 };

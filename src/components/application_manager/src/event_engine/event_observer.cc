@@ -40,6 +40,7 @@ EventObserver::EventObserver()
  : id_(0) {
   //Get unique id based on this
   id_ = reinterpret_cast<unsigned long>(this);
+  pEventDispatcher = EventDispatcherImpl::instance();
 }
 
 EventObserver::~EventObserver() {
