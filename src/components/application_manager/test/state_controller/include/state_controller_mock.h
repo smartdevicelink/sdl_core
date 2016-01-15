@@ -51,7 +51,6 @@ class StateControllerMock :public am::StateController {
       am::ApplicationSharedPtr, const mobile_apis::SystemContext::eType));
   MOCK_METHOD3(OnStateChanged, void (
       am::ApplicationSharedPtr, am::HmiStatePtr, am::HmiStatePtr));
-  MOCK_METHOD1(ApplyStatesForApp, void (am::ApplicationSharedPtr));
   MOCK_METHOD0(OnNaviStreamingStarted, void ());
   MOCK_METHOD0(OnNaviStreamingStopped, void ());
 };

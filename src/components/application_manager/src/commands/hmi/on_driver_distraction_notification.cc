@@ -72,10 +72,9 @@ void OnDriverDistractionNotification::Run() {
       state;
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
-  const ApplicationManagerImpl::ApplictionSet applications =
-      accessor.applications();
+  const ApplicationSet applications = accessor.applications();
 
-  ApplicationManagerImpl::ApplictionSetConstIt it = applications.begin();
+  ApplicationSetConstIt it = applications.begin();
   for (; applications.end() != it; ++it) {
     const ApplicationSharedPtr app = *it;
     if (app) {

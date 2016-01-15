@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,7 +70,7 @@
 #ifdef ENABLE_SECURITY
 #include "security_manager/security_manager_listener.h"
 #include "security_manager/ssl_context.h"
-#endif  // ENABLE_SECURITY
+#endif // ENABLE_SECURITY
 
 #ifdef TIME_TESTER
 #include "time_metric_observer.h"
@@ -187,6 +187,7 @@ typedef threads::MessageLoopThread<RawAudioDataQueue> AudioPassThruQueue;
 }
 
 typedef std::vector<std::string> RPCParams;
+
 class ApplicationManagerImpl
     : public ApplicationManager,
       public hmi_message_handler::HMIMessageObserver,
@@ -223,6 +224,7 @@ class ApplicationManagerImpl
 
   /////////////////////////////////////////////////////
 
+  virtual DataAccessor<ApplicationSet> applications() const;
   ApplicationSharedPtr application(uint32_t app_id) const;
   ApplicationSharedPtr application_by_policy_id(
       const std::string& policy_app_id) const;
@@ -256,6 +258,12 @@ class ApplicationManagerImpl
    */
   ApplicationSharedPtr get_limited_voice_application() const;
 
+  virtual void OnHMILevelChanged(uint32_t app_id,
+                                 mobile_apis::HMILevel::eType from,
+                                 mobile_apis::HMILevel::eType to);
+
+  void SendHMIStatusNotification(
+      const utils::SharedPtr<Application> app) OVERRIDE;
   /**
    * @brief Checks if application with the same HMI type
    *        (media, voice communication or navi) exists
@@ -277,6 +285,7 @@ class ApplicationManagerImpl
   std::vector<ApplicationSharedPtr> IviInfoUpdated(VehicleDataType vehicle_info,
                                                    int value);
 
+  void OnApplicationRegistered(ApplicationSharedPtr app) OVERRIDE;
   /////////////////////////////////////////////////////
 
   HMICapabilities& hmi_capabilities();
@@ -290,6 +299,8 @@ class ApplicationManagerImpl
    */
   void ProcessQueryApp(const smart_objects::SmartObject& sm_object,
                        const uint32_t connection_key);
+
+  virtual bool is_attenuated_supported();
 
 #ifdef TIME_TESTER
   /**
@@ -454,7 +465,7 @@ class ApplicationManagerImpl
   }
 
   /**
-   * @brief SetState setup regular hmi state, tha will appear if no
+   * @brief SetState setup regular hmi state, that will appear if no
    * specific events are active
    * @param app appication to setup regular State
    * @param state state of new regular state
@@ -637,13 +648,11 @@ class ApplicationManagerImpl
    */
   hmi_apis::Common_TransportType::eType GetDeviceTransportType(
       const std::string& transport_type);
-
   /////////////////////////////////////////////////////
 
   void set_hmi_message_handler(hmi_message_handler::HMIMessageHandler* handler);
   void set_connection_handler(connection_handler::ConnectionHandler* handler);
   void set_protocol_handler(protocol_handler::ProtocolHandler* handler);
-
   ///////////////////////////////////////////////////////
 
   void StartDevicesDiscovery();
@@ -748,7 +757,6 @@ class ApplicationManagerImpl
    * @param app_id Application ID
    */
   void set_application_id(const int32_t correlation_id, const uint32_t app_id);
-
   /**
    * @brief AddPolicyObserver allows to subscribe needed component to events
    * from policy.
@@ -804,19 +812,6 @@ class ApplicationManagerImpl
   void OnAppStreaming(uint32_t app_id,
                       protocol_handler::ServiceType service_type,
                       bool state);
-
-  /**
-   * @brief OnHMILevelChanged the callback that allows SDL to react when
-   * application's HMILeval has been changed.
-   *
-   * @param app_id application identifier for which HMILevel has been chaned.
-   *
-   * @param from previous HMILevel.
-   * @param to current HMILevel.
-   */
-  void OnHMILevelChanged(uint32_t app_id,
-                         mobile_apis::HMILevel::eType from,
-                         mobile_apis::HMILevel::eType to);
 
   mobile_api::HMILevel::eType GetDefaultHmiLevel(
       ApplicationConstSharedPtr application) const;
@@ -928,7 +923,6 @@ class ApplicationManagerImpl
    * Dot use it inside Core
    */
   ApplicationSharedPtr application_by_hmi_app(uint32_t hmi_app_id) const;
-
   // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
   connection_handler::ConnectionHandler* connection_handler();
 
@@ -960,9 +954,9 @@ class ApplicationManagerImpl
 
   /**
    * @brief IsApplicationForbidden allows to distinguish if application is
-   * not allowed to register, becuase of spaming.
+   * not allowed to register, because of spamming.
    *
-   * @param connection_key the conection key ofthe required application
+   * @param connection_key the connection key ofthe required application
    *
    * @param mobile_app_id application's mobile(policy) identifier.
    *
@@ -995,12 +989,7 @@ class ApplicationManagerImpl
       AppsWaitRegistrationSet;
 
   typedef std::set<std::string> ForbiddenApps;
-
   // typedef for Applications list iterator
-  typedef ApplictionSet::iterator ApplictionSetIt;
-
-  // typedef for Applications list const iterator
-  typedef ApplictionSet::const_iterator ApplictionSetConstIt;
 
   DataAccessor<AppsWaitRegistrationSet> apps_waiting_for_registration() const;
   ApplicationConstSharedPtr waiting_app(const uint32_t hmi_id) const;
@@ -1008,13 +997,13 @@ class ApplicationManagerImpl
   /**
    * Class for thread-safe access to applications list
    */
-  class ApplicationListAccessor : public DataAccessor<ApplictionSet> {
+  class ApplicationListAccessor : public DataAccessor<ApplicationSet> {
    public:
     /**
      * @brief ApplicationListAccessor class constructor
      */
     ApplicationListAccessor()
-        : DataAccessor<ApplictionSet>(
+        : DataAccessor<ApplicationSet>(
               ApplicationManagerImpl::instance()->applications_,
               ApplicationManagerImpl::instance()->applications_list_lock_) {}
 
@@ -1024,22 +1013,22 @@ class ApplicationManagerImpl
      * @brief thread-safe getter for applications
      * @return applications list
      */
-    const ApplictionSet& applications() const {
+    const ApplicationSet& applications() const {
       return GetData();
     }
 
-    ApplictionSetConstIt begin() {
+    ApplicationSetConstIt begin() {
       return applications().begin();
     }
 
-    ApplictionSetConstIt end() {
+    ApplicationSetConstIt end() {
       return applications().end();
     }
 
     template <class UnaryPredicate>
     ApplicationSharedPtr Find(UnaryPredicate finder) {
       ApplicationSharedPtr result;
-      ApplictionSetConstIt it = std::find_if(begin(), end(), finder);
+      ApplicationSetConstIt it = std::find_if(begin(), end(), finder);
       if (it != end()) {
         result = *it;
       }
@@ -1049,7 +1038,7 @@ class ApplicationManagerImpl
     template <class UnaryPredicate>
     std::vector<ApplicationSharedPtr> FindAll(UnaryPredicate finder) {
       std::vector<ApplicationSharedPtr> result;
-      ApplictionSetConstIt it = std::find_if(begin(), end(), finder);
+      ApplicationSetConstIt it = std::find_if(begin(), end(), finder);
       while (it != end()) {
         result.push_back(*it);
         it = std::find_if(++it, end(), finder);
@@ -1243,7 +1232,6 @@ class ApplicationManagerImpl
       }
 
       smart_objects::SmartObject hmi_application(smart_objects::SmartType_Map);
-      ;
       if (MessageHelper::CreateHMIApplicationStruct(*it, hmi_application)) {
         applications[app_count++] = hmi_application;
       } else {
@@ -1295,7 +1283,7 @@ class ApplicationManagerImpl
 
   /**
    * @brief GetHashedAppID allows to obtain unique application id as a string.
-   * It concatanates device mac and application id to obtain unique id.
+   * It concatenates device mac and application id to obtain unique id.
    *
    * @param connection_key connection key for which need to obtain device mac;
    *
@@ -1406,7 +1394,7 @@ class ApplicationManagerImpl
   /**
    * @brief List of applications
    */
-  ApplictionSet applications_;
+  ApplicationSet applications_;
   AppsWaitRegistrationSet apps_to_register_;
   ForbiddenApps forbidden_applications;
 
@@ -1478,7 +1466,6 @@ class ApplicationManagerImpl
   std::vector<ApplicationManagerTimerPtr> timer_pool_;
   sync_primitives::Lock timer_pool_lock_;
   sync_primitives::Lock stopping_flag_lock_;
-
   StateController state_ctrl_;
 
 #ifdef TIME_TESTER
@@ -1504,7 +1491,6 @@ class ApplicationManagerImpl
   volatile bool is_stopping_;
 
   DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
-
   FRIEND_BASE_SINGLETON_CLASS(ApplicationManagerImpl);
 };
 
@@ -1519,6 +1505,7 @@ bool ApplicationManagerImpl::driver_distraction() const {
 inline bool ApplicationManagerImpl::all_apps_allowed() const {
   return is_all_apps_allowed_;
 }
+
 }  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_H_

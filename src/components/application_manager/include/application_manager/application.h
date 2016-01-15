@@ -43,6 +43,7 @@
 #include "connection_handler/device.h"
 #include "application_manager/message.h"
 #include "application_manager/hmi_state.h"
+#include "application_manager/application_state.h"
 #include "protocol_handler/protocol_handler.h"
 
 namespace NsSmartDeviceLink {
@@ -360,11 +361,10 @@ class DynamicApplicationData {
 class Application : public virtual InitialApplicationData,
                     public virtual DynamicApplicationData {
  public:
-  enum ApplicationState { kRegistered = 0, kWaitingForRegistration };
+  enum ApplicationRegisterState { kRegistered = 0, kWaitingForRegistration };
 
  public:
   Application() : is_greyed_out_(false) {}
-
   virtual ~Application() {}
 
   /**
@@ -472,16 +472,6 @@ class Application : public virtual InitialApplicationData,
       const = 0;
   virtual const std::string& app_icon_path() const = 0;
   virtual connection_handler::DeviceHandle device() const = 0;
-  virtual bool tts_speak_state() = 0;
-
-  /**
-   * @brief Active states of application
-   */
-  DataAccessor<HmiStateList> GetHmiStateListAccessor() {
-    DataAccessor<HmiStateList> hmi_states_da =
-        DataAccessor<HmiStateList>(hmi_states_, hmi_states_lock_);
-    return hmi_states_da;
-  }
 
   /**
    * @brief sets true if application has sent TTS GlobalProperties
@@ -528,7 +518,7 @@ class Application : public virtual InitialApplicationData,
   virtual void set_is_resuming(bool is_resuming) = 0;
   virtual bool is_resuming() const = 0;
 
-  virtual bool AddFile(AppFile& file) = 0;
+  virtual bool AddFile(const AppFile& file) = 0;
   virtual const AppFilesMap& getAppFiles() const = 0;
 
   /**
@@ -539,7 +529,7 @@ class Application : public virtual InitialApplicationData,
    * need to finish downloading?
    * @return TRUE if file exist and updated sucsesfuly, othervise return false
    */
-  virtual bool UpdateFile(AppFile& file) = 0;
+  virtual bool UpdateFile(const AppFile& file) = 0;
   virtual bool DeleteFile(const std::string& file_name) = 0;
   virtual const AppFile* GetFile(const std::string& file_name) = 0;
 
@@ -588,6 +578,8 @@ class Application : public virtual InitialApplicationData,
   */
   virtual void SetPostponedState(HmiStatePtr state) = 0;
 
+  virtual void RemovePostponedState() = 0;
+
   /**
    * @brief AddHMIState the function that will change application's
    * hmi state.
@@ -612,13 +604,13 @@ class Application : public virtual InitialApplicationData,
    * @brief HmiState of application within active events PhoneCall, TTS< etc ...
    * @return Active HmiState of application
    */
-  virtual HmiStatePtr CurrentHmiState() const = 0;
+  virtual const HmiStatePtr CurrentHmiState() const = 0;
 
   /**
    * @brief RegularHmiState of application without active events VR, TTS etc ...
    * @return HmiState of application
    */
-  virtual HmiStatePtr RegularHmiState() const = 0;
+  virtual const HmiStatePtr RegularHmiState() const = 0;
 
   /**
    * @brief PostponedHmiState returns postponed hmi state of application
@@ -626,7 +618,7 @@ class Application : public virtual InitialApplicationData,
    *
    * @return Postponed hmi state of application
    */
-  virtual HmiStatePtr PostponedHmiState() const = 0;
+  virtual const HmiStatePtr PostponedHmiState() const = 0;
 
   /**
    * @brief Keeps id of softbuttons which is created in commands:
@@ -751,13 +743,10 @@ class Application : public virtual InitialApplicationData,
   virtual void LoadPersistentFiles() = 0;
 
  protected:
-  /**
-   * @brief Active states of application
-   */
-  HmiStateList hmi_states_;
   mutable sync_primitives::Lock hmi_states_lock_;
 
-  ApplicationState app_state_;
+  ApplicationRegisterState app_state_;
+  ApplicationState state_;
   std::string url_;
   std::string package_name_;
   std::string device_id_;

@@ -756,19 +756,19 @@ void ResumeCtrl::LoadResumeData() {
     resumption_storage_->UpdateHmiLevel(
         so_applications_data[i][strings::app_id].asString(),
         so_applications_data[i][strings::device_id].asString(),
-        static_cast<int32_t>(mobile_apis::HMILevel::INVALID_ENUM));
+        mobile_apis::HMILevel::INVALID_ENUM);
   }
   if (full_app != NULL) {
     resumption_storage_->UpdateHmiLevel(
         (*full_app)[strings::app_id].asString(),
         (*full_app)[strings::device_id].asString(),
-        static_cast<int32_t>(mobile_apis::HMILevel::HMI_FULL));
+        mobile_apis::HMILevel::HMI_FULL);
   }
   if (limited_app != NULL) {
     resumption_storage_->UpdateHmiLevel(
         (*limited_app)[strings::app_id].asString(),
         (*limited_app)[strings::device_id].asString(),
-        static_cast<int32_t>(mobile_apis::HMILevel::HMI_LIMITED));
+        mobile_apis::HMILevel::HMI_LIMITED);
   }
 }
 

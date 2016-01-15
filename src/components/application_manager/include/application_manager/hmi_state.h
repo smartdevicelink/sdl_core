@@ -36,25 +36,28 @@
 #include <list>
 #include "interfaces/MOBILE_API.h"
 #include "utils/shared_ptr.h"
-#include "application_manager/state_context.h"
 
 namespace application_manager {
 
 class HmiState;
+class ApplicationManager;
+
 typedef utils::SharedPtr<HmiState> HmiStatePtr;
-typedef std::list<HmiStatePtr> HmiStateList;
 
 /**
- * @brief The HmiState class
- * Handles Hmi state of application
- * (hmi level, audio streaming state, system context)
- */
+* @brief The HmiState class
+*  Handle Hmi state of application (hmi level,
+*  audio streaming state, system context)
+*
+*/
 class HmiState {
  public:
   /**
    * @brief The StateID enum describes state of application
+   * If no events occured STATE_ID_DEFAULT shuld be presented
    */
   enum StateID {
+    STATE_ID_CURRENT,
     STATE_ID_REGULAR,
     STATE_ID_POSTPONED,
     STATE_ID_PHONE_CALL,
@@ -62,12 +65,13 @@ class HmiState {
     STATE_ID_VR_SESSION,
     STATE_ID_TTS_SESSION,
     STATE_ID_NAVI_STREAMING,
+    STATE_ID_DEACTIVATE_HMI,
+    STATE_ID_AUDIO_SOURCE,
+    STATE_ID_EMBEDDED_NAVI
   };
 
-  HmiState(uint32_t app_id, const StateContext& state_context_);
-  HmiState(uint32_t app_id,
-           const StateContext& state_context_,
-           StateID state_id);
+  HmiState(uint32_t app_id, ApplicationManager* app_mngr);
+  HmiState(uint32_t app_id, ApplicationManager* app_mngr, StateID state_id);
 
   virtual ~HmiState() {}
 
@@ -162,51 +166,73 @@ class HmiState {
  protected:
   uint32_t app_id_;
   StateID state_id_;
-  const StateContext& state_context_;
+  ApplicationManager* app_mngr_;
   HmiStatePtr parent_;
   mobile_apis::HMILevel::eType hmi_level_;
   mobile_apis::AudioStreamingState::eType audio_streaming_state_;
   mobile_apis::SystemContext::eType system_context_;
+
+ protected:
+  /**
+   * @brief is_navi_app check if app is navi
+   * @param app_id application id
+   * @return true if app is navi, otherwise return false
+   */
+  bool is_navi_app(const uint32_t app_id) const;
+
+  /**
+   * @brief is_media_app check if app is media
+   * @param app_id application id
+   * @return true if media_app, otherwise return false
+   */
+  bool is_media_app(const uint32_t app_id) const;
+
+  /**
+   * @brief is_voice_communicationn_app check if app is voice comunication
+   * @param app_id application id
+   * @return true if voice_communicationn_app, otherwise return false
+   */
+  bool is_voice_communication_app(const uint32_t app_id) const;
 
  private:
   void operator=(const HmiState&);
 };
 
 /**
- * @brief The VRHmiState class impement logic of VR temporary state
+ * @brief The VRHmiState class implements logic of VR temporary state
  */
 class VRHmiState : public HmiState {
  public:
   virtual mobile_apis::AudioStreamingState::eType audio_streaming_state() const;
-  VRHmiState(uint32_t app_id, const StateContext& state_context);
+  VRHmiState(uint32_t app_id, ApplicationManager* app_mngr);
 };
 
 /**
- * @brief The TTSHmiState class impement logic of TTS temporary state
+ * @brief The TTSHmiState class implements logic of TTS temporary state
  */
 class TTSHmiState : public HmiState {
  public:
-  TTSHmiState(uint32_t app_id, const StateContext& state_context);
+  TTSHmiState(uint32_t app_id, ApplicationManager* app_mngr);
   virtual mobile_apis::AudioStreamingState::eType audio_streaming_state() const;
 };
 
 /**
- * @brief The NaviStreamingState class impement logic of NaviStreaming temporary
- * state
+ * @brief The NaviStreamingState class implements logic of NaviStreaming
+ * temporary state
  */
 class NaviStreamingHmiState : public HmiState {
  public:
-  NaviStreamingHmiState(uint32_t app_id, const StateContext& state_context);
+  NaviStreamingHmiState(uint32_t app_id, ApplicationManager* app_mngr);
   virtual mobile_apis::AudioStreamingState::eType audio_streaming_state() const;
 };
 
 /**
- * @brief The PhoneCallHmiState class impement logic of PhoneCall temporary
+ * @brief The PhoneCallHmiState class implements logic of PhoneCall temporary
  * state
  */
 class PhoneCallHmiState : public HmiState {
  public:
-  PhoneCallHmiState(uint32_t app_id, const StateContext& state_context);
+  PhoneCallHmiState(uint32_t app_id, ApplicationManager* app_mngr);
   virtual mobile_apis::HMILevel::eType hmi_level() const;
   virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const {
@@ -215,12 +241,55 @@ class PhoneCallHmiState : public HmiState {
 };
 
 /**
- * @brief The SafetyModeHmiState class impement logic of SafetyMode temporary
+ * @brief The SafetyModeHmiState class implements logic of SafetyMode temporary
  * state
  */
 class SafetyModeHmiState : public HmiState {
  public:
-  SafetyModeHmiState(uint32_t app_id, const StateContext& state_context);
+  SafetyModeHmiState(uint32_t app_id, ApplicationManager* app_mngr);
+  virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
+      const {
+    return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
+  }
+};
+
+/**
+ * @brief The DeactivateHMI class implements logic of DeactivateHMI temporary
+ * state
+ */
+class DeactivateHMI : public HmiState {
+ public:
+  DeactivateHMI(uint32_t app_id, ApplicationManager* app_mngr);
+  virtual mobile_apis::HMILevel::eType hmi_level() const;
+  virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
+      const {
+    return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
+  }
+};
+
+/**
+ * @brief The AudioSource class implements logic of OnEventChanged(AUDIO_SOURCE)
+ * temporary state
+ */
+class AudioSource : public HmiState {
+ public:
+  AudioSource(uint32_t app_id, ApplicationManager* app_mngr);
+  virtual mobile_apis::HMILevel::eType hmi_level() const;
+  virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
+      const {
+    return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
+  }
+};
+
+/**
+ * @brief The EmbeddedNavi class implements logic of
+ * OnEventChanged(EMBEDDED_NAVI)
+ * temporary state
+ */
+class EmbeddedNavi : public HmiState {
+ public:
+  EmbeddedNavi(uint32_t app_id, ApplicationManager* app_mngr);
+  virtual mobile_apis::HMILevel::eType hmi_level() const;
   virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;

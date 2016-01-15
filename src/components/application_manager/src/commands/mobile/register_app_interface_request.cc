@@ -538,7 +538,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
 
   // Default HMI level should be set before any permissions validation, since it
   // relies on HMI level.
-  resumer.SetupDefaultHMILevel(application);
+  ApplicationManagerImpl::instance()->OnApplicationRegistered(application);
 
   // Sends OnPermissionChange notification to mobile right after RAI response
   // and HMI level set-up
@@ -563,7 +563,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
 
-  ApplicationManagerImpl::ApplictionSetConstIt it = accessor.begin();
+  ApplicationSetConstIt it = accessor.begin();
   const std::string app_name = msg_params[strings::app_name].asString();
 
   for (; accessor.end() != it; ++it) {
@@ -727,11 +727,10 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
       (*message_)[strings::msg_params][strings::app_id].asString();
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
-  const ApplicationManagerImpl::ApplictionSet applications =
-      accessor.applications();
+  const ApplicationSet applications = accessor.applications();
 
-  ApplicationManagerImpl::ApplictionSetConstIt it = applications.begin();
-  ApplicationManagerImpl::ApplictionSetConstIt it_end = applications.end();
+  ApplicationSetConstIt it = applications.begin();
+  ApplicationSetConstIt it_end = applications.end();
 
   for (; it != it_end; ++it) {
     if (!strcasecmp(mobile_app_id.c_str(), (*it)->mobile_app_id().c_str())) {
@@ -870,6 +869,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
       return true;
     }
   }
+
   return false;
 }
 

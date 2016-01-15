@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_DB_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_DB_H_
 #include "application_manager/resumption/resumption_data.h"
+
 #include "sql_database.h"
 #include "sql_query.h"
 
@@ -84,7 +85,6 @@ class ResumptionDataDB : public ResumptionData {
    * @param application is application which need to be saved
    */
   virtual void SaveApplication(app_mngr::ApplicationSharedPtr application);
-
   /**
    * @brief Returns HMI level of application from saved data
    * @param policy_app_id contains policy id of application
@@ -101,7 +101,6 @@ class ResumptionDataDB : public ResumptionData {
    * @return true if exist, otherwise false
    */
   virtual bool IsHMIApplicationIdExist(uint32_t hmi_app_id) const;
-
   /**
    * @brief Checks if saved data have application
    * @param policy_app_id - policy application id
@@ -114,7 +113,7 @@ class ResumptionDataDB : public ResumptionData {
   /**
    * @brief Retrieves HMI app ID for the given mobile app ID
    * and device ID from stored data.
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return HMI app ID
    */
@@ -130,7 +129,7 @@ class ResumptionDataDB : public ResumptionData {
   /**
    * @brief Retrieves hash ID for the given mobile app ID
    * and device ID from stored information.
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @param hash_id - parameter which will contain HASH id from saved
    * application
@@ -148,9 +147,9 @@ class ResumptionDataDB : public ResumptionData {
   virtual void OnAwake();
 
   /**
-   * @brief Retrieves data of saved appliction for the given mobile app ID
+   * @brief Retrieves data of saved application for the given mobile app ID
    * and device ID
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @param saved_app - parameter which will contain data of saved application
    * @return TRUE if application will be found in saved data otherwise
@@ -177,7 +176,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Checks if saved data have application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return 0 if saved data contains application otherwise returns -1
    */
@@ -193,13 +192,13 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Updates HMI level of saved application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
-   * @param hmi_level - contains hmi level for saved appliction
+   * @param hmi_level - contains hmi level for saved application
    */
   virtual void UpdateHmiLevel(const std::string& policy_app_id,
                               const std::string& device_id,
-                              int32_t hmi_level);
+                              mobile_apis::HMILevel::eType hmi_level);
 
   /**
    * @brief Re-creates and re-init DB
@@ -242,7 +241,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Retrieves hmi level from db
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @param hmi_level - will contains hmi level for saved application
    * @return true if application with mobile id and device id has hmi level
@@ -251,7 +250,6 @@ class ResumptionDataDB : public ResumptionData {
   bool SelectHMILevel(const std::string& policy_app_id,
                       const std::string& device_id,
                       int& hmi_level) const;
-
   /**
    * @brief Checks existence HMI id in DB
    * @param hmi_app_id - HMI id
@@ -261,7 +259,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Select HMI id from saved application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @param hmi_id - will contains hmi id from saved application
    */
@@ -271,7 +269,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Select hash id from saved application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @param hash_id - will contains hash id from saved application
    */
@@ -287,7 +285,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Checks existence application in DB
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @param application_exist will contain true if restored data contain
    * application
@@ -308,7 +306,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Deletes saved application from db
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return true if application data was deleted otherwise returns
    * false
@@ -318,7 +316,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Deletes file from saved application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return true if data was deleted otherwise returns
    * false
@@ -328,7 +326,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Deletes submenu from saved application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return true if data was deleted otherwise returns
    * false
@@ -338,7 +336,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Deletes subscriptions from saved application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return true if data was deleted otherwise returns
    * false
@@ -348,7 +346,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Deletes commands from saved application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return true if data was deleted otherwise returns
    * false
@@ -358,7 +356,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Deletes choice set from saved application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return true if data was deleted otherwise returns
    * false
@@ -368,7 +366,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Deletes global properties from saved application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return true if data was deleted otherwise returns
    * false
@@ -377,7 +375,7 @@ class ResumptionDataDB : public ResumptionData {
                                    const std::string& device_id);
   /**
    * @brief Deletes data from application table
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return true if data was deleted otherwise returns
    * false
@@ -450,7 +448,7 @@ class ResumptionDataDB : public ResumptionData {
   /**
    * @brief Saves application data to DB
    * @param application contains data for saving
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return true if application data was saved successfully
    * otherwise returns false
@@ -471,7 +469,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Execute query for delete data of application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @param text_query - contains text of query
    * @return true if query was run successfully otherwise returns
@@ -483,7 +481,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Execute union query for delete data of application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @param text_query - contains text of query
    * @return true if query was run successfully otherwise returns
@@ -637,7 +635,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Selects data from file table
-   * @param policy_app_id contains policy application id of application
+   * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
    * @param saved_app will contain data from file table
    * @return true if query was run successfully otherwise returns
@@ -649,7 +647,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Selects data from subMenu table
-   * @param policy_app_id contains policy application id of application
+   * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
    * @param saved_app will contain data from subMenu table
    * @return true if query was run successfully otherwise returns
@@ -661,7 +659,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Selects data from commands table
-   * @param policy_app_id contains policy application id of application
+   * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
    * @param saved_app will contain commands
    * @return true if query was run successfully otherwise returns
@@ -673,7 +671,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Selects data from applicationSubscribtionsArray table
-   * @param policy_app_id contains policy application id of application
+   * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
    * @param saved_app will contain subscriptions
    * @return true if query was run successfully otherwise returns
@@ -685,7 +683,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Selects choice set data from DB
-   * @param policy_app_id contains policy application id of application
+   * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
    * @param saved_app will contain choiceSets
    * @return true if query was run successfully otherwise returns
@@ -697,7 +695,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Selects global properties data from DB
-   * @param policy_app_id contains policy application id of application
+   * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
    * @param saved_app will contain global properties
    * @return true if query was run successfully otherwise returns
@@ -751,7 +749,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Selects data from application table of DB
-   * @param policy_app_id contains policy application id of application
+   * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
    * @param saved_app will contain data from application table
    * @return true if query was run successfully otherwise returns
@@ -765,7 +763,7 @@ class ResumptionDataDB : public ResumptionData {
    * @brief Selects count from array table
    * @param count_item will contain amount item in table
    * @param text_query - contains text of query
-   * @param policy_app_id contains policy application id of application
+   * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
    * @return true if query was run successfully otherwise returns
    * false
@@ -790,7 +788,7 @@ class ResumptionDataDB : public ResumptionData {
   /**
    * @brief prepare and bind the same type query
    * @param query object of query for DB
-   * @param policy_app_id contains policy application id of application
+   * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
    * @param text_query - contains text of query
    * @return true if query was binded successfully otherwise returns
@@ -804,7 +802,7 @@ class ResumptionDataDB : public ResumptionData {
   /**
    * @brief Updates HMI level and time stamp in application table
    * @param application contains data for saving
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return true if application data were updated successfully
    * otherwise returns false

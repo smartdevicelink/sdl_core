@@ -133,7 +133,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
       const;
   const std::string& app_icon_path() const;
   connection_handler::DeviceHandle device() const;
-  bool tts_speak_state();
   void set_tts_properties_in_none(bool active);
   bool tts_properties_in_none();
   void set_tts_properties_in_full(bool active);
@@ -156,9 +155,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   virtual void set_is_resuming(bool is_resuming);
   virtual bool is_resuming() const;
 
-  bool AddFile(AppFile& file);
-  bool UpdateFile(AppFile& file);
-
+  bool AddFile(const AppFile& file);
+  bool UpdateFile(const AppFile& file);
   bool DeleteFile(const std::string& file_name);
   virtual const AppFilesMap& getAppFiles() const;
 
@@ -230,6 +228,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   */
   virtual void SetPostponedState(HmiStatePtr state);
 
+  virtual void RemovePostponedState();
+
   /**
    * @brief AddHMIState the function that will change application's
    * hmi state.
@@ -254,13 +254,13 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * @brief HmiState of application within active events PhoneCall, TTS< etc ...
    * @return Active HmiState of application
    */
-  virtual HmiStatePtr CurrentHmiState() const;
+  virtual const HmiStatePtr CurrentHmiState() const;
 
   /**
    * @brief RegularHmiState of application without active events VR, TTS etc ...
    * @return HmiState of application
    */
-  virtual HmiStatePtr RegularHmiState() const;
+  virtual const HmiStatePtr RegularHmiState() const;
 
   /**
    * @brief PostponedHmiState returns postponed hmi state of application
@@ -268,7 +268,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    *
    * @return Postponed hmi state of application
    */
-  virtual HmiStatePtr PostponedHmiState() const;
+  virtual const HmiStatePtr PostponedHmiState() const;
 
   uint32_t audio_stream_retry_number() const;
 

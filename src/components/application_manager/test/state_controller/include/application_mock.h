@@ -84,6 +84,8 @@ class ApplicationMock : public am::Application {
   MOCK_METHOD1(set_folder_name, void(const std::string& folder_name));
   MOCK_CONST_METHOD0(folder_name, const std::string());
   MOCK_CONST_METHOD0(is_media_application, bool());
+  MOCK_CONST_METHOD0(is_foreground, bool());
+  MOCK_METHOD1(set_foreground, void(bool));
   MOCK_CONST_METHOD0(hmi_level, const mobile_apis::HMILevel::eType());
   MOCK_CONST_METHOD0(put_file_in_none_count, const uint32_t());
   MOCK_CONST_METHOD0(delete_file_in_none_count, const uint32_t());
@@ -93,10 +95,9 @@ class ApplicationMock : public am::Application {
                      const mobile_apis::AudioStreamingState::eType());
   MOCK_CONST_METHOD0(app_icon_path, const std::string&());
   MOCK_CONST_METHOD0(device, connection_handler::DeviceHandle());
-  MOCK_METHOD0(tts_speak_state, bool());
-  MOCK_CONST_METHOD0(CurrentHmiState, am::HmiStatePtr());
-  MOCK_CONST_METHOD0(RegularHmiState, am::HmiStatePtr());
-  MOCK_CONST_METHOD0(PostponedHmiState, am::HmiStatePtr());
+  MOCK_CONST_METHOD0(CurrentHmiState, const am::HmiStatePtr());
+  MOCK_CONST_METHOD0(RegularHmiState, const am::HmiStatePtr());
+  MOCK_CONST_METHOD0(PostponedHmiState, const am::HmiStatePtr());
   MOCK_METHOD1(set_tts_properties_in_none, void(bool active));
   MOCK_METHOD0(tts_properties_in_none, bool());
   MOCK_METHOD1(set_tts_properties_in_full, void(bool active));
@@ -138,6 +139,7 @@ class ApplicationMock : public am::Application {
   MOCK_METHOD0(usage_report, am::UsageStatistics&());
   MOCK_METHOD1(SetRegularState, void(am::HmiStatePtr state));
   MOCK_METHOD1(SetPostponedState, void(am::HmiStatePtr state));
+  MOCK_METHOD0(RemovePostponedState, void());
   MOCK_METHOD1(AddHMIState, void(am::HmiStatePtr state));
   MOCK_METHOD1(RemoveHMIState, void(am::HmiState::StateID state_id));
   MOCK_METHOD2(SubscribeToSoftButtons,
@@ -150,7 +152,7 @@ class ApplicationMock : public am::Application {
   // InitialApplicationData methods
   MOCK_CONST_METHOD0(app_types, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(vr_synonyms, const smart_objects::SmartObject*());
-  MOCK_CONST_METHOD0(policy_app_id, std::string());
+  MOCK_CONST_METHOD0(mobile_app_id, std::string());
   MOCK_CONST_METHOD0(tts_name, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(ngn_media_screen_name,
                      const smart_objects::SmartObject*());
@@ -160,7 +162,7 @@ class ApplicationMock : public am::Application {
                void(const smart_objects::SmartObject& app_types));
   MOCK_METHOD1(set_vr_synonyms,
                void(const smart_objects::SmartObject& vr_synonyms));
-  MOCK_METHOD1(set_policy_app_id, void(const std::string& policy_app_id));
+  MOCK_METHOD1(set_mobile_app_id, void(const std::string& policy_app_id));
   MOCK_METHOD1(set_tts_name, void(const smart_objects::SmartObject& tts_name));
   MOCK_METHOD1(set_ngn_media_screen_name,
                void(const smart_objects::SmartObject& ngn_name));

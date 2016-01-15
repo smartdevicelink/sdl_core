@@ -393,7 +393,7 @@ mobile_apis::Result::eType ChangeRegistrationRequest::CheckCoincidence() {
     app_name = msg_params[strings::app_name].asString();
   }
 
-  ApplicationManagerImpl::ApplictionSetConstIt it = accessor.begin();
+  ApplicationSetConstIt it = accessor.begin();
   for (; accessor.end() != it; ++it) {
     if (app_id == (*it)->app_id()) {
       continue;

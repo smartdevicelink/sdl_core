@@ -94,7 +94,7 @@ class ResumptionData {
   /**
    * @brief Retrieves HMI app ID for the given mobile app ID
    * and device ID from stored information.
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return HMI app ID
    */
@@ -110,7 +110,7 @@ class ResumptionData {
   /**
    * @brief Retrieves hash ID for the given mobile app ID
    * and device ID from stored information.
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @param hash_id - parameter which will contain HASH id from saved
    * application
@@ -128,9 +128,9 @@ class ResumptionData {
   virtual void OnAwake() = 0;
 
   /**
-   * @brief Retrieves data of saved appliction for the given mobile app ID
+   * @brief Retrieves data of saved application for the given mobile app ID
    * and device ID
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @param saved_app - parameter which will contain data of saved application
    * @return TRUE if application will be found in saved data otherwise
@@ -143,7 +143,7 @@ class ResumptionData {
 
   /**
    * @brief Remove application from list of saved applications
-   * @param policy_app_id application witch need to be removed
+   * @param policy_app_id application which need to be removed
    * @param device_id - contains id of device on which is running application
    * @return return true, if success, otherwise return false
    */
@@ -158,7 +158,7 @@ class ResumptionData {
 
   /**
    * @brief Checks if saved data have application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return index if data of application exists, otherwise returns -1
    */
@@ -174,13 +174,13 @@ class ResumptionData {
 
   /**
    * @brief Updates HMI level of saved application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
-   * @param hmi_level - contains hmi level for saved appliction
+   * @param hmi_level - contains hmi level for saved application
    */
   virtual void UpdateHmiLevel(const std::string& policy_app_id,
                               const std::string& device_id,
-                              int32_t hmi_level) = 0;
+                              mobile_apis::HMILevel::eType hmi_level) = 0;
 
   /**
    * @brief Uses for overload on heir classes

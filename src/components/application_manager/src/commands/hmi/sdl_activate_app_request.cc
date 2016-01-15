@@ -158,10 +158,10 @@ DevicesApps SDLActivateAppRequest::FindAllAppOnParticularDevice(
   DevicesApps apps;
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
-  ApplicationManagerImpl::ApplictionSet app_list = accessor.GetData();
+  const ApplicationSet app_list = accessor.applications();
 
-  ApplicationManagerImpl::ApplictionSetIt it = app_list.begin();
-  ApplicationManagerImpl::ApplictionSetIt it_end = app_list.end();
+  ApplicationSetIt it = app_list.begin();
+  ApplicationSetIt it_end = app_list.end();
 
   for (; it != it_end; ++it) {
     if (handle == (*it)->device()) {

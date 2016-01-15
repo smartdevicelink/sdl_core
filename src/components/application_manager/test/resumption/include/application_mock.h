@@ -95,7 +95,6 @@ class ApplicationMock : public ::application_manager::Application {
                      const mobile_apis::AudioStreamingState::eType());
   MOCK_CONST_METHOD0(app_icon_path, const std::string&());
   MOCK_CONST_METHOD0(device, connection_handler::DeviceHandle());
-  MOCK_METHOD0(tts_speak_state, bool());
   MOCK_CONST_METHOD0(CurrentHmiState, ::application_manager::HmiStatePtr());
   MOCK_CONST_METHOD0(RegularHmiState, ::application_manager::HmiStatePtr());
   MOCK_CONST_METHOD0(PostponedHmiState, ::application_manager::HmiStatePtr());
@@ -122,9 +121,9 @@ class ApplicationMock : public ::application_manager::Application {
                      ::application_manager::ProtocolVersion());
   MOCK_METHOD1(set_is_resuming, void(bool));
   MOCK_CONST_METHOD0(is_resuming, bool());
-  MOCK_METHOD1(AddFile, bool(::application_manager::AppFile& file));
+  MOCK_METHOD1(AddFile, bool(const ::application_manager::AppFile& file));
   MOCK_CONST_METHOD0(getAppFiles, const ::application_manager::AppFilesMap&());
-  MOCK_METHOD1(UpdateFile, bool(::application_manager::AppFile& file));
+  MOCK_METHOD1(UpdateFile, bool(const ::application_manager::AppFile& file));
   MOCK_METHOD1(DeleteFile, bool(const std::string& file_name));
   MOCK_METHOD1(
       GetFile,
@@ -262,7 +261,6 @@ class ApplicationMock : public ::application_manager::Application {
   MOCK_METHOD1(set_reset_global_properties_active, void(bool active));
   MOCK_CONST_METHOD0(is_reset_global_properties_active, bool());
   MOCK_CONST_METHOD0(app_id, uint32_t());
-
   MOCK_CONST_METHOD0(is_foreground, bool());
   MOCK_CONST_METHOD0(mobile_app_id, std::string());
   MOCK_METHOD1(set_mobile_app_id, void(const std::string&));

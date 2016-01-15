@@ -625,7 +625,7 @@ void ResumptionDataDB::SelectDataForLoadResumeData(
 
 void ResumptionDataDB::UpdateHmiLevel(const std::string& policy_app_id,
                                       const std::string& device_id,
-                                      int32_t hmi_level) {
+                                      mobile_apis::HMILevel::eType hmi_level) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   utils::dbms::SQLQuery query(db());

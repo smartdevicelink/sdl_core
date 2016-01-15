@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2015, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,9 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_HELPER_H_
 
 #include <map>
+#include <vector>
 #include <string>
-#include <string.h>
+
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "utils/macro.h"
@@ -77,14 +78,6 @@ class MessageHelper {
       uint32_t correlation_id, const std::vector<std::string>& params);
 
   /**
-   * @brief Sends HMI status notification to mobile
-   *
-   *@param application_impl application with changed HMI status
-   *
-   **/
-  static void SendHMIStatusNotification(const Application& application_impl);
-
-  /**
    * @brief Sends OnAppRegistered notification to HMI
    *
    *@param application_impl application with changed HMI status
@@ -98,6 +91,9 @@ class MessageHelper {
   /**
    * @brief Create mobile HashUpdateNotification
    */
+  static smart_objects::SmartObjectSPtr CreateHashUpdateNotification(
+      const uint32_t app_id);
+
   static smart_objects::SmartObjectSPtr GetHashUpdateNotification(
       const uint32_t app_id);
 

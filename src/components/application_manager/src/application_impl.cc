@@ -124,7 +124,7 @@ ApplicationImpl::ApplicationImpl(
           mobile_apis::HMILevel::INVALID_ENUM,
           mobile_apis::AudioStreamingState::INVALID_ENUM,
           mobile_api::SystemContext::SYSCTXT_MAIN);
-  hmi_states_.push_back(initial_state);
+  state_.InitState(initial_state);
 
   video_stream_suspend_timeout_ =
       profile::Profile::instance()->video_data_stopped_timeout();
@@ -209,37 +209,17 @@ bool ApplicationImpl::IsAudioApplication() const {
 
 void ApplicationImpl::SetRegularState(HmiStatePtr state) {
   LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK_OR_RETURN_VOID(state);
-  DCHECK_OR_RETURN_VOID(state->state_id() ==
-                        HmiState::StateID::STATE_ID_REGULAR);
-  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-  DCHECK_OR_RETURN_VOID(!hmi_states_.empty());
-  hmi_states_.pop_front();
-  if (!hmi_states_.empty()) {
-    HmiStatePtr front_state = hmi_states_.front();
-    if (front_state->state_id() == HmiState::StateID::STATE_ID_REGULAR) {
-      hmi_states_.pop_front();
-    }
-  }
-  if (!hmi_states_.empty()) {
-    HmiStatePtr front_state = hmi_states_.front();
-    front_state->set_parent(state);
-  }
-  hmi_states_.push_front(state);
+  state_.AddState(state);
+}
+
+void ApplicationImpl::RemovePostponedState() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  state_.RemoveState(HmiState::STATE_ID_POSTPONED);
 }
 
 void ApplicationImpl::SetPostponedState(HmiStatePtr state) {
   LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK_OR_RETURN_VOID(state);
-  DCHECK_OR_RETURN_VOID(state->state_id() ==
-                        HmiState::StateID::STATE_ID_POSTPONED);
-  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-  DCHECK_OR_RETURN_VOID(!hmi_states_.empty());
-  HmiStatePtr front_state = hmi_states_.front();
-  if (front_state->state_id() == HmiState::StateID::STATE_ID_POSTPONED) {
-    hmi_states_.pop_front();
-  }
-  hmi_states_.push_front(state);
+  state_.AddState(state);
 }
 
 struct StateIdFindPredicate {
@@ -252,73 +232,24 @@ struct StateIdFindPredicate {
 
 void ApplicationImpl::AddHMIState(HmiStatePtr state) {
   LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK_OR_RETURN_VOID(state);
-  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-  HmiStateList::iterator it =
-      std::find_if(hmi_states_.begin(),
-                   hmi_states_.end(),
-                   StateIdFindPredicate(state->state_id()));
-  if (hmi_states_.end() == it) {
-    hmi_states_.push_back(state);
-  } else {
-    LOG4CXX_WARN(
-        logger_,
-        "Hmi state with ID "
-            << state->state_id()
-            << "has been already applied to this application. Ignoring");
-  }
+  state_.AddState(state);
 }
 
 void ApplicationImpl::RemoveHMIState(HmiState::StateID state_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-  HmiStateList::iterator it = std::find_if(
-      hmi_states_.begin(), hmi_states_.end(), StateIdFindPredicate(state_id));
-  if (it != hmi_states_.end()) {
-    // unable to remove regular state
-    DCHECK_OR_RETURN_VOID(it != hmi_states_.begin());
-    HmiStateList::iterator next = it;
-    HmiStateList::iterator prev = it;
-    next++;
-    prev--;
-    if (next != hmi_states_.end()) {
-      HmiStatePtr next_state = *next;
-      HmiStatePtr prev_state = *prev;
-      next_state->set_parent(prev_state);
-    }
-    hmi_states_.erase(it);
-  } else {
-    LOG4CXX_ERROR(logger_, "Unsuccesfull remove HmiState: " << state_id);
-  }
+  state_.RemoveState(state_id);
 }
 
-HmiStatePtr ApplicationImpl::CurrentHmiState() const {
-  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-  DCHECK_OR_RETURN(!hmi_states_.empty(), HmiStatePtr());
-  HmiStatePtr back_state = hmi_states_.back();
-  DCHECK_OR_RETURN(
-      back_state->state_id() != HmiState::StateID::STATE_ID_POSTPONED,
-      HmiStatePtr());
-  return back_state;
+const HmiStatePtr ApplicationImpl::CurrentHmiState() const {
+  return state_.GetState(HmiState::STATE_ID_CURRENT);
 }
 
-HmiStatePtr ApplicationImpl::RegularHmiState() const {
-  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-  DCHECK_OR_RETURN(!hmi_states_.empty(), HmiStatePtr());
-  HmiStateList::const_iterator front_itr = hmi_states_.begin();
-  if ((*front_itr)->state_id() == HmiState::StateID::STATE_ID_POSTPONED) {
-    ++front_itr;
-  }
-  return *front_itr;
+const HmiStatePtr ApplicationImpl::RegularHmiState() const {
+  return state_.GetState(HmiState::STATE_ID_REGULAR);
 }
 
-HmiStatePtr ApplicationImpl::PostponedHmiState() const {
-  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-  DCHECK_OR_RETURN(!hmi_states_.empty(), HmiStatePtr());
-  HmiStatePtr front_state = hmi_states_.front();
-  return front_state->state_id() == HmiState::StateID::STATE_ID_POSTPONED
-             ? front_state
-             : HmiStatePtr();
+const HmiStatePtr ApplicationImpl::PostponedHmiState() const {
+  return state_.GetState(HmiState::STATE_ID_POSTPONED);
 }
 
 const smart_objects::SmartObject* ApplicationImpl::active_message() const {
@@ -405,13 +336,6 @@ void ApplicationImpl::set_is_media_application(bool is_media) {
 
 bool IsTTSState(const HmiStatePtr state) {
   return state->state_id() == HmiState::STATE_ID_TTS_SESSION;
-}
-
-bool ApplicationImpl::tts_speak_state() {
-  sync_primitives::AutoLock autolock(hmi_states_lock_);
-  HmiStateList::const_iterator it =
-      std::find_if(hmi_states_.begin(), hmi_states_.end(), IsTTSState);
-  return it != hmi_states_.end();
 }
 
 void ApplicationImpl::set_tts_properties_in_none(bool active) {
@@ -653,7 +577,7 @@ bool ApplicationImpl::is_resuming() const {
   return is_resuming_;
 }
 
-bool ApplicationImpl::AddFile(AppFile& file) {
+bool ApplicationImpl::AddFile(const AppFile& file) {
   if (app_files_.count(file.file_name) == 0) {
     LOG4CXX_INFO(logger_,
                  "AddFile file " << file.file_name << " File type is "
@@ -664,7 +588,7 @@ bool ApplicationImpl::AddFile(AppFile& file) {
   return false;
 }
 
-bool ApplicationImpl::UpdateFile(AppFile& file) {
+bool ApplicationImpl::UpdateFile(const AppFile& file) {
   if (app_files_.count(file.file_name) != 0) {
     LOG4CXX_INFO(logger_,
                  "UpdateFile file " << file.file_name << " File type is "
@@ -870,6 +794,7 @@ void ApplicationImpl::UpdateHash() {
   LOG4CXX_AUTO_TRACE(logger_);
   hash_val_ = utils::gen_hash(profile::Profile::instance()->hash_string_size());
   set_is_application_data_changed(true);
+
   MessageHelper::SendHashUpdateNotification(app_id());
 }
 

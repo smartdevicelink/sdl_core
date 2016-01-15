@@ -373,9 +373,10 @@ ResumptionDataJson::~ResumptionDataJson() {
   // TODO Probably Save Data on disk
 }
 
-void ResumptionDataJson::UpdateHmiLevel(const std::string& policy_app_id,
-                                        const std::string& device_id,
-                                        int32_t hmi_level) {
+void ResumptionDataJson::UpdateHmiLevel(
+    const std::string& policy_app_id,
+    const std::string& device_id,
+    mobile_apis::HMILevel::eType hmi_level) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace app_mngr;
 

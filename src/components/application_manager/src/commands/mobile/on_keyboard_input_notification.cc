@@ -54,7 +54,7 @@ void OnKeyBoardInputNotification::Run() {
   ApplicationSharedPtr app_to_notify;
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
-  ApplicationManagerImpl::ApplictionSetIt it = accessor.begin();
+  ApplicationSetIt it = accessor.begin();
   for (; accessor.end() != it; ++it) {
     // if there is app with active perform interaction use it for notification
     if ((*it)->is_perform_interaction_active()) {
