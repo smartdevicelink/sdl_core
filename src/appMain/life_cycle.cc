@@ -372,10 +372,10 @@ namespace {
         break;
       case SIGSEGV:
         LOG4CXX_DEBUG(logger_, "SIGSEGV signal has been caught");
-#ifdef ENABLE_LOG
         FLUSH_LOGGER();
-#endif
-        abort();
+        // exit need to prevent endless sending SIGSEGV
+        // http://stackoverflow.com/questions/2663456/how-to-write-a-signal-handler-to-catch-sigsegv
+        exit(EXIT_FAILURE);
         break;
       default:
         LOG4CXX_DEBUG(logger_, "Unexpected signal has been caught");

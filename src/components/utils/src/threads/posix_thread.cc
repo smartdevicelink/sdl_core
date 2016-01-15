@@ -81,6 +81,10 @@ void* Thread::threadFunc(void* arg) {
   // Disable some system signals receiving in thread
   // by blocking those signals
   // (system signals processes only in the main thread)
+  // Mustn't block all signals!
+  // See "Advanced Programming in the UNIX Environment, 3rd Edition"
+  // (http://poincare.matf.bg.ac.rs/~ivana//courses/ps/sistemi_knjige/pomocno/apue.pdf,
+  // "12.8. Threads and Signals".
   sigset_t set;
   sigemptyset(&set);
   sigaddset(&set, SIGINT);

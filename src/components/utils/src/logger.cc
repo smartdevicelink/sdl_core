@@ -51,12 +51,13 @@ void deinit_logger () {
   logger::logger_status = logger::LoggerThreadNotCreated;
 }
 
+// Don't destroy logger here!
+// It's just for unloading logger queue
 void flush_logger() {
-  logger::LoggerStatus snatcher = logger::logger_status;
+  logger::LoggerStatus old_status = logger::logger_status;
   logger::logger_status = logger::DeletingLoggerThread;
-  logger::LogMessageLoopThread::instance()->WaitEmptyQueue();
-  //logger::LogMessageLoopThread::instance()->Shutdown();
-  logger::logger_status = snatcher;
+  logger::LogMessageLoopThread::instance()->WaitUntilEmpty();
+  logger::logger_status = old_status;
 }
 
 log4cxx_time_t time_now() {

@@ -92,8 +92,10 @@ class MessageLoopThread {
   // Added for utils/test/auto_trace_test.cc
   size_t GetMessageQueueSize() const;
 
-  //wait while message queue will be empty
-  void WaitEmptyQueue();
+  /*
+   * Wait until message queue will be empty
+   */
+  void WaitUntilEmpty();
 
  private:
   /*
@@ -108,6 +110,9 @@ class MessageLoopThread {
     virtual void threadMain() OVERRIDE;
     virtual void exitThreadMain() OVERRIDE;
 
+    // members for immediate dump MessageQueue
+    sync_primitives::ConditionalVariable empty_log_queue_notifier;
+
    private:
     // Handle all messages that are in the queue until it is empty
     void DrainQue();
@@ -115,9 +120,6 @@ class MessageLoopThread {
     Handler& handler_;
     // Message queue that is actually owned by MessageLoopThread
     MessageQueue<Message, Queue>& message_queue_;
-   public:
-    //members for immediate relief MessageQueue
-    sync_primitives::ConditionalVariable relief_notifier;
   };
 
  private:
@@ -125,10 +127,10 @@ class MessageLoopThread {
   LoopThreadDelegate* thread_delegate_;
   threads::Thread* thread_;
 
-  //members for immediate relief MessageQueue
-  sync_primitives::Lock relief_notifier_lock_;
-  //timeout for wait relief(in miliseconds)
-  static const int32_t kReliefTimeout = 5000;
+  // members for immediate dump MessageQueue
+  sync_primitives::Lock empty_log_queue_notifier_lock;
+  // timeout for wait to dump(in miliseconds)
+  static const int32_t kEmpty_log_queue_notifier_timeout = 5000;
 };
 
 ///////// Implementation
@@ -170,9 +172,9 @@ void MessageLoopThread<Q>::Shutdown() {
 }
 
 template<class Q>
-void MessageLoopThread<Q>::WaitEmptyQueue() {
-  sync_primitives::AutoLock main_lock(relief_notifier_lock_);
-  thread_delegate_->relief_notifier.WaitFor(main_lock, kReliefTimeout);
+void MessageLoopThread<Q>::WaitUntilEmpty() {
+  sync_primitives::AutoLock main_lock(empty_log_queue_notifier_lock);
+  thread_delegate_->empty_log_queue_notifier.WaitFor(main_lock, kEmpty_log_queue_notifier_timeout);
 }
 
 //////////
@@ -210,7 +212,7 @@ void MessageLoopThread<Q>::LoopThreadDelegate::DrainQue() {
       handler_.Handle(msg);
     }
   }
-  relief_notifier.NotifyOne();
+  empty_log_queue_notifier.NotifyOne();
 }
 
 }  // namespace threads
