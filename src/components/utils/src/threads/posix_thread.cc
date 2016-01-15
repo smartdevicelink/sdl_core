@@ -78,12 +78,15 @@ void* Thread::threadFunc(void* arg) {
   //     running = 1
   //     finalized = 1
   pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-  // Disable system signals receiving in thread
-  // by setting empty signal mask
+  // Disable some system signals receiving in thread
+  // by blocking those signals
   // (system signals processes only in the main thread)
   sigset_t set;
-  sigfillset(&set);
-  if (pthread_sigmask(SIG_SETMASK, &set, NULL) != 0) {
+  sigemptyset(&set);
+  sigaddset(&set, SIGINT);
+  sigaddset(&set, SIGTERM);
+  sigaddset(&set, SIGSEGV);
+  if(pthread_sigmask(SIG_BLOCK, &set, NULL) != 0){
     LOG4CXX_ERROR(logger_, "Set thread signal mask error");
   }
   LOG4CXX_DEBUG(logger_,
