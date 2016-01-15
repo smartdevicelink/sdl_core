@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_CONVERT_UTILS_H_
 
 #include <stdint.h>
+#include <limits>
 
 namespace utils {
 
@@ -58,6 +59,19 @@ unsigned long long int ConvertUInt64ToLongLongUInt(const uint64_t value);
  * Convert unsigned long long int value to uint64 value
  */
 uint64_t ConvertLongLongUIntToUInt64(const unsigned long long int value);
+
+
+/**
+ * Convert one number value to another type value
+ */
+template <typename InputType, typename OutputType>
+OutputType SafeStaticCast(const InputType value) {
+  DCHECK_OR_RETURN(value >= std::numeric_limits<OutputType>::min(),
+                   std::numeric_limits<OutputType>::min());
+  DCHECK_OR_RETURN(value <= std::numeric_limits<OutputType>::max(),
+                   std::numeric_limits<OutputType>::max());
+  return static_cast<OutputType>(value);
+}
 
 }  // namespace utils
 

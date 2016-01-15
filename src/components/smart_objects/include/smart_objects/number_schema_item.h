@@ -38,6 +38,7 @@
 #include "utils/shared_ptr.h"
 #include "smart_objects/default_shema_item.h"
 #include "smart_objects/schema_item_parameter.h"
+#include "utils/convert_utils.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -124,15 +125,6 @@ bool TNumberSchemaItem<NumberType>::isValidNumberType(SmartType type) {
   }
 }
 
-template <typename InputType, typename OutputType>
-OutputType IntStaticCast(const InputType& value) {
-  DCHECK_OR_RETURN(value >= std::numeric_limits<OutputType>::min(),
-                   std::numeric_limits<OutputType>::min());
-  DCHECK_OR_RETURN(value <= std::numeric_limits<OutputType>::max(),
-                   std::numeric_limits<OutputType>::max());
-  return static_cast<OutputType>(value);
-}
-
 template <typename NumberType>
 Errors::eType TNumberSchemaItem<NumberType>::validate(
     const SmartObject& Object) {
@@ -141,9 +133,9 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(
   }
   NumberType value(0);
   if (typeid(int32_t) == typeid(value)) {
-    value = IntStaticCast<int64_t,int32_t>(Object.asInt());
+    value = utils::SafeStaticCast<int64_t,int32_t>(Object.asInt());
   } else if (typeid(uint32_t) == typeid(value)) {
-    value = IntStaticCast<uint64_t,uint32_t>(Object.asUInt());
+    value = utils::SafeStaticCast<uint64_t,uint32_t>(Object.asUInt());
   } else if (typeid(double) == typeid(value)) {
     value = Object.asDouble();
   } else if (typeid(int64_t) == typeid(value)) {

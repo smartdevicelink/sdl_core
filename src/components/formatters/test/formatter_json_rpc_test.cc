@@ -59,14 +59,32 @@ void CompactJson(std::string& str) {
   reader.parse(str, root);
   Json::FastWriter writer;
   str = writer.write(root);
-  std::string::iterator end_pos = std::remove(str.begin(), str.end(), '\n');
-  str.erase(end_pos, str.end());
+  if (str[str.size() - 1] == '\n') {
+      str.erase(str.size()-1,1);
+  }
 }
 
 namespace {
 const int64_t big_64int = 100000000000;
 const std::string str_with_big_int64 = "100000000000";
 }  // namespace
+
+TEST(FormatterJsonRPCTest, CheckCompactJson){
+  std::string before_compact(
+     "{\n   \"jsonrpc\" : \"2.0\",\n   \"method\" : \"BasicCommunication.OnSystemRequest\","
+     "\n   \"params\" : {\n      \"fileName\" : \"file \n Name\",\n      \"length\" : 100000000000,\n"
+     "\"offset\" : 100000000000,\n      \"requestType\" : \"PROPRIETARY\"\n   }\n}\n");
+  std::string after_compact = before_compact;
+  CompactJson(after_compact);
+
+  EXPECT_NE(before_compact, after_compact);
+
+  std::string expected(
+      "{\"jsonrpc\":\"2.0\",\"method\":\"BasicCommunication.OnSystemRequest\","
+      "\"params\":{\"fileName\":\"file \\n Name\",\"length\":100000000000,"
+      "\"offset\":100000000000,\"requestType\":\"PROPRIETARY\"}}");
+  EXPECT_EQ(expected, after_compact);
+}
 
 TEST(FormatterJsonRPCTest, CorrectRPCv1Request_ToString_Success) {
   // Create SmartObject
