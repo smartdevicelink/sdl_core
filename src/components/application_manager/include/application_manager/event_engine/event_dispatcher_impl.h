@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_DISPATCHER_IMPL_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_DISPATCHER_IMPL_H_
 
-#include <list>
+#include <vector>
 #include <map>
 
 #include "utils/lock.h"
@@ -104,22 +104,22 @@ class EventDispatcherImpl : public EventDispatcher,
    * when occurs unsubscribe from event
    * @param observer to be removed
    */
-  void remove_observer_from_list(EventObserver* const observer);
+  void remove_observer_from_vector(EventObserver* const observer);
 
   DISALLOW_COPY_AND_ASSIGN(EventDispatcherImpl);
 
   FRIEND_BASE_SINGLETON_CLASS(EventDispatcherImpl);
 
   // Data types section
-  typedef std::list<EventObserver*>                   ObserverList;
-  typedef std::map<int32_t, ObserverList>             ObserversMap;
+  typedef std::vector<EventObserver*>                 ObserverVector;
+  typedef std::map<int32_t, ObserverVector>           ObserversMap;
   typedef std::map<Event::EventID, ObserversMap>      EventObserverMap;
 
   // Members section
   sync_primitives::Lock                               state_lock_;
-  sync_primitives::Lock                               observer_list_lock_;
+  sync_primitives::Lock                               observer_vec_lock_;
   EventObserverMap                                    observers_;
-  ObserverList                                        observers_list_;
+  ObserverVector                                      observers_vector_;
 
 };
 

@@ -39,7 +39,7 @@ namespace event_engine {
 using namespace sync_primitives;
 
 EventDispatcherImpl::EventDispatcherImpl()
-    : observer_list_lock_(true),
+    : observer_vec_lock_(true),
       observers_() {
 }
 
@@ -52,25 +52,25 @@ void EventDispatcherImpl::raise_event(const Event& event) {
     // check if event is notification
     if (hmi_apis::messageType::notification == event.smart_object_type()) {
     	const uint32_t notification_correlation_id = 0;
-    	observers_list_ = observers_[event.id()][notification_correlation_id];
+    	observers_vector_ = observers_[event.id()][notification_correlation_id];
     }
 
     if (hmi_apis::messageType::response == event.smart_object_type()
         || hmi_apis::messageType::error_response == event.smart_object_type()) {
-    	observers_list_ = observers_[event.id()][event.smart_object_correlation_id()];
+    	observers_vector_ = observers_[event.id()][event.smart_object_correlation_id()];
     }
   }
 
   // Call observers
   EventObserver* temp;
-  while (observers_list_.size() > 0) {
-    observer_list_lock_.Acquire();
-    if (!observers_list_.empty()) {
-      temp = observers_list_.front();
-      observers_list_.pop_front();
+  while (observers_vector_.size() > 0) {
+    observer_vec_lock_.Acquire();
+    if (!observers_vector_.empty()) {
+      temp = *observers_vector_.begin();
+      observers_vector_.erase(observers_vector_.begin());
       temp->on_event(event);
     }
-    observer_list_lock_.Release();
+    observer_vec_lock_.Release();
   }
 }
 
@@ -83,13 +83,13 @@ void EventDispatcherImpl::add_observer(const Event::EventID& event_id,
 
 void EventDispatcherImpl::remove_observer(const Event::EventID& event_id,
 		                              EventObserver* const observer) {
-  remove_observer_from_list(observer);
+  remove_observer_from_vector(observer);
   AutoLock auto_lock(state_lock_);
   ObserversMap::iterator it =  observers_[event_id].begin();
   for (; observers_[event_id].end() != it; ++it) {
 
     //ObserverList iterator
-	ObserverList::iterator observer_it =  it->second.begin();
+	ObserverVector::iterator observer_it =  it->second.begin();
 	while (it->second.end() != observer_it) {
 	  if (observer->id() == (*observer_it)->id()) {
 	    observer_it = it->second.erase(observer_it);
@@ -101,7 +101,7 @@ void EventDispatcherImpl::remove_observer(const Event::EventID& event_id,
 }
 
 void EventDispatcherImpl::remove_observer(EventObserver* const observer) {
-  remove_observer_from_list(observer);
+  remove_observer_from_vector(observer);
   AutoLock auto_lock(state_lock_);
   EventObserverMap::iterator event_map = observers_.begin();
   for (; observers_.end() != event_map; ++event_map) {
@@ -109,7 +109,7 @@ void EventDispatcherImpl::remove_observer(EventObserver* const observer) {
 	for (; event_map->second.end() != it; ++it) {
 
 	  //ObserverList iterator
-	  ObserverList::iterator observer_it =  it->second.begin();
+	  ObserverVector::iterator observer_it =  it->second.begin();
 	  while (it->second.end() != observer_it) {
 	    if (observer->id() == (*observer_it)->id()) {
 	      observer_it = it->second.erase(observer_it);
@@ -121,13 +121,15 @@ void EventDispatcherImpl::remove_observer(EventObserver* const observer) {
   }
 }
 
-void EventDispatcherImpl::remove_observer_from_list(EventObserver* const observer) {
-  AutoLock auto_lock(observer_list_lock_);
-  if (!observers_list_.empty()) {
-    ObserverList::iterator it_begin = observers_list_.begin();
-    for(; it_begin != observers_list_.end(); ++it_begin) {
+void EventDispatcherImpl::remove_observer_from_vector(EventObserver* const observer) {
+  AutoLock auto_lock(observer_vec_lock_);
+  if (!observers_vector_.empty()) {
+    ObserverVector::iterator it_begin = observers_vector_.begin();
+    while (it_begin != observers_vector_.end()) {
       if ((*it_begin)->id() == observer->id()) {
-        it_begin = observers_list_.erase(it_begin);
+        it_begin = observers_vector_.erase(it_begin);
+      }else{
+        ++it_begin;
       }
     }
   }
