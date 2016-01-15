@@ -72,6 +72,15 @@ class EventObserver
    */
   virtual void on_event(const Event& event) = 0;
 
+  /*
+   * @brief Change the default EventDispatcher
+   *
+   * @param Pointer to different EventDispatcher
+   */
+  inline void  set_event_dispatcher(EventDispatcher* event_dispatcher)
+  {
+    pEventDispatcher = event_dispatcher;
+  }
  protected:
 
   /*
