@@ -54,7 +54,11 @@ void VRGetLanguageResponse::Run() {
       static_cast<hmi_apis::Common_Language::eType>(
           (*message_)[strings::msg_params][hmi_response::language].asInt()));
 
+  LOG4CXX_DEBUG(logger_, "Raising event for function_id "
+                << function_id()
+                << " and correlation_id " << correlation_id());
   event_engine::Event event(hmi_apis::FunctionID::VR_GetLanguage);
+  event.set_smart_object(*message_);
   event.raise();
 }
 

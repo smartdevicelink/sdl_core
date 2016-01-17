@@ -52,6 +52,9 @@ public:
 
   void on_event(const event_engine::Event& event) OVERRIDE;
 
+  void set_handle_response_for(
+          const event_engine::smart_objects::SmartObject& request);
+
 private:
 
   void VerifyRegisteredApps() const;

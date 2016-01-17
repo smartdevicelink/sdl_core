@@ -34,6 +34,7 @@
 #include "application_manager/hmi_language_handler.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/hmi_capabilities.h"
+#include "utils/helpers.h"
 #include "resumption/last_state.h"
 
 static const std::string LanguagesKey = "Languages";
@@ -49,9 +50,6 @@ HMILanguageHandler::HMILanguageHandler()
   : is_ui_language_received_(false),
     is_vr_language_received_(false),
     is_tts_language_received_(false) {
-  subscribe_on_event(hmi_apis::FunctionID::UI_GetLanguage);
-  subscribe_on_event(hmi_apis::FunctionID::VR_GetLanguage);
-  subscribe_on_event(hmi_apis::FunctionID::TTS_GetLanguage);
 }
 
 void HMILanguageHandler::set_ui_language(
@@ -104,7 +102,8 @@ hmi_apis::Common_Language::eType HMILanguageHandler::get_tts_language() const {
   using namespace hmi_apis;
   if (LastState::instance()->dictionary.isMember(LanguagesKey)) {
     if (LastState::instance()->dictionary[LanguagesKey].isMember(TTSKey)) {
-      Common_Language::eType tts_language =
+      // Web HMI returns -1 which causes assert for debug
+      Common_Language::eType tts_language = //Common_Language::EN_US;
           static_cast<Common_Language::eType>(
           LastState::instance()->dictionary[LanguagesKey][TTSKey].asUInt());
 
@@ -137,6 +136,42 @@ void HMILanguageHandler::on_event(const event_engine::Event& event) {
       is_tts_language_received_) {
     VerifyRegisteredApps();
   }
+}
+
+void HMILanguageHandler::set_handle_response_for(
+    const event_engine::smart_objects::SmartObject& request) {
+  using namespace helpers;
+  if (!request.keyExists(strings::params)) {
+    return;
+  }
+
+  if (!request[strings::params].keyExists(strings::function_id)) {
+    return;
+  }
+
+  if (!request[strings::params].keyExists(strings::correlation_id)) {
+    return;
+  }
+
+  hmi_apis::FunctionID::eType function_id =
+      static_cast<hmi_apis::FunctionID::eType>(
+        request[strings::params][strings::function_id].asInt());
+
+  if (!Compare<hmi_apis::FunctionID::eType, ONE, EQ>(
+        function_id,
+        hmi_apis::FunctionID::UI_GetLanguage,
+        hmi_apis::FunctionID::VR_GetLanguage,
+        hmi_apis::FunctionID::TTS_GetLanguage)) {
+    return;
+  }
+
+  uint32_t correlation_id =
+      request[strings::params][strings::correlation_id].asUInt();
+
+  subscribe_on_event(function_id, correlation_id);
+
+  LOG4CXX_DEBUG(logger_, "Subscribed for function_id " << function_id <<
+                " and correlation_id " << correlation_id);
 }
 
 void HMILanguageHandler::VerifyRegisteredApps() const {
