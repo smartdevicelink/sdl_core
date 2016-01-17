@@ -38,25 +38,71 @@
 
 namespace application_manager {
 
+/**
+ * Class is used to handle edge case with slow HMI responses for current
+ * languages. Main idea is to cache values within some persistent storage and
+ * respond to applications with these values. In case app registered before
+ * responses are gotten and after responses were received their language(s)
+ * mismatch to current on HMI - apps have to be unregistered.
+ **/
 class HMILanguageHandler: public event_engine::EventObserver {
 public:
+  /**
+   * @brief Class constructor
+   */
   HMILanguageHandler();
 
+  /**
+   * @brief Sets UI language value in persistent storage
+   * @param language UI language
+   */
   void set_ui_language(hmi_apis::Common_Language::eType language);
+
+  /**
+   * @brief Sets VR language value in persistent storage
+   * @param language VR language
+   */
   void set_vr_language(hmi_apis::Common_Language::eType language);
+
+  /**
+   * @brief Sets TTS language value in persistent storage
+   * @param language TTS language
+   */
   void set_tts_language(hmi_apis::Common_Language::eType language);
 
+  /**
+   * @brief Gets UI language value from persistent storage
+   * @return UI language
+   */
   hmi_apis::Common_Language::eType get_ui_language() const;
+
+  /**
+   * @brief Gets VR language from persistent storage
+   * @return VR language
+   */
   hmi_apis::Common_Language::eType get_vr_language() const;
+
+  /**
+   * @brief Gets TTS language value from persistent storage
+   * @return TTS language
+   */
   hmi_apis::Common_Language::eType get_tts_language() const;
 
   void on_event(const event_engine::Event& event) OVERRIDE;
 
+  /**
+   * @brief Trigger waiting for response
+   * @param request Request object
+   */
   void set_handle_response_for(
           const event_engine::smart_objects::SmartObject& request);
 
 private:
 
+  /**
+   * @brief Verifies already registered apps for language mismatch with
+   * current HMI language(s).
+   */
   void VerifyRegisteredApps() const;
 
   bool is_ui_language_received_;
