@@ -122,8 +122,7 @@ class HMICapabilities {
    *
    * @return Currently active UI language
    */
-  inline const hmi_apis::Common_Language::eType&
-  active_ui_language() const;
+  const hmi_apis::Common_Language::eType active_ui_language() const;
 
   /*
    * @brief Sets currently active UI language
@@ -153,8 +152,7 @@ class HMICapabilities {
    *
    * @return Currently active VR language
    */
-  inline const hmi_apis::Common_Language::eType&
-  active_vr_language() const;
+  const hmi_apis::Common_Language::eType active_vr_language() const;
 
   /*
    * @brief Sets currently active VR language
@@ -184,8 +182,7 @@ class HMICapabilities {
    *
    * @return Currently active TTS language
    */
-  inline const hmi_apis::Common_Language::eType&
-  active_tts_language() const;
+  const hmi_apis::Common_Language::eType active_tts_language() const;
 
   /*
    * @brief Sets currently active TTS language
@@ -501,29 +498,14 @@ bool HMICapabilities::is_ivi_cooperating() const {
   return is_ivi_cooperating_;
 }
 
-const hmi_apis::Common_Language::eType&
-HMICapabilities::active_ui_language() const {
-  return ui_language_;
-}
-
 const smart_objects::SmartObject*
 HMICapabilities::ui_supported_languages() const {
   return ui_supported_languages_;
 }
 
-const hmi_apis::Common_Language::eType&
-HMICapabilities::active_vr_language() const {
-  return vr_language_;
-}
-
 const smart_objects::SmartObject*
 HMICapabilities::vr_supported_languages() const {
   return vr_supported_languages_;
-}
-
-const hmi_apis::Common_Language::eType&
-HMICapabilities::active_tts_language() const {
-  return tts_language_;
 }
 
 const smart_objects::SmartObject*

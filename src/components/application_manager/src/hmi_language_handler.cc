@@ -36,6 +36,11 @@
 #include "application_manager/hmi_capabilities.h"
 #include "resumption/last_state.h"
 
+static const std::string LanguagesKey = "Languages";
+static const std::string UIKey = "UI";
+static const std::string VRKey = "VR";
+static const std::string TTSKey = "TTS";
+
 namespace application_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
@@ -51,17 +56,62 @@ HMILanguageHandler::HMILanguageHandler()
 
 void HMILanguageHandler::set_ui_language(
       hmi_apis::Common_Language::eType language) {
-    resumption::LastState::instance()->dictionary["Languages"]["UI"] = language;
+  resumption::LastState::instance()->dictionary[LanguagesKey][UIKey] = language;
 }
 
 void HMILanguageHandler::set_vr_language(
       hmi_apis::Common_Language::eType language) {
-    resumption::LastState::instance()->dictionary["Languages"]["VR"] = language;
+  resumption::LastState::instance()->dictionary[LanguagesKey][VRKey] = language;
 }
 
 void HMILanguageHandler::set_tts_language(
       hmi_apis::Common_Language::eType language) {
-  resumption::LastState::instance()->dictionary["Languages"]["TTS"] = language;
+  resumption::LastState::instance()->dictionary[LanguagesKey][TTSKey] = language;
+}
+
+hmi_apis::Common_Language::eType HMILanguageHandler::get_ui_language() const {
+  using namespace resumption;
+  using namespace hmi_apis;
+  if (LastState::instance()->dictionary.isMember(LanguagesKey)) {
+    if (LastState::instance()->dictionary[LanguagesKey].isMember(UIKey)) {
+      Common_Language::eType ui_language =
+          static_cast<Common_Language::eType>(
+          LastState::instance()->dictionary[LanguagesKey][UIKey].asUInt());
+
+      return ui_language;
+    }
+  }
+  return Common_Language::INVALID_ENUM;
+}
+
+hmi_apis::Common_Language::eType HMILanguageHandler::get_vr_language() const {
+  using namespace resumption;
+  using namespace hmi_apis;
+  if (LastState::instance()->dictionary.isMember(LanguagesKey)) {
+    if (LastState::instance()->dictionary[LanguagesKey].isMember(VRKey)) {
+      Common_Language::eType vr_language =
+          static_cast<Common_Language::eType>(
+          LastState::instance()->dictionary[LanguagesKey][VRKey].asUInt());
+
+      return vr_language;
+    }
+  }
+  return Common_Language::INVALID_ENUM;
+}
+
+hmi_apis::Common_Language::eType HMILanguageHandler::get_tts_language() const {
+  using namespace resumption;
+  using namespace hmi_apis;
+  if (LastState::instance()->dictionary.isMember(LanguagesKey)) {
+    if (LastState::instance()->dictionary[LanguagesKey].isMember(TTSKey)) {
+      Common_Language::eType tts_language =
+          static_cast<Common_Language::eType>(
+          LastState::instance()->dictionary[LanguagesKey][TTSKey].asUInt());
+
+      return tts_language;
+    }
+  }
+  return Common_Language::INVALID_ENUM;
 }
 
 void HMILanguageHandler::on_event(const event_engine::Event& event) {

@@ -46,6 +46,10 @@ public:
   void set_vr_language(hmi_apis::Common_Language::eType language);
   void set_tts_language(hmi_apis::Common_Language::eType language);
 
+  hmi_apis::Common_Language::eType get_ui_language() const;
+  hmi_apis::Common_Language::eType get_vr_language() const;
+  hmi_apis::Common_Language::eType get_tts_language() const;
+
   void on_event(const event_engine::Event& event) OVERRIDE;
 
 private:

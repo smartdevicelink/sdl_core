@@ -418,6 +418,30 @@ void HMICapabilities::set_active_tts_language(
   hmi_language_handler_.set_tts_language(language);
 }
 
+const hmi_apis::Common_Language::eType
+HMICapabilities::active_ui_language() const {
+  using namespace hmi_apis;
+  const Common_Language::eType language =
+      hmi_language_handler_.get_ui_language();
+  return Common_Language::INVALID_ENUM != language ? language : ui_language_;
+}
+
+const hmi_apis::Common_Language::eType
+HMICapabilities::active_vr_language() const {
+  using namespace hmi_apis;
+  const Common_Language::eType language =
+      hmi_language_handler_.get_vr_language();
+  return Common_Language::INVALID_ENUM != language ? language : vr_language_;
+}
+
+const hmi_apis::Common_Language::eType
+HMICapabilities::active_tts_language() const {
+  using namespace hmi_apis;
+  const Common_Language::eType language =
+      hmi_language_handler_.get_tts_language();
+  return Common_Language::INVALID_ENUM != language ? language : tts_language_;
+}
+
 void HMICapabilities::set_ui_supported_languages(
     const smart_objects::SmartObject& supported_languages) {
   if (ui_supported_languages_) {
