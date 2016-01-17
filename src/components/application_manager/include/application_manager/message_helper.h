@@ -125,20 +125,22 @@ class MessageHelper {
       int32_t connection_key,
       mobile_apis::AppInterfaceUnregisteredReason::eType reason);
 
-  /*
-   * @brief Retrieve vehicle data map for param name in mobile request
-   * to VehicleDataType
-   *
-   * @return VehicleData reference
-   */
-  static const VehicleData& vehicle_data();
+    static void SendOnLanguageChangeToMobile(int32_t connection_key);
 
-  /**
-   * @brief Converts HMI Result enum value to string
-   * @param hmi_result HMI Result enum value
-   * @return stringified value for enum if succedeed, otherwise - empty string
-   */
-  static std::string HMIResultToString(
+    /*
+     * @brief Retrieve vehicle data map for param name in mobile request
+     * to VehicleDataType
+     *
+     * @return VehicleData reference
+     */
+    static const VehicleData& vehicle_data();
+
+    /**
+     * @brief Converts HMI Result enum value to string
+     * @param hmi_result HMI Result enum value
+     * @return stringified value for enum if succedeed, otherwise - empty string
+     */
+    static std::string HMIResultToString(
       hmi_apis::Common_Result::eType hmi_result);
 
   /**

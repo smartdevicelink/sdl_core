@@ -455,6 +455,40 @@ void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
   }
 }
 
+
+void MessageHelper::SendOnLanguageChangeToMobile(int32_t connection_key) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  smart_objects::SmartObjectSPtr notification = new smart_objects::SmartObject;
+  DCHECK(notification);
+  smart_objects::SmartObject& message = *notification;
+
+  message[strings::params][strings::function_id] =
+    static_cast<int32_t>(mobile_api::FunctionID::OnLanguageChangeID);
+
+  message[strings::params][strings::message_type] =
+    static_cast<int32_t>(kNotification);
+
+  message[strings::params][strings::connection_key] = connection_key;
+
+  HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
+
+  message[strings::msg_params][strings::hmi_display_language] =
+      hmi_capabilities.active_ui_language();
+
+  message[strings::msg_params][strings::language] =
+      hmi_capabilities.active_vr_language();
+
+  if (ApplicationManagerImpl::instance()->ManageMobileCommand(
+      notification, commands::Command::ORIGIN_SDL)) {
+    LOG4CXX_DEBUG(logger_, "Mobile command sent");
+  }
+  else {
+    LOG4CXX_WARN(logger_, "Cannot send mobile command");
+  }
+}
+
 const VehicleData& MessageHelper::vehicle_data() {
   return vehicle_data_;
 }
