@@ -219,6 +219,46 @@ hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
   return hmi_apis::Common_Language::INVALID_ENUM;
 }
 
+std::string MessageHelper::MobileLanguageToString(
+  mobile_apis::Language::eType language) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+  const char* str = 0;
+  if (EnumConversionHelper<mobile_apis::Language::eType>::EnumToCString(
+        language, &str)) {
+    return str ? str : "";
+  }
+  return std::string();
+}
+
+mobile_apis::Language::eType MessageHelper::MobileLanguageFromString(
+  const std::string& language) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+  mobile_apis::Language::eType value;
+  if (EnumConversionHelper<mobile_apis::Language::eType>::StringToEnum(
+        language, &value)) {
+    return value;
+  }
+  return mobile_apis::Language::INVALID_ENUM;
+}
+
+hmi_apis::Common_Language::eType MessageHelper::MobileToCommonLanguage(
+    const mobile_apis::Language::eType language) {
+  const std::string result = MobileLanguageToString(language);
+  if (result.empty()) {
+    return hmi_apis::Common_Language::INVALID_ENUM;
+  }
+  return CommonLanguageFromString(result);
+}
+
+mobile_apis::Language::eType MessageHelper::CommonToMobileLanguage(
+    const hmi_apis::Common_Language::eType language) {
+  const std::string result = CommonLanguageToString(language);
+  if (result.empty()) {
+    return mobile_api::Language::INVALID_ENUM;
+  }
+  return MobileLanguageFromString(result);
+}
+
 uint32_t MessageHelper::GetAppCommandLimit(const std::string& policy_app_id) {
   std::string priority;
   policy::PolicyHandler::instance()->GetPriority(policy_app_id, &priority);

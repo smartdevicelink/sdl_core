@@ -601,72 +601,96 @@ class MessageHelper {
   static std::string CommonLanguageToString(
       hmi_apis::Common_Language::eType language);
 
-  /**
-   * @brief Converts string to common language enum value
-   * @param language language as string
-   * @return Common language enum value
-   */
-  static hmi_apis::Common_Language::eType CommonLanguageFromString(
-      const std::string& language);
+    /**
+     * @brief Converts string to common language enum value
+     * @param language language as string
+     * @return Common language enum value
+     */
+    static hmi_apis::Common_Language::eType CommonLanguageFromString(
+       const std::string& language);
 
-  /**
-   * @brief Gets command limit number per minute for specific application
-   * @param policy_app_id Unique application id
-   * @return Limit for number of command per minute
-   */
-  static uint32_t GetAppCommandLimit(const std::string& policy_app_id);
+    /**
+     * @brief Converts mobile language to string representation
+     * @param language Mobile language
+     * @return Mobile language string representation
+     */
+    static std::string MobileLanguageToString(
+            mobile_apis::Language::eType language);
 
-  /**
-   * @brief Creates TTS.SetGlobalProperties request and sends
-   * to HMI for VCA module.
-   * @param app contains application which sends TTS GlobalProperties to HMI
-   * after timeout or first time when application register with level NONE or
-   * BACKGROUND
-   * @param default_help_prompt
-   * if default_help_prompt=TRUE->TTSGlobalProperties request will be created
-   * with
-   * default helpPrompt array, otherwise TTSGlobalProperties request will be
-   * created
-   * with empty helpPrompt array.
-   */
-  static void SendTTSGlobalProperties(ApplicationSharedPtr app,
-                                      bool default_help_prompt);
+    /**
+     * @brief Converts string to mobile language enum value
+     * @param language language as string
+     * @return Mobile language enum value
+     */
+    static mobile_apis::Language::eType MobileLanguageFromString(
+            const std::string& language);
 
-  /**
-   * @brief SendSetAppIcon allows to send SetAppIcon request.
-   *
-   * @param app_id application for which icon request should be sent.
-   *
-   * @param icon_path path to the icon.
-   */
-  static void SendSetAppIcon(uint32_t app_id, const std::string& icon_path);
+    /**
+     * @brief Converts mobile language enum to HMI language enum
+     * @param language Mobile language enum
+     * @return HMI language enum
+     */
+    static hmi_apis::Common_Language::eType MobileToCommonLanguage(
+          const mobile_apis::Language::eType language);
 
- private:
-  /**
-   * @brief Creates new request object and fill its header
-   * @return New request object
-   */
-  static smart_objects::SmartObjectSPtr CreateRequestObject();
+    /**
+     * @brief Converts HMI language enum to mobile language enum
+     * @param language HMI language enum
+     * @return Mobile language enum
+     */
+    static mobile_apis::Language::eType CommonToMobileLanguage(
+          const hmi_apis::Common_Language::eType language);
 
-  /**
-   * @brief Allows to fill SO according to the  current permissions.
-   * @param permissions application permissions.
-   * @param message which should be filled.
-   */
-  static void FillAppRevokedPermissions(
-      const policy::AppPermissions& permissions,
-      smart_objects::SmartObject& message);
+    /**
+     * @brief Gets command limit number per minute for specific application
+     * @param policy_app_id Unique application id
+     * @return Limit for number of command per minute
+     */
+    static uint32_t GetAppCommandLimit(const std::string& policy_app_id);
 
-  static smart_objects::SmartObjectSPtr CreateChangeRegistration(
-      int32_t function_id,
-      int32_t language,
-      uint32_t app_id,
-      const smart_objects::SmartObject* app_types = NULL);
+    /**
+     * @brief Creates TTS.SetGlobalProperties request and sends
+     * to HMI for VCA module.
+     * @param app contains application which sends TTS GlobalProperties to HMI
+     * after timeout or first time when application register with level NONE or
+     * BACKGROUND
+     * @param default_help_prompt
+     * if default_help_prompt=TRUE->TTSGlobalProperties request will be created with
+     * default helpPrompt array, otherwise TTSGlobalProperties request will be created
+     * with empty helpPrompt array.
+     */
+    static void SendTTSGlobalProperties(
+        ApplicationSharedPtr app, bool default_help_prompt);
 
-  MessageHelper();
+    /**
+     * @brief Sends DecryptCertificate request to HMI
+     * @param file_name path to file containing encrypted certificate
+     */
+    static void SendDecryptCertificateToHMI(const std::string& file_name);
 
-  static const VehicleData vehicle_data_;
-  DISALLOW_COPY_AND_ASSIGN(MessageHelper);
+  private:
+    /**
+     * @brief Creates new request object and fill its header
+     * @return New request object
+     */
+    static smart_objects::SmartObjectSPtr CreateRequestObject();
+
+    /**
+     * @brief Allows to fill SO according to the  current permissions.
+     * @param permissions application permissions.
+     * @param message which should be filled.
+     */
+    static void FillAppRevokedPermissions(const policy::AppPermissions& permissions,
+                                   smart_objects::SmartObject& message);
+
+    static smart_objects::SmartObjectSPtr CreateChangeRegistration(
+        int32_t function_id, int32_t language, uint32_t app_id,
+        const smart_objects::SmartObject* app_types = NULL);
+
+    MessageHelper();
+
+    static const VehicleData vehicle_data_;
+    DISALLOW_COPY_AND_ASSIGN(MessageHelper);
 };
 
 }  // namespace application_manager

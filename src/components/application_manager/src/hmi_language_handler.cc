@@ -157,7 +157,7 @@ void HMILanguageHandler::set_handle_response_for(
       static_cast<hmi_apis::FunctionID::eType>(
         request[strings::params][strings::function_id].asInt());
 
-  if (!Compare<hmi_apis::FunctionID::eType, ONE, EQ>(
+  if (!Compare<hmi_apis::FunctionID::eType, EQ, ONE>(
         function_id,
         hmi_apis::FunctionID::UI_GetLanguage,
         hmi_apis::FunctionID::VR_GetLanguage,
@@ -176,6 +176,7 @@ void HMILanguageHandler::set_handle_response_for(
 
 void HMILanguageHandler::VerifyRegisteredApps() const {
   LOG4CXX_AUTO_TRACE(logger_);
+  using namespace helpers;
   HMICapabilities& hmi_capabilities =
         ApplicationManagerImpl::instance()->hmi_capabilities();
 
@@ -189,16 +190,20 @@ void HMILanguageHandler::VerifyRegisteredApps() const {
   ApplicationSetIt it = accessor.begin();
   for (; accessor.end() != it;) {
     ApplicationSharedPtr app = *it++;
-    if (app->ui_language() != static_cast<mobile_apis::Language::eType>(ui_language) ||
-        (app->language() != static_cast<mobile_apis::Language::eType>(vr_language) ||
-         app->language() != static_cast<mobile_apis::Language::eType>(tts_language)))
+    if (app->ui_language() !=
+        MessageHelper::CommonToMobileLanguage(ui_language) ||
+        !Compare<mobile_apis::Language::eType, EQ, ALL>(
+          app->language(),
+          MessageHelper::CommonToMobileLanguage(vr_language),
+          MessageHelper::CommonToMobileLanguage(tts_language))) {
       MessageHelper::SendOnLanguageChangeToMobile(app->app_id());
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
                   app->app_id(),
                   mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE);
       ApplicationManagerImpl::instance()->UnregisterApplication(
                   app->app_id(), mobile_apis::Result::SUCCESS, false);
+    }
   }
 }
 
-}
+} // namespace application_manager
