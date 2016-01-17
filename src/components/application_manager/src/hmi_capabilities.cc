@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -403,16 +403,19 @@ void HMICapabilities::set_attenuated_supported(bool state) {
 void HMICapabilities::set_active_ui_language(
     const hmi_apis::Common_Language::eType& language) {
   ui_language_ = language;
+  hmi_language_handler_.set_ui_language(language);
 }
 
 void HMICapabilities::set_active_vr_language(
     const hmi_apis::Common_Language::eType& language) {
   vr_language_ = language;
+  hmi_language_handler_.set_vr_language(language);
 }
 
 void HMICapabilities::set_active_tts_language(
     const hmi_apis::Common_Language::eType& language) {
   tts_language_ = language;
+  hmi_language_handler_.set_tts_language(language);
 }
 
 void HMICapabilities::set_ui_supported_languages(

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@
  */
 #include "application_manager/commands/hmi/tts_get_language_response.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/event_engine/event.h"
 
 namespace application_manager {
 
@@ -52,6 +53,9 @@ void TTSGetLanguageResponse::Run() {
   hmi_capabilities.set_active_tts_language(
       static_cast<hmi_apis::Common_Language::eType>(
           (*message_)[strings::msg_params][hmi_response::language].asInt()));
+
+  event_engine::Event event(hmi_apis::FunctionID::TTS_GetLanguage);
+  event.raise();
 }
 
 }  // namespace commands

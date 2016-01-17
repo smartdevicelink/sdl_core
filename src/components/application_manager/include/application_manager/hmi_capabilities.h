@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_H_
@@ -37,6 +37,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "json/json.h"
 #include "utils/macro.h"
+#include "application_manager/hmi_language_handler.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -475,6 +476,7 @@ class HMICapabilities {
   bool                             is_phone_call_supported_;
 
   ApplicationManagerImpl*          app_mngr_;
+  HMILanguageHandler               hmi_language_handler_;
 
   DISALLOW_COPY_AND_ASSIGN(HMICapabilities);
 };
