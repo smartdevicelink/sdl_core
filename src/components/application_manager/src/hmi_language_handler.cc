@@ -54,20 +54,24 @@ HMILanguageHandler::HMILanguageHandler()
 
 void HMILanguageHandler::set_ui_language(
       hmi_apis::Common_Language::eType language) {
+  LOG4CXX_AUTO_TRACE(logger_);
   resumption::LastState::instance()->dictionary[LanguagesKey][UIKey] = language;
 }
 
 void HMILanguageHandler::set_vr_language(
       hmi_apis::Common_Language::eType language) {
+  LOG4CXX_AUTO_TRACE(logger_);
   resumption::LastState::instance()->dictionary[LanguagesKey][VRKey] = language;
 }
 
 void HMILanguageHandler::set_tts_language(
       hmi_apis::Common_Language::eType language) {
+  LOG4CXX_AUTO_TRACE(logger_);
   resumption::LastState::instance()->dictionary[LanguagesKey][TTSKey] = language;
 }
 
 hmi_apis::Common_Language::eType HMILanguageHandler::get_ui_language() const {
+  LOG4CXX_AUTO_TRACE(logger_);
   using namespace resumption;
   using namespace hmi_apis;
   if (LastState::instance()->dictionary.isMember(LanguagesKey)) {
@@ -83,6 +87,7 @@ hmi_apis::Common_Language::eType HMILanguageHandler::get_ui_language() const {
 }
 
 hmi_apis::Common_Language::eType HMILanguageHandler::get_vr_language() const {
+  LOG4CXX_AUTO_TRACE(logger_);
   using namespace resumption;
   using namespace hmi_apis;
   if (LastState::instance()->dictionary.isMember(LanguagesKey)) {
@@ -98,6 +103,7 @@ hmi_apis::Common_Language::eType HMILanguageHandler::get_vr_language() const {
 }
 
 hmi_apis::Common_Language::eType HMILanguageHandler::get_tts_language() const {
+  LOG4CXX_AUTO_TRACE(logger_);
   using namespace resumption;
   using namespace hmi_apis;
   if (LastState::instance()->dictionary.isMember(LanguagesKey)) {
@@ -140,16 +146,23 @@ void HMILanguageHandler::on_event(const event_engine::Event& event) {
 
 void HMILanguageHandler::set_handle_response_for(
     const event_engine::smart_objects::SmartObject& request) {
+  LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
   if (!request.keyExists(strings::params)) {
+    LOG4CXX_ERROR(logger_, "Object does not have " << strings::params
+                  << " key.");
     return;
   }
 
   if (!request[strings::params].keyExists(strings::function_id)) {
+    LOG4CXX_ERROR(logger_, "Object does not have " << strings::function_id
+                  << " key.");
     return;
   }
 
   if (!request[strings::params].keyExists(strings::correlation_id)) {
+    LOG4CXX_ERROR(logger_, "Object does not have " << strings::correlation_id
+                  << " key.");
     return;
   }
 
@@ -162,6 +175,8 @@ void HMILanguageHandler::set_handle_response_for(
         hmi_apis::FunctionID::UI_GetLanguage,
         hmi_apis::FunctionID::VR_GetLanguage,
         hmi_apis::FunctionID::TTS_GetLanguage)) {
+    LOG4CXX_ERROR(logger_,
+                  "Only *GetLanguage request are allowed to be subscribed.");
     return;
   }
 
@@ -196,6 +211,9 @@ void HMILanguageHandler::VerifyRegisteredApps() const {
           app->language(),
           MessageHelper::CommonToMobileLanguage(vr_language),
           MessageHelper::CommonToMobileLanguage(tts_language))) {
+      LOG4CXX_INFO(logger_, "Application with app_id " << app->app_id()
+                   << " will be unregistered because of "
+                      "HMI language(s) mismatch.");
       MessageHelper::SendOnLanguageChangeToMobile(app->app_id());
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
                   app->app_id(),
