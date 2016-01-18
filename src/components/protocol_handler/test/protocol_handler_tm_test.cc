@@ -987,6 +987,82 @@ TEST_F(ProtocolHandlerImplTest,
   protocol_handler_impl->SendEndService(connection_id, session_id, SERVICE_TYPE_CONTROL);
 }
 
+TEST_F(ProtocolHandlerImplTest,
+       SendHeartBeat_NoConnection_NotSended) {
+  // Expect check connection with ProtocolVersionUsed
+  EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(connection_id, session_id, _)).
+      WillOnce(Return(false));
+  // Expect not send HeartBeat
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(_)).
+      Times(0);
+  // Act
+  protocol_handler_impl->SendHeartBeat(connection_id, session_id);
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       SendHeartBeat_Succesful) {
+  // Arrange
+  AddSession();
+  // Expect check connection with ProtocolVersionUsed
+  EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(connection_id, session_id, _)).
+      WillOnce(Return(true));
+  // Expect send HeartBeat
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ControlMessage(FRAME_DATA_HEART_BEAT,
+                                                 PROTECTION_OFF,
+                                                 kControl))).
+      WillOnce(Return(E_SUCCESS));
+  // Act
+  protocol_handler_impl->SendHeartBeat(connection_id, session_id);
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       SendHeartBeatAck_Succesful) {
+  // Arrange
+  AddSession();
+  // Expect double check connection and protocol version with
+  // ProtocolVersionUsed
+  EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(connection_id, _, _)).
+      WillOnce(DoAll(SetArgReferee<2>(PROTOCOL_VERSION_3),Return(true))).
+      WillOnce(DoAll(SetArgReferee<2>(PROTOCOL_VERSION_3),Return(true)));
+  // Expect send HeartBeatAck
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ControlMessage(FRAME_DATA_HEART_BEAT_ACK,
+                                                 PROTECTION_OFF,
+                                                 kControl))).
+      WillOnce(Return(E_SUCCESS));
+  // Act
+  SendControlMessage(PROTECTION_OFF, kControl, session_id,
+                     FRAME_DATA_HEART_BEAT);
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       SendHeartBeatAck_WrongProtocolVersion_NotSended) {
+  // Arrange
+  AddSession();
+  // Expect two checks of connection and protocol version with
+  // ProtocolVersionUsed
+  EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(connection_id, _, _)).
+      WillOnce(DoAll(SetArgReferee<2>(PROTOCOL_VERSION_1),Return(true))).
+      WillOnce(DoAll(SetArgReferee<2>(PROTOCOL_VERSION_2),Return(true)));
+  // Expect not send HeartBeatAck
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ControlMessage(FRAME_DATA_HEART_BEAT_ACK,
+                                                 PROTECTION_OFF,
+                                                 kControl))).
+      Times(0);
+  // Act
+  SendControlMessage(PROTECTION_OFF, kControl, session_id,
+                     FRAME_DATA_HEART_BEAT);
+  SendControlMessage(PROTECTION_OFF, kControl, session_id,
+                     FRAME_DATA_HEART_BEAT);
+}
+
 }  // namespace test
 }  // namespace components
 }  // namespace protocol_handler_test
