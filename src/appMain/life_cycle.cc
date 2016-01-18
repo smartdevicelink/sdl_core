@@ -375,11 +375,11 @@ namespace {
         FLUSH_LOGGER();
         // exit need to prevent endless sending SIGSEGV
         // http://stackoverflow.com/questions/2663456/how-to-write-a-signal-handler-to-catch-sigsegv
-        exit(EXIT_FAILURE);
+        abort();
         break;
       default:
         LOG4CXX_DEBUG(logger_, "Unexpected signal has been caught");
-        break;
+        exit(EXIT_FAILURE);
     }
   }
 }
