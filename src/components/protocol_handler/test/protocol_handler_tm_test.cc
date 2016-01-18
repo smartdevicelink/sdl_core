@@ -1063,6 +1063,122 @@ TEST_F(ProtocolHandlerImplTest,
                      FRAME_DATA_HEART_BEAT);
 }
 
+TEST_F(ProtocolHandlerImplTest,
+       SendMessageToMobileApp_SendSingleControlMessage) {
+  // Arrange
+  AddSession();
+  const bool is_final = true;
+  const uint32_t total_data_size = 1;
+  uint8_t* data = new(std::nothrow) uint8_t[total_data_size];
+  RawMessagePtr message (new RawMessage(connection_key, PROTOCOL_VERSION_3,
+                                        data, total_data_size, kControl));
+  // Expect getting pair from key from session observer
+  EXPECT_CALL(session_observer_mock,
+              PairFromKey(message->connection_key(), _, _)).
+      WillOnce(DoAll(SetArgPointee<1>(connection_id),
+                     SetArgPointee<2>(session_id)));
+  // Expect getting ssl context
+#ifdef ENABLE_SECURITY
+  EXPECT_CALL(session_observer_mock,
+              GetSSLContext(message->connection_key(),
+                            message->service_type())).
+      WillOnce(Return(&ssl_context_mock));
+#endif  // ENABLE_SECURITY
+  // Expect send message to mobile
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ExpectedMessage(FRAME_TYPE_SINGLE,
+                                                  FRAME_DATA_SINGLE,
+                                                  PROTECTION_OFF,
+                                                 kControl))).
+      WillOnce(Return(E_SUCCESS));
+  // Act
+  protocol_handler_impl->SendMessageToMobileApp(message, is_final);
+  delete[] data;
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       SendMessageToMobileApp_SendSingleNonControlMessage) {
+  // Arrange
+  AddSession();
+  const bool is_final = true;
+  const uint32_t total_data_size = 1;
+  uint8_t* data = new(std::nothrow) uint8_t[total_data_size];
+  RawMessagePtr message (new RawMessage(connection_key, PROTOCOL_VERSION_3,
+                                        data, total_data_size, kRpc));
+  // Expect getting pair from key from session observer
+  EXPECT_CALL(session_observer_mock,
+              PairFromKey(message->connection_key(), _, _)).
+      WillOnce(DoAll(SetArgPointee<1>(connection_id),
+                     SetArgPointee<2>(session_id)));
+  // Expect getting ssl context
+#ifdef ENABLE_SECURITY
+  EXPECT_CALL(session_observer_mock,
+              GetSSLContext(message->connection_key(),
+                            message->service_type())).
+      Times(2).
+      WillRepeatedly(Return(&ssl_context_mock));
+  AddSecurityManager();
+#endif  // ENABLE_SECURITY
+  // Expect send message to mobile
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ExpectedMessage(FRAME_TYPE_SINGLE,
+                                                  FRAME_DATA_SINGLE,
+                                                  PROTECTION_OFF,
+                                                  kRpc))).
+      WillOnce(Return(E_SUCCESS));
+  // Act
+  protocol_handler_impl->SendMessageToMobileApp(message, is_final);
+  delete[] data;
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       SendMessageToMobileApp_SendMultiframeMessage) {
+  // Arrange
+  AddSession();
+  const bool is_final = true;
+  const uint32_t total_data_size = MAXIMUM_FRAME_DATA_V2_SIZE * 2;
+  uint8_t* data = new(std::nothrow) uint8_t[total_data_size];
+  const uint8_t first_consecutive_frame = 0x01;
+  RawMessagePtr message (new RawMessage(connection_key, PROTOCOL_VERSION_3,
+                                        data, total_data_size, kBulk));
+  // Expect getting pair from key from session observer
+  EXPECT_CALL(session_observer_mock,
+              PairFromKey(message->connection_key(), _, _)).
+      WillOnce(DoAll(SetArgPointee<1>(connection_id),
+                     SetArgPointee<2>(session_id)));
+  // Expect getting ssl context
+#ifdef ENABLE_SECURITY
+  EXPECT_CALL(session_observer_mock,
+              GetSSLContext(message->connection_key(),
+                            message->service_type())).
+      Times(4).
+      WillRepeatedly(Return(&ssl_context_mock));
+  AddSecurityManager();
+#endif  // ENABLE_SECURITY
+  // Expect sending message frame by frame to mobile
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ExpectedMessage(FRAME_TYPE_FIRST,
+                                                  FRAME_DATA_FIRST,
+                                                  PROTECTION_OFF,
+                                                  kBulk))).
+      WillOnce(Return(E_SUCCESS));
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONSECUTIVE,
+                                                  first_consecutive_frame,
+                                                  PROTECTION_OFF,
+                                                  kBulk))).
+      WillOnce(Return(E_SUCCESS));
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONSECUTIVE,
+                                                  FRAME_DATA_LAST_CONSECUTIVE,
+                                                  PROTECTION_OFF,
+                                                  kBulk))).
+      WillOnce(Return(E_SUCCESS));
+  // Act
+  protocol_handler_impl->SendMessageToMobileApp(message, is_final);
+  delete[] data;
+}
+
 }  // namespace test
 }  // namespace components
 }  // namespace protocol_handler_test
