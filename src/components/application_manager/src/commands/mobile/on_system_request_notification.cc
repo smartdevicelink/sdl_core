@@ -76,12 +76,10 @@ void OnSystemRequestNotification::Run() {
   }
 
   if (RequestType::PROPRIETARY == request_type) {
-  std::string filename =
-      (*message_)[strings::msg_params][strings::file_name].asString();
-
-  std::vector<uint8_t> binary_data;
-  file_system::ReadBinaryFile(filename, binary_data);
-    (*message_)[strings::params][strings::binary_data] = binary_data;
+    /* According to requirements:
+       "If the requestType = PROPRIETARY, add to mobile API fileType = JSON
+        If the requestType = HTTP, add to mobile API fileType = BINARY"
+       Also in Genivi SDL we don't save the PT to file - we put it directly in binary_data */
     (*message_)[strings::msg_params][strings::file_type] = FileType::JSON;
   } else if (RequestType::HTTP == request_type) {
     (*message_)[strings::msg_params][strings::file_type] = FileType::BINARY;

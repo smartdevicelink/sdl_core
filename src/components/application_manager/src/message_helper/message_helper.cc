@@ -2016,9 +2016,12 @@ void MessageHelper::SendPolicySnapshotNotification(
   DCHECK(app.get());
 
   smart_objects::SmartObject* content =
-      new smart_objects::SmartObject(smart_objects::SmartType_Map);
+      new smart_objects::SmartObject(smart_objects::SmartType_Map);  // AKirov: possible memory leak here
+
   if (!url.empty()) {
-    (*content)[strings::msg_params][mobile_notification::syncp_url] = url;
+    (*content)[strings::msg_params][strings::url] = url;  // Doesn't work with mobile_notification::syncp_url ("URL")
+  } else {
+    LOG4CXX_WARN(logger_, "No service URLs");
   }
 
   (*content)[strings::msg_params][strings::request_type] =

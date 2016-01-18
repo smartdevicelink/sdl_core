@@ -1044,6 +1044,7 @@ void PolicyHandler::OnSnapshotCreated(
   policy_manager_->GetServiceUrls("0x07", urls);
 
   if (urls.empty()) {
+    LOG4CXX_ERROR(logger_, "Service URLs are empty! NOT sending PT to mobile!");
     return;
   }
   SendMessageToSDK(pt_string, urls.front().url.front());
