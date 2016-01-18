@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,6 +57,9 @@ using ::testing::Ge;
 using ::testing::Le;
 using ::testing::_;
 using ::testing::Invoke;
+using ::testing::DoAll;
+using ::testing::SetArgReferee;
+using ::testing::SetArgPointee;
 
 class ProtocolHandlerImplTest : public ::testing::Test {
  protected:
@@ -932,6 +935,56 @@ TEST_F(ProtocolHandlerImplTest,
                   kControl, FRAME_DATA_SINGLE, session_id,
                   some_data.size(), message_id, &some_data[0]);
   }
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       SendEndServicePrivate_NoConnection_MessageNotSended) {
+  // Expect check connection with ProtocolVersionUsed
+  EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(connection_id, session_id, _)).
+      WillOnce(Return(false));
+  // Expect not send End Service
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(_)).
+      Times(0);
+  // Act
+  protocol_handler_impl->SendEndSession(connection_id, session_id);
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       SendEndServicePrivate_EndSession_MessageSended) {
+  // Arrange
+  AddSession();
+  // Expect check connection with ProtocolVersionUsed
+  EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(connection_id, session_id, _)).
+      WillOnce(Return(true));
+  // Expect send End Service
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ControlMessage(FRAME_DATA_END_SERVICE,
+                                                 PROTECTION_OFF,
+                                                 kRpc))).
+      WillOnce(Return(E_SUCCESS));
+  // Act
+  protocol_handler_impl->SendEndSession(connection_id, session_id);
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       SendEndServicePrivate_ServiceTypeControl_MessageSended) {
+  // Arrange
+  AddSession();
+  // Expect check connection with ProtocolVersionUsed
+  EXPECT_CALL(session_observer_mock,
+              ProtocolVersionUsed(connection_id, session_id, _)).
+      WillOnce(Return(true));
+  // Expect send End Service
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ControlMessage(FRAME_DATA_END_SERVICE,
+                                                 PROTECTION_OFF,
+                                                 kControl))).
+      WillOnce(Return(E_SUCCESS));
+  // Act
+  protocol_handler_impl->SendEndService(connection_id, session_id, SERVICE_TYPE_CONTROL);
 }
 
 }  // namespace test
