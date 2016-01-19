@@ -2906,7 +2906,7 @@ void ApplicationManagerImpl::OnHMILevelChanged(
 }
 
 void ApplicationManagerImpl::SendHMIStatusNotification(
-    const utils::SharedPtr<Application> app) {
+    const ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
   smart_objects::SmartObjectSPtr notification =

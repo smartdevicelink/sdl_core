@@ -262,8 +262,7 @@ class ApplicationManagerImpl
                                  mobile_apis::HMILevel::eType from,
                                  mobile_apis::HMILevel::eType to);
 
-  void SendHMIStatusNotification(
-      const utils::SharedPtr<Application> app) OVERRIDE;
+  void SendHMIStatusNotification(const ApplicationSharedPtr app) OVERRIDE;
   /**
    * @brief Checks if application with the same HMI type
    *        (media, voice communication or navi) exists
