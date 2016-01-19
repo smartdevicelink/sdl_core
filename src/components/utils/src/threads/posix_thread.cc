@@ -78,23 +78,6 @@ void* Thread::threadFunc(void* arg) {
   //     running = 1
   //     finalized = 1
   pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-  // Disable some system signals receiving in thread
-  // by blocking those signals
-  // (system signals processes only in the main thread)
-  // Mustn't block all signals!
-  // See "Advanced Programming in the UNIX Environment, 3rd Edition"
-  // (http://poincare.matf.bg.ac.rs/~ivana//courses/ps/sistemi_knjige/pomocno/apue.pdf,
-  // "12.8. Threads and Signals".
-  sigset_t set;
-  sigemptyset(&set);
-  sigaddset(&set, SIGINT);
-  sigaddset(&set, SIGTERM);
-  sigaddset(&set, SIGSEGV);
-  if(pthread_sigmask(SIG_BLOCK, &set, NULL) != 0){
-    LOG4CXX_ERROR(logger_, "Set thread signal mask error");
-  }
-  LOG4CXX_DEBUG(logger_,
-                "Thread #" << pthread_self() << " started successfully");
 
   threads::Thread* thread = reinterpret_cast<Thread*>(arg);
   DCHECK(thread);

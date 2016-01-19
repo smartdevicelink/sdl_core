@@ -35,33 +35,58 @@
 
 #include "utils/signals.h"
 
-namespace utils {
-
-bool SubscribeToInterruptSignal(sighandler_t func) {
-  struct sigaction act;
-  act.sa_handler = func;
-  sigemptyset(&act.sa_mask);
-  act.sa_flags = 0;
-
-  return sigaction(SIGINT, &act, NULL) == 0;
+bool utils::UnsibscribeFromTermination() {
+  // Disable some system signals receiving in thread
+  // by blocking those signals
+  // (system signals processes only in the main thread)
+  // Mustn't block all signals!
+  // See "Advanced Programming in the UNIX Environment, 3rd Edition"
+  // (http://poincare.matf.bg.ac.rs/~ivana//courses/ps/sistemi_knjige/pomocno/apue.pdf,
+  // "12.8. Threads and Signals".
+  sigset_t signal_set;
+  sigemptyset(&signal_set);
+  sigaddset(&signal_set, SIGINT);
+  sigaddset(&signal_set, SIGTERM);
+  sigaddset(&signal_set, SIGSEGV);
+  return pthread_sigmask(SIG_BLOCK, &signal_set, NULL);
 }
 
-bool SubscribeToTerminateSignal(sighandler_t func) {
+namespace {
+void CatchSIGSEGV(sighandler_t handler) {
   struct sigaction act;
-  act.sa_handler = func;
+  sigset_t signal_set;
+  act.sa_handler = handler;
   sigemptyset(&act.sa_mask);
   act.sa_flags = 0;
+  sigemptyset(&signal_set);
+  sigaddset(&signal_set, SIGSEGV);
 
-  return sigaction(SIGTERM, &act, NULL) == 0;
+  sigaction(SIGSEGV, &act, NULL);
 }
+}  // namespace
 
-bool SubscribeToFaultSignal(sighandler_t func) {
-  struct sigaction act;
-  act.sa_handler = func;
-  sigemptyset(&act.sa_mask);
-  act.sa_flags = 0;
+bool utils::WaitTerminationSignals(sighandler_t sig_handler) {
+  sigset_t signal_set;
+  int sig = -1;
 
-  return sigaction(SIGSEGV, &act, NULL) == 0;
+  sigemptyset(&signal_set);
+  sigaddset(&signal_set, SIGINT);
+  sigaddset(&signal_set, SIGTERM);
+  sigaddset(&signal_set, SIGSEGV);
+
+  if (!sigwait(&signal_set, &sig)) {
+      // unblock SIGSEGV to catch him later
+      sigemptyset(&signal_set);
+      sigaddset(&signal_set, SIGSEGV);
+      pthread_sigmask(SIG_UNBLOCK, &signal_set, NULL);
+
+      // Catch possible crashes on exit
+      // after e.g. sigint was caught
+      if (sig != SIGSEGV) {
+        CatchSIGSEGV(sig_handler);
+      }
+      sig_handler(sig);
+      return true;
+  }
+  return false;
 }
-
-}  //  namespace utils

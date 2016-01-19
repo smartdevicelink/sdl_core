@@ -125,6 +125,12 @@ int32_t main(int32_t argc, char** argv) {
     profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
   }
 
+  // Unsibscribe once for all threads
+  if ( utils::UnsibscribeFromTermination() ) {
+    // Can't use internal logger here
+    exit(EXIT_FAILURE);
+  }
+
   // Logger initialization
   INIT_LOGGER("log4cxx.properties");
 
