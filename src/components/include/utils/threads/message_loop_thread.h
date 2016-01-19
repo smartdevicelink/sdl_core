@@ -95,23 +95,22 @@ class MessageLoopThread {
   /*
    * Wait until message queue will be empty
    */
-  void WaitUntilEmpty();
+  void WaitDumpQueue();
 
  private:
   /*
    * Implementation of ThreadDelegate that actually pumps the queue and is
    * able to correctly shut it down
    */
-  struct LoopThreadDelegate : public threads::ThreadDelegate {
+  class LoopThreadDelegate : public threads::ThreadDelegate {
+
+   public:
     LoopThreadDelegate(MessageQueue<Message, Queue>* message_queue,
                        Handler* handler);
 
     // threads::ThreadDelegate overrides
     virtual void threadMain() OVERRIDE;
     virtual void exitThreadMain() OVERRIDE;
-
-    // members for immediate dump MessageQueue
-    sync_primitives::ConditionalVariable empty_log_queue_notifier;
 
    private:
     // Handle all messages that are in the queue until it is empty
@@ -126,11 +125,6 @@ class MessageLoopThread {
   MessageQueue<Message, Queue> message_queue_;
   LoopThreadDelegate* thread_delegate_;
   threads::Thread* thread_;
-
-  // members for immediate dump MessageQueue
-  sync_primitives::Lock empty_log_queue_notifier_lock;
-  // timeout for wait to dump(in miliseconds)
-  static const int32_t kEmpty_log_queue_notifier_timeout = 5000;
 };
 
 ///////// Implementation
@@ -172,9 +166,8 @@ void MessageLoopThread<Q>::Shutdown() {
 }
 
 template<class Q>
-void MessageLoopThread<Q>::WaitUntilEmpty() {
-  sync_primitives::AutoLock main_lock(empty_log_queue_notifier_lock);
-  thread_delegate_->empty_log_queue_notifier.WaitFor(main_lock, kEmpty_log_queue_notifier_timeout);
+void MessageLoopThread<Q>::WaitDumpQueue() {
+  message_queue_.waitUntilEmpty();
 }
 
 //////////
@@ -212,7 +205,6 @@ void MessageLoopThread<Q>::LoopThreadDelegate::DrainQue() {
       handler_.Handle(msg);
     }
   }
-  empty_log_queue_notifier.NotifyOne();
 }
 
 }  // namespace threads
