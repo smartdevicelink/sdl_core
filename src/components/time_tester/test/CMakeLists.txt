@@ -67,7 +67,7 @@ set(testLibraries
   ConfigProfile
   connectionHandler
   ApplicationManager
-  MessageHelperLibrary
+  MessageHelper
   Resumption
   jsoncpp
   transport_manager

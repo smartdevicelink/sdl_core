@@ -50,7 +50,7 @@ set(SOURCES
 set(LIBRARIES
     MediaManager
     ApplicationManager
-    MessageHelperLibrary
+    MessageHelper
     ProtocolHandler
     gmock
     connectionHandler

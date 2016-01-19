@@ -373,7 +373,7 @@ target_link_libraries("AMPolicyLibrary" ${LIBRARIES} AMEventEngine)
 add_library("AMHMICommandsLibrary" ${HMI_COMMANDS_SOURCES})
 target_link_libraries("AMHMICommandsLibrary" ${LIBRARIES} AMEventEngine)
 
-add_library("MessageHelperLibrary" ${MESSAGE_HELPER_SOURCES})
+add_library("MessageHelper" ${MESSAGE_HELPER_SOURCES})
 
 add_library("AMMobileCommandsLibrary" ${MOBILE_COMMANDS_SOURCES} )
 target_link_libraries("AMMobileCommandsLibrary" ${LIBRARIES} AMEventEngine)
