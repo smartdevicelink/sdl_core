@@ -2788,14 +2788,14 @@
   <function name="SetMediaClockTimer" messagetype="request">
     <description>Sets the initial media clock value and automatic update method.</description>
     <param name="startTime" type="Common.TimeFormat" mandatory="false">
-      <description>startTime should be ignored for "PAUSE", "RESUME", and "CLEAR"</description>
+      <description>SDL transfers startTime together with modes: "COUNTUP", "COUNTDOWN", "PAUSE" to HMI.
+      SDL ignores startTime for modes: "RESUME", and "CLEAR"</description>
     </param>
     <param name="endTime" type="Common.TimeFormat" mandatory="false">
       <description>
           See TimeFormat.
-          endTime can be provided for "COUNTUP" and "COUNTDOWN"; to be used to calculate any visual progress bar (if not provided, this feature is ignored)
-          If endTime is greater then startTime for COUNTDOWN or less than startTime for COUNTUP, then the request will return an INVALID_DATA.
-          endTime will be ignored for "PAUSE", "RESUME", and "CLEAR"
+          SDL transfers endTime together with modes: "COUNTUP", "COUNTDOWN", "PAUSE" to HMI. To be used to calculate any visual progress bar (if not provided, this feature is ignored).
+          SDL ignores endTime for modes: "RESUME", and "CLEAR"
       </description>
     </param>
     <param name="updateMode" type="Common.ClockUpdateMode" mandatory="true">
