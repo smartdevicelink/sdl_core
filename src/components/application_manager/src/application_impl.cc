@@ -222,9 +222,9 @@ void ApplicationImpl::SetPostponedState(HmiStatePtr state) {
   state_.AddState(state);
 }
 
-struct StateIdFindPredicate {
+struct StateIDComparator {
   HmiState::StateID state_id_;
-  StateIdFindPredicate(HmiState::StateID state_id) : state_id_(state_id) {}
+  StateIDComparator(HmiState::StateID state_id) : state_id_(state_id) {}
   bool operator()(const HmiStatePtr cur) {
     return cur->state_id() == state_id_;
   }

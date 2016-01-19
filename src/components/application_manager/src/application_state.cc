@@ -37,9 +37,9 @@
 
 namespace {
 
-struct StateIdFindPredicate {
+struct StateIDComparator {
   application_manager::HmiState::StateID state_id_;
-  StateIdFindPredicate(application_manager::HmiState::StateID state_id)
+  StateIDComparator(application_manager::HmiState::StateID state_id)
       : state_id_(state_id) {}
   bool operator()(const application_manager::HmiStatePtr cur) const {
     return cur->state_id() == state_id_;
@@ -122,7 +122,7 @@ void ApplicationState::AddHMIState(HmiStatePtr state) {
   HmiStates::iterator it =
       std::find_if(hmi_states_.begin(),
                    hmi_states_.end(),
-                   StateIdFindPredicate(state->state_id()));
+                   StateIDComparator(state->state_id()));
   if (hmi_states_.end() != it) {
     LOG4CXX_WARN(
         logger_,
@@ -139,7 +139,7 @@ void ApplicationState::RemoveHMIState(HmiState::StateID state_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
   HmiStates::iterator it = std::find_if(
-      hmi_states_.begin(), hmi_states_.end(), StateIdFindPredicate(state_id));
+      hmi_states_.begin(), hmi_states_.end(), StateIDComparator(state_id));
   if (it == hmi_states_.end()) {
     LOG4CXX_ERROR(logger_, "Unsuccesful remove HmiState: " << state_id);
     return;
@@ -164,7 +164,7 @@ void ApplicationState::RemovePostponedState() {
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
   DCHECK_OR_RETURN_VOID(!hmi_states_.empty());
 
-  StateIdFindPredicate finder(HmiState::StateID::STATE_ID_POSTPONED);
+  StateIDComparator finder(HmiState::StateID::STATE_ID_POSTPONED);
 
   HmiStates::iterator postponed_state =
       std::find_if(hmi_states_.begin(), hmi_states_.end(), finder);
