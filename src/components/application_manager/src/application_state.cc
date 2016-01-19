@@ -90,13 +90,13 @@ void ApplicationState::RemoveState(HmiState::StateID state) {
     case HmiState::StateID::STATE_ID_REGULAR:
       LOG4CXX_ERROR(logger_,
                     "State of type '" << state << "'can't be removed.");
-      return;
+      break;
     case HmiState::StateID::STATE_ID_POSTPONED:
       RemovePostponedState();
-      return;
+      break;
     default:
       RemoveHMIState(state);
-      return;
+      break;
   }
 }
 
