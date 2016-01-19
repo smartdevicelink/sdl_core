@@ -2622,7 +2622,6 @@ void ApplicationManagerImpl::Handle(const impl::AudioData message) {
   (*on_audio_pass)[strings::params][strings::binary_data] =
       smart_objects::SmartObject(message.binary_data);
 
-  LOG4CXX_DEBUG(logger_, "After fill binary data");
   LOG4CXX_DEBUG(logger_, "Send data");
   CommandSharedPtr command(MobileCommandFactory::CreateCommand(
       on_audio_pass, commands::Command::ORIGIN_SDL));
@@ -2702,7 +2701,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
         return mobile_apis::Result::INVALID_ENUM;
     }
   }
-  LOG4CXX_DEBUG(logger_, "Request is allowed by policies. " + log_msg);
+  LOG4CXX_DEBUG(logger_, "Request is allowed by policies. " << log_msg);
   return mobile_api::Result::SUCCESS;
 }
 
