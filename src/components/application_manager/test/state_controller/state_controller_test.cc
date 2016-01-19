@@ -57,14 +57,6 @@ using ::testing::Truly;
 
 static application_manager::MockMessageHelper* message_helper_mock_;
 
-uint32_t application_manager::MessageHelper::SendActivateAppToHMI(
-    uint32_t const app_id,
-    hmi_apis::Common_HMILevel::eType level,
-    bool send_policy_priority) {
-  return message_helper_mock_->SendActivateAppToHMI(
-      app_id, level, send_policy_priority);
-}
-
 namespace state_controller_test {
 
 struct HmiStatesComparator {

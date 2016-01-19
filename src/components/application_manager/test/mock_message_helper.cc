@@ -239,6 +239,14 @@ void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
       ->SendAllOnButtonSubscriptionNotificationsForApp(app);
 }
 
+
+uint32_t MessageHelper::SendActivateAppToHMI(uint32_t const app_id,
+         hmi_apis::Common_HMILevel::eType level,
+         bool send_policy_priority) {
+  return MockMessageHelper::message_helper_mock()->SendActivateAppToHMI(
+      app_id, level, send_policy_priority);
+}
+
 void MessageHelper::SendOnResumeAudioSourceToHMI(const uint32_t app_id) {
   MockMessageHelper::message_helper_mock()->SendOnResumeAudioSourceToHMI(
       app_id);
