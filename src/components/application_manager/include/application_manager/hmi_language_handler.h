@@ -47,6 +47,8 @@ namespace application_manager {
  **/
 class HMILanguageHandler: public event_engine::EventObserver {
 public:
+  typedef std::map<uint32_t, bool> Apps;
+
   /**
    * @brief Class constructor
    */
@@ -97,16 +99,88 @@ public:
   void set_handle_response_for(
           const event_engine::smart_objects::SmartObject& request);
 
+  /**
+   * @brief Sets default languages from HMI capabilities
+   * @param ui UI language
+   * @param vr VR language
+   * @param tts TTS language
+   */
+  void set_default_capabilities_languages(
+          hmi_apis::Common_Language::eType ui,
+          hmi_apis::Common_Language::eType vr,
+          hmi_apis::Common_Language::eType tts);
+
 private:
 
   /**
-   * @brief Verifies already registered apps for language mismatch with
-   * current HMI language(s).
+   * @brief Verifies languages gotten from HMI with persisted languages
    */
-  void VerifyRegisteredApps() const;
+  void VerifyWithPersistedLanguages();
 
+  /**
+   * @brief Handles applications registered before actual HMI languages
+   * have been received
+   * @param app_id Application id
+   */
+  void HandleWrongLanguageApp(const Apps::value_type app_id);
+
+  /**
+   * @brief Checks if application needs to be handled because of language(s)
+   * mismatch
+   * @param app Application
+   */
+  void CheckApplication(const Apps::value_type app);
+
+  sync_primitives::Lock apps_lock_;
+
+  /**
+   * @brief Applications, which needs to be handled
+   */
+  Apps apps_;
+
+  /**
+   * @brief UI language persisted from previous ignition cycle
+   */
+  hmi_apis::Common_Language::eType persisted_ui_language_;
+
+  /**
+   * @brief VR language persisted from previous ignition cycle
+   */
+  hmi_apis::Common_Language::eType persisted_vr_language_;
+
+  /**
+   * @brief TTS language persisted from previous ignition cycle
+   */
+  hmi_apis::Common_Language::eType persisted_tts_language_;
+
+  /**
+   * @brief Default UI language from HMI capabilitites
+   */
+  hmi_apis::Common_Language::eType capabilities_ui_language_;
+
+  /**
+   * @brief Default VR language from HMI capabilitites
+   */
+  hmi_apis::Common_Language::eType capabilities_vr_language_;
+
+  /**
+   * @brief Default TTS language from HMI capabilitites
+   */
+  hmi_apis::Common_Language::eType capabilities_tts_language_;
+
+  /**
+   * @brief Indicates if current UI language has been received from HMI
+   */
   bool is_ui_language_received_;
+
+  /**
+   * @brief Indicates if current VR language has been received from HMI
+   */
   bool is_vr_language_received_;
+
+  /**
+   * @brief Indicates if current TTS language has been received from HMI
+   */
   bool is_tts_language_received_;
 };
 

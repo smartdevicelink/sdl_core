@@ -247,6 +247,9 @@ HMICapabilities::HMICapabilities(ApplicationManagerImpl* const app_mngr)
     is_navi_cooperating_ = true;
     is_ivi_cooperating_ = true;
   }
+
+  hmi_language_handler_.set_default_capabilities_languages(
+        ui_language_, vr_language_, tts_language_);
 }
 
 HMICapabilities::~HMICapabilities() {
@@ -592,8 +595,8 @@ bool HMICapabilities::load_capabilities_from_file() {
       Json::Value ui = root_json.get("UI", Json::Value::null);
 
       if (check_existing_json_member(ui, "language")) {
-        const std::string lang = ui.get("language", "EN_US").asString();
-        set_active_ui_language(MessageHelper::CommonLanguageFromString(lang));
+        const std::string lang = ui.get("language", "EN-US").asString();
+        ui_language_ = (MessageHelper::CommonLanguageFromString(lang));
       }
 
       if (check_existing_json_member(ui, "languages")) {
@@ -794,8 +797,8 @@ bool HMICapabilities::load_capabilities_from_file() {
     if (check_existing_json_member(root_json, "VR")) {
       Json::Value vr = root_json.get("VR", "");
       if (check_existing_json_member(vr, "language")) {
-        const std::string lang = vr.get("language", "").asString();
-        set_active_vr_language(MessageHelper::CommonLanguageFromString(lang));
+        const std::string lang = vr.get("language", "EN-US").asString();
+        vr_language_ = MessageHelper::CommonLanguageFromString(lang);
       }
 
       if (check_existing_json_member(vr, "languages")) {
@@ -823,8 +826,8 @@ bool HMICapabilities::load_capabilities_from_file() {
       Json::Value tts = root_json.get("TTS", "");
 
       if (check_existing_json_member(tts, "language")) {
-        const std::string lang = tts.get("language", "").asString();
-        set_active_tts_language(MessageHelper::CommonLanguageFromString(lang));
+        const std::string lang = tts.get("language", "EN-US").asString();
+        tts_language_  = MessageHelper::CommonLanguageFromString(lang);
       }
 
       if (check_existing_json_member(tts, "languages")) {
