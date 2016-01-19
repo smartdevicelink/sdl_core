@@ -646,7 +646,7 @@ std::string CacheManager::GetLockScreenIconUrl() const {
   return std::string ("");
 }
 
-uint32_t CacheManager::GetNotificationsNumber(const std::string &priority) {
+rpc::policy_table_interface_base::NumberOfNotificationsType CacheManager::GetNotificationsNumber(const std::string& priority) {
   CACHE_MANAGER_CHECK(0);
   typedef rpc::policy_table_interface_base::NumberOfNotificationsPerMinute NNPM;
 

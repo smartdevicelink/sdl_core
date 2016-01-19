@@ -40,7 +40,8 @@ typedef Map< URL, 1, 255 > URLList;
 
 typedef Map< URLList, 1, 255 > ServiceEndpoints;
 
-typedef Map< Integer<uint8_t, 0, 255>, 0, 6 > NumberOfNotificationsPerMinute;
+typedef uint8_t NumberOfNotificationsType;
+typedef Map< Integer<NumberOfNotificationsType, 0, 255>, 0, 6 > NumberOfNotificationsPerMinute;
 
 typedef Array< Integer<uint16_t, 1, 1000>, 0, 10 > SecondsBetweenRetries;
 
