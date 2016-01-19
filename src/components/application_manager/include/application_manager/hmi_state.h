@@ -203,7 +203,7 @@ class HmiState {
  */
 class VRHmiState : public HmiState {
  public:
-  virtual mobile_apis::AudioStreamingState::eType audio_streaming_state() const;
+  mobile_apis::AudioStreamingState::eType audio_streaming_state() const OVERRIDE;
   VRHmiState(uint32_t app_id, ApplicationManager* app_mngr);
 };
 
@@ -213,7 +213,7 @@ class VRHmiState : public HmiState {
 class TTSHmiState : public HmiState {
  public:
   TTSHmiState(uint32_t app_id, ApplicationManager* app_mngr);
-  virtual mobile_apis::AudioStreamingState::eType audio_streaming_state() const;
+  mobile_apis::AudioStreamingState::eType audio_streaming_state() const OVERRIDE;
 };
 
 /**
@@ -223,7 +223,7 @@ class TTSHmiState : public HmiState {
 class NaviStreamingHmiState : public HmiState {
  public:
   NaviStreamingHmiState(uint32_t app_id, ApplicationManager* app_mngr);
-  virtual mobile_apis::AudioStreamingState::eType audio_streaming_state() const;
+  mobile_apis::AudioStreamingState::eType audio_streaming_state() const OVERRIDE;
 };
 
 /**
@@ -233,9 +233,9 @@ class NaviStreamingHmiState : public HmiState {
 class PhoneCallHmiState : public HmiState {
  public:
   PhoneCallHmiState(uint32_t app_id, ApplicationManager* app_mngr);
-  virtual mobile_apis::HMILevel::eType hmi_level() const;
-  virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
-      const {
+  mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
+  mobile_apis::AudioStreamingState::eType audio_streaming_state()
+      const OVERRIDE {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
   }
 };
@@ -247,8 +247,8 @@ class PhoneCallHmiState : public HmiState {
 class SafetyModeHmiState : public HmiState {
  public:
   SafetyModeHmiState(uint32_t app_id, ApplicationManager* app_mngr);
-  virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
-      const {
+  mobile_apis::AudioStreamingState::eType audio_streaming_state()
+      const OVERRIDE {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
   }
 };
@@ -260,9 +260,9 @@ class SafetyModeHmiState : public HmiState {
 class DeactivateHMI : public HmiState {
  public:
   DeactivateHMI(uint32_t app_id, ApplicationManager* app_mngr);
-  virtual mobile_apis::HMILevel::eType hmi_level() const;
-  virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
-      const {
+  mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
+  mobile_apis::AudioStreamingState::eType audio_streaming_state()
+      const OVERRIDE {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
   }
 };
@@ -274,9 +274,9 @@ class DeactivateHMI : public HmiState {
 class AudioSource : public HmiState {
  public:
   AudioSource(uint32_t app_id, ApplicationManager* app_mngr);
-  virtual mobile_apis::HMILevel::eType hmi_level() const;
-  virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
-      const {
+  mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
+  mobile_apis::AudioStreamingState::eType audio_streaming_state()
+      const OVERRIDE {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
   }
 };
@@ -289,9 +289,9 @@ class AudioSource : public HmiState {
 class EmbeddedNavi : public HmiState {
  public:
   EmbeddedNavi(uint32_t app_id, ApplicationManager* app_mngr);
-  virtual mobile_apis::HMILevel::eType hmi_level() const;
-  virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
-      const {
+  mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
+  mobile_apis::AudioStreamingState::eType audio_streaming_state()
+      const OVERRIDE {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
   }
 };
