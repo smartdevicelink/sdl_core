@@ -34,10 +34,11 @@
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_NUMBER_SCHEMA_ITEM_H_
 
 #include <typeinfo>
-
+#include <limits>
 #include "utils/shared_ptr.h"
 #include "smart_objects/default_shema_item.h"
 #include "smart_objects/schema_item_parameter.h"
+#include "utils/convert_utils.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -124,20 +125,23 @@ bool TNumberSchemaItem<NumberType>::isValidNumberType(SmartType type) {
   }
 }
 
-template<typename NumberType>
-Errors::eType TNumberSchemaItem<NumberType>::validate(const SmartObject& Object) {
+template <typename NumberType>
+Errors::eType TNumberSchemaItem<NumberType>::validate(
+    const SmartObject& Object) {
   if (!isValidNumberType(Object.getType())) {
     return Errors::INVALID_VALUE;
   }
   NumberType value(0);
   if (typeid(int32_t) == typeid(value)) {
-    value = Object.asInt();
+    value = utils::SafeStaticCast<int64_t,int32_t>(Object.asInt());
   } else if (typeid(uint32_t) == typeid(value)) {
-    value = Object.asUInt();
+    value = utils::SafeStaticCast<uint64_t,uint32_t>(Object.asUInt());
   } else if (typeid(double) == typeid(value)) {
     value = Object.asDouble();
   } else if (typeid(int64_t) == typeid(value)) {
-    value = Object.asInt64();
+    value = Object.asInt();
+  } else if (typeid(uint64_t) == typeid(value)) {
+    value = Object.asUInt();
   } else {
     NOTREACHED();
   }
@@ -184,7 +188,7 @@ template<>
 SmartType TNumberSchemaItem<uint32_t>::getSmartType() const;
 
 template<>
-SmartType TNumberSchemaItem<uint32_t>::getSmartType() const;
+SmartType TNumberSchemaItem<int64_t>::getSmartType() const;
 
 template<>
 SmartType TNumberSchemaItem<double>::getSmartType() const;

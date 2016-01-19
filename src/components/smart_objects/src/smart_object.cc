@@ -170,9 +170,6 @@ bool SmartObject::operator==(const SmartObject& Other) const {
   return false;
 }
 
-// =============================================================
-// INTEGER TYPE SUPPORT
-// =============================================================
 SmartObject::SmartObject(int32_t InitialValue)
     : m_type(SmartType_Null),
       m_schema() {
@@ -180,14 +177,12 @@ SmartObject::SmartObject(int32_t InitialValue)
   set_value_integer(InitialValue);
 }
 
-int32_t SmartObject::asInt() const {
+int64_t SmartObject::asInt() const {
   const int64_t convert = convert_int();
   if (invalid_int64_value == convert) {
     return invalid_int_value;
   }
-  DCHECK(convert >= std::numeric_limits<int32_t>::min());
-  DCHECK(convert <= std::numeric_limits<int32_t>::max());
-  return static_cast<int32_t>(convert);
+  return convert;
 }
 
 SmartObject& SmartObject::operator=(const int32_t NewValue) {
@@ -233,9 +228,6 @@ int64_t SmartObject::convert_int() const {
   return invalid_int64_value;
 }
 
-// =============================================================
-// uint32_t TYPE SUPPORT
-// =============================================================
 SmartObject::SmartObject(uint32_t InitialValue)
     : m_type(SmartType_Null),
       m_schema() {
@@ -243,14 +235,12 @@ SmartObject::SmartObject(uint32_t InitialValue)
   set_value_integer(InitialValue);
 }
 
-uint32_t SmartObject::asUInt() const {
+uint64_t SmartObject::asUInt() const {
   const int64_t convert = convert_int();
-  if (invalid_int64_value == convert) {
+  if (convert <= invalid_int_value) {
     return invalid_unsigned_int_value;
   }
-  DCHECK(convert >= std::numeric_limits<uint32_t>::min());
-  DCHECK(convert <= std::numeric_limits<uint32_t>::max());
-  return static_cast<uint32_t>(convert);
+  return static_cast<uint64_t>(convert);
 }
 
 SmartObject& SmartObject::operator=(const uint32_t NewValue) {
@@ -268,18 +258,11 @@ bool SmartObject::operator==(const uint32_t Value) const {
   return comp == static_cast<int64_t>(Value);
 }
 
-// =============================================================
-// int64_t TYPE SUPPORT
-// =============================================================
 SmartObject::SmartObject(int64_t InitialValue)
     : m_type(SmartType_Null),
       m_schema() {
   m_data.str_value = NULL;
   set_value_integer(InitialValue);
-}
-
-int64_t SmartObject::asInt64() const {
-  return convert_int();
 }
 
 SmartObject& SmartObject::operator=(const int64_t NewValue) {
@@ -297,9 +280,13 @@ bool SmartObject::operator==(const int64_t Value) const {
   return comp == Value;
 }
 
-// =============================================================
-// DOUBLE TYPE SUPPORT
-// =============================================================
+SmartObject& SmartObject::operator=(const uint64_t NewValue) {
+  if (m_type != SmartType_Invalid) {
+    set_value_integer(NewValue);
+  }
+  return *this;
+}
+
 SmartObject::SmartObject(double InitialValue)
     : m_type(SmartType_Null),
       m_schema() {
@@ -347,10 +334,6 @@ double SmartObject::convert_double() const {
   return invalid_double_value;
 }
 
-// =============================================================
-// BOOL TYPE SUPPORT
-// =============================================================
-
 SmartObject::SmartObject(bool InitialValue)
     : m_type(SmartType_Null),
       m_schema() {
@@ -397,10 +380,6 @@ bool SmartObject::convert_bool() const {
   return invalid_bool_value;
 }
 
-// =============================================================
-// CHAR TYPE SUPPORT
-// =============================================================
-
 SmartObject::SmartObject(char InitialValue)
     : m_type(SmartType_Null),
       m_schema() {
@@ -445,10 +424,6 @@ char SmartObject::convert_char() const {
   }
   return invalid_char_value;
 }
-
-// =============================================================
-// STD::STRING TYPE SUPPORT
-// =============================================================
 
 SmartObject::SmartObject(const std::string& InitialValue)
     : m_type(SmartType_Null),
@@ -507,10 +482,6 @@ std::string SmartObject::convert_string() const {
   return NsSmartDeviceLink::NsSmartObjects::invalid_cstr_value;
 }
 
-// =============================================================
-// CHAR* TYPE SUPPORT
-// =============================================================
-
 SmartObject::SmartObject(const char* const InitialValue)
     : m_type(SmartType_Null),
       m_schema() {
@@ -538,9 +509,6 @@ void SmartObject::set_value_cstr(const char* NewValue) {
   set_value_string(NewValue ? std::string(NewValue) : std::string());
 }
 
-// =============================================================
-// BINARY TYPE SUPPORT
-// =============================================================
 SmartObject::SmartObject(const SmartBinary& InitialValue)
     : m_type(SmartType_Null),
       m_schema() {
@@ -591,10 +559,6 @@ SmartBinary SmartObject::convert_binary() const {
   return invalid_binary_value;
 }
 
-// =============================================================
-// ARRAY INTERFACE SUPPORT
-// =============================================================
-
 SmartObject& SmartObject::operator[](const int32_t Index) {
   return handle_array_access(Index);
 }
@@ -625,10 +589,6 @@ inline SmartObject& SmartObject::handle_array_access(const int32_t Index) {
   // FIXME(EZamakhov): return always the same reference - multi-thread problem?
   return invalid_object_value;
 }
-
-// =============================================================
-// MAP INTERFACE SUPPORT
-// =============================================================
 
 SmartObject& SmartObject::operator[](const std::string& Key) {
   return handle_map_access(Key);
@@ -688,9 +648,6 @@ SmartObject& SmartObject::handle_map_access(const std::string& Key) {
   return map[Key];
 }
 
-// =============================================================
-// OTHER METHODS
-// =============================================================
 void SmartObject::duplicate(const SmartObject& OtherObject) {
   SmartData newData;
   const SmartType newType = OtherObject.m_type;

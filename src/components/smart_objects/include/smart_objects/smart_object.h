@@ -132,6 +132,7 @@ typedef std::vector<SmartObjectSPtr> SmartObjectList;
  * This class act as Variant type from other languages and can be used as primitive type
  * like bool, int32_t, char, double, string and as complex type like array and map.
  **/
+
 class SmartObject FINAL {
  public:
   /**
@@ -197,14 +198,14 @@ class SmartObject FINAL {
    *
    * @param InitialValue Initial object value
    **/
-  explicit SmartObject(int32_t InitialValue);
+  explicit SmartObject(const int32_t InitialValue);
 
   /**
-   * @brief Returns current object converted to int32_t
+   * @brief Returns current object converted to int64_t
    *
-   * @return int32_t
+   * @return int64_t
    **/
-  int32_t asInt() const;
+  int64_t asInt() const;
 
   /**
    * @brief Assignment operator for type: int32_t
@@ -212,7 +213,7 @@ class SmartObject FINAL {
    * @param  NewValue New object value
    * @return SmartObject&
    **/
-  SmartObject& operator=(int32_t NewValue);
+  SmartObject& operator=(const int32_t NewValue);
 
   /**
    * @brief Comparison operator for comparing object with integer value
@@ -220,7 +221,7 @@ class SmartObject FINAL {
    * @param  Value Value to compare object with
    * @return bool
    **/
-  bool operator==(int32_t Value) const;
+  bool operator==(const int32_t Value) const;
 
   // Support of type: uint32_t
   /**
@@ -228,14 +229,14 @@ class SmartObject FINAL {
    *
    * @param InitialValue Initial object value
    **/
-  explicit SmartObject(uint32_t InitialValue);
+  explicit SmartObject(const uint32_t InitialValue);
 
   /**
-   * @brief Returns current object converted to uint32_t int32_t
+   * @brief Returns current object converted to uint64_t
    *
-   * @return double
+   * @return uint64_t
    **/
-  uint32_t asUInt() const;
+  uint64_t asUInt() const;
 
   /**
    * @brief Assignment operator for type: int32_t
@@ -243,7 +244,7 @@ class SmartObject FINAL {
    * @param  NewValue New object value
    * @return SmartObject&
    **/
-  SmartObject& operator=(uint32_t NewValue);
+  SmartObject& operator=(const uint32_t NewValue);
 
   /**
    * @brief Comparison operator for comparing object with uint32_t value
@@ -251,7 +252,7 @@ class SmartObject FINAL {
    * @param  Value Value to compare object with
    * @return bool
    **/
-  bool operator==(uint32_t Value) const;
+  bool operator==(const uint32_t Value) const;
 
   /**
    * @name Support of type: int64_t
@@ -262,7 +263,7 @@ class SmartObject FINAL {
    *
    * @param InitialValue Initial object value
    **/
-  explicit SmartObject(int64_t InitialValue);
+  explicit SmartObject(const int64_t InitialValue);
 
   /**
    * @brief Returns current object converted to int64_t
@@ -277,7 +278,7 @@ class SmartObject FINAL {
    * @param  NewValue New object value
    * @return SmartObject&
    **/
-  SmartObject& operator=(int64_t NewValue);
+  SmartObject& operator=(const int64_t NewValue);
 
   /**
    * @brief Comparison operator for comparing object with integer value
@@ -285,7 +286,20 @@ class SmartObject FINAL {
    * @param  Value Value to compare object with
    * @return bool
    **/
-  bool operator==(int64_t Value) const;
+  bool operator==(const int64_t Value) const;
+
+  /**
+    * @name Support of type: uint64_t
+    * @{
+   **/
+
+   /**
+    * @brief Assignment operator for type: uint64_t
+    *
+    * @param  NewValue New object value
+    * @return SmartObject&
+    **/
+   SmartObject& operator=(const uint64_t NewValue);
 
   /** @} */
 

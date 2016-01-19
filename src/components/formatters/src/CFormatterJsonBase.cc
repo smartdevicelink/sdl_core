@@ -32,8 +32,8 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 #include "json/json.h"
-
 #include "formatters/CFormatterJsonBase.h"
+#include "utils/convert_utils.h"
 
 void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::jsonValueToObj(
     const Json::Value& value,
@@ -56,9 +56,9 @@ void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::jsonValue
         jsonValueToObj(value[i], obj[i]);
       }
     } else if (value.type() == Json::intValue) {
-      obj = value.asInt();
+      obj = utils::ConvertLongLongIntToInt64(value.asInt64());
     } else if (value.type() == Json::uintValue) {
-      obj = value.asUInt();
+      obj = utils::ConvertLongLongUIntToUInt64(value.asUInt64());
     } else if (value.type() == Json::realValue) {
       obj = value.asDouble();
     } else if (value.type() == Json::booleanValue) {
@@ -104,10 +104,10 @@ void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::objToJson
       item = obj.asBool();
     } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_Integer
         == obj.getType()) {
-      item = obj.asInt();
+      item = utils::ConvertInt64ToLongLongInt(obj.asInt());
     } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_UInteger
         == obj.getType()) {
-      item = obj.asUInt();
+      item = utils::ConvertUInt64ToLongLongUInt(obj.asUInt());
     } else if (NsSmartDeviceLink::NsSmartObjects::SmartType_Double
         == obj.getType()) {
       item = obj.asDouble();

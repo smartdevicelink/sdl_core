@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,26 +30,49 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "time_tester/application_manager_metric.h"
-#include "time_tester/json_keys.h"
-#include "application_manager/smart_object_keys.h"
-#include "utils/convert_utils.h"
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_CONVERT_UTILS_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_CONVERT_UTILS_H_
 
-namespace time_tester {
+#include <stdint.h>
+#include <limits>
 
-Json::Value ApplicationManagerMetricWrapper::GetJsonMetric() {
-  Json::Value result = MetricWrapper::GetJsonMetric();
-  result[strings::logger] = "ApplicationManager";
-  result[strings::begin] =
-      Json::Int64(date_time::DateTime::getuSecs(message_metric->begin));
-  result[strings::end] =
-      Json::Int64(date_time::DateTime::getuSecs(message_metric->end));
-  const NsSmartDeviceLink::NsSmartObjects::SmartObject& params =
-      message_metric->message->getElement(application_manager::strings::params);
-  result[strings::correlation_id] = utils::ConvertInt64ToLongLongInt(
-      params[application_manager::strings::correlation_id].asInt());
-  result[strings::connection_key] = utils::ConvertInt64ToLongLongInt(
-      params[application_manager::strings::connection_key].asInt());
-  return result;
+namespace utils {
+
+/**
+ * Convert int64 value to long long int value
+ * Using when int64 value should be assign to JSON value
+ */
+long long int ConvertInt64ToLongLongInt(const int64_t value);
+
+/**
+ * Convert long long int value to int64 value
+ */
+int64_t ConvertLongLongIntToInt64(const long long int value);
+
+/**
+ * Convert uint64 value to unsigned long long int value
+ * Using when uint64 value should be assign to JSON value
+ */
+unsigned long long int ConvertUInt64ToLongLongUInt(const uint64_t value);
+
+/**
+ * Convert unsigned long long int value to uint64 value
+ */
+uint64_t ConvertLongLongUIntToUInt64(const unsigned long long int value);
+
+
+/**
+ * Convert one number value to another type value
+ */
+template <typename InputType, typename OutputType>
+OutputType SafeStaticCast(const InputType value) {
+  DCHECK_OR_RETURN(value >= std::numeric_limits<OutputType>::min(),
+                   std::numeric_limits<OutputType>::min());
+  DCHECK_OR_RETURN(value <= std::numeric_limits<OutputType>::max(),
+                   std::numeric_limits<OutputType>::max());
+  return static_cast<OutputType>(value);
 }
-}  // namespace time_tester
+
+}  // namespace utils
+
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_CONVERT_UTILS_H_
