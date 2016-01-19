@@ -33,6 +33,7 @@
 #include "application_manager/request_info.h"
 #include <iostream>
 #include <vector>
+#include <limits>
 #include "gmock/gmock.h"
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
@@ -375,14 +376,21 @@ TEST_F(RequestInfoTest, RequestInfoSetEqualHash) {
 
 TEST_F(RequestInfoTest, EndTimeisExpired) {
   TimevalStruct time = date_time::DateTime::getCurrentTime();
+
+  TimevalStruct not_expired = date_time::DateTime::getCurrentTime();
+  not_expired.tv_sec = std::numeric_limits<time_t>::min();
+
+  TimevalStruct expired = date_time::DateTime::getCurrentTime();
+  expired.tv_sec = std::numeric_limits<time_t>::max();
+
   utils::SharedPtr<TestRequestInfo> request = CreateTestInfo(
       mobile_connection_key1_, mobile_correlation_id,
       request_info::RequestInfo::MobileRequest, time, default_timeout_);
-  time.tv_sec = time.tv_sec * 100;
-  request->SetEndTime(time);
+
+  request->SetEndTime(expired);
   EXPECT_FALSE(request->isExpired());
-  time.tv_sec = time.tv_sec / 100;
-  request->SetEndTime(time);
+
+  request->SetEndTime(not_expired);
   EXPECT_TRUE(request->isExpired());
 }
 
