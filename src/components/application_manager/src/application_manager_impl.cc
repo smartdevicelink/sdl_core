@@ -2488,6 +2488,12 @@ void ApplicationManagerImpl::UnregisterApplication(
     }
     if (!app_to_remove) {
       LOG4CXX_ERROR(logger_, "Cant find application with app_id = " << app_id);
+
+      // Just to terminate RAI in case of connection is dropped (rare case)
+      // App won't be unregistered since RAI has not been started yet
+      LOG4CXX_DEBUG(logger_, "Trying to terminate possible RAI request.");
+      request_ctrl_.terminateAppRequests(app_id);
+
       return;
     }
     accessor.Erase(app_to_remove);
