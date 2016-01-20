@@ -41,6 +41,9 @@
 namespace test {
 namespace components {
 namespace protocol_handler_test {
+
+using namespace ::protocol_handler;
+
 /*
  * Matcher for checking RawMessage with ControlMessage
  * Check error id
@@ -50,8 +53,11 @@ MATCHER_P2(ControlMessage, ExpectedFrameData, ExpectedEncryption,
            (std::string(ExpectedEncryption ? "Protected" : "Unprotected")
            + " control message ")) {
   // Nack shall be always with flag protected off
-  DCHECK(ExpectedFrameData  != 0x03 /*FRAME_DATA_START_SERVICE_NACK*/ ||
-         !ExpectedEncryption);
+  if (ExpectedFrameData == FRAME_DATA_START_SERVICE_NACK
+      && ExpectedEncryption) {
+    *result_listener << "NACK message with PROTECYION_ON flag";
+    return false;
+  }
   const ::protocol_handler::RawMessagePtr message = arg;
   ::protocol_handler::ProtocolPacket packet(message->connection_key());
   const protocol_handler::RESULT_CODE result =
@@ -75,46 +81,6 @@ MATCHER_P2(ControlMessage, ExpectedFrameData, ExpectedEncryption,
     *result_listener << "Control message is " <<
                      (ExpectedEncryption ? "" : "not ") << "protected";
     return false;
-  }
-  return true;
-}
-
-MATCHER_P3(ControlMessage, ExpectedFrameData, ExpectedEncryption,
-           ExpectedServiceType,
-           (std::string(ExpectedEncryption ? "Protected" : "Unprotected")
-           + " control message ")) {
-  // Nack shall be always with flag protected off
-  DCHECK(ExpectedFrameData  != 0x03 /*FRAME_DATA_START_SERVICE_NACK*/ ||
-         !ExpectedEncryption);
-  const ::protocol_handler::RawMessagePtr message = arg;
-  ::protocol_handler::ProtocolPacket packet(message->connection_key());
-  const protocol_handler::RESULT_CODE result =
-      packet.deserializePacket(message->data(), message->data_size());
-  if (result != protocol_handler::RESULT_OK) {
-    *result_listener <<  "Error while message deserialization.";
-    return false;
-  }
-  if (::protocol_handler::FRAME_TYPE_CONTROL != packet.frame_type()) {
-    *result_listener << "Is not control message";
-    return false;
-  }
-  if (ExpectedFrameData != packet.frame_data()) {
-    *result_listener << "Control message with data 0x"
-                     << std::hex << static_cast<int>(packet.frame_data())
-                     << ", not 0x"
-                     << std::hex << static_cast<int>(ExpectedFrameData);
-    return false;
-  }
-  if (ExpectedEncryption != packet.protection_flag()) {
-    *result_listener << "Control message is " <<
-                     (ExpectedEncryption ? "" : "not ") << "protected";
-    return false;
-  }
-  if (ExpectedServiceType != packet.service_type()) {
-    *result_listener << "Service type is 0x"
-                     << std::hex << static_cast<int>(packet.service_type())
-                     << ", not 0x"
-                     << std::hex << static_cast<int>(ExpectedServiceType);
   }
   return true;
 }
@@ -124,9 +90,11 @@ MATCHER_P4(ControlMessage, ExpectedFrameData, ExpectedEncryption,
            (std::string(ExpectedEncryption ? "Protected" : "Unprotected")
            + " control message ")) {
   // Nack shall be always with flag protected off
-  DCHECK(ExpectedFrameData  != 0x03 /*FRAME_DATA_START_SERVICE_NACK*/ ||
-         !ExpectedEncryption);
-
+  if (ExpectedFrameData == FRAME_DATA_START_SERVICE_NACK
+      && ExpectedEncryption) {
+    *result_listener << "NACK message with PROTECYION_ON flag";
+    return false;
+  }
   const ::protocol_handler::RawMessagePtr message = arg;
   ::protocol_handler::ProtocolPacket packet(message->connection_key());
   const protocol_handler::RESULT_CODE result =
@@ -178,8 +146,12 @@ MATCHER_P4(ExpectedMessage, ExpectedFrameType, ExpectedFrameData,
            (std::string(ExpectedEncryption ? "Protected" : "Unprotected")
            + " message ")) {
   // Nack shall be always with flag protected off
-  DCHECK(ExpectedFrameData  != 0x03 /*FRAME_DATA_START_SERVICE_NACK*/ ||
-         !ExpectedEncryption);
+  if (ExpectedFrameType == FRAME_TYPE_CONTROL
+      && ExpectedFrameData == FRAME_DATA_START_SERVICE_NACK
+      && ExpectedEncryption) {
+    *result_listener << "NACK message with PROTECYION_ON flag";
+    return false;
+  }
   const ::protocol_handler::RawMessagePtr message = arg;
   ::protocol_handler::ProtocolPacket packet(message->connection_key());
   const protocol_handler::RESULT_CODE result =

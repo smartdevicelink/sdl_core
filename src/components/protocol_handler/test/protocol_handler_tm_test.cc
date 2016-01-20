@@ -37,6 +37,7 @@
 #include "protocol_handler_mock.h"
 #include "protocol_observer_mock.h"
 
+#include "utils/make_shared.h"
 
 namespace test {
 namespace components {
@@ -57,7 +58,6 @@ using ::testing::Ge;
 using ::testing::Le;
 using ::testing::_;
 using ::testing::Invoke;
-using ::testing::DoAll;
 using ::testing::SetArgReferee;
 using ::testing::SetArgPointee;
 
@@ -961,9 +961,10 @@ TEST_F(ProtocolHandlerImplTest,
       WillOnce(Return(true));
   // Expect send End Service
   EXPECT_CALL(transport_manager_mock,
-              SendMessageToDevice(ControlMessage(FRAME_DATA_END_SERVICE,
-                                                 PROTECTION_OFF,
-                                                 kRpc))).
+              SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONTROL,
+                                                  FRAME_DATA_END_SERVICE,
+                                                  PROTECTION_OFF,
+                                                  kRpc))).
       WillOnce(Return(E_SUCCESS));
   // Act
   protocol_handler_impl->SendEndSession(connection_id, session_id);
@@ -979,16 +980,16 @@ TEST_F(ProtocolHandlerImplTest,
       WillOnce(Return(true));
   // Expect send End Service
   EXPECT_CALL(transport_manager_mock,
-              SendMessageToDevice(ControlMessage(FRAME_DATA_END_SERVICE,
-                                                 PROTECTION_OFF,
-                                                 kControl))).
+              SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONTROL,
+                                                  FRAME_DATA_END_SERVICE,
+                                                  PROTECTION_OFF,
+                                                  kControl))).
       WillOnce(Return(E_SUCCESS));
   // Act
   protocol_handler_impl->SendEndService(connection_id, session_id, SERVICE_TYPE_CONTROL);
 }
 
-TEST_F(ProtocolHandlerImplTest,
-       SendHeartBeat_NoConnection_NotSended) {
+TEST_F(ProtocolHandlerImplTest, SendHeartBeat_NoConnection_NotSended) {
   // Expect check connection with ProtocolVersionUsed
   EXPECT_CALL(session_observer_mock,
               ProtocolVersionUsed(connection_id, session_id, _)).
@@ -1001,8 +1002,7 @@ TEST_F(ProtocolHandlerImplTest,
   protocol_handler_impl->SendHeartBeat(connection_id, session_id);
 }
 
-TEST_F(ProtocolHandlerImplTest,
-       SendHeartBeat_Succesful) {
+TEST_F(ProtocolHandlerImplTest, SendHeartBeat_Succesful) {
   // Arrange
   AddSession();
   // Expect check connection with ProtocolVersionUsed
@@ -1011,16 +1011,16 @@ TEST_F(ProtocolHandlerImplTest,
       WillOnce(Return(true));
   // Expect send HeartBeat
   EXPECT_CALL(transport_manager_mock,
-              SendMessageToDevice(ControlMessage(FRAME_DATA_HEART_BEAT,
-                                                 PROTECTION_OFF,
-                                                 kControl))).
+              SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONTROL,
+                                                  FRAME_DATA_HEART_BEAT,
+                                                  PROTECTION_OFF,
+                                                  kControl))).
       WillOnce(Return(E_SUCCESS));
   // Act
   protocol_handler_impl->SendHeartBeat(connection_id, session_id);
 }
 
-TEST_F(ProtocolHandlerImplTest,
-       SendHeartBeatAck_Succesful) {
+TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_Succesful) {
   // Arrange
   AddSession();
   // Expect double check connection and protocol version with
@@ -1031,9 +1031,10 @@ TEST_F(ProtocolHandlerImplTest,
       WillOnce(DoAll(SetArgReferee<2>(PROTOCOL_VERSION_3),Return(true)));
   // Expect send HeartBeatAck
   EXPECT_CALL(transport_manager_mock,
-              SendMessageToDevice(ControlMessage(FRAME_DATA_HEART_BEAT_ACK,
-                                                 PROTECTION_OFF,
-                                                 kControl))).
+              SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONTROL,
+                                                  FRAME_DATA_HEART_BEAT_ACK,
+                                                  PROTECTION_OFF,
+                                                  kControl))).
       WillOnce(Return(E_SUCCESS));
   // Act
   SendControlMessage(PROTECTION_OFF, kControl, session_id,
@@ -1052,9 +1053,10 @@ TEST_F(ProtocolHandlerImplTest,
       WillOnce(DoAll(SetArgReferee<2>(PROTOCOL_VERSION_2),Return(true)));
   // Expect not send HeartBeatAck
   EXPECT_CALL(transport_manager_mock,
-              SendMessageToDevice(ControlMessage(FRAME_DATA_HEART_BEAT_ACK,
-                                                 PROTECTION_OFF,
-                                                 kControl))).
+              SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONTROL,
+                                                  FRAME_DATA_HEART_BEAT_ACK,
+                                                  PROTECTION_OFF,
+                                                  kControl))).
       Times(0);
   // Act
   SendControlMessage(PROTECTION_OFF, kControl, session_id,
@@ -1089,7 +1091,7 @@ TEST_F(ProtocolHandlerImplTest,
               SendMessageToDevice(ExpectedMessage(FRAME_TYPE_SINGLE,
                                                   FRAME_DATA_SINGLE,
                                                   PROTECTION_OFF,
-                                                 kControl))).
+                                                  kControl))).
       WillOnce(Return(E_SUCCESS));
   // Act
   protocol_handler_impl->SendMessageToMobileApp(message, is_final);
@@ -1131,8 +1133,7 @@ TEST_F(ProtocolHandlerImplTest,
   delete[] data;
 }
 
-TEST_F(ProtocolHandlerImplTest,
-       SendMessageToMobileApp_SendMultiframeMessage) {
+TEST_F(ProtocolHandlerImplTest, SendMessageToMobileApp_SendMultiframeMessage) {
   // Arrange
   AddSession();
   const bool is_final = true;
