@@ -95,7 +95,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @param message which should send to mobile side
    *
    */
-  void ProcessVRResponse(const smart_objects::SmartObject& message);
+  void ProcessVRResponse(const smart_objects::SmartObject& message, smart_objects::SmartObject& msg_params);
 
   /*
    * @brief Sends PerformInteraction response to mobile side
@@ -104,7 +104,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    *
    */
   void ProcessPerformInteractionResponse
-  (const smart_objects::SmartObject& message);
+  (const smart_objects::SmartObject& message, smart_objects::SmartObject &msg_params);
 
 
   /*
@@ -206,11 +206,34 @@ class PerformInteractionRequest : public CommandRequestImpl  {
                                 const size_t choice_set_id_list_length,
                                 const smart_objects::SmartObject& choice_set_id_list) const;
 
+  /**
+   * @brief Tells if there are sent requests without responses
+   * @return If there is request without response method returns TRUE
+   * otherwise returns FALSE
+   */
+  bool HasHMIResponsesToWait();
+
+  /**
+   * @brief Check VR response result code, in case GENERIC_ERROR, REJECTED,
+   * send resultCode FALSE, in case WARNINGS send resultCode TRUE
+   */
+  void CheckResponseResultCode();
+
+  /**
+   * @brief Check UI & VR result codes, send response to mobile
+   * @param msg_param Message params to send
+   */
+  void SendBothModeResponse(const smart_objects::SmartObject &msg_param);
+
   mobile_apis::InteractionMode::eType interaction_mode_;
   bool                                ui_response_recived_;
   bool                                vr_response_recived_;
+  bool                                ui_result_;
+  bool                                vr_result_;
   bool                                app_pi_was_active_before_;
   static uint32_t                     pi_requests_count_;
+  mobile_apis::Result::eType          vr_resultCode_;
+  mobile_apis::Result::eType          ui_resultCode_;
 
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
 };
