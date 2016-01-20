@@ -58,9 +58,15 @@ TEST_F(ProtocolPacketTest, SerializePacketWithDiffVersions) {
   RawMessagePtr res;
   uint8_t version = PROTOCOL_VERSION_1;
   for (; version <= PROTOCOL_VERSION_MAX; ++version) {
-    ProtocolPacket prot_packet(
-        some_connection_id, version, PROTECTION_OFF, FRAME_TYPE_CONTROL,
-        kControl, FRAME_DATA_HEART_BEAT, some_session_id, 0u, some_message_id);
+    ProtocolPacket prot_packet(some_connection_id,
+                               version,
+                               PROTECTION_OFF,
+                               FRAME_TYPE_CONTROL,
+                               kControl,
+                               FRAME_DATA_HEART_BEAT,
+                               some_session_id,
+                               0u,
+                               some_message_id);
     res = prot_packet.serializePacket();
     EXPECT_EQ(res->protocol_version(), version);
     EXPECT_EQ(res->service_type(), kControl);
@@ -85,10 +91,15 @@ TEST_F(ProtocolPacketTest, SerializePacketWithDiffServiceType) {
 
   RawMessagePtr res;
   for (size_t i = 0; i < serv_types.size(); ++i) {
-    ProtocolPacket prot_packet(some_connection_id, PROTOCOL_VERSION_3,
-                               PROTECTION_OFF, FRAME_TYPE_CONTROL,
-                               serv_types[i], FRAME_DATA_HEART_BEAT,
-                               some_session_id, 0u, some_message_id);
+    ProtocolPacket prot_packet(some_connection_id,
+                               PROTOCOL_VERSION_3,
+                               PROTECTION_OFF,
+                               FRAME_TYPE_CONTROL,
+                               serv_types[i],
+                               FRAME_DATA_HEART_BEAT,
+                               some_session_id,
+                               0u,
+                               some_message_id);
     res = prot_packet.serializePacket();
     EXPECT_EQ(PROTOCOL_VERSION_3, res->protocol_version());
     EXPECT_EQ(serv_types[i], res->service_type());
@@ -110,10 +121,15 @@ TEST_F(ProtocolPacketTest, SerializePacketWithWrongServiceType) {
 
   RawMessagePtr res;
   for (size_t i = 0; i < serv_types.size(); ++i) {
-    ProtocolPacket prot_packet(some_connection_id, PROTOCOL_VERSION_3,
-                               PROTECTION_OFF, FRAME_TYPE_CONTROL,
-                               serv_types[i], FRAME_DATA_HEART_BEAT,
-                               some_session_id, 0u, some_message_id);
+    ProtocolPacket prot_packet(some_connection_id,
+                               PROTOCOL_VERSION_3,
+                               PROTECTION_OFF,
+                               FRAME_TYPE_CONTROL,
+                               serv_types[i],
+                               FRAME_DATA_HEART_BEAT,
+                               some_session_id,
+                               0u,
+                               some_message_id);
     res = prot_packet.serializePacket();
     EXPECT_EQ(PROTOCOL_VERSION_3, res->protocol_version());
     EXPECT_EQ(kInvalidServiceType, res->service_type());
@@ -125,9 +141,15 @@ TEST_F(ProtocolPacketTest, SetPacketWithDiffFrameType) {
   uint8_t frame_type;
   for (frame_type = FRAME_TYPE_CONTROL + 1; frame_type <= FRAME_TYPE_MAX_VALUE;
        ++frame_type) {
-    ProtocolPacket prot_packet(
-        some_connection_id, PROTOCOL_VERSION_3, PROTECTION_OFF, frame_type,
-        kControl, FRAME_DATA_HEART_BEAT, some_session_id, 0u, some_message_id);
+    ProtocolPacket prot_packet(some_connection_id,
+                               PROTOCOL_VERSION_3,
+                               PROTECTION_OFF,
+                               frame_type,
+                               kControl,
+                               FRAME_DATA_HEART_BEAT,
+                               some_session_id,
+                               0u,
+                               some_message_id);
     res = prot_packet.serializePacket();
     EXPECT_EQ(PROTOCOL_VERSION_3, res->protocol_version());
     EXPECT_EQ(kControl, res->service_type());
@@ -203,7 +225,7 @@ TEST_F(ProtocolPacketTest, DeserializePacket_FrameTypeFirst_ResultOK) {
   ProtocolPacket protocol_packet;
   // Act
   RESULT_CODE res =
-    protocol_packet.deserializePacket(message, PROTOCOL_HEADER_V2_SIZE);
+      protocol_packet.deserializePacket(message, PROTOCOL_HEADER_V2_SIZE);
   uint8_t frame_type = protocol_packet.frame_type();
   // Assert
   EXPECT_EQ(FRAME_TYPE_FIRST, frame_type);

@@ -49,12 +49,14 @@ using namespace ::protocol_handler;
  * Check error id
  */
 
-MATCHER_P2(ControlMessage, ExpectedFrameData, ExpectedEncryption,
-           (std::string(ExpectedEncryption ? "Protected" : "Unprotected")
-           + " control message ")) {
+MATCHER_P2(ControlMessage,
+           ExpectedFrameData,
+           ExpectedEncryption,
+           (std::string(ExpectedEncryption ? "Protected" : "Unprotected") +
+            " control message ")) {
   // Nack shall be always with flag protected off
-  if (ExpectedFrameData == FRAME_DATA_START_SERVICE_NACK
-      && ExpectedEncryption) {
+  if (ExpectedFrameData == FRAME_DATA_START_SERVICE_NACK &&
+      ExpectedEncryption) {
     *result_listener << "NACK message with PROTECYION_ON flag";
     return false;
   }
@@ -63,7 +65,7 @@ MATCHER_P2(ControlMessage, ExpectedFrameData, ExpectedEncryption,
   const protocol_handler::RESULT_CODE result =
       packet.deserializePacket(message->data(), message->data_size());
   if (result != protocol_handler::RESULT_OK) {
-    *result_listener <<  "Error while message deserialization.";
+    *result_listener << "Error while message deserialization.";
     return false;
   }
   if (::protocol_handler::FRAME_TYPE_CONTROL != packet.frame_type()) {
@@ -71,27 +73,29 @@ MATCHER_P2(ControlMessage, ExpectedFrameData, ExpectedEncryption,
     return false;
   }
   if (ExpectedFrameData != packet.frame_data()) {
-    *result_listener << "Control message with data 0x"
-                     << std::hex << static_cast<int>(packet.frame_data())
-                     << ", not 0x"
+    *result_listener << "Control message with data 0x" << std::hex
+                     << static_cast<int>(packet.frame_data()) << ", not 0x"
                      << std::hex << static_cast<int>(ExpectedFrameData);
     return false;
   }
   if (ExpectedEncryption != packet.protection_flag()) {
-    *result_listener << "Control message is " <<
-                     (ExpectedEncryption ? "" : "not ") << "protected";
+    *result_listener << "Control message is "
+                     << (ExpectedEncryption ? "" : "not ") << "protected";
     return false;
   }
   return true;
 }
 
-MATCHER_P4(ControlMessage, ExpectedFrameData, ExpectedEncryption,
-           ConnectionKey, VectorMatcher,
-           (std::string(ExpectedEncryption ? "Protected" : "Unprotected")
-           + " control message ")) {
+MATCHER_P4(ControlMessage,
+           ExpectedFrameData,
+           ExpectedEncryption,
+           ConnectionKey,
+           VectorMatcher,
+           (std::string(ExpectedEncryption ? "Protected" : "Unprotected") +
+            " control message ")) {
   // Nack shall be always with flag protected off
-  if (ExpectedFrameData == FRAME_DATA_START_SERVICE_NACK
-      && ExpectedEncryption) {
+  if (ExpectedFrameData == FRAME_DATA_START_SERVICE_NACK &&
+      ExpectedEncryption) {
     *result_listener << "NACK message with PROTECYION_ON flag";
     return false;
   }
@@ -100,7 +104,7 @@ MATCHER_P4(ControlMessage, ExpectedFrameData, ExpectedEncryption,
   const protocol_handler::RESULT_CODE result =
       packet.deserializePacket(message->data(), message->data_size());
   if (result != protocol_handler::RESULT_OK) {
-    *result_listener <<  "Error while message deserialization.";
+    *result_listener << "Error while message deserialization.";
     return false;
   }
 
@@ -109,20 +113,20 @@ MATCHER_P4(ControlMessage, ExpectedFrameData, ExpectedEncryption,
     return false;
   }
   if (ExpectedFrameData != packet.frame_data()) {
-    *result_listener << "Control message with data 0x"
-                     << std::hex << static_cast<int>(packet.frame_data())
-                     << ", not 0x"
+    *result_listener << "Control message with data 0x" << std::hex
+                     << static_cast<int>(packet.frame_data()) << ", not 0x"
                      << std::hex << static_cast<int>(ExpectedFrameData);
     return false;
   }
   if (ExpectedEncryption != packet.protection_flag()) {
-    *result_listener << "Control message is " <<
-                     (ExpectedEncryption ? "" : "not ") << "protected";
+    *result_listener << "Control message is "
+                     << (ExpectedEncryption ? "" : "not ") << "protected";
     return false;
   }
   if (ConnectionKey != message->connection_key()) {
-    *result_listener << "Message for connection_id " << message->connection_key() <<
-                        ", expected for connection_id " << ConnectionKey;
+    *result_listener << "Message for connection_id "
+                     << message->connection_key()
+                     << ", expected for connection_id " << ConnectionKey;
     return false;
   }
   std::vector<uint8_t> data_vector;
@@ -134,21 +138,24 @@ MATCHER_P4(ControlMessage, ExpectedFrameData, ExpectedEncryption,
     *result_listener << "Message with " << data_vector.size()
                      << " byte data : 0x";
     for (size_t i = 0u; i < data_vector.size(); ++i) {
-      *result_listener  << std::hex << static_cast<int>(data_vector[i]);
+      *result_listener << std::hex << static_cast<int>(data_vector[i]);
     }
     return false;
   }
   return true;
 }
 
-MATCHER_P4(ExpectedMessage, ExpectedFrameType, ExpectedFrameData,
-           ExpectedEncryption, ExpectedServiceType,
-           (std::string(ExpectedEncryption ? "Protected" : "Unprotected")
-           + " message ")) {
+MATCHER_P4(ExpectedMessage,
+           ExpectedFrameType,
+           ExpectedFrameData,
+           ExpectedEncryption,
+           ExpectedServiceType,
+           (std::string(ExpectedEncryption ? "Protected" : "Unprotected") +
+            " message ")) {
   // Nack shall be always with flag protected off
-  if (ExpectedFrameType == FRAME_TYPE_CONTROL
-      && ExpectedFrameData == FRAME_DATA_START_SERVICE_NACK
-      && ExpectedEncryption) {
+  if (ExpectedFrameType == FRAME_TYPE_CONTROL &&
+      ExpectedFrameData == FRAME_DATA_START_SERVICE_NACK &&
+      ExpectedEncryption) {
     *result_listener << "NACK message with PROTECYION_ON flag";
     return false;
   }
@@ -157,32 +164,29 @@ MATCHER_P4(ExpectedMessage, ExpectedFrameType, ExpectedFrameData,
   const protocol_handler::RESULT_CODE result =
       packet.deserializePacket(message->data(), message->data_size());
   if (result != protocol_handler::RESULT_OK) {
-    *result_listener <<  "Error while message deserialization.";
+    *result_listener << "Error while message deserialization.";
     return false;
   }
   if (ExpectedFrameType != packet.frame_type()) {
-    *result_listener << "Message with frame type 0x"
-                     << std::hex << static_cast<int>(packet.frame_type())
-                     << ", not 0x"
+    *result_listener << "Message with frame type 0x" << std::hex
+                     << static_cast<int>(packet.frame_type()) << ", not 0x"
                      << std::hex << static_cast<int>(ExpectedFrameType);
     return false;
   }
   if (ExpectedFrameData != packet.frame_data()) {
-    *result_listener << "Message with data 0x"
-                     << std::hex << static_cast<int>(packet.frame_data())
-                     << ", not 0x"
+    *result_listener << "Message with data 0x" << std::hex
+                     << static_cast<int>(packet.frame_data()) << ", not 0x"
                      << std::hex << static_cast<int>(ExpectedFrameData);
     return false;
   }
   if (ExpectedEncryption != packet.protection_flag()) {
-    *result_listener << "Message is " <<
-                     (ExpectedEncryption ? "" : "not ") << "protected";
+    *result_listener << "Message is " << (ExpectedEncryption ? "" : "not ")
+                     << "protected";
     return false;
   }
   if (ExpectedServiceType != packet.service_type()) {
-    *result_listener << "Service type is 0x"
-                     << std::hex << static_cast<int>(packet.service_type())
-                     << ", not 0x"
+    *result_listener << "Service type is 0x" << std::hex
+                     << static_cast<int>(packet.service_type()) << ", not 0x"
                      << std::hex << static_cast<int>(ExpectedServiceType);
   }
   return true;
