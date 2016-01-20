@@ -213,18 +213,18 @@ class ApplicationManagerImpl
   /**
    * Inits application manager
    */
-  virtual bool Init();
+  bool Init() OVERRIDE;
 
   /**
    * @brief Stop work.
    *
    * @return TRUE on success otherwise FALSE.
    **/
-  virtual bool Stop();
+  bool Stop() OVERRIDE;
 
   /////////////////////////////////////////////////////
 
-  virtual DataAccessor<ApplicationSet> applications() const;
+  DataAccessor<ApplicationSet> applications() const OVERRIDE;
   ApplicationSharedPtr application(uint32_t app_id) const;
   ApplicationSharedPtr application_by_policy_id(
       const std::string& policy_app_id) const;
@@ -258,9 +258,9 @@ class ApplicationManagerImpl
    */
   ApplicationSharedPtr get_limited_voice_application() const;
 
-  virtual void OnHMILevelChanged(uint32_t app_id,
+  void OnHMILevelChanged(uint32_t app_id,
                                  mobile_apis::HMILevel::eType from,
-                                 mobile_apis::HMILevel::eType to);
+                                 mobile_apis::HMILevel::eType to) OVERRIDE;
 
   void SendHMIStatusNotification(const ApplicationSharedPtr app) OVERRIDE;
   /**
@@ -299,7 +299,7 @@ class ApplicationManagerImpl
   void ProcessQueryApp(const smart_objects::SmartObject& sm_object,
                        const uint32_t connection_key);
 
-  virtual bool is_attenuated_supported();
+  bool is_attenuated_supported() OVERRIDE;
 
 #ifdef TIME_TESTER
   /**
@@ -596,8 +596,8 @@ class ApplicationManagerImpl
    * UI_ChangeRegistration with list new AppHMIType
    * for app with HMI level BACKGROUND.
    */
-  virtual void OnUpdateHMIAppType(
-      std::map<std::string, std::vector<std::string> > app_hmi_types);
+  void OnUpdateHMIAppType(
+      std::map<std::string, std::vector<std::string> > app_hmi_types) OVERRIDE;
 
   /*
    * @brief Starts audio pass thru thread
@@ -677,9 +677,9 @@ class ApplicationManagerImpl
 
   /////////////////////////////////////////////////////////
   // Overriden ProtocolObserver method
-  virtual void OnMessageReceived(
+  void OnMessageReceived(
       const ::protocol_handler::RawMessagePtr message) OVERRIDE;
-  virtual void OnMobileMessageSent(
+  void OnMobileMessageSent(
       const ::protocol_handler::RawMessagePtr message) OVERRIDE;
 
   // Overriden HMIMessageObserver method
@@ -1202,19 +1202,19 @@ class ApplicationManagerImpl
    * of messages. Beware, each is called on different thread!
    */
   // CALLED ON messages_from_mobile_ thread!
-  virtual void Handle(const impl::MessageFromMobile message) OVERRIDE;
+  void Handle(const impl::MessageFromMobile message) OVERRIDE;
 
   // CALLED ON messages_to_mobile_ thread!
-  virtual void Handle(const impl::MessageToMobile message) OVERRIDE;
+  void Handle(const impl::MessageToMobile message) OVERRIDE;
 
   // CALLED ON messages_from_hmi_ thread!
-  virtual void Handle(const impl::MessageFromHmi message) OVERRIDE;
+  void Handle(const impl::MessageFromHmi message) OVERRIDE;
 
   // CALLED ON messages_to_hmi_ thread!
-  virtual void Handle(const impl::MessageToHmi message) OVERRIDE;
+  void Handle(const impl::MessageToHmi message) OVERRIDE;
 
   // CALLED ON audio_pass_thru_messages_ thread!
-  virtual void Handle(const impl::AudioData message) OVERRIDE;
+  void Handle(const impl::AudioData message) OVERRIDE;
 
   template <typename ApplicationList>
   void PrepareApplicationListSO(ApplicationList app_list,
