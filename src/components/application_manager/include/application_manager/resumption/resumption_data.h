@@ -183,9 +183,18 @@ class ResumptionData {
                               mobile_apis::HMILevel::eType hmi_level) = 0;
 
   /**
-   * @brief Uses for overload on heir classes
+   * @brief Init storage
    */
   virtual bool Init();
+
+  /**
+   * @brief Drops data related to applicaton data resumption
+   * @param device_id Device ID
+   * @param app_id Application ID
+   * @return true, if dropped successfully, otherwise - false
+   */
+  virtual bool DropAppDataResumption(const std::string& device_id,
+                                     const std::string& app_id) = 0;
 
  protected:
   /**

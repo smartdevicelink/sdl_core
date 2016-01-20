@@ -39,6 +39,7 @@
 #include "application_manager/message_helper.h"
 #include "utils/helpers.h"
 #include "utils/gen_hash.h"
+#include "utils/scope_guard.h"
 
 namespace {
 const std::string kDatabaseName = "resumption";
@@ -751,6 +752,42 @@ bool ResumptionDataDB::UpdateDBVersion() const {
   return true;
 }
 
+bool ResumptionDataDB::DropAppDataResumption(const std::string& device_id,
+                                             const std::string& app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  utils::ScopeGuard guard = utils::MakeObjGuard(
+                              *db_,
+                              &utils::dbms::SQLDatabase::RollbackTransaction);
+
+  db_->BeginTransaction();
+  if (!DeleteSavedFiles(app_id, device_id)) {
+    return false;
+  }
+  if (!DeleteSavedSubMenu(app_id, device_id)) {
+    return false;
+  }
+  if (!DeleteSavedSubscriptions(app_id, device_id)) {
+    return false;
+  }
+  if (!DeleteSavedCommands(app_id, device_id)) {
+    return false;
+  }
+  if (!DeleteSavedChoiceSet(app_id, device_id)) {
+    return false;
+  }
+  if (!DeleteSavedGlobalProperties(app_id, device_id)) {
+    return false;
+  }
+  if(!UpdateGrammarID(app_id, device_id, 0)) {
+    return false;
+  }
+  db_->CommitTransaction();
+
+  guard.Dismiss();
+  return true;
+}
+
 const int32_t ResumptionDataDB::GetDBVersion() const {
   return utils::Djb2HashFromString(resumption::kCreateSchema);
 }
@@ -767,6 +804,9 @@ bool ResumptionDataDB::SelectFilesData(
           count_item, kSelectCountFiles, policy_app_id, device_id)) {
     return false;
   }
+
+  saved_app[strings::application_files] = SmartObject(SmartType_Array);
+
   if (0 == count_item) {
     LOG4CXX_INFO(logger_, "Application does not contain files data");
     return true;
@@ -808,6 +848,9 @@ bool ResumptionDataDB::SelectSubmenuData(
           count_item, kSelectCountSubMenu, policy_app_id, device_id)) {
     return false;
   }
+
+  saved_app[strings::application_submenus] = SmartObject(SmartType_Array);
+
   if (0 == count_item) {
     LOG4CXX_INFO(logger_, "Application does not contain submenu data");
     return true;
@@ -849,6 +892,9 @@ bool ResumptionDataDB::SelectCommandData(
           count_item, kSelectCountCommands, policy_app_id, device_id)) {
     return false;
   }
+
+  saved_app[strings::application_commands] = SmartObject(SmartType_Array);
+
   if (0 == count_item) {
     LOG4CXX_INFO(logger_, "Application does not contain commands data");
     return true;
@@ -859,7 +905,6 @@ bool ResumptionDataDB::SelectCommandData(
           select_commands, policy_app_id, device_id, kSelectCommands)) {
     return false;
   }
-  saved_app[strings::application_commands] = SmartObject(SmartType_Array);
   int64_t command_key = 0;
   int32_t command_idx = -1;
   size_t vr_cmd_idx = 0;
@@ -935,6 +980,9 @@ bool ResumptionDataDB::SelectSubscriptionsData(
           count_item, kSelectCountSubscriptions, policy_app_id, device_id)) {
     return false;
   }
+
+  saved_app[strings::application_subscribtions] = SmartObject(SmartType_Map);
+
   if (0 == count_item) {
     LOG4CXX_INFO(logger_, "Application does not contain subscriptions data");
     return true;
@@ -947,7 +995,6 @@ bool ResumptionDataDB::SelectSubscriptionsData(
     LOG4CXX_WARN(logger_, "Problem with verification select_subscriptions");
     return false;
   }
-  saved_app[strings::application_subscribtions] = SmartObject(SmartType_Map);
   SmartObject application_buttons(SmartType_Array);
   SmartObject application_vehicle_info(SmartType_Array);
   size_t buttons_idx = 0;
@@ -988,6 +1035,9 @@ bool ResumptionDataDB::SelectChoiceSetData(
           count_item, kSelectCountChoiceSet, policy_app_id, device_id)) {
     return false;
   }
+
+  saved_app[strings::application_choice_sets] = SmartObject(SmartType_Array);
+
   if (0 == count_item) {
     LOG4CXX_INFO(logger_, "Application does not contain choice set data");
     return true;
@@ -999,7 +1049,6 @@ bool ResumptionDataDB::SelectChoiceSetData(
     return false;
   }
 
-  saved_app[strings::application_choice_sets] = SmartObject(SmartType_Array);
   int64_t application_choice_set_key = 0;
   int64_t choice_key = 0;
   int32_t choice_set_idx = -1;
@@ -1088,6 +1137,10 @@ bool ResumptionDataDB::SelectGlobalPropertiesData(
           count_item, kSelectCountGlobalProperties, policy_app_id, device_id)) {
     return false;
   }
+
+  saved_app[strings::application_global_properties] =
+      SmartObject(SmartType_Map);
+
   if (0 == count_item) {
     LOG4CXX_INFO(logger_,
                  "Application does not contain global properties data");
@@ -1364,7 +1417,10 @@ bool ResumptionDataDB::SelectDataFromAppTable(
        */
   saved_app[strings::app_id] = query.GetString(0);
   saved_app[strings::connection_key] = query.GetUInteger(1);
-  saved_app[strings::grammar_id] = query.GetUInteger(2);
+  uint32_t grammarID = query.GetUInteger(2);
+  if (grammarID) {
+    saved_app[strings::grammar_id] = grammarID;
+  }
   saved_app[strings::hash_id] = query.GetString(3);
   saved_app[strings::hmi_app_id] = query.GetUInteger(4);
   saved_app[strings::hmi_level] = query.GetInteger(5);
@@ -1404,36 +1460,36 @@ bool ResumptionDataDB::SelectCountFromArray(
 bool ResumptionDataDB::DeleteSavedApplication(const std::string& policy_app_id,
                                               const std::string& device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  utils::ScopeGuard guard = utils::MakeObjGuard(
+                              *db_,
+                              &utils::dbms::SQLDatabase::RollbackTransaction);
+
   db_->BeginTransaction();
   if (!DeleteSavedFiles(policy_app_id, device_id)) {
-    db_->RollbackTransaction();
     return false;
   }
   if (!DeleteSavedSubMenu(policy_app_id, device_id)) {
-    db_->RollbackTransaction();
     return false;
   }
   if (!DeleteSavedSubscriptions(policy_app_id, device_id)) {
-    db_->RollbackTransaction();
     return false;
   }
   if (!DeleteSavedCommands(policy_app_id, device_id)) {
-    db_->RollbackTransaction();
     return false;
   }
   if (!DeleteSavedChoiceSet(policy_app_id, device_id)) {
-    db_->RollbackTransaction();
     return false;
   }
   if (!DeleteSavedGlobalProperties(policy_app_id, device_id)) {
-    db_->RollbackTransaction();
     return false;
   }
   if (!DeleteDataFromApplicationTable(policy_app_id, device_id)) {
-    db_->RollbackTransaction();
     return false;
   }
   db_->CommitTransaction();
+
+  guard.Dismiss();
   return true;
 }
 
@@ -2693,6 +2749,35 @@ bool ResumptionDataDB::UpdateApplicationData(
 void ResumptionDataDB::WriteDb() {
   LOG4CXX_AUTO_TRACE(logger_);
   db_->Backup();
+}
+
+bool ResumptionDataDB::UpdateGrammarID(const std::string& policy_app_id,
+                                       const std::string& device_id,
+                                       const uint32_t grammar_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace app_mngr;
+  utils::dbms::SQLQuery query(db());
+
+  if (!query.Prepare(kUpdateGrammarID)) {
+    LOG4CXX_WARN(logger_,
+                 "Problem with verification query for updating grammar id.");
+    return false;
+  }
+
+  //  Positions of binding data for "query":
+  //  field "grammarID" from table "application" = 0
+  //  field "appID" from table "application" = 1
+  //  field "deviceID" from table "application" = 2
+  query.Bind(0, static_cast<int32_t>(grammar_id));
+  query.Bind(1, policy_app_id);
+  query.Bind(2, device_id);
+
+  if (!query.Exec()) {
+    LOG4CXX_WARN(logger_, "Problem with execution query");
+    return false;
+  }
+  LOG4CXX_INFO(logger_, "Data were updated successfully in application table");
+  return true;
 }
 
 utils::dbms::SQLDatabase* ResumptionDataDB::db() const {

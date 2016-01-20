@@ -179,6 +179,9 @@ class ResumptionDataJson : public ResumptionData {
 
   virtual bool Init();
 
+  bool DropAppDataResumption(const std::string& device_id,
+                             const std::string& app_id) OVERRIDE;
+
  private:
   /**
    * @brief GetFromSavedOrAppend allows to get existed record about application

@@ -959,4 +959,9 @@ const std::string kSelectDBVersion =
 const std::string kUpdateDBVersion =
     "UPDATE `_internal_data` SET `db_version_hash` = ? ; ";
 
+const std::string kUpdateGrammarID =
+    "UPDATE `application` "
+    "SET `grammarID` = ? "
+    "WHERE `appID` = ? AND `deviceID` = ?;";
+
 }  // namespace resumption

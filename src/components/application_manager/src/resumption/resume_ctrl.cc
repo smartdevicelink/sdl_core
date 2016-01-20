@@ -726,50 +726,25 @@ void ResumeCtrl::LoadResumeData() {
   smart_objects::SmartObject so_applications_data;
   resumption_storage_->GetDataForLoadResumeData(so_applications_data);
   size_t length = so_applications_data.length();
-  smart_objects::SmartObject* full_app = NULL;
-  smart_objects::SmartObject* limited_app = NULL;
-  time_t time_stamp_full = 0;
-  time_t time_stamp_limited = 0;
-  // only apps with first IGN should be resumed
-  const int32_t first_ign = 1;
   for (size_t i = 0; i < length; ++i) {
-    if (first_ign == so_applications_data[i][strings::ign_off_count].asInt()) {
-      const mobile_apis::HMILevel::eType saved_hmi_level =
-          static_cast<mobile_apis::HMILevel::eType>(
-              so_applications_data[i][strings::hmi_level].asInt());
-      const time_t saved_time_stamp = static_cast<time_t>(
-          so_applications_data[i][strings::time_stamp].asUInt());
-      if (mobile_apis::HMILevel::HMI_FULL == saved_hmi_level) {
-        if (time_stamp_full < saved_time_stamp) {
-          time_stamp_full = saved_time_stamp;
-          full_app = &(so_applications_data[i]);
-        }
-      }
-      if (mobile_apis::HMILevel::HMI_LIMITED == saved_hmi_level) {
-        if (time_stamp_limited < saved_time_stamp) {
-          time_stamp_limited = saved_time_stamp;
-          limited_app = &(so_applications_data[i]);
-        }
-      }
+    smart_objects::SmartObject& application = so_applications_data[i];
+    if (IsAppDataResumptionExpired(application)) {
+      const std::string device_id = application[strings::device_id].asString();
+      const std::string app_id = application[strings::app_id].asString();
+      LOG4CXX_INFO(logger_, "Data resumption is expired.");
+      LOG4CXX_DEBUG(logger_, "Resumption data for application " << app_id
+                    << " and device id " << device_id
+                    << " will be dropped.");
+      resumption_storage_->DropAppDataResumption(device_id, app_id);
+      continue;
     }
-    // set invalid HMI level for all
-    resumption_storage_->UpdateHmiLevel(
-        so_applications_data[i][strings::app_id].asString(),
-        so_applications_data[i][strings::device_id].asString(),
-        mobile_apis::HMILevel::INVALID_ENUM);
   }
-  if (full_app != NULL) {
-    resumption_storage_->UpdateHmiLevel(
-        (*full_app)[strings::app_id].asString(),
-        (*full_app)[strings::device_id].asString(),
-        mobile_apis::HMILevel::HMI_FULL);
-  }
-  if (limited_app != NULL) {
-    resumption_storage_->UpdateHmiLevel(
-        (*limited_app)[strings::app_id].asString(),
-        (*limited_app)[strings::device_id].asString(),
-        mobile_apis::HMILevel::HMI_LIMITED);
-  }
+}
+
+bool ResumeCtrl::IsAppDataResumptionExpired(
+    const smart_objects::SmartObject& application) const {
+  const int32_t max_ign_off_count = 3;
+  return max_ign_off_count <= application[strings::ign_off_count].asInt();
 }
 
 }  // namespce resumption

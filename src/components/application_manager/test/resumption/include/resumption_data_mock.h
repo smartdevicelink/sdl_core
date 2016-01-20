@@ -77,6 +77,8 @@ class ResumptionDataMock : public ::resumption::ResumptionData {
                                     const std::string& device_id,
                                     mobile_apis::HMILevel::eType hmi_level));
   MOCK_METHOD0(Init, bool());
+  MOCK_METHOD2(DropAppDataResumption, bool(const std::string& device_id,
+                                           const std::string& app_id));
 };
 
 }  // namespace resumption_test

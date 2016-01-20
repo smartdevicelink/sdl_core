@@ -232,6 +232,9 @@ class ResumptionDataDB : public ResumptionData {
    */
   bool UpdateDBVersion() const;
 
+  bool DropAppDataResumption(const std::string& device_id,
+                             const std::string& app_id) OVERRIDE;
+
  private:
   /**
    * @brief Calculates DB version from current schema
@@ -820,6 +823,17 @@ class ResumptionDataDB : public ResumptionData {
    * @brief returns pointer to data base
    */
   utils::dbms::SQLDatabase* db() const;
+
+  /**
+   * @brief Updates grammarID for application
+   * @param policy_app_id Application ID
+   * @param device_id Device ID
+   * @param grammar_id GrammarID
+   * @return true if succedeed, otherwise - false
+   */
+  bool UpdateGrammarID(const std::string& policy_app_id,
+                       const std::string& device_id,
+                       const uint32_t grammar_id);
 
   DISALLOW_COPY_AND_ASSIGN(ResumptionDataDB);
 
