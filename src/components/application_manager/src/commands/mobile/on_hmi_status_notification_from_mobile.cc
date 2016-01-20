@@ -41,29 +41,27 @@ namespace commands {
 
 OnHMIStatusNotificationFromMobile::OnHMIStatusNotificationFromMobile(
     const MessageSharedPtr& message)
-    : CommandNotificationFromMobileImpl(message) {
-}
+    : CommandNotificationFromMobileImpl(message) {}
 
-OnHMIStatusNotificationFromMobile::~OnHMIStatusNotificationFromMobile() {
-}
+OnHMIStatusNotificationFromMobile::~OnHMIStatusNotificationFromMobile() {}
 
 void OnHMIStatusNotificationFromMobile::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  (*message_)[strings::params][strings::message_type] = static_cast<int32_t> (
-      application_manager::MessageType::kNotification);
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-        connection_key());
+  (*message_)[strings::params][strings::message_type] =
+      static_cast<int32_t>(application_manager::MessageType::kNotification);
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!app.valid()) {
-    LOG4CXX_ERROR(logger_,
-                  "OnHMIStatusNotificationFromMobile application doesn't exist");
+    LOG4CXX_ERROR(
+        logger_, "OnHMIStatusNotificationFromMobile application doesn't exist");
     return;
   }
 
   mobile_apis::HMILevel::eType current_hmi_state =
       static_cast<mobile_apis::HMILevel::eType>(
-        (*message_)[strings::msg_params][strings::hmi_level].asUInt());
+          (*message_)[strings::msg_params][strings::hmi_level].asUInt());
 
   bool is_current_state_foreground =
       mobile_apis::HMILevel::HMI_FULL == current_hmi_state;
@@ -72,11 +70,14 @@ void OnHMIStatusNotificationFromMobile::Run() {
 
   connection_handler::DeviceHandle handle = app->device();
   bool is_apps_requested_before =
-      application_manager::ApplicationManagerImpl::instance()->
-      IsAppsQueriedFrom(handle);
+      application_manager::ApplicationManagerImpl::instance()
+          ->IsAppsQueriedFrom(handle);
 
-  LOG4CXX_DEBUG(logger_, "Mobile HMI state notication came for connection key:"
-                << connection_key() << " and handle: " << handle);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Mobile HMI state notication came for connection key:" << connection_key()
+                                                             << " and handle: "
+                                                             << handle);
 
   if (!is_apps_requested_before &&
       ProtocolVersion::kV4 == app->protocol_version() && app->is_foreground()) {
@@ -88,28 +89,30 @@ void OnHMIStatusNotificationFromMobile::Run() {
   }
 
   if (is_apps_requested_before) {
-    LOG4CXX_DEBUG(logger_, "Remote apps list had been requested already "
-                  " for handle: " << handle);
+    LOG4CXX_DEBUG(logger_,
+                  "Remote apps list had been requested already "
+                  " for handle: "
+                      << handle);
 
     if (ProtocolVersion::kV4 == app->protocol_version()) {
       ApplicationManagerImpl::ApplicationListAccessor accessor;
 
       bool is_another_foreground_sdl4_app = false;
-      ApplicationManagerImpl::ApplictionSetIt it = accessor.begin();
-      for (;accessor.end() != it; ++it) {
+      ApplicationSetIt it = accessor.begin();
+      for (; accessor.end() != it; ++it) {
         if (connection_key() != (*it)->app_id() &&
             ProtocolVersion::kV4 == (*it)->protocol_version() &&
-           (*it)->is_foreground()) {
+            (*it)->is_foreground()) {
           is_another_foreground_sdl4_app = true;
           break;
         }
       }
 
       if (!is_another_foreground_sdl4_app) {
-        application_manager::ApplicationManagerImpl::instance()->
-            MarkAppsGreyOut(handle, !is_current_state_foreground);
-        application_manager::ApplicationManagerImpl::instance()->
-            SendUpdateAppList();
+        application_manager::ApplicationManagerImpl::instance()
+            ->MarkAppsGreyOut(handle, !is_current_state_foreground);
+        application_manager::ApplicationManagerImpl::instance()
+            ->SendUpdateAppList();
       }
     }
     return;

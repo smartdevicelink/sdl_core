@@ -44,7 +44,6 @@ namespace resumption {
  */
 class ResumptionDataJson : public ResumptionData {
  public:
-
   /**
    * @brief Constructor of ResumptionDataJson
    */
@@ -69,7 +68,7 @@ class ResumptionDataJson : public ResumptionData {
    * returns -1
    */
   virtual int32_t GetStoredHMILevel(const std::string& policy_app_id,
-                                const std::string& device_id) const;
+                                    const std::string& device_id) const;
 
   /**
    * @brief Checks if saved data of applications have hmi app id
@@ -91,7 +90,7 @@ class ResumptionDataJson : public ResumptionData {
   /**
    * @brief Retrieves HMI app ID for the given mobile app ID
    * and device ID from stored information.
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return HMI app ID
    */
@@ -113,9 +112,10 @@ class ResumptionDataJson : public ResumptionData {
   /**
    * @brief Retrieves hash ID for the given mobile app ID
    * and device ID from stored information.
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
-   * @param hash_id - parameter which will contain HASH id from saved application
+   * @param hash_id - parameter which will contain HASH id from saved
+   * application
    * @return TRUE if application will be found in saved data otherwise
    * returns FALSE
    */
@@ -124,9 +124,9 @@ class ResumptionDataJson : public ResumptionData {
                          std::string& hash_id) const;
 
   /**
-   * @brief Retrieves data of saved appliction for the given mobile app ID
+   * @brief Retrieves data of saved application for the given mobile app ID
    * and device ID
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @param saved_app - parameter which will contain data of saved application
    * @return TRUE if application will be found in saved data otherwise
@@ -153,33 +153,33 @@ class ResumptionDataJson : public ResumptionData {
 
   /**
    * @brief Checks if saved data have application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return index if data of application exists, otherwise returns -1
    */
   virtual ssize_t IsApplicationSaved(const std::string& policy_app_id,
-                                 const std::string& device_id) const;
+                                     const std::string& device_id) const;
 
   /**
    * @brief Retrieves data from saved application
    * @param  will be contain data for resume_ctrl
    */
-  virtual void GetDataForLoadResumeData(smart_objects::SmartObject& saved_data) const;
+  virtual void GetDataForLoadResumeData(
+      smart_objects::SmartObject& saved_data) const;
 
   /**
    * @brief Updates HMI level of saved application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
-   * @param hmi_level - contains hmi level for saved appliction
+   * @param hmi_level - contains hmi level for saved application
    */
   virtual void UpdateHmiLevel(const std::string& policy_app_id,
                               const std::string& device_id,
-                              int32_t hmi_level);
+                              mobile_apis::HMILevel::eType hmi_level);
 
   virtual bool Init();
 
  private:
-
   /**
    * @brief GetFromSavedOrAppend allows to get existed record about application
    * or adds the new one.
@@ -210,7 +210,7 @@ class ResumptionDataJson : public ResumptionData {
    * @return application's index of or -1 if it doesn't exists
    */
   ssize_t GetObjectIndex(const std::string& policy_app_id,
-                     const std::string& device_id) const;
+                         const std::string& device_id) const;
 
   /**
    * @brief Set applications for resumption to LastState
@@ -232,7 +232,6 @@ class ResumptionDataJson : public ResumptionData {
   bool IsResumptionDataValid(uint32_t index) const;
 
   DISALLOW_COPY_AND_ASSIGN(ResumptionDataJson);
-
 };
 }  // namespace resumption
 

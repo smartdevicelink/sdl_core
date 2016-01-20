@@ -33,9 +33,9 @@ set (AM_SOURCE_DIR ${COMPONENTS_DIR}/application_manager)
 set (AM_TEST_DIR ${AM_SOURCE_DIR}/test)
 set (AM_MOCK_DIR ${AM_TEST_DIR}/mock)
 
-
 include_directories (
   include/
+  ${COMPONENTS_DIR}
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/formatters/include/
   ${COMPONENTS_DIR}/protocol_handler/include/
@@ -60,19 +60,23 @@ include_directories (
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-include_directories(
-  ${COMPONENTS_DIR}/utils/include/utils/sqlite_wrapper/
-)
+  include_directories(
+    ${COMPONENTS_DIR}/utils/include/utils/sqlite_wrapper/
+  )
 endif ()
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "QNX")
   include_directories(
-  ${COMPONENTS_DIR}/utils/include/utils/qdb_wrapper/
-)
+    ${COMPONENTS_DIR}/utils/include/utils/qdb_wrapper/
+  )
 endif()
 
 file (GLOB SOURCES
   ${AM_SOURCE_DIR}/src/*
+)
+
+set (MESSAGE_HELPER_SOURCES
+  ${AM_SOURCE_DIR}/src/message_helper/message_helper.cc
 )
 
 set (POLICIES_MANAGER
@@ -85,7 +89,6 @@ ${AM_SOURCE_DIR}/src/policies/delegates/statistics_delegate.cc
   include_directories(
     ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
   )
-
 file (GLOB EVENT_ENGINE
   ${AM_SOURCE_DIR}/src/event_engine/*
 )
@@ -370,6 +373,8 @@ target_link_libraries("AMPolicyLibrary" ${LIBRARIES} AMEventEngine)
 add_library("AMHMICommandsLibrary" ${HMI_COMMANDS_SOURCES})
 target_link_libraries("AMHMICommandsLibrary" ${LIBRARIES} AMEventEngine)
 
+add_library("MessageHelper" ${MESSAGE_HELPER_SOURCES})
+
 add_library("AMMobileCommandsLibrary" ${MOBILE_COMMANDS_SOURCES} )
 target_link_libraries("AMMobileCommandsLibrary" ${LIBRARIES} AMEventEngine)
 
@@ -385,5 +390,6 @@ endif()
 
 if(BUILD_TESTS)
   add_subdirectory(test)
+  add_subdirectory(test/state_controller)
   add_subdirectory(test/message_helper)
 endif()

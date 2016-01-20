@@ -45,19 +45,16 @@ namespace hmi {
 
 OnDriverDistractionNotification::OnDriverDistractionNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnDriverDistractionNotification::~OnDriverDistractionNotification() {
-}
+OnDriverDistractionNotification::~OnDriverDistractionNotification() {}
 
 void OnDriverDistractionNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const hmi_apis::Common_DriverDistractionState::eType state =
       static_cast<hmi_apis::Common_DriverDistractionState::eType>(
-          (*message_)[strings::msg_params][hmi_notification::state]
-          .asInt());
+          (*message_)[strings::msg_params][hmi_notification::state].asInt());
   ApplicationManagerImpl::instance()->set_driver_distraction(state);
 
   smart_objects::SmartObjectSPtr on_driver_distraction =
@@ -75,14 +72,14 @@ void OnDriverDistractionNotification::Run() {
       state;
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
-  const ApplicationManagerImpl::ApplictionSet applications = accessor.applications();
+  const ApplicationSet applications = accessor.applications();
 
-  ApplicationManagerImpl::ApplictionSetConstIt it = applications.begin();
+  ApplicationSetConstIt it = applications.begin();
   for (; applications.end() != it; ++it) {
     const ApplicationSharedPtr app = *it;
     if (app) {
-      (*on_driver_distraction)[strings::params]
-                              [strings::connection_key] = app->app_id();
+      (*on_driver_distraction)[strings::params][strings::connection_key] =
+          app->app_id();
       SendNotificationToMobile(on_driver_distraction);
     }
   }
@@ -93,4 +90,3 @@ void OnDriverDistractionNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

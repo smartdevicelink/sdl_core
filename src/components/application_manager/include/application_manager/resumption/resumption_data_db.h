@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_DB_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_DB_H_
 #include "application_manager/resumption/resumption_data.h"
+
 #include "sql_database.h"
 #include "sql_query.h"
 
@@ -41,22 +42,19 @@ namespace resumption {
 /**
  * @brief Points what structure contains vr commands
  */
-enum AccessoryVRCommand {
-  kVRCommandFromChoice = 0,
-  kVRCommandFromCommand
-};
+enum AccessoryVRCommand { kVRCommandFromChoice = 0, kVRCommandFromCommand };
 
 struct ApplicationParams {
-    ApplicationParams(const smart_objects::SmartObject& application);
-    ApplicationParams(app_mngr::ApplicationSharedPtr application);
+  ApplicationParams(const smart_objects::SmartObject& application);
+  ApplicationParams(app_mngr::ApplicationSharedPtr application);
 
-    std::string m_hash;
-    int64_t m_grammar_id;
-    int64_t m_connection_key;
-    int64_t m_hmi_app_id;
-    mobile_apis::HMILevel::eType m_hmi_level;
-    bool m_is_media_application;
-    bool m_is_valid;
+  std::string m_hash;
+  int64_t m_grammar_id;
+  int64_t m_connection_key;
+  int64_t m_hmi_app_id;
+  mobile_apis::HMILevel::eType m_hmi_level;
+  bool m_is_media_application;
+  bool m_is_valid;
 };
 
 /**
@@ -65,7 +63,6 @@ struct ApplicationParams {
  */
 class ResumptionDataDB : public ResumptionData {
  public:
-
   /**
    * @brief Constructor of ResumptionDataDB
    */
@@ -88,7 +85,6 @@ class ResumptionDataDB : public ResumptionData {
    * @param application is application which need to be saved
    */
   virtual void SaveApplication(app_mngr::ApplicationSharedPtr application);
-
   /**
    * @brief Returns HMI level of application from saved data
    * @param policy_app_id contains policy id of application
@@ -97,7 +93,7 @@ class ResumptionDataDB : public ResumptionData {
    * returns -1
    */
   virtual int32_t GetStoredHMILevel(const std::string& policy_app_id,
-                                const std::string& device_id) const;
+                                    const std::string& device_id) const;
 
   /**
    * @brief Checks if saved data of applications have hmi app id
@@ -105,7 +101,6 @@ class ResumptionDataDB : public ResumptionData {
    * @return true if exist, otherwise false
    */
   virtual bool IsHMIApplicationIdExist(uint32_t hmi_app_id) const;
-
   /**
    * @brief Checks if saved data have application
    * @param policy_app_id - policy application id
@@ -118,7 +113,7 @@ class ResumptionDataDB : public ResumptionData {
   /**
    * @brief Retrieves HMI app ID for the given mobile app ID
    * and device ID from stored data.
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return HMI app ID
    */
@@ -134,9 +129,10 @@ class ResumptionDataDB : public ResumptionData {
   /**
    * @brief Retrieves hash ID for the given mobile app ID
    * and device ID from stored information.
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
-   * @param hash_id - parameter which will contain HASH id from saved application
+   * @param hash_id - parameter which will contain HASH id from saved
+   * application
    * @return TRUE if application will be found in saved data otherwise
    * returns FALSE
    */
@@ -151,9 +147,9 @@ class ResumptionDataDB : public ResumptionData {
   virtual void OnAwake();
 
   /**
-   * @brief Retrieves data of saved appliction for the given mobile app ID
+   * @brief Retrieves data of saved application for the given mobile app ID
    * and device ID
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @param saved_app - parameter which will contain data of saved application
    * @return TRUE if application will be found in saved data otherwise
@@ -180,28 +176,29 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Checks if saved data have application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return 0 if saved data contains application otherwise returns -1
    */
   virtual ssize_t IsApplicationSaved(const std::string& policy_app_id,
-                                 const std::string& device_id) const;
+                                     const std::string& device_id) const;
 
   /**
    * @brief Retrieves data from saved application
    * @param  will contain data for resume_ctrl
    */
-  virtual void GetDataForLoadResumeData(smart_objects::SmartObject& saved_data) const;
+  virtual void GetDataForLoadResumeData(
+      smart_objects::SmartObject& saved_data) const;
 
   /**
    * @brief Updates HMI level of saved application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
-   * @param hmi_level - contains hmi level for saved appliction
+   * @param hmi_level - contains hmi level for saved application
    */
   virtual void UpdateHmiLevel(const std::string& policy_app_id,
                               const std::string& device_id,
-                              int32_t hmi_level);
+                              mobile_apis::HMILevel::eType hmi_level);
 
   /**
    * @brief Re-creates and re-init DB
@@ -236,7 +233,6 @@ class ResumptionDataDB : public ResumptionData {
   bool UpdateDBVersion() const;
 
  private:
-
   /**
    * @brief Calculates DB version from current schema
    * @return version
@@ -245,15 +241,15 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Retrieves hmi level from db
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @param hmi_level - will contains hmi level for saved application
    * @return true if application with mobile id and device id has hmi level
    * otherwise returns false
    */
-  bool SelectHMILevel(const std::string& policy_app_id, const std::string& device_id,
+  bool SelectHMILevel(const std::string& policy_app_id,
+                      const std::string& device_id,
                       int& hmi_level) const;
-
   /**
    * @brief Checks existence HMI id in DB
    * @param hmi_app_id - HMI id
@@ -263,16 +259,17 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Select HMI id from saved application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @param hmi_id - will contains hmi id from saved application
    */
-  void SelectHMIId(const std::string& policy_app_id, const std::string& device_id,
+  void SelectHMIId(const std::string& policy_app_id,
+                   const std::string& device_id,
                    uint32_t& hmi_id) const;
 
   /**
    * @brief Select hash id from saved application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @param hash_id - will contains hash id from saved application
    */
@@ -288,9 +285,10 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Checks existence application in DB
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
-   * @param application_exist will contain true if restored data contain application
+   * @param application_exist will contain true if restored data contain
+   * application
    * otherwise will contain false
    * return if we have problem with access to DB returns FALSE otherwise
    * returns TRUE
@@ -303,11 +301,12 @@ class ResumptionDataDB : public ResumptionData {
    * @brief Retrieves data from saved application
    * @param will contain data for resume_ctrl
    */
-  void SelectDataForLoadResumeData(smart_objects::SmartObject& saved_data) const;
+  void SelectDataForLoadResumeData(
+      smart_objects::SmartObject& saved_data) const;
 
   /**
    * @brief Deletes saved application from db
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return true if application data was deleted otherwise returns
    * false
@@ -317,7 +316,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Deletes file from saved application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return true if data was deleted otherwise returns
    * false
@@ -327,7 +326,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Deletes submenu from saved application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return true if data was deleted otherwise returns
    * false
@@ -337,7 +336,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Deletes subscriptions from saved application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return true if data was deleted otherwise returns
    * false
@@ -347,7 +346,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Deletes commands from saved application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return true if data was deleted otherwise returns
    * false
@@ -357,7 +356,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Deletes choice set from saved application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return true if data was deleted otherwise returns
    * false
@@ -367,7 +366,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Deletes global properties from saved application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return true if data was deleted otherwise returns
    * false
@@ -376,7 +375,7 @@ class ResumptionDataDB : public ResumptionData {
                                    const std::string& device_id);
   /**
    * @brief Deletes data from application table
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return true if data was deleted otherwise returns
    * false
@@ -449,7 +448,7 @@ class ResumptionDataDB : public ResumptionData {
   /**
    * @brief Saves application data to DB
    * @param application contains data for saving
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return true if application data was saved successfully
    * otherwise returns false
@@ -470,7 +469,7 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Execute query for delete data of application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @param text_query - contains text of query
    * @return true if query was run successfully otherwise returns
@@ -482,15 +481,15 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Execute union query for delete data of application
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @param text_query - contains text of query
    * @return true if query was run successfully otherwise returns
    * false
    */
-  bool ExecUnionQueryToDeleteData (const std::string& policy_app_id,
-                                   const std::string& device_id,
-                                   const std::string& text_query);
+  bool ExecUnionQueryToDeleteData(const std::string& policy_app_id,
+                                  const std::string& device_id,
+                                  const std::string& text_query);
 
   /**
    * @brief Execute query in order to insert image to DB
@@ -552,7 +551,8 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Execute query in order to insert characters array to DB
-   * @param global_properties_key contains primary key from globalproperties table
+   * @param global_properties_key contains primary key from globalproperties
+   * table
    * @param characters_array contains data for saving to DB
    * @return true if query was run successfully otherwise returns
    * false
@@ -563,7 +563,8 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Execute query in order to insert vr help item array to DB
-   * @param global_properties_key contains primary key from globalproperties table
+   * @param global_properties_key contains primary key from globalproperties
+   * table
    * @param vrhelp_array contains data for saving to DB
    * @return true if query was run successfully otherwise returns
    * false
@@ -585,7 +586,8 @@ class ResumptionDataDB : public ResumptionData {
   /**
    * @brief Execute query in order to insert data to helpTimeoutPromptArray
    * @param global_properties contains data for saving to DB
-   * @param global_properties_key contains primary key from globalproperties table
+   * @param global_properties_key contains primary key from globalproperties
+   * table
    * @return true if query was run successfully otherwise returns
    * false
    */
@@ -598,12 +600,14 @@ class ResumptionDataDB : public ResumptionData {
    * @param application contains data for saving to DB
    * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
-   * @param application_primary_key will contain primary key from application table
-   * @param global_properties_key contains primary key from globalproperties table
+   * @param application_primary_key will contain primary key from application
+   * table
+   * @param global_properties_key contains primary key from globalproperties
+   * table
    * @return true if query was run successfully otherwise returns
    * false
    */
-  bool InsertApplicationData(const ApplicationParams& application ,
+  bool InsertApplicationData(const ApplicationParams& application,
                              const std::string& policy_app_id,
                              const std::string& device_id,
                              int64_t* application_primary_key,
@@ -631,68 +635,74 @@ class ResumptionDataDB : public ResumptionData {
 
   /**
    * @brief Selects data from file table
-   * @param policy_app_id contains policy application id of application
+   * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
    * @param saved_app will contain data from file table
    * @return true if query was run successfully otherwise returns
    * false
    */
-  bool SelectFilesData(const std::string& policy_app_id, const std::string& device_id,
+  bool SelectFilesData(const std::string& policy_app_id,
+                       const std::string& device_id,
                        smart_objects::SmartObject& saved_app) const;
 
   /**
    * @brief Selects data from subMenu table
-   * @param policy_app_id contains policy application id of application
+   * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
    * @param saved_app will contain data from subMenu table
    * @return true if query was run successfully otherwise returns
    * false
    */
-  bool SelectSubmenuData(const std::string& policy_app_id, const std::string& device_id,
+  bool SelectSubmenuData(const std::string& policy_app_id,
+                         const std::string& device_id,
                          smart_objects::SmartObject& saved_app) const;
 
   /**
    * @brief Selects data from commands table
-   * @param policy_app_id contains policy application id of application
+   * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
    * @param saved_app will contain commands
    * @return true if query was run successfully otherwise returns
    * false
    */
-  bool SelectCommandData(const std::string& policy_app_id, const std::string& device_id,
+  bool SelectCommandData(const std::string& policy_app_id,
+                         const std::string& device_id,
                          smart_objects::SmartObject& saved_app) const;
 
   /**
    * @brief Selects data from applicationSubscribtionsArray table
-   * @param policy_app_id contains policy application id of application
+   * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
    * @param saved_app will contain subscriptions
    * @return true if query was run successfully otherwise returns
    * false
    */
-  bool SelectSubscriptionsData(const  std::string& policy_app_id, const std::string& device_id,
+  bool SelectSubscriptionsData(const std::string& policy_app_id,
+                               const std::string& device_id,
                                smart_objects::SmartObject& saved_app) const;
 
   /**
    * @brief Selects choice set data from DB
-   * @param policy_app_id contains policy application id of application
+   * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
    * @param saved_app will contain choiceSets
    * @return true if query was run successfully otherwise returns
    * false
    */
-  bool SelectChoiceSetData(const std::string& policy_app_id, const std::string& device_id,
+  bool SelectChoiceSetData(const std::string& policy_app_id,
+                           const std::string& device_id,
                            smart_objects::SmartObject& saved_app) const;
 
   /**
    * @brief Selects global properties data from DB
-   * @param policy_app_id contains policy application id of application
+   * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
    * @param saved_app will contain global properties
    * @return true if query was run successfully otherwise returns
    * false
    */
-  bool SelectGlobalPropertiesData(const std::string& policy_app_id, const std::string& device_id,
+  bool SelectGlobalPropertiesData(const std::string& policy_app_id,
+                                  const std::string& device_id,
                                   smart_objects::SmartObject& saved_app) const;
 
   /**
@@ -702,7 +712,8 @@ class ResumptionDataDB : public ResumptionData {
    * @return true if query was run successfully otherwise returns
    * false
    */
-  bool SelectImageData(int64_t image_key, smart_objects::SmartObject& image) const;
+  bool SelectImageData(int64_t image_key,
+                       smart_objects::SmartObject& image) const;
 
   /**
    * @brief Selects ttsChunk data from DB
@@ -711,7 +722,8 @@ class ResumptionDataDB : public ResumptionData {
    * @return true if query was run successfully otherwise returns
    * false
    */
-  bool SelectTTSChunkData(int64_t tts_chunk_key, smart_objects::SmartObject& tts_chunk) const;
+  bool SelectTTSChunkData(int64_t tts_chunk_key,
+                          smart_objects::SmartObject& tts_chunk) const;
 
   /**
    * @brief Selects VR help items data from DB
@@ -720,8 +732,9 @@ class ResumptionDataDB : public ResumptionData {
    * @return true if query was run successfully otherwise returns
    * false
    */
-  bool SelectVrHelpItemsData(int64_t global_properties_key,
-                             smart_objects::SmartObject& global_properties) const;
+  bool SelectVrHelpItemsData(
+      int64_t global_properties_key,
+      smart_objects::SmartObject& global_properties) const;
 
   /**
    * @brief Selects table limited character data from DB
@@ -730,30 +743,33 @@ class ResumptionDataDB : public ResumptionData {
    * @return true if query was run successfully otherwise returns
    * false
    */
-  bool SelectCharactersData(int64_t global_properties_key,
-                            smart_objects::SmartObject& keyboard_properties) const;
+  bool SelectCharactersData(
+      int64_t global_properties_key,
+      smart_objects::SmartObject& keyboard_properties) const;
 
   /**
    * @brief Selects data from application table of DB
-   * @param policy_app_id contains policy application id of application
+   * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
    * @param saved_app will contain data from application table
    * @return true if query was run successfully otherwise returns
    * false
    */
-  bool SelectDataFromAppTable(const std::string& policy_app_id, const std::string& device_id,
+  bool SelectDataFromAppTable(const std::string& policy_app_id,
+                              const std::string& device_id,
                               smart_objects::SmartObject& saved_app) const;
 
   /**
    * @brief Selects count from array table
    * @param count_item will contain amount item in table
    * @param text_query - contains text of query
-   * @param policy_app_id contains policy application id of application
+   * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
    * @return true if query was run successfully otherwise returns
    * false
    */
-  bool SelectCountFromArray(uint32_t& count_item, const std::string& text_query,
+  bool SelectCountFromArray(uint32_t& count_item,
+                            const std::string& text_query,
                             const std::string& policy_app_id,
                             const std::string& device_id) const;
 
@@ -764,32 +780,36 @@ class ResumptionDataDB : public ResumptionData {
    * @param query object of query for DB
    * @param pos contains position for binding query
    */
-  void CustomBind(const std::string& key, const smart_objects::SmartObject& so,
-                  utils::dbms::SQLQuery& query, const int pos) const;
+  void CustomBind(const std::string& key,
+                  const smart_objects::SmartObject& so,
+                  utils::dbms::SQLQuery& query,
+                  const int pos) const;
 
   /**
    * @brief prepare and bind the same type query
    * @param query object of query for DB
-   * @param policy_app_id contains policy application id of application
+   * @param policy_app_id contains mobile application id of application
    * @param device_id contains id of device on which is running application
    * @param text_query - contains text of query
    * @return true if query was binded successfully otherwise returns
    * false
    */
-  bool PrepareSelectQuery(utils::dbms::SQLQuery& query, const std::string& policy_app_id,
-                          const std::string& device_id, const std::string& text_query) const;
+  bool PrepareSelectQuery(utils::dbms::SQLQuery& query,
+                          const std::string& policy_app_id,
+                          const std::string& device_id,
+                          const std::string& text_query) const;
 
   /**
    * @brief Updates HMI level and time stamp in application table
    * @param application contains data for saving
-   * @param policy_app_id - policy application id
+   * @param policy_app_id - mobile application id
    * @param device_id - contains id of device on which is running application
    * @return true if application data were updated successfully
    * otherwise returns false
    */
   bool UpdateApplicationData(app_mngr::ApplicationConstSharedPtr application,
                              const std::string& policy_app_id,
-                              const std::string& device_id);
+                             const std::string& device_id);
 
   /**
    * @brief Writes data to DB after update
@@ -804,7 +824,6 @@ class ResumptionDataDB : public ResumptionData {
   DISALLOW_COPY_AND_ASSIGN(ResumptionDataDB);
 
   utils::dbms::SQLDatabase* db_;
-
 };
 }  // namespace resumption
 

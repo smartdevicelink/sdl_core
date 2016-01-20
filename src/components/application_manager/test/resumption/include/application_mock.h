@@ -44,7 +44,7 @@ class ApplicationMock : public ::application_manager::Application {
   MOCK_CONST_METHOD0(mobile_app_id, std::string());
   MOCK_CONST_METHOD0(is_foreground, bool());
   MOCK_METHOD1(set_foreground, void(bool is_foreground));
-  MOCK_METHOD1(set_mobile_app_id, void (const std::string& mobile_app_id));
+  MOCK_METHOD1(set_mobile_app_id, void(const std::string& mobile_app_id));
   MOCK_CONST_METHOD0(active_message, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(curHash, const std::string&());
   MOCK_METHOD0(UpdateHash, void());
@@ -95,13 +95,9 @@ class ApplicationMock : public ::application_manager::Application {
                      const mobile_apis::AudioStreamingState::eType());
   MOCK_CONST_METHOD0(app_icon_path, const std::string&());
   MOCK_CONST_METHOD0(device, connection_handler::DeviceHandle());
-  MOCK_METHOD0(tts_speak_state, bool());
-  MOCK_CONST_METHOD0(CurrentHmiState,
-                     ::application_manager::HmiStatePtr());
-  MOCK_CONST_METHOD0(RegularHmiState,
-                     ::application_manager::HmiStatePtr());
-  MOCK_CONST_METHOD0(PostponedHmiState,
-                     ::application_manager::HmiStatePtr());
+  MOCK_CONST_METHOD0(CurrentHmiState, ::application_manager::HmiStatePtr());
+  MOCK_CONST_METHOD0(RegularHmiState, ::application_manager::HmiStatePtr());
+  MOCK_CONST_METHOD0(PostponedHmiState, ::application_manager::HmiStatePtr());
   MOCK_METHOD1(set_tts_properties_in_none, void(bool active));
   MOCK_METHOD0(tts_properties_in_none, bool());
   MOCK_METHOD1(set_tts_properties_in_full, void(bool active));
@@ -125,12 +121,13 @@ class ApplicationMock : public ::application_manager::Application {
                      ::application_manager::ProtocolVersion());
   MOCK_METHOD1(set_is_resuming, void(bool));
   MOCK_CONST_METHOD0(is_resuming, bool());
-  MOCK_METHOD1(AddFile, bool(::application_manager::AppFile& file));
+  MOCK_METHOD1(AddFile, bool(const ::application_manager::AppFile& file));
   MOCK_CONST_METHOD0(getAppFiles, const ::application_manager::AppFilesMap&());
-  MOCK_METHOD1(UpdateFile, bool(::application_manager::AppFile& file));
+  MOCK_METHOD1(UpdateFile, bool(const ::application_manager::AppFile& file));
   MOCK_METHOD1(DeleteFile, bool(const std::string& file_name));
-  MOCK_METHOD1(GetFile, const ::application_manager::AppFile*(
-                            const std::string& file_name));
+  MOCK_METHOD1(
+      GetFile,
+      const ::application_manager::AppFile*(const std::string& file_name));
   MOCK_METHOD1(SubscribeToButton,
                bool(mobile_apis::ButtonName::eType btn_name));
   MOCK_METHOD1(IsSubscribedToButton,
@@ -146,7 +143,8 @@ class ApplicationMock : public ::application_manager::Application {
                     ::application_manager::TLimitSource source));
   MOCK_METHOD0(usage_report, ::application_manager::UsageStatistics&());
   MOCK_METHOD1(SetRegularState, void(::application_manager::HmiStatePtr state));
-  MOCK_METHOD1(SetPostponedState, void(::application_manager::HmiStatePtr state));
+  MOCK_METHOD1(SetPostponedState,
+               void(::application_manager::HmiStatePtr state));
   MOCK_METHOD1(AddHMIState, void(::application_manager::HmiStatePtr state));
   MOCK_METHOD1(RemoveHMIState,
                void(::application_manager::HmiState::StateID state_id));
@@ -188,10 +186,10 @@ class ApplicationMock : public ::application_manager::Application {
   MOCK_CONST_METHOD0(tbt_show_command, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(
       SubscribedButtons,
-      DataAccessor<  ::application_manager::ButtonSubscriptions >());
+      DataAccessor<::application_manager::ButtonSubscriptions>());
   MOCK_CONST_METHOD0(
       SubscribedIVI,
-      DataAccessor< ::application_manager::VehicleInfoSubscriptions >());
+      DataAccessor<::application_manager::VehicleInfoSubscriptions>());
   MOCK_CONST_METHOD0(keyboard_props, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(menu_title, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(menu_icon, const smart_objects::SmartObject*());
@@ -224,8 +222,9 @@ class ApplicationMock : public ::application_manager::Application {
   MOCK_CONST_METHOD0(video_stream_retry_number, uint32_t());
   MOCK_METHOD1(set_video_stream_retry_number,
                void(const uint32_t& video_stream_retry_number));
-  MOCK_METHOD2(AddCommand, void(uint32_t cmd_id,
-                                const smart_objects::SmartObject& command));
+  MOCK_METHOD2(AddCommand,
+               void(uint32_t cmd_id,
+                    const smart_objects::SmartObject& command));
   MOCK_METHOD1(RemoveCommand, void(uint32_t cmd_id));
   MOCK_METHOD1(FindCommand, smart_objects::SmartObject*(uint32_t cmd_id));
   MOCK_METHOD2(AddSubMenu,
@@ -241,19 +240,20 @@ class ApplicationMock : public ::application_manager::Application {
   MOCK_METHOD1(FindChoiceSet,
                smart_objects::SmartObject*(uint32_t choice_set_id));
   MOCK_METHOD3(AddPerformInteractionChoiceSet,
-               void(uint32_t correlation_id, uint32_t choice_set_id,
+               void(uint32_t correlation_id,
+                    uint32_t choice_set_id,
                     const smart_objects::SmartObject& choice_set));
   MOCK_METHOD1(DeletePerformInteractionChoiceSet,
                void(uint32_t correlation_id));
   MOCK_CONST_METHOD0(
       performinteraction_choice_set_map,
-      DataAccessor< ::application_manager::PerformChoiceSetMap >());
+      DataAccessor<::application_manager::PerformChoiceSetMap>());
   MOCK_CONST_METHOD0(commands_map,
-                     DataAccessor< ::application_manager::CommandsMap >());
+                     DataAccessor<::application_manager::CommandsMap>());
   MOCK_CONST_METHOD0(sub_menu_map,
-                     DataAccessor< ::application_manager::SubMenuMap >());
+                     DataAccessor<::application_manager::SubMenuMap>());
   MOCK_CONST_METHOD0(choice_set_map,
-                     DataAccessor< ::application_manager::ChoiceSetMap >());
+                     DataAccessor<::application_manager::ChoiceSetMap>());
   MOCK_METHOD1(set_perform_interaction_active, void(uint32_t active));
   MOCK_CONST_METHOD0(is_perform_interaction_active, uint32_t());
   MOCK_METHOD1(set_perform_interaction_mode, void(int32_t mode));
@@ -261,13 +261,12 @@ class ApplicationMock : public ::application_manager::Application {
   MOCK_METHOD1(set_reset_global_properties_active, void(bool active));
   MOCK_CONST_METHOD0(is_reset_global_properties_active, bool());
   MOCK_CONST_METHOD0(app_id, uint32_t());
-
   MOCK_CONST_METHOD0(is_foreground, bool());
   MOCK_CONST_METHOD0(mobile_app_id, std::string());
   MOCK_METHOD1(set_mobile_app_id, void(const std::string&));
   MOCK_METHOD1(set_foreground, void(bool));
-  MOCK_METHOD1(AddFile, bool(application_manager::AppFile &));
-  MOCK_METHOD1(UpdateFile, bool (application_manager::AppFile &));
+  MOCK_METHOD1(AddFile, bool(application_manager::AppFile&));
+  MOCK_METHOD1(UpdateFile, bool(application_manager::AppFile&));
 };
 
 }  // namespace resumption_test
