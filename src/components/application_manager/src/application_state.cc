@@ -119,10 +119,9 @@ void ApplicationState::AddHMIState(HmiStatePtr state) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(state);
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-  HmiStates::iterator it =
-      std::find_if(hmi_states_.begin(),
-                   hmi_states_.end(),
-                   StateIDComparator(state->state_id()));
+  HmiStates::iterator it = std::find_if(hmi_states_.begin(),
+                                        hmi_states_.end(),
+                                        StateIDComparator(state->state_id()));
   if (hmi_states_.end() != it) {
     LOG4CXX_WARN(
         logger_,

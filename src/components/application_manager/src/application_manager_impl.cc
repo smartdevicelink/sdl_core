@@ -1080,7 +1080,7 @@ bool ApplicationManagerImpl::StartNaviService(
     if (navi_service_status_.end() == it) {
       std::pair<NaviServiceStatusMap::iterator, bool> res =
           navi_service_status_.insert(
-              std::pair<uint32_t, std::pair<bool, bool> >(
+              std::pair<uint32_t, std::pair<bool, bool>>(
                   app_id, std::make_pair(false, false)));
       if (!res.second) {
         LOG4CXX_WARN(logger_, "Navi service refused");
@@ -3247,10 +3247,10 @@ bool ApplicationManagerImpl::CompareAppHMIType(
 }
 
 void ApplicationManagerImpl::OnUpdateHMIAppType(
-    std::map<std::string, std::vector<std::string> > app_hmi_types) {
+    std::map<std::string, std::vector<std::string>> app_hmi_types) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  std::map<std::string, std::vector<std::string> >::iterator
+  std::map<std::string, std::vector<std::string>>::iterator
       it_app_hmi_types_from_policy;
   std::vector<std::string> hmi_types_from_policy;
   smart_objects::SmartObject transform_app_hmi_types(

@@ -311,19 +311,19 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
   }
 
   if (application_impl.IsRegistered()) {
-  std::vector<std::string> request_types =
-      policy::PolicyHandler::instance()->GetAppRequestTypes(
+    std::vector<std::string> request_types =
+        policy::PolicyHandler::instance()->GetAppRequestTypes(
             application_impl.mobile_app_id());
 
-  application[strings::request_type] = SmartObject(SmartType_Array);
-  smart_objects::SmartObject& request_array =
-      application[strings::request_type];
+    application[strings::request_type] = SmartObject(SmartType_Array);
+    smart_objects::SmartObject& request_array =
+        application[strings::request_type];
 
-  uint32_t index = 0;
-  std::vector<std::string>::const_iterator it = request_types.begin();
-  for (; request_types.end() != it; ++it) {
-    request_array[index] = *it;
-    ++index;
+    uint32_t index = 0;
+    std::vector<std::string>::const_iterator it = request_types.begin();
+    for (; request_types.end() != it; ++it) {
+      request_array[index] = *it;
+      ++index;
     }
   }
 
@@ -402,7 +402,7 @@ smart_objects::SmartObject* MessageHelper::GetLockScreenIconUrlNotification(
       policy::PolicyHandler::instance()->GetLockScreenIconUrl();
 
   return message;
-  }
+}
 void MessageHelper::SendLockScreenIconUrlNotification(
     const uint32_t connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -420,11 +420,11 @@ void MessageHelper::SendHashUpdateNotification(const uint32_t app_id) {
   if (so) {
     PrintSmartObject(*so);
     if (!ApplicationManagerImpl::instance()->ManageMobileCommand(so)) {
-    LOG4CXX_ERROR(logger_, "Failed to send HashUpdate notification.");
-  } else {
-    ApplicationManagerImpl::instance()
-        ->resume_controller()
-        .ApplicationsDataUpdated();
+      LOG4CXX_ERROR(logger_, "Failed to send HashUpdate notification.");
+    } else {
+      ApplicationManagerImpl::instance()
+          ->resume_controller()
+          .ApplicationsDataUpdated();
     }
   }
 }
@@ -1261,7 +1261,6 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateChangeRegistration(
 
   params[strings::msg_params] = msg_params;
   return command;
-
 }
 
 void MessageHelper::SendUIChangeRegistrationRequestToHMI(
@@ -1394,8 +1393,8 @@ bool MessageHelper::CreateHMIApplicationStruct(
   }
 
   if (app->IsRegistered()) {
-  output[strings::hmi_display_language_desired] = app->ui_language();
-  output[strings::is_media_application] = app->is_media_application();
+    output[strings::hmi_display_language_desired] = app->ui_language();
+    output[strings::is_media_application] = app->is_media_application();
   } else {
     output[strings::greyOut] = app->is_greyed_out();
     const SmartObject* app_tts_name = app->tts_name();
@@ -1743,7 +1742,6 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
   smart_objects::SmartObject& user_friendly_messages =
       (*message)[strings::msg_params][messages];
 
-
   const std::string message_code = "messageCode";
 
   std::vector<policy::UserFriendlyMessage>::const_iterator it = msg.begin();
@@ -1754,7 +1752,6 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
 
     smart_objects::SmartObject& obj = user_friendly_messages[index];
     obj[message_code] = it->message_code;
-
   }
 
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
@@ -2550,7 +2547,6 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         break;
       }
       case SoftButtonType::SBT_TEXT: {
-
         if ((!request_soft_buttons[i].keyExists(strings::text)) ||
             (!VerifySoftButtonString(
                 request_soft_buttons[i][strings::text].asString()))) {

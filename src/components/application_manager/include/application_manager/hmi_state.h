@@ -203,7 +203,8 @@ class HmiState {
  */
 class VRHmiState : public HmiState {
  public:
-  mobile_apis::AudioStreamingState::eType audio_streaming_state() const OVERRIDE;
+  mobile_apis::AudioStreamingState::eType audio_streaming_state()
+      const OVERRIDE;
   VRHmiState(uint32_t app_id, ApplicationManager* app_mngr);
 };
 
@@ -213,7 +214,8 @@ class VRHmiState : public HmiState {
 class TTSHmiState : public HmiState {
  public:
   TTSHmiState(uint32_t app_id, ApplicationManager* app_mngr);
-  mobile_apis::AudioStreamingState::eType audio_streaming_state() const OVERRIDE;
+  mobile_apis::AudioStreamingState::eType audio_streaming_state()
+      const OVERRIDE;
 };
 
 /**
@@ -223,7 +225,8 @@ class TTSHmiState : public HmiState {
 class NaviStreamingHmiState : public HmiState {
  public:
   NaviStreamingHmiState(uint32_t app_id, ApplicationManager* app_mngr);
-  mobile_apis::AudioStreamingState::eType audio_streaming_state() const OVERRIDE;
+  mobile_apis::AudioStreamingState::eType audio_streaming_state()
+      const OVERRIDE;
 };
 
 /**

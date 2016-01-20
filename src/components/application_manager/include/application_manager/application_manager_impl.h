@@ -70,7 +70,7 @@
 #ifdef ENABLE_SECURITY
 #include "security_manager/security_manager_listener.h"
 #include "security_manager/ssl_context.h"
-#endif // ENABLE_SECURITY
+#endif  // ENABLE_SECURITY
 
 #ifdef TIME_TESTER
 #include "time_metric_observer.h"
@@ -168,13 +168,13 @@ struct MessageToHmi : public utils::SharedPtr<Message> {
 };
 
 // Short type names for prioritized message queues
-typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromMobile> >
+typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromMobile>>
     FromMobileQueue;
-typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToMobile> >
+typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToMobile>>
     ToMobileQueue;
-typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromHmi> >
+typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromHmi>>
     FromHmiQueue;
-typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToHmi> >
+typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToHmi>>
     ToHmiQueue;
 
 // AudioPassThru
@@ -259,8 +259,8 @@ class ApplicationManagerImpl
   ApplicationSharedPtr get_limited_voice_application() const;
 
   void OnHMILevelChanged(uint32_t app_id,
-                                 mobile_apis::HMILevel::eType from,
-                                 mobile_apis::HMILevel::eType to) OVERRIDE;
+                         mobile_apis::HMILevel::eType from,
+                         mobile_apis::HMILevel::eType to) OVERRIDE;
 
   void SendHMIStatusNotification(const ApplicationSharedPtr app) OVERRIDE;
   /**
@@ -597,7 +597,7 @@ class ApplicationManagerImpl
    * for app with HMI level BACKGROUND.
    */
   void OnUpdateHMIAppType(
-      std::map<std::string, std::vector<std::string> > app_hmi_types) OVERRIDE;
+      std::map<std::string, std::vector<std::string>> app_hmi_types) OVERRIDE;
 
   /*
    * @brief Starts audio pass thru thread
@@ -1275,9 +1275,9 @@ class ApplicationManagerImpl
    * 1st value - is video service opened or not
    * 2nd value - is audio service opened or not
    */
-  typedef std::map<uint32_t, std::pair<bool, bool> > NaviServiceStatusMap;
+  typedef std::map<uint32_t, std::pair<bool, bool>> NaviServiceStatusMap;
 
-  typedef SharedPtr<TimerThread<ApplicationManagerImpl> >
+  typedef SharedPtr<TimerThread<ApplicationManagerImpl>>
       ApplicationManagerTimerPtr;
 
   /**
