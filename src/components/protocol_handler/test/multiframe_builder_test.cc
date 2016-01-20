@@ -139,26 +139,122 @@ class MultiFrameBuilderTest : public ::testing::Test {
     }
   }
 
+  void VerifyConsecutiveAdd(const MutiframeData& multiframe_data) {
+    const ProtocolFramePtrList& multiframes = multiframe_data.multiframes;
+    const UCharDataVector&      binary_data = multiframe_data.binary_data;
+    ASSERT_FALSE(multiframes.empty());
+
+    // Frame of multiframe loop
+    ProtocolFramePtrList::const_iterator it = multiframes.begin();
+    // Skip last final frame
+    const ProtocolFramePtrList::const_iterator it_last = --(multiframes.end());
+    while (it != it_last) {
+      const ProtocolFramePtr frame = *it;
+      ASSERT_TRUE(frame);
+      EXPECT_EQ(RESULT_OK,
+                multiframe_builder_.AddFrame(frame))
+          << "Non final CONSECUTIVE frame: " << frame;
+      EXPECT_EQ(ProtocolFramePtrList(),
+                multiframe_builder_.PopMultiframes())
+          << "Non final CONSECUTIVE frame: " << frame;
+      ++it;
+      // Skip last final frame
+    }
+
+    const ProtocolFramePtr final_frame = multiframes.back();
+
+    EXPECT_EQ(RESULT_OK,
+              multiframe_builder_.AddFrame(final_frame))
+        << "Final CONSECUTIVE frame: " << final_frame;
+
+    const ProtocolFramePtrList& multiframe_list
+      = multiframe_builder_.PopMultiframes();
+    ASSERT_EQ(multiframe_list.size(), 1u);
+
+    const ProtocolFramePtr result_multiframe = multiframe_list.front();
+    EXPECT_EQ(binary_data,
+              UCharDataVector(result_multiframe->data(),
+                              result_multiframe->data() + result_multiframe->payload_size()));
+  }
+
   // Support method for first and consecutive frame disassembling
-  static void PrepareMultiFrames(
-    const ConnectionID connection_id,
-    const uint8_t protocol_version,
-    const uint8_t service_type,
-    const uint8_t session_id,
-    const uint32_t message_id,
-    const size_t max_frame_size,
-    const UCharDataVector& data,
-    ProtocolFramePtrList& out_frames);
+  void PrepareMultiFrames(const ConnectionID connection_id,
+                          const uint8_t protocol_version,
+                          const uint8_t service_type,
+                          const uint8_t session_id,
+                          const uint32_t message_id,
+                          const size_t max_payload_size,
+                          const UCharDataVector& data,
+                          ProtocolFramePtrList& out_frames) {
+    ASSERT_GT(max_payload_size, FIRST_FRAME_DATA_SIZE);
+    ASSERT_EQ(FIRST_FRAME_DATA_SIZE, 0x08);
 
-  void AddConnection(const ConnectionID connection_id);
+    // TODO(EZamakhov): move to the separate class
+    const size_t data_size =  data.size();
+    // remainder of last frame
+    const size_t lastframe_remainder = data_size % max_payload_size;
+    // size of last frame (full fill or not)
+    const size_t lastframe_size =
+      lastframe_remainder > 0 ? lastframe_remainder : max_payload_size;
 
-  void AddConnections();
+    const size_t frames_count = data_size / max_payload_size +
+                                // add last frame if not empty
+                                (lastframe_remainder > 0 ? 1 : 0);
 
-  void VerifyConsecutiveAdd(const MutiframeData& multiframe_data);
+    uint8_t out_data[FIRST_FRAME_DATA_SIZE];
+    out_data[0] = data_size >> 24;
+    out_data[1] = data_size >> 16;
+    out_data[2] = data_size >> 8;
+    out_data[3] = data_size;
 
-  void RemoveConnection(const ConnectionID connection_id);
+    out_data[4] = frames_count >> 24;
+    out_data[5] = frames_count >> 16;
+    out_data[6] = frames_count >> 8;
+    out_data[7] = frames_count;
 
-  void RemoveConnections();
+    ProtocolFramePtr first_frame(
+      new ProtocolPacket(
+        connection_id, protocol_version, PROTECTION_OFF, FRAME_TYPE_FIRST,
+        service_type, FRAME_DATA_FIRST, session_id, FIRST_FRAME_DATA_SIZE,
+        message_id, out_data));
+    // Note: PHIMpl already prepare First frames the total_data_bytes on desirialization
+    first_frame->set_total_data_bytes(data_size);
+
+    out_frames.clear();
+    out_frames.push_back(first_frame);
+
+    for (size_t i = 0; i < frames_count; ++i) {
+      const bool is_last_frame = (i == (frames_count - 1));
+      const size_t frame_size = is_last_frame ? lastframe_size : max_payload_size;
+      const uint8_t data_type =
+        is_last_frame
+        ? FRAME_DATA_LAST_CONSECUTIVE
+        : (i % FRAME_DATA_MAX_CONSECUTIVE + 1);
+
+      const ProtocolFramePtr consecutive_frame(
+        new ProtocolPacket(
+          connection_id, protocol_version, PROTECTION_OFF, FRAME_TYPE_CONSECUTIVE,
+          service_type, data_type, session_id, frame_size, message_id,
+          &data[max_payload_size * i]));
+      out_frames.push_back(consecutive_frame);
+    }
+  }
+
+  void AddConnection(const ConnectionID connection_id) {
+    ASSERT_TRUE(multiframe_builder_.AddConnection(connection_id));
+  }
+
+  void AddConnections() {
+    for (MultiFrameTestMap::iterator connection_it = test_data_map_.begin();
+         connection_it != test_data_map_.end(); ++connection_it) {
+      const ConnectionID connection_id = connection_it->first;
+      ASSERT_TRUE(multiframe_builder_.AddConnection(connection_id));
+    }
+  }
+
+  void RemoveConnection(const ConnectionID connection_id) {
+    ASSERT_TRUE(multiframe_builder_.RemoveConnection(connection_id));
+  }
 
   MultiFrameBuilder multiframe_builder_;
   MultiFrameTestMap test_data_map_;
@@ -286,8 +382,6 @@ TEST_F(MultiFrameBuilderTest, Add_ConsecutiveFrame) {
   const MutiframeData& multiframe_data = messageId_map.begin()->second;
 
   VerifyConsecutiveAdd(multiframe_data);
-
-  RemoveConnection(connection_id);
 }
 
 TEST_F(MultiFrameBuilderTest, Add_ConsecutiveFrames_OneByOne) {
@@ -308,7 +402,6 @@ TEST_F(MultiFrameBuilderTest, Add_ConsecutiveFrames_OneByOne) {
       }
     }
   }
-  RemoveConnections();
 }
 
 TEST_F(MultiFrameBuilderTest, Add_ConsecutiveFrames_per1) {
@@ -406,145 +499,27 @@ TEST_F(MultiFrameBuilderTest, FrameExpired_OneMSec) {
   ASSERT_FALSE(list.empty());
   EXPECT_EQ(first_frame,
             list.front());
-
-  RemoveConnection(connection_id);
 }
 
 TEST_F(MultiFrameBuilderTest, RemoveConnection_NoConnection_ResultFail) {
   // Arrange
   const ConnectionID& connection_id = test_data_map_.begin()->first;
   // Act
-  const bool connection_result = multiframe_builder_.RemoveConnection(connection_id);
+  const bool connection_result =
+      multiframe_builder_.RemoveConnection(connection_id);
   // Assert
   ASSERT_FALSE(connection_result);
 }
 
-/*
- * Testing support methods
- */
-
-void MultiFrameBuilderTest::VerifyConsecutiveAdd(const MutiframeData& multiframe_data) {
-  const ProtocolFramePtrList& multiframes = multiframe_data.multiframes;
-  const UCharDataVector&      binary_data = multiframe_data.binary_data;
-  ASSERT_FALSE(multiframes.empty());
-
-  // Frame of multiframe loop
-  ProtocolFramePtrList::const_iterator it = multiframes.begin();
-  // Skip last final frame
-  const ProtocolFramePtrList::const_iterator it_last = --(multiframes.end());
-  while (it != it_last) {
-    const ProtocolFramePtr frame = *it;
-    ASSERT_TRUE(frame);
-    EXPECT_EQ(RESULT_OK,
-              multiframe_builder_.AddFrame(frame))
-        << "Non final CONSECUTIVE frame: " << frame;
-    EXPECT_EQ(ProtocolFramePtrList(),
-              multiframe_builder_.PopMultiframes())
-        << "Non final CONSECUTIVE frame: " << frame;
-    ++it;
-    // Skip last final frame
-  }
-
-  const ProtocolFramePtr final_frame = multiframes.back();
-
-  EXPECT_EQ(RESULT_OK,
-            multiframe_builder_.AddFrame(final_frame))
-      << "Final CONSECUTIVE frame: " << final_frame;
-
-  const ProtocolFramePtrList& multiframe_list
-    = multiframe_builder_.PopMultiframes();
-  ASSERT_EQ(multiframe_list.size(), 1u);
-
-  const ProtocolFramePtr result_multiframe = multiframe_list.front();
-  EXPECT_EQ(binary_data,
-            UCharDataVector(result_multiframe->data(),
-                            result_multiframe->data() + result_multiframe->payload_size()));
-}
-
-void MultiFrameBuilderTest::PrepareMultiFrames(const ConnectionID connection_id,
-                                               const uint8_t protocol_version,
-                                               const uint8_t service_type,
-                                               const uint8_t session_id,
-                                               const uint32_t message_id,
-                                               const size_t max_payload_size,
-                                               const UCharDataVector& data,
-                                               ProtocolFramePtrList& out_frames) {
-  ASSERT_GT(max_payload_size, FIRST_FRAME_DATA_SIZE);
-  ASSERT_EQ(FIRST_FRAME_DATA_SIZE, 0x08);
-
-  // TODO(EZamakhov): move to the separate class
-  const size_t data_size =  data.size();
-  // remainder of last frame
-  const size_t lastframe_remainder = data_size % max_payload_size;
-  // size of last frame (full fill or not)
-  const size_t lastframe_size =
-    lastframe_remainder > 0 ? lastframe_remainder : max_payload_size;
-
-  const size_t frames_count = data_size / max_payload_size +
-                              // add last frame if not empty
-                              (lastframe_remainder > 0 ? 1 : 0);
-
-  uint8_t out_data[FIRST_FRAME_DATA_SIZE];
-  out_data[0] = data_size >> 24;
-  out_data[1] = data_size >> 16;
-  out_data[2] = data_size >> 8;
-  out_data[3] = data_size;
-
-  out_data[4] = frames_count >> 24;
-  out_data[5] = frames_count >> 16;
-  out_data[6] = frames_count >> 8;
-  out_data[7] = frames_count;
-
-  ProtocolFramePtr first_frame(
-    new ProtocolPacket(
-      connection_id, protocol_version, PROTECTION_OFF, FRAME_TYPE_FIRST,
-      service_type, FRAME_DATA_FIRST, session_id, FIRST_FRAME_DATA_SIZE,
-      message_id, out_data));
-  // Note: PHIMpl already prepare First frames the total_data_bytes on desirialization
-  first_frame->set_total_data_bytes(data_size);
-
-  out_frames.clear();
-  out_frames.push_back(first_frame);
-
-  for (size_t i = 0; i < frames_count; ++i) {
-    const bool is_last_frame = (i == (frames_count - 1));
-    const size_t frame_size = is_last_frame ? lastframe_size : max_payload_size;
-    const uint8_t data_type =
-      is_last_frame
-      ? FRAME_DATA_LAST_CONSECUTIVE
-      : (i % FRAME_DATA_MAX_CONSECUTIVE + 1);
-
-    const ProtocolFramePtr consecutive_frame(
-      new ProtocolPacket(
-        connection_id, protocol_version, PROTECTION_OFF, FRAME_TYPE_CONSECUTIVE,
-        service_type, data_type, session_id, frame_size, message_id,
-        &data[max_payload_size * i]));
-    out_frames.push_back(consecutive_frame);
-  }
-}
-
-void MultiFrameBuilderTest::AddConnection(const ConnectionID connection_id) {
-  ASSERT_TRUE(multiframe_builder_.AddConnection(connection_id));
-}
-
-void MultiFrameBuilderTest::AddConnections() {
-  for (MultiFrameTestMap::iterator connection_it = test_data_map_.begin();
-       connection_it != test_data_map_.end(); ++connection_it) {
-    const ConnectionID connection_id = connection_it->first;
-    ASSERT_TRUE(multiframe_builder_.AddConnection(connection_id));
-  }
-}
-
-void MultiFrameBuilderTest::RemoveConnection(const ConnectionID connection_id) {
-  ASSERT_TRUE(multiframe_builder_.RemoveConnection(connection_id));
-}
-
-void MultiFrameBuilderTest::RemoveConnections() {
-  for (MultiFrameTestMap::iterator connection_it = test_data_map_.begin();
-      connection_it != test_data_map_.end(); ++connection_it) {
-    const ConnectionID connection_id = connection_it->first;
-    ASSERT_TRUE(multiframe_builder_.RemoveConnection(connection_id));
-  }
+TEST_F(MultiFrameBuilderTest, RemoveConnection_Succesful) {
+  // Arrange
+  const ConnectionID& connection_id = test_data_map_.begin()->first;
+  AddConnection(connection_id);
+  // Act
+  const bool connection_result =
+      multiframe_builder_.RemoveConnection(connection_id);
+  //Assert
+  ASSERT_TRUE(connection_result);
 }
 
 }  // namespace protocol_handler_test
