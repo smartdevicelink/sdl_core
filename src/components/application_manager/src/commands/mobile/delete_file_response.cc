@@ -59,8 +59,9 @@ void DeleteFileResponse::Run() {
   }
 
   (*message_)[strings::msg_params][strings::space_available] =
-      static_cast<int32_t>(
-      ApplicationManagerImpl::instance()->GetAvailableSpaceForApp(app->name()));
+      static_cast<uint32_t>(
+          ApplicationManagerImpl::instance()->
+              GetAvailableSpaceForApp(app->folder_name()));
   SendResponse((*message_)[strings::msg_params][strings::success].asBool());
 }
 

@@ -57,11 +57,31 @@ class DialNumberRequest : public CommandRequestImpl {
   virtual ~DialNumberRequest();
 
   /**
+    * @brief Initialize request params
+   **/
+   virtual bool Init();
+
+  /**
    * @brief Execute command
    **/
   virtual void Run();
 
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  void on_event(const event_engine::Event& event);
+
  private:
+
+  /**
+   * @brief Removes from number param all characters
+   * except the + character and digits.
+   *
+   */
+  void StripNumberParam(std::string &number);
+
   DISALLOW_COPY_AND_ASSIGN(DialNumberRequest);
 };
 

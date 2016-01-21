@@ -30,14 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "protocol_handler_observer.h"
 #include "utils/date_time.h"
-#include "protocol_handler_metric.h"
-#include "time_manager.h"
+#include "time_tester/protocol_handler_observer.h"
+#include "time_tester/protocol_handler_metric.h"
+#include "time_tester/time_manager.h"
 
 namespace time_tester {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TimeManager")
 
 ProtocolHandlerObserver::ProtocolHandlerObserver(TimeManager *time_manager):
   time_manager_(time_manager) {
@@ -49,7 +49,8 @@ void ProtocolHandlerObserver::StartMessageProcess(uint32_t message_id,
     return;
   }
   if (time_starts.find(message_id) != time_starts.end()) {
-    LOG4CXX_INFO(logger_, "Message ID already wait for stop processing" << message_id);
+    LOG4CXX_DEBUG(logger_, "Already waiting for stop processing for Message ID: "
+                  << message_id);
     return;
   }
   time_starts[message_id] = start_time;
@@ -62,11 +63,11 @@ void ProtocolHandlerObserver::EndMessageProcess(utils::SharedPtr<MessageMetric> 
     LOG4CXX_WARN(logger_, "Cant find start time for message" << message_id);
     return;
   }
-  m->begin= time_starts[message_id];
+  m->begin = time_starts[message_id];
   m->end = date_time::DateTime::getCurrentTime();
   ProtocolHandlerMecticWrapper* metric = new ProtocolHandlerMecticWrapper();
   metric->message_metric = m;
   metric->grabResources();
   time_manager_->SendMetric(metric);
 }
-}  //namespace time_tester
+}  // namespace time_tester

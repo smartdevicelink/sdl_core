@@ -55,14 +55,16 @@ namespace impl {
 * when we have them.
 */
 struct MessageFromHmi: public MessageSharedPointer {
-  MessageFromHmi(const MessageSharedPointer& message)
+  MessageFromHmi() {}
+  explicit MessageFromHmi(const MessageSharedPointer& message)
       : MessageSharedPointer(message) {}
   // PrioritizedQueue requres this method to decide which priority to assign
   size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
 };
 
 struct MessageToHmi: public MessageSharedPointer {
-  MessageToHmi(const MessageSharedPointer& message)
+  MessageToHmi() {}
+  explicit MessageToHmi(const MessageSharedPointer& message)
       : MessageSharedPointer(message) {}
   // PrioritizedQueue requres this method to decide which priority to assign
   size_t PriorityOrder() const { return (*this)->Priority().OrderingValue(); }
@@ -90,6 +92,16 @@ class HMIMessageHandlerImpl
   void OnErrorSending(MessageSharedPointer message);
   void AddHMIMessageAdapter(HMIMessageAdapter* adapter);
   void RemoveHMIMessageAdapter(HMIMessageAdapter* adapter);
+
+#ifdef BUILD_TESTS
+  std::set<HMIMessageAdapter*> message_adapters() const {
+      return message_adapters_;
+  }
+
+  HMIMessageObserver* observer() const {
+      return observer_;
+  }
+#endif // BUILD_TESTS
 
  private:
   HMIMessageHandlerImpl();

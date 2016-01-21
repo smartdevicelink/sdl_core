@@ -308,7 +308,7 @@ class Profile : public utils::Singleton<Profile> {
     /*
      * @brief Heartbeat timeout before closing connection
      */
-    int32_t heart_beat_timeout() const;
+    uint32_t heart_beat_timeout() const;
 
     /*
      * @brief Path to preloaded policy file
@@ -358,6 +358,48 @@ class Profile : public utils::Singleton<Profile> {
      */
     uint16_t tts_global_properties_timeout() const;
 
+#ifdef ENABLE_SECURITY
+  /**
+   * @brief Returns name of Security Manager protocol
+   */
+  const std::string& security_manager_protocol_name() const;
+
+  /**
+   * @brief Returns SSL mode
+   */
+  const std::string& ssl_mode() const;
+
+  /**
+   * @brief Returns key path to pem file
+   */
+  const std::string& key_path() const;
+
+  /**
+   * @brief Returns certificate path to pem file
+   */
+  const std::string& cert_path() const;
+
+  /**
+   * @brief Returns ca certificate path to pem file
+   */
+  const std::string& ca_cert_path() const;
+
+  /**
+   * @brief Returns ciphers
+   */
+  const std::string& ciphers_list() const;
+
+  /**
+   * @brief Returns true if Mobile app certificate is verified
+   */
+  bool verify_peer() const;
+
+  /**
+   * @brief Return hours amount when PTU should be triggered
+   */
+  uint32_t update_before_hours() const;
+
+#endif //ENABLE_SECURITY
     /**
      * @brief Reads a string value from the profile
      *
@@ -452,8 +494,6 @@ class Profile : public utils::Singleton<Profile> {
      */
     const std::string& recording_file_name() const;
 
-    const std::string& mme_db_name() const;
-
     const std::string& event_mq_name() const;
 
     const std::string& ack_mq_name() const;
@@ -505,6 +545,8 @@ class Profile : public utils::Singleton<Profile> {
 
     size_t malformed_frequency_time() const;
 
+    uint32_t multiframe_waiting_timeout() const;
+
     uint16_t attempts_to_open_policy_db() const;
 
     uint16_t open_attempt_timeout_ms() const;
@@ -515,11 +557,28 @@ class Profile : public utils::Singleton<Profile> {
 
     uint32_t hash_string_size() const;
 
+    bool logs_enabled() const;
+
+    /**
+     * @brief Returns true if resumption ctrl uses db, returns false if
+     * resumption ctrl uses JSON.
+     */
+    bool use_db_for_resumption() const;
+
+    /**
+     * @brief Returns amount of attempts for opening resumption db
+     */
+    uint16_t attempts_to_open_resumption_db() const;
+
+    /**
+     * @brief Returns timeout between attempts
+     */
+    uint16_t open_attempt_timeout_ms_resumption_db() const;
+
     /*
      * @brief Updates all related values from ini file
      */
     void UpdateValues();
-
 
   private:
     /**
@@ -691,6 +750,17 @@ private:
     uint32_t                        application_list_update_timeout_;
     uint32_t                        max_thread_pool_size_;
     uint32_t                        default_hub_protocol_index_;
+#ifdef ENABLE_SECURITY
+  std::string                       cert_path_;
+  std::string                       ca_cert_path_;
+  std::string                       ssl_mode_;
+  std::string                       key_path_;
+  std::string                       ciphers_list_;
+  bool                              verify_peer_;
+  uint32_t                          update_before_hours_;
+  std::string                       security_manager_protocol_name_;
+#endif
+
     /*
      * first value is count of request
      * second is time scale
@@ -722,6 +792,10 @@ private:
     uint32_t                        resumption_delay_before_ign_;
     uint32_t                        resumption_delay_after_ign_;
     uint32_t                        hash_string_size_;
+    bool                            logs_enabled_;
+    bool                            use_db_for_resumption_;
+    uint16_t                        attempts_to_open_resumption_db_;
+    uint16_t                        open_attempt_timeout_ms_resumption_db_;
 
     FRIEND_BASE_SINGLETON_CLASS(Profile);
     DISALLOW_COPY_AND_ASSIGN(Profile);

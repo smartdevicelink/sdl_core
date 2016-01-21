@@ -33,8 +33,11 @@
 #include "utils/push_log.h"
 #include "utils/log_message_loop_thread.h"
 #include "utils/logger_status.h"
+#include "config_profile/profile.h"
 
 namespace logger {
+
+static bool logs_enabled_ = false;
 
 bool push_log(log4cxx::LoggerPtr logger,
               log4cxx::LevelPtr level,
@@ -63,6 +66,14 @@ bool push_log(log4cxx::LoggerPtr logger,
 // while deleting logger thread
 
   return false;
+}
+
+bool logs_enabled() {
+  return logs_enabled_;
+}
+
+void set_logs_enabled() {
+  logs_enabled_ = profile::Profile::instance()->logs_enabled();
 }
 
 }  // namespace logger

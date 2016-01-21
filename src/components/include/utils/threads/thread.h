@@ -124,7 +124,6 @@ class Thread {
   }
 
   void set_delegate(ThreadDelegate *delegate) {
-    DCHECK(!isThreadRunning_);
     delegate_ = delegate;
   }
 
@@ -132,6 +131,10 @@ class Thread {
   friend void DeleteThread(Thread* thread);
 
  public:
+
+  // Yield current thread
+  static void yield();
+
   // Get unique ID of currently executing thread
   static PlatformThreadHandle CurrentId();
 

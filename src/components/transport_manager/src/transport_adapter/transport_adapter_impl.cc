@@ -32,6 +32,7 @@
 
 #include "config_profile/profile.h"
 #include "utils/logger.h"
+#include "utils/helpers.h"
 
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
@@ -45,9 +46,9 @@ namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 namespace {
 DeviceTypes devicesType = {
-  std::make_pair(AOA, std::string("USB")),
-  std::make_pair(PASA_AOA, std::string("USB")),
-  std::make_pair(MME, std::string("USB")),
+  std::make_pair(AOA, std::string("USB_AOA")),
+  std::make_pair(PASA_AOA, std::string("USB_AOA")),
+  std::make_pair(MME, std::string("USB_IOS")),
   std::make_pair(BLUETOOTH, std::string("BLUETOOTH")),
   std::make_pair(PASA_BLUETOOTH, std::string("BLUETOOTH")),
   std::make_pair(TCP, std::string("WIFI"))
@@ -114,8 +115,8 @@ void TransportAdapterImpl::Terminate() {
 
   LOG4CXX_DEBUG(logger_, "Connections deleted");
 
-  devices_mutex_.Acquire();
   DeviceMap devices;
+  devices_mutex_.Acquire();
   std::swap(devices, devices_);
   devices_mutex_.Release();
   devices.clear();
@@ -315,6 +316,7 @@ TransportAdapter::Error TransportAdapterImpl::StopClientListening() {
     return BAD_STATE;
   }
   TransportAdapter::Error err = client_connection_listener_->StopListening();
+  sync_primitives::AutoLock locker(devices_mutex_);
   for(DeviceMap::iterator it = devices_.begin();
       it != devices_.end();
       ++it) {
@@ -479,7 +481,7 @@ bool TransportAdapterImpl::IsServerOriginatedConnectSupported() const {
 }
 
 bool TransportAdapterImpl::IsClientOriginatedConnectSupported() const {
-  LOG4CXX_TRACE(logger_, "IsClientOriginatedConnectSupported");
+  LOG4CXX_AUTO_TRACE(logger_);
   return client_connection_listener_ != 0;
 }
 
@@ -592,6 +594,7 @@ void TransportAdapterImpl::DataReceiveDone(const DeviceUID& device_id,
     metric_observer_->StartRawMsg(message.get());
   }
 #endif  // TIME_TESTER
+
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end(); ++it) {
     (*it)->OnDataReceiveDone(this, device_id, app_handle, message);
@@ -636,8 +639,8 @@ void TransportAdapterImpl::DataSendFailed(const DeviceUID& device_id,
 DeviceSptr TransportAdapterImpl::FindDevice(const DeviceUID& device_id) const {
   LOG4CXX_TRACE(logger_, "enter. device_id: " << &device_id);
   DeviceSptr ret;
-  LOG4CXX_DEBUG(logger_, "devices_.size() = " << devices_.size());
   sync_primitives::AutoLock locker(devices_mutex_);
+  LOG4CXX_DEBUG(logger_, "devices_.size() = " << devices_.size());
   DeviceMap::const_iterator it = devices_.find(device_id);
   if (it != devices_.end()) {
     ret = it->second;

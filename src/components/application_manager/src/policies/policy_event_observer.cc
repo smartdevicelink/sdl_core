@@ -95,14 +95,10 @@ void PolicyEventObserver::ProcessOdometerEvent(const smart_objects::SmartObject&
         .asInt())) {
 
     if (message[strings::msg_params].keyExists(strings::odometer)) {
-      TimevalStruct current_time = date_time::DateTime::getCurrentTime();
-      const int kSecondsInDay = 60 * 60 * 24;
-      int days_after_epoch = current_time.tv_sec / kSecondsInDay;
-
       if (policy_handler_) {
         policy_handler_->PTUpdatedAt(
-              message[strings::msg_params][strings::odometer].asInt(),
-            days_after_epoch);
+              Counters::KILOMETERS,
+              message[strings::msg_params][strings::odometer].asInt());
       }
     }
   }

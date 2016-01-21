@@ -40,10 +40,10 @@
 #include "utils/threads/thread.h"
 #include "utils/singleton.h"
 #include "utils/threads/thread_delegate.h"
-#include "metric_wrapper.h"
-#include "application_manager_observer.h"
+#include "time_tester/metric_wrapper.h"
+#include "time_tester/application_manager_observer.h"
 #include "application_manager/application_manager_impl.h"
-#include "transport_manager_observer.h"
+#include "time_tester/transport_manager_observer.h"
 #include "transport_manager/transport_manager_impl.h"
 #include "protocol_handler_observer.h"
 #include "protocol_handler/protocol_handler_impl.h"
@@ -52,37 +52,42 @@ namespace time_tester {
 
 using ::utils::MessageQueue;
 
+class Streamer : public threads::ThreadDelegate {
+ public:
+  explicit Streamer(TimeManager* const server);
+  ~Streamer();
+  void threadMain() OVERRIDE;
+  void exitThreadMain() OVERRIDE;
+
+  virtual void PushMessage(utils::SharedPtr<MetricWrapper> metric);
+  volatile bool is_client_connected_;
+ private:
+  void Start();
+  void Stop();
+  bool IsReady() const;
+  bool Send(const std::string &msg);
+  void ShutDownAndCloseSocket(int32_t socket_fd);
+  TimeManager* const kserver_;
+  int32_t server_socket_fd_;
+  int32_t client_socket_fd_;
+  volatile bool stop_flag_;
+  MessageQueue<utils::SharedPtr<MetricWrapper> > messages_;
+  DISALLOW_COPY_AND_ASSIGN(Streamer);
+};
+
 class TimeManager {
  public:
   TimeManager();
-  ~TimeManager();
-  void Init(protocol_handler::ProtocolHandlerImpl* ph);
-  void Stop();
-  void SendMetric(utils::SharedPtr<MetricWrapper> metric);
+  virtual ~TimeManager();
+  virtual void Init(protocol_handler::ProtocolHandlerImpl* ph);
+  virtual void Stop();
+  virtual void Start();
+  virtual void SendMetric(utils::SharedPtr<MetricWrapper> metric);
+  void set_streamer(Streamer* streamer);
+  const std::string& ip() const;
+  int16_t port() const;
+
  private:
-
-  class Streamer : public threads::ThreadDelegate {
-   public:
-    explicit Streamer(TimeManager* const server);
-    ~Streamer();
-    void threadMain() OVERRIDE;
-    void exitThreadMain() OVERRIDE;
-    bool IsReady() const;
-    void Start();
-    void Stop();
-    bool Send(const std::string &msg);
-    void PushMessage(utils::SharedPtr<MetricWrapper> metric);
-    volatile bool is_client_connected_;
-    private:
-    void ShutDownAndCloseSocket(int32_t socket_fd);
-    TimeManager* const server_;
-    int32_t server_socket_fd_;
-    int32_t client_socket_fd_;
-    volatile bool stop_flag_;
-    MessageQueue<utils::SharedPtr<MetricWrapper> > messages_;
-    DISALLOW_COPY_AND_ASSIGN(Streamer);
-  };
-
   int16_t port_;
   std::string ip_;
   bool is_ready_;

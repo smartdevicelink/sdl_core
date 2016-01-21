@@ -38,7 +38,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "FromMicRecorderAdapter")
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
 FromMicRecorderAdapter::FromMicRecorderAdapter()
   : recorder_thread_(NULL)
@@ -98,8 +98,8 @@ void FromMicRecorderAdapter::StopActivity(int32_t application_key) {
   current_application_ = 0;
 }
 
-bool FromMicRecorderAdapter::is_app_performing_activity(int32_t
-                                                        application_key) {
+bool FromMicRecorderAdapter::is_app_performing_activity(
+    int32_t application_key) const {
   return (application_key == current_application_);
 }
 

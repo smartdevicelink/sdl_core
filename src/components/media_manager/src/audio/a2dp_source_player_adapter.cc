@@ -42,7 +42,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "A2DPSourcePlayerAdapter");
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
 const static size_t BUFSIZE = 32;
 
@@ -128,8 +128,8 @@ void A2DPSourcePlayerAdapter::StopActivity(int32_t application_key) {
   }
 }
 
-bool A2DPSourcePlayerAdapter::is_app_performing_activity(int32_t
-                                                         application_key) {
+bool A2DPSourcePlayerAdapter::is_app_performing_activity(
+    int32_t application_key) const {
   return (application_key == current_application_);
 }
 

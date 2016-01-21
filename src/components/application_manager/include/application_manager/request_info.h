@@ -62,20 +62,20 @@ namespace request_controller {
 
     RequestInfo(RequestPtr request,
                 const RequestType requst_type,
-                const uint64_t timeout_sec)
+                const uint64_t timeout_msec)
       : request_(request),
-        timeout_sec_(timeout_sec) {
+        timeout_msec_(timeout_msec) {
         start_time_ = date_time::DateTime::getCurrentTime();
         updateEndTime();
         requst_type_ = requst_type;
       }
 
     RequestInfo(RequestPtr request, const RequestType requst_type,
-                const TimevalStruct& start_time, const  uint64_t timeout_sec);
+                const TimevalStruct& start_time, const  uint64_t timeout_msec);
 
     void updateEndTime();
 
-    void updateTimeOut(const uint64_t& timeout_sec);
+    void updateTimeOut(const uint64_t& timeout_msec);
 
     bool isExpired();
 
@@ -87,12 +87,12 @@ namespace request_controller {
       start_time_ = start_time;
     }
 
-    uint64_t timeout_sec() {
-      return timeout_sec_;
+    uint64_t timeout_msec() {
+      return timeout_msec_;
     }
 
-    void set_timeout_sec(uint64_t timeout) {
-      timeout_sec_ = timeout;
+    void set_timeout_msec(uint64_t timeout) {
+      timeout_msec_ = timeout;
     }
 
     TimevalStruct end_time() {
@@ -128,7 +128,7 @@ namespace request_controller {
   protected:
     RequestPtr request_;
     TimevalStruct                 start_time_;
-    uint64_t                      timeout_sec_;
+    uint64_t                      timeout_msec_;
     TimevalStruct                 end_time_;
     uint32_t                      app_id_;
     mobile_apis::HMILevel::eType  hmi_level_;
@@ -136,20 +136,20 @@ namespace request_controller {
     uint32_t                      correlation_id_;
   };
 
-  typedef utils::SharedPtr<RequestInfo> RequestInfoPtr;
+ typedef utils::SharedPtr<RequestInfo> RequestInfoPtr;
 
   struct MobileRequestInfo: public RequestInfo {
       MobileRequestInfo(RequestPtr request,
-                      const uint64_t timeout_sec);
+                      const uint64_t timeout_msec);
     MobileRequestInfo(RequestPtr request,
                       const TimevalStruct& start_time,
-                      const uint64_t timeout_sec);
+                      const uint64_t timeout_msec);
   };
 
   struct HMIRequestInfo: public RequestInfo {
-    HMIRequestInfo(RequestPtr request, const uint64_t timeout_sec);
+    HMIRequestInfo(RequestPtr request, const uint64_t timeout_msec);
     HMIRequestInfo(RequestPtr request, const TimevalStruct& start_time,
-                     const  uint64_t timeout_sec);
+                     const  uint64_t timeout_msec);
   };
 
   // Request info, for searching in request info set by log_n time
@@ -316,10 +316,7 @@ namespace request_controller {
         return false;
       }
 
-      if (date_time::DateTime::getmSecs(setEntry->start_time())
-          < date_time::DateTime::getmSecs(start_) ||
-          date_time::DateTime::getmSecs(setEntry->start_time())
-          > date_time::DateTime::getmSecs(end_)) {
+      if ((setEntry->start_time() < start_) ||  (end_ < setEntry->start_time() )) {
         return false;
       }
 

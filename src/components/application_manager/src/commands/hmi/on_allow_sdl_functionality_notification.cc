@@ -39,17 +39,15 @@ namespace commands {
 
 OnAllowSDLFunctionalityNotification::OnAllowSDLFunctionalityNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnAllowSDLFunctionalityNotification::~OnAllowSDLFunctionalityNotification() {
-}
+OnAllowSDLFunctionalityNotification::~OnAllowSDLFunctionalityNotification() {}
 
 void OnAllowSDLFunctionalityNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  uint32_t device_id = 0;
+  std::string device_id;
   if ((*message_)[strings::msg_params].keyExists("device")) {
-    device_id = (*message_)[strings::msg_params]["device"]["id"].asUInt();
+    device_id = (*message_)[strings::msg_params]["device"]["id"].asString();
   }
   policy::PolicyHandler::instance()->OnAllowSDLFunctionalityNotification(
       (*message_)[strings::msg_params][hmi_response::allowed].asBool(),
@@ -59,4 +57,3 @@ void OnAllowSDLFunctionalityNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

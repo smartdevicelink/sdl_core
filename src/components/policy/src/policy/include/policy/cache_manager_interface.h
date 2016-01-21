@@ -38,6 +38,7 @@
 
 #include "utils/shared_ptr.h"
 #include "usage_statistics/counter.h"
+#include "policy/policy_types.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -82,11 +83,10 @@ class CacheManagerInterface {
   virtual int KilometersBeforeExchange(int current) = 0;
 
   /**
-   * @brief Sets kilometers and days after epoch, that passed for recieved
-   * successful PT UPdate
+   * @brief Sets counter value that passed for recieved successful PT UPdate
    */
-  virtual bool SetCountersPassedForSuccessfulUpdate(int kilometers,
-                                                    int days_after_epoch) = 0;
+  virtual bool SetCountersPassedForSuccessfulUpdate(Counters counter,
+                                                    int value) = 0;
 
   /**
    * Gets value in days before next update policy table
@@ -121,7 +121,7 @@ class CacheManagerInterface {
   /**
    * @brief Get information about vehicle
    */
-  virtual VehicleData GetVehicleData() = 0;
+  virtual const VehicleInfo GetVehicleInfo() const = 0;
 
   /**
    * @brief Allows to update 'vin' field in module_meta table.
@@ -342,6 +342,15 @@ class CacheManagerInterface {
       rpc::policy_table_interface_base::Strings &preconsented_groups) = 0;
 
   /**
+   * @brief Add's information about mobile device in Policy Table.
+   * @param device_id Generated or obtained id of device
+   * @param connection_type device connection type
+   * @return bool Success of operation
+   */
+  virtual bool AddDevice(const std::string& device_id,
+                         const std::string& connection_type) = 0;
+
+  /**
    * @brief Record information about mobile device in Policy Table.
    * @param device_id Generated or obtained id of device
    * @return bool Success of operation
@@ -527,9 +536,10 @@ class CacheManagerInterface {
   /**
    * @brief LoadFromFile allows to load policy cache from preloaded table.
    * @param file_name preloaded
-   * @return
+   * @param table object which will be filled during file parsing.
+   * @return true in case file was successfuly loaded, false otherwise.
    */
-  virtual bool LoadFromFile(const std::string& file_name) = 0;
+  virtual bool LoadFromFile(const std::string& file_name, policy_table::Table& table) = 0;
 
   /**
    * @brief Backup allows to save cache onto hard drive.
@@ -539,10 +549,10 @@ class CacheManagerInterface {
   /**
    * Returns heart beat timeout
    * @param app_id application id
-   * @return if timeout was set then value in seconds greater zero
+   * @return if timeout was set then value in milliseconds greater zero
    * otherwise heart beat for specific application isn't set
    */
-  virtual uint16_t HeartBeatTimeout(const std::string& app_id) const = 0;
+  virtual uint32_t HeartBeatTimeout(const std::string& app_id) const = 0;
 
   /**
    * @brief Resets all calculated permissions in cache
@@ -582,6 +592,24 @@ class CacheManagerInterface {
   virtual void GetAppRequestTypes(
       const std::string& policy_app_id,
       std::vector<std::string>& request_types) const = 0;
+
+    /**
+     * @brief GetCertificate allows to obtain certificate in order to
+     * make secure connection
+     *
+     * @return The certificate in PKCS#7.
+     */
+    virtual std::string GetCertificate() const = 0;
+
+#ifdef BUILD_TESTS
+  /**
+   * @brief GetPT allows to obtain SharedPtr to PT.
+   * Used ONLY in Unit tests
+   * @return SharedPTR to PT
+   *
+   */
+  virtual utils::SharedPtr<policy_table::Table> GetPT() const  = 0;
+#endif
 };
 
 typedef utils::SharedPtr<CacheManagerInterface> CacheManagerInterfaceSPtr;

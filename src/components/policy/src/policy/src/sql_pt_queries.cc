@@ -1,5 +1,5 @@
-﻿/*
- Copyright (c) 2013, " Ford Motor Company
+/*
+ Copyright (c) 2015, " Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, " with or without
@@ -72,13 +72,14 @@ const std::string kCreateSchema =
   "  `exchange_after_x_kilometers` INTEGER NOT NULL, "
   "  `exchange_after_x_days` INTEGER NOT NULL, "
   "  `timeout_after_x_seconds` INTEGER NOT NULL, "
+  "  `certificate` TEXT, "
   "  `vehicle_make` VARCHAR(45), "
   "  `vehicle_model` VARCHAR(45), "
   "  `vehicle_year` VARCHAR(4) "
   "); "
   "CREATE TABLE IF NOT EXISTS `functional_group`( "
   "  `id` INTEGER PRIMARY KEY NOT NULL, "
-  "  `user_consent_prompt` TEXT UNIQUE ON CONFLICT REPLACE, "
+  "  `user_consent_prompt` TEXT, "
   "  `name` VARCHAR(100) NOT NULL "
   "); "
   "CREATE TABLE IF NOT EXISTS `priority`( "
@@ -218,6 +219,7 @@ const std::string kCreateSchema =
   "  `count_of_rpcs_sent_in_hmi_none` INTEGER DEFAULT 0, "
   "  `count_of_removals_for_bad_behavior` INTEGER DEFAULT 0, "
   "  `count_of_run_attempts_while_revoked` INTEGER DEFAULT 0, "
+  "  `count_of_tls_errors` INTEGER DEFAULT 0, "
   "  `app_registration_language_gui` VARCHAR(25), "
   "  `app_registration_language_vui` VARCHAR(25), "
   "  CONSTRAINT `fk_app_levels_application1` "
@@ -317,6 +319,9 @@ const std::string kCreateSchema =
   "  ON `message`(`language_code`);"
   "CREATE INDEX IF NOT EXISTS `message.fk_message_consumer_friendly_messages1_idx` "
   "  ON `message`(`message_type_name`);"
+  "CREATE TABLE IF NOT EXISTS `_internal_data`( "
+  "   `db_version_hash` INTEGER "
+  "  ); "
   "COMMIT;";
 
 const std::string kInsertInitData =
@@ -342,6 +347,7 @@ const std::string kInsertInitData =
   "INSERT OR IGNORE INTO `hmi_level`(`value`) VALUES ('BACKGROUND'); "
   "INSERT OR IGNORE INTO `hmi_level`(`value`) VALUES ('NONE'); "
   "INSERT OR IGNORE INTO `version` (`number`) VALUES('0'); "
+  "INSERT OR IGNORE INTO `_internal_data` (`db_version_hash`) VALUES(0); "
   "";
 
 const std::string kDropSchema =
@@ -391,6 +397,7 @@ const std::string kDropSchema =
   "DROP TABLE IF EXISTS `module_meta`; "
   "DROP TABLE IF EXISTS `usage_and_error_count`; "
   "DROP TABLE IF EXISTS `device`; "
+  "DROP TABLE IF EXISTS `_internal_data`; "
   "COMMIT; "
   "VACUUM;";
 
@@ -496,7 +503,7 @@ const std::string kUpdateModuleConfig =
   "UPDATE `module_config` SET `preloaded_pt` = ?, "
   "  `exchange_after_x_ignition_cycles` = ?,"
   "  `exchange_after_x_kilometers` = ?, `exchange_after_x_days` = ?, "
-  "  `timeout_after_x_seconds` = ?, `vehicle_make` = ?, "
+  "  `timeout_after_x_seconds` = ?, `certificate` = ?, `vehicle_make` = ?, "
   "  `vehicle_model` = ?, `vehicle_year` = ?";
 
 const std::string kInsertEndpoint =
@@ -522,7 +529,7 @@ const std::string kInsertAppLevel =
     "`count_of_rejections_duplicate_name`,`count_of_rejected_rpcs_calls`,"
     "`count_of_rpcs_sent_in_hmi_none`,`count_of_removals_for_bad_behavior`,"
     "`count_of_run_attempts_while_revoked`,`app_registration_language_gui`,"
-    "`app_registration_language_vui`) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    "`app_registration_language_vui`, `count_of_tls_errors`) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 const std::string kDeleteSecondsBetweenRetries =
   "DELETE FROM `seconds_between_retry`";
@@ -542,7 +549,7 @@ const std::string kDeleteAppGroup = "DELETE FROM `app_group`";
 const std::string kSelectModuleConfig =
   "SELECT `preloaded_pt`, `exchange_after_x_ignition_cycles`, "
   " `exchange_after_x_kilometers`, `exchange_after_x_days`, "
-  " `timeout_after_x_seconds`, `vehicle_make`,"
+  " `timeout_after_x_seconds`, `certificate`, `vehicle_make`,"
   " `vehicle_model`, `vehicle_year` "
   " FROM `module_config`";
 
@@ -662,6 +669,12 @@ const std::string kSelectApplicationFull =
   "SELECT `keep_context`, `steal_focus`, `default_hmi`, `priority_value`, "
   "  `is_revoked`, `is_default`, `is_predata`, `memory_kb`,"
   "  `heart_beat_timeout_ms`, `certificate` FROM `application` WHERE `id` = ?";
+
+const std::string kSelectDBVersion =
+    "SELECT `db_version_hash` from `_internal_data`";
+
+const std::string kUpdateDBVersion =
+    "UPDATE `_internal_data` SET `db_version_hash` = ? ";
 
 }  // namespace sql_pt
 }  // namespace policy

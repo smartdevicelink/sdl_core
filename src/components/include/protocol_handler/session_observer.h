@@ -212,6 +212,9 @@ class SessionObserver {
   virtual void SetProtectionFlag(
     const uint32_t &key,
     const protocol_handler::ServiceType &service_type) = 0;
+
+  virtual security_manager::SSLContext::HandshakeContext
+    GetHandshakeContext(uint32_t key) const = 0;
 #endif  // ENABLE_SECURITY
 
  protected:

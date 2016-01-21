@@ -34,14 +34,10 @@
 #include <limits.h>
 #include <stddef.h>
 #include <signal.h>
-
-#ifdef BUILD_TESTS
-// Temporary fix for UnitTest until APPLINK-9987 is resolved
-#include <unistd.h>
-#endif
+#include <pthread.h>
+#include <sched.h>
 
 #include "utils/threads/thread.h"
-#include "pthread.h"
 #include "utils/atomic.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/logger.h"
@@ -82,6 +78,14 @@ void* Thread::threadFunc(void* arg) {
   //     running = 1
   //     finalized = 1
   pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+  // Disable system signals receiving in thread
+  // by setting empty signal mask
+  // (system signals processes only in the main thread)
+  sigset_t set;
+  sigfillset(&set);
+  if (pthread_sigmask(SIG_SETMASK, &set, NULL) != 0) {
+    LOG4CXX_ERROR(logger_, "Set thread signal mask error");
+  }
   LOG4CXX_DEBUG(logger_,
                 "Thread #" << pthread_self() << " started successfully");
 
@@ -98,7 +102,8 @@ void* Thread::threadFunc(void* arg) {
       thread->run_cond_.Wait(thread->state_lock_);
       LOG4CXX_DEBUG(
           logger_,
-          "Thread #" << pthread_self() << " execute. " << "stopped_ = " << thread->stopped_ << "; finalized_ = " << thread->finalized_);
+          "Thread #" << pthread_self() << " execute. " << "stopped_ = "
+            << thread->stopped_ << "; finalized_ = " << thread->finalized_);
       if (!thread->stopped_ && !thread->finalized_) {
         thread->isThreadRunning_ = true;
         pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
@@ -131,8 +136,9 @@ void Thread::SetNameForId(const PlatformThreadHandle& thread_id,
   const int rc = pthread_setname_np(thread_id, name.c_str());
   if (rc != EOK) {
     LOG4CXX_WARN(
-        logger_,
-        "Couldn't set pthread name \"" << name << "\", error code " << rc << " (" << strerror(rc) << ")");
+          logger_,
+          "Couldn't set pthread name \"" << name << "\", error code "
+          << rc << " (" << strerror(rc) << ")");
   }
 }
 
@@ -183,16 +189,18 @@ bool Thread::start(const ThreadOptions& options) {
   int pthread_result = pthread_attr_init(&attributes);
   if (pthread_result != EOK) {
     LOG4CXX_WARN(
-        logger_,
-        "Couldn't init pthread attributes. Error code = " << pthread_result << " (\"" << strerror(pthread_result) << "\")");
+          logger_,
+          "Couldn't init pthread attributes. Error code = "<< pthread_result
+          << " (\"" << strerror(pthread_result) << "\")");
   }
 
   if (!thread_options_.is_joinable()) {
     pthread_result = pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED);
     if (pthread_result != EOK) {
       LOG4CXX_WARN(
-          logger_,
-          "Couldn't set detach state attribute. Error code = " << pthread_result << " (\"" << strerror(pthread_result) << "\")");
+            logger_,
+            "Couldn't set detach state attribute. Error code = " << pthread_result
+            << " (\"" << strerror(pthread_result) << "\")");
       thread_options_.is_joinable(false);
     }
   }
@@ -202,11 +210,11 @@ bool Thread::start(const ThreadOptions& options) {
     pthread_result = pthread_attr_setstacksize(&attributes, stack_size);
     if (pthread_result != EOK) {
       LOG4CXX_WARN(
-          logger_,
-          "Couldn't set stacksize = " << stack_size << ". Error code = " << pthread_result << " (\"" << strerror(pthread_result) << "\")");
+            logger_,
+            "Couldn't set stacksize = " << stack_size << ". Error code = "
+            << pthread_result << " (\"" << strerror(pthread_result) << "\")");
     }
-  }
-  else {
+  } else {
     ThreadOptions thread_options_temp(Thread::kMinStackSize, thread_options_.is_joinable());
     thread_options_ = thread_options_temp;
   }
@@ -224,16 +232,21 @@ bool Thread::start(const ThreadOptions& options) {
     } else {
       LOG4CXX_ERROR(
           logger_,
-          "Couldn't create thread " << name_ << ". Error code = " << pthread_result << " (\"" << strerror(pthread_result) << "\")");
+          "Couldn't create thread " << name_ << ". Error code = "
+            << pthread_result <<" (\"" << strerror(pthread_result) << "\")");
     }
   }
   stopped_ = false;
   run_cond_.NotifyOne();
-  LOG4CXX_DEBUG(
-      logger_,
-      "Thread " << name_ << " #" << handle_ << " started. pthread_result = " << pthread_result);
+  LOG4CXX_DEBUG(logger_,
+                "Thread " << name_ << " #" << handle_<< " started." <<
+                " pthread_result = " << pthread_result);
   pthread_attr_destroy(&attributes);
   return pthread_result == EOK;
+}
+
+void Thread::yield() {
+  sched_yield();
 }
 
 void Thread::stop() {
@@ -243,7 +256,7 @@ void Thread::stop() {
   stopped_ = true;
 
   LOG4CXX_DEBUG(logger_, "Stopping thread #" << handle_
-                << " \"" << name_ << " \"");
+                << " \"" << name_ << "\"");
 
   if (delegate_ && isThreadRunning_) {
     delegate_->exitThreadMain();
@@ -263,6 +276,8 @@ void Thread::join() {
   run_cond_.NotifyOne();
   if (isThreadRunning_) {
     if (!pthread_equal(pthread_self(), handle_)) {
+      LOG4CXX_DEBUG(logger_, "Waiting for #"<< handle_
+                    << " finished iteration in thread #" << pthread_self());
       state_cond_.Wait(auto_lock);
     }
   }

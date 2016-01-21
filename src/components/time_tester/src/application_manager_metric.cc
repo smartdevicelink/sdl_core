@@ -30,9 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager_metric.h"
-#include "json_keys.h"
+#include "time_tester/application_manager_metric.h"
+#include "time_tester/json_keys.h"
 #include "application_manager/smart_object_keys.h"
+#include "utils/convert_utils.h"
 
 namespace time_tester {
 
@@ -45,10 +46,10 @@ Json::Value ApplicationManagerMetricWrapper::GetJsonMetric() {
       Json::Int64(date_time::DateTime::getuSecs(message_metric->end));
   const NsSmartDeviceLink::NsSmartObjects::SmartObject& params =
       message_metric->message->getElement(application_manager::strings::params);
-  result[strings::correlation_id] =
-      params[application_manager::strings::correlation_id].asInt();
-  result[strings::connection_key] =
-      params[application_manager::strings::connection_key].asInt();
+  result[strings::correlation_id] = utils::ConvertInt64ToLongLongInt(
+      params[application_manager::strings::correlation_id].asInt());
+  result[strings::connection_key] = utils::ConvertInt64ToLongLongInt(
+      params[application_manager::strings::connection_key].asInt());
   return result;
 }
 }  // namespace time_tester

@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2015, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,33 @@
 # TODO{ALeshin}: APPLINK-10792. Do not write tests which use
 # application manager(AM) singleton while refactoring of AM is finished.
 
+if (BUILD_TESTS)
+
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/commands)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/commands/mobile)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/commands/hmi)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/event_engine)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/policies)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/policies/delegates)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/resumption)
+
+  file (GLOB_RECURSE AMINCLUDE_TO_BE_MOCKED
+    ${AM_SOURCE_DIR}/include/application_manager/*
+  )
+  list(REMOVE_ITEM AMINCLUDE_TO_BE_MOCKED "${AM_SOURCE_DIR}/include/application_manager/application_manager_impl.h")
+  file(COPY "${AM_SOURCE_DIR}/test/mock/include/application_manager/application_manager_impl.h"
+       DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/)
+
+  FOREACH(infileName ${AMINCLUDE_TO_BE_MOCKED})
+  file(RELATIVE_PATH rel "${AM_SOURCE_DIR}/" ${infileName})
+  execute_process(
+    COMMAND "${CMAKE_COMMAND}" "-E" "create_symlink" "${infileName}" "${CMAKE_CURRENT_BINARY_DIR}/mock/${rel}"
+  )
+  ENDFOREACH(infileName)
+
 # Replace include for mocking singltone
 get_property(the_include_dirs DIRECTORY "" PROPERTY INCLUDE_DIRECTORIES)
 set(class_to_mock ${CMAKE_SOURCE_DIR}/src/components/application_manager/include)
@@ -45,12 +72,23 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/gtest/include
   ${COMPONENTS_DIR}/application_manager/include/application_manager/
   ${COMPONENTS_DIR}/application_manager/include/application_manager/policies
+  ${COMPONENTS_DIR}/application_manager/include/application_manager/resumption
+  ${COMPONENTS_DIR}/application_manager/include/
+  ${COMPONENTS_DIR}/utils/include/utils/
+  ${COMPONENTS_DIR}/policy/test/include/
+  ${COMPONENTS_DIR}/security_manager/test/include/
+  ${COMPONENTS_DIR}/security_manager/include/
+  ${COMPONENTS_DIR}/include/utils/
+  ${COMPONENTS_DIR}/application_manager/test/resumption/include/
+  ${COMPONENTS_DIR}
 )
 
 set(testSources
-  #${AM_TEST_DIR}/command_impl_test.cc
-  ${COMPONENTS_DIR}/application_manager/test/mobile_message_handler_test.cc
-  #${AM_TEST_DIR}/request_info_test.cc
+    ${AM_TEST_DIR}/mobile_message_handler_test.cc
+    ${AM_TEST_DIR}/mobile_message_handler_v1_test.cc
+    ${AM_TEST_DIR}/request_info_test.cc
+    ${AM_TEST_DIR}/resumption_sql_queries_test.cc
+    ${AM_TEST_DIR}/event_engine_test.cc
 )
 
 set(mockedSources
@@ -79,18 +117,32 @@ set(AM_SOURCES
   ${AM_SOURCE_DIR}/src/hmi_capabilities.cc
   ${AM_SOURCE_DIR}/src/application_data_impl.cc
   ${AM_SOURCE_DIR}/src/request_controller.cc
-  ${AM_SOURCE_DIR}/src/resume_ctrl.cpp
+  ${AM_SOURCE_DIR}/src/resumption/resume_ctrl.cc
   ${AM_SOURCE_DIR}/src/mobile_message_handler.cc
 )
   include_directories(
     ${AM_SOURCE_DIR}/policy/src/policy/policy_table/table_struct
   )
 set(testLibraries
-  gmock
+  Utils
+  dbms
+  jsoncpp
+  Policy
+  connectionHandler
+  HMI_API
+  MOBILE_API
+  v4_protocol_v1_2_no_extra
+  SmartObjects
+  formatters
   gmock_main
   UsageStatistics
   dl
   ProtocolLibrary
+  ConfigProfile
+  MediaManager
+  Resumption
+  ProtocolHandler
+  SecurityManager
 )
 
 set(test_exec_libraries
@@ -140,5 +192,15 @@ target_link_libraries("application_manager_test"
   Resumption
 )
 
-#add_executable(application_manager_test ${testSources})
-#target_link_libraries(application_manager_test ApplicationManagerTest ${test_exec_libraries})
+  set(ResumptionData_SOURCES
+    #${AM_TEST_DIR}/resumption/resumption_data_test.cc
+  )
+
+  file(COPY hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+  file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/resumption)
+  file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resumption)
+  create_test("resumption/data_resumption_test" "${ResumptionData_SOURCES}" "${testLibraries}")
+
+endif()

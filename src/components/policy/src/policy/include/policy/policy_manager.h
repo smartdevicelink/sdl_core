@@ -40,6 +40,7 @@
 #include "usage_statistics/statistics_manager.h"
 
 namespace policy {
+
 class PolicyManager : public usage_statistics::StatisticsManager {
   public:
     virtual ~PolicyManager() {
@@ -204,10 +205,9 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     virtual bool ReactOnUserDevConsentForApp(const std::string app_id,
         bool is_device_allowed) = 0;
     /**
-     * Sets number of kilometers and days after epoch, that passed for
-     * receiving PT UPdate.
+     * Sets counter value that passed for receiving PT UPdate.
      */
-    virtual void PTUpdatedAt(int kilometers, int days_after_epoch) = 0;
+    virtual void PTUpdatedAt(Counters counter, int value) = 0;
 
     /**
      * @brief Retrieves data from app_policies about app on its registration:
@@ -218,6 +218,15 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     virtual bool GetInitialAppData(const std::string& application_id,
                                    StringArray* nicknames = NULL,
                                    StringArray* app_hmi_types = NULL) = 0;
+
+    /**
+     * @brief Add's device to policy table
+     * @param device_id        Device mac address
+     * @param connection_type  Device connection type
+     */
+    virtual void AddDevice(const std::string& device_id,
+                           const std::string& connection_type) = 0;
+
     /**
      * @brief Stores device parameters received during application registration
      * to policy table
@@ -383,10 +392,10 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     /**
      * Returns heart beat timeout
      * @param app_id application id
-     * @return if timeout was set then value in seconds greater zero
+     * @return if timeout was set then value in milliseconds greater zero
      * otherwise heart beat for specific application isn't set
      */
-    virtual uint16_t HeartBeatTimeout(const std::string& app_id) const = 0;
+    virtual uint32_t HeartBeatTimeout(const std::string& app_id) const = 0;
 
     /**
      * @brief SaveUpdateStatusRequired alows to save update status.
@@ -409,6 +418,28 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      */
     virtual const std::vector<std::string> GetAppRequestTypes(
       const std::string policy_app_id) const = 0;
+   
+    /**
+     * @brief Get information about vehicle
+     */
+    virtual const VehicleInfo GetVehicleInfo() const = 0;
+
+    /**
+     * @brief OnAppRegisteredOnMobile alows to handle event when application were
+     * succesfully registered on mobile device.
+     * It will send OnAppPermissionSend notification and will try to start PTU.
+     *
+     * @param application_id registered application.
+     */
+    virtual void OnAppRegisteredOnMobile(const std::string& application_id) = 0;
+
+    /**
+     * @brief RetrieveCertificate Allows to obtain certificate in order
+     * to start secure connection.
+     *
+     * @return The certificate in PKCS#7 format.
+     */
+    virtual std::string RetrieveCertificate() const = 0;
 
   protected:
     /**

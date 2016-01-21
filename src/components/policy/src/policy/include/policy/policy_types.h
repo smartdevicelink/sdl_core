@@ -1,4 +1,4 @@
-﻿/*
+/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -39,6 +39,7 @@
 #include <set>
 #include "utils/shared_ptr.h"
 #include "utils/helpers.h"
+
 namespace policy {
 
 // TODO(PV): specify errors
@@ -181,10 +182,10 @@ struct DeviceInfo {
     void AdoptDeviceType(const std::string& deviceType) {
       connection_type = "USB_serial_number";
       using namespace helpers;
-      if (Compare<std::string, EQ, ONE> (deviceType,
-                                         "BLUETOOTH",
-                                         "WIFI")) {
-          connection_type.assign("BTMAC");
+      static const std::string bluetooth("BLUETOOTH");
+      static const std::string wifi("WIFI");
+      if (Compare<std::string, EQ, ONE>(deviceType, bluetooth, wifi)) {
+        connection_type.assign("BTMAC");
       }
     }
 };
@@ -304,6 +305,23 @@ typedef std::map<uint32_t, std::pair<std::string, std::string> > FunctionalGroup
  * @brief Array of device ids, which are an identifiers in policy table
  */
 typedef std::vector<std::string> DeviceIds;
+
+/**
+ * @brief Counters that calculated on receiving of succesful update
+ */
+enum Counters {
+  KILOMETERS,
+  DAYS_AFTER_EPOCH
+};
+
+/**
+ * @struct Vehicle information
+ */
+struct VehicleInfo {
+  std::string vehicle_make;
+  std::string vehicle_model;
+  std::string vehicle_year;
+};
 
 }  //  namespace policy
 

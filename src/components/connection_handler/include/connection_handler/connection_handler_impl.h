@@ -38,6 +38,13 @@
 #include <string>
 #include <vector>
 
+#include "utils/logger.h"
+#include "utils/macro.h"
+#include "utils/lock.h"
+#include "utils/stl_utils.h"
+#include "utils/singleton.h"
+#include "utils/rwlock.h"
+
 #include "transport_manager/transport_manager_listener_empty.h"
 #include "protocol_handler/session_observer.h"
 #include "protocol_handler/protocol_handler.h"
@@ -46,11 +53,6 @@
 #include "connection_handler/connection.h"
 #include "connection_handler/devices_discovery_starter.h"
 #include "connection_handler/connection_handler.h"
-#include "utils/logger.h"
-#include "utils/macro.h"
-#include "utils/lock.h"
-#include "utils/stl_utils.h"
-#include "utils/singleton.h"
 
 /**
  * \namespace connection_handler
@@ -225,18 +227,6 @@ class ConnectionHandlerImpl : public ConnectionHandler,
                            uint8_t *session_id);
 
   /**
-   * \brief information about given Connection Key.
-   * \param key Unique key used by other components as session identifier
-   * \param app_id Returned: ApplicationID
-   * \param sessions_list Returned: List of session keys
-   * \param device_id Returned: DeviceID
-   * \return int32_t -1 in case of error or 0 in case of success
-   */
-  virtual int32_t GetDataOnSessionKey(uint32_t key, uint32_t *app_id = 0,
-                                      std::list<int32_t> *sessions_list = NULL,
-                                      uint32_t *device_id = 0);
-
-  /**
    * \brief information about device
    * \param device_handle
    * \param device_name Returned: name of device
@@ -250,6 +240,15 @@ class ConnectionHandlerImpl : public ConnectionHandler,
                                     std::list<uint32_t> *applications_list = NULL,
                                     std::string *mac_address = NULL,
                                     std::string* connection_type = NULL);
+
+  /**
+   * @brief GetConnectedDevicesMAC allows to obtain MAC adresses for all
+   * currently connected devices.
+   *
+   * @param device_macs collection of MAC adresses for connected devices.
+   */
+  void GetConnectedDevicesMAC(std::vector<std::string> &device_macs) const;
+
 #ifdef ENABLE_SECURITY
   /**
    * \brief Sets crypto context of connection
@@ -280,6 +279,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
   void SetProtectionFlag(
     const uint32_t &key,
     const protocol_handler::ServiceType &service_type) OVERRIDE;
+
+  security_manager::SSLContext::HandshakeContext
+    GetHandshakeContext(uint32_t key) const OVERRIDE;
 #endif  // ENABLE_SECURITY
 
   /**
@@ -365,9 +367,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
   /**
    * Sets heart beat timeout for specified session
    * @param connection_key pair of connection and session id
-   * @param timeout in seconds
+   * @param timeout in milliseconds
    */
-  virtual void SetHeartBeatTimeout(uint32_t connection_key, int32_t timeout);
+  virtual void SetHeartBeatTimeout(uint32_t connection_key, uint32_t timeout);
 
   /**
    * \brief Keep connection associated with the key from being closed by heartbeat monitor
@@ -403,6 +405,11 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    */
   virtual bool ProtocolVersionUsed(uint32_t connection_id,
   		  uint8_t session_id, uint8_t& protocol_version);
+
+  virtual int32_t GetDataOnSessionKey(uint32_t key, uint32_t* app_id,
+                                      std::list<int32_t>* sessions_list,
+                                      uint32_t* device_id);
+
   private:
   /**
    * \brief Default class constructor
@@ -456,6 +463,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
 #ifdef BUILD_TESTS
   // Methods for test usage
  public:
+  const DeviceMap& getDeviceList();
   ConnectionList &getConnectionList();
   void addDeviceConnection(
     const transport_manager::DeviceInfo &device_info,

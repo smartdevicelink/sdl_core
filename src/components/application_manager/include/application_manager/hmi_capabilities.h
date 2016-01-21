@@ -470,9 +470,9 @@ class HMICapabilities {
   smart_objects::SmartObject*      speech_capabilities_;
   smart_objects::SmartObject*      audio_pass_thru_capabilities_;
   smart_objects::SmartObject*      prerecorded_speech_;
+  std::string                      ccpu_version_;
   bool                             is_navigation_supported_;
   bool                             is_phone_call_supported_;
-  std::string                      ccpu_version_;
 
   ApplicationManagerImpl*          app_mngr_;
 
@@ -580,16 +580,16 @@ HMICapabilities::prerecorded_speech() const {
   return prerecorded_speech_;
 }
 
+const std::string& HMICapabilities::ccpu_version() const {
+  return ccpu_version_;
+}
+
 bool HMICapabilities::navigation_supported() const {
   return is_navigation_supported_;
 }
 
 bool HMICapabilities::phone_call_supported() const {
   return is_phone_call_supported_;
-}
-
-const std::string& HMICapabilities::ccpu_version() const {
-  return ccpu_version_;
 }
 
 }  //  namespace application_manager

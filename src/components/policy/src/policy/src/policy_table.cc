@@ -38,12 +38,10 @@
 
 namespace policy {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyTable")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
 PolicyTable::PolicyTable()
-    : pt_data_(
-               new SQLPTRepresentation()
-               ) {
+    : pt_data_(new SQLPTRepresentation()) {
 }
 
 PolicyTable::PolicyTable(utils::SharedPtr<PTRepresentation> pt_data)

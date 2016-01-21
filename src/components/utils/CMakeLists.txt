@@ -56,6 +56,8 @@ set (SOURCES
     ${UTILS_SRC_DIR}/resource_usage.cc
     ${UTILS_SRC_DIR}/appenders_loader.cc
     ${UTILS_SRC_DIR}/gen_hash.cc
+    ${UTILS_SRC_DIR}/convert_utils.cc
+    ${UTILS_SRC_DIR}/custom_string.cc
 )
 
 if(ENABLE_LOG)
@@ -80,7 +82,15 @@ if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
     )
 endif()
 
-add_library("Utils" SHARED ${SOURCES})
+add_library("Utils" ${SOURCES})
+
+if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+    # --- QDB Wrapper 
+    add_subdirectory(./src/qdb_wrapper)
+else ()
+    # --- SQLite Wrapper
+    add_subdirectory(./src/sqlite_wrapper)
+endif ()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
  list(APPEND LIBRARIES dl) 
@@ -91,6 +101,8 @@ if(ENABLE_LOG)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
   list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
   list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
+  list(APPEND LIBRARIES ConfigProfile)
+
   ADD_DEPENDENCIES(Utils install-3rd_party_logger)
 endif()
 
@@ -99,6 +111,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 target_link_libraries("Utils" ${LIBRARIES})
+
 
 if(BUILD_TESTS)
   add_subdirectory(test)

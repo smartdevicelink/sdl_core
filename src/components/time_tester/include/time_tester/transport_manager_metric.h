@@ -34,16 +34,15 @@
 #define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_
 
 #include <string>
-#include "metric_wrapper.h"
-#include "transport_manager_observer.h"
+#include "time_tester/metric_wrapper.h"
+#include "time_tester/transport_manager_observer.h"
 
 namespace time_tester {
 
 class TransportManagerMecticWrapper: public MetricWrapper {
  public:
   utils::SharedPtr<transport_manager::TMMetricObserver::MessageMetric> message_metric;
-  protected:
-    virtual Json::Value GetJsonMetric();
+  virtual Json::Value GetJsonMetric();
 };
 }  // namespace time_tester
 #endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_TRANSPORT_MANAGER_MECTRIC_H_

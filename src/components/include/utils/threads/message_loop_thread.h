@@ -67,7 +67,8 @@ class MessageLoopThread {
      * Method called by MessageLoopThread to process single message
      * from it's queue. After calling this method message is discarded.
      */
-    virtual void Handle(const Message message) = 0; // TODO(dchmerev): Use reference?
+    // TODO (AKozoriz) : change to const reference (APPLINK-20235)
+    virtual void Handle(const Message message) = 0;
 
     virtual ~Handler() {}
   };
@@ -85,6 +86,9 @@ class MessageLoopThread {
 
   // Process already posted messages and stop thread processing. Thread-safe.
   void Shutdown();
+
+  // Added for utils/test/auto_trace_test.cc
+  size_t GetMessageQueueSize() const;
 
  private:
   /*
@@ -117,6 +121,11 @@ class MessageLoopThread {
 ///////// Implementation
 
 template<class Q>
+size_t MessageLoopThread<Q>::GetMessageQueueSize() const {
+  return message_queue_.size();
+}
+
+template<class Q>
 MessageLoopThread<Q>::MessageLoopThread(const std::string&   name,
                                         Handler*             handler,
                                         const ThreadOptions& thread_opts)
@@ -133,7 +142,6 @@ MessageLoopThread<Q>::MessageLoopThread(const std::string&   name,
 template<class Q>
 MessageLoopThread<Q>::~MessageLoopThread() {
   Shutdown();
-  thread_->join();
   delete thread_delegate_;
   threads::DeleteThread(thread_);
 }
@@ -145,7 +153,7 @@ void MessageLoopThread<Q>::PostMessage(const Message& message) {
 
 template <class Q>
 void MessageLoopThread<Q>::Shutdown() {
-  thread_->stop();
+  thread_->join();
 }
 
 //////////
@@ -172,15 +180,16 @@ void MessageLoopThread<Q>::LoopThreadDelegate::threadMain() {
 
 template<class Q>
 void MessageLoopThread<Q>::LoopThreadDelegate::exitThreadMain() {
-  CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-  LOG4CXX_AUTO_TRACE(logger_);
   message_queue_.Shutdown();
 }
 
 template<class Q>
 void MessageLoopThread<Q>::LoopThreadDelegate::DrainQue() {
   while (!message_queue_.empty()) {
-    handler_.Handle(message_queue_.pop());
+    Message msg;
+    if (message_queue_.pop(msg)) {
+      handler_.Handle(msg);
+    }
   }
 }
 }  // namespace threads

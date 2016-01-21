@@ -55,7 +55,7 @@ ENDIF ()
 set (SOURCES
     ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_handler_impl.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/messagebroker_adapter.cc
-    ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_adapter.cc
+    ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_adapter_impl.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/mqueue_adapter.cc
     ${DBUS_SOURCE}
 )
@@ -76,6 +76,6 @@ endif()
 # Tests temporary are inactivated. For details please check
 # Readme.txt in test directory of hmi_message_handler 
 
-#if(BUILD_TESTS)
-#  add_subdirectory(test)
-#endif()
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()

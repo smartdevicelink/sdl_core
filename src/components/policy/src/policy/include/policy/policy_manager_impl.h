@@ -33,15 +33,18 @@
 #ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_IMPL_H_
 
+#include <string>
 #include <list>
+
 #include "utils/shared_ptr.h"
 #include "utils/lock.h"
 #include "policy/policy_manager.h"
 #include "policy/policy_table.h"
 #include "policy/cache_manager_interface.h"
 #include "policy/update_status_manager.h"
-#include "./functions.h"
+#include "functions.h"
 #include "usage_statistics/statistics_manager.h"
+#include "policy/policy_helper.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -80,7 +83,7 @@ class PolicyManagerImpl : public PolicyManager {
     virtual const std::vector<int> RetrySequenceDelaysSeconds();
     virtual void OnExceededTimeout();
     virtual void OnUpdateStarted();
-    virtual void PTUpdatedAt(int kilometers, int days_after_epoch);
+    virtual void PTUpdatedAt(Counters counter, int value);
 
     /**
      * Refresh data about retry sequence from policy table
@@ -97,6 +100,9 @@ class PolicyManagerImpl : public PolicyManager {
     virtual bool GetInitialAppData(const std::string& application_id,
                                    StringArray* nicknames = NULL,
                                    StringArray* app_hmi_types = NULL);
+
+    virtual void AddDevice(const std::string& device_id,
+                           const std::string& connection_type);
 
     virtual void SetDeviceInfo(const std::string& device_id,
                                const DeviceInfo& device_info);
@@ -158,7 +164,7 @@ class PolicyManagerImpl : public PolicyManager {
     virtual void RemoveAppConsentForGroup(const std::string& app_id,
                                           const std::string& group_name);
 
-    virtual uint16_t HeartBeatTimeout(const std::string& app_id) const;
+    virtual uint32_t HeartBeatTimeout(const std::string& app_id) const;
 
     virtual void SaveUpdateStatusRequired(bool is_update_needed);
 
@@ -169,8 +175,18 @@ class PolicyManagerImpl : public PolicyManager {
 
     virtual void OnAppsSearchCompleted();
 
+#ifdef BUILD_TESTS
+    inline CacheManagerInterfaceSPtr GetCache() { return cache_; }
+#endif  // BUILD_TESTS
     virtual const std::vector<std::string> GetAppRequestTypes(
       const std::string policy_app_id) const;
+
+    virtual const VehicleInfo GetVehicleInfo() const;
+
+    virtual void OnAppRegisteredOnMobile(const std::string& application_id) OVERRIDE;
+
+    virtual std::string RetrieveCertificate() const OVERRIDE;
+
   protected:
     #ifdef USE_HMI_PTU_DECRYPTION
     virtual utils::SharedPtr<policy_table::Table> Parse(
@@ -296,11 +312,6 @@ private:
      * Lock for guarding retry sequence
      */
     sync_primitives::Lock retry_sequence_lock_;
-
-    /**
-     * Lock for guarding recording statistics
-     */
-    sync_primitives::Lock statistics_lock_;
 
     /**
      * @brief Device id, which is used during PTU handling for specific

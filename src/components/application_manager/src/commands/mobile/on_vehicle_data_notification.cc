@@ -66,10 +66,15 @@ void OnVehicleDataNotification::Run() {
         ApplicationManagerImpl::instance()->IviInfoUpdated(it->second,
                                                            (*message_)[strings::msg_params][it->first].asInt());
 
-      std::vector<ApplicationSharedPtr>::const_iterator app_it = applications.begin();
+      std::vector<ApplicationSharedPtr>::const_iterator app_it =
+        applications.begin();
+
       for (; applications.end() != app_it; ++app_it) {
         const ApplicationSharedPtr app = *app_it;
-        DCHECK(app);
+        if (!app) {
+          LOG4CXX_ERROR(logger_, "NULL pointer");
+          continue;
+}
 
         appNotification_it = find(appNotification.begin(), appNotification.end(), app);
         if (appNotification_it == appNotification.end()) {
@@ -81,6 +86,7 @@ void OnVehicleDataNotification::Run() {
         } else {
           size_t idx = std::distance(appNotification.begin(), appNotification_it);
           appSO[idx][it->first] = (*message_)[strings::msg_params][it->first];
+
         }
       }
     }
@@ -92,7 +98,7 @@ void OnVehicleDataNotification::Run() {
   for (size_t idx = 0; idx < appNotification.size(); idx++) {
     LOG4CXX_INFO(
       logger_,
-      "Send OnVehicleData PRNDL notification to " << appNotification[idx]->name()
+      "Send OnVehicleData PRNDL notification to " << appNotification[idx]->name().c_str()
       << " application id " << appNotification[idx]->app_id());
     (*message_)[strings::params][strings::connection_key] =
       appNotification[idx]->app_id();

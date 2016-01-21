@@ -67,7 +67,7 @@ TEST_F(ProtocolHeaderValidatorTest, MaxPayloadSizeSetGet) {
   }
 }
 
-// Protocol version shall be from 1 to 3
+// Protocol version shall be from 1 to 4
 TEST_F(ProtocolHeaderValidatorTest, Malformed_Version) {
   std::vector<uint8_t> malformed_versions;
   malformed_versions.push_back(0);

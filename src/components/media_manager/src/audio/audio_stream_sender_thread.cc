@@ -57,7 +57,7 @@ using sync_primitives::AutoLock;
 const int32_t AudioStreamSenderThread::kAudioPassThruTimeout = 1;
 const uint32_t kMqueueMessageSize = 4095;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "AudioPassThruThread")
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
 AudioStreamSenderThread::AudioStreamSenderThread(
   const std::string fileName, uint32_t session_key)
@@ -93,23 +93,23 @@ void AudioStreamSenderThread::sendAudioChunkToMobile() {
   std::vector<uint8_t>::iterator to;
 
   if (!file_system::ReadBinaryFile(fileName_, binaryData)) {
-    LOG4CXX_ERROR_EXT(logger_, "Unable to read file." << fileName_);
+    LOG4CXX_ERROR(logger_, "Unable to read file." << fileName_);
 
     return;
   }
 
   if (binaryData.empty()) {
-    LOG4CXX_ERROR_EXT(logger_, "Binary data is empty.");
+    LOG4CXX_ERROR(logger_, "Binary data is empty.");
     return;
   }
 
-  LOG4CXX_INFO_EXT(logger_, "offset = " << offset_);
+  LOG4CXX_INFO(logger_, "offset = " << offset_);
 
   from = binaryData.begin() + offset_;
   to = binaryData.end();
 
   if (from < binaryData.end() /*from != binaryData.end()*/) {
-    LOG4CXX_INFO_EXT(logger_, "from != binaryData.end()");
+    LOG4CXX_INFO(logger_, "from != binaryData.end()");
 
     offset_ = offset_ + to - from;
     std::vector<uint8_t> data(from, to);

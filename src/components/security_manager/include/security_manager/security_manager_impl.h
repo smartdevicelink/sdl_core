@@ -52,6 +52,7 @@ namespace security_manager {
  * for thread working
  */
 struct SecurityMessage: public SecurityQueryPtr {
+  SecurityMessage() {}
   explicit SecurityMessage(const SecurityQueryPtr &message)
     : SecurityQueryPtr(message) {}
   // PrioritizedQueue requires this method to decide which priority to assign
@@ -148,7 +149,14 @@ class SecurityManagerImpl
    * \param success result of connection protection
    */
   void NotifyListenersOnHandshakeDone(const uint32_t &connection_key,
-                                      const bool success);
+                                      SSLContext::HandshakeResult error);
+
+  /**
+   * @brief Notifiers for listeners.
+   * Allows to notify that certificate should be updated
+   */
+  void NotifyOnCertififcateUpdateRequired();
+
   /**
    * @brief SecurityConfigSection
    * @return Session name in config file

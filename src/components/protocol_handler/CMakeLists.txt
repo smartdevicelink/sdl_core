@@ -43,6 +43,7 @@ set(SOURCES
     ${COMPONENTS_DIR}/protocol_handler/src/protocol_handler_impl.cc
     ${COMPONENTS_DIR}/protocol_handler/src/protocol_packet.cc
     ${COMPONENTS_DIR}/protocol_handler/src/protocol_payload.cc
+    ${COMPONENTS_DIR}/protocol_handler/src/multiframe_builder.cc
 )
 
 set(LIBRARIES

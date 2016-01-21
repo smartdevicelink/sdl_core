@@ -44,13 +44,13 @@ include_directories (
   
 
 set(testSources
-  #metric_wrapper_test.cc
-  #time_manager_test.cc
-  #protocol_handler_metric_test.cc
+  metric_wrapper_test.cc
+  time_manager_test.cc
+  protocol_handler_metric_test.cc
   protocol_handler_observer_test.cc
-  #transport_manager_metric_test.cc
+  transport_manager_metric_test.cc
   transport_manager_observer_test.cc
-  #application_manager_metric_test.cc
+  application_manager_metric_test.cc
   application_manager_observer_test.cc
 )
 
@@ -67,6 +67,7 @@ set(testLibraries
   ConfigProfile
   connectionHandler
   ApplicationManager
+  MessageHelper
   Resumption
   jsoncpp
   transport_manager

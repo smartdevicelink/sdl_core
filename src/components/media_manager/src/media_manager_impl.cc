@@ -50,14 +50,15 @@
 #include "media_manager/audio/socket_audio_streamer_adapter.h"
 #include "media_manager/video/pipe_video_streamer_adapter.h"
 #include "media_manager/audio/pipe_audio_streamer_adapter.h"
-#include "media_manager/video/video_stream_to_file_adapter.h"
+#include "media_manager/video/file_video_streamer_adapter.h"
+#include "media_manager/audio/file_audio_streamer_adapter.h"
 
 namespace media_manager {
 
 using profile::Profile;
 using timer::TimerThread;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManagerImpl")
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
 MediaManagerImpl::MediaManagerImpl()
   : protocol_handler_(NULL)
@@ -78,6 +79,34 @@ MediaManagerImpl::~MediaManagerImpl() {
   }
 }
 
+#ifdef BUILD_TESTS
+  void MediaManagerImpl::set_mock_a2dp_player(MediaAdapter* media_adapter) {
+    a2dp_player_= media_adapter;
+  }
+
+  void MediaManagerImpl::set_mock_mic_listener(MediaListenerPtr media_listener) {
+    from_mic_listener_ = media_listener;
+  }
+
+#ifdef EXTENDED_MEDIA_MODE
+  void MediaManagerImpl::set_mock_mic_recorder(MediaAdapterImpl* media_adapter) {
+    from_mic_recorder_ = media_adapter;
+  }
+
+#endif // EXTENDED_MEDIA_MODE
+
+  void MediaManagerImpl::set_mock_streamer(protocol_handler::ServiceType stype,
+                                           MediaAdapterImpl* mock_stream) {
+    streamer_[stype]=  mock_stream;
+  }
+
+  void MediaManagerImpl::set_mock_streamer_listener(protocol_handler::ServiceType stype,
+                                                    MediaAdapterListener* mock_stream) {
+    streamer_listener_[stype]=  mock_stream;
+  }
+
+#endif // BUILD_TESTS
+
 void MediaManagerImpl::Init() {
   using namespace protocol_handler;
   LOG4CXX_INFO(logger_, "MediaManagerImpl::Init()");
@@ -93,8 +122,7 @@ void MediaManagerImpl::Init() {
   } else if ("pipe" == profile::Profile::instance()->video_server_type()) {
     streamer_[ServiceType::kMobileNav] = new PipeVideoStreamerAdapter();
   } else if ("file" == profile::Profile::instance()->video_server_type()) {
-    streamer_[ServiceType::kMobileNav] = new VideoStreamToFileAdapter(
-        profile::Profile::instance()->video_stream_file());
+    streamer_[ServiceType::kMobileNav] = new FileVideoStreamerAdapter();
   }
 
   if ("socket" == profile::Profile::instance()->audio_server_type()) {
@@ -102,8 +130,7 @@ void MediaManagerImpl::Init() {
   } else if ("pipe" == profile::Profile::instance()->audio_server_type()) {
     streamer_[ServiceType::kAudio] = new PipeAudioStreamerAdapter();
   } else if ("file" == profile::Profile::instance()->audio_server_type()) {
-    streamer_[ServiceType::kAudio] = new VideoStreamToFileAdapter(
-        profile::Profile::instance()->audio_stream_file());
+    streamer_[ServiceType::kAudio] = new FileAudioStreamerAdapter();
   }
 
   streamer_listener_[ServiceType::kMobileNav] = new StreamerListener();

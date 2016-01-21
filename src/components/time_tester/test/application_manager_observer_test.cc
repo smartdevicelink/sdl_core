@@ -45,7 +45,7 @@ namespace time_tester_test {
 using namespace time_tester;
 using ::testing::_;
 
-TEST(ApplicationManagerObserver, DISABLED_CallOnMessage) {
+TEST(ApplicationManagerObserver, CallOnMessage) {
   TimeManagerMock time_manager_mock;
   ApplicationManagerObserver app_observer(&time_manager_mock);
   typedef application_manager::AMMetricObserver::MessageMetric AMMetric;

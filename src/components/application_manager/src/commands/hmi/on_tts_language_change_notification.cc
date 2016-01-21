@@ -42,11 +42,9 @@ namespace commands {
 
 OnTTSLanguageChangeNotification::OnTTSLanguageChangeNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnTTSLanguageChangeNotification::~OnTTSLanguageChangeNotification() {
-}
+OnTTSLanguageChangeNotification::~OnTTSLanguageChangeNotification() {}
 
 void OnTTSLanguageChangeNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -72,14 +70,14 @@ void OnTTSLanguageChangeNotification::Run() {
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
 
-  ApplicationManagerImpl::ApplictionSetIt it = accessor.begin();
+  ApplicationSetIt it = accessor.begin();
   for (; accessor.end() != it;) {
     ApplicationSharedPtr app = *it++;
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);
 
-    if (static_cast<int>(app->language())
-        != (*message_)[strings::msg_params][strings::language].asInt()) {
+    if (static_cast<int>(app->language()) !=
+        (*message_)[strings::msg_params][strings::language].asInt()) {
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
           app->app_id(),
           mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE);
@@ -92,4 +90,3 @@ void OnTTSLanguageChangeNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

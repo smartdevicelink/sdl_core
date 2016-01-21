@@ -38,6 +38,7 @@
 #ifdef ENABLE_SECURITY
 #include "security_manager/security_manager_impl.h"
 #include "security_manager/crypto_manager_impl.h"
+#include "application_manager/policies/policy_handler.h"
 #endif  // ENABLE_SECURITY
 
 #ifdef ENABLE_LOG
@@ -48,7 +49,7 @@ using threads::Thread;
 
 namespace main_namespace {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "appMain")
+CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
 
 namespace {
 void NameMessageBrokerThread(const System::Thread& thread,
@@ -84,11 +85,10 @@ LifeCycle::LifeCycle()
   , mb_server_thread_(NULL)
   , mb_adapter_thread_(NULL)
 #endif  // MESSAGEBROKER_HMIADAPTER
-  , components_started_(false)
 { }
 
 bool LifeCycle::StartComponents() {
-  LOG4CXX_INFO(logger_, "LifeCycle::StartComponents()");
+  LOG4CXX_AUTO_TRACE(logger_);
   transport_manager_ =
     transport_manager::TransportManagerDefault::instance();
   DCHECK(transport_manager_ != NULL);
@@ -99,7 +99,8 @@ bool LifeCycle::StartComponents() {
                                               profile::Profile::instance()->message_frequency_count(),
                                               profile::Profile::instance()->malformed_message_filtering(),
                                               profile::Profile::instance()->malformed_frequency_time(),
-                                              profile::Profile::instance()->malformed_frequency_count());
+                                              profile::Profile::instance()->malformed_frequency_count(),
+                                              profile::Profile::instance()->multiframe_waiting_timeout());
   DCHECK(protocol_handler_ != NULL);
 
   connection_handler_ =
@@ -163,12 +164,14 @@ bool LifeCycle::StartComponents() {
   }
 
   if (!crypto_manager_->Init(
-      ssl_mode == "SERVER" ? security_manager::SERVER : security_manager::CLIENT,
-          protocol,
-          cert_filename,
-          key_filename,
-          ciphers_list,
-          verify_peer)) {
+        ssl_mode == "SERVER" ? security_manager::SERVER : security_manager::CLIENT,
+        protocol,
+        policy::PolicyHandler::instance()->RetrieveCertificate(),
+        profile::Profile::instance()->ciphers_list(),
+        profile::Profile::instance()->verify_peer(),
+        profile::Profile::instance()->ca_cert_path(),
+        profile::Profile::instance()->update_before_hours())
+        ) {
     LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
     return false;
   }
@@ -194,15 +197,10 @@ bool LifeCycle::StartComponents() {
   connection_handler_->set_protocol_handler(protocol_handler_);
   connection_handler_->set_connection_handler_observer(app_manager_);
 
-#ifdef ENABLE_SECURITY
-  security_manager_->set_session_observer(connection_handler_);
-  security_manager_->set_protocol_handler(protocol_handler_);
-  security_manager_->set_crypto_manager(crypto_manager_);
-#endif  // ENABLE_SECURITY
-
   // it is important to initialise TimeTester before TM to listen TM Adapters
 #ifdef TIME_TESTER
   time_tester_ = new time_tester::TimeManager();
+  time_tester_->Start();
   time_tester_->Init(protocol_handler_);
 #endif  // TIME_TESTER
   // It's important to initialise TM after setting up listener chain
@@ -211,11 +209,18 @@ bool LifeCycle::StartComponents() {
   app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
 
+#ifdef ENABLE_SECURITY
+  security_manager_->set_session_observer(connection_handler_);
+  security_manager_->set_protocol_handler(protocol_handler_);
+  security_manager_->AddListener(app_manager_);
+  security_manager_->set_crypto_manager(crypto_manager_);
+  app_manager_->AddPolicyObserver(crypto_manager_);
+#endif  // ENABLE_SECURITY
+
   transport_manager_->Init();
   // start transport manager
   transport_manager_->Visibility(true);
 
-  components_started_ = true;
   return true;
 }
 
@@ -343,41 +348,52 @@ bool LifeCycle::InitMessageSystem() {
 #endif  // MQUEUE_HMIADAPTER
 
 namespace {
-
+  pthread_t main_thread;
   void sig_handler(int sig) {
-    // Do nothing
+    switch(sig) {
+      case SIGINT:
+        LOG4CXX_DEBUG(logger_, "SIGINT signal has been caught");
+        break;
+      case SIGTERM:
+        LOG4CXX_DEBUG(logger_, "SIGTERM signal has been caught");
+        break;
+      case SIGSEGV:
+        LOG4CXX_DEBUG(logger_, "SIGSEGV signal has been caught");
+        break;
+      default:
+        LOG4CXX_DEBUG(logger_, "Unexpected signal has been caught");
+        break;
+    }
+    /*
+     * Resend signal to the main thread in case it was
+     * caught by another thread
+     */
+    if(pthread_equal(pthread_self(), main_thread) == 0) {
+      LOG4CXX_DEBUG(logger_, "Resend signal to the main thread");
+      if(pthread_kill(main_thread, sig) != 0) {
+        LOG4CXX_FATAL(logger_, "Send signal to thread error");
+      }
+    }
   }
-
-  void agony(int sig) {
-// these actions are not signal safe
-// (in case logger is on)
-// but they cannot be moved to a separate thread
-// because the application most probably will crash as soon as this handler returns
-//
-// the application is anyway about to crash
-    LOG4CXX_FATAL(logger_, "Stopping application due to segmentation fault");
-#ifdef ENABLE_LOG
-    logger::LogMessageLoopThread::destroy();
-#endif
-  }
-
 }  //  namespace
 
 void LifeCycle::Run() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  main_thread = pthread_self();
   // First, register signal handlers
-  ::utils::SubscribeToTerminateSignal(&sig_handler);
-  ::utils::SubscribeToFaultSignal(&agony);
+  if(!::utils::SubscribeToInterruptSignal(&sig_handler) ||
+     !::utils::SubscribeToTerminateSignal(&sig_handler) ||
+     !::utils::SubscribeToFaultSignal(&sig_handler)) {
+    LOG4CXX_FATAL(logger_, "Subscribe to system signals error");
+  }
   // Now wait for any signal
   pause();
 }
 
 
 void LifeCycle::StopComponents() {
-  if (!components_started_) {
-    LOG4CXX_TRACE(logger_, "exit");
-    LOG4CXX_ERROR(logger_, "Components wasn't started");
-    return;
-  }
+  LOG4CXX_AUTO_TRACE(logger_);
+
   hmi_handler_->set_message_observer(NULL);
   connection_handler_->set_connection_handler_observer(NULL);
   protocol_handler_->RemoveProtocolObserver(app_manager_);
@@ -387,6 +403,7 @@ void LifeCycle::StopComponents() {
   protocol_handler_->RemoveProtocolObserver(media_manager_);
 #ifdef ENABLE_SECURITY
   protocol_handler_->RemoveProtocolObserver(security_manager_);
+  security_manager_->RemoveListener(app_manager_);
 #endif  // ENABLE_SECURITY
   protocol_handler_->Stop();
 
@@ -410,7 +427,6 @@ void LifeCycle::StopComponents() {
 
 #ifdef ENABLE_SECURITY
   LOG4CXX_INFO(logger_, "Destroying Crypto Manager");
-  crypto_manager_->Finish();
   delete crypto_manager_;
 
   LOG4CXX_INFO(logger_, "Destroying Security Manager");
@@ -424,6 +440,7 @@ void LifeCycle::StopComponents() {
   application_manager::ApplicationManagerImpl::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
+
 #ifdef DBUS_HMIADAPTER
   if (dbus_adapter_) {
     if (hmi_handler_) {
@@ -438,22 +455,20 @@ void LifeCycle::StopComponents() {
     delete dbus_adapter_;
   }
 #endif  // DBUS_HMIADAPTER
+
 #ifdef MESSAGEBROKER_HMIADAPTER
-  hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
   if (mb_adapter_) {
+    hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
     mb_adapter_->unregisterController();
-    mb_adapter_->Close();
     mb_adapter_->exitReceivingThread();
     if (mb_adapter_thread_) {
+      mb_adapter_thread_->Stop();
       mb_adapter_thread_->Join();
+      delete mb_adapter_thread_;
     }
     delete mb_adapter_;
   }
   hmi_message_handler::HMIMessageHandlerImpl::destroy();
-  if (mb_adapter_thread_) {
-    mb_adapter_thread_->Stop();
-    delete mb_adapter_thread_;
-  }
 
 #endif  // MESSAGEBROKER_HMIADAPTER
 
@@ -488,8 +503,6 @@ void LifeCycle::StopComponents() {
     time_tester_ = NULL;
   }
 #endif  // TIME_TESTER
-  components_started_ = false;
-  LOG4CXX_TRACE(logger_, "exit");
 }
 
 }  //  namespace main_namespace

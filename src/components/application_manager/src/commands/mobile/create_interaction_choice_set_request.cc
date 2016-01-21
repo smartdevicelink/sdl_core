@@ -39,6 +39,8 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "utils/gen_hash.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 
@@ -60,7 +62,7 @@ void CreateInteractionChoiceSetRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace mobile_apis;
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-                (*message_)[strings::params][strings::connection_key].asUInt());
+        connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -86,7 +88,7 @@ void CreateInteractionChoiceSetRequest::Run() {
     }
     if (verification_result_image == Result::INVALID_DATA ||
         verification_result_secondary_image == Result::INVALID_DATA) {
-      LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
+      LOG4CXX_ERROR(logger_, "Image verification failed.");
         SendResponse(false, Result::INVALID_DATA);
       return;
     }
@@ -96,7 +98,8 @@ void CreateInteractionChoiceSetRequest::Run() {
                    [strings::interaction_choice_set_id].asInt();
 
   if (app->FindChoiceSet(choice_set_id_)) {
-    LOG4CXX_ERROR(logger_, "Invalid ID");
+    LOG4CXX_ERROR(logger_, "Choice set with id " << choice_set_id_ <<
+                  " is not found.");
     SendResponse(false, Result::INVALID_ID);
     return;
   }
@@ -353,6 +356,7 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
 void CreateInteractionChoiceSetRequest::on_event(
     const event_engine::Event& event) {
   using namespace hmi_apis;
+  using namespace helpers;
   LOG4CXX_AUTO_TRACE(logger_);
 
   const smart_objects::SmartObject& message = event.smart_object();
@@ -364,40 +368,44 @@ void CreateInteractionChoiceSetRequest::on_event(
 
     uint32_t corr_id = static_cast<uint32_t>(message[strings::params]
         [strings::correlation_id].asUInt());
-    SentCommandsMap::iterator it = sent_commands_map_.find(corr_id);
-    if (sent_commands_map_.end() == it) {
-      LOG4CXX_WARN(logger_, "HMI response for unknown VR command received");
+    {
+      sync_primitives::AutoLock commands_lock(vr_commands_lock_);
+      SentCommandsMap::iterator it = sent_commands_map_.find(corr_id);
+      if (sent_commands_map_.end() == it) {
+        LOG4CXX_WARN(logger_, "HMI response for unknown VR command received");
+        return;
+      }
+
+
+      Common_Result::eType  vr_result = static_cast<Common_Result::eType>(
+            message[strings::params][hmi_response::code].asInt());
+
+      const bool is_vr_no_error =
+          Compare<Common_Result::eType, EQ, ONE>(
+            vr_result,
+            Common_Result::SUCCESS,
+            Common_Result::WARNINGS);
+
+      if (is_vr_no_error) {
+        VRCommandInfo& vr_command = it->second;
+        vr_command.succesful_response_received_ = true;
+      } else {
+        LOG4CXX_DEBUG(logger_, "Hmi response is not Success: " << vr_result
+                      << ". Stop sending VRAddCommand requests");
+        if (!error_from_hmi_) {
+          error_from_hmi_ = true;
+          SendResponse(false, GetMobileResultCode(vr_result));
+        }
+      }
+    }
+
+    if (received_chs_count_ < expected_chs_count_) {
+      ApplicationManagerImpl::instance()->updateRequestTimeout(
+            connection_key(), correlation_id(), default_timeout());
+      LOG4CXX_DEBUG(logger_, "Timeout for request was updated");
       return;
     }
-
-    Common_Result::eType  vr_result_ = static_cast<Common_Result::eType>(
-        message[strings::params][hmi_response::code].asInt());
-    if (Common_Result::SUCCESS == vr_result_) {
-      VRCommandInfo& vr_command = it->second;
-      vr_command.succesful_response_received_ = true;
-    } else {
-      LOG4CXX_DEBUG(logger_, "Hmi response is not Success: " << vr_result_
-                    << ". Stop sending VRAddCommand requests");
-      sync_primitives::AutoLock error_lock(error_from_hmi_lock_);
-      if (!error_from_hmi_) {
-        error_from_hmi_ = true;
-        SendResponse(false, GetMobileResultCode(vr_result_));
-      }
-    }
-
-    // update request timeout for case we send many VR add command requests
-    // and HMI has no time to send responses for all of them
-    LOG4CXX_DEBUG(logger_, "expected_chs_count_ = " << expected_chs_count_
-                  << "received_chs_count_ = " << received_chs_count_);
-    if (received_chs_count_ < expected_chs_count_) {
-      sync_primitives::AutoLock timeout_lock_(is_timed_out_lock_);
-      if (!is_timed_out_) {
-        ApplicationManagerImpl::instance()->updateRequestTimeout(
-            connection_key(), correlation_id(), default_timeout());
-      }
-    } else {
-      OnAllHMIResponsesReceived();
-    }
+    OnAllHMIResponsesReceived();
   }
 }
 

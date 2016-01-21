@@ -47,6 +47,9 @@ bool push_log(
         const log4cxx::LogString& threadName
         );
 
+bool logs_enabled();
+void set_logs_enabled();
+
 }  // namespace logger
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_PUSH_LOG_H_

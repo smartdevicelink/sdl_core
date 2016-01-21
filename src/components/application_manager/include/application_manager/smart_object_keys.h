@@ -52,7 +52,7 @@ const char method_name[] = "methodName";
 const char info[] = "info";
 const char app_id[] = "appID";
 const char hmi_app_id[] = "hmiAppID";
-const char device_mac[] = "deviceMAC";
+const char device_id[] = "deviceID";
 const char url[] = "url";
 const char urlScheme[] = "urlScheme";
 const char packageName[] = "packageName";
@@ -201,6 +201,7 @@ const char os[] = "os";
 const char os_version[] = "osVersion";
 const char carrier[] = "carrier";
 const char slider_header[] = "sliderHeader";
+const char key_press_mode[] = "keypressMode";
 
 // duplicate names from hmi_request
 const char limited_character_list[] = "limitedCharacterList";
@@ -252,7 +253,7 @@ const char priority[] = "priority";
 //resuming
 const char application_commands[] = "applicationCommands";
 const char application_submenus[] = "applicationSubMenus";
-const char application_choise_sets[] = "applicationChoiceSets";
+const char application_choice_sets[] = "applicationChoiceSets";
 const char application_global_properties[] = "globalProperties";
 const char application_vehicle_info[] = "vehicleInfo";
 const char application_buttons[] = "buttons";
@@ -280,6 +281,7 @@ const char location_name[] = "locationName";
 const char location_description[] = "locationDescription";
 const char address_lines[] = "addressLines";
 const char phone_number[] = "phoneNumber";
+const char number[] = "number";
 const char location_image[] = "locationImage";
 const char is_suscribed[] = "isSubscribed";
 const char message_data[] = "messageData";

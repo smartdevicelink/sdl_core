@@ -43,18 +43,20 @@
 namespace state_controller_test {
 namespace am = application_manager;
 
-class StateControllerMock :public am::StateController {
+class StateControllerMock : public am::StateController {
  public:
-  MOCK_METHOD2(SetRegularState, void (
-      am::ApplicationSharedPtr, const mobile_apis::AudioStreamingState::eType));
-  MOCK_METHOD2(SetRegularState, void (
-      am::ApplicationSharedPtr, const mobile_apis::SystemContext::eType));
-  MOCK_METHOD3(OnStateChanged, void (
-      am::ApplicationSharedPtr, am::HmiStatePtr, am::HmiStatePtr));
-  MOCK_METHOD1(ApplyStatesForApp, void (am::ApplicationSharedPtr));
-  MOCK_METHOD0(OnNaviStreamingStarted, void ());
-  MOCK_METHOD0(OnNaviStreamingStopped, void ());
+  MOCK_METHOD2(SetRegularState,
+               void(am::ApplicationSharedPtr,
+                    const mobile_apis::AudioStreamingState::eType));
+  MOCK_METHOD2(SetRegularState,
+               void(am::ApplicationSharedPtr,
+                    const mobile_apis::SystemContext::eType));
+  MOCK_METHOD3(OnStateChanged,
+               void(am::ApplicationSharedPtr,
+                    am::HmiStatePtr,
+                    am::HmiStatePtr));
+  MOCK_METHOD0(OnNaviStreamingStarted, void());
+  MOCK_METHOD0(OnNaviStreamingStopped, void());
 };
-
 }
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_STATE_CONTROLLER_INCLUDE_STATE_CONTROLLER_MOCK
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_STATE_CONTROLLER_INCLUDE_STATE_CONTROLLER_MOCK

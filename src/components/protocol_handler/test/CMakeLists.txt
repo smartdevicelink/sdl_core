@@ -49,9 +49,10 @@ set(LIBRARIES
 set(SOURCES
   incoming_data_handler_test.cc
   protocol_header_validator_test.cc
-  #protocol_handler_tm_test.cc
+  protocol_handler_tm_test.cc
   protocol_packet_test.cc
   protocol_payload_test.cc
+  multiframe_builder_test.cc
 )
 
 create_test("protocol_handler_test" "${SOURCES}" "${LIBRARIES}")

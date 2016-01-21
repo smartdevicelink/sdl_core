@@ -43,7 +43,7 @@ namespace time_tester_test {
 using namespace time_tester;
 using ::testing::_;
 
-TEST(TransportManagerObserverTest, DISABLED_MessageProcess) {
+TEST(TransportManagerObserverTest, MessageProcess) {
   TimeManagerMock time_manager_mock;
   TransportManagerObserver tr_observer(&time_manager_mock);
   protocol_handler::RawMessage* ptr = new ::protocol_handler::RawMessage(0, 0, NULL, 0);

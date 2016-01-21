@@ -143,10 +143,10 @@ class ConnectionHandler {
   /**
    * Sets heart beat timeout for specified session
    * @param connection_key pair of connection and session id
-   * @param timeout in seconds
+   * @param timeout in milliseconds
    */
   virtual void SetHeartBeatTimeout(uint32_t connection_key,
-                                   int32_t timeout) = 0;
+                                   uint32_t timeout) = 0;
 
   /**
    * \brief binds protocol version with session
@@ -157,6 +157,18 @@ class ConnectionHandler {
    */
   virtual void BindProtocolVersionWithSession(uint32_t connection_key,
                                               uint8_t protocol_version) = 0;
+
+  /**
+   * \brief information about given Connection Key.
+   * \param key Unique key used by other components as session identifier
+   * \param app_id Returned: ApplicationID
+   * \param sessions_list Returned: List of session keys
+   * \param device_id Returned: DeviceID
+   * \return int32_t -1 in case of error or 0 in case of success
+   */
+  virtual int32_t GetDataOnSessionKey(uint32_t key, uint32_t* app_id,
+                                      std::list<int32_t>* sessions_list,
+                                      uint32_t* device_id) = 0;
 
  protected:
   /**

@@ -33,9 +33,9 @@ set (AM_SOURCE_DIR ${COMPONENTS_DIR}/application_manager)
 set (AM_TEST_DIR ${AM_SOURCE_DIR}/test)
 set (AM_MOCK_DIR ${AM_TEST_DIR}/mock)
 
-
 include_directories (
   include/
+  ${COMPONENTS_DIR}
   ${COMPONENTS_DIR}/utils/include/
   ${COMPONENTS_DIR}/formatters/include/
   ${COMPONENTS_DIR}/protocol_handler/include/
@@ -51,6 +51,7 @@ include_directories (
   ${CMAKE_BINARY_DIR}/src/components/
   ${COMPONENTS_DIR}/include/
   ${COMPONENTS_DIR}/policy/src/policy/include/
+  ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct/
   ${COMPONENTS_DIR}/policy/src/policy/usage_statistics/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${ENCRYPTION_INCLUDE_DIRECTORY}
@@ -58,8 +59,24 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  include_directories(
+    ${COMPONENTS_DIR}/utils/include/utils/sqlite_wrapper/
+  )
+endif ()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "QNX")
+  include_directories(
+    ${COMPONENTS_DIR}/utils/include/utils/qdb_wrapper/
+  )
+endif()
+
 file (GLOB SOURCES
   ${AM_SOURCE_DIR}/src/*
+)
+
+set (MESSAGE_HELPER_SOURCES
+  ${AM_SOURCE_DIR}/src/message_helper/message_helper.cc
 )
 
 set (POLICIES_MANAGER
@@ -72,9 +89,12 @@ ${AM_SOURCE_DIR}/src/policies/delegates/statistics_delegate.cc
   include_directories(
     ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
   )
-
 file (GLOB EVENT_ENGINE
   ${AM_SOURCE_DIR}/src/event_engine/*
+)
+
+file (GLOB RESUMPTION
+  ${AM_SOURCE_DIR}/src/resumption/*
 )
 
 file (GLOB MOBILE_COMMANDS_SOURCES
@@ -232,7 +252,6 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/on_ignition_cycle_over_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_system_info_changed_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_file_removed_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_play_tone_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_tts_started_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_tts_stopped_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_vr_started_notification.cc
@@ -279,6 +298,8 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/on_device_state_changed_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_tts_reset_timeout_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_phone_call_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/dial_number_request.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/dial_number_response.cc
 )
 
 set (HMI_COMMANDS_SOURCES_JSON
@@ -331,7 +352,12 @@ SET (LIBRARIES
   UsageStatistics
   dl
   formatters
+  dbms
 )
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  list(APPEND LIBRARIES sqlite3)
+endif ()
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
   list(REMOVE_ITEM LIBRARIES dl)
@@ -340,16 +366,19 @@ endif()
 add_library("AMEventEngine" ${EVENT_ENGINE})
 target_link_libraries("AMEventEngine" ${LIBRARIES})
 
+
 add_library("AMPolicyLibrary" ${POLICIES_MANAGER} )
 target_link_libraries("AMPolicyLibrary" ${LIBRARIES} AMEventEngine)
 
 add_library("AMHMICommandsLibrary" ${HMI_COMMANDS_SOURCES})
 target_link_libraries("AMHMICommandsLibrary" ${LIBRARIES} AMEventEngine)
 
+add_library("MessageHelper" ${MESSAGE_HELPER_SOURCES})
+
 add_library("AMMobileCommandsLibrary" ${MOBILE_COMMANDS_SOURCES} )
 target_link_libraries("AMMobileCommandsLibrary" ${LIBRARIES} AMEventEngine)
 
-add_library("ApplicationManager" ${SOURCES})
+add_library("ApplicationManager" ${SOURCES} ${RESUMPTION})
 target_link_libraries("ApplicationManager" ${LIBRARIES} AMHMICommandsLibrary
                                                         AMMobileCommandsLibrary
                                                         AMEventEngine
@@ -361,4 +390,6 @@ endif()
 
 if(BUILD_TESTS)
   add_subdirectory(test)
+  add_subdirectory(test/state_controller)
+  add_subdirectory(test/message_helper)
 endif()

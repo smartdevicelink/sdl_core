@@ -49,10 +49,9 @@ OnAppActivatedNotification::~OnAppActivatedNotification() {
 
 void OnAppActivatedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  uint32_t app_id = ((*message_)[strings::msg_params][strings::app_id]).asUInt();
-  ApplicationManagerImpl::instance()->SetState<true>(app_id,
-                                               mobile_apis::HMILevel::HMI_FULL
-                                               );
+  event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_OnAppActivated);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands

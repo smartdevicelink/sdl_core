@@ -65,12 +65,11 @@
 </enum>
 
 <enum name="TransportType">
-    <description>
-      Lists of the transport types used for device connection to HU.
-    </description>
-    <element name="BLUETOOTH"/>
-    <element name="USB"/>
-    <element name="WIFI"/>
+  <description>Lists of the transport types used for device connection to HU.</description>
+  <element name="BLUETOOTH"/>
+  <element name="USB_IOS"/>
+  <element name="USB_AOA"/>
+  <element name="WIFI"/>
 </enum>
 
 <enum name="ButtonName">
@@ -184,6 +183,21 @@
     </element>
      <element name="NO-NO" internal_name="NO_NO">
       <description>Norwegian - Norway</description>
+    </element>
+    <element name="NL-BE" internal_name="NL_BE">
+      <description>Dutch (Flemish) - Belgium</description>
+    </element>
+    <element name="EL-GR" internal_name="EL_GR">
+      <description>Greek - Greece</description>
+    </element>
+    <element name="HU-HU" internal_name="HU_HU">
+      <description>Hungarian - Hungary</description>
+    </element>
+    <element name="FI-FI" internal_name="FI_FI">
+      <description>Finnish - Finland</description>
+    </element>
+    <element name="SK-SK" internal_name="SK_SK">
+      <description>Slovak - Slovakia</description>
     </element>
 </enum>
 
@@ -382,10 +396,16 @@
   <element name="DYNAMIC" />
 </enum>
 
-<enum name="ApplicationToNONEReason">
-  <description>Describes the reasons of moving the app to NONE.</description>
-  <element name="DRIVER_DISTRACTION_VIOLATION" />
-  <element name="USER_EXIT" />
+<enum name="ApplicationExitReason">
+  <element name="DRIVER_DISTRACTION_VIOLATION" >
+    <description>By getting this value, SDL puts the named app to NONE HMILevel</description>
+  </element>
+  <element name="USER_EXIT" >
+    <description>By getting this value, SDL puts the named app to NONE HMILevel</description>
+  </element>
+  <element name="UNAUTHORIZED_TRANSPORT_REGISTRATION">
+    <description>By getting this value, SDL unregisters the named application</description>
+  </element>
 </enum>
 
 <enum name="TextFieldName">
@@ -1303,7 +1323,7 @@
     <description>The name of the device connected.</description>
   </param>
   <param name="id" type="String" mandatory="true">
-    <description>The ID of the device connected</description>
+    <description>The ID of the device connectedi: either hash of device's USB serial number(in case of USB connection) or has of device's MAC address(in case of BlueTooth or WIFI connection</description>
   </param>
   <param name="transportType" type="Common.TransportType" mandatory="false">
     <description>The transport type the named-app's-device is connected over HU(BlueTooth, USB or WiFi). It must be provided in OnAppRegistered and in UpdateDeviceList</description>
@@ -1393,7 +1413,7 @@
     </param>
     <param name="greyOut" type="Boolean" mandatory="false">
       <description>Indicates whether application should be dimmed on the screen.</description>
-      <description>In case app is not in foreground SDL must notify HMI to grey out the corresponding apps-available-for-launching and currently not registered</description>
+      <description>Applicable only for apps received through QueryApps and still not registered.</description>
     </param>
     <param name="requestType" type="Common.RequestType" minsize="0" maxsize="100" array="true" mandatory="false">
       <description>The list of SystemRequest's RequestTypes allowed by policies for the named application</description>
@@ -2152,7 +2172,7 @@
     </function>
     <function name="OnExitApplication" messagetype="notification">
       <description>Must be sent by HMI when the User chooses to exit the application..</description>
-      <param name="reason" type="Common.ApplicationToNONEReason" mandatory="true">
+      <param name="reason" type="Common.ApplicationExitReason" mandatory="true">
         <description>Specifies reason of moving the app to NONE</description>
       </param>
       <param name="appID" type="Integer" mandatory="true">
@@ -2179,15 +2199,19 @@
         <description>Must be true if supported</description>
       </param>
     </function>
-    <function name="PlayTone" messagetype="notification">
-      <description>Sent by SDL to HMI to notify that the tone should be played.</description>
-      <param name="appID" type="Integer" mandatory="true">
-         <description>ID of the application that invoked this notification</description>
+    <function name="DialNumber" messagetype="request">
+      <description>Request from SDL to call a specific number.</description>
+      <param name="number" type="String" maxlength="40">
+        <description>The number to dial. Only the character + and numbers are allowed.</description>
       </param>
-      <param name="methodName" type="Common.MethodName" mandatory="true">
-         <description>Defines the name of app's request that initiates playing a tone</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that concerns this RPC.</description>
       </param>
     </function>
+
+    <function name="DialNumber" messagetype="response">
+    </function>
+
     <!-- Policies -->
 
     <!-- SyncP RPC-->
@@ -2411,6 +2435,9 @@
         IDs of the specific compiled grammars for this voice interaction.
       </description>
     </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application related to this RPC.</description>
+    </param>
   </function>
   <function name="PerformInteraction" messagetype="response">
     <param name="choiceID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
@@ -2513,6 +2540,9 @@
     </param>
     <param name="speakType" type="Common.MethodName" mandatory="false">
       <description>Defines the type of the request which causes text-to-speech</description>
+    </param>
+    <param name="playTone" type="Boolean" mandatory="false">
+      <description>Defines that the tone should be played</description>
     </param>
   </function>
   <function name="Speak" messagetype="response">
@@ -2758,14 +2788,14 @@
   <function name="SetMediaClockTimer" messagetype="request">
     <description>Sets the initial media clock value and automatic update method.</description>
     <param name="startTime" type="Common.TimeFormat" mandatory="false">
-      <description>startTime should be ignored for "PAUSE", "RESUME", and "CLEAR"</description>
+      <description>SDL transfers startTime together with modes: "COUNTUP", "COUNTDOWN", "PAUSE" to HMI.
+      SDL ignores startTime for modes: "RESUME", and "CLEAR"</description>
     </param>
     <param name="endTime" type="Common.TimeFormat" mandatory="false">
       <description>
           See TimeFormat.
-          endTime can be provided for "COUNTUP" and "COUNTDOWN"; to be used to calculate any visual progress bar (if not provided, this feature is ignored)
-          If endTime is greater then startTime for COUNTDOWN or less than startTime for COUNTUP, then the request will return an INVALID_DATA.
-          endTime will be ignored for "PAUSE", "RESUME", and "CLEAR"
+          SDL transfers endTime together with modes: "COUNTUP", "COUNTDOWN", "PAUSE" to HMI. To be used to calculate any visual progress bar (if not provided, this feature is ignored).
+          SDL ignores endTime for modes: "RESUME", and "CLEAR"
       </description>
     </param>
     <param name="updateMode" type="Common.ClockUpdateMode" mandatory="true">
@@ -2832,7 +2862,7 @@
     </param>
     <param name="audioPassThruCapabilities" type="Common.AudioPassThruCapabilities" mandatory="true"/>
     <param name="hmiZoneCapabilities" type="Common.HmiZoneCapabilities" mandatory="true"/>
-    <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" mandatory="false">
+    <param name="softButtonCapabilities" type="Common.SoftButtonCapabilities" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>Must be returned if the platform supports on-screen SoftButtons.</description>
     </param>
     <param name="hmiCapabilities" type="Common.HMICapabilities" mandatory="false">
@@ -3196,7 +3226,7 @@
     </param>
   </function>
   <function name="StartStream" messagetype="request">
-    <description>Notification from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
+    <description>Request from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
     <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
       <description>URL that HMI start playing.</description>
     </param>
@@ -3207,7 +3237,7 @@
   <function name="StartStream" messagetype="response">
   </function>
   <function name="StopStream" messagetype="request">
-    <description>Notification from SmartDeviceLinkCore to HMI to start playing video streaming.</description>
+    <description>Request from SmartDeviceLinkCore to HMI to stop playing video streaming.</description>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application related to this RPC.</description>
     </param>
@@ -3215,7 +3245,7 @@
   <function name="StopStream" messagetype="response">
   </function>
   <function name="StartAudioStream" messagetype="request">
-    <description>Notification from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
+    <description>Request from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
     <param name="url" type="String" minlength="21" maxlength="500" mandatory="true">
       <description>URL that HMI start playing.</description>
     </param>
@@ -3226,7 +3256,7 @@
   <function name="StartAudioStream" messagetype="response">
   </function>
   <function name="StopAudioStream" messagetype="request">
-    <description>Notification from SmartDeviceLinkCore to HMI to start playing audio streaming.</description>
+    <description>Request from SmartDeviceLinkCore to HMI to stop playing audio streaming.</description>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application related to this RPC.</description>
     </param>
@@ -3335,9 +3365,6 @@
         The application will be notified by the onVehicleData notification whenever new data is available.
         To unsubscribe the notifications, use unsubscribe with the same subscriptionType.
     </description>
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application that requested this RPC.</description>
-    </param>
     <param name="gps" type="Boolean" mandatory="false">
       <description>See GPSData</description>
     </param>
@@ -3723,9 +3750,6 @@
     </param>
     <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
-    </param>
-    <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
     </param>
   </function>
   <function name="GetVehicleData" messagetype="response">

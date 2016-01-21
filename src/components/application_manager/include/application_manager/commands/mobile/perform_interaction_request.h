@@ -132,12 +132,6 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    */
   void SendUIShowVRHelpRequest(ApplicationSharedPtr const app);
 
-  /**
-   * @brief Creates and Sends Perform interaction to UI.
-   */
-  void CreateUIPerformInteraction(const smart_objects::SmartObject& msg_params,
-                                  application_manager::ApplicationSharedPtr const app);
-
   /*
    * @brief Checks if incoming choice set doesn't has similar menu names.
    *
@@ -197,8 +191,6 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    */
   bool CheckChoiceIDFromResponse(ApplicationSharedPtr app, int32_t choice_id);
 
-  // members
-  mobile_apis::Result::eType          vr_perform_interaction_code_;
   mobile_apis::InteractionMode::eType interaction_mode_;
   bool                                ui_response_recived_;
   bool                                vr_response_recived_;

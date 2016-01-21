@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,6 +69,15 @@ class DateTime {
   static int64_t calculateTimeDiff(const TimevalStruct& time1,
                                    const TimevalStruct& time2);
 
+  /**
+   * @brief Adds milliseconds to time struct
+   * @param time contains time struct
+   * @param milliseconds contains value which need to
+   * add to time struct
+   **/
+  static void AddMilliseconds(TimevalStruct& time,
+                             uint32_t milliseconds);
+
   static TimevalStruct Sub(const TimevalStruct& time1,
                            const TimevalStruct& time2);
 
@@ -78,9 +87,12 @@ class DateTime {
   static bool Greater(const TimevalStruct& time1, const TimevalStruct& time2);
   static bool Less(const TimevalStruct& time1, const TimevalStruct& time2);
   static bool Equal(const TimevalStruct& time1, const TimevalStruct& time2);
+ private:
+  static TimevalStruct ConvertionUsecs(const TimevalStruct &time);
 };
 
 }  // namespace date_time
 bool operator<(const TimevalStruct& time1, const TimevalStruct& time2);
 bool operator==(const TimevalStruct& time1, const TimevalStruct& time2);
+const TimevalStruct operator-(const TimevalStruct& time1, const TimevalStruct& time2);
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_DATE_TIME_H_

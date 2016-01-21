@@ -35,6 +35,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_UNSUBSCRIBE_VEHICLE_DATA_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/application.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -85,8 +86,37 @@ class UnsubscribeVehicleDataRequest : public CommandRequestImpl {
 #endif // #ifdef HMI_DBUS_API
 
  private:
-  bool IsAnythingAlreadyUnsubscribed(
-      const smart_objects::SmartObject& msg_params) const;
+  /**
+   * @brief Checks, if any app is subscribed for particular VI parameter
+   * @param param_id VI parameter id
+   * @return true, if there are registered apps subscribed for VI parameter,
+   * otherwise - false
+   */
+  bool IsSomeoneSubscribedFor(const uint32_t param_id) const;
+
+  /**
+   * @brief Adds VI parameters being unsubscribed by another or the same app to
+   * response with appropriate results
+   * @param msg_params 'message_params' response section reference
+   */
+  void AddAlreadyUnsubscribedVI(smart_objects::SmartObject& response) const;
+
+  /**
+   * @brief Allows to update hash after sending response to mobile.
+   */
+  void UpdateHash() const;
+
+  /**
+   * @brief VI parameters which still being subscribed by another apps after
+   * particular app had been unsubscribed from these parameters
+   */
+  VehicleInfoSubscriptions vi_still_subscribed_by_another_apps_;
+
+  /**
+   * @brief VI parameters which had been unsubscribed already by particular app
+   */
+  VehicleInfoSubscriptions vi_already_unsubscribed_by_this_app_;
+
   DISALLOW_COPY_AND_ASSIGN(UnsubscribeVehicleDataRequest);
 };
 

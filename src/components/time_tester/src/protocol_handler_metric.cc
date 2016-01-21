@@ -30,9 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "protocol_handler_metric.h"
+#include "time_tester/protocol_handler_metric.h"
 #include "json/json.h"
-#include "json_keys.h"
+#include "time_tester/json_keys.h"
 
 namespace time_tester {
 

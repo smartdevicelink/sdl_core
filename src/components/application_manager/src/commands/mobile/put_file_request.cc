@@ -127,7 +127,7 @@ void PutFileRequest::Run() {
       (*message_)[strings::msg_params].keyExists(strings::offset);
 
   if (offset_exist) {
-    offset_ = (*message_)[strings::msg_params][strings::offset].asInt64();
+    offset_ = (*message_)[strings::msg_params][strings::offset].asInt();
   }
 
   if ((*message_)[strings::msg_params].
@@ -185,7 +185,7 @@ void PutFileRequest::Run() {
   sync_file_name_ = file_path + "/" + sync_file_name_;
   switch (save_result) {
     case mobile_apis::Result::SUCCESS: {
-
+      LOG4CXX_INFO(logger_, "PutFile is successful");
       if (!is_system_file) {
         AppFile file(sync_file_name_, is_persistent_file_,
                      is_download_compleate, file_type_);
@@ -200,7 +200,7 @@ void PutFileRequest::Run() {
             /* It can be first part of new big file, so we need to update
                information about it's downloading status and persistence */
             if (!application->UpdateFile(file)) {
-              LOG4CXX_INFO(logger_, "Couldn't update file");
+              LOG4CXX_ERROR(logger_, "Couldn't update file");
               /* If it is impossible to update file, application doesn't
               know about existing this file */
               SendResponse(false, mobile_apis::Result::INVALID_DATA,
@@ -224,7 +224,7 @@ void PutFileRequest::Run() {
       break;
     }
     default:
-      LOG4CXX_WARN(logger_, "Save in unsuccessful. Result = " << save_result);
+      LOG4CXX_WARN(logger_, "PutFile is unsuccessful. Result = " << save_result);
       SendResponse(false, save_result, "Can't save file", &response_params);
       break;
   }

@@ -791,7 +791,7 @@ TEST(test_int_double_value, test_NumberSchemaItemTest) {
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 }
 
-TEST(test_double_int_value, DISABLED_test_NumberSchemaItemTest) {
+TEST(test_double_int_value, test_NumberSchemaItemTest) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
 
   ISchemaItemPtr item = TNumberSchemaItem<double>::create(

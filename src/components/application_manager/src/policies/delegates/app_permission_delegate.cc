@@ -34,7 +34,7 @@
 #include "application_manager/policies/policy_handler.h"
 
 namespace policy {
-  CREATE_LOGGERPTR_GLOBAL(logger_, "AppPermissionDelegate")
+  CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 
   AppPermissionDelegate::AppPermissionDelegate(
       const uint32_t connection_key, const PermissionConsent& permissions)

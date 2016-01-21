@@ -52,10 +52,9 @@ class ApplicationManagerMock : public application_manager::ApplicationManager {
   MOCK_METHOD1(set_connection_handler,
                void(connection_handler::ConnectionHandler*));
   MOCK_CONST_METHOD0(applications, DataAccessor<am::ApplicationSet>());
+  MOCK_CONST_METHOD1(application, am::ApplicationSharedPtr(uint32_t app_id));
   MOCK_CONST_METHOD1(application_by_hmi_app,
                      am::ApplicationSharedPtr(uint32_t));
-  MOCK_CONST_METHOD1(application, am::ApplicationSharedPtr(uint32_t));
-
   MOCK_CONST_METHOD0(active_application, am::ApplicationSharedPtr());
   MOCK_CONST_METHOD1(application_by_policy_id,
                      am::ApplicationSharedPtr(const std::string&));
@@ -65,16 +64,21 @@ class ApplicationManagerMock : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(get_limited_media_application, am::ApplicationSharedPtr());
   MOCK_CONST_METHOD0(get_limited_navi_application, am::ApplicationSharedPtr());
   MOCK_CONST_METHOD0(get_limited_voice_application, am::ApplicationSharedPtr());
+  MOCK_METHOD1(application_id, const uint32_t(const int32_t));
   MOCK_METHOD2(set_application_id, void(const int32_t, const uint32_t));
-  MOCK_METHOD1(application_id, uint32_t(const int32_t));
-  MOCK_METHOD3(OnHMILevelChanged, void(uint32_t, mobile_apis::HMILevel::eType,
-                                       mobile_apis::HMILevel::eType));
+  MOCK_METHOD3(OnHMILevelChanged,
+               void(uint32_t,
+                    mobile_apis::HMILevel::eType,
+                    mobile_apis::HMILevel::eType));
   MOCK_METHOD1(SendHMIStatusNotification, void(const am::ApplicationSharedPtr));
-  MOCK_CONST_METHOD1(GetDefaultHmiLevel, mobile_apis::HMILevel::eType(
-                                             am::ApplicationConstSharedPtr));
+  MOCK_CONST_METHOD1(
+      GetDefaultHmiLevel,
+      mobile_apis::HMILevel::eType(am::ApplicationConstSharedPtr));
   MOCK_METHOD0(hmi_capabilities, am::HMICapabilities&());
   MOCK_METHOD0(is_attenuated_supported, bool());
-  MOCK_CONST_METHOD1(IsAppTypeExistsInFullOrLimited, bool(am::ApplicationConstSharedPtr));
+  MOCK_CONST_METHOD1(IsAppTypeExistsInFullOrLimited,
+                     bool(am::ApplicationConstSharedPtr));
+  MOCK_METHOD1(OnApplicationRegistered, void(am::ApplicationSharedPtr));
 };
 }  // namespace state_controller_test
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_STATE_CONTROLLER_INCLUDE_APPLICATION_MANAGER_MOCK_H_

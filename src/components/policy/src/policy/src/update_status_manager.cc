@@ -36,7 +36,7 @@
 
 namespace  policy {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "UpdateStatusManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
 UpdateStatusManager::UpdateStatusManager() :
   listener_(NULL),
@@ -65,7 +65,7 @@ void UpdateStatusManager::set_listener(PolicyListener* listener) {
 }
 
 void UpdateStatusManager::OnUpdateSentOut(uint32_t update_timeout) {
-  LOG4CXX_INFO(logger_, "OnUpdateSentOut");
+  LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(update_status_thread_delegate_);
   const unsigned milliseconds_in_second = 1000;
   update_status_thread_delegate_->updateTimeOut(update_timeout *
@@ -76,7 +76,7 @@ void UpdateStatusManager::OnUpdateSentOut(uint32_t update_timeout) {
 }
 
 void UpdateStatusManager::OnUpdateTimeoutOccurs() {
-  LOG4CXX_INFO(logger_, "OnUpdateTimeoutOccurs");
+  LOG4CXX_AUTO_TRACE(logger_);
   set_update_required(true);
   set_exchange_in_progress(false);
   set_exchange_pending(false);
@@ -85,21 +85,22 @@ void UpdateStatusManager::OnUpdateTimeoutOccurs() {
 }
 
 void UpdateStatusManager::OnValidUpdateReceived() {
-  LOG4CXX_INFO(logger_, "OnValidUpdateReceived");
+  LOG4CXX_AUTO_TRACE(logger_);
   update_status_thread_delegate_->updateTimeOut(0); // Stop Timer
   set_exchange_pending(false);
   set_exchange_in_progress(false);
 }
 
 void UpdateStatusManager::OnWrongUpdateReceived() {
-  LOG4CXX_INFO(logger_, "OnWrongUpdateReceived");
+  LOG4CXX_AUTO_TRACE(logger_);
   update_status_thread_delegate_->updateTimeOut(0); // Stop Timer
   set_update_required(true);
   set_exchange_in_progress(false);
+  set_exchange_pending(false);
 }
 
 void UpdateStatusManager::OnResetDefaultPT(bool is_update_required) {
-  LOG4CXX_INFO(logger_, "OnResetDefaultPT");
+  LOG4CXX_AUTO_TRACE(logger_);
   exchange_in_progress_ = false;
   update_required_ = is_update_required;
   exchange_pending_ = false;
@@ -107,7 +108,7 @@ void UpdateStatusManager::OnResetDefaultPT(bool is_update_required) {
 }
 
 void UpdateStatusManager::OnResetRetrySequence() {
-  LOG4CXX_INFO(logger_, "OnResetRetrySequence");
+  LOG4CXX_AUTO_TRACE(logger_);
   if (exchange_in_progress_) {
     set_exchange_pending(true);
   }
@@ -115,12 +116,12 @@ void UpdateStatusManager::OnResetRetrySequence() {
 }
 
 void UpdateStatusManager::OnNewApplicationAdded() {
-  LOG4CXX_INFO(logger_, "OnNewApplicationAdded");
+  LOG4CXX_AUTO_TRACE(logger_);
   set_update_required(true);
 }
 
 void UpdateStatusManager::OnPolicyInit(bool is_update_required) {
-  LOG4CXX_INFO(logger_, "OnPolicyInit");
+  LOG4CXX_AUTO_TRACE(logger_);
   update_required_ = is_update_required;
 }
 

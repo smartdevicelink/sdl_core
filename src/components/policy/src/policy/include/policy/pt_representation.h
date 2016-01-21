@@ -42,15 +42,6 @@ namespace policy_table = rpc::policy_table_interface_base;
 
 namespace policy {
 
-/**
- * @struct Data about vehicle
- */
-struct VehicleData {
-  const std::string vehicle_make;
-  const std::string vehicle_model;
-  int vehicle_year;
-};
-
 enum InitResult {
   NONE = 0,
   EXISTS,
@@ -138,7 +129,7 @@ class PTRepresentation {
     /**
      * @brief Get information about vehicle
      */
-    virtual VehicleData GetVehicleData() = 0;
+    virtual const VehicleInfo GetVehicleInfo() const = 0;
 
     /**
      * @brief Allows to update 'vin' field in module_meta table.
@@ -303,6 +294,25 @@ class PTRepresentation {
                                            bool is_predata) = 0;
 
     virtual void WriteDb() = 0;
+
+    /**
+     * @brief RemoveDB allows to remove the database.
+     * It will either remove or do nothing in case file not exists or any other
+     * troubles are happens during this operation.
+     */
+    virtual void RemoveDB() const = 0;
+
+    /**
+     * @brief Checks if DB version is actual to current schema
+     * @return true if actual, otherwise - false
+     */
+    virtual bool IsDBVersionActual() const = 0;
+
+    /**
+     * @brief Updates DB version according to current schema
+     * @return true if success, otherwise - false
+     */
+    virtual bool UpdateDBVersion() const = 0;
 };
 
 }  //  namespace policy

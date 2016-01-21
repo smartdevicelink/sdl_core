@@ -30,16 +30,17 @@
 
 include_directories(
   include
+  ${COMPONENTS_DIR}
   ${GMOCK_INCLUDE_DIRECTORY}
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/policy/src/policy/include/
-  ${COMPONENTS_DIR}/policy/src/policy/sqlite_wrapper/include
-  ${COMPONENTS_DIR}/policy/src/policy/qdb_wrapper/include
   ${COMPONENTS_DIR}/policy/src/policy/usage_statistics/include
   ${COMPONENTS_DIR}/rpc_base/include
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/utils/include/
+  ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
   ${COMPONENTS_DIR}/policy/src/policy/policy_table/
+  ${COMPONENTS_DIR}/policy/test/include/
 )
 
 set(testLibraries
@@ -50,46 +51,31 @@ set(testLibraries
 )
 
 set(testSources
-  usage_statistics_test.cc    
-  shared_library_test.cc    
-  generated_code_test.cc 
-  #policy_manager_impl_test.cc
+  usage_statistics_test.cc
+  shared_library_test.cc
+  generated_code_test.cc
+  policy_manager_impl_test.cc
+  update_status_manager_test.cc
 )
 
-  include_directories(${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct)
-  list (APPEND testSources
-    sql_pt_representation_test.cc
-  )
-
-if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  list(REMOVE_ITEM testLibraries dl)
-  # --- Tests for QDB Wrapper
-  include_directories(../src/policy/qdb_wrapper/include)
-  list (APPEND testSources
-    qdb_wrapper/sql_database_test.cc
-    qdb_wrapper/sql_query_test.cc
-  )
-  file(COPY qdbserver.sh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-  file(COPY test-qdb.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-  file(COPY policy.sql DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-else ()
-  # --- Tests for SQLite Wrapper
-  find_package(Sqlite3 REQUIRED)
-  include_directories(../src/policy/sqlite_wrapper/include)
-  list (APPEND testSources
-    sqlite_wrapper/sql_database_test.cc 
-    sqlite_wrapper/sql_query_test.cc   
-    generated_code_with_sqlite_test.cc   
-
-    # TODO{ALeshin} AssertTrue in SetUpTestCase() return false
-    #policy_manager_impl_stress_test.cc
-  )
-  list (APPEND testLibraries sqlite3)
-endif()
+list (APPEND testSources
+  sql_pt_representation_test.cc
+)
 
 create_test("policy_test" "${testSources}" "${testLibraries}")
 
 file(COPY valid_sdl_pt_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY PTU.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY PTU2.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY PTU3.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY PTU4.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ptu_requestType.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ptu2_requestType.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY smartDeviceLink2.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY smartDeviceLink3.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY sdl_pt_first_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY sdl_pt_second_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY sdl_pt_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

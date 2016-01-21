@@ -53,7 +53,7 @@ policy::PolicyManager* CreateManager() {
 
 namespace policy {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyManagerImpl")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
 PolicyManagerImpl::PolicyManagerImpl()
   : PolicyManager(),
@@ -80,7 +80,7 @@ utils::SharedPtr<policy_table::Table> PolicyManagerImpl::Parse(
     return new policy_table::Table(&value);
   } else {
     return utils::SharedPtr<policy_table::Table>();
-  } 
+  }
 }
 
 #else
@@ -94,7 +94,7 @@ utils::SharedPtr<policy_table::Table> PolicyManagerImpl::ParseArray(
     //For PT Update received from SDL Server.
     if (value["data"].size()!=0) {
       Json::Value data = value["data"];
-      //First Element in 
+      //First Element in
       return new policy_table::Table(&data[0]);
     } else {
       return new policy_table::Table(&value);
@@ -131,9 +131,9 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
   // Parse message into table struct
   utils::SharedPtr<policy_table::Table> pt_update = Parse(pt_content);
   #else
-  //Message Received from server unecnrypted with PTU in first element 
+  //Message Received from server unecnrypted with PTU in first element
   //of 'data' array. No Parsing was done by HMI.
-  utils::SharedPtr<policy_table::Table> pt_update = ParseArray(pt_content); 
+  utils::SharedPtr<policy_table::Table> pt_update = ParseArray(pt_content);
   #endif
   if (!pt_update) {
     LOG4CXX_WARN(logger_, "Parsed table pointer is 0.");
@@ -141,6 +141,7 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     return false;
   }
 
+  file_system::DeleteFile(file);
 
   if (!IsPTValid(pt_update, policy_table::PT_UPDATE)) {
     update_status_manager_.OnWrongUpdateReceived();
@@ -150,43 +151,43 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
   update_status_manager_.OnValidUpdateReceived();
   cache_->SaveUpdateRequired(false);
 
-  apps_registration_lock_.Acquire();
+  {
+    sync_primitives::AutoLock lock(apps_registration_lock_);
 
-  // Get current DB data, since it could be updated during awaiting of PTU
-  utils::SharedPtr<policy_table::Table> policy_table_snapshot =
-      cache_->GenerateSnapshot();
-  if (!policy_table_snapshot) {
-    LOG4CXX_ERROR(logger_, "Failed to create snapshot of policy table");
-    return false;
+    // Get current DB data, since it could be updated during awaiting of PTU
+    utils::SharedPtr<policy_table::Table> policy_table_snapshot =
+        cache_->GenerateSnapshot();
+    if (!policy_table_snapshot) {
+      LOG4CXX_ERROR(logger_, "Failed to create snapshot of policy table");
+      return false;
+    }
+
+    // Checking of difference between PTU and current policy state
+    // Must to be done before PTU applying since it is possible, that functional
+    // groups, which had been present before are absent in PTU and will be
+    // removed after update. So in case of revoked groups system has to know
+    // names and ids of revoked groups before they will be removed.
+    CheckPermissionsChanges(pt_update, policy_table_snapshot);
+
+    // Replace current data with updated
+    if (!cache_->ApplyUpdate(*pt_update)) {
+      LOG4CXX_WARN(logger_, "Unsuccessful save of updated policy table.");
+      return false;
+    }
+
+    if (pt_update->policy_table.module_config.certificate.is_initialized()) {
+      listener_->OnCertificateUpdated(*(pt_update->policy_table.module_config.certificate));
+    }
+
+    std::map<std::string, StringArray> app_hmi_types;
+    cache_->GetHMIAppTypeAfterUpdate(app_hmi_types);
+    if (!app_hmi_types.empty()) {
+      LOG4CXX_INFO(logger_, "app_hmi_types is full calling OnUpdateHMIAppType");
+      listener_->OnUpdateHMIAppType(app_hmi_types);
+    } else {
+      LOG4CXX_INFO(logger_, "app_hmi_types empty" << pt_content.size());
+    }
   }
-
-  // Checking of difference between PTU and current policy state
-  // Must to be done before PTU applying since it is possible, that functional
-  // groups, which had been present before are absent in PTU and will be
-  // removed after update. So in case of revoked groups system has to know
-  // names and ids of revoked groups before they will be removed.
-  CheckPermissionsChanges(pt_update, policy_table_snapshot);
-
-  // Replace current data with updated
-  if (!cache_->ApplyUpdate(*pt_update)) {
-    LOG4CXX_WARN(logger_, "Unsuccessful save of updated policy table.");
-    return false;
-  }
-
-  if (pt_update->policy_table.module_config.certificate.is_initialized()) {
-    listener_->OnCertificateUpdated(*(pt_update->policy_table.module_config.certificate));
-  }
-
-  std::map<std::string, StringArray> app_hmi_types;
-  cache_->GetHMIAppTypeAfterUpdate(app_hmi_types);
-  if (!app_hmi_types.empty()) {
-    LOG4CXX_INFO(logger_, "app_hmi_types is full calling OnUpdateHMIAppType");
-    listener_->OnUpdateHMIAppType(app_hmi_types);
-  } else {
-    LOG4CXX_INFO(logger_, "app_hmi_types empty" << pt_content.size());
-  }
-
-  apps_registration_lock_.Release();
 
   // If there was a user request for policy table update, it should be started
   // right after current update is finished
@@ -311,6 +312,11 @@ const std::vector<std::string> PolicyManagerImpl::GetAppRequestTypes(
   cache_->GetAppRequestTypes(policy_app_id, request_types);
   return request_types;
 }
+
+const VehicleInfo PolicyManagerImpl::GetVehicleInfo() const {
+  return cache_->GetVehicleInfo();
+}
+
 void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
                                          const PTString& hmi_level,
                                           const PTString& rpc,
@@ -369,7 +375,7 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
 }
 
 bool PolicyManagerImpl::CleanupUnpairedDevices() {
-  LOG4CXX_INFO(logger_, "CleanupUnpairedDevices");
+  LOG4CXX_AUTO_TRACE(logger_);
   // For SDL-specific it doesn't matter
   return true;
 }
@@ -382,7 +388,7 @@ DeviceConsent PolicyManagerImpl::GetUserConsentForDevice(
 
 void PolicyManagerImpl::SetUserConsentForDevice(const std::string& device_id,
     bool is_allowed) {
-  LOG4CXX_INFO(logger_, "SetUserConsentForDevice");
+  LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Device :" << device_id);
   DeviceConsent current_consent = GetUserConsentForDevice(device_id);
   bool is_current_device_allowed =
@@ -403,7 +409,7 @@ bool PolicyManagerImpl::ReactOnUserDevConsentForApp(const std::string app_id,
 bool PolicyManagerImpl::GetInitialAppData(const std::string& application_id,
     StringArray* nicknames,
     StringArray* app_hmi_types) {
-  LOG4CXX_INFO(logger_, "GetInitialAppData");
+  LOG4CXX_AUTO_TRACE(logger_);
   const bool result = nicknames && app_hmi_types;
   if (result) {
     cache_->GetInitialAppData(application_id, *nicknames, *app_hmi_types);
@@ -411,9 +417,15 @@ bool PolicyManagerImpl::GetInitialAppData(const std::string& application_id,
   return result;
 }
 
+void PolicyManagerImpl::AddDevice(const std::string& device_id,
+                                  const std::string& connection_type) {
+  LOG4CXX_INFO(logger_, "SetDeviceInfo");
+  LOG4CXX_DEBUG(logger_, "Device :" << device_id);
+}
+
 void PolicyManagerImpl::SetDeviceInfo(const std::string& device_id,
                                       const DeviceInfo& device_info) {
-  LOG4CXX_INFO(logger_, "SetDeviceInfo");
+  LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Device :" << device_id);
 }
 
@@ -454,7 +466,7 @@ PermissionConsent PolicyManagerImpl::EnsureCorrectPermissionConsent(
 void PolicyManagerImpl::CheckPendingPermissionsChanges(
     const std::string& policy_app_id,
     const std::vector<FunctionalGroupPermission>& current_permissions) {
-  LOG4CXX_INFO(logger_, "CheckPendingPermissionsChanges");
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(app_permissions_diff_lock_);
   std::map<std::string, AppPermissions>::iterator it_pending =
       app_permissions_diff_.find(policy_app_id);
@@ -495,18 +507,23 @@ void PolicyManagerImpl::CheckPendingPermissionsChanges(
 
 void PolicyManagerImpl::SetUserConsentForApp(
     const PermissionConsent& permissions) {
-  LOG4CXX_INFO(logger_, "SetUserConsentForApp");
+  LOG4CXX_AUTO_TRACE(logger_);
 }
 
 bool PolicyManagerImpl::GetDefaultHmi(const std::string& policy_app_id,
                                       std::string* default_hmi) {
-  LOG4CXX_INFO(logger_, "GetDefaultHmi");
-  return false;
+  LOG4CXX_AUTO_TRACE(logger_);
+  const std::string device_id = GetCurrentDeviceId(policy_app_id);
+  DeviceConsent device_consent = GetUserConsentForDevice(device_id);
+  const std::string app_id =
+      policy::kDeviceAllowed != device_consent ?  kPreDataConsentId :
+                                                  policy_app_id;
+  return cache_->GetDefaultHMI(app_id, *default_hmi);
 }
 
 bool PolicyManagerImpl::GetPriority(const std::string& policy_app_id,
                                     std::string* priority) {
-  LOG4CXX_INFO(logger_, "GetPriority");
+  LOG4CXX_AUTO_TRACE(logger_);
   if (!priority) {
     LOG4CXX_WARN(logger_, "Input priority parameter is null.");
     return false;
@@ -523,7 +540,7 @@ std::vector<UserFriendlyMessage> PolicyManagerImpl::GetUserFriendlyMessages(
 void PolicyManagerImpl::GetUserConsentForApp(
   const std::string& device_id, const std::string& policy_app_id,
   std::vector<FunctionalGroupPermission>& permissions) {
-  LOG4CXX_INFO(logger_, "GetUserConsentForApp");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   FunctionalIdType group_types;
   if (!cache_->GetPermissionsForApp(device_id, policy_app_id,
@@ -571,7 +588,7 @@ void PolicyManagerImpl::GetUserConsentForApp(
 void PolicyManagerImpl::GetPermissionsForApp(
   const std::string& device_id, const std::string& policy_app_id,
   std::vector<FunctionalGroupPermission>& permissions) {
-  LOG4CXX_INFO(logger_, "GetPermissionsForApp");
+  LOG4CXX_AUTO_TRACE(logger_);
   std::string app_id_to_check = policy_app_id;
 
   bool allowed_by_default = false;
@@ -639,7 +656,7 @@ void PolicyManagerImpl::SetSystemLanguage(const std::string& language) {
 void PolicyManagerImpl::SetSystemInfo(const std::string& ccpu_version,
                                       const std::string& wers_country_code,
                                       const std::string& language) {
-  LOG4CXX_INFO(logger_, "SetSystemInfo");
+  LOG4CXX_AUTO_TRACE(logger_);
 }
 
 void PolicyManagerImpl::OnSystemReady() {
@@ -652,7 +669,7 @@ void PolicyManagerImpl::OnSystemReady() {
 
 uint32_t PolicyManagerImpl::GetNotificationsNumber(
     const std::string& priority) {
-  LOG4CXX_INFO(logger_, "GetNotificationsNumber");
+  LOG4CXX_AUTO_TRACE(logger_);
   return cache_->GetNotificationsNumber(priority);
 }
 
@@ -689,6 +706,7 @@ void PolicyManagerImpl::KmsChanged(int kilometers) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (0 == cache_->KilometersBeforeExchange(kilometers)) {
     LOG4CXX_INFO(logger_, "Enough kilometers passed to send for PT update.");
+    update_status_manager_.ScheduleUpdate();
     StartPTExchange();
   }
 }
@@ -747,43 +765,42 @@ void PolicyManagerImpl::OnExceededTimeout() {
 
 void PolicyManagerImpl::OnUpdateStarted() {
   int update_timeout = TimeoutExchange();
-  LOG4CXX_INFO(logger_, "Update timeout will be set to: " << update_timeout);
+  LOG4CXX_DEBUG(logger_, "Update timeout will be set to (sec): "
+               << update_timeout);
   update_status_manager_.OnUpdateSentOut(update_timeout);
   cache_->SaveUpdateRequired(true);
 }
 
-void PolicyManagerImpl::PTUpdatedAt(int kilometers, int days_after_epoch) {
-  LOG4CXX_INFO(logger_, "PTUpdatedAt");
-  LOG4CXX_INFO(logger_,
-               "Kilometers: " << kilometers << " Days: " << days_after_epoch);
+void PolicyManagerImpl::PTUpdatedAt(Counters counter, int value) {
+  LOG4CXX_AUTO_TRACE(logger_);
   cache_->SetCountersPassedForSuccessfulUpdate(
-    kilometers, days_after_epoch);
+    counter, value);
   cache_->ResetIgnitionCycles();
 }
 
 void PolicyManagerImpl::Increment(usage_statistics::GlobalCounterId type) {
   LOG4CXX_INFO(logger_, "Increment without app id" );
-  sync_primitives::AutoLock locker(statistics_lock_);
+  cache_->Increment(type);
 }
 
 void PolicyManagerImpl::Increment(const std::string& app_id,
                                   usage_statistics::AppCounterId type){
-  LOG4CXX_INFO(logger_, "Increment " << app_id);
-  sync_primitives::AutoLock locker(statistics_lock_);
+  LOG4CXX_DEBUG(logger_, "Increment " << app_id << " AppCounter: " << type);
+  cache_->Increment(app_id, type);
 }
 
 void PolicyManagerImpl::Set(const std::string& app_id,
                             usage_statistics::AppInfoId type,
                             const std::string& value) {
   LOG4CXX_INFO(logger_, "Set " << app_id);
-  sync_primitives::AutoLock locker(statistics_lock_);
+  cache_->Set(app_id, type, value);
 }
 
 void PolicyManagerImpl::Add(const std::string& app_id,
                             usage_statistics::AppStopwatchId type,
                             int32_t timespan_seconds) {
   LOG4CXX_INFO(logger_, "Add " << app_id);
-  sync_primitives::AutoLock locker(statistics_lock_);
+  cache_->Add(app_id, type, timespan_seconds);
 }
 
 bool PolicyManagerImpl::IsApplicationRevoked(const std::string& app_id) const {
@@ -829,8 +846,19 @@ bool PolicyManagerImpl::CanAppStealFocus(const std::string& app_id) {
 void PolicyManagerImpl::MarkUnpairedDevice(const std::string& device_id) {
 }
 
+void PolicyManagerImpl::OnAppRegisteredOnMobile(
+    const std::string& application_id) {
+  SendNotificationOnPermissionsUpdated(application_id);
+  StartPTExchange();
+}
+
+std::string PolicyManagerImpl::RetrieveCertificate() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return cache_->GetCertificate();
+}
+
 void PolicyManagerImpl::AddApplication(const std::string& application_id) {
-  LOG4CXX_INFO(logger_, "AddApplication");
+  LOG4CXX_AUTO_TRACE(logger_);
   const std::string device_id = GetCurrentDeviceId(application_id);
   DeviceConsent device_consent = GetUserConsentForDevice(device_id);
   sync_primitives::AutoLock lock(apps_registration_lock_);
@@ -841,8 +869,6 @@ void PolicyManagerImpl::AddApplication(const std::string& application_id) {
   } else {
     PromoteExistedApplication(application_id, device_consent);
   }
-  StartPTExchange();
-  SendNotificationOnPermissionsUpdated(application_id);
 }
 
 void PolicyManagerImpl::RemoveAppConsentForGroup(const std::string& app_id,
@@ -920,7 +946,7 @@ bool PolicyManagerImpl::InitPT(const std::string& file_name) {
   return ret;
 }
 
-uint16_t PolicyManagerImpl::HeartBeatTimeout(const std::string& app_id) const {
+uint32_t PolicyManagerImpl::HeartBeatTimeout(const std::string& app_id) const {
   return cache_->HeartBeatTimeout(app_id);
 }
 

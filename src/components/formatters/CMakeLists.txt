@@ -38,16 +38,17 @@ include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${COMPONENTS_DIR}/smart_objects/include
+  ${COMPONENTS_DIR}/utils/include
 )
 
 set (SOURCES
-    ${FORMATTERS_SRC_DIR}/CSmartFactory.cpp
+    ${FORMATTERS_SRC_DIR}/CSmartFactory.cc
 )
 
 set (FORMATTER_SOURCES
-   ${FORMATTERS_SRC_DIR}/CFormatterJsonBase.cpp
-   ${FORMATTERS_SRC_DIR}/CFormatterJsonSDLRPCv1.cpp
-   ${FORMATTERS_SRC_DIR}/CFormatterJsonSDLRPCv2.cpp
+   ${FORMATTERS_SRC_DIR}/CFormatterJsonBase.cc
+   ${FORMATTERS_SRC_DIR}/CFormatterJsonSDLRPCv1.cc
+   ${FORMATTERS_SRC_DIR}/CFormatterJsonSDLRPCv2.cc
    ${FORMATTERS_SRC_DIR}/formatter_json_rpc.cc
    ${FORMATTERS_SRC_DIR}/meta_formatter.cc
    ${FORMATTERS_SRC_DIR}/generic_json_formatter.cc

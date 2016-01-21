@@ -42,7 +42,7 @@ namespace time_tester_test {
 using namespace time_tester;
 using ::testing::_;
 
-TEST(ProtocolHandlerObserverTest, DISABLED_MessageProcess) {
+TEST(ProtocolHandlerObserverTest, MessageProcess) {
   TimeManagerMock time_manager_mock;
 
   ProtocolHandlerObserver pr_handler(&time_manager_mock);

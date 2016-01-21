@@ -36,7 +36,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "StreamerListener")
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
 StreamerListener::StreamerListener()
   : current_application_(0) {
@@ -55,7 +55,7 @@ void StreamerListener::OnDataReceived(
 void StreamerListener::OnErrorReceived(
   int32_t application_key,
   const DataForListener& data) {
-  LOG4CXX_ERROR(logger_, "StreamerListener::OnErrorReceived");
+  LOG4CXX_AUTO_TRACE(logger_);
 }
 
 void StreamerListener::OnActivityStarted(int32_t application_key) {

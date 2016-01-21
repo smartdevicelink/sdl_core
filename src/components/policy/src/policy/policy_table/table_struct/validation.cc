@@ -9,7 +9,7 @@ bool IsTypeInvalid(rpc::Enum<rpc::policy_table_interface_base::RequestType> requ
 namespace rpc {
 namespace policy_table_interface_base {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyTableValidation")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
 void RemoveInvalidTypes(RequestTypes& types) {
  types.erase(
