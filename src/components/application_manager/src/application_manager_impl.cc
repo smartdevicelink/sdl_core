@@ -2066,38 +2066,56 @@ void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
                                                SmartObject& ttsName,
                                                SmartObject& vrSynonym) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (app_data.keyExists(json::languages)) {
-    const HMICapabilities& hmi_cap = hmi_capabilities();
-    std::string vr(
-        MessageHelper::CommonLanguageToString(hmi_cap.active_vr_language()));
-    const SmartObject& arr = app_data[json::languages];
-
-    std::transform(vr.begin(), vr.end(), vr.begin(), ::toupper);
-
-    ssize_t default_idx = -1;
-    ssize_t specific_idx = -1;
-
-    const size_t size = arr.length();
-    for (size_t idx = 0; idx < size; ++idx) {
-      if (arr[idx].keyExists(vr)) {
-        specific_idx = idx;
-        break;
-      } else if (arr[idx].keyExists(json::default_)) {
-        default_idx = idx;
-      } else {
-        LOG4CXX_DEBUG(logger_, "Unknown key was specified.");
-      }
-    }
-
-    const ssize_t regular_id = specific_idx != -1 ? specific_idx : default_idx;
-
-    if (regular_id != -1 &&
-        app_data[json::languages][regular_id][vr].keyExists(json::ttsName) &&
-        app_data[json::languages][regular_id][vr].keyExists(json::vrSynonyms)) {
-      ttsName = app_data[json::languages][regular_id][vr][json::ttsName];
-      vrSynonym = app_data[json::languages][regular_id][vr][json::vrSynonyms];
-    }
+  if (!app_data.keyExists(json::languages)) {
+    LOG4CXX_WARN(logger_, "\"languages\" not exists");
+    return;
   }
+
+  const HMICapabilities& hmi_cap = hmi_capabilities();
+  std::string cur_vr_lang(MessageHelper::CommonLanguageToString
+                          (hmi_cap.active_vr_language()));
+  const SmartObject& languages = app_data[json::languages];
+
+  std::transform(cur_vr_lang.begin(), cur_vr_lang.end(), cur_vr_lang.begin(), ::toupper);
+
+  ssize_t default_idx = -1;
+  ssize_t specific_idx = -1;
+
+  const size_t size = languages.length();
+  for (size_t idx = 0; idx < size; ++idx) {
+    if (languages[idx].keyExists(cur_vr_lang)) {
+        LOG4CXX_DEBUG(logger_, "Found active HMI language " << cur_vr_lang);
+        specific_idx = idx;
+    } else if (languages[idx].keyExists(json::default_)) {
+        LOG4CXX_DEBUG(logger_, "Found default language");
+        default_idx = idx;
+      }
+  }
+
+  if ( (-1 == specific_idx) && (-1 == default_idx) ) {
+    LOG4CXX_DEBUG(logger_, "No suitable language found");
+    return;
+  }
+
+  if (app_data[json::languages][specific_idx][cur_vr_lang].keyExists(json::ttsName)) {
+    LOG4CXX_DEBUG(logger_, "Get ttsName from " << cur_vr_lang << " language");
+    ttsName = app_data[json::languages][specific_idx][cur_vr_lang][json::ttsName];
+  } else if (app_data[json::languages][default_idx][json::default_].keyExists(json::ttsName)) {
+      LOG4CXX_DEBUG(logger_, "Get ttsName from " << json::default_ << " language");
+      ttsName = app_data[json::languages][default_idx][json::default_][json::ttsName];
+    } else {
+      LOG4CXX_DEBUG(logger_, "No data for ttsName");
+    }
+
+  if (app_data[json::languages][specific_idx][cur_vr_lang].keyExists(json::vrSynonyms)) {
+    LOG4CXX_DEBUG(logger_, "Get vrSynonyms from " << cur_vr_lang << " language");
+    vrSynonym = app_data[json::languages][specific_idx][cur_vr_lang][json::vrSynonyms];
+  } else if (app_data[json::languages][default_idx][json::default_].keyExists(json::vrSynonyms)) {
+      LOG4CXX_DEBUG(logger_, "Get vrSynonyms from " << json::default_ << " language");
+      vrSynonym = app_data[json::languages][default_idx][json::default_][json::vrSynonyms];
+    } else {
+      LOG4CXX_DEBUG(logger_, "No data for vrSynonyms");
+    }
 }
 
 void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
@@ -2145,11 +2163,12 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
 
     PullLanguagesInfo(app_data[os_type], ttsName, vrSynonym);
 
-    if (ttsName.empty() || vrSynonym.empty()) {
+    if (ttsName.empty()) {
       ttsName = SmartObject(SmartType_Array);
-      vrSynonym = SmartObject(SmartType_Array);
-
       ttsName[0] = appName;
+    }
+    if (vrSynonym.empty()) {
+      vrSynonym = SmartObject(SmartType_Array);
       vrSynonym[0] = appName;
     }
 
