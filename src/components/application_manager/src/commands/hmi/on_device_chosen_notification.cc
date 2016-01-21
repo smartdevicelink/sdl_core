@@ -38,11 +38,10 @@ namespace application_manager {
 namespace commands {
 
 OnDeviceChosenNotification::OnDeviceChosenNotification(
-    const MessageSharedPtr& message) : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {}
 
-OnDeviceChosenNotification::~OnDeviceChosenNotification() {
-}
+OnDeviceChosenNotification::~OnDeviceChosenNotification() {}
 
 void OnDeviceChosenNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -57,4 +56,3 @@ void OnDeviceChosenNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

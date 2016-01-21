@@ -64,6 +64,7 @@ set(testSources
   scope_guard_test.cc
   atomic_object_test.cc
   message_loop_thread_test.cc
+  custom_string_test.cc
 )
 
 set(testLibraries

@@ -37,6 +37,7 @@
 #include <string.h>
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
+#include "utils/custom_string.h"
 
 namespace policy {
 struct DeviceInfo;
@@ -47,6 +48,8 @@ namespace application_manager {
 class Application;
 
 namespace commands {
+
+namespace custom_str = utils::custom_string;
 
 /**
  * @brief Register app interface request  command class
@@ -99,22 +102,21 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
   mobile_apis::Result::eType CheckCoincidence();
 
   /*
-  * @brief Predicate for using with CheckCoincidence method to compare with VR synonym SO
+  * @brief Predicate for using with CheckCoincidence method to compare with VR
+  * synonym SO
   *
   * return TRUE if there is coincidence of VR, otherwise FALSE
   */
   struct CoincidencePredicateVR {
-      explicit CoincidencePredicateVR(const std::string &newItem)
-      :newItem_(newItem)
-      {};
+    explicit CoincidencePredicateVR(const custom_str::CustomString& newItem)
+        : newItem_(newItem){};
 
-      bool operator()(smart_objects::SmartObject obj) {
-        const std::string vr_synonym = obj.asString();
-        return !(strcasecmp(vr_synonym.c_str(), newItem_.c_str()));
-      };
-
-      const std::string &newItem_;
+    bool operator()(const smart_objects::SmartObject& obj) {
+      const custom_str::CustomString& vr_synonym = obj.asCustomString();
+      return newItem_.CompareIgnoreCase(vr_synonym);
     };
+    const custom_str::CustomString& newItem_;
+  };
 
   /**
    * @brief Check request parameters against policy table data
@@ -152,10 +154,9 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
    */
   void SendSubscribeCustomButtonNotification();
 
-private:
+ private:
   std::string response_info_;
   mobile_apis::Result::eType result_checking_app_hmi_type_;
-
 
   DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);
 };

@@ -102,6 +102,7 @@ namespace application_manager {
 namespace mobile_api = mobile_apis;
 using namespace utils;
 using namespace timer;
+namespace custom_str = custom_string;
 
 class ApplicationManagerImpl;
 

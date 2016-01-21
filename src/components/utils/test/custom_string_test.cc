@@ -45,22 +45,30 @@ std::string CreateMultibyteString(uint8_t* array, size_t array_size) {
   return std::string(array, array + array_size);
 }
 
-class CustomStringTest: public ::testing::TestWithParam<std::string> {
+class CustomStringTest : public ::testing::TestWithParam<std::string> {
  protected:
   static void SetUpTestCase() {
     const size_t kSizeStr = 8;
-    uint8_t array[] = {0xD0, 0xA2, 0xD0, 0xB5, 0xD1, 0x81, 0xD1, 0x82};  //Array contains russian word "Тест"
+    uint8_t array[] = {0xD0,
+                       0xA2,
+                       0xD0,
+                       0xB5,
+                       0xD1,
+                       0x81,
+                       0xD1,
+                       0x82};  // Array contains russian word "Тест"
     mbstring1_ = CreateMultibyteString(array, kSizeStr);
     mbstring2_ = mbstring1_ + "abc";
-    amount_symbols_mbstring1_ = 4;  //amount of symbols from string mbstring1_
-    amount_symbols_mbstring2_ = 7;  //amount of symbols from string mbstring2_
+    amount_symbols_mbstring1_ = 4;  // amount of symbols from string mbstring1_
+    amount_symbols_mbstring2_ = 7;  // amount of symbols from string mbstring2_
     amount_bytes_mbstring1_ = mbstring1_.size();
     amount_bytes_mbstring2_ = mbstring2_.size();
-    }
+  }
 
  public:
-  static std::string mbstring1_;  //String contains russian word "Тест"
-  static std::string mbstring2_;  //String contains russian word with ASCII symbols "Тестabc"
+  static std::string mbstring1_;  // String contains russian word "Тест"
+  static std::string
+      mbstring2_;  // String contains russian word with ASCII symbols "Тестabc"
   static size_t amount_symbols_mbstring1_;
   static size_t amount_symbols_mbstring2_;
   static size_t amount_bytes_mbstring1_;
@@ -74,10 +82,8 @@ size_t CustomStringTest::amount_symbols_mbstring2_ = 0;
 size_t CustomStringTest::amount_bytes_mbstring1_ = 0;
 size_t CustomStringTest::amount_bytes_mbstring2_ = 0;
 
-
-
-
-TEST_F(CustomStringTest, AddASCIIStringToCustomString_ExpectCorrectSizeAndIsASCIIStringEQTrue) {
+TEST_F(CustomStringTest,
+       AddASCIIStringToCustomString_ExpectCorrectSizeAndIsASCIIStringEQTrue) {
   std::string str("Test string");
   custom_str::CustomString obj(str);
 
@@ -88,7 +94,8 @@ TEST_F(CustomStringTest, AddASCIIStringToCustomString_ExpectCorrectSizeAndIsASCI
   EXPECT_FALSE(obj.empty());
 }
 
-TEST_F(CustomStringTest, AddEmptyToCustomString_ExpectCorrectSizeAndIsASCIIStringEQTrue) {
+TEST_F(CustomStringTest,
+       AddEmptyToCustomString_ExpectCorrectSizeAndIsASCIIStringEQTrue) {
   std::string str;
   custom_str::CustomString obj(str);
 
@@ -99,19 +106,22 @@ TEST_F(CustomStringTest, AddEmptyToCustomString_ExpectCorrectSizeAndIsASCIIStrin
   EXPECT_TRUE(obj.empty());
 }
 
-TEST_F(CustomStringTest, AddEmptyToCustomString_ExpectCorrectWorkOfMethodAsMBString) {
+TEST_F(CustomStringTest,
+       AddEmptyToCustomString_ExpectCorrectWorkOfMethodAsMBString) {
   std::string str;
   custom_str::CustomString obj(str);
   EXPECT_TRUE(str == obj.AsMBString());
 }
 
-TEST_F(CustomStringTest, AddASCIIStringToCustomString_ExpectCorrectWorkOfMethodAsMBString) {
+TEST_F(CustomStringTest,
+       AddASCIIStringToCustomString_ExpectCorrectWorkOfMethodAsMBString) {
   std::string str("Test string");
   custom_str::CustomString obj(str);
   EXPECT_TRUE(str == obj.AsMBString());
 }
 
-TEST_F(CustomStringTest, AddASCIIStringToCustomString_ExpectCorrectWorkOfAppendOperator) {
+TEST_F(CustomStringTest,
+       AddASCIIStringToCustomString_ExpectCorrectWorkOfAppendOperator) {
   custom_str::CustomString obj("Test string");
   custom_str::CustomString obj1("abc");
   custom_str::CustomString obj_empty;
@@ -130,7 +140,8 @@ TEST_F(CustomStringTest, AddASCIIStringToCustomString_ExpectCorrectWorkOfAppendO
   EXPECT_TRUE(str_result1 == obj_result.AsMBString());
 }
 
-TEST_F(CustomStringTest, AddEmptyStringToCustomString_ExpectCorrectWorkOfAppendOperator) {
+TEST_F(CustomStringTest,
+       AddEmptyStringToCustomString_ExpectCorrectWorkOfAppendOperator) {
   custom_str::CustomString obj_empty;
   custom_str::CustomString obj("abc");
   custom_str::CustomString obj_empty1;
@@ -147,7 +158,9 @@ TEST_F(CustomStringTest, AddEmptyStringToCustomString_ExpectCorrectWorkOfAppendO
   EXPECT_TRUE(str_empty == obj_result.AsMBString());
 }
 
-TEST_F(CustomStringTest, AddASCIIAndEmptyStringToCustomString_ExpectCorrectWorkOfCompareOperator) {
+TEST_F(
+    CustomStringTest,
+    AddASCIIAndEmptyStringToCustomString_ExpectCorrectWorkOfCompareOperator) {
   custom_str::CustomString obj_empty;
   custom_str::CustomString obj_empty1;
   custom_str::CustomString obj("abc");
@@ -164,7 +177,8 @@ TEST_F(CustomStringTest, AddASCIIAndEmptyStringToCustomString_ExpectCorrectWorkO
   EXPECT_FALSE(obj == str_empty);
 }
 
-TEST_F(CustomStringTest, AddASCIIAndEmptyStringToCustomString_ExpectCorrectWorkOfCompareMethod) {
+TEST_F(CustomStringTest,
+       AddASCIIAndEmptyStringToCustomString_ExpectCorrectWorkOfCompareMethod) {
   custom_str::CustomString obj_empty;
   custom_str::CustomString obj("abc");
   std::string str_empty;
@@ -180,7 +194,8 @@ TEST_F(CustomStringTest, AddASCIIAndEmptyStringToCustomString_ExpectCorrectWorkO
   EXPECT_TRUE(obj.compare("abc") == 0);
 }
 
-TEST_F(CustomStringTest, AddASCIIStringToCustomString_ExpectCorrectWorkOfAtMethod) {
+TEST_F(CustomStringTest,
+       AddASCIIStringToCustomString_ExpectCorrectWorkOfAtMethod) {
   std::string str("abc");
   custom_str::CustomString obj(str);
   for (size_t i = 0; i < obj.size(); ++i) {
@@ -188,7 +203,9 @@ TEST_F(CustomStringTest, AddASCIIStringToCustomString_ExpectCorrectWorkOfAtMetho
   }
 }
 
-TEST_F(CustomStringTest, AddASCIIAndEmptyStringToCustomString_ExpectCorrectWorkOfCompareIgnoreCaseMethod) {
+TEST_F(
+    CustomStringTest,
+    AddASCIIAndEmptyStringToCustomString_ExpectCorrectWorkOfCompareIgnoreCaseMethod) {
   custom_str::CustomString obj_empty;
   custom_str::CustomString obj_empty1;
   custom_str::CustomString obj("abc");
@@ -203,13 +220,15 @@ TEST_F(CustomStringTest, AddASCIIAndEmptyStringToCustomString_ExpectCorrectWorkO
   EXPECT_FALSE(obj.CompareIgnoreCase(obj_empty));
 }
 
-TEST_F(CustomStringTest, AddASCIIStringToCustomString_ExpectCorrectWorkOfToWStringMethod) {
+TEST_F(CustomStringTest,
+       AddASCIIStringToCustomString_ExpectCorrectWorkOfToWStringMethod) {
   custom_str::CustomString obj("abc");
   std::wstring wstr(L"abc");
   EXPECT_TRUE(wstr == obj.ToWString());
 }
 
-TEST_F(CustomStringTest, AddUTF8StringToCustomString_ExpectCorrectSizeAndIsASCIIStringEQFalse) {
+TEST_F(CustomStringTest,
+       AddUTF8StringToCustomString_ExpectCorrectSizeAndIsASCIIStringEQFalse) {
   custom_str::CustomString obj(CustomStringTest::mbstring1_);
   EXPECT_EQ(obj.size(), CustomStringTest::amount_symbols_mbstring1_);
   EXPECT_EQ(obj.length(), CustomStringTest::amount_symbols_mbstring1_);
@@ -217,7 +236,9 @@ TEST_F(CustomStringTest, AddUTF8StringToCustomString_ExpectCorrectSizeAndIsASCII
   EXPECT_FALSE(obj.is_ascii_string());
 }
 
-TEST_F(CustomStringTest, AddMixingUTF8WithASCIIStringToCustomString_ExpectCorrectSizeAndIsASCIIStringEQFalse) {
+TEST_F(
+    CustomStringTest,
+    AddMixingUTF8WithASCIIStringToCustomString_ExpectCorrectSizeAndIsASCIIStringEQFalse) {
   custom_str::CustomString obj(CustomStringTest::mbstring2_);
   EXPECT_EQ(obj.size(), CustomStringTest::amount_symbols_mbstring2_);
   EXPECT_EQ(obj.length(), CustomStringTest::amount_symbols_mbstring2_);
@@ -225,14 +246,17 @@ TEST_F(CustomStringTest, AddMixingUTF8WithASCIIStringToCustomString_ExpectCorrec
   EXPECT_FALSE(obj.is_ascii_string());
 }
 
-TEST_F(CustomStringTest, AddUTF8StringAndMixingUTF8WithASCIIToCustomString_ExpectCorrectWorkOfMethodAsMBString) {
+TEST_F(
+    CustomStringTest,
+    AddUTF8StringAndMixingUTF8WithASCIIToCustomString_ExpectCorrectWorkOfMethodAsMBString) {
   custom_str::CustomString obj(CustomStringTest::mbstring1_);
   custom_str::CustomString obj1(CustomStringTest::mbstring2_);
   EXPECT_TRUE(CustomStringTest::mbstring1_ == obj.AsMBString());
   EXPECT_TRUE(CustomStringTest::mbstring2_ == obj1.AsMBString());
 }
 
-TEST_F(CustomStringTest, AddUTF8StringToCustomString_ExpectCorrectConvertingToWString) {
+TEST_F(CustomStringTest,
+       AddUTF8StringToCustomString_ExpectCorrectConvertingToWString) {
   custom_str::CustomString obj(CustomStringTest::mbstring1_);
   custom_str::CustomString obj1(CustomStringTest::mbstring2_);
   std::wstring wstr1(L"Тест");
@@ -241,7 +265,9 @@ TEST_F(CustomStringTest, AddUTF8StringToCustomString_ExpectCorrectConvertingToWS
   EXPECT_TRUE(wstr2 == obj1.ToWString());
 }
 
-TEST_F(CustomStringTest, AddSameMultiByteStringsToCustomString_ExpectCorrectCaseSensetiveComparing) {
+TEST_F(
+    CustomStringTest,
+    AddSameMultiByteStringsToCustomString_ExpectCorrectCaseSensetiveComparing) {
   custom_str::CustomString obj(CustomStringTest::mbstring1_);
   custom_str::CustomString obj_1(CustomStringTest::mbstring1_);
   EXPECT_TRUE(obj == obj_1);
@@ -250,7 +276,9 @@ TEST_F(CustomStringTest, AddSameMultiByteStringsToCustomString_ExpectCorrectCase
   EXPECT_EQ(0, obj.compare(CustomStringTest::mbstring1_));
 }
 
-TEST_F(CustomStringTest, AddDiferenceMultiByteStringsToCustomString_ExpectCorrectCaseSensetiveComparing) {
+TEST_F(
+    CustomStringTest,
+    AddDiferenceMultiByteStringsToCustomString_ExpectCorrectCaseSensetiveComparing) {
   custom_str::CustomString obj(CustomStringTest::mbstring1_);
   custom_str::CustomString obj1(CustomStringTest::mbstring2_);
   EXPECT_FALSE(obj == obj1);
@@ -258,16 +286,27 @@ TEST_F(CustomStringTest, AddDiferenceMultiByteStringsToCustomString_ExpectCorrec
   EXPECT_TRUE(obj.compare(CustomStringTest::mbstring2_) != 0);
 }
 
-TEST_F(CustomStringTest, AddDiferenceMultiByteStringsToCustomString_ExpectCorrectCaseInsensitiveComparing) {
+TEST_F(
+    CustomStringTest,
+    AddDiferenceMultiByteStringsToCustomString_ExpectCorrectCaseInsensitiveComparing) {
   custom_str::CustomString obj(CustomStringTest::mbstring1_);
   custom_str::CustomString obj1(CustomStringTest::mbstring2_);
   EXPECT_FALSE(obj.CompareIgnoreCase(obj1));
   EXPECT_FALSE(obj.CompareIgnoreCase(CustomStringTest::mbstring2_.c_str()));
 }
 
-TEST_F(CustomStringTest, AddSameMultiByteStringsToCustomString_ExpectCorrectCaseInsensitiveComparing) {
+TEST_F(
+    CustomStringTest,
+    AddSameMultiByteStringsToCustomString_ExpectCorrectCaseInsensitiveComparing) {
   const size_t kSizeStr = 8;
-  uint8_t array[] = {0xD1, 0x82, 0xD0, 0xB5, 0xD1, 0x81, 0xD0, 0xA2};  //String contains russian word "тесТ"
+  uint8_t array[] = {0xD1,
+                     0x82,
+                     0xD0,
+                     0xB5,
+                     0xD1,
+                     0x81,
+                     0xD0,
+                     0xA2};  // String contains russian word "тесТ"
   std::string mbstring = CreateMultibyteString(array, kSizeStr);
   custom_str::CustomString obj(CustomStringTest::mbstring1_);
   custom_str::CustomString obj1(mbstring);
@@ -278,4 +317,3 @@ TEST_F(CustomStringTest, AddSameMultiByteStringsToCustomString_ExpectCorrectCase
 }  // namespace utils
 }  // namespace components
 }  // namespace test
-

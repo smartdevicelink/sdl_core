@@ -293,7 +293,7 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
       MessageHelper::GetDeviceMacAddressForHandle(application->device()),
       saved_app);
   if (result) {
-    const std::string saved_hash = saved_app[strings::hash_id].asString();
+    const std::string& saved_hash = saved_app[strings::hash_id].asString();
     result = saved_hash == hash ? RestoreApplicationData(application) : false;
     application->UpdateHash();
     AddToResumptionTimerQueue(application->app_id());

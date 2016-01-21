@@ -1,6 +1,6 @@
 /*
 
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -42,18 +42,16 @@ namespace application_manager {
 namespace commands {
 
 DialNumberRequest::DialNumberRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+    : CommandRequestImpl(message) {}
 
-DialNumberRequest::~DialNumberRequest() {
-}
+DialNumberRequest::~DialNumberRequest() {}
 
-bool DialNumberRequest::Init(){
-    LOG4CXX_AUTO_TRACE(logger_);
+bool DialNumberRequest::Init() {
+  LOG4CXX_AUTO_TRACE(logger_);
 
-    default_timeout_ = 0;
+  default_timeout_ = 0;
 
-    return true;
+  return true;
 }
 
 void DialNumberRequest::Run() {
@@ -67,30 +65,31 @@ void DialNumberRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
-  std::string number = (*message_)[strings::msg_params][strings::number].asString();
+  std::string number =
+      (*message_)[strings::msg_params][strings::number].asString();
   if (!CheckSyntax(number)) {
-      LOG4CXX_ERROR(logger_, "Invalid incoming data");
-      SendResponse(false, mobile_apis::Result::INVALID_DATA);
-      return;
-  }
-  StripNumberParam(number);
-  if (number.empty()) {
-    LOG4CXX_WARN(logger_, "After strip number param is empty. Invalid incoming data");
+    LOG4CXX_ERROR(logger_, "Invalid incoming data");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  StripNumberParam(number);
+  if (number.empty()) {
+    LOG4CXX_WARN(logger_,
+                 "After strip number param is empty. Invalid incoming data");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::number] =
-    (*message_)[strings::msg_params][strings::number].asString();
+      (*message_)[strings::msg_params][strings::number].asString();
   msg_params[strings::app_id] = application->hmi_app_id();
 
-  SendHMIRequest(hmi_apis::FunctionID::BasicCommunication_DialNumber,
-                 &msg_params, true);
+  SendHMIRequest(
+      hmi_apis::FunctionID::BasicCommunication_DialNumber, &msg_params, true);
 }
 
 void DialNumberRequest::on_event(const event_engine::Event& event) {
-
   ApplicationSharedPtr application =
       ApplicationManagerImpl::instance()->application(connection_key());
 
@@ -104,13 +103,13 @@ void DialNumberRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::BasicCommunication_DialNumber: {
       LOG4CXX_INFO(logger_, "Received DialNumber event");
-      result_code =  CommandRequestImpl::GetMobileResultCode(
-        static_cast<hmi_apis::Common_Result::eType>(
-          message[strings::params][hmi_response::code].asInt()));
+      result_code = CommandRequestImpl::GetMobileResultCode(
+          static_cast<hmi_apis::Common_Result::eType>(
+              message[strings::params][hmi_response::code].asInt()));
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
       return;
     }
   }
@@ -129,12 +128,13 @@ void DialNumberRequest::on_event(const event_engine::Event& event) {
   SendResponse(is_success, result_code);
 }
 
-void DialNumberRequest::StripNumberParam(std::string &number) {
-    std::size_t found = 0;
-    while (std::string::npos != (found = number.find_first_not_of("+0123456789"))) {
-      number.erase(number.begin() + found);
-    }
-    (*message_)[strings::msg_params][strings::number] = number;
+void DialNumberRequest::StripNumberParam(std::string& number) {
+  std::size_t found = 0;
+  while (std::string::npos !=
+         (found = number.find_first_not_of("+0123456789"))) {
+    number.erase(number.begin() + found);
+  }
+  (*message_)[strings::msg_params][strings::number] = number;
 }
 
 }  // namespace commands

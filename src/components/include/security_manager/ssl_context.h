@@ -37,6 +37,7 @@
 #include <string>
 #include <ctype.h>
 #include <algorithm>
+#include "utils/custom_string.h"
 
 // TODO(EZamakhov): update brief info
 /**
@@ -55,11 +56,13 @@
  *
  * \param in_data        [in]   data sent by other side
  * \param in_data_size   [in]   size of data in \ref in_data buffer
- * \param out_data       [out]  response of SSL context if there is one. If not, equals NULL
+ * \param out_data       [out]  response of SSL context if there is one. If not,
+ * equals NULL
  * \param out_data_size  [out]  length of response. On no response, equals 0
  */
 
 namespace security_manager {
+namespace custom_str = utils::custom_string;
 class SSLContext {
  public:
   enum HandshakeResult {
@@ -74,42 +77,39 @@ class SSLContext {
   };
 
   struct HandshakeContext {
-    std::string expected_sn;
-    std::string expected_cn;
+    custom_str::CustomString expected_sn;
+    custom_str::CustomString expected_cn;
 
-    HandshakeContext& make_context(const std::string& sn,
-                                  const std::string& cn) {
+    HandshakeContext& make_context(const custom_str::CustomString& sn,
+                                   const custom_str::CustomString& cn) {
       expected_sn = sn;
       expected_cn = cn;
-
-      std::transform(expected_sn.begin(), expected_sn.end(),
-                     expected_sn.begin(), ::tolower);
-
-      std::transform(expected_cn.begin(), expected_cn.end(),
-                     expected_cn.begin(), ::tolower);
       return *this;
     }
   };
 
   virtual HandshakeResult StartHandshake(const uint8_t** const out_data,
-                                         size_t *out_data_size) = 0;
-  virtual HandshakeResult DoHandshakeStep(const uint8_t *const in_data,
+                                         size_t* out_data_size) = 0;
+  virtual HandshakeResult DoHandshakeStep(const uint8_t* const in_data,
                                           size_t in_data_size,
                                           const uint8_t** const out_data,
-                                          size_t *out_data_size) = 0;
-  virtual bool Encrypt(const uint8_t *const in_data,    size_t in_data_size,
-                       const uint8_t ** const out_data, size_t *out_data_size) = 0;
-  virtual bool Decrypt(const uint8_t *const in_data,    size_t in_data_size,
-                       const uint8_t ** const out_data, size_t *out_data_size) = 0;
-  virtual bool  IsInitCompleted() const = 0;
-  virtual bool  IsHandshakePending() const = 0;
+                                          size_t* out_data_size) = 0;
+  virtual bool Encrypt(const uint8_t* const in_data,
+                       size_t in_data_size,
+                       const uint8_t** const out_data,
+                       size_t* out_data_size) = 0;
+  virtual bool Decrypt(const uint8_t* const in_data,
+                       size_t in_data_size,
+                       const uint8_t** const out_data,
+                       size_t* out_data_size) = 0;
+  virtual bool IsInitCompleted() const = 0;
+  virtual bool IsHandshakePending() const = 0;
   virtual size_t get_max_block_size(size_t mtu) const = 0;
   virtual std::string LastError() const = 0;
 
   virtual void ResetConnection() = 0;
   virtual void SetHandshakeContext(const HandshakeContext& hsh_ctx) = 0;
-  virtual ~SSLContext() { }
-
+  virtual ~SSLContext() {}
 };
 }  // namespace security_manager
 #endif  // SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SSL_CONTEXT_H_

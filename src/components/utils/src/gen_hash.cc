@@ -31,17 +31,18 @@
  */
 
 #include "utils/gen_hash.h"
-
 #include <cstdlib>
 #include <string>
 #include <locale>
+#include "utils/custom_string.h"
 
 namespace utils {
 
 const std::string gen_hash(size_t size) {
-  static const char symbols[] = "0123456789"
-                                "abcdefghijklmnopqrstuvwxyz"
-                                "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  static const char symbols[] =
+      "0123456789"
+      "abcdefghijklmnopqrstuvwxyz"
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   static const size_t capacity = sizeof(symbols) - 1;
 
   std::string hash(size, '\0');
@@ -57,7 +58,7 @@ int32_t Djb2HashFromString(const std::string& str_to_hash) {
   std::string::const_iterator it = str_to_hash.begin();
   std::string::const_iterator it_end = str_to_hash.end();
 
-  for (;it != it_end; ++it) {
+  for (; it != it_end; ++it) {
     hash = ((hash << 5) + hash) + (*it);
   }
 
@@ -67,12 +68,12 @@ int32_t Djb2HashFromString(const std::string& str_to_hash) {
   return result;
 }
 
-uint32_t Faq6HashFromString(const std::string& str_to_hash) {
+uint32_t CaseInsensitiveFaq6HashFromString(const char* cstr) {
   uint32_t hash = 0;
-  const char* cstr = str_to_hash.c_str();
-
+  std::locale loc;
   for (; *cstr; ++cstr) {
-    hash += (uint32_t)(*cstr);
+    char lower_char = std::tolower(*cstr, loc);
+    hash += static_cast<uint32_t>(lower_char);
     hash += (hash << 10);
     hash ^= (hash >> 6);
   }
@@ -84,21 +85,22 @@ uint32_t Faq6HashFromString(const std::string& str_to_hash) {
 }
 
 uint32_t CaseInsensitiveFaq6HashFromString(
-    const std::string& str_to_hash) {
+    const custom_string::CustomString& str_to_hash) {
   uint32_t hash = 0;
-  const char* cstr = str_to_hash.c_str();
-  std::locale loc;
-
-  for (; *cstr; ++cstr) {
-    char lower_char = std::tolower(*cstr, loc);
-    hash += (uint32_t)(lower_char);
-    hash += (hash << 10);
-    hash ^= (hash >> 6);
+  if (str_to_hash.is_ascii_string()) {
+    hash = CaseInsensitiveFaq6HashFromString(str_to_hash.c_str());
+  } else {
+    const std::wstring& wstr = str_to_hash.ToWStringLowerCase();
+    size_t size = wstr.size();
+    for (size_t i = 0; i < size; ++i) {
+      hash += static_cast<uint32_t>(wstr[i]);
+      hash += (hash << 10);
+      hash ^= (hash >> 6);
+    }
+    hash += (hash << 3);
+    hash ^= (hash >> 11);
+    hash += (hash << 15);
   }
-  hash += (hash << 3);
-  hash ^= (hash >> 11);
-  hash += (hash << 15);
-
   return hash;
 }
 
