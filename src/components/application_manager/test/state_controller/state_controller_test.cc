@@ -556,7 +556,8 @@ class StateControllerTest : public ::testing::Test {
     namespace AudioStreamingState = mobile_apis::AudioStreamingState;
     namespace SystemContext = mobile_apis::SystemContext;
     // Valid states for not audio app
-    message_helper_mock_ = new application_manager::MockMessageHelper;
+    message_helper_mock_ =
+            application_manager::MockMessageHelper::message_helper_mock();
     valid_states_for_not_audio_app_.push_back(
         createHmiState(HMILevel::HMI_NONE,
                        AudioStreamingState::NOT_AUDIBLE,
@@ -795,10 +796,6 @@ class StateControllerTest : public ::testing::Test {
     ConfigureApps();
     CheckAppConfiguration();
     FillStatesLists();
-  }
-
-  void TearDown() {
-    delete message_helper_mock_;
   }
 
   void ExpectSuccesfullSetHmiState(am::ApplicationSharedPtr app,
