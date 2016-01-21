@@ -1391,25 +1391,18 @@ bool MessageHelper::CreateHMIApplicationStruct(
   if (!icon_path.empty()) {
     output[strings::icon] = icon_path;
   }
-
   if (app->IsRegistered()) {
     output[strings::hmi_display_language_desired] = app->ui_language();
     output[strings::is_media_application] = app->is_media_application();
   } else {
     output[strings::greyOut] = app->is_greyed_out();
-    const SmartObject* app_tts_name = app->tts_name();
-    if (!app_tts_name->empty()) {
-      SmartObject output_tts_name = SmartObject(SmartType_Array);
-      output_tts_name[0][strings::text] = *(app->tts_name());
-      output_tts_name[0][strings::type] =
-          hmi_apis::Common_SpeechCapabilities::SC_TEXT;
-      output[json::ttsName] = output_tts_name;
-    }
-    if (!app->vr_synonyms()->empty()) {
-      output[json::vrSynonyms] = *(app->vr_synonyms());
-    }
   }
-
+  if (app->tts_name()) {
+    output[json::ttsName] = *(app->tts_name());
+  }
+  if (app->vr_synonyms()) {
+    output[json::vrSynonyms] = *(app->vr_synonyms());
+  }
   if (ngn_media_screen_name) {
     output[strings::ngn_media_screen_app_name] =
         ngn_media_screen_name->asString();
