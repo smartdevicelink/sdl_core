@@ -35,6 +35,8 @@
 
 #include "utils/signals.h"
 
+// Can't be covered by test because is sysAPI
+// and for test it need sysAPI
 bool utils::UnsibscribeFromTermination() {
   // Disable some system signals receiving in thread
   // by blocking those signals
@@ -65,6 +67,8 @@ void CatchSIGSEGV(sighandler_t handler) {
 }
 }  // namespace
 
+// Can't be covered by unit test because this function
+// freezing thread until get signal from another thread
 bool utils::WaitTerminationSignals(sighandler_t sig_handler) {
   sigset_t signal_set;
   int sig = -1;
@@ -75,18 +79,18 @@ bool utils::WaitTerminationSignals(sighandler_t sig_handler) {
   sigaddset(&signal_set, SIGSEGV);
 
   if (!sigwait(&signal_set, &sig)) {
-      // unblock SIGSEGV to catch him later
-      sigemptyset(&signal_set);
-      sigaddset(&signal_set, SIGSEGV);
-      pthread_sigmask(SIG_UNBLOCK, &signal_set, NULL);
+    // unblock SIGSEGV to catch him later
+    sigemptyset(&signal_set);
+    sigaddset(&signal_set, SIGSEGV);
+    pthread_sigmask(SIG_UNBLOCK, &signal_set, NULL);
 
-      // Catch possible crashes on exit
-      // after e.g. sigint was caught
-      if (sig != SIGSEGV) {
-        CatchSIGSEGV(sig_handler);
-      }
-      sig_handler(sig);
-      return true;
+    // Catch possible crashes on exit
+    // after e.g. sigint was caught
+    if (sig != SIGSEGV) {
+      CatchSIGSEGV(sig_handler);
+    }
+    sig_handler(sig);
+    return true;
   }
   return false;
 }
