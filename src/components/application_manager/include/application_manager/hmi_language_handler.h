@@ -50,45 +50,33 @@ public:
   typedef std::map<uint32_t, bool> Apps;
 
   /**
+  * @brief System interfaces
+  */
+  enum Interface {
+    INTERFACE_UI,
+    INTERFACE_VR,
+    INTERFACE_TTS
+  };
+
+  /**
    * @brief Class constructor
    */
   HMILanguageHandler();
 
   /**
-   * @brief Sets UI language value in persistent storage
-   * @param language UI language
+   * @brief Sets language for interface
+   * @param interface Interface
+   * @param language Language
    */
-  void set_ui_language(hmi_apis::Common_Language::eType language);
+  void set_language_for(Interface interface,
+                        hmi_apis::Common_Language::eType language);
 
   /**
-   * @brief Sets VR language value in persistent storage
-   * @param language VR language
+   * @brief Gets language for interface
+   * @param interface Interface
+   * @return Language
    */
-  void set_vr_language(hmi_apis::Common_Language::eType language);
-
-  /**
-   * @brief Sets TTS language value in persistent storage
-   * @param language TTS language
-   */
-  void set_tts_language(hmi_apis::Common_Language::eType language);
-
-  /**
-   * @brief Gets UI language value from persistent storage
-   * @return UI language
-   */
-  hmi_apis::Common_Language::eType get_ui_language() const;
-
-  /**
-   * @brief Gets VR language from persistent storage
-   * @return VR language
-   */
-  hmi_apis::Common_Language::eType get_vr_language() const;
-
-  /**
-   * @brief Gets TTS language value from persistent storage
-   * @return TTS language
-   */
-  hmi_apis::Common_Language::eType get_tts_language() const;
+  hmi_apis::Common_Language::eType get_language_for(Interface interface) const;
 
   void on_event(const event_engine::Event& event) OVERRIDE;
 
@@ -122,7 +110,7 @@ private:
    * have been received
    * @param app_id Application id
    */
-  void HandleWrongLanguageApp(const Apps::value_type app_id);
+  void HandleWrongLanguageApp(const Apps::value_type& app_id);
 
   /**
    * @brief Checks if application needs to be handled because of language(s)

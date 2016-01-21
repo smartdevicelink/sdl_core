@@ -54,75 +54,66 @@ HMILanguageHandler::HMILanguageHandler()  :
     is_vr_language_received_(false),
     is_tts_language_received_(false) {
 
-  persisted_ui_language_ = get_ui_language();
-  persisted_vr_language_ = get_vr_language();
-  persisted_tts_language_ = get_tts_language();
+  persisted_ui_language_ = get_language_for(INTERFACE_UI);
+  persisted_vr_language_ = get_language_for(INTERFACE_VR);
+  persisted_tts_language_ = get_language_for(INTERFACE_TTS);
 
   subscribe_on_event(
         hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
 }
 
-void HMILanguageHandler::set_ui_language(
-      hmi_apis::Common_Language::eType language) {
+void HMILanguageHandler::set_language_for(
+    HMILanguageHandler::Interface interface,
+    hmi_apis::Common_Language::eType language) {
   LOG4CXX_AUTO_TRACE(logger_);
-  resumption::LastState::instance()->dictionary[LanguagesKey][UIKey] = language;
-}
-
-void HMILanguageHandler::set_vr_language(
-      hmi_apis::Common_Language::eType language) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  resumption::LastState::instance()->dictionary[LanguagesKey][VRKey] = language;
-}
-
-void HMILanguageHandler::set_tts_language(
-      hmi_apis::Common_Language::eType language) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  resumption::LastState::instance()->dictionary[LanguagesKey][TTSKey] = language;
-}
-
-hmi_apis::Common_Language::eType HMILanguageHandler::get_ui_language() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  using namespace resumption;
-  using namespace hmi_apis;
-  if (LastState::instance()->dictionary.isMember(LanguagesKey)) {
-    if (LastState::instance()->dictionary[LanguagesKey].isMember(UIKey)) {
-      Common_Language::eType ui_language =
-          static_cast<Common_Language::eType>(
-          LastState::instance()->dictionary[LanguagesKey][UIKey].asInt());
-
-      return ui_language;
+  std::string key = "UNKNOWN";
+  switch (interface) {
+    case INTERFACE_UI:
+      key = UIKey;
+      break;
+    case INTERFACE_VR:
+      key = VRKey;
+      break;
+    case INTERFACE_TTS:
+      key = TTSKey;
+      break;
+    default:
+      LOG4CXX_WARN(logger_, "Unknown interface has been passed " << interface);
+      return;
     }
-  }
-  return Common_Language::INVALID_ENUM;
+  LOG4CXX_DEBUG(logger_, "Setting language " << language
+               << " for interface " << interface);
+  resumption::LastState::instance()->dictionary[LanguagesKey][key] = language;
+  return;
 }
 
-hmi_apis::Common_Language::eType HMILanguageHandler::get_vr_language() const {
+hmi_apis::Common_Language::eType HMILanguageHandler::get_language_for(
+    HMILanguageHandler::Interface interface) const {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace resumption;
   using namespace hmi_apis;
-  if (LastState::instance()->dictionary.isMember(LanguagesKey)) {
-    if (LastState::instance()->dictionary[LanguagesKey].isMember(VRKey)) {
-      Common_Language::eType vr_language =
-          static_cast<Common_Language::eType>(
-          LastState::instance()->dictionary[LanguagesKey][VRKey].asInt());
-
-      return vr_language;
-    }
+  std::string key = "UNKNOWN";
+  switch (interface) {
+    case INTERFACE_UI:
+      key = UIKey;
+      break;
+    case INTERFACE_VR:
+      key = VRKey;
+      break;
+    case INTERFACE_TTS:
+      key = TTSKey;
+      break;
+    default:
+      LOG4CXX_WARN(logger_, "Unknown interfcase has been passed " << interface);
+      return Common_Language::INVALID_ENUM;
   }
-  return Common_Language::INVALID_ENUM;
-}
 
-hmi_apis::Common_Language::eType HMILanguageHandler::get_tts_language() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  using namespace resumption;
-  using namespace hmi_apis;
   if (LastState::instance()->dictionary.isMember(LanguagesKey)) {
-    if (LastState::instance()->dictionary[LanguagesKey].isMember(TTSKey)) {
-      Common_Language::eType tts_language =
+    if (LastState::instance()->dictionary[LanguagesKey].isMember(key)) {
+      Common_Language::eType language =
           static_cast<Common_Language::eType>(
-          LastState::instance()->dictionary[LanguagesKey][TTSKey].asInt());
-
-      return tts_language;
+          LastState::instance()->dictionary[LanguagesKey][key].asUInt());
+      return language;
     }
   }
   return Common_Language::INVALID_ENUM;
@@ -228,7 +219,7 @@ void HMILanguageHandler::set_default_capabilities_languages(
 void HMILanguageHandler::VerifyWithPersistedLanguages() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
-  HMICapabilities& hmi_capabilities =
+  const HMICapabilities& hmi_capabilities =
         ApplicationManagerImpl::instance()->hmi_capabilities();
 
   // Updated values compared with persisted
@@ -246,7 +237,7 @@ void HMILanguageHandler::VerifyWithPersistedLanguages() {
   ApplicationManagerImpl::ApplicationListAccessor accessor;
   ApplicationSetIt it = accessor.begin();
   for (; accessor.end() != it;) {
-    ApplicationSharedPtr app = *it++;
+    ApplicationConstSharedPtr app = *it++;
 
     LOG4CXX_INFO(logger_, "Application with app_id " << app->app_id()
                  << " will be unregistered because of "
@@ -256,15 +247,14 @@ void HMILanguageHandler::VerifyWithPersistedLanguages() {
   }
 
   sync_primitives::AutoLock lock(apps_lock_);
-  if (!apps_.size()) {
+  if (0 == apps_.size()) {
     LOG4CXX_DEBUG(logger_,
                   "No registered apps found. Unsubscribing from all events.");
     unsubscribe_from_all_events();
   }
 }
 
-void HMILanguageHandler::HandleWrongLanguageApp(
-      const Apps::value_type app) {
+void HMILanguageHandler::HandleWrongLanguageApp(const Apps::value_type& app) {
   LOG4CXX_AUTO_TRACE(logger_);
   Apps::iterator it = apps_.find(app.first);
   if (apps_.end() == it) {
@@ -283,7 +273,7 @@ void HMILanguageHandler::HandleWrongLanguageApp(
   ApplicationManagerImpl::instance()->
       UnregisterApplication(app.first, mobile_apis::Result::SUCCESS, false);
   apps_.erase(it);
-  if (!apps_.size()) {
+  if (0 == apps_.size()) {
     LOG4CXX_DEBUG(logger_,
                   "All apps processed. Unsubscribing from all events.");
     unsubscribe_from_all_events();

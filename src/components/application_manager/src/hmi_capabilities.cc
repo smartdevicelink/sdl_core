@@ -332,7 +332,7 @@ void HMICapabilities::set_is_vr_cooperating(bool value) {
   if (is_vr_cooperating_) {
     utils::SharedPtr<smart_objects::SmartObject> get_language(
       MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage));
-    hmi_language_handler_.set_handle_response_for(*get_language.get());
+    hmi_language_handler_.set_handle_response_for(*get_language);
     app_mngr_->ManageHMICommand(get_language);
     utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
         MessageHelper::CreateModuleInfoSO(
@@ -352,7 +352,7 @@ void HMICapabilities::set_is_tts_cooperating(bool value) {
     utils::SharedPtr<smart_objects::SmartObject> get_language(
       MessageHelper::CreateModuleInfoSO(
         hmi_apis::FunctionID::TTS_GetLanguage));
-    hmi_language_handler_.set_handle_response_for(*get_language.get());
+    hmi_language_handler_.set_handle_response_for(*get_language);
     app_mngr_->ManageHMICommand(get_language);
     utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
         MessageHelper::CreateModuleInfoSO(
@@ -372,7 +372,7 @@ void HMICapabilities::set_is_ui_cooperating(bool value) {
     utils::SharedPtr<smart_objects::SmartObject> get_language(
       MessageHelper::CreateModuleInfoSO(
         hmi_apis::FunctionID::UI_GetLanguage));
-    hmi_language_handler_.set_handle_response_for(*get_language.get());
+    hmi_language_handler_.set_handle_response_for(*get_language);
     app_mngr_->ManageHMICommand(get_language);
     utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
         MessageHelper::CreateModuleInfoSO(
@@ -408,26 +408,29 @@ void HMICapabilities::set_attenuated_supported(bool state) {
 void HMICapabilities::set_active_ui_language(
     const hmi_apis::Common_Language::eType& language) {
   ui_language_ = language;
-  hmi_language_handler_.set_ui_language(language);
+  hmi_language_handler_.set_language_for(HMILanguageHandler::INTERFACE_UI,
+                                         language);
 }
 
 void HMICapabilities::set_active_vr_language(
     const hmi_apis::Common_Language::eType& language) {
   vr_language_ = language;
-  hmi_language_handler_.set_vr_language(language);
+  hmi_language_handler_.set_language_for(HMILanguageHandler::INTERFACE_VR,
+                                         language);
 }
 
 void HMICapabilities::set_active_tts_language(
     const hmi_apis::Common_Language::eType& language) {
   tts_language_ = language;
-  hmi_language_handler_.set_tts_language(language);
+  hmi_language_handler_.set_language_for(HMILanguageHandler::INTERFACE_TTS,
+                                         language);
 }
 
 const hmi_apis::Common_Language::eType
 HMICapabilities::active_ui_language() const {
   using namespace hmi_apis;
   const Common_Language::eType language =
-      hmi_language_handler_.get_ui_language();
+      hmi_language_handler_.get_language_for(HMILanguageHandler::INTERFACE_UI);
   return Common_Language::INVALID_ENUM != language ? language : ui_language_;
 }
 
@@ -435,7 +438,7 @@ const hmi_apis::Common_Language::eType
 HMICapabilities::active_vr_language() const {
   using namespace hmi_apis;
   const Common_Language::eType language =
-      hmi_language_handler_.get_vr_language();
+      hmi_language_handler_.get_language_for(HMILanguageHandler::INTERFACE_VR);
   return Common_Language::INVALID_ENUM != language ? language : vr_language_;
 }
 
@@ -443,7 +446,7 @@ const hmi_apis::Common_Language::eType
 HMICapabilities::active_tts_language() const {
   using namespace hmi_apis;
   const Common_Language::eType language =
-      hmi_language_handler_.get_tts_language();
+      hmi_language_handler_.get_language_for(HMILanguageHandler::INTERFACE_TTS);
   return Common_Language::INVALID_ENUM != language ? language : tts_language_;
 }
 

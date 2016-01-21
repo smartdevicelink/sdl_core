@@ -125,7 +125,11 @@ class MessageHelper {
       int32_t connection_key,
       mobile_apis::AppInterfaceUnregisteredReason::eType reason);
 
-    static void SendOnLanguageChangeToMobile(int32_t connection_key);
+    /**
+     * @brief Sends OnLanguageChange notification to application
+     * @param connection_key Connection key of application
+     */
+    static void SendOnLanguageChangeToMobile(uint32_t connection_key);
 
     /*
      * @brief Retrieve vehicle data map for param name in mobile request
@@ -615,7 +619,7 @@ class MessageHelper {
      * @return Mobile language string representation
      */
     static std::string MobileLanguageToString(
-            mobile_apis::Language::eType language);
+            const mobile_apis::Language::eType language);
 
     /**
      * @brief Converts string to mobile language enum value

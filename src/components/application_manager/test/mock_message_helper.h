@@ -118,12 +118,22 @@ class MockMessageHelper {
   MOCK_METHOD2(SendOnAppInterfaceUnregisteredNotificationToMobile,
                void(int32_t connection_key,
                     mobile_apis::AppInterfaceUnregisteredReason::eType reason));
-  MOCK_METHOD1(CommonLanguageFromString,
-               hmi_apis::Common_Language::eType(const std::string& language));
-  MOCK_METHOD1(CommonLanguageToString,
-               std::string(hmi_apis::Common_Language::eType));
-  MOCK_METHOD1(CreateModuleInfoSO,
-               smart_objects::SmartObjectSPtr(uint32_t function_id));
+  MOCK_METHOD1(SendOnLanguageChangeToMobile,
+               void(uint32_t connection_key));
+  MOCK_METHOD1(CommonLanguageFromString, hmi_apis::Common_Language::eType(
+          const std::string& language)) ;
+  MOCK_METHOD1(CommonLanguageToString, std::string(
+          hmi_apis::Common_Language::eType));
+  MOCK_METHOD1(MobileLanguageToString,
+               std::string(const mobile_apis::Language::eType language));
+  MOCK_METHOD1(MobileLanguageFromString,
+               mobile_apis::Language::eType(const std::string& lanugage));
+  MOCK_METHOD1(MobileToCommonLanguage,
+               hmi_apis::Common_Language::eType(const mobile_apis::Language::eType language));
+  MOCK_METHOD1(CommonToMobileLanguage,
+               mobile_apis::Language::eType(const hmi_apis::Common_Language::eType language));
+
+  MOCK_METHOD1(CreateModuleInfoSO, smart_objects::SmartObjectSPtr(uint32_t function_id));
   MOCK_METHOD1(SendAllOnButtonSubscriptionNotificationsForApp,
                void(ApplicationConstSharedPtr app));
 

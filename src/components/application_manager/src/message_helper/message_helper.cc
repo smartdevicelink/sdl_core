@@ -220,7 +220,7 @@ hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
 }
 
 std::string MessageHelper::MobileLanguageToString(
-  mobile_apis::Language::eType language) {
+  const mobile_apis::Language::eType language) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
   const char* str = 0;
   if (EnumConversionHelper<mobile_apis::Language::eType>::EnumToCString(
@@ -495,12 +495,11 @@ void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
   }
 }
 
-
-void MessageHelper::SendOnLanguageChangeToMobile(int32_t connection_key) {
+void MessageHelper::SendOnLanguageChangeToMobile(uint32_t connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   smart_objects::SmartObjectSPtr notification = new smart_objects::SmartObject;
-  DCHECK(notification);
+  DCHECK_OR_RETURN_VOID(notification);
   smart_objects::SmartObject& message = *notification;
 
   message[strings::params][strings::function_id] =
@@ -522,7 +521,7 @@ void MessageHelper::SendOnLanguageChangeToMobile(int32_t connection_key) {
 
   if (ApplicationManagerImpl::instance()->ManageMobileCommand(
       notification, commands::Command::ORIGIN_SDL)) {
-    LOG4CXX_DEBUG(logger_, "Mobile command sent");
+    LOG4CXX_INFO(logger_, "Mobile command sent");
   }
   else {
     LOG4CXX_WARN(logger_, "Cannot send mobile command");
