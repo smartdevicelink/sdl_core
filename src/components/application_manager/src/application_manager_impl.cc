@@ -2854,9 +2854,10 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
 
     navi_app_to_stop_.push_back(app_id);
 
-    ApplicationManagerTimerPtr closeTimer(
-        new TimerThread<ApplicationManagerImpl>(
-            "CloseNaviAppTimer", this, &ApplicationManagerImpl::CloseNaviApp));
+    ApplicationManagerTimerPtr closeTimer;
+    closeTimer = utils::MakeShared< TimerThread<ApplicationManagerImpl> >(
+        "CloseNaviAppTimer", this, &ApplicationManagerImpl::CloseNaviApp);
+
     closeTimer->start(navi_close_app_timeout_);
 
     sync_primitives::AutoLock lock(timer_pool_lock_);
@@ -2894,10 +2895,10 @@ void ApplicationManagerImpl::OnHMILevelChanged(uint32_t app_id,
       LOG4CXX_TRACE(logger_, "HMILevel from FULL or LIMITED");
       navi_app_to_end_stream_.push_back(app_id);
 
-      ApplicationManagerTimerPtr endStreamTimer(
-          new TimerThread<ApplicationManagerImpl>(
-              "AppShouldFinishStreaming", this,
-              &ApplicationManagerImpl::EndNaviStreaming));
+      ApplicationManagerTimerPtr endStreamTimer;
+      endStreamTimer = utils::MakeShared< TimerThread<ApplicationManagerImpl> >(
+        "AppShouldFinishStreaming", this, &ApplicationManagerImpl::EndNaviStreaming);
+
       endStreamTimer->start(navi_end_stream_timeout_);
 
       sync_primitives::AutoLock lock(timer_pool_lock_);
