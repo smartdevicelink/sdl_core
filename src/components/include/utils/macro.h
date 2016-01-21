@@ -60,6 +60,7 @@
 
 #ifdef DEBUG
   #define ASSERT(condition) \
+    FLUSH_LOGGER(); \
     do { \
       DEINIT_LOGGER(); \
       assert(condition); \
