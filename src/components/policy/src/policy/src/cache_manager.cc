@@ -693,6 +693,88 @@ void CacheManager::CheckSnapshotInitialization() {
   // SDL must not send certificate in snapshot
   snapshot_->policy_table.module_config.certificate =
       rpc::Optional<rpc::String<0, 65535> >();
+
+  /* consumer_friendly_messages are required for the snapshot;
+   * consumer_friendly_messages->version is required always, but
+   * consumer_friendly_messages->messages must be omitted in PTS */
+  if( snapshot_->policy_table.consumer_friendly_messages->is_initialized() ) {
+    snapshot_->policy_table.consumer_friendly_messages->messages =
+        rpc::Optional<policy_table::Messages>();
+  } else {
+    LOG4CXX_WARN(logger_, "policy_table.consumer_friendly_messages is not initialized");
+  }
+
+  /* policy_table.usage_and_error_counts are required for PTS and
+   * policy_table.usage_and_error_counts->app_level is optional */
+  rpc::Optional<policy_table::UsageAndErrorCounts>& usage_and_error_counts =
+      snapshot_->policy_table.usage_and_error_counts;
+
+  if (usage_and_error_counts->is_initialized() &&
+      usage_and_error_counts->app_level->is_initialized()) {
+    policy_table::AppLevels::iterator it =
+        usage_and_error_counts->app_level->begin();
+    policy_table::AppLevels::const_iterator it_end =
+        usage_and_error_counts->app_level->end();
+    for (;it != it_end; ++it) {
+      if (!(*it).second.minutes_in_hmi_full.is_initialized()) {
+        (*it).second.minutes_in_hmi_full = 0;
+      }
+
+      if (!(*it).second.app_registration_language_gui.is_initialized()) {
+        (*it).second.app_registration_language_gui = "unknown";
+      }
+
+      if (!(*it).second.app_registration_language_vui.is_initialized()) {
+        (*it).second.app_registration_language_vui = "unknown";
+      }
+
+      if (!(*it).second.minutes_in_hmi_limited.is_initialized()) {
+        (*it).second.minutes_in_hmi_limited = 0;
+      }
+
+      if (!(*it).second.minutes_in_hmi_background.is_initialized()) {
+        (*it).second.minutes_in_hmi_background = 0;
+      }
+
+      if (!(*it).second.minutes_in_hmi_none.is_initialized()) {
+        (*it).second.minutes_in_hmi_none = 0;
+      }
+
+      if (!(*it).second.count_of_user_selections.is_initialized()) {
+        (*it).second.count_of_user_selections = 0;
+      }
+
+      if (!(*it).second.count_of_rejections_sync_out_of_memory.is_initialized()) {
+        (*it).second.count_of_rejections_sync_out_of_memory = 0;
+      }
+
+      if (!(*it).second.count_of_rejections_nickname_mismatch.is_initialized()) {
+        (*it).second.count_of_rejections_nickname_mismatch = 0;
+      }
+
+      if (!(*it).second.count_of_rejections_duplicate_name.is_initialized()) {
+        (*it).second.count_of_rejections_duplicate_name = 0;
+      }
+
+      if (!(*it).second.count_of_rejected_rpc_calls.is_initialized()) {
+        (*it).second.count_of_rejected_rpc_calls = 0;
+      }
+
+      if (!(*it).second.count_of_rpcs_sent_in_hmi_none.is_initialized()) {
+        (*it).second.count_of_rpcs_sent_in_hmi_none = 0;
+      }
+
+      if (!(*it).second.count_of_removals_for_bad_behavior.is_initialized()) {
+        (*it).second.count_of_removals_for_bad_behavior = 0;
+      }
+
+      if (!(*it).second.count_of_run_attempts_while_revoked.is_initialized()) {
+        (*it).second.count_of_run_attempts_while_revoked = 0;
+      }
+    }
+  } else {
+    LOG4CXX_WARN(logger_, "usage_and_error_counts or app_level is not initialized");
+  }
 }
 
 void CacheManager::PersistData() {
