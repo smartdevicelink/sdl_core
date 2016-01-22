@@ -90,8 +90,6 @@ class EventDispatcherImpl : public EventDispatcher,
    */
  virtual ~EventDispatcherImpl();
 
- protected:
-
  private:
 
   /*
@@ -122,6 +120,7 @@ class EventDispatcherImpl : public EventDispatcher,
   ObserverVector                                      observers_vector_;
 
 };
+
 
 }
 }

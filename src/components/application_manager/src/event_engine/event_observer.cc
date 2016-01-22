@@ -49,15 +49,15 @@ EventObserver::~EventObserver() {
 
 void EventObserver::subscribe_on_event(const Event::EventID& event_id,
                                        int32_t hmi_correlation_id) {
-  EventDispatcherImpl::instance()->add_observer(event_id, hmi_correlation_id, this);
+  pEventDispatcher->add_observer(event_id, hmi_correlation_id, this);
 }
 
 void EventObserver::unsubscribe_from_event(const Event::EventID& event_id) {
-  EventDispatcherImpl::instance()->remove_observer(event_id, this);
+  pEventDispatcher->remove_observer(event_id, this);
 }
 
 void EventObserver::unsubscribe_from_all_events() {
-  EventDispatcherImpl::instance()->remove_observer(this);
+  pEventDispatcher->remove_observer(this);
 }
 
 }

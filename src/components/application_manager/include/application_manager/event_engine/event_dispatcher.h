@@ -88,11 +88,6 @@ class EventDispatcher {
    */
   virtual ~EventDispatcher() {
   };
-
- protected:
-
- private:
-
 };
 
 }
