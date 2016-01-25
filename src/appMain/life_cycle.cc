@@ -394,26 +394,32 @@ void LifeCycle::Run() {
 void LifeCycle::StopComponents() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  hmi_handler_->set_message_observer(NULL);
-  connection_handler_->set_connection_handler_observer(NULL);
-  protocol_handler_->RemoveProtocolObserver(app_manager_);
+  hmi_message_handler::HMIMessageHandlerImpl::instance()->set_message_observer(
+      NULL);
+  connection_handler::ConnectionHandlerImpl::instance()->set_connection_handler_observer(NULL);
+  if (protocol_handler_)
+    protocol_handler_->RemoveProtocolObserver(app_manager_);
   app_manager_->Stop();
 
   LOG4CXX_INFO(logger_, "Stopping Protocol Handler");
-  protocol_handler_->RemoveProtocolObserver(media_manager_);
+  if (protocol_handler_)
+    protocol_handler_->RemoveProtocolObserver(media_manager_);
 #ifdef ENABLE_SECURITY
-  protocol_handler_->RemoveProtocolObserver(security_manager_);
-  security_manager_->RemoveListener(app_manager_);
+  if (protocol_handler_)
+    protocol_handler_->RemoveProtocolObserver(security_manager_);
+  if (security_manager_)
+    security_manager_->RemoveListener(app_manager_);
 #endif  // ENABLE_SECURITY
-  protocol_handler_->Stop();
+  if (protocol_handler_)
+    protocol_handler_->Stop();
 
   LOG4CXX_INFO(logger_, "Destroying Media Manager");
-  media_manager_->SetProtocolHandler(NULL);
+  media_manager::MediaManagerImpl::instance()->SetProtocolHandler(NULL);
   media_manager::MediaManagerImpl::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying Transport Manager.");
-  transport_manager_->Visibility(false);
-  transport_manager_->Stop();
+  transport_manager::TransportManagerDefault::instance()->Visibility(false);
+  transport_manager::TransportManagerDefault::instance()->Stop();
   transport_manager::TransportManagerDefault::destroy();
 
   LOG4CXX_INFO(logger_, "Stopping Connection Handler.");
@@ -472,7 +478,6 @@ void LifeCycle::StopComponents() {
 
 #endif  // MESSAGEBROKER_HMIADAPTER
 
-
 #ifdef MESSAGEBROKER_HMIADAPTER
   LOG4CXX_INFO(logger_, "Destroying Message Broker");
   if (mb_server_thread_) {
@@ -485,9 +490,10 @@ void LifeCycle::StopComponents() {
     mb_thread_->Join();
     delete mb_thread_;
   }
-  message_broker_server_->Close();
+  if (message_broker_server_)
+    message_broker_server_->Close();
   delete message_broker_server_;
-  message_broker_->stopMessageBroker();
+  NsMessageBroker::CMessageBroker::getInstance()->stopMessageBroker();
 
   networking::cleanup();
 #endif  // MESSAGEBROKER_HMIADAPTER
