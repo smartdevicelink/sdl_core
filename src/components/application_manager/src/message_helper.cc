@@ -1267,9 +1267,7 @@ bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
   }
 
   const SmartObject* app_types = app->app_types();
-  DCHECK_OR_RETURN(app_types, false);
   const SmartObject* ngn_media_screen_name = app->ngn_media_screen_name();
-  DCHECK_OR_RETURN(ngn_media_screen_name, false);
   const connection_handler::DeviceHandle handle = app->device();
   std::string device_name = ApplicationManagerImpl::instance()->GetDeviceName(handle);
 
