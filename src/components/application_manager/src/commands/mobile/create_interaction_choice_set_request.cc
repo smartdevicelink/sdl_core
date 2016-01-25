@@ -408,6 +408,7 @@ void CreateInteractionChoiceSetRequest::onTimeOut() {
   if (!error_from_hmi_) {
     SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
   }
+  DeleteChoices();
 
   // We have to keep request alive until receive all responses from HMI
   // according to SDLAQ-CRS-2976
