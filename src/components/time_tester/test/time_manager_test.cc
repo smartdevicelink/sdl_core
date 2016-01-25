@@ -35,7 +35,9 @@
 #include "time_manager.h"
 #include "protocol_handler/time_metric_observer.h"
 #include "protocol_handler.h"
-#include "include/protocol_handler_mock.h"
+#include "protocol_handler/mock_protocol_handler.h"
+#include "transport_manager/mock_transport_manager.h"
+
 
 namespace test {
 namespace components {
@@ -54,7 +56,7 @@ class StreamerMock : public Streamer {
 
 TEST(TimeManagerTest, DISABLED_MessageProcess) {
   //TODO(AK) APPLINK-13351 Disable due to refactor TimeTester
-  protocol_handler_test::TransportManagerMock transport_manager_mock;
+  transport_manager_test::MockTransportManager transport_manager_mock;
   protocol_handler::ProtocolHandlerImpl protocol_handler_mock(&transport_manager_mock, 0, 0, 0, 0, 0, 0);
   TimeManager * time_manager = new TimeManager();
   // Streamer will be deleted by Thread

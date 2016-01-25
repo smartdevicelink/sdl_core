@@ -50,7 +50,7 @@ using ::transport_manager::TransportManagerListener;
 /*
  * MOCK implementation of ::transport_manager::TransportManager interface
  */
-class TransportManagerMock: public ::transport_manager::TransportManager {
+class MockTransportManager: public ::transport_manager::TransportManager {
  public:
   MOCK_METHOD0(Init,
                int());

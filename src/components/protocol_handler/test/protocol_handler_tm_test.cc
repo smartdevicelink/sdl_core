@@ -33,9 +33,14 @@
 #include <string>
 #include "protocol_handler/protocol_handler_impl.h"
 #include "protocol/common.h"
-#include "control_message_matcher.h"
-#include "protocol_handler_mock.h"
-#include "protocol_observer_mock.h"
+#include "protocol_handler/control_message_matcher.h"
+#include "protocol_handler/mock_protocol_handler.h"
+#include "protocol_handler/mock_protocol_observer.h"
+
+#include "transport_manager/mock_transport_manager.h"
+#include "protocol_handler/mock_session_observer.h"
+#include "security_manager/mock_security_manager.h"
+#include "security_manager/mock_ssl_context.h"
 
 #include "utils/make_shared.h"
 
