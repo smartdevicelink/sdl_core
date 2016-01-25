@@ -112,7 +112,7 @@ hmi_apis::Common_Language::eType HMILanguageHandler::get_language_for(
     if (LastState::instance()->dictionary[LanguagesKey].isMember(key)) {
       Common_Language::eType language =
           static_cast<Common_Language::eType>(
-          LastState::instance()->dictionary[LanguagesKey][key].asUInt());
+          LastState::instance()->dictionary[LanguagesKey][key].asInt());
       return language;
     }
   }
