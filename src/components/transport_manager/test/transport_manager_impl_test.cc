@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "gtest/gtest.h"
 #include "protocol/raw_message.h"
 #include "transport_manager/common.h"
@@ -41,6 +42,10 @@
 #include "include/mock_telemetry_observer.h"
 
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
+#include "transport_manager/transport_adapter/transport_adapter_mock.h"
+#include "transport_manager/mock_transport_manager_impl.h"
+#include "utils/make_shared.h"
+#include "utils/shared_ptr.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -49,235 +54,276 @@ using ::testing::Return;
 using ::protocol_handler::RawMessage;
 using ::protocol_handler::RawMessagePtr;
 
+using utils::MakeShared;
+
 namespace test {
 namespace components {
 namespace transport_manager_test {
 
-using namespace ::transport_manager;
-
-class TransportManagerTest : public TransportManagerImpl {
- public:
-  void TestHandle(TransportAdapterEvent test_event) { Handle(test_event); }
-};
-
 class TransportManagerImplTest : public ::testing::Test {
  protected:
-  virtual void SetUp() {
-    tm.Init();
-    mock_adapter = new TransportAdapterMock();
-    tm_listener = new TransportManagerListenerMock();
+  TransportManagerImplTest()
+      : device_handle_(1)
+      , mac_address_("MA:CA:DR:ES:S")
+      , dev_info_(device_handle_, mac_address_, "TestDeviceName", "BTMAC") {}
 
-    EXPECT_EQ(E_SUCCESS, tm.AddEventListener(tm_listener));
-    EXPECT_CALL(*mock_adapter, AddListener(_));
-    EXPECT_CALL(*mock_adapter, IsInitialised()).WillOnce(Return(true));
+  void SetUp() OVERRIDE {
+    tm_.Init();
+    mock_adapter_ = new TransportAdapterMock();
+    tm_listener_ = MakeShared<TransportManagerListenerMock>();
+
+#ifdef TIME_TESTER
+    tm_.SetTimeMetricObserver(&mock_metric_observer_);
+    metrics_call_count_ = 1;
+#else
+    metrics_call_count_ = 0;
+#endif  // TIME_TESTER
+    EXPECT_EQ(E_SUCCESS, tm_.AddEventListener(tm_listener_.get()));
+    EXPECT_CALL(*mock_adapter_, AddListener(_));
+    EXPECT_CALL(*mock_adapter_, IsInitialised()).WillOnce(Return(true));
     EXPECT_EQ(::transport_manager::E_SUCCESS,
-              tm.AddTransportAdapter(mock_adapter));
+              tm_.AddTransportAdapter(mock_adapter_));
 
-    device_handle_ = 1;
     connection_key_ = 1;
-    mac_address_ = "MA:CA:DR:ES:S";
-    error_ = new BaseError();
+    error_ = MakeShared<BaseError>();
 
     const unsigned int version_protocol_ = 1;
     const unsigned int kSize = 12;
-    unsigned char data[kSize] = {0x20, 0x07, 0x01, 0x00, 0x00, 0x00,
-                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    unsigned char data[kSize] = {
+        0x20, 0x07, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     test_message_ =
-        new RawMessage(connection_key_, version_protocol_, data, kSize);
+        MakeShared<RawMessage>(connection_key_, version_protocol_, data, kSize);
   }
 
-  virtual void TearDown() { delete tm_listener; }
+  void HandleDeviceListUpdated() {
+    const int type = static_cast<int>(
+        TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED);
 
-  void HandleDeviceListUpdated();
-  void HandleConnection();
-  void HandleSendDone();
-  void HandleSendFailed();
-  void HandleSearchDone();
-  void HandleSearchFail();
-  void HandleFindNewApplicationsRequest();
-  void HandleConnectionFailed();
-  void HandleConnectionClosed();
-  void HandleDisconnectionFailed();
-  void HandleReceiveDone();
+    TransportAdapterEvent test_event(type,
+                                     mock_adapter_,
+                                     dev_info_.mac_address(),
+                                     application_id_,
+                                     test_message_,
+                                     error_);
+    device_list_.push_back(dev_info_.mac_address());
+    std::vector<DeviceInfo> vector_dev_info;
+    vector_dev_info.push_back(dev_info_);
 
-  TransportManagerTest tm;
-  TransportAdapterMock* mock_adapter;
+    EXPECT_CALL(*mock_adapter_, GetDeviceList())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(device_list_));
+    EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(dev_info_.name()));
+    EXPECT_CALL(*mock_adapter_, GetConnectionType())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(dev_info_.connection_type()));
 
-  TransportManagerListenerMock* tm_listener;
+    EXPECT_CALL(*tm_listener_, OnDeviceFound(dev_info_));
+    EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
+    EXPECT_CALL(*tm_listener_, OnDeviceListUpdated(vector_dev_info));
 
-  const ApplicationHandle application_id = 1;
+    tm_.TestHandle(test_event);
+    device_list_.pop_back();
+  }
 
-  // count of connections
+  void HandleConnection() {
+    const int type = static_cast<int>(
+        TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE);
+
+    TransportAdapterEvent test_event(type,
+                                     mock_adapter_,
+                                     dev_info_.mac_address(),
+                                     application_id_,
+                                     test_message_,
+                                     error_);
+
+    EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
+        .WillOnce(Return(dev_info_.name()));
+    EXPECT_CALL(*mock_adapter_, GetConnectionType())
+        .WillOnce(Return(dev_info_.connection_type()));
+
+    EXPECT_CALL(*tm_listener_,
+                OnConnectionEstablished(dev_info_, connection_key_));
+
+    tm_.TestHandle(test_event);
+  }
+
+  void HandleConnectionFailed() {
+    const int type = static_cast<int>(
+        TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL);
+
+    TransportAdapterEvent test_event(type,
+                                     mock_adapter_,
+                                     dev_info_.mac_address(),
+                                     application_id_,
+                                     test_message_,
+                                     error_);
+
+    EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
+        .WillOnce(Return(dev_info_.name()));
+    EXPECT_CALL(*mock_adapter_, GetConnectionType())
+        .WillOnce(Return(dev_info_.connection_type()));
+
+    EXPECT_CALL(*tm_listener_, OnConnectionFailed(dev_info_, _));
+
+    tm_.TestHandle(test_event);
+  }
+
+  void HandleSendDone() {
+    const int type = static_cast<int>(
+        TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_DONE);
+    TransportAdapterEvent test_event(type,
+                                     mock_adapter_,
+                                     mac_address_,
+                                     application_id_,
+                                     test_message_,
+                                     error_);
+
+    EXPECT_CALL(mock_metric_observer_, StopRawMsg(_))
+        .Times(metrics_call_count_);
+    EXPECT_CALL(*tm_listener_, OnTMMessageSend(test_message_));
+
+    tm_.TestHandle(test_event);
+  }
+
+  void HandleReceiveDone() {
+    const int type = static_cast<int>(
+        TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE);
+    TransportAdapterEvent test_event(type,
+                                     mock_adapter_,
+                                     mac_address_,
+                                     application_id_,
+                                     test_message_,
+                                     error_);
+
+    EXPECT_CALL(mock_metric_observer_, StopRawMsg(_));
+    EXPECT_CALL(*tm_listener_, OnTMMessageReceived(test_message_));
+
+    tm_.TestHandle(test_event);
+  }
+
+  void HandleSendFailed() {
+    const int type = static_cast<int>(
+        TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL);
+
+    TransportAdapterEvent test_event(type,
+                                     mock_adapter_,
+                                     mac_address_,
+                                     application_id_,
+                                     test_message_,
+                                     error_);
+
+    EXPECT_CALL(mock_metric_observer_, StopRawMsg(_))
+        .Times(metrics_call_count_);
+
+    tm_.TestHandle(test_event);
+  }
+
+  void HandleSearchDone() {
+    const int type = static_cast<int>(
+        TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE);
+
+    TransportAdapterEvent test_event(type,
+                                     mock_adapter_,
+                                     mac_address_,
+                                     application_id_,
+                                     test_message_,
+                                     error_);
+
+    EXPECT_CALL(*tm_listener_, OnScanDevicesFinished());
+
+    tm_.TestHandle(test_event);
+  }
+
+  void HandleSearchFail() {
+    const int type = static_cast<int>(
+        TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL);
+
+    TransportAdapterEvent test_event(type,
+                                     mock_adapter_,
+                                     mac_address_,
+                                     application_id_,
+                                     test_message_,
+                                     error_);
+
+    EXPECT_CALL(*tm_listener_, OnScanDevicesFailed(_));
+
+    tm_.TestHandle(test_event);
+  }
+
+  void HandleFindNewApplicationsRequest() {
+    const int type =
+        static_cast<int>(TransportAdapterListenerImpl::EventTypeEnum::
+                             ON_FIND_NEW_APPLICATIONS_REQUEST);
+
+    TransportAdapterEvent test_event(type,
+                                     mock_adapter_,
+                                     mac_address_,
+                                     application_id_,
+                                     test_message_,
+                                     error_);
+
+    EXPECT_CALL(*tm_listener_, OnFindNewApplicationsRequest());
+
+    tm_.TestHandle(test_event);
+  }
+
+  void HandleConnectionClosed() {
+    const int type = static_cast<int>(
+        TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE);
+
+    TransportAdapterEvent test_event(type,
+                                     mock_adapter_,
+                                     mac_address_,
+                                     application_id_,
+                                     test_message_,
+                                     error_);
+
+    EXPECT_CALL(*tm_listener_, OnConnectionClosed(application_id_));
+
+    tm_.TestHandle(test_event);
+  }
+
+  void HandleDisconnectionFailed() {
+    const int type = static_cast<int>(
+        TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL);
+
+    TransportAdapterEvent test_event(type,
+                                     mock_adapter_,
+                                     mac_address_,
+                                     application_id_,
+                                     test_message_,
+                                     error_);
+
+    EXPECT_CALL(*tm_listener_, OnDisconnectFailed(device_handle_, _));
+
+    tm_.TestHandle(test_event);
+  }
+
+  void UninitializeTM() {
+    EXPECT_CALL(*mock_adapter_, Terminate());
+    ASSERT_EQ(E_SUCCESS, tm_.Stop());
+  }
+
+  MockTransportManagerImpl tm_;
+  TMMetricObserverMock mock_metric_observer_;
+  size_t metrics_call_count_;
+  TransportAdapterMock* mock_adapter_;
+
+  utils::SharedPtr<TransportManagerListenerMock> tm_listener_;
+
+  const ApplicationHandle application_id_ = 1;
+
   ConnectionUID connection_key_;
   RawMessagePtr test_message_;
   DeviceHandle device_handle_;
   std::string mac_address_;
 
-  DeviceList dev;
+  const DeviceInfo dev_info_;
+  DeviceList device_list_;
   BaseErrorPtr error_;
 };
-
-void TransportManagerImplTest::HandleDeviceListUpdated() {
-  int type = static_cast<int>(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED);
-  const DeviceInfo dev_info(device_handle_, mac_address_, "TestDeviceName",
-                            "BTMAC");
-
-  TransportAdapterEvent test_event(type, mock_adapter, dev_info.mac_address(),
-                                   application_id, test_message_, error_);
-  dev.push_back(dev_info.mac_address());
-  std::vector<DeviceInfo> vector_dev_info;
-  std::vector<DeviceInfo>::iterator it = vector_dev_info.begin();
-  vector_dev_info.insert(it, dev_info);
-
-  EXPECT_CALL(*mock_adapter, GetDeviceList())
-      .Times(AtLeast(1))
-      .WillRepeatedly(Return(dev));
-  EXPECT_CALL(*mock_adapter, DeviceName(dev_info.mac_address()))
-      .Times(AtLeast(1))
-      .WillRepeatedly(Return(dev_info.name()));
-  EXPECT_CALL(*mock_adapter, GetConnectionType())
-      .Times(AtLeast(1))
-      .WillRepeatedly(Return(dev_info.connection_type()));
-
-  EXPECT_CALL(*tm_listener, OnDeviceFound(dev_info));
-  EXPECT_CALL(*tm_listener, OnDeviceAdded(dev_info));
-  EXPECT_CALL(*tm_listener, OnDeviceListUpdated(vector_dev_info));
-
-  tm.TestHandle(test_event);
-  dev.pop_back();
-}
-
-void TransportManagerImplTest::HandleConnection() {
-  int type = static_cast<int>(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE);
-  const DeviceInfo dev_info(device_handle_, mac_address_, "TestDeviceName",
-                            "BTMAC");
-
-  TransportAdapterEvent test_event(type, mock_adapter, dev_info.mac_address(),
-                                   application_id, test_message_, error_);
-
-  EXPECT_CALL(*mock_adapter, DeviceName(dev_info.mac_address()))
-      .WillOnce(Return(dev_info.name()));
-  EXPECT_CALL(*mock_adapter, GetConnectionType())
-      .WillOnce(Return(dev_info.connection_type()));
-
-  EXPECT_CALL(*tm_listener, OnConnectionEstablished(dev_info, connection_key_));
-
-  tm.TestHandle(test_event);
-}
-
-void TransportManagerImplTest::HandleConnectionFailed() {
-  int type = static_cast<int>(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL);
-
-  const DeviceInfo dev_info(device_handle_, mac_address_, "TestDeviceName",
-                            "BTMAC");
-
-  TransportAdapterEvent test_event(type, mock_adapter, dev_info.mac_address(),
-                                   application_id, test_message_, error_);
-
-  EXPECT_CALL(*mock_adapter, DeviceName(dev_info.mac_address()))
-      .WillOnce(Return(dev_info.name()));
-  EXPECT_CALL(*mock_adapter, GetConnectionType())
-      .WillOnce(Return(dev_info.connection_type()));
-
-  EXPECT_CALL(*tm_listener, OnConnectionFailed(dev_info, _));
-
-  tm.TestHandle(test_event);
-}
-
-void TransportManagerImplTest::HandleSendDone() {
-  int type = static_cast<int>(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_DONE);
-  TransportAdapterEvent test_event(type, mock_adapter, mac_address_,
-                                   application_id, test_message_, error_);
-
-  EXPECT_CALL(*tm_listener, OnTMMessageSend(test_message_));
-
-  tm.TestHandle(test_event);
-}
-
-void TransportManagerImplTest::HandleReceiveDone() {
-  int type = static_cast<int>(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE);
-  TransportAdapterEvent test_event(type, mock_adapter, mac_address_,
-                                   application_id, test_message_, error_);
-
-  EXPECT_CALL(*tm_listener, OnTMMessageReceived(test_message_));
-
-  tm.TestHandle(test_event);
-}
-
-void TransportManagerImplTest::HandleSendFailed() {
-  int type = static_cast<int>(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL);
-
-  TransportAdapterEvent test_event(type, mock_adapter, mac_address_,
-                                   application_id, test_message_, error_);
-
-  tm.TestHandle(test_event);
-}
-
-void TransportManagerImplTest::HandleSearchDone() {
-  int type = static_cast<int>(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE);
-
-  TransportAdapterEvent test_event(type, mock_adapter, mac_address_,
-                                   application_id, test_message_, error_);
-
-  EXPECT_CALL(*tm_listener, OnScanDevicesFinished());
-
-  tm.TestHandle(test_event);
-}
-
-void TransportManagerImplTest::HandleSearchFail() {
-  int type = static_cast<int>(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL);
-
-  TransportAdapterEvent test_event(type, mock_adapter, mac_address_,
-                                   application_id, test_message_, error_);
-
-  EXPECT_CALL(*tm_listener, OnScanDevicesFailed(_));
-
-  tm.TestHandle(test_event);
-}
-
-void TransportManagerImplTest::HandleFindNewApplicationsRequest() {
-  int type = static_cast<int>(TransportAdapterListenerImpl::EventTypeEnum::
-                                  ON_FIND_NEW_APPLICATIONS_REQUEST);
-
-  TransportAdapterEvent test_event(type, mock_adapter, mac_address_,
-                                   application_id, test_message_, error_);
-
-  EXPECT_CALL(*tm_listener, OnFindNewApplicationsRequest());
-
-  tm.TestHandle(test_event);
-}
-
-void TransportManagerImplTest::HandleConnectionClosed() {
-  int type = static_cast<int>(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE);
-
-  TransportAdapterEvent test_event(type, mock_adapter, mac_address_,
-                                   application_id, test_message_, error_);
-
-  EXPECT_CALL(*tm_listener, OnConnectionClosed(application_id));
-
-  tm.TestHandle(test_event);
-}
-
-void TransportManagerImplTest::HandleDisconnectionFailed() {
-  int type = static_cast<int>(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL);
-
-  TransportAdapterEvent test_event(type, mock_adapter, mac_address_,
-                                   application_id, test_message_, error_);
-
-  EXPECT_CALL(*tm_listener, OnDisconnectFailed(device_handle_, _));
-
-  tm.TestHandle(test_event);
-}
 
 TEST(TransportManagerTest, SearchDevices_AdaptersNotAdded) {
   TransportManagerTest tm;
@@ -291,10 +337,10 @@ TEST(TransportManagerTest, AddTransportAdapter) {
   tm.Init();
 
   TransportAdapterMock* mock_adapter = new TransportAdapterMock();
-  TransportManagerListenerMock* tm_listener =
-      new TransportManagerListenerMock();
+  utils::SharedPtr<TransportManagerListenerMock> tm_listener =
+      MakeShared<TransportManagerListenerMock>();
 
-  EXPECT_EQ(E_SUCCESS, tm.AddEventListener(tm_listener));
+  EXPECT_EQ(E_SUCCESS, tm.AddEventListener(tm_listener.get()));
   EXPECT_CALL(*mock_adapter, AddListener(_));
   EXPECT_CALL(*mock_adapter, IsInitialised()).WillOnce(Return(false));
   EXPECT_CALL(*mock_adapter, Init()).WillOnce(Return(TransportAdapter::OK));
@@ -303,101 +349,114 @@ TEST(TransportManagerTest, AddTransportAdapter) {
 }
 
 TEST_F(TransportManagerImplTest, AddTransportAdapterSecondTime) {
-  EXPECT_EQ(E_ADAPTER_EXISTS, tm.AddTransportAdapter(mock_adapter));
+  EXPECT_EQ(E_ADAPTER_EXISTS, tm_.AddTransportAdapter(mock_adapter_));
 }
 
 TEST_F(TransportManagerImplTest, ConnectDevice) {
   HandleDeviceListUpdated();
-  EXPECT_CALL(*mock_adapter, ConnectDevice(mac_address_))
+  EXPECT_CALL(*mock_adapter_, ConnectDevice(mac_address_))
       .WillOnce(Return(TransportAdapter::OK));
-  EXPECT_EQ(E_SUCCESS, tm.ConnectDevice(device_handle_));
+  EXPECT_EQ(E_SUCCESS, tm_.ConnectDevice(device_handle_));
 }
 
 TEST_F(TransportManagerImplTest, ConnectDevice_DeviceNotHandled) {
-  EXPECT_CALL(*mock_adapter, ConnectDevice(mac_address_)).Times(0);
-  EXPECT_EQ(E_INVALID_HANDLE, tm.ConnectDevice(device_handle_));
+  EXPECT_CALL(*mock_adapter_, ConnectDevice(mac_address_)).Times(0);
+  EXPECT_EQ(E_INVALID_HANDLE, tm_.ConnectDevice(device_handle_));
 }
 
 TEST_F(TransportManagerImplTest, ConnectDevice_DeviceNotConnected) {
   HandleDeviceListUpdated();
-  EXPECT_CALL(*mock_adapter, ConnectDevice(mac_address_))
+  EXPECT_CALL(*mock_adapter_, ConnectDevice(mac_address_))
       .WillOnce(Return(TransportAdapter::FAIL));
-  EXPECT_EQ(E_INTERNAL_ERROR, tm.ConnectDevice(device_handle_));
+  EXPECT_EQ(E_INTERNAL_ERROR, tm_.ConnectDevice(device_handle_));
 }
 
 TEST_F(TransportManagerImplTest, DisconnectDevice) {
   HandleDeviceListUpdated();
-  EXPECT_CALL(*mock_adapter, ConnectDevice(mac_address_))
+  EXPECT_CALL(*mock_adapter_, ConnectDevice(mac_address_))
       .WillOnce(Return(TransportAdapter::OK));
-  EXPECT_EQ(E_SUCCESS, tm.ConnectDevice(device_handle_));
+  EXPECT_EQ(E_SUCCESS, tm_.ConnectDevice(device_handle_));
 
-  EXPECT_CALL(*mock_adapter, DisconnectDevice(mac_address_))
+  EXPECT_CALL(*mock_adapter_, DisconnectDevice(mac_address_))
       .WillOnce(Return(TransportAdapter::OK));
 
-  EXPECT_EQ(E_SUCCESS, tm.DisconnectDevice(device_handle_));
+  EXPECT_EQ(E_SUCCESS, tm_.DisconnectDevice(device_handle_));
+}
+
+TEST_F(TransportManagerImplTest, DisconnectDevice_ConnectionFailed) {
+  HandleDeviceListUpdated();
+  EXPECT_CALL(*mock_adapter_, ConnectDevice(mac_address_))
+      .WillOnce(Return(TransportAdapter::FAIL));
+  EXPECT_EQ(E_INTERNAL_ERROR, tm_.ConnectDevice(device_handle_));
+
+  EXPECT_CALL(*mock_adapter_, DisconnectDevice(mac_address_))
+      .WillOnce(Return(TransportAdapter::FAIL));
+
+  EXPECT_EQ(E_INTERNAL_ERROR, tm_.DisconnectDevice(device_handle_));
 }
 
 TEST_F(TransportManagerImplTest, DisconnectDevice_DeviceNotConnected) {
-  EXPECT_CALL(*mock_adapter, DisconnectDevice(mac_address_)).Times(0);
-  EXPECT_EQ(E_INVALID_HANDLE, tm.DisconnectDevice(device_handle_));
+  EXPECT_CALL(*mock_adapter_, DisconnectDevice(mac_address_)).Times(0);
+  EXPECT_EQ(E_INVALID_HANDLE, tm_.DisconnectDevice(device_handle_));
 }
 
 TEST_F(TransportManagerImplTest, Disconnect) {
   // Arrange
   HandleConnection();
 
-  EXPECT_CALL(*mock_adapter, Disconnect(mac_address_, application_id))
+  EXPECT_CALL(*mock_adapter_, Disconnect(mac_address_, application_id_))
       .WillOnce(Return(TransportAdapter::OK));
   // Assert
-  EXPECT_EQ(E_SUCCESS, tm.Disconnect(connection_key_));
+  EXPECT_EQ(E_SUCCESS, tm_.Disconnect(connection_key_));
+}
+
+TEST_F(TransportManagerImplTest, Disconnect_DisconnectionFailed) {
+  // Arrange
+  HandleConnection();
+
+  EXPECT_CALL(*mock_adapter_, Disconnect(mac_address_, application_id_))
+      .WillOnce(Return(TransportAdapter::FAIL));
+  // Assert
+  EXPECT_EQ(E_INTERNAL_ERROR, tm_.Disconnect(connection_key_));
 }
 
 TEST_F(TransportManagerImplTest, Disconnect_ConnectionNotExist) {
-  EXPECT_CALL(*mock_adapter, Disconnect(mac_address_, application_id)).Times(0);
+  EXPECT_CALL(*mock_adapter_, Disconnect(mac_address_, application_id_))
+      .Times(0);
   // Assert
-  EXPECT_EQ(E_INVALID_HANDLE, tm.Disconnect(connection_key_));
+  EXPECT_EQ(E_INVALID_HANDLE, tm_.Disconnect(connection_key_));
 }
 
 TEST_F(TransportManagerImplTest, Disconnect_ConnectionDoesNotExists) {
   // Arrange
   HandleDeviceListUpdated();
 
-  EXPECT_CALL(*mock_adapter, ConnectDevice(mac_address_))
+  EXPECT_CALL(*mock_adapter_, ConnectDevice(mac_address_))
       .WillRepeatedly(Return(TransportAdapter::OK));
-  EXPECT_EQ(E_SUCCESS, tm.ConnectDevice(device_handle_));
+  EXPECT_EQ(E_SUCCESS, tm_.ConnectDevice(device_handle_));
 
-  EXPECT_CALL(*mock_adapter, Disconnect(mac_address_, application_id))
+  EXPECT_CALL(*mock_adapter_, Disconnect(mac_address_, application_id_))
       .WillRepeatedly(Return(TransportAdapter::OK));
   // Assert
-  EXPECT_EQ(E_INVALID_HANDLE, tm.Disconnect(connection_key_));
+  EXPECT_EQ(E_INVALID_HANDLE, tm_.Disconnect(connection_key_));
 }
 
-TEST_F(TransportManagerImplTest, DisconnectForce) {
+TEST_F(TransportManagerImplTest, DisconnectForce_TMIsInitialized) {
   // Arrange
   HandleConnection();
 
-  EXPECT_CALL(*mock_adapter, Disconnect(mac_address_, application_id))
+  EXPECT_CALL(*mock_adapter_, Disconnect(mac_address_, application_id_))
       .WillRepeatedly(Return(TransportAdapter::OK));
   // Assert
-  EXPECT_EQ(E_SUCCESS, tm.DisconnectForce(connection_key_));
-}
-
-TEST_F(TransportManagerImplTest, DisconnectForce_) {
-  // Arrange
-  HandleConnection();
-
-  EXPECT_CALL(*mock_adapter, Disconnect(mac_address_, application_id))
-      .WillRepeatedly(Return(TransportAdapter::OK));
-  // Assert
-  EXPECT_EQ(E_SUCCESS, tm.DisconnectForce(connection_key_));
+  EXPECT_EQ(E_SUCCESS, tm_.DisconnectForce(connection_key_));
 }
 
 TEST_F(TransportManagerImplTest, SearchDevices_DeviceConnected) {
   HandleDeviceListUpdated();
 
-  EXPECT_CALL(*mock_adapter, SearchDevices())
+  EXPECT_CALL(*mock_adapter_, SearchDevices())
       .WillOnce(Return(TransportAdapter::OK));
-  EXPECT_EQ(E_SUCCESS, tm.SearchDevices());
+  EXPECT_EQ(E_SUCCESS, tm_.SearchDevices());
 
   HandleSearchDone();
 }
@@ -405,36 +464,37 @@ TEST_F(TransportManagerImplTest, SearchDevices_DeviceConnected) {
 TEST_F(TransportManagerImplTest, SearchDevices_DeviceNotFound) {
   HandleDeviceListUpdated();
 
-  EXPECT_CALL(*mock_adapter, SearchDevices())
+  EXPECT_CALL(*mock_adapter_, SearchDevices())
       .WillOnce(Return(TransportAdapter::FAIL));
-  EXPECT_EQ(E_ADAPTERS_FAIL, tm.SearchDevices());
+  EXPECT_EQ(E_ADAPTERS_FAIL, tm_.SearchDevices());
 }
 
 TEST_F(TransportManagerImplTest, SearchDevices_AdapterNotSupported) {
   HandleDeviceListUpdated();
 
-  EXPECT_CALL(*mock_adapter, SearchDevices())
+  EXPECT_CALL(*mock_adapter_, SearchDevices())
       .WillOnce(Return(TransportAdapter::NOT_SUPPORTED));
-  EXPECT_EQ(E_ADAPTERS_FAIL, tm.SearchDevices());
+  EXPECT_EQ(E_ADAPTERS_FAIL, tm_.SearchDevices());
 }
 
 TEST_F(TransportManagerImplTest, SearchDevices_AdapterWithBadState) {
   HandleDeviceListUpdated();
 
-  EXPECT_CALL(*mock_adapter, SearchDevices())
+  EXPECT_CALL(*mock_adapter_, SearchDevices())
       .WillOnce(Return(TransportAdapter::BAD_STATE));
-  EXPECT_EQ(E_ADAPTERS_FAIL, tm.SearchDevices());
+  EXPECT_EQ(E_ADAPTERS_FAIL, tm_.SearchDevices());
 }
 
 TEST_F(TransportManagerImplTest, SendMessageToDevice) {
   // Arrange
   HandleConnection();
 
-  EXPECT_CALL(*mock_adapter,
-              SendData(mac_address_, application_id, test_message_))
+  EXPECT_CALL(*mock_adapter_,
+              SendData(mac_address_, application_id_, test_message_))
       .WillOnce(Return(TransportAdapter::OK));
+  EXPECT_CALL(mock_metric_observer_, StartRawMsg(_)).Times(metrics_call_count_);
 
-  EXPECT_EQ(E_SUCCESS, tm.SendMessageToDevice(test_message_));
+  EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
   testing::Mock::AsyncVerifyAndClearExpectations(10000);
 }
 
@@ -442,18 +502,15 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_SendingFailed) {
   // Arrange
   HandleConnection();
 
-  MockTMTelemetryObserver* mock_metric_observer = new MockTMTelemetryObserver();
-  tm.SetTelemetryObserver(mock_metric_observer);
-  EXPECT_CALL(*mock_metric_observer, StartRawMsg(_));
-
-  EXPECT_CALL(*mock_adapter,
-              SendData(mac_address_, application_id, test_message_))
+  EXPECT_CALL(mock_metric_observer_, StartRawMsg(_)).Times(metrics_call_count_);
+  EXPECT_CALL(*mock_adapter_,
+              SendData(mac_address_, application_id_, test_message_))
       .WillOnce(Return(TransportAdapter::FAIL));
 
-  EXPECT_CALL(*tm_listener, OnTMMessageSendFailed(_, test_message_));
-  EXPECT_EQ(E_SUCCESS, tm.SendMessageToDevice(test_message_));
+  EXPECT_CALL(*tm_listener_, OnTMMessageSendFailed(_, test_message_));
+  EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
 
-  EXPECT_CALL(*mock_metric_observer, StopRawMsg(_)).Times(0);
+  EXPECT_CALL(mock_metric_observer_, StopRawMsg(_)).Times(0);
 
   delete mock_metric_observer;
   testing::Mock::AsyncVerifyAndClearExpectations(10000);
@@ -463,15 +520,12 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_StartTimeObserver) {
   // Arrange
   HandleConnection();
 
-  MockTMTelemetryObserver* mock_metric_observer = new MockTMTelemetryObserver();
-  tm.SetTelemetryObserver(mock_metric_observer);
-  EXPECT_CALL(*mock_adapter,
-              SendData(mac_address_, application_id, test_message_))
+  EXPECT_CALL(*mock_adapter_,
+              SendData(mac_address_, application_id_, test_message_))
       .WillOnce(Return(TransportAdapter::OK));
-  EXPECT_CALL(*mock_metric_observer, StartRawMsg(_));
+  EXPECT_CALL(mock_metric_observer_, StartRawMsg(_)).Times(metrics_call_count_);
 
-  EXPECT_EQ(E_SUCCESS, tm.SendMessageToDevice(test_message_));
-  delete mock_metric_observer;
+  EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
   testing::Mock::AsyncVerifyAndClearExpectations(10000);
 }
 
@@ -479,16 +533,12 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_SendDone) {
   // Arrange
   HandleConnection();
 
-  MockTMTelemetryObserver* mock_metric_observer = new MockTMTelemetryObserver();
-  tm.SetTelemetryObserver(mock_metric_observer);
-  EXPECT_CALL(*mock_adapter,
-              SendData(mac_address_, application_id, test_message_))
+  EXPECT_CALL(*mock_adapter_,
+              SendData(mac_address_, application_id_, test_message_))
       .WillOnce(Return(TransportAdapter::OK));
-  EXPECT_CALL(*mock_metric_observer, StartRawMsg(_));
+  EXPECT_CALL(mock_metric_observer_, StartRawMsg(_)).Times(metrics_call_count_);
 
-  EXPECT_EQ(E_SUCCESS, tm.SendMessageToDevice(test_message_));
-
-  EXPECT_CALL(*mock_metric_observer, StopRawMsg(_));
+  EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
   HandleSendDone();
 
   delete mock_metric_observer;
@@ -499,18 +549,14 @@ TEST_F(TransportManagerImplTest, SendMessageFailed_GetHandleSendFailed) {
   // Arrange
   HandleConnection();
 
-  MockTMTelemetryObserver* mock_metric_observer = new MockTMTelemetryObserver();
-  tm.SetTelemetryObserver(mock_metric_observer);
-  EXPECT_CALL(*mock_metric_observer, StartRawMsg(_));
+  EXPECT_CALL(mock_metric_observer_, StartRawMsg(_)).Times(metrics_call_count_);
 
-  EXPECT_CALL(*mock_adapter,
-              SendData(mac_address_, application_id, test_message_))
+  EXPECT_CALL(*mock_adapter_,
+              SendData(mac_address_, application_id_, test_message_))
       .WillOnce(Return(TransportAdapter::FAIL));
 
-  EXPECT_CALL(*tm_listener, OnTMMessageSendFailed(_, test_message_));
-  EXPECT_EQ(E_SUCCESS, tm.SendMessageToDevice(test_message_));
-
-  EXPECT_CALL(*mock_metric_observer, StopRawMsg(_));
+  EXPECT_CALL(*tm_listener_, OnTMMessageSendFailed(_, test_message_));
+  EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
 
   HandleSendFailed();
   delete mock_metric_observer;
@@ -520,94 +566,82 @@ TEST_F(TransportManagerImplTest, SendMessageFailed_GetHandleSendFailed) {
 TEST_F(TransportManagerImplTest, RemoveDevice_DeviceWasAdded) {
   // Arrange
   HandleDeviceListUpdated();
-  EXPECT_CALL(*mock_adapter, ConnectDevice(mac_address_))
+  EXPECT_CALL(*mock_adapter_, ConnectDevice(mac_address_))
       .WillOnce(Return(TransportAdapter::OK));
-  EXPECT_EQ(E_SUCCESS, tm.ConnectDevice(device_handle_));
+  EXPECT_EQ(E_SUCCESS, tm_.ConnectDevice(device_handle_));
 
   // Assert
-  EXPECT_EQ(E_SUCCESS, tm.RemoveDevice(device_handle_));
+  EXPECT_EQ(E_SUCCESS, tm_.RemoveDevice(device_handle_));
 }
 
 TEST_F(TransportManagerImplTest, SetVisibilityOn_StartClientListening) {
-  EXPECT_CALL(*mock_adapter, StartClientListening())
+  EXPECT_CALL(*mock_adapter_, StartClientListening())
       .WillOnce(Return(TransportAdapter::OK));
-  EXPECT_EQ(::transport_manager::E_SUCCESS, tm.Visibility(true));
+  EXPECT_EQ(::transport_manager::E_SUCCESS, tm_.Visibility(true));
 }
 
 TEST_F(TransportManagerImplTest, SetVisibilityOff_StopClientListening) {
-  EXPECT_CALL(*mock_adapter, StopClientListening())
+  EXPECT_CALL(*mock_adapter_, StopClientListening())
       .WillOnce(Return(TransportAdapter::OK));
-  EXPECT_EQ(::transport_manager::E_SUCCESS, tm.Visibility(false));
+  EXPECT_EQ(::transport_manager::E_SUCCESS, tm_.Visibility(false));
 }
 
 TEST_F(TransportManagerImplTest, StopTransportManager) {
   HandleDeviceListUpdated();
-  EXPECT_CALL(*mock_adapter, ConnectDevice(mac_address_))
+  EXPECT_CALL(*mock_adapter_, ConnectDevice(mac_address_))
       .WillRepeatedly(Return(TransportAdapter::OK));
-  EXPECT_EQ(E_SUCCESS, tm.ConnectDevice(device_handle_));
+  EXPECT_EQ(E_SUCCESS, tm_.ConnectDevice(device_handle_));
 
-  EXPECT_CALL(*mock_adapter, DisconnectDevice(mac_address_))
+  EXPECT_CALL(*mock_adapter_, DisconnectDevice(mac_address_))
       .WillRepeatedly(Return(TransportAdapter::OK));
 
-  EXPECT_CALL(*mock_adapter, Terminate());
-  EXPECT_EQ(E_SUCCESS, tm.Stop());
+  EXPECT_CALL(*mock_adapter_, Terminate());
+  EXPECT_EQ(E_SUCCESS, tm_.Stop());
 }
 
 TEST_F(TransportManagerImplTest, Reinit) {
-  EXPECT_CALL(*mock_adapter, Terminate());
-  EXPECT_CALL(*mock_adapter, Init()).WillOnce(Return(TransportAdapter::OK));
-  EXPECT_EQ(E_SUCCESS, tm.Reinit());
+  EXPECT_CALL(*mock_adapter_, Terminate());
+  EXPECT_CALL(*mock_adapter_, Init()).WillOnce(Return(TransportAdapter::OK));
+  EXPECT_EQ(E_SUCCESS, tm_.Reinit());
 }
 
 TEST_F(TransportManagerImplTest, Reinit_InitAdapterFailed) {
-  EXPECT_CALL(*mock_adapter, Terminate());
-  EXPECT_CALL(*mock_adapter, Init()).WillOnce(Return(TransportAdapter::FAIL));
-  EXPECT_EQ(E_ADAPTERS_FAIL, tm.Reinit());
+  EXPECT_CALL(*mock_adapter_, Terminate());
+  EXPECT_CALL(*mock_adapter_, Init()).WillOnce(Return(TransportAdapter::FAIL));
+  EXPECT_EQ(E_ADAPTERS_FAIL, tm_.Reinit());
 }
 
 TEST_F(TransportManagerImplTest, UpdateDeviceList_AddNewDevice) {
-  const DeviceInfo dev_info(device_handle_, mac_address_, "TestDeviceName",
-                            "BTMAC");
+  device_list_.push_back(dev_info_.mac_address());
 
-  dev.push_back(dev_info.mac_address());
-  std::vector<DeviceInfo> vector_dev_info;
-  std::vector<DeviceInfo>::iterator it = vector_dev_info.begin();
-  vector_dev_info.insert(it, dev_info);
+  EXPECT_CALL(*mock_adapter_, GetDeviceList()).WillOnce(Return(device_list_));
+  EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
+      .WillOnce(Return(dev_info_.name()));
+  EXPECT_CALL(*mock_adapter_, GetConnectionType())
+      .WillOnce(Return(dev_info_.connection_type()));
+  EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
 
-  EXPECT_CALL(*mock_adapter, GetDeviceList()).WillOnce(Return(dev));
-  EXPECT_CALL(*mock_adapter, DeviceName(dev_info.mac_address()))
-      .WillOnce(Return(dev_info.name()));
-  EXPECT_CALL(*mock_adapter, GetConnectionType())
-      .WillOnce(Return(dev_info.connection_type()));
-  EXPECT_CALL(*tm_listener, OnDeviceAdded(dev_info));
-
-  tm.UpdateDeviceList(mock_adapter);
-  dev.pop_back();
+  tm_.UpdateDeviceList(mock_adapter_);
+  device_list_.pop_back();
 }
 
 TEST_F(TransportManagerImplTest, UpdateDeviceList_RemoveDevice) {
-  const DeviceInfo dev_info(device_handle_, mac_address_, "TestDeviceName",
-                            "BTMAC");
-
-  dev.push_back(dev_info.mac_address());
-  std::vector<DeviceInfo> vector_dev_info;
-  std::vector<DeviceInfo>::iterator it = vector_dev_info.begin();
-  vector_dev_info.insert(it, dev_info);
+  device_list_.push_back(dev_info_.mac_address());
 
   ::testing::InSequence seq;
-  EXPECT_CALL(*mock_adapter, GetDeviceList()).WillOnce(Return(dev));
-  EXPECT_CALL(*mock_adapter, GetConnectionType())
-      .WillOnce(Return(dev_info.connection_type()));
-  EXPECT_CALL(*mock_adapter, DeviceName(dev_info.mac_address()))
-      .WillOnce(Return(dev_info.name()));
-  EXPECT_CALL(*tm_listener, OnDeviceAdded(dev_info));
-  tm.UpdateDeviceList(mock_adapter);
-  dev.pop_back();
+  EXPECT_CALL(*mock_adapter_, GetDeviceList()).WillOnce(Return(device_list_));
+  EXPECT_CALL(*mock_adapter_, GetConnectionType())
+      .WillOnce(Return(dev_info_.connection_type()));
+  EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
+      .WillOnce(Return(dev_info_.name()));
+  EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
+  tm_.UpdateDeviceList(mock_adapter_);
+  device_list_.pop_back();
 
   // Device list is empty now
-  EXPECT_CALL(*mock_adapter, GetDeviceList()).WillOnce(Return(dev));
-  EXPECT_CALL(*tm_listener, OnDeviceRemoved(dev_info));
-  tm.UpdateDeviceList(mock_adapter);
+  EXPECT_CALL(*mock_adapter_, GetDeviceList()).WillOnce(Return(device_list_));
+  EXPECT_CALL(*tm_listener_, OnDeviceRemoved(dev_info_));
+  tm_.UpdateDeviceList(mock_adapter_);
 }
 
 /*
@@ -617,12 +651,16 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceDone) {
   int type = static_cast<int>(
       TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE);
 
-  TransportAdapterEvent test_event(type, mock_adapter, mac_address_,
-                                   application_id, test_message_, error_);
+  TransportAdapterEvent test_event(type,
+                                   mock_adapter_,
+                                   mac_address_,
+                                   application_id_,
+                                   test_message_,
+                                   error_);
 
-  EXPECT_CALL(*tm_listener, OnScanDevicesFinished());
+  EXPECT_CALL(*tm_listener_, OnScanDevicesFinished());
 
-  tm.ReceiveEventFromDevice(test_event);
+  tm_.TestReceiveEventFromDevice(test_event);
   testing::Mock::AsyncVerifyAndClearExpectations(10000);
 }
 
@@ -630,44 +668,49 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceFail) {
   int type = static_cast<int>(
       TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL);
 
-  TransportAdapterEvent test_event(type, mock_adapter, mac_address_,
-                                   application_id, test_message_, error_);
+  TransportAdapterEvent test_event(type,
+                                   mock_adapter_,
+                                   mac_address_,
+                                   application_id_,
+                                   test_message_,
+                                   error_);
 
-  EXPECT_CALL(*tm_listener, OnScanDevicesFailed(_));
+  EXPECT_CALL(*tm_listener_, OnScanDevicesFailed(_));
 
-  tm.ReceiveEventFromDevice(test_event);
+  tm_.TestReceiveEventFromDevice(test_event);
   testing::Mock::AsyncVerifyAndClearExpectations(10000);
 }
 
 TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_DeviceListUpdated) {
   int type = static_cast<int>(
       TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED);
-  const DeviceInfo dev_info(device_handle_, mac_address_, "TestDeviceName",
-                            "BTMAC");
 
-  TransportAdapterEvent test_event(type, mock_adapter, dev_info.mac_address(),
-                                   application_id, test_message_, error_);
-  dev.push_back(dev_info.mac_address());
+  TransportAdapterEvent test_event(type,
+                                   mock_adapter_,
+                                   dev_info_.mac_address(),
+                                   application_id_,
+                                   test_message_,
+                                   error_);
+  device_list_.push_back(dev_info_.mac_address());
   std::vector<DeviceInfo> vector_dev_info;
-  std::vector<DeviceInfo>::iterator it = vector_dev_info.begin();
-  vector_dev_info.insert(it, dev_info);
+  vector_dev_info.push_back(dev_info_);
 
-  EXPECT_CALL(*mock_adapter, GetDeviceList())
+  EXPECT_CALL(*mock_adapter_, GetDeviceList())
       .Times(AtLeast(1))
-      .WillRepeatedly(Return(dev));
-  EXPECT_CALL(*mock_adapter, DeviceName(dev_info.mac_address()))
+      .WillRepeatedly(Return(device_list_));
+  EXPECT_CALL(*mock_adapter_, DeviceName(dev_info_.mac_address()))
       .Times(AtLeast(1))
-      .WillRepeatedly(Return(dev_info.name()));
-  EXPECT_CALL(*mock_adapter, GetConnectionType())
+      .WillRepeatedly(Return(dev_info_.name()));
+  EXPECT_CALL(*mock_adapter_, GetConnectionType())
       .Times(AtLeast(1))
-      .WillRepeatedly(Return(dev_info.connection_type()));
+      .WillRepeatedly(Return(dev_info_.connection_type()));
 
-  EXPECT_CALL(*tm_listener, OnDeviceFound(dev_info));
-  EXPECT_CALL(*tm_listener, OnDeviceAdded(dev_info));
-  EXPECT_CALL(*tm_listener, OnDeviceListUpdated(vector_dev_info));
+  EXPECT_CALL(*tm_listener_, OnDeviceFound(dev_info_));
+  EXPECT_CALL(*tm_listener_, OnDeviceAdded(dev_info_));
+  EXPECT_CALL(*tm_listener_, OnDeviceListUpdated(vector_dev_info));
 
-  tm.ReceiveEventFromDevice(test_event);
-  dev.pop_back();
+  tm_.TestReceiveEventFromDevice(test_event);
+  device_list_.pop_back();
   testing::Mock::AsyncVerifyAndClearExpectations(10000);
 }
 
@@ -688,6 +731,164 @@ TEST_F(TransportManagerImplTest, CheckEvents) {
 TEST_F(TransportManagerImplTest, CheckReceiveEvent) {
   HandleConnection();
   HandleReceiveDone();
+}
+
+TEST_F(TransportManagerImplTest, CheckReceiveFailedEvent) {
+  // Arrange
+  const int type = static_cast<int>(
+      TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL);
+
+  TransportAdapterEvent test_event(type,
+                                   mock_adapter_,
+                                   mac_address_,
+                                   application_id_,
+                                   test_message_,
+                                   error_);
+  // Check before act
+  HandleConnection();
+  // Act and Assert
+  EXPECT_CALL(*tm_listener_, OnTMMessageReceiveFailed(connection_key_, _));
+  tm_.TestHandle(test_event);
+}
+
+TEST_F(TransportManagerImplTest, CheckUnexpectedDisconnect) {
+  // Arrange
+  const int type = static_cast<int>(
+      TransportAdapterListenerImpl::EventTypeEnum::ON_UNEXPECTED_DISCONNECT);
+
+  TransportAdapterEvent test_event(type,
+                                   mock_adapter_,
+                                   mac_address_,
+                                   application_id_,
+                                   test_message_,
+                                   error_);
+  // Check before act
+  HandleConnection();
+  // Act and Assert
+  EXPECT_CALL(*tm_listener_, OnUnexpectedDisconnect(connection_key_, _));
+  tm_.TestHandle(test_event);
+}
+
+TEST_F(TransportManagerImplTest, CheckExpectedDisconnect) {
+  // Arrange
+  const int type = static_cast<int>(
+      TransportAdapterListenerImpl::EventTypeEnum::ON_EXPECTED_DISCONNECT);
+
+  TransportAdapterEvent test_event(type,
+                                   mock_adapter_,
+                                   mac_address_,
+                                   application_id_,
+                                   test_message_,
+                                   error_);
+  // Check before act
+  HandleConnection();
+  // Act and Assert
+  EXPECT_CALL(*tm_listener_, OnExpectedDisconnect(connection_key_, _));
+  tm_.TestHandle(test_event);
+}
+
+TEST_F(TransportManagerImplTest, ConnectDevice_TMIsNotInitialized) {
+  // Check before Act
+  UninitializeTM();
+  // Act and Assert
+  EXPECT_CALL(*mock_adapter_, ConnectDevice(_)).Times(0);
+  EXPECT_EQ(E_TM_IS_NOT_INITIALIZED, tm_.ConnectDevice(device_handle_));
+}
+
+TEST_F(TransportManagerImplTest, DisconnectDevice_TMIsNotInitialized) {
+  // Check before Act
+  UninitializeTM();
+  // Act and Assert
+  EXPECT_CALL(*mock_adapter_, DisconnectDevice(_)).Times(0);
+  EXPECT_EQ(E_TM_IS_NOT_INITIALIZED, tm_.DisconnectDevice(device_handle_));
+}
+
+TEST_F(TransportManagerImplTest, Disconnect_TMIsNotInitialized) {
+  // Check before Act
+  UninitializeTM();
+  // Act and Assert
+  EXPECT_CALL(*mock_adapter_, Disconnect(_, _)).Times(0);
+  EXPECT_EQ(E_TM_IS_NOT_INITIALIZED, tm_.Disconnect(connection_key_));
+}
+
+TEST_F(TransportManagerImplTest, DisconnectForce_TMIsNotInitialized) {
+  // Check before Act
+  UninitializeTM();
+  // Act and Assert
+  EXPECT_CALL(*mock_adapter_, Disconnect(_, _)).Times(0);
+  EXPECT_EQ(E_TM_IS_NOT_INITIALIZED, tm_.DisconnectForce(connection_key_));
+}
+
+TEST_F(TransportManagerImplTest, DisconnectForce_ConnectionNotExist) {
+  // SetUp does not add connections
+  // Act and Assert
+  EXPECT_CALL(*mock_adapter_, Disconnect(_, _)).Times(0);
+  EXPECT_EQ(E_INVALID_HANDLE, tm_.DisconnectForce(connection_key_));
+}
+
+TEST_F(TransportManagerImplTest, Stop_TMIsNotInitialized) {
+  // Check before Act
+  UninitializeTM();
+  // Act and Assert
+  EXPECT_CALL(*mock_adapter_, DisconnectDevice(_)).Times(0);
+  EXPECT_CALL(*mock_adapter_, Terminate()).Times(0);
+  EXPECT_EQ(E_TM_IS_NOT_INITIALIZED, tm_.Stop());
+}
+
+TEST_F(TransportManagerImplTest, SendMessageToDevice_TMIsNotInitialized) {
+  // Check before Act
+  UninitializeTM();
+  // Act and Assert
+  EXPECT_CALL(*mock_adapter_, SendData(_, _, _)).Times(0);
+  EXPECT_CALL(*tm_listener_, OnTMMessageSendFailed(_, _)).Times(0);
+  EXPECT_EQ(E_TM_IS_NOT_INITIALIZED, tm_.SendMessageToDevice(test_message_));
+}
+
+TEST_F(TransportManagerImplTest, SendMessageToDevice_ConnectionNotExist) {
+  // SetUp does not add connections
+  // Act and Assert
+  EXPECT_CALL(*mock_adapter_, SendData(_, _, _)).Times(0);
+  EXPECT_CALL(*tm_listener_, OnTMMessageSendFailed(_, _)).Times(0);
+  EXPECT_EQ(E_INVALID_HANDLE, tm_.SendMessageToDevice(test_message_));
+}
+
+TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_TMIsNotInitialized) {
+  // Arrange
+  const int type = static_cast<int>(
+      TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE);
+  TransportAdapterEvent test_event(
+      type, NULL, mac_address_, application_id_, test_message_, error_);
+  // Check before Act
+  UninitializeTM();
+  // Act and Assert
+  EXPECT_CALL(*tm_listener_, OnScanDevicesFinished()).Times(0);
+  EXPECT_EQ(E_TM_IS_NOT_INITIALIZED, tm_.ReceiveEventFromDevice(test_event));
+}
+
+TEST_F(TransportManagerImplTest, RemoveDevice_TMIsNotInitialized) {
+  // Check before Act
+  UninitializeTM();
+  // Act and Assert
+  EXPECT_EQ(E_TM_IS_NOT_INITIALIZED, tm_.RemoveDevice(device_handle_));
+}
+
+TEST_F(TransportManagerImplTest, Visibility_TMIsNotInitialized) {
+  // Arrange
+  const bool visible = true;
+  // Check before Act
+  UninitializeTM();
+  // Act and Assert
+  EXPECT_CALL(*mock_adapter_, StartClientListening()).Times(0);
+  EXPECT_EQ(E_TM_IS_NOT_INITIALIZED, tm_.Visibility(visible));
+}
+
+TEST_F(TransportManagerImplTest, HandleMessage_ConnectionNotExist) {
+  EXPECT_CALL(*mock_adapter_,
+              SendData(mac_address_, application_id_, test_message_)).Times(0);
+  EXPECT_CALL(*tm_listener_, OnTMMessageSendFailed(_, test_message_));
+
+  tm_.TestHandle(test_message_);
+  testing::Mock::AsyncVerifyAndClearExpectations(10000);
 }
 
 }  // namespace transport_manager_test
