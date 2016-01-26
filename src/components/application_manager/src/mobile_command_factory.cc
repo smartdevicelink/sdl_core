@@ -532,8 +532,9 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     case mobile_apis::FunctionID::OnHMIStatusID: {
       if (origin == commands::Command::ORIGIN_MOBILE) {
         command = utils::MakeShared<commands::OnHMIStatusNotificationFromMobile>(message);
+      } else {
+        command = utils::MakeShared<commands::OnHMIStatusNotification>(message);
       }
-      command = utils::MakeShared<commands::OnHMIStatusNotification>(message);
       break;
     }
     case mobile_apis::FunctionID::OnKeyboardInputID: {
