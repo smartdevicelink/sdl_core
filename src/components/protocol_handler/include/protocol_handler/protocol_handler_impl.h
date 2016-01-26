@@ -430,14 +430,15 @@ class ProtocolHandlerImpl
    * \param packet Received message with protocol header.
    * \return \saRESULT_CODE Status of operation
    */
-  RESULT_CODE HandleControlMessage(
-    const ProtocolFramePtr packet);
+  RESULT_CODE HandleControlMessage(const ProtocolFramePtr packet);
 
-  RESULT_CODE HandleControlMessageEndSession(const ProtocolPacket &packet);
+  RESULT_CODE HandleControlMessageEndSession(const ProtocolPacket& packet);
 
-  RESULT_CODE HandleControlMessageStartSession(const ProtocolPacket &packet);
+  RESULT_CODE HandleControlMessageEndServiceACK(const ProtocolPacket& packet);
 
-  RESULT_CODE HandleControlMessageHeartBeat(const ProtocolPacket &packet);
+  RESULT_CODE HandleControlMessageStartSession(const ProtocolPacket& packet);
+
+  RESULT_CODE HandleControlMessageHeartBeat(const ProtocolPacket& packet);
 
   void PopValideAndExpirateMultiframes();
 

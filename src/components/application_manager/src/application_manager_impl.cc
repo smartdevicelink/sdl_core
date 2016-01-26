@@ -2787,7 +2787,8 @@ bool ApplicationManagerImpl::CanAppStream(
   } else {
     LOG4CXX_WARN(logger_, "Unsupported service_type " << service_type);
   }
-  return HMILevelAllowsStreaming(app_id, service_type) && is_allowed;
+
+  return HMILevelAllowsStreaming(app_id, service_type) && is_allowed; 
 }
 
 void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
@@ -2856,6 +2857,7 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
 
   NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
   if (navi_service_status_.end() == it) {
+    LOG4CXX_ERROR(logger_, "No info about navi servicies for app");
     return;
   }
 
@@ -2863,24 +2865,19 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
     if (it->second.first) {
       LOG4CXX_DEBUG(logger_, "Going to end video service");
       connection_handler_->SendEndService(app_id, ServiceType::kMobileNav);
-      MessageHelper::SendNaviStopStream(app->app_id());
-      app->set_video_streaming_approved(false);
-      app->set_video_streaming_allowed(false);
-      app->set_video_stream_retry_number(0);
     }
     if (it->second.second) {
       LOG4CXX_DEBUG(logger_, "Going to end audio service");
       connection_handler_->SendEndService(app_id, ServiceType::kAudio);
-      MessageHelper::SendAudioStopStream(app->app_id());
-      app->set_audio_streaming_approved(false);
-      app->set_audio_streaming_allowed(false);
-      app->set_audio_stream_retry_number(0);
     }
+    DisallowStreaming(app_id);
+
     navi_app_to_stop_.push_back(app_id);
 
-    ApplicationManagerTimerPtr closeTimer(
-        new TimerThread<ApplicationManagerImpl>(
-            "CloseAppTimer", this, &ApplicationManagerImpl::CloseNaviApp));
+    ApplicationManagerTimerPtr closeTimer;
+    closeTimer = utils::MakeShared< TimerThread<ApplicationManagerImpl> >(
+        "CloseNaviAppTimer", this, &ApplicationManagerImpl::CloseNaviApp);
+
     closeTimer->start(navi_close_app_timeout_);
 
     sync_primitives::AutoLock lock(timer_pool_lock_);
@@ -2888,14 +2885,15 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
   }
 }
 
-void ApplicationManagerImpl::OnHMILevelChanged(
-    uint32_t app_id,
-    mobile_apis::HMILevel::eType from,
-    mobile_apis::HMILevel::eType to) {
+void ApplicationManagerImpl::OnHMILevelChanged(uint32_t app_id,
+                                               mobile_apis::HMILevel::eType from,
+                                               mobile_apis::HMILevel::eType to) {
+  LOG4CXX_AUTO_TRACE(logger_);
   using namespace mobile_apis::HMILevel;
   using namespace helpers;
 
   if (from == to) {
+    LOG4CXX_TRACE(logger_, "HMILevel from = to");
     return;
   }
 
@@ -2906,24 +2904,28 @@ void ApplicationManagerImpl::OnHMILevelChanged(
   }
 
   if (to == HMI_FULL || to == HMI_LIMITED) {
+    LOG4CXX_TRACE(logger_, "HMILevel to FULL or LIMITED");
     if (from == HMI_BACKGROUND) {
+      LOG4CXX_TRACE(logger_, "HMILevel from BACKGROUND");
       AllowStreaming(app_id);
     }
   } else if (to == HMI_BACKGROUND) {
+    LOG4CXX_TRACE(logger_, "HMILevel to BACKGROUND");
     if (from == HMI_FULL || from == HMI_LIMITED) {
+      LOG4CXX_TRACE(logger_, "HMILevel from FULL or LIMITED");
       navi_app_to_end_stream_.push_back(app_id);
 
-      ApplicationManagerTimerPtr endStreamTimer(
-          new TimerThread<ApplicationManagerImpl>(
-              "EndStreamTimer",
-              this,
-              &ApplicationManagerImpl::EndNaviStreaming));
+      ApplicationManagerTimerPtr endStreamTimer;
+      endStreamTimer = utils::MakeShared< TimerThread<ApplicationManagerImpl> >(
+        "AppShouldFinishStreaming", this, &ApplicationManagerImpl::EndNaviStreaming);
+
       endStreamTimer->start(navi_end_stream_timeout_);
 
       sync_primitives::AutoLock lock(timer_pool_lock_);
       timer_pool_.push_back(endStreamTimer);
     }
   } else if (to == HMI_NONE) {
+    LOG4CXX_TRACE(logger_, "HMILevel to NONE");
     if (from == HMI_FULL || from == HMI_LIMITED || from == HMI_BACKGROUND) {
       EndNaviServices(app_id);
     }
@@ -2988,6 +2990,7 @@ void ApplicationManagerImpl::CloseNaviApp() {
   NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
   if (navi_service_status_.end() != it) {
     if (it->second.first || it->second.second) {
+      LOG4CXX_INFO(logger_, "App haven't answered for EndService. Unregister it.");
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
           app_id, PROTOCOL_VIOLATION);
       UnregisterApplication(app_id, ABORTED);
