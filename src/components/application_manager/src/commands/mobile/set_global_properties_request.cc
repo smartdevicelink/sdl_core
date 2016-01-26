@@ -289,11 +289,15 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
           std::max(ui_result_, tts_result_));
   }
 
+  //TODO{ALeshin} APPLINK-15858. connection_key removed during SendResponse
+  const uint32_t stashedConnectionKey = connection_key();
+
   SendResponse(result, result_code, return_info,
                &(message[strings::msg_params]));
 
   ApplicationSharedPtr application =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      ApplicationManagerImpl::instance()->application(stashedConnectionKey);
+
   if (!application) {
     LOG4CXX_DEBUG(logger_, "NULL pointer.");
     return;
