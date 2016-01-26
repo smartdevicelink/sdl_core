@@ -220,8 +220,22 @@ TEST_F(ProtocolPacketTest, DeserializeNonZeroPacket) {
 
 TEST_F(ProtocolPacketTest, DeserializePacket_FrameTypeFirst_ResultOK) {
   // Arrange
+  uint8_t session_id = 1u;
+  uint8_t data_size = 1u;
   // Set protol version - 2 and frame type - first
-  uint8_t message[] = {0x22};
+  uint8_t message[] = {0x22,
+                       kRpc,
+                       FRAME_DATA_FIRST,
+                       session_id,
+                       0x00,
+                       0x00,
+                       0x00,
+                       data_size,
+                       0x00,
+                       0x00,
+                       0x00,
+                       0x00,
+                       0x00};
   ProtocolPacket protocol_packet;
   // Act
   RESULT_CODE res =
