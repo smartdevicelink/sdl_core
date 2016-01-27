@@ -28,14 +28,14 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-if(BUILD_TESTS)
+if (BUILD_TESTS)
 
-include_directories(
+include_directories (
   include
   ${GMOCK_INCLUDE_DIRECTORY}
 )
 
-set(LIBRARIES
+set (LIBRARIES
   gmock
   ProtocolHandler
   connectionHandler
@@ -44,7 +44,7 @@ set(LIBRARIES
   ProtocolLibrary
 )
 
-set(SOURCES
+set (SOURCES
   incoming_data_handler_test.cc
   protocol_header_validator_test.cc
   protocol_handler_tm_test.cc
@@ -53,6 +53,6 @@ set(SOURCES
   multiframe_builder_test.cc
 )
 
-create_test("protocol_handler_test" "${SOURCES}" "${LIBRARIES}")
+create_test ("protocol_handler_test" "${SOURCES}" "${LIBRARIES}")
 
-endif()
+endif ()

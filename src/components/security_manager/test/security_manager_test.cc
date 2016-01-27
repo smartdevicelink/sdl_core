@@ -101,11 +101,12 @@ class SecurityManagerTest : public ::testing::Test {
   /*
    * Wrapper for fast emulate recieve SecurityManager::OnMessageReceived
    */
-  void call_OnMessageReceived(const uint8_t* const data, uint32_t dataSize,
+  void call_OnMessageReceived(const uint8_t* const data,
+                              uint32_t dataSize,
                               const ServiceType serviceType) {
     const ::protocol_handler::RawMessagePtr rawMessagePtr(
-        new ::protocol_handler::RawMessage(key, protocolVersion, data, dataSize,
-                                           serviceType));
+        new ::protocol_handler::RawMessage(
+            key, protocolVersion, data, dataSize, serviceType));
     security_manager_->OnMessageReceived(rawMessagePtr);
   }
   /*
@@ -561,7 +562,8 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInitIsNotComplete) {
   // Only on both correct - data and size shall be send message to mobile app
   EXPECT_CALL(mock_ssl_context_exists, StartHandshake(_, _))
       .WillOnce(DoAll(
-          SetArgPointee<0>(handshake_data_out_pointer), SetArgPointee<1>(0),
+          SetArgPointee<0>(handshake_data_out_pointer),
+          SetArgPointee<1>(0),
           Return(security_manager::SSLContext::Handshake_Result_Success)))
       .WillOnce(DoAll(
           SetArgPointee<0>((uint8_t*)NULL),
@@ -693,7 +695,9 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_InvalidData) {
   EXPECT_CALL(
       mock_ssl_context_exists,
       DoHandshakeStep(HandshakeStepEq(handshake_data, handshake_data_size),
-                      handshake_data_size, _, _))
+                      handshake_data_size,
+                      _,
+                      _))
       .WillOnce(DoAll(
           SetArgPointee<2>(handshake_data_out_pointer),
           SetArgPointee<3>(handshake_data_out_size),
@@ -703,18 +707,20 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_InvalidData) {
           SetArgPointee<3>(handshake_data_out_size),
           Return(security_manager::SSLContext::Handshake_Result_AbnormalFail)))
       .WillOnce(DoAll(
-          SetArgPointee<2>(handshake_data_out_pointer), SetArgPointee<3>(0),
+          SetArgPointee<2>(handshake_data_out_pointer),
+          SetArgPointee<3>(0),
           Return(security_manager::SSLContext::Handshake_Result_AbnormalFail)))
       .WillOnce(DoAll(
-          SetArgPointee<2>((uint8_t*)NULL), SetArgPointee<3>(0),
+          SetArgPointee<2>((uint8_t*)NULL),
+          SetArgPointee<3>(0),
           Return(security_manager::SSLContext::Handshake_Result_AbnormalFail)));
 
   // On each wrong handshake will be asked error
   EXPECT_CALL(mock_ssl_context_exists, LastError()).Times(handshake_emulates);
 
   // Emulate handshare #handshake_emulates times for 5 cases
-  EmulateMobileMessageHandshake(handshake_data, handshake_data_size,
-                                handshake_emulates);
+  EmulateMobileMessageHandshake(
+      handshake_data, handshake_data_size, handshake_emulates);
 }
 /*
  * Shall send HandshakeData on getting SEND_HANDSHAKE_DATA from mobile side
@@ -757,7 +763,9 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_Answer) {
   EXPECT_CALL(
       mock_ssl_context_exists,
       DoHandshakeStep(HandshakeStepEq(handshake_data, handshake_data_size),
-                      handshake_data_size, _, _))
+                      handshake_data_size,
+                      _,
+                      _))
       .WillOnce(DoAll(
           SetArgPointee<2>(handshake_data_out_pointer),
           SetArgPointee<3>(handshake_data_out_size),
@@ -767,8 +775,8 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_Answer) {
                 SetArgPointee<3>(handshake_data_out_size),
                 Return(security_manager::SSLContext::Handshake_Result_Fail)));
 
-  EmulateMobileMessageHandshake(handshake_data, handshake_data_size,
-                                handshake_emulates);
+  EmulateMobileMessageHandshake(
+      handshake_data, handshake_data_size, handshake_emulates);
 }
 /*
  * Shall call all listeners on success end handshake
@@ -796,7 +804,9 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_HandshakeFinished) {
   EXPECT_CALL(
       mock_ssl_context_exists,
       DoHandshakeStep(HandshakeStepEq(handshake_data, handshake_data_size),
-                      handshake_data_size, _, _))
+                      handshake_data_size,
+                      _,
+                      _))
       .
       // two states with correct out data
       WillOnce(DoAll(
@@ -820,10 +830,12 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_HandshakeFinished) {
       .
       // two states with with null data size
       WillOnce(DoAll(
-          SetArgPointee<2>(handshake_data_out_pointer), SetArgPointee<3>(0),
+          SetArgPointee<2>(handshake_data_out_pointer),
+          SetArgPointee<3>(0),
           Return(security_manager::SSLContext::Handshake_Result_Success)))
       .WillOnce(DoAll(
-          SetArgPointee<2>(handshake_data_out_pointer), SetArgPointee<3>(0),
+          SetArgPointee<2>(handshake_data_out_pointer),
+          SetArgPointee<3>(0),
           Return(security_manager::SSLContext::Handshake_Result_Success)));
 
   // Expect send two message (with correct pointer and size data)
@@ -841,8 +853,8 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_HandshakeFinished) {
       .Times(2);
 
   // Expect NO InternalError with ERROR_ID
-  EmulateMobileMessageHandshake(handshake_data, handshake_data_size,
-                                handshake_emulates);
+  EmulateMobileMessageHandshake(
+      handshake_data, handshake_data_size, handshake_emulates);
 }
 /*
  * Shall not any query on getting empty SEND_INTERNAL_ERROR
@@ -871,12 +883,12 @@ TEST_F(SecurityManagerTest, GetInternalError) {
 TEST_F(SecurityManagerTest, GetInternalError_WithErrText) {
   SetMockCryptoManager();
 
-  SecurityQuery::QueryHeader header(SecurityQuery::NOTIFICATION,
-                                    SecurityQuery::SEND_INTERNAL_ERROR, 0);
+  SecurityQuery::QueryHeader header(
+      SecurityQuery::NOTIFICATION, SecurityQuery::SEND_INTERNAL_ERROR, 0);
   std::string error("JSON wrong string");
   header.json_size = error.size();
-  EmulateMobileMessage(header, reinterpret_cast<const uint8_t*>(error.c_str()),
-                       error.size());
+  EmulateMobileMessage(
+      header, reinterpret_cast<const uint8_t*>(error.c_str()), error.size());
 }
 /*
  * Shall not send any query on getting SEND_INTERNAL_ERROR with error string
@@ -884,12 +896,12 @@ TEST_F(SecurityManagerTest, GetInternalError_WithErrText) {
 TEST_F(SecurityManagerTest, GetInternalError_WithErrJSONText) {
   SetMockCryptoManager();
 
-  SecurityQuery::QueryHeader header(SecurityQuery::NOTIFICATION,
-                                    SecurityQuery::SEND_INTERNAL_ERROR, 0);
+  SecurityQuery::QueryHeader header(
+      SecurityQuery::NOTIFICATION, SecurityQuery::SEND_INTERNAL_ERROR, 0);
   std::string error(" { \"id\": 1 } ");
   header.json_size = error.size();
-  EmulateMobileMessage(header, reinterpret_cast<const uint8_t*>(error.c_str()),
-                       error.size());
+  EmulateMobileMessage(
+      header, reinterpret_cast<const uint8_t*>(error.c_str()), error.size());
 }
 
 }  // namespace security_manager_test

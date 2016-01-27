@@ -76,10 +76,8 @@ class ConnectionHandlerTest : public ::testing::Test {
     device_name_ = "test_name";
     mac_address_ = "test_address";
 
-    const transport_manager::DeviceInfo device_info(device_handle_,
-                                                    mac_address_,
-                                                    device_name_,
-                                                    connection_type_);
+    const transport_manager::DeviceInfo device_info(
+        device_handle_, mac_address_, device_name_, connection_type_);
     // Add Device and connection
     connection_handler_->addDeviceConnection(device_info, uid_);
     connection_key_ = connection_handler_->KeyFromPair(uid_, 0u);
@@ -88,7 +86,7 @@ class ConnectionHandlerTest : public ::testing::Test {
   }
   void AddTestSession() {
     start_session_id_ = connection_handler_->OnSessionStartedCallback(
-                       uid_, 0, kRpc, PROTECTION_OFF, &out_hash_id_);
+        uid_, 0, kRpc, PROTECTION_OFF, &out_hash_id_);
     EXPECT_NE(0u, start_session_id_);
     EXPECT_EQ(SessionHash(uid_, start_session_id_), out_hash_id_);
     connection_key_ = connection_handler_->KeyFromPair(uid_, start_session_id_);
@@ -108,15 +106,18 @@ class ConnectionHandlerTest : public ::testing::Test {
   }
 
   // Additional SetUp
-  void SetSpecificServices(const std::string& protect, const std::string& not_protect) {
+  void SetSpecificServices(const std::string& protect,
+                           const std::string& not_protect) {
     const char* config_file = "config.ini";
     std::ofstream file_config(config_file);
     ASSERT_TRUE(file_config.is_open());
     const std::string non("NON");
-    file_config << "[Security Manager]" << std::endl
+    file_config
+        << "[Security Manager]" << std::endl
         << "; Force protected services (could be id's from 0x01 to 0xFF)"
-        << std::endl << "ForceProtectedService = "
-        << (protect.empty() ? non : protect) << std::endl
+        << std::endl
+        << "ForceProtectedService = " << (protect.empty() ? non : protect)
+        << std::endl
         << "; Force unprotected services" << std::endl
         << "ForceUnprotectedService = "
         << (not_protect.empty() ? non : not_protect) << std::endl;
@@ -127,7 +128,8 @@ class ConnectionHandlerTest : public ::testing::Test {
   // If session_id is NULL - check that there is no sessions in connection
   void CheckSessionExists(const int connectionId, const int session_id) {
     // Check all tree to find Session and check own protected value
-    const ConnectionList& connection_list = connection_handler_->getConnectionList();
+    const ConnectionList& connection_list =
+        connection_handler_->getConnectionList();
     ASSERT_FALSE(connection_list.empty());
     ConnectionList::const_iterator conn_it = connection_list.find(connectionId);
     ASSERT_NE(conn_it, connection_list.end());
@@ -144,17 +146,21 @@ class ConnectionHandlerTest : public ::testing::Test {
       const ServiceList& service_list = session.service_list;
       ASSERT_FALSE(service_list.empty());
       // Check RPC and bulk services in session
-      ASSERT_NE(service_list.end(), std::find(service_list.begin(), service_list.end(), kRpc));
-      ASSERT_NE(service_list.end(), std::find(service_list.begin(), service_list.end(), kBulk));
+      ASSERT_NE(service_list.end(),
+                std::find(service_list.begin(), service_list.end(), kRpc));
+      ASSERT_NE(service_list.end(),
+                std::find(service_list.begin(), service_list.end(), kBulk));
     }
   }
 
   // Check Service Wrapper
-  void CheckServiceExists(const int connectionId, const int session_id,
+  void CheckServiceExists(const int connectionId,
+                          const int session_id,
                           const ::protocol_handler::ServiceType serviceId,
                           const bool exists) {
     // Check all trees to find Service and check own protected value
-    const ConnectionList& connection_list = connection_handler_->getConnectionList();
+    const ConnectionList& connection_list =
+        connection_handler_->getConnectionList();
     ASSERT_FALSE(connection_list.empty());
     ConnectionList::const_iterator conn_it = connection_list.find(connectionId);
     ASSERT_NE(conn_it, connection_list.end());
@@ -167,7 +173,8 @@ class ConnectionHandlerTest : public ::testing::Test {
     const Session& session = sess_it->second;
     const ServiceList& service_list = session.service_list;
     ASSERT_FALSE(service_list.empty());
-    ServiceList::const_iterator serv_it = std::find(service_list.begin(), service_list.end(), serviceId);
+    ServiceList::const_iterator serv_it =
+        std::find(service_list.begin(), service_list.end(), serviceId);
     if (exists) {
       ASSERT_NE(serv_it, service_list.end());
     } else {
@@ -175,12 +182,14 @@ class ConnectionHandlerTest : public ::testing::Test {
     }
   }
   // Check Service Wrapper
-  void CheckService(const int connectionId, const int session_id,
+  void CheckService(const int connectionId,
+                    const int session_id,
                     const ::protocol_handler::ServiceType serviceId,
                     const ::security_manager::SSLContext* ssl_context,
                     const bool is_protected) {
     // Check all tree to find Service and check own protected value
-    const ConnectionList& connection_list = connection_handler_->getConnectionList();
+    const ConnectionList& connection_list =
+        connection_handler_->getConnectionList();
     ASSERT_FALSE(connection_list.empty());
     ConnectionList::const_iterator conn_it = connection_list.find(connectionId);
     ASSERT_NE(conn_it, connection_list.end());
@@ -196,7 +205,8 @@ class ConnectionHandlerTest : public ::testing::Test {
 #endif  // ENABLE_SECURITY
     const ServiceList& service_list = session.service_list;
     ASSERT_FALSE(service_list.empty());
-    ServiceList::const_iterator serv_it = std::find(service_list.begin(), service_list.end(), serviceId);
+    ServiceList::const_iterator serv_it =
+        std::find(service_list.begin(), service_list.end(), serviceId);
     ASSERT_NE(serv_it, service_list.end());
 
     const Service& service = *serv_it;
@@ -204,25 +214,28 @@ class ConnectionHandlerTest : public ::testing::Test {
 #ifdef ENABLE_SECURITY
     if (is_protected) {
       // Emulate success protection - check enable service flag
-      const uint32_t connection_key_ = connection_handler_->KeyFromPair(
-          connectionId, session_id);
+      const uint32_t connection_key_ =
+          connection_handler_->KeyFromPair(connectionId, session_id);
       connection_handler_->SetProtectionFlag(connection_key_, serviceId);
     }
 #endif  // ENABLE_SECURITY
   }
 
-  void ChangeProtocol(const int connectionId, const int session_id, const uint8_t protocol_version) {
+  void ChangeProtocol(const int connectionId,
+                      const int session_id,
+                      const uint8_t protocol_version) {
     ConnectionList connection_list = connection_handler_->getConnectionList();
 
-    ConnectionList::const_iterator conn_it = (connection_handler_->getConnectionList()).find(connectionId);
+    ConnectionList::const_iterator conn_it =
+        (connection_handler_->getConnectionList()).find(connectionId);
     ASSERT_NE(conn_it, connection_list.end());
-    Connection * connection = conn_it->second;
+    Connection* connection = conn_it->second;
     ASSERT_TRUE(connection != NULL);
     connection->UpdateProtocolVersionSession(session_id, protocol_version);
     uint8_t check_protocol_version;
-    EXPECT_TRUE(connection->ProtocolVersion(session_id, check_protocol_version));
-    EXPECT_EQ(check_protocol_version,protocol_version);
-
+    EXPECT_TRUE(
+        connection->ProtocolVersion(session_id, check_protocol_version));
+    EXPECT_EQ(check_protocol_version, protocol_version);
   }
 
   ConnectionHandlerImpl* connection_handler_;
@@ -235,14 +248,14 @@ class ConnectionHandlerTest : public ::testing::Test {
   std::string connection_type_;
   std::string device_name_;
   std::string mac_address_;
-
 };
 
 TEST_F(ConnectionHandlerTest, StartSession_NoConnection) {
   // Null sessionId for start new session
   const uint8_t sessionID = 0;
   // Start new session with RPC service
-  const uint32_t result_fail = connection_handler_->OnSessionStartedCallback(uid_, sessionID, kRpc, PROTECTION_ON, &out_hash_id_);
+  const uint32_t result_fail = connection_handler_->OnSessionStartedCallback(
+      uid_, sessionID, kRpc, PROTECTION_ON, &out_hash_id_);
   // Unknown connection error is '0'
   EXPECT_EQ(0u, result_fail);
   EXPECT_EQ(protocol_handler::HASH_ID_WRONG, out_hash_id_);
@@ -267,10 +280,12 @@ TEST_F(ConnectionHandlerTest, AddConnection_StopConnection) {
 
 TEST_F(ConnectionHandlerTest, GetConnectionSessionsCount) {
   AddTestDeviceConnection();
-  EXPECT_EQ(0u, connection_handler_->GetConnectionSessionsCount(connection_key_));
+  EXPECT_EQ(0u,
+            connection_handler_->GetConnectionSessionsCount(connection_key_));
 
   AddTestSession();
-  EXPECT_EQ(1u, connection_handler_->GetConnectionSessionsCount(connection_key_));
+  EXPECT_EQ(1u,
+            connection_handler_->GetConnectionSessionsCount(connection_key_));
 }
 
 TEST_F(ConnectionHandlerTest, GetAppIdOnSessionKey) {
@@ -280,7 +295,9 @@ TEST_F(ConnectionHandlerTest, GetAppIdOnSessionKey) {
   uint32_t app_id = 0;
   const uint32_t testid = SessionHash(uid_, start_session_id_);
 
-  EXPECT_EQ(0, connection_handler_->GetDataOnSessionKey(connection_key_, &app_id, NULL, NULL));
+  EXPECT_EQ(0,
+            connection_handler_->GetDataOnSessionKey(
+                connection_key_, &app_id, NULL, NULL));
   EXPECT_EQ(testid, app_id);
 }
 
@@ -288,41 +305,46 @@ TEST_F(ConnectionHandlerTest, GetAppIdOnSessionKey_SessionNotStarted) {
   AddTestDeviceConnection();
 
   uint32_t app_id = 0;
-  EXPECT_EQ(-1, connection_handler_->GetDataOnSessionKey(connection_key_, &app_id, NULL, NULL));
+  EXPECT_EQ(-1,
+            connection_handler_->GetDataOnSessionKey(
+                connection_key_, &app_id, NULL, NULL));
 }
 
-TEST_F(ConnectionHandlerTest,GetDeviceID) {
+TEST_F(ConnectionHandlerTest, GetDeviceID) {
   AddTestDeviceConnection();
   AddTestSession();
 
   DeviceHandle test_handle;
-  const DeviceMap & devmap = connection_handler_->getDeviceList();
+  const DeviceMap& devmap = connection_handler_->getDeviceList();
   DeviceMap::const_iterator pos = devmap.find(device_handle_);
   ASSERT_NE(pos, devmap.end());
-  const Device & devres = pos->second;
+  const Device& devres = pos->second;
   std::string test_mac_address = devres.mac_address();
 
   EXPECT_TRUE(connection_handler_->GetDeviceID(test_mac_address, &test_handle));
   EXPECT_EQ(device_handle_, test_handle);
 }
 
-TEST_F(ConnectionHandlerTest,GetDeviceName) {
+TEST_F(ConnectionHandlerTest, GetDeviceName) {
   AddTestDeviceConnection();
   AddTestSession();
 
   std::string test_device_name;
   DeviceHandle handle = 0;
-  EXPECT_EQ(0, connection_handler_->GetDataOnDeviceID(handle, &test_device_name));
+  EXPECT_EQ(0,
+            connection_handler_->GetDataOnDeviceID(handle, &test_device_name));
   EXPECT_EQ(device_name_, test_device_name);
 }
 
-TEST_F(ConnectionHandlerTest,GetConnectionType) {
+TEST_F(ConnectionHandlerTest, GetConnectionType) {
   AddTestDeviceConnection();
   AddTestSession();
 
   const DeviceHandle handle = 0;
   std::string test_connection_type;
-  EXPECT_EQ(0, connection_handler_->GetDataOnDeviceID(handle, NULL, NULL, NULL, &test_connection_type));
+  EXPECT_EQ(0,
+            connection_handler_->GetDataOnDeviceID(
+                handle, NULL, NULL, NULL, &test_connection_type));
   EXPECT_EQ(connection_type_, test_connection_type);
 }
 
@@ -332,8 +354,9 @@ TEST_F(ConnectionHandlerTest, GetApplicationsOnDevice) {
 
   const DeviceHandle handle = 0;
   std::list<uint32_t> applications_list;
-  EXPECT_EQ(0, connection_handler_->GetDataOnDeviceID(handle, NULL,
-                                                      &applications_list));
+  EXPECT_EQ(
+      0,
+      connection_handler_->GetDataOnDeviceID(handle, NULL, &applications_list));
 
   uint32_t test_id = connection_handler_->KeyFromPair(uid_, start_session_id_);
   EXPECT_EQ(1u, applications_list.size());
@@ -346,7 +369,8 @@ TEST_F(ConnectionHandlerTest, GetDefaultProtocolVersion) {
   AddTestSession();
 
   uint8_t protocol_version = 0;
-  EXPECT_TRUE(connection_handler_->ProtocolVersionUsed(uid_, start_session_id_, protocol_version));
+  EXPECT_TRUE(connection_handler_->ProtocolVersionUsed(
+      uid_, start_session_id_, protocol_version));
 
   EXPECT_EQ(PROTOCOL_VERSION_2, protocol_version);
 }
@@ -357,7 +381,8 @@ TEST_F(ConnectionHandlerTest, GetProtocolVersion) {
   ChangeProtocol(uid_, start_session_id_, PROTOCOL_VERSION_3);
 
   uint8_t protocol_version = 0;
-  EXPECT_TRUE(connection_handler_->ProtocolVersionUsed(uid_, start_session_id_, protocol_version));
+  EXPECT_TRUE(connection_handler_->ProtocolVersionUsed(
+      uid_, start_session_id_, protocol_version));
 
   EXPECT_EQ(PROTOCOL_VERSION_3, protocol_version);
 }
@@ -366,12 +391,15 @@ TEST_F(ConnectionHandlerTest, GetProtocolVersionAfterBinding) {
   AddTestDeviceConnection();
   AddTestSession();
   uint8_t protocol_version = 0;
-  EXPECT_TRUE(connection_handler_->ProtocolVersionUsed(uid_, start_session_id_, protocol_version));
+  EXPECT_TRUE(connection_handler_->ProtocolVersionUsed(
+      uid_, start_session_id_, protocol_version));
   EXPECT_EQ(PROTOCOL_VERSION_2, protocol_version);
 
-  connection_handler_->BindProtocolVersionWithSession(connection_key_, PROTOCOL_VERSION_3);
+  connection_handler_->BindProtocolVersionWithSession(connection_key_,
+                                                      PROTOCOL_VERSION_3);
 
-  EXPECT_TRUE(connection_handler_->ProtocolVersionUsed(uid_, start_session_id_, protocol_version));
+  EXPECT_TRUE(connection_handler_->ProtocolVersionUsed(
+      uid_, start_session_id_, protocol_version));
   EXPECT_EQ(PROTOCOL_VERSION_3, protocol_version);
 }
 
@@ -391,47 +419,54 @@ TEST_F(ConnectionHandlerTest, IsHeartBeatSupported) {
   AddTestSession();
   ::profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
   ChangeProtocol(uid_, start_session_id_, PROTOCOL_VERSION_3);
-  EXPECT_TRUE(connection_handler_->IsHeartBeatSupported(uid_, start_session_id_));
+  EXPECT_TRUE(
+      connection_handler_->IsHeartBeatSupported(uid_, start_session_id_));
 }
 
-TEST_F(ConnectionHandlerTest,SendEndServiceWithoutSetProtocolHandler) {
+TEST_F(ConnectionHandlerTest, SendEndServiceWithoutSetProtocolHandler) {
   AddTestDeviceConnection();
   AddTestSession();
   protocol_handler_test::MockProtocolHandler mock_protocol_handler;
 
-  EXPECT_CALL(mock_protocol_handler, SendEndService(_,_,kRpc)).Times(0);
+  EXPECT_CALL(mock_protocol_handler, SendEndService(_, _, kRpc)).Times(0);
   connection_handler_->SendEndService(connection_key_, kRpc);
 }
 
-TEST_F(ConnectionHandlerTest,SendEndService) {
+TEST_F(ConnectionHandlerTest, SendEndService) {
   AddTestDeviceConnection();
   AddTestSession();
   protocol_handler_test::MockProtocolHandler mock_protocol_handler;
 
   connection_handler_->set_protocol_handler(&mock_protocol_handler);
-  EXPECT_CALL(mock_protocol_handler, SendEndService(_,_,kRpc));
+  EXPECT_CALL(mock_protocol_handler, SendEndService(_, _, kRpc));
   connection_handler_->SendEndService(connection_key_, kRpc);
 }
 
-TEST_F(ConnectionHandlerTest,OnFindNewApplicationsRequest) {
+TEST_F(ConnectionHandlerTest, OnFindNewApplicationsRequest) {
   AddTestDeviceConnection();
   AddTestSession();
-  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
-  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+  connection_handler_test::ConnectionHandlerObserverMock
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
 
   EXPECT_CALL(mock_connection_handler_observer, OnFindNewApplicationsRequest());
   connection_handler_->OnFindNewApplicationsRequest();
 }
 
-TEST_F(ConnectionHandlerTest,OnFindNewApplicationsRequestWithoutObserver) {
-  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
-  EXPECT_CALL(mock_connection_handler_observer, OnFindNewApplicationsRequest()).Times(0);
+TEST_F(ConnectionHandlerTest, OnFindNewApplicationsRequestWithoutObserver) {
+  connection_handler_test::ConnectionHandlerObserverMock
+      mock_connection_handler_observer;
+  EXPECT_CALL(mock_connection_handler_observer, OnFindNewApplicationsRequest())
+      .Times(0);
   connection_handler_->OnFindNewApplicationsRequest();
 }
 
-TEST_F(ConnectionHandlerTest,OnFindNewApplicationsRequestWithoutSession) {
-  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
-  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+TEST_F(ConnectionHandlerTest, OnFindNewApplicationsRequestWithoutSession) {
+  connection_handler_test::ConnectionHandlerObserverMock
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
 
   EXPECT_CALL(mock_connection_handler_observer, OnFindNewApplicationsRequest());
   connection_handler_->OnFindNewApplicationsRequest();
@@ -442,18 +477,24 @@ TEST_F(ConnectionHandlerTest, OnMalformedMessageCallback) {
   AddTestSession();
   AddTestService(kAudio);
   AddTestService(kMobileNav);
-  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
-  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+  connection_handler_test::ConnectionHandlerObserverMock
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kMobileNav, kMalformed)).Times(1);
+              OnServiceEndedCallback(connection_key_, kMobileNav, kMalformed))
+      .Times(1);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kAudio, kMalformed)).Times(1);
+              OnServiceEndedCallback(connection_key_, kAudio, kMalformed))
+      .Times(1);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kBulk, kMalformed)).Times(1);
+              OnServiceEndedCallback(connection_key_, kBulk, kMalformed))
+      .Times(1);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kRpc, kMalformed)).Times(1);
+              OnServiceEndedCallback(connection_key_, kRpc, kMalformed))
+      .Times(1);
   connection_handler_->OnMalformedMessageCallback(uid_);
 }
 
@@ -462,23 +503,26 @@ TEST_F(ConnectionHandlerTest, OnApplicationFloodCallBack) {
   AddTestSession();
   AddTestService(kAudio);
   AddTestService(kMobileNav);
-  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
-  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+  connection_handler_test::ConnectionHandlerObserverMock
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
 
   protocol_handler_test::MockProtocolHandler mock_protocol_handler;
   connection_handler_->set_protocol_handler(&mock_protocol_handler);
 
-  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_,start_session_id_)).Times(1);
+  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_, start_session_id_))
+      .Times(1);
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kMobileNav, kCommon));
+              OnServiceEndedCallback(connection_key_, kMobileNav, kCommon));
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kAudio, kCommon));
+              OnServiceEndedCallback(connection_key_, kAudio, kCommon));
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kBulk, kCommon));
+              OnServiceEndedCallback(connection_key_, kBulk, kCommon));
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kRpc, kCommon));
+              OnServiceEndedCallback(connection_key_, kRpc, kCommon));
   connection_handler_->OnApplicationFloodCallBack(uid_);
 }
 
@@ -489,23 +533,25 @@ TEST_F(ConnectionHandlerTest, OnApplicationFloodCallBack_SessionFound) {
   AddTestService(kAudio);
   AddTestService(kMobileNav);
 
-  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
-  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+  connection_handler_test::ConnectionHandlerObserverMock
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
 
   protocol_handler_test::MockProtocolHandler mock_protocol_handler;
   connection_handler_->set_protocol_handler(&mock_protocol_handler);
 
-  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_,start_session_id_));
+  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_, start_session_id_));
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kMobileNav, kFlood));
+              OnServiceEndedCallback(connection_key_, kMobileNav, kFlood));
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kAudio, kFlood));
+              OnServiceEndedCallback(connection_key_, kAudio, kFlood));
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kBulk, kFlood));
+              OnServiceEndedCallback(connection_key_, kBulk, kFlood));
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kRpc, kFlood));
+              OnServiceEndedCallback(connection_key_, kRpc, kFlood));
 
   connection_handler_->OnApplicationFloodCallBack(connection_key_);
 }
@@ -515,8 +561,10 @@ TEST_F(ConnectionHandlerTest, StartDevicesDiscovery) {
   AddTestSession();
   transport_manager_test::MockTransportManager mock_transport_manager;
   connection_handler_->set_transport_manager(&mock_transport_manager);
-  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
-  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+  connection_handler_test::ConnectionHandlerObserverMock
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
 
   EXPECT_CALL(mock_transport_manager, SearchDevices());
   EXPECT_CALL(mock_connection_handler_observer, OnDeviceListUpdated(_));
@@ -537,13 +585,14 @@ MATCHER_P(CheckDevList, check_device_map, "") {
       return false;
     }
     if ((*it).second.device_handle() != (*check_it).second.device_handle()) {
-       return false;
+      return false;
     }
     if ((*it).second.mac_address() != (*check_it).second.mac_address()) {
-       return false;
+      return false;
     }
-    if ((*it).second.connection_type() != (*check_it).second.connection_type()) {
-       return false;
+    if ((*it).second.connection_type() !=
+        (*check_it).second.connection_type()) {
+      return false;
     }
   }
   return true;
@@ -561,8 +610,8 @@ TEST_F(ConnectionHandlerTest, UpdateDeviceList) {
   connection_type_ = "BTMAC";
   device_name_ = "test_name";
   mac_address_ = "test_address";
-  const transport_manager::DeviceInfo added_info(0, "test_address", "test_name",
-                                                 "BTMAC");
+  const transport_manager::DeviceInfo added_info(
+      0, "test_address", "test_name", "BTMAC");
   connection_handler_->OnDeviceAdded(added_info);
 
   // Prepare map with DeviceInfo that sets in OnDeviceListUpdated
@@ -571,11 +620,12 @@ TEST_F(ConnectionHandlerTest, UpdateDeviceList) {
   std::vector<transport_manager::DeviceInfo> unused_info;
   unused_info.push_back(unused_parameter);
   DeviceMap map_with_unused_var;
-  map_with_unused_var.insert(DeviceMap::value_type(
-      unused_parameter.device_handle(),
-      Device(unused_parameter.device_handle(), unused_parameter.name(),
-             unused_parameter.mac_address(),
-             unused_parameter.connection_type())));
+  map_with_unused_var.insert(
+      DeviceMap::value_type(unused_parameter.device_handle(),
+                            Device(unused_parameter.device_handle(),
+                                   unused_parameter.name(),
+                                   unused_parameter.mac_address(),
+                                   unused_parameter.connection_type())));
 
   // Only previously added devices is updated
   EXPECT_CALL(
@@ -594,10 +644,10 @@ TEST_F(ConnectionHandlerTest, GetConnectedDevicesMAC) {
   const std::string mac_address1 = "test_address1";
   const std::string mac_address2 = "test_address2";
 
-  const transport_manager::DeviceInfo device1(0, mac_address1, device_name_,
-                                                 connection_type_);
-  const transport_manager::DeviceInfo device2(1, mac_address2, device_name_,
-                                                 connection_type_);
+  const transport_manager::DeviceInfo device1(
+      0, mac_address1, device_name_, connection_type_);
+  const transport_manager::DeviceInfo device2(
+      1, mac_address2, device_name_, connection_type_);
   connection_handler_->OnDeviceAdded(device1);
   connection_handler_->OnDeviceAdded(device2);
 
@@ -606,7 +656,7 @@ TEST_F(ConnectionHandlerTest, GetConnectedDevicesMAC) {
   const std::string check_mac2 = encryption::MakeHash(mac_address2);
   std::vector<std::string> device_macs;
   connection_handler_->GetConnectedDevicesMAC(device_macs);
-  ASSERT_EQ(2u,device_macs.size());
+  ASSERT_EQ(2u, device_macs.size());
   EXPECT_EQ(check_mac1, device_macs.at(0));
   EXPECT_EQ(check_mac2, device_macs.at(1));
 }
@@ -625,19 +675,21 @@ TEST_F(ConnectionHandlerTest, OnDeviceRemoved_ServiceNotStarted) {
   const uint32_t dev_handle1 = 1;
   const uint32_t dev_handle2 = 2;
 
-  const transport_manager::DeviceInfo device1(dev_handle1, mac_address_,
-                                              device_name_, connection_type_);
-  const transport_manager::DeviceInfo device2(dev_handle2, mac_address_,
-                                              device_name_, connection_type_);
+  const transport_manager::DeviceInfo device1(
+      dev_handle1, mac_address_, device_name_, connection_type_);
+  const transport_manager::DeviceInfo device2(
+      dev_handle2, mac_address_, device_name_, connection_type_);
   connection_handler_->OnDeviceAdded(device1);
   connection_handler_->OnDeviceAdded(device2);
 
+  connection_handler_test::ConnectionHandlerObserverMock
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
 
-  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
-  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
-
-  EXPECT_CALL(mock_connection_handler_observer, RemoveDevice(dev_handle1) );
-  EXPECT_CALL(mock_connection_handler_observer, OnServiceEndedCallback(_,_,_)).Times(0);
+  EXPECT_CALL(mock_connection_handler_observer, RemoveDevice(dev_handle1));
+  EXPECT_CALL(mock_connection_handler_observer, OnServiceEndedCallback(_, _, _))
+      .Times(0);
   connection_handler_->OnDeviceRemoved(device1);
 }
 
@@ -646,20 +698,20 @@ TEST_F(ConnectionHandlerTest, OnDeviceRemoved_ServiceStarted) {
   AddTestDeviceConnection();
   AddTestSession();
 
-  const transport_manager::DeviceInfo device1(device_handle_,
-                                                  mac_address_,
-                                                  device_name_,
-                                                  connection_type_);
+  const transport_manager::DeviceInfo device1(
+      device_handle_, mac_address_, device_name_, connection_type_);
 
-  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
-  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+  connection_handler_test::ConnectionHandlerObserverMock
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
 
   EXPECT_CALL(mock_connection_handler_observer, RemoveDevice(device_handle_));
 
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kBulk, kCommon));
+              OnServiceEndedCallback(connection_key_, kBulk, kCommon));
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kRpc, kCommon));
+              OnServiceEndedCallback(connection_key_, kRpc, kCommon));
   connection_handler_->OnDeviceRemoved(device1);
 }
 
@@ -667,13 +719,15 @@ TEST_F(ConnectionHandlerTest, OnConnectionClosed) {
   AddTestDeviceConnection();
   AddTestSession();
 
-  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
-  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+  connection_handler_test::ConnectionHandlerObserverMock
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
 
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kBulk, kCommon));
+              OnServiceEndedCallback(connection_key_, kBulk, kCommon));
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kRpc, kCommon));
+              OnServiceEndedCallback(connection_key_, kRpc, kCommon));
 
   connection_handler_->OnConnectionClosed(uid_);
 }
@@ -682,27 +736,30 @@ TEST_F(ConnectionHandlerTest, OnUnexpectedDisconnect) {
   AddTestDeviceConnection();
   AddTestSession();
 
-  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
-  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+  connection_handler_test::ConnectionHandlerObserverMock
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
   transport_manager::CommunicationError err;
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kBulk, CloseSessionReason::kCommon));
+              OnServiceEndedCallback(
+                  connection_key_, kBulk, CloseSessionReason::kCommon));
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kRpc, CloseSessionReason::kCommon));
+              OnServiceEndedCallback(
+                  connection_key_, kRpc, CloseSessionReason::kCommon));
 
-  connection_handler_->OnUnexpectedDisconnect(uid_,err);
+  connection_handler_->OnUnexpectedDisconnect(uid_, err);
 }
-
 
 TEST_F(ConnectionHandlerTest, ConnectToDevice) {
   // Precondition
   const uint32_t dev_handle1 = 1;
   const uint32_t dev_handle2 = 2;
 
-  const transport_manager::DeviceInfo device1(dev_handle1, mac_address_,
-                                              device_name_, connection_type_);
-  const transport_manager::DeviceInfo device2(dev_handle2, mac_address_,
-                                              device_name_, connection_type_);
+  const transport_manager::DeviceInfo device1(
+      dev_handle1, mac_address_, device_name_, connection_type_);
+  const transport_manager::DeviceInfo device2(
+      dev_handle2, mac_address_, device_name_, connection_type_);
   connection_handler_->OnDeviceAdded(device1);
   connection_handler_->OnDeviceAdded(device2);
 
@@ -719,10 +776,10 @@ TEST_F(ConnectionHandlerTest, ConnectToAllDevices) {
   const uint32_t dev_handle1 = 1;
   const uint32_t dev_handle2 = 2;
 
-  const transport_manager::DeviceInfo device1(dev_handle1, mac_address_,
-                                              device_name_, connection_type_);
-  const transport_manager::DeviceInfo device2(dev_handle2, mac_address_,
-                                              device_name_, connection_type_);
+  const transport_manager::DeviceInfo device1(
+      dev_handle1, mac_address_, device_name_, connection_type_);
+  const transport_manager::DeviceInfo device2(
+      dev_handle2, mac_address_, device_name_, connection_type_);
   connection_handler_->OnDeviceAdded(device1);
   connection_handler_->OnDeviceAdded(device2);
 
@@ -758,23 +815,28 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithCommonReason) {
   AddTestSession();
   AddTestService(kAudio);
   AddTestService(kMobileNav);
-  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
-  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+  connection_handler_test::ConnectionHandlerObserverMock
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
 
   protocol_handler_test::MockProtocolHandler mock_protocol_handler;
   connection_handler_->set_protocol_handler(&mock_protocol_handler);
 
-  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_,start_session_id_)).Times(1);
+  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_, start_session_id_))
+      .Times(1);
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kMobileNav, kCommon)).Times(1);
+              OnServiceEndedCallback(connection_key_, kMobileNav, kCommon))
+      .Times(1);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kAudio, kCommon)).Times(1);
+              OnServiceEndedCallback(connection_key_, kAudio, kCommon))
+      .Times(1);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kBulk, kCommon)).Times(1);
+              OnServiceEndedCallback(connection_key_, kBulk, kCommon)).Times(1);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kRpc, kCommon)).Times(1);
+              OnServiceEndedCallback(connection_key_, kRpc, kCommon)).Times(1);
   connection_handler_->CloseSession(connection_key_, kCommon);
   Mock::AsyncVerifyAndClearExpectations(10000);
 }
@@ -784,23 +846,27 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithFloodReason) {
   AddTestSession();
   AddTestService(kAudio);
   AddTestService(kMobileNav);
-  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
-  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+  connection_handler_test::ConnectionHandlerObserverMock
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
 
   protocol_handler_test::MockProtocolHandler mock_protocol_handler;
   connection_handler_->set_protocol_handler(&mock_protocol_handler);
 
-  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_,start_session_id_)).Times(1);
+  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_, start_session_id_))
+      .Times(1);
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kMobileNav, kFlood)).Times(1);
+              OnServiceEndedCallback(connection_key_, kMobileNav, kFlood))
+      .Times(1);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kAudio, kFlood)).Times(1);
+              OnServiceEndedCallback(connection_key_, kAudio, kFlood)).Times(1);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kBulk, kFlood)).Times(1);
+              OnServiceEndedCallback(connection_key_, kBulk, kFlood)).Times(1);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kRpc, kFlood)).Times(1);
+              OnServiceEndedCallback(connection_key_, kRpc, kFlood)).Times(1);
   connection_handler_->CloseSession(connection_key_, kFlood);
   Mock::AsyncVerifyAndClearExpectations(10000);
 }
@@ -810,23 +876,30 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithMalformedMessage) {
   AddTestSession();
   AddTestService(kAudio);
   AddTestService(kMobileNav);
-  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
-  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+  connection_handler_test::ConnectionHandlerObserverMock
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
 
   protocol_handler_test::MockProtocolHandler mock_protocol_handler;
   connection_handler_->set_protocol_handler(&mock_protocol_handler);
 
-  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_,start_session_id_)).Times(0);
+  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_, start_session_id_))
+      .Times(0);
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kMobileNav, kMalformed)).Times(1);
+              OnServiceEndedCallback(connection_key_, kMobileNav, kMalformed))
+      .Times(1);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kAudio, kMalformed)).Times(1);
+              OnServiceEndedCallback(connection_key_, kAudio, kMalformed))
+      .Times(1);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kBulk, kMalformed)).Times(1);
+              OnServiceEndedCallback(connection_key_, kBulk, kMalformed))
+      .Times(1);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kRpc, kMalformed)).Times(1);
+              OnServiceEndedCallback(connection_key_, kRpc, kMalformed))
+      .Times(1);
   connection_handler_->CloseSession(connection_key_, kMalformed);
   Mock::AsyncVerifyAndClearExpectations(10000);
 }
@@ -836,23 +909,30 @@ TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithMalformedMessage) {
   AddTestSession();
   AddTestService(kAudio);
   AddTestService(kMobileNav);
-  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
-  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+  connection_handler_test::ConnectionHandlerObserverMock
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
 
   protocol_handler_test::MockProtocolHandler mock_protocol_handler;
   connection_handler_->set_protocol_handler(&mock_protocol_handler);
 
-  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_,start_session_id_)).Times(0);
+  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_, start_session_id_))
+      .Times(0);
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kMobileNav, kMalformed)).Times(1);
+              OnServiceEndedCallback(connection_key_, kMobileNav, kMalformed))
+      .Times(1);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kAudio, kMalformed)).Times(1);
+              OnServiceEndedCallback(connection_key_, kAudio, kMalformed))
+      .Times(1);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kBulk, kMalformed)).Times(1);
+              OnServiceEndedCallback(connection_key_, kBulk, kMalformed))
+      .Times(1);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kRpc, kMalformed)).Times(1);
+              OnServiceEndedCallback(connection_key_, kRpc, kMalformed))
+      .Times(1);
   connection_handler_->CloseConnectionSessions(uid_, kMalformed);
   Mock::AsyncVerifyAndClearExpectations(10000);
 }
@@ -862,23 +942,28 @@ TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithCommonReason) {
   AddTestSession();
   AddTestService(kAudio);
   AddTestService(kMobileNav);
-  connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
-  connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
+  connection_handler_test::ConnectionHandlerObserverMock
+      mock_connection_handler_observer;
+  connection_handler_->set_connection_handler_observer(
+      &mock_connection_handler_observer);
 
   protocol_handler_test::MockProtocolHandler mock_protocol_handler;
   connection_handler_->set_protocol_handler(&mock_protocol_handler);
 
-  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_,start_session_id_)).Times(1);
+  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_, start_session_id_))
+      .Times(1);
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_, kMobileNav, kCommon)).Times(1);
+              OnServiceEndedCallback(connection_key_, kMobileNav, kCommon))
+      .Times(1);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kAudio, kCommon)).Times(1);
+              OnServiceEndedCallback(connection_key_, kAudio, kCommon))
+      .Times(1);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kBulk, kCommon)).Times(1);
+              OnServiceEndedCallback(connection_key_, kBulk, kCommon)).Times(1);
   EXPECT_CALL(mock_connection_handler_observer,
-              OnServiceEndedCallback(connection_key_,kRpc, kCommon)).Times(1);
+              OnServiceEndedCallback(connection_key_, kRpc, kCommon)).Times(1);
   connection_handler_->CloseConnectionSessions(uid_, kCommon);
   Mock::AsyncVerifyAndClearExpectations(10000);
 }
@@ -890,7 +975,7 @@ TEST_F(ConnectionHandlerTest, StartService_withServices) {
 
   // Start Audio service
   const uint32_t start_audio = connection_handler_->OnSessionStartedCallback(
-        uid_, start_session_id_, kAudio, PROTECTION_OFF, &out_hash_id_);
+      uid_, start_session_id_, kAudio, PROTECTION_OFF, &out_hash_id_);
   EXPECT_EQ(start_session_id_, start_audio);
   CheckServiceExists(uid_, start_session_id_, kAudio, true);
   EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, out_hash_id_);
@@ -906,8 +991,8 @@ TEST_F(ConnectionHandlerTest, StartService_withServices) {
 TEST_F(ConnectionHandlerTest, ServiceStop_UnExistSession) {
   AddTestDeviceConnection();
 
-  const uint32_t end_session_result = connection_handler_->OnSessionEndedCallback(
-        uid_, 0u, 0u, kAudio);
+  const uint32_t end_session_result =
+      connection_handler_->OnSessionEndedCallback(uid_, 0u, 0u, kAudio);
   EXPECT_EQ(0u, end_session_result);
   CheckSessionExists(uid_, 0);
 }
@@ -915,8 +1000,9 @@ TEST_F(ConnectionHandlerTest, ServiceStop_UnExistSession) {
 TEST_F(ConnectionHandlerTest, ServiceStop_UnExistService) {
   AddTestDeviceConnection();
   AddTestSession();
-  const uint32_t end_session_result = connection_handler_->OnSessionEndedCallback(
-        uid_, start_session_id_, 0u, kAudio);
+  const uint32_t end_session_result =
+      connection_handler_->OnSessionEndedCallback(
+          uid_, start_session_id_, 0u, kAudio);
   EXPECT_EQ(0u, end_session_result);
   CheckServiceExists(uid_, start_session_id_, kAudio, false);
 }
@@ -928,12 +1014,13 @@ TEST_F(ConnectionHandlerTest, ServiceStop) {
   for (uint32_t some_hash_id = 0; some_hash_id < 0xFF; ++some_hash_id) {
     // Start audio service
     const uint32_t start_audio = connection_handler_->OnSessionStartedCallback(
-          uid_, start_session_id_, kAudio, PROTECTION_OFF, &out_hash_id_);
+        uid_, start_session_id_, kAudio, PROTECTION_OFF, &out_hash_id_);
     EXPECT_EQ(start_session_id_, start_audio);
     EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, out_hash_id_);
 
-    const uint32_t end_session_result = connection_handler_->OnSessionEndedCallback(
-          uid_, start_session_id_, some_hash_id, kAudio);
+    const uint32_t end_session_result =
+        connection_handler_->OnSessionEndedCallback(
+            uid_, start_session_id_, some_hash_id, kAudio);
     EXPECT_EQ(connection_key_, end_session_result);
     CheckServiceExists(uid_, start_session_id_, kAudio, false);
   }
@@ -947,13 +1034,14 @@ TEST_F(ConnectionHandlerTest, SessionStop_CheckHash) {
     const uint32_t hash = connection_key_;
     const uint32_t wrong_hash = hash + 1;
 
-    const uint32_t end_audio_wrong_hash = connection_handler_->OnSessionEndedCallback(
-          uid_, start_session_id_, wrong_hash, kRpc);
+    const uint32_t end_audio_wrong_hash =
+        connection_handler_->OnSessionEndedCallback(
+            uid_, start_session_id_, wrong_hash, kRpc);
     EXPECT_EQ(0u, end_audio_wrong_hash);
     CheckSessionExists(uid_, start_session_id_);
 
     const uint32_t end_audio = connection_handler_->OnSessionEndedCallback(
-          uid_, start_session_id_, hash, kRpc);
+        uid_, start_session_id_, hash, kRpc);
     EXPECT_EQ(connection_key_, end_audio);
     CheckSessionExists(uid_, 0);
   }
@@ -967,13 +1055,14 @@ TEST_F(ConnectionHandlerTest, SessionStop_CheckSpecificHash) {
     const uint32_t wrong_hash = protocol_handler::HASH_ID_WRONG;
     const uint32_t hash = protocol_handler::HASH_ID_NOT_SUPPORTED;
 
-    const uint32_t end_audio_wrong_hash = connection_handler_->OnSessionEndedCallback(
-          uid_, start_session_id_, wrong_hash, kRpc);
+    const uint32_t end_audio_wrong_hash =
+        connection_handler_->OnSessionEndedCallback(
+            uid_, start_session_id_, wrong_hash, kRpc);
     EXPECT_EQ(0u, end_audio_wrong_hash);
     CheckSessionExists(uid_, start_session_id_);
 
     const uint32_t end_audio = connection_handler_->OnSessionEndedCallback(
-          uid_, start_session_id_, hash, kRpc);
+        uid_, start_session_id_, hash, kRpc);
     EXPECT_EQ(connection_key_, end_audio);
     CheckSessionExists(uid_, 0);
   }
@@ -1000,14 +1089,16 @@ TEST_F(ConnectionHandlerTest, SessionStarted_WithRpc) {
   EXPECT_NE(0u, new_session_id);
 }
 
-TEST_F(ConnectionHandlerTest, SessionStarted_StartSession_SecureSpecific_Unprotect) {
+TEST_F(ConnectionHandlerTest,
+       SessionStarted_StartSession_SecureSpecific_Unprotect) {
   // Add virtual device and connection
   AddTestDeviceConnection();
   // Forbid start kRPC without encryption
   SetSpecificServices("0x07", "");
   // Start new session with RPC service
-  const uint32_t session_id_fail = connection_handler_->OnSessionStartedCallback(
-        uid_, 0, kRpc, PROTECTION_OFF, &out_hash_id_);
+  const uint32_t session_id_fail =
+      connection_handler_->OnSessionStartedCallback(
+          uid_, 0, kRpc, PROTECTION_OFF, &out_hash_id_);
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(0u, session_id_fail);
   EXPECT_EQ(protocol_handler::HASH_ID_WRONG, out_hash_id_);
@@ -1020,20 +1111,22 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartSession_SecureSpecific_Unprote
   SetSpecificServices("0x00, Non", "");
   // Start new session with RPC service
   const uint32_t session_id = connection_handler_->OnSessionStartedCallback(
-        uid_, 0, kRpc, PROTECTION_OFF, &out_hash_id_);
+      uid_, 0, kRpc, PROTECTION_OFF, &out_hash_id_);
   EXPECT_NE(0u, session_id);
   CheckService(uid_, session_id, kRpc, NULL, PROTECTION_OFF);
   EXPECT_EQ(SessionHash(uid_, session_id), out_hash_id_);
 }
 
-TEST_F(ConnectionHandlerTest, SessionStarted_StartSession_SecureSpecific_Protect) {
+TEST_F(ConnectionHandlerTest,
+       SessionStarted_StartSession_SecureSpecific_Protect) {
   // Add virtual device and connection
   AddTestDeviceConnection();
   // Forbid start kRPC with encryption
   SetSpecificServices("", "0x06, 0x07, 0x08, Non");
   // Start new session with RPC service
-  const uint32_t session_id_fail = connection_handler_->OnSessionStartedCallback(
-        uid_, 0, kRpc, PROTECTION_ON, NULL);
+  const uint32_t session_id_fail =
+      connection_handler_->OnSessionStartedCallback(
+          uid_, 0, kRpc, PROTECTION_ON, NULL);
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(0u, session_id_fail);
 #else
@@ -1044,7 +1137,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartSession_SecureSpecific_Protect
   SetSpecificServices("", "0x00, 0x05, Non");
   // Start new session with RPC service
   const uint32_t session_id = connection_handler_->OnSessionStartedCallback(
-        uid_, 0, kRpc, PROTECTION_ON, &out_hash_id_);
+      uid_, 0, kRpc, PROTECTION_ON, &out_hash_id_);
   EXPECT_NE(0u, session_id);
   EXPECT_EQ(SessionHash(uid_, session_id), out_hash_id_);
 
@@ -1052,7 +1145,8 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartSession_SecureSpecific_Protect
   CheckService(uid_, session_id, kRpc, NULL, PROTECTION_OFF);
 }
 
-TEST_F(ConnectionHandlerTest, SessionStarted_StartService_SecureSpecific_Unprotect) {
+TEST_F(ConnectionHandlerTest,
+       SessionStarted_StartService_SecureSpecific_Unprotect) {
   AddTestDeviceConnection();
   AddTestSession();
 
@@ -1063,7 +1157,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartService_SecureSpecific_Unprote
   SetSpecificServices("0x06, 0x0A, 0x08, Non", "");
   // Start new session with Audio service
   const uint32_t session_id2 = connection_handler_->OnSessionStartedCallback(
-        uid_, start_session_id_, kAudio, PROTECTION_OFF, NULL);
+      uid_, start_session_id_, kAudio, PROTECTION_OFF, NULL);
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(0u, session_id2);
 #else
@@ -1072,21 +1166,20 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartService_SecureSpecific_Unprote
   // Allow start kAudio without encryption
   SetSpecificServices("0x06, 0x0B, 0x08, Non", "");
   const uint32_t session_id3 = connection_handler_->OnSessionStartedCallback(
-        uid_, start_session_id_, kAudio, PROTECTION_OFF, &out_hash_id_);
-  // Returned original session id
+      uid_, start_session_id_, kAudio, PROTECTION_OFF, &out_hash_id_);
+// Returned original session id
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(start_session_id_, session_id3);
   EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, out_hash_id_);
-  CheckService(uid_, session_id3, kRpc,
-      NULL,
-      PROTECTION_OFF);
+  CheckService(uid_, session_id3, kRpc, NULL, PROTECTION_OFF);
 #else
   EXPECT_EQ(0u, session_id3);
   EXPECT_EQ(protocol_handler::HASH_ID_WRONG, out_hash_id_);
 #endif  // ENABLE_SECURITY
 }
 
-TEST_F(ConnectionHandlerTest, SessionStarted_StartService_SecureSpecific_Protect) {
+TEST_F(ConnectionHandlerTest,
+       SessionStarted_StartService_SecureSpecific_Protect) {
   AddTestDeviceConnection();
   AddTestSession();
 
@@ -1095,8 +1188,9 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartService_SecureSpecific_Protect
   // Forbid start kAudio with encryption
   SetSpecificServices("", "0x06, 0x0A, 0x08, Non");
   // Start new session with Audio service
-  const uint32_t session_id_reject = connection_handler_->OnSessionStartedCallback(
-        uid_, start_session_id_, kAudio, PROTECTION_ON, NULL);
+  const uint32_t session_id_reject =
+      connection_handler_->OnSessionStartedCallback(
+          uid_, start_session_id_, kAudio, PROTECTION_ON, NULL);
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(0u, session_id_reject);
 #else
@@ -1105,14 +1199,12 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartService_SecureSpecific_Protect
   // Allow start kAudio with encryption
   SetSpecificServices("", "Non");
   const uint32_t session_id3 = connection_handler_->OnSessionStartedCallback(
-        uid_, start_session_id_, kAudio, PROTECTION_ON, &out_hash_id_);
-  // Returned original session id
+      uid_, start_session_id_, kAudio, PROTECTION_ON, &out_hash_id_);
+// Returned original session id
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(start_session_id_, session_id3);
   EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, out_hash_id_);
-  CheckService(uid_, session_id3, kAudio,
-      NULL,
-      PROTECTION_ON);
+  CheckService(uid_, session_id3, kAudio, NULL, PROTECTION_ON);
 #else
   EXPECT_EQ(0u, session_id3);
   EXPECT_EQ(protocol_handler::HASH_ID_WRONG, out_hash_id_);
@@ -1126,14 +1218,12 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtect) {
 
   // Start RPC protection
   const uint32_t session_id_new = connection_handler_->OnSessionStartedCallback(
-        uid_, start_session_id_, kRpc, PROTECTION_ON, &out_hash_id_);
+      uid_, start_session_id_, kRpc, PROTECTION_ON, &out_hash_id_);
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(start_session_id_, session_id_new);
   // Post protection nedd no hash
   EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, out_hash_id_);
-  CheckService(uid_, start_session_id_, kRpc,
-      NULL,
-      PROTECTION_ON);
+  CheckService(uid_, start_session_id_, kRpc, NULL, PROTECTION_ON);
 #else
   EXPECT_EQ(0u, session_id_new);
   // Post protection nedd no hash
@@ -1143,20 +1233,18 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtect) {
 
   // Start Audio session without protection
   const uint32_t session_id2 = connection_handler_->OnSessionStartedCallback(
-        uid_, start_session_id_, kAudio, PROTECTION_OFF, &out_hash_id_);
+      uid_, start_session_id_, kAudio, PROTECTION_OFF, &out_hash_id_);
   EXPECT_EQ(start_session_id_, session_id2);
   EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, out_hash_id_);
   CheckService(uid_, start_session_id_, kAudio, NULL, PROTECTION_OFF);
 
   // Start Audio protection
   const uint32_t session_id3 = connection_handler_->OnSessionStartedCallback(
-        uid_, start_session_id_, kAudio, PROTECTION_ON, &out_hash_id_);
+      uid_, start_session_id_, kAudio, PROTECTION_ON, &out_hash_id_);
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(start_session_id_, session_id3);
   EXPECT_EQ(protocol_handler::HASH_ID_NOT_SUPPORTED, out_hash_id_);
-  CheckService(uid_, start_session_id_, kAudio,
-      NULL,
-      PROTECTION_ON);
+  CheckService(uid_, start_session_id_, kAudio, NULL, PROTECTION_ON);
 #else
   EXPECT_EQ(0u, session_id3);
   EXPECT_EQ(protocol_handler::HASH_ID_WRONG, out_hash_id_);
@@ -1169,12 +1257,10 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtectBulk) {
   AddTestSession();
 
   const uint32_t session_id_new = connection_handler_->OnSessionStartedCallback(
-        uid_, start_session_id_, kBulk, PROTECTION_ON, NULL);
+      uid_, start_session_id_, kBulk, PROTECTION_ON, NULL);
 #ifdef ENABLE_SECURITY
   EXPECT_EQ(start_session_id_, session_id_new);
-  CheckService(uid_, start_session_id_, kRpc,
-      NULL,
-      PROTECTION_ON);
+  CheckService(uid_, start_session_id_, kRpc, NULL, PROTECTION_ON);
 #else
   EXPECT_EQ(0u, session_id_new);
   CheckService(uid_, start_session_id_, kRpc, NULL, PROTECTION_OFF);
@@ -1185,31 +1271,31 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtectBulk) {
 TEST_F(ConnectionHandlerTest, SetSSLContext_Null) {
   // No SSLContext on start up
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kControl),
-      reinterpret_cast<security_manager::SSLContext *>(NULL));
+            reinterpret_cast<security_manager::SSLContext*>(NULL));
   EXPECT_EQ(::security_manager::SecurityManager::ERROR_INTERNAL,
-      connection_handler_->SetSSLContext(connection_key_, NULL));
+            connection_handler_->SetSSLContext(connection_key_, NULL));
   // No SSLContext after error
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kControl),
-      reinterpret_cast<security_manager::SSLContext *>(NULL));
+            reinterpret_cast<security_manager::SSLContext*>(NULL));
 
   AddTestDeviceConnection();
   EXPECT_EQ(::security_manager::SecurityManager::ERROR_INTERNAL,
-      connection_handler_->SetSSLContext(connection_key_, NULL));
+            connection_handler_->SetSSLContext(connection_key_, NULL));
   // No SSLContext after error
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kControl),
-      reinterpret_cast<security_manager::SSLContext *>(NULL));
+            reinterpret_cast<security_manager::SSLContext*>(NULL));
 
   AddTestSession();
   EXPECT_EQ(::security_manager::SecurityManager::ERROR_SUCCESS,
-      connection_handler_->SetSSLContext(connection_key_, NULL));
+            connection_handler_->SetSSLContext(connection_key_, NULL));
   // NULL SSLContext after success
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kControl),
-      reinterpret_cast<security_manager::SSLContext *>(NULL));
+            reinterpret_cast<security_manager::SSLContext*>(NULL));
 }
 TEST_F(ConnectionHandlerTest, SetSSLContext) {
   // No SSLContext on start up
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kControl),
-      reinterpret_cast<security_manager::SSLContext *>(NULL));
+            reinterpret_cast<security_manager::SSLContext*>(NULL));
 
   testing::StrictMock<security_manager_test::MockSSLContext> mock_ssl_context;
   // Error on no connection
@@ -1218,7 +1304,7 @@ TEST_F(ConnectionHandlerTest, SetSSLContext) {
       ::security_manager::SecurityManager::ERROR_INTERNAL);
   // No SSLContext after error
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kControl),
-      reinterpret_cast<security_manager::SSLContext *>(NULL));
+            reinterpret_cast<security_manager::SSLContext*>(NULL));
 
   AddTestDeviceConnection();
   // Error on no session
@@ -1227,7 +1313,7 @@ TEST_F(ConnectionHandlerTest, SetSSLContext) {
       ::security_manager::SecurityManager::ERROR_INTERNAL);
   // No SSLContext after error
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kControl),
-      reinterpret_cast<security_manager::SSLContext *>(NULL));
+            reinterpret_cast<security_manager::SSLContext*>(NULL));
   AddTestSession();
   // Success
   EXPECT_EQ(
@@ -1235,22 +1321,22 @@ TEST_F(ConnectionHandlerTest, SetSSLContext) {
       ::security_manager::SecurityManager::ERROR_SUCCESS);
   // SSLContext set on Success
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kControl),
-      &mock_ssl_context);
+            &mock_ssl_context);
   // Null SSLContext for unprotected services
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kRpc),
-      reinterpret_cast<security_manager::SSLContext *>(NULL));
+            reinterpret_cast<security_manager::SSLContext*>(NULL));
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kBulk),
-      reinterpret_cast<security_manager::SSLContext *>(NULL));
+            reinterpret_cast<security_manager::SSLContext*>(NULL));
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kAudio),
-      reinterpret_cast<security_manager::SSLContext *>(NULL));
+            reinterpret_cast<security_manager::SSLContext*>(NULL));
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kMobileNav),
-      reinterpret_cast<security_manager::SSLContext *>(NULL));
+            reinterpret_cast<security_manager::SSLContext*>(NULL));
 }
 
 TEST_F(ConnectionHandlerTest, GetSSLContext_ByProtectedService) {
   // No SSLContext on start up
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kControl),
-      reinterpret_cast<security_manager::SSLContext *>(NULL));
+            reinterpret_cast<security_manager::SSLContext*>(NULL));
 
   testing::StrictMock<security_manager_test::MockSSLContext> mock_ssl_context;
   AddTestDeviceConnection();
@@ -1260,11 +1346,11 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByProtectedService) {
       ::security_manager::SecurityManager::ERROR_SUCCESS);
   // kControl service mean - return for all connection
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kControl),
-      &mock_ssl_context);
+            &mock_ssl_context);
 
   // kAudio is not exists yet
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kAudio),
-      reinterpret_cast<security_manager::SSLContext *>(NULL));
+            reinterpret_cast<security_manager::SSLContext*>(NULL));
   // Open kAudio service
   const uint32_t session_id = connection_handler_->OnSessionStartedCallback(
       uid_, start_session_id_, kAudio, PROTECTION_ON, NULL);
@@ -1273,7 +1359,7 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByProtectedService) {
 
   // kAudio is not exists yet
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kAudio),
-      &mock_ssl_context);
+            &mock_ssl_context);
 }
 TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtectedRPC) {
   testing::StrictMock<security_manager_test::MockSSLContext> mock_ssl_context;
@@ -1283,11 +1369,11 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtectedRPC) {
       connection_handler_->SetSSLContext(connection_key_, &mock_ssl_context),
       ::security_manager::SecurityManager::ERROR_SUCCESS);
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kControl),
-      &mock_ssl_context);
+            &mock_ssl_context);
 
   // kRpc is not protected
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kRpc),
-      reinterpret_cast<security_manager::SSLContext *>(NULL));
+            reinterpret_cast<security_manager::SSLContext*>(NULL));
 
   // Protect kRpc (Bulk will be protect also)
   const uint32_t session_id = connection_handler_->OnSessionStartedCallback(
@@ -1297,10 +1383,10 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtectedRPC) {
 
   // kRpc is protected
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kRpc),
-      &mock_ssl_context);
+            &mock_ssl_context);
   // kBulk is protected
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kBulk),
-      &mock_ssl_context);
+            &mock_ssl_context);
 }
 TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtectedBulk) {
   testing::StrictMock<security_manager_test::MockSSLContext> mock_ssl_context;
@@ -1310,11 +1396,11 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtectedBulk) {
       connection_handler_->SetSSLContext(connection_key_, &mock_ssl_context),
       ::security_manager::SecurityManager::ERROR_SUCCESS);
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kControl),
-      &mock_ssl_context);
+            &mock_ssl_context);
 
   // kRpc is not protected
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kRpc),
-      reinterpret_cast<security_manager::SSLContext *>(NULL));
+            reinterpret_cast<security_manager::SSLContext*>(NULL));
 
   // Protect Bulk (kRpc will be protected also)
   const uint32_t session_id = connection_handler_->OnSessionStartedCallback(
@@ -1324,10 +1410,10 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtectedBulk) {
 
   // kRpc is protected
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kRpc),
-      &mock_ssl_context);
+            &mock_ssl_context);
   // kBulk is protected
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kBulk),
-      &mock_ssl_context);
+            &mock_ssl_context);
 }
 #endif  // ENABLE_SECURITY
 
@@ -1338,7 +1424,7 @@ TEST_F(ConnectionHandlerTest, SendHeartBeat) {
   protocol_handler_test::MockProtocolHandler mock_protocol_handler;
   connection_handler_->set_protocol_handler(&mock_protocol_handler);
 
-  EXPECT_CALL(mock_protocol_handler,SendHeartBeat(uid_,start_session_id_) );
+  EXPECT_CALL(mock_protocol_handler, SendHeartBeat(uid_, start_session_id_));
   connection_handler_->SendHeartBeat(uid_, start_session_id_);
 }
 
