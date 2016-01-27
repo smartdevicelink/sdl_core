@@ -1681,9 +1681,14 @@ void MessageHelper::GetDeviceInfoForApp(uint32_t connection_key,
     return;
   }
 
-  device_info->device_handle =
-      ApplicationManagerImpl::instance()->application(connection_key)->device();
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+      connection_key);
 
+  if (!app.valid()) {
+    LOG4CXX_ERROR(logger_, "Invalid application with connection_key " << connection_key);
+    return;
+  }
+  device_info->device_handle = app->device();
   GetDeviceInfoForHandle(device_info->device_handle, device_info);
 }
 
