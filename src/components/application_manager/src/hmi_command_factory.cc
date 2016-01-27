@@ -2057,7 +2057,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case hmi_apis::FunctionID::BasicCommunication_OnEventChanged: {
-      command = utils::MakeShared<commands::OnEventChangedNotification>(message);
+      command.reset(new commands::OnEventChangedNotification(message));
       break;
     }
   }

@@ -1,4 +1,4 @@
-/*
+ /*
  Copyright (c) 2015, Ford Motor Company
  All rights reserved.
 
@@ -253,30 +253,6 @@ bool StateController::IsStateAvailable(ApplicationSharedPtr app,
       LOG4CXX_DEBUG(logger_,
                     "AUDIO_SOURCE or EMBEDDED_NAVI is active."
                         << " Requested state is not available");
-      return false;
-    }
-  }
-
-  LOG4CXX_DEBUG(logger_, "Requested state is available");
-  return true;
-}
-
-bool StateController::IsStateAvailableForResumption(ApplicationSharedPtr app,
-                                                    HmiStatePtr state) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  using namespace mobile_apis;
-  using namespace helpers;
-
-  if (app->is_resuming()) {
-    return IsStateAvailableForResumption(app, state);
-  }
-
-  if (IsTempStateActive(HmiState::StateID::STATE_ID_AUDIO_SOURCE) ||
-      IsTempStateActive(HmiState::StateID::STATE_ID_EMBEDDED_NAVI)) {
-
-    if (HMILevel::HMI_FULL == state->hmi_level()) {
-      LOG4CXX_DEBUG(logger_, "AUDIO_SOURCE or EMBEDDED_NAVI is active."
-                    << " Requested state is not available");
       return false;
     }
   }

@@ -350,15 +350,6 @@ class StateController : public event_engine::EventObserver {
   bool IsResumptionAllowed(ApplicationSharedPtr app, HmiStatePtr state) const;
 
   /**
-   * @brief IsResumptionAllowed checks, if app is allowed to be resumed in
-   * current state
-   * @param app Application
-   * @param state State to be checked
-   * @return true, if app is allowed to be resumed, otherwise - false
-   */
-  bool IsResumptionAllowed(ApplicationSharedPtr app, HmiStatePtr state) const;
-
-  /**
    * @brief GetAvailableHmiLevel Returns closest to requested
    * available hmi level for application
    *
@@ -396,19 +387,6 @@ class StateController : public event_engine::EventObserver {
    */
   bool IsStateAvailableForResumption(ApplicationSharedPtr app,
                                      HmiStatePtr state) const;
-
-  /**
-   * @brief IsStateAvailableForResumption Checks if hmi state is available
-   * to apply for specified application during resumption
-   *
-   * @param app application to apply state
-   *
-   * @param state state to be checked
-   *
-   * @return true if state is available, false otherwise
-   */
-  bool IsStateAvailableForResumption(
-      ApplicationSharedPtr app, HmiStatePtr state) const;
 
   /**
    * @brief ApplyPostponedStateForApp tries to apply postponed state
