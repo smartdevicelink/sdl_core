@@ -1397,10 +1397,10 @@ bool MessageHelper::CreateHMIApplicationStruct(
   } else {
     output[strings::greyOut] = app->is_greyed_out();
   }
-  if (app->tts_name()) {
+  if (app->tts_name() && !app->tts_name()->empty()) {
     output[json::ttsName] = *(app->tts_name());
   }
-  if (app->vr_synonyms()) {
+  if (app->vr_synonyms() && !app->vr_synonyms()->empty()) {
     output[json::vrSynonyms] = *(app->vr_synonyms());
   }
   if (ngn_media_screen_name) {
