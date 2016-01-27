@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string.h>
+#include <cstring>
 #include <string>
 #include "application_manager/commands/mobile/perform_audio_pass_thru_request.h"
 #include "application_manager/application_manager_impl.h"
@@ -299,7 +299,7 @@ bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
 
     for (; it_ip != it_ip_end; ++it_ip) {
       str = (*it_ip)[strings::text].asCharArray();
-      if (strlen(str) && !CheckSyntax(str)) {
+      if (std::strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid initial_prompt syntax check failed");
         return true;
       }
