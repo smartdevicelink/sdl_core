@@ -83,10 +83,6 @@ if (BUILD_BT_SUPPORT)
   list(APPEND testLibraries bluetooth)
 endif()
 
-if (BUILD_AVAHI_SUPPORT)
-  list(APPEND testLibraries avahi-client avahi-common)
-endif()
-
 file(COPY log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 create_test("time_tester_test" "${testSources}" "${testLibraries}")
