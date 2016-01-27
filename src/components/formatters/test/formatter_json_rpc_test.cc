@@ -362,12 +362,13 @@ TEST(FormatterJsonRPCTest, RequestToSmartObject_Success) {
   int32_t result = FormatterJsonRpc::FromString<hmi_apis::FunctionID::eType,
                                                 hmi_apis::messageType::eType>(
       json_string, obj);
+  int32_t function_id = hmi_apis::FunctionID::VR_IsReady;
   EXPECT_EQ(0, result);
   // Get keys collection from Smart Object
   std::set<std::string> keys = obj["params"].enumerate();
   EXPECT_EQ(5u, keys.size());
   EXPECT_EQ(4444, obj["params"]["correlation_id"].asInt());
-  EXPECT_EQ(35, obj["params"]["function_id"].asInt());
+  EXPECT_EQ(function_id, obj["params"]["function_id"].asInt());
   EXPECT_EQ(0, obj["params"]["message_type"].asInt());
   EXPECT_EQ(1, obj["params"]["protocol_type"].asInt());
   EXPECT_EQ(2, obj["params"]["protocol_version"].asInt());
@@ -384,13 +385,16 @@ TEST(FormatterJsonRPCTest, ResponseToSmartObject_Success) {
   int32_t result = FormatterJsonRpc::FromString<hmi_apis::FunctionID::eType,
                                                 hmi_apis::messageType::eType>(
       json_string, obj);
+
+  int32_t function_id = hmi_apis::FunctionID::VR_AddCommand;
+
   EXPECT_EQ(0, result);
   // Get keys collection from Smart Object
   std::set<std::string> keys = obj["params"].enumerate();
   EXPECT_EQ(6u, keys.size());
   EXPECT_EQ(0, obj["params"]["code"].asInt());
   EXPECT_EQ(4440, obj["params"]["correlation_id"].asInt());
-  EXPECT_EQ(38, obj["params"]["function_id"].asInt());
+  EXPECT_EQ(function_id, obj["params"]["function_id"].asInt());
   EXPECT_EQ(1, obj["params"]["message_type"].asInt());
   EXPECT_EQ(1, obj["params"]["protocol_type"].asInt());
   EXPECT_EQ(2, obj["params"]["protocol_version"].asInt());
