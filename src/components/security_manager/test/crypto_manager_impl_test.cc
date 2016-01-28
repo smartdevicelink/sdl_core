@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@
 #else
 #include <openssl/ssl.h>
 #endif
-
+#include <limits>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -69,25 +69,39 @@ class CryptoManagerTest : public testing::Test {
             utils::MakeShared<security_manager::CryptoManagerImpl>()) {}
 
  protected:
-  void InitSecurityManager() {
-    const bool crypto_manager_initialization = crypto_manager->Init(
-        security_manager::CLIENT, security_manager::TLSv1_2, "", ALL_CIPHERS,
-        false, "/tmp/ca_cert.crt", updates_before_hour);
-    ASSERT_TRUE(crypto_manager_initialization);
-  }
-  std::string GenerateCertificateString() {
+  static void SetUpTestCase() {
     std::ifstream certificate_file("server/spt_credential.p12.enc");
-    EXPECT_TRUE(certificate_file.good());
+    EXPECT_TRUE(certificate_file.good())
+        << "Could not open certificate data file";
 
     const std::string cetrificate(
         (std::istreambuf_iterator<char>(certificate_file)),
         std::istreambuf_iterator<char>());
-    EXPECT_FALSE(cetrificate.empty());
-    return cetrificate;
+    EXPECT_FALSE(cetrificate.empty()) << "Certificate data file is empty";
+    certificate_data_base64 = cetrificate;
+  }
+
+  void SetUp() OVERRIDE {
+    ASSERT_FALSE(certificate_data_base64.empty());
+    crypto_manager = new security_manager::CryptoManagerImpl();
+  }
+
+  void InitSecurityManager() {
+    const bool crypto_manager_initialization =
+        crypto_manager->Init(security_manager::CLIENT,
+                             security_manager::TLSv1_2,
+                             "",
+                             ALL_CIPHERS,
+                             false,
+                             "/tmp/ca_cert.crt",
+                             updates_before_hour);
+    ASSERT_TRUE(crypto_manager_initialization);
   }
 
   utils::SharedPtr<security_manager::CryptoManagerImpl> crypto_manager;
+  static std::string certificate_data_base64;
 };
+std::string CryptoManagerTest::certificate_data_base64;
 
 TEST_F(CryptoManagerTest, UsingBeforeInit) {
   EXPECT_TRUE(crypto_manager->CreateSSLContext() == NULL);
@@ -100,66 +114,74 @@ TEST_F(CryptoManagerTest, WrongInit) {
   // crypto_manager->Init(...)
   security_manager::Protocol UNKNOWN =
       static_cast<security_manager::Protocol>(-1);
-
-  std::ifstream file("spt_credential.p12.enc");
-  std::stringstream ss;
-  ss << file.rdbuf();
-
   // Unknown protocol version
-  EXPECT_FALSE(crypto_manager->Init(security_manager::SERVER, UNKNOWN, ss.str(),
-                                    FORD_CIPHER, false, "",
+  EXPECT_FALSE(crypto_manager->Init(security_manager::SERVER,
+                                    UNKNOWN,
+                                    certificate_data_base64,
+                                    FORD_CIPHER,
+                                    false,
+                                    "",
                                     updates_before_hour));
+  EXPECT_NE(crypto_manager->LastError(), std::string());
 
   EXPECT_FALSE(crypto_manager->LastError().empty());
   // Unexistent cipher value
-  EXPECT_FALSE(crypto_manager->Init(
-      security_manager::SERVER, security_manager::TLSv1_2, ss.str(),
-      "INVALID_UNKNOWN_CIPHER", false, "", updates_before_hour));
-  EXPECT_FALSE(crypto_manager->LastError().empty());
+  EXPECT_FALSE(crypto_manager->Init(security_manager::SERVER,
+                                    security_manager::TLSv1_2,
+                                    certificate_data_base64,
+                                    "INVALID_UNKNOWN_CIPHER",
+                                    false,
+                                    "",
+                                    updates_before_hour));
+
+  EXPECT_NE(crypto_manager->LastError(), std::string());
 }
 
 //  #ifndef __QNXNTO__
 TEST_F(CryptoManagerTest, CorrectInit) {
-  bool is_initialyzed;
-  std::string error_string;
-  std::ifstream file("server/spt_credential.p12.enc");
-  std::stringstream ss;
-  ss << file.rdbuf();
-
   // Empty cert and key values for SERVER
-  is_initialyzed = crypto_manager->Init(
-      security_manager::SERVER, security_manager::TLSv1_2, ss.str(),
-      FORD_CIPHER, false, "", updates_before_hour);
-  EXPECT_TRUE(is_initialyzed);
-  error_string = crypto_manager->LastError();
-  EXPECT_TRUE(error_string.empty());
+  EXPECT_TRUE(crypto_manager->Init(security_manager::SERVER,
+                                   security_manager::TLSv1_2,
+                                   certificate_data_base64,
+                                   FORD_CIPHER,
+                                   false,
+                                   "",
+                                   updates_before_hour));
 
   // Recall init
-  is_initialyzed =
-      crypto_manager->Init(security_manager::CLIENT, security_manager::TLSv1_2,
-                           "", FORD_CIPHER, false, "", updates_before_hour);
-  error_string = crypto_manager->LastError();
-  EXPECT_TRUE(error_string.empty());
+  EXPECT_TRUE(crypto_manager->Init(security_manager::CLIENT,
+                                   security_manager::TLSv1_2,
+                                   "",
+                                   FORD_CIPHER,
+                                   false,
+                                   "",
+                                   updates_before_hour));
 
   // Recall init with other protocols
-  is_initialyzed =
-      crypto_manager->Init(security_manager::CLIENT, security_manager::TLSv1_1,
-                           "", FORD_CIPHER, false, "", updates_before_hour);
-  error_string = crypto_manager->LastError();
-  EXPECT_TRUE(error_string.empty());
+  EXPECT_TRUE(crypto_manager->Init(security_manager::CLIENT,
+                                   security_manager::TLSv1_1,
+                                   "",
+                                   FORD_CIPHER,
+                                   false,
+                                   "",
+                                   updates_before_hour));
 
-  is_initialyzed =
-      crypto_manager->Init(security_manager::CLIENT, security_manager::TLSv1,
-                           "", FORD_CIPHER, false, "", updates_before_hour);
-  error_string = crypto_manager->LastError();
-  EXPECT_TRUE(error_string.empty());
+  EXPECT_TRUE(crypto_manager->Init(security_manager::CLIENT,
+                                   security_manager::TLSv1,
+                                   "",
+                                   FORD_CIPHER,
+                                   false,
+                                   "",
+                                   updates_before_hour));
 
   // Cipher value
-  is_initialyzed = crypto_manager->Init(
-      security_manager::SERVER, security_manager::TLSv1_2, ss.str(),
-      ALL_CIPHERS, false, "", updates_before_hour);
-  error_string = crypto_manager->LastError();
-  EXPECT_TRUE(error_string.empty());
+  EXPECT_TRUE(crypto_manager->Init(security_manager::SERVER,
+                                   security_manager::TLSv1_2,
+                                   certificate_data_base64,
+                                   ALL_CIPHERS,
+                                   false,
+                                   "",
+                                   updates_before_hour));
 }
 // #endif  // __QNX__
 
@@ -169,8 +191,12 @@ TEST_F(CryptoManagerTest, ReleaseSSLContext_Null) {
 
 TEST_F(CryptoManagerTest, CreateReleaseSSLContext) {
   EXPECT_TRUE(crypto_manager->Init(security_manager::CLIENT,
-                                   security_manager::TLSv1_2, "", ALL_CIPHERS,
-                                   false, "", updates_before_hour));
+                                   security_manager::TLSv1_2,
+                                   "",
+                                   ALL_CIPHERS,
+                                   false,
+                                   "",
+                                   updates_before_hour));
   security_manager::SSLContext* context = crypto_manager->CreateSSLContext();
   EXPECT_TRUE(context);
   EXPECT_NO_THROW(crypto_manager->ReleaseSSLContext(context));
@@ -178,18 +204,38 @@ TEST_F(CryptoManagerTest, CreateReleaseSSLContext) {
 
 TEST_F(CryptoManagerTest, OnCertificateUpdated) {
   InitSecurityManager();
+  EXPECT_TRUE(crypto_manager->OnCertificateUpdated(certificate_data_base64));
+}
 
-  const std::string cetrificate = GenerateCertificateString();
-  ASSERT_FALSE(cetrificate.empty());
+TEST_F(CryptoManagerTest, OnCertificateUpdated_UpdateNotRequired) {
+  size_t updates_before = 0;
+  bool crypto_manager_initialization =
+      crypto_manager->Init(security_manager::CLIENT,
+                           security_manager::TLSv1_2,
+                           "",
+                           ALL_CIPHERS,
+                           false,
+                           "/tmp/ca_cert.crt",
+                           updates_before);
+  ASSERT_TRUE(crypto_manager_initialization);
+  EXPECT_FALSE(crypto_manager->IsCertificateUpdateRequired());
 
-  EXPECT_TRUE(crypto_manager->OnCertificateUpdated(cetrificate));
+  size_t max_updates_ = std::numeric_limits<size_t>::max();
+  crypto_manager_initialization =
+      crypto_manager->Init(security_manager::CLIENT,
+                           security_manager::TLSv1_2,
+                           "",
+                           ALL_CIPHERS,
+                           false,
+                           "/tmp/ca_cert.crt",
+                           max_updates_);
+  ASSERT_TRUE(crypto_manager_initialization);
+
+  EXPECT_TRUE(crypto_manager->IsCertificateUpdateRequired());
 }
 
 TEST_F(CryptoManagerTest, OnCertificateUpdated_NotInitialized) {
-  const std::string cetrificate = GenerateCertificateString();
-  ASSERT_FALSE(cetrificate.empty());
-
-  EXPECT_FALSE(crypto_manager->OnCertificateUpdated(cetrificate));
+  EXPECT_FALSE(crypto_manager->OnCertificateUpdated(certificate_data_base64));
 }
 
 TEST_F(CryptoManagerTest, OnCertificateUpdated_NullString) {
@@ -199,19 +245,21 @@ TEST_F(CryptoManagerTest, OnCertificateUpdated_NullString) {
 
 TEST_F(CryptoManagerTest, OnCertificateUpdated_MalformedSign) {
   InitSecurityManager();
+  // Corrupt the middle symbol
+  certificate_data_base64[certificate_data_base64.size() / 2] = '?';
 
-  std::string cetrificate = GenerateCertificateString();
-  ASSERT_FALSE(cetrificate.empty());
-  // corrupt the middle symbol
-  cetrificate[cetrificate.size() / 2] = '?';
-
-  EXPECT_FALSE(crypto_manager->OnCertificateUpdated(cetrificate));
+  EXPECT_FALSE(crypto_manager->OnCertificateUpdated(certificate_data_base64));
 }
 
 TEST_F(CryptoManagerTest, OnCertificateUpdated_WrongInitFolder) {
-  const bool crypto_manager_initialization = crypto_manager->Init(
-      ::security_manager::CLIENT, security_manager::TLSv1_2, "wrong_name",
-      ALL_CIPHERS, true, "", updates_before_hour);
+  const bool crypto_manager_initialization =
+      crypto_manager->Init(::security_manager::CLIENT,
+                           security_manager::TLSv1_2,
+                           "wrong_name",
+                           ALL_CIPHERS,
+                           true,
+                           "",
+                           updates_before_hour);
   ASSERT_TRUE(crypto_manager_initialization);
 
   std::string cetrificate = "wrong_data";
