@@ -33,6 +33,8 @@
 #include <vector>
 #include <utility>
 #include <limits>
+#include <map>
+#include <algorithm>
 #include "utils/make_shared.h"
 #include "protocol_handler/multiframe_builder.h"
 
@@ -40,7 +42,18 @@ namespace test {
 namespace components {
 namespace protocol_handler_test {
 
-using namespace protocol_handler;
+namespace ph = protocol_handler;
+using ph::ProtocolPacket;
+using ph::ConnectionID;
+using ph::MessageID;
+using ph::SessionID;
+using ph::RESULT_OK;
+using ph::RESULT_FAIL;
+using ph::PROTECTION_OFF;
+using ph::FIRST_FRAME_DATA_SIZE;
+using ph::FRAME_TYPE_FIRST;
+using ph::FRAME_TYPE_CONSECUTIVE;
+using ph::FRAME_DATA_FIRST;
 
 typedef std::vector<ConnectionID> ConnectionList;
 typedef std::vector<uint8_t> UCharDataVector;
@@ -93,8 +106,8 @@ class MultiFrameBuilderTest : public ::testing::Test {
 
     MutiframeData some_data;
 
-    const uint8_t protocol_version = PROTOCOL_VERSION_2;
-    const uint8_t service_type = SERVICE_TYPE_RPC;
+    const uint8_t protocol_version = ph::PROTOCOL_VERSION_2;
+    const uint8_t service_type = ph::SERVICE_TYPE_RPC;
 
     // We need 255+ messages for rolling over max uint8_t value
     int multi_frames_count = std::numeric_limits<uint8_t>::max() * 2;
@@ -162,7 +175,7 @@ class MultiFrameBuilderTest : public ::testing::Test {
 
     const ProtocolFramePtrList& multiframe_list =
         multiframe_builder_.PopMultiframes();
-    ASSERT_EQ(multiframe_list.size(), 1u);
+    ASSERT_EQ(1u, multiframe_list.size());
 
     const ProtocolFramePtr result_multiframe = multiframe_list.front();
     EXPECT_EQ(binary_data,
@@ -180,8 +193,10 @@ class MultiFrameBuilderTest : public ::testing::Test {
                           const size_t max_payload_size,
                           const UCharDataVector& data,
                           ProtocolFramePtrList& out_frames) {
-    ASSERT_GT(max_payload_size, FIRST_FRAME_DATA_SIZE);
-    ASSERT_EQ(FIRST_FRAME_DATA_SIZE, 0x08);
+    ASSERT_LT(FIRST_FRAME_DATA_SIZE, max_payload_size);
+    ASSERT_EQ(0x08, FIRST_FRAME_DATA_SIZE)
+        << "Size of FIRST_FRAME_DATA: " << FIRST_FRAME_DATA_SIZE
+        << ", it must be only 0x08";
 
     // TODO(EZamakhov): move to the separate class
     const size_t data_size = data.size();
@@ -224,12 +239,12 @@ class MultiFrameBuilderTest : public ::testing::Test {
     out_frames.push_back(first_frame);
 
     for (size_t i = 0; i < frames_count; ++i) {
-      const bool is_last_frame = (i == (frames_count - 1));
+      const bool is_last_frame = ((frames_count - 1) == i);
       const size_t frame_size =
           is_last_frame ? lastframe_size : max_payload_size;
       const uint8_t data_type = is_last_frame
-                                    ? FRAME_DATA_LAST_CONSECUTIVE
-                                    : (i % FRAME_DATA_MAX_CONSECUTIVE + 1);
+                                    ? ph::FRAME_DATA_LAST_CONSECUTIVE
+                                    : (i % ph::FRAME_DATA_MAX_CONSECUTIVE + 1);
 
       const ProtocolFramePtr consecutive_frame(
           new ProtocolPacket(connection_id,
@@ -246,10 +261,6 @@ class MultiFrameBuilderTest : public ::testing::Test {
     }
   }
 
-  void AddConnection(const ConnectionID connection_id) {
-    ASSERT_TRUE(multiframe_builder_.AddConnection(connection_id));
-  }
-
   void AddConnections() {
     for (MultiFrameTestMap::iterator connection_it = test_data_map_.begin();
          connection_it != test_data_map_.end();
@@ -259,11 +270,7 @@ class MultiFrameBuilderTest : public ::testing::Test {
     }
   }
 
-  void RemoveConnection(const ConnectionID connection_id) {
-    ASSERT_TRUE(multiframe_builder_.RemoveConnection(connection_id));
-  }
-
-  MultiFrameBuilder multiframe_builder_;
+  ph::MultiFrameBuilder multiframe_builder_;
   MultiFrameTestMap test_data_map_;
   static size_t mtu_;
 };
@@ -299,10 +306,10 @@ TEST_F(MultiFrameBuilderTest, Add_NonSingleOrConsecutive_Frames) {
     const uint8_t frame_type = *it;
     const ProtocolFramePtr unexpected_frame(
         new ProtocolPacket(0u,
-                           PROTOCOL_VERSION_3,
+                           ph::PROTOCOL_VERSION_3,
                            PROTECTION_OFF,
                            frame_type,
-                           SERVICE_TYPE_RPC,
+                           ph::SERVICE_TYPE_RPC,
                            FRAME_DATA_FIRST,
                            0u,
                            0u,
@@ -387,7 +394,7 @@ TEST_F(MultiFrameBuilderTest, Add_ConsecutiveFrame) {
   const ConnectionID& connection_id = test_data_map_.begin()->first;
   SessionToMutiframeDataTestMap& session_map = test_data_map_.begin()->second;
 
-  AddConnection(connection_id);
+  ASSERT_TRUE(multiframe_builder_.AddConnection(connection_id));
 
   ASSERT_FALSE(session_map.empty());
   MessageIDToMutiframeDataTestMap& messageId_map = session_map.begin()->second;
@@ -458,7 +465,7 @@ TEST_F(MultiFrameBuilderTest, Add_ConsecutiveFrames_per1) {
           if (multiframes.empty()) {
             const ProtocolFramePtrList& multiframe_list =
                 multiframe_builder_.PopMultiframes();
-            ASSERT_EQ(multiframe_list.size(), 1u);
+            ASSERT_EQ(1u, multiframe_list.size());
 
             const ProtocolFramePtr result_multiframe = multiframe_list.front();
             const UCharDataVector& binary_data = multiframe_data.binary_data;
@@ -497,7 +504,7 @@ TEST_F(MultiFrameBuilderTest, FrameExpired_OneMSec) {
   const ConnectionID& connection_id = test_data_map_.begin()->first;
   SessionToMutiframeDataTestMap& session_map = test_data_map_.begin()->second;
 
-  AddConnection(connection_id);
+  ASSERT_TRUE(multiframe_builder_.AddConnection(connection_id));
 
   ASSERT_FALSE(session_map.empty());
   MessageIDToMutiframeDataTestMap& messageId_map = session_map.begin()->second;
@@ -532,7 +539,7 @@ TEST_F(MultiFrameBuilderTest, RemoveConnection_NoConnection_ResultFail) {
 TEST_F(MultiFrameBuilderTest, RemoveConnection_Succesful) {
   // Arrange
   const ConnectionID& connection_id = test_data_map_.begin()->first;
-  AddConnection(connection_id);
+  ASSERT_TRUE(multiframe_builder_.AddConnection(connection_id));
   // Act
   const bool connection_result =
       multiframe_builder_.RemoveConnection(connection_id);
