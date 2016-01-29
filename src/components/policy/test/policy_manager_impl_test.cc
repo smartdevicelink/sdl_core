@@ -47,6 +47,7 @@
 #include "table_struct/types.h"
 #include "utils/file_system.h"
 #include "utils/date_time.h"
+#include "utils/make_shared.h"
 
 using ::testing::Return;
 using ::testing::NiceMock;
@@ -104,7 +105,9 @@ class PolicyManagerImplTest : public ::testing::Test {
     manager->set_cache_manager(cache_manager);
   }
 
-  void TearDown() OVERRIDE { delete manager; }
+  void TearDown() OVERRIDE {
+    delete manager;
+  }
 
   ::testing::AssertionResult IsValid(const policy_table::Table& table) {
      if (table.is_valid()) {
@@ -303,7 +306,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   }
 };
 
-Json::Value createPTforLoad() {
+Json::Value CreatePTforLoad() {
   const std::string load_table(
   "{"
   "\"policy_table\": {"
@@ -388,7 +391,6 @@ Json::Value createPTforLoad() {
       "}"
     "}"
   "}");
-
   Json::Value table(Json::objectValue);
   Json::Reader reader;
   EXPECT_TRUE(reader.parse(load_table, table));
@@ -396,8 +398,8 @@ Json::Value createPTforLoad() {
 }
 
 TEST_F(PolicyManagerImplTest, GetNotificationsNumber) {
-  std::string priority = "EMERGENCY";
-  uint32_t notif_number = 100;
+  const std::string priority = "EMERGENCY";
+  const uint32_t notif_number = 100u;
   EXPECT_CALL(*cache_manager, GetNotificationsNumber(priority))
       .WillOnce(Return(notif_number));
 
@@ -405,13 +407,12 @@ TEST_F(PolicyManagerImplTest, GetNotificationsNumber) {
 }
 
 TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
-  // Arrange
-
-  Json::Value table = createPTforLoad();
+  // Arrange  
+  Json::Value table = CreatePTforLoad();
   policy_table::Table update(&table);
   update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
   // Act
-  std::string json = table.toStyledString();
+  const std::string json = table.toStyledString();
   ::policy::BinaryMessage msg(json.begin(), json.end());
   EXPECT_CALL(listener, OnUpdateStatusChanged(_));
   EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
@@ -499,8 +500,7 @@ TEST_F(PolicyManagerImplTest, ResetPT) {
 
 TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   // Arrange
-  Json::Value table = createPTforLoad();
-
+  Json::Value table = CreatePTforLoad();
   policy_table::Table update(&table);
   update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
 
@@ -510,11 +510,11 @@ TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
   EXPECT_CALL(*cache_manager, GetHMIAppTypeAfterUpdate(_)).Times(AtLeast(1));
 
   // Act
-  std::string json = table.toStyledString();
+  const std::string json = table.toStyledString();
   ::policy::BinaryMessage msg(json.begin(), json.end());
 
   utils::SharedPtr<policy_table::Table> snapshot =
-      new policy_table::Table(update.policy_table);
+      utils::MakeShared<policy_table::Table>(update.policy_table);
   // Assert
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
