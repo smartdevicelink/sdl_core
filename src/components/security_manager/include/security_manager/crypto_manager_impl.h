@@ -106,7 +106,7 @@ class CryptoManagerImpl : public CryptoManager {
     BIO* bioIn_;
     BIO* bioOut_;
     BIO* bioFilter_;
-    mutable sync_primitives::Lock bio_locker;
+    mutable sync_primitives::Lock ssl_locker_;
     size_t buffer_size_;
     uint8_t* buffer_;
     bool is_handshake_pending_;

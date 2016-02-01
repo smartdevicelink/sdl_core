@@ -68,7 +68,7 @@ std::string CryptoManagerImpl::SSLContextImpl::LastError() const {
 }
 
 bool CryptoManagerImpl::SSLContextImpl::IsInitCompleted() const {
-  sync_primitives::AutoLock locker(bio_locker);
+  sync_primitives::AutoLock locker(ssl_locker_);
   return SSL_is_init_finished(connection_);
 }
 
@@ -343,7 +343,7 @@ bool CryptoManagerImpl::SSLContextImpl::Encrypt(const uint8_t* const in_data,
                                                 size_t in_data_size,
                                                 const uint8_t** const out_data,
                                                 size_t* out_data_size) {
-  sync_primitives::AutoLock locker(bio_locker);
+  sync_primitives::AutoLock locker(ssl_locker_);
   if (!SSL_is_init_finished(connection_) || !in_data || !in_data_size) {
     return false;
   }
@@ -369,7 +369,7 @@ bool CryptoManagerImpl::SSLContextImpl::Decrypt(const uint8_t* const in_data,
                                                 size_t in_data_size,
                                                 const uint8_t** const out_data,
                                                 size_t* out_data_size) {
-  sync_primitives::AutoLock locker(bio_locker);
+  sync_primitives::AutoLock locker(ssl_locker_);
   if (!SSL_is_init_finished(connection_)) {
     return false;
   }
