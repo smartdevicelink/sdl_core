@@ -34,11 +34,6 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_DISPATCHER_H_
 
 #include <list>
-#include <map>
-
-#include "utils/lock.h"
-#include "utils/singleton.h"
-
 #include "application_manager/event_engine/event.h"
 
 namespace application_manager {

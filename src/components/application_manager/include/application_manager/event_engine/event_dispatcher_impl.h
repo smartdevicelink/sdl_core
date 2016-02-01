@@ -116,8 +116,8 @@ class EventDispatcherImpl : public EventDispatcher,
   // Members section
   sync_primitives::Lock                               state_lock_;
   sync_primitives::Lock                               observer_lock_;
-  EventObserverMap                                    observers_event;
-  ObserverVector                                      observers;
+  EventObserverMap                                    observers_event_;
+  ObserverVector                                      observers_;
 
 };
 
