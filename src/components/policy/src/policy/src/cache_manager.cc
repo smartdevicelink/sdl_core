@@ -655,7 +655,8 @@ rpc::policy_table_interface_base::NumberOfNotificationsType CacheManager::GetNot
 
   NNPM::const_iterator priority_iter = nnpm.find(priority);
 
-  const uint32_t result = (nnpm.end() != priority_iter ? (*priority_iter).second : 0);
+  const rpc::policy_table_interface_base::NumberOfNotificationsType result =
+      (nnpm.end() != priority_iter ? (*priority_iter).second : 0u);
   return result;
 }
 
