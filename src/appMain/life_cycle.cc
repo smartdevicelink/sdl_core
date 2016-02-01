@@ -1,4 +1,4 @@
-e*
+/*
 * Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
@@ -382,15 +382,14 @@ namespace {
         exit(EXIT_FAILURE);
     }
   }
-}
 }  //  namespace
 
 void LifeCycle::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   // Register signal handlers and wait sys signals
-  // from another thread
+  // from child threads
   if (!utils::WaitTerminationSignals(&sig_handler)) {
-      LOG4CXX_WARN(logger_, "Fail to catch system signal!");
+      LOG4CXX_FATAL(logger_, "Fail to catch system signal!");
   }
 }
 

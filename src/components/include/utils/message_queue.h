@@ -99,7 +99,7 @@ template<typename T, class Q = std::queue<T> > class MessageQueue {
       * \brief waitUntilEmpty message queue
       * Wait until message queue is empty
       */
-    void waitUntilEmpty();
+    void WaitUntilEmpty();
 
     /**
      * \brief Shutdown the queue.
@@ -143,7 +143,7 @@ template<typename T, class Q> void MessageQueue<T, Q>::wait() {
   }
 }
 
-template<typename T, class Q> void MessageQueue<T, Q>::waitUntilEmpty() {
+template<typename T, class Q> void MessageQueue<T, Q>::WaitUntilEmpty() {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   while ((!shutting_down_) && !queue_.empty()) {
     queue_new_items_.Wait(auto_lock);

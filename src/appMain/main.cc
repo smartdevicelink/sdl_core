@@ -126,7 +126,7 @@ int32_t main(int32_t argc, char** argv) {
   }
 
   // Unsibscribe once for all threads
-  if ( utils::UnsibscribeFromTermination() ) {
+  if (utils::UnsibscribeFromTermination()) {
     // Can't use internal logger here
     exit(EXIT_FAILURE);
   }

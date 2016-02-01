@@ -88,7 +88,6 @@ class MessageLoopThread {
   // Process already posted messages and stop thread processing. Thread-safe.
   void Shutdown();
 
-
   // Added for utils/test/auto_trace_test.cc
   size_t GetMessageQueueSize() const;
 
@@ -167,7 +166,7 @@ void MessageLoopThread<Q>::Shutdown() {
 
 template<class Q>
 void MessageLoopThread<Q>::WaitDumpQueue() {
-  message_queue_.waitUntilEmpty();
+  message_queue_.WaitUntilEmpty();
 }
 
 //////////

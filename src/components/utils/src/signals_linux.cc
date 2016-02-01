@@ -48,7 +48,7 @@ bool utils::UnsibscribeFromTermination() {
   sigaddset(&signal_set, SIGINT);
   sigaddset(&signal_set, SIGTERM);
   sigaddset(&signal_set, SIGSEGV);
-  return pthread_sigmask(SIG_BLOCK, &signal_set, NULL);
+  return !pthread_sigmask(SIG_BLOCK, &signal_set, NULL);
 }
 
 namespace {
