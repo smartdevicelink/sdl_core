@@ -55,24 +55,32 @@ void RegisterAppInterfaceResponse::Run() {
       last_message = false;
     }
   }
- 
+
   SendResponse(success, result_code, last_message);
 
   if (mobile_apis::Result::SUCCESS != result_code) { return; }
 
   // Add registered application to the policy db right after response sent to
   // mobile to be able to check all other API according to app permissions
-  uint32_t connection_key =
-      (*message_)[strings::params][strings::connection_key].asUInt();
-  application_manager::ApplicationSharedPtr app =
+  application_manager::ApplicationSharedPtr application =
       application_manager::ApplicationManagerImpl::instance()->application(
-          connection_key);
-  if (app) {
-    std::string mobile_app_id = app->mobile_app_id();
-    policy::PolicyHandler::instance()->OnAppRegisteredOnMobile(mobile_app_id);
-
-    SetHeartBeatTimeout(connection_key, mobile_app_id);
+          connection_key());
+  if (!application) {
+    LOG4CXX_ERROR(logger_, "Application with connection key "
+                  << connection_key() << " is not registered.");
+    return;
   }
+
+  SetHeartBeatTimeout(connection_key(), application->mobile_app_id());
+
+  // Default HMI level should be set before any permissions validation, since it
+  // relies on HMI level.
+  ApplicationManagerImpl::instance()->OnApplicationRegistered(application);
+
+  // Sends OnPermissionChange notification to mobile right after RAI response
+  // and HMI level set-up
+  policy::PolicyHandler::instance()->OnAppRegisteredOnMobile(
+        application->mobile_app_id());
 }
 
 void RegisterAppInterfaceResponse::SetHeartBeatTimeout(

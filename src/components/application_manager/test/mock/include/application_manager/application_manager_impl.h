@@ -369,6 +369,7 @@ class ApplicationManagerImpl
   MOCK_CONST_METHOD0(get_limited_voice_application, ApplicationSharedPtr());
   MOCK_CONST_METHOD1(IsAppTypeExistsInFullOrLimited,
                      bool(ApplicationConstSharedPtr));
+  MOCK_METHOD1(OnApplicationRegistered, void(ApplicationSharedPtr));
   MOCK_CONST_METHOD0(active_application, ApplicationSharedPtr());
   MOCK_METHOD0(OnApplicationListUpdateTimer, void());
   MOCK_METHOD0(OnLowVoltage, void());
