@@ -667,6 +667,15 @@ class MessageHelper {
         ApplicationSharedPtr app, bool default_help_prompt);
 
     /**
+     * @brief SendSetAppIcon allows to send SetAppIcon request.
+     *
+     * @param app_id application for which icon request should be sent.
+     *
+     * @param icon_path path to the icon.
+     */
+     static void SendSetAppIcon(uint32_t app_id, const std::string& icon_path);
+
+    /**
      * @brief Sends DecryptCertificate request to HMI
      * @param file_name path to file containing encrypted certificate
      */
