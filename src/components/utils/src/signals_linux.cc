@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,7 @@ bool utils::UnsibscribeFromTermination() {
   sigemptyset(&signal_set);
   sigaddset(&signal_set, SIGINT);
   sigaddset(&signal_set, SIGTERM);
-  sigaddset(&signal_set, SIGSEGV);
+
   return !pthread_sigmask(SIG_BLOCK, &signal_set, NULL);
 }
 
