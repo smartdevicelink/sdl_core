@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -39,29 +39,29 @@
 
 namespace policy {
 class PolicyListener {
- public:
-  virtual ~PolicyListener() {
-  }
-  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
-                                    const Permissions& permissions,
-                                    const policy::HMILevel& default_hmi) = 0;
-  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
-                                    const Permissions& permissions) = 0;
-  virtual void OnPendingPermissionChange(const std::string& policy_app_id) = 0;
-  virtual void OnUpdateStatusChanged(const std::string&) = 0;
-  virtual std::string OnCurrentDeviceIdUpdateRequired(
-      const std::string& policy_app_id) = 0;
+public:
+  virtual ~PolicyListener() {}
+  virtual void OnPermissionsUpdated(const std::string &policy_app_id,
+                                    const Permissions &permissions,
+                                    const policy::HMILevel &default_hmi) = 0;
+  virtual void OnPermissionsUpdated(const std::string &policy_app_id,
+                                    const Permissions &permissions) = 0;
+  virtual void OnPendingPermissionChange(const std::string &policy_app_id) = 0;
+  virtual void OnUpdateStatusChanged(const std::string &) = 0;
+  virtual std::string
+  OnCurrentDeviceIdUpdateRequired(const std::string &policy_app_id) = 0;
   virtual void OnSystemInfoUpdateRequired() = 0;
-  virtual std::string GetAppName(const std::string& policy_app_id) = 0;
-  virtual void OnUpdateHMIAppType(std::map<std::string, StringArray> app_hmi_types) = 0;
+  virtual std::string GetAppName(const std::string &policy_app_id) = 0;
+  virtual void
+  OnUpdateHMIAppType(std::map<std::string, StringArray> app_hmi_types) = 0;
 
-    /**
-   * @brief CanUpdate allows to find active application
-   * and check whether related device consented.
-   *
-   * @return true if there are at least one application has been registered
-   * with consented device.
-   */
+  /**
+ * @brief CanUpdate allows to find active application
+ * and check whether related device consented.
+ *
+ * @return true if there are at least one application has been registered
+ * with consented device.
+ */
   virtual bool CanUpdate() = 0;
 
   /**
@@ -69,8 +69,9 @@ class PolicyListener {
    * when snapshot for PTU has been created.
    *
    * @param pt_string the snapshot
+   *
    */
-  virtual void OnSnapshotCreated(const BinaryMessage& pt_string) = 0;
+  virtual void OnSnapshotCreated(const BinaryMessage &pt_string) = 0;
 
   /**
    * @brief Make appropriate changes for related applications permissions and
@@ -78,13 +79,13 @@ class PolicyListener {
    * @param device_id Unique device id, which consent had been changed
    * @param device_consent Device consent, which is done by user
    */
-  virtual void OnDeviceConsentChanged(const std::string& device_id,
+  virtual void OnDeviceConsentChanged(const std::string &device_id,
                                       bool is_allowed) = 0;
 
   /**
    * @brief GetAvailableApps allows to obtain list of registered applications.
    */
-  virtual void GetAvailableApps(std::queue<std::string>&) = 0;
+  virtual void GetAvailableApps(std::queue<std::string> &) = 0;
 
   /**
    * @brief OnCertificateUpdated the callback which signals if certificate field
@@ -92,7 +93,7 @@ class PolicyListener {
    *
    * @param certificate_data the value of the updated field.
    */
-  virtual void OnCertificateUpdated(const std::string& certificate_data) = 0;
+  virtual void OnCertificateUpdated(const std::string &certificate_data) = 0;
 };
-}  //  namespace policy
-#endif  //  SRC_COMPONENTS_POLICY_INCLUDE_POLICY_LISTENER_H_
+} //  namespace policy
+#endif //  SRC_COMPONENTS_POLICY_INCLUDE_POLICY_LISTENER_H_

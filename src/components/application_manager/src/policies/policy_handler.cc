@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2014, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -1066,7 +1066,7 @@ void PolicyHandler::ResetRetrySequence() {
   policy_manager_->ResetRetrySequence();
 }
 
-int PolicyHandler::NextRetryTimeout() {
+uint32_t PolicyHandler::NextRetryTimeout() {
   POLICY_LIB_CHECK(0);
   return policy_manager_->NextRetryTimeout();
 }
