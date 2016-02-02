@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -117,18 +117,17 @@ bool InitHmi() {
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
 int32_t main(int32_t argc, char** argv) {
+  // Unsibscribe once for all threads
+  if (!utils::UnsibscribeFromTermination()) {
+    // Can't use internal logger here
+    exit(EXIT_FAILURE);
+  }
 
   // --------------------------------------------------------------------------
   if ((argc > 1)&&(0 != argv)) {
     profile::Profile::instance()->config_file_name(argv[1]);
   } else {
     profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
-  }
-
-  // Unsibscribe once for all threads
-  if (!utils::UnsibscribeFromTermination()) {
-    // Can't use internal logger here
-    exit(EXIT_FAILURE);
   }
 
   // Logger initialization

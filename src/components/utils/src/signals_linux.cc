@@ -54,12 +54,10 @@ bool utils::UnsibscribeFromTermination() {
 namespace {
 bool CatchSIGSEGV(sighandler_t handler) {
   struct sigaction act;
-  sigset_t signal_set;
+
   act.sa_handler = handler;
   sigemptyset(&act.sa_mask);
   act.sa_flags = 0;
-  sigemptyset(&signal_set);
-  sigaddset(&signal_set, SIGSEGV);
 
   return !sigaction(SIGSEGV, &act, NULL);
 }

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2014, Ford Motor Company
+* Copyright (c) 2016, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -376,7 +376,6 @@ namespace {
         // exit need to prevent endless sending SIGSEGV
         // http://stackoverflow.com/questions/2663456/how-to-write-a-signal-handler-to-catch-sigsegv
         abort();
-        break;
       default:
         LOG4CXX_DEBUG(logger_, "Unexpected signal has been caught");
         exit(EXIT_FAILURE);
