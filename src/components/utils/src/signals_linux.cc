@@ -52,7 +52,7 @@ bool utils::UnsibscribeFromTermination() {
 }
 
 namespace {
-void CatchSIGSEGV(sighandler_t handler) {
+bool CatchSIGSEGV(sighandler_t handler) {
   struct sigaction act;
   sigset_t signal_set;
   act.sa_handler = handler;
@@ -61,7 +61,7 @@ void CatchSIGSEGV(sighandler_t handler) {
   sigemptyset(&signal_set);
   sigaddset(&signal_set, SIGSEGV);
 
-  sigaction(SIGSEGV, &act, NULL);
+  return !sigaction(SIGSEGV, &act, NULL);
 }
 }  // namespace
 
@@ -72,19 +72,12 @@ bool utils::WaitTerminationSignals(sighandler_t sig_handler) {
   sigemptyset(&signal_set);
   sigaddset(&signal_set, SIGINT);
   sigaddset(&signal_set, SIGTERM);
-  sigaddset(&signal_set, SIGSEGV);
+
+  if (!CatchSIGSEGV(sig_handler)) {
+    return false;
+  }
 
   if (!sigwait(&signal_set, &sig)) {
-    // unblock SIGSEGV to catch him later
-    sigemptyset(&signal_set);
-    sigaddset(&signal_set, SIGSEGV);
-    pthread_sigmask(SIG_UNBLOCK, &signal_set, NULL);
-
-    // Catch possible crashes on exit
-    // after e.g. sigint was caught
-    if (sig != SIGSEGV) {
-      CatchSIGSEGV(sig_handler);
-    }
     sig_handler(sig);
     return true;
   }
