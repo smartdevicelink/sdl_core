@@ -113,8 +113,6 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo(
       "BasicCommunication.OnExitAllApplications");
   MessageBrokerController::subscribeTo("BasicCommunication.OnDeviceChosen");
-  MessageBrokerController::subscribeTo("BasicCommunication.OnPhoneCall");
-  MessageBrokerController::subscribeTo("BasicCommunication.OnEmergencyEvent");
   MessageBrokerController::subscribeTo("UI.OnLanguageChange");
   MessageBrokerController::subscribeTo("VR.OnLanguageChange");
   MessageBrokerController::subscribeTo("TTS.OnLanguageChange");
@@ -136,6 +134,7 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("SDL.AddStatisticsInfo");
   MessageBrokerController::subscribeTo("SDL.OnDeviceStateChanged");
   MessageBrokerController::subscribeTo("SDL.OnPolicyUpdate");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnEventChanged");
 
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }

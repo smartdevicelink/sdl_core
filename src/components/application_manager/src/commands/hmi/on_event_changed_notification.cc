@@ -30,24 +30,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_emergency_event_notification.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/commands/hmi/on_event_changed_notification.h"
 
 namespace application_manager {
 
 namespace commands {
 
-OnEmergencyEventNotification::OnEmergencyEventNotification(
+OnEventChangedNotification::OnEventChangedNotification(
     const MessageSharedPtr& message)
     : NotificationFromHMI(message) {
 }
 
-OnEmergencyEventNotification::~OnEmergencyEventNotification() {
+OnEventChangedNotification::~OnEventChangedNotification() {
 }
 
-void OnEmergencyEventNotification::Run() {
+void OnEventChangedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_OnEmergencyEvent);
+  event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_OnEventChanged);
   event.set_smart_object(*message_);
   event.raise();
 }
@@ -55,5 +54,4 @@ void OnEmergencyEventNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-
 

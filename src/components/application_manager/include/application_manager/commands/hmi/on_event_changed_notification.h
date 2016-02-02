@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_PHONE_CALL_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_PHONE_CALL_NOTIFICATION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_EVENT_CHANGED_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_EVENT_CHANGED_NOTIFICATION_H_
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
 
@@ -39,39 +39,34 @@ namespace application_manager {
 
 namespace commands {
 
-namespace hmi {
-
-
 /**
- * @brief OnPhoneCallNotification command class
+ * @brief OnEventChangedNotification command class
  **/
-class OnPhoneCallNotification : public NotificationFromHMI {
- public:
-  /**
-   * @brief OnPhoneCallNotification class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit OnPhoneCallNotification(const MessageSharedPtr& message);
+class OnEventChangedNotification : public NotificationFromHMI {
+  public:
+    /**
+     * @brief OnEventChangedNotification class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit OnEventChangedNotification(const MessageSharedPtr& message);
 
-  /**
-   * @brief OnPhoneCallNotification class destructor
-   **/
-  virtual ~OnPhoneCallNotification();
+    /**
+     * @brief OnEventChangedNotification class destructor
+     **/
+    virtual ~OnEventChangedNotification();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(OnPhoneCallNotification);
+  private:
+    DISALLOW_COPY_AND_ASSIGN(OnEventChangedNotification);
 };
-
-}  // namespace hmi
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_PHONE_CALL_NOTIFICATION_H_
+#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_EVENT_CHANGED_NOTIFICATION_H_

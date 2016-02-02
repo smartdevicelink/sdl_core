@@ -1,4 +1,4 @@
-/*
+ /*
  Copyright (c) 2015, Ford Motor Company
  All rights reserved.
 
@@ -53,12 +53,11 @@ StateController::StateController(ApplicationManager* app_mngr)
     : EventObserver(), app_mngr_(app_mngr) {
   subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnAppActivated);
   subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated);
-  subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnEmergencyEvent);
-  subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnPhoneCall);
   subscribe_on_event(hmi_apis::FunctionID::TTS_Started);
   subscribe_on_event(hmi_apis::FunctionID::TTS_Stopped);
   subscribe_on_event(hmi_apis::FunctionID::VR_Started);
   subscribe_on_event(hmi_apis::FunctionID::VR_Stopped);
+  subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnEventChanged);
 }
 
 void StateController::HmiLevelConflictResolver::operator()(
@@ -399,29 +398,6 @@ void StateController::on_event(const event_engine::Event& event) {
       OnAppDeactivated(message);
       break;
     }
-    case FunctionID::BasicCommunication_OnEmergencyEvent: {
-      bool is_active =
-          message[strings::msg_params][hmi_response::enabled].asBool();
-      if (is_active) {
-        ApplyTempState<HmiState::STATE_ID_SAFETY_MODE>();
-
-      } else {
-        CancelTempState<HmiState::STATE_ID_SAFETY_MODE>();
-      }
-      break;
-    }
-    case FunctionID::BasicCommunication_OnPhoneCall: {
-      bool is_active =
-          message[strings::msg_params][hmi_notification::is_active].asBool();
-      if (is_active) {
-        ApplyTempState<HmiState::STATE_ID_PHONE_CALL>();
-
-      } else {
-        CancelTempState<HmiState::STATE_ID_PHONE_CALL>();
-      }
-      break;
-    }
-
     case FunctionID::VR_Started: {
       ApplyTempState<HmiState::STATE_ID_VR_SESSION>();
       break;
@@ -436,6 +412,59 @@ void StateController::on_event(const event_engine::Event& event) {
     }
     case FunctionID::TTS_Stopped: {
       CancelTempState<HmiState::STATE_ID_TTS_SESSION>();
+      break;
+    }
+    case FunctionID::BasicCommunication_OnEventChanged: {
+      bool is_active =
+          message[strings::msg_params][hmi_notification::is_active].asBool();
+      const uint32_t id =
+          message[strings::msg_params][hmi_notification::event_name].asUInt();
+      //TODO(AOleynik): Add verification/conversion check here
+      Common_EventTypes::eType state_id =
+          static_cast<Common_EventTypes::eType>(id);
+      if (is_active) {
+        if (Common_EventTypes::AUDIO_SOURCE == state_id) {
+          ApplyTempState<HmiState::STATE_ID_AUDIO_SOURCE>();
+          break;
+        }
+        if (Common_EventTypes::EMBEDDED_NAVI == state_id) {
+          ApplyTempState<HmiState::STATE_ID_EMBEDDED_NAVI>();
+          break;
+        }
+        if (Common_EventTypes::PHONE_CALL == state_id) {
+          ApplyTempState<HmiState::STATE_ID_PHONE_CALL>();
+          break;
+        }
+        if (Common_EventTypes::EMERGENCY_EVENT == state_id) {
+          ApplyTempState<HmiState::STATE_ID_SAFETY_MODE>();
+          break;
+        }
+        if (Common_EventTypes::DEACTIVATE_HMI == state_id) {
+          ApplyTempState<HmiState::STATE_ID_DEACTIVATE_HMI>();
+          break;
+        }
+      } else {
+        if (Common_EventTypes::AUDIO_SOURCE == state_id) {
+          CancelTempState<HmiState::STATE_ID_AUDIO_SOURCE>();
+          break;
+        }
+        if (Common_EventTypes::EMBEDDED_NAVI == state_id) {
+          CancelTempState<HmiState::STATE_ID_EMBEDDED_NAVI>();
+          break;
+        }
+        if (Common_EventTypes::PHONE_CALL == state_id) {
+          CancelTempState<HmiState::STATE_ID_PHONE_CALL>();
+          break;
+        }
+        if (Common_EventTypes::EMERGENCY_EVENT == state_id) {
+          CancelTempState<HmiState::STATE_ID_SAFETY_MODE>();
+          break;
+        }
+        if (Common_EventTypes::DEACTIVATE_HMI == state_id) {
+          CancelTempState<HmiState::STATE_ID_DEACTIVATE_HMI>();
+          break;
+        }
+      }
       break;
     }
     default:
@@ -549,7 +578,7 @@ void StateController::TempStateStopped(HmiState::StateID ID) {
       std::mem_fun(&StateController::ApplyPostponedStateForApp), this));
 }
 
-void StateController::DeactivateAppWithGeneralReason(ApplicationSharedPtr app) {
+void StateController::DeactivateApp(ApplicationSharedPtr app) {
   using namespace mobile_apis;
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -559,28 +588,11 @@ void StateController::DeactivateAppWithGeneralReason(ApplicationSharedPtr app) {
   HmiStatePtr new_regular = utils::MakeShared<HmiState>(*regular);
 
   if (app->IsAudioApplication()) {
-    new_regular->set_hmi_level(mobile_api::HMILevel::HMI_LIMITED);
-  } else {
-    new_regular->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
-  }
-
-  SetRegularState<false>(app, new_regular);
-}
-
-void StateController::DeactivateAppWithAudioReason(ApplicationSharedPtr app) {
-  using namespace mobile_apis;
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  DCHECK_OR_RETURN_VOID(app);
-  HmiStatePtr regular = app->RegularHmiState();
-  DCHECK_OR_RETURN_VOID(regular);
-  HmiStatePtr new_regular = utils::MakeShared<HmiState>(*regular);
-
-  if (app->is_navi()) {
     new_regular->set_hmi_level(HMILevel::HMI_LIMITED);
+    new_regular->set_audio_streaming_state(AudioStreamingState::AUDIBLE);
   } else {
-    new_regular->set_audio_streaming_state(AudioStreamingState::NOT_AUDIBLE);
     new_regular->set_hmi_level(HMILevel::HMI_BACKGROUND);
+    new_regular->set_audio_streaming_state(AudioStreamingState::NOT_AUDIBLE);
   }
 
   SetRegularState<false>(app, new_regular);
@@ -633,31 +645,13 @@ void StateController::OnAppDeactivated(
     return;
   }
 
-  if (Compare<HMILevel::eType, EQ, ONE>(
-          app->hmi_level(), HMILevel::HMI_NONE, HMILevel::HMI_BACKGROUND)) {
+  if (HMILevel::HMI_FULL != app->hmi_level()) {
     return;
   }
 
-  Common_DeactivateReason::eType deactivate_reason =
-      static_cast<Common_DeactivateReason::eType>(
-          message[strings::msg_params][hmi_request::reason].asInt());
-
-  switch (deactivate_reason) {
-    case Common_DeactivateReason::AUDIO: {
-      ForEachApplication(std::bind1st(
-          std::mem_fun(&StateController::DeactivateAppWithAudioReason), this));
-      break;
-    }
-    case Common_DeactivateReason::NAVIGATIONMAP:
-    case Common_DeactivateReason::PHONEMENU:
-    case Common_DeactivateReason::SYNCSETTINGS:
-    case Common_DeactivateReason::GENERAL: {
-      DeactivateAppWithGeneralReason(app);
-      break;
-    }
-    default:
-      break;
-  }
+  //TODO(AOleynik): Need to delete DeactivateReason and modify OnAppDeactivated
+  // when HMI will support that, otherwise won't be testable
+  DeactivateApp(app);
 }
 
 void StateController::SetAplicationManager(ApplicationManager* app_mngr) {
