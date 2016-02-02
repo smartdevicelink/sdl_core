@@ -53,17 +53,16 @@ namespace custom_str = utils::custom_string;
 uint32_t PerformInteractionRequest::pi_requests_count_ = 0;
 
 PerformInteractionRequest::PerformInteractionRequest(
-  const MessageSharedPtr& message)
-: CommandRequestImpl(message),
-  interaction_mode_(mobile_apis::InteractionMode::INVALID_ENUM),
-  ui_response_recived_(false),
-  vr_response_recived_(false),
-  ui_result_(false),
-  vr_result_(false),
-  app_pi_was_active_before_(false),
-  vr_resultCode_(mobile_apis::Result::INVALID_ENUM),
-  ui_resultCode_(mobile_apis::Result::INVALID_ENUM) {
-
+    const MessageSharedPtr& message)
+    : CommandRequestImpl(message),
+      interaction_mode_(mobile_apis::InteractionMode::INVALID_ENUM),
+      ui_response_recived_(false),
+      vr_response_recived_(false),
+      ui_result_(false),
+      vr_result_(false),
+      app_pi_was_active_before_(false),
+      vr_resultCode_(mobile_apis::Result::INVALID_ENUM),
+      ui_resultCode_(mobile_apis::Result::INVALID_ENUM) {
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
   subscribe_on_event(hmi_apis::FunctionID::VR_OnCommand);
   subscribe_on_event(hmi_apis::FunctionID::Buttons_OnButtonPress);
@@ -933,7 +932,7 @@ bool PerformInteractionRequest::CheckChoiceIDFromRequest(
   return true;
 }
 
-bool PerformInteractionRequest::HasHMIResponsesToWait() {
+const bool PerformInteractionRequest::HasHMIResponsesToWait() const {
   LOG4CXX_AUTO_TRACE(logger_);
   return !ui_response_recived_ || !vr_response_recived_;
 }

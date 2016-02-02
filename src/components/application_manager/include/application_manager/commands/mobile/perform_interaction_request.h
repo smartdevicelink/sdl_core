@@ -211,7 +211,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @return If there is request without response method returns TRUE
    * otherwise returns FALSE
    */
-  bool HasHMIResponsesToWait();
+  const bool HasHMIResponsesToWait() const;
 
   /**
    * @brief Check VR response result code, in case GENERIC_ERROR, REJECTED,
