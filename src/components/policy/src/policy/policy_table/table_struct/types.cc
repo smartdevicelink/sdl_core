@@ -26,107 +26,55 @@ namespace policy_table_interface_base {
   PolicyBase::PolicyBase()
     : CompositeType(kUninitialized) {
   }
-  PolicyBase::PolicyBase(const Strings& groups, Priority priority, HmiLevel default_hmi, bool keep_context, bool steal_focus)
+
+  PolicyBase::PolicyBase(Priority priority)
     : CompositeType(kUninitialized),
-      groups(groups),
-      priority(priority),
-      default_hmi(default_hmi),
-      keep_context(keep_context),
-      steal_focus(steal_focus) {
+      priority(priority) {
   }
+
   PolicyBase::~PolicyBase() {
   }
+
   PolicyBase::PolicyBase(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject)),
-      groups(impl::ValueMember(value__, "groups")),
-      preconsented_groups(impl::ValueMember(value__, "preconsented_groups")),
-      priority(impl::ValueMember(value__, "priority")),
-      default_hmi(impl::ValueMember(value__, "default_hmi")),
-      keep_context(impl::ValueMember(value__, "keep_context")),
-      steal_focus(impl::ValueMember(value__, "steal_focus")) {
+      priority(impl::ValueMember(value__, "priority")) {
   }
+
   Json::Value PolicyBase::ToJsonValue() const {
     Json::Value result__(Json::objectValue);
-    impl::WriteJsonField("groups", groups, &result__);
-    impl::WriteJsonField("preconsented_groups", preconsented_groups, &result__);
     impl::WriteJsonField("priority", priority, &result__);
-    impl::WriteJsonField("default_hmi", default_hmi, &result__);
-    impl::WriteJsonField("keep_context", keep_context, &result__);
-    impl::WriteJsonField("steal_focus", steal_focus, &result__);
     return result__;
   }
+
   bool PolicyBase::is_valid() const {
-    if (!groups.is_valid()) {
-      return false;
-    }
-    if (!preconsented_groups.is_valid()) {
-      return false;
-    }
     if (!priority.is_valid()) {
-      return false;
-    }
-    if (!default_hmi.is_valid()) {
-      return false;
-    }
-    if (!keep_context.is_valid()) {
-      return false;
-    }
-    if (!steal_focus.is_valid()) {
       return false;
     }
     return Validate();
   }
+
   bool PolicyBase::is_initialized() const {
     return (initialization_state__ != kUninitialized) || (!struct_empty());
   }
+
   bool PolicyBase::struct_empty() const {
-    if (groups.is_initialized()) {
-      return false;
-    }
-    if (preconsented_groups.is_initialized()) {
-      return false;
-    }
     if (priority.is_initialized()) {
-      return false;
-    }
-    if (default_hmi.is_initialized()) {
-      return false;
-    }
-    if (keep_context.is_initialized()) {
-      return false;
-    }
-    if (steal_focus.is_initialized()) {
       return false;
     }
     return true;
   }
+
   void PolicyBase::ReportErrors(rpc::ValidationReport* report__) const {
     if (struct_empty()) {
       rpc::CompositeType::ReportErrors(report__);
     }
-    if (!groups.is_valid()) {
-      groups.ReportErrors(&report__->ReportSubobject("groups"));
-    }
-    if (!preconsented_groups.is_valid()) {
-      preconsented_groups.ReportErrors(&report__->ReportSubobject("preconsented_groups"));
-    }
     if (!priority.is_valid()) {
       priority.ReportErrors(&report__->ReportSubobject("priority"));
-    }
-    if (!default_hmi.is_valid()) {
-      default_hmi.ReportErrors(&report__->ReportSubobject("default_hmi"));
-    }
-    if (!keep_context.is_valid()) {
-      keep_context.ReportErrors(&report__->ReportSubobject("keep_context"));
-    }
-    if (!steal_focus.is_valid()) {
-      steal_focus.ReportErrors(&report__->ReportSubobject("steal_focus"));
     }
   }
 
   void PolicyBase::SetPolicyTableType(PolicyTableType pt_type) {
     CompositeType::SetPolicyTableType(pt_type);
-    groups.SetPolicyTableType(pt_type);
     priority.SetPolicyTableType(pt_type);
   }
 
@@ -134,11 +82,14 @@ namespace policy_table_interface_base {
   DevicePolicy::DevicePolicy()
     : PolicyBase() {
   }
-  DevicePolicy::DevicePolicy(const Strings& groups, Priority priority, HmiLevel default_hmi, bool keep_context, bool steal_focus)
-    : PolicyBase(groups, priority, default_hmi, keep_context, steal_focus) {
+
+  DevicePolicy::DevicePolicy(Priority priority)
+    : PolicyBase(priority) {
   }
+
   DevicePolicy::~DevicePolicy() {
   }
+
   DevicePolicy::DevicePolicy(const Json::Value* value__)
     : PolicyBase(value__) {
   }
@@ -147,13 +98,16 @@ namespace policy_table_interface_base {
   ApplicationPoliciesSection::ApplicationPoliciesSection()
     : CompositeType(kUninitialized) {
   }
+
   ApplicationPoliciesSection::ApplicationPoliciesSection(const ApplicationPolicies& apps, const DevicePolicy& device)
     : CompositeType(kUninitialized),
       apps(apps),
       device(device) {
   }
+
   ApplicationPoliciesSection::~ApplicationPoliciesSection() {
   }
+
   ApplicationPoliciesSection::ApplicationPoliciesSection(const Json::Value* value__)
     : CompositeType(InitHelper(value__, &Json::Value::isObject)),
       apps(value__),
@@ -163,12 +117,14 @@ namespace policy_table_interface_base {
     // device section
     apps.erase("device");
   }
+
   Json::Value ApplicationPoliciesSection::ToJsonValue() const {
     Json::Value result__(Json::objectValue);
     result__ = apps.ToJsonValue();
     impl::WriteJsonField("device", device, &result__);
     return result__;
   }
+
   bool ApplicationPoliciesSection::is_valid() const {
     if (!device.is_valid()) {
       return false;
@@ -178,9 +134,11 @@ namespace policy_table_interface_base {
     }
     return Validate();
   }
+
   bool ApplicationPoliciesSection::is_initialized() const {
     return (initialization_state__ != kUninitialized) || (!struct_empty());
   }
+
   bool ApplicationPoliciesSection::struct_empty() const {
     if (device.is_initialized()) {
       return false;
@@ -190,6 +148,7 @@ namespace policy_table_interface_base {
     }
     return true;
   }
+
   void ApplicationPoliciesSection::ReportErrors(rpc::ValidationReport* report__) const {
     if (struct_empty()) {
       rpc::CompositeType::ReportErrors(report__);
@@ -210,15 +169,21 @@ namespace policy_table_interface_base {
 
 // ApplicationParams methods
 ApplicationParams::ApplicationParams()
-  : PolicyBase() {
+  : PolicyBase(),
+    groups() {
 }
-ApplicationParams::ApplicationParams(const Strings& groups, Priority priority, HmiLevel default_hmi, bool keep_context, bool steal_focus)
-  : PolicyBase(groups, priority, default_hmi, keep_context, steal_focus) {
+
+ApplicationParams::ApplicationParams(const Strings& groups, Priority priority)
+  : PolicyBase(priority),
+    groups(groups) {
 }
+
 ApplicationParams::~ApplicationParams() {
 }
+
 ApplicationParams::ApplicationParams(const Json::Value* value__)
   : PolicyBase(value__),
+    groups(impl::ValueMember(value__, "groups")),
     nicknames(impl::ValueMember(value__, "nicknames")),
     AppHMIType(impl::ValueMember(value__, "AppHMIType")),
     RequestType(impl::ValueMember(value__, "RequestType")),
@@ -226,8 +191,10 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     heart_beat_timeout_ms(impl::ValueMember(value__, "heart_beat_timeout_ms")),
     certificate(impl::ValueMember(value__, "certificate"), "not_specified") {
 }
+
 Json::Value ApplicationParams::ToJsonValue() const {
   Json::Value result__(PolicyBase::ToJsonValue());
+  impl::WriteJsonField("groups", groups, &result__);
   impl::WriteJsonField("nicknames", nicknames, &result__);
   impl::WriteJsonField("AppHMIType", AppHMIType, &result__);
   impl::WriteJsonField("RequestType", RequestType, &result__);
@@ -236,10 +203,14 @@ Json::Value ApplicationParams::ToJsonValue() const {
   impl::WriteJsonField("certificate", certificate, &result__);
   return result__;
 }
+
 bool ApplicationParams::is_valid() const {
   // RequestType is not validated since there is high-level validation logic,
   // which takes into account information not available here.
   if (!PolicyBase::is_valid()) {
+    return false;
+  }
+  if (!groups.is_valid()) {
     return false;
   }
   if (!nicknames.is_valid()) {
@@ -259,11 +230,16 @@ bool ApplicationParams::is_valid() const {
   }
   return Validate();
 }
+
 bool ApplicationParams::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
+
 bool ApplicationParams::struct_empty() const {
   if (!PolicyBase::is_initialized()) {
+    return false;
+  }
+  if (groups.is_initialized()) {
     return false;
   }
   if (nicknames.is_initialized()) {
@@ -286,6 +262,7 @@ bool ApplicationParams::struct_empty() const {
   }
   return true;
 }
+
 void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -296,9 +273,6 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
   if (!nicknames.is_valid()) {
     nicknames.ReportErrors(&report__->ReportSubobject("nicknames"));
   }
-  if (!preconsented_groups.is_valid()) {
-    preconsented_groups.ReportErrors(&report__->ReportSubobject("preconsented_groups"));
-  }
   if (!AppHMIType.is_valid()) {
     AppHMIType.ReportErrors(&report__->ReportSubobject("AppHMIType"));
   }
@@ -307,15 +281,6 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
   }
   if (!priority.is_valid()) {
     priority.ReportErrors(&report__->ReportSubobject("priority"));
-  }
-  if (!default_hmi.is_valid()) {
-    default_hmi.ReportErrors(&report__->ReportSubobject("default_hmi"));
-  }
-  if (!keep_context.is_valid()) {
-    keep_context.ReportErrors(&report__->ReportSubobject("keep_context"));
-  }
-  if (!steal_focus.is_valid()) {
-    steal_focus.ReportErrors(&report__->ReportSubobject("steal_focus"));
   }
   if (!memory_kb.is_valid()) {
     memory_kb.ReportErrors(&report__->ReportSubobject("memory_kb"));
@@ -330,12 +295,14 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
 
 void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
   PolicyBase::SetPolicyTableType(pt_type);
+  groups.SetPolicyTableType(pt_type);
   AppHMIType.SetPolicyTableType(pt_type);
   RequestType.SetPolicyTableType(pt_type);
   memory_kb.SetPolicyTableType(pt_type);
   heart_beat_timeout_ms.SetPolicyTableType(pt_type);
   certificate.SetPolicyTableType(pt_type);
 }
+
 // RpcParameters methods
 RpcParameters::RpcParameters()
   : CompositeType(kUninitialized) {
