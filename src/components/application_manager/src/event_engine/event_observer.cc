@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/event_engine/event.h"
 #include "application_manager/event_engine/event_observer.h"
+#include "application_manager/event_engine/event.h"
 
 namespace application_manager {
 namespace event_engine {
@@ -59,5 +59,5 @@ void EventObserver::unsubscribe_from_all_events() {
   EventDispatcherImpl::instance()->remove_observer(this);
 }
 
-}
-}
+} // namespace event_engine
+} // namespace aplication_manager

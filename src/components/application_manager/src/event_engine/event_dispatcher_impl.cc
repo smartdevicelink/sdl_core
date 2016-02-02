@@ -30,9 +30,9 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "application_manager/event_engine/event_dispatcher_impl.h"
 #include "interfaces/HMI_API.h"
 #include "application_manager/event_engine/event_observer.h"
-#include "application_manager/event_engine/event_dispatcher_impl.h"
 #include <algorithm>
 
 namespace application_manager {
@@ -62,15 +62,11 @@ void EventDispatcherImpl::raise_event(const Event& event) {
 
   // Call observers
   EventObserver* temp;
-  while (observers_.size() > 0) {
-    {
-      AutoLock auto_lock(observer_lock_);
-      if (!observers_.empty()) {
-        temp = *observers_.begin();
-        observers_.erase(observers_.begin());
-        temp->on_event(event);
-      }
-    }
+  while (!observers_.empty()) {
+    AutoLock auto_lock(observer_lock_);
+    temp = *observers_.begin();
+    observers_.erase(observers_.begin());
+    temp->on_event(event);
   }
 }
 
@@ -100,9 +96,10 @@ void EventDispatcherImpl::remove_observer(const Event::EventID& event_id,
 
   for (; observers_event_[event_id].end() != it; ++it) {
     ObserverVector& obs_vec = it->second;
+    const ObserverVector::iterator obs_vec_it = obs_vec.end();
     obs_vec.erase(
-        std::remove_if(obs_vec.begin(), obs_vec.end(), IdCheckFunctor(observer->id())),
-        obs_vec.end());
+        std::remove_if(obs_vec.begin(), obs_vec_it, IdCheckFunctor(observer->id())),
+        obs_vec_it);
   }
 }
 
@@ -126,5 +123,4 @@ void EventDispatcherImpl::remove_observer_from_vector(
 }
 
 }  // namespace event_engine
-
 }  // namespace application_manager

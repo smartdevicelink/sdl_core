@@ -85,7 +85,7 @@ class EventDispatcher {
   };
 };
 
-}
-}
+} // namespace event_engine
+} // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_DISPATCHER_H_
