@@ -52,10 +52,37 @@ namespace protocol_handler_test {
 #define NEW_SESSION_ID 0u
 #define SESSION_START_REJECT 0u
 
-using namespace ::protocol_handler;
-using namespace ::transport_manager;
+// using namespace ::protocol_handler;
+namespace ph = protocol_handler;
+namespace tm = transport_manager;
 // For TM states
-using ::transport_manager::TransportManagerListener;
+using tm::TransportManagerListener;
+using tm::E_SUCCESS;
+
+using ph::ServiceType;
+using ph::RawMessage;
+using ph::RawMessagePtr;
+using ph::PROTECTION_ON;
+using ph::PROTECTION_OFF;
+using ph::PROTOCOL_VERSION_1;
+using ph::PROTOCOL_VERSION_3;
+using ph::PROTOCOL_VERSION_MAX;
+using ph::FRAME_TYPE_CONTROL;
+using ph::FRAME_TYPE_SINGLE;
+using ph::FRAME_TYPE_MAX_VALUE;
+using ph::FRAME_DATA_START_SERVICE;
+using ph::FRAME_DATA_START_SERVICE_ACK;
+using ph::FRAME_DATA_END_SERVICE;
+using ph::FRAME_DATA_HEART_BEAT;
+using ph::FRAME_DATA_HEART_BEAT_ACK;
+using ph::FRAME_DATA_SINGLE;
+using ph::kRpc;
+using ph::kControl;
+using ph::kAudio;
+using ph::kMobileNav;
+using ph::kBulk;
+using ph::kInvalidServiceType;
+
 using ::testing::Return;
 using ::testing::ReturnNull;
 using ::testing::AnyOf;
@@ -63,6 +90,7 @@ using ::testing::Ge;
 using ::testing::Le;
 using ::testing::_;
 using ::testing::Invoke;
+using ::testing::DoAll;
 using ::testing::SetArgReferee;
 using ::testing::SetArgPointee;
 
@@ -75,13 +103,13 @@ class ProtocolHandlerImplTest : public ::testing::Test {
                                const size_t malformd_max_messages = 0u,
                                const int32_t multiframe_waiting_timeout = 0) {
     protocol_handler_impl.reset(
-        new ProtocolHandlerImpl(&transport_manager_mock,
-                                period_msec,
-                                max_messages,
-                                malformed_message_filtering,
-                                malformd_period_msec,
-                                malformd_max_messages,
-                                multiframe_waiting_timeout));
+        new ph::ProtocolHandlerImpl(&transport_manager_mock,
+                                    period_msec,
+                                    max_messages,
+                                    malformed_message_filtering,
+                                    malformd_period_msec,
+                                    malformd_max_messages,
+                                    multiframe_waiting_timeout));
     protocol_handler_impl->set_session_observer(&session_observer_mock);
     tm_listener = protocol_handler_impl.get();
   }
@@ -110,10 +138,10 @@ class ProtocolHandlerImplTest : public ::testing::Test {
 
   // Emulate connection establish
   void AddConnection() {
-    tm_listener->OnConnectionEstablished(DeviceInfo(DeviceHandle(1u),
-                                                    std::string("mac"),
-                                                    std::string("name"),
-                                                    std::string("BTMAC")),
+    tm_listener->OnConnectionEstablished(tm::DeviceInfo(tm::DeviceHandle(1u),
+                                                        std::string("mac"),
+                                                        std::string("name"),
+                                                        std::string("BTMAC")),
                                          connection_id);
   }
   void AddSession() {
@@ -164,16 +192,16 @@ class ProtocolHandlerImplTest : public ::testing::Test {
                      uint32_t messageID,
                      const uint8_t* data = 0) {
     // Create packet
-    const ProtocolPacket packet(connection_id,
-                                version,
-                                protection,
-                                frameType,
-                                serviceType,
-                                frameData,
-                                sessionId,
-                                dataSize,
-                                messageID,
-                                data);
+    const ph::ProtocolPacket packet(connection_id,
+                                    version,
+                                    protection,
+                                    frameType,
+                                    serviceType,
+                                    frameData,
+                                    sessionId,
+                                    dataSize,
+                                    messageID,
+                                    data);
     // Emulate resive packet from transoprt manager
     tm_listener->OnTMMessageReceived(packet.serializePacket());
   }
@@ -195,10 +223,10 @@ class ProtocolHandlerImplTest : public ::testing::Test {
                   data);
   }
 
-  ::utils::SharedPtr<ProtocolHandlerImpl> protocol_handler_impl;
+  ::utils::SharedPtr<ph::ProtocolHandlerImpl> protocol_handler_impl;
   TransportManagerListener* tm_listener;
   // Uniq connection
-  ::transport_manager::ConnectionUID connection_id;
+  tm::ConnectionUID connection_id;
   // id of established session
   uint8_t session_id;
   // uniq id as connection_id and session_id in one
@@ -391,8 +419,8 @@ TEST_F(ProtocolHandlerImplTest, EndSession_SessionObserverReject) {
 
   // expect send NAck
   EXPECT_CALL(transport_manager_mock,
-              SendMessageToDevice(
-                  ControlMessage(FRAME_DATA_END_SERVICE_NACK, PROTECTION_OFF)))
+              SendMessageToDevice(ControlMessage(
+                  ph::FRAME_DATA_END_SERVICE_NACK, PROTECTION_OFF)))
       .WillOnce(Return(E_SUCCESS));
 
   SendControlMessage(
@@ -413,8 +441,8 @@ TEST_F(ProtocolHandlerImplTest, EndSession_Success) {
 
   // expect send Ack
   EXPECT_CALL(transport_manager_mock,
-              SendMessageToDevice(
-                  ControlMessage(FRAME_DATA_END_SERVICE_ACK, PROTECTION_OFF)))
+              SendMessageToDevice(ControlMessage(ph::FRAME_DATA_END_SERVICE_ACK,
+                                                 PROTECTION_OFF)))
       .WillOnce(Return(E_SUCCESS));
 
   SendControlMessage(
@@ -1173,8 +1201,7 @@ TEST_F(ProtocolHandlerImplTest,
                                                   kControl)))
       .WillOnce(Return(E_SUCCESS));
   // Act
-  protocol_handler_impl->SendEndService(
-      connection_id, session_id, SERVICE_TYPE_CONTROL);
+  protocol_handler_impl->SendEndService(connection_id, session_id, kControl);
 }
 
 TEST_F(ProtocolHandlerImplTest, SendHeartBeat_NoConnection_NotSended) {
@@ -1211,8 +1238,8 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_Succesful) {
   // Expect double check connection and protocol version with
   // ProtocolVersionUsed
   EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(connection_id, _, _))
-      .WillOnce(DoAll(SetArgReferee<2>(PROTOCOL_VERSION_3), Return(true)))
-      .WillOnce(DoAll(SetArgReferee<2>(PROTOCOL_VERSION_3), Return(true)));
+      .WillRepeatedly(
+          DoAll(SetArgReferee<2>(PROTOCOL_VERSION_3), Return(true)));
   // Expect send HeartBeatAck
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONTROL,
@@ -1232,8 +1259,9 @@ TEST_F(ProtocolHandlerImplTest,
   // Expect two checks of connection and protocol version with
   // ProtocolVersionUsed
   EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(connection_id, _, _))
-      .WillOnce(DoAll(SetArgReferee<2>(PROTOCOL_VERSION_1), Return(true)))
-      .WillOnce(DoAll(SetArgReferee<2>(PROTOCOL_VERSION_2), Return(true)));
+      .Times(2)
+      .WillRepeatedly(
+          DoAll(SetArgReferee<2>(PROTOCOL_VERSION_1), Return(true)));
   // Expect not send HeartBeatAck
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONTROL,
@@ -1312,7 +1340,7 @@ TEST_F(ProtocolHandlerImplTest, SendMessageToMobileApp_SendMultiframeMessage) {
   // Arrange
   AddSession();
   const bool is_final = true;
-  const uint32_t total_data_size = MAXIMUM_FRAME_DATA_V2_SIZE * 2;
+  const uint32_t total_data_size = ph::MAXIMUM_FRAME_DATA_V2_SIZE * 2;
   std::vector<uint8_t> data(total_data_size);
   const uint8_t first_consecutive_frame = 0x01;
   RawMessagePtr message = utils::MakeShared<RawMessage>(
@@ -1331,22 +1359,23 @@ TEST_F(ProtocolHandlerImplTest, SendMessageToMobileApp_SendMultiframeMessage) {
   AddSecurityManager();
 #endif  // ENABLE_SECURITY
   // Expect sending message frame by frame to mobile
-  EXPECT_CALL(transport_manager_mock,
-              SendMessageToDevice(ExpectedMessage(
-                  FRAME_TYPE_FIRST, FRAME_DATA_FIRST, PROTECTION_OFF, kBulk)))
+  EXPECT_CALL(
+      transport_manager_mock,
+      SendMessageToDevice(ExpectedMessage(
+          ph::FRAME_TYPE_FIRST, ph::FRAME_DATA_FIRST, PROTECTION_OFF, kBulk)))
       .WillOnce(Return(E_SUCCESS));
   EXPECT_CALL(transport_manager_mock,
-              SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONSECUTIVE,
+              SendMessageToDevice(ExpectedMessage(ph::FRAME_TYPE_CONSECUTIVE,
                                                   first_consecutive_frame,
                                                   PROTECTION_OFF,
                                                   kBulk)))
       .WillOnce(Return(E_SUCCESS));
-  EXPECT_CALL(transport_manager_mock,
-              SendMessageToDevice(ExpectedMessage(FRAME_TYPE_CONSECUTIVE,
-                                                  FRAME_DATA_LAST_CONSECUTIVE,
-                                                  PROTECTION_OFF,
-                                                  kBulk)))
-      .WillOnce(Return(E_SUCCESS));
+  EXPECT_CALL(
+      transport_manager_mock,
+      SendMessageToDevice(ExpectedMessage(ph::FRAME_TYPE_CONSECUTIVE,
+                                          ph::FRAME_DATA_LAST_CONSECUTIVE,
+                                          PROTECTION_OFF,
+                                          kBulk))).WillOnce(Return(E_SUCCESS));
   // Act
   protocol_handler_impl->SendMessageToMobileApp(message, is_final);
 }

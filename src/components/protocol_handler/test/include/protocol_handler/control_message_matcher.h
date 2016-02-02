@@ -42,7 +42,8 @@ namespace test {
 namespace components {
 namespace protocol_handler_test {
 
-using namespace ::protocol_handler;
+namespace ph = protocol_handler;
+using ph::FRAME_DATA_START_SERVICE_NACK;
 
 /*
  * Matcher for checking RawMessage with ControlMessage
@@ -60,15 +61,15 @@ MATCHER_P2(ControlMessage,
     *result_listener << "NACK message with PROTECYION_ON flag";
     return false;
   }
-  const ::protocol_handler::RawMessagePtr message = arg;
-  ::protocol_handler::ProtocolPacket packet(message->connection_key());
-  const protocol_handler::RESULT_CODE result =
+  const ph::RawMessagePtr message = arg;
+  ph::ProtocolPacket packet(message->connection_key());
+  const ph::RESULT_CODE result =
       packet.deserializePacket(message->data(), message->data_size());
-  if (result != protocol_handler::RESULT_OK) {
+  if (result != ph::RESULT_OK) {
     *result_listener << "Error while message deserialization.";
     return false;
   }
-  if (::protocol_handler::FRAME_TYPE_CONTROL != packet.frame_type()) {
+  if (ph::FRAME_TYPE_CONTROL != packet.frame_type()) {
     *result_listener << "Is not control message";
     return false;
   }
@@ -99,16 +100,16 @@ MATCHER_P4(ControlMessage,
     *result_listener << "NACK message with PROTECYION_ON flag";
     return false;
   }
-  const ::protocol_handler::RawMessagePtr message = arg;
-  ::protocol_handler::ProtocolPacket packet(message->connection_key());
-  const protocol_handler::RESULT_CODE result =
+  const ph::RawMessagePtr message = arg;
+  ph::ProtocolPacket packet(message->connection_key());
+  const ph::RESULT_CODE result =
       packet.deserializePacket(message->data(), message->data_size());
-  if (result != protocol_handler::RESULT_OK) {
+  if (result != ph::RESULT_OK) {
     *result_listener << "Error while message deserialization.";
     return false;
   }
 
-  if (::protocol_handler::FRAME_TYPE_CONTROL != packet.frame_type()) {
+  if (ph::FRAME_TYPE_CONTROL != packet.frame_type()) {
     *result_listener << "Is not control message";
     return false;
   }
@@ -153,17 +154,17 @@ MATCHER_P4(ExpectedMessage,
            (std::string(ExpectedEncryption ? "Protected" : "Unprotected") +
             " message ")) {
   // Nack shall be always with flag protected off
-  if (ExpectedFrameType == FRAME_TYPE_CONTROL &&
+  if (ExpectedFrameType == ph::FRAME_TYPE_CONTROL &&
       ExpectedFrameData == FRAME_DATA_START_SERVICE_NACK &&
       ExpectedEncryption) {
     *result_listener << "NACK message with PROTECYION_ON flag";
     return false;
   }
-  const ::protocol_handler::RawMessagePtr message = arg;
-  ::protocol_handler::ProtocolPacket packet(message->connection_key());
-  const protocol_handler::RESULT_CODE result =
+  const ph::RawMessagePtr message = arg;
+  ph::ProtocolPacket packet(message->connection_key());
+  const ph::RESULT_CODE result =
       packet.deserializePacket(message->data(), message->data_size());
-  if (result != protocol_handler::RESULT_OK) {
+  if (result != ph::RESULT_OK) {
     *result_listener << "Error while message deserialization.";
     return false;
   }
