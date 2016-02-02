@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -651,8 +651,16 @@ TEST_F(PolicyManagerImplTest2, NextRetryTimeout_ExpectTimeoutsFromPT) {
         root["policy_table"]["module_config"]["seconds_between_retries"];
     uint32_t size = seconds_between_retries.size();
     CreateLocalPT("sdl_preloaded_pt.json");
-    for (uint32_t i = 0; i < size; ++i) {
-      EXPECT_EQ(seconds_between_retries[i], manager->NextRetryTimeout());
+
+    uint32_t waiting_timeout = 0u;
+
+    for (uint32_t retry_number = 0u; retry_number < size; ++retry_number) {
+      waiting_timeout += seconds_between_retries[retry_number].asInt();
+      waiting_timeout += manager->TimeoutExchange();
+
+      // it's in miliseconds
+      EXPECT_EQ(waiting_timeout * date_time::DateTime::MILLISECONDS_IN_SECOND,
+                manager->NextRetryTimeout());
     }
   }
 }

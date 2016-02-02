@@ -1,4 +1,4 @@
-/* Copyright (c) 2014, Ford Motor Company
+/* Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,10 +69,7 @@ class MockPolicyListener : public PolicyListener {
                void(const std::string& device_id, bool is_allowed));
   MOCK_METHOD1(OnUpdateHMIAppType, void(std::map<std::string, StringArray>));
   MOCK_METHOD1(GetAvailableApps, void(std::queue<std::string>&));
-  MOCK_METHOD3(OnSnapshotCreated,
-               void(const BinaryMessage& pt_string,
-                    const std::vector<int>& retry_seconds,
-                    int timeout_exceed));
+  MOCK_METHOD1(OnSnapshotCreated, void(const BinaryMessage& pt_string));
   MOCK_METHOD0(CanUpdate, bool());
   MOCK_METHOD1(OnCertificateUpdated, void(const std::string&));
   MOCK_CONST_METHOD2(SendOnAppPermissionsChanged,

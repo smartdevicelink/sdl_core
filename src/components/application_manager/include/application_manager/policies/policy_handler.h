@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <cstdint>
 #include "policy/policy_manager.h"
 #include "application_manager/policies/policy_event_observer.h"
 #include "application_manager/policies/delegates/statistics_delegate.h"
@@ -84,9 +85,7 @@ class PolicyHandler
   virtual void OnPermissionsUpdated(const std::string& policy_app_id,
                                     const Permissions& permissions);
 
-  virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
-                                 const std::vector<int>& retry_delay_seconds,
-                                 int timeout_exchange);
+  void OnSnapshotCreated(const BinaryMessage& pt_string) OVERRIDE;
 
   bool GetPriority(const std::string& policy_app_id, std::string* priority);
   void CheckPermissions(const PTString& app_id,
@@ -107,7 +106,7 @@ class PolicyHandler
 
   std::string GetLockScreenIconUrl() const;
   void ResetRetrySequence();
-  int NextRetryTimeout();
+  uint32_t NextRetryTimeout();
   int TimeoutExchange();
   void OnExceededTimeout();
   void OnSystemReady();
@@ -244,7 +243,7 @@ class PolicyHandler
   /**
    * @brief Send request to HMI to get update on system parameters
    */
-  virtual void OnSystemInfoUpdateRequired();
+  void OnSystemInfoUpdateRequired() OVERRIDE;
 
   /**
    * @brief Sends GetVehicleData request in case when Vechicle info is ready.
@@ -283,19 +282,19 @@ class PolicyHandler
 
   custom_str::CustomString GetAppName(const std::string& policy_app_id);
 
-  virtual void OnUpdateHMIAppType(
-      std::map<std::string, StringArray> app_hmi_types);
+  void OnUpdateHMIAppType(
+      std::map<std::string, StringArray> app_hmi_types) OVERRIDE;
 
-  virtual void OnCertificateUpdated(const std::string& certificate_data);
+  void OnCertificateUpdated(const std::string& certificate_data) OVERRIDE;
 
-  virtual bool CanUpdate();
+  bool CanUpdate() OVERRIDE;
 
-  virtual void OnDeviceConsentChanged(const std::string& device_id,
-                                      bool is_allowed);
+  void OnDeviceConsentChanged(const std::string& device_id,
+                              bool is_allowed) OVERRIDE;
 
   virtual void OnPTExchangeNeeded();
 
-  virtual void GetAvailableApps(std::queue<std::string>& apps);
+  void GetAvailableApps(std::queue<std::string>& apps) OVERRIDE;
 
   /**
    * @brief Allows to add new or update existed application during

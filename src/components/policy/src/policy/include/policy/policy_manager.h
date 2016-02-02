@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_H_
 
 #include <vector>
+#include <cstdint>
 
 #include "policy/policy_types.h"
 #include "policy/policy_listener.h"
@@ -90,7 +91,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     /**
      * @brief PTU is needed, for this PTS has to be formed and sent.
      */
-    virtual void RequestPTUpdate() = 0;
+    virtual bool RequestPTUpdate() = 0;
 
     /**
      * @brief Check if specified RPC for specified application
@@ -144,10 +145,10 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
     /**
      * Gets timeout to wait before next retry updating PT
-     * If timeout is less or equal to zero then the retry sequence is not need.
+     * If timeout is equal to zero then the retry sequence is not need.
      * @return timeout in seconds
      */
-    virtual int NextRetryTimeout() = 0;
+    virtual uint32_t NextRetryTimeout() = 0;
 
     /**
      * Gets timeout to wait until receive response
