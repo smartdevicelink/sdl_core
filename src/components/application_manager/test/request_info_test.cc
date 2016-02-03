@@ -432,10 +432,10 @@ TEST_F(RequestInfoTest, EndTimeisExpired) {
   TimevalStruct time = date_time::DateTime::getCurrentTime();
 
   TimevalStruct not_expired = date_time::DateTime::getCurrentTime();
-  not_expired.tv_sec = std::numeric_limits<time_t>::min();
+  not_expired.tv_usec = std::numeric_limits<time_t>::min();
 
   TimevalStruct expired = date_time::DateTime::getCurrentTime();
-  expired.tv_sec = std::numeric_limits<time_t>::max();
+  expired.tv_usec = std::numeric_limits<time_t>::max();
 
   utils::SharedPtr<TestRequestInfo> request =
       CreateTestInfo(mobile_connection_key1_,
