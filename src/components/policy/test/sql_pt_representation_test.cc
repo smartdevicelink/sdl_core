@@ -1439,12 +1439,7 @@ TEST_F(SQLPTRepresentationTest, Save_SetPolicyTableThenSave_ExpectSavedToPT) {
   GatherApplicationPoliciesSection(&policies);
   // Check ApplicationPoliciesSection
   EXPECT_EQ(0u, policies.apps.size());
-  EXPECT_EQ(0u, (policies.device.preconsented_groups)->size());
-  EXPECT_EQ(0u, policies.device.groups.size());
   EXPECT_EQ(policy_table::Priority::P_EMERGENCY, policies.device.priority);
-  EXPECT_EQ(policy_table::HmiLevel::HL_BACKGROUND, policies.device.default_hmi);
-  EXPECT_FALSE(policies.device.keep_context);
-  EXPECT_FALSE(policies.device.steal_focus);
 
   policy_table::ModuleConfig config;
   GatherModuleConfig(&config);
@@ -1519,16 +1514,10 @@ TEST_F(SQLPTRepresentationTest, Save_SetPolicyTableThenSave_ExpectSavedToPT) {
   CheckAppPoliciesSection(policies, apps_size,
                           policy_table::Priority::P_EMERGENCY, "device", 0u, 0u,
                           groups);
-  EXPECT_EQ(0u, (policies.device.preconsented_groups)->size());
-  EXPECT_EQ(0u, policies.device.groups.size());
-  EXPECT_EQ(policy_table::HmiLevel::HL_BACKGROUND, policies.device.default_hmi);
-  EXPECT_FALSE(policies.device.keep_context);
-  EXPECT_FALSE(policies.device.steal_focus);
 
   CheckAppGroups("1234", groups);
   CheckAppGroups("default", groups);
   CheckAppGroups("pre_DataConsent", groups);
-  CheckAppGroups("device", groups);
 
   GatherModuleConfig(&config);
   // Check Module Config section

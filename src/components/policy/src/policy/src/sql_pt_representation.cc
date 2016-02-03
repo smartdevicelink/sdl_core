@@ -948,10 +948,6 @@ bool policy::SQLPTRepresentation::SaveDevicePolicy(
     return false;
   }
 
-  if (!SaveAppGroup(kDeviceId, device.groups)) {
-    return false;
-  }
-
   return true;
 }
 
