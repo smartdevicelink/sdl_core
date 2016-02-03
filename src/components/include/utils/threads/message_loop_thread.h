@@ -41,6 +41,7 @@
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/shared_ptr.h"
+#include "utils/lock.h"
 
 namespace threads {
 
@@ -90,12 +91,19 @@ class MessageLoopThread {
   // Added for utils/test/auto_trace_test.cc
   size_t GetMessageQueueSize() const;
 
+  /*
+   * Wait until message queue will be empty
+   */
+  void WaitDumpQueue();
+
  private:
   /*
    * Implementation of ThreadDelegate that actually pumps the queue and is
    * able to correctly shut it down
    */
-  struct LoopThreadDelegate : public threads::ThreadDelegate {
+  class LoopThreadDelegate : public threads::ThreadDelegate {
+
+   public:
     LoopThreadDelegate(MessageQueue<Message, Queue>* message_queue,
                        Handler* handler);
 
@@ -156,6 +164,11 @@ void MessageLoopThread<Q>::Shutdown() {
   thread_->join();
 }
 
+template<class Q>
+void MessageLoopThread<Q>::WaitDumpQueue() {
+  message_queue_.WaitUntilEmpty();
+}
+
 //////////
 template<class Q>
 MessageLoopThread<Q>::LoopThreadDelegate::LoopThreadDelegate(
@@ -192,5 +205,6 @@ void MessageLoopThread<Q>::LoopThreadDelegate::DrainQue() {
     }
   }
 }
+
 }  // namespace threads
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_THREADS_MESSAGE_LOOP_THREAD_H_

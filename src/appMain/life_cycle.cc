@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2014, Ford Motor Company
+* Copyright (c) 2016, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -362,46 +362,34 @@ bool LifeCycle::InitMessageSystem() {
 #endif  // MQUEUE_HMIADAPTER
 
 namespace {
-pthread_t main_thread;
-void sig_handler(int sig) {
-  switch (sig) {
-    case SIGINT:
-      LOG4CXX_DEBUG(logger_, "SIGINT signal has been caught");
-      break;
-    case SIGTERM:
-      LOG4CXX_DEBUG(logger_, "SIGTERM signal has been caught");
-      break;
-    case SIGSEGV:
-      LOG4CXX_DEBUG(logger_, "SIGSEGV signal has been caught");
-      break;
-    default:
-      LOG4CXX_DEBUG(logger_, "Unexpected signal has been caught");
-      break;
-  }
-  /*
-   * Resend signal to the main thread in case it was
-   * caught by another thread
-   */
-  if (pthread_equal(pthread_self(), main_thread) == 0) {
-    LOG4CXX_DEBUG(logger_, "Resend signal to the main thread");
-    if (pthread_kill(main_thread, sig) != 0) {
-      LOG4CXX_FATAL(logger_, "Send signal to thread error");
+  void sig_handler(int sig) {
+    switch(sig) {
+      case SIGINT:
+        LOG4CXX_DEBUG(logger_, "SIGINT signal has been caught");
+        break;
+      case SIGTERM:
+        LOG4CXX_DEBUG(logger_, "SIGTERM signal has been caught");
+        break;
+      case SIGSEGV:
+        LOG4CXX_DEBUG(logger_, "SIGSEGV signal has been caught");
+        FLUSH_LOGGER();
+        // exit need to prevent endless sending SIGSEGV
+        // http://stackoverflow.com/questions/2663456/how-to-write-a-signal-handler-to-catch-sigsegv
+        abort();
+      default:
+        LOG4CXX_DEBUG(logger_, "Unexpected signal has been caught");
+        exit(EXIT_FAILURE);
     }
   }
-}
 }  //  namespace
 
 void LifeCycle::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  main_thread = pthread_self();
-  // First, register signal handlers
-  if (!::utils::SubscribeToInterruptSignal(&sig_handler) ||
-      !::utils::SubscribeToTerminateSignal(&sig_handler) ||
-      !::utils::SubscribeToFaultSignal(&sig_handler)) {
-    LOG4CXX_FATAL(logger_, "Subscribe to system signals error");
+  // Register signal handlers and wait sys signals
+  // from OS
+  if (!utils::WaitTerminationSignals(&sig_handler)) {
+      LOG4CXX_FATAL(logger_, "Fail to catch system signal!");
   }
-  // Now wait for any signal
-  pause();
 }
 
 void LifeCycle::StopComponents() {

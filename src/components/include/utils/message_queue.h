@@ -96,6 +96,12 @@ template<typename T, class Q = std::queue<T> > class MessageQueue {
     void wait();
 
     /**
+      * \brief waitUntilEmpty message queue
+      * Wait until message queue is empty
+      */
+    void WaitUntilEmpty();
+
+    /**
      * \brief Shutdown the queue.
      * This leads to waking up everyone waiting on the queue
      * Queue being shut down can be drained ( with pop() )
@@ -137,6 +143,13 @@ template<typename T, class Q> void MessageQueue<T, Q>::wait() {
   }
 }
 
+template<typename T, class Q> void MessageQueue<T, Q>::WaitUntilEmpty() {
+  sync_primitives::AutoLock auto_lock(queue_lock_);
+  while ((!shutting_down_) && !queue_.empty()) {
+    queue_new_items_.Wait(auto_lock);
+  }
+}
+
 template<typename T, class Q> size_t MessageQueue<T, Q>::size() const {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   return queue_.size();
@@ -169,6 +182,7 @@ template<typename T, class Q> bool MessageQueue<T, Q>::pop(T& element) {
   }
   element = queue_.front();
   queue_.pop();
+  queue_new_items_.NotifyOne();
   return true;
 }
 

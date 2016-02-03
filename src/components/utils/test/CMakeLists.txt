@@ -45,7 +45,6 @@ set(testSources
   file_system_test.cc
   date_time_test.cc
   system_test.cc
-  signals_linux_test.cc
   thread_validator_test.cc
   conditional_variable_test.cc
   message_queue_test.cc

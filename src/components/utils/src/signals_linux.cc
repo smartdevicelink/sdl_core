@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,33 +35,49 @@
 
 #include "utils/signals.h"
 
-namespace utils {
+bool utils::UnsibscribeFromTermination() {
+  // Disable some system signals receiving in thread
+  // by blocking those signals
+  // (system signals processes only in the main thread)
+  // Mustn't block all signals!
+  // See "Advanced Programming in the UNIX Environment, 3rd Edition"
+  // (http://poincare.matf.bg.ac.rs/~ivana//courses/ps/sistemi_knjige/pomocno/apue.pdf,
+  // "12.8. Threads and Signals".
+  sigset_t signal_set;
+  sigemptyset(&signal_set);
+  sigaddset(&signal_set, SIGINT);
+  sigaddset(&signal_set, SIGTERM);
 
-bool SubscribeToInterruptSignal(sighandler_t func) {
+  return !pthread_sigmask(SIG_BLOCK, &signal_set, NULL);
+}
+
+namespace {
+bool CatchSIGSEGV(sighandler_t handler) {
   struct sigaction act;
-  act.sa_handler = func;
+
+  act.sa_handler = handler;
   sigemptyset(&act.sa_mask);
   act.sa_flags = 0;
 
-  return sigaction(SIGINT, &act, NULL) == 0;
+  return !sigaction(SIGSEGV, &act, NULL);
 }
+}  // namespace
 
-bool SubscribeToTerminateSignal(sighandler_t func) {
-  struct sigaction act;
-  act.sa_handler = func;
-  sigemptyset(&act.sa_mask);
-  act.sa_flags = 0;
+bool utils::WaitTerminationSignals(sighandler_t sig_handler) {
+  sigset_t signal_set;
+  int sig = -1;
 
-  return sigaction(SIGTERM, &act, NULL) == 0;
+  sigemptyset(&signal_set);
+  sigaddset(&signal_set, SIGINT);
+  sigaddset(&signal_set, SIGTERM);
+
+  if (!CatchSIGSEGV(sig_handler)) {
+    return false;
+  }
+
+  if (!sigwait(&signal_set, &sig)) {
+    sig_handler(sig);
+    return true;
+  }
+  return false;
 }
-
-bool SubscribeToFaultSignal(sighandler_t func) {
-  struct sigaction act;
-  act.sa_handler = func;
-  sigemptyset(&act.sa_mask);
-  act.sa_flags = 0;
-
-  return sigaction(SIGSEGV, &act, NULL) == 0;
-}
-
-}  //  namespace utils
