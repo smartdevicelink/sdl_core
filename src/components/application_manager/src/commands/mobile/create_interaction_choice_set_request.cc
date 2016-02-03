@@ -122,10 +122,10 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
 
   std::set<uint32_t> choice_id_set;
 
-  const smart_objects::SmartArray* new_choice_set_array =
+  const SmartArray* new_choice_set_array =
       (*message_)[strings::msg_params][strings::choice_set].asArray();
 
-  smart_objects::SmartArray::const_iterator it_array =
+  SmartArray::const_iterator it_array =
       new_choice_set_array->begin();
 
   const SmartArray* choice_set =
@@ -144,10 +144,10 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
     }
 
     // Check along with VR commands in other choices in the new set
-    smart_objects::SmartArray::const_iterator it_same_array =
+    SmartArray::const_iterator it_same_array =
       new_choice_set_array->begin();
 
-    smart_objects::SmartArray::const_iterator it_same_array_end =
+    SmartArray::const_iterator it_same_array_end =
       new_choice_set_array->end();
 
     for (; it_same_array != it_same_array_end; ++it_same_array) {

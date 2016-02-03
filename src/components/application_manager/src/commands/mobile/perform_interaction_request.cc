@@ -976,10 +976,10 @@ void PerformInteractionRequest::SendBothModeResponse(
     result = false;
   }
 
-  const bool is_success_code = (SUCCESS != perform_interaction_result_code ||
+  const bool is_error_code = (SUCCESS != perform_interaction_result_code ||
       WARNINGS != perform_interaction_result_code);
 
-  if (vr_resultCode_ == ui_resultCode_ && is_success_code) {
+  if (vr_resultCode_ == ui_resultCode_ && is_error_code) {
     result = false;
   }
 
