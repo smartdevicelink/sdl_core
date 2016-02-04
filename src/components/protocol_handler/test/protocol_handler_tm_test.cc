@@ -52,7 +52,6 @@ namespace protocol_handler_test {
 #define NEW_SESSION_ID 0u
 #define SESSION_START_REJECT 0u
 
-// using namespace ::protocol_handler;
 namespace ph = protocol_handler;
 namespace tm = transport_manager;
 // For TM states
@@ -93,6 +92,8 @@ using ::testing::Invoke;
 using ::testing::DoAll;
 using ::testing::SetArgReferee;
 using ::testing::SetArgPointee;
+
+typedef std::vector<uint8_t> UCharDataVector;
 
 class ProtocolHandlerImplTest : public ::testing::Test {
  protected:
@@ -232,7 +233,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   // uniq id as connection_id and session_id in one
   uint32_t connection_key;
   uint32_t message_id;
-  std::vector<uint8_t> some_data;
+  UCharDataVector some_data;
   // Strict mocks (same as all methods EXPECT_CALL().Times(0))
   testing::StrictMock<transport_manager_test::MockTransportManager>
       transport_manager_mock;
@@ -1238,6 +1239,7 @@ TEST_F(ProtocolHandlerImplTest, SendHeartBeatAck_Succesful) {
   // Expect double check connection and protocol version with
   // ProtocolVersionUsed
   EXPECT_CALL(session_observer_mock, ProtocolVersionUsed(connection_id, _, _))
+      .Times(2)
       .WillRepeatedly(
           DoAll(SetArgReferee<2>(PROTOCOL_VERSION_3), Return(true)));
   // Expect send HeartBeatAck
@@ -1281,7 +1283,7 @@ TEST_F(ProtocolHandlerImplTest,
   AddSession();
   const bool is_final = true;
   const uint32_t total_data_size = 1;
-  std::vector<uint8_t> data(total_data_size);
+  UCharDataVector data(total_data_size);
   RawMessagePtr message = utils::MakeShared<RawMessage>(
       connection_key, PROTOCOL_VERSION_3, &data[0], total_data_size, kControl);
   // Expect getting pair from key from session observer
@@ -1311,7 +1313,7 @@ TEST_F(ProtocolHandlerImplTest,
   AddSession();
   const bool is_final = true;
   const uint32_t total_data_size = 1;
-  std::vector<uint8_t> data(total_data_size);
+  UCharDataVector data(total_data_size);
   RawMessagePtr message = utils::MakeShared<RawMessage>(
       connection_key, PROTOCOL_VERSION_3, &data[0], total_data_size, kRpc);
   // Expect getting pair from key from session observer
@@ -1341,7 +1343,7 @@ TEST_F(ProtocolHandlerImplTest, SendMessageToMobileApp_SendMultiframeMessage) {
   AddSession();
   const bool is_final = true;
   const uint32_t total_data_size = ph::MAXIMUM_FRAME_DATA_V2_SIZE * 2;
-  std::vector<uint8_t> data(total_data_size);
+  UCharDataVector data(total_data_size);
   const uint8_t first_consecutive_frame = 0x01;
   RawMessagePtr message = utils::MakeShared<RawMessage>(
       connection_key, PROTOCOL_VERSION_3, &data[0], total_data_size, kBulk);
@@ -1380,6 +1382,6 @@ TEST_F(ProtocolHandlerImplTest, SendMessageToMobileApp_SendMultiframeMessage) {
   protocol_handler_impl->SendMessageToMobileApp(message, is_final);
 }
 
-}  // namespace test
-}  // namespace components
 }  // namespace protocol_handler_test
+}  // namespace components
+}  // namespace test
