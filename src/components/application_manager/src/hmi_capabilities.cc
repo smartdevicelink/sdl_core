@@ -830,7 +830,7 @@ bool HMICapabilities::load_capabilities_from_file() {
 
       if (check_existing_json_member(tts, "language")) {
         const std::string lang = tts.get("language", "EN-US").asString();
-        tts_language_  = MessageHelper::CommonLanguageFromString(lang);
+        tts_language_ = MessageHelper::CommonLanguageFromString(lang);
       }
 
       if (check_existing_json_member(tts, "languages")) {

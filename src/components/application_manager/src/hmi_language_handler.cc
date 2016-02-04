@@ -58,8 +58,7 @@ HMILanguageHandler::HMILanguageHandler()  :
   persisted_vr_language_ = get_language_for(INTERFACE_VR);
   persisted_tts_language_ = get_language_for(INTERFACE_TTS);
 
-  subscribe_on_event(
-        hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
+  subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
 }
 
 void HMILanguageHandler::set_language_for(
