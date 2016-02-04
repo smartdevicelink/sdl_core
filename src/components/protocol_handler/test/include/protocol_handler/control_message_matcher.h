@@ -29,20 +29,19 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TEST_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_CONTROL_MESSAGE_MATCHER_H_
-#define TEST_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_CONTROL_MESSAGE_MATCHER_H_
+#ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_TEST_INCLUDE_PROTOCOL_HANDLER_CONTROL_MESSAGE_MATCHER_H_
+#define SRC_COMPONENTS_PROTOCOL_HANDLER_TEST_INCLUDE_PROTOCOL_HANDLER_CONTROL_MESSAGE_MATCHER_H_
 
-#include <gmock/gmock.h>
+#include <ios>
 #include <string>
 #include <vector>
+#include "gmock/gmock.h"
 #include "protocol/raw_message.h"
 #include "protocol_handler/protocol_packet.h"
 
 namespace test {
 namespace components {
 namespace protocol_handler_test {
-
-using ::std::hex;
 
 namespace ph = protocol_handler;
 using ph::ProtocolPacket;
@@ -63,15 +62,15 @@ bool CheckRegularMatches(const ProtocolPacket& packet,
     return false;
   }
   if (ExpectedFrameType != packet.frame_type()) {
-    *result_listener << "Message with frame type 0x" << hex
+    *result_listener << "Message with frame type 0x" << std::hex
                      << static_cast<int>(packet.frame_type()) << ", not 0x"
-                     << hex << static_cast<int>(ExpectedFrameType);
+                     << std::hex << static_cast<int>(ExpectedFrameType);
     return false;
   }
   if (ExpectedFrameData != packet.frame_data()) {
-    *result_listener << "Message with data 0x" << hex
+    *result_listener << "Message with data 0x" << std::hex
                      << static_cast<int>(packet.frame_data()) << ", not 0x"
-                     << hex << static_cast<int>(ExpectedFrameData);
+                     << std::hex << static_cast<int>(ExpectedFrameData);
     return false;
   }
   if (ExpectedEncryption != packet.protection_flag()) {
@@ -81,7 +80,7 @@ bool CheckRegularMatches(const ProtocolPacket& packet,
   }
   return true;
 }
-}
+}  // namespace
 
 /*
  * Matcher for checking RawMessage with ControlMessage
@@ -157,7 +156,7 @@ MATCHER_P4(ControlMessage,
     *result_listener << "Message with " << data_vector.size()
                      << " byte data : 0x";
     for (size_t i = 0u; i < data_vector.size(); ++i) {
-      *result_listener << hex << static_cast<int>(data_vector[i]);
+      *result_listener << std::hex << static_cast<int>(data_vector[i]);
     }
     return false;
   }
@@ -196,9 +195,9 @@ MATCHER_P4(ExpectedMessage,
     return false;
   }
   if (ExpectedServiceType != packet.service_type()) {
-    *result_listener << "Service type is 0x" << hex
+    *result_listener << "Service type is 0x" << std::hex
                      << static_cast<int>(packet.service_type()) << ", not 0x"
-                     << hex << static_cast<int>(ExpectedServiceType);
+                     << std::hex << static_cast<int>(ExpectedServiceType);
     return false;
   }
   return true;
@@ -207,4 +206,4 @@ MATCHER_P4(ExpectedMessage,
 }  // namespace protocol_handler_test
 }  // namespace components
 }  // namespace test
-#endif  // TEST_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_CONTROL_MESSAGE_MATCHER_H_
+#endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_TEST_INCLUDE_PROTOCOL_HANDLER_CONTROL_MESSAGE_MATCHER_H_
