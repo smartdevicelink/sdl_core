@@ -219,6 +219,46 @@ hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
   return hmi_apis::Common_Language::INVALID_ENUM;
 }
 
+std::string MessageHelper::MobileLanguageToString(
+  const mobile_apis::Language::eType language) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+  const char* str = 0;
+  if (EnumConversionHelper<mobile_apis::Language::eType>::EnumToCString(
+        language, &str)) {
+    return str ? str : "";
+  }
+  return std::string();
+}
+
+mobile_apis::Language::eType MessageHelper::MobileLanguageFromString(
+  const std::string& language) {
+  using namespace NsSmartDeviceLink::NsSmartObjects;
+  mobile_apis::Language::eType value;
+  if (EnumConversionHelper<mobile_apis::Language::eType>::StringToEnum(
+        language, &value)) {
+    return value;
+  }
+  return mobile_apis::Language::INVALID_ENUM;
+}
+
+hmi_apis::Common_Language::eType MessageHelper::MobileToCommonLanguage(
+    const mobile_apis::Language::eType language) {
+  const std::string result = MobileLanguageToString(language);
+  if (result.empty()) {
+    return hmi_apis::Common_Language::INVALID_ENUM;
+  }
+  return CommonLanguageFromString(result);
+}
+
+mobile_apis::Language::eType MessageHelper::CommonToMobileLanguage(
+    const hmi_apis::Common_Language::eType language) {
+  const std::string result = CommonLanguageToString(language);
+  if (result.empty()) {
+    return mobile_api::Language::INVALID_ENUM;
+  }
+  return MobileLanguageFromString(result);
+}
+
 uint32_t MessageHelper::GetAppCommandLimit(const std::string& policy_app_id) {
   std::string priority;
   policy::PolicyHandler::instance()->GetPriority(policy_app_id, &priority);
@@ -451,6 +491,39 @@ void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
   if (ApplicationManagerImpl::instance()->ManageMobileCommand(notification)) {
     LOG4CXX_DEBUG(logger_, "Mobile command sent");
   } else {
+    LOG4CXX_WARN(logger_, "Cannot send mobile command");
+  }
+}
+
+void MessageHelper::SendOnLanguageChangeToMobile(uint32_t connection_key) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  smart_objects::SmartObjectSPtr notification = new smart_objects::SmartObject;
+  DCHECK_OR_RETURN_VOID(notification);
+  smart_objects::SmartObject& message = *notification;
+
+  message[strings::params][strings::function_id] =
+    static_cast<int32_t>(mobile_api::FunctionID::OnLanguageChangeID);
+
+  message[strings::params][strings::message_type] =
+    static_cast<int32_t>(kNotification);
+
+  message[strings::params][strings::connection_key] = connection_key;
+
+  HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
+
+  message[strings::msg_params][strings::hmi_display_language] =
+      hmi_capabilities.active_ui_language();
+
+  message[strings::msg_params][strings::language] =
+      hmi_capabilities.active_vr_language();
+
+  if (ApplicationManagerImpl::instance()->ManageMobileCommand(
+      notification, commands::Command::ORIGIN_SDL)) {
+    LOG4CXX_INFO(logger_, "Mobile command sent");
+  }
+  else {
     LOG4CXX_WARN(logger_, "Cannot send mobile command");
   }
 }
