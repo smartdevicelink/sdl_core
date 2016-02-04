@@ -91,7 +91,7 @@ std::vector<IntegerType> getTestVector() {
 template <typename IntegerType>
 struct Incrementor {
   IntegerType value;
-  Incrementor(const IntegerType value = 0u) : value(value) {}
+  explicit Incrementor(const IntegerType value = 0u) : value(value) {}
   IntegerType operator()() {
     return ++value;
   }
@@ -539,6 +539,8 @@ TEST_F(MultiFrameBuilderTest, RemoveConnection_NoConnection_ResultFail) {
 TEST_F(MultiFrameBuilderTest, RemoveConnection_Succesful) {
   // Arrange
   const ConnectionID& connection_id = test_data_map_.begin()->first;
+  // test_data_map initially contains ID's of not existed in MultiframeBuilder
+  // connections
   ASSERT_TRUE(multiframe_builder_.AddConnection(connection_id));
   // Act
   const bool connection_result =
