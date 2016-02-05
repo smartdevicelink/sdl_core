@@ -12,11 +12,11 @@ We use <a href="http://nvie.com/posts/a-successful-git-branching-model/">Gitflow
 
 ### Pull Requests
 * Please follow the repository's for all code and documentation.
-* All pull requests should be sent to `smartdevicelink/sdl_core/`, in `develop` or `master` branches.
+* All pull requests should be sent to `smartdevicelink/sdl_core/`, to `develop` or `master` branch.
 * All feature branches should be based on `develop` and have the format `feature/branch_name`.
-* All hotfix branches should be based on `develop` and have the format `fix/branch_name`.
+* All fix branches should be based on `develop` and have the format `fix/branch_name`.
 * All new functionality requests should be provided only for `develop` branch.
-* In case defect should be fixed in short time (after release), send pull request on `master` and have the format `hotfix/branch_name`. 
+* In case defect should be fixed in short time (after release), send pull request to `master` and have the format `hotfix/branch_name`. 
 * In case defect exists in `develop` and `master` branches, send pull request to `develop` only. Do not send the same pull request to the `master` branch. 
 * All pull requests should implement a single feature or fix a single bug. Pull Requests that involve multiple changes (it is our discretion what precisely this means) will be rejected with a reason.
 * All commits should be separated into logical units, i.e. unrelated changes should be in different commits within a pull request.
