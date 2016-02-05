@@ -31,7 +31,7 @@ set in the form of a pull request.
    Windows paths vs. POSIX paths).
 * Thread safe code.
 * No deadlocks.
-* Doxygen API documentation available?
+* Is Doxygen API documentation available?
 * Do you have thread specific comment provided? (if another thread uses added method/classes, 
    there must be comment which explains: When method will be called by thread? Which thread calls the method? e.g.)
 * Do you have specific realization code comments?
