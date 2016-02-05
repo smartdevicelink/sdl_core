@@ -50,6 +50,7 @@ using ph::RESULT_CODE;
 using ph::RESULT_OK;
 using ph::FRAME_TYPE_CONTROL;
 using ph::kControl;
+using ph::kRpc;
 using ph::kInvalidServiceType;
 using ph::FRAME_DATA_HEART_BEAT;
 
@@ -90,9 +91,9 @@ TEST_F(ProtocolPacketTest, SerializePacketWithDiffVersions) {
     EXPECT_EQ(kControl, res->service_type());
     EXPECT_EQ(some_connection_id, res->connection_key());
     if (res->protocol_version() == PROTOCOL_VERSION_1) {
-      EXPECT_EQ(8u, res->data_size());
+      EXPECT_EQ(ph::PROTOCOL_HEADER_V1_SIZE, res->data_size());
     } else {
-      EXPECT_EQ(12u, res->data_size());
+      EXPECT_EQ(ph::PROTOCOL_HEADER_V2_SIZE, res->data_size());
     }
   }
 }
@@ -101,24 +102,24 @@ TEST_F(ProtocolPacketTest, SerializePacketWithDiffVersions) {
 // (Video), 0x0F (Bulk)
 TEST_F(ProtocolPacketTest, SerializePacketWithDiffServiceType) {
   std::vector<uint8_t> serv_types;
-  serv_types.push_back(0x0);
-  serv_types.push_back(0x07);
-  serv_types.push_back(0x0A);
-  serv_types.push_back(0x0B);
-  serv_types.push_back(0x0F);
+  serv_types.push_back(kControl);
+  serv_types.push_back(kRpc);
+  serv_types.push_back(ph::kAudio);
+  serv_types.push_back(ph::kMobileNav);
+  serv_types.push_back(ph::kBulk);
 
   for (size_t i = 0; i < serv_types.size(); ++i) {
     RawMessagePtr res =
         GetRawMessage(PROTOCOL_VERSION_3, FRAME_TYPE_CONTROL, serv_types[i]);
     EXPECT_EQ(PROTOCOL_VERSION_3, res->protocol_version());
     EXPECT_EQ(serv_types[i], res->service_type());
-    EXPECT_EQ(12u, res->data_size());
+    EXPECT_EQ(ph::PROTOCOL_HEADER_V2_SIZE, res->data_size());
   }
 }
 
 TEST_F(ProtocolPacketTest, SerializePacketWithWrongServiceType) {
   std::vector<uint8_t> serv_types;
-  for (uint8_t service_type = kControl + 1; service_type < ph::kRpc;
+  for (uint8_t service_type = kControl + 1; service_type < kRpc;
        ++service_type) {
     serv_types.push_back(service_type);
   }
@@ -150,7 +151,8 @@ TEST_F(ProtocolPacketTest, SetPacketWithDiffFrameType) {
 TEST_F(ProtocolPacketTest, AppendDataToEmptyPacket) {
   // Set version, serviceType, frameData, sessionId
   const uint8_t session_id = 1u;
-  uint8_t some_data[] = {0x0, 0x07, 0x02, session_id};
+  uint8_t some_data[] = {
+      0x0, kRpc, ph::FRAME_DATA_START_SERVICE_ACK, session_id};
   ProtocolPacket protocol_packet;
   RESULT_CODE res = protocol_packet.appendData(some_data, sizeof(some_data));
   EXPECT_EQ(ph::RESULT_FAIL, res);
@@ -167,27 +169,27 @@ TEST_F(ProtocolPacketTest, SetTotalDataBytes) {
 TEST_F(ProtocolPacketTest, AppendDataToPacketWithNonZeroSize) {
   // Set version, serviceType, frameData, sessionId
   const uint8_t session_id = 1u;
-  uint8_t some_data[] = {0x0, 0x07, FRAME_TYPE_CONTROL, session_id};
+  uint8_t some_data[] = {0x0, kRpc, FRAME_DATA_HEART_BEAT, session_id};
   ProtocolPacket protocol_packet;
   protocol_packet.set_total_data_bytes(sizeof(some_data) + 1);
   RESULT_CODE res = protocol_packet.appendData(some_data, sizeof(some_data));
   EXPECT_EQ(RESULT_OK, res);
 
   EXPECT_EQ(0x0, protocol_packet.data()[0]);
-  EXPECT_EQ(0x07, protocol_packet.data()[1]);
-  EXPECT_EQ(FRAME_TYPE_CONTROL, protocol_packet.data()[2]);
+  EXPECT_EQ(kRpc, protocol_packet.data()[1]);
+  EXPECT_EQ(FRAME_DATA_HEART_BEAT, protocol_packet.data()[2]);
   EXPECT_EQ(session_id, protocol_packet.data()[3]);
 }
 
 TEST_F(ProtocolPacketTest, SetData) {
   const uint8_t session_id = 1u;
-  uint8_t some_data[] = {0x0, 0x07, FRAME_TYPE_CONTROL, session_id};
+  uint8_t some_data[] = {0x0, kRpc, FRAME_DATA_HEART_BEAT, session_id};
   ProtocolPacket protocol_packet;
   protocol_packet.set_data(some_data, sizeof(some_data));
 
   EXPECT_EQ(0x0, protocol_packet.data()[0]);
-  EXPECT_EQ(0x07, protocol_packet.data()[1]);
-  EXPECT_EQ(FRAME_TYPE_CONTROL, protocol_packet.data()[2]);
+  EXPECT_EQ(kRpc, protocol_packet.data()[1]);
+  EXPECT_EQ(FRAME_DATA_HEART_BEAT, protocol_packet.data()[2]);
   EXPECT_EQ(session_id, protocol_packet.data()[3]);
 }
 
@@ -201,7 +203,9 @@ TEST_F(ProtocolPacketTest, DeserializeZeroPacket) {
 TEST_F(ProtocolPacketTest, DeserializeNonZeroPacket) {
   // Set header, serviceType, frameData, sessionId
   const uint8_t session_id = 1u;
-  uint8_t some_message[] = {0x21, 0x07, 0x02, session_id};
+  const uint8_t version_frame_type = 0x21;
+  uint8_t some_message[] = {
+      version_frame_type, kRpc, ph::FRAME_DATA_START_SERVICE_ACK, session_id};
   ProtocolPacket protocol_packet;
   RESULT_CODE res = protocol_packet.deserializePacket(
       some_message, ph::PROTOCOL_HEADER_V2_SIZE);
@@ -212,9 +216,10 @@ TEST_F(ProtocolPacketTest, DeserializePacket_FrameTypeFirst_ResultOK) {
   // Arrange
   const uint8_t session_id = 1u;
   const uint8_t data_size = 1u;
+  const uint8_t version_frame_type = 0x22;
   // Set protol version - 2 and frame type - first
-  uint8_t message[] = {0x22,
-                       ph::kRpc,
+  uint8_t message[] = {version_frame_type,
+                       kRpc,
                        ph::FRAME_DATA_FIRST,
                        session_id,
                        0x00,
