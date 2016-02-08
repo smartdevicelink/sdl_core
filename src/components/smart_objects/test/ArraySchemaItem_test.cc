@@ -77,7 +77,7 @@ TEST(test_no_default_value, test_ArraySchemaItemTest) {
   resultType = item->validate(obj[3]);
   EXPECT_EQ(Errors::OK, resultType);
 
-  item->applySchema(obj);
+  item->applySchema(obj, false);
 
   resultType = item->validate(obj);
   EXPECT_EQ(Errors::OK, resultType);
@@ -146,7 +146,7 @@ TEST(test_item_with_default_value, test_ArraySchemaItemTest) {
   resultType = item->validate(obj[2]);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
-  item->applySchema(obj);
+  item->applySchema(obj, false);
 
   resultType = item->validate(obj);
   EXPECT_EQ(Errors::OK, resultType);

@@ -65,10 +65,11 @@ Errors::eType CArraySchemaItem::validate(const SmartObject& Object) {
   return Errors::OK;
 }
 
-void CArraySchemaItem::applySchema(SmartObject& Object) {
+void CArraySchemaItem::applySchema(SmartObject& Object,
+                                   const bool RemoveFakeParameters) {
   if (SmartType_Array == Object.getType()) {
     for (size_t i = 0U; i < Object.length(); ++i) {
-      mElementSchemaItem->applySchema(Object[i]);
+      mElementSchemaItem->applySchema(Object[i], RemoveFakeParameters);
     }
   }
 }

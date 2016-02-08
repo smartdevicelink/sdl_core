@@ -209,19 +209,19 @@ TEST_F(EnumSchemaItemTest, test_apply_unapply_schema) {
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
   EXPECT_EQ(std::string("FACTORY_DEFAULTS"), obj.asString());
 
-  item->applySchema(obj);
+  item->applySchema(obj, false);
   resultType = item->validate(obj);
   EXPECT_EQ(Errors::OK, resultType);
   EXPECT_EQ(TestType::FACTORY_DEFAULTS, obj.asInt());
 
   obj = "TOO_MANY_REQUESTS";
-  item->applySchema(obj);
+  item->applySchema(obj, false);
   resultType = item->validate(obj);
   EXPECT_EQ(Errors::OK, resultType);
   EXPECT_EQ(TestType::TOO_MANY_REQUESTS, obj.asInt());
 
   obj = "ENOUGH_REQUESTS";
-  item->applySchema(obj);
+  item->applySchema(obj, false);
   resultType = item->validate(obj);
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
   EXPECT_EQ(std::string("ENOUGH_REQUESTS"), obj.asString());

@@ -51,8 +51,8 @@ void CSmartSchema::setSchemaItem(const ISchemaItemPtr schemaItem) {
   mSchemaItem = schemaItem;
 }
 
-void CSmartSchema::applySchema(SmartObject& Object) {
-  mSchemaItem->applySchema(Object);
+void CSmartSchema::applySchema(SmartObject& Object, const bool RemoveFakeParameters) {
+  mSchemaItem->applySchema(Object, RemoveFakeParameters);
 }
 
 void CSmartSchema::unapplySchema(SmartObject& Object) {
