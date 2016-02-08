@@ -319,15 +319,13 @@ void ProtocolHandlerImpl::SendHeartBeat(int32_t connection_id,
   LOG4CXX_AUTO_TRACE(logger_);
   uint8_t protocol_version;
   if (session_observer_->ProtocolVersionUsed(connection_id,
-      session_id, protocol_version)) {
+        session_id, protocol_version)) {
     ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-      protocol_version, PROTECTION_OFF, FRAME_TYPE_CONTROL,
+        protocol_version, PROTECTION_OFF, FRAME_TYPE_CONTROL,
         SERVICE_TYPE_CONTROL, FRAME_DATA_HEART_BEAT, session_id,
         0u, message_counters_[session_id]++));
-
-    raw_ford_messages_to_mobile_.PostMessage(
-        impl::RawFordMessageToMobile(ptr, false));
-    LOG4CXX_DEBUG(logger_, "SendHeartBeat finished successfully");
+    raw_ford_messages_to_mobile_.PostMessage(impl::RawFordMessageToMobile(ptr, false));
+  LOG4CXX_DEBUG(logger_, "SendHeartBeat finished successfully");
   } else {
     LOG4CXX_WARN(logger_, "SendHeartBeat is failed connection or session does not exist");
   }
