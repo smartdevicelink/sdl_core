@@ -34,6 +34,7 @@
 
 #include "gtest/gtest.h"
 #include "utils/byte_order.h"
+#include "utils/make_shared.h"
 #include "protocol/common.h"
 #include "security_manager/security_manager_impl.h"
 
@@ -105,7 +106,7 @@ class SecurityManagerTest : public ::testing::Test {
                               uint32_t dataSize,
                               const ServiceType serviceType) {
     const ::protocol_handler::RawMessagePtr rawMessagePtr(
-        new ::protocol_handler::RawMessage(
+        utils::MakeShared<RawMessage>(
             key, protocolVersion, data, dataSize, serviceType));
     security_manager_->OnMessageReceived(rawMessagePtr);
   }
