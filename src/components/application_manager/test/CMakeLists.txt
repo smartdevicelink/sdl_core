@@ -105,7 +105,7 @@ set(testSources
     ${AM_SOURCE_DIR}/src/policies/delegates/app_permission_delegate.cc
     ${AM_SOURCE_DIR}/src/policies/delegates/statistics_delegate.cc
 
-    ${AM_SOURCE_DIR}/src/event_engine/event_dispatcher.cc
+    ${AM_SOURCE_DIR}/src/event_engine/event_dispatcher_impl.cc
     ${AM_SOURCE_DIR}/src/event_engine/event_observer.cc
     ${AM_SOURCE_DIR}/src/event_engine/event.cc
 

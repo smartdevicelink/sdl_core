@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 
 #include "event_engine/event_observer.h"
 #include "event_engine/event.h"
-#include "event_engine/event_dispatcher.h"
+#include "event_engine/event_dispatcher_impl.h"
 #include <interfaces/HMI_API.h>
 #include "mock/event_observer_mock.h"
 #include "smart_objects/smart_object.h"
@@ -44,7 +44,7 @@ namespace components {
 namespace event_engine {
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-using application_manager::event_engine::EventDispatcher;
+using application_manager::event_engine::EventDispatcherImpl;
 using application_manager::event_engine::Event;
 using application_manager::event_engine::EventObserver;
 using application_manager::event_engine::MockEventObserver;
@@ -58,7 +58,7 @@ class EventEngineTest : public testing::Test {
         event_id3(Event::EventID::VR_IsReady) {}
 
  protected:
-  EventDispatcher* event_dispatcher_instance_;
+  EventDispatcherImpl* event_dispatcher_instance_;
   Event* event_;
   const application_manager::event_engine::Event::EventID event_id;
   const application_manager::event_engine::Event::EventID event_id2;
@@ -72,8 +72,8 @@ class EventEngineTest : public testing::Test {
   smart_objects::SmartObject smart_object_with_invalid_type;
 
   virtual void SetUp() OVERRIDE {
-    EventDispatcher::destroy();
-    event_dispatcher_instance_ = EventDispatcher::instance();
+    EventDispatcherImpl::destroy();
+    event_dispatcher_instance_ = EventDispatcherImpl::instance();
     event_ = new Event(hmi_apis::FunctionID::eType::VR_IsReady);
     smart_object_with_type_notification["params"]["message_type"] =
         hmi_apis::messageType::notification;
@@ -110,7 +110,7 @@ class EventEngineTest : public testing::Test {
   }
 
   virtual void TearDown() OVERRIDE {
-    EventDispatcher::destroy();
+    EventDispatcherImpl::destroy();
     delete event_;
   }
 
@@ -136,28 +136,28 @@ TEST_F(EventEngineTest, EventObserverTest_ExpectObserversEmpty) {
 }
 
 TEST_F(EventEngineTest,
-       EventDispatcher_RaiseEvent_EventSOTypeResponse_ExpectEventRaised) {
+       EventDispatcherImpl_RaiseEvent_EventSOTypeResponse_ExpectEventRaised) {
   CheckRaiseEvent(event_id3, 1u, smart_object_with_type_response);
 }
 
 TEST_F(EventEngineTest,
-       EventDispatcher_RaiseEvent_EventSOTypeErrorResponse_ExpectEventRaised) {
+       EventDispatcherImpl_RaiseEvent_EventSOTypeErrorResponse_ExpectEventRaised) {
   CheckRaiseEvent(event_id3, 1u, smart_object_with_type_error_response);
 }
 
 TEST_F(EventEngineTest,
-       EventDispatcher_RaiseEvent_EventSOTypeInvalid_ExpectEventNotRaised) {
+       EventDispatcherImpl_RaiseEvent_EventSOTypeInvalid_ExpectEventNotRaised) {
   CheckRaiseEvent(event_id3, 0u, smart_object_with_invalid_type);
 }
 
 TEST_F(EventEngineTest,
-       EventDispatcher_RaiseEvent_EventSOTypeRequest_ExpectEventNotRaised) {
+       EventDispatcherImpl_RaiseEvent_EventSOTypeRequest_ExpectEventNotRaised) {
   CheckRaiseEvent(event_id3, 0u, smart_object_with_type_request);
 }
 
 TEST_F(
     EventEngineTest,
-    EventDispatcher_RaiseEvent_EventSOTypeNotification_ExpectEventNotRaised) {
+    EventDispatcherImpl_RaiseEvent_EventSOTypeNotification_ExpectEventNotRaised) {
   CheckRaiseEvent(event_id3, 0u, smart_object_with_type_notification);
 }
 
