@@ -40,9 +40,10 @@
 #include "policy/pt_ext_representation.h"
 #include "usage_statistics/statistics_manager.h"
 #include "policy/cache_manager_interface.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
 #include "utils/lock.h"
-#include "utils/timer_thread.h"
 #include "utils/conditional_variable.h"
 #include "policy/policy_types.h"
 

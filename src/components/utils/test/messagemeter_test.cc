@@ -57,7 +57,7 @@ const TimePair testing_time_pairs[] = { TimePair(0,  50),
 class MessageMeterTest: public ::testing::TestWithParam<TimePair> {
  protected:
   void SetUp() OVERRIDE {
-    usecs = date_time::DateTime::MICROSECONDS_IN_MILLISECONDS;
+    usecs = date_time::DateTime::MICROSECONDS_IN_MILLISECOND;
     id1 = 0x0;
     id2 = 0xABCDEF;
     id3 = 0xFEBCDA;
@@ -99,7 +99,7 @@ TEST(MessageMeterTest, TimeRangeSetter) {
   for (int sec = test_count_secs; sec >= 0; --sec) {
     for (int msec = test_count_msecs; msec >= 0; --msec) {
       time_range.tv_sec = sec;
-      time_range.tv_usec = msec * date_time::DateTime::MICROSECONDS_IN_MILLISECONDS;
+      time_range.tv_usec = msec * date_time::DateTime::MICROSECONDS_IN_MILLISECOND;
       // Setter TimevalStruct
       meter.set_time_range(time_range);
       EXPECT_EQ(time_range,

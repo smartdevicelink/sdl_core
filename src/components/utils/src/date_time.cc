@@ -54,13 +54,13 @@ int64_t date_time::DateTime::getSecs(const TimevalStruct &time) {
 int64_t DateTime::getmSecs(const TimevalStruct &time) {
   const TimevalStruct times = ConvertionUsecs(time);
   return static_cast<int64_t>(times.tv_sec) * MILLISECONDS_IN_SECOND
-      + times.tv_usec / MICROSECONDS_IN_MILLISECONDS;
+      + times.tv_usec / MICROSECONDS_IN_MILLISECOND;
 }
 
 int64_t DateTime::getuSecs(const TimevalStruct &time) {
   const TimevalStruct times = ConvertionUsecs(time);
   return static_cast<int64_t>(times.tv_sec) * MILLISECONDS_IN_SECOND
-      * MICROSECONDS_IN_MILLISECONDS + times.tv_usec;
+      * MICROSECONDS_IN_MILLISECOND + times.tv_usec;
 }
 
 int64_t DateTime::calculateTimeSpan(const TimevalStruct& sinceTime) {
@@ -83,7 +83,7 @@ int64_t DateTime::calculateTimeDiff(const TimevalStruct &time1,
 void DateTime::AddMilliseconds(TimevalStruct& time,
                              uint32_t milliseconds) {
   const uint32_t sec = milliseconds/MILLISECONDS_IN_SECOND;
-  const uint32_t usec = (milliseconds%MILLISECONDS_IN_SECOND)*MICROSECONDS_IN_MILLISECONDS;
+  const uint32_t usec = (milliseconds%MILLISECONDS_IN_SECOND)*MICROSECONDS_IN_MILLISECOND;
   time.tv_sec += sec;
   time.tv_usec += usec;
   time = ConvertionUsecs(time);
