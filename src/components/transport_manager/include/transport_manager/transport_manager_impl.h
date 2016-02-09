@@ -40,7 +40,8 @@
 #include <utility>
 #include <algorithm>
 
-#include "utils/timer_thread.h"
+#include "utils/timer.h"
+#include "utils/timer_task_impl.h"
 #include "utils/rwlock.h"
 
 #include "transport_manager/transport_manager.h"
@@ -59,6 +60,7 @@ typedef threads::MessageLoopThread<std::queue<protocol_handler::RawMessagePtr> >
   RawMessageLoopThread;
 typedef threads::MessageLoopThread<std::queue<TransportAdapterEvent> >
   TransportAdapterEventLoopThread;
+typedef utils::SharedPtr<timer::Timer> TimerSPtr;
 
 /**
  * @brief Implementation of transport manager.s
@@ -80,10 +82,8 @@ class TransportManagerImpl : public TransportManager,
   struct ConnectionInternal: public Connection {
     TransportManagerImpl* transport_manager;
     TransportAdapter* transport_adapter;
-    typedef timer::TimerThread<ConnectionInternal> TimerInternal;
-    typedef utils::SharedPtr<TimerInternal> TimerInternalSharedPointer;
-    TimerInternalSharedPointer timer;
-    bool shutDown;
+    TimerSPtr timer;
+    bool shutdown;
     DeviceHandle device_handle_;
     int messages_count;
 
@@ -92,6 +92,7 @@ class TransportManagerImpl : public TransportManager,
                        const ConnectionUID& id, const DeviceUID& dev_id,
                        const ApplicationHandle& app_id,
                        const DeviceHandle& device_handle);
+
     void DisconnectFailedRoutine();
   };
  public:
