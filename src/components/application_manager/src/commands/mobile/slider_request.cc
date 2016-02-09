@@ -54,8 +54,12 @@ bool SliderRequest::Init() {
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
   if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
-    default_timeout_ =
-        (*message_)[strings::msg_params][strings::timeout].asUInt();
+    // Add 2 seconds reserve to compensate HMI communication and processing.
+    uint32_t request_timeout_plus_reserve =
+        (*message_)[strings::msg_params][strings::timeout].asUInt() + 2000;
+    if (request_timeout_plus_reserve > default_timeout_) {
+      default_timeout_ = request_timeout_plus_reserve;
+    }
   }
 
   return true;
