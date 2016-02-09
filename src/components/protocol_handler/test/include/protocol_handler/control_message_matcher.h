@@ -53,29 +53,29 @@ using ph::FRAME_DATA_START_SERVICE_NACK;
 namespace {
 bool CheckRegularMatches(const ProtocolPacket& packet,
                          RESULT_CODE result,
-                         testing::MatchResultListener* result_listener,
+                         testing::MatchResultListener& result_listener,
                          uint8_t ExpectedFrameType,
                          uint8_t ExpectedFrameData,
                          uint8_t ExpectedEncryption) {
   if (result != ph::RESULT_OK) {
-    *result_listener << "Error while message deserialization.";
+    result_listener << "Error while message deserialization.";
     return false;
   }
   if (ExpectedFrameType != packet.frame_type()) {
-    *result_listener << "Message with frame type 0x" << std::hex
-                     << static_cast<int>(packet.frame_type()) << ", not 0x"
-                     << std::hex << static_cast<int>(ExpectedFrameType);
+    result_listener << "Message with frame type 0x" << std::hex
+                    << static_cast<int>(packet.frame_type()) << ", not 0x"
+                    << std::hex << static_cast<int>(ExpectedFrameType);
     return false;
   }
   if (ExpectedFrameData != packet.frame_data()) {
-    *result_listener << "Message with data 0x" << std::hex
-                     << static_cast<int>(packet.frame_data()) << ", not 0x"
-                     << std::hex << static_cast<int>(ExpectedFrameData);
+    result_listener << "Message with data 0x" << std::hex
+                    << static_cast<int>(packet.frame_data()) << ", not 0x"
+                    << std::hex << static_cast<int>(ExpectedFrameData);
     return false;
   }
   if (ExpectedEncryption != packet.protection_flag()) {
-    *result_listener << "Message is " << (ExpectedEncryption ? "" : "not ")
-                     << "protected";
+    result_listener << "Message is " << (ExpectedEncryption ? "" : "not ")
+                    << "protected";
     return false;
   }
   return true;
@@ -105,7 +105,7 @@ MATCHER_P2(ControlMessage,
 
   if (!CheckRegularMatches(packet,
                            result,
-                           result_listener,
+                           *result_listener,
                            FRAME_TYPE_CONTROL,
                            ExpectedFrameData,
                            ExpectedEncryption)) {
@@ -134,7 +134,7 @@ MATCHER_P4(ControlMessage,
 
   if (!CheckRegularMatches(packet,
                            result,
-                           result_listener,
+                           *result_listener,
                            FRAME_TYPE_CONTROL,
                            ExpectedFrameData,
                            ExpectedEncryption)) {
@@ -188,7 +188,7 @@ MATCHER_P4(ExpectedMessage,
 
   if (!CheckRegularMatches(packet,
                            result,
-                           result_listener,
+                           *result_listener,
                            ExpectedFrameType,
                            ExpectedFrameData,
                            ExpectedEncryption)) {
