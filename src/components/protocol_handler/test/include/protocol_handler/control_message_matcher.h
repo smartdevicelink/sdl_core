@@ -50,7 +50,6 @@ using ph::RESULT_CODE;
 using ph::FRAME_TYPE_CONTROL;
 using ph::FRAME_DATA_START_SERVICE_NACK;
 
-namespace {
 bool CheckRegularMatches(const ProtocolPacket& packet,
                          RESULT_CODE result,
                          testing::MatchResultListener& result_listener,
@@ -80,7 +79,6 @@ bool CheckRegularMatches(const ProtocolPacket& packet,
   }
   return true;
 }
-}  // namespace
 
 /*
  * Matcher for checking RawMessage with ControlMessage
