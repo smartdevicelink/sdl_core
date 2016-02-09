@@ -145,7 +145,7 @@ TEST(FormatterJsonRPCTest, UpperBoundValuesInSystemRequest_ToString_Success) {
   // Attach Schema
 
   hmi_apis::HMI_API factory;
-  EXPECT_TRUE(factory.attachSchema(obj));
+  EXPECT_TRUE(factory.attachSchema(obj, false));
   EXPECT_EQ(Errors::OK, obj.validate());
   std::string result;
   // Convert SmartObject to Json string
@@ -170,7 +170,7 @@ TEST(FormatterJsonRPCTest, CorrectRPCv1Notification_ToString_Success) {
   obj[S_MSG_PARAMS] = SmartObject(SmartType::SmartType_Map);
   // Attach Schema
   hmi_apis::HMI_API factory;
-  EXPECT_TRUE(factory.attachSchema(obj));
+  EXPECT_TRUE(factory.attachSchema(obj, false));
   // Convert SmartObject to Json string
   EXPECT_TRUE(FormatterJsonRpc::ToString(obj, result));
   CompactJson(result);
@@ -190,7 +190,7 @@ TEST(FormatterJsonRPCTest, CorrectResponseToString_Success) {
   obj[S_MSG_PARAMS] = SmartObject(SmartType::SmartType_Map);
   // Attach Schema
   hmi_apis::HMI_API factory;
-  EXPECT_TRUE(factory.attachSchema(obj));
+  EXPECT_TRUE(factory.attachSchema(obj, false));
 
   std::string result;
   // Convert SmartObject to Json string
@@ -213,7 +213,7 @@ TEST(FormatterJsonRPCTest, ErrorResponse_ToString_Success) {
   obj[S_MSG_PARAMS] = SmartObject(SmartType::SmartType_Map);
   // Attach Schema
   hmi_apis::HMI_API factory;
-  EXPECT_TRUE(factory.attachSchema(obj));
+  EXPECT_TRUE(factory.attachSchema(obj, false));
 
   std::string result;
   // Convert SmartObject to Json string
@@ -237,7 +237,7 @@ TEST(FormatterJsonRPCTest, ResponseWithoutCorID_ToString_Fail) {
   obj[S_MSG_PARAMS] = SmartObject(SmartType::SmartType_Map);
   // Attach Schema
   hmi_apis::HMI_API factory;
-  EXPECT_TRUE(factory.attachSchema(obj));
+  EXPECT_TRUE(factory.attachSchema(obj, false));
 
   std::string result;
   // Convert SmartObject to Json string will finish wrong
@@ -252,7 +252,7 @@ TEST(FormatterJsonRPCTest, RequestWithoutMSGParams_ToString_Success) {
   obj[S_PARAMS][S_CORRELATION_ID] = 4444;
   // Attach Schema
   mobile_apis::MOBILE_API factory;
-  EXPECT_TRUE(factory.attachSchema(obj));
+  EXPECT_TRUE(factory.attachSchema(obj, false));
 
   std::string result;
   // Convert SmartObject to Json string
@@ -271,7 +271,7 @@ TEST(FormatterJsonRPCTest, RequestWithoutCorID_ToString_Fail) {
   obj[S_MSG_PARAMS] = SmartObject(SmartType::SmartType_Map);
   // Attach Schema
   mobile_apis::MOBILE_API factory;
-  EXPECT_TRUE(factory.attachSchema(obj));
+  EXPECT_TRUE(factory.attachSchema(obj, false));
 
   std::string result;
   // Converting SmartObject to Json string is failed
@@ -289,7 +289,7 @@ TEST(FormatterJsonRPCTest, RequestWithoutType_ToString_Fail) {
   obj[S_MSG_PARAMS] = SmartObject(SmartType::SmartType_Map);
   // Attach Schema is impossible
   mobile_apis::MOBILE_API factory;
-  EXPECT_FALSE(factory.attachSchema(obj));
+  EXPECT_FALSE(factory.attachSchema(obj, false));
 
   std::string result;
   // Converting SmartObject to Json string is failed
