@@ -312,7 +312,7 @@ std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
   SubscribedToIVIPredicate finder(
         static_cast<int32_t>(vehicle_info));
   ApplicationListAccessor accessor;
-  std::vector<ApplicationSharedPtr> apps = accessor.FindAll(NaviAppPredicate);
+  std::vector<ApplicationSharedPtr> apps = accessor.FindAll(finder);
   LOG4CXX_DEBUG(logger_, " vehicle_info << " << vehicle_info << "Found count: " << apps.size());
   return apps;
 }
