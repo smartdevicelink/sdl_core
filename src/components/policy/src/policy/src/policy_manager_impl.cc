@@ -35,6 +35,7 @@
 #include <set>
 #include <queue>
 #include <iterator>
+#include <limits>
 #include "json/reader.h"
 #include "json/writer.h"
 #include "policy/policy_table.h"

@@ -34,7 +34,14 @@
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_TIMER_H_
 
 #include <stdint.h>
+
+#ifdef __QNX__
+#include <sys/siginfo.h>
+#else
 #include <signal.h>
+typedef sigval_t sigval;
+#endif
+
 #include <time.h>
 #include <string>
 
@@ -113,10 +120,10 @@ class Timer {
   bool StopUnsafe();
 
   /**
-   * @brief alone function which sends to posix_timer as calle
-   * @param signal_value - structure with parameters of posix_timer calle
+   * @brief alone function which sends to posix_timer as callee
+   * @param signal_value - structure with parameters of posix_timer callee
    */
-  friend void HandlePosixTimer(sigval_t signal_value);
+  friend void HandlePosixTimer(sigval signal_value);
 
   DISALLOW_COPY_AND_ASSIGN(Timer);
 };

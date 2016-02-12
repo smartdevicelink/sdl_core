@@ -127,12 +127,12 @@ ApplicationManagerImpl::ApplicationManagerImpl()
           "AM ListUpdater",
           new TimerTaskImpl<ApplicationManagerImpl>(
               this,
-              &ApplicationManagerImpl::OnApplicationListUpdateTimer)),
+              &ApplicationManagerImpl::OnApplicationListUpdateTimer))
     , tts_global_properties_timer_(
           "AM TTSGLPRTimer",
           new TimerTaskImpl<ApplicationManagerImpl>(
               this,
-              &ApplicationManagerImpl::OnTimerSendTTSGlobalProperties)),
+              &ApplicationManagerImpl::OnTimerSendTTSGlobalProperties))
     , is_low_voltage_(false)
     , is_stopping_(false) {
 

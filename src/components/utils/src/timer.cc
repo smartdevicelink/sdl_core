@@ -49,7 +49,7 @@ namespace timer {
 // Function HandlePosixTimer is not in anonymous namespace
 // because we need to set this func as friend to Timer
 // and for setting friend function must be located in same namespace with class
-void HandlePosixTimer(sigval_t signal_value) {
+void HandlePosixTimer(sigval signal_value) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   DCHECK_OR_RETURN_VOID(signal_value.sival_ptr)
@@ -127,8 +127,7 @@ timer::Timer::Timer(const std::string& name, const TimerTask* task_for_tracking)
     , is_running_(false)
     , timer_(NULL) {
   LOG4CXX_AUTO_TRACE(logger_);
-  bool is_name_empty = !name_.empty();
-  DCHECK(is_name_empty);
+  DCHECK(!name_.empty());
   DCHECK(task_);
 }
 
@@ -177,7 +176,7 @@ void timer::Timer::OnTimeout() {
     // Task locked by own lock because from this task in callback we can
     // call Stop of this timer and get DeadLock
     sync_primitives::AutoLock auto_lock(task_lock_);
-    DCHECK_OR_RETURN_VOID(task_);
+    DCHECK(task_);
     task_->run();
   }
   sync_primitives::AutoLock auto_lock(lock_);

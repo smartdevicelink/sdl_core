@@ -70,10 +70,8 @@ mobile_apis::FileType::eType StringToFileType(const char* str) {
 }
 }
 
-namespace application_manager {
-
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
-
+namespace application_manager {
 ApplicationImpl::ApplicationImpl(
     uint32_t application_id,
     const std::string& mobile_app_id,
@@ -121,7 +119,7 @@ ApplicationImpl::ApplicationImpl(
   cmd_number_to_time_limits_[mobile_apis::FunctionID::GetVehicleDataID] = {
       date_time::DateTime::getCurrentTime(), 0};
 
-  set_policy_app_id(policy_app_id);
+  set_mobile_app_id(mobile_app_id);
   set_name(app_name);
 
   MarkUnregistered();

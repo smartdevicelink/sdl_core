@@ -47,8 +47,8 @@ namespace {
 
 sync_primitives::Lock test_lock;
 sync_primitives::ConditionalVariable lock_monitor;
-const uint32_t default_timeout = 30u;
-const std::string timer_name_ = "test_timer";
+const uint32_t kDefaultTimeout = 30u;
+const std::string kTimerName = "test_timer";
 
 class TestTask : public timer::TimerTask {
  public:
@@ -73,7 +73,7 @@ class FakeClassWithTimer {
       , internal_timer_("test_timer",
                         new timer::TimerTaskImpl<FakeClassWithTimer>(
                             this, &FakeClassWithTimer::OnTimer)) {
-    internal_timer_.Start(default_timeout, true);
+    internal_timer_.Start(kDefaultTimeout, true);
   }
   void OnTimer() {
     sync_primitives::AutoLock auto_lock_(test_lock);
@@ -98,7 +98,7 @@ class FakeClassWithTimer {
 class TimerTest : public testing::Test {
  protected:
   void SetUp() OVERRIDE {
-    timeout_ = default_timeout;
+    timeout_ = kDefaultTimeout;
     repeatable_ = false;
     // Will be destroyed in Timer Destructor
     test_task_ = new MockTimerTask();
@@ -110,7 +110,7 @@ class TimerTest : public testing::Test {
 
 TEST_F(TimerTest, Start_ZeroTimeout_CorrectTimeout) {
   // Preconditions
-  timer::Timer test_timer(timer_name_, test_task_);
+  timer::Timer test_timer(kTimerName, test_task_);
   // Actions
   test_timer.Start(0u, repeatable_);
   // Expects
@@ -123,7 +123,7 @@ TEST_F(TimerTest, Start_NoLoop_OneCall) {
   // Preconditions
   test_lock.Acquire();
   TestTask* task = new TestTask();
-  timer::Timer test_timer(timer_name_, task);
+  timer::Timer test_timer(kTimerName, task);
   // Actions
   test_timer.Start(timeout_, repeatable_);
   ASSERT_TRUE(test_timer.IsRunning());
@@ -140,7 +140,7 @@ TEST_F(TimerTest, Start_Loop_3Calls) {
   repeatable_ = true;
   test_lock.Acquire();
   TestTask* task = new TestTask();
-  timer::Timer test_timer(timer_name_, task);
+  timer::Timer test_timer(kTimerName, task);
   // Actions
   test_timer.Start(timeout_, repeatable_);
   for (int i = loops_count; i; --i) {
@@ -154,7 +154,7 @@ TEST_F(TimerTest, Start_Loop_3Calls) {
 
 TEST_F(TimerTest, Start_Runned_RunnedWithNewTimeout) {
   // Preconditions
-  timer::Timer test_timer(timer_name_, test_task_);
+  timer::Timer test_timer(kTimerName, test_task_);
   // Actions
   test_timer.Start(timeout_, repeatable_);
   // Expects
@@ -170,7 +170,7 @@ TEST_F(TimerTest, Start_Runned_RunnedWithNewTimeout) {
 
 TEST_F(TimerTest, Start_NotRunned_RunnedWithNewTimeout) {
   // Preconditions
-  timer::Timer test_timer(timer_name_, test_task_);
+  timer::Timer test_timer(kTimerName, test_task_);
   // Expects
   ASSERT_EQ(0u, test_timer.GetTimeout());
   ASSERT_FALSE(test_timer.IsRunning());
@@ -185,7 +185,7 @@ TEST_F(TimerTest, Start_NotRunned_RunnedWithNewTimeout) {
 
 TEST_F(TimerTest, Stop_FirstLoop_NoCall) {
   // Preconditions
-  timer::Timer test_timer(timer_name_, test_task_);
+  timer::Timer test_timer(kTimerName, test_task_);
   // Expects
   EXPECT_CALL(*test_task_, run()).Times(0);
   // Actions
@@ -197,7 +197,7 @@ TEST_F(TimerTest, Stop_SecondLoop_OneCall) {
   // Preconditions
   test_lock.Acquire();
   TestTask* task = new TestTask();
-  timer::Timer test_timer(timer_name_, task);
+  timer::Timer test_timer(kTimerName, task);
   // Actions
   test_timer.Start(timeout_, repeatable_);
   ASSERT_TRUE(test_timer.IsRunning());
@@ -211,7 +211,7 @@ TEST_F(TimerTest, Stop_SecondLoop_OneCall) {
 
 TEST_F(TimerTest, IsRunning_Started_True) {
   // Preconditions
-  timer::Timer test_timer(timer_name_, test_task_);
+  timer::Timer test_timer(kTimerName, test_task_);
   // Actions
   test_timer.Start(timeout_, repeatable_);
   // Expects
@@ -220,7 +220,7 @@ TEST_F(TimerTest, IsRunning_Started_True) {
 
 TEST_F(TimerTest, IsRunning_Stoped_False) {
   // Preconditions
-  timer::Timer test_timer(timer_name_, test_task_);
+  timer::Timer test_timer(kTimerName, test_task_);
   // Actions
   test_timer.Start(timeout_, repeatable_);
   ASSERT_TRUE(test_timer.IsRunning());

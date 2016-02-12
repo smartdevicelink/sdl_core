@@ -1471,8 +1471,6 @@ typedef utils::SharedPtr<timer::Timer> TimerSPtr;
   AMMetricObserver* metric_observer_;
 #endif  // TIME_TESTER
 
-  typedef utils::SharedPtr<ApplicationListUpdateTimer>
-      ApplicationListUpdateTimerSptr;
   Timer application_list_update_timer_;
 
   Timer tts_global_properties_timer_;
