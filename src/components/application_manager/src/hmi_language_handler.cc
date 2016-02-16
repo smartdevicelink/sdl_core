@@ -42,9 +42,9 @@ static const std::string UIKey = "UI";
 static const std::string VRKey = "VR";
 static const std::string TTSKey = "TTS";
 
-namespace application_manager {
-
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+
+namespace application_manager {
 
 HMILanguageHandler::HMILanguageHandler()  :
     capabilities_ui_language_(hmi_apis::Common_Language::INVALID_ENUM),

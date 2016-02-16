@@ -36,6 +36,7 @@
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/commands/hmi/request_to_hmi.h"
 #include "utils/make_shared.h"
+#include "utils/timer_task_impl.h"
 
 namespace application_manager {
 
@@ -46,13 +47,16 @@ using namespace sync_primitives;
 CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController")
 
 RequestController::RequestController()
-  : pool_state_(UNDEFINED),
-    pool_size_(profile::Profile::instance()->thread_pool_size()),
-    timer_("RequestCtrlTimer", this, &RequestController::onTimer, true),
-    is_low_voltage_(false) {
+    : pool_state_(UNDEFINED),
+      pool_size_(profile::Profile::instance()->thread_pool_size()),
+      timer_("AM RequestCtrlTimer",
+             new timer::TimerTaskImpl<RequestController>(
+                this,
+                &RequestController::onTimer)),
+      is_low_voltage_(false) {
   LOG4CXX_AUTO_TRACE(logger_);
   InitializeThreadpool();
-  timer_.start(default_sleep_time_);
+  timer_.Start(default_sleep_time_, true);
 }
 
 RequestController::~RequestController() {
@@ -479,8 +483,7 @@ void RequestController::UpdateTimer() {
       const uint32_t msecs =static_cast<uint32_t>(date_time::DateTime::getmSecs(end_time - current_time) );
       LOG4CXX_DEBUG(logger_, "Sleep for " << msecs << " millisecs" );
       // Timeout for bigger than 5 minutes is a mistake
-
-      timer_.updateTimeOut(msecs);
+      timer_.Start(msecs, true);
     } else {
       LOG4CXX_WARN(logger_, "Request app_id: " << front->app_id()
                    << " correlation_id: " << front->requestId()
@@ -493,12 +496,12 @@ void RequestController::UpdateTimer() {
                    << date_time::DateTime::getmSecs(current_time - end_time)
                    << " Request timeout (sec): "
                    << front->timeout_msec()/date_time::DateTime::MILLISECONDS_IN_SECOND);
-      timer_.updateTimeOut(0);
+      timer_.Start(0u, true);
     }
   } else {
     LOG4CXX_DEBUG(logger_, "Sleep for default sleep time "
                   << default_sleep_time_ << " milliseconds.");
-    timer_.updateTimeOut(default_sleep_time_);
+    timer_.Start(default_sleep_time_, true);
   }
 }
 

@@ -41,6 +41,8 @@
 #include "utils/file_system.h"
 #include "utils/logger.h"
 #include "utils/gen_hash.h"
+#include "utils/make_shared.h"
+#include "utils/timer_task_impl.h"
 
 namespace {
 
@@ -103,13 +105,23 @@ ApplicationImpl::ApplicationImpl(
     , is_voice_communication_application_(false)
     , is_resuming_(false)
     , video_stream_retry_number_(0)
-    , audio_stream_retry_number_(0) {
+    , audio_stream_retry_number_(0)
+    , video_stream_suspend_timer_(
+          "VideoStreamSuspend",
+          new ::timer::TimerTaskImpl<ApplicationImpl>(
+              this,
+              &ApplicationImpl::OnVideoStreamSuspend))
+    , audio_stream_suspend_timer_(
+          "AudioStreamSuspend",
+          new ::timer::TimerTaskImpl<ApplicationImpl>(
+              this,
+              &ApplicationImpl::OnAudioStreamSuspend)) {
   cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] = {
       date_time::DateTime::getCurrentTime(), 0};
   cmd_number_to_time_limits_[mobile_apis::FunctionID::GetVehicleDataID] = {
       date_time::DateTime::getCurrentTime(), 0};
 
-  set_mobile_app_id(mobile_app_id);
+  set_policy_app_id(policy_app_id);
   set_name(app_name);
 
   MarkUnregistered();
@@ -130,19 +142,6 @@ ApplicationImpl::ApplicationImpl(
       profile::Profile::instance()->video_data_stopped_timeout();
   audio_stream_suspend_timeout_ =
       profile::Profile::instance()->audio_data_stopped_timeout();
-
-  video_stream_suspend_timer_ =
-      ApplicationTimerPtr(new timer::TimerThread<ApplicationImpl>(
-          "VideoStreamSuspend",
-          this,
-          &ApplicationImpl::OnVideoStreamSuspend,
-          true));
-  audio_stream_suspend_timer_ =
-      ApplicationTimerPtr(new timer::TimerThread<ApplicationImpl>(
-          "AudioStreamSuspend",
-          this,
-          &ApplicationImpl::OnAudioStreamSuspend,
-          true));
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -417,13 +416,13 @@ void ApplicationImpl::StopStreaming(
 
   if (ServiceType::kMobileNav == service_type) {
     if (video_streaming_approved()) {
-      video_stream_suspend_timer_->stop();
+      video_stream_suspend_timer_.Stop();
       MessageHelper::SendNaviStopStream(app_id());
       set_video_streaming_approved(false);
     }
   } else if (ServiceType::kAudio == service_type) {
     if (audio_streaming_approved()) {
-      audio_stream_suspend_timer_->stop();
+      audio_stream_suspend_timer_.Stop();
       MessageHelper::SendAudioStopStream(app_id());
       set_audio_streaming_approved(false);
     }
@@ -436,13 +435,13 @@ void ApplicationImpl::SuspendStreaming(
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (ServiceType::kMobileNav == service_type) {
-    video_stream_suspend_timer_->suspend();
+    video_stream_suspend_timer_.Stop();
     ApplicationManagerImpl::instance()->OnAppStreaming(
         app_id(), service_type, false);
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
     video_streaming_suspended_ = true;
   } else if (ServiceType::kAudio == service_type) {
-    audio_stream_suspend_timer_->suspend();
+    audio_stream_suspend_timer_.Stop();
     ApplicationManagerImpl::instance()->OnAppStreaming(
         app_id(), service_type, false);
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
@@ -464,7 +463,7 @@ void ApplicationImpl::WakeUpStreaming(
       MessageHelper::SendOnDataStreaming(ServiceType::kMobileNav, true);
       video_streaming_suspended_ = false;
     }
-    video_stream_suspend_timer_->start(video_stream_suspend_timeout_);
+    video_stream_suspend_timer_.Start(video_stream_suspend_timeout_, true);
   } else if (ServiceType::kAudio == service_type) {
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     if (audio_streaming_suspended_) {
@@ -473,7 +472,7 @@ void ApplicationImpl::WakeUpStreaming(
       MessageHelper::SendOnDataStreaming(ServiceType::kAudio, true);
       audio_streaming_suspended_ = false;
     }
-    audio_stream_suspend_timer_->start(audio_stream_suspend_timeout_);
+    audio_stream_suspend_timer_.Start(audio_stream_suspend_timeout_, true);
   }
 }
 

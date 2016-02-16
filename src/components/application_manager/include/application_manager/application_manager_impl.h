@@ -85,6 +85,7 @@
 #include "utils/lock.h"
 #include "utils/singleton.h"
 #include "utils/data_accessor.h"
+#include "utils/timer.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -186,7 +187,7 @@ typedef struct {
 typedef std::queue<AudioData> RawAudioDataQueue;
 typedef threads::MessageLoopThread<RawAudioDataQueue> AudioPassThruQueue;
 }
-
+CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 typedef std::vector<std::string> RPCParams;
 
 class ApplicationManagerImpl
@@ -1278,9 +1279,7 @@ class ApplicationManagerImpl
    */
   typedef std::map<uint32_t, std::pair<bool, bool>> NaviServiceStatusMap;
 
-  typedef SharedPtr<TimerThread<ApplicationManagerImpl>>
-      ApplicationManagerTimerPtr;
-
+typedef utils::SharedPtr<timer::Timer> TimerSPtr;
   /**
    * @brief GetHashedAppID allows to obtain unique application id as a string.
    * It concatenates device mac and application id to obtain unique id.
@@ -1463,7 +1462,7 @@ class ApplicationManagerImpl
   uint32_t navi_close_app_timeout_;
   uint32_t navi_end_stream_timeout_;
 
-  std::vector<ApplicationManagerTimerPtr> timer_pool_;
+  std::vector<TimerSPtr> timer_pool_;
   sync_primitives::Lock timer_pool_lock_;
   sync_primitives::Lock stopping_flag_lock_;
   StateController state_ctrl_;
@@ -1472,20 +1471,11 @@ class ApplicationManagerImpl
   AMMetricObserver* metric_observer_;
 #endif  // TIME_TESTER
 
-  class ApplicationListUpdateTimer
-      : public timer::TimerThread<ApplicationManagerImpl> {
-   public:
-    ApplicationListUpdateTimer(ApplicationManagerImpl* callee)
-        : timer::TimerThread<ApplicationManagerImpl>(
-              "AM ListUpdater",
-              callee,
-              &ApplicationManagerImpl::OnApplicationListUpdateTimer) {}
-  };
   typedef utils::SharedPtr<ApplicationListUpdateTimer>
       ApplicationListUpdateTimerSptr;
-  ApplicationListUpdateTimerSptr application_list_update_timer_;
+  Timer application_list_update_timer_;
 
-  timer::TimerThread<ApplicationManagerImpl> tts_global_properties_timer_;
+  Timer tts_global_properties_timer_;
 
   bool is_low_voltage_;
   volatile bool is_stopping_;

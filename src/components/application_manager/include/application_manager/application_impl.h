@@ -46,10 +46,10 @@
 #include "protocol_handler/protocol_handler.h"
 
 #include "connection_handler/device.h"
-#include "utils/timer_thread.h"
 #include "utils/lock.h"
 #include "utils/atomic_object.h"
 #include "utils/custom_string.h"
+#include "utils/timer.h"
 
 namespace usage_statistics {
 
@@ -287,7 +287,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void CleanupFiles();
 
  private:
-  typedef SharedPtr<TimerThread<ApplicationImpl>> ApplicationTimerPtr;
 
   /**
    * @brief Callback for video streaming suspend timer.
@@ -345,8 +344,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   uint32_t audio_stream_retry_number_;
   uint32_t video_stream_suspend_timeout_;
   uint32_t audio_stream_suspend_timeout_;
-  ApplicationTimerPtr video_stream_suspend_timer_;
-  ApplicationTimerPtr audio_stream_suspend_timer_;
+  Timer video_stream_suspend_timer_;
+  Timer audio_stream_suspend_timer_;
 
   /**
    * @brief Defines number per time in seconds limits

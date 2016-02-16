@@ -406,19 +406,7 @@ class ApplicationManagerImpl
 
   friend class ApplicationListAccessor;
 
-  class ApplicationListUpdateTimer
-      : public timer::TimerThread<ApplicationManagerImpl> {
-   public:
-    ApplicationListUpdateTimer(ApplicationManagerImpl* callee)
-        : timer::TimerThread<ApplicationManagerImpl>(
-              "AM ListUpdater",
-              callee,
-              &ApplicationManagerImpl::OnApplicationListUpdateTimer) {}
-  };
-  typedef utils::SharedPtr<ApplicationListUpdateTimer>
-      ApplicationListUpdateTimerSptr;
-
- private:
+private:
   FRIEND_BASE_SINGLETON_CLASS(ApplicationManagerImpl);
 };
 
