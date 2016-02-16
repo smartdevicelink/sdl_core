@@ -142,6 +142,9 @@ mobile_apis::HMILevel::eType PhoneCallHmiState::hmi_level() const {
   if (is_navi_app(app_id_)) {
     return HMILevel::HMI_LIMITED;
   }
+  if (!is_media_app(app_id_)) {
+    return parent()->hmi_level();
+  }
   return HMILevel::HMI_BACKGROUND;
 }
 

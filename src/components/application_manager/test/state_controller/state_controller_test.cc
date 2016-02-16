@@ -253,10 +253,9 @@ class StateControllerTest : public ::testing::Test {
     switch (app_t) {
       case APP_TYPE_NON_MEDIA: {
         PrepareCommonStateResults(result_hmi_state);
-        result_hmi_state.push_back(
-            createHmiState(HMILevel::HMI_BACKGROUND,
-                           AudioStreamingState::NOT_AUDIBLE,
-                           SystemContext::SYSCTXT_MAIN));
+        result_hmi_state.push_back(createHmiState(
+            HMILevel::HMI_FULL, AudioStreamingState::NOT_AUDIBLE,
+            SystemContext::SYSCTXT_MAIN));
         break;
       }
       case APP_TYPE_MEDIA: {
@@ -428,16 +427,27 @@ class StateControllerTest : public ::testing::Test {
   }
 
   ApplicationType AppType(uint32_t app_id) {
-    ApplicationType app_type;
-    if (simple_app_id_ == app_id) {
-      app_type = APP_TYPE_NON_MEDIA;
-    } else if (media_app_id_ == app_id || vc_app_id_ == app_id ||
-               media_vc_app_id_ == app_id) {
-      app_type = APP_TYPE_MEDIA;
-    } else {
-      app_type = APP_TYPE_NAVI;
+    // TODO(AOleynik): Currently there is ongoing discussion regarding mixed
+    // application properties, i.e. is_media_application flag from RAI and
+    // AppHMITypes (NAVIGATION, etc.). Most likely logic should be changed
+    // after conclusion on APPLINK-20231
+    std::vector<am::ApplicationSharedPtr>::iterator app  =
+        std::find_if(
+          applications_list_.begin(),
+          applications_list_.end(),
+          [app_id](am::ApplicationSharedPtr a){return app_id == a->app_id();});
+
+    if (app == applications_list_.end()) {
+      return APP_TYPE_NON_MEDIA;
     }
-    return app_type;
+
+    if ((*app)->is_navi()) {
+      return APP_TYPE_NAVI;
+    }
+    if ((*app)->is_media_application()) {
+      return APP_TYPE_MEDIA;
+    }
+    return APP_TYPE_NON_MEDIA;
   }
 
   void TestSetState(am::ApplicationSharedPtr app,
