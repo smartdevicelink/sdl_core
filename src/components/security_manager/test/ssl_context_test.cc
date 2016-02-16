@@ -83,7 +83,9 @@ class SSLTest : public testing::Test {
  protected:
   static void SetUpTestCase() {
     std::ifstream file("server/spt_credential.p12.enc");
-    ss << file.rdbuf();
+    if (file.is_open()) {
+      ss << file.rdbuf();
+    }
     file.close();
     crypto_manager = new security_manager::CryptoManagerImpl();
     const bool crypto_manager_initialization =
@@ -152,7 +154,9 @@ class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
  protected:
   virtual void SetUp() OVERRIDE {
     std::ifstream file("server/spt_credential.p12.enc");
-    ss << file.rdbuf();
+    if (file.is_open()) {
+      ss << file.rdbuf();
+    }
     file.close();
 
     crypto_manager = new security_manager::CryptoManagerImpl();
@@ -290,7 +294,7 @@ TEST_F(SSLTest, OnTSL2Protocol_Positive) {
   ASSERT_FALSE(NULL == client_buf);
   ASSERT_LT(0u, client_buf_len);
 
-  while(true) {
+  while (true) {
     ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
               server_ctx->DoHandshakeStep(
                   client_buf, client_buf_len, &server_buf, &server_buf_len));
