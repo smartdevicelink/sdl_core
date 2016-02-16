@@ -84,11 +84,16 @@ class StateController : public event_engine::EventObserver {
       return;
     }
 
-    if (SendActivateApp) {
-      uint32_t corr_id = MessageHelper::SendActivateAppToHMI(
-          app->app_id(),
-          static_cast<hmi_apis::Common_HMILevel::eType>(
-              resolved_state->hmi_level()));
+    const bool is_full_allowed =
+            mobile_apis::HMILevel::HMI_FULL == resolved_state->hmi_level()
+            ? true
+            : false;
+
+    if (SendActivateApp && is_full_allowed) {
+        uint32_t corr_id = MessageHelper::SendActivateAppToHMI(
+            app->app_id(), static_cast<hmi_apis::Common_HMILevel::eType>(
+                                   resolved_state->hmi_level()));
+
       subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_ActivateApp,
                          corr_id);
       waiting_for_activate[app->app_id()] = resolved_state;
