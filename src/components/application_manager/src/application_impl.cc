@@ -405,6 +405,20 @@ void ApplicationImpl::StartStreaming(
   }
 }
 
+void ApplicationImpl::StopStreamingForce(
+    protocol_handler::ServiceType service_type) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  SuspendStreaming(service_type);
+
+  if (service_type == ServiceType::kMobileNav) {
+    StopNaviStreaming();
+  } else if (service_type == ServiceType::kAudio) {
+    StopAudioStreaming();
+  }
+}
+
 void ApplicationImpl::StopStreaming(
     protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
@@ -412,19 +426,29 @@ void ApplicationImpl::StopStreaming(
 
   SuspendStreaming(service_type);
 
-  if (ServiceType::kMobileNav == service_type) {
-    if (video_streaming_approved()) {
-      video_stream_suspend_timer_.Stop();
-      MessageHelper::SendNaviStopStream(app_id());
-      set_video_streaming_approved(false);
-    }
-  } else if (ServiceType::kAudio == service_type) {
-    if (audio_streaming_approved()) {
-      audio_stream_suspend_timer_.Stop();
-      MessageHelper::SendAudioStopStream(app_id());
-      set_audio_streaming_approved(false);
-    }
+  if (service_type == ServiceType::kMobileNav &&
+      video_streaming_approved()) {
+    StopNaviStreaming();
+  } else if (service_type == ServiceType::kAudio &&
+             audio_streaming_approved()) {
+    StopAudioStreaming();
   }
+}
+
+void ApplicationImpl::StopNaviStreaming() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  video_stream_suspend_timer_->stop();
+  MessageHelper::SendNaviStopStream(app_id());
+  set_video_streaming_approved(false);
+  set_video_stream_retry_number(0);
+}
+
+void ApplicationImpl::StopAudioStreaming() {
+  LOG4CXX_AUTO_TRACE(logger_);    
+  audio_stream_suspend_timer_->stop();
+  MessageHelper::SendAudioStopStream(app_id());
+  set_audio_streaming_approved(false);
+  set_audio_stream_retry_number(0);
 }
 
 void ApplicationImpl::SuspendStreaming(

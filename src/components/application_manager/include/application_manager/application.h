@@ -430,7 +430,15 @@ class Application : public virtual InitialApplicationData,
    * @brief Stops streaming service for application
    * @param service_type Type of streaming service
    */
-  virtual void StopStreaming(protocol_handler::ServiceType service_type) = 0;
+  virtual void StopStreaming(
+      protocol_handler::ServiceType service_type) = 0;
+
+  /**
+   * @brief Stops streaming for application whether it is allowed or not HMI
+   * @param service_type video or audio
+   */
+  virtual void StopStreamingForce(
+      protocol_handler::ServiceType service_type) = 0;
 
   /**
    * @brief Suspends streaming process for application

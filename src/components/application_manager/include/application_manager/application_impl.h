@@ -103,11 +103,16 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool audio_streaming_allowed() const;
   void set_audio_streaming_allowed(bool state);
 
-  void StartStreaming(protocol_handler::ServiceType service_type);
-  void StopStreaming(protocol_handler::ServiceType service_type);
-
-  void SuspendStreaming(protocol_handler::ServiceType service_type);
-  void WakeUpStreaming(protocol_handler::ServiceType service_type);
+  void StartStreaming(
+      protocol_handler::ServiceType service_type);
+  void StopStreamingForce(
+      protocol_handler::ServiceType service_type);
+  void StopStreaming(
+      protocol_handler::ServiceType service_type);
+  void SuspendStreaming(
+      protocol_handler::ServiceType service_type);
+  void WakeUpStreaming(
+      protocol_handler::ServiceType service_type);
 
   virtual bool is_voice_communication_supported() const;
   virtual void set_voice_communication_supported(
@@ -293,6 +298,16 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * Suspends video streaming process for application
    */
   void OnVideoStreamSuspend();
+
+  /**
+   * @brief Stops video streaming for application
+   */
+  inline void StopNaviStreaming();
+
+  /**
+   * @brief Stops audio streaming for application
+   */
+  inline void StopAudioStreaming();
 
   /**
    * @brief Callback for audio streaming suspend timer.
