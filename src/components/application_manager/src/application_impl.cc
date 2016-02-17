@@ -389,14 +389,14 @@ void ApplicationImpl::StartStreaming(
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (ServiceType::kMobileNav == service_type) {
-    LOG4CXX_TRACE(logger_, "Service type = Video");
+    LOG4CXX_TRACE(logger_, "ServiceType = Video");
     if (!video_streaming_approved()) {
       LOG4CXX_TRACE(logger_, "Video streaming not approved");
       MessageHelper::SendNaviStartStream(app_id());
       set_video_stream_retry_number(0);
     }
   } else if (ServiceType::kAudio == service_type) {
-    LOG4CXX_TRACE(logger_, "Service type = Audio");
+    LOG4CXX_TRACE(logger_, "ServiceType = Audio");
     if (!audio_streaming_approved()) {
       LOG4CXX_TRACE(logger_, "Audio streaming not approved");
       MessageHelper::SendAudioStartStream(app_id());
@@ -437,7 +437,7 @@ void ApplicationImpl::StopStreaming(
 
 void ApplicationImpl::StopNaviStreaming() {
   LOG4CXX_AUTO_TRACE(logger_);
-  video_stream_suspend_timer_->stop();
+  video_stream_suspend_timer_.Stop();
   MessageHelper::SendNaviStopStream(app_id());
   set_video_streaming_approved(false);
   set_video_stream_retry_number(0);
@@ -445,7 +445,7 @@ void ApplicationImpl::StopNaviStreaming() {
 
 void ApplicationImpl::StopAudioStreaming() {
   LOG4CXX_AUTO_TRACE(logger_);    
-  audio_stream_suspend_timer_->stop();
+  audio_stream_suspend_timer_.Stop();
   MessageHelper::SendAudioStopStream(app_id());
   set_audio_streaming_approved(false);
   set_audio_stream_retry_number(0);
