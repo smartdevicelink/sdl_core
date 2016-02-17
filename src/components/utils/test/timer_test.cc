@@ -40,9 +40,7 @@
 
 namespace test {
 namespace components {
-
 namespace timer_test {
-
 namespace {
 
 sync_primitives::Lock test_lock;
@@ -53,15 +51,17 @@ const std::string kTimerName = "test_timer";
 class TestTask : public timer::TimerTask {
  public:
   TestTask() : calls_count_(0u) {}
+
   void run() const OVERRIDE {
     sync_primitives::AutoLock auto_lock(test_lock);
     ++calls_count_;
     lock_monitor.NotifyOne();
   }
+
   uint GetCallsCount() const {
     return calls_count_;
   }
-  ~TestTask() {}
+
  private:
   mutable uint calls_count_;
 };
@@ -75,15 +75,18 @@ class FakeClassWithTimer {
                             this, &FakeClassWithTimer::OnTimer)) {
     internal_timer_.Start(kDefaultTimeout, true);
   }
+
   void OnTimer() {
     sync_primitives::AutoLock auto_lock_(test_lock);
     internal_timer_.Stop();
     ++calls_count_;
     lock_monitor.NotifyOne();
   }
+
   bool IsTimerRunning() const {
     return internal_timer_.IsRunning();
   }
+
   uint GetCallsCount() const {
     return calls_count_;
   }
@@ -93,7 +96,6 @@ class FakeClassWithTimer {
   timer::Timer internal_timer_;
 };
 }  // namespace
-
 
 class TimerTest : public testing::Test {
  protected:
@@ -143,7 +145,7 @@ TEST_F(TimerTest, Start_Loop_3Calls) {
   timer::Timer test_timer(kTimerName, task);
   // Actions
   test_timer.Start(timeout_, repeatable_);
-  for (int i = loops_count; i; --i) {
+  for (uint i = loops_count; i; --i) {
     lock_monitor.Wait(test_lock);
   }
   test_lock.Release();
@@ -181,7 +183,6 @@ TEST_F(TimerTest, Start_NotRunned_RunnedWithNewTimeout) {
   ASSERT_EQ(timeout_, test_timer.GetTimeout());
   ASSERT_TRUE(test_timer.IsRunning());
 }
-
 
 TEST_F(TimerTest, Stop_FirstLoop_NoCall) {
   // Preconditions

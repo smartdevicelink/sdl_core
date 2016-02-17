@@ -82,7 +82,7 @@ class AppStopwatch {
                const std::string& app_id);
   AppStopwatch(utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
                const std::string& app_id,
-               std::uint32_t timeout);
+               uint32_t timeout);
   ~AppStopwatch();
   void Start(AppStopwatchId stopwatch_type);
   void Switch(AppStopwatchId stopwatch_type);
@@ -93,7 +93,7 @@ class AppStopwatch {
   AppStopwatchId stopwatch_type_;
   utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager_;
   timer::Timer timer_;
-  const std::uint32_t time_out_;
+  const uint32_t time_out_;
 };
 
 }  // namespace usage_statistics
