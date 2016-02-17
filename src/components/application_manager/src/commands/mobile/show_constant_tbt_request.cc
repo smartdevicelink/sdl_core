@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string.h>
+#include <cstring>
 #include "application_manager/commands/mobile/show_constant_tbt_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -181,6 +181,7 @@ void ShowConstantTBTRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_ShowConstantTBT: {
       LOG4CXX_INFO(logger_, "Received Navigation_ShowConstantTBT event");
+      std::string return_info;
 
       mobile_apis::Result::eType result_code =
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
@@ -190,12 +191,16 @@ void ShowConstantTBTRequest::on_event(const event_engine::Event& event) {
       bool result = false;
       if (mobile_apis::Result::SUCCESS == result_code) {
         result = true;
+        return_info =
+            message[strings::msg_params][hmi_response::message].asString();
       } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code) &&
           hmi_capabilities.is_ui_cooperating()) {
         result = true;
       }
 
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      SendResponse(result, result_code,
+                   return_info.empty() ? 0 : return_info.c_str(),
+                   &(message[strings::msg_params]));
       break;
     }
     default: {
