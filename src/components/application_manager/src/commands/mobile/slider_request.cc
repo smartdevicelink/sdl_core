@@ -34,6 +34,7 @@
 #include "application_manager/commands/mobile/slider_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "config_profile/profile.h"
 
 namespace application_manager {
 
@@ -52,7 +53,7 @@ bool SliderRequest::Init() {
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
   if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
-    default_timeout_ =
+    default_timeout_ = profile::Profile::instance()->default_timeout() +
         (*message_)[strings::msg_params][strings::timeout].asUInt();
   }
 
