@@ -83,6 +83,12 @@ void OnExitApplicationNotification::Run() {
       app_mgr->UnregisterApplication(app_id, Result::SUCCESS);
       return;
     }
+    case Common_ApplicationExitReason::UNSUPPORTED_HMI_RESOURCE: {
+      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+          app_id, AppInterfaceUnregisteredReason::UNSUPPORTED_HMI_RESOURCE);
+      app_mgr->UnregisterApplication(app_id, Result::SUCCESS);
+      return;
+    }
     default: {
       LOG4CXX_WARN(logger_, "Unhandled reason");
       return;

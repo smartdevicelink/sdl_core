@@ -384,6 +384,9 @@
   <element name="UNAUTHORIZED_TRANSPORT_REGISTRATION">
     <description>By getting this value, SDL unregisters the named application</description>
   </element>
+  <element name="UNSUPPORTED_HMI_RESOURCE">
+    <description>By getting this value, SDL unregisters the named application</description>
+  </element>
 </enum>
 
 <enum name="TextFieldName">
