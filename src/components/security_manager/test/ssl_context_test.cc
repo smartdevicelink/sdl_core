@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,14 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <openssl/ssl.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <fstream>
-
 #include "gtest/gtest.h"
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <openssl/ssl.h>
+
 #include "security_manager/crypto_manager.h"
 #include "security_manager/crypto_manager_impl.h"
 #include "security_manager/ssl_context.h"
@@ -54,26 +52,47 @@
 
 namespace {
 const size_t updates_before_hour = 24;
-}
+const uint8_t* server_buf;
+const uint8_t* client_buf;
+size_t server_buf_len;
+size_t client_buf_len;
+}  // namespace
 
 namespace test {
 namespace components {
 namespace ssl_context_test {
 namespace custom_str = utils::custom_string;
 
+struct ProtocolAndCipher {
+  security_manager::Protocol server_protocol;
+  security_manager::Protocol client_protocol;
+  std::string server_ciphers_list;
+  std::string client_ciphers_list;
+
+  ProtocolAndCipher(security_manager::Protocol s_protocol,
+                    security_manager::Protocol c_protocol,
+                    std::string s_ciphers_list,
+                    std::string c_ciphers_list)
+      : server_protocol(s_protocol)
+      , client_protocol(c_protocol)
+      , server_ciphers_list(s_ciphers_list)
+      , client_ciphers_list(c_ciphers_list) {}
+};
+
 class SSLTest : public testing::Test {
  protected:
   static void SetUpTestCase() {
     std::ifstream file("server/spt_credential.p12.enc");
-    std::stringstream ss;
-    ss << file.rdbuf();
+    if (file.is_open()) {
+      ss << file.rdbuf();
+    }
     file.close();
     crypto_manager = new security_manager::CryptoManagerImpl();
     const bool crypto_manager_initialization =
         crypto_manager->Init(security_manager::SERVER,
                              security_manager::TLSv1_2,
                              ss.str(),
-                             FORD_CIPHER,
+                             ALL_CIPHERS,
                              false,
                              "",
                              updates_before_hour);
@@ -84,7 +103,7 @@ class SSLTest : public testing::Test {
         client_manager->Init(security_manager::CLIENT,
                              security_manager::TLSv1_2,
                              "",
-                             FORD_CIPHER,
+                             ALL_CIPHERS,
                              false,
                              "",
                              updates_before_hour);
@@ -107,6 +126,11 @@ class SSLTest : public testing::Test {
 
     ctx.expected_cn = "server";
     client_ctx->SetHandshakeContext(ctx);
+
+    server_buf = NULL;
+    client_buf = NULL;
+    server_buf_len = 0u;
+    client_buf_len = 0u;
   }
 
   virtual void TearDown() OVERRIDE {
@@ -118,22 +142,141 @@ class SSLTest : public testing::Test {
   static security_manager::CryptoManager* client_manager;
   security_manager::SSLContext* server_ctx;
   security_manager::SSLContext* client_ctx;
+  static std::stringstream ss;
 };
 
 security_manager::CryptoManager* SSLTest::crypto_manager;
 security_manager::CryptoManager* SSLTest::client_manager;
+std::stringstream SSLTest::ss;
 
-// TODO(EZAMAKHOV): Split to SSL/TLS1/TLS1_1/TLS1_2 tests
+// StartHandshake() fails when client and server protocols are not TLSv1_2
+class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
+ protected:
+  virtual void SetUp() OVERRIDE {
+    std::ifstream file("server/spt_credential.p12.enc");
+    if (file.is_open()) {
+      ss << file.rdbuf();
+    }
+    file.close();
 
-TEST_F(SSLTest, BrokenHandshake) {
-  const uint8_t* server_buf;
-  const uint8_t* client_buf;
-  size_t server_buf_len;
-  size_t client_buf_len;
+    crypto_manager = new security_manager::CryptoManagerImpl();
+    const bool crypto_manager_initialization =
+        crypto_manager->Init(security_manager::SERVER,
+                             GetParam().server_protocol,
+                             ss.str(),
+                             GetParam().server_ciphers_list,
+                             false,
+                             "",
+                             updates_before_hour);
+    EXPECT_TRUE(crypto_manager_initialization);
+
+    client_manager = new security_manager::CryptoManagerImpl();
+    const bool client_manager_initialization =
+        client_manager->Init(security_manager::CLIENT,
+                             GetParam().client_protocol,
+                             "",
+                             GetParam().client_ciphers_list,
+                             false,
+                             "",
+                             updates_before_hour);
+    EXPECT_TRUE(client_manager_initialization);
+
+    server_ctx = crypto_manager->CreateSSLContext();
+    client_ctx = client_manager->CreateSSLContext();
+
+    security_manager::SSLContext::HandshakeContext ctx;
+    ctx.make_context(custom_str::CustomString("SPT"),
+                     custom_str::CustomString("client"));
+    server_ctx->SetHandshakeContext(ctx);
+
+    ctx.expected_cn = "server";
+    client_ctx->SetHandshakeContext(ctx);
+
+    server_buf = NULL;
+    client_buf = NULL;
+    server_buf_len = 0u;
+    client_buf_len = 0u;
+  }
+
+  virtual void TearDown() OVERRIDE {
+    crypto_manager->ReleaseSSLContext(server_ctx);
+    client_manager->ReleaseSSLContext(client_ctx);
+
+    delete crypto_manager;
+    delete client_manager;
+  }
+
+  security_manager::CryptoManager* crypto_manager;
+  security_manager::CryptoManager* client_manager;
+  security_manager::SSLContext* server_ctx;
+  security_manager::SSLContext* client_ctx;
+  std::stringstream ss;
+};
+
+class SSLTestForTLS1_2 : public SSLTestParam {};
+
+// This case fails starting because we can handshake only with TLSv1_2 protocol.
+INSTANTIATE_TEST_CASE_P(
+    CorrectProtocolAndCiphers,
+    SSLTestParam,
+    ::testing::Values(ProtocolAndCipher(security_manager::TLSv1,
+                                        security_manager::TLSv1,
+                                        FORD_CIPHER,
+                                        FORD_CIPHER),
+                      ProtocolAndCipher(security_manager::TLSv1_1,
+                                        security_manager::TLSv1_1,
+                                        FORD_CIPHER,
+                                        FORD_CIPHER),
+                      ProtocolAndCipher(security_manager::SSLv3,
+                                        security_manager::SSLv3,
+                                        FORD_CIPHER,
+                                        FORD_CIPHER)));
+
+INSTANTIATE_TEST_CASE_P(
+    IncorrectProtocolAndCiphers,
+    SSLTestParam,
+    ::testing::Values(ProtocolAndCipher(security_manager::TLSv1,
+                                        security_manager::TLSv1_1,
+                                        FORD_CIPHER,
+                                        FORD_CIPHER),
+                      ProtocolAndCipher(security_manager::TLSv1,
+                                        security_manager::SSLv3,
+                                        FORD_CIPHER,
+                                        FORD_CIPHER),
+                      ProtocolAndCipher(security_manager::TLSv1_1,
+                                        security_manager::TLSv1,
+                                        FORD_CIPHER,
+                                        FORD_CIPHER),
+                      ProtocolAndCipher(security_manager::TLSv1_1,
+                                        security_manager::SSLv3,
+                                        FORD_CIPHER,
+                                        FORD_CIPHER),
+                      ProtocolAndCipher(security_manager::TLSv1_2,
+                                        security_manager::TLSv1,
+                                        FORD_CIPHER,
+                                        FORD_CIPHER),
+                      ProtocolAndCipher(security_manager::TLSv1_2,
+                                        security_manager::TLSv1_1,
+                                        FORD_CIPHER,
+                                        FORD_CIPHER),
+                      ProtocolAndCipher(security_manager::TLSv1_2,
+                                        security_manager::SSLv3,
+                                        FORD_CIPHER,
+                                        FORD_CIPHER),
+                      ProtocolAndCipher(security_manager::SSLv3,
+                                        security_manager::TLSv1,
+                                        FORD_CIPHER,
+                                        FORD_CIPHER),
+                      ProtocolAndCipher(security_manager::SSLv3,
+                                        security_manager::TLSv1_1,
+                                        FORD_CIPHER,
+                                        FORD_CIPHER)));
+
+TEST_F(SSLTest, OnTSL2Protocol_BrokenHandshake) {
   ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
             client_ctx->StartHandshake(&client_buf, &client_buf_len));
-  ASSERT_FALSE(client_buf == NULL);
-  ASSERT_GT(client_buf_len, 0u);
+  ASSERT_FALSE(NULL == client_buf);
+  ASSERT_LT(0u, client_buf_len);
   // Broke 3 bytes for get abnormal fail of handshake
   const_cast<uint8_t*>(client_buf)[0] ^= 0xFF;
   const_cast<uint8_t*>(client_buf)[client_buf_len / 2] ^= 0xFF;
@@ -141,25 +284,22 @@ TEST_F(SSLTest, BrokenHandshake) {
   ASSERT_EQ(security_manager::SSLContext::Handshake_Result_AbnormalFail,
             server_ctx->DoHandshakeStep(
                 client_buf, client_buf_len, &server_buf, &server_buf_len));
+  EXPECT_EQ("Initialization is not completed", server_ctx->LastError());
+  EXPECT_EQ("Initialization is not completed", client_ctx->LastError());
 }
 
-TEST_F(SSLTest, Positive) {
-  const uint8_t* server_buf;
-  const uint8_t* client_buf;
-  size_t server_buf_len;
-  size_t client_buf_len;
-
+TEST_F(SSLTest, OnTSL2Protocol_Positive) {
   ASSERT_EQ(client_ctx->StartHandshake(&client_buf, &client_buf_len),
             security_manager::SSLContext::Handshake_Result_Success);
-  ASSERT_FALSE(client_buf == NULL);
-  ASSERT_GT(client_buf_len, 0u);
+  ASSERT_FALSE(NULL == client_buf);
+  ASSERT_LT(0u, client_buf_len);
 
-  for (;;) {
+  while (true) {
     ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
               server_ctx->DoHandshakeStep(
                   client_buf, client_buf_len, &server_buf, &server_buf_len));
-    ASSERT_FALSE(server_buf == NULL);
-    ASSERT_GT(server_buf_len, 0u);
+    ASSERT_FALSE(NULL == server_buf);
+    ASSERT_LT(0u, server_buf_len);
 
     ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
               client_ctx->DoHandshakeStep(
@@ -168,12 +308,12 @@ TEST_F(SSLTest, Positive) {
       break;
     }
 
-    ASSERT_FALSE(client_buf == NULL);
-    ASSERT_GT(client_buf_len, 0u);
+    ASSERT_FALSE(NULL == client_buf);
+    ASSERT_LT(0u, client_buf_len);
   }
   // Expect empty buffers after init complete
-  ASSERT_TRUE(client_buf == NULL);
-  ASSERT_EQ(client_buf_len, 0u);
+  ASSERT_TRUE(NULL == client_buf);
+  ASSERT_EQ(0u, client_buf_len);
   // expect both side initialization complete
   EXPECT_TRUE(client_ctx->IsInitCompleted());
   EXPECT_TRUE(server_ctx->IsInitCompleted());
@@ -186,43 +326,39 @@ TEST_F(SSLTest, Positive) {
   EXPECT_TRUE(client_ctx->Encrypt(
       text, text_len, &encrypted_text, &encrypted_text_len));
 
-  ASSERT_NE(encrypted_text, reinterpret_cast<void*>(NULL));
-  ASSERT_GT(encrypted_text_len, 0u);
+  ASSERT_NE(reinterpret_cast<void*>(NULL), encrypted_text);
+  ASSERT_LT(0u, encrypted_text_len);
 
   // Decrypt text on server side
   EXPECT_TRUE(server_ctx->Decrypt(
       encrypted_text, encrypted_text_len, &text, &text_len));
-  ASSERT_NE(text, reinterpret_cast<void*>(NULL));
-  ASSERT_GT(text_len, 0u);
+  ASSERT_NE(reinterpret_cast<void*>(NULL), text);
+  ASSERT_LT(0u, text_len);
 
   ASSERT_EQ(strncmp(reinterpret_cast<const char*>(text), "abra", 4), 0);
 }
 
-TEST_F(SSLTest, EcncryptionFail) {
-  const uint8_t* server_buf;
-  const uint8_t* client_buf;
-  size_t server_buf_len;
-  size_t client_buf_len;
+TEST_F(SSLTest, OnTSL2Protocol_EcncryptionFail) {
   ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
             client_ctx->StartHandshake(&client_buf, &client_buf_len));
 
   while (!server_ctx->IsInitCompleted()) {
-    ASSERT_FALSE(client_buf == NULL);
-    ASSERT_GT(client_buf_len, 0u);
+    ASSERT_FALSE(NULL == client_buf);
+    ASSERT_LT(0u, client_buf_len);
     ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
               server_ctx->DoHandshakeStep(
                   client_buf, client_buf_len, &server_buf, &server_buf_len));
-    ASSERT_FALSE(server_buf == NULL);
-    ASSERT_GT(server_buf_len, 0u);
+    ASSERT_FALSE(NULL == server_buf);
+    ASSERT_LT(0u, server_buf_len);
 
     ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
               client_ctx->DoHandshakeStep(
                   server_buf, server_buf_len, &client_buf, &client_buf_len));
   }
-  // expect empty buffers after init complete
-  ASSERT_TRUE(client_buf == NULL);
-  ASSERT_EQ(client_buf_len, 0u);
-  // expect both side initialization complete
+  // Expect empty buffers after init complete
+  ASSERT_TRUE(NULL == client_buf);
+  ASSERT_EQ(0u, client_buf_len);
+  // Expect both side initialization complete
   EXPECT_TRUE(client_ctx->IsInitCompleted());
   EXPECT_TRUE(server_ctx->IsInitCompleted());
 
@@ -233,8 +369,8 @@ TEST_F(SSLTest, EcncryptionFail) {
   size_t encrypted_text_len;
   EXPECT_TRUE(client_ctx->Encrypt(
       text, text_len, &encrypted_text, &encrypted_text_len));
-  ASSERT_NE(encrypted_text, reinterpret_cast<void*>(NULL));
-  ASSERT_GT(encrypted_text_len, 0u);
+  ASSERT_NE(reinterpret_cast<void*>(NULL), encrypted_text);
+  ASSERT_LT(0u, encrypted_text_len);
 
   std::vector<uint8_t> broken(encrypted_text,
                               encrypted_text + encrypted_text_len);
@@ -253,6 +389,50 @@ TEST_F(SSLTest, EcncryptionFail) {
       encrypted_text, encrypted_text_len, &out_text, &out_text_size));
   EXPECT_FALSE(server_ctx->Encrypt(
       text, text_len, &encrypted_text, &encrypted_text_len));
+}
+
+TEST_P(SSLTestParam, ClientAndServerNotTLSv1_2_HandshakeFailed) {
+  ASSERT_EQ(security_manager::SSLContext::Handshake_Result_AbnormalFail,
+            client_ctx->StartHandshake(&client_buf, &client_buf_len));
+  EXPECT_TRUE(NULL == client_buf);
+  EXPECT_EQ(0u, client_buf_len);
+  ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
+            server_ctx->DoHandshakeStep(
+                client_buf, client_buf_len, &server_buf, &server_buf_len));
+  EXPECT_TRUE(NULL == server_buf);
+  EXPECT_EQ(0u, server_buf_len);
+
+  EXPECT_FALSE(server_ctx->IsInitCompleted());
+}
+
+INSTANTIATE_TEST_CASE_P(
+    ServerProtocolTLSv12,
+    SSLTestForTLS1_2,
+    ::testing::Values(ProtocolAndCipher(security_manager::TLSv1,
+                                        security_manager::TLSv1_2,
+                                        FORD_CIPHER,
+                                        FORD_CIPHER),
+                      ProtocolAndCipher(security_manager::TLSv1_1,
+                                        security_manager::TLSv1_2,
+                                        FORD_CIPHER,
+                                        FORD_CIPHER),
+                      ProtocolAndCipher(security_manager::SSLv3,
+                                        security_manager::TLSv1_2,
+                                        FORD_CIPHER,
+                                        FORD_CIPHER)));
+
+TEST_P(SSLTestForTLS1_2, HandshakeFailed) {
+  ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
+            client_ctx->StartHandshake(&client_buf, &client_buf_len));
+  EXPECT_FALSE(NULL == client_buf);
+  ASSERT_LT(0u, client_buf_len);
+  ASSERT_EQ(security_manager::SSLContext::Handshake_Result_AbnormalFail,
+            server_ctx->DoHandshakeStep(
+                client_buf, client_buf_len, &server_buf, &server_buf_len));
+  EXPECT_TRUE(NULL == server_buf);
+  EXPECT_EQ(0u, server_buf_len);
+
+  EXPECT_FALSE(server_ctx->IsInitCompleted());
 }
 
 }  // namespace ssl_context_test
