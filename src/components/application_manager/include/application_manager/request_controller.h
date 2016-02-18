@@ -42,12 +42,12 @@
 #include "utils/threads/thread.h"
 #include "utils/conditional_variable.h"
 #include "utils/threads/thread_delegate.h"
+#include "utils/timer.h"
 
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
 #include "application_manager/request_info.h"
-#include "utils/timer_thread.h"
 
 
 namespace application_manager {
@@ -281,7 +281,7 @@ class RequestController {
     /*
      * timer for checking requests timeout
      */
-    timer::TimerThread<RequestController> timer_;
+    timer::Timer timer_;
     static const uint32_t default_sleep_time_ = UINT_MAX;
 
     bool is_low_voltage_;

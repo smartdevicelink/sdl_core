@@ -36,9 +36,11 @@
 #include <ctime>
 #include "usage_statistics/statistics_manager.h"
 #include "utils/shared_ptr.h"
-#include "utils/timer_thread.h"
+#include "utils/timer.h"
 
 namespace usage_statistics {
+
+using timer::Timer;
 
 class GlobalCounter {
  public:
@@ -80,7 +82,7 @@ class AppStopwatch {
                const std::string& app_id);
   AppStopwatch(utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
                const std::string& app_id,
-               std::uint32_t time_out);
+               uint32_t timeout);
   ~AppStopwatch();
   void Start(AppStopwatchId stopwatch_type);
   void Switch(AppStopwatchId stopwatch_type);
@@ -90,9 +92,8 @@ class AppStopwatch {
   std::string app_id_;
   AppStopwatchId stopwatch_type_;
   utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager_;
-  typedef timer::TimerThread<AppStopwatch> Timer;
-  Timer* timer_;
-  const std::uint32_t time_out_;
+  timer::Timer timer_;
+  const uint32_t time_out_;
 };
 
 }  // namespace usage_statistics

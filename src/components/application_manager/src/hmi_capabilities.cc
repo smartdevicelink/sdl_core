@@ -45,32 +45,35 @@
 #include "application_manager/message_helper.h"
 #include "formatters/CFormatterJsonBase.h"
 
+CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+
 namespace application_manager {
 namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+std::map<std::string, hmi_apis::Common_VrCapabilities::eType> vr_enum_capabilities =
+{
+    {"TEXT", hmi_apis::Common_VrCapabilities::VR_TEXT}
+};
 
-std::map<std::string, hmi_apis::Common_VrCapabilities::eType>
-    vr_enum_capabilities = {{"TEXT", hmi_apis::Common_VrCapabilities::VR_TEXT}};
-
-std::map<std::string, hmi_apis::Common_ButtonName::eType> button_enum_name = {
-    {"OK", hmi_apis::Common_ButtonName::OK},
-    {"SEEKLEFT", hmi_apis::Common_ButtonName::SEEKLEFT},
-    {"SEEKRIGHT", hmi_apis::Common_ButtonName::SEEKRIGHT},
-    {"TUNEUP", hmi_apis::Common_ButtonName::TUNEUP},
-    {"TUNEDOWN", hmi_apis::Common_ButtonName::TUNEDOWN},
-    {"PRESET_0", hmi_apis::Common_ButtonName::PRESET_0},
-    {"PRESET_1", hmi_apis::Common_ButtonName::PRESET_1},
-    {"PRESET_2", hmi_apis::Common_ButtonName::PRESET_2},
-    {"PRESET_3", hmi_apis::Common_ButtonName::PRESET_3},
-    {"PRESET_4", hmi_apis::Common_ButtonName::PRESET_4},
-    {"PRESET_5", hmi_apis::Common_ButtonName::PRESET_5},
-    {"PRESET_6", hmi_apis::Common_ButtonName::PRESET_6},
-    {"PRESET_7", hmi_apis::Common_ButtonName::PRESET_7},
-    {"PRESET_8", hmi_apis::Common_ButtonName::PRESET_8},
-    {"PRESET_9", hmi_apis::Common_ButtonName::PRESET_9},
-    {"CUSTOM_BUTTON", hmi_apis::Common_ButtonName::CUSTOM_BUTTON},
-    {"SEARCH", hmi_apis::Common_ButtonName::SEARCH},
+std::map<std::string, hmi_apis::Common_ButtonName::eType> button_enum_name =
+{
+    {"OK"             , hmi_apis::Common_ButtonName::OK},
+    {"SEEKLEFT"       , hmi_apis::Common_ButtonName::SEEKLEFT},
+    {"SEEKRIGHT"      , hmi_apis::Common_ButtonName::SEEKRIGHT},
+    {"TUNEUP"         , hmi_apis::Common_ButtonName::TUNEUP},
+    {"TUNEDOWN"       , hmi_apis::Common_ButtonName::TUNEDOWN},
+    {"PRESET_0"       , hmi_apis::Common_ButtonName::PRESET_0},
+    {"PRESET_1"       , hmi_apis::Common_ButtonName::PRESET_1},
+    {"PRESET_2"       , hmi_apis::Common_ButtonName::PRESET_2},
+    {"PRESET_3"       , hmi_apis::Common_ButtonName::PRESET_3},
+    {"PRESET_4"       , hmi_apis::Common_ButtonName::PRESET_4},
+    {"PRESET_5"       , hmi_apis::Common_ButtonName::PRESET_5},
+    {"PRESET_6"       , hmi_apis::Common_ButtonName::PRESET_6},
+    {"PRESET_7"       , hmi_apis::Common_ButtonName::PRESET_7},
+    {"PRESET_8"       , hmi_apis::Common_ButtonName::PRESET_8},
+    {"PRESET_9"       , hmi_apis::Common_ButtonName::PRESET_9},
+    {"CUSTOM_BUTTON"  , hmi_apis::Common_ButtonName::CUSTOM_BUTTON},
+    {"SEARCH"         , hmi_apis::Common_ButtonName::SEARCH},
 
 };
 

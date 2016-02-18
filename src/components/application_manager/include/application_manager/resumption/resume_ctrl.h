@@ -45,8 +45,8 @@
 #include "application_manager/event_engine/event_observer.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/application.h"
-#include "utils/timer_thread.h"
 #include "resumption_data.h"
+#include "utils/timer.h"
 
 namespace application_manager {
 class Application;
@@ -436,8 +436,8 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    *
    */
   mutable sync_primitives::Lock   queue_lock_;
-  timer::TimerThread<ResumeCtrl>  restore_hmi_level_timer_;
-  timer::TimerThread<ResumeCtrl>  save_persistent_data_timer_;
+  timer::Timer restore_hmi_level_timer_;
+  timer::Timer save_persistent_data_timer_;
   typedef std::list<uint32_t>     WaitingForTimerList;
   WaitingForTimerList             waiting_for_timer_;
   bool                            is_resumption_active_;

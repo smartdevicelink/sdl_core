@@ -44,6 +44,8 @@
 #include "utils/logger.h"
 #include "utils/gen_hash.h"
 #include "utils/macro.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
 #  include "policy/sql_pt_representation.h"
 

@@ -56,7 +56,6 @@ set(testSources
   singleton_test.cc
   #posix_thread_test.cc
   stl_utils_test.cc
-  timer_thread_test.cc
   rwlock_posix_test.cc
   async_runner_test.cc
   shared_ptr_test.cc
@@ -64,6 +63,7 @@ set(testSources
   atomic_object_test.cc
   message_loop_thread_test.cc
   custom_string_test.cc
+  timer_test.cc
 )
 
 set(testLibraries

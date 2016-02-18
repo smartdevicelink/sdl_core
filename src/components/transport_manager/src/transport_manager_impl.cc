@@ -43,6 +43,8 @@
 
 #include "utils/macro.h"
 #include "utils/logger.h"
+#include "utils/make_shared.h"
+#include "utils/timer_task_impl.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_manager_listener_empty.h"
@@ -295,7 +297,7 @@ int TransportManagerImpl::SendMessageToDevice(const ::protocol_handler::RawMessa
     return E_INVALID_HANDLE;
   }
 
-  if (connection->shutDown) {
+  if (connection->shutdown) {
     LOG4CXX_ERROR(logger_, "TransportManagerImpl::Disconnect: Connection is to shut down.");
     LOG4CXX_TRACE(logger_,
                   "exit with E_CONNECTION_IS_TO_SHUTDOWN. Condition: connection->shutDown");
@@ -694,8 +696,8 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
         break;
       }
       RaiseEvent(&TransportManagerListener::OnTMMessageSend, event.event_data);
-      if (connection->shutDown && --connection->messages_count == 0) {
-        connection->timer->stop();
+      if (connection->shutdown && --connection->messages_count == 0) {
+        connection->timer->Stop();
         connection->transport_adapter->Disconnect(connection->device,
             connection->application);
       }
@@ -853,16 +855,20 @@ void TransportManagerImpl::Handle(::protocol_handler::RawMessagePtr msg) {
 }
 
 TransportManagerImpl::ConnectionInternal::ConnectionInternal(
-  TransportManagerImpl* transport_manager, TransportAdapter* transport_adapter,
-  const ConnectionUID& id, const DeviceUID& dev_id, const ApplicationHandle& app_id,
-  const DeviceHandle& device_handle)
-  : transport_manager(transport_manager),
-    transport_adapter(transport_adapter),
-    timer(new TimerInternal("TM DiscRoutine", this,
-                            &ConnectionInternal::DisconnectFailedRoutine)),
-    shutDown(false),
-    device_handle_(device_handle),
-    messages_count(0) {
+    TransportManagerImpl* transport_manager,
+    TransportAdapter* transport_adapter, const ConnectionUID& id,
+    const DeviceUID& dev_id, const ApplicationHandle& app_id,
+    const DeviceHandle& device_handle)
+    : transport_manager(transport_manager),
+      transport_adapter(transport_adapter),
+      timer(utils::MakeShared<timer::Timer>(
+                "TM DiscRoutine",
+                new ::timer::TimerTaskImpl<ConnectionInternal> (
+                    this,
+                    &ConnectionInternal::DisconnectFailedRoutine))),
+      shutdown(false),
+      device_handle_(device_handle),
+      messages_count(0) {
   Connection::id = id;
   Connection::device = dev_id;
   Connection::application = app_id;
@@ -872,8 +878,8 @@ void TransportManagerImpl::ConnectionInternal::DisconnectFailedRoutine() {
   LOG4CXX_TRACE(logger_, "enter");
   transport_manager->RaiseEvent(&TransportManagerListener::OnDisconnectFailed,
                                 device_handle_, DisconnectDeviceError());
-  shutDown = false;
-  timer->stop();
+  shutdown = false;
+  timer->Stop();
   LOG4CXX_TRACE(logger_, "exit");
 }
 

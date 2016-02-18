@@ -59,10 +59,9 @@
 #include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
 
-namespace application_manager {
-
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
+namespace application_manager {
 namespace {
 
 typedef std::map<std::string, hmi_apis::Common_AppPriority::eType>

@@ -56,7 +56,6 @@
 namespace media_manager {
 
 using profile::Profile;
-using timer::TimerThread;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
