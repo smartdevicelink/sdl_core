@@ -41,7 +41,7 @@ namespace timer {
 class TimerTask {
  public:
   /**
-   * @brief run
+   * @brief this method calls callback from callee
    */
   virtual void run() const = 0;
 

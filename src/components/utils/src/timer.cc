@@ -190,8 +190,6 @@ void timer::Timer::OnTimeout() {
 }
 
 void timer::Timer::SetTimeoutUnsafe(const timer::Milliseconds timeout) {
-  // There would be no way to stop thread if timeout in lopper will be 0
-  // and if we puts to timer_create zero timeout then we get sys error(22)
   timeout_ms_ = (0u != timeout) ? timeout : 1u;
 }
 

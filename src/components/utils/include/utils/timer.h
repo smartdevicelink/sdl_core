@@ -79,7 +79,7 @@ class Timer {
    */
   void Stop();
   /**
-   * @brief method which know about Timer state: runned or no
+   * @brief method which know about Timer state: is running or not
    * @return true when timer runned, false when timer stand
    */
   bool IsRunning() const;
@@ -107,7 +107,8 @@ class Timer {
   /**
    * @brief method for setting correct timeout.
    * @param timeout - if it`s value = 0, timeout will be setted to 1
-   * (description inside specification)
+   * There would be no way to stop thread if timeout in lopper will be 0
+   * and if we puts to timer_create zero timeout then we get sys error(22)
    */
   void SetTimeoutUnsafe(const Milliseconds timeout);
 
