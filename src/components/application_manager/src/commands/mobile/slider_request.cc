@@ -36,6 +36,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "utils/helpers.h"
+#include "config_profile/profile.h"
 
 namespace application_manager {
 
@@ -54,12 +55,10 @@ bool SliderRequest::Init() {
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
   if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
-    // Add 2 seconds reserve to compensate HMI communication and processing.
-    uint32_t request_timeout_plus_reserve =
-        (*message_)[strings::msg_params][strings::timeout].asUInt() + 2000;
-    if (request_timeout_plus_reserve > default_timeout_) {
-      default_timeout_ = request_timeout_plus_reserve;
-    }
+    /* According to APPLINK-21499 set mobile command timeout (default_timeout_)
+       to slider RPC timeout plus default command timeout */
+    default_timeout_ = profile::Profile::instance()->default_timeout() +
+        (*message_)[strings::msg_params][strings::timeout].asUInt();
   }
 
   return true;
