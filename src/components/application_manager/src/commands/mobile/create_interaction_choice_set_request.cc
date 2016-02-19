@@ -122,12 +122,6 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
 
   std::set<uint32_t> choice_id_set;
 
-  const SmartArray* new_choice_set_array =
-      (*message_)[strings::msg_params][strings::choice_set].asArray();
-
-  SmartArray::const_iterator it_array =
-      new_choice_set_array->begin();
-
   const SmartArray* choice_set =
       (*message_)[strings::msg_params][strings::choice_set].asArray();
 
@@ -143,35 +137,12 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
       return mobile_apis::Result::INVALID_ID;
     }
 
-    // Check along with VR commands in other choices in the new set
-    SmartArray::const_iterator it_same_array =
-      new_choice_set_array->begin();
-
-    SmartArray::const_iterator it_same_array_end =
-      new_choice_set_array->end();
-
-    for (; it_same_array != it_same_array_end; ++it_same_array) {
-      // Skip check for itself
-      if ((*it_array)[strings::choice_id] ==
-          (*it_same_array)[strings::choice_id]) {
-        continue;
-      }
-
-      if (compareSynonyms((*it_array), (*it_same_array))) {
-        LOG4CXX_ERROR(logger_,
-                      "Incoming choice set has duplicate VR command(s).");
-
-        return mobile_apis::Result::DUPLICATE_NAME;
-      }
-    }
-
-    if (IsWhiteSpaceExist((*it_array))) {
+    if (IsWhiteSpaceExist(*choice_set_it)) {
       LOG4CXX_ERROR(logger_,
                     "Incoming choice set has contains \t\n \\t \\n");
       return mobile_apis::Result::INVALID_DATA;
     }
   }
-
   return mobile_apis::Result::SUCCESS;
 }
 
