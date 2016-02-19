@@ -602,7 +602,7 @@ bool HMICapabilities::load_capabilities_from_file() {
 
       if (check_existing_json_member(ui, "language")) {
         const std::string lang = ui.get("language", "EN-US").asString();
-        ui_language_ = (MessageHelper::CommonLanguageFromString(lang));
+        set_active_ui_language(MessageHelper::CommonLanguageFromString(lang));
       }
 
       if (check_existing_json_member(ui, "languages")) {
@@ -804,7 +804,7 @@ bool HMICapabilities::load_capabilities_from_file() {
       Json::Value vr = root_json.get("VR", "");
       if (check_existing_json_member(vr, "language")) {
         const std::string lang = vr.get("language", "EN-US").asString();
-        vr_language_ = MessageHelper::CommonLanguageFromString(lang);
+        set_active_vr_language(MessageHelper::CommonLanguageFromString(lang));
       }
 
       if (check_existing_json_member(vr, "languages")) {
@@ -833,7 +833,7 @@ bool HMICapabilities::load_capabilities_from_file() {
 
       if (check_existing_json_member(tts, "language")) {
         const std::string lang = tts.get("language", "EN-US").asString();
-        tts_language_ = MessageHelper::CommonLanguageFromString(lang);
+        set_active_tts_language(MessageHelper::CommonLanguageFromString(lang));
       }
 
       if (check_existing_json_member(tts, "languages")) {
