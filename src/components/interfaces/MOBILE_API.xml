@@ -385,6 +385,7 @@
     <element name="FACTORY_DEFAULTS" />
     <element name="APP_UNAUTHORIZED" />
     <element name="PROTOCOL_VIOLATION" />
+    <element name="UNSUPPORTED_HMI_RESOURCE" />
   </enum>
 
   <enum name="TriggerSource">
