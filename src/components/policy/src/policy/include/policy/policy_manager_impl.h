@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -35,6 +35,7 @@
 
 #include <string>
 #include <list>
+#include <cstdint>
 
 #include "utils/shared_ptr.h"
 #include "utils/lock.h"
@@ -45,6 +46,7 @@
 #include "functions.h"
 #include "usage_statistics/statistics_manager.h"
 #include "policy/policy_helper.h"
+#include "utils/timer.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -66,7 +68,7 @@ class PolicyManagerImpl : public PolicyManager {
                                 EndpointUrls& end_points);
 
     virtual std::string GetLockScreenIconUrl() const;
-    virtual void RequestPTUpdate();
+    virtual bool RequestPTUpdate();
     virtual void CheckPermissions(const PTString& app_id,
         const PTString& hmi_level,
         const PTString& rpc,
@@ -78,7 +80,7 @@ class PolicyManagerImpl : public PolicyManager {
     virtual std::string ForcePTExchange();
     virtual std::string GetPolicyTableStatus() const;
     virtual void ResetRetrySequence();
-    virtual int NextRetryTimeout();
+    virtual uint32_t NextRetryTimeout();
     virtual int TimeoutExchange();
     virtual const std::vector<int> RetrySequenceDelaysSeconds();
     virtual void OnExceededTimeout();
@@ -284,6 +286,8 @@ class PolicyManagerImpl : public PolicyManager {
     bool IsPTValid(utils::SharedPtr<policy_table::Table> policy_table,
                    policy_table::PolicyTableType type) const;
 
+    void RetrySequence();
+
 private:
     PolicyListener* listener_;
 
@@ -296,7 +300,7 @@ private:
     /**
      * Timeout to wait response with UpdatePT
      */
-    int retry_sequence_timeout_;
+    uint32_t retry_sequence_timeout_;
 
     /**
      * Seconds between retries to update PT
@@ -312,6 +316,11 @@ private:
      * Lock for guarding retry sequence
      */
     sync_primitives::Lock retry_sequence_lock_;
+
+    /**
+      * Timer to retry UpdatePT
+      */
+    timer::Timer timer_retry_sequence_;
 
     /**
      * @brief Device id, which is used during PTU handling for specific

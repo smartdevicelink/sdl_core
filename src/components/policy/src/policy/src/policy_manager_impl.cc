@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -44,26 +44,34 @@
 #include "utils/file_system.h"
 #include "utils/logger.h"
 #include "utils/date_time.h"
+#include "utils/make_shared.h"
 #include "policy/cache_manager.h"
 #include "policy/update_status_manager.h"
 #include "config_profile/profile.h"
+#include "utils/timer_task_impl.h"
 
 policy::PolicyManager* CreateManager() {
   return new policy::PolicyManagerImpl();
 }
+
+namespace {
+const uint32_t kDefaultRetryTimeoutInSec = 60u;
+}  // namespace
 
 namespace policy {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
 PolicyManagerImpl::PolicyManagerImpl()
-  : PolicyManager(),
-    listener_(NULL),
-    cache_(new CacheManager),
-    retry_sequence_timeout_(60),
-    retry_sequence_index_(0),
-    ignition_check(true) {
-}
+    : PolicyManager()
+    , listener_(NULL)
+    , cache_(new CacheManager)
+    , retry_sequence_timeout_(kDefaultRetryTimeoutInSec)
+    , retry_sequence_index_(0)
+    , timer_retry_sequence_("Retry sequence timer",
+                            new timer::TimerTaskImpl<PolicyManagerImpl>(
+                                this, &PolicyManagerImpl::RetrySequence))
+    , ignition_check(true) {}
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
   listener_ = listener;
@@ -152,6 +160,12 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
   update_status_manager_.OnValidUpdateReceived();
   cache_->SaveUpdateRequired(false);
 
+  // Update finished, no need retry
+  if (timer_retry_sequence_.IsRunning()) {
+    LOG4CXX_INFO(logger_, "Stop retry sequence");
+    timer_retry_sequence_.Stop();
+  }
+
   {
     sync_primitives::AutoLock lock(apps_registration_lock_);
 
@@ -232,13 +246,13 @@ void PolicyManagerImpl::GetServiceUrls(const std::string& service_type,
   cache_->GetServiceUrls(service_type, end_points);
 }
 
-void PolicyManagerImpl::RequestPTUpdate() {
+bool PolicyManagerImpl::RequestPTUpdate() {
   LOG4CXX_AUTO_TRACE(logger_);
   utils::SharedPtr<policy_table::Table> policy_table_snapshot =
       cache_->GenerateSnapshot();
   if (!policy_table_snapshot) {
     LOG4CXX_ERROR(logger_, "Failed to create snapshot of policy table");
-    return;
+    return false;
   }
 
   IsPTValid(policy_table_snapshot, policy_table::PT_SNAPSHOT);
@@ -251,14 +265,13 @@ void PolicyManagerImpl::RequestPTUpdate() {
 
   BinaryMessage update(message_string.begin(), message_string.end());
 
-
-  listener_->OnSnapshotCreated(update,
-                               RetrySequenceDelaysSeconds(),
-                               TimeoutExchange());
+  listener_->OnSnapshotCreated(update);
 
   // Need to reset update schedule since all currenly registered applications
   // were already added to the snapshot so no update for them required.
   update_status_manager_.ResetUpdateSchedule();
+
+  return true;
 }
 
 std::string PolicyManagerImpl::GetLockScreenIconUrl() const {
@@ -289,7 +302,10 @@ void PolicyManagerImpl::StartPTExchange() {
     }
 
     if (update_status_manager_.IsUpdateRequired()) {
-      RequestPTUpdate();
+      if (RequestPTUpdate() && !timer_retry_sequence_.IsRunning()) {
+        // Start retry sequency
+        timer_retry_sequence_.Start(NextRetryTimeout(), true);
+      }
     }
   }
 }
@@ -726,16 +742,25 @@ std::string PolicyManagerImpl::GetPolicyTableStatus() const {
   return update_status_manager_.StringifiedUpdateStatus();
 }
 
-int PolicyManagerImpl::NextRetryTimeout() {
+uint32_t PolicyManagerImpl::NextRetryTimeout() {
   sync_primitives::AutoLock auto_lock(retry_sequence_lock_);
   LOG4CXX_DEBUG(logger_, "Index: " << retry_sequence_index_);
-  int next = 0;
-  if (!retry_sequence_seconds_.empty()
-      && retry_sequence_index_ < retry_sequence_seconds_.size()) {
-    next = retry_sequence_seconds_[retry_sequence_index_];
-    ++retry_sequence_index_;
+  uint32_t next = 0u;
+  if (retry_sequence_seconds_.empty() ||
+      retry_sequence_index_ >= retry_sequence_seconds_.size()) {
+    return next;
   }
-  return next;
+
+  ++retry_sequence_index_;
+
+  for (uint32_t i = 0u; i < retry_sequence_index_; ++i) {
+    next += retry_sequence_seconds_[i];
+    // According to requirement APPLINK-18244
+    next += retry_sequence_timeout_;
+  }
+
+  // Return miliseconds
+  return next * date_time::DateTime::MILLISECONDS_IN_SECOND;
 }
 
 void PolicyManagerImpl::RefreshRetrySequence() {
@@ -960,5 +985,18 @@ void PolicyManagerImpl::set_cache_manager(
   cache_ = cache_manager;
 }
 
-}  //  namespace policy
+void PolicyManagerImpl::RetrySequence() {
+  LOG4CXX_INFO(logger_, "Start new retry sequence");
+  RequestPTUpdate();
 
+  uint32_t timeout = NextRetryTimeout();
+
+  if (!timeout && timer_retry_sequence_.IsRunning()) {
+    timer_retry_sequence_.Stop();
+    return;
+  }
+
+  timer_retry_sequence_.Start(timeout, true);
+}
+
+}  //  namespace policy

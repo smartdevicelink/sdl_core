@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,7 +58,7 @@ class MockPolicyManager : public PolicyManager {
   MOCK_METHOD1(ResetPT, bool(const std::string& file_name));
   MOCK_CONST_METHOD1(GetUpdateUrl, std::string(int service_type));
   MOCK_METHOD2(GetUpdateUrls, void(int service_type, EndpointUrls& end_points));
-  MOCK_METHOD0(RequestPTUpdate, void());
+  MOCK_METHOD0(RequestPTUpdate, bool());
   MOCK_METHOD5(CheckPermissions,
                void(const PTString& app_id, const PTString& hmi_level,
                     const PTString& rpc, const RPCParams& rpc_params,
