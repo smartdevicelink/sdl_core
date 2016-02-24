@@ -182,6 +182,7 @@ void ResumeCtrl::ApplicationResumptiOnTimer() {
   }
   is_resumption_active_ = false;
   waiting_for_timer_.clear();
+  StartSavePersistentDataTimer();
 }
 
 void ResumeCtrl::OnAppActivated(ApplicationSharedPtr application) {
@@ -747,10 +748,27 @@ void ResumeCtrl::LoadResumeData() {
   }
 }
 
+void ResumeCtrl::OnAppRegistrationStart(const std::string& policy_app_id,
+                                          const std::string& device_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (IsApplicationSaved(policy_app_id, device_id)) {
+    LOG4CXX_INFO(logger_, "Application is found in resumption "
+        "data and will try to resume. Stopping resume data persistent timer");
+    StopSavePersistentDataTimer();
+  }
+}
+
+void ResumeCtrl::OnAppRegistrationEnd() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  StartSavePersistentDataTimer();
+}
+
 bool ResumeCtrl::IsAppDataResumptionExpired(
     const smart_objects::SmartObject& application) const {
   const int32_t max_ign_off_count = 3;
   return max_ign_off_count <= application[strings::ign_off_count].asInt();
 }
+
+
 
 }  // namespce resumption

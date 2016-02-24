@@ -548,6 +548,11 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
                  : GenerateNewHMIAppID());
   }
 
+  // Stops timer of saving data to resumption in order to
+  // doesn't erase data from resumption storage.
+  // Timer will be started after hmi level resumption.
+  resume_ctrl_.OnAppRegistrationStart(policy_app_id, device_mac);
+
   // Add application to registered app list and set appropriate mark.
   // Lock has to be released before adding app to policy DB to avoid possible
   // deadlock with simultaneous PTU processing
