@@ -67,30 +67,6 @@ class MediaAdapterImplMock : public ::media_manager::MediaAdapterImpl {
       bool(int32_t application_key));
 };
 
-/*
- * MOCK implementation of ::protocol_handler::ProtocolHandler
- */
-using namespace protocol_handler;
-class ProtocolHandlerMock : public protocol_handler::ProtocolHandler {
- public:
-  MOCK_METHOD2(SendMessageToMobileApp,
-      void(const ::protocol_handler::RawMessagePtr message,
-          bool final_message));
-  MOCK_METHOD1(AddProtocolObserver,
-      void(::protocol_handler::ProtocolObserver *observer));
-  MOCK_METHOD1(RemoveProtocolObserver,
-      void(::protocol_handler::ProtocolObserver *observer));
-  MOCK_METHOD2(SendFramesNumber,
-      void(uint32_t connection_key, int32_t number_of_frames));
-  MOCK_METHOD2(SendHeartBeat,
-      void(int32_t connection_id, uint8_t session_id));
-  MOCK_METHOD2(SendEndSession,
-      void(int32_t connection_id, uint8_t session_id));
-  MOCK_METHOD3(SendEndService,
-      void(int32_t connection_id, uint8_t session_id, uint8_t service_type));
-};
-
-
 }  // namespace media_manager_test
 }  // namespace components
 }  // namespace test
