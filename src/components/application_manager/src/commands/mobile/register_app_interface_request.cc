@@ -43,6 +43,7 @@
 #include "application_manager/policies/policy_handler.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
+#include "utils/make_shared.h"
 
 namespace {
 
@@ -245,13 +246,12 @@ void RegisterAppInterfaceRequest::Run() {
   resumption::ResumeCtrl& resumer =
       ApplicationManagerImpl::instance()->resume_controller();
 
-  const std::string device_id =
-      MessageHelper::GetDeviceMacAddressForHandle(application->device());
+  const std::string& device_mac = application->mac_address();
 
   // there is side affect with 2 mobile app with the same mobile app_id
-  if (resumer.IsApplicationSaved(policy_app_id, device_id)) {
+  if (resumer.IsApplicationSaved(policy_app_id, device_mac)) {
     application->set_hmi_application_id(
-          resumer.GetHMIApplicationID(policy_app_id, device_id));
+          resumer.GetHMIApplicationID(policy_app_id, device_mac));
   } else {
     application->set_hmi_application_id(
           ApplicationManagerImpl::instance()->GenerateNewHMIAppID());
@@ -294,22 +294,31 @@ void RegisterAppInterfaceRequest::Run() {
     }
   }
 
-
-  const connection_handler::DeviceHandle handle = application->device();
   // Add device to policy table and set device info, if any
-  std::string device_mac_address =
-      application_manager::MessageHelper::GetDeviceMacAddressForHandle(handle);
   policy::DeviceParams dev_params;
-  application_manager::MessageHelper::GetDeviceInfoForHandle(handle,
-                                                             &dev_params);
+  if (-1 ==
+      ApplicationManagerImpl::instance()
+          ->connection_handler()
+          .get_session_observer()
+          .GetDataOnDeviceID(application->device(),
+                             &dev_params.device_name,
+                             NULL,
+                             &dev_params.device_mac_address,
+                             &dev_params.device_connection_type)) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to extract information for device "
+                      << application->device());
+  }
+
   policy::DeviceInfo device_info;
   device_info.AdoptDeviceType(dev_params.device_connection_type);
   if (msg_params.keyExists(strings::device_info)) {
     FillDeviceInfo(&device_info);
   }
 
-  policy::PolicyHandler::instance()->SetDeviceInfo(device_mac_address,
-                                                   device_info);
+  policy::PolicyHandler::instance()->SetDeviceInfo(
+        dev_params.device_mac_address,
+        device_info);
 
   SendRegisterAppInterfaceResponseToMobile();
 }
@@ -528,14 +537,14 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
     result_code = result_checking_app_hmi_type_;
   }
 
-  // in case application exist in resumption we need to send resumeVrgrammars
+  // In case application exist in resumption we need to send resumeVrgrammars
   if (false == resumption) {
     resumption = resumer.IsApplicationSaved(
         application->mobile_app_id(),
-        MessageHelper::GetDeviceMacAddressForHandle(application->device()));
+        application->mac_address());
   }
 
-  MessageHelper::SendOnAppRegisteredNotificationToHMI(
+  SendOnAppRegisteredNotificationToHMI(
       *(application.get()), resumption, need_restore_vr);
   SendResponse(true, result_code, add_info.c_str(), &response_params);
 
@@ -548,6 +557,120 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
   // By default app subscribed to CUSTOM_BUTTON
   SendSubscribeCustomButtonNotification();
   MessageHelper::SendChangeRegistrationRequestToHMI(application);
+}
+
+void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
+    const Application& application_impl,
+    bool resumption,
+    bool need_restore_vr) {
+  using namespace smart_objects;
+
+  SmartObjectSPtr notification = utils::MakeShared<SmartObject>(SmartType_Map);
+  if (!notification) {
+    LOG4CXX_ERROR(logger_, "Failed to create smart object");
+    return;
+  }
+
+  (*notification)[strings::params] = SmartObject(SmartType_Map);
+  smart_objects::SmartObject& params = (*notification)[strings::params];
+  params[strings::function_id] = static_cast<int32_t>(
+      hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
+  params[strings::message_type] = static_cast<int32_t>(kNotification);
+  params[strings::protocol_version] = commands::CommandImpl::protocol_version_;
+  params[strings::protocol_type] = commands::CommandImpl::hmi_protocol_type_;
+
+  (*notification)[strings::msg_params] = SmartObject(SmartType_Map);
+  smart_objects::SmartObject& msg_params = (*notification)[strings::msg_params];
+  // Due to current requirements in case when we're in resumption mode
+  // we have to always send resumeVRGrammar field.
+  if (resumption) {
+    msg_params[strings::resume_vr_grammars] = need_restore_vr;
+  }
+
+  if (application_impl.vr_synonyms()) {
+    msg_params[strings::vr_synonyms] = *(application_impl.vr_synonyms());
+  }
+
+  if (application_impl.tts_name()) {
+    msg_params[strings::tts_name] = *(application_impl.tts_name());
+  }
+
+  std::string priority;
+  policy::PolicyHandler::instance()->GetPriority(
+      application_impl.mobile_app_id(), &priority);
+  if (!priority.empty()) {
+    msg_params[strings::priority] = MessageHelper::GetPriorityCode(priority);
+  }
+
+  msg_params[strings::msg_params] = SmartObject(SmartType_Map);
+  smart_objects::SmartObject& application = msg_params[strings::application];
+  application[strings::app_name] = application_impl.name();
+  application[strings::app_id] = application_impl.app_id();
+  application[hmi_response::policy_app_id] = application_impl.mobile_app_id();
+  application[strings::icon] = application_impl.app_icon_path();
+
+  const smart_objects::SmartObject* ngn_media_screen_name =
+      application_impl.ngn_media_screen_name();
+  if (ngn_media_screen_name) {
+    application[strings::ngn_media_screen_app_name] = *ngn_media_screen_name;
+  }
+
+  application[strings::hmi_display_language_desired] =
+      static_cast<int32_t>(application_impl.ui_language());
+
+  application[strings::is_media_application] =
+      application_impl.is_media_application();
+
+  const smart_objects::SmartObject* app_type = application_impl.app_types();
+  if (app_type) {
+    application[strings::app_type] = *app_type;
+  }
+
+  std::vector<std::string> request_types =
+      policy::PolicyHandler::instance()->GetAppRequestTypes(
+          application_impl.mobile_app_id());
+
+  application[strings::request_type] = SmartObject(SmartType_Array);
+  smart_objects::SmartObject& request_array =
+      application[strings::request_type];
+
+  uint32_t index = 0;
+  std::vector<std::string>::const_iterator it = request_types.begin();
+  for (; request_types.end() != it; ++it) {
+    request_array[index] = *it;
+    ++index;
+  }
+
+  application[strings::device_info] = SmartObject(SmartType_Map);
+  smart_objects::SmartObject& device_info = application[strings::device_info];
+  const protocol_handler::SessionObserver& session_observer =
+      application_manager::ApplicationManagerImpl::instance()
+          ->connection_handler()
+          .get_session_observer();
+  std::string device_name;
+  std::string mac_address;
+  std::string transport_type;
+  const connection_handler::DeviceHandle handle = application_impl.device();
+  if (-1 ==
+      session_observer.GetDataOnDeviceID(
+          handle, &device_name, NULL, &mac_address, &transport_type)) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to extract information for device " << handle);
+  }
+
+  device_info[strings::name] = device_name;
+  device_info[strings::id] = mac_address;
+
+  const policy::DeviceConsent device_consent =
+      policy::PolicyHandler::instance()->GetUserConsentForDevice(mac_address);
+  device_info[strings::isSDLAllowed] =
+      policy::DeviceConsent::kDeviceAllowed == device_consent;
+
+  device_info[strings::transport_type] =
+      ApplicationManagerImpl::instance()->GetDeviceTransportType(
+          transport_type);
+
+  DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
 }
 
 mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckCoincidence() {

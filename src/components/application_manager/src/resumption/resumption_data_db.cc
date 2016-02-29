@@ -140,28 +140,27 @@ void ResumptionDataDB::SaveApplication(
   DCHECK_OR_RETURN_VOID(application);
   bool application_exist = false;
   const std::string& policy_app_id = application->mobile_app_id();
-  const std::string device_id =
-      MessageHelper::GetDeviceMacAddressForHandle(application->device());
+  const std::string& device_mac = application->mac_address();
   LOG4CXX_INFO(logger_,
                "app_id : " << application->app_id() << " policy_app_id : "
                            << policy_app_id
                            << " device_id : "
-                           << device_id);
+                           << device_mac);
 
-  if (!CheckExistenceApplication(policy_app_id, device_id, application_exist)) {
+  if (!CheckExistenceApplication(policy_app_id, device_mac, application_exist)) {
     LOG4CXX_ERROR(logger_, "Problem with access to DB");
     return;
   }
 
   if (application->is_application_data_changed()) {
     if (application_exist) {
-      if (!DeleteSavedApplication(policy_app_id, device_id)) {
+      if (!DeleteSavedApplication(policy_app_id, device_mac)) {
         LOG4CXX_ERROR(logger_, "Deleting of application data is not finished");
         return;
       }
     }
 
-    if (!SaveApplicationToDB(application, policy_app_id, device_id)) {
+    if (!SaveApplicationToDB(application, policy_app_id, device_mac)) {
       LOG4CXX_ERROR(logger_, "Saving of application data is not finished");
       return;
     }
@@ -169,7 +168,7 @@ void ResumptionDataDB::SaveApplication(
     application->set_is_application_data_changed(false);
   } else {
     if (application_exist) {
-      if (!UpdateApplicationData(application, policy_app_id, device_id)) {
+      if (!UpdateApplicationData(application, policy_app_id, device_mac)) {
         LOG4CXX_ERROR(logger_, "Updating application data is failed");
         return;
       }
@@ -178,7 +177,7 @@ void ResumptionDataDB::SaveApplication(
       if (Compare<HMILevel::eType, EQ, ONE>(application->hmi_level(),
                                             HMILevel::HMI_FULL,
                                             HMILevel::HMI_LIMITED)) {
-        if (!InsertApplicationData(application, policy_app_id, device_id)) {
+        if (!InsertApplicationData(application, policy_app_id, device_mac)) {
           LOG4CXX_ERROR(logger_, "Saving data of application is failed");
           return;
         }

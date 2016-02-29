@@ -90,9 +90,11 @@ class StateController : public event_engine::EventObserver {
             : false;
 
     if (SendActivateApp && is_full_allowed) {
+        hmi_apis::Common_HMILevel::eType hmi_level =
+	    static_cast<hmi_apis::Common_HMILevel::eType>(
+	        resolved_state->hmi_level());
         uint32_t corr_id = MessageHelper::SendActivateAppToHMI(
-            app->app_id(), static_cast<hmi_apis::Common_HMILevel::eType>(
-                                   resolved_state->hmi_level()));
+            app->app_id(), hmi_level);
 
       subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_ActivateApp,
                          corr_id);
@@ -303,7 +305,12 @@ class StateController : public event_engine::EventObserver {
    */
   bool IsDeactivateHMIStateActive() const;
 
+  bool IsStateActive(HmiState::StateID state_id) const;
+
  private:
+  int64_t SendBCActivateApp(ApplicationConstSharedPtr app,
+                            hmi_apis::Common_HMILevel::eType level,
+                            bool send_policy_priority);
   /**
    * @brief The HmiLevelConflictResolver struct
    * Move other application to HmiStates if applied moved to FULL or LIMITED

@@ -85,6 +85,15 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
   void SendRegisterAppInterfaceResponseToMobile();
 
  private:
+  /**
+   * @brief Sends OnAppRegistered notification to HMI
+   *
+   *@param application_impl application with changed HMI status
+   *
+   **/
+  void SendOnAppRegisteredNotificationToHMI(const Application& application_impl,
+                                            bool resumption = false,
+                                            bool need_restore_vr = false);
   /*
    * @brief Check new ID along with known mobile application ID
    *

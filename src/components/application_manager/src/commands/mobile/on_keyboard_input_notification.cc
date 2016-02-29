@@ -57,16 +57,17 @@ void OnKeyBoardInputNotification::Run() {
   ApplicationSetIt it = accessor.begin();
   for (; accessor.end() != it; ++it) {
     // if there is app with active perform interaction use it for notification
-    if ((*it)->is_perform_interaction_active()) {
+    ApplicationSharedPtr app = *it;
+    if (app->is_perform_interaction_active()) {
       LOG4CXX_INFO(logger_,
                    "There is application with active PerformInteraction");
-      app_to_notify = *it;
+      app_to_notify = app;
       break;
     }
 
-    if (mobile_apis::HMILevel::eType::HMI_FULL == (*it)->hmi_level()) {
+    if (mobile_apis::HMILevel::eType::HMI_FULL == app->hmi_level()) {
       LOG4CXX_INFO(logger_, "There is application in HMI_FULL level");
-      app_to_notify = *it;
+      app_to_notify = app;
     }
   }
 

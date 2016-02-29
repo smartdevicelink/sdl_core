@@ -99,6 +99,7 @@ public:
           hmi_apis::Common_Language::eType tts);
 
 private:
+  void SendOnLanguageChangeToMobile(uint32_t connection_key);
 
   /**
    * @brief Verifies languages gotten from HMI with persisted languages
