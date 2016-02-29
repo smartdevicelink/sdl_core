@@ -33,7 +33,6 @@
 #include <string>
 
 #include "hmi_message_handler/messagebroker_adapter.h"
-#include "config_profile/profile.h"
 #include "utils/logger.h"
 
 namespace hmi_message_handler {
