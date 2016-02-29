@@ -114,27 +114,10 @@ smart_objects::SmartObjectSPtr CreateDeviceListSO(
   return MockMessageHelper::message_helper_mock()->CreateDeviceListSO(devices);
 }
 
-uint32_t MessageHelper::GetDeviceHandleForMac(const std::string& device_mac) {
-  return MockMessageHelper::message_helper_mock()->GetDeviceHandleForMac(
-      device_mac);
-}
-
-void MessageHelper::GetDeviceInfoForApp(uint32_t connection_key,
-                                        policy::DeviceParams* device_info) {
-  MockMessageHelper::message_helper_mock()->GetDeviceInfoForApp(connection_key,
-                                                                device_info);
-}
-
 void MessageHelper::SendOnAppPermissionsChangedNotification(
     uint32_t connection_key, const policy::AppPermissions& permissions) {
   MockMessageHelper::message_helper_mock()
       ->SendOnAppPermissionsChangedNotification(connection_key, permissions);
-}
-
-void MessageHelper::GetDeviceInfoForHandle(const uint32_t device_handle,
-                                           policy::DeviceParams* device_info) {
-  MockMessageHelper::message_helper_mock()->GetDeviceInfoForHandle(
-      device_handle, device_info);
 }
 
 void MessageHelper::SendGetUserFriendlyMessageResponse(
@@ -169,11 +152,6 @@ void MessageHelper::SendGetListOfPermissionsResponse(
     uint32_t correlation_id) {
   MockMessageHelper::message_helper_mock()->SendGetListOfPermissionsResponse(
       permissions, correlation_id);
-}
-
-void MessageHelper::GetConnectedDevicesMAC(
-    std::vector<std::string>& device_macs) {
-  MockMessageHelper::message_helper_mock()->GetConnectedDevicesMAC(device_macs);
 }
 
 void MessageHelper::SendOnPermissionsChangeNotification(
@@ -262,14 +240,6 @@ void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
       ->SendAllOnButtonSubscriptionNotificationsForApp(app);
 }
 
-uint32_t MessageHelper::SendActivateAppToHMI(
-    uint32_t const app_id,
-    hmi_apis::Common_HMILevel::eType level,
-    bool send_policy_priority) {
-  return MockMessageHelper::message_helper_mock()->SendActivateAppToHMI(
-      app_id, level, send_policy_priority);
-}
-
 void MessageHelper::SendOnResumeAudioSourceToHMI(const uint32_t app_id) {
   MockMessageHelper::message_helper_mock()->SendOnResumeAudioSourceToHMI(
       app_id);
@@ -319,7 +289,15 @@ bool MessageHelper::CheckWithPolicy(
     mobile_apis::SystemAction::eType system_action,
     const std::string& app_mobile_id) {
   return MockMessageHelper::message_helper_mock()->CheckWithPolicy(
-      system_action, app_mobile_id);
+        system_action, app_mobile_id);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
+    ApplicationConstSharedPtr app,
+    hmi_apis::Common_HMILevel::eType hmi_level,
+    bool send_policy_priority) {
+  return MockMessageHelper::message_helper_mock()->
+      GetBCActivateAppRequestToHMI(app, hmi_level, send_policy_priority);
 }
 
 }  // namespace application_manager

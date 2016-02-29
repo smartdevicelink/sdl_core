@@ -57,7 +57,7 @@ class ResumptionDataTest : public ::testing::Test {
 
   // Set data for resumption
   virtual void PrepareData();
-  utils::SharedPtr<NiceMock<ApplicationMock>> app_mock;
+  utils::SharedPtr<NiceMock<MockApplication>> app_mock;
 
   HMILevel::eType hmi_level_;
   size_t app_id_;
@@ -111,7 +111,7 @@ class ResumptionDataTest : public ::testing::Test {
   const size_t count_of_submenues = 3;
   const size_t count_of_files = 8;
   const size_t count_of_vrhelptitle = 2;
-  const std::string device_id_ = "12345";
+  const std::string mac_address = "12345";
 
   am::CommandsMap test_commands_map;
   am::SubMenuMap test_submenu_map;

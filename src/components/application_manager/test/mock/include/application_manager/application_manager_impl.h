@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,6 @@
 #include <map>
 #include <set>
 
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
 #include "application_manager/hmi_command_factory.h"
@@ -49,6 +48,7 @@
 #include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/vehicle_info_data.h"
 #include "application_manager/state_controller.h"
+#include "application_manager/commands/command.h"
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
 #include "hmi_message_handler/hmi_message_observer.h"
@@ -174,6 +174,8 @@ class ApplicationManagerImpl
   MOCK_METHOD1(set_protocol_handler, void(protocol_handler::ProtocolHandler*));
   MOCK_METHOD1(set_connection_handler,
                void(connection_handler::ConnectionHandler*));
+  MOCK_CONST_METHOD0(connection_handler,
+                     connection_handler::ConnectionHandler&());
 
   MOCK_CONST_METHOD0(applications, DataAccessor<ApplicationSet>());
 
@@ -222,16 +224,16 @@ class ApplicationManagerImpl
   MOCK_METHOD0(hmi_capabilities, HMICapabilities&());
   MOCK_METHOD0(is_attenuated_supported, bool());
   MOCK_METHOD1(ManageHMICommand,
-               bool(const utils::SharedPtr<smart_objects::SmartObject>&));
+               bool(const application_manager::commands::MessageSharedPtr message));
   MOCK_METHOD2(ManageMobileCommand,
-               bool(const utils::SharedPtr<smart_objects::SmartObject>& message,
+               bool(const smart_objects::SmartObjectSPtr message,
                     commands::Command::CommandOrigin));
   MOCK_METHOD1(SendMessageToHMI,
-               bool(const utils::SharedPtr<smart_objects::SmartObject>&));
+               void(const application_manager::commands::MessageSharedPtr));
   MOCK_METHOD2(SendMessageToMobile,
-               bool(const utils::SharedPtr<smart_objects::SmartObject>&, bool));
+               void(const application_manager::commands::MessageSharedPtr, bool));
   MOCK_METHOD1(SendMessageToMobile,
-               bool(const utils::SharedPtr<smart_objects::SmartObject>&));
+               void(const application_manager::commands::MessageSharedPtr));
   MOCK_METHOD1(GetDeviceName, std::string(connection_handler::DeviceHandle));
   MOCK_METHOD1(GetDeviceTransportType,
                hmi_apis::Common_TransportType::eType(const std::string&));
@@ -384,6 +386,8 @@ class ApplicationManagerImpl
                     mobile_apis::AudioStreamingState::eType));
   MOCK_CONST_METHOD1(GetDefaultHmiLevel,
                      mobile_apis::HMILevel::eType(ApplicationConstSharedPtr));
+  MOCK_CONST_METHOD1(application, ApplicationSharedPtr(uint32_t app_id));
+
   bool IsHMICooperating() const {
     return true;
   };

@@ -30,16 +30,16 @@
 
 if(BUILD_TESTS)
 
-set(appMain_DIR ${CMAKE_SOURCE_DIR}/src/appMain)
-
 include_directories(
     ${GMOCK_INCLUDE_DIRECTORY}
-    ${COMPONENTS_DIR}/application_manager/test/state_controller/include
+    include
+    ${COMPONENTS_DIR}/application_manager/test/include
 )
 
 set(LIBRARIES
   gmock
   ApplicationManager
+  ApplicationManagerTest
 )
 
 set(SOURCES
