@@ -57,7 +57,7 @@ class ResumptionDataTest : public ::testing::Test {
 
   // Set data for resumption
   virtual void PrepareData();
-  utils::SharedPtr<NiceMock<ApplicationMock>> app_mock;
+  utils::SharedPtr<NiceMock<MockApplication>> app_mock;
 
   HMILevel::eType hmi_level_;
   size_t app_id_;

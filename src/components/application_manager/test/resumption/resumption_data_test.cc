@@ -45,12 +45,6 @@
 
 #include "include/resumption_data_test.h"
 
-std::string application_manager::MessageHelper::GetDeviceMacAddressForHandle(
-    const uint32_t device_handle) {
-  std::string device_mac_address = "12345";
-  return device_mac_address;
-}
-
 namespace test {
 namespace components {
 namespace resumption_test {
@@ -354,6 +348,7 @@ void ResumptionDataTest::PrepareData() {
   ON_CALL(*app_mock, is_application_data_changed()).WillByDefault(Return(true));
 
   ON_CALL(*app_mock, policy_app_id()).WillByDefault(Return(policy_app_id_));
+  ON_CALL(*app_mock, mac_address()).WillByDefault(ReturnRef(mac_address_));
   ON_CALL(*app_mock, curHash()).WillByDefault(ReturnRef(hash_));
   ON_CALL(*app_mock, get_grammar_id()).WillByDefault(Return(grammar_id_));
   ON_CALL(*app_mock, device()).WillByDefault(Return(device_handle_));

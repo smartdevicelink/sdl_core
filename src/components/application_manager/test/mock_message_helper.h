@@ -64,13 +64,6 @@ class MockMessageHelper {
   MOCK_METHOD1(CreateDeviceListSO,
                smart_objects::SmartObjectSPtr(
                    const connection_handler::DeviceMap& devices));
-  MOCK_METHOD1(GetDeviceHandleForMac, uint32_t(const std::string& device_mac));
-  MOCK_METHOD2(GetDeviceInfoForHandle,
-               void(const uint32_t device_handle,
-                    policy::DeviceParams* device_info));
-  MOCK_METHOD2(GetDeviceInfoForApp,
-               void(uint32_t connection_key,
-                    policy::DeviceParams* device_info));
   MOCK_METHOD1(SendNaviStartStream, void(int32_t connection_key));
   MOCK_METHOD1(SendNaviStopStream, void(int32_t connection_key));
   MOCK_METHOD2(SendOnAppPermissionsChangedNotification,
@@ -105,8 +98,6 @@ class MockMessageHelper {
       SendGetListOfPermissionsResponse,
       void(const std::vector<policy::FunctionalGroupPermission>& permissions,
            uint32_t correlation_id));
-  MOCK_METHOD1(GetConnectedDevicesMAC,
-               void(std::vector<std::string>& device_macs));
   MOCK_METHOD2(SendOnPermissionsChangeNotification,
                void(uint32_t connection_key,
                     const policy::Permissions& permissions));
@@ -137,11 +128,6 @@ class MockMessageHelper {
   MOCK_METHOD1(SendAllOnButtonSubscriptionNotificationsForApp,
                void(ApplicationConstSharedPtr app));
 
-  MOCK_METHOD3(SendActivateAppToHMI,
-               uint32_t(uint32_t const app_id,
-                        hmi_apis::Common_HMILevel::eType level,
-                        bool send_policy_priority));
-
   MOCK_METHOD1(SendOnResumeAudioSourceToHMI, void(uint32_t app_id));
   MOCK_METHOD1(CreateAddSubMenuRequestToHMI,
                smart_objects::SmartObjectList(ApplicationConstSharedPtr app));
@@ -157,6 +143,10 @@ class MockMessageHelper {
                                           ApplicationConstSharedPtr app));
   MOCK_METHOD2(CheckWithPolicy,
                bool(mobile_apis::SystemAction::eType, const std::string&));
+
+  MOCK_METHOD3(GetBCActivateAppRequestToHMI, smart_objects::SmartObjectSPtr (ApplicationConstSharedPtr app,
+                                                   hmi_apis::Common_HMILevel::eType level,
+                                                   bool send_policy_priority));
 
   static MockMessageHelper* message_helper_mock();
 };
