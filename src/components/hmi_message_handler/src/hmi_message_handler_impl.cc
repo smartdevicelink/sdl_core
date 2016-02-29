@@ -31,21 +31,22 @@
  */
 
 #include "hmi_message_handler/hmi_message_handler_impl.h"
-#include "config_profile/profile.h"
 #include "utils/logger.h"
 
 namespace hmi_message_handler {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "HMIMessageHandler")
 
-HMIMessageHandlerImpl::HMIMessageHandlerImpl()
-    : observer_(NULL),
-      messages_to_hmi_("HMH ToHMI", this,
-                 threads::ThreadOptions(
-                     profile::Profile::instance()->thread_min_stack_size())),
-      messages_from_hmi_("HMH FromHMI", this,
-                 threads::ThreadOptions(
-                     profile::Profile::instance()->thread_min_stack_size())) {
+HMIMessageHandlerImpl::HMIMessageHandlerImpl(
+    const HMIMessageHandlerSettings& settings)
+  : settings_(settings)
+  , observer_(NULL)
+  , messages_to_hmi_("HMH ToHMI", this,
+               threads::ThreadOptions(
+                   get_settings().thread_min_stack_size()))
+  , messages_from_hmi_("HMH FromHMI", this,
+               threads::ThreadOptions(
+                   get_settings().thread_min_stack_size())){
 }
 
 HMIMessageHandlerImpl::~HMIMessageHandlerImpl() {
@@ -104,6 +105,10 @@ void HMIMessageHandlerImpl::RemoveHMIMessageAdapter(
     return;
   }
   message_adapters_.erase(adapter);
+}
+
+const HMIMessageHandlerSettings& HMIMessageHandlerImpl::get_settings() const {
+  return  settings_;
 }
 
 void HMIMessageHandlerImpl::Handle(const impl::MessageFromHmi message) {
