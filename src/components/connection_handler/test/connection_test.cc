@@ -37,9 +37,10 @@
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol/service_type.h"
 #include "utils/shared_ptr.h"
+#include "connection_handler/mock_connection_handler_settings.h"
+#include "transport_manager/transport_manager_mock.h"
 #include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_ssl_context.h"
-#include "config_profile/profile.h"
 
 #define EXPECT_RETURN_TRUE true
 #define EXPECT_RETURN_FALSE false
@@ -48,14 +49,15 @@
 
 namespace test {
 namespace components {
-namespace connection_handle {
+namespace connection_handler_test {
 using namespace ::connection_handler;
 using namespace ::protocol_handler;
 
 class ConnectionTest : public ::testing::Test {
  protected:
   void SetUp() OVERRIDE {
-    connection_handler_ = ConnectionHandlerImpl::instance();
+    connection_handler_ = new ConnectionHandlerImpl(
+        mock_connection_handler_settings, transport_manager_mock);
     const ConnectionHandle connectionHandle = 0;
     const DeviceHandle device_handle = 0;
     connection_.reset(
@@ -65,7 +67,7 @@ class ConnectionTest : public ::testing::Test {
 
   void TearDown() OVERRIDE {
     connection_.reset();
-    ConnectionHandlerImpl::destroy();
+    delete connection_handler_;
   }
   void StartSession() {
     session_id = connection_->AddNewSession();
@@ -126,6 +128,9 @@ class ConnectionTest : public ::testing::Test {
   }
 
   ::utils::SharedPtr<Connection> connection_;
+  MockConnectionHandlerSettings mock_connection_handler_settings;
+  testing::StrictMock<transport_manager_test::TransportManagerMock>
+      transport_manager_mock;
   ConnectionHandlerImpl* connection_handler_;
   uint32_t session_id;
 };
@@ -163,7 +168,6 @@ TEST_F(ConnectionTest, HeartBeat_NotSupported) {
 TEST_F(ConnectionTest, HeartBeat_Supported) {
   // Arrange
   StartSession();
-  ::profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
   // Check if protocol version is 3
   const uint8_t protocol_version = static_cast<uint8_t>(PROTOCOL_VERSION_3);
   connection_->UpdateProtocolVersionSession(session_id, protocol_version);

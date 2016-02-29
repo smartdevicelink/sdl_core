@@ -32,11 +32,11 @@
 
 #include <string>
 #include <iostream>
-#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "connection_handler/heartbeat_monitor.h"
 #include "connection_handler/connection.h"
 #include "connection_handler/connection_handler.h"
-#include "config_profile/profile.h"
+#include "connection_handler/mock_connection_handler.h"
 
 namespace {
 const int32_t MILLISECONDS_IN_SECOND = 1000;
@@ -49,56 +49,14 @@ namespace components {
 namespace connection_handler_test {
 using ::testing::_;
 
-class ConnectionHandlerMock : public connection_handler::ConnectionHandler {
- public:
-  MOCK_METHOD1(set_connection_handler_observer,
-               void(connection_handler::ConnectionHandlerObserver*));
-  MOCK_METHOD1(set_transport_manager,
-               void(transport_manager::TransportManager*));
-  MOCK_METHOD0(StartTransportManager, void());
-  MOCK_METHOD1(ConnectToDevice,
-               void(connection_handler::DeviceHandle device_handle));
-  MOCK_METHOD0(ConnectToAllDevices, void());
-  MOCK_METHOD1(CloseRevokedConnection, void(uint32_t connection_key));
-  MOCK_METHOD1(CloseConnection,
-               void(connection_handler::ConnectionHandle connection_handle));
-  MOCK_METHOD1(GetConnectionSessionsCount, uint32_t(uint32_t connection_key));
-  MOCK_METHOD2(GetDeviceID,
-               bool(const std::string& mac_address,
-                    connection_handler::DeviceHandle* device_handle));
-  MOCK_CONST_METHOD1(GetConnectedDevicesMAC,
-                     void(std::vector<std::string>& device_macs));
-  MOCK_METHOD2(CloseSession,
-               void(uint32_t key,
-                    connection_handler::CloseSessionReason close_reason));
-  MOCK_METHOD3(CloseSession,
-               void(connection_handler::ConnectionHandle connection_handle,
-                    uint8_t session_id,
-                    connection_handler::CloseSessionReason close_reason));
-  MOCK_METHOD2(SendEndService, void(uint32_t key, uint8_t service_type));
-
-  MOCK_METHOD1(StartSessionHeartBeat, void(uint32_t key));
-  MOCK_METHOD2(SendHeartBeat,
-               void(connection_handler::ConnectionHandle connection_handle,
-                    uint8_t session_id));
-  MOCK_METHOD2(SetHeartBeatTimeout,
-               void(uint32_t connection_key, uint32_t timeout));
-  MOCK_METHOD2(BindProtocolVersionWithSession,
-               void(uint32_t connection_key, uint8_t protocol_version));
-  MOCK_METHOD4(GetDataOnSessionKey,
-               int32_t(uint32_t key, uint32_t* app_id,
-                       std::list<int32_t>* sessions_list, uint32_t* device_id));
-};
-
 class HeartBeatMonitorTest : public testing::Test {
  public:
   HeartBeatMonitorTest() : conn(NULL) {
-    profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
-    kTimeout = profile::Profile::instance()->heart_beat_timeout();
+    kTimeout = 5000u;
   }
 
  protected:
-  testing::NiceMock<ConnectionHandlerMock> connection_handler_mock;
+  testing::NiceMock<MockConnectionHandler> connection_handler_mock;
   connection_handler::Connection* conn;
   uint32_t kTimeout;
   static const connection_handler::ConnectionHandle kConnectionHandle =

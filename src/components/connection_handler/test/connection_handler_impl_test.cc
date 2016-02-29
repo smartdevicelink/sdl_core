@@ -30,23 +30,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 #include <fstream>
 #include <cstdint>
+#include <vector>
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol/common.h"
-#include "config_profile/profile.h"
 // TODO(EZamakhov): move security test
 #include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_ssl_context.h"
-#include "protocol_handler_mock.h"
+#include "protocol_handler/protocol_handler_mock.h"
 #include "connection_handler_observer_mock.h"
-#include "transport_manager_mock.h"
+#include "connection_handler/mock_connection_handler_settings.h"
+#include "transport_manager/transport_manager_mock.h"
 #include "encryption/hashing.h"
 
 namespace test {
 namespace components {
-namespace connection_handle_test {
+namespace connection_handler_test {
 
 using namespace ::connection_handler;
 using ::protocol_handler::ServiceType;
@@ -55,18 +56,38 @@ using ::testing::_;
 using ::testing::InSequence;
 using ::testing::Mock;
 using ::testing::Return;
+using ::testing::ReturnRefOfCopy;
 
 // For service types and PROTECTION_ON/OFF
+
+enum UnnamedService {
+    served_service1 = 0x06,
+   served_service2 = 0x08
+};
 
 class ConnectionHandlerTest : public ::testing::Test {
  protected:
   void SetUp() OVERRIDE {
-    connection_handler_ = ConnectionHandlerImpl::instance();
+    connection_handler_ =  new ConnectionHandlerImpl(
+          mock_connection_handler_settings,
+          mock_transport_manager);
     uid_ = 1u;
     connection_key_ = connection_handler_->KeyFromPair(0, 0u);
+    protected_services_.clear();
+    unprotected_services_.clear();
+    SetSpecificServices();
   }
   void TearDown() OVERRIDE {
-    ConnectionHandlerImpl::destroy();
+    delete connection_handler_;
+  }
+
+  void SetSpecificServices() {
+#ifdef ENABLE_SECURITY
+    ON_CALL(mock_connection_handler_settings, force_protected_service())
+        .WillByDefault(ReturnRefOfCopy(protected_services_));
+    ON_CALL(mock_connection_handler_settings, force_unprotected_service())
+        .WillByDefault(ReturnRefOfCopy(unprotected_services_));
+#endif  // ENABLE_SECURITY
   }
   // Additional SetUp
   void AddTestDeviceConnection() {
@@ -84,7 +105,6 @@ class ConnectionHandlerTest : public ::testing::Test {
     connection_handler_->addDeviceConnection(device_info, uid_);
     connection_key_ = connection_handler_->KeyFromPair(uid_, 0u);
     // Remove all specific services
-    SetSpecificServices("", "");
   }
   void AddTestSession() {
     start_session_id_ = connection_handler_->OnSessionStartedCallback(
@@ -107,22 +127,6 @@ class ConnectionHandlerTest : public ::testing::Test {
     EXPECT_EQ(session_id, start_session_id_);
   }
 
-  // Additional SetUp
-  void SetSpecificServices(const std::string& protect, const std::string& not_protect) {
-    const char* config_file = "config.ini";
-    std::ofstream file_config(config_file);
-    ASSERT_TRUE(file_config.is_open());
-    const std::string non("NON");
-    file_config << "[Security Manager]" << std::endl
-        << "; Force protected services (could be id's from 0x01 to 0xFF)"
-        << std::endl << "ForceProtectedService = "
-        << (protect.empty() ? non : protect) << std::endl
-        << "; Force unprotected services" << std::endl
-        << "ForceUnprotectedService = "
-        << (not_protect.empty() ? non : not_protect) << std::endl;
-    file_config.close();
-    profile::Profile::instance()->config_file_name(config_file);
-  }
   // Check Service Wrapper
   // If session_id is NULL - check that there is no sessions in connection
   void CheckSessionExists(const int connectionId, const int session_id) {
@@ -226,6 +230,10 @@ class ConnectionHandlerTest : public ::testing::Test {
   }
 
   ConnectionHandlerImpl* connection_handler_;
+  testing::NiceMock<transport_manager_test::TransportManagerMock>
+      mock_transport_manager;
+  testing::NiceMock<MockConnectionHandlerSettings>
+      mock_connection_handler_settings;
   transport_manager::DeviceHandle device_handle_;
   transport_manager::ConnectionUID uid_;
   uint32_t connection_key_;
@@ -236,6 +244,9 @@ class ConnectionHandlerTest : public ::testing::Test {
   std::string device_name_;
   std::string mac_address_;
 
+  const uint32_t heartbeat_timeout = 100u;
+  std::vector<int> protected_services_;
+  std::vector<int> unprotected_services_;
 };
 
 TEST_F(ConnectionHandlerTest, StartSession_NoConnection) {
@@ -389,7 +400,6 @@ TEST_F(ConnectionHandlerTest, GetPairFromKey) {
 TEST_F(ConnectionHandlerTest, IsHeartBeatSupported) {
   AddTestDeviceConnection();
   AddTestSession();
-  ::profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
   ChangeProtocol(uid_, start_session_id_, PROTOCOL_VERSION_3);
   EXPECT_TRUE(connection_handler_->IsHeartBeatSupported(uid_, start_session_id_));
 }
@@ -513,8 +523,7 @@ TEST_F(ConnectionHandlerTest, OnApplicationFloodCallBack_SessionFound) {
 TEST_F(ConnectionHandlerTest, StartDevicesDiscovery) {
   AddTestDeviceConnection();
   AddTestSession();
-  transport_manager_test::TransportManagerMock mock_transport_manager;
-  connection_handler_->set_transport_manager(&mock_transport_manager);
+
   connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
 
@@ -614,8 +623,7 @@ TEST_F(ConnectionHandlerTest, GetConnectedDevicesMAC) {
 TEST_F(ConnectionHandlerTest, StartTransportManager) {
   AddTestDeviceConnection();
   AddTestSession();
-  transport_manager_test::TransportManagerMock mock_transport_manager;
-  connection_handler_->set_transport_manager(&mock_transport_manager);
+
   EXPECT_CALL(mock_transport_manager, Visibility(true));
   connection_handler_->StartTransportManager();
 }
@@ -706,8 +714,6 @@ TEST_F(ConnectionHandlerTest, ConnectToDevice) {
   connection_handler_->OnDeviceAdded(device1);
   connection_handler_->OnDeviceAdded(device2);
 
-  transport_manager_test::TransportManagerMock mock_transport_manager;
-  connection_handler_->set_transport_manager(&mock_transport_manager);
   EXPECT_CALL(mock_transport_manager, ConnectDevice(dev_handle1))
       .WillOnce(Return(transport_manager::E_SUCCESS));
   EXPECT_CALL(mock_transport_manager, ConnectDevice(dev_handle2)).Times(0);
@@ -726,8 +732,6 @@ TEST_F(ConnectionHandlerTest, ConnectToAllDevices) {
   connection_handler_->OnDeviceAdded(device1);
   connection_handler_->OnDeviceAdded(device2);
 
-  transport_manager_test::TransportManagerMock mock_transport_manager;
-  connection_handler_->set_transport_manager(&mock_transport_manager);
   EXPECT_CALL(mock_transport_manager, ConnectDevice(dev_handle1))
       .WillOnce(Return(transport_manager::E_SUCCESS));
   EXPECT_CALL(mock_transport_manager, ConnectDevice(dev_handle2))
@@ -738,8 +742,7 @@ TEST_F(ConnectionHandlerTest, ConnectToAllDevices) {
 TEST_F(ConnectionHandlerTest, CloseConnection) {
   AddTestDeviceConnection();
   AddTestSession();
-  transport_manager_test::TransportManagerMock mock_transport_manager;
-  connection_handler_->set_transport_manager(&mock_transport_manager);
+
   EXPECT_CALL(mock_transport_manager, DisconnectForce(uid_));
   connection_handler_->CloseConnection(uid_);
 }
@@ -747,8 +750,7 @@ TEST_F(ConnectionHandlerTest, CloseConnection) {
 TEST_F(ConnectionHandlerTest, CloseRevokedConnection) {
   AddTestDeviceConnection();
   AddTestSession();
-  transport_manager_test::TransportManagerMock mock_transport_manager;
-  connection_handler_->set_transport_manager(&mock_transport_manager);
+
   EXPECT_CALL(mock_transport_manager, DisconnectForce(uid_));
   connection_handler_->CloseRevokedConnection(connection_key_);
 }
@@ -1001,10 +1003,13 @@ TEST_F(ConnectionHandlerTest, SessionStarted_WithRpc) {
 }
 
 TEST_F(ConnectionHandlerTest, SessionStarted_StartSession_SecureSpecific_Unprotect) {
+  EXPECT_CALL(mock_connection_handler_settings, heart_beat_timeout())
+      .WillOnce(Return(heartbeat_timeout));
   // Add virtual device and connection
   AddTestDeviceConnection();
   // Forbid start kRPC without encryption
-  SetSpecificServices("0x07", "");
+  protected_services_.push_back(kRpc);
+  SetSpecificServices();
   // Start new session with RPC service
   const uint32_t session_id_fail = connection_handler_->OnSessionStartedCallback(
         uid_, 0, kRpc, PROTECTION_OFF, &out_hash_id_);
@@ -1017,7 +1022,9 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartSession_SecureSpecific_Unprote
 #endif  // ENABLE_SECURITY
 
   // Allow start kRPC without encryption
-  SetSpecificServices("0x00, Non", "");
+  protected_services_.clear();
+  protected_services_.push_back(kControl);
+  SetSpecificServices();
   // Start new session with RPC service
   const uint32_t session_id = connection_handler_->OnSessionStartedCallback(
         uid_, 0, kRpc, PROTECTION_OFF, &out_hash_id_);
@@ -1030,7 +1037,11 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartSession_SecureSpecific_Protect
   // Add virtual device and connection
   AddTestDeviceConnection();
   // Forbid start kRPC with encryption
-  SetSpecificServices("", "0x06, 0x07, 0x08, Non");
+  unprotected_services_.push_back(UnnamedService::served_service1);
+  unprotected_services_.push_back(kRpc);
+  unprotected_services_.push_back(UnnamedService::served_service2);
+  unprotected_services_.push_back(kControl);
+  SetSpecificServices();
   // Start new session with RPC service
   const uint32_t session_id_fail = connection_handler_->OnSessionStartedCallback(
         uid_, 0, kRpc, PROTECTION_ON, NULL);
@@ -1041,7 +1052,9 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartSession_SecureSpecific_Protect
 #endif  // ENABLE_SECURITY
 
   // Allow start kRPC with encryption
-  SetSpecificServices("", "0x00, 0x05, Non");
+  unprotected_services_.clear();
+  unprotected_services_.push_back(kControl);
+  SetSpecificServices();
   // Start new session with RPC service
   const uint32_t session_id = connection_handler_->OnSessionStartedCallback(
         uid_, 0, kRpc, PROTECTION_ON, &out_hash_id_);
@@ -1056,11 +1069,12 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartService_SecureSpecific_Unprote
   AddTestDeviceConnection();
   AddTestSession();
 
-  // Audio is 0x0A
-  ASSERT_EQ(0x0A, kAudio);
-
   // Forbid start kAudio without encryption
-  SetSpecificServices("0x06, 0x0A, 0x08, Non", "");
+  protected_services_.push_back(UnnamedService::served_service1);
+  protected_services_.push_back(kAudio);
+  protected_services_.push_back(UnnamedService::served_service2);
+  protected_services_.push_back(kControl);
+  SetSpecificServices();
   // Start new session with Audio service
   const uint32_t session_id2 = connection_handler_->OnSessionStartedCallback(
         uid_, start_session_id_, kAudio, PROTECTION_OFF, NULL);
@@ -1070,7 +1084,12 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartService_SecureSpecific_Unprote
   EXPECT_EQ(1u, session_id2);
 #endif  // ENABLE_SECURITY
   // Allow start kAudio without encryption
-  SetSpecificServices("0x06, 0x0B, 0x08, Non", "");
+  protected_services_.clear();
+  protected_services_.push_back(UnnamedService::served_service1);
+  protected_services_.push_back(kMobileNav);
+  protected_services_.push_back(UnnamedService::served_service2);
+  protected_services_.push_back(kControl);
+  SetSpecificServices();
   const uint32_t session_id3 = connection_handler_->OnSessionStartedCallback(
         uid_, start_session_id_, kAudio, PROTECTION_OFF, &out_hash_id_);
   // Returned original session id
@@ -1090,10 +1109,12 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartService_SecureSpecific_Protect
   AddTestDeviceConnection();
   AddTestSession();
 
-  // Audio is 0x0A
-  ASSERT_EQ(0x0A, kAudio);
   // Forbid start kAudio with encryption
-  SetSpecificServices("", "0x06, 0x0A, 0x08, Non");
+  unprotected_services_.push_back(UnnamedService::served_service1);
+  unprotected_services_.push_back(kAudio);
+  unprotected_services_.push_back(UnnamedService::served_service2);
+  unprotected_services_.push_back(kControl);
+  SetSpecificServices();
   // Start new session with Audio service
   const uint32_t session_id_reject = connection_handler_->OnSessionStartedCallback(
         uid_, start_session_id_, kAudio, PROTECTION_ON, NULL);
@@ -1103,7 +1124,8 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartService_SecureSpecific_Protect
   EXPECT_EQ(1u, session_id_reject);
 #endif  // ENABLE_SECURITY
   // Allow start kAudio with encryption
-  SetSpecificServices("", "Non");
+  unprotected_services_.clear();
+  SetSpecificServices();
   const uint32_t session_id3 = connection_handler_->OnSessionStartedCallback(
         uid_, start_session_id_, kAudio, PROTECTION_ON, &out_hash_id_);
   // Returned original session id
