@@ -33,6 +33,7 @@
 #define SRC_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_H_
 
 #include "protocol/common.h"
+#include "protocol_handler/protocol_handler_settings.h"
 
 /**
  *\namespace protocol_handlerHandler
@@ -100,6 +101,11 @@ class ProtocolHandler {
   virtual void SendEndService(int32_t connection_id,
                               uint8_t session_id,
                               uint8_t service_type) = 0;
+  /**
+   * \brief Protocol handler settings getter
+   * \return pointer to protocol handler settings class
+   */
+  virtual const ProtocolHandlerSettings& get_settings() const = 0;
 
  protected:
   /**
