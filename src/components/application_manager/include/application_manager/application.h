@@ -108,6 +108,7 @@ class InitialApplicationData {
 
   virtual const smart_objects::SmartObject* app_types() const = 0;
   virtual const smart_objects::SmartObject* vr_synonyms() const = 0;
+  virtual const std::string& mac_address() const = 0;
   virtual std::string mobile_app_id() const = 0;
   virtual const smart_objects::SmartObject* tts_name() const = 0;
   virtual const smart_objects::SmartObject* ngn_media_screen_name() const = 0;
@@ -333,6 +334,18 @@ class DynamicApplicationData {
   virtual uint32_t is_perform_interaction_active() const = 0;
 
   /*
+  * @brief Set perform interaction layout
+  *
+  * @param Current Interaction layout of the perform interaction
+  */
+ virtual void set_perform_interaction_layout(mobile_api::LayoutMode::eType layout) = 0;
+
+ /*
+  * @brief Retrieve perform interaction layout
+  */
+ virtual mobile_api::LayoutMode::eType perform_interaction_layout() const = 0;
+
+/*
    * @brief Sets the mode for perform interaction: UI/VR/BOTH
    *
    * @param mode Mode that was selected (MENU; VR; BOTH)

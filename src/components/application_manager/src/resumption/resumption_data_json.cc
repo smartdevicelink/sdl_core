@@ -60,15 +60,14 @@ void ResumptionDataJson::SaveApplication(
   const std::string hash = application->curHash();
   const uint32_t grammar_id = application->get_grammar_id();
   const uint32_t time_stamp = (uint32_t)time(NULL);
-  const std::string device_id =
-      MessageHelper::GetDeviceMacAddressForHandle(application->device());
+  const std::string device_mac = application->mac_address();
   const mobile_apis::HMILevel::eType hmi_level = application->hmi_level();
 
   sync_primitives::AutoLock autolock(resumption_lock_);
   Json::Value tmp;
-  Json::Value& json_app = GetFromSavedOrAppend(policy_app_id, device_id);
+  Json::Value& json_app = GetFromSavedOrAppend(policy_app_id, device_mac);
 
-  json_app[strings::device_id] = device_id;
+  json_app[strings::device_id] = device_mac;
   json_app[strings::app_id] = policy_app_id;
   json_app[strings::grammar_id] = grammar_id;
   json_app[strings::connection_key] = application->app_id();

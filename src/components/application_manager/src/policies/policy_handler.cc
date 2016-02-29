@@ -61,6 +61,8 @@ namespace policy {
 
 using namespace application_manager;
 
+CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
+
 namespace {
 using namespace mobile_apis;
 typedef std::map<RequestType::eType, std::string> RequestTypeMap;
@@ -94,6 +96,25 @@ const std::string RequestTypeToString(RequestType::eType type) {
   }
   return "";
 }
+
+const policy::DeviceParams GetDeviceParams(
+    connection_handler::DeviceHandle device_handle,
+    const protocol_handler::SessionObserver& session_observer) {
+  CREATE_LOGGERPTR_LOCAL(logger_, "PolicyHandler")
+  policy::DeviceParams device_params;
+  if (-1 ==
+      session_observer.GetDataOnDeviceID(
+          device_handle,
+          &device_params.device_name,
+          NULL,
+          &device_params.device_mac_address,
+          &device_params.device_connection_type)) {
+    LOG4CXX_ERROR(logger_,
+                  "Failed to extract information for device " << device_handle);
+  }
+  device_params.device_handle = device_handle;
+  return device_params;
+}
 }
 #define POLICY_LIB_CHECK(return_value)                                      \
   {                                                                         \
@@ -112,8 +133,6 @@ const std::string RequestTypeToString(RequestType::eType type) {
       return;                                                               \
     }                                                                       \
   }
-
-CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 
 struct ApplicationListHmiLevelSorter {
   bool operator()(const application_manager::ApplicationSharedPtr& lhs,
@@ -200,8 +219,11 @@ struct LinkAppToDevice {
                    "Skip current application.");
       return;
     }
-    DeviceParams device_params;
-    MessageHelper::GetDeviceInfoForApp(app->app_id(), &device_params);
+    DeviceParams device_params =
+        GetDeviceParams(app->device(),
+                        ApplicationManagerImpl::instance()
+                            ->connection_handler()
+                              .get_session_observer());
     const std::string app_id = app->mobile_app_id();
     if (device_params.device_mac_address.empty()) {
       LOG4CXX_WARN(logger_,
@@ -349,16 +371,20 @@ uint32_t PolicyHandler::GetAppIdForSending() {
 
   LOG4CXX_INFO(logger_, "Apps size: " << app_list.size());
 
-  DeviceParams device_param;
   for (HmiLevelOrderedApplicationList::const_iterator first = app_list.begin();
        first != app_list.end();
        ++first) {
     if ((*first)->IsRegistered()) {
       const uint32_t app_id = (*first)->app_id();
-      MessageHelper::GetDeviceInfoForApp(app_id, &device_param);
+      DeviceParams device_params =
+          GetDeviceParams((*first)->device(),
+                          ApplicationManagerImpl::instance()
+                              ->connection_handler()
+                              .get_session_observer());
+
       if (kDeviceAllowed ==
           policy_manager_->GetUserConsentForDevice(
-              device_param.device_mac_address)) {
+              device_params.device_mac_address)) {
         return app_id;
       }
     }
@@ -377,7 +403,7 @@ void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
                                            bool is_allowed) {
   POLICY_LIB_CHECK_VOID();
   connection_handler::DeviceHandle device_handle;
-  ApplicationManagerImpl::instance()->connection_handler()->GetDeviceID(
+  ApplicationManagerImpl::instance()->connection_handler().GetDeviceID(
       device_id, &device_handle);
   // In case of changed consent for device, related applications will be
   // limited to pre_DataConsent permissions, if device disallowed, or switch
@@ -451,8 +477,11 @@ void PolicyHandler::OnAppPermissionConsentInternal(
 
     if (app.valid()) {
       permissions.policy_app_id = app->mobile_app_id();
-      policy::DeviceParams device_params;
-      MessageHelper::GetDeviceInfoForHandle(app->device(), &device_params);
+      DeviceParams device_params =
+          GetDeviceParams(app->device(),
+                          ApplicationManagerImpl::instance()
+                              ->connection_handler()
+                                  .get_session_observer());
 
       permissions.device_id = device_params.device_mac_address;
     }
@@ -488,10 +517,11 @@ void PolicyHandler::OnAppPermissionConsentInternal(
                    "Permissions setting skipped.");
       continue;
     }
-
-    policy::DeviceParams device_params;
-    MessageHelper::GetDeviceInfoForHandle(app->device(), &device_params);
-
+    DeviceParams device_params =
+        GetDeviceParams(app->device(),
+                        ApplicationManagerImpl::instance()
+                            ->connection_handler()
+                              .get_session_observer());
     if (device_params.device_mac_address != it->second) {
       LOG4CXX_WARN(logger_,
                    "Device_id of application is changed."
@@ -576,9 +606,11 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
                         "not found within registered applications.");
     return;
   }
-
-  DeviceParams device_params;
-  MessageHelper::GetDeviceInfoForApp(connection_key, &device_params);
+  DeviceParams device_params =
+      GetDeviceParams(app->device(),
+                      ApplicationManagerImpl::instance()
+                          ->connection_handler()
+                            .get_session_observer());
   std::vector<FunctionalGroupPermission> group_permissions;
   if (device_params.device_mac_address.empty()) {
     LOG4CXX_WARN(logger_, "Couldn't find device, which hosts application.");
@@ -621,9 +653,12 @@ std::string PolicyHandler::OnCurrentDeviceIdUpdateRequired(
                         "not found within registered applications.");
     return "";
   }
-  DeviceParams device_param;
-  MessageHelper::GetDeviceInfoForApp(app->app_id(), &device_param);
-  return device_param.device_mac_address;
+  DeviceParams device_params =
+      GetDeviceParams(app->device(),
+                      ApplicationManagerImpl::instance()
+                          ->connection_handler()
+                            .get_session_observer());
+  return device_params.device_mac_address;
 }
 
 void PolicyHandler::OnSystemInfoChanged(const std::string& language) {
@@ -832,17 +867,20 @@ bool PolicyHandler::UnloadPolicyLibrary() {
 }
 
 void PolicyHandler::OnAllowSDLFunctionalityNotification(
-    bool is_allowed, const std::string& device_id) {
+    bool is_allowed, const std::string& device_mac) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK_VOID();
   // Device ids, need to be changed
   std::vector<std::string> device_macs;
-  const bool device_specific = !device_id.empty();
+  const bool device_specific = !device_mac.empty();
   // Common devices consents change
+    connection_handler::ConnectionHandler& connection_handler =
+        application_manager::ApplicationManagerImpl::instance()
+            ->connection_handler();
   if (!device_specific) {
-    MessageHelper::GetConnectedDevicesMAC(device_macs);
+      connection_handler.GetConnectedDevicesMAC(device_macs);
   } else {
-    device_macs.push_back(device_id);
+    device_macs.push_back(device_mac);
   }
 
   std::vector<std::string>::const_iterator it_ids = device_macs.begin();
@@ -855,15 +893,23 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
       return;
     }
     policy_manager_->SetUserConsentForDevice(device_id, is_allowed);
+    uint32_t device_handle = 0;
+    if (!connection_handler.GetDeviceID(device_mac, &device_handle)) {
+      LOG4CXX_WARN(logger_,
+                   "Device hadle with mac " << device_mac << " wasn't found.");
+    }
   }
 
   // Case, when specific device was changed
   if (device_specific) {
-    const uint32_t device_handle =
-        MessageHelper::GetDeviceHandleForMac(device_id);
+    uint32_t device_handle = 0;
+    if (!connection_handler.GetDeviceID(device_mac, &device_handle)) {
+      LOG4CXX_WARN(logger_,
+                   "Device hadle with mac " << device_mac << " wasn't found.");
+    }
     DeviceHandles::iterator it = std::find(pending_device_handles_.begin(),
                                            pending_device_handles_.end(),
-                                           device_handle);
+                                             device_handle);
     // If consent done from HMI menu
     if (it == pending_device_handles_.end()) {
       return;

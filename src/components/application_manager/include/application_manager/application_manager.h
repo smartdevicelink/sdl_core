@@ -39,6 +39,9 @@
 
 #include "application_manager/application.h"
 #include "application_manager/hmi_capabilities.h"
+#include "application_manager/commands/command.h"
+#include "connection_handler/connection_handler.h"
+
 #include "utils/data_accessor.h"
 #include "utils/shared_ptr.h"
 
@@ -180,6 +183,16 @@ class ApplicationManager {
   virtual void SendHMIStatusNotification(
       const utils::SharedPtr<Application> app) = 0;
 
+  virtual void SendMessageToMobile(const commands::MessageSharedPtr message,
+                                   bool final_message = false) = 0;
+
+  virtual void SendMessageToHMI(const commands::MessageSharedPtr message) = 0;
+
+  virtual bool ManageHMICommand(const commands::MessageSharedPtr message) = 0;
+  virtual bool ManageMobileCommand(const commands::MessageSharedPtr message,
+                                   commands::Command::CommandOrigin origin) = 0;
+
+
   virtual mobile_api::HMILevel::eType GetDefaultHmiLevel(
       ApplicationConstSharedPtr application) const = 0;
   /**
@@ -208,6 +221,8 @@ class ApplicationManager {
    * @param app Application
    */
   virtual void OnApplicationRegistered(ApplicationSharedPtr app) = 0;
+
+  virtual connection_handler::ConnectionHandler& connection_handler() const = 0;
 };
 
 }  // namespace application_manager
