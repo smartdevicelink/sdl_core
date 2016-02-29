@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,11 +29,10 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_PROTOCOL_HANDLER_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_PROTOCOL_HANDLER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_PROTOCOL_HANDLER_SETTINGS_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_PROTOCOL_HANDLER_SETTINGS_H_
 
 #include "gmock/gmock.h"
-#include "protocol_handler/protocol_packet.h"
 #include "protocol_handler/protocol_handler.h"
 #include "protocol_handler/protocol_handler_settings.h"
 
@@ -41,26 +40,38 @@ namespace test {
 namespace components {
 namespace protocol_handler_test {
 
-class MockProtocolHandler : public ::protocol_handler::ProtocolHandler {
+class MockProtocolHandlerSettings : public protocol_handler::ProtocolHandlerSettings {
  public:
-  MOCK_METHOD2(SendMessageToMobileApp,
-               void(const ::protocol_handler::RawMessagePtr message,
-                    bool final_message));
-  MOCK_METHOD1(AddProtocolObserver,
-               void(::protocol_handler::ProtocolObserver* observer));
-  MOCK_METHOD1(RemoveProtocolObserver,
-               void(::protocol_handler::ProtocolObserver* observer));
-  MOCK_METHOD2(SendFramesNumber,
-               void(uint32_t connection_key, int32_t number_of_frames));
-  MOCK_METHOD2(SendHeartBeat, void(int32_t connection_id, uint8_t session_id));
-  MOCK_METHOD2(SendEndSession, void(int32_t connection_id, uint8_t session_id));
-  MOCK_METHOD3(SendEndService, void(int32_t connection_id, uint8_t session_id,
-                                    uint8_t service_type));
-  MOCK_CONST_METHOD0(get_settings,
-                     protocol_handler::ProtocolHandlerSettings &());
+  MOCK_CONST_METHOD0(maximum_payload_size,
+      size_t());
+  MOCK_CONST_METHOD0(message_frequency_count,
+      size_t());
+  MOCK_CONST_METHOD0(message_frequency_time,
+      size_t());
+  MOCK_CONST_METHOD0(malformed_message_filtering,
+      bool());
+  MOCK_CONST_METHOD0(malformed_frequency_count,
+      size_t());
+  MOCK_CONST_METHOD0(malformed_frequency_time,
+      size_t());
+  MOCK_CONST_METHOD0(heart_beat_timeout,
+      uint32_t());
+  MOCK_CONST_METHOD0(max_supported_protocol_version,
+      uint16_t());
+  MOCK_CONST_METHOD0(enable_protocol_4,
+      bool());
+  MOCK_CONST_METHOD0(multiframe_waiting_timeout,
+      uint32_t());
+#ifdef ENABLE_SECURITY
+  MOCK_CONST_METHOD0(force_protected_service,
+      const std::vector<int>&());
+  MOCK_CONST_METHOD0(force_unprotected_service,
+      const std::vector<int>&());
+#endif
 };
+
 }  // namespace protocol_handler_test
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_PROTOCOL_HANDLER_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_PROTOCOL_HANDLER_SETTINGS_H_
