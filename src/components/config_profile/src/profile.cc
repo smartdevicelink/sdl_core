@@ -66,6 +66,8 @@ const char* kDefaultConfigFileName = "smartDeviceLink.ini";
 const char* kMainSection = "MAIN";
 #ifdef ENABLE_SECURITY
 const char* kSecuritySection = "Security Manager";
+const char* kForceProtectedService = "ForceProtectedService";
+const char* kForceUnprotectedService = "ForceUnprotectedService";
 #endif
 const char* kPolicySection = "Policy";
 const char* kHmiSection = "HMI";
@@ -145,6 +147,7 @@ const char* kHelpTitleKey = "HelpTitle";
 const char* kHelpCommandKey = "HelpCommand";
 const char* kSystemFilesPathKey = "SystemFilesPath";
 const char* kHeartBeatTimeoutKey = "HeartBeatTimeout";
+const char* kMaxSupportedProtocolVersionKey = "MaxSupportedProtocolVersion";
 const char* kUseLastStateKey = "UseLastState";
 const char* kTCPAdapterPortKey = "TCPAdapterPort";
 const char* kServerPortKey = "ServerPort";
@@ -234,6 +237,7 @@ const uint32_t kDefaultBeforeUpdateHours = 24;
 
 const uint32_t kDefaultHubProtocolIndex = 0;
 const uint32_t kDefaultHeartBeatTimeout = 0;
+const uint16_t kDefaultMaxSupportedProtocolVersion = 3;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
 const uint16_t kDefaultServerPort = 8087;
 const uint16_t kDefaultVideoStreamingPort = 5050;
@@ -328,6 +332,7 @@ Profile::Profile()
       list_files_in_none_(kDefaultListFilesRequestInNone),
       app_info_storage_(kDefaultAppInfoFileName),
       heart_beat_timeout_(kDefaultHeartBeatTimeout),
+      max_supported_protocol_version_(kDefaultMaxSupportedProtocolVersion),
       policy_snapshot_file_name_(kDefaultPoliciesSnapshotFileName),
       enable_policy_(false),
       transport_manager_disconnect_timeout_(
@@ -566,6 +571,10 @@ uint32_t Profile::heart_beat_timeout() const {
   return heart_beat_timeout_;
 }
 
+uint16_t Profile::max_supported_protocol_version() const{
+  return max_supported_protocol_version_;
+}
+
 const std::string& Profile::preloaded_pt_file() const {
   return preloaded_pt_file_;
 }
@@ -776,6 +785,13 @@ const std::string& Profile::security_manager_protocol_name() const {
   return security_manager_protocol_name_;
 }
 
+const std::vector<int>& Profile::force_protected_service() const {
+  return force_protected_service_;
+}
+
+const std::vector<int>& Profile::force_unprotected_service() const {
+  return force_unprotected_service_;
+}
 #endif // ENABLE_SECURITY
 
 bool Profile::logs_enabled() const {
@@ -822,6 +838,12 @@ void Profile::UpdateValues() {
 #endif // WEB_HMI
 
 #ifdef ENABLE_SECURITY
+
+  force_protected_service_ =
+      ReadIntContainer(kSecuritySection, kForceProtectedService, NULL);
+
+  force_unprotected_service_ =
+      ReadIntContainer(kSecuritySection, kForceUnprotectedService, NULL);
 
   ReadStringValue(&security_manager_protocol_name_, kDefaultSecurityProtocol, kSecuritySection,
       kSecurityProtocolKey);
@@ -1437,6 +1459,18 @@ void Profile::UpdateValues() {
     enable_policy_ = false;
   }
 
+  // Max protocol version
+  ReadUIntValue(&max_supported_protocol_version_,
+                kDefaultMaxSupportedProtocolVersion,
+                kProtocolHandlerSection,
+                kMaxSupportedProtocolVersionKey);
+
+  // if .ini file contains protocol version less than 2 or more than 3
+  // max_supported_protocol_version_ = 3
+  if (max_supported_protocol_version_ < 2) {
+    max_supported_protocol_version_ = 3;
+  }
+
   LOG_UPDATED_BOOL_VALUE(enable_policy_, kEnablePolicy, kPolicySection);
 
   ReadUIntValue(&application_list_update_timeout_,
@@ -1638,26 +1672,26 @@ int32_t hex_to_int(const std::string& value) {
 }
 }
 
-std::list<int> Profile::ReadIntContainer(
+std::vector<int> Profile::ReadIntContainer(
     const char * const pSection, const char * const pKey,
                                          bool *out_result) const {
-  const std::list<std::string> string_list =
+  const std::vector<std::string> string_list =
       ReadStringContainer(pSection, pKey, out_result);
-  std::list<int> value_list;
+  std::vector<int> value_list;
   value_list.resize(string_list.size());
   std::transform(string_list.begin(), string_list.end(),
                  value_list.begin(), hex_to_int);
   return value_list;
 }
 
-std::list<std::string> Profile::ReadStringContainer(
+std::vector<std::string> Profile::ReadStringContainer(
     const char * const pSection, const char * const pKey,
                                                     bool *out_result) const {
   std::string string;
   const bool result = ReadValue(&string, pSection, pKey);
   if (out_result)
     *out_result = result;
-  std::list < std::string > value_container;
+  std::vector < std::string > value_container;
   if (result) {
     std::istringstream iss(string);
     std::string temp_str;
