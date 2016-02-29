@@ -30,9 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <algorithm>
+#include <vector>
+
 #include "gtest/gtest.h"
 #include "config_profile/profile.h"
-#include <algorithm>
 #include "utils/file_system.h"
 #include "utils/threads/thread.h"
 
@@ -670,13 +672,13 @@ TEST_F(ProfileTest, CheckIntContainer) {
             Profile::instance()->config_file_name());
 
   bool isread = false;
-  std::list<int> diagmodes_list =
+  std::vector<int> diagmodes_list =
       profile::Profile::instance()->ReadIntContainer("MAIN",
                                                      "SupportedDiagModes",
                                                      &isread);
   EXPECT_TRUE(isread);
 
-  std::list<int>::iterator diag_mode = std::find(diagmodes_list.begin(),
+  std::vector<int>::iterator diag_mode = std::find(diagmodes_list.begin(),
                                                  diagmodes_list.end(), 0x12);
 
   // This element doesn't appear in list
@@ -687,7 +689,7 @@ TEST_F(ProfileTest, CheckIntContainer) {
   EXPECT_EQ(diag_mode, diagmodes_list.begin());
 
   // List includes 0x03
-  std::list<int>::iterator element_mode = diagmodes_list.begin();
+  std::vector<int>::iterator element_mode = diagmodes_list.begin();
   element_mode++;
   element_mode++;
 
@@ -705,7 +707,7 @@ TEST_F(ProfileTest, CheckVectorContainer) {
       ->supported_diag_modes();
 
   bool isread = false;
-  std::list<int> diagmodes_list =
+  std::vector<int> diagmodes_list =
       profile::Profile::instance()->ReadIntContainer("MAIN",
                                                      "SupportedDiagModes",
                                                      &isread);
@@ -713,7 +715,7 @@ TEST_F(ProfileTest, CheckVectorContainer) {
   // Compare with result of ReadIntContainer
   ASSERT_EQ(diag_modes.size(), diagmodes_list.size());
   bool isEqual = true;
-  std::list<int>::iterator iter = diagmodes_list.begin();
+  std::vector<int>::iterator iter = diagmodes_list.begin();
 
   for (std::vector<uint32_t>::const_iterator it = diag_modes.begin();
       it != diag_modes.end(); it++) {
@@ -734,11 +736,11 @@ TEST_F(ProfileTest, CheckStringContainer) {
             Profile::instance()->config_file_name());
 
   bool isread = false;
-  std::list < std::string > diagmodes_list = profile::Profile::instance()
+  std::vector < std::string > diagmodes_list = profile::Profile::instance()
       ->ReadStringContainer("MAIN", "SupportedDiagModes", &isread);
   EXPECT_TRUE(isread);
 
-  std::list<std::string>::iterator diag_mode =
+  std::vector<std::string>::iterator diag_mode =
       std::find(diagmodes_list.begin(), diagmodes_list.end(), "0x12");
 
   // This element doesn't appear in list
@@ -749,7 +751,7 @@ TEST_F(ProfileTest, CheckStringContainer) {
   EXPECT_EQ(diag_mode, diagmodes_list.begin());
 
   // List includes 0x03
-  std::list<std::string>::iterator element_mode = diagmodes_list.begin();
+  std::vector<std::string>::iterator element_mode = diagmodes_list.begin();
   element_mode++;
   element_mode++;
   diag_mode = std::find(diagmodes_list.begin(), diagmodes_list.end(), " 0x03");
@@ -763,16 +765,16 @@ TEST_F(ProfileTest, CheckIntContainerInSecurityData) {
   EXPECT_EQ("smartDeviceLink_test.ini",
       Profile::instance()->config_file_name());
 
-  std::list<int> force_unprotected_list =
+  std::vector<int> force_unprotected_list =
   profile::Profile::instance()->ReadIntContainer(
       "Security Manager", "ForceUnprotectedService", NULL);
 
-  std::list<int> force_protected_list =
+  std::vector<int> force_protected_list =
   profile::Profile::instance()->ReadIntContainer(
       "Security Manager", "ForceProtectedService", NULL);
 
-  std::list<int>::iterator res_unprotect = std::find(force_unprotected_list.begin(), force_unprotected_list.end(), 0x07);
-  std::list<int>::iterator res_protect = std::find(force_protected_list.begin(), force_protected_list.end(), 0x07);
+  std::vector<int>::iterator res_unprotect = std::find(force_unprotected_list.begin(), force_unprotected_list.end(), 0x07);
+  std::vector<int>::iterator res_protect = std::find(force_protected_list.begin(), force_protected_list.end(), 0x07);
   // This element doesn't appear in both lists
   EXPECT_EQ(res_unprotect, force_unprotected_list.end() );
   EXPECT_EQ(res_protect, force_protected_list.end() );
