@@ -102,7 +102,6 @@ bool LifeCycle::StartComponents() {
   DCHECK(connection_handler_);
 
   DCHECK(!protocol_handler_);
-  //TODO(AKutsan) : APPLINK-20265 Singletons should be removed
   protocol_handler_ =
       new protocol_handler::ProtocolHandlerImpl(*(profile::Profile::instance()),
                                                 *connection_handler_,

@@ -61,8 +61,8 @@ TEST(HMIMessageAdapterImplTest, Handler_CorrectPointer_CorrectReturnedPointer) {
 
   EXPECT_EQ(message_handler, message_adapter_impl->get_handler());
 
-  message_handler = NULL;
   delete message_handler;
+  message_handler = NULL;
 }
 
 TEST(HMIMessageAdapterImplTest, Handler_NULLPointer_CorrectReturnedPointer) {

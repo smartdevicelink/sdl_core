@@ -36,7 +36,6 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
-#include <list>
 #include "utils/macro.h"
 #include "utils/singleton.h"
 #include "protocol_handler/protocol_handler_settings.h"

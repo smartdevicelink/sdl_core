@@ -215,7 +215,8 @@ void HMILanguageHandler::set_default_capabilities_languages(
   }
 }
 
-void HMILanguageHandler::SendOnLanguageChangeToMobile(uint32_t connection_key) {
+void HMILanguageHandler::SendOnLanguageChangeToMobile(
+      const uint32_t connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   smart_objects::SmartObjectSPtr notification = new smart_objects::SmartObject;

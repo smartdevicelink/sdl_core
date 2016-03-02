@@ -721,9 +721,9 @@ smart_objects::SmartObjectList MessageHelper::GetIVISubscriptionRequests(
 }
 
 void MessageHelper::SendOnButtonSubscriptionNotification(
-    uint32_t app_id,
-    hmi_apis::Common_ButtonName::eType button,
-    bool is_subscribed) {
+    const uint32_t app_id,
+    const hmi_apis::Common_ButtonName::eType button,
+    const bool is_subscribed) {
   using namespace smart_objects;
   using namespace hmi_apis;
   LOG4CXX_AUTO_TRACE(logger_);
@@ -777,7 +777,7 @@ void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
   }
 }
 
-void MessageHelper::SendSetAppIcon(uint32_t app_id,
+void MessageHelper::SendSetAppIcon(const uint32_t app_id,
                                    const std::string& icon_path) {
   using namespace smart_objects;
   SmartObjectSPtr set_app_icon = CreateRequestObject();
@@ -897,7 +897,7 @@ MessageHelper::CreateGlobalPropertiesRequestsToHMI(
 }
 
 void MessageHelper::SendTTSGlobalProperties(ApplicationSharedPtr app,
-                                            bool default_help_prompt) {
+                                            const bool default_help_prompt) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!app) {
     return;
@@ -1124,9 +1124,9 @@ MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
 }
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateChangeRegistration(
-    int32_t function_id,
-    int32_t language,
-    uint32_t app_id,
+    const int32_t function_id,
+    const int32_t language,
+    const uint32_t app_id,
     const smart_objects::SmartObject* app_types) {
   smart_objects::SmartObjectSPtr command = CreateRequestObject();
   if (!command) {
@@ -1208,18 +1208,18 @@ void MessageHelper::SendChangeRegistrationRequestToHMI(
 }
 
 void MessageHelper::SendAddVRCommandToHMI(
-    uint32_t cmd_id,
+    const uint32_t cmd_id,
     const smart_objects::SmartObject& vr_commands,
-    uint32_t app_id) {
+    const uint32_t app_id) {
   smart_objects::SmartObjectSPtr request =
       CreateAddVRCommandToHMI(cmd_id, vr_commands, app_id);
   DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(request));
 }
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateAddVRCommandToHMI(
-    uint32_t cmd_id,
+    const uint32_t cmd_id,
     const smart_objects::SmartObject& vr_commands,
-    uint32_t app_id) {
+    const uint32_t app_id) {
   smart_objects::SmartObjectSPtr vr_command = CreateRequestObject();
   if (!vr_command) {
     return NULL;
@@ -1253,6 +1253,7 @@ bool MessageHelper::CreateHMIApplicationStruct(
   LOG4CXX_AUTO_TRACE(logger_);
   using smart_objects::SmartObject;
 
+  DCHECK(output);
   SmartObject& message = *output;
   if (!app) {
     LOG4CXX_WARN(logger_, "Application is not valid");
@@ -1360,7 +1361,7 @@ smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestToHMI(
 }
 
 void MessageHelper::SendOnAppUnregNotificationToHMI(
-    ApplicationConstSharedPtr app, bool is_unexpected_disconnect) {
+    ApplicationConstSharedPtr app, const bool is_unexpected_disconnect) {
   smart_objects::SmartObjectSPtr notification =
       new smart_objects::SmartObject(smart_objects::SmartType_Map);
   if (!notification) {
@@ -1385,13 +1386,13 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(
 smart_objects::SmartObjectSPtr
 MessageHelper::GetBCActivateAppRequestToHMI(
       ApplicationConstSharedPtr app,
-     hmi_apis::Common_HMILevel::eType level,
-     bool send_policy_priority) {
+     const hmi_apis::Common_HMILevel::eType level,
+     const bool send_policy_priority) {
   DCHECK_OR_RETURN(app, smart_objects::SmartObjectSPtr());
 
-  uint32_t correlation_id =
+  const uint32_t correlation_id =
       ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
- smart_objects::SmartObjectSPtr message =
+  smart_objects::SmartObjectSPtr message =
       utils::MakeShared<smart_objects::SmartObject>(
           smart_objects::SmartType_Map);
   (*message)[strings::params][strings::function_id] =
@@ -1453,7 +1454,7 @@ void MessageHelper::SendOnResumeAudioSourceToHMI(const uint32_t app_id) {
 }
 
 void MessageHelper::SendSDLActivateAppResponse(
-    policy::AppPermissions& permissions, uint32_t correlation_id) {
+    policy::AppPermissions& permissions, const uint32_t correlation_id) {
   smart_objects::SmartObjectSPtr message =
       new smart_objects::SmartObject(smart_objects::SmartType_Map);
   if (!message) {
@@ -1523,7 +1524,7 @@ void MessageHelper::SendOnSDLConsentNeeded(
 }
 
 void MessageHelper::SendPolicyUpdate(const std::string& file_path,
-                                     int timeout,
+                                     const int timeout,
                                      const std::vector<int>& retries) {
   smart_objects::SmartObjectSPtr message = CreateRequestObject();
   smart_objects::SmartObject& object = *message;
@@ -1542,7 +1543,7 @@ void MessageHelper::SendPolicyUpdate(const std::string& file_path,
 
 void MessageHelper::SendGetUserFriendlyMessageResponse(
     const std::vector<policy::UserFriendlyMessage>& msg,
-    uint32_t correlation_id) {
+    const uint32_t correlation_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr message =
       new smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -1586,7 +1587,7 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
 
 void MessageHelper::SendGetListOfPermissionsResponse(
     const std::vector<policy::FunctionalGroupPermission>& permissions,
-    uint32_t correlation_id) {
+    const uint32_t correlation_id) {
   smart_objects::SmartObjectSPtr message =
       new smart_objects::SmartObject(smart_objects::SmartType_Map);
   if (!message) {
@@ -1650,7 +1651,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponse(
   return response;
 }
 
-void MessageHelper::SendNaviStartStream(int32_t app_id) {
+void MessageHelper::SendNaviStartStream(const int32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr start_stream = CreateRequestObject();
   if (!start_stream) {
@@ -1692,7 +1693,7 @@ void MessageHelper::SendNaviStartStream(int32_t app_id) {
   ApplicationManagerImpl::instance()->ManageHMICommand(start_stream);
 }
 
-void MessageHelper::SendNaviStopStream(int32_t app_id) {
+void MessageHelper::SendNaviStopStream(const int32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr stop_stream = CreateRequestObject();
   if (!stop_stream) {
@@ -1712,7 +1713,7 @@ void MessageHelper::SendNaviStopStream(int32_t app_id) {
   ApplicationManagerImpl::instance()->ManageHMICommand(stop_stream);
 }
 
-void MessageHelper::SendAudioStartStream(int32_t app_id) {
+void MessageHelper::SendAudioStartStream(const int32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr start_stream = CreateRequestObject();
   if (!start_stream) {
@@ -1755,7 +1756,7 @@ void MessageHelper::SendAudioStartStream(int32_t app_id) {
   DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(start_stream));
 }
 
-void MessageHelper::SendAudioStopStream(int32_t app_id) {
+void MessageHelper::SendAudioStopStream(const int32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr stop_stream = CreateRequestObject();
   if (!stop_stream) {
@@ -1775,8 +1776,8 @@ void MessageHelper::SendAudioStopStream(int32_t app_id) {
   ApplicationManagerImpl::instance()->ManageHMICommand(stop_stream);
 }
 
-void MessageHelper::SendOnDataStreaming(protocol_handler::ServiceType service,
-                                        bool available) {
+void MessageHelper::SendOnDataStreaming(const protocol_handler::ServiceType service,
+                                        const bool available) {
   using namespace protocol_handler;
   smart_objects::SmartObjectSPtr notification =
       new smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -1818,10 +1819,9 @@ bool MessageHelper::SendStopAudioPathThru() {
 }
 
 void MessageHelper::SendPolicySnapshotNotification(
-    unsigned int connection_key,
+    const unsigned int connection_key,
     const std::vector<uint8_t>& policy_data,
-    const std::string& url,
-    int timeout) {
+    const std::string& url) {
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(connection_key);
   DCHECK(app.get());
@@ -1846,7 +1846,7 @@ void MessageHelper::SendPolicySnapshotNotification(
 }
 
 void MessageHelper::SendSystemRequestNotification(
-    uint32_t connection_key, smart_objects::SmartObject*& content) {
+    const uint32_t connection_key, smart_objects::SmartObject*& content) {
   using namespace mobile_apis;
   using namespace commands;
   (*content)[strings::params][strings::function_id] =
@@ -1868,7 +1868,7 @@ void MessageHelper::SendSystemRequestNotification(
   DCHECK(ApplicationManagerImpl::instance()->ManageMobileCommand(so));
 }
 
-void MessageHelper::SendLaunchApp(uint32_t connection_key,
+void MessageHelper::SendLaunchApp(const uint32_t connection_key,
                                   const std::string& urlSchema,
                                   const std::string& packageName) {
   using namespace mobile_apis;
@@ -1888,7 +1888,7 @@ void MessageHelper::SendLaunchApp(uint32_t connection_key,
 }
 
 void application_manager::MessageHelper::SendQueryApps(
-    uint32_t connection_key) {
+    const uint32_t connection_key) {
   using namespace mobile_apis;
   using namespace smart_objects;
 
@@ -2068,7 +2068,7 @@ void MessageHelper::FillAppRevokedPermissions(
 }
 
 void MessageHelper::SendOnAppPermissionsChangedNotification(
-    uint32_t connection_key, const policy::AppPermissions& permissions) {
+    const uint32_t connection_key, const policy::AppPermissions& permissions) {
   using namespace smart_objects;
   SmartObjectSPtr notification = new SmartObject(SmartType_Map);
   if (!notification) {
@@ -2118,7 +2118,7 @@ void MessageHelper::SendOnAppPermissionsChangedNotification(
 }
 
 void MessageHelper::SendGetStatusUpdateResponse(const std::string& status,
-                                                uint32_t correlation_id) {
+                                                const uint32_t correlation_id) {
   smart_objects::SmartObjectSPtr message =
       new smart_objects::SmartObject(smart_objects::SmartType_Map);
   if (!message) {
@@ -2137,7 +2137,7 @@ void MessageHelper::SendGetStatusUpdateResponse(const std::string& status,
 }
 
 void MessageHelper::SendUpdateSDLResponse(const std::string& result,
-                                          uint32_t correlation_id) {
+                                          const uint32_t correlation_id) {
   smart_objects::SmartObjectSPtr message =
       new smart_objects::SmartObject(smart_objects::SmartType_Map);
   DCHECK(message);

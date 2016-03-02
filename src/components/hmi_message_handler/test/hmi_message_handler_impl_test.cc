@@ -62,13 +62,10 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
         .WillByDefault(ReturnRef(stack_size));
     hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(
         mock_hmi_message_handler_settings);
-    ASSERT_TRUE(NULL != hmi_handler_);
     mb_adapter_ = new hmi_message_handler::MessageBrokerAdapter(
         hmi_handler_, "localhost", 22);
-    ASSERT_TRUE(NULL != mb_adapter_);
     mock_hmi_message_observer_ =
         new hmi_message_handler::MockHMIMessageObserver();
-    ASSERT_TRUE(NULL != mock_hmi_message_observer_);
     hmi_handler_->set_message_observer(mock_hmi_message_observer_);
     EXPECT_TRUE(NULL != hmi_handler_->observer());
   }

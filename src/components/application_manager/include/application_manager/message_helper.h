@@ -241,9 +241,9 @@ class MessageHelper {
    * @brief Sends button subscription notification
    */
   static void SendOnButtonSubscriptionNotification(
-      uint32_t app_id,
-      hmi_apis::Common_ButtonName::eType button,
-      bool is_subscribed);
+      const uint32_t app_id,
+      const hmi_apis::Common_ButtonName::eType button,
+      const bool is_subscribed);
 
   /**
    * @brief Sends button subscription notifications for all buttons
@@ -279,14 +279,14 @@ class MessageHelper {
       ApplicationConstSharedPtr app);
   static void SendChangeRegistrationRequestToHMI(ApplicationConstSharedPtr app);
   static void SendAddVRCommandToHMI(
-      uint32_t cmd_id,
+      const uint32_t cmd_id,
       const smart_objects::SmartObject& vr_commands,
-      uint32_t app_id);
+      const uint32_t app_id);
 
   static smart_objects::SmartObjectSPtr CreateAddVRCommandToHMI(
-      uint32_t cmd_id,
+      const uint32_t cmd_id,
       const smart_objects::SmartObject& vr_commands,
-      uint32_t app_id);
+      const uint32_t app_id);
 
   /*
    * @brief Create Common.HMIApplication struct application instance
@@ -310,11 +310,12 @@ class MessageHelper {
    * Indicates if connection was unexpectedly lost by TM or HB
    */
   static void SendOnAppUnregNotificationToHMI(
-      ApplicationConstSharedPtr app, bool is_unexpected_disconnect = false);
+      ApplicationConstSharedPtr app,
+      const bool is_unexpected_disconnect = false);
 
   static smart_objects::SmartObjectSPtr GetBCActivateAppRequestToHMI(ApplicationConstSharedPtr app,
-       hmi_apis::Common_HMILevel::eType level,
-       bool send_policy_priority = true);
+       const hmi_apis::Common_HMILevel::eType level,
+       const bool send_policy_priority = true);
 
   static void SendOnResumeAudioSourceToHMI(const uint32_t app_id);
 
@@ -323,7 +324,7 @@ class MessageHelper {
   * @param permissions response parameters
   */
   static void SendSDLActivateAppResponse(policy::AppPermissions& permissions,
-                                         uint32_t correlation_id);
+                                         const uint32_t correlation_id);
 
   /**
   * @brief Send OnSDLConsentNeeded to HMI for device data consent by user
@@ -339,7 +340,7 @@ class MessageHelper {
     * @param retries Seconds between retries
     */
   static void SendPolicyUpdate(const std::string& file_path,
-                               int timeout,
+                               const int timeout,
                                const std::vector<int>& retries);
 
   /**
@@ -349,7 +350,7 @@ class MessageHelper {
    */
   static void SendGetUserFriendlyMessageResponse(
       const std::vector<policy::UserFriendlyMessage>& msg,
-      uint32_t correlation_id);
+      const uint32_t correlation_id);
 
   /**
    * @brief Send GetListOfPermissions response to HMI
@@ -358,7 +359,7 @@ class MessageHelper {
    */
   static void SendGetListOfPermissionsResponse(
       const std::vector<policy::FunctionalGroupPermission>& permissions,
-      uint32_t correlation_id);
+      const uint32_t correlation_id);
 
   /*
    * @brief Sends notification to HMI to start video streaming
@@ -366,7 +367,7 @@ class MessageHelper {
    * @param connection_key  Application connection key
    *
    */
-  static void SendNaviStartStream(int32_t app_id);
+  static void SendNaviStartStream(const int32_t app_id);
 
   /*
    * @brief Sends notification to HMI to stop video streaming
@@ -374,7 +375,7 @@ class MessageHelper {
    * @param connection_key  Application connection key
    *
    */
-  static void SendNaviStopStream(int32_t app_id);
+  static void SendNaviStopStream(const int32_t app_id);
 
   /*
   * @brief Send notification for Update of Policy Table
@@ -384,14 +385,12 @@ class MessageHelper {
   * @param url If empty string, no URL is provided
   * @param timeout If -1 no timeout is provdied
   */
-  static void SendPolicySnapshotNotification(
-      unsigned int connection_key,
+  static void SendPolicySnapshotNotification(const unsigned int connection_key,
       const std::vector<uint8_t>& policy_data,
-      const std::string& url = "",
-      int timeout = -1);
+      const std::string& url = "");
 
   static void SendSystemRequestNotification(
-      uint32_t connection_key,
+      const uint32_t connection_key,
       NsSmartDeviceLink::NsSmartObjects::SmartObject*& content);
 
   /**
@@ -403,7 +402,7 @@ class MessageHelper {
    *
    * @param packageName application's package name.
    */
-  static void SendLaunchApp(uint32_t connection_key,
+  static void SendLaunchApp(const uint32_t connection_key,
                             const std::string& urlSchema,
                             const std::string& packageName);
 
@@ -411,7 +410,7 @@ class MessageHelper {
    * @brief Sends OnSystemRequest which queries remote apps list
    * @param connection_key application id, which is used for sending out
    */
-  static void SendQueryApps(uint32_t connection_key);
+  static void SendQueryApps(const uint32_t connection_key);
 
   /*
   * @brief Send notification to mobile on application permissions update
@@ -419,7 +418,7 @@ class MessageHelper {
   * @param permissions updated permissions for application
   */
   static void SendOnPermissionsChangeNotification(
-      uint32_t connection_key, const policy::Permissions& permissions);
+      const uint32_t connection_key, const policy::Permissions& permissions);
 
   /*
   * @brief Send notification to HMI on application permissions update
@@ -427,7 +426,7 @@ class MessageHelper {
   * @param permissions updated permissions for application
   */
   static void SendOnAppPermissionsChangedNotification(
-      uint32_t connection_key, const policy::AppPermissions& permissions);
+      const uint32_t connection_key, const policy::AppPermissions& permissions);
 
   /**
    * @brief Send GetStatusUpdate response to HMI with current policy update
@@ -436,7 +435,7 @@ class MessageHelper {
    * @param correlation_id Correlation id from request
    */
   static void SendGetStatusUpdateResponse(const std::string& status,
-                                          uint32_t correlation_id);
+                                          const uint32_t correlation_id);
 
   /**
    * @brief Send UpdateSDL response to HMI with policy update result
@@ -444,7 +443,7 @@ class MessageHelper {
    * @param correlation_id Correlation id from request
    */
   static void SendUpdateSDLResponse(const std::string& result,
-                                    uint32_t correlation_id);
+                                    const uint32_t correlation_id);
 
   /**
    * @brief Send OnStatusUpdate to HMI on policy update status change
@@ -463,7 +462,7 @@ class MessageHelper {
    * @param connection_key  Application connection key
    *
    */
-  static void SendAudioStartStream(int32_t app_id);
+  static void SendAudioStartStream(const int32_t app_id);
 
   /*
    * @brief Sends notification to HMI to stop audio streaming
@@ -471,10 +470,10 @@ class MessageHelper {
    * @param connection_key  Application connection key
    *
    */
-  static void SendAudioStopStream(int32_t connection_key);
+  static void SendAudioStopStream(const int32_t connection_key);
 
-  static void SendOnDataStreaming(protocol_handler::ServiceType service,
-                                  bool available);
+  static void SendOnDataStreaming(const protocol_handler::ServiceType service,
+                                  const bool available);
 
   /*
    * @brief Sends notification to HMI to stop audioPathThru
@@ -634,7 +633,7 @@ class MessageHelper {
      * with empty helpPrompt array.
      */
     static void SendTTSGlobalProperties(
-        ApplicationSharedPtr app, bool default_help_prompt);
+        ApplicationSharedPtr app, const bool default_help_prompt);
 
     /**
      * @brief SendSetAppIcon allows to send SetAppIcon request.
@@ -643,7 +642,7 @@ class MessageHelper {
      *
      * @param icon_path path to the icon.
      */
-     static void SendSetAppIcon(uint32_t app_id, const std::string& icon_path);
+     static void SendSetAppIcon(const uint32_t app_id, const std::string& icon_path);
 
     /**
      * @brief Sends DecryptCertificate request to HMI
@@ -663,11 +662,14 @@ class MessageHelper {
      * @param permissions application permissions.
      * @param message which should be filled.
      */
-    static void FillAppRevokedPermissions(const policy::AppPermissions& permissions,
-                                   smart_objects::SmartObject& message);
+    static void FillAppRevokedPermissions(
+        const policy::AppPermissions& permissions,
+        smart_objects::SmartObject& message);
 
     static smart_objects::SmartObjectSPtr CreateChangeRegistration(
-        int32_t function_id, int32_t language, uint32_t app_id,
+        const int32_t function_id,
+        const int32_t language,
+        const uint32_t app_id,
         const smart_objects::SmartObject* app_types = NULL);
 
     MessageHelper();

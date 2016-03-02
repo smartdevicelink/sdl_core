@@ -321,7 +321,7 @@ connection_handler::DeviceHandle ApplicationImpl::device() const {
   return device_;
 }
 
-const std::string&ApplicationImpl::mac_address() const{
+const std::string& ApplicationImpl::mac_address() const{
   return mac_address_;
 }
 

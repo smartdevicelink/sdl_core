@@ -36,7 +36,6 @@
 #include "connection_handler/connection.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol/service_type.h"
-#include "utils/shared_ptr.h"
 #include "connection_handler/mock_connection_handler_settings.h"
 #include "transport_manager/transport_manager_mock.h"
 #include "security_manager/mock_security_manager.h"
@@ -60,13 +59,14 @@ class ConnectionTest : public ::testing::Test {
         mock_connection_handler_settings, transport_manager_mock);
     const ConnectionHandle connectionHandle = 0;
     const DeviceHandle device_handle = 0;
-    connection_.reset(
-        new Connection(connectionHandle, device_handle, connection_handler_,
-                       10000));
+    connection_ = new Connection(connectionHandle,
+                                 device_handle,
+                                 connection_handler_,
+                                 10000);
   }
 
   void TearDown() OVERRIDE {
-    connection_.reset();
+    delete connection_;
     delete connection_handler_;
   }
   void StartSession() {
@@ -127,7 +127,7 @@ class ConnectionTest : public ::testing::Test {
     EXPECT_EQ(expect_exist_service, found_result);
   }
 
-  ::utils::SharedPtr<Connection> connection_;
+  Connection* connection_;
   MockConnectionHandlerSettings mock_connection_handler_settings;
   testing::StrictMock<transport_manager_test::TransportManagerMock>
       transport_manager_mock;

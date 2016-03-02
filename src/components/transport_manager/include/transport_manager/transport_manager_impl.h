@@ -83,7 +83,7 @@ class TransportManagerImpl : public TransportManager,
     TransportManagerImpl* transport_manager;
     TransportAdapter* transport_adapter;
     TimerSPtr timer;
-    bool shutDown;
+    bool shut_down;
     DeviceHandle device_handle_;
     int messages_count;
 
