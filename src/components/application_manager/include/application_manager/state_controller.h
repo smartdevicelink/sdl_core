@@ -83,25 +83,24 @@ class StateController : public event_engine::EventObserver {
       app->SetPostponedState(state);
       return;
     }
+    hmi_apis::Common_HMILevel::eType hmi_level =
+        static_cast<hmi_apis::Common_HMILevel::eType>(
+            resolved_state->hmi_level());
 
-    const bool is_full_allowed =
-            mobile_apis::HMILevel::HMI_FULL == resolved_state->hmi_level()
-            ? true
-            : false;
+    const bool is_full_allowed = hmi_apis::Common_HMILevel::FULL == hmi_level;
 
     if (SendActivateApp && is_full_allowed) {
-        hmi_apis::Common_HMILevel::eType hmi_level =
-	    static_cast<hmi_apis::Common_HMILevel::eType>(
-	        resolved_state->hmi_level());
-        uint32_t corr_id = MessageHelper::SendActivateAppToHMI(
-            app->app_id(), hmi_level);
-
-      subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_ActivateApp,
-                         corr_id);
-      waiting_for_activate[app->app_id()] = resolved_state;
-    } else {
-      ApplyRegularState(app, resolved_state);
+      int64_t corr_id = SendBCActivateApp(app, hmi_level, true);
+      if (-1 != corr_id) {
+        subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_ActivateApp,
+                           corr_id);
+        waiting_for_activate[app->app_id()] = resolved_state;
+        return;
+      }
+      LOG4CXX_ERROR(logger_, "Unable to send BC.ActivateApp");
+      return;
     }
+    ApplyRegularState(app, resolved_state);
   }
 
   /**

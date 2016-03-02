@@ -163,10 +163,9 @@ void MessageHelper::SendOnPermissionsChangeNotification(
 void MessageHelper::SendPolicySnapshotNotification(
     unsigned int connection_key,
     const std::vector<uint8_t>& policy_data,
-    const std::string& url,
-    int timeout) {
+    const std::string& url) {
   MockMessageHelper::message_helper_mock()->SendPolicySnapshotNotification(
-      connection_key, policy_data, url, timeout);
+      connection_key, policy_data, url);
 }
 void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
     int32_t connection_key,

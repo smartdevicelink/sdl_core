@@ -227,6 +227,8 @@ class MockApplication : public application_manager::Application {
       void(bool state));
   MOCK_METHOD1(StartStreaming,
       void(protocol_handler::ServiceType service_type));
+  MOCK_METHOD1(StopStreamingForce,
+      void(protocol_handler::ServiceType service_type));
   MOCK_METHOD1(StopStreaming,
       void(protocol_handler::ServiceType service_type));
   MOCK_METHOD1(SuspendStreaming,

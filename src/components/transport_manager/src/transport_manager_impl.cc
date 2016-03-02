@@ -297,7 +297,7 @@ int TransportManagerImpl::SendMessageToDevice(const ::protocol_handler::RawMessa
     return E_INVALID_HANDLE;
   }
 
-  if (connection->shutDown) {
+  if (connection->shut_down) {
     LOG4CXX_ERROR(logger_, "TransportManagerImpl::Disconnect: Connection is to shut down.");
     LOG4CXX_TRACE(logger_,
                   "exit with E_CONNECTION_IS_TO_SHUTDOWN. Condition: connection->shutDown");
@@ -696,7 +696,7 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
         break;
       }
       RaiseEvent(&TransportManagerListener::OnTMMessageSend, event.event_data);
-      if (connection->shutDown && --connection->messages_count == 0) {
+      if (connection->shut_down && --connection->messages_count == 0) {
         connection->timer->Stop();
         connection->transport_adapter->Disconnect(connection->device,
             connection->application);
@@ -864,7 +864,7 @@ TransportManagerImpl::ConnectionInternal::ConnectionInternal(TransportManagerImp
                 new ::timer::TimerTaskImpl<ConnectionInternal> (
                     this,
                     &ConnectionInternal::DisconnectFailedRoutine))),
-      shutDown(false),
+      shut_down(false),
       device_handle_(device_handle),
       messages_count(0) {
   Connection::id = id;
@@ -876,7 +876,7 @@ void TransportManagerImpl::ConnectionInternal::DisconnectFailedRoutine() {
   LOG4CXX_TRACE(logger_, "enter");
   transport_manager->RaiseEvent(&TransportManagerListener::OnDisconnectFailed,
                                 device_handle_, DisconnectDeviceError());
-  shutDown = false;
+  shut_down = false;
   timer->Stop();
   LOG4CXX_TRACE(logger_, "exit");
 }

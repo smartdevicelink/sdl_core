@@ -101,11 +101,10 @@ class MockMessageHelper {
   MOCK_METHOD2(SendOnPermissionsChangeNotification,
                void(uint32_t connection_key,
                     const policy::Permissions& permissions));
-  MOCK_METHOD4(SendPolicySnapshotNotification,
+  MOCK_METHOD3(SendPolicySnapshotNotification,
                void(unsigned int connection_key,
                     const std::vector<uint8_t>& policy_data,
-                    const std::string& url,
-                    int timeout));
+                    const std::string& url));
   MOCK_METHOD2(SendOnAppInterfaceUnregisteredNotificationToMobile,
                void(int32_t connection_key,
                     mobile_apis::AppInterfaceUnregisteredReason::eType reason));

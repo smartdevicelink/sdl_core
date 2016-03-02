@@ -557,10 +557,12 @@ int64_t StateController::SendBCActivateApp(
           level,
           send_policy_priority);
   if (!bc_activate_app_request) {
+    std::cout << "Unable to create BC.ActivateAppRequest" << std::endl;
     LOG4CXX_ERROR(logger_, "Unable to create BC.ActivateAppRequest");
     return -1;
   }
   if (!app_mngr_->ManageHMICommand(bc_activate_app_request)) {
+    std::cout << "Unable to send BC.ActivateAppRequest" << std::endl;
     LOG4CXX_ERROR(logger_, "Unable to send BC.ActivateAppRequest");
     return -1;
   }

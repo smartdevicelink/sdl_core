@@ -39,7 +39,7 @@ include_directories(
 set(LIBRARIES
   gmock
   ApplicationManager
-  ApplicationManagerTest
+  connectionHandler
 )
 
 set(SOURCES

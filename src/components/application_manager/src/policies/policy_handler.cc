@@ -812,7 +812,7 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
           << " for application "
           << ApplicationManagerImpl::instance()->application(app_id)->name().c_str());
 
-  MessageHelper::SendPolicySnapshotNotification(app_id, pt_string, url, 0);
+  MessageHelper::SendPolicySnapshotNotification(app_id, pt_string, url);
 
   return true;
 }

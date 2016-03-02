@@ -1,6 +1,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_SETTINGS_H_
 #define SRC_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_SETTINGS_H_
-#include <stdint.h>
+
+#include <cstdint>
 #include <string>
 #include <vector>
 
