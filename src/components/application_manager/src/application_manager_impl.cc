@@ -2886,10 +2886,12 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
     if (it->second.first) {
       LOG4CXX_DEBUG(logger_, "Going to end video service");
       connection_handler_->SendEndService(app_id, ServiceType::kMobileNav);
+      app->StopStreamingForce(ServiceType::kMobileNav);
     }
     if (it->second.second) {
       LOG4CXX_DEBUG(logger_, "Going to end audio service");
       connection_handler_->SendEndService(app_id, ServiceType::kAudio);
+      app->StopStreamingForce(ServiceType::kAudio);
     }
     DisallowStreaming(app_id);
 
