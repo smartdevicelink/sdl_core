@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,32 +30,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_CRYPTO_MANAGER_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_CRYPTO_MANAGER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_SUCURITY_MANAGER_SUCURITY_MANAGER_SETTINGS_H_
+#define SRC_COMPONENTS_INCLUDE_SUCURITY_MANAGER_SUCURITY_MANAGER_SETTINGS_H_
 
-#include <string>
-
-#include "gmock/gmock.h"
-#include "security_manager/crypto_manager.h"
-
-namespace test {
-namespace components {
-namespace security_manager_test {
-
-class MockCryptoManager : public ::security_manager::CryptoManager {
+namespace security_manager {
+enum Mode { CLIENT, SERVER };
+enum Protocol { SSLv3, TLSv1, TLSv1_1, TLSv1_2 };
+/**
+ * \class ConnectionHandlerSettings
+ * \brief Interface for connection handler component settings.
+ */
+class CryptoManagerSettings {
  public:
-  MOCK_METHOD0(Init, bool());
-  MOCK_CONST_METHOD0(is_initialized, bool());
-  MOCK_CONST_METHOD0(get_settings,
-                     const ::security_manager::CryptoManagerSettings&());
-  MOCK_METHOD1(OnCertificateUpdated, bool(const std::string&));
-  MOCK_METHOD0(CreateSSLContext, ::security_manager::SSLContext*());
-  MOCK_METHOD1(ReleaseSSLContext, void(::security_manager::SSLContext*));
-  MOCK_CONST_METHOD0(LastError, std::string());
-  MOCK_CONST_METHOD0(IsCertificateUpdateRequired, bool());
-};
-}  // namespace security_manager_test
-}  // namespace components
-}  // namespace test
+  virtual ~CryptoManagerSettings() {}
 
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_CRYPTO_MANAGER_H_
+  virtual Mode security_manager_mode() const = 0;
+  virtual Protocol security_manager_protocol_name() const = 0;
+  virtual bool verify_peer() const = 0;
+  virtual const std::string& certificate_data() const = 0;
+  virtual const std::string& ciphers_list() const = 0;
+  virtual const std::string& ca_cert_path() const = 0;
+  virtual size_t update_before_hours() const = 0;
+  virtual size_t maximum_payload_size() const = 0;
+};
+
+}  // namespace security_manager
+#endif  // SRC_COMPONENTS_INCLUDE_SUCURITY_MANAGER_SUCURITY_MANAGER_SETTINGS_H_

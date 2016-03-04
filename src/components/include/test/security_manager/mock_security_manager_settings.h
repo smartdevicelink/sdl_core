@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,32 +30,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_CRYPTO_MANAGER_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_CRYPTO_MANAGER_H_
-
-#include <string>
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SECURITY_MANAGER_SETTINGS_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SECURITY_MANAGER_SETTINGS_H_
 
 #include "gmock/gmock.h"
-#include "security_manager/crypto_manager.h"
+#include "security_manager/security_manager_settings.h"
 
 namespace test {
 namespace components {
 namespace security_manager_test {
 
-class MockCryptoManager : public ::security_manager::CryptoManager {
+class MockCryptoManagerSettings
+    : public ::security_manager::CryptoManagerSettings {
  public:
-  MOCK_METHOD0(Init, bool());
-  MOCK_CONST_METHOD0(is_initialized, bool());
-  MOCK_CONST_METHOD0(get_settings,
-                     const ::security_manager::CryptoManagerSettings&());
-  MOCK_METHOD1(OnCertificateUpdated, bool(const std::string&));
-  MOCK_METHOD0(CreateSSLContext, ::security_manager::SSLContext*());
-  MOCK_METHOD1(ReleaseSSLContext, void(::security_manager::SSLContext*));
-  MOCK_CONST_METHOD0(LastError, std::string());
-  MOCK_CONST_METHOD0(IsCertificateUpdateRequired, bool());
+  MOCK_CONST_METHOD0(security_manager_mode, ::security_manager::Mode());
+  MOCK_CONST_METHOD0(security_manager_protocol_name,
+                     ::security_manager::Protocol());
+  MOCK_CONST_METHOD0(verify_peer, bool());
+  MOCK_CONST_METHOD0(certificate_data, const std::string&());
+  MOCK_CONST_METHOD0(ciphers_list, const std::string&());
+  MOCK_CONST_METHOD0(ca_cert_path, const std::string&());
+  MOCK_CONST_METHOD0(update_before_hours, size_t());
+  MOCK_CONST_METHOD0(maximum_payload_size, size_t());
 };
+
 }  // namespace security_manager_test
 }  // namespace components
 }  // namespace test
-
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_CRYPTO_MANAGER_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_SECURITY_MANAGER_MOCK_SECURITY_MANAGER_SETTINGS_H_
