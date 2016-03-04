@@ -398,7 +398,7 @@ class Profile :public protocol_handler::ProtocolHandlerSettings,
   /**
    * @brief Return hours amount when PTU should be triggered
    */
-  uint32_t update_before_hours() const;
+  size_t update_before_hours() const;
 
 #endif //ENABLE_SECURITY
     /**

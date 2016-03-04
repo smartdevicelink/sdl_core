@@ -777,7 +777,7 @@ bool Profile::verify_peer() const {
   return verify_peer_;
 }
 
-uint32_t Profile::update_before_hours() const {
+size_t Profile::update_before_hours() const {
   return update_before_hours_;
 }
 
