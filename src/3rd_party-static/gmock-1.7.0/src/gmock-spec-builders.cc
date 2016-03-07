@@ -761,7 +761,7 @@ bool Mock::AsyncVerifyAndClearExpectations(int timeout_msec)
   return AsyncVerifyAndClearExpectationsLocked(timeout_msec);
 }
 
-bool Mock::AsyncVerifyAndClearExpectationsLocked(int timeout_msec)
+bool Mock::AsyncVerifyAndClearExpectationsLocked(const int timeout_msec_in)
     GTEST_EXCLUSIVE_LOCK_REQUIRED_(internal::g_gmock_mutex) {
   internal::g_gmock_mutex.AssertHeld();
   MockObjectRegistry::StateMap& state_map = g_mock_object_registry.states();
@@ -773,7 +773,7 @@ bool Mock::AsyncVerifyAndClearExpectationsLocked(int timeout_msec)
   // TODO(ezamakhov@gmail.com): refactor the next loops
   bool expectations_met = true;
   timeval first_register_time {0, 0};
-
+  int timeout_msec = timeout_msec_in;
   for (MockObjectRegistry::StateMap::iterator mock_it = state_map.begin();
       state_map.end() != mock_it; ++mock_it) {
     MockObjectState& state = mock_it->second;
@@ -831,8 +831,12 @@ bool Mock::AsyncVerifyAndClearExpectationsLocked(int timeout_msec)
           timerisset(&first_register_time)
           ? internal::UsecsElapsed(first_register_time)
           : 100 * 1000;
-      // Wait double times
-      internal::UnlockAndSleep(elapsed_usecs * 2);
+      // To avoid waitings very long times.
+      const long max_sleep_time = timeout_msec_in * 10 * 1000;
+      if (max_sleep_time > elapsed_usecs * 2) {
+        // Wait double times
+        internal::UnlockAndSleep(elapsed_usecs * 2);
+      }
     }
 
     // Verifies and clears the expectations on each mock method in the
@@ -843,7 +847,7 @@ bool Mock::AsyncVerifyAndClearExpectationsLocked(int timeout_msec)
       // Get finial result and clear expectation
       const bool final_verification = base->VerifyAndClearExpectationsLocked();
       if (!final_verification) {
-        expectations_met = false;
+//        expectations_met = false;
       }
     }
   } // state_map iteration

@@ -65,7 +65,7 @@ void InitLogger() {
   // Set enabled logs
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
   profile::Profile::instance()->UpdateValues();
-  INIT_LOGGER("log4cxx.properties");
+  INIT_LOGGER("log4cxx.properties", true); //DEINIT_LOGGER will be called in test_main.cc
 }
 
 void CreateDeleteAutoTrace(const std::string & testlog) {
@@ -95,10 +95,6 @@ bool CheckAutoTraceDebugInFile(const std::string & testlog) {
   return isLogFound;
 }
 
-void DeinitLogger() {
-  DEINIT_LOGGER();
-}
-
 TEST(AutoTraceTest, AutoTrace_WriteToFile_ReadCorrectString) {
   const std::string testlog =
       "Test trace is working!";
@@ -109,13 +105,12 @@ TEST(AutoTraceTest, AutoTrace_WriteToFile_ReadCorrectString) {
   const TimevalStruct startTime = date_time::DateTime::getCurrentTime();
   const int64_t timeout_msec = 10000;
   // Waiting for empty Logger MessageQueue 10 seconds
-  while (LogMessageLoopThread::instance()->GetMessageQueueSize()) {
+  LogMessageLoopThread loop_thread;
+  while (loop_thread.GetMessageQueueSize()) {
     ASSERT_LT(date_time::DateTime::calculateTimeDiff(
         date_time::DateTime::getCurrentTime(), startTime), timeout_msec);
     threads::Thread::yield();
   }
-  DeinitLogger();
-
   ASSERT_TRUE(CheckAutoTraceDebugInFile(testlog));
 }
 
