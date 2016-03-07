@@ -207,7 +207,7 @@ TEST(CFormatterJsonBaseTest, JSonObjectValueToSmartObj_ExpectSuccessful) {
     EXPECT_EQ(*it, *it1);
     ++it1;
   }
-  ASSERT(it == mems.end() && it1 == keys.end());
+  EXPECT_TRUE(it == mems.end() && it1 == keys.end());
 }
 
 TEST(CFormatterJsonBaseTest, StringSmartObjectToJSon_ExpectSuccessful) {
@@ -345,7 +345,7 @@ TEST(CFormatterJsonBaseTest, JSonObjectValueToObj_ExpectSuccessful) {
     EXPECT_EQ(*it, *it1);
     ++it1;
   }
-  ASSERT(it == mems.end() && it1 == keys.end());
+  EXPECT_TRUE(it == mems.end() && it1 == keys.end());
 }
 
 }  // namespace formatters

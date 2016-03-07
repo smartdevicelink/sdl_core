@@ -38,8 +38,8 @@
 void deinit_logger () {
   CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
   LOG4CXX_DEBUG(logger_, "Logger deinitialization");
-  logger::set_logs_enabled();
-  logger::LogMessageLoopThread::destroy();
+  logger::set_logs_enabled(false);
+  logger::delete_log_message_loop_thread();
   log4cxx::LoggerPtr rootLogger = log4cxx::Logger::getRootLogger();
   log4cxx::spi::LoggerRepositoryPtr repository = rootLogger->getLoggerRepository();
   log4cxx::LoggerList loggers = repository->getCurrentLoggers();
@@ -49,16 +49,6 @@ void deinit_logger () {
   }
   rootLogger->removeAllAppenders();
   logger::logger_status = logger::LoggerThreadNotCreated;
-}
-
-// Don't destroy logger here!
-// It's just for unloading logger queue
-void flush_logger() {
-  logger::LoggerStatus old_status = logger::logger_status;
-  // Stop pushing new messages to the log queue
-  logger::logger_status = logger::DeletingLoggerThread;
-  logger::LogMessageLoopThread::instance()->WaitDumpQueue();
-  logger::logger_status = old_status;
 }
 
 log4cxx_time_t time_now() {

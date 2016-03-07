@@ -381,18 +381,11 @@ void LifeCycle::StopComponents() {
   connection_handler_->Stop();
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
+  DCHECK_OR_RETURN_VOID(protocol_handler_);
   delete protocol_handler_;
 
   LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
   delete connection_handler_;
-
-#ifdef ENABLE_SECURITY
-  LOG4CXX_INFO(logger_, "Destroying Crypto Manager");
-  delete crypto_manager_;
-
-  LOG4CXX_INFO(logger_, "Destroying Security Manager");
-  delete security_manager_;
-#endif  // ENABLE_SECURITY
 
   LOG4CXX_INFO(logger_, "Destroying Last State");
   resumption::LastState::destroy();
