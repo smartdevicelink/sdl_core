@@ -1934,7 +1934,7 @@ void MessageHelper::SendPolicySnapshotNotification(
 
   SmartObject content (SmartType_Map);
   if (!url.empty()) {
-    content[strings::msg_params][mobile_notification::syncp_url] = url;
+    content[strings::msg_params][strings::url] = url;
   }
 
   content[strings::msg_params][strings::request_type] = RequestType::HTTP;
