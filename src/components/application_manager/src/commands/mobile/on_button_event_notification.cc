@@ -115,7 +115,7 @@ void OnButtonEventNotification::Run() {
 
     //Send ButtonEvent notification for OK button only in HMI_FULL mode
     if ((static_cast<uint32_t>(mobile_apis::ButtonName::OK) == btn_id) &&
-        (subscribed_app->IsFullscreen())) {
+        (!subscribed_app->IsFullscreen())) {
       continue;
     }
 
