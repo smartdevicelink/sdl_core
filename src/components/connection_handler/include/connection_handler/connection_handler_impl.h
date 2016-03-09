@@ -51,6 +51,7 @@
 #include "utils/lock.h"
 #include "utils/stl_utils.h"
 #include "utils/singleton.h"
+#include "utils/rwlock.h"
 
 /**
  * \namespace connection_handler
@@ -402,7 +403,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * @return TRUE if session and connection exist otherwise returns FALSE
    */
   virtual bool ProtocolVersionUsed(uint32_t connection_id,
-  		  uint8_t session_id, uint8_t& protocol_version);
+                  uint8_t session_id, uint8_t& protocol_version);
   private:
   /**
    * \brief Default class constructor
@@ -446,7 +447,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    *  \brief Lock for applications list
    */
   mutable sync_primitives::Lock connection_list_lock_;
-  mutable sync_primitives::Lock connection_handler_observer_lock_;
+  mutable sync_primitives::RWLock connection_handler_observer_lock_;
 
   /**
    * \brief Cleans connection list on destruction

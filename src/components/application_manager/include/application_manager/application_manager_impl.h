@@ -1305,6 +1305,11 @@ class ApplicationManagerImpl : public ApplicationManager,
     void RemoveAppsWaitingForRegistration(
         const connection_handler::DeviceHandle handle);
 
+    /**
+     * @brief Clears TTS global properties list of apps
+     */
+    void ClearTTSGlobalPropertiesList();
+
   private:
     /**
      * @brief List of applications
