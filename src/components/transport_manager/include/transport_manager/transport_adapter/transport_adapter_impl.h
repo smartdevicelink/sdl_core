@@ -46,9 +46,9 @@
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/transport_adapter/connection.h"
 
-#ifdef TIME_TESTER
-#include "transport_manager/time_metric_observer.h"
-#endif  // TIME_TESTER
+#ifdef TELEMETRY_MONITOR
+#include "transport_manager/telemetry_observer.h"
+#endif  // TELEMETRY_MONITOR
 
 namespace transport_manager {
 
@@ -398,21 +398,21 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual std::string GetConnectionType() const;
 
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
   /**
    * @brief Setup observer for time metric.
    *
    * @param observer - pointer to observer
    */
-  void SetTimeMetricObserver(TMMetricObserver* observer);
+  void SetTelemetryObserver(TMTelemetryObserver* observer);
 
   /**
    * @brief Return Time metric observer
    *
    * @param return pointer to Time metric observer
    */
-  virtual TMMetricObserver* GetTimeMetricObserver();
-#endif  // TIME_TESTER
+  virtual TMTelemetryObserver* GetTelemetryObserver();
+#endif  // TELEMETRY_MONITOR
 
  protected:
   /**
@@ -529,12 +529,12 @@ class TransportAdapterImpl : public TransportAdapter,
   mutable sync_primitives::RWLock connections_lock_;
 
  protected:
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
   /**
    * @brief Pointer to time metric observer
    */
-  TMMetricObserver* metric_observer_;
-#endif  // TIME_TESTER
+  TMTelemetryObserver* metric_observer_;
+#endif  // TELEMETRY_MONITOR
 
   /**
    * @brief Pointer to the device scanner.

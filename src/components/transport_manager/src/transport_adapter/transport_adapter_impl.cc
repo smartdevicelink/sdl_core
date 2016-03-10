@@ -65,9 +65,9 @@ TransportAdapterImpl::TransportAdapterImpl(
     devices_mutex_(),
     connections_(),
     connections_lock_(),
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
     metric_observer_(NULL),
-#endif  // TIME_TESTER
+#endif  // TELEMETRY_MONITOR
     device_scanner_(device_scanner),
     server_connection_factory_(server_connection_factory),
     client_connection_listener_(client_connection_listener) {
@@ -589,11 +589,11 @@ void TransportAdapterImpl::DataReceiveDone(const DeviceUID& device_id,
   LOG4CXX_TRACE(logger_, "enter. device_id: " << &device_id << ", app_handle: " <<
                 &app_handle << ", message: " << message);
 
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
     metric_observer_->StartRawMsg(message.get());
   }
-#endif  // TIME_TESTER
+#endif  // TELEMETRY_MONITOR
 
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end(); ++it) {
@@ -773,17 +773,17 @@ std::string TransportAdapterImpl::GetConnectionType() const {
   return devicesType[GetDeviceType()];
 }
 
-#ifdef TIME_TESTER
-void TransportAdapterImpl::SetTimeMetricObserver(TMMetricObserver* observer) {
+#ifdef TELEMETRY_MONITOR
+void TransportAdapterImpl::SetTelemetryObserver(TMTelemetryObserver* observer) {
   metric_observer_ = observer;
 }
-#endif  // TIME_TESTER
+#endif  // TELEMETRY_MONITOR
 
-#ifdef TIME_TESTER
-TMMetricObserver* TransportAdapterImpl::GetTimeMetricObserver() {
+#ifdef TELEMETRY_MONITOR
+TMTelemetryObserver* TransportAdapterImpl::GetTelemetryObserver() {
   return metric_observer_;
 }
-#endif  // TIME_TESTER
+#endif  // TELEMETRY_MONITOR
 
 void TransportAdapterImpl::Store() const {
 }

@@ -177,7 +177,7 @@ class StateControllerTest : public ::testing::Test {
 
   connection_handler_test::MockConnectionHandlerSettings
       mock_connection_handler_settings;
-  transport_manager_test::TransportManagerMock mock_transport_manager;
+  transport_manager_test::MockTransportManager mock_transport_manager;
   connection_handler::ConnectionHandlerImpl* conn_handler;
 
   am::HmiStatePtr createHmiState(

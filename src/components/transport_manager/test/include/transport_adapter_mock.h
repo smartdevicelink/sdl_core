@@ -92,9 +92,9 @@ class TransportAdapterMock
       DeviceName,
       std::string(const ::transport_manager::DeviceUID& device_handle));
 
-#ifdef TIME_TESTER
-  MOCK_METHOD0(GetTimeMetricObserver, ::transport_manager::TMMetricObserver*());
-#endif  // TIME_TESTER
+#ifdef TELEMETRY_MONITOR
+  MOCK_METHOD0(GetTelemetryObserver, ::transport_manager::TMTelemetryObserver*());
+#endif  // TELEMETRY_MONITOR
 };
 
 }  // namespace transport_manager_test
