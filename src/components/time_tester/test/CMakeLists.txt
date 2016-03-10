@@ -58,21 +58,21 @@ set(testLibraries
   gmock
   TimeTester
   jsoncpp
-  Utils  
+  Utils
   MediaManager
-  ProtocolHandler   
+  ProtocolHandler
   v4_protocol_v1_2_no_extra
-  SmartObjects  
+  SmartObjects
   ProtocolLibrary
   ConfigProfile
-  connectionHandler
   ApplicationManager
   MessageHelper
   Resumption
   jsoncpp
   transport_manager
   MediaManager
-  ProtocolHandler  
+  ProtocolHandler
+  connectionHandler
 )
 
 if (BUILD_USB_SUPPORT)

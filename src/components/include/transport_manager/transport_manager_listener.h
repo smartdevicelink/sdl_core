@@ -89,7 +89,7 @@ class TransportManagerListener {
    * @param connection_id connection unique identifier.
    */
   virtual void OnConnectionEstablished(const DeviceInfo& device_info,
-                                       const ConnectionUID& connection_id) = 0;
+                                       const ConnectionUID connection_id) = 0;
 
   /**
    * @brief Reaction to the event, when connection to the device is failed.
@@ -105,7 +105,7 @@ class TransportManagerListener {
    *
    * @param connection_id Connection unique identifier.
    */
-  virtual void OnConnectionClosed(ConnectionUID connection_id) = 0;
+  virtual void OnConnectionClosed(const ConnectionUID connection_id) = 0;
 
   /**
    * @brief Called when connection is closed unexpectedly, i.e. disconnect was not requested
@@ -113,7 +113,7 @@ class TransportManagerListener {
    * @param connection_id Connection ID.
    * @param error Error information.
    */
-  virtual void OnUnexpectedDisconnect(ConnectionUID connection_id,
+  virtual void OnUnexpectedDisconnect(const ConnectionUID connection_id,
                                       const CommunicationError& error) = 0;
 
   /**
@@ -122,7 +122,7 @@ class TransportManagerListener {
    * @param connection_id Connection unique identifier.
    * @param error Error information about possible reason of failure.
    */
-  virtual void OnConnectionClosedFailure(ConnectionUID connection_id,
+  virtual void OnConnectionClosedFailure(const ConnectionUID connection_id,
                                          const DisconnectError& error) = 0;
 
   /**
@@ -153,8 +153,7 @@ class TransportManagerListener {
    * @param connection_id connection unique identifier.
    * @param error Error information about possible reason of failure.
    */
-  virtual void OnTMMessageReceiveFailed(ConnectionUID connection_id,
-                                        const DataReceiveError& error) = 0;
+  virtual void OnTMMessageReceiveFailed(const DataReceiveError& error) = 0;
 
   /**
    * @brief Reaction to the event, when transport manager sent a massage.

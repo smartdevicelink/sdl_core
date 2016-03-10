@@ -227,6 +227,11 @@ ApplicationSharedPtr ApplicationManagerImpl::application_by_hmi_app(
   return app;
 }
 
+connection_handler::ConnectionHandler&
+ApplicationManagerImpl::connection_handler() const {
+  return *connection_handler_;
+}
+
 ApplicationSharedPtr ApplicationManagerImpl::application_by_policy_id(
     const std::string& policy_app_id) const {
   MobileAppIdPredicate finder(policy_app_id);
@@ -419,7 +424,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   uint32_t device_id = 0;
 
   DCHECK_OR_RETURN(connection_handler_, ApplicationSharedPtr());
-  if (connection_handler_->GetDataOnSessionKey(
+  if (connection_handler().GetDataOnSessionKey(
           connection_key, &app_id, &sessions_list, &device_id) == -1) {
     LOG4CXX_ERROR(logger_, "Failed to create application: no connection info.");
     utils::SharedPtr<smart_objects::SmartObject> response(
@@ -456,6 +461,14 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   const custom_str::CustomString& app_name =
       message[strings::msg_params][strings::app_name].asCustomString();
 
+  std::string device_mac = "";
+  if (connection_handler().get_session_observer().GetDataOnDeviceID(
+          device_id, NULL, NULL, &device_mac, NULL) == -1) {
+    LOG4CXX_ERROR(logger_, "Failed to extract device mac for id " << device_id);
+  } else {
+    LOG4CXX_DEBUG(logger_,
+                  "Device mac for id" << device_id << " is " << device_mac);
+  }
   LOG4CXX_DEBUG(logger_,
                 "App with connection key: " << connection_key
                                             << " registered from handle: "
@@ -463,6 +476,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   ApplicationSharedPtr application(new ApplicationImpl(
       app_id,
       policy_app_id,
+      device_mac,
       app_name,
       policy::PolicyHandler::instance()->GetStatisticManager()));
   if (!application) {
@@ -481,9 +495,6 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
     ManageMobileCommand(response);
     return ApplicationSharedPtr();
   }
-
-  const std::string device_mac = MessageHelper::GetDeviceMacAddressForHandle(
-      static_cast<uint32_t>(device_id));
 
   application->set_folder_name(policy_app_id + "_" + device_mac);
   // To load persistent files, app folder name must be known first, which is now
@@ -523,12 +534,12 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   application->set_protocol_version(protocol_version);
 
   if (ProtocolVersion::kUnknownProtocol != protocol_version) {
-    connection_handler_->BindProtocolVersionWithSession(
+    connection_handler().BindProtocolVersionWithSession(
         connection_key, static_cast<uint8_t>(protocol_version));
   }
   if (protocol_version >= ProtocolVersion::kV3 &&
       profile::Profile::instance()->heart_beat_timeout() > 0) {
-    connection_handler_->StartSessionHeartBeat(connection_key);
+    connection_handler().StartSessionHeartBeat(connection_key);
   }
 
   // Keep HMI add id in case app is present in "waiting for registration" list
@@ -630,13 +641,13 @@ void ApplicationManagerImpl::ConnectToDevice(const std::string& device_mac) {
   }
 
   connection_handler::DeviceHandle handle;
-  if (!connection_handler_->GetDeviceID(device_mac, &handle)) {
+  if (!connection_handler().GetDeviceID(device_mac, &handle)) {
     LOG4CXX_ERROR(
         logger_,
         "Attempt to connect to invalid device with mac:" << device_mac);
     return;
   }
-  connection_handler_->ConnectToDevice(handle);
+  connection_handler().ConnectToDevice(handle);
 }
 
 void ApplicationManagerImpl::OnHMIStartedCooperation() {
@@ -733,6 +744,12 @@ HmiStatePtr ApplicationManagerImpl::CreateRegularState(
   return state;
 }
 
+bool ApplicationManagerImpl::IsStateActive(HmiState::StateID state_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Checking for active state id " << state_id);
+  return state_ctrl_.IsStateActive(state_id);
+}
+
 void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
                                                       int32_t correlation_id,
                                                       int32_t max_duration,
@@ -776,13 +793,10 @@ void ApplicationManagerImpl::StopAudioPassThru(int32_t application_key) {
 
 std::string ApplicationManagerImpl::GetDeviceName(
     connection_handler::DeviceHandle handle) {
-  DCHECK(connection_handler_ != 0);
-
+  DCHECK(connection_handler_);
   std::string device_name = "";
-  connection_handler::ConnectionHandlerImpl* con_handler_impl =
-      static_cast<connection_handler::ConnectionHandlerImpl*>(
-          connection_handler_);
-  if (con_handler_impl->GetDataOnDeviceID(handle, &device_name, NULL) == -1) {
+  if (connection_handler().get_session_observer().GetDataOnDeviceID(
+        handle, &device_name, NULL, NULL, NULL) == -1) {
     LOG4CXX_ERROR(logger_, "Failed to extract device name for id " << handle);
   } else {
     LOG4CXX_DEBUG(logger_, "\t\t\t\t\tDevice name is " << device_name);
@@ -902,8 +916,12 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
   connection_handler::DeviceMap::const_iterator it = device_list.begin();
   for (; device_list.end() != it; ++it) {
     policy::DeviceParams dev_params;
-    MessageHelper::GetDeviceInfoForHandle(it->second.device_handle(),
-                                          &dev_params);
+    connection_handler().get_session_observer().GetDataOnDeviceID(
+      it->second.device_handle(),
+      &dev_params.device_name,
+      NULL,
+      &dev_params.device_mac_address,
+      &dev_params.device_connection_type);
 
     policy::DeviceInfo device_info;
     device_info.AdoptDeviceType(dev_params.device_connection_type);
@@ -933,7 +951,7 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
 }
 
 void ApplicationManagerImpl::OnFindNewApplicationsRequest() {
-  connection_handler_->ConnectToAllDevices();
+  connection_handler().ConnectToAllDevices();
   LOG4CXX_DEBUG(logger_, "Starting application list update timer");
   uint32_t timeout =
       profile::Profile::instance()->application_list_update_timeout();
@@ -1305,19 +1323,13 @@ void ApplicationManagerImpl::set_connection_handler(
   connection_handler_ = handler;
 }
 
-connection_handler::ConnectionHandler*
-ApplicationManagerImpl::connection_handler() {
-  return connection_handler_;
-}
-
 void ApplicationManagerImpl::set_protocol_handler(
     protocol_handler::ProtocolHandler* handler) {
   protocol_handler_ = handler;
 }
 
 void ApplicationManagerImpl::StartDevicesDiscovery() {
-  connection_handler::ConnectionHandlerImpl::instance()
-      ->StartDevicesDiscovery();
+  connection_handler().get_device_discovery_starter().StartDevicesDiscovery();
 }
 
 void ApplicationManagerImpl::SendMessageToMobile(
@@ -1665,8 +1677,8 @@ bool ApplicationManagerImpl::ManageHMICommand(
 
     command->Run();
     if (kResponse == message_type) {
-      int32_t correlation_id =
-          (*(message.get()))[strings::params][strings::correlation_id].asInt();
+      const uint32_t correlation_id =
+          (*(message.get()))[strings::params][strings::correlation_id].asUInt();
       request_ctrl_.OnHMIResponse(correlation_id);
     }
     return true;
@@ -1891,13 +1903,15 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
                                        .asInt());
 
   std::string output_string;
-  switch (message.getElement(jhs::S_PARAMS)
-              .getElement(jhs::S_PROTOCOL_TYPE)
-              .asInt()) {
+    const int64_t protocol_type = message.getElement(jhs::S_PARAMS)
+                                       .getElement(jhs::S_PROTOCOL_TYPE)
+                                      .asInt();
+    const int64_t protocol_version = message.getElement(jhs::S_PARAMS)
+                                          .getElement(jhs::S_PROTOCOL_VERSION)
+                                         .asInt();
+  switch (protocol_type) {
     case 0: {
-      if (message.getElement(jhs::S_PARAMS)
-              .getElement(jhs::S_PROTOCOL_VERSION)
-              .asInt() == 1) {
+      if (protocol_version == 1) {
         if (!formatters::CFormatterJsonSDLRPCv1::toString(message,
                                                           output_string)) {
           LOG4CXX_WARN(logger_, "Failed to serialize smart object");
@@ -1911,11 +1925,8 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
           return false;
         }
         output.set_protocol_version(static_cast<ProtocolVersion>(
-            message.getElement(jhs::S_PARAMS)
-                .getElement(jhs::S_PROTOCOL_VERSION)
-                .asUInt()));
+                                        protocol_version));
       }
-
       break;
     }
     case 1: {
@@ -2200,20 +2211,19 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
 
     uint32_t device_id = 0;
 
-    connection_handler::ConnectionHandlerImpl* con_handler_impl =
-        static_cast<connection_handler::ConnectionHandlerImpl*>(
-            connection_handler_);
-
-    if (-1 ==
-        con_handler_impl->GetDataOnSessionKey(
+    if (-1 == connection_handler().GetDataOnSessionKey(
             connection_key, NULL, NULL, &device_id)) {
       LOG4CXX_ERROR(logger_,
                     "Failed to create application: no connection info.");
       continue;
     }
 
-    const std::string device_mac = MessageHelper::GetDeviceMacAddressForHandle(
-        static_cast<uint32_t>(device_id));
+    std::string device_mac;
+    connection_handler().get_session_observer().GetDataOnDeviceID(device_id,
+                                                                  NULL,
+                                                                  NULL,
+                                                                  &device_mac,
+                                                                  NULL);
 
     const uint32_t hmi_app_id =
         resume_ctrl_.IsApplicationSaved(policy_app_id, device_mac)
@@ -2225,6 +2235,7 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     ApplicationSharedPtr app(
         new ApplicationImpl(0,
                             policy_app_id,
+                            device_mac,
                             appName,
                             PolicyHandler::instance()->GetStatisticManager()));
     DCHECK_OR_RETURN_VOID(app);
@@ -2436,7 +2447,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
                             mobile_apis::Result::INVALID_ENUM,
                             is_ignition_off,
                             is_unexpected_disconnect);
-      connection_handler_->CloseSession(app_to_remove->app_id(),
+      connection_handler().CloseSession(app_to_remove->app_id(),
                                         connection_handler::kCommon);
       it = accessor.begin();
     }
@@ -2569,7 +2580,7 @@ void ApplicationManagerImpl::UnregisterApplication(
 }
 
 void ApplicationManagerImpl::OnAppUnauthorized(const uint32_t& app_id) {
-  connection_handler_->CloseSession(app_id,
+  connection_handler().CloseSession(app_id,
                                     connection_handler::kUnauthorizedApp);
 }
 
@@ -2606,7 +2617,7 @@ void ApplicationManagerImpl::Handle(const impl::MessageToMobile message) {
   bool is_final = message.is_final;
   bool close_session = false;
   if (is_final) {
-    if (1 < connection_handler_->GetConnectionSessionsCount(
+    if (1 < connection_handler().GetConnectionSessionsCount(
                 message->connection_key())) {
       is_final = false;
       close_session = true;
@@ -2617,7 +2628,7 @@ void ApplicationManagerImpl::Handle(const impl::MessageToMobile message) {
   LOG4CXX_INFO(logger_, "Message for mobile given away");
 
   if (close_session) {
-    connection_handler_->CloseSession(message->connection_key(),
+    connection_handler().CloseSession(message->connection_key(),
                                       connection_handler::kCommon);
   }
 }
@@ -2765,12 +2776,15 @@ bool ApplicationManagerImpl::IsLowVoltage() {
 
 std::string ApplicationManagerImpl::GetHashedAppID(
     uint32_t connection_key, const std::string& mobile_app_id) {
-  using namespace connection_handler;
   uint32_t device_id = 0;
-  ConnectionHandlerImpl::instance()->GetDataOnSessionKey(
+  connection_handler().GetDataOnSessionKey(
       connection_key, 0, NULL, &device_id);
   std::string device_name;
-  ConnectionHandlerImpl::instance()->GetDataOnDeviceID(device_id, &device_name);
+  connection_handler().get_session_observer().GetDataOnDeviceID(device_id,
+                                                                &device_name,
+                                                                NULL,
+                                                                NULL,
+                                                                NULL);
 
   return mobile_app_id + device_name;
 }
@@ -2885,12 +2899,12 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
   if (connection_handler_) {
     if (it->second.first) {
       LOG4CXX_DEBUG(logger_, "Going to end video service");
-      connection_handler_->SendEndService(app_id, ServiceType::kMobileNav);
+      connection_handler().SendEndService(app_id, ServiceType::kMobileNav);
       app->StopStreamingForce(ServiceType::kMobileNav);
     }
     if (it->second.second) {
       LOG4CXX_DEBUG(logger_, "Going to end audio service");
-      connection_handler_->SendEndService(app_id, ServiceType::kAudio);
+      connection_handler().SendEndService(app_id, ServiceType::kAudio);
       app->StopStreamingForce(ServiceType::kAudio);
     }
     DisallowStreaming(app_id);

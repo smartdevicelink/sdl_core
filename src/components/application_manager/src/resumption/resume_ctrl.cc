@@ -135,11 +135,10 @@ bool ResumeCtrl::RestoreAppHMIState(ApplicationSharedPtr application) {
   LOG4CXX_DEBUG(logger_,
                 "app_id : " << application->app_id() << "; policy_app_id : "
                             << application->mobile_app_id());
-  const std::string device_id =
-      MessageHelper::GetDeviceMacAddressForHandle(application->device());
+  const std::string& device_mac = application->mac_address();
   smart_objects::SmartObject saved_app(smart_objects::SmartType_Map);
   bool result = resumption_storage_->GetSavedApplication(
-      application->mobile_app_id(), device_id, saved_app);
+      application->mobile_app_id(), device_mac, saved_app);
   if (result) {
     DCHECK_OR_RETURN(application, false);
     if (saved_app.keyExists(strings::hmi_level)) {
@@ -209,10 +208,9 @@ bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
       " app_id : " << application->app_id() << ", hmi_level : " << hmi_level
                    << ", check_policy : "
                    << check_policy);
-  const std::string device_id =
-      MessageHelper::GetDeviceMacAddressForHandle(application->device());
+  const std::string& device_mac = application->mac_address();
   if (check_policy &&
-      policy::PolicyHandler::instance()->GetUserConsentForDevice(device_id) !=
+      policy::PolicyHandler::instance()->GetUserConsentForDevice(device_mac) !=
           policy::DeviceConsent::kDeviceAllowed) {
     LOG4CXX_ERROR(logger_, "Resumption abort. Data consent wasn't allowed");
     SetupDefaultHMILevel(application);
@@ -240,16 +238,15 @@ bool ResumeCtrl::IsApplicationSaved(const std::string& policy_app_id,
 }
 
 uint32_t ResumeCtrl::GetHMIApplicationID(const std::string& policy_app_id,
-                                         const std::string& device_id) const {
-  return resumption_storage_->GetHMIApplicationID(policy_app_id, device_id);
+                                         const std::string& device_mac) const {
+  return resumption_storage_->GetHMIApplicationID(policy_app_id, device_mac);
 }
 
 bool ResumeCtrl::RemoveApplicationFromSaved(
     ApplicationConstSharedPtr application) {
-  const std::string device_id =
-      MessageHelper::GetDeviceMacAddressForHandle(application->device());
+  const std::string device_mac = application->mac_address();
   return resumption_storage_->RemoveApplicationFromSaved(
-      application->mobile_app_id(), device_id);
+      application->mobile_app_id(), device_mac);
 }
 
 void ResumeCtrl::OnSuspend() {
@@ -295,9 +292,10 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
                                     << hash);
   SetupDefaultHMILevel(application);
   smart_objects::SmartObject saved_app;
+  const std::string& device_mac = application->mac_address();
   bool result = resumption_storage_->GetSavedApplication(
       application->mobile_app_id(),
-      MessageHelper::GetDeviceMacAddressForHandle(application->device()),
+      device_mac,
       saved_app);
   if (result) {
     const std::string& saved_hash = saved_app[strings::hash_id].asString();
@@ -323,10 +321,11 @@ bool ResumeCtrl::StartResumptionOnlyHMILevel(ApplicationSharedPtr application) {
                     << ", policy_app_id "
                     << application->mobile_app_id());
   SetupDefaultHMILevel(application);
+  const std::string& device_mac = application->mac_address();
   smart_objects::SmartObject saved_app;
   bool result = resumption_storage_->GetSavedApplication(
       application->mobile_app_id(),
-      MessageHelper::GetDeviceMacAddressForHandle(application->device()),
+      device_mac,
       saved_app);
   if (result) {
     // sync_primitives::AutoUnlock unlock(lock);
@@ -342,9 +341,10 @@ void ResumeCtrl::StartAppHmiStateResumption(ApplicationSharedPtr application) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(application);
   smart_objects::SmartObject saved_app;
+  const std::string& device_mac = application->mac_address();
   bool result = resumption_storage_->GetSavedApplication(
       application->mobile_app_id(),
-      MessageHelper::GetDeviceMacAddressForHandle(application->device()),
+      device_mac,
       saved_app);
   DCHECK_OR_RETURN_VOID(result);
   const uint32_t ign_off_count = saved_app[strings::ign_off_count].asUInt();
@@ -376,9 +376,10 @@ bool ResumeCtrl::CheckPersistenceFilesForResumption(
                 " Resume app_id = " << application->app_id() << " policy_id = "
                                     << application->mobile_app_id());
   smart_objects::SmartObject saved_app;
+  const std::string& device_mac = application->mac_address();
   bool result = resumption_storage_->GetSavedApplication(
       application->mobile_app_id(),
-      MessageHelper::GetDeviceMacAddressForHandle(application->device()),
+      device_mac,
       saved_app);
   if (result) {
     if (!CheckIcons(application, saved_app[strings::application_commands])) {
@@ -398,9 +399,10 @@ bool ResumeCtrl::CheckApplicationHash(ApplicationSharedPtr application,
   LOG4CXX_DEBUG(logger_,
                 "app_id : " << application->app_id() << " hash : " << hash);
   smart_objects::SmartObject saved_app;
+  const std::string& device_mac = application->mac_address();
   bool result = resumption_storage_->GetSavedApplication(
       application->mobile_app_id(),
-      MessageHelper::GetDeviceMacAddressForHandle(application->device()),
+      device_mac,
       saved_app);
   return result ? saved_app[strings::hash_id].asString() == hash : false;
 }
@@ -423,8 +425,7 @@ void ResumeCtrl::SaveDataOnTimer() {
 
 bool ResumeCtrl::IsDeviceMacAddressEqual(ApplicationSharedPtr application,
                                          const std::string& saved_device_mac) {
-  const std::string device_mac =
-      MessageHelper::GetDeviceMacAddressForHandle(application->device());
+  const std::string device_mac = application->mac_address();
   return device_mac == saved_device_mac;
 }
 
@@ -434,9 +435,10 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
   LOG4CXX_DEBUG(logger_, "app_id : " << application->app_id());
 
   smart_objects::SmartObject saved_app(smart_objects::SmartType_Map);
+  const std::string& device_mac = application->mac_address();
   bool result = resumption_storage_->GetSavedApplication(
       application->mobile_app_id(),
-      MessageHelper::GetDeviceMacAddressForHandle(application->device()),
+      device_mac,
       saved_app);
   if (result) {
     if (saved_app.keyExists(strings::grammar_id)) {

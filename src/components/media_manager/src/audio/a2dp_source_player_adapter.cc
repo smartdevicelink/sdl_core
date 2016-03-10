@@ -39,6 +39,7 @@
 #include "utils/lock.h"
 #include "utils/logger.h"
 #include "connection_handler/connection_handler_impl.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace media_manager {
 
@@ -89,15 +90,16 @@ void A2DPSourcePlayerAdapter::StartActivity(int32_t application_key) {
   if (application_key != current_application_) {
     current_application_ = application_key;
 
+    const protocol_handler::SessionObserver& session_observer =
+        application_manager::ApplicationManagerImpl::instance()
+        ->connection_handler()
+        .get_session_observer();
+
     uint32_t device_id = 0;
-    connection_handler::ConnectionHandlerImpl::instance()->
-        GetDataOnSessionKey(application_key, 0, NULL, &device_id);
-    std::string mac_adddress;
-    connection_handler::ConnectionHandlerImpl::instance()->GetDataOnDeviceID(
-      device_id,
-      NULL,
-      NULL,
-      &mac_adddress);
+    session_observer.GetDataOnSessionKey(application_key, 0, NULL, &device_id);
+
+    std::string mac_address;
+    session_observer.GetDataOnDeviceID(device_id, NULL, NULL, &mac_address);
 
     // TODO(PK): Convert mac_adddress to the
     // following format : "bluez_source.XX_XX_XX_XX_XX_XX" if needed

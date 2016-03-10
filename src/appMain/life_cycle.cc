@@ -30,7 +30,7 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "./life_cycle.h"
+#include "life_cycle.h"
 #include "utils/signals.h"
 #include "config_profile/profile.h"
 #include "resumption/last_state.h"
@@ -43,7 +43,7 @@
 
 #ifdef ENABLE_LOG
 #include "utils/log_message_loop_thread.h"
-#endif
+#endif  // ENABLE_LOG
 
 using threads::Thread;
 
@@ -90,34 +90,43 @@ LifeCycle::LifeCycle()
 
 bool LifeCycle::StartComponents() {
   LOG4CXX_AUTO_TRACE(logger_);
+
+  DCHECK(!transport_manager_);
   transport_manager_ = transport_manager::TransportManagerDefault::instance();
-  DCHECK(transport_manager_ != NULL);
+  DCHECK(transport_manager_);
 
-  protocol_handler_ = new protocol_handler::ProtocolHandlerImpl(
-      transport_manager_,
-      profile::Profile::instance()->message_frequency_time(),
-      profile::Profile::instance()->message_frequency_count(),
-      profile::Profile::instance()->malformed_message_filtering(),
-      profile::Profile::instance()->malformed_frequency_time(),
-      profile::Profile::instance()->malformed_frequency_count(),
-      profile::Profile::instance()->multiframe_waiting_timeout());
-  DCHECK(protocol_handler_ != NULL);
+  DCHECK(!connection_handler_);
+  connection_handler_ = new connection_handler::ConnectionHandlerImpl(
+                          *profile::Profile::instance(),
+                          *transport_manager_);
+  DCHECK(connection_handler_);
 
-  connection_handler_ = connection_handler::ConnectionHandlerImpl::instance();
-  DCHECK(connection_handler_ != NULL);
+  DCHECK(!protocol_handler_);
+  protocol_handler_ =
+      new protocol_handler::ProtocolHandlerImpl(*(profile::Profile::instance()),
+                                                *connection_handler_,
+                                                *connection_handler_,
+                                                *transport_manager_);
+  DCHECK(protocol_handler_);
 
+  DCHECK(!app_manager_);
   app_manager_ = application_manager::ApplicationManagerImpl::instance();
-  DCHECK(app_manager_ != NULL);
+  DCHECK(app_manager_);
+
   if (!app_manager_->Init()) {
     LOG4CXX_ERROR(logger_, "Application manager init failed.");
     return false;
   }
 
-  hmi_handler_ = hmi_message_handler::HMIMessageHandlerImpl::instance();
-  DCHECK(hmi_handler_ != NULL)
+  DCHECK(!hmi_handler_)
+  hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(
+        *(profile::Profile::instance()));
+  DCHECK(hmi_handler_)
 
 #ifdef ENABLE_SECURITY
   security_manager_ = new security_manager::SecurityManagerImpl();
+  crypto_manager_ = new security_manager::CryptoManagerImpl();
+  media_manager_ = media_manager::MediaManagerImpl::instance();
 
   // FIXME(EZamakhov): move to Config or in Sm initialization method
   std::string cert_filename;
@@ -133,7 +142,6 @@ bool LifeCycle::StartComponents() {
       "CLIENT",
       security_manager::SecurityManagerImpl::ConfigSection(),
       "SSLMode");
-  crypto_manager_ = new security_manager::CryptoManagerImpl();
 
   std::string key_filename;
   profile::Profile::instance()->ReadStringValue(
@@ -156,12 +164,8 @@ bool LifeCycle::StartComponents() {
       security_manager::SecurityManagerImpl::ConfigSection(),
       "VerifyPeer");
 
-  std::string protocol_name;
-  profile::Profile::instance()->ReadStringValue(
-      &protocol_name,
-      "TLSv1.2",
-      security_manager::SecurityManagerImpl::ConfigSection(),
-      "Protocol");
+  std::string protocol_name =
+      profile::Profile::instance()->security_manager_protocol_name();
 
   security_manager::Protocol protocol;
   if (protocol_name == "TLSv1.0") {
@@ -198,7 +202,6 @@ bool LifeCycle::StartComponents() {
 
   media_manager_ = media_manager::MediaManagerImpl::instance();
 
-  protocol_handler_->set_session_observer(connection_handler_);
   protocol_handler_->AddProtocolObserver(media_manager_);
   protocol_handler_->AddProtocolObserver(app_manager_);
 #ifdef ENABLE_SECURITY
@@ -207,7 +210,6 @@ bool LifeCycle::StartComponents() {
 #endif  // ENABLE_SECURITY
   media_manager_->SetProtocolHandler(protocol_handler_);
 
-  connection_handler_->set_transport_manager(transport_manager_);
   connection_handler_->set_protocol_handler(protocol_handler_);
   connection_handler_->set_connection_handler_observer(app_manager_);
 
@@ -240,6 +242,7 @@ bool LifeCycle::StartComponents() {
 
 #ifdef MESSAGEBROKER_HMIADAPTER
 bool LifeCycle::InitMessageSystem() {
+  DCHECK(!message_broker_)
   message_broker_ = NsMessageBroker::CMessageBroker::getInstance();
   if (!message_broker_) {
     LOG4CXX_FATAL(logger_, " Wrong pMessageBroker pointer!");
@@ -275,12 +278,11 @@ bool LifeCycle::InitMessageSystem() {
   }
 
   mb_adapter_ = new hmi_message_handler::MessageBrokerAdapter(
-      hmi_message_handler::HMIMessageHandlerImpl::instance(),
+      hmi_handler_,
       profile::Profile::instance()->server_address(),
       profile::Profile::instance()->server_port());
 
-  hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
-      mb_adapter_);
+  hmi_handler_->AddHMIMessageAdapter(mb_adapter_);
   if (!mb_adapter_->Connect()) {
     LOG4CXX_FATAL(logger_, "Cannot connect to remote peer!");
     return false;
@@ -395,57 +397,49 @@ void LifeCycle::Run() {
 void LifeCycle::StopComponents() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (hmi_handler_) {
-    hmi_handler_->set_message_observer(NULL);
-  }
-  if (connection_handler_) {
-    connection_handler_->set_connection_handler_observer(NULL);
-  }
-  if (protocol_handler_) {
-    protocol_handler_->RemoveProtocolObserver(app_manager_);
-  }
-  if (app_manager_) {
-    app_manager_->Stop();
-  }
+  DCHECK_OR_RETURN_VOID(hmi_handler_);
+  hmi_handler_->set_message_observer(NULL);
+
+  DCHECK_OR_RETURN_VOID(connection_handler_);
+  connection_handler_->set_connection_handler_observer(NULL);
+
+  DCHECK_OR_RETURN_VOID(protocol_handler_);
+  protocol_handler_->RemoveProtocolObserver(app_manager_);
+
+  DCHECK_OR_RETURN_VOID(app_manager_);
+  app_manager_->Stop();
+
   LOG4CXX_INFO(logger_, "Stopping Protocol Handler");
-  if (protocol_handler_) {
-    protocol_handler_->RemoveProtocolObserver(media_manager_);
+  DCHECK_OR_RETURN_VOID(protocol_handler_);
+  protocol_handler_->RemoveProtocolObserver(media_manager_);
+
 #ifdef ENABLE_SECURITY
-    protocol_handler_->RemoveProtocolObserver(security_manager_);
+  protocol_handler_->RemoveProtocolObserver(security_manager_);
+  DCHECK_OR_RETURN_VOID(security_manager_);
+  security_manager_->RemoveListener(app_manager_);
 #endif  // ENABLE_SECURITY
-  }
-#ifdef ENABLE_SECURITY
-  if (security_manager_) {
-    security_manager_->RemoveListener(app_manager_);
-  }
-#endif  // ENABLE_SECURITY
-  if (protocol_handler_) {
-    protocol_handler_->Stop();
-  }
+  protocol_handler_->Stop();
 
   LOG4CXX_INFO(logger_, "Destroying Media Manager");
-  if (media_manager_) {
-    media_manager_->SetProtocolHandler(NULL);
-  }
+  DCHECK_OR_RETURN_VOID(media_manager_);
+  media_manager_->SetProtocolHandler(NULL);
   media_manager::MediaManagerImpl::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying Transport Manager.");
-  if (transport_manager_) {
-    transport_manager_->Visibility(false);
-    transport_manager_->Stop();
-  }
+  DCHECK_OR_RETURN_VOID(transport_manager_);
+  transport_manager_->Visibility(false);
+  transport_manager_->Stop();
   transport_manager::TransportManagerDefault::destroy();
 
   LOG4CXX_INFO(logger_, "Stopping Connection Handler.");
-  if (connection_handler_) {
-    connection_handler_->Stop();
-  }
+  DCHECK_OR_RETURN_VOID(connection_handler_);
+  connection_handler_->Stop();
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
   delete protocol_handler_;
 
   LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
-  connection_handler::ConnectionHandlerImpl::destroy();
+  delete connection_handler_;
 
 #ifdef ENABLE_SECURITY
   LOG4CXX_INFO(logger_, "Destroying Crypto Manager");
@@ -479,22 +473,20 @@ void LifeCycle::StopComponents() {
 #endif  // DBUS_HMIADAPTER
 
 #ifdef MESSAGEBROKER_HMIADAPTER
-  if (mb_adapter_) {
-    hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
-    mb_adapter_->unregisterController();
-    mb_adapter_->exitReceivingThread();
-    if (mb_adapter_thread_) {
-      mb_adapter_thread_->Stop();
-      mb_adapter_thread_->Join();
-      delete mb_adapter_thread_;
-    }
-    delete mb_adapter_;
+  DCHECK_OR_RETURN_VOID(mb_adapter_);
+  hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
+  mb_adapter_->unregisterController();
+  mb_adapter_->exitReceivingThread();
+  if (mb_adapter_thread_) {
+    mb_adapter_thread_->Stop();
+    mb_adapter_thread_->Join();
+    delete mb_adapter_thread_;
   }
-  hmi_message_handler::HMIMessageHandlerImpl::destroy();
+  delete mb_adapter_;
 
-#endif  // MESSAGEBROKER_HMIADAPTER
+  DCHECK_OR_RETURN_VOID(hmi_handler_);
+  delete hmi_handler_;
 
-#ifdef MESSAGEBROKER_HMIADAPTER
   LOG4CXX_INFO(logger_, "Destroying Message Broker");
   if (mb_server_thread_) {
     mb_server_thread_->Stop();

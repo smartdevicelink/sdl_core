@@ -101,7 +101,7 @@ TransportManagerImpl::~TransportManagerImpl() {
   LOG4CXX_INFO(logger_, "TransportManager object destroyed");
 }
 
-int TransportManagerImpl::ConnectDevice(const DeviceHandle& device_handle) {
+int TransportManagerImpl::ConnectDevice(const DeviceHandle device_handle) {
   LOG4CXX_TRACE(logger_, "enter. DeviceHandle: " << &device_handle);
   if (!this->is_initialized_) {
     LOG4CXX_ERROR(logger_, "TransportManager is not initialized.");
@@ -128,7 +128,7 @@ int TransportManagerImpl::ConnectDevice(const DeviceHandle& device_handle) {
   return err;
 }
 
-int TransportManagerImpl::DisconnectDevice(const DeviceHandle& device_handle) {
+int TransportManagerImpl::DisconnectDevice(const DeviceHandle device_handle) {
   LOG4CXX_TRACE(logger_, "enter. DeviceHandle: " << &device_handle);
   if (!this->is_initialized_) {
     LOG4CXX_ERROR(logger_, "TransportManager is not initialized.");
@@ -152,7 +152,7 @@ int TransportManagerImpl::DisconnectDevice(const DeviceHandle& device_handle) {
   return E_SUCCESS;
 }
 
-int TransportManagerImpl::Disconnect(const ConnectionUID& cid) {
+int TransportManagerImpl::Disconnect(const ConnectionUID cid) {
   LOG4CXX_TRACE(logger_, "enter. ConnectionUID: " << &cid);
   if (!this->is_initialized_) {
     LOG4CXX_ERROR(logger_, "TransportManager is not initialized.");
@@ -200,7 +200,7 @@ int TransportManagerImpl::Disconnect(const ConnectionUID& cid) {
   return E_SUCCESS;
 }
 
-int TransportManagerImpl::DisconnectForce(const ConnectionUID& cid) {
+int TransportManagerImpl::DisconnectForce(const ConnectionUID cid) {
   LOG4CXX_TRACE(logger_, "enter ConnectionUID: " << &cid);
   if (false == this->is_initialized_) {
     LOG4CXX_ERROR(logger_, "TransportManager is not initialized.");
@@ -297,7 +297,7 @@ int TransportManagerImpl::SendMessageToDevice(const ::protocol_handler::RawMessa
     return E_INVALID_HANDLE;
   }
 
-  if (connection->shutdown) {
+  if (connection->shut_down) {
     LOG4CXX_ERROR(logger_, "TransportManagerImpl::Disconnect: Connection is to shut down.");
     LOG4CXX_TRACE(logger_,
                   "exit with E_CONNECTION_IS_TO_SHUTDOWN. Condition: connection->shutDown");
@@ -327,7 +327,7 @@ int TransportManagerImpl::ReceiveEventFromDevice(const TransportAdapterEvent& ev
   return E_SUCCESS;
 }
 
-int TransportManagerImpl::RemoveDevice(const DeviceHandle& device_handle) {
+int TransportManagerImpl::RemoveDevice(const DeviceHandle device_handle) {
   LOG4CXX_TRACE(logger_, "enter. DeviceHandle: " << &device_handle);
   DeviceUID device_id = converter_.HandleToUid(device_handle);
   if (false == this->is_initialized_) {
@@ -552,7 +552,7 @@ void TransportManagerImpl::RemoveConnection(uint32_t id) {
 }
 
 TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
-  const ConnectionUID& id) {
+  const ConnectionUID id) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "ConnectionUID: " << &id);
   for (std::vector<ConnectionInternal>::iterator it = connections_.begin();
@@ -696,7 +696,7 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
         break;
       }
       RaiseEvent(&TransportManagerListener::OnTMMessageSend, event.event_data);
-      if (connection->shutdown && --connection->messages_count == 0) {
+      if (connection->shut_down && --connection->messages_count == 0) {
         connection->timer->Stop();
         connection->transport_adapter->Disconnect(connection->device,
             connection->application);
@@ -773,11 +773,10 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
         connections_lock_.Release();
         break;
       }
-      ConnectionUID connection_id = connection->id;
       connections_lock_.Release();
 
       RaiseEvent(&TransportManagerListener::OnTMMessageReceiveFailed,
-                 connection_id, *static_cast<DataReceiveError*>(event.event_error.get()));
+                 *static_cast<DataReceiveError*>(event.event_error.get()));
       LOG4CXX_DEBUG(logger_, "event_type = ON_RECEIVED_FAIL");
       break;
     }
@@ -854,11 +853,10 @@ void TransportManagerImpl::Handle(::protocol_handler::RawMessagePtr msg) {
   LOG4CXX_TRACE(logger_, "exit");
 }
 
-TransportManagerImpl::ConnectionInternal::ConnectionInternal(
-    TransportManagerImpl* transport_manager,
-    TransportAdapter* transport_adapter, const ConnectionUID& id,
+TransportManagerImpl::ConnectionInternal::ConnectionInternal(TransportManagerImpl* transport_manager,
+    TransportAdapter* transport_adapter, const ConnectionUID id,
     const DeviceUID& dev_id, const ApplicationHandle& app_id,
-    const DeviceHandle& device_handle)
+    const DeviceHandle device_handle)
     : transport_manager(transport_manager),
       transport_adapter(transport_adapter),
       timer(utils::MakeShared<timer::Timer>(
@@ -866,7 +864,7 @@ TransportManagerImpl::ConnectionInternal::ConnectionInternal(
                 new ::timer::TimerTaskImpl<ConnectionInternal> (
                     this,
                     &ConnectionInternal::DisconnectFailedRoutine))),
-      shutdown(false),
+      shut_down(false),
       device_handle_(device_handle),
       messages_count(0) {
   Connection::id = id;
@@ -878,7 +876,7 @@ void TransportManagerImpl::ConnectionInternal::DisconnectFailedRoutine() {
   LOG4CXX_TRACE(logger_, "enter");
   transport_manager->RaiseEvent(&TransportManagerListener::OnDisconnectFailed,
                                 device_handle_, DisconnectDeviceError());
-  shutdown = false;
+  shut_down = false;
   timer->Stop();
   LOG4CXX_TRACE(logger_, "exit");
 }

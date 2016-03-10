@@ -83,23 +83,24 @@ class StateController : public event_engine::EventObserver {
       app->SetPostponedState(state);
       return;
     }
+    hmi_apis::Common_HMILevel::eType hmi_level =
+        static_cast<hmi_apis::Common_HMILevel::eType>(
+            resolved_state->hmi_level());
 
-    const bool is_full_allowed =
-            mobile_apis::HMILevel::HMI_FULL == resolved_state->hmi_level()
-            ? true
-            : false;
+    const bool is_full_allowed = hmi_apis::Common_HMILevel::FULL == hmi_level;
 
     if (SendActivateApp && is_full_allowed) {
-        uint32_t corr_id = MessageHelper::SendActivateAppToHMI(
-            app->app_id(), static_cast<hmi_apis::Common_HMILevel::eType>(
-                                   resolved_state->hmi_level()));
-
-      subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_ActivateApp,
-                         corr_id);
-      waiting_for_activate[app->app_id()] = resolved_state;
-    } else {
-      ApplyRegularState(app, resolved_state);
+      int64_t corr_id = SendBCActivateApp(app, hmi_level, true);
+      if (-1 != corr_id) {
+        subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_ActivateApp,
+                           corr_id);
+        waiting_for_activate[app->app_id()] = resolved_state;
+        return;
+      }
+      LOG4CXX_ERROR(logger_, "Unable to send BC.ActivateApp");
+      return;
     }
+    ApplyRegularState(app, resolved_state);
   }
 
   /**
@@ -303,7 +304,12 @@ class StateController : public event_engine::EventObserver {
    */
   bool IsDeactivateHMIStateActive() const;
 
+  bool IsStateActive(HmiState::StateID state_id) const;
+
  private:
+  int64_t SendBCActivateApp(ApplicationConstSharedPtr app,
+                            hmi_apis::Common_HMILevel::eType level,
+                            bool send_policy_priority);
   /**
    * @brief The HmiLevelConflictResolver struct
    * Move other application to HmiStates if applied moved to FULL or LIMITED

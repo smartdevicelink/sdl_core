@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,45 +30,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_MOCK_H_
-#define TEST_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_MOCK_H_
+#ifndef SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_HMI_MESSAGE_HANDLER_SETTINGS_H_
+#define SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_HMI_MESSAGE_HANDLER_SETTINGS_H_
 
-#include <gmock/gmock.h>
-#include "media_manager/media_adapter_impl.h"
-#include "media_adapter_listener_mock.h"
-#include "media_manager/media_adapter_listener.h"
-#include "media_adapter_mock.h"
-#include "utils/macro.h"
-#include "protocol_handler/protocol_handler.h"
+#include <stdint.h>
+#include "gmock/gmock.h"
+#include "hmi_message_handler/hmi_message_handler_settings.h"
 
 namespace test {
 namespace components {
-namespace media_manager_test {
+namespace hmi_message_handler_test {
 
-/*
- * MOCK implementation of ::media_manager::MediaAdapterImpl
- */
-using namespace media_manager;
-typedef utils::SharedPtr<MediaAdapterListener> MediaListenerPtr;
-class MediaAdapterImplMock : public ::media_manager::MediaAdapterImpl {
+class MockHMIMessageHandlerSettings
+    : public ::hmi_message_handler::HMIMessageHandlerSettings {
  public:
-  MOCK_METHOD1(AddListener,
-        void(const utils::SharedPtr<MediaAdapterListener>&));
-  MOCK_METHOD1(RemoveListener,
-      void(const utils::SharedPtr<MediaAdapterListener> &));
-  MOCK_METHOD2(SendData,
-      void(int32_t application_key,
-           const ::protocol_handler::RawMessagePtr message));
-  MOCK_METHOD1(StartActivity,
-      void(int32_t application_key));
-  MOCK_METHOD1(StopActivity,
-      void(int32_t application_key));
-  MOCK_CONST_METHOD1(is_app_performing_activity,
-      bool(int32_t application_key));
+  MOCK_CONST_METHOD0(thread_min_stack_size, const uint64_t&());
 };
-
-}  // namespace media_manager_test
+}  // namespace hmi_message_handler_test
 }  // namespace components
 }  // namespace test
-
-#endif  // TEST_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_MOCK_H_
+#endif  // SRC_COMPONENTS_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_HMI_MESSAGE_HANDLER_SETTINGS_H_

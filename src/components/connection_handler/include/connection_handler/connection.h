@@ -297,6 +297,7 @@ class Connection {
    * @brief monitor that closes connection if there is no traffic over it
    */
   HeartBeatMonitor* heartbeat_monitor_;
+  uint32_t heartbeat_timeout_;
   threads::Thread *heart_beat_monitor_thread_;
 
   DISALLOW_COPY_AND_ASSIGN(Connection);

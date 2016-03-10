@@ -35,13 +35,14 @@
 #include "include/media_adapter_mock.h"
 #include "include/media_adapter_listener_mock.h"
 #include "include/media_adapter_impl_mock.h"
+#include "protocol_handler/mock_protocol_handler.h"
 
 namespace test {
 namespace components {
 namespace media_manager_test {
 
-using namespace ::media_manager;
 using ::testing::_;
+using protocol_handler::ServiceType;
 
 TEST(MediaManagerImplTest, PlayA2DPSource) {
   MediaManagerImpl* mediaManagerImpl = MediaManagerImpl::instance();
@@ -109,7 +110,7 @@ TEST(MediaManagerImplTest, StartStopStreaming) {
 
 TEST(MediaManagerImplTest, CheckFramesProcessed) {
   MediaManagerImpl* mediaManagerImpl = MediaManagerImpl::instance();
-  ProtocolHandlerMock mock_protocol_handler;
+  protocol_handler_test::MockProtocolHandler mock_protocol_handler;
   mediaManagerImpl->SetProtocolHandler(&mock_protocol_handler);
   int32_t application_key = 1;
   int32_t frame_number = 10;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,46 +29,49 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_PROTOCOL_HANDLER_SETTINGS_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_PROTOCOL_HANDLER_SETTINGS_H_
 
-#ifndef TEST_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_MOCK_H_
-#define TEST_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_MOCK_H_
-
-#include <gmock/gmock.h>
-#include "media_manager/media_adapter_impl.h"
-#include "media_adapter_listener_mock.h"
-#include "media_manager/media_adapter_listener.h"
-#include "media_adapter_mock.h"
-#include "utils/macro.h"
+#include "gmock/gmock.h"
 #include "protocol_handler/protocol_handler.h"
+#include "protocol_handler/protocol_handler_settings.h"
 
 namespace test {
 namespace components {
-namespace media_manager_test {
+namespace protocol_handler_test {
 
-/*
- * MOCK implementation of ::media_manager::MediaAdapterImpl
- */
-using namespace media_manager;
-typedef utils::SharedPtr<MediaAdapterListener> MediaListenerPtr;
-class MediaAdapterImplMock : public ::media_manager::MediaAdapterImpl {
+class MockProtocolHandlerSettings : public protocol_handler::ProtocolHandlerSettings {
  public:
-  MOCK_METHOD1(AddListener,
-        void(const utils::SharedPtr<MediaAdapterListener>&));
-  MOCK_METHOD1(RemoveListener,
-      void(const utils::SharedPtr<MediaAdapterListener> &));
-  MOCK_METHOD2(SendData,
-      void(int32_t application_key,
-           const ::protocol_handler::RawMessagePtr message));
-  MOCK_METHOD1(StartActivity,
-      void(int32_t application_key));
-  MOCK_METHOD1(StopActivity,
-      void(int32_t application_key));
-  MOCK_CONST_METHOD1(is_app_performing_activity,
-      bool(int32_t application_key));
+  MOCK_CONST_METHOD0(maximum_payload_size,
+      size_t());
+  MOCK_CONST_METHOD0(message_frequency_count,
+      size_t());
+  MOCK_CONST_METHOD0(message_frequency_time,
+      size_t());
+  MOCK_CONST_METHOD0(malformed_message_filtering,
+      bool());
+  MOCK_CONST_METHOD0(malformed_frequency_count,
+      size_t());
+  MOCK_CONST_METHOD0(malformed_frequency_time,
+      size_t());
+  MOCK_CONST_METHOD0(heart_beat_timeout,
+      uint32_t());
+  MOCK_CONST_METHOD0(max_supported_protocol_version,
+      uint16_t());
+  MOCK_CONST_METHOD0(enable_protocol_4,
+      bool());
+  MOCK_CONST_METHOD0(multiframe_waiting_timeout,
+      uint32_t());
+#ifdef ENABLE_SECURITY
+  MOCK_CONST_METHOD0(force_protected_service,
+      const std::vector<int>&());
+  MOCK_CONST_METHOD0(force_unprotected_service,
+      const std::vector<int>&());
+#endif
 };
 
-}  // namespace media_manager_test
+}  // namespace protocol_handler_test
 }  // namespace components
 }  // namespace test
 
-#endif  // TEST_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_MOCK_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_PROTOCOL_HANDLER_SETTINGS_H_

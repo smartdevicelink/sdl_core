@@ -153,6 +153,14 @@ void InitialApplicationDataImpl::set_ui_language(
   ui_language_ = ui_language;
 }
 
+void InitialApplicationDataImpl::set_perform_interaction_layout(mobile_apis::LayoutMode::eType layout) {
+  perform_interaction_layout_ = layout;
+}
+
+mobile_apis::LayoutMode::eType InitialApplicationDataImpl::perform_interaction_layout() const {
+  return perform_interaction_layout_;
+}
+
 DynamicApplicationDataImpl::DynamicApplicationDataImpl()
     : help_prompt_(NULL),
       timeout_prompt_(NULL),

@@ -230,4 +230,5 @@ target_link_libraries("application_manager_test"
   file(COPY smartDeviceLink_test.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/resumption)
   create_test("resumption/data_resumption_test" "${ResumptionData_SOURCES}" "${testLibraries}")
 
+  add_subdirectory(state_controller)
 endif()

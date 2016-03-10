@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,45 +30,27 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_MOCK_H_
-#define TEST_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_MOCK_H_
+#ifndef SRC_COMPONENTS_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_SETTINGS_H_
+#define SRC_COMPONENTS_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_SETTINGS_H_
+#include <stdint.h>
+#include <vector>
 
-#include <gmock/gmock.h>
-#include "media_manager/media_adapter_impl.h"
-#include "media_adapter_listener_mock.h"
-#include "media_manager/media_adapter_listener.h"
-#include "media_adapter_mock.h"
-#include "utils/macro.h"
-#include "protocol_handler/protocol_handler.h"
+namespace connection_handler {
 
-namespace test {
-namespace components {
-namespace media_manager_test {
-
-/*
- * MOCK implementation of ::media_manager::MediaAdapterImpl
+/**
+ * \class ConnectionHandlerSettings
+ * \brief Interface for connection handler component settings.
  */
-using namespace media_manager;
-typedef utils::SharedPtr<MediaAdapterListener> MediaListenerPtr;
-class MediaAdapterImplMock : public ::media_manager::MediaAdapterImpl {
+class ConnectionHandlerSettings {
  public:
-  MOCK_METHOD1(AddListener,
-        void(const utils::SharedPtr<MediaAdapterListener>&));
-  MOCK_METHOD1(RemoveListener,
-      void(const utils::SharedPtr<MediaAdapterListener> &));
-  MOCK_METHOD2(SendData,
-      void(int32_t application_key,
-           const ::protocol_handler::RawMessagePtr message));
-  MOCK_METHOD1(StartActivity,
-      void(int32_t application_key));
-  MOCK_METHOD1(StopActivity,
-      void(int32_t application_key));
-  MOCK_CONST_METHOD1(is_app_performing_activity,
-      bool(int32_t application_key));
+  virtual ~ConnectionHandlerSettings() {}
+
+  virtual uint32_t heart_beat_timeout() const = 0;
+#ifdef ENABLE_SECURITY
+  virtual const std::vector<int>& force_protected_service() const = 0;
+  virtual const std::vector<int>& force_unprotected_service() const = 0;
+#endif  // ENABLE_SECURITY
 };
 
-}  // namespace media_manager_test
-}  // namespace components
-}  // namespace test
-
-#endif  // TEST_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_MOCK_H_
+}  // namespace connection_handler
+#endif  // SRC_COMPONENTS_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_SETTINGS_H_

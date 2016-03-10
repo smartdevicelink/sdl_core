@@ -73,10 +73,11 @@ mobile_apis::FileType::eType StringToFileType(const char* str) {
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 namespace application_manager {
 ApplicationImpl::ApplicationImpl(
-    uint32_t application_id,
-    const std::string& mobile_app_id,
-    const custom_str::CustomString& app_name,
-    utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager)
+      uint32_t application_id,
+      const std::string& mobile_app_id,
+      const std::string& mac_address,
+      const custom_str::CustomString& app_name,
+      utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager)
     : grammar_id_(0)
     , hmi_app_id_(0)
     , app_id_(application_id)
@@ -98,6 +99,7 @@ ApplicationImpl::ApplicationImpl(
     , delete_file_in_none_count_(0)
     , list_files_in_none_count_(0)
     , device_(0)
+    , mac_address_(mac_address)
     , usage_report_(mobile_app_id, statistics_manager)
     , protocol_version_(ProtocolVersion::kV3)
     , is_voice_communication_application_(false)
@@ -317,6 +319,10 @@ const std::string& ApplicationImpl::app_icon_path() const {
 
 connection_handler::DeviceHandle ApplicationImpl::device() const {
   return device_;
+}
+
+const std::string& ApplicationImpl::mac_address() const{
+  return mac_address_;
 }
 
 void ApplicationImpl::set_version(const Version& ver) {

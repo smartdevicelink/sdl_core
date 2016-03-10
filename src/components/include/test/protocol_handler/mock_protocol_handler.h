@@ -34,6 +34,8 @@
 
 #include "gmock/gmock.h"
 #include "protocol_handler/protocol_packet.h"
+#include "protocol_handler/protocol_handler.h"
+#include "protocol_handler/protocol_handler_settings.h"
 
 namespace test {
 namespace components {
@@ -54,6 +56,8 @@ class MockProtocolHandler : public ::protocol_handler::ProtocolHandler {
   MOCK_METHOD2(SendEndSession, void(int32_t connection_id, uint8_t session_id));
   MOCK_METHOD3(SendEndService, void(int32_t connection_id, uint8_t session_id,
                                     uint8_t service_type));
+  MOCK_CONST_METHOD0(get_settings,
+                     protocol_handler::ProtocolHandlerSettings &());
 };
 }  // namespace protocol_handler_test
 }  // namespace components

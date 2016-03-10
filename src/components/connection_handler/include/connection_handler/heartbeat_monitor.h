@@ -83,7 +83,7 @@ class HeartBeatMonitor: public threads::ThreadDelegate {
 
  private:
 
-  // \brief Heartbeat timeout, should be read from profile
+  // \brief Heartbeat timeout
   uint32_t default_heartbeat_timeout_;
   // \brief Connection that must be closed when timeout elapsed
   Connection *connection_;

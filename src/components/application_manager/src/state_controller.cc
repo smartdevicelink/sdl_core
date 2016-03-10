@@ -546,6 +546,32 @@ void StateController::OnApplicationRegistered(
   OnStateChanged(app, initial_state, new_state);
 }
 
+int64_t StateController::SendBCActivateApp(
+    ApplicationConstSharedPtr app,
+    hmi_apis::Common_HMILevel::eType level,
+    bool send_policy_priority) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObjectSPtr bc_activate_app_request =
+      MessageHelper::GetBCActivateAppRequestToHMI(
+          app,
+          level,
+          send_policy_priority);
+  if (!bc_activate_app_request) {
+    std::cout << "Unable to create BC.ActivateAppRequest" << std::endl;
+    LOG4CXX_ERROR(logger_, "Unable to create BC.ActivateAppRequest");
+    return -1;
+  }
+  if (!app_mngr_->ManageHMICommand(bc_activate_app_request)) {
+    std::cout << "Unable to send BC.ActivateAppRequest" << std::endl;
+    LOG4CXX_ERROR(logger_, "Unable to send BC.ActivateAppRequest");
+    return -1;
+  }
+  const int64_t corr_id =
+      (*bc_activate_app_request)[strings::params][strings::correlation_id]
+          .asInt();
+  return corr_id;
+}
+
 void StateController::ApplyPostponedStateForApp(ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
   HmiStatePtr state = app->PostponedHmiState();
@@ -668,6 +694,18 @@ void StateController::OnNaviStreamingStopped() {
 
 bool StateController::IsDeactivateHMIStateActive() const {
   return IsTempStateActive(HmiState::StateID::STATE_ID_DEACTIVATE_HMI);
+}
+
+bool StateController::IsStateActive(HmiState::StateID state_id) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  switch (state_id) {
+    case HmiState::STATE_ID_CURRENT:
+    case HmiState::STATE_ID_REGULAR:
+      return true;
+    default:
+      return IsTempStateActive(state_id);
+  }
+  return false;
 }
 
 HmiStatePtr StateController::CreateHmiState(uint32_t app_id,

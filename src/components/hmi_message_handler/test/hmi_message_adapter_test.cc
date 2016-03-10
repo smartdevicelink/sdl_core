@@ -36,27 +36,33 @@
 
 #include "hmi_message_handler/hmi_message_handler_impl.h"
 #include "hmi_message_handler/mock_hmi_message_adapter_impl.h"
+#include "hmi_message_handler/mock_hmi_message_handler_settings.h"
 
 namespace test {
 namespace components {
 namespace hmi_message_handler_test {
 
+using ::testing::ReturnRef;
 using hmi_message_handler::HMIMessageHandlerImpl;
 
 typedef utils::SharedPtr<MockHMIMessageAdapterImpl>
     MockHMIMessageAdapterImplSPtr;
 
 TEST(HMIMessageAdapterImplTest, Handler_CorrectPointer_CorrectReturnedPointer) {
-  HMIMessageHandler* message_handler = HMIMessageHandlerImpl::instance();
+  testing::NiceMock<MockHMIMessageHandlerSettings> mock_hmi_message_handler_settings;
+  const uint64_t stack_size =1000u;
+  ON_CALL(mock_hmi_message_handler_settings, thread_min_stack_size())
+      .WillByDefault(ReturnRef(stack_size));
+  HMIMessageHandler* message_handler = new hmi_message_handler::HMIMessageHandlerImpl(
+              mock_hmi_message_handler_settings);;
+
   MockHMIMessageAdapterImplSPtr message_adapter_impl =
       utils::MakeShared<MockHMIMessageAdapterImpl>(message_handler);
 
   EXPECT_EQ(message_handler, message_adapter_impl->get_handler());
 
+  delete message_handler;
   message_handler = NULL;
-  if (HMIMessageHandlerImpl::exists()) {
-    HMIMessageHandlerImpl::destroy();
-  }
 }
 
 TEST(HMIMessageAdapterImplTest, Handler_NULLPointer_CorrectReturnedPointer) {

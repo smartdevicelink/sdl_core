@@ -30,18 +30,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "application_manager/message.h"
-#include "config_profile/profile.h"
 #include "hmi_message_handler/hmi_message_handler_impl.h"
 #include "hmi_message_handler/messagebroker_adapter.h"
 #include "hmi_message_handler/mock_hmi_message_observer.h"
+#include "hmi_message_handler/mock_hmi_message_handler_settings.h"
 #include "utils/make_shared.h"
 
 namespace test {
 namespace components {
 namespace hmi_message_handler_test {
 
+using ::testing::ReturnRef;
 class HMIMessageHandlerImplTest : public ::testing::Test {
  public:
   HMIMessageHandlerImplTest()
@@ -53,24 +54,26 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
   hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
   hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
   hmi_message_handler::MockHMIMessageObserver* mock_hmi_message_observer_;
+  testing::NiceMock<MockHMIMessageHandlerSettings> mock_hmi_message_handler_settings;
+  const uint64_t stack_size =1000u;
 
   virtual void SetUp() OVERRIDE {
-    hmi_handler_ = hmi_message_handler::HMIMessageHandlerImpl::instance();
-    ASSERT_TRUE(NULL != hmi_handler_);
+    ON_CALL(mock_hmi_message_handler_settings, thread_min_stack_size())
+        .WillByDefault(ReturnRef(stack_size));
+    hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(
+        mock_hmi_message_handler_settings);
     mb_adapter_ = new hmi_message_handler::MessageBrokerAdapter(
         hmi_handler_, "localhost", 22);
-    ASSERT_TRUE(NULL != mb_adapter_);
     mock_hmi_message_observer_ =
-        hmi_message_handler::MockHMIMessageObserver::instance();
-    ASSERT_TRUE(NULL != mock_hmi_message_observer_);
+        new hmi_message_handler::MockHMIMessageObserver();
     hmi_handler_->set_message_observer(mock_hmi_message_observer_);
     EXPECT_TRUE(NULL != hmi_handler_->observer());
   }
 
   virtual void TearDown() OVERRIDE {
     hmi_handler_->set_message_observer(NULL);
-    hmi_message_handler::MockHMIMessageObserver::destroy();
-    hmi_message_handler::HMIMessageHandlerImpl::destroy();
+    delete mock_hmi_message_observer_;
+    delete hmi_handler_;
     delete mb_adapter_;
   }
 };

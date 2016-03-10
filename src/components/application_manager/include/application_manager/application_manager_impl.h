@@ -586,6 +586,13 @@ class ApplicationManagerImpl
     state_ctrl_.SetRegularState(app, state);
   }
 
+ /**
+   * @brief Checks, if particular state is active
+   * @param state_id State
+   * @return True, if state is active, otherwise - false
+   */
+  bool IsStateActive(HmiState::StateID state_id) const;
+
   /**
    * @brief Notification from PolicyHandler about PTU.
    * Compares AppHMIType between saved in app and received from PTU. If they are
@@ -662,7 +669,7 @@ class ApplicationManagerImpl
   // if |final_message| parameter is set connection to mobile will be closed
   // after processing this message
   void SendMessageToMobile(const commands::MessageSharedPtr message,
-                           bool final_message = false);
+                           bool final_message = false) OVERRIDE;
 
   /**
    * @brief TerminateRequest forces termination of request
@@ -673,9 +680,9 @@ class ApplicationManagerImpl
 
   bool ManageMobileCommand(
       const commands::MessageSharedPtr message,
-      commands::Command::CommandOrigin origin = commands::Command::ORIGIN_SDL);
-  void SendMessageToHMI(const commands::MessageSharedPtr message);
-  bool ManageHMICommand(const commands::MessageSharedPtr message);
+      commands::Command::CommandOrigin origin = commands::Command::ORIGIN_SDL) OVERRIDE;
+  void SendMessageToHMI(const commands::MessageSharedPtr message) OVERRIDE;
+  bool ManageHMICommand(const commands::MessageSharedPtr message) OVERRIDE;
 
   /////////////////////////////////////////////////////////
   // Overriden ProtocolObserver method
@@ -925,7 +932,7 @@ class ApplicationManagerImpl
    */
   ApplicationSharedPtr application_by_hmi_app(uint32_t hmi_app_id) const;
   // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
-  connection_handler::ConnectionHandler* connection_handler();
+  connection_handler::ConnectionHandler& connection_handler() const OVERRIDE;
 
   /**
    * @brief Checks, if given RPC is allowed at current HMI level for specific
@@ -1233,7 +1240,10 @@ class ApplicationManagerImpl
       }
 
       smart_objects::SmartObject hmi_application(smart_objects::SmartType_Map);
-      if (MessageHelper::CreateHMIApplicationStruct(*it, hmi_application)) {
+      const protocol_handler::SessionObserver& session_observer =
+          connection_handler().get_session_observer();
+      if (MessageHelper::CreateHMIApplicationStruct(
+            *it, session_observer, &hmi_application)) {
         applications[app_count++] = hmi_application;
       } else {
         LOG4CXX_DEBUG(logger_, "Can't CreateHMIApplicationStruct ");

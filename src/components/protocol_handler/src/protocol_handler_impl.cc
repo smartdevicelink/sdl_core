@@ -35,7 +35,6 @@
 #include <algorithm>    // std::find
 
 #include "connection_handler/connection_handler_impl.h"
-#include "config_profile/profile.h"
 #include "utils/byte_order.h"
 #include "protocol/common.h"
 
@@ -55,29 +54,19 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
 std::string ConvertPacketDataToString(const uint8_t *data,
                                       const size_t data_size);
 
-/**
- * @brief Function returns supported SDL Protocol Version,
- */
-uint8_t SupportedSDLProtocolVersion();
-
-
 const size_t kStackSize = 32768;
 
-ProtocolHandlerImpl::ProtocolHandlerImpl(transport_manager::TransportManager *transport_manager_param,
-                                         size_t message_frequency_time, size_t message_frequency_count,
-                                         bool malformed_message_filtering,
-                                         size_t malformed_message_frequency_time,
-                                         size_t malformed_message_frequency_count,
-                                         uint32_t multiframe_waiting_timeout)
-    : protocol_observers_(),
-      session_observer_(0),
-      transport_manager_(transport_manager_param),
-      kPeriodForNaviAck(5),
-      message_max_frequency_(message_frequency_count),
-      message_frequency_time_(message_frequency_time),
-      malformed_message_filtering_(malformed_message_filtering),
-      malformed_message_max_frequency_(malformed_message_frequency_count),
-      malformed_message_frequency_time_(malformed_message_frequency_time),
+ProtocolHandlerImpl::ProtocolHandlerImpl(const ProtocolHandlerSettings& settings,
+    protocol_handler::SessionObserver& session_observer,
+    connection_handler::ConnectionHandler& connection_handler,
+    transport_manager::TransportManager& transport_manager)
+    : settings_(settings)
+    , protocol_observers_()
+    , session_observer_(session_observer)
+    , connection_handler_(connection_handler)
+    , transport_manager_(transport_manager)
+    , kPeriodForNaviAck(5)
+    ,
 #ifdef ENABLE_SECURITY
       security_manager_(NULL),
 #endif  // ENABLE_SECURITY
@@ -92,25 +81,31 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(transport_manager::TransportManager *tr
 {
   LOG4CXX_AUTO_TRACE(logger_);
   protocol_header_validator_.set_max_payload_size(
-        profile::Profile::instance()->maximum_payload_size());
+        get_settings().maximum_payload_size());
   incoming_data_handler_.set_validator(&protocol_header_validator_);
 
-  if (message_frequency_time_ > 0u &&
-      message_max_frequency_ > 0u) {
-    message_meter_.set_time_range(message_frequency_time_);
-    LOG4CXX_DEBUG(logger_, "Frequency meter is enabled ( " << message_max_frequency_
-                  << " per " << message_frequency_time_ << " mSecond)");
+  const size_t& message_frequency_count = get_settings().message_frequency_count();
+  const size_t& message_frequency_time = get_settings().message_frequency_time();
+
+  if (message_frequency_time > 0u &&
+      message_frequency_count > 0u) {
+    message_meter_.set_time_range(message_frequency_time);
+    LOG4CXX_DEBUG(logger_, "Frequency meter is enabled ( " << message_frequency_count
+                  << " per " << message_frequency_time << " mSecond)");
   } else {
     LOG4CXX_WARN(logger_, "Frequency meter is disabled");
   }
 
-  if (malformed_message_filtering_) {
-    if (malformed_message_frequency_time_ > 0u &&
-        malformed_message_max_frequency_ > 0u) {
-      malformed_message_meter_.set_time_range(malformed_message_frequency_time_);
+  const size_t& malformed_frequency_time = get_settings().malformed_frequency_time();
+  const size_t& malformed_frequency_count = get_settings().message_frequency_time();
+
+  if (get_settings().malformed_message_filtering()) {
+    if (malformed_frequency_time > 0u &&
+        malformed_frequency_count > 0u) {
+      malformed_message_meter_.set_time_range(malformed_frequency_time);
       LOG4CXX_DEBUG(logger_, "Malformed frequency meter is enabled ( "
-                    << malformed_message_max_frequency_ << " per "
-                    << malformed_message_frequency_time_ << " mSecond)");
+                    << malformed_frequency_count << " per "
+                    << malformed_frequency_time << " mSecond)");
     } else {
       LOG4CXX_WARN(logger_, "Malformed frequency meter is disabled");
     }
@@ -118,7 +113,7 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(transport_manager::TransportManager *tr
     LOG4CXX_WARN(logger_, "Malformed message filtering is disabled."
                  << "Connection will be close on first malformed message detection");
   }
-  multiframe_builder_.set_waiting_timeout(multiframe_waiting_timeout);
+  multiframe_builder_.set_waiting_timeout(get_settings().multiframe_waiting_timeout());
 }
 
 ProtocolHandlerImpl::~ProtocolHandlerImpl() {
@@ -146,14 +141,6 @@ void ProtocolHandlerImpl::RemoveProtocolObserver(ProtocolObserver* observer) {
   }
   sync_primitives::AutoLock lock(protocol_observers_lock_);
   protocol_observers_.erase(observer);
-}
-
-void ProtocolHandlerImpl::set_session_observer(SessionObserver *observer) {
-  if (!observer) {
-    LOG4CXX_WARN(logger_, "Invalid (NULL) pointer to ISessionObserver.");
-    // Do not return from here!
-  }
-  session_observer_ = observer;
 }
 
 void set_hash_id(uint32_t hash_id, protocol_handler::ProtocolPacket& packet) {
@@ -265,7 +252,7 @@ void ProtocolHandlerImpl::SendEndServicePrivate(int32_t connection_id,
   LOG4CXX_AUTO_TRACE(logger_);
 
   uint8_t protocol_version;
-  if (session_observer_->ProtocolVersionUsed(connection_id,
+  if (session_observer_.ProtocolVersionUsed(connection_id,
       session_id, protocol_version)) {
     ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
       protocol_version, PROTECTION_OFF, FRAME_TYPE_CONTROL,
@@ -299,7 +286,7 @@ RESULT_CODE ProtocolHandlerImpl::SendHeartBeatAck(ConnectionID connection_id,
   LOG4CXX_AUTO_TRACE(logger_);
 
   uint8_t protocol_version;
-  if (session_observer_->ProtocolVersionUsed(connection_id,
+  if (session_observer_.ProtocolVersionUsed(connection_id,
   session_id, protocol_version)) {
   ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
         protocol_version, PROTECTION_OFF, FRAME_TYPE_CONTROL,
@@ -318,7 +305,7 @@ void ProtocolHandlerImpl::SendHeartBeat(int32_t connection_id,
                                         uint8_t session_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   uint8_t protocol_version;
-  if (session_observer_->ProtocolVersionUsed(connection_id,
+  if (session_observer_.ProtocolVersionUsed(connection_id,
         session_id, protocol_version)) {
     ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
         protocol_version, PROTECTION_OFF, FRAME_TYPE_CONTROL,
@@ -343,16 +330,9 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
     return;
   }
 
-  if (!session_observer_) {
-    LOG4CXX_ERROR(
-        logger_,
-        "Cannot handle message to mobile app:" <<
-        " ISessionObserver doesn't exist.");
-    return;
-  }
   uint32_t connection_handle = 0;
   uint8_t sessionID = 0;
-  session_observer_->PairFromKey(message->connection_key(), &connection_handle,
+  session_observer_.PairFromKey(message->connection_key(), &connection_handle,
                                  &sessionID);
 #ifdef TIME_TESTER
   uint32_t message_id = message_counters_[sessionID];
@@ -360,8 +340,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
     metric_observer_->StartMessageProcess(message_id, start_time);
   }
 #endif  // TIME_TESTER
-  const size_t max_frame_size =
-      profile::Profile::instance()->maximum_payload_size();
+  const size_t max_frame_size = get_settings().maximum_payload_size();
   size_t frame_size = MAXIMUM_FRAME_DATA_V2_SIZE;
   switch (message->protocol_version()) {
     case PROTOCOL_VERSION_3:
@@ -373,7 +352,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
       break;
   }
 #ifdef ENABLE_SECURITY
-  const security_manager::SSLContext *ssl_context = session_observer_->
+  const security_manager::SSLContext *ssl_context = session_observer_.
       GetSSLContext(message->connection_key(), message->service_type());
   if (ssl_context && ssl_context->IsInitCompleted()) {
     const size_t max_block_size = ssl_context->get_max_block_size(frame_size);
@@ -445,18 +424,16 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
 
   RESULT_CODE result;
   size_t malformed_occurs = 0u;
-  const std::list<ProtocolFramePtr> protocol_frames =
+  const ProtocolFramePtrList protocol_frames =
       incoming_data_handler_.ProcessData(*tm_message, &result, &malformed_occurs);
   LOG4CXX_DEBUG(logger_, "Proccessed " << protocol_frames.size() << " frames");
   if (result != RESULT_OK) {
     if (result == RESULT_MALFORMED_OCCURS) {
       LOG4CXX_WARN(logger_, "Malformed message occurs, connection id "
                    << connection_key);
-      if (!malformed_message_filtering_) {
+      if (!get_settings().malformed_message_filtering()) {
         LOG4CXX_DEBUG(logger_, "Malformed message filterign disabled");
-        if (session_observer_) {
-          session_observer_->OnMalformedMessageCallback(connection_key);
-        }
+        session_observer_.OnMalformedMessageCallback(connection_key);
       // For tracking only malformed occurrence check outpute
       } else {
         if (malformed_occurs > 0) {
@@ -465,11 +442,11 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
       }
     } else {
       LOG4CXX_ERROR(logger_, "Incoming data processing failed.");
-      transport_manager_->DisconnectForce(connection_key);
+      transport_manager_.DisconnectForce(connection_key);
     }
   }
 
-  for (std::list<ProtocolFramePtr>::const_iterator it =
+  for (ProtocolFramePtrList::const_iterator it =
        protocol_frames.begin(); it != protocol_frames.end(); ++it) {
 #ifdef TIME_TESTER
     const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
@@ -520,17 +497,17 @@ void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
   uint32_t connection_handle = 0;
   uint8_t sessionID = 0;
 
-  session_observer_->PairFromKey(message->connection_key(),
+  session_observer_.PairFromKey(message->connection_key(),
                                  &connection_handle,
                                  &sessionID);
 
-  std::list<uint32_t>::iterator connection_it =
+  std::vector<uint32_t>::iterator connection_it =
       std::find(ready_to_close_connections_.begin(),
                 ready_to_close_connections_.end(), connection_handle);
 
   if (ready_to_close_connections_.end() != connection_it) {
     ready_to_close_connections_.erase(connection_it);
-    transport_manager_->Disconnect(connection_handle);
+    transport_manager_.Disconnect(connection_handle);
     return;
   }
 
@@ -574,13 +551,13 @@ void ProtocolHandlerImpl::OnTMMessageSendFailed(
 
 void ProtocolHandlerImpl::OnConnectionEstablished(
     const transport_manager::DeviceInfo &device_info,
-    const transport_manager::ConnectionUID &connection_id) {
+    const transport_manager::ConnectionUID connection_id) {
   incoming_data_handler_.AddConnection(connection_id);
   multiframe_builder_.AddConnection(connection_id);
 }
 
 void ProtocolHandlerImpl::OnConnectionClosed(
-    const transport_manager::ConnectionUID &connection_id) {
+    const transport_manager::ConnectionUID connection_id) {
   incoming_data_handler_.RemoveConnection(connection_id);
   message_meter_.ClearIdentifiers();
   malformed_message_meter_.ClearIdentifiers();
@@ -614,12 +591,8 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
                "Message to send with connection id " <<
                static_cast<int>(packet->connection_id()));
 
-  if (!transport_manager_) {
-    LOG4CXX_WARN(logger_, "No Transport Manager found.");
-    return RESULT_FAIL;
-  }
   if (transport_manager::E_SUCCESS !=
-      transport_manager_->SendMessageToDevice(message_to_send)) {
+      transport_manager_.SendMessageToDevice(message_to_send)) {
     LOG4CXX_WARN(logger_, "Can't send message to device");
     return RESULT_FAIL;
   }
@@ -743,15 +716,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(const ProtocolFramePtr
         "FRAME_TYPE_SINGLE message of size " << packet->data_size() << "; message "
         << ConvertPacketDataToString(packet->data(), packet->data_size()));
 
-  if (!session_observer_) {
-    LOG4CXX_ERROR(logger_,
-                  "Cannot handle message from Transport"
-                  << " Manager: ISessionObserver doesn't exist.");
-    return RESULT_FAIL;
-  }
-
   const uint32_t connection_key =
-      session_observer_->KeyFromPair(packet->connection_id(), packet->session_id());
+      session_observer_.KeyFromPair(packet->connection_id(), packet->session_id());
 
   const RawMessagePtr rawMessage(
         new RawMessage(connection_key,
@@ -782,11 +748,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(const ProtocolFramePtr
 RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(const ProtocolFramePtr packet) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (!session_observer_) {
-    LOG4CXX_ERROR(logger_, "No ISessionObserver set.");
-    return RESULT_FAIL;
-  }
-
   if (multiframe_builder_.AddFrame(packet) != RESULT_OK) {
     LOG4CXX_WARN(logger_, "Frame assembling issue");
   }
@@ -796,11 +757,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(const ProtocolFramePtr 
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(const ProtocolFramePtr packet) {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  if (!session_observer_) {
-    LOG4CXX_ERROR(logger_, "ISessionObserver is not set.");
-    return RESULT_FAIL;
-  }
 
   // TODO{ALeshin}: Rename "Session" to "Service" on PH, CH, AM levels
   switch (packet->frame_data()) {
@@ -858,7 +814,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(const ProtocolPa
   const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
 
   const ConnectionID connection_id = packet.connection_id();
-  const uint32_t session_key = session_observer_->OnSessionEndedCallback(
+  const uint32_t session_key = session_observer_.OnSessionEndedCallback(
       connection_id, current_session_id, hash_id, service_type);
 
   // TODO(EZamakhov): add clean up output queue (for removed service)
@@ -879,17 +835,12 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(const ProtocolPa
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndServiceACK(const ProtocolPacket& packet) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (!session_observer_) {
-    LOG4CXX_ERROR(logger_, "No ISessionObserver set.");
-    return RESULT_FAIL;
-  }
-
   const uint8_t current_session_id = packet.session_id();
   const uint32_t hash_id = get_hash_id(packet);
   const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
   const ConnectionID connection_id = packet.connection_id();
 
-  const uint32_t session_key = session_observer_->OnSessionEndedCallback(
+  const uint32_t session_key = session_observer_.OnSessionEndedCallback(
       connection_id, current_session_id, hash_id, service_type);
 
   if (0 == session_key) {
@@ -911,12 +862,13 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
   StartSessionHandler(
       uint32_t connection_key,
       ProtocolHandlerImpl *protocol_handler,
-      SessionObserver *session_observer,
+      SessionObserver& session_observer,
       ConnectionID connection_id,
       int32_t session_id,
       uint8_t protocol_version,
       uint32_t hash_id,
-      ServiceType service_type)
+      ServiceType service_type,
+      const std::vector<int>& force_protected_service)
     : connection_key_(connection_key),
       protocol_handler_(protocol_handler),
       session_observer_(session_observer),
@@ -924,23 +876,24 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
       session_id_(session_id),
       protocol_version_(protocol_version),
       hash_id_(hash_id),
-      service_type_(service_type) {
+      service_type_(service_type)
+      ,force_protected_service_(force_protected_service)
+  {
   }
+
   bool OnHandshakeDone(
       const uint32_t connection_key,
       security_manager::SSLContext::HandshakeResult result) OVERRIDE {
     if (connection_key != connection_key_) {
       return false;
     }
+    const bool success =
+        result == security_manager::SSLContext::Handshake_Result_Success;
     // check current service protection
     const bool was_service_protection_enabled =
-        session_observer_->GetSSLContext(connection_key_, service_type_) != NULL;
+        session_observer_.GetSSLContext(connection_key_, service_type_) != NULL;
     if (was_service_protection_enabled) {
-      if (result != security_manager::SSLContext::Handshake_Result_Success) {
-//        const std::string error_text("Connection is already protected");
-//        LOG4CXX_WARN(logger_, error_text << ", key " << connection_key);
-//        security_manager_->SendInternalError(
-//              connection_key, security_manager::SecurityManager::ERROR_SERVICE_ALREADY_PROTECTED, error_text);
+      if (!success) {
         protocol_handler_->SendStartSessionNAck(connection_id_, session_id_,
                                                 protocol_version_, service_type_);
       } else {
@@ -948,14 +901,14 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
         NOTREACHED();
       }
     } else {
-      if (result == security_manager::SSLContext::Handshake_Result_Success) {
-        session_observer_->SetProtectionFlag(connection_key_, service_type_);
+      if (success) {
+        session_observer_.SetProtectionFlag(connection_key_, service_type_);
       }
       protocol_handler_->SendStartSessionAck(
             connection_id_, session_id_,
             protocol_version_, hash_id_,
             service_type_,
-            security_manager::SSLContext::Handshake_Result_Success == result);
+            success);
     }
     delete this;
     return true;
@@ -964,16 +917,21 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
   void OnCertificateUpdateRequired() OVERRIDE {
   }
 
+  virtual const std::vector<int>& force_protected_service() const {
+    return force_protected_service_;
+  }
+
  private:
   const uint32_t connection_key_;
   ProtocolHandlerImpl *protocol_handler_;
-  SessionObserver *session_observer_;
+  SessionObserver& session_observer_;
 
   const ConnectionID connection_id_;
   const int32_t session_id_;
   const uint8_t protocol_version_;
   const uint32_t hash_id_;
   const ServiceType service_type_;
+  const std::vector<int> force_protected_service_;
 };
 }  // namespace
 #endif  // ENABLE_SECURITY
@@ -994,10 +952,9 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(const Protocol
   const bool protection = false;
 #endif  // ENABLE_SECURITY
 
-  DCHECK(session_observer_);
   uint32_t hash_id;
   const ConnectionID connection_id = packet.connection_id();
-  const uint32_t session_id = session_observer_->OnSessionStartedCallback(
+  const uint32_t session_id = session_observer_.OnSessionStartedCallback(
         connection_id, packet.session_id(), service_type, protection, &hash_id);
 
   if (0 == session_id) {
@@ -1012,7 +969,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(const Protocol
   // for packet is encrypted and security plugin is enable
   if (protection && security_manager_) {
     const uint32_t connection_key =
-        session_observer_->KeyFromPair(connection_id, session_id);
+        session_observer_.KeyFromPair(connection_id, session_id);
 
     security_manager::SSLContext *ssl_context =
         security_manager_->CreateSSLContext(connection_key);
@@ -1028,7 +985,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(const Protocol
     }
     if (ssl_context->IsInitCompleted()) {
       // mark service as protected
-      session_observer_->SetProtectionFlag(connection_key, service_type);
+      session_observer_.SetProtectionFlag(connection_key, service_type);
       // Start service as protected with current SSLContext
       SendStartSessionAck(connection_id, session_id, packet.protocol_version(),
                           hash_id, packet.service_type(), PROTECTION_ON);
@@ -1037,7 +994,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(const Protocol
             new StartSessionHandler(
               connection_key, this, session_observer_,
               connection_id, session_id, packet.protocol_version(),
-              hash_id, service_type));
+              hash_id, service_type, get_settings().force_protected_service()));
       if (!ssl_context->IsHandshakePending()) {
         // Start handshake process
         security_manager_->StartHandshake(connection_key);
@@ -1060,7 +1017,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(const ProtocolPac
       logger_,
       "Sending heart beat acknowledgment for connection " << connection_id);
   uint8_t protocol_version;
-  if (session_observer_->ProtocolVersionUsed(
+  if (session_observer_.ProtocolVersionUsed(
       connection_id, packet.session_id(), protocol_version)) {
     // TODO(EZamakhov): investigate message_id for HeartBeatAck
     if (PROTOCOL_VERSION_3 == protocol_version ||
@@ -1089,7 +1046,7 @@ void ProtocolHandlerImpl::PopValideAndExpirateMultiframes() {
     }
 
     const uint32_t connection_key =
-        session_observer_->KeyFromPair(frame->connection_id(), frame->session_id());
+        session_observer_.KeyFromPair(frame->connection_id(), frame->session_id());
     LOG4CXX_DEBUG(logger_, "Result frame" << frame <<
                   "for connection "<< connection_key);
     const RawMessagePtr rawMessage(
@@ -1115,15 +1072,14 @@ void ProtocolHandlerImpl::PopValideAndExpirateMultiframes() {
 
 bool ProtocolHandlerImpl::TrackMessage(const uint32_t& connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (message_frequency_time_ > 0u &&
-      message_max_frequency_ > 0u) {
+  const size_t& frequency_time = get_settings().message_frequency_time();
+  const size_t& frequency_count = get_settings().message_frequency_count();
+  if (frequency_time > 0u && frequency_count > 0u) {
     const size_t message_frequency = message_meter_.TrackMessage(connection_key);
     LOG4CXX_DEBUG(logger_, "Frequency of " << connection_key << " is " << message_frequency);
-    if (message_frequency > message_max_frequency_) {
+    if (message_frequency > frequency_count) {
       LOG4CXX_WARN(logger_, "Frequency of " << connection_key << " is marked as high.");
-      if (session_observer_) {
-        session_observer_->OnApplicationFloodCallBack(connection_key);
-      }
+      session_observer_.OnApplicationFloodCallBack(connection_key);
       message_meter_.RemoveIdentifier(connection_key);
       return true;
     }
@@ -1133,20 +1089,20 @@ bool ProtocolHandlerImpl::TrackMessage(const uint32_t& connection_key) {
 
 bool ProtocolHandlerImpl::TrackMalformedMessage(const uint32_t &connection_key,
                                                 const size_t count) {
+  const size_t& malformed_frequency_count =
+      get_settings().malformed_frequency_count();
   LOG4CXX_AUTO_TRACE(logger_);
-  if (malformed_message_frequency_time_ > 0u &&
-      malformed_message_max_frequency_ > 0u) {
+  if (get_settings().malformed_frequency_time() > 0u &&
+      malformed_frequency_count > 0u) {
     const size_t malformed_message_frequency =
         malformed_message_meter_.TrackMessages(connection_key, count);
     LOG4CXX_DEBUG(logger_, "Malformed frequency of " << connection_key
                   << " is " << malformed_message_frequency);
-    if (!malformed_message_filtering_ ||
-        malformed_message_frequency > malformed_message_max_frequency_) {
+    if (!get_settings().malformed_message_filtering() ||
+        malformed_message_frequency > malformed_frequency_count) {
       LOG4CXX_WARN(logger_, "Malformed frequency of " << connection_key
                    << " is marked as high.");
-      if (session_observer_) {
-        session_observer_->OnMalformedMessageCallback(connection_key);
-      }
+      session_observer_.OnMalformedMessageCallback(connection_key);
       malformed_message_meter_.RemoveIdentifier(connection_key);
       return true;
     }
@@ -1154,21 +1110,15 @@ bool ProtocolHandlerImpl::TrackMalformedMessage(const uint32_t &connection_key,
   return false;
 }
 
-void ProtocolHandlerImpl::Handle(
-    const impl::RawFordMessageFromMobile message) {
+void ProtocolHandlerImpl::Handle(const impl::RawFordMessageFromMobile message) {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  if (NULL == session_observer_) {
-    LOG4CXX_WARN(logger_, "Session Observer is NULL");
-    return;
-  }
 
   switch (message->service_type()) {
     case kMobileNav:
     case kAudio:
       break;
     default: {
-        const uint32_t connection_key = session_observer_->KeyFromPair(
+        const uint32_t connection_key = session_observer_.KeyFromPair(
               message->connection_id(), message->session_id());
         if (TrackMessage(connection_key)) {
           return;
@@ -1176,15 +1126,12 @@ void ProtocolHandlerImpl::Handle(
       }
       break;
   }
-
-  connection_handler::ConnectionHandlerImpl *connection_handler =
-        connection_handler::ConnectionHandlerImpl::instance();
   LOG4CXX_DEBUG(logger_, "Message : " << message.get());
   const uint8_t c_id = message->connection_id();
-  const uint32_t m_id = message->session_id();
+  const uint32_t m_id = message->session_id();  
 
-  if (session_observer_->IsHeartBeatSupported(c_id, m_id)) {
-    connection_handler->KeepConnectionAlive(c_id, m_id);
+  if (session_observer_.IsHeartBeatSupported(c_id, m_id)) {
+    connection_handler_.KeepConnectionAlive(c_id, m_id);
   }
 
   // TODO(EZamakhov): remove dublication of IncomingDataHandler logic
@@ -1239,17 +1186,13 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
      packet->frame_type() == FRAME_TYPE_CONTROL) {
     return RESULT_OK;
   }
-  if (!session_observer_) {
-    LOG4CXX_WARN(logger_, "No session_observer_ set.");
-    return RESULT_FAIL;
-  }
   if (!security_manager_) {
     LOG4CXX_WARN(logger_, "No security_manager_ set.");
     return RESULT_FAIL;
   }
-  const uint32_t connection_key = session_observer_->KeyFromPair(
+  const uint32_t connection_key = session_observer_.KeyFromPair(
         packet->connection_id(), packet->session_id());
-  security_manager::SSLContext *context = session_observer_->GetSSLContext(
+  security_manager::SSLContext *context = session_observer_.GetSSLContext(
         connection_key, ServiceTypeFromByte(packet->service_type()));
   if (!context || !context->IsInitCompleted()) {
     return RESULT_OK;
@@ -1263,7 +1206,7 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
     security_manager_->SendInternalError(connection_key,
           security_manager::SecurityManager::ERROR_ENCRYPTION_FAILED, error_text);
     // Close session to prevent usage unprotected service/session
-    session_observer_->OnSessionEndedCallback(
+    session_observer_.OnSessionEndedCallback(
           packet->connection_id(), packet->session_id(),
           packet->message_id(),    kRpc);
     return RESULT_OK;
@@ -1285,17 +1228,13 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
      packet->frame_type() == FRAME_TYPE_CONTROL) {
     return RESULT_OK;
   }
-  if (!session_observer_) {
-    LOG4CXX_WARN(logger_, "No session_observer_ set.");
-    return RESULT_FAIL;
-  }
   if (!security_manager_) {
     LOG4CXX_WARN(logger_, "No security_manager_ set.");
     return RESULT_FAIL;
   }
-  const uint32_t connection_key = session_observer_->KeyFromPair(
+  const uint32_t connection_key = session_observer_.KeyFromPair(
         packet->connection_id(), packet->session_id());
-  security_manager::SSLContext *context = session_observer_->GetSSLContext(
+  security_manager::SSLContext *context = session_observer_.GetSSLContext(
         connection_key, ServiceTypeFromByte(packet->service_type()));
   if (!context || !context->IsInitCompleted()) {
     const std::string error_text("Fail decryption for unprotected service ");
@@ -1313,7 +1252,7 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
     security_manager_->SendInternalError(connection_key,
           security_manager::SecurityManager::ERROR_DECRYPTION_FAILED, error_text);
     // Close session to prevent usage unprotected service/session
-    session_observer_->OnSessionEndedCallback(
+    session_observer_.OnSessionEndedCallback(
           packet->connection_id(), packet->session_id(),
           packet->message_id(),    kRpc);
     return RESULT_ENCRYPTION_FAILED;
@@ -1335,9 +1274,9 @@ void ProtocolHandlerImpl::SendFramesNumber(uint32_t connection_key,
   // TODO(EZamakhov): add protocol version check - to avoid send for PROTOCOL_VERSION_1
   transport_manager::ConnectionUID connection_id = 0;
   uint8_t session_id = 0;
-  session_observer_->PairFromKey(connection_key, &connection_id, &session_id);
+  session_observer_.PairFromKey(connection_key, &connection_id, &session_id);
   uint8_t protocol_version;
-  if (session_observer_->ProtocolVersionUsed(connection_id, session_id,
+  if (session_observer_.ProtocolVersionUsed(connection_id, session_id,
       protocol_version)) {
     ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
         protocol_version, PROTECTION_OFF, FRAME_TYPE_CONTROL,
@@ -1380,12 +1319,13 @@ std::string ConvertPacketDataToString(const uint8_t *data,
   return is_printable_array ? std::string(text, data_size) : std::string("is raw data");
 }
 
-uint8_t SupportedSDLProtocolVersion() {
+uint8_t ProtocolHandlerImpl::SupportedSDLProtocolVersion() const {
   LOG4CXX_AUTO_TRACE(logger_);
 
   bool heart_beat_support =
-    (0 != profile::Profile::instance()->heart_beat_timeout());
-  bool sdl4_support = profile::Profile::instance()->enable_protocol_4();
+    (0 != get_settings().heart_beat_timeout());
+
+  bool sdl4_support = get_settings().enable_protocol_4();
 
   if (sdl4_support) {
     return PROTOCOL_VERSION_4;

@@ -83,15 +83,16 @@ class TransportManagerImpl : public TransportManager,
     TransportManagerImpl* transport_manager;
     TransportAdapter* transport_adapter;
     TimerSPtr timer;
-    bool shutdown;
+    bool shut_down;
     DeviceHandle device_handle_;
     int messages_count;
 
     ConnectionInternal(TransportManagerImpl* transport_manager,
                        TransportAdapter* transport_adapter,
-                       const ConnectionUID& id, const DeviceUID& dev_id,
+                       const ConnectionUID id,
+                       const DeviceUID& dev_id,
                        const ApplicationHandle& app_id,
-                       const DeviceHandle& device_handle);
+                       const DeviceHandle device_handle);
 
     void DisconnectFailedRoutine();
   };
@@ -106,20 +107,20 @@ class TransportManagerImpl : public TransportManager,
    *
    * @return Code error.
    */
-  virtual int Init();
+  int Init() OVERRIDE;
 
   /**
    * Reinitializes transport manager
    * @return Error code
    */
-  virtual int Reinit();
+  int Reinit() OVERRIDE;
 
   /**
    * @brief Start scanning for new devices.
    *
    * @return Code error.
    **/
-  virtual int SearchDevices();
+  int SearchDevices() OVERRIDE;
 
   /**
    * @brief Connect to all applications discovered on device.
@@ -128,7 +129,7 @@ class TransportManagerImpl : public TransportManager,
    *
    * @return Code error.
    **/
-  virtual int ConnectDevice(const DeviceHandle& device_id);
+  int ConnectDevice(const DeviceHandle device_id) OVERRIDE;
 
   /**
    * @brief Disconnect from all applications connected on device.
@@ -137,7 +138,7 @@ class TransportManagerImpl : public TransportManager,
    *
    * @return Code error.
    **/
-  virtual int DisconnectDevice(const DeviceHandle& device_id);
+  int DisconnectDevice(const DeviceHandle device_id) OVERRIDE;
 
   /**
    * @brief Disconnect from applications connected on device by connection
@@ -147,14 +148,14 @@ class TransportManagerImpl : public TransportManager,
    *
    * @return Code error.
    **/
-  virtual int Disconnect(const ConnectionUID& connection_id);
+  int Disconnect(const ConnectionUID connection_id) OVERRIDE;
 
   /**
    * @brief Disconnect and clear all unreceived data.
    *
    * @param connection Connection unique identifier.
    */
-  virtual int DisconnectForce(const ConnectionUID& connection_id);
+  int DisconnectForce(const ConnectionUID connection_id) OVERRIDE;
   /**
    * @brief Post new message in queue for massages destined to device.
    *
@@ -162,7 +163,7 @@ class TransportManagerImpl : public TransportManager,
    *
    * @return Code error.
    **/
-  virtual int SendMessageToDevice(const protocol_handler::RawMessagePtr message);
+  int SendMessageToDevice(const protocol_handler::RawMessagePtr message) OVERRIDE;
 
   /**
    * @brief Post event in the event queue.
@@ -171,7 +172,7 @@ class TransportManagerImpl : public TransportManager,
    *
    * @return Code error.
    **/
-  virtual int ReceiveEventFromDevice(const TransportAdapterEvent& event);
+  int ReceiveEventFromDevice(const TransportAdapterEvent& event) OVERRIDE;
 
   /**
    * @brief Post listener to the container of transport manager listeners.
@@ -180,9 +181,9 @@ class TransportManagerImpl : public TransportManager,
    *
    * @return Code error.
    **/
-  virtual int AddEventListener(TransportManagerListener* listener);
+  int AddEventListener(TransportManagerListener* listener) OVERRIDE;
 
-  virtual int Stop();
+  int Stop() OVERRIDE;
 
   /**
    * @brief Add device adapter to the container of device adapters.
@@ -191,8 +192,8 @@ class TransportManagerImpl : public TransportManager,
    *
    * @return Code error.
    **/
-  virtual int AddTransportAdapter(
-      transport_adapter::TransportAdapter* transport_adapter);
+  int AddTransportAdapter(
+      transport_adapter::TransportAdapter* transport_adapter) OVERRIDE;
 
   /**
    * @brief Remove device from the container that hold devices.
@@ -201,7 +202,7 @@ class TransportManagerImpl : public TransportManager,
    *
    * @return Code error.
    **/
-  virtual int RemoveDevice(const DeviceHandle& device);
+  int RemoveDevice(const DeviceHandle device) OVERRIDE;
 
   /**
    * @brief Turns on or off visibility of SDL to mobile devices
@@ -210,7 +211,7 @@ class TransportManagerImpl : public TransportManager,
    *
    * @return Code error.
    */
-  virtual int Visibility(const bool& on_off) const;
+  int Visibility(const bool& on_off) const OVERRIDE;
 
   /**
    * @brief Updates total device list with info from specific transport adapter.
@@ -344,7 +345,7 @@ class TransportManagerImpl : public TransportManager,
 
   void AddConnection(const ConnectionInternal& c);
   void RemoveConnection(uint32_t id);
-  ConnectionInternal* GetConnection(const ConnectionUID& id);
+  ConnectionInternal* GetConnection(const ConnectionUID id);
   ConnectionInternal* GetConnection(const DeviceUID& device,
                                     const ApplicationHandle& application);
 

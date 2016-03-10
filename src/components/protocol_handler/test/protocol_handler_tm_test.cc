@@ -29,32 +29,36 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 #include <string>
+#include "protocol_handler/protocol_handler.h"
 #include "protocol_handler/protocol_handler_impl.h"
 #include "protocol/common.h"
-#include "control_message_matcher.h"
-#include "protocol_handler_mock.h"
-#include "protocol_observer_mock.h"
+#include "protocol_handler/control_message_matcher.h"
+#include "protocol_handler/protocol_handler_mock.h"
+#include "protocol_handler/protocol_observer_mock.h"
+#include "protocol_handler/mock_protocol_handler_settings.h"
+#include "protocol_handler/mock_session_observer.h"
+#include "connection_handler/mock_connection_handler.h"
+#include "transport_manager/transport_manager_mock.h"
 
+#include "utils/make_shared.h"
 
 namespace test {
 namespace components {
 namespace protocol_handler_test {
 
-// id passed as NULL for new session establishing
+// Id passed as NULL for new session establishing
 #define NEW_SESSION_ID        0u
 #define SESSION_START_REJECT  0u
 
 using namespace ::protocol_handler;
 using namespace ::transport_manager;
-// For TM states
 using ::transport_manager::TransportManagerListener;
 using ::testing::Return;
+using ::testing::ReturnRefOfCopy;
 using ::testing::ReturnNull;
 using ::testing::AnyOf;
-using ::testing::Ge;
-using ::testing::Le;
 using ::testing::_;
 using ::testing::Invoke;
 
@@ -65,15 +69,26 @@ class ProtocolHandlerImplTest : public ::testing::Test {
       bool malformed_message_filtering = false,
       const size_t malformd_period_msec = 0u,
       const size_t malformd_max_messages = 0u,
-      const int32_t multiframe_waiting_timeout = 0) {
-    protocol_handler_impl.reset(
-        new ProtocolHandlerImpl(&transport_manager_mock,
-                                period_msec, max_messages,
-                                malformed_message_filtering,
-                                malformd_period_msec,
-                                malformd_max_messages,
-                                multiframe_waiting_timeout));
-    protocol_handler_impl->set_session_observer(&session_observer_mock);
+                                     const int32_t multiframe_waiting_timeout = 0,
+                                     const size_t maximum_payload_size = 0u) {
+          ON_CALL(protocol_handler_settings_mock, maximum_payload_size())
+              .WillByDefault(Return(maximum_payload_size));
+          ON_CALL(protocol_handler_settings_mock, message_frequency_time())
+              .WillByDefault(Return(period_msec));
+          ON_CALL(protocol_handler_settings_mock, message_frequency_count())
+              .WillByDefault(Return(max_messages));
+          ON_CALL(protocol_handler_settings_mock, malformed_message_filtering())
+              .WillByDefault(Return(malformed_message_filtering));
+          ON_CALL(protocol_handler_settings_mock, malformed_frequency_time())
+              .WillByDefault(Return(malformd_period_msec));
+          ON_CALL(protocol_handler_settings_mock, malformed_frequency_count())
+              .WillByDefault(Return(malformd_max_messages));
+          ON_CALL(protocol_handler_settings_mock, multiframe_waiting_timeout())
+              .WillByDefault(Return(multiframe_waiting_timeout));
+          protocol_handler_impl.reset(new ProtocolHandlerImpl(protocol_handler_settings_mock,
+                                      session_observer_mock,
+                                      connection_handler_mock,
+                                      transport_manager_mock));
     tm_listener = protocol_handler_impl.get();
   }
   void SetUp() OVERRIDE {
@@ -84,14 +99,14 @@ class ProtocolHandlerImplTest : public ::testing::Test {
     message_id = 0xABCDEFu;
     some_data.resize(256, 0xAB);
 
-    // expect ConnectionHandler support methods call (conversion, check heartbeat)
+    // Expect ConnectionHandler support methods call (conversion, check heartbeat)
     EXPECT_CALL(session_observer_mock,
         KeyFromPair(connection_id, _)).
-    //return some connection_key
+    // Return some connection_key
     WillRepeatedly(Return(connection_key));
     EXPECT_CALL(session_observer_mock,
         IsHeartBeatSupported(connection_id, _)).
-    //return false to avoid call KeepConnectionAlive
+    // Return false to avoid call KeepConnectionAlive
     WillRepeatedly(Return(false));
   }
 
@@ -117,14 +132,14 @@ class ProtocolHandlerImplTest : public ::testing::Test {
     // For disabled protection callback shall ignore protection income flad and use protection OFF
     const bool callback_protection_flag = PROTECTION_OFF;
 #endif  // ENABLE_SECURITY
-    // expect ConnectionHandler check
+    // Expect ConnectionHandler check
     EXPECT_CALL(session_observer_mock,
         OnSessionStartedCallback(connection_id, NEW_SESSION_ID, start_service,
             callback_protection_flag, _)).
-    //return sessions start success
+    // Return sessions start success
     WillOnce(Return(session_id));
 
-    // expect send Ack with PROTECTION_OFF (on no Security Manager)
+    // Expect send Ack with PROTECTION_OFF (on no Security Manager)
     EXPECT_CALL(transport_manager_mock,
         SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF)))
         .WillOnce(Return(E_SUCCESS));
@@ -147,9 +162,16 @@ class ProtocolHandlerImplTest : public ::testing::Test {
     const ProtocolPacket packet(connection_id, version, protection, frameType,
                                 serviceType, frameData, sessionId, dataSize,
                                 messageID, data);
-    // Emulate resive packet from transoprt manager
+    // Emulate receive packet from transoprt manager
     tm_listener->OnTMMessageReceived(packet.serializePacket());
   }
+
+  void SetProtocolVersion2() {
+    // Set protocol version 2
+    ON_CALL(protocol_handler_settings_mock, max_supported_protocol_version())
+        .WillByDefault(Return(PROTOCOL_VERSION_2));
+  }
+
   void SendControlMessage(bool protection, uint8_t service_type,
                           uint8_t sessionId, uint32_t frame_data,
                           uint32_t dataSize = 0u, const uint8_t *data = NULL) {
@@ -158,19 +180,21 @@ class ProtocolHandlerImplTest : public ::testing::Test {
                   dataSize, message_id, data);
   }
 
+  testing::NiceMock<MockProtocolHandlerSettings> protocol_handler_settings_mock;
   ::utils::SharedPtr<ProtocolHandlerImpl> protocol_handler_impl;
   TransportManagerListener* tm_listener;
   // Uniq connection
   ::transport_manager::ConnectionUID connection_id;
-  // id of established session
+  // Id of established session
   uint8_t session_id;
-  // uniq id as connection_id and session_id in one
+  // Uniq id as connection_id and session_id in one
   uint32_t connection_key;
   uint32_t message_id;
   std::vector<uint8_t> some_data;
   // Strict mocks (same as all methods EXPECT_CALL().Times(0))
-  testing::StrictMock<protocol_handler_test::TransportManagerMock> transport_manager_mock;
-  testing::StrictMock<protocol_handler_test::SessionObserverMock> session_observer_mock;
+  testing::NiceMock<connection_handler_test::MockConnectionHandler> connection_handler_mock;
+  testing::StrictMock<transport_manager_test::TransportManagerMock> transport_manager_mock;
+  testing::StrictMock<protocol_handler_test::MockSessionObserver> session_observer_mock;
 #ifdef ENABLE_SECURITY
   testing::NiceMock<protocol_handler_test::SecurityManagerMock> security_manager_mock;
   testing::NiceMock<protocol_handler_test::SSLContextMock> ssl_context_mock;
@@ -216,15 +240,15 @@ TEST_F(ProtocolHandlerImplTest, RecieveOnUnknownConnection) {
 TEST_F(ProtocolHandlerImplTest, StartSession_Unprotected_SessionObserverReject) {
   const int call_times = 5;
   AddConnection();
-  // expect ConnectionHandler check
+  // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
       OnSessionStartedCallback(
           connection_id, NEW_SESSION_ID, AnyOf(kControl, kRpc, kAudio,
               kMobileNav, kBulk), PROTECTION_OFF, _)).Times(call_times).
-  //return sessions start rejection
+  // Return sessions start rejection
       WillRepeatedly(Return(SESSION_START_REJECT));
 
-  // expect send NAck
+  // Expect send NAck
   EXPECT_CALL(transport_manager_mock,
       SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_NACK, PROTECTION_OFF)))
       .Times(call_times).WillRepeatedly(Return(E_SUCCESS));
@@ -255,16 +279,16 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
   // For disabled protection callback shall ignore protection income flag and use protection OFF
   const bool callback_protection_flag = PROTECTION_OFF;
 #endif  // ENABLE_SECURITY
-  // expect ConnectionHandler check
+  // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
       OnSessionStartedCallback(
           connection_id, NEW_SESSION_ID, AnyOf(kControl, kRpc, kAudio,
               kMobileNav, kBulk), callback_protection_flag, _)).Times(
       call_times).
-  //return sessions start rejection
+  // Return sessions start rejection
       WillRepeatedly(Return(SESSION_START_REJECT));
 
-  // expect send NAck with encryption OFF
+  // Expect send NAck with encryption OFF
   EXPECT_CALL(transport_manager_mock,
       SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_NACK, PROTECTION_OFF)))
       .Times(call_times).WillRepeatedly(Return(E_SUCCESS));
@@ -287,14 +311,15 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
 TEST_F(ProtocolHandlerImplTest, StartSession_Unprotected_SessionObserverAccept) {
   AddConnection();
   const ServiceType start_service = kRpc;
-  // expect ConnectionHandler check
+  // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
       OnSessionStartedCallback(connection_id, NEW_SESSION_ID, start_service, PROTECTION_OFF, _))
       .
-      //return sessions start success
+      // Return sessions start success
   WillOnce(Return(session_id));
 
-  // expect send Ack
+  SetProtocolVersion2();
+  // Expect send Ack
   EXPECT_CALL(transport_manager_mock,
       SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF)))
       .WillOnce(Return(E_SUCCESS));
@@ -308,6 +333,7 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Unprotected_SessionObserverAccept) 
  * For ENABLE_SECURITY=OFF session_observer shall be called with protection flag OFF
  */
 TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverAccept) {
+  SetProtocolVersion2();
   AddSession();
 }
 // TODO(EZamakhov): add test for get_hash_id/set_hash_id from protocol_handler_impl.cc
@@ -318,13 +344,14 @@ TEST_F(ProtocolHandlerImplTest, EndSession_SessionObserverReject) {
   AddSession();
   const ServiceType service = kRpc;
 
-  // expect ConnectionHandler check
+  // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
       OnSessionEndedCallback(connection_id, session_id, _, service)).
   // reject session start
   WillOnce(Return(SESSION_START_REJECT));
 
-  // expect send NAck
+  SetProtocolVersion2();
+  // Expect send NAck
   EXPECT_CALL(transport_manager_mock,
       SendMessageToDevice(ControlMessage(FRAME_DATA_END_SERVICE_NACK, PROTECTION_OFF)))
       .WillOnce(Return(E_SUCCESS));
@@ -339,13 +366,14 @@ TEST_F(ProtocolHandlerImplTest, EndSession_Success) {
   AddSession();
   const ServiceType service = kRpc;
 
-  // expect ConnectionHandler check
+  // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
       OnSessionEndedCallback(connection_id, session_id, _, service)).
   // return sessions start success
   WillOnce(Return(connection_key));
 
-  // expect send Ack
+  SetProtocolVersion2();
+  // Expect send Ack
   EXPECT_CALL(transport_manager_mock,
       SendMessageToDevice(ControlMessage(FRAME_DATA_END_SERVICE_ACK, PROTECTION_OFF)))
       .WillOnce(Return(E_SUCCESS));
@@ -364,13 +392,14 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
   // Add security manager
   AddSecurityManager();
   const ServiceType start_service = kRpc;
-  // expect ConnectionHandler check
+  // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
       OnSessionStartedCallback(connection_id, NEW_SESSION_ID, start_service, PROTECTION_OFF, _)).
-  //return sessions start success
+  // Return sessions start success
   WillOnce(Return(session_id));
 
-  // expect send Ack with PROTECTION_OFF (on no Security Manager)
+  SetProtocolVersion2();
+  // Expect send Ack with PROTECTION_OFF (on no Security Manager)
   EXPECT_CALL(transport_manager_mock,
       SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF))).
   WillOnce(Return(E_SUCCESS));
@@ -386,13 +415,14 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionUnprotected) {
   // Add security manager
   AddSecurityManager();
   const ServiceType start_service = kRpc;
-  // expect ConnectionHandler check
+  // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
       OnSessionStartedCallback(connection_id, NEW_SESSION_ID, start_service, PROTECTION_OFF, _)).
-  //return sessions start success
+  // Return sessions start success
   WillOnce(Return(session_id));
 
-  // expect send Ack with PROTECTION_OFF (on no Security Manager)
+  SetProtocolVersion2();
+  // Expect send Ack with PROTECTION_OFF (on no Security Manager)
   EXPECT_CALL(transport_manager_mock,
       SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF))).
   WillOnce(Return(E_SUCCESS));
@@ -406,19 +436,20 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_Fail) {
   AddConnection();
   AddSecurityManager();
   const ServiceType start_service = kRpc;
-  // expect ConnectionHandler check
+  // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
       OnSessionStartedCallback(connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _)).
-  //return sessions start success
+  // Return sessions start success
   WillOnce(Return(session_id));
 
-  // expect start protection for unprotected session
+  SetProtocolVersion2();
+  // Expect start protection for unprotected session
   EXPECT_CALL(security_manager_mock,
       CreateSSLContext(connection_key)).
-  //return fail protection
+  // Return fail protection
   WillOnce(ReturnNull());
 
-  // expect send Ack with PROTECTION_OFF (on fail SLL creation)
+  // Expect send Ack with PROTECTION_OFF (on fail SLL creation)
   EXPECT_CALL(transport_manager_mock,
       SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF))).
   WillOnce(Return(E_SUCCESS));
@@ -432,19 +463,20 @@ TEST_F(ProtocolHandlerImplTest,SecurityEnable_StartSessionProtected_SSLInitializ
   AddConnection();
   AddSecurityManager();
   const ServiceType start_service = kRpc;
-  // expect ConnectionHandler check
+  // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
       OnSessionStartedCallback(connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _)).
-  //return sessions start success
+  // Return sessions start success
   WillOnce(Return(session_id));
 
+  SetProtocolVersion2();
   // call new SSLContext creation
   EXPECT_CALL(security_manager_mock,
       CreateSSLContext(connection_key)).
-  //return new SSLContext
+  // Return new SSLContext
   WillOnce(Return(&ssl_context_mock));
 
-  // initilization check
+  // Initilization check
   EXPECT_CALL(ssl_context_mock,
       IsInitCompleted()).
   //emulate SSL is initilized
@@ -454,7 +486,7 @@ TEST_F(ProtocolHandlerImplTest,SecurityEnable_StartSessionProtected_SSLInitializ
   EXPECT_CALL(session_observer_mock,
       SetProtectionFlag(connection_key, start_service));
 
-  // expect send Ack with PROTECTION_ON (on SSL is initilized)
+  // Expect send Ack with PROTECTION_ON (on SSL is initilized)
   EXPECT_CALL(transport_manager_mock,
       SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_ON))).
   WillOnce(Return(E_SUCCESS));
@@ -468,19 +500,26 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_HandshakeFa
   AddConnection();
   AddSecurityManager();
   const ServiceType start_service = kRpc;
-  // expect ConnectionHandler check
+  // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
       OnSessionStartedCallback(connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _)).
-  //return sessions start success
+  // Return sessions start success
   WillOnce(Return(session_id));
+
+  std::vector<int> services;
+  // TODO(AKutsan) : APPLINK-21398 use named constants instead of magic numbers
+  services.push_back(0x0A);
+  services.push_back(0x0B);
+  ON_CALL(protocol_handler_settings_mock, force_protected_service())
+      .WillByDefault(ReturnRefOfCopy(services));
 
   // call new SSLContext creation
   EXPECT_CALL(security_manager_mock,
       CreateSSLContext(connection_key)).
-  //return new SSLContext
+  // Return new SSLContext
   WillOnce(Return(&ssl_context_mock));
 
-  // initilization check
+  // Initilization check
   EXPECT_CALL(ssl_context_mock,
       IsInitCompleted()).
   //emulate SSL is not initilized
@@ -492,10 +531,10 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_HandshakeFa
   //emulate is pending
   WillOnce(Return(true));
 
-  // expect add listener for handshake result
+  // Expect add listener for handshake result
   EXPECT_CALL(security_manager_mock,
       AddListener(_))
-  // emulate handshake fail
+  // Emulate handshake fail
   .WillOnce(Invoke(OnHandshakeDoneFunctor(
                      connection_key,
                      security_manager::SSLContext::Handshake_Result_Fail)));
@@ -503,10 +542,10 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_HandshakeFa
   // Listener check SSLContext
   EXPECT_CALL(session_observer_mock,
       GetSSLContext(connection_key, start_service)).
-  // emulate protection for service is not enabled
+  // Emulate protection for service is not enabled
   WillOnce(ReturnNull());
 
-  // expect send Ack with PROTECTION_OFF (on fail handshake)
+  // Expect send Ack with PROTECTION_OFF (on fail handshake)
   EXPECT_CALL(transport_manager_mock,
       SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF))).
   WillOnce(Return(E_SUCCESS));
@@ -520,19 +559,25 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_HandshakeSu
   AddConnection();
   AddSecurityManager();
   const ServiceType start_service = kRpc;
-  // expect ConnectionHandler check
+
+  // No services are protected
+  std::vector<int> services;
+  ON_CALL(protocol_handler_settings_mock, force_protected_service())
+      .WillByDefault(ReturnRefOfCopy(services));
+
+  // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
       OnSessionStartedCallback(connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _)).
-  //return sessions start success
+  // Return sessions start success
   WillOnce(Return(session_id));
 
   // call new SSLContext creation
   EXPECT_CALL(security_manager_mock,
       CreateSSLContext(connection_key)).
-  //return new SSLContext
+  // Return new SSLContext
   WillOnce(Return(&ssl_context_mock));
 
-  // initilization check
+  // Initilization check
   EXPECT_CALL(ssl_context_mock,
       IsInitCompleted()).
   //emulate SSL is not initilized
@@ -544,10 +589,10 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_HandshakeSu
   //emulate is pending
   WillOnce(Return(true));
 
-  // expect add listener for handshake result
+  // Expect add listener for handshake result
   EXPECT_CALL(security_manager_mock,
       AddListener(_))
-  // emulate handshake fail
+  // Emulate handshake fail
   .WillOnce(Invoke(OnHandshakeDoneFunctor(
                      connection_key,
                      security_manager::SSLContext::Handshake_Result_Success)));
@@ -555,14 +600,14 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_HandshakeSu
   // Listener check SSLContext
   EXPECT_CALL(session_observer_mock,
       GetSSLContext(connection_key, start_service)).
-  // emulate protection for service is not enabled
+  // Emulate protection for service is not enabled
   WillOnce(ReturnNull());
 
   // Expect service protection enable
   EXPECT_CALL(session_observer_mock,
       SetProtectionFlag(connection_key, start_service));
 
-  // expect send Ack with PROTECTION_OFF (on fail handshake)
+  // Expect send Ack with PROTECTION_OFF (on fail handshake)
   EXPECT_CALL(transport_manager_mock,
       SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_ON))).
   WillOnce(Return(E_SUCCESS));
@@ -577,19 +622,24 @@ TEST_F(ProtocolHandlerImplTest,
   AddConnection();
   AddSecurityManager();
   const ServiceType start_service = kRpc;
-  // expect ConnectionHandler check
+
+  std::vector<int> services;
+  ON_CALL(protocol_handler_settings_mock, force_protected_service())
+      .WillByDefault(ReturnRefOfCopy(services));
+
+  // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
       OnSessionStartedCallback(connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _)).
-  //return sessions start success
+  // Return sessions start success
   WillOnce(Return(session_id));
 
   // call new SSLContext creation
   EXPECT_CALL(security_manager_mock,
       CreateSSLContext(connection_key)).
-  //return new SSLContext
+  // Return new SSLContext
   WillOnce(Return(&ssl_context_mock));
 
-  // initilization check
+  // Initilization check
   EXPECT_CALL(ssl_context_mock,
       IsInitCompleted()).
   //emulate SSL is not initilized
@@ -601,10 +651,10 @@ TEST_F(ProtocolHandlerImplTest,
   //emulate is pending
   WillOnce(Return(true));
 
-  // expect add listener for handshake result
+  // Expect add listener for handshake result
   EXPECT_CALL(security_manager_mock,
       AddListener(_))
-  // emulate handshake fail
+  // Emulate handshake fail
   .WillOnce(Invoke(OnHandshakeDoneFunctor(
                      connection_key,
                      security_manager::SSLContext::Handshake_Result_Success)));
@@ -612,14 +662,14 @@ TEST_F(ProtocolHandlerImplTest,
   // Listener check SSLContext
   EXPECT_CALL(session_observer_mock,
       GetSSLContext(connection_key, start_service)).
-  // emulate protection for service is not enabled
+  // Emulate protection for service is not enabled
   WillOnce(ReturnNull());
 
   // Expect service protection enable
   EXPECT_CALL(session_observer_mock,
       SetProtectionFlag(connection_key, start_service));
 
-  // expect send Ack with PROTECTION_OFF (on fail handshake)
+  // Expect send Ack with PROTECTION_OFF (on fail handshake)
   EXPECT_CALL(transport_manager_mock,
       SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_ON))).
   WillOnce(Return(E_SUCCESS));
@@ -634,19 +684,24 @@ TEST_F(ProtocolHandlerImplTest,
   AddConnection();
   AddSecurityManager();
   const ServiceType start_service = kRpc;
-  // expect ConnectionHandler check
+
+  std::vector<int> services;
+  ON_CALL(protocol_handler_settings_mock, force_protected_service())
+      .WillByDefault(ReturnRefOfCopy(services));
+
+  // Expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
       OnSessionStartedCallback(connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON, _)).
-  //return sessions start success
+  // Return sessions start success
   WillOnce(Return(session_id));
 
   // call new SSLContext creation
   EXPECT_CALL(security_manager_mock,
       CreateSSLContext(connection_key)).
-  //return new SSLContext
+  // Return new SSLContext
   WillOnce(Return(&ssl_context_mock));
 
-  // initilization check
+  // Initilization check
   EXPECT_CALL(ssl_context_mock,
       IsInitCompleted()).
   //emulate SSL is not initilized
@@ -662,10 +717,10 @@ TEST_F(ProtocolHandlerImplTest,
   EXPECT_CALL(security_manager_mock,
       StartHandshake(connection_key));
 
-  // expect add listener for handshake result
+  // Expect add listener for handshake result
   EXPECT_CALL(security_manager_mock,
       AddListener(_))
-  // emulate handshake fail
+  // Emulate handshake fail
   .WillOnce(Invoke(OnHandshakeDoneFunctor(
                      connection_key,
                      security_manager::SSLContext::Handshake_Result_Success)));
@@ -673,14 +728,14 @@ TEST_F(ProtocolHandlerImplTest,
   // Listener check SSLContext
   EXPECT_CALL(session_observer_mock,
       GetSSLContext(connection_key, start_service)).
-  // emulate protection for service is not enabled
+  // Emulate protection for service is not enabled
   WillOnce(ReturnNull());
 
   // Expect service protection enable
   EXPECT_CALL(session_observer_mock,
       SetProtectionFlag(connection_key, start_service));
 
-  // expect send Ack with PROTECTION_OFF (on fail handshake)
+  // Expect send Ack with PROTECTION_OFF (on fail handshake)
   EXPECT_CALL(transport_manager_mock,
       SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_ON))).
   WillOnce(Return(E_SUCCESS));
@@ -697,10 +752,15 @@ TEST_F(ProtocolHandlerImplTest,
   AddConnection();
   AddSession();
 
-  // expect flood notification to CH
+  // Expect flood notification to CH
   EXPECT_CALL(session_observer_mock,
       OnApplicationFloodCallBack(connection_key)).
   Times(1);
+
+  ON_CALL(protocol_handler_settings_mock, message_frequency_time())
+      .WillByDefault(Return(period_msec));
+  ON_CALL(protocol_handler_settings_mock, message_frequency_count())
+      .WillByDefault(Return(max_messages));
 
   for (size_t i = 0; i < max_messages + 1; ++i) {
     SendTMMessage(connection_id, PROTOCOL_VERSION_3, PROTECTION_OFF, FRAME_TYPE_SINGLE,
@@ -716,7 +776,14 @@ TEST_F(ProtocolHandlerImplTest,
   AddConnection();
   AddSession();
 
-  // expect NO flood notification to CH
+  ON_CALL(protocol_handler_settings_mock, message_frequency_time())
+      .WillByDefault(Return(period_msec));
+  ON_CALL(protocol_handler_settings_mock, message_frequency_count())
+      .WillByDefault(Return(max_messages));
+
+  // Expect NO flood notification to CH
+  EXPECT_CALL(session_observer_mock, OnApplicationFloodCallBack(connection_key))
+      .Times(0);
   for (size_t i = 0; i < max_messages - 1; ++i) {
     SendTMMessage(connection_id, PROTOCOL_VERSION_3, PROTECTION_OFF, FRAME_TYPE_SINGLE,
         kControl, FRAME_DATA_SINGLE, session_id,
@@ -731,7 +798,7 @@ TEST_F(ProtocolHandlerImplTest,
   AddConnection();
   AddSession();
 
-  // expect NO flood notification to CH on video data streaming
+  // Expect NO flood notification to CH on video data streaming
   for (size_t i = 0; i < max_messages + 1; ++i) {
     SendTMMessage(connection_id, PROTOCOL_VERSION_3, PROTECTION_OFF, FRAME_TYPE_SINGLE,
         kMobileNav, FRAME_DATA_SINGLE, session_id,
@@ -746,7 +813,7 @@ TEST_F(ProtocolHandlerImplTest,
   AddConnection();
   AddSession();
 
-  // expect NO flood notification to CH on video data streaming
+  // Expect NO flood notification to CH on video data streaming
   for (size_t i = 0; i < max_messages + 1; ++i) {
     SendTMMessage(connection_id, PROTOCOL_VERSION_3, PROTECTION_OFF, FRAME_TYPE_SINGLE,
         kAudio, FRAME_DATA_SINGLE, session_id,
@@ -761,7 +828,7 @@ TEST_F(ProtocolHandlerImplTest,
   AddConnection();
   AddSession();
 
-  // expect NO flood notification to session observer
+  // Expect NO flood notification to session observer
   for (size_t i = 0; i < max_messages + 1; ++i) {
     SendTMMessage(connection_id, PROTOCOL_VERSION_3, PROTECTION_OFF, FRAME_TYPE_SINGLE,
         kControl, FRAME_DATA_SINGLE, session_id,
@@ -778,7 +845,7 @@ TEST_F(ProtocolHandlerImplTest,
   AddConnection();
   AddSession();
 
-  // expect malformed notification to CH
+  // Expect malformed notification to CH
   EXPECT_CALL(session_observer_mock,
               OnMalformedMessageCallback(connection_id)).
       Times(max_messages);
@@ -799,7 +866,7 @@ TEST_F(ProtocolHandlerImplTest,
   AddConnection();
   AddSession();
 
-  // expect malformed notification to CH
+  // Expect malformed notification to CH
   EXPECT_CALL(session_observer_mock,
               OnMalformedMessageCallback(connection_id)).
       Times(1);
@@ -826,7 +893,7 @@ TEST_F(ProtocolHandlerImplTest,
   AddConnection();
   AddSession();
 
-  // expect malformed notification to CH
+  // Expect malformed notification to CH
   EXPECT_CALL(session_observer_mock,
       OnMalformedMessageCallback(connection_id)).
   Times(1);
@@ -864,7 +931,7 @@ TEST_F(ProtocolHandlerImplTest,
   AddConnection();
   AddSession();
 
-  // expect NO malformed notification to CH
+  // Expect NO malformed notification to CH
   EXPECT_CALL(session_observer_mock,
               OnMalformedMessageCallback(connection_id)).
       Times(0);
@@ -899,7 +966,7 @@ TEST_F(ProtocolHandlerImplTest,
   AddConnection();
   AddSession();
 
-  // expect no malformed notification to CH
+  // Expect no malformed notification to CH
   EXPECT_CALL(session_observer_mock,
               OnMalformedMessageCallback(connection_id)).
       Times(0);
@@ -920,7 +987,7 @@ TEST_F(ProtocolHandlerImplTest,
   AddConnection();
   AddSession();
 
-  // expect no malformed notification to CH
+  // Expect no malformed notification to CH
   EXPECT_CALL(session_observer_mock,
               OnMalformedMessageCallback(connection_id)).
       Times(0);

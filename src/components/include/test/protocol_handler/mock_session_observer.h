@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,10 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_SESSION_OBSERVER_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_SESSION_OBSERVER_H_
+#ifndef TEST_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_SESSION_OBSERVER_MOCK_H_
+#define TEST_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_SESSION_OBSERVER_MOCK_H_
 
-#include "gmock/gmock.h"
+#include <gmock/gmock.h>
 #include <string>
 #include <list>
 #include "protocol_handler/session_observer.h"
@@ -41,60 +41,71 @@
 namespace test {
 namespace components {
 namespace protocol_handler_test {
-
+/*
+ * MOCK implementation of ::protocol_handler::SessionObserver interface
+ */
 class MockSessionObserver : public ::protocol_handler::SessionObserver {
  public:
   MOCK_METHOD5(
       OnSessionStartedCallback,
-      uint32_t(const transport_manager::ConnectionUID& connection_handle,
-               const uint8_t session_id,
-               const ::protocol_handler::ServiceType& service_type,
-               const bool is_protected, uint32_t* hash_id));
+      uint32_t(const transport_manager::ConnectionUID connection_handle,
+               const uint8_t sessionId,
+               const protocol_handler::ServiceType& service_type,
+               const bool is_protected,
+               uint32_t* hash_id));
   MOCK_METHOD4(
       OnSessionEndedCallback,
-      uint32_t(const transport_manager::ConnectionUID& connection_handle,
-               const uint8_t sessionId, const uint32_t& hashCode,
-               const ::protocol_handler::ServiceType& service_type));
-  MOCK_METHOD1(OnApplicationFloodCallBack, void(const uint32_t&));
-  MOCK_METHOD1(OnMalformedMessageCallback, void(const uint32_t&));
-  MOCK_METHOD2(KeyFromPair,
-               uint32_t(transport_manager::ConnectionUID connection_handle,
-                        uint8_t sessionId));
-  MOCK_METHOD3(PairFromKey,
-               void(uint32_t key,
-                    transport_manager::ConnectionUID* connection_handle,
-                    uint8_t* sessionId));
-  MOCK_METHOD4(GetDataOnSessionKey,
-               int32_t(uint32_t key, uint32_t* app_id,
-                       std::list<int32_t>* sessions_list, uint32_t* device_id));
-  MOCK_METHOD5(GetDataOnDeviceID,
-               int32_t(uint32_t device_handle, std::string* device_name,
-                       std::list<uint32_t>* applications_list,
-                       std::string* mac_address, std::string* connection_type));
-  MOCK_METHOD2(IsHeartBeatSupported,
-               bool(transport_manager::ConnectionUID connection_handle,
-                    uint8_t session_id));
-  MOCK_METHOD3(ProtocolVersionUsed,
-               bool(uint32_t connection_id, uint8_t session_id,
-                    uint8_t& protocol_version));
+      uint32_t(const transport_manager::ConnectionUID connection_handle,
+               const uint8_t sessionId,
+               const uint32_t& hashCode,
+               const protocol_handler::ServiceType& service_type));
+  MOCK_METHOD1(OnApplicationFloodCallBack,
+               void(const uint32_t& connection_key));
+  MOCK_METHOD1(OnMalformedMessageCallback,
+               void(const uint32_t& connection_key));
+  MOCK_CONST_METHOD2(
+      KeyFromPair,
+      uint32_t(transport_manager::ConnectionUID connection_handle,
+               uint8_t session_id));
+  MOCK_CONST_METHOD3(PairFromKey,
+                     void(uint32_t key,
+                          transport_manager::ConnectionUID* connection_handle,
+                          uint8_t* sessionId));
+  MOCK_CONST_METHOD4(GetDataOnSessionKey,
+                     int32_t(uint32_t key,
+                             uint32_t* app_id,
+                             std::list<int32_t>* sessions_list,
+                             uint32_t* device_id));
+  MOCK_CONST_METHOD5(GetDataOnDeviceID,
+                     int32_t(uint32_t device_handle,
+                             std::string* device_name,
+                             std::list<uint32_t>* applications_list,
+                             std::string* mac_address,
+                             std::string* connection_type));
+  MOCK_CONST_METHOD2(IsHeartBeatSupported,
+                     bool(transport_manager::ConnectionUID connection_handle,
+                          uint8_t session_id));
+  MOCK_CONST_METHOD3(ProtocolVersionUsed,
+                     bool(uint32_t connection_id,
+                          uint8_t session_id,
+                          uint8_t& protocol_version));
+
 #ifdef ENABLE_SECURITY
-  MOCK_METHOD2(SetSSLContext, int(const uint32_t& key,
-                                  ::security_manager::SSLContext* context));
+  MOCK_METHOD2(SetSSLContext,
+               int(const uint32_t& key, security_manager::SSLContext* context));
   MOCK_METHOD2(GetSSLContext,
-               ::security_manager::SSLContext*(
+               security_manager::SSLContext*(
                    const uint32_t& key,
-                   const ::protocol_handler::ServiceType& service_type));
+                   const protocol_handler::ServiceType& service_type));
   MOCK_METHOD2(SetProtectionFlag,
                void(const uint32_t& key,
-                    const ::protocol_handler::ServiceType& service_type));
+                    const protocol_handler::ServiceType& service_type));
   MOCK_CONST_METHOD1(
       GetHandshakeContext,
-      security_manager::SSLContext::HandshakeContext(const uint32_t key));
-
+      security_manager::SSLContext::HandshakeContext(uint32_t key));
 #endif  // ENABLE_SECURITY
 };
 }  // namespace protocol_handler_test
 }  // namespace components
 }  // namespace test
-
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_SESSION_OBSERVER_H_
+#endif  // TEST_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_SESSION_OBSERVER_MOCK_H_

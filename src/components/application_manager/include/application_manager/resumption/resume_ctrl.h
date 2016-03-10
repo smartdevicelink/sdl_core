@@ -215,7 +215,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @return HMI app ID
    */
   uint32_t GetHMIApplicationID(const std::string& policy_app_id,
-                               const std::string& device_id) const;
+                               const std::string& device_mac) const;
   /**
    * @brief SaveDataOnTimer :
    *  Timer callback for persisting ResumptionData each N seconds

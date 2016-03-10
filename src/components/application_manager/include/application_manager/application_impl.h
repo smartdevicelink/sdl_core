@@ -69,6 +69,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   ApplicationImpl(
       uint32_t application_id,
       const std::string& mobile_app_id,
+      const std::string& mac_address,
       const custom_str::CustomString& app_name,
       utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager);
 
@@ -140,6 +141,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
       const;
   const std::string& app_icon_path() const;
   connection_handler::DeviceHandle device() const;
+  const std::string& mac_address() const OVERRIDE;
   void set_tts_properties_in_none(bool active);
   bool tts_properties_in_none();
   void set_tts_properties_in_full(bool active);
@@ -346,6 +348,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   uint32_t list_files_in_none_count_;
   std::string app_icon_path_;
   connection_handler::DeviceHandle device_;
+  const std::string mac_address_;
 
   AppFilesMap app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;

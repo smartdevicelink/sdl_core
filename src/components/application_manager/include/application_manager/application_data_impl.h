@@ -63,6 +63,11 @@ class InitialApplicationDataImpl : public virtual Application {
     void set_language(const mobile_api::Language::eType& language);
     void set_ui_language(const mobile_api::Language::eType& ui_language);
 
+    void set_perform_interaction_layout(
+        mobile_api::LayoutMode::eType layout) OVERRIDE;
+    mobile_api::LayoutMode::eType perform_interaction_layout() const OVERRIDE;
+
+
   protected:
     smart_objects::SmartObject* app_types_;
     smart_objects::SmartObject* vr_synonyms_;
@@ -71,6 +76,7 @@ class InitialApplicationDataImpl : public virtual Application {
     smart_objects::SmartObject* ngn_media_screen_name_;
     mobile_api::Language::eType language_;
     mobile_api::Language::eType ui_language_;
+    mobile_apis::LayoutMode::eType perform_interaction_layout_;
   private:
     DISALLOW_COPY_AND_ASSIGN(InitialApplicationDataImpl);
 };
