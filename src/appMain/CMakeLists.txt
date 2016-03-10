@@ -51,9 +51,9 @@ set(default_media_inc
 )
 endif()
 
-if (TIME_TESTER)
-    set(TIME_TESTER_LIB
-        TimeTester)
+if (TELEMETRY_MONITOR)
+    set(TELEMETRY_MONITOR_LIB
+        TelemetryMonitor)
 endif()
 
 set(LIBRARIES
@@ -64,7 +64,7 @@ set(LIBRARIES
   MOBILE_API
   v4_protocol_v1_2_no_extra
   SmartObjects
-  ${TIME_TESTER_LIB}
+  ${TELEMETRY_MONITOR_LIB}
   formatters
   ProtocolLibrary
   ProtocolHandler
@@ -118,7 +118,7 @@ include_directories (
   ${COMPONENTS_DIR}/request_watchdog/include
   ${COMPONENTS_DIR}/smart_objects/include/
   ${COMPONENTS_DIR}/media_manager/include/
-  ${COMPONENTS_DIR}/time_tester/include
+  ${COMPONENTS_DIR}/telemetry_monitor/include
   ${COMPONENTS_DIR}/policy/src/policy/include/
   ${COMPONENTS_DIR}/policy/src/policy/usage_statistics/include/
   ${COMPONENTS_DIR}/resumption/include/

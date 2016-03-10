@@ -48,11 +48,12 @@
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
 #include "protocol/common.h"
-#ifdef TIME_TESTER
-#include "transport_manager/time_metric_observer.h"
-#endif  // TIME_TESTER
+#ifdef TELEMETRY_MONITOR
+#include "transport_manager/telemetry_observer.h"
+#endif  // TELEMETRY_MONITOR
 #include "utils/threads/message_loop_thread.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
+#include "telemetry_monitor/telemetry_observable.h"
 
 namespace transport_manager {
 
@@ -65,9 +66,14 @@ typedef utils::SharedPtr<timer::Timer> TimerSPtr;
 /**
  * @brief Implementation of transport manager.s
  */
-class TransportManagerImpl : public TransportManager,
-                             public RawMessageLoopThread::Handler,
-                             public TransportAdapterEventLoopThread::Handler {
+class TransportManagerImpl
+    : public TransportManager,
+      public RawMessageLoopThread::Handler
+#ifdef TELEMETRY_MONITOR
+      ,
+      public telemetry_monitor::TelemetryObservable<TMTelemetryObserver>
+#endif  // TELEMETRY_MONITOR
+      , public TransportAdapterEventLoopThread::Handler {
  public:
   struct Connection {
     ConnectionUID id;
@@ -219,14 +225,14 @@ class TransportManagerImpl : public TransportManager,
    */
   void UpdateDeviceList(TransportAdapter* ta);
 
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
   /**
    * @brief Setup observer for time metric.
    *
    * @param observer - pointer to observer
    */
-  void SetTimeMetricObserver(TMMetricObserver* observer);
-#endif  // TIME_TESTER
+  void SetTelemetryObserver(TMTelemetryObserver* observer);
+#endif  // TELEMETRY_MONITOR
 
 
   /**
@@ -272,9 +278,9 @@ class TransportManagerImpl : public TransportManager,
    */
   bool is_initialized_;
 
-#ifdef TIME_TESTER
-  TMMetricObserver* metric_observer_;
-#endif  // TIME_TESTER
+#ifdef TELEMETRY_MONITOR
+  TMTelemetryObserver* metric_observer_;
+#endif  // TELEMETRY_MONITOR
 
  private:
   /**

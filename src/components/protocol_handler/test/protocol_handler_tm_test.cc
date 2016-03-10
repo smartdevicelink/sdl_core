@@ -193,7 +193,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   std::vector<uint8_t> some_data;
   // Strict mocks (same as all methods EXPECT_CALL().Times(0))
   testing::NiceMock<connection_handler_test::MockConnectionHandler> connection_handler_mock;
-  testing::StrictMock<transport_manager_test::TransportManagerMock> transport_manager_mock;
+  testing::StrictMock<transport_manager_test::MockTransportManager> transport_manager_mock;
   testing::StrictMock<protocol_handler_test::MockSessionObserver> session_observer_mock;
 #ifdef ENABLE_SECURITY
   testing::NiceMock<protocol_handler_test::SecurityManagerMock> security_manager_mock;

@@ -129,7 +129,7 @@ class ConnectionTest : public ::testing::Test {
 
   Connection* connection_;
   MockConnectionHandlerSettings mock_connection_handler_settings;
-  testing::StrictMock<transport_manager_test::TransportManagerMock>
+  testing::StrictMock<transport_manager_test::MockTransportManager>
       transport_manager_mock;
   ConnectionHandlerImpl* connection_handler_;
   uint32_t session_id;

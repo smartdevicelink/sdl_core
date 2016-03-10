@@ -72,9 +72,9 @@ LifeCycle::LifeCycle()
     , hmi_handler_(NULL)
     , hmi_message_adapter_(NULL)
     , media_manager_(NULL)
-#ifdef TIME_TESTER
-    , time_tester_(NULL)
-#endif  // TIME_TESTER
+#ifdef TELEMETRY_MONITOR
+    , telemetry_monitor_(NULL)
+#endif  // TELEMETRY_MONITOR
 #ifdef DBUS_HMIADAPTER
     , dbus_adapter_(NULL)
     , dbus_adapter_thread_(NULL)
@@ -161,12 +161,13 @@ bool LifeCycle::StartComponents() {
   connection_handler_->set_protocol_handler(protocol_handler_);
   connection_handler_->set_connection_handler_observer(app_manager_);
 
-// it is important to initialise TimeTester before TM to listen TM Adapters
-#ifdef TIME_TESTER
-  time_tester_ = new time_tester::TimeManager();
-  time_tester_->Start();
-  time_tester_->Init(protocol_handler_);
-#endif  // TIME_TESTER
+// it is important to initialise TelemetryMonitor before TM to listen TM Adapters
+#ifdef TELEMETRY_MONITOR
+  telemetry_monitor_ = new telemetry_monitor::TelemetryMonitor(profile::Profile::instance()->server_address(),
+                                              profile::Profile::instance()->time_testing_port());
+  telemetry_monitor_->Start();
+  telemetry_monitor_->Init(protocol_handler_, app_manager_, transport_manager_);
+#endif  // TELEMETRY_MONITOR
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   app_manager_->set_protocol_handler(protocol_handler_);
@@ -451,14 +452,14 @@ void LifeCycle::StopComponents() {
   delete hmi_message_adapter_;
   hmi_message_adapter_ = NULL;
 
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
   // It's important to delete tester Obcervers after TM adapters destruction
-  if (time_tester_) {
-    time_tester_->Stop();
-    delete time_tester_;
-    time_tester_ = NULL;
+  if (telemetry_monitor_) {
+    telemetry_monitor_->Stop();
+    delete telemetry_monitor_;
+    telemetry_monitor_ = NULL;
   }
-#endif  // TIME_TESTER
+#endif  // TELEMETRY_MONITOR
 }
 
 }  //  namespace main_namespace

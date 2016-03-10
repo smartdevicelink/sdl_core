@@ -52,7 +52,7 @@ class TransportAdapterListenerTest : public ::testing::Test {
  protected:
   const int app_handle;
   const std::string dev_id;
-  TransportManagerMock tr_mock;
+  MockTransportManager tr_mock;
   TransportAdapterMock adapter_mock;
   TransportAdapterListenerImpl transport_listener;
 };

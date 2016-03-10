@@ -230,7 +230,7 @@ class ConnectionHandlerTest : public ::testing::Test {
   }
 
   ConnectionHandlerImpl* connection_handler_;
-  testing::NiceMock<transport_manager_test::TransportManagerMock>
+  testing::NiceMock<transport_manager_test::MockTransportManager>
       mock_transport_manager;
   testing::NiceMock<MockConnectionHandlerSettings>
       mock_connection_handler_settings;

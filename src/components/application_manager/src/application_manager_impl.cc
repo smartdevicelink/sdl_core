@@ -119,10 +119,10 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     , stopping_flag_lock_(true)
     , state_ctrl_(this)
     ,
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
     metric_observer_(NULL)
     ,
-#endif  // TIME_TESTER
+#endif  // TELEMETRY_MONITOR
       application_list_update_timer_(
           "AM ListUpdater",
           new TimerTaskImpl<ApplicationManagerImpl>(
@@ -2014,11 +2014,11 @@ utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
 void ApplicationManagerImpl::ProcessMessageFromMobile(
     const utils::SharedPtr<Message> message) {
   LOG4CXX_AUTO_TRACE(logger_);
-#ifdef TIME_TESTER
-  AMMetricObserver::MessageMetricSharedPtr metric(
-      new AMMetricObserver::MessageMetric());
+#ifdef TELEMETRY_MONITOR
+  AMTelemetryObserver::MessageMetricSharedPtr metric(
+      new AMTelemetryObserver::MessageMetric());
   metric->begin = date_time::DateTime::getCurrentTime();
-#endif  // TIME_TESTER
+#endif  // TELEMETRY_MONITOR
   smart_objects::SmartObjectSPtr so_from_mobile(new smart_objects::SmartObject);
 
   if (!so_from_mobile) {
@@ -2030,19 +2030,19 @@ void ApplicationManagerImpl::ProcessMessageFromMobile(
     LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
     return;
   }
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
   metric->message = so_from_mobile;
-#endif  // TIME_TESTER
+#endif  // TELEMETRY_MONITOR
 
   if (!ManageMobileCommand(so_from_mobile, commands::Command::ORIGIN_MOBILE)) {
     LOG4CXX_ERROR(logger_, "Received command didn't run successfully");
   }
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
   metric->end = date_time::DateTime::getCurrentTime();
   if (metric_observer_) {
     metric_observer_->OnMessage(metric);
   }
-#endif  // TIME_TESTER
+#endif  // TELEMETRY_MONITOR
 }
 
 void ApplicationManagerImpl::ProcessMessageFromHMI(
@@ -2289,11 +2289,11 @@ bool ApplicationManagerImpl::is_attenuated_supported() {
          profile::Profile::instance()->is_mixing_audio_supported();
 }
 
-#ifdef TIME_TESTER
-void ApplicationManagerImpl::SetTimeMetricObserver(AMMetricObserver* observer) {
+#ifdef TELEMETRY_MONITOR
+void ApplicationManagerImpl::SetTelemetryObserver(AMTelemetryObserver* observer) {
   metric_observer_ = observer;
 }
-#endif  // TIME_TESTER
+#endif  // TELEMETRY_MONITOR
 
 void ApplicationManagerImpl::addNotification(const CommandSharedPtr ptr) {
   request_ctrl_.addNotification(ptr);
