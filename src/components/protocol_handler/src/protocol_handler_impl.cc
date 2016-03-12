@@ -1322,6 +1322,13 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
                 << out_data_size << " bytes");
   DCHECK(out_data);
   DCHECK(out_data_size);
+  if (packet->frame_type() == FRAME_TYPE_FIRST &&
+     packet->protection_flag() == true) {
+    // Read decrypted multiframe payload
+    uint32_t total_data_bytes = packet->read_total_data_bytes(out_data);
+    packet->set_total_data_bytes(total_data_bytes);
+    return RESULT_OK;
+  }
   packet->set_data(out_data, out_data_size);
   return RESULT_OK;
 }
