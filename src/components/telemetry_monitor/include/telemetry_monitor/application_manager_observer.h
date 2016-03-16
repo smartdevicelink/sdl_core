@@ -35,7 +35,7 @@
 
 #include "utils/message_queue.h"
 #include "application_manager/telemetry_observer.h"
-#include "telemetry_monitor/application_manager_metric.h"
+#include "telemetry_monitor/application_manager_metric_wrapper.h"
 
 
 namespace telemetry_monitor {

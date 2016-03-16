@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "telemetry_monitor/transport_manager_metric.h"
+#include "telemetry_monitor/transport_manager_metric_wrapper.h"
 #include "json/json.h"
 #include "telemetry_monitor/json_keys.h"
 #include "application_manager/smart_object_keys.h"

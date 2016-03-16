@@ -97,6 +97,7 @@ timer_t StartPosixTimer(timer::Timer& trackable,
 
   if (timer_settime(internal_timer, 0, &itimer, NULL) == kErrorCode) {
     int error_code = errno;
+    UNUSED(error_code);
     LOG4CXX_FATAL(logger_,
                   "Can`t set timeout to posix_timer. Error("
                       << error_code << "): " << strerror(error_code));

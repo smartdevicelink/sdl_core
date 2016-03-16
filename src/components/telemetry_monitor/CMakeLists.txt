@@ -55,9 +55,9 @@ set(SOURCES
     ${TELEMETRY_MONITOR_SRC_DIR}/application_manager_observer.cc
     ${TELEMETRY_MONITOR_SRC_DIR}/transport_manager_observer.cc
     ${TELEMETRY_MONITOR_SRC_DIR}/protocol_handler_observer.cc
-    ${TELEMETRY_MONITOR_SRC_DIR}/application_manager_metric.cc
-    ${TELEMETRY_MONITOR_SRC_DIR}/transport_manager_metric.cc
-    ${TELEMETRY_MONITOR_SRC_DIR}/protocol_handler_metric.cc
+    ${TELEMETRY_MONITOR_SRC_DIR}/application_manager_metric_wrapper.cc
+    ${TELEMETRY_MONITOR_SRC_DIR}/transport_manager_metric_wrapper.cc
+    ${TELEMETRY_MONITOR_SRC_DIR}/protocol_handler_metric_wrapper.cc
 )
 
 add_library("TelemetryMonitor" ${SOURCES})

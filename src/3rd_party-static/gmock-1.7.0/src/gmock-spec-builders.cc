@@ -847,7 +847,7 @@ bool Mock::AsyncVerifyAndClearExpectationsLocked(const int timeout_msec_in)
       // Get finial result and clear expectation
       const bool final_verification = base->VerifyAndClearExpectationsLocked();
       if (!final_verification) {
-//        expectations_met = false;
+        expectations_met = false;
       }
     }
   } // state_map iteration

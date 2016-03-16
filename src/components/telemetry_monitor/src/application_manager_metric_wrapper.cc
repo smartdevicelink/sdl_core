@@ -30,21 +30,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_PROTOCOL_HANDLER_MECTRIC_H_
-#define SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_PROTOCOL_HANDLER_MECTRIC_H_
-
-#include <string>
-#include "utils/shared_ptr.h"
-#include "telemetry_monitor/metric_wrapper.h"
-#include "protocol_handler_observer.h"
+#include "telemetry_monitor/application_manager_metric_wrapper.h"
+#include "telemetry_monitor/json_keys.h"
+#include "application_manager/smart_object_keys.h"
+#include "utils/convert_utils.h"
 
 namespace telemetry_monitor {
 
-class ProtocolHandlerMecticWrapper: public MetricWrapper {
-
-  public:
-    utils::SharedPtr<protocol_handler::PHTelemetryObserver::MessageMetric> message_metric;
-    virtual Json::Value GetJsonMetric();
-};
+Json::Value ApplicationManagerMetricWrapper::GetJsonMetric() {
+  Json::Value result = MetricWrapper::GetJsonMetric();
+  result[strings::logger] = "ApplicationManager";
+  result[strings::begin] =
+      Json::Int64(date_time::DateTime::getuSecs(message_metric->begin));
+  result[strings::end] =
+      Json::Int64(date_time::DateTime::getuSecs(message_metric->end));
+  const NsSmartDeviceLink::NsSmartObjects::SmartObject& params =
+      message_metric->message->getElement(application_manager::strings::params);
+  result[strings::correlation_id] = utils::ConvertInt64ToLongLongInt(
+      params[application_manager::strings::correlation_id].asInt());
+  result[strings::connection_key] = utils::ConvertInt64ToLongLongInt(
+      params[application_manager::strings::connection_key].asInt());
+  return result;
+}
 }  // namespace telemetry_monitor
-#endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_PROTOCOL_HANDLER_MECTRIC_H_
