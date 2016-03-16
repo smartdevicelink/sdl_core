@@ -86,8 +86,10 @@ void create_log_message_loop_thread() {
 }
 
 void delete_log_message_loop_thread() {
-    delete log_message_loop_thread;
+  delete log_message_loop_thread;
+  log_message_loop_thread = NULL;
 }
+
 void flush_logger() {
     logger::LoggerStatus old_status = logger::logger_status;
     // Stop pushing new messages to the log queue

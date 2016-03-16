@@ -375,6 +375,7 @@ TEST_F(SSLTest, OnTSL2Protocol_BrokenHandshake) {
 }
 
 // TODO {AKozoriz} : Unexpected uncomplited init of SSL component.
+// In this and next tests.
 // Must be fixed after merge to develop.
 TEST_F(SSLTest, DISABLED_OnTSL2Protocol_Positive) {
   ASSERT_EQ(client_ctx->StartHandshake(&kClientBuf, &client_buf_len),

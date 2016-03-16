@@ -74,6 +74,7 @@ class ResumptionDataDBTest : public ResumptionDataTest {
     ign_off_count_ = 0;
     grammar_id_ = 16;
   }
+
   virtual void TearDown() {
     utils::dbms::SQLQuery query(test_db());
     EXPECT_TRUE(query.Prepare(remove_all_tables));
@@ -112,10 +113,11 @@ class ResumptionDataDBTest : public ResumptionDataTest {
     delete res_db_;
   }
 
-  utils::dbms::SQLDatabase* test_db() {
+  utils::dbms::SQLDatabase* test_db() const {
     return test_db_;
   }
-  std::string path() {
+
+  std::string path() const {
     return path_;
   }
 
@@ -301,6 +303,7 @@ void ResumptionDataDBTest::CheckGlobalProportiesData() {
     CheckVRHelpItem(global_properties_key);
   }
 }
+
 void ResumptionDataDBTest::CheckVRHelpItem(int64_t global_properties_key) {
   utils::dbms::SQLQuery checks_vrhelp_item(test_db());
   EXPECT_TRUE(checks_vrhelp_item.Prepare(kChecksVrHelpItem));

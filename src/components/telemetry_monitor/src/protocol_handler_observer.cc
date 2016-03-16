@@ -32,7 +32,7 @@
 
 #include "utils/date_time.h"
 #include "telemetry_monitor/protocol_handler_observer.h"
-#include "telemetry_monitor/protocol_handler_metric.h"
+#include "telemetry_monitor/protocol_handler_metric_wrapper.h"
 #include "telemetry_monitor/telemetry_monitor.h"
 
 namespace telemetry_monitor {

@@ -219,6 +219,7 @@ target_link_libraries("application_manager_test"
   Resumption
 )
 
+# TODO [AKozoriz] : Fix not buildable tests
   set(ResumptionData_SOURCES
 #    ${AM_TEST_DIR}/resumption/resumption_data_test.cc
 #    ${AM_TEST_DIR}/resumption/resumption_data_db_test.cc

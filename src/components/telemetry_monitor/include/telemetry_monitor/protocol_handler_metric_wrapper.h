@@ -30,22 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "telemetry_monitor/protocol_handler_metric.h"
-#include "json/json.h"
-#include "telemetry_monitor/json_keys.h"
+#ifndef SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_PROTOCOL_HANDLER_MECTRIC_WRAPPER_H_
+#define SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_PROTOCOL_HANDLER_MECTRIC_WRAPPER_H_
+
+#include <string>
+#include "utils/shared_ptr.h"
+#include "telemetry_monitor/metric_wrapper.h"
+#include "protocol_handler_observer.h"
 
 namespace telemetry_monitor {
 
-Json::Value ProtocolHandlerMecticWrapper::GetJsonMetric() {
-  Json::Value result = MetricWrapper::GetJsonMetric();
-  result[strings::logger] = "ProtocolHandler";
-  result[strings::begin] =
-      Json::Int64(date_time::DateTime::getuSecs(message_metric->begin));
-  result[strings::end] =
-      Json::Int64(date_time::DateTime::getuSecs(message_metric->end));
-  result[strings::message_id] = message_metric->message_id;
-  result[strings::connection_key] = message_metric->connection_key;
-  return result;
-}
+class ProtocolHandlerMecticWrapper: public MetricWrapper {
 
+  public:
+    utils::SharedPtr<protocol_handler::PHTelemetryObserver::MessageMetric> message_metric;
+    virtual Json::Value GetJsonMetric();
+};
 }  // namespace telemetry_monitor
+#endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_PROTOCOL_HANDLER_MECTRIC_WRAPPER_H_

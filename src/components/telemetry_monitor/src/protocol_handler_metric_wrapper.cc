@@ -30,26 +30,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "telemetry_monitor/application_manager_metric.h"
+#include "telemetry_monitor/protocol_handler_metric_wrapper.h"
+#include "json/json.h"
 #include "telemetry_monitor/json_keys.h"
-#include "application_manager/smart_object_keys.h"
-#include "utils/convert_utils.h"
 
 namespace telemetry_monitor {
 
-Json::Value ApplicationManagerMetricWrapper::GetJsonMetric() {
+Json::Value ProtocolHandlerMecticWrapper::GetJsonMetric() {
   Json::Value result = MetricWrapper::GetJsonMetric();
-  result[strings::logger] = "ApplicationManager";
+  result[strings::logger] = "ProtocolHandler";
   result[strings::begin] =
       Json::Int64(date_time::DateTime::getuSecs(message_metric->begin));
   result[strings::end] =
       Json::Int64(date_time::DateTime::getuSecs(message_metric->end));
-  const NsSmartDeviceLink::NsSmartObjects::SmartObject& params =
-      message_metric->message->getElement(application_manager::strings::params);
-  result[strings::correlation_id] = utils::ConvertInt64ToLongLongInt(
-      params[application_manager::strings::correlation_id].asInt());
-  result[strings::connection_key] = utils::ConvertInt64ToLongLongInt(
-      params[application_manager::strings::connection_key].asInt());
+  result[strings::message_id] = message_metric->message_id;
+  result[strings::connection_key] = message_metric->connection_key;
   return result;
 }
+
 }  // namespace telemetry_monitor
