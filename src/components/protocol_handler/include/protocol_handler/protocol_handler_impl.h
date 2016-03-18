@@ -57,9 +57,10 @@
 #include "transport_manager/transport_manager_listener_empty.h"
 #include "connection_handler/connection_handler.h"
 
-#ifdef TIME_TESTER
-#include "protocol_handler/time_metric_observer.h"
-#endif  // TIME_TESTER
+#ifdef TELEMETRY_MONITOR
+#include "protocol_handler/telemetry_observer.h"
+#include "telemetry_monitor/telemetry_observable.h"
+#endif  // TELEMETRY_MONITOR
 
 #ifdef ENABLE_SECURITY
 #include "security_manager/security_manager.h"
@@ -138,7 +139,12 @@ class ProtocolHandlerImpl
   : public ProtocolHandler,
     public TransportManagerListenerEmpty,
     public impl::FromMobileQueue::Handler,
-    public impl::ToMobileQueue::Handler {
+    public impl::ToMobileQueue::Handler
+#ifdef TELEMETRY_MONITOR
+    ,
+    public telemetry_monitor::TelemetryObservable<PHTelemetryObserver>
+#endif  // TELEMETRY_MONITOR
+    {
  public:
   /**
    * @brief Constructor
@@ -194,14 +200,14 @@ class ProtocolHandlerImpl
    */
   void SendFramesNumber(uint32_t connection_key, int32_t number_of_frames);
 
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
   /**
    * @brief Setup observer for time metric.
    *
    * @param observer - pointer to observer
    */
-  void SetTimeMetricObserver(PHMetricObserver *observer);
-#endif  // TIME_TESTER
+  void SetTelemetryObserver(PHTelemetryObserver *observer);
+#endif  // TELEMETRY_MONITOR
 
   /*
    * Prepare and send heartbeat message to mobile
@@ -545,9 +551,9 @@ class ProtocolHandlerImpl
 
   sync_primitives::Lock protocol_observers_lock_;
 
-#ifdef TIME_TESTER
-  PHMetricObserver *metric_observer_;
-#endif  // TIME_TESTER
+#ifdef TELEMETRY_MONITOR
+  PHTelemetryObserver *metric_observer_;
+#endif  // TELEMETRY_MONITOR
 };
 }  // namespace protocol_handler
 #endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_IMPL_H_

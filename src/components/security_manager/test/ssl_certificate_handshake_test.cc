@@ -35,7 +35,11 @@
 
 #include "gtest/gtest.h"
 #include "security_manager/crypto_manager_impl.h"
+#include "security_manager/mock_security_manager_settings.h"
 #include "utils/custom_string.h"
+
+using ::testing::Return;
+using ::testing::ReturnRef;
 
 namespace test {
 namespace components {
@@ -68,13 +72,23 @@ const size_t updates_before_hour = 24;
 
 class SSLHandshakeTest : public testing::Test {
  protected:
-  void SetUp() OVERRIDE {
-    server_manager = new security_manager::CryptoManagerImpl();
+  void SetUp() OVERRIDE {    
+    mock_server_manager_settings = new testing::NiceMock<
+        security_manager_test::MockCryptoManagerSettings>();
+
+    server_manager = new security_manager::CryptoManagerImpl(
+        utils::SharedPtr<security_manager::CryptoManagerSettings>(
+            mock_server_manager_settings));
     ASSERT_TRUE(server_manager);
-    client_manager = new security_manager::CryptoManagerImpl();
-    ASSERT_TRUE(client_manager);
-    server_ctx = NULL;
-    client_ctx = NULL;
+    mock_client_manager_settings = new testing::NiceMock<
+        security_manager_test::MockCryptoManagerSettings>();
+
+    client_manager = new security_manager::CryptoManagerImpl(
+        utils::SharedPtr<security_manager::CryptoManagerSettings>(
+            mock_client_manager_settings));
+     ASSERT_TRUE(client_manager);
+     server_ctx = NULL;
+     client_ctx = NULL;
   }
 
   void TearDown() OVERRIDE {
@@ -84,22 +98,69 @@ class SSLHandshakeTest : public testing::Test {
     delete client_manager;
   }
 
+  void SetServerInitialValues(const security_manager::Protocol protocol,
+                              const std::string cert,
+                              const std::string server_ciphers_list,
+                              const bool verify_peer,
+                              const std::string& ca_certificate_path) {
+    server_certificate_ = cert;
+    server_ciphers_list_ = server_ciphers_list;
+    server_ca_certificate_path_ = ca_certificate_path;
+
+      ON_CALL(*mock_server_manager_settings, security_manager_mode())
+          .WillByDefault(Return(security_manager::SERVER));
+      ON_CALL(*mock_server_manager_settings,
+                  security_manager_protocol_name())
+          .WillByDefault(Return(protocol));
+      ON_CALL(*mock_server_manager_settings, certificate_data())
+          .WillByDefault(ReturnRef(server_certificate_));
+      ON_CALL(*mock_server_manager_settings, ciphers_list())
+          .WillByDefault(ReturnRef(server_ciphers_list_));
+      ON_CALL(*mock_server_manager_settings, ca_cert_path())
+          .WillByDefault(ReturnRef(server_ca_certificate_path_));
+      ON_CALL(*mock_server_manager_settings,verify_peer())
+          .WillByDefault(Return(verify_peer));
+  }
+  void SetClientInitialValues(const security_manager::Protocol protocol,
+                           const std::string certificate,
+                           const std::string client_ciphers_list,
+                           const bool verify_peer,
+                           const std::string& ca_certificate_path) {
+
+    client_certificate_ = certificate;
+    client_ciphers_list_ = client_ciphers_list;
+    client_ca_certificate_path_ = ca_certificate_path;
+
+    ON_CALL(*mock_client_manager_settings, security_manager_mode())
+        .WillByDefault(Return(security_manager::CLIENT));
+    ON_CALL(*mock_client_manager_settings,
+        security_manager_protocol_name())
+        .WillByDefault(Return(protocol));
+    ON_CALL(*mock_client_manager_settings, certificate_data())
+        .WillByDefault(ReturnRef(client_certificate_));
+    ON_CALL(*mock_client_manager_settings, ciphers_list())
+        .WillByDefault(ReturnRef(client_ciphers_list_));
+    ON_CALL(*mock_client_manager_settings, ca_cert_path())
+        .WillByDefault(ReturnRef(client_ca_certificate_path_));
+    ON_CALL(*mock_client_manager_settings,verify_peer())
+        .WillByDefault(Return(verify_peer));
+  }
+
   bool InitServerManagers(security_manager::Protocol protocol,
                           const std::string& cert_filename,
                           const std::string& ciphers_list,
                           const bool verify_peer,
-                          const std::string& cacertificate_path) {
+                          const std::string& ca_certificate_path) {
     std::ifstream cert(cert_filename);
     std::stringstream ss;
-    ss << cert.rdbuf();
+    if (cert.is_open()){
+      ss << cert.rdbuf();
+    }
     cert.close();
-    const bool initialized = server_manager->Init(security_manager::SERVER,
-                                                  protocol,
-                                                  ss.str(),
-                                                  ciphers_list,
-                                                  verify_peer,
-                                                  cacertificate_path,
-                                                  updates_before_hour);
+    SetServerInitialValues(
+          protocol, ss.str(), ciphers_list, verify_peer, ca_certificate_path);
+    const bool initialized = server_manager->Init();
+
     if (!initialized) {
       return false;
     }
@@ -111,8 +172,9 @@ class SSLHandshakeTest : public testing::Test {
     }
 
     security_manager::SSLContext::HandshakeContext ctx;
-    server_ctx->SetHandshakeContext(ctx.make_context(custom_str::CustomString("SPT"),
-                                                     custom_str::CustomString("client")));
+    server_ctx->SetHandshakeContext(
+          ctx.make_context(custom_str::CustomString("SPT"),
+                           custom_str::CustomString("client")));
 
     return true;
   }
@@ -121,18 +183,19 @@ class SSLHandshakeTest : public testing::Test {
                           const std::string& cert_filename,
                           const std::string& ciphers_list,
                           const bool verify_peer,
-                          const std::string& cacertificate_path) {
+                          const std::string& ca_certificate_path) {
     std::ifstream cert(cert_filename);
-    std::stringstream ss;
-    ss << cert.rdbuf();
+    std::stringstream certificate;
+    if (cert.is_open()) {
+      certificate << cert.rdbuf();
+    }
     cert.close();
-    const bool initialized = client_manager->Init(security_manager::CLIENT,
-                                                  protocol,
-                                                  ss.str(),
-                                                  ciphers_list,
-                                                  verify_peer,
-                                                  cacertificate_path,
-                                                  updates_before_hour);
+    SetClientInitialValues(protocol,
+                           certificate.str(),
+                           ciphers_list,
+                           verify_peer,
+                           ca_certificate_path);
+    const bool initialized = client_manager->Init();
     if (!initialized) {
       return false;
     }
@@ -199,7 +262,7 @@ class SSLHandshakeTest : public testing::Test {
       ASSERT_FALSE(server_ctx->IsInitCompleted())
           << "Expected server side handshake fail";
 
-      // First few handsahke will be successful
+      // First few handshake will be successful
       if (result != SSLContext::Handshake_Result_Success) {
         // Test successfully passed with handshake fail
         return;
@@ -257,11 +320,23 @@ class SSLHandshakeTest : public testing::Test {
   security_manager::CryptoManager* client_manager;
   security_manager::SSLContext* server_ctx;
   security_manager::SSLContext* client_ctx;
+  testing::NiceMock<security_manager_test::MockCryptoManagerSettings>*
+      mock_server_manager_settings;
+  testing::NiceMock<security_manager_test::MockCryptoManagerSettings>*
+      mock_client_manager_settings;
 
   const uint8_t* server_buf;
   const uint8_t* client_buf;
   size_t server_buf_len;
   size_t client_buf_len;
+
+  std::string server_certificate_;
+  std::string server_ciphers_list_;
+  std::string server_ca_certificate_path_;
+
+  std::string client_certificate_;
+  std::string client_ciphers_list_;
+  std::string client_ca_certificate_path_;
 };
 
 TEST_F(SSLHandshakeTest, NoVerification) {

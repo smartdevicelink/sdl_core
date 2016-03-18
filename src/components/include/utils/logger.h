@@ -54,9 +54,9 @@
     #define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name) \
       log4cxx::LoggerPtr logger_var = log4cxx::LoggerPtr(log4cxx::Logger::getLogger(logger_name));
 
-    #define INIT_LOGGER(file_name) \
+    #define INIT_LOGGER(file_name, logs_enabled) \
       log4cxx::PropertyConfigurator::configure(file_name); \
-      logger::set_logs_enabled();
+      logger::set_logs_enabled(logs_enabled);
 
     // Logger deinitilization function and macro, need to stop log4cxx writing
     // without this deinitilization log4cxx threads continue using some instances destroyed by exit()
@@ -65,8 +65,7 @@
 
     // special macros to dump logs from queue
     // it's need, for example, when crash happend
-    void flush_logger();
-    #define FLUSH_LOGGER() flush_logger()
+    #define FLUSH_LOGGER() logger::flush_logger()
 
     #define LOG4CXX_IS_TRACE_ENABLED(logger) logger->isTraceEnabled()
 

@@ -32,12 +32,14 @@
 
 #include "life_cycle.h"
 #include "utils/signals.h"
+#include "utils/make_shared.h"
 #include "config_profile/profile.h"
 #include "resumption/last_state.h"
 
 #ifdef ENABLE_SECURITY
 #include "security_manager/security_manager_impl.h"
 #include "security_manager/crypto_manager_impl.h"
+#include "security_manager/crypto_manager_settings_impl.h"
 #include "application_manager/policies/policy_handler.h"
 #endif  // ENABLE_SECURITY
 
@@ -70,9 +72,9 @@ LifeCycle::LifeCycle()
     , hmi_handler_(NULL)
     , hmi_message_adapter_(NULL)
     , media_manager_(NULL)
-#ifdef TIME_TESTER
-    , time_tester_(NULL)
-#endif  // TIME_TESTER
+#ifdef TELEMETRY_MONITOR
+    , telemetry_monitor_(NULL)
+#endif  // TELEMETRY_MONITOR
 #ifdef DBUS_HMIADAPTER
     , dbus_adapter_(NULL)
     , dbus_adapter_thread_(NULL)
@@ -125,71 +127,20 @@ bool LifeCycle::StartComponents() {
 
 #ifdef ENABLE_SECURITY
   security_manager_ = new security_manager::SecurityManagerImpl();
-  crypto_manager_ = new security_manager::CryptoManagerImpl();
-  media_manager_ = media_manager::MediaManagerImpl::instance();
+  crypto_manager_ = new security_manager::CryptoManagerImpl(
+        utils::MakeShared<security_manager::CryptoManagerSettingsImpl>(
+          *(profile::Profile::instance()),
+          policy::PolicyHandler::instance()->RetrieveCertificate()));
+  protocol_handler_->AddProtocolObserver(security_manager_);
+  protocol_handler_->set_security_manager(security_manager_);
 
-  // FIXME(EZamakhov): move to Config or in Sm initialization method
-  std::string cert_filename;
-  profile::Profile::instance()->ReadStringValue(
-      &cert_filename,
-      "",
-      security_manager::SecurityManagerImpl::ConfigSection(),
-      "CertificatePath");
+  security_manager_->set_session_observer(connection_handler_);
+  security_manager_->set_protocol_handler(protocol_handler_);
+  security_manager_->set_crypto_manager(crypto_manager_);
+  security_manager_->AddListener(app_manager_);
 
-  std::string ssl_mode;
-  profile::Profile::instance()->ReadStringValue(
-      &ssl_mode,
-      "CLIENT",
-      security_manager::SecurityManagerImpl::ConfigSection(),
-      "SSLMode");
-
-  std::string key_filename;
-  profile::Profile::instance()->ReadStringValue(
-      &key_filename,
-      "",
-      security_manager::SecurityManagerImpl::ConfigSection(),
-      "KeyPath");
-
-  std::string ciphers_list;
-  profile::Profile::instance()->ReadStringValue(
-      &ciphers_list,
-      SSL_TXT_ALL,
-      security_manager::SecurityManagerImpl::ConfigSection(),
-      "CipherList");
-
-  bool verify_peer;
-  profile::Profile::instance()->ReadBoolValue(
-      &verify_peer,
-      false,
-      security_manager::SecurityManagerImpl::ConfigSection(),
-      "VerifyPeer");
-
-  std::string protocol_name =
-      profile::Profile::instance()->security_manager_protocol_name();
-
-  security_manager::Protocol protocol;
-  if (protocol_name == "TLSv1.0") {
-    protocol = security_manager::TLSv1;
-  } else if (protocol_name == "TLSv1.1") {
-    protocol = security_manager::TLSv1_1;
-  } else if (protocol_name == "TLSv1.2") {
-    protocol = security_manager::TLSv1_2;
-  } else if (protocol_name == "SSLv3") {
-    protocol = security_manager::SSLv3;
-  } else {
-    LOG4CXX_ERROR(logger_, "Unknown protocol: " << protocol_name);
-    return false;
-  }
-
-  if (!crypto_manager_->Init(
-          ssl_mode == "SERVER" ? security_manager::SERVER
-                               : security_manager::CLIENT,
-          protocol,
-          policy::PolicyHandler::instance()->RetrieveCertificate(),
-          profile::Profile::instance()->ciphers_list(),
-          profile::Profile::instance()->verify_peer(),
-          profile::Profile::instance()->ca_cert_path(),
-          profile::Profile::instance()->update_before_hours())) {
+  app_manager_->AddPolicyObserver(crypto_manager_);
+  if (!crypto_manager_->Init()) {
     LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
     return false;
   }
@@ -204,34 +155,24 @@ bool LifeCycle::StartComponents() {
 
   protocol_handler_->AddProtocolObserver(media_manager_);
   protocol_handler_->AddProtocolObserver(app_manager_);
-#ifdef ENABLE_SECURITY
-  protocol_handler_->AddProtocolObserver(security_manager_);
-  protocol_handler_->set_security_manager(security_manager_);
-#endif  // ENABLE_SECURITY
+
   media_manager_->SetProtocolHandler(protocol_handler_);
 
   connection_handler_->set_protocol_handler(protocol_handler_);
   connection_handler_->set_connection_handler_observer(app_manager_);
 
-// it is important to initialise TimeTester before TM to listen TM Adapters
-#ifdef TIME_TESTER
-  time_tester_ = new time_tester::TimeManager();
-  time_tester_->Start();
-  time_tester_->Init(protocol_handler_);
-#endif  // TIME_TESTER
+// it is important to initialise TelemetryMonitor before TM to listen TM Adapters
+#ifdef TELEMETRY_MONITOR
+  telemetry_monitor_ = new telemetry_monitor::TelemetryMonitor(profile::Profile::instance()->server_address(),
+                                              profile::Profile::instance()->time_testing_port());
+  telemetry_monitor_->Start();
+  telemetry_monitor_->Init(protocol_handler_, app_manager_, transport_manager_);
+#endif  // TELEMETRY_MONITOR
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   app_manager_->set_protocol_handler(protocol_handler_);
   app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
-
-#ifdef ENABLE_SECURITY
-  security_manager_->set_session_observer(connection_handler_);
-  security_manager_->set_protocol_handler(protocol_handler_);
-  security_manager_->AddListener(app_manager_);
-  security_manager_->set_crypto_manager(crypto_manager_);
-  app_manager_->AddPolicyObserver(crypto_manager_);
-#endif  // ENABLE_SECURITY
 
   transport_manager_->Init();
   // start transport manager
@@ -415,8 +356,13 @@ void LifeCycle::StopComponents() {
 
 #ifdef ENABLE_SECURITY
   protocol_handler_->RemoveProtocolObserver(security_manager_);
-  DCHECK_OR_RETURN_VOID(security_manager_);
-  security_manager_->RemoveListener(app_manager_);
+  if (security_manager_) {
+    security_manager_->RemoveListener(app_manager_);
+    LOG4CXX_INFO(logger_, "Destroying Crypto Manager");
+    delete crypto_manager_;
+    LOG4CXX_INFO(logger_, "Destroying Security Manager");
+    delete security_manager_;
+  }
 #endif  // ENABLE_SECURITY
   protocol_handler_->Stop();
 
@@ -436,18 +382,11 @@ void LifeCycle::StopComponents() {
   connection_handler_->Stop();
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
+  DCHECK_OR_RETURN_VOID(protocol_handler_);
   delete protocol_handler_;
 
   LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
   delete connection_handler_;
-
-#ifdef ENABLE_SECURITY
-  LOG4CXX_INFO(logger_, "Destroying Crypto Manager");
-  delete crypto_manager_;
-
-  LOG4CXX_INFO(logger_, "Destroying Security Manager");
-  delete security_manager_;
-#endif  // ENABLE_SECURITY
 
   LOG4CXX_INFO(logger_, "Destroying Last State");
   resumption::LastState::destroy();
@@ -513,14 +452,14 @@ void LifeCycle::StopComponents() {
   delete hmi_message_adapter_;
   hmi_message_adapter_ = NULL;
 
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
   // It's important to delete tester Obcervers after TM adapters destruction
-  if (time_tester_) {
-    time_tester_->Stop();
-    delete time_tester_;
-    time_tester_ = NULL;
+  if (telemetry_monitor_) {
+    telemetry_monitor_->Stop();
+    delete telemetry_monitor_;
+    telemetry_monitor_ = NULL;
   }
-#endif  // TIME_TESTER
+#endif  // TELEMETRY_MONITOR
 }
 
 }  //  namespace main_namespace

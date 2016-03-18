@@ -131,7 +131,8 @@ int32_t main(int32_t argc, char** argv) {
   }
 
   // Logger initialization
-  INIT_LOGGER("log4cxx.properties");
+  INIT_LOGGER("log4cxx.properties",
+              profile::Profile::instance()->logs_enabled());
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 

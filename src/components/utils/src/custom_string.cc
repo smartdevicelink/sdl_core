@@ -37,6 +37,7 @@
 #include <cwctype>
 #include <new>
 #include <algorithm>
+#include <string.h>
 #include "utils/logger.h"
 #include "utils/macro.h"
 

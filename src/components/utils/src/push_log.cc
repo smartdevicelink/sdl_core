@@ -33,11 +33,11 @@
 #include "utils/push_log.h"
 #include "utils/log_message_loop_thread.h"
 #include "utils/logger_status.h"
-#include "config_profile/profile.h"
 
 namespace logger {
 
 static bool logs_enabled_ = false;
+static LogMessageLoopThread* log_message_loop_thread = NULL;
 
 bool push_log(log4cxx::LoggerPtr logger,
               log4cxx::LevelPtr level,
@@ -48,16 +48,19 @@ bool push_log(log4cxx::LoggerPtr logger,
               ) {
   if (LoggerThreadCreated == logger_status) {
     LogMessage message = {logger, level, entry, timeStamp, location, threadName};
-    LogMessageLoopThread::instance()->PostMessage(message);
-    return true;
+    if (log_message_loop_thread) {
+      log_message_loop_thread->PostMessage(message);
+      return true;
+    }
   }
 
   if (LoggerThreadNotCreated == logger_status) {
     logger_status = CreatingLoggerThread;
 // we'll have to drop messages
 // while creating logger thread
+    create_log_message_loop_thread();
     LogMessage message = {logger, level, entry, timeStamp, location, threadName};
-    LogMessageLoopThread::instance()->PostMessage(message);
+    log_message_loop_thread->PostMessage(message);
     logger_status = LoggerThreadCreated;
     return true;
   }
@@ -72,8 +75,27 @@ bool logs_enabled() {
   return logs_enabled_;
 }
 
-void set_logs_enabled() {
-  logs_enabled_ = profile::Profile::instance()->logs_enabled();
+void set_logs_enabled(bool state) {
+  logs_enabled_ = state;
+}
+
+void create_log_message_loop_thread() {
+  if (!log_message_loop_thread) {
+    log_message_loop_thread = new LogMessageLoopThread();
+  }
+}
+
+void delete_log_message_loop_thread() {
+  delete log_message_loop_thread;
+  log_message_loop_thread = NULL;
+}
+
+void flush_logger() {
+    logger::LoggerStatus old_status = logger::logger_status;
+    // Stop pushing new messages to the log queue
+    logger::logger_status = logger::DeletingLoggerThread;
+    log_message_loop_thread->WaitDumpQueue();
+    logger::logger_status = old_status;
 }
 
 }  // namespace logger

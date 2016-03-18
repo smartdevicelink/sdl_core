@@ -46,7 +46,6 @@
 #include "utils/atomic.h"
 #include "utils/macro.h"
 #include "utils/scope_guard.h"
-#include "config_profile/profile.h"
 
 #define TLS1_1_MINIMAL_VERSION            0x1000103fL
 #define CONST_SSL_METHOD_MINIMAL_VERSION  0x00909000L
@@ -79,10 +78,10 @@ namespace {
   }
 }
 
-CryptoManagerImpl::CryptoManagerImpl()
-    : context_(NULL),
-      mode_(CLIENT),
-      verify_peer_(false) {
+CryptoManagerImpl::CryptoManagerImpl(
+    const utils::SharedPtr<const CryptoManagerSettings> set)
+    : settings_(set)
+    , context_(NULL) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(instance_lock_);
   instance_count_++;
@@ -112,28 +111,27 @@ CryptoManagerImpl::~CryptoManagerImpl() {
   }
 }
 
-bool CryptoManagerImpl::Init(Mode mode, Protocol protocol,
-                             const std::string &cert_data,
-                             const std::string &ciphers_list,
-                             const bool verify_peer,
-                             const std::string &ca_certificate_file,
-                             const size_t hours_before_update) {
+bool CryptoManagerImpl::Init() {
   LOG4CXX_AUTO_TRACE(logger_);
-  mode_ = mode;
-  verify_peer_ = verify_peer;
-  certificate_data_ = cert_data;
-  hours_before_update_ = hours_before_update;
-  LOG4CXX_DEBUG(logger_, (mode_ == SERVER ? "Server" : "Client") << " mode");
-  LOG4CXX_DEBUG(logger_, "Peer verification " << (verify_peer_? "enabled" : "disabled"));
-  LOG4CXX_DEBUG(logger_, "CA certificate file is \"" << ca_certificate_file << '"');
 
+  const Mode mode = get_settings().security_manager_mode();
   const bool is_server = (mode == SERVER);
+  if (is_server) {
+    LOG4CXX_DEBUG(logger_, "Server mode");
+  } else {
+    LOG4CXX_DEBUG(logger_, "Client mode");
+  }
+  LOG4CXX_DEBUG(logger_, "Peer verification "
+                << (get_settings().verify_peer() ? "enabled" : "disabled"));
+  LOG4CXX_DEBUG(logger_, "CA certificate file is \""
+                << get_settings().ca_cert_path() << '"');
+
 #if OPENSSL_VERSION_NUMBER < CONST_SSL_METHOD_MINIMAL_VERSION
   SSL_METHOD *method;
 #else
   const SSL_METHOD *method;
 #endif
-  switch (protocol) {
+  switch (get_settings().security_manager_protocol_name()) {
     case SSLv3:
       method = is_server ?
           SSLv3_server_method() :
@@ -171,7 +169,8 @@ bool CryptoManagerImpl::Init(Mode mode, Protocol protocol,
 #endif
       break;
     default:
-      LOG4CXX_ERROR(logger_, "Unknown protocol: " << protocol);
+      LOG4CXX_ERROR(logger_, "Unknown protocol: "
+                    << get_settings().security_manager_protocol_name());
       return false;
   }
   if (context_) {
@@ -185,40 +184,43 @@ bool CryptoManagerImpl::Init(Mode mode, Protocol protocol,
   // Disable SSL2 as deprecated
   SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
 
-  set_certificate(cert_data);
+  set_certificate(get_settings().certificate_data());
 
-  if (ciphers_list.empty()) {
+  if (get_settings().ciphers_list().empty()) {
     LOG4CXX_WARN(logger_, "Empty ciphers list");
   } else {
-    LOG4CXX_INFO(logger_, "Cipher list: " << ciphers_list);
-    if (!SSL_CTX_set_cipher_list(context_, ciphers_list.c_str())) {
-      LOG4CXX_ERROR(logger_, "Could not set cipher list: " << ciphers_list);
+      LOG4CXX_DEBUG(logger_, "Cipher list: " << get_settings().ciphers_list());
+      if (!SSL_CTX_set_cipher_list(context_, get_settings().ciphers_list().c_str())) {
+        LOG4CXX_ERROR(logger_, "Could not set cipher list: "
+                      << get_settings().ciphers_list());
       return false;
     }
   }
 
-  if (ca_certificate_file.empty()) {
+  if (get_settings().ca_cert_path().empty()) {
     LOG4CXX_WARN(logger_, "Setting up empty CA certificate location");
   }
+
   LOG4CXX_DEBUG(logger_, "Setting up CA certificate location");
-  const int result = SSL_CTX_load_verify_locations(context_,
-                                                   NULL,
-                                                   ca_certificate_file.c_str());
+  const int result = SSL_CTX_load_verify_locations(
+      context_, NULL, get_settings().ca_cert_path().c_str());
+
   if (!result) {
     const unsigned long error = ERR_get_error();
     UNUSED(error);
     LOG4CXX_WARN(
         logger_,
-        "Wrong certificate file '" << ca_certificate_file
+        "Wrong certificate file '" << get_settings().ca_cert_path()
         << "', err 0x" << std::hex << error
         << " \"" << ERR_reason_error_string(error) << '"');
   }
 
   guard.Dismiss();
 
-  const int verify_mode = verify_peer_ ? SSL_VERIFY_PEER |
-                                         SSL_VERIFY_FAIL_IF_NO_PEER_CERT
-                                       : SSL_VERIFY_NONE;
+  const int verify_mode =
+      get_settings().verify_peer() ? SSL_VERIFY_PEER |
+                                     SSL_VERIFY_FAIL_IF_NO_PEER_CERT
+                                   : SSL_VERIFY_NONE;
   LOG4CXX_DEBUG(logger_, "Setting up peer verification in mode: " << verify_mode);
   SSL_CTX_set_verify(context_, verify_mode, &debug_callback);
   return true;
@@ -243,12 +245,14 @@ SSLContext* CryptoManagerImpl::CreateSSLContext() {
   if (conn == NULL)
     return NULL;
 
-  if (mode_ == SERVER) {
+  if (get_settings().security_manager_mode() == SERVER) {
     SSL_set_accept_state(conn);
   } else {
     SSL_set_connect_state(conn);
   }
-  return new SSLContextImpl(conn, mode_);
+  return new SSLContextImpl(conn,
+                            get_settings().security_manager_mode(),
+                            get_settings().maximum_payload_size());
 }
 
 void CryptoManagerImpl::ReleaseSSLContext(SSLContext *context) {
@@ -270,12 +274,16 @@ bool CryptoManagerImpl::IsCertificateUpdateRequired() const {
   const time_t cert_date = mktime(&expiration_time_);
 
   const double seconds = difftime(cert_date, now);
+  LOG4CXX_DEBUG(
+      logger_,
+      "Certificate time: " << asctime(&expiration_time_)
+                           << ". Host time: " << asctime(localtime(&now))
+                           << ". Seconds before expiration: " << seconds);
+  return seconds <= get_settings().update_before_hours();
+}
 
-  LOG4CXX_DEBUG(logger_, "Certificate time: " << asctime(&expiration_time_));
-  LOG4CXX_DEBUG(logger_, "Host time: " << asctime(localtime(&now)));
-  LOG4CXX_DEBUG(logger_, "Seconds before expiration: " << seconds);
-
-  return seconds <= hours_before_update_;
+const CryptoManagerSettings& CryptoManagerImpl::get_settings() const {
+  return *settings_;
 }
 
 

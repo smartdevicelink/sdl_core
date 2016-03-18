@@ -50,7 +50,7 @@
 
 namespace transport_manager {
 
-class TMMetricObserver;
+class TMTelemetryObserver;
 
 namespace transport_adapter {
 
@@ -272,14 +272,14 @@ class TransportAdapter {
    */
   virtual std::string DeviceName(const DeviceUID& device_id) const = 0;
 
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
   /**
    * @brief Return Time metric observer
    *
    * @param return pointer to Time metric observer
    */
-  virtual TMMetricObserver* GetTimeMetricObserver() = 0;
-#endif  // TIME_TESTER
+  virtual TMTelemetryObserver* GetTelemetryObserver() = 0;
+#endif  // TELEMETRY_MONITOR
 };
 }  // namespace transport_adapter
 }  // namespace transport_manager

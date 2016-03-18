@@ -43,6 +43,7 @@
 
 #include "utils/data_accessor.h"
 #include "utils/shared_ptr.h"
+#include "telemetry_monitor/telemetry_observable.h"
 
 // Other compomnents class declaration
 namespace hmi_message_handler {

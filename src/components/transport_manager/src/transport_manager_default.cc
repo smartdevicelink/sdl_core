@@ -64,32 +64,32 @@ int TransportManagerDefault::Init() {
 
   ta = new transport_adapter::BluetoothTransportAdapter;
 
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
-    ta->SetTimeMetricObserver(metric_observer_);
+    ta->SetTelemetryObserver(metric_observer_);
   }
-#endif  // TIME_TESTER
+#endif  // TELEMETRY_MONITOR
   AddTransportAdapter(ta);
 #endif
 
 
   uint16_t port = profile::Profile::instance()->transport_manager_tcp_adapter_port();
   ta = new transport_adapter::TcpTransportAdapter(port);
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
-    ta->SetTimeMetricObserver(metric_observer_);
+    ta->SetTelemetryObserver(metric_observer_);
   }
-#endif  // TIME_TESTER
+#endif  // TELEMETRY_MONITOR
   AddTransportAdapter(ta);
 
 
 #if defined(USB_SUPPORT)
   ta = new transport_adapter::UsbAoaAdapter();
-#ifdef TIME_TESTER
+#ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
-    ta->SetTimeMetricObserver(metric_observer_);
+    ta->SetTelemetryObserver(metric_observer_);
   }
-#endif  // TIME_TESTER
+#endif  // TELEMETRY_MONITOR
   AddTransportAdapter(ta);
 #endif  // USB_SUPPORT
 

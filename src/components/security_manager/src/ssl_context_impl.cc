@@ -45,15 +45,13 @@ namespace security_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "SecurityManager")
 
-CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL* conn, Mode mode)
+CryptoManagerImpl::SSLContextImpl::SSLContextImpl(
+    SSL* conn, Mode mode, size_t maximum_payload_size)
     : connection_(conn)
     , bioIn_(BIO_new(BIO_s_mem()))
     , bioOut_(BIO_new(BIO_s_mem()))
     , bioFilter_(NULL)
-    ,
-    // TODO(EZamakhov): get MTU by parameter (from transport)
-    // default buffer size is TCP MTU
-    buffer_size_(1500)
+    , buffer_size_(maximum_payload_size)
     , buffer_(new uint8_t[buffer_size_])
     , is_handshake_pending_(false)
     , mode_(mode) {

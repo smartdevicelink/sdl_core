@@ -42,32 +42,14 @@ namespace utils {
 using namespace ::logger;
 using ::testing::_;
 
-TEST(LogMessageLoopThread,CreateLogMessageSingleton) {
-  //if logger_status is LoggerThreadNotCreated or LoggerThreadCreated,
-  // creation of singleton will be impossible
-  logger::logger_status = CreatingLoggerThread;
-
-  LogMessageLoopThread *instance_1 = LogMessageLoopThread::instance();
-  LogMessageLoopThread *instance_2 = LogMessageLoopThread::instance();
-
-  //assert
-  EXPECT_EQ(instance_1, instance_2);
-
-  LogMessageLoopThread::destroy();
-
-  EXPECT_FALSE(LogMessageLoopThread::exists());
-  logger::logger_status = LoggerThreadNotCreated;
-}
-
 TEST(LogMessageLoopThread, DestroyLogMessage_loggerStatusDeletingLogger) {
   logger::logger_status = CreatingLoggerThread;
-  LogMessageLoopThread::instance();
-
+  LogMessageLoopThread* loop_thread = new LogMessageLoopThread();
   //assert
   EXPECT_EQ(CreatingLoggerThread, logger::logger_status);
 
   //act
-  LogMessageLoopThread::destroy();
+  delete loop_thread;
 
   //assert
   EXPECT_EQ(DeletingLoggerThread, logger::logger_status);
@@ -85,9 +67,9 @@ TEST(LogMessageLoopThread, HandleNeverCalled) {
 
   MockLogMessageTest mmock;
   EXPECT_CALL(mmock,Handle(_)).Times(0);
-  LogMessageLoopThread::instance();
+  LogMessageLoopThread* loop_thread = new LogMessageLoopThread();
 
-  LogMessageLoopThread::destroy();
+  delete loop_thread;
   logger::logger_status = LoggerThreadNotCreated;
 }
 

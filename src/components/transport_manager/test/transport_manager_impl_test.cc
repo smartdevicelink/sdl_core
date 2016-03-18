@@ -38,7 +38,7 @@
 #include "include/transport_adapter_mock.h"
 #include "include/transport_manager_listener_mock.h"
 #include "include/transport_adapter_listener_mock.h"
-#include "include/time_metric_observer_mock.h"
+#include "include/mock_telemetry_observer.h"
 
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 
@@ -442,8 +442,8 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_SendingFailed) {
   // Arrange
   HandleConnection();
 
-  TMMetricObserverMock* mock_metric_observer = new TMMetricObserverMock();
-  tm.SetTimeMetricObserver(mock_metric_observer);
+  MockTMTelemetryObserver* mock_metric_observer = new MockTMTelemetryObserver();
+  tm.SetTelemetryObserver(mock_metric_observer);
   EXPECT_CALL(*mock_metric_observer, StartRawMsg(_));
 
   EXPECT_CALL(*mock_adapter,
@@ -463,8 +463,8 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_StartTimeObserver) {
   // Arrange
   HandleConnection();
 
-  TMMetricObserverMock* mock_metric_observer = new TMMetricObserverMock();
-  tm.SetTimeMetricObserver(mock_metric_observer);
+  MockTMTelemetryObserver* mock_metric_observer = new MockTMTelemetryObserver();
+  tm.SetTelemetryObserver(mock_metric_observer);
   EXPECT_CALL(*mock_adapter,
               SendData(mac_address_, application_id, test_message_))
       .WillOnce(Return(TransportAdapter::OK));
@@ -479,8 +479,8 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_SendDone) {
   // Arrange
   HandleConnection();
 
-  TMMetricObserverMock* mock_metric_observer = new TMMetricObserverMock();
-  tm.SetTimeMetricObserver(mock_metric_observer);
+  MockTMTelemetryObserver* mock_metric_observer = new MockTMTelemetryObserver();
+  tm.SetTelemetryObserver(mock_metric_observer);
   EXPECT_CALL(*mock_adapter,
               SendData(mac_address_, application_id, test_message_))
       .WillOnce(Return(TransportAdapter::OK));
@@ -499,8 +499,8 @@ TEST_F(TransportManagerImplTest, SendMessageFailed_GetHandleSendFailed) {
   // Arrange
   HandleConnection();
 
-  TMMetricObserverMock* mock_metric_observer = new TMMetricObserverMock();
-  tm.SetTimeMetricObserver(mock_metric_observer);
+  MockTMTelemetryObserver* mock_metric_observer = new MockTMTelemetryObserver();
+  tm.SetTelemetryObserver(mock_metric_observer);
   EXPECT_CALL(*mock_metric_observer, StartRawMsg(_));
 
   EXPECT_CALL(*mock_adapter,
