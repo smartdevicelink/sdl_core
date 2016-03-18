@@ -7,10 +7,56 @@
     <element name="SUCCESS">
       <description>The request succeeded</description>
     </element>
+    <element name="UNSUPPORTED_REQUEST">
+      <description>The request is not supported by Sync</description>
+    </element>
+    <element name="UNSUPPORTED_RESOURCE">
+      <description>
+        A button that was requested for subscription is not supported under the current system.
+        NOTE: could become a more generic UNSUPPORTED_RESOURCE by merging with VEHICLE_DATA_NOT_AVAILABLE.
+      </description>
+    </element>
+    <element name="DISALLOWED">
+      <description>RPC is not authorized in local policy table.</description>
+    </element>
+    <element name="REJECTED">
+      <description>
+        The requested command was rejected, e.g. because mobile app is in background and cannot perform any HMI commands.
+        Or an HMI command (e.g. Speak) is rejected because a higher priority HMI command (e.g. Alert) is playing.
+      </description>
+    </element>
+    <element name="ABORTED">
+      <description>
+        A command was aborted, for example due to user interaction (e.g. user pressed button).
+        Or an HMI command (e.g. Speak) is aborted because a higher priority HMI command (e.g. Alert) was requested.
+      </description>
+    </element>
+    <element name="IGNORED">
+      <description>
+        A command was ignored, because the intended result is already in effect.
+        For example, SetMediaClockTimer was used to pause the media clock although the clock is paused already.
+        NOTE: potentially replaces SUBSCRIBED_ALREADY
+      </description>
+    </element>
+    <element name="RETRY">
+      <description>The user interrupted the RPC (e.g. PerformAudioPassThru) and indicated to start over.  Note, the app must issue the new RPC.</description>
+    </element>
+    <element name="IN_USE">
+      <description>
+        The data may not be changed, because it is currently in use.
+        For example when trying to delete a command set that is currently involved in an interaction.
+      </description>
+    </element>
+    <element name="VEHICLE_DATA_NOT_AVAILABLE">
+      <description>The requested vehicle data is not available on this vehicle or is not published.</description>
+    </element>
+    <element name="TIMED_OUT">
+      <description>Overlay reached the maximum timeout and closed.</description>
+    </element>          
     <element name="INVALID_DATA">
       <description>
       	The data sent is invalid. For example:
-		Invalid Json syntax
+		    Invalid Json syntax
       	Parameters out of bounds (number or enum range)
       	Mandatory parameters not provided
       	Parameter provided with wrong type
@@ -18,9 +64,25 @@
       	Empty string
       </description>
     </element>
-    <element name="UNSUPPORTED_REQUEST">
-      <description>The request is not supported by Sync</description>
+    <element name="CHAR_LIMIT_EXCEEDED"></element>
+    <element name="INVALID_ID">
+      <description>
+        One of the provided IDs is not valid. For example
+        This applies to CorrelationID, SubscriptionID, CommandID, MenuID, etc.
+      </description>
     </element>
+    <element name="DUPLICATE_NAME">
+      <description>There was a conflict with an registered name (application or menu item) or vr command</description>
+    </element>
+    <element name="APPLICATION_NOT_REGISTERED">
+      <description>An command can not be executed because no application has been registered with RegisterApplication.</description>
+    </element>    
+    <element name="WRONG_LANGUAGE">
+      <description>
+        The requested language is currently not supported.
+        Might be because of a mismatch of the currently active language on Sync and the requested language
+      </description>
+    </element>   
     <element name="OUT_OF_MEMORY">
       <description>The system could not process the request because the necessary memory couldn't be allocated</description>
     </element>
@@ -28,97 +90,36 @@
       <description>There are too many requests pending (means, that the response has not been delivered, yet).</description>
       <designdescription>There may be a maximum of 1000 pending requests at a time.</designdescription>
     </element>
-    <element name="INVALID_ID">
-      <description>
-      	One of the provided IDs is not valid. For example
-      	This applies to CorrelationID, SubscriptionID, CommandID, MenuID, etc.
-      </description>
-    </element>
-    <element name="DUPLICATE_NAME">
-      <description>There was a conflict with an registered name (application or menu item) or vr command</description>
-    </element>
     <element name="TOO_MANY_APPLICATIONS">
       <description>There are already too many registered applications</description>
     </element>
     <element name="APPLICATION_REGISTERED_ALREADY">
       <description>RegisterApplication has been called again, after a RegisterApplication was successful before.</description>
     </element>
-    <element name="UNSUPPORTED_VERSION">
-      <description>Sync doesn't support the protocol that is requested by the mobile application</description>
-    </element>
-    <element name="WRONG_LANGUAGE">
-      <description>
-      	The requested language is currently not supported.
-      	Might be because of a mismatch of the currently active language on Sync and the requested language
-      </description>
-    </element>
-    <element name="APPLICATION_NOT_REGISTERED">
-      <description>An command can not be executed because no application has been registered with RegisterApplication.</description>
-    </element>
-    <element name="IN_USE">
-      <description>
-      	The data may not be changed, because it is currently in use.
-      	For example when trying to delete a command set that is currently involved in an interaction.
-      </description>
-    </element>
-    <element name="VEHICLE_DATA_NOT_ALLOWED">
-      <description>The user has turned off access to vehicle data, and it is globally unavailable to mobile applications.</description>
-    </element>
-    <element name="VEHICLE_DATA_NOT_AVAILABLE">
-      <description>The requested vehicle data is not available on this vehicle or is not published.</description>
-    </element>
-    <element name="REJECTED">
-      <description>
-      	The requested command was rejected, e.g. because mobile app is in background and cannot perform any HMI commands.
-      	Or an HMI command (e.g. Speak) is rejected because a higher priority HMI command (e.g. Alert) is playing.
-      </description>
-    </element>
-    <element name="ABORTED">
-      <description>
-      	A command was aborted, for example due to user interaction (e.g. user pressed button).
-      	Or an HMI command (e.g. Speak) is aborted because a higher priority HMI command (e.g. Alert) was requested.
-      </description>
-    </element>
-    <element name="IGNORED">
-      <description>
-      	A command was ignored, because the intended result is already in effect.
-      	For example, SetMediaClockTimer was used to pause the media clock although the clock is paused already.
-      	NOTE: potentially replaces SUBSCRIBED_ALREADY
-      </description>
-    </element>
-    <element name="UNSUPPORTED_RESOURCE">
-      <description>
-      	A button that was requested for subscription is not supported under the current system.
-      	NOTE: could become a more generic UNSUPPORTED_RESOURCE by merging with VEHICLE_DATA_NOT_AVAILABLE.
-      </description>
-    </element>
-    <element name="FILE_NOT_FOUND">
-      <description>A specified file could not be found on Sync.</description>
+    <element name="WARNINGS">
+      <description>The RPC (e.g. SubscribeVehicleData) executed successfully but one or more items have a warning or failure.</description>
     </element>
     <element name="GENERIC_ERROR">
       <description>Provided data is valid but something went wrong in the lower layers.</description>
     </element>
-    <element name="DISALLOWED">
-      <description>RPC is not authorized in local policy table.</description>
-    </element>   
     <element name="USER_DISALLOWED">
       <description>RPC is included in a functional group explicitly blocked by the user.</description>
     </element>
-    <element name="TIMED_OUT">
-      <description>Overlay reached the maximum timeout and closed.</description>
+    <element name="TRUNCATED_DATA">
+      <description>The RPC (e.g. ReadDID) executed successfully but the data exceeded the platform maximum threshold and thus, only part of the data is available.</description>
+    </element>  
+    <element name="UNSUPPORTED_VERSION">
+      <description>Sync doesn't support the protocol that is requested by the mobile application</description>
+    </element>
+    <element name="VEHICLE_DATA_NOT_ALLOWED">
+      <description>The user has turned off access to vehicle data, and it is globally unavailable to mobile applications.</description>
+    </element>
+    <element name="FILE_NOT_FOUND">
+      <description>A specified file could not be found on Sync.</description>
     </element>
     <element name="CANCEL_ROUTE">
       <description>User selected to Cancel Route.</description>
-    </element>
-    <element name="TRUNCATED_DATA">
-      <description>The RPC (e.g. ReadDID) executed successfully but the data exceeded the platform maximum threshold and thus, only part of the data is available.</description>
     </element>        
-    <element name="RETRY">
-      <description>The user interrupted the RPC (e.g. PerformAudioPassThru) and indicated to start over.  Note, the app must issue the new RPC.</description>
-    </element>        
-    <element name="WARNINGS">
-      <description>The RPC (e.g. SubscribeVehicleData) executed successfully but one or more items have a warning or failure.</description>
-    </element>
     <element name="SAVED">
       <description>The RPC (e.g. Slider) executed successfully and the user elected to save the current position / value.</description>
     </element>
@@ -131,7 +132,6 @@
     <element name="RESUME_FAILED">
       <description>The provided hash ID does not match the hash of the current set of registered data or the core could not resume the previous data.</description>
     </element>
-    <element name="CHAR_LIMIT_EXCEEDED"></element>
   </enum>
 
   <enum name="ButtonPressMode">
