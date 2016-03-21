@@ -227,11 +227,6 @@ class ProtocolPacket {
   uint8_t *data() const;
 
   /**
-   *\brief Read size of message from payload buffer
-   */
-  uint32_t  read_total_data_bytes(const uint8_t *data);
-
-  /**
    *\brief Setter for size of multiframe message
    */
   void set_total_data_bytes(size_t dataBytes);
