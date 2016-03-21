@@ -31,6 +31,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <cstring>
 #include <vector>
 #include <list>
 
@@ -194,6 +195,44 @@ TEST_F(ProtocolPacketTest, DeserializeNonZeroPacket) {
   RESULT_CODE res =
       protocol_packet.deserializePacket(some_message, PROTOCOL_HEADER_V2_SIZE);
   EXPECT_EQ(RESULT_OK, res);
+}
+
+TEST_F(ProtocolPacketTest, DeserializePacket_FrameTypeFirstEncrypted4bytes_ResultOK) {
+  // Arrange
+  // Set protol version - 3, frame type - first, protection - ON, frame info - 0, session id - 0
+  // data size - 4 message id = aa
+  const uint8_t message[] = {0x3a,0xff,0x00,0x01,0x00,0x00,0x00,0x04,0x00,0x00,0x00,0x0aa,0xb,0xe,0xe,0xf};
+  const uint8_t correct_val[] = {0xb,0xe,0xe,0xf};
+  ProtocolPacket protocol_packet;
+  // Act
+  RESULT_CODE res =
+      protocol_packet.deserializePacket(message, sizeof(message));
+  const uint8_t *data = protocol_packet.data();
+  // Assert
+  ASSERT_EQ(RESULT_OK, res);
+  EXPECT_EQ(4u, protocol_packet.data_size());
+  EXPECT_EQ(4u, protocol_packet.total_data_bytes());
+  EXPECT_TRUE( 0 == std::memcmp(data, correct_val, protocol_packet.data_size() ));
+  EXPECT_EQ(FRAME_TYPE_FIRST, protocol_packet.frame_type());
+}
+
+TEST_F(ProtocolPacketTest, DeserializePacket_FrameTypeFirst8bytes_ResultOK) {
+  // Arrange
+  // Set protol version - 3, frame type - first, protection - OFF, frame info - 0, session id - 0
+  // data size - 8 message id = ab
+  const uint8_t message[] = {0x32,0xff,0x00,0x01,0x00,0x00,0x00,0x08,0x00,0x00,0x00,0x0ab,0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8};
+  const uint8_t correct_val[] = {0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8};
+  ProtocolPacket protocol_packet;
+  // Act
+  RESULT_CODE res =
+      protocol_packet.deserializePacket(message,  sizeof(message));
+  const uint8_t *data = protocol_packet.data();
+  // Assert
+  ASSERT_EQ(RESULT_OK, res);
+  EXPECT_EQ(8u, protocol_packet.data_size());
+  EXPECT_EQ(0x1020304u, protocol_packet.total_data_bytes());
+  EXPECT_FALSE( 0 == std::memcmp(data, correct_val, protocol_packet.data_size() ));
+  EXPECT_EQ(FRAME_TYPE_FIRST, protocol_packet.frame_type());
 }
 
 }  // namespace protocol_handler_test
