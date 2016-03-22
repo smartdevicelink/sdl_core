@@ -1292,7 +1292,7 @@ class ApplicationManagerImpl
    */
   typedef std::map<uint32_t, std::pair<bool, bool>> NaviServiceStatusMap;
 
-typedef utils::SharedPtr<timer::Timer> TimerSPtr;
+  typedef utils::SharedPtr<timer::Timer> TimerSPtr;
   /**
    * @brief GetHashedAppID allows to obtain unique application id as a string.
    * It concatenates device mac and application id to obtain unique id.
@@ -1363,6 +1363,8 @@ typedef utils::SharedPtr<timer::Timer> TimerSPtr;
    */
   ProtocolVersion SupportedSDLVersion() const;
 
+  void ClearTTSGlobalPropertiesList();
+ 
   /**
    * @brief Types of directories used by Application Manager
    */

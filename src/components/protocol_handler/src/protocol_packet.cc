@@ -379,29 +379,32 @@ RESULT_CODE ProtocolPacket::deserializePacket(
 
   packet_data_.totalDataBytes = packet_header_.dataSize;
 
-  uint32_t dataPayloadSize = 0;
-  if ((offset < messageSize) &&
-      packet_header_.frameType != FRAME_TYPE_FIRST) {
-    dataPayloadSize = messageSize - offset;
+  if (messageSize <= offset) {
+    return RESULT_OK;
   }
 
-  if (packet_header_.frameType == FRAME_TYPE_FIRST) {
-    payload_size_ = 0;
+  if (packet_header_.frameType != FRAME_TYPE_FIRST) {
+
+    const uint32_t dataPayloadSize = messageSize - offset;
+    set_data(message + offset, dataPayloadSize);
+    payload_size_ = dataPayloadSize;
+
+  } else if (packet_header_.frameType == FRAME_TYPE_FIRST) {
+
+    const uint32_t data_size = packet_header_.dataSize;
+    payload_size_ = 0u;
+
+    if (packet_header_.protection_flag == true) {
+      set_data(message + offset, data_size);
+      return RESULT_OK;
+    }
+
     const uint8_t *data = message + offset;
-    uint32_t total_data_bytes = data[0] << 24;
-    total_data_bytes |= data[1] << 16;
-    total_data_bytes |= data[2] << 8;
-    total_data_bytes |= data[3];
+    const uint32_t total_data_bytes = read_be_uint32(data);
     set_total_data_bytes(total_data_bytes);
-    if (0 == packet_data_.data) {
+    if (0u == packet_data_.data) {
       return RESULT_FAIL;
     }
-  } else if (dataPayloadSize) {
-
-    delete[] packet_data_.data;
-    packet_data_.data = new (std::nothrow) uint8_t[dataPayloadSize];
-    memcpy(packet_data_.data, message + offset, dataPayloadSize);
-    payload_size_ = dataPayloadSize;
   }
 
   return RESULT_OK;

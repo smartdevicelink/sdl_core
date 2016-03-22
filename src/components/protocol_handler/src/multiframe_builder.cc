@@ -194,6 +194,16 @@ RESULT_CODE MultiFrameBuilder::HandleFirstFrame(const ProtocolFramePtr packet) {
                 << ", session_id: " << static_cast<int>(session_id)
                 << ", message_id: " << message_id);
   messageId_map[message_id] = {packet, date_time::DateTime::getCurrentTime()};
+
+  if (packet->protection_flag() == true) {
+    const uint8_t *data = packet->data();
+    uint32_t total_data_bytes = data[3];
+    total_data_bytes += (data[2] <<  8);
+    total_data_bytes += (data[1] << 16);
+    total_data_bytes += (data[0] << 24);
+    packet->set_total_data_bytes(total_data_bytes);
+  }
+
   return RESULT_OK;
 }
 
