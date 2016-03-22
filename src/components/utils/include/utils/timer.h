@@ -44,9 +44,12 @@ typedef sigval_t sigval;
 
 #include <time.h>
 #include <string>
+#include <limits>
 
 #include "utils/lock.h"
 #include "utils/timer_task.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
 namespace timer {
 typedef uint32_t Milliseconds;
@@ -57,6 +60,8 @@ typedef uint32_t Milliseconds;
  */
 class Timer {
  public:
+  friend class TimerDelegate;
+  friend class TimerLooperDelegate;
   /**
    * @brief constructor
    * @param name for indentify of current timer
@@ -67,7 +72,7 @@ class Timer {
   /**
    * @brief destructor - if timer running : call stop in the body
    */
-  ~Timer();
+  virtual ~Timer();
   /**
    * @brief starts timer with new timeout
    * @param timeout - time to call method from trackable class
@@ -84,18 +89,137 @@ class Timer {
    */
   bool IsRunning() const;
   /**
+   * @brief Suspends timer execution after next loop.
+   */
+  virtual void Suspend();
+
+  /**
+   * @brief Stop timer update timeout and start timer again
+   * Note that it cancel thread of timer, If you use it from callback,
+   * it probably will stop execution of callback function
+   * @param timeout_milliseconds new timeout value
+   *
+   */
+  virtual void UpdateTimeOut(const uint32_t timeout_milliseconds);
+
+  /**
    * @brief GetTimeout
    * @return returns timeout
    */
   Milliseconds GetTimeout() const;
 
  private:
+  /**
+   * @brief Delegate release timer, will call callback function one time
+   */
+  class TimerDelegate : public threads::ThreadDelegate {
+    friend class Timer;
+
+   public:
+    /**
+     * @brief Default constructor
+     *
+     * @param timer_thread The Timer_thread pointer
+     */
+    explicit TimerDelegate(Timer* timer);
+
+    /**
+     * @brief Destructor
+     */
+    virtual ~TimerDelegate();
+
+    /**
+     * @brief Thread main function.
+     */
+    void threadMain() OVERRIDE;
+
+    /**
+     * @brief Called by thread::thread to free all allocated resources.
+     */
+    void exitThreadMain() OVERRIDE;
+
+    /**
+     * @brief Set new Timeout
+     * @param timeout_milliseconds New timeout to be set
+     */
+    virtual void SetTimeOut(const uint32_t timeout_milliseconds);
+
+    /**
+      * @brief Wait until timer will start
+      */
+    virtual void WaitUntilStart();
+
+   protected:
+    Timer* timer_;
+    uint32_t timeout_milliseconds_;
+    sync_primitives::Lock state_lock_;
+    sync_primitives::ConditionalVariable termination_condition_;
+    sync_primitives::ConditionalVariable starting_condition_;
+    volatile bool stop_flag_;
+    sync_primitives::Lock restart_flag_lock_;
+    volatile bool restart_flag_;
+    volatile bool is_started_flag_;
+
+    /**
+     * @brief Gets timeout with overflow check
+     * @return timeout
+     */
+    inline int32_t Get_timeout() const {
+      return std::min(
+          static_cast<uint32_t>(std::numeric_limits<int32_t>::max()),
+          timeout_milliseconds_);
+    }
+
+   private:
+    /**
+     * @brief Quits threadMain function after next loop.
+     */
+    virtual void ShouldBeStoped();
+
+    /**
+     * @brief Restarts non-loop timer after current iteration.
+     */
+    virtual void ShouldBeRestarted();
+
+    /**
+     * @brief Return flag IsGoingStop
+     */
+    bool IsGoingStop();
+
+    DISALLOW_COPY_AND_ASSIGN(TimerDelegate);
+  };
+
+  /**
+   * @brief Delegate release looper timer.
+   * Will call delegate every timeout function while stop()
+   * won't be called
+   */
+  class TimerLooperDelegate : public TimerDelegate {
+   public:
+    /**
+     * @brief Default constructor
+     *
+     * @param timer_thread The Timer_thread pointer
+     * @param timeout      Timeout to be set
+     */
+    explicit TimerLooperDelegate(Timer* timer);
+
+    /**
+     * @brief Thread main function.
+     */
+    void threadMain() OVERRIDE;
+
+   private:
+    DISALLOW_COPY_AND_ASSIGN(TimerLooperDelegate);
+  };
+
   const std::string name_;
   const TimerTask* task_;
-  bool repeatable_;
   uint32_t timeout_ms_;
   bool is_running_;
-  timer_t timer_;
+  threads::Thread* thread_;
+  TimerDelegate* delegate_;
+
   mutable sync_primitives::Lock lock_;
   sync_primitives::Lock task_lock_;
 
@@ -103,28 +227,6 @@ class Timer {
    * @brief method called from friend handler_wrapper and call run() from task.
    */
   void OnTimeout();
-
-  /**
-   * @brief method for setting correct timeout.
-   * @param timeout - if it`s value = 0, timeout will be setted to 1
-   * There would be no way to stop thread if timeout in lopper will be 0
-   * and if we puts to timer_create zero timeout then we get sys error(22)
-   */
-  void SetTimeoutUnsafe(const Milliseconds timeout);
-
-  /**
-   * @brief startUnsafe, stopUnsafe - methods used for correct synchronization
-   *  and must be used only with sync_primitive (auto_lock e.g.)
-   * @return true if start/stop successfull, false if unsuccessfull
-   */
-  void StartUnsafe();
-  bool StopUnsafe();
-
-  /**
-   * @brief alone function which sends to posix_timer as callee
-   * @param signal_value - structure with parameters of posix_timer callee
-   */
-  friend void HandlePosixTimer(sigval signal_value);
 
   DISALLOW_COPY_AND_ASSIGN(Timer);
 };
