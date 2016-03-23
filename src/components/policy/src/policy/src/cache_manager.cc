@@ -1046,6 +1046,16 @@ bool CacheManager::Init(const std::string& file_name) {
     case InitResult::SUCCESS: {
       LOG4CXX_INFO(logger_, "Policy Table was inited successfully");
       result = LoadFromFile(file_name);
+
+      utils::SharedPtr<policy_table::Table> snapshot = GenerateSnapshot();
+      result &= snapshot->is_valid();
+      LOG4CXX_DEBUG(logger_, "Check if snapshot is valid: "
+		             << std::boolalpha << result);
+      if(!result) {
+        rpc::ValidationReport report("policy_table");
+	snapshot->ReportErrors(&report);
+      }
+
     } break;
     default: {
       result = false;
