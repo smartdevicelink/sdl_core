@@ -82,7 +82,6 @@ void timer::Timer::Start(const Milliseconds timeout, const bool repeatable) {
     delegate_ =
         repeatable ? new TimerLooperDelegate(this) : new TimerDelegate(this);
 
-    DCHECK(delegate_);
     thread_ = threads::CreateThread(name_.c_str(), delegate_);
     DCHECK(thread_);
   }
@@ -136,8 +135,8 @@ void timer::Timer::OnTimeout() {
                 "Timer has finished counting. Timeout(ms): "
                     << static_cast<uint32_t>(timeout_ms_));
 
-  // Task locked by own lock because from this task in callback we can
-  // call Stop of this timer and get DeadLock
+  // Task locked by own lock because from this task in callback
+  // we can call Stop of this timer and get DeadLock
   sync_primitives::AutoLock auto_lock(task_lock_);
   DCHECK(task_);
   task_->run();
