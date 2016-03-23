@@ -80,7 +80,7 @@ class SQLPTRepresentation : public virtual PTRepresentation {
     virtual int GetNotificationsNumber(const std::string& priority);
     virtual bool GetPriority(const std::string& policy_app_id,
                              std::string* priority);
-    InitResult Init();
+    InitResult Init(const PolicySettings* settings);
     bool Close();
     bool Clear();
     bool Drop();
@@ -197,6 +197,8 @@ class SQLPTRepresentation : public virtual PTRepresentation {
       const policy_table::NumberOfNotificationsPerMinute& notifications);
     bool SaveMessageType(const std::string& type);
     bool SaveLanguage(const std::string& code);
+
+    bool is_in_memory;
 };
 }  //  namespace policy
 

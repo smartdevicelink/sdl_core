@@ -44,7 +44,7 @@
 #include "policy/cache_manager_interface.h"
 #include "policy/update_status_manager.h"
 #include "functions.h"
-#include "usage_statistics/statistics_manager.h"
+#include "policy/usage_statistics/statistics_manager.h"
 #include "policy/policy_helper.h"
 #include "utils/timer.h"
 
@@ -60,7 +60,7 @@ class PolicyManagerImpl : public PolicyManager {
     PolicyListener* listener() const {
       return listener_;
     }
-    virtual bool InitPT(const std::string& file_name);
+    virtual bool InitPT(const std::string& file_name, const PolicySettings *settings);
     virtual bool LoadPT(const std::string& file, const BinaryMessage& pt_content);
     virtual bool ResetPT(const std::string& file_name);
 
@@ -91,7 +91,7 @@ class PolicyManagerImpl : public PolicyManager {
      * Refresh data about retry sequence from policy table
      */
     virtual void RefreshRetrySequence();
-    virtual DeviceConsent GetUserConsentForDevice(const std::string& device_id);
+    virtual DeviceConsent GetUserConsentForDevice(const std::string& device_id) const OVERRIDE;
     virtual void GetUserConsentForApp(
       const std::string& device_id, const std::string& policy_app_id,
       std::vector<FunctionalGroupPermission>& permissions);
@@ -112,10 +112,10 @@ class PolicyManagerImpl : public PolicyManager {
     virtual void SetUserConsentForApp(const PermissionConsent& permissions);
 
     virtual bool GetDefaultHmi(const std::string& policy_app_id,
-                               std::string* default_hmi);
+                               std::string* default_hmi) const ;
 
     virtual bool GetPriority(const std::string& policy_app_id,
-                             std::string* priority);
+                             std::string* priority) const;
 
     virtual std::vector<UserFriendlyMessage> GetUserFriendlyMessages(
       const std::vector<std::string>& message_code, const std::string& language);
@@ -126,7 +126,7 @@ class PolicyManagerImpl : public PolicyManager {
       const std::string& device_id, const std::string& policy_app_id,
       std::vector<FunctionalGroupPermission>& permissions);
 
-    virtual std::string& GetCurrentDeviceId(const std::string& policy_app_id);
+    virtual std::string& GetCurrentDeviceId(const std::string& policy_app_id) const;
 
     virtual void SetSystemLanguage(const std::string& language);
 
@@ -135,7 +135,7 @@ class PolicyManagerImpl : public PolicyManager {
                                const std::string& language);
     virtual void OnSystemReady();
 
-    virtual uint32_t GetNotificationsNumber(const std::string& priority);
+    virtual uint32_t GetNotificationsNumber(const std::string& priority) const OVERRIDE;
 
     virtual void SetVINValue(const std::string& value);
 
@@ -157,8 +157,8 @@ class PolicyManagerImpl : public PolicyManager {
 
     bool CleanupUnpairedDevices();
 
-    bool CanAppKeepContext(const std::string& app_id);
-    bool CanAppStealFocus(const std::string& app_id);
+    bool CanAppKeepContext(const std::string& app_id) const;
+    bool CanAppStealFocus(const std::string& app_id) const;
     void MarkUnpairedDevice(const std::string& device_id);
 
     void AddApplication(const std::string& application_id);
@@ -197,6 +197,8 @@ class PolicyManagerImpl : public PolicyManager {
     virtual utils::SharedPtr<policy_table::Table> ParseArray(
         const BinaryMessage& pt_content);
     #endif
+
+    const PolicySettings& get_settings() const OVERRIDE;
 
   private:
     void CheckTriggers();
@@ -326,10 +328,11 @@ private:
      * @brief Device id, which is used during PTU handling for specific
      * application
      */
-    std::string last_device_id_;
+    mutable std::string last_device_id_;
 
     bool ignition_check;
 
+    const PolicySettings* settings_;
     friend struct CheckAppPolicy;
 };
 

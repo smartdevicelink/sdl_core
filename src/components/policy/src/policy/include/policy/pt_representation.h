@@ -36,7 +36,8 @@
 #include <vector>
 #include <string>
 #include "policy/policy_types.h"
-#include "./types.h"
+#include "types.h"
+#include "policy/policy_settings.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -186,7 +187,7 @@ class PTRepresentation {
      * @brief Initialized Policy Table (load)
      * @return bool Success of operation
      */
-    virtual InitResult Init() = 0;
+    virtual InitResult Init(const PolicySettings* settings) = 0;
 
     /**
      * @brief Close policy table
@@ -313,6 +314,13 @@ class PTRepresentation {
      * @return true if success, otherwise - false
      */
     virtual bool UpdateDBVersion() const = 0;
+
+   protected:
+    const PolicySettings& get_settings() const {
+        DCHECK(settings_);
+        return *settings_;
+    }
+    const PolicySettings* settings_;
 };
 
 }  //  namespace policy
