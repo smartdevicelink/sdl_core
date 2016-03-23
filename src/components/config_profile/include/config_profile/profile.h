@@ -41,38 +41,41 @@
 #include "protocol_handler/protocol_handler_settings.h"
 #include "connection_handler/connection_handler_settings.h"
 #include "hmi_message_handler/hmi_message_handler_settings.h"
-
+#include "media_manager/media_manager_settings.h"
+#include "policy/policy_settings.h"
 
 namespace profile {
 
 /**
  * The Profile class
  */
-class Profile :public protocol_handler::ProtocolHandlerSettings,
-               public connection_handler::ConnectionHandlerSettings,
-               public hmi_message_handler::HMIMessageHandlerSettings,
-               public utils::Singleton<Profile> {
-  public:
-    // Methods section
+class Profile : public protocol_handler::ProtocolHandlerSettings,
+                public connection_handler::ConnectionHandlerSettings,
+                public hmi_message_handler::HMIMessageHandlerSettings,
+                public media_manager::MediaManagerSettings,
+                public policy::PolicySettings,
+                public utils::Singleton<Profile> {
+ public:
+  // Methods section
 
-    /**
-     * Destructor
-     *
-     * Unimplemented to avoid misusing
-     *
-     */
-    virtual ~Profile();
+  /**
+   * Destructor
+   *
+   * Unimplemented to avoid misusing
+   *
+   */
+  virtual ~Profile();
 
-    /**
-     * @brief Returns sdl version represented
-     * by git commit or value specified by user
-     */
-    const std::string& sdl_version() const;
+  /**
+   * @brief Returns sdl version represented
+   * by git commit or value specified by user
+   */
+  const std::string& sdl_version() const;
 
-    /**
-      * @brief Returns true if HMI should be started, otherwise false
-      */
-    bool launch_hmi() const;
+  /**
+    * @brief Returns true if HMI should be started, otherwise false
+    */
+  bool launch_hmi() const;
 #ifdef WEB_HMI
     /**
       * @brief Returns link to web hmi
@@ -92,7 +95,7 @@ class Profile :public protocol_handler::ProtocolHandlerSettings,
     /**
      * @brief Return application resourse folder
      */
-    const std::string& app_resourse_folder() const;
+    const std::string& app_resource_folder() const;
 
     /**
      * @brief Returns true, if SDL 4.0 is enabled
@@ -138,12 +141,12 @@ class Profile :public protocol_handler::ProtocolHandlerSettings,
     /**
      * @brief Returns port for video streaming
      */
-    const uint16_t& video_streaming_port() const;
+    const uint16_t video_streaming_port() const OVERRIDE;
 
     /**
       * @brief Returns port for audio streaming
       */
-    const uint16_t& audio_streaming_port() const;
+    const uint16_t audio_streaming_port() const;
 
     /**
      * @brief Returns streaming timeout
@@ -707,7 +710,7 @@ private:
 #endif // WEB_HMI
     std::string                     app_config_folder_;
     std::string                     app_storage_folder_;
-    std::string                     app_resourse_folder_;
+    std::string                     app_resource_folder_;
     bool                            enable_protocol_4_;
     std::string                     app_icons_folder_;
     uint32_t                        app_icons_folder_max_size_;
