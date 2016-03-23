@@ -44,6 +44,15 @@
 #include "utils/data_accessor.h"
 #include "utils/shared_ptr.h"
 #include "telemetry_monitor/telemetry_observable.h"
+#include "application_manager/policies/policy_handler_interface.h"
+
+namespace resumption {
+class LastState;
+}
+
+namespace media_manager {
+class MediaManager;
+}
 
 // Other compomnents class declaration
 namespace hmi_message_handler {
@@ -79,7 +88,8 @@ class ApplicationManager {
   /**
    * Inits application manager
    */
-  virtual bool Init() = 0;
+  virtual bool Init(resumption::LastState& last_state,
+                    media_manager::MediaManager* media_manager) = 0;
 
   /**
    * @brief Stop work.
@@ -94,6 +104,7 @@ class ApplicationManager {
       protocol_handler::ProtocolHandler* handler) = 0;
   virtual void set_connection_handler(
       connection_handler::ConnectionHandler* handler) = 0;
+  virtual connection_handler::ConnectionHandler& connection_handler() const = 0;
 
   virtual DataAccessor<ApplicationSet> applications() const = 0;
 
@@ -220,7 +231,34 @@ class ApplicationManager {
    */
   virtual void OnApplicationRegistered(ApplicationSharedPtr app) = 0;
 
-  virtual connection_handler::ConnectionHandler& connection_handler() const = 0;
+  /**
+   * @brief Checks if application can stream (streaming service is started and
+   * streaming is enabled in application)
+   * @param app_id Application id
+   * @param service_type Service type to check
+   * @return True if streaming is allowed, false in other case
+   */
+  virtual bool CanAppStream(
+      uint32_t app_id, protocol_handler::ServiceType service_type) const = 0;
+
+  /**
+   * @brief ForbidStreaming forbids  the stream over the certain application.
+   * @param app_id the application's id which should stop streaming.
+   */
+  virtual void ForbidStreaming(uint32_t app_id) = 0;
+
+  /*
+   * @brief Creates AudioPassThru data chunk and inserts it
+   * to audio_pass_thru_messages_
+   *
+   * @param session_key Id of application for which
+   * audio pass thru should be sent
+   *
+   * @param binary_data AudioPassThru data chunk
+   */
+  virtual void SendAudioPassThroughNotification(uint32_t session_key,
+                                        std::vector<uint8_t>& binary_data) = 0;
+  virtual policy::PolicyHandlerInterface& GetPolicyHandler() = 0;
 };
 
 }  // namespace application_manager

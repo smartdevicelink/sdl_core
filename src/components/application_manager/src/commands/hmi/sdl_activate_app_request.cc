@@ -31,8 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/sdl_activate_app_request.h"
-#include "application_manager/policies/policy_handler.h"
-#include "application_manager/message_helper.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -91,8 +90,10 @@ void SDLActivateAppRequest::Run() {
     }
     subscribe_on_event(BasicCommunication_OnAppRegistered);
   } else {
-    policy::PolicyHandler::instance()->OnActivateApp(application_id,
-                                                     correlation_id());
+    const uint32_t application_id = app_id();
+    application_manager::ApplicationManagerImpl::instance()
+	->GetPolicyHandler().OnActivateApp(application_id,
+					   correlation_id());
   }
 }
 
@@ -124,8 +125,8 @@ void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
         logger_, "Application not found by HMI app id: " << hmi_application_id);
     return;
   }
-  policy::PolicyHandler::instance()->OnActivateApp(app->app_id(),
-                                                   correlation_id());
+  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler()
+      .OnActivateApp(app->app_id(), correlation_id());
 }
 
 uint32_t SDLActivateAppRequest::app_id() const {

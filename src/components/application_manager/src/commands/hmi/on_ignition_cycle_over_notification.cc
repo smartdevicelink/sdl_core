@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/on_ignition_cycle_over_notification.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -47,7 +47,7 @@ OnIgnitionCycleOverNotification::~OnIgnitionCycleOverNotification() {
 
 void OnIgnitionCycleOverNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  policy::PolicyHandler::instance()->OnIgnitionCycleOver();
+  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnIgnitionCycleOver();
 }
 
 }  // namespace commands

@@ -36,7 +36,6 @@
 #include "formatters/CFormatterJsonBase.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/smart_object_keys.h"
-#include "resumption/last_state.h"
 #include "config_profile/profile.h"
 
 namespace resumption {
@@ -45,7 +44,8 @@ namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
-ResumptionDataJson::ResumptionDataJson() : ResumptionData() {}
+ResumptionDataJson::ResumptionDataJson(LastState& last_state)
+    : ResumptionData(), last_state_(last_state) {}
 
 void ResumptionDataJson::SaveApplication(
     app_mngr::ApplicationSharedPtr application) {
@@ -207,7 +207,6 @@ void ResumptionDataJson::OnSuspend() {
   SetSavedApplication(to_save);
   SetLastIgnOffTime(time(NULL));
   LOG4CXX_DEBUG(logger_, GetResumptionData().toStyledString());
-  ::resumption::LastState::instance()->SaveToFileSystem();
 }
 
 void ResumptionDataJson::OnAwake() {
@@ -411,12 +410,12 @@ Json::Value& ResumptionDataJson::GetResumptionData() const {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
-  Json::Value& last_state = ::resumption::LastState::instance()->dictionary;
-  if (!last_state.isMember(strings::resumption)) {
-    last_state[strings::resumption] = Json::Value(Json::objectValue);
+  Json::Value& dictionary = last_state().dictionary;
+  if (!dictionary.isMember(strings::resumption)) {
+    last_state().dictionary[strings::resumption] = Json::Value(Json::objectValue);
     LOG4CXX_WARN(logger_, "resumption section is missed");
   }
-  Json::Value& resumption = last_state[strings::resumption];
+  Json::Value& resumption = dictionary[strings::resumption];
   if (!resumption.isObject()) {
     LOG4CXX_ERROR(logger_, "resumption type INVALID rewrite");
     resumption = Json::Value(Json::objectValue);
@@ -515,5 +514,9 @@ bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
   return true;
 }
 
+void ResumptionDataJson::Persist() {
+    last_state().SaveToFileSystem();
+}
 
-} // resumption
+
+}  // resumption

@@ -33,7 +33,7 @@
 #include "application_manager/usage_statistics.h"
 #include "smart_objects/smart_object.h"
 #include "smart_objects/enum_schema_item.h"
-#include "usage_statistics/statistics_manager.h"
+#include "policy/usage_statistics/statistics_manager.h"
 #include "utils/macro.h"
 #include "utils/make_shared.h"
 

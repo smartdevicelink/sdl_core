@@ -45,11 +45,16 @@
 #include "application_manager/vehicle_info_data.h"
 #include "policy/policy_types.h"
 #include "protocol_handler/session_observer.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 class SmartObject;
 }
+}
+
+namespace policy {
+class PolicyHandlerInterface;
 }
 
 namespace application_manager {
@@ -86,18 +91,6 @@ class MessageHelper {
 
   static smart_objects::SmartObjectSPtr GetHashUpdateNotification(
       const uint32_t app_id);
-
-  /**
-   * @brief Create OnSystemRequest notification for lock screen icon url
-   */
-  static smart_objects::SmartObject* GetLockScreenIconUrlNotification(
-      const uint32_t connection_key);
-
-  /**
-  * @brief Send the OnSystemRequest notification for lock screen icon url to the
-  * mobile device
-  */
-  static void SendLockScreenIconUrlNotification(const uint32_t connection_key);
 
   /**
    * @brief Sends to mobile HashUpdateNotification
@@ -218,7 +211,8 @@ class MessageHelper {
    *
    */
   static smart_objects::SmartObjectSPtr CreateDeviceListSO(
-      const connection_handler::DeviceMap& devices);
+      const connection_handler::DeviceMap& devices,
+      const policy::PolicyHandlerInterface& policy_handler);
 
   static smart_objects::SmartObjectSPtr CreateModuleInfoSO(
       uint32_t function_id);
@@ -294,9 +288,9 @@ class MessageHelper {
    * @param output smart object to store Common.HMIApplication struct
    * @return true on succes, otherwise return false;
    */
-  static bool CreateHMIApplicationStruct(
-      ApplicationConstSharedPtr app,
+  static bool CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
       const protocol_handler::SessionObserver& session_observer,
+      const policy::PolicyHandlerInterface &policy_handler,
       smart_objects::SmartObject* output);
 
   static void SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
@@ -310,12 +304,14 @@ class MessageHelper {
    * Indicates if connection was unexpectedly lost by TM or HB
    */
   static void SendOnAppUnregNotificationToHMI(
-      ApplicationConstSharedPtr app,
-      const bool is_unexpected_disconnect = false);
+      ApplicationConstSharedPtr app, bool is_unexpected_disconnect = false);
 
-  static smart_objects::SmartObjectSPtr GetBCActivateAppRequestToHMI(ApplicationConstSharedPtr app,
-       const hmi_apis::Common_HMILevel::eType level,
-       const bool send_policy_priority = true);
+  static NsSmartDeviceLink::NsSmartObjects::SmartObjectSPtr
+  GetBCActivateAppRequestToHMI(ApplicationConstSharedPtr app,
+      const protocol_handler::SessionObserver& session_observer,
+      const policy::PolicyHandlerInterface &policy_handler,
+      hmi_apis::Common_HMILevel::eType level,
+      bool send_policy_priority);
 
   static void SendOnResumeAudioSourceToHMI(const uint32_t app_id);
 
@@ -531,17 +527,8 @@ class MessageHelper {
 
   static mobile_apis::Result::eType ProcessSoftButtons(
       smart_objects::SmartObject& message_params,
-      ApplicationConstSharedPtr app);
-
-  /**
-   * @brief checkWithPolicy allows to check soft button's parameters
-   * according to the current policy
-   * @param system_action system action
-   * @param app_mobile_id policy application id
-   * @return
-   */
-  static bool CheckWithPolicy(mobile_apis::SystemAction::eType system_action,
-                              const std::string& app_mobile_id);
+      ApplicationConstSharedPtr app,
+      const policy::PolicyHandlerInterface& policy_handler);
 
   /*
    * @brief subscribe application to softbutton
@@ -573,22 +560,6 @@ class MessageHelper {
    */
   static std::string CommonLanguageToString(
       hmi_apis::Common_Language::eType language);
-
-    /**
-     * @brief Converts string to common language enum value
-     * @param language language as string
-     * @return Common language enum value
-     */
-    static hmi_apis::Common_Language::eType CommonLanguageFromString(
-       const std::string& language);
-
-    /**
-     * @brief Converts mobile language to string representation
-     * @param language Mobile language
-     * @return Mobile language string representation
-     */
-    static std::string MobileLanguageToString(
-            const mobile_apis::Language::eType language);
 
     /**
      * @brief Converts string to mobile language enum value
@@ -649,6 +620,9 @@ class MessageHelper {
      * @param file_name path to file containing encrypted certificate
      */
     static void SendDecryptCertificateToHMI(const std::string& file_name);
+
+    static hmi_apis::Common_Language::eType CommonLanguageFromString(
+        const std::string& language);
 
   private:
     /**

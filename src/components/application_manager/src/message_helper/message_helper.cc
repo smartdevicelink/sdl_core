@@ -45,7 +45,8 @@
 #include "application_manager/application.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/commands/command_impl.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "config_profile/profile.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "interfaces/MOBILE_API.h"
@@ -218,12 +219,6 @@ hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
   return hmi_apis::Common_Language::INVALID_ENUM;
 }
 
-uint32_t MessageHelper::GetAppCommandLimit(const std::string& policy_app_id) {
-  std::string priority;
-  policy::PolicyHandler::instance()->GetPriority(policy_app_id, &priority);
-  return policy::PolicyHandler::instance()->GetNotificationsNumber(priority);
-}
-
 smart_objects::SmartObjectSPtr MessageHelper::CreateRequestObject() {
   using namespace smart_objects;
 
@@ -260,58 +255,6 @@ smart_objects::SmartObjectSPtr MessageHelper::GetHashUpdateNotification(
   (*message)[strings::params][strings::message_type] =
       static_cast<int32_t>(kNotification);
   return message;
-}
-
-smart_objects::SmartObject* MessageHelper::GetLockScreenIconUrlNotification(
-    const uint32_t connection_key) {
-  ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(connection_key);
-  DCHECK(app.get());
-
-  smart_objects::SmartObject* message =
-      new smart_objects::SmartObject(smart_objects::SmartType_Map);
-  (*message)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::OnSystemRequestID;
-  (*message)[strings::params][strings::connection_key] = connection_key;
-  (*message)[strings::params][strings::message_type] =
-      mobile_apis::messageType::notification;
-  (*message)[strings::params][strings::protocol_type] =
-      commands::CommandImpl::mobile_protocol_type_;
-  (*message)[strings::params][strings::protocol_version] =
-      commands::CommandImpl::protocol_version_;
-
-  (*message)[strings::msg_params][strings::request_type] =
-      mobile_apis::RequestType::LOCK_SCREEN_ICON_URL;
-
-  (*message)[strings::msg_params][strings::url] =
-      policy::PolicyHandler::instance()->GetLockScreenIconUrl();
-
-  return message;
-}
-void MessageHelper::SendLockScreenIconUrlNotification(
-    const uint32_t connection_key) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  smart_objects::SmartObject* so =
-      GetLockScreenIconUrlNotification(connection_key);
-  PrintSmartObject(*so);
-  DCHECK(ApplicationManagerImpl::instance()->ManageMobileCommand(so));
-}
-
-void MessageHelper::SendHashUpdateNotification(const uint32_t app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  smart_objects::SmartObjectSPtr so = GetHashUpdateNotification(app_id);
-  if (so) {
-    PrintSmartObject(*so);
-    if (!ApplicationManagerImpl::instance()->ManageMobileCommand(so)) {
-      LOG4CXX_ERROR(logger_, "Failed to send HashUpdate notification.");
-    } else {
-      ApplicationManagerImpl::instance()
-          ->resume_controller()
-          .ApplicationsDataUpdated();
-    }
-  }
 }
 
 void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
@@ -582,7 +525,8 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateBlockedByPoliciesResponse(
 }
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateDeviceListSO(
-    const connection_handler::DeviceMap& devices) {
+    const connection_handler::DeviceMap& devices,
+    const policy::PolicyHandlerInterface& policy_handler) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObjectSPtr device_list_so =
       new smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -601,8 +545,7 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateDeviceListSO(
     list_so[index][strings::id] = it->second.mac_address();
 
     const policy::DeviceConsent device_consent =
-        policy::PolicyHandler::instance()->GetUserConsentForDevice(
-            it->second.mac_address());
+        policy_handler.GetUserConsentForDevice(it->second.mac_address());
     list_so[index][strings::isSDLAllowed] =
         policy::DeviceConsent::kDeviceAllowed == device_consent;
     list_so[index][strings::transport_type] =
@@ -1247,13 +1190,12 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateAddVRCommandToHMI(
 }
 
 bool MessageHelper::CreateHMIApplicationStruct(
-      ApplicationConstSharedPtr app,
-      const protocol_handler::SessionObserver& session_observer,
-      NsSmartDeviceLink::NsSmartObjects::SmartObject* output) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  using smart_objects::SmartObject;
-
-  DCHECK(output);
+    ApplicationConstSharedPtr app,
+    const protocol_handler::SessionObserver& session_observer,
+    const policy::PolicyHandlerInterface& policy_handler,
+    NsSmartDeviceLink::NsSmartObjects::SmartObject* output) {
+  using NsSmartDeviceLink::NsSmartObjects::SmartObject;
+  DCHECK_OR_RETURN(output, false);
   SmartObject& message = *output;
   if (!app) {
     LOG4CXX_WARN(logger_, "Application is not valid");
@@ -1306,7 +1248,7 @@ bool MessageHelper::CreateHMIApplicationStruct(
   message[strings::device_info][strings::name] = device_name;
   message[strings::device_info][strings::id] = mac_address;
   const policy::DeviceConsent device_consent =
-      policy::PolicyHandler::instance()->GetUserConsentForDevice(mac_address);
+      policy_handler.GetUserConsentForDevice(mac_address);
   message[strings::device_info][strings::isSDLAllowed] =
       policy::DeviceConsent::kDeviceAllowed == device_consent;
 
@@ -1383,11 +1325,11 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(
   ApplicationManagerImpl::instance()->ManageHMICommand(notification);
 }
 
-smart_objects::SmartObjectSPtr
-MessageHelper::GetBCActivateAppRequestToHMI(
-      ApplicationConstSharedPtr app,
-     const hmi_apis::Common_HMILevel::eType level,
-     const bool send_policy_priority) {
+smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(ApplicationConstSharedPtr app,
+    const protocol_handler::SessionObserver& session_observer,
+    const policy::PolicyHandlerInterface &policy_handler,
+    hmi_apis::Common_HMILevel::eType level,
+    bool send_policy_priority) {
   DCHECK_OR_RETURN(app, smart_objects::SmartObjectSPtr());
 
   const uint32_t correlation_id =
@@ -1405,15 +1347,14 @@ MessageHelper::GetBCActivateAppRequestToHMI(
     std::string priority;
     // TODO(KKolodiy): need remove method policy_manager
 
-    policy::PolicyHandler::instance()->GetPriority(app->mobile_app_id(),
+    policy_handler.GetPriority(app->mobile_app_id(),
                                                    &priority);
     // According SDLAQ-CRS-2794
     // SDL have to send ActivateApp without "proirity" parameter to HMI.
     // in case of unconsented device
     const std::string& mac_adress = app->mac_address();
 
-    policy::DeviceConsent consent =
-        policy::PolicyHandler::instance()->GetUserConsentForDevice(mac_adress);
+    policy::DeviceConsent consent = policy_handler.GetUserConsentForDevice(mac_adress);
     if (!priority.empty() &&
         (policy::DeviceConsent::kDeviceAllowed == consent)) {
       (*message)[strings::msg_params][strings::priority] =
@@ -1892,21 +1833,22 @@ void application_manager::MessageHelper::SendQueryApps(
   using namespace mobile_apis;
   using namespace smart_objects;
 
-  policy::PolicyHandler* policy_handler = policy::PolicyHandler::instance();
+  policy::PolicyHandlerInterface& policy_handler =
+      ApplicationManagerImpl::instance()->GetPolicyHandler();
 
   SmartObject* content = new SmartObject(SmartType_Map);
   (*content)[strings::msg_params][strings::request_type] =
       RequestType::QUERY_APPS;
   (*content)[strings::msg_params][strings::url] =
-      policy_handler->RemoteAppsUrl();
+      policy_handler.RemoteAppsUrl();
   (*content)[strings::msg_params][strings::timeout] =
-      policy_handler->TimeoutExchange();
+      policy_handler.TimeoutExchange();
 
   Json::Value http;
   Json::Value& http_header =
       http[http_request::httpRequest][http_request::headers];
 
-  const int timeout = policy_handler->TimeoutExchange();
+  const int timeout = policy_handler.TimeoutExchange();
 
   http_header[http_request::content_type] = "application/json";
   http_header[http_request::connect_timeout] = timeout;
@@ -1926,6 +1868,40 @@ void application_manager::MessageHelper::SendQueryApps(
   (*content)[strings::msg_params][strings::file_type] = FileType::BINARY;
 
   SendSystemRequestNotification(connection_key, content);
+}
+
+smart_objects::SmartObjectSPtr MessageHelper::CreateHashUpdateNotification(
+    const uint32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObjectSPtr message =
+      utils::MakeShared<smart_objects::SmartObject>(
+          smart_objects::SmartType_Map);
+  (*message)[strings::params][strings::function_id] =
+      mobile_apis::FunctionID::OnHashChangeID;
+  (*message)[strings::params][strings::connection_key] = app_id;
+  (*message)[strings::params][strings::message_type] =
+      static_cast<int32_t>(kNotification);
+  return message;
+}
+
+void MessageHelper::SendHashUpdateNotification(const uint32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(app_id);
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Application not found by appID");
+    return;
+  }
+  smart_objects::SmartObjectSPtr so = CreateHashUpdateNotification(app_id);
+  PrintSmartObject(*so);
+  if (!ApplicationManagerImpl::instance()->ManageMobileCommand(
+          so, commands::Command::ORIGIN_SDL)) {
+    LOG4CXX_ERROR(logger_, "Failed to send HashUpdate notification.");
+  } else {
+    ApplicationManagerImpl::instance()
+        ->resume_controller()
+        .ApplicationsDataUpdated();
+  }
 }
 
 void MessageHelper::SendOnPermissionsChangeNotification(
@@ -2302,21 +2278,20 @@ bool MessageHelper::VerifySoftButtonString(const std::string& str) {
   return true;
 }
 
-bool MessageHelper::CheckWithPolicy(
-    mobile_api::SystemAction::eType system_action,
-    const std::string& app_mobile_id) {
+bool CheckWithPolicy(mobile_api::SystemAction::eType system_action,
+                     const std::string& app_mobile_id,
+                     const policy::PolicyHandlerInterface& policy_handler) {
   using namespace mobile_apis;
   bool result = true;
-  policy::PolicyHandler* policy_handler = policy::PolicyHandler::instance();
-  if (NULL != policy_handler && policy_handler->PolicyEnabled()) {
-    result = policy_handler->CheckSystemAction(system_action, app_mobile_id);
+  if (policy_handler.PolicyEnabled()) {
+    result = policy_handler.CheckSystemAction(system_action, app_mobile_id);
   }
-
   return result;
 }
 
-mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
-    smart_objects::SmartObject& message_params, ApplicationConstSharedPtr app) {
+mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(smart_objects::SmartObject& message_params,
+    ApplicationConstSharedPtr app,
+    const policy::PolicyHandlerInterface &policy_handler) {
   using namespace mobile_apis;
   using namespace smart_objects;
 
@@ -2340,7 +2315,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         request_soft_buttons[i][strings::system_action].asInt();
 
     if (!CheckWithPolicy(static_cast<SystemAction::eType>(system_action),
-                         app->mobile_app_id())) {
+                         app->mobile_app_id(),  policy_handler)) {
       return Result::DISALLOWED;
     }
 

@@ -35,7 +35,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 namespace application_manager {
 
@@ -67,9 +67,10 @@ void OnSystemRequestNotification::Run() {
 
   RequestType::eType request_type = static_cast<RequestType::eType>
       ((*message_)[strings::msg_params][strings::request_type].asInt());
-
-  if (!policy::PolicyHandler::instance()->IsRequestTypeAllowed(
-           app->mobile_app_id(), request_type)) {
+  const policy::PolicyHandlerInterface& policy_handler =
+      application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler();
+  if (!policy_handler.IsRequestTypeAllowed(app->mobile_app_id(),
+                                           request_type)) {
     LOG4CXX_WARN(logger_, "Request type "  << request_type
                  <<" is not allowed by policies");
     return;

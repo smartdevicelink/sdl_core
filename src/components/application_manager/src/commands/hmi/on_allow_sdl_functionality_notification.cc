@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/on_allow_sdl_functionality_notification.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -49,7 +49,7 @@ void OnAllowSDLFunctionalityNotification::Run() {
   if ((*message_)[strings::msg_params].keyExists("device")) {
     device_id = (*message_)[strings::msg_params]["device"]["id"].asString();
   }
-  policy::PolicyHandler::instance()->OnAllowSDLFunctionalityNotification(
+  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnAllowSDLFunctionalityNotification(
       (*message_)[strings::msg_params][hmi_response::allowed].asBool(),
       device_id);
 }

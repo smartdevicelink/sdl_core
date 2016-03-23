@@ -44,6 +44,9 @@ namespace NsSmartObjects {
 class SmartObject;
 }
 }
+namespace resumption {
+class LastState;
+}
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
@@ -403,6 +406,8 @@ class HMICapabilities {
    * @return TRUE if it supported, otherwise FALSE
    */
   inline const std::string& ccpu_version() const;
+
+  void Init(resumption::LastState* last_state);
 
  protected:
 

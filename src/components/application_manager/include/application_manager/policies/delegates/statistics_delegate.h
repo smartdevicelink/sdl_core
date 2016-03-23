@@ -42,6 +42,8 @@
 
 namespace policy {
 
+class PolicyHandler;
+
   class StatisticsDelegate: public threads::ThreadDelegate {
       enum StatisticType{
         INCREMENT_GLOBAL,
@@ -50,16 +52,19 @@ namespace policy {
         ADD
       };
     public:
-      explicit StatisticsDelegate(usage_statistics::GlobalCounterId type);
+      StatisticsDelegate(PolicyHandler& policy_handler,
+                                  usage_statistics::GlobalCounterId type);
 
-      StatisticsDelegate(const std::string& app_id,
+      StatisticsDelegate(PolicyHandler& policy_handler,
+                         const std::string& app_id,
                         usage_statistics::AppCounterId type);
 
-      StatisticsDelegate(const std::string& app_id,
+      StatisticsDelegate(PolicyHandler &policy_handler, const std::string& app_id,
                         usage_statistics::AppInfoId type,
                         const std::string& value);
 
-      StatisticsDelegate(const std::string& app_id,
+      StatisticsDelegate(PolicyHandler& policy_handler,
+                         const std::string& app_id,
                         usage_statistics::AppStopwatchId type,
                         int32_t timespan_seconds);
 
@@ -76,6 +81,7 @@ namespace policy {
       std::string app_id_;
       std::string value_;
       int32_t timespan_seconds_;
+      PolicyHandler& policy_handler_;
   };
 } // namespace policy
 

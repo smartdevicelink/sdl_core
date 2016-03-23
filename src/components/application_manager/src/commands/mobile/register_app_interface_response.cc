@@ -33,9 +33,9 @@
 
 #include "application_manager/commands/mobile/register_app_interface_response.h"
 #include "interfaces/MOBILE_API.h"
-#include "application_manager/policies/policy_handler.h"
 #include "application_manager/application_manager_impl.h"
 #include "connection_handler/connection_handler.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 namespace application_manager {
 
@@ -79,16 +79,17 @@ void RegisterAppInterfaceResponse::Run() {
 
   // Sends OnPermissionChange notification to mobile right after RAI response
   // and HMI level set-up
-  policy::PolicyHandler::instance()->OnAppRegisteredOnMobile(
-        application->mobile_app_id());
+  application_manager::ApplicationManagerImpl::instance()
+      ->GetPolicyHandler().OnAppRegisteredOnMobile(application->mobile_app_id());
 }
 
 void RegisterAppInterfaceResponse::SetHeartBeatTimeout(
     uint32_t connection_key, const std::string& mobile_app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  policy::PolicyHandler *policy_handler = policy::PolicyHandler::instance();
-  if (policy_handler->PolicyEnabled()) {
-    const uint32_t timeout = policy_handler->HeartBeatTimeout(mobile_app_id);
+  const policy::PolicyHandlerInterface& policy_handler =
+      application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler();
+  if (policy_handler.PolicyEnabled()) {
+    const uint32_t timeout = policy_handler.HeartBeatTimeout(mobile_app_id);
     if (timeout > 0) {
       application_manager::ApplicationManagerImpl::instance()->
           connection_handler().SetHeartBeatTimeout(connection_key, timeout);

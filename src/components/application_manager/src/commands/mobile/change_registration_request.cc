@@ -36,7 +36,6 @@
 #include "application_manager/commands/mobile/change_registration_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/policies/policy_handler.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
@@ -454,8 +453,10 @@ bool ChangeRegistrationRequest::IsNicknameAllowed(
   policy::StringArray app_nicknames;
   policy::StringArray app_hmi_types;
 
-  bool init_result = policy::PolicyHandler::instance()->GetInitialAppData(
-      policy_app_id, &app_nicknames, &app_hmi_types);
+  bool init_result =
+      application_manager::ApplicationManagerImpl::instance()
+          ->GetPolicyHandler()
+          .GetInitialAppData(policy_app_id, &app_nicknames, &app_hmi_types);
 
   if (!init_result) {
     LOG4CXX_ERROR(logger_,
@@ -473,7 +474,9 @@ bool ChangeRegistrationRequest::IsNicknameAllowed(
                    "Application name was not found in nicknames list.");
 
       usage_statistics::AppCounter count_of_rejections_nickname_mismatch(
-          policy::PolicyHandler::instance()->GetStatisticManager(),
+          application_manager::ApplicationManagerImpl::instance()
+              ->GetPolicyHandler()
+              .GetStatisticManager(),
           policy_app_id,
           usage_statistics::REJECTIONS_NICKNAME_MISMATCH);
       ++count_of_rejections_nickname_mismatch;

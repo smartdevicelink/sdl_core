@@ -43,11 +43,6 @@ ResumptionData::ResumptionData():
   resumption_lock_(true) {
 }
 
-bool ResumptionData::Init() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  return true;
-}
-
 smart_objects::SmartObject ResumptionData::GetApplicationCommands(
     app_mngr::ApplicationConstSharedPtr application) const {
   using namespace app_mngr;

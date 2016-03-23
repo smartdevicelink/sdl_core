@@ -35,61 +35,61 @@
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 namespace policy {
-  StatisticsDelegate::StatisticsDelegate(usage_statistics::GlobalCounterId type)
-    : type_(INCREMENT_GLOBAL),
-      global_counter_(type),
-      app_id_(""),
-      value_(""),
-      timespan_seconds_(0) {
+StatisticsDelegate::StatisticsDelegate(PolicyHandler& policy_handler,
+                                       usage_statistics::GlobalCounterId type)
+    : type_(INCREMENT_GLOBAL)
+    , global_counter_(type)
+    , app_id_("")
+    , value_("")
+    , timespan_seconds_(0)
+    , policy_handler_(policy_handler) {}
 
-  }
-
-  StatisticsDelegate::StatisticsDelegate(const std::string& app_id,
+StatisticsDelegate::StatisticsDelegate(PolicyHandler& policy_handler,
+                                       const std::string& app_id,
                                        usage_statistics::AppCounterId type)
-    : type_(INCREMENT_APP),
-      app_counter_(type),
-      app_id_(app_id),
-      value_(""),
-      timespan_seconds_(0) {
+    : type_(INCREMENT_APP)
+    , app_counter_(type)
+    , app_id_(app_id)
+    , value_("")
+    , timespan_seconds_(0)
+    , policy_handler_(policy_handler) {}
 
-  }
-
-  StatisticsDelegate::StatisticsDelegate(const std::string& app_id,
+StatisticsDelegate::StatisticsDelegate(PolicyHandler& policy_handler,
+                                       const std::string& app_id,
                                        usage_statistics::AppInfoId type,
                                        const std::string& value)
-    : type_(SET),
-      app_info_(type),
-      app_id_(app_id),
-      value_(value),
-      timespan_seconds_(0) {
+    : type_(SET)
+    , app_info_(type)
+    , app_id_(app_id)
+    , value_(value)
+    , timespan_seconds_(0)
+    , policy_handler_(policy_handler) {}
 
-  }
-
-  StatisticsDelegate::StatisticsDelegate(const std::string& app_id,
+StatisticsDelegate::StatisticsDelegate(PolicyHandler& policy_handler,
+                                       const std::string& app_id,
                                        usage_statistics::AppStopwatchId type,
                                        int32_t timespan_seconds)
-    : type_(ADD),
-      stop_watch_(type),
-      app_id_(app_id),
-      value_(""),
-      timespan_seconds_(timespan_seconds) {
-
-  }
+    : type_(ADD)
+    , stop_watch_(type)
+    , app_id_(app_id)
+    , value_("")
+    , timespan_seconds_(timespan_seconds)
+    , policy_handler_(policy_handler) {}
 
   void StatisticsDelegate::threadMain() {
     LOG4CXX_AUTO_TRACE(logger_);
     switch (type_) {
       case INCREMENT_GLOBAL:
-        PolicyHandler::instance()->Increment(global_counter_);
+        policy_handler_.Increment(global_counter_);
         break;
       case INCREMENT_APP:
-        PolicyHandler::instance()->Increment(app_id_, app_counter_);
+        policy_handler_.Increment(app_id_, app_counter_);
         break;
       case SET:
-        PolicyHandler::instance()->Set(app_id_, app_info_, value_);
+        policy_handler_.Set(app_id_, app_info_, value_);
         break;
       case ADD:
-        PolicyHandler::instance()->Add(app_id_, stop_watch_, timespan_seconds_);
+        policy_handler_.Add(app_id_, stop_watch_, timespan_seconds_);
         break;
       default:
         LOG4CXX_ERROR(logger_,"Unknown statistics operator");
