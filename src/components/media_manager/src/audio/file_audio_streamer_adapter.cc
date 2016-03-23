@@ -31,12 +31,13 @@
  */
 
 #include "media_manager/audio/file_audio_streamer_adapter.h"
-#include "config_profile/profile.h"
 
 namespace media_manager {
 
-FileAudioStreamerAdapter::FileAudioStreamerAdapter()
-  : FileStreamerAdapter(profile::Profile::instance()->audio_stream_file()) {
+FileAudioStreamerAdapter::FileAudioStreamerAdapter(
+    const std::string& audio_stream_file,
+    const std::string& app_storage_folder)
+  : FileStreamerAdapter(audio_stream_file, app_storage_folder) {
 }
 
 FileAudioStreamerAdapter::~FileAudioStreamerAdapter() {

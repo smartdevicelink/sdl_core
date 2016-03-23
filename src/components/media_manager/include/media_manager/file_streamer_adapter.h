@@ -42,14 +42,16 @@ namespace media_manager {
 
 class FileStreamerAdapter : public StreamerAdapter {
  public:
-  explicit FileStreamerAdapter(const std::string& file_name);
+  FileStreamerAdapter(
+      const std::string& file_name, const std::string& app_storage_folder);
   virtual ~FileStreamerAdapter();
 
  protected:
   class FileStreamer : public StreamerAdapter::Streamer {
    public:
     FileStreamer(FileStreamerAdapter* const adapter,
-                 const std::string& file_name);
+                 const std::string& file_name,
+                 const std::string& app_storage_folder);
     virtual ~FileStreamer();
 
    protected:
@@ -59,6 +61,7 @@ class FileStreamerAdapter : public StreamerAdapter {
 
    private:
     std::string    file_name_;
+    std::string    app_storage_folder_;
     std::ofstream* file_stream_;
   };
 };

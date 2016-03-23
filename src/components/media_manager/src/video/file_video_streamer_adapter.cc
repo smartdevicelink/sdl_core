@@ -31,12 +31,13 @@
  */
 
 #include "media_manager/video/file_video_streamer_adapter.h"
-#include "config_profile/profile.h"
 
 namespace media_manager {
 
-FileVideoStreamerAdapter::FileVideoStreamerAdapter()
-  : FileStreamerAdapter(profile::Profile::instance()->video_stream_file()) {
+FileVideoStreamerAdapter::FileVideoStreamerAdapter(
+    const std::string& video_stream_file,
+    const std::string& app_storage_folder)
+  : FileStreamerAdapter(video_stream_file, app_storage_folder) {
 }
 
 FileVideoStreamerAdapter::~FileVideoStreamerAdapter() {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016 Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,49 +30,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_A2DP_SOURCE_PLAYER_ADAPTER_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_A2DP_SOURCE_PLAYER_ADAPTER_H_
-
-#include <map>
-#include "protocol/common.h"
-#include "media_manager/media_adapter_impl.h"
-#include "utils/threads/thread_delegate.h"
-
-namespace protocol_handler {
-  class SessionObserver;
-}
-
-namespace threads {
-class Thread;
-}
+#ifndef SRC_COMPONENTS_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_SETTINGS_H_
+#define SRC_COMPONENTS_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_SETTINGS_H_
+#include <string>
+#include <stdint.h>
 
 namespace media_manager {
 
-class A2DPSourcePlayerAdapter : public MediaAdapterImpl {
-  public:
-    A2DPSourcePlayerAdapter(protocol_handler::SessionObserver& session_observer);
-    ~A2DPSourcePlayerAdapter();
-    void SendData(int32_t application_key,
-                  const ::protocol_handler::RawMessagePtr message) {}
-    void StartActivity(int32_t application_key);
-    void StopActivity(int32_t application_key);
-    bool is_app_performing_activity(int32_t application_key) const;
+/**
+ * \class MediaManagerSettings
+ * \brief Interface for media manager component settings.
+ */
+class MediaManagerSettings {
+ public:
+  virtual ~MediaManagerSettings() {}
 
-    void set_connection_handler(
-        connection_handler::ConnectionHandlerImpl* connection_handler) {
-      connection_handler_ = connection_handler;
-    }
-
-  private:
-    class A2DPSourcePlayerThread;
-
-    typedef std::pair<threads::Thread*, A2DPSourcePlayerThread*> Pair;
-    typedef std::map<int32_t, Pair> SourcesMap;
-    SourcesMap sources_;
-    protocol_handler::SessionObserver& session_observer_;
-    DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerAdapter);
+  virtual const std::string& video_server_type() const = 0;
+  virtual const std::string& audio_server_type() const = 0;
+  virtual const std::string& server_address() const = 0;
+  virtual const uint16_t video_streaming_port() const = 0;
+  virtual const uint16_t audio_streaming_port() const = 0;
+  virtual const std::string& named_video_pipe_path() const = 0;
+  virtual const std::string& named_audio_pipe_path() const = 0;
+  virtual const std::string& video_stream_file() const = 0;
+  virtual const std::string& audio_stream_file() const = 0;
+  virtual const std::string& app_storage_folder() const = 0;
+  virtual const std::string& app_resource_folder() const = 0;
+#ifdef CUSTOMER_PASA
+  virtual const std::string& audio_mq_path() const = 0;
+#else
+    virtual const std::string& recording_file_source() const = 0;
+#endif  // CUSTOMER_PASA
 };
 
 }  // namespace media_manager
-
-#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_A2DP_SOURCE_PLAYER_ADAPTER_H_
+#endif  // SRC_COMPONENTS_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_SETTINGS_H_

@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "config_profile/profile.h"
+
 #include "media_manager/media_manager_impl.h"
 #include "media_manager/audio/from_mic_recorder_listener.h"
 #include "media_manager/streamer_listener.h"
@@ -52,17 +52,20 @@
 #include "media_manager/audio/pipe_audio_streamer_adapter.h"
 #include "media_manager/video/file_video_streamer_adapter.h"
 #include "media_manager/audio/file_audio_streamer_adapter.h"
+#include "media_manager/media_manager_settings.h"
 
 namespace media_manager {
 
-using profile::Profile;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
-MediaManagerImpl::MediaManagerImpl()
-  : protocol_handler_(NULL)
+MediaManagerImpl::MediaManagerImpl(application_manager::ApplicationManager &application_manager,
+    const MediaManagerSettings& settings)
+  : settings_(settings),
+    protocol_handler_(NULL)
   , a2dp_player_(NULL)
-  , from_mic_recorder_(NULL) {
+  , from_mic_recorder_(NULL),
+    application_manager_(application_manager) {
   Init();
 }
 
@@ -112,28 +115,34 @@ void MediaManagerImpl::Init() {
 
 #if defined(EXTENDED_MEDIA_MODE)
   LOG4CXX_INFO(logger_, "Called Init with default configuration.");
-  a2dp_player_ = new A2DPSourcePlayerAdapter();
+  a2dp_player_ = new A2DPSourcePlayerAdapter(protocol_handler_->get_session_observer());
   from_mic_recorder_ = new FromMicRecorderAdapter();
 #endif
 
-  if ("socket" == profile::Profile::instance()->video_server_type()) {
-    streamer_[ServiceType::kMobileNav] = new SocketVideoStreamerAdapter();
-  } else if ("pipe" == profile::Profile::instance()->video_server_type()) {
-    streamer_[ServiceType::kMobileNav] = new PipeVideoStreamerAdapter();
-  } else if ("file" == profile::Profile::instance()->video_server_type()) {
-    streamer_[ServiceType::kMobileNav] = new FileVideoStreamerAdapter();
+  if ("socket" == settings().video_server_type()) {
+    streamer_[ServiceType::kMobileNav] = new SocketVideoStreamerAdapter(
+        settings().server_address(), settings().video_streaming_port());
+  } else if ("pipe" == settings().video_server_type()) {
+    streamer_[ServiceType::kMobileNav]= new PipeVideoStreamerAdapter(
+        settings().named_video_pipe_path(), settings().app_storage_folder());
+  } else if ("file" == settings().video_server_type()) {
+    streamer_[ServiceType::kMobileNav] = new FileVideoStreamerAdapter(
+        settings().video_stream_file(), settings().app_storage_folder());
   }
 
-  if ("socket" == profile::Profile::instance()->audio_server_type()) {
-    streamer_[ServiceType::kAudio] = new SocketAudioStreamerAdapter();
-  } else if ("pipe" == profile::Profile::instance()->audio_server_type()) {
-    streamer_[ServiceType::kAudio] = new PipeAudioStreamerAdapter();
-  } else if ("file" == profile::Profile::instance()->audio_server_type()) {
-    streamer_[ServiceType::kAudio] = new FileAudioStreamerAdapter();
+  if ("socket" == settings().audio_server_type()) {
+    streamer_[ServiceType::kAudio] = new SocketAudioStreamerAdapter(
+        settings().server_address(), settings().audio_streaming_port());
+  } else if ("pipe" == settings().audio_server_type()) {
+    streamer_[ServiceType::kAudio] = new PipeAudioStreamerAdapter(
+        settings().named_audio_pipe_path(), settings().app_storage_folder());
+  } else if ("file" == settings().audio_server_type()) {
+    streamer_[ServiceType::kAudio] = new FileAudioStreamerAdapter(
+        settings().audio_stream_file(), settings().app_storage_folder());
   }
 
-  streamer_listener_[ServiceType::kMobileNav] = new StreamerListener();
-  streamer_listener_[ServiceType::kAudio] = new StreamerListener();
+  streamer_listener_[ServiceType::kMobileNav] = new StreamerListener(*this);
+  streamer_listener_[ServiceType::kAudio] = new StreamerListener(*this);
 
   if (streamer_[ServiceType::kMobileNav]) {
     streamer_[ServiceType::kMobileNav]->AddListener(
@@ -167,14 +176,14 @@ void MediaManagerImpl::StartMicrophoneRecording(
   LOG4CXX_INFO(logger_, "MediaManagerImpl::StartMicrophoneRecording to "
                << output_file);
   application_manager::ApplicationSharedPtr app =
-    application_manager::ApplicationManagerImpl::instance()->
-      application(application_key);
+      application_manager_.application(application_key);
   std::string file_path =
-  profile::Profile::instance()->app_storage_folder();
+  settings().app_storage_folder();
   file_path += "/";
   file_path += output_file;
-  from_mic_listener_ = new FromMicRecorderListener(file_path);
-#if defined(EXTENDED_MEDIA_MODE)
+  from_mic_listener_ = new FromMicRecorderListener(file_path,
+                                                   application_manager_);
+#ifdef EXTENDED_MEDIA_MODE
   if (from_mic_recorder_) {
     from_mic_recorder_->AddListener(from_mic_listener_);
     (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
@@ -194,8 +203,8 @@ void MediaManagerImpl::StartMicrophoneRecording(
     }
   }
   const std::string record_file_source =
-      profile::Profile::instance()->app_resourse_folder() + "/" +
-      profile::Profile::instance()->recording_file_source();
+      settings().app_resource_folder() + "/" +
+      settings().recording_file_source();
   std::vector<uint8_t> buf;
   if (file_system::ReadBinaryFile(record_file_source, buf)) {
     if (file_system::Write(file_path, buf)) {
@@ -269,16 +278,13 @@ void MediaManagerImpl::OnMessageReceived(
     return;
   }
 
-  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-  DCHECK_OR_RETURN_VOID(app_mgr);
-
-  if (!app_mgr->CanAppStream(streaming_app_id, service_type)) {
-    app_mgr->ForbidStreaming(streaming_app_id);
+  if (!application_manager_.CanAppStream(streaming_app_id, service_type)) {
+    application_manager_.ForbidStreaming(streaming_app_id);
     LOG4CXX_ERROR(logger_, "The application trying to stream when it should not.");
     return;
   }
 
-  ApplicationSharedPtr app = app_mgr->application(streaming_app_id);
+  ApplicationSharedPtr app = application_manager_.application(streaming_app_id);
   if (app) {
     app->WakeUpStreaming(service_type);
     streamer_[service_type]->SendData(streaming_app_id, message);
@@ -295,6 +301,10 @@ void MediaManagerImpl::FramesProcessed(int32_t application_key,
     protocol_handler_->SendFramesNumber(application_key,
                                         frame_number);
   }
+}
+
+const MediaManagerSettings& MediaManagerImpl::settings() const {
+  return settings_;
 }
 
 }  //  namespace media_manager

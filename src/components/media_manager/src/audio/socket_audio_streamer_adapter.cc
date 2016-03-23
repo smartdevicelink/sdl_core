@@ -31,7 +31,6 @@
  */
 
 #include <string>
-#include "config_profile/profile.h"
 #include "media_manager/audio/socket_audio_streamer_adapter.h"
 
 namespace {
@@ -44,10 +43,9 @@ namespace {
 
 namespace media_manager {
 
-SocketAudioStreamerAdapter::SocketAudioStreamerAdapter()
-  : SocketStreamerAdapter(profile::Profile::instance()->server_address(),
-                          profile::Profile::instance()->audio_streaming_port(),
-                          kHeader) {
+SocketAudioStreamerAdapter::SocketAudioStreamerAdapter(
+    const std::string& server_address, uint16_t audio_streaming_port)
+  : SocketStreamerAdapter(server_address, audio_streaming_port, kHeader) {
 }
 
 SocketAudioStreamerAdapter::~SocketAudioStreamerAdapter() {

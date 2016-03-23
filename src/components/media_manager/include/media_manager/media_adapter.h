@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_H_
 
-#include <cstdint>
+#include <stdint.h>
 #include "protocol/common.h"
 
 namespace media_manager {
