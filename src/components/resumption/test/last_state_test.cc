@@ -31,6 +31,7 @@
  */
 
 #include "gtest/gtest.h"
+#include <string>
 #include "resumption/last_state.h"
 #include "config_profile/profile.h"
 #include "utils/file_system.h"
@@ -43,7 +44,9 @@ using namespace ::resumption;
 using namespace ::Json;
 
 class LastStateTest : public ::testing::Test {
- public:
+ protected:
+  LastStateTest():last_state_("app_storage_folder",
+                              "app_info_storage"){}
   virtual void SetUp() {
     ASSERT_TRUE(::file_system::CreateFile("./app_info.dat"));
     ::profile::Profile::instance()->UpdateValues();
@@ -52,22 +55,32 @@ class LastStateTest : public ::testing::Test {
   virtual void TearDown() {
     EXPECT_TRUE(::file_system::DeleteFile("./app_info.dat"));
   }
+  resumption::LastState last_state_;
 };
 
 TEST_F(LastStateTest, Basic) {
-  Value& dictionary = LastState::instance()->dictionary;
-  EXPECT_EQ("null\n", dictionary.toStyledString());
+  Value& dictionary = last_state_.dictionary;
+  const std::string empty_dictionary =
+      "{\n   \"TransportManager\" : {\n      \"BluetoothAdapter\" : {\n        "
+      " \"devices\" : \"bluetooth_device\"\n      },\n      \"TcpAdapter\" : "
+      "{\n         \"devices\" : {\n            \"name\" : \"test_device\"\n   "
+      "      }\n      }\n   },\n   \"resumption\" : {\n      "
+      "\"last_ign_off_time\" : null,\n      \"resume_app_list\" : null\n   "
+      "}\n}\n";
+  EXPECT_EQ(empty_dictionary, dictionary.toStyledString());
 }
 
 TEST_F(LastStateTest, SetGetData) {
   {
-    Value& dictionary = LastState::instance()->dictionary;
+    Value& dictionary = last_state_.dictionary;
     Value bluetooth_info = dictionary["TransportManager"]["BluetoothAdapter"];
-    EXPECT_EQ("null\n", bluetooth_info.toStyledString());
+    const std::string empty_bluetooth = "{\n   \"devices\" : \"bluetooth_device\"\n}\n";
+    EXPECT_EQ(empty_bluetooth, bluetooth_info.toStyledString());
 
     Value tcp_adapter_info =
         dictionary["TransportManager"]["TcpAdapter"]["devices"];
-    EXPECT_EQ("null\n", tcp_adapter_info.toStyledString());
+    const std::string no_devices = "{\n   \"name\" : \"test_device\"\n}\n";
+    EXPECT_EQ(no_devices, tcp_adapter_info.toStyledString());
 
     Value resumption_time = dictionary["resumption"]["last_ign_off_time"];
     EXPECT_EQ("null\n", resumption_time.toStyledString());
@@ -78,15 +91,15 @@ TEST_F(LastStateTest, SetGetData) {
     Value test_value;
     test_value["name"] = "test_device";
 
-    LastState::instance()
-        ->dictionary["TransportManager"]["TcpAdapter"]["devices"] = test_value;
-    LastState::instance()
-        ->dictionary["TransportManager"]["BluetoothAdapter"]["devices"] =
+    last_state_
+        .dictionary["TransportManager"]["TcpAdapter"]["devices"] = test_value;
+    last_state_
+        .dictionary["TransportManager"]["BluetoothAdapter"]["devices"] =
         "bluetooth_device";
-    LastState::instance()->SaveToFileSystem();
+    last_state_.SaveToFileSystem();
   }
 
-  Value& dictionary = LastState::instance()->dictionary;
+  Value& dictionary = last_state_.dictionary;
 
   Value bluetooth_info = dictionary["TransportManager"]["BluetoothAdapter"];
   Value tcp_adapter_info = dictionary["TransportManager"]["TcpAdapter"];
