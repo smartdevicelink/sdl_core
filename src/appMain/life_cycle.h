@@ -98,9 +98,10 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     security_manager::CryptoManager* crypto_manager_;
     security_manager::SecurityManager* security_manager_;
 #endif  // ENABLE_SECURITY
-    hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
-    hmi_message_handler::HMIMessageAdapterImpl* hmi_message_adapter_;
-    media_manager::MediaManagerImpl* media_manager_;
+  hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
+  hmi_message_handler::HMIMessageAdapter* hmi_message_adapter_;
+  media_manager::MediaManagerImpl* media_manager_;
+  resumption::LastState* last_state_;
 #ifdef TELEMETRY_MONITOR
     telemetry_monitor::TelemetryMonitor* telemetry_monitor_;
 #endif  // TELEMETRY_MONITOR
