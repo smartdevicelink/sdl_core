@@ -42,9 +42,7 @@
 namespace policy {
 struct DeviceInfo;
 }
-namespace policy {
-class PolicyHandler;
-}
+
 namespace application_manager {
 
 class Application;
@@ -120,12 +118,12 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
   */
   struct CoincidencePredicateVR {
     explicit CoincidencePredicateVR(const custom_str::CustomString& newItem)
-        : newItem_(newItem){};
+        : newItem_(newItem){}
 
     bool operator()(const smart_objects::SmartObject& obj) {
       const custom_str::CustomString& vr_synonym = obj.asCustomString();
       return newItem_.CompareIgnoreCase(vr_synonym);
-    };
+    }
     const custom_str::CustomString& newItem_;
   };
 

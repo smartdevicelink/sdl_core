@@ -1354,7 +1354,7 @@ smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(Appli
     // in case of unconsented device
     const std::string& mac_adress = app->mac_address();
 
-    policy::DeviceConsent consent = policy_handler.GetUserConsentForDevice(mac_adress);
+    const policy::DeviceConsent& consent = policy_handler.GetUserConsentForDevice(mac_adress);
     if (!priority.empty() &&
         (policy::DeviceConsent::kDeviceAllowed == consent)) {
       (*message)[strings::msg_params][strings::priority] =

@@ -68,27 +68,6 @@ namespace {
 int get_rand_from_range(uint32_t from = 0, int to = RAND_MAX) {
   return std::rand() % to + from;
 }
-CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
-
-//void HandleWrongMessageType(smart_objects::SmartObject& output) {
-//  LOG4CXX_AUTO_TRACE(logger_);
-//  switch (output[strings::params][strings::message_type].asInt()) {
-//    case application_manager::MessageType::kNotification: {
-//      LOG4CXX_ERROR(logger_, "Ignore wrong HMI notification");
-//    }
-//    case application_manager::MessageType::kRequest: {
-//      LOG4CXX_ERROR(logger_, "Ignore wrong HMI request");
-//    }
-//    default: {
-//      output.erase(strings::msg_params);
-//      output[strings::params][hmi_response::code] =
-//          hmi_apis::Common_Result::INVALID_DATA;
-//      output[strings::msg_params][strings::info] =
-//          std::string("Received invalid data on HMI response");
-//      LOG4CXX_ERROR(logger_, "Received invalid data on HMI response");
-//    }
-//  }
-//}
 }
 
 namespace application_manager {
@@ -253,10 +232,6 @@ connection_handler::ConnectionHandler&
 ApplicationManagerImpl::connection_handler() const {
   return *connection_handler_;
 }
-
-//policy::PolicyHandlerInterface& ApplicationManagerImpl::policy_handler() const {
-//  return
-//}
 
 ApplicationSharedPtr ApplicationManagerImpl::application_by_policy_id(
     const std::string& policy_app_id) const {
@@ -444,7 +419,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
       message[strings::params][strings::connection_key].asInt();
 
   // app_id is SDL "internal" ID
-  // original app_id can be gotten via ApplicationImpl::mobile_app_id()
+  // original app_id can be received via ApplicationImpl::mobile_app_id()
   uint32_t app_id = 0;
   std::list<int32_t> sessions_list;
   uint32_t device_id = 0;

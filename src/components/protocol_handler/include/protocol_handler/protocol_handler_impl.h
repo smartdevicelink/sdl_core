@@ -36,7 +36,6 @@
 #include <map>
 #include <memory>
 #include <set>
-#include <list>
 #include <stdint.h>
 #include <utility>  // std::make_pair
 #include <vector>

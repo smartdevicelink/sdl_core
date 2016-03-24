@@ -189,7 +189,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     return root;
   }
 
-  void CreateLocalPT(std::string file_name) {
+  void CreateLocalPT(const std::string& file_name) {
     file_system::remove_directory_content("storage1");
     ON_CALL(policy_settings_, app_storage_folder()).WillByDefault(ReturnRef(kAppStorageFolder));
     ASSERT_TRUE(manager->InitPT(file_name, &policy_settings_));

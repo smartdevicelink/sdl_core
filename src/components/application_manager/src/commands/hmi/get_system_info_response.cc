@@ -72,7 +72,7 @@ const SystemInfo GetSystemInfoResponse::GetSystemInfo(
   info.wers_country_code =
       (*message_)[strings::msg_params]["wersCountryCode"].asString();
 
-  uint32_t lang_code = (*message_)[strings::msg_params]["language"].asUInt();
+  const uint32_t lang_code = (*message_)[strings::msg_params]["language"].asUInt();
   info.language = application_manager::MessageHelper::CommonLanguageToString(
       static_cast<hmi_apis::Common_Language::eType>(lang_code));
 

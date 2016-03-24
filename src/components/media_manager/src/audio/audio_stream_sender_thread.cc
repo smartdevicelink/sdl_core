@@ -59,7 +59,7 @@ const uint32_t kMqueueMessageSize = 4095;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
-AudioStreamSenderThread::AudioStreamSenderThread(const std::string fileName,
+AudioStreamSenderThread::AudioStreamSenderThread(const std::string& fileName,
     uint32_t session_key,
     application_manager::ApplicationManager &app_mngr)
     : session_key_(session_key)

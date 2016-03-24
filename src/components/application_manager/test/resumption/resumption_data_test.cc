@@ -35,7 +35,6 @@
 #include "gtest/gtest.h"
 
 #include "application_manager/usage_statistics.h"
-#include "include/application_mock.h"
 #include "include/resumption_data_mock.h"
 #include "utils/custom_string.h"
 #include "application_manager/application_manager_impl.h"
@@ -54,7 +53,7 @@ using ::testing::ReturnRef;
 using ::testing::ReturnPointee;
 
 void ResumptionDataTest::CheckSavedApp(sm::SmartObject& resume_app_list) {
-  EXPECT_EQ(policy_app_id_, resume_app_list[am::strings::app_id].asString());
+  EXPECT_EQ(mobile_app_id_, resume_app_list[am::strings::app_id].asString());
   EXPECT_EQ(grammar_id_, resume_app_list[am::strings::grammar_id].asUInt());
   EXPECT_EQ(app_id_, resume_app_list[am::strings::connection_key].asUInt());
   EXPECT_EQ(hmi_app_id_, resume_app_list[am::strings::hmi_app_id].asUInt());
@@ -347,7 +346,7 @@ void ResumptionDataTest::PrepareData() {
 
   ON_CALL(*app_mock, is_application_data_changed()).WillByDefault(Return(true));
 
-  ON_CALL(*app_mock, policy_app_id()).WillByDefault(Return(policy_app_id_));
+  ON_CALL(*app_mock, mobile_app_id()).WillByDefault(Return(mobile_app_id_));
   ON_CALL(*app_mock, mac_address()).WillByDefault(ReturnRef(mac_address_));
   ON_CALL(*app_mock, curHash()).WillByDefault(ReturnRef(hash_));
   ON_CALL(*app_mock, get_grammar_id()).WillByDefault(Return(grammar_id_));

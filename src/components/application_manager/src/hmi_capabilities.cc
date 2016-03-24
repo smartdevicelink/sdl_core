@@ -559,11 +559,11 @@ void HMICapabilities::set_ccpu_version(const std::string& ccpu_version) {
   ccpu_version_ = ccpu_version;
 }
 
-void HMICapabilities::set_navigation_supported(bool supported) {
+void HMICapabilities::set_navigation_supported(const bool supported) {
   is_navigation_supported_ = supported;
 }
 
-void HMICapabilities::set_phone_call_supported(bool supported) {
+void HMICapabilities::set_phone_call_supported(const bool supported) {
     is_phone_call_supported_ = supported;
 }
 

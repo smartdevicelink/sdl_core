@@ -56,11 +56,7 @@ class MediaManagerSettings {
   virtual const std::string& audio_stream_file() const = 0;
   virtual const std::string& app_storage_folder() const = 0;
   virtual const std::string& app_resource_folder() const = 0;
-#ifdef CUSTOMER_PASA
-  virtual const std::string& audio_mq_path() const = 0;
-#else
-    virtual const std::string& recording_file_source() const = 0;
-#endif  // CUSTOMER_PASA
+  virtual const std::string& recording_file_source() const = 0;
 };
 
 }  // namespace media_manager

@@ -83,7 +83,7 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
      * @param session_key     Session key of connection for Mobile side
      * @param correlation_id  Correlation id for response for Mobile side
      */
-    AudioStreamSenderThread(const std::string fileName,
+    AudioStreamSenderThread(const std::string& fileName,
                             uint32_t session_key,
                             application_manager::ApplicationManager& app_mngr);
 

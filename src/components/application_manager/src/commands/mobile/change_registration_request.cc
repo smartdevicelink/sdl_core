@@ -453,7 +453,7 @@ bool ChangeRegistrationRequest::IsNicknameAllowed(
   policy::StringArray app_nicknames;
   policy::StringArray app_hmi_types;
 
-  bool init_result =
+  const bool init_result =
       application_manager::ApplicationManagerImpl::instance()
           ->GetPolicyHandler()
           .GetInitialAppData(policy_app_id, &app_nicknames, &app_hmi_types);

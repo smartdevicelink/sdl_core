@@ -33,6 +33,7 @@
 #include <string>
 #include <algorithm>
 #include <fstream>
+#include <memory>
 #include <stdio.h>
 #include <sys/stat.h>
 
@@ -77,14 +78,14 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   static SQLPTRepresentation* reps;
   static const std::string kDatabaseName;
   //Gtest can show message that this object doesn't destroyed
-  static utils::SharedPtr<policy_handler_test::MockPolicySettings> policy_settings_;
+  static std::auto_ptr<policy_handler_test::MockPolicySettings> policy_settings_;
 
   static void SetUpTestCase() {
     const std::string kAppStorageFolder = "storage1";
     reps = new SQLPTRepresentation;
     dbms = new DBMS(kDatabaseName);
-    policy_settings_ =
-        utils::MakeShared<policy_handler_test::MockPolicySettings>();
+    policy_settings_ = std::auto_ptr<policy_handler_test::MockPolicySettings>(
+          new policy_handler_test::MockPolicySettings());
     ON_CALL(*policy_settings_,
             app_storage_folder()).WillByDefault(ReturnRef(kAppStorageFolder));
     EXPECT_EQ(::policy::SUCCESS, reps->Init(policy_settings_.get()));
@@ -320,7 +321,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
 DBMS* SQLPTRepresentationTest::dbms = 0;
 SQLPTRepresentation* SQLPTRepresentationTest::reps = 0;
 const std::string SQLPTRepresentationTest::kDatabaseName = "policy.sqlite";
-utils::SharedPtr<policy_handler_test::MockPolicySettings>
+std::auto_ptr<policy_handler_test::MockPolicySettings>
     SQLPTRepresentationTest::policy_settings_;
 
 class SQLPTRepresentationTest2 : public ::testing::Test {

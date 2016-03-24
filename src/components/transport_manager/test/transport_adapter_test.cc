@@ -45,6 +45,7 @@
 #include "protocol/raw_message.h"
 #include "utils/make_shared.h"
 #include "resumption/last_state.h"
+#include "config_profile/profile.h"
 
 namespace test {
 namespace components {
@@ -84,11 +85,16 @@ class TransportAdapterTest : public ::testing::Test {
   TransportAdapterTest(): last_state_("app_storage_folder",
                                       "app_info_storage"){}
 
-  virtual void SetUp() {
+  static void SetUpTestCase() {
+    profile::Profile::instance()->config_file_name("smartDeviceLink_test.ini");
+  }
+
+  void SetUp() OVERRIDE {
     dev_id = "device_id";
     uniq_id = "unique_device_id";
     app_handle = 1;
   }
+
   resumption::LastState  last_state_;
   std::string dev_id;
   std::string uniq_id;

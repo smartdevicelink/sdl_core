@@ -125,19 +125,6 @@ const char* kSecurityVerifyPeerKey = "VerifyPeer";
 const char* kBeforeUpdateHours = "UpdateBeforeHours";
 #endif
 
-#ifdef CUSTOMER_PASA
-const char* kHMIHeartBeatTimeoutKey = "HMIHeartBeatTimeout";
-const char* kLoggerSection = "LOGGING";
-const char* kAudioMQPath = "MQAudioPath";
-const char* kLoggerConfigFileKey = "LoggerConfigFile";
-const char* kRemoteLoggingFlagFileKey = "RemoteLoggingFlagFile";
-const char* kRemoteLoggingFlagFilePathKey = "RemoteLoggingFlagFilePath";
-const char* kTargetLogFileHomeDirKey = "TargetLogFileHomeDir";
-const char* kTargetLogFileNamePatternKey = "TargetLogFileNamePattern";
-const char* kTargetBootCountFileKey = "TargetBootCountFile";
-const char* kTargetTmpDirKey = "TargetTmpDir";
-const char* kLogFileMaxSizeKey = "LogFileMaxSize";
-#endif
 const char* kAudioDataStoppedTimeoutKey = "AudioDataStoppedTimeout";
 const char* kVideoDataStoppedTimeoutKey = "VideoDataStoppedTimeout";
 const char* kMixingAudioSupportedKey = "MixingAudioSupported";

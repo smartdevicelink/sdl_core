@@ -53,13 +53,9 @@ class MockMediaManagerSettings : public ::media_manager::MediaManagerSettings {
   MOCK_CONST_METHOD0(named_audio_pipe_path, const std::string&());
   MOCK_CONST_METHOD0(video_stream_file, const std::string&());
   MOCK_CONST_METHOD0(audio_stream_file, const std::string&());
-#ifdef CUSTOMER_PASA
-  MOCK_CONST_METHOD0(audio_mq_path, const std::string&());
-#else
   MOCK_CONST_METHOD0(app_storage_folder, const std::string&());
   MOCK_CONST_METHOD0(app_resource_folder, const std::string&());
   MOCK_CONST_METHOD0(recording_file_source, const std::string&());
-#endif  // CUSTOMER_PASA
 };
 
 }  // namespace media_manager_test

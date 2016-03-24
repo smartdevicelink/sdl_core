@@ -256,11 +256,6 @@ class ApplicationManagerImpl
   MOCK_METHOD1(RemoveAppDataFromHMI, bool(ApplicationSharedPtr));
   MOCK_METHOD1(HeadUnitReset,
                void(mobile_api::AppInterfaceUnregisteredReason::eType));
-#ifdef CUSTOMER_PASA
-  MOCK_METHOD0(HeadUnitSuspend, void());
-  MOCK_CONST_METHOD0(state_suspended, bool());
-  MOCK_METHOD1(set_state_suspended, void(const bool));
-#endif  // CUSTOMER_PASA
   MOCK_METHOD1(LoadAppDataToHMI, bool(ApplicationSharedPtr));
   MOCK_METHOD1(ActivateApplication, bool(ApplicationSharedPtr));
   MOCK_METHOD1(IsHmiLevelFullAllowed,
