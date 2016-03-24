@@ -50,7 +50,7 @@ namespace media_manager_test {
  */
 using namespace media_manager;
 typedef utils::SharedPtr<MediaAdapterListener> MediaListenerPtr;
-class MediaAdapterImplMock : public ::media_manager::MediaAdapterImpl {
+class MockMediaAdapterImpl : public ::media_manager::MediaAdapterImpl {
  public:
   MOCK_METHOD1(AddListener,
         void(const utils::SharedPtr<MediaAdapterListener>&));

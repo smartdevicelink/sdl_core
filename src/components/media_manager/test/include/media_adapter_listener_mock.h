@@ -43,7 +43,7 @@ namespace media_manager_test {
 /*
  * MOCK implementation of ::media_manager::MediaAdapterListener
  */
-class MediaAdapterListenerMock : public ::media_manager::MediaAdapterListener {
+class MockMediaAdapterListener : public ::media_manager::MediaAdapterListener {
  public:
   MOCK_METHOD2(OnDataReceived,
       void(int32_t application_key,

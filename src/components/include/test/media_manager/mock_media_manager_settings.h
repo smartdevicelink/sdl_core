@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,37 +29,41 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifndef TEST_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_MOCK_H_
-#define TEST_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_MOCK_H_
+#ifndef SRC_COMPONENTS_INCLUDE__TEST_MEDIA_MANAGER_MOCK_MEDIA_MANAGER_SETTINGS_H_
+#define SRC_COMPONENTS_INCLUDE__TEST_MEDIA_MANAGER_MOCK_MEDIA_MANAGER_SETTINGS_H_
 
 #include <gmock/gmock.h>
-#include "media_manager/media_manager.h"
-#include "media_manager/media_adapter.h"
+#include <string>
+#include "media_manager/media_manager_settings.h"
 
 namespace test {
 namespace components {
 namespace media_manager_test {
 
-/*
- * MOCK implementation of ::media_manager::MediaAdapter
- */
-class MockMediaAdapter : public ::media_manager::MediaAdapter {
- public:
-  MOCK_METHOD2(SendData,
-      void(int32_t application_key,
-           const ::protocol_handler::RawMessagePtr message));
-  MOCK_METHOD1(StartActivity,
-      void(int32_t application_key));
-  MOCK_METHOD1(StopActivity,
-      void(int32_t application_key));
-  MOCK_CONST_METHOD1(is_app_performing_activity,
-      bool(int32_t application_key));
-};
 
+
+class MockMediaManagerSettings : public ::media_manager::MediaManagerSettings {
+ public:
+  MOCK_CONST_METHOD0(video_server_type, const std::string&());
+  MOCK_CONST_METHOD0(audio_server_type, const std::string&());
+  MOCK_CONST_METHOD0(server_address, const std::string&());
+  MOCK_CONST_METHOD0(video_streaming_port, const std::uint16_t());
+  MOCK_CONST_METHOD0(audio_streaming_port, const std::uint16_t());
+  MOCK_CONST_METHOD0(named_video_pipe_path, const std::string&());
+  MOCK_CONST_METHOD0(named_audio_pipe_path, const std::string&());
+  MOCK_CONST_METHOD0(video_stream_file, const std::string&());
+  MOCK_CONST_METHOD0(audio_stream_file, const std::string&());
+#ifdef CUSTOMER_PASA
+  MOCK_CONST_METHOD0(audio_mq_path, const std::string&());
+#else
+  MOCK_CONST_METHOD0(app_storage_folder, const std::string&());
+  MOCK_CONST_METHOD0(app_resource_folder, const std::string&());
+  MOCK_CONST_METHOD0(recording_file_source, const std::string&());
+#endif  // CUSTOMER_PASA
+};
 
 }  // namespace media_manager_test
 }  // namespace components
 }  // namespace test
 
-#endif  // TEST_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_MOCK_H_
+#endif  // SRC_COMPONENTS_INCLUDE__TEST_MEDIA_MANAGER_MOCK_MEDIA_MANAGER_SETTINGS_H_
