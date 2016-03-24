@@ -42,7 +42,7 @@ namespace transport_manager_test {
 
 using namespace ::transport_manager::transport_adapter;
 
-class ConnectionMock : public Connection {
+class MockConnection : public Connection {
  public:
   MOCK_METHOD1(SendData, TransportAdapter::Error(
                              ::protocol_handler::RawMessagePtr message));

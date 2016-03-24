@@ -42,18 +42,18 @@ namespace test {
 namespace components {
 namespace transport_manager_test {
 
-class DeviceMock : public ::transport_manager::transport_adapter::Device {
+class MockDevice : public ::transport_manager::transport_adapter::Device {
  public:
-  DeviceMock(const std::string& name, const std::string& unique_device_id)
+  MockDevice(const std::string& name, const std::string& unique_device_id)
       : Device(name, unique_device_id) {}
   MOCK_CONST_METHOD1(IsSameAs, bool(const Device* other_device));
   MOCK_CONST_METHOD0(GetApplicationList, std::vector<int>());
   MOCK_METHOD0(Stop, void());
 };
 
-class TCPDeviceMock : public ::transport_manager::transport_adapter::TcpDevice {
+class MockTCPDevice : public ::transport_manager::transport_adapter::TcpDevice {
  public:
-  TCPDeviceMock(const uint32_t& in_addr_t, const std::string& name)
+  MockTCPDevice(const uint32_t& in_addr_t, const std::string& name)
       : TcpDevice(in_addr_t, name) {}
   MOCK_CONST_METHOD1(IsSameAs, bool(const Device* other_device));
   MOCK_CONST_METHOD0(GetApplicationList, std::vector<int>());

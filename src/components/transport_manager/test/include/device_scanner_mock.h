@@ -40,7 +40,7 @@ namespace test {
 namespace components {
 namespace transport_manager_test {
 
-class DeviceScannerMock
+class MockDeviceScanner
     : public ::transport_manager::transport_adapter::DeviceScanner {
  public:
   MOCK_METHOD0(

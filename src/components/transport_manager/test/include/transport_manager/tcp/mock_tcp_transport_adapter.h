@@ -30,33 +30,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_CLIENT_CONNECTION_LISTENER_MOCK_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_CLIENT_CONNECTION_LISTENER_MOCK_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TCP_MOCK_TCP_TRANSPORT_ADAPTER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TCP_MOCK_TCP_TRANSPORT_ADAPTER_H_
 
 #include "gmock/gmock.h"
-#include "transport_manager/transport_adapter/client_connection_listener.h"
+#include "transport_manager/tcp/tcp_transport_adapter.h"
 
 namespace test {
 namespace components {
 namespace transport_manager_test {
 
-class MockClientConnectionListener
-    : public ::transport_manager::transport_adapter::ClientConnectionListener {
+using namespace ::transport_manager::transport_adapter;
+
+class MockTCPTransportAdapter : public TcpTransportAdapter {
  public:
-  MOCK_METHOD0(
-      Init, ::transport_manager::transport_adapter::TransportAdapter::Error());
-  MOCK_METHOD0(Terminate, void());
-  MOCK_CONST_METHOD0(IsInitialised, bool());
-  MOCK_METHOD0(
-      StartListening,
-      ::transport_manager::transport_adapter::TransportAdapter::Error());
-  MOCK_METHOD0(
-      StopListening,
-      ::transport_manager::transport_adapter::TransportAdapter::Error());
+  MockTCPTransportAdapter(uint16_t port, resumption::LastState& last_state)
+    : TcpTransportAdapter(port,last_state) {
+    ::profile::Profile::instance()->config_file_name(
+        "smartDeviceLink_test.ini");
+  }
+  MOCK_CONST_METHOD2(FindEstablishedConnection,
+                     ConnectionSPtr(const DeviceUID& device_handle,
+                                    const ApplicationHandle& app_handle));
+
+  MOCK_CONST_METHOD1(FindDevice, DeviceSptr(const DeviceUID& device_handle));
+  MOCK_METHOD2(Connect,
+               TransportAdapter::Error(const DeviceUID& device_handle,
+                                       const ApplicationHandle& app_handle));
+  void CallStore() { Store(); }
+  bool CallRestore() { return Restore(); }
 };
 
 }  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_CLIENT_CONNECTION_LISTENER_MOCK_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TCP_MOCK_TCP_TRANSPORT_ADAPTER_H_
