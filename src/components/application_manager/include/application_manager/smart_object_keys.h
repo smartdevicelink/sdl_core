@@ -277,12 +277,26 @@ const char time_stamp[] = "timeStamp";
 const char manual_text_entry[] = "manualTextEntry";
 const char image_type_supported[] = "imageTypeSupported";
 const char unexpected_disconnect[] = "unexpectedDisconnect";
+
+const char longitude_degrees[] = "longitudeDegrees";
+const char latitude_degrees[] = "latitudeDegrees";
 const char location_name[] = "locationName";
 const char location_description[] = "locationDescription";
 const char address_lines[] = "addressLines";
 const char phone_number[] = "phoneNumber";
 const char number[] = "number";
 const char location_image[] = "locationImage";
+const char address[] = "address";
+const char country_name[] = "countryName";
+const char country_code[] = "countryCode";
+const char postal_code[] = "postalCode";
+const char administrative_area[] = "administrativeArea";
+const char locality[] = "locality";
+const char sub_locality[] = "subLocality";
+const char thoroughfare[] = "thoroughfare";
+const char sub_thoroughfare[] = "subThoroughfare";
+
+
 const char is_suscribed[] = "isSubscribed";
 const char message_data[] = "messageData";
 }  // namespace strings
