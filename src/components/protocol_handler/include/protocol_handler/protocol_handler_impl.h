@@ -36,7 +36,8 @@
 #include <map>
 #include <memory>
 #include <set>
-#include <cstdint>
+#include <list>
+#include <stdint.h>
 #include <utility>  // std::make_pair
 #include <vector>
 #include "utils/prioritized_queue.h"
@@ -291,6 +292,9 @@ class ProtocolHandlerImpl
                           uint32_t session_id,
                           uint8_t protocol_version,
                           uint8_t service_type);
+
+
+  SessionObserver &get_session_observer() OVERRIDE;
 
  private:
   void SendEndServicePrivate(int32_t connection_id, uint8_t session_id,
