@@ -30,16 +30,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_MOCK_POLICY_HANDLER_INTERFACE_MOCK_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_MOCK_POLICY_HANDLER_INTERFACE_MOCK_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_POLICY_HANDLER_INTERFACE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_POLICY_HANDLER_INTERFACE_H_
 
 #include "application_manager/policies/policy_handler_interface.h"
 #include "gmock/gmock.h"
 #include "policy/policy_types.h"
 
-
-namespace policy {
+namespace test {
+namespace components {
+namespace policy_test {
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
@@ -178,14 +178,17 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                          int32_t timespan_seconds));
   MOCK_CONST_METHOD0(RetrieveCertificate, std::string());
   MOCK_CONST_METHOD0(get_settings, const policy::PolicySettings&());
-
+  MOCK_CONST_METHOD0(RemoteAppsUrl, const std::string());
+  MOCK_METHOD2(GetServiceUrls, void(const std::string& service_type,
+                                    policy::EndpointUrls& end_points));
  private:
   MOCK_METHOD2(OnAppPermissionConsentInternal,
                void(const uint32_t connection_key,
                     policy::PermissionConsent& permissions));
 };
 
-}  // namespace policy
+}  // namespace policy_test
+}  // namespace components
+}  // namespace test
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_MOCK_POLICY_HANDLER_INTERFACE_MOCK_H_
-
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_POLICY_HANDLER_INTERFACE_H_

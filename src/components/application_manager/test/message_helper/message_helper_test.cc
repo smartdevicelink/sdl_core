@@ -39,6 +39,8 @@
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/test/resumption/include/application_mock.h"
 #include "utils/custom_string.h"
+#include "policy/mock_policy_settings.h"
+#include "application_manager/policies/policy_handler.h"
 
 namespace application_manager {
 namespace test {
@@ -680,9 +682,11 @@ TEST_F(MessageHelperTest,
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<AppMock>();
   // Creating input data for method
   smart_objects::SmartObject object;
+  policy_handler_test::MockPolicySettings policy_settings_;
+  const policy::PolicyHandler policy_handler (policy_settings_);
   // Method call
   mobile_apis::Result::eType result =
-      MessageHelper::ProcessSoftButtons(object, appSharedMock);
+      MessageHelper::ProcessSoftButtons(object, appSharedMock, policy_handler);
   // Expect
   EXPECT_EQ(mobile_apis::Result::SUCCESS, result);
 }
@@ -696,9 +700,11 @@ TEST_F(MessageHelperTest,
   smart_objects::SmartObject& buttons = object[strings::soft_buttons];
   // Setting invalid image string to button
   buttons[0][strings::image][strings::value] = "invalid\\nvalue";
+  policy_handler_test::MockPolicySettings policy_settings_;
+  const policy::PolicyHandler policy_handler (policy_settings_);
   // Method call
   mobile_apis::Result::eType result =
-      MessageHelper::ProcessSoftButtons(object, appSharedMock);
+      MessageHelper::ProcessSoftButtons(object, appSharedMock, policy_handler);
   // Expect
   EXPECT_EQ(mobile_apis::Result::INVALID_DATA, result);
 }
