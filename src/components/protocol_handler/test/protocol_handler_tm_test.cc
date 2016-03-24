@@ -35,12 +35,14 @@
 #include "protocol_handler/protocol_handler_impl.h"
 #include "protocol/common.h"
 #include "protocol_handler/control_message_matcher.h"
-#include "protocol_handler/protocol_handler_mock.h"
+#include "protocol_handler/mock_protocol_handler.h"
 #include "protocol_handler/protocol_observer_mock.h"
 #include "protocol_handler/mock_protocol_handler_settings.h"
 #include "protocol_handler/mock_session_observer.h"
 #include "connection_handler/mock_connection_handler.h"
 #include "transport_manager/transport_manager_mock.h"
+#include "security_manager/mock_security_manager.h"
+#include "security_manager/mock_ssl_context.h"
 
 #include "utils/make_shared.h"
 
@@ -196,8 +198,8 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   testing::StrictMock<transport_manager_test::MockTransportManager> transport_manager_mock;
   testing::StrictMock<protocol_handler_test::MockSessionObserver> session_observer_mock;
 #ifdef ENABLE_SECURITY
-  testing::NiceMock<protocol_handler_test::SecurityManagerMock> security_manager_mock;
-  testing::NiceMock<protocol_handler_test::SSLContextMock> ssl_context_mock;
+  testing::NiceMock<security_manager_test::MockSecurityManager> security_manager_mock;
+  testing::NiceMock<security_manager_test::MockSSLContext> ssl_context_mock;
 #endif  // ENABLE_SECURITY
 };
 
