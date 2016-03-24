@@ -33,6 +33,7 @@
 #include "application_manager/commands/mobile/send_location_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
+#include "utils/helpers.h"
 
 namespace application_manager {
 
@@ -47,6 +48,7 @@ SendLocationRequest::~SendLocationRequest() {
 
 void SendLocationRequest::Run() {
   using namespace hmi_apis;
+  using smart_objects::SmartObject;
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application_manager::ApplicationManagerImpl::instance()
@@ -60,7 +62,7 @@ void SendLocationRequest::Run() {
     return;
   }
 
-  const smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
+  SmartObject& msg_params = (*message_)[strings::msg_params];
   std::list<Common_TextFieldName::eType> fields_to_check;
 
   if (msg_params.keyExists(strings::location_name)) {
@@ -87,11 +89,17 @@ void SendLocationRequest::Run() {
     return;
   }
 
-  if ((*message_)[strings::msg_params].keyExists(strings::location_image)) {
+  if (!CheckFieldsCompatibility()){
+      LOG4CXX_ERROR(logger_, "CheckFieldsCompability failed");
+      SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      return;
+  }
+
+  if (msg_params.keyExists(strings::location_image)) {
     mobile_apis::Result::eType verification_result =
         mobile_apis::Result::SUCCESS;
     verification_result = MessageHelper::VerifyImage(
-        (*message_)[strings::msg_params][strings::location_image], app);
+        msg_params[strings::location_image], app);
     if (mobile_apis::Result::SUCCESS != verification_result) {
       LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
       SendResponse(false, verification_result);
@@ -99,59 +107,77 @@ void SendLocationRequest::Run() {
     }
   }
 
-  smart_objects::SmartObject request_msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-  request_msg_params = (*message_)[strings::msg_params];
-  request_msg_params[strings::app_id] = app->hmi_app_id();
 
+  SmartObject request_msg_params = SmartObject(
+      smart_objects::SmartType_Map);
+  request_msg_params = msg_params;
+  request_msg_params[strings::app_id] = app->hmi_app_id();
   SendHMIRequest(hmi_apis::FunctionID::Navigation_SendLocation,
                  &request_msg_params, true);
 }
 
 void SendLocationRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
+  namespace Result = mobile_apis::Result;
+  using namespace helpers;
   const smart_objects::SmartObject& message = event.smart_object();
-  switch (event.id()) {
-    case hmi_apis::FunctionID::Navigation_SendLocation: {
-      LOG4CXX_INFO(logger_, "Received Navigation_SendLocation event");
-      mobile_apis::Result::eType result_code = GetMobileResultCode(
-          static_cast<hmi_apis::Common_Result::eType>(
-              message[strings::params][hmi_response::code].asUInt()));
-      bool result =
-          mobile_apis::Result::SUCCESS == result_code ||
-          mobile_apis::Result::WARNINGS == result_code ||
-          mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code ;
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
-      break;
-    }
-    default: {
-      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
-      break;
-    }
+  if (hmi_apis::FunctionID::Navigation_SendLocation == event.id()) {
+    LOG4CXX_INFO(logger_, "Received Navigation_SendLocation event");
+    mobile_apis::Result::eType result_code =
+        GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
+            message[strings::params][hmi_response::code].asUInt()));
+    const bool result =
+        Compare<Result::eType, EQ, ONE>(result_code,
+                                        Result::SAVED,
+                                        Result::SUCCESS,
+                                        Result::WARNINGS,
+                                        Result::UNSUPPORTED_RESOURCE);
+    SendResponse(result, result_code, NULL, &(message[strings::params]));
+    return;
   }
+  LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+}
+
+bool SendLocationRequest::CheckFieldsCompatibility() {
+  const smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
+  MessageHelper::PrintSmartObject(msg_params);
+  const bool longitude_degrees_exist =
+      msg_params.keyExists(strings::longitude_degrees);
+  const bool latitude_degrees_exist =
+      msg_params.keyExists(strings::latitude_degrees);
+  const bool address_exist = msg_params.keyExists(strings::address);
+
+  if (latitude_degrees_exist ^ longitude_degrees_exist) {
+    LOG4CXX_DEBUG(logger_, "latitudeand longitude should be provided only in pair");
+    return false;
+  }
+
+  if (!address_exist && !longitude_degrees_exist && !latitude_degrees_exist) {
+    LOG4CXX_DEBUG(logger_, "address or latitude/longtitude should should be provided");
+    return false;
+  }
+  return true;
 }
 
 bool SendLocationRequest::IsWhiteSpaceExist() {
   LOG4CXX_AUTO_TRACE(logger_);
-  const char* str;
+  std::vector<std::string> field_names;
+  field_names.push_back(strings::location_name);
+  field_names.push_back(strings::location_description);
+  field_names.push_back(strings::phone_number);
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
 
-  if (msg_params.keyExists(strings::location_name)) {
-    str = msg_params[strings::location_name].asCharArray();
-    if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_,
-                    "parameter locationName contains invalid character");
-      return true;
-    }
-  }
-
-  if (msg_params.keyExists(strings::location_description)) {
-    str = msg_params[strings::location_description].asCharArray();
-    if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_,
-                    "parameter locationDescription contains invalid character");
-      return true;
+  std::vector<std::string>::iterator it = field_names.begin();
+  for (; it != field_names.end(); ++it) {
+      const std::string& field_name = *it;
+    if (msg_params.keyExists(field_name)) {
+        const char* str = msg_params[field_name].asCharArray();
+        if (!CheckSyntax(str)) {
+            LOG4CXX_ERROR(logger_,
+                          "parameter " << field_name << " contains invalid character");
+            return true;
+        }
     }
   }
 
@@ -161,30 +187,12 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
     smart_objects::SmartArray::const_iterator it_al = al_array->begin();
     smart_objects::SmartArray::const_iterator it_al_end = al_array->end();
     for (; it_al != it_al_end; ++it_al) {
-      str = (*it_al).asCharArray();
+      const char* str = (*it_al).asCharArray();
       if(!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_,
                       "parameter address_lines contains invalid character");
         return true;
       }
-    }
-  }
-
-  if (msg_params.keyExists(strings::phone_number)) {
-    str = msg_params[strings::phone_number].asCharArray();
-    if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_,
-                    "parameter phoneNumber contains invalid character");
-      return true;
-    }
-  }
-
-  if (msg_params.keyExists(strings::location_image)) {
-    str = msg_params[strings::location_image][strings::value].asCharArray();
-    if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_,
-                          "parameter value in locationImage contains invalid character");
-      return true;
     }
   }
 
