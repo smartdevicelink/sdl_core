@@ -53,6 +53,7 @@ extern const char* info;
 extern const char* app_id;
 extern const char* hmi_app_id;
 extern const char* device_id;
+extern const char* subscribed_for_way_points;
 extern const char* url;
 extern const char* urlScheme;
 extern const char* packageName;

@@ -137,6 +137,21 @@ smart_objects::SmartObject ResumptionData::GetApplicationGlobalProperties(
   return global_properties;
 }
 
+smart_objects::SmartObject ResumptionData::GetSubscribedForWayPoints(
+    const std::set<int32_t>& subscribed_for_way_points) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject result =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+  int app_id_counter = 0;
+  for (std::set<int32_t>::const_iterator app_id =
+           subscribed_for_way_points.begin();
+       app_id != subscribed_for_way_points.end(); ++app_id) {
+    result[app_id_counter] = *app_id;
+    app_id_counter++;
+  }
+  return result;
+}
+
 smart_objects::SmartObject ResumptionData::GetApplicationSubscriptions(
         app_mngr::ApplicationConstSharedPtr application) const {
   using namespace app_mngr;

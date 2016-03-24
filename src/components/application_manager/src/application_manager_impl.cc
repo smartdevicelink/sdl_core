@@ -1262,6 +1262,11 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
         break;
       }
     }
+    // SDL sends UnsubscribeWayPoints only for last application
+    if (subscribed_way_points_apps_list_.size() == 1) {
+      LOG4CXX_ERROR(logger_, "Send UnsubscribeWayPoints");
+      MessageHelper::SendUnSubscribedWayPoints();
+    }
     UnregisterApplication(
         session_key, reason, is_resuming, is_unexpected_disconnect);
     return;
@@ -3455,6 +3460,47 @@ void ApplicationManagerImpl::ClearTTSGlobalPropertiesList() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(tts_global_properties_app_list_lock_);
   tts_global_properties_app_list_.clear();
+}
+
+bool ApplicationManagerImpl::IsAppSubscribedForWayPoints(const uint32_t app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (subscribed_way_points_apps_list_.find(app) ==
+      subscribed_way_points_apps_list_.end()) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+void ApplicationManagerImpl::SubscribeAppForWayPoints(const uint32_t app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  subscribed_way_points_apps_list_.insert(app);
+}
+
+void ApplicationManagerImpl::UnSubscribeAppForWayPoints(const uint32_t app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  subscribed_way_points_apps_list_.erase(app);
+}
+
+bool ApplicationManagerImpl::IsAnyAppSubscribedForWayPoints() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (subscribed_way_points_apps_list_.size() == 0) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+const std::set<int32_t>& ApplicationManagerImpl::GetSubscribedForWayPoints()
+    const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return subscribed_way_points_apps_list_;
+}
+
+void ApplicationManagerImpl::SetSubscribedForWayPoints(
+    const std::set<int32_t>& subscribed_way_points_apps) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  subscribed_way_points_apps_list_ = subscribed_way_points_apps;
 }
 
 ApplicationManagerImpl::ApplicationListAccessor::~ApplicationListAccessor() {}

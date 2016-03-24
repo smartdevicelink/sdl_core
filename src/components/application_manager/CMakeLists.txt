@@ -237,6 +237,10 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/navi_show_constant_tbt_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/navi_send_location_request.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/navi_send_location_response.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/navi_subscribe_way_points_request.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/navi_subscribe_way_points_response.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/navi_unsubscribe_way_points_request.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/navi_unsubscribe_way_points_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_ready_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_system_context_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_device_chosen_notification.cc

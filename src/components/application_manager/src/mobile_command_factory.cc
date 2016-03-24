@@ -107,6 +107,10 @@
 #include "application_manager/commands/mobile/subscribe_button_response.h"
 #include "application_manager/commands/mobile/subscribe_vehicle_data_request.h"
 #include "application_manager/commands/mobile/subscribe_vehicle_data_response.h"
+#include "application_manager/commands/mobile/subscribe_way_points_request.h"
+#include "application_manager/commands/mobile/subscribe_way_points_response.h"
+#include "application_manager/commands/mobile/unsubscribe_way_points_request.h"
+#include "application_manager/commands/mobile/unsubscribe_way_points_response.h"
 #include "application_manager/commands/mobile/unregister_app_interface_request.h"
 #include "application_manager/commands/mobile/unregister_app_interface_response.h"
 #include "application_manager/commands/mobile/unsubscribe_button_request.h"
@@ -360,6 +364,24 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
         command = utils::MakeShared<commands::UnsubscribeVehicleDataResponse>(message);
       } else {
         command = utils::MakeShared<commands::UnsubscribeVehicleDataRequest>(message);
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::SubscribeWayPointsID: {
+      if ((*message)[strings::params][strings::message_type]
+          == static_cast<int>(application_manager::MessageType::kResponse)) {
+        command = utils::MakeShared<commands::SubscribeWayPointsResponse>(message);
+      } else {
+        command = utils::MakeShared<commands::SubscribeWayPointsRequest>(message);
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::UnsubscribeWayPointsID: {
+      if ((*message)[strings::params][strings::message_type]
+          == static_cast<int>(application_manager::MessageType::kResponse)) {
+        command = utils::MakeShared<commands::UnSubscribeWayPointsResponse>(message);
+      } else {
+        command = utils::MakeShared<commands::UnSubscribeWayPointsRequest>(message);
       }
       break;
     }

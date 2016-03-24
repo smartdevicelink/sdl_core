@@ -821,6 +821,24 @@ class ResumptionDataDB : public ResumptionData {
                              const std::string& device_id);
 
   /**
+   * @brief Insert subscribed AppIDs for way points to DB
+   * @return true if query is success otherwise false
+   */
+  bool InsertSubscribedForWayPoints();
+
+  /**
+   * @brief Get subscribed AppIDs for way points to DB
+   * @return true if query is success otherwise false
+   */
+  bool SelectSubscribedForWayPoints() const;
+
+  /**
+   * @brief Delete from DB subscribed apps for way points
+   * @return true if query is success otherwise false
+   */
+  bool DeleteSubscribedForWayPoints();
+
+  /**
    * @brief Writes data to DB after update
    */
   void WriteDb();

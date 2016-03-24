@@ -480,6 +480,12 @@ class MessageHelper {
    */
   static bool SendStopAudioPathThru();
 
+  /**
+   * @brief Sends UnsubscribeWayPoints request
+   * @return true if UnSubscribedWayPoints is send otherwise false
+   */
+  static bool SendUnSubscribedWayPoints();
+
   static smart_objects::SmartObjectSPtr CreateNegativeResponse(
       uint32_t connection_key,
       int32_t function_id,

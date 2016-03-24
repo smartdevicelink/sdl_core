@@ -32,6 +32,7 @@
 #include <string>
 #include <unistd.h>
 
+#include "application_manager/application_manager_impl.h"
 #include "application_manager/resumption/resumption_data_db.h"
 #include "application_manager/resumption/resumption_sql_queries.h"
 #include "application_manager/smart_object_keys.h"
@@ -149,6 +150,11 @@ void ResumptionDataDB::SaveApplication(
 
   if (!CheckExistenceApplication(policy_app_id, device_mac, application_exist)) {
     LOG4CXX_ERROR(logger_, "Problem with access to DB");
+    return;
+  }
+
+  if (!InsertSubscribedForWayPoints()) {
+    LOG4CXX_ERROR(logger_, "Problem with saving SubscribedForWayPoints");
     return;
   }
 
@@ -340,6 +346,11 @@ bool ResumptionDataDB::GetSavedApplication(
   if (!SelectDataFromAppTable(policy_app_id, device_id, saved_app)) {
     LOG4CXX_ERROR(logger_,
                   "Problem with restoring of data from application table");
+    return false;
+  }
+
+  if (!SelectSubscribedForWayPoints()) {
+    LOG4CXX_ERROR(logger_, "Problem with restoring of SubscribedForWayPoints");
     return false;
   }
 
@@ -2710,6 +2721,73 @@ void ResumptionDataDB::UpdateDataOnAwake() {
       WriteDb();
     }
   }
+}
+
+bool ResumptionDataDB::InsertSubscribedForWayPoints() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace app_mngr;
+
+  if (!DeleteSubscribedForWayPoints()) {
+    LOG4CXX_WARN(logger_, "SubscribedForWayPoints table was not cleaned");
+  }
+
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(kInsertSubscribedForWayPoints)) {
+    LOG4CXX_WARN(logger_,
+                 "Problem with verification query "
+                 "for updating some SubscribedForWayPoints data");
+    return false;
+  }
+
+  const std::set<int32_t> apps =
+      application_manager::ApplicationManagerImpl::instance()
+          ->GetSubscribedForWayPoints();
+  for (std::set<int32_t>::iterator i = apps.begin(); i != apps.end(); i++) {
+    query.Reset();
+    query.Bind(0, *i);
+    if (!query.Exec()) {
+      LOG4CXX_WARN(logger_, "Problem with execution query");
+      return false;
+    }
+  }
+  LOG4CXX_INFO(
+      logger_,
+      "Data were updated successfully in SubscribedForWayPoints table");
+  return true;
+}
+
+bool ResumptionDataDB::SelectSubscribedForWayPoints() const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  std::set<int32_t> subscribed_for_way_points;
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(kSelectSubscribedForWayPoints)) {
+    LOG4CXX_WARN(
+        logger_,
+        "Problem with verification kSelectSubscribedForWayPoints query");
+    return false;
+  }
+  while (query.Next()) {
+    subscribed_for_way_points.insert(query.GetInteger(0));
+  }
+  application_manager::ApplicationManagerImpl::instance()
+      ->SetSubscribedForWayPoints(subscribed_for_way_points);
+  return true;
+}
+
+bool ResumptionDataDB::DeleteSubscribedForWayPoints() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  utils::dbms::SQLQuery query(db());
+  if (!query.Prepare(kDeleteSubscribedForWayPoints)) {
+    LOG4CXX_WARN(
+        logger_,
+        "Problem with verification kDeleteSubscribedForWayPoints query");
+    return false;
+  }
+  if (!query.Exec()) {
+    LOG4CXX_WARN(logger_, "Problem with execution query");
+    return false;
+  }
+  return true;
 }
 
 bool ResumptionDataDB::UpdateApplicationData(

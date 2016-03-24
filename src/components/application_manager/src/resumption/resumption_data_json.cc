@@ -30,6 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "application_manager/application_manager_impl.h"
 #include "application_manager/resumption/resumption_data_json.h"
 #include "smart_objects/smart_object.h"
 #include "json/json.h"
@@ -62,6 +63,8 @@ void ResumptionDataJson::SaveApplication(
   const uint32_t time_stamp = (uint32_t)time(NULL);
   const std::string device_mac = application->mac_address();
   const mobile_apis::HMILevel::eType hmi_level = application->hmi_level();
+  const std::set<int32_t> subscribed_for_way_points =
+      app_mngr::ApplicationManagerImpl::instance()->GetSubscribedForWayPoints();
 
   sync_primitives::AutoLock autolock(resumption_lock_);
   Json::Value tmp;
@@ -96,6 +99,10 @@ void ResumptionDataJson::SaveApplication(
       GetApplicationFiles(application), tmp);
   json_app[strings::application_files] = tmp;
   json_app[strings::time_stamp] = time_stamp;
+  Formatters::CFormatterJsonBase::objToJsonValue(
+      GetSubscribedForWayPoints(subscribed_for_way_points), tmp);
+  json_app[strings::subscribed_for_way_points] = tmp;
+
   LOG4CXX_DEBUG(logger_, "SaveApplication : " << json_app.toStyledString());
 }
 
@@ -255,6 +262,7 @@ bool ResumptionDataJson::GetSavedApplication(
     const std::string& policy_app_id,
     const std::string& device_id,
     smart_objects::SmartObject& saved_app) const {
+  using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
   const int idx = GetObjectIndex(policy_app_id, device_id);
@@ -263,6 +271,19 @@ bool ResumptionDataJson::GetSavedApplication(
   }
   const Json::Value& json_saved_app = GetSavedApplications()[idx];
   Formatters::CFormatterJsonBase::jsonValueToObj(json_saved_app, saved_app);
+
+  smart_objects::SmartArray app_id_list =
+      *(saved_app[strings::subscribed_for_way_points].asArray());
+
+  std::set<int32_t> subscribed_for_way_points;
+
+  for (smart_objects::SmartArray::iterator i = app_id_list.begin();
+       i != app_id_list.end(); ++i) {
+    subscribed_for_way_points.insert((*i).asInt());
+  }
+
+  app_mngr::ApplicationManagerImpl::instance()->SetSubscribedForWayPoints(
+      subscribed_for_way_points);
   return true;
 }
 
