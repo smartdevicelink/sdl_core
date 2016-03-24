@@ -1369,7 +1369,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
   mobile_so_factory().attachSchema(*message, false);
   LOG4CXX_INFO(logger_, "Attached schema to message, result if valid: "
                             << message->isValid());
-  
+
   // Messages to mobile are not yet prioritized so use default priority value
   utils::SharedPtr<Message> message_to_send(
       new Message(protocol_handler::MessagePriority::kDefault));
@@ -2437,6 +2437,8 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   bool is_unexpected_disconnect = Compare<eType, NEQ, ALL>(
       unregister_reason_, IGNITION_OFF, MASTER_RESET, FACTORY_DEFAULTS);
 
+  ClearTTSGlobalPropertiesList();
+
   {  // A local scope to limit accessor's lifetime and release app list lock.
     ApplicationListAccessor accessor;
     ApplicationSetConstIt it = accessor.begin();
@@ -3437,6 +3439,12 @@ bool ApplicationManagerImpl::IsReadWriteAllowed(const std::string& path,
                 directory_type << " directory has read/write permissions.");
 
   return true;
+}
+
+void ApplicationManagerImpl::ClearTTSGlobalPropertiesList() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(tts_global_properties_app_list_lock_);
+  tts_global_properties_app_list_.clear();
 }
 
 ApplicationManagerImpl::ApplicationListAccessor::~ApplicationListAccessor() {}

@@ -1201,11 +1201,21 @@ bool CacheManager::Init(const std::string& file_name) {
     } break;
     case InitResult::SUCCESS: {
       LOG4CXX_INFO(logger_, "Policy Table was inited successfully");
+      
       result = LoadFromFile(file_name, *pt_);
-      backup_->UpdateDBVersion();
-      if (result) {
-        Backup();
+     
+      utils::SharedPtr<policy_table::Table> snapshot = GenerateSnapshot();
+      result &= snapshot->is_valid();
+      LOG4CXX_DEBUG(logger_, "Check if snapshot is valid: "
+		             << std::boolalpha << result);
+      if(!result) {
+        rpc::ValidationReport report("policy_table");
+	snapshot->ReportErrors(&report);
+	return result;
       }
+
+      backup_->UpdateDBVersion();
+      Backup();
     } break;
     default: {
       result = false;

@@ -1258,6 +1258,8 @@ class ApplicationManagerImpl
     }
   }
 
+  void ClearTTSGlobalPropertiesList();
+
   void OnApplicationListUpdateTimer();
 
   /**

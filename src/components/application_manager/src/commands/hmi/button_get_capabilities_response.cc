@@ -47,6 +47,14 @@ ButtonGetCapabilitiesResponse::~ButtonGetCapabilitiesResponse() {
 
 void ButtonGetCapabilitiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  const hmi_apis::Common_Result::eType code =
+      static_cast<hmi_apis::Common_Result::eType>(
+          (*message_)[strings::params][hmi_response::code].asInt());
+
+  if (hmi_apis::Common_Result::SUCCESS != code) {
+    LOG4CXX_ERROR(logger_, "Error is returned. Capabilities won't be updated.");
+    return;
+  }
 
   HMICapabilities& hmi_capabilities =
       ApplicationManagerImpl::instance()->hmi_capabilities();
