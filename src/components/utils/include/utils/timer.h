@@ -48,6 +48,7 @@ typedef sigval_t sigval;
 
 #include "utils/lock.h"
 #include "utils/timer_task.h"
+#include "utils/atomic_object.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 
@@ -60,8 +61,6 @@ typedef uint32_t Milliseconds;
  */
 class Timer {
  public:
-  friend class TimerDelegate;
-  friend class TimerLooperDelegate;
   /**
    * @brief constructor
    * @param name for indentify of current timer
@@ -111,9 +110,10 @@ class Timer {
  private:
   /**
    * @brief Delegate release timer, will call callback function one time
+   * or call delegate every timeout function while stop()
+   * won't be called. It's depend on flag.
    */
   class TimerDelegate : public threads::ThreadDelegate {
-    friend class Timer;
 
    public:
     /**
@@ -149,28 +149,6 @@ class Timer {
       */
     virtual void WaitUntilStart();
 
-   protected:
-    Timer* timer_;
-    uint32_t timeout_milliseconds_;
-    sync_primitives::Lock state_lock_;
-    sync_primitives::ConditionalVariable termination_condition_;
-    sync_primitives::ConditionalVariable starting_condition_;
-    volatile bool stop_flag_;
-    sync_primitives::Lock restart_flag_lock_;
-    volatile bool restart_flag_;
-    volatile bool is_started_flag_;
-
-    /**
-     * @brief Gets timeout with overflow check
-     * @return timeout
-     */
-    inline int32_t Get_timeout() const {
-      return std::min(
-          static_cast<uint32_t>(std::numeric_limits<int32_t>::max()),
-          timeout_milliseconds_);
-    }
-
-   private:
     /**
      * @brief Quits threadMain function after next loop.
      */
@@ -186,37 +164,42 @@ class Timer {
      */
     bool IsGoingStop();
 
-    DISALLOW_COPY_AND_ASSIGN(TimerDelegate);
-  };
-
-  /**
-   * @brief Delegate release looper timer.
-   * Will call delegate every timeout function while stop()
-   * won't be called
-   */
-  class TimerLooperDelegate : public TimerDelegate {
-   public:
     /**
-     * @brief Default constructor
-     *
-     * @param timer_thread The Timer_thread pointer
-     * @param timeout      Timeout to be set
+     * @brief Gets timeout with overflow check
+     * @return timeout
      */
-    explicit TimerLooperDelegate(Timer* timer);
+    inline int32_t Get_timeout() const {
+      return std::min(
+          static_cast<uint32_t>(std::numeric_limits<int32_t>::max()),
+          timeout_milliseconds_);
+    }
 
     /**
-     * @brief Thread main function.
-     */
-    void threadMain() OVERRIDE;
+      * @brief Make class delegate repeatable
+      */
+    inline void MakeRepetable() {
+      is_repeatable_ = true;
+    }
+
+   protected:
+    Timer* timer_;
+    uint32_t timeout_milliseconds_;
+    sync_primitives::Lock state_lock_;
+    sync_primitives::ConditionalVariable termination_condition_;
+    sync_primitives::ConditionalVariable starting_condition_;
+    sync_primitives::atomic_bool stop_flag_;
+    sync_primitives::atomic_bool restart_flag_;
+    sync_primitives::atomic_bool is_started_flag_;
+    sync_primitives::atomic_bool is_repeatable_;
 
    private:
-    DISALLOW_COPY_AND_ASSIGN(TimerLooperDelegate);
+    DISALLOW_COPY_AND_ASSIGN(TimerDelegate);
   };
 
   const std::string name_;
   const TimerTask* task_;
   uint32_t timeout_ms_;
-  bool is_running_;
+  sync_primitives::atomic_bool is_running_;
   threads::Thread* thread_;
   TimerDelegate* delegate_;
 

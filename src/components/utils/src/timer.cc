@@ -79,13 +79,16 @@ void timer::Timer::Start(const Milliseconds timeout, const bool repeatable) {
 
   // It's new timer and we have to create it
   if (!delegate_ && !thread_) {
-    delegate_ =
-        repeatable ? new TimerLooperDelegate(this) : new TimerDelegate(this);
-
+    delegate_ = new TimerDelegate(this);
     thread_ = threads::CreateThread(name_.c_str(), delegate_);
+    DCHECK(delegate_);
     DCHECK(thread_);
+
+    if (repeatable) {
+      delegate_->MakeRepetable();
+    }
   }
-  // else timer has been already starting
+  // Else timer has been already starting
 
   if (thread_->is_running()) {
     LOG4CXX_INFO(logger_, "Restart timer in thread " << name_);
@@ -105,7 +108,7 @@ void timer::Timer::Stop() {
   DCHECK(thread_);
   LOG4CXX_DEBUG(logger_, "Stopping timer  " << name_);
   if (pthread_equal(pthread_self(), thread_->thread_handle())) {
-    // Stop itself can't, so suspend
+    // Thread can't stop itself , so it will suspend
     Suspend();
   } else {
     thread_->join();
@@ -153,12 +156,10 @@ timer::Timer::TimerDelegate::TimerDelegate(Timer* timer)
     , state_lock_(true)
     , stop_flag_(false)
     , restart_flag_(false)
-    , is_started_flag_(false) {
+    , is_started_flag_(false)
+    , is_repeatable_(false) {
   DCHECK(timer_);
 }
-
-timer::Timer::TimerLooperDelegate::TimerLooperDelegate(timer::Timer* timer)
-    : TimerDelegate(timer) {}
 
 timer::Timer::TimerDelegate::~TimerDelegate() {
   timer_ = NULL;
@@ -191,40 +192,11 @@ void timer::Timer::TimerDelegate::threadMain() {
           logger_,
           "Timeout reset force (ms): " << TimerDelegate::timeout_milliseconds_);
     }
-    {
-      sync_primitives::AutoLock auto_lock(restart_flag_lock_);
+    if (!is_repeatable_) {
       if (!restart_flag_) {
         return;
       }
       restart_flag_ = false;
-    }
-  }
-}
-
-void timer::Timer::TimerLooperDelegate::threadMain() {
-  using sync_primitives::ConditionalVariable;
-  sync_primitives::AutoLock auto_lock(TimerDelegate::state_lock_);
-  TimerDelegate::stop_flag_ = false;
-  // Notify that we've already started
-  is_started_flag_ = true;
-  starting_condition_.NotifyOne();
-
-  while (!TimerDelegate::stop_flag_) {
-    int32_t wait_milliseconds_left = TimerDelegate::Get_timeout();
-    LOG4CXX_DEBUG(logger_,
-                  "Milliseconds left to wait: " << wait_milliseconds_left);
-    ConditionalVariable::WaitStatus wait_status =
-        TimerDelegate::termination_condition_.WaitFor(auto_lock,
-                                                      wait_milliseconds_left);
-    // Quit sleeping or continue sleeping in case of spurious wake up
-    if (ConditionalVariable::kTimeout == wait_status ||
-        wait_milliseconds_left <= 0) {
-      LOG4CXX_TRACE(logger_, "Timer timeout (ms): " << wait_milliseconds_left);
-      TimerDelegate::timer_->OnTimeout();
-    } else {
-      LOG4CXX_DEBUG(
-          logger_,
-          "Timeout reset force (ms): " << TimerDelegate::timeout_milliseconds_);
     }
   }
 }
@@ -241,23 +213,15 @@ void timer::Timer::TimerDelegate::SetTimeOut(
 }
 
 void timer::Timer::TimerDelegate::ShouldBeStoped() {
-  {
-    sync_primitives::AutoLock auto_lock(state_lock_);
     stop_flag_ = true;
-  }
-  {
-    sync_primitives::AutoLock auto_lock(restart_flag_lock_);
     restart_flag_ = false;
-  }
 }
 
 void timer::Timer::TimerDelegate::ShouldBeRestarted() {
-  sync_primitives::AutoLock auto_lock(restart_flag_lock_);
   restart_flag_ = true;
 }
 
 bool timer::Timer::TimerDelegate::IsGoingStop() {
-  sync_primitives::AutoLock auto_lock(state_lock_);
   return stop_flag_;
 }
 
@@ -268,3 +232,4 @@ void timer::Timer::TimerDelegate::WaitUntilStart() {
     starting_condition_.Wait(auto_lock);
   }
 }
+
