@@ -223,6 +223,7 @@ const std::string kCreateSchema =
     "  `deviceID` TEXT, "
     "  `idglobalProperties` INTEGER, "
     "  `isMediaApplication` BOOL, "
+    "  `isSubscribedForWayPoints` BOOL, "
     "  CONSTRAINT `fk_globalProperties` "
     "    FOREIGN KEY(`idglobalProperties`) "
     "    REFERENCES `globalProperties`(`idglobalProperties`) "
@@ -790,9 +791,9 @@ const std::string kInsertApplication =
     "(`connection_key`, `grammarID`, `hashID`, "
     "`hmiAppID`, `hmiLevel`, `ign_off_count`, "
     "`timeStamp`, `idglobalProperties`, "
-    "`isMediaApplication`, `appID`, `deviceID`) "
+    "`isMediaApplication`, `appID`, `deviceID`, `isSubscribedForWayPoints`) "
     "VALUES "
-    "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+    "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
 const std::string kSelectCountFiles =
     "SELECT COUNT (`idfile`) "
@@ -945,7 +946,7 @@ const std::string kSelectTTSChunk =
 const std::string kSelectAppTable =
     "SELECT `appID`, `connection_key`, `grammarID`, `hashID`, `hmiAppID`, "
     "`hmiLevel`, `ign_off_count`, "
-    "`timeStamp`, `deviceID`, `isMediaApplication` "
+    "`timeStamp`, `deviceID`, `isMediaApplication`, `isSubscribedForWayPoints` "
     "FROM `application` "
     "WHERE `appID` = ? AND `deviceID` = ?;";
 

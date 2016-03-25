@@ -32,7 +32,6 @@
 
 #include "application_manager/commands/hmi/navi_subscribe_way_points_response.h"
 #include "application_manager/event_engine/event.h"
-#include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {

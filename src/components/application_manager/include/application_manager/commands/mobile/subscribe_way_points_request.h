@@ -25,7 +25,7 @@ public:
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  virtual void Run() OVERRIDE;
   /**
    * @brief Interface method that is called whenever new event received
    *

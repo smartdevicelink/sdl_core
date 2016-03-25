@@ -36,5 +36,4 @@ class NaviUnSubscribeWaypointsResponse
 } // namespace commands
 
 } // namespace application_manager
-
 #endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_UNSUBSCRIBE_WAY_POINTS_RESPONSE_H_

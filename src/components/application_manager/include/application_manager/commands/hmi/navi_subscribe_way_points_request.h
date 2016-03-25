@@ -18,7 +18,7 @@ public:
      *
      * @param message Incoming SmartObject message
      **/
-    explicit NaviSubscribeWayPointsRequest(const MessageSharedPtr &);
+    explicit NaviSubscribeWayPointsRequest(const MessageSharedPtr& message);
     /**
      * @brief NaviSubscribeWayPointsRequest class destructor
      **/
@@ -26,7 +26,7 @@ public:
     /**
      * @brief Execute command
      **/
-    virtual void Run();
+    virtual void Run() OVERRIDE;
 
 private:
   DISALLOW_COPY_AND_ASSIGN(NaviSubscribeWayPointsRequest);

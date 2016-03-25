@@ -286,7 +286,7 @@ class ApplicationManagerImpl
    * @return true if Application is subscribed for way points
    * otherwise false
    */
-  bool IsAppSubscribedForWayPoints(const uint32_t app);
+  bool IsAppSubscribedForWayPoints(const uint32_t app_id) const;
 
   /**
    * @brief Subscribe Application for way points

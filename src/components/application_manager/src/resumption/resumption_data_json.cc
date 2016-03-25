@@ -63,8 +63,9 @@ void ResumptionDataJson::SaveApplication(
   const uint32_t time_stamp = (uint32_t)time(NULL);
   const std::string device_mac = application->mac_address();
   const mobile_apis::HMILevel::eType hmi_level = application->hmi_level();
-  const std::set<int32_t> subscribed_for_way_points =
-      app_mngr::ApplicationManagerImpl::instance()->GetSubscribedForWayPoints();
+  const bool is_subscribed_for_way_points =
+      app_mngr::ApplicationManagerImpl::instance()->
+      IsAppSubscribedForWayPoints(application->app_id());
 
   sync_primitives::AutoLock autolock(resumption_lock_);
   Json::Value tmp;
@@ -99,9 +100,7 @@ void ResumptionDataJson::SaveApplication(
       GetApplicationFiles(application), tmp);
   json_app[strings::application_files] = tmp;
   json_app[strings::time_stamp] = time_stamp;
-  Formatters::CFormatterJsonBase::objToJsonValue(
-      GetSubscribedForWayPoints(subscribed_for_way_points), tmp);
-  json_app[strings::subscribed_for_way_points] = tmp;
+  json_app[strings::subscribed_for_way_points] = is_subscribed_for_way_points;
 
   LOG4CXX_DEBUG(logger_, "SaveApplication : " << json_app.toStyledString());
 }
@@ -272,18 +271,6 @@ bool ResumptionDataJson::GetSavedApplication(
   const Json::Value& json_saved_app = GetSavedApplications()[idx];
   Formatters::CFormatterJsonBase::jsonValueToObj(json_saved_app, saved_app);
 
-  smart_objects::SmartArray app_id_list =
-      *(saved_app[strings::subscribed_for_way_points].asArray());
-
-  std::set<int32_t> subscribed_for_way_points;
-
-  for (smart_objects::SmartArray::iterator i = app_id_list.begin();
-       i != app_id_list.end(); ++i) {
-    subscribed_for_way_points.insert((*i).asInt());
-  }
-
-  app_mngr::ApplicationManagerImpl::instance()->SetSubscribedForWayPoints(
-      subscribed_for_way_points);
   return true;
 }
 
