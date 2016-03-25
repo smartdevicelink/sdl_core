@@ -45,6 +45,7 @@ typedef sigval_t sigval;
 #include <time.h>
 #include <string>
 #include <limits>
+#include <memory>
 
 #include "utils/lock.h"
 #include "utils/timer_task.h"
@@ -66,7 +67,7 @@ class Timer {
    * @param name for indentify of current timer
    * @param task_for_tracking is SPtr to trackable task
    */
-  Timer(const std::string& name, const TimerTask* task_for_tracking);
+  Timer(const std::string& name, TimerTask* task_for_tracking);
 
   /**
    * @brief destructor - if timer running : call stop in the body
@@ -162,7 +163,7 @@ class Timer {
     /**
      * @brief Return flag IsGoingStop
      */
-    bool IsGoingStop();
+    bool IsGoingToStop() const;
 
     /**
      * @brief Gets timeout with overflow check
@@ -197,19 +198,19 @@ class Timer {
   };
 
   const std::string name_;
-  const TimerTask* task_;
+  std::auto_ptr<TimerTask> task_;
   uint32_t timeout_ms_;
   sync_primitives::atomic_bool is_running_;
-  threads::Thread* thread_;
-  TimerDelegate* delegate_;
+  TimerDelegate delegate_;
+  threads::Thread *thread_;
 
   mutable sync_primitives::Lock lock_;
-  sync_primitives::Lock task_lock_;
+  mutable sync_primitives::Lock task_lock_;
 
   /**
    * @brief method called from friend handler_wrapper and call run() from task.
    */
-  void OnTimeout();
+  void OnTimeout() const;
 
   DISALLOW_COPY_AND_ASSIGN(Timer);
 };

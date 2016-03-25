@@ -44,30 +44,27 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 using date_time::DateTime;
 
-timer::Timer::Timer(const std::string& name, const TimerTask* task_for_tracking)
+timer::Timer::Timer(const std::string& name, TimerTask* task_for_tracking)
     : name_(name)
     , task_(task_for_tracking)
     , timeout_ms_(0u)
     , is_running_(false)
-    , thread_(NULL)
-    , delegate_(NULL) {
+    , delegate_(this)
+    , thread_(threads::CreateThread(name_.c_str(), &delegate_)) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(!name_.empty());
-  DCHECK(task_);
+  DCHECK(task_.get());
+  DCHECK(thread_);
 }
 
 timer::Timer::~Timer() {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, "Timer is to be destroyed " << name_);
   sync_primitives::AutoLock auto_lock(task_lock_);
-  DCHECK(task_);
-  delete task_;
-  if (thread_) {
-    thread_->join();
-    DCHECK(delegate_);
-    delete delegate_;
-    threads::DeleteThread(thread_);
-  }
+
+  DCHECK(thread_);
+  thread_->join();
+  DeleteThread(thread_);
 }
 
 void timer::Timer::Start(const Milliseconds timeout, const bool repeatable) {
@@ -77,29 +74,20 @@ void timer::Timer::Start(const Milliseconds timeout, const bool repeatable) {
   // There would be no way to stop thread if timeout in lopper will be 0
   timeout_ms_ = (0u != timeout) ? timeout : 1u;
 
-  // It's new timer and we have to create it
-  if (!delegate_ && !thread_) {
-    delegate_ = new TimerDelegate(this);
-    thread_ = threads::CreateThread(name_.c_str(), delegate_);
-    DCHECK(delegate_);
-    DCHECK(thread_);
-
-    if (repeatable) {
-      delegate_->MakeRepetable();
-    }
+  if (repeatable) {
+    delegate_.MakeRepetable();
   }
-  // Else timer has been already starting
 
   if (thread_->is_running()) {
     LOG4CXX_INFO(logger_, "Restart timer in thread " << name_);
-    delegate_->ShouldBeRestarted();
+    delegate_.ShouldBeRestarted();
     UpdateTimeOut(timeout_ms_);
   } else {
     UpdateTimeOut(timeout_ms_);
     thread_->start();
   }
 
-  delegate_->WaitUntilStart();
+  delegate_.WaitUntilStart();
 }
 
 void timer::Timer::Stop() {
@@ -117,22 +105,20 @@ void timer::Timer::Stop() {
 
 bool timer::Timer::IsRunning() const {
   sync_primitives::AutoLock auto_lock(lock_);
-  if (!thread_)
-    return false;
-  DCHECK(delegate_);
-  return (thread_->is_running() && !delegate_->IsGoingStop());
+  return (thread_->is_running()
+          && !delegate_.IsGoingToStop());
 }
 
 void timer::Timer::Suspend() {
   LOG4CXX_DEBUG(logger_, "Suspend timer " << name_ << " after next loop");
-  delegate_->ShouldBeStoped();
+  delegate_.ShouldBeStoped();
 }
 
 void timer::Timer::UpdateTimeOut(const uint32_t timeout_milliseconds) {
-  delegate_->SetTimeOut(timeout_milliseconds);
+  delegate_.SetTimeOut(timeout_milliseconds);
 }
 
-void timer::Timer::OnTimeout() {
+void timer::Timer::OnTimeout() const {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_,
                 "Timer has finished counting. Timeout(ms): "
@@ -141,7 +127,7 @@ void timer::Timer::OnTimeout() {
   // Task locked by own lock because from this task in callback
   // we can call Stop of this timer and get DeadLock
   sync_primitives::AutoLock auto_lock(task_lock_);
-  DCHECK(task_);
+  DCHECK(task_.get());
   task_->run();
 }
 
@@ -158,7 +144,6 @@ timer::Timer::TimerDelegate::TimerDelegate(Timer* timer)
     , restart_flag_(false)
     , is_started_flag_(false)
     , is_repeatable_(false) {
-  DCHECK(timer_);
 }
 
 timer::Timer::TimerDelegate::~TimerDelegate() {
@@ -186,6 +171,7 @@ void timer::Timer::TimerDelegate::threadMain() {
       LOG4CXX_DEBUG(logger_,
                     "Timer has finished counting. Timeout(ms): "
                         << wait_milliseconds_left);
+      DCHECK(timer_);
       timer_->OnTimeout();
     } else {
       LOG4CXX_DEBUG(
@@ -221,7 +207,7 @@ void timer::Timer::TimerDelegate::ShouldBeRestarted() {
   restart_flag_ = true;
 }
 
-bool timer::Timer::TimerDelegate::IsGoingStop() {
+bool timer::Timer::TimerDelegate::IsGoingToStop() const {
   return stop_flag_;
 }
 
