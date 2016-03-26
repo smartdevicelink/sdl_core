@@ -34,6 +34,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SEND_LOCATION_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SEND_LOCATION_REQUEST_H_
 
+#include <list>
 #include "application_manager/commands/command_request_impl.h"
 
 namespace application_manager {
@@ -69,6 +70,12 @@ class SendLocationRequest : public CommandRequestImpl {
 
 
  private:
+
+    /**
+   * @brief CheckFieldsCompatibility checks if fields are compatible with each other.
+   * @return true if compatible, otherwise return false
+   */
+  bool CheckFieldsCompatibility();
 
   /**
    * @brief Checks sendlocation params(locationName, locationDescription, ...).

@@ -350,6 +350,10 @@ mobile_apis::Result::eType CommandRequestImpl::GetMobileResultCode(
       mobile_result = mobile_apis::Result::USER_DISALLOWED;
       break;
     }
+    case hmi_apis::Common_Result::SAVED: {
+      mobile_result = mobile_apis::Result::SAVED;
+      break;
+    }
     default: {
       LOG4CXX_ERROR(logger_, "Unknown HMI result code " << hmi_code);
       break;
