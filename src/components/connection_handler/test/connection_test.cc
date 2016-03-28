@@ -59,10 +59,11 @@ class ConnectionTest : public ::testing::Test {
         mock_connection_handler_settings, transport_manager_mock);
     const ConnectionHandle connectionHandle = 0;
     const DeviceHandle device_handle = 0;
+    const uint32_t heart_beat = 10000;
     connection_ = new Connection(connectionHandle,
                                  device_handle,
                                  connection_handler_,
-                                 10000);
+                                 heart_beat);
   }
 
   void TearDown() OVERRIDE {
@@ -165,7 +166,7 @@ TEST_F(ConnectionTest, HeartBeat_NotSupported) {
   EXPECT_FALSE(connection_->SupportHeartBeat(session_id));
 }
 
-TEST_F(ConnectionTest, HeartBeat_Supported) {
+TEST_F(ConnectionTest, HeartBeat_Protocol3_Supported) {
   // Arrange
   StartSession();
   // Check if protocol version is 3
@@ -173,6 +174,36 @@ TEST_F(ConnectionTest, HeartBeat_Supported) {
   connection_->UpdateProtocolVersionSession(session_id, protocol_version);
   // Assert
   EXPECT_TRUE(connection_->SupportHeartBeat(session_id));
+}
+
+TEST_F(ConnectionTest, HeartBeat_Protocol4_PositiveHeartBeat_Supported) {
+  // Arrange
+  StartSession();
+  // Check if protocol version is 4
+  const uint8_t protocol_version = static_cast<uint8_t>(PROTOCOL_VERSION_4);
+  connection_->UpdateProtocolVersionSession(session_id, protocol_version);
+  // Assert
+  EXPECT_TRUE(connection_->SupportHeartBeat(session_id));
+}
+
+TEST_F(ConnectionTest, HeartBeat_Protocol4_ZeroHeartBeat_NotSupported) {
+  // Correctc of connection (need connection with heartbeat=0)
+  delete connection_;
+  connection_ = 0;
+
+  const ConnectionHandle connectionHandle = 0;
+  const DeviceHandle device_handle = 0;
+  const uint32_t heart_beat = 0;
+  connection_ = new Connection(connectionHandle,
+                               device_handle,
+                               connection_handler_,
+                               heart_beat);
+  StartSession();
+  // Check if protocol version is 4
+  const uint8_t protocol_version = static_cast<uint8_t>(PROTOCOL_VERSION_4);
+  connection_->UpdateProtocolVersionSession(session_id, protocol_version);
+  // Assert
+  EXPECT_FALSE(connection_->SupportHeartBeat(session_id));
 }
 
 // Try to add service without session
