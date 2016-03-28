@@ -153,7 +153,7 @@ class Timer {
     /**
      * @brief Quits threadMain function after next loop.
      */
-    virtual void ShouldBeStoped();
+    virtual void ShouldBeStopped();
 
     /**
      * @brief Restarts non-loop timer after current iteration.

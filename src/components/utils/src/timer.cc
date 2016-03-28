@@ -71,25 +71,22 @@ void timer::Timer::Start(const Milliseconds timeout, const bool repeatable) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(lock_);
 
-  LOG4CXX_DEBUG(logger_,
-                "Prepare start timer for %d ms, repetable = " << repeatable
-                    ? "true"
-                    : "false");
-
-  // There would be no way to stop thread if timeout in lopper will be 0
-  timeout_ms_ = (timeout > 0u) ? timeout : 1u;
+  LOG4CXX_DEBUG(logger_, "Prepare start timer for"
+                          << timeout
+                          << "ms, repetable = "
+                          << (repeatable ? "true" : "false"));
 
   if (repeatable) {
-    delegate_.make_repetable();
+    delegate_.make_repeatable();
   }
 
   if (thread_->is_running()) {
     LOG4CXX_INFO(logger_, "Restart timer in thread " << name_);
     delegate_.ShouldBeRestarted();
-    UpdateTimeOut(timeout_ms_);
+    UpdateTimeOut(timeout);
   } else {
     LOG4CXX_INFO(logger_, "Start new timer in thread " << name_);
-    UpdateTimeOut(timeout_ms_);
+    UpdateTimeOut(timeout);
     thread_->start();
   }
 
@@ -116,10 +113,14 @@ bool timer::Timer::IsRunning() const {
 
 void timer::Timer::Suspend() {
   LOG4CXX_DEBUG(logger_, "Suspend timer " << name_ << " after next loop");
-  delegate_.ShouldBeStoped();
+  delegate_.ShouldBeStopped();
 }
 
 void timer::Timer::UpdateTimeOut(const uint32_t timeout_milliseconds) {
+
+  // There would be no way to stop thread if timeout in lopper will be 0
+  timeout_ms_ = (timeout_milliseconds > 0u) ? timeout_milliseconds : 1u;
+
   LOG4CXX_DEBUG(logger_,
                 "Set new timeout " << timeout_milliseconds << "ms for timer "
                                    << name_);
@@ -196,8 +197,8 @@ void timer::Timer::TimerDelegate::threadMain() {
 }
 
 void timer::Timer::TimerDelegate::exitThreadMain() {
-  LOG4CXX_DEBUG(logger_, "Exit from timer thread for timer " << name_);
-  ShouldBeStoped();
+  LOG4CXX_DEBUG(logger_, "Exit from timer thread.");
+  ShouldBeStopped();
   termination_condition_.NotifyOne();
 }
 
@@ -207,7 +208,7 @@ void timer::Timer::TimerDelegate::SetTimeOut(
   termination_condition_.NotifyOne();
 }
 
-void timer::Timer::TimerDelegate::ShouldBeStoped() {
+void timer::Timer::TimerDelegate::ShouldBeStopped() {
   stop_flag_ = true;
   restart_flag_ = false;
 }
