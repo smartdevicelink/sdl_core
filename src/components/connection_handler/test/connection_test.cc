@@ -30,8 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
 #include <algorithm>
+
+#include "gtest/gtest.h"
+
 #include "protocol/common.h"
 #include "connection_handler/connection.h"
 #include "connection_handler/connection_handler_impl.h"
@@ -58,11 +60,12 @@ class ConnectionTest : public ::testing::Test {
     connection_handler_ = new ConnectionHandlerImpl(
         mock_connection_handler_settings, transport_manager_mock);
     const ConnectionHandle connectionHandle = 0;
-    const DeviceHandle device_handle = 0;
+    const DeviceHandle device_handle = 0u;
+    const uint32_t heart_beat = 10000u;
     connection_ = new Connection(connectionHandle,
                                  device_handle,
                                  connection_handler_,
-                                 10000);
+                                 heart_beat);
   }
 
   void TearDown() OVERRIDE {
@@ -165,14 +168,41 @@ TEST_F(ConnectionTest, HeartBeat_NotSupported) {
   EXPECT_FALSE(connection_->SupportHeartBeat(session_id));
 }
 
-TEST_F(ConnectionTest, HeartBeat_Supported) {
+TEST_F(ConnectionTest, HeartBeat_Protocol3_Supported) {
   // Arrange
   StartSession();
-  // Check if protocol version is 3
+  // Check execution if protocol version is 3
   const uint8_t protocol_version = static_cast<uint8_t>(PROTOCOL_VERSION_3);
   connection_->UpdateProtocolVersionSession(session_id, protocol_version);
-  // Assert
   EXPECT_TRUE(connection_->SupportHeartBeat(session_id));
+}
+
+TEST_F(ConnectionTest, HeartBeat_Protocol4_PositiveHeartBeat_Supported) {
+  // Arrange
+  StartSession();
+  // Check execution if protocol version is 4
+  const uint8_t protocol_version = static_cast<uint8_t>(PROTOCOL_VERSION_4);
+  connection_->UpdateProtocolVersionSession(session_id, protocol_version);
+  EXPECT_TRUE(connection_->SupportHeartBeat(session_id));
+}
+
+TEST_F(ConnectionTest, HeartBeat_Protocol4_ZeroHeartBeat_NotSupported) {
+  // Correctc of connection (need connection with heartbeat=0)
+  delete connection_;
+  connection_ = 0;
+
+  const ConnectionHandle connectionHandle = 0;
+  const DeviceHandle device_handle = 0u;
+  const uint32_t heart_beat = 0u;
+  connection_ = new Connection(connectionHandle,
+                               device_handle,
+                               connection_handler_,
+                               heart_beat);
+  StartSession();
+  // Check execution if protocol version is 4
+  const uint8_t protocol_version = static_cast<uint8_t>(PROTOCOL_VERSION_4);
+  connection_->UpdateProtocolVersionSession(session_id, protocol_version);
+  EXPECT_FALSE(connection_->SupportHeartBeat(session_id));
 }
 
 // Try to add service without session

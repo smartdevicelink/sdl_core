@@ -76,14 +76,15 @@ Connection::Connection(ConnectionHandle connection_handle,
                        DeviceHandle connection_device_handle,
                        ConnectionHandler *connection_handler,
                        uint32_t heartbeat_timeout)
-    : connection_handler_(connection_handler),
-      connection_handle_(connection_handle),
-      connection_device_handle_(connection_device_handle),
-      session_map_lock_(true) {
+    : connection_handler_(connection_handler)
+    , connection_handle_(connection_handle)
+    , connection_device_handle_(connection_device_handle)
+    , session_map_lock_(true)
+    , heartbeat_timeout_(heartbeat_timeout) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(connection_handler_);
 
-  heartbeat_monitor_ = new HeartBeatMonitor(heartbeat_timeout, this);
+  heartbeat_monitor_ = new HeartBeatMonitor(heartbeat_timeout_, this);
   heart_beat_monitor_thread_ = threads::CreateThread("HeartBeatMonitor",
                                                      heartbeat_monitor_);
   heart_beat_monitor_thread_->start();
@@ -343,7 +344,6 @@ bool Connection::SupportHeartBeat(uint8_t session_id) {
     return false;
   }
   Session &session = session_it->second;
-
   return ((::protocol_handler::PROTOCOL_VERSION_3 == session.protocol_version ||
            ::protocol_handler::PROTOCOL_VERSION_4 == session.protocol_version) &&
            (0 != heartbeat_timeout_));
