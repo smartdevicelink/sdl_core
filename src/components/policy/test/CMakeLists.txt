@@ -51,7 +51,7 @@ set(testLibraries
 )
 
 set(testSources
-  usage_statistics_test.cc
+  counter_test.cc
   shared_library_test.cc
   generated_code_test.cc
   policy_manager_impl_test.cc

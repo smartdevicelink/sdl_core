@@ -35,8 +35,10 @@
 
 #include <ctime>
 #include "usage_statistics/statistics_manager.h"
+#include "usage_statistics/app_stopwatch.h"
 #include "utils/shared_ptr.h"
 #include "utils/timer.h"
+#include "utils/macro.h"
 
 namespace usage_statistics {
 
@@ -44,56 +46,60 @@ using timer::Timer;
 
 class GlobalCounter {
  public:
-  GlobalCounter(utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
+  GlobalCounter(utils::SharedPtr<StatisticsManager> statistics_manager,
                 GlobalCounterId counter_type);
   void operator++() const;
+
  private:
   GlobalCounterId counter_type_;
-  utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager_;
+  utils::SharedPtr<StatisticsManager> statistics_manager_;
 };
 
 class AppCounter {
  public:
-  AppCounter(utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
+  AppCounter(utils::SharedPtr<StatisticsManager> statistics_manager,
              const std::string& app_id,
              AppCounterId counter_type);
   void operator++() const;
+
  private:
   std::string app_id_;
   AppCounterId counter_type_;
-  utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager_;
+  utils::SharedPtr<StatisticsManager> statistics_manager_;
 };
 
 class AppInfo {
  public:
-  AppInfo(utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
+  AppInfo(utils::SharedPtr<StatisticsManager> statistics_manager,
           const std::string& app_id,
           AppInfoId info_type);
   void Update(const std::string& new_info) const;
+
  private:
   std::string app_id_;
   AppInfoId info_type_;
-  utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager_;
+  utils::SharedPtr<StatisticsManager> statistics_manager_;
 };
 
-class AppStopwatch {
+class AppStopwatchImpl : public AppStopwatch {
  public:
-  AppStopwatch(utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
-               const std::string& app_id);
-  AppStopwatch(utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
-               const std::string& app_id,
-               uint32_t timeout);
-  ~AppStopwatch();
-  void Start(AppStopwatchId stopwatch_type);
-  void Switch(AppStopwatchId stopwatch_type);
-  void WriteTime();
+  AppStopwatchImpl(utils::SharedPtr<StatisticsManager> statistics_manager,
+                   const std::string& app_id);
+  AppStopwatchImpl(utils::SharedPtr<StatisticsManager> statistics_manager,
+                   const std::string& app_id,
+                   std::uint32_t timeout);
+  void Start(AppStopwatchId stopwatch_type) OVERRIDE;
+  void Switch(AppStopwatchId stopwatch_type) OVERRIDE;
+  void WriteTime() OVERRIDE;
+
  private:
   // Fields
   std::string app_id_;
   AppStopwatchId stopwatch_type_;
-  utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager_;
+  utils::SharedPtr<StatisticsManager> statistics_manager_;
   timer::Timer timer_;
-  const uint32_t time_out_;
+  const std::uint32_t time_out_;
+  DISALLOW_COPY_AND_ASSIGN(AppStopwatchImpl);
 };
 
 }  // namespace usage_statistics

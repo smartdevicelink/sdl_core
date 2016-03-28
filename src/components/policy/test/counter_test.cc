@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Ford Motor Company
+/* Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "gtest/gtest.h"
+
+#include "gmock/gmock.h"
 
 #include "mock_statistics_manager.h"
 #include "usage_statistics/counter.h"
@@ -36,8 +37,11 @@
 using ::testing::StrictMock;
 using ::testing::InSequence;
 
-namespace usage_statistics {
 namespace test {
+namespace components {
+namespace usage_statistics_test {
+
+using namespace usage_statistics;
 
 // TEST(A, B_C_D) { ... }
 // A - What you test
@@ -126,7 +130,7 @@ TEST(StatisticsManagerAddMethod, AppStopwatchStartMethod_CallONCE_StatisticsMana
   // Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
   const std::uint32_t time_out = 1;
-  AppStopwatch hmi_full_stopwatch(msm, "HelloApp", time_out);
+  AppStopwatchImpl hmi_full_stopwatch(msm, "HelloApp", time_out);
 
   hmi_full_stopwatch.Start(SECONDS_HMI_FULL);
   // Assert
@@ -139,7 +143,7 @@ TEST(StatisticsManagerAddMethod, AppStopwatchStartMethod_CallONCE_StatisticsMana
 TEST(StatisticsManagerAddMethod, AppStopwatchSwitchMethod_Call_StatisticsManagerAddMethodCalled) {
   // Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
-  AppStopwatch hmi_full_stopwatch(msm, "HelloApp");
+  AppStopwatchImpl hmi_full_stopwatch(msm, "HelloApp");
   hmi_full_stopwatch.Start(SECONDS_HMI_FULL);
 
   hmi_full_stopwatch.Switch(SECONDS_HMI_FULL);
@@ -155,7 +159,7 @@ TEST(StatisticsManagerAddMethod, AppStopwatchSwitchMethod_CallAnd1SecSleepAfter_
   // Arrange
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
   const std::uint32_t time_out = 1;
-  AppStopwatch hmi_full_stopwatch(msm, "HelloApp", time_out);
+  AppStopwatchImpl hmi_full_stopwatch(msm, "HelloApp", time_out);
 
   // Act
   hmi_full_stopwatch.Start(SECONDS_HMI_NONE);
@@ -170,5 +174,7 @@ TEST(StatisticsManagerAddMethod, AppStopwatchSwitchMethod_CallAnd1SecSleepAfter_
   // Act
   hmi_full_stopwatch.WriteTime();
 }
+
+}  // namespace usage_statistics_test
+}  // namespace components
 }  // namespace test
-}  // namespace usage_statistics
