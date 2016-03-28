@@ -43,6 +43,7 @@ typedef sigval_t sigval;
 #endif
 
 #include <time.h>
+#include <stdint.h>
 #include <string>
 #include <limits>
 #include <memory>
@@ -115,7 +116,6 @@ class Timer {
    * won't be called. It's depend on flag.
    */
   class TimerDelegate : public threads::ThreadDelegate {
-
    public:
     /**
      * @brief Default constructor
@@ -169,7 +169,7 @@ class Timer {
      * @brief Gets timeout with overflow check
      * @return timeout
      */
-    inline int32_t Get_timeout() const {
+    inline int32_t get_timeout() const {
       return std::min(
           static_cast<uint32_t>(std::numeric_limits<int32_t>::max()),
           timeout_milliseconds_);
@@ -178,7 +178,7 @@ class Timer {
     /**
       * @brief Make class delegate repeatable
       */
-    inline void MakeRepetable() {
+    inline void make_repetable() {
       is_repeatable_ = true;
     }
 
@@ -202,7 +202,7 @@ class Timer {
   uint32_t timeout_ms_;
   sync_primitives::atomic_bool is_running_;
   TimerDelegate delegate_;
-  threads::Thread *thread_;
+  threads::Thread* thread_;
 
   mutable sync_primitives::Lock lock_;
   mutable sync_primitives::Lock task_lock_;

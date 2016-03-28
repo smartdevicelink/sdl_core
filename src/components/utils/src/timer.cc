@@ -71,11 +71,16 @@ void timer::Timer::Start(const Milliseconds timeout, const bool repeatable) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(lock_);
 
+  LOG4CXX_DEBUG(logger_,
+                "Prepare start timer for %d ms, repetable = " << repeatable
+                    ? "true"
+                    : "false");
+
   // There would be no way to stop thread if timeout in lopper will be 0
-  timeout_ms_ = (0u != timeout) ? timeout : 1u;
+  timeout_ms_ = (timeout > 0u) ? timeout : 1u;
 
   if (repeatable) {
-    delegate_.MakeRepetable();
+    delegate_.make_repetable();
   }
 
   if (thread_->is_running()) {
@@ -83,6 +88,7 @@ void timer::Timer::Start(const Milliseconds timeout, const bool repeatable) {
     delegate_.ShouldBeRestarted();
     UpdateTimeOut(timeout_ms_);
   } else {
+    LOG4CXX_INFO(logger_, "Start new timer in thread " << name_);
     UpdateTimeOut(timeout_ms_);
     thread_->start();
   }
@@ -105,8 +111,7 @@ void timer::Timer::Stop() {
 
 bool timer::Timer::IsRunning() const {
   sync_primitives::AutoLock auto_lock(lock_);
-  return (thread_->is_running()
-          && !delegate_.IsGoingToStop());
+  return (thread_->is_running() && !delegate_.IsGoingToStop());
 }
 
 void timer::Timer::Suspend() {
@@ -115,6 +120,9 @@ void timer::Timer::Suspend() {
 }
 
 void timer::Timer::UpdateTimeOut(const uint32_t timeout_milliseconds) {
+  LOG4CXX_DEBUG(logger_,
+                "Set new timeout " << timeout_milliseconds << "ms for timer "
+                                   << name_);
   delegate_.SetTimeOut(timeout_milliseconds);
 }
 
@@ -160,7 +168,7 @@ void timer::Timer::TimerDelegate::threadMain() {
 
   while (!stop_flag_) {
     // Sleep
-    int32_t wait_milliseconds_left = TimerDelegate::Get_timeout();
+    int32_t wait_milliseconds_left = TimerDelegate::get_timeout();
     LOG4CXX_DEBUG(logger_,
                   "Milliseconds left to wait: " << wait_milliseconds_left);
     ConditionalVariable::WaitStatus wait_status =
@@ -188,6 +196,7 @@ void timer::Timer::TimerDelegate::threadMain() {
 }
 
 void timer::Timer::TimerDelegate::exitThreadMain() {
+  LOG4CXX_DEBUG(logger_, "Exit from timer thread for timer " << name_);
   ShouldBeStoped();
   termination_condition_.NotifyOne();
 }
@@ -199,8 +208,8 @@ void timer::Timer::TimerDelegate::SetTimeOut(
 }
 
 void timer::Timer::TimerDelegate::ShouldBeStoped() {
-    stop_flag_ = true;
-    restart_flag_ = false;
+  stop_flag_ = true;
+  restart_flag_ = false;
 }
 
 void timer::Timer::TimerDelegate::ShouldBeRestarted() {
@@ -218,4 +227,3 @@ void timer::Timer::TimerDelegate::WaitUntilStart() {
     starting_condition_.Wait(auto_lock);
   }
 }
-
