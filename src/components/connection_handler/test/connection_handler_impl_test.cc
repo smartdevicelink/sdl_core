@@ -103,7 +103,7 @@ class ConnectionHandlerTest : public ::testing::Test {
                                                     connection_type_);
     // Add Device and connection
     ON_CALL(mock_connection_handler_settings, heart_beat_timeout())
-        .WillByDefault(Return(1000));
+        .WillByDefault(Return(1000u));
     connection_handler_->addDeviceConnection(device_info, uid_);
     connection_key_ = connection_handler_->KeyFromPair(uid_, 0u);
     // Remove all specific services
