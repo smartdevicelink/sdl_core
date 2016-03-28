@@ -178,7 +178,7 @@ class Timer {
     /**
       * @brief Make class delegate repeatable
       */
-    inline void make_repetable() {
+    inline void make_repeatable() {
       is_repeatable_ = true;
     }
 
