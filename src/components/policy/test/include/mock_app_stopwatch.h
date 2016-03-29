@@ -1,5 +1,4 @@
-﻿/*
- * Copyright (c) 2016, Ford Motor Company
+/* Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,50 +29,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_USAGE_STATISTICS_STATISTICS_MANAGER_H_
-#define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_USAGE_STATISTICS_STATISTICS_MANAGER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_POLICY_USAGE_STATISTICS_MOCK_APP_STOPWATCH_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_POLICY_USAGE_STATISTICS_MOCK_APP_STOPWATCH_H_
 
-#include <stdint.h>
-#include <string>
+#include "gmock/gmock.h"
+#include "usage_statistics/app_stopwatch.h"
+#include "usage_statistics/statistics_manager.h"
 
-namespace usage_statistics {
+namespace test {
+namespace components {
+namespace usage_statistics_test {
 
-enum GlobalCounterId { IAP_BUFFER_FULL, SYNC_OUT_OF_MEMORY, SYNC_REBOOTS };
-
-enum AppInfoId { LANGUAGE_GUI, LANGUAGE_VUI };
-
-enum AppStopwatchId {
-  SECONDS_HMI_FULL,
-  SECONDS_HMI_LIMITED,
-  SECONDS_HMI_BACKGROUND,
-  SECONDS_HMI_NONE
-};
-
-enum AppCounterId {
-  USER_SELECTIONS,
-  REJECTIONS_SYNC_OUT_OF_MEMORY,
-  REJECTIONS_NICKNAME_MISMATCH,
-  REJECTIONS_DUPLICATE_NAME,
-  REJECTED_RPC_CALLS,
-  RPCS_IN_HMI_NONE,
-  REMOVALS_MISBEHAVED,
-  RUN_ATTEMPTS_WHILE_REVOKED,
-  COUNT_OF_TLS_ERRORS,
-};
-
-class StatisticsManager {
+class MockAppStopwatch : public usage_statistics::AppStopwatch {
  public:
-  virtual ~StatisticsManager() {}
-  virtual void Increment(GlobalCounterId type) = 0;
-  virtual void Increment(const std::string& app_id, AppCounterId type) = 0;
-  virtual void Set(const std::string& app_id,
-                   AppInfoId type,
-                   const std::string& value) = 0;
-  virtual void Add(const std::string& app_id,
-                   AppStopwatchId type,
-                   int32_t timespan_seconds) = 0;
+  MOCK_METHOD1(Start, void(usage_statistics::AppStopwatchId stopwatch_type));
+  MOCK_METHOD1(Switch, void(usage_statistics::AppStopwatchId stopwatch_type));
+  MOCK_METHOD0(WriteTime, void());
 };
 
-}  //  namespace usage_statistics
+}  // namespace usage_statistics_test
+}  // namespace components
+}  // namespace test
 
-#endif  // SRC_COMPONENTS_INCLUDE_POLICY_USAGE_STATISTICS_STATISTICS_MANAGER_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_POLICY_USAGE_STATISTICS_MOCK_APP_STOPWATCH_H_

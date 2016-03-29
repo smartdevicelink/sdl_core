@@ -41,11 +41,10 @@
 
 namespace usage_statistics {
 
-GlobalCounter::GlobalCounter(utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
-                             GlobalCounterId counter_type)
-    : counter_type_(counter_type),
-      statistics_manager_(statistics_manager) {
-}
+GlobalCounter::GlobalCounter(
+    utils::SharedPtr<StatisticsManager> statistics_manager,
+    GlobalCounterId counter_type)
+    : counter_type_(counter_type), statistics_manager_(statistics_manager) {}
 
 void GlobalCounter::operator++() const {
   if (statistics_manager_) {
@@ -53,13 +52,12 @@ void GlobalCounter::operator++() const {
   }
 }
 
-AppCounter::AppCounter(utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
+AppCounter::AppCounter(utils::SharedPtr<StatisticsManager> statistics_manager,
                        const std::string& app_id,
                        AppCounterId counter_type)
-    : app_id_(app_id),
-      counter_type_(counter_type),
-      statistics_manager_(statistics_manager) {
-}
+    : app_id_(app_id)
+    , counter_type_(counter_type)
+    , statistics_manager_(statistics_manager) {}
 
 void AppCounter::operator++() const {
   if (statistics_manager_) {
@@ -67,13 +65,12 @@ void AppCounter::operator++() const {
   }
 }
 
-AppInfo::AppInfo(utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
+AppInfo::AppInfo(utils::SharedPtr<StatisticsManager> statistics_manager,
                  const std::string& app_id,
                  AppInfoId info_type)
-    : app_id_(app_id),
-      info_type_(info_type),
-      statistics_manager_(statistics_manager) {
-}
+    : app_id_(app_id)
+    , info_type_(info_type)
+    , statistics_manager_(statistics_manager) {}
 
 void AppInfo::Update(const std::string& new_info) const {
   if (statistics_manager_) {
@@ -81,39 +78,39 @@ void AppInfo::Update(const std::string& new_info) const {
   }
 }
 
-AppStopwatch::AppStopwatch(
-    utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
-    const std::string& app_id)
-    : app_id_(app_id),
-      stopwatch_type_(SECONDS_HMI_NONE),
-      statistics_manager_(statistics_manager),
-      timer_("HMI levels timer",
-             new timer::TimerTaskImpl<AppStopwatch>(this, &AppStopwatch::WriteTime)),
-      time_out_(60) {}
-
-AppStopwatch::AppStopwatch(
+AppStopwatchImpl::AppStopwatchImpl(
     utils::SharedPtr<StatisticsManager> statistics_manager,
-    const std::string& app_id, uint32_t timeout)
-    : app_id_(app_id),
-      stopwatch_type_(SECONDS_HMI_NONE),
-      statistics_manager_(statistics_manager),
-      timer_("HMI levels timer",
-             new timer::TimerTaskImpl<AppStopwatch>(this, &AppStopwatch::WriteTime)),
-      time_out_(timeout) {}
+    const std::string& app_id)
+    : app_id_(app_id)
+    , stopwatch_type_(SECONDS_HMI_NONE)
+    , statistics_manager_(statistics_manager)
+    , timer_("HMI levels timer",
+             new timer::TimerTaskImpl<AppStopwatchImpl>(
+                 this, &AppStopwatchImpl::WriteTime))
+    , time_out_(60) {}
 
-AppStopwatch::~AppStopwatch() {
-}
+AppStopwatchImpl::AppStopwatchImpl(
+    utils::SharedPtr<StatisticsManager> statistics_manager,
+    const std::string& app_id,
+    uint32_t timeout)
+    : app_id_(app_id)
+    , stopwatch_type_(SECONDS_HMI_NONE)
+    , statistics_manager_(statistics_manager)
+    , timer_("HMI levels timer",
+             new timer::TimerTaskImpl<AppStopwatchImpl>(
+                 this, &AppStopwatchImpl::WriteTime))
+    , time_out_(timeout) {}
 
-void AppStopwatch::Start(AppStopwatchId stopwatch_type) {
+void AppStopwatchImpl::Start(AppStopwatchId stopwatch_type) {
   stopwatch_type_ = stopwatch_type;
   timer_.Start(time_out_ * date_time::DateTime::MILLISECONDS_IN_SECOND, true);
 }
 
-void AppStopwatch::Switch(AppStopwatchId stopwatch_type) {
+void AppStopwatchImpl::Switch(AppStopwatchId stopwatch_type) {
   Start(stopwatch_type);
 }
 
-void AppStopwatch::WriteTime() {
+void AppStopwatchImpl::WriteTime() {
   if (statistics_manager_) {
     statistics_manager_->Add(app_id_, stopwatch_type_, time_out_);
   }

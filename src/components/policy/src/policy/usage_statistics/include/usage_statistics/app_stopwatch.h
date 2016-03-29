@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
@@ -30,50 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_USAGE_STATISTICS_STATISTICS_MANAGER_H_
-#define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_USAGE_STATISTICS_STATISTICS_MANAGER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_POLICY_USAGE_STATISTICS_APP_STOPWATCH_H_
+#define SRC_COMPONENTS_INCLUDE_POLICY_USAGE_STATISTICS_APP_STOPWATCH_H_
 
-#include <stdint.h>
-#include <string>
+#include "statistics_manager.h"
 
 namespace usage_statistics {
 
-enum GlobalCounterId { IAP_BUFFER_FULL, SYNC_OUT_OF_MEMORY, SYNC_REBOOTS };
-
-enum AppInfoId { LANGUAGE_GUI, LANGUAGE_VUI };
-
-enum AppStopwatchId {
-  SECONDS_HMI_FULL,
-  SECONDS_HMI_LIMITED,
-  SECONDS_HMI_BACKGROUND,
-  SECONDS_HMI_NONE
-};
-
-enum AppCounterId {
-  USER_SELECTIONS,
-  REJECTIONS_SYNC_OUT_OF_MEMORY,
-  REJECTIONS_NICKNAME_MISMATCH,
-  REJECTIONS_DUPLICATE_NAME,
-  REJECTED_RPC_CALLS,
-  RPCS_IN_HMI_NONE,
-  REMOVALS_MISBEHAVED,
-  RUN_ATTEMPTS_WHILE_REVOKED,
-  COUNT_OF_TLS_ERRORS,
-};
-
-class StatisticsManager {
+class AppStopwatch {
  public:
-  virtual ~StatisticsManager() {}
-  virtual void Increment(GlobalCounterId type) = 0;
-  virtual void Increment(const std::string& app_id, AppCounterId type) = 0;
-  virtual void Set(const std::string& app_id,
-                   AppInfoId type,
-                   const std::string& value) = 0;
-  virtual void Add(const std::string& app_id,
-                   AppStopwatchId type,
-                   int32_t timespan_seconds) = 0;
+  virtual ~AppStopwatch() {}
+  virtual void Start(AppStopwatchId stopwatch_type) = 0;
+  virtual void Switch(AppStopwatchId stopwatch_type) = 0;
+  virtual void WriteTime() = 0;
 };
 
 }  //  namespace usage_statistics
 
-#endif  // SRC_COMPONENTS_INCLUDE_POLICY_USAGE_STATISTICS_STATISTICS_MANAGER_H_
+#endif  // SRC_COMPONENTS_INCLUDE_POLICY_USAGE_STATISTICS_APP_STOPWATCH_H_
