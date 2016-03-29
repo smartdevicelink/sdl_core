@@ -80,13 +80,13 @@ void timer::Timer::Start(const Milliseconds timeout, const bool repeatable) {
     delegate_.make_repeatable();
   }
 
+  UpdateTimeOut(timeout);
+
   if (thread_->is_running()) {
     LOG4CXX_INFO(logger_, "Restart timer in thread " << name_);
     delegate_.ShouldBeRestarted();
-    UpdateTimeOut(timeout);
   } else {
     LOG4CXX_INFO(logger_, "Start new timer in thread " << name_);
-    UpdateTimeOut(timeout);
     thread_->start();
   }
 
@@ -116,7 +116,7 @@ void timer::Timer::Suspend() {
   delegate_.ShouldBeStopped();
 }
 
-void timer::Timer::UpdateTimeOut(const uint32_t timeout_milliseconds) {
+void timer::Timer::UpdateTimeOut(const Milliseconds timeout_milliseconds) {
 
   // There would be no way to stop thread if timeout in lopper will be 0
   timeout_ms_ = (timeout_milliseconds > 0u) ? timeout_milliseconds : 1u;

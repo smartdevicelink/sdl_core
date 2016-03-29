@@ -43,7 +43,7 @@ typedef sigval_t sigval;
 #endif
 
 #include <time.h>
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 #include <limits>
 #include <memory>
@@ -101,7 +101,7 @@ class Timer {
    * @param timeout_milliseconds new timeout value
    *
    */
-  virtual void UpdateTimeOut(const uint32_t timeout_milliseconds);
+  void UpdateTimeOut(const Milliseconds timeout_milliseconds);
 
   /**
    * @brief GetTimeout
