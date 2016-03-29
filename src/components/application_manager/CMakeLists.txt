@@ -279,6 +279,8 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/navi_audio_start_stream_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/navi_audio_stop_stream_request.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/navi_audio_stop_stream_response.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/navi_get_way_points_request.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/navi_get_way_points_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_system_request_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_put_file_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_resume_audio_source_notification.cc

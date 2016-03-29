@@ -58,6 +58,8 @@
 #include "application_manager/commands/mobile/get_dtcs_response.h"
 #include "application_manager/commands/mobile/get_vehicle_data_request.h"
 #include "application_manager/commands/mobile/get_vehicle_data_response.h"
+#include "application_manager/commands/mobile/get_way_points_request.h"
+#include "application_manager/commands/mobile/get_way_points_response.h"
 #include "application_manager/commands/mobile/list_files_request.h"
 #include "application_manager/commands/mobile/list_files_response.h"
 #include "application_manager/commands/mobile/on_app_interface_unregistered_notification.h"
@@ -346,6 +348,15 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
         command = utils::MakeShared<commands::ShowResponse>(message);
       } else {
         command = utils::MakeShared<commands::ShowRequest>(message);
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::GetWayPointsID: {
+      if ((*message)[strings::params][strings::message_type]
+          == static_cast<int>(application_manager::MessageType::kResponse)) {
+        command = utils::MakeShared<commands::GetWayPointsResponse>(message);
+      } else {
+        command = utils::MakeShared<commands::GetWayPointsRequest>(message);
       }
       break;
     }
