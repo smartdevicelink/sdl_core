@@ -43,7 +43,7 @@ typedef sigval_t sigval;
 #endif
 
 #include <time.h>
-#include <cstdint>
+#include <stdint.h>
 #include <string>
 #include <limits>
 #include <memory>
@@ -89,10 +89,6 @@ class Timer {
    * @return true when timer runned, false when timer stand
    */
   bool IsRunning() const;
-  /**
-   * @brief Suspends timer execution after next loop.
-   */
-  virtual void Suspend();
 
   /**
    * @brief Stop timer update timeout and start timer again
@@ -210,6 +206,11 @@ class Timer {
    * @brief method called from friend handler_wrapper and call run() from task.
    */
   void OnTimeout() const;
+
+  /**
+   * @brief Suspends timer execution after next loop.
+   */
+  virtual void Suspend();
 
   DISALLOW_COPY_AND_ASSIGN(Timer);
 };
