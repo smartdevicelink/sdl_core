@@ -48,7 +48,6 @@ timer::Timer::Timer(const std::string& name, TimerTask* task_for_tracking)
     : name_(name)
     , task_(task_for_tracking)
     , timeout_ms_(0u)
-    , is_running_(false)
     , delegate_(this)
     , thread_(threads::CreateThread(name_.c_str(), &delegate_)) {
   LOG4CXX_AUTO_TRACE(logger_);

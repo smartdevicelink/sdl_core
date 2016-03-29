@@ -200,7 +200,6 @@ class Timer {
   const std::string name_;
   std::auto_ptr<TimerTask> task_;
   uint32_t timeout_ms_;
-  sync_primitives::atomic_bool is_running_;
   TimerDelegate delegate_;
   threads::Thread* thread_;
 
