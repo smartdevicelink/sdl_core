@@ -107,6 +107,11 @@ class Timer {
 
  private:
   /**
+   * @brief method called from friend handler_wrapper and call run() from task.
+   */
+  void OnTimeout() const;
+
+  /**
    * @brief Delegate release timer, will call callback function one time
    * or call delegate every timeout function while stop()
    * won't be called. It's depend on flag.
@@ -139,22 +144,22 @@ class Timer {
      * @brief Set new Timeout
      * @param timeout_milliseconds New timeout to be set
      */
-    virtual void SetTimeOut(const uint32_t timeout_milliseconds);
+    void SetTimeOut(const uint32_t timeout_milliseconds);
 
     /**
       * @brief Wait until timer will start
       */
-    virtual void WaitUntilStart();
+    void WaitUntilStart();
 
     /**
      * @brief Quits threadMain function after next loop.
      */
-    virtual void ShouldBeStopped();
+    void ShouldBeStopped();
 
     /**
      * @brief Restarts non-loop timer after current iteration.
      */
-    virtual void ShouldBeRestarted();
+    void ShouldBeRestarted();
 
     /**
      * @brief Return flag IsGoingStop
@@ -181,6 +186,7 @@ class Timer {
    protected:
     Timer* timer_;
     uint32_t timeout_milliseconds_;
+    // Lock for condition variable
     sync_primitives::Lock state_lock_;
     sync_primitives::ConditionalVariable termination_condition_;
     sync_primitives::ConditionalVariable starting_condition_;
@@ -195,22 +201,11 @@ class Timer {
 
   const std::string name_;
   std::auto_ptr<TimerTask> task_;
-  uint32_t timeout_ms_;
   TimerDelegate delegate_;
   threads::Thread* thread_;
 
+  // Prevent execute in the same time Start and Stop of timer
   mutable sync_primitives::Lock lock_;
-  mutable sync_primitives::Lock task_lock_;
-
-  /**
-   * @brief method called from friend handler_wrapper and call run() from task.
-   */
-  void OnTimeout() const;
-
-  /**
-   * @brief Suspends timer execution after next loop.
-   */
-  virtual void Suspend();
 
   DISALLOW_COPY_AND_ASSIGN(Timer);
 };
