@@ -1,0 +1,15 @@
+language: cpp
+addons:
+  apt:
+    sources:
+    - travis-ci/sqlite3
+    packages:
+    - sqlite3
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y libavahi-client-dev libssl-dev libbluetooth3 libbluetooth-dev bluez-tools libudev-dev
+  - sudo add-apt-repository ppa:kalakris/cmake -y
+  - sudo apt-get update -q
+  - sudo apt-get install -y cmake
+script:
+  - mkdir build && cd build && cmake ../ && make && make install
