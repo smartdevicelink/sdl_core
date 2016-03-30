@@ -1458,7 +1458,7 @@
   <param name="tertiaryText" maxlength="500" type="String" mandatory="false">
     <description>Optional tertiary text to display; e.g. distance to POI for a search result entry</description>
   </param>
-  <param name="secondaryImage" type="Image" mandatory="false">
+  <param name="secondaryImage" type="Common.Image" mandatory="false">
     <description>Optional secondary image struct for choice</description>
   </param>
 </struct>
