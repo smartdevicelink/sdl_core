@@ -145,6 +145,7 @@ void DBusMessageAdapter::SubscribeTo() {
   DBusMessageController::SubscribeTo("VehicleInfo", "OnSteeringWheelAngle");
   DBusMessageController::SubscribeTo("VehicleInfo", "OnMyKey");
   DBusMessageController::SubscribeTo("Navigation",  "OnTBTClientState");
+  DBusMessageController::SubscribeTo("Navigation", "OnWayPointChange");
   DBusMessageController::SubscribeTo("SDL", "OnAllowSDLFunctionality");
   DBusMessageController::SubscribeTo("SDL", "OnReceivedPolicyUpdate");
   DBusMessageController::SubscribeTo("SDL", "OnPolicyUpdate");

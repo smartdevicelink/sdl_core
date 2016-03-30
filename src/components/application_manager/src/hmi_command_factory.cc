@@ -233,6 +233,7 @@
 #include "application_manager/commands/hmi/on_vr_language_change_notification.h"
 #include "application_manager/commands/hmi/on_tts_language_change_notification.h"
 #include "application_manager/commands/hmi/on_navi_tbt_client_state_notification.h"
+#include "application_manager/commands/hmi/on_navi_way_point_change_notification.h"
 #include "application_manager/commands/hmi/on_button_event_notification.h"
 #include "application_manager/commands/hmi/on_button_press_notification.h"
 #include "application_manager/commands/hmi/on_button_subscription_notification.h"
@@ -2088,6 +2089,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       } else {
         command.reset(new commands::hmi::DialNumberRequest(message));
       }
+      break;
+    }
+    case hmi_apis::FunctionID::Navigation_OnWayPointChange: {
+      command = utils::MakeShared<commands::OnNaviWayPointChangeNotification>(message);
       break;
     }
   }

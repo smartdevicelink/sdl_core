@@ -75,6 +75,7 @@
 #include "application_manager/commands/mobile/on_tbt_client_state_notification.h"
 #include "application_manager/commands/mobile/on_vehicle_data_notification.h"
 #include "application_manager/commands/mobile/on_hash_change_notification.h"
+#include "application_manager/commands/mobile/on_way_point_change_notification.h"
 #include "application_manager/commands/mobile/perform_audio_pass_thru_request.h"
 #include "application_manager/commands/mobile/perform_audio_pass_thru_response.h"
 #include "application_manager/commands/mobile/perform_interaction_request.h"
@@ -584,6 +585,10 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     }
     case mobile_apis::FunctionID::OnHashChangeID: {
       command = utils::MakeShared<commands::mobile::OnHashChangeNotification>(message);
+      break;
+    }
+    case mobile_apis::FunctionID::OnWayPointChangeID: {
+      command = utils::MakeShared<commands::OnWayPointChangeNotification>(message);
       break;
     }
     default: {

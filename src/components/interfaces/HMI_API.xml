@@ -989,13 +989,13 @@
 </enum>
 
 <enum name="RequestType">
-    <description>Enumeration listing possible asynchronous requests.</description>
-    <element name="HTTP" />
-    <element name="FILE_RESUME" />
-    <element name="AUTH_REQUEST" />
-    <element name="AUTH_CHALLENGE" />
-    <element name="AUTH_ACK" />
-    <element name="PROPRIETARY" />
+  <description>Enumeration listing possible asynchronous requests.</description>
+  <element name="HTTP" />
+  <element name="FILE_RESUME" />
+  <element name="AUTH_REQUEST" />
+  <element name="AUTH_CHALLENGE" />
+  <element name="AUTH_ACK" />
+  <element name="PROPRIETARY" />
   <element name="QUERY_APPS" />
   <element name="LAUNCH_APP" />
   <element name="LOCK_SCREEN_ICON_URL" />
@@ -1227,8 +1227,8 @@
     <param name="url" type="String" mandatory="true">
       <description>Get URL based on service type.</description>
     </param>
-    <param name="policyAppId" type="String" mandatory="false">
-      <description>Used if URL needed are specific for application.</description>
+    <param name="appID" type="Integer" mandatory="false">
+      <description>Internal ID of the application that corresponds to the policyAppID</description>
     </param>
   </struct>
 <!-- End of Policies -->
@@ -1379,25 +1379,10 @@
       <description>Path to application icon stored on HU.</description>
     </param>
     <param name="deviceInfo" type="Common.DeviceInfo" mandatory="true">
-       <description>The ID, serial number, transport type the named-app's-device is connected over to HU.</description>
+      <description>The ID, serial number, transport type the named-app's-device is connected over to HU.</description>
     </param>
     <param name="policyAppID" type="String" maxlength="50" minlength="1" mandatory="true">
       <description>Policy ID(=the appID the application registers with) of registered application.</description>
-    </param>
-    <param name="ttsName" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
-      <description>
-        TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green".
-        Meant to overcome any failing on speech engine in properly pronouncing / understanding app name.
-        May not be empty.
-        May not start with a new line character.
-        Not unique value
-      </description>
-    </param>
-    <param name="vrSynonyms" type="String" maxlength="40" minsize="1" maxsize="100" array="true" mandatory="false">
-      <description>
-        Defines an additional voice recognition command.
-        Must not interfere with any name of previously registered applications(SDL makes check).
-      </description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>Unique (during ignition cycle) id of the application. To be used in all RPCs sent by both HU system and SDL</description>
@@ -1411,10 +1396,6 @@
     <param name="appType" type="Common.AppHMIType" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>List of all applicable app types stating which classifications to be given to the app.</description>
       <description>e.g. for platforms like GEN2, this determines which "corner(s)" the app can populate.</description>
-    </param>
-    <param name="greyOut" type="Boolean" mandatory="false">
-      <description>Indicates whether application should be dimmed on the screen.</description>
-      <description>Applicable only for apps received through QueryApps and still not registered.</description>
     </param>
     <param name="requestType" type="Common.RequestType" minsize="0" maxsize="100" array="true" mandatory="false">
       <description>The list of SystemRequest's RequestTypes allowed by policies for the named application</description>
@@ -1459,7 +1440,7 @@
   <param name="tertiaryText" maxlength="500" type="String" mandatory="false">
     <description>Optional tertiary text to display; e.g. distance to POI for a search result entry</description>
   </param>
-  <param name="secondaryImage" type="Common.Image" mandatory="false">
+  <param name="secondaryImage" type="Image" mandatory="false">
     <description>Optional secondary image struct for choice</description>
   </param>
 </struct>
@@ -2089,21 +2070,6 @@
     <function name="OnUpdateDeviceList" messagetype="notification">
       <description>Notification from HMI to SDL sent when HMI requires update of device list (i.e. when user clicks 'Change Device' button)</description>
     </function>
-    <function name="OnPhoneCall" messagetype="notification">
-        <description>Sender: HMI->SDL. When: upon phone-call event started or ended</description>
-        <param name="isActive" type="Boolean" mandatory="true">
-            <description>Must be 'true' - when the phone call is started on HMI. Must be 'false' when the phone call is ended on HMI</description>
-        </param>
-    </function>
-    <function name="OnEmergencyEvent" messagetype="notification">
-        <description>
-            "Sender: HMI->SDL. Conditions: when HMI enters the mode of "911 Assist", or other rear view camera,
-            or something else in the future. Purpose: for SDL to change the audioStreamingState of the related apps to
-            NOT_AUDIBLE when "enabled:true" and back to AUDIBLE when "enabled:false""
-        </description>
-        <param name="enabled" type="Boolean" mandatory="true">
-        </param>
-    </function>
     <function name="OnResumeAudioSource" messagetype="notification">
       <description>This method must be invoked by SDL to update audio state.</description>
       <param name="appID" type="Integer" mandatory="true">
@@ -2257,7 +2223,7 @@
     <function name="DialNumber" messagetype="request">
       <description>Request from SDL to call a specific number.</description>
       <param name="number" type="String" maxlength="40">
-        <description>The number to dial. Only the character + and numbers are allowed.</description>
+        <description>The number to dial. All characters shall be stripped from string except digits 0-9 and * # , ;.</description>
       </param>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of application that concerns this RPC.</description>
@@ -2293,8 +2259,8 @@
       <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
         <description>File reference name.</description>
       </param>
-      <param name="appID" type="String" maxlength="50" minlength="1" mandatory="false">
-        <description>ID of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="false">
+        <description>Internal ID of the application that corresponds to the policyAppID</description>
       </param>
     </function>
     <function name="SystemRequest" messagetype="request">
@@ -2305,8 +2271,8 @@
       <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
           <description>The path to file.</description>
       </param>
-      <param name="appID" type="String" maxlength="50" minlength="1" mandatory="false">
-        <description>ID of application that requested this RPC.</description>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>Internal ID of the application that requested this RPC.</description>
       </param>
     </function>
     <function name="SystemRequest" messagetype="response">
@@ -2404,17 +2370,16 @@
   <function name="OnIgnitionCycleOver" messagetype="notification">
     <description>Notification from system to SDL to let it know that ignition cycle is over.</description>
   </function>
-  <!-- End of Policies -->
-   <function name="OnDeactivateHMI" messagetype="notification">
-        <description>
-          Sender: HMI->SDL. When: in case GAL/DIO is active or disabling
-        </description>
-     <param name="isDeactivated" type="Boolean" mandatory="true">
-        <description>
-          Must be 'true' - GAL/DIO is active. Must be 'false' when GAL/DIO is disabling
-        </description>
+  <function name="DecryptCertificate" messagetype="request">
+     <description>Sender: SDL->HMI. Purpose: to decrypt the certificate received via the Updated Policy Table. </description>
+     <param name="fileName" type="String" maxlength="255" minlength="1" mandatory="true">
+         <description>The path to the file with the encrypted certificate from the PolicyTable.</description>
      </param>
    </function>
+   <function name="DecryptCertificate" messagetype="response">
+         <description>SUCCESS - in case the certificate is decrypted and placed to the same file from request.</description>
+   </function>
+  <!-- End of Policies -->
    <function name="OnEventChanged" messagetype="notification">
      <description>Sender: HMI->SDL. When event is become active</description>
      <param name="eventName" type="Common.EventTypes" mandatory="true">
@@ -2523,7 +2488,12 @@
     <param name="cmdID" type="Integer" mandatory="true" minvalue="0" maxvalue="2000000000">
       <description>ID of of the command (list of strings)</description>
     </param>
-    <param name="appID" type="Integer" mandatory="true">
+    <param name="grammarID" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="true">
+    <description>
+      ID of the specific grammar that the command relates to. Previously provided by SDL via corresponding VR.AddCommand request.
+    </description>
+    </param>
+    <param name="appID" type="Integer" mandatory="false">
       <description>ID of application related to this RPC.</description>
     </param>
   </function>
@@ -3195,6 +3165,91 @@
 </interface>
 
 <interface name="Navigation" version="1.0" date="2013-05-22">
+
+  <enum name="ImageType">
+    <description>Contains information about the type of image.</description>
+    <element name="STATIC" />
+    <element name="DYNAMIC" />
+  </enum>
+
+  <enum name="WayPointType">
+    <description>Describes what kind of waypoint is requested/provided.</description>
+    <element name="ALL" />
+    <element name="DESTINATION" />
+  </enum>
+
+  <struct name="Image">
+    <param name="value" minlength="0" maxlength="65535" type="String">
+      <description>Either the static hex icon value or the binary image file name identifier (sent by PutFile).</description>
+    </param>
+    <param name="imageType" type="ImageType">
+      <description>Describes, whether it is a static or dynamic image.</description>
+    </param>
+  </struct>
+
+  <struct name="Coordinate2">
+    <param name="latitudeDegrees" minvalue="-90" maxvalue="90" type="Float" mandatory="true">
+      <description>Latitude of the location.</description>
+    </param>
+    <param name="longitudeDegrees" minvalue="-180" maxvalue="180" type="Float" mandatory="true">
+      <description>Longitude of the location.</description>
+    </param>
+  </struct>
+
+  <struct name="OASISAddress">
+    <param name="countryName" minlength="0" maxlength="200" type="String" mandatory="false">
+      <description>Name of the country (localized)</description>
+    </param>
+    <param name="countryCode" minlength="0" maxlength="50" type="String" mandatory="false">
+      <description>Name of country (ISO 3166-2)</description>
+    </param>
+    <param name="postalCode" minlength="0" maxlength="16" type="String" mandatory="false">
+      <description>(PLZ, ZIP, PIN, CAP etc.)</description>
+    </param>
+    <param name="administrativeArea" minlength="0" maxlength="200" type="String" mandatory="false">
+      <description>Portion of country (e.g. state)</description>
+    </param>
+    <param name="subAdministrativeArea" minlength="0" maxlength="200" type="String" mandatory="false">
+      <description>Portion of e.g. state (e.g. county)</description>
+    </param>
+    <param name="locality" minlength="0" maxlength="200" type="String" mandatory="false">
+      <description>Hypernym for e.g. city/village</description>
+    </param>
+    <param name="subLocality" minlength="0" maxlength="200" type="String" mandatory="false">
+      <description>Hypernym for e.g. district</description>
+    </param>
+    <param name="thoroughfare" minlength="0" maxlength="200" type="String" mandatory="false">
+      <description>Hypernym for street, road etc.</description>
+    </param>
+    <param name="subThoroughfare" minlength="0" maxlength="200" type="String" mandatory="false">
+      <description>Portion of thoroughfare e.g. house number</description>
+    </param>
+  </struct>
+
+  <struct name="LocationDetails">
+    <param name="coordinate" type="Coordinate2" mandatory="false">
+      <description>Latitude/Longitude of the location.</description>
+    </param>
+    <param name="locationName" type="String" maxlength="500" mandatory="false">
+      <description>Name of location.</description>
+    </param>
+    <param name="addressLines" type="String" maxlength="500" minsize="0" maxsize="4" array="true" mandatory="false">
+      <description>Location address for display purposes only</description>
+    </param>
+    <param name="locationDescription" type="String" maxlength="500" mandatory="false">
+      <description>Description intended location / establishment (if applicable)</description>
+    </param>
+    <param name="phoneNumber" type="String" maxlength="500" mandatory="false">
+      <description>Phone number of location / establishment.</description>
+    </param>
+    <param name="locationImage" type="Image" mandatory="false">
+      <description>Image / icon of intended location.</description>
+    </param>
+    <param name="searchAddress" type="OASISAddress" mandatory="false">
+      <description>Address to be used by navigation engines for search</description>
+    </param>
+  </struct>
+
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response must provide the information about presence of UI Navigation module and its readiness to cooperate with SDL.</description>
   </function>
@@ -3356,6 +3411,40 @@
     <param name="available" type="Boolean" mandatory="true">
       <description>If "true" - video data started. If "false" - video data stopped.</description>
     </param>
+  </function>
+  <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="request">
+    <description>Request for getting waypoint/destination data.</description>
+    <param name="wayPointType" type="WayPointType" defvalue="ALL" mandatory="false">
+      <description>To request for either the destination only or for all waypoints including destination</description>
+    </param>
+  </function>
+  <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="response">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of the application.</description>
+    </param>
+    <param name="wayPoints" type="LocationDetails" mandatory="false" array="true" minsize="1" maxsize="10">
+      <description>See LocationDetails</description>
+    </param>
+  </function>
+  <function name="OnWayPointChange" functionID="OnWayPointChangeID" messagetype="notification">
+    <description>Notification which provides the entire LocationDetails when there is a change to any waypoints or destination.</description>
+    <param name="wayPoints" type="LocationDetails" mandatory="true" array="true" minsize="1" maxsize="10">
+      <description>See LocationDetails</description>
+    </param>
+  </function>
+
+  <function name="SubscribeWayPoints" functionID="SubscribeWayPointsID" messagetype="request">
+    <description>To subscribe in getting changes for Waypoints/destinations</description>
+  </function>
+
+  <function name="SubscribeWayPoints" functionID="SubscribeWayPointsID" messagetype="response">
+  </function>
+
+  <function name="UnsubscribeWayPoints" functionID="UnsubscribeWayPointsID" messagetype="request">
+    <description>Request to unsubscribe from WayPoints and Destination</description>
+  </function>
+
+  <function name="UnsubscribeWayPoints" functionID="UnsubscribeWayPointsID" messagetype="response">
   </function>
 
 </interface>
@@ -4103,7 +4192,7 @@
         <description>The list of SystemRequest's RequestTypes allowed by policies for the named application (the app's SystemRequest sent with RequestType           out of this list will get 'disallowed' response from SDL).
         If SDL sends an empty array - any RequestType is allowed for this app.
         If SDL omits this parameter - nothing is changed for RequestType in the policies
-      </description>
+        </description>
       </param>
     </function>
 
