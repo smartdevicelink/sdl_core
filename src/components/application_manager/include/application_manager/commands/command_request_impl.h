@@ -136,10 +136,8 @@ class CommandRequestImpl : public CommandImpl,
 
   /**
    * @brief Remove from current message parameters disallowed by policy table
-   * @param params_permissions Parameters permissions from policy table
    */
-  void RemoveDisallowedParameters(
-      const CommandParametersPermissions& params_permissions);
+  void RemoveDisallowedParameters();
 
   /**
    * @brief Adds disallowed parameters back to response with appropriate
@@ -156,9 +154,16 @@ class CommandRequestImpl : public CommandImpl,
   bool HasDisallowedParams() const;
 
  protected:
+  /**
+   * @brief Returns policy parameters permissions
+   * @return Parameters permissions struct reference
+   */
+  const CommandParametersPermissions& parameters_permissions() const;
+
   RequestState current_state_;
   sync_primitives::Lock state_lock_;
   CommandParametersPermissions parameters_permissions_;
+  CommandParametersPermissions removed_parameters_permissions_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);

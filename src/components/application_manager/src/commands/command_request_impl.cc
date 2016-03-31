@@ -397,14 +397,13 @@ bool CommandRequestImpl::CheckAllowedParameters() {
         }
       }
 
-      CommandParametersPermissions params_permissions;
       mobile_apis::Result::eType check_result =
           application_manager_.CheckPolicyPermissions(
               (*it_app_list).get()->policy_app_id(),
               (*it_app_list).get()->hmi_level(),
               static_cast<mobile_api::FunctionID::eType>(function_id()),
               params,
-              &params_permissions);
+              &parameters_permissions_);
 
       // Check, if RPC is allowed by policy
       if (mobile_apis::Result::SUCCESS != check_result) {
@@ -421,33 +420,33 @@ bool CommandRequestImpl::CheckAllowedParameters() {
 
       // If no parameters specified in policy table, no restriction will be
       // applied for parameters
-      if (params_permissions.allowed_params.empty() &&
-          params_permissions.disallowed_params.empty() &&
-          params_permissions.undefined_params.empty()) {
+      if (parameters_permissions_.allowed_params.empty() &&
+          parameters_permissions_.disallowed_params.empty() &&
+          parameters_permissions_.undefined_params.empty()) {
         return true;
       }
 
-      RemoveDisallowedParameters(params_permissions);
+      RemoveDisallowedParameters();
     }
   }
   return true;
 }
 
-void CommandRequestImpl::RemoveDisallowedParameters(
-    const CommandParametersPermissions& params_permissions) {
+void CommandRequestImpl::RemoveDisallowedParameters() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   smart_objects::SmartObject& params = (*message_)[strings::msg_params];
 
   // Remove from request all disallowed parameters
   std::vector<std::string>::const_iterator it_disallowed =
-      params_permissions.disallowed_params.begin();
+      parameters_permissions_.disallowed_params.begin();
   std::vector<std::string>::const_iterator it_disallowed_end =
-      params_permissions.disallowed_params.end();
+      parameters_permissions_.disallowed_params.end();
   for (; it_disallowed != it_disallowed_end; ++it_disallowed) {
     if (params.keyExists(*it_disallowed)) {
       params.erase(*it_disallowed);
-      parameters_permissions_.disallowed_params.push_back(*it_disallowed);
+      removed_parameters_permissions_.disallowed_params.push_back(
+          *it_disallowed);
       LOG4CXX_INFO(
           logger_,
           "Following parameter is disallowed by user: " << *it_disallowed);
@@ -456,13 +455,13 @@ void CommandRequestImpl::RemoveDisallowedParameters(
 
   // Remove from request all undefined yet parameters
   std::vector<std::string>::const_iterator it_undefined =
-      params_permissions.undefined_params.begin();
+      parameters_permissions_.undefined_params.begin();
   std::vector<std::string>::const_iterator it_undefined_end =
-      params_permissions.undefined_params.end();
+      parameters_permissions_.undefined_params.end();
   for (; it_undefined != it_undefined_end; ++it_undefined) {
     if (params.keyExists(*it_undefined)) {
       params.erase(*it_undefined);
-      parameters_permissions_.undefined_params.push_back(*it_undefined);
+      removed_parameters_permissions_.undefined_params.push_back(*it_undefined);
       LOG4CXX_INFO(
           logger_,
           "Following parameter is disallowed by policy: " << *it_undefined);
@@ -478,12 +477,12 @@ void CommandRequestImpl::RemoveDisallowedParameters(
   for (; it_vehicle_data != it_vehicle_data_end; ++it_vehicle_data) {
     const std::string key = it_vehicle_data->first;
     if (params.keyExists(key) &&
-        params_permissions.allowed_params.end() ==
-            std::find(params_permissions.allowed_params.begin(),
-                      params_permissions.allowed_params.end(),
+        parameters_permissions_.allowed_params.end() ==
+            std::find(parameters_permissions_.allowed_params.begin(),
+                      parameters_permissions_.allowed_params.end(),
                       key)) {
       params.erase(key);
-      parameters_permissions_.undefined_params.push_back(key);
+      removed_parameters_permissions_.undefined_params.push_back(key);
       LOG4CXX_INFO(logger_,
                    "Following parameter is not found among allowed parameters '"
                        << key << "' and will be treated as disallowed.");
@@ -506,13 +505,13 @@ void CommandRequestImpl::AddDisallowedParametersToInfo(
   std::string info;
 
   std::vector<std::string>::const_iterator it =
-      parameters_permissions_.disallowed_params.begin();
-  for (; it != parameters_permissions_.disallowed_params.end(); ++it) {
+      removed_parameters_permissions_.disallowed_params.begin();
+  for (; it != removed_parameters_permissions_.disallowed_params.end(); ++it) {
     AddDissalowedParameterToInfoString(info, (*it));
   }
 
-  it = parameters_permissions_.undefined_params.begin();
-  for (; it != parameters_permissions_.undefined_params.end(); ++it) {
+  it = removed_parameters_permissions_.undefined_params.begin();
+  for (; it != removed_parameters_permissions_.undefined_params.end(); ++it) {
     AddDissalowedParameterToInfoString(info, (*it));
   }
 
@@ -533,20 +532,25 @@ void CommandRequestImpl::AddDisallowedParameters(
     smart_objects::SmartObject& response) {
   DisallowedParamsInserter disallowed_inserter(
       response, mobile_apis::VehicleDataResultCode::VDRC_USER_DISALLOWED);
-  std::for_each(parameters_permissions_.disallowed_params.begin(),
-                parameters_permissions_.disallowed_params.end(),
+  std::for_each(removed_parameters_permissions_.disallowed_params.begin(),
+                removed_parameters_permissions_.disallowed_params.end(),
                 disallowed_inserter);
 
   DisallowedParamsInserter undefined_inserter(
       response, mobile_apis::VehicleDataResultCode::VDRC_DISALLOWED);
-  std::for_each(parameters_permissions_.undefined_params.begin(),
-                parameters_permissions_.undefined_params.end(),
+  std::for_each(removed_parameters_permissions_.undefined_params.begin(),
+                removed_parameters_permissions_.undefined_params.end(),
                 undefined_inserter);
 }
 
 bool CommandRequestImpl::HasDisallowedParams() const {
-  return ((!parameters_permissions_.disallowed_params.empty()) ||
-          (!parameters_permissions_.undefined_params.empty()));
+  return ((!removed_parameters_permissions_.disallowed_params.empty()) ||
+          (!removed_parameters_permissions_.undefined_params.empty()));
+}
+
+const CommandParametersPermissions& CommandRequestImpl::parameters_permissions()
+    const {
+  return parameters_permissions_;
 }
 
 }  // namespace commands
