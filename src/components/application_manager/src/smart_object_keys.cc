@@ -265,6 +265,8 @@ const char* number = "number";
 const char* location_image = "locationImage";
 const char* is_suscribed = "isSubscribed";
 const char* message_data = "messageData";
+
+const char* delivery_mode = "deliveryMode";
 }  // namespace strings
 
 namespace json {

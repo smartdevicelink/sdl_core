@@ -30,6 +30,8 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
+#include <algorithm>
+
 #include "application_manager/commands/mobile/send_location_request.h"
 
 #include "application_manager/message_helper.h"
@@ -61,9 +63,18 @@ void SendLocationRequest::Run() {
     return;
   }
 
-  SmartObject& msg_params = (*message_)[strings::msg_params];
-  std::list<Common_TextFieldName::eType> fields_to_check;
+  smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
+  if (msg_params.keyExists(strings::delivery_mode)) {
+    const std::vector<std::string>& allowed_params =
+        parameters_permissions().allowed_params;
+    if (allowed_params.end() == std::find(allowed_params.begin(),
+                                          allowed_params.end(),
+                                          strings::delivery_mode)) {
+      msg_params.erase(strings::delivery_mode);
+    }
+  }
 
+  std::list<Common_TextFieldName::eType> fields_to_check;
   if (msg_params.keyExists(strings::location_name)) {
     fields_to_check.push_back(Common_TextFieldName::locationName);
   }
