@@ -1985,9 +1985,12 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     ApplicationSharedPtr registered_app =
         ApplicationManagerImpl::instance()->
         application_by_policy_id(mobile_app_id);
-    if (registered_app) {
+
+    if (registered_app && device_id == registered_app->device()) {
       LOG4CXX_DEBUG(logger_, "Application with the same id: " << mobile_app_id
-                    << " is registered already.");
+                    << " is registered already on the same device."
+                       " Device id is:" << device_id
+                    << " Application processing skipped.");
       continue;
     }
 
