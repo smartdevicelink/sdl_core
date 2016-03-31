@@ -60,7 +60,7 @@ timer::Timer::~Timer() {
   sync_primitives::AutoLock auto_lock(lock_);
   LOG4CXX_DEBUG(logger_, "Timer is to be destroyed " << name_);
 
-  DCHECK(thread_);
+  DCHECK_OR_RETURN_VOID(thread_);
   thread_->join();
   DeleteThread(thread_);
 }
@@ -124,7 +124,7 @@ void timer::Timer::OnTimeout() const {
                 "Timer has finished counting. Timeout(ms): "
                     << static_cast<uint32_t>(delegate_.get_timeout()));
 
-  DCHECK(task_.get());
+  DCHECK_OR_RETURN_VOID(task_.get());
   task_->run();
 }
 
@@ -175,12 +175,16 @@ void timer::Timer::TimerDelegate::threadMain() {
     }
 
     if (is_repeatable_) {
+      // it's repeatable just looping here
       continue;
     }
     if (restart_flag_) {
+      // It's one-shoot timer, it've updated timeout
+      // need one more shoot
       restart_flag_ = false;
       continue;
     }
+    // One-shoot timer wihout update timeout, just exit
     return;
   }
 }
@@ -192,7 +196,7 @@ void timer::Timer::TimerDelegate::exitThreadMain() {
 }
 
 void timer::Timer::TimerDelegate::SetTimeOut(
-    const uint32_t timeout_milliseconds) {
+    const Milliseconds timeout_milliseconds) {
   timeout_milliseconds_ = timeout_milliseconds;
   termination_condition_.NotifyOne();
 }

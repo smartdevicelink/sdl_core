@@ -144,7 +144,7 @@ class Timer {
      * @brief Set new Timeout
      * @param timeout_milliseconds New timeout to be set
      */
-    void SetTimeOut(const uint32_t timeout_milliseconds);
+    void SetTimeOut(const Milliseconds timeout_milliseconds);
 
     /**
       * @brief Wait until timer will start
