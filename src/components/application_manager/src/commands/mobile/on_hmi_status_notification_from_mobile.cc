@@ -98,7 +98,7 @@ void OnHMIStatusNotificationFromMobile::Run() {
       ApplicationManagerImpl::ApplicationListAccessor accessor;
 
       bool is_another_foreground_sdl4_app = false;
-      ApplicationSetIt it = accessor.begin();
+      ApplicationSetConstIt it = accessor.begin();
       for (; accessor.end() != it; ++it) {
         if (connection_key() != (*it)->app_id() &&
             ProtocolVersion::kV4 == (*it)->protocol_version() &&
