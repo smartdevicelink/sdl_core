@@ -111,7 +111,7 @@ bool timer::Timer::IsRunning() const {
 
 void timer::Timer::UpdateTimeOut(const Milliseconds timeout_milliseconds) {
   // There would be no way to stop thread if timeout in lopper will be 0
-  uint32_t timeout = (timeout_milliseconds > 0u) ? timeout_milliseconds : 1u;
+  Milliseconds timeout = (timeout_milliseconds > 0u) ? timeout_milliseconds : 1u;
 
   LOG4CXX_DEBUG(logger_,
                 "Set new timeout " << timeout << "ms for timer " << name_);
@@ -122,7 +122,7 @@ void timer::Timer::OnTimeout() const {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_,
                 "Timer has finished counting. Timeout(ms): "
-                    << static_cast<uint32_t>(delegate_.get_timeout()));
+                    << static_cast<Milliseconds>(delegate_.get_timeout()));
 
   DCHECK_OR_RETURN_VOID(task_.get());
   task_->run();
