@@ -55,7 +55,7 @@ typedef sigval_t sigval;
 #include "utils/threads/thread_delegate.h"
 
 namespace timer {
-typedef uint32_t Milliseconds;
+typedef uint64_t Milliseconds;
 /**
  * @brief The Timer is class for calling any method after out of internal time.
  * Time setups in ::Start(uint,bool) method and starts time out steps.
@@ -170,9 +170,9 @@ class Timer {
      * @brief Gets timeout with overflow check
      * @return timeout
      */
-    inline int32_t get_timeout() const {
+    inline Milliseconds get_timeout() const {
       return std::min(
-          static_cast<uint32_t>(std::numeric_limits<int32_t>::max()),
+          static_cast<Milliseconds>(std::numeric_limits<int32_t>::max()),
           timeout_milliseconds_);
     }
 
@@ -185,7 +185,7 @@ class Timer {
 
    protected:
     Timer* timer_;
-    uint32_t timeout_milliseconds_;
+    Milliseconds timeout_milliseconds_;
     // Lock for condition variable
     sync_primitives::Lock state_lock_;
     sync_primitives::ConditionalVariable termination_condition_;
