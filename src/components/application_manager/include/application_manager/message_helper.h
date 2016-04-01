@@ -484,7 +484,7 @@ class MessageHelper {
    * @brief Sends UnsubscribeWayPoints request
    * @return true if UnSubscribedWayPoints is send otherwise false
    */
-  static bool SendUnSubscribedWayPoints();
+  static bool SendUnsubscribedWayPoints();
 
   static smart_objects::SmartObjectSPtr CreateNegativeResponse(
       uint32_t connection_key,

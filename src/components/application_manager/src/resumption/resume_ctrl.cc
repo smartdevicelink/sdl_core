@@ -455,7 +455,7 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
       AddChoicesets(application, saved_app);
       SetGlobalProperties(application, saved_app);
       AddSubscriptions(application, saved_app);
-      AddSubscribedForWayPoints(application, saved_app);
+      AddWayPointsSubscription(application, saved_app);
       result = true;
     } else {
       LOG4CXX_WARN(logger_,
@@ -566,7 +566,7 @@ void ResumeCtrl::SetGlobalProperties(
   }
 }
 
-void ResumeCtrl::AddSubscribedForWayPoints(app_mngr::ApplicationSharedPtr application,
+void ResumeCtrl::AddWayPointsSubscription(app_mngr::ApplicationSharedPtr application,
                                            const smart_objects::SmartObject& saved_app) {
   LOG4CXX_AUTO_TRACE(logger_);
 

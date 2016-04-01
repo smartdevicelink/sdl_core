@@ -153,11 +153,6 @@ void ResumptionDataDB::SaveApplication(
     return;
   }
 
-  if (!InsertSubscribedForWayPoints()) {
-    LOG4CXX_ERROR(logger_, "Problem with saving SubscribedForWayPoints");
-    return;
-  }
-
   if (application->is_application_data_changed()) {
     if (application_exist) {
       if (!DeleteSavedApplication(policy_app_id, device_mac)) {
@@ -346,11 +341,6 @@ bool ResumptionDataDB::GetSavedApplication(
   if (!SelectDataFromAppTable(policy_app_id, device_id, saved_app)) {
     LOG4CXX_ERROR(logger_,
                   "Problem with restoring of data from application table");
-    return false;
-  }
-
-  if (!SelectSubscribedForWayPoints()) {
-    LOG4CXX_ERROR(logger_, "Problem with restoring of SubscribedForWayPoints");
     return false;
   }
 
@@ -1424,11 +1414,10 @@ bool ResumptionDataDB::SelectDataFromAppTable(
   //  field "hmiAppID" from table "application" = 4
   //  field "hmiLevel" from table "application" = 5
   //  field "ign_off_count" from table "application" = 6
-  //  field "suspend_count" from table "application" = 7
-  //  field "timeStamp" from table "application" = 8
-  //  field "deviceID" from table "application" = 9
-  //  field "isMediaApplication" from table "application" = 10
-  //  field "IsSubscribedForWayPoints" from table "application" = 11
+  //  field "timeStamp" from table "application" = 7
+  //  field "deviceID" from table "application" = 8
+  //  field "isMediaApplication" from table "application" = 9
+  //  field "IsSubscribedForWayPoints" from table "application" = 10
   uint32_t connection_key = query.GetUInteger(1);
 
   saved_app[strings::app_id] = query.GetString(0);
@@ -1441,11 +1430,10 @@ bool ResumptionDataDB::SelectDataFromAppTable(
   saved_app[strings::hmi_app_id] = query.GetUInteger(4);
   saved_app[strings::hmi_level] = query.GetInteger(5);
   saved_app[strings::ign_off_count] = query.GetInteger(6);
-  saved_app[strings::suspend_count] = query.GetInteger(7);
-  saved_app[strings::time_stamp] = query.GetUInteger(8);
-  saved_app[strings::device_id] = query.GetString(9);
-  saved_app[strings::is_media_application] = query.GetBoolean(10);
-  saved_app[strings::subscribed_for_way_points] = query.GetBoolean(11);
+  saved_app[strings::time_stamp] = query.GetUInteger(7);
+  saved_app[strings::device_id] = query.GetString(8);
+  saved_app[strings::is_media_application] = query.GetBoolean(9);
+  saved_app[strings::subscribed_for_way_points] = query.GetBoolean(10);
 
   LOG4CXX_INFO(logger_,
                "Data from application table was restored successfully");
@@ -2643,30 +2631,28 @@ bool ResumptionDataDB::InsertApplicationData(
      field "hmiAppID" from table "application" = 3
      field "hmiLevel" from table "application" = 4
      field "ign_off_count" from table "application" = 5
-     field "suspend_count" from table "application" = 6
-     field "timeStamp" from table "application" = 7
-     field "idglobalProperties" from table "application" = 8
-     field "isMediaApplication" from table "application" = 9
-     field "appID" from table "application" = 10
-     field "deviceID" from table "application" = 11
-     field "isSubscribedForWayPoints" from table "application" = 12*/
+     field "timeStamp" from table "application" = 6
+     field "idglobalProperties" from table "application" = 7
+     field "isMediaApplication" from table "application" = 8
+     field "appID" from table "application" = 9
+     field "deviceID" from table "application" = 10
+     field "isSubscribedForWayPoints" from table "application" = 11*/
   query.Bind(0, connection_key);
   query.Bind(1, grammar_id);
   query.Bind(2, hash);
   query.Bind(3, hmi_app_id);
   query.Bind(4, static_cast<int32_t>(hmi_level));
   query.Bind(5, 0);
-  query.Bind(6, 0);
-  query.Bind(7, time_stamp);
+  query.Bind(6, time_stamp);
   if (global_properties_key) {
-    query.Bind(8, global_properties_key);
+    query.Bind(7, global_properties_key);
   } else {
-    query.Bind(8);
+    query.Bind(7);
   }
-  query.Bind(9, is_media_application);
-  query.Bind(10, policy_app_id);
-  query.Bind(11, device_id);
-  query.Bind(12, is_subscribed_for_way_points);
+  query.Bind(8, is_media_application);
+  query.Bind(9, policy_app_id);
+  query.Bind(10, device_id);
+  query.Bind(11, is_subscribed_for_way_points);
 
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Problem with execution query");
@@ -2730,73 +2716,6 @@ void ResumptionDataDB::UpdateDataOnAwake() {
       WriteDb();
     }
   }
-}
-
-bool ResumptionDataDB::InsertSubscribedForWayPoints() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  using namespace app_mngr;
-
-  if (!DeleteSubscribedForWayPoints()) {
-    LOG4CXX_WARN(logger_, "SubscribedForWayPoints table was not cleaned");
-  }
-
-  utils::dbms::SQLQuery query(db());
-  if (!query.Prepare(kInsertSubscribedForWayPoints)) {
-    LOG4CXX_WARN(logger_,
-                 "Problem with verification query "
-                 "for updating some SubscribedForWayPoints data");
-    return false;
-  }
-
-  const std::set<int32_t> apps =
-      application_manager::ApplicationManagerImpl::instance()
-          ->GetSubscribedForWayPoints();
-  for (std::set<int32_t>::iterator i = apps.begin(); i != apps.end(); i++) {
-    query.Reset();
-    query.Bind(0, *i);
-    if (!query.Exec()) {
-      LOG4CXX_WARN(logger_, "Problem with execution query");
-      return false;
-    }
-  }
-  LOG4CXX_INFO(
-      logger_,
-      "Data were updated successfully in SubscribedForWayPoints table");
-  return true;
-}
-
-bool ResumptionDataDB::SelectSubscribedForWayPoints() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  std::set<int32_t> subscribed_for_way_points;
-  utils::dbms::SQLQuery query(db());
-  if (!query.Prepare(kSelectSubscribedForWayPoints)) {
-    LOG4CXX_WARN(
-        logger_,
-        "Problem with verification kSelectSubscribedForWayPoints query");
-    return false;
-  }
-  while (query.Next()) {
-    subscribed_for_way_points.insert(query.GetInteger(0));
-  }
-  application_manager::ApplicationManagerImpl::instance()
-      ->SetSubscribedForWayPoints(subscribed_for_way_points);
-  return true;
-}
-
-bool ResumptionDataDB::DeleteSubscribedForWayPoints() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  utils::dbms::SQLQuery query(db());
-  if (!query.Prepare(kDeleteSubscribedForWayPoints)) {
-    LOG4CXX_WARN(
-        logger_,
-        "Problem with verification kDeleteSubscribedForWayPoints query");
-    return false;
-  }
-  if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Problem with execution query");
-    return false;
-  }
-  return true;
 }
 
 bool ResumptionDataDB::UpdateApplicationData(

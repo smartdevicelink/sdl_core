@@ -391,7 +391,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     case mobile_apis::FunctionID::UnsubscribeWayPointsID: {
       if ((*message)[strings::params][strings::message_type]
           == static_cast<int>(application_manager::MessageType::kResponse)) {
-        command = utils::MakeShared<commands::UnSubscribeWayPointsResponse>(message);
+        command = utils::MakeShared<commands::UnsubscribeWayPointsResponse>(message);
       } else {
         command = utils::MakeShared<commands::UnSubscribeWayPointsRequest>(message);
       }

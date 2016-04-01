@@ -1759,8 +1759,8 @@ bool MessageHelper::SendStopAudioPathThru() {
   return ApplicationManagerImpl::instance()->ManageHMICommand(result);
 }
 
-bool MessageHelper::SendUnSubscribedWayPoints() {
-  LOG4CXX_INFO(logger_, "MessageHelper::SendUnSubscribedWayPoints");
+bool MessageHelper::SendUnsubscribedWayPoints() {
+  LOG4CXX_INFO(logger_, "MessageHelper::SendUnsubscribedWayPoints");
 
   smart_objects::SmartObjectSPtr result = CreateRequestObject();
 

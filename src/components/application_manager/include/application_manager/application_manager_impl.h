@@ -292,13 +292,13 @@ class ApplicationManagerImpl
    * @brief Subscribe Application for way points
    * @param Application AppID
    */
-  void SubscribeAppForWayPoints(const uint32_t app);
+  void SubscribeAppForWayPoints(const uint32_t app_id);
 
   /**
    * @brief Unsubscribe Application for way points
    * @param Application AppID
    */
-  void UnSubscribeAppForWayPoints(const uint32_t app);
+  void UnsubscribeAppFromWayPoints(const uint32_t app_id);
 
   /**
    * @brief Is Any Application is subscribed for way points
@@ -310,13 +310,7 @@ class ApplicationManagerImpl
    * @brief Get subscribed for way points
    * @return reference to set of subscribed apps for way points
    */
-  const std::set<int32_t>& GetSubscribedForWayPoints() const;
-
-  /**
-   * @brief Set subscribed for way points
-   * @param subscribed_way_points_apps
-   */
-  void SetSubscribedForWayPoints(const std::set<int32_t>& subscribed_way_points_apps);
+  const std::set<int32_t> GetAppsSubscribedForWayPoints() const;
 
   /**
    * @brief Notifies all components interested in Vehicle Data update
@@ -1457,6 +1451,7 @@ typedef utils::SharedPtr<timer::Timer> TimerSPtr;
   // Lock for applications list
   mutable sync_primitives::Lock applications_list_lock_;
   mutable sync_primitives::Lock apps_to_register_list_lock_;
+  mutable sync_primitives::Lock subscribed_way_points_apps_lock_;
 
   /**
    * @brief Map of correlation id  and associated application id.

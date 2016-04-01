@@ -49,7 +49,7 @@ void OnWayPointChangeNotification::Run() {
 
   std::set<int32_t> subscribed_for_way_points =
       application_manager::ApplicationManagerImpl::instance()
-          ->GetSubscribedForWayPoints();
+          ->GetAppsSubscribedForWayPoints();
 
   for (std::set<int32_t>::const_iterator app_id =
            subscribed_for_way_points.begin();

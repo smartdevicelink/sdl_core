@@ -39,13 +39,13 @@ namespace application_manager {
 
 namespace commands {
 
-NaviUnSubscribeWaypointsResponse::NaviUnSubscribeWaypointsResponse(
+NaviUnsubscribeWayPointsResponse::NaviUnsubscribeWayPointsResponse(
     const MessageSharedPtr &message)
     : ResponseFromHMI(message) {}
 
-NaviUnSubscribeWaypointsResponse::~NaviUnSubscribeWaypointsResponse() {}
+NaviUnsubscribeWayPointsResponse::~NaviUnsubscribeWayPointsResponse() {}
 
-void NaviUnSubscribeWaypointsResponse::Run() {
+void NaviUnsubscribeWayPointsResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   event_engine::Event event(

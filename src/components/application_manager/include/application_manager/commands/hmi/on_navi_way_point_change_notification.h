@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,7 @@ class OnNaviWayPointChangeNotification : public NotificationFromHMI {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  virtual void Run() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(OnNaviWayPointChangeNotification);

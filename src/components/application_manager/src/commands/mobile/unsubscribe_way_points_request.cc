@@ -50,7 +50,7 @@ void UnSubscribeWayPointsRequest::on_event(const event_engine::Event &event) {
       bool result = mobile_apis::Result::SUCCESS == result_code;
       if (result) {
         application_manager::ApplicationManagerImpl::instance()
-            ->UnSubscribeAppForWayPoints(app->app_id());
+            ->UnsubscribeAppFromWayPoints(app->app_id());
       }
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
       break;

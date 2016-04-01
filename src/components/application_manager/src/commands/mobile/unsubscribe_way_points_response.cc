@@ -5,13 +5,13 @@ namespace application_manager {
 
 namespace commands {
 
-UnSubscribeWayPointsResponse::UnSubscribeWayPointsResponse(
+UnsubscribeWayPointsResponse::UnsubscribeWayPointsResponse(
     const MessageSharedPtr &message)
     : CommandResponseImpl(message) {}
 
-UnSubscribeWayPointsResponse::~UnSubscribeWayPointsResponse() {}
+UnsubscribeWayPointsResponse::~UnsubscribeWayPointsResponse() {}
 
-void UnSubscribeWayPointsResponse::Run() {
+void UnsubscribeWayPointsResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);

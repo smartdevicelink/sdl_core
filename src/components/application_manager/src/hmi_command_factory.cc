@@ -1050,7 +1050,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::Navigation_GetWayPoints: {
       if (is_response) {
-        command.reset(new commands::NaviGetWaypointsResponse(message));
+        command.reset(new commands::NaviGetWayPointsResponse(message));
       } else {
         command.reset(new commands::NaviGetWayPointsRequest(message));
       }
@@ -1074,7 +1074,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::Navigation_SubscribeWayPoints: {
       if (is_response) {
-        command.reset(new commands::NaviSubscribeWaypointsResponse(message));
+        command.reset(new commands::NaviSubscribeWayPointsResponse(message));
       } else {
         command.reset(new commands::NaviSubscribeWayPointsRequest(message));
       }
@@ -1082,7 +1082,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints: {
       if (is_response) {
-        command.reset(new commands::NaviUnSubscribeWaypointsResponse(message));
+        command.reset(new commands::NaviUnsubscribeWayPointsResponse(message));
       } else {
         command.reset(new commands::NaviUnSubscribeWayPointsRequest(message));
       }
@@ -2092,7 +2092,7 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       break;
     }
     case hmi_apis::FunctionID::Navigation_OnWayPointChange: {
-      command = utils::MakeShared<commands::OnNaviWayPointChangeNotification>(message);
+      command.reset(new commands::OnNaviWayPointChangeNotification(message));
       break;
     }
   }

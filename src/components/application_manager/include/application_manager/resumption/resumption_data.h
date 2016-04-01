@@ -237,13 +237,6 @@ class ResumptionData {
       app_mngr::ApplicationConstSharedPtr application) const;
 
   /**
-   * @brief Retrieves of subscribed apps for way points
-   * @param reference for set of subscribed for way points
-   * @return subscribed apps for way points
-   */
-  smart_objects::SmartObject GetSubscribedForWayPoints(const std::set<int32_t>& subscribed_for_way_points);
-
-  /**
    * @brief Retrieves of subscriptions from application
    * @param application contains application of which selection subscriptions
    * @return subscriptions of application
