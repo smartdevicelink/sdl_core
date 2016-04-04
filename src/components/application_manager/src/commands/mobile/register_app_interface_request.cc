@@ -513,14 +513,19 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   SendResponse(true, result, add_info.c_str(), &response_params);
 
-  // Default HMI level should be set before any permissions validation, since it
-  // relies on HMI level.
-  resumer.SetupDefaultHMILevel(application);
+  // when application's hmilevel is not defined, we should set
+  // default and try to perform resumption
+  // fix for APPLINK-12311
+  if (mobile_apis::HMILevel::INVALID_ENUM == application->CurrentHmiState()->hmi_level()) {
+    // Default HMI level should be set before any permissions validation, since it
+    // relies on HMI level.
+    resumer.SetupDefaultHMILevel(application);
 
-  if (result != mobile_apis::Result::RESUME_FAILED) {
-    resumer.StartResumption(application, hash_id);
-  } else {
-    resumer.StartResumptionOnlyHMILevel(application);
+    if (result != mobile_apis::Result::RESUME_FAILED) {
+      resumer.StartResumption(application, hash_id);
+    } else {
+      resumer.StartResumptionOnlyHMILevel(application);
+    }
   }
 
   // By default app subscribed to CUSTOM_BUTTON
