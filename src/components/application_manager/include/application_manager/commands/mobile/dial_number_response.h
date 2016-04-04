@@ -30,10 +30,10 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_RESPONSE_H_
 
-#include "application_manager/commands/command_request_impl.h"
+#include "application_manager/commands/command_response_impl.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -41,51 +41,32 @@ namespace application_manager {
 namespace commands {
 
 /**
- * @brief DialNumber request command class
+ * @brief DialNumberResponse command class
  **/
-class DialNumberRequest : public CommandRequestImpl {
+class DialNumberResponse : public CommandResponseImpl {
  public:
   /**
-   * \brief DialNumberRequest class constructor
+   * @brief DialNumberResponse class constructor
+   *
+   * @param message Incoming SmartObject message
    **/
-  explicit DialNumberRequest(const MessageSharedPtr& message);
+  explicit DialNumberResponse(const MessageSharedPtr& message);
 
   /**
-   * \brief DialNumberRequest class destructor
+   * @brief DialNumberResponse class destructor
    **/
-  virtual ~DialNumberRequest();
-
-  /**
-    * @brief Initialize request params
-   **/
-   virtual bool Init();
+  virtual ~DialNumberResponse();
 
   /**
    * @brief Execute command
    **/
   virtual void Run();
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
-  void on_event(const event_engine::Event& event);
-
  private:
-
-  /**
-   * @brief Removes from number param all characters
-   * except the + character and digits.
-   *
-   */
-  void StripNumberParam(std::string &number);
-
-  DISALLOW_COPY_AND_ASSIGN(DialNumberRequest);
+  DISALLOW_COPY_AND_ASSIGN(DialNumberResponse);
 };
 
 }  // namespace commands
-
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_RESPONSE_H_

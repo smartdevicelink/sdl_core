@@ -264,6 +264,8 @@
 #include "application_manager/commands/hmi/navi_send_location_response.h"
 #include "application_manager/commands/hmi/on_tts_reset_timeout_notification.h"
 #include "application_manager/commands/hmi/on_phone_call_notification.h"
+#include "application_manager/commands/hmi/dial_number_request.h"
+#include "application_manager/commands/hmi/dial_number_response.h"
 
 namespace application_manager {
 
@@ -2058,6 +2060,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::BasicCommunication_OnPhoneCall: {
       command.reset(new commands::hmi::OnPhoneCallNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_DialNumber: {
+      if (is_response) {
+        command.reset(new commands::hmi::DialNumberResponse(message));
+      } else {
+        command.reset(new commands::hmi::DialNumberRequest(message));
+      }
       break;
     }
   }
