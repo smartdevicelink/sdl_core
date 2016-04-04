@@ -264,112 +264,63 @@ class QueryAppsDataValidator {
     // Every language has ttsname string and vrsynonyms array
     for (size_t idx = 0; idx < languages_array_size; ++idx) {
       const smart_objects::SmartObject& language = languages.getElement(idx);
-      std::set<std::string> keys = language.enumerate();
-      for (std::set<std::string>::const_iterator iter = keys.begin();
-           iter != keys.end();
-           ++iter) {
-        // Verify default language defined
-        if (!(*iter).compare(json::default_)) {
-          default_language_found = true;
-        }
-        // Add set for synonyms' duplicates validation
-        if (synonyms_map.find(*iter) == synonyms_map.end()) {
-          synonyms_map[*iter] = SynonymsSet();
-        }
-        // ttsName verification
-        if (!language[*iter].keyExists(json::ttsName)) {
+      if (smart_objects::SmartType_Map != language.getType()) {
+        LOG4CXX_WARN(logger_,
+                     kQueryAppsValidationFailedPrefix
+                         << "language is not a map.");
+        return false;
+      }
+      if (language.length() != 1) {
+        LOG4CXX_WARN(logger_,
+                     kQueryAppsValidationFailedPrefix
+                         << "language map size is not equal 1.");
+        return false;
+      }
+      const std::string language_name = (*language.map_begin()).first;
+      if (!language_name.length()) {
+        LOG4CXX_WARN(logger_,
+                     kQueryAppsValidationFailedPrefix
+                         << "language name is empty");
+        return false;
+      }
+      // Verify default language defined
+      if (!(language_name).compare(json::default_)) {
+        default_language_found = true;
+      }
+      // Add set for synonyms' duplicates validation
+      if (synonyms_map.find(language_name) == synonyms_map.end()) {
+        synonyms_map[language_name] = SynonymsSet();
+      }
+      // ttsName verification
+      if (!language[language_name].keyExists(json::ttsName)) {
+        LOG4CXX_WARN(logger_,
+                     kQueryAppsValidationFailedPrefix
+                         << "'languages.ttsName' doesn't exist");
+        return false;
+      }
+      const smart_objects::SmartObject& ttsNameObject =
+          language[language_name][json::ttsName];
+      // ttsName is string
+      if (smart_objects::SmartType_String == ttsNameObject.getType()) {
+        const std::string ttsName =
+            language[language_name][json::ttsName].asString();
+        if (ttsName.length() > kTtsNameLengthMax) {
           LOG4CXX_WARN(logger_,
                        kQueryAppsValidationFailedPrefix
-                           << "'languages.ttsName' doesn't exist");
-          return false;
-        }
-        const smart_objects::SmartObject& ttsNameObject =
-            language[*iter][json::ttsName];
-        // ttsName is string
-        if (smart_objects::SmartType_String == ttsNameObject.getType()) {
-          const std::string ttsName = language[*iter][json::ttsName].asString();
-          if (ttsName.length() > kTtsNameLengthMax) {
-            LOG4CXX_WARN(logger_,
-                         kQueryAppsValidationFailedPrefix
-                             << "ttsName string exceeds max length ["
-                             << ttsName.length() << "]>[" << kTtsNameLengthMax
-                             << "]");
-            return false;
-          }
-        } else {
-          LOG4CXX_WARN(logger_,
-                       kQueryAppsValidationFailedPrefix
-                           << "ttsName is not the string type.");
-          return false;
-        }
-        if (!language[*iter].keyExists(json::vrSynonyms)) {
-          LOG4CXX_WARN(logger_,
-                       kQueryAppsValidationFailedPrefix
-                           << "'languages.vrSynonyms' doesn't exist");
-          return false;
-        }
-        const smart_objects::SmartArray* synonyms_array =
-            language[*iter][json::vrSynonyms].asArray();
-        if (!synonyms_array) {
-          LOG4CXX_WARN(logger_,
-                       kQueryAppsValidationFailedPrefix
-                           << "vrSynonyms is not array.");
-          return false;
-        }
-        const size_t synonyms_array_size = synonyms_array->size();
-        if (synonyms_array_size < kVrArraySizeMin) {
-          LOG4CXX_WARN(logger_,
-                       kQueryAppsValidationFailedPrefix
-                           << "vrSynomyms array has [" << synonyms_array_size
-                           << "] size < allowed min size [" << kVrArraySizeMin
+                           << "ttsName string exceeds max length ["
+                           << ttsName.length() << "]>[" << kTtsNameLengthMax
                            << "]");
           return false;
         }
-        if (synonyms_array_size > kVrArraySizeMax) {
-          LOG4CXX_WARN(logger_,
-                       kQueryAppsValidationFailedPrefix
-                           << "vrSynomyms array size [" << synonyms_array_size
-                           << "] exceeds maximum allowed size ["
-                           << kVrArraySizeMax << "]");
-          return false;
-        }
-        for (std::size_t idx = 0; idx < synonyms_array_size; ++idx) {
-          const smart_objects::SmartObject& synonym = (*synonyms_array)[idx];
-          const std::string vrSynonym = synonym.asString();
-          if (vrSynonym.length() > kVrSynonymLengthMax) {
-            LOG4CXX_WARN(logger_,
-                         kQueryAppsValidationFailedPrefix
-                             << "vrSYnomym item [" << idx
-                             << "] exceeds max length [" << vrSynonym.length()
-                             << "]>[" << kVrSynonymLengthMax << "]");
-            return false;
-          }
-          if (vrSynonym.length() < kVrSynonymLengthMin) {
-            LOG4CXX_WARN(logger_,
-                         kQueryAppsValidationFailedPrefix
-                             << "vrSYnomym item [" << idx << "] length ["
-                             << vrSynonym.length()
-                             << "] is less then min length ["
-                             << kVrSynonymLengthMin << "] allowed.");
-            return false;
-          }
-          // Verify duplicates
-          SynonymsMap::iterator synonyms_map_iter = synonyms_map.find(*iter);
-          SynonymsSet* synonyms_set = &(synonyms_map_iter->second);
-          if (synonyms_map_iter != synonyms_map.end()) {
-            if ((*synonyms_map_iter).second.find(vrSynonym) ==
-                synonyms_set->end()) {
-              synonyms_set->insert(vrSynonym);
-            } else {
-              LOG4CXX_WARN(logger_,
-                           kQueryAppsValidationFailedPrefix
-                               << "vrSYnomym item already defined ["
-                               << vrSynonym.c_str() << "] for language ["
-                               << *iter << "]");
-              return false;
-            }
-          }
-        }
+      } else {
+        LOG4CXX_WARN(logger_,
+                     kQueryAppsValidationFailedPrefix
+                         << "ttsName is not the string type.");
+        return false;
+      }
+
+      if (!ValidateSynonymsAtLanguage(language, language_name, synonyms_map)) {
+        return false;
       }
     }
     if (!default_language_found) {
@@ -377,6 +328,77 @@ class QueryAppsDataValidator {
                    kQueryAppsValidationFailedPrefix
                        << " 'languages'.default' doesn't exist");
       return false;
+    }
+    return true;
+  }
+
+  bool ValidateSynonymsAtLanguage(const smart_objects::SmartObject& language,
+                                  const std::string& language_name,
+                                  SynonymsMap& synonyms_map) const {
+    if (!language[language_name].keyExists(json::vrSynonyms)) {
+      LOG4CXX_WARN(logger_,
+                   kQueryAppsValidationFailedPrefix
+                       << "'languages.vrSynonyms' doesn't exist");
+      return false;
+    }
+    const smart_objects::SmartArray* synonyms_array =
+        language[language_name][json::vrSynonyms].asArray();
+    if (!synonyms_array) {
+      LOG4CXX_WARN(logger_,
+                   kQueryAppsValidationFailedPrefix
+                       << "vrSynonyms is not array.");
+      return false;
+    }
+    const size_t synonyms_array_size = synonyms_array->size();
+    if (synonyms_array_size < kVrArraySizeMin) {
+      LOG4CXX_WARN(logger_,
+                   kQueryAppsValidationFailedPrefix
+                       << "vrSynomyms array has [" << synonyms_array_size
+                       << "] size < allowed min size [" << kVrArraySizeMin
+                       << "]");
+      return false;
+    }
+    if (synonyms_array_size > kVrArraySizeMax) {
+      LOG4CXX_WARN(logger_,
+                   kQueryAppsValidationFailedPrefix
+                       << "vrSynomyms array size [" << synonyms_array_size
+                       << "] exceeds maximum allowed size [" << kVrArraySizeMax
+                       << "]");
+      return false;
+    }
+
+    for (std::size_t idx = 0; idx < synonyms_array_size; ++idx) {
+      const smart_objects::SmartObject& synonym = (*synonyms_array)[idx];
+      const std::string vrSynonym = synonym.asString();
+      if (vrSynonym.length() > kVrSynonymLengthMax) {
+        LOG4CXX_WARN(logger_,
+                     kQueryAppsValidationFailedPrefix
+                         << "vrSYnomym item [" << idx
+                         << "] exceeds max length [" << vrSynonym.length()
+                         << "]>[" << kVrSynonymLengthMax << "]");
+        return false;
+      }
+      if (vrSynonym.length() < kVrSynonymLengthMin) {
+        LOG4CXX_WARN(logger_,
+                     kQueryAppsValidationFailedPrefix
+                         << "vrSYnomym item [" << idx << "] length ["
+                         << vrSynonym.length() << "] is less then min length ["
+                         << kVrSynonymLengthMin << "] allowed.");
+        return false;
+      }
+      // Verify duplicates
+      SynonymsMap::iterator synonyms_map_iter =
+          synonyms_map.find(language_name);
+      if (synonyms_map_iter != synonyms_map.end()) {
+        if (!(*synonyms_map_iter).second.insert(vrSynonym).second) {
+          LOG4CXX_WARN(logger_,
+                       kQueryAppsValidationFailedPrefix
+                           << "vrSYnomym item already defined ["
+                           << vrSynonym.c_str() << "] for language ["
+                           << language_name << "]");
+          return false;
+        }
+      }
     }
     return true;
   }
@@ -396,9 +418,11 @@ const std::string kSYNC = "SYNC";
 const std::string kIVSU = "IVSU";
 
 SystemRequest::SystemRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {}
+    : CommandRequestImpl(message) {
+}
 
-SystemRequest::~SystemRequest() {}
+SystemRequest::~SystemRequest() {
+}
 
 void SystemRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
