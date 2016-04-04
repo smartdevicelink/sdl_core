@@ -56,13 +56,13 @@ timer::Timer::Timer(const std::string& name, TimerTask* task_for_tracking)
 }
 
 timer::Timer::~Timer() {
-  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(lock_);
   LOG4CXX_DEBUG(logger_, "Timer is to be destroyed " << name_);
 
   DCHECK_OR_RETURN_VOID(thread_);
   thread_->join();
   DeleteThread(thread_);
+  LOG4CXX_DEBUG(logger_, "Timer destroyed " << name_);
 }
 
 void timer::Timer::Start(const Milliseconds timeout, const bool repeatable) {
@@ -95,7 +95,7 @@ void timer::Timer::Stop() {
   sync_primitives::AutoLock auto_lock(lock_);
   DCHECK(thread_);
   LOG4CXX_DEBUG(logger_, "Stopping timer  " << name_);
-  if (pthread_equal(pthread_self(), thread_->thread_handle())) {
+  if (thread_->IsItDelegate()) {
     // Thread can't stop itself , so it will suspend
     LOG4CXX_DEBUG(logger_, "Suspend timer " << name_ << " after next loop");
     delegate_.ShouldBeStopped();
@@ -215,9 +215,8 @@ bool timer::Timer::TimerDelegate::IsGoingToStop() const {
 }
 
 void timer::Timer::TimerDelegate::WaitUntilStart() {
-  sync_primitives::AutoLock auto_lock(TimerDelegate::state_lock_);
-
   while (!is_started_flag_) {
+    sync_primitives::AutoLock auto_lock(TimerDelegate::state_lock_);
     starting_condition_.Wait(auto_lock);
   }
 }

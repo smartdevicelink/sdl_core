@@ -73,7 +73,7 @@ class Timer {
   /**
    * @brief destructor - if timer running : call stop in the body
    */
-  virtual ~Timer();
+  ~Timer();
   /**
    * @brief starts timer with new timeout
    * @param timeout - time to call method from trackable class
