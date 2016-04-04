@@ -46,6 +46,7 @@
 #include "telemetry_monitor/mock_telemetry_observer.h"
 #include "utils/make_shared.h"
 #include "utils/shared_ptr.h"
+#include "resumption/last_state.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -60,15 +61,19 @@ namespace test {
 namespace components {
 namespace transport_manager_test {
 
+const std::string kAppStorageFolder = "app_storage_folder";
+const std::string kAppInfoFolder = "app_info_folder";
+
 class TransportManagerImplTest : public ::testing::Test {
  protected:
   TransportManagerImplTest()
       : device_handle_(1)
       , mac_address_("MA:CA:DR:ES:S")
-      , dev_info_(device_handle_, mac_address_, "TestDeviceName", "BTMAC") {}
+      , dev_info_(device_handle_, mac_address_, "TestDeviceName", "BTMAC")
+      , last_state_(kAppStorageFolder, kAppInfoFolder) {}
 
   void SetUp() OVERRIDE {
-    mock_transport_manager_.Init();
+    mock_transport_manager_.Init(last_state_);
     mock_adapter_ = new TransportAdapterMock();
     mock_transport_manager_listener_ = MakeShared<TransportManagerListenerMock>();
 
@@ -320,28 +325,26 @@ class TransportManagerImplTest : public ::testing::Test {
   const DeviceInfo dev_info_;
   DeviceList device_list_;
   BaseErrorPtr error_;
+  resumption::LastState last_state_;
 };
 
-TEST(TransportManagerTest, SearchDevices_AdaptersNotAdded) {
-  MockTransportManagerImpl tm;
-  tm.Init();
-
-  EXPECT_EQ(E_SUCCESS, tm.SearchDevices());
+TEST_F(TransportManagerImplTest, SearchDevices_AdaptersNotAdded) {
+  ON_CALL(*mock_adapter_, SearchDevices()).WillByDefault(Return(
+        ::transport_manager::transport_adapter::TransportAdapter::OK));
+  EXPECT_EQ(E_SUCCESS, mock_transport_manager_.SearchDevices());
 }
 
-TEST(TransportManagerTest, AddTransportAdapter) {
-  MockTransportManagerImpl tm;
-  tm.Init();
+TEST_F(TransportManagerImplTest, AddTransportAdapter) {
 
   TransportAdapterMock* mock_adapter = new TransportAdapterMock();
   utils::SharedPtr<TransportManagerListenerMock> mock_transport_manager_listener =
       MakeShared<TransportManagerListenerMock>();
 
-  EXPECT_EQ(E_SUCCESS, tm.AddEventListener(mock_transport_manager_listener.get()));
+  EXPECT_EQ(E_SUCCESS, mock_transport_manager_.AddEventListener(mock_transport_manager_listener.get()));
   EXPECT_CALL(*mock_adapter, AddListener(_));
   EXPECT_CALL(*mock_adapter, IsInitialised()).WillOnce(Return(false));
   EXPECT_CALL(*mock_adapter, Init()).WillOnce(Return(TransportAdapter::OK));
-  EXPECT_EQ(E_SUCCESS, tm.AddTransportAdapter(mock_adapter));
+  EXPECT_EQ(E_SUCCESS, mock_transport_manager_.AddTransportAdapter(mock_adapter));
 }
 
 TEST_F(TransportManagerImplTest, AddTransportAdapterSecondTime) {

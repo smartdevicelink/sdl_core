@@ -32,7 +32,7 @@
 
 #include <string>
 #include "application_manager/commands/hmi/on_received_policy_update.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager_impl.h"
 #include "utils/file_system.h"
 
 namespace application_manager {
@@ -53,8 +53,7 @@ void OnReceivedPolicyUpdate::Run() {
     LOG4CXX_ERROR(logger_, "Failed to read Update file.");
     return;
   }
-  policy::PolicyHandler::instance()->ReceiveMessageFromSDK(file_path,
-                                                           file_content);
+  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().ReceiveMessageFromSDK(file_path, file_content);
 }
 
 }  // namespace commands

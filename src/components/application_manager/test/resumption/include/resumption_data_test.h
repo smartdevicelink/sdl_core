@@ -57,12 +57,13 @@ class ResumptionDataTest : public ::testing::Test {
 
   // Set data for resumption
   virtual void PrepareData();
-  utils::SharedPtr<NiceMock<MockApplication>> app_mock;
+  utils::SharedPtr<NiceMock<state_controller_test::MockApplication>> app_mock;
 
   HMILevel::eType hmi_level_;
   size_t app_id_;
   size_t hmi_app_id_;
-  std::string policy_app_id_;
+  std::string mobile_app_id_;
+  std::string mac_address_;
   size_t ign_off_count_;
   const size_t tts_chunks_count = 4;
 

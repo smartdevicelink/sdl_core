@@ -34,7 +34,7 @@
 #include <string>
 
 #include "gmock/gmock.h"
-#include "usage_statistics/statistics_manager.h"
+#include "policy/usage_statistics/statistics_manager.h"
 
 namespace test {
 namespace components {

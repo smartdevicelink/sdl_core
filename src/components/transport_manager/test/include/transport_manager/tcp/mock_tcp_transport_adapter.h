@@ -30,25 +30,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_HANDLER_INTERFACE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_HANDLER_INTERFACE_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TCP_MOCK_TCP_TRANSPORT_ADAPTER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TCP_MOCK_TCP_TRANSPORT_ADAPTER_H_
 
-#include "policy/policy_types.h"
+#include "gmock/gmock.h"
+#include "transport_manager/tcp/tcp_transport_adapter.h"
 
-namespace policy {
+namespace test {
+namespace components {
+namespace transport_manager_test {
 
-// Current interface created just to be able make unit-testing
-// It should be refactored in task pointed below
-// TODO(AByzhynar) : APPLINK-16112 Create PolicyHandler interface
+using namespace ::transport_manager::transport_adapter;
 
-class PolicyHandlerInterface {
+class MockTCPTransportAdapter : public TcpTransportAdapter {
  public:
-  virtual ~PolicyHandlerInterface() {}
-  virtual void OnSystemReady() = 0;
-  virtual void PTUpdatedAt(Counters counter, int value) = 0;
+  MockTCPTransportAdapter(uint16_t port, resumption::LastState& last_state)
+    : TcpTransportAdapter(port,last_state) {
+    ::profile::Profile::instance()->config_file_name(
+        "smartDeviceLink_test.ini");
+  }
+  MOCK_CONST_METHOD2(FindEstablishedConnection,
+                     ConnectionSPtr(const DeviceUID& device_handle,
+                                    const ApplicationHandle& app_handle));
+
+  MOCK_CONST_METHOD1(FindDevice, DeviceSptr(const DeviceUID& device_handle));
+  MOCK_METHOD2(Connect,
+               TransportAdapter::Error(const DeviceUID& device_handle,
+                                       const ApplicationHandle& app_handle));
+  void CallStore() { Store(); }
+  bool CallRestore() { return Restore(); }
 };
 
-}  //  namespace policy
+}  // namespace transport_manager_test
+}  // namespace components
+}  // namespace test
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_HANDLER_INTERFACE_H_
-
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_TCP_MOCK_TCP_TRANSPORT_ADAPTER_H_

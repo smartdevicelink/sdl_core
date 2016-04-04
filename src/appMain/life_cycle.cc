@@ -72,6 +72,7 @@ LifeCycle::LifeCycle()
     , hmi_handler_(NULL)
     , hmi_message_adapter_(NULL)
     , media_manager_(NULL)
+    , last_state_(NULL)
 #ifdef TELEMETRY_MONITOR
     , telemetry_monitor_(NULL)
 #endif  // TELEMETRY_MONITOR
@@ -92,6 +93,10 @@ LifeCycle::LifeCycle()
 
 bool LifeCycle::StartComponents() {
   LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK(!last_state_);
+  profile::Profile* profile = profile::Profile::instance();
+  last_state_ = new resumption::LastState(profile->app_storage_folder(),
+                                          profile->app_info_storage());
 
   DCHECK(!transport_manager_);
   transport_manager_ = transport_manager::TransportManagerDefault::instance();
@@ -113,24 +118,23 @@ bool LifeCycle::StartComponents() {
 
   DCHECK(!app_manager_);
   app_manager_ = application_manager::ApplicationManagerImpl::instance();
-  DCHECK(app_manager_);
 
-  if (!app_manager_->Init()) {
+  DCHECK(!hmi_handler_);
+  hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(
+      *(profile::Profile::instance()));
+
+  media_manager_ = new media_manager::MediaManagerImpl(*app_manager_, *profile);
+  if (!app_manager_->Init(*last_state_, media_manager_)) {
     LOG4CXX_ERROR(logger_, "Application manager init failed.");
     return false;
   }
-
-  DCHECK(!hmi_handler_)
-  hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(
-        *(profile::Profile::instance()));
-  DCHECK(hmi_handler_)
 
 #ifdef ENABLE_SECURITY
   security_manager_ = new security_manager::SecurityManagerImpl();
   crypto_manager_ = new security_manager::CryptoManagerImpl(
         utils::MakeShared<security_manager::CryptoManagerSettingsImpl>(
           *(profile::Profile::instance()),
-          policy::PolicyHandler::instance()->RetrieveCertificate()));
+                  app_manager_->GetPolicyHandler().RetrieveCertificate()));
   protocol_handler_->AddProtocolObserver(security_manager_);
   protocol_handler_->set_security_manager(security_manager_);
 
@@ -151,8 +155,6 @@ bool LifeCycle::StartComponents() {
 
   hmi_handler_->set_message_observer(app_manager_);
 
-  media_manager_ = media_manager::MediaManagerImpl::instance();
-
   protocol_handler_->AddProtocolObserver(media_manager_);
   protocol_handler_->AddProtocolObserver(app_manager_);
 
@@ -163,7 +165,8 @@ bool LifeCycle::StartComponents() {
 
 // it is important to initialise TelemetryMonitor before TM to listen TM Adapters
 #ifdef TELEMETRY_MONITOR
-  telemetry_monitor_ = new telemetry_monitor::TelemetryMonitor(profile::Profile::instance()->server_address(),
+  telemetry_monitor_ = new telemetry_monitor::TelemetryMonitor(
+      profile::Profile::instance()->server_address(),
                                               profile::Profile::instance()->time_testing_port());
   telemetry_monitor_->Start();
   telemetry_monitor_->Init(protocol_handler_, app_manager_, transport_manager_);
@@ -174,7 +177,7 @@ bool LifeCycle::StartComponents() {
   app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
 
-  transport_manager_->Init();
+  transport_manager_->Init(*last_state_);
   // start transport manager
   transport_manager_->Visibility(true);
 
@@ -258,7 +261,6 @@ bool LifeCycle::InitMessageSystem() {
           NULL));
   mb_adapter_thread_->Start(false);
   NameMessageBrokerThread(*mb_adapter_thread_, "MB Adapter");
-
   return true;
 }
 #endif  // MESSAGEBROKER_HMIADAPTER
@@ -369,7 +371,8 @@ void LifeCycle::StopComponents() {
   LOG4CXX_INFO(logger_, "Destroying Media Manager");
   DCHECK_OR_RETURN_VOID(media_manager_);
   media_manager_->SetProtocolHandler(NULL);
-  media_manager::MediaManagerImpl::destroy();
+  delete media_manager_;
+  media_manager_ = NULL;
 
   LOG4CXX_INFO(logger_, "Destroying Transport Manager.");
   DCHECK_OR_RETURN_VOID(transport_manager_);
@@ -382,14 +385,18 @@ void LifeCycle::StopComponents() {
   connection_handler_->Stop();
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
-  DCHECK_OR_RETURN_VOID(protocol_handler_);
+  DCHECK(protocol_handler_);
   delete protocol_handler_;
+  protocol_handler_ = NULL;
 
   LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
   delete connection_handler_;
+  connection_handler_ = NULL;
 
   LOG4CXX_INFO(logger_, "Destroying Last State");
-  resumption::LastState::destroy();
+  DCHECK(last_state_);
+  delete last_state_;
+  last_state_ = NULL;
 
   LOG4CXX_INFO(logger_, "Destroying Application Manager.");
   application_manager::ApplicationManagerImpl::destroy();
@@ -398,9 +405,11 @@ void LifeCycle::StopComponents() {
 
 #ifdef DBUS_HMIADAPTER
   if (dbus_adapter_) {
+    DCHECK_OR_RETURN_VOID(hmi_handler_);
     if (hmi_handler_) {
       hmi_handler_->RemoveHMIMessageAdapter(dbus_adapter_);
-      hmi_message_handler::HMIMessageHandlerImpl::destroy();
+      delete hmi_message_adapter_;
+      hmi_message_adapter_ = NULL;
     }
     if (dbus_adapter_thread_) {
       dbus_adapter_thread_->Stop();
@@ -408,6 +417,7 @@ void LifeCycle::StopComponents() {
       delete dbus_adapter_thread_;
     }
     delete dbus_adapter_;
+    dbus_adapter_ = NULL;
   }
 #endif  // DBUS_HMIADAPTER
 
@@ -422,9 +432,11 @@ void LifeCycle::StopComponents() {
     delete mb_adapter_thread_;
   }
   delete mb_adapter_;
+  mb_adapter_ = NULL;
 
   DCHECK_OR_RETURN_VOID(hmi_handler_);
   delete hmi_handler_;
+  hmi_handler_ = NULL;
 
   LOG4CXX_INFO(logger_, "Destroying Message Broker");
   if (mb_server_thread_) {
@@ -439,8 +451,9 @@ void LifeCycle::StopComponents() {
   }
   if (message_broker_server_) {
     message_broker_server_->Close();
+    delete message_broker_server_;
+    message_broker_server_ = NULL;
   }
-  delete message_broker_server_;
 
   if (message_broker_) {
     message_broker_->stopMessageBroker();
@@ -448,9 +461,6 @@ void LifeCycle::StopComponents() {
 
   networking::cleanup();
 #endif  // MESSAGEBROKER_HMIADAPTER
-
-  delete hmi_message_adapter_;
-  hmi_message_adapter_ = NULL;
 
 #ifdef TELEMETRY_MONITOR
   // It's important to delete tester Obcervers after TM adapters destruction

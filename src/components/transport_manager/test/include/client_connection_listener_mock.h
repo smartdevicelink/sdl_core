@@ -40,7 +40,7 @@ namespace test {
 namespace components {
 namespace transport_manager_test {
 
-class ClientConnectionListenerMock
+class MockClientConnectionListener
     : public ::transport_manager::transport_adapter::ClientConnectionListener {
  public:
   MOCK_METHOD0(

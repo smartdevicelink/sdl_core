@@ -35,7 +35,9 @@
 
 #include "application_manager/event_engine/event_observer.h"
 #include "interfaces/HMI_API.h"
-
+namespace resumption {
+class LastState;
+}
 namespace application_manager {
 
 /**
@@ -93,10 +95,10 @@ public:
    * @param vr VR language
    * @param tts TTS language
    */
-  void set_default_capabilities_languages(
-          hmi_apis::Common_Language::eType ui,
-          hmi_apis::Common_Language::eType vr,
-          hmi_apis::Common_Language::eType tts);
+  void set_default_capabilities_languages(hmi_apis::Common_Language::eType ui,
+                                          hmi_apis::Common_Language::eType vr,
+                                          hmi_apis::Common_Language::eType tts);
+  void Init(resumption::LastState* value);
 
 private:
   void SendOnLanguageChangeToMobile(uint32_t connection_key);
@@ -171,6 +173,7 @@ private:
    * @brief Indicates if current TTS language has been received from HMI
    */
   bool is_tts_language_received_;
+  resumption::LastState* last_state_;
 };
 
 } // namespace application_manager

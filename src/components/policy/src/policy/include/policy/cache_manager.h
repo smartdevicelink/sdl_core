@@ -38,7 +38,7 @@
 #include "utils/shared_ptr.h"
 #include "policy/pt_representation.h"
 #include "policy/pt_ext_representation.h"
-#include "usage_statistics/statistics_manager.h"
+#include "policy/usage_statistics/statistics_manager.h"
 #include "policy/cache_manager_interface.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
@@ -48,6 +48,7 @@
 #include "policy/policy_types.h"
 
 namespace policy {
+class PolicySettings;
 
 class CacheManager : public CacheManagerInterface {
  public:
@@ -178,13 +179,13 @@ class CacheManager : public CacheManagerInterface {
    * @return true, if succedeed, otherwise - false
    */
   virtual bool GetPriority(const std::string& policy_app_id,
-                           std::string& priority);
+                           std::string& priority) const OVERRIDE;
 
   /**
    * @brief Initialized Policy Table (load)
    * @return bool Success of operation
    */
-  bool Init(const std::string& file_name);
+  bool Init(const std::string& file_name, const PolicySettings *settings);
 
   /**
    * @brief Get snapshot of Policy Table
@@ -288,24 +289,24 @@ class CacheManager : public CacheManagerInterface {
    * @param app_id Application id
    * @return bool Allowed/disallowed.
    */
-  bool CanAppKeepContext(const std::string& app_id);
+  bool CanAppKeepContext(const std::string& app_id) const OVERRIDE;
 
   /**
    * @brief Is application allowed to move foreground at will?
    * @param app_id Application id
    * @return bool Allowed/disallowed.
    */
-  bool CanAppStealFocus(const std::string& app_id);
+  bool CanAppStealFocus(const std::string& app_id) const;
 
   /**
-   * @brief Get default_hmi for given application
+   * @brief Gets default_hmi for given application
    * @param policy_app_id Unique application id
    * @param default_hmi Default HMI level for application or empty, if value was
    * not set
    * @return true, if succedeed, otherwise - false
    */
   bool GetDefaultHMI(const std::string& app_id,
-                     std::string &default_hmi);
+                     std::string &default_hmi) const;
 
   /**
    * @brief Reset user consent for device data and applications permissions
@@ -322,7 +323,7 @@ class CacheManager : public CacheManagerInterface {
    */
   bool GetUserPermissionsForDevice(const std::string& device_id,
                                    StringArray &consented_groups,
-                                   StringArray &disallowed_groups);
+                                   StringArray& disallowed_groups) const;
 
   /**
    * @brief Gets list of groups permissions from policy table
@@ -343,7 +344,7 @@ class CacheManager : public CacheManagerInterface {
    */
   bool GetDeviceGroupsFromPolicies(
       rpc::policy_table_interface_base::Strings &groups,
-      rpc::policy_table_interface_base::Strings &preconsented_groups);
+      rpc::policy_table_interface_base::Strings& preconsented_groups) const;
 
   /**
    * @brief Add's information about mobile device in Policy Table.
@@ -664,6 +665,7 @@ class CacheManager : public CacheManagerInterface {
   void MergeCFM(const policy_table::PolicyTable& new_pt,
                 policy_table::PolicyTable& pt);
 
+   const PolicySettings& get_settings() const;
 
 #ifdef BUILD_TESTS
  utils::SharedPtr<policy_table::Table> GetPT() const {
@@ -703,7 +705,6 @@ private:
   bool IsPermissionsCalculated(const std::string& device_id,
                                const std::string& policy_app_id,
                                policy::Permissions& permission);
-
 private:
   /**
    * @brief Checks, if input string is known service represented by number, than
@@ -751,6 +752,7 @@ private:
   threads::Thread* backup_thread_;
   sync_primitives::Lock backuper_locker_;
   BackgroundBackuper* backuper_;
+  const PolicySettings* settings_;
 };
 }  // namespace policy
 #endif // SRC_COMPONENTS_POLICY_INCLUDE_CACHE_MANAGER_H_

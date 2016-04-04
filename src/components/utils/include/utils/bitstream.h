@@ -32,7 +32,7 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_BITSTREAM_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_BITSTREAM_H_
 
-#include "stdint.h"
+#include <stdint.h>
 
 #include <climits>
 #include <cstring>

@@ -36,6 +36,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
@@ -82,7 +83,11 @@ void ShowConstantTBTRequest::Run() {
   //ProcessSoftButtons checks strings on the contents incorrect character
 
   mobile_apis::Result::eType processing_result =
-      MessageHelper::ProcessSoftButtons(msg_params, app);
+      MessageHelper::ProcessSoftButtons(
+          msg_params,
+          app,
+          application_manager::ApplicationManagerImpl::instance()
+              ->GetPolicyHandler());
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
     LOG4CXX_ERROR(logger_, "INVALID_DATA!");

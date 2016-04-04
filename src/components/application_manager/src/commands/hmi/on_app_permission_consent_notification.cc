@@ -34,7 +34,6 @@
 #include "application_manager/commands/hmi/on_app_permission_consent_notification.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/policies/policy_handler.h"
 
 namespace application_manager {
 
@@ -82,8 +81,8 @@ void OnAppPermissionConsentNotification::Run() {
 
     permission_consent.consent_source = msg_params["source"].asString();
 
-    policy::PolicyHandler::instance()->OnAppPermissionConsent(
-        connection_key, permission_consent);
+    application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnAppPermissionConsent(connection_key,
+      permission_consent);
   }
 }
 

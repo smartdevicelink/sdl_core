@@ -59,7 +59,9 @@
 #include "smart_objects/enum_schema_item.h"
 #include "interfaces/HMI_API_schema.h"
 #include "application_manager/application_impl.h"
+#include "media_manager/media_manager.h"
 #include "usage_statistics/counter.h"
+#include "utils/custom_string.h"
 #include <time.h>
 
 namespace {
@@ -100,6 +102,7 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     , media_manager_(NULL)
     , hmi_handler_(NULL)
     , connection_handler_(NULL)
+    , policy_handler_(*profile::Profile::instance())
     , protocol_handler_(NULL)
     , request_ctrl_()
     , hmi_so_factory_(NULL)
@@ -171,10 +174,8 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
     mobile_so_factory_ = NULL;
   }
   protocol_handler_ = NULL;
-  media_manager_ = NULL;
   LOG4CXX_DEBUG(logger_, "Destroying Policy Handler");
   RemovePolicyObserver(this);
-  policy::PolicyHandler::destroy();
 
   sync_primitives::AutoLock lock(timer_pool_lock_);
   timer_pool_.clear();
@@ -200,11 +201,11 @@ bool ApplicationManagerImpl::Stop() {
     LOG4CXX_ERROR(logger_,
                   "An error occurred during unregistering applications.");
   }
-
   request_ctrl_.DestroyThreadpool();
+
   // for PASA customer policy backup should happen :AllApp(SUSPEND)
   LOG4CXX_DEBUG(logger_, "Unloading policy library.");
-  policy::PolicyHandler::instance()->UnloadPolicyLibrary();
+  GetPolicyHandler().UnloadPolicyLibrary();
 
   return true;
 }
@@ -321,7 +322,7 @@ std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
   // i.e. odometer etc
   switch (vehicle_info) {
     case ODOMETER:
-      policy::PolicyHandler::instance()->KmsChanged(value);
+      GetPolicyHandler().KmsChanged(value);
       break;
     default:
       break;
@@ -418,7 +419,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
       message[strings::params][strings::connection_key].asInt();
 
   // app_id is SDL "internal" ID
-  // original app_id can be gotten via ApplicationImpl::policy_app_id()
+  // original app_id can be received via ApplicationImpl::mobile_app_id()
   uint32_t app_id = 0;
   std::list<int32_t> sessions_list;
   uint32_t device_id = 0;
@@ -438,7 +439,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   }
 
   LOG4CXX_DEBUG(logger_, "Restarting application list update timer");
-  policy::PolicyHandler::instance()->OnAppsSearchStarted();
+  GetPolicyHandler().OnAppsSearchStarted();
   uint32_t timeout =
       profile::Profile::instance()->application_list_update_timeout();
   application_list_update_timer_.Start(timeout, false);
@@ -478,10 +479,10 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
       policy_app_id,
       device_mac,
       app_name,
-      policy::PolicyHandler::instance()->GetStatisticManager()));
+      GetPolicyHandler().GetStatisticManager()));
   if (!application) {
     usage_statistics::AppCounter count_of_rejections_sync_out_of_memory(
-        policy::PolicyHandler::instance()->GetStatisticManager(),
+        GetPolicyHandler().GetStatisticManager(),
         policy_app_id,
         usage_statistics::REJECTIONS_SYNC_OUT_OF_MEMORY);
     ++count_of_rejections_sync_out_of_memory;
@@ -572,7 +573,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   applications_.insert(application);
   applications_list_lock_.Release();
 
-  policy::PolicyHandler::instance()->AddApplication(
+  GetPolicyHandler().AddApplication(
       application->mobile_app_id());
 
   return application;
@@ -758,12 +759,11 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
                                                       int32_t audio_type) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_INFO(logger_, "START MICROPHONE RECORDER");
-  if (NULL != media_manager_) {
-    media_manager_->StartMicrophoneRecording(
-        session_key,
-        profile::Profile::instance()->recording_file_name(),
-        max_duration);
-  }
+  DCHECK_OR_RETURN_VOID(media_manager_);
+  media_manager_->StartMicrophoneRecording(
+      session_key,
+      profile::Profile::instance()->recording_file_name(),
+      max_duration);
 }
 
 void ApplicationManagerImpl::SendAudioPassThroughNotification(
@@ -786,9 +786,8 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
 void ApplicationManagerImpl::StopAudioPassThru(int32_t application_key) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(audio_pass_thru_lock_);
-  if (NULL != media_manager_) {
-    media_manager_->StopMicrophoneRecording(application_key);
-  }
+  DCHECK_OR_RETURN_VOID(media_manager_);
+  media_manager_->StopMicrophoneRecording(application_key);
 }
 
 std::string ApplicationManagerImpl::GetDeviceName(
@@ -926,12 +925,12 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
     policy::DeviceInfo device_info;
     device_info.AdoptDeviceType(dev_params.device_connection_type);
 
-    policy::PolicyHandler::instance()->AddDevice(dev_params.device_mac_address,
+    GetPolicyHandler().AddDevice(dev_params.device_mac_address,
                                                  device_info.connection_type);
   }
 
   smart_objects::SmartObjectSPtr msg_params =
-      MessageHelper::CreateDeviceListSO(device_list);
+      MessageHelper::CreateDeviceListSO(device_list, GetPolicyHandler());
   if (!msg_params) {
     LOG4CXX_WARN(logger_, "Failed to create sub-smart object.");
     return;
@@ -956,7 +955,7 @@ void ApplicationManagerImpl::OnFindNewApplicationsRequest() {
   uint32_t timeout =
       profile::Profile::instance()->application_list_update_timeout();
   application_list_update_timer_.Start(timeout, false);
-  policy::PolicyHandler::instance()->OnAppsSearchStarted();
+  GetPolicyHandler().OnAppsSearchStarted();
 }
 
 void ApplicationManagerImpl::SendUpdateAppList() {
@@ -991,10 +990,10 @@ mobile_apis::HMILevel::eType ApplicationManagerImpl::GetDefaultHmiLevel(
   LOG4CXX_AUTO_TRACE(logger_);
   HMILevel::eType default_hmi = HMILevel::HMI_NONE;
 
-  if (policy::PolicyHandler::instance()->PolicyEnabled()) {
+  if (policy_handler_.PolicyEnabled()) {
     const std::string policy_app_id = application->mobile_app_id();
     std::string default_hmi_string = "";
-    if (policy::PolicyHandler::instance()->GetDefaultHmi(policy_app_id,
+    if (policy_handler_.GetDefaultHmi(policy_app_id,
                                                          &default_hmi_string)) {
       if ("BACKGROUND" == default_hmi_string) {
         default_hmi = HMILevel::HMI_BACKGROUND;
@@ -1299,7 +1298,7 @@ bool ApplicationManagerImpl::OnHandshakeDone(
 
 void ApplicationManagerImpl::OnCertificateUpdateRequired() {
   LOG4CXX_AUTO_TRACE(logger_);
-  policy::PolicyHandler::instance()->OnPTExchangeNeeded();
+  GetPolicyHandler().OnPTExchangeNeeded();
 }
 
 security_manager::SSLContext::HandshakeContext
@@ -1420,7 +1419,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
               (*message)[strings::msg_params][strings::request_type].asUInt());
       if (mobile_apis::RequestType::PROPRIETARY == request_type ||
           mobile_apis::RequestType::HTTP == request_type) {
-        policy::PolicyHandler::instance()->OnUpdateRequestSentToMobile();
+        GetPolicyHandler().OnUpdateRequestSentToMobile();
       }
     }
   }
@@ -1686,7 +1685,8 @@ bool ApplicationManagerImpl::ManageHMICommand(
   return false;
 }
 
-bool ApplicationManagerImpl::Init() {
+bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
+                                  media_manager::MediaManager* media_manager) {
   LOG4CXX_TRACE(logger_, "Init application manager");
   const std::string app_storage_folder =
       profile::Profile::instance()->app_storage_folder();
@@ -1694,9 +1694,15 @@ bool ApplicationManagerImpl::Init() {
       !IsReadWriteAllowed(app_storage_folder, TYPE_STORAGE)) {
     return false;
   }
-  if (!resume_ctrl_.Init()) {
+  if (!resume_ctrl_.Init(last_state)) {
     LOG4CXX_ERROR(logger_, "Problem with initialization of resume controller");
+  }
+  hmi_capabilities_.Init(&last_state);
 
+  if (!(file_system::IsWritingAllowed(app_storage_folder) &&
+        file_system::IsReadingAllowed(app_storage_folder))) {
+    LOG4CXX_ERROR(logger_,
+                  "Storage directory doesn't have read/write permissions");
     return false;
   }
 
@@ -1714,14 +1720,14 @@ bool ApplicationManagerImpl::Init() {
   // In case there is no R/W permissions for this location, SDL just has to
   // log this and proceed
   IsReadWriteAllowed(app_icons_folder, TYPE_ICONS);
-  if (policy::PolicyHandler::instance()->PolicyEnabled()) {
-    if (!policy::PolicyHandler::instance()->LoadPolicyLibrary()) {
+  if (GetPolicyHandler().PolicyEnabled()) {
+    if (!GetPolicyHandler().LoadPolicyLibrary()) {
       LOG4CXX_ERROR(logger_,
                     "Policy library is not loaded. Check LD_LIBRARY_PATH");
       return false;
     }
     LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
-    if (!policy::PolicyHandler::instance()->InitPolicyTable()) {
+    if (!GetPolicyHandler().InitPolicyTable()) {
       LOG4CXX_ERROR(logger_, "Policy table is not initialized.");
       return false;
     }
@@ -1729,7 +1735,7 @@ bool ApplicationManagerImpl::Init() {
     LOG4CXX_WARN(logger_,
                  "System is configured to work without policy functionality.");
   }
-  media_manager_ = media_manager::MediaManagerImpl::instance();
+  media_manager_ = media_manager;
   return true;
 }
 
@@ -2238,7 +2244,7 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
                             policy_app_id,
                             device_mac,
                             appName,
-                            PolicyHandler::instance()->GetStatisticManager()));
+                            GetPolicyHandler().GetStatisticManager()));
     DCHECK_OR_RETURN_VOID(app);
     app->SetShemaUrl(url_scheme);
     app->SetPackageName(package_name);
@@ -2335,12 +2341,12 @@ void ApplicationManagerImpl::set_application_id(const int32_t correlation_id,
 
 void ApplicationManagerImpl::AddPolicyObserver(
     policy::PolicyHandlerObserver* listener) {
-  policy::PolicyHandler::instance()->add_listener(listener);
+  GetPolicyHandler().add_listener(listener);
 }
 
 void ApplicationManagerImpl::RemovePolicyObserver(
     policy::PolicyHandlerObserver* listener) {
-  policy::PolicyHandler::instance()->remove_listener(listener);
+  GetPolicyHandler().remove_listener(listener);
 }
 
 void ApplicationManagerImpl::SetUnregisterAllApplicationsReason(
@@ -2357,8 +2363,8 @@ void ApplicationManagerImpl::HeadUnitReset(
   switch (reason) {
     case mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET: {
       UnregisterAllApplications();
-      policy::PolicyHandler::instance()->ResetPolicyTable();
-      policy::PolicyHandler::instance()->UnloadPolicyLibrary();
+      GetPolicyHandler().ResetPolicyTable();
+      GetPolicyHandler().UnloadPolicyLibrary();
 
       resume_controller().StopSavePersistentDataTimer();
       file_system::remove_directory_content(
@@ -2366,7 +2372,11 @@ void ApplicationManagerImpl::HeadUnitReset(
       break;
     }
     case mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS: {
-      policy::PolicyHandler::instance()->ClearUserConsent();
+      GetPolicyHandler().ClearUserConsent();
+
+      resume_controller().StopSavePersistentDataTimer();
+      file_system::remove_directory_content(
+          profile::Profile::instance()->app_storage_folder());
       break;
     }
     default: {
@@ -2701,7 +2711,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
   LOG4CXX_AUTO_TRACE(logger_);
   // TODO(AOleynik): Remove check of policy_enable, when this flag will be
   // unused in config file
-  if (!policy::PolicyHandler::instance()->PolicyEnabled()) {
+  if (!GetPolicyHandler().PolicyEnabled()) {
     return mobile_apis::Result::SUCCESS;
   }
 
@@ -2715,7 +2725,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
                                              << " rpc "
                                              << stringified_functionID);
   policy::CheckPermissionResult result;
-  policy::PolicyHandler::instance()->CheckPermissions(policy_app_id,
+  GetPolicyHandler().CheckPermissions(policy_app_id,
                                                       stringified_hmi_level,
                                                       stringified_functionID,
                                                       rpc_params,
@@ -3193,7 +3203,7 @@ bool ApplicationManagerImpl::IsHMICooperating() const {
 void ApplicationManagerImpl::OnApplicationListUpdateTimer() {
   LOG4CXX_DEBUG(logger_, "Application list update timer finished");
   SendUpdateAppList();
-  policy::PolicyHandler::instance()->OnAppsSearchCompleted();
+  GetPolicyHandler().OnAppsSearchCompleted();
 }
 
 void ApplicationManagerImpl::OnTimerSendTTSGlobalProperties() {

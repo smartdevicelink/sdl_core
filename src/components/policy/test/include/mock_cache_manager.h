@@ -76,14 +76,14 @@ class MockCacheManagerInterface : public CacheManagerInterface {
       void(int service_type, EndpointUrls& end_points));
   MOCK_METHOD1(GetNotificationsNumber,
       policy_table::NumberOfNotificationsType(const std::string& priority));
-  MOCK_METHOD2(GetPriority,
+  MOCK_CONST_METHOD2(GetPriority,
       bool(const std::string& policy_app_id, std::string& priority));
   MOCK_METHOD2(GetServiceUrls,
       void(const std::string& service_type, EndpointUrls& end_points));
   MOCK_CONST_METHOD0(GetLockScreenIconUrl,
       std::string());
-  MOCK_METHOD1(Init,
-      bool(const std::string& file_name));
+  MOCK_METHOD2(Init,
+      bool(const std::string& file_name, const PolicySettings* settings));
   MOCK_METHOD0(GenerateSnapshot,
       utils::SharedPtr<policy_table::Table>());
   MOCK_METHOD1(ApplyUpdate,
@@ -110,19 +110,19 @@ class MockCacheManagerInterface : public CacheManagerInterface {
       bool(const std::string& app_id));
   MOCK_METHOD1(SetDefaultPolicy,
       bool(const std::string& app_id));
-  MOCK_METHOD1(CanAppKeepContext,
+  MOCK_CONST_METHOD1(CanAppKeepContext,
       bool(const std::string& app_id));
-  MOCK_METHOD1(CanAppStealFocus,
+  MOCK_CONST_METHOD1(CanAppStealFocus,
       bool(const std::string& app_id));
-  MOCK_METHOD2(GetDefaultHMI,
+  MOCK_CONST_METHOD2(GetDefaultHMI,
       bool(const std::string& app_id, std::string &default_hmi));
   MOCK_METHOD0(ResetUserConsent,
       bool());
-  MOCK_METHOD3(GetUserPermissionsForDevice,
+  MOCK_CONST_METHOD3(GetUserPermissionsForDevice,
       bool(const std::string& device_id, StringArray &consented_groups, StringArray &disallowed_groups));
   MOCK_METHOD3(GetPermissionsForApp,
       bool(const std::string& device_id, const std::string& app_id, FunctionalIdType &group_types));
-  MOCK_METHOD2(GetDeviceGroupsFromPolicies,
+  MOCK_CONST_METHOD2(GetDeviceGroupsFromPolicies,
       bool(rpc::policy_table_interface_base::Strings &groups, rpc::policy_table_interface_base::Strings &preconsented_groups));
   MOCK_METHOD2(AddDevice,
       bool(const std::string& device_id, const std::string& connection_type));

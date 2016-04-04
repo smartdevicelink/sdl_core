@@ -56,21 +56,24 @@ DeviceTypes devicesType = {
 }
 
 TransportAdapterImpl::TransportAdapterImpl(
-  DeviceScanner* device_scanner,
-  ServerConnectionFactory* server_connection_factory,
-  ClientConnectionListener* client_connection_listener)
-  : listeners_(),
-    initialised_(0),
-    devices_(),
-    devices_mutex_(),
-    connections_(),
-    connections_lock_(),
+    DeviceScanner* device_scanner,
+    ServerConnectionFactory* server_connection_factory,
+    ClientConnectionListener* client_connection_listener,
+    resumption::LastState& last_state)
+    : listeners_()
+    , initialised_(0)
+    , devices_()
+    , devices_mutex_()
+    , connections_()
+    , connections_lock_()
+    ,
 #ifdef TELEMETRY_MONITOR
     metric_observer_(NULL),
 #endif  // TELEMETRY_MONITOR
-    device_scanner_(device_scanner),
-    server_connection_factory_(server_connection_factory),
-    client_connection_listener_(client_connection_listener) {
+    device_scanner_(device_scanner)
+    , server_connection_factory_(server_connection_factory)
+    , client_connection_listener_(client_connection_listener),
+    last_state_(last_state) {
 }
 
 TransportAdapterImpl::~TransportAdapterImpl() {

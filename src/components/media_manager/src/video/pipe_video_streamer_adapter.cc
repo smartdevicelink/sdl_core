@@ -31,12 +31,13 @@
  */
 
 #include "media_manager/video/pipe_video_streamer_adapter.h"
-#include "config_profile/profile.h"
 
 namespace media_manager {
 
-PipeVideoStreamerAdapter::PipeVideoStreamerAdapter()
-  : PipeStreamerAdapter(profile::Profile::instance()->named_video_pipe_path()) {
+PipeVideoStreamerAdapter::PipeVideoStreamerAdapter(
+    const std::string& named_video_pipe_path,
+    const std::string& app_storage_folder)
+  : PipeStreamerAdapter(named_video_pipe_path, app_storage_folder) {
 }
 
 PipeVideoStreamerAdapter::~PipeVideoStreamerAdapter() {

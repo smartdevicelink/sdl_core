@@ -54,7 +54,7 @@ using tm::DisconnectDeviceError;
 using tm::DataSendError;
 using tm::DataReceiveError;
 
-class TransportAdapterListenerMock : public TransportAdapterListener {
+class MockTransportAdapterListener : public TransportAdapterListener {
  public:
   MOCK_METHOD1(OnSearchDeviceDone,
                void(const TransportAdapter* transport_adapter));

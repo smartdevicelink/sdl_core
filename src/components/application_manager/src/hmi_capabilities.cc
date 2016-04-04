@@ -232,11 +232,6 @@ HMICapabilities::HMICapabilities(ApplicationManagerImpl* const app_mngr)
     , is_navigation_supported_(false)
     , is_phone_call_supported_(false)
     , app_mngr_(app_mngr) {
-  if (false == load_capabilities_from_file()) {
-    LOG4CXX_ERROR(logger_, "file hmi_capabilities.json was not loaded");
-  } else {
-    LOG4CXX_INFO(logger_, "file hmi_capabilities.json was loaded");
-  }
   if (false == profile::Profile::instance()->launch_hmi()) {
     is_vr_ready_response_recieved_ = true;
     is_tts_ready_response_recieved_ = true;
@@ -250,9 +245,6 @@ HMICapabilities::HMICapabilities(ApplicationManagerImpl* const app_mngr)
     is_navi_cooperating_ = true;
     is_ivi_cooperating_ = true;
   }
-
-  hmi_language_handler_.set_default_capabilities_languages(
-        ui_language_, vr_language_, tts_language_);
 }
 
 HMICapabilities::~HMICapabilities() {
@@ -567,12 +559,23 @@ void HMICapabilities::set_ccpu_version(const std::string& ccpu_version) {
   ccpu_version_ = ccpu_version;
 }
 
-void HMICapabilities::set_navigation_supported(bool supported) {
+void HMICapabilities::set_navigation_supported(const bool supported) {
   is_navigation_supported_ = supported;
 }
 
-void HMICapabilities::set_phone_call_supported(bool supported) {
-  is_phone_call_supported_ = supported;
+void HMICapabilities::set_phone_call_supported(const bool supported) {
+    is_phone_call_supported_ = supported;
+}
+
+void HMICapabilities::Init(resumption::LastState *last_state) {    
+  hmi_language_handler_.Init(last_state);
+  if (false == load_capabilities_from_file()) {
+    LOG4CXX_ERROR(logger_, "file hmi_capabilities.json was not loaded");
+  } else {
+    LOG4CXX_INFO(logger_, "file hmi_capabilities.json was loaded");
+  }
+  hmi_language_handler_.set_default_capabilities_languages(
+        ui_language_, vr_language_, tts_language_);
 }
 
 bool HMICapabilities::load_capabilities_from_file() {

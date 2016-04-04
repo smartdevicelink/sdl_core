@@ -42,7 +42,6 @@
 #include "application_manager/message_helper.h"
 #include "connection_handler/connection.h"
 #include "application_manager/commands/command_impl.h"
-#include "resumption/last_state.h"
 #include "policy/policy_manager_impl.h"
 #include "application_manager/policies/policy_handler.h"
 #include "utils/helpers.h"
@@ -68,7 +67,7 @@ ResumeCtrl::ResumeCtrl()
       is_data_saved_(false),
       launch_time_(time(NULL)) {}
 
-bool ResumeCtrl::Init() {
+bool ResumeCtrl::Init(resumption::LastState& last_state) {
   using namespace profile;
   bool use_db = Profile::instance()->use_db_for_resumption();
   if (use_db) {
@@ -96,7 +95,11 @@ bool ResumeCtrl::Init() {
       db->UpdateDBVersion();
     }
   } else {
-    resumption_storage_.reset(new ResumptionDataJson());
+    resumption_storage_.reset(new ResumptionDataJson(last_state));
+    if (!resumption_storage_->Init()) {
+        LOG4CXX_DEBUG(logger_, "Resumption storage initialisation failed");
+        return false;
+    }
   }
   LoadResumeData();
   save_persistent_data_timer_.Start(
@@ -210,8 +213,9 @@ bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
                    << check_policy);
   const std::string& device_mac = application->mac_address();
   if (check_policy &&
-      policy::PolicyHandler::instance()->GetUserConsentForDevice(device_mac) !=
-          policy::DeviceConsent::kDeviceAllowed) {
+      ApplicationManagerImpl::instance()->
+          GetPolicyHandler().GetUserConsentForDevice(device_mac) !=
+              policy::DeviceConsent::kDeviceAllowed) {
     LOG4CXX_ERROR(logger_, "Resumption abort. Data consent wasn't allowed");
     SetupDefaultHMILevel(application);
     return false;
@@ -253,7 +257,8 @@ void ResumeCtrl::OnSuspend() {
   LOG4CXX_AUTO_TRACE(logger_);
   StopSavePersistentDataTimer();
   SaveAllApplications();
-  return resumption_storage_->OnSuspend();
+  resumption_storage_->OnSuspend();
+  resumption_storage_->Persist();
 }
 
 void ResumeCtrl::OnAwake() {
@@ -418,7 +423,7 @@ void ResumeCtrl::SaveDataOnTimer() {
     SaveAllApplications();
     is_data_saved_ = true;
     if (!(profile::Profile::instance()->use_db_for_resumption())) {
-      resumption::LastState::instance()->SaveToFileSystem();
+      resumption_storage_->Persist();
     }
   }
 }

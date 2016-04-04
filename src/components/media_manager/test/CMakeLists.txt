@@ -1,4 +1,4 @@
-# Copyright (c) 2015, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,10 @@ if(BUILD_TESTS)
 include_directories(
     ${GMOCK_INCLUDE_DIRECTORY}
     ${COMPONENTS_DIR}/media_manager/include
-    ${COMPONENTS_DIR}/include/
+    ${COMPONENTS_DIR}/protocol_handler/include
+    ${COMPONENTS_DIR}/application_manager/test/include
+    ${COMPONENTS_DIR}/resumption/include
+
 )
 
 if(EXTENDED_MEDIA_MODE)
@@ -48,8 +51,9 @@ set(SOURCES
 )
 
 set(LIBRARIES
+    SmartObjects
     MediaManager
-    ApplicationManager
+    ApplicationManagerTest
     MessageHelper
     ProtocolHandler
     gmock

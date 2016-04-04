@@ -31,59 +31,56 @@
  */
 #include "application_manager/commands/hmi/get_system_info_response.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/policies/policy_handler.h"
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
-
 namespace commands {
 
-GetSystemInfoResponse::GetSystemInfoResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
-}
+GetSystemInfoResponse::GetSystemInfoResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {}
 
-GetSystemInfoResponse::~GetSystemInfoResponse() {
-}
+GetSystemInfoResponse::~GetSystemInfoResponse() {}
 
 void GetSystemInfoResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  application_manager::ApplicationManagerImpl* app_manager_inst =
+      application_manager::ApplicationManagerImpl::instance();
+
   const hmi_apis::Common_Result::eType code =
       static_cast<hmi_apis::Common_Result::eType>(
           (*message_)[strings::params][hmi_response::code].asInt());
 
-  std::string ccpu_version;
-  std::string wers_country_code;
-  std::string language;
-
-  if (hmi_apis::Common_Result::SUCCESS == code) {
-    ccpu_version =
-        (*message_)[strings::msg_params]["ccpu_version"].asString();
-    wers_country_code =
-        (*message_)[strings::msg_params]["wersCountryCode"].asString();
-    uint32_t lang_code = (*message_)[strings::msg_params]["language"].asUInt();
-    language = application_manager::MessageHelper::CommonLanguageToString(
-        static_cast<hmi_apis::Common_Language::eType>(lang_code));
-
-    HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
-    hmi_capabilities.set_ccpu_version(ccpu_version);
-  } else {
-    LOG4CXX_WARN(logger_, "GetSystemError returns an error code " << code);
-
-    // We have to set preloaded flag as false in policy table on any response
-    // of GetSystemInfo (SDLAQ-CRS-2365)
-    const std::string empty_value;
-    policy::PolicyHandler::instance()->OnGetSystemInfo(empty_value,
-                                                       empty_value,
-                                                       empty_value);
-    return;
-  }
+  const SystemInfo& info = GetSystemInfo(code);
 
   // We have to set preloaded flag as false in policy table on any response
   // of GetSystemInfo (SDLAQ-CRS-2365)
-  policy::PolicyHandler::instance()->OnGetSystemInfo(ccpu_version,
-                                                     wers_country_code,
-                                                     language);
+  app_manager_inst->GetPolicyHandler().OnGetSystemInfo(
+      info.ccpu_version, info.wers_country_code, info.language);
+}
+
+const SystemInfo GetSystemInfoResponse::GetSystemInfo(
+    const hmi_apis::Common_Result::eType code) const {
+  SystemInfo info;
+
+  if (hmi_apis::Common_Result::SUCCESS != code) {
+    LOG4CXX_WARN(logger_, "GetSystemError returns an error code " << code);
+    return info;
+  }
+  info.ccpu_version =
+      (*message_)[strings::msg_params]["ccpu_version"].asString();
+
+  info.wers_country_code =
+      (*message_)[strings::msg_params]["wersCountryCode"].asString();
+
+  const uint32_t lang_code = (*message_)[strings::msg_params]["language"].asUInt();
+  info.language = application_manager::MessageHelper::CommonLanguageToString(
+      static_cast<hmi_apis::Common_Language::eType>(lang_code));
+
+  application_manager::ApplicationManagerImpl::instance()
+      ->hmi_capabilities()
+      .set_ccpu_version(info.ccpu_version);
+
+  return info;
 }
 
 }  // namespace commands

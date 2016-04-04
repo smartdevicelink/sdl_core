@@ -32,14 +32,14 @@
 
 #include "gtest/gtest.h"
 #include <fstream>
-#include <cstdint>
+#include <stdint.h>
 #include <vector>
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol/common.h"
 // TODO(EZamakhov): move security test
 #include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_ssl_context.h"
-#include "protocol_handler/protocol_handler_mock.h"
+#include "protocol_handler/mock_protocol_handler.h"
 #include "connection_handler_observer_mock.h"
 #include "connection_handler/mock_connection_handler_settings.h"
 #include "transport_manager/transport_manager_mock.h"
@@ -236,6 +236,7 @@ class ConnectionHandlerTest : public ::testing::Test {
       mock_transport_manager;
   testing::NiceMock<MockConnectionHandlerSettings>
       mock_connection_handler_settings;
+  protocol_handler_test::MockProtocolHandler mock_protocol_handler_;
   transport_manager::DeviceHandle device_handle_;
   transport_manager::ConnectionUID uid_;
   uint32_t connection_key_;
@@ -409,19 +410,19 @@ TEST_F(ConnectionHandlerTest, IsHeartBeatSupported) {
 TEST_F(ConnectionHandlerTest,SendEndServiceWithoutSetProtocolHandler) {
   AddTestDeviceConnection();
   AddTestSession();
-  protocol_handler_test::ProtocolHandlerMock mock_protocol_handler;
 
-  EXPECT_CALL(mock_protocol_handler, SendEndService(_,_,kRpc)).Times(0);
+
+  EXPECT_CALL(mock_protocol_handler_, SendEndService(_,_,kRpc)).Times(0);
   connection_handler_->SendEndService(connection_key_, kRpc);
 }
 
 TEST_F(ConnectionHandlerTest,SendEndService) {
   AddTestDeviceConnection();
   AddTestSession();
-  protocol_handler_test::ProtocolHandlerMock mock_protocol_handler;
 
-  connection_handler_->set_protocol_handler(&mock_protocol_handler);
-  EXPECT_CALL(mock_protocol_handler, SendEndService(_,_,kRpc));
+
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+  EXPECT_CALL(mock_protocol_handler_, SendEndService(_,_,kRpc));
   connection_handler_->SendEndService(connection_key_, kRpc);
 }
 
@@ -477,10 +478,10 @@ TEST_F(ConnectionHandlerTest, OnApplicationFloodCallBack) {
   connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
 
-  protocol_handler_test::ProtocolHandlerMock mock_protocol_handler;
-  connection_handler_->set_protocol_handler(&mock_protocol_handler);
 
-  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_,start_session_id_)).Times(1);
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+
+  EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_,start_session_id_)).Times(1);
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
@@ -504,10 +505,10 @@ TEST_F(ConnectionHandlerTest, OnApplicationFloodCallBack_SessionFound) {
   connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
 
-  protocol_handler_test::ProtocolHandlerMock mock_protocol_handler;
-  connection_handler_->set_protocol_handler(&mock_protocol_handler);
 
-  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_,start_session_id_));
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+
+  EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_,start_session_id_));
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
@@ -765,10 +766,10 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithCommonReason) {
   connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
 
-  protocol_handler_test::ProtocolHandlerMock mock_protocol_handler;
-  connection_handler_->set_protocol_handler(&mock_protocol_handler);
 
-  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_,start_session_id_)).Times(1);
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+
+  EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_,start_session_id_)).Times(1);
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
@@ -791,10 +792,10 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithFloodReason) {
   connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
 
-  protocol_handler_test::ProtocolHandlerMock mock_protocol_handler;
-  connection_handler_->set_protocol_handler(&mock_protocol_handler);
 
-  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_,start_session_id_)).Times(1);
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+
+  EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_,start_session_id_)).Times(1);
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
@@ -817,10 +818,10 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithMalformedMessage) {
   connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
 
-  protocol_handler_test::ProtocolHandlerMock mock_protocol_handler;
-  connection_handler_->set_protocol_handler(&mock_protocol_handler);
 
-  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_,start_session_id_)).Times(0);
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+
+  EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_,start_session_id_)).Times(0);
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
@@ -843,10 +844,10 @@ TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithMalformedMessage) {
   connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
 
-  protocol_handler_test::ProtocolHandlerMock mock_protocol_handler;
-  connection_handler_->set_protocol_handler(&mock_protocol_handler);
 
-  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_,start_session_id_)).Times(0);
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+
+  EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_,start_session_id_)).Times(0);
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
@@ -869,10 +870,10 @@ TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithCommonReason) {
   connection_handler_test::ConnectionHandlerObserverMock mock_connection_handler_observer;
   connection_handler_->set_connection_handler_observer(&mock_connection_handler_observer);
 
-  protocol_handler_test::ProtocolHandlerMock mock_protocol_handler;
-  connection_handler_->set_protocol_handler(&mock_protocol_handler);
 
-  EXPECT_CALL(mock_protocol_handler, SendEndSession(uid_,start_session_id_)).Times(1);
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+
+  EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_,start_session_id_)).Times(1);
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
@@ -1359,10 +1360,10 @@ TEST_F(ConnectionHandlerTest, SendHeartBeat) {
   // Add virtual device and connection
   AddTestDeviceConnection();
   AddTestSession();
-  protocol_handler_test::ProtocolHandlerMock mock_protocol_handler;
-  connection_handler_->set_protocol_handler(&mock_protocol_handler);
 
-  EXPECT_CALL(mock_protocol_handler,SendHeartBeat(uid_,start_session_id_) );
+  connection_handler_->set_protocol_handler(&mock_protocol_handler_);
+
+  EXPECT_CALL(mock_protocol_handler_,SendHeartBeat(uid_,start_session_id_) );
   connection_handler_->SendHeartBeat(uid_, start_session_id_);
 }
 

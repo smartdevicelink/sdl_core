@@ -38,8 +38,9 @@ namespace media_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
-StreamerListener::StreamerListener()
-  : current_application_(0) {
+StreamerListener::StreamerListener(MediaManager& media_manager)
+  : current_application_(0),
+    media_manager_(media_manager) {
 }
 
 StreamerListener::~StreamerListener() {
@@ -49,7 +50,7 @@ StreamerListener::~StreamerListener() {
 void StreamerListener::OnDataReceived(
   int32_t application_key,
   const DataForListener& data) {
-  MediaManagerImpl::instance()->FramesProcessed(application_key, data);
+  media_manager_.FramesProcessed(application_key, data);
 }
 
 void StreamerListener::OnErrorReceived(

@@ -36,6 +36,10 @@
 #include <string>
 #include "media_manager/media_adapter_listener.h"
 
+namespace application_manager {
+  class ApplicationManager;
+}
+
 namespace threads {
 class Thread;
 }
@@ -43,8 +47,8 @@ class Thread;
 namespace media_manager {
 class FromMicRecorderListener : public MediaAdapterListener {
   public:
-    explicit FromMicRecorderListener(
-      const std::string& file_name);
+    FromMicRecorderListener(const std::string& file_name,
+      application_manager::ApplicationManager &);
     ~FromMicRecorderListener();
     virtual void OnDataReceived(
       int32_t application_key,
@@ -59,6 +63,7 @@ class FromMicRecorderListener : public MediaAdapterListener {
     threads::Thread* reader_;
     std::string file_name_;
     int32_t current_application_;
+    application_manager::ApplicationManager& application_manager_;
     DISALLOW_COPY_AND_ASSIGN(FromMicRecorderListener);
 };
 }  //  namespace media_manager

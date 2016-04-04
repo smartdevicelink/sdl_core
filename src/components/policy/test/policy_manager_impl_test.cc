@@ -45,15 +45,21 @@
 #include "config_profile/profile.h"
 #include "table_struct/enums.h"
 #include "table_struct/types.h"
+#include "policy/mock_policy_settings.h"
+
+#include "utils/macro.h"
 #include "utils/file_system.h"
 #include "utils/date_time.h"
 #include "utils/make_shared.h"
 
-using ::testing::Return;
+using ::testing::ReturnRef;
+using ::testing::DoAll;
+using ::testing::SetArgReferee;
 using ::testing::NiceMock;
 using ::testing::_;
 using ::testing::SetArgReferee;
 using ::testing::AtLeast;
+using ::testing::Return;
 
 using ::policy::MockPolicyListener;
 
@@ -141,12 +147,16 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   const std::string dev_id1;
   const std::string dev_id2;
   Json::Value PTU_request_types;
+  static const bool in_memory_;
+  NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
+  const std::string kAppStorageFolder = "storage1";
 
   void SetUp() OVERRIDE {
     file_system::CreateDirectory("storage1");
 
     profile::Profile::instance()->config_file_name("smartDeviceLink2.ini");
     manager = new PolicyManagerImpl();
+    ON_CALL(policy_settings_, app_storage_folder()).WillByDefault(ReturnRef(kAppStorageFolder));
     manager->set_listener(&listener);
     const char* levels[] = {"BACKGROUND", "FULL", "LIMITED", "NONE"};
     hmi_level.assign(levels, levels + sizeof(levels) / sizeof(levels[0]));
@@ -179,9 +189,10 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     return root;
   }
 
-  void CreateLocalPT(std::string file_name) {
+  void CreateLocalPT(const std::string& file_name) {
     file_system::remove_directory_content("storage1");
-    ASSERT_TRUE(manager->InitPT(file_name));
+    ON_CALL(policy_settings_, app_storage_folder()).WillByDefault(ReturnRef(kAppStorageFolder));
+    ASSERT_TRUE(manager->InitPT(file_name, &policy_settings_));
   }
 
   void AddRTtoPT(const std::string& update_file_name,

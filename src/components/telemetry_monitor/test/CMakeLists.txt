@@ -37,6 +37,8 @@ include_directories(
   ${COMPONENTS_DIR}/utils/include
   ${COMPONENTS_DIR}/protocol_handler/include
   ${COMPONENTS_DIR}/application_manager/include
+  ${COMPONENTS_DIR}/resumption/include
+  ${JSONCPP_INCLUDE_DIRECTORY}
 )
   
 

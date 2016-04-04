@@ -38,6 +38,7 @@
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "telemetry_monitor/telemetry_observable.h"
+#include "resumption/last_state.h"
 
 namespace test {
 namespace components {
@@ -57,7 +58,7 @@ class MockTransportManager
           transport_manager::TMTelemetryObserver>{
 
  public:
-  MOCK_METHOD0(Init, int());
+  MOCK_METHOD1(Init, int(resumption::LastState &last_state));
   MOCK_METHOD0(Reinit, int());
   MOCK_METHOD0(SearchDevices, int());
   MOCK_METHOD1(ConnectDevice, int(const DeviceHandle));

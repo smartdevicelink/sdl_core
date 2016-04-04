@@ -31,13 +31,15 @@
  */
 
 #include "application_manager/message_helper.h"
-#include "mock_message_helper.h"
+#include "application_manager/mock_message_helper.h"
+#include "application_manager/policies/policy_handler.h"
 
 namespace application_manager {
 
 void MessageHelper::SendHashUpdateNotification(uint32_t const app_id) {
   MockMessageHelper::message_helper_mock()->SendHashUpdateNotification(app_id);
 }
+
 void MessageHelper::SendNaviStartStream(int32_t connection_key) {
   MockMessageHelper::message_helper_mock()->SendNaviStartStream(connection_key);
 }
@@ -55,11 +57,6 @@ void MessageHelper::SendOnDataStreaming(protocol_handler::ServiceType service,
                                         bool available) {
   MockMessageHelper::message_helper_mock()->SendOnDataStreaming(service,
                                                                 available);
-}
-
-uint32_t MessageHelper::GetAppCommandLimit(const std::string& policy_app_id) {
-  return MockMessageHelper::message_helper_mock()->GetAppCommandLimit(
-      policy_app_id);
 }
 
 smart_objects::SmartObjectSPtr GetHashUpdateNotification(
@@ -208,10 +205,6 @@ hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(const s
         language);
 }
 
-std::string MessageHelper::MobileLanguageToString(const mobile_apis::Language::eType language) {
-  return  MockMessageHelper::message_helper_mock()->MobileLanguageToString(language);
-}
-
 mobile_apis::Language::eType MessageHelper::MobileLanguageFromString(const std::string& language) {
   return  MockMessageHelper::message_helper_mock()->MobileLanguageFromString(language);
 }
@@ -284,19 +277,13 @@ std::string MessageHelper::CommonLanguageToString(
   return MockMessageHelper::message_helper_mock()->CommonLanguageToString(lang);
 }
 
-bool MessageHelper::CheckWithPolicy(
-    mobile_apis::SystemAction::eType system_action,
-    const std::string& app_mobile_id) {
-  return MockMessageHelper::message_helper_mock()->CheckWithPolicy(
-        system_action, app_mobile_id);
-}
-
-smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
-    ApplicationConstSharedPtr app,
-    hmi_apis::Common_HMILevel::eType hmi_level,
+smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(ApplicationConstSharedPtr app,
+    const protocol_handler::SessionObserver& session_observer,
+    const policy::PolicyHandlerInterface &policy_handler,
+    hmi_apis::Common_HMILevel::eType level,
     bool send_policy_priority) {
-  return MockMessageHelper::message_helper_mock()->
-      GetBCActivateAppRequestToHMI(app, hmi_level, send_policy_priority);
+  return MockMessageHelper::message_helper_mock()->GetBCActivateAppRequestToHMI(
+      app, session_observer, policy_handler, level, send_policy_priority);
 }
 
 }  // namespace application_manager

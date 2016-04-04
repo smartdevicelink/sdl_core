@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/on_policy_update.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 namespace commands {
@@ -45,7 +45,7 @@ OnPolicyUpdate::~OnPolicyUpdate() {
 
 void OnPolicyUpdate::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  policy::PolicyHandler::instance()->OnPTExchangeNeeded();
+  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnPTExchangeNeeded();
 }
 
 }  // namespace commands

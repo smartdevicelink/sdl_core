@@ -81,6 +81,7 @@
 #include "utils/lock.h"
 #include "utils/singleton.h"
 #include "utils/data_accessor.h"
+#include "resumption/last_state.h"
 
 namespace application_manager {
 enum VRTTSSessionChanging { kVRSessionChanging = 0, kTTSSessionChanging };
@@ -165,7 +166,8 @@ class ApplicationManagerImpl
     std::cout << "ApplicationManagerImpl Mock created \n";
   }
 
-  MOCK_METHOD0(Init, bool());
+  MOCK_METHOD2(Init, bool(resumption::LastState& last_state,
+                          media_manager::MediaManager* media_manager));
   MOCK_METHOD0(Stop, bool());
 
   // ApplicationManager methods
@@ -214,6 +216,17 @@ class ApplicationManagerImpl
   MOCK_METHOD1(Handle, void(const impl::MessageToHmi));
   MOCK_METHOD1(Handle, void(const impl::AudioData));
 
+//  // ApplicationManager methods
+//  MOCK_METHOD1(set_hmi_message_handler,
+//               void(hmi_message_handler::HMIMessageHandler*));
+//  MOCK_METHOD1(set_protocol_handler, void(protocol_handler::ProtocolHandler*));
+//  MOCK_METHOD1(set_connection_handler,
+//               void(connection_handler::ConnectionHandler*));
+//  MOCK_CONST_METHOD0(connection_handler,
+//                     connection_handler::ConnectionHandler&());
+//  MOCK_METHOD0(GetPolicyHandler,
+//                     policy::PolicyHandlerInterface&());
+
 // ApplicationManagerImpl methods:
 #ifdef TELEMETRY_MONITOR
   MOCK_METHOD1(SetTelemetryObserver, void(AMTelemetryObserver*));
@@ -243,11 +256,6 @@ class ApplicationManagerImpl
   MOCK_METHOD1(RemoveAppDataFromHMI, bool(ApplicationSharedPtr));
   MOCK_METHOD1(HeadUnitReset,
                void(mobile_api::AppInterfaceUnregisteredReason::eType));
-#ifdef CUSTOMER_PASA
-  MOCK_METHOD0(HeadUnitSuspend, void());
-  MOCK_CONST_METHOD0(state_suspended, bool());
-  MOCK_METHOD1(set_state_suspended, void(const bool));
-#endif  // CUSTOMER_PASA
   MOCK_METHOD1(LoadAppDataToHMI, bool(ApplicationSharedPtr));
   MOCK_METHOD1(ActivateApplication, bool(ApplicationSharedPtr));
   MOCK_METHOD1(IsHmiLevelFullAllowed,
@@ -302,9 +310,9 @@ class ApplicationManagerImpl
 
   MOCK_METHOD2(HMILevelAllowsStreaming,
                bool(uint32_t, protocol_handler::ServiceType));
-  MOCK_METHOD2(CanAppStream, bool(uint32_t, protocol_handler::ServiceType));
+  MOCK_CONST_METHOD2(CanAppStream, bool(uint32_t, protocol_handler::ServiceType));
   MOCK_METHOD1(EndNaviServices, void(int32_t));
-  MOCK_METHOD1(ForbidStreaming, void(int32_t));
+  MOCK_METHOD1(ForbidStreaming, void(uint32_t));
   MOCK_METHOD3(OnAppStreaming,
                void(int32_t, protocol_handler::ServiceType, bool));
 

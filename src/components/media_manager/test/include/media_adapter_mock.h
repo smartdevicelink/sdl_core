@@ -35,6 +35,7 @@
 
 #include <gmock/gmock.h>
 #include "media_manager/media_manager.h"
+#include "media_manager/media_adapter.h"
 
 namespace test {
 namespace components {
@@ -43,7 +44,7 @@ namespace media_manager_test {
 /*
  * MOCK implementation of ::media_manager::MediaAdapter
  */
-class MediaAdapterMock : public ::media_manager::MediaAdapter {
+class MockMediaAdapter : public ::media_manager::MediaAdapter {
  public:
   MOCK_METHOD2(SendData,
       void(int32_t application_key,

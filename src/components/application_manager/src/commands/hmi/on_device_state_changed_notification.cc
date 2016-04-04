@@ -32,7 +32,7 @@
 
 #include <algorithm>
 #include "application_manager/commands/hmi/on_device_state_changed_notification.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
 #include "encryption/hashing.h"
@@ -106,7 +106,7 @@ void OnDeviceStateChangedNotification::Run() {
       device_id = encryption::MakeHash(bt_mac);
       LOG4CXX_DEBUG(logger_, "Device_id hashed as BT MAC : " << device_id);
     }
-    policy::PolicyHandler::instance()->RemoveDevice(device_id);
+    application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().RemoveDevice(device_id);
   }
 }
 

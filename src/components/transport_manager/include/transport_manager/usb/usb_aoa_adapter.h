@@ -44,7 +44,7 @@ namespace transport_adapter {
 
 class UsbAoaAdapter : public TransportAdapterImpl {
  public:
-  UsbAoaAdapter();
+  UsbAoaAdapter(resumption::LastState& last_state);
   virtual ~UsbAoaAdapter();
 
  protected:

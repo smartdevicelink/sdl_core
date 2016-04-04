@@ -36,7 +36,6 @@
 #include "application_manager/usage_statistics.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_mock.h"
-#include "application_manager/test/mock_message_helper.h"
 #include "connection_handler/mock_connection_handler_settings.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "transport_manager/transport_manager_mock.h"
@@ -47,6 +46,12 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/event_engine/event.h"
 #include "application_manager/smart_object_keys.h"
+#include "application_manager/mock_message_helper.h"
+#include "policy/mock_policy_settings.h"
+#include "protocol_handler/mock_session_observer.h"
+#include "connection_handler/mock_connection_handler.h"
+#include "application_manager/policies/mock_policy_handler_interface.h"
+#include "application_manager/mock_application_manager.h"
 
 namespace am = application_manager;
 using am::HmiState;
@@ -126,7 +131,10 @@ class StateControllerTest : public ::testing::Test {
                        new state_controller_test::StatisticsManagerMock))
       , applications_(application_set_, applications_lock_)
       , state_ctrl_(&app_manager_mock_) {}
-  NiceMock<application_manager::ApplicationManagerImpl> app_manager_mock_;
+  NiceMock<application_manager_test::MockApplicationManager> app_manager_mock_;
+  NiceMock<policy_test::MockPolicyHandlerInterface> policy_interface_;
+  NiceMock<connection_handler_test::MockConnectionHandler> mock_connection_handler_;
+  NiceMock<protocol_handler_test::MockSessionObserver> mock_session_observer_;
 
   am::UsageStatistics usage_stat;
 
@@ -176,7 +184,7 @@ class StateControllerTest : public ::testing::Test {
   std::vector<am::ApplicationSharedPtr> applications_list_;
 
   connection_handler_test::MockConnectionHandlerSettings
-      mock_connection_handler_settings;
+      mock_connection_handler__settings;
   transport_manager_test::MockTransportManager mock_transport_manager;
   connection_handler::ConnectionHandlerImpl* conn_handler;
 
@@ -832,22 +840,26 @@ class StateControllerTest : public ::testing::Test {
 
   void SetConnection() {
     conn_handler = new connection_handler::ConnectionHandlerImpl(
-        mock_connection_handler_settings, mock_transport_manager);
+        mock_connection_handler__settings, mock_transport_manager);
     ON_CALL(app_manager_mock_, connection_handler())
-        .WillByDefault(Return(conn_handler));
+        .WillByDefault(ReturnRef(*conn_handler));
   }
 
-  void SetBCActivateAppRequestToHMI(mobile_apis::HMILevel::eType set_lvl,
+  void SetBCActivateAppRequestToHMI(const hmi_apis::Common_HMILevel::eType hmi_lvl,
                                     uint32_t corr_id) {
+      ON_CALL(mock_connection_handler_,get_session_observer()).WillByDefault(ReturnRef(mock_session_observer_));
+      ON_CALL(app_manager_mock_,connection_handler()).WillByDefault(ReturnRef(mock_connection_handler_));
+      ON_CALL(app_manager_mock_,GetPolicyHandler()).WillByDefault(ReturnRef(policy_interface_));
     smart_objects::SmartObjectSPtr bc_activate_app_request =
         new smart_objects::SmartObject();
-    const hmi_apis::Common_HMILevel::eType hmi_lvl =
-        static_cast<hmi_apis::Common_HMILevel::eType>(set_lvl);
     (*bc_activate_app_request)[am::strings::params]
                               [am::strings::correlation_id] = corr_id;
-    EXPECT_CALL(*message_helper_mock_,
-                GetBCActivateAppRequestToHMI(_, hmi_lvl, _))
-        .WillOnce(Return(bc_activate_app_request));
+    ON_CALL(*message_helper_mock_,
+                GetBCActivateAppRequestToHMI(_, _, _,hmi_lvl, _))
+        .WillByDefault(Return(bc_activate_app_request));
+
+    ON_CALL(app_manager_mock_, ManageHMICommand(bc_activate_app_request))
+        .WillByDefault(Return(true));
   }
 
   void ExpectSuccesfullSetHmiState(am::ApplicationSharedPtr app,
@@ -1694,31 +1706,30 @@ TEST_F(StateControllerTest, DISABLED_ActivateAppSuccessReceivedFromHMI) {
       new smart_objects::SmartObject();
   (*bc_activate_app_request)[am::strings::params][am::strings::correlation_id] =
       corr_id;
-
   for (; it != hmi_states.end(); ++it) {
     am::HmiStatePtr hmi_state = it->first;
     am::HmiStatePtr initial_hmi_state = it->first;
     Common_HMILevel::eType hmi_level = it->second;
 
-    EXPECT_CALL(*message_helper_mock_,
-                GetBCActivateAppRequestToHMI(_, hmi_level, _))
-        .WillOnce(Return(bc_activate_app_request));
+      SetBCActivateAppRequestToHMI(hmi_level, corr_id);
+      ON_CALL(app_manager_mock_, ManageHMICommand(bc_activate_app_request))
+          .WillByDefault(Return(true));
 
-    EXPECT_CALL(app_manager_mock_, application_id(corr_id))
-        .WillOnce(Return(hmi_app_id));
-    EXPECT_CALL(app_manager_mock_, application_by_hmi_app(hmi_app_id))
-        .WillOnce(Return(media_app_));
-    ExpectSuccesfullSetHmiState(
-        media_app_, media_app_ptr_, initial_hmi_state, hmi_state);
-    state_ctrl_.SetRegularState<true>(media_app_, hmi_state);
-    smart_objects::SmartObject message;
-    message[am::strings::params][am::hmi_response::code] =
-        Common_Result::SUCCESS;
-    message[am::strings::params][am::strings::correlation_id] = corr_id;
-    am::event_engine::Event event(
-        hmi_apis::FunctionID::BasicCommunication_ActivateApp);
-    event.set_smart_object(message);
-    state_ctrl_.on_event(event);
+      EXPECT_CALL(app_manager_mock_, application_id(corr_id))
+          .WillOnce(Return(hmi_app_id));
+      EXPECT_CALL(app_manager_mock_, application_by_hmi_app(hmi_app_id))
+          .WillOnce(Return(media_app_));
+      ExpectSuccesfullSetHmiState(
+          media_app_, media_app_ptr_, initial_hmi_state, hmi_state);
+      state_ctrl_.SetRegularState<true>(media_app_, hmi_state);
+      smart_objects::SmartObject message;
+      message[am::strings::params][am::hmi_response::code] =
+          Common_Result::SUCCESS;
+      message[am::strings::params][am::strings::correlation_id] = corr_id;
+      am::event_engine::Event event(
+          hmi_apis::FunctionID::BasicCommunication_ActivateApp);
+      event.set_smart_object(message);
+      state_ctrl_.on_event(event);
   }
 }
 
@@ -1798,7 +1809,7 @@ TEST_F(StateControllerTest, ActivateAppInvalidCorrelationId) {
       .Times(0);
   EXPECT_CALL(app_manager_mock_, OnHMILevelChanged(simple_app_->app_id(), _, _))
       .Times(0);
-  SetBCActivateAppRequestToHMI(mobile_apis::HMILevel::HMI_FULL, corr_id);
+  SetBCActivateAppRequestToHMI(Common_HMILevel::FULL, corr_id);
   state_ctrl_.SetRegularState<true>(simple_app_, FullNotAudibleState());
   smart_objects::SmartObject message;
   message[am::strings::params][am::hmi_response::code] = Common_Result::SUCCESS;
@@ -2239,7 +2250,7 @@ TEST_F(StateControllerTest, SetRegularStateWithNewHmiLvl) {
       .WillOnce(Return(BackgroundState()));
 
   const uint32_t corr_id = 314;
-  SetBCActivateAppRequestToHMI(set_lvl, corr_id);
+  SetBCActivateAppRequestToHMI(static_cast<hmi_apis::Common_HMILevel::eType>(set_lvl), corr_id);
 
   state_ctrl_.SetRegularState(simple_app_, set_lvl);
 

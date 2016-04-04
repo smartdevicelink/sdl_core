@@ -42,7 +42,7 @@
 namespace protocol_handler {
 
 class ProtocolObserver;
-
+class SessionObserver;
 /**
  * \class ProtocolHandler
  * \brief Interface for component parsing protocol header
@@ -106,6 +106,7 @@ class ProtocolHandler {
    * \return pointer to protocol handler settings class
    */
   virtual const ProtocolHandlerSettings& get_settings() const = 0;
+  virtual SessionObserver& get_session_observer() = 0;
 
  protected:
   /**

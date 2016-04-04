@@ -270,7 +270,6 @@ void ResumptionDataDB::OnSuspend() {
       LOG4CXX_INFO(logger_, "Data last_ign_off_time was updated");
     }
   }
-  WriteDb();
 }
 
 bool ResumptionDataDB::DeleteAppWithIgnCount(const int application_lifes) {
@@ -648,6 +647,10 @@ void ResumptionDataDB::UpdateHmiLevel(const std::string& policy_app_id,
       WriteDb();
     }
   }
+}
+
+void ResumptionDataDB::Persist() {
+    WriteDb();
 }
 
 bool ResumptionDataDB::RefreshDB() const {

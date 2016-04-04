@@ -33,13 +33,17 @@
 #ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_SOCKET_VIDEO_STREAMER_ADAPTER_H_
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_VIDEO_SOCKET_VIDEO_STREAMER_ADAPTER_H_
 
+#include <string>
+#include <stdint.h>
+
 #include "media_manager/socket_streamer_adapter.h"
 
 namespace media_manager {
 
 class SocketVideoStreamerAdapter : public SocketStreamerAdapter {
  public:
-  SocketVideoStreamerAdapter();
+  SocketVideoStreamerAdapter(
+      const std::string& server_address, uint16_t video_streaming_port);
   virtual ~SocketVideoStreamerAdapter();
 };
 

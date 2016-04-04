@@ -38,6 +38,10 @@
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "protocol/common.h"
 
+namespace resumption {
+class LastState;
+}
+
 namespace transport_manager {
 
 class TransportAdapterEvent;
@@ -56,7 +60,7 @@ class TransportManager {
    * @brief Initialize transport manager.
    * @return Error code.
    */
-  virtual int Init() = 0;
+  virtual int Init(resumption::LastState &last_state) = 0;
 
   /**
    * @brief Reinitializes transport manager

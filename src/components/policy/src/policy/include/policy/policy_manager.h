@@ -38,9 +38,10 @@
 
 #include "policy/policy_types.h"
 #include "policy/policy_listener.h"
-#include "usage_statistics/statistics_manager.h"
+#include "policy/usage_statistics/statistics_manager.h"
 
 namespace policy {
+class PolicySettings;
 
 class PolicyManager : public usage_statistics::StatisticsManager {
   public:
@@ -54,7 +55,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @param file_name Path to preloaded PT file
      * @return true if successfully
      */
-    virtual bool InitPT(const std::string& file_name) = 0;
+    virtual bool InitPT(const std::string& file_name, const PolicySettings* settings) = 0;
 
     /**
      * @brief Updates Policy Table from binary message received from
@@ -179,7 +180,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @return status of device consent
      */
     virtual DeviceConsent GetUserConsentForDevice(
-      const std::string& device_id) = 0;
+      const std::string& device_id) const = 0;
 
     /**
      * @brief Get user consent for application
@@ -254,7 +255,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @return true, if succedeed, otherwise - false
      */
     virtual bool GetDefaultHmi(const std::string& policy_app_id,
-                               std::string* default_hmi) = 0;
+                               std::string* default_hmi) const = 0;
 
     /**
      * @brief Get priority for application
@@ -263,7 +264,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @return true, if succedeed, otherwise - false
      */
     virtual bool GetPriority(const std::string& policy_app_id,
-                             std::string* priority) = 0;
+                             std::string* priority) const = 0;
 
     /**
      * @brief Get user friendly messages for given RPC messages and language
@@ -308,7 +309,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @brief Return device id, which hosts specific application
      * @param Application id, which is required to update device id
      */
-    virtual std::string& GetCurrentDeviceId(const std::string& policy_app_id) = 0;
+    virtual std::string& GetCurrentDeviceId(const std::string& policy_app_id) const = 0;
 
     /**
      * @brief Set current system language
@@ -356,12 +357,12 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     /**
      * @brief Check if app can keep context.
      */
-    virtual bool CanAppKeepContext(const std::string& app_id) = 0;
+    virtual bool CanAppKeepContext(const std::string& app_id) const = 0;
 
     /**
      * @brief Check if app can steal focus.
      */
-    virtual bool CanAppStealFocus(const std::string& app_id) = 0;
+    virtual bool CanAppStealFocus(const std::string& app_id) const = 0;
 
     /**
      * @brief Runs necessary operations, which is depends on external system
@@ -375,7 +376,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @param priority
      * @return
      */
-    virtual uint32_t GetNotificationsNumber(const std::string& priority) = 0;
+    virtual uint32_t GetNotificationsNumber(const std::string& priority) const = 0 ;
 
     /**
      * @brief Allows to update Vehicle Identification Number in policy table.
@@ -441,6 +442,8 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @return The certificate in PKCS#7 format.
      */
     virtual std::string RetrieveCertificate() const = 0;
+
+    virtual const PolicySettings& get_settings() const = 0;
 
   protected:
     /**

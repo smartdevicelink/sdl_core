@@ -35,6 +35,7 @@
 #include <algorithm>    // std::find
 
 #include "connection_handler/connection_handler_impl.h"
+#include "protocol_handler/session_observer.h"
 #include "utils/byte_order.h"
 #include "protocol/common.h"
 
@@ -221,9 +222,15 @@ void ProtocolHandlerImpl::SendEndSessionNAck(ConnectionID connection_id,
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
 
-  LOG4CXX_DEBUG(logger_, "SendEndSessionNAck() for connection " << connection_id
-               << " for service_type " << static_cast<int32_t>(service_type)
-               << " session_id " << static_cast<int32_t>(session_id));
+  LOG4CXX_DEBUG(logger_,
+                "SendEndSessionNAck() for connection "
+                    << connection_id << " for service_type "
+                    << static_cast<int32_t>(service_type) << " session_id "
+                << static_cast<int32_t>(session_id));
+}
+
+SessionObserver& ProtocolHandlerImpl::get_session_observer() {
+  return session_observer_;
 }
 
 void ProtocolHandlerImpl::SendEndSessionAck(ConnectionID connection_id,

@@ -42,7 +42,6 @@
 
 #include "utils/logger.h"
 #include "utils/threads/thread_delegate.h"
-#include "resumption/last_state.h"
 #include "transport_manager/tcp/tcp_client_listener.h"
 #include "transport_manager/tcp/tcp_connection_factory.h"
 #include "transport_manager/tcp/tcp_device.h"
@@ -52,12 +51,12 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
-TcpTransportAdapter::TcpTransportAdapter(const uint16_t port)
-    : TransportAdapterImpl(
-                           NULL,
+TcpTransportAdapter::TcpTransportAdapter(const uint16_t port,
+                                         resumption::LastState& last_state)
+    : TransportAdapterImpl(NULL,
                            new TcpConnectionFactory(this),
-                           new TcpClientListener(this, port, true)) {
-}
+                           new TcpClientListener(this, port, true),
+                           last_state) {}
 
 TcpTransportAdapter::~TcpTransportAdapter() {
 }
@@ -108,15 +107,15 @@ void TcpTransportAdapter::Store() const {
     }
   }
   tcp_adapter_dictionary["devices"] = devices_dictionary;
-  Json::Value& dictionary = resumption::LastState::instance()->dictionary;
+  Json::Value& dictionary = last_state().dictionary;
   dictionary["TransportManager"]["TcpAdapter"] = tcp_adapter_dictionary;
 }
 
 bool TcpTransportAdapter::Restore() {
   LOG4CXX_AUTO_TRACE(logger_);
   bool errors_occurred = false;
-  const Json::Value tcp_adapter_dictionary = resumption::LastState::instance()
-      ->dictionary["TransportManager"]["TcpAdapter"];
+  const Json::Value tcp_adapter_dictionary =
+      last_state().dictionary["TransportManager"]["TcpAdapter"];
   const Json::Value devices_dictionary = tcp_adapter_dictionary["devices"];
   for (Json::Value::const_iterator i = devices_dictionary.begin();
       i != devices_dictionary.end(); ++i) {

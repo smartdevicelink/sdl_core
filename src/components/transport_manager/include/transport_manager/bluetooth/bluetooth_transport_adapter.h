@@ -49,7 +49,7 @@ class BluetoothTransportAdapter : public TransportAdapterImpl {
   /**
    * @brief Constructor.
    */
-  BluetoothTransportAdapter();
+  BluetoothTransportAdapter(resumption::LastState& last_state);
 
   /**
    * @brief Destructor.

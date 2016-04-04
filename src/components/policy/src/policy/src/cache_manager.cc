@@ -101,7 +101,7 @@ CacheManager::~CacheManager() {
   threads::DeleteThread(backup_thread_);
 }
 
-bool CacheManager::CanAppKeepContext(const std::string &app_id) {
+bool CacheManager::CanAppKeepContext(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(false);
   bool result = true;
   return result;
@@ -119,14 +119,16 @@ uint32_t CacheManager::HeartBeatTimeout(const std::string& app_id) const {
   return result;
 }
 
-bool CacheManager::CanAppStealFocus(const std::string &app_id) {
+
+bool CacheManager::CanAppStealFocus(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(false);
   bool result = true;
   return result;
 }
 
-bool CacheManager::GetDefaultHMI(const std::string &app_id,
-                                 std::string& default_hmi) {
+
+bool CacheManager::GetDefaultHMI(const std::string& app_id,
+                                 std::string& default_hmi) const {
   CACHE_MANAGER_CHECK(false);
   bool result = true;
   return result;
@@ -141,7 +143,7 @@ bool CacheManager::ResetUserConsent() {
 
 bool CacheManager::GetUserPermissionsForDevice(const std::string &device_id,
                                                StringArray& consented_groups,
-                                               StringArray& disallowed_groups) {
+                                               StringArray& disallowed_groups) const {
 
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK(false);
@@ -296,7 +298,7 @@ bool CacheManager::GetPermissionsForApp(const std::string &device_id,
 
 bool CacheManager::GetDeviceGroupsFromPolicies(
   policy_table::Strings& groups,
-  policy_table::Strings& preconsented_groups) {
+  policy_table::Strings& preconsented_groups) const {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK(false);
   return true;
@@ -652,8 +654,8 @@ rpc::policy_table_interface_base::NumberOfNotificationsType CacheManager::GetNot
   return result;
 }
 
-bool CacheManager::GetPriority(const std::string &policy_app_id,
-                               std::string &priority) {
+bool CacheManager::GetPriority(const std::string& policy_app_id,
+                               std::string& priority) const {
   CACHE_MANAGER_CHECK(false);
   if (kDeviceId == policy_app_id) {
     priority = EnumToJsonString(
@@ -1176,10 +1178,11 @@ bool CacheManager::IsApplicationRepresented(const std::string& app_id) const {
   return pt_->policy_table.app_policies_section.apps.end() != iter;
 }
 
-bool CacheManager::Init(const std::string& file_name) {
+bool CacheManager::Init(const std::string& file_name,
+                        const PolicySettings* settings) {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  InitResult init_result = backup_->Init();
+  settings_ = settings;
+  InitResult init_result = backup_->Init(settings);
 
   bool result = true;
   switch (init_result) {
@@ -1420,8 +1423,14 @@ void CacheManager::MergeCFM(const policy_table::PolicyTable& new_pt,
   }
 }
 
+const PolicySettings& CacheManager::get_settings() const {
+  DCHECK(settings_);
+
+  return *settings_;
+}
+
 CacheManager::BackgroundBackuper::BackgroundBackuper(CacheManager* cache_manager)
-  : cache_manager_(cache_manager),
+    : cache_manager_(cache_manager),
     stop_flag_(false),
     new_data_available_(false) {
   LOG4CXX_AUTO_TRACE(logger_);

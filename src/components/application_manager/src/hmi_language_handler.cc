@@ -46,18 +46,13 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 namespace application_manager {
 
-HMILanguageHandler::HMILanguageHandler()  :
-    capabilities_ui_language_(hmi_apis::Common_Language::INVALID_ENUM),
-    capabilities_vr_language_(hmi_apis::Common_Language::INVALID_ENUM),
-    capabilities_tts_language_(hmi_apis::Common_Language::INVALID_ENUM),
-    is_ui_language_received_(false),
-    is_vr_language_received_(false),
-    is_tts_language_received_(false) {
-
-  persisted_ui_language_ = get_language_for(INTERFACE_UI);
-  persisted_vr_language_ = get_language_for(INTERFACE_VR);
-  persisted_tts_language_ = get_language_for(INTERFACE_TTS);
-
+HMILanguageHandler::HMILanguageHandler()
+    : capabilities_ui_language_(hmi_apis::Common_Language::INVALID_ENUM)
+    , capabilities_vr_language_(hmi_apis::Common_Language::INVALID_ENUM)
+    , capabilities_tts_language_(hmi_apis::Common_Language::INVALID_ENUM)
+    , is_ui_language_received_(false)
+    , is_vr_language_received_(false)
+    , is_tts_language_received_(false) {
   subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
 }
 
@@ -79,10 +74,11 @@ void HMILanguageHandler::set_language_for(
     default:
       LOG4CXX_WARN(logger_, "Unknown interface has been passed " << interface);
       return;
-    }
-  LOG4CXX_DEBUG(logger_, "Setting language " << language
-               << " for interface " << interface);
-  resumption::LastState::instance()->dictionary[LanguagesKey][key] = language;
+  }
+  LOG4CXX_DEBUG(logger_,
+                "Setting language " << language << " for interface "
+                                    << interface);
+  last_state_->dictionary[LanguagesKey][key] = language;
   return;
 }
 
@@ -107,11 +103,10 @@ hmi_apis::Common_Language::eType HMILanguageHandler::get_language_for(
       return Common_Language::INVALID_ENUM;
   }
 
-  if (LastState::instance()->dictionary.isMember(LanguagesKey)) {
-    if (LastState::instance()->dictionary[LanguagesKey].isMember(key)) {
-      Common_Language::eType language =
-          static_cast<Common_Language::eType>(
-          LastState::instance()->dictionary[LanguagesKey][key].asInt());
+  if (last_state_->dictionary.isMember(LanguagesKey)) {
+    if (last_state_->dictionary[LanguagesKey].isMember(key)) {
+      Common_Language::eType language = static_cast<Common_Language::eType>(
+          last_state_->dictionary[LanguagesKey][key].asInt());
       return language;
     }
   }
@@ -321,4 +316,12 @@ void HMILanguageHandler::CheckApplication(const Apps::value_type app) {
   }
 }
 
-} // namespace application_manager
+void HMILanguageHandler::Init(resumption::LastState* value) {
+  last_state_ = value;
+  persisted_ui_language_ = get_language_for(INTERFACE_UI);
+  persisted_vr_language_ = get_language_for(INTERFACE_VR);
+  persisted_tts_language_ = get_language_for(INTERFACE_TTS);
+
+}
+
+}  // namespace application_manager

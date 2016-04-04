@@ -30,8 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string>
-#include "config_profile/profile.h"
 #include "media_manager/video/socket_video_streamer_adapter.h"
 
 namespace {
@@ -44,11 +42,8 @@ namespace {
 
 namespace media_manager {
 
-SocketVideoStreamerAdapter::SocketVideoStreamerAdapter()
-  : SocketStreamerAdapter(profile::Profile::instance()->server_address(),
-                          profile::Profile::instance()->video_streaming_port(),
-                          kHeader) {
-}
+SocketVideoStreamerAdapter::SocketVideoStreamerAdapter(const std::string& server_address, uint16_t video_streaming_port)
+    : SocketStreamerAdapter(server_address, video_streaming_port, kHeader) {}
 
 SocketVideoStreamerAdapter::~SocketVideoStreamerAdapter() {
 }

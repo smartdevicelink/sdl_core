@@ -40,13 +40,12 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/policies/policy_handler.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "utils/make_shared.h"
 
 namespace {
-
 namespace custom_str = utils::custom_string;
 
 mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string& str) {
@@ -219,7 +218,7 @@ void RegisterAppInterfaceRequest::Run() {
     LOG4CXX_ERROR(logger_, "Coincidence check failed.");
     if (mobile_apis::Result::DUPLICATE_NAME == coincidence_result) {
       usage_statistics::AppCounter count_of_rejections_duplicate_name(
-          policy::PolicyHandler::instance()->GetStatisticManager(),
+          GetPolicyHandler().GetStatisticManager(),
           policy_app_id,
           usage_statistics::REJECTIONS_DUPLICATE_NAME);
       ++count_of_rejections_duplicate_name;
@@ -316,9 +315,7 @@ void RegisterAppInterfaceRequest::Run() {
     FillDeviceInfo(&device_info);
   }
 
-  policy::PolicyHandler::instance()->SetDeviceInfo(
-        dev_params.device_mac_address,
-        device_info);
+  GetPolicyHandler().SetDeviceInfo(device_mac, device_info);
 
   SendRegisterAppInterfaceResponseToMobile();
 }
@@ -504,8 +501,11 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
       hmi_capabilities.phone_call_supported();
   response_params[strings::sdl_version] =
       profile::Profile::instance()->sdl_version();
-  response_params[strings::system_software_version] =
-      hmi_capabilities.ccpu_version();
+  const std::string ccpu_version = hmi_capabilities.ccpu_version();
+
+  if (!ccpu_version.empty()) {
+    response_params[strings::system_software_version] = ccpu_version;
+  }
 
   bool resumption = (*message_)[strings::msg_params].keyExists(strings::hash_id);
 
@@ -564,7 +564,6 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
     bool resumption,
     bool need_restore_vr) {
   using namespace smart_objects;
-
   SmartObjectSPtr notification = utils::MakeShared<SmartObject>(SmartType_Map);
   if (!notification) {
     LOG4CXX_ERROR(logger_, "Failed to create smart object");
@@ -596,8 +595,7 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
   }
 
   std::string priority;
-  policy::PolicyHandler::instance()->GetPriority(
-      application_impl.mobile_app_id(), &priority);
+  GetPolicyHandler().GetPriority(application_impl.mobile_app_id(), &priority);
   if (!priority.empty()) {
     msg_params[strings::priority] = MessageHelper::GetPriorityCode(priority);
   }
@@ -627,7 +625,8 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
   }
 
   std::vector<std::string> request_types =
-      policy::PolicyHandler::instance()->GetAppRequestTypes(
+
+      GetPolicyHandler().GetAppRequestTypes(
           application_impl.mobile_app_id());
 
   application[strings::request_type] = SmartObject(SmartType_Array);
@@ -662,7 +661,7 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
   device_info[strings::id] = mac_address;
 
   const policy::DeviceConsent device_consent =
-      policy::PolicyHandler::instance()->GetUserConsentForDevice(mac_address);
+      GetPolicyHandler().GetUserConsentForDevice(mac_address);
   device_info[strings::isSDLAllowed] =
       policy::DeviceConsent::kDeviceAllowed == device_consent;
 
@@ -725,7 +724,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
   // TODO(AOleynik): Check is necessary to allow register application in case
   // of disabled policy
   // Remove this check, when HMI will support policy
-  if (!policy::PolicyHandler::instance()->PolicyEnabled()) {
+  if (!GetPolicyHandler().PolicyEnabled()) {
     return mobile_apis::Result::WARNINGS;
   }
 
@@ -735,7 +734,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
 
   std::string mobile_app_id =
       message[strings::msg_params][strings::app_id].asString();
-  const bool init_result = policy::PolicyHandler::instance()->GetInitialAppData(
+  const bool init_result = GetPolicyHandler().GetInitialAppData(
       mobile_app_id, &app_nicknames, &app_hmi_types);
 
   if (!init_result) {
@@ -754,7 +753,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
       // App should be unregistered, if its name is not present in nicknames
       // list
       usage_statistics::AppCounter count_of_rejections_nickname_mismatch(
-          policy::PolicyHandler::instance()->GetStatisticManager(),
+          GetPolicyHandler().GetStatisticManager(),
           mobile_app_id,
           usage_statistics::REJECTIONS_NICKNAME_MISMATCH);
       ++count_of_rejections_nickname_mismatch;
@@ -1016,6 +1015,11 @@ void RegisterAppInterfaceRequest::SendSubscribeCustomButtonNotification() {
   msg_params[strings::name] = Common_ButtonName::CUSTOM_BUTTON;
   msg_params[strings::is_suscribed] = true;
   CreateHMINotification(FunctionID::Buttons_OnButtonSubscription, msg_params);
+}
+
+policy::PolicyHandlerInterface& RegisterAppInterfaceRequest::GetPolicyHandler() {
+  return application_manager::ApplicationManagerImpl::instance()
+      ->GetPolicyHandler();
 }
 
 }  // namespace commands

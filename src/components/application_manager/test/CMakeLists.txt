@@ -68,6 +68,7 @@ endif()
 set_property(DIRECTORY "" PROPERTY INCLUDE_DIRECTORIES ${the_include_dirs})
 
 include_directories(
+  include
   ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/include
   ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/gtest/include
   ${COMPONENTS_DIR}/application_manager/include/application_manager/
@@ -80,6 +81,7 @@ include_directories(
   ${COMPONENTS_DIR}/security_manager/include/
   ${COMPONENTS_DIR}/include/utils/
   ${COMPONENTS_DIR}/application_manager/test/resumption/include/
+  ${COMPONENTS_DIR}/application_manager/test/state_controller/include/
   ${COMPONENTS_DIR}
 )
 
@@ -222,7 +224,7 @@ target_link_libraries("application_manager_test"
 
 # TODO [AKozoriz] : Fix not buildable tests
   set(ResumptionData_SOURCES
-#    ${AM_TEST_DIR}/resumption/resumption_data_test.cc
+    ${AM_TEST_DIR}/resumption/resumption_data_test.cc
 #    ${AM_TEST_DIR}/resumption/resumption_data_db_test.cc
   )
 

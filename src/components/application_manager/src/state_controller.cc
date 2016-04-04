@@ -34,6 +34,7 @@
 #include "application_manager/usage_statistics.h"
 #include "utils/helpers.h"
 #include "utils/make_shared.h"
+#include "connection_handler/connection_handler.h"
 
 namespace application_manager {
 
@@ -551,9 +552,13 @@ int64_t StateController::SendBCActivateApp(
     hmi_apis::Common_HMILevel::eType level,
     bool send_policy_priority) {
   LOG4CXX_AUTO_TRACE(logger_);
+  connection_handler::ConnectionHandler& conn_handler =
+      app_mngr_->connection_handler();
   smart_objects::SmartObjectSPtr bc_activate_app_request =
       MessageHelper::GetBCActivateAppRequestToHMI(
           app,
+          conn_handler.get_session_observer(),
+          app_mngr_->GetPolicyHandler(),
           level,
           send_policy_priority);
   if (!bc_activate_app_request) {

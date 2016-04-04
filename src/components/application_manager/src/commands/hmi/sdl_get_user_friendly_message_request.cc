@@ -33,7 +33,6 @@
 #include "application_manager/commands/hmi/sdl_get_user_friendly_message_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/policies/policy_handler.h"
 
 namespace application_manager {
 
@@ -82,7 +81,7 @@ void SDLGetUserFriendlyMessageRequest::Run() {
         application_manager::MessageHelper::CommonLanguageToString(ui_language);
   }
 
-  policy::PolicyHandler::instance()->OnGetUserFriendlyMessage(
+    application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnGetUserFriendlyMessage(
         msg_codes, required_language,
         (*message_)[strings::params][strings::correlation_id].asInt());
 }

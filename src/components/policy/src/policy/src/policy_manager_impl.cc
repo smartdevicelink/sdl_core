@@ -398,7 +398,7 @@ bool PolicyManagerImpl::CleanupUnpairedDevices() {
 }
 
 DeviceConsent PolicyManagerImpl::GetUserConsentForDevice(
-  const std::string& device_id) {
+  const std::string& device_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
   return kDeviceAllowed;
 }
@@ -528,7 +528,7 @@ void PolicyManagerImpl::SetUserConsentForApp(
 }
 
 bool PolicyManagerImpl::GetDefaultHmi(const std::string& policy_app_id,
-                                      std::string* default_hmi) {
+                                      std::string* default_hmi) const {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string device_id = GetCurrentDeviceId(policy_app_id);
   DeviceConsent device_consent = GetUserConsentForDevice(device_id);
@@ -539,7 +539,7 @@ bool PolicyManagerImpl::GetDefaultHmi(const std::string& policy_app_id,
 }
 
 bool PolicyManagerImpl::GetPriority(const std::string& policy_app_id,
-                                    std::string* priority) {
+                                    std::string* priority) const {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!priority) {
     LOG4CXX_WARN(logger_, "Input priority parameter is null.");
@@ -660,7 +660,7 @@ void PolicyManagerImpl::GetPermissionsForApp(
 }
 
 std::string& PolicyManagerImpl::GetCurrentDeviceId(
-  const std::string& policy_app_id) {
+  const std::string& policy_app_id) const {
   LOG4CXX_INFO(logger_, "GetDeviceInfo");
   last_device_id_ =
     listener()->OnCurrentDeviceIdUpdateRequired(policy_app_id);
@@ -685,7 +685,7 @@ void PolicyManagerImpl::OnSystemReady() {
 }
 
 uint32_t PolicyManagerImpl::GetNotificationsNumber(
-    const std::string& priority) {
+    const std::string& priority) const {
   LOG4CXX_AUTO_TRACE(logger_);
   return cache_->GetNotificationsNumber(priority);
 }
@@ -710,11 +710,17 @@ bool PolicyManagerImpl::IsPTValid(
   return true;
 }
 
-bool PolicyManagerImpl::ExceededDays() {
+const PolicySettings& PolicyManagerImpl::get_settings() const {
+  DCHECK(settings_);
+  return *settings_;
+}
 
-  TimevalStruct current_time = date_time::DateTime::getCurrentTime();
-  const int kSecondsInDay = 60 * 60 * 24;
-  int days = current_time.tv_sec / kSecondsInDay;
+bool PolicyManagerImpl::ExceededDays() {
+    LOG4CXX_AUTO_TRACE(logger_);
+
+    TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+    const int kSecondsInDay = 60 * 60 * 24;
+  const int days = current_time.tv_sec / kSecondsInDay;
 
   return 0 == cache_->DaysBeforeExchange(days);
 }
@@ -861,11 +867,11 @@ void PolicyManagerImpl::RemovePendingPermissionChanges(
   app_permissions_diff_.erase(app_id);
 }
 
-bool PolicyManagerImpl::CanAppKeepContext(const std::string& app_id) {
+bool PolicyManagerImpl::CanAppKeepContext(const std::string& app_id) const {
   return cache_->CanAppKeepContext(app_id);
 }
 
-bool PolicyManagerImpl::CanAppStealFocus(const std::string& app_id) {
+bool PolicyManagerImpl::CanAppStealFocus(const std::string& app_id) const {
   return cache_->CanAppStealFocus(app_id);
 }
 
@@ -941,7 +947,7 @@ bool PolicyManagerImpl::ResetPT(const std::string& file_name) {
 bool PolicyManagerImpl::CheckAppStorageFolder() const {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string app_storage_folder =
-      profile::Profile::instance()->app_storage_folder();
+      get_settings().app_storage_folder();
   LOG4CXX_DEBUG(logger_, "AppStorageFolder " << app_storage_folder);
   if (!file_system::DirectoryExists(app_storage_folder)) {
     LOG4CXX_WARN(logger_,
@@ -958,13 +964,15 @@ bool PolicyManagerImpl::CheckAppStorageFolder() const {
   return true;
 }
 
-bool PolicyManagerImpl::InitPT(const std::string& file_name) {
+bool PolicyManagerImpl::InitPT(const std::string& file_name,
+                               const PolicySettings* settings) {
   LOG4CXX_AUTO_TRACE(logger_);
+  settings_ = settings;
   if (!CheckAppStorageFolder()) {
     LOG4CXX_ERROR(logger_, "Can not read/write into AppStorageFolder");
     return false;
   }
-  const bool ret = cache_->Init(file_name);
+  const bool ret = cache_->Init(file_name, settings);
   if (ret) {
     RefreshRetrySequence();
     update_status_manager_.OnPolicyInit(cache_->UpdateRequired());

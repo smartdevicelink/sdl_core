@@ -38,6 +38,10 @@
 #include "media_manager/media_adapter_impl.h"
 #include "utils/threads/thread_delegate.h"
 
+namespace protocol_handler {
+  class SessionObserver;
+}
+
 namespace threads {
 class Thread;
 }
@@ -46,7 +50,7 @@ namespace media_manager {
 
 class A2DPSourcePlayerAdapter : public MediaAdapterImpl {
   public:
-    A2DPSourcePlayerAdapter();
+    A2DPSourcePlayerAdapter(protocol_handler::SessionObserver& session_observer);
     ~A2DPSourcePlayerAdapter();
     void SendData(int32_t application_key,
                   const ::protocol_handler::RawMessagePtr message) {}
@@ -54,12 +58,18 @@ class A2DPSourcePlayerAdapter : public MediaAdapterImpl {
     void StopActivity(int32_t application_key);
     bool is_app_performing_activity(int32_t application_key) const;
 
+    void set_connection_handler(
+        connection_handler::ConnectionHandlerImpl* connection_handler) {
+      connection_handler_ = connection_handler;
+    }
+
   private:
     class A2DPSourcePlayerThread;
 
     typedef std::pair<threads::Thread*, A2DPSourcePlayerThread*> Pair;
     typedef std::map<int32_t, Pair> SourcesMap;
     SourcesMap sources_;
+    protocol_handler::SessionObserver& session_observer_;
     DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerAdapter);
 };
 

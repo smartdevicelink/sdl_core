@@ -38,9 +38,12 @@
 #include "utils/macro.h"
 
 namespace media_manager {
+
+class MediaManager;
+
 class StreamerListener : public MediaAdapterListener {
   public:
-    StreamerListener();
+    StreamerListener(MediaManager& media_manager);
     ~StreamerListener();
     virtual void OnDataReceived(
       int32_t application_key,
@@ -50,8 +53,10 @@ class StreamerListener : public MediaAdapterListener {
       const DataForListener& data);
     virtual void OnActivityStarted(int32_t application_key);
     virtual void OnActivityEnded(int32_t application_key);
+
   private:
     int32_t current_application_;
+    media_manager::MediaManager& media_manager_;
     DISALLOW_COPY_AND_ASSIGN(StreamerListener);
 };
 }  //  namespace media_manager

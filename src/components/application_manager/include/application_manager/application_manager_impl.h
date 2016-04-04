@@ -54,11 +54,11 @@
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "hmi_message_handler/hmi_message_sender.h"
 #include "application_manager/policies/policy_handler_observer.h"
-#include "media_manager/media_manager_impl.h"
 #include "connection_handler/connection_handler.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
 #include "formatters/CSmartFactory.h"
+#include "policies/policy_handler.h"
 
 #include "interfaces/HMI_API.h"
 #include "interfaces/HMI_API_schema.h"
@@ -218,7 +218,8 @@ class ApplicationManagerImpl
   /**
    * Inits application manager
    */
-  bool Init() OVERRIDE;
+  bool Init(resumption::LastState& last_state,
+            media_manager::MediaManager* media_manager) OVERRIDE;
 
   /**
    * @brief Stop work.
@@ -809,7 +810,7 @@ class ApplicationManagerImpl
   void EndNaviServices(uint32_t app_id);
 
   /**
-   * @brief ForbidStreaming forbid the stream over the certain application.
+   * @brief ForbidStreaming forbids the stream over the certain application.
    * @param app_id the application's id which should stop streaming.
    */
   void ForbidStreaming(uint32_t app_id);
@@ -937,6 +938,9 @@ class ApplicationManagerImpl
   // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
   connection_handler::ConnectionHandler& connection_handler() const OVERRIDE;
 
+  virtual policy::PolicyHandlerInterface& GetPolicyHandler() OVERRIDE {
+      return policy_handler_;
+  }
   /**
    * @brief Checks, if given RPC is allowed at current HMI level for specific
    * application in policy table
@@ -1246,7 +1250,7 @@ class ApplicationManagerImpl
       const protocol_handler::SessionObserver& session_observer =
           connection_handler().get_session_observer();
       if (MessageHelper::CreateHMIApplicationStruct(
-            *it, session_observer, &hmi_application)) {
+              *it, session_observer, GetPolicyHandler(), &hmi_application)) {
         applications[app_count++] = hmi_application;
       } else {
         LOG4CXX_DEBUG(logger_, "Can't CreateHMIApplicationStruct ");
@@ -1438,6 +1442,7 @@ typedef utils::SharedPtr<timer::Timer> TimerSPtr;
 
   hmi_message_handler::HMIMessageHandler* hmi_handler_;
   connection_handler::ConnectionHandler* connection_handler_;
+  policy::PolicyHandler policy_handler_;
   protocol_handler::ProtocolHandler* protocol_handler_;
   request_controller::RequestController request_ctrl_;
 

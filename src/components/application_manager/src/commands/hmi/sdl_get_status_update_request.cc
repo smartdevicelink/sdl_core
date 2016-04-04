@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/sdl_get_status_update_request.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -46,7 +46,7 @@ SDLGetStatusUpdateRequest::~SDLGetStatusUpdateRequest() {
 
 void SDLGetStatusUpdateRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  policy::PolicyHandler::instance()->OnGetStatusUpdate(
+  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnGetStatusUpdate(
         (*message_)[strings::params][strings::correlation_id].asUInt());
 }
 

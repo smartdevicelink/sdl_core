@@ -39,11 +39,8 @@ namespace media_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
-FromMicRecorderListener::FromMicRecorderListener(
-  const std::string& file_name)
-  : reader_(NULL)
-  , file_name_(file_name) {
-}
+FromMicRecorderListener::FromMicRecorderListener(const std::string& file_name, application_manager::ApplicationManager &app_mngr)
+    : reader_(NULL), file_name_(file_name), application_manager_(app_mngr) {}
 
 FromMicRecorderListener::~FromMicRecorderListener() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -72,7 +69,7 @@ void FromMicRecorderListener::OnActivityStarted(int32_t application_key) {
   }
   if (!reader_) {
     AudioStreamSenderThread* thread_delegate =
-      new AudioStreamSenderThread(file_name_, application_key);
+      new AudioStreamSenderThread(file_name_, application_key, application_manager_);
     reader_ = threads::CreateThread("RecorderSender", thread_delegate);
   }
   if (reader_) {
