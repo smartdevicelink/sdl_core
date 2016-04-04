@@ -43,13 +43,19 @@ typedef sigval_t sigval;
 #endif
 
 #include <time.h>
+#include <stdint.h>
 #include <string>
+#include <limits>
+#include <memory>
 
 #include "utils/lock.h"
 #include "utils/timer_task.h"
+#include "utils/atomic_object.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
 namespace timer {
-typedef uint32_t Milliseconds;
+typedef uint64_t Milliseconds;
 /**
  * @brief The Timer is class for calling any method after out of internal time.
  * Time setups in ::Start(uint,bool) method and starts time out steps.
@@ -62,7 +68,7 @@ class Timer {
    * @param name for indentify of current timer
    * @param task_for_tracking is SPtr to trackable task
    */
-  Timer(const std::string& name, const TimerTask* task_for_tracking);
+  Timer(const std::string& name, TimerTask* task_for_tracking);
 
   /**
    * @brief destructor - if timer running : call stop in the body
@@ -83,6 +89,16 @@ class Timer {
    * @return true when timer runned, false when timer stand
    */
   bool IsRunning() const;
+
+  /**
+   * @brief Stop timer update timeout and start timer again
+   * Note that it cancel thread of timer, If you use it from callback,
+   * it probably will stop execution of callback function
+   * @param timeout_milliseconds new timeout value
+   *
+   */
+  void UpdateTimeOut(const Milliseconds timeout_milliseconds);
+
   /**
    * @brief GetTimeout
    * @return returns timeout
@@ -90,41 +106,106 @@ class Timer {
   Milliseconds GetTimeout() const;
 
  private:
-  const std::string name_;
-  const TimerTask* task_;
-  bool repeatable_;
-  uint32_t timeout_ms_;
-  bool is_running_;
-  timer_t timer_;
-  mutable sync_primitives::Lock lock_;
-  sync_primitives::Lock task_lock_;
-
   /**
    * @brief method called from friend handler_wrapper and call run() from task.
    */
-  void OnTimeout();
+  void OnTimeout() const;
 
   /**
-   * @brief method for setting correct timeout.
-   * @param timeout - if it`s value = 0, timeout will be setted to 1
-   * There would be no way to stop thread if timeout in lopper will be 0
-   * and if we puts to timer_create zero timeout then we get sys error(22)
+   * @brief Delegate release timer, will call callback function one time
+   * or call delegate every timeout function while stop()
+   * won't be called. It's depend on flag.
    */
-  void SetTimeoutUnsafe(const Milliseconds timeout);
+  class TimerDelegate : public threads::ThreadDelegate {
+   public:
+    /**
+     * @brief Default constructor
+     *
+     * @param timer_thread The Timer_thread pointer
+     */
+    explicit TimerDelegate(Timer* timer);
 
-  /**
-   * @brief startUnsafe, stopUnsafe - methods used for correct synchronization
-   *  and must be used only with sync_primitive (auto_lock e.g.)
-   * @return true if start/stop successfull, false if unsuccessfull
-   */
-  void StartUnsafe();
-  bool StopUnsafe();
+    /**
+     * @brief Destructor
+     */
+    virtual ~TimerDelegate();
 
-  /**
-   * @brief alone function which sends to posix_timer as callee
-   * @param signal_value - structure with parameters of posix_timer callee
-   */
-  friend void HandlePosixTimer(sigval signal_value);
+    /**
+     * @brief Thread main function.
+     */
+    void threadMain() OVERRIDE;
+
+    /**
+     * @brief Called by thread::thread to free all allocated resources.
+     */
+    void exitThreadMain() OVERRIDE;
+
+    /**
+     * @brief Set new Timeout
+     * @param timeout_milliseconds New timeout to be set
+     */
+    void SetTimeOut(const Milliseconds timeout_milliseconds);
+
+    /**
+      * @brief Wait until timer will start
+      */
+    void WaitUntilStart();
+
+    /**
+     * @brief Quits threadMain function after next loop.
+     */
+    void ShouldBeStopped();
+
+    /**
+     * @brief Restarts non-loop timer after current iteration.
+     */
+    void ShouldBeRestarted();
+
+    /**
+     * @brief Return flag IsGoingStop
+     */
+    bool IsGoingToStop() const;
+
+    /**
+     * @brief Gets timeout with overflow check
+     * @return timeout
+     */
+    inline Milliseconds get_timeout() const {
+      return std::min(
+          static_cast<Milliseconds>(std::numeric_limits<int32_t>::max()),
+          timeout_milliseconds_);
+    }
+
+    /**
+      * @brief Make class delegate repeatable
+      */
+    inline void make_repeatable() {
+      is_repeatable_ = true;
+    }
+
+   protected:
+    Timer* timer_;
+    Milliseconds timeout_milliseconds_;
+    // Lock for condition variable
+    sync_primitives::Lock state_lock_;
+    sync_primitives::ConditionalVariable termination_condition_;
+    sync_primitives::ConditionalVariable starting_condition_;
+    sync_primitives::atomic_bool stop_flag_;
+    sync_primitives::atomic_bool restart_flag_;
+    sync_primitives::atomic_bool is_started_flag_;
+    sync_primitives::atomic_bool is_repeatable_;
+
+   private:
+    DISALLOW_COPY_AND_ASSIGN(TimerDelegate);
+  };
+
+  const std::string name_;
+  std::auto_ptr<TimerTask> task_;
+  TimerDelegate delegate_;
+  threads::Thread* thread_;
+
+  // Prevent execute in the same time Start and Stop of timer
+  mutable sync_primitives::Lock lock_;
 
   DISALLOW_COPY_AND_ASSIGN(Timer);
 };

@@ -206,6 +206,12 @@ class Thread {
   }
 
   /**
+    * @brief Check calling thread and delegate the same
+    * @return result of check
+    */
+  bool IsItDelegate() const;
+
+  /**
    * @brief Minimum size of thread stack for specific platform.
    */
   static size_t kMinStackSize;

@@ -45,7 +45,7 @@ namespace {
 
 sync_primitives::Lock test_lock;
 sync_primitives::ConditionalVariable lock_monitor;
-const uint32_t kDefaultTimeout = 30u;
+const Milliseconds kDefaultTimeout = 30u;
 const std::string kTimerName = "test_timer";
 
 class TestTask : public timer::TimerTask {
@@ -107,7 +107,7 @@ class TimerTest : public testing::Test {
   }
   bool repeatable_;
   MockTimerTask* test_task_;
-  uint32_t timeout_;
+  timer::Milliseconds timeout_;
 };
 
 TEST_F(TimerTest, Start_ZeroTimeout_CorrectTimeout) {
@@ -117,8 +117,8 @@ TEST_F(TimerTest, Start_ZeroTimeout_CorrectTimeout) {
   test_timer.Start(0u, repeatable_);
   // Expects
   EXPECT_EQ(1u, test_timer.GetTimeout());
-
   test_timer.Stop();
+  ASSERT_FALSE(test_timer.IsRunning());
 }
 
 TEST_F(TimerTest, Start_NoLoop_OneCall) {
@@ -132,6 +132,7 @@ TEST_F(TimerTest, Start_NoLoop_OneCall) {
   // Wait for call
   lock_monitor.Wait(test_lock);
   test_lock.Release();
+  test_timer.Stop();
   EXPECT_FALSE(test_timer.IsRunning());
   EXPECT_EQ(1u, task->GetCallsCount());
 }
@@ -168,6 +169,8 @@ TEST_F(TimerTest, Start_Runned_RunnedWithNewTimeout) {
   // Expects
   ASSERT_EQ(timeout_, test_timer.GetTimeout());
   ASSERT_TRUE(test_timer.IsRunning());
+  test_timer.Stop();
+  ASSERT_FALSE(test_timer.IsRunning());
 }
 
 TEST_F(TimerTest, Start_NotRunned_RunnedWithNewTimeout) {
