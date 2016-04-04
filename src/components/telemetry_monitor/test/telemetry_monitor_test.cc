@@ -38,7 +38,7 @@
 #include "protocol_handler/mock_session_observer.h"
 #include "protocol_handler/mock_protocol_handler_settings.h"
 #include "connection_handler/mock_connection_handler.h"
-#include "transport_manager/transport_manager_mock.h"
+#include "transport_manager/mock_transport_manager.h"
 #include "telemetry_monitor/mock_telemetry_observable.h"
 
 

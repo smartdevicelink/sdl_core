@@ -43,7 +43,6 @@
 #include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_ssl_context.h"
 #include "transport_manager/mock_transport_manager.h"
-
 #include "utils/make_shared.h"
 
 namespace test {
@@ -53,24 +52,33 @@ namespace protocol_handler_test {
 // Id passed as NULL for new session establishing
 #define NEW_SESSION_ID 0u
 #define SESSION_START_REJECT 0u
-
+// Protocol Handler Entities
+using protocol_handler::ProtocolHandlerImpl;
 using protocol_handler::ServiceType;
 using protocol_handler::RawMessage;
 using protocol_handler::RawMessagePtr;
 using protocol_handler::PROTECTION_ON;
 using protocol_handler::PROTECTION_OFF;
 using protocol_handler::PROTOCOL_VERSION_1;
+using protocol_handler::PROTOCOL_VERSION_2;
 using protocol_handler::PROTOCOL_VERSION_3;
 using protocol_handler::PROTOCOL_VERSION_MAX;
 using protocol_handler::FRAME_TYPE_CONTROL;
 using protocol_handler::FRAME_TYPE_SINGLE;
+using protocol_handler::FRAME_TYPE_FIRST;
+using protocol_handler::FRAME_TYPE_CONSECUTIVE;
 using protocol_handler::FRAME_TYPE_MAX_VALUE;
+using protocol_handler::MAXIMUM_FRAME_DATA_V2_SIZE;
 using protocol_handler::FRAME_DATA_START_SERVICE;
 using protocol_handler::FRAME_DATA_START_SERVICE_ACK;
+using protocol_handler::FRAME_DATA_END_SERVICE_NACK;
+using protocol_handler::FRAME_DATA_END_SERVICE_ACK;
 using protocol_handler::FRAME_DATA_END_SERVICE;
 using protocol_handler::FRAME_DATA_HEART_BEAT;
 using protocol_handler::FRAME_DATA_HEART_BEAT_ACK;
 using protocol_handler::FRAME_DATA_SINGLE;
+using protocol_handler::FRAME_DATA_FIRST;
+using protocol_handler::FRAME_DATA_LAST_CONSECUTIVE;
 using protocol_handler::kRpc;
 using protocol_handler::kControl;
 using protocol_handler::kAudio;
@@ -80,7 +88,10 @@ using protocol_handler::kInvalidServiceType;
 // For TM states
 using transport_manager::TransportManagerListener;
 using transport_manager::E_SUCCESS;
-
+using transport_manager::DeviceInfo;
+// For CH entities
+using connection_handler::DeviceHandle;
+// Google Testing Framework Entities
 using ::testing::Return;
 using ::testing::ReturnRefOfCopy;
 using ::testing::ReturnNull;

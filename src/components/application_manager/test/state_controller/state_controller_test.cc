@@ -38,7 +38,7 @@
 #include "application_mock.h"
 #include "connection_handler/mock_connection_handler_settings.h"
 #include "connection_handler/connection_handler_impl.h"
-#include "transport_manager/transport_manager_mock.h"
+#include "transport_manager/mock_transport_manager.h"
 #include "statistics_manager_mock.h"
 #include "utils/lock.h"
 #include "utils/data_accessor.h"
