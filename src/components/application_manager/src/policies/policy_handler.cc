@@ -670,7 +670,7 @@ void PolicyHandler::OnPendingPermissionChange(
       app_id, permissions);
     ApplicationManagerImpl::instance()->SetState<true>(app->app_id(),
                                                  mobile_apis::HMILevel::HMI_NONE,
-                                                 mobile_apis::AudioStreamingState::NOT_AUDIBLE);    
+                                                 mobile_apis::AudioStreamingState::NOT_AUDIBLE);
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);
     return;
   }
@@ -1018,12 +1018,24 @@ bool PolicyHandler::SaveSnapshot(const BinaryMessage& pt_string,
   return result;
 }
 
-void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
-                                      const std::vector<int>& retry_delay_seconds,
-                                      int timeout_exchange) {
+void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_VOID();
+#ifdef EXTENDED_POLICY
+  std::string policy_snapshot_full_path;
+  if (!SaveSnapshot(pt_string, policy_snapshot_full_path)) {
+    LOG4CXX_ERROR(logger_, "Snapshot processing skipped.");
+    return;
+  }
+  MessageHelper::SendPolicyUpdate(
+      policy_snapshot_full_path,
+      policy_manager_->TimeoutExchange(),
+      policy_manager_->RetrySequenceDelaysSeconds());
+#else
   EndpointUrls urls;
   policy_manager_->GetServiceUrls("0x07", urls);
   SendMessageToSDK(pt_string, urls.front().url.front());
+#endif
 }
 
 bool PolicyHandler::GetPriority(const std::string& policy_app_id,

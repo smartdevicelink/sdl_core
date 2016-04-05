@@ -81,9 +81,7 @@ class PolicyHandler :
   virtual void OnPermissionsUpdated(const std::string& policy_app_id,
                                     const Permissions& permissions);
 
-  virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
-                                 const std::vector<int>& retry_delay_seconds,
-                                 int timeout_exchange);
+  virtual void OnSnapshotCreated(const BinaryMessage& pt_string);
 
   bool GetPriority(const std::string& policy_app_id, std::string* priority);
   void CheckPermissions(const PTString& app_id,
