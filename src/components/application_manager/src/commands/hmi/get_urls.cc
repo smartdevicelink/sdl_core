@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,59 +38,60 @@
 namespace application_manager {
 namespace commands {
 
-GetUrls::GetUrls(const MessageSharedPtr& message)
-  : RequestFromHMI(message) {
-}
+GetUrls::GetUrls(const MessageSharedPtr& message) : RequestFromHMI(message) {}
 
-GetUrls::~GetUrls() {
-}
+GetUrls::~GetUrls() {}
 
 void GetUrls::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObject& object = *message_;
-  object[strings::params][strings::message_type] = MessageType::kResponse;
-  if (policy::PolicyHandler::instance()->PolicyEnabled()) {
-    policy::EndpointUrls endpoints;
-    policy::PolicyHandler::instance()->GetServiceUrls(
-        object[strings::msg_params][hmi_request::service].asString(),
-        endpoints);
+  using namespace smart_objects;
+  using namespace application_manager;
+  using namespace strings;
+  using namespace hmi_apis;
 
-    if (!endpoints.empty()) {
-      object[strings::msg_params].erase(hmi_request::service);
-
-      object[strings::msg_params][hmi_response::urls] =
-        smart_objects::SmartObject(smart_objects::SmartType_Array);
-
-      smart_objects::SmartObject& urls =
-          object[strings::msg_params][hmi_response::urls];
-
-      size_t index = 0;
-
-      for (size_t i = 0; i < endpoints.size(); ++i) {
-        for (size_t k = 0; k < endpoints[i].url.size(); ++k, ++index) {
-          const std::string url = endpoints[i].url[k];
-
-          urls[index] = smart_objects::SmartObject(
-                smart_objects::SmartType_Map);
-          smart_objects::SmartObject& service_info = urls[index];
-
-          service_info[strings::url] = url;
-          if (policy::kDefaultId != endpoints[i].app_id) {
-            service_info[hmi_response::policy_app_id] =
-              endpoints[i].app_id;
-          }
-        }
-      }
-      object[strings::params][hmi_response::code] =
-          hmi_apis::Common_Result::SUCCESS;
-    } else {
-      object[strings::params][hmi_response::code] =
-          hmi_apis::Common_Result::DATA_NOT_AVAILABLE;
-    }
-  } else {
-    object[strings::params][hmi_response::code] =
-        hmi_apis::Common_Result::DATA_NOT_AVAILABLE;
+  SmartObject& object = *message_;
+  object[params][message_type] = MessageType::kResponse;
+  if (!policy::PolicyHandler::instance()->PolicyEnabled()) {
+    object[params][hmi_response::code] = Common_Result::DATA_NOT_AVAILABLE;
+    ApplicationManagerImpl::instance()->ManageHMICommand(message_);
+    return;
   }
+
+  policy::EndpointUrls endpoints;
+  policy::PolicyHandler::instance()->GetServiceUrls(
+      object[strings::msg_params][hmi_request::service].asString(),
+      endpoints);
+  if (endpoints.empty()) {
+    object[params][hmi_response::code] = Common_Result::DATA_NOT_AVAILABLE;
+    ApplicationManagerImpl::instance()->ManageHMICommand(message_);
+    return;
+  }
+
+  object[msg_params].erase(hmi_request::service);
+  object[msg_params][hmi_response::urls] = SmartObject(SmartType_Array);
+
+  SmartObject& urls = object[msg_params][hmi_response::urls];
+
+  size_t index = 0;
+
+  for (size_t service = 0; service < endpoints.size(); ++service) {
+    for (size_t app = 0; app < endpoints[service].url.size(); ++app, ++index) {
+      const std::string app_url = endpoints[service].url[app];
+
+      urls[index] = SmartObject(SmartType_Map);
+      SmartObject& service_info = urls[index];
+
+      // TODO(AOleynik): Currently sends default for service 7
+      // Must be changed to send choosen app_id, but logic should be clarified
+      // first
+      service_info[url] = app_url;
+      if (policy::kDefaultId != endpoints[service].app_id) {
+        service_info[hmi_response::policy_app_id] = endpoints[service].app_id;
+      }
+    }
+  }
+
+  object[params][hmi_response::code] = Common_Result::SUCCESS;
   ApplicationManagerImpl::instance()->ManageHMICommand(message_);
 }
 
