@@ -29,105 +29,156 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_TIMER_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_TIMER_H_
 
+#include <string>
 #include <stdint.h>
 
-#ifdef __QNX__
-#include <sys/siginfo.h>
-#else
-#include <signal.h>
-typedef sigval_t sigval;
-#endif
-
-#include <time.h>
-#include <string>
-
+#include "utils/macro.h"
 #include "utils/lock.h"
 #include "utils/timer_task.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
 namespace timer {
+
 typedef uint32_t Milliseconds;
+
 /**
- * @brief The Timer is class for calling any method after out of internal time.
- * Time setups in ::Start(uint,bool) method and starts time out steps.
- * User can call Start, Stop, IsRunning, GetTimeout.
+ * @brief Timer calls custom callback function after
+ * specified timeout has been elapsed
  */
 class Timer {
  public:
   /**
-   * @brief constructor
-   * @param name for indentify of current timer
-   * @param task_for_tracking is SPtr to trackable task
+   * @brief Constructor
+   * Does not starts timer
+   * @param name Timer name for identity
+   * @param task Task for tracking
    */
-  Timer(const std::string& name, const TimerTask* task_for_tracking);
+  Timer(const std::string& name, TimerTask* task);
 
   /**
-   * @brief destructor - if timer running : call stop in the body
+   * @brief Destructor
+   * Stops timer if it's running
    */
   ~Timer();
+  
   /**
-   * @brief starts timer with new timeout
-   * @param timeout - time to call method from trackable class
-   * @param repeatable - should timer repeat after calling callback, or no
+   * @brief Starts timer with specified timeout
+   * @param timeout Timer timeout
+   * @param single_shot Shows needs to restart timer after timeout
    */
-  void Start(const Milliseconds timeout, const bool repeatable);
+  void Start(const Milliseconds timeout, const bool single_shot);
+
   /**
-   * @brief stops timer without calling callback
+   * @brief Stops timer if it's running
    */
   void Stop();
+
   /**
-   * @brief method which know about Timer state: is running or not
-   * @return true when timer runned, false when timer stand
+   * @brief Gets current timer status
+   * @return True in case of timer is running, false otherwise
    */
-  bool IsRunning() const;
+  bool is_running() const;
+
   /**
-   * @brief GetTimeout
-   * @return returns timeout
+   * @brief Gets current timer timeout
+   * @return Current timeout in milliseconds.
+   * Null if timer has not been started
    */
-  Milliseconds GetTimeout() const;
+  Milliseconds timeout() const;
 
  private:
+  /**
+   * @brief Delegate for timer thread
+   */
+  class TimerDelegate : public threads::ThreadDelegate {
+   public:
+    /**
+     * @brief Constructor
+     * @param timer Timer instance pointer for callback calling
+     */
+    explicit TimerDelegate(const Timer* timer);
+
+    /**
+     * @brief Sets timer timeout
+     * Thread-safe method
+     * @param timeout Timeout in milliseconds to be set
+     */
+    void set_timeout(const Milliseconds timeout);
+
+    /**
+     * @brief Gets timer timeout
+     * Thread-safe method
+     * @return Timer timeout
+     */
+    Milliseconds timeout() const;
+
+    /**
+     * @brief Sets timer delegate stop flag
+     * Thread-safe method
+     * @param stop_flag Bool flag to be set
+     */
+    void set_stop_flag(const bool stop_flag);
+
+    /**
+     * @brief Gets timer delegate stop flag
+     * Thread-safe method
+     * @return Delegate stop flag
+     */
+    bool stop_flag() const;
+
+    void threadMain() OVERRIDE;
+    void exitThreadMain() OVERRIDE;
+
+   private:
+    const Timer* timer_;
+
+    /*
+     * Params lock used to protect timeout_ and stop_flag_ variables
+     */
+    mutable sync_primitives::Lock params_lock_;
+    Milliseconds timeout_;
+    bool stop_flag_;
+
+    /*
+     * State lock used to protect condition variable
+     */
+    sync_primitives::Lock state_lock_;
+    sync_primitives::ConditionalVariable termination_condition_;
+
+    DISALLOW_COPY_AND_ASSIGN(TimerDelegate);
+  };
+
+  /**
+   * @brief Callback called on timeout
+   */
+  void OnTimeout() const;
+
   const std::string name_;
-  const TimerTask* task_;
-  bool repeatable_;
-  uint32_t timeout_ms_;
-  bool is_running_;
-  timer_t timer_;
-  mutable sync_primitives::Lock lock_;
-  sync_primitives::Lock task_lock_;
 
-  /**
-   * @brief method called from friend handler_wrapper and call run() from task.
+  /*
+   * Task lock used to protect task from deleting during execution
    */
-  void OnTimeout();
+  mutable sync_primitives::Lock task_lock_;
+  TimerTask* task_;
 
-  /**
-   * @brief method for setting correct timeout.
-   * @param timeout - if it`s value = 0, timeout will be setted to 1
-   * There would be no way to stop thread if timeout in lopper will be 0
-   * and if we puts to timer_create zero timeout then we get sys error(22)
-   */
-  void SetTimeoutUnsafe(const Milliseconds timeout);
+  mutable TimerDelegate delegate_;
+  threads::Thread* thread_;
 
-  /**
-   * @brief startUnsafe, stopUnsafe - methods used for correct synchronization
-   *  and must be used only with sync_primitive (auto_lock e.g.)
-   * @return true if start/stop successfull, false if unsuccessfull
+  /*
+   * We should not protect this variable with any
+   * synchronization primitives in current implementation
+   * because we use it only in two places, that cannot
+   * be invoked simultaneously
    */
-  void StartUnsafe();
-  bool StopUnsafe();
-
-  /**
-   * @brief alone function which sends to posix_timer as callee
-   * @param signal_value - structure with parameters of posix_timer callee
-   */
-  friend void HandlePosixTimer(sigval signal_value);
+  bool single_shot_;
 
   DISALLOW_COPY_AND_ASSIGN(Timer);
 };
+
 }  // namespace timer
 
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_TIMER_H_
