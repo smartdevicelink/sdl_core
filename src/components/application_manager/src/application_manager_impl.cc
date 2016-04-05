@@ -153,7 +153,7 @@ ApplicationManagerImpl::ApplicationManagerImpl()
                                   this,
                                   &ApplicationManagerImpl::ClearTimerPool)));
   const uint32_t timeout_ms = 10000u;
-  clearing_timer->Start(timeout_ms, true);
+  clearing_timer->Start(timeout_ms, false);
   timer_pool_.push_back(clearing_timer);
 }
 
@@ -442,7 +442,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   GetPolicyHandler().OnAppsSearchStarted();
   uint32_t timeout =
       profile::Profile::instance()->application_list_update_timeout();
-  application_list_update_timer_.Start(timeout, false);
+  application_list_update_timer_.Start(timeout, true);
 
   if (!is_all_apps_allowed_) {
     LOG4CXX_WARN(logger_,
@@ -954,7 +954,7 @@ void ApplicationManagerImpl::OnFindNewApplicationsRequest() {
   LOG4CXX_DEBUG(logger_, "Starting application list update timer");
   uint32_t timeout =
       profile::Profile::instance()->application_list_update_timeout();
-  application_list_update_timer_.Start(timeout, false);
+  application_list_update_timer_.Start(timeout, true);
   GetPolicyHandler().OnAppsSearchStarted();
 }
 
@@ -2929,7 +2929,7 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
                              new TimerTaskImpl<ApplicationManagerImpl>(
                                  this,
                                  &ApplicationManagerImpl::CloseNaviApp)));
-    close_timer->Start(navi_close_app_timeout_, false);
+    close_timer->Start(navi_close_app_timeout_, true);
 
     sync_primitives::AutoLock lock(timer_pool_lock_);
     timer_pool_.push_back(close_timer);
@@ -2972,7 +2972,7 @@ void ApplicationManagerImpl::OnHMILevelChanged(uint32_t app_id,
                                      this,
                                      &ApplicationManagerImpl::EndNaviStreaming)
                                  ));
-      end_stream_timer->Start(navi_end_stream_timeout_, false);
+      end_stream_timer->Start(navi_end_stream_timeout_, true);
 
       sync_primitives::AutoLock lock(timer_pool_lock_);
       timer_pool_.push_back(end_stream_timer);
@@ -3023,7 +3023,7 @@ void ApplicationManagerImpl::ClearTimerPool() {
   new_timer_pool.push_back(timer_pool_[0]);
 
   for (size_t i = 1; i < timer_pool_.size(); ++i) {
-    if (timer_pool_[i]->IsRunning()) {
+    if (timer_pool_[i]->is_running()) {
       new_timer_pool.push_back(timer_pool_[i]);
     }
   }
@@ -3251,7 +3251,7 @@ void ApplicationManagerImpl::AddAppToTTSGlobalPropertiesList(
     LOG4CXX_INFO(logger_, "Start tts_global_properties_timer_");
     tts_global_properties_app_list_lock_.Release();
     const uint32_t timeout_ms = 1000;
-    tts_global_properties_timer_.Start(timeout_ms, true);
+    tts_global_properties_timer_.Start(timeout_ms, false);
     return;
   }
   tts_global_properties_app_list_lock_.Release();
