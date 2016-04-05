@@ -198,6 +198,12 @@ class Thread {
   }
 
   /**
+   * @brief Checks if invoked in this Thread context
+   * @return True if called from this Thread class, false otherwise
+   */
+  bool IsCurrentThread() const;
+
+  /**
    * @brief Thread options.
    * @return thread options.
    */
