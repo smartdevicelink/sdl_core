@@ -39,20 +39,38 @@
 
 #include "protocol_handler/mock_protocol_handler.h"
 #include "protocol_handler/mock_session_observer.h"
-#include "transport_manager/transport_manager_mock.h"
 #include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_ssl_context.h"
 #include "security_manager/mock_crypto_manager.h"
 #include "security_manager/mock_security_manager_listener.h"
+#include "utils/make_shared.h"
 
 namespace test {
 namespace components {
 namespace security_manager_test {
 
-using namespace ::protocol_handler;
-using ::protocol_handler::ServiceType;
-using namespace ::transport_manager;
-using namespace ::security_manager;
+using protocol_handler::PROTOCOL_VERSION_2;
+using protocol_handler::ServiceType;
+using protocol_handler::kControl;
+using protocol_handler::kRpc;
+using protocol_handler::kAudio;
+using protocol_handler::kMobileNav;
+using protocol_handler::kBulk;
+using protocol_handler::kInvalidServiceType;
+using protocol_handler::RawMessagePtr;
+using protocol_handler::RawMessage;
+
+using security_manager::SecurityQuery;
+using security_manager::SSLContext;
+using security_manager::SecurityManager;
+using security_manager::SecurityManagerImpl;
+
+using security_manager_test::InternalErrorWithErrId;
+using ::testing::Return;
+using ::testing::ReturnNull;
+using ::testing::DoAll;
+using ::testing::SetArgPointee;
+using ::testing::_;
 
 // Sample data for handshake data emulation
 const int32_t key = 0x1;
@@ -70,15 +88,6 @@ uint8_t* handshake_data_out_pointer = handshake_data_out;
 const size_t handshake_data_out_size =
     sizeof(handshake_data_out) / sizeof(handshake_data_out[0]);
 
-using ::security_manager::SecurityQuery;
-using security_manager_test::InternalErrorWithErrId;
-using ::testing::Return;
-using ::testing::ReturnNull;
-using ::testing::DoAll;
-using ::testing::SetArgPointee;
-using ::testing::_;
-using ::security_manager::SecurityManager;
-using ::security_manager::SecurityManagerImpl;
 
 class SecurityManagerTest : public ::testing::Test {
  protected:
@@ -101,11 +110,12 @@ class SecurityManagerTest : public ::testing::Test {
   /*
    * Wrapper for fast emulate recieve SecurityManager::OnMessageReceived
    */
-  void call_OnMessageReceived(const uint8_t* const data, uint32_t dataSize,
+  void call_OnMessageReceived(const uint8_t* const data,
+                              uint32_t dataSize,
                               const ServiceType serviceType) {
-    const ::protocol_handler::RawMessagePtr rawMessagePtr(
-        new ::protocol_handler::RawMessage(key, protocolVersion, data, dataSize,
-                                           serviceType));
+    const RawMessagePtr rawMessagePtr(
+        utils::MakeShared<RawMessage>(
+            key, protocolVersion, data, dataSize, serviceType));
     security_manager_->OnMessageReceived(rawMessagePtr);
   }
   /*
@@ -280,8 +290,9 @@ TEST_F(SecurityManagerTest, SecurityManager_NULLCryptoManager) {
  * Shall skip all OnMobileMessageSent
  */
 TEST_F(SecurityManagerTest, OnMobileMessageSent) {
-  const ::protocol_handler::RawMessagePtr rawMessagePtr(
-      new ::protocol_handler::RawMessage(key, protocolVersion, NULL, 0));
+  const uint8_t* data_param = NULL;
+  const RawMessagePtr rawMessagePtr(
+      utils::MakeShared<RawMessage>(key, protocolVersion, data_param, 0));
   security_manager_->OnMobileMessageSent(rawMessagePtr);
 }
 /*
@@ -372,9 +383,9 @@ TEST_F(SecurityManagerTest, CreateSSLContext_ServiceAlreadyProtected) {
   EXPECT_CALL(mock_session_observer, GetSSLContext(key, kControl))
       .WillOnce(Return(&mock_ssl_context_new));
 
-  const security_manager::SSLContext* rezult =
+  const SSLContext* result =
       security_manager_->CreateSSLContext(key);
-  EXPECT_EQ(rezult, &mock_ssl_context_new);
+  EXPECT_EQ(&mock_ssl_context_new, result);
 }
 /*
  * Shall send Internall Error on error create SSL
@@ -399,9 +410,9 @@ TEST_F(SecurityManagerTest, CreateSSLContext_ErrorCreateSSL) {
       .WillOnce(ReturnNull());
   EXPECT_CALL(mock_crypto_manager, CreateSSLContext()).WillOnce(ReturnNull());
 
-  const security_manager::SSLContext* rezult =
+  const SSLContext* result =
       security_manager_->CreateSSLContext(key);
-  EXPECT_EQ(NULL, rezult);
+  EXPECT_EQ(NULL, result);
 }
 /*
  * Shall send InternalError with SERVICE_NOT_FOUND
@@ -433,9 +444,8 @@ TEST_F(SecurityManagerTest, CreateSSLContext_SetSSLContextError) {
   EXPECT_CALL(mock_session_observer, SetSSLContext(key, &mock_ssl_context_new))
       .WillOnce(Return(SecurityManager::ERROR_UNKNOWN_INTERNAL_ERROR));
 
-  const security_manager::SSLContext* rezult =
-      security_manager_->CreateSSLContext(key);
-  EXPECT_EQ(NULL, rezult);
+  const SSLContext* result = security_manager_->CreateSSLContext(key);
+  EXPECT_EQ(NULL, result);
 }
 /*
  * Shall protect connection on correct call CreateSSLContext
@@ -456,9 +466,9 @@ TEST_F(SecurityManagerTest, CreateSSLContext_Success) {
   EXPECT_CALL(mock_session_observer, SetSSLContext(key, &mock_ssl_context_new))
       .WillOnce(Return(SecurityManager::ERROR_SUCCESS));
 
-  const security_manager::SSLContext* rezult =
+  const SSLContext* result =
       security_manager_->CreateSSLContext(key);
-  EXPECT_EQ(rezult, &mock_ssl_context_new);
+  EXPECT_EQ(&mock_ssl_context_new, result);
 }
 /*
  * Shall send InternallError on call StartHandshake for uprotected service
@@ -499,7 +509,7 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInternalError) {
   // uint8_t protocol_version = 0;
   EXPECT_CALL(mock_session_observer, PairFromKey(key, _, _));
   EXPECT_CALL(mock_session_observer, GetHandshakeContext(key))
-      .WillOnce(Return(security_manager::SSLContext::HandshakeContext()));
+      .WillOnce(Return(SSLContext::HandshakeContext()));
   EXPECT_CALL(mock_session_observer,
               ProtocolVersionUsed(connection_id, session_id, _))
       .WillOnce(Return(true));
@@ -524,7 +534,7 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInternalError) {
       .WillOnce(
           DoAll(SetArgPointee<0>(handshake_data_out_pointer),
                 SetArgPointee<1>(handshake_data_out_size),
-                Return(security_manager::SSLContext::Handshake_Result_Fail)));
+                Return(SSLContext::Handshake_Result_Fail)));
 
   security_manager_->StartHandshake(key);
 }
@@ -539,7 +549,7 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInitIsNotComplete) {
   EXPECT_CALL(mock_session_observer, PairFromKey(key, _, _));
   EXPECT_CALL(mock_session_observer, GetHandshakeContext(key))
       .Times(3)
-      .WillRepeatedly(Return(security_manager::SSLContext::HandshakeContext()));
+      .WillRepeatedly(Return(SSLContext::HandshakeContext()));
   EXPECT_CALL(mock_session_observer,
               ProtocolVersionUsed(connection_id, session_id, _))
       .WillOnce(Return(true));
@@ -561,16 +571,17 @@ TEST_F(SecurityManagerTest, StartHandshake_SSLInitIsNotComplete) {
   // Only on both correct - data and size shall be send message to mobile app
   EXPECT_CALL(mock_ssl_context_exists, StartHandshake(_, _))
       .WillOnce(DoAll(
-          SetArgPointee<0>(handshake_data_out_pointer), SetArgPointee<1>(0),
-          Return(security_manager::SSLContext::Handshake_Result_Success)))
+          SetArgPointee<0>(handshake_data_out_pointer),
+          SetArgPointee<1>(0),
+          Return(SSLContext::Handshake_Result_Success)))
       .WillOnce(DoAll(
           SetArgPointee<0>((uint8_t*)NULL),
           SetArgPointee<1>(handshake_data_out_size),
-          Return(security_manager::SSLContext::Handshake_Result_Success)))
+          Return(SSLContext::Handshake_Result_Success)))
       .WillOnce(DoAll(
           SetArgPointee<0>(handshake_data_out_pointer),
           SetArgPointee<1>(handshake_data_out_size),
-          Return(security_manager::SSLContext::Handshake_Result_Success)));
+          Return(SSLContext::Handshake_Result_Success)));
 
   security_manager_->StartHandshake(key);
   security_manager_->StartHandshake(key);
@@ -697,17 +708,17 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_InvalidData) {
       .WillOnce(DoAll(
           SetArgPointee<2>(handshake_data_out_pointer),
           SetArgPointee<3>(handshake_data_out_size),
-          Return(security_manager::SSLContext::Handshake_Result_AbnormalFail)))
+          Return(SSLContext::Handshake_Result_AbnormalFail)))
       .WillOnce(DoAll(
           SetArgPointee<2>((uint8_t*)NULL),
           SetArgPointee<3>(handshake_data_out_size),
-          Return(security_manager::SSLContext::Handshake_Result_AbnormalFail)))
+          Return(SSLContext::Handshake_Result_AbnormalFail)))
       .WillOnce(DoAll(
           SetArgPointee<2>(handshake_data_out_pointer), SetArgPointee<3>(0),
-          Return(security_manager::SSLContext::Handshake_Result_AbnormalFail)))
+          Return(SSLContext::Handshake_Result_AbnormalFail)))
       .WillOnce(DoAll(
           SetArgPointee<2>((uint8_t*)NULL), SetArgPointee<3>(0),
-          Return(security_manager::SSLContext::Handshake_Result_AbnormalFail)));
+          Return(SSLContext::Handshake_Result_AbnormalFail)));
 
   // On each wrong handshake will be asked error
   EXPECT_CALL(mock_ssl_context_exists, LastError()).Times(handshake_emulates);
@@ -761,11 +772,11 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_Answer) {
       .WillOnce(DoAll(
           SetArgPointee<2>(handshake_data_out_pointer),
           SetArgPointee<3>(handshake_data_out_size),
-          Return(security_manager::SSLContext::Handshake_Result_Success)))
+          Return(SSLContext::Handshake_Result_Success)))
       .WillOnce(
           DoAll(SetArgPointee<2>(handshake_data_out_pointer),
                 SetArgPointee<3>(handshake_data_out_size),
-                Return(security_manager::SSLContext::Handshake_Result_Fail)));
+                Return(SSLContext::Handshake_Result_Fail)));
 
   EmulateMobileMessageHandshake(handshake_data, handshake_data_size,
                                 handshake_emulates);
@@ -802,29 +813,29 @@ TEST_F(SecurityManagerTest, ProccessHandshakeData_HandshakeFinished) {
       WillOnce(DoAll(
           SetArgPointee<2>(handshake_data_out_pointer),
           SetArgPointee<3>(handshake_data_out_size),
-          Return(security_manager::SSLContext::Handshake_Result_Success)))
+          Return(SSLContext::Handshake_Result_Success)))
       .WillOnce(
            DoAll(SetArgPointee<2>(handshake_data_out_pointer),
                  SetArgPointee<3>(handshake_data_out_size),
-                 Return(security_manager::SSLContext::Handshake_Result_Fail)))
+                 Return(SSLContext::Handshake_Result_Fail)))
       .
       // two states with with null pointer data
       WillOnce(DoAll(
           SetArgPointee<2>((uint8_t*)NULL),
           SetArgPointee<3>(handshake_data_out_size),
-          Return(security_manager::SSLContext::Handshake_Result_Success)))
+          Return(SSLContext::Handshake_Result_Success)))
       .WillOnce(
            DoAll(SetArgPointee<2>((uint8_t*)NULL),
                  SetArgPointee<3>(handshake_data_out_size),
-                 Return(security_manager::SSLContext::Handshake_Result_Fail)))
+                 Return(SSLContext::Handshake_Result_Fail)))
       .
       // two states with with null data size
       WillOnce(DoAll(
           SetArgPointee<2>(handshake_data_out_pointer), SetArgPointee<3>(0),
-          Return(security_manager::SSLContext::Handshake_Result_Success)))
+          Return(SSLContext::Handshake_Result_Success)))
       .WillOnce(DoAll(
           SetArgPointee<2>(handshake_data_out_pointer), SetArgPointee<3>(0),
-          Return(security_manager::SSLContext::Handshake_Result_Success)));
+          Return(SSLContext::Handshake_Result_Success)));
 
   // Expect send two message (with correct pointer and size data)
 

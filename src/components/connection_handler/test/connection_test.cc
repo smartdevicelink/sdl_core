@@ -39,7 +39,7 @@
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol/service_type.h"
 #include "connection_handler/mock_connection_handler_settings.h"
-#include "transport_manager/transport_manager_mock.h"
+#include "transport_manager/mock_transport_manager.h"
 #include "security_manager/mock_security_manager.h"
 #include "security_manager/mock_ssl_context.h"
 

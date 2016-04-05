@@ -30,10 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_MOCK_H_
-#define TEST_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_MOCK_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_H_
 
-#include <gmock/gmock.h>
+#include "gmock/gmock.h"
 #include <string>
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
@@ -81,4 +81,4 @@ class MockTransportManager
 }  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test
-#endif  // TEST_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_MOCK_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_H_
