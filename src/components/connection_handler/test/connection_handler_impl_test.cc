@@ -60,7 +60,7 @@ using ::testing::ReturnRefOfCopy;
 
 // For service types and PROTECTION_ON/OFF
 
-enum UnnamedService { served_service1 = 0x06, served_service2 = 0x08 };
+enum UnnamedService { kServedService1 = 0x06, kServedService2 = 0x08 };
 
 class ConnectionHandlerTest : public ::testing::Test {
  protected:
@@ -1100,9 +1100,9 @@ TEST_F(ConnectionHandlerTest,
   // Add virtual device and connection
   AddTestDeviceConnection();
   // Forbid start kRPC with encryption
-  unprotected_services_.push_back(UnnamedService::served_service1);
+  unprotected_services_.push_back(UnnamedService::kServedService1);
   unprotected_services_.push_back(kRpc);
-  unprotected_services_.push_back(UnnamedService::served_service2);
+  unprotected_services_.push_back(UnnamedService::kServedService2);
   unprotected_services_.push_back(kControl);
   SetSpecificServices();
   // Start new session with RPC service
@@ -1135,9 +1135,9 @@ TEST_F(ConnectionHandlerTest,
   AddTestSession();
 
   // Forbid start kAudio without encryption
-  protected_services_.push_back(UnnamedService::served_service1);
+  protected_services_.push_back(UnnamedService::kServedService1);
   protected_services_.push_back(kAudio);
-  protected_services_.push_back(UnnamedService::served_service2);
+  protected_services_.push_back(UnnamedService::kServedService2);
   protected_services_.push_back(kControl);
   SetSpecificServices();
   // Start new session with Audio service
@@ -1150,9 +1150,9 @@ TEST_F(ConnectionHandlerTest,
 #endif  // ENABLE_SECURITY
   // Allow start kAudio without encryption
   protected_services_.clear();
-  protected_services_.push_back(UnnamedService::served_service1);
+  protected_services_.push_back(UnnamedService::kServedService1);
   protected_services_.push_back(kMobileNav);
-  protected_services_.push_back(UnnamedService::served_service2);
+  protected_services_.push_back(UnnamedService::kServedService2);
   protected_services_.push_back(kControl);
   SetSpecificServices();
   const uint32_t session_id3 = connection_handler_->OnSessionStartedCallback(
@@ -1174,9 +1174,9 @@ TEST_F(ConnectionHandlerTest,
   AddTestSession();
 
   // Forbid start kAudio with encryption
-  unprotected_services_.push_back(UnnamedService::served_service1);
+  unprotected_services_.push_back(UnnamedService::kServedService1);
   unprotected_services_.push_back(kAudio);
-  unprotected_services_.push_back(UnnamedService::served_service2);
+  unprotected_services_.push_back(UnnamedService::kServedService2);
   unprotected_services_.push_back(kControl);
   SetSpecificServices();
   // Start new session with Audio service
@@ -1285,6 +1285,7 @@ TEST_F(ConnectionHandlerTest, SetSSLContext_Null) {
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kControl),
             reinterpret_cast<security_manager::SSLContext*>(NULL));
 }
+
 TEST_F(ConnectionHandlerTest, SetSSLContext) {
   // No SSLContext on start up
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kControl),
@@ -1354,6 +1355,7 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByProtectedService) {
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kAudio),
             &mock_ssl_context);
 }
+
 TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtectedRPC) {
   testing::StrictMock<security_manager_test::MockSSLContext> mock_ssl_context;
   AddTestDeviceConnection();
@@ -1381,6 +1383,7 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtectedRPC) {
   EXPECT_EQ(connection_handler_->GetSSLContext(connection_key_, kBulk),
             &mock_ssl_context);
 }
+
 TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtectedBulk) {
   testing::StrictMock<security_manager_test::MockSSLContext> mock_ssl_context;
   AddTestDeviceConnection();

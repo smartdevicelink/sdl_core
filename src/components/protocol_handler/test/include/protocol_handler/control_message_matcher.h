@@ -92,7 +92,7 @@ MATCHER_P2(ControlMessage,
   // Nack shall be always with flag protected off
   if (ExpectedFrameData == FRAME_DATA_START_SERVICE_NACK &&
       ExpectedEncryption) {
-    *result_listener << "NACK message with PROTECYION_ON flag";
+    *result_listener << "NACK message with PROTECTION_ON flag";
     return false;
   }
   const RawMessagePtr message = arg;
@@ -121,7 +121,7 @@ MATCHER_P4(ControlMessage,
   // Nack shall be always with flag protected off
   if (ExpectedFrameData == FRAME_DATA_START_SERVICE_NACK &&
       ExpectedEncryption) {
-    *result_listener << "NACK message with PROTECYION_ON flag";
+    *result_listener << "NACK message with PROTECTION_ON flag";
     return false;
   }
   const RawMessagePtr message = arg;
@@ -175,7 +175,7 @@ MATCHER_P4(ExpectedMessage,
   if (ExpectedFrameType == FRAME_TYPE_CONTROL &&
       ExpectedFrameData == FRAME_DATA_START_SERVICE_NACK &&
       ExpectedEncryption) {
-    *result_listener << "NACK message with PROTECYION_ON flag";
+    *result_listener << "NACK message with PROTECTION_ON flag";
     return false;
   }
   const RawMessagePtr message = arg;

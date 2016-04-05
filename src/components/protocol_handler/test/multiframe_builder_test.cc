@@ -184,9 +184,6 @@ class MultiFrameBuilderTest : public ::testing::Test {
                           const UCharDataVector& data,
                           ProtocolFramePtrList& out_frames) {
     ASSERT_LT(FIRST_FRAME_DATA_SIZE, max_payload_size);
-    ASSERT_EQ(0x08, FIRST_FRAME_DATA_SIZE)
-        << "Size of FIRST_FRAME_DATA: " << FIRST_FRAME_DATA_SIZE
-        << ", it must be only 0x08";
 
     // TODO(EZamakhov): move to the separate class
     const size_t data_size = data.size();
@@ -336,7 +333,7 @@ TEST_F(MultiFrameBuilderTest, Add_FirstFrames_NoConnections) {
         const ProtocolFramePtr first_frame = multiframes.front();
         ASSERT_TRUE(first_frame);
         EXPECT_EQ(RESULT_FAIL, multiframe_builder_.AddFrame(first_frame))
-            << "Unexisting connection " << connection_id
+            << "Non-existed connection " << connection_id
             << "- to be skipped first frame: " << first_frame;
 
         EXPECT_EQ(ProtocolFramePtrList(), multiframe_builder_.PopMultiframes())
