@@ -53,17 +53,17 @@ class DialNumberRequest : public CommandRequestImpl {
   /**
    * \brief DialNumberRequest class destructor
    **/
-  virtual ~DialNumberRequest();
+  ~DialNumberRequest() OVERRIDE;
 
   /**
     * @brief Initialize request params
    **/
-   virtual bool Init();
+   bool Init() OVERRIDE;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
   /**
    * @brief Interface method that is called whenever new event received

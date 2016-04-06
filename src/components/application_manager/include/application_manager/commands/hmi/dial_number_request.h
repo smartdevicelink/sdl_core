@@ -55,7 +55,7 @@ class DialNumberRequest : public RequestToHMI {
   /**
    * @brief DialNumberRequest class destructor
    **/
-  virtual ~DialNumberRequest();
+  ~DialNumberRequest() OVERRIDE;
 
   /**
    * @brief Execute command

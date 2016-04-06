@@ -56,7 +56,7 @@ class DialNumberResponse : public ResponseFromHMI {
   /**
    * @brief DialNumberResponse class destructor
    **/
-  virtual ~DialNumberResponse();
+  ~DialNumberResponse() OVERRIDE;
 
   /**
    * @brief Execute command
