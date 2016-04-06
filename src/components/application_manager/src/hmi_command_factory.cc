@@ -262,12 +262,13 @@
 #include "application_manager/commands/hmi/navi_send_location_request.h"
 #include "application_manager/commands/hmi/navi_send_location_response.h"
 #include "application_manager/commands/hmi/on_tts_reset_timeout_notification.h"
+#include "application_manager/commands/hmi/on_phone_call_notification.h"
 #include "application_manager/commands/hmi/dial_number_request.h"
 #include "application_manager/commands/hmi/dial_number_response.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
-
 namespace application_manager {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 CommandSharedPtr HMICommandFactory::CreateCommand(
     const commands::MessageSharedPtr& message) {
@@ -2048,16 +2049,16 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       command.reset(new commands::hmi::OnTTSResetTimeoutNotification(message));
       break;
     }
+    case hmi_apis::FunctionID::BasicCommunication_OnEventChanged: {
+      command.reset(new commands::OnEventChangedNotification(message));
+      break;
+    }
     case hmi_apis::FunctionID::BasicCommunication_DialNumber: {
       if (is_response) {
         command.reset(new commands::hmi::DialNumberResponse(message));
       } else {
         command.reset(new commands::hmi::DialNumberRequest(message));
       }
-      break;
-    }
-    case hmi_apis::FunctionID::BasicCommunication_OnEventChanged: {
-      command.reset(new commands::OnEventChangedNotification(message));
       break;
     }
   }

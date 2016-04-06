@@ -489,6 +489,15 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
+    case mobile_apis::FunctionID::DialNumberID: {
+      if ((*message)[strings::params][strings::message_type]
+          == static_cast<int>(application_manager::MessageType::kResponse)) {
+        return  new commands::DialNumberResponse(message);
+      } else {
+        return new commands::DialNumberRequest(message);
+      }
+      break;
+    }
     case mobile_apis::FunctionID::OnButtonEventID: {
       command = utils::MakeShared<commands::mobile::OnButtonEventNotification>(message);
       break;

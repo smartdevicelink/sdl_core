@@ -1,6 +1,5 @@
 /*
-
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -54,7 +53,12 @@ class DialNumberRequest : public CommandRequestImpl {
   /**
    * \brief DialNumberRequest class destructor
    **/
-  virtual ~DialNumberRequest();
+  ~DialNumberRequest() OVERRIDE;
+
+  /**
+    * @brief Initialize request params
+   **/
+   bool Init() OVERRIDE;
 
   /**
     * @brief Initialize request params
@@ -64,7 +68,14 @@ class DialNumberRequest : public CommandRequestImpl {
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
+
+  /**
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
+   */
+  void on_event(const event_engine::Event& event);
 
   /**
    * @brief Interface method that is called whenever new event received
