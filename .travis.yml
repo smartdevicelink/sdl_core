@@ -1,6 +1,13 @@
+language: cpp
 dist: trusty
 sudo: required
-language: cpp
+only:
+  - master
+  - develop
+  - \/feature\/.+
+  - \/fix\/.+
+  - \/hotfix\/.+
+
 addons:
   apt:
     sources:
@@ -8,12 +15,25 @@ addons:
     packages:
     - gcc-4.9
     - g++-4.9
-    script: make
+    - lcov
+    - libssl-dev
+    - libbluetooth3
+    - libbluetooth-dev
+    - libudev-dev
+    - cmake
 
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install -y libavahi-client-dev libssl-dev libbluetooth3 libbluetooth-dev bluez-tools libudev-dev sqlite3 libsqlite3-dev
-  - sudo apt-get install -y cmake
+  - sudo apt-get -q -y install libavahi-client-dev bluez-tools sqlite3 libsqlite3-dev automake1.11
+script:
+  - cmake --version
+  - mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON && make && make install && make test
+  - mkdir coverage_report/ && lcov --capture --directory . --output-file coverage_report/full_report.info;
+  - lcov --remove coverage_report/full_report.info  '/usr/*' 'src/3rd*' '*/commands/*' '*/test/*'  --output-file coverage_report/coverage.info;
+  - genhtml coverage_report/coverage.info --output-directory coverage_report/
+env:
+  global:
+  - CMAKE_CXX_COMPILER=g++-4.9
+  - CMAKE_C_COMPILER=gcc-4.9
 
-  - mkdir build && cd build && cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=On ../ && make && make install
-  - make test
+
