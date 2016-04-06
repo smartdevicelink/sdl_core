@@ -1,15 +1,19 @@
+dist: trusty
+sudo: required
 language: cpp
 addons:
   apt:
     sources:
-    - travis-ci/sqlite3
+    - ubuntu-toolchain-r-test
     packages:
-    - sqlite3
+    - gcc-4.9
+    - g++-4.9
+    script: make
+
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install -y libavahi-client-dev libssl-dev libbluetooth3 libbluetooth-dev bluez-tools libudev-dev
-  - sudo add-apt-repository ppa:kalakris/cmake -y
-  - sudo apt-get update -q
+  - sudo apt-get install -y libavahi-client-dev libssl-dev libbluetooth3 libbluetooth-dev bluez-tools libudev-dev sqlite3 libsqlite3-dev
   - sudo apt-get install -y cmake
-script:
-  - mkdir build && cd build && cmake ../ && make && make install
+
+  - mkdir build && cd build && cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTS=On ../ && make && make install
+  - make test
