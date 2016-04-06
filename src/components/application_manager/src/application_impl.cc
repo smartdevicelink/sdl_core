@@ -492,7 +492,7 @@ void ApplicationImpl::WakeUpStreaming(
       MessageHelper::SendOnDataStreaming(ServiceType::kMobileNav, true);
       video_streaming_suspended_ = false;
     }
-    video_stream_suspend_timer_.Start(video_stream_suspend_timeout_, true);
+    video_stream_suspend_timer_.Start(video_stream_suspend_timeout_, false);
   } else if (ServiceType::kAudio == service_type) {
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     if (audio_streaming_suspended_) {
@@ -501,7 +501,7 @@ void ApplicationImpl::WakeUpStreaming(
       MessageHelper::SendOnDataStreaming(ServiceType::kAudio, true);
       audio_streaming_suspended_ = false;
     }
-    audio_stream_suspend_timer_.Start(audio_stream_suspend_timeout_, true);
+    audio_stream_suspend_timer_.Start(audio_stream_suspend_timeout_, false);
   }
 }
 

@@ -29,190 +29,134 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include "utils/timer.h"
 
-#include <ctime>
-#include <cerrno>
-#include <cstring>
+#include <string>
 
-#include "utils/timer_task.h"
-#include "utils/date_time.h"
 #include "utils/macro.h"
+#include "utils/logger.h"
+#include "utils/lock.h"
+#include "utils/timer_task.h"
+#include "utils/conditional_variable.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
-using date_time::DateTime;
-
-namespace timer {
-
-// Function HandlePosixTimer is not in anonymous namespace
-// because we need to set this func as friend to Timer
-// and for setting friend function must be located in same namespace with class
-void HandlePosixTimer(sigval signal_value) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  DCHECK_OR_RETURN_VOID(signal_value.sival_ptr)
-
-  timer::Timer* timer = static_cast<timer::Timer*>(signal_value.sival_ptr);
-  timer->OnTimeout();
-}
-}  // namespace timer
-
-namespace {
-const int kErrorCode = -1;
-
-itimerspec MillisecondsToItimerspec(const timer::Milliseconds miliseconds) {
-  struct itimerspec result;
-
-  result.it_value.tv_sec = miliseconds / DateTime::MILLISECONDS_IN_SECOND;
-  result.it_value.tv_nsec = (miliseconds % DateTime::MILLISECONDS_IN_SECOND) *
-                            DateTime::NANOSECONDS_IN_MILLISECOND;
-  result.it_interval.tv_sec = 0;
-  result.it_interval.tv_nsec = 0;
-
-  return result;
-}
-
-timer_t StartPosixTimer(timer::Timer& trackable,
-                        const timer::Milliseconds timeout) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  timer_t internal_timer = NULL;
-
-  sigevent signal_event;
-  signal_event.sigev_notify = SIGEV_THREAD;
-  signal_event.sigev_notify_attributes = NULL;
-  signal_event.sigev_value.sival_ptr = static_cast<void*>(&trackable);
-  signal_event.sigev_notify_function = timer::HandlePosixTimer;
-
-  if (timer_create(CLOCK_REALTIME, &signal_event, &internal_timer) ==
-      kErrorCode) {
-    int error_code = errno;
-    LOG4CXX_FATAL(logger_,
-                  "Can`t create posix_timer. Error("
-                      << error_code << "): " << strerror(error_code));
-    return NULL;
-  }
-  const itimerspec itimer = MillisecondsToItimerspec(timeout);
-
-  if (timer_settime(internal_timer, 0, &itimer, NULL) == kErrorCode) {
-    int error_code = errno;
-    UNUSED(error_code);
-    LOG4CXX_FATAL(logger_,
-                  "Can`t set timeout to posix_timer. Error("
-                      << error_code << "): " << strerror(error_code));
-    return NULL;
-  }
-  return internal_timer;
-}
-
-bool StopPosixTimer(timer_t timer) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const int resultCode = timer_delete(timer);
-  if (kErrorCode == resultCode) {
-    int error_code = errno;
-    LOG4CXX_ERROR(logger_,
-                  "Can`t delete posix_timer. Error("
-                      << error_code << "): " << strerror(error_code));
-    return false;
-  }
-  return true;
-}
-}  // namespace
-
-timer::Timer::Timer(const std::string& name, const TimerTask* task_for_tracking)
+timer::Timer::Timer(const std::string& name, TimerTask* task)
     : name_(name)
-    , task_(task_for_tracking)
-    , repeatable_(false)
-    , timeout_ms_(0u)
-    , is_running_(false)
-    , timer_(NULL) {
+    , task_lock_()
+    , task_(task)
+    , delegate_(this)
+    , thread_(threads::CreateThread(name_.c_str(), &delegate_))
+    , single_shot_(true) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(!name_.empty());
   DCHECK(task_);
+  DCHECK(thread_);
+  LOG4CXX_DEBUG(logger_, "Timer " << name_ << " has been created");
 }
 
 timer::Timer::~Timer() {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "Timer is to be destroyed " << name_);
   Stop();
+  DCHECK(thread_);
+  DeleteThread(thread_);
   sync_primitives::AutoLock auto_lock(task_lock_);
   DCHECK(task_);
   delete task_;
+  LOG4CXX_DEBUG(logger_, "Timer " << name_ << " has been destroyed");
 }
 
-void timer::Timer::Start(const Milliseconds timeout, const bool repeatable) {
+void timer::Timer::Start(const Milliseconds timeout, const bool single_shot) {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock auto_lock(lock_);
-  SetTimeoutUnsafe(timeout);
-  repeatable_ = repeatable;
-  if (is_running_) {
-    const bool stop_result = StopUnsafe();
-    DCHECK_OR_RETURN_VOID(stop_result);
-  }
-  StartUnsafe();
+  DCHECK_OR_RETURN_VOID(thread_);
+  Stop();
+  delegate_.set_timeout(timeout);
+  single_shot_ = single_shot;
+  thread_->start();
+  delegate_.set_stop_flag(false);
+  LOG4CXX_DEBUG(logger_, "Timer " << name_ << " has been started");
 }
 
 void timer::Timer::Stop() {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock auto_lock(lock_);
-  repeatable_ = false;
-  if (is_running_) {
-    const bool stop_result = StopUnsafe();
-    DCHECK(stop_result);
+  DCHECK_OR_RETURN_VOID(thread_);
+  delegate_.set_stop_flag(true);
+  if (!thread_->IsCurrentThread()) {
+    thread_->join();
   }
+  delegate_.set_timeout(0);
+  LOG4CXX_DEBUG(logger_, "Timer " << name_ << " has been stopped");
 }
 
-bool timer::Timer::IsRunning() const {
-  sync_primitives::AutoLock auto_lock(lock_);
-  return is_running_;
+bool timer::Timer::is_running() const {
+  return !delegate_.stop_flag();
 }
 
-void timer::Timer::OnTimeout() {
+timer::Milliseconds timer::Timer::timeout() const {
+  return delegate_.timeout();
+}
+
+void timer::Timer::OnTimeout() const {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_,
-                "Timer has finished counting. Timeout(ms): "
-                    << static_cast<uint32_t>(timeout_ms_));
-  {
-    // Task locked by own lock because from this task in callback we can
-    // call Stop of this timer and get DeadLock
-    sync_primitives::AutoLock auto_lock(task_lock_);
-    DCHECK(task_);
-    task_->run();
-  }
-  sync_primitives::AutoLock auto_lock(lock_);
-  if (is_running_) {
-    const bool stop_result = StopUnsafe();
-    DCHECK_OR_RETURN_VOID(stop_result);
-  }
-  if (repeatable_) {
-    StartUnsafe();
-  }
+  delegate_.set_stop_flag(single_shot_);
+  sync_primitives::AutoLock auto_lock(task_lock_);
+  DCHECK_OR_RETURN_VOID(task_);
+  task_->run();
 }
 
-void timer::Timer::SetTimeoutUnsafe(const timer::Milliseconds timeout) {
-  timeout_ms_ = (0u != timeout) ? timeout : 1u;
+timer::Timer::TimerDelegate::TimerDelegate(const Timer* timer)
+    : timer_(timer)
+    , params_lock_()
+    , timeout_(0)
+    , stop_flag_(true)
+    , state_lock_() {
+  DCHECK(timer_);
 }
 
-void timer::Timer::StartUnsafe() {
-  LOG4CXX_DEBUG(logger_, "Creating posix_timer in " << name_);
-  // Create new posix timer
-  timer_ = StartPosixTimer(*this, timeout_ms_);
-  DCHECK_OR_RETURN_VOID(timer_);
-  is_running_ = true;
+void timer::Timer::TimerDelegate::set_timeout(const Milliseconds timeout) {
+  sync_primitives::AutoLock auto_lock(params_lock_);
+  timeout_ = timeout;
 }
 
-bool timer::Timer::StopUnsafe() {
-  LOG4CXX_DEBUG(logger_, "Stopping timer  " << name_);
-  //  Destroing of posix timer
-  if (StopPosixTimer(timer_)) {
-    is_running_ = false;
-    return true;
+timer::Milliseconds timer::Timer::TimerDelegate::timeout() const {
+  sync_primitives::AutoLock auto_lock(params_lock_);
+  return timeout_;
+}
+
+void timer::Timer::TimerDelegate::set_stop_flag(const bool stop_flag) {
+  sync_primitives::AutoLock auto_lock(params_lock_);
+  stop_flag_ = stop_flag;
+}
+
+bool timer::Timer::TimerDelegate::stop_flag() const {
+  sync_primitives::AutoLock auto_lock(params_lock_);
+  return stop_flag_;
+}
+
+void timer::Timer::TimerDelegate::threadMain() {
+  sync_primitives::AutoLock auto_lock(state_lock_);
+  set_stop_flag(false);
+  while (!stop_flag()) {
+    const Milliseconds curr_timeout = timeout();
+    LOG4CXX_DEBUG(logger_, "Milliseconds left to wait: " << curr_timeout);
+    if (sync_primitives::ConditionalVariable::kTimeout ==
+        termination_condition_.WaitFor(auto_lock, curr_timeout)) {
+      LOG4CXX_DEBUG(logger_,
+                    "Timer has finished counting. Timeout (ms): "
+                    << curr_timeout);
+      if (timer_) {
+        timer_->OnTimeout();
+      }
+    } else {
+      LOG4CXX_DEBUG(logger_, "Timer has been force reset");
+    }
   }
-  return false;
+  set_timeout(0);
 }
 
-timer::Milliseconds timer::Timer::GetTimeout() const {
-  sync_primitives::AutoLock auto_lock(lock_);
-  return timeout_ms_;
+void timer::Timer::TimerDelegate::exitThreadMain() {
+  sync_primitives::AutoLock auto_lock(state_lock_);
+  termination_condition_.NotifyOne();
 }

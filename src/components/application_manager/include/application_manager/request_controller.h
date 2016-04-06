@@ -282,7 +282,6 @@ class RequestController {
      * timer for checking requests timeout
      */
     timer::Timer timer_;
-    static const uint32_t default_sleep_time_ = UINT_MAX;
 
     bool is_low_voltage_;
     DISALLOW_COPY_AND_ASSIGN(RequestController);

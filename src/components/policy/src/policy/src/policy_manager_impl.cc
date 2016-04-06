@@ -161,7 +161,7 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
   cache_->SaveUpdateRequired(false);
 
   // Update finished, no need retry
-  if (timer_retry_sequence_.IsRunning()) {
+  if (timer_retry_sequence_.is_running()) {
     LOG4CXX_INFO(logger_, "Stop retry sequence");
     timer_retry_sequence_.Stop();
   }
@@ -302,9 +302,9 @@ void PolicyManagerImpl::StartPTExchange() {
     }
 
     if (update_status_manager_.IsUpdateRequired()) {
-      if (RequestPTUpdate() && !timer_retry_sequence_.IsRunning()) {
+      if (RequestPTUpdate() && !timer_retry_sequence_.is_running()) {
         // Start retry sequency
-        timer_retry_sequence_.Start(NextRetryTimeout(), true);
+        timer_retry_sequence_.Start(NextRetryTimeout(), false);
       }
     }
   }
@@ -999,12 +999,12 @@ void PolicyManagerImpl::RetrySequence() {
 
   uint32_t timeout = NextRetryTimeout();
 
-  if (!timeout && timer_retry_sequence_.IsRunning()) {
+  if (!timeout && timer_retry_sequence_.is_running()) {
     timer_retry_sequence_.Stop();
     return;
   }
 
-  timer_retry_sequence_.Start(timeout, true);
+  timer_retry_sequence_.Start(timeout, false);
 }
 
 }  //  namespace policy

@@ -56,7 +56,6 @@ RequestController::RequestController()
       is_low_voltage_(false) {
   LOG4CXX_AUTO_TRACE(logger_);
   InitializeThreadpool();
-  timer_.Start(default_sleep_time_, true);
 }
 
 RequestController::~RequestController() {
@@ -498,10 +497,6 @@ void RequestController::UpdateTimer() {
                    << front->timeout_msec()/date_time::DateTime::MILLISECONDS_IN_SECOND);
       timer_.Start(0u, true);
     }
-  } else {
-    LOG4CXX_DEBUG(logger_, "Sleep for default sleep time "
-                  << default_sleep_time_ << " milliseconds.");
-    timer_.Start(default_sleep_time_, true);
   }
 }
 
