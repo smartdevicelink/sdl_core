@@ -48,48 +48,136 @@ void GetUrls::Run() {
   using namespace strings;
   using namespace hmi_apis;
 
-  SmartObject& object = *message_;
-  object[params][message_type] = MessageType::kResponse;
   if (!ApplicationManagerImpl::instance()->GetPolicyHandler().PolicyEnabled()) {
-    object[params][hmi_response::code] = Common_Result::DATA_NOT_AVAILABLE;
-    ApplicationManagerImpl::instance()->ManageHMICommand(message_);
+    SendResponseToHMI(Common_Result::DATA_NOT_AVAILABLE);
     return;
   }
+
+  SmartObject& object = *message_;
+  const std::string service_to_check =
+      object[msg_params][hmi_request::service].asString();
 
   policy::EndpointUrls endpoints;
   ApplicationManagerImpl::instance()->GetPolicyHandler().GetServiceUrls(
-      object[msg_params][hmi_request::service].asString(), endpoints);
+      service_to_check, endpoints);
+
   if (endpoints.empty()) {
-    object[params][hmi_response::code] = Common_Result::DATA_NOT_AVAILABLE;
+    LOG4CXX_ERROR(logger_, "No URLs for service " << service_to_check);
+    SendResponseToHMI(Common_Result::DATA_NOT_AVAILABLE);
+    return;
+  }
+
+#ifdef EXTENDED_POLICY
+  const std::string policy_service = "7";
+
+  if (policy_service == service_to_check) {
+    ProcessPolicyServiceURLs(endpoints);
+    return;
+  }
+#endif
+  ProcessServiceURLs(endpoints);
+}
+
+#ifdef EXTENDED_POLICY
+void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace smart_objects;
+  using namespace application_manager;
+  using namespace strings;
+  using namespace hmi_apis;
+
+  const uint32_t app_id_to_send_to =
+      ApplicationManagerImpl::instance()->
+      GetPolicyHandler().GetAppIdForSending();
+
+  if (!app_id_to_send_to) {
+    LOG4CXX_ERROR(logger_,
+                  "There are no available applications for processing.");
     ApplicationManagerImpl::instance()->ManageHMICommand(message_);
     return;
   }
 
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(app_id_to_send_to);
+
+  if (!app.valid()) {
+    LOG4CXX_WARN(logger_,
+                 "There is no registered application with "
+                 "connection key '" << app_id_to_send_to << "'");
+    SendResponseToHMI(Common_Result::DATA_NOT_AVAILABLE);
+    return;
+  }
+
+  SmartObject& object = *message_;
+  object[msg_params].erase(hmi_request::service);
+  object[msg_params][hmi_response::urls] = SmartObject(SmartType_Array);
+
+  SmartObject& urls = object[msg_params][hmi_response::urls];
+
+  const std::string mobile_app_id = app->mobile_app_id();
+  std::string default_url = "URL is not found";
+
+  // Will use only one URL for particular application if it will be found
+  // Otherwise URL from default section will used
+  SmartObject service_info = SmartObject(SmartType_Map);
+
+  for (size_t e = 0; e < endpoints.size(); ++e) {
+
+    if (mobile_app_id == endpoints[e].app_id) {
+      if (endpoints[e].url.size()) {
+        service_info[url] = endpoints[e].url[0];
+        SendResponseToHMI(Common_Result::SUCCESS);
+        return;
+      }
+    }
+    if (policy::kDefaultId == endpoints[e].app_id) {
+      if (endpoints[e].url.size()) {
+        default_url = endpoints[e].url[0];
+      }
+    }
+  }
+
+  service_info[hmi_response::policy_app_id] = mobile_app_id;
+  service_info[strings::url] = default_url;
+  urls[0] = service_info;
+  // TODO(AOleynik): Issue with absent policy_app_id. Need to fix later on.
+  // Possibly related to smart schema
+  SendResponseToHMI(Common_Result::SUCCESS);
+  return;
+}
+#endif
+
+void GetUrls::ProcessServiceURLs(const policy::EndpointUrls& endpoints) {
+  using namespace smart_objects;
+  using namespace strings;
+  using namespace hmi_apis;
+
+  SmartObject& object = *message_;
   object[msg_params].erase(hmi_request::service);
   object[msg_params][hmi_response::urls] = SmartObject(SmartType_Array);
 
   SmartObject& urls = object[msg_params][hmi_response::urls];
 
   size_t index = 0;
-
-  for (size_t service = 0; service < endpoints.size(); ++service) {
-    for (size_t app = 0; app < endpoints[service].url.size(); ++app, ++index) {
-      const std::string app_url = endpoints[service].url[app];
+  for (size_t e = 0; e < endpoints.size(); ++e) {
+    for (size_t u = 0; u < endpoints[e].url.size(); ++u, ++index) {
+      const std::string app_url = endpoints[e].url[u];
 
       urls[index] = SmartObject(SmartType_Map);
       SmartObject& service_info = urls[index];
 
-      // TODO(AOleynik): Currently sends default for service 7
-      // Must be changed to send choosen app_id, but logic should be clarified
-      // first
       service_info[url] = app_url;
-      if (policy::kDefaultId != endpoints[service].app_id) {
-        service_info[hmi_response::policy_app_id] = endpoints[service].app_id;
+      if (policy::kDefaultId != endpoints[e].app_id) {
+        service_info[hmi_response::policy_app_id] = endpoints[e].app_id;
       }
     }
   }
+  SendResponseToHMI(Common_Result::SUCCESS);
+}
 
-  object[params][hmi_response::code] = Common_Result::SUCCESS;
+void GetUrls::SendResponseToHMI(hmi_apis::Common_Result::eType result) {
+  (*message_)[strings::params][strings::message_type] = MessageType::kResponse;
+  (*message_)[strings::params][hmi_response::code] = result;
   ApplicationManagerImpl::instance()->ManageHMICommand(message_);
 }
 
