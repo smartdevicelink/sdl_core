@@ -27,7 +27,7 @@ before_install:
 script:
   - mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON && make && make install
   - sudo ldconfig
-  - make test ARGS="-V"
+  - make test
   - mkdir coverage_report/ && lcov --capture --directory . --output-file coverage_report/full_report.info;
   - lcov --remove coverage_report/full_report.info  '/usr/*' 'src/3rd*' '*/commands/*' '*/test/*'  --output-file coverage_report/coverage.info;
   - genhtml coverage_report/coverage.info --output-directory coverage_report/
