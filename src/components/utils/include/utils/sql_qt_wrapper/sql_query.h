@@ -30,15 +30,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_POLICY_SQLITE_WRAPPER_INCLUDE_SQLITE_WRAPPER_SQL_QUERY_H_
-#define SRC_COMPONENTS_POLICY_SQLITE_WRAPPER_INCLUDE_SQLITE_WRAPPER_SQL_QUERY_H_
+#ifndef SRC_COMPONENTS_POLICY_SQLITE_WRAPPER_INCLUDE_SQL_QT_WRAPPER_SQL_QUERY_H_
+#define SRC_COMPONENTS_POLICY_SQLITE_WRAPPER_INCLUDE_SQL_QT_WRAPPER_SQL_QUERY_H_
 
-#include <stdint.h>
+#include <cstdint>
 #include <string>
-#include "utils/sqlite_wrapper/sql_error.h"
-#include "utils/lock.h"
 
-struct sqlite3_stmt;
+#include <QStringList>
+#include <QSqlQuery>
+
+#include "utils/lock.h"
+#include "utils/sql_qt_wrapper/sql_error.h"
 
 namespace utils {
 namespace dbms {
@@ -138,49 +140,49 @@ class SQLQuery {
    * @param pos position of value
    * @return boolean value
    */
-  bool GetBoolean(int pos) const;
+  bool GetBoolean(int pos);
 
   /**
    * Gets value in the result record
    * @param pos position of value
    * @return integer value
    */
-  int GetInteger(int pos) const;
+  int GetInteger(int pos);
 
   /**
    * Gets value in the result record
    * @param pos position of value
    * @return unsigned integer value
    */
-  uint32_t GetUInteger(int pos) const;
+  uint32_t GetUInteger(int pos);
 
   /**
    * Gets value in the result record
    * @param pos position of value
    * @return  int64_t value
    */
-  int64_t GetLongInt(int pos) const;
+  int64_t GetLongInt(int pos);
 
   /**
    * Gets value in the result record
    * @param pos position of value
    * @return double value
    */
-  double GetDouble(int pos) const;
+  double GetDouble(int pos);
 
   /**
    * Gets value in the result record
    * @param pos position of value
    * @return string value
    */
-  std::string GetString(int pos) const;
+  std::string GetString(int pos);
 
   /**
    * Checks if value is null
    * @param pos position of value
    * @return true if value is null
    */
-  bool IsNull(int pos) const;
+  bool IsNull(int pos);
 
   /**
    * Gets last id of insert row
@@ -192,7 +194,7 @@ class SQLQuery {
    * Gets string of the query
    * @return string of the query
    */
-  const std::string& query() const;
+  std::string query() const;
 
   /**
    * Gets information about the last error that occurred on the database
@@ -202,34 +204,17 @@ class SQLQuery {
 
  private:
   /**
-   * The instantiation of database
+   * @brief Splits query by statements
+   * @param query Query to be processed
+   * @return List of query statements
    */
-  SQLDatabase& db_;
+  QStringList SplitQuery(const std::string& query) const;
 
-  /**
-   * The string of query
-   */
-  std::string query_;
-
-#ifndef QT_PORT
-  /**
-   * The SQL statement in SQLite
-   */
-  sqlite3_stmt* statement_;
-#endif  // QT_PORT
-
-  /**
-   * Lock for guarding statement
-   */
-  sync_primitives::Lock statement_lock_;
-
-  /**
-   * The last error that occurred with this query
-   */
-  int error_;
+  QSqlQuery query_;
+  QStringList queries_cache_;
 };
 
 }  // namespace dbms
 }  // namespace utils
 
-#endif  // SRC_COMPONENTS_POLICY_SQLITE_WRAPPER_INCLUDE_SQLITE_WRAPPER_SQL_QUERY_H_
+#endif  // SRC_COMPONENTS_POLICY_SQLITE_WRAPPER_INCLUDE_SQL_QT_WRAPPER_SQL_QUERY_H_

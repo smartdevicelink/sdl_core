@@ -87,6 +87,13 @@ class SQLDatabase {
   SQLError LastError() const;
 
   /**
+   * @brief HasErrors Indicate the status of the last executed operation.
+   *
+   * @return true in case last operation has any errors, false otherwise.
+   */
+  bool HasErrors() const;
+
+  /**
    * Call backup for opened DB
    */
   bool Backup();

@@ -29,23 +29,18 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 set(target dbms)
-
-if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-  find_package(WinSqlite3 REQUIRED)
-else()
-  find_package(Sqlite3 REQUIRED)
-endif()
-
+find_package(Qt5 REQUIRED Sql)
 include_directories(
   ${COMPONENTS_DIR}/utils/include/utils
-  ${SQLITE_INCLUDE_DIRECTORY}
+  ${Qt5Sql_INCLUDE_DIRS}
 )
 
 set(SOURCES
   ./sql_database.cc
-  ./sql_query.cc
   ./sql_error.cc
+  ./sql_query.cc
 )
 
 add_library(${target} ${SOURCES})
-target_link_libraries(${target} Utils)
+
+target_link_libraries(${target} Utils Qt5::Sql)
