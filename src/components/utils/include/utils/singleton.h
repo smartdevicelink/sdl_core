@@ -70,13 +70,13 @@ class Singleton {
   /**
    * @brief Singleton template
    * Singleton classes must derive from this template specialized with class
-   *itself:
+   * itself:
    *
    * class MySingleton : public Singleton<MySingleton> {...};
    *
    * All such classes must declare instance() method as friend
    * by adding FRIEND_BASE_SINGLETON_CLASS macro from macro.h to class
-   *definition:
+   * definition:
    *
    * FRIEND_BASE_SINGLETON_CLASS(MySingleton);
    *
@@ -141,6 +141,8 @@ T* Singleton<T, Deleter>::instance() {
 
 template <typename T, class Deleter>
 void Singleton<T, Deleter>::destroy() {
+  static sync_primitives::Lock lock;
+
   T* local_instance;
   atomic_pointer_assign(local_instance, *instance_pointer());
   memory_barrier();

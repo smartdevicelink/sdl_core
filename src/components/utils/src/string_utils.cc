@@ -29,32 +29,38 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include <cstdint>
+#include <string>
+#include <algorithm>
 
-#ifndef SRC_COMPONENTS_INCLUDE_UTILS_BYTE_ORDER_H_
-#define SRC_COMPONENTS_INCLUDE_UTILS_BYTE_ORDER_H_
+#include "utils/string_utils.h"
 
-#if defined(OS_POSIX)
-#if defined(__QNX__)
-#include <gulliver.h>
-#define BE_TO_LE32(x) ENDIAN_SWAP32(&(x));
-#define LE_TO_BE32(x) ENDIAN_SWAP32(&(x));
-#else
-#include <byteswap.h>
-#define BE_TO_LE32(x) bswap_32(x)
-#define LE_TO_BE32(x) bswap_32(x)
-#endif
-#elif defined(OS_WINDOWS)
-#define bswap_16(x) (((x) << 8) & 0xff00) | (((x) >> 8) & 0xff)
-#define bswap_32(x)                                      \
-  (((x) << 24) & 0xff000000) | (((x) << 8) & 0xff0000) | \
-      (((x) >> 8) & 0xff00) | (((x) >> 24) & 0xff)
-#define bswap_64(x)                                                            \
-  ((((x)&0xff00000000000000ull) >> 56) | (((x)&0x00ff000000000000ull) >> 40) | \
-   (((x)&0x0000ff0000000000ull) >> 24) | (((x)&0x000000ff00000000ull) >> 8) |  \
-   (((x)&0x00000000ff000000ull) << 8) | (((x)&0x0000000000ff0000ull) << 24) |  \
-   (((x)&0x000000000000ff00ull) << 40) | (((x)&0x00000000000000ffull) << 56))
-#define BE_TO_LE32(x) bswap_32(x)
-#define LE_TO_BE32(x) bswap_32(x)
-#endif
+void utils::ReplaceStringInPlace(std::string& str,
+                                 const std::string& from,
+                                 const std::string& to) {
+  std::size_t pos = 0;
+  while ((pos = str.find(from, pos)) != std::string::npos) {
+    str.replace(pos, from.length(), to);
+    pos += to.length();
+  }
+}
 
-#endif  // SRC_COMPONENTS_INCLUDE_UTILS_BYTE_ORDER_H_
+std::string utils::ReplaceString(std::string str,
+                                 const std::string& from,
+                                 const std::string& to) {
+  ReplaceStringInPlace(str, from, to);
+  return str;
+}
+
+std::string utils::Trim(const std::string& value,
+                        const std::string& whitespace) {
+  const std::size_t begin = value.find_first_not_of(whitespace);
+  if (begin == std::string::npos) {
+    return "";
+  }
+
+  const std::size_t end = value.find_last_not_of(whitespace);
+  const std::size_t range = end - begin + 1;
+
+  return value.substr(begin, range);
+}

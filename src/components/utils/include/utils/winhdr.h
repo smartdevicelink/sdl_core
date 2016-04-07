@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,32 +29,59 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef SRC_COMPONENTS_INCLUDE_UTILS_WINHDR_H_
+#define SRC_COMPONENTS_INCLUDE_UTILS_WINHDR_H_
 
-#ifndef SRC_COMPONENTS_INCLUDE_UTILS_BYTE_ORDER_H_
-#define SRC_COMPONENTS_INCLUDE_UTILS_BYTE_ORDER_H_
+#define WIN32_LEAN_AND_MEAN
 
-#if defined(OS_POSIX)
-#if defined(__QNX__)
-#include <gulliver.h>
-#define BE_TO_LE32(x) ENDIAN_SWAP32(&(x));
-#define LE_TO_BE32(x) ENDIAN_SWAP32(&(x));
-#else
-#include <byteswap.h>
-#define BE_TO_LE32(x) bswap_32(x)
-#define LE_TO_BE32(x) bswap_32(x)
-#endif
-#elif defined(OS_WINDOWS)
-#define bswap_16(x) (((x) << 8) & 0xff00) | (((x) >> 8) & 0xff)
-#define bswap_32(x)                                      \
-  (((x) << 24) & 0xff000000) | (((x) << 8) & 0xff0000) | \
-      (((x) >> 8) & 0xff00) | (((x) >> 24) & 0xff)
-#define bswap_64(x)                                                            \
-  ((((x)&0xff00000000000000ull) >> 56) | (((x)&0x00ff000000000000ull) >> 40) | \
-   (((x)&0x0000ff0000000000ull) >> 24) | (((x)&0x000000ff00000000ull) >> 8) |  \
-   (((x)&0x00000000ff000000ull) << 8) | (((x)&0x0000000000ff0000ull) << 24) |  \
-   (((x)&0x000000000000ff00ull) << 40) | (((x)&0x00000000000000ffull) << 56))
-#define BE_TO_LE32(x) bswap_32(x)
-#define LE_TO_BE32(x) bswap_32(x)
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <wspiapi.h>
+#include <Mstcpip.h>
+#include <psapi.h>
+#include <Wtsapi32.h>
+
+#ifdef min
+#undef min
 #endif
 
-#endif  // SRC_COMPONENTS_INCLUDE_UTILS_BYTE_ORDER_H_
+#ifdef max
+#undef max
+#endif
+
+#ifdef CreateFile
+#undef CreateFile
+#endif
+
+#ifdef DeleteFile
+#undef DeleteFile
+#endif
+
+#ifdef CreateDirectory
+#undef CreateDirectory
+#endif
+
+#ifdef RemoveDirectory
+#undef RemoveDirectory
+#endif
+
+#ifdef CopyFile
+#undef CopyFile
+#endif
+
+#ifdef MoveFile
+#undef MoveFile
+#endif
+
+#ifdef ERROR
+#undef ERROR
+#endif
+
+#pragma warning(disable : 4482)  // Disabled MSVS warning c4482. /W1 (level 1)
+#pragma warning(disable : 4200)  // Disabled MSVS warning c4200. /W2 (level 2)
+#pragma warning(disable : 4250)  // Disabled MSVS warning c4250. /W2 (level 2)
+#pragma warning(disable : 4373)  // Disabled MSVS warning c4373. /W2 (level 3)
+// Compiler warnings:
+// https://msdn.microsoft.com/en-us/library/79wf64bc(v=vs.100).aspx
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_WINHDR_H_

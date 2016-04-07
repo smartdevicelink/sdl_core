@@ -49,9 +49,9 @@
  * SharedPtr<A> shared3(MakeShared<A>(5, 5.5, std::string("MyStr"));
  *
  * The profit in using MakeShared instead of simple allocation with operator new
- *is evident.
+ * is evident.
  * Firstly it allows us to centralize allocation place, secondly it allows us to
- *use
+ * use
  * safe operator new overloading (no throwable one).
  */
 namespace utils {

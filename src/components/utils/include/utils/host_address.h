@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,32 +29,45 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_HOST_ADDRESS_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_HOST_ADDRESS_H_
 
-#ifndef SRC_COMPONENTS_INCLUDE_UTILS_BYTE_ORDER_H_
-#define SRC_COMPONENTS_INCLUDE_UTILS_BYTE_ORDER_H_
+#include <cstdint>
+#include <string>
 
-#if defined(OS_POSIX)
-#if defined(__QNX__)
-#include <gulliver.h>
-#define BE_TO_LE32(x) ENDIAN_SWAP32(&(x));
-#define LE_TO_BE32(x) ENDIAN_SWAP32(&(x));
-#else
-#include <byteswap.h>
-#define BE_TO_LE32(x) bswap_32(x)
-#define LE_TO_BE32(x) bswap_32(x)
-#endif
-#elif defined(OS_WINDOWS)
-#define bswap_16(x) (((x) << 8) & 0xff00) | (((x) >> 8) & 0xff)
-#define bswap_32(x)                                      \
-  (((x) << 24) & 0xff000000) | (((x) << 8) & 0xff0000) | \
-      (((x) >> 8) & 0xff00) | (((x) >> 24) & 0xff)
-#define bswap_64(x)                                                            \
-  ((((x)&0xff00000000000000ull) >> 56) | (((x)&0x00ff000000000000ull) >> 40) | \
-   (((x)&0x0000ff0000000000ull) >> 24) | (((x)&0x000000ff00000000ull) >> 8) |  \
-   (((x)&0x00000000ff000000ull) << 8) | (((x)&0x0000000000ff0000ull) << 24) |  \
-   (((x)&0x000000000000ff00ull) << 40) | (((x)&0x00000000000000ffull) << 56))
-#define BE_TO_LE32(x) bswap_32(x)
-#define LE_TO_BE32(x) bswap_32(x)
-#endif
+namespace utils {
 
-#endif  // SRC_COMPONENTS_INCLUDE_UTILS_BYTE_ORDER_H_
+namespace SpecialAddress {
+enum Type { Any, LoopBack };
+}  // namespace SpecialAddress
+
+class HostAddress {
+ public:
+  HostAddress();
+
+  explicit HostAddress(const SpecialAddress::Type address);
+
+  explicit HostAddress(const std::string& ip4_address);
+
+  HostAddress(const uint32_t ip4_address, const bool is_host_byte_order);
+
+  bool operator==(const HostAddress& address) const;
+
+  bool operator==(const SpecialAddress::Type address) const;
+
+  inline bool operator!=(const HostAddress& address) const;
+
+  inline bool operator!=(const SpecialAddress::Type address) const;
+
+  uint32_t ToIp4Address(const bool is_host_byte_order) const;
+
+  std::string ToString() const;
+
+ private:
+  // Address in the network byte order
+  uint32_t ip4_;
+};
+
+}  // namespace utils
+
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_HOST_ADDRESS_H_
