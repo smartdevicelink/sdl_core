@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,8 @@
  */
 
 #include "application_manager/commands/hmi/sdl_activate_app_request.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/message_helper.h"
 
 namespace application_manager {
 
@@ -67,16 +68,17 @@ void SDLActivateAppRequest::Run() {
     }
   }
 
+  DevicesApps devices_apps = FindAllAppOnParticularDevice(app->device());
+  if (!devices_apps.first && devices_apps.second.empty()) {
+    LOG4CXX_ERROR(logger_,
+                  "Can't find regular foreground app with the same "
+                  "connection id:"
+                      << app->device());
+    SendResponse(correlation_id(), SDL_ActivateApp, NO_APPS_REGISTERED);
+    return;
+  }
+
   if (!app->IsRegistered()) {
-    DevicesApps devices_apps = FindAllAppOnParticularDevice(app->device());
-    if (!devices_apps.first && devices_apps.second.empty()) {
-      LOG4CXX_ERROR(logger_,
-                    "Can't find regular foreground app with the same "
-                    "connection id:"
-                        << app->device());
-      SendResponse(correlation_id(), SDL_ActivateApp, NO_APPS_REGISTERED);
-      return;
-    }
     if (devices_apps.first) {
       MessageHelper::SendLaunchApp(
           devices_apps.first->app_id(), app->SchemaUrl(), app->PackageName());
@@ -90,10 +92,14 @@ void SDLActivateAppRequest::Run() {
     }
     subscribe_on_event(BasicCommunication_OnAppRegistered);
   } else {
-    const uint32_t application_id = app_id();
-    application_manager::ApplicationManagerImpl::instance()
-	->GetPolicyHandler().OnActivateApp(application_id,
-					   correlation_id());
+    if (devices_apps.first) {
+      MessageHelper::SendLaunchApp(
+          devices_apps.first->app_id(), app->SchemaUrl(), app->PackageName());
+    } else {
+      application_manager::ApplicationManagerImpl::instance()
+          ->GetPolicyHandler()
+          .OnActivateApp(application_id, correlation_id());
+    }
   }
 }
 
@@ -125,7 +131,8 @@ void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
         logger_, "Application not found by HMI app id: " << hmi_application_id);
     return;
   }
-  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler()
+  application_manager::ApplicationManagerImpl::instance()
+      ->GetPolicyHandler()
       .OnActivateApp(app->app_id(), correlation_id());
 }
 
