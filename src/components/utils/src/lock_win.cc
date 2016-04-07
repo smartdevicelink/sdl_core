@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (c) 2013-2016, Ford Motor Company
+ * Copyright (c) 2015-2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,12 +29,9 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#if defined(OS_POSIX)
+#if defined(OS_WINDOWS)
 
 #include "utils/lock.h"
-#include <errno.h>
-#include <stdint.h>
-#include <cstring>
 #include "utils/logger.h"
 
 namespace sync_primitives {
@@ -65,39 +62,21 @@ Lock::~Lock() {
     LOGGER_ERROR(logger_, "Destroying non-released mutex " << &mutex_);
   }
 #endif
-  int32_t status = pthread_mutex_destroy(&mutex_);
-  if (status != 0) {
-    LOGGER_ERROR(logger_,
-                 "Failed to destroy mutex " << &mutex_ << ": "
-                                            << strerror(status));
-  }
+  DeleteCriticalSection(&mutex_);
 }
 
 void Lock::Acquire() {
-  const int32_t status = pthread_mutex_lock(&mutex_);
-  if (status != 0) {
-    LOGGER_FATAL(logger_,
-                 "Failed to acquire mutex " << &mutex_ << ": "
-                                            << strerror(status));
-    DCHECK(status != 0);
-  } else {
-    AssertFreeAndMarkTaken();
-  }
+  EnterCriticalSection(&mutex_);
+  AssertFreeAndMarkTaken();
 }
 
 void Lock::Release() {
   AssertTakenAndMarkFree();
-  const int32_t status = pthread_mutex_unlock(&mutex_);
-  if (status != 0) {
-    LOGGER_ERROR(logger_,
-                 "Failed to unlock mutex" << &mutex_ << ": "
-                                          << strerror(status));
-  }
+  LeaveCriticalSection(&mutex_);
 }
 
 bool Lock::Try() {
-  const int32_t status = pthread_mutex_trylock(&mutex_);
-  if (status == 0) {
+  if (TryEnterCriticalSection(&mutex_)) {
 #ifndef NDEBUG
     lock_taken_++;
 #endif
@@ -124,24 +103,9 @@ void Lock::AssertTakenAndMarkFree() {
 #endif
 
 void Lock::Init(bool is_recursive) {
-  pthread_mutexattr_t attr;
-  pthread_mutexattr_init(&attr);
-
-  const int32_t mutex_type =
-      is_recursive ? PTHREAD_MUTEX_RECURSIVE : PTHREAD_MUTEX_ERRORCHECK;
-
-  pthread_mutexattr_settype(&attr, mutex_type);
-  const int32_t status = pthread_mutex_init(&mutex_, &attr);
-
-  pthread_mutexattr_destroy(&attr);
-
-  if (status != 0) {
-    LOGGER_FATAL(logger_,
-                 "Failed to initialize mutex. " << std::strerror(status));
-    DCHECK(status != 0);
-  }
+  InitializeCriticalSection(&mutex_);
 }
 
 }  // namespace sync_primitives
 
-#endif  // OS_POSIX
+#endif  // OS_WINDOWS

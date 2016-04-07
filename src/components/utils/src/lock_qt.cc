@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (c) 2013-2016, Ford Motor Company
+ * Copyright (c) 2015-2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,12 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#if defined(OS_POSIX)
 
 #include "utils/lock.h"
-#include <errno.h>
-#include <stdint.h>
-#include <cstring>
 #include "utils/logger.h"
 
 namespace sync_primitives {
@@ -61,43 +57,26 @@ Lock::Lock(bool is_recursive)
 
 Lock::~Lock() {
 #ifndef NDEBUG
-  if (lock_taken_ > 0) {
+  if (0 < lock_taken_) {
     LOGGER_ERROR(logger_, "Destroying non-released mutex " << &mutex_);
   }
 #endif
-  int32_t status = pthread_mutex_destroy(&mutex_);
-  if (status != 0) {
-    LOGGER_ERROR(logger_,
-                 "Failed to destroy mutex " << &mutex_ << ": "
-                                            << strerror(status));
-  }
+  delete mutex_;
+  mutex_ = NULL;
 }
 
 void Lock::Acquire() {
-  const int32_t status = pthread_mutex_lock(&mutex_);
-  if (status != 0) {
-    LOGGER_FATAL(logger_,
-                 "Failed to acquire mutex " << &mutex_ << ": "
-                                            << strerror(status));
-    DCHECK(status != 0);
-  } else {
-    AssertFreeAndMarkTaken();
-  }
+  mutex_->lock();
+  AssertFreeAndMarkTaken();
 }
 
 void Lock::Release() {
   AssertTakenAndMarkFree();
-  const int32_t status = pthread_mutex_unlock(&mutex_);
-  if (status != 0) {
-    LOGGER_ERROR(logger_,
-                 "Failed to unlock mutex" << &mutex_ << ": "
-                                          << strerror(status));
-  }
+  mutex_->unlock();
 }
 
 bool Lock::Try() {
-  const int32_t status = pthread_mutex_trylock(&mutex_);
-  if (status == 0) {
+  if (mutex_->tryLock()) {
 #ifndef NDEBUG
     lock_taken_++;
 #endif
@@ -108,15 +87,13 @@ bool Lock::Try() {
 
 #ifndef NDEBUG
 void Lock::AssertFreeAndMarkTaken() {
-  if ((lock_taken_ > 0) && !is_mutex_recursive_) {
-    LOGGER_ERROR(logger_, "Locking already taken not recursive mutex");
+  if ((0 < lock_taken_) && !is_mutex_recursive_) {
     NOTREACHED();
   }
   lock_taken_++;
 }
 void Lock::AssertTakenAndMarkFree() {
-  if (lock_taken_ == 0) {
-    LOGGER_ERROR(logger_, "Unlocking a mutex that is not taken");
+  if (!lock_taken_) {
     NOTREACHED();
   }
   lock_taken_--;
@@ -124,24 +101,10 @@ void Lock::AssertTakenAndMarkFree() {
 #endif
 
 void Lock::Init(bool is_recursive) {
-  pthread_mutexattr_t attr;
-  pthread_mutexattr_init(&attr);
+  const QMutex::RecursionMode mutex_type =
+      is_recursive ? QMutex::Recursive : QMutex::NonRecursive;
 
-  const int32_t mutex_type =
-      is_recursive ? PTHREAD_MUTEX_RECURSIVE : PTHREAD_MUTEX_ERRORCHECK;
-
-  pthread_mutexattr_settype(&attr, mutex_type);
-  const int32_t status = pthread_mutex_init(&mutex_, &attr);
-
-  pthread_mutexattr_destroy(&attr);
-
-  if (status != 0) {
-    LOGGER_FATAL(logger_,
-                 "Failed to initialize mutex. " << std::strerror(status));
-    DCHECK(status != 0);
-  }
+  mutex_ = new QMutex(mutex_type);
 }
 
 }  // namespace sync_primitives
-
-#endif  // OS_POSIX
