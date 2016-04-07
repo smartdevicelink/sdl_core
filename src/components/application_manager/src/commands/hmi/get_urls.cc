@@ -137,7 +137,11 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
     }
   }
 
-  service_info[hmi_response::policy_app_id] = mobile_app_id;
+  // Usage of plain string instead of smart object keys is workaround for
+  // different cases between parameter name and key. Because of that SDL
+  // removes field from response.
+  // There is another CRQ to completely remove 'policyAppId' from HMI API.
+  service_info["policyAppId"] = mobile_app_id;
   service_info[strings::url] = default_url;
   urls[0] = service_info;
   // TODO(AOleynik): Issue with absent policy_app_id. Need to fix later on.
