@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,20 +40,23 @@ namespace application_manager {
 namespace commands {
 
 class SDLPolicyUpdate : public RequestToHMI {
-  public:
-    /**
-       * @brief SDLPolicyUpdate class constructor
-       *
-       * @param message Incoming SmartObject message
-       **/
-    explicit SDLPolicyUpdate(const MessageSharedPtr& message);
-    virtual ~SDLPolicyUpdate();
-    /**
-     * @brief Execute command
+ public:
+  /**
+     * @brief SDLPolicyUpdate class constructor
+     *
+     * @param message Incoming SmartObject message
      **/
-    virtual void Run();
-  private:
-    DISALLOW_COPY_AND_ASSIGN(SDLPolicyUpdate);
+  explicit SDLPolicyUpdate(const MessageSharedPtr& message);
+
+  ~SDLPolicyUpdate() OVERRIDE;
+
+  /**
+   * @brief Execute command
+   **/
+  void Run() OVERRIDE;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(SDLPolicyUpdate);
 };
 
 }  // namespace commands
