@@ -27,6 +27,7 @@ before_install:
   - sudo apt-get -q -y install libavahi-client-dev bluez-tools sqlite3 libsqlite3-dev automake1.11
 script:
   - cmake --version
+  - export LD_LIBRARY_PATH=.
   - mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON && make && make install && make test
   - mkdir coverage_report/ && lcov --capture --directory . --output-file coverage_report/full_report.info;
   - lcov --remove coverage_report/full_report.info  '/usr/*' 'src/3rd*' '*/commands/*' '*/test/*'  --output-file coverage_report/coverage.info;
