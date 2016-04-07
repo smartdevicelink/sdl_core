@@ -29,20 +29,55 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "utils/signals.h"
+#include "utils/logger.h"
+#include <QCoreApplication>
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
+CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
-#if defined(__QNXNTO__)
-typedef void (*sighandler_t)(int);
-#else
-#include <signal.h>
-#endif
+namespace {
+
+void HandleSignals(const char* log_name) {
+  LOGGER_INFO(logger_, log_name);
+  QCoreApplication* const app = QCoreApplication::instance();
+  if (!app) {
+    LOGGER_FATAL(logger_, "No QCoreApplication instance already");
+  }
+  app->quit();
+}
+
+void SigHandler(int sig) {
+  switch (sig) {
+    case SIGINT:
+      HandleSignals("SIGINT signal has been caught");
+      break;
+    case SIGTERM:
+      HandleSignals("SIGTERM signal has been caught");
+      break;
+    case SIGSEGV:
+      HandleSignals("SIGSEGV signal has been caught");
+      break;
+    default:
+      HandleSignals("Unexpected signal has been caught");
+      break;
+  }
+}
+}  //  namespace
 
 namespace utils {
-void CreateSdlEvent();
-void WaitForSdlExecute();
-void SubscribeToTerminationSignals();
-}  //  namespace utils
 
-#endif  //  SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
+void WaitForSdlExecute() {
+  QCoreApplication::instance()->processEvents();
+  QCoreApplication::instance()->exec();
+}
+
+void CreateSdlEvent() {}
+
+void SubscribeToTerminationSignals() {
+  if ((signal(SIGINT, &SigHandler) == SIG_ERR) ||
+      (signal(SIGTERM, &SigHandler) == SIG_ERR) ||
+      (signal(SIGSEGV, &SigHandler) == SIG_ERR)) {
+    LOGGER_FATAL(logger_, "SDL is not subscribed to signal events");
+  }
+}
+}  //  namespace utils

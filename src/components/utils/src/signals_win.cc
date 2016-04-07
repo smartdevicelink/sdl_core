@@ -29,20 +29,57 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "utils/winhdr.h"
+#include "utils/signals.h"
+#include "utils/logger.h"
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
+CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
-#if defined(__QNXNTO__)
-typedef void (*sighandler_t)(int);
-#else
-#include <signal.h>
-#endif
+namespace {
+HANDLE signal_handle = NULL;
+
+void HandleSignals(HANDLE& signal_handle, const char* log_name) {
+  LOGGER_INFO(logger_, log_name);
+  SetEvent(signal_handle);
+}
+
+void SigHandler(int sig) {
+  switch (sig) {
+    case SIGINT:
+      HandleSignals(signal_handle, "SIGINT signal has been caught");
+      break;
+    case SIGTERM:
+      HandleSignals(signal_handle, "SIGTERM signal has been caught");
+      break;
+    case SIGSEGV:
+      HandleSignals(signal_handle, "SIGSEGV signal has been caught");
+      break;
+    default:
+      HandleSignals(signal_handle, "Unexpected signal has been caught");
+      break;
+  }
+}
+}  //  namespace
 
 namespace utils {
-void CreateSdlEvent();
-void WaitForSdlExecute();
-void SubscribeToTerminationSignals();
-}  //  namespace utils
 
-#endif  //  SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
+void WaitForSdlExecute() {
+  if (signal_handle) {
+    WaitForSingleObject(signal_handle, INFINITE);
+  } else {
+    LOGGER_FATAL(logger_, "SDL is not subscribed to signal events");
+  }
+}
+
+void CreateSdlEvent() {
+  signal_handle = CreateEvent(NULL, true, false, "SignalEvent");
+}
+
+void SubscribeToTerminationSignals() {
+  if ((signal(SIGINT, &SigHandler) == SIG_ERR) ||
+      (signal(SIGTERM, &SigHandler) == SIG_ERR) ||
+      (signal(SIGSEGV, &SigHandler) == SIG_ERR)) {
+    LOGGER_FATAL(logger_, "Subscribe to system signals error");
+  }
+}
+}  //  namespace utils
