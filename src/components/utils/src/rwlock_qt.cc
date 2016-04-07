@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2015-2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,15 +29,15 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include <pthread.h>
-
 #include "utils/rwlock.h"
 #include "utils/logger.h"
 #include "utils/pimpl_impl.h"
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
+#include <QReadWriteLock>
 
 namespace sync_primitives {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 class RWLock::Impl {
  public:
@@ -52,7 +52,7 @@ class RWLock::Impl {
   void ReleaseForWriting();
 
  private:
-  pthread_rwlock_t rwlock_;
+  QReadWriteLock* rwlock_;
 };
 
 }  // namespace sync_primitives
@@ -86,25 +86,20 @@ void sync_primitives::RWLock::ReleaseForWriting() {
 }
 
 sync_primitives::RWLock::Impl::Impl() {
-  if (pthread_rwlock_init(&rwlock_, 0) != 0) {
-    LOGGER_ERROR(logger_, "Failed to initialize rwlock");
-  }
+  rwlock_ = new QReadWriteLock;
 }
 
 sync_primitives::RWLock::Impl::~Impl() {
-  if (pthread_rwlock_destroy(&rwlock_) != 0) {
-    LOGGER_ERROR(logger_, "Failed to destroy rwlock");
-  }
+  delete rwlock_;
+  rwlock_ = NULL;
 }
 
 void sync_primitives::RWLock::Impl::AcquireForReading() {
-  if (pthread_rwlock_rdlock(&rwlock_) != 0) {
-    LOGGER_ERROR(logger_, "Failed to acquire rwlock for reading");
-  }
+  rwlock_->lockForRead();
 }
 
 bool sync_primitives::RWLock::Impl::TryAcquireForReading() {
-  if (pthread_rwlock_tryrdlock(&rwlock_) != 0) {
+  if (!rwlock_->tryLockForRead()) {
     LOGGER_DEBUG(logger_, "Cannot acquire rwlock for reading");
     return false;
   }
@@ -112,13 +107,11 @@ bool sync_primitives::RWLock::Impl::TryAcquireForReading() {
 }
 
 void sync_primitives::RWLock::Impl::AcquireForWriting() {
-  if (pthread_rwlock_wrlock(&rwlock_) != 0) {
-    LOGGER_ERROR(logger_, "Failed to acquire rwlock for writing");
-  }
+  rwlock_->lockForWrite();
 }
 
 bool sync_primitives::RWLock::Impl::TryAcquireForWriting() {
-  if (pthread_rwlock_trywrlock(&rwlock_) != 0) {
+  if (!rwlock_->tryLockForWrite()) {
     LOGGER_DEBUG(logger_, "Cannot acquire rwlock for writing");
     return false;
   }
@@ -126,13 +119,9 @@ bool sync_primitives::RWLock::Impl::TryAcquireForWriting() {
 }
 
 void sync_primitives::RWLock::Impl::ReleaseForReading() {
-  if (pthread_rwlock_unlock(&rwlock_) != 0) {
-    LOGGER_ERROR(logger_, "Failed to release rwlock for reading");
-  }
+  rwlock_->unlock();
 }
 
 void sync_primitives::RWLock::Impl::ReleaseForWriting() {
-  if (pthread_rwlock_unlock(&rwlock_) != 0) {
-    LOGGER_ERROR(logger_, "Failed to release rwlock for writing");
-  }
+  rwlock_->unlock();
 }
