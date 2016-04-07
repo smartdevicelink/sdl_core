@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@ OnReceivedPolicyUpdate::~OnReceivedPolicyUpdate() {}
 
 void OnReceivedPolicyUpdate::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+#ifdef EXTENDED_POLICY
   const std::string& file_path =
       (*message_)[strings::msg_params][hmi_notification::policyfile].asString();
   policy::BinaryMessage file_content;
@@ -53,7 +54,13 @@ void OnReceivedPolicyUpdate::Run() {
     LOG4CXX_ERROR(logger_, "Failed to read Update file.");
     return;
   }
-  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().ReceiveMessageFromSDK(file_path, file_content);
+  ApplicationManagerImpl::instance()->GetPolicyHandler().ReceiveMessageFromSDK(
+      file_path, file_content);
+#else
+  LOG4CXX_WARN(logger_,
+               "This RPC is part of extended policy flow."
+               "Please re-build with extended policy mode enabled.");
+#endif
 }
 
 }  // namespace commands
