@@ -60,22 +60,10 @@ class DialNumberRequest : public CommandRequestImpl {
    **/
    bool Init() OVERRIDE;
 
-  /**
-    * @brief Initialize request params
-   **/
-   virtual bool Init();
-
-  /**
+ /**
    * @brief Execute command
    **/
   void Run() OVERRIDE;
-
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
-  void on_event(const event_engine::Event& event);
 
   /**
    * @brief Interface method that is called whenever new event received
