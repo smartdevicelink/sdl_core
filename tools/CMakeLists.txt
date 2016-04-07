@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 
+if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 include(ExternalProject)
 
 set(intergen_SOURCES "${CMAKE_CURRENT_LIST_DIR}/intergen")
@@ -20,8 +21,4 @@ ExternalProject_Add_Step(intergen forcebuild
                          COMMAND ${CMAKE_COMMAND} -E echo "Force intergen build"
                          DEPENDEES update DEPENDERS build
                          ALWAYS 1)
-
-if(BUILD_TESTS)
-  add_subdirectory(intergen/test)
-endif()  
-add_subdirectory(policy_table_validator)
+endif()
