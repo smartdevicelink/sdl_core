@@ -68,8 +68,10 @@ void OnSystemRequestNotification::Run() {
 
   RequestType::eType request_type = static_cast<RequestType::eType>(
       (*message_)[strings::msg_params][strings::request_type].asInt());
+
   const policy::PolicyHandlerInterface& policy_handler =
       ApplicationManagerImpl::instance()->GetPolicyHandler();
+
   if (!policy_handler.IsRequestTypeAllowed(app->mobile_app_id(),
                                            request_type)) {
     LOG4CXX_WARN(logger_,
@@ -79,12 +81,6 @@ void OnSystemRequestNotification::Run() {
   }
 
   if (RequestType::PROPRIETARY == request_type) {
-/* According to requirements:
-   "If the requestType = PROPRIETARY, add to mobile API fileType = JSON
-    If the requestType = HTTP, add to mobile API fileType = BINARY"
-   Also in Genivi SDL we don't save the PT to file - we put it directly in
-   binary_data */
-
 #ifdef EXTENDED_POLICY
     const std::string filename =
         (*message_)[strings::msg_params][strings::file_name].asString();
@@ -95,7 +91,9 @@ void OnSystemRequestNotification::Run() {
     (*message_)[strings::params][strings::binary_data] = binary_data;
 #endif
     (*message_)[strings::msg_params][strings::file_type] = FileType::JSON;
-  } else if (RequestType::HTTP == request_type) {
+  }
+
+  if (RequestType::HTTP == request_type) {
     (*message_)[strings::msg_params][strings::file_type] = FileType::BINARY;
   }
 

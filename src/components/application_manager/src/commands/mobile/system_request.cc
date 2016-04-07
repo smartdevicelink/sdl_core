@@ -463,6 +463,25 @@ void SystemRequest::Run() {
     file_name = buf;
   }
 
+#ifndef EXTENDED_POLICY
+  // Supposed to be policy table update in case of open source non-extended case
+  if (mobile_apis::RequestType::HTTP == request_type &&
+      std::string::npos != file_name.find(kSYNC)) {
+    if (!(*message_)[strings::params].keyExists(strings::binary_data)) {
+      LOG4CXX_ERROR(logger_, "Binary data are missing for policy update."
+                    " Nothing to process.");
+      SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      return;
+    }
+    const std::vector<uint8_t> binary_data =
+        (*message_)[strings::params][strings::binary_data].asBinary();
+    ApplicationManagerImpl::instance()->
+        GetPolicyHandler().ReceiveMessageFromSDK(file_name, binary_data);
+    SendResponse(false, mobile_apis::Result::SUCCESS);
+    return;
+  }
+#endif
+
   std::vector<uint8_t> binary_data;
   std::string binary_data_folder;
   if ((*message_)[strings::params].keyExists(strings::binary_data)) {
