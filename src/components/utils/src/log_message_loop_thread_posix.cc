@@ -29,65 +29,50 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOG_MESSAGE_LOOP_THREAD_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOG_MESSAGE_LOOP_THREAD_H_
-
-#include <string>
-#include <queue>
+#include "utils/macro.h"
+#include "utils/log_message_loop_thread.h"
 
 #if defined(LOG4CXX_LOGGER)
 #include <log4cxx/logger.h>
-#elif defined(WIN_NATIVE)
-#include "utils/winhdr.h"
-#elif defined(QT_PORT)
-#include <QDateTime>
-#else
-#error "Logger is not implemented for this platform"
-#endif
 
-#include "utils/macro.h"
-#include "utils/threads/message_loop_thread.h"
+namespace {
+
+log4cxx::LevelPtr GetLog4cxxLogLevel(const logger::LogLevel::Type level) {
+  using namespace logger;
+  switch (level) {
+    case LogLevel::LL_TRACE:
+      return log4cxx::Level::getTrace();
+    case LogLevel::LL_DEBUG:
+      return log4cxx::Level::getDebug();
+    case LogLevel::LL_INFO:
+      return log4cxx::Level::getInfo();
+    case LogLevel::LL_WARN:
+      return log4cxx::Level::getWarn();
+    case LogLevel::LL_ERROR:
+      return log4cxx::Level::getError();
+    case LogLevel::LL_FATAL:
+      return log4cxx::Level::getFatal();
+    default:
+      NOTREACHED();
+  }
+}
+
+}  // namespace
 
 namespace logger {
 
-struct LogMessage {
-  logger::LoggerType logger_;
-  logger::LogLevel::Type level_;
-  std::string entry_;
-  logger::LogLocation location_;
-#if defined(LOG4CXX_LOGGER)
-  log4cxx_time_t time_;
-  log4cxx::LogString thread_name_;
-#elif defined(WIN_NATIVE)
-  SYSTEMTIME time_;
-  uint32_t thread_id_;
-  FILE* output_file_;
-#elif defined(QT_PORT)
-  QDateTime time_;
-  uint32_t thread_id_;
-#endif
-};
-
-typedef std::queue<LogMessage> LogMessageQueue;
-typedef threads::MessageLoopThread<LogMessageQueue>
-    LogMessageLoopThreadTemplate;
-
-class LogMessageHandler : public LogMessageLoopThreadTemplate::Handler {
- public:
-  virtual void Handle(const LogMessage message) OVERRIDE;
-};
-
-class LogMessageLoopThread : public LogMessageLoopThreadTemplate {
- public:
-  LogMessageLoopThread()
-      : LogMessageLoopThreadTemplate("Logger", new LogMessageHandler()) {}
-
-  ~LogMessageLoopThread() {}
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(LogMessageLoopThread);
-};
+void LogMessageHandler::Handle(const LogMessage message) {
+  message.logger_->forcedLog(
+      GetLog4cxxLogLevel(message.level_),
+      message.entry_,
+      message.time_,
+      log4cxx::spi::LocationInfo(
+          message.location_.file_name_,
+          message.location_.function_name_,
+          static_cast<int>(message.location_.line_number_)),
+      message.thread_name_);
+}
 
 }  // namespace logger
 
-#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOG_MESSAGE_LOOP_THREAD_H_
+#endif  // LOG4CXX_LOGGER
