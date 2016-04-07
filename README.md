@@ -27,14 +27,15 @@ The Core component of SDL runs on a vehicle's computing system (head unit). Core
 We're ramping up our efforts to get SmartDeviceLink developed and maintained directly in the open. For the Mobile libraries, we're expecting better integration soon, SDL Core is slightly more complicated. We are currently working on generating documentation, creating a developer portal, an open forum, Mobile validation, and everything else that we've been asked for to renew the community's interest in this project. From a technical standpoint, SDL is stable, and the most work is being put into making it a more robust solution for app connectivity. We are, however, definitely looking for and interested in other people and company's contributions to SDL whether it be feature based, bug fixes, healthy conversation, or even just suggestions for improvement.
 
 # Getting Started
+
+####Linux
+
 A quick guide to installing, configuring, and running an instance of the SDL Core on a linux OS.
 
   1. Clone this repository
   2. Create a folder for your build and run `cmake ../sdl_core`
   3. If there are any dependency issues, install missing dependencies
   4. Run the following commands to compile and install smartdevicelink
-
-
 
 ```
 %make
@@ -43,13 +44,32 @@ A quick guide to installing, configuring, and running an instance of the SDL Cor
 %cp bin/mycert.pem src/appMain
 ```
 
+####Windows
+
+A quick guide to configuring and running an instance of the SDL Core on a Windows OS.
+For details [see](How-to-build-and-run-SDL-on-windows)
+
+  1. Clone this repository
+  2. Install required version of the Visual Studio and all other requirements.
+  3. Run Visual Studio or Qt Creator and build the application.
+
 ## Start SDL Core
 Once SDL Core is compiled and installed you can start it from the executable in the bin folder
+
+####Linux
 
 ```
 %cd src/appMain
 %./smartDeviceLinkCore
 ```
+
+####Windows
+
+See [link](How-to-build-and-run-SDL-on-windows#run)
+
+Executable is available in
+Windows native: <build dir>\sdl_win_x64\src\appMain\<Debug or Release>
+Windows Qt: <build>\sdl_win_qt_x86\src\appMain
 
 ## Start WEB HMI
 Web HMI is separated from SDL Core and located in another repository. So to make it workable please do next steps.
@@ -59,9 +79,11 @@ Web HMI is separated from SDL Core and located in another repository. So to make
 
 
 ## A quick note about dependencies
-The dependencies for SDL Core vary based on the configuration. You can change SDL Core's configuration in the top level CMakeLists.txt. We have defaulted this file to a configuration which we believe is common for people who are interested in getting up and running quickly, generally on a Linux VM.
+The dependencies for SDL Core vary based on the configuration. You can change SDL Core's configuration in the top level CMakeLists.txt. We have defaulted this file to a configuration which we believe is common for people who are interested in getting up and running quickly.
 
 ### Dependencies list
+
+####Linux
 
 | Flag | Description | Dependencies |
 |------|-------------|--------------|
@@ -72,7 +94,14 @@ The dependencies for SDL Core vary based on the configuration. You can change SD
 |Testing framework|Needed to support running unit tests|libgtest-dev|
 |Cmake|Needed to configure SDL prior to compilation|cmake|
 
+####Windows
+
+See [link](How-to-build-and-run-SDL-on-windows#common-steps-for-windows-and-qt-platforms)
+
 ### Known Dependency Issues
+
+####Linux
+
   * log4cxx - We know that the version of log4cxx on a linux machine can conflict with the one used, which is why it is provided in the repository. To avoid the conflict, we recommend removing liblog4cxx*.
   * cmake - on some versions of linux, the included cmake package doesn't have the right version. If apt-get is your package manager, you can find the correct version using
 ```
@@ -81,6 +110,10 @@ sudo add-apt-repository ppa:kalakris/cmake
 sudo apt-get update
 sudo apt-get upgrade
 ```
+
+####Windows
+
+For common issues related to the USB transport [see](USB-transport-notes)
 
 ## Required RPCs
 There are several RPCs that are "required" to be implemented in order for SDL to work across vehicle manufacturers and applications, listed below.  The RPC specification can be found in the [Mobile API Spec](src/components/interfaces/MOBILE_API.xml).
