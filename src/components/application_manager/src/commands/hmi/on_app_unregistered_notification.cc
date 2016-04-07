@@ -39,17 +39,17 @@ namespace application_manager {
 namespace commands {
 
 OnAppUnregisteredNotification::OnAppUnregisteredNotification(
-    const MessageSharedPtr& message) : NotificationToHMI(message) {
-}
+    const MessageSharedPtr& message)
+    : NotificationToHMI(message) {}
 
-OnAppUnregisteredNotification::~OnAppUnregisteredNotification() {
-}
+OnAppUnregisteredNotification::~OnAppUnregisteredNotification() {}
 
 void OnAppUnregisteredNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  //sending event for delete VRCommand on PerformInteraction
-  event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered);
+  // sending event for delete VRCommand on PerformInteraction
+  event_engine::Event event(
+      hmi_apis::FunctionID::BasicCommunication_OnAppUnregistered);
   event.set_smart_object(*message_);
   event.raise();
 
@@ -59,4 +59,3 @@ void OnAppUnregisteredNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

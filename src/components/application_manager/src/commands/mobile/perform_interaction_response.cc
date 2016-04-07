@@ -40,11 +40,9 @@ namespace commands {
 
 PerformInteractionResponse::PerformInteractionResponse(
     const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    : CommandResponseImpl(message) {}
 
-PerformInteractionResponse::~PerformInteractionResponse() {
-}
+PerformInteractionResponse::~PerformInteractionResponse() {}
 
 void PerformInteractionResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -39,12 +39,10 @@ namespace application_manager {
 namespace commands {
 
 SetMediaClockTimerResponse::SetMediaClockTimerResponse(
-  const MessageSharedPtr& message)
-  : CommandResponseImpl(message) {
-}
+    const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {}
 
-SetMediaClockTimerResponse::~SetMediaClockTimerResponse() {
-}
+SetMediaClockTimerResponse::~SetMediaClockTimerResponse() {}
 
 void SetMediaClockTimerResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

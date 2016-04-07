@@ -65,6 +65,7 @@ class OnCommandNotification : public CommandNotificationImpl {
    * @brief Execute command
    **/
   virtual void Run();
+
  private:
   DISALLOW_COPY_AND_ASSIGN(OnCommandNotification);
 };

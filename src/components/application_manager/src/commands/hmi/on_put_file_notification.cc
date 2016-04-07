@@ -37,13 +37,10 @@ namespace application_manager {
 
 namespace commands {
 
-OnPutFileNotification::OnPutFileNotification(
-    const MessageSharedPtr& message)
-    : NotificationToHMI(message) {
-}
+OnPutFileNotification::OnPutFileNotification(const MessageSharedPtr& message)
+    : NotificationToHMI(message) {}
 
-OnPutFileNotification::~OnPutFileNotification() {
-}
+OnPutFileNotification::~OnPutFileNotification() {}
 
 void OnPutFileNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,4 +50,3 @@ void OnPutFileNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

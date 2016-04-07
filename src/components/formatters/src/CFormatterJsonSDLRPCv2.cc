@@ -47,7 +47,8 @@ bool CFormatterJsonSDLRPCv2::toString(const smart_objects_ns::SmartObject& obj,
     Json::Value root(Json::objectValue);
 
     smart_objects_ns::SmartObject formattedObj(obj);
-    formattedObj.getSchema().unapplySchema(formattedObj);  // converts enums(as int32_t) to strings
+    formattedObj.getSchema().unapplySchema(
+        formattedObj);  // converts enums(as int32_t) to strings
 
     objToJsonValue(formattedObj.getElement(strings::S_MSG_PARAMS), root);
 
@@ -63,31 +64,33 @@ bool CFormatterJsonSDLRPCv2::toString(const smart_objects_ns::SmartObject& obj,
 
 // ----------------------------------------------------------------------------
 
-CFormatterJsonSDLRPCv2::tMetaFormatterErrorCode CFormatterJsonSDLRPCv2::MetaFormatToString(
+CFormatterJsonSDLRPCv2::tMetaFormatterErrorCode
+CFormatterJsonSDLRPCv2::MetaFormatToString(
     const smart_objects_ns::SmartObject& object,
-    const smart_objects_ns::CSmartSchema& schema, std::string& outStr) {
-
+    const smart_objects_ns::CSmartSchema& schema,
+    std::string& outStr) {
   meta_formatter_error_code::tMetaFormatterErrorCode result_code =
       meta_formatter_error_code::kErrorOk;
 
   smart_objects_ns::SmartObject tmp_object;
 
-  if (false
-      == CMetaFormatter::CreateObjectByPattern(object, schema, tmp_object)) {
+  if (false ==
+      CMetaFormatter::CreateObjectByPattern(object, schema, tmp_object)) {
     result_code |= meta_formatter_error_code::kErrorFailedCreateObjectBySchema;
     return result_code;
   }
 
   // determine whether smart objects are functions
   // (in terms of SDLRPC communication)
-  bool is_root_object_created_by_schema = ((tmp_object.getType()
-      == smart_objects_ns::SmartType_Map)
-      && tmp_object.keyExists(strings::S_PARAMS)
-      && tmp_object.keyExists(strings::S_MSG_PARAMS));
+  bool is_root_object_created_by_schema =
+      ((tmp_object.getType() == smart_objects_ns::SmartType_Map) &&
+       tmp_object.keyExists(strings::S_PARAMS) &&
+       tmp_object.keyExists(strings::S_MSG_PARAMS));
 
-  bool is_root_object = ((object.getType() == smart_objects_ns::SmartType_Map)
-      && object.keyExists(strings::S_PARAMS)
-      && object.keyExists(strings::S_MSG_PARAMS));
+  bool is_root_object =
+      ((object.getType() == smart_objects_ns::SmartType_Map) &&
+       object.keyExists(strings::S_PARAMS) &&
+       object.keyExists(strings::S_MSG_PARAMS));
 
   if (false == is_root_object) {
     result_code |= meta_formatter_error_code::kErrorObjectIsNotFunction;
@@ -100,7 +103,6 @@ CFormatterJsonSDLRPCv2::tMetaFormatterErrorCode CFormatterJsonSDLRPCv2::MetaForm
 
   return result_code;
 }
-
 }
 }
 }

@@ -44,8 +44,9 @@ using namespace ::transport_manager::transport_adapter;
 
 class MockConnection : public Connection {
  public:
-  MOCK_METHOD1(SendData, TransportAdapter::Error(
-                             ::protocol_handler::RawMessagePtr message));
+  MOCK_METHOD1(
+      SendData,
+      TransportAdapter::Error(::protocol_handler::RawMessagePtr message));
   MOCK_METHOD0(Disconnect, TransportAdapter::Error());
 };
 

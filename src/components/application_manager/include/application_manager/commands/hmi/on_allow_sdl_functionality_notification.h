@@ -43,26 +43,26 @@ namespace commands {
  * @brief OnAllowSDLFunctionalityNotification command class
  **/
 class OnAllowSDLFunctionalityNotification : public NotificationFromHMI {
-  public:
-    /**
-     * @brief OnAllowSDLFunctionalityNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnAllowSDLFunctionalityNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnAllowSDLFunctionalityNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnAllowSDLFunctionalityNotification(const MessageSharedPtr& message);
 
-    /**
-     * @brief OnAllowSDLFunctionalityNotification class destructor
-     **/
-    virtual ~OnAllowSDLFunctionalityNotification();
+  /**
+   * @brief OnAllowSDLFunctionalityNotification class destructor
+   **/
+  virtual ~OnAllowSDLFunctionalityNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnAllowSDLFunctionalityNotification);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnAllowSDLFunctionalityNotification);
 };
 
 }  // namespace commands

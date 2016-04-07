@@ -39,11 +39,9 @@ namespace application_manager {
 namespace commands {
 
 TTSSpeakResponse::TTSSpeakResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-TTSSpeakResponse::~TTSSpeakResponse() {
-}
+TTSSpeakResponse::~TTSSpeakResponse() {}
 
 void TTSSpeakResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

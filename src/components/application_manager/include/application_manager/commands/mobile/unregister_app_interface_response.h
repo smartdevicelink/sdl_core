@@ -48,14 +48,12 @@ class UnregisterAppInterfaceResponse : public CommandResponseImpl {
    * \brief UnregisterAppInterfaceResponse class constructor
    **/
   explicit UnregisterAppInterfaceResponse(const MessageSharedPtr& response)
-      : CommandResponseImpl(response) {
-  }
+      : CommandResponseImpl(response) {}
 
   /**
    * \brief UnregisterAppInterfaceResponse class destructor
    **/
-  virtual ~UnregisterAppInterfaceResponse() {
-  }
+  virtual ~UnregisterAppInterfaceResponse() {}
 
   /**
    * @brief Execute command

@@ -55,8 +55,8 @@ class BluetoothTransportAdapter : public TransportAdapterImpl {
    * @brief Destructor.
    */
   virtual ~BluetoothTransportAdapter();
- protected:
 
+ protected:
   /**
    * @brief Return type of device.
    */

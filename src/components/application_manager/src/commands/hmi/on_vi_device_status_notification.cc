@@ -39,11 +39,9 @@ namespace commands {
 
 OnVIDeviceStatusNotification::OnVIDeviceStatusNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnVIDeviceStatusNotification::~OnVIDeviceStatusNotification() {
-}
+OnVIDeviceStatusNotification::~OnVIDeviceStatusNotification() {}
 
 void OnVIDeviceStatusNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,4 +56,3 @@ void OnVIDeviceStatusNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

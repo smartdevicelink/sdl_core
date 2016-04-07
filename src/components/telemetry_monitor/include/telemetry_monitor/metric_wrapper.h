@@ -41,19 +41,20 @@ namespace telemetry_monitor {
 
 class MetricWrapper {
   utils::ResourseUsage* resources;
-  public:
-    MetricWrapper();
-    /*
-     * @brief get current cpu and memory info and store it as member
-     */
-    bool grabResources();
-    virtual std::string GetStyledString();
-    virtual Json::Value GetJsonMetric();
-    virtual ~MetricWrapper();
-  protected:
-    void Clear();
-};
 
+ public:
+  MetricWrapper();
+  /*
+   * @brief get current cpu and memory info and store it as member
+   */
+  bool grabResources();
+  virtual std::string GetStyledString();
+  virtual Json::Value GetJsonMetric();
+  virtual ~MetricWrapper();
+
+ protected:
+  void Clear();
+};
 
 }  // namespace telemetry_monitor
 #endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_MECTRIC_WRAPPER_H_

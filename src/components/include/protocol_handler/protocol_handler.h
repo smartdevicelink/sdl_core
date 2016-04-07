@@ -55,14 +55,14 @@ class ProtocolHandler {
    * \param observer Pointer to object of the class implementing
    * IProtocolObserver
    */
-  virtual void AddProtocolObserver(ProtocolObserver *observer) = 0;
+  virtual void AddProtocolObserver(ProtocolObserver* observer) = 0;
 
   /**
    * \brief Removes pointer to higher layer handler for message exchange
    * \param observer Pointer to object of the class implementing
    * IProtocolObserver.
    */
-  virtual void RemoveProtocolObserver(ProtocolObserver *observer) = 0;
+  virtual void RemoveProtocolObserver(ProtocolObserver* observer) = 0;
 
   /**
    * \brief Method for sending message to Mobile Application.
@@ -112,8 +112,7 @@ class ProtocolHandler {
   /**
    * \brief Destructor
    */
-  virtual ~ProtocolHandler() {
-  }
+  virtual ~ProtocolHandler() {}
 };
 }  //  namespace protocol_handler
 #endif  // SRC_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_H_

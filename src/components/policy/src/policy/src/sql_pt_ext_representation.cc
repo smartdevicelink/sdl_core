@@ -83,8 +83,9 @@ bool SQLPTExtRepresentation::ResetAppConsents() {
 }
 
 bool SQLPTExtRepresentation::GetUserPermissionsForDevice(
-  const std::string& device_id, StringArray* consented_groups,
-  StringArray* disallowed_groups) {
+    const std::string& device_id,
+    StringArray* consented_groups,
+    StringArray* disallowed_groups) {
   LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectDeviceConsentedGroup)) {
@@ -110,8 +111,9 @@ bool SQLPTExtRepresentation::GetUserPermissionsForDevice(
 }
 
 bool SQLPTExtRepresentation::GetPermissionsForApp(
-  const std::string& device_id, const std::string& policy_app_id,
-  FunctionalIdType* group_types) {
+    const std::string& device_id,
+    const std::string& policy_app_id,
+    FunctionalIdType* group_types) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!group_types) {
     LOG4CXX_WARN(logger_, "Input parameter for group types is null.");
@@ -130,8 +132,8 @@ bool SQLPTExtRepresentation::GetPermissionsForApp(
   // Get consented (allowed/disallowed) groups
   FunctionalGroupIDs allowed_groups;
   FunctionalGroupIDs disallowed_groups;
-  if (!GetConsentedGroups(policy_app_id, device_id,
-                          allowed_groups, disallowed_groups)) {
+  if (!GetConsentedGroups(
+          policy_app_id, device_id, allowed_groups, disallowed_groups)) {
     return false;
   }
   // Get all default groups
@@ -164,7 +166,7 @@ bool SQLPTExtRepresentation::GetPermissionsForApp(
 }
 
 bool SQLPTExtRepresentation::GetDeviceGroupsFromPolicies(
-  policy_table::Strings* groups, policy_table::Strings* preconsented_groups) {
+    policy_table::Strings* groups, policy_table::Strings* preconsented_groups) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (groups) {
     GatherAppGroup(kDeviceId, groups);
@@ -176,13 +178,13 @@ bool SQLPTExtRepresentation::GetDeviceGroupsFromPolicies(
 }
 
 bool SQLPTExtRepresentation::SetDeviceData(const std::string& device_id,
-    const std::string& hardware,
-    const std::string& firmware,
-    const std::string& os,
-    const std::string& os_version,
-    const std::string& carrier,
-    const uint32_t number_of_ports,
-    const std::string& connection_type) {
+                                           const std::string& hardware,
+                                           const std::string& firmware,
+                                           const std::string& os,
+                                           const std::string& os_version,
+                                           const std::string& carrier,
+                                           const uint32_t number_of_ports,
+                                           const std::string& connection_type) {
   LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery count_query(db());
   if (!count_query.Prepare(sql_pt_ext::kCountDevice)) {
@@ -251,8 +253,9 @@ bool SQLPTExtRepresentation::SetDeviceData(const std::string& device_id,
 }
 
 bool SQLPTExtRepresentation::SetUserPermissionsForDevice(
-  const std::string& device_id, const StringArray& consented_groups,
-  const StringArray& disallowed_groups) {
+    const std::string& device_id,
+    const StringArray& consented_groups,
+    const StringArray& disallowed_groups) {
   LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery count_query(db());
   if (!count_query.Prepare(sql_pt_ext::kCountDeviceConsentGroup)) {
@@ -274,13 +277,15 @@ bool SQLPTExtRepresentation::SetUserPermissionsForDevice(
   // Update old values
   if (update) {
     if (!query.Prepare(sql_pt_ext::kUpdateDeviceConsentedGroup)) {
-      LOG4CXX_WARN(logger_, "Incorrect statement for updating consented groups on device");
+      LOG4CXX_WARN(
+          logger_,
+          "Incorrect statement for updating consented groups on device");
       return false;
     }
 
     StringArray::const_iterator it_consented_groups = consented_groups.begin();
     StringArray::const_iterator it_consented_groups_end =
-      consented_groups.end();
+        consented_groups.end();
     for (; it_consented_groups != it_consented_groups_end;
          ++it_consented_groups) {
       query.Bind(0, true);
@@ -289,15 +294,16 @@ bool SQLPTExtRepresentation::SetUserPermissionsForDevice(
       query.Bind(3, *it_consented_groups);
       // TODO(AOleynik): Get this info from external data
       if (!query.Exec() || !query.Reset()) {
-        LOG4CXX_WARN(logger_, "Failed update of device allowed consented groups.");
+        LOG4CXX_WARN(logger_,
+                     "Failed update of device allowed consented groups.");
         return false;
       }
     }
 
     StringArray::const_iterator it_disallowed_groups =
-      disallowed_groups.begin();
+        disallowed_groups.begin();
     StringArray::const_iterator it_disallowed_groups_end =
-      disallowed_groups.end();
+        disallowed_groups.end();
     for (; it_disallowed_groups != it_disallowed_groups_end;
          ++it_disallowed_groups) {
       query.Bind(0, false);
@@ -305,7 +311,8 @@ bool SQLPTExtRepresentation::SetUserPermissionsForDevice(
       query.Bind(2, device_id);
       query.Bind(3, *it_disallowed_groups);
       if (!query.Exec() || !query.Reset()) {
-        LOG4CXX_WARN(logger_, "Failed update of device disallowed consented groups.");
+        LOG4CXX_WARN(logger_,
+                     "Failed update of device disallowed consented groups.");
         return false;
       }
     }
@@ -315,7 +322,8 @@ bool SQLPTExtRepresentation::SetUserPermissionsForDevice(
 
   // Insert new values
   if (!query.Prepare(sql_pt_ext::kInsertDeviceConsentedGroup)) {
-    LOG4CXX_WARN(logger_, "Incorrect statement of inserting to device consented groups");
+    LOG4CXX_WARN(logger_,
+                 "Incorrect statement of inserting to device consented groups");
     return false;
   }
 
@@ -329,14 +337,15 @@ bool SQLPTExtRepresentation::SetUserPermissionsForDevice(
     // TODO(AOleynik): Get this info from external data
     query.Bind(3, std::string("GUI"));
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_, "Failed insert to device allowed consented groups.");
+      LOG4CXX_WARN(logger_,
+                   "Failed insert to device allowed consented groups.");
       return false;
     }
   }
 
   StringArray::const_iterator it_disallowed_groups = disallowed_groups.begin();
   StringArray::const_iterator it_disallowed_groups_end =
-    disallowed_groups.end();
+      disallowed_groups.end();
   for (; it_disallowed_groups != it_disallowed_groups_end;
        ++it_disallowed_groups) {
     query.Bind(0, device_id);
@@ -344,7 +353,8 @@ bool SQLPTExtRepresentation::SetUserPermissionsForDevice(
     query.Bind(2, false);
     query.Bind(3);
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_, "Failed insert to device disallowed consented groups.");
+      LOG4CXX_WARN(logger_,
+                   "Failed insert to device disallowed consented groups.");
       return false;
     }
   }
@@ -353,8 +363,7 @@ bool SQLPTExtRepresentation::SetUserPermissionsForDevice(
 }
 
 bool SQLPTExtRepresentation::ReactOnUserDevConsentForApp(
-  const std::string& app_id,
-  bool is_device_allowed) {
+    const std::string& app_id, bool is_device_allowed) {
   bool result = true;
   if (is_device_allowed) {
     // If app has pre_DataConsented groups it should be 'promoted' to default
@@ -363,13 +372,15 @@ bool SQLPTExtRepresentation::ReactOnUserDevConsentForApp(
     if (IsPredataPolicy(app_id)) {
       utils::dbms::SQLQuery query(db());
       if (!query.Prepare(sql_pt_ext::kHasAppPreloadedGroups)) {
-        LOG4CXX_WARN(logger_, "Incorrect statement for has app preloaded groups");
+        LOG4CXX_WARN(logger_,
+                     "Incorrect statement for has app preloaded groups");
         return false;
       }
       query.Bind(0, app_id);
       query.Bind(1, kPreDataConsentId);
       if (!query.Exec()) {
-        LOG4CXX_WARN(logger_, "Incorrect select for app has predataconsted groups");
+        LOG4CXX_WARN(logger_,
+                     "Incorrect select for app has predataconsted groups");
         return false;
       }
       if (query.GetInteger(0) > 0) {
@@ -392,14 +403,14 @@ bool SQLPTExtRepresentation::ReactOnUserDevConsentForApp(
 }
 
 bool SQLPTExtRepresentation::SetUserPermissionsForApp(
-  const PermissionConsent& permissions) {
+    const PermissionConsent& permissions) {
   LOG4CXX_AUTO_TRACE(logger_);
   // TODO(AOleynik): Handle situation, when no application was specified, i.e.
   // general permissions were set
-  std::vector<FunctionalGroupPermission>::const_iterator it = permissions
-      .group_permissions.begin();
-  std::vector<FunctionalGroupPermission>::const_iterator it_end = permissions
-      .group_permissions.end();
+  std::vector<FunctionalGroupPermission>::const_iterator it =
+      permissions.group_permissions.begin();
+  std::vector<FunctionalGroupPermission>::const_iterator it_end =
+      permissions.group_permissions.end();
 
   utils::dbms::SQLQuery query(db());
   for (; it != it_end; ++it) {
@@ -437,7 +448,8 @@ bool SQLPTExtRepresentation::SetUserPermissionsForApp(
       query.Bind(4, permissions.device_id);
 
       if (!query.Exec() || !query.Reset()) {
-        LOG4CXX_WARN(logger_, "Incorrect update on user defined permissions "
+        LOG4CXX_WARN(logger_,
+                     "Incorrect update on user defined permissions "
                      "for app groups.");
         return false;
       }
@@ -462,7 +474,8 @@ bool SQLPTExtRepresentation::SetUserPermissionsForApp(
     query.Bind(4, permissions.consent_source);
 
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_, "Incorrect insert to user defined permissions "
+      LOG4CXX_WARN(logger_,
+                   "Incorrect insert to user defined permissions "
                    "for app groups.");
       return false;
     }
@@ -510,7 +523,8 @@ std::vector<UserFriendlyMessage> SQLPTExtRepresentation::GetUserFriendlyMsg(
     result.push_back(msg);
 
     if (!query.Reset()) {
-      LOG4CXX_WARN(logger_, "Failed reset statement for selecting friendly "
+      LOG4CXX_WARN(logger_,
+                   "Failed reset statement for selecting friendly "
                    "messages.");
       return result;
     }
@@ -535,7 +549,6 @@ bool SQLPTExtRepresentation::GatherConsumerFriendlyMessages(
 
   if (result) {
     while (query.Next()) {
-
       UserFriendlyMessage msg;
 
       msg.tts = query.GetString(1);
@@ -547,11 +560,16 @@ bool SQLPTExtRepresentation::GatherConsumerFriendlyMessages(
 
       std::string language = query.GetString(6);
 
-      *(*messages->messages)[msg.message_code].languages[language].tts = msg.tts;
-      *(*messages->messages)[msg.message_code].languages[language].label = msg.label;
-      *(*messages->messages)[msg.message_code].languages[language].line1 = msg.line1;
-      *(*messages->messages)[msg.message_code].languages[language].line2 = msg.line2;
-      *(*messages->messages)[msg.message_code].languages[language].textBody = msg.text_body;
+      *(*messages->messages)[msg.message_code].languages[language].tts =
+          msg.tts;
+      *(*messages->messages)[msg.message_code].languages[language].label =
+          msg.label;
+      *(*messages->messages)[msg.message_code].languages[language].line1 =
+          msg.line1;
+      *(*messages->messages)[msg.message_code].languages[language].line2 =
+          msg.line2;
+      *(*messages->messages)[msg.message_code].languages[language].textBody =
+          msg.text_body;
     }
   } else {
     LOG4CXX_WARN(logger_, "Incorrect statement for select friendly messages.");
@@ -560,8 +578,8 @@ bool SQLPTExtRepresentation::GatherConsumerFriendlyMessages(
 }
 
 bool SQLPTExtRepresentation::SetMetaInfo(const std::string& ccpu_version,
-    const std::string& wers_country_code,
-    const std::string& language) {
+                                         const std::string& wers_country_code,
+                                         const std::string& language) {
   LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kUpdateMetaParams)) {
@@ -711,15 +729,15 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   app_query.Bind(1, app.second.keep_context);
   app_query.Bind(2, app.second.steal_focus);
   app_query.Bind(
-    3, std::string(policy_table::EnumToJsonString(app.second.default_hmi)));
+      3, std::string(policy_table::EnumToJsonString(app.second.default_hmi)));
   app_query.Bind(
-    4, std::string(policy_table::EnumToJsonString(app.second.priority)));
-  app_query.Bind(
-    5, app.second.is_null());
+      4, std::string(policy_table::EnumToJsonString(app.second.priority)));
+  app_query.Bind(5, app.second.is_null());
   app_query.Bind(6, *app.second.memory_kb);
   app_query.Bind(7, static_cast<int64_t>(*app.second.heart_beat_timeout_ms));
-  app.second.certificate.is_initialized() ?
-  app_query.Bind(8, *app.second.certificate) : app_query.Bind(8, std::string());
+  app.second.certificate.is_initialized()
+      ? app_query.Bind(8, *app.second.certificate)
+      : app_query.Bind(8, std::string());
 
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
@@ -749,16 +767,17 @@ bool policy::SQLPTExtRepresentation::SaveDevicePolicy(
     const policy_table::DevicePolicy& device) {
   dbms::SQLQuery app_query(db());
   if (!app_query.Prepare(sql_pt_ext::kInsertApplication)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement into application (device).");
+    LOG4CXX_WARN(logger_,
+                 "Incorrect insert statement into application (device).");
     return false;
   }
   app_query.Bind(0, kDeviceId);
   app_query.Bind(1, device.keep_context);
   app_query.Bind(2, device.steal_focus);
   app_query.Bind(
-    3, std::string(policy_table::EnumToJsonString(device.default_hmi)));
-  app_query.Bind(
-    4, std::string(policy_table::EnumToJsonString(device.priority)));
+      3, std::string(policy_table::EnumToJsonString(device.default_hmi)));
+  app_query.Bind(4,
+                 std::string(policy_table::EnumToJsonString(device.priority)));
   app_query.Bind(5, false);
   app_query.Bind(6, 0);
   app_query.Bind(7, 0);
@@ -851,7 +870,7 @@ bool SQLPTExtRepresentation::GatherApplicationPoliciesSection(
 }
 
 void SQLPTExtRepresentation::GatherPreconsentedGroup(
-  const std::string& app_id, policy_table::Strings* groups) const {
+    const std::string& app_id, policy_table::Strings* groups) const {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectPreconsentedGroups)) {
     LOG4CXX_WARN(logger_, "Incorrect select from preconsented group");
@@ -865,7 +884,7 @@ void SQLPTExtRepresentation::GatherPreconsentedGroup(
 }
 
 bool SQLPTExtRepresentation::GatherUsageAndErrorCounts(
-  policy_table::UsageAndErrorCounts* counts) const {
+    policy_table::UsageAndErrorCounts* counts) const {
   LOG4CXX_INFO(logger_, "Gather Usage and Error Counts.");
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectUsageAndErrorCount) || !query.Exec()) {
@@ -881,11 +900,12 @@ bool SQLPTExtRepresentation::GatherUsageAndErrorCounts(
 }
 
 bool SQLPTExtRepresentation::GatherAppLevels(
-  policy_table::AppLevels* apps) const {
+    policy_table::AppLevels* apps) const {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectAppLevels)) {
-    LOG4CXX_INFO(logger_, "Failed select from app_level. SQLError = "
-                 << query.LastError().text());
+    LOG4CXX_INFO(logger_,
+                 "Failed select from app_level. SQLError = "
+                     << query.LastError().text());
     return false;
   }
   while (query.Next()) {
@@ -913,7 +933,7 @@ bool SQLPTExtRepresentation::GatherAppLevels(
 }
 
 void SQLPTExtRepresentation::GatherDeviceData(
-  policy_table::DeviceData* data) const {
+    policy_table::DeviceData* data) const {
   LOG4CXX_INFO(logger_, "Gather device data.");
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectDeviceData)) {
@@ -937,8 +957,8 @@ void SQLPTExtRepresentation::GatherDeviceData(
 }
 
 void SQLPTExtRepresentation::GatherConsentGroup(
-  const std::string& device_id,
-  policy_table::UserConsentRecords* records) const {
+    const std::string& device_id,
+    policy_table::UserConsentRecords* records) const {
   LOG4CXX_INFO(logger_, "Gather consent records.");
   utils::dbms::SQLQuery query(db());
   // Fill data for device
@@ -952,9 +972,11 @@ void SQLPTExtRepresentation::GatherConsentGroup(
 
   // Fill device_data -> user_consent_records -> "device"
   while (query.Next()) {
-    policy_table::ConsentRecords* device_consent_records = &(*records)[kDeviceId];
+    policy_table::ConsentRecords* device_consent_records =
+        &(*records)[kDeviceId];
     // TODO(IKozyrenko): Check logic if optional container is missing
-    policy_table::ConsentGroups& consent_groups = *device_consent_records->consent_groups;
+    policy_table::ConsentGroups& consent_groups =
+        *device_consent_records->consent_groups;
     consent_groups[query.GetString(1)] = query.GetBoolean(2);
     policy_table::Input input;
     policy_table::EnumFromJsonString(query.GetString(3), &input);
@@ -977,10 +999,11 @@ void SQLPTExtRepresentation::GatherConsentGroup(
 
   // Fill device_data -> user_consent_records -> <app_id>
   while (query.Next()) {
-    policy_table::ConsentRecords* app_consent_records = &(*records)[query
-        .GetString(1)];
+    policy_table::ConsentRecords* app_consent_records =
+        &(*records)[query.GetString(1)];
     // TODO(IKozyrenko): Check logic if optional container is missing
-    policy_table::ConsentGroups& consent_groups = *app_consent_records->consent_groups;
+    policy_table::ConsentGroups& consent_groups =
+        *app_consent_records->consent_groups;
 
     consent_groups[query.GetString(2)] = query.GetBoolean(3);
     policy_table::Input input;
@@ -991,7 +1014,7 @@ void SQLPTExtRepresentation::GatherConsentGroup(
 }
 
 bool SQLPTExtRepresentation::SaveDeviceData(
-const policy_table::DeviceData& devices) {
+    const policy_table::DeviceData& devices) {
   LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery drop_device_query(db());
   const std::string drop_device = "DELETE FROM `device`";
@@ -1047,8 +1070,8 @@ const policy_table::DeviceData& devices) {
 }
 
 bool SQLPTExtRepresentation::SaveConsentGroup(
-  const std::string& device_id,
-  const policy_table::UserConsentRecords& records) {
+    const std::string& device_id,
+    const policy_table::UserConsentRecords& records) {
   LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
 
@@ -1056,10 +1079,10 @@ bool SQLPTExtRepresentation::SaveConsentGroup(
   policy_table::UserConsentRecords::const_iterator it_end = records.end();
   for (; it != it_end; ++it) {
     // TODO(IKozyrenko): Check logic if optional container is missing
-    policy_table::ConsentGroups::const_iterator it_groups = it->second
-        .consent_groups->begin();
-    policy_table::ConsentGroups::const_iterator it_groups_end = it->second
-        .consent_groups->end();
+    policy_table::ConsentGroups::const_iterator it_groups =
+        it->second.consent_groups->begin();
+    policy_table::ConsentGroups::const_iterator it_groups_end =
+        it->second.consent_groups->end();
     for (; it_groups != it_groups_end; ++it_groups) {
       if (kDeviceId == it->first) {
         if (!query.Prepare(sql_pt_ext::kInsertDeviceConsentedGroup)) {
@@ -1071,13 +1094,15 @@ bool SQLPTExtRepresentation::SaveConsentGroup(
         query.Bind(1, it_groups->first);
         query.Bind(2, it_groups->second);
         query.Bind(
-          3,
-          std::string(policy_table::EnumToJsonString(*(it->second.input))));
+            3,
+            std::string(policy_table::EnumToJsonString(*(it->second.input))));
         query.Bind(4, std::string(*(it->second.time_stamp)));
-        LOG4CXX_INFO(logger_, "Device:" <<
-                     "time stamp " << std::string(*(it->second.time_stamp))
-                     << " group " << it_groups->first
-                     << " consent " << it_groups->second);
+        LOG4CXX_INFO(logger_,
+                     "Device:"
+                         << "time stamp "
+                         << std::string(*(it->second.time_stamp)) << " group "
+                         << it_groups->first << " consent "
+                         << it_groups->second);
       } else {
         if (!query.Prepare(sql_pt_ext::kInsertConsentGroups)) {
           LOG4CXX_WARN(logger_,
@@ -1089,13 +1114,15 @@ bool SQLPTExtRepresentation::SaveConsentGroup(
         query.Bind(2, it_groups->first);
         query.Bind(3, it_groups->second);
         query.Bind(
-          4,
-          std::string(policy_table::EnumToJsonString(*(it->second.input))));
+            4,
+            std::string(policy_table::EnumToJsonString(*(it->second.input))));
         query.Bind(5, std::string(*(it->second.time_stamp)));
-        LOG4CXX_INFO(logger_, "Device:" <<
-                     "time stamp " << std::string(*(it->second.time_stamp))
-                     << " group " << it_groups->first
-                     << " consent " << it_groups->second);
+        LOG4CXX_INFO(logger_,
+                     "Device:"
+                         << "time stamp "
+                         << std::string(*(it->second.time_stamp)) << " group "
+                         << it_groups->first << " consent "
+                         << it_groups->second);
       }
 
       if (!query.Exec() || !query.Reset()) {
@@ -1109,12 +1136,11 @@ bool SQLPTExtRepresentation::SaveConsentGroup(
 }
 
 bool SQLPTExtRepresentation::SavePreconsentedGroup(
-  const std::string& app_id, const policy_table::Strings& groups) {
+    const std::string& app_id, const policy_table::Strings& groups) {
   LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kInsertPreconsentedGroups)) {
-    LOG4CXX_WARN(logger_,
-                 "Incorrect insert statement for preconsented groups");
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for preconsented groups");
     return false;
   }
 
@@ -1132,7 +1158,7 @@ bool SQLPTExtRepresentation::SavePreconsentedGroup(
 }
 
 void SQLPTExtRepresentation::GatherModuleMeta(
-  policy_table::ModuleMeta* meta) const {
+    policy_table::ModuleMeta* meta) const {
   LOG4CXX_INFO(logger_, "Gather Module Meta Info");
   utils::dbms::SQLQuery query(db());
   if (query.Prepare(sql_pt_ext::kSelectModuleMeta) && query.Next()) {
@@ -1148,8 +1174,8 @@ void SQLPTExtRepresentation::GatherModuleMeta(
 
 void SQLPTExtRepresentation::Increment(const std::string& type) const {
   utils::dbms::SQLQuery query(db());
-  std::string update_counter = "UPDATE `usage_and_error_count` SET `" + type
-                               + "` = `" + type + "` + 1";
+  std::string update_counter =
+      "UPDATE `usage_and_error_count` SET `" + type + "` = `" + type + "` + 1";
   if (!query.Exec(update_counter)) {
     LOG4CXX_INFO(logger_, "Failed updating global counter");
   }
@@ -1170,7 +1196,7 @@ bool SQLPTExtRepresentation::IsExistAppLevel(const std::string& app_id) const {
 }
 
 bool SQLPTExtRepresentation::GetAllAppGroups(const std::string& policy_app_id,
-    FunctionalGroupIDs& all_groups) {
+                                             FunctionalGroupIDs& all_groups) {
   LOG4CXX_INFO(logger_, "GetAllAppGroups for '" << policy_app_id << "'");
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectAppGroupsId)) {
@@ -1188,9 +1214,10 @@ bool SQLPTExtRepresentation::GetAllAppGroups(const std::string& policy_app_id,
 }
 
 bool SQLPTExtRepresentation::GetConsentedGroups(
-  const std::string& policy_app_id, const std::string& device_id,
-  FunctionalGroupIDs& allowed_groups, FunctionalGroupIDs& disallowed_groups) {
-
+    const std::string& policy_app_id,
+    const std::string& device_id,
+    FunctionalGroupIDs& allowed_groups,
+    FunctionalGroupIDs& disallowed_groups) {
   LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectConsentedGroupsId)) {
@@ -1213,7 +1240,7 @@ bool SQLPTExtRepresentation::GetConsentedGroups(
 }
 
 bool SQLPTExtRepresentation::GetPreconsentedGroups(
-  const std::string& policy_app_id, FunctionalGroupIDs& preconsented_groups) {
+    const std::string& policy_app_id, FunctionalGroupIDs& preconsented_groups) {
   LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectPreconsentedGroupsId)) {
@@ -1232,7 +1259,7 @@ bool SQLPTExtRepresentation::GetPreconsentedGroups(
 }
 
 bool SQLPTExtRepresentation::GetFunctionalGroupNames(
-  FunctionalGroupNames& names) {
+    FunctionalGroupNames& names) {
   LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectFunctionalGroupNames)) {
@@ -1245,20 +1272,21 @@ bool SQLPTExtRepresentation::GetFunctionalGroupNames(
     // Some of functional grous doesn't have filled user_consent_prompt
     if (query.IsNull(1)) {
       names[query.GetInteger(0)] =
-        std::make_pair<std::string, std::string>("", query.GetString(2));
+          std::make_pair<std::string, std::string>("", query.GetString(2));
     } else {
-      names[query.GetInteger(0)] =
-        std::make_pair<std::string, std::string>(query.GetString(1), query.GetString(2));
+      names[query.GetInteger(0)] = std::make_pair<std::string, std::string>(
+          query.GetString(1), query.GetString(2));
     }
-
   }
 
   return true;
 }
 
 void SQLPTExtRepresentation::FillFunctionalGroupPermissions(
-  FunctionalGroupIDs& ids, FunctionalGroupNames& names, GroupConsent state,
-  std::vector<FunctionalGroupPermission>& permissions) {
+    FunctionalGroupIDs& ids,
+    FunctionalGroupNames& names,
+    GroupConsent state,
+    std::vector<FunctionalGroupPermission>& permissions) {
   FunctionalGroupIDs::const_iterator it = ids.begin();
   FunctionalGroupIDs::const_iterator it_end = ids.end();
   for (; it != it_end; ++it) {
@@ -1277,11 +1305,12 @@ void SQLPTExtRepresentation::Increment(const std::string& app_id,
   std::string sql_counter;
   if (IsExistAppLevel(app_id)) {
     // update
-    sql_counter = "UPDATE `app_level` SET `" + type + "` = `" + type
-                  + "` + 1 WHERE `application_id` = ?";
+    sql_counter = "UPDATE `app_level` SET `" + type + "` = `" + type +
+                  "` + 1 WHERE `application_id` = ?";
   } else {
     // insert
-    sql_counter = "INSERT INTO `app_level` (`application_id`, `" + type + "`) "
+    sql_counter = "INSERT INTO `app_level` (`application_id`, `" + type +
+                  "`) "
                   "VALUES (?, 1)";
   }
   if (!query.Prepare(sql_counter)) {
@@ -1301,11 +1330,13 @@ void SQLPTExtRepresentation::Set(const std::string& app_id,
   std::string sql_info;
   if (IsExistAppLevel(app_id)) {
     // update
-    sql_info = "UPDATE `app_level` SET `" + type + "` = ? "
+    sql_info = "UPDATE `app_level` SET `" + type +
+               "` = ? "
                "WHERE `application_id` = ?";
   } else {
     // insert
-    sql_info = "INSERT INTO `app_level` (`" + type + "`, `application_id`) "
+    sql_info = "INSERT INTO `app_level` (`" + type +
+               "`, `application_id`) "
                "VALUES (?, ?)";
   }
   if (!query.Prepare(sql_info)) {
@@ -1320,17 +1351,18 @@ void SQLPTExtRepresentation::Set(const std::string& app_id,
 }
 
 void SQLPTExtRepresentation::Add(const std::string& app_id,
-                                 const std::string& type, int seconds) const {
+                                 const std::string& type,
+                                 int seconds) const {
   utils::dbms::SQLQuery query(db());
   std::string sql_stopwatch;
   if (IsExistAppLevel(app_id)) {
     // update
-    sql_stopwatch = "UPDATE `app_level` SET `" + type + "` = `" + type
-                    + "` + ? WHERE `application_id` = ?";
+    sql_stopwatch = "UPDATE `app_level` SET `" + type + "` = `" + type +
+                    "` + ? WHERE `application_id` = ?";
   } else {
     // insert
-    sql_stopwatch = "INSERT INTO `app_level` (`" + type
-                    + "`, `application_id`) "
+    sql_stopwatch = "INSERT INTO `app_level` (`" + type +
+                    "`, `application_id`) "
                     "VALUES (?, ?)";
   }
   if (!query.Prepare(sql_stopwatch)) {
@@ -1345,7 +1377,7 @@ void SQLPTExtRepresentation::Add(const std::string& app_id,
 }
 
 bool SQLPTExtRepresentation::GetDefaultHMI(const std::string& policy_app_id,
-    std::string* default_hmi) {
+                                           std::string* default_hmi) {
   LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kSelectDefaultHmi)) {
@@ -1371,9 +1403,9 @@ bool SQLPTExtRepresentation::GetDefaultHMI(const std::string& policy_app_id,
 }
 
 bool SQLPTExtRepresentation::CountUnconsentedGroups(
-  const std::string& policy_app_id,
-  const std::string& device_id,
-  int* result) const {
+    const std::string& policy_app_id,
+    const std::string& device_id,
+    int* result) const {
   LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kCountUnconsentedGroups)) {
@@ -1394,8 +1426,8 @@ bool SQLPTExtRepresentation::CountUnconsentedGroups(
   return true;
 }
 
-bool SQLPTExtRepresentation::IsMsgLanguagePresent(const std::string &message,
-                                                  const std::string &language) {
+bool SQLPTExtRepresentation::IsMsgLanguagePresent(const std::string& message,
+                                                  const std::string& language) {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kHasMsgLanguageCode)) {
     LOG4CXX_WARN(logger_, "Incorrect statement for message language check.");
@@ -1414,8 +1446,9 @@ bool SQLPTExtRepresentation::IsMsgLanguagePresent(const std::string &message,
 }
 
 bool SQLPTExtRepresentation::SaveMessageString(
-  const std::string& type, const std::string& lang,
-  const policy_table::MessageString& strings) {
+    const std::string& type,
+    const std::string& lang,
+    const policy_table::MessageString& strings) {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kInsertMessageString)) {
     LOG4CXX_WARN(logger_, "Incorrect insert statement for message.");
@@ -1529,7 +1562,7 @@ bool SQLPTExtRepresentation::SaveGlobalCounters(
 }
 
 bool SQLPTExtRepresentation::CleanupUnpairedDevices(
-  const DeviceIds& device_ids) const {
+    const DeviceIds& device_ids) const {
   LOG4CXX_AUTO_TRACE(logger_);
   utils::dbms::SQLQuery delete_device_query(db());
   if (!delete_device_query.Prepare(sql_pt::kDeleteDevice)) {
@@ -1615,7 +1648,8 @@ bool SQLPTExtRepresentation::SetDefaultPolicy(const std::string& app_id) {
 }
 
 bool SQLPTExtRepresentation::SetPredataPolicy(const std::string& app_id) {
-  LOG4CXX_INFO(logger_, "SQLPTExtRepresentation::SetPredataPolicy for " << app_id);
+  LOG4CXX_INFO(logger_,
+               "SQLPTExtRepresentation::SetPredataPolicy for " << app_id);
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kDeleteAppGroupByApplicationId)) {
     LOG4CXX_ERROR(logger_, "Incorrect statement to delete from app_group.");
@@ -1648,7 +1682,7 @@ bool SQLPTExtRepresentation::SetPredataPolicy(const std::string& app_id) {
   GatherAppGroup(kPreDataConsentId, &predataconsent_groups);
   GatherPreconsentedGroup(kPreDataConsentId, &predataconsent_groups);
   if (SaveAppGroup(app_id, predataconsent_groups) &&
-    SavePreconsentedGroup(app_id, predataconsent_groups)) {
+      SavePreconsentedGroup(app_id, predataconsent_groups)) {
     return SetIsDefault(app_id, false) && SetIsPredata(app_id, true);
   }
   return false;
@@ -1670,7 +1704,7 @@ bool SQLPTExtRepresentation::IsPredataPolicy(const std::string& app_id) const {
 }
 
 bool SQLPTExtRepresentation::SetIsPredata(const std::string& app_id,
-    bool is_pre_data) {
+                                          bool is_pre_data) {
   LOG4CXX_TRACE(logger_, "Set flag is_predata of application");
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kUpdateIsPredata)) {
@@ -1719,7 +1753,7 @@ bool SQLPTExtRepresentation::UnpairedDevicesList(DeviceIds* device_ids) const {
   return true;
 }
 
-bool SQLPTExtRepresentation::SetVINValue(const std::string& value){
+bool SQLPTExtRepresentation::SetVINValue(const std::string& value) {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kUpdateModuleMetaVinParam)) {
     LOG4CXX_WARN(logger_, "Incorect statement for updating module_meta params");
@@ -1771,4 +1805,3 @@ bool SQLPTExtRepresentation::RemoveAppConsentForGroup(
 }
 
 }  // namespace policy
-

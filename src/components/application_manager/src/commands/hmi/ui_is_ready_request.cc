@@ -37,11 +37,9 @@ namespace application_manager {
 namespace commands {
 
 UIIsReadyRequest::UIIsReadyRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+    : RequestToHMI(message) {}
 
-UIIsReadyRequest::~UIIsReadyRequest() {
-}
+UIIsReadyRequest::~UIIsReadyRequest() {}
 
 void UIIsReadyRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,4 +50,3 @@ void UIIsReadyRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

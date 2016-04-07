@@ -41,11 +41,9 @@ namespace application_manager {
 namespace commands {
 
 GetDTCsRequest::GetDTCsRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+    : CommandRequestImpl(message) {}
 
-GetDTCsRequest::~GetDTCsRequest() {
-}
+GetDTCsRequest::~GetDTCsRequest() {}
 
 void GetDTCsRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -59,8 +57,8 @@ void GetDTCsRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params[strings::ecu_name] =
       (*message_)[strings::msg_params][strings::ecu_name];

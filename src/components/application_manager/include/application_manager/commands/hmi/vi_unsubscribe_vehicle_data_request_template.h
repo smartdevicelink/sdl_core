@@ -44,7 +44,7 @@ namespace commands {
  *
  * Template class for sending 1 unsubscribe thin request
  **/
-template<event_engine::Event::EventID eventID>
+template <event_engine::Event::EventID eventID>
 class VIUnsubscribeVehicleDataRequestTemplate : public RequestToHMI {
  public:
   /**
@@ -54,8 +54,7 @@ class VIUnsubscribeVehicleDataRequestTemplate : public RequestToHMI {
    **/
   explicit VIUnsubscribeVehicleDataRequestTemplate(
       const MessageSharedPtr& message)
-      : RequestToHMI(message) {
-  }
+      : RequestToHMI(message) {}
 
   /**
    * @brief Execute command with sending DBus thin request to HMI

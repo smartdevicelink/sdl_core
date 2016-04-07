@@ -39,11 +39,9 @@ namespace commands {
 
 UIScrollableMessageResponse::UIScrollableMessageResponse(
     const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-UIScrollableMessageResponse::~UIScrollableMessageResponse() {
-}
+UIScrollableMessageResponse::~UIScrollableMessageResponse() {}
 
 void UIScrollableMessageResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

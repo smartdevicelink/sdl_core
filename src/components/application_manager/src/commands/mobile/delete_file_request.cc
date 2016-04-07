@@ -42,11 +42,9 @@ namespace application_manager {
 namespace commands {
 
 DeleteFileRequest::DeleteFileRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+    : CommandRequestImpl(message) {}
 
-DeleteFileRequest::~DeleteFileRequest() {
-}
+DeleteFileRequest::~DeleteFileRequest() {}
 
 void DeleteFileRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -63,11 +61,12 @@ void DeleteFileRequest::Run() {
   if ((mobile_api::HMILevel::HMI_NONE == application->hmi_level()) &&
       (profile::Profile::instance()->delete_file_in_none() <=
        application->delete_file_in_none_count())) {
-      // If application is in the HMI_NONE level the quantity of allowed
-      // DeleteFile request is limited by the configuration profile
-      LOG4CXX_ERROR(logger_, "Too many requests from the app with HMILevel HMI_NONE ");
-      SendResponse(false, mobile_apis::Result::REJECTED);
-      return;
+    // If application is in the HMI_NONE level the quantity of allowed
+    // DeleteFile request is limited by the configuration profile
+    LOG4CXX_ERROR(logger_,
+                  "Too many requests from the app with HMILevel HMI_NONE ");
+    SendResponse(false, mobile_apis::Result::REJECTED);
+    return;
   }
 
   const std::string& sync_file_name =
@@ -97,17 +96,16 @@ void DeleteFileRequest::Run() {
   }
 }
 
-void DeleteFileRequest::SendFileRemovedNotification(
-    const AppFile* file) const {
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
+void DeleteFileRequest::SendFileRemovedNotification(const AppFile* file) const {
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-    msg_params[strings::app_id] = connection_key();
-    msg_params[strings::file_name] = file->file_name;
-    msg_params[strings::file_type] = file->file_type;
+  msg_params[strings::app_id] = connection_key();
+  msg_params[strings::file_name] = file->file_name;
+  msg_params[strings::file_type] = file->file_type;
 
-    CreateHMINotification(
-            hmi_apis::FunctionID::BasicCommunication_OnFileRemoved, msg_params);
+  CreateHMINotification(hmi_apis::FunctionID::BasicCommunication_OnFileRemoved,
+                        msg_params);
 }
 
 }  // namespace commands

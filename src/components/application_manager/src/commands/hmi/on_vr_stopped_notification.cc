@@ -39,11 +39,9 @@ namespace commands {
 
 OnVRStoppedNotification::OnVRStoppedNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnVRStoppedNotification::~OnVRStoppedNotification() {
-}
+OnVRStoppedNotification::~OnVRStoppedNotification() {}
 
 void OnVRStoppedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -56,4 +54,3 @@ void OnVRStoppedNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

@@ -47,14 +47,13 @@ bool formatter_ns::CMetaFormatter::CreateObjectByPattern(
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
     const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
     NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object) {
-
   if (smart_objects_ns::SmartType_Invalid == result_object.getType()) {
     return false;
   }
-  
+
   schema.BuildObjectBySchema(object, result_object);
 
   result_object.setSchema(schema);
 
   return true;
-}  
+}

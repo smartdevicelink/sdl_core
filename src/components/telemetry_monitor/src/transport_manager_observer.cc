@@ -38,26 +38,30 @@
 
 namespace telemetry_monitor {
 
-TransportManagerObserver::TransportManagerObserver(TelemetryMonitor* telemetry_monitor):
-  telemetry_monitor_ (telemetry_monitor) {
-}
+TransportManagerObserver::TransportManagerObserver(
+    TelemetryMonitor* telemetry_monitor)
+    : telemetry_monitor_(telemetry_monitor) {}
 
-void TransportManagerObserver::StartRawMsg(const protocol_handler::RawMessage* ptr) {
+void TransportManagerObserver::StartRawMsg(
+    const protocol_handler::RawMessage* ptr) {
   time_starts[ptr] = date_time::DateTime::getCurrentTime();
 }
 
-void TransportManagerObserver::StopRawMsg(const protocol_handler::RawMessage* ptr) {
-    std::map<const protocol_handler::RawMessage*, TimevalStruct>::const_iterator it;
-    it = time_starts.find(ptr);
-    if (it != time_starts.end()) {
-      TransportManagerMecticWrapper* m = new TransportManagerMecticWrapper();
-      m->message_metric = new transport_manager::TMTelemetryObserver::MessageMetric();
-      m->message_metric->begin = it->second;
-      m->message_metric->end = date_time::DateTime::getCurrentTime();
-      m->message_metric->data_size = ptr->data_size();
-      m->grabResources();
-      telemetry_monitor_->SendMetric(m);
-    }
+void TransportManagerObserver::StopRawMsg(
+    const protocol_handler::RawMessage* ptr) {
+  std::map<const protocol_handler::RawMessage*, TimevalStruct>::const_iterator
+      it;
+  it = time_starts.find(ptr);
+  if (it != time_starts.end()) {
+    TransportManagerMecticWrapper* m = new TransportManagerMecticWrapper();
+    m->message_metric =
+        new transport_manager::TMTelemetryObserver::MessageMetric();
+    m->message_metric->begin = it->second;
+    m->message_metric->end = date_time::DateTime::getCurrentTime();
+    m->message_metric->data_size = ptr->data_size();
+    m->grabResources();
+    telemetry_monitor_->SendMetric(m);
+  }
 }
 
-} //namespace telemetry_monitor
+}  // namespace telemetry_monitor

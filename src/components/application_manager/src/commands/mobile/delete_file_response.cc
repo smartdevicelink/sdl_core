@@ -40,16 +40,14 @@ namespace application_manager {
 namespace commands {
 
 DeleteFileResponse::DeleteFileResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    : CommandResponseImpl(message) {}
 
-DeleteFileResponse::~DeleteFileResponse() {
-}
+DeleteFileResponse::~DeleteFileResponse() {}
 
 void DeleteFileResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  uint32_t app_id = (*message_)[strings::params][strings::connection_key]
-      .asUInt();
+  uint32_t app_id =
+      (*message_)[strings::params][strings::connection_key].asUInt();
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(app_id);
   if (!app) {
@@ -60,8 +58,8 @@ void DeleteFileResponse::Run() {
 
   (*message_)[strings::msg_params][strings::space_available] =
       static_cast<uint32_t>(
-          ApplicationManagerImpl::instance()->
-              GetAvailableSpaceForApp(app->folder_name()));
+          ApplicationManagerImpl::instance()->GetAvailableSpaceForApp(
+              app->folder_name()));
   SendResponse((*message_)[strings::msg_params][strings::success].asBool());
 }
 

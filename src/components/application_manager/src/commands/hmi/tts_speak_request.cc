@@ -37,11 +37,9 @@ namespace application_manager {
 namespace commands {
 
 TTSSpeakRequest::TTSSpeakRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+    : RequestToHMI(message) {}
 
-TTSSpeakRequest::~TTSSpeakRequest() {
-}
+TTSSpeakRequest::~TTSSpeakRequest() {}
 
 void TTSSpeakRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,4 +50,3 @@ void TTSSpeakRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

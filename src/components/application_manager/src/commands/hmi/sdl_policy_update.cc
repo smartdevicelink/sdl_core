@@ -36,12 +36,10 @@ namespace application_manager {
 
 namespace commands {
 
-SDLPolicyUpdate::SDLPolicyUpdate(
-  const MessageSharedPtr& message): RequestToHMI(message) {
-}
+SDLPolicyUpdate::SDLPolicyUpdate(const MessageSharedPtr& message)
+    : RequestToHMI(message) {}
 
-SDLPolicyUpdate::~SDLPolicyUpdate() {
-}
+SDLPolicyUpdate::~SDLPolicyUpdate() {}
 
 void SDLPolicyUpdate::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

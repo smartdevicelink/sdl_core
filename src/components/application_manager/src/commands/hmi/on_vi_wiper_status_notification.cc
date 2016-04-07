@@ -39,11 +39,9 @@ namespace commands {
 
 OnVIWiperStatusNotification::OnVIWiperStatusNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnVIWiperStatusNotification::~OnVIWiperStatusNotification() {
-}
+OnVIWiperStatusNotification::~OnVIWiperStatusNotification() {}
 
 void OnVIWiperStatusNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,4 +56,3 @@ void OnVIWiperStatusNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

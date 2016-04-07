@@ -49,8 +49,9 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD0(InitPolicyTable, bool());
   MOCK_METHOD0(ResetPolicyTable, bool());
   MOCK_METHOD0(ClearUserConsent, bool());
-  MOCK_METHOD2(SendMessageToSDK, bool(const policy::BinaryMessage& pt_string,
-                                      const std::string& url));
+  MOCK_METHOD2(SendMessageToSDK,
+               bool(const policy::BinaryMessage& pt_string,
+                    const std::string& url));
   MOCK_METHOD2(ReceiveMessageFromSDK,
                bool(const std::string& file,
                     const policy::BinaryMessage& pt_string));
@@ -66,27 +67,31 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
                void(const policy::BinaryMessage& pt_string,
                     const std::vector<int>& retry_delay_seconds,
                     int timeout_exchange));
-  MOCK_CONST_METHOD2(GetPriority, bool(const std::string& policy_app_id,
-                                       std::string* priority));
+  MOCK_CONST_METHOD2(GetPriority,
+                     bool(const std::string& policy_app_id,
+                          std::string* priority));
   MOCK_METHOD5(CheckPermissions,
                void(const policy::PTString& app_id,
                     const policy::PTString& hmi_level,
-                    const policy::PTString& rpc, const policy::RPCParams& rpc_params,
+                    const policy::PTString& rpc,
+                    const policy::RPCParams& rpc_params,
                     policy::CheckPermissionResult& result));
   MOCK_CONST_METHOD1(GetNotificationsNumber,
                      uint32_t(const std::string& priority));
   MOCK_CONST_METHOD1(GetUserConsentForDevice,
                      policy::DeviceConsent(const std::string& device_id));
-  MOCK_CONST_METHOD2(GetDefaultHmi, bool(const std::string& policy_app_id,
-                                         std::string* default_hmi));
+  MOCK_CONST_METHOD2(GetDefaultHmi,
+                     bool(const std::string& policy_app_id,
+                          std::string* default_hmi));
 
   MOCK_METHOD3(GetInitialAppData,
-               bool(const std::string& application_id, policy::StringArray* nicknames,
+               bool(const std::string& application_id,
+                    policy::StringArray* nicknames,
                     policy::StringArray* app_hmi_types));
   MOCK_METHOD2(GetInitialAppData,
-               bool(const std::string& application_id, policy::StringArray* nicknames));
-  MOCK_METHOD1(GetInitialAppData,
-               bool(const std::string& application_id));
+               bool(const std::string& application_id,
+                    policy::StringArray* nicknames));
+  MOCK_METHOD1(GetInitialAppData, bool(const std::string& application_id));
   MOCK_METHOD2(GetUpdateUrls,
                void(int service_type, policy::EndpointUrls& end_points));
   MOCK_METHOD0(ResetRetrySequence, void());
@@ -111,26 +116,31 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD1(OnPendingPermissionChange,
                void(const std::string& policy_app_id));
   MOCK_METHOD1(PTExchangeAtUserRequest, void(uint32_t correlation_id));
-  MOCK_METHOD2(AddDevice, void(const std::string& device_id,
-                               const std::string& connection_type));
-  MOCK_METHOD2(SetDeviceInfo, void(const std::string& device_id,
-                                   const policy::DeviceInfo& device_info));
+  MOCK_METHOD2(AddDevice,
+               void(const std::string& device_id,
+                    const std::string& connection_type));
+  MOCK_METHOD2(SetDeviceInfo,
+               void(const std::string& device_id,
+                    const policy::DeviceInfo& device_info));
   MOCK_METHOD2(OnAppPermissionConsent,
                void(const uint32_t connection_key,
                     const policy::PermissionConsent& permissions));
   MOCK_METHOD3(OnGetUserFriendlyMessage,
                void(const std::vector<std::string>& message_codes,
-                    const std::string& language, uint32_t correlation_id));
-  MOCK_METHOD2(OnGetListOfPermissions, void(const uint32_t connection_key,
-                                            const uint32_t correlation_id));
+                    const std::string& language,
+                    uint32_t correlation_id));
+  MOCK_METHOD2(OnGetListOfPermissions,
+               void(const uint32_t connection_key,
+                    const uint32_t correlation_id));
   MOCK_METHOD1(OnGetStatusUpdate, void(const uint32_t correlation_id));
   MOCK_METHOD1(OnUpdateStatusChanged, void(const std::string& status));
   MOCK_METHOD1(OnCurrentDeviceIdUpdateRequired,
                std::string(const std::string& policy_app_id));
   MOCK_METHOD1(OnSystemInfoChanged, void(const std::string& language));
-  MOCK_METHOD3(OnGetSystemInfo, void(const std::string& ccpu_version,
-                                     const std::string& wers_country_code,
-                                     const std::string& language));
+  MOCK_METHOD3(OnGetSystemInfo,
+               void(const std::string& ccpu_version,
+                    const std::string& wers_country_code,
+                    const std::string& language));
   MOCK_METHOD0(OnSystemInfoUpdateRequired, void());
   MOCK_METHOD0(OnVIIsReady, void());
   MOCK_METHOD1(OnVehicleDataUpdated,
@@ -139,8 +149,9 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_METHOD1(AddStatisticsInfo, void(int type));
   MOCK_METHOD1(OnSystemError, void(int code));
   MOCK_CONST_METHOD0(GetAppIdForSending, uint32_t());
-  MOCK_METHOD1(GetAppName,
-               utils::custom_string::CustomString(const std::string& policy_app_id));
+  MOCK_METHOD1(
+      GetAppName,
+      utils::custom_string::CustomString(const std::string& policy_app_id));
   MOCK_METHOD1(OnUpdateHMIAppType,
                void(std::map<std::string, policy::StringArray> app_hmi_types));
   MOCK_METHOD1(OnCertificateUpdated, void(const std::string& certificate_data));
@@ -164,23 +175,29 @@ class MockPolicyHandlerInterface : public policy::PolicyHandlerInterface {
   MOCK_CONST_METHOD2(IsRequestTypeAllowed,
                      bool(const std::string& policy_app_id,
                           mobile_apis::RequestType::eType type));
-  MOCK_CONST_METHOD1(GetAppRequestTypes, const std::vector<std::string>(
-                                             const std::string& policy_app_id));
+  MOCK_CONST_METHOD1(
+      GetAppRequestTypes,
+      const std::vector<std::string>(const std::string& policy_app_id));
   MOCK_CONST_METHOD0(GetVehicleInfo, const policy::VehicleInfo());
   MOCK_METHOD1(Increment, void(usage_statistics::GlobalCounterId type));
-  MOCK_METHOD2(Increment, void(const std::string& app_id,
-                               usage_statistics::AppCounterId type));
+  MOCK_METHOD2(Increment,
+               void(const std::string& app_id,
+                    usage_statistics::AppCounterId type));
   MOCK_METHOD3(Set,
-               void(const std::string& app_id, usage_statistics::AppInfoId type,
+               void(const std::string& app_id,
+                    usage_statistics::AppInfoId type,
                     const std::string& value));
-  MOCK_METHOD3(Add, void(const std::string& app_id,
-                         usage_statistics::AppStopwatchId type,
-                         int32_t timespan_seconds));
+  MOCK_METHOD3(Add,
+               void(const std::string& app_id,
+                    usage_statistics::AppStopwatchId type,
+                    int32_t timespan_seconds));
   MOCK_CONST_METHOD0(RetrieveCertificate, std::string());
   MOCK_CONST_METHOD0(get_settings, const policy::PolicySettings&());
   MOCK_CONST_METHOD0(RemoteAppsUrl, const std::string());
-  MOCK_METHOD2(GetServiceUrls, void(const std::string& service_type,
-                                    policy::EndpointUrls& end_points));
+  MOCK_METHOD2(GetServiceUrls,
+               void(const std::string& service_type,
+                    policy::EndpointUrls& end_points));
+
  private:
   MOCK_METHOD2(OnAppPermissionConsentInternal,
                void(const uint32_t connection_key,

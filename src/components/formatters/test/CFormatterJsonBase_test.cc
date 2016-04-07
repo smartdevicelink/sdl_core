@@ -100,10 +100,12 @@ TEST(CFormatterJsonBaseTest, JSonSignedMaxIntValueToSmartObj_ExpectSuccessful) {
   EXPECT_EQ(ival, object.asInt());
 }
 
-TEST(CFormatterJsonBaseTest, JSonUnsignedMaxIntValueToSmartObj_ExpectSuccessful) {
+TEST(CFormatterJsonBaseTest,
+     JSonUnsignedMaxIntValueToSmartObj_ExpectSuccessful) {
   // Arrange value
   Json::UInt ui_val = Json::Value::maxUInt;
-  Json::Value json_value(ui_val);  // Json value from maximum possible unsigned int
+  Json::Value json_value(
+      ui_val);  // Json value from maximum possible unsigned int
   SmartObject object;
   // Convert json to smart object
   CFormatterJsonBase::jsonValueToObj(json_value, object);
@@ -162,7 +164,8 @@ TEST(CFormatterJsonBaseTest, JSonCStringValueToSmartObj_ExpectSuccessful) {
 
 TEST(CFormatterJsonBaseTest, JSonArrayValueToSmartObj_ExpectSuccessful) {
   // Arrange value
-  const char* json_array = "[\"test1\", \"test2\", \"test3\"]";  // Array in json format
+  const char* json_array =
+      "[\"test1\", \"test2\", \"test3\"]";  // Array in json format
   Json::Value json_value;  // Json value from array. Will be initialized later
   SmartObject object;
   Json::Reader reader;  // Json reader - Needed for correct parsing
@@ -173,7 +176,7 @@ TEST(CFormatterJsonBaseTest, JSonArrayValueToSmartObj_ExpectSuccessful) {
   // Check conversion was successful
   EXPECT_TRUE(json_value.isArray());
   EXPECT_EQ(3u, object.asArray()->size());
-  SmartArray *ptr = NULL;  // Smart Array pointer;
+  SmartArray* ptr = NULL;  // Smart Array pointer;
   EXPECT_NE(ptr, object.asArray());
 }
 
@@ -294,13 +297,15 @@ TEST(CFormatterJsonBaseTest, CStringSmartObjectToJSon_ExpectSuccessful) {
 
 TEST(CFormatterJsonBaseTest, ArraySmartObjectToJSon_ExpectSuccessful) {
   // Arrange value
-  const char* json_array = "[\"test1\", \"test2\", \"test3\"]";  // Array in json format
+  const char* json_array =
+      "[\"test1\", \"test2\", \"test3\"]";  // Array in json format
   Json::Value json_value;  // Json value from array. Will be initialized later
-  Json::Value result;  // Json value from array. Will be initialized later
+  Json::Value result;      // Json value from array. Will be initialized later
   SmartObject object;
   Json::Reader reader;  // Json reader - Needed for correct parsing
   // Parse array to json value
-  ASSERT_TRUE(reader.parse(json_array, json_value));  // Convert json array to SmartObject
+  ASSERT_TRUE(reader.parse(json_array,
+                           json_value));  // Convert json array to SmartObject
   // Convert json array to SmartObject
   CFormatterJsonBase::jsonValueToObj(json_value, object);
   // Convert SmartObject to JSon
@@ -316,12 +321,15 @@ TEST(CFormatterJsonBaseTest, JSonObjectValueToObj_ExpectSuccessful) {
       "{ \"json_test_object\": [\"test1\", \"test2\", \"test3\"], "
       "\"json_test_object2\": [\"test11\", \"test12\", \"test13\" ]}";
   Json::Value
-      json_value;      // Json value from json object. Will be initialized later
-  Json::Value result;  // Json value from Smart object. Will keep conversion result
+      json_value;  // Json value from json object. Will be initialized later
+  Json::Value
+      result;  // Json value from Smart object. Will keep conversion result
   SmartObject object;
   Json::Reader reader;  // Json reader - Needed for correct parsing
   // Parse json object to correct json value
-  ASSERT_TRUE(reader.parse(json_object, json_value));  // If parsing not successful - no sense to continue
+  ASSERT_TRUE(reader.parse(
+      json_object,
+      json_value));  // If parsing not successful - no sense to continue
   // Convert json array to SmartObject
   CFormatterJsonBase::jsonValueToObj(json_value, object);
   // Convert SmartObject to JSon

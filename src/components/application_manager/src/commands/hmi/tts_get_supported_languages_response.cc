@@ -39,11 +39,9 @@ namespace commands {
 
 TTSGetSupportedLanguagesResponse::TTSGetSupportedLanguagesResponse(
     const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-TTSGetSupportedLanguagesResponse::~TTSGetSupportedLanguagesResponse() {
-}
+TTSGetSupportedLanguagesResponse::~TTSGetSupportedLanguagesResponse() {}
 
 void TTSGetSupportedLanguagesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

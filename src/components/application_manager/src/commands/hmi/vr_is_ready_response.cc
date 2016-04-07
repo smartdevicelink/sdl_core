@@ -37,11 +37,9 @@ namespace application_manager {
 namespace commands {
 
 VRIsReadyResponse::VRIsReadyResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-VRIsReadyResponse::~VRIsReadyResponse() {
-}
+VRIsReadyResponse::~VRIsReadyResponse() {}
 
 void VRIsReadyResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

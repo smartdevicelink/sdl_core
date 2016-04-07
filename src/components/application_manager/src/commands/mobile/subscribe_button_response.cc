@@ -39,11 +39,9 @@ namespace commands {
 
 SubscribeButtonResponse::SubscribeButtonResponse(
     const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    : CommandResponseImpl(message) {}
 
-SubscribeButtonResponse::~SubscribeButtonResponse() {
-}
+SubscribeButtonResponse::~SubscribeButtonResponse() {}
 
 void SubscribeButtonResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

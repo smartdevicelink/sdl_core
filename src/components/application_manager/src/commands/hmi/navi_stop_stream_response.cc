@@ -36,15 +36,12 @@ namespace application_manager {
 namespace commands {
 
 NaviStopStreamResponse::NaviStopStreamResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-NaviStopStreamResponse::~NaviStopStreamResponse() {
-}
+NaviStopStreamResponse::~NaviStopStreamResponse() {}
 
 void NaviStopStreamResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
 }
 
 }  // namespace commands

@@ -37,17 +37,17 @@ namespace application_manager {
 
 namespace commands {
 
-VIDiagnosticMessageResponse::VIDiagnosticMessageResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+VIDiagnosticMessageResponse::VIDiagnosticMessageResponse(
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {}
 
-VIDiagnosticMessageResponse::~VIDiagnosticMessageResponse() {
-}
+VIDiagnosticMessageResponse::~VIDiagnosticMessageResponse() {}
 
 void VIDiagnosticMessageResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  event_engine::Event event(hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage);
+  event_engine::Event event(
+      hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage);
   event.set_smart_object(*message_);
   event.raise();
 }

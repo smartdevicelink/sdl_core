@@ -42,26 +42,26 @@ namespace commands {
  * @brief UiSetDisplayLayoutRequest command class
  **/
 class UiSetDisplayLayoutRequest : public RequestToHMI {
-  public:
-    /**
-     * @brief UiSetDisplayLayoutRequest class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit UiSetDisplayLayoutRequest(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief UiSetDisplayLayoutRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit UiSetDisplayLayoutRequest(const MessageSharedPtr& message);
 
-    /**
-     * @brief UiSetDisplayLayoutRequest class destructor
-     **/
-    virtual ~UiSetDisplayLayoutRequest();
+  /**
+   * @brief UiSetDisplayLayoutRequest class destructor
+   **/
+  virtual ~UiSetDisplayLayoutRequest();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(UiSetDisplayLayoutRequest);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(UiSetDisplayLayoutRequest);
 };
 
 }  // namespace commands

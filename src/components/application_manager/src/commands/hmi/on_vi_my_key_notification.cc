@@ -37,13 +37,10 @@ namespace application_manager {
 
 namespace commands {
 
-OnVIMyKeyNotification::OnVIMyKeyNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+OnVIMyKeyNotification::OnVIMyKeyNotification(const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {}
 
-OnVIMyKeyNotification::~OnVIMyKeyNotification() {
-}
+OnVIMyKeyNotification::~OnVIMyKeyNotification() {}
 
 void OnVIMyKeyNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,4 +55,3 @@ void OnVIMyKeyNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

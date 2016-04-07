@@ -39,11 +39,9 @@ namespace commands {
 
 OnVideoDataStreamingNotification::OnVideoDataStreamingNotification(
     const MessageSharedPtr& message)
-    : NotificationToHMI(message) {
-}
+    : NotificationToHMI(message) {}
 
-OnVideoDataStreamingNotification::~OnVideoDataStreamingNotification() {
-}
+OnVideoDataStreamingNotification::~OnVideoDataStreamingNotification() {}
 
 void OnVideoDataStreamingNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

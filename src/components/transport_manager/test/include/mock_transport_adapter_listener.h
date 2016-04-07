@@ -52,41 +52,75 @@ using namespace ::protocol_handler;
 class MockTransportAdapterListener : public TransportAdapterListener {
  public:
   MOCK_METHOD1(OnSearchDeviceDone,
-      void(const TransportAdapter* transport_adapter));
-  MOCK_METHOD0(AckDevices,void());
+               void(const TransportAdapter* transport_adapter));
+  MOCK_METHOD0(AckDevices, void());
   MOCK_METHOD2(OnSearchDeviceFailed,
-      void(const TransportAdapter* transport_adapter, const SearchDeviceError& error));
+               void(const TransportAdapter* transport_adapter,
+                    const SearchDeviceError& error));
   MOCK_METHOD1(OnFindNewApplicationsRequest,
-      void(const TransportAdapter* adapter));
+               void(const TransportAdapter* adapter));
   MOCK_METHOD1(OnDeviceListUpdated,
-      void(const TransportAdapter* transport_adapter));
+               void(const TransportAdapter* transport_adapter));
   MOCK_METHOD3(OnConnectDone,
-      void(const TransportAdapter* transport_adapter, const DeviceUID& device_handle, const ApplicationHandle& app_handle));
+               void(const TransportAdapter* transport_adapter,
+                    const DeviceUID& device_handle,
+                    const ApplicationHandle& app_handle));
   MOCK_METHOD4(OnConnectFailed,
-      void(const TransportAdapter* transport_adapter, const DeviceUID& device_handle, const ApplicationHandle& app_handle, const ConnectError& error));
+               void(const TransportAdapter* transport_adapter,
+                    const DeviceUID& device_handle,
+                    const ApplicationHandle& app_handle,
+                    const ConnectError& error));
   MOCK_METHOD4(OnUnexpectedDisconnect,
-      void(const TransportAdapter* transport_adapter, const DeviceUID& device_handle, const ApplicationHandle& app_handle, const CommunicationError& error));
+               void(const TransportAdapter* transport_adapter,
+                    const DeviceUID& device_handle,
+                    const ApplicationHandle& app_handle,
+                    const CommunicationError& error));
   MOCK_METHOD3(OnDisconnectDone,
-      void(const TransportAdapter* transport_adapter, const DeviceUID& device_handle, const ApplicationHandle& app_handle));
+               void(const TransportAdapter* transport_adapter,
+                    const DeviceUID& device_handle,
+                    const ApplicationHandle& app_handle));
   MOCK_METHOD4(OnDisconnectFailed,
-      void(const TransportAdapter* transport_adapter, const DeviceUID& device_handle, const ApplicationHandle& app_handle, const DisconnectError& error));
+               void(const TransportAdapter* transport_adapter,
+                    const DeviceUID& device_handle,
+                    const ApplicationHandle& app_handle,
+                    const DisconnectError& error));
   MOCK_METHOD2(OnDisconnectDeviceDone,
-      void(const TransportAdapter* transport_adapter, const DeviceUID& device_handle));
+               void(const TransportAdapter* transport_adapter,
+                    const DeviceUID& device_handle));
   MOCK_METHOD3(OnDisconnectDeviceFailed,
-      void(const TransportAdapter* transport_adapter, const DeviceUID& device_handle, const DisconnectDeviceError& error));
+               void(const TransportAdapter* transport_adapter,
+                    const DeviceUID& device_handle,
+                    const DisconnectDeviceError& error));
   MOCK_METHOD4(OnDataSendDone,
-      void(const TransportAdapter* transport_adapter, const DeviceUID& device_handle, const ApplicationHandle& app_handle, const RawMessagePtr data_container));
+               void(const TransportAdapter* transport_adapter,
+                    const DeviceUID& device_handle,
+                    const ApplicationHandle& app_handle,
+                    const RawMessagePtr data_container));
   MOCK_METHOD5(OnDataSendFailed,
-      void(const TransportAdapter* transport_adapter, const DeviceUID& device_handle, const ApplicationHandle& app_handle, const RawMessagePtr data_container, const DataSendError& error));
+               void(const TransportAdapter* transport_adapter,
+                    const DeviceUID& device_handle,
+                    const ApplicationHandle& app_handle,
+                    const RawMessagePtr data_container,
+                    const DataSendError& error));
   MOCK_METHOD4(OnDataReceiveDone,
-      void(const TransportAdapter* transport_adapter, const DeviceUID& device_handle, const ApplicationHandle& app_handle, const RawMessagePtr data_container));
+               void(const TransportAdapter* transport_adapter,
+                    const DeviceUID& device_handle,
+                    const ApplicationHandle& app_handle,
+                    const RawMessagePtr data_container));
   MOCK_METHOD4(OnDataReceiveFailed,
-      void(const TransportAdapter* transport_adapter, const DeviceUID& device_handle, const ApplicationHandle& app_handle, const DataReceiveError& error));
+               void(const TransportAdapter* transport_adapter,
+                    const DeviceUID& device_handle,
+                    const ApplicationHandle& app_handle,
+                    const DataReceiveError& error));
   MOCK_METHOD3(OnCommunicationError,
-      void(const TransportAdapter* transport_adapter, const DeviceUID& device_handle, const ApplicationHandle& app_handle));
-  MOCK_METHOD3(OnConnectRequested, void(const TransportAdapter*, const DeviceUID&, const ApplicationHandle&));
+               void(const TransportAdapter* transport_adapter,
+                    const DeviceUID& device_handle,
+                    const ApplicationHandle& app_handle));
+  MOCK_METHOD3(OnConnectRequested,
+               void(const TransportAdapter*,
+                    const DeviceUID&,
+                    const ApplicationHandle&));
 };
-
 }
 }
 }

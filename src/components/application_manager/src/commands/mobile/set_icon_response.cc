@@ -39,11 +39,9 @@ namespace application_manager {
 namespace commands {
 
 SetIconResponse::SetIconResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    : CommandResponseImpl(message) {}
 
-SetIconResponse::~SetIconResponse() {
-}
+SetIconResponse::~SetIconResponse() {}
 
 void SetIconResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

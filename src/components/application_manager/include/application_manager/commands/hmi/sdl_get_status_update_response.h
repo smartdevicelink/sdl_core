@@ -43,26 +43,26 @@ namespace commands {
  * @brief SDLGetStatusUpdateResponse command class
  **/
 class SDLGetStatusUpdateResponse : public ResponseToHMI {
-  public:
-    /**
-     * @brief SDLGetStatusUpdateResponse class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit SDLGetStatusUpdateResponse(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief SDLGetStatusUpdateResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit SDLGetStatusUpdateResponse(const MessageSharedPtr& message);
 
-    /**
-     * @brief SDLGetStatusUpdateResponse class destructor
-     **/
-    virtual ~SDLGetStatusUpdateResponse();
+  /**
+   * @brief SDLGetStatusUpdateResponse class destructor
+   **/
+  virtual ~SDLGetStatusUpdateResponse();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(SDLGetStatusUpdateResponse);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(SDLGetStatusUpdateResponse);
 };
 
 }  // namespace commands

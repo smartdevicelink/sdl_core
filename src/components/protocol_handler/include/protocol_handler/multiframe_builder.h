@@ -34,9 +34,9 @@
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_MULTIFRAME_BUILDER_H_
 
 #include <map>
-#include <ostream>      // std::basic_ostream
-#include <iterator>     // std::ostream_iterator
-#include <algorithm>    // std::copy
+#include <ostream>    // std::basic_ostream
+#include <iterator>   // std::ostream_iterator
+#include <algorithm>  // std::copy
 
 #include "utils/date_time.h"
 #include "protocol_handler/protocol_packet.h"
@@ -63,15 +63,18 @@ struct ProtocolFrameData {
   TimevalStruct append_time;
 };
 /**
- *\brief Map of frames with last frame data for messages received in multiple frames.
+ *\brief Map of frames with last frame data for messages received in multiple
+ *frames.
  */
 typedef std::map<MessageID, ProtocolFrameData> MessageIDToFrameMap;
 /**
- *\brief Map of frames with last frame data for messages received in multiple frames.
+ *\brief Map of frames with last frame data for messages received in multiple
+ *frames.
  */
 typedef std::map<SessionID, MessageIDToFrameMap> SessionToFrameMap;
 /**
- *\brief Map of frames with last frame data for messages received in multiple frames.
+ *\brief Map of frames with last frame data for messages received in multiple
+ *frames.
  */
 typedef std::map<ConnectionID, SessionToFrameMap> MultiFrameMap;
 
@@ -119,33 +122,39 @@ class MultiFrameBuilder {
   RESULT_CODE HandleFirstFrame(const ProtocolFramePtr packet);
   RESULT_CODE HandleConsecutiveFrame(const ProtocolFramePtr packet);
 
-  //  Map of frames with last frame data for messages received in multiple frames.
+  //  Map of frames with last frame data for messages received in multiple
+  //  frames.
   MultiFrameMap multiframes_map_;
   int64_t consecutive_frame_wait_msecs_;
 };
 
-template<typename _CharT>
-std::basic_ostream<_CharT>& operator<<(std::basic_ostream<_CharT>& stream,
-                                       const protocol_handler::MultiFrameMap& map) {
+template <typename _CharT>
+std::basic_ostream<_CharT>& operator<<(
+    std::basic_ostream<_CharT>& stream,
+    const protocol_handler::MultiFrameMap& map) {
   if (map.empty()) {
     stream << "{empty}";
     return stream;
   }
   for (MultiFrameMap::const_iterator connection_it = map.begin();
-       connection_it != map.end(); ++connection_it) {
+       connection_it != map.end();
+       ++connection_it) {
     const SessionToFrameMap& session_map = connection_it->second;
 
     for (SessionToFrameMap::const_iterator session_it = session_map.begin();
-         session_it != session_map.end(); ++session_it) {
+         session_it != session_map.end();
+         ++session_it) {
       const MessageIDToFrameMap& messageId_map = session_it->second;
 
-      for (MessageIDToFrameMap::const_iterator messageId_it = messageId_map.begin();
-           messageId_it != messageId_map.end(); ++messageId_it) {
+      for (MessageIDToFrameMap::const_iterator messageId_it =
+               messageId_map.begin();
+           messageId_it != messageId_map.end();
+           ++messageId_it) {
         const ProtocolFrameData& frame_data = messageId_it->second;
 
         stream << "ConnectionID: " << connection_it->first
-               << ", SessionID: "  << static_cast<uint32_t>(session_it->first)
-               << ", MessageID: "  << static_cast<uint32_t>(messageId_it->first)
+               << ", SessionID: " << static_cast<uint32_t>(session_it->first)
+               << ", MessageID: " << static_cast<uint32_t>(messageId_it->first)
                << " msec, frame: " << frame_data.frame << std::endl;
       }
     }

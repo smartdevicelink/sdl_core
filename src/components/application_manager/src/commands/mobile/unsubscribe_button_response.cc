@@ -40,11 +40,9 @@ namespace commands {
 
 UnsubscribeButtonResponse::UnsubscribeButtonResponse(
     const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    : CommandResponseImpl(message) {}
 
-UnsubscribeButtonResponse::~UnsubscribeButtonResponse() {
-}
+UnsubscribeButtonResponse::~UnsubscribeButtonResponse() {}
 
 void UnsubscribeButtonResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

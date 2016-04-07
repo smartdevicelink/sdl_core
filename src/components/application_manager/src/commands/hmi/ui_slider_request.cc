@@ -37,11 +37,9 @@ namespace application_manager {
 namespace commands {
 
 UISliderRequest::UISliderRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+    : RequestToHMI(message) {}
 
-UISliderRequest::~UISliderRequest() {
-}
+UISliderRequest::~UISliderRequest() {}
 
 void UISliderRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,4 +50,3 @@ void UISliderRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

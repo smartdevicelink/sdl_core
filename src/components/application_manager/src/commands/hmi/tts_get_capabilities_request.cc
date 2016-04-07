@@ -38,11 +38,9 @@ namespace commands {
 
 TTSGetCapabilitiesRequest::TTSGetCapabilitiesRequest(
     const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+    : RequestToHMI(message) {}
 
-TTSGetCapabilitiesRequest::~TTSGetCapabilitiesRequest() {
-}
+TTSGetCapabilitiesRequest::~TTSGetCapabilitiesRequest() {}
 
 void TTSGetCapabilitiesRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,4 +51,3 @@ void TTSGetCapabilitiesRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

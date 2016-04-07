@@ -37,11 +37,9 @@ namespace application_manager {
 namespace commands {
 
 TTSIsReadyResponse::TTSIsReadyResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-TTSIsReadyResponse::~TTSIsReadyResponse() {
-}
+TTSIsReadyResponse::~TTSIsReadyResponse() {}
 
 void TTSIsReadyResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

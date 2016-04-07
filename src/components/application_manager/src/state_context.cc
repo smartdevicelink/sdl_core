@@ -35,28 +35,29 @@
 
 namespace application_manager {
 
-
 bool StateContext::is_navi_app(const uint32_t app_id) const {
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(app_id);
   DCHECK_OR_RETURN(app, false);
   return app ? app->is_navi() : false;
 }
 
 bool StateContext::is_meida_app(const uint32_t app_id) const {
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(app_id);
   return app ? app->is_media_application() : false;
 }
 
 bool StateContext::is_voice_comunication_app(const uint32_t app_id) const {
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(app_id);
   return app ? app->is_voice_communication_supported() : false;
 }
 
-bool StateContext::is_attenuated_supported() const{
+bool StateContext::is_attenuated_supported() const {
   const HMICapabilities& hmi_capabilities =
       ApplicationManagerImpl::instance()->hmi_capabilities();
   return hmi_capabilities.attenuated_supported() &&
          profile::Profile::instance()->is_mixing_audio_supported();
 }
-
 }

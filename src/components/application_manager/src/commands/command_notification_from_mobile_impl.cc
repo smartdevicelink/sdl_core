@@ -40,11 +40,9 @@ namespace commands {
 
 CommandNotificationFromMobileImpl::CommandNotificationFromMobileImpl(
     const MessageSharedPtr& message)
-    : CommandImpl(message) {
-}
+    : CommandImpl(message) {}
 
-CommandNotificationFromMobileImpl::~CommandNotificationFromMobileImpl() {
-}
+CommandNotificationFromMobileImpl::~CommandNotificationFromMobileImpl() {}
 
 bool CommandNotificationFromMobileImpl::Init() {
   return true;
@@ -54,8 +52,7 @@ bool CommandNotificationFromMobileImpl::CleanUp() {
   return true;
 }
 
-void CommandNotificationFromMobileImpl::Run() {
-}
+void CommandNotificationFromMobileImpl::Run() {}
 
 void CommandNotificationFromMobileImpl::SendNotification() {
   (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;

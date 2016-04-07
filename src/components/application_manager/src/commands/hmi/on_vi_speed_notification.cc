@@ -37,13 +37,10 @@ namespace application_manager {
 
 namespace commands {
 
-OnVISpeedNotification::OnVISpeedNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+OnVISpeedNotification::OnVISpeedNotification(const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {}
 
-OnVISpeedNotification::~OnVISpeedNotification() {
-}
+OnVISpeedNotification::~OnVISpeedNotification() {}
 
 void OnVISpeedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,4 +55,3 @@ void OnVISpeedNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

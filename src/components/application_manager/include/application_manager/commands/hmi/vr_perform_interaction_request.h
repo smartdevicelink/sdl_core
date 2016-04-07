@@ -43,26 +43,26 @@ namespace commands {
  * @brief VRPerformInteractionRequest command class
  **/
 class VRPerformInteractionRequest : public RequestToHMI {
-  public:
-    /**
-     * @brief VRPerformInteractionRequest class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit VRPerformInteractionRequest(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief VRPerformInteractionRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit VRPerformInteractionRequest(const MessageSharedPtr& message);
 
-    /**
-     * @brief VRPerformInteractionRequest class destructor
-     **/
-    virtual ~VRPerformInteractionRequest();
+  /**
+   * @brief VRPerformInteractionRequest class destructor
+   **/
+  virtual ~VRPerformInteractionRequest();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(VRPerformInteractionRequest);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(VRPerformInteractionRequest);
 };
 
 }  // namespace commands

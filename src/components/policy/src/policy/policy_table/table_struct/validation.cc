@@ -3,7 +3,10 @@
 #include "utils/logger.h"
 
 namespace {
-bool IsTypeInvalid(rpc::Enum<rpc::policy_table_interface_base::RequestType> request) { return !request.is_valid(); }
+bool IsTypeInvalid(
+    rpc::Enum<rpc::policy_table_interface_base::RequestType> request) {
+  return !request.is_valid();
+}
 }
 
 namespace rpc {
@@ -12,9 +15,8 @@ namespace policy_table_interface_base {
 CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
 void RemoveInvalidTypes(RequestTypes& types) {
- types.erase(
-       std::remove_if(types.begin(), types.end(), &IsTypeInvalid),
-       types.end());
+  types.erase(std::remove_if(types.begin(), types.end(), &IsTypeInvalid),
+              types.end());
 }
 
 bool PolicyBase::Validate() const {
@@ -22,8 +24,7 @@ bool PolicyBase::Validate() const {
 }
 
 bool ApplicationPoliciesSection::Validate() const {
-  ApplicationPolicies::iterator it_default_policy =
-      apps.find(kDefaultApp);
+  ApplicationPolicies::iterator it_default_policy = apps.find(kDefaultApp);
   ApplicationPolicies::iterator it_pre_data_policy =
       apps.find(kPreDataConsentApp);
 
@@ -53,8 +54,8 @@ bool ApplicationPoliciesSection::Validate() const {
     if (PT_PRELOADED == pt_type) {
       if (it_default_policy->second.RequestType->empty()) {
         LOG4CXX_ERROR(
-              logger_,
-              "Default policy RequestTypes empty after clean-up. Exiting.");
+            logger_,
+            "Default policy RequestTypes empty after clean-up. Exiting.");
         return false;
       }
     }
@@ -63,8 +64,7 @@ bool ApplicationPoliciesSection::Validate() const {
   ApplicationPolicies::iterator iter = apps.begin();
   ApplicationPolicies::iterator end_iter = apps.end();
 
-
-  while(iter != end_iter) {
+  while (iter != end_iter) {
     ApplicationParams& app_params = (*iter).second;
     bool is_request_type_ommited = !app_params.RequestType.is_initialized();
     bool is_request_type_valid = app_params.RequestType.is_valid();
@@ -72,33 +72,33 @@ bool ApplicationPoliciesSection::Validate() const {
 
     if (PT_PRELOADED == pt_type) {
       if (!is_request_type_valid) {
-        LOG4CXX_WARN(
-              logger_,
-              "App policy RequestTypes are not valid. Will be cleaned.");
+        LOG4CXX_WARN(logger_,
+                     "App policy RequestTypes are not valid. Will be cleaned.");
         RemoveInvalidTypes(*app_params.RequestType);
         if (app_params.RequestType->empty()) {
           LOG4CXX_ERROR(
-                logger_,
-                "App policy RequestTypes empty after clean-up. Exiting.");
+              logger_,
+              "App policy RequestTypes empty after clean-up. Exiting.");
           return false;
         }
       }
     } else {
       if (is_request_type_ommited) {
-        LOG4CXX_WARN(logger_, "App policy RequestTypes ommited."
-                              " Will be replaced with default.");
+        LOG4CXX_WARN(logger_,
+                     "App policy RequestTypes ommited."
+                     " Will be replaced with default.");
         app_params.RequestType = apps[kDefaultApp].RequestType;
         ++iter;
         continue;
       }
       if (!is_request_type_valid) {
-        LOG4CXX_WARN(
-              logger_,
-              "App policy RequestTypes are invalid. Will be cleaned.");
+        LOG4CXX_WARN(logger_,
+                     "App policy RequestTypes are invalid. Will be cleaned.");
         RemoveInvalidTypes(*app_params.RequestType);
         if (app_params.RequestType->empty()) {
-          LOG4CXX_WARN(logger_, "App policy RequestTypes empty after clean-up."
-                                " Will be replaced with default.");
+          LOG4CXX_WARN(logger_,
+                       "App policy RequestTypes empty after clean-up."
+                       " Will be replaced with default.");
           app_params.RequestType = apps[kDefaultApp].RequestType;
           ++iter;
           continue;
@@ -125,9 +125,7 @@ bool Rpcs::Validate() const {
 }
 
 bool ModuleConfig::Validate() const {
-
   if (PT_PRELOADED == GetPolicyTableType()) {
-
     if (vehicle_make.is_initialized()) {
       return false;
     }
@@ -173,7 +171,7 @@ bool AppLevel::Validate() const {
 bool UsageAndErrorCounts::Validate() const {
   if (PT_PRELOADED == GetPolicyTableType() ||
       PT_UPDATE == GetPolicyTableType()) {
-   return false;
+    return false;
   }
   return true;
 }
@@ -194,4 +192,3 @@ bool Table::Validate() const {
 }
 }  // namespace policy_table_interface_base
 }  // namespace rpc
-

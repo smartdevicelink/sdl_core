@@ -49,9 +49,11 @@ void OnAllowSDLFunctionalityNotification::Run() {
   if ((*message_)[strings::msg_params].keyExists("device")) {
     device_id = (*message_)[strings::msg_params]["device"]["id"].asString();
   }
-  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnAllowSDLFunctionalityNotification(
-      (*message_)[strings::msg_params][hmi_response::allowed].asBool(),
-      device_id);
+  application_manager::ApplicationManagerImpl::instance()
+      ->GetPolicyHandler()
+      .OnAllowSDLFunctionalityNotification(
+          (*message_)[strings::msg_params][hmi_response::allowed].asBool(),
+          device_id);
 }
 
 }  // namespace commands

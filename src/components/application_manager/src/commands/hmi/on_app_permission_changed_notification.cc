@@ -38,11 +38,9 @@ namespace commands {
 
 OnAppPermissionChangedNotification::OnAppPermissionChangedNotification(
     const MessageSharedPtr& message)
-    : NotificationToHMI(message) {
-}
+    : NotificationToHMI(message) {}
 
-OnAppPermissionChangedNotification::~OnAppPermissionChangedNotification() {
-}
+OnAppPermissionChangedNotification::~OnAppPermissionChangedNotification() {}
 
 void OnAppPermissionChangedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

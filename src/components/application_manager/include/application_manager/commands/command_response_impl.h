@@ -57,6 +57,7 @@ class CommandResponseImpl : public CommandImpl {
                     const mobile_apis::Result::eType& result_code =
                         mobile_apis::Result::INVALID_ENUM,
                     bool final_message = false);
+
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandResponseImpl);
 };

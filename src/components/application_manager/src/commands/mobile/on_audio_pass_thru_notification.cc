@@ -38,11 +38,9 @@ namespace commands {
 
 OnAudioPassThruNotification::OnAudioPassThruNotification(
     const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {
-}
+    : CommandNotificationImpl(message) {}
 
-OnAudioPassThruNotification::~OnAudioPassThruNotification() {
-}
+OnAudioPassThruNotification::~OnAudioPassThruNotification() {}
 
 void OnAudioPassThruNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

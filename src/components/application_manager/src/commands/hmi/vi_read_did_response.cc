@@ -33,17 +33,14 @@
 #include "application_manager/event_engine/event.h"
 #include "application_manager/application_manager_impl.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 VIReadDIDResponse::VIReadDIDResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-VIReadDIDResponse::~VIReadDIDResponse() {
-}
+VIReadDIDResponse::~VIReadDIDResponse() {}
 
 void VIReadDIDResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

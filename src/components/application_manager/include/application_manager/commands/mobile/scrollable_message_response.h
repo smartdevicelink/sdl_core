@@ -50,8 +50,7 @@ class ScrollableMessageResponse : public CommandResponseImpl {
   /**
    * \brief SpeakResponseCommand class destructor
    **/
-  virtual ~ScrollableMessageResponse() {
-  }
+  virtual ~ScrollableMessageResponse() {}
 
   /**
    * @brief Execute command

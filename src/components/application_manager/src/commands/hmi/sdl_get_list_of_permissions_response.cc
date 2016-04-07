@@ -38,11 +38,10 @@ namespace application_manager {
 namespace commands {
 
 SDLGetListOfPermissionsResponse::SDLGetListOfPermissionsResponse(
-  const MessageSharedPtr& message): ResponseToHMI(message) {
-}
+    const MessageSharedPtr& message)
+    : ResponseToHMI(message) {}
 
-SDLGetListOfPermissionsResponse::~SDLGetListOfPermissionsResponse() {
-}
+SDLGetListOfPermissionsResponse::~SDLGetListOfPermissionsResponse() {}
 
 void SDLGetListOfPermissionsResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -54,5 +53,3 @@ void SDLGetListOfPermissionsResponse::Run() {
 
 }  // namespace commands
 }  // namespace application_manager
-
-

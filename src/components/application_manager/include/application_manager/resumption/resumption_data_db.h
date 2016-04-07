@@ -200,7 +200,6 @@ class ResumptionDataDB : public ResumptionData {
                               const std::string& device_id,
                               mobile_apis::HMILevel::eType hmi_level);
 
-
   /**
    * @brief Write database to file system
    */

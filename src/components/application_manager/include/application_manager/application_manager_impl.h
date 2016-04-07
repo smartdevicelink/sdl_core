@@ -316,9 +316,8 @@ class ApplicationManagerImpl
   void SetTelemetryObserver(AMTelemetryObserver* observer);
 #endif  // TELEMETRY_MONITOR
 
-  ApplicationSharedPtr RegisterApplication(
-      const utils::SharedPtr<smart_objects::SmartObject>&
-          request_for_registration);
+  ApplicationSharedPtr RegisterApplication(const utils::SharedPtr<
+      smart_objects::SmartObject>& request_for_registration);
   /*
    * @brief Closes application by id
    *
@@ -590,11 +589,11 @@ class ApplicationManagerImpl
     state_ctrl_.SetRegularState(app, state);
   }
 
- /**
-   * @brief Checks, if particular state is active
-   * @param state_id State
-   * @return True, if state is active, otherwise - false
-   */
+  /**
+    * @brief Checks, if particular state is active
+    * @param state_id State
+    * @return True, if state is active, otherwise - false
+    */
   bool IsStateActive(HmiState::StateID state_id) const;
 
   /**
@@ -682,9 +681,9 @@ class ApplicationManagerImpl
    */
   void TerminateRequest(uint32_t connection_key, uint32_t corr_id);
 
-  bool ManageMobileCommand(
-      const commands::MessageSharedPtr message,
-      commands::Command::CommandOrigin origin = commands::Command::ORIGIN_SDL) OVERRIDE;
+  bool ManageMobileCommand(const commands::MessageSharedPtr message,
+                           commands::Command::CommandOrigin origin =
+                               commands::Command::ORIGIN_SDL) OVERRIDE;
   void SendMessageToHMI(const commands::MessageSharedPtr message) OVERRIDE;
   bool ManageHMICommand(const commands::MessageSharedPtr message) OVERRIDE;
 
@@ -939,7 +938,7 @@ class ApplicationManagerImpl
   connection_handler::ConnectionHandler& connection_handler() const OVERRIDE;
 
   virtual policy::PolicyHandlerInterface& GetPolicyHandler() OVERRIDE {
-      return policy_handler_;
+    return policy_handler_;
   }
   /**
    * @brief Checks, if given RPC is allowed at current HMI level for specific
@@ -1298,7 +1297,7 @@ class ApplicationManagerImpl
    */
   typedef std::map<uint32_t, std::pair<bool, bool>> NaviServiceStatusMap;
 
-typedef utils::SharedPtr<timer::Timer> TimerSPtr;
+  typedef utils::SharedPtr<timer::Timer> TimerSPtr;
   /**
    * @brief GetHashedAppID allows to obtain unique application id as a string.
    * It concatenates device mac and application id to obtain unique id.

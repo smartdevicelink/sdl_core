@@ -43,11 +43,9 @@ namespace mobile {
 
 OnTouchEventNotification::OnTouchEventNotification(
     const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {
-}
+    : CommandNotificationImpl(message) {}
 
-OnTouchEventNotification::~OnTouchEventNotification() {
-}
+OnTouchEventNotification::~OnTouchEventNotification() {}
 
 void OnTouchEventNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

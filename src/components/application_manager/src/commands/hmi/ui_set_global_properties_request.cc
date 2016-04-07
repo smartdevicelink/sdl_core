@@ -38,11 +38,9 @@ namespace commands {
 
 UISetGlobalPropertiesRequest::UISetGlobalPropertiesRequest(
     const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+    : RequestToHMI(message) {}
 
-UISetGlobalPropertiesRequest::~UISetGlobalPropertiesRequest() {
-}
+UISetGlobalPropertiesRequest::~UISetGlobalPropertiesRequest() {}
 
 void UISetGlobalPropertiesRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,4 +51,3 @@ void UISetGlobalPropertiesRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

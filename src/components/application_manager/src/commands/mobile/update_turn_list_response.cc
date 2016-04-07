@@ -40,11 +40,9 @@ namespace application_manager {
 namespace commands {
 
 UpdateTurnListResponse::UpdateTurnListResponse(const MessageSharedPtr& message)
- : CommandResponseImpl(message) {
-}
+    : CommandResponseImpl(message) {}
 
-UpdateTurnListResponse::~UpdateTurnListResponse() {
-}
+UpdateTurnListResponse::~UpdateTurnListResponse() {}
 
 void UpdateTurnListResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

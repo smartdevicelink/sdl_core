@@ -37,11 +37,9 @@ namespace application_manager {
 namespace commands {
 
 VRAddCommandRequest::VRAddCommandRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+    : RequestToHMI(message) {}
 
-VRAddCommandRequest::~VRAddCommandRequest() {
-}
+VRAddCommandRequest::~VRAddCommandRequest() {}
 
 void VRAddCommandRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,4 +50,3 @@ void VRAddCommandRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

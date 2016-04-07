@@ -153,8 +153,7 @@ TEST_F(ProtocolPacketTest, SerializePacketWithWrongServiceType) {
 
 TEST_F(ProtocolPacketTest, SetPacketWithDiffFrameType) {
   uint8_t frame_type;
-  for (frame_type = FRAME_TYPE_CONTROL + 1;
-       frame_type <= FRAME_TYPE_MAX_VALUE;
+  for (frame_type = FRAME_TYPE_CONTROL + 1; frame_type <= FRAME_TYPE_MAX_VALUE;
        ++frame_type) {
     RawMessagePtr res = GetRawMessage(PROTOCOL_VERSION_3, frame_type, kControl);
     EXPECT_EQ(PROTOCOL_VERSION_3, res->protocol_version());

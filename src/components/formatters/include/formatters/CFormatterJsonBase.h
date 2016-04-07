@@ -43,80 +43,77 @@ namespace NsJSONHandler {
 namespace Formatters {
 
 namespace meta_formatter_error_code {
+/**
+  * @brief Error codes of MetaFormatter represented as bitmask
+  **/
+typedef long tMetaFormatterErrorCode;
+
+/**
+  * @brief OK, no error
+  */
+static const tMetaFormatterErrorCode kErrorOk = 0x0;
+
+/**
+  * @brief origin smart object is not function
+  */
+static const tMetaFormatterErrorCode kErrorObjectIsNotFunction = 0x01;
+
+/**
+  * @brief smart shema describes object which is not function
+  */
+static const tMetaFormatterErrorCode kErrorSchemaIsNotFunction = 0x02;
+
+/**
+  * @brief result smart object has invalid type (SmartType_Invalid)
+  *        before passing to MetaFormatter, i.e. result object can not
+  *        be changed, i.e. result object can not be built
+  *
+  */
+static const tMetaFormatterErrorCode kErrorFailedCreateObjectBySchema = 0x04;
+}
+
+/**
+ * @brief The base class for all JSON based formatters.
+ */
+class CFormatterJsonBase {
+ private:
   /**
-    * @brief Error codes of MetaFormatter represented as bitmask
-    **/
-  typedef long tMetaFormatterErrorCode ;
+   * @brief Constructor.
+   */
+  CFormatterJsonBase();
 
   /**
-    * @brief OK, no error
-    */
-  static const tMetaFormatterErrorCode kErrorOk = 0x0;
+   * @brief Copy constructor.
+   *
+   * @param obj Object to copy.
+   */
+  CFormatterJsonBase(const CFormatterJsonBase& obj);
+
+ protected:
+ public:
+  /**
+   * @brief The method constructs a SmartObject from the input JSON object
+   *
+   * @param value Input JSON object.
+   * @param obj The resulting SmartObject.
+   */
+  static void jsonValueToObj(
+      const Json::Value& value,
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& obj);
 
   /**
-    * @brief origin smart object is not function
-    */
-  static const tMetaFormatterErrorCode kErrorObjectIsNotFunction = 0x01;
-
-  /**
-    * @brief smart shema describes object which is not function
-    */
-  static const tMetaFormatterErrorCode kErrorSchemaIsNotFunction = 0x02;
-
-  /**
-    * @brief result smart object has invalid type (SmartType_Invalid)
-    *        before passing to MetaFormatter, i.e. result object can not
-    *        be changed, i.e. result object can not be built
+    * @brief The method constructs a JSON object from the input SmartObject
     *
+    * @param obj Input SmartObject. Can contain a complex structure of objects.
+    * @param value The resulting JSON object. It has the same structure as the
+    *input SmartObject.
     */
-  static const tMetaFormatterErrorCode kErrorFailedCreateObjectBySchema = 0x04;
-}
-
-    /**
-     * @brief The base class for all JSON based formatters.
-     */
-    class CFormatterJsonBase
-    {
-    private:
-
-        /**
-         * @brief Constructor.
-         */
-        CFormatterJsonBase();
-
-        /**
-         * @brief Copy constructor.
-         *
-         * @param obj Object to copy.
-         */
-        CFormatterJsonBase(const CFormatterJsonBase &obj);
-
-    protected:
-
-
-    public:
-
-        /**
-         * @brief The method constructs a SmartObject from the input JSON object
-         *
-         * @param value Input JSON object.
-         * @param obj The resulting SmartObject.
-         */
-        static void jsonValueToObj(const Json::Value &value,
-                NsSmartDeviceLink::NsSmartObjects::SmartObject &obj);
-
-       /**
-         * @brief The method constructs a JSON object from the input SmartObject
-         *
-         * @param obj Input SmartObject. Can contain a complex structure of objects.
-         * @param value The resulting JSON object. It has the same structure as the input SmartObject.
-         */
-        static void objToJsonValue(const NsSmartDeviceLink::NsSmartObjects::SmartObject &obj,
-                Json::Value &value);
-    };
-
+  static void objToJsonValue(
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject& obj,
+      Json::Value& value);
+};
 }
 }
-} // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
+}  // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
 
-#endif // __CFORMATTERJSONBASE_HPP__
+#endif  // __CFORMATTERJSONBASE_HPP__

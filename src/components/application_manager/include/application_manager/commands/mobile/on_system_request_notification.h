@@ -34,7 +34,6 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_SYSTEM_REQUEST_NOTIFICATION_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_SYSTEM_REQUEST_NOTIFICATION_H_
 
-
 #include "application_manager/commands/command_notification_impl.h"
 
 namespace application_manager {
@@ -64,7 +63,8 @@ class OnSystemRequestNotification : public CommandNotificationImpl {
    * @brief Execute command
    **/
   virtual void Run();
-  private:
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(OnSystemRequestNotification);
 };
 

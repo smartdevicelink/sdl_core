@@ -479,8 +479,7 @@ void CommandRequestImpl::RemoveDisallowedParameters(
       parameters_permissions_.undefined_params.push_back(key);
       LOG4CXX_INFO(logger_,
                    "Following parameter is not found among allowed parameters '"
-                       << key
-                       << "' and will be treated as disallowed.");
+                       << key << "' and will be treated as disallowed.");
     }
   }
 }

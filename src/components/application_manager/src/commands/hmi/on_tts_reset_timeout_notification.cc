@@ -9,11 +9,10 @@ namespace commands {
 namespace hmi {
 
 OnTTSResetTimeoutNotification::OnTTSResetTimeoutNotification(
-    const MessageSharedPtr& message) : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {}
 
-OnTTSResetTimeoutNotification::~OnTTSResetTimeoutNotification() {
-}
+OnTTSResetTimeoutNotification::~OnTTSResetTimeoutNotification() {}
 
 void OnTTSResetTimeoutNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -28,4 +27,3 @@ void OnTTSResetTimeoutNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

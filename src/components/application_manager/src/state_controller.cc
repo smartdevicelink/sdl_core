@@ -1,34 +1,34 @@
- /*
- Copyright (c) 2015, Ford Motor Company
- All rights reserved.
+/*
+Copyright (c) 2015, Ford Motor Company
+All rights reserved.
 
- Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
 
- Redistributions of source code must retain the above copyright notice, this
- list of conditions and the following disclaimer.
+Redistributions of source code must retain the above copyright notice, this
+list of conditions and the following disclaimer.
 
- Redistributions in binary form must reproduce the above copyright notice,
- this list of conditions and the following
- disclaimer in the documentation and/or other materials provided with the
- distribution.
+Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following
+disclaimer in the documentation and/or other materials provided with the
+distribution.
 
- Neither the name of the Ford Motor Company nor the names of its contributors
- may be used to endorse or promote products derived from this software
- without specific prior written permission.
+Neither the name of the Ford Motor Company nor the names of its contributors
+may be used to endorse or promote products derived from this software
+without specific prior written permission.
 
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- POSSIBILITY OF SUCH DAMAGE.
- */
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+*/
 
 #include "application_manager/state_controller.h"
 #include "application_manager/usage_statistics.h"
@@ -129,11 +129,10 @@ HmiStatePtr StateController::ResolveHmiState(ApplicationSharedPtr app,
   using namespace helpers;
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_,
-                "State to resolve: hmi_level " << state->hmi_level()
-                                               << ", audio_state "
-                                               << state->audio_streaming_state()
-                                               << ", system_context "
-                                               << state->system_context());
+                "State to resolve: hmi_level "
+                    << state->hmi_level() << ", audio_state "
+                    << state->audio_streaming_state() << ", system_context "
+                    << state->system_context());
 
   HmiStatePtr available_state =
       CreateHmiState(app->app_id(), HmiState::StateID::STATE_ID_REGULAR);
@@ -238,11 +237,10 @@ bool StateController::IsStateAvailable(ApplicationSharedPtr app,
   using namespace helpers;
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_,
-                "Checking state: hmi_level " << state->hmi_level()
-                                             << ", audio_state "
-                                             << state->audio_streaming_state()
-                                             << ", system_context "
-                                             << state->system_context());
+                "Checking state: hmi_level "
+                    << state->hmi_level() << ", audio_state "
+                    << state->audio_streaming_state() << ", system_context "
+                    << state->system_context());
 
   if (app->is_resuming()) {
     return IsStateAvailableForResumption(app, state);
@@ -311,8 +309,7 @@ void StateController::SetupRegularHmiState(ApplicationSharedPtr app,
   LOG4CXX_DEBUG(logger_,
                 "hmi_level " << state->hmi_level() << ", audio_state "
                              << state->audio_streaming_state()
-                             << ", system_context "
-                             << state->system_context());
+                             << ", system_context " << state->system_context());
   HmiStatePtr curr_state = app->CurrentHmiState();
   HmiStatePtr old_state =
       CreateHmiState(app->app_id(), HmiState::StateID::STATE_ID_REGULAR);
@@ -420,7 +417,7 @@ void StateController::on_event(const event_engine::Event& event) {
           message[strings::msg_params][hmi_notification::is_active].asBool();
       const uint32_t id =
           message[strings::msg_params][hmi_notification::event_name].asUInt();
-      //TODO(AOleynik): Add verification/conversion check here
+      // TODO(AOleynik): Add verification/conversion check here
       Common_EventTypes::eType state_id =
           static_cast<Common_EventTypes::eType>(id);
       if (is_active) {
@@ -680,7 +677,7 @@ void StateController::OnAppDeactivated(
     return;
   }
 
-  //TODO(AOleynik): Need to delete DeactivateReason and modify OnAppDeactivated
+  // TODO(AOleynik): Need to delete DeactivateReason and modify OnAppDeactivated
   // when HMI will support that, otherwise won't be testable
   DeactivateApp(app);
 }

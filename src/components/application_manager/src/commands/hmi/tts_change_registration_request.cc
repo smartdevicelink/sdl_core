@@ -38,11 +38,9 @@ namespace commands {
 
 TTSChangeRegistrationRequest::TTSChangeRegistrationRequest(
     const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+    : RequestToHMI(message) {}
 
-TTSChangeRegistrationRequest::~TTSChangeRegistrationRequest() {
-}
+TTSChangeRegistrationRequest::~TTSChangeRegistrationRequest() {}
 
 void TTSChangeRegistrationRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,4 +51,3 @@ void TTSChangeRegistrationRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

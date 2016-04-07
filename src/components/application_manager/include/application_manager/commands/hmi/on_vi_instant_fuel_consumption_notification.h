@@ -50,7 +50,8 @@ class OnVIInstantFuelConsumptionNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVIInstantFuelConsumptionNotification(const MessageSharedPtr& message);
+  explicit OnVIInstantFuelConsumptionNotification(
+      const MessageSharedPtr& message);
 
   /**
    * @brief OnVIInstantFuelConsumptionNotification class destructor

@@ -39,11 +39,9 @@ namespace application_manager {
 namespace commands {
 
 SystemResponse::SystemResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    : CommandResponseImpl(message) {}
 
-SystemResponse::~SystemResponse() {
-}
+SystemResponse::~SystemResponse() {}
 
 void SystemResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -40,10 +40,7 @@ namespace dbms {
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 SQLDatabase::SQLDatabase(const std::string& db_name)
-    : conn_(NULL),
-      db_name_(db_name),
-      error_(Error::OK) {
-}
+    : conn_(NULL), db_name_(db_name), error_(Error::OK) {}
 
 SQLDatabase::~SQLDatabase() {
   Close();
@@ -51,7 +48,8 @@ SQLDatabase::~SQLDatabase() {
 
 bool SQLDatabase::Open() {
   sync_primitives::AutoLock auto_lock(conn_lock_);
-  if (conn_) return true;
+  if (conn_)
+    return true;
   conn_ = qdb_connect(db_name_.c_str(), 0);
   if (conn_ == NULL) {
     error_ = Error::ERROR;
@@ -102,9 +100,9 @@ qdb_hdl_t* SQLDatabase::conn() const {
 
 bool SQLDatabase::Backup() {
   if (qdb_backup(conn_, QDB_ATTACH_DEFAULT) == -1) {
-	error_ = Error::ERROR;
+    error_ = Error::ERROR;
     LOG4CXX_ERROR(logger_, "Backup returned error: " << std::strerror(errno));
-	return false;
+    return false;
   }
   LOG4CXX_INFO(logger_, "Backup was successful.");
   return true;

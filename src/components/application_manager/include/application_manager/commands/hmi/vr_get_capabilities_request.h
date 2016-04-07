@@ -43,26 +43,26 @@ namespace commands {
  * @brief VRGetCapabilitiesRequest command class
  **/
 class VRGetCapabilitiesRequest : public RequestToHMI {
-  public:
-    /**
-     * @brief VRGetCapabilitiesRequest class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit VRGetCapabilitiesRequest(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief VRGetCapabilitiesRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit VRGetCapabilitiesRequest(const MessageSharedPtr& message);
 
-    /**
-     * @brief VRGetCapabilitiesRequest class destructor
-     **/
-    virtual ~VRGetCapabilitiesRequest();
+  /**
+   * @brief VRGetCapabilitiesRequest class destructor
+   **/
+  virtual ~VRGetCapabilitiesRequest();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(VRGetCapabilitiesRequest);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(VRGetCapabilitiesRequest);
 };
 
 }  // namespace commands

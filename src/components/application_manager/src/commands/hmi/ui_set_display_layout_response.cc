@@ -39,11 +39,10 @@ namespace application_manager {
 namespace commands {
 
 UiSetDisplayLayoutResponse::UiSetDisplayLayoutResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
-}
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {}
 
-UiSetDisplayLayoutResponse::~UiSetDisplayLayoutResponse() {
-}
+UiSetDisplayLayoutResponse::~UiSetDisplayLayoutResponse() {}
 
 void UiSetDisplayLayoutResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

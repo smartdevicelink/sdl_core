@@ -40,11 +40,9 @@ namespace commands {
 
 ChangeRegistrationResponse::ChangeRegistrationResponse(
     const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    : CommandResponseImpl(message) {}
 
-ChangeRegistrationResponse::~ChangeRegistrationResponse() {
-}
+ChangeRegistrationResponse::~ChangeRegistrationResponse() {}
 
 void ChangeRegistrationResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

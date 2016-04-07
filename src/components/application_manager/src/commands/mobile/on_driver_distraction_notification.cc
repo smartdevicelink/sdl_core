@@ -44,11 +44,9 @@ namespace mobile {
 
 OnDriverDistractionNotification::OnDriverDistractionNotification(
     const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {
-}
+    : CommandNotificationImpl(message) {}
 
-OnDriverDistractionNotification::~OnDriverDistractionNotification() {
-}
+OnDriverDistractionNotification::~OnDriverDistractionNotification() {}
 
 void OnDriverDistractionNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

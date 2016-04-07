@@ -39,19 +39,17 @@ namespace commands {
 
 VIGetVehicleDataResponse::VIGetVehicleDataResponse(
     const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-VIGetVehicleDataResponse::~VIGetVehicleDataResponse() {
-}
+VIGetVehicleDataResponse::~VIGetVehicleDataResponse() {}
 
 void VIGetVehicleDataResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
 
-  if ((*message_)[strings::params][strings::message_type]
-      == static_cast<int32_t>(hmi_apis::messageType::error_response)) {
+  if ((*message_)[strings::params][strings::message_type] ==
+      static_cast<int32_t>(hmi_apis::messageType::error_response)) {
     smart_objects::SmartObject result(smart_objects::SmartType_Map);
 
     if ((*message_)[strings::params].keyExists(strings::data)) {
@@ -73,7 +71,9 @@ void VIGetVehicleDataResponse::Run() {
     event.set_smart_object(result);
   } else {
     event.set_smart_object(*message_);
-    application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnVehicleDataUpdated(*message_);
+    application_manager::ApplicationManagerImpl::instance()
+        ->GetPolicyHandler()
+        .OnVehicleDataUpdated(*message_);
   }
 
   event.raise();

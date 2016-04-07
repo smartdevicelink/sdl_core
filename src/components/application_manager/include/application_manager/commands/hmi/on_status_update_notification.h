@@ -43,26 +43,26 @@ namespace commands {
  * @brief OnGetStatusUpdateNotification command class
  **/
 class OnStatusUpdateNotification : public NotificationToHMI {
-  public:
-    /**
-     * @brief OnGetStatusUpdateNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnStatusUpdateNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnGetStatusUpdateNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnStatusUpdateNotification(const MessageSharedPtr& message);
 
-    /**
-     * @brief OnGetStatusUpdateNotification class destructor
-     **/
-    virtual ~OnStatusUpdateNotification();
+  /**
+   * @brief OnGetStatusUpdateNotification class destructor
+   **/
+  virtual ~OnStatusUpdateNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnStatusUpdateNotification);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnStatusUpdateNotification);
 };
 
 }  // namespace commands

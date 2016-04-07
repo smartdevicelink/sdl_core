@@ -68,7 +68,7 @@ class OnHashChangeNotification : public CommandNotificationImpl {
   DISALLOW_COPY_AND_ASSIGN(OnHashChangeNotification);
 };
 
-}   // namespace mobile
+}  // namespace mobile
 }  // namespace commands
 }  // namespace application_manager
 

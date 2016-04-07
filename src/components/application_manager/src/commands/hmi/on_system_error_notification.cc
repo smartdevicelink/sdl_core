@@ -40,23 +40,21 @@ namespace commands {
 
 OnSystemErrorNotification::OnSystemErrorNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnSystemErrorNotification::~OnSystemErrorNotification() {
-}
+OnSystemErrorNotification::~OnSystemErrorNotification() {}
 
 void OnSystemErrorNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  const int code = (*message_)[strings::msg_params][hmi_notification::error]
-      .asInt();
+  const int code =
+      (*message_)[strings::msg_params][hmi_notification::error].asInt();
 
   application_manager::ApplicationManagerImpl::instance()
-      ->GetPolicyHandler().OnSystemError(code);
+      ->GetPolicyHandler()
+      .OnSystemError(code);
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

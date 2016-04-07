@@ -136,9 +136,8 @@ void SetAppIconRequest::CopyToIconStorage(
     LOG4CXX_ERROR(logger_,
                   "Icon size (" << file_size << ") is bigger, than "
                                                 " icons storage maximum size ("
-                                << storage_max_size
-                                << ")."
-                                   "Copying skipped.");
+                                << storage_max_size << ")."
+                                                       "Copying skipped.");
     return;
   }
 
@@ -256,8 +255,7 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
 
         const std::string& path =
             (*message_)[strings::msg_params][strings::sync_file_name]
-                       [strings::value]
-                           .asString();
+                       [strings::value].asString();
         app->set_app_icon_path(path);
 
         LOG4CXX_INFO(logger_,

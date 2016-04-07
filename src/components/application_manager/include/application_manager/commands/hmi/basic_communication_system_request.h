@@ -43,26 +43,26 @@ namespace commands {
  * @brief BasicCommunicationSystemRequest command class
  **/
 class BasicCommunicationSystemRequest : public RequestToHMI {
-  public:
-    /**
-     * @brief BasicCommunicationSystemRequest class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit BasicCommunicationSystemRequest(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief BasicCommunicationSystemRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit BasicCommunicationSystemRequest(const MessageSharedPtr& message);
 
-    /**
-     * @brief BasicCommunicationSystemRequest class destructor
-     **/
-    virtual ~BasicCommunicationSystemRequest();
+  /**
+   * @brief BasicCommunicationSystemRequest class destructor
+   **/
+  virtual ~BasicCommunicationSystemRequest();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(BasicCommunicationSystemRequest);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(BasicCommunicationSystemRequest);
 };
 
 }  // namespace commands

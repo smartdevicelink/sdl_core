@@ -45,8 +45,9 @@ namespace security_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "SecurityManager")
 
-CryptoManagerImpl::SSLContextImpl::SSLContextImpl(
-    SSL* conn, Mode mode, size_t maximum_payload_size)
+CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL* conn,
+                                                  Mode mode,
+                                                  size_t maximum_payload_size)
     : connection_(conn)
     , bioIn_(BIO_new(BIO_s_mem()))
     , bioOut_(BIO_new(BIO_s_mem()))
@@ -191,8 +192,7 @@ CryptoManagerImpl::SSLContextImpl::CheckCertContext() {
   if (!(hsh_context_.expected_cn.CompareIgnoreCase(cn.c_str()))) {
     LOG4CXX_ERROR(logger_,
                   "Trying to run handshake with wrong app name: "
-                      << cn
-                      << ". Expected app name: "
+                      << cn << ". Expected app name: "
                       << hsh_context_.expected_cn.AsMBString());
     return Handshake_Result_AppNameMismatch;
   }
@@ -200,8 +200,7 @@ CryptoManagerImpl::SSLContextImpl::CheckCertContext() {
   if (!(hsh_context_.expected_sn.CompareIgnoreCase(sn.c_str()))) {
     LOG4CXX_ERROR(logger_,
                   "Trying to run handshake with wrong app id: "
-                      << sn
-                      << ". Expected app id: "
+                      << sn << ". Expected app id: "
                       << hsh_context_.expected_sn.AsMBString());
     return Handshake_Result_AppIDMismatch;
   }
@@ -278,11 +277,8 @@ CryptoManagerImpl::SSLContextImpl::PerformHandshake() {
       SetHandshakeError(error);
       LOG4CXX_WARN(logger_,
                    "Handshake failed with error "
-                       << " -> "
-                       << SSL_get_error(connection_, error)
-                       << " \""
-                       << LastError()
-                       << '"');
+                       << " -> " << SSL_get_error(connection_, error) << " \""
+                       << LastError() << '"');
       ResetConnection();
       is_handshake_pending_ = false;
 

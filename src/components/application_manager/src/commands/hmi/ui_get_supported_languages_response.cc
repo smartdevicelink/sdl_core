@@ -39,11 +39,9 @@ namespace commands {
 
 UIGetSupportedLanguagesResponse::UIGetSupportedLanguagesResponse(
     const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-UIGetSupportedLanguagesResponse::~UIGetSupportedLanguagesResponse() {
-}
+UIGetSupportedLanguagesResponse::~UIGetSupportedLanguagesResponse() {}
 
 void UIGetSupportedLanguagesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

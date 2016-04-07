@@ -37,13 +37,10 @@ namespace application_manager {
 
 namespace commands {
 
-OnVIRpmNotification::OnVIRpmNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+OnVIRpmNotification::OnVIRpmNotification(const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {}
 
-OnVIRpmNotification::~OnVIRpmNotification() {
-}
+OnVIRpmNotification::~OnVIRpmNotification() {}
 
 void OnVIRpmNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,4 +55,3 @@ void OnVIRpmNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

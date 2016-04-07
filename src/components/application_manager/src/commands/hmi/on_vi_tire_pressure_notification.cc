@@ -39,11 +39,9 @@ namespace commands {
 
 OnVITirePressureNotification::OnVITirePressureNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnVITirePressureNotification::~OnVITirePressureNotification() {
-}
+OnVITirePressureNotification::~OnVITirePressureNotification() {}
 
 void OnVITirePressureNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,4 +56,3 @@ void OnVITirePressureNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

@@ -39,11 +39,9 @@ namespace application_manager {
 namespace commands {
 
 UIGetLanguageResponse::UIGetLanguageResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-UIGetLanguageResponse::~UIGetLanguageResponse() {
-}
+UIGetLanguageResponse::~UIGetLanguageResponse() {}
 
 void UIGetLanguageResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,17 +51,17 @@ void UIGetLanguageResponse::Run() {
 
   if ((*message_).keyExists(strings::msg_params) &&
       (*message_)[strings::msg_params].keyExists(hmi_response::language)) {
-
     language = static_cast<Common_Language::eType>(
-             (*message_)[strings::msg_params][hmi_response::language].asInt());
+        (*message_)[strings::msg_params][hmi_response::language].asInt());
   }
 
-  ApplicationManagerImpl::instance()->hmi_capabilities().
-      set_active_ui_language(language);
+  ApplicationManagerImpl::instance()->hmi_capabilities().set_active_ui_language(
+      language);
 
-  LOG4CXX_DEBUG(logger_, "Raising event for function_id "
-                << function_id()
-                << " and correlation_id " << correlation_id());
+  LOG4CXX_DEBUG(logger_,
+                "Raising event for function_id " << function_id()
+                                                 << " and correlation_id "
+                                                 << correlation_id());
   event_engine::Event event(FunctionID::UI_GetLanguage);
   event.set_smart_object(*message_);
   event.raise();

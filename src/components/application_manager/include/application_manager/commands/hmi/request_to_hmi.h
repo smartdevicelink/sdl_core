@@ -39,7 +39,6 @@ namespace application_manager {
 
 namespace commands {
 
-
 class RequestToHMI : public CommandImpl {
  public:
   explicit RequestToHMI(const MessageSharedPtr& message);

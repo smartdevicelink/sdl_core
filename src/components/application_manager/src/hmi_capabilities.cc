@@ -50,30 +50,27 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 namespace application_manager {
 namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
-std::map<std::string, hmi_apis::Common_VrCapabilities::eType> vr_enum_capabilities =
-{
-    {"TEXT", hmi_apis::Common_VrCapabilities::VR_TEXT}
-};
+std::map<std::string, hmi_apis::Common_VrCapabilities::eType>
+    vr_enum_capabilities = {{"TEXT", hmi_apis::Common_VrCapabilities::VR_TEXT}};
 
-std::map<std::string, hmi_apis::Common_ButtonName::eType> button_enum_name =
-{
-    {"OK"             , hmi_apis::Common_ButtonName::OK},
-    {"SEEKLEFT"       , hmi_apis::Common_ButtonName::SEEKLEFT},
-    {"SEEKRIGHT"      , hmi_apis::Common_ButtonName::SEEKRIGHT},
-    {"TUNEUP"         , hmi_apis::Common_ButtonName::TUNEUP},
-    {"TUNEDOWN"       , hmi_apis::Common_ButtonName::TUNEDOWN},
-    {"PRESET_0"       , hmi_apis::Common_ButtonName::PRESET_0},
-    {"PRESET_1"       , hmi_apis::Common_ButtonName::PRESET_1},
-    {"PRESET_2"       , hmi_apis::Common_ButtonName::PRESET_2},
-    {"PRESET_3"       , hmi_apis::Common_ButtonName::PRESET_3},
-    {"PRESET_4"       , hmi_apis::Common_ButtonName::PRESET_4},
-    {"PRESET_5"       , hmi_apis::Common_ButtonName::PRESET_5},
-    {"PRESET_6"       , hmi_apis::Common_ButtonName::PRESET_6},
-    {"PRESET_7"       , hmi_apis::Common_ButtonName::PRESET_7},
-    {"PRESET_8"       , hmi_apis::Common_ButtonName::PRESET_8},
-    {"PRESET_9"       , hmi_apis::Common_ButtonName::PRESET_9},
-    {"CUSTOM_BUTTON"  , hmi_apis::Common_ButtonName::CUSTOM_BUTTON},
-    {"SEARCH"         , hmi_apis::Common_ButtonName::SEARCH},
+std::map<std::string, hmi_apis::Common_ButtonName::eType> button_enum_name = {
+    {"OK", hmi_apis::Common_ButtonName::OK},
+    {"SEEKLEFT", hmi_apis::Common_ButtonName::SEEKLEFT},
+    {"SEEKRIGHT", hmi_apis::Common_ButtonName::SEEKRIGHT},
+    {"TUNEUP", hmi_apis::Common_ButtonName::TUNEUP},
+    {"TUNEDOWN", hmi_apis::Common_ButtonName::TUNEDOWN},
+    {"PRESET_0", hmi_apis::Common_ButtonName::PRESET_0},
+    {"PRESET_1", hmi_apis::Common_ButtonName::PRESET_1},
+    {"PRESET_2", hmi_apis::Common_ButtonName::PRESET_2},
+    {"PRESET_3", hmi_apis::Common_ButtonName::PRESET_3},
+    {"PRESET_4", hmi_apis::Common_ButtonName::PRESET_4},
+    {"PRESET_5", hmi_apis::Common_ButtonName::PRESET_5},
+    {"PRESET_6", hmi_apis::Common_ButtonName::PRESET_6},
+    {"PRESET_7", hmi_apis::Common_ButtonName::PRESET_7},
+    {"PRESET_8", hmi_apis::Common_ButtonName::PRESET_8},
+    {"PRESET_9", hmi_apis::Common_ButtonName::PRESET_9},
+    {"CUSTOM_BUTTON", hmi_apis::Common_ButtonName::CUSTOM_BUTTON},
+    {"SEARCH", hmi_apis::Common_ButtonName::SEARCH},
 
 };
 
@@ -326,7 +323,8 @@ void HMICapabilities::set_is_vr_cooperating(bool value) {
   is_vr_cooperating_ = value;
   if (is_vr_cooperating_) {
     utils::SharedPtr<smart_objects::SmartObject> get_language(
-      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage));
+        MessageHelper::CreateModuleInfoSO(
+            hmi_apis::FunctionID::VR_GetLanguage));
     hmi_language_handler_.set_handle_response_for(*get_language);
     app_mngr_->ManageHMICommand(get_language);
     utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
@@ -345,8 +343,8 @@ void HMICapabilities::set_is_tts_cooperating(bool value) {
   is_tts_cooperating_ = value;
   if (is_tts_cooperating_) {
     utils::SharedPtr<smart_objects::SmartObject> get_language(
-      MessageHelper::CreateModuleInfoSO(
-        hmi_apis::FunctionID::TTS_GetLanguage));
+        MessageHelper::CreateModuleInfoSO(
+            hmi_apis::FunctionID::TTS_GetLanguage));
     hmi_language_handler_.set_handle_response_for(*get_language);
     app_mngr_->ManageHMICommand(get_language);
     utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
@@ -365,8 +363,8 @@ void HMICapabilities::set_is_ui_cooperating(bool value) {
   is_ui_cooperating_ = value;
   if (is_ui_cooperating_) {
     utils::SharedPtr<smart_objects::SmartObject> get_language(
-      MessageHelper::CreateModuleInfoSO(
-        hmi_apis::FunctionID::UI_GetLanguage));
+        MessageHelper::CreateModuleInfoSO(
+            hmi_apis::FunctionID::UI_GetLanguage));
     hmi_language_handler_.set_handle_response_for(*get_language);
     app_mngr_->ManageHMICommand(get_language);
     utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
@@ -421,24 +419,24 @@ void HMICapabilities::set_active_tts_language(
                                          language);
 }
 
-const hmi_apis::Common_Language::eType
-HMICapabilities::active_ui_language() const {
+const hmi_apis::Common_Language::eType HMICapabilities::active_ui_language()
+    const {
   using namespace hmi_apis;
   const Common_Language::eType language =
       hmi_language_handler_.get_language_for(HMILanguageHandler::INTERFACE_UI);
   return Common_Language::INVALID_ENUM != language ? language : ui_language_;
 }
 
-const hmi_apis::Common_Language::eType
-HMICapabilities::active_vr_language() const {
+const hmi_apis::Common_Language::eType HMICapabilities::active_vr_language()
+    const {
   using namespace hmi_apis;
   const Common_Language::eType language =
       hmi_language_handler_.get_language_for(HMILanguageHandler::INTERFACE_VR);
   return Common_Language::INVALID_ENUM != language ? language : vr_language_;
 }
 
-const hmi_apis::Common_Language::eType
-HMICapabilities::active_tts_language() const {
+const hmi_apis::Common_Language::eType HMICapabilities::active_tts_language()
+    const {
   using namespace hmi_apis;
   const Common_Language::eType language =
       hmi_language_handler_.get_language_for(HMILanguageHandler::INTERFACE_TTS);
@@ -564,10 +562,10 @@ void HMICapabilities::set_navigation_supported(const bool supported) {
 }
 
 void HMICapabilities::set_phone_call_supported(const bool supported) {
-    is_phone_call_supported_ = supported;
+  is_phone_call_supported_ = supported;
 }
 
-void HMICapabilities::Init(resumption::LastState *last_state) {    
+void HMICapabilities::Init(resumption::LastState* last_state) {
   hmi_language_handler_.Init(last_state);
   if (false == load_capabilities_from_file()) {
     LOG4CXX_ERROR(logger_, "file hmi_capabilities.json was not loaded");
@@ -575,7 +573,7 @@ void HMICapabilities::Init(resumption::LastState *last_state) {
     LOG4CXX_INFO(logger_, "file hmi_capabilities.json was loaded");
   }
   hmi_language_handler_.set_default_capabilities_languages(
-        ui_language_, vr_language_, tts_language_);
+      ui_language_, vr_language_, tts_language_);
 }
 
 bool HMICapabilities::load_capabilities_from_file() {
@@ -645,8 +643,7 @@ bool HMICapabilities::load_capabilities_from_file() {
                        hmi_apis::Common_TextFieldName::eType>::const_iterator
                   it_text_field_name = text_fields_enum_name.find(
                       display_capabilities_so[hmi_response::text_fields][i]
-                                             [strings::name]
-                                                 .asString());
+                                             [strings::name].asString());
               display_capabilities_so[hmi_response::text_fields][i].erase(
                   strings::name);
               if (text_fields_enum_name.end() != it_text_field_name) {
@@ -764,21 +761,18 @@ bool HMICapabilities::load_capabilities_from_file() {
         if (check_existing_json_member(audio_capabilities, "samplingRate")) {
           audio_capabilities_so["samplingRate"] =
               sampling_rate_enum.find(audio_capabilities.get("samplingRate", "")
-                                          .asString())
-                  ->second;
+                                          .asString())->second;
         }
         if (check_existing_json_member(audio_capabilities, "bitsPerSample")) {
           audio_capabilities_so["bitsPerSample"] =
-              bit_per_sample_enum.find(
-                                     audio_capabilities.get("bitsPerSample", "")
-                                         .asString())
+              bit_per_sample_enum.find(audio_capabilities.get("bitsPerSample",
+                                                              "").asString())
                   ->second;
         }
         if (check_existing_json_member(audio_capabilities, "audioType")) {
           audio_capabilities_so["audioType"] =
               audio_type_enum.find(audio_capabilities.get("audioType", "")
-                                       .asString())
-                  ->second;
+                                       .asString())->second;
         }
         set_audio_pass_thru_capabilities(audio_capabilities_so);
       }

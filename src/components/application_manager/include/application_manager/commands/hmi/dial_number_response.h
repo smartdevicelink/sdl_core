@@ -67,7 +67,7 @@ class DialNumberResponse : public ResponseFromHMI {
   DISALLOW_COPY_AND_ASSIGN(DialNumberResponse);
 };
 
-} // namespace hmi
+}  // namespace hmi
 
 }  // namespace commands
 

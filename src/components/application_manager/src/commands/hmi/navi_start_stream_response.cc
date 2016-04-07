@@ -35,12 +35,11 @@ namespace application_manager {
 
 namespace commands {
 
-NaviStartStreamResponse::NaviStartStreamResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+NaviStartStreamResponse::NaviStartStreamResponse(
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {}
 
-NaviStartStreamResponse::~NaviStartStreamResponse() {
-}
+NaviStartStreamResponse::~NaviStartStreamResponse() {}
 
 void NaviStartStreamResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

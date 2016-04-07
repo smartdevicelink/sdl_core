@@ -45,10 +45,11 @@ namespace us = usage_statistics;
 
 class StatisticsManagerMock : public us::StatisticsManager {
  public:
-  MOCK_METHOD1(Increment, void (us::GlobalCounterId));
-  MOCK_METHOD2(Increment, void (const std::string&, us::AppCounterId));
-  MOCK_METHOD3(Set, void (const std::string&, us::AppInfoId, const std::string&));
-  MOCK_METHOD3(Add, void (const std::string&, us::AppStopwatchId, int32_t));
+  MOCK_METHOD1(Increment, void(us::GlobalCounterId));
+  MOCK_METHOD2(Increment, void(const std::string&, us::AppCounterId));
+  MOCK_METHOD3(Set,
+               void(const std::string&, us::AppInfoId, const std::string&));
+  MOCK_METHOD3(Add, void(const std::string&, us::AppStopwatchId, int32_t));
 };
 
 }  // namespace state_controller_test

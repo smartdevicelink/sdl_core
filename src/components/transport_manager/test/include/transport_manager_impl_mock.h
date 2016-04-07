@@ -51,4 +51,4 @@ class TransportManagerImplMock : public TransportManagerImpl {
 }  // namespace components
 }  // namespace test
 
-#endif // APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_TRANSPORT_MANAGER_IMPL_MOCK_H_
+#endif  // APPLINK_TEST_COMPONENTS_TRANSPORTMANAGER_INCLUDE_TRANSPORT_MANAGER_IMPL_MOCK_H_

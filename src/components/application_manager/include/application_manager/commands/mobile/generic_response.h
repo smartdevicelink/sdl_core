@@ -46,14 +46,12 @@ class GenericResponse : public CommandResponseImpl {
    * \brief GenericResponse class constructor
    **/
   explicit GenericResponse(const MessageSharedPtr& message)
-  : CommandResponseImpl(message) {
-  }
+      : CommandResponseImpl(message) {}
 
   /**
    * \brief GenericResponse class destructor
    **/
-  virtual ~GenericResponse() {
-  }
+  virtual ~GenericResponse() {}
 
   /**
    * @brief Execute command

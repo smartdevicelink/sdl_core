@@ -39,11 +39,9 @@ namespace commands {
 
 UISetGlobalPropertiesResponse::UISetGlobalPropertiesResponse(
     const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-UISetGlobalPropertiesResponse::~UISetGlobalPropertiesResponse() {
-}
+UISetGlobalPropertiesResponse::~UISetGlobalPropertiesResponse() {}
 
 void UISetGlobalPropertiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

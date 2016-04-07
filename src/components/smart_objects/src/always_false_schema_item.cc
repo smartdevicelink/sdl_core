@@ -35,8 +35,7 @@
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
-CAlwaysFalseSchemaItem::CAlwaysFalseSchemaItem() {
-}
+CAlwaysFalseSchemaItem::CAlwaysFalseSchemaItem() {}
 
 utils::SharedPtr<CAlwaysFalseSchemaItem> CAlwaysFalseSchemaItem::create() {
   return new CAlwaysFalseSchemaItem();

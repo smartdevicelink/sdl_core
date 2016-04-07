@@ -39,13 +39,11 @@ namespace commands {
 
 RequestFromHMI::RequestFromHMI(const MessageSharedPtr& message)
     : CommandImpl(message) {
-
   // Replace HMI app id with Mobile connection id
   ApplicationManagerImpl::instance()->ReplaceHMIByMobileAppId(*(message.get()));
 }
 
-RequestFromHMI::~RequestFromHMI() {
-}
+RequestFromHMI::~RequestFromHMI() {}
 
 bool RequestFromHMI::Init() {
   return true;
@@ -55,17 +53,15 @@ bool RequestFromHMI::CleanUp() {
   return true;
 }
 
-void RequestFromHMI::Run() {
-}
+void RequestFromHMI::Run() {}
 
-void RequestFromHMI::on_event(const event_engine::Event& event) {
-}
+void RequestFromHMI::on_event(const event_engine::Event& event) {}
 
 void RequestFromHMI::SendResponse(uint32_t correlation_id,
                                   hmi_apis::FunctionID::eType function_id,
                                   hmi_apis::Common_Result::eType result_code) {
-  smart_objects::SmartObject* message = new smart_objects::SmartObject(
-    smart_objects::SmartType_Map);
+  smart_objects::SmartObject* message =
+      new smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   (*message)[strings::params][strings::function_id] = function_id;
   (*message)[strings::params][strings::message_type] = MessageType::kResponse;
@@ -75,7 +71,5 @@ void RequestFromHMI::SendResponse(uint32_t correlation_id,
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
 }
 
-
 }  // namespace commands
 }  // namespace application_manager
-

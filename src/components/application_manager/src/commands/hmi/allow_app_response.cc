@@ -37,27 +37,26 @@ namespace application_manager {
 
 namespace commands {
 
-AllowAppResponse::AllowAppResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
-}
+AllowAppResponse::AllowAppResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {}
 
-AllowAppResponse::~AllowAppResponse() {
-}
+AllowAppResponse::~AllowAppResponse() {}
 
 void AllowAppResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   uint32_t connection_key =
-    (*message_)[strings::params][strings::connection_key].asInt();
+      (*message_)[strings::params][strings::connection_key].asInt();
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->
-                     application(connection_key);
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(connection_key);
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
   }
-  app->set_app_allowed((*message_)[strings::msg_params][hmi_response::allowed].asBool());
+  app->set_app_allowed(
+      (*message_)[strings::msg_params][hmi_response::allowed].asBool());
 }
 
 }  // namespace commands

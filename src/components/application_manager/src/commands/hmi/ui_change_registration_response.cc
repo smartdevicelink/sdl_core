@@ -39,11 +39,9 @@ namespace commands {
 
 UIChangeRegistratioResponse::UIChangeRegistratioResponse(
     const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-UIChangeRegistratioResponse::~UIChangeRegistratioResponse() {
-}
+UIChangeRegistratioResponse::~UIChangeRegistratioResponse() {}
 
 void UIChangeRegistratioResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -71,7 +71,6 @@ class DeleteCommandRequest : public CommandRequestImpl {
   void on_event(const event_engine::Event& event);
 
  private:
-
   DISALLOW_COPY_AND_ASSIGN(DeleteCommandRequest);
 
   /*

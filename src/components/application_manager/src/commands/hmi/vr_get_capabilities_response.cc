@@ -37,12 +37,10 @@ namespace application_manager {
 namespace commands {
 
 VRGetCapabilitiesResponse::VRGetCapabilitiesResponse(
-  const MessageSharedPtr& message)
-  : ResponseFromHMI(message) {
-}
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {}
 
-VRGetCapabilitiesResponse::~VRGetCapabilitiesResponse() {
-}
+VRGetCapabilitiesResponse::~VRGetCapabilitiesResponse() {}
 
 void VRGetCapabilitiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -51,7 +49,7 @@ void VRGetCapabilitiesResponse::Run() {
       ApplicationManagerImpl::instance()->hmi_capabilities();
 
   hmi_capabilities.set_vr_capabilities(
-    (*message_)[strings::msg_params][strings::vr_capabilities]);
+      (*message_)[strings::msg_params][strings::vr_capabilities]);
 }
 
 }  // namespace commands

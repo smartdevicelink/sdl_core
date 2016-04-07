@@ -42,11 +42,10 @@ namespace application_manager {
 namespace commands {
 
 OnExitApplicationNotification::OnExitApplicationNotification(
-    const MessageSharedPtr& message) : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {}
 
-OnExitApplicationNotification::~OnExitApplicationNotification() {
-}
+OnExitApplicationNotification::~OnExitApplicationNotification() {}
 
 void OnExitApplicationNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -57,21 +56,21 @@ void OnExitApplicationNotification::Run() {
   ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
   uint32_t app_id = (*message_)[strings::msg_params][strings::app_id].asUInt();
   ApplicationSharedPtr app_impl = app_mgr->application(app_id);
-      
+
   if (!(app_impl.valid())) {
     LOG4CXX_ERROR(logger_, "Application does not exist");
     return;
   }
 
   Common_ApplicationExitReason::eType reason;
-  reason = static_cast<Common_ApplicationExitReason::eType>
-      ((*message_)[strings::msg_params][strings::reason].asInt());
+  reason = static_cast<Common_ApplicationExitReason::eType>(
+      (*message_)[strings::msg_params][strings::reason].asInt());
 
   switch (reason) {
     case Common_ApplicationExitReason::DRIVER_DISTRACTION_VIOLATION: {
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
           app_impl->app_id(),
-              AppInterfaceUnregisteredReason::DRIVER_DISTRACTION_VIOLATION);
+          AppInterfaceUnregisteredReason::DRIVER_DISTRACTION_VIOLATION);
       break;
     }
     case Common_ApplicationExitReason::USER_EXIT: {

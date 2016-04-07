@@ -37,11 +37,9 @@ namespace application_manager {
 namespace commands {
 
 AllowAllAppsResponse::AllowAllAppsResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-AllowAllAppsResponse::~AllowAllAppsResponse() {
-}
+AllowAllAppsResponse::~AllowAllAppsResponse() {}
 
 void AllowAllAppsResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

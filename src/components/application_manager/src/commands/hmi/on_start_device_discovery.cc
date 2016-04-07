@@ -38,11 +38,9 @@ namespace application_manager {
 namespace commands {
 
 OnStartDeviceDiscovery::OnStartDeviceDiscovery(const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnStartDeviceDiscovery::~OnStartDeviceDiscovery() {
-}
+OnStartDeviceDiscovery::~OnStartDeviceDiscovery() {}
 
 void OnStartDeviceDiscovery::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,4 +51,3 @@ void OnStartDeviceDiscovery::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

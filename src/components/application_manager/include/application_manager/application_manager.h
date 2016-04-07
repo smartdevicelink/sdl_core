@@ -201,7 +201,6 @@ class ApplicationManager {
   virtual bool ManageMobileCommand(const commands::MessageSharedPtr message,
                                    commands::Command::CommandOrigin origin) = 0;
 
-
   virtual mobile_api::HMILevel::eType GetDefaultHmiLevel(
       ApplicationConstSharedPtr application) const = 0;
   /**
@@ -256,8 +255,8 @@ class ApplicationManager {
    *
    * @param binary_data AudioPassThru data chunk
    */
-  virtual void SendAudioPassThroughNotification(uint32_t session_key,
-                                        std::vector<uint8_t>& binary_data) = 0;
+  virtual void SendAudioPassThroughNotification(
+      uint32_t session_key, std::vector<uint8_t>& binary_data) = 0;
   virtual policy::PolicyHandlerInterface& GetPolicyHandler() = 0;
 };
 

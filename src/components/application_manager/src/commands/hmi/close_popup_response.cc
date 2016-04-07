@@ -36,11 +36,9 @@ namespace application_manager {
 namespace commands {
 
 ClosePopupResponse::ClosePopupResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-ClosePopupResponse::~ClosePopupResponse() {
-}
+ClosePopupResponse::~ClosePopupResponse() {}
 
 void ClosePopupResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

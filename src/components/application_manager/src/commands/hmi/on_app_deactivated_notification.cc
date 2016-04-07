@@ -43,15 +43,14 @@ namespace commands {
 
 OnAppDeactivatedNotification::OnAppDeactivatedNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnAppDeactivatedNotification::~OnAppDeactivatedNotification() {
-}
+OnAppDeactivatedNotification::~OnAppDeactivatedNotification() {}
 
 void OnAppDeactivatedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated);
+  event_engine::Event event(
+      hmi_apis::FunctionID::BasicCommunication_OnAppDeactivated);
   event.set_smart_object(*message_);
   event.raise();
 }

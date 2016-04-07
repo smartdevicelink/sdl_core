@@ -37,11 +37,9 @@ namespace application_manager {
 namespace commands {
 
 UIIsReadyResponse::UIIsReadyResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-UIIsReadyResponse::~UIIsReadyResponse() {
-}
+UIIsReadyResponse::~UIIsReadyResponse() {}
 
 void UIIsReadyResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -143,9 +143,9 @@ void timer::Timer::TimerDelegate::threadMain() {
     LOG4CXX_DEBUG(logger_, "Milliseconds left to wait: " << curr_timeout);
     if (sync_primitives::ConditionalVariable::kTimeout ==
         termination_condition_.WaitFor(auto_lock, curr_timeout)) {
-      LOG4CXX_DEBUG(logger_,
-                    "Timer has finished counting. Timeout (ms): "
-                    << curr_timeout);
+      LOG4CXX_DEBUG(
+          logger_,
+          "Timer has finished counting. Timeout (ms): " << curr_timeout);
       if (timer_) {
         timer_->OnTimeout();
       }

@@ -134,13 +134,13 @@ class CommandImpl : public Command {
   * If true, request controller will terminate request on response
   */
   virtual void SetAllowedToTerminate(bool allowed) {
-      allowed_to_terminate_ = allowed;
+    allowed_to_terminate_ = allowed;
   }
 
   // members
   static const int32_t hmi_protocol_type_;
   static const int32_t mobile_protocol_type_;
-  static const int32_t protocol_version_;  
+  static const int32_t protocol_version_;
 
  protected:
   MessageSharedPtr message_;
@@ -148,7 +148,7 @@ class CommandImpl : public Command {
   bool allowed_to_terminate_;
 #ifdef ENABLE_LOG
   static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
+#endif  // ENABLE_LOG
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandImpl);

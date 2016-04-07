@@ -39,11 +39,9 @@ namespace commands {
 
 UIPerformInteractionResponse::UIPerformInteractionResponse(
     const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-UIPerformInteractionResponse::~UIPerformInteractionResponse() {
-}
+UIPerformInteractionResponse::~UIPerformInteractionResponse() {}
 
 void UIPerformInteractionResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

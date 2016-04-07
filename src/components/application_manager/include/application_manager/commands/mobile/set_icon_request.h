@@ -49,10 +49,7 @@ class SetIconRequest : public CommandRequestImpl {
   /**
    * @brief Contains information about the type of image
    */
-  typedef enum {
-    STATIC = 0,
-    DYNAMIC
-  } ImageType;
+  typedef enum { STATIC = 0, DYNAMIC } ImageType;
 
   /**
    * @brief SetIconRequest class constructor

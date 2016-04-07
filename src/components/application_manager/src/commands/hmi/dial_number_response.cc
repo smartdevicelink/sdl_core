@@ -38,19 +38,18 @@ namespace commands {
 namespace hmi {
 
 DialNumberResponse::DialNumberResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-DialNumberResponse::~DialNumberResponse() {
-}
+DialNumberResponse::~DialNumberResponse() {}
 
 void DialNumberResponse::Run() {
-  event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_DialNumber);
+  event_engine::Event event(
+      hmi_apis::FunctionID::BasicCommunication_DialNumber);
   event.set_smart_object(*message_);
   event.raise();
 }
 
-} // namespace hmi
+}  // namespace hmi
 
 }  // namespace commands
 

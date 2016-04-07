@@ -53,7 +53,9 @@ void OnReceivedPolicyUpdate::Run() {
     LOG4CXX_ERROR(logger_, "Failed to read Update file.");
     return;
   }
-  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().ReceiveMessageFromSDK(file_path, file_content);
+  application_manager::ApplicationManagerImpl::instance()
+      ->GetPolicyHandler()
+      .ReceiveMessageFromSDK(file_path, file_content);
 }
 
 }  // namespace commands

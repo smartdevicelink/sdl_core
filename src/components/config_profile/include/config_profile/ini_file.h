@@ -37,7 +37,7 @@
 
 namespace profile {
 
-#define INI_FILE_VER  1000
+#define INI_FILE_VER 1000
 
 #if !defined TRUE
 #define TRUE 1
@@ -56,12 +56,12 @@ namespace profile {
 /*
  * @brief Global defines
  */
-#define INI_LINE_LEN                512
-#define INI_FILE_TEMP_NAME          "ini.tmp"
+#define INI_LINE_LEN 512
+#define INI_FILE_TEMP_NAME "ini.tmp"
 
-#define INI_FLAG_UPDATE             0x00
-#define INI_FLAG_ITEM_UP_CREA       0x01
-#define INI_FLAG_FILE_UP_CREA       0x10
+#define INI_FLAG_UPDATE 0x00
+#define INI_FLAG_ITEM_UP_CREA 0x01
+#define INI_FLAG_FILE_UP_CREA 0x10
 
 /*
  * @brief Global typedefs
@@ -90,28 +90,27 @@ extern "C" {
  *
  * @return NULL if file or desired entry not found, otherwise pointer to fname
  */
-extern char* ini_write_inst(const char *fname,
-                            uint8_t flag);
+extern char* ini_write_inst(const char* fname, uint8_t flag);
 
 /*
  * @brief Read a certain item of the specified chapter of a ini-file
  *
  * @return NULL if file or desired entry not found, otherwise pointer to value
  */
-extern char* ini_read_value(const char *fname,
-                            const char *chapter,
-                            const char *item,
-                            char *value);
+extern char* ini_read_value(const char* fname,
+                            const char* chapter,
+                            const char* item,
+                            char* value);
 
 /*
  * @brief Write a certain item of the specified chapter of a ini-file
  *
  * @return NULL if file not found, otherwise pointer to value
  */
-extern char ini_write_value(const char *fname,
-                            const char *chapter,
-                            const char *item,
-                            const char *value,
+extern char ini_write_value(const char* fname,
+                            const char* chapter,
+                            const char* item,
+                            const char* value,
                             uint8_t flag);
 
 /*
@@ -120,9 +119,9 @@ extern char ini_write_value(const char *fname,
  *
  * @return NULL if desired entry not found, otherwise pointer to value
  */
-extern Ini_search_id ini_parse_line(const char *line,
-                                    const char *tag,
-                                    char *value);
+extern Ini_search_id ini_parse_line(const char* line,
+                                    const char* tag,
+                                    char* value);
 
 #ifdef __cplusplus
 }

@@ -38,11 +38,9 @@ namespace application_manager {
 namespace commands {
 
 VIGetDTCsResponse::VIGetDTCsResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-VIGetDTCsResponse::~VIGetDTCsResponse() {
-}
+VIGetDTCsResponse::~VIGetDTCsResponse() {}
 
 void VIGetDTCsResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

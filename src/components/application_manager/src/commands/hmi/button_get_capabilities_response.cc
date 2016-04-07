@@ -39,11 +39,9 @@ namespace commands {
 
 ButtonGetCapabilitiesResponse::ButtonGetCapabilitiesResponse(
     const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-ButtonGetCapabilitiesResponse::~ButtonGetCapabilitiesResponse() {
-}
+ButtonGetCapabilitiesResponse::~ButtonGetCapabilitiesResponse() {}
 
 void ButtonGetCapabilitiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

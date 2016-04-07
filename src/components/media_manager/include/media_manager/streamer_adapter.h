@@ -60,8 +60,7 @@ class StreamerAdapter : public MediaAdapterImpl {
   virtual void StopActivity(int32_t application_key);
   virtual void SendData(int32_t application_key,
                         const ::protocol_handler::RawMessagePtr msg);
-  virtual bool is_app_performing_activity(
-      int32_t application_key) const;
+  virtual bool is_app_performing_activity(int32_t application_key) const;
 
  protected:
   // TODO(AN): APPLINK-15203 Use MessageLoopThread
@@ -80,7 +79,7 @@ class StreamerAdapter : public MediaAdapterImpl {
 
    private:
     sync_primitives::atomic_bool stop_flag_;
-    StreamerAdapter*             adapter_;
+    StreamerAdapter* adapter_;
 
     DISALLOW_COPY_AND_ASSIGN(Streamer);
   };
@@ -89,7 +88,7 @@ class StreamerAdapter : public MediaAdapterImpl {
   int32_t current_application_;
   utils::MessageQueue<protocol_handler::RawMessagePtr> messages_;
 
-  Streamer*        streamer_;
+  Streamer* streamer_;
   threads::Thread* thread_;
 
   DISALLOW_COPY_AND_ASSIGN(StreamerAdapter);

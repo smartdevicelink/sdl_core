@@ -40,10 +40,8 @@
 namespace application_manager {
 namespace event_engine {
 
-class EventObserver
-{
+class EventObserver {
  public:
-
   // Typedef for possible Observer ID's from mobile_apis functionID enum
   typedef unsigned long ObserverID;
 
@@ -73,7 +71,6 @@ class EventObserver
   virtual void on_event(const Event& event) = 0;
 
  protected:
-
   /*
    * @brief Subscribe to an event
    *
@@ -81,8 +78,8 @@ class EventObserver
    * @param hmi_correlation_id  The event HMI correlation ID.
    * If param is omitted, it means subscription for HMI notification
    */
-  void subscribe_on_event(
-      const Event::EventID& event_id, int32_t hmi_correlation_id = 0);
+  void subscribe_on_event(const Event::EventID& event_id,
+                          int32_t hmi_correlation_id = 0);
 
   /*
    * @brief Unsubscribes the observer from specific event
@@ -98,7 +95,6 @@ class EventObserver
   void unsubscribe_from_all_events();
 
  private:
-
   ObserverID id_;
 
   DISALLOW_COPY_AND_ASSIGN(EventObserver);
@@ -111,4 +107,4 @@ const EventObserver::ObserverID& EventObserver::id() const {
 }  // namespace event_engine
 }  // namespace application_manager
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_OBSERVER_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_OBSERVER_H_

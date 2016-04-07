@@ -38,28 +38,26 @@ namespace commands {
 
 TTSGetCapabilitiesResponse::TTSGetCapabilitiesResponse(
     const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-TTSGetCapabilitiesResponse::~TTSGetCapabilitiesResponse() {
-}
+TTSGetCapabilitiesResponse::~TTSGetCapabilitiesResponse() {}
 
 void TTSGetCapabilitiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   HMICapabilities& hmi_capabilities =
       ApplicationManagerImpl::instance()->hmi_capabilities();
-  if ((*message_)[strings::msg_params].keyExists(hmi_response::speech_capabilities)) {
+  if ((*message_)[strings::msg_params].keyExists(
+          hmi_response::speech_capabilities)) {
     hmi_capabilities.set_speech_capabilities(
-       (*message_)[strings::msg_params][hmi_response::speech_capabilities]);
+        (*message_)[strings::msg_params][hmi_response::speech_capabilities]);
   }
   if ((*message_)[strings::msg_params].keyExists(
-      hmi_response::prerecorded_speech_capabilities)) {
+          hmi_response::prerecorded_speech_capabilities)) {
     hmi_capabilities.set_prerecorded_speech(
         (*message_)[strings::msg_params]
-                    [hmi_response::prerecorded_speech_capabilities]);
+                   [hmi_response::prerecorded_speech_capabilities]);
   }
-
 }
 
 }  // namespace commands

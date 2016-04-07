@@ -39,11 +39,9 @@ namespace application_manager {
 namespace commands {
 
 DeleteSubMenuResponse::DeleteSubMenuResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    : CommandResponseImpl(message) {}
 
-DeleteSubMenuResponse::~DeleteSubMenuResponse() {
-}
+DeleteSubMenuResponse::~DeleteSubMenuResponse() {}
 
 void DeleteSubMenuResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

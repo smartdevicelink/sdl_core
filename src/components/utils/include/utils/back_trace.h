@@ -68,8 +68,8 @@ class Backtrace {
   std::vector<void*> backtrace_;
 };
 
-std::ostream& operator<< (std::ostream& os, const Backtrace& bt);
+std::ostream& operator<<(std::ostream& os, const Backtrace& bt);
 
-} // namespace utils
+}  // namespace utils
 
-#endif // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_BACK_TRACE_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_BACK_TRACE_H_

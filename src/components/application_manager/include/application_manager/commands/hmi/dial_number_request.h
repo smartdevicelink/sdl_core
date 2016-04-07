@@ -66,7 +66,7 @@ class DialNumberRequest : public RequestToHMI {
   DISALLOW_COPY_AND_ASSIGN(DialNumberRequest);
 };
 
-} // namespace hmi
+}  // namespace hmi
 
 }  // namespace commands
 

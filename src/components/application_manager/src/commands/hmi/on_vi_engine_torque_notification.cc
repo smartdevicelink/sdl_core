@@ -39,11 +39,9 @@ namespace commands {
 
 OnVIEngineTorqueNotification::OnVIEngineTorqueNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnVIEngineTorqueNotification::~OnVIEngineTorqueNotification() {
-}
+OnVIEngineTorqueNotification::~OnVIEngineTorqueNotification() {}
 
 void OnVIEngineTorqueNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,4 +56,3 @@ void OnVIEngineTorqueNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

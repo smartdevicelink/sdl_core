@@ -39,11 +39,9 @@ namespace commands {
 
 UIEndAudioPassThruResponse::UIEndAudioPassThruResponse(
     const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-UIEndAudioPassThruResponse::~UIEndAudioPassThruResponse() {
-}
+UIEndAudioPassThruResponse::~UIEndAudioPassThruResponse() {}
 
 void UIEndAudioPassThruResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

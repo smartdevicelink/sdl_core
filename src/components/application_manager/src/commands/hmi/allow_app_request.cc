@@ -37,11 +37,9 @@ namespace application_manager {
 namespace commands {
 
 AllowAppRequest::AllowAppRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+    : RequestToHMI(message) {}
 
-AllowAppRequest::~AllowAppRequest() {
-}
+AllowAppRequest::~AllowAppRequest() {}
 
 void AllowAppRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,4 +50,3 @@ void AllowAppRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

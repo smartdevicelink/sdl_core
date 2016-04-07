@@ -35,12 +35,11 @@ namespace application_manager {
 
 namespace commands {
 
-AudioStartStreamResponse::AudioStartStreamResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+AudioStartStreamResponse::AudioStartStreamResponse(
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {}
 
-AudioStartStreamResponse::~AudioStartStreamResponse() {
-}
+AudioStartStreamResponse::~AudioStartStreamResponse() {}
 
 void AudioStartStreamResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

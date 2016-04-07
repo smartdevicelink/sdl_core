@@ -76,9 +76,10 @@ void SystemRequest::Run() {
           (*message_)[strings::msg_params][strings::request_type].asInt());
 
   const policy::PolicyHandlerInterface& policy_handler =
-      application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler();
-  if (!policy_handler.IsRequestTypeAllowed(
-           application->mobile_app_id(), request_type)) {
+      application_manager::ApplicationManagerImpl::instance()
+          ->GetPolicyHandler();
+  if (!policy_handler.IsRequestTypeAllowed(application->mobile_app_id(),
+                                           request_type)) {
     SendResponse(false, mobile_apis::Result::DISALLOWED);
     return;
   }
@@ -134,8 +135,7 @@ void SystemRequest::Run() {
 
     LOG4CXX_DEBUG(logger_,
                   "Binary data is not present. Trying to find file "
-                      << file_name
-                      << " within previously saved app file in "
+                      << file_name << " within previously saved app file in "
                       << binary_data_folder);
 
     const AppFile* file = application->GetFile(app_full_file_path);

@@ -192,7 +192,8 @@ void MessageHelper::SendUpdateSDLResponse(const std::string& result,
 }
 
 void MessageHelper::SendOnLanguageChangeToMobile(uint32_t connection_key) {
-  MockMessageHelper::message_helper_mock()->SendOnLanguageChangeToMobile(connection_key);
+  MockMessageHelper::message_helper_mock()->SendOnLanguageChangeToMobile(
+      connection_key);
 }
 
 void MessageHelper::SendDecryptCertificateToHMI(const std::string& file_name) {
@@ -200,26 +201,34 @@ void MessageHelper::SendDecryptCertificateToHMI(const std::string& file_name) {
       file_name);
 }
 
-hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(const std::string& language) {
-   return MockMessageHelper::message_helper_mock()->CommonLanguageFromString(
-        language);
+hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
+    const std::string& language) {
+  return MockMessageHelper::message_helper_mock()->CommonLanguageFromString(
+      language);
 }
 
-mobile_apis::Language::eType MessageHelper::MobileLanguageFromString(const std::string& language) {
-  return  MockMessageHelper::message_helper_mock()->MobileLanguageFromString(language);
+mobile_apis::Language::eType MessageHelper::MobileLanguageFromString(
+    const std::string& language) {
+  return MockMessageHelper::message_helper_mock()->MobileLanguageFromString(
+      language);
 }
 
-hmi_apis::Common_Language::eType MessageHelper::MobileToCommonLanguage(const mobile_apis::Language::eType language) {
-  return MockMessageHelper::message_helper_mock()->MobileToCommonLanguage(language);
+hmi_apis::Common_Language::eType MessageHelper::MobileToCommonLanguage(
+    const mobile_apis::Language::eType language) {
+  return MockMessageHelper::message_helper_mock()->MobileToCommonLanguage(
+      language);
 }
 
-mobile_apis::Language::eType MessageHelper::CommonToMobileLanguage(const hmi_apis::Common_Language::eType language) {
-  return  MockMessageHelper::message_helper_mock()->CommonToMobileLanguage(language);
+mobile_apis::Language::eType MessageHelper::CommonToMobileLanguage(
+    const hmi_apis::Common_Language::eType language) {
+  return MockMessageHelper::message_helper_mock()->CommonToMobileLanguage(
+      language);
 }
 
-smart_objects::SmartObjectSPtr MessageHelper::CreateModuleInfoSO (uint32_t function_id) {
-    return  MockMessageHelper::message_helper_mock()->CreateModuleInfoSO(
-                function_id);
+smart_objects::SmartObjectSPtr MessageHelper::CreateModuleInfoSO(
+    uint32_t function_id) {
+  return MockMessageHelper::message_helper_mock()->CreateModuleInfoSO(
+      function_id);
 }
 
 MockMessageHelper* MockMessageHelper::message_helper_mock() {
@@ -277,9 +286,10 @@ std::string MessageHelper::CommonLanguageToString(
   return MockMessageHelper::message_helper_mock()->CommonLanguageToString(lang);
 }
 
-smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(ApplicationConstSharedPtr app,
+smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
+    ApplicationConstSharedPtr app,
     const protocol_handler::SessionObserver& session_observer,
-    const policy::PolicyHandlerInterface &policy_handler,
+    const policy::PolicyHandlerInterface& policy_handler,
     hmi_apis::Common_HMILevel::eType level,
     bool send_policy_priority) {
   return MockMessageHelper::message_helper_mock()->GetBCActivateAppRequestToHMI(

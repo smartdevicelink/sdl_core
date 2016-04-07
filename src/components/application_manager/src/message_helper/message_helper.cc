@@ -1325,9 +1325,10 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(
   ApplicationManagerImpl::instance()->ManageHMICommand(notification);
 }
 
-smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(ApplicationConstSharedPtr app,
+smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
+    ApplicationConstSharedPtr app,
     const protocol_handler::SessionObserver& session_observer,
-    const policy::PolicyHandlerInterface &policy_handler,
+    const policy::PolicyHandlerInterface& policy_handler,
     hmi_apis::Common_HMILevel::eType level,
     bool send_policy_priority) {
   DCHECK_OR_RETURN(app, smart_objects::SmartObjectSPtr());
@@ -1347,14 +1348,14 @@ smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(Appli
     std::string priority;
     // TODO(KKolodiy): need remove method policy_manager
 
-    policy_handler.GetPriority(app->mobile_app_id(),
-                                                   &priority);
+    policy_handler.GetPriority(app->mobile_app_id(), &priority);
     // According SDLAQ-CRS-2794
     // SDL have to send ActivateApp without "proirity" parameter to HMI.
     // in case of unconsented device
     const std::string& mac_adress = app->mac_address();
 
-    const policy::DeviceConsent& consent = policy_handler.GetUserConsentForDevice(mac_adress);
+    const policy::DeviceConsent& consent =
+        policy_handler.GetUserConsentForDevice(mac_adress);
     if (!priority.empty() &&
         (policy::DeviceConsent::kDeviceAllowed == consent)) {
       (*message)[strings::msg_params][strings::priority] =
@@ -1717,8 +1718,8 @@ void MessageHelper::SendAudioStopStream(const int32_t app_id) {
   ApplicationManagerImpl::instance()->ManageHMICommand(stop_stream);
 }
 
-void MessageHelper::SendOnDataStreaming(const protocol_handler::ServiceType service,
-                                        const bool available) {
+void MessageHelper::SendOnDataStreaming(
+    const protocol_handler::ServiceType service, const bool available) {
   using namespace protocol_handler;
   smart_objects::SmartObjectSPtr notification =
       new smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -1767,11 +1768,12 @@ void MessageHelper::SendPolicySnapshotNotification(
       ApplicationManagerImpl::instance()->application(connection_key);
   DCHECK(app.get());
 
-  smart_objects::SmartObject* content =
-      new smart_objects::SmartObject(smart_objects::SmartType_Map);  // AKirov: possible memory leak here
+  smart_objects::SmartObject* content = new smart_objects::SmartObject(
+      smart_objects::SmartType_Map);  // AKirov: possible memory leak here
 
   if (!url.empty()) {
-    (*content)[strings::msg_params][strings::url] = url;  // Doesn't work with mobile_notification::syncp_url ("URL")
+    (*content)[strings::msg_params][strings::url] =
+        url;  // Doesn't work with mobile_notification::syncp_url ("URL")
   } else {
     LOG4CXX_WARN(logger_, "No service URLs");
   }
@@ -2289,9 +2291,10 @@ bool CheckWithPolicy(mobile_api::SystemAction::eType system_action,
   return result;
 }
 
-mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(smart_objects::SmartObject& message_params,
+mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
+    smart_objects::SmartObject& message_params,
     ApplicationConstSharedPtr app,
-    const policy::PolicyHandlerInterface &policy_handler) {
+    const policy::PolicyHandlerInterface& policy_handler) {
   using namespace mobile_apis;
   using namespace smart_objects;
 
@@ -2315,7 +2318,8 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(smart_objects::Smar
         request_soft_buttons[i][strings::system_action].asInt();
 
     if (!CheckWithPolicy(static_cast<SystemAction::eType>(system_action),
-                         app->mobile_app_id(),  policy_handler)) {
+                         app->mobile_app_id(),
+                         policy_handler)) {
       return Result::DISALLOWED;
     }
 
@@ -2336,7 +2340,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(smart_objects::Smar
       case SoftButtonType::SBT_TEXT: {
         if ((!request_soft_buttons[i].keyExists(strings::text)) ||
             (!VerifySoftButtonString(
-                request_soft_buttons[i][strings::text].asString()))) {
+                 request_soft_buttons[i][strings::text].asString()))) {
           return Result::INVALID_DATA;
         }
         break;
@@ -2345,7 +2349,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(smart_objects::Smar
         if ((!request_soft_buttons[i].keyExists(strings::text)) ||
             ((request_soft_buttons[i][strings::text].length()) &&
              (!VerifySoftButtonString(
-                 request_soft_buttons[i][strings::text].asString())))) {
+                  request_soft_buttons[i][strings::text].asString())))) {
           return Result::INVALID_DATA;
         }
 

@@ -38,11 +38,9 @@ namespace commands {
 
 OnStatusUpdateNotification::OnStatusUpdateNotification(
     const MessageSharedPtr& message)
-    : NotificationToHMI(message) {
-}
+    : NotificationToHMI(message) {}
 
-OnStatusUpdateNotification::~OnStatusUpdateNotification() {
-}
+OnStatusUpdateNotification::~OnStatusUpdateNotification() {}
 
 void OnStatusUpdateNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,4 +50,3 @@ void OnStatusUpdateNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

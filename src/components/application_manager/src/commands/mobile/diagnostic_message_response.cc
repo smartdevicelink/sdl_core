@@ -38,12 +38,11 @@ namespace application_manager {
 
 namespace commands {
 
-DiagnosticMessageResponse::DiagnosticMessageResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+DiagnosticMessageResponse::DiagnosticMessageResponse(
+    const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {}
 
-DiagnosticMessageResponse::~DiagnosticMessageResponse() {
-}
+DiagnosticMessageResponse::~DiagnosticMessageResponse() {}
 
 void DiagnosticMessageResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

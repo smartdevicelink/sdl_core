@@ -36,12 +36,11 @@ namespace application_manager {
 
 namespace commands {
 
-NaviSendLocationResponse::NaviSendLocationResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+NaviSendLocationResponse::NaviSendLocationResponse(
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {}
 
-NaviSendLocationResponse::~NaviSendLocationResponse() {
-}
+NaviSendLocationResponse::~NaviSendLocationResponse() {}
 
 void NaviSendLocationResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

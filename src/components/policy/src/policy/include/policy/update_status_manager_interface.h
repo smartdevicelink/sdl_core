@@ -42,8 +42,7 @@ class PolicyListener;
 
 class UpdateStatusManagerInterface {
  public:
-  virtual ~UpdateStatusManagerInterface() {
-  }
+  virtual ~UpdateStatusManagerInterface() {}
   /**
    * @brief Sets listener pointer
    * @param listener Pointer to policy listener implementation
@@ -100,7 +99,8 @@ class UpdateStatusManagerInterface {
   virtual PolicyTableStatus GetUpdateStatus() = 0;
 };
 
-typedef utils::SharedPtr<UpdateStatusManagerInterface> UpdateStatusManagerInterfaceSPtr;
+typedef utils::SharedPtr<UpdateStatusManagerInterface>
+    UpdateStatusManagerInterfaceSPtr;
 
 }  // namespace policy
 

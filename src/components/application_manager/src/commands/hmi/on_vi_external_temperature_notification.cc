@@ -39,11 +39,9 @@ namespace commands {
 
 OnVIExternalTemperatureNotification::OnVIExternalTemperatureNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnVIExternalTemperatureNotification::~OnVIExternalTemperatureNotification() {
-}
+OnVIExternalTemperatureNotification::~OnVIExternalTemperatureNotification() {}
 
 void OnVIExternalTemperatureNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,4 +56,3 @@ void OnVIExternalTemperatureNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

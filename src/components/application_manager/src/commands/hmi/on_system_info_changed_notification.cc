@@ -40,11 +40,9 @@ namespace commands {
 
 OnSystemInfoChangedNotification::OnSystemInfoChangedNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnSystemInfoChangedNotification::~OnSystemInfoChangedNotification() {
-}
+OnSystemInfoChangedNotification::~OnSystemInfoChangedNotification() {}
 
 void OnSystemInfoChangedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,13 +50,13 @@ void OnSystemInfoChangedNotification::Run() {
       (*message_)[strings::msg_params][strings::language].asUInt();
   const std::string language =
       application_manager::MessageHelper::CommonLanguageToString(
-        static_cast<hmi_apis::Common_Language::eType>(lang_code));
+          static_cast<hmi_apis::Common_Language::eType>(lang_code));
 
-  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnSystemInfoChanged(language);
+  application_manager::ApplicationManagerImpl::instance()
+      ->GetPolicyHandler()
+      .OnSystemInfoChanged(language);
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-

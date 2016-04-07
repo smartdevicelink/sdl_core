@@ -44,7 +44,7 @@ namespace commands {
  *
  * Template class for sending 1 subscribe thin request
  **/
-template<event_engine::Event::EventID eventID>
+template <event_engine::Event::EventID eventID>
 class VIGetVehicleDataRequestTemplate : public RequestToHMI {
  public:
   /**
@@ -53,8 +53,7 @@ class VIGetVehicleDataRequestTemplate : public RequestToHMI {
    * @param message Incoming SmartObject message
    **/
   explicit VIGetVehicleDataRequestTemplate(const MessageSharedPtr& message)
-      : RequestToHMI(message) {
-  }
+      : RequestToHMI(message) {}
 
   /**
    * @brief Execute command with sending DBus thin request to HMI

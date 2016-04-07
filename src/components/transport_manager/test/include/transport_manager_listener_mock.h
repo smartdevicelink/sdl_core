@@ -49,41 +49,39 @@ using ::protocol_handler::RawMessagePtr;
 class TransportManagerListenerMock : public TransportManagerListener {
  public:
   MOCK_METHOD1(OnDeviceListUpdated,
-      void(const std::vector<DeviceInfo>& device_info));
-  MOCK_METHOD0(OnFindNewApplicationsRequest,
-      void());
-  MOCK_METHOD1(OnDeviceFound,
-      void(const DeviceInfo& device_info));
-  MOCK_METHOD1(OnDeviceAdded,
-      void(const DeviceInfo& device_info));
-  MOCK_METHOD1(OnDeviceRemoved,
-      void(const DeviceInfo& device_info));
-  MOCK_METHOD0(OnScanDevicesFinished,
-      void());
-  MOCK_METHOD1(OnScanDevicesFailed,
-      void(const SearchDeviceError& error));
+               void(const std::vector<DeviceInfo>& device_info));
+  MOCK_METHOD0(OnFindNewApplicationsRequest, void());
+  MOCK_METHOD1(OnDeviceFound, void(const DeviceInfo& device_info));
+  MOCK_METHOD1(OnDeviceAdded, void(const DeviceInfo& device_info));
+  MOCK_METHOD1(OnDeviceRemoved, void(const DeviceInfo& device_info));
+  MOCK_METHOD0(OnScanDevicesFinished, void());
+  MOCK_METHOD1(OnScanDevicesFailed, void(const SearchDeviceError& error));
   MOCK_METHOD2(OnConnectionEstablished,
-      void(const DeviceInfo& device_info, const ConnectionUID connection_id));
+               void(const DeviceInfo& device_info,
+                    const ConnectionUID connection_id));
   MOCK_METHOD2(OnConnectionFailed,
-      void(const DeviceInfo& device_info, const ConnectError& error));
-  MOCK_METHOD1(OnConnectionClosed,
-      void(const ConnectionUID connection_id));
+               void(const DeviceInfo& device_info, const ConnectError& error));
+  MOCK_METHOD1(OnConnectionClosed, void(const ConnectionUID connection_id));
   MOCK_METHOD2(OnUnexpectedDisconnect,
-      void(const ConnectionUID connection_id, const CommunicationError& error));
+               void(const ConnectionUID connection_id,
+                    const CommunicationError& error));
   MOCK_METHOD2(OnConnectionClosedFailure,
-      void(const ConnectionUID connection_id, const DisconnectError& error));
+               void(const ConnectionUID connection_id,
+                    const DisconnectError& error));
   MOCK_METHOD2(OnDeviceConnectionLost,
-      void(const DeviceHandle& device, const DisconnectDeviceError& error));
+               void(const DeviceHandle& device,
+                    const DisconnectDeviceError& error));
   MOCK_METHOD2(OnDisconnectFailed,
-      void(const DeviceHandle& device, const DisconnectDeviceError& error));
+               void(const DeviceHandle& device,
+                    const DisconnectDeviceError& error));
   MOCK_METHOD1(OnTMMessageReceived,
-      void(const ::protocol_handler::RawMessagePtr message));
-  MOCK_METHOD1(OnTMMessageReceiveFailed,
-      void(const DataReceiveError& error));
+               void(const ::protocol_handler::RawMessagePtr message));
+  MOCK_METHOD1(OnTMMessageReceiveFailed, void(const DataReceiveError& error));
   MOCK_METHOD1(OnTMMessageSend,
-      void(const ::protocol_handler::RawMessagePtr message));
+               void(const ::protocol_handler::RawMessagePtr message));
   MOCK_METHOD2(OnTMMessageSendFailed,
-      void(const DataSendError& error, const ::protocol_handler::RawMessagePtr message));
+               void(const DataSendError& error,
+                    const ::protocol_handler::RawMessagePtr message));
 };
 
 }  // namespace transport_manager_test

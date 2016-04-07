@@ -56,11 +56,11 @@ using namespace application_manager;
 
 class HMICapabilitiesTest : public ::testing::Test {
  protected:
-  HMICapabilitiesTest():
-     last_state_("app_storage_folder", "app_info_data")  {}
+  HMICapabilitiesTest() : last_state_("app_storage_folder", "app_info_data") {}
   virtual void SetUp() OVERRIDE {
     app_mngr_ = ApplicationManagerImpl::instance();
-    hmi_capabilities_test = utils::MakeShared<HMICapabilitiesForTesting>(app_mngr_);
+    hmi_capabilities_test =
+        utils::MakeShared<HMICapabilitiesForTesting>(app_mngr_);
     hmi_capabilities_test->Init(&last_state_);
   }
 
@@ -78,7 +78,6 @@ class HMICapabilitiesTest : public ::testing::Test {
   ApplicationManagerImpl* app_mngr_;
   utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities_test;
   resumption::LastState last_state_;
-
 };
 
 const char* const cstring_values_[] = {
@@ -153,10 +152,9 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
       .WillRepeatedly(Invoke(TestCommonLanguageFromString));
 
   if (file_system::FileExists("./app_info_data")) {
-     EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
-   }
+    EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
+  }
   EXPECT_TRUE(hmi_capabilities_test->LoadCapabilitiesFromFile());
-
 
   // Check active languages
   EXPECT_EQ(hmi_apis::Common_Language::EN_US,

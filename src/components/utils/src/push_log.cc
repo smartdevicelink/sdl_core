@@ -44,10 +44,10 @@ bool push_log(log4cxx::LoggerPtr logger,
               const std::string& entry,
               log4cxx_time_t timeStamp,
               const log4cxx::spi::LocationInfo& location,
-              const log4cxx::LogString& threadName
-              ) {
+              const log4cxx::LogString& threadName) {
   if (LoggerThreadCreated == logger_status) {
-    LogMessage message = {logger, level, entry, timeStamp, location, threadName};
+    LogMessage message = {
+        logger, level, entry, timeStamp, location, threadName};
     if (log_message_loop_thread) {
       log_message_loop_thread->PostMessage(message);
       return true;
@@ -56,17 +56,18 @@ bool push_log(log4cxx::LoggerPtr logger,
 
   if (LoggerThreadNotCreated == logger_status) {
     logger_status = CreatingLoggerThread;
-// we'll have to drop messages
-// while creating logger thread
+    // we'll have to drop messages
+    // while creating logger thread
     create_log_message_loop_thread();
-    LogMessage message = {logger, level, entry, timeStamp, location, threadName};
+    LogMessage message = {
+        logger, level, entry, timeStamp, location, threadName};
     log_message_loop_thread->PostMessage(message);
     logger_status = LoggerThreadCreated;
     return true;
   }
 
-// also we drop messages
-// while deleting logger thread
+  // also we drop messages
+  // while deleting logger thread
 
   return false;
 }
@@ -91,11 +92,11 @@ void delete_log_message_loop_thread() {
 }
 
 void flush_logger() {
-    logger::LoggerStatus old_status = logger::logger_status;
-    // Stop pushing new messages to the log queue
-    logger::logger_status = logger::DeletingLoggerThread;
-    log_message_loop_thread->WaitDumpQueue();
-    logger::logger_status = old_status;
+  logger::LoggerStatus old_status = logger::logger_status;
+  // Stop pushing new messages to the log queue
+  logger::logger_status = logger::DeletingLoggerThread;
+  log_message_loop_thread->WaitDumpQueue();
+  logger::logger_status = old_status;
 }
 
 }  // namespace logger

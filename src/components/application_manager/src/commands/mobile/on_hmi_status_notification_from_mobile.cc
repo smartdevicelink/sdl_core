@@ -73,11 +73,9 @@ void OnHMIStatusNotificationFromMobile::Run() {
       application_manager::ApplicationManagerImpl::instance()
           ->IsAppsQueriedFrom(handle);
 
-  LOG4CXX_DEBUG(
-      logger_,
-      "Mobile HMI state notication came for connection key:" << connection_key()
-                                                             << " and handle: "
-                                                             << handle);
+  LOG4CXX_DEBUG(logger_,
+                "Mobile HMI state notication came for connection key:"
+                    << connection_key() << " and handle: " << handle);
 
   if (!is_apps_requested_before &&
       ProtocolVersion::kV4 == app->protocol_version() && app->is_foreground()) {

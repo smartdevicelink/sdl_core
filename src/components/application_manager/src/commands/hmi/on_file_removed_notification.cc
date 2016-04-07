@@ -38,11 +38,10 @@ namespace application_manager {
 namespace commands {
 
 OnFileRemovedNotification::OnFileRemovedNotification(
-    const MessageSharedPtr& message) : NotificationToHMI(message) {
-}
+    const MessageSharedPtr& message)
+    : NotificationToHMI(message) {}
 
-OnFileRemovedNotification::~OnFileRemovedNotification() {
-}
+OnFileRemovedNotification::~OnFileRemovedNotification() {}
 
 void OnFileRemovedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,4 +52,3 @@ void OnFileRemovedNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

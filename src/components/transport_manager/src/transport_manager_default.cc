@@ -43,12 +43,9 @@
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #endif
 
-
 #if defined(USB_SUPPORT)
 #include "transport_manager/usb/usb_aoa_adapter.h"
 #endif  // USB_SUPPORT
-
-
 
 namespace transport_manager {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
@@ -86,7 +83,6 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
   AddTransportAdapter(ta_tcp);
   ta_tcp = NULL;
 
-
 #if defined(USB_SUPPORT)
   transport_adapter::TransportAdapterImpl* ta_usb =
       new transport_adapter::UsbAoaAdapter(last_state);
@@ -105,7 +101,6 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
 
 TransportManagerDefault::~TransportManagerDefault() {}
 
-TransportManagerDefault::TransportManagerDefault()
-    : TransportManagerImpl() {}
+TransportManagerDefault::TransportManagerDefault() : TransportManagerImpl() {}
 
 }  //  namespace transport_manager

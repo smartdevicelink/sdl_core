@@ -39,11 +39,7 @@ namespace utils {
 namespace dbms {
 
 SQLQuery::SQLQuery(SQLDatabase* db)
-    : db_(*db),
-      query_(""),
-      statement_(NULL),
-      error_(SQLITE_OK) {
-}
+    : db_(*db), query_(""), statement_(NULL), error_(SQLITE_OK) {}
 
 SQLQuery::~SQLQuery() {
   Finalize();
@@ -52,9 +48,10 @@ SQLQuery::~SQLQuery() {
 bool SQLQuery::Prepare(const std::string& query) {
   Finalize();
   sync_primitives::AutoLock auto_lock(statement_lock_);
-  if (statement_) return false;
-  error_ = sqlite3_prepare(db_.conn(), query.c_str(), query.length(),
-                           &statement_, NULL);
+  if (statement_)
+    return false;
+  error_ = sqlite3_prepare(
+      db_.conn(), query.c_str(), query.length(), &statement_, NULL);
   query_ = query;
   return error_ == SQLITE_OK;
 }
@@ -109,8 +106,8 @@ void SQLQuery::Bind(int pos, bool value) {
 
 void SQLQuery::Bind(int pos, const std::string& value) {
   // In SQLite the number of position for binding starts since 1.
-  error_ = sqlite3_bind_text(statement_, pos + 1, value.c_str(), value.length(),
-  SQLITE_TRANSIENT);
+  error_ = sqlite3_bind_text(
+      statement_, pos + 1, value.c_str(), value.length(), SQLITE_TRANSIENT);
 }
 
 bool SQLQuery::GetBoolean(int pos) const {
@@ -122,13 +119,11 @@ int SQLQuery::GetInteger(int pos) const {
 }
 
 uint32_t SQLQuery::GetUInteger(int pos) const {
-  return static_cast<uint32_t>(
-      sqlite3_column_int64(statement_, pos));
+  return static_cast<uint32_t>(sqlite3_column_int64(statement_, pos));
 }
 
 int64_t SQLQuery::GetLongInt(int pos) const {
-  return static_cast<int64_t>(
-      sqlite3_column_int64(statement_, pos));
+  return static_cast<int64_t>(sqlite3_column_int64(statement_, pos));
 }
 
 double SQLQuery::GetDouble(int pos) const {
@@ -164,4 +159,3 @@ int64_t SQLQuery::LastInsertId() const {
 
 }  // namespace dbms
 }  // namespace utils
-

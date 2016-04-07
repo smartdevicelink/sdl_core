@@ -39,28 +39,28 @@ namespace application_manager {
 namespace commands {
 
 SendLocationRequest::SendLocationRequest(const MessageSharedPtr& message)
- : CommandRequestImpl(message) {
-}
+    : CommandRequestImpl(message) {}
 
-SendLocationRequest::~SendLocationRequest() {
-}
+SendLocationRequest::~SendLocationRequest() {}
 
 void SendLocationRequest::Run() {
   using namespace hmi_apis;
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = application_manager::ApplicationManagerImpl::instance()
-      ->application(connection_key());
+  ApplicationSharedPtr app =
+      application_manager::ApplicationManagerImpl::instance()->application(
+          connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_,
-                      "An application with connection key " << connection_key()
-                      << " is not registered.");
+                  "An application with connection key "
+                      << connection_key() << " is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
-  const smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
   std::list<Common_TextFieldName::eType> fields_to_check;
 
   if (msg_params.keyExists(strings::location_name)) {
@@ -99,13 +99,13 @@ void SendLocationRequest::Run() {
     }
   }
 
-  smart_objects::SmartObject request_msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObject request_msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
   request_msg_params = (*message_)[strings::msg_params];
   request_msg_params[strings::app_id] = app->hmi_app_id();
 
-  SendHMIRequest(hmi_apis::FunctionID::Navigation_SendLocation,
-                 &request_msg_params, true);
+  SendHMIRequest(
+      hmi_apis::FunctionID::Navigation_SendLocation, &request_msg_params, true);
 }
 
 void SendLocationRequest::on_event(const event_engine::Event& event) {
@@ -114,18 +114,17 @@ void SendLocationRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_SendLocation: {
       LOG4CXX_INFO(logger_, "Received Navigation_SendLocation event");
-      mobile_apis::Result::eType result_code = GetMobileResultCode(
-          static_cast<hmi_apis::Common_Result::eType>(
+      mobile_apis::Result::eType result_code =
+          GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asUInt()));
-      bool result =
-          mobile_apis::Result::SUCCESS == result_code ||
-          mobile_apis::Result::WARNINGS == result_code ||
-          mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code ;
+      bool result = mobile_apis::Result::SUCCESS == result_code ||
+                    mobile_apis::Result::WARNINGS == result_code ||
+                    mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code;
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
       break;
     }
   }
@@ -162,7 +161,7 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
     smart_objects::SmartArray::const_iterator it_al_end = al_array->end();
     for (; it_al != it_al_end; ++it_al) {
       str = (*it_al).asCharArray();
-      if(!CheckSyntax(str)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_,
                       "parameter address_lines contains invalid character");
         return true;
@@ -182,8 +181,9 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
   if (msg_params.keyExists(strings::location_image)) {
     str = msg_params[strings::location_image][strings::value].asCharArray();
     if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_,
-                          "parameter value in locationImage contains invalid character");
+      LOG4CXX_ERROR(
+          logger_,
+          "parameter value in locationImage contains invalid character");
       return true;
     }
   }
@@ -191,7 +191,8 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
   return false;
 }
 
-bool SendLocationRequest::CheckHMICapabilities(std::list<hmi_apis::Common_TextFieldName::eType>& fields_names) {
+bool SendLocationRequest::CheckHMICapabilities(
+    std::list<hmi_apis::Common_TextFieldName::eType>& fields_names) {
   using namespace smart_objects;
   using namespace hmi_apis;
 
@@ -208,12 +209,14 @@ bool SendLocationRequest::CheckHMICapabilities(std::list<hmi_apis::Common_TextFi
 
   if (hmi_capabilities.display_capabilities()) {
     const SmartObject disp_cap = (*hmi_capabilities.display_capabilities());
-    const SmartObject& text_fields = disp_cap.getElement(hmi_response::text_fields);
+    const SmartObject& text_fields =
+        disp_cap.getElement(hmi_response::text_fields);
     const size_t len = text_fields.length();
     for (size_t i = 0; i < len; ++i) {
       const SmartObject& text_field = text_fields[i];
       const Common_TextFieldName::eType filed_name =
-          static_cast<Common_TextFieldName::eType>(text_field.getElement(strings::name).asInt());
+          static_cast<Common_TextFieldName::eType>(
+              text_field.getElement(strings::name).asInt());
       const std::list<Common_TextFieldName::eType>::iterator it =
           std::find(fields_names.begin(), fields_names.end(), filed_name);
       if (it != fields_names.end()) {

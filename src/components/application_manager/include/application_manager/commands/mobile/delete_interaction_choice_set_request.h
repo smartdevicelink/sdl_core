@@ -65,7 +65,6 @@ class DeleteInteractionChoiceSetRequest : public CommandRequestImpl {
   virtual void Run();
 
  private:
-
   /*
    * @brief Check if requested choice set ID in use by perform interaction
    *

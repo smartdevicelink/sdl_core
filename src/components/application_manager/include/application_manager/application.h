@@ -338,18 +338,19 @@ class DynamicApplicationData {
   *
   * @param Current Interaction layout of the perform interaction
   */
- virtual void set_perform_interaction_layout(mobile_api::LayoutMode::eType layout) = 0;
+  virtual void set_perform_interaction_layout(
+      mobile_api::LayoutMode::eType layout) = 0;
 
- /*
-  * @brief Retrieve perform interaction layout
-  */
- virtual mobile_api::LayoutMode::eType perform_interaction_layout() const = 0;
-
-/*
-   * @brief Sets the mode for perform interaction: UI/VR/BOTH
-   *
-   * @param mode Mode that was selected (MENU; VR; BOTH)
+  /*
+   * @brief Retrieve perform interaction layout
    */
+  virtual mobile_api::LayoutMode::eType perform_interaction_layout() const = 0;
+
+  /*
+     * @brief Sets the mode for perform interaction: UI/VR/BOTH
+     *
+     * @param mode Mode that was selected (MENU; VR; BOTH)
+     */
   virtual void set_perform_interaction_mode(int32_t mode) = 0;
 
   /*
@@ -443,8 +444,7 @@ class Application : public virtual InitialApplicationData,
    * @brief Stops streaming service for application
    * @param service_type Type of streaming service
    */
-  virtual void StopStreaming(
-      protocol_handler::ServiceType service_type) = 0;
+  virtual void StopStreaming(protocol_handler::ServiceType service_type) = 0;
 
   /**
    * @brief Stops streaming for application whether it is allowed or not HMI

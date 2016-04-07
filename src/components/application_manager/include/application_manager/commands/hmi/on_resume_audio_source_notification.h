@@ -63,7 +63,6 @@ class OnResumeAudioSourceNotification : public NotificationToHMI {
   virtual void Run();
 
  private:
-
   DISALLOW_COPY_AND_ASSIGN(OnResumeAudioSourceNotification);
 };
 

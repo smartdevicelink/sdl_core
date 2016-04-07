@@ -39,9 +39,10 @@
 
 namespace telemetry_monitor {
 
-class TransportManagerMecticWrapper: public MetricWrapper {
+class TransportManagerMecticWrapper : public MetricWrapper {
  public:
-  utils::SharedPtr<transport_manager::TMTelemetryObserver::MessageMetric> message_metric;
+  utils::SharedPtr<transport_manager::TMTelemetryObserver::MessageMetric>
+      message_metric;
   virtual Json::Value GetJsonMetric();
 };
 }  // namespace telemetry_monitor

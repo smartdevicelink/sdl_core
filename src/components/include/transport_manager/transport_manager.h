@@ -60,7 +60,7 @@ class TransportManager {
    * @brief Initialize transport manager.
    * @return Error code.
    */
-  virtual int Init(resumption::LastState &last_state) = 0;
+  virtual int Init(resumption::LastState& last_state) = 0;
 
   /**
    * @brief Reinitializes transport manager
@@ -117,7 +117,8 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int SendMessageToDevice(const protocol_handler::RawMessagePtr message) = 0;
+  virtual int SendMessageToDevice(
+      const protocol_handler::RawMessagePtr message) = 0;
 
   /**
    * @brief Post event in the event queue.
@@ -136,7 +137,7 @@ class TransportManager {
    * @return Error code.
    **/
   virtual int AddTransportAdapter(
-    transport_adapter::TransportAdapter* transport_adapter) = 0;
+      transport_adapter::TransportAdapter* transport_adapter) = 0;
 
   /**
    * @brief Post listener to the container of transport manager listeners.

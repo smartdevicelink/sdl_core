@@ -51,7 +51,7 @@ class LastStateTest : public ::testing::Test {
   void SetUp() OVERRIDE {
     file_system::DeleteFile("./app_info_storage");
     last_state_ = std::auto_ptr<resumption::LastState>(
-          new resumption::LastState("app_storage_folder", "app_info_storage"));
+        new resumption::LastState("app_storage_folder", "app_info_storage"));
     ASSERT_TRUE(file_system::CreateFile("./app_info.dat"));
     profile::Profile::instance()->UpdateValues();
   }
@@ -89,10 +89,9 @@ TEST_F(LastStateTest, SetGetData) {
     Value test_value;
     test_value["name"] = "test_device";
 
-    last_state_
-        ->dictionary["TransportManager"]["TcpAdapter"]["devices"] = test_value;
-    last_state_
-        ->dictionary["TransportManager"]["BluetoothAdapter"]["devices"] =
+    last_state_->dictionary["TransportManager"]["TcpAdapter"]["devices"] =
+        test_value;
+    last_state_->dictionary["TransportManager"]["BluetoothAdapter"]["devices"] =
         "bluetooth_device";
     last_state_->SaveToFileSystem();
   }

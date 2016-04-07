@@ -41,14 +41,14 @@ namespace application_manager {
 namespace commands {
 
 ScrollableMessageResponse::ScrollableMessageResponse(
-  const MessageSharedPtr& message)
-  : CommandResponseImpl(message) {
-}
+    const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {}
 
 void ScrollableMessageResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  mobile_apis::Result::eType result_code = static_cast<mobile_apis::Result::eType>(
-      (*message_)[strings::msg_params][strings::result_code].asInt());
+  mobile_apis::Result::eType result_code =
+      static_cast<mobile_apis::Result::eType>(
+          (*message_)[strings::msg_params][strings::result_code].asInt());
   ApplicationSharedPtr application =
       ApplicationManagerImpl::instance()->application(
           (*message_)[strings::params][strings::connection_key].asInt());

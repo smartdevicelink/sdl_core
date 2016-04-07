@@ -40,13 +40,11 @@ namespace commands {
 
 NotificationFromHMI::NotificationFromHMI(const MessageSharedPtr& message)
     : CommandImpl(message) {
-
   // Replace HMI app id with Mobile connection id
   ApplicationManagerImpl::instance()->ReplaceHMIByMobileAppId(*message);
 }
 
-NotificationFromHMI::~NotificationFromHMI() {
-}
+NotificationFromHMI::~NotificationFromHMI() {}
 
 bool NotificationFromHMI::Init() {
   return true;
@@ -56,12 +54,10 @@ bool NotificationFromHMI::CleanUp() {
   return true;
 }
 
-void NotificationFromHMI::Run() {
-}
+void NotificationFromHMI::Run() {}
 
 void NotificationFromHMI::SendNotificationToMobile(
     const MessageSharedPtr& message) {
-
   (*message)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
   ApplicationManagerImpl::instance()->ManageMobileCommand(message);
@@ -70,7 +66,6 @@ void NotificationFromHMI::SendNotificationToMobile(
 void NotificationFromHMI::CreateHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject& msg_params) const {
-
   smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
   if (!result) {
     LOG4CXX_ERROR(logger_, "Memory allocation failed.");
@@ -78,8 +73,8 @@ void NotificationFromHMI::CreateHMIRequest(
   }
 
   // get hmi correlation id for chaining further request from this object
-  const uint32_t hmi_correlation_id_ = ApplicationManagerImpl::instance()
-      ->GetNextHMICorrelationID();
+  const uint32_t hmi_correlation_id_ =
+      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 
   NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
   request[strings::params][strings::message_type] =

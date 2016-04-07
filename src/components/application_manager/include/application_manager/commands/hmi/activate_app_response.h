@@ -43,26 +43,26 @@ namespace commands {
  * @brief ActivateAppResponse command class
  **/
 class ActivateAppResponse : public ResponseFromHMI {
-  public:
-    /**
-     * @brief ActivateAppResponse class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit ActivateAppResponse(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief ActivateAppResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit ActivateAppResponse(const MessageSharedPtr& message);
 
-    /**
-     * @brief ActivateAppResponse class destructor
-     **/
-    virtual ~ActivateAppResponse();
+  /**
+   * @brief ActivateAppResponse class destructor
+   **/
+  virtual ~ActivateAppResponse();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(ActivateAppResponse);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ActivateAppResponse);
 };
 
 }  // namespace commands

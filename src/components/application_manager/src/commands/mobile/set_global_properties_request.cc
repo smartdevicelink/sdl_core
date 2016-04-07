@@ -45,17 +45,15 @@ namespace commands {
 
 SetGlobalPropertiesRequest::SetGlobalPropertiesRequest(
     const MessageSharedPtr& message)
-    : CommandRequestImpl(message),
-      is_ui_send_(false),
-      is_tts_send_(false),
-      is_ui_received_(false),
-      is_tts_received_(false),
-      ui_result_(hmi_apis::Common_Result::INVALID_ENUM),
-      tts_result_(hmi_apis::Common_Result::INVALID_ENUM) {
-}
+    : CommandRequestImpl(message)
+    , is_ui_send_(false)
+    , is_tts_send_(false)
+    , is_ui_received_(false)
+    , is_tts_received_(false)
+    , ui_result_(hmi_apis::Common_Result::INVALID_ENUM)
+    , tts_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
 
-SetGlobalPropertiesRequest::~SetGlobalPropertiesRequest() {
-}
+SetGlobalPropertiesRequest::~SetGlobalPropertiesRequest() {}
 
 void SetGlobalPropertiesRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -67,8 +65,9 @@ void SetGlobalPropertiesRequest::Run() {
       ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "No application associated with connection key "
-                  << connection_key());
+    LOG4CXX_ERROR(logger_,
+                  "No application associated with connection key "
+                      << connection_key());
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -86,16 +85,17 @@ void SetGlobalPropertiesRequest::Run() {
     verification_result = MessageHelper::VerifyImage(
         (*message_)[strings::msg_params][strings::menu_icon], app);
     if (mobile_apis::Result::SUCCESS != verification_result) {
-      LOG4CXX_ERROR(logger_, "MessageHelper::VerifyImage return "
-                    << verification_result);
+      LOG4CXX_ERROR(
+          logger_, "MessageHelper::VerifyImage return " << verification_result);
       SendResponse(false, verification_result);
       return;
     }
   }
   // Check for image file(s) in vrHelpItem
   if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
-    if (mobile_apis::Result::SUCCESS != MessageHelper::VerifyImageVrHelpItems(
-        (*message_)[strings::msg_params][strings::vr_help], app)) {
+    if (mobile_apis::Result::SUCCESS !=
+        MessageHelper::VerifyImageVrHelpItems(
+            (*message_)[strings::msg_params][strings::vr_help], app)) {
       LOG4CXX_ERROR(logger_, "MessageHelper::VerifyImage return INVALID_DATA!");
       SendResponse(false, mobile_apis::Result::INVALID_DATA);
       return;
@@ -108,19 +108,20 @@ void SetGlobalPropertiesRequest::Run() {
     return;
   }
 
-  //if application waits for sending ttsGlobalProperties need to remove this
-  //application from tts_global_properties_app_list_
+  // if application waits for sending ttsGlobalProperties need to remove this
+  // application from tts_global_properties_app_list_
   ApplicationManagerImpl::instance()->RemoveAppFromTTSGlobalPropertiesList(
       connection_key());
   bool is_help_prompt_present = msg_params.keyExists(strings::help_prompt);
-  bool is_timeout_prompt_present = msg_params.keyExists(
-      strings::timeout_prompt);
+  bool is_timeout_prompt_present =
+      msg_params.keyExists(strings::timeout_prompt);
   bool is_vr_help_title_present = msg_params.keyExists(strings::vr_help_title);
   bool is_vr_help_present = msg_params.keyExists(strings::vr_help);
 
   // check VR params
   if (is_vr_help_title_present ^ is_vr_help_present) {
-    LOG4CXX_ERROR(logger_, "Reject because of vr_help or vr_help_title only provided");
+    LOG4CXX_ERROR(logger_,
+                  "Reject because of vr_help or vr_help_title only provided");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
@@ -129,8 +130,8 @@ void SetGlobalPropertiesRequest::Run() {
 
     if (!CheckVrHelpItemsOrder(msg_params[strings::vr_help])) {
       LOG4CXX_ERROR(logger_,
-                    "VR Help Items contains nonsequential positions" <<
-                    " (e.g. [1,2,4]) or not started from 1");
+                    "VR Help Items contains nonsequential positions"
+                        << " (e.g. [1,2,4]) or not started from 1");
       SendResponse(false, mobile_apis::Result::REJECTED);
       return;
     }
@@ -177,14 +178,12 @@ void SetGlobalPropertiesRequest::Run() {
         smart_objects::SmartObject(smart_objects::SmartType_Map);
 
     if (is_help_prompt_present) {
-      app->set_help_prompt(
-          msg_params.getElement(strings::help_prompt));
+      app->set_help_prompt(msg_params.getElement(strings::help_prompt));
       params[strings::help_prompt] = (*app->help_prompt());
     }
 
     if (is_timeout_prompt_present) {
-      app->set_timeout_prompt(
-          msg_params.getElement(strings::timeout_prompt));
+      app->set_timeout_prompt(msg_params.getElement(strings::timeout_prompt));
       params[strings::timeout_prompt] = (*app->timeout_prompt());
     }
 
@@ -201,11 +200,13 @@ bool SetGlobalPropertiesRequest::CheckVrHelpItemsOrder(
   DCHECK_OR_RETURN(vr_help_length > 0, false);
 
   for (size_t j = 0; j < vr_help_length; ++j) {
-    const size_t position = vr_help.getElement(j).getElement(strings::position).asUInt();
+    const size_t position =
+        vr_help.getElement(j).getElement(strings::position).asUInt();
     // Elements shall start from 1 and increment one by one
     if (position != (j + 1)) {
-      LOG4CXX_ERROR(logger_, "VR help items order is wrong" <<
-                    " at " << j << ", position value:" << position);
+      LOG4CXX_ERROR(logger_,
+                    "VR help items order is wrong"
+                        << " at " << j << ", position value:" << position);
       return false;
     }
   }
@@ -245,55 +246,50 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
 
   const bool is_tts_succeeded =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-        tts_result_,
-        hmi_apis::Common_Result::SUCCESS,
-        hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
-        hmi_apis::Common_Result::WARNINGS);
+          tts_result_,
+          hmi_apis::Common_Result::SUCCESS,
+          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
+          hmi_apis::Common_Result::WARNINGS);
 
-  const bool is_ui_succeeded =
-      Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-        ui_result_,
-        hmi_apis::Common_Result::SUCCESS,
-        hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
-        hmi_apis::Common_Result::WARNINGS);
+  const bool is_ui_succeeded = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
+      ui_result_,
+      hmi_apis::Common_Result::SUCCESS,
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
+      hmi_apis::Common_Result::WARNINGS);
 
   const bool is_ui_invalid_unsupported =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-        ui_result_,
-        hmi_apis::Common_Result::INVALID_ENUM,
-        hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
+          ui_result_,
+          hmi_apis::Common_Result::INVALID_ENUM,
+          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
 
-  bool result =
-      (is_tts_succeeded && is_ui_succeeded) ||
-      (is_ui_succeeded &&
-       hmi_apis::Common_Result::INVALID_ENUM == tts_result_) ||
-      (is_ui_invalid_unsupported && is_tts_succeeded);
+  bool result = (is_tts_succeeded && is_ui_succeeded) ||
+                (is_ui_succeeded &&
+                 hmi_apis::Common_Result::INVALID_ENUM == tts_result_) ||
+                (is_ui_invalid_unsupported && is_tts_succeeded);
 
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
   const char* return_info = NULL;
 
   const bool is_ui_or_tts_warning =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-        hmi_apis::Common_Result::WARNINGS,
-        tts_result_,
-        ui_result_);
+          hmi_apis::Common_Result::WARNINGS, tts_result_, ui_result_);
 
-  if (result &&
-      (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_ ||
-       is_ui_or_tts_warning)) {
+  if (result && (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_ ||
+                 is_ui_or_tts_warning)) {
     result_code = mobile_apis::Result::WARNINGS;
     return_info =
         std::string("Unsupported phoneme type sent in a prompt").c_str();
   } else {
-    result_code = MessageHelper::HMIToMobileResult(
-          std::max(ui_result_, tts_result_));
+    result_code =
+        MessageHelper::HMIToMobileResult(std::max(ui_result_, tts_result_));
   }
 
-  //TODO{ALeshin} APPLINK-15858. connection_key removed during SendResponse
+  // TODO{ALeshin} APPLINK-15858. connection_key removed during SendResponse
   const uint32_t stashedConnectionKey = connection_key();
 
-  SendResponse(result, result_code, return_info,
-               &(message[strings::msg_params]));
+  SendResponse(
+      result, result_code, return_info, &(message[strings::msg_params]));
 
   ApplicationSharedPtr application =
       ApplicationManagerImpl::instance()->application(stashedConnectionKey);
@@ -313,30 +309,28 @@ bool SetGlobalPropertiesRequest::ValidateVRHelpTitle(
   LOG4CXX_AUTO_TRACE(logger_);
   if (vr_help_so_ptr) {
     const std::string& vr_help = vr_help_so_ptr->asString();
-    LOG4CXX_TRACE(logger_, "App contains vr_help_title: \"" << vr_help <<  '"');
+    LOG4CXX_TRACE(logger_, "App contains vr_help_title: \"" << vr_help << '"');
     return !vr_help.empty();
   }
   return false;
 }
 
 void SetGlobalPropertiesRequest::PrepareUIRequestVRHelpData(
-    const ApplicationSharedPtr app, const smart_objects::SmartObject &msg_params,
-    smart_objects::SmartObject &out_params) {
+    const ApplicationSharedPtr app,
+    const smart_objects::SmartObject& msg_params,
+    smart_objects::SmartObject& out_params) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
 
-  app->set_vr_help_title(
-      msg_params.getElement(strings::vr_help_title));
-  app->set_vr_help(
-      msg_params.getElement(strings::vr_help));
+  app->set_vr_help_title(msg_params.getElement(strings::vr_help_title));
+  app->set_vr_help(msg_params.getElement(strings::vr_help));
 
   out_params[strings::vr_help_title] = (*app->vr_help_title());
   out_params[strings::vr_help] = (*app->vr_help());
 }
 
 bool SetGlobalPropertiesRequest::PrepareUIRequestDefaultVRHelpData(
-    const ApplicationSharedPtr app,
-    smart_objects::SmartObject &out_params) {
+    const ApplicationSharedPtr app, smart_objects::SmartObject& out_params) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(app, false);
 
@@ -347,7 +341,8 @@ bool SetGlobalPropertiesRequest::PrepareUIRequestDefaultVRHelpData(
   int32_t index = 0;
   smart_objects::SmartObject vr_help_items;
   for (CommandsMap::const_iterator command_it = cmdMap.begin();
-       cmdMap.end() != command_it; ++command_it) {
+       cmdMap.end() != command_it;
+       ++command_it) {
     const smart_objects::SmartObject& command = *command_it->second;
     if (!command.keyExists(strings::vr_commands)) {
       LOG4CXX_ERROR(logger_, "VR synonyms are empty");
@@ -370,13 +365,16 @@ bool SetGlobalPropertiesRequest::PrepareUIRequestDefaultVRHelpData(
 }
 
 void SetGlobalPropertiesRequest::PrepareUIRequestMenuAndKeyboardData(
-    const ApplicationSharedPtr app, const smart_objects::SmartObject &msg_params,
-    smart_objects::SmartObject &out_params) {
+    const ApplicationSharedPtr app,
+    const smart_objects::SmartObject& msg_params,
+    smart_objects::SmartObject& out_params) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
 
-  const bool is_menu_title_present = msg_params.keyExists(hmi_request::menu_title);
-  const bool is_menu_icon_present = msg_params.keyExists(hmi_request::menu_icon);
+  const bool is_menu_title_present =
+      msg_params.keyExists(hmi_request::menu_title);
+  const bool is_menu_icon_present =
+      msg_params.keyExists(hmi_request::menu_icon);
   const bool is_keyboard_props_present =
       msg_params.keyExists(hmi_request::keyboard_properties);
 
@@ -386,8 +384,7 @@ void SetGlobalPropertiesRequest::PrepareUIRequestMenuAndKeyboardData(
     app->set_menu_title(msg_params[hmi_request::menu_title]);
   }
   if (is_menu_icon_present) {
-    out_params[hmi_request::menu_icon] =
-        msg_params[hmi_request::menu_icon];
+    out_params[hmi_request::menu_icon] = msg_params[hmi_request::menu_icon];
     app->set_menu_icon(msg_params[hmi_request::menu_icon]);
   }
   if (is_keyboard_props_present) {
@@ -398,18 +395,18 @@ void SetGlobalPropertiesRequest::PrepareUIRequestMenuAndKeyboardData(
 }
 
 void SetGlobalPropertiesRequest::SendTTSRequest(
-    const smart_objects::SmartObject &params, bool use_events) {
+    const smart_objects::SmartObject& params, bool use_events) {
   LOG4CXX_AUTO_TRACE(logger_);
-  SendHMIRequest(hmi_apis::FunctionID::TTS_SetGlobalProperties,
-                 &params, use_events);
+  SendHMIRequest(
+      hmi_apis::FunctionID::TTS_SetGlobalProperties, &params, use_events);
   is_tts_send_ = true;
 }
 
 void SetGlobalPropertiesRequest::SendUIRequest(
-    const smart_objects::SmartObject &params, bool use_events) {
+    const smart_objects::SmartObject& params, bool use_events) {
   LOG4CXX_AUTO_TRACE(logger_);
-  SendHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties,
-                     &params, use_events);
+  SendHMIRequest(
+      hmi_apis::FunctionID::UI_SetGlobalProperties, &params, use_events);
   is_ui_send_ = true;
 }
 
@@ -420,13 +417,13 @@ bool SetGlobalPropertiesRequest::IsPendingResponseExist() {
 bool SetGlobalPropertiesRequest::ValidateConditionalMandatoryParameters(
     const smart_objects::SmartObject& params) {
   LOG4CXX_AUTO_TRACE(logger_);
-  return params.keyExists(strings::help_prompt)
-      || params.keyExists(strings::timeout_prompt)
-      || params.keyExists(strings::vr_help_title)
-      || params.keyExists(strings::vr_help)
-      || params.keyExists(strings::menu_title)
-      || params.keyExists(strings::menu_icon)
-      || params.keyExists(strings::keyboard_properties);
+  return params.keyExists(strings::help_prompt) ||
+         params.keyExists(strings::timeout_prompt) ||
+         params.keyExists(strings::vr_help_title) ||
+         params.keyExists(strings::vr_help) ||
+         params.keyExists(strings::menu_title) ||
+         params.keyExists(strings::menu_icon) ||
+         params.keyExists(strings::keyboard_properties);
 }
 
 bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
@@ -486,11 +483,11 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
         str = (*it_vh)[strings::image][strings::value].asCharArray();
         if (!CheckSyntax(str)) {
           LOG4CXX_ERROR(logger_,
-                       "Invalid vr_help image value syntax check failed");
+                        "Invalid vr_help image value syntax check failed");
           return true;
         }
       }  // if image exists
-    }  // for - vh_array iteration
+    }    // for - vh_array iteration
   }
 
   if (msg_params.keyExists(strings::menu_icon)) {
@@ -517,13 +514,12 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
     }
   }
 
-
   if (msg_params.keyExists(strings::keyboard_properties)) {
-    if (msg_params[strings::keyboard_properties].
-        keyExists(strings::limited_character_list)) {
+    if (msg_params[strings::keyboard_properties].keyExists(
+            strings::limited_character_list)) {
       const smart_objects::SmartArray* lcl_array =
           msg_params[strings::keyboard_properties]
-                     [strings::limited_character_list].asArray();
+                    [strings::limited_character_list].asArray();
 
       smart_objects::SmartArray::const_iterator it_lcl = lcl_array->begin();
       smart_objects::SmartArray::const_iterator it_lcl_end = lcl_array->end();
@@ -531,21 +527,24 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
       for (; it_lcl != it_lcl_end; ++it_lcl) {
         str = (*it_lcl).asCharArray();
         if (!CheckSyntax(str)) {
-          LOG4CXX_ERROR(logger_, "Invalid keyboard_properties "
-              "limited_character_list syntax check failed");
+          LOG4CXX_ERROR(logger_,
+                        "Invalid keyboard_properties "
+                        "limited_character_list syntax check failed");
           return true;
         }
       }
     }
 
-    if (msg_params[strings::keyboard_properties].
-        keyExists(strings::auto_complete_text)) {
-      str = msg_params[strings::keyboard_properties]
-                       [strings::auto_complete_text].asCharArray();
+    if (msg_params[strings::keyboard_properties].keyExists(
+            strings::auto_complete_text)) {
+      str =
+          msg_params[strings::keyboard_properties][strings::auto_complete_text]
+              .asCharArray();
 
       if (!CheckSyntax(str)) {
-        LOG4CXX_ERROR(logger_, "Invalid keyboard_properties "
-            "auto_complete_text syntax check failed");
+        LOG4CXX_ERROR(logger_,
+                      "Invalid keyboard_properties "
+                      "auto_complete_text syntax check failed");
         return true;
       }
     }

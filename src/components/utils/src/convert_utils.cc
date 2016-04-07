@@ -52,13 +52,15 @@ int64_t utils::ConvertLongLongIntToInt64(const long long int value) {
   return static_cast<int64_t>(value);
 }
 
-unsigned long long int utils::ConvertUInt64ToLongLongUInt(const uint64_t value) {
+unsigned long long int utils::ConvertUInt64ToLongLongUInt(
+    const uint64_t value) {
   DCHECK(value >= std::numeric_limits<unsigned long long int>::min());
   DCHECK(value <= std::numeric_limits<unsigned long long int>::max());
   return static_cast<unsigned long long int>(value);
 }
 
-uint64_t utils::ConvertLongLongUIntToUInt64(const unsigned long long int value) {
+uint64_t utils::ConvertLongLongUIntToUInt64(
+    const unsigned long long int value) {
   DCHECK_OR_RETURN(
       value >= std::numeric_limits<uint64_t>::min(),
       std::min<uint64_t>(value, std::numeric_limits<uint64_t>::min()));

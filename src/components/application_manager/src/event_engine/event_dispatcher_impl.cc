@@ -98,7 +98,8 @@ void EventDispatcherImpl::remove_observer(const Event::EventID& event_id,
     ObserverVector& obs_vec = it->second;
     const ObserverVector::iterator obs_vec_it = obs_vec.end();
     obs_vec.erase(
-        std::remove_if(obs_vec.begin(), obs_vec_it, IdCheckFunctor(observer->id())),
+        std::remove_if(
+            obs_vec.begin(), obs_vec_it, IdCheckFunctor(observer->id())),
         obs_vec_it);
   }
 }
@@ -117,8 +118,8 @@ void EventDispatcherImpl::remove_observer_from_vector(
   AutoLock auto_lock(observer_lock_);
 
   observers_.erase(
-      std::remove_if(observers_.begin(), observers_.end(),
-                     IdCheckFunctor(observer->id())),
+      std::remove_if(
+          observers_.begin(), observers_.end(), IdCheckFunctor(observer->id())),
       observers_.end());
 }
 

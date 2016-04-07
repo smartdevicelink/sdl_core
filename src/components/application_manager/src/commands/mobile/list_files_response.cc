@@ -40,11 +40,9 @@ namespace application_manager {
 namespace commands {
 
 ListFilesResponse::ListFilesResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    : CommandResponseImpl(message) {}
 
-ListFilesResponse::~ListFilesResponse() {
-}
+ListFilesResponse::~ListFilesResponse() {}
 
 void ListFilesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -39,12 +39,10 @@ namespace application_manager {
 namespace commands {
 
 EndAudioPassThruRequest::EndAudioPassThruRequest(
-  const MessageSharedPtr& message)
-  : CommandRequestImpl(message) {
-}
+    const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {}
 
-EndAudioPassThruRequest::~EndAudioPassThruRequest() {
-}
+EndAudioPassThruRequest::~EndAudioPassThruRequest() {}
 
 void EndAudioPassThruRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -68,8 +66,8 @@ void EndAudioPassThruRequest::on_event(const event_engine::Event& event) {
         bool ended_successfully =
             ApplicationManagerImpl::instance()->end_audio_pass_thru();
         if (ended_successfully) {
-            ApplicationManagerImpl::instance()->StopAudioPassThru(
-                connection_key());
+          ApplicationManagerImpl::instance()->StopAudioPassThru(
+              connection_key());
         }
       }
 

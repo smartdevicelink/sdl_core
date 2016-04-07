@@ -39,11 +39,9 @@ namespace commands {
 
 TTSSetGlobalPropertiesResponse::TTSSetGlobalPropertiesResponse(
     const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-TTSSetGlobalPropertiesResponse::~TTSSetGlobalPropertiesResponse() {
-}
+TTSSetGlobalPropertiesResponse::~TTSSetGlobalPropertiesResponse() {}
 
 void TTSSetGlobalPropertiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

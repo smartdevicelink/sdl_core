@@ -43,26 +43,26 @@ namespace commands {
  * @brief SDLGetUserFriendlyMessageRequest command class
  **/
 class SDLGetUserFriendlyMessageRequest : public RequestFromHMI {
-  public:
-    /**
-     * @brief SDLGetUserFriendlyMessageRequest class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit SDLGetUserFriendlyMessageRequest(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief SDLGetUserFriendlyMessageRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit SDLGetUserFriendlyMessageRequest(const MessageSharedPtr& message);
 
-    /**
-     * @brief SDLGetUserFriendlyMessageRequest class destructor
-     **/
-    virtual ~SDLGetUserFriendlyMessageRequest();
+  /**
+   * @brief SDLGetUserFriendlyMessageRequest class destructor
+   **/
+  virtual ~SDLGetUserFriendlyMessageRequest();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(SDLGetUserFriendlyMessageRequest);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(SDLGetUserFriendlyMessageRequest);
 };
 
 }  // namespace commands

@@ -38,11 +38,9 @@ namespace commands {
 
 VIGetVehicleTypeResponse::VIGetVehicleTypeResponse(
     const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-VIGetVehicleTypeResponse::~VIGetVehicleTypeResponse() {
-}
+VIGetVehicleTypeResponse::~VIGetVehicleTypeResponse() {}
 
 void VIGetVehicleTypeResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

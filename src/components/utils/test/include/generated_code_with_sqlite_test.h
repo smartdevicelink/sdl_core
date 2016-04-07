@@ -51,7 +51,8 @@ bool FindSection(dbms::SQLDatabase* db, policy_table::ServiceEndpoints& ep) {
    * table Endpoints
    * index, service_type, application_id, url, is_default
    *
-   * If url belongs to default section, application_id should be null and is_defaut = true
+   * If url belongs to default section, application_id should be null and
+   *is_defaut = true
    * Otherwise application_id should be set and is_default = false
    */
 
@@ -101,7 +102,7 @@ bool RemoveSection(dbms::SQLDatabase* db,
   //      bool is_nicknames_removed = sqlquery.Exec("delete from Nicknames");
   bool is_groups_removed = sqlquery.Exec("delete from Groups");
 
-  return is_policies_removed /*&& is_nicknames_removed*/&& is_groups_removed;
+  return is_policies_removed /*&& is_nicknames_removed*/ && is_groups_removed;
 }
 
 bool RemoveSection(dbms::SQLDatabase* db,
@@ -135,7 +136,8 @@ bool UpdateSection(dbms::SQLDatabase* db,
    * table Endpoints
    * index, service_type, application_id, url, is_default
    *
-   * If url belongs to default section, application_id should be null and is_defaut = true
+   * If url belongs to default section, application_id should be null and
+   *is_defaut = true
    * Otherwise application_id should be set and is_default = false
    */
 
@@ -225,7 +227,8 @@ bool UpdateSection(dbms::SQLDatabase* db,
     return false;
   }
 
-  std::string query = "insert into FunctionalGroups values("
+  std::string query =
+      "insert into FunctionalGroups values("
       "?,"
       "(select index from Groups where group_name=?),"
       "(select index from Rpcs where rpc=?),"
@@ -245,10 +248,10 @@ bool UpdateSection(dbms::SQLDatabase* db,
     for (; it_rpcs != it_rpcs_end; ++it_rpcs) {
       policy_table::RpcParameters rpc_params = (*it_rpcs).second;
 
-      policy_table::HmiLevels::const_iterator it_hmi_levels = rpc_params
-          .hmi_levels.begin();
-      policy_table::HmiLevels::const_iterator it_hmi_levels_end = rpc_params
-          .hmi_levels.end();
+      policy_table::HmiLevels::const_iterator it_hmi_levels =
+          rpc_params.hmi_levels.begin();
+      policy_table::HmiLevels::const_iterator it_hmi_levels_end =
+          rpc_params.hmi_levels.end();
 
       for (; it_hmi_levels != it_hmi_levels_end; ++it_hmi_levels) {
         // Index binding
@@ -302,7 +305,8 @@ bool UpdateSection(dbms::SQLDatabase* db,
     return false;
   }
 
-  std::string groups_query = "insert into Groups values ("
+  std::string groups_query =
+      "insert into Groups values ("
       "?,"
       "?,"
       "?)";
@@ -334,7 +338,8 @@ bool UpdateSection(dbms::SQLDatabase* db,
       app_policies_sqlquery.Bind(3, false);
     }
 
-    // Struct contains groups, nicknames, priority for application/default section
+    // Struct contains groups, nicknames, priority for application/default
+    // section
     policy_table::ApplicationParams app_params = (*it_ap).second;
 
     // Priority binding
@@ -354,10 +359,13 @@ bool UpdateSection(dbms::SQLDatabase* db,
       // begin/end methods in its interface
       // To be discussed with I.Kozyrenko
 
-      //          policy_table::StringArray::const_iterator it_nicknames = app_params.nicknames.begin();
-      //          policy_table::StringArray::const_iterator it_nicknames_end = app_params.nicknames.end();
+      //          policy_table::StringArray::const_iterator it_nicknames =
+      //          app_params.nicknames.begin();
+      //          policy_table::StringArray::const_iterator it_nicknames_end =
+      //          app_params.nicknames.end();
       //
-      //          for (int nick_index = 0;it_nicknames != it_nicknames_end; ++ it_nicknames, ++nick_index) {
+      //          for (int nick_index = 0;it_nicknames != it_nicknames_end; ++
+      //          it_nicknames, ++nick_index) {
       //            nicknames_sqlquery.Bind(0, nick_index);
       //            nicknames_sqlquery.Bind(1, app_policy_name);
       //
@@ -372,11 +380,11 @@ bool UpdateSection(dbms::SQLDatabase* db,
 
       policy_table::Strings::const_iterator it_groups =
           app_params.groups.begin();
-      policy_table::Strings::const_iterator it_groups_end = app_params.groups
-          .end();
+      policy_table::Strings::const_iterator it_groups_end =
+          app_params.groups.end();
 
       for (int group_index = 0; it_groups != it_groups_end;
-          ++it_groups, ++group_index) {
+           ++it_groups, ++group_index) {
         groups_sqlquery.Bind(0, group_index);
         groups_sqlquery.Bind(1, app_policy_name);
         groups_sqlquery.Bind(2, (*it_groups));

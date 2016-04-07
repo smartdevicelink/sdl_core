@@ -39,11 +39,9 @@ namespace application_manager {
 namespace commands {
 
 ReadDIDResponse::ReadDIDResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    : CommandResponseImpl(message) {}
 
-ReadDIDResponse::~ReadDIDResponse() {
-}
+ReadDIDResponse::~ReadDIDResponse() {}
 
 void ReadDIDResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

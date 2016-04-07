@@ -4,13 +4,10 @@ namespace application_manager {
 
 namespace commands {
 
-NaviStopStreamRequest::NaviStopStreamRequest(
-    const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+NaviStopStreamRequest::NaviStopStreamRequest(const MessageSharedPtr& message)
+    : RequestToHMI(message) {}
 
-NaviStopStreamRequest::~NaviStopStreamRequest() {
-}
+NaviStopStreamRequest::~NaviStopStreamRequest() {}
 
 void NaviStopStreamRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

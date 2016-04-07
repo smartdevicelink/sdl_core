@@ -39,11 +39,9 @@ namespace commands {
 
 TTSStopSpeakingResponse::TTSStopSpeakingResponse(
     const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-TTSStopSpeakingResponse::~TTSStopSpeakingResponse() {
-}
+TTSStopSpeakingResponse::~TTSStopSpeakingResponse() {}
 
 void TTSStopSpeakingResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

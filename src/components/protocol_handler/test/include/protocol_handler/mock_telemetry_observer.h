@@ -51,4 +51,4 @@ class MockPHTelemetryObserver : public ::protocol_handler::PHTelemetryObserver {
 }  // namespace components
 }  // namespace test
 
--#endif  // SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_TIME_METRIC_OBSERVER_H_
+- #endif  // SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_TIME_METRIC_OBSERVER_H_

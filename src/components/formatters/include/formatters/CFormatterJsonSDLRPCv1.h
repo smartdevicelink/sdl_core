@@ -111,14 +111,15 @@ class CFormatterJsonSDLRPCv1 : public CFormatterJsonBase {
   static const std::string S_CORRELATION_ID;
 
  public:
-
   static const int32_t kSuccess;
   static const int32_t kParsingError;
   static const int32_t kFunctionIdNotFound;
   static const int32_t kMessageTypeNotFound;
   static const int32_t kCorrelationIdNotFound;
 
-  typedef NsSmartDeviceLink::NsJSONHandler::Formatters::meta_formatter_error_code::tMetaFormatterErrorCode tMetaFormatterErrorCode;
+  typedef NsSmartDeviceLink::NsJSONHandler::Formatters::
+      meta_formatter_error_code::tMetaFormatterErrorCode
+          tMetaFormatterErrorCode;
 
   /**
    * @brief Creates a JSON string from a SmartObject.
@@ -128,7 +129,7 @@ class CFormatterJsonSDLRPCv1 : public CFormatterJsonBase {
    * @return true if success, false otherwise
    */
   static bool toString(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject &obj,
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject& obj,
       std::string& outStr);
 
   /**
@@ -138,15 +139,17 @@ class CFormatterJsonSDLRPCv1 : public CFormatterJsonBase {
    * @param out The resulting SmartObject
    * @return true if success, otherwise - false
    */
-  template<typename FunctionId, typename MessageType>
-  static int32_t fromString(const std::string &str,
-                        NsSmartDeviceLink::NsSmartObjects::SmartObject &out);
+  template <typename FunctionId, typename MessageType>
+  static int32_t fromString(
+      const std::string& str,
+      NsSmartDeviceLink::NsSmartObjects::SmartObject& out);
 
   /**
    * @brief Converts to string the smart object against the given schema
    *
    * @param object Original smart object
-   * @param schema Smart schema which describes 'fake' smart object to be formatted
+   * @param schema Smart schema which describes 'fake' smart object to be
+   *formatted
    * @param outStr Resulting JSON string
    * @return formatting error code
    */
@@ -154,12 +157,11 @@ class CFormatterJsonSDLRPCv1 : public CFormatterJsonBase {
       const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
       const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
       std::string& outStr);
-
 };
 
 // ----------------------------------------------------------------------------
 
-template<typename FunctionId, typename MessageType>
+template <typename FunctionId, typename MessageType>
 int32_t Formatters::CFormatterJsonSDLRPCv1::fromString(
     const std::string& str,
     NsSmartDeviceLink::NsSmartObjects::SmartObject& out) {
@@ -171,15 +173,15 @@ int32_t Formatters::CFormatterJsonSDLRPCv1::fromString(
     std::string type;
 
     if (false == reader.parse(str, root)) {
-      result = kParsingError | kMessageTypeNotFound | kFunctionIdNotFound
-          | kCorrelationIdNotFound;
+      result = kParsingError | kMessageTypeNotFound | kFunctionIdNotFound |
+               kCorrelationIdNotFound;
     }
 
     if (kSuccess == result) {
       type = getMessageType(root);
       if (true == type.empty()) {
-        result = kMessageTypeNotFound | kFunctionIdNotFound
-            | kCorrelationIdNotFound;
+        result =
+            kMessageTypeNotFound | kFunctionIdNotFound | kCorrelationIdNotFound;
       }
     }
 
@@ -187,16 +189,18 @@ int32_t Formatters::CFormatterJsonSDLRPCv1::fromString(
     MessageType messageType = MessageType::INVALID_ENUM;
 
     if (kSuccess == result) {
-      if (!NsSmartObjects::EnumConversionHelper<MessageType>::StringToEnum(type, &messageType)) {
-        // If MessageType is not found than FunctionId and CorrelationId can not be found either
-        result = kMessageTypeNotFound | kFunctionIdNotFound
-            | kCorrelationIdNotFound;
+      if (!NsSmartObjects::EnumConversionHelper<MessageType>::StringToEnum(
+              type, &messageType)) {
+        // If MessageType is not found than FunctionId and CorrelationId can not
+        // be found either
+        result =
+            kMessageTypeNotFound | kFunctionIdNotFound | kCorrelationIdNotFound;
       }
     }
 
     if (kSuccess == result) {
-      if (!NsSmartObjects::EnumConversionHelper<FunctionId>::StringToEnum(root[type][S_NAME].asString(),
-                                          &functionId)) {
+      if (!NsSmartObjects::EnumConversionHelper<FunctionId>::StringToEnum(
+              root[type][S_NAME].asString(), &functionId)) {
         result = kFunctionIdNotFound;
         functionId = FunctionId::INVALID_ENUM;
       }
@@ -210,13 +214,14 @@ int32_t Formatters::CFormatterJsonSDLRPCv1::fromString(
       out[S::S_PARAMS][S::S_MESSAGE_TYPE] = messageType;
       out[S::S_PARAMS][S::S_FUNCTION_ID] = functionId;
       if (true == root[type][S_CORRELATION_ID].empty()) {
-        if (type != S_NOTIFICATION) {  // Notification may not have CorrelationId
+        if (type !=
+            S_NOTIFICATION) {  // Notification may not have CorrelationId
           result |= kCorrelationIdNotFound;
           out[S::S_PARAMS][S::S_CORRELATION_ID] = -1;
         }
       } else {
-        out[S::S_PARAMS][S::S_CORRELATION_ID] = root[type][S_CORRELATION_ID]
-            .asInt();
+        out[S::S_PARAMS][S::S_CORRELATION_ID] =
+            root[type][S_CORRELATION_ID].asInt();
       }
       out[S::S_PARAMS][S::S_PROTOCOL_TYPE] = 0;
       out[S::S_PARAMS][S::S_PROTOCOL_VERSION] = 1;
@@ -227,9 +232,8 @@ int32_t Formatters::CFormatterJsonSDLRPCv1::fromString(
 
   return result;
 }
-
 }
 }
 }  // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
 
-#endif // __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV1_HPP__
+#endif  // __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV1_HPP__

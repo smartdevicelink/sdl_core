@@ -43,26 +43,26 @@ namespace commands {
  * @brief OnSDLConsentNeededNotification command class
  **/
 class OnSDLConsentNeededNotification : public NotificationToHMI {
-  public:
-    /**
-     * @brief OnSDLConsentNeededNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnSDLConsentNeededNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnSDLConsentNeededNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnSDLConsentNeededNotification(const MessageSharedPtr& message);
 
-    /**
-     * @brief OnSDLConsentNeededNotification class destructor
-     **/
-    virtual ~OnSDLConsentNeededNotification();
+  /**
+   * @brief OnSDLConsentNeededNotification class destructor
+   **/
+  virtual ~OnSDLConsentNeededNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnSDLConsentNeededNotification);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnSDLConsentNeededNotification);
 };
 
 }  // namespace commands

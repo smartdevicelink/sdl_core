@@ -37,11 +37,9 @@ namespace application_manager {
 namespace commands {
 
 NaviIsReadyResponse::NaviIsReadyResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-NaviIsReadyResponse::~NaviIsReadyResponse() {
-}
+NaviIsReadyResponse::~NaviIsReadyResponse() {}
 
 void NaviIsReadyResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

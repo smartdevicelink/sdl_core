@@ -36,12 +36,10 @@
 namespace application_manager {
 namespace commands {
 
-GetUrlsResponse::GetUrlsResponse(
-  const MessageSharedPtr& message): ResponseToHMI(message) {
-}
+GetUrlsResponse::GetUrlsResponse(const MessageSharedPtr& message)
+    : ResponseToHMI(message) {}
 
-GetUrlsResponse::~GetUrlsResponse() {
-}
+GetUrlsResponse::~GetUrlsResponse() {}
 
 void GetUrlsResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

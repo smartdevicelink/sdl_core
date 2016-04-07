@@ -92,8 +92,8 @@ void SDLActivateAppRequest::Run() {
   } else {
     const uint32_t application_id = app_id();
     application_manager::ApplicationManagerImpl::instance()
-	->GetPolicyHandler().OnActivateApp(application_id,
-					   correlation_id());
+        ->GetPolicyHandler()
+        .OnActivateApp(application_id, correlation_id());
   }
 }
 
@@ -125,7 +125,8 @@ void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
         logger_, "Application not found by HMI app id: " << hmi_application_id);
     return;
   }
-  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler()
+  application_manager::ApplicationManagerImpl::instance()
+      ->GetPolicyHandler()
       .OnActivateApp(app->app_id(), correlation_id());
 }
 

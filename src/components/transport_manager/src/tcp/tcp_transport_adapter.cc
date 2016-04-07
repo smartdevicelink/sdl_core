@@ -58,8 +58,7 @@ TcpTransportAdapter::TcpTransportAdapter(const uint16_t port,
                            new TcpClientListener(this, port, true),
                            last_state) {}
 
-TcpTransportAdapter::~TcpTransportAdapter() {
-}
+TcpTransportAdapter::~TcpTransportAdapter() {}
 
 DeviceType TcpTransportAdapter::GetDeviceType() const {
   return TCP;
@@ -71,14 +70,14 @@ void TcpTransportAdapter::Store() const {
   Json::Value devices_dictionary;
   DeviceList device_ids = GetDeviceList();
   for (DeviceList::const_iterator i = device_ids.begin(); i != device_ids.end();
-      ++i) {
+       ++i) {
     DeviceUID device_id = *i;
     DeviceSptr device = FindDevice(device_id);
     if (!device) {  // device could have been disconnected
       continue;
     }
-    utils::SharedPtr<TcpDevice> tcp_device = DeviceSptr::static_pointer_cast<
-        TcpDevice>(device);
+    utils::SharedPtr<TcpDevice> tcp_device =
+        DeviceSptr::static_pointer_cast<TcpDevice>(device);
     Json::Value device_dictionary;
     device_dictionary["name"] = tcp_device->name();
     struct in_addr address;
@@ -87,7 +86,8 @@ void TcpTransportAdapter::Store() const {
     Json::Value applications_dictionary;
     ApplicationList app_ids = tcp_device->GetApplicationList();
     for (ApplicationList::const_iterator j = app_ids.begin();
-        j != app_ids.end(); ++j) {
+         j != app_ids.end();
+         ++j) {
       ApplicationHandle app_handle = *j;
       if (FindEstablishedConnection(tcp_device->unique_device_id(),
                                     app_handle)) {
@@ -118,7 +118,8 @@ bool TcpTransportAdapter::Restore() {
       last_state().dictionary["TransportManager"]["TcpAdapter"];
   const Json::Value devices_dictionary = tcp_adapter_dictionary["devices"];
   for (Json::Value::const_iterator i = devices_dictionary.begin();
-      i != devices_dictionary.end(); ++i) {
+       i != devices_dictionary.end();
+       ++i) {
     const Json::Value device_dictionary = *i;
     std::string name = device_dictionary["name"].asString();
     std::string address_record = device_dictionary["address"].asString();
@@ -129,7 +130,8 @@ bool TcpTransportAdapter::Restore() {
     const Json::Value applications_dictionary =
         device_dictionary["applications"];
     for (Json::Value::const_iterator j = applications_dictionary.begin();
-        j != applications_dictionary.end(); ++j) {
+         j != applications_dictionary.end();
+         ++j) {
       const Json::Value application_dictionary = *j;
       std::string port_record = application_dictionary["port"].asString();
       int port = atoi(port_record.c_str());
@@ -146,4 +148,3 @@ bool TcpTransportAdapter::Restore() {
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-

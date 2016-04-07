@@ -72,7 +72,6 @@ class AddCommandRequest : public CommandRequestImpl {
   void on_event(const event_engine::Event& event);
 
  private:
-
   /*
    * @brief Check if command name doesn't exist in application
    * Please see SDLAQ-CRS-407 for more information

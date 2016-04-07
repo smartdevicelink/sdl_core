@@ -39,11 +39,9 @@ namespace commands {
 
 OnVIVehicleDataNotification::OnVIVehicleDataNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnVIVehicleDataNotification::~OnVIVehicleDataNotification() {
-}
+OnVIVehicleDataNotification::~OnVIVehicleDataNotification() {}
 
 void OnVIVehicleDataNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,4 +56,3 @@ void OnVIVehicleDataNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

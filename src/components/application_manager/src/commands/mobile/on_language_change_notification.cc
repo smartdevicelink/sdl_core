@@ -39,11 +39,9 @@ namespace commands {
 
 OnLanguageChangeNotification::OnLanguageChangeNotification(
     const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {
-}
+    : CommandNotificationImpl(message) {}
 
-OnLanguageChangeNotification::~OnLanguageChangeNotification() {
-}
+OnLanguageChangeNotification::~OnLanguageChangeNotification() {}
 
 void OnLanguageChangeNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

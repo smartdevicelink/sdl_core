@@ -42,10 +42,10 @@ namespace hmi_message_handler_test {
 
 using hmi_message_handler::HMIMessageAdapter;
 
-class  MockHMIMessageHandler : public ::hmi_message_handler::HMIMessageHandler {
-  public:
-    MOCK_METHOD1(AddHMIMessageAdapter, void(HMIMessageAdapter* adapter));
-    MOCK_METHOD1(RemoveHMIMessageAdapter, void(HMIMessageAdapter* adapter));
+class MockHMIMessageHandler : public ::hmi_message_handler::HMIMessageHandler {
+ public:
+  MOCK_METHOD1(AddHMIMessageAdapter, void(HMIMessageAdapter* adapter));
+  MOCK_METHOD1(RemoveHMIMessageAdapter, void(HMIMessageAdapter* adapter));
 };
 }  // namespace hmi_message_handler_test
 }  // namespace components

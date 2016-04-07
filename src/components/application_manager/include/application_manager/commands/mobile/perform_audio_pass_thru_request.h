@@ -126,7 +126,7 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
    */
   void FinishTTSSpeak();
 
-  //flag display state of speak during perform audio pass thru
+  // flag display state of speak during perform audio pass thru
   bool is_active_tts_speak_;
   mobile_apis::Result::eType result_tts_speak_;
 

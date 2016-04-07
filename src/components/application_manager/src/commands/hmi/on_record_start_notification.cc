@@ -38,11 +38,10 @@ namespace application_manager {
 namespace commands {
 
 OnRecordStartdNotification::OnRecordStartdNotification(
-    const MessageSharedPtr& message) : NotificationToHMI(message) {
-}
+    const MessageSharedPtr& message)
+    : NotificationToHMI(message) {}
 
-OnRecordStartdNotification::~OnRecordStartdNotification() {
-}
+OnRecordStartdNotification::~OnRecordStartdNotification() {}
 
 void OnRecordStartdNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,4 +52,3 @@ void OnRecordStartdNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

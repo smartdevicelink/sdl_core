@@ -37,12 +37,10 @@ namespace application_manager {
 
 namespace commands {
 
-SDLActivateAppResponse::SDLActivateAppResponse(
-  const MessageSharedPtr& message): ResponseToHMI(message) {
-}
+SDLActivateAppResponse::SDLActivateAppResponse(const MessageSharedPtr& message)
+    : ResponseToHMI(message) {}
 
-SDLActivateAppResponse::~SDLActivateAppResponse() {
-}
+SDLActivateAppResponse::~SDLActivateAppResponse() {}
 
 void SDLActivateAppResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -54,5 +52,3 @@ void SDLActivateAppResponse::Run() {
 
 }  // namespace commands
 }  // namespace application_manager
-
-

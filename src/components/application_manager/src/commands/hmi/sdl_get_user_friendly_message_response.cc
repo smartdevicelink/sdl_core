@@ -38,11 +38,10 @@ namespace application_manager {
 namespace commands {
 
 SDLGetUserFriendlyMessageResponse::SDLGetUserFriendlyMessageResponse(
-  const MessageSharedPtr& message): ResponseToHMI(message) {
-}
+    const MessageSharedPtr& message)
+    : ResponseToHMI(message) {}
 
-SDLGetUserFriendlyMessageResponse::~SDLGetUserFriendlyMessageResponse() {
-}
+SDLGetUserFriendlyMessageResponse::~SDLGetUserFriendlyMessageResponse() {}
 
 void SDLGetUserFriendlyMessageResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -54,5 +53,3 @@ void SDLGetUserFriendlyMessageResponse::Run() {
 
 }  // namespace commands
 }  // namespace application_manager
-
-

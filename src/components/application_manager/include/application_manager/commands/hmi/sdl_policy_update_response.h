@@ -40,26 +40,26 @@ namespace application_manager {
 namespace commands {
 
 class SDLPolicyUpdateResponse : public ResponseFromHMI {
-  public:
-    /**
-     * @brief SDLPolicyUpdateResponse class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit SDLPolicyUpdateResponse(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief SDLPolicyUpdateResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit SDLPolicyUpdateResponse(const MessageSharedPtr& message);
 
-    /**
-     * @brief SDLPolicyUpdateResponse class destructor
-     **/
-    virtual ~SDLPolicyUpdateResponse();
+  /**
+   * @brief SDLPolicyUpdateResponse class destructor
+   **/
+  virtual ~SDLPolicyUpdateResponse();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(SDLPolicyUpdateResponse);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(SDLPolicyUpdateResponse);
 };
 
 }  // namespace commands

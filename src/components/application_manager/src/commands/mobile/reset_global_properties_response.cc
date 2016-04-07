@@ -40,11 +40,9 @@ namespace commands {
 
 ResetGlobalPropertiesResponse::ResetGlobalPropertiesResponse(
     const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    : CommandResponseImpl(message) {}
 
-ResetGlobalPropertiesResponse::~ResetGlobalPropertiesResponse() {
-}
+ResetGlobalPropertiesResponse::~ResetGlobalPropertiesResponse() {}
 
 void ResetGlobalPropertiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

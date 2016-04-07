@@ -49,10 +49,7 @@ class SetAppIconRequest : public CommandRequestImpl {
   /**
    * @brief Contains information about the type of image
    */
-  typedef enum {
-    STATIC = 0,
-    DYNAMIC
-  } ImageType;
+  typedef enum { STATIC = 0, DYNAMIC } ImageType;
 
   /**
    * @brief SetIconRequest class constructor
@@ -101,7 +98,7 @@ class SetAppIconRequest : public CommandRequestImpl {
   bool IsEnoughSpaceForIcon(const uint64_t icon_size) const;
   DISALLOW_COPY_AND_ASSIGN(SetAppIconRequest);
 
-private:
+ private:
   /**
    * @brief Checks, if icons saving to configured folder is enabled
    */

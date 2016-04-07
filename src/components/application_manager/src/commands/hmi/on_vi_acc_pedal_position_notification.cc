@@ -39,11 +39,9 @@ namespace commands {
 
 OnVIAccPedalPositionNotification::OnVIAccPedalPositionNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnVIAccPedalPositionNotification::~OnVIAccPedalPositionNotification() {
-}
+OnVIAccPedalPositionNotification::~OnVIAccPedalPositionNotification() {}
 
 void OnVIAccPedalPositionNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,4 +56,3 @@ void OnVIAccPedalPositionNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

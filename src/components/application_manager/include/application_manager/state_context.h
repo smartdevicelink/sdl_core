@@ -37,39 +37,37 @@
 
 namespace application_manager {
 /**
-* @brief The StateContext implement acessing to data, that is required by HmiState
+* @brief The StateContext implement acessing to data, that is required by
+* HmiState
 */
 class StateContext {
-  public:
+ public:
+  /**
+   * @brief is_navi_app check if app is navi
+   * @param app_id application id
+   * @return true if app is navi, otherwise return false
+   */
+  bool is_navi_app(const uint32_t app_id) const;
 
-    /**
-     * @brief is_navi_app check if app is navi
-     * @param app_id application id
-     * @return true if app is navi, otherwise return false
-     */
-    bool is_navi_app(const uint32_t app_id) const;
+  /**
+   * @brief is_meida_app check if app is is meida
+   * @param app_id application id
+   * @return @return true if meida_app, otherwise return false
+   */
+  bool is_meida_app(const uint32_t app_id) const;
 
-    /**
-     * @brief is_meida_app check if app is is meida
-     * @param app_id application id
-     * @return @return true if meida_app, otherwise return false
-     */
-    bool is_meida_app(const uint32_t app_id) const;
+  /**
+   * @brief is_voice_comunication_app check if app is voice comunication
+   * @param app_id application id
+   * @return @return true if voice_comunication_app, otherwise return false
+   */
+  bool is_voice_comunication_app(const uint32_t app_id) const;
 
-    /**
-     * @brief is_voice_comunication_app check if app is voice comunication
-     * @param app_id application id
-     * @return @return true if voice_comunication_app, otherwise return false
-     */
-    bool is_voice_comunication_app(const uint32_t app_id) const;
-
-    /**
-     * @brief is_attenuated_supported check if HMI support attenuated mode
-     * @return true if supported, otherwise return false
-     */
-    bool is_attenuated_supported() const;
+  /**
+   * @brief is_attenuated_supported check if HMI support attenuated mode
+   * @return true if supported, otherwise return false
+   */
+  bool is_attenuated_supported() const;
 };
-
 }
-#endif // STATE_CONTEXT_H
-
+#endif  // STATE_CONTEXT_H

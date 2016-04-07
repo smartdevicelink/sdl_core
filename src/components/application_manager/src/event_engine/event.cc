@@ -36,13 +36,9 @@
 namespace application_manager {
 namespace event_engine {
 
-Event::Event(const EventID& id)
-: id_(id)
-, response_so_() {
-}
+Event::Event(const EventID& id) : id_(id), response_so_() {}
 
-Event::~Event() {
-}
+Event::~Event() {}
 
 void Event::raise() {
   EventDispatcherImpl::instance()->raise_event(*this);

@@ -222,10 +222,11 @@ class TransportAdapterListenerImpl
    * @param app_id Handle of application.
    * @param data_container Smart pointer to the raw message.
    */
-  virtual void OnDataReceiveDone(const TransportAdapter* adapter,
-                                 const DeviceUID& device,
-                                 const ApplicationHandle& app_id,
-                                 const ::protocol_handler::RawMessagePtr data_container);
+  virtual void OnDataReceiveDone(
+      const TransportAdapter* adapter,
+      const DeviceUID& device,
+      const ApplicationHandle& app_id,
+      const ::protocol_handler::RawMessagePtr data_container);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers
@@ -253,21 +254,23 @@ class TransportAdapterListenerImpl
    * @param app_id Handle of application.
    * @param data_container Smart pointer to the raw message.
    */
-  virtual void OnDataSendDone(const TransportAdapter* adapter,
-                              const DeviceUID& device,
-                              const ApplicationHandle& app_id,
-                              const ::protocol_handler::RawMessagePtr data_container);
+  virtual void OnDataSendDone(
+      const TransportAdapter* adapter,
+      const DeviceUID& device,
+      const ApplicationHandle& app_id,
+      const ::protocol_handler::RawMessagePtr data_container);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers
    * to device adapters to be sure it is available, create data send error,
    * launch event ON_SEND_FAIL in transport manager.
    */
-  virtual void OnDataSendFailed(const TransportAdapter* adapter,
-                                const DeviceUID& device,
-                                const ApplicationHandle& app_id,
-                                const ::protocol_handler::RawMessagePtr data_container,
-                                const DataSendError& error);
+  virtual void OnDataSendFailed(
+      const TransportAdapter* adapter,
+      const DeviceUID& device,
+      const ApplicationHandle& app_id,
+      const ::protocol_handler::RawMessagePtr data_container,
+      const DataSendError& error);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers

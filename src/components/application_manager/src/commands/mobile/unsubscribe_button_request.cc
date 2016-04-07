@@ -43,11 +43,9 @@ namespace str = strings;
 
 UnsubscribeButtonRequest::UnsubscribeButtonRequest(
     const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+    : CommandRequestImpl(message) {}
 
-UnsubscribeButtonRequest::~UnsubscribeButtonRequest() {
-}
+UnsubscribeButtonRequest::~UnsubscribeButtonRequest() {}
 
 void UnsubscribeButtonRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -64,13 +62,15 @@ void UnsubscribeButtonRequest::Run() {
   const uint32_t btn_id =
       (*message_)[str::msg_params][str::button_name].asUInt();
 
-  if (!app->IsSubscribedToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id))) {
+  if (!app->IsSubscribedToButton(
+          static_cast<mobile_apis::ButtonName::eType>(btn_id))) {
     LOG4CXX_ERROR(logger_, "App doesn't subscibe to button " << btn_id);
     SendResponse(false, mobile_apis::Result::IGNORED);
     return;
   }
 
-  app->UnsubscribeFromButton(static_cast<mobile_apis::ButtonName::eType>(btn_id));
+  app->UnsubscribeFromButton(
+      static_cast<mobile_apis::ButtonName::eType>(btn_id));
 
   SendUnsubscribeButtonNotification();
   const bool is_succedeed = true;

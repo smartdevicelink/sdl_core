@@ -63,7 +63,6 @@ class OnSystemRequestNotification : public NotificationFromHMI {
   virtual void Run();
 
  private:
-
   DISALLOW_COPY_AND_ASSIGN(OnSystemRequestNotification);
 };
 

@@ -39,11 +39,9 @@ namespace application_manager {
 namespace commands {
 
 SliderResponse::SliderResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    : CommandResponseImpl(message) {}
 
-SliderResponse::~SliderResponse() {
-}
+SliderResponse::~SliderResponse() {}
 
 void SliderResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

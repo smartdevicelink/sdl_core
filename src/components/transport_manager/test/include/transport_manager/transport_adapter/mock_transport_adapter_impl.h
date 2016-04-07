@@ -52,20 +52,23 @@ namespace transport_manager_test {
 class MockTransportAdapterImpl : public TransportAdapterImpl {
  public:
   MockTransportAdapterImpl(DeviceScanner* device_scanner,
-                       ServerConnectionFactory* server_connection_factory,
-                       ClientConnectionListener* client_connection_listener,
-                       resumption::LastState& last_state)
-      : TransportAdapterImpl(device_scanner, server_connection_factory,
-                             client_connection_listener,last_state) {
-  }
+                           ServerConnectionFactory* server_connection_factory,
+                           ClientConnectionListener* client_connection_listener,
+                           resumption::LastState& last_state)
+      : TransportAdapterImpl(device_scanner,
+                             server_connection_factory,
+                             client_connection_listener,
+                             last_state) {}
 
   ConnectionSPtr FindStatedConnection(const DeviceUID& device_handle,
-                                        const ApplicationHandle& app_handle) {
+                                      const ApplicationHandle& app_handle) {
     return this->FindEstablishedConnection(device_handle, app_handle);
   }
   virtual ~MockTransportAdapterImpl(){};
 
-  virtual DeviceType GetDeviceType() const { return UNKNOWN; }
+  virtual DeviceType GetDeviceType() const {
+    return UNKNOWN;
+  }
 
   MOCK_CONST_METHOD0(Store, void());
   MOCK_METHOD0(Restore, bool());

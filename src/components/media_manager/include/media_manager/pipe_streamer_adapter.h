@@ -41,8 +41,8 @@ namespace media_manager {
 
 class PipeStreamerAdapter : public StreamerAdapter {
  public:
-  PipeStreamerAdapter(
-      const std::string& named_pipe_path, const std::string& app_storage_folder);
+  PipeStreamerAdapter(const std::string& named_pipe_path,
+                      const std::string& app_storage_folder);
   virtual ~PipeStreamerAdapter();
 
  protected:
@@ -61,7 +61,7 @@ class PipeStreamerAdapter : public StreamerAdapter {
    private:
     std::string named_pipe_path_;
     std::string app_storage_folder_;
-    int32_t     pipe_fd_;
+    int32_t pipe_fd_;
   };
 };
 

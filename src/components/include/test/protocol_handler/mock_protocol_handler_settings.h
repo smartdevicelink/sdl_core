@@ -39,33 +39,22 @@ namespace test {
 namespace components {
 namespace protocol_handler_test {
 
-class MockProtocolHandlerSettings : public protocol_handler::ProtocolHandlerSettings {
+class MockProtocolHandlerSettings
+    : public protocol_handler::ProtocolHandlerSettings {
  public:
-  MOCK_CONST_METHOD0(maximum_payload_size,
-      size_t());
-  MOCK_CONST_METHOD0(message_frequency_count,
-      size_t());
-  MOCK_CONST_METHOD0(message_frequency_time,
-      size_t());
-  MOCK_CONST_METHOD0(malformed_message_filtering,
-      bool());
-  MOCK_CONST_METHOD0(malformed_frequency_count,
-      size_t());
-  MOCK_CONST_METHOD0(malformed_frequency_time,
-      size_t());
-  MOCK_CONST_METHOD0(heart_beat_timeout,
-      uint32_t());
-  MOCK_CONST_METHOD0(max_supported_protocol_version,
-      uint16_t());
-  MOCK_CONST_METHOD0(enable_protocol_4,
-      bool());
-  MOCK_CONST_METHOD0(multiframe_waiting_timeout,
-      uint32_t());
+  MOCK_CONST_METHOD0(maximum_payload_size, size_t());
+  MOCK_CONST_METHOD0(message_frequency_count, size_t());
+  MOCK_CONST_METHOD0(message_frequency_time, size_t());
+  MOCK_CONST_METHOD0(malformed_message_filtering, bool());
+  MOCK_CONST_METHOD0(malformed_frequency_count, size_t());
+  MOCK_CONST_METHOD0(malformed_frequency_time, size_t());
+  MOCK_CONST_METHOD0(heart_beat_timeout, uint32_t());
+  MOCK_CONST_METHOD0(max_supported_protocol_version, uint16_t());
+  MOCK_CONST_METHOD0(enable_protocol_4, bool());
+  MOCK_CONST_METHOD0(multiframe_waiting_timeout, uint32_t());
 #ifdef ENABLE_SECURITY
-  MOCK_CONST_METHOD0(force_protected_service,
-      const std::vector<int>&());
-  MOCK_CONST_METHOD0(force_unprotected_service,
-      const std::vector<int>&());
+  MOCK_CONST_METHOD0(force_protected_service, const std::vector<int>&());
+  MOCK_CONST_METHOD0(force_unprotected_service, const std::vector<int>&());
 #endif
 };
 

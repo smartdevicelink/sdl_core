@@ -39,11 +39,9 @@ namespace commands {
 
 OnVIFuelLevelNotification::OnVIFuelLevelNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnVIFuelLevelNotification::~OnVIFuelLevelNotification() {
-}
+OnVIFuelLevelNotification::~OnVIFuelLevelNotification() {}
 
 void OnVIFuelLevelNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,4 +56,3 @@ void OnVIFuelLevelNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

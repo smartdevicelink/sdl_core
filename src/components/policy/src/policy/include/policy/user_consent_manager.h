@@ -35,9 +35,9 @@
 
 namespace policy {
 class UserConsentManager {
-  public:
-    UserConsentManager() {}
-    ~UserConsentManager() {}
+ public:
+  UserConsentManager() {}
+  ~UserConsentManager() {}
 };
 }  //  namespace policy
 

@@ -39,11 +39,9 @@ namespace commands {
 
 VRDeleteCommandResponse::VRDeleteCommandResponse(
     const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-VRDeleteCommandResponse::~VRDeleteCommandResponse() {
-}
+VRDeleteCommandResponse::~VRDeleteCommandResponse() {}
 
 void VRDeleteCommandResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

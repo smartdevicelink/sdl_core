@@ -52,7 +52,8 @@ namespace test {
 const int32_t connection_key_p1 = 1;
 const int32_t protocol_version_1 = 1;
 
-const std::string data_json("\"{\"menu\": {\"id\": \"file\",\"va"
+const std::string data_json(
+    "\"{\"menu\": {\"id\": \"file\",\"va"
     "lue\": \"File\",\"popup\": {\"menuitem\": [ {\"val"
     "ue\": \"New\", \"onclick\": \"CreateNe"
     "wDoc()\"}, {\"value\": \"Open\", \"oncli"
@@ -60,17 +61,15 @@ const std::string data_json("\"{\"menu\": {\"id\": \"file\",\"va"
     "ose\", \"onclick\": \"CloseDoc()\"}]}}}\"");
 
 const unsigned char binary[PROTOCOL_HEADER_V1_SIZE] = {
-    0x20, 0x00, 0x00, 0xf7,
-    0x00, 0x00, 0x00, 0x10 };
+    0x20, 0x00, 0x00, 0xf7, 0x00, 0x00, 0x00, 0x10};
 
 const unsigned char* data_v1 =
-    reinterpret_cast<const unsigned char*> (data_json.c_str());
+    reinterpret_cast<const unsigned char*>(data_json.c_str());
 
 TEST(MobileMessageHandlerTestV1Test,
      HandleIncomingMessageProtocolV1_SendJSONData_ExpectEqual) {
-  RawMessagePtr message =
-      utils::MakeShared<RawMessage>
-          (connection_key_p1, protocol_version_1, data_v1, data_json.length());
+  RawMessagePtr message = utils::MakeShared<RawMessage>(
+      connection_key_p1, protocol_version_1, data_v1, data_json.length());
 
   application_manager::Message* ptr =
       MobileMessageHandler::HandleIncomingMessageProtocol(message);
@@ -84,15 +83,13 @@ TEST(MobileMessageHandlerTestV1Test,
 
 TEST(MobileMessageHandlerTestV1Test,
      HandleIncomingMessageProtocolV1_SendBinaryJSONData_ExpectEqual) {
-
   std::string full_data(reinterpret_cast<const char*>(binary));
   full_data += data_json;
   const unsigned char* data_v1 =
-      reinterpret_cast<const unsigned char*> (full_data.c_str());
+      reinterpret_cast<const unsigned char*>(full_data.c_str());
 
-  RawMessagePtr message =
-      utils::MakeShared<RawMessage>
-          (connection_key_p1, protocol_version_1, data_v1, full_data.length());
+  RawMessagePtr message = utils::MakeShared<RawMessage>(
+      connection_key_p1, protocol_version_1, data_v1, full_data.length());
 
   application_manager::Message* ptr =
       MobileMessageHandler::HandleIncomingMessageProtocol(message);
@@ -106,12 +103,10 @@ TEST(MobileMessageHandlerTestV1Test,
 
 TEST(MobileMessageHandlerTestV1Test,
      HandleOutgoingMessageProtocol_SendMessage_ExpectEqual) {
-
   uint32_t connection_key = 1;
 
   MobileMessage message =
-      utils::MakeShared<Message>
-          (protocol_handler::MessagePriority::kDefault);
+      utils::MakeShared<Message>(protocol_handler::MessagePriority::kDefault);
 
   message->set_protocol_version(application_manager::ProtocolVersion::kV1);
   message->set_json_message(data_json);
@@ -124,7 +119,7 @@ TEST(MobileMessageHandlerTestV1Test,
 
   EXPECT_EQ(connection_key, ptr->connection_key());
   EXPECT_EQ(static_cast<uint32_t>(application_manager::ProtocolVersion::kV1),
-      ptr->protocol_version());
+            ptr->protocol_version());
 }
 
 }  // namespace test

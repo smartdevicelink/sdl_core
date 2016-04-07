@@ -43,7 +43,7 @@ namespace hmi_message_handler {
 
 class MockSubscriber {
  public:
-  MockSubscriber(const std::string &nameService, const std::string & path);
+  MockSubscriber(const std::string& nameService, const std::string& path);
   virtual ~MockSubscriber();
   virtual void Receive();
   bool Start();

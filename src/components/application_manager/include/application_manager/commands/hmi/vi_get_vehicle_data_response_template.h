@@ -42,7 +42,7 @@ namespace commands {
 /**
  * @brief VIGetVehicleDataResponseTemplate command class
  **/
-template<event_engine::Event::EventID eventID>
+template <event_engine::Event::EventID eventID>
 class VIGetVehicleDataResponseTemplate : public ResponseFromHMI {
  public:
   /**
@@ -51,8 +51,7 @@ class VIGetVehicleDataResponseTemplate : public ResponseFromHMI {
    * @param message Incoming SmartObject message
    **/
   explicit VIGetVehicleDataResponseTemplate(const MessageSharedPtr& message)
-      : ResponseFromHMI(message) {
-  }
+      : ResponseFromHMI(message) {}
 
   /**
    * @brief Execute command

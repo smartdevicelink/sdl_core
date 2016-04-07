@@ -45,8 +45,8 @@ namespace commands {
 /**
  * @brief OnHMIStatusNotificationFromMobile class
  **/
-class OnHMIStatusNotificationFromMobile :
-        public CommandNotificationFromMobileImpl {
+class OnHMIStatusNotificationFromMobile
+    : public CommandNotificationFromMobileImpl {
  public:
   /**
    * @brief OnHMIStatusNotificationFromMobile class constructor
@@ -65,7 +65,7 @@ class OnHMIStatusNotificationFromMobile :
    **/
   virtual void Run();
 
-private:
+ private:
   DISALLOW_COPY_AND_ASSIGN(OnHMIStatusNotificationFromMobile);
 };
 

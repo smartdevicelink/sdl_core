@@ -42,11 +42,11 @@ namespace event_engine {
 
 class MockEventObserver : public EventObserver {
  public:
-  MOCK_METHOD1(on_event, void(const application_manager::event_engine::Event& event));
+  MOCK_METHOD1(on_event,
+               void(const application_manager::event_engine::Event& event));
 };
 
 }  // namespace event_engine
 }  // namespace application_manager
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_MOCK_EVENT_OBSERVER_MOCK_H_
-
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_MOCK_EVENT_OBSERVER_MOCK_H_

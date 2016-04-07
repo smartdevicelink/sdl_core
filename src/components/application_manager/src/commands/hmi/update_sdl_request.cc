@@ -39,20 +39,19 @@ namespace application_manager {
 namespace commands {
 
 UpdateSDLRequest::UpdateSDLRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+    : RequestToHMI(message) {}
 
-UpdateSDLRequest::~UpdateSDLRequest() {
-}
+UpdateSDLRequest::~UpdateSDLRequest() {}
 
 void UpdateSDLRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().PTExchangeAtUserRequest(
-      (*message_)[strings::params][strings::correlation_id].asInt());
+  application_manager::ApplicationManagerImpl::instance()
+      ->GetPolicyHandler()
+      .PTExchangeAtUserRequest(
+          (*message_)[strings::params][strings::correlation_id].asInt());
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

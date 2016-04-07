@@ -45,7 +45,6 @@ namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 class Event {
  public:
-
   // Typedef for possible Event ID's from mobile_apis functionID enum
   typedef hmi_apis::FunctionID::eType EventID;
 
@@ -102,11 +101,9 @@ class Event {
   inline int32_t smart_object_type() const;
 
  protected:
-
  private:
-
-  EventID                        id_;
-  smart_objects::SmartObject     response_so_;
+  EventID id_;
+  smart_objects::SmartObject response_so_;
 
   /*
    * @brief Default constructor
@@ -127,18 +124,21 @@ const smart_objects::SmartObject& Event::smart_object() const {
 }
 
 int32_t Event::smart_object_function_id() const {
-  return response_so_.getElement(
-      strings::params).getElement(strings::function_id).asInt();
+  return response_so_.getElement(strings::params)
+      .getElement(strings::function_id)
+      .asInt();
 }
 
 int32_t Event::smart_object_correlation_id() const {
-  return response_so_.getElement(
-      strings::params).getElement(strings::correlation_id).asInt();
+  return response_so_.getElement(strings::params)
+      .getElement(strings::correlation_id)
+      .asInt();
 }
 
 int32_t Event::smart_object_type() const {
-  return response_so_.getElement(
-        strings::params).getElement(strings::message_type).asInt();
+  return response_so_.getElement(strings::params)
+      .getElement(strings::message_type)
+      .asInt();
 }
 
 }  // namespace event_engine

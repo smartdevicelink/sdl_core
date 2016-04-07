@@ -39,11 +39,9 @@ namespace commands {
 
 SDLGetListOfPermissionsRequest::SDLGetListOfPermissionsRequest(
     const MessageSharedPtr& message)
-    : RequestFromHMI(message) {
-}
+    : RequestFromHMI(message) {}
 
-SDLGetListOfPermissionsRequest::~SDLGetListOfPermissionsRequest() {
-}
+SDLGetListOfPermissionsRequest::~SDLGetListOfPermissionsRequest() {}
 
 void SDLGetListOfPermissionsRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -51,12 +49,12 @@ void SDLGetListOfPermissionsRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::app_id)) {
     connection_key = (*message_)[strings::msg_params][strings::app_id].asUInt();
   }
-  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnGetListOfPermissions(
-        connection_key,
-        (*message_)[strings::params][strings::correlation_id].asUInt());
+  application_manager::ApplicationManagerImpl::instance()
+      ->GetPolicyHandler()
+      .OnGetListOfPermissions(
+          connection_key,
+          (*message_)[strings::params][strings::correlation_id].asUInt());
 }
 
 }  // namespace commands
 }  // namespace application_manager
-
-

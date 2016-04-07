@@ -32,7 +32,7 @@
 
 #include "policy/policy_table.h"
 
-#  include "policy/sql_pt_representation.h"
+#include "policy/sql_pt_representation.h"
 
 #include "utils/logger.h"
 
@@ -40,13 +40,10 @@ namespace policy {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
-PolicyTable::PolicyTable()
-    : pt_data_(new SQLPTRepresentation()) {
-}
+PolicyTable::PolicyTable() : pt_data_(new SQLPTRepresentation()) {}
 
 PolicyTable::PolicyTable(utils::SharedPtr<PTRepresentation> pt_data)
-    : pt_data_(pt_data) {
-}
+    : pt_data_(pt_data) {}
 
 PolicyTable::~PolicyTable() {
   LOG4CXX_INFO(logger_, "Destroying policy table.");

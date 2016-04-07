@@ -38,11 +38,9 @@ namespace commands {
 
 UIGetCapabilitiesResponse::UIGetCapabilitiesResponse(
     const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-UIGetCapabilitiesResponse::~UIGetCapabilitiesResponse() {
-}
+UIGetCapabilitiesResponse::~UIGetCapabilitiesResponse() {}
 
 void UIGetCapabilitiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -83,7 +81,6 @@ void UIGetCapabilitiesResponse::Run() {
           msg_params[strings::hmi_capabilities][strings::phone_call].asBool());
     }
   }
-
 }
 
 }  // namespace commands

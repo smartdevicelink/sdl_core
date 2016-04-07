@@ -40,11 +40,9 @@ namespace commands {
 
 VRGetSupportedLanguagesResponse::VRGetSupportedLanguagesResponse(
     const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-VRGetSupportedLanguagesResponse::~VRGetSupportedLanguagesResponse() {
-}
+VRGetSupportedLanguagesResponse::~VRGetSupportedLanguagesResponse() {}
 
 void VRGetSupportedLanguagesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

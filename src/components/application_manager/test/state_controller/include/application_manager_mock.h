@@ -96,11 +96,12 @@ class ApplicationManagerMock : public application_manager::ApplicationManager {
                     am::commands::Command::CommandOrigin origin));
   MOCK_METHOD1(ManageHMICommand,
                bool(const smart_objects::SmartObjectSPtr message));
-  MOCK_CONST_METHOD2(CanAppStream, bool (uint32_t app_id,
-                                         protocol_handler::ServiceType service_type));
-  MOCK_METHOD1(ForbidStreaming, void (uint32_t app_id));
-  MOCK_METHOD2(SendAudioPassThroughNotification, void (uint32_t session_key,
-                                                       std::vector<uint8_t>& binary_data));
+  MOCK_CONST_METHOD2(CanAppStream,
+                     bool(uint32_t app_id,
+                          protocol_handler::ServiceType service_type));
+  MOCK_METHOD1(ForbidStreaming, void(uint32_t app_id));
+  MOCK_METHOD2(SendAudioPassThroughNotification,
+               void(uint32_t session_key, std::vector<uint8_t>& binary_data));
   MOCK_CONST_METHOD0(connection_handler,
                      connection_handler::ConnectionHandler&());
 };

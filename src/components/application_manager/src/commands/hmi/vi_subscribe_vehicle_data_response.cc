@@ -38,17 +38,14 @@ namespace commands {
 
 VISubscribeVehicleDataResponse::VISubscribeVehicleDataResponse(
     const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-VISubscribeVehicleDataResponse::~VISubscribeVehicleDataResponse() {
-}
+VISubscribeVehicleDataResponse::~VISubscribeVehicleDataResponse() {}
 
 void VISubscribeVehicleDataResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   event_engine::Event event(
-      hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData
-      );
+      hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData);
   event.set_smart_object(*message_);
   event.raise();
 }

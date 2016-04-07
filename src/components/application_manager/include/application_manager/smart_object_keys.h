@@ -146,7 +146,7 @@ const char start_time[] = "startTime";
 const char end_time[] = "endTime";
 const char hours[] = "hours";
 const char minutes[] = "minutes";
-const char seconds [] = "seconds";
+const char seconds[] = "seconds";
 const char update_mode[] = "updateMode";
 const char trigger_source[] = "triggerSource";
 const char hmi_level[] = "hmiLevel";
@@ -250,7 +250,7 @@ const char sdl_version[] = "sdlVersion";
 const char system_software_version[] = "systemSoftwareVersion";
 const char priority[] = "priority";
 
-//resuming
+// resuming
 const char application_commands[] = "applicationCommands";
 const char application_submenus[] = "applicationSubMenus";
 const char application_choice_sets[] = "applicationChoiceSets";
@@ -301,7 +301,7 @@ const char default_[] = "default";
 const char languages[] = "languages";
 const char ttsName[] = "ttsName";
 const char vrSynonyms[] = "vrSynonyms";
-} // namespace json
+}  // namespace json
 
 namespace http_request {
 const char httpRequest[] = "HTTPRequest";
@@ -317,7 +317,7 @@ const char instance_follow_redirect[] = "InstanceFollowRedirect";
 const char charset[] = "charset";
 const char content_lenght[] = "Content_Lenght";
 const char GET[] = "GET";
-} // http_request
+}  // http_request
 
 namespace mobile_notification {
 const char state[] = "state";

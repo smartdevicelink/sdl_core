@@ -38,11 +38,9 @@ namespace commands {
 
 VISubscribeVehicleDataRequest::VISubscribeVehicleDataRequest(
     const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+    : RequestToHMI(message) {}
 
-VISubscribeVehicleDataRequest::~VISubscribeVehicleDataRequest() {
-}
+VISubscribeVehicleDataRequest::~VISubscribeVehicleDataRequest() {}
 
 void VISubscribeVehicleDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,4 +51,3 @@ void VISubscribeVehicleDataRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

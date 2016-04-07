@@ -43,26 +43,26 @@ namespace commands {
  * @brief UpdateDeviceListResponse command class
  **/
 class UpdateDeviceListResponse : public ResponseFromHMI {
-  public:
-    /**
-     * @brief UpdateDeviceListResponse class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit UpdateDeviceListResponse(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief UpdateDeviceListResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit UpdateDeviceListResponse(const MessageSharedPtr& message);
 
-    /**
-     * @brief UpdateDeviceListResponse class destructor
-     **/
-    virtual ~UpdateDeviceListResponse();
+  /**
+   * @brief UpdateDeviceListResponse class destructor
+   **/
+  virtual ~UpdateDeviceListResponse();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(UpdateDeviceListResponse);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(UpdateDeviceListResponse);
 };
 
 }  // namespace commands

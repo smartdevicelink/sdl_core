@@ -41,11 +41,9 @@ namespace commands {
 
 ShowConstantTBTResponse::ShowConstantTBTResponse(
     const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    : CommandResponseImpl(message) {}
 
-ShowConstantTBTResponse::~ShowConstantTBTResponse() {
-}
+ShowConstantTBTResponse::~ShowConstantTBTResponse() {}
 
 void ShowConstantTBTResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

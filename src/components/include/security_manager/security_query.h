@@ -51,19 +51,19 @@ class SecurityQuery {
    * Equal RPC Type (Ford Binary Header Definition)
    */
   enum QueryType {
-    REQUEST      = 0x00,
-    RESPONSE     = 0x10,
+    REQUEST = 0x00,
+    RESPONSE = 0x10,
     NOTIFICATION = 0x20,
     INVALID_QUERY_TYPE = 0xFF
-    };
+  };
   /**
    * \brief QueryId is 3 byte identifier of income query
    * Equal RPC Function ID (Ford Binary Header Definition)
    */
   enum QueryId {
-    SEND_HANDSHAKE_DATA      = 0x1,
-    SEND_INTERNAL_ERROR      = 0x2,
-    INVALID_QUERY_ID         = 0xFFFFFF
+    SEND_HANDSHAKE_DATA = 0x1,
+    SEND_INTERNAL_ERROR = 0x2,
+    INVALID_QUERY_ID = 0xFFFFFF
   };
   /**
    * \brief QueryHeader is 12 byte header of security query
@@ -71,12 +71,14 @@ class SecurityQuery {
    */
   struct QueryHeader {
     QueryHeader();
-    QueryHeader(uint8_t queryType, uint32_t queryId,
-                uint32_t seqNumber = 0, uint32_t jsonSize= 0);
+    QueryHeader(uint8_t queryType,
+                uint32_t queryId,
+                uint32_t seqNumber = 0,
+                uint32_t jsonSize = 0);
     // TODO(EZamakhov): check bitfield correctness on other endianness platform
-    uint32_t query_type:8;
-    uint32_t query_id:24;  // API function identifier
-    uint32_t seq_number;   // request sequential number
+    uint32_t query_type : 8;
+    uint32_t query_id : 24;  // API function identifier
+    uint32_t seq_number;     // request sequential number
     uint32_t json_size;
   };
 
@@ -86,19 +88,23 @@ class SecurityQuery {
   SecurityQuery();
   /**
    * \brief Constructor with header and connection_key
-   * \param connection_key Unique key used by other components as session identifier
+   * \param connection_key Unique key used by other components as session
+   * identifier
    * \param header QueryHeader
    */
-  SecurityQuery(const QueryHeader &header, const uint32_t connection_key);
+  SecurityQuery(const QueryHeader& header, const uint32_t connection_key);
   /**
    * \brief Constructor with header, connection_key and query binary data
-   * \param connection_key Unique key used by other components as session identifier
+   * \param connection_key Unique key used by other components as session
+   * identifier
    * \param raw_data pointer to binary data array
    * \param raw_data_size size of binary data array
    * \param header QueryHeader
    */
-  SecurityQuery(const QueryHeader &header, const uint32_t connection_key,
-                const uint8_t *const raw_data, const size_t raw_data_size);
+  SecurityQuery(const QueryHeader& header,
+                const uint32_t connection_key,
+                const uint8_t* const raw_data,
+                const size_t raw_data_size);
   /**
    * \brief Serialize income from Mobile Application data
    * as query with header and binary data or json message
@@ -106,7 +112,8 @@ class SecurityQuery {
    * \param raw_data_size size of binary data array
    * \return \c true on correct parse and \c false on wrong size of data
    */
-  bool SerializeQuery(const uint8_t *const raw_data, const size_t raw_data_size);
+  bool SerializeQuery(const uint8_t* const raw_data,
+                      const size_t raw_data_size);
   /**
    * \brief Deserialize query for sending to Mobile Application
    * \return \c vector of uint8_t data (serialized header data and send_data))
@@ -117,32 +124,33 @@ class SecurityQuery {
    * \param binary_data pointer to binary data array
    * \param bin_data_size size of binary data array
    */
-  void set_data(const uint8_t *const binary_data, const size_t bin_data_size);
+  void set_data(const uint8_t* const binary_data, const size_t bin_data_size);
   /**
    * \brief Set json data. (No header modification)
    * \param json_message string with json error
    */
-  void set_json_message(const std::string &json_message);
+  void set_json_message(const std::string& json_message);
   /**
    * \brief Set connection key
-   * \param connection_key Unique key used by other components as session identifier
+   * \param connection_key Unique key used by other components as session
+   * identifier
    */
   void set_connection_key(const uint32_t connection_key);
   /**
    * \brief Set query header
    * \param header of query
    */
-  void set_header(const QueryHeader &header);
+  void set_header(const QueryHeader& header);
   /**
    * \brief Get query header
    * \return header of query
    */
-  const QueryHeader &get_header() const;
+  const QueryHeader& get_header() const;
   /**
    * \brief Get query binary data (without header data)
    * \return const pointer to const binary data
    */
-  const uint8_t *get_data() const;
+  const uint8_t* get_data() const;
   /**
    * \brief Get query binary data size
    * \return size of binary data
@@ -152,7 +160,7 @@ class SecurityQuery {
    * \brief Get json string data (without header data)
    * \return const pointer to const binary data
    */
-  const std::string &get_json_message() const;
+  const std::string& get_json_message() const;
   /**
    * \brief Get connection key
    * \return Unique key used by other components as session identifier

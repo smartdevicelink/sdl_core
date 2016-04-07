@@ -83,7 +83,7 @@ class SubscribeVehicleDataRequest : public CommandRequestImpl {
 
   typedef std::vector<HmiRequest> HmiRequests;
   HmiRequests hmi_requests_;
-#endif // #ifdef HMI_DBUS_API
+#endif  // #ifdef HMI_DBUS_API
 
  private:
   /**

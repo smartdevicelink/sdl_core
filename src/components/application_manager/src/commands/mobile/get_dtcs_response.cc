@@ -39,11 +39,9 @@ namespace application_manager {
 namespace commands {
 
 GetDTCsResponse::GetDTCsResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    : CommandResponseImpl(message) {}
 
-GetDTCsResponse::~GetDTCsResponse() {
-}
+GetDTCsResponse::~GetDTCsResponse() {}
 
 void GetDTCsResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

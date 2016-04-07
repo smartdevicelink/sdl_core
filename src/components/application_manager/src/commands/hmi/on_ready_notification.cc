@@ -38,11 +38,9 @@ namespace application_manager {
 namespace commands {
 
 OnReadyNotification::OnReadyNotification(const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnReadyNotification::~OnReadyNotification() {
-}
+OnReadyNotification::~OnReadyNotification() {}
 
 void OnReadyNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -56,4 +54,3 @@ void OnReadyNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

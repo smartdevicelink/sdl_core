@@ -37,11 +37,9 @@ namespace application_manager {
 namespace commands {
 
 UIAddCommandRequest::UIAddCommandRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+    : RequestToHMI(message) {}
 
-UIAddCommandRequest::~UIAddCommandRequest() {
-}
+UIAddCommandRequest::~UIAddCommandRequest() {}
 
 void UIAddCommandRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,4 +50,3 @@ void UIAddCommandRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

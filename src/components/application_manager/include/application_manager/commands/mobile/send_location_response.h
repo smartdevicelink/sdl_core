@@ -36,7 +36,6 @@
 #include "application_manager/commands/command_response_impl.h"
 #include "application_manager/message.h"
 
-
 namespace application_manager {
 namespace commands {
 

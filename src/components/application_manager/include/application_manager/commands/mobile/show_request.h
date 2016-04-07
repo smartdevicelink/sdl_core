@@ -70,7 +70,6 @@ class ShowRequest : public CommandRequestImpl {
   virtual void on_event(const event_engine::Event& event);
 
  private:
-
   /*
    * @brief Check if all strings have valid syntax in request
    *

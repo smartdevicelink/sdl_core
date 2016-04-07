@@ -40,11 +40,9 @@ namespace commands {
 
 EndAudioPassThruResponse::EndAudioPassThruResponse(
     const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    : CommandResponseImpl(message) {}
 
-EndAudioPassThruResponse::~EndAudioPassThruResponse() {
-}
+EndAudioPassThruResponse::~EndAudioPassThruResponse() {}
 
 void EndAudioPassThruResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

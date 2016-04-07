@@ -47,18 +47,22 @@ void RegisterAppInterfaceResponse::Run() {
   mobile_apis::Result::eType result_code = mobile_apis::Result::SUCCESS;
   bool success = (*message_)[strings::msg_params][strings::success].asBool();
   bool last_message = !success;
-  // Do not close connection in case of APPLICATION_NOT_REGISTERED despite it is an error
-  if (!success && (*message_)[strings::msg_params].keyExists(strings::result_code)) {
+  // Do not close connection in case of APPLICATION_NOT_REGISTERED despite it is
+  // an error
+  if (!success &&
+      (*message_)[strings::msg_params].keyExists(strings::result_code)) {
     result_code = static_cast<mobile_apis::Result::eType>(
         (*message_)[strings::msg_params][strings::result_code].asInt());
-    if (result_code ==  mobile_apis::Result::APPLICATION_REGISTERED_ALREADY) {
+    if (result_code == mobile_apis::Result::APPLICATION_REGISTERED_ALREADY) {
       last_message = false;
     }
   }
 
   SendResponse(success, result_code, last_message);
 
-  if (mobile_apis::Result::SUCCESS != result_code) { return; }
+  if (mobile_apis::Result::SUCCESS != result_code) {
+    return;
+  }
 
   // Add registered application to the policy db right after response sent to
   // mobile to be able to check all other API according to app permissions
@@ -66,8 +70,9 @@ void RegisterAppInterfaceResponse::Run() {
       application_manager::ApplicationManagerImpl::instance()->application(
           connection_key());
   if (!application) {
-    LOG4CXX_ERROR(logger_, "Application with connection key "
-                  << connection_key() << " is not registered.");
+    LOG4CXX_ERROR(logger_,
+                  "Application with connection key " << connection_key()
+                                                     << " is not registered.");
     return;
   }
 
@@ -80,19 +85,22 @@ void RegisterAppInterfaceResponse::Run() {
   // Sends OnPermissionChange notification to mobile right after RAI response
   // and HMI level set-up
   application_manager::ApplicationManagerImpl::instance()
-      ->GetPolicyHandler().OnAppRegisteredOnMobile(application->mobile_app_id());
+      ->GetPolicyHandler()
+      .OnAppRegisteredOnMobile(application->mobile_app_id());
 }
 
 void RegisterAppInterfaceResponse::SetHeartBeatTimeout(
     uint32_t connection_key, const std::string& mobile_app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   const policy::PolicyHandlerInterface& policy_handler =
-      application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler();
+      application_manager::ApplicationManagerImpl::instance()
+          ->GetPolicyHandler();
   if (policy_handler.PolicyEnabled()) {
     const uint32_t timeout = policy_handler.HeartBeatTimeout(mobile_app_id);
     if (timeout > 0) {
-      application_manager::ApplicationManagerImpl::instance()->
-          connection_handler().SetHeartBeatTimeout(connection_key, timeout);
+      application_manager::ApplicationManagerImpl::instance()
+          ->connection_handler()
+          .SetHeartBeatTimeout(connection_key, timeout);
     }
   } else {
     LOG4CXX_INFO(logger_, "Policy is turn off");

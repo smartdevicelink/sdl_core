@@ -37,13 +37,10 @@ namespace application_manager {
 
 namespace commands {
 
-OnVIVinNotification::OnVIVinNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+OnVIVinNotification::OnVIVinNotification(const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {}
 
-OnVIVinNotification::~OnVIVinNotification() {
-}
+OnVIVinNotification::~OnVIVinNotification() {}
 
 void OnVIVinNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,4 +55,3 @@ void OnVIVinNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

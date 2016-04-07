@@ -36,12 +36,10 @@ namespace application_manager {
 
 namespace commands {
 
-OnSDLCloseNotification::OnSDLCloseNotification(
-    const MessageSharedPtr& message) : NotificationToHMI(message) {
-}
+OnSDLCloseNotification::OnSDLCloseNotification(const MessageSharedPtr& message)
+    : NotificationToHMI(message) {}
 
-OnSDLCloseNotification::~OnSDLCloseNotification() {
-}
+OnSDLCloseNotification::~OnSDLCloseNotification() {}
 
 void OnSDLCloseNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,4 +50,3 @@ void OnSDLCloseNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

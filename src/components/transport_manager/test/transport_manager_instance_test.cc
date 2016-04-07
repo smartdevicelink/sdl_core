@@ -31,12 +31,14 @@
  */
 
 /*
-    Tests transport manager functionality with single device adapter that behaves correctly and single client
+    Tests transport manager functionality with single device adapter that
+   behaves correctly and single client
     Following sequence is tested:
         - TM created and runned
         - TM client registered as listener
         - TM client requests device scaning
-        - single device was returned to TM client with onDeviceListUpdated callback
+        - single device was returned to TM client with onDeviceListUpdated
+   callback
         - TM client calls "connect" on found device
         - device adapter sends onApplicationConnected
         - TM client receives onApplicationConnected
@@ -61,13 +63,12 @@
 #include "../include/transport_manager/transport_manager_default.h"
 #include "../../connection_handler/include/connection_handler/connection_handler.h"
 
-
-namespace test{
+namespace test {
 namespace test_transport_manager_instance {
-TEST(test_transport_manager_instance, test_transport_manager_instance)
-{
-  transport_manager::TransportManager *Instance = transport_manager::TransportManagerDefault::instance();
+TEST(test_transport_manager_instance, test_transport_manager_instance) {
+  transport_manager::TransportManager* Instance =
+      transport_manager::TransportManagerDefault::instance();
   ASSERT_EQ(Instance, transport_manager::TransportManagerDefault::instance());
 }
-
-}}
+}
+}

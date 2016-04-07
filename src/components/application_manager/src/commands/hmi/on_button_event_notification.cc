@@ -42,8 +42,8 @@ namespace commands {
 namespace hmi {
 
 OnButtonEventNotification::OnButtonEventNotification(
-    const MessageSharedPtr& message) : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {}
 
 void OnButtonEventNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -59,4 +59,3 @@ void OnButtonEventNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

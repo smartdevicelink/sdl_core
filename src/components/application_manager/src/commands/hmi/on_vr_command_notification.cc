@@ -44,28 +44,25 @@ namespace commands {
 
 OnVRCommandNotification::OnVRCommandNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnVRCommandNotification::~OnVRCommandNotification() {
-}
+OnVRCommandNotification::~OnVRCommandNotification() {}
 
 void OnVRCommandNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr active_app = ApplicationManagerImpl::instance()
-      ->active_application();
-  const uint32_t cmd_id = (*message_)[strings::msg_params][strings::cmd_id]
-      .asUInt();
+  ApplicationSharedPtr active_app =
+      ApplicationManagerImpl::instance()->active_application();
+  const uint32_t cmd_id =
+      (*message_)[strings::msg_params][strings::cmd_id].asUInt();
   uint32_t max_cmd_id = profile::Profile::instance()->max_cmd_id();
 
   // Check if this is one of standart VR commands (i.e. "Help")
   if (cmd_id > max_cmd_id + 1) {
     LOG4CXX_INFO(logger_, "Switched App");
     const uint32_t app_id = cmd_id - max_cmd_id;
-    ApplicationManagerImpl::instance()->SetState<true>(app_id,
-                                                 mobile_apis::HMILevel::HMI_FULL
-                                                 );
+    ApplicationManagerImpl::instance()->SetState<true>(
+        app_id, mobile_apis::HMILevel::HMI_FULL);
     return;
   }
 
@@ -73,9 +70,10 @@ void OnVRCommandNotification::Run() {
   if (cmd_id == max_cmd_id + 1) {
     return;
   }
-  const uint32_t app_id = (*message_)[strings::msg_params][strings::app_id]
-      .asUInt();
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  const uint32_t app_id =
+      (*message_)[strings::msg_params][strings::app_id].asUInt();
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(app_id);
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
@@ -101,4 +99,3 @@ void OnVRCommandNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

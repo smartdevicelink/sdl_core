@@ -39,18 +39,17 @@ namespace commands {
 
 OnIgnitionCycleOverNotification::OnIgnitionCycleOverNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnIgnitionCycleOverNotification::~OnIgnitionCycleOverNotification() {
-}
+OnIgnitionCycleOverNotification::~OnIgnitionCycleOverNotification() {}
 
 void OnIgnitionCycleOverNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnIgnitionCycleOver();
+  application_manager::ApplicationManagerImpl::instance()
+      ->GetPolicyHandler()
+      .OnIgnitionCycleOver();
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

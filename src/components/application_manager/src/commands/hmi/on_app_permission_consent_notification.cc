@@ -81,8 +81,9 @@ void OnAppPermissionConsentNotification::Run() {
 
     permission_consent.consent_source = msg_params["source"].asString();
 
-    application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnAppPermissionConsent(connection_key,
-      permission_consent);
+    application_manager::ApplicationManagerImpl::instance()
+        ->GetPolicyHandler()
+        .OnAppPermissionConsent(connection_key, permission_consent);
   }
 }
 

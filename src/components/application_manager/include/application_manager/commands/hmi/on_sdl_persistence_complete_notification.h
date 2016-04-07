@@ -43,26 +43,27 @@ namespace commands {
  * @brief OnSDLPersistenceCompleteNotification command class
  **/
 class OnSDLPersistenceCompleteNotification : public NotificationToHMI {
-  public:
-    /**
-     * @brief OnSDLPersistenceCompleteNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnSDLPersistenceCompleteNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnSDLPersistenceCompleteNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnSDLPersistenceCompleteNotification(
+      const MessageSharedPtr& message);
 
-    /**
-     * @brief OnSDLPersistenceCompleteNotification class destructor
-     **/
-    virtual ~OnSDLPersistenceCompleteNotification();
+  /**
+   * @brief OnSDLPersistenceCompleteNotification class destructor
+   **/
+  virtual ~OnSDLPersistenceCompleteNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnSDLPersistenceCompleteNotification);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnSDLPersistenceCompleteNotification);
 };
 
 }  // namespace commands

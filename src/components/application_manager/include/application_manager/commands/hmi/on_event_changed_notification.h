@@ -43,26 +43,26 @@ namespace commands {
  * @brief OnEventChangedNotification command class
  **/
 class OnEventChangedNotification : public NotificationFromHMI {
-  public:
-    /**
-     * @brief OnEventChangedNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit OnEventChangedNotification(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief OnEventChangedNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit OnEventChangedNotification(const MessageSharedPtr& message);
 
-    /**
-     * @brief OnEventChangedNotification class destructor
-     **/
-    virtual ~OnEventChangedNotification();
+  /**
+   * @brief OnEventChangedNotification class destructor
+   **/
+  virtual ~OnEventChangedNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnEventChangedNotification);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnEventChangedNotification);
 };
 
 }  // namespace commands

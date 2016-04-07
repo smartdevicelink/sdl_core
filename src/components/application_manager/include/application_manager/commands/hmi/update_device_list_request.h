@@ -73,14 +73,14 @@ class UpdateDeviceListRequest : public RequestToHMI,
    */
   virtual void on_event(const event_engine::Event& event);
 
- /**
-  * @brief Need to stop execution StopMethod if HMI did not started
-  */
+  /**
+   * @brief Need to stop execution StopMethod if HMI did not started
+   */
   virtual bool CleanUp();
 
  private:
-  sync_primitives::Lock                            wait_hmi_lock;
-  sync_primitives::ConditionalVariable             termination_condition_;
+  sync_primitives::Lock wait_hmi_lock;
+  sync_primitives::ConditionalVariable termination_condition_;
 
   DISALLOW_COPY_AND_ASSIGN(UpdateDeviceListRequest);
 };

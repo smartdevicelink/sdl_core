@@ -41,7 +41,6 @@
 #include "transport_manager/mock_transport_manager.h"
 #include "telemetry_monitor/mock_telemetry_observable.h"
 
-
 using testing::Return;
 using testing::_;
 
@@ -53,11 +52,10 @@ using namespace telemetry_monitor;
 
 class StreamerMock : public Streamer {
  public:
-  StreamerMock(TelemetryMonitor* const server)
-      : Streamer(server) {
+  StreamerMock(TelemetryMonitor* const server) : Streamer(server) {
     is_client_connected_ = true;
   }
-  MOCK_METHOD1(PushMessage,void(utils::SharedPtr<MetricWrapper> metric));
+  MOCK_METHOD1(PushMessage, void(utils::SharedPtr<MetricWrapper> metric));
 };
 
 TEST(TelemetryMonitorTest, MessageProcess) {
@@ -65,14 +63,14 @@ TEST(TelemetryMonitorTest, MessageProcess) {
   const uint16_t port = 12345;
   MockTelemetryObservable am_observeble;
 
-   transport_manager_test::MockTransportManager transport_manager_mock;
-   testing::NiceMock<connection_handler_test::MockConnectionHandler>
-       connection_handler_mock;
+  transport_manager_test::MockTransportManager transport_manager_mock;
+  testing::NiceMock<connection_handler_test::MockConnectionHandler>
+      connection_handler_mock;
   testing::NiceMock<
       ::test::components::protocol_handler_test::MockProtocolHandlerSettings>
-       protocol_handler_settings_mock;
-   ::test::components::protocol_handler_test::MockSessionObserver
-       session_observer_mock;
+      protocol_handler_settings_mock;
+  ::test::components::protocol_handler_test::MockSessionObserver
+      session_observer_mock;
 
   const size_t init_value = 1000u;
   ON_CALL(protocol_handler_settings_mock, maximum_payload_size())
@@ -83,9 +81,11 @@ TEST(TelemetryMonitorTest, MessageProcess) {
       .WillByDefault(Return(init_value));
   ON_CALL(protocol_handler_settings_mock, multiframe_waiting_timeout())
       .WillByDefault(Return(init_value));
-   protocol_handler::ProtocolHandlerImpl protocol_handler_mock(
-      protocol_handler_settings_mock, session_observer_mock,
-      connection_handler_mock, transport_manager_mock);
+  protocol_handler::ProtocolHandlerImpl protocol_handler_mock(
+      protocol_handler_settings_mock,
+      session_observer_mock,
+      connection_handler_mock,
+      transport_manager_mock);
 
   EXPECT_CALL(am_observeble, SetTelemetryObserver(_));
   EXPECT_CALL(transport_manager_mock, SetTelemetryObserver(_));
@@ -94,8 +94,8 @@ TEST(TelemetryMonitorTest, MessageProcess) {
   telemetry_monitor.Start();
 
   telemetry_monitor.set_streamer(&streamer_mock);
-  telemetry_monitor.Init(&protocol_handler_mock, &am_observeble,
-                           &transport_manager_mock);
+  telemetry_monitor.Init(
+      &protocol_handler_mock, &am_observeble, &transport_manager_mock);
   utils::SharedPtr<telemetry_monitor::MetricWrapper> test_metric;
   EXPECT_CALL(streamer_mock, PushMessage(test_metric));
   telemetry_monitor.SendMetric(test_metric);

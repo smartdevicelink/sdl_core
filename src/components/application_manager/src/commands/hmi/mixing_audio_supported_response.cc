@@ -37,19 +37,19 @@ namespace application_manager {
 namespace commands {
 
 MixingAudioSupportedResponse::MixingAudioSupportedResponse(
-  const MessageSharedPtr& message) : ResponseFromHMI(message) {
-}
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {}
 
-MixingAudioSupportedResponse::~MixingAudioSupportedResponse() {
-}
+MixingAudioSupportedResponse::~MixingAudioSupportedResponse() {}
 
 void MixingAudioSupportedResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   HMICapabilities& hmi_capabilities =
       ApplicationManagerImpl::instance()->hmi_capabilities();
-  hmi_capabilities.set_attenuated_supported((*message_)
-      [strings::msg_params][hmi_response::attenuated_supported].asBool());
+  hmi_capabilities.set_attenuated_supported(
+      (*message_)[strings::msg_params][hmi_response::attenuated_supported]
+          .asBool());
 }
 
 }  // namespace commands

@@ -39,11 +39,9 @@ namespace application_manager {
 namespace commands {
 
 DialNumberResponse::DialNumberResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+    : CommandResponseImpl(message) {}
 
-DialNumberResponse::~DialNumberResponse() {
-}
+DialNumberResponse::~DialNumberResponse() {}
 
 void DialNumberResponse::Run() {
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);

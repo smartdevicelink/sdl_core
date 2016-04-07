@@ -49,12 +49,15 @@ typedef utils::SharedPtr<MockHMIMessageAdapterImpl>
     MockHMIMessageAdapterImplSPtr;
 
 TEST(HMIMessageAdapterImplTest, Handler_CorrectPointer_CorrectReturnedPointer) {
-  testing::NiceMock<MockHMIMessageHandlerSettings> mock_hmi_message_handler_settings;
-  const uint64_t stack_size =1000u;
+  testing::NiceMock<MockHMIMessageHandlerSettings>
+      mock_hmi_message_handler_settings;
+  const uint64_t stack_size = 1000u;
   ON_CALL(mock_hmi_message_handler_settings, thread_min_stack_size())
       .WillByDefault(ReturnRef(stack_size));
-  HMIMessageHandler* message_handler = new hmi_message_handler::HMIMessageHandlerImpl(
-              mock_hmi_message_handler_settings);;
+  HMIMessageHandler* message_handler =
+      new hmi_message_handler::HMIMessageHandlerImpl(
+          mock_hmi_message_handler_settings);
+  ;
 
   MockHMIMessageAdapterImplSPtr message_adapter_impl =
       utils::MakeShared<MockHMIMessageAdapterImpl>(message_handler);

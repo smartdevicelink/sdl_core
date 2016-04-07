@@ -48,69 +48,52 @@ namespace policy {
 class MockPTRepresentation : virtual public PTRepresentation {
  public:
   MOCK_METHOD4(CheckPermissions,
-      void(const PTString& app_id,
-          const PTString& hmi_level,
-          const PTString& rpc,
-          CheckPermissionResult& result));
-  MOCK_METHOD0(IsPTPreloaded,
-      bool());
-  MOCK_METHOD0(IgnitionCyclesBeforeExchange,
-      int());
-  MOCK_METHOD1(KilometersBeforeExchange,
-      int(int current));
+               void(const PTString& app_id,
+                    const PTString& hmi_level,
+                    const PTString& rpc,
+                    CheckPermissionResult& result));
+  MOCK_METHOD0(IsPTPreloaded, bool());
+  MOCK_METHOD0(IgnitionCyclesBeforeExchange, int());
+  MOCK_METHOD1(KilometersBeforeExchange, int(int current));
   MOCK_METHOD2(SetCountersPassedForSuccessfulUpdate,
-      bool(int kilometers, int days_after_epoch));
-  MOCK_METHOD1(DaysBeforeExchange,
-      int(int current));
-  MOCK_METHOD0(IncrementIgnitionCycles,
-      void());
-  MOCK_METHOD0(ResetIgnitionCycles,
-      void());
-  MOCK_METHOD0(TimeoutResponse,
-      int());
-  MOCK_METHOD1(SecondsBetweenRetries,
-      bool(std::vector<int>* seconds));
+               bool(int kilometers, int days_after_epoch));
+  MOCK_METHOD1(DaysBeforeExchange, int(int current));
+  MOCK_METHOD0(IncrementIgnitionCycles, void());
+  MOCK_METHOD0(ResetIgnitionCycles, void());
+  MOCK_METHOD0(TimeoutResponse, int());
+  MOCK_METHOD1(SecondsBetweenRetries, bool(std::vector<int>* seconds));
   MOCK_METHOD2(GetPriority,
-      bool(const std::string& app_id, std::string* priority));
-  MOCK_CONST_METHOD0(GetVehicleInfo,
-      const VehicleInfo());
-  MOCK_METHOD1(SetVINValue,
-      bool(const std::string& value));
-  MOCK_METHOD2(GetUserFriendlyMsg,
+               bool(const std::string& app_id, std::string* priority));
+  MOCK_CONST_METHOD0(GetVehicleInfo, const VehicleInfo());
+  MOCK_METHOD1(SetVINValue, bool(const std::string& value));
+  MOCK_METHOD2(
+      GetUserFriendlyMsg,
       std::vector<UserFriendlyMessage>(const std::vector<std::string>& msg_code,
-          const std::string& language));
-  MOCK_METHOD2(GetUpdateUrls,
-      void(int service_type, EndpointUrls&));
-  MOCK_METHOD1(GetNotificationsNumber,
-      int(const std::string& priority));
-  MOCK_METHOD0(Init,
-      InitResult());
-  MOCK_METHOD0(Close,
-      bool());
-  MOCK_METHOD0(Clear,
-      bool());
-  MOCK_METHOD0(Drop,
-      bool());
-  MOCK_CONST_METHOD0(GenerateSnapshot,
-      utils::SharedPtr<policy_table::Table>());
-  MOCK_METHOD1(Save,
-      bool(const policy_table::Table& table));
-  MOCK_CONST_METHOD0(UpdateRequired,
-      bool());
-  MOCK_METHOD1(SaveUpdateRequired,
-      void(bool value));
+                                       const std::string& language));
+  MOCK_METHOD2(GetUpdateUrls, void(int service_type, EndpointUrls&));
+  MOCK_METHOD1(GetNotificationsNumber, int(const std::string& priority));
+  MOCK_METHOD0(Init, InitResult());
+  MOCK_METHOD0(Close, bool());
+  MOCK_METHOD0(Clear, bool());
+  MOCK_METHOD0(Drop, bool());
+  MOCK_CONST_METHOD0(GenerateSnapshot, utils::SharedPtr<policy_table::Table>());
+  MOCK_METHOD1(Save, bool(const policy_table::Table& table));
+  MOCK_CONST_METHOD0(UpdateRequired, bool());
+  MOCK_METHOD1(SaveUpdateRequired, void(bool value));
   MOCK_METHOD3(GetInitialAppData,
-      bool(const std::string& app_id, StringArray* nicknames, StringArray* app_types));
+               bool(const std::string& app_id,
+                    StringArray* nicknames,
+                    StringArray* app_types));
 
   MOCK_METHOD4(SaveApplicationCustomData,
-      bool(const std::string& app_id,
-          bool is_revoked,
-          bool is_default,
-          bool is_predata));
+               bool(const std::string& app_id,
+                    bool is_revoked,
+                    bool is_default,
+                    bool is_predata));
 
   MOCK_CONST_METHOD1(IsApplicationRevoked, bool(const std::string& app_id));
   MOCK_METHOD1(GetFunctionalGroupings,
-      bool(policy_table::FunctionalGroupings& groups));
+               bool(policy_table::FunctionalGroupings& groups));
   MOCK_CONST_METHOD1(IsApplicationRepresented, bool(const std::string& app_id));
   MOCK_CONST_METHOD1(IsDefaultPolicy, bool(const std::string& app_id));
   MOCK_METHOD1(SetDefaultPolicy, bool(const std::string& app_id));

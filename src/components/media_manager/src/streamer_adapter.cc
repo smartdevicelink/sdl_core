@@ -38,10 +38,7 @@ namespace media_manager {
 CREATE_LOGGERPTR_GLOBAL(logger, "StreamerAdapter")
 
 StreamerAdapter::StreamerAdapter(Streamer* const streamer)
-  : current_application_(0),
-    messages_(),
-    streamer_(streamer),
-    thread_(NULL) {
+    : current_application_(0), messages_(), streamer_(streamer), thread_(NULL) {
   DCHECK(streamer_);
   thread_ = threads::CreateThread("StreamerAdapter", streamer_);
 }
@@ -55,8 +52,9 @@ StreamerAdapter::~StreamerAdapter() {
 void StreamerAdapter::StartActivity(int32_t application_key) {
   LOG4CXX_AUTO_TRACE(logger);
   if (is_app_performing_activity(application_key)) {
-    LOG4CXX_WARN(logger, "Activity for application: "
-                 << application_key << " has been already started");
+    LOG4CXX_WARN(logger,
+                 "Activity for application: " << application_key
+                                              << " has been already started");
     return;
   }
   messages_.Reset();
@@ -76,8 +74,9 @@ void StreamerAdapter::StartActivity(int32_t application_key) {
 void StreamerAdapter::StopActivity(int32_t application_key) {
   LOG4CXX_AUTO_TRACE(logger);
   if (!is_app_performing_activity(application_key)) {
-    LOG4CXX_WARN(logger, "Activity for application: "
-                 << application_key << " has not been started");
+    LOG4CXX_WARN(logger,
+                 "Activity for application: " << application_key
+                                              << " has not been started");
     return;
   }
 
@@ -96,8 +95,9 @@ void StreamerAdapter::SendData(int32_t application_key,
                                const ::protocol_handler::RawMessagePtr msg) {
   LOG4CXX_AUTO_TRACE(logger);
   if (!is_app_performing_activity(application_key)) {
-    LOG4CXX_ERROR(logger, "Activity for application: "
-                  << application_key << " has not been started");
+    LOG4CXX_ERROR(logger,
+                  "Activity for application: " << application_key
+                                               << " has not been started");
     return;
   }
   messages_.push(msg);
@@ -109,13 +109,11 @@ bool StreamerAdapter::is_app_performing_activity(
 }
 
 StreamerAdapter::Streamer::Streamer(StreamerAdapter* const adapter)
-  : stop_flag_(false),
-    adapter_(adapter) {
+    : stop_flag_(false), adapter_(adapter) {
   DCHECK(adapter_);
 }
 
-StreamerAdapter::Streamer::~Streamer() {
-}
+StreamerAdapter::Streamer::~Streamer() {}
 
 void StreamerAdapter::Streamer::threadMain() {
   LOG4CXX_AUTO_TRACE(logger);
@@ -148,11 +146,12 @@ void StreamerAdapter::Streamer::threadMain() {
       static int32_t messages_for_session = 0;
       ++messages_for_session;
 
-      LOG4CXX_DEBUG(logger, "Handling map streaming message. This is "
-                    << messages_for_session << " message for "
-                    << adapter_->current_application_);
-      std::set<MediaListenerPtr>::iterator it = adapter_->media_listeners_
-          .begin();
+      LOG4CXX_DEBUG(logger,
+                    "Handling map streaming message. This is "
+                        << messages_for_session << " message for "
+                        << adapter_->current_application_);
+      std::set<MediaListenerPtr>::iterator it =
+          adapter_->media_listeners_.begin();
       for (; adapter_->media_listeners_.end() != it; ++it) {
         (*it)->OnDataReceived(adapter_->current_application_,
                               messages_for_session);

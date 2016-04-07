@@ -42,18 +42,20 @@
 namespace hmi_message_handler {
 
 class MessageBrokerAdapter : public HMIMessageAdapterImpl,
-    public NsMessageBroker::CMessageBrokerController,
-    public threads::SingleThreadValidator {
+                             public NsMessageBroker::CMessageBrokerController,
+                             public threads::SingleThreadValidator {
  public:
-  MessageBrokerAdapter(HMIMessageHandler* handler_param, const std::string&
-                                server_address, uint16_t port);
+  MessageBrokerAdapter(HMIMessageHandler* handler_param,
+                       const std::string& server_address,
+                       uint16_t port);
   ~MessageBrokerAdapter();
   void SendMessageToHMI(MessageSharedPointer message);
 
   /*Methods from CMessageBrokerController*/
   /**
    * \brief Called on receiving response message from RPCBus.
-   * \param method Name of corresponding request method that was sent previously to RPCBus.
+   * \param method Name of corresponding request method that was sent previously
+   * to RPCBus.
    * \param root Received Json object.
    */
   void processResponse(std::string method, Json::Value& root);

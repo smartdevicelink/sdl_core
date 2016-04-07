@@ -43,25 +43,23 @@ namespace application_manager {
 namespace commands {
 
 ShowRequest::ShowRequest(const MessageSharedPtr& message)
- : CommandRequestImpl(message) {
-}
+    : CommandRequestImpl(message) {}
 
-ShowRequest::~ShowRequest() {
-}
+ShowRequest::~ShowRequest() {}
 
 void ShowRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app =
       application_manager::ApplicationManagerImpl::instance()->application(
-      connection_key());
+          connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
-  //SDLAQ-CRS-494, VC3.1
+  // SDLAQ-CRS-494, VC3.1
   if ((*message_)[strings::msg_params].empty()) {
     LOG4CXX_ERROR(logger_, strings::msg_params << " is empty.");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -69,15 +67,15 @@ void ShowRequest::Run() {
   }
 
   if (!CheckStringsOfShowRequest()) {
-     LOG4CXX_ERROR(logger_, "Incorrect characters in string");
-     SendResponse(false, mobile_apis::Result::INVALID_DATA);
-     return;
-   }
+    LOG4CXX_ERROR(logger_, "Incorrect characters in string");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
 
-  //ProcessSoftButtons checks strings on the contents incorrect character
+  // ProcessSoftButtons checks strings on the contents incorrect character
 
   mobile_apis::Result::eType processing_result = mobile_apis::Result::SUCCESS;
-  if(((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) &&
+  if (((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) &&
       ((*message_)[strings::msg_params][strings::soft_buttons].length() > 0)) {
     processing_result = MessageHelper::ProcessSoftButtons(
         (*message_)[strings::msg_params],
@@ -92,11 +90,10 @@ void ShowRequest::Run() {
     return;
   }
 
-  mobile_apis::Result::eType verification_result =
-      mobile_apis::Result::SUCCESS;
+  mobile_apis::Result::eType verification_result = mobile_apis::Result::SUCCESS;
   if (((*message_)[strings::msg_params].keyExists(strings::graphic)) &&
-      ((*message_)[strings::msg_params]
-                   [strings::graphic][strings::value].asString()).length()) {
+      ((*message_)[strings::msg_params][strings::graphic][strings::value]
+           .asString()).length()) {
     verification_result = MessageHelper::VerifyImage(
         (*message_)[strings::msg_params][strings::graphic], app);
     if (mobile_apis::Result::SUCCESS != verification_result) {
@@ -116,12 +113,12 @@ void ShowRequest::Run() {
     }
   }
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app->app_id();
 
-  msg_params[hmi_request::show_strings] = smart_objects::SmartObject(
-      smart_objects::SmartType_Array);
+  msg_params[hmi_request::show_strings] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
 
   int32_t index = 0;
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_1)) {
@@ -192,7 +189,7 @@ void ShowRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::secondary_graphic)) {
     msg_params[strings::secondary_graphic] =
-            (*message_)[strings::msg_params][strings::secondary_graphic];
+        (*message_)[strings::msg_params][strings::secondary_graphic];
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
@@ -229,13 +226,12 @@ void ShowRequest::on_event(const event_engine::Event& event) {
       std::string response_info;
       mobile_apis::Result::eType result_code =
           static_cast<mobile_apis::Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
+              message[strings::params][hmi_response::code].asInt());
 
-      const bool result =
-          Compare<mobile_api::Result::eType, EQ, ONE>(
-            result_code,
-            mobile_api::Result::SUCCESS,
-            mobile_api::Result::WARNINGS);
+      const bool result = Compare<mobile_api::Result::eType, EQ, ONE>(
+          result_code,
+          mobile_api::Result::SUCCESS,
+          mobile_api::Result::WARNINGS);
 
       if (mobile_apis::Result::WARNINGS == result_code &&
           message[strings::params].keyExists(hmi_response::message)) {
@@ -243,13 +239,14 @@ void ShowRequest::on_event(const event_engine::Event& event) {
             message[strings::params][hmi_response::message].asString();
       }
 
-      SendResponse(result, result_code,
+      SendResponse(result,
+                   result_code,
                    response_info.empty() ? NULL : response_info.c_str(),
                    &(message[strings::msg_params]));
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_,"Received unknown event " << event.id());
+      LOG4CXX_ERROR(logger_, "Received unknown event " << event.id());
       break;
     }
   }
@@ -263,7 +260,7 @@ bool ShowRequest::CheckStringsOfShowRequest() {
     str = (*message_)[strings::msg_params][strings::main_field_4].asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid main_field_4 syntax check failed");
-      return  false;
+      return false;
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_3)) {
@@ -309,20 +306,20 @@ bool ShowRequest::CheckStringsOfShowRequest() {
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::custom_presets)) {
-      smart_objects::SmartObject& custom_presets_array =
-          (*message_)[strings::msg_params][strings::custom_presets];
-      for (size_t i = 0; i < custom_presets_array.length(); ++i) {
-        str = custom_presets_array[i].asCharArray();
-        if (!CheckSyntax(str)) {
-          LOG4CXX_ERROR(logger_, "Invalid custom_presets syntax check failed");
-          return false;
-        }
+    smart_objects::SmartObject& custom_presets_array =
+        (*message_)[strings::msg_params][strings::custom_presets];
+    for (size_t i = 0; i < custom_presets_array.length(); ++i) {
+      str = custom_presets_array[i].asCharArray();
+      if (!CheckSyntax(str)) {
+        LOG4CXX_ERROR(logger_, "Invalid custom_presets syntax check failed");
+        return false;
       }
+    }
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::graphic)) {
-    str = (*message_)[strings::msg_params]
-                     [strings::graphic][strings::value].asCharArray();
+    str = (*message_)[strings::msg_params][strings::graphic][strings::value]
+              .asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid graphic value syntax check failed");
       return false;
@@ -330,11 +327,11 @@ bool ShowRequest::CheckStringsOfShowRequest() {
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::secondary_graphic)) {
-    str = (*message_)[strings::msg_params]
-                     [strings::secondary_graphic][strings::value].asCharArray();
+    str = (*message_)[strings::msg_params][strings::secondary_graphic]
+                     [strings::value].asCharArray();
     if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_,
-                   "Invalid secondary_graphic value syntax check failed");
+                    "Invalid secondary_graphic value syntax check failed");
       return false;
     }
   }

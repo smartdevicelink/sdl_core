@@ -37,19 +37,18 @@
 #include "application_manager/telemetry_observer.h"
 #include "telemetry_monitor/application_manager_metric_wrapper.h"
 
-
 namespace telemetry_monitor {
 
 class TelemetryMonitor;
 
-class ApplicationManagerObserver: public application_manager::AMTelemetryObserver {
-   public:
-    explicit ApplicationManagerObserver(TelemetryMonitor* telemetry_monitor);
-   virtual void OnMessage(utils::SharedPtr<MessageMetric> metric);
+class ApplicationManagerObserver
+    : public application_manager::AMTelemetryObserver {
+ public:
+  explicit ApplicationManagerObserver(TelemetryMonitor* telemetry_monitor);
+  virtual void OnMessage(utils::SharedPtr<MessageMetric> metric);
 
-  private:
-    TelemetryMonitor* telemetry_monitor_;
+ private:
+  TelemetryMonitor* telemetry_monitor_;
 };
-
 }
 #endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_APPLICATION_MANAGER_OBSERVER_H_

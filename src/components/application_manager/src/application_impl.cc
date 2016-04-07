@@ -74,11 +74,11 @@ mobile_apis::FileType::eType StringToFileType(const char* str) {
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 namespace application_manager {
 ApplicationImpl::ApplicationImpl(
-      uint32_t application_id,
-      const std::string& mobile_app_id,
-      const std::string& mac_address,
-      const custom_str::CustomString& app_name,
-      utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager)
+    uint32_t application_id,
+    const std::string& mobile_app_id,
+    const std::string& mac_address,
+    const custom_str::CustomString& app_name,
+    utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager)
     : grammar_id_(0)
     , hmi_app_id_(0)
     , app_id_(application_id)
@@ -110,13 +110,11 @@ ApplicationImpl::ApplicationImpl(
     , video_stream_suspend_timer_(
           "VideoStreamSuspend",
           new ::timer::TimerTaskImpl<ApplicationImpl>(
-              this,
-              &ApplicationImpl::OnVideoStreamSuspend))
+              this, &ApplicationImpl::OnVideoStreamSuspend))
     , audio_stream_suspend_timer_(
           "AudioStreamSuspend",
           new ::timer::TimerTaskImpl<ApplicationImpl>(
-              this,
-              &ApplicationImpl::OnAudioStreamSuspend)) {
+              this, &ApplicationImpl::OnAudioStreamSuspend)) {
   cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] = {
       date_time::DateTime::getCurrentTime(), 0};
   cmd_number_to_time_limits_[mobile_apis::FunctionID::GetVehicleDataID] = {
@@ -322,7 +320,7 @@ connection_handler::DeviceHandle ApplicationImpl::device() const {
   return device_;
 }
 
-const std::string& ApplicationImpl::mac_address() const{
+const std::string& ApplicationImpl::mac_address() const {
   return mac_address_;
 }
 
@@ -433,8 +431,7 @@ void ApplicationImpl::StopStreaming(
 
   SuspendStreaming(service_type);
 
-  if (service_type == ServiceType::kMobileNav &&
-      video_streaming_approved()) {
+  if (service_type == ServiceType::kMobileNav && video_streaming_approved()) {
     StopNaviStreaming();
   } else if (service_type == ServiceType::kAudio &&
              audio_streaming_approved()) {
@@ -451,7 +448,7 @@ void ApplicationImpl::StopNaviStreaming() {
 }
 
 void ApplicationImpl::StopAudioStreaming() {
-  LOG4CXX_AUTO_TRACE(logger_);    
+  LOG4CXX_AUTO_TRACE(logger_);
   audio_stream_suspend_timer_.Stop();
   MessageHelper::SendAudioStopStream(app_id());
   set_audio_streaming_approved(false);
@@ -725,18 +722,12 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
 
       LOG4CXX_INFO(logger_,
                    "Time Info: "
-                       << "\n Current: "
-                       << current.tv_sec
-                       << "\n Limit: ("
-                       << limit.first.tv_sec
-                       << ","
-                       << limit.second
+                       << "\n Current: " << current.tv_sec << "\n Limit: ("
+                       << limit.first.tv_sec << "," << limit.second
                        << ")"
                           "\n frequency_restrictions: ("
-                       << frequency_restrictions.first
-                       << ","
-                       << frequency_restrictions.second
-                       << ")");
+                       << frequency_restrictions.first << ","
+                       << frequency_restrictions.second << ")");
       if (current.tv_sec < limit.first.tv_sec + frequency_restrictions.second) {
         if (limit.second < frequency_restrictions.first) {
           ++limit.second;
@@ -829,8 +820,7 @@ void ApplicationImpl::UpdateHash() {
 }
 
 void ApplicationImpl::CleanupFiles() {
-  profile::Profile* profile =
-          profile::Profile::instance();
+  profile::Profile* profile = profile::Profile::instance();
   std::string directory_name = profile->app_storage_folder();
   directory_name += "/" + folder_name();
 
@@ -897,9 +887,8 @@ void ApplicationImpl::LoadPersistentFiles() {
       }
 
       LOG4CXX_INFO(logger_,
-                   "Loaded persistent file " << file.file_name
-                                             << " File type is "
-                                             << file.file_type);
+                   "Loaded persistent file "
+                       << file.file_name << " File type is " << file.file_type);
       AddFile(file);
     }
   }

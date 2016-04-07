@@ -39,11 +39,9 @@ namespace commands {
 
 OnResumeAudioSourceNotification::OnResumeAudioSourceNotification(
     const MessageSharedPtr& message)
-    : NotificationToHMI(message) {
-}
+    : NotificationToHMI(message) {}
 
-OnResumeAudioSourceNotification::~OnResumeAudioSourceNotification() {
-}
+OnResumeAudioSourceNotification::~OnResumeAudioSourceNotification() {}
 
 void OnResumeAudioSourceNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,4 +51,3 @@ void OnResumeAudioSourceNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

@@ -40,8 +40,7 @@ namespace test {
 namespace components {
 namespace policy_handler_test {
 
-class MockPolicySettings
-    : public ::policy::PolicySettings {
+class MockPolicySettings : public ::policy::PolicySettings {
  public:
   MOCK_CONST_METHOD0(enable_policy, bool());
   MOCK_CONST_METHOD0(preloaded_pt_file, const std::string&());

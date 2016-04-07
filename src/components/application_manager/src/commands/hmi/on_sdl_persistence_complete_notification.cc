@@ -38,11 +38,9 @@ namespace commands {
 
 OnSDLPersistenceCompleteNotification::OnSDLPersistenceCompleteNotification(
     const MessageSharedPtr& message)
-    : NotificationToHMI(message) {
-}
+    : NotificationToHMI(message) {}
 
-OnSDLPersistenceCompleteNotification::~OnSDLPersistenceCompleteNotification() {
-}
+OnSDLPersistenceCompleteNotification::~OnSDLPersistenceCompleteNotification() {}
 
 void OnSDLPersistenceCompleteNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

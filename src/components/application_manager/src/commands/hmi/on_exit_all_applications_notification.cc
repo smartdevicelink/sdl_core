@@ -39,17 +39,15 @@
 #include "application_manager/application_manager_impl.h"
 #include "interfaces/HMI_API.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 OnExitAllApplicationsNotification::OnExitAllApplicationsNotification(
-    const MessageSharedPtr& message) : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message)
+    : NotificationFromHMI(message) {}
 
-OnExitAllApplicationsNotification::~OnExitAllApplicationsNotification() {
-}
+OnExitAllApplicationsNotification::~OnExitAllApplicationsNotification() {}
 
 void OnExitAllApplicationsNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -81,7 +79,7 @@ void OnExitAllApplicationsNotification::Run() {
       SendOnSDLPersistenceComplete();
       return;
     }
-    default : {
+    default: {
       LOG4CXX_ERROR(logger_, "Unknown Application close reason" << reason);
       return;
     }
@@ -90,7 +88,8 @@ void OnExitAllApplicationsNotification::Run() {
   app_manager->SetUnregisterAllApplicationsReason(mob_reason);
 
   if (mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET == mob_reason ||
-      mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS == mob_reason) {
+      mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS ==
+          mob_reason) {
     app_manager->HeadUnitReset(mob_reason);
   }
   kill(getpid(), SIGINT);
@@ -103,14 +102,14 @@ void OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete() {
       new smart_objects::SmartObject(smart_objects::SmartType_Map);
   (*message)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::BasicCommunication_OnSDLPersistenceComplete;
-  (*message)[strings::params][strings::message_type] = MessageType::kNotification;
+  (*message)[strings::params][strings::message_type] =
+      MessageType::kNotification;
   (*message)[strings::params][strings::correlation_id] =
       ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 
-   ApplicationManagerImpl::instance()->ManageHMICommand(message);
+  ApplicationManagerImpl::instance()->ManageHMICommand(message);
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

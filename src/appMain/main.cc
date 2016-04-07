@@ -64,7 +64,6 @@
 
 // ----------------------------------------------------------------------------
 
-
 CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
 
 namespace {
@@ -86,7 +85,9 @@ bool InitHmi() {
     LOG4CXX_FATAL(logger_, "HMI index file " << hmi_link << " doesn't exist!");
     return false;
   }
-  return utils::System(kBrowser, kBrowserName).Add(kBrowserParams).Add(hmi_link)
+  return utils::System(kBrowser, kBrowserName)
+      .Add(kBrowserParams)
+      .Add(hmi_link)
       .Execute();
 }
 #endif  // WEB_HMI
@@ -107,7 +108,6 @@ bool InitHmi() {
   return utils::System(kStartHmi).Execute();
 }
 #endif  // QT_HMI
-
 }
 
 /**
@@ -124,7 +124,7 @@ int32_t main(int32_t argc, char** argv) {
   }
 
   // --------------------------------------------------------------------------
-  if ((argc > 1)&&(0 != argv)) {
+  if ((argc > 1) && (0 != argv)) {
     profile::Profile::instance()->config_file_name(argv[1]);
   } else {
     profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
@@ -137,12 +137,13 @@ int32_t main(int32_t argc, char** argv) {
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
   if (!utils::appenders_loader.Loaded()) {
-    LOG4CXX_ERROR(logger_, "Appenders plugin not loaded, file logging disabled");
+    LOG4CXX_ERROR(logger_,
+                  "Appenders plugin not loaded, file logging disabled");
   }
 
   LOG4CXX_INFO(logger_, "Application started!");
-  LOG4CXX_INFO(logger_, "SDL version: "
-                         << profile::Profile::instance()->sdl_version());
+  LOG4CXX_INFO(logger_,
+               "SDL version: " << profile::Profile::instance()->sdl_version());
 
   // --------------------------------------------------------------------------
   // Components initialization

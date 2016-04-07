@@ -38,11 +38,9 @@ namespace commands {
 
 UIPerformInteractionRequest::UIPerformInteractionRequest(
     const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+    : RequestToHMI(message) {}
 
-UIPerformInteractionRequest::~UIPerformInteractionRequest() {
-}
+UIPerformInteractionRequest::~UIPerformInteractionRequest() {}
 
 void UIPerformInteractionRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,4 +51,3 @@ void UIPerformInteractionRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

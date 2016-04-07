@@ -42,11 +42,9 @@ namespace commands {
 
 OnTBTClientStateNotification::OnTBTClientStateNotification(
     const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {
-}
+    : CommandNotificationImpl(message) {}
 
-OnTBTClientStateNotification::~OnTBTClientStateNotification() {
-}
+OnTBTClientStateNotification::~OnTBTClientStateNotification() {}
 
 void OnTBTClientStateNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

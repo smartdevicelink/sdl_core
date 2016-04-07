@@ -39,11 +39,9 @@ namespace commands {
 
 OnTTSStartedNotification::OnTTSStartedNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnTTSStartedNotification::~OnTTSStartedNotification() {
-}
+OnTTSStartedNotification::~OnTTSStartedNotification() {}
 
 void OnTTSStartedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -55,4 +53,3 @@ void OnTTSStartedNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

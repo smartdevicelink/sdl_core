@@ -45,7 +45,7 @@ using namespace ::transport_manager::transport_adapter;
 class MockTCPTransportAdapter : public TcpTransportAdapter {
  public:
   MockTCPTransportAdapter(uint16_t port, resumption::LastState& last_state)
-    : TcpTransportAdapter(port,last_state) {
+      : TcpTransportAdapter(port, last_state) {
     ::profile::Profile::instance()->config_file_name(
         "smartDeviceLink_test.ini");
   }
@@ -57,8 +57,12 @@ class MockTCPTransportAdapter : public TcpTransportAdapter {
   MOCK_METHOD2(Connect,
                TransportAdapter::Error(const DeviceUID& device_handle,
                                        const ApplicationHandle& app_handle));
-  void CallStore() { Store(); }
-  bool CallRestore() { return Restore(); }
+  void CallStore() {
+    Store();
+  }
+  bool CallRestore() {
+    return Restore();
+  }
 };
 
 }  // namespace transport_manager_test

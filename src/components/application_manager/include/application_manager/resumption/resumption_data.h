@@ -201,6 +201,7 @@ class ResumptionData {
    * @brief Persist saves resumption data on file system
    */
   virtual void Persist() = 0;
+
  protected:
   /**
    * @brief Retrieves of commands from application

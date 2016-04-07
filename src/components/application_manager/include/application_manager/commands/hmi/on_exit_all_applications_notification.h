@@ -62,7 +62,6 @@ class OnExitAllApplicationsNotification : public NotificationFromHMI {
   virtual void Run();
 
  private:
-
   /**
    * @brief Notify's HMI that SDL stored all data required for resumption
    **/

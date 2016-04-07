@@ -53,18 +53,15 @@ typedef utils::SharedPtr<MediaAdapterListener> MediaListenerPtr;
 class MockMediaAdapterImpl : public ::media_manager::MediaAdapterImpl {
  public:
   MOCK_METHOD1(AddListener,
-        void(const utils::SharedPtr<MediaAdapterListener>&));
+               void(const utils::SharedPtr<MediaAdapterListener>&));
   MOCK_METHOD1(RemoveListener,
-      void(const utils::SharedPtr<MediaAdapterListener> &));
+               void(const utils::SharedPtr<MediaAdapterListener>&));
   MOCK_METHOD2(SendData,
-      void(int32_t application_key,
-           const ::protocol_handler::RawMessagePtr message));
-  MOCK_METHOD1(StartActivity,
-      void(int32_t application_key));
-  MOCK_METHOD1(StopActivity,
-      void(int32_t application_key));
-  MOCK_CONST_METHOD1(is_app_performing_activity,
-      bool(int32_t application_key));
+               void(int32_t application_key,
+                    const ::protocol_handler::RawMessagePtr message));
+  MOCK_METHOD1(StartActivity, void(int32_t application_key));
+  MOCK_METHOD1(StopActivity, void(int32_t application_key));
+  MOCK_CONST_METHOD1(is_app_performing_activity, bool(int32_t application_key));
 };
 
 }  // namespace media_manager_test

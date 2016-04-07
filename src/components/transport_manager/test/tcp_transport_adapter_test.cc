@@ -54,7 +54,7 @@ using namespace transport_manager::transport_adapter;
 class TestTCPTransportAdapter : public TcpTransportAdapter {
  public:
   TestTCPTransportAdapter(uint16_t port, resumption::LastState& last_state)
-    : TcpTransportAdapter(port, last_state) {
+      : TcpTransportAdapter(port, last_state) {
     ::profile::Profile::instance()->config_file_name(
         "smartDeviceLink_test.ini");
   }
@@ -66,25 +66,26 @@ class TestTCPTransportAdapter : public TcpTransportAdapter {
   MOCK_METHOD2(Connect,
                TransportAdapter::Error(const DeviceUID& device_handle,
                                        const ApplicationHandle& app_handle));
-  void CallStore() { Store(); }
-  bool CallRestore() { return Restore(); }
+  void CallStore() {
+    Store();
+  }
+  bool CallRestore() {
+    return Restore();
+  }
 };
 
 class TcpAdapterTest : public ::testing::Test {
  protected:
-  TcpAdapterTest():last_state_("app_storage_folder",
-                               "app_info_storage"){}
+  TcpAdapterTest() : last_state_("app_storage_folder", "app_info_storage") {}
   static void SetUpTestCase() {
     ::profile::Profile::instance()->config_file_name(
         "smartDeviceLink_test.ini");
   }
-   virtual void SetUp() {
-  }
+  virtual void SetUp() {}
 
-  virtual void TearDown() {
-  }
+  virtual void TearDown() {}
 
-  resumption::LastState  last_state_;
+  resumption::LastState last_state_;
   const uint32_t port = 12345;
   const std::string string_port = "12345";
 };
@@ -114,8 +115,8 @@ TEST_F(TcpAdapterTest, StoreDataWithOneDeviceAndOneApplication) {
   transport_adapter.CallStore();
 
   // Check that value is saved
-  Json::Value& tcp_dict = last_state_
-                              .dictionary["TransportManager"]["TcpAdapter"];
+  Json::Value& tcp_dict =
+      last_state_.dictionary["TransportManager"]["TcpAdapter"];
 
   ASSERT_TRUE(tcp_dict.isObject());
   ASSERT_FALSE(tcp_dict["devices"].isNull());
@@ -165,8 +166,8 @@ TEST_F(TcpAdapterTest, StoreDataWithSeveralDevicesAndOneApplication) {
   transport_adapter.CallStore();
 
   // Check that values are saved
-  Json::Value& tcp_dict = last_state_
-                              .dictionary["TransportManager"]["TcpAdapter"];
+  Json::Value& tcp_dict =
+      last_state_.dictionary["TransportManager"]["TcpAdapter"];
   ASSERT_TRUE(tcp_dict.isObject());
   ASSERT_FALSE(tcp_dict["devices"].isNull());
   for (uint32_t i = 0; i < count_dev; i++) {
@@ -221,8 +222,8 @@ TEST_F(TcpAdapterTest, StoreDataWithSeveralDevicesAndSeveralApplications) {
   transport_adapter.CallStore();
 
   // Check that value is saved
-  Json::Value& tcp_dict = last_state_
-                              .dictionary["TransportManager"]["TcpAdapter"];
+  Json::Value& tcp_dict =
+      last_state_.dictionary["TransportManager"]["TcpAdapter"];
 
   ASSERT_TRUE(tcp_dict.isObject());
   ASSERT_FALSE(tcp_dict["devices"].isNull());
@@ -258,15 +259,13 @@ TEST_F(TcpAdapterTest, StoreData_ConnectionNotExist_DataNotStored) {
 
   // Check that value is not saved
   Json::Value& tcp_dict =
-      last_state_
-          .dictionary["TransportManager"]["TcpAdapter"]["devices"];
+      last_state_.dictionary["TransportManager"]["TcpAdapter"]["devices"];
   ASSERT_TRUE(tcp_dict.isNull());
 }
 
 TEST_F(TcpAdapterTest, RestoreData_DataNotStored) {
   Json::Value& tcp_adapter_dictionary =
-      last_state_
-          .dictionary["TransportManager"]["TcpAdapter"];
+      last_state_.dictionary["TransportManager"]["TcpAdapter"];
   tcp_adapter_dictionary = Json::Value();
   TestTCPTransportAdapter transport_adapter(port, last_state_);
   EXPECT_CALL(transport_adapter, Connect(_, _)).Times(0);

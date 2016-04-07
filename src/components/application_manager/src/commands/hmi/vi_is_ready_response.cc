@@ -37,11 +37,9 @@ namespace application_manager {
 namespace commands {
 
 VIIsReadyResponse::VIIsReadyResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    : ResponseFromHMI(message) {}
 
-VIIsReadyResponse::~VIIsReadyResponse() {
-}
+VIIsReadyResponse::~VIIsReadyResponse() {}
 
 void VIIsReadyResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -56,7 +54,9 @@ void VIIsReadyResponse::Run() {
       ApplicationManagerImpl::instance()->hmi_capabilities();
   hmi_capabilities.set_is_ivi_cooperating(is_available);
 
-  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnVIIsReady();
+  application_manager::ApplicationManagerImpl::instance()
+      ->GetPolicyHandler()
+      .OnVIIsReady();
 }
 
 }  // namespace commands

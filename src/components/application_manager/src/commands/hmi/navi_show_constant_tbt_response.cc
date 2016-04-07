@@ -38,11 +38,10 @@ namespace application_manager {
 namespace commands {
 
 NaviShowConstantTBTResponse::NaviShowConstantTBTResponse(
-    const MessageSharedPtr& message) : ResponseFromHMI(message) {
-}
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {}
 
-NaviShowConstantTBTResponse::~NaviShowConstantTBTResponse() {
-}
+NaviShowConstantTBTResponse::~NaviShowConstantTBTResponse() {}
 
 void NaviShowConstantTBTResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

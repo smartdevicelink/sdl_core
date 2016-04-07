@@ -64,7 +64,7 @@ class OnButtonEventNotification : public NotificationFromHMI {
   DISALLOW_COPY_AND_ASSIGN(OnButtonEventNotification);
 };
 
-} // namespace hmi
+}  // namespace hmi
 
 }  // namespace commands
 

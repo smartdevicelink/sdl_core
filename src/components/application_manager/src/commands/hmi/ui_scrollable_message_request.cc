@@ -38,11 +38,9 @@ namespace commands {
 
 UIScrollableMessageRequest::UIScrollableMessageRequest(
     const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+    : RequestToHMI(message) {}
 
-UIScrollableMessageRequest::~UIScrollableMessageRequest() {
-}
+UIScrollableMessageRequest::~UIScrollableMessageRequest() {}
 
 void UIScrollableMessageRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,4 +51,3 @@ void UIScrollableMessageRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

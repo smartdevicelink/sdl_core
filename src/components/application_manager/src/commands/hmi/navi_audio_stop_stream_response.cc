@@ -35,16 +35,14 @@ namespace application_manager {
 
 namespace commands {
 
-AudioStopStreamResponse::AudioStopStreamResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+AudioStopStreamResponse::AudioStopStreamResponse(
+    const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {}
 
-AudioStopStreamResponse::~AudioStopStreamResponse() {
-}
+AudioStopStreamResponse::~AudioStopStreamResponse() {}
 
 void AudioStopStreamResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
 }
 
 }  // namespace commands

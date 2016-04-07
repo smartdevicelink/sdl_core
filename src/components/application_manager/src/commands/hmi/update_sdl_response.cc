@@ -36,12 +36,10 @@ namespace application_manager {
 
 namespace commands {
 
-UpdateSDLResponse::UpdateSDLResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
-}
+UpdateSDLResponse::UpdateSDLResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {}
 
-UpdateSDLResponse::~UpdateSDLResponse() {
-}
+UpdateSDLResponse::~UpdateSDLResponse() {}
 
 void UpdateSDLResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -38,11 +38,10 @@ namespace application_manager {
 namespace commands {
 
 SDLGetStatusUpdateResponse::SDLGetStatusUpdateResponse(
-  const MessageSharedPtr& message): ResponseToHMI(message) {
-}
+    const MessageSharedPtr& message)
+    : ResponseToHMI(message) {}
 
-SDLGetStatusUpdateResponse::~SDLGetStatusUpdateResponse() {
-}
+SDLGetStatusUpdateResponse::~SDLGetStatusUpdateResponse() {}
 
 void SDLGetStatusUpdateResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -54,6 +53,3 @@ void SDLGetStatusUpdateResponse::Run() {
 
 }  // namespace commands
 }  // namespace application_manager
-
-
-
