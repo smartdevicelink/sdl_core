@@ -48,9 +48,8 @@ Copyright (c) 2013, Ford Motor Company
 
 namespace application_manager {
 
-namespace {
-
 CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
+namespace {
 
 const char* kQueryAppsValidationFailedPrefix =
     ":QUERY_APPS_VALIDATION_FAILED: ";
