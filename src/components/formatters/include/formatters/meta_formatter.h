@@ -45,7 +45,7 @@ namespace Formatters {
 
 /**
   * @brief Formats to string the smart object against given schema for given
-  *formatter
+ * formatter
   *
   * Sample usage:
   *    CSmartFactory factory;
