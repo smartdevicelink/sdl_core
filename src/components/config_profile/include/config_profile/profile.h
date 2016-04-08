@@ -36,6 +36,8 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <list>
+
 #include "utils/macro.h"
 #include "utils/singleton.h"
 #include "protocol_handler/protocol_handler_settings.h"
@@ -100,7 +102,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /**
    * @brief Returns true, if SDL 4.0 is enabled
    */
-  bool enable_protocol_4() const OVERRIDE;
+  bool enable_protocol_4() const;
 
   /**
    * @brief Returns application icons folder path
@@ -141,7 +143,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /**
    * @brief Returns port for video streaming
    */
-  const uint16_t video_streaming_port() const OVERRIDE;
+  const uint16_t video_streaming_port() const;
 
   /**
     * @brief Returns port for audio streaming
@@ -260,13 +262,13 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    * @brief Returns timeout for SDL to wait for the next package of raw data
    * over audio service
    */
-  const std::uint32_t audio_data_stopped_timeout() const;
+  const uint32_t audio_data_stopped_timeout() const;
 
   /**
    * @brief Returns timeout for SDL to wait for the next package of raw data
    * over video service
    */
-  const std::uint32_t video_data_stopped_timeout() const;
+  const uint32_t video_data_stopped_timeout() const;
 
   /**
    * @brief Returns allowable max amount of requests per time scale for
@@ -541,30 +543,28 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   /*
    * ProtocolHandler section
    */
-  size_t maximum_payload_size() const OVERRIDE;
+  size_t maximum_payload_size() const;
 
-  size_t message_frequency_count() const OVERRIDE;
+  size_t message_frequency_count() const;
 
-  size_t message_frequency_time() const OVERRIDE;
+  size_t message_frequency_time() const;
 
-  bool malformed_message_filtering() const OVERRIDE;
+  bool malformed_message_filtering() const;
 
-  size_t malformed_frequency_count() const OVERRIDE;
+  size_t malformed_frequency_count() const;
 
-  size_t malformed_frequency_time() const OVERRIDE;
+  size_t malformed_frequency_time() const;
 
-  uint32_t multiframe_waiting_timeout() const OVERRIDE;
+  uint32_t multiframe_waiting_timeout() const;
 
-  uint32_t heart_beat_timeout() const OVERRIDE;
+  uint32_t heart_beat_timeout() const;
 
-  uint16_t max_supported_protocol_version() const OVERRIDE;
+  uint16_t max_supported_protocol_version() const;
 
 #ifdef ENABLE_SECURITY
-  const std::vector<int>& force_protected_service() const OVERRIDE;
-
-  const std::vector<int>& force_unprotected_service() const OVERRIDE;
+  const std::vector<int>& force_protected_service() const;
+  const std::vector<int>& force_unprotected_service() const;
 #endif  // ENABLE_SECURITY
-  // ProtocolHandler section end
 
   uint16_t attempts_to_open_policy_db() const;
 
@@ -680,19 +680,6 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
                      const char* const pKey) const;
 
   /**
-   * @brief Checks, if path is relative
-   * @param path Path
-   * @return true, if is relative, otherwise - false
-   */
-  bool IsRelativePath(const std::string& path);
-
-  /**
-   * @brief Makes relative path absolute
-   * @param path Path
-   */
-  void MakeAbsolutePath(std::string& path);
-
-  /**
    * @brief Converts input string to number
    * @param input Input string
    * @param output Output number
@@ -760,8 +747,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
   std::string system_files_path_;
   uint16_t transport_manager_tcp_adapter_port_;
   std::string tts_delimiter_;
-  std::uint32_t audio_data_stopped_timeout_;
-  std::uint32_t video_data_stopped_timeout_;
+  uint32_t audio_data_stopped_timeout_;
+  uint32_t video_data_stopped_timeout_;
   std::string mme_db_name_;
   std::string event_mq_name_;
   std::string ack_mq_name_;
