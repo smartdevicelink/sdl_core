@@ -44,6 +44,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "utils/make_shared.h"
+#include "interfaces/generated_msg_version.h"
 
 namespace {
 namespace custom_str = utils::custom_string;
@@ -342,9 +343,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
   }
 
   response_params[strings::sync_msg_version][strings::major_version] =
-      APIVersion::kAPIV3;
+      major_version; // From generated file interfaces/generated_msg_version.h
   response_params[strings::sync_msg_version][strings::minor_version] =
-      APIVersion::kAPIV0;
+      minor_version; // From generated file interfaces/generated_msg_version.h
 
   response_params[strings::language] = hmi_capabilities.active_vr_language();
   response_params[strings::hmi_display_language] =
