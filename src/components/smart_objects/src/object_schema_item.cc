@@ -95,6 +95,22 @@ void CObjectSchemaItem::applySchema(SmartObject& Object,
     RemoveFakeParams(Object);
   }
 
+  for (SmartMap::const_iterator it = Object.map_begin();
+       it != Object.map_end();) {
+    const std::string& key = it->first;
+    if (mMembers.end() == mMembers.find(key)
+        // FIXME(EZamakhov): Remove illegal usage of filed in AM
+        &&
+        key.compare(connection_key) != 0 && key.compare(binary_data) != 0 &&
+        key.compare(app_id) != 0) {
+      ++it;
+      // FIXME(DK): remove fake params. There are error responses with params
+      // Object.erase(key);
+    } else {
+      it++;
+    }
+  }
+
   SmartObject default_value;
   for (Members::const_iterator it = mMembers.begin(); it != mMembers.end();
        ++it) {
@@ -161,7 +177,7 @@ CObjectSchemaItem::CObjectSchemaItem(const Members& members)
 
 void CObjectSchemaItem::RemoveFakeParams(SmartObject& Object) {
   for (SmartMap::const_iterator it = Object.map_begin();
-       it != Object.map_end();) {
+      it != Object.map_end();) {
     const std::string& key = it->first;
     if (mMembers.end() == mMembers.find(key)
         // FIXME(EZamakhov): Remove illegal usage of filed in AM
