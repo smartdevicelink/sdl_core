@@ -48,19 +48,19 @@
 #endif  // ENABLE_SECURITY
 
 namespace {
-#define LOG_UPDATED_VALUE(value, key, section)                              \
-  {                                                                         \
-    LOG4CXX_INFO(logger_,                                                   \
-                 "Setting value '" << value << "' for key '" << key         \
-                                   << "' in section '" << section << "'."); \
+#define LOG_UPDATED_VALUE(value, key, section)                             \
+  {                                                                        \
+    LOGGER_INFO(logger_,                                                   \
+                "Setting value '" << value << "' for key '" << key         \
+                                  << "' in section '" << section << "'."); \
   }
 
-#define LOG_UPDATED_BOOL_VALUE(value, key, section)                            \
-  {                                                                            \
-    LOG4CXX_INFO(logger_,                                                      \
-                 "Setting value '" << std::boolalpha << value << "' for key '" \
-                                   << key << "' in section '" << section       \
-                                   << "'.");                                   \
+#define LOG_UPDATED_BOOL_VALUE(value, key, section)                           \
+  {                                                                           \
+    LOGGER_INFO(logger_,                                                      \
+                "Setting value '" << std::boolalpha << value << "' for key '" \
+                                  << key << "' in section '" << section       \
+                                  << "'.");                                   \
   }
 
 const char* kDefaultConfigFileName = "smartDeviceLink.ini";
@@ -205,7 +205,7 @@ const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
 const char* kDefaultPreloadedPTFileName = "sdl_preloaded_pt.json";
 const char* kDefaultServerAddress = "127.0.0.1";
 const char* kDefaultAppInfoFileName = "app_info.dat";
-const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
+const char* kDefaultSystemFilesPath = "ivsu_cache";
 const char* kDefaultTtsDelimiter = ",";
 const uint32_t kDefaultAudioDataStoppedTimeout = 1000;
 const uint32_t kDefaultVideoDataStoppedTimeout = 1000;
@@ -256,9 +256,11 @@ const uint32_t kDefaultAppHmiLevelNoneRequestsTimeScale = 10;
 const uint32_t kDefaultPendingRequestsAmount = 0;
 const uint32_t kDefaultTransportManagerDisconnectTimeout = 0;
 const uint32_t kDefaultApplicationListUpdateTimeout = 1;
-const std::pair<uint32_t, uint32_t> kReadDIDFrequency = {5, 1};
-const std::pair<uint32_t, uint32_t> kGetVehicleDataFrequency = {5, 1};
-const std::pair<uint32_t, uint32_t> kStartStreamRetryAmount = {3, 1};
+const std::pair<uint32_t, uint32_t> kReadDIDFrequency = std::make_pair(5, 1);
+const std::pair<uint32_t, uint32_t> kGetVehicleDataFrequency =
+    std::make_pair(5, 1);
+const std::pair<uint32_t, uint32_t> kStartStreamRetryAmount =
+    std::make_pair(3, 1);
 const uint32_t kDefaultMaxThreadPoolSize = 2;
 const int kDefaultIAP2HubConnectAttempts = 0;
 const int kDefaultIAPHubConnectionWaitTimeout = 10000;
@@ -525,11 +527,11 @@ const std::string& Profile::audio_stream_file() const {
   return audio_stream_file_;
 }
 
-const std::uint32_t Profile::audio_data_stopped_timeout() const {
+const uint32_t Profile::audio_data_stopped_timeout() const {
   return audio_data_stopped_timeout_;
 }
 
-const std::uint32_t Profile::video_data_stopped_timeout() const {
+const uint32_t Profile::video_data_stopped_timeout() const {
   return video_data_stopped_timeout_;
 }
 
@@ -612,6 +614,7 @@ const std::string& Profile::tts_delimiter() const {
 const std::string& Profile::recording_file_source() const {
   return recording_file_source_;
 }
+
 const std::string& Profile::recording_file_name() const {
   return recording_file_name_;
 }
@@ -730,6 +733,7 @@ size_t Profile::malformed_frequency_time() const {
                 kMalformedFrequencyTime);
   return malformed_frequency_time;
 }
+
 uint32_t Profile::multiframe_waiting_timeout() const {
   uint32_t multiframe_waiting_timeout = 0;
   ReadUIntValue(&multiframe_waiting_timeout,
@@ -804,6 +808,7 @@ const std::vector<int>& Profile::force_protected_service() const {
 const std::vector<int>& Profile::force_unprotected_service() const {
   return force_unprotected_service_;
 }
+
 #endif  // ENABLE_SECURITY
 
 bool Profile::logs_enabled() const {
@@ -823,7 +828,7 @@ uint16_t Profile::open_attempt_timeout_ms_resumption_db() const {
 }
 
 void Profile::UpdateValues() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   // SDL version
   ReadStringValue(
@@ -850,12 +855,11 @@ void Profile::UpdateValues() {
 #endif  // WEB_HMI
 
 #ifdef ENABLE_SECURITY
-
   force_protected_service_ =
-      ReadIntContainer(kSecuritySection, kForceProtectedService, NULL);
+       ReadIntContainer(kSecuritySection, kForceProtectedService, NULL);
 
   force_unprotected_service_ =
-      ReadIntContainer(kSecuritySection, kForceUnprotectedService, NULL);
+       ReadIntContainer(kSecuritySection, kForceUnprotectedService, NULL);
 
   ReadStringValue(&security_manager_protocol_name_,
                   kDefaultSecurityProtocol,
@@ -898,9 +902,8 @@ void Profile::UpdateValues() {
                   kMainSection,
                   kAppConfigFolderKey);
 
-  if (IsRelativePath(app_config_folder_)) {
-    MakeAbsolutePath(app_config_folder_);
-  }
+  app_config_folder_ =
+      file_system::ConcatCurrentWorkingPath(app_config_folder_);
 
   LOG_UPDATED_VALUE(app_config_folder_, kAppConfigFolderKey, kMainSection);
 
@@ -910,9 +913,8 @@ void Profile::UpdateValues() {
                   kMainSection,
                   kAppStorageFolderKey);
 
-  if (IsRelativePath(app_storage_folder_)) {
-    MakeAbsolutePath(app_storage_folder_);
-  }
+  app_storage_folder_ =
+      file_system::ConcatCurrentWorkingPath(app_storage_folder_);
 
   LOG_UPDATED_VALUE(app_storage_folder_, kAppStorageFolderKey, kMainSection);
 
@@ -922,9 +924,8 @@ void Profile::UpdateValues() {
                   kMainSection,
                   kAppResourseFolderKey);
 
-  if (IsRelativePath(app_resource_folder_)) {
-    MakeAbsolutePath(app_resource_folder_);
-  }
+  app_resource_folder_ =
+      file_system::ConcatCurrentWorkingPath(app_resource_folder_);
 
   LOG_UPDATED_VALUE(app_resource_folder_, kAppResourseFolderKey, kMainSection);
 
@@ -945,9 +946,7 @@ void Profile::UpdateValues() {
                   kSDL4Section,
                   kAppIconsFolderKey);
 
-  if (IsRelativePath(app_icons_folder_)) {
-    MakeAbsolutePath(app_icons_folder_);
-  }
+  app_icons_folder_ = file_system::ConcatCurrentWorkingPath(app_icons_folder_);
 
   LOG_UPDATED_VALUE(app_icons_folder_, kAppIconsFolderKey, kSDL4Section);
 
@@ -994,7 +993,7 @@ void Profile::UpdateValues() {
                   kHmiCapabilitiesKey);
 
   hmi_capabilities_file_name_ =
-      app_config_folder_ + "/" + hmi_capabilities_file_name_;
+      file_system::ConcatPath(app_config_folder_, hmi_capabilities_file_name_);
 
   LOG_UPDATED_VALUE(
       hmi_capabilities_file_name_, kHmiCapabilitiesKey, kMainSection);
@@ -1090,7 +1089,8 @@ void Profile::UpdateValues() {
                   kMediaManagerSection,
                   kNamedVideoPipePathKey);
 
-  named_video_pipe_path_ = app_storage_folder_ + "/" + named_video_pipe_path_;
+  named_video_pipe_path_ =
+      file_system::ConcatPath(app_storage_folder_, named_video_pipe_path_);
 
   LOG_UPDATED_VALUE(
       named_video_pipe_path_, kNamedVideoPipePathKey, kMediaManagerSection);
@@ -1101,7 +1101,8 @@ void Profile::UpdateValues() {
                   kMediaManagerSection,
                   kNamedAudioPipePathKey);
 
-  named_audio_pipe_path_ = app_storage_folder_ + "/" + named_audio_pipe_path_;
+  named_audio_pipe_path_ =
+      file_system::ConcatPath(app_storage_folder_, named_audio_pipe_path_);
 
   LOG_UPDATED_VALUE(
       named_audio_pipe_path_, kNamedAudioPipePathKey, kMediaManagerSection);
@@ -1110,7 +1111,8 @@ void Profile::UpdateValues() {
   ReadStringValue(
       &video_stream_file_, "", kMediaManagerSection, kVideoStreamFileKey);
 
-  video_stream_file_ = app_storage_folder_ + "/" + video_stream_file_;
+  video_stream_file_ =
+      file_system::ConcatPath(app_storage_folder_, video_stream_file_);
 
   LOG_UPDATED_VALUE(
       video_stream_file_, kVideoStreamFileKey, kMediaManagerSection);
@@ -1119,7 +1121,8 @@ void Profile::UpdateValues() {
   ReadStringValue(
       &audio_stream_file_, "", kMediaManagerSection, kAudioStreamFileKey);
 
-  audio_stream_file_ = app_storage_folder_ + "/" + audio_stream_file_;
+  audio_stream_file_ =
+      file_system::ConcatPath(app_storage_folder_, audio_stream_file_);
 
   LOG_UPDATED_VALUE(
       audio_stream_file_, kAudioStreamFileKey, kMediaManagerSection);
@@ -1425,6 +1428,9 @@ void Profile::UpdateValues() {
                   kMainSection,
                   kSystemFilesPathKey);
 
+  system_files_path_ =
+      file_system::ConcatCurrentWorkingPath(system_files_path_);
+
   LOG_UPDATED_VALUE(system_files_path_, kSystemFilesPathKey, kMainSection);
 
   // Heartbeat timeout
@@ -1502,7 +1508,8 @@ void Profile::UpdateValues() {
                   kPolicySection,
                   kPreloadedPTKey);
 
-  preloaded_pt_file_ = app_config_folder_ + '/' + preloaded_pt_file_;
+  preloaded_pt_file_ =
+      file_system::ConcatPath(app_config_folder_, preloaded_pt_file_);
 
   LOG_UPDATED_VALUE(preloaded_pt_file_, kPreloadedPTKey, kPolicySection);
 
@@ -1780,8 +1787,8 @@ int32_t hex_to_int(const std::string& value) {
 }
 
 std::vector<int> Profile::ReadIntContainer(const char* const pSection,
-                                           const char* const pKey,
-                                           bool* out_result) const {
+                                         const char* const pKey,
+                                         bool* out_result) const {
   const std::vector<std::string> string_list =
       ReadStringContainer(pSection, pKey, out_result);
   std::vector<int> value_list;
@@ -1791,10 +1798,9 @@ std::vector<int> Profile::ReadIntContainer(const char* const pSection,
   return value_list;
 }
 
-std::vector<std::string> Profile::ReadStringContainer(
-    const char* const pSection,
-    const char* const pKey,
-    bool* out_result) const {
+std::vector<std::string> Profile::ReadStringContainer(const char* const pSection,
+                                                    const char* const pKey,
+                                                    bool* out_result) const {
   std::string string;
   const bool result = ReadValue(&string, pSection, pKey);
   if (out_result)
@@ -1853,7 +1859,6 @@ bool Profile::ReadUIntValue(uint32_t* value,
       *value = default_value;
       return false;
     }
-
     *value = static_cast<uint32_t>(user_value);
     return true;
   }
@@ -1892,18 +1897,6 @@ bool Profile::StringToNumber(const std::string& input, uint64_t& output) const {
   }
   output = user_value;
   return true;
-}
-
-bool Profile::IsRelativePath(const std::string& path) {
-  if (path.empty()) {
-    LOG4CXX_ERROR(logger_, "Empty path passed.");
-    return false;
-  }
-  return '/' != path[0];
-}
-
-void Profile::MakeAbsolutePath(std::string& path) {
-  path = file_system::CurrentWorkingDirectory() + "/" + path;
 }
 
 }  //  namespace profile

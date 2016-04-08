@@ -43,6 +43,7 @@
 #include <unistd.h>
 #else
 #define PATH_MAX _MAX_PATH
+#define snprintf _snprintf_s
 #endif
 
 #ifdef __linux__
@@ -137,7 +138,11 @@ char* ini_read_value(const char* fname,
       }
       if (INI_RIGHT_ITEM == result) {
         fclose(fp);
+#if defined(_MSC_VER)
+        snprintf(value, INI_LINE_LEN, INI_LINE_LEN, "%s", val);
+#else
         snprintf(value, INI_LINE_LEN, "%s", val);
+#endif
         return value;
       }
     }
@@ -181,8 +186,9 @@ char ini_write_value(const char* fname,
 
 #if USE_MKSTEMP
   {
-    const char* temp_str = "./";
+    char* temp_str;
     int32_t fd = -1;
+    temp_str = static_cast<char*>(getenv("TMPDIR"));
     if (temp_str) {
       snprintf(temp_fname, PATH_MAX, "%s/ini.XXXXXX", temp_str);
 
@@ -284,7 +290,11 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
   char temp_str[INI_LINE_LEN] = "";
   *temp_str = '\0';
 
+#if defined(_MSC_VER)
+  snprintf(value, INI_LINE_LEN, INI_LINE_LEN, "%s", line);
+#else
   snprintf(value, INI_LINE_LEN, "%s", line);
+#endif
 
   /* cut leading spaces */
   line_ptr = line;
@@ -298,7 +308,11 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
     }
   }
   if ('\0' == *line_ptr) {
+#if defined(_MSC_VER)
+    snprintf(value, INI_LINE_LEN, INI_LINE_LEN, "\n");
+#else
     snprintf(value, INI_LINE_LEN, "\n");
+#endif
     return INI_NOTHING;
   }
 
@@ -309,8 +323,8 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
     line_ptr++;
 
     /* cut leading stuff */
-    uint16_t len = strlen(line_ptr);
-    for (int32_t i = 0; i < len; i++) {
+    size_t len = strlen(line_ptr);
+    for (size_t i = 0; i < len; i++) {
       if ((*line_ptr == ' ') || (*line_ptr == 9) ||  // TAB
           (*line_ptr == 10) ||                       // LF
           (*line_ptr == 13)) {                       // CR
@@ -331,7 +345,7 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
     }
 
     /* cut trailing stuff */
-    for (int32_t i = strlen(temp_str) - 1; i > 0; i--) {
+    for (size_t i = strlen(temp_str) - 1; i > 0; i--) {
       if ((temp_str[i] == ' ') || (temp_str[i] == 9) ||  // TAB
           (temp_str[i] == 10) ||                         // LF
           (temp_str[i] == 13)) {                         // CR
@@ -341,7 +355,11 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
       }
     }
 
+#if defined(_MSC_VER)
+    snprintf(value, INI_LINE_LEN, INI_LINE_LEN, "%s", temp_str);
+#else
     snprintf(value, INI_LINE_LEN, "%s", temp_str);
+#endif
 
     for (uint32_t i = 0; i < strlen(temp_str); i++)
       temp_str[i] = toupper(temp_str[i]);
@@ -354,7 +372,7 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
   if (NULL != strchr(line_ptr, '=')) {
     strncpy(temp_str, line_ptr, (strchr(line_ptr, '=') - line_ptr));
     /* cut trailing stuff */
-    for (int32_t i = strlen(temp_str) - 1; i > 0; i--) {
+    for (size_t i = strlen(temp_str) - 1; i > 0; i--) {
       if ((temp_str[i] == '=') || (temp_str[i] == ' ') ||
           (temp_str[i] == 9) ||   // TAB
           (temp_str[i] == 10) ||  // LF
@@ -365,15 +383,19 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
       }
     }
 
+#if defined(_MSC_VER)
+    snprintf(value, INI_LINE_LEN, INI_LINE_LEN, "%s", temp_str);
+#else
     snprintf(value, INI_LINE_LEN, "%s", temp_str);
+#endif
 
     for (uint32_t i = 0; i < strlen(temp_str); i++)
       temp_str[i] = toupper(temp_str[i]);
     if (strcmp(temp_str, tag) == 0) {
       line_ptr = strchr(line_ptr, '=') + 1;
-      uint16_t len = strlen(line_ptr);
+      size_t len = strlen(line_ptr);
       /* cut trailing stuff */
-      for (uint32_t i = 0; i < len; i++) {
+      for (size_t i = 0; i < len; i++) {
         if ((*line_ptr == ' ') || (*line_ptr == 9) ||  // TAB
             (*line_ptr == 10) ||                       // LF
             (*line_ptr == 13)) {                       // CR
@@ -383,11 +405,15 @@ Ini_search_id ini_parse_line(const char* line, const char* tag, char* value) {
         }
       }
 
+#if defined(_MSC_VER)
+      snprintf(value, INI_LINE_LEN, INI_LINE_LEN, "%s", line_ptr);
+#else
       snprintf(value, INI_LINE_LEN, "%s", line_ptr);
+#endif
 
       if (value[0] != '\0') {
         /* cut trailing stuff */
-        for (int32_t i = strlen(value) - 1; i > 0; i--) {
+        for (size_t i = strlen(value) - 1; i > 0; i--) {
           if ((value[i] == ' ') || (value[i] == ';') ||
               (value[i] == 9) ||   // TAB
               (value[i] == 10) ||  // LF
