@@ -158,11 +158,11 @@ bool utils::TcpSocketConnection::Impl::CreateNotifictionPipes() {
   const int is_success = pipe(fds);
 
   if (!is_success) {
-    LOG4CXX_ERROR(logger_, "pipe creation failed: " << errno);
+    LOGGER_ERROR(logger_, "pipe creation failed: " << errno);
     return false;
   }
 
-  LOG4CXX_DEBUG(logger_, "pipe created");
+  LOGGER_DEBUG(logger_, "pipe created");
   read_fd_ = fds[0];
   write_fd_ = fds[1];
 

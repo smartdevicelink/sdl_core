@@ -50,44 +50,44 @@ timer::Timer::Timer(const std::string& name, TimerTask* task)
     , delegate_(this)
     , thread_(threads::CreateThread(name_.c_str(), &delegate_))
     , single_shot_(true) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   DCHECK(!name_.empty());
   DCHECK(task_);
   DCHECK(thread_);
-  LOG4CXX_DEBUG(logger_, "Timer " << name_ << " has been created");
+  LOGGER_DEBUG(logger_, "Timer " << name_ << " has been created");
 }
 
 timer::Timer::~Timer() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   Stop();
   DCHECK(thread_);
   DeleteThread(thread_);
   sync_primitives::AutoLock auto_lock(task_lock_);
   DCHECK(task_);
   delete task_;
-  LOG4CXX_DEBUG(logger_, "Timer " << name_ << " has been destroyed");
+  LOGGER_DEBUG(logger_, "Timer " << name_ << " has been destroyed");
 }
 
 void timer::Timer::Start(const Milliseconds timeout, const bool single_shot) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(thread_);
   Stop();
   delegate_.set_timeout(timeout);
   single_shot_ = single_shot;
   thread_->start();
   delegate_.set_stop_flag(false);
-  LOG4CXX_DEBUG(logger_, "Timer " << name_ << " has been started");
+  LOGGER_DEBUG(logger_, "Timer " << name_ << " has been started");
 }
 
 void timer::Timer::Stop() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(thread_);
   delegate_.set_stop_flag(true);
   if (!thread_->IsCurrentThread()) {
     thread_->join();
   }
   delegate_.set_timeout(0);
-  LOG4CXX_DEBUG(logger_, "Timer " << name_ << " has been stopped");
+  LOGGER_DEBUG(logger_, "Timer " << name_ << " has been stopped");
 }
 
 bool timer::Timer::is_running() const {
@@ -99,7 +99,7 @@ timer::Milliseconds timer::Timer::timeout() const {
 }
 
 void timer::Timer::OnTimeout() const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   delegate_.set_stop_flag(single_shot_);
   sync_primitives::AutoLock auto_lock(task_lock_);
   DCHECK_OR_RETURN_VOID(task_);
@@ -140,17 +140,17 @@ void timer::Timer::TimerDelegate::threadMain() {
   set_stop_flag(false);
   while (!stop_flag()) {
     const Milliseconds curr_timeout = timeout();
-    LOG4CXX_DEBUG(logger_, "Milliseconds left to wait: " << curr_timeout);
+    LOGGER_DEBUG(logger_, "Milliseconds left to wait: " << curr_timeout);
     if (sync_primitives::ConditionalVariable::kTimeout ==
         termination_condition_.WaitFor(auto_lock, curr_timeout)) {
-      LOG4CXX_DEBUG(
+      LOGGER_DEBUG(
           logger_,
           "Timer has finished counting. Timeout (ms): " << curr_timeout);
       if (timer_) {
         timer_->OnTimeout();
       }
     } else {
-      LOG4CXX_DEBUG(logger_, "Timer has been force reset");
+      LOGGER_DEBUG(logger_, "Timer has been force reset");
     }
   }
   set_timeout(0);
