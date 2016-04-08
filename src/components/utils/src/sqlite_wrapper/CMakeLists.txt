@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Ford Motor Company
+# Copyright (c) 2015, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,9 +30,16 @@
 
 set(target dbms)
 
-find_package(Sqlite3 REQUIRED)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  find_package(WinSqlite3 REQUIRED)
+else()
+  find_package(Sqlite3 REQUIRED)
+endif()
 
-include_directories(${COMPONENTS_DIR}/utils/include/utils)
+include_directories(
+  ${COMPONENTS_DIR}/utils/include/utils
+  ${SQLITE_INCLUDE_DIRECTORY}
+)
 
 set(SOURCES
   ./sql_database.cc

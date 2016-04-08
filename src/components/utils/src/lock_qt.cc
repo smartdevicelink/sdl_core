@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2014, Ford Motor Company
+﻿/*
+ * Copyright (c) 2015-2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,37 +30,81 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <apr_time.h>
-#include <log4cxx/spi/loggingevent.h>
+#include "utils/lock.h"
+#include "utils/logger.h"
 
-#include "utils/auto_trace.h"
-#include "utils/push_log.h"
+namespace sync_primitives {
 
-namespace logger {
+CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
-AutoTrace::AutoTrace(log4cxx::LoggerPtr logger,
-                     const log4cxx::spi::LocationInfo& location)
-    : logger_(logger), location_(location) {
-  if (logger::logs_enabled() && logger_->isTraceEnabled()) {
-    push_log(logger_,
-             ::log4cxx::Level::getTrace(),
-             "Enter",
-             apr_time_now(),
-             location_,
-             ::log4cxx::spi::LoggingEvent::getCurrentThreadName());
-  }
+Lock::Lock()
+#ifndef NDEBUG
+    : lock_taken_(0)
+    , is_mutex_recursive_(false)
+#endif  // NDEBUG
+{
+  Init(false);
 }
 
-AutoTrace::~AutoTrace() {
-  if (logger::logs_enabled() && logger_->isTraceEnabled()) {
-    push_log(logger_,
-             ::log4cxx::Level::getTrace(),
-             "Exit",
-             apr_time_now(),
-             location_,  // the location corresponds rather to creation of
-                         // autotrace object than to deletion
-             ::log4cxx::spi::LoggingEvent::getCurrentThreadName());
-  }
+Lock::Lock(bool is_recursive)
+#ifndef NDEBUG
+    : lock_taken_(0)
+    , is_mutex_recursive_(is_recursive)
+#endif  // NDEBUG
+{
+  Init(is_recursive);
 }
 
-}  // namespace logger
+Lock::~Lock() {
+#ifndef NDEBUG
+  if (0 < lock_taken_) {
+    LOGGER_ERROR(logger_, "Destroying non-released mutex " << &mutex_);
+  }
+#endif
+  delete mutex_;
+  mutex_ = NULL;
+}
+
+void Lock::Acquire() {
+  mutex_->lock();
+  AssertFreeAndMarkTaken();
+}
+
+void Lock::Release() {
+  AssertTakenAndMarkFree();
+  mutex_->unlock();
+}
+
+bool Lock::Try() {
+  if (mutex_->tryLock()) {
+#ifndef NDEBUG
+    lock_taken_++;
+#endif
+    return true;
+  }
+  return false;
+}
+
+#ifndef NDEBUG
+void Lock::AssertFreeAndMarkTaken() {
+  if ((0 < lock_taken_) && !is_mutex_recursive_) {
+    NOTREACHED();
+  }
+  lock_taken_++;
+}
+void Lock::AssertTakenAndMarkFree() {
+  if (!lock_taken_) {
+    NOTREACHED();
+  }
+  lock_taken_--;
+}
+#endif
+
+void Lock::Init(bool is_recursive) {
+  const QMutex::RecursionMode mutex_type =
+      is_recursive ? QMutex::Recursive : QMutex::NonRecursive;
+
+  mutex_ = new QMutex(mutex_type);
+}
+
+}  // namespace sync_primitives

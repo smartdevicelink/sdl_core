@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,11 +29,34 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "utils/threads/thread_delegate.h"
 
-#include "utils/logger_status.h"
+#include <pthread.h>
 
-namespace logger {
+#include "utils/threads/thread.h"
+#include "utils/lock.h"
 
-volatile LoggerStatus logger_status = LoggerThreadNotCreated;
+namespace threads {
 
-}  // namespace logger
+ThreadDelegate::~ThreadDelegate() {
+  if (thread_) {
+    thread_->set_delegate(NULL);
+  }
+}
+
+void ThreadDelegate::exitThreadMain() {
+  if (thread_) {
+    if (thread_->thread_handle() == pthread_self()) {
+      pthread_exit(NULL);
+    } else {
+      pthread_cancel(thread_->thread_handle());
+    }
+  }
+}
+
+void ThreadDelegate::set_thread(Thread* thread) {
+  DCHECK(thread);
+  thread_ = thread;
+}
+
+}  // namespace threads

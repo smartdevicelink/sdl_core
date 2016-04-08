@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,24 +29,32 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "utils/threads/thread_delegate.h"
+#include "utils/winhdr.h"
+#include "utils/threads/thread.h"
+#include "utils/lock.h"
 
-#ifndef SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_STATUS_H_
-#define SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_STATUS_H_
+namespace threads {
 
-namespace logger {
+ThreadDelegate::~ThreadDelegate() {
+  if (thread_) {
+    thread_->set_delegate(NULL);
+  }
+}
 
-typedef enum {
-  LoggerThreadNotCreated,
-  CreatingLoggerThread,
-  LoggerThreadCreated,
-  DeletingLoggerThread
-} LoggerStatus;
+void ThreadDelegate::exitThreadMain() {
+  if (thread_) {
+    if (thread_->thread_handle() == GetCurrentThread()) {
+      ExitThread(kThreadCancelledExitCode);
+    } else {
+      TerminateThread(thread_->thread_handle(), kThreadCancelledExitCode);
+    }
+  }
+}
 
-// this variable is only changed when creating and deleting logger thread
-// its reads and writes are believed to be atomic
-// thus it shall be considered thread safe
-extern volatile LoggerStatus logger_status;
+void ThreadDelegate::set_thread(Thread* thread) {
+  DCHECK(thread);
+  thread_ = thread;
+}
 
-}  // namespace logger
-
-#endif  // SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_STATUS_H_
+}  // namespace threads

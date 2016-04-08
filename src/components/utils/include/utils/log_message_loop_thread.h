@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,30 +29,46 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOG_MESSAGE_LOOP_THREAD_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOG_MESSAGE_LOOP_THREAD_H_
 
 #include <string>
 #include <queue>
+
+#if defined(LOG4CXX_LOGGER)
 #include <log4cxx/logger.h>
+#elif defined(WIN_NATIVE)
+#include "utils/winhdr.h"
+#elif defined(QT_PORT)
+#include <QDateTime>
+#else
+#error "Logger is not implemented for this platform"
+#endif
 
 #include "utils/macro.h"
 #include "utils/threads/message_loop_thread.h"
 
 namespace logger {
 
-typedef struct {
-  log4cxx::LoggerPtr logger;
-  log4cxx::LevelPtr level;
-  std::string entry;
-  log4cxx_time_t timeStamp;
-  log4cxx::spi::LocationInfo location;
-  log4cxx::LogString threadName;
-} LogMessage;
+struct LogMessage {
+  logger::LoggerType logger_;
+  logger::LogLevel::Type level_;
+  std::string entry_;
+  logger::LogLocation location_;
+#if defined(LOG4CXX_LOGGER)
+  log4cxx_time_t time_;
+  log4cxx::LogString thread_name_;
+#elif defined(WIN_NATIVE)
+  SYSTEMTIME time_;
+  uint32_t thread_id_;
+  FILE* output_file_;
+#elif defined(QT_PORT)
+  QDateTime time_;
+  uint32_t thread_id_;
+#endif
+};
 
 typedef std::queue<LogMessage> LogMessageQueue;
-
 typedef threads::MessageLoopThread<LogMessageQueue>
     LogMessageLoopThreadTemplate;
 
@@ -63,9 +79,12 @@ class LogMessageHandler : public LogMessageLoopThreadTemplate::Handler {
 
 class LogMessageLoopThread : public LogMessageLoopThreadTemplate {
  public:
-  LogMessageLoopThread();
-  ~LogMessageLoopThread();
+  LogMessageLoopThread()
+      : LogMessageLoopThreadTemplate("Logger", new LogMessageHandler()) {}
 
+  ~LogMessageLoopThread() {}
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(LogMessageLoopThread);
 };
 

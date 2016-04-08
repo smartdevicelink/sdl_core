@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,26 +29,57 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef SRC_COMPONENTS_INCLUDE_UTILS_PIMPL_IMPL_H_
+#define SRC_COMPONENTS_INCLUDE_UTILS_PIMPL_IMPL_H_
 
-#ifndef SRC_COMPONENTS_INCLUDE_UTILS_AUTO_TRACE_H_
-#define SRC_COMPONENTS_INCLUDE_UTILS_AUTO_TRACE_H_
+#include "utils/pimpl.h"
+#include <algorithm>
 
-#include <log4cxx/logger.h>
-#include <string>
+template <typename Impl>
+void utils::SwapAssigner<Impl>::operator()(Impl& lhs, Impl& rhs) const {
+  std::swap(lhs, rhs);
+}
 
-namespace logger {
+template <typename Impl>
+void utils::CopyAssigner<Impl>::operator()(Impl& lhs, Impl& rhs) const {
+  lhs = rhs;
+}
 
-class AutoTrace {
- public:
-  AutoTrace(log4cxx::LoggerPtr logger,
-            const log4cxx::spi::LocationInfo& location);
-  ~AutoTrace();
+template <typename Impl, typename Assigner>
+utils::Pimpl<Impl, Assigner>::Pimpl()
+    : impl_(new Impl()) {}
 
- private:
-  log4cxx::LoggerPtr logger_;
-  log4cxx::spi::LocationInfo location_;
-};
+template <typename Impl, typename Assigner>
+utils::Pimpl<Impl, Assigner>::Pimpl(Impl* impl)
+    : impl_(impl) {}
 
-}  // namespace logger
+template <typename Impl, typename Assigner>
+utils::Pimpl<Impl, Assigner>::~Pimpl() {
+  delete impl_;
+}
 
-#endif  // SRC_COMPONENTS_INCLUDE_UTILS_AUTO_TRACE_H_
+template <typename Impl, typename Assigner>
+utils::Pimpl<Impl, Assigner>::Pimpl(utils::Pimpl<Impl, Assigner>& rhs) {
+  Assigner assigner;
+  assigner(*this->impl_, *rhs.impl_);
+}
+
+template <typename Impl, typename Assigner>
+utils::Pimpl<Impl, Assigner>& utils::Pimpl<Impl, Assigner>::operator=(
+    utils::Pimpl<Impl, Assigner>& rhs) {
+  Assigner assigner;
+  assigner(*this->impl_, *rhs.impl_);
+  return *this;
+}
+
+template <typename Impl, typename Assigner>
+Impl* utils::Pimpl<Impl, Assigner>::operator->() const {
+  return impl_;
+}
+
+template <typename Impl, typename Assigner>
+Impl& utils::Pimpl<Impl, Assigner>::operator&() const {
+  return *impl_;
+}
+
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_PIMPL_IMPL_H_

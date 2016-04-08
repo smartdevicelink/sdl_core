@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,27 +29,37 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "utils/shared_library.h"
 
-#include "utils/log_message_loop_thread.h"
-#include "utils/logger_status.h"
+utils::SharedLibrary::SharedLibrary() : library_() {}
 
-namespace logger {
-
-void LogMessageHandler::Handle(const LogMessage message) {
-  message.logger->forcedLog(message.level,
-                            message.entry,
-                            message.timeStamp,
-                            message.location,
-                            message.threadName);
+utils::SharedLibrary::SharedLibrary(const char* library_name) : library_() {
+  Load(library_name);
 }
 
-LogMessageLoopThread::LogMessageLoopThread()
-    : LogMessageLoopThreadTemplate("Logger", new LogMessageHandler()) {}
-
-LogMessageLoopThread::~LogMessageLoopThread() {
-  // we'll have to drop messages
-  // while deleting logger thread
-  logger_status = DeletingLoggerThread;
+bool utils::SharedLibrary::Load(const char* library_name) {
+  if (library_.isLoaded()) {
+    return true;
+  }
+  library_.setFileName(library_name);
+  library_.load();
+  return IsLoaded();
 }
 
-}  // namespace logger
+void utils::SharedLibrary::Unload() {
+  library_.unload();
+}
+
+bool utils::SharedLibrary::IsLoaded() const {
+  return library_.isLoaded();
+}
+
+void* utils::SharedLibrary::GetSymbol(const char* name) {
+  void* result = NULL;
+  result = library_.resolve(name);
+  return result;
+}
+
+bool utils::SharedLibrary::HasSymbol(const char* name) {
+  return GetSymbol(name) != NULL;
+}

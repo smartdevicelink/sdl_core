@@ -97,9 +97,9 @@ class MessageQueue {
   void wait();
 
   /**
-    * \brief waitUntilEmpty message queue
-    * Wait until message queue is empty
-    */
+   * \brief waitUntilEmpty message queue
+   * Wait until message queue is empty
+   */
   void WaitUntilEmpty();
 
   /**

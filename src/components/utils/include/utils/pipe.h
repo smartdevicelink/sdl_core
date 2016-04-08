@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,30 +29,34 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_PIPE_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_PIPE_H_
 
-#include "utils/logger.h"
-#include "utils/log_message_loop_thread.h"
-#include "utils/logger_status.h"
-#include <apr_time.h>
+#include <string>
+#include <cstdint>
+#include <cstddef>
 
-void deinit_logger() {
-  CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-  LOG4CXX_DEBUG(logger_, "Logger deinitialization");
-  logger::set_logs_enabled(false);
-  logger::delete_log_message_loop_thread();
-  log4cxx::LoggerPtr rootLogger = log4cxx::Logger::getRootLogger();
-  log4cxx::spi::LoggerRepositoryPtr repository =
-      rootLogger->getLoggerRepository();
-  log4cxx::LoggerList loggers = repository->getCurrentLoggers();
-  for (log4cxx::LoggerList::iterator i = loggers.begin(); i != loggers.end();
-       ++i) {
-    log4cxx::LoggerPtr logger = *i;
-    logger->removeAllAppenders();
-  }
-  rootLogger->removeAllAppenders();
-  logger::logger_status = logger::LoggerThreadNotCreated;
-}
+#include "utils/pimpl.h"
 
-log4cxx_time_t time_now() {
-  return apr_time_now();
-}
+namespace utils {
+
+class Pipe {
+ public:
+  Pipe(const std::string& name);
+
+  bool Open();
+  void Close();
+  bool IsOpen() const;
+
+  bool Write(const uint8_t* buffer,
+             size_t bytes_to_write,
+             size_t& bytes_written);
+
+ private:
+  class Impl;
+  Pimpl<Impl> impl_;
+};
+
+}  // namespace utils
+
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_PIPE_H_

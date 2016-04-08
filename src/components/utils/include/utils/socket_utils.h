@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,29 +29,15 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SOCKET_UTILS_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SOCKET_UTILS_H_
 
-#ifndef SRC_COMPONENTS_INCLUDE_UTILS_PUSH_LOG_H_
-#define SRC_COMPONENTS_INCLUDE_UTILS_PUSH_LOG_H_
+namespace utils {
 
-#include <log4cxx/logger.h>
-#include <string>
+void EnableKeepalive(int socket,
+                     int keepalive_time_sec,
+                     int keepalive_Interval_sec);
 
-namespace logger {
+}  // namespace utils
 
-bool push_log(log4cxx::LoggerPtr logger,
-              log4cxx::LevelPtr level,
-              const std::string& entry,
-              log4cxx_time_t timeStamp,
-              const log4cxx::spi::LocationInfo& location,
-              const log4cxx::LogString& threadName);
-
-void flush_logger();
-
-bool logs_enabled();
-void set_logs_enabled(bool state);
-
-void create_log_message_loop_thread();
-void delete_log_message_loop_thread();
-}  // namespace logger
-
-#endif  // SRC_COMPONENTS_INCLUDE_UTILS_PUSH_LOG_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SOCKET_UTILS_H_

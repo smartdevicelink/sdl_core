@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,35 +29,45 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_HOST_ADDRESS_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_HOST_ADDRESS_H_
 
-#include "utils/threads/thread_delegate.h"
+#include <cstdint>
+#include <string>
 
-#include <pthread.h>
+namespace utils {
 
-#include "utils/threads/thread.h"
-#include "utils/lock.h"
+namespace SpecialAddress {
+enum Type { Any, LoopBack };
+}  // namespace SpecialAddress
 
-namespace threads {
+class HostAddress {
+ public:
+  HostAddress();
 
-ThreadDelegate::~ThreadDelegate() {
-  if (thread_) {
-    thread_->set_delegate(NULL);
-  }
-}
+  explicit HostAddress(const SpecialAddress::Type address);
 
-void ThreadDelegate::exitThreadMain() {
-  if (thread_) {
-    if (thread_->IsCurrentThread()) {
-      pthread_exit(NULL);
-    } else {
-      pthread_cancel(thread_->thread_handle());
-    }
-  }
-}
+  explicit HostAddress(const std::string& ip4_address);
 
-void ThreadDelegate::set_thread(Thread* thread) {
-  DCHECK(thread);
-  thread_ = thread;
-}
+  HostAddress(const uint32_t ip4_address, const bool is_host_byte_order);
 
-}  // namespace threads
+  bool operator==(const HostAddress& address) const;
+
+  bool operator==(const SpecialAddress::Type address) const;
+
+  inline bool operator!=(const HostAddress& address) const;
+
+  inline bool operator!=(const SpecialAddress::Type address) const;
+
+  uint32_t ToIp4Address(const bool is_host_byte_order) const;
+
+  std::string ToString() const;
+
+ private:
+  // Address in the network byte order
+  uint32_t ip4_;
+};
+
+}  // namespace utils
+
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_HOST_ADDRESS_H_

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,20 +29,21 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include <sys/time.h>
+#include <QDateTime>
 #include <stdint.h>
+
 #include "utils/date_time.h"
 
 namespace date_time {
 
 TimevalStruct DateTime::getCurrentTime() {
-  TimevalStruct currentTime;
-  timezone timeZone;
+  const qint64 tmpres = QDateTime::currentMSecsSinceEpoch();
 
-  gettimeofday(&currentTime, &timeZone);
-
-  return currentTime;
+  TimevalStruct tv;
+  tv.tv_sec = static_cast<long>(tmpres / kMillisecondsInSecond);
+  tv.tv_usec = static_cast<long>((tmpres % kMillisecondsInSecond) *
+                                 kMicrosecondsInMillisecond);
+  return tv;
 }
 
 int64_t date_time::DateTime::getSecs(const TimevalStruct& time) {
@@ -52,14 +53,14 @@ int64_t date_time::DateTime::getSecs(const TimevalStruct& time) {
 
 int64_t DateTime::getmSecs(const TimevalStruct& time) {
   const TimevalStruct times = ConvertionUsecs(time);
-  return static_cast<int64_t>(times.tv_sec) * MILLISECONDS_IN_SECOND +
-         times.tv_usec / MICROSECONDS_IN_MILLISECOND;
+  return static_cast<int64_t>(times.tv_sec) * kMillisecondsInSecond +
+         times.tv_usec / kMicrosecondsInMillisecond;
 }
 
 int64_t DateTime::getuSecs(const TimevalStruct& time) {
   const TimevalStruct times = ConvertionUsecs(time);
-  return static_cast<int64_t>(times.tv_sec) * MILLISECONDS_IN_SECOND *
-             MICROSECONDS_IN_MILLISECOND +
+  return static_cast<int64_t>(times.tv_sec) * kMillisecondsInSecond *
+             kMicrosecondsInMillisecond +
          times.tv_usec;
 }
 
@@ -81,9 +82,9 @@ int64_t DateTime::calculateTimeDiff(const TimevalStruct& time1,
 }
 
 void DateTime::AddMilliseconds(TimevalStruct& time, uint32_t milliseconds) {
-  const uint32_t sec = milliseconds / MILLISECONDS_IN_SECOND;
+  const uint32_t sec = milliseconds / kMillisecondsInSecond;
   const uint32_t usec =
-      (milliseconds % MILLISECONDS_IN_SECOND) * MICROSECONDS_IN_MILLISECOND;
+      (milliseconds % kMillisecondsInSecond) * kMicrosecondsInMillisecond;
   time.tv_sec += sec;
   time.tv_usec += usec;
   time = ConvertionUsecs(time);
@@ -94,7 +95,13 @@ TimevalStruct DateTime::Sub(const TimevalStruct& time1,
   const TimevalStruct times1 = ConvertionUsecs(time1);
   const TimevalStruct times2 = ConvertionUsecs(time2);
   TimevalStruct ret;
-  timersub(&times1, &times2, &ret);
+
+  ret.tv_sec = times1.tv_sec - times2.tv_sec;
+  ret.tv_usec = times1.tv_usec - times2.tv_usec;
+  if (ret.tv_usec < 0) {
+    --ret.tv_sec;
+    ret.tv_usec += 1000000;
+  }
   return ret;
 }
 
@@ -126,11 +133,11 @@ TimeCompare date_time::DateTime::compareTime(const TimevalStruct& time1,
 }
 
 TimevalStruct date_time::DateTime::ConvertionUsecs(const TimevalStruct& time) {
-  if (time.tv_usec >= MICROSECONDS_IN_SECOND) {
+  if (time.tv_usec >= kMicrosecondsInSecond) {
     TimevalStruct time1;
     time1.tv_sec = static_cast<int64_t>(time.tv_sec) +
-                   (time.tv_usec / MICROSECONDS_IN_SECOND);
-    time1.tv_usec = static_cast<int64_t>(time.tv_usec) % MICROSECONDS_IN_SECOND;
+                   (time.tv_usec / kMicrosecondsInSecond);
+    time1.tv_usec = static_cast<int64_t>(time.tv_usec) % kMicrosecondsInSecond;
     return time1;
   }
   return time;

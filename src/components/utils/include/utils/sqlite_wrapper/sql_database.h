@@ -49,8 +49,8 @@ class SQLQuery;
  */
 class SQLDatabase {
  public:
-  SQLDatabase();
-  explicit SQLDatabase(const std::string& filename);
+  SQLDatabase(const std::string& database_path,
+              const std::string& connection_name);
   ~SQLDatabase();
 
   /**
@@ -89,10 +89,11 @@ class SQLDatabase {
   SQLError LastError() const;
 
   /**
-   * Sets path to database
-   * If the database is already opened then need reopen it
+   * @brief HasErrors Indicate the status of the last executed operation.
+   *
+   * @return true in case last operation has any errors, false otherwise.
    */
-  void set_path(const std::string& path);
+  bool HasErrors() const;
 
   /**
    * @brief get_path databse location path.
@@ -113,17 +114,21 @@ class SQLDatabase {
   bool Backup();
 
  protected:
+#ifndef QT_PORT
   /**
-   * Gets connection to the SQLite database
-   * @return pointer to connection
-   */
+    * Gets connection to the SQLite database
+    * @return pointer to connection
+    */
   sqlite3* conn() const;
+#endif  // QT_PORT
 
  private:
+#ifndef QT_PORT
   /**
    * The connection to the SQLite database
    */
   sqlite3* conn_;
+#endif  // QT_PORT
 
   /**
    * Lock for guarding connection to database
@@ -133,11 +138,13 @@ class SQLDatabase {
   /**
    * The filename of database
    */
-  std::string databasename_;
+  const std::string database_path_;
 
   /**
-   * The last error that occurred on the database
+   * The database connection name
    */
+  const std::string connection_name_;
+
   int error_;
 
   /**

@@ -41,7 +41,6 @@
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/shared_ptr.h"
-#include "utils/lock.h"
 
 namespace threads {
 
@@ -69,7 +68,8 @@ class MessageLoopThread {
      * from it's queue. After calling this method message is discarded.
      */
     // TODO (AKozoriz) : change to const reference (APPLINK-20235)
-    virtual void Handle(const Message message) = 0;
+    virtual void Handle(
+        const Message message) = 0;
 
     virtual ~Handler() {}
   };
@@ -141,7 +141,7 @@ MessageLoopThread<Q>::MessageLoopThread(const std::string& name,
   const bool started = thread_->start(thread_opts);
   if (!started) {
     CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-    LOG4CXX_ERROR(logger_, "Failed to start thread " << name);
+    LOGGER_ERROR(logger_, "Failed to start thread " << name);
   }
 }
 
@@ -179,7 +179,7 @@ MessageLoopThread<Q>::LoopThreadDelegate::LoopThreadDelegate(
 template <class Q>
 void MessageLoopThread<Q>::LoopThreadDelegate::threadMain() {
   CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   while (!message_queue_.IsShuttingDown()) {
     DrainQue();
     message_queue_.wait();
@@ -190,6 +190,8 @@ void MessageLoopThread<Q>::LoopThreadDelegate::threadMain() {
 
 template <class Q>
 void MessageLoopThread<Q>::LoopThreadDelegate::exitThreadMain() {
+  CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
+  LOGGER_AUTO_TRACE(logger_);
   message_queue_.Shutdown();
 }
 
@@ -202,6 +204,5 @@ void MessageLoopThread<Q>::LoopThreadDelegate::DrainQue() {
     }
   }
 }
-
 }  // namespace threads
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_THREADS_MESSAGE_LOOP_THREAD_H_

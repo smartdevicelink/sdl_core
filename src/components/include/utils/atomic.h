@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2013-2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,14 +33,18 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_ATOMIC_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_ATOMIC_H_
 
-#ifdef __QNXNTO__
+#if defined(__QNXNTO__)
 #include <atomic.h>
+#elif defined(OS_WINDOWS)
+#include "utils/winhdr.h"
 #endif
 
 #if defined(__QNXNTO__)
 #define atomic_post_inc(ptr) atomic_add_value((ptr), 1)
 #elif defined(__GNUG__)
 #define atomic_post_inc(ptr) __sync_fetch_and_add((ptr), 1)
+#elif defined(OS_WINDOWS)
+#define atomic_post_inc(ptr) (InterlockedIncrement((ptr)) - 1)
 #else
 #warning "atomic_post_inc() implementation is not atomic"
 #define atomic_post_inc(ptr) (*(ptr))++
@@ -50,36 +54,36 @@
 #define atomic_post_dec(ptr) atomic_sub_value((ptr), 1)
 #elif defined(__GNUG__)
 #define atomic_post_dec(ptr) __sync_fetch_and_sub((ptr), 1)
+#elif defined(OS_WINDOWS)
+#define atomic_post_dec(ptr) (InterlockedDecrement((ptr)) + 1)
 #else
 #warning "atomic_post_dec() implementation is not atomic"
 #define atomic_post_dec(ptr) (*(ptr))--
 #endif
 
-#if defined(__QNXNTO__)
-// on QNX pointer assignment is believed to be atomic
+// pointer assignment is believed to be atomic
 #define atomic_pointer_assign(dst, src) (dst) = (src)
-#elif defined(__GNUG__)
-// with g++ pointer assignment is believed to be atomic
-#define atomic_pointer_assign(dst, src) (dst) = (src)
-#else
-#warning atomic_pointer_assign() implementation may be non-atomic
-#define atomic_pointer_assign(dst, src) (dst) = (src)
-#endif
 
 #if defined(__QNXNTO__)
 #define atomic_post_set(dst) atomic_set_value(dst, 1)
 #elif defined(__GNUG__)
 #define atomic_post_set(dst) __sync_val_compare_and_swap((dst), 0, 1)
+#elif defined(OS_WINDOWS)
+#define atomic_post_set(dst) InterlockedCompareExchange((dst), 1, 0)
 #else
-#error "atomic post set operation not defined"
+#warning "atomic_post_set() implementation is not atomic"
+#define atomic_post_set(dst) (dst) = (dst) == 0 ? 1 : (dst)
 #endif
 
 #if defined(__QNXNTO__)
 #define atomic_post_clr(dst) atomic_clr_value(dst, 1)
 #elif defined(__GNUG__)
 #define atomic_post_clr(dst) __sync_val_compare_and_swap((dst), 1, 0)
+#elif defined(OS_WINDOWS)
+#define atomic_post_clr(dst) InterlockedCompareExchange((dst), 0, 1)
 #else
-#error "atomic post clear operation not defined"
+#warning "atomic_post_clr() implementation is not atomic"
+#define atomic_post_clr(dst) (dst) = (dst) == 1 ? 0 : (dst)
 #endif
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_ATOMIC_H_
