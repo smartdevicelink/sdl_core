@@ -85,7 +85,7 @@ A2DPSourcePlayerAdapter::~A2DPSourcePlayerAdapter() {
 }
 
 void A2DPSourcePlayerAdapter::StartActivity(int32_t application_key) {
-  LOG4CXX_INFO(logger_,
+  LOGGER_INFO(logger_,
                "Starting a2dp playing music for " << application_key
                                                   << " application.");
   if (application_key != current_application_) {
@@ -115,7 +115,7 @@ void A2DPSourcePlayerAdapter::StartActivity(int32_t application_key) {
 }
 
 void A2DPSourcePlayerAdapter::StopActivity(int32_t application_key) {
-  LOG4CXX_INFO(logger_,
+  LOGGER_INFO(logger_,
                "Stopping 2dp playing for " << application_key
                                            << " application.");
   if (application_key != current_application_) {
@@ -147,7 +147,7 @@ A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::A2DPSourcePlayerThread(
     : threads::ThreadDelegate(), device_(device) {}
 
 void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::freeStreams() {
-  LOG4CXX_INFO(logger_, "Free streams in A2DPSourcePlayerThread.");
+  LOGGER_INFO(logger_, "Free streams in A2DPSourcePlayerThread.");
   if (s_in) {
     pa_simple_free(s_in);
   }
@@ -163,7 +163,7 @@ void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::exitThreadMain() {
 }
 
 void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::threadMain() {
-  LOG4CXX_INFO(logger_, "Main thread of A2DPSourcePlayerThread.");
+  LOGGER_INFO(logger_, "Main thread of A2DPSourcePlayerThread.");
 
   {
     sync_primitives::AutoLock auto_lock(should_be_stopped_lock_);
@@ -174,9 +174,9 @@ void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::threadMain() {
 
   const char* a2dpSource = device_.c_str();
 
-  LOG4CXX_DEBUG(logger_, device_);
+  LOGGER_DEBUG(logger_, device_);
 
-  LOG4CXX_DEBUG(logger_, "Creating streams");
+  LOGGER_DEBUG(logger_, "Creating streams");
 
   /* Create a new playback stream */
   if (!(s_out = pa_simple_new(NULL,
@@ -188,7 +188,7 @@ void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::threadMain() {
                               NULL,
                               NULL,
                               &error))) {
-    LOG4CXX_ERROR(logger_, "pa_simple_new() failed: " << pa_strerror(error));
+    LOGGER_ERROR(logger_, "pa_simple_new() failed: " << pa_strerror(error));
     freeStreams();
     return;
   }
@@ -202,12 +202,12 @@ void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::threadMain() {
                              NULL,
                              NULL,
                              &error))) {
-    LOG4CXX_ERROR(logger_, "pa_simple_new() failed: " << pa_strerror(error));
+    LOGGER_ERROR(logger_, "pa_simple_new() failed: " << pa_strerror(error));
     freeStreams();
     return;
   }
 
-  LOG4CXX_DEBUG(logger_, "Entering main loop");
+  LOGGER_DEBUG(logger_, "Entering main loop");
 
   for (;;) {
     uint8_t buf[BUFSIZE];
@@ -215,29 +215,29 @@ void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::threadMain() {
     pa_usec_t latency;
 
     if ((latency = pa_simple_get_latency(s_in, &error)) == (pa_usec_t)-1) {
-      LOG4CXX_ERROR(logger_,
+      LOGGER_ERROR(logger_,
                     "pa_simple_get_latency() failed: " << pa_strerror(error));
       break;
     }
 
-    // LOG4CXX_INFO(logger_, "In: " << static_cast<float>(latency));
+    // LOGGER_INFO(logger_, "In: " << static_cast<float>(latency));
 
     if ((latency = pa_simple_get_latency(s_out, &error)) == (pa_usec_t)-1) {
-      LOG4CXX_ERROR(logger_,
+      LOGGER_ERROR(logger_,
                     "pa_simple_get_latency() failed: " << pa_strerror(error));
       break;
     }
 
-    // LOG4CXX_INFO(logger_, "Out: " << static_cast<float>(latency));
+    // LOGGER_INFO(logger_, "Out: " << static_cast<float>(latency));
 
     if (pa_simple_read(s_in, buf, sizeof(buf), &error) < 0) {
-      LOG4CXX_ERROR(logger_, "read() failed: " << strerror(error));
+      LOGGER_ERROR(logger_, "read() failed: " << strerror(error));
       break;
     }
 
     /* ... and play it */
     if (pa_simple_write(s_out, buf, sizeof(buf), &error) < 0) {
-      LOG4CXX_ERROR(logger_,
+      LOGGER_ERROR(logger_,
                     "pa_simple_write() failed: " << pa_strerror(error));
       break;
     }
@@ -256,7 +256,7 @@ void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::threadMain() {
 
   /* Make sure that every single sample was played */
   if (pa_simple_drain(s_out, &error) < 0) {
-    LOG4CXX_ERROR(logger_, "pa_simple_drain() failed: " << pa_strerror(error));
+    LOGGER_ERROR(logger_, "pa_simple_drain() failed: " << pa_strerror(error));
     freeStreams();
     return;
   }
