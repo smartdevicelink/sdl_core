@@ -49,7 +49,7 @@ class UIGetCapabilitiesRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIGetCapabilitiesRequest(const MessageSharedPtr& message);
+  explicit UIGetCapabilitiesRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief UIGetCapabilitiesRequest class destructor

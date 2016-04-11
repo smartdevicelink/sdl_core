@@ -50,7 +50,7 @@ class OnResumeAudioSourceNotification : public NotificationToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnResumeAudioSourceNotification(const MessageSharedPtr& message);
+  explicit OnResumeAudioSourceNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnResumeAudioSourceNotification class destructor

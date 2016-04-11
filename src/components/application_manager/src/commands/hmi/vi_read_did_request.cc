@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-VIReadDIDRequest::VIReadDIDRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
+VIReadDIDRequest::VIReadDIDRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {
 }
 
 VIReadDIDRequest::~VIReadDIDRequest() {

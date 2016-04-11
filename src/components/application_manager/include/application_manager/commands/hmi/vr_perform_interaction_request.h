@@ -49,7 +49,7 @@ class VRPerformInteractionRequest : public RequestToHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit VRPerformInteractionRequest(const MessageSharedPtr& message);
+    explicit VRPerformInteractionRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief VRPerformInteractionRequest class destructor

@@ -31,8 +31,9 @@
  */
 
 #include "application_manager/commands/hmi/on_exit_application_notification.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
+#include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -42,7 +43,7 @@ namespace application_manager {
 namespace commands {
 
 OnExitApplicationNotification::OnExitApplicationNotification(
-    const MessageSharedPtr& message) : NotificationFromHMI(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager) : NotificationFromHMI(message, application_manager) {
 }
 
 OnExitApplicationNotification::~OnExitApplicationNotification() {
@@ -54,10 +55,9 @@ void OnExitApplicationNotification::Run() {
   using namespace mobile_apis;
   using namespace hmi_apis;
 
-  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
   uint32_t app_id = (*message_)[strings::msg_params][strings::app_id].asUInt();
-  ApplicationSharedPtr app_impl = app_mgr->application(app_id);
-      
+  ApplicationSharedPtr app_impl = application_manager_.application(app_id);
+
   if (!(app_impl.valid())) {
     LOG4CXX_ERROR(logger_, "Application does not exist");
     return;
@@ -69,24 +69,27 @@ void OnExitApplicationNotification::Run() {
 
   switch (reason) {
     case Common_ApplicationExitReason::DRIVER_DISTRACTION_VIOLATION: {
-      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-          app_impl->app_id(),
-              AppInterfaceUnregisteredReason::DRIVER_DISTRACTION_VIOLATION);
+      application_manager_.ManageMobileCommand(
+          MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+              app_id,
+              AppInterfaceUnregisteredReason::DRIVER_DISTRACTION_VIOLATION),
+          commands::Command::ORIGIN_SDL);
       break;
     }
     case Common_ApplicationExitReason::USER_EXIT: {
       break;
     }
     case Common_ApplicationExitReason::UNAUTHORIZED_TRANSPORT_REGISTRATION: {
-      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-          app_id, AppInterfaceUnregisteredReason::APP_UNAUTHORIZED);
-      app_mgr->UnregisterApplication(app_id, Result::SUCCESS);
+      application_manager_.ManageMobileCommand(MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+          app_id, AppInterfaceUnregisteredReason::APP_UNAUTHORIZED), commands::Command::ORIGIN_SDL);
+      // HMI rejects registration for navi application
+      application_manager_.UnregisterApplication(app_id, Result::SUCCESS);
       return;
     }
     case Common_ApplicationExitReason::UNSUPPORTED_HMI_RESOURCE: {
-      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-          app_id, AppInterfaceUnregisteredReason::UNSUPPORTED_HMI_RESOURCE);
-      app_mgr->UnregisterApplication(app_id, Result::SUCCESS);
+      application_manager_.ManageMobileCommand(MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+          app_id, AppInterfaceUnregisteredReason::UNSUPPORTED_HMI_RESOURCE), commands::Command::ORIGIN_SDL);
+      application_manager_.UnregisterApplication(app_id, Result::SUCCESS);
       return;
     }
     default: {
@@ -94,9 +97,13 @@ void OnExitApplicationNotification::Run() {
       return;
     }
   }
-
-  ApplicationManagerImpl::instance()->SetState<false>(
-      app_id, HMILevel::HMI_NONE, AudioStreamingState::NOT_AUDIBLE);
+  ApplicationSharedPtr app = application_manager_.application(app_id);
+  if (app) {
+    application_manager_.state_controller().SetRegularState(
+        app, HMILevel::HMI_NONE, AudioStreamingState::NOT_AUDIBLE, false);
+  } else {
+    LOG4CXX_ERROR(logger_, "Unable to find appication " << app_id);
+  }
 }
 
 }  // namespace commands

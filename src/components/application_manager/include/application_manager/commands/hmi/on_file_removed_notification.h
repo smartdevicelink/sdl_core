@@ -49,7 +49,7 @@ class OnFileRemovedNotification : public NotificationToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnFileRemovedNotification(const MessageSharedPtr& message);
+  explicit OnFileRemovedNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnFileRemovedNotification class destructor

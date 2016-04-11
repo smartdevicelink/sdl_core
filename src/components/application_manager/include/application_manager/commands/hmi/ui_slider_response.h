@@ -49,7 +49,7 @@ class UISliderResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UISliderResponse(const MessageSharedPtr& message);
+  explicit UISliderResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief UISliderResponse class destructor

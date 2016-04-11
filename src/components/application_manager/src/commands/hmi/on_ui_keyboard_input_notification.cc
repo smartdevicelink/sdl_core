@@ -40,7 +40,7 @@ namespace commands {
 namespace hmi {
 
 OnUIKeyBoardInputNotification::OnUIKeyBoardInputNotification(
-    const MessageSharedPtr& message) : NotificationFromHMI(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager) : NotificationFromHMI(message, application_manager) {
 }
 
 OnUIKeyBoardInputNotification::~OnUIKeyBoardInputNotification() {

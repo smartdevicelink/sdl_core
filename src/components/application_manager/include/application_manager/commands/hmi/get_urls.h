@@ -48,7 +48,7 @@ class GetUrls : public RequestFromHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit GetUrls(const MessageSharedPtr& message);
+    explicit GetUrls(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief GetUrls class destructor

@@ -38,8 +38,8 @@ namespace application_manager {
 namespace commands {
 
 OnVISpeedNotification::OnVISpeedNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {
 }
 
 OnVISpeedNotification::~OnVISpeedNotification() {

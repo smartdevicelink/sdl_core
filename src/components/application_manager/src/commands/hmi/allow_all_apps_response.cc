@@ -30,14 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/allow_all_apps_response.h"
-#include "application_manager/application_manager_impl.h"
+
 
 namespace application_manager {
 
 namespace commands {
 
-AllowAllAppsResponse::AllowAllAppsResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+AllowAllAppsResponse::AllowAllAppsResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {
 }
 
 AllowAllAppsResponse::~AllowAllAppsResponse() {
@@ -46,7 +46,7 @@ AllowAllAppsResponse::~AllowAllAppsResponse() {
 void AllowAllAppsResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl::instance()->set_all_apps_allowed(
+  application_manager_.SetAllAppsAllowed(
       (*message_)[strings::msg_params][hmi_response::allowed].asBool());
 }
 

@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-UIAddSubmenuRequest::UIAddSubmenuRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
+UIAddSubmenuRequest::UIAddSubmenuRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {
 }
 
 UIAddSubmenuRequest::~UIAddSubmenuRequest() {

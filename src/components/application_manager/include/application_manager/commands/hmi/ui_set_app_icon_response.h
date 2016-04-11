@@ -49,7 +49,7 @@ class UISetAppIconResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UISetAppIconResponse(const MessageSharedPtr& message);
+  explicit UISetAppIconResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief UISetIconResponse class destructor

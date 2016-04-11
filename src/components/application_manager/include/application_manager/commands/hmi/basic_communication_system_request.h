@@ -49,7 +49,7 @@ class BasicCommunicationSystemRequest : public RequestToHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit BasicCommunicationSystemRequest(const MessageSharedPtr& message);
+    explicit BasicCommunicationSystemRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief BasicCommunicationSystemRequest class destructor

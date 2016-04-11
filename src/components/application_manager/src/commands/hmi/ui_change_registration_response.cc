@@ -31,6 +31,7 @@
  */
 #include "application_manager/commands/hmi/ui_change_registration_response.h"
 #include "application_manager/event_engine/event.h"
+
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -38,8 +39,8 @@ namespace application_manager {
 namespace commands {
 
 UIChangeRegistratioResponse::UIChangeRegistratioResponse(
-    const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {
 }
 
 UIChangeRegistratioResponse::~UIChangeRegistratioResponse() {
@@ -50,7 +51,7 @@ void UIChangeRegistratioResponse::Run() {
 
   event_engine::Event event(hmi_apis::FunctionID::UI_ChangeRegistration);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

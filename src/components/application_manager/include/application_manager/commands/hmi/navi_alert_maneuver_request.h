@@ -49,7 +49,7 @@ class NaviAlertManeuverRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit NaviAlertManeuverRequest(const MessageSharedPtr& message);
+  explicit NaviAlertManeuverRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief NaviAlertManeuverRequest class destructor

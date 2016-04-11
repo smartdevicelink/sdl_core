@@ -49,7 +49,7 @@ class OnRecordStartdNotification : public NotificationToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnRecordStartdNotification(const MessageSharedPtr& message);
+  explicit OnRecordStartdNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnRecordStartdNotification class destructor

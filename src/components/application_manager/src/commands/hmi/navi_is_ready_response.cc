@@ -30,14 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/navi_is_ready_response.h"
-#include "application_manager/application_manager_impl.h"
+
 
 namespace application_manager {
 
 namespace commands {
 
-NaviIsReadyResponse::NaviIsReadyResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+NaviIsReadyResponse::NaviIsReadyResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {
 }
 
 NaviIsReadyResponse::~NaviIsReadyResponse() {
@@ -53,7 +53,7 @@ void NaviIsReadyResponse::Run() {
   }
 
   HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
+      application_manager_.hmi_capabilities();
 
   hmi_capabilities.set_is_navi_cooperating(is_available);
 }

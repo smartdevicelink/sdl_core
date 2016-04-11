@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/commands/hmi/sdl_get_user_friendly_message_request.h"
-#include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
@@ -39,8 +38,8 @@ namespace application_manager {
 namespace commands {
 
 SDLGetUserFriendlyMessageRequest::SDLGetUserFriendlyMessageRequest(
-    const MessageSharedPtr& message)
-    : RequestFromHMI(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestFromHMI(message, application_manager) {
 }
 
 SDLGetUserFriendlyMessageRequest::~SDLGetUserFriendlyMessageRequest() {
@@ -73,15 +72,13 @@ void SDLGetUserFriendlyMessageRequest::Run() {
         application_manager::MessageHelper::CommonLanguageToString(
           static_cast<hmi_apis::Common_Language::eType>(lang_code));
   } else {
-    hmi_apis::Common_Language::eType ui_language =
-        application_manager::ApplicationManagerImpl::instance()
-        ->hmi_capabilities().active_ui_language();
+    hmi_apis::Common_Language::eType ui_language = application_manager_.hmi_capabilities().active_ui_language();
 
     required_language =
         application_manager::MessageHelper::CommonLanguageToString(ui_language);
   }
 
-    application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnGetUserFriendlyMessage(
+    application_manager_.GetPolicyHandler().OnGetUserFriendlyMessage(
         msg_codes, required_language,
         (*message_)[strings::params][strings::correlation_id].asInt());
 }

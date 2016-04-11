@@ -49,7 +49,7 @@ class VIDiagnosticMessageResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VIDiagnosticMessageResponse(const MessageSharedPtr& message);
+  explicit VIDiagnosticMessageResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief VIDiagnosticMessageResponse class destructor

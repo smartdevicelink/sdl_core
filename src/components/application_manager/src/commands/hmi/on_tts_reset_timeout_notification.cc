@@ -9,7 +9,7 @@ namespace commands {
 namespace hmi {
 
 OnTTSResetTimeoutNotification::OnTTSResetTimeoutNotification(
-    const MessageSharedPtr& message) : NotificationFromHMI(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager) : NotificationFromHMI(message, application_manager) {
 }
 
 OnTTSResetTimeoutNotification::~OnTTSResetTimeoutNotification() {
@@ -20,7 +20,7 @@ void OnTTSResetTimeoutNotification::Run() {
 
   event_engine::Event event(hmi_apis::FunctionID::TTS_OnResetTimeout);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace hmi

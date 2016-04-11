@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_NAVI_WAY_POINT_CHANGE_NOTIFICATION_H_
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
@@ -50,7 +50,8 @@ class OnNaviWayPointChangeNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnNaviWayPointChangeNotification(const MessageSharedPtr& message);
+  explicit OnNaviWayPointChangeNotification(const MessageSharedPtr& message,
+                                            ApplicationManager& app_man);
 
   /**
    * @brief OnNaviWayPointChangeNotification class destructor

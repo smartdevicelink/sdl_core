@@ -35,6 +35,7 @@
 
 #include "application_manager/event_engine/event.h"
 #include "application_manager/commands/hmi/response_from_hmi.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 namespace commands {
@@ -51,8 +52,8 @@ class VIUnsubscribeVehicleDataResponseTemplate : public ResponseFromHMI {
    * @param message Incoming SmartObject message
    **/
   explicit VIUnsubscribeVehicleDataResponseTemplate(
-      const MessageSharedPtr& message)
-      : ResponseFromHMI(message) {
+      const MessageSharedPtr& message, ApplicationManager& application_manager)
+      : ResponseFromHMI(message, application_manager) {
   }
 
   /**
@@ -62,7 +63,7 @@ class VIUnsubscribeVehicleDataResponseTemplate : public ResponseFromHMI {
     LOG4CXX_AUTO_TRACE(logger_);
     event_engine::Event event(eventID);
     event.set_smart_object(*message_);
-    event.raise();
+    event.raise(application_manager_.event_dispatcher());
   }
  private:
   DISALLOW_COPY_AND_ASSIGN(VIUnsubscribeVehicleDataResponseTemplate<eventID>);

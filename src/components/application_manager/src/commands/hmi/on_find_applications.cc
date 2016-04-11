@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-OnFindApplications::OnFindApplications(const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
+OnFindApplications::OnFindApplications(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {
 }
 
 OnFindApplications::~OnFindApplications() {

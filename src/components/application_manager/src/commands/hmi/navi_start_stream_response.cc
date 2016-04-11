@@ -31,12 +31,13 @@
  */
 #include "application_manager/commands/hmi/navi_start_stream_response.h"
 
+
 namespace application_manager {
 
 namespace commands {
 
-NaviStartStreamResponse::NaviStartStreamResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+NaviStartStreamResponse::NaviStartStreamResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {
 }
 
 NaviStartStreamResponse::~NaviStartStreamResponse() {
@@ -47,7 +48,7 @@ void NaviStartStreamResponse::Run() {
 
   event_engine::Event event(hmi_apis::FunctionID::Navigation_StartStream);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

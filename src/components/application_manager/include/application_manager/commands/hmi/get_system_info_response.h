@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_SYSTEM_INFO_RESPONSE_H_
 
 #include "application_manager/commands/hmi/response_from_hmi.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
@@ -55,7 +56,7 @@ class GetSystemInfoResponse : public ResponseFromHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit GetSystemInfoResponse(const MessageSharedPtr& message);
+    explicit GetSystemInfoResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief GetSystemInfoResponse class destructor

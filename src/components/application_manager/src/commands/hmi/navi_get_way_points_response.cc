@@ -39,8 +39,8 @@ namespace application_manager {
 namespace commands {
 
 NaviGetWayPointsResponse::NaviGetWayPointsResponse(
-    const MessageSharedPtr &message)
-    : ResponseFromHMI(message) {}
+    const MessageSharedPtr &message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
 NaviGetWayPointsResponse::~NaviGetWayPointsResponse() {}
 
@@ -50,7 +50,7 @@ void NaviGetWayPointsResponse::Run() {
   event_engine::Event event(
       hmi_apis::FunctionID::Navigation_GetWayPoints);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

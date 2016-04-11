@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/on_system_info_changed_notification.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
@@ -39,8 +39,8 @@ namespace application_manager {
 namespace commands {
 
 OnSystemInfoChangedNotification::OnSystemInfoChangedNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {
 }
 
 OnSystemInfoChangedNotification::~OnSystemInfoChangedNotification() {
@@ -54,7 +54,7 @@ void OnSystemInfoChangedNotification::Run() {
       application_manager::MessageHelper::CommonLanguageToString(
         static_cast<hmi_apis::Common_Language::eType>(lang_code));
 
-  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnSystemInfoChanged(language);
+  application_manager_.GetPolicyHandler().OnSystemInfoChanged(language);
 }
 
 }  // namespace commands

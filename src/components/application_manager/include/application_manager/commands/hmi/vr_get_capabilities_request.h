@@ -49,7 +49,7 @@ class VRGetCapabilitiesRequest : public RequestToHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit VRGetCapabilitiesRequest(const MessageSharedPtr& message);
+    explicit VRGetCapabilitiesRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief VRGetCapabilitiesRequest class destructor

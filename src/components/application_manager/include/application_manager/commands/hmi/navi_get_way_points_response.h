@@ -50,7 +50,8 @@ class NaviGetWayPointsResponse
      *
      * @param message Incoming SmartObject message
      **/
-    explicit NaviGetWayPointsResponse(const MessageSharedPtr& message);
+    NaviGetWayPointsResponse(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager);
 
     /**
      * @brief NaviGetWaypoints class destructor

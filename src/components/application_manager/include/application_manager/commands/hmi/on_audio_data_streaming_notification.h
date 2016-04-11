@@ -49,7 +49,7 @@ class OnAudioDataStreamingNotification : public NotificationToHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit OnAudioDataStreamingNotification(const MessageSharedPtr& message);
+    explicit OnAudioDataStreamingNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief OnAudioDataStreamingNotification class destructor

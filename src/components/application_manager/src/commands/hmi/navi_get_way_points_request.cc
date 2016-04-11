@@ -37,8 +37,8 @@ namespace application_manager {
 namespace commands {
 
 NaviGetWayPointsRequest::NaviGetWayPointsRequest(
-    const MessageSharedPtr& message)
-    : RequestToHMI(message) {}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
 NaviGetWayPointsRequest::~NaviGetWayPointsRequest() {}
 

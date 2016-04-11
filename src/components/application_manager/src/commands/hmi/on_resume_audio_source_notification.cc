@@ -38,8 +38,8 @@ namespace application_manager {
 namespace commands {
 
 OnResumeAudioSourceNotification::OnResumeAudioSourceNotification(
-    const MessageSharedPtr& message)
-    : NotificationToHMI(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationToHMI(message, application_manager) {
 }
 
 OnResumeAudioSourceNotification::~OnResumeAudioSourceNotification() {

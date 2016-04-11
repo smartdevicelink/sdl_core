@@ -31,12 +31,13 @@
  */
 #include "application_manager/commands/hmi/navi_audio_start_stream_response.h"
 
+
 namespace application_manager {
 
 namespace commands {
 
-AudioStartStreamResponse::AudioStartStreamResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+AudioStartStreamResponse::AudioStartStreamResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {
 }
 
 AudioStartStreamResponse::~AudioStartStreamResponse() {
@@ -47,7 +48,7 @@ void AudioStartStreamResponse::Run() {
 
   event_engine::Event event(hmi_apis::FunctionID::Navigation_StartAudioStream);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

@@ -32,7 +32,7 @@
 
 #include <set>
 #include "application_manager/commands/hmi/on_driver_distraction_notification.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -44,18 +44,21 @@ namespace commands {
 namespace hmi {
 
 OnDriverDistractionNotification::OnDriverDistractionNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {
+}
 
-OnDriverDistractionNotification::~OnDriverDistractionNotification() {}
+OnDriverDistractionNotification::~OnDriverDistractionNotification() {
+}
 
 void OnDriverDistractionNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   const hmi_apis::Common_DriverDistractionState::eType state =
       static_cast<hmi_apis::Common_DriverDistractionState::eType>(
-          (*message_)[strings::msg_params][hmi_notification::state].asInt());
-  ApplicationManagerImpl::instance()->set_driver_distraction(state);
+          (*message_)[strings::msg_params][hmi_notification::state]
+          .asInt());
+  application_manager_.set_driver_distraction(state);
 
   smart_objects::SmartObjectSPtr on_driver_distraction =
       new smart_objects::SmartObject();
@@ -71,15 +74,15 @@ void OnDriverDistractionNotification::Run() {
   (*on_driver_distraction)[strings::msg_params][mobile_notification::state] =
       state;
 
-  ApplicationManagerImpl::ApplicationListAccessor accessor;
-  const ApplicationSet applications = accessor.applications();
+  const ApplicationSet applications =
+      application_manager_.applications().GetData();
 
   ApplicationSetConstIt it = applications.begin();
   for (; applications.end() != it; ++it) {
     const ApplicationSharedPtr app = *it;
     if (app) {
-      (*on_driver_distraction)[strings::params][strings::connection_key] =
-          app->app_id();
+      (*on_driver_distraction)[strings::params]
+                              [strings::connection_key] = app->app_id();
       SendNotificationToMobile(on_driver_distraction);
     }
   }

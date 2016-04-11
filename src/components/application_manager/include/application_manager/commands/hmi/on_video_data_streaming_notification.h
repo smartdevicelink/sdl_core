@@ -49,7 +49,7 @@ class OnVideoDataStreamingNotification : public NotificationToHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit OnVideoDataStreamingNotification(const MessageSharedPtr& message);
+    explicit OnVideoDataStreamingNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief OnVideoDataStreamingNotification class destructor

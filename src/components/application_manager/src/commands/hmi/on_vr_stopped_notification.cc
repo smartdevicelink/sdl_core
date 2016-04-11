@@ -31,15 +31,15 @@
  */
 
 #include "application_manager/commands/hmi/on_vr_stopped_notification.h"
-#include "application_manager/application_manager_impl.h"
+
 
 namespace application_manager {
 
 namespace commands {
 
 OnVRStoppedNotification::OnVRStoppedNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {
 }
 
 OnVRStoppedNotification::~OnVRStoppedNotification() {
@@ -50,7 +50,7 @@ void OnVRStoppedNotification::Run() {
 
   event_engine::Event event(hmi_apis::FunctionID::VR_Stopped);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

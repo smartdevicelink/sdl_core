@@ -37,7 +37,7 @@ namespace application_manager {
 namespace commands {
 
 SDLPolicyUpdate::SDLPolicyUpdate(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+  const MessageSharedPtr& message, ApplicationManager& application_manager): RequestToHMI(message, application_manager) {
 }
 
 SDLPolicyUpdate::~SDLPolicyUpdate() {

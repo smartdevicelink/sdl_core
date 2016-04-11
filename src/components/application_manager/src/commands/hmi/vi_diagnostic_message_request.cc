@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-VIDiagnosticMessageRequest::VIDiagnosticMessageRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
+VIDiagnosticMessageRequest::VIDiagnosticMessageRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {
 }
 
 VIDiagnosticMessageRequest::~VIDiagnosticMessageRequest() {

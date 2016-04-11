@@ -49,7 +49,7 @@ class UpdateAppListRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UpdateAppListRequest(const MessageSharedPtr& message);
+  explicit UpdateAppListRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief UpdateAppListRequest class destructor

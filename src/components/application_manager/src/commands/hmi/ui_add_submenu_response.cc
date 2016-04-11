@@ -31,14 +31,15 @@
  */
 #include "application_manager/commands/hmi/ui_add_submenu_response.h"
 #include "application_manager/event_engine/event.h"
+
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UIAddSubmenuResponse::UIAddSubmenuResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+UIAddSubmenuResponse::UIAddSubmenuResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {
 }
 
 UIAddSubmenuResponse::~UIAddSubmenuResponse() {
@@ -49,7 +50,7 @@ void UIAddSubmenuResponse::Run() {
 
   event_engine::Event event(hmi_apis::FunctionID::UI_AddSubMenu);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

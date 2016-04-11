@@ -31,16 +31,17 @@
  */
 
 #include "application_manager/commands/hmi/on_system_context_notification.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
+#include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
 namespace commands {
 
 OnSystemContextNotification::OnSystemContextNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {
 }
 
 OnSystemContextNotification::~OnSystemContextNotification() {
@@ -57,17 +58,17 @@ void OnSystemContextNotification::Run() {
   if ((mobile_api::SystemContext::SYSCTXT_VRSESSION == system_context) ||
       (mobile_api::SystemContext::SYSCTXT_MENU == system_context) ||
       (mobile_api::SystemContext::SYSCTXT_HMI_OBSCURED == system_context)) {
-    app = ApplicationManagerImpl::instance()->active_application();
+    app = application_manager_.active_application();
   } else if ((mobile_api::SystemContext::SYSCTXT_ALERT == system_context) ||
              (mobile_api::SystemContext::SYSCTXT_MAIN == system_context)) {
     if ((*message_)[strings::msg_params].keyExists(strings::app_id)) {
-      app = ApplicationManagerImpl::instance()->
+      app = application_manager_.
         application((*message_)[strings::msg_params][strings::app_id].asUInt());
     }
   }
 
   if (app && mobile_api::SystemContext::INVALID_ENUM != system_context) {
-    ApplicationManagerImpl::instance()->SetState(app->app_id(), system_context);
+    application_manager_.state_controller().SetRegularState(app, system_context);
   } else {
     LOG4CXX_ERROR(logger_, "Application does not exist");
   }

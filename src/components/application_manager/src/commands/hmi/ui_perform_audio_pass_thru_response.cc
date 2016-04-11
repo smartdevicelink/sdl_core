@@ -38,8 +38,8 @@ namespace application_manager {
 namespace commands {
 
 UIPerformAudioPassThruResponse::UIPerformAudioPassThruResponse(
-    const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {
 }
 
 UIPerformAudioPassThruResponse::~UIPerformAudioPassThruResponse() {
@@ -50,7 +50,7 @@ void UIPerformAudioPassThruResponse::Run() {
 
   event_engine::Event event(hmi_apis::FunctionID::UI_PerformAudioPassThru);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

@@ -49,7 +49,7 @@ class NaviUpdateTurnListResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit NaviUpdateTurnListResponse(const MessageSharedPtr& message);
+  explicit NaviUpdateTurnListResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief NaviUpdateTurnListResponse class destructor

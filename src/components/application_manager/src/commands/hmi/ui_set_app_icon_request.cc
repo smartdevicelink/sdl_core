@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-UISetAppIconRequest::UISetAppIconRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
+UISetAppIconRequest::UISetAppIconRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {
 }
 
 UISetAppIconRequest::~UISetAppIconRequest() {

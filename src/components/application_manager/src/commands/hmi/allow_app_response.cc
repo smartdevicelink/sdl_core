@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/allow_app_response.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 
 namespace application_manager {
@@ -38,7 +38,7 @@ namespace application_manager {
 namespace commands {
 
 AllowAppResponse::AllowAppResponse(
-  const MessageSharedPtr& message): ResponseFromHMI(message) {
+  const MessageSharedPtr& message, ApplicationManager& application_manager): ResponseFromHMI(message, application_manager) {
 }
 
 AllowAppResponse::~AllowAppResponse() {
@@ -50,7 +50,7 @@ void AllowAppResponse::Run() {
   uint32_t connection_key =
     (*message_)[strings::params][strings::connection_key].asInt();
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->
+  ApplicationSharedPtr app = application_manager_.
                      application(connection_key);
 
   if (!app) {

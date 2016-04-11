@@ -31,15 +31,15 @@
  */
 
 #include "application_manager/commands/hmi/on_vr_started_notification.h"
-#include "application_manager/application_manager_impl.h"
+
 
 namespace application_manager {
 
 namespace commands {
 
 OnVRStartedNotification::OnVRStartedNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {
 }
 
 OnVRStartedNotification::~OnVRStartedNotification() {
@@ -50,7 +50,7 @@ void OnVRStartedNotification::Run() {
 
   event_engine::Event event(hmi_apis::FunctionID::VR_Started);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

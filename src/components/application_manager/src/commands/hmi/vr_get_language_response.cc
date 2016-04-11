@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/vr_get_language_response.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/event_engine/event.h"
 #include "interfaces/HMI_API.h"
 
@@ -38,8 +38,8 @@ namespace application_manager {
 
 namespace commands {
 
-VRGetLanguageResponse::VRGetLanguageResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+VRGetLanguageResponse::VRGetLanguageResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {
 }
 
 VRGetLanguageResponse::~VRGetLanguageResponse() {
@@ -58,7 +58,7 @@ void VRGetLanguageResponse::Run() {
              (*message_)[strings::msg_params][hmi_response::language].asInt());
   }
 
-  ApplicationManagerImpl::instance()->hmi_capabilities().
+  application_manager_.hmi_capabilities().
       set_active_vr_language(language);
 
   LOG4CXX_DEBUG(logger_, "Raising event for function_id "
@@ -66,7 +66,7 @@ void VRGetLanguageResponse::Run() {
                 << " and correlation_id " << correlation_id());
   event_engine::Event event(FunctionID::VR_GetLanguage);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

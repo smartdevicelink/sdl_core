@@ -37,8 +37,8 @@ namespace application_manager {
 namespace commands {
 
 OnStatusUpdateNotification::OnStatusUpdateNotification(
-    const MessageSharedPtr& message)
-    : NotificationToHMI(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationToHMI(message, application_manager) {
 }
 
 OnStatusUpdateNotification::~OnStatusUpdateNotification() {

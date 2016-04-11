@@ -37,8 +37,8 @@ namespace application_manager {
 
 namespace commands {
 
-UISetAppIconResponse::UISetAppIconResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+UISetAppIconResponse::UISetAppIconResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {
 }
 
 UISetAppIconResponse::~UISetAppIconResponse() {
@@ -49,7 +49,7 @@ void UISetAppIconResponse::Run() {
 
   event_engine::Event event(hmi_apis::FunctionID::UI_SetAppIcon);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

@@ -49,7 +49,7 @@ class OnSystemErrorNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnSystemErrorNotification(const MessageSharedPtr& message);
+  explicit OnSystemErrorNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnSystemErrorNotification class destructor

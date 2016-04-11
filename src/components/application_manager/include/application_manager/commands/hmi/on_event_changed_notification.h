@@ -49,7 +49,7 @@ class OnEventChangedNotification : public NotificationFromHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit OnEventChangedNotification(const MessageSharedPtr& message);
+    explicit OnEventChangedNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief OnEventChangedNotification class destructor

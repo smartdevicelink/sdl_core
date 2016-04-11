@@ -48,7 +48,7 @@ class NaviStartStreamResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit NaviStartStreamResponse(const MessageSharedPtr& message);
+  explicit NaviStartStreamResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief NaviStartStreamResponse class destructor

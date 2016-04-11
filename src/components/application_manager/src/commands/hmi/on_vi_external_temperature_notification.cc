@@ -38,8 +38,8 @@ namespace application_manager {
 namespace commands {
 
 OnVIExternalTemperatureNotification::OnVIExternalTemperatureNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {
 }
 
 OnVIExternalTemperatureNotification::~OnVIExternalTemperatureNotification() {

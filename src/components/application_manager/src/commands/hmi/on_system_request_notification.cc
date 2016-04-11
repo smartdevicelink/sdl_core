@@ -31,21 +31,21 @@
  */
 
 #include "application_manager/application_impl.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/commands/hmi/on_system_request_notification.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 
-using policy::PolicyHandler;
+using policy::PolicyHandlerInterface;
 
 namespace application_manager {
 
 namespace commands {
 
 OnSystemRequestNotification::OnSystemRequestNotification(
-  const MessageSharedPtr& message)
-  : NotificationFromHMI(message) {
+  const MessageSharedPtr& message, ApplicationManager& application_manager)
+  : NotificationFromHMI(message, application_manager) {
 }
 
 OnSystemRequestNotification::~OnSystemRequestNotification() {
@@ -66,17 +66,14 @@ void OnSystemRequestNotification::Run() {
   ApplicationSharedPtr app;
   if (strings::default_app_id == app_id) {
     const policy::PolicyHandlerInterface& policy_handler = 
-	application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler();
+	application_manager_.GetPolicyHandler();
     const uint32_t selected_app_id = policy_handler.GetAppIdForSending();
     if (0 == selected_app_id) {
       LOG4CXX_WARN(logger_,
                    "Can't select application to forward OnSystemRequestNotification");
       return;
     }
-    ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-    app = app_mgr->application(selected_app_id);
-  } else {
-    app = ApplicationManagerImpl::instance()->application_by_policy_id(app_id);
+    app = application_manager_.application(selected_app_id);
   }
 
   if (!app.valid()) {

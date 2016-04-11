@@ -49,7 +49,7 @@ class VRPerformInteractionResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VRPerformInteractionResponse(const MessageSharedPtr& message);
+  explicit VRPerformInteractionResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief TTSPerformInteractionResponse class destructor

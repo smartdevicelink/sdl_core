@@ -49,7 +49,7 @@ class UpdateAppListResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UpdateAppListResponse(const MessageSharedPtr& message);
+  explicit UpdateAppListResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief UpdateAppListResponse class destructor

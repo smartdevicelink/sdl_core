@@ -31,14 +31,15 @@
  */
 #include "application_manager/commands/hmi/dial_number_response.h"
 
+
 namespace application_manager {
 
 namespace commands {
 
 namespace hmi {
 
-DialNumberResponse::DialNumberResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+DialNumberResponse::DialNumberResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {
 }
 
 DialNumberResponse::~DialNumberResponse() {
@@ -47,7 +48,7 @@ DialNumberResponse::~DialNumberResponse() {
 void DialNumberResponse::Run() {
   event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_DialNumber);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 } // namespace hmi

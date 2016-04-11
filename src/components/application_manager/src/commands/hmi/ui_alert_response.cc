@@ -31,14 +31,15 @@
  */
 #include "application_manager/commands/hmi/ui_alert_response.h"
 #include "application_manager/event_engine/event.h"
+
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UIAlertResponse::UIAlertResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+UIAlertResponse::UIAlertResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {
 }
 
 UIAlertResponse::~UIAlertResponse() {
@@ -49,7 +50,7 @@ void UIAlertResponse::Run() {
 
   event_engine::Event event(hmi_apis::FunctionID::UI_Alert);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

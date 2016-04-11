@@ -37,7 +37,7 @@ namespace application_manager {
 namespace commands {
 
 UiSetDisplayLayoutRequest::UiSetDisplayLayoutRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+  const MessageSharedPtr& message, ApplicationManager& application_manager): RequestToHMI(message, application_manager) {
 }
 
 UiSetDisplayLayoutRequest::~UiSetDisplayLayoutRequest() {

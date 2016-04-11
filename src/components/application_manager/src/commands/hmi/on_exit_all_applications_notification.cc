@@ -36,7 +36,8 @@
 #include <unistd.h>
 #include <signal.h>
 
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/resumption/resume_ctrl.h"
 #include "interfaces/HMI_API.h"
 
 
@@ -45,7 +46,8 @@ namespace application_manager {
 namespace commands {
 
 OnExitAllApplicationsNotification::OnExitAllApplicationsNotification(
-    const MessageSharedPtr& message) : NotificationFromHMI(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+  : NotificationFromHMI(message, application_manager) {
 }
 
 OnExitAllApplicationsNotification::~OnExitAllApplicationsNotification() {
@@ -61,8 +63,6 @@ void OnExitAllApplicationsNotification::Run() {
 
   mobile_api::AppInterfaceUnregisteredReason::eType mob_reason =
       mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM;
-
-  ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
 
   switch (reason) {
     case hmi_apis::Common_ApplicationsCloseReason::IGNITION_OFF: {
@@ -87,11 +87,11 @@ void OnExitAllApplicationsNotification::Run() {
     }
   }
 
-  app_manager->SetUnregisterAllApplicationsReason(mob_reason);
+  application_manager_.SetUnregisterAllApplicationsReason(mob_reason);
 
   if (mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET == mob_reason ||
       mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS == mob_reason) {
-    app_manager->HeadUnitReset(mob_reason);
+    application_manager_.HeadUnitReset(mob_reason);
   }
   kill(getpid(), SIGINT);
 }
@@ -105,9 +105,9 @@ void OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete() {
       hmi_apis::FunctionID::BasicCommunication_OnSDLPersistenceComplete;
   (*message)[strings::params][strings::message_type] = MessageType::kNotification;
   (*message)[strings::params][strings::correlation_id] =
-      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+      application_manager_.GetNextHMICorrelationID();
 
-   ApplicationManagerImpl::instance()->ManageHMICommand(message);
+   application_manager_.ManageHMICommand(message);
 }
 
 }  // namespace commands

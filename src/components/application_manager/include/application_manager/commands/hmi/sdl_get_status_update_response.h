@@ -49,7 +49,7 @@ class SDLGetStatusUpdateResponse : public ResponseToHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit SDLGetStatusUpdateResponse(const MessageSharedPtr& message);
+    explicit SDLGetStatusUpdateResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief SDLGetStatusUpdateResponse class destructor

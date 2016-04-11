@@ -49,7 +49,7 @@ class ButtonGetCapabilitiesRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit ButtonGetCapabilitiesRequest(const MessageSharedPtr& message);
+  explicit ButtonGetCapabilitiesRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief ButtonGetCapabilitiesRequest class destructor

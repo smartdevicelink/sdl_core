@@ -49,7 +49,7 @@ class AllowAppRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AllowAppRequest(const MessageSharedPtr& message);
+  explicit AllowAppRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief AllowAppRequest class destructor

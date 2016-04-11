@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-NaviSendLocationRequest::NaviSendLocationRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
+NaviSendLocationRequest::NaviSendLocationRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {
 }
 
 NaviSendLocationRequest::~NaviSendLocationRequest() {

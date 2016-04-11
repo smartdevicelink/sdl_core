@@ -35,8 +35,8 @@ namespace application_manager {
 
 namespace commands {
 
-NaviStopStreamResponse::NaviStopStreamResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+NaviStopStreamResponse::NaviStopStreamResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {
 }
 
 NaviStopStreamResponse::~NaviStopStreamResponse() {

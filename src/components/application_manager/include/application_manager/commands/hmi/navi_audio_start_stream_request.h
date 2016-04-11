@@ -50,7 +50,7 @@ class AudioStartStreamRequest : public RequestToHMI,
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AudioStartStreamRequest(const MessageSharedPtr& message);
+  explicit AudioStartStreamRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnNaviStartStreamRequest class destructor

@@ -32,14 +32,13 @@
  */
 
 #include "application_manager/commands/hmi/update_sdl_request.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UpdateSDLRequest::UpdateSDLRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
+UpdateSDLRequest::UpdateSDLRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {
 }
 
 UpdateSDLRequest::~UpdateSDLRequest() {
@@ -48,7 +47,7 @@ UpdateSDLRequest::~UpdateSDLRequest() {
 void UpdateSDLRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().PTExchangeAtUserRequest(
+  application_manager_.GetPolicyHandler().PTExchangeAtUserRequest(
       (*message_)[strings::params][strings::correlation_id].asInt());
 }
 

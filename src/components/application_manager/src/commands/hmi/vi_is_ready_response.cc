@@ -30,14 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/vi_is_ready_response.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-VIIsReadyResponse::VIIsReadyResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+VIIsReadyResponse::VIIsReadyResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {
 }
 
 VIIsReadyResponse::~VIIsReadyResponse() {
@@ -53,10 +52,10 @@ void VIIsReadyResponse::Run() {
   }
 
   HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
+      application_manager_.hmi_capabilities();
   hmi_capabilities.set_is_ivi_cooperating(is_available);
 
-  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnVIIsReady();
+  application_manager_.GetPolicyHandler().OnVIIsReady();
 }
 
 }  // namespace commands

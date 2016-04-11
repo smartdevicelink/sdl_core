@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/ui_get_language_response.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/event_engine/event.h"
 #include "interfaces/HMI_API.h"
 
@@ -38,8 +38,8 @@ namespace application_manager {
 
 namespace commands {
 
-UIGetLanguageResponse::UIGetLanguageResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+UIGetLanguageResponse::UIGetLanguageResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {
 }
 
 UIGetLanguageResponse::~UIGetLanguageResponse() {
@@ -58,7 +58,7 @@ void UIGetLanguageResponse::Run() {
              (*message_)[strings::msg_params][hmi_response::language].asInt());
   }
 
-  ApplicationManagerImpl::instance()->hmi_capabilities().
+  application_manager_.hmi_capabilities().
       set_active_ui_language(language);
 
   LOG4CXX_DEBUG(logger_, "Raising event for function_id "
@@ -66,7 +66,7 @@ void UIGetLanguageResponse::Run() {
                 << " and correlation_id " << correlation_id());
   event_engine::Event event(FunctionID::UI_GetLanguage);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

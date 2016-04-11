@@ -35,8 +35,8 @@ namespace application_manager {
 
 namespace commands {
 
-AudioStopStreamResponse::AudioStopStreamResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+AudioStopStreamResponse::AudioStopStreamResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {
 }
 
 AudioStopStreamResponse::~AudioStopStreamResponse() {

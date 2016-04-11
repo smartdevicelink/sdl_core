@@ -49,7 +49,7 @@ class OnStatusUpdateNotification : public NotificationToHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit OnStatusUpdateNotification(const MessageSharedPtr& message);
+    explicit OnStatusUpdateNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief OnGetStatusUpdateNotification class destructor

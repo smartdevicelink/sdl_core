@@ -40,7 +40,7 @@ namespace commands {
 namespace hmi {
 
 OnUITouchEventNotification::OnUITouchEventNotification(
-    const MessageSharedPtr& message) : NotificationFromHMI(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager) : NotificationFromHMI(message, application_manager) {
 }
 
 OnUITouchEventNotification::~OnUITouchEventNotification() {

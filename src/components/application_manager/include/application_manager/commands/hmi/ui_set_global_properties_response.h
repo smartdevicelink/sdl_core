@@ -49,7 +49,7 @@ class UISetGlobalPropertiesResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UISetGlobalPropertiesResponse(const MessageSharedPtr& message);
+  explicit UISetGlobalPropertiesResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief UISetGlobalPropertiesResponse class destructor

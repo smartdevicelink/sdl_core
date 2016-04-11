@@ -46,7 +46,7 @@ class SDLPolicyUpdateResponse : public ResponseFromHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit SDLPolicyUpdateResponse(const MessageSharedPtr& message);
+    explicit SDLPolicyUpdateResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief SDLPolicyUpdateResponse class destructor

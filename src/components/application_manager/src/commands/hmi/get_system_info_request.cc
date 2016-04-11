@@ -31,14 +31,14 @@
  */
 
 #include "application_manager/commands/hmi/get_system_info_request.h"
-#include "application_manager/application_manager_impl.h"
+
 
 namespace application_manager {
 
 namespace commands {
 
 GetSystemInfoRequest::GetSystemInfoRequest(
-  const MessageSharedPtr& message): RequestToHMI(message) {
+  const MessageSharedPtr& message, ApplicationManager& application_manager): RequestToHMI(message, application_manager) {
 }
 
 GetSystemInfoRequest::~GetSystemInfoRequest() {
@@ -48,7 +48,7 @@ void GetSystemInfoRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   uint32_t correlation_id = RequestToHMI::correlation_id();
   uint32_t app_id = RequestToHMI::application_id();
-  ApplicationManagerImpl::instance()->set_application_id(correlation_id, app_id);
+  application_manager_.set_application_id(correlation_id, app_id);
   SendRequest();
 }
 

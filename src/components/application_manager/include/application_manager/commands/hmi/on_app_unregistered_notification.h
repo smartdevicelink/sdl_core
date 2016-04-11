@@ -49,7 +49,7 @@ class OnAppUnregisteredNotification : public NotificationToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnAppUnregisteredNotification(const MessageSharedPtr& message);
+  explicit OnAppUnregisteredNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnAppUnregisteredNotification class destructor

@@ -36,8 +36,8 @@ namespace application_manager {
 
 namespace commands {
 
-UIShowResponse::UIShowResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+UIShowResponse::UIShowResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {
 }
 
 UIShowResponse::~UIShowResponse() {
@@ -48,7 +48,7 @@ void UIShowResponse::Run() {
 
   event_engine::Event event(hmi_apis::FunctionID::UI_Show);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

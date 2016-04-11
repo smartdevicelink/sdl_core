@@ -37,7 +37,7 @@ namespace application_manager {
 namespace commands {
 
 OnSDLCloseNotification::OnSDLCloseNotification(
-    const MessageSharedPtr& message) : NotificationToHMI(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager) : NotificationToHMI(message, application_manager) {
 }
 
 OnSDLCloseNotification::~OnSDLCloseNotification() {

@@ -32,12 +32,13 @@
 #include "application_manager/commands/hmi/navi_send_location_response.h"
 #include "application_manager/event_engine/event.h"
 
+
 namespace application_manager {
 
 namespace commands {
 
-NaviSendLocationResponse::NaviSendLocationResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+NaviSendLocationResponse::NaviSendLocationResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {
 }
 
 NaviSendLocationResponse::~NaviSendLocationResponse() {
@@ -48,7 +49,7 @@ void NaviSendLocationResponse::Run() {
 
   event_engine::Event event(hmi_apis::FunctionID::Navigation_SendLocation);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

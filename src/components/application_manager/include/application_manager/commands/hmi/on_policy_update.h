@@ -45,7 +45,7 @@ class OnPolicyUpdate : public NotificationFromHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit OnPolicyUpdate(const MessageSharedPtr& message);
+    explicit OnPolicyUpdate(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief OnPolicyUpdate class destructor

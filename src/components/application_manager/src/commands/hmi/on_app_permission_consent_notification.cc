@@ -32,18 +32,20 @@
  */
 
 #include "application_manager/commands/hmi/on_app_permission_consent_notification.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/policies/policy_handler.h"
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
 
 namespace commands {
 
-OnAppPermissionConsentNotification::OnAppPermissionConsentNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {}
+OnAppPermissionConsentNotification::OnAppPermissionConsentNotification(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {
+}
 
-OnAppPermissionConsentNotification::~OnAppPermissionConsentNotification() {}
+OnAppPermissionConsentNotification::~OnAppPermissionConsentNotification() {
+}
 
 void OnAppPermissionConsentNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -79,9 +81,10 @@ void OnAppPermissionConsentNotification::Run() {
       permission_consent.group_permissions.push_back(permissions);
     }
 
-    permission_consent.consent_source = msg_params["source"].asString();
+    permission_consent.consent_source =
+        msg_params["source"].asString();
 
-    application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnAppPermissionConsent(connection_key,
+    application_manager_.GetPolicyHandler().OnAppPermissionConsent(connection_key,
       permission_consent);
   }
 }

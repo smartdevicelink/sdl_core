@@ -49,7 +49,7 @@ class OnVRStartedNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVRStartedNotification(const MessageSharedPtr& message);
+  explicit OnVRStartedNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnVRStartedNotification class destructor

@@ -31,8 +31,8 @@
  */
 
 #include "application_manager/commands/hmi/update_device_list_request.h"
-#include "application_manager/application_manager_impl.h"
-#include "config_profile/profile.h"
+
+
 #include "interfaces/HMI_API.h"
 
 #include <unistd.h>
@@ -42,9 +42,9 @@ namespace application_manager {
 namespace commands {
 
 UpdateDeviceListRequest::UpdateDeviceListRequest(
-    const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager)
+    , EventObserver(application_manager_.event_dispatcher()) {}
 
 UpdateDeviceListRequest::~UpdateDeviceListRequest() {
 }
@@ -55,8 +55,8 @@ void UpdateDeviceListRequest::Run() {
   // Fix problem with SDL and HMI HTML. This problem is not actual for HMI PASA.
   // Flag conditional compilation for specific customer is used in order to exclude
   // hit code to RTC
-  if (true == profile::Profile::instance()->launch_hmi()) {
-    if (!ApplicationManagerImpl::instance()->IsHMICooperating()) {
+  if (true == application_manager_.get_settings().launch_hmi()) {
+    if (!application_manager_.IsHMICooperating()) {
       LOG4CXX_INFO(logger_, "Wait for HMI Cooperation");
       subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnReady);
       termination_condition_.Wait(auto_lock);

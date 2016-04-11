@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/on_tts_stopped_notification.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/event_engine/event.h"
 
 namespace application_manager {
@@ -39,8 +39,8 @@ namespace application_manager {
 namespace commands {
 
 OnTTSStoppedNotification::OnTTSStoppedNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {
 }
 
 OnTTSStoppedNotification::~OnTTSStoppedNotification() {
@@ -51,7 +51,7 @@ void OnTTSStoppedNotification::Run() {
 
   event_engine::Event event(hmi_apis::FunctionID::TTS_Stopped);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

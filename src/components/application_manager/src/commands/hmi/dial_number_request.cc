@@ -38,8 +38,8 @@ namespace commands {
 
 namespace hmi {
 
-DialNumberRequest::DialNumberRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
+DialNumberRequest::DialNumberRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {
 }
 
 DialNumberRequest::~DialNumberRequest() {

@@ -49,7 +49,7 @@ class OnAppPermissionConsentNotification : public NotificationFromHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit OnAppPermissionConsentNotification(const MessageSharedPtr& message);
+    explicit OnAppPermissionConsentNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief OnAppPermissionConsentNotification class destructor

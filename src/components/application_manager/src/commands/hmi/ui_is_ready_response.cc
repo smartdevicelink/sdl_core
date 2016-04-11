@@ -30,14 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/ui_is_ready_response.h"
-#include "application_manager/application_manager_impl.h"
+
 
 namespace application_manager {
 
 namespace commands {
 
-UIIsReadyResponse::UIIsReadyResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+UIIsReadyResponse::UIIsReadyResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {
 }
 
 UIIsReadyResponse::~UIIsReadyResponse() {
@@ -53,7 +53,7 @@ void UIIsReadyResponse::Run() {
   }
 
   HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
+      application_manager_.hmi_capabilities();
 
   hmi_capabilities.set_is_ui_cooperating(is_available);
 }

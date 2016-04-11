@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_USER_FRIENDLY_MESSAGE_REQUEST_H_
 
 #include "application_manager/commands/hmi/request_from_hmi.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
@@ -49,7 +50,7 @@ class SDLGetUserFriendlyMessageRequest : public RequestFromHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit SDLGetUserFriendlyMessageRequest(const MessageSharedPtr& message);
+    explicit SDLGetUserFriendlyMessageRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief SDLGetUserFriendlyMessageRequest class destructor

@@ -49,7 +49,7 @@ class UIAddSubmenuRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIAddSubmenuRequest(const MessageSharedPtr& message);
+  explicit UIAddSubmenuRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief UIAddSubmenuRequest class destructor

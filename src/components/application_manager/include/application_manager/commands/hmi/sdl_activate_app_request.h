@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_SDL_ACTIVATE_APP_REQUEST_H_
 
 #include "application_manager/commands/hmi/request_from_hmi.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
@@ -51,7 +51,7 @@ class SDLActivateAppRequest : public RequestFromHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit SDLActivateAppRequest(const MessageSharedPtr& message);
+    explicit SDLActivateAppRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief SDLActivateAppRequest class destructor

@@ -32,13 +32,14 @@
 
 #include "application_manager/commands/hmi/get_urls.h"
 #include "application_manager/message.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/policies/policy_handler.h"
 
 namespace application_manager {
 namespace commands {
 
-GetUrls::GetUrls(const MessageSharedPtr& message)
-  : RequestFromHMI(message) {
+GetUrls::GetUrls(const MessageSharedPtr& message, ApplicationManager& application_manager)
+  : RequestFromHMI(message, application_manager) {
 }
 
 GetUrls::~GetUrls() {
@@ -48,9 +49,9 @@ void GetUrls::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject& object = *message_;
   object[strings::params][strings::message_type] = MessageType::kResponse;
-  if (application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().PolicyEnabled()) {
+  if (application_manager_.GetPolicyHandler().PolicyEnabled()) {
     policy::EndpointUrls endpoints;
-    application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().GetServiceUrls(
+    application_manager_.GetPolicyHandler().GetServiceUrls(
         object[strings::msg_params][hmi_request::service].asString(), endpoints);
     if (!endpoints.empty()) {
       object[strings::msg_params].erase(hmi_request::service);
@@ -88,7 +89,7 @@ void GetUrls::Run() {
     object[strings::params][hmi_response::code] =
         hmi_apis::Common_Result::DATA_NOT_AVAILABLE;
   }
-  ApplicationManagerImpl::instance()->ManageHMICommand(message_);
+  application_manager_.ManageHMICommand(message_);
 }
 
 }  // namespace commands

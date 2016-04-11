@@ -53,7 +53,7 @@ class OnButtonEventNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnButtonEventNotification(const MessageSharedPtr& message);
+  explicit OnButtonEventNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief Execute command

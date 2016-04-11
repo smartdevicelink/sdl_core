@@ -50,7 +50,8 @@ class NaviUnsubscribeWayPointsResponse
      *
      * @param message Incoming SmartObject message
      **/
-    explicit NaviUnsubscribeWayPointsResponse(const MessageSharedPtr& message);
+    NaviUnsubscribeWayPointsResponse(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager);
 
     /**
      * @brief NaviUnSubscribeWaypoints class destructor

@@ -31,15 +31,14 @@
  */
 #include "application_manager/commands/hmi/vi_get_vehicle_data_response.h"
 #include "application_manager/event_engine/event.h"
-#include "application_manager/application_manager_impl.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
 namespace commands {
 
 VIGetVehicleDataResponse::VIGetVehicleDataResponse(
-    const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {
 }
 
 VIGetVehicleDataResponse::~VIGetVehicleDataResponse() {
@@ -73,10 +72,10 @@ void VIGetVehicleDataResponse::Run() {
     event.set_smart_object(result);
   } else {
     event.set_smart_object(*message_);
-    application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnVehicleDataUpdated(*message_);
+    application_manager_.GetPolicyHandler().OnVehicleDataUpdated(*message_);
   }
 
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

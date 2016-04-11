@@ -53,7 +53,7 @@ class UpdateDeviceListRequest : public RequestToHMI,
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UpdateDeviceListRequest(const MessageSharedPtr& message);
+  explicit UpdateDeviceListRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief UpdateDeviceListRequest class destructor

@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/button_get_capabilities_response.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "utils/logger.h"
 
 namespace application_manager {
@@ -38,8 +38,8 @@ namespace application_manager {
 namespace commands {
 
 ButtonGetCapabilitiesResponse::ButtonGetCapabilitiesResponse(
-    const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {
 }
 
 ButtonGetCapabilitiesResponse::~ButtonGetCapabilitiesResponse() {
@@ -57,7 +57,7 @@ void ButtonGetCapabilitiesResponse::Run() {
   }
 
   HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
+      application_manager_.hmi_capabilities();
 
   hmi_capabilities.set_button_capabilities(
       (*message_)[strings::msg_params][hmi_response::capabilities]);

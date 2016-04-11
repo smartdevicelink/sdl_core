@@ -37,8 +37,8 @@ namespace application_manager {
 
 namespace commands {
 
-UIAddCommandResponse::UIAddCommandResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
+UIAddCommandResponse::UIAddCommandResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {
 }
 
 UIAddCommandResponse::~UIAddCommandResponse() {
@@ -49,7 +49,7 @@ void UIAddCommandResponse::Run() {
 
   event_engine::Event event(hmi_apis::FunctionID::UI_AddCommand);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands
