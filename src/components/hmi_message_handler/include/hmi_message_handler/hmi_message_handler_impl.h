@@ -87,7 +87,6 @@ class HMIMessageHandlerImpl : public HMIMessageHandler,
                               public impl::ToHmiQueue::Handler {
  public:
   explicit HMIMessageHandlerImpl(const HMIMessageHandlerSettings& settings);
-
   ~HMIMessageHandlerImpl();
   void OnMessageReceived(MessageSharedPointer message);
   void SendMessageToHMI(MessageSharedPointer message);
@@ -118,6 +117,7 @@ class HMIMessageHandlerImpl : public HMIMessageHandler,
 
  private:
   const HMIMessageHandlerSettings& settings_;
+
   HMIMessageObserver* observer_;
   mutable sync_primitives::Lock observer_locker_;
   std::set<HMIMessageAdapter*> message_adapters_;

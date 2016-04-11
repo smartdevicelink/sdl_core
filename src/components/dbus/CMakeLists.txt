@@ -48,9 +48,9 @@ set (SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/dbus_message_controller.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/src/schema.cc
 )
-
-set (LIBRARIES dbus-1 -L${DBUS_LIBS_DIRECTORY})
-
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  set (LIBRARIES dbus-1 -L${DBUS_LIBS_DIRECTORY})
+endif()  
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/message_descriptions.cc
@@ -69,8 +69,15 @@ add_custom_command(
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../interfaces/QT_HMI_API.xml
     ${CMAKE_CURRENT_SOURCE_DIR}/codegen/make_introspection_c.py
 )
-
-add_library("DBus" ${SOURCES})
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  set(HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/dbus/*.h)
+  source_group("Header Files" FILES ${HEADERS} )
+  source_group("Source Files" FILES ${SOURCES})
+  add_library("DBus" ${HEADERS} ${SOURCES})
+else()
+  add_library("DBus" ${SOURCES})
+endif()
+  
 ADD_DEPENDENCIES("DBus" Utils install-3rd_party_dbus)
 
 target_link_libraries("DBus" "${LIBRARIES}")
