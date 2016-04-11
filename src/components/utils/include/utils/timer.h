@@ -47,13 +47,14 @@ typedef uint32_t Milliseconds;
 
 /**
  * @brief Timer calls custom callback function after
- * specified timeout has been elapsed
+ * specified timeout has been elapsed.
+ * Thread-safe class
  */
 class Timer {
  public:
   /**
    * @brief Constructor
-   * Does not starts timer
+   * Does not start timer
    * @param name Timer name for identity
    * @param task Task for tracking
    */
@@ -104,28 +105,24 @@ class Timer {
 
     /**
      * @brief Sets timer timeout
-     * Thread-safe method
      * @param timeout Timeout in milliseconds to be set
      */
     void set_timeout(const Milliseconds timeout);
 
     /**
      * @brief Gets timer timeout
-     * Thread-safe method
      * @return Timer timeout
      */
     Milliseconds timeout() const;
 
     /**
      * @brief Sets timer delegate stop flag
-     * Thread-safe method
      * @param stop_flag Bool flag to be set
      */
     void set_stop_flag(const bool stop_flag);
 
     /**
      * @brief Gets timer delegate stop flag
-     * Thread-safe method
      * @return Delegate stop flag
      */
     bool stop_flag() const;
@@ -152,6 +149,8 @@ class Timer {
     DISALLOW_COPY_AND_ASSIGN(TimerDelegate);
   };
 
+  void StopUnsafe();
+
   /**
    * @brief Callback called on timeout
    */
@@ -165,6 +164,10 @@ class Timer {
   mutable sync_primitives::Lock task_lock_;
   TimerTask* task_;
 
+  /*
+   * State lock used to protect thread and delegate
+   */
+  sync_primitives::Lock state_lock_;
   mutable TimerDelegate delegate_;
   threads::Thread* thread_;
 

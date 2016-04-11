@@ -59,10 +59,11 @@ timer::Timer::Timer(const std::string& name, TimerTask* task)
 
 timer::Timer::~Timer() {
   LOG4CXX_AUTO_TRACE(logger_);
-  Stop();
+  sync_primitives::AutoLock state_auto_lock(state_lock_);
+  StopUnsafe();
   DCHECK(thread_);
   DeleteThread(thread_);
-  sync_primitives::AutoLock auto_lock(task_lock_);
+  sync_primitives::AutoLock task_auto_lock(task_lock_);
   DCHECK(task_);
   delete task_;
   LOG4CXX_DEBUG(logger_, "Timer " << name_ << " has been destroyed");
@@ -70,8 +71,9 @@ timer::Timer::~Timer() {
 
 void timer::Timer::Start(const Milliseconds timeout, const bool single_shot) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock auto_lock(state_lock_);
+  StopUnsafe();
   DCHECK_OR_RETURN_VOID(thread_);
-  Stop();
   delegate_.set_timeout(timeout);
   single_shot_ = single_shot;
   thread_->start();
@@ -80,14 +82,8 @@ void timer::Timer::Start(const Milliseconds timeout, const bool single_shot) {
 }
 
 void timer::Timer::Stop() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK_OR_RETURN_VOID(thread_);
-  delegate_.set_stop_flag(true);
-  if (!thread_->IsCurrentThread()) {
-    thread_->join();
-  }
-  delegate_.set_timeout(0);
-  LOG4CXX_DEBUG(logger_, "Timer " << name_ << " has been stopped");
+  sync_primitives::AutoLock auto_lock(state_lock_);
+  StopUnsafe();
 }
 
 bool timer::Timer::is_running() const {
@@ -96,6 +92,17 @@ bool timer::Timer::is_running() const {
 
 timer::Milliseconds timer::Timer::timeout() const {
   return delegate_.timeout();
+}
+
+void timer::Timer::StopUnsafe() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  DCHECK_OR_RETURN_VOID(thread_);
+  delegate_.set_stop_flag(true);
+  if (!thread_->IsCurrentThread()) {
+    thread_->join();
+  }
+  delegate_.set_timeout(0);
+  LOG4CXX_DEBUG(logger_, "Timer " << name_ << " has been stopped");
 }
 
 void timer::Timer::OnTimeout() const {
