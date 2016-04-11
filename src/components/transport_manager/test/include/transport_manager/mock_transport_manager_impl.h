@@ -34,21 +34,28 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_TEST_INCLUDE_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_IMPL_H_
 
 #include "gmock/gmock.h"
+#include "config_profile/profile.h"
 #include "transport_manager/transport_manager_impl.h"
+#include "transport_manager/mock_transport_manager_settings.h"
+#include "transport_manager/transport_manager_settings.h"
 
 namespace test {
 namespace components {
 namespace transport_manager_test {
 
 class MockTransportManagerImpl
-    : public transport_manager::TransportManagerImpl {
+    : public ::transport_manager::TransportManagerImpl {
  public:
+
+  explicit MockTransportManagerImpl(MockTransportManagerSettings& settings):
+        ::transport_manager::TransportManagerImpl(settings) {}
+
   int TestReceiveEventFromDevice(
-      const transport_manager::TransportAdapterEvent& event) {
-    return TransportManagerImpl::ReceiveEventFromDevice(event);
+      const ::transport_manager::TransportAdapterEvent& event) {
+    return ::transport_manager::TransportManagerImpl::ReceiveEventFromDevice(event);
   }
 
-  void TestHandle(transport_manager::TransportAdapterEvent test_event) {
+  void TestHandle(::transport_manager::TransportAdapterEvent test_event) {
     Handle(test_event);
   }
 

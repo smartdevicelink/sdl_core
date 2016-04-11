@@ -29,39 +29,35 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "gtest/gtest.h"
-#include "transport_manager/transport_manager.h"
-#include "transport_manager/transport_manager_default.h"
-#include "resumption/last_state.h"
-#include "transport_manager/mock_transport_manager_settings.h"
-#include "resumption/last_state.h"
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_MME_SETTINGS_H
+#define SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_MME_SETTINGS_H
+
+#include <gmock/gmock.h>
+#include "protocol_handler/protocol_handler.h"
+#include "transport_manager/transport_manager_mme_settings.h"
 
 namespace test {
 namespace components {
 namespace transport_manager_test {
 
-using ::testing::Return;
-TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
-  MockTransportManagerSettings transport_manager_settings;
-  transport_manager::TransportManagerDefault transport_manager(transport_manager_settings);
-  resumption::LastState last_state("app_storage_folder", "app_info_storage");
+class MockTransportManagerMMESettings
+    : public ::transport_manager::TransportManagerMMESettings {
+ public:
+  MOCK_CONST_METHOD0(event_mq_name, const std::string&());
+  MOCK_CONST_METHOD0(ack_mq_name, const std::string&());
+  MOCK_CONST_METHOD0(iap2_hub_connect_attempts, uint32_t());
+  MOCK_CONST_METHOD0(default_hub_protocol_index, uint32_t());
+  MOCK_CONST_METHOD0(iap_legacy_protocol_mask, const std::string&());
+  MOCK_CONST_METHOD0(iap_hub_protocol_mask, const std::string&());
+  MOCK_CONST_METHOD0(iap_pool_protocol_mask, const std::string&());
+  MOCK_CONST_METHOD0(iap_system_config, const std::string&());
+  MOCK_CONST_METHOD0(iap2_system_config, const std::string&());
+  MOCK_CONST_METHOD0(iap_hub_connection_wait_timeout, uint32_t());
 
-  EXPECT_CALL(transport_manager_settings,use_last_state()).WillRepeatedly(Return(false));
-  EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port()).WillRepeatedly(Return(1u));
-  transport_manager.Init(last_state);
-}
-
-//TODO(VVeremjova) APPLINK-22021
-TEST(TestTransportManagerDefault, DISABLED_Init_LastStateUsed) {
-  MockTransportManagerSettings transport_manager_settings;
-  transport_manager::TransportManagerDefault transport_manager(transport_manager_settings);
-  resumption::LastState last_state("app_storage_folder", "app_info_storage");
-
-  EXPECT_CALL(transport_manager_settings, use_last_state()).WillRepeatedly(Return(true));
-  EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port()).WillRepeatedly(Return(1u));
-  transport_manager.Init(last_state);
-}
+};
 
 }  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test
+
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_MME_SETTINGS_H

@@ -31,7 +31,7 @@
  */
 
 #include "gtest/gtest.h"
-#include "include/transport_adapter_mock.h"
+#include "transport_manager/transport_adapter_mock.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
 #include "transport_manager/mock_transport_manager.h"
 
@@ -53,7 +53,7 @@ class TransportAdapterListenerTest : public ::testing::Test {
   const int app_handle;
   const std::string dev_id;
   MockTransportManager tr_mock;
-  TransportAdapterMock adapter_mock;
+  MockTransportAdapter adapter_mock;
   TransportAdapterListenerImpl transport_listener;
 };
 

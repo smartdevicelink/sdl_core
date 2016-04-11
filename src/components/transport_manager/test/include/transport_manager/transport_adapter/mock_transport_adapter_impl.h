@@ -35,6 +35,7 @@
 
 #include "gmock/gmock.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "transport_manager/transport_manager_settings.h"
 
 using ::transport_manager::transport_adapter::TransportAdapterImpl;
 using ::transport_manager::transport_adapter::DeviceScanner;
@@ -54,9 +55,10 @@ class MockTransportAdapterImpl : public TransportAdapterImpl {
   MockTransportAdapterImpl(DeviceScanner* device_scanner,
                        ServerConnectionFactory* server_connection_factory,
                        ClientConnectionListener* client_connection_listener,
-                       resumption::LastState& last_state)
+                       resumption::LastState& last_state,
+                        const transport_manager::TransportManagerSettings& settings)
       : TransportAdapterImpl(device_scanner, server_connection_factory,
-                             client_connection_listener,last_state) {
+                             client_connection_listener,last_state, settings) {
   }
 
   ConnectionSPtr FindStatedConnection(const DeviceUID& device_handle,

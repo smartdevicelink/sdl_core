@@ -46,7 +46,7 @@ using transport_manager::transport_adapter::TransportAdapterListener;
 
 namespace test {
 namespace components {
-namespace transport_manager {
+namespace transport_manager_test {
 using namespace ::protocol_handler;
 
 class MockTransportAdapterListener : public TransportAdapterListener {

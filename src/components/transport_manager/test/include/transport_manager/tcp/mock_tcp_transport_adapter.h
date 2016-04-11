@@ -35,6 +35,7 @@
 
 #include "gmock/gmock.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
+#include "transport_manager/transport_manager_settings.h"
 
 namespace test {
 namespace components {
@@ -44,11 +45,9 @@ using namespace ::transport_manager::transport_adapter;
 
 class MockTCPTransportAdapter : public TcpTransportAdapter {
  public:
-  MockTCPTransportAdapter(uint16_t port, resumption::LastState& last_state)
-    : TcpTransportAdapter(port,last_state) {
-    ::profile::Profile::instance()->config_file_name(
-        "smartDeviceLink_test.ini");
-  }
+  MockTCPTransportAdapter(uint16_t port, resumption::LastState& last_state,
+                           const transport_manager::TransportManagerSettings& settings)
+    : TcpTransportAdapter(port,last_state, settings) {}
   MOCK_CONST_METHOD2(FindEstablishedConnection,
                      ConnectionSPtr(const DeviceUID& device_handle,
                                     const ApplicationHandle& app_handle));

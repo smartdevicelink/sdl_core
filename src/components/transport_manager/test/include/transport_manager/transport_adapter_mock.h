@@ -40,7 +40,7 @@ namespace test {
 namespace components {
 namespace transport_manager_test {
 
-class TransportAdapterMock
+class MockTransportAdapter
     : public ::transport_manager::transport_adapter::TransportAdapter {
  public:
   MOCK_CONST_METHOD0(GetDeviceType,
