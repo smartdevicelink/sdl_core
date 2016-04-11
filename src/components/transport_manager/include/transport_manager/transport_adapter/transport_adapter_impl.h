@@ -45,6 +45,7 @@
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/transport_adapter/connection.h"
+#include "transport_manager/transport_manager_settings.h"
 #include "resumption/last_state.h"
 
 #ifdef TELEMETRY_MONITOR
@@ -78,7 +79,8 @@ class TransportAdapterImpl : public TransportAdapter,
   TransportAdapterImpl(DeviceScanner* device_scanner,
                        ServerConnectionFactory* server_connection_factory,
                        ClientConnectionListener* client_connection_listener,
-                       resumption::LastState& last_state);
+                       resumption::LastState& last_state,
+                       const TransportManagerSettings& settings);
 
   /**
    * @brief Destructor.
@@ -452,6 +454,10 @@ class TransportAdapterImpl : public TransportAdapter,
   virtual ConnectionSPtr FindEstablishedConnection(const DeviceUID& device_handle,
                                            const ApplicationHandle& app_handle) const;
 
+  const TransportManagerSettings& get_settings() const {
+      return settings_;
+  }
+
  private:
   /**
    * @brief Connect to all applications discovered on device
@@ -558,6 +564,7 @@ class TransportAdapterImpl : public TransportAdapter,
   ClientConnectionListener* client_connection_listener_;
 
   resumption::LastState& last_state_;
+  const TransportManagerSettings& settings_;
 };
 
 }  // namespace transport_adapter

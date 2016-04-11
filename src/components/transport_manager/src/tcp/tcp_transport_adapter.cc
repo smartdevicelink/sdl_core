@@ -51,12 +51,14 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
-TcpTransportAdapter::TcpTransportAdapter(const uint16_t port,
-                                         resumption::LastState& last_state)
+TcpTransportAdapter::TcpTransportAdapter(
+    const uint16_t port,
+    resumption::LastState& last_state,
+    const TransportManagerSettings& settings)
     : TransportAdapterImpl(NULL,
                            new TcpConnectionFactory(this),
                            new TcpClientListener(this, port, true),
-                           last_state) {}
+                           last_state, settings) {}
 
 TcpTransportAdapter::~TcpTransportAdapter() {
 }

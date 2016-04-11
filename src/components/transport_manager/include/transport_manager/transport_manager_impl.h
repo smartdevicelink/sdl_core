@@ -50,10 +50,11 @@
 #include "protocol/common.h"
 #ifdef TELEMETRY_MONITOR
 #include "transport_manager/telemetry_observer.h"
+#include "telemetry_monitor/telemetry_observable.h"
 #endif  // TELEMETRY_MONITOR
 #include "utils/threads/message_loop_thread.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
-#include "telemetry_monitor/telemetry_observable.h"
+#include "transport_manager/transport_manager_settings.h"
 
 namespace transport_manager {
 
@@ -66,14 +67,14 @@ typedef utils::SharedPtr<timer::Timer> TimerSPtr;
 /**
  * @brief Implementation of transport manager.s
  */
-class TransportManagerImpl
-    : public TransportManager,
-      public RawMessageLoopThread::Handler
+class TransportManagerImpl : public TransportManager,
+                             public RawMessageLoopThread::Handler,
+                             public TransportAdapterEventLoopThread::Handler
 #ifdef TELEMETRY_MONITOR
       ,
       public telemetry_monitor::TelemetryObservable<TMTelemetryObserver>
 #endif  // TELEMETRY_MONITOR
-      , public TransportAdapterEventLoopThread::Handler {
+ {
  public:
   struct Connection {
     ConnectionUID id;
@@ -89,7 +90,7 @@ class TransportManagerImpl
     TransportManagerImpl* transport_manager;
     TransportAdapter* transport_adapter;
     TimerSPtr timer;
-    bool shut_down;
+    bool shutdown_;
     DeviceHandle device_handle_;
     int messages_count;
 
@@ -103,6 +104,13 @@ class TransportManagerImpl
     void DisconnectFailedRoutine();
   };
  public:
+
+
+  /**
+   * @brief Constructor.
+   **/
+  explicit TransportManagerImpl(const TransportManagerSettings& settings);
+
   /**
    * @brief Destructor.
    **/
@@ -234,11 +242,12 @@ class TransportManagerImpl
   void SetTelemetryObserver(TMTelemetryObserver* observer);
 #endif  // TELEMETRY_MONITOR
 
-
   /**
    * @brief Constructor.
    **/
   TransportManagerImpl();
+
+  const TransportManagerSettings& get_settings() const;
 
  protected:
   template <class Proc, class... Args>
@@ -343,7 +352,7 @@ class TransportManagerImpl
       transport_adapter_listeners_;
   RawMessageLoopThread message_queue_;
   TransportAdapterEventLoopThread event_queue_;
-
+  const TransportManagerSettings& settings_;
   typedef std::vector<std::pair<const TransportAdapter*, DeviceInfo> >
   DeviceInfoList;
   sync_primitives::RWLock device_list_lock_;

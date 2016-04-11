@@ -32,9 +32,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "config_profile/profile.h"
-
 #include "transport_manager/transport_manager_default.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "utils/logger.h"
@@ -53,6 +50,10 @@
 namespace transport_manager {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
+TransportManagerDefault::TransportManagerDefault(
+    const TransportManagerSettings& settings)
+    : TransportManagerImpl(settings) {}
+
 int TransportManagerDefault::Init(resumption::LastState& last_state) {
   LOG4CXX_TRACE(logger_, "enter");
   if (E_SUCCESS != TransportManagerImpl::Init(last_state)) {
@@ -64,7 +65,7 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
 
 #ifdef BLUETOOTH_SUPPORT
   transport_adapter::TransportAdapterImpl* ta_bluetooth =
-      new transport_adapter::BluetoothTransportAdapter(last_state);
+      new transport_adapter::BluetoothTransportAdapter(last_state, get_settings());
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
     ta_bluetooth->SetTelemetryObserver(metric_observer_);
@@ -75,9 +76,9 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
 #endif
 
   const uint16_t port =
-      profile::Profile::instance()->transport_manager_tcp_adapter_port();
+      get_settings().transport_manager_tcp_adapter_port();
   transport_adapter::TransportAdapterImpl* ta_tcp =
-      new transport_adapter::TcpTransportAdapter(port, last_state);
+      new transport_adapter::TcpTransportAdapter(port, last_state, get_settings());
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
     ta_tcp->SetTelemetryObserver(metric_observer_);
@@ -89,7 +90,7 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
 
 #if defined(USB_SUPPORT)
   transport_adapter::TransportAdapterImpl* ta_usb =
-      new transport_adapter::UsbAoaAdapter(last_state);
+      new transport_adapter::UsbAoaAdapter(last_state, get_settings());
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
     ta_usb->SetTelemetryObserver(metric_observer_);
@@ -104,8 +105,5 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
 }
 
 TransportManagerDefault::~TransportManagerDefault() {}
-
-TransportManagerDefault::TransportManagerDefault()
-    : TransportManagerImpl() {}
 
 }  //  namespace transport_manager

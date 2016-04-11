@@ -59,7 +59,8 @@ TransportAdapterImpl::TransportAdapterImpl(
     DeviceScanner* device_scanner,
     ServerConnectionFactory* server_connection_factory,
     ClientConnectionListener* client_connection_listener,
-    resumption::LastState& last_state)
+    resumption::LastState& last_state,
+    const TransportManagerSettings& settings)
     : listeners_()
     , initialised_(0)
     , devices_()
@@ -72,8 +73,9 @@ TransportAdapterImpl::TransportAdapterImpl(
 #endif  // TELEMETRY_MONITOR
     device_scanner_(device_scanner)
     , server_connection_factory_(server_connection_factory)
-    , client_connection_listener_(client_connection_listener),
-    last_state_(last_state) {
+    , client_connection_listener_(client_connection_listener)
+    , last_state_(last_state)
+    , settings_(settings) {
 }
 
 TransportAdapterImpl::~TransportAdapterImpl() {
@@ -144,7 +146,7 @@ TransportAdapter::Error TransportAdapterImpl::Init() {
 
   initialised_ = (error == OK);
 
-  if (profile::Profile::instance()->use_last_state()) {
+  if (get_settings().use_last_state()) {
     if (!Restore()) {
       LOG4CXX_WARN(logger_, "could not restore transport adapter state");
       error = FAIL;

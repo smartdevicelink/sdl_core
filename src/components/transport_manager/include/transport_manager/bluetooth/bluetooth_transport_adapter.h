@@ -49,7 +49,8 @@ class BluetoothTransportAdapter : public TransportAdapterImpl {
   /**
    * @brief Constructor.
    */
-  BluetoothTransportAdapter(resumption::LastState& last_state);
+  BluetoothTransportAdapter(resumption::LastState& last_state, 
+			    const TransportManagerSettings& settings);
 
   /**
    * @brief Destructor.

@@ -57,10 +57,10 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 BluetoothTransportAdapter::~BluetoothTransportAdapter() {
 }
 
-BluetoothTransportAdapter::BluetoothTransportAdapter(resumption::LastState &last_state)
+BluetoothTransportAdapter::BluetoothTransportAdapter(resumption::LastState &last_state, const TransportManagerSettings &settings)
   : TransportAdapterImpl(new BluetoothDeviceScanner(this, true, 0),
                          new BluetoothConnectionFactory(this), NULL,
-                         last_state) {
+                         last_state, settings) {
 }
 
 DeviceType BluetoothTransportAdapter::GetDeviceType() const {
