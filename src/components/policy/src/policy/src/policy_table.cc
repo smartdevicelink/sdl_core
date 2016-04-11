@@ -46,7 +46,7 @@ PolicyTable::PolicyTable(utils::SharedPtr<PTRepresentation> pt_data)
     : pt_data_(pt_data) {}
 
 PolicyTable::~PolicyTable() {
-  LOG4CXX_INFO(logger_, "Destroying policy table.");
+  LOGGER_INFO(logger_, "Destroying policy table.");
 }
 
 }  // namespace policy

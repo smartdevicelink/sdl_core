@@ -33,8 +33,8 @@
   installed with following command:
   sudo pip install -r tools/InterfaceGenerator/requirements.txt
   
-  For logging Apache log4cxx library is used. Install required packages with the following command:
-  sudo apt-get install liblog4cxx10 liblog4cxx10-dev
+  For logging Apache logger library is used. Install required packages with the following command:
+  sudo apt-get install liblogger10 liblogger10-dev
   
   For installing pulseaudio development files which neededfor audio management fetures run:
   sudo apt-get install libpulse-dev

@@ -49,7 +49,7 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/components
   ${CMAKE_SOURCE_DIR}/src/components/config_profile/include
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/table_struct
-  ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${LOGGER_INCLUDE_DIRECTORY}
 )
 
 set(SOURCES
@@ -83,7 +83,7 @@ add_library(${target} SHARED ${SOURCES})
 target_link_libraries(${target} ${LIBRARIES} )
 
 if(ENABLE_LOG)
-  target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+  target_link_libraries(${target} logger -L${LOGGER_LIBS_DIRECTORY})
 endif()
 
 add_custom_target(copy_library_${target} ALL
