@@ -40,6 +40,10 @@
 #include "application_manager/mock_application_manager.h"
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
+#include "application_manager/event_engine/event_dispatcher.h"
+#include "application_manager/state_controller.h"
+#include "application_manager/resumption/resume_ctrl.h"
+#include "resumption/last_state.h"
 
 namespace test {
 namespace components {

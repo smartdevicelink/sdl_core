@@ -53,7 +53,7 @@ set(SOURCES
 set(LIBRARIES
     SmartObjects
     MediaManager
-    ApplicationManagerTest
+    ApplicationManager
     MessageHelper
     ProtocolHandler
     gmock
