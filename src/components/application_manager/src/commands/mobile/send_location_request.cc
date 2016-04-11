@@ -74,7 +74,7 @@ void SendLocationRequest::Run() {
     }
   }
 
-  std::list<Common_TextFieldName::eType> fields_to_check;
+  std::vector<Common_TextFieldName::eType> fields_to_check;
   if (msg_params.keyExists(strings::location_name)) {
     fields_to_check.push_back(Common_TextFieldName::locationName);
   }
@@ -236,8 +236,7 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
 }
 
 bool SendLocationRequest::CheckHMICapabilities(
-    std::list<hmi_apis::Common_TextFieldName::eType>& fields_names) {
-  LOG4CXX_AUTO_TRACE(logger_);
+    std::vector<hmi_apis::Common_TextFieldName::eType>& fields_names) {
   using namespace smart_objects;
   using namespace hmi_apis;
   if (fields_names.empty()) {
@@ -261,7 +260,7 @@ bool SendLocationRequest::CheckHMICapabilities(
       const Common_TextFieldName::eType filed_name =
           static_cast<Common_TextFieldName::eType>(
               text_field.getElement(strings::name).asInt());
-      const std::list<Common_TextFieldName::eType>::iterator it =
+      const std::vector<Common_TextFieldName::eType>::iterator it =
           std::find(fields_names.begin(), fields_names.end(), filed_name);
       if (it != fields_names.end()) {
         fields_names.erase(it);
