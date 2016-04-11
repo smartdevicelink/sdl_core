@@ -109,7 +109,7 @@ class InitialApplicationData {
   virtual const smart_objects::SmartObject* app_types() const = 0;
   virtual const smart_objects::SmartObject* vr_synonyms() const = 0;
   virtual const std::string& mac_address() const = 0;
-  virtual std::string mobile_app_id() const = 0;
+  virtual std::string policy_app_id() const = 0;
   virtual const smart_objects::SmartObject* tts_name() const = 0;
   virtual const smart_objects::SmartObject* ngn_media_screen_name() const = 0;
   virtual const mobile_api::Language::eType& language() const = 0;
@@ -117,7 +117,7 @@ class InitialApplicationData {
   virtual void set_app_types(const smart_objects::SmartObject& app_types) = 0;
   virtual void set_vr_synonyms(
       const smart_objects::SmartObject& vr_synonyms) = 0;
-  virtual void set_mobile_app_id(const std::string& mobile_app_id) = 0;
+  virtual void set_mobile_app_id(const std::string& policy_app_id) = 0;
   virtual void set_tts_name(const smart_objects::SmartObject& tts_name) = 0;
   virtual void set_ngn_media_screen_name(
       const smart_objects::SmartObject& ngn_name) = 0;
@@ -766,6 +766,12 @@ class Application : public virtual InitialApplicationData,
    */
   virtual void LoadPersistentFiles() = 0;
 
+    /**
+     * @brief Get available app space
+     * @param name of the app folder(make + mobile app id)
+     * @return free app space.
+     */
+  virtual uint32_t GetAvailableDiskSpace() = 0;
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;
 

@@ -31,7 +31,7 @@
  */
 
 #include "utils/logger.h"
-#include "config_profile/profile.h"
+
 #include "application_manager/request_controller.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/commands/hmi/request_to_hmi.h"
@@ -46,14 +46,14 @@ using namespace sync_primitives;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController")
 
-RequestController::RequestController()
-    : pool_state_(UNDEFINED),
-      pool_size_(profile::Profile::instance()->thread_pool_size()),
-      timer_("AM RequestCtrlTimer",
+RequestController::RequestController(const RequestControlerSettings& settings)
+    : pool_state_(UNDEFINED)
+    , pool_size_(settings.thread_pool_size())
+    , timer_("AM RequestCtrlTimer",
              new timer::TimerTaskImpl<RequestController>(
-                this,
-                &RequestController::onTimer)),
-      is_low_voltage_(false) {
+                 this, &RequestController::onTimer))
+    , is_low_voltage_(false)
+    , settings_(settings) {
   LOG4CXX_AUTO_TRACE(logger_);
   InitializeThreadpool();
 }
@@ -99,20 +99,20 @@ RequestController::TResult  RequestController::CheckPosibilitytoAdd(
     const RequestPtr request) {
   LOG4CXX_AUTO_TRACE(logger_);
   const uint32_t& app_hmi_level_none_time_scale =
-      profile::Profile::instance()->app_hmi_level_none_time_scale();
+      settings_.app_hmi_level_none_time_scale();
 
   // app_hmi_level_none_max_request_per_time_scale
   const uint32_t& hmi_level_none_count =
-     profile::Profile::instance()->app_hmi_level_none_time_scale_max_requests();
+    settings_.app_hmi_level_none_time_scale_max_requests();
 
   const uint32_t& app_time_scale =
-      profile::Profile::instance()->app_time_scale();
+     settings_.app_time_scale();
 
   const uint32_t& max_request_per_time_scale =
-      profile::Profile::instance()->app_time_scale_max_requests();
+     settings_.app_time_scale_max_requests();
 
   const uint32_t& pending_requests_amount =
-      profile::Profile::instance()->pending_requests_amount();
+     settings_.pending_requests_amount();
 
   if (!CheckPendingRequestsAmount(pending_requests_amount)) {
     LOG4CXX_ERROR(logger_, "Too many pending request");

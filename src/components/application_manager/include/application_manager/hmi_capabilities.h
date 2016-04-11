@@ -51,7 +51,7 @@ class LastState;
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace application_manager {
-class ApplicationManagerImpl;
+class ApplicationManager;
 
 class HMICapabilities {
 
@@ -62,7 +62,7 @@ class HMICapabilities {
    *
    * @param app_mngr Application manager pointer
    */
-  explicit HMICapabilities(ApplicationManagerImpl* const app_mngr);
+  explicit HMICapabilities(ApplicationManager& app_mngr);
 
   /*
    * @brief Class destructor
@@ -477,7 +477,7 @@ class HMICapabilities {
   bool                             is_navigation_supported_;
   bool                             is_phone_call_supported_;
 
-  ApplicationManagerImpl*          app_mngr_;
+  ApplicationManager&          app_mngr_;
   HMILanguageHandler               hmi_language_handler_;
 
   DISALLOW_COPY_AND_ASSIGN(HMICapabilities);

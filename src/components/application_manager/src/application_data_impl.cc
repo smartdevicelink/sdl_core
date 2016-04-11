@@ -80,7 +80,7 @@ InitialApplicationDataImpl::vr_synonyms() const {
   return vr_synonyms_;
 }
 
-std::string InitialApplicationDataImpl::mobile_app_id() const {
+std::string InitialApplicationDataImpl::policy_app_id() const {
   return mobile_app_id_;
 }
 

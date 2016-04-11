@@ -31,15 +31,15 @@
  */
 
 #include "application_manager/commands/command_response_impl.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
 namespace commands {
 
-CommandResponseImpl::CommandResponseImpl(const MessageSharedPtr& message)
-    : CommandImpl(message) {
-}
+CommandResponseImpl::CommandResponseImpl(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandImpl(message, application_manager) {}
 
 CommandResponseImpl::~CommandResponseImpl() {
 }
@@ -80,7 +80,7 @@ void CommandResponseImpl::SendResponse(
     }
   }
 
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_, final_message);
+  application_manager_.SendMessageToMobile(message_, final_message);
 }
 
 }  // namespace commands

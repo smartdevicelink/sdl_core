@@ -834,7 +834,7 @@ class StateControllerTest : public ::testing::Test {
     SetConnection();
   }
 
-  virtual void TearDown() OVERRIDE {
+  void TearDown() OVERRIDE {
     delete conn_handler;
   }
 

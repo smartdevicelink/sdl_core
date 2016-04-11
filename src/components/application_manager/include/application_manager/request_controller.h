@@ -48,6 +48,7 @@
 #include "interfaces/HMI_API.h"
 
 #include "application_manager/request_info.h"
+#include "application_manager/request_controller_settings.h"
 
 
 namespace application_manager {
@@ -86,7 +87,7 @@ class RequestController {
     * @brief Class constructor
     *
     */
-    RequestController();
+    RequestController(const RequestControlerSettings& settings);
 
     /**
     * @brief Class destructor
@@ -284,6 +285,7 @@ class RequestController {
     timer::Timer timer_;
 
     bool is_low_voltage_;
+    const RequestControlerSettings& settings_;
     DISALLOW_COPY_AND_ASSIGN(RequestController);
 };
 

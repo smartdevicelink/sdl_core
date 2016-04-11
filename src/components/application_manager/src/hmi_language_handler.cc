@@ -31,7 +31,7 @@
 */
 
 #include "application_manager/hmi_language_handler.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/hmi_capabilities.h"
 #include "utils/helpers.h"
@@ -43,16 +43,17 @@ static const std::string VRKey = "VR";
 static const std::string TTSKey = "TTS";
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
-
 namespace application_manager {
 
-HMILanguageHandler::HMILanguageHandler()
-    : capabilities_ui_language_(hmi_apis::Common_Language::INVALID_ENUM)
+HMILanguageHandler::HMILanguageHandler(ApplicationManager& application_manager)
+    : event_engine::EventObserver(application_manager.event_dispatcher())
+    , capabilities_ui_language_(hmi_apis::Common_Language::INVALID_ENUM)
     , capabilities_vr_language_(hmi_apis::Common_Language::INVALID_ENUM)
     , capabilities_tts_language_(hmi_apis::Common_Language::INVALID_ENUM)
     , is_ui_language_received_(false)
     , is_vr_language_received_(false)
-    , is_tts_language_received_(false) {
+    , is_tts_language_received_(false)
+    , application_manager_(application_manager) {
   subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
 }
 
@@ -117,25 +118,24 @@ void HMILanguageHandler::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject msg = event.smart_object();
   switch (event.id()) {
-  case hmi_apis::FunctionID::UI_GetLanguage:
-    LOG4CXX_DEBUG(logger_, "Got UI language response.");
-    is_ui_language_received_ = true;
-    break;
-  case hmi_apis::FunctionID::VR_GetLanguage:
-    LOG4CXX_DEBUG(logger_, "Got VR language response.");
-    is_vr_language_received_ = true;
-    break;
-  case hmi_apis::FunctionID::TTS_GetLanguage:
-    LOG4CXX_DEBUG(logger_, "Got TTS language response.");
-    is_tts_language_received_ = true;
-    break;
-  case hmi_apis::FunctionID::BasicCommunication_OnAppRegistered:
-    CheckApplication(std::make_pair(
-                     msg[strings::params][strings::app_id].asUInt(),
-                     true));
-    return;
-  default:
-    return;
+    case hmi_apis::FunctionID::UI_GetLanguage:
+      LOG4CXX_DEBUG(logger_, "Got UI language response.");
+      is_ui_language_received_ = true;
+      break;
+    case hmi_apis::FunctionID::VR_GetLanguage:
+      LOG4CXX_DEBUG(logger_, "Got VR language response.");
+      is_vr_language_received_ = true;
+      break;
+    case hmi_apis::FunctionID::TTS_GetLanguage:
+      LOG4CXX_DEBUG(logger_, "Got TTS language response.");
+      is_tts_language_received_ = true;
+      break;
+    case hmi_apis::FunctionID::BasicCommunication_OnAppRegistered:
+      CheckApplication(
+          std::make_pair(msg[strings::params][strings::app_id].asUInt(), true));
+      return;
+    default:
+      return;
   }
 
   if (is_ui_language_received_ && is_vr_language_received_ &&
@@ -150,32 +150,32 @@ void HMILanguageHandler::set_handle_response_for(
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
   if (!request.keyExists(strings::params)) {
-    LOG4CXX_ERROR(logger_, "Object does not have " << strings::params
-                  << " key.");
+    LOG4CXX_ERROR(logger_,
+                  "Object does not have " << strings::params << " key.");
     return;
   }
 
   if (!request[strings::params].keyExists(strings::function_id)) {
-    LOG4CXX_ERROR(logger_, "Object does not have " << strings::function_id
-                  << " key.");
+    LOG4CXX_ERROR(logger_,
+                  "Object does not have " << strings::function_id << " key.");
     return;
   }
 
   if (!request[strings::params].keyExists(strings::correlation_id)) {
-    LOG4CXX_ERROR(logger_, "Object does not have " << strings::correlation_id
-                  << " key.");
+    LOG4CXX_ERROR(
+        logger_, "Object does not have " << strings::correlation_id << " key.");
     return;
   }
 
   hmi_apis::FunctionID::eType function_id =
       static_cast<hmi_apis::FunctionID::eType>(
-        request[strings::params][strings::function_id].asInt());
+          request[strings::params][strings::function_id].asInt());
 
   if (!Compare<hmi_apis::FunctionID::eType, EQ, ONE>(
-        function_id,
-        hmi_apis::FunctionID::UI_GetLanguage,
-        hmi_apis::FunctionID::VR_GetLanguage,
-        hmi_apis::FunctionID::TTS_GetLanguage)) {
+          function_id,
+          hmi_apis::FunctionID::UI_GetLanguage,
+          hmi_apis::FunctionID::VR_GetLanguage,
+          hmi_apis::FunctionID::TTS_GetLanguage)) {
     LOG4CXX_ERROR(logger_,
                   "Only *GetLanguage request are allowed to be subscribed.");
     return;
@@ -223,13 +223,12 @@ void HMILanguageHandler::SendOnLanguageChangeToMobile(
       static_cast<int32_t>(kNotification);
   message[strings::params][strings::connection_key] = connection_key;
 
-  HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
+  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
   message[strings::msg_params][strings::hmi_display_language] =
       hmi_capabilities.active_ui_language();
   message[strings::msg_params][strings::language] =
       hmi_capabilities.active_vr_language();
-  if (ApplicationManagerImpl::instance()->ManageMobileCommand(
+  if (application_manager_.ManageMobileCommand(
           notification, commands::Command::ORIGIN_SDL)) {
     LOG4CXX_INFO(logger_, "Mobile command sent");
   } else {
@@ -240,8 +239,7 @@ void HMILanguageHandler::SendOnLanguageChangeToMobile(
 void HMILanguageHandler::VerifyWithPersistedLanguages() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace helpers;
-  const HMICapabilities& hmi_capabilities =
-        ApplicationManagerImpl::instance()->hmi_capabilities();
+  const HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
 
   // Updated values compared with persisted
   if (hmi_capabilities.active_ui_language() == persisted_ui_language_ &&
@@ -255,7 +253,7 @@ void HMILanguageHandler::VerifyWithPersistedLanguages() {
   LOG4CXX_INFO(logger_, "Some languages gotten from HMI have "
                         "mismatch with persisted values.");
 
-  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  const ApplicationSet& accessor = application_manager_.applications().GetData();
   ApplicationSetIt it = accessor.begin();
   for (; accessor.end() != it;) {
     ApplicationConstSharedPtr app = *it++;
@@ -288,11 +286,10 @@ void HMILanguageHandler::HandleWrongLanguageApp(const Apps::value_type& app) {
                << app.first << " because of HMI language(s) mismatch.");
 
   SendOnLanguageChangeToMobile(app.first);
-  MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-              app.first,
-              mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE);
-  ApplicationManagerImpl::instance()->
-      UnregisterApplication(app.first, mobile_apis::Result::SUCCESS, false);
+  application_manager_.ManageMobileCommand(MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+      app.first, mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE), commands::Command::ORIGIN_SDL);
+  application_manager_.UnregisterApplication(
+      app.first, mobile_apis::Result::SUCCESS, false);
   apps_.erase(it);
   if (0 == apps_.size()) {
     LOG4CXX_DEBUG(logger_,

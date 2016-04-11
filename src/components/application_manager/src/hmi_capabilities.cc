@@ -37,11 +37,11 @@
 #include "json/json.h"
 #include "utils/file_system.h"
 #include "interfaces/HMI_API.h"
-#include "config_profile/profile.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/smart_object_keys.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
 #include "formatters/CFormatterJsonBase.h"
 
@@ -201,7 +201,7 @@ const std::map<std::string, hmi_apis::Common_CharacterSet::eType>
                           {"CID1SET", hmi_apis::Common_CharacterSet::CID1SET},
                           {"CID2SET", hmi_apis::Common_CharacterSet::CID2SET}};
 
-HMICapabilities::HMICapabilities(ApplicationManagerImpl* const app_mngr)
+HMICapabilities::HMICapabilities(ApplicationManager& app_mngr)
     : is_vr_cooperating_(false)
     , is_tts_cooperating_(false)
     , is_ui_cooperating_(false)
@@ -231,8 +231,9 @@ HMICapabilities::HMICapabilities(ApplicationManagerImpl* const app_mngr)
     , prerecorded_speech_(NULL)
     , is_navigation_supported_(false)
     , is_phone_call_supported_(false)
-    , app_mngr_(app_mngr) {
-  if (false == profile::Profile::instance()->launch_hmi()) {
+    , app_mngr_(app_mngr)
+    , hmi_language_handler_(app_mngr_){
+  if (false == app_mngr_.get_settings().launch_hmi()) {
     is_vr_ready_response_recieved_ = true;
     is_tts_ready_response_recieved_ = true;
     is_ui_ready_response_recieved_ = true;
@@ -261,7 +262,6 @@ HMICapabilities::~HMICapabilities() {
   delete speech_capabilities_;
   delete audio_pass_thru_capabilities_;
   delete prerecorded_speech_;
-  app_mngr_ = NULL;
 }
 
 bool HMICapabilities::is_hmi_capabilities_initialized() const {
@@ -326,17 +326,15 @@ void HMICapabilities::set_is_vr_cooperating(bool value) {
   is_vr_cooperating_ = value;
   if (is_vr_cooperating_) {
     utils::SharedPtr<smart_objects::SmartObject> get_language(
-      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage));
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage, app_mngr_));
     hmi_language_handler_.set_handle_response_for(*get_language);
-    app_mngr_->ManageHMICommand(get_language);
+    app_mngr_.ManageHMICommand(get_language);
     utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
-        MessageHelper::CreateModuleInfoSO(
-            hmi_apis::FunctionID::VR_GetSupportedLanguages));
-    app_mngr_->ManageHMICommand(get_all_languages);
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetSupportedLanguages, app_mngr_));
+    app_mngr_.ManageHMICommand(get_all_languages);
     utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
-        MessageHelper::CreateModuleInfoSO(
-            hmi_apis::FunctionID::VR_GetCapabilities));
-    app_mngr_->ManageHMICommand(get_capabilities);
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetCapabilities, app_mngr_));
+    app_mngr_.ManageHMICommand(get_capabilities);
   }
 }
 
@@ -346,17 +344,17 @@ void HMICapabilities::set_is_tts_cooperating(bool value) {
   if (is_tts_cooperating_) {
     utils::SharedPtr<smart_objects::SmartObject> get_language(
       MessageHelper::CreateModuleInfoSO(
-        hmi_apis::FunctionID::TTS_GetLanguage));
+        hmi_apis::FunctionID::TTS_GetLanguage, app_mngr_));
     hmi_language_handler_.set_handle_response_for(*get_language);
-    app_mngr_->ManageHMICommand(get_language);
+    app_mngr_.ManageHMICommand(get_language);
     utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
-        MessageHelper::CreateModuleInfoSO(
-            hmi_apis::FunctionID::TTS_GetSupportedLanguages));
-    app_mngr_->ManageHMICommand(get_all_languages);
+      MessageHelper::CreateModuleInfoSO(
+        hmi_apis::FunctionID::TTS_GetSupportedLanguages, app_mngr_));
+    app_mngr_.ManageHMICommand(get_all_languages);
     utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
-        MessageHelper::CreateModuleInfoSO(
-            hmi_apis::FunctionID::TTS_GetCapabilities));
-    app_mngr_->ManageHMICommand(get_capabilities);
+      MessageHelper::CreateModuleInfoSO(
+        hmi_apis::FunctionID::TTS_GetCapabilities, app_mngr_));
+    app_mngr_.ManageHMICommand(get_capabilities);
   }
 }
 
@@ -366,17 +364,17 @@ void HMICapabilities::set_is_ui_cooperating(bool value) {
   if (is_ui_cooperating_) {
     utils::SharedPtr<smart_objects::SmartObject> get_language(
       MessageHelper::CreateModuleInfoSO(
-        hmi_apis::FunctionID::UI_GetLanguage));
+        hmi_apis::FunctionID::UI_GetLanguage, app_mngr_));
     hmi_language_handler_.set_handle_response_for(*get_language);
-    app_mngr_->ManageHMICommand(get_language);
+    app_mngr_.ManageHMICommand(get_language);
     utils::SharedPtr<smart_objects::SmartObject> get_all_languages(
-        MessageHelper::CreateModuleInfoSO(
-            hmi_apis::FunctionID::UI_GetSupportedLanguages));
-    app_mngr_->ManageHMICommand(get_all_languages);
+      MessageHelper::CreateModuleInfoSO(
+        hmi_apis::FunctionID::UI_GetSupportedLanguages, app_mngr_));
+    app_mngr_.ManageHMICommand(get_all_languages);
     utils::SharedPtr<smart_objects::SmartObject> get_capabilities(
-        MessageHelper::CreateModuleInfoSO(
-            hmi_apis::FunctionID::UI_GetCapabilities));
-    app_mngr_->ManageHMICommand(get_capabilities);
+      MessageHelper::CreateModuleInfoSO(
+        hmi_apis::FunctionID::UI_GetCapabilities, app_mngr_));
+    app_mngr_.ManageHMICommand(get_capabilities);
   }
 }
 
@@ -390,9 +388,9 @@ void HMICapabilities::set_is_ivi_cooperating(bool value) {
   is_ivi_cooperating_ = value;
   if (is_ivi_cooperating_) {
     utils::SharedPtr<smart_objects::SmartObject> get_type(
-        MessageHelper::CreateModuleInfoSO(
-            hmi_apis::FunctionID::VehicleInfo_GetVehicleType));
-    app_mngr_->ManageHMICommand(get_type);
+      MessageHelper::CreateModuleInfoSO(
+        hmi_apis::FunctionID::VehicleInfo_GetVehicleType, app_mngr_));
+    app_mngr_.ManageHMICommand(get_type);
   }
 }
 
@@ -580,8 +578,7 @@ void HMICapabilities::Init(resumption::LastState *last_state) {
 
 bool HMICapabilities::load_capabilities_from_file() {
   std::string json_string;
-  std::string file_name =
-      profile::Profile::instance()->hmi_capabilities_file_name();
+  std::string file_name = app_mngr_.get_settings().hmi_capabilities_file_name();
 
   if (!file_system::FileExists(file_name)) {
     return false;
@@ -592,6 +589,7 @@ bool HMICapabilities::load_capabilities_from_file() {
   }
 
   try {
+
     Json::Reader reader_;
     Json::Value root_json;
 

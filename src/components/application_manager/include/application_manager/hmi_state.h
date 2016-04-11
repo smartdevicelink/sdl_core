@@ -70,8 +70,8 @@ class HmiState {
     STATE_ID_EMBEDDED_NAVI
   };
 
-  HmiState(uint32_t app_id, ApplicationManager* app_mngr);
-  HmiState(uint32_t app_id, ApplicationManager* app_mngr, StateID state_id);
+  HmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  HmiState(uint32_t app_id, const ApplicationManager& app_mngr, StateID state_id);
 
   virtual ~HmiState() {}
 
@@ -166,7 +166,7 @@ class HmiState {
  protected:
   uint32_t app_id_;
   StateID state_id_;
-  ApplicationManager* app_mngr_;
+  const ApplicationManager& app_mngr_;
   HmiStatePtr parent_;
   mobile_apis::HMILevel::eType hmi_level_;
   mobile_apis::AudioStreamingState::eType audio_streaming_state_;
@@ -203,9 +203,8 @@ class HmiState {
  */
 class VRHmiState : public HmiState {
  public:
-  mobile_apis::AudioStreamingState::eType audio_streaming_state()
-      const OVERRIDE;
-  VRHmiState(uint32_t app_id, ApplicationManager* app_mngr);
+  virtual mobile_apis::AudioStreamingState::eType audio_streaming_state() const OVERRIDE;
+  VRHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
 };
 
 /**
@@ -213,9 +212,8 @@ class VRHmiState : public HmiState {
  */
 class TTSHmiState : public HmiState {
  public:
-  TTSHmiState(uint32_t app_id, ApplicationManager* app_mngr);
-  mobile_apis::AudioStreamingState::eType audio_streaming_state()
-      const OVERRIDE;
+  TTSHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  virtual mobile_apis::AudioStreamingState::eType audio_streaming_state() const OVERRIDE;
 };
 
 /**
@@ -224,18 +222,16 @@ class TTSHmiState : public HmiState {
  */
 class NaviStreamingHmiState : public HmiState {
  public:
-  NaviStreamingHmiState(uint32_t app_id, ApplicationManager* app_mngr);
-  mobile_apis::AudioStreamingState::eType audio_streaming_state()
-      const OVERRIDE;
+  NaviStreamingHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
+  mobile_apis::AudioStreamingState::eType audio_streaming_state() const OVERRIDE;
 };
 
 /**
- * @brief The PhoneCallHmiState class implements logic of PhoneCall temporary
- * state
+ * @brief The PhoneCallHmiState class implements logic of PhoneCall temporary state
  */
 class PhoneCallHmiState : public HmiState {
  public:
-  PhoneCallHmiState(uint32_t app_id, ApplicationManager* app_mngr);
+  PhoneCallHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
@@ -249,7 +245,7 @@ class PhoneCallHmiState : public HmiState {
  */
 class SafetyModeHmiState : public HmiState {
  public:
-  SafetyModeHmiState(uint32_t app_id, ApplicationManager* app_mngr);
+  SafetyModeHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
@@ -262,7 +258,7 @@ class SafetyModeHmiState : public HmiState {
  */
 class DeactivateHMI : public HmiState {
  public:
-  DeactivateHMI(uint32_t app_id, ApplicationManager* app_mngr);
+  DeactivateHMI(uint32_t app_id, const ApplicationManager& app_mngr);
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
@@ -276,7 +272,7 @@ class DeactivateHMI : public HmiState {
  */
 class AudioSource : public HmiState {
  public:
-  AudioSource(uint32_t app_id, ApplicationManager* app_mngr);
+  AudioSource(uint32_t app_id, const ApplicationManager& app_mngr);
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {
@@ -290,7 +286,7 @@ class AudioSource : public HmiState {
  */
 class EmbeddedNavi : public HmiState {
  public:
-  EmbeddedNavi(uint32_t app_id, ApplicationManager* app_mngr);
+  EmbeddedNavi(uint32_t app_id, const ApplicationManager& app_mngr);
   mobile_apis::HMILevel::eType hmi_level() const OVERRIDE;
   mobile_apis::AudioStreamingState::eType audio_streaming_state()
       const OVERRIDE {

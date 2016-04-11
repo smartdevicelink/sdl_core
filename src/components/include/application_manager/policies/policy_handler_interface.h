@@ -99,6 +99,10 @@ class PolicyHandlerInterface {
   virtual utils::SharedPtr<usage_statistics::StatisticsManager>
   GetStatisticManager() const = 0;
 
+  virtual void SendOnAppPermissionsChanged(
+      const AppPermissions& permissions,
+      const std::string& policy_app_id) const = 0;
+
   /**
    * @brief CheckSystemAction allows to check whether certain system
    * action is enabled.

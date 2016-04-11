@@ -34,6 +34,9 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_IMPL_H_
 
 #include "application_manager/commands/command.h"
+#include "application_manager/event_engine/event_observer.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/smart_object_keys.h"
 #include "utils/logger.h"
 
 namespace application_manager {
@@ -49,7 +52,6 @@ struct CommandParametersPermissions {
 };
 
 namespace commands {
-
 /**
  * @brief Class is intended to encapsulate RPC as an object
  **/
@@ -60,7 +62,8 @@ class CommandImpl : public Command {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit CommandImpl(const MessageSharedPtr& message);
+  explicit CommandImpl(const MessageSharedPtr& message,
+                       ApplicationManager& application_manager);
 
   /**
    * @brief CommandImpl class destructor
@@ -125,17 +128,13 @@ class CommandImpl : public Command {
  *  If request need to terminate itself, it should override this function false
  * @return allowed_to_terminate_ value
  */
-  virtual bool AllowedToTerminate() {
-    return allowed_to_terminate_;
-  }
+  virtual bool AllowedToTerminate();
 
   /**
   * @brief SetAllowedToTerminate set up allowed to terminate flag.
   * If true, request controller will terminate request on response
   */
-  virtual void SetAllowedToTerminate(bool allowed) {
-      allowed_to_terminate_ = allowed;
-  }
+  virtual void SetAllowedToTerminate(bool allowed);
 
   // members
   static const int32_t hmi_protocol_type_;
@@ -143,15 +142,32 @@ class CommandImpl : public Command {
   static const int32_t protocol_version_;  
 
  protected:
+  /**
+   * @brief Parse smartObject and replace mobile app Id by HMI app ID
+   *
+   * @param message Smartobject to be parsed
+   */
+  void ReplaceMobileByHMIAppId(smart_objects::SmartObject& message);
+
+  /**
+   * @brief Parse smartObject and replace HMI app ID by mobile app Id
+   *
+   * @param message Smartobject to be parsed
+   */
+  void ReplaceHMIByMobileAppId(smart_objects::SmartObject& message);
+
   MessageSharedPtr message_;
   uint32_t default_timeout_;
   bool allowed_to_terminate_;
+  ApplicationManager& application_manager_;
+
 #ifdef ENABLE_LOG
   static log4cxx::LoggerPtr logger_;
 #endif // ENABLE_LOG
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandImpl);
+
 };
 
 }  // namespace commands

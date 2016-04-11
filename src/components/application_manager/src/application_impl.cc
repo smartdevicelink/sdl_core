@@ -34,8 +34,8 @@
 #include <string>
 #include <strings.h>
 #include "application_manager/message_helper.h"
-#include "application_manager/application_manager_impl.h"
 #include "protocol_handler/protocol_handler.h"
+#include "application_manager/application_manager.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
@@ -72,13 +72,16 @@ mobile_apis::FileType::eType StringToFileType(const char* str) {
 }
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+
 namespace application_manager {
+
 ApplicationImpl::ApplicationImpl(
-      uint32_t application_id,
-      const std::string& mobile_app_id,
-      const std::string& mac_address,
-      const custom_str::CustomString& app_name,
-      utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager)
+    uint32_t application_id,
+    const std::string& mobile_app_id,
+    const std::string& mac_address,
+    const custom_str::CustomString& app_name,
+    utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
+    ApplicationManager& application_manager)
     : grammar_id_(0)
     , hmi_app_id_(0)
     , app_id_(application_id)
@@ -110,13 +113,13 @@ ApplicationImpl::ApplicationImpl(
     , video_stream_suspend_timer_(
           "VideoStreamSuspend",
           new ::timer::TimerTaskImpl<ApplicationImpl>(
-              this,
-              &ApplicationImpl::OnVideoStreamSuspend))
+              this, &ApplicationImpl::OnVideoStreamSuspend))
     , audio_stream_suspend_timer_(
           "AudioStreamSuspend",
           new ::timer::TimerTaskImpl<ApplicationImpl>(
-              this,
-              &ApplicationImpl::OnAudioStreamSuspend)) {
+              this, &ApplicationImpl::OnAudioStreamSuspend))
+    , application_manager_(application_manager) {
+
   cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] = {
       date_time::DateTime::getCurrentTime(), 0};
   cmd_number_to_time_limits_[mobile_apis::FunctionID::GetVehicleDataID] = {
@@ -128,21 +131,18 @@ ApplicationImpl::ApplicationImpl(
   MarkUnregistered();
   // subscribe application to custom button by default
   SubscribeToButton(mobile_apis::ButtonName::CUSTOM_BUTTON);
-
   // load persistent files
   LoadPersistentFiles();
-  HmiStatePtr initial_state =
-      ApplicationManagerImpl::instance()->CreateRegularState(
+  HmiStatePtr initial_state = application_manager_.CreateRegularState(
           app_id(),
           mobile_apis::HMILevel::INVALID_ENUM,
           mobile_apis::AudioStreamingState::INVALID_ENUM,
           mobile_api::SystemContext::SYSCTXT_MAIN);
   state_.InitState(initial_state);
 
-  video_stream_suspend_timeout_ =
-      profile::Profile::instance()->video_data_stopped_timeout();
+  video_stream_suspend_timeout_ = application_manager_.get_settings().video_data_stopped_timeout();
   audio_stream_suspend_timeout_ =
-      profile::Profile::instance()->audio_data_stopped_timeout();
+       application_manager_.get_settings().audio_data_stopped_timeout();
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -268,7 +268,7 @@ const custom_str::CustomString& ApplicationImpl::name() const {
   return app_name_;
 }
 
-void application_manager::ApplicationImpl::set_folder_name(
+void ApplicationImpl::set_folder_name(
     const std::string& folder_name) {
   folder_name_ = folder_name;
 }
@@ -322,7 +322,7 @@ connection_handler::DeviceHandle ApplicationImpl::device() const {
   return device_;
 }
 
-const std::string& ApplicationImpl::mac_address() const{
+const std::string& ApplicationImpl::mac_address() const {
   return mac_address_;
 }
 
@@ -399,14 +399,14 @@ void ApplicationImpl::StartStreaming(
     LOG4CXX_TRACE(logger_, "ServiceType = Video");
     if (!video_streaming_approved()) {
       LOG4CXX_TRACE(logger_, "Video streaming not approved");
-      MessageHelper::SendNaviStartStream(app_id());
+      MessageHelper::SendNaviStartStream(app_id(), application_manager_);
       set_video_stream_retry_number(0);
     }
   } else if (ServiceType::kAudio == service_type) {
     LOG4CXX_TRACE(logger_, "ServiceType = Audio");
     if (!audio_streaming_approved()) {
       LOG4CXX_TRACE(logger_, "Audio streaming not approved");
-      MessageHelper::SendAudioStartStream(app_id());
+      MessageHelper::SendAudioStartStream(app_id(), application_manager_);
       set_audio_stream_retry_number(0);
     }
   }
@@ -445,7 +445,7 @@ void ApplicationImpl::StopStreaming(
 void ApplicationImpl::StopNaviStreaming() {
   LOG4CXX_AUTO_TRACE(logger_);
   video_stream_suspend_timer_.Stop();
-  MessageHelper::SendNaviStopStream(app_id());
+  MessageHelper::SendNaviStopStream(app_id(), application_manager_);
   set_video_streaming_approved(false);
   set_video_stream_retry_number(0);
 }
@@ -453,7 +453,7 @@ void ApplicationImpl::StopNaviStreaming() {
 void ApplicationImpl::StopAudioStreaming() {
   LOG4CXX_AUTO_TRACE(logger_);    
   audio_stream_suspend_timer_.Stop();
-  MessageHelper::SendAudioStopStream(app_id());
+  MessageHelper::SendAudioStopStream(app_id(), application_manager_);
   set_audio_streaming_approved(false);
   set_audio_stream_retry_number(0);
 }
@@ -465,18 +465,18 @@ void ApplicationImpl::SuspendStreaming(
 
   if (ServiceType::kMobileNav == service_type) {
     video_stream_suspend_timer_.Stop();
-    ApplicationManagerImpl::instance()->OnAppStreaming(
+    application_manager_.OnAppStreaming(
         app_id(), service_type, false);
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
     video_streaming_suspended_ = true;
   } else if (ServiceType::kAudio == service_type) {
     audio_stream_suspend_timer_.Stop();
-    ApplicationManagerImpl::instance()->OnAppStreaming(
+    application_manager_.OnAppStreaming(
         app_id(), service_type, false);
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     audio_streaming_suspended_ = true;
   }
-  MessageHelper::SendOnDataStreaming(service_type, false);
+  MessageHelper::SendOnDataStreaming(service_type, false, application_manager_);
 }
 
 void ApplicationImpl::WakeUpStreaming(
@@ -487,18 +487,18 @@ void ApplicationImpl::WakeUpStreaming(
   if (ServiceType::kMobileNav == service_type) {
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
     if (video_streaming_suspended_) {
-      ApplicationManagerImpl::instance()->OnAppStreaming(
+      application_manager_.OnAppStreaming(
           app_id(), service_type, true);
-      MessageHelper::SendOnDataStreaming(ServiceType::kMobileNav, true);
+      MessageHelper::SendOnDataStreaming(ServiceType::kMobileNav, true, application_manager_);
       video_streaming_suspended_ = false;
     }
     video_stream_suspend_timer_.Start(video_stream_suspend_timeout_, false);
   } else if (ServiceType::kAudio == service_type) {
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     if (audio_streaming_suspended_) {
-      ApplicationManagerImpl::instance()->OnAppStreaming(
+      application_manager_.OnAppStreaming(
           app_id(), service_type, true);
-      MessageHelper::SendOnDataStreaming(ServiceType::kAudio, true);
+      MessageHelper::SendOnDataStreaming(ServiceType::kAudio, true, application_manager_);
       audio_streaming_suspended_ = false;
     }
     audio_stream_suspend_timer_.Start(audio_stream_suspend_timeout_, false);
@@ -713,11 +713,11 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
 
       if (mobile_apis::FunctionID::ReadDIDID == cmd_id) {
         frequency_restrictions =
-            profile::Profile::instance()->read_did_frequency();
+             application_manager_.get_settings().read_did_frequency();
 
       } else if (mobile_apis::FunctionID::GetVehicleDataID == cmd_id) {
         frequency_restrictions =
-            profile::Profile::instance()->get_vehicle_data_frequency();
+             application_manager_.get_settings().get_vehicle_data_frequency();
       } else {
         LOG4CXX_INFO(logger_, "No restrictions for request");
         return false;
@@ -756,9 +756,9 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
     // commands per minute, e.g. 10 command per minute i.e. 1 command per 6 sec
     case POLICY_TABLE: {
       const policy::PolicyHandlerInterface& policy_handler =
-          ApplicationManagerImpl::instance()->GetPolicyHandler();
+          application_manager_.GetPolicyHandler();
       std::string priority;
-      policy_handler.GetPriority(mobile_app_id(), &priority);
+      policy_handler.GetPriority(policy_app_id(), &priority);
       uint32_t cmd_limit = policy_handler.GetNotificationsNumber(priority);
 
       if (0 == cmd_limit) {
@@ -822,16 +822,15 @@ void ApplicationImpl::set_is_application_data_changed(
 
 void ApplicationImpl::UpdateHash() {
   LOG4CXX_AUTO_TRACE(logger_);
-  hash_val_ = utils::gen_hash(profile::Profile::instance()->hash_string_size());
+  hash_val_ = utils::gen_hash( application_manager_.get_settings().hash_string_size());
   set_is_application_data_changed(true);
 
-  MessageHelper::SendHashUpdateNotification(app_id());
+  MessageHelper::SendHashUpdateNotification(app_id(), application_manager_);
 }
 
 void ApplicationImpl::CleanupFiles() {
-  profile::Profile* profile =
-          profile::Profile::instance();
-  std::string directory_name = profile->app_storage_folder();
+  std::string directory_name =
+       application_manager_.get_settings().app_storage_folder();
   directory_name += "/" + folder_name();
 
   if (file_system::DirectoryExists(directory_name)) {
@@ -860,7 +859,8 @@ void ApplicationImpl::LoadPersistentFiles() {
   using namespace profile;
 
   if (kWaitingForRegistration == app_state_) {
-    const std::string app_icon_dir(Profile::instance()->app_icons_folder());
+    const std::string app_icon_dir(
+          application_manager_.get_settings().app_icons_folder());
     const std::string full_icon_path(app_icon_dir + "/" + mobile_app_id_);
     if (file_system::FileExists(full_icon_path)) {
       AppFile file;
@@ -873,7 +873,8 @@ void ApplicationImpl::LoadPersistentFiles() {
     return;
   }
 
-  std::string directory_name = Profile::instance()->app_storage_folder();
+  std::string directory_name =
+      application_manager_.get_settings().app_storage_folder();
   directory_name += "/" + folder_name();
 
   if (file_system::DirectoryExists(directory_name)) {
@@ -902,6 +903,34 @@ void ApplicationImpl::LoadPersistentFiles() {
                                              << file.file_type);
       AddFile(file);
     }
+  }
+}
+
+uint32_t ApplicationImpl::GetAvailableDiskSpace() {
+  const uint32_t app_quota =  application_manager_.get_settings().app_dir_quota();
+  std::string app_storage_path =
+       application_manager_.get_settings().app_storage_folder();
+
+  app_storage_path += "/";
+  app_storage_path += folder_name();
+
+  if (file_system::DirectoryExists(app_storage_path)) {
+    size_t size_of_directory = file_system::DirectorySize(app_storage_path);
+    if (app_quota < size_of_directory) {
+      return 0;
+    }
+
+    uint32_t current_app_quota = app_quota - size_of_directory;
+    uint32_t available_disk_space =
+        file_system::GetAvailableDiskSpace(app_storage_path);
+
+    if (current_app_quota > available_disk_space) {
+      return available_disk_space;
+    } else {
+      return current_app_quota;
+    }
+  } else {
+    return app_quota;
   }
 }
 

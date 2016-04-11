@@ -41,6 +41,8 @@
 namespace application_manager {
 namespace event_engine {
 
+class EventDispatcher;
+
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 class Event {
@@ -65,7 +67,7 @@ class Event {
    * @brief Sends synchronously event to all subscribers.
    *
    */
-  void raise();
+  void raise(EventDispatcher& event_dispatcher);
 
   /*
    * @brief Provides event ID

@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/command_notification_impl.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
@@ -39,9 +39,8 @@ namespace application_manager {
 namespace commands {
 
 CommandNotificationImpl::CommandNotificationImpl(
-    const MessageSharedPtr& message)
-    : CommandImpl(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandImpl(message, application_manager) {}
 
 CommandNotificationImpl::~CommandNotificationImpl() {
 }
@@ -66,7 +65,7 @@ void CommandNotificationImpl::SendNotification() {
   LOG4CXX_INFO(logger_, "SendNotification");
   MessageHelper::PrintSmartObject(*message_);
 
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+  application_manager_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands

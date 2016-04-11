@@ -32,19 +32,14 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_H_
-
-#include "utils/shared_ptr.h"
+#include <stdint.h>
 #include "smart_objects/smart_object.h"
-#include "application_manager/event_engine/event_observer.h"
-#include "application_manager/smart_object_keys.h"
+#include "utils/shared_ptr.h"
 
 namespace application_manager {
-/**
- * @brief SmartObject type
- **/
-
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
+class ApplicationManager;
 namespace commands {
 
 /**
@@ -128,7 +123,6 @@ class Command {
 };
 
 typedef smart_objects::SmartObjectSPtr MessageSharedPtr;
-
 }  // namespace commands
 
 }  // namespace application_manager

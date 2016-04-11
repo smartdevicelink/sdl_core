@@ -34,12 +34,15 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_LANGUAGE_HANDLER_H_
 
 #include "application_manager/event_engine/event_observer.h"
+#include "utils/lock.h"
 #include "interfaces/HMI_API.h"
 namespace resumption {
 class LastState;
 }
 namespace application_manager {
 
+
+class ApplicationManager;
 /**
  * Class is used to handle edge case with slow HMI responses for current
  * languages. Main idea is to cache values within some persistent storage and
@@ -63,7 +66,7 @@ public:
   /**
    * @brief Class constructor
    */
-  HMILanguageHandler();
+  HMILanguageHandler(ApplicationManager& application_manager);
 
   /**
    * @brief Sets language for interface
@@ -174,6 +177,7 @@ private:
    */
   bool is_tts_language_received_;
   resumption::LastState* last_state_;
+  ApplicationManager& application_manager_;
 };
 
 } // namespace application_manager
