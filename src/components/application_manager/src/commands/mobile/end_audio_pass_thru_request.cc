@@ -32,15 +32,15 @@
  */
 
 #include "application_manager/commands/mobile/end_audio_pass_thru_request.h"
-#include "application_manager/application_manager_impl.h"
+
 
 namespace application_manager {
 
 namespace commands {
 
 EndAudioPassThruRequest::EndAudioPassThruRequest(
-  const MessageSharedPtr& message)
-  : CommandRequestImpl(message) {
+  const MessageSharedPtr& message, ApplicationManager& application_manager)
+  : CommandRequestImpl(message, application_manager) {
 }
 
 EndAudioPassThruRequest::~EndAudioPassThruRequest() {
@@ -66,9 +66,9 @@ void EndAudioPassThruRequest::on_event(const event_engine::Event& event) {
 
       if (result) {
         bool ended_successfully =
-            ApplicationManagerImpl::instance()->end_audio_pass_thru();
+            application_manager_.EndAudioPassThrough();
         if (ended_successfully) {
-            ApplicationManagerImpl::instance()->StopAudioPassThru(
+            application_manager_.StopAudioPassThru(
                 connection_key());
         }
       }

@@ -49,7 +49,7 @@ class SliderRequest : public CommandRequestImpl {
   /**
    * \brief SliderRequest class constructor
    **/
-  explicit SliderRequest(const MessageSharedPtr& message);
+  explicit SliderRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * \brief SliderRequest class destructor

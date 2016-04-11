@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/slider_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "utils/helpers.h"
@@ -42,8 +42,8 @@ namespace application_manager {
 
 namespace commands {
 
-SliderRequest::SliderRequest(const MessageSharedPtr& message)
- : CommandRequestImpl(message) {
+SliderRequest::SliderRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+ : CommandRequestImpl(message, application_manager) {
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
 }
 
@@ -55,7 +55,8 @@ bool SliderRequest::Init() {
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
   if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
-    default_timeout_ = profile::Profile::instance()->default_timeout() +
+    default_timeout_ =
+        application_manager_.get_settings().default_timeout() +
         (*message_)[strings::msg_params][strings::timeout].asUInt();
   }
 
@@ -66,7 +67,7 @@ void SliderRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application =
-      application_manager::ApplicationManagerImpl::instance()->application(
+      application_manager_.application(
           (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!application) {
@@ -123,7 +124,7 @@ void SliderRequest::on_event(const event_engine::Event& event) {
   const event_engine::Event::EventID event_id = event.id();
   if (event_id == FunctionID::UI_OnResetTimeout) {
     LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
-    ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
+    application_manager_.updateRequestTimeout(connection_key(),
       correlation_id(),
       default_timeout());
     return;

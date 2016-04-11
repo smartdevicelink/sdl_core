@@ -33,8 +33,9 @@
 
 #include <string.h>
 #include "application_manager/commands/mobile/scrollable_message_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
+#include "application_manager/policies/policy_handler.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -45,8 +46,8 @@ namespace application_manager {
 namespace commands {
 
 ScrollableMessageRequest::ScrollableMessageRequest(
-    const MessageSharedPtr& message)
- : CommandRequestImpl(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+ : CommandRequestImpl(message, application_manager) {
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
 }
 
@@ -71,9 +72,7 @@ bool ScrollableMessageRequest::Init() {
 void ScrollableMessageRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app =
-      application_manager::ApplicationManagerImpl::instance()
-      ->application(connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -85,7 +84,7 @@ void ScrollableMessageRequest::Run() {
 
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app,
-          application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler());
+          application_manager_.GetPolicyHandler(), application_manager_);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
     LOG4CXX_ERROR(logger_, "Wrong soft buttons parameters!");
@@ -121,7 +120,7 @@ void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
       LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
-      ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
+      application_manager_.updateRequestTimeout(connection_key(),
           correlation_id(),
           default_timeout());
       break;
@@ -134,7 +133,7 @@ void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
           (message[strings::params][hmi_response::code].asInt());
 
       HMICapabilities& hmi_capabilities =
-          ApplicationManagerImpl::instance()->hmi_capabilities();
+          application_manager_.hmi_capabilities();
 
       bool result =
           Compare<mobile_api::Result::eType, EQ, ONE>(

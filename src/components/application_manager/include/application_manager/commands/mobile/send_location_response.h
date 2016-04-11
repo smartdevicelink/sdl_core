@@ -45,7 +45,7 @@ class SendLocationResponse : public CommandResponseImpl {
   /**
    * @brief SendLocationResponse class constructor
    */
-  explicit SendLocationResponse(const MessageSharedPtr& message);
+  explicit SendLocationResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief SendLocationResponse class destructor

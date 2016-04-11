@@ -33,7 +33,8 @@
 
 #include <cstring>
 #include "application_manager/commands/mobile/show_constant_tbt_request.h"
-#include "application_manager/application_manager_impl.h"
+
+#include "application_manager/policies/policy_handler.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/policies/policy_handler_interface.h"
@@ -44,8 +45,8 @@ namespace application_manager {
 
 namespace commands {
 
-ShowConstantTBTRequest::ShowConstantTBTRequest(const MessageSharedPtr& message)
- : CommandRequestImpl(message) {
+ShowConstantTBTRequest::ShowConstantTBTRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+ : CommandRequestImpl(message, application_manager) {
 }
 
 ShowConstantTBTRequest::~ShowConstantTBTRequest() {
@@ -54,7 +55,7 @@ ShowConstantTBTRequest::~ShowConstantTBTRequest() {
 void ShowConstantTBTRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = application_manager_.application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!app) {
@@ -85,9 +86,7 @@ void ShowConstantTBTRequest::Run() {
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons(
           msg_params,
-          app,
-          application_manager::ApplicationManagerImpl::instance()
-              ->GetPolicyHandler());
+          app, application_manager_.GetPolicyHandler() , application_manager_);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
     LOG4CXX_ERROR(logger_, "INVALID_DATA!");
@@ -100,7 +99,7 @@ void ShowConstantTBTRequest::Run() {
       mobile_apis::Result::SUCCESS;
   if (msg_params.keyExists(strings::turn_icon)) {
     verification_result = MessageHelper::VerifyImage(
-        msg_params[strings::turn_icon], app);
+        msg_params[strings::turn_icon], app, application_manager_);
     if (mobile_apis::Result::SUCCESS != verification_result) {
       LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
       SendResponse(false, verification_result);
@@ -110,7 +109,7 @@ void ShowConstantTBTRequest::Run() {
 
   if (msg_params.keyExists(strings::next_turn_icon)) {
     verification_result = MessageHelper::VerifyImage(
-        msg_params[strings::next_turn_icon], app);
+        msg_params[strings::next_turn_icon], app, application_manager_);
     if (mobile_apis::Result::SUCCESS != verification_result) {
       LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
       SendResponse(false, verification_result);
@@ -192,7 +191,7 @@ void ShowConstantTBTRequest::on_event(const event_engine::Event& event) {
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt()));
       HMICapabilities& hmi_capabilities =
-                ApplicationManagerImpl::instance()->hmi_capabilities();
+                application_manager_.hmi_capabilities();
       bool result = false;
       if (mobile_apis::Result::SUCCESS == result_code) {
         result = true;

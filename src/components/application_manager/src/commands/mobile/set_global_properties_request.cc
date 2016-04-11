@@ -33,7 +33,7 @@
 #include <string.h>
 #include <algorithm>
 #include "application_manager/commands/mobile/set_global_properties_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -44,8 +44,8 @@ namespace application_manager {
 namespace commands {
 
 SetGlobalPropertiesRequest::SetGlobalPropertiesRequest(
-    const MessageSharedPtr& message)
-    : CommandRequestImpl(message),
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager),
       is_ui_send_(false),
       is_tts_send_(false),
       is_ui_received_(false),
@@ -64,7 +64,7 @@ void SetGlobalPropertiesRequest::Run() {
       (*message_)[strings::msg_params];
 
   ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "No application associated with connection key "
@@ -84,7 +84,7 @@ void SetGlobalPropertiesRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::menu_icon)) {
     verification_result = MessageHelper::VerifyImage(
-        (*message_)[strings::msg_params][strings::menu_icon], app);
+        (*message_)[strings::msg_params][strings::menu_icon], app, application_manager_);
     if (mobile_apis::Result::SUCCESS != verification_result) {
       LOG4CXX_ERROR(logger_, "MessageHelper::VerifyImage return "
                     << verification_result);
@@ -95,7 +95,7 @@ void SetGlobalPropertiesRequest::Run() {
   // Check for image file(s) in vrHelpItem
   if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
     if (mobile_apis::Result::SUCCESS != MessageHelper::VerifyImageVrHelpItems(
-        (*message_)[strings::msg_params][strings::vr_help], app)) {
+        (*message_)[strings::msg_params][strings::vr_help], app, application_manager_)) {
       LOG4CXX_ERROR(logger_, "MessageHelper::VerifyImage return INVALID_DATA!");
       SendResponse(false, mobile_apis::Result::INVALID_DATA);
       return;
@@ -110,7 +110,7 @@ void SetGlobalPropertiesRequest::Run() {
 
   //if application waits for sending ttsGlobalProperties need to remove this
   //application from tts_global_properties_app_list_
-  ApplicationManagerImpl::instance()->RemoveAppFromTTSGlobalPropertiesList(
+  application_manager_.RemoveAppFromTTSGlobalPropertiesList(
       connection_key());
   bool is_help_prompt_present = msg_params.keyExists(strings::help_prompt);
   bool is_timeout_prompt_present = msg_params.keyExists(
@@ -290,13 +290,11 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
   }
 
   //TODO{ALeshin} APPLINK-15858. connection_key removed during SendResponse
-  const uint32_t stashedConnectionKey = connection_key();
+  ApplicationSharedPtr application = 
+	application_manager_.application(connection_key());
 
   SendResponse(result, result_code, return_info,
                &(message[strings::msg_params]));
-
-  ApplicationSharedPtr application =
-      ApplicationManagerImpl::instance()->application(stashedConnectionKey);
 
   if (!application) {
     LOG4CXX_DEBUG(logger_, "NULL pointer.");

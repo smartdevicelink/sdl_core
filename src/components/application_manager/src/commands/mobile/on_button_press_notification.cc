@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/on_button_press_notification.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -43,8 +43,8 @@ namespace commands {
 namespace mobile {
 
 OnButtonPressNotification::OnButtonPressNotification(
-    const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandNotificationImpl(message, application_manager) {
 }
 
 OnButtonPressNotification::~OnButtonPressNotification() {
@@ -73,7 +73,7 @@ void OnButtonPressNotification::Run() {
       return;
     }
 
-    ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+    ApplicationSharedPtr app = application_manager_.application(
         (*message_)[strings::msg_params][strings::app_id].asUInt());
 
     if (false == app.valid()) {
@@ -96,7 +96,7 @@ void OnButtonPressNotification::Run() {
   }
 
   const std::vector<ApplicationSharedPtr>& subscribedApps =
-      ApplicationManagerImpl::instance()->applications_by_button(btn_id);
+      application_manager_.applications_by_button(btn_id);
 
   std::vector<ApplicationSharedPtr>::const_iterator it = subscribedApps.begin();
   for (; subscribedApps.end() != it; ++it) {

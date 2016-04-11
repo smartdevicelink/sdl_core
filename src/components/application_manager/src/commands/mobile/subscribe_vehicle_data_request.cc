@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/subscribe_vehicle_data_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "utils/helpers.h"
@@ -41,8 +41,8 @@ namespace application_manager {
 namespace commands {
 
 SubscribeVehicleDataRequest::SubscribeVehicleDataRequest(
-    const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {
 }
 
 SubscribeVehicleDataRequest::~SubscribeVehicleDataRequest() {
@@ -87,7 +87,7 @@ namespace {
 void SubscribeVehicleDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = application_manager_.application(
       connection_key());
 
   if (!app) {
@@ -239,7 +239,7 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     return;
   }
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = application_manager_.application(
       CommandRequestImpl::connection_key());
 
   if (!app) {
@@ -387,12 +387,23 @@ void SubscribeVehicleDataRequest::UnsubscribeFailedSubscriptions(
   }
 }
 
+struct SubscribedToIVIPredicate {
+  int32_t vehicle_info_;
+  SubscribedToIVIPredicate(int32_t vehicle_info)
+      : vehicle_info_(vehicle_info) {}
+  bool operator()(const ApplicationSharedPtr app) const {
+    return app ? app->IsSubscribedToIVI(vehicle_info_) : false;
+  }
+};
+
 bool SubscribeVehicleDataRequest::IsSomeoneSubscribedFor(
     const uint32_t param_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationManagerImpl::SubscribedToIVIPredicate finder(param_id);
-  ApplicationManagerImpl::ApplicationListAccessor accessor;
-  return !accessor.FindAll(finder).empty();
+  SubscribedToIVIPredicate finder(param_id);
+  DataAccessor<ApplicationSet> accessor = application_manager_.applications();
+  ApplicationSetConstIt it = std::find_if(
+      accessor.GetData().begin(), accessor.GetData().end(), finder);
+  return it != accessor.GetData().end();
 }
 
 }  // namespace commands

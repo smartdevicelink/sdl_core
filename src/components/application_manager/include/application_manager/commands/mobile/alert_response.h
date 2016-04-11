@@ -51,7 +51,7 @@ class AlertResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AlertResponse(const MessageSharedPtr& message);
+  explicit AlertResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief AlertResponse class destructor

@@ -36,7 +36,7 @@
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
@@ -52,7 +52,7 @@ class PutFileRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit PutFileRequest(const MessageSharedPtr& message);
+  explicit PutFileRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief PutFileRequest class destructor

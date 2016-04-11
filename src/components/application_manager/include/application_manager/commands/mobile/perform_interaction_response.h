@@ -51,7 +51,7 @@ class PerformInteractionResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit PerformInteractionResponse(const MessageSharedPtr& message);
+  explicit PerformInteractionResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief PerformInteractionResponse class destructor

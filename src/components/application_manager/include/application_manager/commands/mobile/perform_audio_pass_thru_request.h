@@ -52,7 +52,7 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit PerformAudioPassThruRequest(const MessageSharedPtr& message);
+  explicit PerformAudioPassThruRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief PerformAudioPassThruRequest class destructor

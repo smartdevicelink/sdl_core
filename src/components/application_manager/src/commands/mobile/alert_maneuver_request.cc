@@ -33,8 +33,9 @@
 #include <cstring>
 #include <string>
 #include "application_manager/commands/mobile/alert_maneuver_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
+#include "application_manager/policies/policy_handler.h"
 #include "application_manager/message_helper.h"
 #include "utils/helpers.h"
 
@@ -42,8 +43,8 @@ namespace application_manager {
 
 namespace commands {
 
-AlertManeuverRequest::AlertManeuverRequest(const MessageSharedPtr& message)
- : CommandRequestImpl(message),
+AlertManeuverRequest::AlertManeuverRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+ : CommandRequestImpl(message, application_manager),
    tts_speak_result_code_(mobile_apis::Result::INVALID_ENUM),
    navi_alert_maneuver_result_code_(mobile_apis::Result::INVALID_ENUM) {
   subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
@@ -62,7 +63,7 @@ void AlertManeuverRequest::Run() {
     return;
   }
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = application_manager_.application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (NULL == app.get()) {
@@ -83,7 +84,7 @@ void AlertManeuverRequest::Run() {
 
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app,
-          application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler());
+          application_manager_.GetPolicyHandler(), application_manager_);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
     LOG4CXX_ERROR(logger_, "Wrong soft buttons parameters!");
@@ -163,7 +164,7 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::TTS_OnResetTimeout: {
       LOG4CXX_INFO(logger_, "Received TTS_OnResetTimeout event");
 
-      ApplicationManagerImpl::instance()->updateRequestTimeout(
+      application_manager_.updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
       break;
     }

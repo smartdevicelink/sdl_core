@@ -53,7 +53,7 @@ class GetVehicleDataRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit GetVehicleDataRequest(const MessageSharedPtr& message);
+  explicit GetVehicleDataRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief GetVehicleDataRequest class destructor

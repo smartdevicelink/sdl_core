@@ -32,17 +32,17 @@
  */
 
 #include "application_manager/commands/mobile/delete_file_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
-#include "config_profile/profile.h"
+
 #include "utils/file_system.h"
 
 namespace application_manager {
 
 namespace commands {
 
-DeleteFileRequest::DeleteFileRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+DeleteFileRequest::DeleteFileRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {
 }
 
 DeleteFileRequest::~DeleteFileRequest() {
@@ -52,7 +52,7 @@ void DeleteFileRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -61,7 +61,7 @@ void DeleteFileRequest::Run() {
   }
 
   if ((mobile_api::HMILevel::HMI_NONE == application->hmi_level()) &&
-      (profile::Profile::instance()->delete_file_in_none() <=
+      (application_manager_.get_settings().delete_file_in_none() <=
        application->delete_file_in_none_count())) {
       // If application is in the HMI_NONE level the quantity of allowed
       // DeleteFile request is limited by the configuration profile
@@ -74,7 +74,7 @@ void DeleteFileRequest::Run() {
       (*message_)[strings::msg_params][strings::sync_file_name].asString();
 
   std::string full_file_path =
-      profile::Profile::instance()->app_storage_folder() + "/";
+      application_manager_.get_settings().app_storage_folder() + "/";
   full_file_path += application->folder_name();
   full_file_path += "/";
   full_file_path += sync_file_name;

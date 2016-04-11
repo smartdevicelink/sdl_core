@@ -31,16 +31,17 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/mobile/send_location_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/message_helper.h"
 #include "utils/helpers.h"
+#include "utils/custom_string.h"
 
 namespace application_manager {
 
 namespace commands {
 
-SendLocationRequest::SendLocationRequest(const MessageSharedPtr& message)
- : CommandRequestImpl(message) {
+SendLocationRequest::SendLocationRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+ : CommandRequestImpl(message, application_manager) {
 }
 
 SendLocationRequest::~SendLocationRequest() {
@@ -51,8 +52,7 @@ void SendLocationRequest::Run() {
   using smart_objects::SmartObject;
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = application_manager::ApplicationManagerImpl::instance()
-      ->application(connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_,
@@ -91,7 +91,7 @@ void SendLocationRequest::Run() {
   }
 
   if (msg_params.keyExists(strings::address)) {
-    const custom_string::CustomString& address =
+    const utils::custom_string::CustomString& address =
         msg_params[strings::address].asCustomString();
     if (address.empty()) {
         msg_params.erase(strings::address);
@@ -108,7 +108,7 @@ void SendLocationRequest::Run() {
     mobile_apis::Result::eType verification_result =
         mobile_apis::Result::SUCCESS;
     verification_result = MessageHelper::VerifyImage(
-        msg_params[strings::location_image], app);
+        (*message_)[strings::msg_params][strings::location_image], app, application_manager_);
     if (mobile_apis::Result::SUCCESS != verification_result) {
       LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
       SendResponse(false, verification_result);
@@ -169,7 +169,7 @@ bool SendLocationRequest::CheckFieldsCompatibility() {
 }
 void insert_if_contains(const smart_objects::SmartObject& msg_params,
                         const std::string& param_key,
-                        std::vector<custom_string::CustomString>& output_vector) {
+                        std::vector<utils::custom_string::CustomString>& output_vector) {
     if (msg_params.keyExists(param_key)) {
         output_vector.push_back(msg_params[param_key].asCustomString());
     }
@@ -177,7 +177,7 @@ void insert_if_contains(const smart_objects::SmartObject& msg_params,
 
 bool SendLocationRequest::IsWhiteSpaceExist() {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::vector<custom_string::CustomString> fields_to_check;
+  std::vector<utils::custom_string::CustomString> fields_to_check;
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
   insert_if_contains(msg_params, strings::location_name, fields_to_check);
@@ -191,7 +191,7 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
     smart_objects::SmartArray::const_iterator it_al = al_array->begin();
     smart_objects::SmartArray::const_iterator it_al_end = al_array->end();
     for (; it_al != it_al_end; ++it_al) {
-      const custom_string::CustomString& val = (*it_al).asCustomString();
+      const utils::custom_string::CustomString& val = (*it_al).asCustomString();
       fields_to_check.push_back(val);
     }
   }
@@ -209,7 +209,7 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
     insert_if_contains(address_so, strings::sub_thoroughfare, fields_to_check);
   }
 
-  std::vector<custom_string::CustomString>::iterator it =
+  std::vector<utils::custom_string::CustomString>::iterator it =
       fields_to_check.begin();
   for (; it != fields_to_check.end(); ++it) {
     const std::string& str = it->AsMBString();
@@ -223,15 +223,14 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
 }
 
 bool SendLocationRequest::CheckHMICapabilities(std::list<hmi_apis::Common_TextFieldName::eType>& fields_names) {
+  LOG4CXX_AUTO_TRACE(logger_);  
   using namespace smart_objects;
   using namespace hmi_apis;
-
   if (fields_names.empty()) {
     return true;
   }
 
-  ApplicationManagerImpl* instance = ApplicationManagerImpl::instance();
-  const HMICapabilities& hmi_capabilities = instance->hmi_capabilities();
+  const HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
   if (!hmi_capabilities.is_ui_cooperating()) {
     LOG4CXX_ERROR(logger_, "UI is not supported.");
     return false;

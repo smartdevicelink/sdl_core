@@ -36,6 +36,9 @@
 
 #include <string>
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/event_engine/event.h"
+#include "smart_objects/smart_object.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -57,7 +60,7 @@ class SystemRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SystemRequest(const MessageSharedPtr& message);
+  explicit SystemRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief SystemRequest class destructor

@@ -33,10 +33,9 @@
 
 #include <cstring>
 #include "application_manager/commands/mobile/perform_audio_pass_thru_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "config_profile/profile.h"
 #include "utils/helpers.h"
 
 namespace application_manager {
@@ -46,8 +45,8 @@ namespace commands {
 namespace str = strings;
 
 PerformAudioPassThruRequest::PerformAudioPassThruRequest(
-    const MessageSharedPtr& message)
-    : CommandRequestImpl(message),
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager),
       is_active_tts_speak_(false),
       result_tts_speak_(mobile_apis::Result::SUCCESS) {
   subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
@@ -73,7 +72,7 @@ void PerformAudioPassThruRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "APPLICATION_NOT_REGISTERED");
@@ -156,7 +155,7 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
         return_info = "Unsupported phoneme type sent in a prompt";
       }
 
-      SendResponse(result, mobile_code, return_info.c_str(),
+      SendResponse(result, mobile_code, return_info.empty() ? NULL : return_info.c_str(),
                    &(message[strings::msg_params]));
       break;
     }
@@ -171,7 +170,7 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
         StartMicrophoneRecording();
 
         // update request timeout to get time for perform audio recording
-        ApplicationManagerImpl::instance()->
+        application_manager_.
             updateRequestTimeout(connection_key(),
                                  correlation_id(),
                                  default_timeout());
@@ -181,7 +180,7 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::TTS_OnResetTimeout: {
       LOG4CXX_INFO(logger_, "Received TTS_OnResetTimeout event");
 
-      ApplicationManagerImpl::instance()->updateRequestTimeout(
+      application_manager_.updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
       break;
     }
@@ -275,9 +274,9 @@ void PerformAudioPassThruRequest::SendRecordStartNotification() {
 void PerformAudioPassThruRequest::StartMicrophoneRecording() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl::instance()->begin_audio_pass_thru();
+  application_manager_.BeginAudioPassThrough();
 
-  ApplicationManagerImpl::instance()->StartAudioPassThruThread(
+  application_manager_.StartAudioPassThruThread(
       connection_key(), correlation_id(),
       (*message_)[str::msg_params][str::max_duration].asInt(),
       (*message_)[str::msg_params][str::sampling_rate].asInt(),
@@ -331,12 +330,11 @@ bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
   return false;
 }
 
-void PerformAudioPassThruRequest::FinishTTSSpeak() {
+void PerformAudioPassThruRequest::FinishTTSSpeak(){
   LOG4CXX_AUTO_TRACE(logger_);
-  if (ApplicationManagerImpl::instance()->end_audio_pass_thru()) {
+  if (application_manager_.EndAudioPassThrough()) {
     LOG4CXX_DEBUG(logger_, "Stop AudioPassThru.");
-    ApplicationManagerImpl::instance()->
-        StopAudioPassThru(connection_key());
+    application_manager_.StopAudioPassThru(connection_key());
   }
   if (!is_active_tts_speak_) {
     LOG4CXX_WARN(logger_, "TTS Speak is inactive.");
@@ -349,7 +347,7 @@ void PerformAudioPassThruRequest::FinishTTSSpeak() {
 bool PerformAudioPassThruRequest::WaitTTSSpeak() {
   LOG4CXX_AUTO_TRACE(logger_);
   uint64_t default_timeout_msec =
-      profile::Profile::instance()->default_timeout();
+      application_manager_.get_settings().default_timeout();
   const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
 
   // Waiting for TTS_Speak

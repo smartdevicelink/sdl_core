@@ -47,7 +47,8 @@ public:
   /**
    * \brief SubscribeWayPointsRequest class constructor
    **/
-  explicit SubscribeWayPointsRequest(const MessageSharedPtr& message);
+  SubscribeWayPointsRequest(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /**
    * \brief SubscribeWayPointsRequest class destructor

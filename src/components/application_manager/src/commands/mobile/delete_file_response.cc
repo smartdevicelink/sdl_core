@@ -32,15 +32,15 @@
  */
 
 #include "application_manager/commands/mobile/delete_file_response.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-DeleteFileResponse::DeleteFileResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
+DeleteFileResponse::DeleteFileResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {
 }
 
 DeleteFileResponse::~DeleteFileResponse() {
@@ -51,7 +51,7 @@ void DeleteFileResponse::Run() {
   uint32_t app_id = (*message_)[strings::params][strings::connection_key]
       .asUInt();
   ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(app_id);
+      application_manager_.application(app_id);
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -59,9 +59,7 @@ void DeleteFileResponse::Run() {
   }
 
   (*message_)[strings::msg_params][strings::space_available] =
-      static_cast<uint32_t>(
-          ApplicationManagerImpl::instance()->
-              GetAvailableSpaceForApp(app->folder_name()));
+      static_cast<uint32_t>(app->GetAvailableDiskSpace());
   SendResponse((*message_)[strings::msg_params][strings::success].asBool());
 }
 

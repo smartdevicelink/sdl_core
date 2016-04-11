@@ -52,7 +52,7 @@ class AlertRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AlertRequest(const MessageSharedPtr& message);
+  explicit AlertRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief AlertRequest class destructor

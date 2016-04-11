@@ -53,7 +53,7 @@ class OnDriverDistractionNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnDriverDistractionNotification(const MessageSharedPtr& message);
+  explicit OnDriverDistractionNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnDriverDistractionNotification class destructor

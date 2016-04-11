@@ -53,7 +53,7 @@ class AlertManeuverRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AlertManeuverRequest(const MessageSharedPtr& message);
+  explicit AlertManeuverRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief AlertManeuverRequest class destructor

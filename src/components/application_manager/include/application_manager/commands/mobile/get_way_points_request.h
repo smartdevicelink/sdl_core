@@ -47,7 +47,8 @@ public:
   /**
    * \brief GetWayPointsRequest class constructor
    **/
-  explicit GetWayPointsRequest(const MessageSharedPtr& message);
+  GetWayPointsRequest(const MessageSharedPtr& message,
+                      ApplicationManager& application_manager);
 
   /**
    * \brief GetWayPointsRequest class destructor

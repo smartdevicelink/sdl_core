@@ -32,15 +32,15 @@
  */
 
 #include "application_manager/commands/mobile/add_sub_menu_response.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-AddSubMenuResponse::AddSubMenuResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
+AddSubMenuResponse::AddSubMenuResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {
 }
 
 AddSubMenuResponse::~AddSubMenuResponse() {
@@ -49,7 +49,7 @@ AddSubMenuResponse::~AddSubMenuResponse() {
 void AddSubMenuResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+  application_manager_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands

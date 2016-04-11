@@ -53,7 +53,7 @@ class OnKeyBoardInputNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnKeyBoardInputNotification(const MessageSharedPtr& message);
+  explicit OnKeyBoardInputNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnKeyBoardInputNotification class destructor

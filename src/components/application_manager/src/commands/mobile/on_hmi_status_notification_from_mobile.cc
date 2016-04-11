@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/on_hmi_status_notification_from_mobile.h"
-#include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/message.h"
 
@@ -40,8 +39,9 @@ namespace application_manager {
 namespace commands {
 
 OnHMIStatusNotificationFromMobile::OnHMIStatusNotificationFromMobile(
-    const MessageSharedPtr& message)
-    : CommandNotificationFromMobileImpl(message) {}
+    const MessageSharedPtr& message,
+    ApplicationManager& application_manager)
+    : CommandNotificationFromMobileImpl(message, application_manager) {}
 
 OnHMIStatusNotificationFromMobile::~OnHMIStatusNotificationFromMobile() {}
 
@@ -51,7 +51,7 @@ void OnHMIStatusNotificationFromMobile::Run() {
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
   ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!app.valid()) {
     LOG4CXX_ERROR(
@@ -70,8 +70,7 @@ void OnHMIStatusNotificationFromMobile::Run() {
 
   connection_handler::DeviceHandle handle = app->device();
   bool is_apps_requested_before =
-      application_manager::ApplicationManagerImpl::instance()
-          ->IsAppsQueriedFrom(handle);
+      application_manager_.IsAppsQueriedFrom(handle);
 
   LOG4CXX_DEBUG(
       logger_,
@@ -84,7 +83,7 @@ void OnHMIStatusNotificationFromMobile::Run() {
     // In case this notification will be received from mobile side with
     // foreground level for app on mobile, this should trigger remote
     // apps list query for SDL 4.0 app
-    MessageHelper::SendQueryApps(connection_key());
+    MessageHelper::SendQueryApps(connection_key(), application_manager_);
     return;
   }
 
@@ -95,7 +94,8 @@ void OnHMIStatusNotificationFromMobile::Run() {
                       << handle);
 
     if (ProtocolVersion::kV4 == app->protocol_version()) {
-      ApplicationManagerImpl::ApplicationListAccessor accessor;
+      const ApplicationSet& accessor =
+          application_manager_.applications().GetData();
 
       bool is_another_foreground_sdl4_app = false;
       ApplicationSetConstIt it = accessor.begin();
@@ -109,10 +109,8 @@ void OnHMIStatusNotificationFromMobile::Run() {
       }
 
       if (!is_another_foreground_sdl4_app) {
-        application_manager::ApplicationManagerImpl::instance()
-            ->MarkAppsGreyOut(handle, !is_current_state_foreground);
-        application_manager::ApplicationManagerImpl::instance()
-            ->SendUpdateAppList();
+        application_manager_.MarkAppsGreyOut(handle, !is_current_state_foreground);
+        application_manager_.SendUpdateAppList();
       }
     }
     return;

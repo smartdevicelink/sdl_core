@@ -51,7 +51,7 @@ class PutFileResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit PutFileResponse(const MessageSharedPtr& message);
+  explicit PutFileResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief PutFileResponse class destructor

@@ -48,7 +48,7 @@ class DialNumberRequest : public CommandRequestImpl {
   /**
    * \brief DialNumberRequest class constructor
    **/
-  explicit DialNumberRequest(const MessageSharedPtr& message);
+  explicit DialNumberRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * \brief DialNumberRequest class destructor

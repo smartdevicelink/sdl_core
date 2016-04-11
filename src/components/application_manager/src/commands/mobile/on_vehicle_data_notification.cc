@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/on_vehicle_data_notification.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
@@ -42,8 +42,8 @@ namespace application_manager {
 namespace commands {
 
 OnVehicleDataNotification::OnVehicleDataNotification(
-  const MessageSharedPtr& message)
-  : CommandNotificationImpl(message) {
+  const MessageSharedPtr& message, ApplicationManager& application_manager)
+  : CommandNotificationImpl(message, application_manager) {
 }
 
 OnVehicleDataNotification::~OnVehicleDataNotification() {
@@ -63,7 +63,7 @@ void OnVehicleDataNotification::Run() {
   for (; vehicle_data.end() != it; ++it) {
     if (true == (*message_)[strings::msg_params].keyExists(it->first)) {
       const std::vector<ApplicationSharedPtr>& applications =
-        ApplicationManagerImpl::instance()->IviInfoUpdated(it->second,
+        application_manager_.IviInfoUpdated(it->second,
                                                            (*message_)[strings::msg_params][it->first].asInt());
 
       std::vector<ApplicationSharedPtr>::const_iterator app_it =

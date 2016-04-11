@@ -31,22 +31,21 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/update_turn_list_response.h"
-
-#include "interfaces/HMI_API.h"
+#include "application_manager/commands/mobile/set_icon_response.h"
 
 namespace application_manager {
 
 namespace commands {
 
-UpdateTurnListResponse::UpdateTurnListResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
- : CommandResponseImpl(message, application_manager) {
+SetIconResponse::SetIconResponse(const MessageSharedPtr& message,
+                                 ApplicationManager& app_man)
+    : CommandResponseImpl(message, app_man) {
 }
 
-UpdateTurnListResponse::~UpdateTurnListResponse() {
+SetIconResponse::~SetIconResponse() {
 }
 
-void UpdateTurnListResponse::Run() {
+void SetIconResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   application_manager_.SendMessageToMobile(message_);

@@ -32,7 +32,8 @@
  */
 #include <string.h>
 #include "application_manager/commands/mobile/show_request.h"
-#include "application_manager/application_manager_impl.h"
+
+#include "application_manager/policies/policy_handler.h"
 #include "application_manager/application.h"
 #include "application_manager/message_helper.h"
 #include "utils/file_system.h"
@@ -42,8 +43,8 @@ namespace application_manager {
 
 namespace commands {
 
-ShowRequest::ShowRequest(const MessageSharedPtr& message)
- : CommandRequestImpl(message) {
+ShowRequest::ShowRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+ : CommandRequestImpl(message, application_manager) {
 }
 
 ShowRequest::~ShowRequest() {
@@ -53,7 +54,7 @@ void ShowRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app =
-      application_manager::ApplicationManagerImpl::instance()->application(
+      application_manager_.application(
       connection_key());
 
   if (!app) {
@@ -81,9 +82,7 @@ void ShowRequest::Run() {
       ((*message_)[strings::msg_params][strings::soft_buttons].length() > 0)) {
     processing_result = MessageHelper::ProcessSoftButtons(
         (*message_)[strings::msg_params],
-        app,
-        application_manager::ApplicationManagerImpl::instance()
-            ->GetPolicyHandler());
+        app, application_manager_.GetPolicyHandler(),application_manager_);
   }
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
@@ -98,7 +97,7 @@ void ShowRequest::Run() {
       ((*message_)[strings::msg_params]
                    [strings::graphic][strings::value].asString()).length()) {
     verification_result = MessageHelper::VerifyImage(
-        (*message_)[strings::msg_params][strings::graphic], app);
+        (*message_)[strings::msg_params][strings::graphic], app, application_manager_);
     if (mobile_apis::Result::SUCCESS != verification_result) {
       LOG4CXX_ERROR(logger_, "Image verification failed.");
       SendResponse(false, verification_result);
@@ -108,7 +107,7 @@ void ShowRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::secondary_graphic)) {
     verification_result = MessageHelper::VerifyImage(
-        (*message_)[strings::msg_params][strings::secondary_graphic], app);
+        (*message_)[strings::msg_params][strings::secondary_graphic], app, application_manager_);
     if (mobile_apis::Result::SUCCESS != verification_result) {
       LOG4CXX_ERROR(logger_, "Image verification failed.");
       SendResponse(false, verification_result);

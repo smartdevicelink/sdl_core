@@ -52,7 +52,7 @@ class SubscribeButtonRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SubscribeButtonRequest(const MessageSharedPtr& message);
+  explicit SubscribeButtonRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief SubscribeButtonRequest class destructor

@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/subscribe_button_request.h"
-#include "application_manager/application_manager_impl.h"
+
 
 namespace application_manager {
 
@@ -40,8 +40,8 @@ namespace commands {
 
 namespace str = strings;
 
-SubscribeButtonRequest::SubscribeButtonRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+SubscribeButtonRequest::SubscribeButtonRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {
 }
 
 SubscribeButtonRequest::~SubscribeButtonRequest() {
@@ -51,7 +51,7 @@ void SubscribeButtonRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "APPLICATION_NOT_REGISTERED");
@@ -114,10 +114,7 @@ bool SubscribeButtonRequest::CheckHMICapabilities(
   using namespace mobile_apis;
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-  DCHECK_OR_RETURN(app_mgr, false);
-
-  const HMICapabilities& hmi_caps = app_mgr->hmi_capabilities();
+  const HMICapabilities& hmi_caps = application_manager_.hmi_capabilities();
   if (!hmi_caps.is_ui_cooperating()) {
     LOG4CXX_ERROR(logger_, "UI is not supported by HMI.");
     return false;

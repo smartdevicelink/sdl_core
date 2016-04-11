@@ -59,7 +59,7 @@ class SetAppIconRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SetAppIconRequest(const MessageSharedPtr& message);
+  explicit SetAppIconRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief SetIconRequest class destructor
@@ -105,7 +105,7 @@ private:
   /**
    * @brief Checks, if icons saving to configured folder is enabled
    */
-  static int8_t is_icons_saving_enabled_;
+  bool is_icons_saving_enabled_;
 };
 
 }  // namespace commands

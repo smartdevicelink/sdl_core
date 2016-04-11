@@ -58,7 +58,7 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit CreateInteractionChoiceSetRequest(const MessageSharedPtr& message);
+    explicit CreateInteractionChoiceSetRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief CreateInteractionChoiceSetRequest class destructor

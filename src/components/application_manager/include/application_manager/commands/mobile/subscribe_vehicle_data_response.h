@@ -51,7 +51,7 @@ class SubscribeVehicleDataResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SubscribeVehicleDataResponse(const MessageSharedPtr& message);
+  explicit SubscribeVehicleDataResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief UnsubscribeVehicleDataCommandRequest class destructor

@@ -52,7 +52,7 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit ResetGlobalPropertiesRequest(const MessageSharedPtr& message);
+  explicit ResetGlobalPropertiesRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief ResetGlobalPropertiesRequest class destructor

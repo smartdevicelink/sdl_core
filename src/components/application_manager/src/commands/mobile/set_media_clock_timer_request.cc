@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/set_media_clock_timer_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -41,8 +41,8 @@ namespace application_manager {
 
 namespace commands {
 
-SetMediaClockRequest::SetMediaClockRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+SetMediaClockRequest::SetMediaClockRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {
 }
 
 SetMediaClockRequest::~SetMediaClockRequest() {
@@ -52,7 +52,7 @@ void SetMediaClockRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);

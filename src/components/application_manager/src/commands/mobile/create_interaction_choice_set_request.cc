@@ -1,6 +1,6 @@
 /*
 
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -31,12 +31,11 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <string.h>
 #include <string>
 #include <algorithm>
 #include <vector>
 #include "application_manager/commands/mobile/create_interaction_choice_set_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "utils/gen_hash.h"
@@ -47,8 +46,8 @@ namespace application_manager {
 namespace commands {
 
 CreateInteractionChoiceSetRequest::CreateInteractionChoiceSetRequest(
-  const MessageSharedPtr& message)
-  : CommandRequestImpl(message),
+  const MessageSharedPtr& message, ApplicationManager& application_manager)
+  : CommandRequestImpl(message, application_manager),
     expected_chs_count_(0),
     received_chs_count_(0),
     error_from_hmi_(false) {
@@ -61,7 +60,7 @@ CreateInteractionChoiceSetRequest::~CreateInteractionChoiceSetRequest() {
 void CreateInteractionChoiceSetRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace mobile_apis;
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = application_manager_.application(
         connection_key());
 
   if (!app) {
@@ -78,13 +77,13 @@ void CreateInteractionChoiceSetRequest::Run() {
         [strings::choice_set][i].keyExists(strings::image)) {
       verification_result_image = MessageHelper::VerifyImage(
                            (*message_)[strings::msg_params][strings::choice_set]
-                           [i][strings::image], app);
+                           [i][strings::image], app, application_manager_);
     }
     if ((*message_)[strings::msg_params]
         [strings::choice_set][i].keyExists(strings::secondary_image)) {
       verification_result_secondary_image = MessageHelper::VerifyImage(
                            (*message_)[strings::msg_params][strings::choice_set]
-                           [i][strings::secondary_image], app);
+                           [i][strings::secondary_image], app, application_manager_);
     }
     if (verification_result_image == Result::INVALID_DATA ||
         verification_result_secondary_image == Result::INVALID_DATA) {
@@ -109,7 +108,7 @@ void CreateInteractionChoiceSetRequest::Run() {
     SendResponse(false, result);
     return;
   }
-  uint32_t grammar_id = ApplicationManagerImpl::instance()->GenerateGrammarID();
+  uint32_t grammar_id = application_manager_.GenerateGrammarID();
   (*message_)[strings::msg_params][strings::grammar_id] = grammar_id;
   app->AddChoiceSet(choice_set_id_, (*message_)[strings::msg_params]);
   SendVRAddCommandRequests(app);
@@ -304,7 +303,6 @@ void CreateInteractionChoiceSetRequest::on_event(
         return;
       }
 
-
       Common_Result::eType  vr_result = static_cast<Common_Result::eType>(
             message[strings::params][hmi_response::code].asInt());
 
@@ -326,10 +324,9 @@ void CreateInteractionChoiceSetRequest::on_event(
         }
       }
     }
-
     if (received_chs_count_ < expected_chs_count_) {
-      ApplicationManagerImpl::instance()->updateRequestTimeout(
-            connection_key(), correlation_id(), default_timeout());
+      application_manager_.updateRequestTimeout(
+          connection_key(), correlation_id(), default_timeout());
       LOG4CXX_DEBUG(logger_, "Timeout for request was updated");
       return;
     }
@@ -340,7 +337,6 @@ void CreateInteractionChoiceSetRequest::on_event(
 void CreateInteractionChoiceSetRequest::onTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  sync_primitives::AutoLock error_lock(error_from_hmi_lock_);
   if (!error_from_hmi_) {
     SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
   }
@@ -350,7 +346,7 @@ void CreateInteractionChoiceSetRequest::onTimeOut() {
   // according to SDLAQ-CRS-2976
   sync_primitives::AutoLock timeout_lock_(is_timed_out_lock_);
   is_timed_out_ = true;
-  ApplicationManagerImpl::instance()->TerminateRequest(
+  application_manager_.TerminateRequest(
       connection_key(), correlation_id());
 }
 
@@ -358,7 +354,7 @@ void CreateInteractionChoiceSetRequest::DeleteChoices() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application =
-    ApplicationManagerImpl::instance()->application(connection_key());
+    application_manager_.application(connection_key());
   if (!application) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
@@ -391,7 +387,7 @@ void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
     SendResponse(true, mobile_apis::Result::SUCCESS);
 
     ApplicationSharedPtr application =
-        ApplicationManagerImpl::instance()->application(connection_key());
+        application_manager_.application(connection_key());
     if (!application) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
       return;
@@ -400,8 +396,9 @@ void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
   } else {
     DeleteChoices();
   }
-  ApplicationManagerImpl::instance()->TerminateRequest(connection_key(),
-                                                       correlation_id());
+
+  application_manager_.TerminateRequest(
+      connection_key(), correlation_id());
 }
 
 }  // namespace commands

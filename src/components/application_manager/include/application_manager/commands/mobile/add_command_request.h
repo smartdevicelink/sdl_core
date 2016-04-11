@@ -52,7 +52,7 @@ class AddCommandRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AddCommandRequest(const MessageSharedPtr& message);
+  explicit AddCommandRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief AddCommandRequest class destructor

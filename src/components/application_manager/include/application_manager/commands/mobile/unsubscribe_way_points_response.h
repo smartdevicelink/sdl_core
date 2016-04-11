@@ -48,7 +48,8 @@ public:
   /**
    * \brief UnsubscribeWayPointsResponse class constructor
    **/
-  explicit UnsubscribeWayPointsResponse(const MessageSharedPtr& message);
+  UnsubscribeWayPointsResponse(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager);
 
   /**
    * \brief UnsubscribeWayPointsResponse class destructor

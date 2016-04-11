@@ -49,8 +49,8 @@ class UnregisterAppInterfaceRequest : public CommandRequestImpl {
   /**
    * \brief UnregisterAppInterfaceRequest class constructor
    **/
-  explicit UnregisterAppInterfaceRequest(const MessageSharedPtr& message)
-      : CommandRequestImpl(message) {
+  explicit UnregisterAppInterfaceRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+      : CommandRequestImpl(message, application_manager) {
   }
 
   /**

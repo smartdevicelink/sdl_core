@@ -32,8 +32,9 @@
  */
 
 #include "application_manager/commands/mobile/delete_command_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "utils/helpers.h"
@@ -42,8 +43,8 @@ namespace application_manager {
 
 namespace commands {
 
-DeleteCommandRequest::DeleteCommandRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message),
+DeleteCommandRequest::DeleteCommandRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager),
       is_ui_send_(false),
       is_vr_send_(false),
       is_ui_received_(false),
@@ -58,7 +59,7 @@ DeleteCommandRequest::~DeleteCommandRequest() {
 void DeleteCommandRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr application = ApplicationManagerImpl::instance()->
+  ApplicationSharedPtr application = application_manager_.
       application(connection_key());
 
   if (!application) {
@@ -146,7 +147,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
   }
 
   ApplicationSharedPtr application =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "Application is not registered");

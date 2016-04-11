@@ -52,7 +52,7 @@ class DeleteInteractionChoiceSetRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit DeleteInteractionChoiceSetRequest(const MessageSharedPtr& message);
+  explicit DeleteInteractionChoiceSetRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief DeleteInteractionChoiceSetRequest class destructor

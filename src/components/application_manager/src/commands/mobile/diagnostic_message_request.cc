@@ -33,17 +33,17 @@
 
 #include <algorithm>
 #include "application_manager/commands/mobile/diagnostic_message_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
-#include "config_profile/profile.h"
+
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-DiagnosticMessageRequest::DiagnosticMessageRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+DiagnosticMessageRequest::DiagnosticMessageRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {
 }
 
 DiagnosticMessageRequest::~DiagnosticMessageRequest() {
@@ -53,7 +53,7 @@ void DiagnosticMessageRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application is not registered.");
@@ -62,7 +62,7 @@ void DiagnosticMessageRequest::Run() {
   }
 
   const std::vector<uint32_t>& supported_diag_modes =
-      profile::Profile::instance()->supported_diag_modes();
+      application_manager_.get_settings().supported_diag_modes();
 
   smart_objects::SmartObject& msg_data =
       (*message_)[strings::msg_params][strings::message_data];

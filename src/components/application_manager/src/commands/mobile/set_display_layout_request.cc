@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/set_display_layout_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 
 
@@ -41,8 +41,8 @@ namespace application_manager {
 namespace commands {
 
 SetDisplayLayoutRequest::SetDisplayLayoutRequest(
-    const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {
 }
 
 SetDisplayLayoutRequest::~SetDisplayLayoutRequest() {
@@ -51,7 +51,7 @@ SetDisplayLayoutRequest::~SetDisplayLayoutRequest() {
 void SetDisplayLayoutRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationConstSharedPtr app =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -82,7 +82,7 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
 
       if (response_success) {
         HMICapabilities& hmi_capabilities =
-            ApplicationManagerImpl::instance()->hmi_capabilities();
+            application_manager_.hmi_capabilities();
 
         // in case templates_available is empty copy from hmi capabilities
         if (msg_params.keyExists(hmi_response::display_capabilities)) {

@@ -1,12 +1,13 @@
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/commands/mobile/get_way_points_request.h"
 
 namespace application_manager {
 
 namespace commands {
 
-GetWayPointsRequest::GetWayPointsRequest(const MessageSharedPtr& message)
-    :CommandRequestImpl(message){
+GetWayPointsRequest::GetWayPointsRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    :CommandRequestImpl(message, application_manager){
 }
 
 GetWayPointsRequest::~GetWayPointsRequest() {}
@@ -15,7 +16,7 @@ void GetWayPointsRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app =
-        application_manager::ApplicationManagerImpl::instance()->application(
+        application_manager_.application(
             connection_key());
 
   if (!app) {
@@ -31,7 +32,7 @@ void GetWayPointsRequest::Run() {
 void GetWayPointsRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app =
-        application_manager::ApplicationManagerImpl::instance()->application(
+        application_manager_.application(
             connection_key());
   const smart_objects::SmartObject &message = event.smart_object();
   switch(event.id()) {

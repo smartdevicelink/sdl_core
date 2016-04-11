@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/unsubscribe_button_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 
 namespace application_manager {
@@ -42,8 +42,8 @@ namespace commands {
 namespace str = strings;
 
 UnsubscribeButtonRequest::UnsubscribeButtonRequest(
-    const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {
 }
 
 UnsubscribeButtonRequest::~UnsubscribeButtonRequest() {
@@ -53,7 +53,7 @@ void UnsubscribeButtonRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "APPLICATION_NOT_REGISTERED");

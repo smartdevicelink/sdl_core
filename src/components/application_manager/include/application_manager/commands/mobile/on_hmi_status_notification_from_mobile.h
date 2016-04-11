@@ -35,6 +35,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_HMI_STATUS_NOTIFICATION_FROM_MOBILE_H_
 
 #include "application_manager/commands/command_notification_from_mobile_impl.h"
+#include "application_manager/application_manager.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 
@@ -53,7 +54,8 @@ class OnHMIStatusNotificationFromMobile :
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnHMIStatusNotificationFromMobile(const MessageSharedPtr& message);
+  explicit OnHMIStatusNotificationFromMobile(const MessageSharedPtr& message,
+                                             ApplicationManager& application_manager);
 
   /**
    * @brief OnHMIStatusNotificationFromMobile class destructor

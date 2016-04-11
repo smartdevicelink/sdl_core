@@ -51,7 +51,7 @@ class OnLanguageChangeNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnLanguageChangeNotification(const MessageSharedPtr& message);
+  explicit OnLanguageChangeNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnLanguageChangeNotification class destructor

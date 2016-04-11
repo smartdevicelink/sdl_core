@@ -59,7 +59,8 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
   /**
    * \brief RegisterAppInterfaceRequest class constructor
    **/
-  explicit RegisterAppInterfaceRequest(const MessageSharedPtr& message);
+  explicit RegisterAppInterfaceRequest(const MessageSharedPtr& message,
+                                       ApplicationManager& application_manager);
 
   /**
    * @brief RegisterAppInterfaceRequest class destructor

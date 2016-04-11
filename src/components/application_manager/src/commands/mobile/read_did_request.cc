@@ -32,7 +32,7 @@
 
 #include <string>
 #include "application_manager/commands/mobile/read_did_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -41,8 +41,8 @@ namespace application_manager {
 
 namespace commands {
 
-ReadDIDRequest::ReadDIDRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+ReadDIDRequest::ReadDIDRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {
 }
 
 ReadDIDRequest::~ReadDIDRequest() {
@@ -54,7 +54,7 @@ void ReadDIDRequest::Run() {
   uint32_t app_id = (*message_)[strings::params][strings::connection_key]
       .asUInt();
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationSharedPtr app = application_manager_.application(app_id);
   LOG4CXX_INFO(logger_, "Correlation_id :" << (*message_)[strings::params][strings::correlation_id]
                .asUInt());
 

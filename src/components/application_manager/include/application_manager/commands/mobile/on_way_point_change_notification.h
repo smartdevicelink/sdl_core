@@ -47,7 +47,8 @@ class OnWayPointChangeNotification: public CommandNotificationImpl {
   *
   * @param message Incoming SmartObject message
   **/
- explicit OnWayPointChangeNotification(const MessageSharedPtr& message);
+ OnWayPointChangeNotification(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
  /**
   * @brief OnWayPointChangeNotification class destructor

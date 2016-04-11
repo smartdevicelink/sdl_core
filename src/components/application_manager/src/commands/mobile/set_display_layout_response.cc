@@ -33,15 +33,15 @@
 
 #include "application_manager/commands/mobile/set_display_layout_response.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/application_manager_impl.h"
+
 
 namespace application_manager {
 
 namespace commands {
 
 SetDisplayLayoutResponse::SetDisplayLayoutResponse(
-    const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {
 }
 
 SetDisplayLayoutResponse::~SetDisplayLayoutResponse() {
@@ -50,7 +50,7 @@ SetDisplayLayoutResponse::~SetDisplayLayoutResponse() {
 void SetDisplayLayoutResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+  application_manager_.SendMessageToMobile(message_);
 
 }
 

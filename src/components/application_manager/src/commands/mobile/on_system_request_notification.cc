@@ -34,7 +34,7 @@
 #include "application_manager/commands/mobile/on_system_request_notification.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/policies/policy_handler_interface.h"
 
 namespace application_manager {
@@ -44,8 +44,8 @@ namespace commands {
 namespace mobile {
 
 OnSystemRequestNotification::OnSystemRequestNotification(
-    const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandNotificationImpl(message, application_manager) {
 }
 
 OnSystemRequestNotification::~OnSystemRequestNotification() {
@@ -56,7 +56,7 @@ void OnSystemRequestNotification::Run() {
   using namespace application_manager;
   using namespace mobile_apis;
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->
+  ApplicationSharedPtr app = application_manager_.
                              application(connection_key());
 
   if (!app.valid()) {
@@ -68,8 +68,8 @@ void OnSystemRequestNotification::Run() {
   RequestType::eType request_type = static_cast<RequestType::eType>
       ((*message_)[strings::msg_params][strings::request_type].asInt());
   const policy::PolicyHandlerInterface& policy_handler =
-      application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler();
-  if (!policy_handler.IsRequestTypeAllowed(app->mobile_app_id(),
+      application_manager_.GetPolicyHandler();
+  if (!policy_handler.IsRequestTypeAllowed(app->policy_app_id(),
                                            request_type)) {
     LOG4CXX_WARN(logger_, "Request type "  << request_type
                  <<" is not allowed by policies");

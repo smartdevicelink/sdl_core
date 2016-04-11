@@ -53,7 +53,7 @@ class OnSystemRequestNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnSystemRequestNotification(const MessageSharedPtr& message);
+  explicit OnSystemRequestNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnSystemRequestNotification class destructor

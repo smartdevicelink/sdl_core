@@ -37,7 +37,8 @@
 
 #include "application_manager/message_helper.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/application_manager_impl.h"
+
+#include "application_manager/policies/policy_handler.h"
 #include "utils/helpers.h"
 
 namespace application_manager {
@@ -46,8 +47,8 @@ namespace commands {
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
-AlertRequest::AlertRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message),
+AlertRequest::AlertRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager),
       awaiting_ui_alert_response_(false),
       awaiting_tts_speak_response_(false),
       awaiting_tts_stop_speaking_response_(false),
@@ -136,7 +137,7 @@ void AlertRequest::on_event(const event_engine::Event& event) {
                    << awaiting_tts_speak_response_ << " "
                    << awaiting_tts_stop_speaking_response_ << " "
                    << awaiting_ui_alert_response_);
-      ApplicationManagerImpl::instance()->updateRequestTimeout(
+      application_manager_.updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
       break;
     }
@@ -250,7 +251,7 @@ void AlertRequest::on_event(const event_engine::Event& event) {
 bool AlertRequest::Validate(uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(app_id);
+      application_manager_.application(app_id);
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "No application associated with session key");
@@ -276,7 +277,7 @@ bool AlertRequest::Validate(uint32_t app_id) {
 
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app,
-          application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler());
+          application_manager_.GetPolicyHandler(), application_manager_);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
     LOG4CXX_ERROR(logger_, "INVALID_DATA!");
@@ -302,7 +303,7 @@ bool AlertRequest::Validate(uint32_t app_id) {
 void AlertRequest::SendAlertRequest(int32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(app_id);
+      application_manager_.application(app_id);
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);

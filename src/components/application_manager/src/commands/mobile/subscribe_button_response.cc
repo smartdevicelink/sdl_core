@@ -38,8 +38,8 @@ namespace application_manager {
 namespace commands {
 
 SubscribeButtonResponse::SubscribeButtonResponse(
-    const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {
 }
 
 SubscribeButtonResponse::~SubscribeButtonResponse() {

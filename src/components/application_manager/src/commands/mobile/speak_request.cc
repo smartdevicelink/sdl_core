@@ -33,16 +33,17 @@
 
 #include <string.h>
 #include "application_manager/commands/mobile/speak_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 #include "utils/helpers.h"
 
 namespace application_manager {
 
 namespace commands {
 
-SpeakRequest::SpeakRequest(const MessageSharedPtr& message)
-  : CommandRequestImpl(message) {
+SpeakRequest::SpeakRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+  : CommandRequestImpl(message, application_manager) {
   subscribe_on_event(hmi_apis::FunctionID::TTS_OnResetTimeout);
 }
 
@@ -53,7 +54,7 @@ void SpeakRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app =
-      application_manager::ApplicationManagerImpl::instance()->application(
+      application_manager_.application(
         connection_key());
 
   if (!app) {
@@ -89,7 +90,7 @@ void SpeakRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::TTS_OnResetTimeout: {
       LOG4CXX_INFO(logger_, "Received TTS_OnResetTimeout event");
 
-      ApplicationManagerImpl::instance()->updateRequestTimeout(
+      application_manager_.updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
       break;
     }
@@ -106,7 +107,7 @@ void SpeakRequest::ProcessTTSSpeakResponse(
   using namespace helpers;
 
   ApplicationSharedPtr application =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "NULL pointer");

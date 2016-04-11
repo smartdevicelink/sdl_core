@@ -31,10 +31,10 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <algorithm>
 #include "application_manager/commands/mobile/set_app_icon_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
-#include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "utils/file_system.h"
@@ -44,15 +44,12 @@ namespace application_manager {
 
 namespace commands {
 
-int8_t SetAppIconRequest::is_icons_saving_enabled_ = -1;
-
-SetAppIconRequest::SetAppIconRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-  if (-1 == is_icons_saving_enabled_) {
-    const std::string path = profile::Profile::instance()->app_icons_folder();
+SetAppIconRequest::SetAppIconRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager)
+    , is_icons_saving_enabled_(false){
+    const std::string path = application_manager_.get_settings().app_icons_folder();
     is_icons_saving_enabled_ = file_system::IsWritingAllowed(path) &&
                                file_system::IsReadingAllowed(path);
-  }
 }
 
 SetAppIconRequest::~SetAppIconRequest() {}
@@ -61,7 +58,7 @@ void SetAppIconRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -73,7 +70,7 @@ void SetAppIconRequest::Run() {
       (*message_)[strings::msg_params][strings::sync_file_name].asString();
 
   std::string full_file_path =
-      profile::Profile::instance()->app_storage_folder() + "/";
+      application_manager_.get_settings().app_storage_folder() + "/";
   full_file_path += app->folder_name();
   full_file_path += "/";
   full_file_path += sync_file_name;
@@ -114,7 +111,7 @@ void SetAppIconRequest::Run() {
 
 void SetAppIconRequest::CopyToIconStorage(
     const std::string& path_to_file) const {
-  if (!profile::Profile::instance()->enable_protocol_4()) {
+  if (!application_manager_.protocol_handler().get_settings().enable_protocol_4()) {
     LOG4CXX_WARN(logger_,
                  "Icon copying skipped, since protocol ver. 4 is not enabled.");
     return;
@@ -127,9 +124,9 @@ void SetAppIconRequest::CopyToIconStorage(
   }
 
   const std::string icon_storage =
-      profile::Profile::instance()->app_icons_folder();
+      application_manager_.get_settings().app_icons_folder();
   const uint64_t storage_max_size = static_cast<uint64_t>(
-      profile::Profile::instance()->app_icons_folder_max_size());
+      application_manager_.get_settings().app_icons_folder_max_size());
   const uint64_t file_size = file_system::FileSize(path_to_file);
 
   if (storage_max_size < file_size) {
@@ -146,7 +143,7 @@ void SetAppIconRequest::CopyToIconStorage(
       static_cast<uint64_t>(file_system::DirectorySize(icon_storage));
   if (storage_max_size < (file_size + storage_size)) {
     const uint32_t icons_amount =
-        profile::Profile::instance()->app_icons_amount_to_remove();
+        application_manager_.get_settings().app_icons_amount_to_remove();
 
     if (!icons_amount) {
       LOG4CXX_DEBUG(logger_,
@@ -160,8 +157,7 @@ void SetAppIconRequest::CopyToIconStorage(
     }
   }
   ApplicationConstSharedPtr app =
-      application_manager::ApplicationManagerImpl::instance()->application(
-          connection_key());
+      application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(
@@ -170,7 +166,7 @@ void SetAppIconRequest::CopyToIconStorage(
     return;
   }
 
-  const std::string icon_path = icon_storage + "/" + app->mobile_app_id();
+  const std::string icon_path = icon_storage + "/" + app->policy_app_id();
   if (!file_system::CreateFile(icon_path)) {
     LOG4CXX_ERROR(logger_, "Can't create icon: " << icon_path);
     return;
@@ -221,9 +217,9 @@ void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
 
 bool SetAppIconRequest::IsEnoughSpaceForIcon(const uint64_t icon_size) const {
   const std::string icon_storage =
-      profile::Profile::instance()->app_icons_folder();
+      application_manager_.get_settings().app_icons_folder();
   const uint64_t storage_max_size = static_cast<uint64_t>(
-      profile::Profile::instance()->app_icons_folder_max_size());
+      application_manager_.get_settings().app_icons_folder_max_size());
   const uint64_t storage_size =
       static_cast<uint64_t>(file_system::DirectorySize(icon_storage));
   return storage_max_size >= (icon_size + storage_size);
@@ -240,24 +236,24 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
           static_cast<mobile_apis::Result::eType>(
               message[strings::params][hmi_response::code].asInt());
 
-      const bool result = Compare<mobile_api::Result::eType, EQ, ONE>(
-          result_code,
-          mobile_api::Result::SUCCESS,
-          mobile_api::Result::WARNINGS);
+     const bool result =
+         Compare<mobile_api::Result::eType, EQ, ONE>(
+           result_code,
+           mobile_api::Result::SUCCESS,
+           mobile_api::Result::WARNINGS);
 
       if (result) {
         ApplicationSharedPtr app =
-            ApplicationManagerImpl::instance()->application(connection_key());
+            application_manager_.application(connection_key());
 
         if (!message_.valid() || !app.valid()) {
-          LOG4CXX_ERROR(logger_, "NULL pointer.");
-          return;
+           LOG4CXX_ERROR(logger_, "NULL pointer.");
+           return;
         }
 
-        const std::string& path =
-            (*message_)[strings::msg_params][strings::sync_file_name]
-                       [strings::value]
-                           .asString();
+        const std::string& path = (*message_)[strings::msg_params]
+                                              [strings::sync_file_name]
+                                               [strings::value].asString();
         app->set_app_icon_path(path);
 
         LOG4CXX_INFO(logger_,

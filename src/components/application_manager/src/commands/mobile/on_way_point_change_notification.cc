@@ -32,15 +32,14 @@
  */
 
 #include "application_manager/commands/mobile/on_way_point_change_notification.h"
-#include "application_manager/application_impl.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 namespace commands {
 
 OnWayPointChangeNotification::OnWayPointChangeNotification(
-    const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandNotificationImpl(message, application_manager) {}
 
 OnWayPointChangeNotification::~OnWayPointChangeNotification() {}
 
@@ -48,8 +47,7 @@ void OnWayPointChangeNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   std::set<int32_t> subscribed_for_way_points =
-      application_manager::ApplicationManagerImpl::instance()
-          ->GetAppsSubscribedForWayPoints();
+      application_manager_.GetAppsSubscribedForWayPoints();
 
   for (std::set<int32_t>::const_iterator app_id =
            subscribed_for_way_points.begin();

@@ -32,10 +32,10 @@
  */
 
 #include "application_manager/commands/mobile/reset_global_properties_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-#include "config_profile/profile.h"
+
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
@@ -44,8 +44,8 @@ namespace application_manager {
 namespace commands {
 
 ResetGlobalPropertiesRequest::ResetGlobalPropertiesRequest(
-  const MessageSharedPtr& message)
-  : CommandRequestImpl(message),
+  const MessageSharedPtr& message, ApplicationManager& application_manager)
+  : CommandRequestImpl(message, application_manager),
     is_ui_send_(false),
     is_tts_send_(false),
     is_ui_received_(false),
@@ -61,7 +61,7 @@ void ResetGlobalPropertiesRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   uint32_t app_id = (*message_)[strings::params][strings::connection_key].asUInt();
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationSharedPtr app = application_manager_.application(app_id);
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "No application associated with session key");
@@ -74,7 +74,7 @@ void ResetGlobalPropertiesRequest::Run() {
   //if application waits for sending ttsGlobalProperties need to remove this
   //application from tts_global_properties_app_list_
   LOG4CXX_INFO(logger_, "RemoveAppFromTTSGlobalPropertiesList");
-  ApplicationManagerImpl::instance()->RemoveAppFromTTSGlobalPropertiesList(
+  application_manager_.RemoveAppFromTTSGlobalPropertiesList(
       app_id);
 
   bool helpt_promt = false;
@@ -203,8 +203,8 @@ bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(
     return false;
   }
 
-  const std::vector<std::string>& time_out_promt = profile::Profile::instance()
-      ->time_out_promt();
+  const std::vector<std::string>& time_out_promt =
+      application_manager_.get_settings().time_out_promt();
 
   smart_objects::SmartObject so_time_out_promt = smart_objects::SmartObject(
         smart_objects::SmartType_Array);
@@ -240,7 +240,7 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
   const smart_objects::SmartObject& message = event.smart_object();
 
   ApplicationSharedPtr application =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   switch (event.id()) {
   case hmi_apis::FunctionID::UI_SetGlobalProperties: {

@@ -52,7 +52,7 @@ class SubscribeVehicleDataRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SubscribeVehicleDataRequest(const MessageSharedPtr& message);
+  explicit SubscribeVehicleDataRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief SubscribeButtonCommandRequest class destructor

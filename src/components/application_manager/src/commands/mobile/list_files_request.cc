@@ -33,9 +33,9 @@
 
 #include <string>
 #include "application_manager/commands/mobile/list_files_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
-#include "config_profile/profile.h"
+
 #include "application_manager/mobile_command_factory.h"
 #include "utils/file_system.h"
 
@@ -43,8 +43,8 @@ namespace application_manager {
 
 namespace commands {
 
-ListFilesRequest::ListFilesRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+ListFilesRequest::ListFilesRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {
 }
 
 ListFilesRequest::~ListFilesRequest() {
@@ -54,7 +54,7 @@ void ListFilesRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -63,7 +63,7 @@ void ListFilesRequest::Run() {
   }
 
   if ((mobile_api::HMILevel::HMI_NONE == application->hmi_level()) &&
-      (profile::Profile::instance()->list_files_in_none() <=
+      (application_manager_.get_settings().list_files_in_none() <=
        application->list_files_in_none_count())) {
       // If application is in the HMI_NONE level the quantity of allowed
       // DeleteFile request is limited by the configuration profile
@@ -75,8 +75,7 @@ void ListFilesRequest::Run() {
   application->increment_list_files_in_none_count();
 
   (*message_)[strings::msg_params][strings::space_available] =
-        static_cast<int32_t>(ApplicationManagerImpl::instance()->
-                             GetAvailableSpaceForApp(application->folder_name()));
+        static_cast<int32_t>(application->GetAvailableDiskSpace());
   uint32_t i = 0;
   const AppFilesMap& app_files = application->getAppFiles();
   for (AppFilesMap::const_iterator it = app_files.begin();
@@ -85,7 +84,7 @@ void ListFilesRequest::Run() {
     // In AppFile to application stored full path to file. In message required
     // to write only name file.
     // Plus one required for move to next letter after '/'.
-    if (i < ::profile::Profile::instance()->list_files_response_size()) {
+    if (i < application_manager_.get_settings().list_files_response_size()) {
       LOG4CXX_DEBUG(logger_, "File " + filename + " added to ListFiles response");
       (*message_)[strings::msg_params][strings::filenames][i++] = filename;
     } else {

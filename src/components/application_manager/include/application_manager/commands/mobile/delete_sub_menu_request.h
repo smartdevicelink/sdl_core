@@ -52,7 +52,7 @@ class DeleteSubMenuRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit DeleteSubMenuRequest(const MessageSharedPtr& message);
+  explicit DeleteSubMenuRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief DeleteSubMenuRequest class destructor

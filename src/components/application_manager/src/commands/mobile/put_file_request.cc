@@ -31,19 +31,20 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <algorithm>
 #include "application_manager/commands/mobile/put_file_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/application_impl.h"
-#include "config_profile/profile.h"
+
 #include "utils/file_system.h"
 
 namespace application_manager {
 
 namespace commands {
 
-PutFileRequest::PutFileRequest(const MessageSharedPtr& message)
-  : CommandRequestImpl(message)
+PutFileRequest::PutFileRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+  : CommandRequestImpl(message, application_manager)
   , offset_(0)
   , sync_file_name_()
   , length_(0)
@@ -58,7 +59,7 @@ void PutFileRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
   smart_objects::SmartObject response_params = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
 
@@ -69,7 +70,7 @@ void PutFileRequest::Run() {
   }
 
   if (mobile_api::HMILevel::HMI_NONE == application->hmi_level() &&
-      profile::Profile::instance()->put_file_in_none() <=
+      application_manager_.get_settings().put_file_in_none() <=
       application->put_file_in_none_count()) {
     // If application is in the HMI_NONE level the quantity of allowed
     // PutFile request is limited by the configuration profile
@@ -115,8 +116,7 @@ void PutFileRequest::Run() {
   // Policy table update in json format is currently to be received via PutFile
   // TODO(PV): after latest discussion has to be changed
   if (mobile_apis::FileType::JSON == file_type_) {
-    application_manager::ApplicationManagerImpl::instance()
-        ->GetPolicyHandler()
+    application_manager_.GetPolicyHandler()
         .ReceiveMessageFromSDK(sync_file_name_, binary_data);
   }
 
@@ -147,13 +147,12 @@ void PutFileRequest::Run() {
 
   if (is_system_file) {
     response_params[strings::space_available] = 0;
-    file_path = profile::Profile::instance()->system_files_path();
+    file_path = application_manager_.get_settings().system_files_path();
   } else {
-    file_path = profile::Profile::instance()->app_storage_folder();
+    file_path = application_manager_.get_settings().app_storage_folder();
     file_path += "/" + application->folder_name();
 
-    uint32_t space_available = ApplicationManagerImpl::instance()->
-        GetAvailableSpaceForApp(application->folder_name());
+    uint32_t space_available = application->GetAvailableDiskSpace();
 
     if (binary_data.size() > space_available) {
 
@@ -168,20 +167,27 @@ void PutFileRequest::Run() {
   }
 
   if (!file_system::CreateDirectoryRecursively(file_path)) {
-    LOG4CXX_ERROR(logger_, "Cann't create folder");
+    LOG4CXX_ERROR(logger_, "Can't create folder");
     SendResponse(false, mobile_apis::Result::GENERIC_ERROR,
-                 "Cann't create folder.", &response_params);
+                 "Can't create folder.", &response_params);
     return;
   }
-
+  const std::string full_path = file_path + "/" + sync_file_name_;
+  UNUSED(full_path);
+  LOG4CXX_DEBUG(logger_, "Wrtiting " << binary_data.size() << "bytes to "
+                << full_path << " (current size is"
+                << file_system::FileSize(full_path) << ")");
+  
   mobile_apis::Result::eType save_result =
-      ApplicationManagerImpl::instance()->SaveBinary(binary_data, file_path,
+      application_manager_.SaveBinary(binary_data, file_path,
                                                      sync_file_name_, offset_);
 
+  LOG4CXX_DEBUG(logger_, "New size of "
+                << full_path << " is "
+                << file_system::FileSize(full_path) << " bytes");
   if (!is_system_file) {
     response_params[strings::space_available] = static_cast<uint32_t>(
-        ApplicationManagerImpl::instance()->GetAvailableSpaceForApp(
-          application->folder_name()));
+        application->GetAvailableDiskSpace());
   }
 
   sync_file_name_ = file_path + "/" + sync_file_name_;
@@ -252,7 +258,7 @@ void PutFileRequest::SendOnPutFileNotification() {
   message[strings::msg_params][strings::length] = length_;
   message[strings::msg_params][strings::persistent_file] = is_persistent_file_;
   message[strings::msg_params][strings::file_type] = file_type_;
-  ApplicationManagerImpl::instance()->ManageHMICommand(notification);
+  application_manager_.ManageHMICommand(notification);
 }
 
 }  // namespace commands

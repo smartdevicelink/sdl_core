@@ -32,15 +32,15 @@
  */
 
 #include "application_manager/commands/mobile/on_command_notification.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-OnCommandNotification::OnCommandNotification(const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {
+OnCommandNotification::OnCommandNotification(const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandNotificationImpl(message, application_manager) {
 }
 
 OnCommandNotification::~OnCommandNotification() {
@@ -49,7 +49,7 @@ OnCommandNotification::~OnCommandNotification() {
 void OnCommandNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = application_manager_.application(
       (*message_)[strings::msg_params][strings::app_id].asInt());
 
   if (!app) {

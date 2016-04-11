@@ -51,7 +51,7 @@ class OnHMIStatusNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnHMIStatusNotification(const MessageSharedPtr& message);
+  explicit OnHMIStatusNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnHMIStatusNotification class destructor
