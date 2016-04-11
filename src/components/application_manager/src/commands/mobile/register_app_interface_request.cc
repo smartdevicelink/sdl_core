@@ -464,6 +464,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
           *hmi_capabilities.audio_pass_thru_capabilities();
     }
   }
+  if (hmi_capabilities.pcm_stream_capabilities() ) {
+      response_params[strings::pcm_stream_capabilities] =
+            *hmi_capabilities.pcm_stream_capabilities();      
+  }
   if (hmi_capabilities.vehicle_type()) {
     response_params[hmi_response::vehicle_type] =
         *hmi_capabilities.vehicle_type();
