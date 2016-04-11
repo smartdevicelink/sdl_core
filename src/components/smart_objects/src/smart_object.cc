@@ -424,7 +424,7 @@ char SmartObject::convert_char() const {
 SmartObject::SmartObject(const std::string& InitialValue)
     : m_type(SmartType_Null), m_schema() {
   m_data.str_value = NULL;
-  set_value_string(InitialValue);
+  set_value_string(custom_str::CustomString(InitialValue));
 }
 
 SmartObject::SmartObject(const custom_str::CustomString& InitialValue)
@@ -450,7 +450,7 @@ const char* SmartObject::asCharArray() const {
 
 SmartObject& SmartObject::operator=(const std::string& NewValue) {
   if (m_type != SmartType_Invalid) {
-    set_value_string(NewValue);
+    set_value_string(custom_str::CustomString(NewValue));
   }
   return *this;
 }
