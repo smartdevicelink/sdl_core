@@ -190,11 +190,11 @@ std::string utils::json::JsonValue::AsString() const {
 }
 
 utils::json::JsonValue::Int utils::json::JsonValue::AsInt() const {
-  return storage_.asInt();
+  return storage_.asInt64();
 }
 
 utils::json::JsonValue::UInt utils::json::JsonValue::AsUInt() const {
-  return storage_.asUInt();
+  return storage_.asUInt64();
 }
 
 bool utils::json::JsonValue::AsBool() const {
