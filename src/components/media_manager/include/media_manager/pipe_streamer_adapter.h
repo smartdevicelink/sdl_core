@@ -34,8 +34,10 @@
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_PIPE_STREAMER_ADAPTER_H_
 
 #include <string>
+
 #include "media_manager/streamer_adapter.h"
 #include "utils/threads/thread_delegate.h"
+#include "utils/pipe.h"
 
 namespace media_manager {
 
@@ -59,9 +61,8 @@ class PipeStreamerAdapter : public StreamerAdapter {
     virtual bool Send(protocol_handler::RawMessagePtr msg);
 
    private:
-    std::string named_pipe_path_;
+    utils::Pipe pipe_;
     std::string app_storage_folder_;
-    int32_t pipe_fd_;
   };
 };
 
