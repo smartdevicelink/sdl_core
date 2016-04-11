@@ -40,6 +40,10 @@
 
 #include "rpc_base/validation_report.h"
 
+#if defined(_MSC_VER)
+#define snprintf _snprintf_s
+#endif
+
 namespace rpc {
 
 /*
@@ -176,10 +180,7 @@ template <typename T, T minval, T maxval>
 Integer<T, minval, maxval>& Integer<T, minval, maxval>::operator=(
     const Integer& new_val) {
   this->value_ = new_val.value_;
-  if (new_val.is_initialized()) {
-    this->value_state_ = range_.Includes(new_val.value_) ? kValid : kInvalid;
-  }
-
+  this->value_state_ = range_.Includes(new_val.value_) ? kValid : kInvalid;
   return *this;
 }
 
@@ -204,8 +205,8 @@ Integer<T, minval, maxval>::operator IntType() const {
  * Float class
  */
 template <int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
-const Range<double> Float<minnum, maxnum, minden, maxden>::range_(
-    (double(minnum) / minden), (double(maxnum) / maxden));
+const Range<double> Float<minnum, maxnum, minden, maxden>::range_ =
+    ((double(minnum) / minden), (double(maxnum) / maxden));
 
 template <int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float()
@@ -251,7 +252,7 @@ String<minlen, maxlen>::String(const char* value)
 }
 
 template <size_t minlen, size_t maxlen>
-bool String<minlen, maxlen>::operator<(const String& new_val) const {
+bool String<minlen, maxlen>::operator<(String new_val) {
   return value_ < new_val.value_;
 }
 
@@ -266,16 +267,13 @@ String<minlen, maxlen>& String<minlen, maxlen>::operator=(
 template <size_t minlen, size_t maxlen>
 String<minlen, maxlen>& String<minlen, maxlen>::operator=(
     const String& new_val) {
-  if (*this == new_val) {
-    return *this;
-  }
   value_.assign(new_val.value_);
   value_state_ = new_val.value_state_;
   return *this;
 }
 
 template <size_t minlen, size_t maxlen>
-bool String<minlen, maxlen>::operator==(const String& rhs) const {
+bool String<minlen, maxlen>::operator==(const String& rhs) {
   return value_ == rhs.value_;
 }
 
@@ -296,7 +294,7 @@ Enum<T>::Enum(EnumType value)
     : PrimitiveType(IsValidEnum(value) ? kValid : kInvalid), value_(value) {}
 
 template <typename T>
-Enum<T>& Enum<T>::operator=(const EnumType& new_val) {
+Enum<T>& Enum<T>::operator=(EnumType new_val) {
   value_ = new_val;
   value_state_ = IsValidEnum(value_) ? kValid : kInvalid;
   return *this;
@@ -381,7 +379,7 @@ void Array<T, minsize, maxsize>::ReportErrors(ValidationReport* report) const {
     const T& elem = this->operator[](i);
     if (!elem.is_valid()) {
       char elem_idx[32] = {};
-      snprintf(elem_idx, 32, "[%zu]", i);
+      snprintf(elem_idx, 32, "[%lu]", static_cast<unsigned long>(i));
       ValidationReport& elem_report = report->ReportSubobject(elem_idx);
       elem.ReportErrors(&elem_report);
     }
@@ -504,11 +502,6 @@ Nullable<T>::Nullable()
 
 template <typename T>
 template <typename U>
-Nullable<T>::Nullable(const U& value)
-    : T(value), marked_null_(false) {}
-
-template <typename T>
-template <typename U>
 Nullable<T>& Nullable<T>::operator=(const U& new_val) {
   this->T::operator=(new_val);
   return *this;
@@ -575,13 +568,6 @@ const T* Optional<T>::operator->() const {
 }
 
 template <typename T>
-void Optional<T>::assign_if_valid(const Optional<T>& value) {
-  if (value.is_initialized()) {
-    value_ = value.value_;
-  }
-}
-
-template <typename T>
 Optional<T>::operator const void*() const {
   return is_initialized() ? &value_ : NULL;
 }
@@ -623,11 +609,6 @@ void rpc::Optional<T>::SetPolicyTableType(
 template <typename T>
 Stringifyable<T>::Stringifyable()
     : predefined_string_("") {}
-
-template <typename T>
-template <typename U>
-Stringifyable<T>::Stringifyable(const U& value)
-    : T(value), predefined_string_("") {}
 
 template <typename T>
 template <typename U>

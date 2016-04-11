@@ -35,9 +35,11 @@
 
 #include "rpc_base.h"
 
-namespace Json {
-class Value;
-}
+namespace utils {
+namespace json {
+class JsonValue;
+}  // namespace json
+}  // namespace utils
 
 namespace rpc {
 
@@ -57,8 +59,8 @@ class Message {
   virtual const char* function_string_id() const = 0;
   // Interface name as specified in original xml file
   virtual const char* interface_string_id() const = 0;
-  // Serializes message to Json::Value
-  virtual Json::Value ToJsonValue() const = 0;
+  // Serializes message to utils::json::JsonValue
+  virtual utils::json::JsonValue ToJsonValue() const = 0;
   virtual ~Message() {}
 };
 
