@@ -37,14 +37,13 @@
 #include <map>
 #include <set>
 #include <vector>
-#include <stdint.h>
+#include <list>
 #include "policy/policy_manager.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/policies/policy_event_observer.h"
 #include "application_manager/policies/delegates/statistics_delegate.h"
 #include "application_manager/policies/policy_handler_observer.h"
 #include "utils/logger.h"
-#include "utils/singleton.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/conditional_variable.h"
@@ -58,6 +57,10 @@ namespace Json {
 class Value;
 }
 
+namespace application_manager {
+class ApplicationManager;
+}
+
 namespace policy {
 typedef std::vector<uint32_t> AppIds;
 typedef std::vector<uint32_t> DeviceHandles;
@@ -68,8 +71,9 @@ class PolicyHandler
       public PolicyListener,
       public threads::AsyncRunner {
  public:
-  PolicyHandler(const policy::PolicySettings& get_settings);
-  ~PolicyHandler();
+  PolicyHandler(const policy::PolicySettings& get_settings,
+                application_manager::ApplicationManager& application_manager);
+  virtual ~PolicyHandler();
   bool LoadPolicyLibrary() OVERRIDE;
   bool PolicyEnabled() const OVERRIDE;
   bool InitPolicyTable() OVERRIDE;
@@ -79,16 +83,16 @@ class PolicyHandler
   bool ReceiveMessageFromSDK(const std::string& file,
                              const BinaryMessage& pt_string) OVERRIDE;
   bool UnloadPolicyLibrary() OVERRIDE;
-  void OnPermissionsUpdated(const std::string& policy_app_id,
+  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
                                     const Permissions& permissions,
                                     const HMILevel& default_hmi) OVERRIDE;
 
-  void OnPermissionsUpdated(const std::string& policy_app_id,
+  virtual void OnPermissionsUpdated(const std::string& policy_app_id,
                                     const Permissions& permissions) OVERRIDE;
 
-  void OnSnapshotCreated(const BinaryMessage& pt_string) OVERRIDE;
+  virtual void OnSnapshotCreated(const BinaryMessage& pt_string) OVERRIDE;
 
-  bool GetPriority(const std::string& policy_app_id, std::string* priority) const OVERRIDE;
+  virtual bool GetPriority(const std::string& policy_app_id, std::string* priority) const OVERRIDE;
   void CheckPermissions(const PTString& app_id,
                         const PTString& hmi_level,
                         const PTString& rpc,
@@ -96,7 +100,7 @@ class PolicyHandler
                         CheckPermissionResult& result) OVERRIDE;
 
   uint32_t GetNotificationsNumber(const std::string& priority) const OVERRIDE;
-  DeviceConsent GetUserConsentForDevice(const std::string& device_id) const OVERRIDE;
+  virtual DeviceConsent GetUserConsentForDevice(const std::string& device_id) const OVERRIDE;
   bool GetDefaultHmi(const std::string& policy_app_id,
                      std::string* default_hmi) const OVERRIDE;
   bool GetInitialAppData(const std::string& application_id,
@@ -243,18 +247,18 @@ class PolicyHandler
   /**
    * @brief Send request to HMI to get update on system parameters
    */
-  void OnSystemInfoUpdateRequired() OVERRIDE;
+  virtual void OnSystemInfoUpdateRequired() OVERRIDE;
 
   /**
    * @brief Sends GetVehicleData request in case when Vechicle info is ready.
    */
-  void OnVIIsReady() OVERRIDE;
+  virtual void OnVIIsReady() OVERRIDE;
 
   /**
    * @brief Allows to update vechicle data info.
    * @param SmartObject which contains all needed information.
    */
-  void OnVehicleDataUpdated(const smart_objects::SmartObject& message) OVERRIDE;
+  virtual void OnVehicleDataUpdated(const smart_objects::SmartObject& message) OVERRIDE;
 
   /**
    * Removes device
@@ -282,19 +286,23 @@ class PolicyHandler
 
   custom_str::CustomString GetAppName(const std::string& policy_app_id) OVERRIDE;
 
-  void OnUpdateHMIAppType(
+  virtual void OnUpdateHMIAppType(
       std::map<std::string, StringArray> app_hmi_types) OVERRIDE;
 
-  void OnCertificateUpdated(const std::string& certificate_data) OVERRIDE;
+  virtual void OnCertificateUpdated(const std::string& certificate_data) OVERRIDE;
 
-  bool CanUpdate() OVERRIDE;
+  virtual bool CanUpdate() OVERRIDE;
 
-  void OnDeviceConsentChanged(const std::string& device_id,
+  virtual void OnDeviceConsentChanged(const std::string& device_id,
                                       bool is_allowed) OVERRIDE;
 
-  void OnPTExchangeNeeded() OVERRIDE;
+  virtual void SendOnAppPermissionsChanged(
+      const AppPermissions& permissions,
+      const std::string& policy_app_id) const OVERRIDE;
 
-  void GetAvailableApps(std::queue<std::string>& apps) OVERRIDE;
+  virtual void OnPTExchangeNeeded() OVERRIDE;
+
+  virtual void GetAvailableApps(std::queue<std::string>& apps) OVERRIDE;
 
   /**
    * @brief Allows to add new or update existed application during
@@ -371,13 +379,13 @@ class PolicyHandler
   void OnAppRegisteredOnMobile(const std::string& application_id) OVERRIDE;
 
   // TODO(AKutsan) REMOVE THIS UGLY HOTFIX
-  void Increment(usage_statistics::GlobalCounterId type) OVERRIDE;
-  void Increment(const std::string& app_id,
+  virtual void Increment(usage_statistics::GlobalCounterId type) OVERRIDE;
+  virtual void Increment(const std::string& app_id,
                          usage_statistics::AppCounterId type) OVERRIDE;
-  void Set(const std::string& app_id,
+  virtual void Set(const std::string& app_id,
                    usage_statistics::AppInfoId type,
                    const std::string& value) OVERRIDE;
-  void Add(const std::string& app_id,
+  virtual void Add(const std::string& app_id,
                    usage_statistics::AppStopwatchId type,
                    int32_t timespan_seconds) OVERRIDE;
 
@@ -444,7 +452,7 @@ class PolicyHandler
       DCHECK(policy_handler_);
     }
     // TODO(AKutsan) REMOVE THIS UGLY HOTFIX
-    void Increment(usage_statistics::GlobalCounterId type) {
+    virtual void Increment(usage_statistics::GlobalCounterId type) {
       policy_handler_->AsyncRun(new StatisticsDelegate(*policy_handler_, type));
     }
 
@@ -502,10 +510,10 @@ class PolicyHandler
 
   utils::SharedPtr<StatisticManagerImpl> statistic_manager_impl_;
   const PolicySettings& settings_;
+  application_manager::ApplicationManager& application_manager_;
   friend class AppPermissionDelegate;
 
   DISALLOW_COPY_AND_ASSIGN(PolicyHandler);
-  FRIEND_DELETER_DESTRUCTOR(PolicyHandler);
 };
 
 }  //  namespace policy

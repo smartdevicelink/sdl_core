@@ -42,7 +42,10 @@ namespace resumption {
 /**
  * @brief Points what structure contains vr commands
  */
-enum AccessoryVRCommand { kVRCommandFromChoice = 0, kVRCommandFromCommand };
+enum AccessoryVRCommand {
+  kVRCommandFromChoice = 0,
+  kVRCommandFromCommand
+};
 
 struct ApplicationParams {
   ApplicationParams(const smart_objects::SmartObject& application);
@@ -65,8 +68,10 @@ class ResumptionDataDB : public ResumptionData {
  public:
   /**
    * @brief Constructor of ResumptionDataDB
+   * @param db_storage show database should be saved in a disk file or in memory
    */
-  ResumptionDataDB();
+  ResumptionDataDB(
+      const application_manager::ApplicationManager& application_manager);
 
   /**
    * @brief allows to destroy ResumptionDataDB object
@@ -84,7 +89,8 @@ class ResumptionDataDB : public ResumptionData {
    * @brief Save application persistent info for future resuming to db
    * @param application is application which need to be saved
    */
-  virtual void SaveApplication(app_mngr::ApplicationSharedPtr application);
+  void SaveApplication(
+      app_mngr::ApplicationSharedPtr application) OVERRIDE;
   /**
    * @brief Returns HMI level of application from saved data
    * @param policy_app_id contains policy id of application

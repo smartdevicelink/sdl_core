@@ -48,7 +48,8 @@ class ResumptionDataJson : public ResumptionData {
   /**
    * @brief Constructor of ResumptionDataJson
    */
-  ResumptionDataJson(LastState& last_state);
+  ResumptionDataJson(LastState& last_state,
+                     const application_manager::ApplicationManager& application_manager);
 
   /**
    * @brief allows to destroy ResumptionDataJson object
@@ -59,7 +60,8 @@ class ResumptionDataJson : public ResumptionData {
    * @brief Save application persistent info for future resuming on json format
    * @param application is application witch need to be saved
    */
-  virtual void SaveApplication(app_mngr::ApplicationSharedPtr application);
+  virtual void SaveApplication(
+      app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
   /**
    * @brief Returns HMI level of application from saved data

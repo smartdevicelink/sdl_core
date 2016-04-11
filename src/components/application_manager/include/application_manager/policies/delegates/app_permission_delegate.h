@@ -39,9 +39,10 @@
 #include "utils/conditional_variable.h"
 
 #include "policy/policy_types.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 namespace policy {
-
+class PolicyHandler;
   /**
  * @brief The AppPermissionDelegate class allows to call OnAppPermissionConsent
  * in async way.
@@ -56,8 +57,9 @@ class AppPermissionDelegate: public threads::ThreadDelegate {
      *
      * @param permissions new permissions
      */
-    AppPermissionDelegate(const uint32_t connection_key,
-                          const PermissionConsent &permissions);
+   AppPermissionDelegate(const uint32_t connection_key,
+                         const PermissionConsent& permissions,
+                         policy::PolicyHandlerInterface& policy_handler);
 
     /**
      * @brief threadMain run the needed function.
@@ -74,6 +76,7 @@ class AppPermissionDelegate: public threads::ThreadDelegate {
   private:
     uint32_t connection_key_;
     PermissionConsent permissions_;
+    policy::PolicyHandlerInterface& policy_handler_;
 };
 
 } // namespace policy

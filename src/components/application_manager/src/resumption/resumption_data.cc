@@ -34,14 +34,14 @@
 #include "utils/logger.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/vehicle_info_data.h"
+#include "application_manager/application_manager_settings.h"
 
 namespace resumption {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
-ResumptionData::ResumptionData():
-  resumption_lock_(true) {
-}
+ResumptionData::ResumptionData(const application_manager::ApplicationManager& application_manager)
+    : resumption_lock_(true), application_manager_(application_manager) {}
 
 smart_objects::SmartObject ResumptionData::GetApplicationCommands(
     app_mngr::ApplicationConstSharedPtr application) const {

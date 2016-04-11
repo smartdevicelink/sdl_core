@@ -61,9 +61,9 @@ void PTExchangeHandlerExt::Start() {
   LOG4CXX_TRACE(logger_, "Start exchange PT");
 
   const string policy_snapshot_file_name =
-      Profile::instance()->policies_snapshot_file_name();
+      policy_handler_->get_settings().policies_snapshot_file_name();
   const std::string system_files_path =
-      Profile::instance()->system_files_path();
+      policy_handler_->get_settings().system_files_path();
   const std::string policy_snapshot_full_path = system_files_path + '/' +
       policy_snapshot_file_name;
   BinaryMessageSptr pt_snapshot = policy_handler_->RequestPTUpdate();

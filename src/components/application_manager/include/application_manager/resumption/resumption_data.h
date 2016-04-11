@@ -35,6 +35,11 @@
 
 #include "smart_objects/smart_object.h"
 #include "application_manager/application.h"
+#include "application_manager/application_manager.h"
+
+namespace application_manager {
+    class ApplicationManagerSettings;
+}
 
 namespace resumption {
 
@@ -52,7 +57,8 @@ class ResumptionData {
   /**
    * @brief Constructor of ResumptionData
    */
-  ResumptionData();
+  ResumptionData(
+      const application_manager::ApplicationManager& application_manager);
 
   /**
    * @brief Destructor of ResumptionData
@@ -63,7 +69,8 @@ class ResumptionData {
    * @brief Save application persistent info for future resuming
    * @param application is application witch need to be saved
    */
-  virtual void SaveApplication(app_mngr::ApplicationSharedPtr application) = 0;
+  virtual void SaveApplication(
+      app_mngr::ApplicationSharedPtr application) = 0;
 
   /**
    * @brief Returns HMI level of application from saved data
@@ -202,6 +209,7 @@ class ResumptionData {
    */
   virtual void Persist() = 0;
  protected:
+
   /**
    * @brief Retrieves of commands from application
    * @param application contains application of which selection commands
@@ -279,8 +287,8 @@ class ResumptionData {
       ++first;
     }
   }
-
-  mutable sync_primitives::Lock resumption_lock_;
+  mutable sync_primitives::Lock           resumption_lock_;
+  const application_manager::ApplicationManager& application_manager_;
 };
 }  // namespace resumption
 

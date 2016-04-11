@@ -36,11 +36,11 @@
 #include "application_manager/resumption/resumption_data_db.h"
 #include "application_manager/resumption/resumption_sql_queries.h"
 #include "application_manager/smart_object_keys.h"
-#include "config_profile/profile.h"
 #include "application_manager/message_helper.h"
 #include "utils/helpers.h"
 #include "utils/gen_hash.h"
 #include "utils/scope_guard.h"
+#include "application_manager/application_manager_settings.h"
 
 namespace {
 const std::string kDatabaseName = "resumption";
@@ -49,10 +49,11 @@ const std::string kDatabaseName = "resumption";
 namespace resumption {
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
-ResumptionDataDB::ResumptionDataDB()
-    : db_(new utils::dbms::SQLDatabase(kDatabaseName)) {
+ResumptionDataDB::ResumptionDataDB(const application_manager::ApplicationManager& application_manager)
+    : ResumptionData(application_manager),
+      db_(new utils::dbms::SQLDatabase(kDatabaseName)) {
 #ifndef __QNX__
-  std::string path = profile::Profile::instance()->app_storage_folder();
+  std::string path = application_manager_.get_settings().app_storage_folder();
   if (!path.empty()) {
     db_->set_path(path + "/");
   }
@@ -70,12 +71,10 @@ bool ResumptionDataDB::Init() {
   if (!db_->Open()) {
     LOG4CXX_ERROR(logger_, "Failed opening database.");
     LOG4CXX_INFO(logger_, "Starting opening retries.");
-    const uint16_t attempts =
-        profile::Profile::instance()->attempts_to_open_resumption_db();
+    const uint16_t attempts = application_manager_.get_settings().attempts_to_open_resumption_db();
     LOG4CXX_DEBUG(logger_, "Total attempts number is: " << attempts);
     bool is_opened = false;
-    const uint16_t open_attempt_timeout_ms =
-        profile::Profile::instance()->open_attempt_timeout_ms_resumption_db();
+    const uint16_t open_attempt_timeout_ms = application_manager_.get_settings().open_attempt_timeout_ms_resumption_db();
     const useconds_t sleep_interval_mcsec = open_attempt_timeout_ms * 1000;
     LOG4CXX_DEBUG(logger_,
                   "Open attempt timeout(ms) is: " << open_attempt_timeout_ms);
@@ -140,7 +139,7 @@ void ResumptionDataDB::SaveApplication(
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(application);
   bool application_exist = false;
-  const std::string& policy_app_id = application->mobile_app_id();
+  const std::string& policy_app_id = application->policy_app_id();
   const std::string& device_mac = application->mac_address();
   LOG4CXX_INFO(logger_,
                "app_id : " << application->app_id() << " policy_app_id : "
@@ -234,6 +233,7 @@ bool ResumptionDataDB::CheckSavedApplication(const std::string& policy_app_id,
 uint32_t ResumptionDataDB::GetHMIApplicationID(
     const std::string& policy_app_id, const std::string& device_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
+
   uint32_t hmi_app_id = 0;
   SelectHMIId(policy_app_id, device_id, hmi_app_id);
   return hmi_app_id;
@@ -687,9 +687,11 @@ bool ResumptionDataDB::GetAllData(smart_objects::SmartObject& data) const {
   data = smart_objects::SmartObject(smart_objects::SmartType_Array);
 
   uint32_t index = 0;
+  std::string app_id;
+  std::string device_id;
   while (query.Next()) {
-    const std::string app_id = query.GetString(0);
-    const std::string device_id = query.GetString(1);
+    app_id = query.GetString(0);
+    device_id = query.GetString(1);
     if (GetSavedApplication(app_id, device_id, data[index])) {
       ++index;
     }
@@ -2614,8 +2616,7 @@ bool ResumptionDataDB::InsertApplicationData(
   const mobile_apis::HMILevel::eType hmi_level = application.m_hmi_level;
   bool is_media_application = application.m_is_media_application;
   bool is_subscribed_for_way_points =
-      app_mngr::ApplicationManagerImpl::instance()->IsAppSubscribedForWayPoints(
-          connection_key);
+      application_manager_.IsAppSubscribedForWayPoints(connection_key);
 
   if (!query.Prepare(kInsertApplication)) {
     LOG4CXX_WARN(logger_,

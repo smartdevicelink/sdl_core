@@ -49,6 +49,7 @@
 #include "utils/timer.h"
 
 namespace application_manager {
+class ApplicationManager;
 class Application;
 }
 
@@ -67,7 +68,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
   /**
    * @brief allows to create ResumeCtrl object
    */
-  ResumeCtrl();
+  ResumeCtrl(application_manager::ApplicationManager& application_manager);
 
   /**
    * @brief allows to destroy ResumeCtrl object
@@ -159,6 +160,11 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
   void StopSavePersistentDataTimer();
 
   /**
+   * @brief Method stops restore_hmi_level_timer_ "RsmCtrlRstore" in OnSuspend()
+   */
+  void StopRestoreHmiLevelTimer();
+
+  /**
    * @brief Start timer for resumption applications
    *        Restore D1-D5 data
    * @param application that is need to be restored
@@ -173,8 +179,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @param application that is need to be restored
    * @return true if it was saved, otherwise return false
    */
-  bool StartResumptionOnlyHMILevel(
-      app_mngr::ApplicationSharedPtr application);
+  bool StartResumptionOnlyHMILevel(app_mngr::ApplicationSharedPtr application);
 
   /**
    * @brief Check if there are all files need for resumption
@@ -217,7 +222,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @return HMI app ID
    */
   uint32_t GetHMIApplicationID(const std::string& policy_app_id,
-                               const std::string& device_mac) const;
+                               const std::string& device_id) const;
   /**
    * @brief SaveDataOnTimer :
    *  Timer callback for persisting ResumptionData each N seconds
@@ -277,15 +282,17 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @param device_id - id of device where application is run
    */
   void OnAppRegistrationStart(const std::string& policy_app_id,
-                                const std::string& device_id);
+                              const std::string& device_id);
 
   /**
    * @brief Notify resume controller about delete new application
    */
   void OnAppRegistrationEnd();
 
+#ifdef BUILD_TESTS
+  void set_resumption_storage(utils::SharedPtr<ResumptionData> mock_storage);
+#endif  // BUILD_TESTS
  private:
-
   /**
    * @brief restores saved data of application
    * @param application contains application for which restores data
@@ -356,7 +363,8 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
 
   bool CheckIgnCycleRestrictions(const smart_objects::SmartObject& saved_app);
 
-  bool DisconnectedJustBeforeIgnOff(const smart_objects::SmartObject& saved_app);
+  bool DisconnectedJustBeforeIgnOff(
+      const smart_objects::SmartObject& saved_app);
 
   bool CheckAppRestrictions(app_mngr::ApplicationConstSharedPtr application,
                             const smart_objects::SmartObject& saved_app);
@@ -379,20 +387,20 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
 
   typedef std::pair<uint32_t, uint32_t> application_timestamp;
 
-  //    std::set<ApplicationSharedPtr> retrieve_application();
+  std::set<app_mngr::ApplicationSharedPtr> retrieve_application();
 
   /**
    * @brief This struct need to map
    * timestamp and application from correlationID
    */
   struct ResumingApp {
-    uint32_t old_session_key; // session key is the same as app_id
+    uint32_t old_session_key;  // session key is the same as app_id
     app_mngr::ApplicationSharedPtr app;
   };
 
   struct TimeStampComparator {
-    bool operator() (const application_timestamp& lhs,
-                     const application_timestamp& rhs) const{
+    bool operator()(const application_timestamp& lhs,
+                    const application_timestamp& rhs) const {
       return lhs.second < rhs.second;
     }
   };
@@ -442,7 +450,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
 
   void InsertToTimerQueue(uint32_t app_id, uint32_t time_stamp);
 
-  void AddToResumptionTimerQueue(uint32_t app_id);
+  void AddToResumptionTimerQueue(const uint32_t app_id);
 
   void LoadResumeData();
 
@@ -453,6 +461,21 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    */
   bool IsAppDataResumptionExpired(
           const smart_objects::SmartObject& application) const;
+  /**
+   * @brief Checks from resume data, if application has been disconnected
+   * unexpectedly
+   * @param app Application section from resume data
+   * @return true, if it has been unexpectedly disconnected, otherwise - false
+   */
+  bool IsUnexpectedlyDisconnected(const smart_objects::SmartObject& app) const;
+
+  /**
+   * @brief Checks, if application can be resumed
+   * @param application Application
+   * @return true, if no restrictions currently, otherwise - false
+   */
+  bool IsResumeAllowed(
+          const application_manager::ApplicationSharedPtr application) const;
 
   /**
    *@brief Mapping applications to time_stamps
@@ -468,6 +491,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
   bool                            is_data_saved_;
   time_t                          launch_time_;
   utils::SharedPtr<ResumptionData>    resumption_storage_;
+  application_manager::ApplicationManager& application_manager_;
 };
 
 }  // namespace resumption

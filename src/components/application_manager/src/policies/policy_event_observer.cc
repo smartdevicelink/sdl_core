@@ -43,11 +43,12 @@ class PolicyHandler;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 
-PolicyEventObserver::PolicyEventObserver(PolicyHandler* const policy_handler)
-  : policy_handler_(policy_handler) {
-}
+PolicyEventObserver::PolicyEventObserver(
+    policy::PolicyHandlerInterface* const policy_handler,
+    application_manager::event_engine::EventDispatcher& event_dispatcher)
+    : EventObserver(event_dispatcher), policy_handler_(policy_handler) {}
 
-void PolicyEventObserver::set_policy_handler(policy::PolicyHandler* const policy_handler) {
+void PolicyEventObserver::set_policy_handler(PolicyHandlerInterface* const policy_handler) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(policy_handler_lock_);
   LOG4CXX_DEBUG(logger_, "Set policy handler " << policy_handler);
