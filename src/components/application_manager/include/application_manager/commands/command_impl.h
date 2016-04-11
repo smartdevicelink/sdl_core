@@ -147,7 +147,7 @@ class CommandImpl : public Command {
   uint32_t default_timeout_;
   bool allowed_to_terminate_;
 #ifdef ENABLE_LOG
-  static log4cxx::LoggerPtr logger_;
+  static logger::LoggerPtr logger_;
 #endif  // ENABLE_LOG
 
  private:

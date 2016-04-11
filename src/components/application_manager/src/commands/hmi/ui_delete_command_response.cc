@@ -44,7 +44,7 @@ UIDeleteCommandResponse::UIDeleteCommandResponse(
 UIDeleteCommandResponse::~UIDeleteCommandResponse() {}
 
 void UIDeleteCommandResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::UI_DeleteCommand);
   event.set_smart_object(*message_);

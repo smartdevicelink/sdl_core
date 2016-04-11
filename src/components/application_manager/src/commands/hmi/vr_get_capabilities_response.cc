@@ -43,7 +43,7 @@ VRGetCapabilitiesResponse::VRGetCapabilitiesResponse(
 VRGetCapabilitiesResponse::~VRGetCapabilitiesResponse() {}
 
 void VRGetCapabilitiesResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   HMICapabilities& hmi_capabilities =
       ApplicationManagerImpl::instance()->hmi_capabilities();

@@ -41,7 +41,7 @@ AudioStopStreamRequest::AudioStopStreamRequest(const MessageSharedPtr& message)
 AudioStopStreamRequest::~AudioStopStreamRequest() {}
 
 void AudioStopStreamRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }

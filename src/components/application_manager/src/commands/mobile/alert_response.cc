@@ -47,7 +47,7 @@ AlertResponse::AlertResponse(const MessageSharedPtr& message)
 AlertResponse::~AlertResponse() {}
 
 void AlertResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }

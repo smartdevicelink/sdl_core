@@ -56,7 +56,7 @@ SetGlobalPropertiesRequest::SetGlobalPropertiesRequest(
 SetGlobalPropertiesRequest::~SetGlobalPropertiesRequest() {}
 
 void SetGlobalPropertiesRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
@@ -65,7 +65,7 @@ void SetGlobalPropertiesRequest::Run() {
       ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_,
+    LOGGER_ERROR(logger_,
                   "No application associated with connection key "
                       << connection_key());
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -85,7 +85,7 @@ void SetGlobalPropertiesRequest::Run() {
     verification_result = MessageHelper::VerifyImage(
         (*message_)[strings::msg_params][strings::menu_icon], app);
     if (mobile_apis::Result::SUCCESS != verification_result) {
-      LOG4CXX_ERROR(
+      LOGGER_ERROR(
           logger_, "MessageHelper::VerifyImage return " << verification_result);
       SendResponse(false, verification_result);
       return;
@@ -96,14 +96,14 @@ void SetGlobalPropertiesRequest::Run() {
     if (mobile_apis::Result::SUCCESS !=
         MessageHelper::VerifyImageVrHelpItems(
             (*message_)[strings::msg_params][strings::vr_help], app)) {
-      LOG4CXX_ERROR(logger_, "MessageHelper::VerifyImage return INVALID_DATA!");
+      LOGGER_ERROR(logger_, "MessageHelper::VerifyImage return INVALID_DATA!");
       SendResponse(false, mobile_apis::Result::INVALID_DATA);
       return;
     }
   }
 
   if (IsWhiteSpaceExist()) {
-    LOG4CXX_ERROR(logger_, "White spaces found");
+    LOGGER_ERROR(logger_, "White spaces found");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -120,16 +120,16 @@ void SetGlobalPropertiesRequest::Run() {
 
   // check VR params
   if (is_vr_help_title_present ^ is_vr_help_present) {
-    LOG4CXX_ERROR(logger_,
+    LOGGER_ERROR(logger_,
                   "Reject because of vr_help or vr_help_title only provided");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
   if (is_vr_help_title_present && is_vr_help_present) {
-    LOG4CXX_DEBUG(logger_, "VRHelp params presents");
+    LOGGER_DEBUG(logger_, "VRHelp params presents");
 
     if (!CheckVrHelpItemsOrder(msg_params[strings::vr_help])) {
-      LOG4CXX_ERROR(logger_,
+      LOGGER_ERROR(logger_,
                     "VR Help Items contains nonsequential positions"
                         << " (e.g. [1,2,4]) or not started from 1");
       SendResponse(false, mobile_apis::Result::REJECTED);
@@ -145,17 +145,17 @@ void SetGlobalPropertiesRequest::Run() {
     params[strings::app_id] = app->app_id();
     SendUIRequest(params, true);
   } else {
-    LOG4CXX_DEBUG(logger_, "VRHelp params does not present");
+    LOGGER_DEBUG(logger_, "VRHelp params does not present");
     DCHECK_OR_RETURN_VOID(!is_vr_help_title_present && !is_vr_help_present);
 
     smart_objects::SmartObject params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
 
     if (ValidateVRHelpTitle(app->vr_help_title())) {
-      LOG4CXX_DEBUG(logger_, "App already contains VRHelp data");
+      LOGGER_DEBUG(logger_, "App already contains VRHelp data");
     } else {
       if (!PrepareUIRequestDefaultVRHelpData(app, params)) {
-        LOG4CXX_ERROR(logger_, "default VRHElp data could not be generated");
+        LOGGER_ERROR(logger_, "default VRHElp data could not be generated");
         SendResponse(false, mobile_apis::Result::INVALID_DATA);
         return;
       }
@@ -164,7 +164,7 @@ void SetGlobalPropertiesRequest::Run() {
 
     // Preparing data
     if (params.empty()) {
-      LOG4CXX_DEBUG(logger_, "No UI info provided");
+      LOGGER_DEBUG(logger_, "No UI info provided");
     } else {
       params[strings::app_id] = app->app_id();
       SendUIRequest(params, true);
@@ -173,7 +173,7 @@ void SetGlobalPropertiesRequest::Run() {
 
   // check TTS params
   if (is_help_prompt_present || is_timeout_prompt_present) {
-    LOG4CXX_DEBUG(logger_, "TTS params presents");
+    LOGGER_DEBUG(logger_, "TTS params presents");
     smart_objects::SmartObject params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
 
@@ -194,7 +194,7 @@ void SetGlobalPropertiesRequest::Run() {
 
 bool SetGlobalPropertiesRequest::CheckVrHelpItemsOrder(
     const smart_objects::SmartObject& vr_help) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(vr_help.getType() == smart_objects::SmartType_Array, false);
   const size_t vr_help_length = vr_help.length();
   DCHECK_OR_RETURN(vr_help_length > 0, false);
@@ -204,7 +204,7 @@ bool SetGlobalPropertiesRequest::CheckVrHelpItemsOrder(
         vr_help.getElement(j).getElement(strings::position).asUInt();
     // Elements shall start from 1 and increment one by one
     if (position != (j + 1)) {
-      LOG4CXX_ERROR(logger_,
+      LOGGER_ERROR(logger_,
                     "VR help items order is wrong"
                         << " at " << j << ", position value:" << position);
       return false;
@@ -214,33 +214,33 @@ bool SetGlobalPropertiesRequest::CheckVrHelpItemsOrder(
 }
 
 void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   using namespace helpers;
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetGlobalProperties: {
-      LOG4CXX_INFO(logger_, "Received UI_SetGlobalProperties event");
+      LOGGER_INFO(logger_, "Received UI_SetGlobalProperties event");
       is_ui_received_ = true;
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       break;
     }
     case hmi_apis::FunctionID::TTS_SetGlobalProperties: {
-      LOG4CXX_INFO(logger_, "Received TTS_SetGlobalProperties event");
+      LOGGER_INFO(logger_, "Received TTS_SetGlobalProperties event");
       is_tts_received_ = true;
       tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt());
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
       return;
     }
   }
 
   if (IsPendingResponseExist()) {
-    LOG4CXX_DEBUG(logger_, "Continue waiting for response");
+    LOGGER_DEBUG(logger_, "Continue waiting for response");
     return;
   }
 
@@ -295,7 +295,7 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
       ApplicationManagerImpl::instance()->application(stashedConnectionKey);
 
   if (!application) {
-    LOG4CXX_DEBUG(logger_, "NULL pointer.");
+    LOGGER_DEBUG(logger_, "NULL pointer.");
     return;
   }
 
@@ -306,10 +306,10 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
 
 bool SetGlobalPropertiesRequest::ValidateVRHelpTitle(
     const smart_objects::SmartObject* const vr_help_so_ptr) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   if (vr_help_so_ptr) {
     const std::string& vr_help = vr_help_so_ptr->asString();
-    LOG4CXX_TRACE(logger_, "App contains vr_help_title: \"" << vr_help << '"');
+    LOGGER_TRACE(logger_, "App contains vr_help_title: \"" << vr_help << '"');
     return !vr_help.empty();
   }
   return false;
@@ -319,7 +319,7 @@ void SetGlobalPropertiesRequest::PrepareUIRequestVRHelpData(
     const ApplicationSharedPtr app,
     const smart_objects::SmartObject& msg_params,
     smart_objects::SmartObject& out_params) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
 
   app->set_vr_help_title(msg_params.getElement(strings::vr_help_title));
@@ -331,10 +331,10 @@ void SetGlobalPropertiesRequest::PrepareUIRequestVRHelpData(
 
 bool SetGlobalPropertiesRequest::PrepareUIRequestDefaultVRHelpData(
     const ApplicationSharedPtr app, smart_objects::SmartObject& out_params) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(app, false);
 
-  LOG4CXX_DEBUG(logger_, "Generate default VRHelp data");
+  LOGGER_DEBUG(logger_, "Generate default VRHelp data");
   const DataAccessor<CommandsMap> accessor = app->commands_map();
   const CommandsMap& cmdMap = accessor.GetData();
 
@@ -345,7 +345,7 @@ bool SetGlobalPropertiesRequest::PrepareUIRequestDefaultVRHelpData(
        ++command_it) {
     const smart_objects::SmartObject& command = *command_it->second;
     if (!command.keyExists(strings::vr_commands)) {
-      LOG4CXX_ERROR(logger_, "VR synonyms are empty");
+      LOGGER_ERROR(logger_, "VR synonyms are empty");
       return false;
     }
     // use only first
@@ -368,7 +368,7 @@ void SetGlobalPropertiesRequest::PrepareUIRequestMenuAndKeyboardData(
     const ApplicationSharedPtr app,
     const smart_objects::SmartObject& msg_params,
     smart_objects::SmartObject& out_params) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
 
   const bool is_menu_title_present =
@@ -396,7 +396,7 @@ void SetGlobalPropertiesRequest::PrepareUIRequestMenuAndKeyboardData(
 
 void SetGlobalPropertiesRequest::SendTTSRequest(
     const smart_objects::SmartObject& params, bool use_events) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   SendHMIRequest(
       hmi_apis::FunctionID::TTS_SetGlobalProperties, &params, use_events);
   is_tts_send_ = true;
@@ -404,7 +404,7 @@ void SetGlobalPropertiesRequest::SendTTSRequest(
 
 void SetGlobalPropertiesRequest::SendUIRequest(
     const smart_objects::SmartObject& params, bool use_events) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   SendHMIRequest(
       hmi_apis::FunctionID::UI_SetGlobalProperties, &params, use_events);
   is_ui_send_ = true;
@@ -416,7 +416,7 @@ bool SetGlobalPropertiesRequest::IsPendingResponseExist() {
 
 bool SetGlobalPropertiesRequest::ValidateConditionalMandatoryParameters(
     const smart_objects::SmartObject& params) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   return params.keyExists(strings::help_prompt) ||
          params.keyExists(strings::timeout_prompt) ||
          params.keyExists(strings::vr_help_title) ||
@@ -427,7 +427,7 @@ bool SetGlobalPropertiesRequest::ValidateConditionalMandatoryParameters(
 }
 
 bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   const char* str;
 
   const smart_objects::SmartObject& msg_params =
@@ -443,7 +443,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
     for (; it_hp != it_hp_end; ++it_hp) {
       str = (*it_hp)[strings::text].asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
-        LOG4CXX_ERROR(logger_, "Invalid help_prompt syntax check failed");
+        LOGGER_ERROR(logger_, "Invalid help_prompt syntax check failed");
         return true;
       }
     }
@@ -459,7 +459,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
     for (; it_tp != it_tp_end; ++it_tp) {
       str = (*it_tp)[strings::text].asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
-        LOG4CXX_ERROR(logger_, "Invalid timeout_prompt syntax check failed");
+        LOGGER_ERROR(logger_, "Invalid timeout_prompt syntax check failed");
         return true;
       }
     }
@@ -475,14 +475,14 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
     for (; it_vh != it_vh_end; ++it_vh) {
       str = (*it_vh)[strings::text].asCharArray();
       if (!CheckSyntax(str)) {
-        LOG4CXX_ERROR(logger_, "Invalid vr_help text syntax check failed");
+        LOGGER_ERROR(logger_, "Invalid vr_help text syntax check failed");
         return true;
       }
 
       if ((*it_vh).keyExists(strings::image)) {
         str = (*it_vh)[strings::image][strings::value].asCharArray();
         if (!CheckSyntax(str)) {
-          LOG4CXX_ERROR(logger_,
+          LOGGER_ERROR(logger_,
                         "Invalid vr_help image value syntax check failed");
           return true;
         }
@@ -493,7 +493,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
   if (msg_params.keyExists(strings::menu_icon)) {
     str = msg_params[strings::menu_icon][strings::value].asCharArray();
     if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid menu_icon value syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid menu_icon value syntax check failed");
       return true;
     }
   }
@@ -501,7 +501,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
   if (msg_params.keyExists(strings::vr_help_title)) {
     str = msg_params[strings::vr_help_title].asCharArray();
     if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid vr_help_title value syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid vr_help_title value syntax check failed");
       return true;
     }
   }
@@ -509,7 +509,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
   if (msg_params.keyExists(strings::menu_title)) {
     str = msg_params[strings::menu_title].asCharArray();
     if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid menu_title value syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid menu_title value syntax check failed");
       return true;
     }
   }
@@ -527,7 +527,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
       for (; it_lcl != it_lcl_end; ++it_lcl) {
         str = (*it_lcl).asCharArray();
         if (!CheckSyntax(str)) {
-          LOG4CXX_ERROR(logger_,
+          LOGGER_ERROR(logger_,
                         "Invalid keyboard_properties "
                         "limited_character_list syntax check failed");
           return true;
@@ -542,7 +542,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
               .asCharArray();
 
       if (!CheckSyntax(str)) {
-        LOG4CXX_ERROR(logger_,
+        LOGGER_ERROR(logger_,
                       "Invalid keyboard_properties "
                       "auto_complete_text syntax check failed");
         return true;

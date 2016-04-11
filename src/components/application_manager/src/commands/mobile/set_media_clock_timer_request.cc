@@ -47,19 +47,19 @@ SetMediaClockRequest::SetMediaClockRequest(const MessageSharedPtr& message)
 SetMediaClockRequest::~SetMediaClockRequest() {}
 
 void SetMediaClockRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    LOGGER_ERROR(logger_, "Application is not registered");
     return;
   }
 
   if (!app->is_media_application()) {
-    LOG4CXX_ERROR(logger_, "Application is not media application");
+    LOGGER_ERROR(logger_, "Application is not media application");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
@@ -79,7 +79,7 @@ void SetMediaClockRequest::Run() {
 }
 
 void SetMediaClockRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -94,7 +94,7 @@ void SetMediaClockRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
       return;
     }
   }
@@ -109,7 +109,7 @@ bool SetMediaClockRequest::isDataValid() {
   if (update_mode == mobile_apis::UpdateMode::COUNTUP ||
       update_mode == mobile_apis::UpdateMode::COUNTDOWN) {
     if (!msg_params.keyExists(strings::start_time)) {
-      LOG4CXX_INFO(logger_, "Invalid data");
+      LOGGER_INFO(logger_, "Invalid data");
       return false;
     }
 
@@ -134,13 +134,13 @@ bool SetMediaClockRequest::isDataValid() {
            (update_mode == mobile_apis::UpdateMode::COUNTDOWN)) ||
           ((end_time_in_seconds < start_time_in_seconds) &&
            (update_mode == mobile_apis::UpdateMode::COUNTUP))) {
-        LOG4CXX_INFO(logger_, "Invalid data");
+        LOGGER_INFO(logger_, "Invalid data");
         return false;
       }
     }
   }
 
-  LOG4CXX_INFO(logger_, "Data is valid");
+  LOGGER_INFO(logger_, "Data is valid");
   return true;
 }
 

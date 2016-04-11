@@ -58,7 +58,7 @@ class StateController : public event_engine::EventObserver {
   template <bool SendActivateApp>
   void SetRegularState(ApplicationSharedPtr app, HmiStatePtr state) {
     CREATE_LOGGERPTR_LOCAL(logger_, "StateController");
-    LOG4CXX_AUTO_TRACE(logger_);
+    LOGGER_AUTO_TRACE(logger_);
     if (!app) {
       return;
     }
@@ -69,7 +69,7 @@ class StateController : public event_engine::EventObserver {
         state->audio_streaming_state() ==
             mobile_apis::AudioStreamingState::INVALID_ENUM ||
         state->system_context() == mobile_apis::SystemContext::INVALID_ENUM) {
-      LOG4CXX_ERROR(logger_, "Get invalid state");
+      LOGGER_ERROR(logger_, "Get invalid state");
       return;
     }
 
@@ -97,7 +97,7 @@ class StateController : public event_engine::EventObserver {
         waiting_for_activate[app->app_id()] = resolved_state;
         return;
       }
-      LOG4CXX_ERROR(logger_, "Unable to send BC.ActivateApp");
+      LOGGER_ERROR(logger_, "Unable to send BC.ActivateApp");
       return;
     }
     ApplyRegularState(app, resolved_state);

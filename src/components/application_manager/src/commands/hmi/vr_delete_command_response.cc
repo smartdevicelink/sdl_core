@@ -44,7 +44,7 @@ VRDeleteCommandResponse::VRDeleteCommandResponse(
 VRDeleteCommandResponse::~VRDeleteCommandResponse() {}
 
 void VRDeleteCommandResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::VR_DeleteCommand);
   event.set_smart_object(*message_);

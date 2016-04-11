@@ -45,12 +45,12 @@ OnReceivedPolicyUpdate::OnReceivedPolicyUpdate(const MessageSharedPtr& message)
 OnReceivedPolicyUpdate::~OnReceivedPolicyUpdate() {}
 
 void OnReceivedPolicyUpdate::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   const std::string& file_path =
       (*message_)[strings::msg_params][hmi_notification::policyfile].asString();
   policy::BinaryMessage file_content;
   if (!file_system::ReadBinaryFile(file_path, file_content)) {
-    LOG4CXX_ERROR(logger_, "Failed to read Update file.");
+    LOGGER_ERROR(logger_, "Failed to read Update file.");
     return;
   }
   application_manager::ApplicationManagerImpl::instance()

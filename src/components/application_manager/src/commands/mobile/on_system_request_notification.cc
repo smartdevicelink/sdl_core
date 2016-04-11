@@ -50,7 +50,7 @@ OnSystemRequestNotification::OnSystemRequestNotification(
 OnSystemRequestNotification::~OnSystemRequestNotification() {}
 
 void OnSystemRequestNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   using namespace application_manager;
   using namespace mobile_apis;
 
@@ -58,7 +58,7 @@ void OnSystemRequestNotification::Run() {
       ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!app.valid()) {
-    LOG4CXX_ERROR(logger_,
+    LOGGER_ERROR(logger_,
                   "Application with connection key " << connection_key()
                                                      << " is not registered.");
     return;
@@ -71,7 +71,7 @@ void OnSystemRequestNotification::Run() {
           ->GetPolicyHandler();
   if (!policy_handler.IsRequestTypeAllowed(app->mobile_app_id(),
                                            request_type)) {
-    LOG4CXX_WARN(logger_,
+    LOGGER_WARN(logger_,
                  "Request type " << request_type
                                  << " is not allowed by policies");
     return;

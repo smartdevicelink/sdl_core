@@ -44,7 +44,7 @@ UpdateSDLRequest::UpdateSDLRequest(const MessageSharedPtr& message)
 UpdateSDLRequest::~UpdateSDLRequest() {}
 
 void UpdateSDLRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   application_manager::ApplicationManagerImpl::instance()
       ->GetPolicyHandler()

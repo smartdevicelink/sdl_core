@@ -568,9 +568,9 @@ void HMICapabilities::set_phone_call_supported(const bool supported) {
 void HMICapabilities::Init(resumption::LastState* last_state) {
   hmi_language_handler_.Init(last_state);
   if (false == load_capabilities_from_file()) {
-    LOG4CXX_ERROR(logger_, "file hmi_capabilities.json was not loaded");
+    LOGGER_ERROR(logger_, "file hmi_capabilities.json was not loaded");
   } else {
-    LOG4CXX_INFO(logger_, "file hmi_capabilities.json was loaded");
+    LOGGER_INFO(logger_, "file hmi_capabilities.json was loaded");
   }
   hmi_language_handler_.set_default_capabilities_languages(
       ui_language_, vr_language_, tts_language_);

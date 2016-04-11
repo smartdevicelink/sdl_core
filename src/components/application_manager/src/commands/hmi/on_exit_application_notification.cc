@@ -48,7 +48,7 @@ OnExitApplicationNotification::OnExitApplicationNotification(
 OnExitApplicationNotification::~OnExitApplicationNotification() {}
 
 void OnExitApplicationNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   using namespace mobile_apis;
   using namespace hmi_apis;
@@ -58,7 +58,7 @@ void OnExitApplicationNotification::Run() {
   ApplicationSharedPtr app_impl = app_mgr->application(app_id);
 
   if (!(app_impl.valid())) {
-    LOG4CXX_ERROR(logger_, "Application does not exist");
+    LOGGER_ERROR(logger_, "Application does not exist");
     return;
   }
 
@@ -89,7 +89,7 @@ void OnExitApplicationNotification::Run() {
       return;
     }
     default: {
-      LOG4CXX_WARN(logger_, "Unhandled reason");
+      LOGGER_WARN(logger_, "Unhandled reason");
       return;
     }
   }

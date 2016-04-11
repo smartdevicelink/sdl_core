@@ -42,7 +42,7 @@ UIDeleteSubmenuRequest::UIDeleteSubmenuRequest(const MessageSharedPtr& message)
 UIDeleteSubmenuRequest::~UIDeleteSubmenuRequest() {}
 
 void UIDeleteSubmenuRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }

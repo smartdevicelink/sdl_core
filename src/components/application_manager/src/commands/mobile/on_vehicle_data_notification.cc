@@ -48,7 +48,7 @@ OnVehicleDataNotification::OnVehicleDataNotification(
 OnVehicleDataNotification::~OnVehicleDataNotification() {}
 
 void OnVehicleDataNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   std::vector<ApplicationSharedPtr> appNotification;
   std::vector<ApplicationSharedPtr>::iterator appNotification_it =
@@ -70,7 +70,7 @@ void OnVehicleDataNotification::Run() {
       for (; applications.end() != app_it; ++app_it) {
         const ApplicationSharedPtr app = *app_it;
         if (!app) {
-          LOG4CXX_ERROR(logger_, "NULL pointer");
+          LOGGER_ERROR(logger_, "NULL pointer");
           continue;
         }
 
@@ -91,12 +91,12 @@ void OnVehicleDataNotification::Run() {
     }
   }
 
-  LOG4CXX_DEBUG(
+  LOGGER_DEBUG(
       logger_,
       "Number of Notifications to be send: " << appNotification.size());
 
   for (size_t idx = 0; idx < appNotification.size(); idx++) {
-    LOG4CXX_INFO(logger_,
+    LOGGER_INFO(logger_,
                  "Send OnVehicleData PRNDL notification to "
                      << appNotification[idx]->name().c_str()
                      << " application id " << appNotification[idx]->app_id());

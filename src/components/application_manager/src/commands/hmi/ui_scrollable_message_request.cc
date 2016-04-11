@@ -43,7 +43,7 @@ UIScrollableMessageRequest::UIScrollableMessageRequest(
 UIScrollableMessageRequest::~UIScrollableMessageRequest() {}
 
 void UIScrollableMessageRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }

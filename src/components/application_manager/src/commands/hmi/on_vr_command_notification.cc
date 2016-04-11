@@ -49,7 +49,7 @@ OnVRCommandNotification::OnVRCommandNotification(
 OnVRCommandNotification::~OnVRCommandNotification() {}
 
 void OnVRCommandNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr active_app =
       ApplicationManagerImpl::instance()->active_application();
@@ -59,7 +59,7 @@ void OnVRCommandNotification::Run() {
 
   // Check if this is one of standart VR commands (i.e. "Help")
   if (cmd_id > max_cmd_id + 1) {
-    LOG4CXX_INFO(logger_, "Switched App");
+    LOGGER_INFO(logger_, "Switched App");
     const uint32_t app_id = cmd_id - max_cmd_id;
     ApplicationManagerImpl::instance()->SetState<true>(
         app_id, mobile_apis::HMILevel::HMI_FULL);
@@ -75,7 +75,7 @@ void OnVRCommandNotification::Run() {
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(app_id);
   if (!app) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    LOGGER_ERROR(logger_, "NULL pointer");
     return;
   }
   /* check if perform interaction is active

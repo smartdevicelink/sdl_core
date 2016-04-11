@@ -48,26 +48,26 @@ ShowRequest::ShowRequest(const MessageSharedPtr& message)
 ShowRequest::~ShowRequest() {}
 
 void ShowRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app =
       application_manager::ApplicationManagerImpl::instance()->application(
           connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    LOGGER_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
   // SDLAQ-CRS-494, VC3.1
   if ((*message_)[strings::msg_params].empty()) {
-    LOG4CXX_ERROR(logger_, strings::msg_params << " is empty.");
+    LOGGER_ERROR(logger_, strings::msg_params << " is empty.");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
   if (!CheckStringsOfShowRequest()) {
-    LOG4CXX_ERROR(logger_, "Incorrect characters in string");
+    LOGGER_ERROR(logger_, "Incorrect characters in string");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -85,7 +85,7 @@ void ShowRequest::Run() {
   }
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
-    LOG4CXX_ERROR(logger_, "Processing of soft buttons failed.");
+    LOGGER_ERROR(logger_, "Processing of soft buttons failed.");
     SendResponse(false, processing_result);
     return;
   }
@@ -97,7 +97,7 @@ void ShowRequest::Run() {
     verification_result = MessageHelper::VerifyImage(
         (*message_)[strings::msg_params][strings::graphic], app);
     if (mobile_apis::Result::SUCCESS != verification_result) {
-      LOG4CXX_ERROR(logger_, "Image verification failed.");
+      LOGGER_ERROR(logger_, "Image verification failed.");
       SendResponse(false, verification_result);
       return;
     }
@@ -107,7 +107,7 @@ void ShowRequest::Run() {
     verification_result = MessageHelper::VerifyImage(
         (*message_)[strings::msg_params][strings::secondary_graphic], app);
     if (mobile_apis::Result::SUCCESS != verification_result) {
-      LOG4CXX_ERROR(logger_, "Image verification failed.");
+      LOGGER_ERROR(logger_, "Image verification failed.");
       SendResponse(false, verification_result);
       return;
     }
@@ -215,14 +215,14 @@ void ShowRequest::Run() {
 }
 
 void ShowRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   using namespace helpers;
 
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_Show: {
-      LOG4CXX_DEBUG(logger_, "Received UI_Show event.");
+      LOGGER_DEBUG(logger_, "Received UI_Show event.");
       std::string response_info;
       mobile_apis::Result::eType result_code =
           static_cast<mobile_apis::Result::eType>(
@@ -246,62 +246,62 @@ void ShowRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event " << event.id());
+      LOGGER_ERROR(logger_, "Received unknown event " << event.id());
       break;
     }
   }
 }
 
 bool ShowRequest::CheckStringsOfShowRequest() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   const char* str;
 
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_4)) {
     str = (*message_)[strings::msg_params][strings::main_field_4].asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid main_field_4 syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid main_field_4 syntax check failed");
       return false;
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_3)) {
     str = (*message_)[strings::msg_params][strings::main_field_3].asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid main_field_3 syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid main_field_3 syntax check failed");
       return false;
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_2)) {
     str = (*message_)[strings::msg_params][strings::main_field_2].asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid main_field_2 syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid main_field_2 syntax check failed");
       return false;
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_1)) {
     str = (*message_)[strings::msg_params][strings::main_field_1].asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid main_field_1 syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid main_field_1 syntax check failed");
       return false;
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::status_bar)) {
     str = (*message_)[strings::msg_params][strings::status_bar].asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid status_bar syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid status_bar syntax check failed");
       return false;
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::media_clock)) {
     str = (*message_)[strings::msg_params][strings::media_clock].asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid media_clock syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid media_clock syntax check failed");
       return false;
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::media_track)) {
     str = (*message_)[strings::msg_params][strings::media_track].asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid media_track syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid media_track syntax check failed");
       return false;
     }
   }
@@ -311,7 +311,7 @@ bool ShowRequest::CheckStringsOfShowRequest() {
     for (size_t i = 0; i < custom_presets_array.length(); ++i) {
       str = custom_presets_array[i].asCharArray();
       if (!CheckSyntax(str)) {
-        LOG4CXX_ERROR(logger_, "Invalid custom_presets syntax check failed");
+        LOGGER_ERROR(logger_, "Invalid custom_presets syntax check failed");
         return false;
       }
     }
@@ -321,7 +321,7 @@ bool ShowRequest::CheckStringsOfShowRequest() {
     str = (*message_)[strings::msg_params][strings::graphic][strings::value]
               .asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid graphic value syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid graphic value syntax check failed");
       return false;
     }
   }
@@ -330,7 +330,7 @@ bool ShowRequest::CheckStringsOfShowRequest() {
     str = (*message_)[strings::msg_params][strings::secondary_graphic]
                      [strings::value].asCharArray();
     if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_,
+      LOGGER_ERROR(logger_,
                     "Invalid secondary_graphic value syntax check failed");
       return false;
     }

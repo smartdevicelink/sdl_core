@@ -42,7 +42,7 @@ VIIsReadyRequest::VIIsReadyRequest(const MessageSharedPtr& message)
 VIIsReadyRequest::~VIIsReadyRequest() {}
 
 void VIIsReadyRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }

@@ -44,7 +44,7 @@ OnRecordStartdNotification::OnRecordStartdNotification(
 OnRecordStartdNotification::~OnRecordStartdNotification() {}
 
 void OnRecordStartdNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendNotification();
 }

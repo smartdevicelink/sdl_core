@@ -44,7 +44,7 @@ UIPerformInteractionResponse::UIPerformInteractionResponse(
 UIPerformInteractionResponse::~UIPerformInteractionResponse() {}
 
 void UIPerformInteractionResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   event_engine::Event event(hmi_apis::FunctionID::UI_PerformInteraction);
   event.set_smart_object(*message_);
   event.raise();

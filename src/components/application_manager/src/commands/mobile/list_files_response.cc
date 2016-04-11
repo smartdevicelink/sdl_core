@@ -45,7 +45,7 @@ ListFilesResponse::ListFilesResponse(const MessageSharedPtr& message)
 ListFilesResponse::~ListFilesResponse() {}
 
 void ListFilesResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }

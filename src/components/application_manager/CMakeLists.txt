@@ -54,7 +54,7 @@ include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${ENCRYPTION_INCLUDE_DIRECTORY}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
-  ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${LOGGER_INCLUDE_DIRECTORY}
 )
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -382,7 +382,7 @@ target_link_libraries("ApplicationManager" ${LIBRARIES} AMHMICommandsLibrary
                                                         AMPolicyLibrary)
 
 if(ENABLE_LOG)
-  target_link_libraries("ApplicationManager" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+  target_link_libraries("ApplicationManager" logger -L${LOGGER_LIBS_DIRECTORY})
 endif()
 
 if(BUILD_TESTS)

@@ -52,11 +52,11 @@ AlertManeuverRequest::AlertManeuverRequest(const MessageSharedPtr& message)
 AlertManeuverRequest::~AlertManeuverRequest() {}
 
 void AlertManeuverRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   if ((!(*message_)[strings::msg_params].keyExists(strings::soft_buttons)) &&
       (!(*message_)[strings::msg_params].keyExists(strings::tts_chunks))) {
-    LOG4CXX_ERROR(logger_, "AlertManeuverRequest::Request without parameters!");
+    LOGGER_ERROR(logger_, "AlertManeuverRequest::Request without parameters!");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -65,13 +65,13 @@ void AlertManeuverRequest::Run() {
       (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (NULL == app.get()) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    LOGGER_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if (IsWhiteSpaceExist()) {
-    LOG4CXX_ERROR(logger_,
+    LOGGER_ERROR(logger_,
                   "Incoming alert maneuver has contains \\t\\n \\\\t \\\\n"
                   "text contains only whitespace in ttsChunks");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -88,7 +88,7 @@ void AlertManeuverRequest::Run() {
               ->GetPolicyHandler());
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
-    LOG4CXX_ERROR(logger_, "Wrong soft buttons parameters!");
+    LOGGER_ERROR(logger_, "Wrong soft buttons parameters!");
     SendResponse(false, processing_result);
     return;
   }
@@ -134,14 +134,14 @@ void AlertManeuverRequest::Run() {
 }
 
 void AlertManeuverRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   using namespace helpers;
   const smart_objects::SmartObject& message = event.smart_object();
 
   hmi_apis::FunctionID::eType event_id = event.id();
   switch (event_id) {
     case hmi_apis::FunctionID::Navigation_AlertManeuver: {
-      LOG4CXX_INFO(logger_, "Received Navigation_AlertManeuver event");
+      LOGGER_INFO(logger_, "Received Navigation_AlertManeuver event");
 
       pending_requests_.Remove(event_id);
 
@@ -152,7 +152,7 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
       break;
     }
     case hmi_apis::FunctionID::TTS_Speak: {
-      LOG4CXX_INFO(logger_, "Received TTS_Speak event");
+      LOGGER_INFO(logger_, "Received TTS_Speak event");
 
       pending_requests_.Remove(event_id);
 
@@ -162,14 +162,14 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
       break;
     }
     case hmi_apis::FunctionID::TTS_OnResetTimeout: {
-      LOG4CXX_INFO(logger_, "Received TTS_OnResetTimeout event");
+      LOGGER_INFO(logger_, "Received TTS_OnResetTimeout event");
 
       ApplicationManagerImpl::instance()->updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
       SendResponse(
           false, mobile_apis::Result::INVALID_ENUM, "Received unknown event");
       return;
@@ -177,7 +177,7 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
   }
 
   if (!pending_requests_.IsFinal(event_id)) {
-    LOG4CXX_DEBUG(logger_,
+    LOGGER_DEBUG(logger_,
                   "There are some pending responses from HMI."
                   "AlertManeuverRequest still waiting.");
     return;
@@ -231,7 +231,7 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
 }
 
 bool AlertManeuverRequest::IsWhiteSpaceExist() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
@@ -244,7 +244,7 @@ bool AlertManeuverRequest::IsWhiteSpaceExist() {
     for (; it_tc != it_tc_end; ++it_tc) {
       str = (*it_tc)[strings::text].asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
-        LOG4CXX_ERROR(logger_, "Invalid tts_chunks syntax check failed");
+        LOGGER_ERROR(logger_, "Invalid tts_chunks syntax check failed");
         return true;
       }
     }

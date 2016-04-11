@@ -42,7 +42,7 @@ AllowAllAppsResponse::AllowAllAppsResponse(const MessageSharedPtr& message)
 AllowAllAppsResponse::~AllowAllAppsResponse() {}
 
 void AllowAllAppsResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl::instance()->set_all_apps_allowed(
       (*message_)[strings::msg_params][hmi_response::allowed].asBool());

@@ -48,9 +48,9 @@ PolicyEventObserver::PolicyEventObserver(PolicyHandler* const policy_handler)
 
 void PolicyEventObserver::set_policy_handler(
     policy::PolicyHandler* const policy_handler) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(policy_handler_lock_);
-  LOG4CXX_DEBUG(logger_, "Set policy handler " << policy_handler);
+  LOGGER_DEBUG(logger_, "Set policy handler " << policy_handler);
   policy_handler_ = policy_handler;
 }
 

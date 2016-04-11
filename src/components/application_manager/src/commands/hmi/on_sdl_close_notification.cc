@@ -42,7 +42,7 @@ OnSDLCloseNotification::OnSDLCloseNotification(const MessageSharedPtr& message)
 OnSDLCloseNotification::~OnSDLCloseNotification() {}
 
 void OnSDLCloseNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendNotification();
 }

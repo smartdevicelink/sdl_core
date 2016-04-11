@@ -49,20 +49,20 @@ SpeakRequest::SpeakRequest(const MessageSharedPtr& message)
 SpeakRequest::~SpeakRequest() {}
 
 void SpeakRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app =
       application_manager::ApplicationManagerImpl::instance()->application(
           connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    LOGGER_ERROR(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if (IsWhiteSpaceExist()) {
-    LOG4CXX_ERROR(logger_,
+    LOGGER_ERROR(logger_,
                   "Incoming speak has contains \\t\\n \\\\t \\\\n "
                   " text contains only whitespace in ttsChunks");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -78,23 +78,23 @@ void SpeakRequest::Run() {
 }
 
 void SpeakRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   switch (event.id()) {
     case hmi_apis::FunctionID::TTS_Speak: {
-      LOG4CXX_INFO(logger_, "Received TTS_Speak event");
+      LOGGER_INFO(logger_, "Received TTS_Speak event");
 
       ProcessTTSSpeakResponse(event.smart_object());
       break;
     }
     case hmi_apis::FunctionID::TTS_OnResetTimeout: {
-      LOG4CXX_INFO(logger_, "Received TTS_OnResetTimeout event");
+      LOGGER_INFO(logger_, "Received TTS_OnResetTimeout event");
 
       ApplicationManagerImpl::instance()->updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
       break;
     }
   }
@@ -102,14 +102,14 @@ void SpeakRequest::on_event(const event_engine::Event& event) {
 
 void SpeakRequest::ProcessTTSSpeakResponse(
     const smart_objects::SmartObject& message) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   using namespace helpers;
 
   ApplicationSharedPtr application =
       ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!application) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    LOGGER_ERROR(logger_, "NULL pointer");
     return;
   }
 
@@ -144,7 +144,7 @@ void SpeakRequest::ProcessTTSSpeakResponse(
 }
 
 bool SpeakRequest::IsWhiteSpaceExist() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
@@ -157,7 +157,7 @@ bool SpeakRequest::IsWhiteSpaceExist() {
     for (; it_tc != it_tc_end; ++it_tc) {
       str = (*it_tc)[strings::text].asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
-        LOG4CXX_ERROR(logger_, "Invalid tts_chunks syntax check failed");
+        LOGGER_ERROR(logger_, "Invalid tts_chunks syntax check failed");
         return true;
       }
     }

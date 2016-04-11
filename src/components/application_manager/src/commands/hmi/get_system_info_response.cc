@@ -42,7 +42,7 @@ GetSystemInfoResponse::GetSystemInfoResponse(const MessageSharedPtr& message)
 GetSystemInfoResponse::~GetSystemInfoResponse() {}
 
 void GetSystemInfoResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   application_manager::ApplicationManagerImpl* app_manager_inst =
       application_manager::ApplicationManagerImpl::instance();
 
@@ -63,7 +63,7 @@ const SystemInfo GetSystemInfoResponse::GetSystemInfo(
   SystemInfo info;
 
   if (hmi_apis::Common_Result::SUCCESS != code) {
-    LOG4CXX_WARN(logger_, "GetSystemError returns an error code " << code);
+    LOGGER_WARN(logger_, "GetSystemError returns an error code " << code);
     return info;
   }
   info.ccpu_version =

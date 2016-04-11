@@ -42,7 +42,7 @@ UISetIconRequest::UISetIconRequest(const MessageSharedPtr& message)
 UISetIconRequest::~UISetIconRequest() {}
 
 void UISetIconRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }
