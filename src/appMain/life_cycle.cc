@@ -58,9 +58,17 @@ void NameMessageBrokerThread(const System::Thread& thread,
                              const std::string& name) {
   Thread::SetNameForId(thread.GetId(), name);
 }
+
+void StopThread(System::Thread* thread) {
+  if (thread) {
+    thread->Stop();
+    thread->Join();
+    delete thread;
+  }
+}
 }  // namespace
 
-LifeCycle::LifeCycle()
+LifeCycle::LifeCycle(profile::Profile& profile)
     : transport_manager_(NULL)
     , protocol_handler_(NULL)
     , connection_handler_(NULL)
@@ -88,42 +96,38 @@ LifeCycle::LifeCycle()
     , mb_server_thread_(NULL)
     , mb_adapter_thread_(NULL)
 #endif  // MESSAGEBROKER_HMIADAPTER
-{
+    , profile_(profile) {
 }
 
 bool LifeCycle::StartComponents() {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(!last_state_);
-  profile::Profile* profile = profile::Profile::instance();
-  last_state_ = new resumption::LastState(profile->app_storage_folder(),
-                                          profile->app_info_storage());
+  last_state_ = new resumption::LastState(profile_.app_storage_folder(),
+                                          profile_.app_info_storage());
 
   DCHECK(!transport_manager_);
-  transport_manager_ = transport_manager::TransportManagerDefault::instance();
-  DCHECK(transport_manager_);
+  transport_manager_ = new transport_manager::TransportManagerDefault(profile_);
 
   DCHECK(!connection_handler_);
   connection_handler_ = new connection_handler::ConnectionHandlerImpl(
-                          *profile::Profile::instance(),
-                          *transport_manager_);
-  DCHECK(connection_handler_);
+      profile_, *transport_manager_);
 
   DCHECK(!protocol_handler_);
   protocol_handler_ =
-      new protocol_handler::ProtocolHandlerImpl(*(profile::Profile::instance()),
+      new protocol_handler::ProtocolHandlerImpl(profile_,
                                                 *connection_handler_,
                                                 *connection_handler_,
                                                 *transport_manager_);
   DCHECK(protocol_handler_);
 
   DCHECK(!app_manager_);
-  app_manager_ = application_manager::ApplicationManagerImpl::instance();
+  app_manager_ = new application_manager::ApplicationManagerImpl(profile_, profile_);
 
   DCHECK(!hmi_handler_);
   hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(
-      *(profile::Profile::instance()));
+      profile_);
 
-  media_manager_ = new media_manager::MediaManagerImpl(*app_manager_, *profile);
+  media_manager_ = new media_manager::MediaManagerImpl(*app_manager_, profile_);
   if (!app_manager_->Init(*last_state_, media_manager_)) {
     LOG4CXX_ERROR(logger_, "Application manager init failed.");
     return false;
@@ -132,8 +136,8 @@ bool LifeCycle::StartComponents() {
 #ifdef ENABLE_SECURITY
   security_manager_ = new security_manager::SecurityManagerImpl();
   crypto_manager_ = new security_manager::CryptoManagerImpl(
-        utils::MakeShared<security_manager::CryptoManagerSettingsImpl>(
-          *(profile::Profile::instance()),
+      utils::MakeShared<security_manager::CryptoManagerSettingsImpl>(
+          profile_,
                   app_manager_->GetPolicyHandler().RetrieveCertificate()));
   protocol_handler_->AddProtocolObserver(security_manager_);
   protocol_handler_->set_security_manager(security_manager_);
@@ -165,9 +169,8 @@ bool LifeCycle::StartComponents() {
 
 // it is important to initialise TelemetryMonitor before TM to listen TM Adapters
 #ifdef TELEMETRY_MONITOR
-  telemetry_monitor_ = new telemetry_monitor::TelemetryMonitor(
-      profile::Profile::instance()->server_address(),
-                                              profile::Profile::instance()->time_testing_port());
+  telemetry_monitor_ = new telemetry_monitor::TelemetryMonitor(profile_.server_address(),
+                                              profile_.time_testing_port());
   telemetry_monitor_->Start();
   telemetry_monitor_->Init(protocol_handler_, app_manager_, transport_manager_);
 #endif  // TELEMETRY_MONITOR
@@ -194,8 +197,8 @@ bool LifeCycle::InitMessageSystem() {
   }
 
   message_broker_server_ = new NsMessageBroker::TcpServer(
-      profile::Profile::instance()->server_address(),
-      profile::Profile::instance()->server_port(),
+      profile_.server_address(),
+      profile_.server_port(),
       message_broker_);
   if (!message_broker_server_) {
     LOG4CXX_FATAL(logger_, " Wrong pJSONRPC20Server pointer!");
@@ -223,8 +226,8 @@ bool LifeCycle::InitMessageSystem() {
 
   mb_adapter_ = new hmi_message_handler::MessageBrokerAdapter(
       hmi_handler_,
-      profile::Profile::instance()->server_address(),
-      profile::Profile::instance()->server_port());
+      profile_.server_address(),
+      profile_.server_port());
 
   hmi_handler_->AddHMIMessageAdapter(mb_adapter_);
   if (!mb_adapter_->Connect()) {
@@ -271,11 +274,9 @@ bool LifeCycle::InitMessageSystem() {
  * @return true if success otherwise false.
  */
 bool LifeCycle::InitMessageSystem() {
-  dbus_adapter_ = new hmi_message_handler::DBusMessageAdapter(
-      hmi_message_handler::HMIMessageHandlerImpl::instance());
+  dbus_adapter_ = new hmi_message_handler::DBusMessageAdapter(hmi_handler_);
 
-  hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
-      dbus_adapter_);
+  hmi_handler_.AddHMIMessageAdapter(dbus_adapter_);
   if (!dbus_adapter_->Init()) {
     LOG4CXX_FATAL(logger_, "Cannot init DBus service!");
     return false;
@@ -297,10 +298,8 @@ bool LifeCycle::InitMessageSystem() {
 
 #ifdef MQUEUE_HMIADAPTER
 bool LifeCycle::InitMessageSystem() {
-  hmi_message_adapter_ = new hmi_message_handler::MqueueAdapter(
-      hmi_message_handler::HMIMessageHandlerImpl::instance());
-  hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
-      hmi_message_adapter_);
+  hmi_message_adapter_ = new hmi_message_handler::MqueueAdapter(hmi_handler_);
+  hmi_handler.AddHMIMessageAdapter(hmi_message_adapter_);
   return true;
 }
 
@@ -378,7 +377,7 @@ void LifeCycle::StopComponents() {
   DCHECK_OR_RETURN_VOID(transport_manager_);
   transport_manager_->Visibility(false);
   transport_manager_->Stop();
-  transport_manager::TransportManagerDefault::destroy();
+  delete transport_manager_;
 
   LOG4CXX_INFO(logger_, "Stopping Connection Handler.");
   DCHECK_OR_RETURN_VOID(connection_handler_);
@@ -399,56 +398,41 @@ void LifeCycle::StopComponents() {
   last_state_ = NULL;
 
   LOG4CXX_INFO(logger_, "Destroying Application Manager.");
-  application_manager::ApplicationManagerImpl::destroy();
+  DCHECK(app_manager_);
+  delete app_manager_;
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
 
 #ifdef DBUS_HMIADAPTER
   if (dbus_adapter_) {
     DCHECK_OR_RETURN_VOID(hmi_handler_);
-    if (hmi_handler_) {
-      hmi_handler_->RemoveHMIMessageAdapter(dbus_adapter_);
-      delete hmi_message_adapter_;
-      hmi_message_adapter_ = NULL;
-    }
-    if (dbus_adapter_thread_) {
-      dbus_adapter_thread_->Stop();
-      dbus_adapter_thread_->Join();
-      delete dbus_adapter_thread_;
-    }
+    hmi_handler_->RemoveHMIMessageAdapter(dbus_adapter_);
+    dbus_adapter_->exitReceivingThread();
+    StopThread(dbus_adapter_thread_);
     delete dbus_adapter_;
     dbus_adapter_ = NULL;
   }
 #endif  // DBUS_HMIADAPTER
 
 #ifdef MESSAGEBROKER_HMIADAPTER
-  DCHECK_OR_RETURN_VOID(mb_adapter_);
-  hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
-  mb_adapter_->unregisterController();
-  mb_adapter_->exitReceivingThread();
-  if (mb_adapter_thread_) {
-    mb_adapter_thread_->Stop();
-    mb_adapter_thread_->Join();
-    delete mb_adapter_thread_;
+  if (mb_adapter_) {
+    DCHECK_OR_RETURN_VOID(hmi_handler_);
+    hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
+    mb_adapter_->unregisterController();
+    mb_adapter_->exitReceivingThread();
+    StopThread(mb_adapter_thread_);
+    delete mb_adapter_;
+    mb_adapter_ = NULL;
   }
-  delete mb_adapter_;
-  mb_adapter_ = NULL;
 
   DCHECK_OR_RETURN_VOID(hmi_handler_);
   delete hmi_handler_;
   hmi_handler_ = NULL;
 
   LOG4CXX_INFO(logger_, "Destroying Message Broker");
-  if (mb_server_thread_) {
-    mb_server_thread_->Stop();
-    mb_server_thread_->Join();
-    delete mb_server_thread_;
-  }
-  if (mb_thread_) {
-    mb_thread_->Stop();
-    mb_thread_->Join();
-    delete mb_thread_;
-  }
+  StopThread(mb_server_thread_);
+  StopThread(mb_thread_);
+
   if (message_broker_server_) {
     message_broker_server_->Close();
     delete message_broker_server_;
