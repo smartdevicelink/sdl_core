@@ -36,7 +36,6 @@
 #include "gtest/gtest.h"
 #include "utils/auto_trace.h"
 #include "utils/logger.h"
-#include "config_profile/profile.h"
 #include "utils/log_message_loop_thread.h"
 #include "utils/threads/message_loop_thread.h"
 #include "utils/file_system.h"
@@ -63,9 +62,7 @@ void Preconditions() {
 
 void InitLogger() {
   // Set enabled logs
-  profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
-  profile::Profile::instance()->UpdateValues();
-  INIT_LOGGER("log4cxx.properties", true); //DEINIT_LOGGER will be called in test_main.cc
+  INIT_LOGGER("log4cxx.properties", true);  // DEINIT_LOGGER will be called in test_main.cc
 }
 
 void CreateDeleteAutoTrace(const std::string & testlog) {

@@ -35,7 +35,8 @@
 #include <stddef.h>
 #include <signal.h>
 #include <pthread.h>
-#include <sched.h>
+#include <algorithm>
+#include <functional>
 
 #include "utils/threads/thread.h"
 #include "utils/atomic.h"

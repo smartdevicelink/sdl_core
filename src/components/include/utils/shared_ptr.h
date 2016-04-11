@@ -41,6 +41,9 @@
 #include "utils/atomic.h"
 
 namespace utils {
+
+
+
 /**
  * @brief Shared pointer.
  *
@@ -52,9 +55,13 @@ namespace utils {
  **/
 template<typename ObjectType>
 class SharedPtr {
+    static void DummyDeleter(ObjectType* t) {
+        delete t;
+    }
   public:
     //std smart pointer compatibility
     typedef ObjectType element_type;
+    typedef void (*Deleter)(ObjectType*) ;
     /**
      * @brief Constructor.
      *
@@ -64,6 +71,13 @@ class SharedPtr {
      * @param Object Wrapped object.
      **/
     SharedPtr(ObjectType* Object);
+
+    SharedPtr(ObjectType* Object, Deleter deleter):
+        mObject(Object),
+        mReferenceCounter(new uint32_t(1)),
+        deleter_(deleter) {
+
+    }
 
     SharedPtr();
 
@@ -198,18 +212,21 @@ class SharedPtr {
      **/
     ObjectType* mObject;
 
+
     /**
      * @brief Pointer to reference counter.
      **/
     uint32_t* mReferenceCounter;
 
+    Deleter deleter_;
     void release();
 };
 
 template<typename ObjectType>
 inline utils::SharedPtr<ObjectType>::SharedPtr(ObjectType* Object)
   : mObject(NULL),
-    mReferenceCounter(new uint32_t(1)) {
+    mReferenceCounter(new uint32_t(1)),
+    deleter_(DummyDeleter) {
   DCHECK(Object != NULL);
   mObject = Object;
 }
@@ -217,14 +234,16 @@ inline utils::SharedPtr<ObjectType>::SharedPtr(ObjectType* Object)
 template<typename ObjectType>
 inline utils::SharedPtr<ObjectType>::SharedPtr()
   : mObject(0),
-    mReferenceCounter(0) {
+    mReferenceCounter(0),
+    deleter_(DummyDeleter) {
 }
 
 template<typename ObjectType>
 inline utils::SharedPtr<ObjectType>::SharedPtr(
   const SharedPtr<ObjectType>& Other)
   : mObject(0),
-    mReferenceCounter(0) {
+    mReferenceCounter(0),
+    deleter_(DummyDeleter) {
   *this = Other;
 }
 
@@ -233,7 +252,8 @@ template<typename OtherObjectType>
 inline utils::SharedPtr<ObjectType>::SharedPtr(
   const SharedPtr<OtherObjectType>& Other)
   : mObject(0),
-    mReferenceCounter(0) {
+    mReferenceCounter(0),
+    deleter_(DummyDeleter) {
   *this = Other;
 }
 
@@ -337,8 +357,7 @@ utils::SharedPtr<ObjectType>::reset(ObjectType* other) {
 
 template<typename ObjectType>
 void SharedPtr<ObjectType>::release() {
-
-  delete mObject;
+  deleter_(mObject);
   mObject = 0;
 
   delete mReferenceCounter;
