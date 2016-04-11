@@ -46,7 +46,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
-
+#include "media_manager/media_manager_settings.h"
 #include "media_manager/audio/audio_stream_sender_thread.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/message.h"
@@ -57,15 +57,17 @@ using sync_primitives::AutoLock;
 const int32_t AudioStreamSenderThread::kAudioPassThruTimeout = 1;
 const uint32_t kMqueueMessageSize = 4095;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "AudioPassThruThread")
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
-AudioStreamSenderThread::AudioStreamSenderThread(
-  const std::string fileName, uint32_t session_key)
-  : session_key_(session_key),
-    fileName_(fileName),
-    shouldBeStoped_(false),
-    shouldBeStoped_lock_(),
-    shouldBeStoped_cv_() {
+AudioStreamSenderThread::AudioStreamSenderThread(const std::string& fileName,
+    uint32_t session_key,
+    application_manager::ApplicationManager &app_mngr)
+    : session_key_(session_key)
+    , fileName_(fileName)
+    , shouldBeStoped_(false)
+    , shouldBeStoped_lock_()
+    , shouldBeStoped_cv_()
+    , application_manager_(app_mngr) {
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
@@ -93,29 +95,28 @@ void AudioStreamSenderThread::sendAudioChunkToMobile() {
   std::vector<uint8_t>::iterator to;
 
   if (!file_system::ReadBinaryFile(fileName_, binaryData)) {
-    LOG4CXX_ERROR_EXT(logger_, "Unable to read file." << fileName_);
+    LOG4CXX_ERROR(logger_, "Unable to read file." << fileName_);
 
     return;
   }
 
   if (binaryData.empty()) {
-    LOG4CXX_ERROR_EXT(logger_, "Binary data is empty.");
+    LOG4CXX_ERROR(logger_, "Binary data is empty.");
     return;
   }
 
-  LOG4CXX_INFO_EXT(logger_, "offset = " << offset_);
+  LOG4CXX_INFO(logger_, "offset = " << offset_);
 
   from = binaryData.begin() + offset_;
   to = binaryData.end();
 
   if (from < binaryData.end() /*from != binaryData.end()*/) {
-    LOG4CXX_INFO_EXT(logger_, "from != binaryData.end()");
+    LOG4CXX_INFO(logger_, "from != binaryData.end()");
 
     offset_ = offset_ + to - from;
     std::vector<uint8_t> data(from, to);
 
-    application_manager::ApplicationManagerImpl::instance()->
-    SendAudioPassThroughNotification(session_key_, data);
+    application_manager_.SendAudioPassThroughNotification(session_key_, data);
     binaryData.clear();
   }
 #if !defined(EXTENDED_MEDIA_MODE)

@@ -36,12 +36,12 @@
 #include <string>
 
 #include "mb_controller.hpp"
-#include "hmi_message_handler/hmi_message_adapter.h"
+#include "hmi_message_handler/hmi_message_adapter_impl.h"
 #include "utils/threads/thread_validator.h"
 
 namespace hmi_message_handler {
 
-class MessageBrokerAdapter : public HMIMessageAdapter,
+class MessageBrokerAdapter : public HMIMessageAdapterImpl,
     public NsMessageBroker::CMessageBrokerController,
     public threads::SingleThreadValidator {
  public:

@@ -35,19 +35,28 @@
 
 #include <string>
 #include <map>
-#include "utils/singleton.h"
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
 #include "media_manager/media_manager.h"
 #include "media_manager/media_adapter_impl.h"
 #include "media_manager/media_adapter_listener.h"
 
+namespace application_manager {
+  class ApplicationManager;
+}
+
+namespace connection_handler {
+  class ConnectionHandlerImpl;
+}
+
 namespace media_manager {
 
 class MediaManagerImpl : public MediaManager,
-  public protocol_handler::ProtocolObserver,
-  public utils::Singleton<MediaManagerImpl> {
+  public protocol_handler::ProtocolObserver {
   public:
+   MediaManagerImpl(
+       application_manager::ApplicationManager& application_manager,
+       const MediaManagerSettings& settings);
     virtual ~MediaManagerImpl();
 
     virtual void PlayA2DPSource(int32_t application_key);
@@ -71,12 +80,25 @@ class MediaManagerImpl : public MediaManager,
       const ::protocol_handler::RawMessagePtr message);
     virtual void FramesProcessed(int32_t application_key, int32_t frame_number);
 
-  protected:
-    MediaManagerImpl();
-    virtual void Init();
+   virtual const MediaManagerSettings& settings() const OVERRIDE;
 
-    protocol_handler::ProtocolHandler* protocol_handler_;
-    MediaAdapter*                      a2dp_player_;
+#ifdef BUILD_TESTS
+  void set_mock_a2dp_player(MediaAdapter* media_adapter);
+  void set_mock_mic_listener(MediaListenerPtr media_listener);
+  void set_mock_mic_recorder(MediaAdapterImpl* media_adapter);
+  void set_mock_streamer(protocol_handler::ServiceType stype,
+                         MediaAdapterImpl* mock_stream);
+  void set_mock_streamer_listener(protocol_handler::ServiceType stype,
+                                  MediaAdapterListener* mock_stream);
+#endif  // BUILD_TESTS
+
+ protected:
+  virtual void Init();
+
+  const MediaManagerSettings& settings_;
+
+  protocol_handler::ProtocolHandler* protocol_handler_;
+  MediaAdapter* a2dp_player_;
 
     MediaAdapterImpl*                  from_mic_recorder_;
     MediaListenerPtr                   from_mic_listener_;
@@ -84,9 +106,10 @@ class MediaManagerImpl : public MediaManager,
     std::map<protocol_handler::ServiceType, MediaAdapterImplPtr> streamer_;
     std::map<protocol_handler::ServiceType, MediaListenerPtr>    streamer_listener_;
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(MediaManagerImpl);
-    FRIEND_BASE_SINGLETON_CLASS(MediaManagerImpl);
+  application_manager::ApplicationManager& application_manager_;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(MediaManagerImpl);
 };
 
 }  //  namespace media_manager

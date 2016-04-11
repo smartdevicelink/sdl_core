@@ -36,7 +36,6 @@
 
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application.h"
-#include "utils/timer_thread.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -95,7 +94,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @param message which should send to mobile side
    *
    */
-  void ProcessVRResponse(const smart_objects::SmartObject& message);
+  void ProcessVRResponse(const smart_objects::SmartObject& message, smart_objects::SmartObject& msg_params);
 
   /*
    * @brief Sends PerformInteraction response to mobile side
@@ -104,7 +103,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    *
    */
   void ProcessPerformInteractionResponse
-  (const smart_objects::SmartObject& message);
+  (const smart_objects::SmartObject& message, smart_objects::SmartObject &msg_params);
 
 
   /*
@@ -131,12 +130,6 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @param app_id Application ID
    */
   void SendUIShowVRHelpRequest(ApplicationSharedPtr const app);
-
-  /**
-   * @brief Creates and Sends Perform interaction to UI.
-   */
-  void CreateUIPerformInteraction(const smart_objects::SmartObject& msg_params,
-                                  application_manager::ApplicationSharedPtr const app);
 
   /*
    * @brief Checks if incoming choice set doesn't has similar menu names.
@@ -197,13 +190,49 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    */
   bool CheckChoiceIDFromResponse(ApplicationSharedPtr app, int32_t choice_id);
 
-  // members
-  mobile_apis::Result::eType          vr_perform_interaction_code_;
+  /**
+   * @brief Checks for a match of choice ID, in
+   * choice sets.
+   * @param app contains pointer to application.
+   * @param choice_set_id_list_length contains amount
+   * of choice set ids.
+   * @param choice_set_id_list array of choice set ids
+   * @return If request contains several choice sets with
+   * same choice id returns false, otherwise returns
+   * true.
+   */
+  bool CheckChoiceIDFromRequest(ApplicationSharedPtr app,
+                                const size_t choice_set_id_list_length,
+                                const smart_objects::SmartObject& choice_set_id_list) const;
+
+  /**
+   * @brief Tells if there are sent requests without responses
+   * @return If there is request without response method returns TRUE
+   * otherwise returns FALSE
+   */
+  const bool HasHMIResponsesToWait() const;
+
+  /**
+   * @brief Check VR response result code, in case GENERIC_ERROR, REJECTED,
+   * send resultCode FALSE, in case WARNINGS send resultCode TRUE
+   */
+  void CheckResponseResultCode();
+
+  /**
+   * @brief Check UI & VR result codes, send response to mobile
+   * @param msg_param Message params to send
+   */
+  void SendBothModeResponse(const smart_objects::SmartObject &msg_param);
+
   mobile_apis::InteractionMode::eType interaction_mode_;
   bool                                ui_response_recived_;
   bool                                vr_response_recived_;
+  bool                                ui_result_;
+  bool                                vr_result_;
   bool                                app_pi_was_active_before_;
   static uint32_t                     pi_requests_count_;
+  mobile_apis::Result::eType          vr_resultCode_;
+  mobile_apis::Result::eType          ui_resultCode_;
 
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
 };

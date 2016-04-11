@@ -40,7 +40,7 @@
 
 #include "policy/pt_ext_representation.h"
 #include "rpc_base/rpc_base.h"
-#include "./types.h"
+#include "table_struct/types.h"
 #include "mock_pt_representation.h"
 
 namespace policy_table = ::rpc::policy_table_interface_base;

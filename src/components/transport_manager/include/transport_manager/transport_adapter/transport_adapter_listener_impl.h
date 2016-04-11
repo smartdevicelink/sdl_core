@@ -36,12 +36,11 @@
 #include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
+#include "transport_manager/transport_manager.h"
 
 namespace transport_manager {
 
 using transport_manager::transport_adapter::TransportAdapter;
-
-class TransportManagerImpl;
 
 /**
  * @brief Implementation of TransportAdapterListener class.
@@ -72,10 +71,10 @@ class TransportAdapterListenerImpl
   /**
    * @brief Constructor.
    *
-   * @param manager Pointer to the transport manager implementation class.
+   * @param manager Pointer to the transport manager class.
    * @param adapter Pointer to the transport adapter associated with listener.
    */
-  TransportAdapterListenerImpl(TransportManagerImpl* manager,
+  TransportAdapterListenerImpl(TransportManager* manager,
                                TransportAdapter* adapter);
 
   /**
@@ -100,7 +99,7 @@ class TransportAdapterListenerImpl
                                     const SearchDeviceError& error);
 
   /**
-   * @brief Passes notification to TransportManagerImpl
+   * @brief Passes notification to TransportManager
    *
    * @param adapter Transport adapter that sent notification
    */
@@ -284,7 +283,7 @@ class TransportAdapterListenerImpl
                                     const ApplicationHandle& app_id);
 
  private:
-  TransportManagerImpl* transport_manager_impl_;
+  TransportManager* transport_manager_;
   TransportAdapter* transport_adapter_;
 };
 }  // namespace transport_manager

@@ -35,7 +35,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 namespace application_manager {
 
@@ -67,21 +67,20 @@ void OnSystemRequestNotification::Run() {
 
   RequestType::eType request_type = static_cast<RequestType::eType>
       ((*message_)[strings::msg_params][strings::request_type].asInt());
-
-  if (!policy::PolicyHandler::instance()->IsRequestTypeAllowed(
-           app->mobile_app_id(), request_type)) {
+  const policy::PolicyHandlerInterface& policy_handler =
+      application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler();
+  if (!policy_handler.IsRequestTypeAllowed(app->mobile_app_id(),
+                                           request_type)) {
     LOG4CXX_WARN(logger_, "Request type "  << request_type
                  <<" is not allowed by policies");
     return;
   }
 
   if (RequestType::PROPRIETARY == request_type) {
-  std::string filename =
-      (*message_)[strings::msg_params][strings::file_name].asString();
-
-  std::vector<uint8_t> binary_data;
-  file_system::ReadBinaryFile(filename, binary_data);
-    (*message_)[strings::params][strings::binary_data] = binary_data;
+    /* According to requirements:
+       "If the requestType = PROPRIETARY, add to mobile API fileType = JSON
+        If the requestType = HTTP, add to mobile API fileType = BINARY"
+       Also in Genivi SDL we don't save the PT to file - we put it directly in binary_data */
     (*message_)[strings::msg_params][strings::file_type] = FileType::JSON;
   } else if (RequestType::HTTP == request_type) {
     (*message_)[strings::msg_params][strings::file_type] = FileType::BINARY;

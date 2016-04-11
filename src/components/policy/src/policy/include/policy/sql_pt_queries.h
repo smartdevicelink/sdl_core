@@ -113,7 +113,8 @@ extern const std::string kInsertApplicationFull;
 extern const std::string kDeletePreconsentedGroupsByApplicationId;
 extern const std::string kSelectApplicationFull;
 extern const std::string kUpdatePreloaded;
-
+extern const std::string kSelectDBVersion;
+extern const std::string kUpdateDBVersion;
 }  // namespace sql_pt
 }  // namespace policy
 

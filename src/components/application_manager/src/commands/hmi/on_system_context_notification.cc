@@ -54,7 +54,6 @@ void OnSystemContextNotification::Run() {
     (*message_)[strings::msg_params][hmi_notification::system_context].asInt());
 
   ApplicationSharedPtr app;
-
   if ((mobile_api::SystemContext::SYSCTXT_VRSESSION == system_context) ||
       (mobile_api::SystemContext::SYSCTXT_MENU == system_context) ||
       (mobile_api::SystemContext::SYSCTXT_HMI_OBSCURED == system_context)) {
@@ -67,21 +66,13 @@ void OnSystemContextNotification::Run() {
     }
   }
 
-  if (app.valid() && (system_context != app->system_context()) &&
-      (system_context != mobile_api::SystemContext::INVALID_ENUM)) {
-    SendSystemContextNotification(app, system_context);
+  if (app && mobile_api::SystemContext::INVALID_ENUM != system_context) {
+    ApplicationManagerImpl::instance()->SetState(app->app_id(), system_context);
   } else {
-    LOG4CXX_ERROR(logger_, "Ignored wrong SystemContext notification!");
+    LOG4CXX_ERROR(logger_, "Application does not exist");
   }
-}
-
-void OnSystemContextNotification::SendSystemContextNotification(ApplicationSharedPtr app,
-    mobile_api::SystemContext::eType system_context) {
-  ApplicationManagerImpl::instance()->SetState(app->app_id(),
-                                               system_context);
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

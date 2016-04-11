@@ -1,5 +1,6 @@
 /*
- Copyright (c) 2016, Ford Motor Company
+
+ Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -55,12 +56,12 @@ class DialNumberResponse : public CommandResponseImpl {
   /**
    * @brief DialNumberResponse class destructor
    **/
-  ~DialNumberResponse() OVERRIDE;
+  virtual ~DialNumberResponse();
 
   /**
    * @brief Execute command
    **/
-  void Run() OVERRIDE;
+  virtual void Run();
 
  private:
   DISALLOW_COPY_AND_ASSIGN(DialNumberResponse);

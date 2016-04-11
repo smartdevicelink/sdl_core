@@ -229,10 +229,10 @@ class String : public PrimitiveType {
     explicit String(const Json::Value* value);
     explicit String(dbus::MessageReader* reader);
     String(const Json::Value* value, const std::string& def_value);
-    bool operator<(String new_val);
+    bool operator<(const String& new_val) const;
     String& operator=(const std::string& new_val);
     String& operator=(const String& new_val);
-    bool operator==(const String& rhs);
+    bool operator==(const String& rhs) const;
     operator const std::string& () const;
     Json::Value ToJsonValue() const;
     void ToDbusWriter(dbus::MessageWriter* writer) const;
@@ -254,7 +254,7 @@ class Enum : public PrimitiveType {
     explicit Enum(const Json::Value* value);
     explicit Enum(dbus::MessageReader* reader);
     Enum(const Json::Value* value, EnumType def_value);
-    Enum& operator=(EnumType new_val);
+    Enum& operator=(const EnumType& new_val);
     operator EnumType() const;
     Json::Value ToJsonValue() const;
     void ToDbusWriter(dbus::MessageWriter* writer) const;

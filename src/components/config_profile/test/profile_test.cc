@@ -30,9 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <algorithm>
+#include <vector>
+
 #include "gtest/gtest.h"
 #include "config_profile/profile.h"
-#include <algorithm>
 #include "utils/file_system.h"
 #include "utils/threads/thread.h"
 
@@ -45,10 +47,10 @@ using namespace ::profile;
 class ProfileTest : public ::testing::Test {
  protected:
   virtual void SetUp() {
-    profile::Profile::destroy();
+    Profile::destroy();
   }
   virtual void TearDown() {
-    profile::Profile::destroy();
+    Profile::destroy();
   }
 
 };
@@ -56,7 +58,7 @@ class ProfileTest : public ::testing::Test {
 TEST_F(ProfileTest, SingletonProfile) {
   Profile::instance();
   EXPECT_TRUE(Profile::exists());
-  profile::Profile::destroy();
+  Profile::destroy();
   EXPECT_FALSE(Profile::exists());
 }
 
@@ -65,17 +67,17 @@ TEST_F(ProfileTest, UpdateConfigWithDefaultFile) {
   uint32_t thread_min_stack_size = threads::Thread::kMinStackSize;
   EXPECT_EQ(thread_min_stack_size,
             Profile::instance()->thread_min_stack_size());
-  EXPECT_FALSE(profile::Profile::instance()->enable_policy());
+  EXPECT_FALSE(Profile::instance()->enable_policy());
   std::string vr_help_title_ = "";
   EXPECT_EQ(vr_help_title_, Profile::instance()->vr_help_title());
   EXPECT_EQ("smartDeviceLink.ini", Profile::instance()->config_file_name());
 
-  profile::Profile::instance()->UpdateValues();
+  Profile::instance()->UpdateValues();
   // Value was updated
   thread_min_stack_size = 20480;
   EXPECT_EQ(thread_min_stack_size,
             Profile::instance()->thread_min_stack_size());
-  EXPECT_TRUE(profile::Profile::instance()->enable_policy());
+  EXPECT_TRUE(Profile::instance()->enable_policy());
   vr_help_title_ = "Available Vr Commands List";
   EXPECT_EQ(vr_help_title_, Profile::instance()->vr_help_title());
 }
@@ -85,7 +87,7 @@ TEST_F(ProfileTest, SetConfigFileWithoutCallUpdate) {
   uint32_t thread_min_stack_size = threads::Thread::kMinStackSize;
   EXPECT_EQ(thread_min_stack_size,
             Profile::instance()->thread_min_stack_size());
-  EXPECT_FALSE(profile::Profile::instance()->enable_policy());
+  EXPECT_FALSE(Profile::instance()->enable_policy());
   std::string vr_help_title_ = "";
   EXPECT_EQ(vr_help_title_, Profile::instance()->vr_help_title());
   EXPECT_EQ("smartDeviceLink.ini", Profile::instance()->config_file_name());
@@ -97,7 +99,7 @@ TEST_F(ProfileTest, SetConfigFileWithoutCallUpdate) {
   thread_min_stack_size = 20480;
   EXPECT_EQ(thread_min_stack_size,
             Profile::instance()->thread_min_stack_size());
-  EXPECT_TRUE(profile::Profile::instance()->enable_policy());
+  EXPECT_TRUE(Profile::instance()->enable_policy());
   vr_help_title_ = "Available Vr Commands List";
   EXPECT_EQ(vr_help_title_, Profile::instance()->vr_help_title());
 }
@@ -116,7 +118,7 @@ TEST_F(ProfileTest, SetConfigFileWithUpdate) {
             Profile::instance()->thread_min_stack_size());
 
   // Update config file again
-  profile::Profile::instance()->UpdateValues();
+  Profile::instance()->UpdateValues();
 
   // Value should be the same
   EXPECT_EQ(thread_min_stack_size,
@@ -129,7 +131,7 @@ TEST_F(ProfileTest, UpdateManyTimesDefaultFile) {
   EXPECT_EQ("smartDeviceLink.ini", Profile::instance()->config_file_name());
   // Update config many times
   for (int i = 0; i < 10; i++) {
-    profile::Profile::instance()->UpdateValues();
+    Profile::instance()->UpdateValues();
   }
 }
 
@@ -150,7 +152,7 @@ TEST_F(ProfileTest, UpdateIntValues) {
             Profile::instance()->thread_min_stack_size());
 
   // Update config file again
-  profile::Profile::instance()->UpdateValues();
+  Profile::instance()->UpdateValues();
   // Values are same
   EXPECT_EQ(thread_min_stack_size,
             Profile::instance()->thread_min_stack_size());
@@ -166,7 +168,7 @@ TEST_F(ProfileTest, UpdateIntValues) {
             Profile::instance()->thread_min_stack_size());
 
   // Update config file again
-  profile::Profile::instance()->UpdateValues();
+  Profile::instance()->UpdateValues();
   EXPECT_EQ("smartDeviceLink_test.ini",
             Profile::instance()->config_file_name());
 
@@ -187,22 +189,22 @@ TEST_F(ProfileTest, UpdateIntValues) {
 TEST_F(ProfileTest, UpdateBoolValues) {
   // Default values
   EXPECT_EQ("smartDeviceLink.ini", Profile::instance()->config_file_name());
-  EXPECT_TRUE(profile::Profile::instance()->launch_hmi());
-  EXPECT_FALSE(profile::Profile::instance()->enable_policy());
+  EXPECT_TRUE(Profile::instance()->launch_hmi());
+  EXPECT_FALSE(Profile::instance()->enable_policy());
 
   // Set config file
   Profile::instance()->config_file_name("smartDeviceLink.ini");
   // Check values
-  EXPECT_TRUE(profile::Profile::instance()->launch_hmi());
-  EXPECT_TRUE(profile::Profile::instance()->enable_policy());
-  EXPECT_FALSE(profile::Profile::instance()->is_redecoding_enabled());
+  EXPECT_TRUE(Profile::instance()->launch_hmi());
+  EXPECT_TRUE(Profile::instance()->enable_policy());
+  EXPECT_FALSE(Profile::instance()->is_redecoding_enabled());
 
   // Update config file again
-  profile::Profile::instance()->UpdateValues();
+  Profile::instance()->UpdateValues();
   // Values are same
-  EXPECT_TRUE(profile::Profile::instance()->launch_hmi());
-  EXPECT_TRUE(profile::Profile::instance()->enable_policy());
-  EXPECT_FALSE(profile::Profile::instance()->is_redecoding_enabled());
+  EXPECT_TRUE(Profile::instance()->launch_hmi());
+  EXPECT_TRUE(Profile::instance()->enable_policy());
+  EXPECT_FALSE(Profile::instance()->is_redecoding_enabled());
 
   // Change config file
   Profile::instance()->config_file_name("smartDeviceLink_test.ini");
@@ -210,53 +212,48 @@ TEST_F(ProfileTest, UpdateBoolValues) {
             Profile::instance()->config_file_name());
 
   // Parameters after updating
-  EXPECT_FALSE(profile::Profile::instance()->launch_hmi());
-  EXPECT_FALSE(profile::Profile::instance()->enable_policy());
-  EXPECT_TRUE(profile::Profile::instance()->is_redecoding_enabled());
+  EXPECT_FALSE(Profile::instance()->launch_hmi());
+  EXPECT_FALSE(Profile::instance()->enable_policy());
+  EXPECT_TRUE(Profile::instance()->is_redecoding_enabled());
 
   // Update config file
-  profile::Profile::instance()->UpdateValues();
+  Profile::instance()->UpdateValues();
 
   // Parameters are same
-  EXPECT_FALSE(profile::Profile::instance()->launch_hmi());
-  EXPECT_FALSE(profile::Profile::instance()->enable_policy());
-  EXPECT_TRUE(profile::Profile::instance()->is_redecoding_enabled());
+  EXPECT_FALSE(Profile::instance()->launch_hmi());
+  EXPECT_FALSE(Profile::instance()->enable_policy());
+  EXPECT_TRUE(Profile::instance()->is_redecoding_enabled());
 }
 
 TEST_F(ProfileTest, UpdateStringValue) {
   // Default values
-  std::string config_folder = "";
+  std::string recording_file_name = "record.wav";
   std::string tts_delimiter_ = "";
   std::string vr_help_title_ = "";
   std::string server_address = "127.0.0.1";
-  std::string app_resourse_folder = "";
-  EXPECT_EQ(config_folder, Profile::instance()->app_resourse_folder());
+  std::string app_resource_folder = "";
+  EXPECT_EQ(app_resource_folder, Profile::instance()->app_resource_folder());
   EXPECT_EQ(server_address, profile::Profile::instance()->server_address());
 
   Profile::instance()->config_file_name("smartDeviceLink.ini");
   EXPECT_EQ("smartDeviceLink.ini", Profile::instance()->config_file_name());
 
   // Check values
-  config_folder = file_system::CurrentWorkingDirectory();
-  EXPECT_EQ(config_folder, Profile::instance()->app_resourse_folder());
+  app_resource_folder = file_system::CurrentWorkingDirectory();
+  EXPECT_EQ(app_resource_folder, Profile::instance()->app_resource_folder());
   tts_delimiter_ = ",";
   EXPECT_EQ(tts_delimiter_, Profile::instance()->tts_delimiter());
   vr_help_title_ = "Available Vr Commands List";
   EXPECT_EQ(vr_help_title_, Profile::instance()->vr_help_title());
 
-  EXPECT_EQ(server_address, profile::Profile::instance()->server_address());
-  app_resourse_folder = file_system::CurrentWorkingDirectory();
-  EXPECT_EQ(app_resourse_folder, Profile::instance()->app_resourse_folder());
-
   // Update config file
-  profile::Profile::instance()->UpdateValues();
+  Profile::instance()->UpdateValues();
 
   // Values are the same
-  EXPECT_EQ(config_folder, Profile::instance()->app_resourse_folder());
+  EXPECT_EQ(app_resource_folder, Profile::instance()->app_resource_folder());
   EXPECT_EQ(tts_delimiter_, Profile::instance()->tts_delimiter());
   EXPECT_EQ(vr_help_title_, Profile::instance()->vr_help_title());
-  EXPECT_EQ(server_address, profile::Profile::instance()->server_address());
-  EXPECT_EQ(app_resourse_folder, Profile::instance()->app_resourse_folder());
+  EXPECT_EQ(server_address, Profile::instance()->server_address());
 }
 
 TEST_F(ProfileTest, UpdateInt_ValueAppearsInFileTwice) {
@@ -282,7 +279,7 @@ TEST_F(ProfileTest, UpdateBool_ValueAppearsInFileTwice) {
             Profile::instance()->config_file_name());
   // Update config file
   // First value is false
-  EXPECT_FALSE(profile::Profile::instance()->is_mixing_audio_supported());
+  EXPECT_FALSE(Profile::instance()->is_mixing_audio_supported());
 }
 
 TEST_F(ProfileTest, UpdateVectorOfString_ValueAppearsInFileTwice) {
@@ -326,7 +323,7 @@ TEST_F(ProfileTest, UpdatePairsValue) {
   EXPECT_EQ(value, Profile::instance()->get_vehicle_data_frequency());
 
   // Update config file
-  profile::Profile::instance()->UpdateValues();
+  Profile::instance()->UpdateValues();
   EXPECT_EQ(value, Profile::instance()->get_vehicle_data_frequency());
 }
 
@@ -349,7 +346,7 @@ TEST_F(ProfileTest, PairsValueEmpty) {
   EXPECT_EQ(value, Profile::instance()->read_did_frequency());
 
   // Update config file
-  profile::Profile::instance()->UpdateValues();
+  Profile::instance()->UpdateValues();
   // Values are same
   EXPECT_EQ(value, Profile::instance()->read_did_frequency());
 }
@@ -367,7 +364,7 @@ TEST_F(ProfileTest, CharValueInPairInsteadOfInt) {
   EXPECT_EQ(value, Profile::instance()->get_vehicle_data_frequency());
 
   // Update config file
-  profile::Profile::instance()->UpdateValues();
+  Profile::instance()->UpdateValues();
   // Values are same
   EXPECT_EQ(value, Profile::instance()->get_vehicle_data_frequency());
 }
@@ -383,12 +380,12 @@ TEST_F(ProfileTest, EmptyValuesInPair) {
   EXPECT_EQ(value, Profile::instance()->get_vehicle_data_frequency());
 
   // Update config file
-  profile::Profile::instance()->UpdateValues();
+  Profile::instance()->UpdateValues();
   // Values are same
   EXPECT_EQ(value, Profile::instance()->get_vehicle_data_frequency());
 }
 
-TEST_F(ProfileTest, DISABLED_IntInsteadOfPair) {
+TEST_F(ProfileTest, IntInsteadOfPair) {
   // Default values
   std::pair < uint32_t, int32_t > value;
   value.first = 0;
@@ -400,18 +397,18 @@ TEST_F(ProfileTest, DISABLED_IntInsteadOfPair) {
             Profile::instance()->config_file_name());
   // Ini file includes only one element
   value.first = 9;
-  value.second = 1000;
+  value.second = 0;
   EXPECT_EQ(value, Profile::instance()->start_stream_retry_amount());
 
   // Update config file
-  profile::Profile::instance()->UpdateValues();
+  Profile::instance()->UpdateValues();
   // Values are same
   EXPECT_EQ(value, Profile::instance()->start_stream_retry_amount());
 }
 
 TEST_F(ProfileTest, WrongIntValue) {
   // Default value
-  int32_t heart_beat_timeout = 0;
+  uint32_t heart_beat_timeout = 0;
   EXPECT_EQ(heart_beat_timeout, Profile::instance()->heart_beat_timeout());
 
   // Change config file
@@ -424,11 +421,11 @@ TEST_F(ProfileTest, WrongIntValue) {
   EXPECT_EQ(heart_beat_timeout, Profile::instance()->heart_beat_timeout());
 
   // Update config file
-  profile::Profile::instance()->UpdateValues();
+  Profile::instance()->UpdateValues();
   EXPECT_EQ(heart_beat_timeout, Profile::instance()->heart_beat_timeout());
 }
 
-TEST_F(ProfileTest, DISABLED_WrongMaxIntValue) {
+TEST_F(ProfileTest, WrongMaxIntValue) {
   // Default value
   uint32_t maxvalue = 2000000000;
   EXPECT_EQ(maxvalue, Profile::instance()->max_cmd_id());
@@ -443,11 +440,11 @@ TEST_F(ProfileTest, DISABLED_WrongMaxIntValue) {
   EXPECT_EQ(maxvalue, Profile::instance()->max_cmd_id());
 
   // Update config file
-  profile::Profile::instance()->UpdateValues();
+  Profile::instance()->UpdateValues();
   EXPECT_EQ(maxvalue, Profile::instance()->max_cmd_id());
 }
 
-TEST_F(ProfileTest, DISABLED_WrongMinIntValue) {
+TEST_F(ProfileTest, WrongMinIntValue) {
   // Default value
   uint32_t minvalue = threads::Thread::kMinStackSize;
   EXPECT_EQ(minvalue, Profile::instance()->thread_min_stack_size());
@@ -466,14 +463,14 @@ TEST_F(ProfileTest, DISABLED_WrongMinIntValue) {
   EXPECT_EQ(server_port, Profile::instance()->server_port());
 
   // Update config file
-  profile::Profile::instance()->UpdateValues();
+  Profile::instance()->UpdateValues();
 
   // Default value should be lefted
   EXPECT_EQ(minvalue, Profile::instance()->thread_min_stack_size());
   EXPECT_EQ(server_port, Profile::instance()->server_port());
 }
 
-TEST_F(ProfileTest, DISABLED_CheckCorrectValueWhenOtherValueInvalid) {
+TEST_F(ProfileTest, CheckCorrectValueWhenOtherValueInvalid) {
   // Default value
   uint32_t maxvalue = 2000000000;
   EXPECT_EQ(maxvalue, Profile::instance()->max_cmd_id());
@@ -497,7 +494,7 @@ TEST_F(ProfileTest, DISABLED_CheckCorrectValueWhenOtherValueInvalid) {
             Profile::instance()->thread_min_stack_size());
 
   // Update config file
-  profile::Profile::instance()->UpdateValues();
+  Profile::instance()->UpdateValues();
 
   // In file the number is bigger than can be, default value should be lefted
   EXPECT_EQ(maxvalue, Profile::instance()->max_cmd_id());
@@ -515,43 +512,41 @@ TEST_F(ProfileTest, PairsValueInsteadOfInt) {
   EXPECT_EQ(list_files_in_none, Profile::instance()->list_files_in_none());
 
   // Update config file
-  profile::Profile::instance()->UpdateValues();
+  Profile::instance()->UpdateValues();
   // Values are same
   EXPECT_EQ(list_files_in_none, Profile::instance()->list_files_in_none());
 }
 
-TEST_F(ProfileTest, DISABLED_StringValueIncludeSlashesAndRussianLetters) {
+TEST_F(ProfileTest, StringValueIncludeSlashesAndRussianLetters) {
   // Default values
   std::string config_folder = "";
-  EXPECT_EQ(config_folder, Profile::instance()->app_resourse_folder());
+  EXPECT_EQ(config_folder, Profile::instance()->app_resource_folder());
   std::string tts_delimiter_ = "";
-  std::string app_resourse_folder = "";
+  std::string app_resource_folder = "";
   std::string app_storage_folder = "";
 
+  std::string current_dir =  file_system::CurrentWorkingDirectory();
   Profile::instance()->config_file_name("smartDeviceLink_invalid_string.ini");
   EXPECT_EQ("smartDeviceLink_invalid_string.ini",
             Profile::instance()->config_file_name());
 
   // Check values
-  config_folder = "///";
-  EXPECT_EQ(config_folder, Profile::instance()->app_config_folder());
   tts_delimiter_ = "coma and point";
   EXPECT_EQ(tts_delimiter_, Profile::instance()->tts_delimiter());
   std::string server_address = "127.0.0.1 + слово";
   EXPECT_EQ(server_address, profile::Profile::instance()->server_address());
-  app_resourse_folder = "new folder/";
-  EXPECT_EQ(app_resourse_folder, Profile::instance()->app_resourse_folder());
-  app_storage_folder = "\" \"";
-  EXPECT_EQ(app_storage_folder, Profile::instance()->app_storage_folder());
+  app_resource_folder = "/new folder/";
+  EXPECT_EQ(current_dir+app_resource_folder, Profile::instance()->app_resource_folder());
+  app_storage_folder = "/\" \"";
+  EXPECT_EQ(current_dir+app_storage_folder, Profile::instance()->app_storage_folder());
 
   // Update config file
-  profile::Profile::instance()->UpdateValues();
+  Profile::instance()->UpdateValues();
 
   // Values are the same
-  EXPECT_EQ(config_folder, Profile::instance()->app_config_folder());
   EXPECT_EQ(tts_delimiter_, Profile::instance()->tts_delimiter());
   EXPECT_EQ(server_address, profile::Profile::instance()->server_address());
-  EXPECT_EQ(app_resourse_folder, Profile::instance()->app_resourse_folder());
+  EXPECT_EQ(current_dir+app_resource_folder, Profile::instance()->app_resource_folder());
 }
 
 TEST_F(ProfileTest, StringUpperBoundValue) {
@@ -574,7 +569,7 @@ TEST_F(ProfileTest, StringUpperBoundValue) {
       "0/0/0/1/2345678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-DEF_GHIJKL+MNO|PQR~STU{}WXY[]Z,01234567890a00012345678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-DEF_GHIJKL+MNO|PQR~STU{}WXY[]Z,01234567890a00012345678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-DEF_GHIJKL+MNO|PQR~STU{}WXY[]Z,01234567890a00012345678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-DEF_GHIJKL+MNO|PQR~STU{}WXY[]Z,01234567890a00012345678'90abc!def@ghi#jkl$mno%pqr^stu*vwx:yz()ABC-DEF_GHIJKL+MNO|PQR~STU{}WXY[]Z,01234567890abc";
   EXPECT_EQ(recording_file_name, Profile::instance()->recording_file_name());
   // Update config file
-  profile::Profile::instance()->UpdateValues();
+  Profile::instance()->UpdateValues();
   // Values are the same
   EXPECT_EQ(vr_help_title, Profile::instance()->vr_help_title());
   EXPECT_EQ(recording_file_name, Profile::instance()->recording_file_name());
@@ -583,15 +578,15 @@ TEST_F(ProfileTest, StringUpperBoundValue) {
 TEST_F(ProfileTest, CapitalLetterInBoolValue) {
   // Default values
   EXPECT_EQ("smartDeviceLink.ini", Profile::instance()->config_file_name());
-  EXPECT_TRUE(profile::Profile::instance()->launch_hmi());
-  EXPECT_FALSE(profile::Profile::instance()->enable_policy());
+  EXPECT_TRUE(Profile::instance()->launch_hmi());
+  EXPECT_FALSE(Profile::instance()->enable_policy());
 
   // Set config file
   Profile::instance()->config_file_name("smartDeviceLink.ini");
   // Check values
-  EXPECT_TRUE(profile::Profile::instance()->launch_hmi());
-  EXPECT_TRUE(profile::Profile::instance()->enable_policy());
-  EXPECT_FALSE(profile::Profile::instance()->is_redecoding_enabled());
+  EXPECT_TRUE(Profile::instance()->launch_hmi());
+  EXPECT_TRUE(Profile::instance()->enable_policy());
+  EXPECT_FALSE(Profile::instance()->is_redecoding_enabled());
 
   // Change config file
   Profile::instance()->config_file_name("smartDeviceLink_invalid_boolean.ini");
@@ -600,11 +595,11 @@ TEST_F(ProfileTest, CapitalLetterInBoolValue) {
 
   // Parameters after updating
   // Parameter launch_hmi = True
-  EXPECT_FALSE(profile::Profile::instance()->launch_hmi());
+  EXPECT_FALSE(Profile::instance()->launch_hmi());
   // EnablePolicy = TRUE
-  EXPECT_FALSE(profile::Profile::instance()->enable_policy());
+  EXPECT_FALSE(Profile::instance()->enable_policy());
   // EnableRedecoding = FALSE
-  EXPECT_FALSE(profile::Profile::instance()->is_redecoding_enabled());
+  EXPECT_FALSE(Profile::instance()->is_redecoding_enabled());
 }
 
 TEST_F(ProfileTest, CheckReadStringValue) {
@@ -613,38 +608,38 @@ TEST_F(ProfileTest, CheckReadStringValue) {
   EXPECT_EQ("smartDeviceLink_test.ini",
             Profile::instance()->config_file_name());
 
-  std::string app_resourse_folder_;
+  std::string app_storage_folder_;
   profile::Profile::instance()->ReadStringValue(
-      &app_resourse_folder_, file_system::CurrentWorkingDirectory().c_str(),
-      "MAIN", "AppResourceFolder");
+      &app_storage_folder_, file_system::CurrentWorkingDirectory().c_str(),
+      "MAIN", "AppStorageFolder");
   // Get default value
-  EXPECT_EQ(app_resourse_folder_, file_system::CurrentWorkingDirectory());
+  EXPECT_EQ("storage", app_storage_folder_);
 
   // Get value from file
   std::string server_address;
-  profile::Profile::instance()->ReadStringValue(&server_address, "", "HMI",
+  Profile::instance()->ReadStringValue(&server_address, "", "HMI",
                                                 "ServerAddress");
   EXPECT_EQ("127.0.0.1", server_address);
 }
 
-TEST_F(ProfileTest, DISABLED_CheckReadBoolValue) {
+TEST_F(ProfileTest, CheckReadBoolValue) {
   // Set new config file
   Profile::instance()->config_file_name("smartDeviceLink_test.ini");
   EXPECT_EQ("smartDeviceLink_test.ini",
             Profile::instance()->config_file_name());
 
   bool enable_policy;
-  profile::Profile::instance()->ReadBoolValue(&enable_policy, false, "Policy",
+  Profile::instance()->ReadBoolValue(&enable_policy, false, "Policy",
                                               "EnablePolicy");
   EXPECT_FALSE(enable_policy);
 
   // Change config back
-  profile::Profile::destroy();
+  Profile::destroy();
   EXPECT_EQ("smartDeviceLink.ini", Profile::instance()->config_file_name());
 
   //get default value
   bool launch_hmi;
-  profile::Profile::instance()->ReadBoolValue(&launch_hmi, true, "HMI",
+  Profile::instance()->ReadBoolValue(&launch_hmi, true, "HMI",
                                               "LaunchHMI");
   EXPECT_TRUE(launch_hmi);
 }
@@ -656,133 +651,133 @@ TEST_F(ProfileTest, CheckReadIntValue) {
             Profile::instance()->config_file_name());
 
   int server_port = 0;
-  profile::Profile::instance()->ReadIntValue(&server_port, 0, "HMI",
+  Profile::instance()->ReadIntValue(&server_port, 0, "HMI",
                                              "ServerPort");
 
   EXPECT_EQ(8088, server_port);
 }
 
-//TEST_F(ProfileTest, CheckIntContainer) {
-//  // Set new config file
-//  Profile::instance()->config_file_name("smartDeviceLink_test.ini");
-//  EXPECT_EQ("smartDeviceLink_test.ini",
-//            Profile::instance()->config_file_name());
+TEST_F(ProfileTest, CheckIntContainer) {
+  // Set new config file
+  Profile::instance()->config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini",
+            Profile::instance()->config_file_name());
 
-//  bool isread = false;
-//  std::vector<int> diagmodes_list =
-//      profile::Profile::instance()->ReadIntContainer("MAIN",
-//                                                     "SupportedDiagModes",
-//                                                     &isread);
-//  EXPECT_TRUE(isread);
+  bool isread = false;
+  std::vector<int> diagmodes_list =
+      Profile::instance()->ReadIntContainer("MAIN",
+                                                     "SupportedDiagModes",
+                                                     &isread);
+  EXPECT_TRUE(isread);
 
-//  std::vector<int>::iterator diag_mode = std::find(diagmodes_list.begin(),
-//                                                 diagmodes_list.end(), 0x12);
+  std::vector<int>::iterator diag_mode = std::find(diagmodes_list.begin(),
+                                                 diagmodes_list.end(), 0x12);
 
-//  // This element doesn't appear in list
-//  EXPECT_EQ(diag_mode, diagmodes_list.end());
+  // This element doesn't appear in list
+  EXPECT_EQ(diag_mode, diagmodes_list.end());
 
-//  // List includes 0x01
-//  diag_mode = std::find(diagmodes_list.begin(), diagmodes_list.end(), 0x01);
-//  EXPECT_EQ(diag_mode, diagmodes_list.begin());
+  // List includes 0x01
+  diag_mode = std::find(diagmodes_list.begin(), diagmodes_list.end(), 0x01);
+  EXPECT_EQ(diag_mode, diagmodes_list.begin());
 
-//  // List includes 0x03
-//  std::vector<int>::iterator element_mode = diagmodes_list.begin();
-//  element_mode++;
-//  element_mode++;
+  // List includes 0x03
+  std::vector<int>::iterator element_mode = diagmodes_list.begin();
+  element_mode++;
+  element_mode++;
 
-//  diag_mode = std::find(diagmodes_list.begin(), diagmodes_list.end(), 0x03);
-//  EXPECT_EQ(diag_mode, element_mode);
-//}
+  diag_mode = std::find(diagmodes_list.begin(), diagmodes_list.end(), 0x03);
+  EXPECT_EQ(diag_mode, element_mode);
+}
 
-//TEST_F(ProfileTest, CheckVectorContainer) {
-//  Profile::instance()->config_file_name("smartDeviceLink_test.ini");
-//  EXPECT_EQ("smartDeviceLink_test.ini",
-//            Profile::instance()->config_file_name());
+TEST_F(ProfileTest, CheckVectorContainer) {
+  Profile::instance()->config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini",
+            Profile::instance()->config_file_name());
 
-//  // Get diag_modes after updating
-//  const std::vector<uint32_t> &diag_modes = profile::Profile::instance()
-//      ->supported_diag_modes();
+  // Get diag_modes after updating
+  const std::vector<uint32_t> &diag_modes = Profile::instance()
+      ->supported_diag_modes();
 
-//  bool isread = false;
-//  std::vector<int> diagmodes_list =
-//      profile::Profile::instance()->ReadIntContainer("MAIN",
-//                                                     "SupportedDiagModes",
-//                                                     &isread);
-//  EXPECT_TRUE(isread);
-//  // Compare with result of ReadIntContainer
-//  ASSERT_EQ(diag_modes.size(), diagmodes_list.size());
-//  bool isEqual = true;
-//  std::vector<int>::iterator iter = diagmodes_list.begin();
+  bool isread = false;
+  std::vector<int> diagmodes_list =
+      Profile::instance()->ReadIntContainer("MAIN",
+                                                     "SupportedDiagModes",
+                                                     &isread);
+  EXPECT_TRUE(isread);
+  // Compare with result of ReadIntContainer
+  ASSERT_EQ(diag_modes.size(), diagmodes_list.size());
+  bool isEqual = true;
+  std::vector<int>::iterator iter = diagmodes_list.begin();
 
-//  for (std::vector<uint32_t>::const_iterator it = diag_modes.begin();
-//      it != diag_modes.end(); it++) {
+  for (std::vector<uint32_t>::const_iterator it = diag_modes.begin();
+      it != diag_modes.end(); it++) {
 
-//    if ((uint32_t)(*iter) != (*it)) {
-//      isEqual = false;
-//      break;
-//    }
-//    iter++;
-//  }
-//  EXPECT_TRUE(isEqual);
-//}
+    if ((uint32_t)(*iter) != (*it)) {
+      isEqual = false;
+      break;
+    }
+    iter++;
+  }
+  EXPECT_TRUE(isEqual);
+}
 
-//TEST_F(ProfileTest, CheckStringContainer) {
-//  // Set new config file
-//  Profile::instance()->config_file_name("smartDeviceLink_test.ini");
-//  EXPECT_EQ("smartDeviceLink_test.ini",
-//            Profile::instance()->config_file_name());
+TEST_F(ProfileTest, CheckStringContainer) {
+  // Set new config file
+  Profile::instance()->config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini",
+            Profile::instance()->config_file_name());
 
-//  bool isread = false;
-//  std::vector < std::string > diagmodes_list = profile::Profile::instance()
-//      ->ReadStringContainer("MAIN", "SupportedDiagModes", &isread);
-//  EXPECT_TRUE(isread);
+  bool isread = false;
+  std::vector < std::string > diagmodes_list = Profile::instance()
+      ->ReadStringContainer("MAIN", "SupportedDiagModes", &isread);
+  EXPECT_TRUE(isread);
 
-//  std::vector<std::string>::iterator diag_mode =
-//      std::find(diagmodes_list.begin(), diagmodes_list.end(), "0x12");
+  std::vector<std::string>::iterator diag_mode =
+      std::find(diagmodes_list.begin(), diagmodes_list.end(), "0x12");
 
-//  // This element doesn't appear in list
-//  EXPECT_EQ(diag_mode, diagmodes_list.end());
+  // This element doesn't appear in list
+  EXPECT_EQ(diag_mode, diagmodes_list.end());
 
-//  // List includes 0x01
-//  diag_mode = std::find(diagmodes_list.begin(), diagmodes_list.end(), "0x01");
-//  EXPECT_EQ(diag_mode, diagmodes_list.begin());
+  // List includes 0x01
+  diag_mode = std::find(diagmodes_list.begin(), diagmodes_list.end(), "0x01");
+  EXPECT_EQ(diag_mode, diagmodes_list.begin());
 
-//  // List includes 0x03
-//  std::vector<std::string>::iterator element_mode = diagmodes_list.begin();
-//  element_mode++;
-//  element_mode++;
-//  diag_mode = std::find(diagmodes_list.begin(), diagmodes_list.end(), " 0x03");
-//  EXPECT_EQ(diag_mode, element_mode);
-//}
+  // List includes 0x03
+  std::vector<std::string>::iterator element_mode = diagmodes_list.begin();
+  element_mode++;
+  element_mode++;
+  diag_mode = std::find(diagmodes_list.begin(), diagmodes_list.end(), " 0x03");
+  EXPECT_EQ(diag_mode, element_mode);
+}
 
-//#ifdef ENABLE_SECURITY
-//TEST_F(ProfileTest, CheckIntContainerInSecurityData) {
-//  // Set new config file
-//  Profile::instance()->config_file_name("smartDeviceLink_test.ini");
-//  EXPECT_EQ("smartDeviceLink_test.ini",
-//      Profile::instance()->config_file_name());
+#ifdef ENABLE_SECURITY
+TEST_F(ProfileTest, CheckIntContainerInSecurityData) {
+  // Set new config file
+  Profile::instance()->config_file_name("smartDeviceLink_test.ini");
+  EXPECT_EQ("smartDeviceLink_test.ini",
+      Profile::instance()->config_file_name());
 
-//  std::vector<int> force_unprotected_list =
-//  profile::Profile::instance()->ReadIntContainer(
-//      "Security Manager", "ForceUnprotectedService", NULL);
+  std::vector<int> force_unprotected_list =
+  Profile::instance()->ReadIntContainer(
+      "Security Manager", "ForceUnprotectedService", NULL);
 
-//  std::vector<int> force_protected_list =
-//  profile::Profile::instance()->ReadIntContainer(
-//      "Security Manager", "ForceProtectedService", NULL);
+  std::vector<int> force_protected_list =
+  Profile::instance()->ReadIntContainer(
+      "Security Manager", "ForceProtectedService", NULL);
 
-//  std::vector<int>::iterator res_unprotect = std::find(force_unprotected_list.begin(), force_unprotected_list.end(), 0x07);
-//  std::vector<int>::iterator res_protect = std::find(force_protected_list.begin(), force_protected_list.end(), 0x07);
-//  // This element doesn't appear in both lists
-//  EXPECT_EQ(res_unprotect, force_unprotected_list.end() );
-//  EXPECT_EQ(res_protect, force_protected_list.end() );
+  std::vector<int>::iterator res_unprotect = std::find(force_unprotected_list.begin(), force_unprotected_list.end(), 0x07);
+  std::vector<int>::iterator res_protect = std::find(force_protected_list.begin(), force_protected_list.end(), 0x07);
+  // This element doesn't appear in both lists
+  EXPECT_EQ(res_unprotect, force_unprotected_list.end() );
+  EXPECT_EQ(res_protect, force_protected_list.end() );
 
-//  // Both lists include 0
-//  res_unprotect = std::find(force_unprotected_list.begin(), force_unprotected_list.end(), 0);
-//  res_protect = std::find(force_protected_list.begin(), force_protected_list.end(), 0);
-//  EXPECT_EQ(res_unprotect, force_unprotected_list.begin() );
-//  EXPECT_EQ(res_protect, force_protected_list.begin() );
-//}
-//#endif
+  // Both lists include 0
+  res_unprotect = std::find(force_unprotected_list.begin(), force_unprotected_list.end(), 0);
+  res_protect = std::find(force_protected_list.begin(), force_protected_list.end(), 0);
+  EXPECT_EQ(res_unprotect, force_unprotected_list.begin() );
+  EXPECT_EQ(res_protect, force_protected_list.begin() );
+}
+#endif
 
 } // namespace profile
 } // namespace components

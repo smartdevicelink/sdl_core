@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,11 +40,21 @@ namespace test {
 namespace components {
 namespace transport_manager_test {
 
-using namespace transport_manager;
-using transport_adapter::TransportAdapter;
-using transport_adapter::TransportAdapterListener;
+namespace tm = transport_manager;
+namespace ta = tm::transport_adapter;
+using ta::TransportAdapter;
+using ta::TransportAdapterListener;
+using tm::SearchDeviceError;
+using tm::DeviceUID;
+using tm::ApplicationHandle;
+using tm::ConnectError;
+using tm::CommunicationError;
+using tm::DisconnectError;
+using tm::DisconnectDeviceError;
+using tm::DataSendError;
+using tm::DataReceiveError;
 
-class TransportAdapterListenerMock : public TransportAdapterListener {
+class MockTransportAdapterListener : public TransportAdapterListener {
  public:
   MOCK_METHOD1(OnSearchDeviceDone,
                void(const TransportAdapter* transport_adapter));

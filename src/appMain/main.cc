@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -65,7 +65,7 @@
 // ----------------------------------------------------------------------------
 
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "appMain")
+CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
 
 namespace {
 
@@ -83,7 +83,7 @@ bool InitHmi() {
   std::string hmi_link = profile::Profile::instance()->link_to_web_hmi();
   struct stat sb;
   if (stat(hmi_link.c_str(), &sb) == -1) {
-    LOG4CXX_FATAL(logger_, "HMI index.html doesn't exist!");
+    LOG4CXX_FATAL(logger_, "HMI index file " << hmi_link << " doesn't exist!");
     return false;
   }
   return utils::System(kBrowser, kBrowserName).Add(kBrowserParams).Add(hmi_link)
@@ -117,15 +117,22 @@ bool InitHmi() {
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
 int32_t main(int32_t argc, char** argv) {
+  // Unsibscribe once for all threads
+  if (!utils::UnsibscribeFromTermination()) {
+    // Can't use internal logger here
+    exit(EXIT_FAILURE);
+  }
 
   // --------------------------------------------------------------------------
+  if ((argc > 1)&&(0 != argv)) {
+    profile::Profile::instance()->config_file_name(argv[1]);
+  } else {
+    profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
+  }
+
   // Logger initialization
-  INIT_LOGGER("log4cxx.properties");
-#if defined(__QNXNTO__) and defined(GCOV_ENABLED)
-  LOG4CXX_WARN(logger_,
-                "Attention! This application was built with unsupported "
-                "configuration (gcov + QNX). Use it at your own risk.");
-#endif
+  INIT_LOGGER("log4cxx.properties",
+              profile::Profile::instance()->logs_enabled());
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
@@ -137,29 +144,8 @@ int32_t main(int32_t argc, char** argv) {
   LOG4CXX_INFO(logger_, "SDL version: "
                          << profile::Profile::instance()->sdl_version());
 
-  // Initialize gstreamer. Needed to activate debug from the command line.
-#if defined(EXTENDED_MEDIA_MODE)
-  gst_init(&argc, &argv);
-#endif
-
   // --------------------------------------------------------------------------
   // Components initialization
-  if ((argc > 1)&&(0 != argv)) {
-      profile::Profile::instance()->config_file_name(argv[1]);
-  } else {
-      profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
-  }
-
-#ifdef __QNX__
-  if (profile::Profile::instance()->enable_policy()) {
-    if (!utils::System("./init_policy.sh").Execute(true)) {
-      LOG4CXX_FATAL(logger_, "Failed to init policy database");
-      DEINIT_LOGGER();
-      exit(EXIT_FAILURE);
-    }
-  }
-#endif  // __QNX__
-
   if (!main_namespace::LifeCycle::instance()->StartComponents()) {
     LOG4CXX_FATAL(logger_, "Failed to start components");
     main_namespace::LifeCycle::instance()->StopComponents();

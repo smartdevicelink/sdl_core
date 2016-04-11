@@ -53,7 +53,7 @@ void SendLocationRequest::Run() {
       ->application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR_EXT(logger_,
+    LOG4CXX_ERROR(logger_,
                       "An application with connection key " << connection_key()
                       << " is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -109,7 +109,7 @@ void SendLocationRequest::Run() {
 }
 
 void SendLocationRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "SendLocationRquest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_SendLocation: {
@@ -132,7 +132,7 @@ void SendLocationRequest::on_event(const event_engine::Event& event) {
 }
 
 bool SendLocationRequest::IsWhiteSpaceExist() {
-  LOG4CXX_INFO(logger_, "SendLocationRquest::IsWhiteSpaceExist");
+  LOG4CXX_AUTO_TRACE(logger_);
   const char* str;
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
@@ -202,7 +202,7 @@ bool SendLocationRequest::CheckHMICapabilities(std::list<hmi_apis::Common_TextFi
   ApplicationManagerImpl* instance = ApplicationManagerImpl::instance();
   const HMICapabilities& hmi_capabilities = instance->hmi_capabilities();
   if (!hmi_capabilities.is_ui_cooperating()) {
-    LOG4CXX_ERROR_EXT(logger_, "UI is not supported.");
+    LOG4CXX_ERROR(logger_, "UI is not supported.");
     return false;
   }
 
@@ -223,7 +223,7 @@ bool SendLocationRequest::CheckHMICapabilities(std::list<hmi_apis::Common_TextFi
   }
 
   if (!fields_names.empty()) {
-    LOG4CXX_ERROR_EXT(logger_, "Some fields are not supported by capabilities");
+    LOG4CXX_ERROR(logger_, "Some fields are not supported by capabilities");
     return false;
   }
   return true;

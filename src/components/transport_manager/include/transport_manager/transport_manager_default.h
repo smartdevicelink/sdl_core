@@ -40,6 +40,10 @@
 
 #include "transport_manager/transport_manager_impl.h"
 
+namespace resumption {
+class LastState;
+}
+
 namespace transport_manager {
 
 /**
@@ -53,7 +57,7 @@ class TransportManagerDefault : public TransportManagerImpl,
    *
    * @return Code error.
    */
-  virtual int Init();
+  int Init(resumption::LastState &last_state) OVERRIDE;
 
   /**
    * @brief Destructor.

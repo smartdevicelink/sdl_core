@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_PACKET_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_PACKET_H_
 
+#include <list>
 #include "utils/macro.h"
 #include "protocol/common.h"
 #include "transport_manager/common.h"
@@ -199,9 +200,11 @@ class ProtocolPacket {
   uint8_t service_type() const;
 
   /**
-   *\brief Getter of frame data (start/end session, number of frame etc)
+   *\brief Getter and setter of frame data (start/end session, number of frame etc)
    */
   uint8_t frame_data() const;
+
+  void set_frame_data(const uint8_t frame_data);
 
   /**
    *\brief Getter of session number
@@ -243,12 +246,17 @@ class ProtocolPacket {
   /**
     * \brief Getter for Connection Identifier
     */
-  uint8_t connection_id() const;
+  ConnectionID connection_id() const;
 
   /**
     * \brief Getter for data payload size
     */
   uint32_t payload_size() const;
+
+  /**
+    * \brief Getter for full header information
+    */
+  const ProtocolHeader& packet_header() const;
 
  private:
   /**
@@ -279,4 +287,36 @@ class ProtocolPacket {
  * @brief Type definition for variable that hold shared pointer to protocolol packet
  */
 typedef utils::SharedPtr<protocol_handler::ProtocolPacket> ProtocolFramePtr;
+typedef std::list<ProtocolFramePtr>                        ProtocolFramePtrList;
+
+template<typename _CharT>
+std::basic_ostream<_CharT>& operator<<(std::basic_ostream<_CharT>& stream,
+                                       const protocol_handler::ProtocolPacket::ProtocolHeader& header) {
+  stream << "Version: "       << static_cast<uint32_t>(header.version) <<
+            ", Protection: "  << (header.protection_flag ? "ON" : "OFF") <<
+            ", FrameType: "   << static_cast<uint32_t>(header.frameType) <<
+            ", ServiceType: " << static_cast<uint32_t>(header.serviceType) <<
+            ", FrameData: "   << static_cast<uint32_t>(header.frameData) <<
+            ", SessionId: "   << static_cast<uint32_t>(header.sessionId) <<
+            ", DataSize: "    << static_cast<uint32_t>(header.dataSize) <<
+            ", MessageId: "   << static_cast<uint32_t>(header.messageId);
+  return stream;
+}
+template<typename _CharT>
+std::basic_ostream<_CharT>& operator<<(std::basic_ostream<_CharT>& stream,
+                                       const protocol_handler::ProtocolPacket& packet) {
+  stream << packet.packet_header() <<
+            ", ConnectionID: "   << static_cast<uint32_t>(packet.connection_id()) <<
+            ", TotalDataBytes: " << (packet.total_data_bytes()) <<
+            ", Data: "           << static_cast<void*>(packet.data());
+  return stream;
+}
+template<typename _CharT>
+std::basic_ostream<_CharT>& operator<<(std::basic_ostream<_CharT>& stream,
+                                       const ProtocolFramePtr packet_ptr) {
+  if(packet_ptr) {
+    return stream << *packet_ptr;
+  }
+  return stream << "empty smart pointer";
+}
 #endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_PACKET_H_

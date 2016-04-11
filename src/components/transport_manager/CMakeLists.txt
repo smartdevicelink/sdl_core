@@ -60,11 +60,6 @@ set (SOURCES
   ${TM_SRC_DIR}/tcp/tcp_connection_factory.cc
 )
 
-if (BUILD_AVAHI_SUPPORT)
-  list (APPEND SOURCES
-  ${TM_SRC_DIR}/tcp/dnssd_service_browser.cc
-  )
-endif()
 if (BUILD_BT_SUPPORT)
   list (APPEND SOURCES
   ${TM_SRC_DIR}/bluetooth/bluetooth_device_scanner.cc
@@ -108,11 +103,6 @@ if (BUILD_USB_SUPPORT)
     target_link_libraries(${target} usbdi)
   endif()
 endif(BUILD_USB_SUPPORT)
-
-
-if (BUILD_AVAHI_SUPPORT)
-  target_link_libraries(${target} avahi-common)
-endif()
 
 if(ENABLE_LOG)
   target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})

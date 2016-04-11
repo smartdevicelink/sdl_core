@@ -60,7 +60,7 @@ class DialNumberRequest : public CommandRequestImpl {
    **/
    bool Init() OVERRIDE;
 
-  /**
+ /**
    * @brief Execute command
    **/
   void Run() OVERRIDE;

@@ -52,8 +52,8 @@
 #include "transport_manager/transport_manager_default.h"
 #include "media_manager/media_manager_impl.h"
 #include "utils/singleton.h"
-#ifdef TIME_TESTER
-#include "time_tester/time_manager.h"
+#ifdef TELEMETRY_MONITOR
+#include "telemetry_monitor/telemetry_monitor.h"
 #endif
 
 //#if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
@@ -90,7 +90,7 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
 
   private:
     LifeCycle();
-    transport_manager::TransportManager* transport_manager_;
+    transport_manager::TransportManagerImpl* transport_manager_;
     protocol_handler::ProtocolHandlerImpl* protocol_handler_;
     connection_handler::ConnectionHandlerImpl* connection_handler_;
     application_manager::ApplicationManagerImpl* app_manager_;
@@ -98,12 +98,13 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     security_manager::CryptoManager* crypto_manager_;
     security_manager::SecurityManager* security_manager_;
 #endif  // ENABLE_SECURITY
-    hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
-    hmi_message_handler::HMIMessageAdapter* hmi_message_adapter_;
-    media_manager::MediaManagerImpl* media_manager_;
-#ifdef TIME_TESTER
-    time_tester::TimeManager* time_tester_;
-#endif  // TIME_TESTER
+  hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
+  hmi_message_handler::HMIMessageAdapter* hmi_message_adapter_;
+  media_manager::MediaManagerImpl* media_manager_;
+  resumption::LastState* last_state_;
+#ifdef TELEMETRY_MONITOR
+    telemetry_monitor::TelemetryMonitor* telemetry_monitor_;
+#endif  // TELEMETRY_MONITOR
 #ifdef DBUS_HMIADAPTER
     hmi_message_handler::DBusMessageAdapter* dbus_adapter_;
     System::Thread* dbus_adapter_thread_;
@@ -119,7 +120,6 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
 #endif  // MESSAGEBROKER_HMIADAPTER
 
 
-    bool components_started_;
     FRIEND_BASE_SINGLETON_CLASS(LifeCycle);
     DISALLOW_COPY_AND_ASSIGN(LifeCycle);
 };

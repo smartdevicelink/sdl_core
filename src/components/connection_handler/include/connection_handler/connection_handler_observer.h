@@ -38,6 +38,10 @@
 #include "connection_handler/connection_handler.h"
 #include "protocol/service_type.h"
 
+#ifdef ENABLE_SECURITY
+#include "security_manager/ssl_context.h"
+#endif // ENABLE_SECURITY
+
 /**
  * \namespace connection_handler
  * \brief SmartDeviceLink connection_handler namespace.
@@ -100,6 +104,10 @@ class ConnectionHandlerObserver {
       const protocol_handler::ServiceType& type,
       const connection_handler::CloseSessionReason& close_reason) = 0;
 
+#ifdef ENABLE_SECURITY
+  virtual security_manager::SSLContext::HandshakeContext
+  GetHandshakeContext(uint32_t key) const = 0;
+#endif // ENABLE_SECURITY
  protected:
   /**
    * \brief Destructor

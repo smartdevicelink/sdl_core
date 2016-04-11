@@ -42,6 +42,10 @@
 #include "json/features.h"
 #include "json/writer.h"
 #include "utils/logger.h"
+#include "utils/gen_hash.h"
+#include "utils/macro.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
 
 #  include "policy/sql_pt_representation.h"
 
@@ -49,7 +53,7 @@ namespace policy_table = rpc::policy_table_interface_base;
 
 namespace policy {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "CacheManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
 #define CACHE_MANAGER_CHECK(return_value) {\
   if (!pt_) {\
@@ -79,9 +83,8 @@ private:
 
 CacheManager::CacheManager()
   : CacheManagerInterface(),
-    backup_(
-                     new SQLPTRepresentation()
-    ),
+    pt_(new policy_table::Table),
+    backup_(new SQLPTRepresentation()),
     update_required(false) {
 
   LOG4CXX_AUTO_TRACE(logger_);
@@ -98,15 +101,15 @@ CacheManager::~CacheManager() {
   threads::DeleteThread(backup_thread_);
 }
 
-bool CacheManager::CanAppKeepContext(const std::string &app_id) {
+bool CacheManager::CanAppKeepContext(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(false);
   bool result = true;
   return result;
 }
 
-uint16_t CacheManager::HeartBeatTimeout(const std::string &app_id) const {
+uint32_t CacheManager::HeartBeatTimeout(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(0);
-  uint16_t result = 0;
+  uint32_t result = 0;
   if (AppExists(app_id)) {
     if (pt_->policy_table.app_policies_section.apps[app_id].heart_beat_timeout_ms
         .is_initialized()) {
@@ -116,14 +119,16 @@ uint16_t CacheManager::HeartBeatTimeout(const std::string &app_id) const {
   return result;
 }
 
-bool CacheManager::CanAppStealFocus(const std::string &app_id) {
+
+bool CacheManager::CanAppStealFocus(const std::string& app_id) const {
   CACHE_MANAGER_CHECK(false);
   bool result = true;
   return result;
 }
 
-bool CacheManager::GetDefaultHMI(const std::string &app_id,
-                                 std::string& default_hmi) {
+
+bool CacheManager::GetDefaultHMI(const std::string& app_id,
+                                 std::string& default_hmi) const {
   CACHE_MANAGER_CHECK(false);
   bool result = true;
   return result;
@@ -138,7 +143,7 @@ bool CacheManager::ResetUserConsent() {
 
 bool CacheManager::GetUserPermissionsForDevice(const std::string &device_id,
                                                StringArray& consented_groups,
-                                               StringArray& disallowed_groups) {
+                                               StringArray& disallowed_groups) const {
 
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK(false);
@@ -150,19 +155,9 @@ void CacheManager::GetAllAppGroups(const std::string& app_id,
 
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK_VOID();
+
   if (kDeviceId == app_id) {
-    policy_table::DevicePolicy& device =
-        pt_->policy_table.app_policies_section.device;
-
-    policy_table::Strings::const_iterator iter = device.groups.begin();
-    policy_table::Strings::const_iterator iter_end = device.groups.end();
-
-    for (; iter != iter_end; ++iter) {
-      const uint32_t group_id =
-          static_cast<uint32_t> ((GenerateHash(*iter)));
-      all_group_ids.push_back(group_id);
-    }
-
+    LOG4CXX_INFO(logger_, "Devices doesn't have groups");
     return;
   }
 
@@ -303,9 +298,19 @@ bool CacheManager::GetPermissionsForApp(const std::string &device_id,
 
 bool CacheManager::GetDeviceGroupsFromPolicies(
   policy_table::Strings& groups,
-  policy_table::Strings& preconsented_groups) {
+  policy_table::Strings& preconsented_groups) const {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK(false);
+  return true;
+}
+
+bool CacheManager::AddDevice(const std::string& device_id,
+                             const std::string& connection_type) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  sync_primitives::AutoLock auto_lock(cache_lock_);
+  CACHE_MANAGER_CHECK(false);
+  Backup();
   return true;
 }
 
@@ -478,9 +483,11 @@ int CacheManager::KilometersBeforeExchange(int current) {
   return std::max(limit - actual, 0);
 }
 
-bool CacheManager::SetCountersPassedForSuccessfulUpdate(int kilometers,
-                                                        int days_after_epoch) {
+bool CacheManager::SetCountersPassedForSuccessfulUpdate(policy::Counters counter,
+                                                        int value) {
   CACHE_MANAGER_CHECK(false);
+  UNUSED(counter);
+  UNUSED(value);
   Backup();
   return true;
 }
@@ -530,13 +537,23 @@ bool CacheManager::SecondsBetweenRetries(std::vector<int>& seconds) {
   return true;
 }
 
-VehicleData CacheManager::GetVehicleData() {
-  // TODO(AGaliuzov): maybe should be removed.
-  return VehicleData();
+const policy::VehicleInfo CacheManager::GetVehicleInfo() const {
+  CACHE_MANAGER_CHECK(VehicleInfo());
+  policy_table::ModuleConfig& module_config =
+      pt_->policy_table.module_config;
+  VehicleInfo vehicle_info;
+  vehicle_info.vehicle_make = *module_config.vehicle_make;
+  vehicle_info.vehicle_model = *module_config.vehicle_model;
+  vehicle_info.vehicle_year = *module_config.vehicle_year;
+  LOG4CXX_DEBUG(logger_, "Vehicle info (make, model, year):"
+                << vehicle_info.vehicle_make << ","
+                << vehicle_info.vehicle_model << ","
+                << vehicle_info.vehicle_year );
+  return vehicle_info;
 }
 
 std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
-    const std::vector<std::string> &msg_codes, const std::string &language) {
+    const std::vector<std::string>& msg_codes, const std::string& language) {
 
   LOG4CXX_AUTO_TRACE(logger_);
   std::vector<UserFriendlyMessage> result;
@@ -623,7 +640,7 @@ std::string CacheManager::GetLockScreenIconUrl() const {
   return std::string ("");
 }
 
-int CacheManager::GetNotificationsNumber(const std::string &priority) {
+rpc::policy_table_interface_base::NumberOfNotificationsType CacheManager::GetNotificationsNumber(const std::string& priority) {
   CACHE_MANAGER_CHECK(0);
   typedef rpc::policy_table_interface_base::NumberOfNotificationsPerMinute NNPM;
 
@@ -632,12 +649,13 @@ int CacheManager::GetNotificationsNumber(const std::string &priority) {
 
   NNPM::const_iterator priority_iter = nnpm.find(priority);
 
-  const int result = (nnpm.end() != priority_iter ? (*priority_iter).second : 0);
+  const rpc::policy_table_interface_base::NumberOfNotificationsType result =
+      (nnpm.end() != priority_iter ? (*priority_iter).second : 0u);
   return result;
 }
 
-bool CacheManager::GetPriority(const std::string &policy_app_id,
-                               std::string &priority) {
+bool CacheManager::GetPriority(const std::string& policy_app_id,
+                               std::string& priority) const {
   CACHE_MANAGER_CHECK(false);
   if (kDeviceId == policy_app_id) {
     priority = EnumToJsonString(
@@ -666,6 +684,92 @@ void CacheManager::CheckSnapshotInitialization() {
   }
 
   *(snapshot_->policy_table.module_config.preloaded_pt) = false;
+
+  // SDL must not send certificate in snapshot
+  snapshot_->policy_table.module_config.certificate =
+      rpc::Optional<rpc::String<0, 65535> >();
+
+  /* consumer_friendly_messages are required for the snapshot;
+   * consumer_friendly_messages->version is required always, but
+   * consumer_friendly_messages->messages must be omitted in PTS */
+  if( snapshot_->policy_table.consumer_friendly_messages->is_initialized() ) {
+    snapshot_->policy_table.consumer_friendly_messages->messages =
+        rpc::Optional<policy_table::Messages>();
+  } else {
+    LOG4CXX_WARN(logger_, "policy_table.consumer_friendly_messages is not initialized");
+  }
+
+  /* policy_table.usage_and_error_counts are required for PTS and
+   * policy_table.usage_and_error_counts->app_level is optional */
+  rpc::Optional<policy_table::UsageAndErrorCounts>& usage_and_error_counts =
+      snapshot_->policy_table.usage_and_error_counts;
+
+  if (usage_and_error_counts->is_initialized() &&
+      usage_and_error_counts->app_level->is_initialized()) {
+    policy_table::AppLevels::iterator it =
+        usage_and_error_counts->app_level->begin();
+    policy_table::AppLevels::const_iterator it_end =
+        usage_and_error_counts->app_level->end();
+    for (;it != it_end; ++it) {
+      if (!(*it).second.minutes_in_hmi_full.is_initialized()) {
+        (*it).second.minutes_in_hmi_full = 0;
+      }
+
+      if (!(*it).second.app_registration_language_gui.is_initialized()) {
+        (*it).second.app_registration_language_gui = "unknown";
+      }
+
+      if (!(*it).second.app_registration_language_vui.is_initialized()) {
+        (*it).second.app_registration_language_vui = "unknown";
+      }
+
+      if (!(*it).second.minutes_in_hmi_limited.is_initialized()) {
+        (*it).second.minutes_in_hmi_limited = 0;
+      }
+
+      if (!(*it).second.minutes_in_hmi_background.is_initialized()) {
+        (*it).second.minutes_in_hmi_background = 0;
+      }
+
+      if (!(*it).second.minutes_in_hmi_none.is_initialized()) {
+        (*it).second.minutes_in_hmi_none = 0;
+      }
+
+      if (!(*it).second.count_of_user_selections.is_initialized()) {
+        (*it).second.count_of_user_selections = 0;
+      }
+
+      if (!(*it).second.count_of_rejections_sync_out_of_memory.is_initialized()) {
+        (*it).second.count_of_rejections_sync_out_of_memory = 0;
+      }
+
+      if (!(*it).second.count_of_rejections_nickname_mismatch.is_initialized()) {
+        (*it).second.count_of_rejections_nickname_mismatch = 0;
+      }
+
+      if (!(*it).second.count_of_rejections_duplicate_name.is_initialized()) {
+        (*it).second.count_of_rejections_duplicate_name = 0;
+      }
+
+      if (!(*it).second.count_of_rejected_rpc_calls.is_initialized()) {
+        (*it).second.count_of_rejected_rpc_calls = 0;
+      }
+
+      if (!(*it).second.count_of_rpcs_sent_in_hmi_none.is_initialized()) {
+        (*it).second.count_of_rpcs_sent_in_hmi_none = 0;
+      }
+
+      if (!(*it).second.count_of_removals_for_bad_behavior.is_initialized()) {
+        (*it).second.count_of_removals_for_bad_behavior = 0;
+      }
+
+      if (!(*it).second.count_of_run_attempts_while_revoked.is_initialized()) {
+        (*it).second.count_of_run_attempts_while_revoked = 0;
+      }
+    }
+  } else {
+    LOG4CXX_WARN(logger_, "usage_and_error_counts or app_level is not initialized");
+  }
 }
 
 void CacheManager::PersistData() {
@@ -723,7 +827,7 @@ void CacheManager::PersistData() {
 }
 
 void CacheManager::ResetCalculatedPermissions() {
-  LOG4CXX_TRACE(logger_, "ResetCalculatedPermissions");
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(calculated_permissions_lock_);
   calculated_permissions_.clear();
 }
@@ -895,6 +999,48 @@ void CacheManager::Increment(usage_statistics::GlobalCounterId type) {
 void CacheManager::Increment(const std::string &app_id,
                              usage_statistics::AppCounterId type) {
   CACHE_MANAGER_CHECK_VOID();
+  sync_primitives::AutoLock lock (cache_lock_);
+  switch (type) {
+    case usage_statistics::USER_SELECTIONS:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_user_selections;
+      break;
+    case usage_statistics::REJECTIONS_SYNC_OUT_OF_MEMORY:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_rejections_sync_out_of_memory;
+      break;
+    case usage_statistics::REJECTIONS_NICKNAME_MISMATCH:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_rejections_nickname_mismatch;
+      break;
+    case usage_statistics::REJECTIONS_DUPLICATE_NAME:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_rejections_duplicate_name;
+      break;
+    case usage_statistics::REJECTED_RPC_CALLS:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_rejected_rpc_calls;
+      break;
+    case usage_statistics::RPCS_IN_HMI_NONE:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_rpcs_sent_in_hmi_none;
+      break;
+    case usage_statistics::REMOVALS_MISBEHAVED:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_removals_for_bad_behavior;
+      break;
+    case usage_statistics::RUN_ATTEMPTS_WHILE_REVOKED:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_run_attempts_while_revoked;
+      break;
+    case usage_statistics::COUNT_OF_TLS_ERRORS:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_tls_errors;
+      break;
+    default:
+      LOG4CXX_WARN(logger_, "Type app counter is unknown");
+      return;
+  }
   Backup();
 }
 
@@ -1032,21 +1178,35 @@ bool CacheManager::IsApplicationRepresented(const std::string& app_id) const {
   return pt_->policy_table.app_policies_section.apps.end() != iter;
 }
 
-bool CacheManager::Init(const std::string& file_name) {
+bool CacheManager::Init(const std::string& file_name,
+                        const PolicySettings* settings) {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  InitResult init_result = backup_->Init();
+  settings_ = settings;
+  InitResult init_result = backup_->Init(settings);
 
   bool result = true;
   switch (init_result) {
     case InitResult::EXISTS: {
       LOG4CXX_INFO(logger_, "Policy Table exists, was loaded correctly.");
       result = LoadFromBackup();
+      if (result) {
+        if (!backup_->IsDBVersionActual()) {
+          LOG4CXX_INFO(logger_, "DB version is NOT actual");
+          if (!backup_->RefreshDB()) {
+            LOG4CXX_ERROR(logger_, "RefreshDB() failed");
+            return false;
+          }
+          backup_->UpdateDBVersion();
+          Backup();
+        }
+        MergePreloadPT(file_name);
+      }
     } break;
     case InitResult::SUCCESS: {
       LOG4CXX_INFO(logger_, "Policy Table was inited successfully");
-      result = LoadFromFile(file_name);
-
+      
+      result = LoadFromFile(file_name, *pt_);
+     
       utils::SharedPtr<policy_table::Table> snapshot = GenerateSnapshot();
       result &= snapshot->is_valid();
       LOG4CXX_DEBUG(logger_, "Check if snapshot is valid: "
@@ -1054,8 +1214,11 @@ bool CacheManager::Init(const std::string& file_name) {
       if(!result) {
         rpc::ValidationReport report("policy_table");
 	snapshot->ReportErrors(&report);
+	return result;
       }
 
+      backup_->UpdateDBVersion();
+      Backup();
     } break;
     default: {
       result = false;
@@ -1079,7 +1242,8 @@ bool CacheManager::LoadFromBackup() {
   return true;
 }
 
-bool CacheManager::LoadFromFile(const std::string& file_name) {
+bool CacheManager::LoadFromFile(const std::string& file_name,
+                                policy_table::Table& table) {
   LOG4CXX_AUTO_TRACE(logger_);
   BinaryMessage json_string;
   if (!file_system::ReadBinaryFile(file_name, json_string)) {
@@ -1099,24 +1263,21 @@ bool CacheManager::LoadFromFile(const std::string& file_name) {
 
   LOG4CXX_TRACE(logger_, "Start create PT");
   sync_primitives::AutoLock locker(cache_lock_);
-  backup_->Clear();
 
-  pt_ = new policy_table::Table(&value);
-  if (pt_->is_valid()) {
-    if (backup_->Save(*pt_)) {
-      backup_->WriteDb();
-      return true;
-    } else {
-      LOG4CXX_FATAL(logger_, "Failed to save PT");
-      return false;
-    }
-  } else {
+  table = policy_table::Table(&value);
+
+  Json::StyledWriter s_writer;
+  LOG4CXX_DEBUG(logger_, "PT out:");
+  LOG4CXX_DEBUG(logger_, s_writer.write(table.ToJsonValue()));
+
+  if (!table.is_valid()) {
     rpc::ValidationReport report("policy_table");
-    pt_->ReportErrors(&report);
+    table.ReportErrors(&report);
     LOG4CXX_FATAL(logger_,
                   "Parsed table is not valid " << rpc::PrettyFormat(report));
     return false;
   }
+  return true;
 }
 
 bool CacheManager::ResetPT(const std::string& file_name) {
@@ -1172,8 +1333,104 @@ void CacheManager::GetAppRequestTypes(
   return;
 }
 
+std::string CacheManager::GetCertificate() const {
+  CACHE_MANAGER_CHECK(std::string(""));
+  if (pt_->policy_table.module_config.certificate.is_initialized()) {
+    return *pt_->policy_table.module_config.certificate;
+  }
+  return std::string("");
+}
+
+void CacheManager::MergePreloadPT(const std::string& file_name) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  policy_table::Table table;
+  if (!LoadFromFile(file_name, table)) {
+    LOG4CXX_DEBUG(logger_, "Unable to load preloaded PT.");
+    return;
+  }
+
+  sync_primitives::AutoLock lock(cache_lock_);
+  policy_table::PolicyTable& current = pt_->policy_table;
+  policy_table::PolicyTable& new_table = table.policy_table;
+  const std::string date_current = *current.module_config.preloaded_date;
+  const std::string date_new = *new_table.module_config.preloaded_date;
+  if (date_current != date_new) {
+    MergeMC(new_table, current);
+    MergeFG(new_table, current);
+    MergeAP(new_table, current);
+    MergeCFM(new_table, current);
+    Backup();
+  }
+}
+
+void CacheManager::MergeMC(const policy_table::PolicyTable& new_pt,
+                           policy_table::PolicyTable& pt) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  policy_table::ModuleConfig copy(pt.module_config);
+
+  pt.module_config = new_pt.module_config;
+  pt.module_config.vehicle_make = copy.vehicle_make;
+  pt.module_config.vehicle_year = copy.vehicle_year;
+  pt.module_config.vehicle_model = copy.vehicle_model;
+}
+
+void CacheManager::MergeFG(const policy_table::PolicyTable& new_pt,
+                           policy_table::PolicyTable& pt) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  policy_table::FunctionalGroupings::const_iterator it = new_pt.functional_groupings.begin();
+
+  for (; it != new_pt.functional_groupings.end(); ++it) {
+    LOG4CXX_DEBUG(logger_, "Merge functional group: " << it->first);
+    pt.functional_groupings[it->first] = it->second;
+  }
+}
+
+void CacheManager::MergeAP(const policy_table::PolicyTable& new_pt,
+                           policy_table::PolicyTable& pt) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  pt.app_policies_section.device = const_cast<policy_table::PolicyTable&>
+      (new_pt).app_policies_section.device;
+
+  pt.app_policies_section.apps[kDefaultId] =
+      const_cast<policy_table::PolicyTable&>
+      (new_pt).app_policies_section.apps[kDefaultId];
+
+  pt.app_policies_section.apps[kPreDataConsentId] =
+      const_cast<policy_table::PolicyTable&>
+      (new_pt).app_policies_section.apps[kPreDataConsentId];
+}
+
+void CacheManager::MergeCFM(const policy_table::PolicyTable& new_pt,
+                            policy_table::PolicyTable& pt) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (new_pt.consumer_friendly_messages.is_initialized()) {
+    if (!pt.consumer_friendly_messages.is_initialized()) {
+      pt.consumer_friendly_messages = new_pt.consumer_friendly_messages;
+    } else {
+      policy_table::Messages::const_iterator it = new_pt.consumer_friendly_messages->messages->begin();
+
+      pt.consumer_friendly_messages->version =
+          new_pt.consumer_friendly_messages->version;
+      for (; it != new_pt.consumer_friendly_messages->messages->end(); ++it) {
+        LOG4CXX_DEBUG(logger_, "Merge CFM: " << it->first);
+        if (!(pt.consumer_friendly_messages->messages.is_initialized())) {
+          LOG4CXX_DEBUG(logger_, "CFM not initialized.");
+        }
+        (*pt.consumer_friendly_messages->messages)[it->first] = it->second;
+      }
+
+    }
+  }
+}
+
+const PolicySettings& CacheManager::get_settings() const {
+  DCHECK(settings_);
+
+  return *settings_;
+}
+
 CacheManager::BackgroundBackuper::BackgroundBackuper(CacheManager* cache_manager)
-  : cache_manager_(cache_manager),
+    : cache_manager_(cache_manager),
     stop_flag_(false),
     new_data_available_(false) {
   LOG4CXX_AUTO_TRACE(logger_);

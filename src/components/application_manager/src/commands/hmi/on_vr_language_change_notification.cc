@@ -42,11 +42,9 @@ namespace commands {
 
 OnVRLanguageChangeNotification::OnVRLanguageChangeNotification(
     const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnVRLanguageChangeNotification::~OnVRLanguageChangeNotification() {
-}
+OnVRLanguageChangeNotification::~OnVRLanguageChangeNotification() {}
 
 void OnVRLanguageChangeNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -66,16 +64,15 @@ void OnVRLanguageChangeNotification::Run() {
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
 
-  ApplicationManagerImpl::ApplictionSetIt it = accessor.begin();
+  ApplicationSetConstIt it = accessor.begin();
   for (; accessor.end() != it;) {
     ApplicationSharedPtr app = *it++;
     (*message_)[strings::params][strings::connection_key] = app->app_id();
     SendNotificationToMobile(message_);
-    if (static_cast<int32_t>(app->language())
-        != (*message_)[strings::msg_params][strings::language].asInt()) {
-
-      ApplicationManagerImpl::instance()->SetState<false>(app->app_id(),
-                                          mobile_api::HMILevel::HMI_NONE);
+    if (static_cast<int32_t>(app->language()) !=
+        (*message_)[strings::msg_params][strings::language].asInt()) {
+      ApplicationManagerImpl::instance()->SetState<false>(
+          app->app_id(), mobile_api::HMILevel::HMI_NONE);
 
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
           app->app_id(),
@@ -89,4 +86,3 @@ void OnVRLanguageChangeNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

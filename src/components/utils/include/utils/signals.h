@@ -41,8 +41,8 @@ typedef void (*sighandler_t) (int);
 
 namespace utils {
 
-bool SubscribeToTerminateSignal(sighandler_t func);
-bool SubscribeToFaultSignal(sighandler_t func);
+bool UnsibscribeFromTermination();
+bool WaitTerminationSignals(sighandler_t sig_handler);
 
 }  //  namespace utils
 

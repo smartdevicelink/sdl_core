@@ -37,7 +37,7 @@
 #include "utils/logger.h"
 
 namespace application_manager {
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationDataImpl")
+CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 InitialApplicationDataImpl::InitialApplicationDataImpl()
     : app_types_(NULL),
@@ -151,6 +151,14 @@ void InitialApplicationDataImpl::set_language(
 void InitialApplicationDataImpl::set_ui_language(
     const mobile_api::Language::eType& ui_language) {
   ui_language_ = ui_language;
+}
+
+void InitialApplicationDataImpl::set_perform_interaction_layout(mobile_apis::LayoutMode::eType layout) {
+  perform_interaction_layout_ = layout;
+}
+
+mobile_apis::LayoutMode::eType InitialApplicationDataImpl::perform_interaction_layout() const {
+  return perform_interaction_layout_;
 }
 
 DynamicApplicationDataImpl::DynamicApplicationDataImpl()

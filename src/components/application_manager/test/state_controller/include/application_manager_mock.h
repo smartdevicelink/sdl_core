@@ -37,13 +37,18 @@
 #include "gmock/gmock.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/usage_statistics.h"
-
+#include "application_manager/commands/command.h"
+#include "media_manager/media_manager.h"
+#include "resumption/last_state.h"
+#include "application_manager/policies/policy_handler.h"
+namespace test {
+namespace components {
 namespace state_controller_test {
 namespace am = application_manager;
 
 class ApplicationManagerMock : public application_manager::ApplicationManager {
  public:
-  MOCK_METHOD0(Init, bool());
+  MOCK_METHOD1(Init, bool(resumption::LastState& last_state));
   MOCK_METHOD0(Stop, bool());
 
   MOCK_METHOD1(set_hmi_message_handler,
@@ -52,10 +57,9 @@ class ApplicationManagerMock : public application_manager::ApplicationManager {
   MOCK_METHOD1(set_connection_handler,
                void(connection_handler::ConnectionHandler*));
   MOCK_CONST_METHOD0(applications, DataAccessor<am::ApplicationSet>());
+  MOCK_CONST_METHOD1(application, am::ApplicationSharedPtr(uint32_t app_id));
   MOCK_CONST_METHOD1(application_by_hmi_app,
                      am::ApplicationSharedPtr(uint32_t));
-  MOCK_CONST_METHOD1(application, am::ApplicationSharedPtr(uint32_t));
-
   MOCK_CONST_METHOD0(active_application, am::ApplicationSharedPtr());
   MOCK_CONST_METHOD1(application_by_policy_id,
                      am::ApplicationSharedPtr(const std::string&));
@@ -65,16 +69,43 @@ class ApplicationManagerMock : public application_manager::ApplicationManager {
   MOCK_CONST_METHOD0(get_limited_media_application, am::ApplicationSharedPtr());
   MOCK_CONST_METHOD0(get_limited_navi_application, am::ApplicationSharedPtr());
   MOCK_CONST_METHOD0(get_limited_voice_application, am::ApplicationSharedPtr());
+  MOCK_METHOD1(application_id, const uint32_t(const int32_t));
   MOCK_METHOD2(set_application_id, void(const int32_t, const uint32_t));
-  MOCK_METHOD1(application_id, uint32_t(const int32_t));
-  MOCK_METHOD3(OnHMILevelChanged, void(uint32_t, mobile_apis::HMILevel::eType,
-                                       mobile_apis::HMILevel::eType));
+  MOCK_METHOD3(OnHMILevelChanged,
+               void(uint32_t,
+                    mobile_apis::HMILevel::eType,
+                    mobile_apis::HMILevel::eType));
   MOCK_METHOD1(SendHMIStatusNotification, void(const am::ApplicationSharedPtr));
-  MOCK_CONST_METHOD1(GetDefaultHmiLevel, mobile_apis::HMILevel::eType(
-                                             am::ApplicationConstSharedPtr));
+  MOCK_CONST_METHOD1(
+      GetDefaultHmiLevel,
+      mobile_apis::HMILevel::eType(am::ApplicationConstSharedPtr));
   MOCK_METHOD0(hmi_capabilities, am::HMICapabilities&());
   MOCK_METHOD0(is_attenuated_supported, bool());
-  MOCK_CONST_METHOD1(IsAppTypeExistsInFullOrLimited, bool(am::ApplicationConstSharedPtr));
+  MOCK_CONST_METHOD1(IsAppTypeExistsInFullOrLimited,
+                     bool(am::ApplicationConstSharedPtr));
+  MOCK_METHOD1(OnApplicationRegistered, void(am::ApplicationSharedPtr));
+  MOCK_METHOD2(SendMessageToMobile,
+               void(const smart_objects::SmartObjectSPtr message,
+                    bool final_message));
+  MOCK_METHOD1(SendMessageToMobile,
+               void(const smart_objects::SmartObjectSPtr message));
+  MOCK_METHOD1(SendMessageToHMI,
+               void(const smart_objects::SmartObjectSPtr message));
+  MOCK_METHOD2(ManageMobileCommand,
+               bool(const smart_objects::SmartObjectSPtr message,
+                    am::commands::Command::CommandOrigin origin));
+  MOCK_METHOD1(ManageHMICommand,
+               bool(const smart_objects::SmartObjectSPtr message));
+  MOCK_CONST_METHOD2(CanAppStream, bool (uint32_t app_id,
+                                         protocol_handler::ServiceType service_type));
+  MOCK_METHOD1(ForbidStreaming, void (uint32_t app_id));
+  MOCK_METHOD2(SendAudioPassThroughNotification, void (uint32_t session_key,
+                                                       std::vector<uint8_t>& binary_data));
+  MOCK_CONST_METHOD0(connection_handler,
+                     connection_handler::ConnectionHandler&());
 };
 }  // namespace state_controller_test
+}  // namespace components
+}  // namespace test
+
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_STATE_CONTROLLER_INCLUDE_APPLICATION_MANAGER_MOCK_H_

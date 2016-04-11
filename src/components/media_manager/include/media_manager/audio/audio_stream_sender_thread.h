@@ -46,6 +46,10 @@ class SmartObject;
 }
 }
 
+namespace application_manager {
+  class ApplicationManager;
+}
+
 namespace media_manager {
 
 typedef enum {
@@ -79,8 +83,9 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
      * @param session_key     Session key of connection for Mobile side
      * @param correlation_id  Correlation id for response for Mobile side
      */
-    AudioStreamSenderThread(const std::string fileName,
-                            uint32_t session_key);
+    AudioStreamSenderThread(const std::string& fileName,
+                            uint32_t session_key,
+                            application_manager::ApplicationManager& app_mngr);
 
     /*
      * @brief AudioStreamSenderThread class destructor
@@ -121,6 +126,8 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
     sync_primitives::ConditionalVariable  shouldBeStoped_cv_;
 
     static const int32_t                  kAudioPassThruTimeout;
+
+    application_manager::ApplicationManager& application_manager_;
 
 
     DISALLOW_COPY_AND_ASSIGN(AudioStreamSenderThread);

@@ -47,6 +47,13 @@ bool push_log(
         const log4cxx::LogString& threadName
         );
 
+void flush_logger();
+
+bool logs_enabled();
+void set_logs_enabled(bool state);
+
+void create_log_message_loop_thread();
+void delete_log_message_loop_thread();
 }  // namespace logger
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_PUSH_LOG_H_

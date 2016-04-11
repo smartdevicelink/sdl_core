@@ -43,6 +43,11 @@
 #include "utils/threads/thread.h"
 #include "utils/file_system.h"
 
+#ifdef ENABLE_SECURITY
+#include <openssl/ssl.h>
+#endif  // ENABLE_SECURITY
+
+
 namespace {
 #define LOG_UPDATED_VALUE(value, key, section) {\
   LOG4CXX_INFO(logger_, "Setting value '" << value\
@@ -59,6 +64,11 @@ namespace {
 const char* kDefaultConfigFileName = "smartDeviceLink.ini";
 
 const char* kMainSection = "MAIN";
+#ifdef ENABLE_SECURITY
+const char* kSecuritySection = "Security Manager";
+const char* kForceProtectedService = "ForceProtectedService";
+const char* kForceUnprotectedService = "ForceUnprotectedService";
+#endif
 const char* kPolicySection = "Policy";
 const char* kHmiSection = "HMI";
 const char* kAppInfoSection = "AppInfo";
@@ -83,12 +93,15 @@ const char* kServerAddressKey = "ServerAddress";
 const char* kAppInfoStorageKey = "AppInfoStorage";
 const char* kAppStorageFolderKey = "AppStorageFolder";
 const char* kAppResourseFolderKey = "AppResourceFolder";
+const char* kLogsEnabledKey = "LogsEnabled";
 const char* kAppConfigFolderKey = "AppConfigFolder";
 const char* kEnableProtocol4Key = "EnableProtocol4";
 const char* kAppIconsFolderKey = "AppIconsFolder";
 const char* kAppIconsFolderMaxSizeKey = "AppIconsFolderMaxSize";
 const char* kAppIconsAmountToRemoveKey = "AppIconsAmountToRemove";
 const char* kLaunchHMIKey = "LaunchHMI";
+
+const char* kDefaultSDLVersion = "";
 #ifdef WEB_HMI
 const char* kLinkToWebHMI = "LinkToWebHMI";
 #endif // WEB_HMI
@@ -100,6 +113,18 @@ const char* kNamedVideoPipePathKey = "NamedVideoPipePath";
 const char* kNamedAudioPipePathKey = "NamedAudioPipePath";
 const char* kVideoStreamFileKey = "VideoStreamFile";
 const char* kAudioStreamFileKey = "AudioStreamFile";
+
+#ifdef ENABLE_SECURITY
+const char* kSecurityProtocolKey = "Protocol";
+const char* kSecurityCertificatePathKey = "CertificatePath";
+const char* kSecurityCACertificatePathKey = "CACertificatePath";
+const char* kSecuritySSLModeKey = "SSLMode";
+const char* kSecurityKeyPathKey = "KeyPath";
+const char* kSecurityCipherListKey = "CipherList";
+const char* kSecurityVerifyPeerKey = "VerifyPeer";
+const char* kBeforeUpdateHours = "UpdateBeforeHours";
+#endif
+
 const char* kAudioDataStoppedTimeoutKey = "AudioDataStoppedTimeout";
 const char* kVideoDataStoppedTimeoutKey = "VideoDataStoppedTimeout";
 const char* kMixingAudioSupportedKey = "MixingAudioSupported";
@@ -109,6 +134,7 @@ const char* kHelpTitleKey = "HelpTitle";
 const char* kHelpCommandKey = "HelpCommand";
 const char* kSystemFilesPathKey = "SystemFilesPath";
 const char* kHeartBeatTimeoutKey = "HeartBeatTimeout";
+const char* kMaxSupportedProtocolVersionKey = "MaxSupportedProtocolVersion";
 const char* kUseLastStateKey = "UseLastState";
 const char* kTCPAdapterPortKey = "TCPAdapterPort";
 const char* kServerPortKey = "ServerPort";
@@ -121,6 +147,7 @@ const char* kMaxCmdIdKey = "MaxCmdID";
 const char* kPutFileRequestKey = "PutFileRequest";
 const char* kDeleteFileRequestKey = "DeleteFileRequest";
 const char* kListFilesRequestKey = "ListFilesRequest";
+const char* kListFilesResponseSizeKey = "ListFilesResponseSize";
 const char* kDefaultTimeoutKey = "DefaultTimeout";
 const char* kAppResumingTimeoutKey = "ApplicationResumingTimeout";
 const char* kAppSavePersistentDataTimeoutKey = "AppSavePersistentDataTimeout";
@@ -140,7 +167,6 @@ const char* kTTSDelimiterKey = "TTSDelimiter";
 const char* kRecordingFileNameKey = "RecordingFileName";
 const char* kRecordingFileSourceKey = "RecordingFileSource";
 const char* kEnablePolicy = "EnablePolicy";
-const char* kMmeDatabaseNameKey = "MMEDatabase";
 const char* kEventMQKey = "EventMQ";
 const char* kAckMQKey = "AckMQ";
 const char* kApplicationListUpdateTimeoutKey = "ApplicationListUpdateTimeout";
@@ -161,12 +187,15 @@ const char* kFrequencyTime = "FrequencyTime";
 const char* kMalformedMessageFiltering = "MalformedMessageFiltering";
 const char* kMalformedFrequencyCount = "MalformedFrequencyCount";
 const char* kMalformedFrequencyTime = "MalformedFrequencyTime";
+const char* kExpectedConsecutiveFramesTimeout = "ExpectedConsecutiveFramesTimeout";
 const char* kHashStringSizeKey = "HashStringSize";
+const char* kUseDBForResumptionKey = "UseDBForResumption";
+const char* kAttemptsToOpenResumptionDBKey = "AttemptsToOpenResumptionDB";
+const char* kOpenAttemptTimeoutMsResumptionDBKey = "OpenAttemptTimeoutMsResumptionDB";
 
 #ifdef WEB_HMI
 const char* kDefaultLinkToWebHMI = "HMI/index.html";
 #endif // WEB_HMI
-const char* kDefaultSDLVersion = "";
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
 const char* kDefaultPreloadedPTFileName = "sdl_preloaded_pt.json";
@@ -176,7 +205,6 @@ const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
 const char* kDefaultTtsDelimiter = ",";
 const uint32_t kDefaultAudioDataStoppedTimeout = 1000;
 const uint32_t kDefaultVideoDataStoppedTimeout = 1000;
-const char* kDefaultMmeDatabaseName = "/dev/qdb/mediaservice_db";
 const char* kDefaultEventMQ = "/dev/mqueue/ToSDLCoreUSBAdapter";
 const char* kDefaultAckMQ = "/dev/mqueue/FromSDLCoreUSBAdapter";
 const char* kDefaultRecordingFileSourceName = "audio.8bit.wav";
@@ -188,8 +216,16 @@ const char* kDefaultPoolProtocolMask = "com.smartdevicelink.prot";
 const char* kDefaultIAPSystemConfig = "/fs/mp/etc/mm/ipod.cfg";
 const char* kDefaultIAP2SystemConfig = "/fs/mp/etc/mm/iap2.cfg";
 
+#ifdef ENABLE_SECURITY
+const char* kDefaultSecurityProtocol = "TLSv1.2";
+const char* kDefaultSSLMode = "CLIENT";
+const bool kDefaultVerifyPeer = false;
+const uint32_t kDefaultBeforeUpdateHours = 24;
+#endif // ENABLE_SECURITY
+
 const uint32_t kDefaultHubProtocolIndex = 0;
 const uint32_t kDefaultHeartBeatTimeout = 0;
+const uint16_t kDefaultMaxSupportedProtocolVersion = 3;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
 const uint16_t kDefaultServerPort = 8087;
 const uint16_t kDefaultVideoStreamingPort = 5050;
@@ -201,11 +237,12 @@ const uint32_t kDefaultPutFileRequestInNone = 5;
 const uint32_t kDefaultDeleteFileRequestInNone = 5;
 const uint32_t kDefaultListFilesRequestInNone = 5;
 const uint32_t kDefaultTimeout = 10000;
-const uint32_t kDefaultAppResumingTimeout = 3;
-const uint32_t kDefaultAppSavePersistentDataTimeout = 10;
+const uint32_t kDefaultAppResumingTimeout = 3000;
+const uint32_t kDefaultAppSavePersistentDataTimeout = 10000;
 const uint32_t kDefaultResumptionDelayBeforeIgn = 30;
 const uint32_t kDefaultResumptionDelayAfterIgn = 30;
 const uint32_t kDefaultHashStringSize = 32;
+const uint32_t kDefaultListFilesResponseSize = 1000;
 
 const uint32_t kDefaultDirQuota = 104857600;
 const uint32_t kDefaultAppTimeScaleMaxRequests = 0;
@@ -220,7 +257,8 @@ const std::pair<uint32_t, uint32_t> kGetVehicleDataFrequency = { 5, 1 };
 const std::pair<uint32_t, uint32_t> kStartStreamRetryAmount = { 3, 1 };
 const uint32_t kDefaultMaxThreadPoolSize = 2;
 const int kDefaultIAP2HubConnectAttempts = 0;
-const int kDefaultIAPHubConnectionWaitTimeout = 10;
+const int kDefaultIAPHubConnectionWaitTimeout = 10000;
+const int kDefaultIAPArmEventTimeout = 500;
 const uint16_t kDefaultTTSGlobalPropertiesTimeout = 20;
 // TCP MTU - header size = 1500 - 12
 const size_t kDefaultMaximumPayloadSize = 1500 - 12;
@@ -229,11 +267,13 @@ const size_t kDefaultFrequencyTime = 1000;
 const bool kDefaulMalformedMessageFiltering = true;
 const size_t kDefaultMalformedFrequencyCount = 10;
 const size_t kDefaultMalformedFrequencyTime = 1000;
+const uint32_t kDefaultExpectedConsecutiveFramesTimeout = 10000;
 const uint16_t kDefaultAttemptsToOpenPolicyDB = 5;
-const uint16_t kDefaultOpenAttemptTimeoutMsKey = 500;
-const uint32_t kDefaultAppIconsFolderMaxSize = 1048576;
+const uint16_t kDefaultOpenAttemptTimeoutMs = 500;
+const uint32_t kDefaultAppIconsFolderMaxSize = 104857600;
 const uint32_t kDefaultAppIconsAmountToRemove = 1;
-
+const uint16_t kDefaultAttemptsToOpenResumptionDB = 5;
+const uint16_t kDefaultOpenAttemptTimeoutMsResumptionDB = 500;
 }  // namespace
 
 namespace profile {
@@ -248,7 +288,7 @@ Profile::Profile()
 #endif // WEB_HMI
       app_config_folder_(),
       app_storage_folder_(),
-      app_resourse_folder_(),
+      app_resource_folder_(),
       enable_protocol_4_(false),
       app_icons_folder_(),
       app_icons_folder_max_size_(kDefaultAppIconsFolderMaxSize),
@@ -279,8 +319,10 @@ Profile::Profile()
       put_file_in_none_(kDefaultPutFileRequestInNone),
       delete_file_in_none_(kDefaultDeleteFileRequestInNone),
       list_files_in_none_(kDefaultListFilesRequestInNone),
+      list_files_response_size_(kDefaultListFilesResponseSize),
       app_info_storage_(kDefaultAppInfoFileName),
       heart_beat_timeout_(kDefaultHeartBeatTimeout),
+      max_supported_protocol_version_(kDefaultMaxSupportedProtocolVersion),
       policy_snapshot_file_name_(kDefaultPoliciesSnapshotFileName),
       enable_policy_(false),
       transport_manager_disconnect_timeout_(
@@ -292,7 +334,6 @@ Profile::Profile()
       tts_delimiter_(kDefaultTtsDelimiter),
       audio_data_stopped_timeout_(kDefaultAudioDataStoppedTimeout),
       video_data_stopped_timeout_(kDefaultVideoDataStoppedTimeout),
-      mme_db_name_(kDefaultMmeDatabaseName),
       event_mq_name_(kDefaultEventMQ),
       ack_mq_name_(kDefaultAckMQ),
       recording_file_source_(kDefaultRecordingFileSourceName),
@@ -308,9 +349,10 @@ Profile::Profile()
       tts_global_properties_timeout_(kDefaultTTSGlobalPropertiesTimeout),
       attempts_to_open_policy_db_(kDefaultAttemptsToOpenPolicyDB),
       open_attempt_timeout_ms_(kDefaultAttemptsToOpenPolicyDB),
-      hash_string_size_(kDefaultHashStringSize) {
-  ReadStringValue(&sdl_version_, kDefaultSDLVersion,
-                  kMainSection, kSDLVersionKey);
+      hash_string_size_(kDefaultHashStringSize),
+      use_db_for_resumption_(false),
+      attempts_to_open_resumption_db_(kDefaultAttemptsToOpenResumptionDB),
+      open_attempt_timeout_ms_resumption_db_(kDefaultOpenAttemptTimeoutMsResumptionDB){
 }
 
 
@@ -351,8 +393,8 @@ const std::string& Profile::app_storage_folder() const {
   return app_storage_folder_;
 }
 
-const std::string& Profile::app_resourse_folder() const {
-  return app_resourse_folder_;
+const std::string& Profile::app_resource_folder() const {
+  return app_resource_folder_;
 }
 
 bool Profile::enable_protocol_4() const {
@@ -415,11 +457,11 @@ const uint16_t& Profile::server_port() const {
   return server_port_;
 }
 
-const uint16_t& Profile::video_streaming_port() const {
+const uint16_t Profile::video_streaming_port() const {
   return video_streaming_port_;
 }
 
-const uint16_t& Profile::audio_streaming_port() const {
+const uint16_t Profile::audio_streaming_port() const {
   return audio_streaming_port_;
 }
 
@@ -511,12 +553,20 @@ const uint32_t& Profile::list_files_in_none() const {
   return list_files_in_none_;
 }
 
+const uint32_t& Profile::list_files_response_size() const {
+  return list_files_response_size_;
+}
+
 const std::string& Profile::app_info_storage() const {
   return app_info_storage_;
 }
 
-int32_t Profile::heart_beat_timeout() const {
+uint32_t Profile::heart_beat_timeout() const {
   return heart_beat_timeout_;
+}
+
+uint16_t Profile::max_supported_protocol_version() const{
+  return max_supported_protocol_version_;
 }
 
 const std::string& Profile::preloaded_pt_file() const {
@@ -558,13 +608,8 @@ const std::string& Profile::tts_delimiter() const {
 const std::string& Profile::recording_file_source() const {
   return recording_file_source_;
 }
-
-const std::string&Profile::recording_file_name() const {
+const std::string& Profile::recording_file_name() const {
   return recording_file_name_;
-}
-
-const std::string& Profile::mme_db_name() const {
-  return mme_db_name_;
 }
 
 const std::string& Profile::event_mq_name() const {
@@ -668,6 +713,12 @@ size_t Profile::malformed_frequency_time() const {
                 kProtocolHandlerSection, kMalformedFrequencyTime);
   return malformed_frequency_time;
 }
+uint32_t Profile::multiframe_waiting_timeout() const {
+  uint32_t multiframe_waiting_timeout = 0;
+  ReadUIntValue(&multiframe_waiting_timeout, kDefaultExpectedConsecutiveFramesTimeout,
+                kProtocolHandlerSection, kExpectedConsecutiveFramesTimeout);
+  return multiframe_waiting_timeout;
+}
 
 uint16_t Profile::attempts_to_open_policy_db() const {
   return attempts_to_open_policy_db_;
@@ -691,6 +742,65 @@ uint32_t Profile::hash_string_size() const {
 
 uint16_t Profile::tts_global_properties_timeout() const {
   return tts_global_properties_timeout_;
+}
+
+#ifdef ENABLE_SECURITY
+
+const std::string& Profile::cert_path() const {
+  return cert_path_;
+}
+
+const std::string& Profile::ca_cert_path() const {
+  return ca_cert_path_;
+}
+
+const std::string& Profile::ssl_mode() const {
+  return ssl_mode_;
+}
+
+const std::string& Profile::key_path() const {
+  return key_path_;
+}
+
+const std::string& Profile::ciphers_list() const {
+  return ciphers_list_;
+}
+
+bool Profile::verify_peer() const {
+  return verify_peer_;
+}
+
+size_t Profile::update_before_hours() const {
+  return update_before_hours_;
+}
+
+const std::string& Profile::security_manager_protocol_name() const {
+  return security_manager_protocol_name_;
+}
+
+const std::vector<int>& Profile::force_protected_service() const {
+  return force_protected_service_;
+}
+
+const std::vector<int>& Profile::force_unprotected_service() const {
+  return force_unprotected_service_;
+}
+#endif // ENABLE_SECURITY
+
+bool Profile::logs_enabled() const {
+  return logs_enabled_;
+}
+
+bool Profile::use_db_for_resumption() const {
+  return use_db_for_resumption_;
+}
+
+uint16_t Profile::attempts_to_open_resumption_db() const {
+  return attempts_to_open_resumption_db_;
+}
+
+uint16_t Profile::open_attempt_timeout_ms_resumption_db() const {
+  return open_attempt_timeout_ms_resumption_db_;
 }
 
 void Profile::UpdateValues() {
@@ -720,6 +830,41 @@ void Profile::UpdateValues() {
   LOG_UPDATED_BOOL_VALUE(link_to_web_hmi_, kLinkToWebHMI, kHmiSection);
 #endif // WEB_HMI
 
+#ifdef ENABLE_SECURITY
+
+  force_protected_service_ =
+      ReadIntContainer(kSecuritySection, kForceProtectedService, NULL);
+
+  force_unprotected_service_ =
+      ReadIntContainer(kSecuritySection, kForceUnprotectedService, NULL);
+
+  ReadStringValue(&security_manager_protocol_name_, kDefaultSecurityProtocol, kSecuritySection,
+      kSecurityProtocolKey);
+
+  ReadStringValue(&cert_path_,   "", kSecuritySection, kSecurityCertificatePathKey);
+  ReadStringValue(&ca_cert_path_, "", kSecuritySection, kSecurityCACertificatePathKey);
+
+  ReadStringValue(&ssl_mode_, kDefaultSSLMode, kSecuritySection,
+      kSecuritySSLModeKey);
+
+  ReadStringValue(&key_path_, "", kSecuritySection, kSecurityKeyPathKey);
+
+  ReadStringValue(&ciphers_list_, SSL_TXT_ALL, kSecuritySection,
+      kSecurityCipherListKey);
+
+  ReadBoolValue(&verify_peer_, kDefaultVerifyPeer, kSecuritySection,
+      kSecurityVerifyPeerKey);
+
+  ReadUIntValue(&update_before_hours_, kDefaultBeforeUpdateHours,
+                kSecuritySection, kBeforeUpdateHours);
+
+#endif  // ENABLE_SECURITY
+
+  // Logs enabled
+  ReadBoolValue(&logs_enabled_, false, kMainSection, kLogsEnabledKey);
+
+  LOG_UPDATED_BOOL_VALUE(logs_enabled_, kLogsEnabledKey, kMainSection);
+
   // Application config folder
   ReadStringValue(&app_config_folder_,
                   file_system::CurrentWorkingDirectory().c_str(),
@@ -743,15 +888,15 @@ void Profile::UpdateValues() {
   LOG_UPDATED_VALUE(app_storage_folder_, kAppStorageFolderKey, kMainSection);
 
   // Application resourse folder
-  ReadStringValue(&app_resourse_folder_,
+  ReadStringValue(&app_resource_folder_,
                   file_system::CurrentWorkingDirectory().c_str(),
                   kMainSection, kAppResourseFolderKey);
 
-  if (IsRelativePath(app_resourse_folder_)) {
-    MakeAbsolutePath(app_resourse_folder_);
+  if (IsRelativePath(app_resource_folder_)) {
+    MakeAbsolutePath(app_resource_folder_);
   }
 
-  LOG_UPDATED_VALUE(app_resourse_folder_, kAppResourseFolderKey,
+  LOG_UPDATED_VALUE(app_resource_folder_, kAppResourseFolderKey,
                     kMainSection);
 
   // Enable protocol ver.4 parameter
@@ -978,6 +1123,13 @@ void Profile::UpdateValues() {
                 kFilesystemRestrictionsSection, kListFilesRequestKey);
 
   LOG_UPDATED_VALUE(list_files_in_none_, kListFilesRequestKey,
+                    kFilesystemRestrictionsSection);
+
+  // ListFiles request size
+  ReadUIntValue(&list_files_response_size_, kDefaultListFilesResponseSize,
+                kFilesystemRestrictionsSection, kListFilesResponseSizeKey);
+
+  LOG_UPDATED_VALUE(list_files_response_size_, kListFilesResponseSizeKey,
                     kFilesystemRestrictionsSection);
 
   // Default timeout
@@ -1226,13 +1378,6 @@ void Profile::UpdateValues() {
   LOG_UPDATED_VALUE(transport_manager_tcp_adapter_port_, kTCPAdapterPortKey,
                     kTransportManagerSection);
 
-  // MME database name
-  ReadStringValue(&mme_db_name_,
-                  kDefaultMmeDatabaseName,
-                  kTransportManagerSection,
-                  kMmeDatabaseNameKey);
-
-  LOG_UPDATED_VALUE(mme_db_name_, kMmeDatabaseNameKey, kTransportManagerSection);
   // Event MQ
   ReadStringValue(&event_mq_name_,
                   kDefaultEventMQ,
@@ -1299,10 +1444,8 @@ void Profile::UpdateValues() {
                     kAttemptsToOpenPolicyDBKey, kPolicySection);
 
   // Open attempt timeout in ms
-  ReadUIntValue(&open_attempt_timeout_ms_,
-                kDefaultOpenAttemptTimeoutMsKey,
-                kPolicySection,
-                kOpenAttemptTimeoutMsKey);
+  ReadUIntValue(&open_attempt_timeout_ms_, kDefaultOpenAttemptTimeoutMs,
+                kPolicySection, kOpenAttemptTimeoutMsKey);
 
   LOG_UPDATED_VALUE(open_attempt_timeout_ms_,
                     kOpenAttemptTimeoutMsKey, kPolicySection);
@@ -1314,6 +1457,18 @@ void Profile::UpdateValues() {
     enable_policy_ = true;
   } else {
     enable_policy_ = false;
+  }
+
+  // Max protocol version
+  ReadUIntValue(&max_supported_protocol_version_,
+                kDefaultMaxSupportedProtocolVersion,
+                kProtocolHandlerSection,
+                kMaxSupportedProtocolVersionKey);
+
+  // if .ini file contains protocol version less than 2 or more than 3
+  // max_supported_protocol_version_ = 3
+  if (max_supported_protocol_version_ < 2) {
+    max_supported_protocol_version_ = 3;
   }
 
   LOG_UPDATED_BOOL_VALUE(enable_policy_, kEnablePolicy, kPolicySection);
@@ -1404,6 +1559,26 @@ void Profile::UpdateValues() {
    LOG_UPDATED_VALUE(hash_string_size_,
                     kHashStringSizeKey,
                     kApplicationManagerSection);
+
+  ReadBoolValue(&use_db_for_resumption_, false, kResumptionSection,
+                kUseDBForResumptionKey);
+
+  LOG_UPDATED_BOOL_VALUE(use_db_for_resumption_, kUseDBForResumptionKey,
+                         kResumptionSection);
+
+  ReadUIntValue(&attempts_to_open_resumption_db_, kDefaultAttemptsToOpenResumptionDB,
+                kResumptionSection, kAttemptsToOpenResumptionDBKey);
+
+  LOG_UPDATED_VALUE(attempts_to_open_resumption_db_, kAttemptsToOpenResumptionDBKey,
+                    kResumptionSection);
+
+  ReadUIntValue(&open_attempt_timeout_ms_resumption_db_,
+                kDefaultOpenAttemptTimeoutMsResumptionDB,
+                kResumptionSection, kOpenAttemptTimeoutMsResumptionDBKey);
+
+  LOG_UPDATED_VALUE(open_attempt_timeout_ms_resumption_db_,
+                    kOpenAttemptTimeoutMsResumptionDBKey,
+                    kResumptionSection);
 }
 
 bool Profile::ReadValue(bool* value, const char* const pSection,
@@ -1415,13 +1590,12 @@ bool Profile::ReadValue(bool* value, const char* const pSection,
   *buf = '\0';
   if ((0 != ini_read_value(config_file_name_.c_str(), pSection, pKey, buf))
       && ('\0' != *buf)) {
-     const int32_t tmpVal = atoi(buf);
-    if (0 == tmpVal) {
-      *value = false;
-    } else {
+    const int32_t tmpVal = atoi(buf);
+    if ((0 == strcmp("true", buf)) || (0 != tmpVal)) {
       *value = true;
+    } else {
+      *value = false;
     }
-
     ret = true;
   }
   return ret;
@@ -1498,26 +1672,26 @@ int32_t hex_to_int(const std::string& value) {
 }
 }
 
-std::list<int> Profile::ReadIntContainer(
+std::vector<int> Profile::ReadIntContainer(
     const char * const pSection, const char * const pKey,
                                          bool *out_result) const {
-  const std::list<std::string> string_list =
+  const std::vector<std::string> string_list =
       ReadStringContainer(pSection, pKey, out_result);
-  std::list<int> value_list;
+  std::vector<int> value_list;
   value_list.resize(string_list.size());
   std::transform(string_list.begin(), string_list.end(),
                  value_list.begin(), hex_to_int);
   return value_list;
 }
 
-std::list<std::string> Profile::ReadStringContainer(
+std::vector<std::string> Profile::ReadStringContainer(
     const char * const pSection, const char * const pKey,
                                                     bool *out_result) const {
   std::string string;
   const bool result = ReadValue(&string, pSection, pKey);
   if (out_result)
     *out_result = result;
-  std::list < std::string > value_container;
+  std::vector < std::string > value_container;
   if (result) {
     std::istringstream iss(string);
     std::string temp_str;
@@ -1542,7 +1716,11 @@ bool Profile::ReadUIntValue(uint16_t* value, uint16_t default_value,
       *value = default_value;
       return false;
     }
-
+    if (user_value > (std::numeric_limits < uint16_t > ::max)())
+    {
+      *value = default_value;
+      return false;
+    }
     *value = static_cast<uint16_t>(user_value);
     return true;
   }
@@ -1558,7 +1736,12 @@ bool Profile::ReadUIntValue(uint32_t* value, uint32_t default_value,
   } else {
     uint64_t user_value;
     if (!StringToNumber(string_value, user_value)) {
-     *value = default_value;
+      *value = default_value;
+      return false;
+    }
+    if (user_value > (std::numeric_limits < uint32_t > ::max)())
+    {
+      *value = default_value;
       return false;
     }
 

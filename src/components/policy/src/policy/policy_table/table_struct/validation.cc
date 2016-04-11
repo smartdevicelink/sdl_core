@@ -9,7 +9,7 @@ bool IsTypeInvalid(rpc::Enum<rpc::policy_table_interface_base::RequestType> requ
 namespace rpc {
 namespace policy_table_interface_base {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyTableValidation")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
 void RemoveInvalidTypes(RequestTypes& types) {
  types.erase(
@@ -153,9 +153,8 @@ bool MessageLanguages::Validate() const {
 }
 
 bool ConsumerFriendlyMessages::Validate() const {
-  if (PT_SNAPSHOT == GetPolicyTableType()) {
-    return false;
-  }
+  /* According to requirements consumer_friendly_messages are optional for PTU
+     and required for PTP and PTS. So, they are allowed always */
   return true;
 }
 

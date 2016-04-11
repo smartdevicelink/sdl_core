@@ -32,7 +32,7 @@
 
 #include <string>
 #include "application_manager/commands/hmi/on_received_policy_update.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager_impl.h"
 #include "utils/file_system.h"
 
 namespace application_manager {
@@ -40,22 +40,20 @@ namespace application_manager {
 namespace commands {
 
 OnReceivedPolicyUpdate::OnReceivedPolicyUpdate(const MessageSharedPtr& message)
-  : NotificationFromHMI(message) {
-}
+    : NotificationFromHMI(message) {}
 
-OnReceivedPolicyUpdate::~OnReceivedPolicyUpdate() {
-}
+OnReceivedPolicyUpdate::~OnReceivedPolicyUpdate() {}
 
 void OnReceivedPolicyUpdate::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   const std::string& file_path =
-    (*message_)[strings::msg_params][hmi_notification::policyfile].asString();
+      (*message_)[strings::msg_params][hmi_notification::policyfile].asString();
   policy::BinaryMessage file_content;
   if (!file_system::ReadBinaryFile(file_path, file_content)) {
     LOG4CXX_ERROR(logger_, "Failed to read Update file.");
     return;
   }
-  policy::PolicyHandler::instance()->ReceiveMessageFromSDK(file_path, file_content);
+  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().ReceiveMessageFromSDK(file_path, file_content);
 }
 
 }  // namespace commands

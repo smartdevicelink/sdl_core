@@ -64,20 +64,19 @@ void DiagnosticMessageRequest::Run() {
   const std::vector<uint32_t>& supported_diag_modes =
       profile::Profile::instance()->supported_diag_modes();
 
-  uint32_t message_data_length =
-     (*message_)[strings::msg_params][strings::message_data].length();
-  for (uint32_t i = 0; i < message_data_length; ++i) {
-    uint32_t message_data =
-        (*message_)[strings::msg_params][strings::message_data][i].asUInt();
-    if (supported_diag_modes.end() == std::find(supported_diag_modes.begin(),
-                                                supported_diag_modes.end(),
-                                                message_data)) {
-      LOG4CXX_ERROR(logger_, "Received message data " << message_data <<
-                             " not supported");
-      SendResponse(false, mobile_apis::Result::REJECTED,
-                   "Received message data not supported");
-      return;
-    }
+  smart_objects::SmartObject& msg_data =
+      (*message_)[strings::msg_params][strings::message_data];
+
+  const uint8_t mode_position = 0;
+  const uint32_t msg_diagnostic_mode = msg_data[mode_position].asUInt();
+  if (supported_diag_modes.end() == std::find(supported_diag_modes.begin(),
+                                              supported_diag_modes.end(),
+                                              msg_diagnostic_mode)) {
+    LOG4CXX_ERROR(logger_, "Received diagnostic mode " << msg_diagnostic_mode <<
+                           " is not supported.");
+    SendResponse(false, mobile_apis::Result::REJECTED,
+                 "Received diagnostic mode is not supported.");
+    return;
   }
 
   // Add app_id for HMI request

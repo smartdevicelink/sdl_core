@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2016, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,10 @@ if(BUILD_TESTS)
 include_directories(
     ${GMOCK_INCLUDE_DIRECTORY}
     ${COMPONENTS_DIR}/media_manager/include
+    ${COMPONENTS_DIR}/protocol_handler/include
+    ${COMPONENTS_DIR}/application_manager/test/include
+    ${COMPONENTS_DIR}/resumption/include
+
 )
 
 if(EXTENDED_MEDIA_MODE)
@@ -43,12 +47,14 @@ if(EXTENDED_MEDIA_MODE)
 endif()
 
 set(SOURCES
-    media_manager_impl_test.cc
+    ${COMPONENTS_DIR}/media_manager/test/media_manager_impl_test.cc
 )
 
 set(LIBRARIES
+    SmartObjects
     MediaManager
-    ApplicationManager
+    ApplicationManagerTest
+    MessageHelper
     ProtocolHandler
     gmock
     connectionHandler
@@ -69,6 +75,6 @@ if(ENABLE_LOG)
     target_link_libraries("media_manager_test" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
-endif() # BUILD_TESTS
+endif()
 
 # vim: set ts=2 sw=2 et:

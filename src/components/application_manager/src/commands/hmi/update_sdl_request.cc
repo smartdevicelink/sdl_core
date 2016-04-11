@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/hmi/update_sdl_request.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -48,7 +48,7 @@ UpdateSDLRequest::~UpdateSDLRequest() {
 void UpdateSDLRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  policy::PolicyHandler::instance()->PTExchangeAtUserRequest(
+  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().PTExchangeAtUserRequest(
       (*message_)[strings::params][strings::correlation_id].asInt());
 }
 

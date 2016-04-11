@@ -129,7 +129,7 @@ class Connection {
   Connection(ConnectionHandle connection_handle,
              DeviceHandle connection_device_handle,
              ConnectionHandler *connection_handler,
-             int32_t heartbeat_timeout);
+             uint32_t heartbeat_timeout);
 
   /**
    * @brief Destructor
@@ -146,7 +146,7 @@ class Connection {
    * @brief Returns connection device handle
    * @return ConnectionDeviceHandle
    */
-  DeviceHandle connection_device_handle();
+  DeviceHandle connection_device_handle() const;
 
   /**
    * @brief Adds session to connection
@@ -242,9 +242,9 @@ class Connection {
 
   /**
    * @brief Sets heart beat timeout
-   * @param timeout in seconds
+   * @param timeout in milliseconds
    */
-  void SetHeartBeatTimeout(int32_t timeout, uint8_t session_id);
+  void SetHeartBeatTimeout(uint32_t timeout, uint8_t session_id);
 
   /**
    * @brief changes protocol version in session
@@ -297,6 +297,7 @@ class Connection {
    * @brief monitor that closes connection if there is no traffic over it
    */
   HeartBeatMonitor* heartbeat_monitor_;
+  uint32_t heartbeat_timeout_;
   threads::Thread *heart_beat_monitor_thread_;
 
   DISALLOW_COPY_AND_ASSIGN(Connection);

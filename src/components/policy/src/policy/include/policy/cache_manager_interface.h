@@ -38,6 +38,8 @@
 
 #include "utils/shared_ptr.h"
 #include "usage_statistics/counter.h"
+#include "policy/policy_types.h"
+#include "policy/policy_settings.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -82,11 +84,10 @@ class CacheManagerInterface {
   virtual int KilometersBeforeExchange(int current) = 0;
 
   /**
-   * @brief Sets kilometers and days after epoch, that passed for recieved
-   * successful PT UPdate
+   * @brief Sets counter value that passed for recieved successful PT UPdate
    */
-  virtual bool SetCountersPassedForSuccessfulUpdate(int kilometers,
-                                                    int days_after_epoch) = 0;
+  virtual bool SetCountersPassedForSuccessfulUpdate(Counters counter,
+                                                    int value) = 0;
 
   /**
    * Gets value in days before next update policy table
@@ -121,7 +122,7 @@ class CacheManagerInterface {
   /**
    * @brief Get information about vehicle
    */
-  virtual VehicleData GetVehicleData() = 0;
+  virtual const VehicleInfo GetVehicleInfo() const = 0;
 
   /**
    * @brief Allows to update 'vin' field in module_meta table.
@@ -164,7 +165,7 @@ class CacheManagerInterface {
    * depending on application priority.
    * @param priority Priority of application
    */
-  virtual int GetNotificationsNumber(const std::string& priority) = 0;
+  virtual policy_table::NumberOfNotificationsType GetNotificationsNumber(const std::string& priority) = 0;
 
   /**
    * @brief Get priority for given application
@@ -173,13 +174,14 @@ class CacheManagerInterface {
    * @return true, if succedeed, otherwise - false
    */
   virtual bool GetPriority(const std::string& policy_app_id,
-                           std::string& priority) = 0;
+                           std::string& priority) const = 0;
 
   /**
    * @brief Initialized Policy Table (load)
    * @return bool Success of operation
    */
-  virtual bool Init(const std::string& file_name) = 0;
+  virtual bool Init(const std::string& file_name,
+                    const PolicySettings* settings) = 0;
 
   /**
    * @brief Get snapshot of Policy Table
@@ -284,14 +286,14 @@ class CacheManagerInterface {
    * @param app_id Application id
    * @return bool Allowed/disallowed.
    */
-  virtual bool CanAppKeepContext(const std::string& app_id) = 0;
+  virtual bool CanAppKeepContext(const std::string& app_id) const = 0;
 
   /**
    * @brief Is application allowed to move foreground at will?
    * @param app_id Application id
    * @return bool Allowed/disallowed.
    */
-  virtual bool CanAppStealFocus(const std::string& app_id) = 0;
+  virtual bool CanAppStealFocus(const std::string& app_id) const = 0;
 
   /**
    * @brief Get default_hmi for given application
@@ -301,7 +303,7 @@ class CacheManagerInterface {
    * @return true, if succedeed, otherwise - false
    */
   virtual bool GetDefaultHMI(const std::string& app_id,
-                             std::string &default_hmi) = 0;
+                             std::string &default_hmi) const = 0;
 
   /**
    * @brief Reset user consent for device data and applications permissions
@@ -318,7 +320,7 @@ class CacheManagerInterface {
    */
   virtual bool GetUserPermissionsForDevice(const std::string& device_id,
                                            StringArray &consented_groups,
-                                           StringArray &disallowed_groups) = 0;
+                                           StringArray &disallowed_groups) const = 0;
 
   /**
    * @brief Gets list of groups permissions from policy table
@@ -339,7 +341,16 @@ class CacheManagerInterface {
    */
   virtual bool GetDeviceGroupsFromPolicies(
       rpc::policy_table_interface_base::Strings &groups,
-      rpc::policy_table_interface_base::Strings &preconsented_groups) = 0;
+      rpc::policy_table_interface_base::Strings &preconsented_groups) const = 0;
+
+  /**
+   * @brief Add's information about mobile device in Policy Table.
+   * @param device_id Generated or obtained id of device
+   * @param connection_type device connection type
+   * @return bool Success of operation
+   */
+  virtual bool AddDevice(const std::string& device_id,
+                         const std::string& connection_type) = 0;
 
   /**
    * @brief Record information about mobile device in Policy Table.
@@ -527,9 +538,10 @@ class CacheManagerInterface {
   /**
    * @brief LoadFromFile allows to load policy cache from preloaded table.
    * @param file_name preloaded
-   * @return
+   * @param table object which will be filled during file parsing.
+   * @return true in case file was successfuly loaded, false otherwise.
    */
-  virtual bool LoadFromFile(const std::string& file_name) = 0;
+  virtual bool LoadFromFile(const std::string& file_name, policy_table::Table& table) = 0;
 
   /**
    * @brief Backup allows to save cache onto hard drive.
@@ -539,10 +551,10 @@ class CacheManagerInterface {
   /**
    * Returns heart beat timeout
    * @param app_id application id
-   * @return if timeout was set then value in seconds greater zero
+   * @return if timeout was set then value in milliseconds greater zero
    * otherwise heart beat for specific application isn't set
    */
-  virtual uint16_t HeartBeatTimeout(const std::string& app_id) const = 0;
+  virtual uint32_t HeartBeatTimeout(const std::string& app_id) const = 0;
 
   /**
    * @brief Resets all calculated permissions in cache
@@ -582,6 +594,24 @@ class CacheManagerInterface {
   virtual void GetAppRequestTypes(
       const std::string& policy_app_id,
       std::vector<std::string>& request_types) const = 0;
+
+    /**
+     * @brief GetCertificate allows to obtain certificate in order to
+     * make secure connection
+     *
+     * @return The certificate in PKCS#7.
+     */
+    virtual std::string GetCertificate() const = 0;
+
+#ifdef BUILD_TESTS
+  /**
+   * @brief GetPT allows to obtain SharedPtr to PT.
+   * Used ONLY in Unit tests
+   * @return SharedPTR to PT
+   *
+   */
+  virtual utils::SharedPtr<policy_table::Table> GetPT() const  = 0;
+#endif
 };
 
 typedef utils::SharedPtr<CacheManagerInterface> CacheManagerInterfaceSPtr;

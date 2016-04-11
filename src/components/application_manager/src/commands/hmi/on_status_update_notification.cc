@@ -45,7 +45,7 @@ OnStatusUpdateNotification::~OnStatusUpdateNotification() {
 }
 
 void OnStatusUpdateNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnGetStatusUpdateNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   SendNotification();
 }
 

@@ -35,9 +35,12 @@
 
 #include <string>
 #include "gmock/gmock.h"
-#include "usage_statistics/statistics_manager.h"
+#include "policy/usage_statistics/statistics_manager.h"
 
+namespace test {
+namespace components {
 namespace state_controller_test {
+
 namespace us = usage_statistics;
 
 class StatisticsManagerMock : public us::StatisticsManager {
@@ -49,4 +52,7 @@ class StatisticsManagerMock : public us::StatisticsManager {
 };
 
 }  // namespace state_controller_test
+}
+}
+
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_STATE_CONTROLLER_INCLUDE_STATISTICS_MANAGER_MOCK_H_

@@ -33,7 +33,6 @@
 #include <string>
 
 #include "hmi_message_handler/messagebroker_adapter.h"
-#include "config_profile/profile.h"
 #include "utils/logger.h"
 
 namespace hmi_message_handler {
@@ -43,29 +42,28 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "HMIMessageHandler")
 typedef NsMessageBroker::CMessageBrokerController MessageBrokerController;
 
 MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler_param,
-    const std::string& server_address,
-    uint16_t port)
-  : HMIMessageAdapter(handler_param),
-    MessageBrokerController(server_address, port, "SDL") {
-  LOG4CXX_INFO(logger_, "Created MessageBrokerAdapter");
+                                           const std::string& server_address,
+                                           uint16_t port)
+    : HMIMessageAdapterImpl(handler_param),
+      MessageBrokerController(server_address, port, "SDL") {
+  LOG4CXX_TRACE(logger_, "Created MessageBrokerAdapter");
 }
 
-
-MessageBrokerAdapter::~MessageBrokerAdapter() {
-}
+MessageBrokerAdapter::~MessageBrokerAdapter() {}
 
 void MessageBrokerAdapter::SendMessageToHMI(
-  hmi_message_handler::MessageSharedPointer message) {
-  LOG4CXX_INFO(logger_, "MessageBrokerAdapter::sendMessageToHMI");
-  /*if (!message) {
-   // TODO(PV): LOG
-   return;
-   }*/
+    hmi_message_handler::MessageSharedPointer message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!message.valid()) {
+    LOG4CXX_ERROR(logger_, "Can`t send not valid message");
+    return;
+  }
 
   Json::Reader reader;
   Json::Value json_value;
   if (!reader.parse(message->json_message(), json_value, false)) {
-    // TODO(PV): LOG4CXX_ERROR(mLogger, "Received invalid json string.");
+    LOG4CXX_ERROR(logger_, "Received invalid json string.");
     return;
   }
 
@@ -73,7 +71,7 @@ void MessageBrokerAdapter::SendMessageToHMI(
 }
 
 void MessageBrokerAdapter::processResponse(std::string method,
-    Json::Value& root) {
+                                           Json::Value& root) {
   LOG4CXX_AUTO_TRACE(logger_);
   ProcessRecievedFromMB(root);
 }
@@ -95,7 +93,8 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("UI.OnCommand");
   MessageBrokerController::subscribeTo("VR.OnCommand");
   MessageBrokerController::subscribeTo("BasicCommunication.OnReady");
-  MessageBrokerController::subscribeTo("BasicCommunication.OnExitAllApplications");
+  MessageBrokerController::subscribeTo(
+      "BasicCommunication.OnExitAllApplications");
   MessageBrokerController::subscribeTo("UI.OnDriverDistraction");
   MessageBrokerController::subscribeTo("UI.OnSystemContext");
   MessageBrokerController::subscribeTo("UI.OnAppActivated");
@@ -104,15 +103,15 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("UI.OnResetTimeout");
   MessageBrokerController::subscribeTo("TTS.OnResetTimeout");
   MessageBrokerController::subscribeTo("BasicCommunication.OnAppDeactivated");
-  MessageBrokerController::subscribeTo("BasicCommunication.OnStartDeviceDiscovery");
+  MessageBrokerController::subscribeTo(
+      "BasicCommunication.OnStartDeviceDiscovery");
   MessageBrokerController::subscribeTo("BasicCommunication.OnUpdateDeviceList");
   MessageBrokerController::subscribeTo("BasicCommunication.OnFindApplications");
   MessageBrokerController::subscribeTo("BasicCommunication.OnAppActivated");
   MessageBrokerController::subscribeTo("BasicCommunication.OnExitApplication");
-  MessageBrokerController::subscribeTo("BasicCommunication.OnExitAllApplications");
+  MessageBrokerController::subscribeTo(
+      "BasicCommunication.OnExitAllApplications");
   MessageBrokerController::subscribeTo("BasicCommunication.OnDeviceChosen");
-  MessageBrokerController::subscribeTo("BasicCommunication.OnPhoneCall");
-  MessageBrokerController::subscribeTo("BasicCommunication.OnEmergencyEvent");
   MessageBrokerController::subscribeTo("UI.OnLanguageChange");
   MessageBrokerController::subscribeTo("VR.OnLanguageChange");
   MessageBrokerController::subscribeTo("TTS.OnLanguageChange");
@@ -123,8 +122,10 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("VR.Started");
   MessageBrokerController::subscribeTo("VR.Stopped");
   MessageBrokerController::subscribeTo("BasicCommunication.OnSystemRequest");
-  MessageBrokerController::subscribeTo("BasicCommunication.OnIgnitionCycleOver");
-  MessageBrokerController::subscribeTo("BasicCommunication.OnSystemInfoChanged");
+  MessageBrokerController::subscribeTo(
+      "BasicCommunication.OnIgnitionCycleOver");
+  MessageBrokerController::subscribeTo(
+      "BasicCommunication.OnSystemInfoChanged");
   MessageBrokerController::subscribeTo("SDL.OnAppPermissionConsent");
   MessageBrokerController::subscribeTo("SDL.OnAllowSDLFunctionality");
   MessageBrokerController::subscribeTo("SDL.OnReceivedPolicyUpdate");
@@ -132,6 +133,7 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("SDL.AddStatisticsInfo");
   MessageBrokerController::subscribeTo("SDL.OnDeviceStateChanged");
   MessageBrokerController::subscribeTo("SDL.OnPolicyUpdate");
+  MessageBrokerController::subscribeTo("BasicCommunication.OnEventChanged");
 
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
 }
@@ -162,8 +164,10 @@ void MessageBrokerAdapter::ProcessRecievedFromMB(Json::Value& root) {
 
   // Messages from HMI (sent through message broker) have no priority so far
   // assign default priority
-  hmi_message_handler::MessageSharedPointer message = hmi_message_handler::MessageSharedPointer(new application_manager::Message(
-        protocol_handler::MessagePriority::kDefault));
+  hmi_message_handler::MessageSharedPointer message =
+      hmi_message_handler::MessageSharedPointer(
+          new application_manager::Message(
+              protocol_handler::MessagePriority::kDefault));
   // message->set_message_type()
   message->set_json_message(message_string);
   message->set_protocol_version(application_manager::ProtocolVersion::kHMI);

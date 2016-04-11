@@ -38,19 +38,18 @@ Copyright (c) 2013, Ford Motor Company
 #include "application_manager/commands/mobile/system_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/MOBILE_API.h"
 #include "config_profile/profile.h"
 #include "utils/file_system.h"
-#include "formatters/CFormatterJsonBase.hpp"
+#include "formatters/CFormatterJsonBase.h"
 #include "json/json.h"
 #include "utils/helpers.h"
 
 namespace application_manager {
 
-namespace {
-
 CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
+namespace {
 
 const char* kQueryAppsValidationFailedPrefix =
     ":QUERY_APPS_VALIDATION_FAILED: ";
@@ -418,11 +417,9 @@ const std::string kSYNC = "SYNC";
 const std::string kIVSU = "IVSU";
 
 SystemRequest::SystemRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+    : CommandRequestImpl(message) {}
 
-SystemRequest::~SystemRequest() {
-}
+SystemRequest::~SystemRequest() {}
 
 void SystemRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -440,8 +437,10 @@ void SystemRequest::Run() {
       static_cast<mobile_apis::RequestType::eType>(
           (*message_)[strings::msg_params][strings::request_type].asInt());
 
-  if (!policy::PolicyHandler::instance()->IsRequestTypeAllowed(
-          application->mobile_app_id(), request_type)) {
+  const policy::PolicyHandlerInterface& policy_handler =
+      application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler();
+  if (!policy_handler.IsRequestTypeAllowed(
+           application->mobile_app_id(), request_type)) {
     SendResponse(false, mobile_apis::Result::DISALLOWED);
     return;
   }
@@ -497,7 +496,8 @@ void SystemRequest::Run() {
 
     LOG4CXX_DEBUG(logger_,
                   "Binary data is not present. Trying to find file "
-                      << file_name << " within previously saved app file in "
+                      << file_name
+                      << " within previously saved app file in "
                       << binary_data_folder);
 
     const AppFile* file = application->GetFile(app_full_file_path);

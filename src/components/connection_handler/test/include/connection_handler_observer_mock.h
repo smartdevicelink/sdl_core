@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_CONNECTION_HANDLER_TEST_INCLUDE_CONNECTION_HANDLER_OBSERVER_MOCK_H_
 #define SRC_COMPONENTS_CONNECTION_HANDLER_TEST_INCLUDE_CONNECTION_HANDLER_OBSERVER_MOCK_H_
 
-#include <gmock/gmock.h>
+#include "gmock/gmock.h"
 #include <string>
 #include "connection_handler/connection_handler_observer.h"
 

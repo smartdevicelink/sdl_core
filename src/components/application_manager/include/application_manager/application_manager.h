@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,44 +33,232 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
 
+#include <string>
+#include <vector>
+#include <set>
+
+#include "application_manager/application.h"
+#include "application_manager/hmi_capabilities.h"
+#include "application_manager/commands/command.h"
+
+#include "utils/data_accessor.h"
+#include "utils/shared_ptr.h"
+#include "telemetry_monitor/telemetry_observable.h"
+#include "application_manager/policies/policy_handler_interface.h"
+
+namespace resumption {
+class LastState;
+}
+
+namespace media_manager {
+class MediaManager;
+}
+
 // Other compomnents class declaration
 namespace hmi_message_handler {
-  class HMIMessageHandler;
+class HMIMessageHandler;
 }
 namespace protocol_handler {
-  class ProtocolHandler;
+class ProtocolHandler;
 }
 namespace connection_handler {
-  class ConnectionHandler;
+class ConnectionHandler;
 }
 
 namespace application_manager {
 
-class Application;
+struct ApplicationsAppIdSorter {
+  bool operator()(const ApplicationSharedPtr lhs,
+                  const ApplicationSharedPtr rhs) const {
+    return lhs->app_id() < rhs->app_id();
+  }
+};
+typedef std::set<ApplicationSharedPtr, ApplicationsAppIdSorter> ApplicationSet;
+
+// typedef for Applications list iterator
+typedef ApplicationSet::iterator ApplicationSetIt;
+
+// typedef for Applications list const iterator
+typedef ApplicationSet::const_iterator ApplicationSetConstIt;
 
 class ApplicationManager {
-  public:
-    virtual ~ApplicationManager() {
-    }
+ public:
+  virtual ~ApplicationManager() {}
 
-    /**
-     * Inits application manager
-     */
-    virtual bool Init() = 0;
+  /**
+   * Inits application manager
+   */
+  virtual bool Init(resumption::LastState& last_state,
+                    media_manager::MediaManager* media_manager) = 0;
 
-    /**
-     * @brief Stop work.
-     *
-     * @return TRUE on success otherwise FALSE.
-     **/
-    virtual bool Stop() = 0;
+  /**
+   * @brief Stop work.
+   *
+   * @return TRUE on success otherwise FALSE.
+   **/
+  virtual bool Stop() = 0;
 
-    virtual void set_hmi_message_handler(
+  virtual void set_hmi_message_handler(
       hmi_message_handler::HMIMessageHandler* handler) = 0;
-    virtual void set_protocol_handler(
+  virtual void set_protocol_handler(
       protocol_handler::ProtocolHandler* handler) = 0;
-    virtual void set_connection_handler(
+  virtual void set_connection_handler(
       connection_handler::ConnectionHandler* handler) = 0;
+  virtual connection_handler::ConnectionHandler& connection_handler() const = 0;
+
+  virtual DataAccessor<ApplicationSet> applications() const = 0;
+
+  virtual ApplicationSharedPtr application(uint32_t app_id) const = 0;
+  virtual ApplicationSharedPtr active_application() const = 0;
+  //
+
+  /**
+   * Function used only by HMI request/response/notification base classes
+   * to change HMI app id to Mobile app id and vice versa.
+   * Don't use it inside Core
+   */
+  virtual ApplicationSharedPtr application_by_hmi_app(
+      uint32_t hmi_app_id) const = 0;
+
+  virtual ApplicationSharedPtr application_by_policy_id(
+      const std::string& policy_app_id) const = 0;
+
+  virtual std::vector<ApplicationSharedPtr> applications_by_button(
+      uint32_t button) = 0;
+  virtual std::vector<ApplicationSharedPtr> applications_with_navi() = 0;
+
+  /**
+   * @brief Returns media application with LIMITED HMI Level if exists
+   *
+   * @return Shared pointer to application if application does not
+   * exist returns empty shared pointer.
+   */
+  virtual ApplicationSharedPtr get_limited_media_application() const = 0;
+
+  /**
+   * @brief Returns navigation application with LIMITED HMI Level if exists
+   *
+   * @return Shared pointer to application if application does not
+   * exist returns empty shared pointer
+   */
+  virtual ApplicationSharedPtr get_limited_navi_application() const = 0;
+
+  /**
+   * @brief Returns voice communication application with
+   * LIMITED HMI Level if exists
+   *
+   * @return Shared pointer to application if application does not
+   * exist returns empty shared pointer
+   */
+  virtual ApplicationSharedPtr get_limited_voice_application() const = 0;
+
+  /**
+   * @brief Retrieves application id associated with correlation id
+   *
+   * @param correlation_id Correlation ID of the HMI request
+   *
+   * @return application id associated with correlation id
+   */
+  virtual const uint32_t application_id(const int32_t correlation_id) = 0;
+
+  /**
+   * @brief Sets application id correlation id
+   *
+   * @param correlation_id Correlation ID of the HMI request
+   * @param app_id Application ID
+   */
+  virtual void set_application_id(const int32_t correlation_id,
+                                  const uint32_t app_id) = 0;
+
+  /**
+   * @brief OnHMILevelChanged the callback that allows SDL to react when
+   * application's HMI level has been changed.
+   *
+   * @param app_id application identifier for which HMILevel has been chaned.
+   *
+   * @param from previous HMILevel.
+   * @param to current HMILevel.
+   */
+  virtual void OnHMILevelChanged(uint32_t app_id,
+                                 mobile_apis::HMILevel::eType from,
+                                 mobile_apis::HMILevel::eType to) = 0;
+
+  /**
+   * @brief Sends HMI status notification to mobile
+   *
+   * @param application_impl application with changed HMI status
+   *
+   **/
+  virtual void SendHMIStatusNotification(
+      const utils::SharedPtr<Application> app) = 0;
+
+  virtual void SendMessageToMobile(const commands::MessageSharedPtr message,
+                                   bool final_message = false) = 0;
+
+  virtual void SendMessageToHMI(const commands::MessageSharedPtr message) = 0;
+
+  virtual bool ManageHMICommand(const commands::MessageSharedPtr message) = 0;
+  virtual bool ManageMobileCommand(const commands::MessageSharedPtr message,
+                                   commands::Command::CommandOrigin origin) = 0;
+
+
+  virtual mobile_api::HMILevel::eType GetDefaultHmiLevel(
+      ApplicationConstSharedPtr application) const = 0;
+  /**
+   * @brief hmi_capabilities return capabilities of hmi
+   * @return capabilities of hmi
+   */
+  virtual HMICapabilities& hmi_capabilities() = 0;
+
+  virtual bool is_attenuated_supported() = 0;
+
+  /**
+   * @brief Checks if application with the same HMI type
+   *        (media, voice communication or navi) exists
+   *        in HMI_FULL or HMI_LIMITED level.
+   *
+   * @param app Pointer to application to compare with
+   *
+   * @return true if exist otherwise false
+   */
+  virtual bool IsAppTypeExistsInFullOrLimited(
+      ApplicationConstSharedPtr app) const = 0;
+
+  /**
+   * @brief Sets default HMI level and configure application after its
+   * registration
+   * @param app Application
+   */
+  virtual void OnApplicationRegistered(ApplicationSharedPtr app) = 0;
+
+  /**
+   * @brief Checks if application can stream (streaming service is started and
+   * streaming is enabled in application)
+   * @param app_id Application id
+   * @param service_type Service type to check
+   * @return True if streaming is allowed, false in other case
+   */
+  virtual bool CanAppStream(
+      uint32_t app_id, protocol_handler::ServiceType service_type) const = 0;
+
+  /**
+   * @brief ForbidStreaming forbids  the stream over the certain application.
+   * @param app_id the application's id which should stop streaming.
+   */
+  virtual void ForbidStreaming(uint32_t app_id) = 0;
+
+  /*
+   * @brief Creates AudioPassThru data chunk and inserts it
+   * to audio_pass_thru_messages_
+   *
+   * @param session_key Id of application for which
+   * audio pass thru should be sent
+   *
+   * @param binary_data AudioPassThru data chunk
+   */
+  virtual void SendAudioPassThroughNotification(uint32_t session_key,
+                                        std::vector<uint8_t>& binary_data) = 0;
+  virtual policy::PolicyHandlerInterface& GetPolicyHandler() = 0;
 };
 
 }  // namespace application_manager

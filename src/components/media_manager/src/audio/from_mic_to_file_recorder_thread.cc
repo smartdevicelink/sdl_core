@@ -37,7 +37,7 @@
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "FromMicToFileRecorderThread")
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
 GMainLoop* FromMicToFileRecorderThread::loop = NULL;
 

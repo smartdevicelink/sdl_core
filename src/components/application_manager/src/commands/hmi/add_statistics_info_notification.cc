@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/add_statistics_info_notification.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager_impl.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -52,7 +52,7 @@ void AddStatisticsInfoNotification::Run() {
   int type = (*message_)[strings::msg_params][hmi_notification::statistic_type]
       .asInt();
 
-  policy::PolicyHandler::instance()->AddStatisticsInfo(type);
+  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().AddStatisticsInfo(type);
 }
 
 }  // namespace commands

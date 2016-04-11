@@ -31,6 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "application_manager/commands/mobile/list_files_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -76,15 +77,20 @@ void ListFilesRequest::Run() {
   (*message_)[strings::msg_params][strings::space_available] =
         static_cast<int32_t>(ApplicationManagerImpl::instance()->
                              GetAvailableSpaceForApp(application->folder_name()));
-  int32_t i = 0;
+  uint32_t i = 0;
   const AppFilesMap& app_files = application->getAppFiles();
   for (AppFilesMap::const_iterator it = app_files.begin();
        it != app_files.end(); ++it) {
-      //In AppFile to application stored full path to file. In message required
-      //to write only name file.
-      //Plus one required for move to next letter after '/'.
-      (*message_)[strings::msg_params][strings::filenames][i++] =
-        it->first.substr(it->first.find_last_of('/') + 1);
+    std::string filename = it->first.substr(it->first.find_last_of('/') + 1);
+    // In AppFile to application stored full path to file. In message required
+    // to write only name file.
+    // Plus one required for move to next letter after '/'.
+    if (i < ::profile::Profile::instance()->list_files_response_size()) {
+      LOG4CXX_DEBUG(logger_, "File " + filename + " added to ListFiles response");
+      (*message_)[strings::msg_params][strings::filenames][i++] = filename;
+    } else {
+      LOG4CXX_DEBUG(logger_, "File " + filename + " not added to ListFiles response");
+    }
   }
   (*message_)[strings::params][strings::message_type] =
       application_manager::MessageType::kResponse;

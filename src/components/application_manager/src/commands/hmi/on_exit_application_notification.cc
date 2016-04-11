@@ -51,30 +51,52 @@ OnExitApplicationNotification::~OnExitApplicationNotification() {
 void OnExitApplicationNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  using namespace mobile_apis;
+  using namespace hmi_apis;
+
   ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-  ApplicationSharedPtr app_impl = app_mgr->application(
-      (*message_)[strings::msg_params][strings::app_id].asUInt());
+  uint32_t app_id = (*message_)[strings::msg_params][strings::app_id].asUInt();
+  ApplicationSharedPtr app_impl = app_mgr->application(app_id);
+      
   if (!(app_impl.valid())) {
     LOG4CXX_ERROR(logger_, "Application does not exist");
     return;
   }
-  hmi_apis::Common_ApplicationToNONEReason::eType reason;
-  reason = static_cast<hmi_apis::Common_ApplicationToNONEReason::eType>
-                       ((*message_)[strings::msg_params][strings::reason].asInt());
+
+  Common_ApplicationExitReason::eType reason;
+  reason = static_cast<Common_ApplicationExitReason::eType>
+      ((*message_)[strings::msg_params][strings::reason].asInt());
+
   switch (reason) {
-    case hmi_apis::Common_ApplicationToNONEReason::USER_EXIT : {
+    case Common_ApplicationExitReason::DRIVER_DISTRACTION_VIOLATION: {
+      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+          app_impl->app_id(),
+              AppInterfaceUnregisteredReason::DRIVER_DISTRACTION_VIOLATION);
       break;
     }
-    default : {
-      LOG4CXX_WARN(logger_, "Unhandled reason");
+    case Common_ApplicationExitReason::USER_EXIT: {
       break;
+    }
+    case Common_ApplicationExitReason::UNAUTHORIZED_TRANSPORT_REGISTRATION: {
+      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+          app_id, AppInterfaceUnregisteredReason::APP_UNAUTHORIZED);
+      app_mgr->UnregisterApplication(app_id, Result::SUCCESS);
+      return;
+    }
+    case Common_ApplicationExitReason::UNSUPPORTED_HMI_RESOURCE: {
+      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+          app_id, AppInterfaceUnregisteredReason::UNSUPPORTED_HMI_RESOURCE);
+      app_mgr->UnregisterApplication(app_id, Result::SUCCESS);
+      return;
+    }
+    default: {
+      LOG4CXX_WARN(logger_, "Unhandled reason");
+      return;
     }
   }
-  using namespace mobile_apis;
-  ApplicationManagerImpl::instance()->SetState<false>(app_impl->app_id(),
-                                                      HMILevel::HMI_NONE,
-                                                      AudioStreamingState::NOT_AUDIBLE,
-                                                      SystemContext::SYSCTXT_MAIN);
+
+  ApplicationManagerImpl::instance()->SetState<false>(
+      app_id, HMILevel::HMI_NONE, AudioStreamingState::NOT_AUDIBLE);
 }
 
 }  // namespace commands

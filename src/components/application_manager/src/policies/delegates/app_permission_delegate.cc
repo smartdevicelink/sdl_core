@@ -31,10 +31,11 @@
  */
 
 #include "application_manager/policies/delegates/app_permission_delegate.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/policies/policy_handler_interface.h"
 
 namespace policy {
-  CREATE_LOGGERPTR_GLOBAL(logger_, "AppPermissionDelegate")
+  CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 
   AppPermissionDelegate::AppPermissionDelegate(
       const uint32_t connection_key, const PermissionConsent& permissions)
@@ -44,7 +45,9 @@ namespace policy {
 
   void AppPermissionDelegate::threadMain() {
   LOG4CXX_AUTO_TRACE(logger_);
-  PolicyHandler::instance()->OnAppPermissionConsentInternal(connection_key_,
+  policy::PolicyHandlerInterface& policy_handler =
+      application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler();
+  policy_handler.OnAppPermissionConsentInternal(connection_key_,
                                                             permissions_);
 }
 
@@ -52,4 +55,4 @@ void AppPermissionDelegate::exitThreadMain() {
   // Do nothing
 }
 
-} // namespace policy
+}  // namespace policy

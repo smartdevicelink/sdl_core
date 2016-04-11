@@ -36,8 +36,8 @@
 #include "gtest/gtest.h"
 
 #include "smart_objects/smart_object.h"
-#include "formatters/CFormatterJsonSDLRPCv1.hpp"
-#include "formatters/CSmartFactory.hpp"
+#include "formatters/CFormatterJsonSDLRPCv1.h"
+#include "formatters/CSmartFactory.h"
 #include "create_smartSchema.h"
 
 namespace test {

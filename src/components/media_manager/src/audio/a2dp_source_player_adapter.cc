@@ -39,10 +39,11 @@
 #include "utils/lock.h"
 #include "utils/logger.h"
 #include "connection_handler/connection_handler_impl.h"
+#include "protocol_handler/session_observer.h"
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "A2DPSourcePlayerAdapter");
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
 const static size_t BUFSIZE = 32;
 
@@ -69,7 +70,8 @@ class A2DPSourcePlayerAdapter::A2DPSourcePlayerThread
     DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerThread);
 };
 
-A2DPSourcePlayerAdapter::A2DPSourcePlayerAdapter() {
+A2DPSourcePlayerAdapter::A2DPSourcePlayerAdapter(protocol_handler::SessionObserver &session_observer)
+    : session_observer_(session_observer) {
 }
 
 A2DPSourcePlayerAdapter::~A2DPSourcePlayerAdapter() {
@@ -89,11 +91,16 @@ void A2DPSourcePlayerAdapter::StartActivity(int32_t application_key) {
   if (application_key != current_application_) {
     current_application_ = application_key;
 
+    const protocol_handler::SessionObserver& session_observer =
+        application_manager::ApplicationManagerImpl::instance()
+        ->connection_handler()
+        .get_session_observer();
+
     uint32_t device_id = 0;
-    connection_handler::ConnectionHandlerImpl::instance()->
-        GetDataOnSessionKey(application_key, 0, NULL, &device_id);
+    session_observer_.GetDataOnSessionKey(
+        application_key, 0, NULL, &device_id);
     std::string mac_adddress;
-    connection_handler::ConnectionHandlerImpl::instance()->GetDataOnDeviceID(
+    session_observer_.GetDataOnDeviceID(
       device_id,
       NULL,
       NULL,
@@ -128,8 +135,8 @@ void A2DPSourcePlayerAdapter::StopActivity(int32_t application_key) {
   }
 }
 
-bool A2DPSourcePlayerAdapter::is_app_performing_activity(int32_t
-                                                         application_key) {
+bool A2DPSourcePlayerAdapter::is_app_performing_activity(
+    int32_t application_key) const {
   return (application_key == current_application_);
 }
 

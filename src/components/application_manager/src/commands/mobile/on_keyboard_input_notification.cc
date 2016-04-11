@@ -44,11 +44,9 @@ namespace mobile {
 
 OnKeyBoardInputNotification::OnKeyBoardInputNotification(
     const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {
-}
+    : CommandNotificationImpl(message) {}
 
-OnKeyBoardInputNotification::~OnKeyBoardInputNotification() {
-}
+OnKeyBoardInputNotification::~OnKeyBoardInputNotification() {}
 
 void OnKeyBoardInputNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -56,23 +54,26 @@ void OnKeyBoardInputNotification::Run() {
   ApplicationSharedPtr app_to_notify;
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
-  ApplicationManagerImpl::ApplictionSetIt it = accessor.begin();
+  ApplicationSetConstIt it = accessor.begin();
   for (; accessor.end() != it; ++it) {
     // if there is app with active perform interaction use it for notification
-    if ((*it)->is_perform_interaction_active()) {
-      LOG4CXX_INFO(logger_, "There is application with active PerformInteraction");
-      app_to_notify = *it;
+    ApplicationSharedPtr app = *it;
+    if (app->is_perform_interaction_active()) {
+      LOG4CXX_INFO(logger_,
+                   "There is application with active PerformInteraction");
+      app_to_notify = app;
       break;
     }
 
-    if (mobile_apis::HMILevel::eType::HMI_FULL == (*it)->hmi_level()) {
+    if (mobile_apis::HMILevel::eType::HMI_FULL == app->hmi_level()) {
       LOG4CXX_INFO(logger_, "There is application in HMI_FULL level");
-      app_to_notify = *it;
+      app_to_notify = app;
     }
   }
 
   if (app_to_notify.valid()) {
-    (*message_)[strings::params][strings::connection_key] = app_to_notify->app_id();
+    (*message_)[strings::params][strings::connection_key] =
+        app_to_notify->app_id();
     SendNotification();
   }
 }

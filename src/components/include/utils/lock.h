@@ -57,11 +57,15 @@ class SpinMutex {
   SpinMutex()
     : state_(0) { }
   void Lock() {
+    // Comment below add exception for lint error
+    // Reason: FlexeLint doesn't know about compiler's built-in instructions
+    /*lint -e1055*/
     if (atomic_post_set(&state_) == 0) {
       return;
     }
     for(;;) {
       sched_yield();
+      /*lint -e1055*/
       if (state_ == 0 && atomic_post_set(&state_) == 0) {
         return;
       }
@@ -92,7 +96,7 @@ class SpinMutex {
 class Lock {
  public:
   Lock();
-  Lock(bool is_mutex_recursive);
+  Lock(bool is_recursive);
   ~Lock();
 
   // Ackquire the lock. Must be called only once on a thread.
@@ -130,6 +134,7 @@ class Lock {
   void AssertTakenAndMarkFree() {}
 #endif
 
+  void Init(bool is_recursive);
 
   friend class ConditionalVariable;
   DISALLOW_COPY_AND_ASSIGN(Lock);

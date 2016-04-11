@@ -1,6 +1,8 @@
 // This file is generated, do not edit
 #ifndef POLICY_TABLE_INTERFACE_BASE_POLICY_TABLE_INTERFACE_BASE_TYPES_H_
 #define POLICY_TABLE_INTERFACE_BASE_POLICY_TABLE_INTERFACE_BASE_TYPES_H_
+#include <climits>
+
 #include "./enums.h"
 #include "rpc_base/rpc_message.h"
 namespace Json {
@@ -38,7 +40,8 @@ typedef Map< URL, 1, 255 > URLList;
 
 typedef Map< URLList, 1, 255 > ServiceEndpoints;
 
-typedef Map< Integer<uint8_t, 0, 255>, 0, 6 > NumberOfNotificationsPerMinute;
+typedef uint8_t NumberOfNotificationsType;
+typedef Map< Integer<NumberOfNotificationsType, 0, 255>, 0, 6 > NumberOfNotificationsPerMinute;
 
 typedef Array< Integer<uint16_t, 1, 1000>, 0, 10 > SecondsBetweenRetries;
 
@@ -58,15 +61,10 @@ typedef Array< Enum<RequestType>, 0, 255 > RequestTypes;
 
 struct PolicyBase : CompositeType {
   public:
-    Strings groups;
-    Optional< Strings > preconsented_groups;
     Enum<Priority> priority;
-    Enum<HmiLevel> default_hmi;
-    Boolean keep_context;
-    Boolean steal_focus;
   public:
     PolicyBase();
-    PolicyBase(const Strings& groups, Priority priority, HmiLevel default_hmi, bool keep_context, bool steal_focus);
+    PolicyBase(Priority priority);
     virtual ~PolicyBase();
     explicit PolicyBase(const Json::Value* value__);
     Json::Value ToJsonValue() const;
@@ -82,22 +80,23 @@ struct PolicyBase : CompositeType {
 struct DevicePolicy : PolicyBase {
   public:
     DevicePolicy();
-    DevicePolicy(const Strings& groups, Priority priority, HmiLevel default_hmi, bool keep_context, bool steal_focus);
+    DevicePolicy(Priority priority);
     ~DevicePolicy();
     explicit DevicePolicy(const Json::Value* value__);
 };
 
 struct ApplicationParams : PolicyBase {
   public:
+    Strings groups;
     Optional< Strings > nicknames;
     Optional< AppHMITypes > AppHMIType;
     Optional< RequestTypes > RequestType;
     Optional< Integer<uint16_t, 0, 65225> > memory_kb;
-    Optional< Integer<uint16_t, 0, 65225> > heart_beat_timeout_ms;
+    Optional< Integer<uint32_t, 0, UINT_MAX> > heart_beat_timeout_ms;
     Optional< String<0, 255> > certificate;
   public:
     ApplicationParams();
-    ApplicationParams(const Strings& groups, Priority priority, HmiLevel default_hmi, bool keep_context, bool steal_focus);
+    ApplicationParams(const Strings& groups, Priority priority);
     ~ApplicationParams();
     explicit ApplicationParams(const Json::Value* value__);
     Json::Value ToJsonValue() const;
@@ -181,6 +180,7 @@ struct ModuleConfig : CompositeType {
     Optional< String<1, 100> > vehicle_make;
     Optional< String<1, 100> > vehicle_model;
     Optional< String<4, 4> > vehicle_year;
+    Optional< String<0, 10> > preloaded_date;
     Optional< String<0, 65535> > certificate;
   public:
     ModuleConfig();
@@ -273,8 +273,26 @@ struct ModuleMeta : CompositeType {
 
 struct AppLevel : CompositeType {
   public:
+
+    Integer<uint16_t, 0, 65535> minutes_in_hmi_full;
+    String<1, 10> app_registration_language_gui;
+    String<0, 10> app_registration_language_vui;
+    Integer<uint16_t, 0, 65535> minutes_in_hmi_limited;
+    Integer<uint16_t, 0, 65535> minutes_in_hmi_background;
+    Integer<uint16_t, 0, 65535> minutes_in_hmi_none;
+    Integer<uint16_t, 0, 65535> count_of_user_selections;
+    Integer<uint16_t, 0, 65535> count_of_rejections_sync_out_of_memory;
+    Integer<uint16_t, 0, 65535> count_of_rejections_nickname_mismatch;
+    Integer<uint16_t, 0, 65535> count_of_rejections_duplicate_name;
+    Integer<uint16_t, 0, 65535> count_of_rejected_rpc_calls;
+    Integer<uint16_t, 0, 65535> count_of_rpcs_sent_in_hmi_none;
+    Integer<uint16_t, 0, 65535> count_of_removals_for_bad_behavior;
+    Integer<uint16_t, 0, 65535> count_of_tls_errors;
+    Integer<uint16_t, 0, 65535> count_of_run_attempts_while_revoked;
   public:
     AppLevel();
+    AppLevel(uint16_t minutes_in_hmi_full, const std::string& app_registration_language_gui, const std::string& app_registration_language_vui, uint16_t minutes_in_hmi_limited, uint16_t minutes_in_hmi_background, uint16_t minutes_in_hmi_none, uint16_t count_of_user_selections, uint16_t count_of_rejections_sync_out_of_memory, uint16_t count_of_rejections_nickname_mismatch, uint16_t count_of_rejections_duplicate_name, uint16_t count_of_rejected_rpc_calls, uint16_t count_of_rpcs_sent_in_hmi_none, uint16_t count_of_removals_for_bad_behavior,
+uint16_t count_of_tls_errors, uint16_t count_of_run_attempts_while_revoked);
     ~AppLevel();
     explicit AppLevel(const Json::Value* value__);
     Json::Value ToJsonValue() const;

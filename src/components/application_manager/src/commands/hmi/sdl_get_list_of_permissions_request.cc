@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/sdl_get_list_of_permissions_request.h"
-#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -51,7 +51,7 @@ void SDLGetListOfPermissionsRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::app_id)) {
     connection_key = (*message_)[strings::msg_params][strings::app_id].asUInt();
   }
-  policy::PolicyHandler::instance()->OnGetListOfPermissions(
+  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnGetListOfPermissions(
         connection_key,
         (*message_)[strings::params][strings::correlation_id].asUInt());
 }

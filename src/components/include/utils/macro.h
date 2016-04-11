@@ -39,8 +39,8 @@
 #endif
 #include "logger.h"
 
-
-
+// A macro to set some action for variable to avoid "unused variable" warning
+#define UNUSED(x) (void)x;
 // A macro to disallow the copy constructor and operator= functions
 // This should be used in the private: declarations for a class
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
@@ -60,6 +60,7 @@
 
 #ifdef DEBUG
   #define ASSERT(condition) \
+    FLUSH_LOGGER(); \
     do { \
       DEINIT_LOGGER(); \
       assert(condition); \
@@ -72,7 +73,7 @@
 
 #define DCHECK(condition) \
   if (!(condition)) { \
-    CREATE_LOGGERPTR_LOCAL(logger_, "assert"); \
+    CREATE_LOGGERPTR_LOCAL(logger_, "Utils"); \
     LOG4CXX_FATAL(logger_,  "DCHECK failed with \"" << #condition \
        << "\" [" << __FUNCTION__ << "][" << __FILE__ << ':' << __LINE__ << ']'); \
     ASSERT((condition)); \
@@ -84,9 +85,9 @@
  */
 #define DCHECK_OR_RETURN(condition, return_value) \
   if (!(condition)) { \
-    CREATE_LOGGERPTR_LOCAL(logger_, "assert"); \
+    CREATE_LOGGERPTR_LOCAL(logger_, "Utils"); \
     LOG4CXX_FATAL(logger_,  "DCHECK failed with \"" << #condition \
-       << "\" [" << __FUNCTION__ << "][" << __FILE__ << ':' << __LINE__ << ']' ); \
+       << "\" [" << __FUNCTION__ << "][" << __FILE__ << ':' << __LINE__ << ']'); \
     ASSERT((condition)); \
     return (return_value); \
   }
@@ -96,9 +97,9 @@
  */
 #define DCHECK_OR_RETURN_VOID(condition) \
   if (!(condition)) { \
-    CREATE_LOGGERPTR_LOCAL(logger_, "assert"); \
+    CREATE_LOGGERPTR_LOCAL(logger_, "Utils"); \
     LOG4CXX_FATAL(logger_,  "DCHECK failed with \"" << #condition \
-       << "\" [" << __FUNCTION__ << "][" << __FILE__ << ':' << __LINE__ << ']' ); \
+       << "\" [" << __FUNCTION__ << "][" << __FILE__ << ':' << __LINE__ << ']'); \
     ASSERT((condition)); \
     return ; \
   }

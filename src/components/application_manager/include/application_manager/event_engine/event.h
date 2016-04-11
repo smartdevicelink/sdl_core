@@ -141,7 +141,7 @@ int32_t Event::smart_object_type() const {
         strings::params).getElement(strings::message_type).asInt();
 }
 
-}
-}
+}  // namespace event_engine
+}  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_H_

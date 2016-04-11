@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,7 @@
 
 #include <string>
 #include "application_manager/event_engine/event.h"
-#include "application_manager/event_engine/event_dispatcher.h"
+#include "application_manager/event_engine/event_dispatcher_impl.h"
 
 namespace application_manager {
 namespace event_engine {
@@ -43,8 +43,6 @@ namespace event_engine {
 class EventObserver
 {
  public:
-
-  friend class EventDispatcher;
 
   // Typedef for possible Observer ID's from mobile_apis functionID enum
   typedef unsigned long ObserverID;
@@ -110,7 +108,7 @@ const EventObserver::ObserverID& EventObserver::id() const {
   return id_;
 }
 
-}
-}
+}  // namespace event_engine
+}  // namespace application_manager
 
 #endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_OBSERVER_H_

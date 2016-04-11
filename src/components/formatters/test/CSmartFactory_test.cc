@@ -31,7 +31,7 @@
  */
 
 #include "SmartFactoryTestHelper.h"
-#include "formatters/CSmartFactory.hpp"
+#include "formatters/CSmartFactory.h"
 #include "gtest/gtest.h"
 
 namespace test {

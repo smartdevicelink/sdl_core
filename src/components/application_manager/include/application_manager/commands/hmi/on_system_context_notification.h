@@ -64,9 +64,6 @@ class OnSystemContextNotification : public NotificationFromHMI {
   virtual void Run();
 
  private:
-  void SendSystemContextNotification(ApplicationSharedPtr app,
-                                     mobile_api::SystemContext::eType system_context);
-
   DISALLOW_COPY_AND_ASSIGN(OnSystemContextNotification);
 };
 

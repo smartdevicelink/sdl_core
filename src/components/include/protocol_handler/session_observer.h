@@ -53,6 +53,7 @@ enum {
   HASH_ID_NOT_SUPPORTED = 0,
   HASH_ID_WRONG = 0xFFFF0000
 };
+
 /**
  * \class SessionObserver
  * \brief Interface for making a bridge between ProtocolHandler and
@@ -75,10 +76,11 @@ class SessionObserver {
    * \return uint32_t Id (number) of new session if successful, otherwise 0.
    */
   virtual uint32_t OnSessionStartedCallback(
-    const transport_manager::ConnectionUID &connection_handle,
+    const transport_manager::ConnectionUID connection_handle,
     const uint8_t sessionId,
     const protocol_handler::ServiceType &service_type,
     const bool is_protected, uint32_t* hash_id) = 0;
+
   /**
    * \brief Callback function used by ProtocolHandler
    * when Mobile Application initiates session ending.
@@ -90,7 +92,7 @@ class SessionObserver {
    * \return uint32_t 0 if operation fails, session key otherwise
    */
   virtual uint32_t OnSessionEndedCallback(
-      const transport_manager::ConnectionUID &connection_handle,
+      const transport_manager::ConnectionUID connection_handle,
       const uint8_t sessionId,
       const uint32_t &hashCode,
       const protocol_handler::ServiceType &service_type) = 0;
@@ -119,7 +121,7 @@ class SessionObserver {
    */
   virtual uint32_t KeyFromPair(
     transport_manager::ConnectionUID connection_handle,
-    uint8_t session_id) = 0;
+    uint8_t session_id) const = 0;
 
   /**
    * \brief Returns connection identifier and session number from given
@@ -131,7 +133,7 @@ class SessionObserver {
   virtual void PairFromKey(
     uint32_t key,
     transport_manager::ConnectionUID *connection_handle,
-    uint8_t *sessionId) = 0;
+    uint8_t *sessionId) const = 0;
 
   /**
    * \brief information about given Connection Key.
@@ -144,7 +146,7 @@ class SessionObserver {
   virtual int32_t GetDataOnSessionKey(uint32_t key,
                                       uint32_t *app_id,
                                       std::list<int32_t> *sessions_list,
-                                      uint32_t *device_id) = 0;
+                                      uint32_t *device_id) const = 0;
 
   /**
    * \brief information about device
@@ -155,11 +157,12 @@ class SessionObserver {
    * \param connection_type Returned: type of connection (USB, BT, etc.)
    * \return int32_t -1 in case of error or 0 in case of success
    */
-  virtual int32_t GetDataOnDeviceID(uint32_t device_handle,
-                                    std::string *device_name,
-                                    std::list<uint32_t> *applications_list,
-                                    std::string *mac_address,
-                                    std::string *connection_type) = 0;
+  virtual int32_t GetDataOnDeviceID(
+        transport_manager::DeviceHandle device_handle,
+        std::string *device_name = NULL,
+        std::list<uint32_t> *applications_list = NULL,
+        std::string *mac_address = NULL,
+        std::string *connection_type = NULL) const = 0;
 
   /**
    * \brief returns TRUE if session supports sending HEARTBEAT ACK to mobile side
@@ -169,7 +172,7 @@ class SessionObserver {
    */
   virtual bool  IsHeartBeatSupported(
     transport_manager::ConnectionUID connection_handle,
-    uint8_t session_id) = 0;
+    uint8_t session_id) const = 0;
 
   /**
    * @brief returns protocol version which application supports
@@ -179,7 +182,7 @@ class SessionObserver {
    * @return TRUE if session and connection exist otherwise returns FALSE
    */
   virtual bool ProtocolVersionUsed(uint32_t connection_id,
-		  uint8_t session_id, uint8_t& protocol_version) = 0;
+      uint8_t session_id, uint8_t& protocol_version) const = 0;
 
 
 #ifdef ENABLE_SECURITY
@@ -212,6 +215,9 @@ class SessionObserver {
   virtual void SetProtectionFlag(
     const uint32_t &key,
     const protocol_handler::ServiceType &service_type) = 0;
+
+  virtual security_manager::SSLContext::HandshakeContext
+    GetHandshakeContext(uint32_t key) const = 0;
 #endif  // ENABLE_SECURITY
 
  protected:

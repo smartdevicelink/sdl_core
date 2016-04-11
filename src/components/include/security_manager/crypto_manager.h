@@ -30,10 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_H_
-#define SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_H_
+#define SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_H_
 
-#include <string>
+#include "application_manager/policies/policy_handler_observer.h"
+#include "security_manager/security_manager_settings.h"
 
 /**
  * \class security_manager::CryptoManager
@@ -49,23 +50,27 @@
 namespace security_manager {
 class SSLContext;
 
-enum Mode { CLIENT, SERVER };
-enum Protocol { SSLv3, TLSv1, TLSv1_1, TLSv1_2};
-
-class CryptoManager {
+class CryptoManager: public policy::PolicyHandlerObserver{
  public:
-  virtual bool Init(Mode mode,
-                    Protocol protocol,
-                    const std::string &cert_filename,
-                    const std::string &key_filename,
-                    const std::string &ciphers_list,
-                    bool verify_peer) = 0;
-  virtual void Finish() = 0;
+  /**
+   * @brief Init allows to initialize cryptomanager with certain values.
+   *
+   * @return true in case initialization was succesfull, false otherwise.
+   */
+  virtual bool Init() = 0;
   virtual SSLContext *CreateSSLContext() = 0;
+  virtual bool OnCertificateUpdated(const std::string& data) = 0;
   virtual void ReleaseSSLContext(SSLContext *context) = 0;
   virtual std::string LastError() const = 0;
+
+  virtual bool IsCertificateUpdateRequired() const = 0;
+  /**
+  * \brief Crypto manager settings getter
+  * \return pointer to crypto manager settings class
+  */
+  virtual const CryptoManagerSettings& get_settings() const = 0;
   virtual ~CryptoManager() { }
 };
 
 }  // namespace security_manager
-#endif  // SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_H_
+#endif  // SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_H_

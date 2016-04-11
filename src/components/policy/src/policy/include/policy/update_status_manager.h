@@ -3,7 +3,6 @@
 
 #include "policy/policy_types.h"
 #include "utils/lock.h"
-#include "utils/timer_thread.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/conditional_variable.h"
@@ -120,6 +119,12 @@ class UpdateStatusManager {
    * @return true, if in progress, otherwise - false
    */
   bool IsAppsSearchInProgress();
+
+#ifdef BUILD_TESTS
+  PolicyTableStatus GetLastUpdateStatus() const {
+      return GetUpdateStatus();
+  }
+#endif // BUILD_TESTS
 
 private:
   /*
