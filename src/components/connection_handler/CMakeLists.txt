@@ -28,14 +28,19 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  find_package(WinOpenSSL REQUIRED)
+endif()
 
 set(CH_SRC_DIR ${COMPONENTS_DIR}/connection_handler/src)
 
 include_directories (
     include
     ${COMPONENTS_DIR}/protocol_handler/include/
+    ${COMPONENTS_DIR}/config_profile/include/
     ${COMPONENTS_DIR}/utils/include/
     ${ENCRYPTION_INCLUDE_DIRECTORY}
+    ${OPENSSL_INCLUDE_DIRECTORY}
     ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
@@ -47,10 +52,23 @@ set (SOURCES
 )
 
 set(LIBRARIES
+    ConfigProfile
     ProtocolLibrary
 )
-
-add_library(connectionHandler ${SOURCES})
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+   set(HEADERS ${COMPONENTS_DIR}/connection_handler/include/connection_handler/connection.h
+               ${COMPONENTS_DIR}/connection_handler/include/connection_handler/connection_handler.h
+               ${COMPONENTS_DIR}/connection_handler/include/connection_handler/connection_handler_impl.h
+               ${COMPONENTS_DIR}/connection_handler/include/connection_handler/connection_handler_observer.h
+               ${COMPONENTS_DIR}/connection_handler/include/connection_handler/device.h
+               ${COMPONENTS_DIR}/connection_handler/include/connection_handler/devices_discovery_starter.h
+               ${COMPONENTS_DIR}/connection_handler/include/connection_handler/heartbeat_monitor.h)
+   source_group("Header Files" FILES ${HEADERS} )
+   source_group("Source Files" FILES ${SOURCES})
+   add_library(connectionHandler ${HEADERS} ${SOURCES})
+else()
+  add_library(connectionHandler ${SOURCES})
+endif()  
 target_link_libraries(connectionHandler encryption)
 
 if(BUILD_TESTS)
