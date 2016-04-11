@@ -405,7 +405,7 @@ const std::string&Profile::app_icons_folder() const {
   return app_icons_folder_;
 }
 
-const uint32_t&Profile::app_icons_folder_max_size() const {
+const uint32_t& Profile::app_icons_folder_max_size() const {
   return app_icons_folder_max_size_;
 }
 
@@ -664,11 +664,11 @@ const std::string& Profile::iap2_system_config() const {
   return iap2_system_config_;
 }
 
-int Profile::iap2_hub_connect_attempts() const {
+uint32_t Profile::iap2_hub_connect_attempts() const {
   return iap2_hub_connect_attempts_;
 }
 
-int Profile::iap_hub_connection_wait_timeout() const {
+uint32_t Profile::iap_hub_connection_wait_timeout() const {
   return iap_hub_connection_wait_timeout_;
 }
 

@@ -36,12 +36,14 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
+#include <list>
 #include "utils/macro.h"
-#include "utils/singleton.h"
 #include "protocol_handler/protocol_handler_settings.h"
 #include "connection_handler/connection_handler_settings.h"
 #include "hmi_message_handler/hmi_message_handler_settings.h"
 #include "media_manager/media_manager_settings.h"
+#include "transport_manager/transport_manager_settings.h"
+#include "application_manager/application_manager_settings.h"
 #include "policy/policy_settings.h"
 
 namespace profile {
@@ -54,9 +56,18 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
                 public hmi_message_handler::HMIMessageHandlerSettings,
                 public media_manager::MediaManagerSettings,
                 public policy::PolicySettings,
-                public utils::Singleton<Profile> {
+                public transport_manager::TransportManagerSettings,
+                public application_manager::ApplicationManagerSettings {
  public:
   // Methods section
+
+  /**
+   * Default constructor
+   *
+   * Unimplemented to avoid misusing
+   *
+   */
+  Profile();
 
   /**
    * Destructor
@@ -70,12 +81,12 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
    * @brief Returns sdl version represented
    * by git commit or value specified by user
    */
-  const std::string& sdl_version() const;
+  const std::string& sdl_version() const OVERRIDE;
 
   /**
     * @brief Returns true if HMI should be started, otherwise false
     */
-  bool launch_hmi() const;
+  bool launch_hmi() const OVERRIDE;
 #ifdef WEB_HMI
     /**
       * @brief Returns link to web hmi
@@ -105,18 +116,18 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
     /**
      * @brief Returns application icons folder path
      */
-    const std::string& app_icons_folder() const;
+    const std::string& app_icons_folder() const OVERRIDE;
 
     /**
      * @brief Returns application icons folder maximum size
      */
-    const uint32_t& app_icons_folder_max_size() const;
+    const uint32_t& app_icons_folder_max_size() const OVERRIDE;
 
     /**
      * @brief Returns application icons amount to remove from icon folder,
      * if maximum size exceeded
      */
-    const uint32_t& app_icons_amount_to_remove() const;
+    const uint32_t& app_icons_amount_to_remove() const OVERRIDE;
 
     /**
      * @brief Returns the path to the config file
@@ -291,81 +302,92 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
      */
     const uint32_t& pending_requests_amount() const;
 
-    /**
-     * @brief Returns Max allowed number of PutFile requests for one
-     * application in NONE
-     */
-    const uint32_t& put_file_in_none() const;
+  /**
+   * @brief Returns Max allowed number of PutFile requests for one
+   * application in NONE
+   */
+  const uint32_t& put_file_in_none() const OVERRIDE;
 
-    /**
-     * @brief Returns Max allowed number of DeleteFile requests for one
-     * application in NONE
-     */
-    const uint32_t& delete_file_in_none() const;
+  /**
+   * @brief Returns Max allowed number of DeleteFile requests for one
+   * application in NONE
+   */
+  const uint32_t& delete_file_in_none() const OVERRIDE;
 
-    /**
-     * @brief Returns Max allowed number of ListFiles requests for one
-     * application in NONE
-     */
-    const uint32_t& list_files_in_none() const;
+  /**
+   * @brief Returns Max allowed number of ListFiles requests for one
+   * application in NONE
+   */
+  const uint32_t& list_files_in_none() const OVERRIDE;
 
-    /**
-     * @brief Return List Files request array size
-     */
-    const uint32_t& list_files_response_size() const;
+  /*
+   * @brief Returns file name for storing applications data
+   */
+  const std::string& app_info_storage() const;
 
-    /*
-     * @brief Returns file name for storing applications data
-     */
-    const std::string& app_info_storage() const;
+  /*
+   * @brief Path to preloaded policy file
+   */
+  const std::string& preloaded_pt_file() const;
 
-    /*
-     * @brief Path to preloaded policy file
-     */
-    const std::string& preloaded_pt_file() const;
+  /**
+   * @brief Path to policies snapshot file
+   * @return file path
+   */
+  const std::string& policies_snapshot_file_name() const;
 
-    /**
-     * @brief Path to policies snapshot file
-     * @return file path
-     */
-    const std::string& policies_snapshot_file_name() const;
+  /**
+   * @brief Should Policy be turned off? (Library not loaded)
+   * @return Flag
+   */
+  bool enable_policy() const;
 
-    /**
-     * @brief Should Policy be turned off? (Library not loaded)
-     * @return Flag
-     */
-    bool enable_policy() const;
+  // TransportManageSettings interface
 
-    /*
-     * @brief Timeout in transport manager before disconnect
+  bool use_last_state() const OVERRIDE;
+
+  uint32_t transport_manager_disconnect_timeout() const OVERRIDE;
+
+  uint16_t transport_manager_tcp_adapter_port() const OVERRIDE;
+
+  // TransportManageMMESettings interface
+
+  const std::string& event_mq_name() const OVERRIDE;
+
+  const std::string& ack_mq_name() const OVERRIDE;
+
+  uint32_t iap2_hub_connect_attempts() const OVERRIDE;
+
+  uint32_t default_hub_protocol_index() const OVERRIDE;
+
+  const std::string& iap_legacy_protocol_mask() const OVERRIDE;
+
+  const std::string& iap_hub_protocol_mask() const OVERRIDE;
+
+  const std::string& iap_pool_protocol_mask() const OVERRIDE;
+
+  const std::string& iap_system_config() const OVERRIDE;
+
+  const std::string& iap2_system_config() const OVERRIDE;
+
+  uint32_t iap_hub_connection_wait_timeout() const OVERRIDE;
+  // TransportManageSettings interface end
+
+  /**
+   * @brief Returns supported diagnostic modes
+   */
+  const std::vector<uint32_t>& supported_diag_modes() const OVERRIDE;
+
+  /**
+    * @brief Returns system files folder path
     */
-    uint32_t transport_manager_disconnect_timeout() const;
+  const std::string& system_files_path() const OVERRIDE;
 
-    /*
-     * @brief Returns true if last state singleton is used
-     */
-    bool use_last_state() const;
-
-    /**
-     * @brief Returns supported diagnostic modes
-     */
-    const std::vector<uint32_t>& supported_diag_modes() const;
-
-    /**
-      * @brief Returns system files folder path
-      */
-    const std::string& system_files_path() const;
-
-    /**
-     * @brief Returns port for TCP transport adapter
-     */
-    uint16_t transport_manager_tcp_adapter_port() const;
-
-    /**
-     * @brief Returns value of timeout after which sent
-     * tts global properties for VCA
-     */
-    uint16_t tts_global_properties_timeout() const;
+  /**
+   * @brief Returns value of timeout after which sent
+   * tts global properties for VCA
+   */
+  uint16_t tts_global_properties_timeout() const OVERRIDE;
 
 #ifdef ENABLE_SECURITY
   /**
@@ -487,57 +509,23 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
                                     const char * const pKey,
                                     bool* out_result) const;
 
-    /**
-     * @brief Returns delimiter for SDL-generated TTS chunks
-     * @return TTS delimiter
-     */
-    const std::string& tts_delimiter() const;
+  /**
+   * @brief Returns delimiter for SDL-generated TTS chunks
+   * @return TTS delimiter
+   */
+  const std::string& tts_delimiter() const OVERRIDE;
 
-    /**
-     * @brief Returns recording file source name
-     */
-    const std::string& recording_file_source() const;
+  /**
+   * @brief Returns recording file name
+   */
+  const std::string& recording_file_name() const OVERRIDE;
 
-    /**
-     * @brief Returns recording file name
-     */
-    const std::string& recording_file_name() const;
-
-    const std::string& event_mq_name() const;
-
-    const std::string& ack_mq_name() const;
-
-    uint32_t application_list_update_timeout() const;
-
-    const std::pair<uint32_t, int32_t>& read_did_frequency() const;
-
-    const  std::pair<uint32_t, int32_t>& get_vehicle_data_frequency() const;
-
-    const  std::pair<uint32_t, int32_t>& start_stream_retry_amount() const;
+  uint32_t application_list_update_timeout() const OVERRIDE;
 
     /**
      * @brief Returns max allowed threads number for handling mobile requests
      */
     uint32_t thread_pool_size() const;
-
-    uint32_t default_hub_protocol_index() const;
-
-    const std::string& iap_legacy_protocol_mask() const;
-
-    const std::string& iap_hub_protocol_mask() const;
-
-    const std::string& iap_pool_protocol_mask() const;
-
-    const std::string& iap_system_config() const;
-
-    const std::string& iap2_system_config() const;
-
-    int iap2_hub_connect_attempts() const;
-
-    /**
-     * @return seconds
-     */
-    int iap_hub_connection_wait_timeout() const;
 
     /*
      * ProtocolHandler section
@@ -600,15 +588,30 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
      */
     void UpdateValues();
 
-  private:
-    /**
-     * Default constructor
-     *
-     * Unimplemented to avoid misusing
-     *
-     */
-    Profile();
+    const uint32_t& list_files_response_size() const OVERRIDE;
 
+    const std::string& recording_file_source() const OVERRIDE;
+
+    const std::pair<uint32_t, int32_t>& read_did_frequency() const OVERRIDE;
+
+    const std::pair<uint32_t, int32_t>& get_vehicle_data_frequency() const OVERRIDE;
+
+    const std::pair<uint32_t, int32_t>& start_stream_retry_amount() const OVERRIDE;
+  private:
+  /**
+   * @brief Reads a string value from the profile and interpret it
+   * as \c true on "true" value or as \c false on any other value
+   *
+   * @param value      The value to return
+   * @param pSection   The section to read the value in
+   * @param pKey       The key whose value needs to be read out
+   *
+   * @return FALSE if could not read the value out of the profile
+   * (then the value is not changed)
+   */
+  bool ReadValue(std::string* value,
+                 const char* const pSection,
+                 const char* const pKey) const;
 
     /**
      * @brief Reads a boolean value from the profile
@@ -621,21 +624,6 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
      * (then the value is not changed)
      */
     bool ReadValue(bool* value,
-                   const char* const pSection,
-                   const char* const pKey) const;
-
-    /**
-     * @brief Reads a string value from the profile and interpret it
-     * as \c true on "true" value or as \c false on any other value
-     *
-     * @param value      The value to return
-     * @param pSection   The section to read the value in
-     * @param pKey       The key whose value needs to be read out
-     *
-     * @return FALSE if could not read the value out of the profile
-     * (then the value is not changed)
-     */
-    bool ReadValue(std::string* value,
                    const char* const pSection,
                    const char* const pKey) const;
 
@@ -821,8 +809,7 @@ private:
     uint16_t                        attempts_to_open_resumption_db_;
     uint16_t                        open_attempt_timeout_ms_resumption_db_;
 
-    FRIEND_BASE_SINGLETON_CLASS(Profile);
-    DISALLOW_COPY_AND_ASSIGN(Profile);
+  DISALLOW_COPY_AND_ASSIGN(Profile);
 };
 }  //  namespace profile
 
