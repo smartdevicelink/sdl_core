@@ -37,15 +37,15 @@
 
 #include "json/reader.h"
 #include "gtest/gtest.h"
-#include "mock_policy_listener.h"
-#include "mock_pt_representation.h"
-#include "mock_cache_manager.h"
-#include "mock_update_status_manager.h"
+
 #include "policy/policy_manager_impl.h"
 #include "config_profile/profile.h"
 #include "table_struct/enums.h"
 #include "table_struct/types.h"
 #include "policy/mock_policy_settings.h"
+#include "mock_policy_listener.h"
+#include "mock_cache_manager.h"
+#include "mock_update_status_manager.h"
 
 #include "utils/macro.h"
 #include "utils/file_system.h"
@@ -147,14 +147,13 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   const std::string dev_id1;
   const std::string dev_id2;
   Json::Value PTU_request_types;
-  static const bool in_memory_;
   NiceMock<policy_handler_test::MockPolicySettings> policy_settings_;
   const std::string kAppStorageFolder = "storage1";
 
   void SetUp() OVERRIDE {
     file_system::CreateDirectory("storage1");
+    file_system::DeleteFile("policy.sqlite");
 
-    profile::Profile::instance()->config_file_name("smartDeviceLink2.ini");
     manager = new PolicyManagerImpl();
     ON_CALL(policy_settings_, app_storage_folder()).WillByDefault(ReturnRef(kAppStorageFolder));
     manager->set_listener(&listener);
@@ -312,7 +311,6 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   }
 
   void TearDown() OVERRIDE {
-    profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
     delete manager;
   }
 };
