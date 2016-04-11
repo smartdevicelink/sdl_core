@@ -39,7 +39,8 @@ namespace media_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
-FromMicRecorderListener::FromMicRecorderListener(const std::string& file_name, application_manager::ApplicationManager &app_mngr)
+FromMicRecorderListener::FromMicRecorderListener(
+    const std::string& file_name, application_manager::ApplicationManager& app_mngr)
     : reader_(NULL), file_name_(file_name), application_manager_(app_mngr) {}
 
 FromMicRecorderListener::~FromMicRecorderListener() {

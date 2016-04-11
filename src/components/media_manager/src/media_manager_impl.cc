@@ -36,7 +36,7 @@
 #include "media_manager/streamer_listener.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/application.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/application_impl.h"
 #include "protocol_handler/protocol_handler.h"
 #include "utils/file_system.h"
@@ -59,7 +59,8 @@ namespace media_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
-MediaManagerImpl::MediaManagerImpl(application_manager::ApplicationManager &application_manager,
+MediaManagerImpl::MediaManagerImpl(
+    application_manager::ApplicationManager& application_manager,
     const MediaManagerSettings& settings)
   : settings_(settings),
     protocol_handler_(NULL)

@@ -92,7 +92,6 @@ void A2DPSourcePlayerAdapter::StartActivity(int32_t application_key) {
     current_application_ = application_key;
 
     const protocol_handler::SessionObserver& session_observer =
-        application_manager::ApplicationManagerImpl::instance()
         ->connection_handler()
         .get_session_observer();
 
