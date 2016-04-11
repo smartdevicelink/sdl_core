@@ -47,6 +47,5 @@ void Event::raise() {
 void Event::set_smart_object(const smart_objects::SmartObject& so) {
   response_so_ = so;
 }
-
 }  // namespace event_engine
 }  // namespace application_manager

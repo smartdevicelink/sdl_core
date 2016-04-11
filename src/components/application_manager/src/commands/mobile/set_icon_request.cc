@@ -63,11 +63,10 @@ void SetIconRequest::Run() {
   const std::string& sync_file_name =
       (*message_)[strings::msg_params][strings::sync_file_name].asString();
 
-  std::string full_file_path =
-      profile::Profile::instance()->app_storage_folder() + "/";
-  full_file_path += app->folder_name();
-  full_file_path += "/";
-  full_file_path += sync_file_name;
+  std::string full_file_path = file_system::ConcatPath(
+      profile::Profile::instance()->app_storage_folder(),
+      app->folder_name(),
+      sync_file_name);
 
   if (!file_system::FileExists(full_file_path)) {
     LOGGER_ERROR(logger_, "No such file " << full_file_path);
@@ -121,7 +120,7 @@ void SetIconRequest::on_event(const event_engine::Event& event) {
         app->set_app_icon_path(path);
 
         LOGGER_INFO(logger_,
-                     "Icon path was set to '" << app->app_icon_path() << "'");
+                    "Icon path was set to '" << app->app_icon_path() << "'");
       }
 
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));

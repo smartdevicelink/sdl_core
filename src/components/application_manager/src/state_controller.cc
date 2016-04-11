@@ -1,34 +1,35 @@
 /*
-Copyright (c) 2015, Ford Motor Company
-All rights reserved.
+ Copyright (c) 2015, Ford Motor Company
+ All rights reserved.
 
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
 
-Redistributions of source code must retain the above copyright notice, this
-list of conditions and the following disclaimer.
+ Redistributions of source code must retain the above copyright notice, this
+ list of conditions and the following disclaimer.
 
-Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following
-disclaimer in the documentation and/or other materials provided with the
-distribution.
+ Redistributions in binary form must reproduce the above copyright notice,
+ this list of conditions and the following
+ disclaimer in the documentation and/or other materials provided with the
+ distribution.
 
-Neither the name of the Ford Motor Company nor the names of its contributors
-may be used to endorse or promote products derived from this software
-without specific prior written permission.
+ Neither the name of the Ford Motor Company nor the names of its contributors
+ may be used to endorse or promote products derived from this software
+ without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-POSSIBILITY OF SUCH DAMAGE.
-*/
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+ */
+#include <functional>
 
 #include "application_manager/state_controller.h"
 #include "application_manager/usage_statistics.h"
@@ -68,8 +69,7 @@ void StateController::HmiLevelConflictResolver::operator()(
   DCHECK_OR_RETURN_VOID(state_ctrl_);
   if (to_resolve == applied_)
     return;
-  HmiStatePtr cur_state = to_resolve->RegularHmiState();
-
+    HmiStatePtr cur_state = to_resolve->RegularHmiState();
   const bool applied_grabs_audio =
       Compare<HMILevel::eType, EQ, ONE>(
           state_->hmi_level(), HMILevel::HMI_FULL, HMILevel::HMI_LIMITED) &&
@@ -111,13 +111,13 @@ void StateController::HmiLevelConflictResolver::operator()(
                   "Application " << to_resolve->app_id()
                                  << " will change HMI level to "
                                  << result_hmi_level);
-    state_ctrl_->SetupRegularHmiState(to_resolve,
+        state_ctrl_->SetupRegularHmiState(to_resolve,
                                       result_hmi_level,
                                       result_hmi_level == HMILevel::HMI_LIMITED
                                           ? AudioStreamingState::AUDIBLE
                                           : AudioStreamingState::NOT_AUDIBLE);
-  } else {
-    LOGGER_DEBUG(logger_,
+      } else {
+        LOGGER_DEBUG(logger_,
                   "Application " << to_resolve->app_id()
                                  << " will not change HMI level");
   }
@@ -129,10 +129,10 @@ HmiStatePtr StateController::ResolveHmiState(ApplicationSharedPtr app,
   using namespace helpers;
   LOGGER_AUTO_TRACE(logger_);
   LOGGER_DEBUG(logger_,
-                "State to resolve: hmi_level "
-                    << state->hmi_level() << ", audio_state "
-                    << state->audio_streaming_state() << ", system_context "
-                    << state->system_context());
+               "State to resolve: hmi_level "
+                   << state->hmi_level() << ", audio_state "
+                   << state->audio_streaming_state() << ", system_context "
+                   << state->system_context());
 
   HmiStatePtr available_state =
       CreateHmiState(app->app_id(), HmiState::StateID::STATE_ID_REGULAR);
@@ -237,11 +237,10 @@ bool StateController::IsStateAvailable(ApplicationSharedPtr app,
   using namespace helpers;
   LOGGER_AUTO_TRACE(logger_);
   LOGGER_DEBUG(logger_,
-                "Checking state: hmi_level "
-                    << state->hmi_level() << ", audio_state "
-                    << state->audio_streaming_state() << ", system_context "
-                    << state->system_context());
-
+               "Checking state: hmi_level "
+                   << state->hmi_level() << ", audio_state "
+                   << state->audio_streaming_state() << ", system_context "
+                   << state->system_context());
   if (app->is_resuming()) {
     return IsStateAvailableForResumption(app, state);
   }
@@ -270,23 +269,23 @@ bool StateController::IsStateAvailableForResumption(ApplicationSharedPtr app,
       !Compare<HMILevel::eType, EQ, ONE>(
           state->hmi_level(), HMILevel::HMI_FULL, HMILevel::HMI_LIMITED)) {
     LOGGER_DEBUG(logger_,
-                  "Application is not in resuming mode."
-                      << " Requested state is available");
+                 "Application is not in resuming mode."
+                     << " Requested state is available");
     return true;
   }
 
   if (IsTempStateActive(HmiState::StateID::STATE_ID_VR_SESSION) ||
       IsTempStateActive(HmiState::StateID::STATE_ID_SAFETY_MODE)) {
     LOGGER_DEBUG(logger_,
-                  "Requested state is not available. "
-                      << "VR session or emergency event is active");
+                 "Requested state is not available. "
+                     << "VR session or emergency event is active");
     return false;
   }
   if (IsTempStateActive(HmiState::StateID::STATE_ID_PHONE_CALL) &&
       app->is_media_application()) {
     LOGGER_DEBUG(logger_,
-                  "Requested state for media application "
-                      << "is not available. Phone call is active");
+                 "Requested state for media application "
+                     << "is not available. Phone call is active");
     return false;
   }
   if (IsTempStateActive(HmiState::StateID::STATE_ID_DEACTIVATE_HMI)) {
@@ -307,9 +306,9 @@ void StateController::SetupRegularHmiState(ApplicationSharedPtr app,
   LOGGER_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(state);
   LOGGER_DEBUG(logger_,
-                "hmi_level " << state->hmi_level() << ", audio_state "
-                             << state->audio_streaming_state()
-                             << ", system_context " << state->system_context());
+               "hmi_level " << state->hmi_level() << ", audio_state "
+                            << state->audio_streaming_state()
+                            << ", system_context " << state->system_context());
   HmiStatePtr curr_state = app->CurrentHmiState();
   HmiStatePtr old_state =
       CreateHmiState(app->app_id(), HmiState::StateID::STATE_ID_REGULAR);
@@ -321,8 +320,8 @@ void StateController::SetupRegularHmiState(ApplicationSharedPtr app,
 
   if (HMILevel::HMI_LIMITED == state->hmi_level() && app->is_resuming()) {
     LOGGER_DEBUG(logger_,
-                  "Resuming to LIMITED level. "
-                      << "Send OnResumeAudioSource notification");
+                 "Resuming to LIMITED level. "
+                     << "Send OnResumeAudioSource notification");
     MessageHelper::SendOnResumeAudioSourceToHMI(app->app_id());
   }
   app->set_is_resuming(false);
@@ -368,7 +367,7 @@ bool StateController::IsSameAppType(ApplicationConstSharedPtr app1,
       app1->is_media_application() && app2->is_media_application();
   const bool both_navi = app1->is_navi() && app2->is_navi();
   const bool both_vc = app1->is_voice_communication_supported() &&
-                       app2->is_voice_communication_supported();
+             app2->is_voice_communication_supported();
   const bool both_simple =
       !app1->IsAudioApplication() && !app2->IsAudioApplication();
   return both_simple || both_media || both_navi || both_vc;
@@ -399,7 +398,7 @@ void StateController::on_event(const event_engine::Event& event) {
     case FunctionID::VR_Started: {
       ApplyTempState<HmiState::STATE_ID_VR_SESSION>();
       break;
-    }
+      }
     case FunctionID::VR_Stopped: {
       CancelTempState<HmiState::STATE_ID_VR_SESSION>();
       break;
@@ -445,23 +444,23 @@ void StateController::on_event(const event_engine::Event& event) {
         if (Common_EventTypes::AUDIO_SOURCE == state_id) {
           CancelTempState<HmiState::STATE_ID_AUDIO_SOURCE>();
           break;
-        }
+      }
         if (Common_EventTypes::EMBEDDED_NAVI == state_id) {
           CancelTempState<HmiState::STATE_ID_EMBEDDED_NAVI>();
-          break;
-        }
+      break;
+    }
         if (Common_EventTypes::PHONE_CALL == state_id) {
           CancelTempState<HmiState::STATE_ID_PHONE_CALL>();
-          break;
-        }
+      break;
+    }
         if (Common_EventTypes::EMERGENCY_EVENT == state_id) {
           CancelTempState<HmiState::STATE_ID_SAFETY_MODE>();
-          break;
-        }
+      break;
+    }
         if (Common_EventTypes::DEACTIVATE_HMI == state_id) {
           CancelTempState<HmiState::STATE_ID_DEACTIVATE_HMI>();
-          break;
-        }
+      break;
+    }
       }
       break;
     }
@@ -515,7 +514,6 @@ void StateController::OnApplicationRegistered(
   namespace SystemContext = mobile_apis::SystemContext;
   LOGGER_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
-
   active_states_lock_.Acquire();
   StateIDList::iterator it = active_states_.begin();
   for (; it != active_states_.end(); ++it) {
@@ -650,6 +648,7 @@ void StateController::OnAppActivated(
 
   uint32_t app_id = message[strings::msg_params][strings::app_id].asUInt();
   ApplicationSharedPtr app = app_mngr_->application(app_id);
+
   if (!app) {
     LOGGER_ERROR(logger_, "Application with id " << app_id << " not found");
     return;
@@ -706,7 +705,8 @@ bool StateController::IsStateActive(HmiState::StateID state_id) const {
       return true;
     default:
       return IsTempStateActive(state_id);
-  }
+}
+
   return false;
 }
 
@@ -782,5 +782,4 @@ mobile_apis::AudioStreamingState::eType StateController::CalcAudioState(
   }
   return audio_state;
 }
-
 }  // namespace application_manager

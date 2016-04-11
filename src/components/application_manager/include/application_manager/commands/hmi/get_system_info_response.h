@@ -44,7 +44,6 @@ struct SystemInfo {
   std::string wers_country_code;
   std::string language;
 };
-
 /**
  * @brief GetSystemInfoResponse command class
  **/
@@ -70,7 +69,6 @@ class GetSystemInfoResponse : public ResponseFromHMI {
  private:
   const SystemInfo GetSystemInfo(
       const hmi_apis::Common_Result::eType code) const;
-
   DISALLOW_COPY_AND_ASSIGN(GetSystemInfoResponse);
 };
 

@@ -72,7 +72,7 @@ void PutFileRequest::Run() {
     // If application is in the HMI_NONE level the quantity of allowed
     // PutFile request is limited by the configuration profile
     LOGGER_ERROR(logger_,
-                  "Too many requests from the app with HMILevel HMI_NONE ");
+                 "Too many requests from the app with HMILevel HMI_NONE ");
     SendResponse(false,
                  mobile_apis::Result::REJECTED,
                  "Too many requests from the app with HMILevel HMI_NONE",
@@ -148,8 +148,9 @@ void PutFileRequest::Run() {
     response_params[strings::space_available] = 0;
     file_path = profile::Profile::instance()->system_files_path();
   } else {
-    file_path = profile::Profile::instance()->app_storage_folder();
-    file_path += "/" + application->folder_name();
+    file_path = file_system::ConcatPath(
+        profile::Profile::instance()->app_storage_folder(),
+        application->folder_name());
 
     uint32_t space_available =
         ApplicationManagerImpl::instance()->GetAvailableSpaceForApp(
@@ -187,7 +188,7 @@ void PutFileRequest::Run() {
             application->folder_name()));
   }
 
-  sync_file_name_ = file_path + "/" + sync_file_name_;
+  sync_file_name_ = file_system::ConcatPath(file_path, sync_file_name_);
   switch (save_result) {
     case mobile_apis::Result::SUCCESS: {
       LOGGER_INFO(logger_, "PutFile is successful");
@@ -201,8 +202,8 @@ void PutFileRequest::Run() {
           LOGGER_INFO(logger_, "New file downloading");
           if (!application->AddFile(file)) {
             LOGGER_INFO(logger_,
-                         "Couldn't add file to application (File already Exist"
-                             << " in application and was rewritten on FS)");
+                        "Couldn't add file to application (File already Exist"
+                            << " in application and was rewritten on FS)");
             /* It can be first part of new big file, so we need to update
                information about it's downloading status and persistence */
             if (!application->UpdateFile(file)) {

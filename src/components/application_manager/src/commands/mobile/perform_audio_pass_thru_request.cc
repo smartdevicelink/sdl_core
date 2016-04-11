@@ -59,6 +59,7 @@ void PerformAudioPassThruRequest::onTimeOut() {
   LOGGER_AUTO_TRACE(logger_);
 
   FinishTTSSpeak();
+
   CommandRequestImpl::onTimeOut();
 }
 
@@ -88,9 +89,9 @@ void PerformAudioPassThruRequest::Run() {
 
   if (IsWhiteSpaceExist()) {
     LOGGER_ERROR(logger_,
-                  "Incoming perform audio pass thru has contains "
-                  "\\t\\n \\\\t \\\\n"
-                  " text contains only whitespace in initialPrompt");
+                 "Incoming perform audio pass thru has contains "
+                 "\\t\\n \\\\t \\\\n"
+                 " text contains only whitespace in initialPrompt");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -121,7 +122,6 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
         LOGGER_DEBUG(logger_, "TTS.Speak is absent");
         return;
       }
-
       mobile_apis::Result::eType mobile_code =
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asUInt()));

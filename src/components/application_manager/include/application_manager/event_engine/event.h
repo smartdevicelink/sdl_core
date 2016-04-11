@@ -140,7 +140,6 @@ int32_t Event::smart_object_type() const {
       .getElement(strings::message_type)
       .asInt();
 }
-
 }  // namespace event_engine
 }  // namespace application_manager
 

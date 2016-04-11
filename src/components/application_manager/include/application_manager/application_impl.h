@@ -107,6 +107,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void StartStreaming(protocol_handler::ServiceType service_type);
   void StopStreamingForce(protocol_handler::ServiceType service_type);
   void StopStreaming(protocol_handler::ServiceType service_type);
+
   void SuspendStreaming(protocol_handler::ServiceType service_type);
   void WakeUpStreaming(protocol_handler::ServiceType service_type);
 
@@ -161,6 +162,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 
   bool AddFile(const AppFile& file);
   bool UpdateFile(const AppFile& file);
+
   bool DeleteFile(const std::string& file_name);
   virtual const AppFilesMap& getAppFiles() const;
 
@@ -233,7 +235,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   virtual void SetPostponedState(HmiStatePtr state);
 
   virtual void RemovePostponedState();
-
   /**
    * @brief AddHMIState the function that will change application's
    * hmi state.
@@ -294,7 +295,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * Suspends video streaming process for application
    */
   void OnVideoStreamSuspend();
-
   /**
    * @brief Stops video streaming for application
    */

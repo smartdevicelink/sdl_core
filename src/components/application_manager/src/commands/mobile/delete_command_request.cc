@@ -121,8 +121,8 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
       const int result = message[strings::params][hmi_response::code].asInt();
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(result);
       LOGGER_DEBUG(logger_,
-                    "Received UI_DeleteCommand event with result "
-                        << MessageHelper::HMIResultToString(ui_result_));
+                   "Received UI_DeleteCommand event with result "
+                       << MessageHelper::HMIResultToString(ui_result_));
       break;
     }
     case hmi_apis::FunctionID::VR_DeleteCommand: {
@@ -130,8 +130,8 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
       const int result = message[strings::params][hmi_response::code].asInt();
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(result);
       LOGGER_DEBUG(logger_,
-                    "Received VR_DeleteCommand event with result "
-                        << MessageHelper::HMIResultToString(vr_result_));
+                   "Received VR_DeleteCommand event with result "
+                       << MessageHelper::HMIResultToString(vr_result_));
       break;
     }
     default: {
@@ -160,9 +160,9 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
 
   if (!command) {
     LOGGER_ERROR(logger_,
-                  "Command id " << cmd_id << " not found for "
-                                             "application with connection key "
-                                << connection_key());
+                 "Command id " << cmd_id << " not found for "
+                                            "application with connection key "
+                               << connection_key());
     return;
   }
 

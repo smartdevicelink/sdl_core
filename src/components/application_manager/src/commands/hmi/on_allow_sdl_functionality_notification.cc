@@ -52,8 +52,8 @@ void OnAllowSDLFunctionalityNotification::Run() {
   application_manager::ApplicationManagerImpl::instance()
       ->GetPolicyHandler()
       .OnAllowSDLFunctionalityNotification(
-          (*message_)[strings::msg_params][hmi_response::allowed].asBool(),
-          device_id);
+      (*message_)[strings::msg_params][hmi_response::allowed].asBool(),
+      device_id);
 }
 
 }  // namespace commands

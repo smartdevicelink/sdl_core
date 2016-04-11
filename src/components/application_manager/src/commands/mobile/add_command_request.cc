@@ -45,7 +45,6 @@ namespace application_manager {
 namespace commands {
 
 namespace custom_str = utils::custom_string;
-
 AddCommandRequest::AddCommandRequest(const MessageSharedPtr& message)
     : CommandRequestImpl(message)
     , send_ui_(false)
@@ -223,8 +222,8 @@ bool AddCommandRequest::CheckCommandName(ApplicationConstSharedPtr app) {
                     [strings::menu_name].asString()) &&
         (saved_parent_id == parent_id)) {
       LOGGER_INFO(logger_,
-                   "AddCommandRequest::CheckCommandName received"
-                   " command name already exist in same level menu");
+                  "AddCommandRequest::CheckCommandName received"
+                  " command name already exist in same level menu");
       return false;
     }
   }
@@ -257,8 +256,8 @@ bool AddCommandRequest::CheckCommandVRSynonym(ApplicationConstSharedPtr app) {
 
         if (vr_cmd_i.CompareIgnoreCase(vr_cmd_j)) {
           LOGGER_INFO(logger_,
-                       "AddCommandRequest::CheckCommandVRSynonym"
-                       " received command vr synonym already exist");
+                      "AddCommandRequest::CheckCommandVRSynonym"
+                      " received command vr synonym already exist");
           return false;
         }
       }
@@ -279,8 +278,8 @@ bool AddCommandRequest::CheckCommandParentId(ApplicationConstSharedPtr app) {
 
   if (!parent) {
     LOGGER_INFO(logger_,
-                 "AddCommandRequest::CheckCommandParentId received"
-                 " submenu doesn't exist");
+                "AddCommandRequest::CheckCommandParentId received"
+                " submenu doesn't exist");
     return false;
   }
   return true;

@@ -91,6 +91,7 @@ void PolicyEventObserver::ProcessOdometerEvent(
       static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt())) {
     if (message[strings::msg_params].keyExists(strings::odometer)) {
+
       if (policy_handler_) {
         policy_handler_->PTUpdatedAt(
             Counters::KILOMETERS,

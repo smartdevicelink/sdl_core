@@ -39,9 +39,12 @@
 #include <stdint.h>
 #include <set>
 
+#if defined(OS_WINDOWS)
+#define ssize_t SSIZE_T
+#endif
+
 #include "application_manager/commands/command_request_impl.h"
 #include "commands/hmi/request_to_hmi.h"
-
 #include "utils/date_time.h"
 
 namespace application_manager {

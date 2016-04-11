@@ -72,8 +72,8 @@ void DiagnosticMessageRequest::Run() {
                                               supported_diag_modes.end(),
                                               msg_diagnostic_mode)) {
     LOGGER_ERROR(logger_,
-                  "Received diagnostic mode " << msg_diagnostic_mode
-                                              << " is not supported.");
+                 "Received diagnostic mode " << msg_diagnostic_mode
+                                             << " is not supported.");
     SendResponse(false,
                  mobile_apis::Result::REJECTED,
                  "Received diagnostic mode is not supported.");

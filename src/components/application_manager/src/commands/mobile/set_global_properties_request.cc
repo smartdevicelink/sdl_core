@@ -1,4 +1,5 @@
 /*
+
  Copyright (c) 2015, Ford Motor Company
  All rights reserved.
 
@@ -66,8 +67,8 @@ void SetGlobalPropertiesRequest::Run() {
 
   if (!app) {
     LOGGER_ERROR(logger_,
-                  "No application associated with connection key "
-                      << connection_key());
+                 "No application associated with connection key "
+                     << connection_key());
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -136,12 +137,12 @@ void SetGlobalPropertiesRequest::Run() {
       return;
     }
 
+
     smart_objects::SmartObject params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
 
     PrepareUIRequestVRHelpData(app, msg_params, params);
     PrepareUIRequestMenuAndKeyboardData(app, msg_params, params);
-
     params[strings::app_id] = app->app_id();
     SendUIRequest(params, true);
   } else {
@@ -166,7 +167,7 @@ void SetGlobalPropertiesRequest::Run() {
     if (params.empty()) {
       LOGGER_DEBUG(logger_, "No UI info provided");
     } else {
-      params[strings::app_id] = app->app_id();
+    params[strings::app_id] = app->app_id();
       SendUIRequest(params, true);
     }
   }
@@ -188,6 +189,7 @@ void SetGlobalPropertiesRequest::Run() {
     }
 
     params[strings::app_id] = app->app_id();
+
     SendTTSRequest(params, true);
   }
 }
@@ -207,9 +209,11 @@ bool SetGlobalPropertiesRequest::CheckVrHelpItemsOrder(
       LOGGER_ERROR(logger_,
                     "VR help items order is wrong"
                         << " at " << j << ", position value:" << position);
-      return false;
-    }
+    return false;
   }
+
+    }
+
   return true;
 }
 
@@ -287,13 +291,11 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
 
   // TODO{ALeshin} APPLINK-15858. connection_key removed during SendResponse
   const uint32_t stashedConnectionKey = connection_key();
-
   SendResponse(
       result, result_code, return_info, &(message[strings::msg_params]));
 
   ApplicationSharedPtr application =
       ApplicationManagerImpl::instance()->application(stashedConnectionKey);
-
   if (!application) {
     LOGGER_DEBUG(logger_, "NULL pointer.");
     return;
@@ -483,7 +485,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
         str = (*it_vh)[strings::image][strings::value].asCharArray();
         if (!CheckSyntax(str)) {
           LOGGER_ERROR(logger_,
-                        "Invalid vr_help image value syntax check failed");
+                       "Invalid vr_help image value syntax check failed");
           return true;
         }
       }  // if image exists
@@ -528,8 +530,8 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
         str = (*it_lcl).asCharArray();
         if (!CheckSyntax(str)) {
           LOGGER_ERROR(logger_,
-                        "Invalid keyboard_properties "
-                        "limited_character_list syntax check failed");
+                       "Invalid keyboard_properties "
+                       "limited_character_list syntax check failed");
           return true;
         }
       }
@@ -543,8 +545,8 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
 
       if (!CheckSyntax(str)) {
         LOGGER_ERROR(logger_,
-                      "Invalid keyboard_properties "
-                      "auto_complete_text syntax check failed");
+                     "Invalid keyboard_properties "
+                     "auto_complete_text syntax check failed");
         return true;
       }
     }
@@ -553,4 +555,5 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
 }
 
 }  // namespace commands
+
 }  // namespace application_manager

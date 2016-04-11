@@ -41,15 +41,14 @@ namespace application_manager {
 
 class HmiState;
 class ApplicationManager;
-
 typedef utils::SharedPtr<HmiState> HmiStatePtr;
 
 /**
-* @brief The HmiState class
+ * @brief The HmiState class
 *  Handle Hmi state of application (hmi level,
 *  audio streaming state, system context)
 *
-*/
+ */
 class HmiState {
  public:
   /**
@@ -171,7 +170,6 @@ class HmiState {
   mobile_apis::HMILevel::eType hmi_level_;
   mobile_apis::AudioStreamingState::eType audio_streaming_state_;
   mobile_apis::SystemContext::eType system_context_;
-
  protected:
   /**
    * @brief is_navi_app check if app is navi

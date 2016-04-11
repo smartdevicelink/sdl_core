@@ -59,21 +59,22 @@ void OnSystemRequestNotification::Run() {
 
   if (!app.valid()) {
     LOGGER_ERROR(logger_,
-                  "Application with connection key " << connection_key()
-                                                     << " is not registered.");
+                 "Application with connection key " << connection_key()
+                                                    << " is not registered.");
     return;
   }
 
   RequestType::eType request_type = static_cast<RequestType::eType>(
       (*message_)[strings::msg_params][strings::request_type].asInt());
+
   const policy::PolicyHandlerInterface& policy_handler =
       application_manager::ApplicationManagerImpl::instance()
           ->GetPolicyHandler();
   if (!policy_handler.IsRequestTypeAllowed(app->mobile_app_id(),
                                            request_type)) {
     LOGGER_WARN(logger_,
-                 "Request type " << request_type
-                                 << " is not allowed by policies");
+                "Request type " << request_type
+                                << " is not allowed by policies");
     return;
   }
 

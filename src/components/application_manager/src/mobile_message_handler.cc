@@ -97,7 +97,7 @@ MobileMessageHandler::HandleIncomingMessageProtocol(
     return NULL;
   }
   LOGGER_DEBUG(logger_,
-                "Incoming RPC_INFO: " << (out_message->connection_key() >> 16)
+               "Incoming RPC_INFO: " << (out_message->connection_key() >> 16)
                                       << ", "
                                       << messageTypes[out_message->type()]
                                       << ", " << out_message->function_id()
@@ -110,11 +110,11 @@ protocol_handler::RawMessage*
 MobileMessageHandler::HandleOutgoingMessageProtocol(
     const MobileMessage& message) {
   LOGGER_DEBUG(logger_,
-                "Outgoing RPC_INFO: " << (message->connection_key() >> 16)
+               "Outgoing RPC_INFO: " << (message->connection_key() >> 16)
                                       << ", " << messageTypes[message->type()]
                                       << ", " << message->function_id() << ", "
-                                      << message->correlation_id() << ", "
-                                      << message->json_message());
+                                     << message->correlation_id() << ", "
+                                     << message->json_message());
 
   if (message->protocol_version() == application_manager::kV1) {
     return MobileMessageHandler::HandleOutgoingMessageProtocolV1(message);

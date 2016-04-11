@@ -76,8 +76,8 @@ bool AlertRequest::Init() {
   // response.
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     LOGGER_INFO(logger_,
-                 "Request contains soft buttons - request timeout "
-                 "will be set to 0.");
+                "Request contains soft buttons - request timeout "
+                "will be set to 0.");
     default_timeout_ = 0;
   }
 
@@ -106,9 +106,8 @@ void AlertRequest::Run() {
   if ((tts_chunks_exists && length_tts_chunks) ||
       ((*message_)[strings::msg_params].keyExists(strings::play_tone) &&
        (*message_)[strings::msg_params][strings::play_tone].asBool())) {
-    awaiting_tts_speak_response_ = true;
-  }
-
+      awaiting_tts_speak_response_ = true;
+    }
   SendAlertRequest(app_id);
   if (awaiting_tts_speak_response_) {
     SendSpeakRequest(app_id, tts_chunks_exists, length_tts_chunks);
@@ -123,8 +122,8 @@ void AlertRequest::onTimeOut() {
     return;
   }
   LOGGER_INFO(logger_,
-               "Default timeout ignored. "
-               "AlertRequest with soft buttons wait timeout on HMI side");
+              "Default timeout ignored. "
+              "AlertRequest with soft buttons wait timeout on HMI side");
 }
 
 void AlertRequest::on_event(const event_engine::Event& event) {
@@ -137,11 +136,11 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::TTS_OnResetTimeout:
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
       LOGGER_INFO(logger_,
-                   "Received UI_OnResetTimeout event "
-                   " or TTS_OnResetTimeout event"
-                       << awaiting_tts_speak_response_ << " "
-                       << awaiting_tts_stop_speaking_response_ << " "
-                       << awaiting_ui_alert_response_);
+                  "Received UI_OnResetTimeout event "
+                  " or TTS_OnResetTimeout event"
+                      << awaiting_tts_speak_response_ << " "
+                      << awaiting_tts_stop_speaking_response_ << " "
+                      << awaiting_ui_alert_response_);
       ApplicationManagerImpl::instance()->updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
       break;
@@ -239,11 +238,9 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     is_alert_succeeded_ = false;
     alert_result_ = tts_speak_result_;
   }
-
   if (mobile_apis::Result::WARNINGS == tts_speak_result_) {
     alert_result_ = mobile_apis::Result::WARNINGS;
   }
-
   SendResponse(is_alert_succeeded_,
                alert_result_,
                response_info.empty() ? NULL : response_info.c_str(),
@@ -378,11 +375,12 @@ void AlertRequest::SendSpeakRequest(int32_t app_id,
   using namespace smart_objects;
   // crate HMI speak request
   SmartObject msg_params = smart_objects::SmartObject(SmartType_Map);
+
   if (tts_chunks_exists && length_tts_chunks) {
-    msg_params[hmi_request::tts_chunks] =
-        smart_objects::SmartObject(SmartType_Array);
-    msg_params[hmi_request::tts_chunks] =
-        (*message_)[strings::msg_params][strings::tts_chunks];
+  msg_params[hmi_request::tts_chunks] =
+      smart_objects::SmartObject(SmartType_Array);
+  msg_params[hmi_request::tts_chunks] =
+      (*message_)[strings::msg_params][strings::tts_chunks];
   }
   if ((*message_)[strings::msg_params].keyExists(strings::play_tone) &&
       (*message_)[strings::msg_params][strings::play_tone].asBool()) {

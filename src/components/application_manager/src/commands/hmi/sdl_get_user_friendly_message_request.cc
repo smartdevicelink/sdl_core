@@ -49,7 +49,7 @@ void SDLGetUserFriendlyMessageRequest::Run() {
   const std::string messageCodes = "messageCodes";
   if (!(*message_)[strings::msg_params].keyExists(messageCodes)) {
     LOGGER_WARN(logger_,
-                 "Mandatory parameter '" + messageCodes + "'' is missing");
+                "Mandatory parameter '" + messageCodes + "'' is missing");
     return;
   }
   smart_objects::SmartArray* msg =
@@ -83,9 +83,9 @@ void SDLGetUserFriendlyMessageRequest::Run() {
   application_manager::ApplicationManagerImpl::instance()
       ->GetPolicyHandler()
       .OnGetUserFriendlyMessage(
-          msg_codes,
-          required_language,
-          (*message_)[strings::params][strings::correlation_id].asInt());
+      msg_codes,
+      required_language,
+      (*message_)[strings::params][strings::correlation_id].asInt());
 }
 
 }  // namespace commands

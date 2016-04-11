@@ -48,7 +48,7 @@ void SDLGetStatusUpdateRequest::Run() {
   application_manager::ApplicationManagerImpl::instance()
       ->GetPolicyHandler()
       .OnGetStatusUpdate(
-          (*message_)[strings::params][strings::correlation_id].asUInt());
+      (*message_)[strings::params][strings::correlation_id].asUInt());
 }
 
 }  // namespace commands

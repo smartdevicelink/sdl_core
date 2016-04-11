@@ -141,6 +141,7 @@ ApplicationImpl::ApplicationImpl(
       profile::Profile::instance()->video_data_stopped_timeout();
   audio_stream_suspend_timeout_ =
       profile::Profile::instance()->audio_data_stopped_timeout();
+
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -208,8 +209,7 @@ bool ApplicationImpl::IsAudioApplication() const {
 void ApplicationImpl::SetRegularState(HmiStatePtr state) {
   LOGGER_AUTO_TRACE(logger_);
   state_.AddState(state);
-}
-
+    }
 void ApplicationImpl::RemovePostponedState() {
   LOGGER_AUTO_TRACE(logger_);
   state_.RemoveState(HmiState::STATE_ID_POSTPONED);
@@ -442,16 +442,15 @@ void ApplicationImpl::StopStreaming(
 void ApplicationImpl::StopNaviStreaming() {
   LOGGER_AUTO_TRACE(logger_);
   video_stream_suspend_timer_.Stop();
-  MessageHelper::SendNaviStopStream(app_id());
-  set_video_streaming_approved(false);
-  set_video_stream_retry_number(0);
-}
-
+      MessageHelper::SendNaviStopStream(app_id());
+      set_video_streaming_approved(false);
+      set_video_stream_retry_number(0);
+    }
 void ApplicationImpl::StopAudioStreaming() {
   LOGGER_AUTO_TRACE(logger_);
   audio_stream_suspend_timer_.Stop();
-  MessageHelper::SendAudioStopStream(app_id());
-  set_audio_streaming_approved(false);
+      MessageHelper::SendAudioStopStream(app_id());
+      set_audio_streaming_approved(false);
   set_audio_stream_retry_number(0);
 }
 
@@ -605,8 +604,8 @@ bool ApplicationImpl::is_resuming() const {
 bool ApplicationImpl::AddFile(const AppFile& file) {
   if (app_files_.count(file.file_name) == 0) {
     LOGGER_INFO(logger_,
-                 "AddFile file " << file.file_name << " File type is "
-                                 << file.file_type);
+                "AddFile file " << file.file_name << " File type is "
+                                << file.file_type);
     app_files_[file.file_name] = file;
     return true;
   }
@@ -616,8 +615,8 @@ bool ApplicationImpl::AddFile(const AppFile& file) {
 bool ApplicationImpl::UpdateFile(const AppFile& file) {
   if (app_files_.count(file.file_name) != 0) {
     LOGGER_INFO(logger_,
-                 "UpdateFile file " << file.file_name << " File type is "
-                                    << file.file_type);
+                "UpdateFile file " << file.file_name << " File type is "
+                                   << file.file_type);
     app_files_[file.file_name] = file;
     return true;
   }
@@ -628,8 +627,8 @@ bool ApplicationImpl::DeleteFile(const std::string& file_name) {
   AppFilesMap::iterator it = app_files_.find(file_name);
   if (it != app_files_.end()) {
     LOGGER_INFO(logger_,
-                 "DeleteFile file " << it->second.file_name << " File type is "
-                                    << it->second.file_type);
+                "DeleteFile file " << it->second.file_name << " File type is "
+                                   << it->second.file_type);
     app_files_.erase(it);
     return true;
   }
@@ -700,7 +699,7 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
           cmd_number_to_time_limits_.find(cmd_id);
       if (cmd_number_to_time_limits_.end() == it) {
         LOGGER_WARN(logger_,
-                     "Limits for command id " << cmd_id << "had not been set.");
+                    "Limits for command id " << cmd_id << "had not been set.");
         return true;
       }
 
@@ -721,13 +720,13 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
       }
 
       LOGGER_INFO(logger_,
-                   "Time Info: "
-                       << "\n Current: " << current.tv_sec << "\n Limit: ("
-                       << limit.first.tv_sec << "," << limit.second
-                       << ")"
-                          "\n frequency_restrictions: ("
-                       << frequency_restrictions.first << ","
-                       << frequency_restrictions.second << ")");
+                  "Time Info: "
+                      << "\n Current: " << current.tv_sec << "\n Limit: ("
+                      << limit.first.tv_sec << "," << limit.second
+                      << ")"
+                         "\n frequency_restrictions: ("
+                      << frequency_restrictions.first << ","
+                      << frequency_restrictions.second << ")");
       if (current.tv_sec < limit.first.tv_sec + frequency_restrictions.second) {
         if (limit.second < frequency_restrictions.first) {
           ++limit.second;
@@ -815,14 +814,13 @@ void ApplicationImpl::UpdateHash() {
   LOGGER_AUTO_TRACE(logger_);
   hash_val_ = utils::gen_hash(profile::Profile::instance()->hash_string_size());
   set_is_application_data_changed(true);
-
   MessageHelper::SendHashUpdateNotification(app_id());
 }
 
 void ApplicationImpl::CleanupFiles() {
   profile::Profile* profile = profile::Profile::instance();
-  std::string directory_name = profile->app_storage_folder();
-  directory_name += "/" + folder_name();
+  std::string directory_name = file_system::ConcatPath(
+      profile->app_storage_folder(), folder_name());
 
   if (file_system::DirectoryExists(directory_name)) {
     std::vector<std::string> files = file_system::ListFiles(directory_name);
@@ -830,9 +828,7 @@ void ApplicationImpl::CleanupFiles() {
 
     std::vector<std::string>::const_iterator it = files.begin();
     for (; it != files.end(); ++it) {
-      std::string file_name = directory_name;
-      file_name += "/";
-      file_name += *it;
+      std::string file_name = file_system::ConcatPath(directory_name, *it);
       app_files_it = app_files_.find(file_name);
       if ((app_files_it == app_files_.end()) ||
           (!app_files_it->second.is_persistent)) {
@@ -851,7 +847,8 @@ void ApplicationImpl::LoadPersistentFiles() {
 
   if (kWaitingForRegistration == app_state_) {
     const std::string app_icon_dir(Profile::instance()->app_icons_folder());
-    const std::string full_icon_path(app_icon_dir + "/" + mobile_app_id_);
+    const std::string full_icon_path(
+        file_system::ConcatPath(app_icon_dir, mobile_app_id_));
     if (file_system::FileExists(full_icon_path)) {
       AppFile file;
       file.is_persistent = true;
@@ -863,8 +860,8 @@ void ApplicationImpl::LoadPersistentFiles() {
     return;
   }
 
-  std::string directory_name = Profile::instance()->app_storage_folder();
-  directory_name += "/" + folder_name();
+  std::string directory_name = file_system::ConcatPath(
+      Profile::instance()->app_storage_folder(), folder_name());
 
   if (file_system::DirectoryExists(directory_name)) {
     std::vector<std::string> persistent_files =
@@ -875,9 +872,7 @@ void ApplicationImpl::LoadPersistentFiles() {
       AppFile file;
       file.is_persistent = true;
       file.is_download_complete = true;
-      file.file_name = directory_name;
-      file.file_name += "/";
-      file.file_name += *it;
+      file.file_name = file_system::ConcatPath(directory_name, *it);
       file.file_type = mobile_apis::FileType::BINARY;
       // Search file extension and convert it to the type
       std::size_t index = it->find_last_of('.');
@@ -887,8 +882,8 @@ void ApplicationImpl::LoadPersistentFiles() {
       }
 
       LOGGER_INFO(logger_,
-                   "Loaded persistent file "
-                       << file.file_name << " File type is " << file.file_type);
+                  "Loaded persistent file "
+                      << file.file_name << " File type is " << file.file_type);
       AddFile(file);
     }
   }

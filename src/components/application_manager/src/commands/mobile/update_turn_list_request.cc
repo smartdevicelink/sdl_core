@@ -45,7 +45,6 @@ namespace application_manager {
 namespace commands {
 
 namespace custom_str = utils::custom_string;
-
 UpdateTurnListRequest::UpdateTurnListRequest(const MessageSharedPtr& message)
     : CommandRequestImpl(message) {}
 
@@ -65,7 +64,7 @@ void UpdateTurnListRequest::Run() {
 
   if (IsWhiteSpaceExist()) {
     LOGGER_ERROR(logger_,
-                  "Incoming update turn list has contains \t\n \\t \\n");
+                 "Incoming update turn list has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }

@@ -33,8 +33,11 @@
 #include "application_manager/commands/hmi/on_exit_all_applications_notification.h"
 
 #include <sys/types.h>
-#include <unistd.h>
 #include <signal.h>
+
+#if defined(OS_POSIX)
+#include <unistd.h>
+#endif
 
 #include "application_manager/application_manager_impl.h"
 #include "interfaces/HMI_API.h"
@@ -92,7 +95,11 @@ void OnExitAllApplicationsNotification::Run() {
           mob_reason) {
     app_manager->HeadUnitReset(mob_reason);
   }
+#if defined(OS_POSIX)
   kill(getpid(), SIGINT);
+#elif defined(OS_WINDOWS)
+  raise(SIGINT);
+#endif
 }
 
 void OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete() {

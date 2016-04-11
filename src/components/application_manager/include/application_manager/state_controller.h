@@ -44,7 +44,6 @@
 #include "utils/helpers.h"
 
 namespace application_manager {
-
 class StateController : public event_engine::EventObserver {
  public:
   explicit StateController(ApplicationManager* app_mngr);
@@ -76,7 +75,6 @@ class StateController : public event_engine::EventObserver {
     if (app->is_resuming() && !IsResumptionAllowed(app, state)) {
       return;
     }
-
     HmiStatePtr resolved_state = ResolveHmiState(app, state);
     if (!resolved_state) {
       state->set_state_id(HmiState::STATE_ID_POSTPONED);
@@ -92,15 +90,15 @@ class StateController : public event_engine::EventObserver {
     if (SendActivateApp && is_full_allowed) {
       int64_t corr_id = SendBCActivateApp(app, hmi_level, true);
       if (-1 != corr_id) {
-        subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_ActivateApp,
-                           corr_id);
-        waiting_for_activate[app->app_id()] = resolved_state;
+      subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_ActivateApp,
+                         corr_id);
+      waiting_for_activate[app->app_id()] = resolved_state;
         return;
       }
       LOGGER_ERROR(logger_, "Unable to send BC.ActivateApp");
       return;
     }
-    ApplyRegularState(app, resolved_state);
+     ApplyRegularState(app, resolved_state);
   }
 
   /**
@@ -144,7 +142,6 @@ class StateController : public event_engine::EventObserver {
     }
     const HmiStatePtr hmi_state =
         CreateHmiState(app->app_id(), HmiState::StateID::STATE_ID_REGULAR);
-
     DCHECK_OR_RETURN_VOID(hmi_state);
     hmi_state->set_hmi_level(hmi_level);
     hmi_state->set_audio_streaming_state(CalcAudioState(app, hmi_level));
@@ -169,7 +166,6 @@ class StateController : public event_engine::EventObserver {
     if (!app) {
       return;
     }
-
     HmiStatePtr hmi_state =
         CreateHmiState(app->app_id(), HmiState::StateID::STATE_ID_REGULAR);
     DCHECK_OR_RETURN_VOID(hmi_state);
@@ -225,13 +221,13 @@ class StateController : public event_engine::EventObserver {
   }
 
   /**
-   * @brief SetRegularState Change regular  system context
+   * @brief SetRegularState Change regular system context
    * @param app appication to setup regular State
    * @param system_context of new regular state
    */
   virtual void SetRegularState(
       ApplicationSharedPtr app,
-      const mobile_apis::SystemContext::eType system_context) {
+                       const mobile_apis::SystemContext::eType system_context) {
     if (!app) {
       return;
     }
@@ -324,7 +320,6 @@ class StateController : public event_engine::EventObserver {
         : applied_(app), state_(state), state_ctrl_(state_ctrl) {}
     void operator()(ApplicationSharedPtr to_resolve);
   };
-
   template <typename UnaryFunction>
   void ForEachApplication(UnaryFunction func) const {
     DataAccessor<ApplicationSet> accessor = app_mngr_->applications();
@@ -350,7 +345,6 @@ class StateController : public event_engine::EventObserver {
    */
   HmiStatePtr ResolveHmiState(ApplicationSharedPtr app,
                               HmiStatePtr state) const;
-
   /**
    * @brief IsResumptionAllowed checks, if app is allowed to be resumed in
    * current state
@@ -518,7 +512,7 @@ class StateController : public event_engine::EventObserver {
       const mobile_apis::AudioStreamingState::eType audio_state);
 
   /**
-   * @brief OnActivateAppResponse calback for activate app response
+   * @brief OnActivateAppResponse callback for activate app response
    * @param message Smart Object
    */
   void OnActivateAppResponse(const smart_objects::SmartObject& message);

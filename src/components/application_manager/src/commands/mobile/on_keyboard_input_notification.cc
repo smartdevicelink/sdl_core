@@ -60,7 +60,7 @@ void OnKeyBoardInputNotification::Run() {
     ApplicationSharedPtr app = *it;
     if (app->is_perform_interaction_active()) {
       LOGGER_INFO(logger_,
-                   "There is application with active PerformInteraction");
+                  "There is application with active PerformInteraction");
       app_to_notify = app;
       break;
     }

@@ -49,7 +49,6 @@ namespace application_manager {
 namespace commands {
 
 namespace custom_str = utils::custom_string;
-
 uint32_t PerformInteractionRequest::pi_requests_count_ = 0;
 
 PerformInteractionRequest::PerformInteractionRequest(
@@ -117,8 +116,8 @@ void PerformInteractionRequest::Run() {
   if ((mobile_apis::InteractionMode::VR_ONLY == interaction_mode_) &&
       (mobile_apis::LayoutMode::KEYBOARD == interaction_layout)) {
     LOGGER_ERROR(logger_,
-                  "PerformInteraction contains InteractionMode"
-                  "=VR_ONLY and interactionLayout=KEYBOARD");
+                 "PerformInteraction contains InteractionMode"
+                 "=VR_ONLY and interactionLayout=KEYBOARD");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -130,16 +129,16 @@ void PerformInteractionRequest::Run() {
     if (mobile_apis::LayoutMode::KEYBOARD == interaction_layout) {
       if (mobile_apis::InteractionMode::BOTH == interaction_mode_) {
         LOGGER_ERROR(logger_,
-                      "interactionChoiceSetIDList is empty,"
-                      " InteractionMode=BOTH and"
-                      " interactionLayout=KEYBOARD");
+                     "interactionChoiceSetIDList is empty,"
+                     " InteractionMode=BOTH and"
+                     " interactionLayout=KEYBOARD");
         SendResponse(false, mobile_apis::Result::INVALID_DATA);
         return;
       }
     } else {
       LOGGER_ERROR(logger_,
-                    "interactionChoiceSetIDList is empty"
-                    " and interactionLayout!=KEYBOARD");
+                   "interactionChoiceSetIDList is empty"
+                   " and interactionLayout!=KEYBOARD");
       SendResponse(false, mobile_apis::Result::INVALID_DATA);
       return;
     }
@@ -162,15 +161,16 @@ void PerformInteractionRequest::Run() {
         MessageHelper::VerifyImageVrHelpItems(msg_params[strings::vr_help],
                                               app)) {
       LOGGER_ERROR(logger_,
-                    "Verification of " << strings::vr_help << " failed.");
+                   "Verification of " << strings::vr_help << " failed.");
       SendResponse(false, mobile_apis::Result::INVALID_DATA);
       return;
     }
   }
 
+
   if (IsWhiteSpaceExist()) {
     LOGGER_ERROR(logger_,
-                  "Incoming perform interaction has contains \t\n \\t \\n");
+                 "Incoming perform interaction has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -333,8 +333,8 @@ void PerformInteractionRequest::ProcessVRResponse(
   if (SUCCESS == vr_resultCode_ &&
       InteractionMode::MANUAL_ONLY == interaction_mode_) {
     LOGGER_DEBUG(logger_,
-                  "VR response SUCCESS in MANUAL_ONLY mode "
-                      << "Wait for UI response");
+                 "VR response SUCCESS in MANUAL_ONLY mode "
+                     << "Wait for UI response");
     // in case MANUAL_ONLY mode VR.PI SUCCESS just return
     return;
   }
@@ -429,7 +429,8 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
   const SmartObject* response_params = msg_params.empty() ? NULL : &msg_params;
 
   if (mobile_apis::InteractionMode::BOTH != interaction_mode_) {
-    DisablePerformInteraction();
+  DisablePerformInteraction();
+
     SendResponse(ui_result_, ui_resultCode_, info.c_str(), response_params);
   }
 }
@@ -604,6 +605,7 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
   } else {
     msg_params[strings::timeout] = default_timeout_;
   }
+
   msg_params[strings::app_id] = app->app_id();
   SendHMIRequest(
       hmi_apis::FunctionID::VR_PerformInteraction, &msg_params, true);
@@ -846,7 +848,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
         str = (*it_vh)[strings::image][strings::value].asCharArray();
         if (!CheckSyntax(str)) {
           LOGGER_ERROR(logger_,
-                        "Invalid vr_help image value syntax check failed");
+                       "Invalid vr_help image value syntax check failed");
           return true;
         }
       }

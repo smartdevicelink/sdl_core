@@ -101,7 +101,7 @@ void CreateInteractionChoiceSetRequest::Run() {
 
   if (app->FindChoiceSet(choice_set_id_)) {
     LOGGER_ERROR(logger_,
-                  "Choice set with id " << choice_set_id_ << " is not found.");
+                 "Choice set with id " << choice_set_id_ << " is not found.");
     SendResponse(false, Result::INVALID_ID);
     return;
   }
@@ -145,6 +145,7 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
       return mobile_apis::Result::INVALID_DATA;
     }
   }
+
   return mobile_apis::Result::SUCCESS;
 }
 
@@ -167,8 +168,8 @@ bool CreateInteractionChoiceSetRequest::compareSynonyms(
 
   if (it != vr_cmds_1->end()) {
     LOGGER_INFO(logger_,
-                 "Incoming choice set has duplicated VR synonyms "
-                     << it->asString());
+                "Incoming choice set has duplicated VR synonyms "
+                    << it->asString());
     return true;
   }
 
@@ -232,8 +233,8 @@ bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
     str = choice_set[strings::secondary_image][strings::value].asCharArray();
     if (!CheckSyntax(str)) {
       LOGGER_ERROR(logger_,
-                    "Invalid secondary_image value. "
-                    "Syntax check failed");
+                   "Invalid secondary_image value. "
+                   "Syntax check failed");
       return true;
     }
   }
@@ -260,7 +261,7 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
       sync_primitives::AutoLock error_lock(error_from_hmi_lock_);
       if (error_from_hmi_) {
         LOGGER_WARN(logger_,
-                     "Error from HMI received. Stop sending VRCommands");
+                    "Error from HMI received. Stop sending VRCommands");
         break;
       }
     }
@@ -280,8 +281,8 @@ void CreateInteractionChoiceSetRequest::SendVRAddCommandRequests(
     VRCommandInfo vr_command(vr_cmd_id);
     sent_commands_map_[vr_corr_id] = vr_command;
     LOGGER_DEBUG(logger_,
-                  "VR_command sent corr_id " << vr_corr_id << " cmd_id "
-                                             << vr_corr_id);
+                 "VR_command sent corr_id " << vr_corr_id << " cmd_id "
+                                            << vr_corr_id);
   }
   expected_chs_count_ = chs_num;
   LOGGER_DEBUG(logger_, "expected_chs_count_ = " << expected_chs_count_);
@@ -297,9 +298,9 @@ void CreateInteractionChoiceSetRequest::on_event(
   if (event.id() == hmi_apis::FunctionID::VR_AddCommand) {
     received_chs_count_++;
     LOGGER_DEBUG(logger_,
-                  "Got VR.AddCommand response, there are "
-                      << expected_chs_count_ - received_chs_count_
-                      << " more to wait.");
+                 "Got VR.AddCommand response, there are "
+                     << expected_chs_count_ - received_chs_count_
+                     << " more to wait.");
 
     uint32_t corr_id = static_cast<uint32_t>(
         message[strings::params][strings::correlation_id].asUInt());
@@ -322,9 +323,9 @@ void CreateInteractionChoiceSetRequest::on_event(
         vr_command.succesful_response_received_ = true;
       } else {
         LOGGER_DEBUG(logger_,
-                      "Hmi response is not Success: "
-                          << vr_result
-                          << ". Stop sending VRAddCommand requests");
+                     "Hmi response is not Success: "
+                         << vr_result
+                         << ". Stop sending VRAddCommand requests");
         if (!error_from_hmi_) {
           error_from_hmi_ = true;
           SendResponse(false, GetMobileResultCode(vr_result));
@@ -382,8 +383,8 @@ void CreateInteractionChoiceSetRequest::DeleteChoices() {
       SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_param);
     } else {
       LOGGER_WARN(logger_,
-                   "Succesfull response has not been received for cmd_id =  "
-                       << vr_command_info.cmd_id_);
+                  "Succesfull response has not been received for cmd_id =  "
+                      << vr_command_info.cmd_id_);
     }
   }
   sent_commands_map_.clear();

@@ -34,6 +34,7 @@
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
+
 namespace commands {
 
 GetSystemInfoResponse::GetSystemInfoResponse(const MessageSharedPtr& message)
@@ -45,7 +46,6 @@ void GetSystemInfoResponse::Run() {
   LOGGER_AUTO_TRACE(logger_);
   application_manager::ApplicationManagerImpl* app_manager_inst =
       application_manager::ApplicationManagerImpl::instance();
-
   const hmi_apis::Common_Result::eType code =
       static_cast<hmi_apis::Common_Result::eType>(
           (*message_)[strings::params][hmi_response::code].asInt());
@@ -70,12 +70,11 @@ const SystemInfo GetSystemInfoResponse::GetSystemInfo(
       (*message_)[strings::msg_params]["ccpu_version"].asString();
 
   info.wers_country_code =
-      (*message_)[strings::msg_params]["wersCountryCode"].asString();
-
+        (*message_)[strings::msg_params]["wersCountryCode"].asString();
   const uint32_t lang_code =
       (*message_)[strings::msg_params]["language"].asUInt();
   info.language = application_manager::MessageHelper::CommonLanguageToString(
-      static_cast<hmi_apis::Common_Language::eType>(lang_code));
+        static_cast<hmi_apis::Common_Language::eType>(lang_code));
 
   application_manager::ApplicationManagerImpl::instance()
       ->hmi_capabilities()

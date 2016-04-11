@@ -53,8 +53,8 @@ void SendLocationRequest::Run() {
 
   if (!app) {
     LOGGER_ERROR(logger_,
-                  "An application with connection key "
-                      << connection_key() << " is not registered.");
+                 "An application with connection key "
+                     << connection_key() << " is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -140,7 +140,7 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
     str = msg_params[strings::location_name].asCharArray();
     if (!CheckSyntax(str)) {
       LOGGER_ERROR(logger_,
-                    "parameter locationName contains invalid character");
+                   "parameter locationName contains invalid character");
       return true;
     }
   }
@@ -149,7 +149,7 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
     str = msg_params[strings::location_description].asCharArray();
     if (!CheckSyntax(str)) {
       LOGGER_ERROR(logger_,
-                    "parameter locationDescription contains invalid character");
+                   "parameter locationDescription contains invalid character");
       return true;
     }
   }
@@ -163,7 +163,7 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
       str = (*it_al).asCharArray();
       if (!CheckSyntax(str)) {
         LOGGER_ERROR(logger_,
-                      "parameter address_lines contains invalid character");
+                     "parameter address_lines contains invalid character");
         return true;
       }
     }

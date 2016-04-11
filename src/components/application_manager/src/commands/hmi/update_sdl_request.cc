@@ -49,7 +49,7 @@ void UpdateSDLRequest::Run() {
   application_manager::ApplicationManagerImpl::instance()
       ->GetPolicyHandler()
       .PTExchangeAtUserRequest(
-          (*message_)[strings::params][strings::correlation_id].asInt());
+      (*message_)[strings::params][strings::correlation_id].asInt());
 }
 
 }  // namespace commands

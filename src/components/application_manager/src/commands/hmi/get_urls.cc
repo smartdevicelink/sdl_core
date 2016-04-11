@@ -52,8 +52,9 @@ void GetUrls::Run() {
     application_manager::ApplicationManagerImpl::instance()
         ->GetPolicyHandler()
         .GetServiceUrls(
-            object[strings::msg_params][hmi_request::service].asString(),
-            endpoints);
+        object[strings::msg_params][hmi_request::service].asString(),
+        endpoints);
+
     if (!endpoints.empty()) {
       object[strings::msg_params].erase(hmi_request::service);
 

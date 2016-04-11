@@ -70,8 +70,8 @@ void SubscribeButtonRequest::Run() {
 
   if (!CheckHMICapabilities(btn_id)) {
     LOGGER_ERROR(logger_,
-                  "Subscribe on button "
-                      << btn_id << " isn't allowed by HMI capabilities");
+                 "Subscribe on button "
+                     << btn_id << " isn't allowed by HMI capabilities");
     SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
     return;
   }

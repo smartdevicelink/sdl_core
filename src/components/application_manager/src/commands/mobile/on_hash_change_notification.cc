@@ -65,7 +65,7 @@ void OnHashChangeNotification::Run() {
     SendNotification();
   } else {
     LOGGER_WARN(logger_,
-                 "Application with app_id " << app_id << " does not exist");
+                "Application with app_id " << app_id << " does not exist");
   }
 }
 

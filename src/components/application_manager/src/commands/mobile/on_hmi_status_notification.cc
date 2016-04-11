@@ -66,8 +66,8 @@ void OnHMIStatusNotification::Run() {
     if (!(app->tts_properties_in_none())) {
       app->set_tts_properties_in_none(true);
       LOGGER_INFO(logger_,
-                   "OnHMIStatusNotification::Send TTS GlobalProperties"
-                   " with empty array to HMI");
+                  "OnHMIStatusNotification::Send TTS GlobalProperties"
+                  " with empty array to HMI");
       MessageHelper::SendTTSGlobalProperties(app, false);
     }
   } else if ((mobile_apis::HMILevel::HMI_FULL == hmi_level) ||
@@ -75,7 +75,7 @@ void OnHMIStatusNotification::Run() {
     if (!(app->tts_properties_in_full())) {
       app->set_tts_properties_in_full(true);
       LOGGER_INFO(logger_,
-                   "OnHMIStatusNotification AddAppToTTSGlobalPropertiesList");
+                  "OnHMIStatusNotification AddAppToTTSGlobalPropertiesList");
       ApplicationManagerImpl::instance()->AddAppToTTSGlobalPropertiesList(
           app->app_id());
     }

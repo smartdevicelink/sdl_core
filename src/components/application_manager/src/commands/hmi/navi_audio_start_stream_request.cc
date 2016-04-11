@@ -48,11 +48,12 @@ AudioStartStreamRequest::AudioStartStreamRequest(
   default_timeout_ = stream_retry.second;
   retry_number_ = stream_retry.first;
   LOGGER_DEBUG(logger_,
-                "default_timeout_ = " << default_timeout_
-                                      << "; retry_number_ = " << retry_number_);
+               "default_timeout_ = " << default_timeout_
+                                     << "; retry_number_ = " << retry_number_);
 }
 
 AudioStartStreamRequest::~AudioStartStreamRequest() {}
+
 
 void AudioStartStreamRequest::Run() {
   LOGGER_AUTO_TRACE(logger_);
@@ -69,8 +70,8 @@ void AudioStartStreamRequest::Run() {
     SendRequest();
   } else {
     LOGGER_ERROR(logger_,
-                  "Applcation with hmi_app_id " << application_id()
-                                                << " does not exist");
+                 "Applcation with hmi_app_id " << application_id()
+                                               << " does not exist");
   }
 }
 
@@ -83,7 +84,7 @@ void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
           application_id());
   if (!app) {
     LOGGER_ERROR(logger_,
-                  "StartAudioStreamRequest aborted. Application not found");
+                 "StartAudioStreamRequest aborted. Application not found");
     return;
   }
 
@@ -111,8 +112,8 @@ void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
       if (hmi_apis::Common_Result::REJECTED == code) {
         LOGGER_INFO(logger_, "StartAudioStream response REJECTED");
         RetryStartSession();
-        break;
-      }
+      break;
+    }
     }
     default: {
       LOGGER_ERROR(logger_, "Received unknown event" << event.id());

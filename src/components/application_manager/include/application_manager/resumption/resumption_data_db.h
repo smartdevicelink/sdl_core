@@ -33,7 +33,6 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_DB_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_DB_H_
 #include "application_manager/resumption/resumption_data.h"
-
 #include "sql_database.h"
 #include "sql_query.h"
 
@@ -85,6 +84,7 @@ class ResumptionDataDB : public ResumptionData {
    * @param application is application which need to be saved
    */
   virtual void SaveApplication(app_mngr::ApplicationSharedPtr application);
+
   /**
    * @brief Returns HMI level of application from saved data
    * @param policy_app_id contains policy id of application
@@ -101,6 +101,7 @@ class ResumptionDataDB : public ResumptionData {
    * @return true if exist, otherwise false
    */
   virtual bool IsHMIApplicationIdExist(uint32_t hmi_app_id) const;
+
   /**
    * @brief Checks if saved data have application
    * @param policy_app_id - policy application id
@@ -236,7 +237,6 @@ class ResumptionDataDB : public ResumptionData {
    * @return true if success, otherwise - false
    */
   bool UpdateDBVersion() const;
-
   bool DropAppDataResumption(const std::string& device_id,
                              const std::string& app_id) OVERRIDE;
 
@@ -258,6 +258,7 @@ class ResumptionDataDB : public ResumptionData {
   bool SelectHMILevel(const std::string& policy_app_id,
                       const std::string& device_id,
                       int& hmi_level) const;
+
   /**
    * @brief Checks existence HMI id in DB
    * @param hmi_app_id - HMI id
@@ -828,7 +829,6 @@ class ResumptionDataDB : public ResumptionData {
    * @brief returns pointer to data base
    */
   utils::dbms::SQLDatabase* db() const;
-
   /**
    * @brief Updates grammarID for application
    * @param policy_app_id Application ID

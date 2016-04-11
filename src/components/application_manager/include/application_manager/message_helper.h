@@ -36,7 +36,6 @@
 #include <map>
 #include <vector>
 #include <string>
-
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "utils/macro.h"
@@ -56,7 +55,6 @@ class SmartObject;
 namespace policy {
 class PolicyHandlerInterface;
 }
-
 namespace application_manager {
 namespace mobile_api = mobile_apis;
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
@@ -83,12 +81,12 @@ class MessageHelper {
   static void CreateGetVehicleDataRequest(
       uint32_t correlation_id, const std::vector<std::string>& params);
 
+
   /**
    * @brief Create mobile HashUpdateNotification
    */
   static smart_objects::SmartObjectSPtr CreateHashUpdateNotification(
       const uint32_t app_id);
-
   static smart_objects::SmartObjectSPtr GetHashUpdateNotification(
       const uint32_t app_id);
 
@@ -107,7 +105,6 @@ class MessageHelper {
   static void SendOnAppInterfaceUnregisteredNotificationToMobile(
       int32_t connection_key,
       mobile_apis::AppInterfaceUnregisteredReason::eType reason);
-
   /**
    * @brief Sends OnLanguageChange notification to application
    * @param connection_key Connection key of application
@@ -306,7 +303,6 @@ class MessageHelper {
    */
   static void SendOnAppUnregNotificationToHMI(
       ApplicationConstSharedPtr app, bool is_unexpected_disconnect = false);
-
   static NsSmartDeviceLink::NsSmartObjects::SmartObjectSPtr
   GetBCActivateAppRequestToHMI(
       ApplicationConstSharedPtr app,
@@ -553,7 +549,6 @@ class MessageHelper {
   static To ConvertEnumAPINoCheck(const From& input) {
     return static_cast<To>(input);
   }
-
   static const uint32_t GetPriorityCode(const std::string& priority);
 
   /**
@@ -571,7 +566,6 @@ class MessageHelper {
    */
   static mobile_apis::Language::eType MobileLanguageFromString(
       const std::string& language);
-
   /**
    * @brief Converts mobile language enum to HMI language enum
    * @param language Mobile language enum

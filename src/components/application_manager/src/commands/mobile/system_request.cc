@@ -42,8 +42,15 @@ Copyright (c) 2013, Ford Motor Company
 #include "config_profile/profile.h"
 #include "utils/file_system.h"
 #include "formatters/CFormatterJsonBase.h"
-#include "json/json.h"
 #include "utils/helpers.h"
+#include "utils/json_utils.h"
+#include <stdio.h>
+#include <string>
+#include <vector>
+
+#if defined(_MSC_VER)
+#define snprintf _snprintf_s
+#endif
 
 namespace application_manager {
 
@@ -108,15 +115,14 @@ void SystemRequest::Run() {
     binary_data = (*message_)[strings::params][strings::binary_data].asBinary();
     binary_data_folder = profile::Profile::instance()->system_files_path();
   } else {
-    binary_data_folder = profile::Profile::instance()->app_storage_folder();
-    binary_data_folder += "/";
-    binary_data_folder += application->folder_name();
-    binary_data_folder += "/";
+    binary_data_folder = file_system::ConcatPath(
+        profile::Profile::instance()->app_storage_folder(),
+        application->folder_name());
+    binary_data_folder += file_system::GetPathDelimiter();
   }
 
-  std::string file_dst_path = profile::Profile::instance()->system_files_path();
-  file_dst_path += "/";
-  file_dst_path += file_name;
+  std::string file_dst_path = file_system::ConcatPath(
+      profile::Profile::instance()->system_files_path(), file_name);
 
   if ((*message_)[strings::params].keyExists(strings::binary_data)) {
     LOGGER_DEBUG(
@@ -134,9 +140,9 @@ void SystemRequest::Run() {
     app_full_file_path += file_name;
 
     LOGGER_DEBUG(logger_,
-                  "Binary data is not present. Trying to find file "
-                      << file_name << " within previously saved app file in "
-                      << binary_data_folder);
+                 "Binary data is not present. Trying to find file "
+                     << file_name << " within previously saved app file in "
+                     << binary_data_folder);
 
     const AppFile* file = application->GetFile(app_full_file_path);
     if (!file || !file->is_download_complete ||
@@ -163,17 +169,19 @@ void SystemRequest::Run() {
 
   if (mobile_apis::RequestType::QUERY_APPS == request_type) {
     using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
+    using namespace utils::json;
 
     smart_objects::SmartObject sm_object;
-    Json::Reader reader;
-    std::string json(binary_data.begin(), binary_data.end());
-    Json::Value root;
-    if (!reader.parse(json.c_str(), root)) {
+    std::string json_string(binary_data.begin(), binary_data.end());
+
+    JsonValue::ParseResult parse_result = JsonValue::Parse(json_string);
+    if (!parse_result.second) {
       LOGGER_DEBUG(logger_, "Unable to parse query_app json file.");
       return;
     }
+    JsonValue& root_json = parse_result.first;
 
-    CFormatterJsonBase::jsonValueToObj(root, sm_object);
+    CFormatterJsonBase::jsonValueToObj(root_json, sm_object);
 
     if (!ValidateQueryAppData(sm_object)) {
       SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -251,8 +259,8 @@ bool SystemRequest::ValidateQueryAppData(
   }
   if (!data.keyExists(json::response)) {
     LOGGER_ERROR(logger_,
-                  "QueryApps response does not contain '" << json::response
-                                                          << "' parameter.");
+                 "QueryApps response does not contain '" << json::response
+                                                         << "' parameter.");
     return false;
   }
   smart_objects::SmartArray* obj_array = data[json::response].asArray();

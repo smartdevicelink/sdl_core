@@ -29,8 +29,8 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include "application_manager/policies/policy_handler.h"
+
 
 #include <unistd.h>
 #include <dlfcn.h>
@@ -39,7 +39,6 @@
 #include "application_manager/smart_object_keys.h"
 
 #include "application_manager/policies/delegates/app_permission_delegate.h"
-
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
 #include "policy/policy_manager_impl.h"
@@ -61,9 +60,10 @@ namespace policy {
 using namespace application_manager;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
-
 namespace {
+
 using namespace mobile_apis;
+
 typedef std::map<RequestType::eType, std::string> RequestTypeMap;
 RequestTypeMap TypeToString = {
     {RequestType::INVALID_ENUM, "INVALID_ENUM"},
@@ -113,24 +113,25 @@ const policy::DeviceParams GetDeviceParams(
   }
   device_params.device_handle = device_handle;
   return device_params;
+  }
 }
-}
-#define POLICY_LIB_CHECK(return_value)                                      \
-  {                                                                         \
-    sync_primitives::AutoReadLock lock(policy_manager_lock_);               \
-    if (!policy_manager_) {                                                 \
+
+#define POLICY_LIB_CHECK(return_value)                                     \
+  {                                                                        \
+    sync_primitives::AutoReadLock lock(policy_manager_lock_);              \
+    if (!policy_manager_) {                                                \
       LOGGER_DEBUG(logger_, "The shared library of policy is not loaded"); \
-      return return_value;                                                  \
-    }                                                                       \
+      return return_value;                                                 \
+    }                                                                      \
   }
 
-#define POLICY_LIB_CHECK_VOID()                                             \
-  {                                                                         \
-    sync_primitives::AutoReadLock lock(policy_manager_lock_);               \
-    if (!policy_manager_) {                                                 \
+#define POLICY_LIB_CHECK_VOID()                                            \
+  {                                                                        \
+    sync_primitives::AutoReadLock lock(policy_manager_lock_);              \
+    if (!policy_manager_) {                                                \
       LOGGER_DEBUG(logger_, "The shared library of policy is not loaded"); \
-      return;                                                               \
-    }                                                                       \
+      return;                                                              \
+    }                                                                      \
   }
 
 struct ApplicationListHmiLevelSorter {
@@ -214,8 +215,8 @@ struct LinkAppToDevice {
   void operator()(const ApplicationSharedPtr& app) {
     if (!app.valid()) {
       LOGGER_WARN(logger_,
-                   "Invalid pointer to application was passed."
-                   "Skip current application.");
+                  "Invalid pointer to application was passed."
+                  "Skip current application.");
       return;
     }
     DeviceParams device_params =
@@ -226,7 +227,7 @@ struct LinkAppToDevice {
     const std::string app_id = app->mobile_app_id();
     if (device_params.device_mac_address.empty()) {
       LOGGER_WARN(logger_,
-                   "Couldn't find device, which hosts application " << app_id);
+                  "Couldn't find device, which hosts application " << app_id);
       return;
     }
     app_to_device_link_[app_id] = device_params.device_mac_address;
@@ -278,8 +279,9 @@ struct PermissionsConsolidator {
 const std::string PolicyHandler::kLibrary = "libPolicy.so";
 
 PolicyHandler::PolicyHandler(const PolicySettings& settings)
+
     : AsyncRunner("PolicyHandler async runner thread")
-    , dl_handle_(0)
+    , policy_library_()
     , last_activated_app_id_(0)
     , app_to_device_link_lock_(true)
     , statistic_manager_impl_(utils::MakeShared<StatisticManagerImpl>(this))
@@ -292,15 +294,14 @@ bool PolicyHandler::LoadPolicyLibrary() {
   sync_primitives::AutoWriteLock lock(policy_manager_lock_);
   if (!PolicyEnabled()) {
     LOGGER_WARN(logger_,
-                 "System is configured to work without policy "
-                 "functionality.");
+                "System is configured to work without policy "
+                "functionality.");
     policy_manager_.reset();
     return NULL;
   }
-  dl_handle_ = dlopen(kLibrary.c_str(), RTLD_LAZY);
 
-  char* error = dlerror();
-  if (!error) {
+  policy_library_.Load(kPolicyLibraryName);
+  if (policy_library_.IsLoaded()) {
     if (CreateManager()) {
       policy_manager_->set_listener(this);
       event_observer_ = utils::MakeShared<PolicyEventObserver>(this);
@@ -308,7 +309,6 @@ bool PolicyHandler::LoadPolicyLibrary() {
   } else {
     LOGGER_ERROR(logger_, error);
   }
-
   return policy_manager_.valid();
 }
 
@@ -317,14 +317,20 @@ bool PolicyHandler::PolicyEnabled() const {
 }
 
 bool PolicyHandler::CreateManager() {
-  typedef PolicyManager* (*CreateManager)();
-  CreateManager create_manager =
-      reinterpret_cast<CreateManager>(dlsym(dl_handle_, "CreateManager"));
-  char* error_string = dlerror();
-  if (NULL == error_string) {
-    policy_manager_ = create_manager();
+  typedef PolicyManager* (*CreateManager)(
+      const std::string&, uint16_t, uint16_t, logger::Logger::Pimpl&);
+  DCHECK_OR_RETURN(policy_library_.IsLoaded(), false);
+  CreateManager create_manager = reinterpret_cast<CreateManager>(
+      policy_library_.GetSymbol("CreateManager"));
+  if (create_manager) {
+    policy_manager_ = create_manager(
+        get_settings().app_storage_folder(),
+        get_settings().attempts_to_open_policy_db(),
+        get_settings().open_attempt_timeout_ms(),
+        GET_LOGGER());
   } else {
-    LOGGER_WARN(logger_, error_string);
+    LOGGER_WARN(logger_,
+                "Policy library loading error. Cannot get proc address");
   }
   return policy_manager_.valid();
 }
@@ -332,7 +338,6 @@ bool PolicyHandler::CreateManager() {
 const PolicySettings& PolicyHandler::get_settings() const {
   return settings_;
 }
-
 bool PolicyHandler::InitPolicyTable() {
   LOGGER_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK(false);
@@ -382,7 +387,6 @@ uint32_t PolicyHandler::GetAppIdForSending() const {
                           ApplicationManagerImpl::instance()
                               ->connection_handler()
                               .get_session_observer());
-
       if (kDeviceAllowed ==
           policy_manager_->GetUserConsentForDevice(
               device_params.device_mac_address)) {
@@ -497,8 +501,8 @@ void PolicyHandler::OnAppPermissionConsentInternal(
   sync_primitives::AutoLock lock(app_to_device_link_lock_);
   if (!app_to_device_link_.size()) {
     LOGGER_WARN(logger_,
-                 "There are no applications previously stored for "
-                 "setting common permissions.");
+                "There are no applications previously stored for "
+                "setting common permissions.");
     return;
   }
 
@@ -514,19 +518,21 @@ void PolicyHandler::OnAppPermissionConsentInternal(
     // permissions should be set only for coincident to registered apps
     if (!app.valid()) {
       LOGGER_WARN(logger_,
-                   "Invalid pointer to application was passed."
-                   "Permissions setting skipped.");
+                  "Invalid pointer to application was passed."
+                  "Permissions setting skipped.");
       continue;
     }
+
     DeviceParams device_params =
         GetDeviceParams(app->device(),
                         ApplicationManagerImpl::instance()
                             ->connection_handler()
                             .get_session_observer());
+
     if (device_params.device_mac_address != it->second) {
       LOGGER_WARN(logger_,
-                   "Device_id of application is changed."
-                   "Permissions setting skipped.");
+                  "Device_id of application is changed."
+                  "Permissions setting skipped.");
       continue;
     }
 
@@ -543,7 +549,6 @@ void policy::PolicyHandler::SetDaysAfterEpoch() {
   int days_after_epoch = current_time.tv_sec / kSecondsInDay;
   PTUpdatedAt(Counters::DAYS_AFTER_EPOCH, days_after_epoch);
 }
-
 #ifdef ENABLE_SECURITY
 std::string PolicyHandler::RetrieveCertificate() const {
   POLICY_LIB_CHECK(std::string(""));
@@ -601,12 +606,13 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
 
   if (!app.valid()) {
     LOGGER_WARN(logger_,
-                 "Connection key '"
-                     << connection_key
-                     << "' "
-                        "not found within registered applications.");
+                "Connection key '"
+                    << connection_key
+                    << "' "
+                       "not found within registered applications.");
     return;
   }
+
   DeviceParams device_params =
       GetDeviceParams(app->device(),
                       ApplicationManagerImpl::instance()
@@ -648,10 +654,10 @@ std::string PolicyHandler::OnCurrentDeviceIdUpdateRequired(
 
   if (!app.valid()) {
     LOGGER_WARN(logger_,
-                 "Application with id '"
-                     << policy_app_id
-                     << "' "
-                        "not found within registered applications.");
+                "Application with id '"
+                    << policy_app_id
+                    << "' "
+                       "not found within registered applications.");
     return "";
   }
   DeviceParams device_params =
@@ -700,15 +706,15 @@ void PolicyHandler::OnVehicleDataUpdated(
 void PolicyHandler::OnPendingPermissionChange(
     const std::string& policy_app_id) {
   LOGGER_DEBUG(logger_,
-                "PolicyHandler::OnPendingPermissionChange for "
-                    << policy_app_id);
+               "PolicyHandler::OnPendingPermissionChange for "
+                   << policy_app_id);
   POLICY_LIB_CHECK_VOID();
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application_by_policy_id(
           policy_app_id);
   if (!app.valid()) {
     LOGGER_WARN(logger_,
-                 "No app found for " << policy_app_id << " policy app id.");
+                "No app found for " << policy_app_id << " policy app id.");
     return;
   }
 
@@ -789,18 +795,18 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
 
   if (!app.valid()) {
     LOGGER_WARN(logger_,
-                 "There is no registered application with "
-                 "connection key '"
-                     << app_id << "'");
+                "There is no registered application with "
+                "connection key '"
+                    << app_id << "'");
     return false;
   }
 
   const std::string& mobile_app_id = app->mobile_app_id();
   if (mobile_app_id.empty()) {
     LOGGER_WARN(logger_,
-                 "Application with connection key '"
-                     << app_id << "'"
-                                  " has no application id.");
+                "Application with connection key '"
+                    << app_id << "'"
+                                 " has no application id.");
     return false;
   }
 
@@ -827,7 +833,6 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
     policy_manager_->CleanupUnpairedDevices();
     int32_t correlation_id =
         ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
-
     SetDaysAfterEpoch();
 
     event_observer_->subscribe_on_event(
@@ -857,10 +862,8 @@ bool PolicyHandler::UnloadPolicyLibrary() {
   if (policy_manager_) {
     policy_manager_.reset();
   }
-  if (dl_handle_) {
-    ret = (dlclose(dl_handle_) == 0);
-    dl_handle_ = 0;
-  }
+
+  policy_library_.Unload();
   LOGGER_TRACE(logger_, "exit");
   return ret;
 }
@@ -966,7 +969,7 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
 
 void PolicyHandler::KmsChanged(int kilometers) {
   LOGGER_DEBUG(logger_,
-                "PolicyHandler::KmsChanged " << kilometers << " kilometers");
+               "PolicyHandler::KmsChanged " << kilometers << " kilometers");
   POLICY_LIB_CHECK_VOID();
   policy_manager_->KmsChanged(kilometers);
 }
@@ -1002,8 +1005,8 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
 
   if (mobile_apis::HMILevel::INVALID_ENUM == hmi_level) {
     LOGGER_WARN(logger_,
-                 "Couldn't convert default hmi level " << default_hmi
-                                                       << " to enum.");
+                "Couldn't convert default hmi level " << default_hmi
+                                                      << " to enum.");
     return;
   }
   if (current_hmi_level == hmi_level) {
@@ -1013,10 +1016,9 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
   switch (current_hmi_level) {
     case mobile_apis::HMILevel::HMI_NONE: {
       LOGGER_INFO(logger_,
-                   "Changing hmi level of application "
-                       << policy_app_id << " to default hmi level "
-                       << default_hmi);
-
+                  "Changing hmi level of application "
+                      << policy_app_id << " to default hmi level "
+                      << default_hmi);
       if (hmi_level == mobile_apis::HMILevel::HMI_FULL) {
         ApplicationManagerImpl::instance()->SetState<true>(app->app_id(),
                                                            hmi_level);
@@ -1028,9 +1030,9 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
     }
     default:
       LOGGER_WARN(logger_,
-                   "Application " << policy_app_id
-                                  << " is running."
-                                     "HMI level won't be changed.");
+                  "Application " << policy_app_id
+                                 << " is running."
+                                    "HMI level won't be changed.");
       break;
   }
 }
@@ -1052,7 +1054,7 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
                                                      permissions);
 
   LOGGER_DEBUG(logger_,
-                "Notification sent for application_id:"
+               "Notification sent for application_id:"
                     << policy_app_id << " and connection_key "
                     << app->app_id());
 }
@@ -1061,8 +1063,10 @@ bool PolicyHandler::SaveSnapshot(const BinaryMessage& pt_string,
                                  std::string& snap_path) {
   const std::string& policy_snapshot_file_name =
       get_settings().policies_snapshot_file_name();
-  const std::string& system_files_path = get_settings().system_files_path();
-  snap_path = system_files_path + '/' + policy_snapshot_file_name;
+  const std::string& system_files_path =
+      get_settings().system_files_path();
+  snap_path =
+      file_system::ConcatPath(system_files_path, policy_snapshot_file_name);
 
   bool result = false;
   if (file_system::CreateDirectoryRecursively(system_files_path)) {
@@ -1084,6 +1088,7 @@ void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
     LOGGER_ERROR(logger_, "Service URLs are empty! NOT sending PT to mobile!");
     return;
   }
+
   SendMessageToSDK(pt_string, urls.front().url.front());
 }
 

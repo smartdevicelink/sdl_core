@@ -63,8 +63,8 @@ void SpeakRequest::Run() {
 
   if (IsWhiteSpaceExist()) {
     LOGGER_ERROR(logger_,
-                  "Incoming speak has contains \\t\\n \\\\t \\\\n "
-                  " text contains only whitespace in ttsChunks");
+                 "Incoming speak has contains \\t\\n \\\\t \\\\n "
+                 " text contains only whitespace in ttsChunks");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }

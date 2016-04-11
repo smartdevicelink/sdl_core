@@ -71,9 +71,9 @@ void SDLActivateAppRequest::Run() {
     DevicesApps devices_apps = FindAllAppOnParticularDevice(app->device());
     if (!devices_apps.first && devices_apps.second.empty()) {
       LOGGER_ERROR(logger_,
-                    "Can't find regular foreground app with the same "
-                    "connection id:"
-                        << app->device());
+                   "Can't find regular foreground app with the same "
+                   "connection id:"
+                       << app->device());
       SendResponse(correlation_id(), SDL_ActivateApp, NO_APPS_REGISTERED);
       return;
     }

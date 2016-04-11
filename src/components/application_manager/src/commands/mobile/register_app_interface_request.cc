@@ -33,7 +33,12 @@
 
 #include "application_manager/commands/mobile/register_app_interface_request.h"
 
+#if defined(OS_POSIX)
 #include <unistd.h>
+#elif defined(OS_WINDOWS)
+#include "utils/winhdr.h"
+#endif
+
 #include <algorithm>
 #include <string.h>
 
@@ -165,10 +170,13 @@ void RegisterAppInterfaceRequest::Run() {
                       << ", thread=" << pthread_self());
     ApplicationManagerImpl::instance()->updateRequestTimeout(
         connection_key(), correlation_id(), default_timeout());
+#if defined(OS_POSIX)
     sleep(1);
+#elif defined(OS_WINDOWS)
+    Sleep(1000);
+#endif
     // TODO(DK): timer_->StartWait(1);
   }
-
   if (!ApplicationManagerImpl::exists()) {
     LOGGER_WARN(logger_, "The ApplicationManager doesn't exist!");
     return;
@@ -184,7 +192,6 @@ void RegisterAppInterfaceRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
     return;
   }
-
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
 
@@ -227,10 +234,11 @@ void RegisterAppInterfaceRequest::Run() {
 
   if (IsWhiteSpaceExist()) {
     LOGGER_INFO(logger_,
-                 "Incoming register app interface has contains \t\n \\t \\n");
+                "Incoming register app interface has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
+
 
   application =
       ApplicationManagerImpl::instance()->RegisterApplication(message_);
@@ -239,60 +247,58 @@ void RegisterAppInterfaceRequest::Run() {
     LOGGER_ERROR(logger_, "Application hasn't been registered!");
     return;
   }
-  // For resuming application need to restore hmi_app_id from resumeCtrl
-  resumption::ResumeCtrl& resumer =
-      ApplicationManagerImpl::instance()->resume_controller();
-
+    // For resuming application need to restore hmi_app_id from resumeCtrl
+    resumption::ResumeCtrl& resumer =
+        ApplicationManagerImpl::instance()->resume_controller();
   const std::string& device_mac = application->mac_address();
 
-  // there is side affect with 2 mobile app with the same mobile app_id
+    // there is side affect with 2 mobile app with the same mobile app_id
   if (resumer.IsApplicationSaved(policy_app_id, device_mac)) {
-    application->set_hmi_application_id(
+      application->set_hmi_application_id(
         resumer.GetHMIApplicationID(policy_app_id, device_mac));
-  } else {
-    application->set_hmi_application_id(
-        ApplicationManagerImpl::instance()->GenerateNewHMIAppID());
-  }
+    } else {
+      application->set_hmi_application_id(
+          ApplicationManagerImpl::instance()->GenerateNewHMIAppID());
+    }
+    application->set_is_media_application(
+        msg_params[strings::is_media_application].asBool());
 
-  application->set_is_media_application(
-      msg_params[strings::is_media_application].asBool());
+    if (msg_params.keyExists(strings::vr_synonyms)) {
+      application->set_vr_synonyms(msg_params[strings::vr_synonyms]);
+    }
 
-  if (msg_params.keyExists(strings::vr_synonyms)) {
-    application->set_vr_synonyms(msg_params[strings::vr_synonyms]);
-  }
+    if (msg_params.keyExists(strings::ngn_media_screen_app_name)) {
+      application->set_ngn_media_screen_name(
+          msg_params[strings::ngn_media_screen_app_name]);
+    }
 
-  if (msg_params.keyExists(strings::ngn_media_screen_app_name)) {
-    application->set_ngn_media_screen_name(
-        msg_params[strings::ngn_media_screen_app_name]);
-  }
+    if (msg_params.keyExists(strings::tts_name)) {
+      application->set_tts_name(msg_params[strings::tts_name]);
+    }
 
-  if (msg_params.keyExists(strings::tts_name)) {
-    application->set_tts_name(msg_params[strings::tts_name]);
-  }
+    if (msg_params.keyExists(strings::app_hmi_type)) {
+      application->set_app_types(msg_params[strings::app_hmi_type]);
 
-  if (msg_params.keyExists(strings::app_hmi_type)) {
-    application->set_app_types(msg_params[strings::app_hmi_type]);
+      // check app type
+      const smart_objects::SmartObject& app_type =
+          msg_params.getElement(strings::app_hmi_type);
 
-    // check app type
-    const smart_objects::SmartObject& app_type =
-        msg_params.getElement(strings::app_hmi_type);
-
-    for (size_t i = 0; i < app_type.length(); ++i) {
-      if (mobile_apis::AppHMIType::NAVIGATION ==
-          static_cast<mobile_apis::AppHMIType::eType>(
-              app_type.getElement(i).asUInt())) {
-        application->set_is_navi(true);
-      }
-      if (mobile_apis::AppHMIType::COMMUNICATION ==
-          static_cast<mobile_apis::AppHMIType::eType>(
-              app_type.getElement(i).asUInt())) {
-        application->set_voice_communication_supported(true);
+      for (size_t i = 0; i < app_type.length(); ++i) {
+        if (mobile_apis::AppHMIType::NAVIGATION ==
+            static_cast<mobile_apis::AppHMIType::eType>(
+                app_type.getElement(i).asUInt())) {
+          application->set_is_navi(true);
+        }
+        if (mobile_apis::AppHMIType::COMMUNICATION ==
+            static_cast<mobile_apis::AppHMIType::eType>(
+                app_type.getElement(i).asUInt())) {
+          application->set_voice_communication_supported(true);
+        }
       }
     }
-  }
 
-  // Add device to policy table and set device info, if any
-  policy::DeviceParams dev_params;
+    // Add device to policy table and set device info, if any
+    policy::DeviceParams dev_params;
   if (-1 ==
       ApplicationManagerImpl::instance()
           ->connection_handler()
@@ -306,16 +312,16 @@ void RegisterAppInterfaceRequest::Run() {
                   "Failed to extract information for device "
                       << application->device());
   }
-
-  policy::DeviceInfo device_info;
-  device_info.AdoptDeviceType(dev_params.device_connection_type);
-  if (msg_params.keyExists(strings::device_info)) {
-    FillDeviceInfo(&device_info);
-  }
+    policy::DeviceInfo device_info;
+    device_info.AdoptDeviceType(dev_params.device_connection_type);
+    if (msg_params.keyExists(strings::device_info)) {
+      FillDeviceInfo(&device_info);
+    }
 
   GetPolicyHandler().SetDeviceInfo(device_mac, device_info);
 
-  SendRegisterAppInterfaceResponseToMobile();
+    SendRegisterAppInterfaceResponseToMobile();
+
 }
 
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
@@ -326,7 +332,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
 
   const HMICapabilities& hmi_capabilities =
       ApplicationManagerImpl::instance()->hmi_capabilities();
-
   const uint32_t key = connection_key();
   ApplicationSharedPtr application =
       ApplicationManagerImpl::instance()->application(key);
@@ -335,7 +340,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
       ApplicationManagerImpl::instance()->resume_controller();
   if (!application) {
     LOGGER_ERROR(logger_,
-                  "There is no application for such connection key" << key);
+                 "There is no application for such connection key" << key);
     LOGGER_DEBUG(logger_, "Need to start resume data persistent timer");
     resumer.OnAppRegistrationEnd();
     return;
@@ -358,7 +363,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
       msg_params[strings::hmi_display_language_desired].asInt() !=
           hmi_capabilities.active_ui_language()) {
     LOGGER_WARN(logger_,
-                 "Wrong language on registering application "
+                "Wrong language on registering application "
                      << application->name().c_str());
 
     LOGGER_ERROR(
@@ -367,7 +372,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
             << msg_params[strings::language_desired].asInt()
             << " , active VR language code is "
             << hmi_capabilities.active_vr_language() << ", UI language code is "
-            << msg_params[strings::hmi_display_language_desired].asInt()
+              << msg_params[strings::hmi_display_language_desired].asInt()
             << " , active UI language code is "
             << hmi_capabilities.active_ui_language());
 
@@ -508,12 +513,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
 
   bool resumption =
       (*message_)[strings::msg_params].keyExists(strings::hash_id);
-
   bool need_restore_vr = resumption;
-
   std::string hash_id;
   std::string add_info;
-
   if (resumption) {
     hash_id = (*message_)[strings::msg_params][strings::hash_id].asString();
     if (!resumer.CheckApplicationHash(application, hash_id)) {
@@ -531,6 +533,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
       add_info = "Resume succeeded.";
     }
   }
+
   if ((mobile_apis::Result::SUCCESS == result_code) &&
       (mobile_apis::Result::INVALID_ENUM != result_checking_app_hmi_type_)) {
     add_info += response_info_;
@@ -835,8 +838,8 @@ void RegisterAppInterfaceRequest::FillDeviceInfo(
 
 bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   LOGGER_INFO(logger_,
-               "RegisterAppInterfaceRequest::"
-               "IsApplicationWithSameAppIdRegistered");
+              "RegisterAppInterfaceRequest::"
+              "IsApplicationWithSameAppIdRegistered");
 
   const custom_string::CustomString mobile_app_id =
       (*message_)[strings::msg_params][strings::app_id].asCustomString();
@@ -888,7 +891,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
               .asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
       LOGGER_ERROR(logger_,
-                    "Invalid ngn_media_screen_app_name syntax check failed");
+                   "Invalid ngn_media_screen_app_name syntax check failed");
       return true;
     }
   }
@@ -924,7 +927,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
                        [strings::hardware].asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
         LOGGER_ERROR(logger_,
-                      "Invalid device_info hardware syntax check failed");
+                     "Invalid device_info hardware syntax check failed");
         return true;
       }
     }
@@ -935,7 +938,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
                        [strings::firmware_rev].asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
         LOGGER_ERROR(logger_,
-                      "Invalid device_info firmware_rev syntax check failed");
+                     "Invalid device_info firmware_rev syntax check failed");
         return true;
       }
     }
@@ -956,7 +959,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
                        [strings::os_version].asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
         LOGGER_ERROR(logger_,
-                      "Invalid device_info os_version syntax check failed");
+                     "Invalid device_info os_version syntax check failed");
         return true;
       }
     }
@@ -967,7 +970,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
                        [strings::carrier].asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
         LOGGER_ERROR(logger_,
-                      "Invalid device_info carrier syntax check failed");
+                     "Invalid device_info carrier syntax check failed");
         return true;
       }
     }
@@ -980,7 +983,6 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
       return true;
     }
   }
-
   return false;
 }
 
@@ -992,8 +994,8 @@ void RegisterAppInterfaceRequest::CheckResponseVehicleTypeParam(
   if (!vehicle_type.keyExists(param) || vehicle_type[param].empty()) {
     if (!backup_value.empty()) {
       LOGGER_DEBUG(logger_,
-                    param << " is missing."
-                             "Will be replaced with policy table value.");
+                   param << " is missing."
+                            "Will be replaced with policy table value.");
       vehicle_type[param] = backup_value;
     } else {
       vehicle_type.erase(param);
