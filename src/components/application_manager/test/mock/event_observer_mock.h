@@ -37,16 +37,20 @@
 #include "application_manager/event_engine/event.h"
 #include "gmock/gmock.h"
 
-namespace application_manager {
-namespace event_engine {
+namespace test {
+namespace components {
+namespace event_engine_test {
 
-class MockEventObserver : public EventObserver {
+class MockEventObserver : public application_manager::event_engine::EventObserver {
  public:
-  MOCK_METHOD1(on_event, void(const application_manager::event_engine::Event& event));
+    MockEventObserver(::application_manager::event_engine::EventDispatcher& event_dispatcher): application_manager::event_engine::EventObserver(event_dispatcher){}
+  MOCK_METHOD1(on_event,
+               void(const application_manager::event_engine::Event& event));
 };
 
-}  // namespace event_engine
-}  // namespace application_manager
+}  // namespace event_engine_test
+}  // namespace components
+}  // namespace test
 
 #endif // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_MOCK_EVENT_OBSERVER_MOCK_H_
 

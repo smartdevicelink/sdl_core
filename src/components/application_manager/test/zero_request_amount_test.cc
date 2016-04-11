@@ -33,7 +33,7 @@
 #include <string>
 #include <algorithm>
 #include "gtest/gtest.h"
-#include "config_profile/profile.h"
+
 #include "application_manager/request_controller.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application_manager_impl.h"
@@ -89,10 +89,6 @@ commands::Command* PutFileCommand(uint32_t &correlation_id,
 
 TEST(RequestControlTest, ZeroValuePendingRequestsAmount) {
   // Default value
-  uint32_t pending_requests_amount = 0;
-  EXPECT_EQ(pending_requests_amount,
-            Profile::instance()->pending_requests_amount());
-
   const uint32_t big_count_of_requests_for_test_ = 10;  //bigger than pending_requests_amount
   uint32_t correlation_id = 0;
   uint32_t connection_key = 0;
@@ -117,9 +113,6 @@ TEST(RequestControlTest, ZeroValuePendingRequestsAmount) {
 
 TEST(RequestControlTest, ZeroValueAppRequestsTimeScale) {
   // Default value
-  uint32_t app_requests_time_scale = 0;
-  EXPECT_EQ(app_requests_time_scale, Profile::instance()->app_time_scale());
-
   const uint32_t big_count_of_requests_for_test_ = 10;  //bigger than pending_requests_amount
   uint32_t correlation_id = 0;
   uint32_t connection_key = 0;
@@ -145,10 +138,6 @@ TEST(RequestControlTest, ZeroValueAppRequestsTimeScale) {
 
 TEST(RequestControlTest, ZeroValueAppTimeScaleMaxRequests) {
   // Default value
-  uint32_t app_time_scale_max_requests = 0;
-  EXPECT_EQ(app_time_scale_max_requests,
-            Profile::instance()->app_time_scale_max_requests());
-
   const uint32_t big_count_of_requests_for_test_ = 10;  //bigger than pending_requests_amount
   uint32_t correlation_id = 0;
   uint32_t connection_key = 0;

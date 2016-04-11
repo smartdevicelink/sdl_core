@@ -34,9 +34,15 @@
 #include <algorithm>
 #include "gtest/gtest.h"
 #include "application_manager/usage_statistics.h"
-#include "application_mock.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/mock_application.h"
+#include "application_manager/mock_application_manager.h"
 #include "utils/data_accessor.h"
+#include "config_profile/profile.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/state_controller.h"
+#include "application_manager/resumption/resume_ctrl.h"
+#include "application_manager/event_engine/event_dispatcher.h"
+#include "application_manager/mock_application_manager_settings.h"
 
 namespace test {
 namespace components {
@@ -51,20 +57,23 @@ using namespace resumption;
 using namespace mobile_apis;
 
 class ResumptionDataTest : public ::testing::Test {
+ public :
+    ResumptionDataTest() :tts_chunks_count(4) {}
  protected:
   // Check structure in saved application
   void CheckSavedApp(sm::SmartObject& saved_data);
 
   // Set data for resumption
   virtual void PrepareData();
-  utils::SharedPtr<NiceMock<MockApplication>> app_mock;
+  utils::SharedPtr<NiceMock<application_manager_test::MockApplication>> app_mock;
 
+  profile::Profile profile_;
   HMILevel::eType hmi_level_;
   size_t app_id_;
   size_t hmi_app_id_;
   std::string policy_app_id_;
   size_t ign_off_count_;
-  const size_t tts_chunks_count = 4;
+  const size_t tts_chunks_count;
 
   size_t grammar_id_;
   std::string hash_;
@@ -111,7 +120,7 @@ class ResumptionDataTest : public ::testing::Test {
   const size_t count_of_submenues = 3;
   const size_t count_of_files = 8;
   const size_t count_of_vrhelptitle = 2;
-  const std::string mac_address = "12345";
+  const std::string mac_address_ = "12345";
 
   am::CommandsMap test_commands_map;
   am::SubMenuMap test_submenu_map;
@@ -126,6 +135,7 @@ class ResumptionDataTest : public ::testing::Test {
   sync_primitives::Lock setlock_;
   sync_primitives::Lock btnlock_;
   sync_primitives::Lock ivilock_;
+  const std::string app_storage_folder_ = "";
 };
 
 }  // namespace resumption_test

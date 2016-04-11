@@ -35,6 +35,8 @@
 #include "gmock/gmock.h"
 #include "application_manager/resumption/resumption_data.h"
 #include "application_manager/application.h"
+#include "application_manager/mock_application_manager_settings.h"
+#include "application_manager/mock_application_manager.h"
 
 namespace test {
 namespace components {
@@ -42,8 +44,10 @@ namespace resumption_test {
 namespace app_mngr = application_manager;
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
-class ResumptionDataMock : public ::resumption::ResumptionData {
+class MockResumptionData : public ::resumption::ResumptionData {
  public:
+  MockResumptionData(const application_manager_test::MockApplicationManager& application_manager):
+      ResumptionData(application_manager) {}
   MOCK_METHOD1(SaveApplication,
                void(app_mngr::ApplicationSharedPtr application));
   MOCK_CONST_METHOD2(GetStoredHMILevel,

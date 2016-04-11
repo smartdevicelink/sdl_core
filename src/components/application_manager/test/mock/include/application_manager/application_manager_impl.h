@@ -285,8 +285,8 @@ class ApplicationManagerImpl
   MOCK_METHOD0(GenerateGrammarID, uint32_t());
   MOCK_METHOD0(GenerateNewHMIAppID, uint32_t());
   MOCK_METHOD1(GetAvailableSpaceForApp, uint32_t(const std::string&));
-  MOCK_METHOD0(begin_audio_pass_thru, bool());
-  MOCK_METHOD0(end_audio_pass_thru, uint32_t());
+  MOCK_METHOD0(BeginAudioPassThrough, bool());
+  MOCK_METHOD0(EndAudioPassThrough, uint32_t());
   MOCK_METHOD1(StopAudioPassThru, void(uint32_t));
   MOCK_METHOD1(applications_by_button,
                std::vector<ApplicationSharedPtr>(uint32_t));
@@ -405,7 +405,7 @@ class ApplicationManagerImpl
    */
   class ApplicationListAccessor : public DataAccessor<ApplicationSet> {
    public:
-    ApplicationListAccessor()
+    ApplicationListAccessor(const application_manager::ApplicationManagerImpl& app_man)
         : DataAccessor<ApplicationSet>(ApplicationSet(),
                                        sync_primitives::Lock()) {}
     MOCK_CONST_METHOD0(applications, const ApplicationSet());

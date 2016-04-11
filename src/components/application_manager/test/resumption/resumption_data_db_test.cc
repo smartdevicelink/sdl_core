@@ -38,12 +38,10 @@
 #include "sql_database.h"
 #include "sql_query.h"
 #include "utils/make_shared.h"
-
-#include "application_manager/application_manager_impl.h"
-#include "config_profile/profile.h"
 #include "utils/file_system.h"
-#include "application_manager/resumption_data_test.h"
 #include "application_manager/test_resumption_data_db.h"
+#include "resumption_data_test.h"
+
 
 #include "application_manager/resumption/resumption_sql_queries.h"
 #include "application_manager/resumption/resumption_data_db.h"
@@ -53,6 +51,7 @@ namespace components {
 namespace resumption_test {
 
 using ::testing::NiceMock;
+using ::testing::ReturnRef;
 using application_manager_test::MockApplication;
 
 namespace am = application_manager;
@@ -83,18 +82,12 @@ class ResumptionDataDBTest : public ResumptionDataTest {
 
   static void SetUpTestCase() {
     kDatabaseName = "resumption";
-    if (is_in_file) {
-      ::profile::Profile::instance()->config_file_name(
-          "smartDeviceLink_test.ini");
-      path_ = profile::Profile::instance()->app_storage_folder();
-      CreateDirectory("./" + path_);
-      test_db_ = new utils::dbms::SQLDatabase(kDatabaseName);
-      test_db_->set_path(path_ + "/");
-      res_db_ = new TestResumptionDataDB(In_File_Storage);
-    } else {
-      res_db_ = new TestResumptionDataDB(In_Memory_Storage);
-      test_db_ = res_db_->get_db_handle();
-    }
+    path_ = "test_storage";
+    CreateDirectory("./" + path_);
+    ON_CALL(mock_application_manager_settings_, app_storage_folder()).WillByDefault(ReturnRef(path_));
+    test_db_ = new utils::dbms::SQLDatabase(kDatabaseName);
+    test_db_->set_path(path_ + "/");
+    res_db_ = new TestResumptionDataDB(mock_application_manager_settings_);
 
     EXPECT_TRUE(test_db_->Open());
     EXPECT_TRUE(test_db_->IsReadWrite());
@@ -107,7 +100,6 @@ class ResumptionDataDBTest : public ResumptionDataTest {
   static void TearDownTestCase() {
     test_db_->Close();
     if (is_in_file) {
-      ::profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
       RemoveDirectory("./" + path_, true);
     }
     delete res_db_;
@@ -122,11 +114,11 @@ class ResumptionDataDBTest : public ResumptionDataTest {
   }
 
   void SetZeroIgnOffTime() {
-    utils::dbms::SQLQuery query(test_db());
-    EXPECT_TRUE(query.Prepare(kUpdateLastIgnOffTime));
-    query.Bind(0, 0);
-    EXPECT_TRUE(query.Exec());
-  }
+      utils::dbms::SQLQuery query(test_db());
+      EXPECT_TRUE(query.Prepare(KUpdateLastIgnOffTime));
+      query.Bind(0, 0);
+      EXPECT_TRUE(query.Exec());
+    }
 
   static TestResumptionDataDB* res_db_;
 

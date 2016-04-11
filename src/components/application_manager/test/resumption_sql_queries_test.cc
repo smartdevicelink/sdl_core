@@ -37,15 +37,17 @@
 #include <utility>
 #include "gtest/gtest.h"
 
-#include "sqlite_wrapper/sql_database.h"
-#include "sqlite_wrapper/sql_query.h"
+#include "utils/sqlite_wrapper/sql_database.h"
+#include "utils/sqlite_wrapper/sql_query.h"
 #include "utils/file_system.h"
-#include "config_profile/profile.h"
-#include "resumption_sql_queries.h"
+#include "application_manager/resumption/resumption_sql_queries.h"
 #include "policy/sql_pt_queries.h"
 
-namespace resumption {
 namespace test {
+namespace components {
+namespace resumption_test {
+
+using namespace ::resumption;
 
 using std::string;
 using std::pair;
@@ -115,7 +117,7 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
     ASSERT_TRUE(db_->Open());
     ASSERT_TRUE(db_->IsReadWrite());
     SQLQuery query(db_);
-    ASSERT_TRUE(query.Exec(resumption::kCreateSchema));
+    ASSERT_TRUE(query.Exec(kCreateSchema));
     SQLQuery query_logging_off(db_);
     ASSERT_TRUE(query_logging_off.Exec(kJournalOff));
   }
@@ -126,8 +128,7 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
     string file_to_delete = kDatabaseName + ".sqlite";
     file_system::DeleteFile(file_to_delete);
   }
-  void TearDown() { DeleteTablesData();
-                  }
+  void TearDown() { DeleteTablesData(); }
 
   void CheckDeleteQuery(const string& count_query, const string& query_to_check,
                         pair<int, string> app_info, pair<int, string> dev_info,
@@ -944,7 +945,7 @@ TEST_F(ResumptionSqlQueriesTest, kUpdateIgnOffCount_ExpectDataUpdated) {
   CheckSelectQuery(kSelectIgnOffCount, ign_off_count, 0);
   SQLQuery query(db());
   // Act
-  EXPECT_TRUE(query.Exec(resumption::kUpdateIgnOffCount));
+  EXPECT_TRUE(query.Exec(kUpdateIgnOffCount));
   // Check after action
   CheckSelectQuery(kSelectIgnOffCount, ign_off_count - 1, 0);
 }
@@ -1008,21 +1009,6 @@ TEST_F(ResumptionSqlQueriesTest, kUpdateSuspendData_ExpectDataUpdated) {
   const std::string kSelectIgnOffCount =
       "SELECT ign_off_count FROM `application`;";
   CheckSelectQuery(kSelectIgnOffCount, 4, 0);
-}
-
-TEST_F(ResumptionSqlQueriesTest, KUpdateLastIgnOffTime_ExpectDataUpdated) {
-  // Arrange
-  SQLQuery query_insert_init_data(db());
-  EXPECT_TRUE(query_insert_init_data.Exec(kInsertInitData));
-  // Check before action
-  CheckSelectQuery(kSelectIgnOffTime, 0, 0);
-  // Act
-  SQLQuery query_update_ign_off_time(db());
-  EXPECT_TRUE(query_update_ign_off_time.Prepare(KUpdateLastIgnOffTime));
-  query_update_ign_off_time.Bind(0, 1);
-  EXPECT_TRUE(query_update_ign_off_time.Exec());
-  // Check after action
-  CheckSelectQuery(kSelectIgnOffTime, 1, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeleteFile_ExpectDataDeleted) {
@@ -2021,7 +2007,6 @@ TEST_F(ResumptionSqlQueriesTest, kSelectSubMenu_ExpectDataCorrect) {
                            hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
                            app_id1, device_id, 9).LastInsertId();
   int64_t submenu_key =
-
       FillSubMenuTable(temp_query, 1, "menu_name", 1).LastInsertId();
 
   FillApplicationSubMenuArrayTable(temp_query, app_key, submenu_key);
@@ -2418,5 +2403,6 @@ TEST_F(ResumptionSqlQueriesTest, kSelectAppTable_ExpectDataCorrect) {
   CheckSelectQuery(kSelectAppTable, p1, p2, true, 9);
 }
 
+}  // namespace resumption_test
+}  // namespace components
 }  // namespace test
-}  // namespace resumption

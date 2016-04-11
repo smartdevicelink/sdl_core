@@ -43,7 +43,7 @@ namespace state_controller_test {
 
 namespace us = usage_statistics;
 
-class StatisticsManagerMock : public us::StatisticsManager {
+class MockStatisticsManager : public us::StatisticsManager {
  public:
   MOCK_METHOD1(Increment, void (us::GlobalCounterId));
   MOCK_METHOD2(Increment, void (const std::string&, us::AppCounterId));
