@@ -65,8 +65,9 @@ class JsonValueRef;
 
 class JsonValue {
  public:
-  typedef int32_t Int;
-  typedef uint32_t UInt;
+  typedef long long int Int;
+  typedef unsigned long long int UInt;
+
   typedef uint32_t ArrayIndex;
   typedef std::vector<std::string> Members;
   typedef std::pair<JsonValue, bool> ParseResult;

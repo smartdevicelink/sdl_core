@@ -344,11 +344,11 @@ std::string utils::json::JsonValue::AsString() const {
 }
 
 utils::json::JsonValue::Int utils::json::JsonValue::AsInt() const {
-  return storage_.toInt();
+  return storage_.toLongLong();
 }
 
 utils::json::JsonValue::UInt utils::json::JsonValue::AsUInt() const {
-  return storage_.toUInt();
+  return storage_.toULongLong();
 }
 
 bool utils::json::JsonValue::AsBool() const {
