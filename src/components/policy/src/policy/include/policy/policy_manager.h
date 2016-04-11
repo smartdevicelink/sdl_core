@@ -469,5 +469,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 }  // namespace policy
 
 extern "C" policy::PolicyManager* CreateManager();
+extern "C" void DeleteManager(policy::PolicyManager*);
 
 #endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_H_

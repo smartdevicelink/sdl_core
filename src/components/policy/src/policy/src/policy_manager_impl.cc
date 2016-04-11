@@ -53,6 +53,9 @@
 policy::PolicyManager* CreateManager() {
   return new policy::PolicyManagerImpl();
 }
+void DeleteManager(policy::PolicyManager* pm) {
+     delete pm;
+}
 
 namespace {
 const uint32_t kDefaultRetryTimeoutInSec = 60u;
