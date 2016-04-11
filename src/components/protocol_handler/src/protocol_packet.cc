@@ -91,10 +91,10 @@ inline uint32_t read_be_uint32(const uint8_t* const data) {
 
 void ProtocolPacket::ProtocolHeader::deserialize(const uint8_t* message,
                                                  const size_t messageSize) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(message);
   if (messageSize < PROTOCOL_HEADER_V1_SIZE) {
-    LOG4CXX_DEBUG(logger_,
+    LOGGER_DEBUG(logger_,
                   "Message size less " << PROTOCOL_HEADER_V1_SIZE << " bytes");
     return;
   }
@@ -116,7 +116,7 @@ void ProtocolPacket::ProtocolHeader::deserialize(const uint8_t* message,
     case PROTOCOL_VERSION_3:
     case PROTOCOL_VERSION_4: {
       if (messageSize < PROTOCOL_HEADER_V2_SIZE) {
-        LOG4CXX_DEBUG(logger_,
+        LOGGER_DEBUG(logger_,
                       "Message size less " << PROTOCOL_HEADER_V2_SIZE
                                            << " bytes");
         return;
@@ -124,7 +124,7 @@ void ProtocolPacket::ProtocolHeader::deserialize(const uint8_t* message,
       messageId = read_be_uint32(message + 8);
     } break;
     default:
-      LOG4CXX_WARN(logger_, "Unknown version:" << static_cast<int>(version));
+      LOGGER_WARN(logger_, "Unknown version:" << static_cast<int>(version));
       messageId = 0;
       break;
   }
@@ -135,7 +135,7 @@ ProtocolPacket::ProtocolHeaderValidator::ProtocolHeaderValidator()
 
 void ProtocolPacket::ProtocolHeaderValidator::set_max_payload_size(
     const size_t max_payload_size) {
-  LOG4CXX_DEBUG(logger_, "New maximum payload size is " << max_payload_size);
+  LOGGER_DEBUG(logger_, "New maximum payload size is " << max_payload_size);
   max_payload_size_ = max_payload_size;
 }
 
@@ -145,7 +145,7 @@ size_t ProtocolPacket::ProtocolHeaderValidator::max_payload_size() const {
 
 RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
     const ProtocolHeader& header) const {
-  LOG4CXX_DEBUG(logger_, "Validating header - " << header);
+  LOGGER_DEBUG(logger_, "Validating header - " << header);
   // expected payload size will be calculated depending
   // on used protocol version
   size_t payload_size = MAXIMUM_FRAME_DATA_V2_SIZE;
@@ -161,14 +161,14 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
                          : MAXIMUM_FRAME_DATA_V2_SIZE;
       break;
     default:
-      LOG4CXX_WARN(logger_,
+      LOGGER_WARN(logger_,
                    "Unknown version:" << static_cast<int>(header.version));
       return RESULT_FAIL;
   }
   // ServiceType shall be equal 0x0 (Control), 0x07 (RPC), 0x0A (PCM), 0x0B
   // (Video), 0x0F (Bulk)
   if (ServiceTypeFromByte(header.serviceType) == kInvalidServiceType) {
-    LOG4CXX_WARN(logger_,
+    LOGGER_WARN(logger_,
                  "Invalide service type"
                      << static_cast<int>(header.serviceType));
     return RESULT_FAIL;
@@ -193,7 +193,7 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
         case FRAME_DATA_HEART_BEAT_ACK:
           break;
         default:
-          LOG4CXX_WARN(logger_,
+          LOGGER_WARN(logger_,
                        "FRAME_TYPE_CONTROL - Invalide frame data "
                            << static_cast<int>(header.frameData));
           return RESULT_FAIL;
@@ -202,7 +202,7 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
     }
     case FRAME_TYPE_SINGLE:
       if (header.frameData != FRAME_DATA_SINGLE) {
-        LOG4CXX_WARN(logger_,
+        LOGGER_WARN(logger_,
                      "FRAME_TYPE_SINGLE - Invalide frame data "
                          << static_cast<int>(header.frameData));
         return RESULT_FAIL;
@@ -210,7 +210,7 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
       break;
     case FRAME_TYPE_FIRST:
       if (header.frameData != FRAME_DATA_FIRST) {
-        LOG4CXX_WARN(logger_,
+        LOGGER_WARN(logger_,
                      "FRAME_TYPE_FIRST - Invalide frame data "
                          << static_cast<int>(header.frameData));
         return RESULT_FAIL;
@@ -220,7 +220,7 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
       // Could have any FrameInfo value
       break;
     default:
-      LOG4CXX_WARN(logger_,
+      LOGGER_WARN(logger_,
                    "Unknown frame type " << static_cast<int>(header.frameType));
       // All other Frame type is invalid
       return RESULT_FAIL;
@@ -229,7 +229,7 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
   // For Single and Consecutive Data Size value shall be greater than 0x00
   // and shall be less than payload size
   if (header.dataSize > payload_size) {
-    LOG4CXX_WARN(logger_,
+    LOGGER_WARN(logger_,
                  "Packet data size is "
                      << header.dataSize
                      << " and bigger than allowed payload size " << payload_size
@@ -240,7 +240,7 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
     case FRAME_TYPE_SINGLE:
     case FRAME_TYPE_CONSECUTIVE:
       if (header.dataSize <= 0u) {
-        LOG4CXX_WARN(logger_,
+        LOGGER_WARN(logger_,
                      "Data size of Single and Consecutive frame shall be not "
                      "equal 0 byte ");
         return RESULT_FAIL;
@@ -254,12 +254,12 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
   if (header.messageId <= 0) {
     if (FRAME_TYPE_CONTROL != header.frameType &&
         PROTOCOL_VERSION_1 != header.version) {
-      LOG4CXX_WARN(logger_, "Message ID shall be greater than 0x00");
+      LOGGER_WARN(logger_, "Message ID shall be greater than 0x00");
       // Message ID shall be greater than 0x00, but not implemented in SPT
       return RESULT_FAIL;
     }
   }
-  LOG4CXX_DEBUG(logger_, "Message header is completely correct.");
+  LOGGER_DEBUG(logger_, "Message header is completely correct.");
   return RESULT_OK;
 }
 
@@ -297,7 +297,7 @@ ProtocolPacket::ProtocolPacket(ConnectionID connection_id)
 
 // Serialization
 RawMessagePtr ProtocolPacket::serializePacket() const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   // TODO(EZamakhov): Move header serialization to ProtocolHeader
   // version is low byte
   const uint8_t version_byte = packet_header_.version << 4;
@@ -394,7 +394,7 @@ bool ProtocolPacket::operator==(const ProtocolPacket& other) const {
 
 RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t* message,
                                               const size_t messageSize) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(message, RESULT_FAIL);
   packet_header_.deserialize(message, messageSize);
   const uint8_t offset = packet_header_.version == PROTOCOL_VERSION_1
