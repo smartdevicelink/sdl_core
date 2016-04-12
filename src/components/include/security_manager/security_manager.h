@@ -42,6 +42,13 @@
 
 #include "security_manager/security_manager_listener.h"
 
+#ifdef ERROR_SUCCESS
+#undef ERROR_SUCCESS
+#undef ERROR_NOT_SUPPORTED
+#undef ERROR_DECRYPTION_FAILED
+#undef ERROR_ENCRYPTION_FAILED
+#endif
+
 namespace security_manager {
 
 class CryptoManager;
