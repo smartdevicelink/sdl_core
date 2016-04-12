@@ -42,12 +42,10 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "UsbTransportAdapter")
 UsbAoaAdapter::UsbAoaAdapter(resumption::LastState& last_state)
-    : TransportAdapterImpl(new UsbDeviceScanner(this),
-                           new UsbConnectionFactory(this),
-                           NULL,
-                           last_state)
+    : TransportAdapterImpl(
+          new UsbDeviceScanner(this), new UsbConnectionFactory(this), NULL, last_state)
     , is_initialised_(false)
     , usb_handler_(new UsbHandler()) {
   static_cast<UsbDeviceScanner*>(device_scanner_)->SetUsbHandler(usb_handler_);
@@ -66,23 +64,23 @@ bool UsbAoaAdapter::IsInitialised() const {
 }
 
 TransportAdapter::Error UsbAoaAdapter::Init() {
-  LOG4CXX_TRACE(logger_, "enter");
+  LOGGER_TRACE(logger_, "enter");
   TransportAdapter::Error error = usb_handler_->Init();
   if (error != TransportAdapter::OK) {
-    LOG4CXX_TRACE(logger_,
-                  "exit with error "
-                      << error << ". Condition: error != TransportAdapter::OK");
+    LOGGER_TRACE(logger_,
+                 "exit with error "
+                     << error << ". Condition: error != TransportAdapter::OK");
     return error;
   }
   error = TransportAdapterImpl::Init();
   if (error != TransportAdapter::OK) {
-    LOG4CXX_TRACE(logger_,
-                  "exit with error "
-                      << error << ". Condition: error != TransportAdapter::OK");
+    LOGGER_TRACE(logger_,
+                 "exit with error "
+                     << error << ". Condition: error != TransportAdapter::OK");
     return error;
   }
   is_initialised_ = true;
-  LOG4CXX_TRACE(logger_, "exit with TransportAdapter::OK");
+  LOGGER_TRACE(logger_, "exit with TransportAdapter::OK");
   return TransportAdapter::OK;
 }
 

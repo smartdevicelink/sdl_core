@@ -51,51 +51,46 @@ namespace transport_manager {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 int TransportManagerDefault::Init(resumption::LastState& last_state) {
-  LOG4CXX_TRACE(logger_, "enter");
+  LOGGER_TRACE(logger_, "enter");
   if (E_SUCCESS != TransportManagerImpl::Init(last_state)) {
-    LOG4CXX_TRACE(logger_,
-                  "exit with E_TM_IS_NOT_INITIALIZED. Condition: E_SUCCESS != "
-                  "TransportManagerImpl::Init()");
+    LOGGER_TRACE(logger_,
+                 "exit with E_TM_IS_NOT_INITIALIZED. Condition: E_SUCCESS != "
+                 "TransportManagerImpl::Init()");
     return E_TM_IS_NOT_INITIALIZED;
   }
-
-#ifdef BLUETOOTH_SUPPORT
-  transport_adapter::TransportAdapterImpl* ta_bluetooth =
-      new transport_adapter::BluetoothTransportAdapter(last_state);
-#ifdef TELEMETRY_MONITOR
-  if (metric_observer_) {
-    ta_bluetooth->SetTelemetryObserver(metric_observer_);
-  }
-#endif  // TELEMETRY_MONITOR
-  AddTransportAdapter(ta_bluetooth);
-  ta_bluetooth = NULL;
-#endif
-
-  const uint16_t port =
-      profile::Profile::instance()->transport_manager_tcp_adapter_port();
-  transport_adapter::TransportAdapterImpl* ta_tcp =
-      new transport_adapter::TcpTransportAdapter(port, last_state);
-#ifdef TELEMETRY_MONITOR
-  if (metric_observer_) {
-    ta_tcp->SetTelemetryObserver(metric_observer_);
-  }
-#endif  // TELEMETRY_MONITOR
-  AddTransportAdapter(ta_tcp);
-  ta_tcp = NULL;
+  transport_adapter::TransportAdapterImpl* ta;
 
 #if defined(USB_SUPPORT)
-  transport_adapter::TransportAdapterImpl* ta_usb =
-      new transport_adapter::UsbAoaAdapter(last_state);
+  ta = new transport_adapter::UsbAoaAdapter(last_state);
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
-    ta_usb->SetTelemetryObserver(metric_observer_);
+    ta->SetTelemetryObserver(metric_observer_);
   }
 #endif  // TELEMETRY_MONITOR
-  AddTransportAdapter(ta_usb);
-  ta_usb = NULL;
+  AddTransportAdapter(ta);
 #endif  // USB_SUPPORT
 
-  LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
+  uint16_t port =
+      profile::Profile::instance()->transport_manager_tcp_adapter_port();
+  ta = new transport_adapter::TcpTransportAdapter(port, last_state);
+#ifdef TELEMETRY_MONITOR
+  if (metric_observer_) {
+    ta->SetTelemetryObserver(metric_observer_);
+  }
+#endif  // TELEMETRY_MONITOR
+  AddTransportAdapter(ta);
+
+#ifdef BLUETOOTH_SUPPORT
+  ta = new transport_adapter::BluetoothTransportAdapter(last_state);
+#ifdef TIME_TESTER
+  if (metric_observer_) {
+    ta->SetTelemetryObserver(metric_observer_);
+  }
+#endif  // TELEMETRY_MONITOR
+  AddTransportAdapter(ta);
+#endif  // TELEMETRY_MONITOR
+
+  LOGGER_TRACE(logger_, "exit with E_SUCCESS");
   return E_SUCCESS;
 }
 
