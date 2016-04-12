@@ -320,7 +320,7 @@ int TransportManagerImpl::SendMessageToDevice(
       return E_INVALID_HANDLE;
     }
 
-    if (connection->shutDown) {
+    if (connection->shut_down) {
       LOGGER_ERROR(
           logger_,
           "TransportManagerImpl::Disconnect: Connection is to shut down.");
@@ -761,8 +761,8 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
         break;
       }
       RaiseEvent(&TransportManagerListener::OnTMMessageSend, event.event_data);
-      if (connection->shutDown && --connection->messages_count == 0) {
-        connection->timer->stop();
+      if (connection->shut_down && --connection->messages_count == 0) {
+        connection->timer->Stop();
         connection->transport_adapter->Disconnect(connection->device,
                                                   connection->application);
       }
@@ -833,7 +833,6 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
     }
     case TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL: {
       LOGGER_DEBUG(logger_, "Event ON_RECEIVED_FAIL");
-      ConnectionUID connection_id = 0;
       {
         sync_primitives::AutoReadLock lock(connections_lock_);
         ConnectionInternal* connection =
@@ -845,10 +844,8 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
                                        << ") not found");
           break;
         }
-        connection_id = connection->id;
       }
       RaiseEvent(&TransportManagerListener::OnTMMessageReceiveFailed,
-                 connection_id,
                  *static_cast<DataReceiveError*>(event.event_error.get()));
       LOGGER_DEBUG(logger_, "event_type = ON_RECEIVED_FAIL");
       break;

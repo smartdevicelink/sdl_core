@@ -48,6 +48,7 @@
 #include "transport_manager/tcp/tcp_connection_factory.h"
 #include "transport_manager/tcp/tcp_device.h"
 #include "utils/json_utils.h"
+#include "utils/convert_utils.h"
 #include "utils/logger.h"
 #include "utils/threads/thread_delegate.h"
 
@@ -99,7 +100,7 @@ void TcpTransportAdapter::Store() const {
         int port = tcp_device->GetApplicationPort(app_handle);
         if (port != -1) {  // don't want to store incoming applications
           JsonValue application_dictionary;
-          application_dictionary["port"] = port;
+          application_dictionary["port"] = utils::ConvertInt64ToLongLongInt(port);
           applications_dictionary.Append(application_dictionary);
         }
       }
@@ -110,7 +111,7 @@ void TcpTransportAdapter::Store() const {
     }
   }
   tcp_adapter_dictionary["devices"] = devices_dictionary;
-  JsonValue& dictionary = last_state().dictionary;
+  JsonValue& dictionary = last_state().dictionary();
   dictionary["TransportManager"]["TcpAdapter"] = tcp_adapter_dictionary;
 }
 
@@ -118,7 +119,7 @@ bool TcpTransportAdapter::Restore() {
   LOGGER_AUTO_TRACE(logger_);
   using namespace utils::json;
   bool errors_occurred = false;
-  const JsonValue& dictionary = last_state().dictionary;
+  const JsonValue& dictionary = last_state().dictionary();
   const JsonValueRef tcp_adapter_dictionary =
       dictionary["TransportManager"]["TcpAdapter"];
   const JsonValueRef devices_dictionary = tcp_adapter_dictionary["devices"];
