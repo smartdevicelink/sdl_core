@@ -63,7 +63,8 @@ void ResumptionDataJson::SaveApplication(
                            << " policy_app_id : " << policy_app_id);
   const std::string hash = application->curHash();
   const uint32_t grammar_id = application->get_grammar_id();
-  const uint32_t time_stamp = (uint32_t)time(NULL);
+  const utils::json::JsonValue::UInt time_stamp =
+      static_cast<uint32_t>(time(NULL));
   const std::string device_mac = application->mac_address();
   const mobile_apis::HMILevel::eType hmi_level = application->hmi_level();
 
@@ -73,13 +74,15 @@ void ResumptionDataJson::SaveApplication(
 
   json_app[strings::device_id] = device_mac;
   json_app[strings::app_id] = policy_app_id;
-  json_app[strings::grammar_id] = grammar_id;
-  json_app[strings::connection_key] = application->app_id();
-  json_app[strings::hmi_app_id] = application->hmi_app_id();
+  json_app[strings::grammar_id] = utils::json::JsonValue::UInt(grammar_id);
+  json_app[strings::connection_key] = utils::json::JsonValue::UInt(
+                                        application->app_id());
+  json_app[strings::hmi_app_id] = utils::json::JsonValue::UInt(
+                                    application->hmi_app_id());
   json_app[strings::is_media_application] = application->IsAudioApplication();
-  json_app[strings::hmi_level] = static_cast<int32_t>(hmi_level);
-  json_app[strings::ign_off_count] = 0;
-  json_app[strings::suspend_count] = 0;
+  json_app[strings::hmi_level] = utils::json::JsonValue::Int(hmi_level);
+  json_app[strings::ign_off_count] = utils::json::JsonValue::UInt(0);
+  json_app[strings::suspend_count] = utils::json::JsonValue::UInt(0);
   json_app[strings::hash_id] = hash;
   Formatters::CFormatterJsonBase::objToJsonValue(
       GetApplicationCommands(application), tmp);
@@ -200,20 +203,22 @@ void ResumptionDataJson::OnSuspend() {
        ++itr) {
     if ((*itr).HasMember(strings::suspend_count)) {
       const uint32_t suspend_count = (*itr)[strings::suspend_count].AsUInt();
-      (*itr)[strings::suspend_count] = suspend_count + 1;
+      (*itr)[strings::suspend_count] =
+          utils::json::JsonValue::UInt(suspend_count + 1);
     } else {
       LOGGER_WARN(logger_, "Unknown key among saved applications");
-      (*itr)[strings::suspend_count] = 1;
+      (*itr)[strings::suspend_count] = utils::json::JsonValue::UInt(1);
     }
     if ((*itr).HasMember(strings::ign_off_count)) {
       const uint32_t ign_off_count = (*itr)[strings::ign_off_count].AsUInt();
       const uint32_t application_lifes = 3;     // TODO make profile variable
       if (ign_off_count < application_lifes) {  // TODO read from profile
-        (*itr)[strings::ign_off_count] = ign_off_count + 1;
+        (*itr)[strings::ign_off_count] =
+            utils::json::JsonValue::UInt(ign_off_count + 1);
       }
     } else {
       LOGGER_WARN(logger_, "Unknown key among saved applications");
-      (*itr)[strings::ign_off_count] = 1;
+      (*itr)[strings::ign_off_count] = utils::json::JsonValue::UInt(1);
     }
     to_save.Append(*itr);
   }
@@ -235,10 +240,12 @@ void ResumptionDataJson::OnAwake() {
        ++itr) {
     if ((*itr).HasMember(strings::ign_off_count)) {
       const uint32_t ign_off_count = (*itr)[strings::ign_off_count].AsUInt();
-      (*itr)[strings::ign_off_count] = ign_off_count - 1;
+      (*itr)[strings::ign_off_count] =
+          utils::json::JsonValue::UInt(ign_off_count - 1);
     } else {
       LOGGER_WARN(logger_, "Unknown key among saved applications");
-      (*itr)[strings::ign_off_count] = 0;
+      (*itr)[strings::ign_off_count] =
+          utils::json::JsonValue::UInt(0);
     }
   }
 }
@@ -275,7 +282,7 @@ bool ResumptionDataJson::GetSavedApplication(
   LOGGER_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
   const int idx = GetObjectIndex(policy_app_id, device_id);
-  if (-1 == idx) {    
+  if (-1 == idx) {
     return false;
   }
   const JsonValueRef json_saved_app = GetSavedApplications()[idx];
@@ -333,7 +340,8 @@ uint32_t ResumptionDataJson::GetIgnOffTime() const {
   sync_primitives::AutoLock autolock(resumption_lock_);
   JsonValueRef resumption = GetResumptionData();
   if (!resumption.HasMember(strings::last_ign_off_time)) {
-    resumption[strings::last_ign_off_time] = 0;
+    resumption[strings::last_ign_off_time] =
+        utils::json::JsonValue::UInt(0);
     LOGGER_WARN(logger_, "last_save_time section is missed");
   }
   return resumption[strings::last_ign_off_time].AsUInt();
@@ -385,9 +393,12 @@ void ResumptionDataJson::GetDataForLoadResumeData(
         ((*itr).HasMember(strings::app_id)) &&
         ((*itr).HasMember(strings::device_id))) {
       smart_objects::SmartObject so(smart_objects::SmartType_Map);
-      so[strings::hmi_level] = (*itr)[strings::hmi_level].AsInt();
-      so[strings::ign_off_count] = (*itr)[strings::ign_off_count].AsInt();
-      so[strings::time_stamp] = (*itr)[strings::time_stamp].AsUInt();
+      so[strings::hmi_level] =
+          static_cast<int32_t>((*itr)[strings::hmi_level].AsInt());
+      so[strings::ign_off_count] =
+          static_cast<int32_t>((*itr)[strings::ign_off_count].AsInt());
+      so[strings::time_stamp] =
+          static_cast<uint32_t>((*itr)[strings::time_stamp].AsUInt());
       so[strings::app_id] = (*itr)[strings::app_id].AsString();
       so[strings::device_id] = (*itr)[strings::device_id].AsString();
       so_array_data[i++] = so;
@@ -414,7 +425,8 @@ void ResumptionDataJson::UpdateHmiLevel(
                     << policy_app_id << " device_id = " << device_id);
     return;
   }
-  GetSavedApplications()[idx][strings::hmi_level] = hmi_level;
+  GetSavedApplications()[idx][strings::hmi_level] =
+      utils::json::JsonValue::Int(hmi_level);
 }
 
 utils::json::JsonValueRef ResumptionDataJson::GetSavedApplications() const {
@@ -440,7 +452,7 @@ utils::json::JsonValueRef ResumptionDataJson::GetResumptionData() const {
   using namespace utils::json;
   LOGGER_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
-  JsonValue& last_state = last_state().dictionary();
+  JsonValue& last_state = last_state_.dictionary();
   if (!last_state.HasMember(strings::resumption)) {
     last_state[strings::resumption] = JsonValue(ValueType::OBJECT_VALUE);
     LOGGER_WARN(logger_, "resumption section is missed");
@@ -516,7 +528,8 @@ void ResumptionDataJson::SetLastIgnOffTime(time_t ign_off_time) {
   sync_primitives::AutoLock autolock(resumption_lock_);
   LOGGER_WARN(logger_, "ign_off_time = " << ign_off_time);
   utils::json::JsonValueRef resumption = GetResumptionData();
-  resumption[strings::last_ign_off_time] = static_cast<uint32_t>(ign_off_time);
+  resumption[strings::last_ign_off_time] =
+      utils::json::JsonValue::UInt(ign_off_time);
 }
 
 bool ResumptionDataJson::Init() {
@@ -530,20 +543,21 @@ bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
   using namespace app_mngr;
   sync_primitives::AutoLock autolock(resumption_lock_);
   utils::json::JsonValueRef application = GetFromSavedOrAppend(app_id, device_id);
-  if (application.isNull()) {
+  if (application.IsNull()) {
     LOGGER_DEBUG(logger_,
                   "Application " << app_id << " with device_id " << device_id
                                  << " hasn't been found in resumption data.");
     return false;
   }
-  application[strings::application_commands].clear();
-  application[strings::application_submenus].clear();
-  application[strings::application_choice_sets].clear();
-  application[strings::application_global_properties].clear();
-  application[strings::application_subscribtions].clear();
-  application[strings::application_files].clear();
+  application[strings::application_commands].Clear();
+  application[strings::application_submenus].Clear();
+  application[strings::application_choice_sets].Clear();
+  application[strings::application_global_properties].Clear();
+  application[strings::application_subscribtions].Clear();
+  application[strings::application_files].Clear();
   // Seems there is no interface for json wrapper - needs to be created
-  application.removeMember(strings::grammar_id);
+  //application.removeMember(strings::grammar_id);
+  application[strings::grammar_id].Clear();
   LOGGER_DEBUG(logger_,
                 "Resumption data for application "
                     << app_id << " with device_id " << device_id

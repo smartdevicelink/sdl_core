@@ -568,6 +568,13 @@ const T* Optional<T>::operator->() const {
 }
 
 template <typename T>
+void Optional<T>::assign_if_valid(const Optional<T>& value) {
+  if (value.is_initialized()) {
+    value_ = value.value_;
+  }
+}
+
+template <typename T>
 Optional<T>::operator const void*() const {
   return is_initialized() ? &value_ : NULL;
 }

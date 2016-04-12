@@ -79,9 +79,8 @@ SQLPTRepresentation::SQLPTRepresentation(const std::string& app_storage_folder,
     : db_(new utils::dbms::SQLDatabase(
           file_system::ConcatPath(app_storage_folder, kDatabaseName),
           "PolicyDatabase"))
-#endif {
-
-}
+#endif
+{}
 
 SQLPTRepresentation::~SQLPTRepresentation() {
   db_->Close();

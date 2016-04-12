@@ -108,6 +108,24 @@ bool InitHmi() {
   return utils::System(kStartHmi).Execute();
 }
 #endif  // QT_HMI
+
+bool UnsibscribeFromTermination() {
+  // Disable some system signals receiving in thread
+  // by blocking those signals
+  // (system signals processes only in the main thread)
+  // Mustn't block all signals!
+  // See "Advanced Programming in the UNIX Environment, 3rd Edition"
+  // (http://poincare.matf.bg.ac.rs/~ivana//courses/ps/sistemi_knjige/pomocno/apue.pdf,
+  // "12.8. Threads and Signals".
+  sigset_t signal_set;
+  sigemptyset(&signal_set);
+  sigaddset(&signal_set, SIGINT);
+  sigaddset(&signal_set, SIGTERM);
+
+  return !pthread_sigmask(SIG_BLOCK, &signal_set, NULL);
+}
+
+
 }
 
 /**
@@ -118,7 +136,7 @@ bool InitHmi() {
  */
 int32_t main(int32_t argc, char** argv) {
   // Unsibscribe once for all threads
-  if (!utils::UnsibscribeFromTermination()) {
+  if (!UnsibscribeFromTermination()) {
     // Can't use internal logger here
     exit(EXIT_FAILURE);
   }
@@ -131,8 +149,7 @@ int32_t main(int32_t argc, char** argv) {
   }
 
   // Logger initialization
-  INIT_LOGGER("log4cxx.properties",
-              profile::Profile::instance()->logs_enabled());
+  INIT_LOGGER(profile::Profile::instance()->logs_enabled());
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 

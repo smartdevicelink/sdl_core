@@ -78,7 +78,8 @@ void HMILanguageHandler::set_language_for(
   LOGGER_DEBUG(logger_,
                 "Setting language " << language << " for interface "
                                     << interface);
-  last_state_->dictionary[LanguagesKey][key] = language;
+  last_state_->dictionary()[LanguagesKey][key] =
+      static_cast<utils::json::JsonValue::Int>(language);
   return;
 }
 
@@ -103,10 +104,10 @@ hmi_apis::Common_Language::eType HMILanguageHandler::get_language_for(
       return Common_Language::INVALID_ENUM;
   }
 
-  if (last_state_->dictionary.isMember(LanguagesKey)) {
-    if (last_state_->dictionary[LanguagesKey].isMember(key)) {
+  if (last_state_->dictionary().HasMember(LanguagesKey)) {
+    if (last_state_->dictionary()[LanguagesKey].HasMember(key)) {
       Common_Language::eType language = static_cast<Common_Language::eType>(
-          last_state_->dictionary[LanguagesKey][key].asInt());
+          last_state_->dictionary()[LanguagesKey][key].AsInt());
       return language;
     }
   }

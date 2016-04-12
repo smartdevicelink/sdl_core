@@ -300,14 +300,14 @@ bool PolicyHandler::LoadPolicyLibrary() {
     return NULL;
   }
 
-  policy_library_.Load(kPolicyLibraryName);
+  policy_library_.Load(kLibrary.c_str());
   if (policy_library_.IsLoaded()) {
     if (CreateManager()) {
       policy_manager_->set_listener(this);
       event_observer_ = utils::MakeShared<PolicyEventObserver>(this);
     }
   } else {
-    LOGGER_ERROR(logger_, error);
+    LOGGER_ERROR(logger_, "Policy library loading error");
   }
   return policy_manager_.valid();
 }

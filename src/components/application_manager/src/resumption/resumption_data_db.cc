@@ -56,13 +56,15 @@ namespace resumption {
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
 ResumptionDataDB::ResumptionDataDB()
-    : db_(new utils::dbms::SQLDatabase(kDatabaseName)) {
-#ifndef __QNX__
-  std::string path = profile::Profile::instance()->app_storage_folder();
-  if (!path.empty()) {
-    db_->set_path(path + "/");
-  }
-#endif  // __QNX__
+#if defined(__QNX__)
+    : db_(new utils::dbms::SQLDatabase(kDatabaseName) {
+#else
+    : db_(new utils::dbms::SQLDatabase(
+          file_system::ConcatPath(
+              profile::Profile::instance()->app_storage_folder(),
+              kDatabaseName),
+          "ResumptionDatabase")) {
+#endif
 }
 
 ResumptionDataDB::~ResumptionDataDB() {

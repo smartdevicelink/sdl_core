@@ -38,6 +38,7 @@
 #include "policy/pt_representation.h"
 #include "rpc_base/rpc_base.h"
 #include "types.h"
+#include "utils/sql_wrapper.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
 

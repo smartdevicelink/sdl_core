@@ -74,7 +74,7 @@ PolicyManagerImpl::PolicyManagerImpl(const std::string& app_storage_folder,
                               attempts_to_open_policy_db,
                               open_attempt_timeout_ms))
     , retry_sequence_timeout_(kDefaultRetryTimeoutInSec)
-    , retry_sequence_index_(0),
+    , retry_sequence_index_(0)
     , timer_retry_sequence_("Retry sequence timer",
                             new timer::TimerTaskImpl<PolicyManagerImpl>(
                                 this, &PolicyManagerImpl::RetrySequence))
@@ -97,7 +97,7 @@ utils::SharedPtr<policy_table::Table> PolicyManagerImpl::Parse(
     return utils::SharedPtr<policy_table::Table>();
   }
   JsonValue& root_json = parse_result.first;
-  return utils::MakeShared<policy_table::Table>(&value);
+  return utils::MakeShared<policy_table::Table>(root_json);
 }
 
 #else
@@ -764,7 +764,7 @@ uint32_t PolicyManagerImpl::NextRetryTimeout() {
     next += retry_sequence_timeout_;
   }
   // Return miliseconds
-  return next * date_time::DateTime::MILLISECONDS_IN_SECOND;
+  return next * date_time::kMillisecondsInSecond;
 }
 
 void PolicyManagerImpl::RefreshRetrySequence() {
