@@ -475,9 +475,12 @@ void RequestController::Worker::exitThreadMain() {
 void RequestController::UpdateTimer() {
   LOG4CXX_AUTO_TRACE(logger_);
   RequestInfoPtr front = waiting_for_response_.FrontWithNotNullTimeout();
+  // Buffer for sending request
+  const uint32_t delay_time = 100u;
   if (front) {
     const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
-    const TimevalStruct end_time = front->end_time();
+    TimevalStruct end_time = front->end_time();
+    date_time::DateTime::AddMilliseconds(end_time, delay_time);
     if (current_time < end_time) {
       const uint32_t msecs =static_cast<uint32_t>(date_time::DateTime::getmSecs(end_time - current_time) );
       LOG4CXX_DEBUG(logger_, "Sleep for " << msecs << " millisecs" );
