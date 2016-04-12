@@ -52,7 +52,9 @@ class PolicySettings;
 
 class CacheManager : public CacheManagerInterface {
  public:
-  CacheManager();
+  CacheManager(const std::string& app_storage_folder,
+               uint16_t attempts_to_open_policy_db,
+               uint16_t open_attempt_timeout_ms);
   ~CacheManager();
 
   /**
@@ -163,7 +165,7 @@ class CacheManager : public CacheManagerInterface {
    * @brief GetLockScreenIcon allows to obtain lock screen icon url;
    *
    * @return url which point to the resourse where lock screen icon could be
-   *obtained.
+   * obtained.
    */
   virtual std::string GetLockScreenIconUrl() const;
 
@@ -591,7 +593,7 @@ class CacheManager : public CacheManagerInterface {
   /**
    * @brief MergePreloadPT allows to load policy table from certain JSON file,
    * and then decide if merge is needed. The merge is needed in case when
-   *preload
+   * preload
    * JSON date is different than current database.
    *
    * @param file_name the preloaded policy table JSON file.
@@ -607,7 +609,7 @@ class CacheManager : public CacheManagerInterface {
    * 2. "vehicle_make", “model”, “year” – leave the fields & values as they were
    * in the database
    * 3. For all other fields – overwrite the values with the new ones from
-   *preloaded PT.
+   * preloaded PT.
    *
    * @param new_pt the policy table loaded from updated preload JSON file.
    *
@@ -618,7 +620,7 @@ class CacheManager : public CacheManagerInterface {
 
   /**
    * @brief MergeFG allows to merge FunctionalGroupings sections by definite
-   *rules.
+   * rules.
    *
    * The rules are:
    * 1. If functional_group_name exists in both database (LocalPT) and updated
@@ -626,7 +628,7 @@ class CacheManager : public CacheManagerInterface {
    * functional_group_name in the database by the one from Pre-PT).
    * 2. If functional_group_name exists in updated PreloadedPT and does not
    * exist in database (LocalPT), PoliciesManager must add such group to the
-   *database.
+   * database.
    * 3. If functional_group_name does not exist in updated PreloadedPT and
    * exists in the database (LocalPT), PoliciesManager must leave such group in
    * the database without changes.
@@ -640,10 +642,10 @@ class CacheManager : public CacheManagerInterface {
 
   /**
    * @brief MergeAP Allows to merge ApplicationPolicies section by definite
-   *relues.
+   * relues.
    * The rules are:
    * 1. Leave “<appID>” sub-sections as they were in the database (fields &
-   *their values).
+   * their values).
    * 2. Over-write "default", "device", "pre_DataConsent" subsections.
    *
    * @param new_pt the policy table loaded from updated preload JSON file.
@@ -655,7 +657,7 @@ class CacheManager : public CacheManagerInterface {
 
   /**
    * @brief MergeCFM allows to merge ConsumerFriendlyMessages section by
-   *definite rules.
+   * definite rules.
    *
    * The rules are:
    * 1. If friendly_message_name exists in both database (LocalPT) and updated
@@ -673,7 +675,6 @@ class CacheManager : public CacheManagerInterface {
    */
   void MergeCFM(const policy_table::PolicyTable& new_pt,
                 policy_table::PolicyTable& pt);
-
   const PolicySettings& get_settings() const;
 
 #ifdef BUILD_TESTS

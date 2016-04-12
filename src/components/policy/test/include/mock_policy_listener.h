@@ -44,7 +44,6 @@
 namespace policy_table = ::rpc::policy_table_interface_base;
 
 namespace policy {
-
 namespace custom_str = utils::custom_string;
 
 class MockPolicyListener : public PolicyListener {

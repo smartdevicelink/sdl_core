@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -30,28 +30,50 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "policy/policy_table.h"
+#ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_USAGE_STATISTICS_STATISTICS_MANAGER_H_
+#define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_USAGE_STATISTICS_STATISTICS_MANAGER_H_
 
-#include "policy/sql_pt_representation.h"
+#include <stdint.h>
+#include <string>
 
-#include "utils/logger.h"
+namespace usage_statistics {
 
-namespace policy {
+enum GlobalCounterId { IAP_BUFFER_FULL, SYNC_OUT_OF_MEMORY, SYNC_REBOOTS };
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
+enum AppInfoId { LANGUAGE_GUI, LANGUAGE_VUI };
 
-PolicyTable::PolicyTable(const std::string& app_storage_folder,
-                         uint16_t attempts_to_open_policy_db,
-                         uint16_t open_attempt_timeout_ms)
-    : pt_data_(new SQLPTRepresentation(app_storage_folder,
-                                       attempts_to_open_policy_db,
-                                       open_attempt_timeout_ms)) {}
+enum AppStopwatchId {
+  SECONDS_HMI_FULL,
+  SECONDS_HMI_LIMITED,
+  SECONDS_HMI_BACKGROUND,
+  SECONDS_HMI_NONE
+};
 
-PolicyTable::PolicyTable(utils::SharedPtr<PTRepresentation> pt_data)
-    : pt_data_(pt_data) {}
+enum AppCounterId {
+  USER_SELECTIONS,
+  REJECTIONS_SYNC_OUT_OF_MEMORY,
+  REJECTIONS_NICKNAME_MISMATCH,
+  REJECTIONS_DUPLICATE_NAME,
+  REJECTED_RPC_CALLS,
+  RPCS_IN_HMI_NONE,
+  REMOVALS_MISBEHAVED,
+  RUN_ATTEMPTS_WHILE_REVOKED,
+  COUNT_OF_TLS_ERRORS,
+};
 
-PolicyTable::~PolicyTable() {
-  LOGGER_INFO(logger_, "Destroying policy table.");
-}
+class StatisticsManager {
+ public:
+  virtual ~StatisticsManager() {}
+  virtual void Increment(GlobalCounterId type) = 0;
+  virtual void Increment(const std::string& app_id, AppCounterId type) = 0;
+  virtual void Set(const std::string& app_id,
+                   AppInfoId type,
+                   const std::string& value) = 0;
+  virtual void Add(const std::string& app_id,
+                   AppStopwatchId type,
+                   int32_t timespan_seconds) = 0;
+};
 
-}  // namespace policy
+}  //  namespace usage_statistics
+
+#endif  //  SRC_COMPONENTS_POLICY_INCLUDE_POLICY_USAGE_STATISTICS_STATISTICS_MANAGER_H_

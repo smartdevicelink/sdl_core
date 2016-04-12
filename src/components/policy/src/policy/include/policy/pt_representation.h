@@ -159,7 +159,7 @@ class PTRepresentation {
    * @brief GetLockScreenIcon allows to obtain lock screen icon url;
    *
    * @return url which point to the resourse where lock screen icon could be
-   *obtained.
+   * obtained.
    */
   virtual std::string GetLockScreenIconUrl() const = 0;
 
@@ -310,7 +310,6 @@ class PTRepresentation {
    * @return true if success, otherwise - false
    */
   virtual bool UpdateDBVersion() const = 0;
-
  protected:
   const PolicySettings& get_settings() const {
     DCHECK(settings_);

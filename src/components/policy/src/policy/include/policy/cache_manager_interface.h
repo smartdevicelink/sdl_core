@@ -40,7 +40,6 @@
 #include "usage_statistics/counter.h"
 #include "policy/policy_types.h"
 #include "policy/policy_settings.h"
-
 namespace policy_table = rpc::policy_table_interface_base;
 
 namespace policy {
@@ -158,7 +157,7 @@ class CacheManagerInterface {
    * @brief GetLockScreenIcon allows to obtain lock screen icon url;
    *
    * @return url which point to the resourse where lock screen icon could be
-   *obtained.
+   * obtained.
    */
   virtual std::string GetLockScreenIconUrl() const = 0;
 

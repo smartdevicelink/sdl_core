@@ -33,5 +33,11 @@ include_directories(include)
 set(SOURCES
   src/counter.cc
 )
+set(HEADERS 
+  include/usage_statistics/counter.h
+  include/usage_statistics/statistics_manager.h
+)
+source_group("Header Files" FILES ${HEADERS} )        
+source_group("Source Files" FILES ${SOURCES} )            
 
-add_library(UsageStatistics ${SOURCES})
+add_library(UsageStatistics ${SOURCES} ${HEADERS})
