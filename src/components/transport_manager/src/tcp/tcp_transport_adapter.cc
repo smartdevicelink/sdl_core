@@ -29,27 +29,32 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 
+#include <errno.h>
 #include <memory.h>
 #include <signal.h>
-#include <errno.h>
 #include <stdio.h>
 
 #include <cstdlib>
 #include <sstream>
 
-#include "utils/logger.h"
-#include "utils/threads/thread_delegate.h"
+#if defined(OS_WINDOWS)
+#include "utils/winhdr.h"
+#endif
+
+#include "resumption/last_state.h"
 #include "transport_manager/tcp/tcp_client_listener.h"
 #include "transport_manager/tcp/tcp_connection_factory.h"
 #include "transport_manager/tcp/tcp_device.h"
+#include "utils/json_utils.h"
+#include "utils/logger.h"
+#include "utils/threads/thread_delegate.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
 
 TcpTransportAdapter::TcpTransportAdapter(const uint16_t port,
                                          resumption::LastState& last_state)
@@ -65,9 +70,11 @@ DeviceType TcpTransportAdapter::GetDeviceType() const {
 }
 
 void TcpTransportAdapter::Store() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  Json::Value tcp_adapter_dictionary;
-  Json::Value devices_dictionary;
+  LOGGER_AUTO_TRACE(logger_);
+  using namespace utils::json;
+
+  JsonValue tcp_adapter_dictionary;
+  JsonValue devices_dictionary;
   DeviceList device_ids = GetDeviceList();
   for (DeviceList::const_iterator i = device_ids.begin(); i != device_ids.end();
        ++i) {
@@ -78,12 +85,10 @@ void TcpTransportAdapter::Store() const {
     }
     utils::SharedPtr<TcpDevice> tcp_device =
         DeviceSptr::static_pointer_cast<TcpDevice>(device);
-    Json::Value device_dictionary;
+    JsonValue device_dictionary;
     device_dictionary["name"] = tcp_device->name();
-    struct in_addr address;
-    address.s_addr = tcp_device->in_addr();
-    device_dictionary["address"] = std::string(inet_ntoa(address));
-    Json::Value applications_dictionary;
+    device_dictionary["address"] = tcp_device->Address().ToString();
+    JsonValue applications_dictionary;
     ApplicationList app_ids = tcp_device->GetApplicationList();
     for (ApplicationList::const_iterator j = app_ids.begin();
          j != app_ids.end();
@@ -93,56 +98,57 @@ void TcpTransportAdapter::Store() const {
                                     app_handle)) {
         int port = tcp_device->GetApplicationPort(app_handle);
         if (port != -1) {  // don't want to store incoming applications
-          Json::Value application_dictionary;
-          char port_record[12];
-          snprintf(port_record, sizeof(port_record), "%d", port);
-          application_dictionary["port"] = std::string(port_record);
-          applications_dictionary.append(application_dictionary);
+          JsonValue application_dictionary;
+          application_dictionary["port"] = port;
+          applications_dictionary.Append(application_dictionary);
         }
       }
     }
-    if (!applications_dictionary.empty()) {
+    if (!applications_dictionary.IsEmpty()) {
       device_dictionary["applications"] = applications_dictionary;
-      devices_dictionary.append(device_dictionary);
+      devices_dictionary.Append(device_dictionary);
     }
   }
   tcp_adapter_dictionary["devices"] = devices_dictionary;
-  Json::Value& dictionary = last_state().dictionary;
+  JsonValue& dictionary = last_state().dictionary;
   dictionary["TransportManager"]["TcpAdapter"] = tcp_adapter_dictionary;
 }
 
 bool TcpTransportAdapter::Restore() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
+  using namespace utils::json;
   bool errors_occurred = false;
-  const Json::Value tcp_adapter_dictionary =
-      last_state().dictionary["TransportManager"]["TcpAdapter"];
-  const Json::Value devices_dictionary = tcp_adapter_dictionary["devices"];
-  for (Json::Value::const_iterator i = devices_dictionary.begin();
-       i != devices_dictionary.end();
-       ++i) {
-    const Json::Value device_dictionary = *i;
-    std::string name = device_dictionary["name"].asString();
-    std::string address_record = device_dictionary["address"].asString();
-    in_addr_t address = inet_addr(address_record.c_str());
-    TcpDevice* tcp_device = new TcpDevice(address, name);
+  const JsonValue& dictionary = last_state().dictionary;
+  const JsonValueRef tcp_adapter_dictionary =
+      dictionary["TransportManager"]["TcpAdapter"];
+  const JsonValueRef devices_dictionary = tcp_adapter_dictionary["devices"];
+  for (JsonValue::const_iterator devices_itr = devices_dictionary.begin(),
+                                 devices_end = devices_dictionary.end();
+       devices_itr != devices_end;
+       ++devices_itr) {
+    const JsonValueRef device_dictionary = *devices_itr;
+    std::string name = device_dictionary["name"].AsString();
+    std::string address = device_dictionary["address"].AsString();
+    TcpDevice* tcp_device = new TcpDevice(utils::HostAddress(address), name);
     DeviceSptr device(tcp_device);
     AddDevice(device);
-    const Json::Value applications_dictionary =
+    const JsonValueRef applications_dictionary =
         device_dictionary["applications"];
-    for (Json::Value::const_iterator j = applications_dictionary.begin();
-         j != applications_dictionary.end();
-         ++j) {
-      const Json::Value application_dictionary = *j;
-      std::string port_record = application_dictionary["port"].asString();
-      int port = atoi(port_record.c_str());
-      ApplicationHandle app_handle = tcp_device->AddDiscoveredApplication(port);
+    for (JsonValue::const_iterator
+             applications_itr = applications_dictionary.begin(),
+             applications_end = applications_dictionary.end();
+         applications_itr != applications_end;
+         ++applications_itr) {
+      const JsonValueRef application_dictionary = *applications_itr;
+      int port = application_dictionary["port"].AsInt();
+      ApplicationHandle app_handle = tcp_device->AddApplication(port, false);
       if (Error::OK != Connect(device->unique_device_id(), app_handle)) {
         errors_occurred = true;
       }
     }
   }
   bool result = !errors_occurred;
-  LOG4CXX_DEBUG(logger_, "result " << std::boolalpha << result);
+  LOGGER_DEBUG(logger_, "result " << std::boolalpha << result);
   return result;
 }
 
