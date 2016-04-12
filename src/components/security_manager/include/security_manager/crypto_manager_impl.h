@@ -33,6 +33,10 @@
 #ifndef SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_IMPL_H_
 #define SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_IMPL_H_
 
+#if defined(OS_WINDOWS)
+#include "utils/winhdr.h"
+#endif
+
 #include <stdint.h>
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
@@ -47,6 +51,12 @@
 #include "utils/macro.h"
 #include "utils/lock.h"
 #include "utils/shared_ptr.h"
+
+#ifdef OS_WINDOWS
+#ifdef X509_NAME
+#undef X509_NAME
+#endif
+#endif
 
 namespace security_manager {
 class CryptoManagerImpl : public CryptoManager {

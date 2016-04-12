@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2015, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,10 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
- 
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  find_package(WinOpenSSL REQUIRED)
+endif()
 
 include_directories(
   include/
@@ -39,6 +42,7 @@ include_directories(
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/jsoncpp/include
   ${APR_INCLUDE_DIRECTORY}
+  ${OPENSSL_INCLUDE_DIRECTORY}
 )
 
 set (SOURCES
@@ -47,9 +51,17 @@ set (SOURCES
   ${COMPONENTS_DIR}/security_manager/src/crypto_manager_impl.cc
   ${COMPONENTS_DIR}/security_manager/src/ssl_context_impl.cc
 )
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    file (GLOB inc ${COMPONENTS_DIR}/security_manager/include/security_manager/*.h) 
+    string( REPLACE / \\ group ${inc} )
+    source_group("Header Files" FILES ${inc} )
+    add_library("SecurityManager" ${inc} ${SOURCES})
+    target_link_libraries(SecurityManager libeay32 ssleay32 ProtocolHandler jsoncpp ProtocolLibrary)      
+else()
+  add_library(SecurityManager ${SOURCES})
+  target_link_libraries(SecurityManager crypto ssl ProtocolHandler jsoncpp ProtocolLibrary)  
+endif()
 
-add_library(SecurityManager ${SOURCES})
-target_link_libraries(SecurityManager crypto ssl ProtocolHandler jsoncpp ProtocolLibrary)
 
 if(BUILD_TESTS)
   add_subdirectory(test)
