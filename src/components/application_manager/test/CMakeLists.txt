@@ -154,6 +154,7 @@ set(testSources
     ${AM_SOURCE_DIR}/policy/src/policy/policy_table/table_struct
   )
 set(testLibraries
+  ApplicationManager
   Utils
   dbms
   jsoncpp
