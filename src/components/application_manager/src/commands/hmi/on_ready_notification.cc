@@ -43,7 +43,7 @@ OnReadyNotification::OnReadyNotification(const MessageSharedPtr& message)
 OnReadyNotification::~OnReadyNotification() {}
 
 void OnReadyNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl::instance()->OnHMIStartedCooperation();
   event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_OnReady);

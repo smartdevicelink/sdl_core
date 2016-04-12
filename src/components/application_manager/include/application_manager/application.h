@@ -46,6 +46,13 @@
 #include "application_manager/application_state.h"
 #include "protocol_handler/protocol_handler.h"
 
+#if defined(OS_POSIX)
+#include <strings.h>
+#elif defined(OS_WINDOWS)
+#define ssize_t SSIZE_T
+#define strcasecmp _stricmp
+#endif
+
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
@@ -58,9 +65,7 @@ namespace application_manager {
 namespace mobile_api = mobile_apis;
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
-
 namespace custom_str = utils::custom_string;
-
 typedef int32_t ErrorCode;
 
 class UsageStatistics;
@@ -347,10 +352,10 @@ class DynamicApplicationData {
   virtual mobile_api::LayoutMode::eType perform_interaction_layout() const = 0;
 
   /*
-     * @brief Sets the mode for perform interaction: UI/VR/BOTH
-     *
-     * @param mode Mode that was selected (MENU; VR; BOTH)
-     */
+   * @brief Sets the mode for perform interaction: UI/VR/BOTH
+   *
+   * @param mode Mode that was selected (MENU; VR; BOTH)
+   */
   virtual void set_perform_interaction_mode(int32_t mode) = 0;
 
   /*
@@ -382,6 +387,7 @@ class Application : public virtual InitialApplicationData,
 
  public:
   Application() : is_greyed_out_(false) {}
+
   virtual ~Application() {}
 
   /**
@@ -601,7 +607,6 @@ class Application : public virtual InitialApplicationData,
   * @param state state to setup
   */
   virtual void SetPostponedState(HmiStatePtr state) = 0;
-
   virtual void RemovePostponedState() = 0;
 
   /**

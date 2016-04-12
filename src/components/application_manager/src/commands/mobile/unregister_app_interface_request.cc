@@ -40,13 +40,13 @@ namespace application_manager {
 namespace commands {
 
 void UnregisterAppInterfaceRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
 
   if (!app_manager->application(connection_key())) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    LOGGER_ERROR(logger_, "Application is not registered");
     return;
   }
 

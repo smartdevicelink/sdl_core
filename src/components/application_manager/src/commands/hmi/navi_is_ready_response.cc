@@ -42,7 +42,7 @@ NaviIsReadyResponse::NaviIsReadyResponse(const MessageSharedPtr& message)
 NaviIsReadyResponse::~NaviIsReadyResponse() {}
 
 void NaviIsReadyResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   smart_objects::SmartObject& object = *message_;
 
   bool is_available = false;

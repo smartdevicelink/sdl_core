@@ -42,7 +42,7 @@ AppPermissionDelegate::AppPermissionDelegate(
     : connection_key_(connection_key), permissions_(permissions) {}
 
 void AppPermissionDelegate::threadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   policy::PolicyHandlerInterface& policy_handler =
       application_manager::ApplicationManagerImpl::instance()
           ->GetPolicyHandler();

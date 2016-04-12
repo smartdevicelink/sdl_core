@@ -45,16 +45,16 @@ SendLocationRequest::~SendLocationRequest() {}
 
 void SendLocationRequest::Run() {
   using namespace hmi_apis;
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app =
       application_manager::ApplicationManagerImpl::instance()->application(
           connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_,
-                  "An application with connection key "
-                      << connection_key() << " is not registered.");
+    LOGGER_ERROR(logger_,
+                 "An application with connection key "
+                     << connection_key() << " is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -82,7 +82,7 @@ void SendLocationRequest::Run() {
   }
 
   if (IsWhiteSpaceExist()) {
-    LOG4CXX_ERROR(logger_, "Strings contain invalid characters");
+    LOGGER_ERROR(logger_, "Strings contain invalid characters");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -93,7 +93,7 @@ void SendLocationRequest::Run() {
     verification_result = MessageHelper::VerifyImage(
         (*message_)[strings::msg_params][strings::location_image], app);
     if (mobile_apis::Result::SUCCESS != verification_result) {
-      LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
+      LOGGER_ERROR(logger_, "VerifyImage INVALID_DATA!");
       SendResponse(false, verification_result);
       return;
     }
@@ -109,11 +109,11 @@ void SendLocationRequest::Run() {
 }
 
 void SendLocationRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_SendLocation: {
-      LOG4CXX_INFO(logger_, "Received Navigation_SendLocation event");
+      LOGGER_INFO(logger_, "Received Navigation_SendLocation event");
       mobile_apis::Result::eType result_code =
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asUInt()));
@@ -124,14 +124,14 @@ void SendLocationRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
       break;
     }
   }
 }
 
 bool SendLocationRequest::IsWhiteSpaceExist() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   const char* str;
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
@@ -139,8 +139,8 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
   if (msg_params.keyExists(strings::location_name)) {
     str = msg_params[strings::location_name].asCharArray();
     if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_,
-                    "parameter locationName contains invalid character");
+      LOGGER_ERROR(logger_,
+                   "parameter locationName contains invalid character");
       return true;
     }
   }
@@ -148,8 +148,8 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
   if (msg_params.keyExists(strings::location_description)) {
     str = msg_params[strings::location_description].asCharArray();
     if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_,
-                    "parameter locationDescription contains invalid character");
+      LOGGER_ERROR(logger_,
+                   "parameter locationDescription contains invalid character");
       return true;
     }
   }
@@ -162,8 +162,8 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
     for (; it_al != it_al_end; ++it_al) {
       str = (*it_al).asCharArray();
       if (!CheckSyntax(str)) {
-        LOG4CXX_ERROR(logger_,
-                      "parameter address_lines contains invalid character");
+        LOGGER_ERROR(logger_,
+                     "parameter address_lines contains invalid character");
         return true;
       }
     }
@@ -172,7 +172,7 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
   if (msg_params.keyExists(strings::phone_number)) {
     str = msg_params[strings::phone_number].asCharArray();
     if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_,
+      LOGGER_ERROR(logger_,
                     "parameter phoneNumber contains invalid character");
       return true;
     }
@@ -181,7 +181,7 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
   if (msg_params.keyExists(strings::location_image)) {
     str = msg_params[strings::location_image][strings::value].asCharArray();
     if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(
+      LOGGER_ERROR(
           logger_,
           "parameter value in locationImage contains invalid character");
       return true;
@@ -203,7 +203,7 @@ bool SendLocationRequest::CheckHMICapabilities(
   ApplicationManagerImpl* instance = ApplicationManagerImpl::instance();
   const HMICapabilities& hmi_capabilities = instance->hmi_capabilities();
   if (!hmi_capabilities.is_ui_cooperating()) {
-    LOG4CXX_ERROR(logger_, "UI is not supported.");
+    LOGGER_ERROR(logger_, "UI is not supported.");
     return false;
   }
 
@@ -226,7 +226,7 @@ bool SendLocationRequest::CheckHMICapabilities(
   }
 
   if (!fields_names.empty()) {
-    LOG4CXX_ERROR(logger_, "Some fields are not supported by capabilities");
+    LOGGER_ERROR(logger_, "Some fields are not supported by capabilities");
     return false;
   }
   return true;

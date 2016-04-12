@@ -45,13 +45,13 @@ OnCommandNotification::OnCommandNotification(const MessageSharedPtr& message)
 OnCommandNotification::~OnCommandNotification() {}
 
 void OnCommandNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::msg_params][strings::app_id].asInt());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "No application associated with session key");
+    LOGGER_ERROR(logger_, "No application associated with session key");
     return;
   }
 
@@ -59,7 +59,7 @@ void OnCommandNotification::Run() {
       (*message_)[strings::msg_params][strings::cmd_id].asUInt();
 
   if (!app->FindCommand(cmd_id)) {
-    LOG4CXX_ERROR(logger_, " No applications found for the command " << cmd_id);
+    LOGGER_ERROR(logger_, " No applications found for the command " << cmd_id);
     return;
   }
 

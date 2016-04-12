@@ -49,13 +49,13 @@ SetIconRequest::SetIconRequest(const MessageSharedPtr& message)
 SetIconRequest::~SetIconRequest() {}
 
 void SetIconRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    LOGGER_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -63,14 +63,13 @@ void SetIconRequest::Run() {
   const std::string& sync_file_name =
       (*message_)[strings::msg_params][strings::sync_file_name].asString();
 
-  std::string full_file_path =
-      profile::Profile::instance()->app_storage_folder() + "/";
-  full_file_path += app->folder_name();
-  full_file_path += "/";
-  full_file_path += sync_file_name;
+  std::string full_file_path = file_system::ConcatPath(
+      profile::Profile::instance()->app_storage_folder(),
+      app->folder_name(),
+      sync_file_name);
 
   if (!file_system::FileExists(full_file_path)) {
-    LOG4CXX_ERROR(logger_, "No such file " << full_file_path);
+    LOGGER_ERROR(logger_, "No such file " << full_file_path);
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -100,7 +99,7 @@ void SetIconRequest::Run() {
 }
 
 void SetIconRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -120,15 +119,15 @@ void SetIconRequest::on_event(const event_engine::Event& event) {
                        [strings::value].asString();
         app->set_app_icon_path(path);
 
-        LOG4CXX_INFO(logger_,
-                     "Icon path was set to '" << app->app_icon_path() << "'");
+        LOGGER_INFO(logger_,
+                    "Icon path was set to '" << app->app_icon_path() << "'");
       }
 
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
       return;
     }
   }

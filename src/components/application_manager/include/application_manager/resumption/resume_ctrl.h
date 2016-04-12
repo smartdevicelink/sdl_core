@@ -53,7 +53,6 @@ class Application;
 }
 
 namespace resumption {
-
 class LastState;
 
 /**
@@ -432,7 +431,6 @@ class ResumeCtrl : public app_mngr::event_engine::EventObserver {
   void AddToResumptionTimerQueue(uint32_t app_id);
 
   void LoadResumeData();
-
   /**
    * @brief Checks, if application data needs to be resumed
    * @param application Application data from storage

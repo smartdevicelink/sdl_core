@@ -43,7 +43,7 @@ VRPerformInteractionRequest::VRPerformInteractionRequest(
 VRPerformInteractionRequest::~VRPerformInteractionRequest() {}
 
 void VRPerformInteractionRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }

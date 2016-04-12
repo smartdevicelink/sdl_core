@@ -75,9 +75,9 @@ bool AlertRequest::Init() {
   // If soft buttons are present, SDL will not use initiate timeout tracking for
   // response.
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
-    LOG4CXX_INFO(logger_,
-                 "Request contains soft buttons - request timeout "
-                 "will be set to 0.");
+    LOGGER_INFO(logger_,
+                "Request contains soft buttons - request timeout "
+                "will be set to 0.");
     default_timeout_ = 0;
   }
 
@@ -85,7 +85,7 @@ bool AlertRequest::Init() {
 }
 
 void AlertRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   uint32_t app_id =
       (*message_)[strings::params][strings::connection_key].asInt();
@@ -106,9 +106,8 @@ void AlertRequest::Run() {
   if ((tts_chunks_exists && length_tts_chunks) ||
       ((*message_)[strings::msg_params].keyExists(strings::play_tone) &&
        (*message_)[strings::msg_params][strings::play_tone].asBool())) {
-    awaiting_tts_speak_response_ = true;
-  }
-
+      awaiting_tts_speak_response_ = true;
+    }
   SendAlertRequest(app_id);
   if (awaiting_tts_speak_response_) {
     SendSpeakRequest(app_id, tts_chunks_exists, length_tts_chunks);
@@ -116,19 +115,19 @@ void AlertRequest::Run() {
 }
 
 void AlertRequest::onTimeOut() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   if (false ==
       (*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     CommandRequestImpl::onTimeOut();
     return;
   }
-  LOG4CXX_INFO(logger_,
-               "Default timeout ignored. "
-               "AlertRequest with soft buttons wait timeout on HMI side");
+  LOGGER_INFO(logger_,
+              "Default timeout ignored. "
+              "AlertRequest with soft buttons wait timeout on HMI side");
 }
 
 void AlertRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   using namespace helpers;
 
   const smart_objects::SmartObject& message = event.smart_object();
@@ -136,18 +135,18 @@ void AlertRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::TTS_OnResetTimeout:
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      LOG4CXX_INFO(logger_,
-                   "Received UI_OnResetTimeout event "
-                   " or TTS_OnResetTimeout event"
-                       << awaiting_tts_speak_response_ << " "
-                       << awaiting_tts_stop_speaking_response_ << " "
-                       << awaiting_ui_alert_response_);
+      LOGGER_INFO(logger_,
+                  "Received UI_OnResetTimeout event "
+                  " or TTS_OnResetTimeout event"
+                      << awaiting_tts_speak_response_ << " "
+                      << awaiting_tts_stop_speaking_response_ << " "
+                      << awaiting_ui_alert_response_);
       ApplicationManagerImpl::instance()->updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
       break;
     }
     case hmi_apis::FunctionID::UI_Alert: {
-      LOG4CXX_INFO(logger_, "Received UI_Alert event");
+      LOGGER_INFO(logger_, "Received UI_Alert event");
       // Unsubscribe from event to avoid unwanted messages
       unsubscribe_from_event(hmi_apis::FunctionID::UI_Alert);
       awaiting_ui_alert_response_ = false;
@@ -174,7 +173,7 @@ void AlertRequest::on_event(const event_engine::Event& event) {
       break;
     }
     case hmi_apis::FunctionID::TTS_Speak: {
-      LOG4CXX_INFO(logger_, "Received TTS_Speak event");
+      LOGGER_INFO(logger_, "Received TTS_Speak event");
       // Unsubscribe from event to avoid unwanted messages
       unsubscribe_from_event(hmi_apis::FunctionID::TTS_Speak);
       awaiting_tts_speak_response_ = false;
@@ -183,14 +182,14 @@ void AlertRequest::on_event(const event_engine::Event& event) {
       break;
     }
     case hmi_apis::FunctionID::TTS_StopSpeaking: {
-      LOG4CXX_INFO(logger_, "Received TTS_StopSpeaking event");
+      LOGGER_INFO(logger_, "Received TTS_StopSpeaking event");
       // Unsubscribe from event to avoid unwanted messages
       unsubscribe_from_event(hmi_apis::FunctionID::TTS_StopSpeaking);
       awaiting_tts_stop_speaking_response_ = false;
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
       return;
     }
   }
@@ -239,11 +238,9 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     is_alert_succeeded_ = false;
     alert_result_ = tts_speak_result_;
   }
-
   if (mobile_apis::Result::WARNINGS == tts_speak_result_) {
     alert_result_ = mobile_apis::Result::WARNINGS;
   }
-
   SendResponse(is_alert_succeeded_,
                alert_result_,
                response_info.empty() ? NULL : response_info.c_str(),
@@ -251,12 +248,12 @@ void AlertRequest::on_event(const event_engine::Event& event) {
 }
 
 bool AlertRequest::Validate(uint32_t app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(app_id);
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "No application associated with session key");
+    LOGGER_ERROR(logger_, "No application associated with session key");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return false;
   }
@@ -265,7 +262,7 @@ bool AlertRequest::Validate(uint32_t app_id) {
       app->IsCommandLimitsExceeded(
           static_cast<mobile_apis::FunctionID::eType>(function_id()),
           application_manager::TLimitSource::POLICY_TABLE)) {
-    LOG4CXX_ERROR(logger_, "Alert frequency is too high.");
+    LOGGER_ERROR(logger_, "Alert frequency is too high.");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return false;
   }
@@ -285,7 +282,7 @@ bool AlertRequest::Validate(uint32_t app_id) {
               ->GetPolicyHandler());
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
-    LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+    LOGGER_ERROR(logger_, "INVALID_DATA!");
     SendResponse(false, processing_result);
     return false;
   }
@@ -295,7 +292,7 @@ bool AlertRequest::Validate(uint32_t app_id) {
       (!(*message_)[strings::msg_params].keyExists(strings::alert_text2)) &&
       (!(*message_)[strings::msg_params].keyExists(strings::tts_chunks) &&
        (1 > (*message_)[strings::msg_params][strings::tts_chunks].length()))) {
-    LOG4CXX_ERROR(logger_, "Mandatory parameters are missing");
+    LOGGER_ERROR(logger_, "Mandatory parameters are missing");
     SendResponse(false,
                  mobile_apis::Result::INVALID_DATA,
                  "Mandatory parameters are missing");
@@ -306,7 +303,7 @@ bool AlertRequest::Validate(uint32_t app_id) {
 }
 
 void AlertRequest::SendAlertRequest(int32_t app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(app_id);
 
@@ -373,16 +370,17 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
 void AlertRequest::SendSpeakRequest(int32_t app_id,
                                     bool tts_chunks_exists,
                                     size_t length_tts_chunks) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   using namespace hmi_apis;
   using namespace smart_objects;
   // crate HMI speak request
   SmartObject msg_params = smart_objects::SmartObject(SmartType_Map);
+
   if (tts_chunks_exists && length_tts_chunks) {
-    msg_params[hmi_request::tts_chunks] =
-        smart_objects::SmartObject(SmartType_Array);
-    msg_params[hmi_request::tts_chunks] =
-        (*message_)[strings::msg_params][strings::tts_chunks];
+  msg_params[hmi_request::tts_chunks] =
+      smart_objects::SmartObject(SmartType_Array);
+  msg_params[hmi_request::tts_chunks] =
+      (*message_)[strings::msg_params][strings::tts_chunks];
   }
   if ((*message_)[strings::msg_params].keyExists(strings::play_tone) &&
       (*message_)[strings::msg_params][strings::play_tone].asBool()) {
@@ -394,13 +392,13 @@ void AlertRequest::SendSpeakRequest(int32_t app_id,
 }
 
 bool AlertRequest::CheckStringsOfAlertRequest() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text1)) {
     str = (*message_)[strings::msg_params][strings::alert_text1].asCharArray();
     if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid alert_text_1 syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid alert_text_1 syntax check failed");
       return false;
     }
   }
@@ -408,7 +406,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text2)) {
     str = (*message_)[strings::msg_params][strings::alert_text2].asCharArray();
     if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid alert_text_2 syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid alert_text_2 syntax check failed");
       return false;
     }
   }
@@ -416,7 +414,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text3)) {
     str = (*message_)[strings::msg_params][strings::alert_text3].asCharArray();
     if (!CheckSyntax(str)) {
-      LOG4CXX_ERROR(logger_, "Invalid alert_text_3 syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid alert_text_3 syntax check failed");
       return false;
     }
   }
@@ -427,7 +425,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
     for (size_t i = 0; i < tts_chunks_array.length(); ++i) {
       str = tts_chunks_array[i][strings::text].asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
-        LOG4CXX_ERROR(logger_, "Invalid tts_chunks text syntax check failed");
+        LOGGER_ERROR(logger_, "Invalid tts_chunks text syntax check failed");
         return false;
       }
     }
@@ -436,7 +434,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
 }
 
 bool AlertRequest::HasHmiResponsesToWait() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   return awaiting_ui_alert_response_ || awaiting_tts_speak_response_ ||
          awaiting_tts_stop_speaking_response_;
 }

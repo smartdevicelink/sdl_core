@@ -148,7 +148,7 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
 
   /*
   * @brief Predicate for using with CheckChoiceSet method to compare choice ID
-  *param
+  * param
   *
   * return TRUE if there is coincidence of choice ID, otherwise FALSE
   */
@@ -165,7 +165,7 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
 
   /*
   * @brief Predicate for using with CheckChoiceSet method to compare menu name
-  *param
+  * param
   *
   * return TRUE if there is coincidence of menu name, otherwise FALSE
   */
@@ -182,7 +182,7 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
 
   /*
   * @brief Predicate for using with CheckChoiceSet method to compare VR commands
-  *param
+  * param
   *
   * return TRUE if there is coincidence of VR commands, otherwise FALSE
   */

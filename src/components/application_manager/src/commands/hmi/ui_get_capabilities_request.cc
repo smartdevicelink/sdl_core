@@ -43,7 +43,7 @@ UIGetCapabilitiesRequest::UIGetCapabilitiesRequest(
 UIGetCapabilitiesRequest::~UIGetCapabilitiesRequest() {}
 
 void UIGetCapabilitiesRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }

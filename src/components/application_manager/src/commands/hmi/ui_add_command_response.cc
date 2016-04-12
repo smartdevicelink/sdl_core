@@ -43,7 +43,7 @@ UIAddCommandResponse::UIAddCommandResponse(const MessageSharedPtr& message)
 UIAddCommandResponse::~UIAddCommandResponse() {}
 
 void UIAddCommandResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::UI_AddCommand);
   event.set_smart_object(*message_);

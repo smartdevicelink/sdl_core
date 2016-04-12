@@ -103,7 +103,6 @@ class EventObserver {
 const EventObserver::ObserverID& EventObserver::id() const {
   return id_;
 }
-
 }  // namespace event_engine
 }  // namespace application_manager
 

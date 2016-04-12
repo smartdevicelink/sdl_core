@@ -44,7 +44,7 @@ OnLanguageChangeNotification::OnLanguageChangeNotification(
 OnLanguageChangeNotification::~OnLanguageChangeNotification() {}
 
 void OnLanguageChangeNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendNotification();
 }

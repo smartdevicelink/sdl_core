@@ -44,7 +44,7 @@ UIDeleteSubmenuResponse::UIDeleteSubmenuResponse(
 UIDeleteSubmenuResponse::~UIDeleteSubmenuResponse() {}
 
 void UIDeleteSubmenuResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::UI_DeleteSubMenu);
   event.set_smart_object(*message_);

@@ -42,7 +42,7 @@ UIAddSubmenuRequest::UIAddSubmenuRequest(const MessageSharedPtr& message)
 UIAddSubmenuRequest::~UIAddSubmenuRequest() {}
 
 void UIAddSubmenuRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }

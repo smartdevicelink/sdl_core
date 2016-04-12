@@ -37,9 +37,7 @@
 #include <vector>
 #include <map>
 #include <set>
-
 #include "gmock/gmock.h"
-
 #include "application_manager/hmi_command_factory.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/hmi_capabilities.h"
@@ -170,7 +168,6 @@ class ApplicationManagerImpl
                bool(resumption::LastState& last_state,
                     media_manager::MediaManager* media_manager));
   MOCK_METHOD0(Stop, bool());
-
   // ApplicationManager methods
   MOCK_METHOD1(set_hmi_message_handler,
                void(hmi_message_handler::HMIMessageHandler*));
@@ -255,8 +252,7 @@ class ApplicationManagerImpl
   MOCK_METHOD1(GetDeviceTransportType,
                hmi_apis::Common_TransportType::eType(const std::string&));
   MOCK_CONST_METHOD1(application_by_policy_id,
-                     ApplicationSharedPtr(const std::string&));
-
+               ApplicationSharedPtr(const std::string&));
   MOCK_METHOD1(RemoveAppDataFromHMI, bool(ApplicationSharedPtr));
   MOCK_METHOD1(HeadUnitReset,
                void(mobile_api::AppInterfaceUnregisteredReason::eType));
@@ -270,7 +266,6 @@ class ApplicationManagerImpl
                     mobile_apis::HMILevel::eType));
   MOCK_METHOD1(SendHMIStatusNotification,
                void(const utils::SharedPtr<Application>));
-
   MOCK_METHOD2(UnregisterRevokedApplication,
                void(uint32_t, mobile_apis::Result::eType));
   MOCK_METHOD1(SetUnregisterAllApplicationsReason,
@@ -346,7 +341,6 @@ class ApplicationManagerImpl
                void(uint32_t,
                     mobile_api::HMILevel::eType,
                     mobile_apis::AudioStreamingState::eType));
-
   template <bool SendActivateApp>
   MOCK_METHOD4(SetState,
                void(uint32_t,
@@ -412,7 +406,7 @@ class ApplicationManagerImpl
    public:
     ApplicationListAccessor()
         : DataAccessor<ApplicationSet>(ApplicationSet(),
-                                       sync_primitives::Lock()) {}
+                                      sync_primitives::Lock()) {}
     MOCK_CONST_METHOD0(applications, const ApplicationSet());
     MOCK_METHOD0(begin, ApplicationSetConstIt());
     MOCK_METHOD0(end, ApplicationSetConstIt());
@@ -428,5 +422,4 @@ class ApplicationManagerImpl
 };
 
 }  // application_manager
-
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_MOCK_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_

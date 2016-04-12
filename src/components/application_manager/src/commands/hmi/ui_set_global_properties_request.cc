@@ -43,7 +43,7 @@ UISetGlobalPropertiesRequest::UISetGlobalPropertiesRequest(
 UISetGlobalPropertiesRequest::~UISetGlobalPropertiesRequest() {}
 
 void UISetGlobalPropertiesRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }

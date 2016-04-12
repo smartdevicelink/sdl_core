@@ -58,6 +58,5 @@ void EventObserver::unsubscribe_from_event(const Event::EventID& event_id) {
 void EventObserver::unsubscribe_from_all_events() {
   EventDispatcherImpl::instance()->remove_observer(this);
 }
-
 }  // namespace event_engine
 }  // namespace application_manager

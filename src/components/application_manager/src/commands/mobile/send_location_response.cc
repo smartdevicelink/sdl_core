@@ -46,7 +46,7 @@ SendLocationResponse::SendLocationResponse(const MessageSharedPtr& message)
 SendLocationResponse::~SendLocationResponse() {}
 
 void SendLocationResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }

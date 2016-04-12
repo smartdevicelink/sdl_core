@@ -28,7 +28,7 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
-*/
+ */
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_CAPABILITIES_H_
@@ -37,6 +37,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "json/json.h"
 #include "utils/macro.h"
+
 #include "application_manager/hmi_language_handler.h"
 
 namespace NsSmartDeviceLink {
@@ -386,7 +387,7 @@ class HMICapabilities {
 
   /*
    * @brief Interface used to store information about software version of the
-   *target
+   * target
    *
    * @param ccpu_version Received system/hmi software version
    */
@@ -409,7 +410,6 @@ class HMICapabilities {
    * @return TRUE if capabilities loaded successfully, otherwise FALSE.
    */
   bool load_capabilities_from_file();
-
   /*
    * @brief function checks if json member exists
    *

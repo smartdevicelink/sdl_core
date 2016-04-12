@@ -42,7 +42,7 @@ UpdateAppListResponse::UpdateAppListResponse(const MessageSharedPtr& message)
 UpdateAppListResponse::~UpdateAppListResponse() {}
 
 void UpdateAppListResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   // TODO(PV): add check
 }

@@ -192,7 +192,6 @@ class PerformInteractionRequest : public CommandRequestImpl {
    * otherwise returns FALSE.
    */
   bool CheckChoiceIDFromResponse(ApplicationSharedPtr app, int32_t choice_id);
-
   /**
    * @brief Checks for a match of choice ID, in
    * choice sets.

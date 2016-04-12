@@ -44,11 +44,11 @@ SDLGetStatusUpdateRequest::SDLGetStatusUpdateRequest(
 SDLGetStatusUpdateRequest::~SDLGetStatusUpdateRequest() {}
 
 void SDLGetStatusUpdateRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   application_manager::ApplicationManagerImpl::instance()
       ->GetPolicyHandler()
       .OnGetStatusUpdate(
-          (*message_)[strings::params][strings::correlation_id].asUInt());
+      (*message_)[strings::params][strings::correlation_id].asUInt());
 }
 
 }  // namespace commands

@@ -43,7 +43,7 @@ UiSetDisplayLayoutRequest::UiSetDisplayLayoutRequest(
 UiSetDisplayLayoutRequest::~UiSetDisplayLayoutRequest() {}
 
 void UiSetDisplayLayoutRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   SendRequest();
 }
 

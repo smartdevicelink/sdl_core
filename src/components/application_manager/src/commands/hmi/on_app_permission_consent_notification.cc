@@ -46,7 +46,7 @@ OnAppPermissionConsentNotification::OnAppPermissionConsentNotification(
 OnAppPermissionConsentNotification::~OnAppPermissionConsentNotification() {}
 
 void OnAppPermissionConsentNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
 
   uint32_t connection_key = 0;

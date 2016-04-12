@@ -42,7 +42,7 @@ GetUrls::GetUrls(const MessageSharedPtr& message) : RequestFromHMI(message) {}
 GetUrls::~GetUrls() {}
 
 void GetUrls::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   smart_objects::SmartObject& object = *message_;
   object[strings::params][strings::message_type] = MessageType::kResponse;
   if (application_manager::ApplicationManagerImpl::instance()
@@ -52,8 +52,9 @@ void GetUrls::Run() {
     application_manager::ApplicationManagerImpl::instance()
         ->GetPolicyHandler()
         .GetServiceUrls(
-            object[strings::msg_params][hmi_request::service].asString(),
-            endpoints);
+        object[strings::msg_params][hmi_request::service].asString(),
+        endpoints);
+
     if (!endpoints.empty()) {
       object[strings::msg_params].erase(hmi_request::service);
 

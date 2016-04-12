@@ -44,7 +44,7 @@ SDLGetListOfPermissionsRequest::SDLGetListOfPermissionsRequest(
 SDLGetListOfPermissionsRequest::~SDLGetListOfPermissionsRequest() {}
 
 void SDLGetListOfPermissionsRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   uint32_t connection_key = 0;
   if ((*message_)[strings::msg_params].keyExists(strings::app_id)) {
     connection_key = (*message_)[strings::msg_params][strings::app_id].asUInt();
@@ -52,8 +52,8 @@ void SDLGetListOfPermissionsRequest::Run() {
   application_manager::ApplicationManagerImpl::instance()
       ->GetPolicyHandler()
       .OnGetListOfPermissions(
-          connection_key,
-          (*message_)[strings::params][strings::correlation_id].asUInt());
+      connection_key,
+      (*message_)[strings::params][strings::correlation_id].asUInt());
 }
 
 }  // namespace commands

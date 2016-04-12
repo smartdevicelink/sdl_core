@@ -42,7 +42,7 @@ TTSSpeakRequest::TTSSpeakRequest(const MessageSharedPtr& message)
 TTSSpeakRequest::~TTSSpeakRequest() {}
 
 void TTSSpeakRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }

@@ -42,7 +42,7 @@ UIDeleteCommandRequest::UIDeleteCommandRequest(const MessageSharedPtr& message)
 UIDeleteCommandRequest::~UIDeleteCommandRequest() {}
 
 void UIDeleteCommandRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }

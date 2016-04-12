@@ -42,7 +42,7 @@ VRAddCommandRequest::VRAddCommandRequest(const MessageSharedPtr& message)
 VRAddCommandRequest::~VRAddCommandRequest() {}
 
 void VRAddCommandRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }

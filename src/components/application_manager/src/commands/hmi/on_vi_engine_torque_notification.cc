@@ -44,7 +44,7 @@ OnVIEngineTorqueNotification::OnVIEngineTorqueNotification(
 OnVIEngineTorqueNotification::~OnVIEngineTorqueNotification() {}
 
 void OnVIEngineTorqueNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =

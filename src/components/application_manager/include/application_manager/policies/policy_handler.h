@@ -37,6 +37,7 @@
 #include <map>
 #include <set>
 #include <vector>
+
 #include <stdint.h>
 #include "policy/policy_manager.h"
 #include "application_manager/policies/policy_handler_interface.h"
@@ -53,6 +54,7 @@
 #include "policy/usage_statistics/statistics_manager.h"
 #include "utils/threads/async_runner.h"
 #include "policy/policy_settings.h"
+#include "utils/shared_library.h"
 
 namespace Json {
 class Value;
@@ -64,8 +66,8 @@ typedef std::vector<uint32_t> DeviceHandles;
 namespace custom_str = utils::custom_string;
 
 class PolicyHandler : public PolicyHandlerInterface,
-                      public PolicyListener,
-                      public threads::AsyncRunner {
+      public PolicyListener,
+      public threads::AsyncRunner {
  public:
   PolicyHandler(const policy::PolicySettings& get_settings);
   ~PolicyHandler();
@@ -80,7 +82,7 @@ class PolicyHandler : public PolicyHandlerInterface,
                              const BinaryMessage& pt_string) OVERRIDE;
   bool UnloadPolicyLibrary() OVERRIDE;
   void OnPermissionsUpdated(const std::string& policy_app_id,
-                            const Permissions& permissions,
+                                    const Permissions& permissions,
                             const HMILevel& default_hmi) OVERRIDE;
 
   void OnPermissionsUpdated(const std::string& policy_app_id,
@@ -381,10 +383,10 @@ class PolicyHandler : public PolicyHandlerInterface,
   void Increment(const std::string& app_id,
                  usage_statistics::AppCounterId type) OVERRIDE;
   void Set(const std::string& app_id,
-           usage_statistics::AppInfoId type,
+                   usage_statistics::AppInfoId type,
            const std::string& value) OVERRIDE;
   void Add(const std::string& app_id,
-           usage_statistics::AppStopwatchId type,
+                   usage_statistics::AppStopwatchId type,
            int32_t timespan_seconds) OVERRIDE;
 
 #ifdef BUILD_TESTS
@@ -392,11 +394,9 @@ class PolicyHandler : public PolicyHandlerInterface,
     policy_manager_ = pm;
   }
 #endif  // BUILD_TESTS
-
 #ifdef ENABLE_SECURITY
   std::string RetrieveCertificate() const OVERRIDE;
 #endif  // ENABLE_SECURITY
-
   const PolicySettings& get_settings() const OVERRIDE;
 
  protected:
@@ -454,25 +454,24 @@ class PolicyHandler : public PolicyHandlerInterface,
     }
 
     void Increment(const std::string& app_id,
-                   usage_statistics::AppCounterId type) {
+                           usage_statistics::AppCounterId type) {
       policy_handler_->AsyncRun(
           new StatisticsDelegate(*policy_handler_, app_id, type));
     }
 
     void Set(const std::string& app_id,
-             usage_statistics::AppInfoId type,
-             const std::string& value) {
+                     usage_statistics::AppInfoId type,
+                     const std::string& value) {
       policy_handler_->AsyncRun(
           new StatisticsDelegate(*policy_handler_, app_id, type, value));
     }
 
     void Add(const std::string& app_id,
-             usage_statistics::AppStopwatchId type,
-             int32_t timespan_seconds) {
+                     usage_statistics::AppStopwatchId type,
+                     int32_t timespan_seconds) {
       policy_handler_->AsyncRun(new StatisticsDelegate(
           *policy_handler_, app_id, type, timespan_seconds));
     }
-
    private:
     PolicyHandler* policy_handler_;
   };
@@ -481,7 +480,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   static const std::string kLibrary;
   mutable sync_primitives::RWLock policy_manager_lock_;
   utils::SharedPtr<PolicyManager> policy_manager_;
-  void* dl_handle_;
+  utils::SharedLibrary policy_library_;
   AppIds last_used_app_ids_;
   utils::SharedPtr<PolicyEventObserver> event_observer_;
   uint32_t last_activated_app_id_;
@@ -507,6 +506,7 @@ class PolicyHandler : public PolicyHandlerInterface,
   sync_primitives::Lock app_to_device_link_lock_;
 
   utils::SharedPtr<StatisticManagerImpl> statistic_manager_impl_;
+
   const PolicySettings& settings_;
   friend class AppPermissionDelegate;
 

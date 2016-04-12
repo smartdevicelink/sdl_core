@@ -43,7 +43,7 @@ UISetAppIconResponse::UISetAppIconResponse(const MessageSharedPtr& message)
 UISetAppIconResponse::~UISetAppIconResponse() {}
 
 void UISetAppIconResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::UI_SetAppIcon);
   event.set_smart_object(*message_);

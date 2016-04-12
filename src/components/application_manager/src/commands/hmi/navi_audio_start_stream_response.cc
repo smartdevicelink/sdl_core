@@ -42,7 +42,7 @@ AudioStartStreamResponse::AudioStartStreamResponse(
 AudioStartStreamResponse::~AudioStartStreamResponse() {}
 
 void AudioStartStreamResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::Navigation_StartAudioStream);
   event.set_smart_object(*message_);

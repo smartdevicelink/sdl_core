@@ -62,21 +62,21 @@ bool SliderRequest::Init() {
 }
 
 void SliderRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application =
       application_manager::ApplicationManagerImpl::instance()->application(
           (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!application) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    LOGGER_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
 
   if ((*message_)[strings::msg_params][strings::num_ticks].asInt() <
       (*message_)[strings::msg_params][strings::position].asInt()) {
-    LOG4CXX_ERROR(logger_, "INVALID_DATA");
+    LOGGER_ERROR(logger_, "INVALID_DATA");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -85,7 +85,7 @@ void SliderRequest::Run() {
     if (1 < (*message_)[strings::msg_params][strings::slider_footer].length()) {
       if ((*message_)[strings::msg_params][strings::num_ticks].asUInt() !=
           (*message_)[strings::msg_params][strings::slider_footer].length()) {
-        LOG4CXX_ERROR(logger_, "INVALID_DATA");
+        LOGGER_ERROR(logger_, "INVALID_DATA");
         SendResponse(false, mobile_apis::Result::INVALID_DATA);
         return;
       }
@@ -93,7 +93,7 @@ void SliderRequest::Run() {
   }
 
   if (IsWhiteSpaceExist()) {
-    LOG4CXX_ERROR(logger_, "Incoming slider has contains \t\n \\t \\n");
+    LOGGER_ERROR(logger_, "Incoming slider has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -111,7 +111,7 @@ void SliderRequest::Run() {
 }
 
 void SliderRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   using namespace helpers;
   using namespace smart_objects;
   using namespace hmi_apis;
@@ -120,21 +120,20 @@ void SliderRequest::on_event(const event_engine::Event& event) {
 
   const event_engine::Event::EventID event_id = event.id();
   if (event_id == FunctionID::UI_OnResetTimeout) {
-    LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event");
+    LOGGER_INFO(logger_, "Received UI_OnResetTimeout event");
     ApplicationManagerImpl::instance()->updateRequestTimeout(
         connection_key(), correlation_id(), default_timeout());
     return;
   }
-
   if (event_id != FunctionID::UI_Slider) {
-    LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+    LOGGER_ERROR(logger_, "Received unknown event" << event.id());
     return;
   }
 
-  LOG4CXX_DEBUG(logger_, "Received UI_Slider event");
+  LOGGER_DEBUG(logger_, "Received UI_Slider event");
 
   const Common_Result::eType response_code = static_cast<Common_Result::eType>(
-      message[strings::params][hmi_response::code].asInt());
+          message[strings::params][hmi_response::code].asInt());
 
   SmartObject response_msg_params = message[strings::msg_params];
 
@@ -144,11 +143,11 @@ void SliderRequest::on_event(const event_engine::Event& event) {
   if (is_timeout_aborted) {
     if (message[strings::params][strings::data].keyExists(
             strings::slider_position)) {
-      // Copy slider_position info to msg_params section
-      response_msg_params[strings::slider_position] =
-          message[strings::params][strings::data][strings::slider_position];
+    // Copy slider_position info to msg_params section
+    response_msg_params[strings::slider_position] =
+        message[strings::params][strings::data][strings::slider_position];
     } else {
-      LOG4CXX_ERROR(logger_,
+      LOGGER_ERROR(logger_,
                     strings::slider_position << " field is absent"
                                                 " in response.");
       response_msg_params[strings::slider_position] = 0;
@@ -165,12 +164,12 @@ void SliderRequest::on_event(const event_engine::Event& event) {
 }
 
 bool SliderRequest::IsWhiteSpaceExist() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   const char* str = NULL;
 
   str = (*message_)[strings::msg_params][strings::slider_header].asCharArray();
   if (!CheckSyntax(str)) {
-    LOG4CXX_ERROR(logger_, "Invalid slider_header value syntax check failed");
+    LOGGER_ERROR(logger_, "Invalid slider_header value syntax check failed");
     return true;
   }
 
@@ -184,7 +183,7 @@ bool SliderRequest::IsWhiteSpaceExist() {
     for (; it_sf != it_sf_end; ++it_sf) {
       str = (*it_sf).asCharArray();
       if (!CheckSyntax(str)) {
-        LOG4CXX_ERROR(logger_, "Invalid slider_footer syntax check failed");
+        LOGGER_ERROR(logger_, "Invalid slider_footer syntax check failed");
         return true;
       }
     }

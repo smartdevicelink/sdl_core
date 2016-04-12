@@ -47,14 +47,14 @@ DeleteFileRequest::DeleteFileRequest(const MessageSharedPtr& message)
 DeleteFileRequest::~DeleteFileRequest() {}
 
 void DeleteFileRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application =
       ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    LOGGER_ERROR(logger_, "Application is not registered");
     return;
   }
 
@@ -63,8 +63,8 @@ void DeleteFileRequest::Run() {
        application->delete_file_in_none_count())) {
     // If application is in the HMI_NONE level the quantity of allowed
     // DeleteFile request is limited by the configuration profile
-    LOG4CXX_ERROR(logger_,
-                  "Too many requests from the app with HMILevel HMI_NONE ");
+    LOGGER_ERROR(logger_,
+                 "Too many requests from the app with HMILevel HMI_NONE ");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
@@ -72,11 +72,10 @@ void DeleteFileRequest::Run() {
   const std::string& sync_file_name =
       (*message_)[strings::msg_params][strings::sync_file_name].asString();
 
-  std::string full_file_path =
-      profile::Profile::instance()->app_storage_folder() + "/";
-  full_file_path += application->folder_name();
-  full_file_path += "/";
-  full_file_path += sync_file_name;
+  std::string full_file_path = file_system::ConcatPath(
+      profile::Profile::instance()->app_storage_folder(),
+      application->folder_name(),
+      sync_file_name);
 
   if (file_system::FileExists(full_file_path)) {
     if (file_system::DeleteFile(full_file_path)) {

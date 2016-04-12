@@ -42,7 +42,7 @@ UIShowResponse::UIShowResponse(const MessageSharedPtr& message)
 UIShowResponse::~UIShowResponse() {}
 
 void UIShowResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::UI_Show);
   event.set_smart_object(*message_);

@@ -42,11 +42,11 @@ ActivateAppRequest::ActivateAppRequest(const MessageSharedPtr& message)
     : RequestToHMI(message) {}
 
 ActivateAppRequest::~ActivateAppRequest() {
-  LOG4CXX_TRACE(logger_, "~ActivateAppRequest");
+  LOGGER_TRACE(logger_, "~ActivateAppRequest");
 }
 
 void ActivateAppRequest::Run() {
-  LOG4CXX_TRACE(logger_, "enter " << correlation_id());
+  LOGGER_TRACE(logger_, "enter " << correlation_id());
   uint32_t app_id = RequestToHMI::application_id();
   ApplicationManagerImpl::instance()->set_application_id(correlation_id(),
                                                          app_id);
@@ -57,11 +57,11 @@ void ActivateAppRequest::Run() {
         static_cast<mobile_apis::HMILevel::eType>(
             (*message_)[strings::msg_params][strings::activate_app_hmi_level]
                 .asInt());
-    LOG4CXX_TRACE(logger_, "requested_hmi_level = " << requested_hmi_level);
+    LOGGER_TRACE(logger_, "requested_hmi_level = " << requested_hmi_level);
   }
 #endif
   SendRequest();
-  LOG4CXX_TRACE(logger_, "exit");
+  LOGGER_TRACE(logger_, "exit");
 }
 
 }  // namespace commands

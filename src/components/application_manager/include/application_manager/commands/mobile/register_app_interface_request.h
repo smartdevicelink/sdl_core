@@ -50,7 +50,6 @@ class Application;
 namespace commands {
 
 namespace custom_str = utils::custom_string;
-
 /**
  * @brief Register app interface request  command class
  **/

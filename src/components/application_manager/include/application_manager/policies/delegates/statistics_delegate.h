@@ -43,7 +43,6 @@
 namespace policy {
 
 class PolicyHandler;
-
 class StatisticsDelegate : public threads::ThreadDelegate {
   enum StatisticType { INCREMENT_GLOBAL, INCREMENT_APP, SET, ADD };
 

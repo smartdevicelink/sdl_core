@@ -28,78 +28,123 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  find_package(WinOpenSSL REQUIRED)
+endif()
+
+if (VERBOSE)
+    message ("Generating project ${PROJECT_NAME} in ${CMAKE_CURRENT_BINARY_DIR}")
+endif()
+
 
 set (AM_SOURCE_DIR ${COMPONENTS_DIR}/application_manager)
 set (AM_TEST_DIR ${AM_SOURCE_DIR}/test)
 set (AM_MOCK_DIR ${AM_TEST_DIR}/mock)
-
 include_directories (
-  include/
-  ${COMPONENTS_DIR}
-  ${COMPONENTS_DIR}/utils/include/
-  ${COMPONENTS_DIR}/formatters/include/
-  ${COMPONENTS_DIR}/protocol_handler/include/
-  ${COMPONENTS_DIR}/smart_objects/include/
-  ${COMPONENTS_DIR}/hmi_message_handler/include
-  ${COMPONENTS_DIR}/media_manager/include/
-  ${COMPONENTS_DIR}/connection_handler/include/
-  ${COMPONENTS_DIR}/config_profile/include/
-  ${COMPONENTS_DIR}/request_watchdog/include/
-  ${COMPONENTS_DIR}/resumption/include/
-  ${COMPONENTS_DIR}/rpc_base/include/
-  ${COMPONENTS_DIR}/interfaces
-  ${CMAKE_BINARY_DIR}/src/components/
-  ${COMPONENTS_DIR}/policy/src/policy/include/
-  ${COMPONENTS_DIR}/policy/src/policy/usage_statistics/include/
-  ${JSONCPP_INCLUDE_DIRECTORY}
-  ${ENCRYPTION_INCLUDE_DIRECTORY}
-  ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
-  ${LOG4CXX_INCLUDE_DIRECTORY}
-)
+    include/
+    ${COMPONENTS_DIR}
+    ${COMPONENTS_DIR}/utils/include/
+    ${COMPONENTS_DIR}/formatters/include/
+    ${COMPONENTS_DIR}/protocol_handler/include/
+    ${COMPONENTS_DIR}/smart_objects/include/
+    ${COMPONENTS_DIR}/hmi_message_handler/include
+    ${COMPONENTS_DIR}/media_manager/include/
+    ${COMPONENTS_DIR}/connection_handler/include/
+    ${COMPONENTS_DIR}/config_profile/include/
+    ${COMPONENTS_DIR}/request_watchdog/include/
+    ${COMPONENTS_DIR}/resumption/include/
+    ${COMPONENTS_DIR}/rpc_base/include/
+    ${COMPONENTS_DIR}/interfaces
+    ${CMAKE_BINARY_DIR}/src/components/
+    ${COMPONENTS_DIR}/include/
+    ${COMPONENTS_DIR}/policy/src/policy/include/
+    ${COMPONENTS_DIR}/policy/src/policy/usage_statistics/include/
+    ${COMPONENTS_DIR}/application_manager/include/
+    ${JSONCPP_INCLUDE_DIRECTORY}
+    ${ENCRYPTION_INCLUDE_DIRECTORY}
+    ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
+    ${LOG4CXX_INCLUDE_DIRECTORY}
+    ${OPENSSL_INCLUDE_DIRECTORY}
+  )
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  include_directories(
+    ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
+  )
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+    file (GLOB_RECURSE inc RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} include/application_manager/*.h)
+  
+    file( GLOB_RECURSE src RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*.cc )
+    foreach( file ${inc};${src} )
+         get_filename_component( path ${file} PATH )
+         string( REPLACE / \\ group ${path} )
+         source_group( ${group} FILES ${file} )
+     endforeach()
+    add_library("ApplicationManager" ${inc} 
+                                     ${src} )    
+  
+    set(LIBRARIES HMI_API 
+                  Utils
+                  MOBILE_API
+                  v4_protocol_v1_2_no_extra
+                  ProtocolLibrary
+                  SmartObjects
+                  UsageStatistics
+                  formatters
+                  dbms)
+    if (${HMI_JSON_API})
+      message ("Generating project ${PROJECT_NAME} in ${CMAKE_CURRENT_BINARY_DIR} set ${HMI_JSON_API}")
+      set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_JSON})
+    endif (${HMI_JSON_API})
+    message ("Generating project ${PROJECT_NAME} in ${CMAKE_CURRENT_BINARY_DIR} set HMI_DBUS_API: ${HMI_DBUS_API}")        
+    if (${HMI_DBUS_API})
+        set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
+    endif (${HMI_DBUS_API})
+
+    target_link_libraries("ApplicationManager" ${LIBRARIES})
+else ()
+
+  if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   include_directories(
     ${COMPONENTS_DIR}/utils/include/utils/sqlite_wrapper/
   )
-endif ()
+  endif ()
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "QNX")
-  include_directories(
+  if (${CMAKE_SYSTEM_NAME} MATCHES "QNX")
+    include_directories(
     ${COMPONENTS_DIR}/utils/include/utils/qdb_wrapper/
   )
-endif()
+  endif()
 
-file (GLOB SOURCES
+  file (GLOB SOURCES
   ${AM_SOURCE_DIR}/src/*
-)
-
+  )
 set (MESSAGE_HELPER_SOURCES
   ${AM_SOURCE_DIR}/src/message_helper/message_helper.cc
 )
-
-set (POLICIES_MANAGER
-${AM_SOURCE_DIR}/src/policies/policy_handler.cc
-${AM_SOURCE_DIR}/src/policies/policy_event_observer.cc
-${AM_SOURCE_DIR}/src/policies/delegates/app_permission_delegate.cc
-${AM_SOURCE_DIR}/src/policies/delegates/statistics_delegate.cc
+  set (POLICIES_MANAGER
+    ${AM_SOURCE_DIR}/src/policies/policy_handler.cc
+    ${AM_SOURCE_DIR}/src/policies/policy_event_observer.cc
+    ${AM_SOURCE_DIR}/src/policies/delegates/app_permission_delegate.cc
+    ${AM_SOURCE_DIR}/src/policies/delegates/statistics_delegate.cc
 )
 
   include_directories(
     ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
   )
-file (GLOB EVENT_ENGINE
-  ${AM_SOURCE_DIR}/src/event_engine/*
-)
+  file (GLOB EVENT_ENGINE
+    ${AM_SOURCE_DIR}/src/event_engine/*
+  )
 
-file (GLOB RESUMPTION
-  ${AM_SOURCE_DIR}/src/resumption/*
-)
+  file (GLOB RESUMPTION
+    ${AM_SOURCE_DIR}/src/resumption/*
+  )
 
-file (GLOB MOBILE_COMMANDS_SOURCES
-  ${AM_SOURCE_DIR}/src/commands/*
-  ${AM_SOURCE_DIR}/src/commands/mobile/*
-)
-
+  file (GLOB MOBILE_COMMANDS_SOURCES
+    ${AM_SOURCE_DIR}/src/commands/*
+    ${AM_SOURCE_DIR}/src/commands/mobile/*
+  )
+ 
   set (HMI_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/request_to_hmi.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/response_from_hmi.cc
@@ -299,90 +344,89 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/on_event_changed_notification.cc
 )
 
-set (HMI_COMMANDS_SOURCES_JSON
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_get_vehicle_data_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_get_vehicle_data_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_subscribe_vehicle_data_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_subscribe_vehicle_data_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_unsubscribe_vehicle_data_request.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/vi_unsubscribe_vehicle_data_response.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_vehicle_data_notification.cc
-)
+  set (HMI_COMMANDS_SOURCES_JSON
+    ${AM_SOURCE_DIR}/src/commands/hmi/vi_get_vehicle_data_request.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/vi_get_vehicle_data_response.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/vi_subscribe_vehicle_data_request.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/vi_subscribe_vehicle_data_response.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/vi_unsubscribe_vehicle_data_request.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/vi_unsubscribe_vehicle_data_response.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_vehicle_data_notification.cc
+  )
 
-set (HMI_COMMANDS_SOURCES_DBUS
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_gps_data_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_speed_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_rpm_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_fuel_level_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_fuel_level_state_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_instant_fuel_consumption_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_external_temperature_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_vin_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_prndl_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_tire_pressure_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_odometer_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_belt_status_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_body_information_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_device_status_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_driver_braking_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_wiper_status_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_head_lamp_status_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_engine_torque_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_acc_pedal_position_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_steering_wheel_angle_notification.cc
-  ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_my_key_notification.cc
-)
+  set (HMI_COMMANDS_SOURCES_DBUS
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_gps_data_notification.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_speed_notification.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_rpm_notification.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_fuel_level_notification.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_fuel_level_state_notification.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_instant_fuel_consumption_notification.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_external_temperature_notification.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_vin_notification.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_prndl_notification.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_tire_pressure_notification.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_odometer_notification.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_belt_status_notification.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_body_information_notification.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_device_status_notification.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_driver_braking_notification.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_wiper_status_notification.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_head_lamp_status_notification.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_engine_torque_notification.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_acc_pedal_position_notification.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_steering_wheel_angle_notification.cc
+    ${AM_SOURCE_DIR}/src/commands/hmi/on_vi_my_key_notification.cc
+  )
 
-if (${HMI_JSON_API})
+  if (${HMI_JSON_API})
     set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_JSON})
-endif (${HMI_JSON_API})
-if (${HMI_DBUS_API})
-    set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
-endif (${HMI_DBUS_API})
+  endif (${HMI_JSON_API})
+  if (${HMI_DBUS_API})
+      set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
+  endif (${HMI_DBUS_API})
 
-SET (LIBRARIES
-  HMI_API
-  MOBILE_API
-  v4_protocol_v1_2_no_extra
-  ProtocolLibrary
-  SmartObjects
-  UsageStatistics
-  dl
-  formatters
-  dbms
-)
+  SET (LIBRARIES
+    HMI_API
+    MOBILE_API
+    v4_protocol_v1_2_no_extra
+    ProtocolLibrary
+    SmartObjects
+    UsageStatistics
+    dl
+    formatters
+    dbms
+  )
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  list(APPEND LIBRARIES sqlite3)
-endif ()
+  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    list(APPEND LIBRARIES sqlite3)
+  endif ()
 
-IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
-  list(REMOVE_ITEM LIBRARIES dl)
-endif()
+  IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
+    list(REMOVE_ITEM LIBRARIES dl)
+  endif()
 
-add_library("AMEventEngine" ${EVENT_ENGINE})
-target_link_libraries("AMEventEngine" ${LIBRARIES})
+  add_library("AMEventEngine" ${EVENT_ENGINE})
+  target_link_libraries("AMEventEngine" ${LIBRARIES})
 
+  add_library("AMPolicyLibrary" ${POLICIES_MANAGER} )
+  target_link_libraries("AMPolicyLibrary" ${LIBRARIES} AMEventEngine)
 
-add_library("AMPolicyLibrary" ${POLICIES_MANAGER} )
-target_link_libraries("AMPolicyLibrary" ${LIBRARIES} AMEventEngine)
+  add_library("AMHMICommandsLibrary" ${HMI_COMMANDS_SOURCES})
+  target_link_libraries("AMHMICommandsLibrary" ${LIBRARIES} AMEventEngine)
 
-add_library("AMHMICommandsLibrary" ${HMI_COMMANDS_SOURCES})
-target_link_libraries("AMHMICommandsLibrary" ${LIBRARIES} AMEventEngine)
+  add_library("MessageHelper" ${MESSAGE_HELPER_SOURCES})
+  add_library("AMMobileCommandsLibrary" ${MOBILE_COMMANDS_SOURCES} )
+  target_link_libraries("AMMobileCommandsLibrary" ${LIBRARIES} AMEventEngine)
 
-add_library("MessageHelper" ${MESSAGE_HELPER_SOURCES})
+  add_library("ApplicationManager" ${SOURCES} ${RESUMPTION})
+  target_link_libraries("ApplicationManager" ${LIBRARIES} AMHMICommandsLibrary
+                                                         AMMobileCommandsLibrary
+                                                         AMEventEngine
+                                                         AMPolicyLibrary)
+  if(ENABLE_LOG)
+    target_link_libraries("ApplicationManager" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+  endif()
 
-add_library("AMMobileCommandsLibrary" ${MOBILE_COMMANDS_SOURCES} )
-target_link_libraries("AMMobileCommandsLibrary" ${LIBRARIES} AMEventEngine)
-
-add_library("ApplicationManager" ${SOURCES} ${RESUMPTION})
-target_link_libraries("ApplicationManager" ${LIBRARIES} AMHMICommandsLibrary
-                                                        AMMobileCommandsLibrary
-                                                        AMEventEngine
-                                                        AMPolicyLibrary)
-
-if(ENABLE_LOG)
-  target_link_libraries("ApplicationManager" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
 if(BUILD_TESTS)

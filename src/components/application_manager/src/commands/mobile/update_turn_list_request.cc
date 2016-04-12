@@ -45,27 +45,26 @@ namespace application_manager {
 namespace commands {
 
 namespace custom_str = utils::custom_string;
-
 UpdateTurnListRequest::UpdateTurnListRequest(const MessageSharedPtr& message)
     : CommandRequestImpl(message) {}
 
 UpdateTurnListRequest::~UpdateTurnListRequest() {}
 
 void UpdateTurnListRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    LOGGER_ERROR(logger_, "Application is not registered");
     return;
   }
 
   if (IsWhiteSpaceExist()) {
-    LOG4CXX_ERROR(logger_,
-                  "Incoming update turn list has contains \t\n \\t \\n");
+    LOGGER_ERROR(logger_,
+                 "Incoming update turn list has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -80,7 +79,7 @@ void UpdateTurnListRequest::Run() {
               ->GetPolicyHandler());
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
-    LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+    LOGGER_ERROR(logger_, "INVALID_DATA!");
     SendResponse(false, processing_result);
     return;
   }
@@ -93,7 +92,7 @@ void UpdateTurnListRequest::Run() {
           (mobile_apis::Result::SUCCESS !=
            MessageHelper::VerifyImage(turn_list_array[i][strings::turn_icon],
                                       app))) {
-        LOG4CXX_ERROR(logger_,
+        LOGGER_ERROR(logger_,
                       "MessageHelper::VerifyImage return INVALID_DATA");
         SendResponse(false, mobile_apis::Result::INVALID_DATA);
         return;
@@ -107,7 +106,7 @@ void UpdateTurnListRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::turn_list)) {
     if (!CheckTurnListArray()) {
-      LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+      LOGGER_ERROR(logger_, "INVALID_DATA!");
       SendResponse(false, mobile_apis::Result::INVALID_DATA);
       return;
     }
@@ -140,18 +139,18 @@ void UpdateTurnListRequest::Run() {
         hmi_apis::FunctionID::Navigation_UpdateTurnList, &msg_params, true);
   } else {
     // conditional mandatory
-    LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+    LOGGER_ERROR(logger_, "INVALID_DATA!");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
 }
 
 void UpdateTurnListRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_UpdateTurnList: {
-      LOG4CXX_INFO(logger_, "Received Navigation_UpdateTurnList event");
+      LOGGER_INFO(logger_, "Received Navigation_UpdateTurnList event");
 
       mobile_apis::Result::eType result_code =
           static_cast<mobile_apis::Result::eType>(
@@ -168,7 +167,7 @@ void UpdateTurnListRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
       break;
     }
   }
@@ -193,7 +192,7 @@ bool UpdateTurnListRequest::CheckTurnListArray() {
 }
 
 bool UpdateTurnListRequest::IsWhiteSpaceExist() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::turn_list)) {
@@ -207,7 +206,7 @@ bool UpdateTurnListRequest::IsWhiteSpaceExist() {
       if ((*it_tl).keyExists(strings::navigation_text)) {
         str = (*it_tl)[strings::navigation_text].asCharArray();
         if (!CheckSyntax(str)) {
-          LOG4CXX_ERROR(
+          LOGGER_ERROR(
               logger_,
               "Invalid turn_list navigation_text text syntax check failed");
           return true;
@@ -217,7 +216,7 @@ bool UpdateTurnListRequest::IsWhiteSpaceExist() {
       if ((*it_tl).keyExists(strings::turn_icon)) {
         str = (*it_tl)[strings::turn_icon][strings::value].asCharArray();
         if (!CheckSyntax(str)) {
-          LOG4CXX_ERROR(
+          LOGGER_ERROR(
               logger_, "Invalid turn_list turn_icon value syntax check failed");
           return true;
         }

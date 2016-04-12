@@ -10,7 +10,7 @@ NaviStopStreamRequest::NaviStopStreamRequest(const MessageSharedPtr& message)
 NaviStopStreamRequest::~NaviStopStreamRequest() {}
 
 void NaviStopStreamRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }

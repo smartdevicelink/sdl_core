@@ -42,7 +42,7 @@ UIAlertRequest::UIAlertRequest(const MessageSharedPtr& message)
 UIAlertRequest::~UIAlertRequest() {}
 
 void UIAlertRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }

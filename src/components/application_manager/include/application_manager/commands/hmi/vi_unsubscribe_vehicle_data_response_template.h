@@ -58,7 +58,7 @@ class VIUnsubscribeVehicleDataResponseTemplate : public ResponseFromHMI {
    * @brief Execute command
    **/
   virtual void Run() {
-    LOG4CXX_AUTO_TRACE(logger_);
+    LOGGER_AUTO_TRACE(logger_);
     event_engine::Event event(eventID);
     event.set_smart_object(*message_);
     event.raise();

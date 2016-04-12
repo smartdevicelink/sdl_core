@@ -43,7 +43,7 @@ AllowAppResponse::AllowAppResponse(const MessageSharedPtr& message)
 AllowAppResponse::~AllowAppResponse() {}
 
 void AllowAppResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   uint32_t connection_key =
       (*message_)[strings::params][strings::connection_key].asInt();
@@ -52,7 +52,7 @@ void AllowAppResponse::Run() {
       ApplicationManagerImpl::instance()->application(connection_key);
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
+    LOGGER_ERROR(logger_, "NULL pointer");
     return;
   }
   app->set_app_allowed(

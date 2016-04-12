@@ -141,6 +141,7 @@ ApplicationImpl::ApplicationImpl(
       profile::Profile::instance()->video_data_stopped_timeout();
   audio_stream_suspend_timeout_ =
       profile::Profile::instance()->audio_data_stopped_timeout();
+
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -206,17 +207,16 @@ bool ApplicationImpl::IsAudioApplication() const {
 }
 
 void ApplicationImpl::SetRegularState(HmiStatePtr state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   state_.AddState(state);
-}
-
+    }
 void ApplicationImpl::RemovePostponedState() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   state_.RemoveState(HmiState::STATE_ID_POSTPONED);
 }
 
 void ApplicationImpl::SetPostponedState(HmiStatePtr state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   state_.AddState(state);
 }
 
@@ -229,12 +229,12 @@ struct StateIDComparator {
 };
 
 void ApplicationImpl::AddHMIState(HmiStatePtr state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   state_.AddState(state);
 }
 
 void ApplicationImpl::RemoveHMIState(HmiState::StateID state_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   state_.RemoveState(state_id);
 }
 
@@ -391,19 +391,19 @@ bool ApplicationImpl::audio_streaming_allowed() const {
 void ApplicationImpl::StartStreaming(
     protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   if (ServiceType::kMobileNav == service_type) {
-    LOG4CXX_TRACE(logger_, "ServiceType = Video");
+    LOGGER_TRACE(logger_, "ServiceType = Video");
     if (!video_streaming_approved()) {
-      LOG4CXX_TRACE(logger_, "Video streaming not approved");
+      LOGGER_TRACE(logger_, "Video streaming not approved");
       MessageHelper::SendNaviStartStream(app_id());
       set_video_stream_retry_number(0);
     }
   } else if (ServiceType::kAudio == service_type) {
-    LOG4CXX_TRACE(logger_, "ServiceType = Audio");
+    LOGGER_TRACE(logger_, "ServiceType = Audio");
     if (!audio_streaming_approved()) {
-      LOG4CXX_TRACE(logger_, "Audio streaming not approved");
+      LOGGER_TRACE(logger_, "Audio streaming not approved");
       MessageHelper::SendAudioStartStream(app_id());
       set_audio_stream_retry_number(0);
     }
@@ -413,7 +413,7 @@ void ApplicationImpl::StartStreaming(
 void ApplicationImpl::StopStreamingForce(
     protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SuspendStreaming(service_type);
 
@@ -427,7 +427,7 @@ void ApplicationImpl::StopStreamingForce(
 void ApplicationImpl::StopStreaming(
     protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SuspendStreaming(service_type);
 
@@ -440,25 +440,24 @@ void ApplicationImpl::StopStreaming(
 }
 
 void ApplicationImpl::StopNaviStreaming() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   video_stream_suspend_timer_.Stop();
-  MessageHelper::SendNaviStopStream(app_id());
-  set_video_streaming_approved(false);
-  set_video_stream_retry_number(0);
-}
-
+      MessageHelper::SendNaviStopStream(app_id());
+      set_video_streaming_approved(false);
+      set_video_stream_retry_number(0);
+    }
 void ApplicationImpl::StopAudioStreaming() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   audio_stream_suspend_timer_.Stop();
-  MessageHelper::SendAudioStopStream(app_id());
-  set_audio_streaming_approved(false);
+      MessageHelper::SendAudioStopStream(app_id());
+      set_audio_streaming_approved(false);
   set_audio_stream_retry_number(0);
 }
 
 void ApplicationImpl::SuspendStreaming(
     protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   if (ServiceType::kMobileNav == service_type) {
     video_stream_suspend_timer_.Stop();
@@ -479,7 +478,7 @@ void ApplicationImpl::SuspendStreaming(
 void ApplicationImpl::WakeUpStreaming(
     protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   if (ServiceType::kMobileNav == service_type) {
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
@@ -504,15 +503,15 @@ void ApplicationImpl::WakeUpStreaming(
 
 void ApplicationImpl::OnVideoStreamSuspend() {
   using namespace protocol_handler;
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_INFO(logger_, "Suspend video streaming by timer");
+  LOGGER_AUTO_TRACE(logger_);
+  LOGGER_INFO(logger_, "Suspend video streaming by timer");
   SuspendStreaming(ServiceType::kMobileNav);
 }
 
 void ApplicationImpl::OnAudioStreamSuspend() {
   using namespace protocol_handler;
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_INFO(logger_, "Suspend audio streaming by timer");
+  LOGGER_AUTO_TRACE(logger_);
+  LOGGER_INFO(logger_, "Suspend audio streaming by timer");
   SuspendStreaming(ServiceType::kAudio);
 }
 
@@ -604,9 +603,9 @@ bool ApplicationImpl::is_resuming() const {
 
 bool ApplicationImpl::AddFile(const AppFile& file) {
   if (app_files_.count(file.file_name) == 0) {
-    LOG4CXX_INFO(logger_,
-                 "AddFile file " << file.file_name << " File type is "
-                                 << file.file_type);
+    LOGGER_INFO(logger_,
+                "AddFile file " << file.file_name << " File type is "
+                                << file.file_type);
     app_files_[file.file_name] = file;
     return true;
   }
@@ -615,9 +614,9 @@ bool ApplicationImpl::AddFile(const AppFile& file) {
 
 bool ApplicationImpl::UpdateFile(const AppFile& file) {
   if (app_files_.count(file.file_name) != 0) {
-    LOG4CXX_INFO(logger_,
-                 "UpdateFile file " << file.file_name << " File type is "
-                                    << file.file_type);
+    LOGGER_INFO(logger_,
+                "UpdateFile file " << file.file_name << " File type is "
+                                   << file.file_type);
     app_files_[file.file_name] = file;
     return true;
   }
@@ -627,9 +626,9 @@ bool ApplicationImpl::UpdateFile(const AppFile& file) {
 bool ApplicationImpl::DeleteFile(const std::string& file_name) {
   AppFilesMap::iterator it = app_files_.find(file_name);
   if (it != app_files_.end()) {
-    LOG4CXX_INFO(logger_,
-                 "DeleteFile file " << it->second.file_name << " File type is "
-                                    << it->second.file_type);
+    LOGGER_INFO(logger_,
+                "DeleteFile file " << it->second.file_name << " File type is "
+                                   << it->second.file_type);
     app_files_.erase(it);
     return true;
   }
@@ -699,8 +698,8 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
       CommandNumberTimeLimit::iterator it =
           cmd_number_to_time_limits_.find(cmd_id);
       if (cmd_number_to_time_limits_.end() == it) {
-        LOG4CXX_WARN(logger_,
-                     "Limits for command id " << cmd_id << "had not been set.");
+        LOGGER_WARN(logger_,
+                    "Limits for command id " << cmd_id << "had not been set.");
         return true;
       }
 
@@ -716,18 +715,18 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
         frequency_restrictions =
             profile::Profile::instance()->get_vehicle_data_frequency();
       } else {
-        LOG4CXX_INFO(logger_, "No restrictions for request");
+        LOGGER_INFO(logger_, "No restrictions for request");
         return false;
       }
 
-      LOG4CXX_INFO(logger_,
-                   "Time Info: "
-                       << "\n Current: " << current.tv_sec << "\n Limit: ("
-                       << limit.first.tv_sec << "," << limit.second
-                       << ")"
-                          "\n frequency_restrictions: ("
-                       << frequency_restrictions.first << ","
-                       << frequency_restrictions.second << ")");
+      LOGGER_INFO(logger_,
+                  "Time Info: "
+                      << "\n Current: " << current.tv_sec << "\n Limit: ("
+                      << limit.first.tv_sec << "," << limit.second
+                      << ")"
+                         "\n frequency_restrictions: ("
+                      << frequency_restrictions.first << ","
+                      << frequency_restrictions.second << ")");
       if (current.tv_sec < limit.first.tv_sec + frequency_restrictions.second) {
         if (limit.second < frequency_restrictions.first) {
           ++limit.second;
@@ -781,7 +780,7 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
       break;
     }
     default: {
-      LOG4CXX_WARN(logger_, "Limit source is not implemented.");
+      LOGGER_WARN(logger_, "Limit source is not implemented.");
       break;
     }
   }
@@ -812,17 +811,16 @@ void ApplicationImpl::set_is_application_data_changed(
 }
 
 void ApplicationImpl::UpdateHash() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   hash_val_ = utils::gen_hash(profile::Profile::instance()->hash_string_size());
   set_is_application_data_changed(true);
-
   MessageHelper::SendHashUpdateNotification(app_id());
 }
 
 void ApplicationImpl::CleanupFiles() {
   profile::Profile* profile = profile::Profile::instance();
-  std::string directory_name = profile->app_storage_folder();
-  directory_name += "/" + folder_name();
+  std::string directory_name = file_system::ConcatPath(
+      profile->app_storage_folder(), folder_name());
 
   if (file_system::DirectoryExists(directory_name)) {
     std::vector<std::string> files = file_system::ListFiles(directory_name);
@@ -830,13 +828,11 @@ void ApplicationImpl::CleanupFiles() {
 
     std::vector<std::string>::const_iterator it = files.begin();
     for (; it != files.end(); ++it) {
-      std::string file_name = directory_name;
-      file_name += "/";
-      file_name += *it;
+      std::string file_name = file_system::ConcatPath(directory_name, *it);
       app_files_it = app_files_.find(file_name);
       if ((app_files_it == app_files_.end()) ||
           (!app_files_it->second.is_persistent)) {
-        LOG4CXX_INFO(logger_, "DeleteFile file " << file_name);
+        LOGGER_INFO(logger_, "DeleteFile file " << file_name);
         file_system::DeleteFile(file_name);
       }
     }
@@ -851,7 +847,8 @@ void ApplicationImpl::LoadPersistentFiles() {
 
   if (kWaitingForRegistration == app_state_) {
     const std::string app_icon_dir(Profile::instance()->app_icons_folder());
-    const std::string full_icon_path(app_icon_dir + "/" + mobile_app_id_);
+    const std::string full_icon_path(
+        file_system::ConcatPath(app_icon_dir, mobile_app_id_));
     if (file_system::FileExists(full_icon_path)) {
       AppFile file;
       file.is_persistent = true;
@@ -863,8 +860,8 @@ void ApplicationImpl::LoadPersistentFiles() {
     return;
   }
 
-  std::string directory_name = Profile::instance()->app_storage_folder();
-  directory_name += "/" + folder_name();
+  std::string directory_name = file_system::ConcatPath(
+      Profile::instance()->app_storage_folder(), folder_name());
 
   if (file_system::DirectoryExists(directory_name)) {
     std::vector<std::string> persistent_files =
@@ -875,9 +872,7 @@ void ApplicationImpl::LoadPersistentFiles() {
       AppFile file;
       file.is_persistent = true;
       file.is_download_complete = true;
-      file.file_name = directory_name;
-      file.file_name += "/";
-      file.file_name += *it;
+      file.file_name = file_system::ConcatPath(directory_name, *it);
       file.file_type = mobile_apis::FileType::BINARY;
       // Search file extension and convert it to the type
       std::size_t index = it->find_last_of('.');
@@ -886,9 +881,9 @@ void ApplicationImpl::LoadPersistentFiles() {
         file.file_type = StringToFileType(file_type.c_str());
       }
 
-      LOG4CXX_INFO(logger_,
-                   "Loaded persistent file "
-                       << file.file_name << " File type is " << file.file_type);
+      LOGGER_INFO(logger_,
+                  "Loaded persistent file "
+                      << file.file_name << " File type is " << file.file_type);
       AddFile(file);
     }
   }
