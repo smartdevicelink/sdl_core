@@ -55,7 +55,9 @@ struct CheckAppPolicy;
 
 class PolicyManagerImpl : public PolicyManager {
  public:
-  PolicyManagerImpl();
+  PolicyManagerImpl(const std::string& app_storage_folder,
+                    uint16_t attempts_to_open_policy_db,
+                    uint16_t open_attempt_timeout_ms);
   virtual void set_listener(PolicyListener* listener);
   PolicyListener* listener() const {
     return listener_;
@@ -194,7 +196,6 @@ class PolicyManagerImpl : public PolicyManager {
       const std::string policy_app_id) const;
 
   virtual const VehicleInfo GetVehicleInfo() const;
-
   virtual void OnAppRegisteredOnMobile(
       const std::string& application_id) OVERRIDE;
 
@@ -208,7 +209,6 @@ class PolicyManagerImpl : public PolicyManager {
   virtual utils::SharedPtr<policy_table::Table> ParseArray(
       const BinaryMessage& pt_content);
 #endif
-
   const PolicySettings& get_settings() const OVERRIDE;
 
  private:
@@ -298,7 +298,6 @@ class PolicyManagerImpl : public PolicyManager {
   virtual bool ExceededIgnitionCycles();
   bool IsPTValid(utils::SharedPtr<policy_table::Table> policy_table,
                  policy_table::PolicyTableType type) const;
-
   void RetrySequence();
 
  private:
@@ -332,7 +331,7 @@ class PolicyManagerImpl : public PolicyManager {
 
   /**
     * Timer to retry UpdatePT
-    */
+   */
   timer::Timer timer_retry_sequence_;
 
   /**
@@ -344,6 +343,7 @@ class PolicyManagerImpl : public PolicyManager {
   bool ignition_check;
 
   const PolicySettings* settings_;
+
   friend struct CheckAppPolicy;
 };
 

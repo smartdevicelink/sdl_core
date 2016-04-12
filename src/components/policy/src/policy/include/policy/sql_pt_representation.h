@@ -49,9 +49,27 @@ class SQLDatabase;
 
 namespace policy {
 
+class Query : public utils::dbms::SQLQuery {
+ public:
+  Query(utils::dbms::SQLDatabase* db) : utils::dbms::SQLQuery(db) {}
+
+  using utils::dbms::SQLQuery::Bind;
+
+  template <class T>
+  void Bind(int pos, const rpc::Optional<T>& opt_val) {
+    if (opt_val.is_initialized()) {
+      Bind(pos, *opt_val);
+    } else {
+      Bind(pos);
+    }
+  }
+};
+
 class SQLPTRepresentation : public virtual PTRepresentation {
  public:
-  SQLPTRepresentation();
+  SQLPTRepresentation(const std::string& app_storage_folder,
+                      uint16_t attempts_to_open_policy_db,
+                      uint16_t open_attempt_timeout_ms);
   ~SQLPTRepresentation();
   virtual void CheckPermissions(const PTString& app_id,
                                 const PTString& hmi_level,
@@ -195,7 +213,6 @@ class SQLPTRepresentation : public virtual PTRepresentation {
       const policy_table::NumberOfNotificationsPerMinute& notifications);
   bool SaveMessageType(const std::string& type);
   bool SaveLanguage(const std::string& code);
-
   bool is_in_memory;
 };
 }  //  namespace policy

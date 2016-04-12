@@ -36,38 +36,45 @@
 #include <queue>
 #include <iterator>
 #include <limits>
-#include "json/reader.h"
-#include "json/writer.h"
 #include "policy/policy_table.h"
 #include "policy/pt_representation.h"
 #include "policy/policy_helper.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
 #include "utils/date_time.h"
+#include "utils/json_utils.h"
 #include "utils/make_shared.h"
 #include "policy/cache_manager.h"
 #include "policy/update_status_manager.h"
 #include "config_profile/profile.h"
 #include "utils/timer_task_impl.h"
 
-policy::PolicyManager* CreateManager() {
-  return new policy::PolicyManagerImpl();
+policy::PolicyManager* CreateManager(const std::string& app_storage_folder,
+                                     uint16_t attempts_to_open_policy_db,
+                                     uint16_t open_attempt_timeout_ms,
+                                     logger::Logger::Pimpl& logger) {
+  SET_LOGGER(logger);
+  return new policy::PolicyManagerImpl(
+      app_storage_folder, attempts_to_open_policy_db, open_attempt_timeout_ms);
 }
 
 namespace {
 const uint32_t kDefaultRetryTimeoutInSec = 60u;
 }  // namespace
-
 namespace policy {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
-PolicyManagerImpl::PolicyManagerImpl()
+PolicyManagerImpl::PolicyManagerImpl(const std::string& app_storage_folder,
+                                     uint16_t attempts_to_open_policy_db,
+                                     uint16_t open_attempt_timeout_ms)
     : PolicyManager()
     , listener_(NULL)
-    , cache_(new CacheManager)
+    , cache_(new CacheManager(app_storage_folder,
+                              attempts_to_open_policy_db,
+                              open_attempt_timeout_ms))
     , retry_sequence_timeout_(kDefaultRetryTimeoutInSec)
-    , retry_sequence_index_(0)
+    , retry_sequence_index_(0),
     , timer_retry_sequence_("Retry sequence timer",
                             new timer::TimerTaskImpl<PolicyManagerImpl>(
                                 this, &PolicyManagerImpl::RetrySequence))
@@ -82,35 +89,36 @@ void PolicyManagerImpl::set_listener(PolicyListener* listener) {
 
 utils::SharedPtr<policy_table::Table> PolicyManagerImpl::Parse(
     const BinaryMessage& pt_content) {
+  using namespace utils::json;
   std::string json(pt_content.begin(), pt_content.end());
-  Json::Value value;
-  Json::Reader reader;
-  if (reader.parse(json.c_str(), value)) {
-    return new policy_table::Table(&value);
-  } else {
+
+  JsonValue::ParseResult parse_result = JsonValue::Parse(json);
+  if (!parse_result.second) {
     return utils::SharedPtr<policy_table::Table>();
   }
+  JsonValue& root_json = parse_result.first;
+  return utils::MakeShared<policy_table::Table>(&value);
 }
 
 #else
 
 utils::SharedPtr<policy_table::Table> PolicyManagerImpl::ParseArray(
     const BinaryMessage& pt_content) {
+  using namespace utils::json;
   std::string json(pt_content.begin(), pt_content.end());
-  Json::Value value;
-  Json::Reader reader;
-  if (reader.parse(json.c_str(), value)) {
-    // For PT Update received from SDL Server.
-    if (value["data"].size() != 0) {
-      Json::Value data = value["data"];
-      // First Element in
-      return new policy_table::Table(&data[0]);
-    } else {
-      return new policy_table::Table(&value);
-    }
-  } else {
+
+  JsonValue::ParseResult parse_result = JsonValue::Parse(json);
+  if (!parse_result.second) {
     return utils::SharedPtr<policy_table::Table>();
   }
+  const JsonValue& root_json = parse_result.first;
+  // For PT Update received from SDL Server.
+  if (root_json.HasMember("data") && root_json["data"].Size()) {
+    const JsonValueRef data = root_json["data"];
+    // First Element in
+    return utils::MakeShared<policy_table::Table>(data[0u]);
+  }
+  return utils::MakeShared<policy_table::Table>(root_json);
 }
 
 #endif
@@ -121,9 +129,9 @@ void PolicyManagerImpl::CheckTriggers() {
   const bool exceed_days = ExceededDays();
 
   LOGGER_DEBUG(logger_,
-                "\nDays exceeded: " << std::boolalpha << exceed_ignition_cycles
-                                    << "\nStatusUpdateRequired: "
-                                    << std::boolalpha << exceed_days);
+               "\nDays exceeded: " << std::boolalpha << exceed_ignition_cycles
+                                   << "\nStatusUpdateRequired: "
+                                   << std::boolalpha << exceed_days);
 
   if (exceed_ignition_cycles || exceed_days) {
     update_status_manager_.ScheduleUpdate();
@@ -151,7 +159,6 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
   }
 
   file_system::DeleteFile(file);
-
   if (!IsPTValid(pt_update, policy_table::PT_UPDATE)) {
     update_status_manager_.OnWrongUpdateReceived();
     return false;
@@ -159,7 +166,6 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
 
   update_status_manager_.OnValidUpdateReceived();
   cache_->SaveUpdateRequired(false);
-
   // Update finished, no need retry
   if (timer_retry_sequence_.is_running()) {
     LOGGER_INFO(logger_, "Stop retry sequence");
@@ -257,9 +263,8 @@ bool PolicyManagerImpl::RequestPTUpdate() {
 
   IsPTValid(policy_table_snapshot, policy_table::PT_SNAPSHOT);
 
-  Json::Value value = policy_table_snapshot->ToJsonValue();
-  Json::FastWriter writer;
-  std::string message_string = writer.write(value);
+  const std::string message_string =
+      policy_table_snapshot->ToJsonValue().ToJson(false);
 
   LOGGER_DEBUG(logger_, "Snapshot contents is : " << message_string);
 
@@ -270,7 +275,6 @@ bool PolicyManagerImpl::RequestPTUpdate() {
   // Need to reset update schedule since all currenly registered applications
   // were already added to the snapshot so no update for them required.
   update_status_manager_.ResetUpdateSchedule();
-
   return true;
 }
 
@@ -284,16 +288,16 @@ void PolicyManagerImpl::StartPTExchange() {
   if (update_status_manager_.IsAppsSearchInProgress()) {
     update_status_manager_.ScheduleUpdate();
     LOGGER_INFO(logger_,
-                 "Starting exchange skipped, since applications "
-                 "search is in progress.");
+                "Starting exchange skipped, since applications "
+                "search is in progress.");
     return;
   }
 
   if (update_status_manager_.IsUpdatePending()) {
     update_status_manager_.ScheduleUpdate();
     LOGGER_INFO(logger_,
-                 "Starting exchange skipped, since another exchange "
-                 "is in progress.");
+                "Starting exchange skipped, since another exchange "
+                "is in progress.");
     return;
   }
 
@@ -331,11 +335,9 @@ const std::vector<std::string> PolicyManagerImpl::GetAppRequestTypes(
   cache_->GetAppRequestTypes(policy_app_id, request_types);
   return request_types;
 }
-
 const VehicleInfo PolicyManagerImpl::GetVehicleInfo() const {
   return cache_->GetVehicleInfo();
 }
-
 void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
                                          const PTString& hmi_level,
                                          const PTString& rpc,
@@ -360,8 +362,8 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
   const std::string device_id = GetCurrentDeviceId(application_id);
   if (device_id.empty()) {
     LOGGER_WARN(logger_,
-                 "Couldn't find device info for application id "
-                 "'" << application_id << "'");
+                "Couldn't find device info for application id "
+                "'" << application_id << "'");
     return;
   }
 
@@ -387,7 +389,7 @@ void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
                           notification_data);
 
   LOGGER_INFO(logger_,
-               "Send notification for application_id:" << application_id);
+              "Send notification for application_id:" << application_id);
 
   std::string default_hmi;
   default_hmi = "NONE";
@@ -568,7 +570,7 @@ void PolicyManagerImpl::GetUserConsentForApp(
   FunctionalIdType group_types;
   if (!cache_->GetPermissionsForApp(device_id, policy_app_id, group_types)) {
     LOGGER_WARN(logger_,
-                 "Can't get user permissions for app " << policy_app_id);
+                "Can't get user permissions for app " << policy_app_id);
     return;
   }
 
@@ -627,7 +629,7 @@ void PolicyManagerImpl::GetPermissionsForApp(
   FunctionalIdType group_types;
   if (!cache_->GetPermissionsForApp(device_id, app_id_to_check, group_types)) {
     LOGGER_WARN(logger_,
-                 "Can't get user permissions for app " << policy_app_id);
+                "Can't get user permissions for app " << policy_app_id);
     return;
   }
 
@@ -717,7 +719,6 @@ const PolicySettings& PolicyManagerImpl::get_settings() const {
 
 bool PolicyManagerImpl::ExceededDays() {
   LOGGER_AUTO_TRACE(logger_);
-
   TimevalStruct current_time = date_time::DateTime::getCurrentTime();
   const int kSecondsInDay = 60 * 60 * 24;
   const int days = current_time.tv_sec / kSecondsInDay;
@@ -756,15 +757,12 @@ uint32_t PolicyManagerImpl::NextRetryTimeout() {
       retry_sequence_index_ >= retry_sequence_seconds_.size()) {
     return next;
   }
-
-  ++retry_sequence_index_;
-
+    ++retry_sequence_index_;
   for (uint32_t i = 0u; i < retry_sequence_index_; ++i) {
     next += retry_sequence_seconds_[i];
     // According to requirement APPLINK-18244
     next += retry_sequence_timeout_;
   }
-
   // Return miliseconds
   return next * date_time::DateTime::MILLISECONDS_IN_SECOND;
 }
@@ -798,7 +796,7 @@ void PolicyManagerImpl::OnExceededTimeout() {
 void PolicyManagerImpl::OnUpdateStarted() {
   int update_timeout = TimeoutExchange();
   LOGGER_DEBUG(logger_,
-                "Update timeout will be set to (sec): " << update_timeout);
+               "Update timeout will be set to (sec): " << update_timeout);
   update_status_manager_.OnUpdateSentOut(update_timeout);
   cache_->SaveUpdateRequired(true);
 }
@@ -953,7 +951,7 @@ bool PolicyManagerImpl::CheckAppStorageFolder() const {
   if (!(file_system::IsWritingAllowed(app_storage_folder) &&
         file_system::IsReadingAllowed(app_storage_folder))) {
     LOGGER_WARN(logger_,
-                 "Storage directory doesn't have read/write permissions "
+                "Storage directory doesn't have read/write permissions "
                      << app_storage_folder);
     return false;
   }

@@ -294,7 +294,6 @@ typedef std::vector<std::string> DeviceIds;
  * @brief Counters that calculated on receiving of succesful update
  */
 enum Counters { KILOMETERS, DAYS_AFTER_EPOCH };
-
 /**
  * @struct Vehicle information
  */
@@ -302,6 +301,10 @@ struct VehicleInfo {
   std::string vehicle_make;
   std::string vehicle_model;
   std::string vehicle_year;
+#if defined(OS_POSIX) || defined(OS_WINDOWS)
+  VehicleInfo(){};
+#endif
+
 };
 
 /**
@@ -311,6 +314,9 @@ struct MetaInfo {
   std::string ccpu_version;
   std::string wers_country_code;
   std::string language;
+#if defined(OS_POSIX) || defined(OS_WINDOWS)
+  MetaInfo(){};
+#endif
 };
 
 }  //  namespace policy

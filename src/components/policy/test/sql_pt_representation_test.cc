@@ -36,7 +36,6 @@
 #include <memory>
 #include <stdio.h>
 #include <sys/stat.h>
-
 #include "gtest/gtest.h"
 #include "policy/test/include/driver_dbms.h"
 #include "policy/sql_pt_representation.h"
@@ -96,7 +95,6 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   void TearDown() {
     EXPECT_TRUE(reps->Clear());
   }
-
   static void TearDownTestCase() {
     EXPECT_TRUE(reps->Drop());
     EXPECT_TRUE(reps->Close());
@@ -608,8 +606,10 @@ TEST_F(SQLPTRepresentationTest,
   // Assert
   ASSERT_TRUE(dbms->Exec(query_limit));
   EXPECT_EQ(1, reps->IgnitionCyclesBeforeExchange());
+
   // Act
   reps->IncrementIgnitionCycles();
+
   // Assert
   EXPECT_EQ(0, reps->IgnitionCyclesBeforeExchange());
 }

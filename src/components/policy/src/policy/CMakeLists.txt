@@ -29,12 +29,19 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 set(target Policy)
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  if(NOT QT_PORT)
+      find_package(WinSqlite3 REQUIRED)
+  endif()
+else()
+  find_package(Sqlite3 REQUIRED)
+endif()
+
 set(install_destination bin)
 set(copy_destination ${CMAKE_BINARY_DIR}/src/appMain)
 set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_SUFFIX})
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-
 
 #Generation of policy table interface...
 #include(${CMAKE_SOURCE_DIR}/tools/intergen/GenerateInterfaceLibrary.cmake)
@@ -49,7 +56,8 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/components
   ${CMAKE_SOURCE_DIR}/src/components/config_profile/include
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/table_struct
-  ${LOGGER_INCLUDE_DIRECTORY}
+  ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${COMPONENTS_DIR}/utils/include/utils
 )
 
 set(SOURCES
@@ -62,7 +70,8 @@ set(SOURCES
   ./src/cache_manager.cc
   ${CMAKE_SOURCE_DIR}/src/components/rpc_base/src/rpc_base/rpc_base.cc
 )
-
+file (GLOB HEADERS ./include/policy/*.h
+      ${CMAKE_SOURCE_DIR}/src/components/rpc_base/include/rpc_base/rpc_base.h)
 
 add_subdirectory(usage_statistics)
 
@@ -73,25 +82,46 @@ set(LIBRARIES ConfigProfile policy_struct dbms jsoncpp Utils)
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   # --- QDB Wrapper 
   include_directories (${COMPONENTS_DIR}/utils/include/utils)
-else ()
-  # --- SQLite Wrapper
-  include_directories (${COMPONENTS_DIR}/utils/include/utils)
-  list(APPEND LIBRARIES sqlite3)
-endif ()
-
-add_library(${target} SHARED ${SOURCES})
-target_link_libraries(${target} ${LIBRARIES} )
-
-if(ENABLE_LOG)
-  target_link_libraries(${target} logger -L${LOGGER_LIBS_DIRECTORY})
 endif()
 
+# --- SQLite Wrapper
+if(NOT QT_PORT)
+  include_directories (${COMPONENTS_DIR}/utils/include/utils)
+  list(APPEND LIBRARIES sqlite3)
+endif()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  source_group("Header Files" FILES ${HEADERS} )        
+  source_group("Source Files" FILES ${SOURCES} )
+  if(NOT QT_PORT)
+    link_directories(${SQLITE_LIB_DIRECTORY})
+  endif()
+endif()
+
+add_library(${target} SHARED ${SOURCES} ${HEADERS})
+target_link_libraries(${target} ${LIBRARIES})
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  if(ENABLE_LOG)
+    target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+  endif()
+endif()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 add_custom_target(copy_library_${target} ALL
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    ${CMAKE_CURRENT_BINARY_DIR}/${library_name}
-    ${copy_destination}
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_BINARY_DIR}/$(Configuration)/${library_name}
+    ${copy_destination}/${library_name}
     DEPENDS ${target}
     COMMENT "Copying library ${library_name}")
+ else()
+add_custom_target(copy_library_${target} ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_BINARY_DIR}/${library_name}
+    ${copy_destination}/${library_name}
+    DEPENDS ${target}
+    COMMENT "Copying library ${library_name}")
+endif()
 
 install(TARGETS ${target}
   DESTINATION ${install_destination}

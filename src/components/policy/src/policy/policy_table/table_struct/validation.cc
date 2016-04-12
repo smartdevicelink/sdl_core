@@ -47,7 +47,7 @@ bool ApplicationPoliciesSection::Validate() const {
 
   if (!it_default_policy->second.RequestType.is_valid()) {
     LOGGER_WARN(logger_,
-                 "Default policy RequestTypes are not valid. Will be cleaned.");
+                "Default policy RequestTypes are not valid. Will be cleaned.");
     RemoveInvalidTypes(*it_default_policy->second.RequestType);
     // If preloaded does not have valid default types - validation fails
     // Otherwise default will be empty, i.e. all types allowed
@@ -73,7 +73,7 @@ bool ApplicationPoliciesSection::Validate() const {
     if (PT_PRELOADED == pt_type) {
       if (!is_request_type_valid) {
         LOGGER_WARN(logger_,
-                     "App policy RequestTypes are not valid. Will be cleaned.");
+                    "App policy RequestTypes are not valid. Will be cleaned.");
         RemoveInvalidTypes(*app_params.RequestType);
         if (app_params.RequestType->empty()) {
           LOGGER_ERROR(
@@ -85,20 +85,20 @@ bool ApplicationPoliciesSection::Validate() const {
     } else {
       if (is_request_type_ommited) {
         LOGGER_WARN(logger_,
-                     "App policy RequestTypes ommited."
-                     " Will be replaced with default.");
+                    "App policy RequestTypes ommited."
+                    " Will be replaced with default.");
         app_params.RequestType = apps[kDefaultApp].RequestType;
         ++iter;
         continue;
       }
       if (!is_request_type_valid) {
         LOGGER_WARN(logger_,
-                     "App policy RequestTypes are invalid. Will be cleaned.");
+                    "App policy RequestTypes are invalid. Will be cleaned.");
         RemoveInvalidTypes(*app_params.RequestType);
         if (app_params.RequestType->empty()) {
           LOGGER_WARN(logger_,
-                       "App policy RequestTypes empty after clean-up."
-                       " Will be replaced with default.");
+                      "App policy RequestTypes empty after clean-up."
+                      " Will be replaced with default.");
           app_params.RequestType = apps[kDefaultApp].RequestType;
           ++iter;
           continue;

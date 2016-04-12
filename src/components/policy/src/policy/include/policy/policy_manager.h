@@ -42,7 +42,6 @@
 
 namespace policy {
 class PolicySettings;
-
 class PolicyManager : public usage_statistics::StatisticsManager {
  public:
   virtual ~PolicyManager() {}
@@ -79,7 +78,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * @brief GetLockScreenIcon allows to obtain lock screen icon url;
    *
    * @return url which point to the resourse where lock screen icon could be
-   *obtained.
+   * obtained.
    */
   virtual std::string GetLockScreenIconUrl() const = 0;
 
@@ -427,7 +426,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    */
   virtual const std::vector<std::string> GetAppRequestTypes(
       const std::string policy_app_id) const = 0;
-
   /**
    * @brief Get information about vehicle
    */
@@ -449,7 +447,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
    * @return The certificate in PKCS#7 format.
    */
   virtual std::string RetrieveCertificate() const = 0;
-
   virtual const PolicySettings& get_settings() const = 0;
 
  protected:
@@ -475,6 +472,10 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
 }  // namespace policy
 
-extern "C" policy::PolicyManager* CreateManager();
+SDL_EXPORT
+policy::PolicyManager* CreateManager(const std::string& app_storage_folder,
+                                     uint16_t attempts_to_open_policy_db,
+                                     uint16_t open_attempt_timeout_ms,
+                                     logger::Logger::Pimpl& logger);
 
 #endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_H_
