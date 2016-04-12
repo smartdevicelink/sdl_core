@@ -112,14 +112,6 @@ void PutFileRequest::Run() {
   const std::vector<uint8_t> binary_data =
     (*message_)[strings::params][strings::binary_data].asBinary();
 
-  // Policy table update in json format is currently to be received via PutFile
-  // TODO(PV): after latest discussion has to be changed
-  if (mobile_apis::FileType::JSON == file_type_) {
-    application_manager::ApplicationManagerImpl::instance()
-        ->GetPolicyHandler()
-        .ReceiveMessageFromSDK(sync_file_name_, binary_data);
-  }
-
   offset_ = 0;
   is_persistent_file_ = false;
   bool is_system_file = false;

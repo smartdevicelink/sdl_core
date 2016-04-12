@@ -1,6 +1,5 @@
 /*
-
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -62,21 +61,21 @@ class SystemRequest : public CommandRequestImpl {
   /**
    * @brief SystemRequest class destructor
    **/
-  virtual ~SystemRequest();
+  ~SystemRequest() OVERRIDE;
 
   /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
   /**
    * @brief Interface method that is called whenever new event received
    *
    * @param event The received event
    */
-  virtual void on_event(const event_engine::Event& event);
+  void on_event(const event_engine::Event& event) OVERRIDE;
 
-private:
+ private:
   /**
    * @brief Validates data coming within QueryApps response
    * @param data Data
@@ -86,7 +85,7 @@ private:
 
  private:
   static uint32_t index;
-  std::string     processing_file_;
+  std::string processing_file_;
   DISALLOW_COPY_AND_ASSIGN(SystemRequest);
 };
 

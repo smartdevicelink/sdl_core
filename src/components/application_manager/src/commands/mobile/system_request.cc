@@ -1,6 +1,5 @@
 /*
-
-Copyright (c) 2013, Ford Motor Company
+Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -438,9 +437,10 @@ void SystemRequest::Run() {
           (*message_)[strings::msg_params][strings::request_type].asInt());
 
   const policy::PolicyHandlerInterface& policy_handler =
-      application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler();
-  if (!policy_handler.IsRequestTypeAllowed(
-           application->mobile_app_id(), request_type)) {
+      application_manager::ApplicationManagerImpl::instance()
+          ->GetPolicyHandler();
+  if (!policy_handler.IsRequestTypeAllowed(application->mobile_app_id(),
+                                           request_type)) {
     SendResponse(false, mobile_apis::Result::DISALLOWED);
     return;
   }
@@ -462,6 +462,25 @@ void SystemRequest::Run() {
     snprintf(buf, max_size - 1, "%d%s", index++, file_name.c_str());
     file_name = buf;
   }
+
+#ifndef EXTENDED_POLICY
+  // Supposed to be policy table update in case of open source non-extended case
+  if (mobile_apis::RequestType::HTTP == request_type &&
+      std::string::npos != file_name.find(kSYNC)) {
+    if (!(*message_)[strings::params].keyExists(strings::binary_data)) {
+      LOG4CXX_ERROR(logger_, "Binary data are missing for policy update."
+                    " Nothing to process.");
+      SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      return;
+    }
+    const std::vector<uint8_t> binary_data =
+        (*message_)[strings::params][strings::binary_data].asBinary();
+    ApplicationManagerImpl::instance()->
+        GetPolicyHandler().ReceiveMessageFromSDK(file_name, binary_data);
+    SendResponse(false, mobile_apis::Result::SUCCESS);
+    return;
+  }
+#endif
 
   std::vector<uint8_t> binary_data;
   std::string binary_data_folder;
@@ -496,8 +515,7 @@ void SystemRequest::Run() {
 
     LOG4CXX_DEBUG(logger_,
                   "Binary data is not present. Trying to find file "
-                      << file_name
-                      << " within previously saved app file in "
+                      << file_name << " within previously saved app file in "
                       << binary_data_folder);
 
     const AppFile* file = application->GetFile(app_full_file_path);

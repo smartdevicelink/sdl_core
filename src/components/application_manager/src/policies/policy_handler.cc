@@ -544,6 +544,42 @@ void policy::PolicyHandler::SetDaysAfterEpoch() {
   PTUpdatedAt(Counters::DAYS_AFTER_EPOCH, days_after_epoch);
 }
 
+const std::string PolicyHandler::GetURL(const std::string& mobile_app_id,
+                                        const std::string& service) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK("");
+  EndpointUrls endpoints;
+  policy_manager_->GetServiceUrls(service, endpoints);
+
+  if (endpoints.empty()) {
+    return "";
+  }
+
+  std::string default_url;
+
+  // Trying to get random URL from available for app or default as fallback
+  for (size_t e = 0; e < endpoints.size(); ++e) {
+    if (mobile_app_id == endpoints[e].app_id) {
+      const size_t size = endpoints[e].url.size();
+      if (size) {
+        const uint8_t i =
+            size > 1 ? static_cast<uint8_t>(std::rand() % (size-1)) : 0;
+        return endpoints[e].url[i];
+      }
+    }
+    if (policy::kDefaultId == endpoints[e].app_id) {
+      const size_t size = endpoints[e].url.size();
+      if (size) {
+        const uint8_t i =
+            size > 1 ? static_cast<uint8_t>(std::rand() % (size-1)) : 0;
+        default_url =
+            endpoints[e].url[i];
+      }
+    }
+  }
+  return default_url;
+}
+
 #ifdef ENABLE_SECURITY
 std::string PolicyHandler::RetrieveCertificate() const {
   POLICY_LIB_CHECK(std::string(""));
@@ -777,12 +813,11 @@ void PolicyHandler::OnPendingPermissionChange(
   }
 }
 
-bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
-                                     const std::string& url) {
+bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string) {
   LOG4CXX_AUTO_TRACE(logger_);
   POLICY_LIB_CHECK(false);
 
-  uint32_t app_id = GetAppIdForSending(); /*last_used_app_ids_.back();*/
+  const uint32_t app_id = GetAppIdForSending();
 
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(app_id);
@@ -791,27 +826,20 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
     LOG4CXX_WARN(logger_,
                  "There is no registered application with "
                  "connection key '"
-                     << app_id
-                     << "'");
+                     << app_id << "'");
     return false;
   }
 
-  const std::string& mobile_app_id = app->mobile_app_id();
-  if (mobile_app_id.empty()) {
-    LOG4CXX_WARN(logger_,
-                 "Application with connection key '"
-                     << app_id
-                     << "'"
-                        " has no application id.");
+  const std::string policy_service = "0x07";
+  const std::string mobile_app_id = app->mobile_app_id();
+  const std::string url = GetURL(mobile_app_id, policy_service);
+
+  if (url.empty()) {
+    LOG4CXX_ERROR(logger_,
+                  "Can't find URL for application id "
+                      << mobile_app_id << " and service id " << policy_service);
     return false;
   }
-
-  LOG4CXX_DEBUG(
-      logger_,
-      "Update url is "
-          << url
-          << " for application "
-          << ApplicationManagerImpl::instance()->application(app_id)->name().c_str());
 
   MessageHelper::SendPolicySnapshotNotification(app_id, pt_string, url);
 
@@ -844,8 +872,8 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
     MessageHelper::CreateGetVehicleDataRequest(correlation_id,
                                                vehicle_data_args);
   } else {
-    LOG4CXX_WARN(logger_, "Exchange wasn't successful, trying another one.");
-    OnPTExchangeNeeded();
+    LOG4CXX_WARN(logger_, "Exchange wasn't successful."
+                          " Will wait for next trigger or retry attempt.");
   }
   return ret;
 }
@@ -1080,14 +1108,23 @@ bool PolicyHandler::SaveSnapshot(const BinaryMessage& pt_string,
 }
 
 void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string) {
-  EndpointUrls urls;
-  policy_manager_->GetServiceUrls("0x07", urls);
-
-  if (urls.empty()) {
-    LOG4CXX_ERROR(logger_, "Service URLs are empty! NOT sending PT to mobile!");
+  LOG4CXX_AUTO_TRACE(logger_);
+  POLICY_LIB_CHECK_VOID();
+#ifdef EXTENDED_POLICY
+  std::string policy_snapshot_full_path;
+  if (!SaveSnapshot(pt_string, policy_snapshot_full_path)) {
+    LOG4CXX_ERROR(logger_, "Snapshot processing skipped.");
     return;
   }
-  SendMessageToSDK(pt_string, urls.front().url.front());
+  MessageHelper::SendPolicyUpdate(
+      policy_snapshot_full_path,
+      policy_manager_->TimeoutExchange(),
+      policy_manager_->RetrySequenceDelaysSeconds());
+#else
+  if (!SendMessageToSDK(pt_string)) {
+    LOG4CXX_ERROR(logger_, "Sending of policy snapshot failed.");
+  }
+#endif
 }
 
 bool PolicyHandler::GetPriority(const std::string& policy_app_id,

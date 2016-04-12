@@ -1777,7 +1777,7 @@ void MessageHelper::SendPolicySnapshotNotification(
   }
 
   (*content)[strings::msg_params][strings::request_type] =
-      mobile_apis::RequestType::PROPRIETARY;
+      mobile_apis::RequestType::HTTP;
   (*content)[strings::params][strings::binary_data] =
       smart_objects::SmartObject(policy_data);
   (*content)[strings::msg_params][strings::file_type] =

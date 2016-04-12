@@ -75,7 +75,7 @@ class PolicyHandler
   bool InitPolicyTable() OVERRIDE;
   bool ResetPolicyTable() OVERRIDE;
   bool ClearUserConsent() OVERRIDE;
-  bool SendMessageToSDK(const BinaryMessage& pt_string, const std::string& url) OVERRIDE;
+  bool SendMessageToSDK(const BinaryMessage& pt_string) OVERRIDE;
   bool ReceiveMessageFromSDK(const std::string& file,
                              const BinaryMessage& pt_string) OVERRIDE;
   bool UnloadPolicyLibrary() OVERRIDE;
@@ -434,6 +434,15 @@ class PolicyHandler
    * @brief Sets days after epoch on successful policy update
    */
   void SetDaysAfterEpoch();
+
+  /**
+   * @brief Gets URL for appropriate application and service to send data
+   * @param mobile_app_id Application id
+   * @param service Service id
+   * @return URL
+   */
+  const std::string GetURL(const std::string& mobile_app_id,
+                           const std::string& service) const;
 
  private:
   class StatisticManagerImpl : public usage_statistics::StatisticsManager {
