@@ -276,7 +276,7 @@ struct PermissionsConsolidator {
   std::vector<policy::FunctionalGroupPermission> consolidated_permissions_;
 };
 
-const std::string PolicyHandler::kLibrary = "libPolicy.so";
+const std::string PolicyHandler::kLibrary = "Policy";
 
 PolicyHandler::PolicyHandler(const PolicySettings& settings)
 
