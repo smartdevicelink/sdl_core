@@ -27,44 +27,42 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-
 INCLUDE("./set_3rd_party_paths.cmake")
 
-if(ENABLE_LOG OR HMI_DBUS_API)
-  # --- libexpat
-  add_subdirectory(expat-2.1.0)
-  set(EXPAT_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+
+  if(ENABLE_LOG OR HMI_DBUS_API)
+    # --- libexpat
+    add_subdirectory(expat-2.1.0)
+    set(EXPAT_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
+  endif()
+
+  if(ENABLE_LOG)
+    set(APR_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
+    set(APR_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include PARENT_SCOPE)
+    set(APR_UTIL_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
+    set(LOG4CXX_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include PARENT_SCOPE)
+    set(LOG4CXX_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
+
+    # --- libapr-1
+    add_subdirectory(apr-cmake)
+
+    # --- apr-util
+    add_subdirectory(apr-util-cmake)
+ 
+    # --- log4cxx
+    add_subdirectory(apache-log4cxx-cmake)
+  endif()
+
+  # --- D-Bus
+  if(HMI_DBUS_API)
+    set(DBUS_INCLUDE_DIR ${3RD_PARTY_INSTALL_PREFIX}/include)
+    set(DBUS_INCLUDE_DIR_ARCH ${3RD_PARTY_INSTALL_PREFIX_ARCH}/include)
+    set(DBUS_INCLUDE_DIRS ${DBUS_INCLUDE_DIR} ${DBUS_INCLUDE_DIR_ARCH})
+    set(DBUS_INCLUDE_DIRS ${DBUS_INCLUDE_DIRS} PARENT_SCOPE)
+    set(DBUS_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
+
+    add_subdirectory(dbus-cmake)
+  endif()
+
 endif()
-
-if(ENABLE_LOG)
-  set(APR_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
-  set(APR_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include PARENT_SCOPE)
-  set(APR_UTIL_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
-  set(LOG4CXX_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include PARENT_SCOPE)
-  set(LOG4CXX_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
-endif()
-
-if(ENABLE_LOG)
-  # --- libapr-1
-  add_subdirectory(apr-cmake)
-
-  # --- apr-util
-  add_subdirectory(apr-util-cmake)
-
-  # --- log4cxx
-  add_subdirectory(apache-log4cxx-cmake)
-endif()
-
-# --- D-Bus
-if(HMI_DBUS_API)
-  set(DBUS_INCLUDE_DIR ${3RD_PARTY_INSTALL_PREFIX}/include)
-  set(DBUS_INCLUDE_DIR_ARCH ${3RD_PARTY_INSTALL_PREFIX_ARCH}/include)
-  set(DBUS_INCLUDE_DIRS ${DBUS_INCLUDE_DIR} ${DBUS_INCLUDE_DIR_ARCH})
-  set(DBUS_INCLUDE_DIRS ${DBUS_INCLUDE_DIRS} PARENT_SCOPE)
-  set(DBUS_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
-endif()
-
-if(HMI_DBUS_API)
-  add_subdirectory(dbus-cmake)
-endif()
-
