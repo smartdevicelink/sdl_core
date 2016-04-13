@@ -512,7 +512,7 @@ void RequestController::UpdateTimer() {
               << date_time::DateTime::getmSecs(current_time - end_time)
               << " Request timeout (sec): "
               << front->timeout_msec() /
-                     date_time::DateTime::MILLISECONDS_IN_SECOND);
+                     date_time::kMillisecondsInSecond);
       timer_.Start(0u, true);
     }
   }

@@ -148,7 +148,7 @@ class CommandImpl : public Command {
   bool allowed_to_terminate_;
 #ifdef ENABLE_LOG
 #if defined(OS_POSIX)
-  static logger::LoggerPtr logger_;
+  static log4cxx::LoggerPtr logger_;
 #elif defined(OS_WINDOWS)
   static std::string logger_;
 #endif

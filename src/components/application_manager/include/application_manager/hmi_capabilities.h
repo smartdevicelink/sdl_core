@@ -37,6 +37,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "json/json.h"
 #include "utils/macro.h"
+#include "utils/json_utils.h"
 
 #include "application_manager/hmi_language_handler.h"
 
@@ -430,7 +431,7 @@ class HMICapabilities {
    * @param languages - the converted object
    *
    */
-  void convert_json_languages_to_obj(Json::Value& json_languages,
+  void convert_json_languages_to_obj(utils::json::JsonValueRef json_languages,
                                      smart_objects::SmartObject& languages);
 
  private:

@@ -318,7 +318,8 @@ int32_t FormatterJsonRpc::FromString(const std::string& str,
           out[strings::S_PARAMS][strings::S_CORRELATION_ID] =
               id_value.AsString();
         } else if (id_value.IsInt()) {
-          out[strings::S_PARAMS][strings::S_CORRELATION_ID] = id_value.AsInt();
+          out[strings::S_PARAMS][strings::S_CORRELATION_ID] =
+                  static_cast<int64_t>(id_value.AsInt());
         } else if (id_value.IsDouble()) {
           out[strings::S_PARAMS][strings::S_CORRELATION_ID] =
               id_value.AsDouble();
@@ -436,7 +437,8 @@ int32_t FormatterJsonRpc::FromString(const std::string& str,
               if (!code_value.IsInt()) {
                 result |= kInvalidFormat | kResponseCodeNotAvailable;
               } else {
-                out[strings::S_PARAMS][strings::kCode] = code_value.AsInt();
+                out[strings::S_PARAMS][strings::kCode] =
+                        static_cast<int64_t>(code_value.AsInt());
               }
             }
 

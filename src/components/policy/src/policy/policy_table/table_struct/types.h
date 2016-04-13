@@ -212,7 +212,7 @@ struct ModuleConfig : CompositeType {
                    notifications_per_minute_by_priority);
   ~ModuleConfig();
   explicit ModuleConfig(const utils::json::JsonValueRef& value__);
-void SafeCopyFrom(const ModuleConfig& from);
+  void SafeCopyFrom(const ModuleConfig& from);
   utils::json::JsonValue ToJsonValue() const;
   bool is_valid() const;
   bool is_initialized() const;

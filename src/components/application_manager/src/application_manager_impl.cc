@@ -83,8 +83,6 @@ DeviceTypes devicesType = {
     std::make_pair(std::string("WIFI"), hmi_apis::Common_TransportType::WIFI)};
 }
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
-
 uint32_t ApplicationManagerImpl::corelation_id_ = 0;
 const uint32_t ApplicationManagerImpl::max_corelation_id_ = UINT_MAX;
 
@@ -2365,7 +2363,7 @@ void ApplicationManagerImpl::HeadUnitReset(
       GetPolicyHandler().UnloadPolicyLibrary();
 
       resume_controller().StopSavePersistentDataTimer();
-      file_system::remove_directory_content(
+      file_system::RemoveDirectoryContent(
           profile::Profile::instance()->app_storage_folder());
       break;
     }
@@ -2373,7 +2371,7 @@ void ApplicationManagerImpl::HeadUnitReset(
       GetPolicyHandler().ClearUserConsent();
 
       resume_controller().StopSavePersistentDataTimer();
-      file_system::remove_directory_content(
+      file_system::RemoveDirectoryContent(
           profile::Profile::instance()->app_storage_folder());
       break;
     }
@@ -3127,7 +3125,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
   uint64_t file_size = file_system::FileSize(full_file_path);
   std::ofstream* file_stream;
   if (offset != 0) {
-    if (file_size != offset) {
+    if (file_size != static_cast<uint64_t>(offset)) {
       LOGGER_DEBUG(logger_,
                   "ApplicationManagerImpl::SaveBinaryWithOffset offset"
                       << " does'n match existing file size");

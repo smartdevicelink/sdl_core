@@ -224,7 +224,8 @@ int32_t Formatters::CFormatterJsonSDLRPCv1::fromString(
         }
       } else {
         out[S::S_PARAMS][S::S_CORRELATION_ID] =
-            root_json[type][S_CORRELATION_ID].AsInt();
+                static_cast<int64_t>(
+                    root_json[type][S_CORRELATION_ID].AsInt());
       }
       out[S::S_PARAMS][S::S_PROTOCOL_TYPE] = 0;
       out[S::S_PARAMS][S::S_PROTOCOL_VERSION] = 1;
