@@ -197,6 +197,9 @@ else()
       ${UTILS_SRC_DIR}/json_utils.cc
       ${UTILS_SRC_DIR}/host_address.cc
       ${UTILS_SRC_DIR}/socket_utils.cc
+      ${UTILS_SRC_DIR}/timer.cc
+      ${UTILS_SRC_DIR}/custom_string.cc
+      ${UTILS_SRC_DIR}/convert_utils.cc
     )
     if(ENABLE_LOG)
       list(APPEND SOURCES

@@ -120,7 +120,7 @@ else ()
   ${AM_SOURCE_DIR}/src/*
   )
 set (MESSAGE_HELPER_SOURCES
-  ${AM_SOURCE_DIR}/src/message_helper/message_helper.cc
+  ${AM_SOURCE_DIR}/src/message_helper.cc
 )
   set (POLICIES_MANAGER
     ${AM_SOURCE_DIR}/src/policies/policy_handler.cc
@@ -431,5 +431,4 @@ endif()
 
 if(BUILD_TESTS)
   add_subdirectory(test)
-  add_subdirectory(test/message_helper)
 endif()

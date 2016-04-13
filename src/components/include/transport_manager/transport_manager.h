@@ -82,7 +82,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int ConnectDevice(const DeviceHandle device_id) = 0;
+  virtual int ConnectDevice(const DeviceHandle& device_id) = 0;
 
   /**
    * @brief Disconnect from all applications connected on device.
@@ -91,7 +91,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int DisconnectDevice(const DeviceHandle device_id) = 0;
+  virtual int DisconnectDevice(const DeviceHandle& device_id) = 0;
 
   /**
    * @brief Disconnect from applications connected on device by connection
@@ -101,14 +101,14 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int Disconnect(const ConnectionUID connection_id) = 0;
+  virtual int Disconnect(const ConnectionUID& connection_id) = 0;
 
   /**
    * @brief Disconnect and clear all unprocessed data.
    *
    * @param connection Connection unique identifier.
    */
-  virtual int DisconnectForce(const ConnectionUID connection_id) = 0;
+  virtual int DisconnectForce(const ConnectionUID& connection_id) = 0;
 
   /**
    * @brief Post new message in queue for massages destined to device.
@@ -162,7 +162,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int RemoveDevice(const DeviceHandle device_handle) = 0;
+  virtual int RemoveDevice(const DeviceHandle& device_handle) = 0;
 
   /**
    * @brief Turns on or off visibility of SDL to mobile devices

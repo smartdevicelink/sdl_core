@@ -424,16 +424,6 @@ class HMICapabilities {
   bool check_existing_json_member(const Json::Value& json_member,
                                   const char* name_of_member);
 
-  /*
-   * @brief function converts json object "languages" to smart object
-   *
-   * @param json_languages from file hmi_capabilities.json
-   * @param languages - the converted object
-   *
-   */
-  void convert_json_languages_to_obj(utils::json::JsonValueRef json_languages,
-                                     smart_objects::SmartObject& languages);
-
  private:
   bool is_vr_cooperating_;
   bool is_tts_cooperating_;
