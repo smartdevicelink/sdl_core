@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <?xml-stylesheet type="text/xml" href="protocol2html.xsl"?>
 
-<interface name="Ford Sync RAPI" version="4.0" date="2015-03-30">
+<interface name="Ford Sync RAPI" version="4.1" date="2016-04-08">
 
   <enum name="Result" internal_scope="base">
     <element name="SUCCESS">
@@ -2245,6 +2245,62 @@
     <element name="notification" value="2" />
   </enum>
 
+    <struct name="DateTime">
+       <param name="second" type="Integer" minvalue="0" maxvalue="60" mandatory="true">
+          <description>Seconds part of time</description>
+       </param>
+       <param name="minute" type="Integer" minvalue="0" maxvalue="59" mandatory="true">
+          <description>Minutes part of time</description>
+       </param>
+       <param name="hour" type="Integer" minvalue="0" maxvalue="23" mandatory="true">
+          <description>Hours part of time. Note that this structure accepts time only in 24 Hr format</description>
+       </param>
+       <param name="day" type="Integer" minvalue="1" maxvalue="31" mandatory="true">
+          <description>Day of the month</description>
+       </param>
+       <param name="month" type="Integer" minvalue="1" maxvalue="12" mandatory="true">
+          <description>Month of the year</description>
+       </param>
+       <param name="year" type="Integer" maxvalue="4095" mandatory="true">
+          <description>The year in YYYY format</description>
+       </param>
+       <param name="tz_hour" type="Integer" minvalue="-12" maxvalue="14" defvalue="0" mandatory="true">
+          <description>Time zone offset in Hours wrt UTC.</description>
+       </param>
+       <param name="tz_minute" type="Integer" minvalue="0" maxvalue="59" defvalue="0" mandatory="true">
+          <description>Time zone offset in Min wrt UTC.</description>
+       </param>
+    </struct>
+
+<struct name="OASISAddress">
+  <param name="countryName" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Name of the country (localized)</description>
+  </param>
+  <param name="countryCode" minlength="0" maxlength="50" type="String" mandatory="false">
+    <description>Name of country (ISO 3166-2)</description>
+  </param>
+  <param name="postalCode" minlength="0" maxlength="16" type="String" mandatory="false">
+    <description>(PLZ, ZIP, PIN, CAP etc.)</description>
+  </param>
+  <param name="administrativeArea" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Portion of country (e.g. state)</description>
+  </param>
+  <param name="subAdministrativeArea" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Portion of e.g. state (e.g. county)</description>
+  </param>
+  <param name="locality" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Hypernym for e.g. city/village</description>
+  </param>
+  <param name="subLocality" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Hypernym for e.g. district</description>
+  </param>
+  <param name="thoroughfare" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Hypernym for street, road etc.</description>
+  </param>
+  <param name="subThoroughfare" minlength="0" maxlength="200" type="String" mandatory="false">
+    <description>Portion of thoroughfare e.g. house number</description>
+  </param>
+</struct>
   <!-- Requests/Responses -->
 
   <function name="RegisterAppInterface" functionID="RegisterAppInterfaceID" messagetype="request">
@@ -4679,9 +4735,9 @@
   </function>
 
   <function name="SendLocation" functionID="SendLocationID" messagetype="request">
-    <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="true">
+     <param name="longitudeDegrees" type="Double" minvalue="-180" maxvalue="180" mandatory="false">
     </param>
-    <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="true">
+     <param name="latitudeDegrees" type="Double" minvalue="-90" maxvalue="90" mandatory="false">
     </param>
     <param name="locationName" type="String" maxlength="500" mandatory="false">
       <description>
@@ -4707,6 +4763,16 @@
       <description>
         Image / icon of intended location (if applicable and supported)
       </description>
+     </param>
+
+     <param name="timeStamp" type="DateTime" mandatory="false">
+        <description>
+            timestamp in ISO 8601 format
+        </description>
+    </param>
+
+    <param name="address" type="OASISAddress" mandatory="false">
+        <description>Address to be used for setting destination</description>
     </param>
   </function>
 

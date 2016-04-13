@@ -1,6 +1,5 @@
 /*
-
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -54,17 +53,17 @@ class DialNumberRequest : public CommandRequestImpl {
   /**
    * \brief DialNumberRequest class destructor
    **/
-  virtual ~DialNumberRequest();
+  ~DialNumberRequest() OVERRIDE;
 
   /**
     * @brief Initialize request params
    **/
-   virtual bool Init();
+   bool Init() OVERRIDE;
 
-  /**
+ /**
    * @brief Execute command
    **/
-  virtual void Run();
+  void Run() OVERRIDE;
 
   /**
    * @brief Interface method that is called whenever new event received

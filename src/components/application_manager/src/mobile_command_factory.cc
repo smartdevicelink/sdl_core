@@ -483,9 +483,9 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     case mobile_apis::FunctionID::DialNumberID: {
       if ((*message)[strings::params][strings::message_type]
           == static_cast<int>(application_manager::MessageType::kResponse)) {
-        command = utils::MakeShared<commands::DialNumberResponse>(message);
+        return  new commands::DialNumberResponse(message);
       } else {
-        command = utils::MakeShared<commands::DialNumberRequest>(message);
+        return new commands::DialNumberRequest(message);
       }
       break;
     }

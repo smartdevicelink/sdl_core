@@ -1,5 +1,4 @@
 /*
-
  Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
@@ -131,7 +130,7 @@ void DialNumberRequest::on_event(const event_engine::Event& event) {
 void DialNumberRequest::StripNumberParam(std::string& number) {
   std::size_t found = 0;
   while (std::string::npos !=
-         (found = number.find_first_not_of("+0123456789"))) {
+         (found = number.find_first_not_of("+*#,;0123456789"))) {
     number.erase(number.begin() + found);
   }
   (*message_)[strings::msg_params][strings::number] = number;
