@@ -1,35 +1,41 @@
 /*
-* Copyright (c) 2016, Ford Motor Company
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*
-* Redistributions of source code must retain the above copyright notice, this
-* list of conditions and the following disclaimer.
-*
-* Redistributions in binary form must reproduce the above copyright notice,
-* this list of conditions and the following
-* disclaimer in the documentation and/or other materials provided with the
-* distribution.
-*
-* Neither the name of the Ford Motor Company nor the names of its contributors
-* may be used to endorse or promote products derived from this software
-* without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.
-*/
+ * Copyright (c) 2015, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+#include <csignal>
 
+#ifdef OS_WINDOWS
+#include "utils/winhdr.h"
+#endif
+
+#include "utils/logger.h"
 #include "life_cycle.h"
 #include "utils/signals.h"
 #include "utils/make_shared.h"
@@ -43,15 +49,11 @@
 #include "application_manager/policies/policy_handler.h"
 #endif  // ENABLE_SECURITY
 
-#ifdef ENABLE_LOG
-#include "utils/log_message_loop_thread.h"
-#endif  // ENABLE_LOG
-
 using threads::Thread;
 
 namespace main_namespace {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
+CREATE_LOGGERPTR_GLOBAL(logger_, "appMain")
 
 namespace {
 void NameMessageBrokerThread(const System::Thread& thread,
@@ -93,36 +95,44 @@ LifeCycle::LifeCycle()
 
 bool LifeCycle::StartComponents() {
   LOGGER_AUTO_TRACE(logger_);
-  DCHECK(!last_state_);
+
+#ifdef OS_WINDOWS
+  WSAData wsa_data;
+  if (0 != WSAStartup(MAKEWORD(2, 2), &wsa_data)) {
+    LOGGER_ERROR(logger_, "WSAStartup() failed");
+    return false;
+  }
+#endif
+
   profile::Profile* profile = profile::Profile::instance();
   last_state_ = new resumption::LastState(profile->app_storage_folder(),
                                           profile->app_info_storage());
+  DCHECK(last_state_ != NULL);
 
-  DCHECK(!transport_manager_);
   transport_manager_ = transport_manager::TransportManagerDefault::instance();
-  DCHECK(transport_manager_);
+  DCHECK(transport_manager_ != NULL);
 
-  DCHECK(!connection_handler_);
   connection_handler_ = new connection_handler::ConnectionHandlerImpl(
       *profile::Profile::instance(), *transport_manager_);
-  DCHECK(connection_handler_);
+  DCHECK(connection_handler_ != NULL);
 
-  DCHECK(!protocol_handler_);
-  protocol_handler_ =
-      new protocol_handler::ProtocolHandlerImpl(*(profile::Profile::instance()),
-                                                *connection_handler_,
-                                                *connection_handler_,
-                                                *transport_manager_);
-  DCHECK(protocol_handler_);
+  protocol_handler_ = new protocol_handler::ProtocolHandlerImpl(
+      *(profile::Profile::instance()),
+      *connection_handler_,
+      *connection_handler_,
+      *transport_manager_);
+  DCHECK(protocol_handler_ != NULL);
 
-  DCHECK(!app_manager_);
   app_manager_ = application_manager::ApplicationManagerImpl::instance();
+  DCHECK(app_manager_ != NULL);
 
-  DCHECK(!hmi_handler_);
   hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(
       *(profile::Profile::instance()));
+  DCHECK(hmi_handler_ != NULL);
 
   media_manager_ = new media_manager::MediaManagerImpl(*app_manager_, *profile);
+  DCHECK(media_manager_ != NULL);
+
   if (!app_manager_->Init(*last_state_, media_manager_)) {
     LOGGER_ERROR(logger_, "Application manager init failed.");
     return false;
@@ -162,8 +172,8 @@ bool LifeCycle::StartComponents() {
   connection_handler_->set_protocol_handler(protocol_handler_);
   connection_handler_->set_connection_handler_observer(app_manager_);
 
-// it is important to initialise TelemetryMonitor before TM to listen TM
-// Adapters
+  // it is important to initialise TelemetryMonitor before TM to listen TM
+  // Adapters
 #ifdef TELEMETRY_MONITOR
   telemetry_monitor_ = new telemetry_monitor::TelemetryMonitor(
       profile::Profile::instance()->server_address(),
@@ -171,6 +181,7 @@ bool LifeCycle::StartComponents() {
   telemetry_monitor_->Start();
   telemetry_monitor_->Init(protocol_handler_, app_manager_, transport_manager_);
 #endif  // TELEMETRY_MONITOR
+
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   app_manager_->set_protocol_handler(protocol_handler_);
@@ -186,7 +197,6 @@ bool LifeCycle::StartComponents() {
 
 #ifdef MESSAGEBROKER_HMIADAPTER
 bool LifeCycle::InitMessageSystem() {
-  DCHECK(!message_broker_)
   message_broker_ = NsMessageBroker::CMessageBroker::getInstance();
   if (!message_broker_) {
     LOGGER_FATAL(logger_, " Wrong pMessageBroker pointer!");
@@ -226,7 +236,8 @@ bool LifeCycle::InitMessageSystem() {
       profile::Profile::instance()->server_address(),
       profile::Profile::instance()->server_port());
 
-  hmi_handler_->AddHMIMessageAdapter(mb_adapter_);
+  hmi_handler_->AddHMIMessageAdapter(
+      mb_adapter_);
   if (!mb_adapter_->Connect()) {
     LOGGER_FATAL(logger_, "Cannot connect to remote peer!");
     return false;
@@ -261,6 +272,7 @@ bool LifeCycle::InitMessageSystem() {
           NULL));
   mb_adapter_thread_->Start(false);
   NameMessageBrokerThread(*mb_adapter_thread_, "MB Adapter");
+
   return true;
 }
 #endif  // MESSAGEBROKER_HMIADAPTER
@@ -306,28 +318,6 @@ bool LifeCycle::InitMessageSystem() {
 
 #endif  // MQUEUE_HMIADAPTER
 
-namespace {
-void sig_handler(int sig) {
-  switch (sig) {
-    case SIGINT:
-      LOGGER_DEBUG(logger_, "SIGINT signal has been caught");
-      break;
-    case SIGTERM:
-      LOGGER_DEBUG(logger_, "SIGTERM signal has been caught");
-      break;
-    case SIGSEGV:
-      LOGGER_DEBUG(logger_, "SIGSEGV signal has been caught");
-      FLUSH_LOGGER();
-      // exit need to prevent endless sending SIGSEGV
-      // http://stackoverflow.com/questions/2663456/how-to-write-a-signal-handler-to-catch-sigsegv
-      abort();
-    default:
-      LOGGER_DEBUG(logger_, "Unexpected signal has been caught");
-      exit(EXIT_FAILURE);
-  }
-}
-}  //  namespace
-
 void LifeCycle::Run() {
   LOGGER_AUTO_TRACE(logger_);
   ::utils::CreateSdlEvent();
@@ -338,6 +328,7 @@ void LifeCycle::Run() {
 void LifeCycle::StopComponents() {
   LOGGER_AUTO_TRACE(logger_);
 
+  LOGGER_INFO(logger_, "Stopping Application Manager");
   DCHECK_OR_RETURN_VOID(hmi_handler_);
   hmi_handler_->set_message_observer(NULL);
 
@@ -452,7 +443,6 @@ void LifeCycle::StopComponents() {
     delete message_broker_server_;
     message_broker_server_ = NULL;
   }
-
   if (message_broker_) {
     message_broker_->stopMessageBroker();
   }
@@ -468,6 +458,10 @@ void LifeCycle::StopComponents() {
     telemetry_monitor_ = NULL;
   }
 #endif  // TELEMETRY_MONITOR
+
+#ifdef OS_WINDOWS
+  WSACleanup();
+#endif
 }
 
 }  //  namespace main_namespace

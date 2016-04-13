@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,42 +29,21 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 #include <sys/stat.h>
-#include <unistd.h>
-#include <signal.h>
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
 #include <string>
-#include <iostream>  // cpplint: Streams are highly discouraged.
-#include <fstream>   // cpplint: Streams are highly discouraged.
 
-// ----------------------------------------------------------------------------
-
-#include "utils/log_message_loop_thread.h"
 #include "utils/logger.h"
-
-#include "./life_cycle.h"
-#include "signal_handlers.h"
-
-#include "utils/signals.h"
+#include "life_cycle.h"
 #include "utils/system.h"
+#include "utils/signals.h"
 #include "config_profile/profile.h"
-#include "utils/appenders_loader.h"
+#include "networking.h"
+#include "utils/macro.h"
 
-#if defined(EXTENDED_MEDIA_MODE)
-#include <gst/gst.h>
-#endif
-
-#include "media_manager/media_manager_impl.h"
-// ----------------------------------------------------------------------------
-// Third-Party includes
-#include "networking.h"  // cpplint: Include the directory when naming .h files
-
-// ----------------------------------------------------------------------------
-
-CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
+CREATE_LOGGERPTR_GLOBAL(logger_, "appMain")
 
 namespace {
 
@@ -79,16 +58,16 @@ const std::string kLocalHostAddress = "127.0.0.1";
  * @return true if success otherwise false.
  */
 bool InitHmi() {
-  std::string hmi_link = profile::Profile::instance()->link_to_web_hmi();
-  struct stat sb;
-  if (stat(hmi_link.c_str(), &sb) == -1) {
-    LOG4CXX_FATAL(logger_, "HMI index file " << hmi_link << " doesn't exist!");
+  // AN: This functionality is disabled until utils::System will be ported
+  /*std::string hmi_link = profile::Profile::instance()->link_to_web_hmi();
+  struct _stat sb;
+  if (_stat(hmi_link.c_str(), &sb) == -1) {
+    LOGGER_FATAL(logger_, "HMI index file " << hmi_link << " doesn't exist!");
     return false;
-  }
-  return utils::System(kBrowser, kBrowserName)
-      .Add(kBrowserParams)
-      .Add(hmi_link)
-      .Execute();
+  }*/
+  return true;  // utils::System(kBrowser,
+                // kBrowserName).Add(kBrowserParams).Add(hmi_link)
+  //.Execute();
 }
 #endif  // WEB_HMI
 
@@ -101,7 +80,7 @@ bool InitHmi() {
   std::string kStartHmi = "./start_hmi.sh";
   struct stat sb;
   if (stat(kStartHmi.c_str(), &sb) == -1) {
-    LOG4CXX_FATAL(logger_, "HMI start script doesn't exist!");
+    LOGGER_FATAL(logger_, "HMI start script doesn't exist!");
     return false;
   }
 
@@ -109,6 +88,7 @@ bool InitHmi() {
 }
 #endif  // QT_HMI
 
+#ifdef OS_POSIX
 bool UnsibscribeFromTermination() {
   // Disable some system signals receiving in thread
   // by blocking those signals
@@ -124,9 +104,9 @@ bool UnsibscribeFromTermination() {
 
   return !pthread_sigmask(SIG_BLOCK, &signal_set, NULL);
 }
+#endif
 
-
-}
+}  // namespace
 
 /**
  * \brief Entry point of the program.
@@ -135,74 +115,70 @@ bool UnsibscribeFromTermination() {
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
 int32_t main(int32_t argc, char** argv) {
+#ifdef OS_POSIX
   // Unsibscribe once for all threads
   if (!UnsibscribeFromTermination()) {
     // Can't use internal logger here
     exit(EXIT_FAILURE);
   }
+#endif
 
-  // --------------------------------------------------------------------------
   if ((argc > 1) && (0 != argv)) {
     profile::Profile::instance()->config_file_name(argv[1]);
   } else {
     profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
   }
 
+  PLATFORM_INIT(argc, argv);
   // Logger initialization
   INIT_LOGGER(profile::Profile::instance()->logs_enabled());
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
-  if (!utils::appenders_loader.Loaded()) {
-    LOG4CXX_ERROR(logger_,
-                  "Appenders plugin not loaded, file logging disabled");
-  }
+  /*if (!utils::appenders_loader.Loaded()) {
+    LOGGER_ERROR(logger_, "Appenders plugin not loaded, file logging
+  disabled");
+  }*/
 
-  LOG4CXX_INFO(logger_, "Application started!");
-  LOG4CXX_INFO(logger_,
-               "SDL version: " << profile::Profile::instance()->sdl_version());
+  LOGGER_INFO(logger_, "Application started!");
+  LOGGER_INFO(logger_,
+              "SDL version: " << profile::Profile::instance()->sdl_version());
 
-  // --------------------------------------------------------------------------
-  // Components initialization
   if (!main_namespace::LifeCycle::instance()->StartComponents()) {
-    LOG4CXX_FATAL(logger_, "Failed to start components");
+    LOGGER_FATAL(logger_, "Failed to start components");
     main_namespace::LifeCycle::instance()->StopComponents();
     DEINIT_LOGGER();
     exit(EXIT_FAILURE);
   }
 
-  // --------------------------------------------------------------------------
-  // Third-Party components initialization.
-
   if (!main_namespace::LifeCycle::instance()->InitMessageSystem()) {
-    LOG4CXX_FATAL(logger_, "Failed to init message system");
+    LOGGER_FATAL(logger_, "Failed to init message system");
     main_namespace::LifeCycle::instance()->StopComponents();
     DEINIT_LOGGER();
-    _exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);
   }
-  LOG4CXX_INFO(logger_, "InitMessageBroker successful");
+  LOGGER_INFO(logger_, "InitMessageBroker successful");
 
   if (profile::Profile::instance()->launch_hmi()) {
     if (profile::Profile::instance()->server_address() == kLocalHostAddress) {
-      LOG4CXX_INFO(logger_, "Start HMI on localhost");
+      LOGGER_INFO(logger_, "Start HMI on localhost");
 
 #ifndef NO_HMI
       if (!InitHmi()) {
-        LOG4CXX_INFO(logger_, "InitHmi successful");
+        LOGGER_INFO(logger_, "InitHmi successful");
       } else {
-        LOG4CXX_WARN(logger_, "Failed to init HMI");
+        LOGGER_WARN(logger_, "Failed to init HMI");
       }
 #endif  // #ifndef NO_HMI
     }
   }
-  // --------------------------------------------------------------------------
 
   main_namespace::LifeCycle::instance()->Run();
-  LOG4CXX_INFO(logger_, "Stopping application due to signal caught");
+  LOGGER_INFO(logger_, "Stopping application due to signal caught");
 
   main_namespace::LifeCycle::instance()->StopComponents();
 
-  LOG4CXX_INFO(logger_, "Application successfully stopped");
+  LOGGER_INFO(logger_, "Application successfully stopped");
   DEINIT_LOGGER();
 
   return EXIT_SUCCESS;
