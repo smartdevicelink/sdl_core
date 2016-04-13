@@ -507,7 +507,7 @@ void CMessageBroker::Test() {
     std::string wmes = p->m_recieverWriter.write(root);
     DBG_MSG(("Parsed JSON string:%s; length: %d\n", wmes.c_str(), wmes.length()));
     DBG_MSG(("Buffer is:%s\n", ReceivingBuffer.c_str()));
-    ssize_t beginpos = ReceivingBuffer.find(wmes);
+    ssize_t beginpos = static_cast<ssize_t>(ReceivingBuffer.find(wmes));
     ReceivingBuffer.erase(0, beginpos + wmes.length());
     DBG_MSG(("Buffer after cut is:%s\n", ReceivingBuffer.c_str()));
     CMessage message(0, root);
@@ -577,7 +577,7 @@ std::string CMessageBroker_Private::getDestinationComponentName(CMessage* pMessa
   if (pMessage) {
     Json::Value mes = pMessage->getMessage();
     std::string method = mes["method"].asString();
-    int pos = method.find(".");
+    int pos = static_cast<int>(method.find("."));
     if (-1 != pos) {
       ret = method.substr(0, pos);
     }
@@ -594,7 +594,7 @@ std::string CMessageBroker_Private::getMethodName(CMessage* pMessage) {
   if (pMessage) {
     Json::Value mes = pMessage->getMessage();
     std::string method = mes["method"].asString();
-    int pos = method.find(".");
+    int pos = static_cast<int>(method.find("."));
     if (-1 != pos) {
       ret = method.substr(pos + 1);
     }
