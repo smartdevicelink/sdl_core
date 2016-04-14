@@ -39,7 +39,7 @@
 #include <log4cxx/propertyconfigurator.h>
 #include <log4cxx/spi/loggingevent.h>
 
-logger::Logger::Pimpl logger::Logger::impl_;
+__attribute__((visibility("hidden"))) logger::Logger::Pimpl logger::Logger::impl_;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// logger::Logger::Impl
