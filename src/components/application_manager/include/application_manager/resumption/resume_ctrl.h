@@ -345,6 +345,14 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
   void AddSubscriptions(app_mngr::ApplicationSharedPtr application,
                         const smart_objects::SmartObject& saved_app);
 
+  /**
+   * @brief AddWayPointsSubscription allows to restore subscription
+   * for WayPoints
+   * @param application application which will be resumed
+   * @param saved_app application specific section from backup file
+   */
+  void AddWayPointsSubscription(app_mngr::ApplicationSharedPtr application,
+                                 const smart_objects::SmartObject& saved_app);
 
   bool CheckIgnCycleRestrictions(const smart_objects::SmartObject& saved_app);
 

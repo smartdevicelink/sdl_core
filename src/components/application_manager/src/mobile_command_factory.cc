@@ -58,6 +58,8 @@
 #include "application_manager/commands/mobile/get_dtcs_response.h"
 #include "application_manager/commands/mobile/get_vehicle_data_request.h"
 #include "application_manager/commands/mobile/get_vehicle_data_response.h"
+#include "application_manager/commands/mobile/get_way_points_request.h"
+#include "application_manager/commands/mobile/get_way_points_response.h"
 #include "application_manager/commands/mobile/list_files_request.h"
 #include "application_manager/commands/mobile/list_files_response.h"
 #include "application_manager/commands/mobile/on_app_interface_unregistered_notification.h"
@@ -73,6 +75,7 @@
 #include "application_manager/commands/mobile/on_tbt_client_state_notification.h"
 #include "application_manager/commands/mobile/on_vehicle_data_notification.h"
 #include "application_manager/commands/mobile/on_hash_change_notification.h"
+#include "application_manager/commands/mobile/on_way_point_change_notification.h"
 #include "application_manager/commands/mobile/perform_audio_pass_thru_request.h"
 #include "application_manager/commands/mobile/perform_audio_pass_thru_response.h"
 #include "application_manager/commands/mobile/perform_interaction_request.h"
@@ -107,6 +110,10 @@
 #include "application_manager/commands/mobile/subscribe_button_response.h"
 #include "application_manager/commands/mobile/subscribe_vehicle_data_request.h"
 #include "application_manager/commands/mobile/subscribe_vehicle_data_response.h"
+#include "application_manager/commands/mobile/subscribe_way_points_request.h"
+#include "application_manager/commands/mobile/subscribe_way_points_response.h"
+#include "application_manager/commands/mobile/unsubscribe_way_points_request.h"
+#include "application_manager/commands/mobile/unsubscribe_way_points_response.h"
 #include "application_manager/commands/mobile/unregister_app_interface_request.h"
 #include "application_manager/commands/mobile/unregister_app_interface_response.h"
 #include "application_manager/commands/mobile/unsubscribe_button_request.h"
@@ -345,6 +352,15 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
+    case mobile_apis::FunctionID::GetWayPointsID: {
+      if ((*message)[strings::params][strings::message_type]
+          == static_cast<int>(application_manager::MessageType::kResponse)) {
+        command = utils::MakeShared<commands::GetWayPointsResponse>(message);
+      } else {
+        command = utils::MakeShared<commands::GetWayPointsRequest>(message);
+      }
+      break;
+    }
     case mobile_apis::FunctionID::SubscribeVehicleDataID: {
       if ((*message)[strings::params][strings::message_type]
           == static_cast<int>(application_manager::MessageType::kResponse)) {
@@ -360,6 +376,24 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
         command = utils::MakeShared<commands::UnsubscribeVehicleDataResponse>(message);
       } else {
         command = utils::MakeShared<commands::UnsubscribeVehicleDataRequest>(message);
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::SubscribeWayPointsID: {
+      if ((*message)[strings::params][strings::message_type]
+          == static_cast<int>(application_manager::MessageType::kResponse)) {
+        command = utils::MakeShared<commands::SubscribeWayPointsResponse>(message);
+      } else {
+        command = utils::MakeShared<commands::SubscribeWayPointsRequest>(message);
+      }
+      break;
+    }
+    case mobile_apis::FunctionID::UnsubscribeWayPointsID: {
+      if ((*message)[strings::params][strings::message_type]
+          == static_cast<int>(application_manager::MessageType::kResponse)) {
+        command = utils::MakeShared<commands::UnsubscribeWayPointsResponse>(message);
+      } else {
+        command = utils::MakeShared<commands::UnSubscribeWayPointsRequest>(message);
       }
       break;
     }
@@ -551,6 +585,10 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     }
     case mobile_apis::FunctionID::OnHashChangeID: {
       command = utils::MakeShared<commands::mobile::OnHashChangeNotification>(message);
+      break;
+    }
+    case mobile_apis::FunctionID::OnWayPointChangeID: {
+      command = utils::MakeShared<commands::OnWayPointChangeNotification>(message);
       break;
     }
     default: {

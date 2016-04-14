@@ -236,6 +236,21 @@
   <element name="SYSTEM" />
 </enum>
 
+  <enum name="WayPointType">
+    <description>Describes what kind of waypoint is requested/provided.</description>
+    <element name="ALL" />
+    <element name="DESTINATION" />
+  </enum>
+
+  <struct name="Coordinate">
+    <param name="latitudeDegrees" minvalue="-90" maxvalue="90" type="Double" mandatory="true">
+      <description>Latitude of the location.</description>
+    </param>
+    <param name="longitudeDegrees" minvalue="-180" maxvalue="180" type="Double" mandatory="true">
+      <description>Longitude of the location.</description>
+    </param>
+  </struct>
+
 <enum name="LayoutMode">
   <description>For touchscreen interactions, the mode of how the choices are presented.</description>
   <element name="ICON_ONLY" />
@@ -2014,6 +2029,30 @@
   </param>
 </struct>
 
+  <struct name="LocationDetails">
+    <param name="coordinate" type="Coordinate" mandatory="false">
+      <description>Latitude/Longitude of the location.</description>
+    </param>
+    <param name="locationName" type="String" maxlength="500" mandatory="false">
+      <description>Name of location.</description>
+    </param>
+    <param name="addressLines" type="String" maxlength="500" minsize="0" maxsize="4" array="true" mandatory="false">
+      <description>Location address for display purposes only</description>
+    </param>
+    <param name="locationDescription" type="String" maxlength="500" mandatory="false">
+      <description>Description intended location / establishment (if applicable)</description>
+    </param>
+    <param name="phoneNumber" type="String" maxlength="500" mandatory="false">
+      <description>Phone number of location / establishment.</description>
+    </param>
+    <param name="locationImage" type="Image" mandatory="false">
+      <description>Image / icon of intended location.</description>
+    </param>
+    <param name="searchAddress" type="OASISAddress" mandatory="false">
+      <description>Address to be used by navigation engines for search</description>
+    </param>
+  </struct>
+
 </interface>
 
 <interface name="Buttons" version="1.0" date="2013-04-12">
@@ -3195,6 +3234,7 @@
 </interface>
 
 <interface name="Navigation" version="1.0" date="2013-05-22">
+
   <function name="IsReady" messagetype="request">
     <description>Method is invoked at system startup. Response must provide the information about presence of UI Navigation module and its readiness to cooperate with SDL.</description>
   </function>
@@ -3356,6 +3396,40 @@
     <param name="available" type="Boolean" mandatory="true">
       <description>If "true" - video data started. If "false" - video data stopped.</description>
     </param>
+  </function>
+  <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="request">
+    <description>Request for getting waypoint/destination data.</description>
+    <param name="wayPointType" type="Common.WayPointType" defvalue="ALL" mandatory="false">
+      <description>To request for either the destination only or for all waypoints including destination</description>
+    </param>
+  </function>
+  <function name="GetWayPoints" functionID="GetWayPointsID" messagetype="response">
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of the application.</description>
+    </param>
+    <param name="wayPoints" type="Common.LocationDetails" mandatory="false" array="true" minsize="1" maxsize="10">
+      <description>See LocationDetails</description>
+    </param>
+  </function>
+  <function name="OnWayPointChange" functionID="OnWayPointChangeID" messagetype="notification">
+    <description>Notification which provides the entire LocationDetails when there is a change to any waypoints or destination.</description>
+    <param name="wayPoints" type="Common.LocationDetails" mandatory="true" array="true" minsize="1" maxsize="10">
+      <description>See LocationDetails</description>
+    </param>
+  </function>
+
+  <function name="SubscribeWayPoints" functionID="SubscribeWayPointsID" messagetype="request">
+    <description>To subscribe in getting changes for Waypoints/destinations</description>
+  </function>
+
+  <function name="SubscribeWayPoints" functionID="SubscribeWayPointsID" messagetype="response">
+  </function>
+
+  <function name="UnsubscribeWayPoints" functionID="UnsubscribeWayPointsID" messagetype="request">
+    <description>Request to unsubscribe from WayPoints and Destination</description>
+  </function>
+
+  <function name="UnsubscribeWayPoints" functionID="UnsubscribeWayPointsID" messagetype="response">
   </function>
 
 </interface>

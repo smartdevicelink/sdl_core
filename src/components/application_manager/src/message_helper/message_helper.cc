@@ -1759,6 +1759,18 @@ bool MessageHelper::SendStopAudioPathThru() {
   return ApplicationManagerImpl::instance()->ManageHMICommand(result);
 }
 
+bool MessageHelper::SendUnsubscribedWayPoints() {
+  LOG4CXX_INFO(logger_, "MessageHelper::SendUnsubscribedWayPoints");
+
+  smart_objects::SmartObjectSPtr result = CreateRequestObject();
+
+  smart_objects::SmartObject& request = *result;
+  request[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints;
+
+  return ApplicationManagerImpl::instance()->ManageHMICommand(result);
+}
+
 void MessageHelper::SendPolicySnapshotNotification(
     const unsigned int connection_key,
     const std::vector<uint8_t>& policy_data,

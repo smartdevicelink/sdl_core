@@ -32,6 +32,7 @@
 #include <string>
 #include <unistd.h>
 
+#include "application_manager/application_manager_impl.h"
 #include "application_manager/resumption/resumption_data_db.h"
 #include "application_manager/resumption/resumption_sql_queries.h"
 #include "application_manager/smart_object_keys.h"
@@ -1404,21 +1405,23 @@ bool ResumptionDataDB::SelectDataFromAppTable(
     LOG4CXX_WARN(logger_, "Problem with execution kSelectAppTable query");
     return false;
   }
-  /* Position of data in "query" :
-       field "appID" from table "application" = 0
-       field "connection_key" from table "application" = 1
-       field "grammarID" from table "application" = 2
-       field "hashID" from table "application" = 3
-       field "hmiAppID" from table "application" = 4
-       field "hmiLevel" from table "application" = 5
-       field "ign_off_count" from table "application" = 6
-       field "suspend_count" from table "application" = 7
-       field "timeStamp" from table "application" = 7
-       field "deviceID" from table "application" = 8
-       field "isMediaApplication" from table "application" = 9
-       */
+
+  //  Position of data in "query" :
+  //  field "appID" from table "application" = 0
+  //  field "connection_key" from table "application" = 1
+  //  field "grammarID" from table "application" = 2
+  //  field "hashID" from table "application" = 3
+  //  field "hmiAppID" from table "application" = 4
+  //  field "hmiLevel" from table "application" = 5
+  //  field "ign_off_count" from table "application" = 6
+  //  field "timeStamp" from table "application" = 7
+  //  field "deviceID" from table "application" = 8
+  //  field "isMediaApplication" from table "application" = 9
+  //  field "IsSubscribedForWayPoints" from table "application" = 10
+  uint32_t connection_key = query.GetUInteger(1);
+
   saved_app[strings::app_id] = query.GetString(0);
-  saved_app[strings::connection_key] = query.GetUInteger(1);
+  saved_app[strings::connection_key] = connection_key;
   uint32_t grammarID = query.GetUInteger(2);
   if (grammarID) {
     saved_app[strings::grammar_id] = grammarID;
@@ -1427,10 +1430,10 @@ bool ResumptionDataDB::SelectDataFromAppTable(
   saved_app[strings::hmi_app_id] = query.GetUInteger(4);
   saved_app[strings::hmi_level] = query.GetInteger(5);
   saved_app[strings::ign_off_count] = query.GetInteger(6);
-  saved_app[strings::suspend_count] = query.GetInteger(7);
-  saved_app[strings::time_stamp] = query.GetUInteger(8);
-  saved_app[strings::device_id] = query.GetString(9);
-  saved_app[strings::is_media_application] = query.GetBoolean(10);
+  saved_app[strings::time_stamp] = query.GetUInteger(7);
+  saved_app[strings::device_id] = query.GetString(8);
+  saved_app[strings::is_media_application] = query.GetBoolean(9);
+  saved_app[strings::subscribed_for_way_points] = query.GetBoolean(10);
 
   LOG4CXX_INFO(logger_,
                "Data from application table was restored successfully");
@@ -2610,6 +2613,9 @@ bool ResumptionDataDB::InsertApplicationData(
   const int64_t hmi_app_id = application.m_hmi_app_id;
   const mobile_apis::HMILevel::eType hmi_level = application.m_hmi_level;
   bool is_media_application = application.m_is_media_application;
+  bool is_subscribed_for_way_points =
+      app_mngr::ApplicationManagerImpl::instance()->IsAppSubscribedForWayPoints(
+          connection_key);
 
   if (!query.Prepare(kInsertApplication)) {
     LOG4CXX_WARN(logger_,
@@ -2625,28 +2631,28 @@ bool ResumptionDataDB::InsertApplicationData(
      field "hmiAppID" from table "application" = 3
      field "hmiLevel" from table "application" = 4
      field "ign_off_count" from table "application" = 5
-     field "suspend_count" from table "application" = 6
-     field "timeStamp" from table "application" = 7
-     field "idglobalProperties" from table "application" = 8
-     field "isMediaApplication" from table "application" = 9
-     field "appID" from table "application" = 10
-     field "deviceID" from table "application" = 11*/
+     field "timeStamp" from table "application" = 6
+     field "idglobalProperties" from table "application" = 7
+     field "isMediaApplication" from table "application" = 8
+     field "appID" from table "application" = 9
+     field "deviceID" from table "application" = 10
+     field "isSubscribedForWayPoints" from table "application" = 11*/
   query.Bind(0, connection_key);
   query.Bind(1, grammar_id);
   query.Bind(2, hash);
   query.Bind(3, hmi_app_id);
   query.Bind(4, static_cast<int32_t>(hmi_level));
   query.Bind(5, 0);
-  query.Bind(6, 0);
-  query.Bind(7, time_stamp);
+  query.Bind(6, time_stamp);
   if (global_properties_key) {
-    query.Bind(8, global_properties_key);
+    query.Bind(7, global_properties_key);
   } else {
-    query.Bind(8);
+    query.Bind(7);
   }
-  query.Bind(9, is_media_application);
-  query.Bind(10, policy_app_id);
-  query.Bind(11, device_id);
+  query.Bind(8, is_media_application);
+  query.Bind(9, policy_app_id);
+  query.Bind(10, device_id);
+  query.Bind(11, is_subscribed_for_way_points);
 
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Problem with execution query");

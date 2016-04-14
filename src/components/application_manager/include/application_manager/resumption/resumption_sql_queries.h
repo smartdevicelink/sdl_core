@@ -130,6 +130,9 @@ extern const std::string kUpdateApplicationData;
 extern const std::string kSelectDBVersion;
 extern const std::string kUpdateDBVersion;
 extern const std::string kUpdateGrammarID;
+extern const std::string kInsertSubscribedForWayPoints;
+extern const std::string kSelectSubscribedForWayPoints;
+extern const std::string kDeleteSubscribedForWayPoints;
 }  // namespace resumption
 
 #endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_SQL_QUERY_H_

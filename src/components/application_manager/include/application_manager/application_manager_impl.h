@@ -281,6 +281,38 @@ class ApplicationManagerImpl
   bool IsAppTypeExistsInFullOrLimited(ApplicationConstSharedPtr app) const;
 
   /**
+   * @brief Checks if Application is subscribed for way points
+   * @param Application AppID
+   * @return true if Application is subscribed for way points
+   * otherwise false
+   */
+  bool IsAppSubscribedForWayPoints(const uint32_t app_id) const;
+
+  /**
+   * @brief Subscribe Application for way points
+   * @param Application AppID
+   */
+  void SubscribeAppForWayPoints(const uint32_t app_id);
+
+  /**
+   * @brief Unsubscribe Application for way points
+   * @param Application AppID
+   */
+  void UnsubscribeAppFromWayPoints(const uint32_t app_id);
+
+  /**
+   * @brief Is Any Application is subscribed for way points
+   * @return true if some app is subscribed otherwise false
+   */
+  bool IsAnyAppSubscribedForWayPoints() const;
+
+  /**
+   * @brief Get subscribed for way points
+   * @return reference to set of subscribed apps for way points
+   */
+  const std::set<int32_t> GetAppsSubscribedForWayPoints() const;
+
+  /**
    * @brief Notifies all components interested in Vehicle Data update
    * i.e. new value of odometer etc and returns list of applications
    * subscribed for event.
@@ -1419,11 +1451,17 @@ typedef utils::SharedPtr<timer::Timer> TimerSPtr;
   // Lock for applications list
   mutable sync_primitives::Lock applications_list_lock_;
   mutable sync_primitives::Lock apps_to_register_list_lock_;
+  mutable sync_primitives::Lock subscribed_way_points_apps_lock_;
 
   /**
    * @brief Map of correlation id  and associated application id.
    */
   std::map<const int32_t, const uint32_t> appID_list_;
+
+  /**
+   * @brief Set AppIDs of subscribed apps for way points
+   */
+  std::set<int32_t> subscribed_way_points_apps_list_;
 
   /**
    * @brief Map contains applications which

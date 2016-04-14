@@ -139,6 +139,7 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/on_sdl_persistence_complete_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_exit_all_applications_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_exit_application_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_navi_way_point_change_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_start_device_discovery.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/close_popup_request.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/close_popup_response.cc
@@ -237,6 +238,10 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/navi_show_constant_tbt_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/navi_send_location_request.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/navi_send_location_response.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/navi_subscribe_way_points_request.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/navi_subscribe_way_points_response.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/navi_unsubscribe_way_points_request.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/navi_unsubscribe_way_points_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_ready_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_system_context_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_device_chosen_notification.cc
@@ -275,6 +280,8 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/navi_audio_start_stream_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/navi_audio_stop_stream_request.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/navi_audio_stop_stream_response.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/navi_get_way_points_request.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/navi_get_way_points_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_system_request_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_put_file_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_resume_audio_source_notification.cc

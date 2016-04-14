@@ -20,6 +20,7 @@ const char* info = "info";
 const char* app_id = "appID";
 const char* hmi_app_id = "hmiAppID";
 const char* device_id = "deviceID";
+const char* subscribed_for_way_points = "subscribed_for_way_points";
 const char* url = "url";
 const char* urlScheme = "urlScheme";
 const char* packageName = "packageName";

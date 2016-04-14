@@ -209,6 +209,12 @@
 #include "application_manager/commands/hmi/navi_alert_maneuver_response.h"
 #include "application_manager/commands/hmi/navi_update_turn_list_request.h"
 #include "application_manager/commands/hmi/navi_update_turn_list_response.h"
+#include "application_manager/commands/hmi/navi_subscribe_way_points_request.h"
+#include "application_manager/commands/hmi/navi_subscribe_way_points_response.h"
+#include "application_manager/commands/hmi/navi_unsubscribe_way_points_request.h"
+#include "application_manager/commands/hmi/navi_unsubscribe_way_points_response.h"
+#include "application_manager/commands/hmi/navi_get_way_points_request.h"
+#include "application_manager/commands/hmi/navi_get_way_points_response.h"
 #include "application_manager/commands/hmi/on_ready_notification.h"
 #include "application_manager/commands/hmi/on_device_chosen_notification.h"
 #include "application_manager/commands/hmi/on_file_removed_notification.h"
@@ -227,6 +233,7 @@
 #include "application_manager/commands/hmi/on_vr_language_change_notification.h"
 #include "application_manager/commands/hmi/on_tts_language_change_notification.h"
 #include "application_manager/commands/hmi/on_navi_tbt_client_state_notification.h"
+#include "application_manager/commands/hmi/on_navi_way_point_change_notification.h"
 #include "application_manager/commands/hmi/on_button_event_notification.h"
 #include "application_manager/commands/hmi/on_button_press_notification.h"
 #include "application_manager/commands/hmi/on_button_subscription_notification.h"
@@ -1041,6 +1048,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       }
       break;
     }
+    case hmi_apis::FunctionID::Navigation_GetWayPoints: {
+      if (is_response) {
+        command.reset(new commands::NaviGetWayPointsResponse(message));
+      } else {
+        command.reset(new commands::NaviGetWayPointsRequest(message));
+      }
+      break;
+    }
     case hmi_apis::FunctionID::Navigation_UpdateTurnList: {
       if (is_response) {
         command.reset(new commands::NaviUpdateTurnListResponse(message));
@@ -1054,6 +1069,22 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::NaviShowConstantTBTResponse(message));
       } else {
         command.reset(new commands::NaviShowConstantTBTRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::Navigation_SubscribeWayPoints: {
+      if (is_response) {
+        command.reset(new commands::NaviSubscribeWayPointsResponse(message));
+      } else {
+        command.reset(new commands::NaviSubscribeWayPointsRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints: {
+      if (is_response) {
+        command.reset(new commands::NaviUnsubscribeWayPointsResponse(message));
+      } else {
+        command.reset(new commands::NaviUnSubscribeWayPointsRequest(message));
       }
       break;
     }
@@ -2058,6 +2089,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
       } else {
         command.reset(new commands::hmi::DialNumberRequest(message));
       }
+      break;
+    }
+    case hmi_apis::FunctionID::Navigation_OnWayPointChange: {
+      command.reset(new commands::OnNaviWayPointChangeNotification(message));
       break;
     }
   }

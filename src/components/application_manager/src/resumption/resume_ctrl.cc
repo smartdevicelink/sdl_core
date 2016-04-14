@@ -455,6 +455,7 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
       AddChoicesets(application, saved_app);
       SetGlobalProperties(application, saved_app);
       AddSubscriptions(application, saved_app);
+      AddWayPointsSubscription(application, saved_app);
       result = true;
     } else {
       LOG4CXX_WARN(logger_,
@@ -562,6 +563,20 @@ void ResumeCtrl::SetGlobalProperties(
         saved_app[strings::application_global_properties];
     application->load_global_properties(properties_so);
     MessageHelper::SendGlobalPropertiesToHMI(application);
+  }
+}
+
+void ResumeCtrl::AddWayPointsSubscription(app_mngr::ApplicationSharedPtr application,
+                                           const smart_objects::SmartObject& saved_app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (saved_app.keyExists(strings::subscribed_for_way_points)) {
+    const smart_objects::SmartObject& subscribed_for_way_points_so =
+        saved_app[strings::subscribed_for_way_points];
+    if (true == subscribed_for_way_points_so.asBool()) {
+      application_manager::ApplicationManagerImpl::instance()->
+          SubscribeAppForWayPoints(application->app_id());
+    }
   }
 }
 
