@@ -77,7 +77,7 @@ namespace NsMessageBroker
         std::map <std::string, int>::iterator it = mControllersList.begin();
         for (; it != mControllersList.end();) {
           if (it->second == fd) {
-            mControllersList.erase(it);
+            mControllersList.erase(it++);
           } else {
             ++it;
           }
