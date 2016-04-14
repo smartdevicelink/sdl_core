@@ -223,7 +223,7 @@ UpdateStatusManager::UpdateThreadDelegate::UpdateThreadDelegate(
     UpdateStatusManager* update_status_manager)
     : timeout_(0)
     , stop_flag_(false)
-    , state_lock_(true)
+    , state_lock_(false)
     , update_status_manager_(update_status_manager) {
   LOGGER_INFO(logger_, "Create UpdateThreadDelegate");
 }
