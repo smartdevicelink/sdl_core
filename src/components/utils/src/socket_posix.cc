@@ -155,9 +155,9 @@ utils::TcpSocketConnection::Impl::~Impl() {
 
 bool utils::TcpSocketConnection::Impl::CreateNotifictionPipes() {
   int fds[2];
-  const int is_success = pipe(fds);
+  const int result = pipe(fds);
 
-  if (!is_success) {
+  if (0 != result) {
     LOGGER_ERROR(logger_, "pipe creation failed: " << errno);
     return false;
   }
@@ -370,7 +370,7 @@ void utils::TcpSocketConnection::Impl::Wait() {
   pollfd poll_fds[kPollFdsSize];
   poll_fds[0].fd = tcp_socket_;
   // TODO: Fix data race. frames_to_send_ should be protected
-  poll_fds[0].events = POLLIN | POLLPRI | POLLOUT;
+  poll_fds[0].events = POLLIN | POLLPRI;
   poll_fds[1].fd = read_fd_;
   poll_fds[1].events = POLLIN | POLLPRI;
   if (-1 == poll(poll_fds, kPollFdsSize, -1)) {
@@ -414,7 +414,7 @@ void utils::TcpSocketConnection::Impl::Wait() {
   }
 
   // send data if possible
-  if (poll_fds[0].revents | POLLOUT) {
+  if (poll_fds[1].revents & (POLLIN | POLLPRI)) {
     OnWrite();
     return;
   }
@@ -556,7 +556,7 @@ bool utils::TcpServerSocket::Impl::Listen(const HostAddress& address,
     return false;
   }
 
-  char optval = 1;
+  int optval = 1;
   if (-1 ==
       setsockopt(
           server_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval))) {
