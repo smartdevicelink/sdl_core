@@ -32,5 +32,5 @@ addons:
     build_command:   "make install"
     branch_pattern: coverity
 script: 
-  - pwd
+  - sudo ldconfig
   - cd build && make test
