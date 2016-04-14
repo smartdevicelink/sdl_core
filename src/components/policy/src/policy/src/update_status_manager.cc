@@ -242,6 +242,7 @@ void UpdateStatusManager::UpdateThreadDelegate::threadMain() {
           termination_condition_.WaitFor(auto_lock, timeout_);
       if (sync_primitives::ConditionalVariable::kTimeout == wait_status) {
         if (update_status_manager_) {
+          sync_primitives::AutoUnlock auto_unlock(auto_lock);
           update_status_manager_->OnUpdateTimeoutOccurs();
         }
       }
