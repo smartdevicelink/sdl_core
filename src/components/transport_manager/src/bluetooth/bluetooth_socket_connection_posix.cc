@@ -127,7 +127,8 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
     return false;
   }
 
-  set_socket(rfcomm_socket);
+  //TODO(AOleynik): fix that
+  //set_socket(rfcomm_socket);
   LOGGER_TRACE(logger_, "exit with TRUE");
   return true;
 }

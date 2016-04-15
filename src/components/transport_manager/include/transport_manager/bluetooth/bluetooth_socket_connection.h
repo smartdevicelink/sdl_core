@@ -38,7 +38,11 @@
 
 #include <queue>
 
+#ifdef OS_WINDOWS
 #include "transport_manager/transport_adapter/connection.h"
+#else
+#include "transport_manager/transport_adapter/threaded_socket_connection.h"
+#endif
 #include "protocol/common.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/lock.h"
@@ -58,7 +62,11 @@ class TransportAdapterController;
 /**
  * @brief Class responsible for communication over bluetooth sockets.
  */
+#ifdef OS_WINDOWS
 class BluetoothSocketConnection : public Connection {
+#else
+class BluetoothSocketConnection : public ThreadedSocketConnection {
+#endif
  public:
   /**
    * @brief Constructor.
@@ -71,7 +79,9 @@ class BluetoothSocketConnection : public Connection {
                             const ApplicationHandle& app_handle,
                             TransportAdapterController* controller);
 
+#ifdef OS_WINDOWS
   TransportAdapter::Error Start();
+#endif
   /**
    * @brief Destructor.
    */
@@ -88,6 +98,7 @@ class BluetoothSocketConnection : public Connection {
    */
   virtual bool Establish(ConnectError** error);
 
+#ifdef OS_WINDOWS
   /**
   * @brief Send data frame.
   *
@@ -130,6 +141,7 @@ class BluetoothSocketConnection : public Connection {
    private:
     BluetoothSocketConnection* connection_;
   };
+
   void OnError(int error);
   void OnData(const uint8_t* const buffer, std::size_t buffer_size);
   void OnCanWrite();
@@ -170,6 +182,7 @@ class BluetoothSocketConnection : public Connection {
   SOCKET rfcomm_socket_;
 
   threads::Thread* thread_;
+#endif
 };
 
 }  // namespace transport_adapter

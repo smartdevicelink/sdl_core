@@ -64,7 +64,7 @@ class BluetoothDevice : public Device {
 #if defined(OS_WINDOWS)
 #define BLUETOOTH_ADDR_INFO BLUETOOTH_DEVICE_INFO
 #else
-#define BLUETOOTH_DEVICE_INFO bdaddr_t
+#define BLUETOOTH_ADDR_INFO bdaddr_t
 #endif
   /**
    * @brief Return device unique identifier.
