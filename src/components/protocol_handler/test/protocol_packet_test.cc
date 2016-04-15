@@ -238,11 +238,15 @@ TEST_F(ProtocolPacketTest, DeserializePacket_FrameTypeFirst_ResultOK) {
                        zero_test_data_element_,
                        zero_test_data_element_,
                        zero_test_data_element_,
+                       zero_test_data_element_,
+                       zero_test_data_element_,
+                       zero_test_data_element_,
+                       zero_test_data_element_,
+                       zero_test_data_element_,
+                       zero_test_data_element_,
+                       zero_test_data_element_,
+                       zero_test_data_element_,
                        data_size,
-                       zero_test_data_element_,
-                       zero_test_data_element_,
-                       zero_test_data_element_,
-                       zero_test_data_element_,
                        zero_test_data_element_};
   ProtocolPacket protocol_packet;
   // Act

@@ -272,6 +272,7 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
     db_schema.push_back("subMenu");
     db_schema.push_back("TTSChunk");
     db_schema.push_back("vrHelpItem");
+    db_schema.push_back("subscribedForWayPoints");
     db_schema.push_back("tableLimitedCharacterList");
     db_schema.push_back("characterArray");
     db_schema.push_back("choice");
