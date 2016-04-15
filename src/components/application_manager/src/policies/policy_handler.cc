@@ -57,41 +57,74 @@ namespace policy {
 using namespace application_manager;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
+
 namespace {
 
 using namespace mobile_apis;
 
 typedef std::map<RequestType::eType, std::string> RequestTypeMap;
-RequestTypeMap TypeToString = {
-    {RequestType::INVALID_ENUM, "INVALID_ENUM"},
-    {RequestType::HTTP, "HTTP"},
-    {RequestType::FILE_RESUME, "FILE_RESUME"},
-    {RequestType::AUTH_REQUEST, "AUTH_REQUEST"},
-    {RequestType::AUTH_CHALLENGE, "AUTH_CHALLENGE"},
-    {RequestType::AUTH_ACK, "AUTH_ACK"},
-    {RequestType::PROPRIETARY, "PROPRIETARY"},
-    {RequestType::QUERY_APPS, "QUERY_APPS"},
-    {RequestType::LAUNCH_APP, "LAUNCH_APP"},
-    {RequestType::LOCK_SCREEN_ICON_URL, "LOCK_SCREEN_ICON_URL"},
-    {RequestType::TRAFFIC_MESSAGE_CHANNEL, "TRAFFIC_MESSAGE_CHANNEL"},
-    {RequestType::DRIVER_PROFILE, "DRIVER_PROFILE"},
-    {RequestType::VOICE_SEARCH, "VOICE_SEARCH"},
-    {RequestType::NAVIGATION, "NAVIGATION"},
-    {RequestType::PHONE, "PHONE"},
-    {RequestType::CLIMATE, "CLIMATE"},
-    {RequestType::SETTINGS, "SETTINGS"},
-    {RequestType::VEHICLE_DIAGNOSTICS, "VEHICLE_DIAGNOSTICS"},
-    {RequestType::EMERGENCY, "EMERGENCY"},
-    {RequestType::MEDIA, "MEDIA"},
-    {RequestType::FOTA, "FOTA"}};
 
-const std::string RequestTypeToString(RequestType::eType type) {
-  RequestTypeMap::const_iterator it = TypeToString.find(type);
-  if (TypeToString.end() != it) {
+#ifdef SDL_CPP11
+RequestTypeMap type_to_string_map = {
+    std::make_pair(RequestType::INVALID_ENUM, std::string("INVALID_ENUM")),
+    std::make_pair(RequestType::HTTP, std::string("HTTP")),
+    std::make_pair(RequestType::FILE_RESUME, std::string("FILE_RESUME")),
+    std::make_pair(RequestType::AUTH_REQUEST, std::string("AUTH_REQUEST")),
+    std::make_pair(RequestType::AUTH_CHALLENGE, std::string("AUTH_CHALLENGE")),
+    std::make_pair(RequestType::AUTH_ACK, std::string("AUTH_ACK")),
+    std::make_pair(RequestType::PROPRIETARY, std::string("PROPRIETARY")),
+    std::make_pair(RequestType::QUERY_APPS, std::string("QUERY_APPS")),
+    std::make_pair(RequestType::LAUNCH_APP, std::string("LAUNCH_APP")),
+    std::make_pair(RequestType::LOCK_SCREEN_ICON_URL, std::string("LOCK_SCREEN_ICON_URL")),
+    std::make_pair(RequestType::TRAFFIC_MESSAGE_CHANNEL, std::string("TRAFFIC_MESSAGE_CHANNEL")),
+    std::make_pair(RequestType::DRIVER_PROFILE, std::string("DRIVER_PROFILE")),
+    std::make_pair(RequestType::VOICE_SEARCH, std::string("VOICE_SEARCH")),
+    std::make_pair(RequestType::NAVIGATION, std::string("NAVIGATION")),
+    std::make_pair(RequestType::PHONE, std::string("PHONE")),
+    std::make_pair(RequestType::CLIMATE, std::string("CLIMATE")),
+    std::make_pair(RequestType::SETTINGS, std::string("SETTINGS")),
+    std::make_pair(RequestType::VEHICLE_DIAGNOSTICS, std::string("VEHICLE_DIAGNOSTICS")),
+    std::make_pair(RequestType::EMERGENCY, std::string("EMERGENCY")),
+    std::make_pair(RequestType::MEDIA, std::string("MEDIA")),
+    std::make_pair(RequestType::FOTA, std::string("FOTA"))};
+#else
+RequestTypeMap create_map() {
+  RequestTypeMap type_to_string_map;
+  type_to_string_map.insert(std::make_pair(RequestType::INVALID_ENUM, std::string("INVALID_ENUM")));
+  type_to_string_map.insert(std::make_pair(RequestType::HTTP, std::string("HTTP")));
+  type_to_string_map.insert(std::make_pair(RequestType::FILE_RESUME, std::string("FILE_RESUME")));
+  type_to_string_map.insert(std::make_pair(RequestType::AUTH_REQUEST, std::string("AUTH_REQUEST")));
+  type_to_string_map.insert(std::make_pair(RequestType::AUTH_CHALLENGE, std::string("AUTH_CHALLENGE")));
+  type_to_string_map.insert(std::make_pair(RequestType::AUTH_ACK, std::string("AUTH_ACK")));
+  type_to_string_map.insert(std::make_pair(RequestType::PROPRIETARY, std::string("PROPRIETARY")));
+  type_to_string_map.insert(std::make_pair(RequestType::QUERY_APPS, std::string("QUERY_APPS")));
+  type_to_string_map.insert(std::make_pair(RequestType::LAUNCH_APP, std::string("LAUNCH_APP")));
+  type_to_string_map.insert(std::make_pair(RequestType::LOCK_SCREEN_ICON_URL, std::string("LOCK_SCREEN_ICON_URL")));
+  type_to_string_map.insert(std::make_pair(RequestType::TRAFFIC_MESSAGE_CHANNEL, std::string("TRAFFIC_MESSAGE_CHANNEL")));
+  type_to_string_map.insert(std::make_pair(RequestType::DRIVER_PROFILE, std::string("DRIVER_PROFILE")));
+  type_to_string_map.insert(std::make_pair(RequestType::VOICE_SEARCH, std::string("VOICE_SEARCH")));
+  type_to_string_map.insert(std::make_pair(RequestType::NAVIGATION, std::string("NAVIGATION")));
+  type_to_string_map.insert(std::make_pair(RequestType::PHONE, std::string("PHONE")));
+  type_to_string_map.insert(std::make_pair(RequestType::CLIMATE, std::string("CLIMATE")));
+  type_to_string_map.insert(std::make_pair(RequestType::SETTINGS, std::string("SETTINGS")));
+  type_to_string_map.insert(std::make_pair(RequestType::VEHICLE_DIAGNOSTICS, std::string("VEHICLE_DIAGNOSTICS")));
+  type_to_string_map.insert(std::make_pair(RequestType::EMERGENCY, std::string("EMERGENCY")));
+  type_to_string_map.insert(std::make_pair(RequestType::MEDIA, std::string("MEDIA")));
+  type_to_string_map.insert(std::make_pair(RequestType::FOTA, std::string("FOTA")));
+  return type_to_string_map;
+}
+RequestTypeMap type_to_string_map = create_map();
+#endif  // SDL_CPP11
+
+std::string RequestTypeToString(RequestType::eType type) {
+  RequestTypeMap::const_iterator it = type_to_string_map.find(type);
+  if (type_to_string_map.end() != it) {
     return (*it).second;
   }
-  return "";
+  return std::string();
 }
+
+}  // namespace
 
 const policy::DeviceParams GetDeviceParams(
     connection_handler::DeviceHandle device_handle,
@@ -111,7 +144,6 @@ const policy::DeviceParams GetDeviceParams(
   device_params.device_handle = device_handle;
   return device_params;
   }
-}
 
 #define POLICY_LIB_CHECK(return_value)                                     \
   {                                                                        \

@@ -56,7 +56,6 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
                 ${UTILS_INCLUDE_DIR}/utils/socket_utils.h
                 ${UTILS_INCLUDE_DIR}/utils/type_traits.h
                 ${UTILS_INCLUDE_DIR}/utils/timer.h
-                ${UTILS_INCLUDE_DIR}/utils/custom_string.h
                 ${UTILS_INCLUDE_DIR}/utils/convert_utils.h)
       set (src ${UTILS_SRC_DIR}/bitstream.cc
            ${UTILS_SRC_DIR}/conditional_variable_qt.cc
