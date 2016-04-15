@@ -72,7 +72,7 @@ bool ConditionalVariable::Wait(AutoLock& auto_lock) {
 }
 
 ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
-    AutoLock& auto_lock, int32_t milliseconds) {
+    AutoLock& auto_lock, uint32_t milliseconds) {
   Lock& lock = auto_lock.GetLock();
 // Disable wait recursive mutexes. Added for compatible with Qt.
 // Actual Qt version (5.5) cannot support waiting on recursive mutex.

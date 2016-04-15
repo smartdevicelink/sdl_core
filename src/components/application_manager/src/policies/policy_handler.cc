@@ -31,9 +31,6 @@
  */
 #include "application_manager/policies/policy_handler.h"
 
-
-#include <unistd.h>
-#include <dlfcn.h>
 #include <algorithm>
 #include <vector>
 #include "application_manager/smart_object_keys.h"

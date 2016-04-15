@@ -1,2 +1,8 @@
 build/
 *.user
+src/3rd_party-static/openssl-1.0.2/
+*.pyc
+src/components/utils/src/threads/thread.h
+src/components/utils/src/threads/thread_delegate.h
+src/components/media_manager/src/audio/from_mic_to_file_recorder_thread.h
+src/components/utils/src/socket.h

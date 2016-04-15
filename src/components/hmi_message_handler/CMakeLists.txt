@@ -56,7 +56,6 @@ set (SOURCES
     ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_handler_impl.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/messagebroker_adapter.cc
     ${COMPONENTS_DIR}/hmi_message_handler/src/hmi_message_adapter_impl.cc
-    ${COMPONENTS_DIR}/hmi_message_handler/src/mqueue_adapter.cc
     ${DBUS_SOURCE}
 )
 if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")	
@@ -73,8 +72,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set (HEADERS
         ${COMPONENTS_DIR}/hmi_message_handler/include/hmi_message_handler/hmi_message_handler_impl.h
         ${COMPONENTS_DIR}/hmi_message_handler/include/hmi_message_handler/messagebroker_adapter.h
-        ${COMPONENTS_DIR}/hmi_message_handler/include/hmi_message_handler//hmi_message_adapter.h
-        ${COMPONENTS_DIR}/hmi_message_handler/include/hmi_message_handler//mqueue_adapter.h
+        ${COMPONENTS_DIR}/hmi_message_handler/include/hmi_message_handler/hmi_message_adapter.h
         ${DBUS_HEADER}
   )
   source_group("Header Files" FILES ${HEADERS} )

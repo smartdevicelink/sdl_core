@@ -33,6 +33,7 @@
 #include "protocol_handler/protocol_handler_impl.h"
 #include <memory.h>
 #include <algorithm>  // std::find
+#include <cctype>  // std::isprint
 
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/session_observer.h"
@@ -1489,11 +1490,10 @@ std::string ConvertPacketDataToString(const uint8_t* data,
   if (0 == data_size)
     return std::string();
   bool is_printable_array = true;
-  std::locale loc;
   const char* text = reinterpret_cast<const char*>(data);
   // Check data for printability
   for (size_t i = 0; i < data_size; ++i) {
-    if (!std::isprint(text[i], loc)) {
+    if (!std::isprint(text[i])) {
       is_printable_array = false;
       break;
     }

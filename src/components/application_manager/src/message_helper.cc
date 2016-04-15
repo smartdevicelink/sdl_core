@@ -60,6 +60,10 @@
 #include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
 
+#if defined(_MSC_VER)
+#define snprintf _snprintf_s
+#endif
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 namespace application_manager {
