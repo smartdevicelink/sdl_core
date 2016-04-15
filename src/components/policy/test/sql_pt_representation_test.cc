@@ -82,6 +82,8 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
 
   static void SetUpTestCase() {
     const std::string kAppStorageFolder = "storage1";
+    file_system::RemoveDirectory(kAppStorageFolder);
+    file_system::DeleteFile("policy.sqlite");
     reps = new SQLPTRepresentation;
     dbms = new DBMS(kDatabaseName);
     policy_settings_ = std::auto_ptr<policy_handler_test::MockPolicySettings>(
