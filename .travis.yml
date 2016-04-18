@@ -2,8 +2,10 @@ env:
   global:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
    #   via the "travis encrypt" command using the project repo's public key
+   - LD_LIBRARY_PATH=.
    - secure: "YrUVgA4/Vs4YPINdq1hwc5Mv2SZEtq/XY/+Wg0hC6lpicRBLSiQEgsqmxZc0/OFIbxzTYSE080X8SA6DXp+A0MEVu94zYr9lS/jJ5cDi/2Cl8QV+S/q0nlvr8aJEmCjOFDQTvWMp32ajBIo9HKsN9WrfK6nHuGhBBkZHPjCiVSE="
 language: cpp
+dist: trusty
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y libavahi-client-dev libssl-dev libbluetooth3 libbluetooth-dev bluez-tools libudev-dev libgtest-dev
@@ -33,4 +35,5 @@ addons:
     branch_pattern: coverity
 script: 
   - sudo ldconfig
-  - cd build && make test
+  - cd build
+  - travis_wait make test
