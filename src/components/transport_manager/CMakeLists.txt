@@ -70,34 +70,33 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set (src
     ${TM_SRC_DIR}/transport_manager_impl.cc
     ${TM_SRC_DIR}/transport_manager_default.cc
-    ${TM_SRC_DIR}/tcp/tcp_transport_adapter.cc    
+    ${TM_SRC_DIR}/tcp/tcp_transport_adapter.cc
    )
   set (src_tm_adpt
     ${TM_SRC_DIR}/transport_adapter/transport_adapter_listener_impl.cc
     ${TM_SRC_DIR}/transport_adapter/transport_adapter_impl.cc
-    ${TM_SRC_DIR}/transport_adapter/threaded_socket_connection.cc
    )
   set (src_tcp
-    ${TM_SRC_DIR}/tcp/tcp_transport_adapter.cc    
+    ${TM_SRC_DIR}/tcp/tcp_transport_adapter.cc
     ${TM_SRC_DIR}/tcp/tcp_client_listener.cc
     ${TM_SRC_DIR}/tcp/tcp_device.cc
     ${TM_SRC_DIR}/tcp/tcp_socket_connection.cc
     ${TM_SRC_DIR}/tcp/tcp_connection_factory.cc
    )
-   
+
     source_group("Header Files" FILES ${inc} )
-    source_group("Header Files\\Transport Manager" FILES ${inc_tm_adpt} )    
-    source_group("Header Files\\TCP" FILES ${inc_tcp} )        
+    source_group("Header Files\\Transport Manager" FILES ${inc_tm_adpt} )
+    source_group("Header Files\\TCP" FILES ${inc_tcp} )
     source_group("Source Files" FILES ${src})
-    source_group("Source Files\\Transport Manager" FILES ${src_tm_adpt})    
-    source_group("Source Files\\TCP" FILES ${src_tcp})    
-  
+    source_group("Source Files\\Transport Manager" FILES ${src_tm_adpt})
+    source_group("Source Files\\TCP" FILES ${src_tcp})
+
   if (BUILD_AVAHI_SUPPORT)
     list (APPEND SOURCES
     ${TM_SRC_DIR}/tcp/dnssd_service_browser.cc
     )
   endif()
-  
+
   if (BUILD_BT_SUPPORT)
     file (GLOB bt_inc ${TM_INC_DIR}/bluetooth/*.h )
     set( bt_src ${TM_SRC_DIR}/bluetooth/bluetooth_connection_factory.cc
@@ -105,42 +104,42 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
                 ${TM_SRC_DIR}/bluetooth/bluetooth_device_scanner_win.cc
                 ${TM_SRC_DIR}/bluetooth/bluetooth_socket_connection_win.cc
                 ${TM_SRC_DIR}/bluetooth/bluetooth_transport_adapter_win.cc)
-    source_group("Header Files\\Bluetooth" FILES ${bt_inc} )    
-    source_group("Source Files\\Bluetooth" FILES ${bt_src} )  
+    source_group("Header Files\\Bluetooth" FILES ${bt_inc} )
+    source_group("Source Files\\Bluetooth" FILES ${bt_src} )
   endif()
 
   if (BUILD_USB_SUPPORT)
     set(usb_src ${TM_SRC_DIR}/usb/usb_aoa_adapter.cc
                 ${TM_SRC_DIR}/usb/usb_connection_factory.cc
                 ${TM_SRC_DIR}/usb/usb_device_scanner.cc)
-                
+
     set (usb_inc ${TM_INC_DIR}/usb/common.h
                  ${TM_INC_DIR}/usb/usb_aoa_adapter.h
                  ${TM_INC_DIR}/usb/usb_connection_factory.h
                  ${TM_INC_DIR}/usb/usb_control_transfer.h
                  ${TM_INC_DIR}/usb/usb_device.h
                  ${TM_INC_DIR}/usb/usb_device_scanner.h)
-                 
+
     set(usb_libsrc ${TM_SRC_DIR}/usb/libusb/platform_usb_device.cc
                    ${TM_SRC_DIR}/usb/libusb/usb_connection.cc
                    ${TM_SRC_DIR}/usb/libusb/usb_handler.cc)
-                   
+
     set(usb_libinc ${TM_INC_DIR}/usb/libusb/platform_usb_device.h
                    ${TM_INC_DIR}/usb/libusb/usb_connection.h
-                   ${TM_INC_DIR}/usb/libusb/usb_handler.h)    
-    source_group("Header Files\\USB" FILES ${usb_inc} )    
-    source_group("Source Files\\USB" FILES ${usb_src} )    
-    source_group("Header Files\\USB\\LibUSB" FILES ${usb_libinc} )    
-    source_group("Source Files\\USB\\LibUSB" FILES ${usb_libsrc} )    
+                   ${TM_INC_DIR}/usb/libusb/usb_handler.h)
+    source_group("Header Files\\USB" FILES ${usb_inc} )
+    source_group("Source Files\\USB" FILES ${usb_src} )
+    source_group("Header Files\\USB\\LibUSB" FILES ${usb_libinc} )
+    source_group("Source Files\\USB\\LibUSB" FILES ${usb_libsrc} )
   endif(BUILD_USB_SUPPORT)
-   
+
     add_library("TransportManager" ${inc} ${src}
                                    ${inc_tm_adpt} ${src_tm_adpt}
-                                   ${inc_tcp}   ${src_tcp} 
-                                   ${bt_inc} ${bt_src} 
+                                   ${inc_tcp}   ${src_tcp}
+                                   ${bt_inc} ${bt_src}
                                    ${usb_inc} ${usb_src}
                                    ${usb_libinc}  ${usb_libsrc}
-    )    
+    )
 
     target_link_libraries("TransportManager" ProtocolLibrary )
 else()
@@ -155,7 +154,6 @@ set (SOURCES
   ${TM_SRC_DIR}/transport_adapter/transport_adapter_listener_impl.cc
   ${TM_SRC_DIR}/transport_adapter/transport_adapter_impl.cc
   ${TM_SRC_DIR}/tcp/tcp_transport_adapter.cc
-  ${TM_SRC_DIR}/transport_adapter/threaded_socket_connection.cc
   ${TM_SRC_DIR}/tcp/tcp_client_listener.cc
   ${TM_SRC_DIR}/tcp/tcp_device.cc
   ${TM_SRC_DIR}/tcp/tcp_socket_connection.cc

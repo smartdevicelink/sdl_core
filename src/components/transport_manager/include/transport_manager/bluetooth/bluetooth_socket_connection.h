@@ -65,7 +65,7 @@ class TransportAdapterController;
 #ifdef OS_WINDOWS
 class BluetoothSocketConnection : public Connection {
 #else
-class BluetoothSocketConnection : public ThreadedSocketConnection {
+class BluetoothSocketConnection : public ThreadedSocketConnection<utils::BluetoothSocketConnection> {
 #endif
  public:
   /**

@@ -36,6 +36,7 @@ set(THREAD_INCLUDE_DIR ${COMPONENTS_DIR}/include/utils/threads/)
 include_directories (
   ${UTILS_INCLUDE_DIR}
   ${COMPONENTS_DIR}/config_profile/include
+  ${COMPONENTS_DIR}/transport_manager/include
 )
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
@@ -175,7 +176,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
       target_link_libraries("Utils" Qt5::Core Qt5::Network ${LIBRARIES})
     else()
       add_subdirectory(./src/sqlite_wrapper)
-      target_link_libraries("Utils" ${LIBRARIES})    
+      target_link_libraries("Utils" ${LIBRARIES})
     endif()
 else()
     include_directories (
@@ -185,7 +186,7 @@ else()
       ${UTILS_SRC_DIR}/bitstream.cc
       ${UTILS_SRC_DIR}/conditional_variable_posix.cc
       ${UTILS_SRC_DIR}/file_system_posix.cc
-      ${UTILS_SRC_DIR}/threads/posix_thread.cc   
+      ${UTILS_SRC_DIR}/threads/posix_thread.cc
       ${UTILS_SRC_DIR}/threads/thread_delegate_posix.cc
       ${UTILS_SRC_DIR}/threads/thread_validator.cc
       ${UTILS_SRC_DIR}/threads/async_runner.cc
@@ -231,7 +232,7 @@ else()
     add_library("Utils" ${SOURCES})
 
     if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-        # --- QDB Wrapper 
+        # --- QDB Wrapper
         add_subdirectory(./src/qdb_wrapper)
     else ()
         # --- SQLite Wrapper
@@ -239,7 +240,7 @@ else()
     endif ()
 
     if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-     list(APPEND LIBRARIES dl) 
+     list(APPEND LIBRARIES dl)
     endif()
 
     if(ENABLE_LOG)

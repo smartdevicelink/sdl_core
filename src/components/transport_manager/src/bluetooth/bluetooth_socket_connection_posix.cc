@@ -76,59 +76,22 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
     return false;
   }
 
-  struct sockaddr_rc remoteSocketAddress = {0};
-  remoteSocketAddress.rc_family = AF_BLUETOOTH;
-  memcpy(&remoteSocketAddress.rc_bdaddr,
-         &bluetooth_device->address(),
-         sizeof(bdaddr_t));
-  remoteSocketAddress.rc_channel = rfcomm_channel;
+  bluetooth_device->address();
 
-  int rfcomm_socket;
-
-  int attempts = 4;
-  int connect_status = 0;
-  LOGGER_DEBUG(logger_, "start rfcomm Connect attempts");
-  do {
-    rfcomm_socket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
-    if (-1 == rfcomm_socket) {
-      LOGGER_ERROR_WITH_ERRNO(logger_,
-                              "Failed to create RFCOMM socket for device "
-                                  << device_handle());
-      *error = new ConnectError();
-      LOGGER_TRACE(logger_, "exit with FALSE");
-      return false;
-    }
-    connect_status = ::connect(rfcomm_socket,
-                               (struct sockaddr*)&remoteSocketAddress,
-                               sizeof(remoteSocketAddress));
-    if (0 == connect_status) {
-      LOGGER_DEBUG(logger_, "rfcomm Connect ok");
-      break;
-    }
-    if (errno != 111 && errno != 104) {
-      LOGGER_DEBUG(logger_, "rfcomm Connect errno " << errno);
-      break;
-    }
-    if (errno) {
-      LOGGER_DEBUG(logger_, "rfcomm Connect errno " << errno);
-      close(rfcomm_socket);
-    }
-    sleep(2);
-  } while (--attempts > 0);
-  LOGGER_INFO(logger_, "rfcomm Connect attempts finished");
-  if (0 != connect_status) {
-    LOGGER_DEBUG(
-        logger_,
-        "Failed to Connect to remote device "
-            << BluetoothDevice::GetUniqueDeviceId(remoteSocketAddress.rc_bdaddr)
-            << " for session " << this);
+  LOGGER_DEBUG(logger_, "Connecting to " << "bluetooth device on port"
+               << ":" << rfcomm_channel);
+  utils::BluetoothSocketConnection bt_connection;
+  if (!bt_connection.Connect(bluetooth_device->address(), rfcomm_channel)) {
+    LOGGER_ERROR(logger_,
+                 "Failed to connect to the server over port:"
+                 << rfcomm_channel
+                 << " for application "
+                 << application_handle());
     *error = new ConnectError();
-    LOGGER_TRACE(logger_, "exit with FALSE");
     return false;
   }
 
-  //TODO(AOleynik): fix that
-  //set_socket(rfcomm_socket);
+  SetSocket(bt_connection);
   LOGGER_TRACE(logger_, "exit with TRUE");
   return true;
 }

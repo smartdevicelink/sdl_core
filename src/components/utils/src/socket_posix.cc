@@ -39,7 +39,11 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <cstring>
+#include <bluetooth/rfcomm.h>
+#include <bluetooth/bluetooth.h>
 
+#include "transport_manager/bluetooth/bluetooth_device.h"
 #include "utils/macro.h"
 #include "utils/pimpl_impl.h"
 #include "utils/socket_utils.h"
@@ -96,6 +100,10 @@ class utils::TcpSocketConnection::Impl {
   uint16_t GetPort() const;
 
   bool Connect(const HostAddress& address, const uint16_t port);
+
+  bool Attach(const int tcp_socket,
+              const HostAddress& address,
+              const uint16_t port);
 
   bool Notify();
 
@@ -280,6 +288,19 @@ bool utils::TcpSocketConnection::Impl::Connect(const HostAddress& address,
   return true;
 }
 
+bool utils::TcpSocketConnection::Impl::Attach(const int tcp_socket,
+                                              const HostAddress& address,
+                                              const uint16_t port) {
+  if (!CreateNotifictionPipes()) {
+    Close();
+    return false;
+  }
+  tcp_socket_ = tcp_socket;
+  address_ = address;
+  port_ = port;
+  return true;
+}
+
 bool utils::TcpSocketConnection::Impl::Notify() {
   if (-1 == write_fd_) {
     LOGGER_ERROR(logger_,
@@ -425,6 +446,164 @@ void utils::TcpSocketConnection::Impl::Wait() {
   }
 }
 
+//#if defined(BLUETOOTH_SUPPORT) && defined(OS_POSIX)
+
+////////////////////////////////////////////////////////////////////////////////
+/// utils::BluetoothSocketConnection::Impl
+////////////////////////////////////////////////////////////////////////////////
+
+class utils::BluetoothSocketConnection::Impl {
+ public:
+  Impl();
+
+  ~Impl();
+
+  bool Send(const char* buffer,
+            const std::size_t size,
+            std::size_t& bytes_written);
+
+  bool Close();
+
+  bool IsValid() const;
+
+  void EnableKeepalive();
+
+  int GetNativeHandle();
+
+  utils::HostAddress GetAddress() const;
+
+  uint16_t GetPort() const;
+
+  bool Connect(const BLUETOOTH_ADDR_INFO& address, const uint8_t rfcomm_port);
+
+  bool Attach(const int tcp_socket,
+              const HostAddress& address,
+              const uint16_t port);
+
+  bool Notify();
+
+  void Wait();
+
+  void SetEventHandler(TcpConnectionEventHandler* event_handler);
+
+private:
+    TcpSocketConnection tcp_connection_;
+};
+
+utils::BluetoothSocketConnection::Impl::Impl() {}
+
+utils::BluetoothSocketConnection::Impl::~Impl() {}
+
+bool utils::BluetoothSocketConnection::Impl::Send(const char* buffer,
+                                            const std::size_t size,
+                                            std::size_t& bytes_written) {
+  return tcp_connection_.Send(buffer, size, bytes_written);
+}
+
+bool utils::BluetoothSocketConnection::Impl::Close() {
+  return tcp_connection_.Close();
+}
+
+bool utils::BluetoothSocketConnection::Impl::IsValid() const {
+  return tcp_connection_.IsValid();
+}
+
+void utils::BluetoothSocketConnection::Impl::EnableKeepalive() {
+  tcp_connection_.EnableKeepalive();
+}
+
+int utils::BluetoothSocketConnection::Impl::GetNativeHandle() {
+  return tcp_connection_.GetNativeHandle();
+}
+
+utils::HostAddress utils::BluetoothSocketConnection::Impl::GetAddress() const {
+  return tcp_connection_.GetAddress();
+}
+
+uint16_t utils::BluetoothSocketConnection::Impl::GetPort() const {
+  return tcp_connection_.GetPort();
+}
+
+bool utils::BluetoothSocketConnection::Impl::Connect(
+    const BLUETOOTH_ADDR_INFO& address,
+    const uint8_t rfcomm_port) {
+  if (IsValid()) {
+    LOGGER_ERROR(logger_, "Already connected. Closing existing connection.");
+    Close();
+    return false;
+  }
+
+  sockaddr_rc remoteSocketAddress = { 0 };
+  remoteSocketAddress.rc_family = AF_BLUETOOTH;
+  remoteSocketAddress.rc_channel = rfcomm_port;
+  bacpy(&remoteSocketAddress.rc_bdaddr, &address);
+
+  int rfcomm_socket;
+
+  int attempts = kConnectionAttempts;
+  int connect_status = 0;
+  LOGGER_DEBUG(logger_, "start rfcomm Connect attempts");
+  do {
+    rfcomm_socket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
+    if (-1 == rfcomm_socket) {
+      LOGGER_ERROR_WITH_ERRNO(logger_,
+                               "Failed to create RFCOMM socket for device.");
+      Close();
+      LOGGER_TRACE(logger_, "exit with FALSE");
+      return false;
+    }
+    connect_status = ::connect(
+                       rfcomm_socket,
+                       reinterpret_cast<sockaddr*>(&remoteSocketAddress),
+                       sizeof(remoteSocketAddress));
+    if (0 == connect_status) {
+      LOGGER_DEBUG(logger_, "rfcomm Connect ok");
+      break;
+    }
+    if (errno != 111 && errno != 104) {
+      LOGGER_DEBUG(logger_, "rfcomm Connect errno " << std::strerror(errno));
+      break;
+    }
+    if (errno) {
+      LOGGER_DEBUG(logger_, "rfcomm Connect errno " << std::strerror(errno));
+      CloseSocket(rfcomm_socket);
+    }
+    sleep(2);
+  } while (--attempts > 0);
+
+  LOGGER_INFO(logger_, "rfcomm Connect attempts finished");
+  if (0 != connect_status) {
+    LOGGER_DEBUG(logger_,
+                  "Failed to Connect to remote bluetooth device for session "
+                 << this);
+    CloseSocket(rfcomm_socket);
+    LOGGER_TRACE(logger_, "exit with FALSE");
+    return false;
+  }
+
+  return Attach(rfcomm_socket, HostAddress("bt_device"), rfcomm_port);
+}
+
+bool utils::BluetoothSocketConnection::Impl::Attach(const int tcp_socket,
+                                              const HostAddress& address,
+                                              const uint16_t port) {
+  return tcp_connection_.Attach(tcp_socket, address, port);
+}
+
+bool utils::BluetoothSocketConnection::Impl::Notify() {
+  return tcp_connection_.Notify();
+}
+
+void utils::BluetoothSocketConnection::Impl::SetEventHandler(
+    TcpConnectionEventHandler* event_handler) {
+  tcp_connection_.SetEventHandler(event_handler);
+}
+
+void utils::BluetoothSocketConnection::Impl::Wait() {
+  tcp_connection_.Wait();
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 /// utils::TcpSocketConnection
 ////////////////////////////////////////////////////////////////////////////////
@@ -487,6 +666,12 @@ bool utils::TcpSocketConnection::Connect(const HostAddress& address,
   return impl_->Connect(address, port);
 }
 
+bool utils::TcpSocketConnection::Attach(const int tcp_socket,
+                                        const HostAddress& address,
+                                        const uint16_t port) {
+  return  impl_->Attach(tcp_socket, address, port);
+}
+
 bool utils::TcpSocketConnection::Notify() {
   return impl_->Notify();
 }
@@ -496,6 +681,67 @@ void utils::TcpSocketConnection::Wait() {
 }
 
 void utils::TcpSocketConnection::SetEventHandler(
+    TcpConnectionEventHandler* event_handler) {
+  impl_->SetEventHandler(event_handler);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// utils::BluetoothSocketConnection
+////////////////////////////////////////////////////////////////////////////////
+
+// Ctor&Dtor should be in the cc file
+// to prevent inlining.
+// Otherwise the compiler will try to inline
+// and fail to find ctor of the Pimpl.
+utils::BluetoothSocketConnection::BluetoothSocketConnection() {}
+
+utils::BluetoothSocketConnection::~BluetoothSocketConnection() {}
+
+utils::BluetoothSocketConnection::BluetoothSocketConnection(
+    const BluetoothSocketConnection& rhs) {
+  impl_ = const_cast<BluetoothSocketConnection&>(rhs).impl_;
+}
+
+utils::BluetoothSocketConnection& utils::BluetoothSocketConnection::operator=(
+    const BluetoothSocketConnection& rhs) {
+  impl_ = const_cast<BluetoothSocketConnection&>(rhs).impl_;
+  return *this;
+}
+
+utils::BluetoothSocketConnection::BluetoothSocketConnection(Impl* impl)
+  : impl_(impl) {
+  DCHECK(impl);
+}
+
+bool utils::BluetoothSocketConnection::Send(const char* buffer,
+                                      const std::size_t size,
+                                      std::size_t& bytes_written) {
+  return impl_->Send(buffer, size, bytes_written);
+}
+
+bool utils::BluetoothSocketConnection::Close() {
+  return impl_->Close();
+}
+
+bool utils::BluetoothSocketConnection::IsValid() const {
+  return impl_->IsValid();
+}
+
+bool utils::BluetoothSocketConnection::Connect(
+    const BLUETOOTH_ADDR_INFO& address,
+    const uint8_t rfcomm_port) {
+  return impl_->Connect(address, rfcomm_port);
+}
+
+bool utils::BluetoothSocketConnection::Notify() {
+  return impl_->Notify();
+}
+
+void utils::BluetoothSocketConnection::Wait() {
+  impl_->Wait();
+}
+
+void utils::BluetoothSocketConnection::SetEventHandler(
     TcpConnectionEventHandler* event_handler) {
   impl_->SetEventHandler(event_handler);
 }
