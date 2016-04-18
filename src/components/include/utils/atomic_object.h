@@ -33,8 +33,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_ATOMIC_OBJECT_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_ATOMIC_OBJECT_H_
 
-#include "utils/rwlock.h"
-#include "utils/conditional_variable.h"
+#include "utils/lock.h"
 #include "utils/macro.h"
 
 namespace sync_primitives {
@@ -68,7 +67,7 @@ class Atomic {
    * @return mofified value.
    */
   T& operator=(const T& val) {
-    sync_primitives::AutoWriteLock lock(rw_lock_);
+    sync_primitives::AutoSpin lock(spin_lock_);
     value_ = val;
     return value_;
   }
@@ -79,7 +78,7 @@ class Atomic {
    * return stored value.
    */
   operator T() const {
-    sync_primitives::AutoReadLock lock(rw_lock_);
+    sync_primitives::AutoSpin lock(spin_lock_);
     return value_;
   }
 
@@ -90,13 +89,13 @@ class Atomic {
    */
   template <typename U>
   operator U() const {
-    sync_primitives::AutoReadLock lock(rw_lock_);
+    sync_primitives::AutoSpin lock(spin_lock_);
     return static_cast<U>(value_);
   }
 
  private:
   T value_;
-  mutable sync_primitives::RWLock rw_lock_;
+  mutable sync_primitives::SpinMutex spin_lock_;
 };
 
 typedef Atomic<int> atomic_int;
