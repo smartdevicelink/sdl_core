@@ -167,7 +167,7 @@ void RegisterAppInterfaceRequest::Run() {
                       << connection_key()
                       << ", correlation_id=" << correlation_id()
                       << ", default_timeout=" << default_timeout()
-                      << ", thread=" << pthread_self());
+                      << ", thread=" << threads::Thread::CurrentId());
     ApplicationManagerImpl::instance()->updateRequestTimeout(
         connection_key(), correlation_id(), default_timeout());
 #if defined(OS_POSIX)

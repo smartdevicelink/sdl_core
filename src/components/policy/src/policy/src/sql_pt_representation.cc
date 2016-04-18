@@ -343,11 +343,10 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
     bool is_opened = false;
     const uint16_t open_attempt_timeout_ms =
         get_settings().open_attempt_timeout_ms();
-    const useconds_t sleep_interval_mcsec = open_attempt_timeout_ms * 1000;
     LOGGER_DEBUG(logger_,
                   "Open attempt timeout(ms) is: " << open_attempt_timeout_ms);
     for (int i = 0; i < attempts; ++i) {
-      usleep(sleep_interval_mcsec);
+      threads::sleep(open_attempt_timeout_ms * 1000);
       LOGGER_INFO(logger_, "Attempt: " << i + 1);
 #ifdef BUILD_TESTS
       ++open_counter_;

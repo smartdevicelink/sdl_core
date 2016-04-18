@@ -187,7 +187,7 @@ typedef struct {
 typedef std::queue<AudioData> RawAudioDataQueue;
 typedef threads::MessageLoopThread<RawAudioDataQueue> AudioPassThruQueue;
 }
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+
 typedef std::vector<std::string> RPCParams;
 
 class ApplicationManagerImpl
@@ -461,6 +461,7 @@ class ApplicationManagerImpl
                 mobile_apis::AudioStreamingState::eType audio_state) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
+      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager");
       LOGGER_ERROR(logger_,
                    "Application with appID=" << app_id << " does not exist");
       return;
@@ -478,6 +479,7 @@ class ApplicationManagerImpl
   void SetState(uint32_t app_id, HmiStatePtr new_state) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
+      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager");
       LOGGER_ERROR(logger_,
                    "Application with appID=" << app_id << " does not exist");
       return;
@@ -494,6 +496,7 @@ class ApplicationManagerImpl
   void SetState(uint32_t app_id, mobile_apis::HMILevel::eType hmi_level) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
+      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager");
       LOGGER_ERROR(logger_,
                    "Application with appID=" << app_id << " does not exist");
       return;
@@ -514,6 +517,7 @@ class ApplicationManagerImpl
                 mobile_apis::AudioStreamingState::eType audio_state) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
+      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager");
       LOGGER_ERROR(logger_,
                    "Application with appID=" << app_id << " does not exist");
       return;
@@ -535,6 +539,7 @@ class ApplicationManagerImpl
                 mobile_apis::SystemContext::eType system_context) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
+      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager");
       LOGGER_ERROR(logger_,
                    "Application with appID=" << app_id << " does not exist");
       return;
@@ -552,6 +557,7 @@ class ApplicationManagerImpl
                 mobile_apis::SystemContext::eType system_context) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
+      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager");
       LOGGER_ERROR(logger_,
                    "Application with appID=" << app_id << " does not exist");
       return;
@@ -567,6 +573,7 @@ class ApplicationManagerImpl
   void SetHmiState(uint32_t app_id, mobile_apis::HMILevel::eType hmi_level) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
+      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager");
       LOGGER_ERROR(logger_,
                    "Application with appID=" << app_id << " does not exist");
       return;
@@ -582,6 +589,7 @@ class ApplicationManagerImpl
   void SetState(uint32_t app_id, HmiStatePtr state) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
+      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager");
       LOGGER_ERROR(logger_,
                    "Application with appID=" << app_id << " does not exist");
       return;

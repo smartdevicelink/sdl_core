@@ -32,7 +32,6 @@
 
 #include "application_manager/application_impl.h"
 #include <string>
-#include <strings.h>
 #include "application_manager/message_helper.h"
 #include "application_manager/application_manager_impl.h"
 #include "protocol_handler/protocol_handler.h"
@@ -115,10 +114,11 @@ ApplicationImpl::ApplicationImpl(
           "AudioStreamSuspend",
           new ::timer::TimerTaskImpl<ApplicationImpl>(
               this, &ApplicationImpl::OnAudioStreamSuspend)) {
-  cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] = {
-      date_time::DateTime::getCurrentTime(), 0};
-  cmd_number_to_time_limits_[mobile_apis::FunctionID::GetVehicleDataID] = {
-      date_time::DateTime::getCurrentTime(), 0};
+
+  cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] =
+      std::make_pair(date_time::DateTime::getCurrentTime(), 0);
+  cmd_number_to_time_limits_[mobile_apis::FunctionID::GetVehicleDataID] =
+      std::make_pair(date_time::DateTime::getCurrentTime(), 0);
 
   set_mobile_app_id(mobile_app_id);
   set_name(app_name);
@@ -760,7 +760,7 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
           cmd_number_to_time_limits_.find(cmd_id);
       // If no command with cmd_id had been executed yet, just add to limits
       if (cmd_number_to_time_limits_.end() == it) {
-        cmd_number_to_time_limits_[cmd_id] = {current, dummy_limit};
+        cmd_number_to_time_limits_[cmd_id] = std::make_pair(current, dummy_limit);
         return false;
       }
 
@@ -774,7 +774,7 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
         return true;
       }
 
-      cmd_number_to_time_limits_[cmd_id] = {current, dummy_limit};
+      cmd_number_to_time_limits_[cmd_id] = std::make_pair(current, dummy_limit);
 
       return false;
       break;

@@ -223,7 +223,7 @@ UpdateStatusManager::UpdateThreadDelegate::UpdateThreadDelegate(
     UpdateStatusManager* update_status_manager)
     : timeout_(0)
     , stop_flag_(false)
-    , state_lock_(true)
+    , state_lock_(false)
     , update_status_manager_(update_status_manager) {
   LOGGER_INFO(logger_, "Create UpdateThreadDelegate");
 }
@@ -242,6 +242,7 @@ void UpdateStatusManager::UpdateThreadDelegate::threadMain() {
           termination_condition_.WaitFor(auto_lock, timeout_);
       if (sync_primitives::ConditionalVariable::kTimeout == wait_status) {
         if (update_status_manager_) {
+          sync_primitives::AutoUnlock auto_unlock(auto_lock);
           update_status_manager_->OnUpdateTimeoutOccurs();
         }
       }

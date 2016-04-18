@@ -47,7 +47,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
 
 namespace {
 #ifdef SDL_CPP11
-DeviceTypes devicesType = {
+DeviceTypes devices_type = {
     std::make_pair(AOA, std::string("USB_AOA")),
     std::make_pair(PASA_AOA, std::string("USB_AOA")),
     std::make_pair(MME, std::string("USB_IOS")),
@@ -56,17 +56,16 @@ DeviceTypes devicesType = {
     std::make_pair(TCP, std::string("WIFI"))};
 #else
 DeviceTypes create_map() {
-  DeviceTypes devicesType;
-  devicesType.insert(std::make_pair(AOA, std::string("USB_AOA")));
-  devicesType.insert(std::make_pair(PASA_AOA, std::string("USB_AOA")));
-  devicesType.insert(std::make_pair(MME, std::string("USB_IOS")));
-  devicesType.insert(std::make_pair(BLUETOOTH, std::string("BLUETOOTH")));
-  devicesType.insert(std::make_pair(PASA_BLUETOOTH, std::string("BLUETOOTH")));
-  devicesType.insert(std::make_pair(TCP, std::string("WIFI")));
-
-  return devicesType;
+  DeviceTypes devices_type;
+  devices_type.insert(std::make_pair(AOA, std::string("USB_AOA")));
+  devices_type.insert(std::make_pair(PASA_AOA, std::string("USB_AOA")));
+  devices_type.insert(std::make_pair(MME, std::string("USB_IOS")));
+  devices_type.insert(std::make_pair(BLUETOOTH, std::string("BLUETOOTH")));
+  devices_type.insert(std::make_pair(PASA_BLUETOOTH, std::string("BLUETOOTH")));
+  devices_type.insert(std::make_pair(TCP, std::string("WIFI")));
+  return devices_type;
 }
-DeviceTypes devicesType = create_map();
+DeviceTypes devices_type = create_map();
 #endif  // SDL_CPP11
 }
 
@@ -857,7 +856,7 @@ std::string TransportAdapterImpl::DeviceName(const DeviceUID& device_id) const {
 }
 
 std::string TransportAdapterImpl::GetConnectionType() const {
-  return devicesType[GetDeviceType()];
+  return devices_type[GetDeviceType()];
 }
 
 #ifdef TELEMETRY_MONITOR

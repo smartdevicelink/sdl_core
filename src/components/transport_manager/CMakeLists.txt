@@ -45,7 +45,7 @@ include_directories (
 )
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set (inc
-    ${TM_INC_DIR}/time_metric_observer.h
+    ${TM_INC_DIR}/telemetry_observer.h
     ${TM_INC_DIR}/transport_manager_default.h
     ${TM_INC_DIR}/transport_manager_impl.h
    )

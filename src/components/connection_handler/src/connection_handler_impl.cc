@@ -321,9 +321,7 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     if (!connection->AddNewService(session_id, service_type, is_protected)) {
       LOGGER_ERROR(logger_,
                     "Couldn't establish "
-#ifdef ENABLE_SECURITY
                         << (is_protected ? "protected" : "non-protected")
-#endif  // ENABLE_SECURITY
                         << " service " << static_cast<int>(service_type)
                         << " for session " << static_cast<int>(session_id));
       return 0;

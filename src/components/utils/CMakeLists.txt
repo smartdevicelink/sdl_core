@@ -55,7 +55,8 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
                 ${UTILS_INCLUDE_DIR}/utils/socket.h
                 ${UTILS_INCLUDE_DIR}/utils/socket_utils.h
                 ${UTILS_INCLUDE_DIR}/utils/type_traits.h
-                )
+                ${UTILS_INCLUDE_DIR}/utils/timer.h
+                ${UTILS_INCLUDE_DIR}/utils/convert_utils.h)
       set (src ${UTILS_SRC_DIR}/bitstream.cc
            ${UTILS_SRC_DIR}/conditional_variable_qt.cc
             ${UTILS_SRC_DIR}/file_system_qt.cc
@@ -75,7 +76,10 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
             ${UTILS_SRC_DIR}/socket_qt.cc
             ${UTILS_SRC_DIR}/json_utils_qt.cc
             ${UTILS_SRC_DIR}/host_address.cc
-            ${UTILS_SRC_DIR}/socket_utils.cc)
+            ${UTILS_SRC_DIR}/socket_utils.cc
+            ${UTILS_SRC_DIR}/timer.cc
+            ${UTILS_SRC_DIR}/custom_string.cc
+            ${UTILS_SRC_DIR}/convert_utils.cc)
     # Files copied for the Qt MOC.
     # Because MOC is looking headre nearby with *.cc
     # This headers include in .git exception. see .gitignore
@@ -110,7 +114,9 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
                 ${UTILS_INCLUDE_DIR}/utils/json_utils.h
                 ${UTILS_INCLUDE_DIR}/utils/host_address.h
                 ${UTILS_INCLUDE_DIR}/utils/socket.h
-                ${UTILS_INCLUDE_DIR}/utils/socket_utils.h)
+                ${UTILS_INCLUDE_DIR}/utils/socket_utils.h
+                ${UTILS_INCLUDE_DIR}/utils/timer.h
+                ${UTILS_INCLUDE_DIR}/utils/convert_utils.h)
     set (src
             ${UTILS_SRC_DIR}/bitstream.cc
             ${UTILS_SRC_DIR}/conditional_variable_win.cc
@@ -130,7 +136,10 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
             ${UTILS_SRC_DIR}/socket_win.cc
             ${UTILS_SRC_DIR}/json_utils.cc
             ${UTILS_SRC_DIR}/host_address.cc
-            ${UTILS_SRC_DIR}/socket_utils.cc)
+            ${UTILS_SRC_DIR}/socket_utils.cc
+            ${UTILS_SRC_DIR}/timer.cc
+            ${UTILS_SRC_DIR}/custom_string.cc
+            ${UTILS_SRC_DIR}/convert_utils.cc)
   endif()
 
   if (BUILD_BT_SUPPORT)
