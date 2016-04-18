@@ -9,7 +9,6 @@ dist: trusty
 before_install:
   - sudo apt-get install -y libavahi-client-dev libssl-dev libbluetooth3 libbluetooth-dev bluez-tools libudev-dev libgtest-dev
   - sudo add-apt-repository ppa:kalakris/cmake -y
-  - sudo apt-get update -q
   - sudo apt-get install -y cmake
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   - sudo apt-get -qq update
