@@ -40,10 +40,14 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <cstring>
+
+#if defined(BLUETOOTH_SUPPORT)
 #include <bluetooth/rfcomm.h>
 #include <bluetooth/bluetooth.h>
 
 #include "transport_manager/bluetooth/bluetooth_device.h"
+#endif
+
 #include "utils/macro.h"
 #include "utils/pimpl_impl.h"
 #include "utils/socket_utils.h"
@@ -446,8 +450,7 @@ void utils::TcpSocketConnection::Impl::Wait() {
   }
 }
 
-//#if defined(BLUETOOTH_SUPPORT) && defined(OS_POSIX)
-
+#if defined(BLUETOOTH_SUPPORT)
 ////////////////////////////////////////////////////////////////////////////////
 /// utils::BluetoothSocketConnection::Impl
 ////////////////////////////////////////////////////////////////////////////////
@@ -602,6 +605,7 @@ void utils::BluetoothSocketConnection::Impl::SetEventHandler(
 void utils::BluetoothSocketConnection::Impl::Wait() {
   tcp_connection_.Wait();
 }
+#endif
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -685,6 +689,7 @@ void utils::TcpSocketConnection::SetEventHandler(
   impl_->SetEventHandler(event_handler);
 }
 
+#if defined(BLUETOOTH_SUPPORT)
 ////////////////////////////////////////////////////////////////////////////////
 /// utils::BluetoothSocketConnection
 ////////////////////////////////////////////////////////////////////////////////
@@ -745,6 +750,7 @@ void utils::BluetoothSocketConnection::SetEventHandler(
     TcpConnectionEventHandler* event_handler) {
   impl_->SetEventHandler(event_handler);
 }
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 /// utils::ServerTcpSocket::Impl
