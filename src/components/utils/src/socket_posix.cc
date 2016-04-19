@@ -469,14 +469,6 @@ class utils::BluetoothSocketConnection::Impl {
 
   bool IsValid() const;
 
-  void EnableKeepalive();
-
-  int GetNativeHandle();
-
-  utils::HostAddress GetAddress() const;
-
-  uint16_t GetPort() const;
-
   bool Connect(const BLUETOOTH_ADDR_INFO& address, const uint8_t rfcomm_port);
 
   bool Attach(const int tcp_socket,
@@ -509,22 +501,6 @@ bool utils::BluetoothSocketConnection::Impl::Close() {
 
 bool utils::BluetoothSocketConnection::Impl::IsValid() const {
   return tcp_connection_.IsValid();
-}
-
-void utils::BluetoothSocketConnection::Impl::EnableKeepalive() {
-  tcp_connection_.EnableKeepalive();
-}
-
-int utils::BluetoothSocketConnection::Impl::GetNativeHandle() {
-  return tcp_connection_.GetNativeHandle();
-}
-
-utils::HostAddress utils::BluetoothSocketConnection::Impl::GetAddress() const {
-  return tcp_connection_.GetAddress();
-}
-
-uint16_t utils::BluetoothSocketConnection::Impl::GetPort() const {
-  return tcp_connection_.GetPort();
 }
 
 bool utils::BluetoothSocketConnection::Impl::Connect(
