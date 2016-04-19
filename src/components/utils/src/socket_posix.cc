@@ -63,8 +63,9 @@ bool CloseSocket(int& socket) {
                  "Socket " << socket << " is not valid. Skip closing.");
     return true;
   }
+  errno = 0;
   if (-1 != close(socket)) {
-    LOGGER_WARN(logger_, "Failed to close socket " << socket << ": " << errno);
+    LOGGER_WARN_WITH_ERRNO(logger_, "Failed recvto close socket " << socket);
     return false;
   }
   socket = 0;
@@ -167,21 +168,23 @@ utils::TcpSocketConnection::Impl::~Impl() {
 
 bool utils::TcpSocketConnection::Impl::CreateNotifictionPipes() {
   int fds[2];
+  errno = 0;
   const int result = pipe(fds);
 
   if (0 != result) {
-    LOGGER_ERROR(logger_, "pipe creation failed: " << errno);
+    LOGGER_ERROR_WITH_ERRNO(logger_, "Pipe creation failed.");
     return false;
   }
 
-  LOGGER_DEBUG(logger_, "pipe created");
+  LOGGER_DEBUG(logger_, "Pipe has been created.");
   read_fd_ = fds[0];
   write_fd_ = fds[1];
 
+  errno = 0;
   const int fcntl_ret =
       fcntl(read_fd_, F_SETFL, fcntl(read_fd_, F_GETFL) | O_NONBLOCK);
   if (0 != fcntl_ret) {
-    LOGGER_ERROR(logger_, "fcntl failed: " << errno);
+    LOGGER_ERROR_WITH_ERRNO(logger_, "fcntl failed.");
     return false;
   }
   return true;
@@ -196,11 +199,12 @@ bool utils::TcpSocketConnection::Impl::Send(const char* buffer,
     return false;
   }
   const int flags = MSG_NOSIGNAL;
+  errno = 0;
   int written = send(tcp_socket_, buffer, size, flags);
   int socket_error = errno;
   if (-1 == written) {
     if (EAGAIN != socket_error && EWOULDBLOCK != socket_error) {
-      LOGGER_ERROR(logger_, "Failed to send data: " << socket_error);
+      LOGGER_ERROR_WITH_ERRNO(logger_, "Failed to send data.");
       return false;
     } else {
       return true;
@@ -263,22 +267,24 @@ bool utils::TcpSocketConnection::Impl::Connect(const HostAddress& address,
     Close();
     return false;
   }
+  errno = 0;
   int client_socket = socket(AF_INET, SOCK_STREAM, 0);
   if (-1 == client_socket) {
-    LOGGER_ERROR(logger_, "Failed to create client socket. Error: " << errno);
+    LOGGER_ERROR_WITH_ERRNO(logger_, "Failed to create client socket.");
     return false;
   }
   sockaddr_in server_address = {0};
   server_address.sin_family = AF_INET;
   server_address.sin_port = htons(port);
   server_address.sin_addr.s_addr = address.ToIp4Address(true);
+  errno = 0;
   if (!connect(client_socket,
                reinterpret_cast<sockaddr*>(&server_address),
                sizeof(server_address)) == 0) {
-    LOGGER_ERROR(logger_,
-                 "Failed to connect to the server " << address.ToString() << ":"
-                                                    << port
-                                                    << ". Error: " << errno);
+    LOGGER_ERROR_WITH_ERRNO(logger_,
+                            "Failed to connect to the server "
+                            << address.ToString() << ":"
+                            << port);
     CloseSocket(client_socket);
     return false;
   }
@@ -308,15 +314,16 @@ bool utils::TcpSocketConnection::Impl::Attach(const int tcp_socket,
 bool utils::TcpSocketConnection::Impl::Notify() {
   if (-1 == write_fd_) {
     LOGGER_ERROR(logger_,
-                 "Failed to wake up connection thread for connection "
-                     << this << ". Error: " << errno);
+                 "File descriptior for writing is invalid. "
+                 "Failed to wake up connection thread for connection " << this);
     return false;
   }
   uint8_t buffer = 0;
+  errno = 0;
   if (1 != write(write_fd_, &buffer, 1)) {
-    LOGGER_ERROR(logger_,
-                 "Failed to wake up connection thread for connection "
-                     << this << ". Error: " << errno);
+    LOGGER_ERROR_WITH_ERRNO(
+          logger_,
+          "Failed to wake up connection thread for connection " << this);
     return false;
   }
   return true;
@@ -345,6 +352,7 @@ void utils::TcpSocketConnection::Impl::OnRead() {
   int bytes_read = -1;
 
   do {
+    errno = 0;
     bytes_read = recv(tcp_socket_, buffer, sizeof(buffer), MSG_DONTWAIT);
     if (bytes_read > 0) {
       LOGGER_DEBUG(logger_,
@@ -355,9 +363,9 @@ void utils::TcpSocketConnection::Impl::OnRead() {
     } else if (bytes_read < 0) {
       int socket_error = errno;
       if (EAGAIN != socket_error && EWOULDBLOCK != socket_error) {
-        LOGGER_ERROR(logger_,
-                     "recv() failed for connection "
-                         << tcp_socket_ << ". Error: " << socket_error);
+        LOGGER_ERROR_WITH_ERRNO(logger_,
+                                "recv() failed for connection "
+                                << tcp_socket_ );
         OnError(socket_error);
         return;
       }
@@ -398,10 +406,11 @@ void utils::TcpSocketConnection::Impl::Wait() {
   poll_fds[0].events = POLLIN | POLLPRI;
   poll_fds[1].fd = read_fd_;
   poll_fds[1].events = POLLIN | POLLPRI;
+  errno = 0;
   if (-1 == poll(poll_fds, kPollFdsSize, -1)) {
-    LOGGER_ERROR(logger_,
-                 "poll failed for the socket " << tcp_socket_
-                                               << ". Error: " << errno);
+    LOGGER_ERROR_WITH_ERRNO(
+          logger_,
+          "poll failed for the socket " << tcp_socket_);
     OnError(errno);
     return;
   }
@@ -412,14 +421,14 @@ void utils::TcpSocketConnection::Impl::Wait() {
                    << poll_fds[1].revents);
   // error check
   if (0 != (poll_fds[1].revents & (POLLERR | POLLHUP | POLLNVAL))) {
-    LOGGER_ERROR(logger_,
-                 "Notification pipe for socket "
-                     << tcp_socket_ << " terminated. Error: " << errno);
+    LOGGER_ERROR(
+          logger_,
+          "Notification pipe for socket " << tcp_socket_ << " terminated.");
     OnError(errno);
     return;
   }
   if (poll_fds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
-    LOGGER_DEBUG(logger_, "Socket " << tcp_socket_ << " has terminated");
+    LOGGER_DEBUG(logger_, "Socket " << tcp_socket_ << " has terminated.");
     OnClose();
     return;
   }
@@ -428,12 +437,14 @@ void utils::TcpSocketConnection::Impl::Wait() {
   char buffer[256];
   ssize_t bytes_read = -1;
   do {
+    errno = 0;
     bytes_read = read(read_fd_, buffer, sizeof(buffer));
   } while (bytes_read > 0);
   if ((bytes_read < 0) && (EAGAIN != errno)) {
-    LOGGER_ERROR(logger_,
-                 "Failed to clear notification pipe. Poll failed for socket "
-                     << tcp_socket_ << ". Error: " << errno);
+    LOGGER_ERROR_WITH_ERRNO(
+          logger_,
+          "Failed to clear notification pipe. Poll failed for socket "
+          << tcp_socket_ );
     OnError(errno);
     return;
   }
@@ -523,6 +534,7 @@ bool utils::BluetoothSocketConnection::Impl::Connect(
   int connect_status = 0;
   LOGGER_DEBUG(logger_, "start rfcomm Connect attempts");
   do {
+    errno = 0;
     rfcomm_socket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
     if (-1 == rfcomm_socket) {
       LOGGER_ERROR_WITH_ERRNO(logger_,
@@ -531,6 +543,7 @@ bool utils::BluetoothSocketConnection::Impl::Connect(
       LOGGER_TRACE(logger_, "exit with FALSE");
       return false;
     }
+    errno = 0;
     connect_status = ::connect(
                        rfcomm_socket,
                        reinterpret_cast<sockaddr*>(&remoteSocketAddress),
@@ -540,11 +553,11 @@ bool utils::BluetoothSocketConnection::Impl::Connect(
       break;
     }
     if (errno != 111 && errno != 104) {
-      LOGGER_DEBUG(logger_, "rfcomm Connect errno " << std::strerror(errno));
+      LOGGER_ERROR_WITH_ERRNO(logger_, "rfcomm connect error.");
       break;
     }
     if (errno) {
-      LOGGER_DEBUG(logger_, "rfcomm Connect errno " << std::strerror(errno));
+      LOGGER_ERROR_WITH_ERRNO(logger_, "rfcomm connect error.");
       CloseSocket(rfcomm_socket);
     }
     sleep(2);
@@ -778,17 +791,19 @@ bool utils::TcpServerSocket::Impl::Listen(const HostAddress& address,
     return false;
   }
 
+  errno = 0;
   int server_socket = socket(AF_INET, SOCK_STREAM, 0);
   if (-1 == server_socket) {
-    LOGGER_ERROR(logger_, "Failed to create server socket: " << errno);
+    LOGGER_ERROR_WITH_ERRNO(logger_, "Failed to create server socket.");
     return false;
   }
 
+  errno = 0;
   int optval = 1;
   if (-1 ==
       setsockopt(
           server_socket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval))) {
-    LOGGER_ERROR(logger_, "Unable to set sockopt: " << errno);
+    LOGGER_ERROR_WITH_ERRNO(logger_, "Unable to set sockopt.");
     return false;
   }
 
@@ -797,20 +812,22 @@ bool utils::TcpServerSocket::Impl::Listen(const HostAddress& address,
   server_address.sin_family = AF_INET;
   server_address.sin_port = htons(port);
 
+  errno = 0;
   if (-1 == bind(server_socket,
                  reinterpret_cast<struct sockaddr*>(&server_address),
                  sizeof(server_address))) {
-    LOGGER_ERROR(logger_, "Unable to bind: " << errno);
+    LOGGER_ERROR_WITH_ERRNO(logger_, "Unable to bind.");
     return false;
   }
 
   LOGGER_DEBUG(logger_,
                "Start listening on " << address.ToString() << ":" << port);
 
+  errno = 0;
   if (-1 == listen(server_socket, backlog)) {
-    LOGGER_ERROR(logger_,
-                 "Failed to listen on " << address.ToString() << ":" << port
-                                        << ". Error: " << errno);
+    LOGGER_ERROR_WITH_ERRNO(
+          logger_,
+          "Failed to listen on " << address.ToString() << ":" << port);
     return false;
   }
 
@@ -824,12 +841,13 @@ utils::TcpSocketConnection utils::TcpServerSocket::Impl::Accept() {
 
   struct sockaddr_in client_address = {0};
   int client_address_length = sizeof(client_address);
+  errno = 0;
   int client_socket =
       accept(server_socket_,
              reinterpret_cast<sockaddr*>(&client_address),
              reinterpret_cast<socklen_t*>(&client_address_length));
   if (-1 == client_socket) {
-    LOGGER_ERROR(logger_, "Failed to accept client socket: " << errno);
+    LOGGER_ERROR_WITH_ERRNO(logger_, "Failed to accept client socket.");
     return utils::TcpSocketConnection();
   }
   if (AF_INET != client_address.sin_family) {
