@@ -34,7 +34,7 @@
 
 #include <cstdint>
 #include <string>
-#ifdef BLUETOOTH_SUPPORT
+#if defined(BLUETOOTH_SUPPORT) && defined(OS_POSIX)
 #include <bluetooth/bluetooth.h>
 #endif
 
@@ -203,7 +203,7 @@ inline bool TcpSocketConnection::Send(const uint8_t* const buffer,
   return Send(reinterpret_cast<const char*>(buffer), size, bytes_written);
 }
 
-#if defined(BLUETOOTH_SUPPORT)
+#if defined(BLUETOOTH_SUPPORT) && defined (OS_POSIX)
 inline bool BluetoothSocketConnection::Send(const uint8_t* const buffer,
                                       const std::size_t size,
                                       std::size_t& bytes_written) {
