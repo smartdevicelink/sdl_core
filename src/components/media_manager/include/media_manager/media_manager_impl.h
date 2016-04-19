@@ -55,6 +55,7 @@ class MediaManagerImpl : public MediaManager,
                          public protocol_handler::ProtocolObserver {
  public:
   MediaManagerImpl(application_manager::ApplicationManager& application_manager,
+                   protocol_handler::ProtocolHandler& protocol_handler,
                    const MediaManagerSettings& settings);
   virtual ~MediaManagerImpl();
 
@@ -70,9 +71,6 @@ class MediaManagerImpl : public MediaManager,
                               protocol_handler::ServiceType service_type);
   virtual void StopStreaming(int32_t application_key,
                              protocol_handler::ServiceType service_type);
-
-  virtual void SetProtocolHandler(
-      protocol_handler::ProtocolHandler* protocol_handler);
   virtual void OnMessageReceived(
       const ::protocol_handler::RawMessagePtr message);
   virtual void OnMobileMessageSent(
@@ -96,7 +94,7 @@ class MediaManagerImpl : public MediaManager,
 
   const MediaManagerSettings& settings_;
 
-  protocol_handler::ProtocolHandler* protocol_handler_;
+  protocol_handler::ProtocolHandler& protocol_handler_;
   MediaAdapter* a2dp_player_;
 
   MediaAdapterImpl* from_mic_recorder_;

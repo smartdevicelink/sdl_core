@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,15 +53,10 @@ class A2DPSourcePlayerAdapter : public MediaAdapterImpl {
   A2DPSourcePlayerAdapter(protocol_handler::SessionObserver& session_observer);
   ~A2DPSourcePlayerAdapter();
   void SendData(int32_t application_key,
-                const ::protocol_handler::RawMessagePtr message) {}
-  void StartActivity(int32_t application_key);
-  void StopActivity(int32_t application_key);
-  bool is_app_performing_activity(int32_t application_key) const;
-
-  void set_connection_handler(
-      connection_handler::ConnectionHandlerImpl* connection_handler) {
-    connection_handler_ = connection_handler;
-  }
+                const ::protocol_handler::RawMessagePtr message) OVERRIDE {}
+  void StartActivity(int32_t application_key) OVERRIDE;
+  void StopActivity(int32_t application_key) OVERRIDE;
+  bool is_app_performing_activity(int32_t application_key) const OVERRIDE;
 
  private:
   class A2DPSourcePlayerThread;

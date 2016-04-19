@@ -130,7 +130,9 @@ bool LifeCycle::StartComponents() {
       *(profile::Profile::instance()));
   DCHECK(hmi_handler_ != NULL);
 
-  media_manager_ = new media_manager::MediaManagerImpl(*app_manager_, *profile);
+  media_manager_ = new media_manager::MediaManagerImpl(*app_manager_,
+                                                       *protocol_handler_,
+                                                       *profile);
   DCHECK(media_manager_ != NULL);
 
   if (!app_manager_->Init(*last_state_, media_manager_)) {
@@ -166,8 +168,6 @@ bool LifeCycle::StartComponents() {
 
   protocol_handler_->AddProtocolObserver(media_manager_);
   protocol_handler_->AddProtocolObserver(app_manager_);
-
-  media_manager_->SetProtocolHandler(protocol_handler_);
 
   connection_handler_->set_protocol_handler(protocol_handler_);
   connection_handler_->set_connection_handler_observer(app_manager_);
@@ -359,7 +359,6 @@ void LifeCycle::StopComponents() {
 
   LOGGER_INFO(logger_, "Destroying Media Manager");
   DCHECK_OR_RETURN_VOID(media_manager_);
-  media_manager_->SetProtocolHandler(NULL);
   delete media_manager_;
   media_manager_ = NULL;
 

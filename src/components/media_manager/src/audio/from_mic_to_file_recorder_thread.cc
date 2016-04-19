@@ -34,6 +34,7 @@
 
 #if defined(OS_POSIX)
 #include <unistd.h>
+#include "utils/timer_task_impl.h"
 #elif defined(OS_WINDOWS)
 #include "utils/threads/thread.h"
 #endif
@@ -112,7 +113,8 @@ media_manager::FromMicToFileRecorderThread::Impl::Impl(
     const std::string oKey_,
     const std::string tKey_,
     const std::string outputFileName,
-    int32_t duration) {
+    int32_t duration)
+  : duration_(duration) {
   argc_ = 5;
   argv_ = new gchar* [argc_];
 
@@ -295,9 +297,10 @@ media_manager::FromMicToFileRecorderThread::FromMicToFileRecorderThread(
     : threads::ThreadDelegate()
     , impl_(new Impl("-o", "-t", output_file, duration)) {
   LOGGER_AUTO_TRACE(logger_);
-  sleep_thread_ = FromMicToFileRecorderThreadPtr(
-      "AudioFromMicSuspend",
-      new timer::TimerTaskImpl<FromMicToFileRecorderThread>(
+  sleep_thread_ =
+      new timer::Timer(
+        "AudioFromMicSuspend",
+        new timer::TimerTaskImpl<FromMicToFileRecorderThread>(
           this,
           &FromMicToFileRecorderThread::onFromMicToFileRecorderThreadSuspned));
 }
@@ -305,7 +308,7 @@ media_manager::FromMicToFileRecorderThread::FromMicToFileRecorderThread(
 media_manager::FromMicToFileRecorderThread::~FromMicToFileRecorderThread() {
   LOGGER_AUTO_TRACE(logger_);
   if (sleep_thread_) {
-    sleep_thread_->suspend();
+    sleep_thread_->Stop();
   }
   delete impl_;
   impl_ = NULL;
@@ -325,7 +328,7 @@ void media_manager::FromMicToFileRecorderThread::threadMain() {
 
   // Start up a timer for the pipeline
   if (impl_->getDuration() > 0) {
-    sleep_thread_->start(impl_->getDuration());
+    sleep_thread_->Start(impl_->getDuration(), true);
   }
 }
 
@@ -343,7 +346,7 @@ void media_manager::FromMicToFileRecorderThread::exitThreadMain() {
   impl_->stopGstLoop();
   if (sleep_thread_) {
     LOGGER_DEBUG(logger_, "Stop sleep thread\n");
-    sleep_thread_->stop();
+    sleep_thread_->Stop();
   }
 
   LOGGER_TRACE(logger_, "Set should be stopped flag\n");

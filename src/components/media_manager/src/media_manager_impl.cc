@@ -59,9 +59,10 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
 MediaManagerImpl::MediaManagerImpl(
     application_manager::ApplicationManager& application_manager,
+    protocol_handler::ProtocolHandler& protocol_handler,
     const MediaManagerSettings& settings)
     : settings_(settings)
-    , protocol_handler_(NULL)
+    , protocol_handler_(protocol_handler)
     , a2dp_player_(NULL)
     , from_mic_recorder_(NULL)
     , application_manager_(application_manager) {
@@ -115,7 +116,7 @@ void MediaManagerImpl::Init() {
 #if defined(EXTENDED_MEDIA_MODE)
   LOGGER_INFO(logger_, "Called Init with default configuration.");
   a2dp_player_ =
-      new A2DPSourcePlayerAdapter(protocol_handler_->get_session_observer());
+      new A2DPSourcePlayerAdapter(protocol_handler_.get_session_observer());
   from_mic_recorder_ = new FromMicRecorderAdapter();
 #endif
 
@@ -253,11 +254,6 @@ void MediaManagerImpl::StopStreaming(
   }
 }
 
-void MediaManagerImpl::SetProtocolHandler(
-    protocol_handler::ProtocolHandler* protocol_handler) {
-  protocol_handler_ = protocol_handler;
-}
-
 void MediaManagerImpl::OnMessageReceived(
     const ::protocol_handler::RawMessagePtr message) {
   using namespace protocol_handler;
@@ -293,9 +289,7 @@ void MediaManagerImpl::OnMobileMessageSent(
 
 void MediaManagerImpl::FramesProcessed(int32_t application_key,
                                        int32_t frame_number) {
-  if (protocol_handler_) {
-    protocol_handler_->SendFramesNumber(application_key, frame_number);
-  }
+  protocol_handler_.SendFramesNumber(application_key, frame_number);
 }
 
 const MediaManagerSettings& MediaManagerImpl::settings() const {
