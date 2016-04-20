@@ -38,21 +38,19 @@
 
 #include <queue>
 
-#ifdef OS_WINDOWS
 #include "transport_manager/transport_adapter/connection.h"
-#else
-#include "transport_manager/transport_adapter/threaded_socket_connection.h"
-#endif
 #include "protocol/common.h"
-#include "utils/threads/thread_delegate.h"
 #include "utils/lock.h"
-#include "utils/socket.h"
 #include "utils/atomic_object.h"
 #include "utils/threads/thread_delegate.h"
 #ifdef OS_WINDOWS
 #include <ws2bth.h>
 #include <BluetoothAPIs.h>
 #endif
+
+namespace threads {
+class Thread;
+}
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -62,11 +60,7 @@ class TransportAdapterController;
 /**
  * @brief Class responsible for communication over bluetooth sockets.
  */
-#ifdef OS_WINDOWS
 class BluetoothSocketConnection : public Connection {
-#else
-class BluetoothSocketConnection : public ThreadedSocketConnection<utils::BluetoothSocketConnection> {
-#endif
  public:
   /**
    * @brief Constructor.
@@ -79,13 +73,11 @@ class BluetoothSocketConnection : public ThreadedSocketConnection<utils::Bluetoo
                             const ApplicationHandle& app_handle,
                             TransportAdapterController* controller);
 
-#ifdef OS_WINDOWS
   TransportAdapter::Error Start();
-#endif
   /**
    * @brief Destructor.
    */
-  virtual ~BluetoothSocketConnection();
+  ~BluetoothSocketConnection();
 
  protected:
   /**
@@ -98,7 +90,6 @@ class BluetoothSocketConnection : public ThreadedSocketConnection<utils::Bluetoo
    */
   virtual bool Establish(ConnectError** error);
 
-#ifdef OS_WINDOWS
   /**
   * @brief Send data frame.
   *
@@ -114,7 +105,7 @@ class BluetoothSocketConnection : public ThreadedSocketConnection<utils::Bluetoo
   *
   * @return Error Information about possible reason of Disconnect failure.
   */
-  virtual TransportAdapter::Error Disconnect();
+  TransportAdapter::Error Disconnect() OVERRIDE;
 
   /**
   * @brief Return pointer to the device adapter controller.
@@ -163,6 +154,10 @@ class BluetoothSocketConnection : public ThreadedSocketConnection<utils::Bluetoo
   void OnRead();
   void OnWrite();
 
+#ifdef OS_POSIX
+  bool CreateNotifictionPipes();
+#endif
+
   TransportAdapterController* controller_;
 
   /**
@@ -178,14 +173,20 @@ class BluetoothSocketConnection : public ThreadedSocketConnection<utils::Bluetoo
   const DeviceUID device_uid_;
   const ApplicationHandle app_handle_;
 
+#ifdef OS_WINDOWS
   HANDLE notify_event_;
   SOCKET rfcomm_socket_;
+#else
+  int rfcomm_socket_;
+  int read_fd_;
+  int write_fd_;
+#endif
 
   threads::Thread* thread_;
-#endif
+//#endif
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif /* BLUETOOTH_SOCKET_CONNECTION_H_ */
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_SOCKET_CONNECTION_H_

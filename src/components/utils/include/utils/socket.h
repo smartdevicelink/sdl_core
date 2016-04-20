@@ -34,21 +34,10 @@
 
 #include <cstdint>
 #include <string>
-#if defined(BLUETOOTH_SUPPORT) && defined(OS_POSIX)
-#include <bluetooth/bluetooth.h>
-#endif
 
 #include "utils/host_address.h"
 #include "utils/pimpl.h"
 #include "utils/macro.h"
-
-#ifdef BLUETOOTH_SUPPORT
-#if defined(OS_WINDOWS)
-#define BLUETOOTH_ADDR_INFO BLUETOOTH_DEVICE_INFO
-#else
-#define BLUETOOTH_ADDR_INFO bdaddr_t
-#endif
-#endif
 
 namespace utils {
 
@@ -130,48 +119,6 @@ class TcpSocketConnection {
   static const int kKeepAliveIntervalSec = 1;
 };
 
-#if defined(BLUETOOTH_SUPPORT) && defined(OS_POSIX)
-class BluetoothSocketConnection {
- public:
-  BluetoothSocketConnection();
-
-  ~BluetoothSocketConnection();
-
-  BluetoothSocketConnection(const BluetoothSocketConnection& rhs);
-
-  BluetoothSocketConnection& operator=(const BluetoothSocketConnection& rhs);
-
-  bool Send(const char* const buffer,
-            const std::size_t size,
-            std::size_t& bytes_written);
-
-  bool Send(const uint8_t* const buffer,
-            const std::size_t size,
-            std::size_t& bytes_written);
-
-  bool Close();
-
-  bool IsValid() const;
-
-  bool Connect(const BLUETOOTH_ADDR_INFO& address, const uint8_t rfcomm_port);
-
-  bool Notify();
-
-  void Wait();
-
-  void SetEventHandler(TcpConnectionEventHandler* event_handler);
-
- private:
-  class Impl;
-
-  explicit BluetoothSocketConnection(Impl* impl);
-
-  Pimpl<Impl> impl_;
-
-  static const int kConnectionAttempts = 4;
-};
-#endif
-
 class TcpServerSocket {
  public:
   TcpServerSocket();
@@ -202,14 +149,6 @@ inline bool TcpSocketConnection::Send(const uint8_t* const buffer,
                                       std::size_t& bytes_written) {
   return Send(reinterpret_cast<const char*>(buffer), size, bytes_written);
 }
-
-#if defined(BLUETOOTH_SUPPORT) && defined (OS_POSIX)
-inline bool BluetoothSocketConnection::Send(const uint8_t* const buffer,
-                                      const std::size_t size,
-                                      std::size_t& bytes_written) {
-  return Send(reinterpret_cast<const char*>(buffer), size, bytes_written);
-}
-#endif
 
 }  // namespace utils
 
