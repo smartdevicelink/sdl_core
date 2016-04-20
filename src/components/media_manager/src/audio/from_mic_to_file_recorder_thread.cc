@@ -298,11 +298,11 @@ media_manager::FromMicToFileRecorderThread::FromMicToFileRecorderThread(
     , impl_(new Impl("-o", "-t", output_file, duration)) {
   LOGGER_AUTO_TRACE(logger_);
   sleep_thread_ =
-      new timer::Timer(
+	  FromMicToFileRecorderThreadPtr(new timer::Timer(
         "AudioFromMicSuspend",
         new timer::TimerTaskImpl<FromMicToFileRecorderThread>(
           this,
-          &FromMicToFileRecorderThread::onFromMicToFileRecorderThreadSuspned));
+          &FromMicToFileRecorderThread::onFromMicToFileRecorderThreadSuspned)));
 }
 
 media_manager::FromMicToFileRecorderThread::~FromMicToFileRecorderThread() {
