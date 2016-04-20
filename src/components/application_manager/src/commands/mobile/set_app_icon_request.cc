@@ -247,8 +247,8 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
             application_manager_.application(connection_key());
 
         if (!message_.valid() || !app.valid()) {
-           LOG4CXX_ERROR(logger_, "NULL pointer.");
-           return;
+          LOG4CXX_ERROR(logger_, "NULL pointer.");
+          return;
         }
 
         const std::string& path = (*message_)[strings::msg_params]

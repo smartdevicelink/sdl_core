@@ -89,8 +89,8 @@ class PolicyHandlerTest : public ::testing::Test {
         rpc_("fake_rpc"),
         priority_("fake_priority"),        
         default_hmi_("fake_hmi")
-        ,kPreloadPTFile("sdl_preloaded_pt.json")
-        ,kAppStorageFolder("storage") {}
+        ,kPreloadPTFile_("sdl_preloaded_pt.json")
+        ,kAppStorageFolder_("storage") {}
 
  protected:
   NiceMock<MockPolicySettings> policy_settings_;
@@ -105,8 +105,8 @@ class PolicyHandlerTest : public ::testing::Test {
   const std::string rpc_;
   std::string priority_;
   std::string default_hmi_;
-  const std::string kPreloadPTFile;
-  const std::string kAppStorageFolder;
+  const std::string kPreloadPTFile_;
+  const std::string kAppStorageFolder_;
 
 
   virtual void SetUp() OVERRIDE {
@@ -118,7 +118,7 @@ class PolicyHandlerTest : public ::testing::Test {
     ASSERT_TRUE(pm_.valid());
   }
 
-  virtual void TearDown() OVERRIDE {
+  void TearDown() OVERRIDE {
     ON_CALL(mock_event_dispatcher_, remove_observer(_,_));
   }
 
@@ -126,8 +126,8 @@ class PolicyHandlerTest : public ::testing::Test {
 
   void EnablePolicy() {
     ON_CALL(policy_settings_, enable_policy()).WillByDefault(Return(true));
-    ON_CALL(policy_settings_, preloaded_pt_file()).WillByDefault(ReturnRef(kPreloadPTFile));
-    ON_CALL(policy_settings_, app_storage_folder()).WillByDefault(ReturnRef(kAppStorageFolder));
+    ON_CALL(policy_settings_, preloaded_pt_file()).WillByDefault(ReturnRef(kPreloadPTFile_));
+    ON_CALL(policy_settings_, app_storage_folder()).WillByDefault(ReturnRef(kAppStorageFolder_));
   }
 
   void EnablePolicyAndPolicyManagerMock() {
@@ -504,8 +504,8 @@ TEST_F(PolicyHandlerTest, Test_OnPendingPermissionChange_method) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
   // Check expectations
-  uint32_t app_id = 123;
-  std::string policy_app_id("mobile_app_id");
+  const uint32_t app_id = 123;
+  const std::string policy_app_id("mobile_app_id");
 
   utils::SharedPtr<application_manager_test::MockApplication> application =
           utils::MakeShared<application_manager_test::MockApplication>();

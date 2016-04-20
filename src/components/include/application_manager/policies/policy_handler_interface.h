@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_HANDLER_INTERFACE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_HANDLER_INTERFACE_H_
+#ifndef SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_HANDLER_INTERFACE_H_
+#define SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_HANDLER_INTERFACE_H_
 
 #include <string>
 #include <map>
@@ -282,7 +282,7 @@ class PolicyHandlerInterface {
   virtual bool CanUpdate() = 0;
 
   virtual void OnDeviceConsentChanged(const std::string& device_id,
-                                      bool is_allowed) = 0;
+                                      const bool is_allowed) = 0;
 
   virtual void OnPTExchangeNeeded() = 0;
 
@@ -383,4 +383,4 @@ class PolicyHandlerInterface {
 
 }  //  namespace policy
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_HANDLER_INTERFACE_H_
+#endif  // SRC_COMPONENTS_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_HANDLER_INTERFACE_H_

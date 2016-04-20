@@ -170,7 +170,7 @@ class SSLTest : public testing::Test {
     client_buf_len = 0u;
   }
 
-  virtual void TearDown() OVERRIDE {
+  void TearDown() OVERRIDE {
     crypto_manager_->ReleaseSSLContext(server_ctx);
     client_manager_->ReleaseSSLContext(client_ctx);
 
@@ -249,7 +249,7 @@ class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
     client_buf_len = 0u;
   }
 
-  virtual void TearDown() OVERRIDE {
+  void TearDown() OVERRIDE {
     crypto_manager->ReleaseSSLContext(server_ctx);
     client_manager->ReleaseSSLContext(client_ctx);
 

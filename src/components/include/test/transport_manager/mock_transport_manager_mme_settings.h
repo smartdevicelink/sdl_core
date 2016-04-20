@@ -32,7 +32,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_MME_SETTINGS_H
 #define SRC_COMPONENTS_INCLUDE_TEST_TRANSPORT_MANAGER_MOCK_TRANSPORT_MANAGER_MME_SETTINGS_H
 
-#include <gmock/gmock.h>
+#include "gmock/gmock.h"
 #include "protocol_handler/protocol_handler.h"
 #include "transport_manager/transport_manager_mme_settings.h"
 

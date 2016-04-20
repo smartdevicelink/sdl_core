@@ -39,7 +39,6 @@
 namespace application_manager {
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
-class ApplicationManager;
 namespace commands {
 
 /**
@@ -113,7 +112,7 @@ class Command {
    * @brief SetAllowedToTerminate set up allowed to terminate flag.
    * If true, request controller will terminate request on response
    */
-  virtual void SetAllowedToTerminate(bool allowed) = 0;
+  virtual void SetAllowedToTerminate(const bool allowed) = 0;
 
 
   enum CommandOrigin {

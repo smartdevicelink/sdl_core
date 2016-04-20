@@ -93,7 +93,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     EXPECT_TRUE(dbms->Open());
   }
 
-  void TearDown() { EXPECT_TRUE(reps->Clear()); }
+  void TearDown() OVERRIDE { EXPECT_TRUE(reps->Clear()); }
 
   static void TearDownTestCase() {
     EXPECT_TRUE(reps->Drop());
@@ -331,7 +331,7 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
                                , kOpenAttemptTimeoutMs(700u)
                                , kAttemptsToOpenPolicyDB(8u) {}
 
-  virtual void SetUp() {
+  void SetUp() OVERRIDE {
     file_system::CreateDirectory(kAppStorageFolder);
     chmod(kAppStorageFolder.c_str(), 00000);
     ON_CALL(policy_settings_, app_storage_folder()).WillByDefault(ReturnRef(kAppStorageFolder));
@@ -340,7 +340,7 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
     reps = new SQLPTRepresentation;
   }
 
-  virtual void TearDown() OVERRIDE {
+  void TearDown() OVERRIDE {
     file_system::RemoveDirectory(kAppStorageFolder,true);
     delete reps;
   }

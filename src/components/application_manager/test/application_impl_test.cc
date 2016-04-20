@@ -96,7 +96,7 @@ class ApplicationImplTest : public ::testing::Test {
 
 
   }
-  virtual void TearDown() OVERRIDE {
+  void TearDown() OVERRIDE {
     delete app_impl;
   }
   HmiStatePtr CreateTestHmiState();

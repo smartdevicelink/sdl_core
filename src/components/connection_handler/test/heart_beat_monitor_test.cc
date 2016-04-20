@@ -67,7 +67,7 @@ class HeartBeatMonitorTest : public testing::Test {
         kConnectionHandle, 0, &connection_handler_mock, kTimeout);
   }
 
-  virtual void TearDown() { delete conn; }
+  void TearDown() OVERRIDE { delete conn; }
 };
 
 ACTION_P2(RemoveSession, conn, session_id) { conn->RemoveSession(session_id); }

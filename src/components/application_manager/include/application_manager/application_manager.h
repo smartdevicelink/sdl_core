@@ -343,7 +343,7 @@ class ApplicationManager {
      *
      * @param allowed SDL access to all mobile apps
      */
-    virtual void SetAllAppsAllowed(const bool& allowed) = 0;
+    virtual void SetAllAppsAllowed(const bool allowed) = 0;
 
     /*
      * @brief Sets state for driver distraction

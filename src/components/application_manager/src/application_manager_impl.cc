@@ -701,15 +701,15 @@ bool ApplicationManagerImpl::EndAudioPassThrough() {
   }
 }
 
-void ApplicationManagerImpl::set_driver_distraction(bool is_distracting) {
+void ApplicationManagerImpl::set_driver_distraction(const bool is_distracting) {
   is_distracting_driver_ = is_distracting;
 }
 
-void ApplicationManagerImpl::set_vr_session_started(const bool& state) {
+void ApplicationManagerImpl::set_vr_session_started(const bool state) {
   is_vr_session_strated_ = state;
 }
 
-void ApplicationManagerImpl::SetAllAppsAllowed(const bool& allowed) {
+void ApplicationManagerImpl::SetAllAppsAllowed(const bool allowed) {
   is_all_apps_allowed_ = allowed;
 }
 

@@ -304,7 +304,7 @@ class MockApplication : public application_manager::Application {
   MOCK_METHOD1(set_app_icon_path,
       bool(const std::string& file_name));
   MOCK_METHOD1(set_app_allowed,
-      void(const bool& allowed));
+      void(const bool allowed));
   MOCK_METHOD1(set_device,
       void(connection_handler::DeviceHandle device));
   MOCK_CONST_METHOD0(get_grammar_id,

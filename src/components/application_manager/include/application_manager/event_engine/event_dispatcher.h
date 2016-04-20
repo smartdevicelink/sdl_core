@@ -60,7 +60,7 @@ class EventDispatcher {
    */
   virtual void add_observer(const Event::EventID& event_id,
                     int32_t hmi_correlation_id,
-                    EventObserver* const observer) = 0;
+                    EventObserver& observer) = 0;
 
   /*
    * @brief Unsubscribes the observer from specific event
@@ -69,14 +69,14 @@ class EventDispatcher {
    * @param observer    The observer to be unsubscribed
    */
   virtual void remove_observer(const Event::EventID& event_id,
-                       EventObserver* const observer) = 0;
+                       EventObserver& observer) = 0;
 
   /*
    * @brief Unsubscribes the observer from all events
    *
    * @param observer  The observer to be unsubscribed
    */
-  virtual void remove_observer(EventObserver* const observer) = 0;
+  virtual void remove_observer(EventObserver& observer) = 0;
 
   /*
    * @brief Destructor

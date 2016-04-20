@@ -64,6 +64,7 @@ namespace transport_manager_test {
 
 const std::string kAppStorageFolder = "app_storage_folder";
 const std::string kAppInfoFolder = "app_info_folder";
+const int kAsyncExpectationsTimeout = 10000;
 
 class TransportManagerImplTest : public ::testing::Test {
  protected:
@@ -497,7 +498,7 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice) {
 #endif  // TELEMETRY_MONITOR
 
   EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
-  testing::Mock::AsyncVerifyAndClearExpectations(1000);
+  testing::Mock::AsyncVerifyAndClearExpectations(kAsyncExpectationsTimeout);
 }
 
 TEST_F(TransportManagerImplTest, SendMessageToDevice_SendingFailed) {
@@ -518,7 +519,7 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_SendingFailed) {
   EXPECT_CALL(*mock_metric_observer, StopRawMsg(_)).Times(0);
 
   delete mock_metric_observer;
-  testing::Mock::AsyncVerifyAndClearExpectations(1000);
+  testing::Mock::AsyncVerifyAndClearExpectations(kAsyncExpectationsTimeout);
 }
 
 TEST_F(TransportManagerImplTest, SendMessageToDevice_StartTimeObserver) {
@@ -534,7 +535,7 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_StartTimeObserver) {
 
   EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
   delete mock_metric_observer;
-  testing::Mock::AsyncVerifyAndClearExpectations(1000);
+  testing::Mock::AsyncVerifyAndClearExpectations(kAsyncExpectationsTimeout);
 }
 
 TEST_F(TransportManagerImplTest, SendMessageToDevice_SendDone) {
@@ -549,7 +550,7 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_SendDone) {
 
   HandleSendDone();
 
-  testing::Mock::AsyncVerifyAndClearExpectations(1000);
+  testing::Mock::AsyncVerifyAndClearExpectations(kAsyncExpectationsTimeout);
 }
 
 TEST_F(TransportManagerImplTest, SendMessageFailed_GetHandleSendFailed) {
@@ -564,7 +565,7 @@ TEST_F(TransportManagerImplTest, SendMessageFailed_GetHandleSendFailed) {
   EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
 
   HandleSendFailed();
-  testing::Mock::AsyncVerifyAndClearExpectations(1000);
+  testing::Mock::AsyncVerifyAndClearExpectations(kAsyncExpectationsTimeout);
 }
 
 TEST_F(TransportManagerImplTest, RemoveDevice_DeviceWasAdded) {
@@ -665,7 +666,7 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceDone) {
   EXPECT_CALL(*tm_listener_, OnScanDevicesFinished());
 
   tm_.ReceiveEventFromDevice(test_event);
-  testing::Mock::AsyncVerifyAndClearExpectations(1000);
+  testing::Mock::AsyncVerifyAndClearExpectations(kAsyncExpectationsTimeout);
 }
 
 TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceFail) {
@@ -678,7 +679,7 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceFail) {
   EXPECT_CALL(*tm_listener_, OnScanDevicesFailed(_));
 
   tm_.ReceiveEventFromDevice(test_event);
-  testing::Mock::AsyncVerifyAndClearExpectations(1000);
+  testing::Mock::AsyncVerifyAndClearExpectations(kAsyncExpectationsTimeout);
 }
 
 TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_DeviceListUpdated) {
@@ -707,7 +708,7 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_DeviceListUpdated) {
 
   tm_.ReceiveEventFromDevice(test_event);
   device_list_.pop_back();
-  testing::Mock::AsyncVerifyAndClearExpectations(1000);
+  testing::Mock::AsyncVerifyAndClearExpectations(kAsyncExpectationsTimeout);
 }
 
 TEST_F(TransportManagerImplTest, CheckEvents) {
@@ -866,7 +867,7 @@ TEST_F(TransportManagerImplTest, HandleMessage_ConnectionNotExist) {
   EXPECT_CALL(*tm_listener_, OnTMMessageSendFailed(_, test_message_));
 
   tm_.TestHandle(test_message_);
-  testing::Mock::AsyncVerifyAndClearExpectations(1000);
+  testing::Mock::AsyncVerifyAndClearExpectations(kAsyncExpectationsTimeout);
 }
 
 TEST_F(TransportManagerImplTest, SearchDevices_TMIsNotInitialized) {

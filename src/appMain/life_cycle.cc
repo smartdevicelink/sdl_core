@@ -68,7 +68,7 @@ void StopThread(System::Thread* thread) {
 }
 }  // namespace
 
-LifeCycle::LifeCycle(profile::Profile& profile)
+LifeCycle::LifeCycle(const profile::Profile& profile)
     : transport_manager_(NULL)
     , protocol_handler_(NULL)
     , connection_handler_(NULL)
@@ -361,8 +361,10 @@ void LifeCycle::StopComponents() {
     security_manager_->RemoveListener(app_manager_);
     LOG4CXX_INFO(logger_, "Destroying Crypto Manager");
     delete crypto_manager_;
+    crypto_manager_ = NULL;
     LOG4CXX_INFO(logger_, "Destroying Security Manager");
     delete security_manager_;
+    security_manager_ = NULL;
   }
 #endif  // ENABLE_SECURITY
   protocol_handler_->Stop();
@@ -378,6 +380,7 @@ void LifeCycle::StopComponents() {
   transport_manager_->Visibility(false);
   transport_manager_->Stop();
   delete transport_manager_;
+  transport_manager_ = NULL;
 
   LOG4CXX_INFO(logger_, "Stopping Connection Handler.");
   DCHECK_OR_RETURN_VOID(connection_handler_);
@@ -400,6 +403,7 @@ void LifeCycle::StopComponents() {
   LOG4CXX_INFO(logger_, "Destroying Application Manager.");
   DCHECK(app_manager_);
   delete app_manager_;
+  app_manager_ = NULL;
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
 

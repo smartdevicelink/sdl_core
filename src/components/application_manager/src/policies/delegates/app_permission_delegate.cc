@@ -32,7 +32,6 @@
 
 #include "application_manager/policies/delegates/app_permission_delegate.h"
 #include "application_manager/application_manager.h"
-#include "application_manager/policies/policy_handler_interface.h"
 
 namespace policy {
   CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")

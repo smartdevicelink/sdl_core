@@ -39,6 +39,7 @@
 namespace application_manager {
 
 typedef utils::SharedPtr<commands::Command> CommandSharedPtr;
+class ApplicationManager;
 
 /**
  * @brief Factory class for command creation

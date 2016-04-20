@@ -74,7 +74,7 @@ class SecurityManagerImpl;
 namespace main_namespace {
 class LifeCycle {
  public:
-  LifeCycle(profile::Profile& profile);
+  LifeCycle(const profile::Profile& profile);
   bool StartComponents();
 
   /**
@@ -120,7 +120,7 @@ class LifeCycle {
 #endif  // MESSAGEBROKER_HMIADAPTER
 
 
-  profile::Profile& profile_;
+  const profile::Profile& profile_;
   DISALLOW_COPY_AND_ASSIGN(LifeCycle);
 };
 }  //  namespace main_namespace

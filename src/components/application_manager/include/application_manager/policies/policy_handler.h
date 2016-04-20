@@ -38,6 +38,8 @@
 #include <set>
 #include <vector>
 #include <list>
+#include <stdint.h>
+
 #include "policy/policy_manager.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/policies/policy_event_observer.h"
@@ -294,7 +296,7 @@ class PolicyHandler
   virtual bool CanUpdate() OVERRIDE;
 
   virtual void OnDeviceConsentChanged(const std::string& device_id,
-                                      bool is_allowed) OVERRIDE;
+                                      const bool is_allowed) OVERRIDE;
 
   virtual void SendOnAppPermissionsChanged(
       const AppPermissions& permissions,

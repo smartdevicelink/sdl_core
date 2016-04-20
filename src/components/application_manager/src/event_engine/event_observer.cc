@@ -48,15 +48,15 @@ EventObserver::~EventObserver() { unsubscribe_from_all_events(); }
 void EventObserver::subscribe_on_event(const Event::EventID& event_id,
                                        int32_t hmi_correlation_id) {
   event_dispatcher_.add_observer(event_id, hmi_correlation_id,
-                                                this);
+                                                *this);
 }
 
 void EventObserver::unsubscribe_from_event(const Event::EventID& event_id) {
-  event_dispatcher_.remove_observer(event_id, this);
+  event_dispatcher_.remove_observer(event_id, *this);
 }
 
 void EventObserver::unsubscribe_from_all_events() {
-  event_dispatcher_.remove_observer(this);
+  event_dispatcher_.remove_observer(*this);
 }
 
 }  // namespace event_engine

@@ -40,7 +40,6 @@
 namespace test {
 namespace components {
 namespace application_manager_test {
-typedef std::pair<uint32_t, int32_t> returnPair;
 
 class MockApplicationManagerSettings
     : public application_manager::ApplicationManagerSettings {

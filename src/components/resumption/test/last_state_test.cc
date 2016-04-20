@@ -58,11 +58,11 @@ class LastStateTest : public ::testing::Test {
     file_system::RemoveDirectory(kAppStorageFolder);
   }
 
-  virtual void SetUp() {
+  void SetUp() OVERRIDE {
     ASSERT_TRUE(file_system::CreateFile(app_info_dat_file_));
   }
 
-  virtual void TearDown() {
+  void TearDown() OVERRIDE {
     EXPECT_TRUE(file_system::DeleteFile((app_info_dat_file_)));
   }
 
@@ -73,24 +73,24 @@ class LastStateTest : public ::testing::Test {
 };
 
 TEST_F(LastStateTest, Basic) {
-  Value& dictionary = last_state_.dictionary;
+  const Value& dictionary = last_state_.dictionary;
   EXPECT_EQ(empty_dictionary_, dictionary.toStyledString());
 }
 
 TEST_F(LastStateTest, SetGetData) {
   {
-    Value& dictionary = last_state_.dictionary;
-    Value& bluetooth_info = dictionary["TransportManager"]["BluetoothAdapter"];
+    const Value& dictionary = last_state_.dictionary;
+    const Value& bluetooth_info = dictionary["TransportManager"]["BluetoothAdapter"];
     EXPECT_EQ(empty_dictionary_, bluetooth_info.toStyledString());
 
-    Value& tcp_adapter_info =
+    const Value& tcp_adapter_info =
         dictionary["TransportManager"]["TcpAdapter"]["devices"];
     EXPECT_EQ(empty_dictionary_, tcp_adapter_info.toStyledString());
 
-    Value& resumption_time = dictionary["resumption"]["last_ign_off_time"];
+    const Value& resumption_time = dictionary["resumption"]["last_ign_off_time"];
     EXPECT_EQ("null\n", resumption_time.toStyledString());
 
-    Value& resumption_list = dictionary["resumption"]["resume_app_list"];
+    const Value& resumption_list = dictionary["resumption"]["resume_app_list"];
     EXPECT_EQ("null\n", resumption_list.toStyledString());
 
     Value test_value;
@@ -104,10 +104,10 @@ TEST_F(LastStateTest, SetGetData) {
     last_state_.SaveToFileSystem();
   }
 
-  Value& dictionary = last_state_.dictionary;
+  const Value& dictionary = last_state_.dictionary;
 
-  Value& bluetooth_info = dictionary["TransportManager"]["BluetoothAdapter"];
-  Value& tcp_adapter_info = dictionary["TransportManager"]["TcpAdapter"];
+  const Value& bluetooth_info = dictionary["TransportManager"]["BluetoothAdapter"];
+  const Value& tcp_adapter_info = dictionary["TransportManager"]["TcpAdapter"];
   EXPECT_EQ("{\n   \"devices\" : \"bluetooth_device\"\n}\n",
             bluetooth_info.toStyledString());
   EXPECT_EQ(

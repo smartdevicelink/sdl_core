@@ -128,7 +128,7 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
     string file_to_delete = kDatabaseName + ".sqlite";
     file_system::DeleteFile(file_to_delete);
   }
-  void TearDown() { DeleteTablesData(); }
+  void TearDown() OVERRIDE { DeleteTablesData(); }
 
   void CheckDeleteQuery(const string& count_query, const string& query_to_check,
                         pair<int, string> app_info, pair<int, string> dev_info,

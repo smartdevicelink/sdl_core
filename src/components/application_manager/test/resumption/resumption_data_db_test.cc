@@ -74,7 +74,7 @@ class ResumptionDataDBTest : public ResumptionDataTest {
     grammar_id_ = 16;
   }
 
-  virtual void TearDown() {
+  void TearDown() OVERRIDE {
     utils::dbms::SQLQuery query(test_db());
     EXPECT_TRUE(query.Prepare(remove_all_tables));
     EXPECT_TRUE(query.Exec());

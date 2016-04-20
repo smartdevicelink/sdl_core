@@ -70,7 +70,7 @@ class HMIMessageHandlerImplTest : public ::testing::Test {
     EXPECT_TRUE(NULL != hmi_handler_->observer());
   }
 
-  virtual void TearDown() OVERRIDE {
+  void TearDown() OVERRIDE {
     hmi_handler_->set_message_observer(NULL);
     delete mock_hmi_message_observer_;
     delete hmi_handler_;

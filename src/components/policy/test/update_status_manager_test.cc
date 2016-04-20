@@ -54,7 +54,7 @@ class UpdateStatusManagerTest : public ::testing::Test {
 
   void SetUp() { manager_ = new UpdateStatusManager(); }
 
-  void TearDown() { delete manager_; }
+  void TearDown() OVERRIDE { delete manager_; }
 };
 
 TEST_F(UpdateStatusManagerTest,

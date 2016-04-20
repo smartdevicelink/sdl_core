@@ -70,7 +70,7 @@ class PolicyEventObserverTest : public ::testing::Test {
                                                      mock_event_dispatcher_);
   }
 
-  virtual void TearDown() OVERRIDE {
+  void TearDown() OVERRIDE {
     delete policy_event_observer_;
     DeleteEvent();
   }

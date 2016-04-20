@@ -102,8 +102,7 @@ class MockMessageHelper {
                     uint32_t correlation_id,
                     ApplicationManager &app_mngr));
   MOCK_METHOD1(SendGetSystemInfoRequest, void(ApplicationManager &app_mngr));
-//  MOCK_METHOD2(SendDecryptCertificateToHMI, void(const std::string& file_name,
-//                                                 ApplicationManager &app_mngr));
+
   MOCK_METHOD4(SendPolicyUpdate,
                void(const std::string& file_path,
                     int timeout,

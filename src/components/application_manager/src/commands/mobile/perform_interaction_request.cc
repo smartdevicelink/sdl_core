@@ -677,7 +677,6 @@ bool PerformInteractionRequest::CheckChoiceSetMenuNames(
 bool PerformInteractionRequest::CheckChoiceSetVRSynonyms(
     application_manager::ApplicationSharedPtr const app) {
   LOG4CXX_AUTO_TRACE(logger_);
-  std::set<uint32_t> vr_command_set;
 
   smart_objects::SmartObject& choice_list =
       (*message_)[strings::msg_params][strings::interaction_choice_set_id_list];
@@ -980,10 +979,10 @@ void PerformInteractionRequest::SendBothModeResponse(
     result = false;
   }
 
-  const bool is_success_code = (SUCCESS != perform_interaction_result_code ||
+  const bool is_error_code = (SUCCESS != perform_interaction_result_code ||
       WARNINGS != perform_interaction_result_code);
 
-  if (vr_resultCode_ == ui_resultCode_ && is_success_code) {
+  if (vr_resultCode_ == ui_resultCode_ && is_error_code) {
     result = false;
   }
 

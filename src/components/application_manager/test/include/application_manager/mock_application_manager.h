@@ -154,7 +154,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
       MOCK_METHOD4(SaveBinary,
           mobile_apis::Result::eType(const std::vector<uint8_t>& binary_data, const std::string& file_path, const std::string& file_name, const int64_t offset));
       MOCK_METHOD1(SetAllAppsAllowed,
-          void(const bool& allowed));
+          void(const bool allowed));
       MOCK_METHOD1(set_driver_distraction,
           void(bool is_distracting));
       MOCK_METHOD6(StartAudioPassThruThread,

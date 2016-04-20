@@ -55,8 +55,8 @@ namespace utils {
  **/
 template<typename ObjectType>
 class SharedPtr {
-    static void DummyDeleter(ObjectType* t) {
-        delete t;
+    static void DummyDeleter(ObjectType* object_to_delete) {
+        delete object_to_delete;
     }
   public:
     //std smart pointer compatibility

@@ -42,7 +42,6 @@
 #include "application_manager/policies/policy_handler_interface.h"
 
 namespace policy {
-class PolicyHandler;
   /**
  * @brief The AppPermissionDelegate class allows to call OnAppPermissionConsent
  * in async way.

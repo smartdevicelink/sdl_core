@@ -486,7 +486,7 @@ class Application : public virtual InitialApplicationData,
   virtual const std::string folder_name() const = 0;
   virtual bool is_media_application() const = 0;
   virtual bool is_foreground() const = 0;
-  virtual void set_foreground(bool is_foreground) = 0;
+  virtual void set_foreground(const bool is_foreground) = 0;
   virtual const mobile_api::HMILevel::eType hmi_level() const = 0;
   virtual const uint32_t put_file_in_none_count() const = 0;
   virtual const uint32_t delete_file_in_none_count() const = 0;
@@ -530,7 +530,7 @@ class Application : public virtual InitialApplicationData,
   virtual void increment_delete_file_in_none_count() = 0;
   virtual void increment_list_files_in_none_count() = 0;
   virtual bool set_app_icon_path(const std::string& file_name) = 0;
-  virtual void set_app_allowed(const bool& allowed) = 0;
+  virtual void set_app_allowed(const bool allowed) = 0;
   virtual void set_device(connection_handler::DeviceHandle device) = 0;
   virtual uint32_t get_grammar_id() const = 0;
   virtual void set_grammar_id(uint32_t value) = 0;

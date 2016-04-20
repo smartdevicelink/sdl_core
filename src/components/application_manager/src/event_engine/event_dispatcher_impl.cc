@@ -72,9 +72,9 @@ void EventDispatcherImpl::raise_event(const Event& event) {
 
 void EventDispatcherImpl::add_observer(const Event::EventID& event_id,
                                        int32_t hmi_correlation_id,
-                                       EventObserver* observer) {
+                                       EventObserver& observer) {
   AutoLock auto_lock(state_lock_);
-  observers_event_[event_id][hmi_correlation_id].push_back(observer);
+  observers_event_[event_id][hmi_correlation_id].push_back(&observer);
 }
 
 struct IdCheckFunctor {
@@ -89,7 +89,7 @@ struct IdCheckFunctor {
 };
 
 void EventDispatcherImpl::remove_observer(const Event::EventID& event_id,
-                                          EventObserver* const observer) {
+                                          EventObserver& observer) {
   remove_observer_from_vector(observer);
   AutoLock auto_lock(state_lock_);
   ObserversMap::iterator it = observers_event_[event_id].begin();
@@ -98,12 +98,12 @@ void EventDispatcherImpl::remove_observer(const Event::EventID& event_id,
     ObserverVector& obs_vec = it->second;
     const ObserverVector::iterator obs_vec_it = obs_vec.end();
     obs_vec.erase(
-        std::remove_if(obs_vec.begin(), obs_vec_it, IdCheckFunctor(observer->id())),
+        std::remove_if(obs_vec.begin(), obs_vec_it, IdCheckFunctor(observer.id())),
         obs_vec_it);
   }
 }
 
-void EventDispatcherImpl::remove_observer(EventObserver* const observer) {
+void EventDispatcherImpl::remove_observer(EventObserver& observer) {
   remove_observer_from_vector(observer);
   EventObserverMap::iterator event_map = observers_event_.begin();
 
@@ -113,12 +113,12 @@ void EventDispatcherImpl::remove_observer(EventObserver* const observer) {
 }
 
 void EventDispatcherImpl::remove_observer_from_vector(
-    EventObserver* const observer) {
+    EventObserver& observer) {
   AutoLock auto_lock(observer_lock_);
 
   observers_.erase(
       std::remove_if(observers_.begin(), observers_.end(),
-                     IdCheckFunctor(observer->id())),
+                     IdCheckFunctor(observer.id())),
       observers_.end());
 }
 

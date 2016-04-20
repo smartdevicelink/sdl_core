@@ -112,7 +112,7 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD0(increment_delete_file_in_none_count, void());
   MOCK_METHOD0(increment_list_files_in_none_count, void());
   MOCK_METHOD1(set_app_icon_path, bool(const std::string& file_name));
-  MOCK_METHOD1(set_app_allowed, void(const bool& allowed));
+  MOCK_METHOD1(set_app_allowed, void(const bool allowed));
   MOCK_METHOD1(set_device, void(connection_handler::DeviceHandle device));
   MOCK_CONST_METHOD0(get_grammar_id, uint32_t());
   MOCK_METHOD1(set_grammar_id, void(uint32_t value));

@@ -83,7 +83,7 @@ class EventDispatcherImpl : public EventDispatcher {
    */
   void add_observer(const Event::EventID& event_id,
                             int32_t hmi_correlation_id,
-                            EventObserver* const observer) OVERRIDE;
+                            EventObserver& observer) OVERRIDE;
 
   /*
    * @brief Unsubscribes the observer from specific event
@@ -92,14 +92,14 @@ class EventDispatcherImpl : public EventDispatcher {
    * @param observer    The observer to be unsubscribed
    */
   void remove_observer(const Event::EventID& event_id,
-                               EventObserver* const observer) OVERRIDE;
+                               EventObserver& observer) OVERRIDE;
 
   /*
    * @brief Unsubscribes the observer from all events
    *
    * @param observer  The observer to be unsubscribed
    */
-  void remove_observer(EventObserver* const observer) OVERRIDE;
+  void remove_observer(EventObserver& observer) OVERRIDE;
 
  private:
 
@@ -108,7 +108,7 @@ class EventDispatcherImpl : public EventDispatcher {
    * when occurs unsubscribe from event
    * @param observer to be removed
    */
-  void remove_observer_from_vector(EventObserver* const observer);
+  void remove_observer_from_vector(EventObserver& observer);
 
   DISALLOW_COPY_AND_ASSIGN(EventDispatcherImpl);
 

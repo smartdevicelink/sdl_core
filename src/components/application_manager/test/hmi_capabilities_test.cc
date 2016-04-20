@@ -72,7 +72,7 @@ class HMICapabilitiesTest : public ::testing::Test {
     hmi_capabilities_test->Init(&last_state_);
   }
 
-  virtual void TearDown() OVERRIDE {
+  void TearDown() OVERRIDE {
     hmi_capabilities_test.reset();
   }
   static void TearDownTestCase() {

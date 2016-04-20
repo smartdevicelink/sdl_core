@@ -433,7 +433,7 @@ class ApplicationManagerImpl
    *
    * @param state New state to be set
    */
-  void set_driver_distraction(bool is_distracting) OVERRIDE;
+  void set_driver_distraction(const bool is_distracting) OVERRIDE;
 
   /*
    * @brief Retrieves if VR session has started
@@ -447,7 +447,7 @@ class ApplicationManagerImpl
    *
    * @param state Current HMI VR session state
    */
-  void set_vr_session_started(const bool& state);
+  void set_vr_session_started(const bool state);
 
   /*
    * @brief Retrieves SDL access to all mobile apps
@@ -461,7 +461,7 @@ class ApplicationManagerImpl
    *
    * @param allowed SDL access to all mobile apps
    */
-  void SetAllAppsAllowed(const bool& allowed) OVERRIDE;
+  void SetAllAppsAllowed(const bool allowed) OVERRIDE;
 
   /**
    * @brief CreateRegularState create regular HMI state for application
@@ -993,6 +993,9 @@ class ApplicationManagerImpl
   struct ApplicationsPolicyAppIdSorter {
     bool operator()(const ApplicationSharedPtr lhs,
                     const ApplicationSharedPtr rhs) {
+      if (lhs->policy_app_id() == rhs->policy_app_id()) {
+        return lhs->device() < rhs->device();
+      }
       return lhs->policy_app_id() < rhs->policy_app_id();
     }
   };

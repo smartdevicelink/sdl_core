@@ -174,8 +174,8 @@ struct DeactivateApplication {
   StateController& state_ctrl_;
 };
 
-struct SDLAlowedNotification {
-  SDLAlowedNotification(const connection_handler::DeviceHandle& device_id,
+struct SDLAllowedNotification {
+  SDLAllowedNotification(const connection_handler::DeviceHandle& device_id,
                         PolicyManager* policy_manager,
                         StateController& state_controller)
       : device_id_(device_id)
@@ -415,7 +415,7 @@ void PolicyHandler::OnAppPermissionConsent(
 }
 
 void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
-                                           bool is_allowed) {
+                                           const bool is_allowed) {
   POLICY_LIB_CHECK_VOID();
   connection_handler::DeviceHandle device_handle;
   application_manager_.connection_handler().GetDeviceID(

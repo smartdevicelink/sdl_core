@@ -38,6 +38,7 @@
 #include <vector>
 #include <utility>
 #include <list>
+#include <stdint.h>
 
 #include "utils/date_time.h"
 #include "application_manager/application_data_impl.h"
@@ -132,7 +133,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   const std::string folder_name() const;
   bool is_media_application() const;
   bool is_foreground() const OVERRIDE;
-  void set_foreground(bool is_foreground) OVERRIDE;
+  void set_foreground(const bool is_foreground) OVERRIDE;
   const mobile_apis::HMILevel::eType hmi_level() const;
   const uint32_t put_file_in_none_count() const;
   const uint32_t delete_file_in_none_count() const;
@@ -154,7 +155,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void increment_delete_file_in_none_count();
   void increment_list_files_in_none_count();
   bool set_app_icon_path(const std::string& path);
-  void set_app_allowed(const bool& allowed);
+  void set_app_allowed(const bool allowed);
   void set_device(connection_handler::DeviceHandle device);
   virtual uint32_t get_grammar_id() const;
   virtual void set_grammar_id(uint32_t value);

@@ -83,7 +83,7 @@ class DBusMessageControllerTest : public ::testing::Test {
     ASSERT_TRUE(subscriber_->Start());
   }
 
-  virtual void TearDown() {
+  void TearDown() OVERRIDE {
     delete controller_;
     delete subscriber_;
   }

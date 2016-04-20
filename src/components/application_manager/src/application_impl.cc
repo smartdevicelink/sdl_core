@@ -287,11 +287,11 @@ const mobile_api::HMILevel::eType ApplicationImpl::hmi_level() const {
   return hmi_state ? hmi_state->hmi_level() : HMILevel::INVALID_ENUM;
 }
 
-bool application_manager::ApplicationImpl::is_foreground() const {
+bool ApplicationImpl::is_foreground() const {
   return is_foreground_;
 }
 
-void application_manager::ApplicationImpl::set_foreground(bool is_foreground) {
+void ApplicationImpl::set_foreground(const bool is_foreground) {
   is_foreground_ = is_foreground;
 }
 
@@ -557,7 +557,7 @@ bool ApplicationImpl::set_app_icon_path(const std::string& path) {
   return false;
 }
 
-void ApplicationImpl::set_app_allowed(const bool& allowed) {
+void ApplicationImpl::set_app_allowed(const bool allowed) {
   is_app_allowed_ = allowed;
 }
 
@@ -926,12 +926,10 @@ uint32_t ApplicationImpl::GetAvailableDiskSpace() {
 
     if (current_app_quota > available_disk_space) {
       return available_disk_space;
-    } else {
-      return current_app_quota;
     }
-  } else {
-    return app_quota;
+    return current_app_quota;
   }
+  return app_quota;
 }
 
 void ApplicationImpl::SubscribeToSoftButtons(

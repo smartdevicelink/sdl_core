@@ -94,7 +94,7 @@ bool CommandImpl::AllowedToTerminate() {
     return allowed_to_terminate_;
 }
 
-void CommandImpl::SetAllowedToTerminate(bool allowed) {
+void CommandImpl::SetAllowedToTerminate(const bool allowed) {
     allowed_to_terminate_ = allowed;
 }
 

@@ -310,7 +310,7 @@ class ResumptionDataDB : public ResumptionData {
    */
   bool CheckExistenceApplication(const std::string& policy_app_id,
                                  const std::string& device_id,
-                                 bool& application_exist) const;
+                                 bool application_exist) const;
 
   /**
    * @brief Retrieves data from saved application

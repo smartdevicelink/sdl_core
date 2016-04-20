@@ -551,7 +551,7 @@ uint32_t ResumptionDataDB::SelectIgnOffTime() const {
 bool ResumptionDataDB::CheckExistenceApplication(
     const std::string& policy_app_id,
     const std::string& device_id,
-    bool& application_exist) const {
+    bool application_exist) const {
   LOG4CXX_AUTO_TRACE(logger_);
   bool result = false;
   utils::dbms::SQLQuery query(db());
