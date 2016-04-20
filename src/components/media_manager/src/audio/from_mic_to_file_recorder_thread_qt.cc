@@ -36,6 +36,7 @@
 #include <ostream>
 
 #include "utils/threads/thread.h"
+#include "utils/timer_task_impl.h"
 #include "utils/logger.h"
 
 namespace media_manager {
@@ -169,11 +170,11 @@ media_manager::FromMicToFileRecorderThread::FromMicToFileRecorderThread(
     , output_file_name_(output_file) {
   LOGGER_AUTO_TRACE(logger_);
   setRecordDuration(duration);
-  sleep_thread_ = FromMicToFileRecorderThreadPtr(
+  sleep_thread_ = FromMicToFileRecorderThreadPtr(new timer::Timer(
       "AudioFromMicSuspend",
       new timer::TimerTaskImpl<FromMicToFileRecorderThread>(
           this,
-          &FromMicToFileRecorderThread::onFromMicToFileRecorderThreadSuspned));
+          &FromMicToFileRecorderThread::onFromMicToFileRecorderThreadSuspned)));
 }
 
 media_manager::FromMicToFileRecorderThread::~FromMicToFileRecorderThread() {
@@ -181,7 +182,7 @@ media_manager::FromMicToFileRecorderThread::~FromMicToFileRecorderThread() {
   delete impl_;
   impl_ = NULL;
   if (sleep_thread_) {
-    sleep_thread_->suspend();
+    sleep_thread_->Stop();
   }
 }
 
@@ -207,7 +208,7 @@ void media_manager::FromMicToFileRecorderThread::threadMain() {
   LOGGER_TRACE(logger_, "Audio capture started ...\n");
 
   if (impl_->getDuration() > 0) {
-    sleep_thread_->start(impl_->getDuration());
+    sleep_thread_->Start(impl_->getDuration(), true);
     impl_->startRecord();
   }
 }
@@ -224,7 +225,7 @@ void media_manager::FromMicToFileRecorderThread::exitThreadMain() {
   LOGGER_AUTO_TRACE(logger_);
   if (sleep_thread_) {
     LOGGER_DEBUG(logger_, "Stop sleep thread\n");
-    sleep_thread_->stop();
+    sleep_thread_->Stop();
   }
 
   LOGGER_TRACE(logger_, "Set should be stopped flag\n");

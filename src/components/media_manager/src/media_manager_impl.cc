@@ -42,7 +42,6 @@
 #include "utils/logger.h"
 #include "utils/helpers.h"
 #if defined(EXTENDED_MEDIA_MODE)
-#include "media_manager/audio/a2dp_source_player_adapter.h"
 #include "media_manager/audio/from_mic_recorder_adapter.h"
 #endif
 #include "media_manager/video/socket_video_streamer_adapter.h"
@@ -59,21 +58,16 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
 MediaManagerImpl::MediaManagerImpl(
     application_manager::ApplicationManager& application_manager,
+    protocol_handler::ProtocolHandler& protocol_handler,
     const MediaManagerSettings& settings)
     : settings_(settings)
-    , protocol_handler_(NULL)
-    , a2dp_player_(NULL)
+    , protocol_handler_(protocol_handler)
     , from_mic_recorder_(NULL)
     , application_manager_(application_manager) {
   Init();
 }
 
 MediaManagerImpl::~MediaManagerImpl() {
-  if (a2dp_player_) {
-    delete a2dp_player_;
-    a2dp_player_ = NULL;
-  }
-
   if (from_mic_recorder_) {
     delete from_mic_recorder_;
     from_mic_recorder_ = NULL;
@@ -81,10 +75,6 @@ MediaManagerImpl::~MediaManagerImpl() {
 }
 
 #ifdef BUILD_TESTS
-void MediaManagerImpl::set_mock_a2dp_player(MediaAdapter* media_adapter) {
-  a2dp_player_ = media_adapter;
-}
-
 void MediaManagerImpl::set_mock_mic_listener(MediaListenerPtr media_listener) {
   from_mic_listener_ = media_listener;
 }
@@ -111,13 +101,6 @@ void MediaManagerImpl::set_mock_streamer_listener(
 void MediaManagerImpl::Init() {
   using namespace protocol_handler;
   LOGGER_INFO(logger_, "MediaManagerImpl::Init()");
-
-#if defined(EXTENDED_MEDIA_MODE)
-  LOGGER_INFO(logger_, "Called Init with default configuration.");
-  a2dp_player_ =
-      new A2DPSourcePlayerAdapter(protocol_handler_->get_session_observer());
-  from_mic_recorder_ = new FromMicRecorderAdapter();
-#endif
 
   if ("socket" == settings().video_server_type()) {
     streamer_[ServiceType::kMobileNav] = new SocketVideoStreamerAdapter(
@@ -152,20 +135,6 @@ void MediaManagerImpl::Init() {
   if (streamer_[ServiceType::kAudio]) {
     streamer_[ServiceType::kAudio]->AddListener(
         streamer_listener_[ServiceType::kAudio]);
-  }
-}
-
-void MediaManagerImpl::PlayA2DPSource(int32_t application_key) {
-  LOGGER_AUTO_TRACE(logger_);
-  if (a2dp_player_) {
-    a2dp_player_->StartActivity(application_key);
-  }
-}
-
-void MediaManagerImpl::StopA2DPSource(int32_t application_key) {
-  LOGGER_AUTO_TRACE(logger_);
-  if (a2dp_player_) {
-    a2dp_player_->StopActivity(application_key);
   }
 }
 
@@ -253,11 +222,6 @@ void MediaManagerImpl::StopStreaming(
   }
 }
 
-void MediaManagerImpl::SetProtocolHandler(
-    protocol_handler::ProtocolHandler* protocol_handler) {
-  protocol_handler_ = protocol_handler;
-}
-
 void MediaManagerImpl::OnMessageReceived(
     const ::protocol_handler::RawMessagePtr message) {
   using namespace protocol_handler;
@@ -293,9 +257,7 @@ void MediaManagerImpl::OnMobileMessageSent(
 
 void MediaManagerImpl::FramesProcessed(int32_t application_key,
                                        int32_t frame_number) {
-  if (protocol_handler_) {
-    protocol_handler_->SendFramesNumber(application_key, frame_number);
-  }
+  protocol_handler_.SendFramesNumber(application_key, frame_number);
 }
 
 const MediaManagerSettings& MediaManagerImpl::settings() const {
