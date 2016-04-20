@@ -38,6 +38,8 @@ env:
   - CMAKE_CXX_COMPILER=g++-4.9
   - CMAKE_C_COMPILER=gcc-4.9
   - LD_LIBRARY_PATH=.
+after_success:
+  - pwd ; bash <(curl -s https://codecov.io/bash) -f ./coverage/coverage.info || echo "Codecov did not collect coverage reports"
 deploy:
   provider: releases
   api-key: "uw8e4USTAS6c9LFhRMYOvw"
