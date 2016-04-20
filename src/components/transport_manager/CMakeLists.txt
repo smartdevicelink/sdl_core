@@ -75,6 +75,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
   set (src_tm_adpt
     ${TM_SRC_DIR}/transport_adapter/transport_adapter_listener_impl.cc
     ${TM_SRC_DIR}/transport_adapter/transport_adapter_impl.cc
+    ${TM_SRC_DIR}/transport_adapter/threaded_socket_connection.cc
    )
   set (src_tcp
     ${TM_SRC_DIR}/tcp/tcp_transport_adapter.cc
@@ -153,6 +154,7 @@ set (SOURCES
   ${TM_SRC_DIR}/transport_manager_default.cc
   ${TM_SRC_DIR}/transport_adapter/transport_adapter_listener_impl.cc
   ${TM_SRC_DIR}/transport_adapter/transport_adapter_impl.cc
+  ${TM_SRC_DIR}/transport_adapter/threaded_socket_connection.cc
   ${TM_SRC_DIR}/tcp/tcp_transport_adapter.cc
   ${TM_SRC_DIR}/tcp/tcp_client_listener.cc
   ${TM_SRC_DIR}/tcp/tcp_device.cc

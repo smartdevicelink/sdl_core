@@ -53,7 +53,7 @@ class TransportAdapterController;
 /**
  * @brief Class responsible for communication over TCP sockets.
  */
-class TcpSocketConnection : public ThreadedSocketConnection<utils::TcpSocketConnection> {
+class TcpSocketConnection : public ThreadedSocketConnection {
  public:
   /**
    * @brief Constructor.
@@ -82,7 +82,7 @@ class TcpSocketConnection : public ThreadedSocketConnection<utils::TcpSocketConn
  * @brief Class responsible for communication over sockets that originated by
  * server.
  */
-class TcpServerOiginatedSocketConnection : public ThreadedSocketConnection<utils::TcpSocketConnection> {
+class TcpServerOiginatedSocketConnection : public ThreadedSocketConnection {
  public:
   /**
    * @brief Constructor.

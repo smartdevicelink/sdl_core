@@ -94,10 +94,6 @@ class TcpSocketConnection {
 
   bool Connect(const HostAddress& address, const uint16_t port);
 
-  bool Attach(const int tcp_socket,
-              const HostAddress& address,
-              const uint16_t port);
-
   bool Notify();
 
   void Wait();
