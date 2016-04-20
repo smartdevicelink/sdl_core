@@ -34,10 +34,10 @@
 
 #if defined(OS_POSIX)
 #include <unistd.h>
-#include "utils/timer_task_impl.h"
 #elif defined(OS_WINDOWS)
 #include "utils/threads/thread.h"
 #endif
+#include "utils/timer_task_impl.h"
 
 #include <sstream>
 #include "utils/logger.h"

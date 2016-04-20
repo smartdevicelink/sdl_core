@@ -155,8 +155,7 @@ if(EXTENDED_MEDIA_MODE)
             glib-2.0
         )
         list(APPEND AUDIO_SOURCES
-            ${COMPONENTS_DIR}/media_manager/src/audio/from_mic_to_file_recorder_thread.cc
-            ${COMPONENTS_DIR}/media_manager/src/audio/a2dp_source_player_adapter.cc
+            ${COMPONENTS_DIR}/media_manager/src/audio/from_mic_to_file_recorder_thread.cc            
         )
     endif()
     list(APPEND AUDIO_INCLUDES
