@@ -32,14 +32,14 @@ script:
   - sudo ldconfig
   - make test | perl -pe 's/\e\[?.*?[\@-~]//g'
   - bash -ex ../tools/Utils/collect_coverage.sh ./
+after_success:
+  - pwd ; bash <(curl -s https://codecov.io/bash) -f ./coverage/coverage.info > /dev/null || echo "Codecov did not collect coverage reports"
 env:
   global:
   - LC_CTYPE=en_US.UTF-8
   - CMAKE_CXX_COMPILER=g++-4.9
   - CMAKE_C_COMPILER=gcc-4.9
   - LD_LIBRARY_PATH=.
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
 deploy:
   provider: releases
   api-key: "uw8e4USTAS6c9LFhRMYOvw"
