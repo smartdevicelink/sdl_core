@@ -92,12 +92,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     source_group("Source Files\\Transport Manager" FILES ${src_tm_adpt})
     source_group("Source Files\\TCP" FILES ${src_tcp})
 
-  if (BUILD_AVAHI_SUPPORT)
-    list (APPEND SOURCES
-    ${TM_SRC_DIR}/tcp/dnssd_service_browser.cc
-    )
-  endif()
-
   if (BUILD_BT_SUPPORT)
     file (GLOB bt_inc ${TM_INC_DIR}/bluetooth/*.h )
     set( bt_src ${TM_SRC_DIR}/bluetooth/bluetooth_connection_factory.cc
