@@ -58,14 +58,15 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 BluetoothTransportAdapter::~BluetoothTransportAdapter() {}
 
-BluetoothTransportAdapter::BluetoothTransportAdapter()
+BluetoothTransportAdapter::BluetoothTransportAdapter(resumption::LastState& last_state)
     : TransportAdapterImpl(
           new BluetoothDeviceScanner(
               this,
               true,
               BluetoothTransportAdapter::kDeviceRepeatSearchIntervalSec),
           new BluetoothConnectionFactory(this),
-          0) {}
+          0,
+          last_state) {}
 
 DeviceType BluetoothTransportAdapter::GetDeviceType() const {
   return BLUETOOTH;
@@ -106,16 +107,16 @@ void BluetoothTransportAdapter::Store() const {
         sprintf(rfcomm_channel_record, "%u", rfcomm_channel);
         application_dictionary["rfcomm_channel"] =
             std::string(rfcomm_channel_record);
-        applications_dictionary.append(application_dictionary);
+        applications_dictionary.Append(application_dictionary);
       }
     }
-    if (!applications_dictionary.empty()) {
+    if (!applications_dictionary.IsEmpty()) {
       device_dictionary["applications"] = applications_dictionary;
-      devices_dictionary.append(device_dictionary);
+      devices_dictionary.Append(device_dictionary);
     }
   }
   bluetooth_adapter_dictionary["devices"] = devices_dictionary;
-  JsonValue& dictionary = resumption::LastState::instance()->dictionary();
+  JsonValue& dictionary = last_state().dictionary();
   dictionary["TransportManager"]["BluetoothAdapter"] =
       bluetooth_adapter_dictionary;
   LOGGER_TRACE(logger_, "exit");
@@ -125,7 +126,7 @@ bool BluetoothTransportAdapter::Restore() {
   using namespace utils::json;
   LOGGER_TRACE(logger_, "enter");
   bool errors_occured = false;
-  const JsonValue& dictionary = resumption::LastState::instance()->dictionary();
+  const JsonValue& dictionary = last_state().dictionary();
   const JsonValueRef bluetooth_adapter_dictionary =
       dictionary["TransportManager"]["BluetoothAdapter"];
   const JsonValueRef devices_dictionary =
@@ -148,7 +149,7 @@ bool BluetoothTransportAdapter::Restore() {
          ++j) {
       const JsonValueRef application_dictionary = *j;
       std::string rfcomm_channel_record =
-          application_dictionary["rfcomm_channel"].asString();
+          application_dictionary["rfcomm_channel"].AsString();
       uint8_t rfcomm_channel =
           static_cast<uint8_t>(atoi(rfcomm_channel_record.c_str()));
       rfcomm_channels.push_back(rfcomm_channel);

@@ -40,15 +40,17 @@
 
 #include "transport_manager/transport_adapter/connection.h"
 #include "protocol/common.h"
-#include "utils/threads/thread_delegate.h"
 #include "utils/lock.h"
-#include "utils/socket.h"
 #include "utils/atomic_object.h"
 #include "utils/threads/thread_delegate.h"
 #ifdef OS_WINDOWS
 #include <ws2bth.h>
 #include <BluetoothAPIs.h>
 #endif
+
+namespace threads {
+class Thread;
+}
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -75,7 +77,7 @@ class BluetoothSocketConnection : public Connection {
   /**
    * @brief Destructor.
    */
-  virtual ~BluetoothSocketConnection();
+  ~BluetoothSocketConnection();
 
  protected:
   /**
@@ -103,7 +105,7 @@ class BluetoothSocketConnection : public Connection {
   *
   * @return Error Information about possible reason of Disconnect failure.
   */
-  virtual TransportAdapter::Error Disconnect();
+  TransportAdapter::Error Disconnect() OVERRIDE;
 
   /**
   * @brief Return pointer to the device adapter controller.
@@ -130,6 +132,7 @@ class BluetoothSocketConnection : public Connection {
    private:
     BluetoothSocketConnection* connection_;
   };
+
   void OnError(int error);
   void OnData(const uint8_t* const buffer, std::size_t buffer_size);
   void OnCanWrite();
@@ -151,6 +154,10 @@ class BluetoothSocketConnection : public Connection {
   void OnRead();
   void OnWrite();
 
+#ifdef OS_POSIX
+  bool CreateNotifictionPipes();
+#endif
+
   TransportAdapterController* controller_;
 
   /**
@@ -166,13 +173,20 @@ class BluetoothSocketConnection : public Connection {
   const DeviceUID device_uid_;
   const ApplicationHandle app_handle_;
 
+#ifdef OS_WINDOWS
   HANDLE notify_event_;
   SOCKET rfcomm_socket_;
+#else
+  int rfcomm_socket_;
+  int read_fd_;
+  int write_fd_;
+#endif
 
   threads::Thread* thread_;
+//#endif
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif /* BLUETOOTH_SOCKET_CONNECTION_H_ */
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_SOCKET_CONNECTION_H_
