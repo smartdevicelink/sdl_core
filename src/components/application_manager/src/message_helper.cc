@@ -1123,11 +1123,11 @@ smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
       msg_params[strings::menu_params] = (*i->second)[strings::menu_params];
       msg_params[strings::app_id] = app->app_id();
 
-      if (((*i->second)[strings::cmd_icon].keyExists(strings::value))
+      if (((*i->second).keyExists(strings::cmd_icon))
           && (0 < (*i->second)[strings::cmd_icon][strings::value].length())) {
         msg_params[strings::cmd_icon] = (*i->second)[strings::cmd_icon];
         msg_params[strings::cmd_icon][strings::value] =
-          (*i->second)[strings::cmd_icon][strings::value].asString();
+            (*i->second)[strings::cmd_icon][strings::value].asString();
       }
       (*ui_command)[strings::msg_params] = msg_params;
       requests.push_back(ui_command);

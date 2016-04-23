@@ -229,8 +229,13 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
       pt_->policy_table.app_policies_section.apps[iter->first].set_to_null();
       pt_->policy_table.app_policies_section.apps[iter->first].set_to_string("");
     } else if (policy::kDefaultId == (iter->second).get_string()) {
-      pt_->policy_table.app_policies_section.apps[iter->first] =
-          pt_->policy_table.app_policies_section.apps[kDefaultId];
+        policy_table::ApplicationPolicies::const_iterator iter_default =
+            update_pt.policy_table.app_policies_section.apps.find(kDefaultId);
+        if (update_pt.policy_table.app_policies_section.apps.end() == iter_default) {
+            LOG4CXX_ERROR(logger_, "The default section was not found in PTU");
+            continue;
+        }
+      pt_->policy_table.app_policies_section.apps[iter->first] = iter_default->second;
     } else {
       pt_->policy_table.app_policies_section.apps[iter->first] = iter->second;
     }
@@ -239,10 +244,11 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
   pt_->policy_table.app_policies_section.device =
       update_pt.policy_table.app_policies_section.device;
 
-  if (update_pt.policy_table.consumer_friendly_messages.is_initialized()) {
-    pt_->policy_table.consumer_friendly_messages =
-        update_pt.policy_table.consumer_friendly_messages;
-  }
+  pt_->policy_table.module_config.SafeCopyFrom(update_pt.policy_table.module_config);
+
+  pt_->policy_table.consumer_friendly_messages.assign_if_valid(
+        update_pt.policy_table.consumer_friendly_messages);
+
   ResetCalculatedPermissions();
   Backup();
   return true;

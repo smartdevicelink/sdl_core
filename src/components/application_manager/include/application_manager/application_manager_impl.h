@@ -1464,6 +1464,7 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     std::vector<ApplicationManagerTimerPtr> timer_pool_;
     sync_primitives::Lock                   timer_pool_lock_;
+    sync_primitives::Lock stopping_flag_lock_;
 
     StateController state_ctrl_;
 
@@ -1484,8 +1485,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     timer::TimerThread<ApplicationManagerImpl>  tts_global_properties_timer_;
 
     bool is_low_voltage_;
-
-    bool is_stopping_;
+    volatile bool is_stopping_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 

@@ -128,6 +128,13 @@ SocketPtr ServerSocket::accept() {
         throw SocketException(status);
     }
     
+    // Added 5 seconds timeout to fix endless blocking on write() when the client is not reading
+    status = apr_socket_timeout_set(newSocket, 5000000);
+    if (status != APR_SUCCESS) {
+        apr_pool_destroy(newPool);
+        throw SocketException(status);
+    }
+
     return new Socket(newSocket, newPool);
 }
 

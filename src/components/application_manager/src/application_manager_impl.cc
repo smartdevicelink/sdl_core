@@ -112,6 +112,7 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM),
     navi_close_app_timeout_(profile::Profile::instance()->stop_streaming_timeout()),
     navi_end_stream_timeout_(profile::Profile::instance()->stop_streaming_timeout()),
+    stopping_flag_lock_(true),
 #ifdef TIME_TESTER
     metric_observer_(NULL),
 #endif  // TIME_TESTER
@@ -171,7 +172,9 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 
 bool ApplicationManagerImpl::Stop() {
   LOG4CXX_INFO(logger_, "Stop ApplicationManager.");
+  stopping_flag_lock_.Acquire();
   is_stopping_ = true;
+  stopping_flag_lock_.Release();
   application_list_update_timer_->stop();
   try {
     UnregisterAllApplications();
@@ -2206,6 +2209,9 @@ void ApplicationManagerImpl::SetUnregisterAllApplicationsReason(
 
 void ApplicationManagerImpl::HeadUnitReset(
     mobile_api::AppInterfaceUnregisteredReason::eType reason) {
+  stopping_flag_lock_.Acquire();
+  is_stopping_ = true;
+  stopping_flag_lock_.Release();
   switch (reason) {
     case mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET: {
       UnregisterAllApplications();
@@ -2292,19 +2298,16 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   bool is_unexpected_disconnect =
       Compare<eType, NEQ, ALL>(unregister_reason_,
                                IGNITION_OFF, MASTER_RESET, FACTORY_DEFAULTS);
+
+  {  // A local scope to limit accessor's lifetime and release app list lock.
   ApplicationListAccessor accessor;
   ApplictionSetConstIt it = accessor.begin();
   while (it != accessor.end()) {
     ApplicationSharedPtr app_to_remove = *it;
 
-#ifdef CUSTOMER_PASA
-    if (!is_ignition_off) {
-#endif // CUSTOMER_PASA
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
             app_to_remove->app_id(), unregister_reason_);
-#ifdef CUSTOMER_PASA
-    }
-#endif // CUSTOMER_PASA
+
 
     UnregisterApplication(app_to_remove->app_id(),
                           mobile_apis::Result::INVALID_ENUM, is_ignition_off,
@@ -2312,6 +2315,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
     connection_handler_->CloseSession(app_to_remove->app_id(),
                                       connection_handler::kCommon);
     it = accessor.begin();
+    }
   }
   if (is_ignition_off) {
     resume_controller().OnSuspend();
@@ -2436,6 +2440,12 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromMobile message) {
 
   if (!message) {
     LOG4CXX_ERROR(logger_, "Null-pointer message received.");
+    return;
+  }
+
+  sync_primitives::AutoLock lock(stopping_flag_lock_);
+  if (is_stopping_) {
+    LOG4CXX_INFO(logger_, "Application manager is stopping");
     return;
   }
   ProcessMessageFromMobile(message);

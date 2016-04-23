@@ -491,6 +491,24 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
     preloaded_date(impl::ValueMember(value__, "preloaded_date")),
     certificate(impl::ValueMember(value__, "certificate")){
 }
+
+void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
+//  device_certificates = from.device_certificates;  // According to the requirements this is optional.
+  exchange_after_x_ignition_cycles = from.exchange_after_x_ignition_cycles;
+  exchange_after_x_kilometers = from.exchange_after_x_kilometers;
+  exchange_after_x_days = from.exchange_after_x_days;
+  timeout_after_x_seconds = from.timeout_after_x_seconds;
+  seconds_between_retries = from.seconds_between_retries;
+  endpoints = from.endpoints;
+  notifications_per_minute_by_priority = from.notifications_per_minute_by_priority;
+
+  vehicle_make.assign_if_valid(from.vehicle_make);
+  vehicle_model.assign_if_valid(from.vehicle_model);
+  vehicle_year.assign_if_valid(from.vehicle_year);
+  certificate .assign_if_valid(from.certificate);
+
+}
+
 Json::Value ModuleConfig::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("device_certificates", device_certificates, &result__);

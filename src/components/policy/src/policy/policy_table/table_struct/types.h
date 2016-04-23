@@ -190,6 +190,7 @@ struct ModuleConfig : CompositeType {
     ModuleConfig(uint8_t exchange_after_x_ignition_cycles, int64_t exchange_after_x_kilometers, uint8_t exchange_after_x_days, uint16_t timeout_after_x_seconds, const SecondsBetweenRetries& seconds_between_retries, const ServiceEndpoints& endpoints, const NumberOfNotificationsPerMinute& notifications_per_minute_by_priority);
     ~ModuleConfig();
     explicit ModuleConfig(const Json::Value* value__);
+    void SafeCopyFrom(const ModuleConfig& from);
     Json::Value ToJsonValue() const;
     bool is_valid() const;
     bool is_initialized() const;
