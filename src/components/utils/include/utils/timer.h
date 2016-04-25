@@ -141,15 +141,15 @@ class Timer {
     bool stop_flag_;
 
     /*
-     * State lock used to protect condition variable
+     * Termination lock used to protect condition variable
      */
-    sync_primitives::Lock state_lock_;
+    sync_primitives::Lock termination_lock_;
     sync_primitives::ConditionalVariable termination_condition_;
 
     DISALLOW_COPY_AND_ASSIGN(TimerDelegate);
   };
 
-  void StopUnsafe();
+  void StopLockFree();
 
   /**
    * @brief Callback called on timeout
@@ -157,26 +157,14 @@ class Timer {
   void OnTimeout() const;
 
   const std::string name_;
-
-  /*
-   * Task lock used to protect task from deleting during execution
-   */
-  mutable sync_primitives::Lock task_lock_;
   TimerTask* task_;
 
   /*
-   * State lock used to protect thread and delegate
+   * State lock used to protect timer thread and delegate
    */
   sync_primitives::Lock state_lock_;
   mutable TimerDelegate delegate_;
   threads::Thread* thread_;
-
-  /*
-   * We should not protect this variable with any
-   * synchronization primitives in current implementation
-   * because we use it only in two places, that cannot
-   * be invoked simultaneously
-   */
   bool single_shot_;
 
   DISALLOW_COPY_AND_ASSIGN(Timer);
