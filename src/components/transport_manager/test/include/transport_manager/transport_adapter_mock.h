@@ -73,6 +73,9 @@ class MockTransportAdapter
   MOCK_METHOD0(
       StopClientListening,
       ::transport_manager::transport_adapter::TransportAdapter::Error());
+  MOCK_METHOD2(RemoveFinalizedConnection, void(
+                  const ::transport_manager::DeviceUID& device_handle,
+                  const ::transport_manager::ApplicationHandle& app_handle));
   MOCK_METHOD2(Disconnect,
                ::transport_manager::transport_adapter::TransportAdapter::Error(
                    const ::transport_manager::DeviceUID& device_handle,

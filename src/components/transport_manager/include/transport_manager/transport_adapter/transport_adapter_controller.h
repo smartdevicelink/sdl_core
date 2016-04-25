@@ -121,7 +121,7 @@ class TransportAdapterController {
                              const ConnectError& error) = 0;
 
   /**
-   * @brief Make state of specified connection - FINILIZING.
+   * @brief Make state of specified connection - FINALISING.
    *
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.

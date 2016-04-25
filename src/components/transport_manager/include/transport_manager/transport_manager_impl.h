@@ -323,7 +323,7 @@ class TransportManagerImpl
       return conversion_table_.size();  // handle begin since 1 (one)
     }
 
-    DeviceUID HandleToUid(DeviceHandle handle) {
+    DeviceUID HandleToUid(const DeviceHandle handle) {
       sync_primitives::AutoReadLock lock(conversion_table_lock);
       if (handle == 0 || handle > conversion_table_.size()) {
         return DeviceUID();
@@ -361,7 +361,8 @@ class TransportManagerImpl
   DeviceInfoList device_list_;
 
   void AddConnection(const ConnectionInternal& c);
-  void RemoveConnection(uint32_t id);
+  void RemoveConnection(const uint32_t id,
+                        transport_adapter::TransportAdapter* transport_adapter);
   ConnectionInternal* GetConnection(const ConnectionUID id);
   ConnectionInternal* GetConnection(const DeviceUID& device,
                                     const ApplicationHandle& application);

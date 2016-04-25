@@ -285,6 +285,7 @@ class TransportManagerImplTest : public ::testing::Test {
                                      error_);
 
     EXPECT_CALL(*tm_listener_, OnConnectionClosed(application_id_));
+    EXPECT_CALL(*mock_adapter_, RemoveFinalizedConnection(mac_address_, application_id_));
 
     tm_.TestHandle(test_event);
   }
@@ -772,6 +773,7 @@ TEST_F(TransportManagerImplTest, CheckUnexpectedDisconnect) {
   HandleConnection();
   // Act and Assert
   EXPECT_CALL(*tm_listener_, OnUnexpectedDisconnect(connection_key_, _));
+  EXPECT_CALL(*mock_adapter_, RemoveFinalizedConnection(mac_address_, application_id_));  
   tm_.TestHandle(test_event);
 }
 
