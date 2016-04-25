@@ -31,15 +31,16 @@
  */
 
 #include "application_manager/commands/hmi/on_allow_sdl_functionality_notification.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/policies/policy_handler.h"
 
 namespace application_manager {
 
 namespace commands {
 
 OnAllowSDLFunctionalityNotification::OnAllowSDLFunctionalityNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
 OnAllowSDLFunctionalityNotification::~OnAllowSDLFunctionalityNotification() {}
 
@@ -49,7 +50,7 @@ void OnAllowSDLFunctionalityNotification::Run() {
   if ((*message_)[strings::msg_params].keyExists("device")) {
     device_id = (*message_)[strings::msg_params]["device"]["id"].asString();
   }
-  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().OnAllowSDLFunctionalityNotification(
+  application_manager_.GetPolicyHandler().OnAllowSDLFunctionalityNotification(
       (*message_)[strings::msg_params][hmi_response::allowed].asBool(),
       device_id);
 }

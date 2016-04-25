@@ -49,7 +49,8 @@ class VRGetLanguageResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VRGetLanguageResponse(const MessageSharedPtr& message);
+  VRGetLanguageResponse(const MessageSharedPtr& message,
+                        ApplicationManager& application_manager);
 
   /**
    * @brief VRGetLanguageResponse class destructor

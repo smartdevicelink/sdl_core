@@ -45,6 +45,7 @@
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/transport_adapter/connection.h"
+#include "transport_manager/transport_manager_settings.h"
 #include "resumption/last_state.h"
 
 #ifdef TELEMETRY_MONITOR
@@ -78,7 +79,8 @@ class TransportAdapterImpl : public TransportAdapter,
   TransportAdapterImpl(DeviceScanner* device_scanner,
                        ServerConnectionFactory* server_connection_factory,
                        ClientConnectionListener* client_connection_listener,
-                       resumption::LastState& last_state);
+                       resumption::LastState& last_state,
+                       const TransportManagerSettings& settings);
 
   /**
    * @brief Destructor.
@@ -174,9 +176,10 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @return Error information about possible reason of sending data failure
    **/
-  virtual TransportAdapter::Error SendData(const DeviceUID& device_handle,
-                                           const ApplicationHandle& app_handle,
-                                           const ::protocol_handler::RawMessagePtr data);
+  virtual TransportAdapter::Error SendData(
+      const DeviceUID& device_handle,
+      const ApplicationHandle& app_handle,
+      const ::protocol_handler::RawMessagePtr data);
 
   /**
    * @brief Start client listener.
@@ -228,8 +231,8 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @return Container(vector) that holds application unique identifiers.
    */
-  virtual ApplicationList GetApplicationList(const DeviceUID& device_handle)
-      const;
+  virtual ApplicationList GetApplicationList(
+      const DeviceUID& device_handle) const;
 
   /**
    * @brief Find device in the internal container(map).
@@ -434,7 +437,6 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual bool ToBeAutoConnected(DeviceSptr device) const;
 
-
   /**
    * @brief Returns true if \a device is to be disconnected automatically when
    * all applications will be closed
@@ -449,8 +451,13 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @return pointer to the connection.
    */
-  virtual ConnectionSPtr FindEstablishedConnection(const DeviceUID& device_handle,
-                                           const ApplicationHandle& app_handle) const;
+  virtual ConnectionSPtr FindEstablishedConnection(
+      const DeviceUID& device_handle,
+      const ApplicationHandle& app_handle) const;
+
+  const TransportManagerSettings& get_settings() const {
+    return settings_;
+  }
 
  private:
   /**
@@ -492,11 +499,7 @@ class TransportAdapterImpl : public TransportAdapter,
     ConnectionSPtr connection;
     DeviceUID device_id;
     ApplicationHandle app_handle;
-    enum {
-      NEW,
-      ESTABLISHED,
-      FINALISING
-    } state;
+    enum { NEW, ESTABLISHED, FINALISING } state;
   };
 
   /**
@@ -539,7 +542,7 @@ class TransportAdapterImpl : public TransportAdapter,
 #endif  // TELEMETRY_MONITOR
 
   resumption::LastState& last_state() const {
-      return last_state_;
+    return last_state_;
   }
 
   /**
@@ -558,9 +561,10 @@ class TransportAdapterImpl : public TransportAdapter,
   ClientConnectionListener* client_connection_listener_;
 
   resumption::LastState& last_state_;
+  const TransportManagerSettings& settings_;
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_IMPL_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_IMPL_H_

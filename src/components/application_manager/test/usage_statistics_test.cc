@@ -34,7 +34,7 @@
 #include <memory>
 #include "gmock/gmock.h"
 #include "smart_objects/enum_schema_item.h"
-#include "mock_statistics_manager.h"
+#include "policy/mock_statistics_manager.h"
 #include "mock_app_stopwatch.h"
 #include "utils/make_shared.h"
 #include "utils/shared_ptr.h"
@@ -77,8 +77,7 @@ class UsageStatisticsTest : public testing::Test {
       , language_(LanguageIdToString(kTestLanguageId)) {}
 
  protected:
-  utils::SharedPtr<MockStatisticsManager>
-      mock_statistics_manager_sptr_;
+  utils::SharedPtr<MockStatisticsManager> mock_statistics_manager_sptr_;
   std::auto_ptr<application_manager::UsageStatistics>
       usage_statistics_test_object1_sptr_;
   const std::string language_;
@@ -86,7 +85,8 @@ class UsageStatisticsTest : public testing::Test {
 
 TEST_F(UsageStatisticsTest, RecordHmiStateChanged_CallMethod_ExpectMethodCall) {
   // Arrange
-  std::auto_ptr<MockAppStopwatch> mock_app_stopwatch_object(new MockAppStopwatch);
+  std::auto_ptr<MockAppStopwatch> mock_app_stopwatch_object(
+      new MockAppStopwatch);
 
   // Checks
   EXPECT_CALL(*mock_app_stopwatch_object, Start(kTestAppStopwatchId));

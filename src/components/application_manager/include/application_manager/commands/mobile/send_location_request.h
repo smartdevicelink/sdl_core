@@ -49,7 +49,8 @@ class SendLocationRequest : public CommandRequestImpl {
   /**
    * @brief SendLocationRquest class constructor
    */
-  explicit SendLocationRequest(const MessageSharedPtr& message);
+  SendLocationRequest(const MessageSharedPtr& message,
+                      ApplicationManager& application_manager);
 
   /**
    * @brief SendLocationRquest class destructor
@@ -68,13 +69,12 @@ class SendLocationRequest : public CommandRequestImpl {
    */
   virtual void on_event(const event_engine::Event& event);
 
-
  private:
-
-    /**
-   * @brief CheckFieldsCompatibility checks if fields are compatible with each other.
-   * @return true if compatible, otherwise return false
-   */
+  /**
+ * @brief CheckFieldsCompatibility checks if fields are compatible with each
+ * other.
+ * @return true if compatible, otherwise return false
+ */
   bool CheckFieldsCompatibility();
 
   /**
@@ -84,7 +84,8 @@ class SendLocationRequest : public CommandRequestImpl {
    */
   bool IsWhiteSpaceExist();
 
-  bool CheckHMICapabilities(std::list<hmi_apis::Common_TextFieldName::eType>& fields_names);
+  bool CheckHMICapabilities(
+      std::list<hmi_apis::Common_TextFieldName::eType>& fields_names);
   DISALLOW_COPY_AND_ASSIGN(SendLocationRequest);
 };
 

@@ -54,7 +54,8 @@ class CommandRequestImpl : public CommandImpl,
  public:
   enum RequestState { kAwaitingHMIResponse = 0, kTimedOut, kCompleted };
 
-  explicit CommandRequestImpl(const MessageSharedPtr& message);
+  CommandRequestImpl(const MessageSharedPtr& message,
+                     ApplicationManager& application_manager);
   virtual ~CommandRequestImpl();
   virtual bool CheckPermissions();
   virtual bool Init();

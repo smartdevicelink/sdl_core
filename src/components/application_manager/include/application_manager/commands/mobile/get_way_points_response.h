@@ -44,11 +44,12 @@ namespace commands {
  * @brief GetWayPointsResponse command class
  **/
 class GetWayPointsResponse : public CommandResponseImpl {
-public:
+ public:
   /**
    * \brief GetWayPointsResponse class constructor
    **/
-  explicit GetWayPointsResponse(const MessageSharedPtr& message);
+  GetWayPointsResponse(const MessageSharedPtr& message,
+                       ApplicationManager& application_manager);
 
   /**
    * \brief GetWayPointsResponse class destructor
@@ -59,12 +60,13 @@ public:
    * @brief Execute command
    **/
   virtual void Run() OVERRIDE;
-private:
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(GetWayPointsResponse);
 };
 
-} // namespace commands
+}  // namespace commands
 
-} // namespace application_manager
+}  // namespace application_manager
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_WAY_POINTS_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_GET_WAY_POINTS_RESPONSE_H_

@@ -34,9 +34,8 @@ class CryptoManagerSettingsImpl : public CryptoManagerSettings {
       return security_manager::SSLv3;
     }
     LOG4CXX_ERROR(
-          logger_,
-          "Unknown protocol: " << profile::Profile::instance()
-                                      ->security_manager_protocol_name());
+        logger_,
+        "Unknown protocol: " << profile_.security_manager_protocol_name());
     return static_cast<security_manager::Protocol>(-1);
   }
   bool verify_peer() const OVERRIDE {

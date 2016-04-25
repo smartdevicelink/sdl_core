@@ -42,30 +42,30 @@ namespace commands {
 /**
  * @brief NaviSubscribeWayPointsRequest command class
  **/
-class NaviUnSubscribeWayPointsRequest
-    : public RequestToHMI {
-public:
-    /**
-     * @brief NaviUnSubscribeWayPointsRequest class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit NaviUnSubscribeWayPointsRequest(const MessageSharedPtr& message);
-    /**
-     * @brief NaviUnSubscribeWayPointsRequest class destructor
-     **/
-    virtual ~NaviUnSubscribeWayPointsRequest();
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run() OVERRIDE;
+class NaviUnSubscribeWayPointsRequest : public RequestToHMI {
+ public:
+  /**
+   * @brief NaviUnSubscribeWayPointsRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  NaviUnSubscribeWayPointsRequest(const MessageSharedPtr& message,
+                                  ApplicationManager& application_manager);
+  /**
+   * @brief NaviUnSubscribeWayPointsRequest class destructor
+   **/
+  virtual ~NaviUnSubscribeWayPointsRequest();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run() OVERRIDE;
 
-private:
+ private:
   DISALLOW_COPY_AND_ASSIGN(NaviUnSubscribeWayPointsRequest);
 };
 
-} // namespace commands
+}  // namespace commands
 
-} // namespace application_manager
+}  // namespace application_manager
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_UNSUBSCRIBE_WAY_POINTS_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_UNSUBSCRIBE_WAY_POINTS_REQUEST_H_

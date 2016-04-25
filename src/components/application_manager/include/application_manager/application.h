@@ -109,7 +109,7 @@ class InitialApplicationData {
   virtual const smart_objects::SmartObject* app_types() const = 0;
   virtual const smart_objects::SmartObject* vr_synonyms() const = 0;
   virtual const std::string& mac_address() const = 0;
-  virtual std::string mobile_app_id() const = 0;
+  virtual std::string policy_app_id() const = 0;
   virtual const smart_objects::SmartObject* tts_name() const = 0;
   virtual const smart_objects::SmartObject* ngn_media_screen_name() const = 0;
   virtual const mobile_api::Language::eType& language() const = 0;
@@ -117,7 +117,7 @@ class InitialApplicationData {
   virtual void set_app_types(const smart_objects::SmartObject& app_types) = 0;
   virtual void set_vr_synonyms(
       const smart_objects::SmartObject& vr_synonyms) = 0;
-  virtual void set_mobile_app_id(const std::string& mobile_app_id) = 0;
+  virtual void set_mobile_app_id(const std::string& policy_app_id) = 0;
   virtual void set_tts_name(const smart_objects::SmartObject& tts_name) = 0;
   virtual void set_ngn_media_screen_name(
       const smart_objects::SmartObject& ngn_name) = 0;
@@ -338,18 +338,19 @@ class DynamicApplicationData {
   *
   * @param Current Interaction layout of the perform interaction
   */
- virtual void set_perform_interaction_layout(mobile_api::LayoutMode::eType layout) = 0;
+  virtual void set_perform_interaction_layout(
+      mobile_api::LayoutMode::eType layout) = 0;
 
- /*
-  * @brief Retrieve perform interaction layout
-  */
- virtual mobile_api::LayoutMode::eType perform_interaction_layout() const = 0;
-
-/*
-   * @brief Sets the mode for perform interaction: UI/VR/BOTH
-   *
-   * @param mode Mode that was selected (MENU; VR; BOTH)
+  /*
+   * @brief Retrieve perform interaction layout
    */
+  virtual mobile_api::LayoutMode::eType perform_interaction_layout() const = 0;
+
+  /*
+     * @brief Sets the mode for perform interaction: UI/VR/BOTH
+     *
+     * @param mode Mode that was selected (MENU; VR; BOTH)
+     */
   virtual void set_perform_interaction_mode(int32_t mode) = 0;
 
   /*
@@ -443,8 +444,7 @@ class Application : public virtual InitialApplicationData,
    * @brief Stops streaming service for application
    * @param service_type Type of streaming service
    */
-  virtual void StopStreaming(
-      protocol_handler::ServiceType service_type) = 0;
+  virtual void StopStreaming(protocol_handler::ServiceType service_type) = 0;
 
   /**
    * @brief Stops streaming for application whether it is allowed or not HMI
@@ -486,7 +486,7 @@ class Application : public virtual InitialApplicationData,
   virtual const std::string folder_name() const = 0;
   virtual bool is_media_application() const = 0;
   virtual bool is_foreground() const = 0;
-  virtual void set_foreground(bool is_foreground) = 0;
+  virtual void set_foreground(const bool is_foreground) = 0;
   virtual const mobile_api::HMILevel::eType hmi_level() const = 0;
   virtual const uint32_t put_file_in_none_count() const = 0;
   virtual const uint32_t delete_file_in_none_count() const = 0;
@@ -530,7 +530,7 @@ class Application : public virtual InitialApplicationData,
   virtual void increment_delete_file_in_none_count() = 0;
   virtual void increment_list_files_in_none_count() = 0;
   virtual bool set_app_icon_path(const std::string& file_name) = 0;
-  virtual void set_app_allowed(const bool& allowed) = 0;
+  virtual void set_app_allowed(const bool allowed) = 0;
   virtual void set_device(connection_handler::DeviceHandle device) = 0;
   virtual uint32_t get_grammar_id() const = 0;
   virtual void set_grammar_id(uint32_t value) = 0;
@@ -765,6 +765,13 @@ class Application : public virtual InitialApplicationData,
    * @brief Load persistent files from application folder.
    */
   virtual void LoadPersistentFiles() = 0;
+
+  /**
+   * @brief Get available app space
+   * @param name of the app folder(make + mobile app id)
+   * @return free app space.
+   */
+  virtual uint32_t GetAvailableDiskSpace() = 0;
 
  protected:
   mutable sync_primitives::Lock hmi_states_lock_;

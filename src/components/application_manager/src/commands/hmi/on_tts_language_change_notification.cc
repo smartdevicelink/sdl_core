@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/on_tts_language_change_notification.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
@@ -41,16 +41,15 @@ namespace application_manager {
 namespace commands {
 
 OnTTSLanguageChangeNotification::OnTTSLanguageChangeNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
 OnTTSLanguageChangeNotification::~OnTTSLanguageChangeNotification() {}
 
 void OnTTSLanguageChangeNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
+  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
 
   hmi_capabilities.set_active_tts_language(
       static_cast<hmi_apis::Common_Language::eType>(
@@ -68,9 +67,9 @@ void OnTTSLanguageChangeNotification::Run() {
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
 
-  ApplicationManagerImpl::ApplicationListAccessor accessor;
-
-  ApplicationSetConstIt it = accessor.begin();
+  const ApplicationSet& accessor =
+      application_manager_.applications().GetData();
+  ApplicationSetIt it = accessor.begin();
   for (; accessor.end() != it;) {
     ApplicationSharedPtr app = *it++;
     (*message_)[strings::params][strings::connection_key] = app->app_id();
@@ -78,10 +77,12 @@ void OnTTSLanguageChangeNotification::Run() {
 
     if (static_cast<int>(app->language()) !=
         (*message_)[strings::msg_params][strings::language].asInt()) {
-      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-          app->app_id(),
-          mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE);
-      ApplicationManagerImpl::instance()->UnregisterApplication(
+      application_manager_.ManageMobileCommand(
+          MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+              app->app_id(),
+              mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE),
+          commands::Command::ORIGIN_SDL);
+      application_manager_.UnregisterApplication(
           app->app_id(), mobile_apis::Result::SUCCESS, false);
     }
   }

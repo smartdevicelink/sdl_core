@@ -31,18 +31,16 @@
  */
 
 #include "application_manager/commands/hmi/on_record_start_notification.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
 OnRecordStartdNotification::OnRecordStartdNotification(
-    const MessageSharedPtr& message) : NotificationToHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationToHMI(message, application_manager) {}
 
-OnRecordStartdNotification::~OnRecordStartdNotification() {
-}
+OnRecordStartdNotification::~OnRecordStartdNotification() {}
 
 void OnRecordStartdNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,4 +51,3 @@ void OnRecordStartdNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

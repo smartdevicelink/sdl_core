@@ -30,25 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/vi_get_vehicle_type_response.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
 VIGetVehicleTypeResponse::VIGetVehicleTypeResponse(
-    const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-VIGetVehicleTypeResponse::~VIGetVehicleTypeResponse() {
-}
+VIGetVehicleTypeResponse::~VIGetVehicleTypeResponse() {}
 
 void VIGetVehicleTypeResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
+  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
 
   hmi_capabilities.set_vehicle_type(
       (*message_)[strings::msg_params][hmi_response::vehicle_type]);

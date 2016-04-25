@@ -52,9 +52,13 @@ class UpdateStatusManagerTest : public ::testing::Test {
  public:
   UpdateStatusManagerTest() : k_timeout_(1) {}
 
-  void SetUp() { manager_ = new UpdateStatusManager(); }
+  void SetUp() {
+    manager_ = new UpdateStatusManager();
+  }
 
-  void TearDown() { delete manager_; }
+  void TearDown() OVERRIDE {
+    delete manager_;
+  }
 };
 
 TEST_F(UpdateStatusManagerTest,

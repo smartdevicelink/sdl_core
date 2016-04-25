@@ -31,24 +31,22 @@
  */
 
 #include "application_manager/policies/delegates/app_permission_delegate.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/policies/policy_handler_interface.h"
+#include "application_manager/application_manager.h"
 
 namespace policy {
-  CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
+CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 
-  AppPermissionDelegate::AppPermissionDelegate(
-      const uint32_t connection_key, const PermissionConsent& permissions)
-    : connection_key_(connection_key),
-      permissions_(permissions) {
-  }
+AppPermissionDelegate::AppPermissionDelegate(
+    const uint32_t connection_key,
+    const PermissionConsent& permissions,
+    policy::PolicyHandlerInterface& policy_handler)
+    : connection_key_(connection_key)
+    , permissions_(permissions)
+    , policy_handler_(policy_handler) {}
 
-  void AppPermissionDelegate::threadMain() {
+void AppPermissionDelegate::threadMain() {
   LOG4CXX_AUTO_TRACE(logger_);
-  policy::PolicyHandlerInterface& policy_handler =
-      application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler();
-  policy_handler.OnAppPermissionConsentInternal(connection_key_,
-                                                            permissions_);
+  policy_handler_.OnAppPermissionConsentInternal(connection_key_, permissions_);
 }
 
 void AppPermissionDelegate::exitThreadMain() {

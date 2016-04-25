@@ -95,7 +95,8 @@ class SSLTest : public testing::Test {
     }
     certificate_file.close();
     certificate_data_base64_ = certificate.str();
-    ASSERT_FALSE(certificate_data_base64_.empty()) << "Certificate data file is empty";
+    ASSERT_FALSE(certificate_data_base64_.empty())
+        << "Certificate data file is empty";
   }
 
   virtual void SetUp() OVERRIDE {
@@ -170,7 +171,7 @@ class SSLTest : public testing::Test {
     client_buf_len = 0u;
   }
 
-  virtual void TearDown() OVERRIDE {
+  void TearDown() OVERRIDE {
     crypto_manager_->ReleaseSSLContext(server_ctx);
     client_manager_->ReleaseSSLContext(client_ctx);
 
@@ -210,7 +211,7 @@ class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
     mock_crypto_manager_settings_ = utils::MakeShared<
         NiceMock<security_manager_test::MockCryptoManagerSettings>>();
     utils::SharedPtr<security_manager::CryptoManagerSettings> server_crypto(
-                mock_crypto_manager_settings_);
+        mock_crypto_manager_settings_);
     crypto_manager = new security_manager::CryptoManagerImpl(server_crypto);
 
     SetServerInitialValues(GetParam().server_protocol,
@@ -223,7 +224,7 @@ class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
         NiceMock<security_manager_test::MockCryptoManagerSettings>>();
 
     utils::SharedPtr<security_manager::CryptoManagerSettings> client_crypto(
-                mock_client_manager_settings_);
+        mock_client_manager_settings_);
     client_manager = new security_manager::CryptoManagerImpl(client_crypto);
 
     SetClientInitialValues(GetParam().client_protocol,
@@ -249,7 +250,7 @@ class SSLTestParam : public testing::TestWithParam<ProtocolAndCipher> {
     client_buf_len = 0u;
   }
 
-  virtual void TearDown() OVERRIDE {
+  void TearDown() OVERRIDE {
     crypto_manager->ReleaseSSLContext(server_ctx);
     client_manager->ReleaseSSLContext(client_ctx);
 

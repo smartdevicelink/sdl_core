@@ -32,13 +32,14 @@
 
 #include "application_manager/event_engine/event_observer.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/event_engine/event_dispatcher.h"
 
 namespace application_manager {
 namespace event_engine {
 
-EventObserver::EventObserver()
- : id_(0) {
-  //Get unique id based on this
+EventObserver::EventObserver(EventDispatcher& event_dispatcher)
+    : id_(0), event_dispatcher_(event_dispatcher) {
+  // Get unique id based on this
   id_ = reinterpret_cast<unsigned long>(this);
 }
 
@@ -48,15 +49,15 @@ EventObserver::~EventObserver() {
 
 void EventObserver::subscribe_on_event(const Event::EventID& event_id,
                                        int32_t hmi_correlation_id) {
-  EventDispatcherImpl::instance()->add_observer(event_id, hmi_correlation_id, this);
+  event_dispatcher_.add_observer(event_id, hmi_correlation_id, *this);
 }
 
 void EventObserver::unsubscribe_from_event(const Event::EventID& event_id) {
-  EventDispatcherImpl::instance()->remove_observer(event_id, this);
+  event_dispatcher_.remove_observer(event_id, *this);
 }
 
 void EventObserver::unsubscribe_from_all_events() {
-  EventDispatcherImpl::instance()->remove_observer(this);
+  event_dispatcher_.remove_observer(*this);
 }
 
 }  // namespace event_engine

@@ -1,4 +1,4 @@
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/commands/mobile/subscribe_way_points_response.h"
 
 namespace application_manager {
@@ -6,17 +6,15 @@ namespace application_manager {
 namespace commands {
 
 SubscribeWayPointsResponse::SubscribeWayPointsResponse(
-    const MessageSharedPtr &message)
-    : CommandResponseImpl(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-SubscribeWayPointsResponse::~SubscribeWayPointsResponse() {
-}
+SubscribeWayPointsResponse::~SubscribeWayPointsResponse() {}
 
 void SubscribeWayPointsResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+  application_manager_.SendMessageToMobile(message_);
 }
 
 }  // namespace commands

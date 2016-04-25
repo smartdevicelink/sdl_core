@@ -30,25 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/ui_get_capabilities_response.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
 UIGetCapabilitiesResponse::UIGetCapabilitiesResponse(
-    const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-UIGetCapabilitiesResponse::~UIGetCapabilitiesResponse() {
-}
+UIGetCapabilitiesResponse::~UIGetCapabilitiesResponse() {}
 
 void UIGetCapabilitiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
+  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
@@ -83,7 +79,6 @@ void UIGetCapabilitiesResponse::Run() {
           msg_params[strings::hmi_capabilities][strings::phone_call].asBool());
     }
   }
-
 }
 
 }  // namespace commands

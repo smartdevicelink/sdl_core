@@ -36,12 +36,11 @@ namespace application_manager {
 
 namespace commands {
 
-TTSIsReadyRequest::TTSIsReadyRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+TTSIsReadyRequest::TTSIsReadyRequest(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-TTSIsReadyRequest::~TTSIsReadyRequest() {
-}
+TTSIsReadyRequest::~TTSIsReadyRequest() {}
 
 void TTSIsReadyRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,4 +51,3 @@ void TTSIsReadyRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

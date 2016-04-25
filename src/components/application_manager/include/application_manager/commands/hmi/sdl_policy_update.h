@@ -40,20 +40,22 @@ namespace application_manager {
 namespace commands {
 
 class SDLPolicyUpdate : public RequestToHMI {
-  public:
-    /**
-       * @brief SDLPolicyUpdate class constructor
-       *
-       * @param message Incoming SmartObject message
-       **/
-    explicit SDLPolicyUpdate(const MessageSharedPtr& message);
-    virtual ~SDLPolicyUpdate();
-    /**
-     * @brief Execute command
+ public:
+  /**
+     * @brief SDLPolicyUpdate class constructor
+     *
+     * @param message Incoming SmartObject message
      **/
-    virtual void Run();
-  private:
-    DISALLOW_COPY_AND_ASSIGN(SDLPolicyUpdate);
+  SDLPolicyUpdate(const MessageSharedPtr& message,
+                  ApplicationManager& application_manager);
+  virtual ~SDLPolicyUpdate();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(SDLPolicyUpdate);
 };
 
 }  // namespace commands

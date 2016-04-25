@@ -49,7 +49,8 @@ class VIGetDTCsResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VIGetDTCsResponse(const MessageSharedPtr& message);
+  VIGetDTCsResponse(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief VIGetDTCsResponse class destructor

@@ -37,7 +37,6 @@
 #include <map>
 
 #include "utils/lock.h"
-#include "utils/singleton.h"
 
 #include "application_manager/event_engine/event.h"
 #include "application_manager/event_engine/event_dispatcher.h"
@@ -47,16 +46,37 @@ namespace event_engine {
 
 class EventObserver;
 
-class EventDispatcherImpl : public EventDispatcher,
-  public utils::Singleton<EventDispatcherImpl> {
+class EventDispatcherImpl : public EventDispatcher {
  public:
+  // Data types section
+  typedef std::vector<EventObserver*> ObserverVector;
+  typedef std::map<int32_t, ObserverVector> ObserversMap;
+  typedef std::map<Event::EventID, ObserversMap> EventObserverMap;
+  /*
+   * @brief Destructor
+   */
+  virtual ~EventDispatcherImpl();
+
+  /*
+   * @brief Default constructor
+   */
+  EventDispatcherImpl();
+
+#ifdef BUILD_TESTS
+  EventObserverMap get_observers() const {
+    return observers_event_;
+  }
+  ObserverVector get_observers_list() const {
+    return observers_;
+  }
+#endif  // BUILD_TESTS
 
   /*
    * @brief Delivers the event to all subscribers
    *
    * @param event Received event
    */
-  virtual void raise_event(const Event& event);
+  void raise_event(const Event& event) OVERRIDE;
 
   /*
    * @brief Subscribe the observer to event
@@ -65,9 +85,9 @@ class EventDispatcherImpl : public EventDispatcher,
    * @param hmi_correlation_id  The event HMI correlation ID
    * @param observer    The observer to subscribe for event
    */
-  virtual void add_observer(const Event::EventID& event_id,
+  void add_observer(const Event::EventID& event_id,
                     int32_t hmi_correlation_id,
-                    EventObserver* const observer);
+                    EventObserver& observer) OVERRIDE;
 
   /*
    * @brief Unsubscribes the observer from specific event
@@ -75,50 +95,32 @@ class EventDispatcherImpl : public EventDispatcher,
    * @param event_id    The event ID to unsubscribe from
    * @param observer    The observer to be unsubscribed
    */
-  virtual void remove_observer(const Event::EventID& event_id,
-                       EventObserver* const observer);
+  void remove_observer(const Event::EventID& event_id,
+                       EventObserver& observer) OVERRIDE;
 
   /*
    * @brief Unsubscribes the observer from all events
    *
    * @param observer  The observer to be unsubscribed
    */
-  virtual void remove_observer(EventObserver* const observer);
-
-  /*
-   * @brief Destructor
-   */
- virtual ~EventDispatcherImpl();
+  void remove_observer(EventObserver& observer) OVERRIDE;
 
  private:
-
-  /*
-   * @brief Default constructor
-   */
-  EventDispatcherImpl();
-
   /*
    * @brief removes observer
    * when occurs unsubscribe from event
    * @param observer to be removed
    */
-  void remove_observer_from_vector(EventObserver* const observer);
+  void remove_observer_from_vector(EventObserver& observer);
 
   DISALLOW_COPY_AND_ASSIGN(EventDispatcherImpl);
 
-  FRIEND_BASE_SINGLETON_CLASS(EventDispatcherImpl);
-
-  // Data types section
-  typedef std::vector<EventObserver*>                 ObserverVector;
-  typedef std::map<int32_t, ObserverVector>           ObserversMap;
-  typedef std::map<Event::EventID, ObserversMap>      EventObserverMap;
-
+ private:
   // Members section
-  sync_primitives::Lock                               state_lock_;
-  sync_primitives::Lock                               observer_lock_;
-  EventObserverMap                                    observers_event_;
-  ObserverVector                                      observers_;
-
+  sync_primitives::Lock state_lock_;
+  sync_primitives::Lock observer_lock_;
+  EventObserverMap observers_event_;
+  ObserverVector observers_;
 };
 
 }  // namespace event_engine

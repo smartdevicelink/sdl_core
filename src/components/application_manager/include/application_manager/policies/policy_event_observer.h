@@ -30,30 +30,34 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_EVENT_OBSERVER_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_EVENT_OBSERVER_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_EVENT_OBSERVER_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_EVENT_OBSERVER_H_
 
 #include "application_manager/event_engine/event_observer.h"
+#include "utils/lock.h"
 
 namespace policy {
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
-class PolicyHandler;
+class PolicyHandlerInterface;
 
-class PolicyEventObserver :
-    public application_manager::event_engine::EventObserver {
+class PolicyEventObserver
+    : public application_manager::event_engine::EventObserver {
  public:
-  explicit PolicyEventObserver(policy::PolicyHandler* const policy_handler);
-  void set_policy_handler(policy::PolicyHandler* const policy_handler);
+  PolicyEventObserver(
+      policy::PolicyHandlerInterface* const policy_handler,
+      application_manager::event_engine::EventDispatcher& event_dispatcher);
+  void set_policy_handler(policy::PolicyHandlerInterface* const policy_handler);
   void on_event(const application_manager::event_engine::Event& event);
   void subscribe_on_event(
       const application_manager::event_engine::Event::EventID& event_id,
       int32_t hmi_correlation_id = 0);
+
  private:
   sync_primitives::Lock policy_handler_lock_;
-  PolicyHandler* policy_handler_;
+  PolicyHandlerInterface* policy_handler_;
   void ProcessOdometerEvent(const smart_objects::SmartObject& message);
 };
 
 }  //  namespace policy
-#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_EVENT_OBSERVER_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICIES_POLICY_EVENT_OBSERVER_H_

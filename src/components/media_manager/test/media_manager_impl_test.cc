@@ -40,6 +40,10 @@
 #include "application_manager/mock_application_manager.h"
 #include "utils/shared_ptr.h"
 #include "utils/make_shared.h"
+#include "application_manager/event_engine/event_dispatcher.h"
+#include "application_manager/state_controller.h"
+#include "application_manager/resumption/resume_ctrl.h"
+#include "resumption/last_state.h"
 
 namespace test {
 namespace components {
@@ -57,23 +61,8 @@ class MediaManagerImplTest : public ::testing::Test {
 };
 
 TEST_F(MediaManagerImplTest, PlayA2DPSource) {
-     MockMediaAdapter* media_mock_ = new MockMediaAdapter();
+  MockMediaAdapter* media_mock_ = new MockMediaAdapter();
 
-  application_manager_test::MockApplicationManager mock_application_manager;
-
-  ON_CALL(mock_media_manager_settings_,video_server_type()).WillByDefault(ReturnRef(kDefaultValue_));
-  ON_CALL(mock_media_manager_settings_,audio_server_type()).WillByDefault(ReturnRef(kDefaultValue_));
-  MediaManagerImpl mediaManagerImpl(mock_application_manager, mock_media_manager_settings_);
-  int32_t application_key = 1;
-
-
-  mediaManagerImpl.set_mock_a2dp_player(media_mock_);
-  EXPECT_CALL(*media_mock_, StartActivity(application_key));
-  mediaManagerImpl.PlayA2DPSource(application_key);
-}
-
-TEST_F(MediaManagerImplTest, StopA2DPSource) {
-    MockMediaAdapter* media_mock_ = new MockMediaAdapter();
   application_manager_test::MockApplicationManager mock_application_manager;
 
   ON_CALL(mock_media_manager_settings_, video_server_type())
@@ -84,6 +73,22 @@ TEST_F(MediaManagerImplTest, StopA2DPSource) {
                                     mock_media_manager_settings_);
   int32_t application_key = 1;
 
+  mediaManagerImpl.set_mock_a2dp_player(media_mock_);
+  EXPECT_CALL(*media_mock_, StartActivity(application_key));
+  mediaManagerImpl.PlayA2DPSource(application_key);
+}
+
+TEST_F(MediaManagerImplTest, StopA2DPSource) {
+  MockMediaAdapter* media_mock_ = new MockMediaAdapter();
+  application_manager_test::MockApplicationManager mock_application_manager;
+
+  ON_CALL(mock_media_manager_settings_, video_server_type())
+      .WillByDefault(ReturnRef(kDefaultValue_));
+  ON_CALL(mock_media_manager_settings_, audio_server_type())
+      .WillByDefault(ReturnRef(kDefaultValue_));
+  MediaManagerImpl mediaManagerImpl(mock_application_manager,
+                                    mock_media_manager_settings_);
+  int32_t application_key = 1;
 
   mediaManagerImpl.set_mock_a2dp_player(media_mock_);
   EXPECT_CALL(*media_mock_, StopActivity(application_key));
@@ -91,68 +96,83 @@ TEST_F(MediaManagerImplTest, StopA2DPSource) {
 }
 
 TEST_F(MediaManagerImplTest, StopMicrophoneRecording) {
+  MockMediaAdapterListener* media_adapter_listener_mock_ =
+      new MockMediaAdapterListener();
+  application_manager_test::MockApplicationManager mock_application_manager;
 
-MockMediaAdapterListener* media_adapter_listener_mock_ = new MockMediaAdapterListener();
-    application_manager_test::MockApplicationManager mock_application_manager;
-
-    ON_CALL(mock_media_manager_settings_,video_server_type()).WillByDefault(ReturnRef(kDefaultValue_));
-    ON_CALL(mock_media_manager_settings_,audio_server_type()).WillByDefault(ReturnRef(kDefaultValue_));
-    MediaManagerImpl mediaManagerImpl(mock_application_manager, mock_media_manager_settings_);
+  ON_CALL(mock_media_manager_settings_, video_server_type())
+      .WillByDefault(ReturnRef(kDefaultValue_));
+  ON_CALL(mock_media_manager_settings_, audio_server_type())
+      .WillByDefault(ReturnRef(kDefaultValue_));
+  MediaManagerImpl mediaManagerImpl(mock_application_manager,
+                                    mock_media_manager_settings_);
   int32_t application_key = 1;
 
   mediaManagerImpl.set_mock_mic_listener(media_adapter_listener_mock_);
 #ifdef EXTENDED_MEDIA_MODE
-  MockMediaAdapterImpl* media_adapter_recorder_mock = new MockMediaAdapterImpl();
+  MockMediaAdapterImpl* media_adapter_recorder_mock =
+      new MockMediaAdapterImpl();
   mediaManagerImpl.set_mock_mic_recorder(media_adapter_recorder_mock);
-  EXPECT_CALL(*media_adapter_recorder_mock,StopActivity(application_key));
-#endif // EXTENDED_MEDIA_MODE
+  EXPECT_CALL(*media_adapter_recorder_mock, StopActivity(application_key));
+#endif  // EXTENDED_MEDIA_MODE
   EXPECT_CALL(*media_adapter_listener_mock_, OnActivityEnded(application_key));
 #ifdef EXTENDED_MEDIA_MODE
-  EXPECT_CALL(*media_adapter_recorder_mock,RemoveListener(_));
-#endif // EXTENDED_MEDIA_MODE
+  EXPECT_CALL(*media_adapter_recorder_mock, RemoveListener(_));
+#endif  // EXTENDED_MEDIA_MODE
   mediaManagerImpl.StopMicrophoneRecording(application_key);
 }
 
 TEST_F(MediaManagerImplTest, StartStopStreaming) {
+  application_manager_test::MockApplicationManager mock_application_manager;
 
-
-    application_manager_test::MockApplicationManager mock_application_manager;
-
-    ON_CALL(mock_media_manager_settings_,video_server_type()).WillByDefault(ReturnRef(kDefaultValue_));
-    ON_CALL(mock_media_manager_settings_,audio_server_type()).WillByDefault(ReturnRef(kDefaultValue_));
-    MediaManagerImpl mediaManagerImpl(mock_application_manager, mock_media_manager_settings_);
+  ON_CALL(mock_media_manager_settings_, video_server_type())
+      .WillByDefault(ReturnRef(kDefaultValue_));
+  ON_CALL(mock_media_manager_settings_, audio_server_type())
+      .WillByDefault(ReturnRef(kDefaultValue_));
+  MediaManagerImpl mediaManagerImpl(mock_application_manager,
+                                    mock_media_manager_settings_);
 
   int32_t application_key = 1;
   MockMediaAdapterImpl* mock_audio_media_streamer = new MockMediaAdapterImpl();
-  mediaManagerImpl.set_mock_streamer(protocol_handler::ServiceType::kAudio, mock_audio_media_streamer);
+  mediaManagerImpl.set_mock_streamer(protocol_handler::ServiceType::kAudio,
+                                     mock_audio_media_streamer);
   MockMediaAdapterImpl* mock_nav_media_streamer = new MockMediaAdapterImpl();
-  mediaManagerImpl.set_mock_streamer(protocol_handler::ServiceType::kMobileNav, mock_nav_media_streamer);
+  mediaManagerImpl.set_mock_streamer(protocol_handler::ServiceType::kMobileNav,
+                                     mock_nav_media_streamer);
 
   EXPECT_CALL(*mock_audio_media_streamer, StartActivity(application_key));
-  mediaManagerImpl.StartStreaming(application_key, protocol_handler::ServiceType::kAudio);
+  mediaManagerImpl.StartStreaming(application_key,
+                                  protocol_handler::ServiceType::kAudio);
 
   EXPECT_CALL(*mock_nav_media_streamer, StartActivity(application_key));
-  mediaManagerImpl.StartStreaming(application_key, protocol_handler::ServiceType::kMobileNav);
+  mediaManagerImpl.StartStreaming(application_key,
+                                  protocol_handler::ServiceType::kMobileNav);
 
   EXPECT_CALL(*mock_audio_media_streamer, StopActivity(application_key));
-  mediaManagerImpl.StopStreaming(application_key, protocol_handler::ServiceType::kAudio);
+  mediaManagerImpl.StopStreaming(application_key,
+                                 protocol_handler::ServiceType::kAudio);
 
   EXPECT_CALL(*mock_nav_media_streamer, StopActivity(application_key));
-  mediaManagerImpl.StopStreaming(application_key, protocol_handler::ServiceType::kMobileNav);
+  mediaManagerImpl.StopStreaming(application_key,
+                                 protocol_handler::ServiceType::kMobileNav);
 }
 
 TEST_F(MediaManagerImplTest, CheckFramesProcessed) {
   application_manager_test::MockApplicationManager mock_application_manager;
 
-  ON_CALL(mock_media_manager_settings_,video_server_type()).WillByDefault(ReturnRef(kDefaultValue_));
-  ON_CALL(mock_media_manager_settings_,audio_server_type()).WillByDefault(ReturnRef(kDefaultValue_));
-  MediaManagerImpl mediaManagerImpl(mock_application_manager, mock_media_manager_settings_);
+  ON_CALL(mock_media_manager_settings_, video_server_type())
+      .WillByDefault(ReturnRef(kDefaultValue_));
+  ON_CALL(mock_media_manager_settings_, audio_server_type())
+      .WillByDefault(ReturnRef(kDefaultValue_));
+  MediaManagerImpl mediaManagerImpl(mock_application_manager,
+                                    mock_media_manager_settings_);
   protocol_handler_test::MockProtocolHandler mock_protocol_handler;
   mediaManagerImpl.SetProtocolHandler(&mock_protocol_handler);
   int32_t application_key = 1;
   int32_t frame_number = 10;
 
-  EXPECT_CALL(mock_protocol_handler, SendFramesNumber(application_key, frame_number));
+  EXPECT_CALL(mock_protocol_handler,
+              SendFramesNumber(application_key, frame_number));
   mediaManagerImpl.FramesProcessed(application_key, frame_number);
 }
 

@@ -30,22 +30,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/get_system_info_response.h"
-#include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
 namespace commands {
 
-GetSystemInfoResponse::GetSystemInfoResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {}
+GetSystemInfoResponse::GetSystemInfoResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
 GetSystemInfoResponse::~GetSystemInfoResponse() {}
 
 void GetSystemInfoResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  application_manager::ApplicationManagerImpl* app_manager_inst =
-      application_manager::ApplicationManagerImpl::instance();
-
   const hmi_apis::Common_Result::eType code =
       static_cast<hmi_apis::Common_Result::eType>(
           (*message_)[strings::params][hmi_response::code].asInt());
@@ -54,7 +51,7 @@ void GetSystemInfoResponse::Run() {
 
   // We have to set preloaded flag as false in policy table on any response
   // of GetSystemInfo (SDLAQ-CRS-2365)
-  app_manager_inst->GetPolicyHandler().OnGetSystemInfo(
+  application_manager_.GetPolicyHandler().OnGetSystemInfo(
       info.ccpu_version, info.wers_country_code, info.language);
 }
 
@@ -72,13 +69,12 @@ const SystemInfo GetSystemInfoResponse::GetSystemInfo(
   info.wers_country_code =
       (*message_)[strings::msg_params]["wersCountryCode"].asString();
 
-  const uint32_t lang_code = (*message_)[strings::msg_params]["language"].asUInt();
+  const uint32_t lang_code =
+      (*message_)[strings::msg_params]["language"].asUInt();
   info.language = application_manager::MessageHelper::CommonLanguageToString(
       static_cast<hmi_apis::Common_Language::eType>(lang_code));
 
-  application_manager::ApplicationManagerImpl::instance()
-      ->hmi_capabilities()
-      .set_ccpu_version(info.ccpu_version);
+  application_manager_.hmi_capabilities().set_ccpu_version(info.ccpu_version);
 
   return info;
 }

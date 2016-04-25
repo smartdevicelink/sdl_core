@@ -50,18 +50,18 @@ class AudioStartStreamRequest : public RequestToHMI,
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AudioStartStreamRequest(const MessageSharedPtr& message);
+  AudioStartStreamRequest(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief OnNaviStartStreamRequest class destructor
    **/
   virtual ~AudioStartStreamRequest();
 
-    /**
-   * @brief onTimeOut from requrst Controller
-   */
+  /**
+ * @brief onTimeOut from requrst Controller
+ */
   virtual void onTimeOut();
-
 
   /**
    * @brief Execute command
@@ -73,13 +73,13 @@ class AudioStartStreamRequest : public RequestToHMI,
    **/
   virtual void on_event(const event_engine::Event& event);
 
-    /**
-   * @brief RetryStartSession resend HMI startSession request if needed.
-   * If limit expired, set audio_stream_retry_number counter to 0
-   */
+  /**
+ * @brief RetryStartSession resend HMI startSession request if needed.
+ * If limit expired, set audio_stream_retry_number counter to 0
+ */
   void RetryStartSession();
 
-  private:
+ private:
   uint32_t retry_number_;
   DISALLOW_COPY_AND_ASSIGN(AudioStartStreamRequest);
 };

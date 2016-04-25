@@ -34,12 +34,14 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_LANGUAGE_HANDLER_H_
 
 #include "application_manager/event_engine/event_observer.h"
+#include "utils/lock.h"
 #include "interfaces/HMI_API.h"
 namespace resumption {
 class LastState;
 }
 namespace application_manager {
 
+class ApplicationManager;
 /**
  * Class is used to handle edge case with slow HMI responses for current
  * languages. Main idea is to cache values within some persistent storage and
@@ -47,23 +49,19 @@ namespace application_manager {
  * responses are gotten and after responses were received their language(s)
  * mismatch to current on HMI - apps have to be unregistered.
  **/
-class HMILanguageHandler: public event_engine::EventObserver {
-public:
+class HMILanguageHandler : public event_engine::EventObserver {
+ public:
   typedef std::map<uint32_t, bool> Apps;
 
   /**
   * @brief System interfaces
   */
-  enum Interface {
-    INTERFACE_UI,
-    INTERFACE_VR,
-    INTERFACE_TTS
-  };
+  enum Interface { INTERFACE_UI, INTERFACE_VR, INTERFACE_TTS };
 
   /**
    * @brief Class constructor
    */
-  HMILanguageHandler();
+  HMILanguageHandler(ApplicationManager& application_manager);
 
   /**
    * @brief Sets language for interface
@@ -87,7 +85,7 @@ public:
    * @param request Request object
    */
   void set_handle_response_for(
-          const event_engine::smart_objects::SmartObject& request);
+      const event_engine::smart_objects::SmartObject& request);
 
   /**
    * @brief Sets default languages from HMI capabilities
@@ -100,7 +98,7 @@ public:
                                           hmi_apis::Common_Language::eType tts);
   void Init(resumption::LastState* value);
 
-private:
+ private:
   void SendOnLanguageChangeToMobile(uint32_t connection_key);
 
   /**
@@ -174,9 +172,9 @@ private:
    */
   bool is_tts_language_received_;
   resumption::LastState* last_state_;
+  ApplicationManager& application_manager_;
 };
 
-} // namespace application_manager
+}  // namespace application_manager
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_LANGUAGE_HANDLER_H_
-
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMI_LANGUAGE_HANDLER_H_

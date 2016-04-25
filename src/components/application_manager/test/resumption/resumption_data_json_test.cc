@@ -36,11 +36,11 @@
 
 #include "application_manager/usage_statistics.h"
 #include "application_manager/mock_application.h"
-#include "application_manager/mock_resumption_data.h"
+#include "include/resumption_data_mock.h"
 #include "interfaces/MOBILE_API.h"
 #include "resumption/last_state.h"
 
-#include "application_manager/resumption_data_test.h"
+#include "resumption_data_test.h"
 #include "formatters/CFormatterJsonBase.h"
 #include "config_profile/profile.h"
 #include "utils/file_system.h"
@@ -64,8 +64,9 @@ namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
 class ResumptionDataJsonTest : public ResumptionDataTest {
  protected:
-  ResumptionDataJsonTest() : last_state_("app_storage_folder",
-                                         "app_info_storage"), res_json(last_state_) {}
+  ResumptionDataJsonTest()
+      : last_state_("app_storage_folder", "app_info_storage")
+      , res_json(last_state_, mock_application_manager_settings_) {}
   virtual void SetUp() {
     app_mock = new NiceMock<application_manager_test::MockApplication>();
 
@@ -104,7 +105,9 @@ class ResumptionDataJsonTest : public ResumptionDataTest {
 
   resumption::LastState last_state_;
   ResumptionDataJson res_json;
-
+  application_manager_test::MockApplicationManagerSettings
+      mock_application_manager_settings_;
+  std::string policy_app_id_;
 };
 
 TEST_F(ResumptionDataJsonTest, SaveApplication) {

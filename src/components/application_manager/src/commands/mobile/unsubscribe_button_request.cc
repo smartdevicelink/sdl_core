@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/unsubscribe_button_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 
 namespace application_manager {
@@ -42,18 +42,15 @@ namespace commands {
 namespace str = strings;
 
 UnsubscribeButtonRequest::UnsubscribeButtonRequest(
-    const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-UnsubscribeButtonRequest::~UnsubscribeButtonRequest() {
-}
+UnsubscribeButtonRequest::~UnsubscribeButtonRequest() {}
 
 void UnsubscribeButtonRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "APPLICATION_NOT_REGISTERED");
@@ -64,13 +61,15 @@ void UnsubscribeButtonRequest::Run() {
   const uint32_t btn_id =
       (*message_)[str::msg_params][str::button_name].asUInt();
 
-  if (!app->IsSubscribedToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id))) {
+  if (!app->IsSubscribedToButton(
+          static_cast<mobile_apis::ButtonName::eType>(btn_id))) {
     LOG4CXX_ERROR(logger_, "App doesn't subscibe to button " << btn_id);
     SendResponse(false, mobile_apis::Result::IGNORED);
     return;
   }
 
-  app->UnsubscribeFromButton(static_cast<mobile_apis::ButtonName::eType>(btn_id));
+  app->UnsubscribeFromButton(
+      static_cast<mobile_apis::ButtonName::eType>(btn_id));
 
   SendUnsubscribeButtonNotification();
   const bool is_succedeed = true;

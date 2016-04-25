@@ -33,7 +33,7 @@
 #include <algorithm>
 #include <string>
 #include "application_manager/commands/command_request_impl.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/message_helper.h"
 #include "smart_objects/smart_object.h"
 
@@ -66,8 +66,11 @@ struct DisallowedParamsInserter {
   mobile_apis::VehicleDataResultCode::eType code_;
 };
 
-CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message)
-    : CommandImpl(message), current_state_(kAwaitingHMIResponse) {}
+CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message,
+                                       ApplicationManager& application_manager)
+    : CommandImpl(message, application_manager)
+    , EventObserver(application_manager.event_dispatcher())
+    , current_state_(kAwaitingHMIResponse) {}
 
 CommandRequestImpl::~CommandRequestImpl() {}
 
@@ -107,7 +110,7 @@ void CommandRequestImpl::onTimeOut() {
                                             correlation_id(),
                                             mobile_api::Result::GENERIC_ERROR);
 
-  ApplicationManagerImpl::instance()->ManageMobileCommand(response);
+  application_manager_.ManageMobileCommand(response, ORIGIN_SDL);
 }
 
 void CommandRequestImpl::on_event(const event_engine::Event& event) {}
@@ -169,7 +172,7 @@ void CommandRequestImpl::SendResponse(
   response[strings::msg_params][strings::success] = success;
   response[strings::msg_params][strings::result_code] = result_code;
 
-  ApplicationManagerImpl::instance()->ManageMobileCommand(result);
+  application_manager_.ManageMobileCommand(result, ORIGIN_SDL);
 }
 
 bool CommandRequestImpl::CheckSyntax(const std::string& str,
@@ -198,7 +201,7 @@ uint32_t CommandRequestImpl::SendHMIRequest(
   smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
 
   const uint32_t hmi_correlation_id =
-      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+      application_manager_.GetNextHMICorrelationID();
   if (use_events) {
     LOG4CXX_DEBUG(logger_,
                   "subscribe_on_event " << function_id << " "
@@ -219,7 +222,7 @@ uint32_t CommandRequestImpl::SendHMIRequest(
     request[strings::msg_params] = *msg_params;
   }
 
-  if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
+  if (!application_manager_.ManageHMICommand(result)) {
     LOG4CXX_ERROR(logger_, "Unable to send request");
     SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
   }
@@ -245,7 +248,7 @@ void CommandRequestImpl::CreateHMINotification(
   notify[strings::params][strings::function_id] = function_id;
   notify[strings::msg_params] = msg_params;
 
-  if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
+  if (!application_manager_.ManageHMICommand(result)) {
     LOG4CXX_ERROR(logger_, "Unable to send HMI notification");
   }
 }
@@ -372,7 +375,8 @@ bool CommandRequestImpl::CheckAllowedParameters() {
     return true;
   }
 
-  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  const ApplicationSet& accessor =
+      application_manager_.applications().GetData();
   ApplicationSetConstIt it_app_list = accessor.begin();
   ApplicationSetConstIt it_app_list_end = accessor.end();
   for (; it_app_list != it_app_list_end; ++it_app_list) {
@@ -395,13 +399,12 @@ bool CommandRequestImpl::CheckAllowedParameters() {
 
       CommandParametersPermissions params_permissions;
       mobile_apis::Result::eType check_result =
-          application_manager::ApplicationManagerImpl::instance()
-              ->CheckPolicyPermissions(
-                  (*it_app_list).get()->mobile_app_id(),
-                  (*it_app_list).get()->hmi_level(),
-                  static_cast<mobile_api::FunctionID::eType>(function_id()),
-                  params,
-                  &params_permissions);
+          application_manager_.CheckPolicyPermissions(
+              (*it_app_list).get()->policy_app_id(),
+              (*it_app_list).get()->hmi_level(),
+              static_cast<mobile_api::FunctionID::eType>(function_id()),
+              params,
+              &params_permissions);
 
       // Check, if RPC is allowed by policy
       if (mobile_apis::Result::SUCCESS != check_result) {
@@ -412,7 +415,7 @@ bool CommandRequestImpl::CheckAllowedParameters() {
                 correlation_id(),
                 (*it_app_list)->app_id());
 
-        ApplicationManagerImpl::instance()->SendMessageToMobile(response);
+        application_manager_.SendMessageToMobile(response);
         return false;
       }
 
@@ -483,8 +486,7 @@ void CommandRequestImpl::RemoveDisallowedParameters(
       parameters_permissions_.undefined_params.push_back(key);
       LOG4CXX_INFO(logger_,
                    "Following parameter is not found among allowed parameters '"
-                       << key
-                       << "' and will be treated as disallowed.");
+                       << key << "' and will be treated as disallowed.");
     }
   }
 }

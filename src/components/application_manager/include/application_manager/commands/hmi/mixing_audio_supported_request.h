@@ -49,7 +49,8 @@ class MixingAudioSupportedRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit MixingAudioSupportedRequest(const MessageSharedPtr& message);
+  MixingAudioSupportedRequest(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief MixingAudioSupportedRequest class destructor

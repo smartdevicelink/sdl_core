@@ -42,15 +42,15 @@ namespace commands {
 /**
  * @brief TTSSpeakResponse command class
  **/
-class TTSSpeakResponse
-    : public ResponseFromHMI {
+class TTSSpeakResponse : public ResponseFromHMI {
  public:
   /**
    * @brief TTSSpeakResponse class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit TTSSpeakResponse(const MessageSharedPtr& message);
+  TTSSpeakResponse(const MessageSharedPtr& message,
+                   ApplicationManager& application_manager);
 
   /**
    * @brief TTSSpeakResponse class destructor

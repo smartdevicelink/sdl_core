@@ -54,7 +54,8 @@ class OnCommandNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnCommandNotification(const MessageSharedPtr& message);
+  OnCommandNotification(const MessageSharedPtr& message,
+                        ApplicationManager& application_manager);
 
   /**
    * @brief OnCommandNotification class destructor
@@ -65,6 +66,7 @@ class OnCommandNotification : public CommandNotificationImpl {
    * @brief Execute command
    **/
   virtual void Run();
+
  private:
   DISALLOW_COPY_AND_ASSIGN(OnCommandNotification);
 };

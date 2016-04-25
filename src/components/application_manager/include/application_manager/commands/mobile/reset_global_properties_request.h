@@ -52,7 +52,8 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit ResetGlobalPropertiesRequest(const MessageSharedPtr& message);
+  ResetGlobalPropertiesRequest(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager);
 
   /**
    * @brief ResetGlobalPropertiesRequest class destructor
@@ -103,7 +104,8 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool ResetVrHelpTitleItems(application_manager::ApplicationSharedPtr const app);
+  bool ResetVrHelpTitleItems(
+      application_manager::ApplicationSharedPtr const app);
 
   /*
    * @brief Check if there some not delivered hmi responses exist

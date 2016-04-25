@@ -38,6 +38,7 @@
 #include <vector>
 #include <utility>
 #include <list>
+#include <stdint.h>
 
 #include "utils/date_time.h"
 #include "application_manager/application_data_impl.h"
@@ -68,10 +69,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
  public:
   ApplicationImpl(
       uint32_t application_id,
-      const std::string& mobile_app_id,
+      const std::string& policy_app_id,
       const std::string& mac_address,
       const custom_str::CustomString& app_name,
-      utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager);
+      utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
+      ApplicationManager& application_manager);
 
   ~ApplicationImpl();
 
@@ -104,16 +106,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool audio_streaming_allowed() const;
   void set_audio_streaming_allowed(bool state);
 
-  void StartStreaming(
-      protocol_handler::ServiceType service_type);
-  void StopStreamingForce(
-      protocol_handler::ServiceType service_type);
-  void StopStreaming(
-      protocol_handler::ServiceType service_type);
-  void SuspendStreaming(
-      protocol_handler::ServiceType service_type);
-  void WakeUpStreaming(
-      protocol_handler::ServiceType service_type);
+  void StartStreaming(protocol_handler::ServiceType service_type);
+  void StopStreamingForce(protocol_handler::ServiceType service_type);
+  void StopStreaming(protocol_handler::ServiceType service_type);
+  void SuspendStreaming(protocol_handler::ServiceType service_type);
+  void WakeUpStreaming(protocol_handler::ServiceType service_type);
 
   virtual bool is_voice_communication_supported() const;
   virtual void set_voice_communication_supported(
@@ -130,9 +127,9 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void set_folder_name(const std::string& folder_name) OVERRIDE;
   const std::string folder_name() const;
   bool is_media_application() const;
-  virtual bool is_foreground() const;
-  virtual void set_foreground(bool is_foreground);
-  virtual const mobile_api::HMILevel::eType hmi_level() const;
+  bool is_foreground() const OVERRIDE;
+  void set_foreground(const bool is_foreground) OVERRIDE;
+  const mobile_apis::HMILevel::eType hmi_level() const;
   const uint32_t put_file_in_none_count() const;
   const uint32_t delete_file_in_none_count() const;
   const uint32_t list_files_in_none_count() const;
@@ -153,7 +150,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void increment_delete_file_in_none_count();
   void increment_list_files_in_none_count();
   bool set_app_icon_path(const std::string& path);
-  void set_app_allowed(const bool& allowed);
+  void set_app_allowed(const bool allowed);
   void set_device(connection_handler::DeviceHandle device);
   virtual uint32_t get_grammar_id() const;
   virtual void set_grammar_id(uint32_t value);
@@ -188,11 +185,15 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   virtual DataAccessor<ButtonSubscriptions> SubscribedButtons() const OVERRIDE;
 
   virtual const std::string& curHash() const;
-  /**
-   * @brief Change Hash for current application
-   * and send notification to mobile
-   * @return updated_hash
-   */
+#ifdef CUSTOMER_PASA
+  virtual bool flag_sending_hash_change_after_awake() const;
+  virtual void set_flag_sending_hash_change_after_awake(bool flag);
+#endif  // CUSTOMER_PASA
+        /**
+         * @brief Change Hash for current application
+         * and send notification to mobile
+         * @return updated_hash
+         */
   virtual void UpdateHash();
 
   UsageStatistics& usage_report();
@@ -216,11 +217,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * @return true if application is media, voice communication or navigation
    */
   virtual bool IsAudioApplication() const;
-
-  /**
-   * @brief Load persistent files from application folder.
-   */
-  virtual void LoadPersistentFiles();
 
   /**
   * @brief SetRegularState set permanent state of application
@@ -287,6 +283,18 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 
   void set_video_stream_retry_number(const uint32_t& video_stream_retry_number);
 
+  /**
+   * @brief Load persistent files from application folder.
+   */
+  void LoadPersistentFiles() OVERRIDE;
+
+  /**
+   * @brief Get available app space
+   * @param name of the app folder(make + mobile app id)
+   * @return free app space.
+   */
+  uint32_t GetAvailableDiskSpace() OVERRIDE;
+
  protected:
   /**
    * @brief Clean up application folder. Persistent files will stay
@@ -294,7 +302,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void CleanupFiles();
 
  private:
-
   /**
    * @brief Callback for video streaming suspend timer.
    * Suspends video streaming process for application
@@ -387,6 +394,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   mutable sync_primitives::Lock vi_lock_;
   sync_primitives::Lock button_lock_;
   std::string folder_name_;
+  ApplicationManager& application_manager_;
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };
 

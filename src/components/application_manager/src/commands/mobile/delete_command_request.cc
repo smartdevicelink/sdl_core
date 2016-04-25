@@ -32,8 +32,9 @@
  */
 
 #include "application_manager/commands/mobile/delete_command_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
+#include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "utils/helpers.h"
@@ -42,24 +43,23 @@ namespace application_manager {
 
 namespace commands {
 
-DeleteCommandRequest::DeleteCommandRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message),
-      is_ui_send_(false),
-      is_vr_send_(false),
-      is_ui_received_(false),
-      is_vr_received_(false),
-      ui_result_(hmi_apis::Common_Result::INVALID_ENUM),
-      vr_result_(hmi_apis::Common_Result::INVALID_ENUM)  {
-}
+DeleteCommandRequest::DeleteCommandRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager)
+    , is_ui_send_(false)
+    , is_vr_send_(false)
+    , is_ui_received_(false)
+    , is_vr_received_(false)
+    , ui_result_(hmi_apis::Common_Result::INVALID_ENUM)
+    , vr_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
 
-DeleteCommandRequest::~DeleteCommandRequest() {
-}
+DeleteCommandRequest::~DeleteCommandRequest() {}
 
 void DeleteCommandRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr application = ApplicationManagerImpl::instance()->
-      application(connection_key());
+  ApplicationSharedPtr application =
+      application_manager_.application(connection_key());
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -78,8 +78,8 @@ void DeleteCommandRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params[strings::cmd_id] =
       (*message_)[strings::msg_params][strings::cmd_id];
@@ -122,20 +122,22 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
       is_ui_received_ = true;
       const int result = message[strings::params][hmi_response::code].asInt();
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(result);
-      LOG4CXX_DEBUG(logger_, "Received UI_DeleteCommand event with result "
-                    << MessageHelper::HMIResultToString(ui_result_));
+      LOG4CXX_DEBUG(logger_,
+                    "Received UI_DeleteCommand event with result "
+                        << MessageHelper::HMIResultToString(ui_result_));
       break;
     }
     case hmi_apis::FunctionID::VR_DeleteCommand: {
       is_vr_received_ = true;
       const int result = message[strings::params][hmi_response::code].asInt();
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(result);
-      LOG4CXX_DEBUG(logger_, "Received VR_DeleteCommand event with result "
-                    << MessageHelper::HMIResultToString(vr_result_));
+      LOG4CXX_DEBUG(logger_,
+                    "Received VR_DeleteCommand event with result "
+                        << MessageHelper::HMIResultToString(vr_result_));
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
       return;
     }
   }
@@ -146,7 +148,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
   }
 
   ApplicationSharedPtr application =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -159,34 +161,32 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
   smart_objects::SmartObject* command = application->FindCommand(cmd_id);
 
   if (!command) {
-    LOG4CXX_ERROR(logger_, "Command id " << cmd_id << " not found for "
-                  "application with connection key " << connection_key());
+    LOG4CXX_ERROR(logger_,
+                  "Command id " << cmd_id << " not found for "
+                                             "application with connection key "
+                                << connection_key());
     return;
   }
 
   const bool is_vr_success_invalid =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-        vr_result_,
-        hmi_apis::Common_Result::SUCCESS,
-        hmi_apis::Common_Result::INVALID_ENUM);
+          vr_result_,
+          hmi_apis::Common_Result::SUCCESS,
+          hmi_apis::Common_Result::INVALID_ENUM);
 
   const bool is_ui_success_invalid =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-        ui_result_,
-        hmi_apis::Common_Result::SUCCESS,
-        hmi_apis::Common_Result::INVALID_ENUM);
+          ui_result_,
+          hmi_apis::Common_Result::SUCCESS,
+          hmi_apis::Common_Result::INVALID_ENUM);
 
   const bool is_vr_ui_invalid =
       Compare<hmi_apis::Common_Result::eType, EQ, ALL>(
-        hmi_apis::Common_Result::INVALID_ENUM,
-        vr_result_,
-        ui_result_);
+          hmi_apis::Common_Result::INVALID_ENUM, vr_result_, ui_result_);
 
   const bool is_vr_or_ui_warning =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-        hmi_apis::Common_Result::WARNINGS,
-        ui_result_,
-        vr_result_);
+          hmi_apis::Common_Result::WARNINGS, ui_result_, vr_result_);
 
   const bool result =
       // In case of UI/VR is SUCCESS and other is SUCCESS/INVALID_ENUM
@@ -201,15 +201,14 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
   }
 
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
-  if (!result &&
-      hmi_apis::Common_Result::REJECTED == ui_result_) {
+  if (!result && hmi_apis::Common_Result::REJECTED == ui_result_) {
     result_code = MessageHelper::HMIToMobileResult(vr_result_);
   } else if (is_vr_or_ui_warning) {
     LOG4CXX_DEBUG(logger_, "VR or UI result is warning");
     result_code = mobile_apis::Result::WARNINGS;
   } else {
-    result_code = MessageHelper::HMIToMobileResult(
-          std::max(ui_result_, vr_result_));
+    result_code =
+        MessageHelper::HMIToMobileResult(std::max(ui_result_, vr_result_));
   }
 
   SendResponse(result, result_code, NULL, &msg_params);

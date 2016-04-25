@@ -49,7 +49,8 @@ class VIIsReadyRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VIIsReadyRequest(const MessageSharedPtr& message);
+  VIIsReadyRequest(const MessageSharedPtr& message,
+                   ApplicationManager& application_manager);
 
   /**
    * @brief VIIsReadyRequest class destructor

@@ -38,19 +38,17 @@ namespace application_manager {
 namespace commands {
 
 UISetGlobalPropertiesResponse::UISetGlobalPropertiesResponse(
-    const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-UISetGlobalPropertiesResponse::~UISetGlobalPropertiesResponse() {
-}
+UISetGlobalPropertiesResponse::~UISetGlobalPropertiesResponse() {}
 
 void UISetGlobalPropertiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

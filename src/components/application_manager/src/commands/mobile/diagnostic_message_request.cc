@@ -33,27 +33,25 @@
 
 #include <algorithm>
 #include "application_manager/commands/mobile/diagnostic_message_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
-#include "config_profile/profile.h"
+
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-DiagnosticMessageRequest::DiagnosticMessageRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+DiagnosticMessageRequest::DiagnosticMessageRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-DiagnosticMessageRequest::~DiagnosticMessageRequest() {
-}
+DiagnosticMessageRequest::~DiagnosticMessageRequest() {}
 
 void DiagnosticMessageRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application is not registered.");
@@ -62,7 +60,7 @@ void DiagnosticMessageRequest::Run() {
   }
 
   const std::vector<uint32_t>& supported_diag_modes =
-      profile::Profile::instance()->supported_diag_modes();
+      application_manager_.get_settings().supported_diag_modes();
 
   smart_objects::SmartObject& msg_data =
       (*message_)[strings::msg_params][strings::message_data];
@@ -72,9 +70,11 @@ void DiagnosticMessageRequest::Run() {
   if (supported_diag_modes.end() == std::find(supported_diag_modes.begin(),
                                               supported_diag_modes.end(),
                                               msg_diagnostic_mode)) {
-    LOG4CXX_ERROR(logger_, "Received diagnostic mode " << msg_diagnostic_mode <<
-                           " is not supported.");
-    SendResponse(false, mobile_apis::Result::REJECTED,
+    LOG4CXX_ERROR(logger_,
+                  "Received diagnostic mode " << msg_diagnostic_mode
+                                              << " is not supported.");
+    SendResponse(false,
+                 mobile_apis::Result::REJECTED,
                  "Received diagnostic mode is not supported.");
     return;
   }
@@ -83,8 +83,8 @@ void DiagnosticMessageRequest::Run() {
   (*message_)[strings::msg_params][strings::app_id] = app->app_id();
 
   SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage,
-                 &(*message_)[strings::msg_params], true);
-
+                 &(*message_)[strings::msg_params],
+                 true);
 }
 
 void DiagnosticMessageRequest::on_event(const event_engine::Event& event) {

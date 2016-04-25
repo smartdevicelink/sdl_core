@@ -33,7 +33,7 @@
 #include <string>
 #include <algorithm>
 #include "gtest/gtest.h"
-#include "config_profile/profile.h"
+
 #include "application_manager/request_controller.h"
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application_manager_impl.h"
@@ -54,28 +54,30 @@ using namespace application_manager;
 using namespace NsSmartDeviceLink::NsSmartObjects;
 
 commands::Command* RegisterApplication() {
-
-  SmartObjectSPtr resultsmart = application_manager::MessageHelper::CreateModuleInfoSO(1);
+  SmartObjectSPtr resultsmart =
+      application_manager::MessageHelper::CreateModuleInfoSO(1);
   SmartObject& test_message = *resultsmart;
   uint32_t connection_key = 0;
   test_message[strings::params][strings::connection_key] = connection_key;
   test_message[strings::msg_params][strings::language_desired] = 0;
   test_message[strings::msg_params][strings::hmi_display_language_desired] = 0;
-  commands::Command* testregCommand = new commands::RegisterAppInterfaceRequest(resultsmart);
+  commands::Command* testregCommand =
+      new commands::RegisterAppInterfaceRequest(resultsmart);
   return testregCommand;
 }
 
 commands::Command* UnregisterApplication() {
-  SmartObjectSPtr resultsmart = application_manager::MessageHelper::CreateModuleInfoSO(2);
-  commands::Command *testregCommand =
+  SmartObjectSPtr resultsmart =
+      application_manager::MessageHelper::CreateModuleInfoSO(2);
+  commands::Command* testregCommand =
       new commands::UnregisterAppInterfaceRequest(resultsmart);
   return testregCommand;
 }
 
-commands::Command* PutFileCommand(uint32_t &correlation_id,
-                                  uint32_t &connection_key) {
-
-  SmartObjectSPtr resultsmart = application_manager::MessageHelper::CreateModuleInfoSO(32);
+commands::Command* PutFileCommand(uint32_t& correlation_id,
+                                  uint32_t& connection_key) {
+  SmartObjectSPtr resultsmart =
+      application_manager::MessageHelper::CreateModuleInfoSO(32);
   SmartObject& test_message = *resultsmart;
   test_message[strings::params][strings::correlation_id] = correlation_id;
   test_message[strings::params][strings::connection_key] = connection_key;
@@ -89,55 +91,49 @@ commands::Command* PutFileCommand(uint32_t &correlation_id,
 
 TEST(RequestControlTest, ZeroValuePendingRequestsAmount) {
   // Default value
-  uint32_t pending_requests_amount = 0;
-  EXPECT_EQ(pending_requests_amount,
-            Profile::instance()->pending_requests_amount());
-
-  const uint32_t big_count_of_requests_for_test_ = 10;  //bigger than pending_requests_amount
+  const uint32_t big_count_of_requests_for_test_ =
+      10;  // bigger than pending_requests_amount
   uint32_t correlation_id = 0;
   uint32_t connection_key = 0;
   RequestController::TResult result;
   RequestController request_ctrl_;
 
-  commands::Command * reg = RegisterApplication();
+  commands::Command* reg = RegisterApplication();
   request_ctrl_.addMobileRequest(reg, mobile_apis::HMILevel::HMI_FULL);
 
   for (uint32_t i = 0; i < big_count_of_requests_for_test_; ++i) {
     correlation_id = i;
-    commands::Command* testCommand = PutFileCommand(correlation_id,
-                                                     connection_key);
+    commands::Command* testCommand =
+        PutFileCommand(correlation_id, connection_key);
     result = request_ctrl_.addMobileRequest(testCommand,
                                             mobile_apis::HMILevel::HMI_FULL);
     EXPECT_EQ(RequestController::SUCCESS, result);
   }
 
-  commands::Command * unreg = UnregisterApplication();
+  commands::Command* unreg = UnregisterApplication();
   request_ctrl_.addMobileRequest(unreg, mobile_apis::HMILevel::HMI_FULL);
 }
 
 TEST(RequestControlTest, ZeroValueAppRequestsTimeScale) {
   // Default value
-  uint32_t app_requests_time_scale = 0;
-  EXPECT_EQ(app_requests_time_scale, Profile::instance()->app_time_scale());
-
-  const uint32_t big_count_of_requests_for_test_ = 10;  //bigger than pending_requests_amount
+  const uint32_t big_count_of_requests_for_test_ =
+      10;  // bigger than pending_requests_amount
   uint32_t correlation_id = 0;
   uint32_t connection_key = 0;
   RequestController::TResult result;
   RequestController request_ctrl_;
 
-  commands::Command * reg = RegisterApplication();
+  commands::Command* reg = RegisterApplication();
   request_ctrl_.addMobileRequest(reg, mobile_apis::HMILevel::HMI_FULL);
 
   for (uint32_t i = 0; i < big_count_of_requests_for_test_; ++i) {
     correlation_id = i;
-    commands::Command * testCommand = PutFileCommand(correlation_id,
-                                                     connection_key);
+    commands::Command* testCommand =
+        PutFileCommand(correlation_id, connection_key);
     result = request_ctrl_.addMobileRequest(testCommand,
                                             mobile_apis::HMILevel::HMI_FULL);
     EXPECT_EQ(RequestController::SUCCESS, result);
   }
-
 
   commands::Command* unreg = UnregisterApplication();
   request_ctrl_.addMobileRequest(unreg, mobile_apis::HMILevel::HMI_FULL);
@@ -145,23 +141,20 @@ TEST(RequestControlTest, ZeroValueAppRequestsTimeScale) {
 
 TEST(RequestControlTest, ZeroValueAppTimeScaleMaxRequests) {
   // Default value
-  uint32_t app_time_scale_max_requests = 0;
-  EXPECT_EQ(app_time_scale_max_requests,
-            Profile::instance()->app_time_scale_max_requests());
-
-  const uint32_t big_count_of_requests_for_test_ = 10;  //bigger than pending_requests_amount
+  const uint32_t big_count_of_requests_for_test_ =
+      10;  // bigger than pending_requests_amount
   uint32_t correlation_id = 0;
   uint32_t connection_key = 0;
   RequestController::TResult result;
   RequestController request_ctrl_;
 
-  commands::Command * reg = RegisterApplication();
+  commands::Command* reg = RegisterApplication();
   request_ctrl_.addMobileRequest(reg, mobile_apis::HMILevel::HMI_FULL);
 
   for (uint32_t i = 0; i < big_count_of_requests_for_test_; ++i) {
     correlation_id = i;
-    commands::Command* testCommand = PutFileCommand(correlation_id,
-                                                     connection_key);
+    commands::Command* testCommand =
+        PutFileCommand(correlation_id, connection_key);
     result = request_ctrl_.addMobileRequest(testCommand,
                                             mobile_apis::HMILevel::HMI_FULL);
     EXPECT_EQ(RequestController::SUCCESS, result);

@@ -32,68 +32,37 @@
 # application manager(AM) singleton while refactoring of AM is finished.
 
 if (BUILD_TESTS)
+ 
+  include_directories(
+    include
+    ${CMAKE_BINARY_DIR}/src/components/
+    ${COMPONENTS_DIR}/resumption/include
+    ${GMOCK_INCLUDE_DIRECTORY}
+    ${COMPONENTS_DIR}/application_manager/include/
+    ${COMPONENTS_DIR}/application_manager/include/application_manager/commands/
+    ${COMPONENTS_DIR}/utils/include/utils
+    ${COMPONENTS_DIR}/include/utils
+    ${COMPONENTS_DIR}/include/
+    ${COMPONENTS_DIR}/policy/include/policy
+    ${COMPONENTS_DIR}/policy/test/include
+    ${COMPONENTS_DIR}/media_manager/include/
+    ${SecurityManagerIncludeDir}
+    ${COMPONENTS_DIR}/security_manager/include
+    ${AM_TEST_DIR}/resumption/include/
+    )
 
-  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock)
-  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include)
-  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager)
-  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/commands)
-  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/commands/mobile)
-  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/commands/hmi)
-  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/event_engine)
-  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/policies)
-  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/policies/delegates)
-  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/resumption)
-
-  file (GLOB_RECURSE AMINCLUDE_TO_BE_MOCKED
-    ${AM_SOURCE_DIR}/include/application_manager/*
-  )
-  list(REMOVE_ITEM AMINCLUDE_TO_BE_MOCKED "${AM_SOURCE_DIR}/include/application_manager/application_manager_impl.h")
-  file(COPY "${AM_SOURCE_DIR}/test/mock/include/application_manager/application_manager_impl.h"
-       DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/mock/include/application_manager/)
-
-  FOREACH(infileName ${AMINCLUDE_TO_BE_MOCKED})
-  file(RELATIVE_PATH rel "${AM_SOURCE_DIR}/" ${infileName})
-  execute_process(
-    COMMAND "${CMAKE_COMMAND}" "-E" "create_symlink" "${infileName}" "${CMAKE_CURRENT_BINARY_DIR}/mock/${rel}"
-  )
-  ENDFOREACH(infileName)
-
-# Replace include for mocking singltone
-get_property(the_include_dirs DIRECTORY "" PROPERTY INCLUDE_DIRECTORIES)
-set(class_to_mock ${CMAKE_SOURCE_DIR}/src/components/application_manager/include)
-list(FIND the_include_dirs ${class_to_mock} find_idx)
-if(find_idx GREATER -1)
-  LIST_REPLACE(the_include_dirs ${find_idx} ${AM_MOCK_DIR}/include)
-endif()
-set_property(DIRECTORY "" PROPERTY INCLUDE_DIRECTORIES ${the_include_dirs})
-
-include_directories(
-  include
-  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/include
-  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/gtest/include
-  ${COMPONENTS_DIR}/application_manager/include/application_manager/
-  ${COMPONENTS_DIR}/application_manager/include/application_manager/policies
-  ${COMPONENTS_DIR}/application_manager/include/application_manager/resumption
-  ${COMPONENTS_DIR}/application_manager/include/
-  ${COMPONENTS_DIR}/utils/include/utils/
-  ${COMPONENTS_DIR}/policy/test/include/
-  ${COMPONENTS_DIR}/security_manager/test/include/
-  ${COMPONENTS_DIR}/security_manager/include/
-  ${COMPONENTS_DIR}/include/utils/
-  ${COMPONENTS_DIR}/application_manager/test/resumption/include/
-  ${COMPONENTS_DIR}/application_manager/test/state_controller/include/
-  ${COMPONENTS_DIR}
-)
-
-set(testSources
+  set(testSources
     ${AM_TEST_DIR}/mobile_message_handler_test.cc
     ${AM_TEST_DIR}/mobile_message_handler_v1_test.cc
     ${AM_TEST_DIR}/request_info_test.cc
     ${AM_TEST_DIR}/resumption_sql_queries_test.cc
     ${AM_TEST_DIR}/event_engine_test.cc
+    ${AM_TEST_DIR}/policy_event_observer_test.cc
+    ${AM_TEST_DIR}/application_impl_test.cc
+    ${AM_TEST_DIR}/hmi_capabilities_test.cc
+    ${AM_TEST_DIR}/application_state_test.cc
     ${AM_TEST_DIR}/usage_statistics_test.cc
-    # TODO(VVeremjova) APPLINK-12835
-    #${AM_TEST_DIR}/zero_request_amount_test.cc
+    ${AM_TEST_DIR}/mock_message_helper.cc
   )
   set (request_controller_SOURCES
     ${AM_TEST_DIR}/request_controller/request_controller_test.cc
@@ -132,7 +101,7 @@ set(testSources
     ${AM_SOURCE_DIR}/src/application_state.cc
     ${AM_SOURCE_DIR}/src/state_controller.cc
     ${AM_SOURCE_DIR}/src/mobile_command_factory.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/application_manager/mock_message_helper.cc
+    ${AM_TEST_DIR}/mock_message_helper.cc
 
     ${AM_SOURCE_DIR}/src/hmi_command_factory.cc
     ${AM_SOURCE_DIR}/src/hmi_state.cc
@@ -196,37 +165,57 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
   list(REMOVE_ITEM test_exec_libraries dl)
 endif()
 
-if(ENABLE_LOG)
-  list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
-  list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
-  list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
-  list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
-endif()
+  set(testLibraries
+    Utils
+    ApplicationManager
+    jsoncpp
+    Policy
+    connectionHandler
+    HMI_API
+    MOBILE_API
+    v4_protocol_v1_2_no_extra
+    SmartObjects
+    formatters
+    gmock_main
+    UsageStatistics
+    dl
+    ProtocolLibrary
+    ConfigProfile
+    MediaManager
+    Resumption
+    ProtocolHandler
+    SecurityManager
+  )
 
-add_library("ApplicationManagerTest" ${mockedSources} ${testSources})
+  if (${CMAKE_SYSTEM_NAME} MATCHES "QNX")
+    list(REMOVE_ITEM test_exec_libraries dl)
+  endif()
 
-target_link_libraries("ApplicationManagerTest" ${testLibraries} AMHMICommandsLibrary
-                                                                AMMobileCommandsLibrary
-                                                                AMEventEngine
-                                                                AMPolicyLibrary)
+  if (ENABLE_LOG)
+    list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+    list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
+    list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
+    list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
+  endif()
 
-create_test("application_manager_test" "${testSources}" "${ApplicationManagerTest}")
-target_link_libraries("application_manager_test"
-  ApplicationManagerTest ${test_exec_libraries}
-  ApplicationManager
-  ProtocolLibrary
-  connectionHandler
-  ConfigProfile
-  jsoncpp
-  MediaManager
-  ProtocolHandler
-  Resumption
-)
+  file(COPY smartDeviceLink_test2.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+  file(COPY sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+  file(COPY sdl_pt_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-# TODO [AKozoriz] : Fix not buildable tests
-  set(ResumptionData_SOURCES
+add_custom_command(
+OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/libPolicy.so
+                     COMMAND ${CMAKE_COMMAND} -E
+                     copy  ${COMPONENTS_DIR}/policy/libPolicy.so ${CMAKE_CURRENT_BINARY_DIR})
+  set(CMAKE_EXE_LINKER_FLAGS
+    "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_CURRENT_BINARY_DIR}")
+  create_test("application_manager_test" "${testSources}" "${testLibraries}" )
+# TODO [AKozoriz] : Fix not buildable tests 
+ set(ResumptionData_SOURCES
     ${AM_TEST_DIR}/resumption/resumption_data_test.cc
 #    ${AM_TEST_DIR}/resumption/resumption_data_db_test.cc
+#    ${AM_TEST_DIR}/resumption/resumption_data_json_test.cc
+#    ${AM_TEST_DIR}/resumption/resume_ctrl_test.cc
+    ${AM_TEST_DIR}/mock_message_helper.cc
   )
 
   file(COPY hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

@@ -37,12 +37,10 @@ namespace application_manager {
 namespace commands {
 
 OnSDLPersistenceCompleteNotification::OnSDLPersistenceCompleteNotification(
-    const MessageSharedPtr& message)
-    : NotificationToHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationToHMI(message, application_manager) {}
 
-OnSDLPersistenceCompleteNotification::~OnSDLPersistenceCompleteNotification() {
-}
+OnSDLPersistenceCompleteNotification::~OnSDLPersistenceCompleteNotification() {}
 
 void OnSDLPersistenceCompleteNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

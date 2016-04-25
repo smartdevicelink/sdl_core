@@ -38,12 +38,10 @@ namespace application_manager {
 namespace commands {
 
 OnVIBodyInformationNotification::OnVIBodyInformationNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnVIBodyInformationNotification::~OnVIBodyInformationNotification() {
-}
+OnVIBodyInformationNotification::~OnVIBodyInformationNotification() {}
 
 void OnVIBodyInformationNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,4 +56,3 @@ void OnVIBodyInformationNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

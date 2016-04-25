@@ -51,7 +51,8 @@ class DialNumberResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit DialNumberResponse(const MessageSharedPtr& message);
+  DialNumberResponse(const MessageSharedPtr& message,
+                     ApplicationManager& application_manager);
 
   /**
    * @brief DialNumberResponse class destructor
@@ -67,7 +68,7 @@ class DialNumberResponse : public ResponseFromHMI {
   DISALLOW_COPY_AND_ASSIGN(DialNumberResponse);
 };
 
-} // namespace hmi
+}  // namespace hmi
 
 }  // namespace commands
 

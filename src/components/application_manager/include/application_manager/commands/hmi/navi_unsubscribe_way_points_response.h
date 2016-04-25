@@ -42,30 +42,31 @@ namespace commands {
 /**
  * @brief NaviUnSubscribeWaypoints command class
  **/
-class NaviUnsubscribeWayPointsResponse
-    : public ResponseFromHMI {
+class NaviUnsubscribeWayPointsResponse : public ResponseFromHMI {
  public:
-    /**
-     * @brief NaviUnSubscribeWaypoints class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit NaviUnsubscribeWayPointsResponse(const MessageSharedPtr& message);
+  /**
+   * @brief NaviUnSubscribeWaypoints class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  NaviUnsubscribeWayPointsResponse(const MessageSharedPtr& message,
+                                   ApplicationManager& application_manager);
 
-    /**
-     * @brief NaviUnSubscribeWaypoints class destructor
-     **/
-    virtual ~NaviUnsubscribeWayPointsResponse();
+  /**
+   * @brief NaviUnSubscribeWaypoints class destructor
+   **/
+  virtual ~NaviUnsubscribeWayPointsResponse();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run() OVERRIDE;
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run() OVERRIDE;
+
  private:
   DISALLOW_COPY_AND_ASSIGN(NaviUnsubscribeWayPointsResponse);
 };
 
-} // namespace commands
+}  // namespace commands
 
-} // namespace application_manager
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_UNSUBSCRIBE_WAY_POINTS_RESPONSE_H_
+}  // namespace application_manager
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_UNSUBSCRIBE_WAY_POINTS_RESPONSE_H_

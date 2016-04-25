@@ -36,12 +36,11 @@ namespace application_manager {
 
 namespace commands {
 
-UIDeleteSubmenuRequest::UIDeleteSubmenuRequest(const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+UIDeleteSubmenuRequest::UIDeleteSubmenuRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-UIDeleteSubmenuRequest::~UIDeleteSubmenuRequest() {
-}
+UIDeleteSubmenuRequest::~UIDeleteSubmenuRequest() {}
 
 void UIDeleteSubmenuRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,4 +51,3 @@ void UIDeleteSubmenuRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

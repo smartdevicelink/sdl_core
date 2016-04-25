@@ -35,6 +35,11 @@
 
 #include "smart_objects/smart_object.h"
 #include "application_manager/application.h"
+#include "application_manager/application_manager.h"
+
+namespace application_manager {
+class ApplicationManagerSettings;
+}
 
 namespace resumption {
 
@@ -52,7 +57,8 @@ class ResumptionData {
   /**
    * @brief Constructor of ResumptionData
    */
-  ResumptionData();
+  ResumptionData(
+      const application_manager::ApplicationManager& application_manager);
 
   /**
    * @brief Destructor of ResumptionData
@@ -201,6 +207,7 @@ class ResumptionData {
    * @brief Persist saves resumption data on file system
    */
   virtual void Persist() = 0;
+
  protected:
   /**
    * @brief Retrieves of commands from application
@@ -279,8 +286,8 @@ class ResumptionData {
       ++first;
     }
   }
-
   mutable sync_primitives::Lock resumption_lock_;
+  const application_manager::ApplicationManager& application_manager_;
 };
 }  // namespace resumption
 

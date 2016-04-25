@@ -33,7 +33,7 @@
 
 #include <string>
 #include "application_manager/commands/mobile/get_vehicle_data_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
@@ -46,8 +46,9 @@ namespace commands {
 namespace str = strings;
 
 #ifdef HMI_DBUS_API
-GetVehicleDataRequest::GetVehicleDataRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {}
+GetVehicleDataRequest::GetVehicleDataRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
 GetVehicleDataRequest::~GetVehicleDataRequest() {}
 
@@ -56,8 +57,7 @@ void GetVehicleDataRequest::Run() {
 
   int32_t app_id =
       (*message_)[strings::params][strings::connection_key].asUInt();
-  ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationSharedPtr app = appplication_manager.application(app_id);
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -211,8 +211,9 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
   }
 }
 #else
-GetVehicleDataRequest::GetVehicleDataRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {}
+GetVehicleDataRequest::GetVehicleDataRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
 GetVehicleDataRequest::~GetVehicleDataRequest() {}
 
@@ -221,8 +222,7 @@ void GetVehicleDataRequest::Run() {
 
   int32_t app_id =
       (*message_)[strings::params][strings::connection_key].asUInt();
-  ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationSharedPtr app = application_manager_.application(app_id);
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");

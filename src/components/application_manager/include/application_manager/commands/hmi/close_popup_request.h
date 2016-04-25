@@ -49,7 +49,8 @@ class ClosePopupRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit ClosePopupRequest(const MessageSharedPtr& message);
+  ClosePopupRequest(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief ClosePopupRequest class destructor

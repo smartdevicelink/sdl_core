@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/add_statistics_info_notification.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/policies/policy_handler.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -39,23 +39,20 @@ namespace application_manager {
 namespace commands {
 
 AddStatisticsInfoNotification::AddStatisticsInfoNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-AddStatisticsInfoNotification::~AddStatisticsInfoNotification() {
-}
+AddStatisticsInfoNotification::~AddStatisticsInfoNotification() {}
 
 void AddStatisticsInfoNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   int type = (*message_)[strings::msg_params][hmi_notification::statistic_type]
-      .asInt();
+                 .asInt();
 
-  application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().AddStatisticsInfo(type);
+  application_manager_.GetPolicyHandler().AddStatisticsInfo(type);
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

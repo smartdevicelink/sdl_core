@@ -30,16 +30,14 @@
 // POSSIBILITY OF SUCH DAMAGE.
 //
 
-
 #if defined(OS_POSIX) && defined(OS_LINUX)
 #include <pthread.h>  // TODO(DK): Need to remove
 #include <unistd.h>
 #endif
 
-
 #include <string>
 #include <string.h>
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/mobile_command_factory.h"
 #include "application_manager/application_impl.h"
 #include "smart_objects/smart_object.h"
@@ -59,9 +57,10 @@ const uint32_t kMqueueMessageSize = 4095;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
-AudioStreamSenderThread::AudioStreamSenderThread(const std::string& fileName,
+AudioStreamSenderThread::AudioStreamSenderThread(
+    const std::string& fileName,
     uint32_t session_key,
-    application_manager::ApplicationManager &app_mngr)
+    application_manager::ApplicationManager& app_mngr)
     : session_key_(session_key)
     , fileName_(fileName)
     , shouldBeStoped_(false)
@@ -71,8 +70,7 @@ AudioStreamSenderThread::AudioStreamSenderThread(const std::string& fileName,
   LOG4CXX_AUTO_TRACE(logger_);
 }
 
-AudioStreamSenderThread::~AudioStreamSenderThread() {
-}
+AudioStreamSenderThread::~AudioStreamSenderThread() {}
 
 void AudioStreamSenderThread::threadMain() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -84,7 +82,6 @@ void AudioStreamSenderThread::threadMain() {
     shouldBeStoped_cv_.WaitFor(auto_lock, kAudioPassThruTimeout * 1000);
     sendAudioChunkToMobile();
   }
-
 }
 
 void AudioStreamSenderThread::sendAudioChunkToMobile() {

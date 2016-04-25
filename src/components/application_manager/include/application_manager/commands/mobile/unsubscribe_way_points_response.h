@@ -44,11 +44,12 @@ namespace commands {
  * @brief UnsubscribeWayPointsResponse command class
  **/
 class UnsubscribeWayPointsResponse : public CommandResponseImpl {
-public:
+ public:
   /**
    * \brief UnsubscribeWayPointsResponse class constructor
    **/
-  explicit UnsubscribeWayPointsResponse(const MessageSharedPtr& message);
+  UnsubscribeWayPointsResponse(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager);
 
   /**
    * \brief UnsubscribeWayPointsResponse class destructor
@@ -59,12 +60,13 @@ public:
    * @brief Execute command
    **/
   virtual void Run() OVERRIDE;
-private:
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(UnsubscribeWayPointsResponse);
 };
 
-} // commands
+}  // commands
 
-} // application_manager
+}  // application_manager
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_UNSUBSCRIBE_WAY_POINTS_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_UNSUBSCRIBE_WAY_POINTS_RESPONSE_H_

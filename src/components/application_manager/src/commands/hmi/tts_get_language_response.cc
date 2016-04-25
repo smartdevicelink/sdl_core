@@ -30,19 +30,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/tts_get_language_response.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/event_engine/event.h"
 
 namespace application_manager {
 
 namespace commands {
 
-TTSGetLanguageResponse::TTSGetLanguageResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+TTSGetLanguageResponse::TTSGetLanguageResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-TTSGetLanguageResponse::~TTSGetLanguageResponse() {
-}
+TTSGetLanguageResponse::~TTSGetLanguageResponse() {}
 
 void TTSGetLanguageResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,20 +51,19 @@ void TTSGetLanguageResponse::Run() {
 
   if ((*message_).keyExists(strings::msg_params) &&
       (*message_)[strings::msg_params].keyExists(hmi_response::language)) {
-
     language = static_cast<Common_Language::eType>(
-             (*message_)[strings::msg_params][hmi_response::language].asInt());
+        (*message_)[strings::msg_params][hmi_response::language].asInt());
   }
 
-  ApplicationManagerImpl::instance()->hmi_capabilities().
-      set_active_tts_language(language);
+  application_manager_.hmi_capabilities().set_active_tts_language(language);
 
-  LOG4CXX_DEBUG(logger_, "Raising event for function_id "
-                << function_id()
-                << " and correlation_id " << correlation_id());
+  LOG4CXX_DEBUG(logger_,
+                "Raising event for function_id " << function_id()
+                                                 << " and correlation_id "
+                                                 << correlation_id());
   event_engine::Event event(FunctionID::TTS_GetLanguage);
   event.set_smart_object(*message_);
-  event.raise();
+  event.raise(application_manager_.event_dispatcher());
 }
 
 }  // namespace commands

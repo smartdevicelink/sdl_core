@@ -49,7 +49,8 @@ class UISetAppIconRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UISetAppIconRequest(const MessageSharedPtr& message);
+  UISetAppIconRequest(const MessageSharedPtr& message,
+                      ApplicationManager& application_manager);
 
   /**
    * @brief UISetIconRequest class destructor

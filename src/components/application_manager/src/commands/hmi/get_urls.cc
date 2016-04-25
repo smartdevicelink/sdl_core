@@ -32,31 +32,32 @@
 
 #include "application_manager/commands/hmi/get_urls.h"
 #include "application_manager/message.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
+#include "application_manager/policies/policy_handler.h"
 
 namespace application_manager {
 namespace commands {
 
-GetUrls::GetUrls(const MessageSharedPtr& message)
-  : RequestFromHMI(message) {
-}
+GetUrls::GetUrls(const MessageSharedPtr& message,
+                 ApplicationManager& application_manager)
+    : RequestFromHMI(message, application_manager) {}
 
-GetUrls::~GetUrls() {
-}
+GetUrls::~GetUrls() {}
 
 void GetUrls::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject& object = *message_;
   object[strings::params][strings::message_type] = MessageType::kResponse;
-  if (application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().PolicyEnabled()) {
+  if (application_manager_.GetPolicyHandler().PolicyEnabled()) {
     policy::EndpointUrls endpoints;
-    application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler().GetServiceUrls(
-        object[strings::msg_params][hmi_request::service].asString(), endpoints);
+    application_manager_.GetPolicyHandler().GetServiceUrls(
+        object[strings::msg_params][hmi_request::service].asString(),
+        endpoints);
     if (!endpoints.empty()) {
       object[strings::msg_params].erase(hmi_request::service);
 
       object[strings::msg_params][hmi_response::urls] =
-        smart_objects::SmartObject(smart_objects::SmartType_Array);
+          smart_objects::SmartObject(smart_objects::SmartType_Array);
 
       smart_objects::SmartObject& urls =
           object[strings::msg_params][hmi_response::urls];
@@ -67,14 +68,13 @@ void GetUrls::Run() {
         for (size_t k = 0; k < endpoints[i].url.size(); ++k, ++index) {
           const std::string url = endpoints[i].url[k];
 
-          urls[index] = smart_objects::SmartObject(
-                smart_objects::SmartType_Map);
+          urls[index] =
+              smart_objects::SmartObject(smart_objects::SmartType_Map);
           smart_objects::SmartObject& service_info = urls[index];
 
           service_info[strings::url] = url;
           if (policy::kDefaultId != endpoints[i].app_id) {
-            service_info[hmi_response::policy_app_id] =
-              endpoints[i].app_id;
+            service_info[hmi_response::policy_app_id] = endpoints[i].app_id;
           }
         }
       }
@@ -88,7 +88,7 @@ void GetUrls::Run() {
     object[strings::params][hmi_response::code] =
         hmi_apis::Common_Result::DATA_NOT_AVAILABLE;
   }
-  ApplicationManagerImpl::instance()->ManageHMICommand(message_);
+  application_manager_.ManageHMICommand(message_);
 }
 
 }  // namespace commands

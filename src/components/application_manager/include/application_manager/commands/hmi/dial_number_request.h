@@ -50,7 +50,8 @@ class DialNumberRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit DialNumberRequest(const MessageSharedPtr& message);
+  DialNumberRequest(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief DialNumberRequest class destructor
@@ -66,7 +67,7 @@ class DialNumberRequest : public RequestToHMI {
   DISALLOW_COPY_AND_ASSIGN(DialNumberRequest);
 };
 
-} // namespace hmi
+}  // namespace hmi
 
 }  // namespace commands
 

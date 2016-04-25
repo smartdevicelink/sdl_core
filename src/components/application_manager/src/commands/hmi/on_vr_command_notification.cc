@@ -31,9 +31,11 @@
  */
 
 #include "application_manager/commands/hmi/on_vr_command_notification.h"
-#include "application_manager/application_manager_impl.h"
+
+#include "application_manager/policies/policy_handler.h"
 #include "application_manager/message_helper.h"
-#include "config_profile/profile.h"
+#include "application_manager/state_controller.h"
+
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "application_manager/event_engine/event.h"
@@ -43,29 +45,28 @@ namespace application_manager {
 namespace commands {
 
 OnVRCommandNotification::OnVRCommandNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnVRCommandNotification::~OnVRCommandNotification() {
-}
+OnVRCommandNotification::~OnVRCommandNotification() {}
 
 void OnVRCommandNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  ApplicationSharedPtr active_app = ApplicationManagerImpl::instance()
-      ->active_application();
-  const uint32_t cmd_id = (*message_)[strings::msg_params][strings::cmd_id]
-      .asUInt();
-  uint32_t max_cmd_id = profile::Profile::instance()->max_cmd_id();
+  const uint32_t cmd_id =
+      (*message_)[strings::msg_params][strings::cmd_id].asUInt();
+  uint32_t max_cmd_id = application_manager_.get_settings().max_cmd_id();
 
   // Check if this is one of standart VR commands (i.e. "Help")
   if (cmd_id > max_cmd_id + 1) {
     LOG4CXX_INFO(logger_, "Switched App");
     const uint32_t app_id = cmd_id - max_cmd_id;
-    ApplicationManagerImpl::instance()->SetState<true>(app_id,
-                                                 mobile_apis::HMILevel::HMI_FULL
-                                                 );
+    ApplicationSharedPtr app = application_manager_.application(app_id);
+    if (app) {
+      application_manager_.state_controller().SetRegularState(
+          app, mobile_apis::HMILevel::HMI_FULL, true);
+    } else {
+      LOG4CXX_ERROR(logger_, "Unable to find appication " << app_id);
+    }
     return;
   }
 
@@ -73,9 +74,9 @@ void OnVRCommandNotification::Run() {
   if (cmd_id == max_cmd_id + 1) {
     return;
   }
-  const uint32_t app_id = (*message_)[strings::msg_params][strings::app_id]
-      .asUInt();
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  const uint32_t app_id =
+      (*message_)[strings::msg_params][strings::app_id].asUInt();
+  ApplicationSharedPtr app = application_manager_.application(app_id);
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     return;
@@ -87,7 +88,7 @@ void OnVRCommandNotification::Run() {
   if (0 != app->is_perform_interaction_active()) {
     event_engine::Event event(hmi_apis::FunctionID::VR_OnCommand);
     event.set_smart_object(*message_);
-    event.raise();
+    event.raise(application_manager_.event_dispatcher());
   } else {
     (*message_)[strings::params][strings::function_id] =
         static_cast<int32_t>(mobile_apis::FunctionID::eType::OnCommandID);
@@ -101,4 +102,3 @@ void OnVRCommandNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

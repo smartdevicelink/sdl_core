@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/on_keyboard_input_notification.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -43,8 +43,8 @@ namespace commands {
 namespace mobile {
 
 OnKeyBoardInputNotification::OnKeyBoardInputNotification(
-    const MessageSharedPtr& message)
-    : CommandNotificationImpl(message) {}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandNotificationImpl(message, application_manager) {}
 
 OnKeyBoardInputNotification::~OnKeyBoardInputNotification() {}
 
@@ -53,9 +53,9 @@ void OnKeyBoardInputNotification::Run() {
 
   ApplicationSharedPtr app_to_notify;
 
-  ApplicationManagerImpl::ApplicationListAccessor accessor;
-  ApplicationSetConstIt it = accessor.begin();
-  for (; accessor.end() != it; ++it) {
+  DataAccessor<ApplicationSet> accessor = application_manager_.applications();
+  ApplicationSetIt it = accessor.GetData().begin();
+  for (; accessor.GetData().end() != it; ++it) {
     // if there is app with active perform interaction use it for notification
     ApplicationSharedPtr app = *it;
     if (app->is_perform_interaction_active()) {

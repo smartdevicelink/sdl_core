@@ -49,7 +49,8 @@ class UIGetCapabilitiesResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIGetCapabilitiesResponse(const MessageSharedPtr& message);
+  UIGetCapabilitiesResponse(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /**
    * @brief UIGetCapabilitiesResponse class destructor

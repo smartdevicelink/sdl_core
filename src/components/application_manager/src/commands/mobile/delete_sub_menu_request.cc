@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/delete_sub_menu_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "interfaces/HMI_API.h"
 #include "utils/helpers.h"
@@ -41,18 +41,16 @@ namespace application_manager {
 
 namespace commands {
 
-DeleteSubMenuRequest::DeleteSubMenuRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
+DeleteSubMenuRequest::DeleteSubMenuRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-DeleteSubMenuRequest::~DeleteSubMenuRequest() {
-}
+DeleteSubMenuRequest::~DeleteSubMenuRequest() {}
 
 void DeleteSubMenuRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -69,8 +67,8 @@ void DeleteSubMenuRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params[strings::menu_id] =
       (*message_)[strings::msg_params][strings::menu_id];
@@ -88,16 +86,14 @@ void DeleteSubMenuRequest::DeleteSubMenuVRCommands(
   CommandsMap::const_iterator it = commands.begin();
 
   for (; commands.end() != it; ++it) {
-
     if (!(*it->second).keyExists(strings::vr_commands)) {
       continue;
     }
 
-    if ((*message_)[strings::msg_params][strings::menu_id].asInt()
-        == (*it->second)[strings::menu_params]
-                         [hmi_request::parent_id].asInt()) {
-      smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-          smart_objects::SmartType_Map);
+    if ((*message_)[strings::msg_params][strings::menu_id].asInt() ==
+        (*it->second)[strings::menu_params][hmi_request::parent_id].asInt()) {
+      smart_objects::SmartObject msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
       msg_params[strings::cmd_id] = (*it->second)[strings::cmd_id].asInt();
       msg_params[strings::app_id] = app->app_id();
       msg_params[strings::grammar_id] = app->get_grammar_id();
@@ -123,11 +119,10 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(
       continue;
     }
 
-    if ((*message_)[strings::msg_params][strings::menu_id].asInt()
-        == (*it->second)[strings::menu_params]
-                         [hmi_request::parent_id].asInt()) {
-      smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-          smart_objects::SmartType_Map);
+    if ((*message_)[strings::msg_params][strings::menu_id].asInt() ==
+        (*it->second)[strings::menu_params][hmi_request::parent_id].asInt()) {
+      smart_objects::SmartObject msg_params =
+          smart_objects::SmartObject(smart_objects::SmartType_Map);
       msg_params[strings::app_id] = app->app_id();
       msg_params[strings::cmd_id] = (*it->second)[strings::cmd_id].asInt();
       app->RemoveCommand((*it->second)[strings::cmd_id].asInt());
@@ -152,14 +147,13 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
           static_cast<mobile_apis::Result::eType>(
               message[strings::params][hmi_response::code].asInt());
 
-      const bool result =
-          Compare<mobile_api::Result::eType, EQ, ONE>(
-            result_code,
-            mobile_api::Result::SUCCESS,
-            mobile_api::Result::WARNINGS);
+      const bool result = Compare<mobile_api::Result::eType, EQ, ONE>(
+          result_code,
+          mobile_api::Result::SUCCESS,
+          mobile_api::Result::WARNINGS);
 
       ApplicationSharedPtr application =
-             ApplicationManagerImpl::instance()->application(connection_key());
+          application_manager_.application(connection_key());
 
       if (!application) {
         LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -172,7 +166,7 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
         DeleteSubMenuUICommands(application);
         application->RemoveSubMenu(
             (*message_)[strings::msg_params][strings::menu_id].asInt());
-       }
+      }
 
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
       if (result) {
@@ -186,7 +180,6 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
     }
   }
 }
-
 
 }  // namespace commands
 

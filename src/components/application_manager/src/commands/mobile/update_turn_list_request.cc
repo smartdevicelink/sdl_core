@@ -33,7 +33,8 @@
 
 #include <string>
 #include "application_manager/commands/mobile/update_turn_list_request.h"
-#include "application_manager/application_manager_impl.h"
+
+#include "application_manager/policies/policy_handler.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
@@ -46,15 +47,16 @@ namespace commands {
 
 namespace custom_str = utils::custom_string;
 
-UpdateTurnListRequest::UpdateTurnListRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {}
+UpdateTurnListRequest::UpdateTurnListRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
 UpdateTurnListRequest::~UpdateTurnListRequest() {}
 
 void UpdateTurnListRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = application_manager_.application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!app) {
@@ -73,8 +75,10 @@ void UpdateTurnListRequest::Run() {
   // ProcessSoftButtons checks strings on the contents incorrect character
 
   mobile_apis::Result::eType processing_result =
-      MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app,
-          application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler());
+      MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params],
+                                        app,
+                                        application_manager_.GetPolicyHandler(),
+                                        application_manager_);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
     LOG4CXX_ERROR(logger_, "INVALID_DATA!");
@@ -89,7 +93,8 @@ void UpdateTurnListRequest::Run() {
       if ((turn_list_array[i].keyExists(strings::turn_icon)) &&
           (mobile_apis::Result::SUCCESS !=
            MessageHelper::VerifyImage(turn_list_array[i][strings::turn_icon],
-                                      app))) {
+                                      app,
+                                      application_manager_))) {
         LOG4CXX_ERROR(logger_,
                       "MessageHelper::VerifyImage return INVALID_DATA");
         SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -154,7 +159,7 @@ void UpdateTurnListRequest::on_event(const event_engine::Event& event) {
           static_cast<mobile_apis::Result::eType>(
               message[strings::params][hmi_response::code].asInt());
       HMICapabilities& hmi_capabilities =
-          ApplicationManagerImpl::instance()->hmi_capabilities();
+          application_manager_.hmi_capabilities();
 
       bool result =
           (mobile_apis::Result::SUCCESS == result_code) ||

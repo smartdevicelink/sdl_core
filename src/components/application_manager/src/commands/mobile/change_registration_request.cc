@@ -34,7 +34,7 @@
 #include <string.h>
 #include <algorithm>
 #include "application_manager/commands/mobile/change_registration_request.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -57,8 +57,8 @@ namespace application_manager {
 namespace commands {
 
 ChangeRegistrationRequest::ChangeRegistrationRequest(
-    const MessageSharedPtr& message)
-    : CommandRequestImpl(message)
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager)
     , ui_result_(hmi_apis::Common_Result::INVALID_ENUM)
     , vr_result_(hmi_apis::Common_Result::INVALID_ENUM)
     , tts_result_(hmi_apis::Common_Result::INVALID_ENUM) {}
@@ -69,10 +69,10 @@ void ChangeRegistrationRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace smart_objects;
 
-  ApplicationManagerImpl* instance = ApplicationManagerImpl::instance();
-  const HMICapabilities& hmi_capabilities = instance->hmi_capabilities();
+  const HMICapabilities& hmi_capabilities =
+      application_manager_.hmi_capabilities();
 
-  ApplicationSharedPtr app = instance->application(connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -219,7 +219,7 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
 
   if (pending_requests_.IsFinal(event_id)) {
     ApplicationSharedPtr application =
-        ApplicationManagerImpl::instance()->application(connection_key());
+        application_manager_.application(connection_key());
 
     if (!application) {
       LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -258,7 +258,7 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
 bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
     const int32_t& hmi_display_lang) {
   const HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
+      application_manager_.hmi_capabilities();
   const smart_objects::SmartObject* ui_languages =
       hmi_capabilities.ui_supported_languages();
 
@@ -281,7 +281,7 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByUI(
 bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
     const int32_t& hmi_display_lang) {
   const HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
+      application_manager_.hmi_capabilities();
   const smart_objects::SmartObject* vr_languages =
       hmi_capabilities.vr_supported_languages();
 
@@ -304,7 +304,7 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByVR(
 bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
     const int32_t& hmi_display_lang) {
   const HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
+      application_manager_.hmi_capabilities();
   const smart_objects::SmartObject* tts_languages =
       hmi_capabilities.tts_supported_languages();
 
@@ -386,7 +386,7 @@ mobile_apis::Result::eType ChangeRegistrationRequest::CheckCoincidence() {
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
 
-  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  ApplicationSet accessor = application_manager_.applications().GetData();
   custom_str::CustomString app_name;
   uint32_t app_id = connection_key();
   if (msg_params.keyExists(strings::app_name)) {
@@ -437,9 +437,7 @@ mobile_apis::Result::eType ChangeRegistrationRequest::CheckCoincidence() {
 bool ChangeRegistrationRequest::IsNicknameAllowed(
     const custom_str::CustomString& app_name) const {
   LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationSharedPtr app =
-      application_manager::ApplicationManagerImpl::instance()->application(
-          connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_,
@@ -448,15 +446,13 @@ bool ChangeRegistrationRequest::IsNicknameAllowed(
     return false;
   }
 
-  const std::string policy_app_id = app->mobile_app_id();
+  const std::string policy_app_id = app->policy_app_id();
 
   policy::StringArray app_nicknames;
   policy::StringArray app_hmi_types;
 
-  const bool init_result =
-      application_manager::ApplicationManagerImpl::instance()
-          ->GetPolicyHandler()
-          .GetInitialAppData(policy_app_id, &app_nicknames, &app_hmi_types);
+  bool init_result = application_manager_.GetPolicyHandler().GetInitialAppData(
+      policy_app_id, &app_nicknames, &app_hmi_types);
 
   if (!init_result) {
     LOG4CXX_ERROR(logger_,
@@ -474,9 +470,7 @@ bool ChangeRegistrationRequest::IsNicknameAllowed(
                    "Application name was not found in nicknames list.");
 
       usage_statistics::AppCounter count_of_rejections_nickname_mismatch(
-          application_manager::ApplicationManagerImpl::instance()
-              ->GetPolicyHandler()
-              .GetStatisticManager(),
+          application_manager_.GetPolicyHandler().GetStatisticManager(),
           policy_app_id,
           usage_statistics::REJECTIONS_NICKNAME_MISMATCH);
       ++count_of_rejections_nickname_mismatch;

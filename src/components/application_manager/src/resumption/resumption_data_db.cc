@@ -36,11 +36,11 @@
 #include "application_manager/resumption/resumption_data_db.h"
 #include "application_manager/resumption/resumption_sql_queries.h"
 #include "application_manager/smart_object_keys.h"
-#include "config_profile/profile.h"
 #include "application_manager/message_helper.h"
 #include "utils/helpers.h"
 #include "utils/gen_hash.h"
 #include "utils/scope_guard.h"
+#include "application_manager/application_manager_settings.h"
 
 namespace {
 const std::string kDatabaseName = "resumption";
@@ -49,10 +49,12 @@ const std::string kDatabaseName = "resumption";
 namespace resumption {
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
-ResumptionDataDB::ResumptionDataDB()
-    : db_(new utils::dbms::SQLDatabase(kDatabaseName)) {
+ResumptionDataDB::ResumptionDataDB(
+    const application_manager::ApplicationManager& application_manager)
+    : ResumptionData(application_manager)
+    , db_(new utils::dbms::SQLDatabase(kDatabaseName)) {
 #ifndef __QNX__
-  std::string path = profile::Profile::instance()->app_storage_folder();
+  std::string path = application_manager_.get_settings().app_storage_folder();
   if (!path.empty()) {
     db_->set_path(path + "/");
   }
@@ -71,11 +73,12 @@ bool ResumptionDataDB::Init() {
     LOG4CXX_ERROR(logger_, "Failed opening database.");
     LOG4CXX_INFO(logger_, "Starting opening retries.");
     const uint16_t attempts =
-        profile::Profile::instance()->attempts_to_open_resumption_db();
+        application_manager_.get_settings().attempts_to_open_resumption_db();
     LOG4CXX_DEBUG(logger_, "Total attempts number is: " << attempts);
     bool is_opened = false;
     const uint16_t open_attempt_timeout_ms =
-        profile::Profile::instance()->open_attempt_timeout_ms_resumption_db();
+        application_manager_.get_settings()
+            .open_attempt_timeout_ms_resumption_db();
     const useconds_t sleep_interval_mcsec = open_attempt_timeout_ms * 1000;
     LOG4CXX_DEBUG(logger_,
                   "Open attempt timeout(ms) is: " << open_attempt_timeout_ms);
@@ -91,8 +94,7 @@ bool ResumptionDataDB::Init() {
     if (!is_opened) {
       LOG4CXX_ERROR(logger_,
                     "Open retry sequence failed. Tried "
-                        << attempts
-                        << " attempts with "
+                        << attempts << " attempts with "
                         << open_attempt_timeout_ms
                         << " open timeout(ms) for each.");
       return false;
@@ -140,15 +142,14 @@ void ResumptionDataDB::SaveApplication(
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(application);
   bool application_exist = false;
-  const std::string& policy_app_id = application->mobile_app_id();
+  const std::string& policy_app_id = application->policy_app_id();
   const std::string& device_mac = application->mac_address();
   LOG4CXX_INFO(logger_,
                "app_id : " << application->app_id() << " policy_app_id : "
-                           << policy_app_id
-                           << " device_id : "
-                           << device_mac);
+                           << policy_app_id << " device_id : " << device_mac);
 
-  if (!CheckExistenceApplication(policy_app_id, device_mac, application_exist)) {
+  if (!CheckExistenceApplication(
+          policy_app_id, device_mac, application_exist)) {
     LOG4CXX_ERROR(logger_, "Problem with access to DB");
     return;
   }
@@ -194,13 +195,10 @@ int32_t ResumptionDataDB::GetStoredHMILevel(
 
   int hmi_level;
   if (SelectHMILevel(policy_app_id, device_id, hmi_level)) {
-    LOG4CXX_INFO(
-        logger_,
-        "Application with policy application id  = " << policy_app_id
-                                                     << " and device id = "
-                                                     << device_id
-                                                     << "has hmi level = "
-                                                     << hmi_level);
+    LOG4CXX_INFO(logger_,
+                 "Application with policy application id  = "
+                     << policy_app_id << " and device id = " << device_id
+                     << "has hmi level = " << hmi_level);
     return hmi_level;
   }
   LOG4CXX_FATAL(logger_, "HMI level doesn't exists in saved data");
@@ -224,16 +222,16 @@ bool ResumptionDataDB::CheckSavedApplication(const std::string& policy_app_id,
     return false;
   }
   LOG4CXX_INFO(logger_,
-               "Application with policy_app_id = " << policy_app_id
-                                                   << " and device_id = "
-                                                   << device_id
-                                                   << " does exist");
+               "Application with policy_app_id = "
+                   << policy_app_id << " and device_id = " << device_id
+                   << " does exist");
   return true;
 }
 
 uint32_t ResumptionDataDB::GetHMIApplicationID(
     const std::string& policy_app_id, const std::string& device_id) const {
   LOG4CXX_AUTO_TRACE(logger_);
+
   uint32_t hmi_app_id = 0;
   SelectHMIId(policy_app_id, device_id, hmi_app_id);
   return hmi_app_id;
@@ -491,9 +489,7 @@ void ResumptionDataDB::SelectHMIId(const std::string& policy_app_id,
   LOG4CXX_FATAL(logger_,
                 "Saved data doesn't have application with "
                 "device id = "
-                    << device_id
-                    << " and policy appID = "
-                    << policy_app_id);
+                    << device_id << " and policy appID = " << policy_app_id);
 }
 
 bool ResumptionDataDB::SelectHashId(const std::string& policy_app_id,
@@ -525,9 +521,7 @@ bool ResumptionDataDB::SelectHashId(const std::string& policy_app_id,
   LOG4CXX_WARN(logger_,
                "Saved data doesn't have application with "
                "device id = "
-                   << device_id
-                   << " and policy appID = "
-                   << policy_app_id
+                   << device_id << " and policy appID = " << policy_app_id
                    << "or hashID");
   return false;
 }
@@ -551,7 +545,7 @@ uint32_t ResumptionDataDB::SelectIgnOffTime() const {
 bool ResumptionDataDB::CheckExistenceApplication(
     const std::string& policy_app_id,
     const std::string& device_id,
-    bool& application_exist) const {
+    bool application_exist) const {
   LOG4CXX_AUTO_TRACE(logger_);
   bool result = false;
   utils::dbms::SQLQuery query(db());
@@ -566,11 +560,9 @@ bool ResumptionDataDB::CheckExistenceApplication(
   /* Position of data in "query" :
      amount of application = 0 */
   if (result && query.GetInteger(0)) {
-    LOG4CXX_INFO(
-        logger_,
-        "Saved data has application with policy appID = " << policy_app_id
-                                                          << " and deviceID = "
-                                                          << device_id);
+    LOG4CXX_INFO(logger_,
+                 "Saved data has application with policy appID = "
+                     << policy_app_id << " and deviceID = " << device_id);
     application_exist = true;
   } else if (result) {
     LOG4CXX_INFO(logger_, "Saved data does not contain application");
@@ -640,18 +632,15 @@ void ResumptionDataDB::UpdateHmiLevel(const std::string& policy_app_id,
     if (query.Exec()) {
       LOG4CXX_INFO(logger_,
                    "Saved data has application with policy appID = "
-                       << policy_app_id
-                       << " and deviceID = "
-                       << device_id
-                       << " has new HMI level = "
-                       << hmi_level);
+                       << policy_app_id << " and deviceID = " << device_id
+                       << " has new HMI level = " << hmi_level);
       WriteDb();
     }
   }
 }
 
 void ResumptionDataDB::Persist() {
-    WriteDb();
+  WriteDb();
 }
 
 bool ResumptionDataDB::RefreshDB() const {
@@ -687,9 +676,11 @@ bool ResumptionDataDB::GetAllData(smart_objects::SmartObject& data) const {
   data = smart_objects::SmartObject(smart_objects::SmartType_Array);
 
   uint32_t index = 0;
+  std::string app_id;
+  std::string device_id;
   while (query.Next()) {
-    const std::string app_id = query.GetString(0);
-    const std::string device_id = query.GetString(1);
+    app_id = query.GetString(0);
+    device_id = query.GetString(1);
     if (GetSavedApplication(app_id, device_id, data[index])) {
       ++index;
     }
@@ -759,9 +750,8 @@ bool ResumptionDataDB::DropAppDataResumption(const std::string& device_id,
                                              const std::string& app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  utils::ScopeGuard guard = utils::MakeObjGuard(
-                              *db_,
-                              &utils::dbms::SQLDatabase::RollbackTransaction);
+  utils::ScopeGuard guard =
+      utils::MakeObjGuard(*db_, &utils::dbms::SQLDatabase::RollbackTransaction);
 
   db_->BeginTransaction();
   if (!DeleteSavedFiles(app_id, device_id)) {
@@ -782,7 +772,7 @@ bool ResumptionDataDB::DropAppDataResumption(const std::string& device_id,
   if (!DeleteSavedGlobalProperties(app_id, device_id)) {
     return false;
   }
-  if(!UpdateGrammarID(app_id, device_id, 0)) {
+  if (!UpdateGrammarID(app_id, device_id, 0)) {
     return false;
   }
   db_->CommitTransaction();
@@ -1466,9 +1456,8 @@ bool ResumptionDataDB::DeleteSavedApplication(const std::string& policy_app_id,
                                               const std::string& device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  utils::ScopeGuard guard = utils::MakeObjGuard(
-                              *db_,
-                              &utils::dbms::SQLDatabase::RollbackTransaction);
+  utils::ScopeGuard guard =
+      utils::MakeObjGuard(*db_, &utils::dbms::SQLDatabase::RollbackTransaction);
 
   db_->BeginTransaction();
   if (!DeleteSavedFiles(policy_app_id, device_id)) {
@@ -2614,8 +2603,7 @@ bool ResumptionDataDB::InsertApplicationData(
   const mobile_apis::HMILevel::eType hmi_level = application.m_hmi_level;
   bool is_media_application = application.m_is_media_application;
   bool is_subscribed_for_way_points =
-      app_mngr::ApplicationManagerImpl::instance()->IsAppSubscribedForWayPoints(
-          connection_key);
+      application_manager_.IsAppSubscribedForWayPoints(connection_key);
 
   if (!query.Prepare(kInsertApplication)) {
     LOG4CXX_WARN(logger_,

@@ -51,7 +51,8 @@ class AddCommandResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AddCommandResponse(const MessageSharedPtr& message);
+  AddCommandResponse(const MessageSharedPtr& message,
+                     ApplicationManager& application_manager);
 
   /**
    * @brief AddCommandResponse class destructor

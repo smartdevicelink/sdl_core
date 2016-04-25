@@ -79,6 +79,7 @@ set (MESSAGE_HELPER_SOURCES
 
 set (POLICIES_MANAGER
 ${AM_SOURCE_DIR}/src/policies/policy_handler.cc
+${AM_SOURCE_DIR}/src/usage_statistics.cc
 ${AM_SOURCE_DIR}/src/policies/policy_event_observer.cc
 ${AM_SOURCE_DIR}/src/policies/delegates/app_permission_delegate.cc
 ${AM_SOURCE_DIR}/src/policies/delegates/statistics_delegate.cc

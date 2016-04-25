@@ -31,28 +31,24 @@
  */
 
 #include "application_manager/commands/hmi/sdl_get_list_of_permissions_response.h"
-#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
 SDLGetListOfPermissionsResponse::SDLGetListOfPermissionsResponse(
-  const MessageSharedPtr& message): ResponseToHMI(message) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseToHMI(message, application_manager) {}
 
-SDLGetListOfPermissionsResponse::~SDLGetListOfPermissionsResponse() {
-}
+SDLGetListOfPermissionsResponse::~SDLGetListOfPermissionsResponse() {}
 
 void SDLGetListOfPermissionsResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
 
-  ApplicationManagerImpl::instance()->SendMessageToHMI(message_);
+  application_manager_.SendMessageToHMI(message_);
 }
 
 }  // namespace commands
 }  // namespace application_manager
-
-

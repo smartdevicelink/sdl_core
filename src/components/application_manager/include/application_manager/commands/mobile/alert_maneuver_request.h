@@ -53,7 +53,8 @@ class AlertManeuverRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AlertManeuverRequest(const MessageSharedPtr& message);
+  AlertManeuverRequest(const MessageSharedPtr& message,
+                       ApplicationManager& application_manager);
 
   /**
    * @brief AlertManeuverRequest class destructor
@@ -81,8 +82,8 @@ class AlertManeuverRequest : public CommandRequestImpl {
    */
   bool IsWhiteSpaceExist();
 
-  mobile_apis::Result::eType  tts_speak_result_code_;
-  mobile_apis::Result::eType  navi_alert_maneuver_result_code_;
+  mobile_apis::Result::eType tts_speak_result_code_;
+  mobile_apis::Result::eType navi_alert_maneuver_result_code_;
   Pending pending_requests_;
 
   DISALLOW_COPY_AND_ASSIGN(AlertManeuverRequest);

@@ -42,26 +42,27 @@ namespace commands {
  * @brief GetUrls command class
  **/
 class GetUrls : public RequestFromHMI {
-  public:
-    /**
-     * @brief GetUrls class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit GetUrls(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief GetUrls class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  GetUrls(const MessageSharedPtr& message,
+          ApplicationManager& application_manager);
 
-    /**
-     * @brief GetUrls class destructor
-     **/
-    virtual ~GetUrls();
+  /**
+   * @brief GetUrls class destructor
+   **/
+  virtual ~GetUrls();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(GetUrls);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(GetUrls);
 };
 
 }  // namespace commands

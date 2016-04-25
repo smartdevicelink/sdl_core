@@ -49,6 +49,7 @@
 #include "utils/timer.h"
 
 namespace application_manager {
+class ApplicationManager;
 class Application;
 }
 
@@ -60,14 +61,12 @@ class LastState;
  * @brief Contains logic for storage/restore data of applications.
  */
 
-class ResumeCtrl: public app_mngr::event_engine::EventObserver {
-
+class ResumeCtrl : public application_manager::event_engine::EventObserver {
  public:
-
   /**
    * @brief allows to create ResumeCtrl object
    */
-  ResumeCtrl();
+  ResumeCtrl(application_manager::ApplicationManager& application_manager);
 
   /**
    * @brief allows to destroy ResumeCtrl object
@@ -78,7 +77,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @brief Event, that raised if application get resumption response from HMI
    * @param event : event object, that contains smart_object with HMI message
    */
-  virtual void on_event(const app_mngr::event_engine::Event& event);
+  virtual void on_event(const application_manager::event_engine::Event& event);
 
   /**
    * @brief Save all applications info to the file system
@@ -89,21 +88,23 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @brief Save application persistent info for future resuming
    * @param application is application witch need to be saved
    */
-  void SaveApplication(app_mngr::ApplicationSharedPtr application);
+  void SaveApplication(application_manager::ApplicationSharedPtr application);
 
   /**
    * @brief Set application HMI Level and ausio_state as saved
    * @param application is application witch HMI Level is need to restore
    * @return true if success, otherwise return false
    */
-  bool RestoreAppHMIState(app_mngr::ApplicationSharedPtr application);
+  bool RestoreAppHMIState(
+      application_manager::ApplicationSharedPtr application);
 
   /**
    * @brief Set application HMI Level as stored in policy
    * @param application is application witch HMI Level is need to setup
    * @return true if success, otherwise return false
    */
-  bool SetupDefaultHMILevel(app_mngr::ApplicationSharedPtr application);
+  bool SetupDefaultHMILevel(
+      application_manager::ApplicationSharedPtr application);
 
   /**
    * @brief Setup HmiLevel for application
@@ -114,7 +115,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @param check_policy indicate if policy data consent must be verified
    * @return true if success, otherwise return false
    */
-  bool SetAppHMIState(app_mngr::ApplicationSharedPtr application,
+  bool SetAppHMIState(application_manager::ApplicationSharedPtr application,
                       const mobile_apis::HMILevel::eType hmi_level,
                       bool check_policy = true);
 
@@ -123,7 +124,8 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @param application is application witch need to be checked
    * @return true if exist, false otherwise
    */
-  bool ApplicationIsSaved(app_mngr::ApplicationConstSharedPtr application);
+  bool ApplicationIsSaved(
+      application_manager::ApplicationConstSharedPtr application);
 
   /**
    * @brief Remove application from list of saved applications
@@ -131,7 +133,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @return return true, if success, otherwise return false
    */
   bool RemoveApplicationFromSaved(
-      app_mngr::ApplicationConstSharedPtr application);
+      application_manager::ApplicationConstSharedPtr application);
 
   /**
    * @brief Increments ignition counter for all registered applications
@@ -159,12 +161,17 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
   void StopSavePersistentDataTimer();
 
   /**
+   * @brief Method stops restore_hmi_level_timer_ "RsmCtrlRstore" in OnSuspend()
+   */
+  void StopRestoreHmiLevelTimer();
+
+  /**
    * @brief Start timer for resumption applications
    *        Restore D1-D5 data
    * @param application that is need to be restored
    * @return true if it was saved, otherwise return false
    */
-  bool StartResumption(app_mngr::ApplicationSharedPtr application,
+  bool StartResumption(application_manager::ApplicationSharedPtr application,
                        const std::string& hash);
 
   /**
@@ -174,7 +181,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @return true if it was saved, otherwise return false
    */
   bool StartResumptionOnlyHMILevel(
-      app_mngr::ApplicationSharedPtr application);
+      application_manager::ApplicationSharedPtr application);
 
   /**
    * @brief Check if there are all files need for resumption
@@ -182,15 +189,16 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @return true if it all files exist, otherwise return false
    */
   bool CheckPersistenceFilesForResumption(
-      app_mngr::ApplicationSharedPtr application);
+      application_manager::ApplicationSharedPtr application);
 
   /**
    * @brief Check application hash
    * @param application that is need to be restored
    * @return true if it was saved, otherwise return false
    */
-  bool CheckApplicationHash(app_mngr::ApplicationSharedPtr application,
-                            const std::string& hash);
+  bool CheckApplicationHash(
+      application_manager::ApplicationSharedPtr application,
+      const std::string& hash);
 
   /**
    * @brief Checks if Resume controller have saved application with hmi app id
@@ -217,7 +225,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @return HMI app ID
    */
   uint32_t GetHMIApplicationID(const std::string& policy_app_id,
-                               const std::string& device_mac) const;
+                               const std::string& device_id) const;
   /**
    * @brief SaveDataOnTimer :
    *  Timer callback for persisting ResumptionData each N seconds
@@ -237,7 +245,8 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @param application - application to restore hmi level
    * and audio streaming state
    */
-  void StartAppHmiStateResumption(app_mngr::ApplicationSharedPtr application);
+  void StartAppHmiStateResumption(
+      application_manager::ApplicationSharedPtr application);
 
   /**
    * @brief Update launch_time_ to current
@@ -255,7 +264,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    *
    * @param application application witch need to be removed from resumption
    */
-  void OnAppActivated(app_mngr::ApplicationSharedPtr application);
+  void OnAppActivated(application_manager::ApplicationSharedPtr application);
 
   /**
    * @brief Removes app from resumption list
@@ -269,7 +278,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @return true if initialization is success otherwise
    * returns false
    */
-  bool Init(LastState &last_state);
+  bool Init(LastState& last_state);
 
   /**
    * @brief Notify resume controller about new application
@@ -277,21 +286,24 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @param device_id - id of device where application is run
    */
   void OnAppRegistrationStart(const std::string& policy_app_id,
-                                const std::string& device_id);
+                              const std::string& device_id);
 
   /**
    * @brief Notify resume controller about delete new application
    */
   void OnAppRegistrationEnd();
 
+#ifdef BUILD_TESTS
+  void set_resumption_storage(utils::SharedPtr<ResumptionData> mock_storage);
+#endif  // BUILD_TESTS
  private:
-
   /**
    * @brief restores saved data of application
    * @param application contains application for which restores data
    * @return true if success, otherwise return false
    */
-  bool RestoreApplicationData(app_mngr::ApplicationSharedPtr application);
+  bool RestoreApplicationData(
+      application_manager::ApplicationSharedPtr application);
 
   /**
    * @brief AddFiles allows to add files for the application
@@ -299,7 +311,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @param application application which will be resumed
    * @param saved_app application specific section from backup file
    */
-  void AddFiles(app_mngr::ApplicationSharedPtr application,
+  void AddFiles(application_manager::ApplicationSharedPtr application,
                 const smart_objects::SmartObject& saved_app);
 
   /**
@@ -308,7 +320,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @param application application which will be resumed
    * @param saved_app application specific section from backup file
    */
-  void AddSubmenues(app_mngr::ApplicationSharedPtr application,
+  void AddSubmenues(application_manager::ApplicationSharedPtr application,
                     const smart_objects::SmartObject& saved_app);
 
   /**
@@ -317,7 +329,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @param application application which will be resumed
    * @param saved_app application specific section from backup file
    */
-  void AddCommands(app_mngr::ApplicationSharedPtr application,
+  void AddCommands(application_manager::ApplicationSharedPtr application,
                    const smart_objects::SmartObject& saved_app);
 
   /**
@@ -326,7 +338,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @param application application which will be resumed
    * @param saved_app application specific section from backup file
    */
-  void AddChoicesets(app_mngr::ApplicationSharedPtr application,
+  void AddChoicesets(application_manager::ApplicationSharedPtr application,
                      const smart_objects::SmartObject& saved_app);
 
   /**
@@ -334,15 +346,16 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @param application application which will be resumed
    * @param saved_app application specific section from backup file
    */
-  void SetGlobalProperties(app_mngr::ApplicationSharedPtr application,
-                           const smart_objects::SmartObject& saved_app);
+  void SetGlobalProperties(
+      application_manager::ApplicationSharedPtr application,
+      const smart_objects::SmartObject& saved_app);
 
   /**
    * @brief AddSubscriptions allows to restore subscriptions
    * @param application application which will be resumed
    * @param saved_app application specific section from backup file
    */
-  void AddSubscriptions(app_mngr::ApplicationSharedPtr application,
+  void AddSubscriptions(application_manager::ApplicationSharedPtr application,
                         const smart_objects::SmartObject& saved_app);
 
   /**
@@ -351,15 +364,18 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @param application application which will be resumed
    * @param saved_app application specific section from backup file
    */
-  void AddWayPointsSubscription(app_mngr::ApplicationSharedPtr application,
-                                 const smart_objects::SmartObject& saved_app);
+  void AddWayPointsSubscription(
+      application_manager::ApplicationSharedPtr application,
+      const smart_objects::SmartObject& saved_app);
 
   bool CheckIgnCycleRestrictions(const smart_objects::SmartObject& saved_app);
 
-  bool DisconnectedJustBeforeIgnOff(const smart_objects::SmartObject& saved_app);
+  bool DisconnectedJustBeforeIgnOff(
+      const smart_objects::SmartObject& saved_app);
 
-  bool CheckAppRestrictions(app_mngr::ApplicationConstSharedPtr application,
-                            const smart_objects::SmartObject& saved_app);
+  bool CheckAppRestrictions(
+      application_manager::ApplicationConstSharedPtr application,
+      const smart_objects::SmartObject& saved_app);
 
   /**
    * @brief CheckIcons allows to check application icons
@@ -367,7 +383,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @param json_object
    * @return true in case icons exists, false otherwise
    */
-  bool CheckIcons(app_mngr::ApplicationSharedPtr application,
+  bool CheckIcons(application_manager::ApplicationSharedPtr application,
                   smart_objects::SmartObject& obj);
 
   /**
@@ -377,22 +393,22 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    */
   bool CheckDelayAfterIgnOn();
 
-  typedef std::pair<uint32_t, uint32_t> application_timestamp;
+  typedef std::pair<uint32_t, uint32_t> ApplicationTimestamp;
 
-  //    std::set<ApplicationSharedPtr> retrieve_application();
+  std::set<application_manager::ApplicationSharedPtr> retrieve_application();
 
   /**
    * @brief This struct need to map
    * timestamp and application from correlationID
    */
   struct ResumingApp {
-    uint32_t old_session_key; // session key is the same as app_id
-    app_mngr::ApplicationSharedPtr app;
+    uint32_t old_session_key;  // session key is the same as app_id
+    application_manager::ApplicationSharedPtr app;
   };
 
   struct TimeStampComparator {
-    bool operator() (const application_timestamp& lhs,
-                     const application_timestamp& rhs) const{
+    bool operator()(const ApplicationTimestamp& lhs,
+                    const ApplicationTimestamp& rhs) const {
       return lhs.second < rhs.second;
     }
   };
@@ -409,8 +425,9 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @param saved_device_mac Saved device MAC address
    * @return TRUE on success, otherwise FALSE
    */
-  bool IsDeviceMacAddressEqual(app_mngr::ApplicationSharedPtr application,
-                               const std::string& saved_device_mac);
+  bool IsDeviceMacAddressEqual(
+      application_manager::ApplicationSharedPtr application,
+      const std::string& saved_device_mac);
 
   /**
    * @brief Get the last ignition off time from LastState
@@ -430,9 +447,8 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @param use_events Process request events or not flag
    * @return TRUE on success, otherwise FALSE
    */
-  bool ProcessHMIRequest(
-      smart_objects::SmartObjectSPtr request = NULL,
-      bool use_events = false);
+  bool ProcessHMIRequest(smart_objects::SmartObjectSPtr request = NULL,
+                         bool use_events = false);
 
   /**
    * @brief Process list of HMI requests using ProcessHMIRequest method
@@ -442,7 +458,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
 
   void InsertToTimerQueue(uint32_t app_id, uint32_t time_stamp);
 
-  void AddToResumptionTimerQueue(uint32_t app_id);
+  void AddToResumptionTimerQueue(const uint32_t app_id);
 
   void LoadResumeData();
 
@@ -452,23 +468,39 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
    * @return true, if data resumption must be skipped, otherwise - false
    */
   bool IsAppDataResumptionExpired(
-          const smart_objects::SmartObject& application) const;
+      const smart_objects::SmartObject& application) const;
+  /**
+   * @brief Checks from resume data, if application has been disconnected
+   * unexpectedly
+   * @param app Application section from resume data
+   * @return true, if it has been unexpectedly disconnected, otherwise - false
+   */
+  bool IsUnexpectedlyDisconnected(const smart_objects::SmartObject& app) const;
+
+  /**
+   * @brief Checks, if application can be resumed
+   * @param application Application
+   * @return true, if no restrictions currently, otherwise - false
+   */
+  bool IsResumeAllowed(
+      const application_manager::ApplicationSharedPtr application) const;
 
   /**
    *@brief Mapping applications to time_stamps
    *       wait for timer to resume HMI Level
    *
    */
-  mutable sync_primitives::Lock   queue_lock_;
+  mutable sync_primitives::Lock queue_lock_;
   timer::Timer restore_hmi_level_timer_;
   timer::Timer save_persistent_data_timer_;
-  typedef std::list<uint32_t>     WaitingForTimerList;
-  WaitingForTimerList             waiting_for_timer_;
-  bool                            is_resumption_active_;
-  bool                            is_data_saved_;
-  time_t                          launch_time_;
-  utils::SharedPtr<ResumptionData>    resumption_storage_;
+  typedef std::list<uint32_t> WaitingForTimerList;
+  WaitingForTimerList waiting_for_timer_;
+  bool is_resumption_active_;
+  bool is_data_saved_;
+  time_t launch_time_;
+  utils::SharedPtr<ResumptionData> resumption_storage_;
+  application_manager::ApplicationManager& application_manager_;
 };
 
 }  // namespace resumption
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_RESUME_CTRL_H
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_RESUME_CTRL_H

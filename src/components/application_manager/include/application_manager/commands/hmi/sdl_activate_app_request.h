@@ -34,54 +34,57 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_SDL_ACTIVATE_APP_REQUEST_H_
 
 #include "application_manager/commands/hmi/request_from_hmi.h"
-#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_manager.h"
 
 namespace application_manager {
 
 namespace commands {
 
-  typedef std::pair<ApplicationSharedPtr, std::vector<ApplicationSharedPtr> > DevicesApps;
+typedef std::pair<ApplicationSharedPtr, std::vector<ApplicationSharedPtr> >
+    DevicesApps;
 /**
  * @brief SDLActivateAppRequest command class
  **/
 class SDLActivateAppRequest : public RequestFromHMI {
-  public:
-    /**
-     * @brief SDLActivateAppRequest class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    explicit SDLActivateAppRequest(const MessageSharedPtr& message);
+ public:
+  /**
+   * @brief SDLActivateAppRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  SDLActivateAppRequest(const MessageSharedPtr& message,
+                        ApplicationManager& application_manager);
 
-    /**
-     * @brief SDLActivateAppRequest class destructor
-     **/
-    virtual ~SDLActivateAppRequest();
+  /**
+   * @brief SDLActivateAppRequest class destructor
+   **/
+  virtual ~SDLActivateAppRequest();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-    /**
-     * @brief onTimeOut allows to process case when timeout has appeared
-     * during request execution.
-     */
-    virtual void onTimeOut();
+  /**
+   * @brief onTimeOut allows to process case when timeout has appeared
+   * during request execution.
+   */
+  virtual void onTimeOut();
 
-    /**
-     * @brief on_event allows to handle events
-     *
-     * @param event event type that current request subscribed on.
-     */
-    virtual void on_event(const event_engine::Event& event);
-  private:
-    uint32_t app_id() const;
-    uint32_t hmi_app_id(const smart_objects::SmartObject& so) const;
+  /**
+   * @brief on_event allows to handle events
+   *
+   * @param event event type that current request subscribed on.
+   */
+  virtual void on_event(const event_engine::Event& event);
 
-    DevicesApps FindAllAppOnParticularDevice(
-        const connection_handler::DeviceHandle handle);
-    DISALLOW_COPY_AND_ASSIGN(SDLActivateAppRequest);
+ private:
+  uint32_t app_id() const;
+  uint32_t hmi_app_id(const smart_objects::SmartObject& so) const;
+
+  DevicesApps FindAllAppOnParticularDevice(
+      const connection_handler::DeviceHandle handle);
+  DISALLOW_COPY_AND_ASSIGN(SDLActivateAppRequest);
 };
 
 }  // namespace commands

@@ -40,11 +40,12 @@ namespace application_manager {
 namespace commands {
 
 class UnSubscribeWayPointsRequest : public CommandRequestImpl {
-public:
+ public:
   /**
    * \brief UnSubscribeWayPointsRequest class constructor
    **/
-  explicit UnSubscribeWayPointsRequest(const MessageSharedPtr& message);
+  UnSubscribeWayPointsRequest(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * \brief UnSubscribeWayPointsRequest class destructor
@@ -61,12 +62,13 @@ public:
    * @param event The received event
    */
   virtual void on_event(const event_engine::Event& event);
-private:
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(UnSubscribeWayPointsRequest);
 };
 
-} // commands
+}  // commands
 
-} // application_manager
+}  // application_manager
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_UNSUBSCRIBE_WAY_POINTS_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_UNSUBSCRIBE_WAY_POINTS_REQUEST_H_

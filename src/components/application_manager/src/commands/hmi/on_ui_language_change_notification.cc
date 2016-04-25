@@ -31,7 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/on_ui_language_change_notification.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
@@ -41,16 +41,15 @@ namespace application_manager {
 namespace commands {
 
 OnUILanguageChangeNotification::OnUILanguageChangeNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
 OnUILanguageChangeNotification::~OnUILanguageChangeNotification() {}
 
 void OnUILanguageChangeNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  HMICapabilities& hmi_capabilities =
-      ApplicationManagerImpl::instance()->hmi_capabilities();
+  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
 
   hmi_capabilities.set_active_ui_language(
       static_cast<hmi_apis::Common_Language::eType>(
@@ -65,7 +64,8 @@ void OnUILanguageChangeNotification::Run() {
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnLanguageChangeID);
 
-  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  const ApplicationSet& accessor =
+      application_manager_.applications().GetData();
 
   ApplicationSetConstIt it = accessor.begin();
   for (; accessor.end() != it;) {
@@ -76,10 +76,12 @@ void OnUILanguageChangeNotification::Run() {
     if (app->ui_language() !=
         (*message_)[strings::msg_params][strings::hmi_display_language]
             .asInt()) {
-      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-          app->app_id(),
-          mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE);
-      ApplicationManagerImpl::instance()->UnregisterApplication(
+      application_manager_.ManageMobileCommand(
+          MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+              app->app_id(),
+              mobile_api::AppInterfaceUnregisteredReason::LANGUAGE_CHANGE),
+          commands::Command::ORIGIN_SDL);
+      application_manager_.UnregisterApplication(
           app->app_id(), mobile_apis::Result::SUCCESS, false);
     }
   }

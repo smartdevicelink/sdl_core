@@ -31,20 +31,20 @@ Copyright (c) 2013, Ford Motor Company
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "application_manager/commands/mobile/system_request.h"
+
 #include <vector>
 #include <string>
-#include <map>
-#include <set>
-#include "application_manager/commands/mobile/system_request.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
+#include <stdio.h>
+#include <algorithm>
+#include <sstream>
 #include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/MOBILE_API.h"
-#include "config_profile/profile.h"
 #include "utils/file_system.h"
 #include "formatters/CFormatterJsonBase.h"
 #include "json/json.h"
 #include "utils/helpers.h"
+#include "utils/custom_string.h"
 
 namespace application_manager {
 
@@ -71,7 +71,7 @@ class QueryAppsDataValidator {
   typedef std::map<std::string, SynonymsSet> SynonymsMap;
 
   QueryAppsDataValidator(const smart_objects::SmartObject& object,
-                         const ApplicationManagerImpl& manager)
+                         const ApplicationManager& manager)
       : data_(object), manager_(manager) {}
 
   bool Validate() const {
@@ -403,7 +403,7 @@ class QueryAppsDataValidator {
   }
 
   const smart_objects::SmartObject& data_;
-  const ApplicationManagerImpl& manager_;
+  const ApplicationManager& manager_;
 
   DISALLOW_COPY_AND_ASSIGN(QueryAppsDataValidator);
 };
@@ -411,13 +411,16 @@ class QueryAppsDataValidator {
 
 namespace commands {
 
+namespace custom_str = utils::custom_string;
+
 uint32_t SystemRequest::index = 0;
 
 const std::string kSYNC = "SYNC";
 const std::string kIVSU = "IVSU";
 
-SystemRequest::SystemRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {}
+SystemRequest::SystemRequest(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
 SystemRequest::~SystemRequest() {}
 
@@ -425,7 +428,7 @@ void SystemRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!(application.valid())) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -438,9 +441,9 @@ void SystemRequest::Run() {
           (*message_)[strings::msg_params][strings::request_type].asInt());
 
   const policy::PolicyHandlerInterface& policy_handler =
-      application_manager::ApplicationManagerImpl::instance()->GetPolicyHandler();
-  if (!policy_handler.IsRequestTypeAllowed(
-           application->mobile_app_id(), request_type)) {
+      application_manager_.GetPolicyHandler();
+  if (!policy_handler.IsRequestTypeAllowed(application->policy_app_id(),
+                                           request_type)) {
     SendResponse(false, mobile_apis::Result::DISALLOWED);
     return;
   }
@@ -467,15 +470,18 @@ void SystemRequest::Run() {
   std::string binary_data_folder;
   if ((*message_)[strings::params].keyExists(strings::binary_data)) {
     binary_data = (*message_)[strings::params][strings::binary_data].asBinary();
-    binary_data_folder = profile::Profile::instance()->system_files_path();
+    binary_data_folder =
+        application_manager_.get_settings().system_files_path();
   } else {
-    binary_data_folder = profile::Profile::instance()->app_storage_folder();
+    binary_data_folder =
+        application_manager_.get_settings().app_storage_folder();
     binary_data_folder += "/";
     binary_data_folder += application->folder_name();
     binary_data_folder += "/";
   }
 
-  std::string file_dst_path = profile::Profile::instance()->system_files_path();
+  std::string file_dst_path =
+      application_manager_.get_settings().system_files_path();
   file_dst_path += "/";
   file_dst_path += file_name;
 
@@ -484,7 +490,7 @@ void SystemRequest::Run() {
         logger_,
         "Binary data is present. Trying to save it to: " << binary_data_folder);
     if (mobile_apis::Result::SUCCESS !=
-        (ApplicationManagerImpl::instance()->SaveBinary(
+        (application_manager_.SaveBinary(
             binary_data, binary_data_folder, file_name, 0))) {
       LOG4CXX_DEBUG(logger_, "Binary data can't be saved.");
       SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
@@ -496,8 +502,7 @@ void SystemRequest::Run() {
 
     LOG4CXX_DEBUG(logger_,
                   "Binary data is not present. Trying to find file "
-                      << file_name
-                      << " within previously saved app file in "
+                      << file_name << " within previously saved app file in "
                       << binary_data_folder);
 
     const AppFile* file = application->GetFile(app_full_file_path);
@@ -541,8 +546,7 @@ void SystemRequest::Run() {
       return;
     }
 
-    ApplicationManagerImpl::instance()->ProcessQueryApp(sm_object,
-                                                        connection_key());
+    application_manager_.ProcessQueryApp(sm_object, connection_key());
     SendResponse(true, mobile_apis::Result::SUCCESS);
     return;
   }
@@ -556,7 +560,7 @@ void SystemRequest::Run() {
   }
 
   if (mobile_apis::RequestType::PROPRIETARY != request_type) {
-    msg_params[strings::app_id] = (application->mobile_app_id());
+    msg_params[strings::app_id] = (application->policy_app_id());
   }
   msg_params[strings::request_type] =
       (*message_)[strings::msg_params][strings::request_type];
@@ -583,7 +587,7 @@ void SystemRequest::on_event(const event_engine::Event& event) {
           mobile_api::Result::WARNINGS);
 
       ApplicationSharedPtr application =
-          ApplicationManagerImpl::instance()->application(connection_key());
+          application_manager_.application(connection_key());
 
       if (!(application.valid())) {
         LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -594,6 +598,7 @@ void SystemRequest::on_event(const event_engine::Event& event) {
         file_system::DeleteFile(processing_file_);
         processing_file_.clear();
       }
+
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
       break;
     }
@@ -619,10 +624,8 @@ bool SystemRequest::ValidateQueryAppData(
                       << json::response << "' parameter.");
     return false;
   }
-  ApplicationManagerImpl* manager = ApplicationManagerImpl::instance();
-  DCHECK(manager);
 
-  QueryAppsDataValidator validator(data, *manager);
+  QueryAppsDataValidator validator(data, application_manager_);
   return validator.Validate();
 }
 

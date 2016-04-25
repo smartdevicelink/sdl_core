@@ -51,7 +51,8 @@ class GetDTCsRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit GetDTCsRequest(const MessageSharedPtr& message);
+  GetDTCsRequest(const MessageSharedPtr& message,
+                 ApplicationManager& application_manager);
 
   /**
    * @brief GetDTCsRequest class destructor

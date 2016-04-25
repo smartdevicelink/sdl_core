@@ -166,8 +166,9 @@ class ApplicationManagerImpl
     std::cout << "ApplicationManagerImpl Mock created \n";
   }
 
-  MOCK_METHOD2(Init, bool(resumption::LastState& last_state,
-                          media_manager::MediaManager* media_manager));
+  MOCK_METHOD2(Init,
+               bool(resumption::LastState& last_state,
+                    media_manager::MediaManager* media_manager));
   MOCK_METHOD0(Stop, bool());
 
   // ApplicationManager methods
@@ -219,7 +220,8 @@ class ApplicationManagerImpl
 //  // ApplicationManager methods
 //  MOCK_METHOD1(set_hmi_message_handler,
 //               void(hmi_message_handler::HMIMessageHandler*));
-//  MOCK_METHOD1(set_protocol_handler, void(protocol_handler::ProtocolHandler*));
+//  MOCK_METHOD1(set_protocol_handler,
+//  void(protocol_handler::ProtocolHandler*));
 //  MOCK_METHOD1(set_connection_handler,
 //               void(connection_handler::ConnectionHandler*));
 //  MOCK_CONST_METHOD0(connection_handler,
@@ -236,15 +238,17 @@ class ApplicationManagerImpl
                    const utils::SharedPtr<smart_objects::SmartObject>&));
   MOCK_METHOD0(hmi_capabilities, HMICapabilities&());
   MOCK_METHOD0(is_attenuated_supported, bool());
-  MOCK_METHOD1(ManageHMICommand,
-               bool(const application_manager::commands::MessageSharedPtr message));
+  MOCK_METHOD1(
+      ManageHMICommand,
+      bool(const application_manager::commands::MessageSharedPtr message));
   MOCK_METHOD2(ManageMobileCommand,
                bool(const smart_objects::SmartObjectSPtr message,
                     commands::Command::CommandOrigin));
   MOCK_METHOD1(SendMessageToHMI,
                void(const application_manager::commands::MessageSharedPtr));
   MOCK_METHOD2(SendMessageToMobile,
-               void(const application_manager::commands::MessageSharedPtr, bool));
+               void(const application_manager::commands::MessageSharedPtr,
+                    bool));
   MOCK_METHOD1(SendMessageToMobile,
                void(const application_manager::commands::MessageSharedPtr));
   MOCK_METHOD1(GetDeviceName, std::string(connection_handler::DeviceHandle));
@@ -285,8 +289,8 @@ class ApplicationManagerImpl
   MOCK_METHOD0(GenerateGrammarID, uint32_t());
   MOCK_METHOD0(GenerateNewHMIAppID, uint32_t());
   MOCK_METHOD1(GetAvailableSpaceForApp, uint32_t(const std::string&));
-  MOCK_METHOD0(begin_audio_pass_thru, bool());
-  MOCK_METHOD0(end_audio_pass_thru, uint32_t());
+  MOCK_METHOD0(BeginAudioPassThrough, bool());
+  MOCK_METHOD0(EndAudioPassThrough, uint32_t());
   MOCK_METHOD1(StopAudioPassThru, void(uint32_t));
   MOCK_METHOD1(applications_by_button,
                std::vector<ApplicationSharedPtr>(uint32_t));
@@ -310,7 +314,8 @@ class ApplicationManagerImpl
 
   MOCK_METHOD2(HMILevelAllowsStreaming,
                bool(uint32_t, protocol_handler::ServiceType));
-  MOCK_CONST_METHOD2(CanAppStream, bool(uint32_t, protocol_handler::ServiceType));
+  MOCK_CONST_METHOD2(CanAppStream,
+                     bool(uint32_t, protocol_handler::ServiceType));
   MOCK_METHOD1(EndNaviServices, void(int32_t));
   MOCK_METHOD1(ForbidStreaming, void(uint32_t));
   MOCK_METHOD3(OnAppStreaming,
@@ -405,7 +410,8 @@ class ApplicationManagerImpl
    */
   class ApplicationListAccessor : public DataAccessor<ApplicationSet> {
    public:
-    ApplicationListAccessor()
+    ApplicationListAccessor(
+        const application_manager::ApplicationManagerImpl& app_man)
         : DataAccessor<ApplicationSet>(ApplicationSet(),
                                        sync_primitives::Lock()) {}
     MOCK_CONST_METHOD0(applications, const ApplicationSet());
@@ -418,7 +424,7 @@ class ApplicationManagerImpl
 
   friend class ApplicationListAccessor;
 
-private:
+ private:
   FRIEND_BASE_SINGLETON_CLASS(ApplicationManagerImpl);
 };
 

@@ -49,17 +49,15 @@ class SetAppIconRequest : public CommandRequestImpl {
   /**
    * @brief Contains information about the type of image
    */
-  typedef enum {
-    STATIC = 0,
-    DYNAMIC
-  } ImageType;
+  typedef enum { STATIC = 0, DYNAMIC } ImageType;
 
   /**
    * @brief SetIconRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SetAppIconRequest(const MessageSharedPtr& message);
+  SetAppIconRequest(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief SetIconRequest class destructor
@@ -101,11 +99,11 @@ class SetAppIconRequest : public CommandRequestImpl {
   bool IsEnoughSpaceForIcon(const uint64_t icon_size) const;
   DISALLOW_COPY_AND_ASSIGN(SetAppIconRequest);
 
-private:
+ private:
   /**
    * @brief Checks, if icons saving to configured folder is enabled
    */
-  static int8_t is_icons_saving_enabled_;
+  bool is_icons_saving_enabled_;
 };
 
 }  // namespace commands

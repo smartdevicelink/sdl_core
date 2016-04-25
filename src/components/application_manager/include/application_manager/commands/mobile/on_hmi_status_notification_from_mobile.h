@@ -35,6 +35,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_HMI_STATUS_NOTIFICATION_FROM_MOBILE_H_
 
 #include "application_manager/commands/command_notification_from_mobile_impl.h"
+#include "application_manager/application_manager.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 
@@ -45,15 +46,16 @@ namespace commands {
 /**
  * @brief OnHMIStatusNotificationFromMobile class
  **/
-class OnHMIStatusNotificationFromMobile :
-        public CommandNotificationFromMobileImpl {
+class OnHMIStatusNotificationFromMobile
+    : public CommandNotificationFromMobileImpl {
  public:
   /**
    * @brief OnHMIStatusNotificationFromMobile class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnHMIStatusNotificationFromMobile(const MessageSharedPtr& message);
+  OnHMIStatusNotificationFromMobile(const MessageSharedPtr& message,
+                                    ApplicationManager& application_manager);
 
   /**
    * @brief OnHMIStatusNotificationFromMobile class destructor
@@ -65,7 +67,7 @@ class OnHMIStatusNotificationFromMobile :
    **/
   virtual void Run();
 
-private:
+ private:
   DISALLOW_COPY_AND_ASSIGN(OnHMIStatusNotificationFromMobile);
 };
 

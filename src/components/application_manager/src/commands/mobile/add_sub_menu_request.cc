@@ -32,7 +32,7 @@
  */
 
 #include "application_manager/commands/mobile/add_sub_menu_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application.h"
 #include "utils/helpers.h"
 
@@ -40,16 +40,16 @@ namespace application_manager {
 
 namespace commands {
 
-AddSubMenuRequest::AddSubMenuRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {}
+AddSubMenuRequest::AddSubMenuRequest(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
 AddSubMenuRequest::~AddSubMenuRequest() {}
 
 void AddSubMenuRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -113,7 +113,7 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
           mobile_api::Result::WARNINGS);
 
       ApplicationSharedPtr application =
-          ApplicationManagerImpl::instance()->application(connection_key());
+          application_manager_.application(connection_key());
 
       if (!application) {
         LOG4CXX_ERROR(logger_, "NULL pointer");

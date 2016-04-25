@@ -33,7 +33,7 @@
 
 #include <string>
 #include "application_manager/commands/mobile/add_command_request.h"
-#include "application_manager/application_manager_impl.h"
+
 #include "application_manager/application.h"
 #include "application_manager/message_helper.h"
 #include "utils/file_system.h"
@@ -46,8 +46,9 @@ namespace commands {
 
 namespace custom_str = utils::custom_string;
 
-AddCommandRequest::AddCommandRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message)
+AddCommandRequest::AddCommandRequest(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager)
     , send_ui_(false)
     , send_vr_(false)
     , is_ui_received_(false)
@@ -66,7 +67,7 @@ void AddCommandRequest::onTimeOut() {
 void AddCommandRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+  ApplicationSharedPtr app = application_manager_.application(
       (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!app) {
@@ -77,7 +78,9 @@ void AddCommandRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::cmd_icon)) {
     mobile_apis::Result::eType verification_result = MessageHelper::VerifyImage(
-        (*message_)[strings::msg_params][strings::cmd_icon], app);
+        (*message_)[strings::msg_params][strings::cmd_icon],
+        app,
+        application_manager_);
 
     if (mobile_apis::Result::SUCCESS != verification_result) {
       LOG4CXX_ERROR(
@@ -111,8 +114,7 @@ void AddCommandRequest::Run() {
             hmi_request::parent_id)) &&
         (0 !=
          (*message_)[strings::msg_params][strings::menu_params]
-                    [hmi_request::parent_id]
-                        .asUInt())) {
+                    [hmi_request::parent_id].asUInt())) {
       if (!CheckCommandParentId(app)) {
         SendResponse(
             false, mobile_apis::Result::INVALID_ID, "Parent ID doesn't exist");
@@ -206,8 +208,7 @@ bool AddCommandRequest::CheckCommandName(ApplicationConstSharedPtr app) {
   if ((*message_)[strings::msg_params][strings::menu_params].keyExists(
           hmi_request::parent_id)) {
     parent_id = (*message_)[strings::msg_params][strings::menu_params]
-                           [hmi_request::parent_id]
-                               .asUInt();
+                           [hmi_request::parent_id].asUInt();
   }
 
   for (; commands.end() != i; ++i) {
@@ -222,8 +223,7 @@ bool AddCommandRequest::CheckCommandName(ApplicationConstSharedPtr app) {
     }
     if (((*i->second)[strings::menu_params][strings::menu_name].asString() ==
          (*message_)[strings::msg_params][strings::menu_params]
-                    [strings::menu_name]
-                        .asString()) &&
+                    [strings::menu_name].asString()) &&
         (saved_parent_id == parent_id)) {
       LOG4CXX_INFO(logger_,
                    "AddCommandRequest::CheckCommandName received"
@@ -277,8 +277,7 @@ bool AddCommandRequest::CheckCommandParentId(ApplicationConstSharedPtr app) {
 
   const int32_t parent_id =
       (*message_)[strings::msg_params][strings::menu_params]
-                 [hmi_request::parent_id]
-                     .asInt();
+                 [hmi_request::parent_id].asInt();
   smart_objects::SmartObject* parent = app->FindSubMenu(parent_id);
 
   if (!parent) {
@@ -297,7 +296,7 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
   const smart_objects::SmartObject& message = event.smart_object();
 
   ApplicationSharedPtr application =
-      ApplicationManagerImpl::instance()->application(connection_key());
+      application_manager_.application(connection_key());
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -444,8 +443,7 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
     str = (*message_)[strings::msg_params][strings::menu_params]
-                     [strings::menu_name]
-                         .asCharArray();
+                     [strings::menu_name].asCharArray();
     if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid menu name syntax check failed.");
       return true;
@@ -483,8 +481,7 @@ bool AddCommandRequest::BothSend() const {
 
 void AddCommandRequest::RemoveCommand() {
   LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application(connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
   if (!app.valid()) {
     LOG4CXX_ERROR(logger_, "No application associated with session key");
     return;
