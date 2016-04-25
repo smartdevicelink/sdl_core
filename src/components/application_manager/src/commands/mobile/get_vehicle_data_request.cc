@@ -46,20 +46,18 @@ namespace commands {
 namespace str = strings;
 
 #ifdef HMI_DBUS_API
-GetVehicleDataRequest::GetVehicleDataRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandRequestImpl(message, application_manager) {
-}
+GetVehicleDataRequest::GetVehicleDataRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-GetVehicleDataRequest::~GetVehicleDataRequest() {
-}
+GetVehicleDataRequest::~GetVehicleDataRequest() {}
 
 void GetVehicleDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   int32_t app_id =
       (*message_)[strings::params][strings::connection_key].asUInt();
-  ApplicationSharedPtr app =
-      appplication_manager.application(app_id);
+  ApplicationSharedPtr app = appplication_manager.application(app_id);
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -71,8 +69,8 @@ void GetVehicleDataRequest::Run() {
   VehicleData::const_iterator it = vehicle_data.begin();
 
   for (; vehicle_data.end() != it; ++it) {
-    if (true == (*message_)[str::msg_params].keyExists(it->first)
-        && true == (*message_)[str::msg_params][it->first].asBool()) {
+    if (true == (*message_)[str::msg_params].keyExists(it->first) &&
+        true == (*message_)[str::msg_params][it->first].asBool()) {
       SendRequestsToHmi(app->app_id());
       return;
     }
@@ -82,37 +80,44 @@ void GetVehicleDataRequest::Run() {
 }
 
 namespace {
-  struct Subrequest {
-    hmi_apis::FunctionID::eType func_id;
-    const char* str;
-  };
-  Subrequest subrequests[] = {
-    { hmi_apis::FunctionID::VehicleInfo_GetGpsData, str::gps},
-    { hmi_apis::FunctionID::VehicleInfo_GetSpeed, str::speed},
-    { hmi_apis::FunctionID::VehicleInfo_GetRpm, str::rpm},
-    { hmi_apis::FunctionID::VehicleInfo_GetFuelLevel, str::fuel_level},
-    { hmi_apis::FunctionID::VehicleInfo_GetFuelLevelState, str::fuel_level_state},
-    { hmi_apis::FunctionID::VehicleInfo_GetInstantFuelConsumption, str::instant_fuel_consumption},
-    { hmi_apis::FunctionID::VehicleInfo_GetExternalTemperature, str::external_temp},
-    { hmi_apis::FunctionID::VehicleInfo_GetVin, str::vin},
-    { hmi_apis::FunctionID::VehicleInfo_GetPrndl, str::prndl},
-    { hmi_apis::FunctionID::VehicleInfo_GetTirePressure, str::tire_pressure},
-    { hmi_apis::FunctionID::VehicleInfo_GetOdometer, str::odometer},
-    { hmi_apis::FunctionID::VehicleInfo_GetBeltStatus, str::belt_status},
-    { hmi_apis::FunctionID::VehicleInfo_GetBodyInformation, str::body_information},
-    { hmi_apis::FunctionID::VehicleInfo_GetDeviceStatus, str::device_status},
-    { hmi_apis::FunctionID::VehicleInfo_GetDriverBraking, str::driver_braking},
-    { hmi_apis::FunctionID::VehicleInfo_GetWiperStatus, str::wiper_status},
-    { hmi_apis::FunctionID::VehicleInfo_GetHeadLampStatus, str::head_lamp_status},
-    { hmi_apis::FunctionID::VehicleInfo_GetEngineTorque, str::engine_torque},
-    { hmi_apis::FunctionID::VehicleInfo_GetAccPedalPosition, str::acc_pedal_pos},
-    { hmi_apis::FunctionID::VehicleInfo_GetSteeringWheelAngle, str::steering_wheel_angle},
-    { hmi_apis::FunctionID::VehicleInfo_GetECallInfo, str::e_call_info},
-    { hmi_apis::FunctionID::VehicleInfo_GetAirbagStatus, str::airbag_status},
-    { hmi_apis::FunctionID::VehicleInfo_GetEmergencyEvent, str::emergency_event},
-    { hmi_apis::FunctionID::VehicleInfo_GetClusterModeStatus, str::cluster_mode_status},
-    { hmi_apis::FunctionID::VehicleInfo_GetMyKey, str::my_key},
-  };
+struct Subrequest {
+  hmi_apis::FunctionID::eType func_id;
+  const char* str;
+};
+Subrequest subrequests[] = {
+    {hmi_apis::FunctionID::VehicleInfo_GetGpsData, str::gps},
+    {hmi_apis::FunctionID::VehicleInfo_GetSpeed, str::speed},
+    {hmi_apis::FunctionID::VehicleInfo_GetRpm, str::rpm},
+    {hmi_apis::FunctionID::VehicleInfo_GetFuelLevel, str::fuel_level},
+    {hmi_apis::FunctionID::VehicleInfo_GetFuelLevelState,
+     str::fuel_level_state},
+    {hmi_apis::FunctionID::VehicleInfo_GetInstantFuelConsumption,
+     str::instant_fuel_consumption},
+    {hmi_apis::FunctionID::VehicleInfo_GetExternalTemperature,
+     str::external_temp},
+    {hmi_apis::FunctionID::VehicleInfo_GetVin, str::vin},
+    {hmi_apis::FunctionID::VehicleInfo_GetPrndl, str::prndl},
+    {hmi_apis::FunctionID::VehicleInfo_GetTirePressure, str::tire_pressure},
+    {hmi_apis::FunctionID::VehicleInfo_GetOdometer, str::odometer},
+    {hmi_apis::FunctionID::VehicleInfo_GetBeltStatus, str::belt_status},
+    {hmi_apis::FunctionID::VehicleInfo_GetBodyInformation,
+     str::body_information},
+    {hmi_apis::FunctionID::VehicleInfo_GetDeviceStatus, str::device_status},
+    {hmi_apis::FunctionID::VehicleInfo_GetDriverBraking, str::driver_braking},
+    {hmi_apis::FunctionID::VehicleInfo_GetWiperStatus, str::wiper_status},
+    {hmi_apis::FunctionID::VehicleInfo_GetHeadLampStatus,
+     str::head_lamp_status},
+    {hmi_apis::FunctionID::VehicleInfo_GetEngineTorque, str::engine_torque},
+    {hmi_apis::FunctionID::VehicleInfo_GetAccPedalPosition, str::acc_pedal_pos},
+    {hmi_apis::FunctionID::VehicleInfo_GetSteeringWheelAngle,
+     str::steering_wheel_angle},
+    {hmi_apis::FunctionID::VehicleInfo_GetECallInfo, str::e_call_info},
+    {hmi_apis::FunctionID::VehicleInfo_GetAirbagStatus, str::airbag_status},
+    {hmi_apis::FunctionID::VehicleInfo_GetEmergencyEvent, str::emergency_event},
+    {hmi_apis::FunctionID::VehicleInfo_GetClusterModeStatus,
+     str::cluster_mode_status},
+    {hmi_apis::FunctionID::VehicleInfo_GetMyKey, str::my_key},
+};
 }
 
 void GetVehicleDataRequest::SendRequestsToHmi(const int32_t app_id) {
@@ -121,8 +126,8 @@ void GetVehicleDataRequest::SendRequestsToHmi(const int32_t app_id) {
 
   for (size_t i = 0; i < sizeof(subrequests) / sizeof(subrequests[0]); ++i) {
     const Subrequest& sr = subrequests[i];
-    if (true == (*message_)[str::msg_params].keyExists(sr.str)
-        && true == (*message_)[str::msg_params][sr.str].asBool()) {
+    if (true == (*message_)[str::msg_params].keyExists(sr.str) &&
+        true == (*message_)[str::msg_params][sr.str].asBool()) {
       HmiRequest hmi_request;
       hmi_request.str = sr.str;
       hmi_request.func_id = sr.func_id;
@@ -135,7 +140,8 @@ void GetVehicleDataRequest::SendRequestsToHmi(const int32_t app_id) {
                hmi_requests_.size() << " requests are going to be sent to HMI");
 
   for (HmiRequests::const_iterator it = hmi_requests_.begin();
-      it != hmi_requests_.end(); ++it) {
+       it != hmi_requests_.end();
+       ++it) {
     SendHMIRequest(it->func_id, &msg_params, true);
   }
 }
@@ -150,9 +156,8 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
        ++it) {
     HmiRequest& hmi_request = *it;
     if (hmi_request.func_id == event.id()) {
-      hmi_request.status =
-          static_cast<hmi_apis::Common_Result::eType>(message[strings::params][hmi_response::code]
-              .asInt());
+      hmi_request.status = static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
       if (hmi_apis::Common_Result::SUCCESS == hmi_request.status)
         hmi_request.value = message[str::msg_params][hmi_request.str];
       hmi_request.complete = true;
@@ -206,16 +211,17 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
   }
 }
 #else
-GetVehicleDataRequest::GetVehicleDataRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandRequestImpl(message, application_manager) {
-}
+GetVehicleDataRequest::GetVehicleDataRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
 GetVehicleDataRequest::~GetVehicleDataRequest() {}
 
 void GetVehicleDataRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  int32_t app_id = (*message_)[strings::params][strings::connection_key].asUInt();
+  int32_t app_id =
+      (*message_)[strings::params][strings::connection_key].asUInt();
   ApplicationSharedPtr app = application_manager_.application(app_id);
 
   if (!app) {
@@ -290,8 +296,8 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-#endif // #ifdef HMI_DBUS_API
+#endif  // #ifdef HMI_DBUS_API
 
-} // namespace commands
+}  // namespace commands
 
-} // namespace application_manager
+}  // namespace application_manager

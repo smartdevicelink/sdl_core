@@ -35,12 +35,11 @@ namespace application_manager {
 
 namespace commands {
 
-VIIsReadyResponse::VIIsReadyResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+VIIsReadyResponse::VIIsReadyResponse(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-VIIsReadyResponse::~VIIsReadyResponse() {
-}
+VIIsReadyResponse::~VIIsReadyResponse() {}
 
 void VIIsReadyResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -51,8 +50,7 @@ void VIIsReadyResponse::Run() {
     is_available = object[strings::msg_params][strings::available].asBool();
   }
 
-  HMICapabilities& hmi_capabilities =
-      application_manager_.hmi_capabilities();
+  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
   hmi_capabilities.set_is_ivi_cooperating(is_available);
 
   application_manager_.GetPolicyHandler().OnVIIsReady();

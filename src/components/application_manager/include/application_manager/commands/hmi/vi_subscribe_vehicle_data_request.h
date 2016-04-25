@@ -49,7 +49,8 @@ class VISubscribeVehicleDataRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  VISubscribeVehicleDataRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  VISubscribeVehicleDataRequest(const MessageSharedPtr& message,
+                                ApplicationManager& application_manager);
 
   /**
    * @brief VISubscribeVehicleDataRequest class destructor

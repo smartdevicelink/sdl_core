@@ -38,11 +38,9 @@ namespace commands {
 
 TTSGetSupportedLanguagesRequest::TTSGetSupportedLanguagesRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : RequestToHMI(message, application_manager) {
-}
+    : RequestToHMI(message, application_manager) {}
 
-TTSGetSupportedLanguagesRequest::~TTSGetSupportedLanguagesRequest() {
-}
+TTSGetSupportedLanguagesRequest::~TTSGetSupportedLanguagesRequest() {}
 
 void TTSGetSupportedLanguagesRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,4 +51,3 @@ void TTSGetSupportedLanguagesRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

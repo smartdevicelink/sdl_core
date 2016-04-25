@@ -51,7 +51,8 @@ class OnButtonSubscriptionNotification : public NotificationToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnButtonSubscriptionNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnButtonSubscriptionNotification(const MessageSharedPtr& message,
+                                   ApplicationManager& application_manager);
 
   /**
    * @brief OnButtonSubscriptionNotification class destructor

@@ -44,12 +44,14 @@ namespace application_manager {
 
 namespace commands {
 
-SetAppIconRequest::SetAppIconRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
+SetAppIconRequest::SetAppIconRequest(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
-    , is_icons_saving_enabled_(false){
-    const std::string path = application_manager_.get_settings().app_icons_folder();
-    is_icons_saving_enabled_ = file_system::IsWritingAllowed(path) &&
-                               file_system::IsReadingAllowed(path);
+    , is_icons_saving_enabled_(false) {
+  const std::string path =
+      application_manager_.get_settings().app_icons_folder();
+  is_icons_saving_enabled_ = file_system::IsWritingAllowed(path) &&
+                             file_system::IsReadingAllowed(path);
 }
 
 SetAppIconRequest::~SetAppIconRequest() {}
@@ -57,8 +59,7 @@ SetAppIconRequest::~SetAppIconRequest() {}
 void SetAppIconRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app =
-      application_manager_.application(connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
@@ -111,7 +112,9 @@ void SetAppIconRequest::Run() {
 
 void SetAppIconRequest::CopyToIconStorage(
     const std::string& path_to_file) const {
-  if (!application_manager_.protocol_handler().get_settings().enable_protocol_4()) {
+  if (!application_manager_.protocol_handler()
+           .get_settings()
+           .enable_protocol_4()) {
     LOG4CXX_WARN(logger_,
                  "Icon copying skipped, since protocol ver. 4 is not enabled.");
     return;
@@ -133,9 +136,8 @@ void SetAppIconRequest::CopyToIconStorage(
     LOG4CXX_ERROR(logger_,
                   "Icon size (" << file_size << ") is bigger, than "
                                                 " icons storage maximum size ("
-                                << storage_max_size
-                                << ")."
-                                   "Copying skipped.");
+                                << storage_max_size << ")."
+                                                       "Copying skipped.");
     return;
   }
 
@@ -236,11 +238,10 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
           static_cast<mobile_apis::Result::eType>(
               message[strings::params][hmi_response::code].asInt());
 
-     const bool result =
-         Compare<mobile_api::Result::eType, EQ, ONE>(
-           result_code,
-           mobile_api::Result::SUCCESS,
-           mobile_api::Result::WARNINGS);
+      const bool result = Compare<mobile_api::Result::eType, EQ, ONE>(
+          result_code,
+          mobile_api::Result::SUCCESS,
+          mobile_api::Result::WARNINGS);
 
       if (result) {
         ApplicationSharedPtr app =
@@ -251,9 +252,9 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
           return;
         }
 
-        const std::string& path = (*message_)[strings::msg_params]
-                                              [strings::sync_file_name]
-                                               [strings::value].asString();
+        const std::string& path =
+            (*message_)[strings::msg_params][strings::sync_file_name]
+                       [strings::value].asString();
         app->set_app_icon_path(path);
 
         LOG4CXX_INFO(logger_,

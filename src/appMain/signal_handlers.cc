@@ -37,5 +37,4 @@
 namespace main_namespace {
 CREATE_LOGGERPTR_GLOBAL(logger_, "SDLMain")
 
-
-} // namespace main_namespace
+}  // namespace main_namespace

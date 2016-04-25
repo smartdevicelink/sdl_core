@@ -39,12 +39,11 @@ namespace application_manager {
 
 namespace commands {
 
-OnCommandNotification::OnCommandNotification(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandNotificationImpl(message, application_manager) {
-}
+OnCommandNotification::OnCommandNotification(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandNotificationImpl(message, application_manager) {}
 
-OnCommandNotification::~OnCommandNotification() {
-}
+OnCommandNotification::~OnCommandNotification() {}
 
 void OnCommandNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -57,12 +56,11 @@ void OnCommandNotification::Run() {
     return;
   }
 
-  const uint32_t cmd_id = (*message_)[strings::msg_params][strings::cmd_id]
-      .asUInt();
+  const uint32_t cmd_id =
+      (*message_)[strings::msg_params][strings::cmd_id].asUInt();
 
   if (!app->FindCommand(cmd_id)) {
-    LOG4CXX_ERROR(logger_,
-                      " No applications found for the command " << cmd_id);
+    LOG4CXX_ERROR(logger_, " No applications found for the command " << cmd_id);
     return;
   }
 

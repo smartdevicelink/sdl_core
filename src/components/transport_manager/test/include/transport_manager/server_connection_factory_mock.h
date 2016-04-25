@@ -40,14 +40,16 @@ namespace test {
 namespace components {
 namespace transport_manager_test {
 
-class MockServerConnectionFactory : public ::transport_manager::transport_adapter::ServerConnectionFactory {
+class MockServerConnectionFactory
+    : public ::transport_manager::transport_adapter::ServerConnectionFactory {
  public:
-  MOCK_METHOD0(Init, ::transport_manager::transport_adapter::TransportAdapter::Error());
+  MOCK_METHOD0(
+      Init, ::transport_manager::transport_adapter::TransportAdapter::Error());
   MOCK_METHOD0(Terminate, void());
   MOCK_CONST_METHOD0(IsInitialised, bool());
   MOCK_METHOD2(CreateConnection,
-               ::transport_manager::transport_adapter::TransportAdapter::Error(const std::string&,
-                                       const int& app_handle));
+               ::transport_manager::transport_adapter::TransportAdapter::Error(
+                   const std::string&, const int& app_handle));
 };
 
 }  // namespace transport_manager_test

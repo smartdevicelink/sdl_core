@@ -32,17 +32,15 @@
 
 #include "application_manager/commands/hmi/sdl_activate_app_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 SDLActivateAppResponse::SDLActivateAppResponse(
-  const MessageSharedPtr& message, ApplicationManager& application_manager): ResponseToHMI(message, application_manager) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseToHMI(message, application_manager) {}
 
-SDLActivateAppResponse::~SDLActivateAppResponse() {
-}
+SDLActivateAppResponse::~SDLActivateAppResponse() {}
 
 void SDLActivateAppResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -54,5 +52,3 @@ void SDLActivateAppResponse::Run() {
 
 }  // namespace commands
 }  // namespace application_manager
-
-

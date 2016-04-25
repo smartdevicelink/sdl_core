@@ -48,35 +48,50 @@ namespace am = application_manager;
 class MockStateController : public am::StateController {
  public:
   MOCK_METHOD3(SetRegularState,
-      void(am::ApplicationSharedPtr app, am::HmiStatePtr state, const bool SendActivateApp));
+               void(am::ApplicationSharedPtr app,
+                    am::HmiStatePtr state,
+                    const bool SendActivateApp));
   MOCK_METHOD4(SetRegularState,
-      void(am::ApplicationSharedPtr app, const mobile_apis::HMILevel::eType hmi_level, const mobile_apis::AudioStreamingState::eType audio_state, const bool SendActivateApp));
+               void(am::ApplicationSharedPtr app,
+                    const mobile_apis::HMILevel::eType hmi_level,
+                    const mobile_apis::AudioStreamingState::eType audio_state,
+                    const bool SendActivateApp));
   MOCK_METHOD3(SetRegularState,
-      void(am::ApplicationSharedPtr app, const mobile_apis::HMILevel::eType hmi_level, const bool SendActivateApp));
+               void(am::ApplicationSharedPtr app,
+                    const mobile_apis::HMILevel::eType hmi_level,
+                    const bool SendActivateApp));
   MOCK_METHOD5(SetRegularState,
-      void(am::ApplicationSharedPtr app, const mobile_apis::HMILevel::eType hmi_level, const mobile_apis::AudioStreamingState::eType audio_state, const mobile_apis::SystemContext::eType system_context, const bool SendActivateApp));
+               void(am::ApplicationSharedPtr app,
+                    const mobile_apis::HMILevel::eType hmi_level,
+                    const mobile_apis::AudioStreamingState::eType audio_state,
+                    const mobile_apis::SystemContext::eType system_context,
+                    const bool SendActivateApp));
   MOCK_METHOD2(SetRegularState,
-      void(am::ApplicationSharedPtr app, const mobile_apis::HMILevel::eType hmi_level));
+               void(am::ApplicationSharedPtr app,
+                    const mobile_apis::HMILevel::eType hmi_level));
   MOCK_METHOD2(SetRegularState,
-      void(am::ApplicationSharedPtr app, const mobile_apis::AudioStreamingState::eType audio_state));
+               void(am::ApplicationSharedPtr app,
+                    const mobile_apis::AudioStreamingState::eType audio_state));
   MOCK_METHOD2(SetRegularState,
-      void(am::ApplicationSharedPtr app, const mobile_apis::SystemContext::eType system_context));
+               void(am::ApplicationSharedPtr app,
+                    const mobile_apis::SystemContext::eType system_context));
   MOCK_METHOD2(SetRegularState,
-      void(am::ApplicationSharedPtr app, am::HmiStatePtr state));
+               void(am::ApplicationSharedPtr app, am::HmiStatePtr state));
   MOCK_METHOD2(OnApplicationRegistered,
-      void(am::ApplicationSharedPtr app, const mobile_apis::HMILevel::eType default_level));
+               void(am::ApplicationSharedPtr app,
+                    const mobile_apis::HMILevel::eType default_level));
   MOCK_METHOD3(SendBCActivateApp,
-      int64_t(am::ApplicationConstSharedPtr app, hmi_apis::Common_HMILevel::eType level, bool send_policy_priority));
-  MOCK_METHOD0(OnNaviStreamingStarted,
-      void());
-  MOCK_METHOD0(OnNaviStreamingStopped,
-      void());
+               int64_t(am::ApplicationConstSharedPtr app,
+                       hmi_apis::Common_HMILevel::eType level,
+                       bool send_policy_priority));
+  MOCK_METHOD0(OnNaviStreamingStarted, void());
+  MOCK_METHOD0(OnNaviStreamingStopped, void());
   MOCK_METHOD3(OnStateChanged,
-      void(am::ApplicationSharedPtr app, am::HmiStatePtr old_state, am::HmiStatePtr new_state));
-  MOCK_CONST_METHOD1(IsStateActive,
-      bool(am::HmiState::StateID state_id));
+               void(am::ApplicationSharedPtr app,
+                    am::HmiStatePtr old_state,
+                    am::HmiStatePtr new_state));
+  MOCK_CONST_METHOD1(IsStateActive, bool(am::HmiState::StateID state_id));
 };
-
 
 }  // namespace application_manager_test
 }  // namespace components

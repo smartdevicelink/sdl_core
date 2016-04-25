@@ -51,7 +51,8 @@ class DialNumberResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  DialNumberResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  DialNumberResponse(const MessageSharedPtr& message,
+                     ApplicationManager& application_manager);
 
   /**
    * @brief DialNumberResponse class destructor

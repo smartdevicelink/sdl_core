@@ -62,13 +62,16 @@ using namespace application_manager;
 
 class HMICapabilitiesTest : public ::testing::Test {
  protected:
-  HMICapabilitiesTest():
-     last_state_("app_storage_folder", "app_info_data")  {}
+  HMICapabilitiesTest() : last_state_("app_storage_folder", "app_info_data") {}
   virtual void SetUp() OVERRIDE {
-	ON_CALL(app_mngr_,event_dispatcher()).WillByDefault(ReturnRef(mock_event_dispatcher));
-    ON_CALL(app_mngr_, get_settings()).WillByDefault(ReturnRef(mock_application_manager_settings_));
-    ON_CALL(mock_application_manager_settings_, hmi_capabilities_file_name()).WillByDefault(ReturnRef(kFileName));
-    hmi_capabilities_test = utils::MakeShared<HMICapabilitiesForTesting>(app_mngr_);
+    ON_CALL(app_mngr_, event_dispatcher())
+        .WillByDefault(ReturnRef(mock_event_dispatcher));
+    ON_CALL(app_mngr_, get_settings())
+        .WillByDefault(ReturnRef(mock_application_manager_settings_));
+    ON_CALL(mock_application_manager_settings_, hmi_capabilities_file_name())
+        .WillByDefault(ReturnRef(kFileName));
+    hmi_capabilities_test =
+        utils::MakeShared<HMICapabilitiesForTesting>(app_mngr_);
     hmi_capabilities_test->Init(&last_state_);
   }
 
@@ -87,8 +90,7 @@ class HMICapabilitiesTest : public ::testing::Test {
   resumption::LastState last_state_;
   MockApplicationManagerSettings mock_application_manager_settings_;
   utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities_test;
-   const std::string kFileName = "hmi_capabilities.json";
-
+  const std::string kFileName = "hmi_capabilities.json";
 };
 
 const char* const cstring_values_[] = {
@@ -163,10 +165,9 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
       .WillRepeatedly(Invoke(TestCommonLanguageFromString));
 
   if (file_system::FileExists("./app_info_data")) {
-     EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
-   }
+    EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
+  }
   EXPECT_TRUE(hmi_capabilities_test->LoadCapabilitiesFromFile());
-
 
   // Check active languages
   EXPECT_EQ(hmi_apis::Common_Language::EN_US,
@@ -425,7 +426,7 @@ TEST_F(HMICapabilitiesTest, VerifyImageType) {
 void HMICapabilitiesTest::SetCooperating() {
   smart_objects::SmartObjectSPtr test_so;
   EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(_,_)).WillRepeatedly(Return(test_so));
+              CreateModuleInfoSO(_, _)).WillRepeatedly(Return(test_so));
   EXPECT_CALL(app_mngr_, ManageHMICommand(_)).WillRepeatedly(Return(true));
 }
 
@@ -435,15 +436,14 @@ TEST_F(HMICapabilitiesTest, SetVRCooperating) {
   smart_objects::SmartObjectSPtr language(
       new smart_objects::SmartObject(smart_objects::SmartType_Map));
   EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
-              CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage,_))
+              CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetLanguage, _))
       .WillOnce(Return(language));
   EXPECT_CALL(app_mngr_, ManageHMICommand(language));
 
   smart_objects::SmartObjectSPtr support_language;
-  EXPECT_CALL(
-      *(MockMessageHelper::message_helper_mock()),
-      CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetSupportedLanguages, _))
-      .WillOnce(Return(support_language));
+  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
+              CreateModuleInfoSO(hmi_apis::FunctionID::VR_GetSupportedLanguages,
+                                 _)).WillOnce(Return(support_language));
   EXPECT_CALL(app_mngr_, ManageHMICommand(support_language));
 
   smart_objects::SmartObjectSPtr capabilities;
@@ -490,10 +490,9 @@ TEST_F(HMICapabilitiesTest, SetUICooperating) {
   EXPECT_CALL(app_mngr_, ManageHMICommand(language));
 
   smart_objects::SmartObjectSPtr support_language;
-  EXPECT_CALL(
-      *(MockMessageHelper::message_helper_mock()),
-      CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetSupportedLanguages, _))
-      .WillOnce(Return(support_language));
+  EXPECT_CALL(*(MockMessageHelper::message_helper_mock()),
+              CreateModuleInfoSO(hmi_apis::FunctionID::UI_GetSupportedLanguages,
+                                 _)).WillOnce(Return(support_language));
   EXPECT_CALL(app_mngr_, ManageHMICommand(support_language));
 
   smart_objects::SmartObjectSPtr capabilities;

@@ -82,19 +82,22 @@ class ApplicationImplTest : public ::testing::Test {
     testHmiState = CreateTestHmiState();
     EXPECT_CALL(mock_application_manager_, CreateRegularState(app_id, _, _, _))
         .WillOnce(Return(testHmiState));
-    EXPECT_CALL(mock_application_manager_, get_settings()).WillRepeatedly(ReturnRef(mock_application_manager_settings_));
-    EXPECT_CALL(mock_application_manager_settings_, app_icons_folder()).WillRepeatedly(ReturnRef(directory_name));
-    EXPECT_CALL(mock_application_manager_settings_, app_storage_folder()).WillRepeatedly(ReturnRef(directory_name));
-    EXPECT_CALL(mock_application_manager_settings_, audio_data_stopped_timeout()).WillOnce(Return(0));
-    EXPECT_CALL(mock_application_manager_settings_, video_data_stopped_timeout()).WillOnce(Return(0));
+    EXPECT_CALL(mock_application_manager_, get_settings())
+        .WillRepeatedly(ReturnRef(mock_application_manager_settings_));
+    EXPECT_CALL(mock_application_manager_settings_, app_icons_folder())
+        .WillRepeatedly(ReturnRef(directory_name));
+    EXPECT_CALL(mock_application_manager_settings_, app_storage_folder())
+        .WillRepeatedly(ReturnRef(directory_name));
+    EXPECT_CALL(mock_application_manager_settings_,
+                audio_data_stopped_timeout()).WillOnce(Return(0));
+    EXPECT_CALL(mock_application_manager_settings_,
+                video_data_stopped_timeout()).WillOnce(Return(0));
     app_impl = new ApplicationImpl(app_id,
                                    policy_app_id,
                                    mac_address,
                                    app_name,
                                    utils::MakeShared<MockStatisticsManager>(),
                                    mock_application_manager_);
-
-
   }
   void TearDown() OVERRIDE {
     delete app_impl;
@@ -120,7 +123,6 @@ class ApplicationImplTest : public ::testing::Test {
   AudioStreamingState::eType audiostate;
   SystemContext::eType syst_context;
 };
-
 
 HmiStatePtr ApplicationImplTest::CreateTestHmiState() {
   HmiStatePtr testState =
@@ -498,17 +500,22 @@ TEST_F(ApplicationImplTest, IsCommandLimitsExceeded_SetLimitFromConfig) {
 
 TEST_F(ApplicationImplTest, IsCommandLimitsExceeded_LimitFromPT) {
   policy_test::MockPolicyHandlerInterface policy_interface;
-  EXPECT_CALL(mock_application_manager_, GetPolicyHandler()).WillRepeatedly(ReturnRef(policy_interface));
-  EXPECT_CALL(policy_interface, GetPriority(policy_app_id, _)).WillRepeatedly(Return(false));
+  EXPECT_CALL(mock_application_manager_, GetPolicyHandler())
+      .WillRepeatedly(ReturnRef(policy_interface));
+  EXPECT_CALL(policy_interface, GetPriority(policy_app_id, _))
+      .WillRepeatedly(Return(false));
 
-  EXPECT_CALL(policy_interface, GetNotificationsNumber(_)).WillOnce(Return(100u));
+  EXPECT_CALL(policy_interface, GetNotificationsNumber(_))
+      .WillOnce(Return(100u));
   EXPECT_FALSE(app_impl->IsCommandLimitsExceeded(FunctionID::ReadDIDID,
                                                  TLimitSource::POLICY_TABLE));
 
-  EXPECT_CALL(policy_interface, GetNotificationsNumber(_)).WillOnce(Return(100u));
+  EXPECT_CALL(policy_interface, GetNotificationsNumber(_))
+      .WillOnce(Return(100u));
   EXPECT_FALSE(app_impl->IsCommandLimitsExceeded(FunctionID::GetVehicleDataID,
                                                  TLimitSource::POLICY_TABLE));
-  EXPECT_CALL(policy_interface, GetNotificationsNumber(_)).WillRepeatedly(Return(0));
+  EXPECT_CALL(policy_interface, GetNotificationsNumber(_))
+      .WillRepeatedly(Return(0));
   EXPECT_TRUE(app_impl->IsCommandLimitsExceeded(FunctionID::ReadDIDID,
                                                 TLimitSource::POLICY_TABLE));
   EXPECT_TRUE(app_impl->IsCommandLimitsExceeded(FunctionID::GetVehicleDataID,

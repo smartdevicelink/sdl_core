@@ -40,18 +40,16 @@ namespace application_manager {
 
 namespace commands {
 
-AddSubMenuRequest::AddSubMenuRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandRequestImpl(message, application_manager) {
-}
+AddSubMenuRequest::AddSubMenuRequest(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-AddSubMenuRequest::~AddSubMenuRequest() {
-}
+AddSubMenuRequest::~AddSubMenuRequest() {}
 
 void AddSubMenuRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = application_manager_.application(
-      connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -82,14 +80,14 @@ void AddSubMenuRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
 
   msg_params[strings::menu_id] =
       (*message_)[strings::msg_params][strings::menu_id];
   if ((*message_)[strings::msg_params].keyExists(strings::position)) {
-     msg_params[strings::menu_params][strings::position] =
-         (*message_)[strings::msg_params][strings::position];
+    msg_params[strings::menu_params][strings::position] =
+        (*message_)[strings::msg_params][strings::position];
   }
   msg_params[strings::menu_params][strings::menu_name] =
       (*message_)[strings::msg_params][strings::menu_name];
@@ -109,14 +107,13 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
           static_cast<mobile_apis::Result::eType>(
               message[strings::params][hmi_response::code].asInt());
 
-      const bool result =
-          Compare<mobile_api::Result::eType, EQ, ONE>(
-            result_code,
-            mobile_api::Result::SUCCESS,
-            mobile_api::Result::WARNINGS);
+      const bool result = Compare<mobile_api::Result::eType, EQ, ONE>(
+          result_code,
+          mobile_api::Result::SUCCESS,
+          mobile_api::Result::WARNINGS);
 
       ApplicationSharedPtr application =
-             application_manager_.application(connection_key());
+          application_manager_.application(connection_key());
 
       if (!application) {
         LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -124,10 +121,10 @@ void AddSubMenuRequest::on_event(const event_engine::Event& event) {
       }
 
       if (result) {
-        application->AddSubMenu((*message_)[strings::msg_params]
-                                   [strings::menu_id].asInt(),
-                        (*message_)[strings::msg_params]);
-       }
+        application->AddSubMenu(
+            (*message_)[strings::msg_params][strings::menu_id].asInt(),
+            (*message_)[strings::msg_params]);
+      }
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
       if (result) {
         application->UpdateHash();

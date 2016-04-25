@@ -39,15 +39,15 @@ namespace application_manager {
 namespace commands {
 
 BasicCommunicationSystemResponse::BasicCommunicationSystemResponse(
-  const MessageSharedPtr& message, ApplicationManager& application_manager): ResponseFromHMI(message, application_manager) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-BasicCommunicationSystemResponse::~BasicCommunicationSystemResponse() {
-}
+BasicCommunicationSystemResponse::~BasicCommunicationSystemResponse() {}
 
 void BasicCommunicationSystemResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_SystemRequest);
+  event_engine::Event event(
+      hmi_apis::FunctionID::BasicCommunication_SystemRequest);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());
 }

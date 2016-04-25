@@ -60,7 +60,8 @@ class SystemRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  SystemRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  SystemRequest(const MessageSharedPtr& message,
+                ApplicationManager& application_manager);
 
   /**
    * @brief SystemRequest class destructor
@@ -79,7 +80,7 @@ class SystemRequest : public CommandRequestImpl {
    */
   virtual void on_event(const event_engine::Event& event);
 
-private:
+ private:
   /**
    * @brief Validates data coming within QueryApps response
    * @param data Data
@@ -89,7 +90,7 @@ private:
 
  private:
   static uint32_t index;
-  std::string     processing_file_;
+  std::string processing_file_;
   DISALLOW_COPY_AND_ASSIGN(SystemRequest);
 };
 

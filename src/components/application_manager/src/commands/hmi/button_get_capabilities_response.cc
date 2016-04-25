@@ -39,11 +39,9 @@ namespace commands {
 
 ButtonGetCapabilitiesResponse::ButtonGetCapabilitiesResponse(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+    : ResponseFromHMI(message, application_manager) {}
 
-ButtonGetCapabilitiesResponse::~ButtonGetCapabilitiesResponse() {
-}
+ButtonGetCapabilitiesResponse::~ButtonGetCapabilitiesResponse() {}
 
 void ButtonGetCapabilitiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -56,8 +54,7 @@ void ButtonGetCapabilitiesResponse::Run() {
     return;
   }
 
-  HMICapabilities& hmi_capabilities =
-      application_manager_.hmi_capabilities();
+  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
 
   hmi_capabilities.set_button_capabilities(
       (*message_)[strings::msg_params][hmi_response::capabilities]);

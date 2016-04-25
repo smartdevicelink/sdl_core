@@ -49,7 +49,8 @@ class VIReadDIDResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  VIReadDIDResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  VIReadDIDResponse(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief VIReadDIDResponse class destructor

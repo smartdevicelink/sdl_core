@@ -34,7 +34,6 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_SYSTEM_REQUEST_NOTIFICATION_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_SYSTEM_REQUEST_NOTIFICATION_H_
 
-
 #include "application_manager/commands/command_notification_impl.h"
 
 namespace application_manager {
@@ -53,7 +52,8 @@ class OnSystemRequestNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  OnSystemRequestNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnSystemRequestNotification(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief OnSystemRequestNotification class destructor
@@ -64,7 +64,8 @@ class OnSystemRequestNotification : public CommandNotificationImpl {
    * @brief Execute command
    **/
   virtual void Run();
-  private:
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(OnSystemRequestNotification);
 };
 

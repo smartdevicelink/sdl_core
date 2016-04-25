@@ -50,7 +50,8 @@ class OnVIHeadLampStatusNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnVIHeadLampStatusNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnVIHeadLampStatusNotification(const MessageSharedPtr& message,
+                                 ApplicationManager& application_manager);
 
   /**
    * @brief OnVIHeadLampStatusNotification class destructor

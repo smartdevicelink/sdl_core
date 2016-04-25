@@ -37,12 +37,11 @@ namespace application_manager {
 
 namespace commands {
 
-UISetAppIconResponse::UISetAppIconResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+UISetAppIconResponse::UISetAppIconResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-UISetAppIconResponse::~UISetAppIconResponse() {
-}
+UISetAppIconResponse::~UISetAppIconResponse() {}
 
 void UISetAppIconResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

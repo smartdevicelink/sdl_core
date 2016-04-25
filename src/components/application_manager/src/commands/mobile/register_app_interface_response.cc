@@ -61,13 +61,14 @@ void RegisterAppInterfaceResponse::Run() {
 
   SendResponse(success, result_code, last_message);
 
-  if (mobile_apis::Result::SUCCESS != result_code) { return; }
+  if (mobile_apis::Result::SUCCESS != result_code) {
+    return;
+  }
 
   // Add registered application to the policy db right after response sent to
   // mobile to be able to check all other API according to app permissions
   application_manager::ApplicationSharedPtr application =
-      application_manager_.application(
-          connection_key());
+      application_manager_.application(connection_key());
   if (!application) {
     LOG4CXX_ERROR(logger_,
                   "Application with connection key " << connection_key()
@@ -83,7 +84,8 @@ void RegisterAppInterfaceResponse::Run() {
 
   // Sends OnPermissionChange notification to mobile right after RAI response
   // and HMI level set-up
-  application_manager_.GetPolicyHandler().OnAppRegisteredOnMobile(application->policy_app_id());
+  application_manager_.GetPolicyHandler().OnAppRegisteredOnMobile(
+      application->policy_app_id());
 }
 
 void RegisterAppInterfaceResponse::SetHeartBeatTimeout(
@@ -94,8 +96,8 @@ void RegisterAppInterfaceResponse::SetHeartBeatTimeout(
   if (policy_handler.PolicyEnabled()) {
     const uint32_t timeout = policy_handler.HeartBeatTimeout(mobile_app_id);
     if (timeout > 0) {
-      application_manager_.connection_handler()
-          .SetHeartBeatTimeout(connection_key, timeout);
+      application_manager_.connection_handler().SetHeartBeatTimeout(
+          connection_key, timeout);
     }
   } else {
     LOG4CXX_INFO(logger_, "Policy is turn off");

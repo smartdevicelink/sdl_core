@@ -43,7 +43,7 @@ namespace commands {
  * @brief SubsribeWayPointsRequest command class
  **/
 class SubscribeWayPointsRequest : public CommandRequestImpl {
-public:
+ public:
   /**
    * \brief SubscribeWayPointsRequest class constructor
    **/
@@ -65,12 +65,13 @@ public:
    * @param event The received event
    */
   virtual void on_event(const event_engine::Event& event);
-private:
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(SubscribeWayPointsRequest);
 };
 
-} // commands
+}  // commands
 
-} // application_manager
+}  // application_manager
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SUBSCRIBE_WAY_POINTS_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SUBSCRIBE_WAY_POINTS_REQUEST_H_

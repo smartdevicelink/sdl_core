@@ -31,17 +31,15 @@
  */
 #include "application_manager/commands/hmi/vr_is_ready_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
-VRIsReadyResponse::VRIsReadyResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+VRIsReadyResponse::VRIsReadyResponse(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-VRIsReadyResponse::~VRIsReadyResponse() {
-}
+VRIsReadyResponse::~VRIsReadyResponse() {}
 
 void VRIsReadyResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,8 +50,7 @@ void VRIsReadyResponse::Run() {
     is_available = object[strings::msg_params][strings::available].asBool();
   }
 
-  HMICapabilities& hmi_capabilities =
-      application_manager_.hmi_capabilities();
+  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
   hmi_capabilities.set_is_vr_cooperating(is_available);
 }
 

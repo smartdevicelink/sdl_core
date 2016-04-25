@@ -51,7 +51,8 @@ class DeleteCommandResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  DeleteCommandResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  DeleteCommandResponse(const MessageSharedPtr& message,
+                        ApplicationManager& application_manager);
 
   /**
    * @brief DeleteCommandResponse class destructor

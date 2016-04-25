@@ -52,7 +52,8 @@ class PutFileRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  PutFileRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  PutFileRequest(const MessageSharedPtr& message,
+                 ApplicationManager& application_manager);
 
   /**
    * @brief PutFileRequest class destructor
@@ -65,13 +66,13 @@ class PutFileRequest : public CommandRequestImpl {
   virtual void Run();
 
  private:
-    int64_t                     offset_;
-    std::string                  sync_file_name_;
-    int64_t                     length_;
-    mobile_apis::FileType::eType file_type_;
-    bool                         is_persistent_file_;
+  int64_t offset_;
+  std::string sync_file_name_;
+  int64_t length_;
+  mobile_apis::FileType::eType file_type_;
+  bool is_persistent_file_;
 
-    void SendOnPutFileNotification();
+  void SendOnPutFileNotification();
   DISALLOW_COPY_AND_ASSIGN(PutFileRequest);
 };
 

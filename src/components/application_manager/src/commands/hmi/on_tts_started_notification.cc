@@ -32,18 +32,15 @@
 
 #include "application_manager/commands/hmi/on_tts_started_notification.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 OnTTSStartedNotification::OnTTSStartedNotification(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : NotificationFromHMI(message, application_manager) {
-}
+    : NotificationFromHMI(message, application_manager) {}
 
-OnTTSStartedNotification::~OnTTSStartedNotification() {
-}
+OnTTSStartedNotification::~OnTTSStartedNotification() {}
 
 void OnTTSStartedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -55,4 +52,3 @@ void OnTTSStartedNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

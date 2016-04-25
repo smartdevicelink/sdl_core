@@ -32,17 +32,15 @@
 
 #include "application_manager/commands/mobile/dial_number_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
-DialNumberResponse::DialNumberResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+DialNumberResponse::DialNumberResponse(const MessageSharedPtr& message,
+                                       ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-DialNumberResponse::~DialNumberResponse() {
-}
+DialNumberResponse::~DialNumberResponse() {}
 
 void DialNumberResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

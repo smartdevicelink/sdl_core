@@ -119,7 +119,6 @@ ApplicationImpl::ApplicationImpl(
           new ::timer::TimerTaskImpl<ApplicationImpl>(
               this, &ApplicationImpl::OnAudioStreamSuspend))
     , application_manager_(application_manager) {
-
   cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] = {
       date_time::DateTime::getCurrentTime(), 0};
   cmd_number_to_time_limits_[mobile_apis::FunctionID::GetVehicleDataID] = {
@@ -134,15 +133,16 @@ ApplicationImpl::ApplicationImpl(
   // load persistent files
   LoadPersistentFiles();
   HmiStatePtr initial_state = application_manager_.CreateRegularState(
-          app_id(),
-          mobile_apis::HMILevel::INVALID_ENUM,
-          mobile_apis::AudioStreamingState::INVALID_ENUM,
-          mobile_api::SystemContext::SYSCTXT_MAIN);
+      app_id(),
+      mobile_apis::HMILevel::INVALID_ENUM,
+      mobile_apis::AudioStreamingState::INVALID_ENUM,
+      mobile_api::SystemContext::SYSCTXT_MAIN);
   state_.InitState(initial_state);
 
-  video_stream_suspend_timeout_ = application_manager_.get_settings().video_data_stopped_timeout();
+  video_stream_suspend_timeout_ =
+      application_manager_.get_settings().video_data_stopped_timeout();
   audio_stream_suspend_timeout_ =
-       application_manager_.get_settings().audio_data_stopped_timeout();
+      application_manager_.get_settings().audio_data_stopped_timeout();
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -268,8 +268,7 @@ const custom_str::CustomString& ApplicationImpl::name() const {
   return app_name_;
 }
 
-void ApplicationImpl::set_folder_name(
-    const std::string& folder_name) {
+void ApplicationImpl::set_folder_name(const std::string& folder_name) {
   folder_name_ = folder_name;
 }
 
@@ -433,8 +432,7 @@ void ApplicationImpl::StopStreaming(
 
   SuspendStreaming(service_type);
 
-  if (service_type == ServiceType::kMobileNav &&
-      video_streaming_approved()) {
+  if (service_type == ServiceType::kMobileNav && video_streaming_approved()) {
     StopNaviStreaming();
   } else if (service_type == ServiceType::kAudio &&
              audio_streaming_approved()) {
@@ -451,7 +449,7 @@ void ApplicationImpl::StopNaviStreaming() {
 }
 
 void ApplicationImpl::StopAudioStreaming() {
-  LOG4CXX_AUTO_TRACE(logger_);    
+  LOG4CXX_AUTO_TRACE(logger_);
   audio_stream_suspend_timer_.Stop();
   MessageHelper::SendAudioStopStream(app_id(), application_manager_);
   set_audio_streaming_approved(false);
@@ -465,14 +463,12 @@ void ApplicationImpl::SuspendStreaming(
 
   if (ServiceType::kMobileNav == service_type) {
     video_stream_suspend_timer_.Stop();
-    application_manager_.OnAppStreaming(
-        app_id(), service_type, false);
+    application_manager_.OnAppStreaming(app_id(), service_type, false);
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
     video_streaming_suspended_ = true;
   } else if (ServiceType::kAudio == service_type) {
     audio_stream_suspend_timer_.Stop();
-    application_manager_.OnAppStreaming(
-        app_id(), service_type, false);
+    application_manager_.OnAppStreaming(app_id(), service_type, false);
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     audio_streaming_suspended_ = true;
   }
@@ -487,18 +483,18 @@ void ApplicationImpl::WakeUpStreaming(
   if (ServiceType::kMobileNav == service_type) {
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
     if (video_streaming_suspended_) {
-      application_manager_.OnAppStreaming(
-          app_id(), service_type, true);
-      MessageHelper::SendOnDataStreaming(ServiceType::kMobileNav, true, application_manager_);
+      application_manager_.OnAppStreaming(app_id(), service_type, true);
+      MessageHelper::SendOnDataStreaming(
+          ServiceType::kMobileNav, true, application_manager_);
       video_streaming_suspended_ = false;
     }
     video_stream_suspend_timer_.Start(video_stream_suspend_timeout_, false);
   } else if (ServiceType::kAudio == service_type) {
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     if (audio_streaming_suspended_) {
-      application_manager_.OnAppStreaming(
-          app_id(), service_type, true);
-      MessageHelper::SendOnDataStreaming(ServiceType::kAudio, true, application_manager_);
+      application_manager_.OnAppStreaming(app_id(), service_type, true);
+      MessageHelper::SendOnDataStreaming(
+          ServiceType::kAudio, true, application_manager_);
       audio_streaming_suspended_ = false;
     }
     audio_stream_suspend_timer_.Start(audio_stream_suspend_timeout_, false);
@@ -713,11 +709,11 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
 
       if (mobile_apis::FunctionID::ReadDIDID == cmd_id) {
         frequency_restrictions =
-             application_manager_.get_settings().read_did_frequency();
+            application_manager_.get_settings().read_did_frequency();
 
       } else if (mobile_apis::FunctionID::GetVehicleDataID == cmd_id) {
         frequency_restrictions =
-             application_manager_.get_settings().get_vehicle_data_frequency();
+            application_manager_.get_settings().get_vehicle_data_frequency();
       } else {
         LOG4CXX_INFO(logger_, "No restrictions for request");
         return false;
@@ -725,18 +721,12 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
 
       LOG4CXX_INFO(logger_,
                    "Time Info: "
-                       << "\n Current: "
-                       << current.tv_sec
-                       << "\n Limit: ("
-                       << limit.first.tv_sec
-                       << ","
-                       << limit.second
+                       << "\n Current: " << current.tv_sec << "\n Limit: ("
+                       << limit.first.tv_sec << "," << limit.second
                        << ")"
                           "\n frequency_restrictions: ("
-                       << frequency_restrictions.first
-                       << ","
-                       << frequency_restrictions.second
-                       << ")");
+                       << frequency_restrictions.first << ","
+                       << frequency_restrictions.second << ")");
       if (current.tv_sec < limit.first.tv_sec + frequency_restrictions.second) {
         if (limit.second < frequency_restrictions.first) {
           ++limit.second;
@@ -822,7 +812,8 @@ void ApplicationImpl::set_is_application_data_changed(
 
 void ApplicationImpl::UpdateHash() {
   LOG4CXX_AUTO_TRACE(logger_);
-  hash_val_ = utils::gen_hash( application_manager_.get_settings().hash_string_size());
+  hash_val_ =
+      utils::gen_hash(application_manager_.get_settings().hash_string_size());
   set_is_application_data_changed(true);
 
   MessageHelper::SendHashUpdateNotification(app_id(), application_manager_);
@@ -830,7 +821,7 @@ void ApplicationImpl::UpdateHash() {
 
 void ApplicationImpl::CleanupFiles() {
   std::string directory_name =
-       application_manager_.get_settings().app_storage_folder();
+      application_manager_.get_settings().app_storage_folder();
   directory_name += "/" + folder_name();
 
   if (file_system::DirectoryExists(directory_name)) {
@@ -860,7 +851,7 @@ void ApplicationImpl::LoadPersistentFiles() {
 
   if (kWaitingForRegistration == app_state_) {
     const std::string app_icon_dir(
-          application_manager_.get_settings().app_icons_folder());
+        application_manager_.get_settings().app_icons_folder());
     const std::string full_icon_path(app_icon_dir + "/" + mobile_app_id_);
     if (file_system::FileExists(full_icon_path)) {
       AppFile file;
@@ -898,18 +889,18 @@ void ApplicationImpl::LoadPersistentFiles() {
       }
 
       LOG4CXX_INFO(logger_,
-                   "Loaded persistent file " << file.file_name
-                                             << " File type is "
-                                             << file.file_type);
+                   "Loaded persistent file "
+                       << file.file_name << " File type is " << file.file_type);
       AddFile(file);
     }
   }
 }
 
 uint32_t ApplicationImpl::GetAvailableDiskSpace() {
-  const uint32_t app_quota =  application_manager_.get_settings().app_dir_quota();
+  const uint32_t app_quota =
+      application_manager_.get_settings().app_dir_quota();
   std::string app_storage_path =
-       application_manager_.get_settings().app_storage_folder();
+      application_manager_.get_settings().app_storage_folder();
 
   app_storage_path += "/";
   app_storage_path += folder_name();

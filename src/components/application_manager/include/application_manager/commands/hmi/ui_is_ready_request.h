@@ -49,7 +49,8 @@ class UIIsReadyRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  UIIsReadyRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  UIIsReadyRequest(const MessageSharedPtr& message,
+                   ApplicationManager& application_manager);
 
   /**
    * @brief UIIsReadyRequest class destructor

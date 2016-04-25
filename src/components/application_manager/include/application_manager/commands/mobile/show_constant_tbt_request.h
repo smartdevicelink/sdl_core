@@ -52,7 +52,8 @@ class ShowConstantTBTRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  ShowConstantTBTRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  ShowConstantTBTRequest(const MessageSharedPtr& message,
+                         ApplicationManager& application_manager);
 
   /**
    * @brief ShowConstantTBTRequest class destructor

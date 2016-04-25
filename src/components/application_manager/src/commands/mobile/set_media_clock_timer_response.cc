@@ -33,18 +33,15 @@
 
 #include "application_manager/commands/mobile/set_media_clock_timer_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 SetMediaClockTimerResponse::SetMediaClockTimerResponse(
-  const MessageSharedPtr& message, ApplicationManager& application_manager)
-  : CommandResponseImpl(message, application_manager) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-SetMediaClockTimerResponse::~SetMediaClockTimerResponse() {
-}
+SetMediaClockTimerResponse::~SetMediaClockTimerResponse() {}
 
 void SetMediaClockTimerResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

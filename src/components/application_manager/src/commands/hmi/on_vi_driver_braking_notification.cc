@@ -39,11 +39,9 @@ namespace commands {
 
 OnVIDriverBrakingNotification::OnVIDriverBrakingNotification(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : NotificationFromHMI(message, application_manager) {
-}
+    : NotificationFromHMI(message, application_manager) {}
 
-OnVIDriverBrakingNotification::~OnVIDriverBrakingNotification() {
-}
+OnVIDriverBrakingNotification::~OnVIDriverBrakingNotification() {}
 
 void OnVIDriverBrakingNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,4 +56,3 @@ void OnVIDriverBrakingNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

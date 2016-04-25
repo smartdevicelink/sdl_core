@@ -44,8 +44,7 @@ ResponseToHMI::ResponseToHMI(const MessageSharedPtr& message,
   ReplaceMobileByHMIAppId(*(message.get()));
 }
 
-ResponseToHMI::~ResponseToHMI() {
-}
+ResponseToHMI::~ResponseToHMI() {}
 
 bool ResponseToHMI::Init() {
   return true;
@@ -64,4 +63,3 @@ void ResponseToHMI::Run() {
 
 }  // namespace commands
 }  // namespace application_manager
-

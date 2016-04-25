@@ -44,15 +44,14 @@ namespace test {
 namespace components {
 namespace application_manager_test {
 
-class  MockPolicyHandlerObserver : public ::policy::PolicyHandlerObserver {
-  public:
-    MOCK_METHOD1(OnUpdateHMIAppType,
-        void(std::map<std::string, std::vector<std::string> >));
-    MOCK_METHOD1(OnCertificateUpdated,
-        bool(const std::string&));
+class MockPolicyHandlerObserver : public ::policy::PolicyHandlerObserver {
+ public:
+  MOCK_METHOD1(OnUpdateHMIAppType,
+               void(std::map<std::string, std::vector<std::string> >));
+  MOCK_METHOD1(OnCertificateUpdated, bool(const std::string&));
 };
-}   //  namespace application_manager_test
-}   //  namespace components
-}   //  namespace test
+}  //  namespace application_manager_test
+}  //  namespace components
+}  //  namespace test
 
 #endif  // SRC_COMPONENTS_INCLUDE_TEST_APPLICATION_MANAGER_POLICIES_MOCK_POLICY_HANDLER_OBSERVER_H_

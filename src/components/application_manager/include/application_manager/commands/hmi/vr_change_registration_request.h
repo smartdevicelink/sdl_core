@@ -49,7 +49,8 @@ class VRChangeRegistrationRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  VRChangeRegistrationRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  VRChangeRegistrationRequest(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief VRChangeRegistrationRequest class destructor

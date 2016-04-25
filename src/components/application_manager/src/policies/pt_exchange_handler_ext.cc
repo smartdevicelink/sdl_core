@@ -43,19 +43,16 @@ using application_manager::MessageHelper;
 using profile::Profile;
 using std::string;
 
-
 namespace policy {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 
 PTExchangeHandlerExt::PTExchangeHandlerExt(PolicyHandler* policy_handler)
-  : PTExchangeHandler(),
-    policy_handler_(policy_handler) {
+    : PTExchangeHandler(), policy_handler_(policy_handler) {
   DCHECK(policy_handler_);
 }
 
-PTExchangeHandlerExt::~PTExchangeHandlerExt() {
-}
+PTExchangeHandlerExt::~PTExchangeHandlerExt() {}
 
 void PTExchangeHandlerExt::Start() {
   LOG4CXX_TRACE(logger_, "Start exchange PT");
@@ -64,17 +61,20 @@ void PTExchangeHandlerExt::Start() {
       policy_handler_->get_settings().policies_snapshot_file_name();
   const std::string system_files_path =
       policy_handler_->get_settings().system_files_path();
-  const std::string policy_snapshot_full_path = system_files_path + '/' +
-      policy_snapshot_file_name;
+  const std::string policy_snapshot_full_path =
+      system_files_path + '/' + policy_snapshot_file_name;
   BinaryMessageSptr pt_snapshot = policy_handler_->RequestPTUpdate();
   if (pt_snapshot.valid()) {
     if (file_system::CreateDirectoryRecursively(system_files_path) &&
         file_system::WriteBinaryFile(policy_snapshot_full_path, *pt_snapshot)) {
-      MessageHelper::SendPolicyUpdate(policy_snapshot_full_path,
-                                      policy_handler_->TimeoutExchange(),
-                                      policy_handler_->RetrySequenceDelaysSeconds());
+      MessageHelper::SendPolicyUpdate(
+          policy_snapshot_full_path,
+          policy_handler_->TimeoutExchange(),
+          policy_handler_->RetrySequenceDelaysSeconds());
     } else {
-      LOG4CXX_ERROR(logger_, "Failed to write snapshot file to " << policy_snapshot_file_name);
+      LOG4CXX_ERROR(logger_,
+                    "Failed to write snapshot file to "
+                        << policy_snapshot_file_name);
     }
   } else {
     LOG4CXX_ERROR(logger_, "Failed to obtain policy table snapshot");

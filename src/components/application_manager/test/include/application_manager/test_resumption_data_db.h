@@ -45,8 +45,9 @@ namespace resumption_test {
 
 class TestResumptionDataDB : public ResumptionDataDB {
  public:
-  TestResumptionDataDB(application_manager_test::MockApplicationManagerSettings& mock_application_manager_settings)
-    : ResumptionDataDB(mock_application_manager_settings) {}
+  TestResumptionDataDB(application_manager_test::MockApplicationManagerSettings&
+                           mock_application_manager_settings)
+      : ResumptionDataDB(mock_application_manager_settings) {}
 };
 
 }  // namespace resumption_test

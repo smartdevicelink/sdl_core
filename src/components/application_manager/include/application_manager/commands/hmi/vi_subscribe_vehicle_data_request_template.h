@@ -44,7 +44,7 @@ namespace commands {
  *
  * Template class for sending 1 subscribe thin request
  **/
-template<event_engine::Event::EventID eventID>
+template <event_engine::Event::EventID eventID>
 class VISubscribeVehicleDataRequestTemplate : public RequestToHMI {
  public:
   /**
@@ -52,10 +52,9 @@ class VISubscribeVehicleDataRequestTemplate : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  VISubscribeVehicleDataRequestTemplate(
-      const MessageSharedPtr& message, ApplicationManager& application_manager)
-      : RequestToHMI(message, application_manager) {
-  }
+  VISubscribeVehicleDataRequestTemplate(const MessageSharedPtr& message,
+                                        ApplicationManager& application_manager)
+      : RequestToHMI(message, application_manager) {}
 
   /**
    * @brief Execute command with sending DBus thin request to HMI

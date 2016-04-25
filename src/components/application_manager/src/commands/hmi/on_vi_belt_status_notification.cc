@@ -39,11 +39,9 @@ namespace commands {
 
 OnVIBeltStatusNotification::OnVIBeltStatusNotification(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : NotificationFromHMI(message, application_manager) {
-}
+    : NotificationFromHMI(message, application_manager) {}
 
-OnVIBeltStatusNotification::~OnVIBeltStatusNotification() {
-}
+OnVIBeltStatusNotification::~OnVIBeltStatusNotification() {}
 
 void OnVIBeltStatusNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,4 +56,3 @@ void OnVIBeltStatusNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

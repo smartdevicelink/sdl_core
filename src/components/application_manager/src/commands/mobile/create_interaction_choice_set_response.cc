@@ -42,11 +42,9 @@ namespace commands {
 
 CreateInteractionChoiceSetResponse::CreateInteractionChoiceSetResponse(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+    : CommandResponseImpl(message, application_manager) {}
 
-CreateInteractionChoiceSetResponse::~CreateInteractionChoiceSetResponse() {
-}
+CreateInteractionChoiceSetResponse::~CreateInteractionChoiceSetResponse() {}
 
 void CreateInteractionChoiceSetResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

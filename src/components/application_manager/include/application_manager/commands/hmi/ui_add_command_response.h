@@ -49,7 +49,8 @@ class UIAddCommandResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  UIAddCommandResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  UIAddCommandResponse(const MessageSharedPtr& message,
+                       ApplicationManager& application_manager);
 
   /**
    * @brief UIAddCommandResponse class destructor

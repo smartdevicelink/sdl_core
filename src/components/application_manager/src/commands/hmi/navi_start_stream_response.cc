@@ -31,17 +31,15 @@
  */
 #include "application_manager/commands/hmi/navi_start_stream_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
-NaviStartStreamResponse::NaviStartStreamResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+NaviStartStreamResponse::NaviStartStreamResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-NaviStartStreamResponse::~NaviStartStreamResponse() {
-}
+NaviStartStreamResponse::~NaviStartStreamResponse() {}
 
 void NaviStartStreamResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

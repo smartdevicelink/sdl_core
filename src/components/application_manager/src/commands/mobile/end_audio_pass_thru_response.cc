@@ -33,18 +33,15 @@
 
 #include "application_manager/commands/mobile/end_audio_pass_thru_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 EndAudioPassThruResponse::EndAudioPassThruResponse(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+    : CommandResponseImpl(message, application_manager) {}
 
-EndAudioPassThruResponse::~EndAudioPassThruResponse() {
-}
+EndAudioPassThruResponse::~EndAudioPassThruResponse() {}
 
 void EndAudioPassThruResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -106,16 +106,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool audio_streaming_allowed() const;
   void set_audio_streaming_allowed(bool state);
 
-  void StartStreaming(
-      protocol_handler::ServiceType service_type);
-  void StopStreamingForce(
-      protocol_handler::ServiceType service_type);
-  void StopStreaming(
-      protocol_handler::ServiceType service_type);
-  void SuspendStreaming(
-      protocol_handler::ServiceType service_type);
-  void WakeUpStreaming(
-      protocol_handler::ServiceType service_type);
+  void StartStreaming(protocol_handler::ServiceType service_type);
+  void StopStreamingForce(protocol_handler::ServiceType service_type);
+  void StopStreaming(protocol_handler::ServiceType service_type);
+  void SuspendStreaming(protocol_handler::ServiceType service_type);
+  void WakeUpStreaming(protocol_handler::ServiceType service_type);
 
   virtual bool is_voice_communication_supported() const;
   virtual void set_voice_communication_supported(
@@ -193,12 +188,12 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 #ifdef CUSTOMER_PASA
   virtual bool flag_sending_hash_change_after_awake() const;
   virtual void set_flag_sending_hash_change_after_awake(bool flag);
-#endif // CUSTOMER_PASA
-  /**
-   * @brief Change Hash for current application
-   * and send notification to mobile
-   * @return updated_hash
-   */
+#endif  // CUSTOMER_PASA
+        /**
+         * @brief Change Hash for current application
+         * and send notification to mobile
+         * @return updated_hash
+         */
   virtual void UpdateHash();
 
   UsageStatistics& usage_report();
@@ -299,6 +294,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * @return free app space.
    */
   uint32_t GetAvailableDiskSpace() OVERRIDE;
+
  protected:
   /**
    * @brief Clean up application folder. Persistent files will stay

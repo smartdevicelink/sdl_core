@@ -40,12 +40,9 @@
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #endif
 
-
 #if defined(USB_SUPPORT)
 #include "transport_manager/usb/usb_aoa_adapter.h"
 #endif  // USB_SUPPORT
-
-
 
 namespace transport_manager {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
@@ -65,7 +62,8 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
 
 #ifdef BLUETOOTH_SUPPORT
   transport_adapter::TransportAdapterImpl* ta_bluetooth =
-      new transport_adapter::BluetoothTransportAdapter(last_state, get_settings());
+      new transport_adapter::BluetoothTransportAdapter(last_state,
+                                                       get_settings());
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
     ta_bluetooth->SetTelemetryObserver(metric_observer_);
@@ -75,10 +73,10 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
   ta_bluetooth = NULL;
 #endif
 
-  const uint16_t port =
-      get_settings().transport_manager_tcp_adapter_port();
+  const uint16_t port = get_settings().transport_manager_tcp_adapter_port();
   transport_adapter::TransportAdapterImpl* ta_tcp =
-      new transport_adapter::TcpTransportAdapter(port, last_state, get_settings());
+      new transport_adapter::TcpTransportAdapter(
+          port, last_state, get_settings());
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
     ta_tcp->SetTelemetryObserver(metric_observer_);
@@ -86,7 +84,6 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
 #endif  // TELEMETRY_MONITOR
   AddTransportAdapter(ta_tcp);
   ta_tcp = NULL;
-
 
 #if defined(USB_SUPPORT)
   transport_adapter::TransportAdapterImpl* ta_usb =

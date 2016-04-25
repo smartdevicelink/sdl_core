@@ -71,7 +71,9 @@ class HmiState {
   };
 
   HmiState(uint32_t app_id, const ApplicationManager& app_mngr);
-  HmiState(uint32_t app_id, const ApplicationManager& app_mngr, StateID state_id);
+  HmiState(uint32_t app_id,
+           const ApplicationManager& app_mngr,
+           StateID state_id);
 
   virtual ~HmiState() {}
 
@@ -203,7 +205,8 @@ class HmiState {
  */
 class VRHmiState : public HmiState {
  public:
-  virtual mobile_apis::AudioStreamingState::eType audio_streaming_state() const OVERRIDE;
+  virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
+      const OVERRIDE;
   VRHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
 };
 
@@ -213,7 +216,8 @@ class VRHmiState : public HmiState {
 class TTSHmiState : public HmiState {
  public:
   TTSHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
-  virtual mobile_apis::AudioStreamingState::eType audio_streaming_state() const OVERRIDE;
+  virtual mobile_apis::AudioStreamingState::eType audio_streaming_state()
+      const OVERRIDE;
 };
 
 /**
@@ -223,11 +227,13 @@ class TTSHmiState : public HmiState {
 class NaviStreamingHmiState : public HmiState {
  public:
   NaviStreamingHmiState(uint32_t app_id, const ApplicationManager& app_mngr);
-  mobile_apis::AudioStreamingState::eType audio_streaming_state() const OVERRIDE;
+  mobile_apis::AudioStreamingState::eType audio_streaming_state()
+      const OVERRIDE;
 };
 
 /**
- * @brief The PhoneCallHmiState class implements logic of PhoneCall temporary state
+ * @brief The PhoneCallHmiState class implements logic of PhoneCall temporary
+ * state
  */
 class PhoneCallHmiState : public HmiState {
  public:
@@ -281,7 +287,8 @@ class AudioSource : public HmiState {
 };
 
 /**
- * @brief The EmbeddedNavi class implements logic of OnEventChanged(EMBEDDED_NAVI)
+ * @brief The EmbeddedNavi class implements logic of
+ * OnEventChanged(EMBEDDED_NAVI)
  * temporary state
  */
 class EmbeddedNavi : public HmiState {
@@ -293,6 +300,5 @@ class EmbeddedNavi : public HmiState {
     return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
   }
 };
-
 }
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMISTATE_H

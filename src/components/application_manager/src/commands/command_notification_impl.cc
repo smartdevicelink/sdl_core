@@ -42,8 +42,7 @@ CommandNotificationImpl::CommandNotificationImpl(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandImpl(message, application_manager) {}
 
-CommandNotificationImpl::~CommandNotificationImpl() {
-}
+CommandNotificationImpl::~CommandNotificationImpl() {}
 
 bool CommandNotificationImpl::Init() {
   return true;
@@ -53,8 +52,7 @@ bool CommandNotificationImpl::CleanUp() {
   return true;
 }
 
-void CommandNotificationImpl::Run() {
-}
+void CommandNotificationImpl::Run() {}
 
 void CommandNotificationImpl::SendNotification() {
   (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;

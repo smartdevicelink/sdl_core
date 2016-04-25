@@ -43,22 +43,28 @@ namespace transport_manager_test {
 using ::testing::Return;
 TEST(TestTransportManagerDefault, Init_LastStateNotUsed) {
   MockTransportManagerSettings transport_manager_settings;
-  transport_manager::TransportManagerDefault transport_manager(transport_manager_settings);
+  transport_manager::TransportManagerDefault transport_manager(
+      transport_manager_settings);
   resumption::LastState last_state("app_storage_folder", "app_info_storage");
 
-  EXPECT_CALL(transport_manager_settings,use_last_state()).WillRepeatedly(Return(false));
-  EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port()).WillRepeatedly(Return(1u));
+  EXPECT_CALL(transport_manager_settings, use_last_state())
+      .WillRepeatedly(Return(false));
+  EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port())
+      .WillRepeatedly(Return(1u));
   transport_manager.Init(last_state);
 }
 
-//TODO(VVeremjova) APPLINK-22021
+// TODO(VVeremjova) APPLINK-22021
 TEST(TestTransportManagerDefault, DISABLED_Init_LastStateUsed) {
   MockTransportManagerSettings transport_manager_settings;
-  transport_manager::TransportManagerDefault transport_manager(transport_manager_settings);
+  transport_manager::TransportManagerDefault transport_manager(
+      transport_manager_settings);
   resumption::LastState last_state("app_storage_folder", "app_info_storage");
 
-  EXPECT_CALL(transport_manager_settings, use_last_state()).WillRepeatedly(Return(true));
-  EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port()).WillRepeatedly(Return(1u));
+  EXPECT_CALL(transport_manager_settings, use_last_state())
+      .WillRepeatedly(Return(true));
+  EXPECT_CALL(transport_manager_settings, transport_manager_tcp_adapter_port())
+      .WillRepeatedly(Return(1u));
   transport_manager.Init(last_state);
 }
 

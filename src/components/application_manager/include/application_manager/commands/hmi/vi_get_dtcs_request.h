@@ -49,7 +49,8 @@ class VIGetDTCsRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  VIGetDTCsRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  VIGetDTCsRequest(const MessageSharedPtr& message,
+                   ApplicationManager& application_manager);
 
   /**
    * @brief VIGetDTCsRequest class destructor

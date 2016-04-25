@@ -47,15 +47,15 @@ namespace commands {
 /**
  * @brief PerformInteractionRequest command class
  **/
-class PerformInteractionRequest : public CommandRequestImpl  {
-
+class PerformInteractionRequest : public CommandRequestImpl {
  public:
   /**
    * @brief PerformInteractionRequest class constructor
    *
    * @param message Incoming SmartObject message
    **/
-  PerformInteractionRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  PerformInteractionRequest(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /**
    * @brief PerformInteractionRequest class destructor
@@ -85,7 +85,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * has exceed it's limit
    *
    */
-    virtual void onTimeOut();
+  virtual void onTimeOut();
 
   /*
    * @brief Function will be called when VR_OnCommand event
@@ -94,7 +94,8 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @param message which should send to mobile side
    *
    */
-  void ProcessVRResponse(const smart_objects::SmartObject& message, smart_objects::SmartObject& msg_params);
+  void ProcessVRResponse(const smart_objects::SmartObject& message,
+                         smart_objects::SmartObject& msg_params);
 
   /*
    * @brief Sends PerformInteraction response to mobile side
@@ -102,9 +103,9 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @param message which should send to mobile side
    *
    */
-  void ProcessPerformInteractionResponse
-  (const smart_objects::SmartObject& message, smart_objects::SmartObject &msg_params);
-
+  void ProcessPerformInteractionResponse(
+      const smart_objects::SmartObject& message,
+      smart_objects::SmartObject& msg_params);
 
   /*
    * @brief Sends UI PerformInteraction request to HMI
@@ -139,7 +140,8 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * return Return TRUE if there are no similar menu names in choice set,
    * otherwise FALSE
    */
-  bool CheckChoiceSetMenuNames(application_manager::ApplicationSharedPtr const app);
+  bool CheckChoiceSetMenuNames(
+      application_manager::ApplicationSharedPtr const app);
 
   /*
    * @brief Checks if incoming choice set doesn't has similar VR synonyms.
@@ -149,7 +151,8 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * return Return TRUE if there are no similar VR synonyms in choice set,
    * otherwise FALSE
    */
-  bool CheckChoiceSetVRSynonyms(application_manager::ApplicationSharedPtr const app);
+  bool CheckChoiceSetVRSynonyms(
+      application_manager::ApplicationSharedPtr const app);
 
   /*
    * @brief Checks if request with non-sequential positions of vrHelpItems
@@ -160,7 +163,8 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @return TRUE if vrHelpItems positions are sequential,
    * otherwise FALSE
    */
-  bool CheckVrHelpItemPositions(application_manager::ApplicationSharedPtr const app);
+  bool CheckVrHelpItemPositions(
+      application_manager::ApplicationSharedPtr const app);
 
   /*
    * @brief Disable PerformInteraction state in application and
@@ -201,9 +205,10 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * same choice id returns false, otherwise returns
    * true.
    */
-  bool CheckChoiceIDFromRequest(ApplicationSharedPtr app,
-                                const size_t choice_set_id_list_length,
-                                const smart_objects::SmartObject& choice_set_id_list) const;
+  bool CheckChoiceIDFromRequest(
+      ApplicationSharedPtr app,
+      const size_t choice_set_id_list_length,
+      const smart_objects::SmartObject& choice_set_id_list) const;
 
   /**
    * @brief Tells if there are sent requests without responses
@@ -222,17 +227,17 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @brief Check UI & VR result codes, send response to mobile
    * @param msg_param Message params to send
    */
-  void SendBothModeResponse(const smart_objects::SmartObject &msg_param);
+  void SendBothModeResponse(const smart_objects::SmartObject& msg_param);
 
   mobile_apis::InteractionMode::eType interaction_mode_;
-  bool                                ui_response_recived_;
-  bool                                vr_response_recived_;
-  bool                                ui_result_;
-  bool                                vr_result_;
-  bool                                app_pi_was_active_before_;
-  static uint32_t                     pi_requests_count_;
-  mobile_apis::Result::eType          vr_resultCode_;
-  mobile_apis::Result::eType          ui_resultCode_;
+  bool ui_response_recived_;
+  bool vr_response_recived_;
+  bool ui_result_;
+  bool vr_result_;
+  bool app_pi_was_active_before_;
+  static uint32_t pi_requests_count_;
+  mobile_apis::Result::eType vr_resultCode_;
+  mobile_apis::Result::eType ui_resultCode_;
 
   DISALLOW_COPY_AND_ASSIGN(PerformInteractionRequest);
 };

@@ -34,20 +34,19 @@
 #include "application_manager/application_manager.h"
 
 namespace policy {
-  CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
+CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 
-  AppPermissionDelegate::AppPermissionDelegate(
-      const uint32_t connection_key,
-      const PermissionConsent& permissions,
-      policy::PolicyHandlerInterface& policy_handler)
-      : connection_key_(connection_key)
-      , permissions_(permissions)
-      , policy_handler_(policy_handler) {}
+AppPermissionDelegate::AppPermissionDelegate(
+    const uint32_t connection_key,
+    const PermissionConsent& permissions,
+    policy::PolicyHandlerInterface& policy_handler)
+    : connection_key_(connection_key)
+    , permissions_(permissions)
+    , policy_handler_(policy_handler) {}
 
-  void AppPermissionDelegate::threadMain() {
+void AppPermissionDelegate::threadMain() {
   LOG4CXX_AUTO_TRACE(logger_);
-  policy_handler_.OnAppPermissionConsentInternal(connection_key_,
-                                                            permissions_);
+  policy_handler_.OnAppPermissionConsentInternal(connection_key_, permissions_);
 }
 
 void AppPermissionDelegate::exitThreadMain() {

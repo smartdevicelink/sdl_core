@@ -38,12 +38,11 @@ namespace application_manager {
 
 namespace commands {
 
-CommandNotificationFromMobileImpl::CommandNotificationFromMobileImpl(const MessageSharedPtr& message, ApplicationManager &application_manager)
-    : CommandImpl(message, application_manager) {
-}
+CommandNotificationFromMobileImpl::CommandNotificationFromMobileImpl(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandImpl(message, application_manager) {}
 
-CommandNotificationFromMobileImpl::~CommandNotificationFromMobileImpl() {
-}
+CommandNotificationFromMobileImpl::~CommandNotificationFromMobileImpl() {}
 
 bool CommandNotificationFromMobileImpl::Init() {
   return true;
@@ -53,8 +52,7 @@ bool CommandNotificationFromMobileImpl::CleanUp() {
   return true;
 }
 
-void CommandNotificationFromMobileImpl::Run() {
-}
+void CommandNotificationFromMobileImpl::Run() {}
 
 void CommandNotificationFromMobileImpl::SendNotification() {
   (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;

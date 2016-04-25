@@ -51,7 +51,8 @@ class UpdateTurnListResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  UpdateTurnListResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  UpdateTurnListResponse(const MessageSharedPtr& message,
+                         ApplicationManager& application_manager);
 
   /**
    * @brief UpdateTurnListResponse class destructor

@@ -208,9 +208,10 @@ class ApplicationManagerImpl
       public impl::ToHmiQueue::Handler,
       public impl::AudioPassThruQueue::Handler
 #ifdef TELEMETRY_MONITOR
-      , public telemetry_monitor::TelemetryObservable<AMTelemetryObserver>
+      ,
+      public telemetry_monitor::TelemetryObservable<AMTelemetryObserver>
 #endif  // TELEMETRY_MONITOR
-{
+      {
 
   friend class ResumeCtrl;
   friend class CommandImpl;
@@ -669,8 +670,8 @@ class ApplicationManagerImpl
    *
    * @param binary_data AudioPassThru data chunk
    */
-  void SendAudioPassThroughNotification(uint32_t session_key,
-                                        std::vector<uint8_t>& binary_data) OVERRIDE;
+  void SendAudioPassThroughNotification(
+      uint32_t session_key, std::vector<uint8_t>& binary_data) OVERRIDE;
 
   std::string GetDeviceName(connection_handler::DeviceHandle handle);
 
@@ -708,7 +709,7 @@ class ApplicationManagerImpl
    * @param connection_key - application id of request
    * @param corr_id correlation id of request
    */
-  void TerminateRequest(uint32_t connection_key, uint32_t corr_id)OVERRIDE;
+  void TerminateRequest(uint32_t connection_key, uint32_t corr_id) OVERRIDE;
   // Overriden ProtocolObserver method
   void OnMessageReceived(
       const ::protocol_handler::RawMessagePtr message) OVERRIDE;
@@ -837,7 +838,7 @@ class ApplicationManagerImpl
     * Getter for resume_controller
     * @return Resume Controller
     */
-  resumption::ResumeCtrl& resume_controller() OVERRIDE{
+  resumption::ResumeCtrl& resume_controller() OVERRIDE {
     return resume_ctrl_;
   }
 
@@ -853,7 +854,7 @@ class ApplicationManagerImpl
    *
    * @return New HMI application ID
    */
-  uint32_t GenerateNewHMIAppID()OVERRIDE;
+  uint32_t GenerateNewHMIAppID() OVERRIDE;
 
   /**
    * @brief Parse smartObject and replace mobile app Id by HMI app ID
@@ -939,7 +940,7 @@ class ApplicationManagerImpl
   protocol_handler::ProtocolHandler& protocol_handler() const OVERRIDE;
 
   virtual policy::PolicyHandlerInterface& GetPolicyHandler() OVERRIDE {
-      return policy_handler_;
+    return policy_handler_;
   }
   /**
    * @brief Checks, if given RPC is allowed at current HMI level for specific
@@ -1097,7 +1098,8 @@ class ApplicationManagerImpl
    * @param handle, Device handle
    * @return true, if list had been queried already, otherwise - false
    */
-  bool IsAppsQueriedFrom(const connection_handler::DeviceHandle handle) const OVERRIDE;
+  bool IsAppsQueriedFrom(
+      const connection_handler::DeviceHandle handle) const OVERRIDE;
 
   bool IsStopping() const OVERRIDE {
     return is_stopping_;
@@ -1107,7 +1109,7 @@ class ApplicationManagerImpl
   const ApplicationManagerSettings& get_settings() const OVERRIDE;
   virtual event_engine::EventDispatcher& event_dispatcher() OVERRIDE;
 
-private:
+ private:
   /**
    * @brief PullLanguagesInfo allows to pull information about languages.
    *
@@ -1187,8 +1189,11 @@ private:
       smart_objects::SmartObject hmi_application(smart_objects::SmartType_Map);
       const protocol_handler::SessionObserver& session_observer =
           connection_handler().get_session_observer();
-      if (MessageHelper::CreateHMIApplicationStruct(
-              *it, session_observer, GetPolicyHandler(), &hmi_application, app_mngr)) {
+      if (MessageHelper::CreateHMIApplicationStruct(*it,
+                                                    session_observer,
+                                                    GetPolicyHandler(),
+                                                    &hmi_application,
+                                                    app_mngr)) {
         applications[app_count++] = hmi_application;
       } else {
         LOG4CXX_DEBUG(logger_, "Can't CreateHMIApplicationStruct ");

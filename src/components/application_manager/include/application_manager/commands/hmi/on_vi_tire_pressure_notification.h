@@ -50,7 +50,8 @@ class OnVITirePressureNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnVITirePressureNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnVITirePressureNotification(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager);
 
   /**
    * @brief OnVITirePressureNotification class destructor

@@ -33,17 +33,15 @@
 
 #include "application_manager/commands/mobile/diagnostic_message_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
-DiagnosticMessageResponse::DiagnosticMessageResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+DiagnosticMessageResponse::DiagnosticMessageResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-DiagnosticMessageResponse::~DiagnosticMessageResponse() {
-}
+DiagnosticMessageResponse::~DiagnosticMessageResponse() {}
 
 void DiagnosticMessageResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

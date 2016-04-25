@@ -50,7 +50,8 @@ class OnSystemRequestNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnSystemRequestNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnSystemRequestNotification(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief OnSystemRequestNotification class destructor
@@ -63,7 +64,6 @@ class OnSystemRequestNotification : public NotificationFromHMI {
   virtual void Run();
 
  private:
-
   DISALLOW_COPY_AND_ASSIGN(OnSystemRequestNotification);
 };
 

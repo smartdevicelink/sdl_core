@@ -32,16 +32,14 @@
 
 #include "application_manager/commands/hmi/get_urls_response.h"
 
-
 namespace application_manager {
 namespace commands {
 
-GetUrlsResponse::GetUrlsResponse(
-  const MessageSharedPtr& message, ApplicationManager& application_manager): ResponseToHMI(message, application_manager) {
-}
+GetUrlsResponse::GetUrlsResponse(const MessageSharedPtr& message,
+                                 ApplicationManager& application_manager)
+    : ResponseToHMI(message, application_manager) {}
 
-GetUrlsResponse::~GetUrlsResponse() {
-}
+GetUrlsResponse::~GetUrlsResponse() {}
 
 void GetUrlsResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

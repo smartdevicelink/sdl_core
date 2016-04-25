@@ -51,7 +51,8 @@ class SetGlobalPropertiesResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  SetGlobalPropertiesResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  SetGlobalPropertiesResponse(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief SetGlobalPropertiesResponse class destructor

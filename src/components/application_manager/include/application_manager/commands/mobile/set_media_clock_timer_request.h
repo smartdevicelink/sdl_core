@@ -49,7 +49,8 @@ class SetMediaClockRequest : public CommandRequestImpl {
   /**
    * \brief SetMediaClockRequest class constructor
    **/
-  SetMediaClockRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  SetMediaClockRequest(const MessageSharedPtr& message,
+                       ApplicationManager& application_manager);
 
   /**
    * \brief ShowCommand class destructor

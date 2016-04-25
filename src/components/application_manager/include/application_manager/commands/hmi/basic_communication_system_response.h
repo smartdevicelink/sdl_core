@@ -43,26 +43,27 @@ namespace commands {
  * @brief BasicCommunicationSystemResponse command class
  **/
 class BasicCommunicationSystemResponse : public ResponseFromHMI {
-  public:
-    /**
-     * @brief BasicCommunicationSystemResponse class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    BasicCommunicationSystemResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+ public:
+  /**
+   * @brief BasicCommunicationSystemResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  BasicCommunicationSystemResponse(const MessageSharedPtr& message,
+                                   ApplicationManager& application_manager);
 
-    /**
-     * @brief BasicCommunicationSystemResponse class destructor
-     **/
-    virtual ~BasicCommunicationSystemResponse();
+  /**
+   * @brief BasicCommunicationSystemResponse class destructor
+   **/
+  virtual ~BasicCommunicationSystemResponse();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(BasicCommunicationSystemResponse);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(BasicCommunicationSystemResponse);
 };
 
 }  // namespace commands

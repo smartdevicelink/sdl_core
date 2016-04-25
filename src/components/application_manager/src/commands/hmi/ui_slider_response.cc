@@ -37,12 +37,11 @@ namespace application_manager {
 
 namespace commands {
 
-UISliderResponse::UISliderResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+UISliderResponse::UISliderResponse(const MessageSharedPtr& message,
+                                   ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-UISliderResponse::~UISliderResponse() {
-}
+UISliderResponse::~UISliderResponse() {}
 
 void UISliderResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

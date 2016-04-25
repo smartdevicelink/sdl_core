@@ -37,12 +37,11 @@ namespace application_manager {
 
 namespace commands {
 
-UIAddCommandResponse::UIAddCommandResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+UIAddCommandResponse::UIAddCommandResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-UIAddCommandResponse::~UIAddCommandResponse() {
-}
+UIAddCommandResponse::~UIAddCommandResponse() {}
 
 void UIAddCommandResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -49,7 +49,8 @@ class UIPerformInteractionRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  UIPerformInteractionRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  UIPerformInteractionRequest(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief UIPerformInteractionRequest class destructor

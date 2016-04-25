@@ -56,7 +56,7 @@ class EventEngineTest : public testing::Test {
       : event_id(Event::EventID::BasicCommunication_ActivateApp)
       , event_id2(Event::EventID::BasicCommunication_OnAppActivated)
       , event_id3(Event::EventID::VR_IsReady)
-      , event_observer_mock_(mock_event_dispatcher_)  {}
+      , event_observer_mock_(mock_event_dispatcher_) {}
 
  protected:
   EventDispatcherImpl* event_dispatcher_instance_;
@@ -74,7 +74,7 @@ class EventEngineTest : public testing::Test {
   smart_objects::SmartObject smart_object_with_invalid_type;
 
   virtual void SetUp() OVERRIDE {
-    event_dispatcher_instance_ =  new EventDispatcherImpl();
+    event_dispatcher_instance_ = new EventDispatcherImpl();
     event_ = new Event(hmi_apis::FunctionID::eType::VR_IsReady);
     smart_object_with_type_notification["params"]["message_type"] =
         hmi_apis::messageType::notification;
@@ -119,8 +119,8 @@ class EventEngineTest : public testing::Test {
                        const uint32_t calls_number,
                        const smart_objects::SmartObject& so) {
     // Arrange
-    event_dispatcher_instance_->add_observer(event_id, correlation_id,
-                                             event_observer_mock_);
+    event_dispatcher_instance_->add_observer(
+        event_id, correlation_id, event_observer_mock_);
     event_->set_smart_object(so);
     EXPECT_CALL(event_observer_mock_, on_event(_)).Times(calls_number);
     event_dispatcher_instance_->raise_event(*event_);
@@ -141,8 +141,9 @@ TEST_F(EventEngineTest,
   CheckRaiseEvent(event_id3, 1u, smart_object_with_type_response);
 }
 
-TEST_F(EventEngineTest,
-       EventDispatcherImpl_RaiseEvent_EventSOTypeErrorResponse_ExpectEventRaised) {
+TEST_F(
+    EventEngineTest,
+    EventDispatcherImpl_RaiseEvent_EventSOTypeErrorResponse_ExpectEventRaised) {
   CheckRaiseEvent(event_id3, 1u, smart_object_with_type_error_response);
 }
 
@@ -165,7 +166,8 @@ TEST_F(
 TEST_F(EventEngineTest, Event_set_smart_object_ExpectObjectSet) {
   // Act
   event_->set_smart_object(smart_object_with_type_notification);
-  const int32_t obj_type = static_cast<int32_t>(hmi_apis::messageType::notification);
+  const int32_t obj_type =
+      static_cast<int32_t>(hmi_apis::messageType::notification);
   const int32_t function_id =
       static_cast<int32_t>(hmi_apis::FunctionID::eType::VR_IsReady);
   // Checks

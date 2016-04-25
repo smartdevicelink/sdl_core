@@ -51,7 +51,8 @@ class AddSubMenuRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  AddSubMenuRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  AddSubMenuRequest(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief AddSubMenuRequest class destructor
@@ -71,7 +72,6 @@ class AddSubMenuRequest : public CommandRequestImpl {
   void on_event(const event_engine::Event& event);
 
  private:
-
   /*
    * @brief Check if submenu name is valid
    *

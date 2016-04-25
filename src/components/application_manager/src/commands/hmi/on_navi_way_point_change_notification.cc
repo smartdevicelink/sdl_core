@@ -38,11 +38,9 @@ namespace commands {
 
 OnNaviWayPointChangeNotification::OnNaviWayPointChangeNotification(
     const MessageSharedPtr& message, ApplicationManager& app_man)
-    : NotificationFromHMI(message, app_man) {
-}
+    : NotificationFromHMI(message, app_man) {}
 
-OnNaviWayPointChangeNotification::~OnNaviWayPointChangeNotification() {
-}
+OnNaviWayPointChangeNotification::~OnNaviWayPointChangeNotification() {}
 
 void OnNaviWayPointChangeNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -32,17 +32,15 @@
 #include "application_manager/commands/hmi/navi_send_location_response.h"
 #include "application_manager/event_engine/event.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
-NaviSendLocationResponse::NaviSendLocationResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+NaviSendLocationResponse::NaviSendLocationResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-NaviSendLocationResponse::~NaviSendLocationResponse() {
-}
+NaviSendLocationResponse::~NaviSendLocationResponse() {}
 
 void NaviSendLocationResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

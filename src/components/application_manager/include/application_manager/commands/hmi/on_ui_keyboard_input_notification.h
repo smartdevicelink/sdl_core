@@ -52,7 +52,8 @@ class OnUIKeyBoardInputNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnUIKeyBoardInputNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnUIKeyBoardInputNotification(const MessageSharedPtr& message,
+                                ApplicationManager& application_manager);
 
   /**
    * @brief OnUIKeyBoardInputNotification class destructor

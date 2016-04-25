@@ -33,17 +33,15 @@
 
 #include "application_manager/commands/mobile/read_did_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
-ReadDIDResponse::ReadDIDResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+ReadDIDResponse::ReadDIDResponse(const MessageSharedPtr& message,
+                                 ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-ReadDIDResponse::~ReadDIDResponse() {
-}
+ReadDIDResponse::~ReadDIDResponse() {}
 
 void ReadDIDResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

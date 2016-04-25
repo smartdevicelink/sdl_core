@@ -33,18 +33,15 @@
 
 #include "application_manager/commands/mobile/unsubscribe_button_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 UnsubscribeButtonResponse::UnsubscribeButtonResponse(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+    : CommandResponseImpl(message, application_manager) {}
 
-UnsubscribeButtonResponse::~UnsubscribeButtonResponse() {
-}
+UnsubscribeButtonResponse::~UnsubscribeButtonResponse() {}
 
 void UnsubscribeButtonResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

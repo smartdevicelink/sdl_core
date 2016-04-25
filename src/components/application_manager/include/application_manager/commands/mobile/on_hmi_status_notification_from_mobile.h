@@ -46,8 +46,8 @@ namespace commands {
 /**
  * @brief OnHMIStatusNotificationFromMobile class
  **/
-class OnHMIStatusNotificationFromMobile :
-        public CommandNotificationFromMobileImpl {
+class OnHMIStatusNotificationFromMobile
+    : public CommandNotificationFromMobileImpl {
  public:
   /**
    * @brief OnHMIStatusNotificationFromMobile class constructor
@@ -55,7 +55,7 @@ class OnHMIStatusNotificationFromMobile :
    * @param message Incoming SmartObject message
    **/
   OnHMIStatusNotificationFromMobile(const MessageSharedPtr& message,
-                                             ApplicationManager& application_manager);
+                                    ApplicationManager& application_manager);
 
   /**
    * @brief OnHMIStatusNotificationFromMobile class destructor
@@ -67,7 +67,7 @@ class OnHMIStatusNotificationFromMobile :
    **/
   virtual void Run();
 
-private:
+ private:
   DISALLOW_COPY_AND_ASSIGN(OnHMIStatusNotificationFromMobile);
 };
 

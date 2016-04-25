@@ -33,17 +33,15 @@
 
 #include "application_manager/commands/mobile/delete_command_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
-DeleteCommandResponse::DeleteCommandResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+DeleteCommandResponse::DeleteCommandResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-DeleteCommandResponse::~DeleteCommandResponse() {
-}
+DeleteCommandResponse::~DeleteCommandResponse() {}
 
 void DeleteCommandResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

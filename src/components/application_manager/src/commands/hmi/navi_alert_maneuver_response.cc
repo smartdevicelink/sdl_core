@@ -39,11 +39,10 @@ namespace application_manager {
 namespace commands {
 
 NaviAlertManeuverResponse::NaviAlertManeuverResponse(
-    const MessageSharedPtr& message, ApplicationManager& application_manager) : ResponseFromHMI(message, application_manager) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-NaviAlertManeuverResponse::~NaviAlertManeuverResponse() {
-}
+NaviAlertManeuverResponse::~NaviAlertManeuverResponse() {}
 
 void NaviAlertManeuverResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

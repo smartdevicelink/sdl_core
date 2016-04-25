@@ -49,7 +49,8 @@ class NaviIsReadyResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  NaviIsReadyResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  NaviIsReadyResponse(const MessageSharedPtr& message,
+                      ApplicationManager& application_manager);
 
   /**
    * @brief NaviIsReadyResponse class destructor

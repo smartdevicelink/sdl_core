@@ -38,11 +38,9 @@ namespace commands {
 
 UnsubscribeVehicleDataResponse::UnsubscribeVehicleDataResponse(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+    : CommandResponseImpl(message, application_manager) {}
 
-UnsubscribeVehicleDataResponse::~UnsubscribeVehicleDataResponse() {
-}
+UnsubscribeVehicleDataResponse::~UnsubscribeVehicleDataResponse() {}
 
 void UnsubscribeVehicleDataResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

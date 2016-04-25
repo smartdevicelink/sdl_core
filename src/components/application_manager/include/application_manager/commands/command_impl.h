@@ -63,7 +63,7 @@ class CommandImpl : public Command {
    * @param message Incoming SmartObject message
    **/
   CommandImpl(const MessageSharedPtr& message,
-                       ApplicationManager& application_manager);
+              ApplicationManager& application_manager);
 
   /**
    * @brief CommandImpl class destructor
@@ -138,7 +138,7 @@ class CommandImpl : public Command {
   // members
   static const int32_t hmi_protocol_type_;
   static const int32_t mobile_protocol_type_;
-  static const int32_t protocol_version_;  
+  static const int32_t protocol_version_;
 
  protected:
   /**
@@ -162,11 +162,10 @@ class CommandImpl : public Command {
 
 #ifdef ENABLE_LOG
   static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
+#endif  // ENABLE_LOG
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandImpl);
-
 };
 
 }  // namespace commands

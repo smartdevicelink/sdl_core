@@ -38,11 +38,9 @@ namespace commands {
 
 UIPerformAudioPassThruRequest::UIPerformAudioPassThruRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : RequestToHMI(message, application_manager) {
-}
+    : RequestToHMI(message, application_manager) {}
 
-UIPerformAudioPassThruRequest::~UIPerformAudioPassThruRequest() {
-}
+UIPerformAudioPassThruRequest::~UIPerformAudioPassThruRequest() {}
 
 void UIPerformAudioPassThruRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,4 +51,3 @@ void UIPerformAudioPassThruRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

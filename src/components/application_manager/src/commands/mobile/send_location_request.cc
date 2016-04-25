@@ -40,12 +40,11 @@ namespace application_manager {
 
 namespace commands {
 
-SendLocationRequest::SendLocationRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
- : CommandRequestImpl(message, application_manager) {
-}
+SendLocationRequest::SendLocationRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-SendLocationRequest::~SendLocationRequest() {
-}
+SendLocationRequest::~SendLocationRequest() {}
 
 void SendLocationRequest::Run() {
   using namespace hmi_apis;
@@ -56,8 +55,8 @@ void SendLocationRequest::Run() {
 
   if (!app) {
     LOG4CXX_ERROR(logger_,
-                      "An application with connection key " << connection_key()
-                      << " is not registered.");
+                  "An application with connection key "
+                      << connection_key() << " is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -83,7 +82,6 @@ void SendLocationRequest::Run() {
     return;
   }
 
-
   if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_, "Strings contain invalid characters");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -94,21 +92,23 @@ void SendLocationRequest::Run() {
     const utils::custom_string::CustomString& address =
         msg_params[strings::address].asCustomString();
     if (address.empty()) {
-        msg_params.erase(strings::address);
+      msg_params.erase(strings::address);
     }
   }
 
-  if (!CheckFieldsCompatibility()){
-      LOG4CXX_ERROR(logger_, "CheckFieldsCompatibility failed");
-      SendResponse(false, mobile_apis::Result::INVALID_DATA);
-      return;
+  if (!CheckFieldsCompatibility()) {
+    LOG4CXX_ERROR(logger_, "CheckFieldsCompatibility failed");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
   }
 
   if (msg_params.keyExists(strings::location_image)) {
     mobile_apis::Result::eType verification_result =
         mobile_apis::Result::SUCCESS;
     verification_result = MessageHelper::VerifyImage(
-        (*message_)[strings::msg_params][strings::location_image], app, application_manager_);
+        (*message_)[strings::msg_params][strings::location_image],
+        app,
+        application_manager_);
     if (mobile_apis::Result::SUCCESS != verification_result) {
       LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
       SendResponse(false, verification_result);
@@ -116,13 +116,11 @@ void SendLocationRequest::Run() {
     }
   }
 
-
-  SmartObject request_msg_params = SmartObject(
-      smart_objects::SmartType_Map);
+  SmartObject request_msg_params = SmartObject(smart_objects::SmartType_Map);
   request_msg_params = msg_params;
   request_msg_params[strings::app_id] = app->hmi_app_id();
-  SendHMIRequest(hmi_apis::FunctionID::Navigation_SendLocation,
-                 &request_msg_params, true);
+  SendHMIRequest(
+      hmi_apis::FunctionID::Navigation_SendLocation, &request_msg_params, true);
 }
 
 void SendLocationRequest::on_event(const event_engine::Event& event) {
@@ -148,7 +146,8 @@ void SendLocationRequest::on_event(const event_engine::Event& event) {
 }
 
 bool SendLocationRequest::CheckFieldsCompatibility() {
-  const smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
   MessageHelper::PrintSmartObject(msg_params);
   const bool longitude_degrees_exist =
       msg_params.keyExists(strings::longitude_degrees);
@@ -157,22 +156,25 @@ bool SendLocationRequest::CheckFieldsCompatibility() {
   const bool address_exist = msg_params.keyExists(strings::address);
 
   if (latitude_degrees_exist ^ longitude_degrees_exist) {
-    LOG4CXX_DEBUG(logger_, "latitude and longitude should be provided only in pair");
+    LOG4CXX_DEBUG(logger_,
+                  "latitude and longitude should be provided only in pair");
     return false;
   }
 
   if (!address_exist && !longitude_degrees_exist && !latitude_degrees_exist) {
-    LOG4CXX_DEBUG(logger_, "address or latitude/longtitude should should be provided");
+    LOG4CXX_DEBUG(logger_,
+                  "address or latitude/longtitude should should be provided");
     return false;
   }
   return true;
 }
-void insert_if_contains(const smart_objects::SmartObject& msg_params,
-                        const std::string& param_key,
-                        std::vector<utils::custom_string::CustomString>& output_vector) {
-    if (msg_params.keyExists(param_key)) {
-        output_vector.push_back(msg_params[param_key].asCustomString());
-    }
+void insert_if_contains(
+    const smart_objects::SmartObject& msg_params,
+    const std::string& param_key,
+    std::vector<utils::custom_string::CustomString>& output_vector) {
+  if (msg_params.keyExists(param_key)) {
+    output_vector.push_back(msg_params[param_key].asCustomString());
+  }
 }
 
 bool SendLocationRequest::IsWhiteSpaceExist() {
@@ -222,15 +224,17 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
   return false;
 }
 
-bool SendLocationRequest::CheckHMICapabilities(std::list<hmi_apis::Common_TextFieldName::eType>& fields_names) {
-  LOG4CXX_AUTO_TRACE(logger_);  
+bool SendLocationRequest::CheckHMICapabilities(
+    std::list<hmi_apis::Common_TextFieldName::eType>& fields_names) {
+  LOG4CXX_AUTO_TRACE(logger_);
   using namespace smart_objects;
   using namespace hmi_apis;
   if (fields_names.empty()) {
     return true;
   }
 
-  const HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
+  const HMICapabilities& hmi_capabilities =
+      application_manager_.hmi_capabilities();
   if (!hmi_capabilities.is_ui_cooperating()) {
     LOG4CXX_ERROR(logger_, "UI is not supported.");
     return false;
@@ -238,12 +242,14 @@ bool SendLocationRequest::CheckHMICapabilities(std::list<hmi_apis::Common_TextFi
 
   if (hmi_capabilities.display_capabilities()) {
     const SmartObject disp_cap = (*hmi_capabilities.display_capabilities());
-    const SmartObject& text_fields = disp_cap.getElement(hmi_response::text_fields);
+    const SmartObject& text_fields =
+        disp_cap.getElement(hmi_response::text_fields);
     const size_t len = text_fields.length();
     for (size_t i = 0; i < len; ++i) {
       const SmartObject& text_field = text_fields[i];
       const Common_TextFieldName::eType filed_name =
-          static_cast<Common_TextFieldName::eType>(text_field.getElement(strings::name).asInt());
+          static_cast<Common_TextFieldName::eType>(
+              text_field.getElement(strings::name).asInt());
       const std::list<Common_TextFieldName::eType>::iterator it =
           std::find(fields_names.begin(), fields_names.end(), filed_name);
       if (it != fields_names.end()) {

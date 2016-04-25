@@ -49,7 +49,8 @@ class NaviUpdateTurnListRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  NaviUpdateTurnListRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  NaviUpdateTurnListRequest(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /**
    * @brief NaviUpdateTurnListRequest class destructor

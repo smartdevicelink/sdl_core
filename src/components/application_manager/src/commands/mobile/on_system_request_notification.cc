@@ -45,34 +45,33 @@ namespace mobile {
 
 OnSystemRequestNotification::OnSystemRequestNotification(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandNotificationImpl(message, application_manager) {
-}
+    : CommandNotificationImpl(message, application_manager) {}
 
-OnSystemRequestNotification::~OnSystemRequestNotification() {
-}
+OnSystemRequestNotification::~OnSystemRequestNotification() {}
 
 void OnSystemRequestNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace application_manager;
   using namespace mobile_apis;
 
-  ApplicationSharedPtr app = application_manager_.
-                             application(connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app.valid()) {
-    LOG4CXX_ERROR(logger_, "Application with connection key "
-                  << connection_key() << " is not registered.");
+    LOG4CXX_ERROR(logger_,
+                  "Application with connection key " << connection_key()
+                                                     << " is not registered.");
     return;
   }
 
-  RequestType::eType request_type = static_cast<RequestType::eType>
-      ((*message_)[strings::msg_params][strings::request_type].asInt());
+  RequestType::eType request_type = static_cast<RequestType::eType>(
+      (*message_)[strings::msg_params][strings::request_type].asInt());
   const policy::PolicyHandlerInterface& policy_handler =
       application_manager_.GetPolicyHandler();
   if (!policy_handler.IsRequestTypeAllowed(app->policy_app_id(),
                                            request_type)) {
-    LOG4CXX_WARN(logger_, "Request type "  << request_type
-                 <<" is not allowed by policies");
+    LOG4CXX_WARN(logger_,
+                 "Request type " << request_type
+                                 << " is not allowed by policies");
     return;
   }
 
@@ -80,7 +79,8 @@ void OnSystemRequestNotification::Run() {
     /* According to requirements:
        "If the requestType = PROPRIETARY, add to mobile API fileType = JSON
         If the requestType = HTTP, add to mobile API fileType = BINARY"
-       Also in Genivi SDL we don't save the PT to file - we put it directly in binary_data */
+       Also in Genivi SDL we don't save the PT to file - we put it directly in
+       binary_data */
     (*message_)[strings::msg_params][strings::file_type] = FileType::JSON;
   } else if (RequestType::HTTP == request_type) {
     (*message_)[strings::msg_params][strings::file_type] = FileType::BINARY;
@@ -89,7 +89,7 @@ void OnSystemRequestNotification::Run() {
   SendNotification();
 }
 
-}  //namespace mobile
+}  // namespace mobile
 
 }  // namespace commands
 

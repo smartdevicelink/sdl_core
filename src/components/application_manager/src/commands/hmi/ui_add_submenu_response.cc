@@ -38,12 +38,11 @@ namespace application_manager {
 
 namespace commands {
 
-UIAddSubmenuResponse::UIAddSubmenuResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+UIAddSubmenuResponse::UIAddSubmenuResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-UIAddSubmenuResponse::~UIAddSubmenuResponse() {
-}
+UIAddSubmenuResponse::~UIAddSubmenuResponse() {}
 
 void UIAddSubmenuResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

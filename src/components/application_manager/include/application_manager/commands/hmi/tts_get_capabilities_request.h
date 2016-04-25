@@ -49,7 +49,8 @@ class TTSGetCapabilitiesRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  TTSGetCapabilitiesRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  TTSGetCapabilitiesRequest(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /**
    * @brief TTSGetCapabilitiesRequest class destructor

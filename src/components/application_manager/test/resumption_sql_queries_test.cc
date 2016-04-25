@@ -128,20 +128,28 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
     string file_to_delete = kDatabaseName + ".sqlite";
     file_system::DeleteFile(file_to_delete);
   }
-  void TearDown() OVERRIDE { DeleteTablesData(); }
+  void TearDown() OVERRIDE {
+    DeleteTablesData();
+  }
 
-  void CheckDeleteQuery(const string& count_query, const string& query_to_check,
-                        pair<int, string> app_info, pair<int, string> dev_info,
-                        const int value_before, const int value_after,
+  void CheckDeleteQuery(const string& count_query,
+                        const string& query_to_check,
+                        pair<int, string> app_info,
+                        pair<int, string> dev_info,
+                        const int value_before,
+                        const int value_after,
                         const int position_in_result);
 
-  void CheckSelectQuery(const string& query_to_check, const int control_value,
+  void CheckSelectQuery(const string& query_to_check,
+                        const int control_value,
                         const int position_in_result);
 
-  void CheckSelectQuery(const string& query_to_check, const char* control_value,
+  void CheckSelectQuery(const string& query_to_check,
+                        const char* control_value,
                         const int position_in_result);
 
-  void CheckSelectQuery(const string& query_to_check, const bool control_value,
+  void CheckSelectQuery(const string& query_to_check,
+                        const bool control_value,
                         const int position_in_result);
 
   void CheckSelectQuery(const string& query_to_check,
@@ -149,11 +157,14 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
                         const int position_in_result);
 
   void CheckSelectQuery(const string& query_to_check,
-                        pair<int, string> app_info, pair<int, string> dev_info,
-                        const int control_value, const int position_in_result);
+                        pair<int, string> app_info,
+                        pair<int, string> dev_info,
+                        const int control_value,
+                        const int position_in_result);
 
   void CheckSelectQuery(const string& query_to_check,
-                        pair<int, string> app_info, pair<int, string> dev_info,
+                        pair<int, string> app_info,
+                        pair<int, string> dev_info,
                         const string& control_value,
                         const int position_in_result);
 
@@ -163,20 +174,30 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
     return ss.str();
   }
 
-  SQLQuery& FillGlobalPropertiesTable(
-      SQLQuery& query, const string& vrHelpTitle, const string& menuTitle,
-      const int language, const int keyboardLayout, const int keypressMode,
-      const string& autoCompleteText, const int64_t image_key);
+  SQLQuery& FillGlobalPropertiesTable(SQLQuery& query,
+                                      const string& vrHelpTitle,
+                                      const string& menuTitle,
+                                      const int language,
+                                      const int keyboardLayout,
+                                      const int keypressMode,
+                                      const string& autoCompleteText,
+                                      const int64_t image_key);
 
-  SQLQuery& FillApplicationTable(SQLQuery& query, const int connection_key,
-                                 const int grammarID, const string& hashID,
-                                 const int hmiAppID, const int hmiLevel,
-                                 const int ign_off_count, const int timeStamp,
-                                 bool isMediaApplication, const string& appID,
+  SQLQuery& FillApplicationTable(SQLQuery& query,
+                                 const int connection_key,
+                                 const int grammarID,
+                                 const string& hashID,
+                                 const int hmiAppID,
+                                 const int hmiLevel,
+                                 const int ign_off_count,
+                                 const int timeStamp,
+                                 bool isMediaApplication,
+                                 const string& appID,
                                  const string& deviceID,
                                  const int64_t glob_prop_key);
 
-  SQLQuery& FillImageTable(SQLQuery& query, const int imageType,
+  SQLQuery& FillImageTable(SQLQuery& query,
+                           const int imageType,
                            const string& value);
 
   SQLQuery& FillTableLimitedCharacterListTable(
@@ -186,7 +207,8 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
                                     const int64_t glob_prop_key,
                                     const int64_t lim_char_list_key);
 
-  SQLQuery& FillTTSChunkTable(SQLQuery& query, const int type,
+  SQLQuery& FillTTSChunkTable(SQLQuery& query,
+                              const int type,
                               const string& text);
 
   SQLQuery& FillHelpTimeoutPromptArrayTable(SQLQuery& query,
@@ -194,18 +216,23 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
                                             const int64_t tts_chunk_key,
                                             const int idhelpPrompt);
 
-  SQLQuery& FillFileTable(SQLQuery& query, const int fileType,
-                          bool is_download_complete, bool persistentFile,
+  SQLQuery& FillFileTable(SQLQuery& query,
+                          const int fileType,
+                          bool is_download_complete,
+                          bool persistentFile,
                           const string& syncFileName);
 
   SQLQuery& FillApplicationFilesArrayTable(SQLQuery& query,
                                            const int64_t app_key,
                                            const int64_t file_key);
 
-  SQLQuery& FillSubMenuTable(SQLQuery& query, const int menuID,
-                             const string& menuName, const int position);
+  SQLQuery& FillSubMenuTable(SQLQuery& query,
+                             const int menuID,
+                             const string& menuName,
+                             const int position);
 
-  SQLQuery& FillApplicationSubMenuArrayTable(SQLQuery& query, const int app_key,
+  SQLQuery& FillApplicationSubMenuArrayTable(SQLQuery& query,
+                                             const int app_key,
                                              const int sub_menu_key);
 
   SQLQuery& FillAppSubscriptionsArrayTable(SQLQuery& query,
@@ -213,16 +240,21 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
                                            const int ButtonNameValue,
                                            const int app_key);
 
-  SQLQuery& FillCommandTable(SQLQuery& query, const int cmdID,
-                             const string& menuName, const int parentID,
-                             const int position, const int64_t image_key);
+  SQLQuery& FillCommandTable(SQLQuery& query,
+                             const int cmdID,
+                             const string& menuName,
+                             const int parentID,
+                             const int position,
+                             const int64_t image_key);
 
   SQLQuery& FillApplicationCommandsArrayTable(SQLQuery& query,
                                               const int64_t application_key,
                                               const int64_t command_key);
 
-  SQLQuery& FillChoiceTable(SQLQuery& query, const int choiceID,
-                            const string& menuName, const string& secondaryText,
+  SQLQuery& FillChoiceTable(SQLQuery& query,
+                            const int choiceID,
+                            const string& menuName,
+                            const string& secondaryText,
                             const string& tertiaryText,
                             const int64_t image_key);
 
@@ -230,19 +262,23 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
                                  const int64_t app_choice_set_key,
                                  const int64_t choice_key);
 
-  SQLQuery& FillApplicationChoiceSetTable(SQLQuery& query, const int grammarID,
+  SQLQuery& FillApplicationChoiceSetTable(SQLQuery& query,
+                                          const int grammarID,
                                           const int interactionChoiceSetID);
 
   SQLQuery& FillApplicationChoiceSetArrayTable(SQLQuery& query,
                                                const int64_t app_choice_set_key,
                                                const int64_t app_key);
 
-  SQLQuery& FillVRCommandsArrayTable(SQLQuery& query, const string& vrCommand,
+  SQLQuery& FillVRCommandsArrayTable(SQLQuery& query,
+                                     const string& vrCommand,
                                      AccessoryVRCommand value,
                                      const int64_t foreing_key);
 
-  SQLQuery& FillVRHelpItemTable(SQLQuery& query, const string& text,
-                                const int position, const int64_t image_key);
+  SQLQuery& FillVRHelpItemTable(SQLQuery& query,
+                                const string& text,
+                                const int position,
+                                const int64_t image_key);
 
   SQLQuery& FillVRHelpItemArrayTable(SQLQuery& query,
                                      const int64_t global_prop_key,
@@ -263,7 +299,9 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
     EXPECT_TRUE(query.Exec(kDeleteData));
   }
 
-  SQLDatabase* db() const { return db_; }
+  SQLDatabase* db() const {
+    return db_;
+  }
 
   void db_schema_fill() {
     db_schema.push_back("resumption");
@@ -436,7 +474,8 @@ SQLQuery& ResumptionSqlQueriesTest::FillTableLimitedCharacterListTable(
 }
 
 SQLQuery& ResumptionSqlQueriesTest::FillCharacterArrayTable(
-    SQLQuery& query, const int64_t glob_prop_key,
+    SQLQuery& query,
+    const int64_t glob_prop_key,
     const int64_t lim_char_list_key) {
   EXPECT_TRUE(query.Prepare(kInsertCharacterArray));
   query.Bind(0, glob_prop_key);
@@ -456,7 +495,9 @@ SQLQuery& ResumptionSqlQueriesTest::FillTTSChunkTable(SQLQuery& query,
 }
 
 SQLQuery& ResumptionSqlQueriesTest::FillHelpTimeoutPromptArrayTable(
-    SQLQuery& query, int64_t glob_prop_key, int64_t tts_chunk_key,
+    SQLQuery& query,
+    int64_t glob_prop_key,
+    int64_t tts_chunk_key,
     const int idhelpPrompt) {
   EXPECT_TRUE(query.Prepare(kInsertHelpTimeoutPromptArray));
   query.Bind(0, glob_prop_key);
@@ -467,10 +508,18 @@ SQLQuery& ResumptionSqlQueriesTest::FillHelpTimeoutPromptArrayTable(
 }
 
 SQLQuery& ResumptionSqlQueriesTest::FillApplicationTable(
-    SQLQuery& query, const int connection_key, const int grammarID,
-    const string& hashID, const int hmiAppID, const int hmiLevel,
-    const int ign_off_count, const int timeStamp, bool isMediaApplication,
-    const string& appID, const string& deviceID, const int64_t glob_prop_key) {
+    SQLQuery& query,
+    const int connection_key,
+    const int grammarID,
+    const string& hashID,
+    const int hmiAppID,
+    const int hmiLevel,
+    const int ign_off_count,
+    const int timeStamp,
+    bool isMediaApplication,
+    const string& appID,
+    const string& deviceID,
+    const int64_t glob_prop_key) {
   EXPECT_TRUE(query.Prepare(kInsertApplication));
   query.Bind(0, connection_key);
   query.Bind(1, grammarID);
@@ -488,9 +537,14 @@ SQLQuery& ResumptionSqlQueriesTest::FillApplicationTable(
 }
 
 SQLQuery& ResumptionSqlQueriesTest::FillGlobalPropertiesTable(
-    SQLQuery& query, const string& vrHelpTitle, const string& menuTitle,
-    const int language, const int keyboardLayout, const int keypressMode,
-    const string& autoCompleteText, const int64_t image_key) {
+    SQLQuery& query,
+    const string& vrHelpTitle,
+    const string& menuTitle,
+    const int language,
+    const int keyboardLayout,
+    const int keypressMode,
+    const string& autoCompleteText,
+    const int64_t image_key) {
   EXPECT_TRUE(query.Prepare(kInsertGlobalProperties));
   query.Bind(0, vrHelpTitle);
   query.Bind(1, menuTitle);
@@ -512,9 +566,12 @@ SQLQuery& ResumptionSqlQueriesTest::FillApplicationCommandsArrayTable(
   return query;
 }
 
-SQLQuery& ResumptionSqlQueriesTest::FillCommandTable(
-    SQLQuery& query, const int cmdID, const string& menuName,
-    const int parentID, const int position, const int64_t image_key) {
+SQLQuery& ResumptionSqlQueriesTest::FillCommandTable(SQLQuery& query,
+                                                     const int cmdID,
+                                                     const string& menuName,
+                                                     const int parentID,
+                                                     const int position,
+                                                     const int64_t image_key) {
   EXPECT_TRUE(query.Prepare(kInsertToCommand));
   query.Bind(0, cmdID);
   query.Bind(1, image_key);
@@ -543,7 +600,8 @@ SQLQuery& ResumptionSqlQueriesTest::FillChoiceTable(SQLQuery& query,
 }
 
 SQLQuery& ResumptionSqlQueriesTest::FillChoiceArrayTable(
-    SQLQuery& query, const int64_t app_choice_set_key,
+    SQLQuery& query,
+    const int64_t app_choice_set_key,
     const int64_t choice_key) {
   EXPECT_TRUE(query.Prepare(kInsertChoiceArray));
   query.Bind(0, app_choice_set_key);
@@ -571,7 +629,9 @@ SQLQuery& ResumptionSqlQueriesTest::FillApplicationChoiceSetArrayTable(
 }
 
 SQLQuery& ResumptionSqlQueriesTest::FillVRCommandsArrayTable(
-    SQLQuery& query, const string& vrCommand, AccessoryVRCommand value,
+    SQLQuery& query,
+    const string& vrCommand,
+    AccessoryVRCommand value,
     const int64_t foreing_key) {
   EXPECT_TRUE(query.Prepare(kInsertVrCommand));
   query.Bind(0, vrCommand);
@@ -587,7 +647,9 @@ SQLQuery& ResumptionSqlQueriesTest::FillVRCommandsArrayTable(
 }
 
 SQLQuery& ResumptionSqlQueriesTest::FillVRHelpItemTable(
-    SQLQuery& query, const string& text, const int position,
+    SQLQuery& query,
+    const string& text,
+    const int position,
     const int64_t image_key) {
   EXPECT_TRUE(query.Prepare(kInsertVRHelpItem));
   query.Bind(0, text);
@@ -598,7 +660,8 @@ SQLQuery& ResumptionSqlQueriesTest::FillVRHelpItemTable(
 }
 
 SQLQuery& ResumptionSqlQueriesTest::FillVRHelpItemArrayTable(
-    SQLQuery& query, const int64_t global_prop_key,
+    SQLQuery& query,
+    const int64_t global_prop_key,
     const int64_t vr_help_item_key) {
   EXPECT_TRUE(query.Prepare(kInsertVRHelpItemArray));
   query.Bind(0, global_prop_key);
@@ -617,7 +680,9 @@ SQLQuery& ResumptionSqlQueriesTest::FillApplicationSubMenuArrayTable(
 }
 
 SQLQuery& ResumptionSqlQueriesTest::FillAppSubscriptionsArrayTable(
-    SQLQuery& query, const int vehicleValue, const int ButtonNameValue,
+    SQLQuery& query,
+    const int vehicleValue,
+    const int ButtonNameValue,
     const int app_key) {
   EXPECT_TRUE(query.Prepare(kInsertSubscriptions));
   query.Bind(0, app_key);
@@ -738,12 +803,22 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCountHMILevel_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  key = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                  "auto", key).LastInsertId();
+  key = FillGlobalPropertiesTable(
+            temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
+            .LastInsertId();
 
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, key);
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       key);
 
   ValToPosPair p1(0, device_id);
   ValToPosPair p2(1, app_id1);
@@ -755,11 +830,21 @@ TEST_F(ResumptionSqlQueriesTest, kSelectHMILevel_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  key = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                  "auto", key).LastInsertId();
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, key);
+  key = FillGlobalPropertiesTable(
+            temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
+            .LastInsertId();
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       key);
   ValToPosPair p1(0, device_id);
   ValToPosPair p2(1, app_id1);
   // Check
@@ -770,11 +855,21 @@ TEST_F(ResumptionSqlQueriesTest, kCheckHMIId_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  key = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                  "auto", key).LastInsertId();
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, key);
+  key = FillGlobalPropertiesTable(
+            temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
+            .LastInsertId();
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       key);
   ValToPosPair p1(0, IntToString(hmiAppID));
   ValToPosPair p2(1, "");
   // Check
@@ -785,11 +880,21 @@ TEST_F(ResumptionSqlQueriesTest, kSelectHMIId_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  key = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                  "auto", key).LastInsertId();
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, key);
+  key = FillGlobalPropertiesTable(
+            temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
+            .LastInsertId();
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       key);
   ValToPosPair p1(0, device_id);
   ValToPosPair p2(1, app_id1);
   // Check
@@ -800,11 +905,21 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCountHMIId_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  key = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                  "auto", key).LastInsertId();
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, key);
+  key = FillGlobalPropertiesTable(
+            temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
+            .LastInsertId();
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       key);
 
   ValToPosPair p1(0, device_id);
   ValToPosPair p2(1, app_id1);
@@ -816,11 +931,21 @@ TEST_F(ResumptionSqlQueriesTest, kCountHashId_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  key = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                  "auto", key).LastInsertId();
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, key);
+  key = FillGlobalPropertiesTable(
+            temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
+            .LastInsertId();
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       key);
 
   ValToPosPair p1(0, device_id);
   ValToPosPair p2(1, app_id1);
@@ -832,11 +957,21 @@ TEST_F(ResumptionSqlQueriesTest, kSelectHashId_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  key = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                  "auto", key).LastInsertId();
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, key);
+  key = FillGlobalPropertiesTable(
+            temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
+            .LastInsertId();
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       key);
   ValToPosPair p1(0, device_id);
   ValToPosPair p2(1, app_id1);
   // Check
@@ -856,11 +991,21 @@ TEST_F(ResumptionSqlQueriesTest, kCheckApplication_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  key = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                  "auto", key).LastInsertId();
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, key);
+  key = FillGlobalPropertiesTable(
+            temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
+            .LastInsertId();
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       key);
   ValToPosPair p1(0, device_id);
   ValToPosPair p2(1, app_id1);
   // Check
@@ -871,18 +1016,38 @@ TEST_F(ResumptionSqlQueriesTest, kCountApplications_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  key = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                  "auto", key).LastInsertId();
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, key);
+  key = FillGlobalPropertiesTable(
+            temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
+            .LastInsertId();
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       key);
 
   key = FillImageTable(temp_query, 1, "tst_img2").LastInsertId();
-  key = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                  "auto", key).LastInsertId();
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash2,
-                       hmiAppID2, hmiLevel2, ign_off_count, timeStamp2, false,
-                       app_id2, device_id, key);
+  key = FillGlobalPropertiesTable(
+            temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
+            .LastInsertId();
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash2,
+                       hmiAppID2,
+                       hmiLevel2,
+                       ign_off_count,
+                       timeStamp2,
+                       false,
+                       app_id2,
+                       device_id,
+                       key);
   // Check
   CheckSelectQuery(kCountApplications, 2, 0);
 }
@@ -892,12 +1057,22 @@ TEST_F(ResumptionSqlQueriesTest,
   // Arrange
   SQLQuery temp_query(db());
   int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  key = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                  "auto", key).LastInsertId();
+  key = FillGlobalPropertiesTable(
+            temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
+            .LastInsertId();
 
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, key);
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       key);
   // Checks
   CheckSelectQuery(kSelectDataForLoadResumeData, hmiLevel, 0);
   CheckSelectQuery(kSelectDataForLoadResumeData, ign_off_count, 1);
@@ -910,12 +1085,22 @@ TEST_F(ResumptionSqlQueriesTest, kUpdateHMILevel_ExpectDataUpdated) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  key = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                  "auto", key).LastInsertId();
+  key = FillGlobalPropertiesTable(
+            temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
+            .LastInsertId();
 
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, key);
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       key);
   // Act
   SQLQuery query_update_hmi_level(db());
   EXPECT_TRUE(query_update_hmi_level.Prepare(kUpdateHMILevel));
@@ -933,11 +1118,21 @@ TEST_F(ResumptionSqlQueriesTest, kUpdateIgnOffCount_ExpectDataUpdated) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  key = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                  "auto", key).LastInsertId();
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, key);
+  key = FillGlobalPropertiesTable(
+            temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
+            .LastInsertId();
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       key);
 
   const std::string kSelectIgnOffCount =
       "SELECT ign_off_count FROM application;";
@@ -954,16 +1149,35 @@ TEST_F(ResumptionSqlQueriesTest, kCountApplicationsIgnOff_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  key = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                  "auto", key).LastInsertId();
+  key = FillGlobalPropertiesTable(
+            temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
+            .LastInsertId();
 
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, key);
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       key);
 
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash2,
-                       hmiAppID2, hmiLevel2, ign_off_count2, timeStamp2, false,
-                       app_id2, device_id, key);
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash2,
+                       hmiAppID2,
+                       hmiLevel2,
+                       ign_off_count2,
+                       timeStamp2,
+                       false,
+                       app_id2,
+                       device_id,
+                       key);
 
   ValToPosPair p1(0, IntToString(4));
   ValToPosPair p2(1, "");
@@ -976,15 +1190,34 @@ TEST_F(ResumptionSqlQueriesTest,
   // Arrange
   SQLQuery temp_query(db());
   int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  key = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                  "auto", key).LastInsertId();
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, key);
+  key = FillGlobalPropertiesTable(
+            temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
+            .LastInsertId();
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       key);
 
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash2,
-                       hmiAppID2, hmiLevel2, ign_off_count2, timeStamp2, false,
-                       app_id2, device_id, key);
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash2,
+                       hmiAppID2,
+                       hmiLevel2,
+                       ign_off_count2,
+                       timeStamp2,
+                       false,
+                       app_id2,
+                       device_id,
+                       key);
 
   ValToPosPair p1(0, IntToString(4));
   ValToPosPair p2(1, "");
@@ -997,10 +1230,21 @@ TEST_F(ResumptionSqlQueriesTest, kUpdateSuspendData_ExpectDataUpdated) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  key = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                  "auto", key).LastInsertId();
-  FillApplicationTable(temp_query, 1, 1, test_hash, 111, 1, 3, 45127, false,
-                       app_id1, device_id, key);
+  key = FillGlobalPropertiesTable(
+            temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
+            .LastInsertId();
+  FillApplicationTable(temp_query,
+                       1,
+                       1,
+                       test_hash,
+                       111,
+                       1,
+                       3,
+                       45127,
+                       false,
+                       app_id1,
+                       device_id,
+                       key);
 
   // Act
   SQLQuery query_update_suspend_data(db());
@@ -1015,11 +1259,21 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteFile_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  key1 = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                   "auto", key1).LastInsertId();
-  key1 = FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                              hmiAppID, hmiLevel, ign_off_count, timeStamp,
-                              false, app_id2, device_id, key1).LastInsertId();
+  key1 = FillGlobalPropertiesTable(
+             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key1)
+             .LastInsertId();
+  key1 = FillApplicationTable(temp_query,
+                              connection_key,
+                              grammarID,
+                              test_hash,
+                              hmiAppID,
+                              hmiLevel,
+                              ign_off_count,
+                              timeStamp,
+                              false,
+                              app_id2,
+                              device_id,
+                              key1).LastInsertId();
   int64_t key2 =
       FillFileTable(temp_query, 1, true, true, "tst_name").LastInsertId();
   FillApplicationFilesArrayTable(temp_query, key1, key2);
@@ -1035,11 +1289,21 @@ TEST_F(ResumptionSqlQueriesTest,
   // Arrange
   SQLQuery temp_query(db());
   int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  key1 = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                   "auto", key1).LastInsertId();
-  key1 = FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                              hmiAppID, hmiLevel, ign_off_count, timeStamp,
-                              false, app_id2, device_id, key1).LastInsertId();
+  key1 = FillGlobalPropertiesTable(
+             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key1)
+             .LastInsertId();
+  key1 = FillApplicationTable(temp_query,
+                              connection_key,
+                              grammarID,
+                              test_hash,
+                              hmiAppID,
+                              hmiLevel,
+                              ign_off_count,
+                              timeStamp,
+                              false,
+                              app_id2,
+                              device_id,
+                              key1).LastInsertId();
   int64_t key2 =
       FillFileTable(temp_query, 1, true, true, "tst_name").LastInsertId();
   FillApplicationFilesArrayTable(temp_query, key1, key2);
@@ -1049,18 +1313,33 @@ TEST_F(ResumptionSqlQueriesTest,
   ValToPosPair p1(0, app_id2);
   ValToPosPair p2(1, device_id);
   CheckDeleteQuery(select_count_applicationsFilesArray,
-                   kDeleteApplicationFilesArray, p1, p2, 1, 0, 0);
+                   kDeleteApplicationFilesArray,
+                   p1,
+                   p2,
+                   1,
+                   0,
+                   0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeleteSubMenu_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  key = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                  "auto", key).LastInsertId();
-  key = FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                             hmiAppID, hmiLevel, ign_off_count, timeStamp,
-                             false, app_id2, device_id, key).LastInsertId();
+  key = FillGlobalPropertiesTable(
+            temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
+            .LastInsertId();
+  key = FillApplicationTable(temp_query,
+                             connection_key,
+                             grammarID,
+                             test_hash,
+                             hmiAppID,
+                             hmiLevel,
+                             ign_off_count,
+                             timeStamp,
+                             false,
+                             app_id2,
+                             device_id,
+                             key).LastInsertId();
   int64_t submenu_key =
       FillSubMenuTable(temp_query, 1, "tst_menuName", 2).LastInsertId();
 
@@ -1077,11 +1356,21 @@ TEST_F(ResumptionSqlQueriesTest,
   // Arrange
   SQLQuery temp_query(db());
   int64_t key = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  key = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                  "auto", key).LastInsertId();
-  key = FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                             hmiAppID, hmiLevel, ign_off_count, timeStamp,
-                             false, app_id2, device_id, key).LastInsertId();
+  key = FillGlobalPropertiesTable(
+            temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key)
+            .LastInsertId();
+  key = FillApplicationTable(temp_query,
+                             connection_key,
+                             grammarID,
+                             test_hash,
+                             hmiAppID,
+                             hmiLevel,
+                             ign_off_count,
+                             timeStamp,
+                             false,
+                             app_id2,
+                             device_id,
+                             key).LastInsertId();
 
   int64_t submenu_key =
       FillSubMenuTable(temp_query, 1, "tst_menuName", 2).LastInsertId();
@@ -1092,8 +1381,8 @@ TEST_F(ResumptionSqlQueriesTest,
       "SELECT COUNT(*) FROM applicationSubMenuArray;";
   ValToPosPair p1(0, app_id2);
   ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_subMenu, kDeleteApplicationSubMenuArray, p1, p2,
-                   1, 0, 0);
+  CheckDeleteQuery(
+      select_count_subMenu, kDeleteApplicationSubMenuArray, p1, p2, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -1101,11 +1390,21 @@ TEST_F(ResumptionSqlQueriesTest,
   // Arrange
   SQLQuery temp_query(db());
   int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  key1 = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                   "auto", key1).LastInsertId();
-  key1 = FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                              hmiAppID, hmiLevel, ign_off_count, timeStamp,
-                              false, app_id2, device_id, key1).LastInsertId();
+  key1 = FillGlobalPropertiesTable(
+             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key1)
+             .LastInsertId();
+  key1 = FillApplicationTable(temp_query,
+                              connection_key,
+                              grammarID,
+                              test_hash,
+                              hmiAppID,
+                              hmiLevel,
+                              ign_off_count,
+                              timeStamp,
+                              false,
+                              app_id2,
+                              device_id,
+                              key1).LastInsertId();
   int64_t key2 =
       FillFileTable(temp_query, 1, true, true, "tst_name").LastInsertId();
   key1 = FillApplicationFilesArrayTable(temp_query, key1, key2).LastInsertId();
@@ -1116,7 +1415,12 @@ TEST_F(ResumptionSqlQueriesTest,
   ValToPosPair p1(0, app_id2);
   ValToPosPair p2(1, device_id);
   CheckDeleteQuery(select_count_applicationSubscribtionsArray,
-                   kDeleteApplicationSubscribtionsArray, p1, p2, 1, 0, 0);
+                   kDeleteApplicationSubscribtionsArray,
+                   p1,
+                   p2,
+                   1,
+                   0,
+                   0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeleteImageFromCommands_ExpectDataDeleted) {
@@ -1125,18 +1429,28 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteImageFromCommands_ExpectDataDeleted) {
   int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
   int64_t key2 = FillCommandTable(temp_query, 1, "tst_menu_name", 1, 2, key1)
                      .LastInsertId();
-  key1 = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                   "auto", key1).LastInsertId();
-  key1 = FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                              hmiAppID, hmiLevel, ign_off_count, timeStamp,
-                              false, app_id2, device_id, key1).LastInsertId();
+  key1 = FillGlobalPropertiesTable(
+             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key1)
+             .LastInsertId();
+  key1 = FillApplicationTable(temp_query,
+                              connection_key,
+                              grammarID,
+                              test_hash,
+                              hmiAppID,
+                              hmiLevel,
+                              ign_off_count,
+                              timeStamp,
+                              false,
+                              app_id2,
+                              device_id,
+                              key1).LastInsertId();
   FillApplicationCommandsArrayTable(temp_query, key1, key2);
   // Check before action
   const std::string select_count_image = "SELECT COUNT(*) FROM image;";
   ValToPosPair p1(0, app_id2);
   ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_image, kDeleteImageFromCommands, p1, p2, 1, 0,
-                   0);
+  CheckDeleteQuery(
+      select_count_image, kDeleteImageFromCommands, p1, p2, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeleteVrCommands_ExpectDataDeleted) {
@@ -1145,22 +1459,32 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteVrCommands_ExpectDataDeleted) {
   int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
   int64_t key2 = FillCommandTable(temp_query, 1, "tst_menu_name", 1, 2, key1)
                      .LastInsertId();
-  key1 = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                   "auto", key1).LastInsertId();
-  key1 = FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                              hmiAppID, hmiLevel, ign_off_count, timeStamp,
-                              false, app_id2, device_id, key1).LastInsertId();
+  key1 = FillGlobalPropertiesTable(
+             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key1)
+             .LastInsertId();
+  key1 = FillApplicationTable(temp_query,
+                              connection_key,
+                              grammarID,
+                              test_hash,
+                              hmiAppID,
+                              hmiLevel,
+                              ign_off_count,
+                              timeStamp,
+                              false,
+                              app_id2,
+                              device_id,
+                              key1).LastInsertId();
 
-  FillVRCommandsArrayTable(temp_query, "tst_vr_command", kVRCommandFromCommand,
-                           key2);
+  FillVRCommandsArrayTable(
+      temp_query, "tst_vr_command", kVRCommandFromCommand, key2);
   FillApplicationCommandsArrayTable(temp_query, key1, key2);
   // Check
   const std::string select_count_vrCommandsArray =
       "SELECT COUNT(*) FROM vrCommandsArray;";
   ValToPosPair p1(0, app_id2);
   ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_vrCommandsArray, kDeleteVrCommands, p1, p2, 1,
-                   0, 0);
+  CheckDeleteQuery(
+      select_count_vrCommandsArray, kDeleteVrCommands, p1, p2, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeleteCommands_ExpectDataDeleted) {
@@ -1170,11 +1494,21 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteCommands_ExpectDataDeleted) {
   int64_t key2 = FillCommandTable(temp_query, 1, "tst_menu_name", 1, 2, key1)
                      .LastInsertId();
 
-  key1 = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                   "auto", key1).LastInsertId();
-  key1 = FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                              hmiAppID, hmiLevel, ign_off_count, timeStamp,
-                              false, app_id2, device_id, key1).LastInsertId();
+  key1 = FillGlobalPropertiesTable(
+             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key1)
+             .LastInsertId();
+  key1 = FillApplicationTable(temp_query,
+                              connection_key,
+                              grammarID,
+                              test_hash,
+                              hmiAppID,
+                              hmiLevel,
+                              ign_off_count,
+                              timeStamp,
+                              false,
+                              app_id2,
+                              device_id,
+                              key1).LastInsertId();
 
   FillApplicationCommandsArrayTable(temp_query, key1, key2);
   // Check
@@ -1192,11 +1526,21 @@ TEST_F(ResumptionSqlQueriesTest,
   int64_t key2 = FillCommandTable(temp_query, 1, "tst_menu_name", 1, 2, key1)
                      .LastInsertId();
 
-  key1 = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                   "auto", key1).LastInsertId();
-  key1 = FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                              hmiAppID, hmiLevel, ign_off_count, timeStamp,
-                              false, app_id2, device_id, key1).LastInsertId();
+  key1 = FillGlobalPropertiesTable(
+             temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key1)
+             .LastInsertId();
+  key1 = FillApplicationTable(temp_query,
+                              connection_key,
+                              grammarID,
+                              test_hash,
+                              hmiAppID,
+                              hmiLevel,
+                              ign_off_count,
+                              timeStamp,
+                              false,
+                              app_id2,
+                              device_id,
+                              key1).LastInsertId();
 
   FillApplicationCommandsArrayTable(temp_query, key1, key2);
   // Check
@@ -1205,20 +1549,36 @@ TEST_F(ResumptionSqlQueriesTest,
   ValToPosPair p1(0, app_id2);
   ValToPosPair p2(1, device_id);
   CheckDeleteQuery(select_count_applicationCommandsArray,
-                   kDeleteApplicationCommandsArray, p1, p2, 1, 0, 0);
+                   kDeleteApplicationCommandsArray,
+                   p1,
+                   p2,
+                   1,
+                   0,
+                   0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeleteImageFromChoiceSet_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  int64_t key2 =
-      FillChoiceTable(temp_query, 2, "tst_menu_name", "secondary_txt",
-                      "tst_tert_text", key1).LastInsertId();
-  int64_t key3 =
-      FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                           hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                           app_id2, device_id, key1).LastInsertId();
+  int64_t key2 = FillChoiceTable(temp_query,
+                                 2,
+                                 "tst_menu_name",
+                                 "secondary_txt",
+                                 "tst_tert_text",
+                                 key1).LastInsertId();
+  int64_t key3 = FillApplicationTable(temp_query,
+                                      connection_key,
+                                      grammarID,
+                                      test_hash,
+                                      hmiAppID,
+                                      hmiLevel,
+                                      ign_off_count,
+                                      timeStamp,
+                                      false,
+                                      app_id2,
+                                      device_id,
+                                      key1).LastInsertId();
   int64_t key4 = FillApplicationChoiceSetTable(temp_query, 1, 2).LastInsertId();
   FillChoiceArrayTable(temp_query, key4, key2);
   FillApplicationChoiceSetArrayTable(temp_query, key4, key3);
@@ -1227,8 +1587,8 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteImageFromChoiceSet_ExpectDataDeleted) {
   const std::string select_count_image = "SELECT COUNT(*) FROM image;";
   ValToPosPair p1(0, app_id2);
   ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_image, kDeleteImageFromChoiceSet, p1, p2, 1, 0,
-                   0);
+  CheckDeleteQuery(
+      select_count_image, kDeleteImageFromChoiceSet, p1, p2, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -1236,14 +1596,25 @@ TEST_F(ResumptionSqlQueriesTest,
   // Arrange
   SQLQuery temp_query(db());
   int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  int64_t key2 = FillChoiceTable(temp_query, 1, "tst_menu_name", "second_text",
-                                 "tert_txt", key1).LastInsertId();
-  key1 = FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                              hmiAppID, hmiLevel, ign_off_count, timeStamp,
-                              false, app_id2, device_id, key1).LastInsertId();
+  int64_t key2 =
+      FillChoiceTable(
+          temp_query, 1, "tst_menu_name", "second_text", "tert_txt", key1)
+          .LastInsertId();
+  key1 = FillApplicationTable(temp_query,
+                              connection_key,
+                              grammarID,
+                              test_hash,
+                              hmiAppID,
+                              hmiLevel,
+                              ign_off_count,
+                              timeStamp,
+                              false,
+                              app_id2,
+                              device_id,
+                              key1).LastInsertId();
 
-  FillVRCommandsArrayTable(temp_query, "tst_vr_command", kVRCommandFromChoice,
-                           key2);
+  FillVRCommandsArrayTable(
+      temp_query, "tst_vr_command", kVRCommandFromChoice, key2);
 
   int64_t key3 = FillApplicationChoiceSetTable(temp_query, 1, 2).LastInsertId();
 
@@ -1255,19 +1626,35 @@ TEST_F(ResumptionSqlQueriesTest,
   // Check
   ValToPosPair p1(0, app_id2);
   ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_vrCommandsArray, kDeleteVrCommandsFromChoiceSet,
-                   p1, p2, 1, 0, 0);
+  CheckDeleteQuery(select_count_vrCommandsArray,
+                   kDeleteVrCommandsFromChoiceSet,
+                   p1,
+                   p2,
+                   1,
+                   0,
+                   0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeleteChoice_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  int64_t key2 = FillChoiceTable(temp_query, 1, "tst_menu_name", "second_text",
-                                 "tert_txt", key1).LastInsertId();
-  key1 = FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                              hmiAppID, hmiLevel, ign_off_count, timeStamp,
-                              false, app_id2, device_id, key1).LastInsertId();
+  int64_t key2 =
+      FillChoiceTable(
+          temp_query, 1, "tst_menu_name", "second_text", "tert_txt", key1)
+          .LastInsertId();
+  key1 = FillApplicationTable(temp_query,
+                              connection_key,
+                              grammarID,
+                              test_hash,
+                              hmiAppID,
+                              hmiLevel,
+                              ign_off_count,
+                              timeStamp,
+                              false,
+                              app_id2,
+                              device_id,
+                              key1).LastInsertId();
   int64_t key3 = FillApplicationChoiceSetTable(temp_query, 1, 2).LastInsertId();
   FillChoiceArrayTable(temp_query, key3, key2);
   FillApplicationChoiceSetArrayTable(temp_query, key3, key1);
@@ -1283,37 +1670,54 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteChoiceArray_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t choice_table_key =
-      FillChoiceTable(temp_query, 1, "tst_menu_name", "second_text", "tert_txt",
-                      0).LastInsertId();
+      FillChoiceTable(
+          temp_query, 1, "tst_menu_name", "second_text", "tert_txt", 0)
+          .LastInsertId();
 
   int64_t application_choiceset_table_key =
       FillApplicationChoiceSetTable(temp_query, 1, 2).LastInsertId();
-  int64_t application_table_key =
-      FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                           hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                           app_id2, device_id, 1).LastInsertId();
+  int64_t application_table_key = FillApplicationTable(temp_query,
+                                                       connection_key,
+                                                       grammarID,
+                                                       test_hash,
+                                                       hmiAppID,
+                                                       hmiLevel,
+                                                       ign_off_count,
+                                                       timeStamp,
+                                                       false,
+                                                       app_id2,
+                                                       device_id,
+                                                       1).LastInsertId();
   FillApplicationChoiceSetArrayTable(
       temp_query, application_choiceset_table_key, application_table_key);
-  FillChoiceArrayTable(temp_query, application_choiceset_table_key,
-                       choice_table_key);
+  FillChoiceArrayTable(
+      temp_query, application_choiceset_table_key, choice_table_key);
   // Check
   const std::string select_count_choice_array =
       "SELECT COUNT(*) FROM choiceArray;";
 
   ValToPosPair p1(0, app_id2);
   ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_choice_array, kDeleteChoiceArray, p1, p2, 1, 0,
-                   0);
+  CheckDeleteQuery(
+      select_count_choice_array, kDeleteChoiceArray, p1, p2, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
        kDeleteApplicationChoiceSet_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key1 =
-      FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                           hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                           app_id2, device_id, 1).LastInsertId();
+  int64_t key1 = FillApplicationTable(temp_query,
+                                      connection_key,
+                                      grammarID,
+                                      test_hash,
+                                      hmiAppID,
+                                      hmiLevel,
+                                      ign_off_count,
+                                      timeStamp,
+                                      false,
+                                      app_id2,
+                                      device_id,
+                                      1).LastInsertId();
 
   int64_t key2 = FillApplicationChoiceSetTable(temp_query, 1, 2).LastInsertId();
   FillApplicationChoiceSetArrayTable(temp_query, key2, key1);
@@ -1325,17 +1729,30 @@ TEST_F(ResumptionSqlQueriesTest,
   ValToPosPair p1(0, app_id2);
   ValToPosPair p2(1, device_id);
   CheckDeleteQuery(select_count_applicationChoiceSet,
-                   kDeleteApplicationChoiceSet, p1, p2, 1, 0, 0);
+                   kDeleteApplicationChoiceSet,
+                   p1,
+                   p2,
+                   1,
+                   0,
+                   0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
        kDeleteApplicationChoiceSetArray_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t key1 =
-      FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                           hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                           app_id2, device_id, 1).LastInsertId();
+  int64_t key1 = FillApplicationTable(temp_query,
+                                      connection_key,
+                                      grammarID,
+                                      test_hash,
+                                      hmiAppID,
+                                      hmiLevel,
+                                      ign_off_count,
+                                      timeStamp,
+                                      false,
+                                      app_id2,
+                                      device_id,
+                                      1).LastInsertId();
 
   int64_t key2 = FillApplicationChoiceSetTable(temp_query, 1, 2).LastInsertId();
   FillApplicationChoiceSetArrayTable(temp_query, key2, key1);
@@ -1346,7 +1763,12 @@ TEST_F(ResumptionSqlQueriesTest,
   ValToPosPair p1(0, app_id2);
   ValToPosPair p2(1, device_id);
   CheckDeleteQuery(select_count_applicationChoiceSetArray,
-                   kDeleteApplicationChoiceSetArray, p1, p2, 1, 0, 0);
+                   kDeleteApplicationChoiceSetArray,
+                   p1,
+                   p2,
+                   1,
+                   0,
+                   0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -1354,59 +1776,89 @@ TEST_F(ResumptionSqlQueriesTest,
   // Arrange
   SQLQuery temp_query(db());
   int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  int64_t key2 = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1,
-                                           1, 2, "auto", key1).LastInsertId();
+  int64_t key2 = FillGlobalPropertiesTable(
+                     temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key1)
+                     .LastInsertId();
   key1 = FillVRHelpItemTable(temp_query, "tst_text", 1, key1).LastInsertId();
   FillVRHelpItemArrayTable(temp_query, key2, key1);
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id2, device_id, key2);
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id2,
+                       device_id,
+                       key2);
   // Check
   const std::string select_count_image = "SELECT COUNT(*) FROM image;";
   ValToPosPair p1(0, app_id2);
   ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_image, kDeleteImageFromGlobalProperties, p1, p2,
-                   1, 0, 0);
+  CheckDeleteQuery(
+      select_count_image, kDeleteImageFromGlobalProperties, p1, p2, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeletevrHelpItem_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  int64_t key2 = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1,
-                                           1, 2, "auto", key1).LastInsertId();
+  int64_t key2 = FillGlobalPropertiesTable(
+                     temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key1)
+                     .LastInsertId();
   key1 = FillVRHelpItemTable(temp_query, "tst_text", 1, key1).LastInsertId();
   FillVRHelpItemArrayTable(temp_query, key2, key1);
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id2, device_id, key2);
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id2,
+                       device_id,
+                       key2);
   // Check
   const std::string select_count_vrhelp_item =
       "SELECT COUNT(*) FROM vrHelpItem;";
   ValToPosPair p1(0, app_id2);
   ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_vrhelp_item, kDeletevrHelpItem, p1, p2, 1, 0,
-                   0);
+  CheckDeleteQuery(
+      select_count_vrhelp_item, kDeletevrHelpItem, p1, p2, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeletevrHelpItemArray_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t key1 = FillImageTable(temp_query, 1, test_image).LastInsertId();
-  int64_t key2 = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1,
-                                           1, 2, "auto", key1).LastInsertId();
+  int64_t key2 = FillGlobalPropertiesTable(
+                     temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", key1)
+                     .LastInsertId();
   key1 = FillVRHelpItemTable(temp_query, "tst_text", 1, key1).LastInsertId();
   FillVRHelpItemArrayTable(temp_query, key2, key1);
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id2, device_id, key2);
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id2,
+                       device_id,
+                       key2);
   // Check
   const std::string select_count_vrhelp_item_array =
       "SELECT COUNT(*) FROM vrHelpItemArray;";
   ValToPosPair p1(0, app_id2);
   ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_vrhelp_item_array, kDeletevrHelpItemArray, p1,
-                   p2, 1, 0, 0);
+  CheckDeleteQuery(
+      select_count_vrhelp_item_array, kDeletevrHelpItemArray, p1, p2, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -1416,11 +1868,21 @@ TEST_F(ResumptionSqlQueriesTest,
   string character_list = "abcdefghij";
   int64_t key1 = FillTableLimitedCharacterListTable(temp_query, character_list)
                      .LastInsertId();
-  int64_t key2 = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1,
-                                           1, 2, "auto", 0).LastInsertId();
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, key2);
+  int64_t key2 =
+      FillGlobalPropertiesTable(
+          temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", 0).LastInsertId();
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       key2);
   FillCharacterArrayTable(temp_query, key2, key1);
   // Check
   const std::string select_count_tableLimitedCharacterList =
@@ -1428,7 +1890,12 @@ TEST_F(ResumptionSqlQueriesTest,
   ValToPosPair p1(0, app_id1);
   ValToPosPair p2(1, device_id);
   CheckDeleteQuery(select_count_tableLimitedCharacterList,
-                   kDeleteTableLimitedCharacterList, p1, p2, 1, 0, 0);
+                   kDeleteTableLimitedCharacterList,
+                   p1,
+                   p2,
+                   1,
+                   0,
+                   0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeleteCharacterArray_ExpectDataDeleted) {
@@ -1437,19 +1904,29 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteCharacterArray_ExpectDataDeleted) {
   string character_list = "abcdefghij";
   int64_t key1 = FillTableLimitedCharacterListTable(temp_query, character_list)
                      .LastInsertId();
-  int64_t key2 = FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1,
-                                           1, 2, "auto", 0).LastInsertId();
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, key2);
+  int64_t key2 =
+      FillGlobalPropertiesTable(
+          temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", 0).LastInsertId();
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       key2);
   FillCharacterArrayTable(temp_query, key2, key1);
   // Check
   const std::string select_count_characterArray =
       "SELECT COUNT(*) FROM characterArray;";
   ValToPosPair p1(0, app_id1);
   ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_characterArray, kDeleteCharacterArray, p1, p2,
-                   1, 0, 0);
+  CheckDeleteQuery(
+      select_count_characterArray, kDeleteCharacterArray, p1, p2, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeleteTTSChunk_ExpectDataDeleted) {
@@ -1458,12 +1935,21 @@ TEST_F(ResumptionSqlQueriesTest, kDeleteTTSChunk_ExpectDataDeleted) {
   int64_t tts_chunk_key =
       FillTTSChunkTable(temp_query, 1, "tst_text").LastInsertId();
   int64_t glob_prop_key =
-      FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                "auto", 0).LastInsertId();
+      FillGlobalPropertiesTable(
+          temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", 0).LastInsertId();
 
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, glob_prop_key);
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       glob_prop_key);
 
   FillHelpTimeoutPromptArrayTable(temp_query, glob_prop_key, tts_chunk_key, 1);
   // Check
@@ -1477,16 +1963,25 @@ TEST_F(ResumptionSqlQueriesTest,
        kDeleteFromApplicationTable_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, 1);
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       1);
   // Check
   const std::string select_count_application =
       "SELECT COUNT(*) FROM application;";
   ValToPosPair p1(0, app_id1);
   ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_application, kDeleteFromApplicationTable, p1,
-                   p2, 1, 0, 0);
+  CheckDeleteQuery(
+      select_count_application, kDeleteFromApplicationTable, p1, p2, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest,
@@ -1496,11 +1991,20 @@ TEST_F(ResumptionSqlQueriesTest,
   int64_t tts_chunk_key =
       FillTTSChunkTable(temp_query, 1, "tst_text").LastInsertId();
   int64_t glob_prop_key =
-      FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                "auto", 0).LastInsertId();
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, glob_prop_key);
+      FillGlobalPropertiesTable(
+          temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", 0).LastInsertId();
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       glob_prop_key);
 
   FillHelpTimeoutPromptArrayTable(temp_query, glob_prop_key, tts_chunk_key, 1);
   // Check
@@ -1509,25 +2013,39 @@ TEST_F(ResumptionSqlQueriesTest,
   ValToPosPair p1(0, app_id1);
   ValToPosPair p2(1, device_id);
   CheckDeleteQuery(select_count_helpTimeoutPromptArray,
-                   kDeleteHelpTimeoutPromptArray, p1, p2, 1, 0, 0);
+                   kDeleteHelpTimeoutPromptArray,
+                   p1,
+                   p2,
+                   1,
+                   0,
+                   0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kDeleteGlobalProperties_ExpectDataDeleted) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t glob_prop_key =
-      FillGlobalPropertiesTable(temp_query, "vrHelp", "menuTitle", 1, 1, 2,
-                                "auto", 0).LastInsertId();
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, glob_prop_key);
+      FillGlobalPropertiesTable(
+          temp_query, "vrHelp", "menuTitle", 1, 1, 2, "auto", 0).LastInsertId();
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       glob_prop_key);
   // Check
   const std::string select_count_globalProperties =
       "SELECT COUNT(*) FROM globalProperties;";
   ValToPosPair p1(0, app_id1);
   ValToPosPair p2(1, device_id);
-  CheckDeleteQuery(select_count_globalProperties, kDeleteGlobalProperties, p1,
-                   p2, 1, 0, 0);
+  CheckDeleteQuery(
+      select_count_globalProperties, kDeleteGlobalProperties, p1, p2, 1, 0, 0);
 }
 
 TEST_F(ResumptionSqlQueriesTest, kSelectCountImage_ExpectDataCorrect) {
@@ -1783,8 +2301,8 @@ TEST_F(ResumptionSqlQueriesTest,
 TEST_F(ResumptionSqlQueriesTest, kInsertGlobalProperties_ExpectDataInserted) {
   // Arrange
   SQLQuery temp_query(db());
-  FillGlobalPropertiesTable(temp_query, "vr_title", "menu_title", 2, 1, 3,
-                            "auto", 7);
+  FillGlobalPropertiesTable(
+      temp_query, "vr_title", "menu_title", 2, 1, 3, "auto", 7);
   // Checks
   const std::string select_count_globalProperties =
       "SELECT COUNT(*) FROM globalProperties;";
@@ -1911,9 +2429,18 @@ TEST_F(ResumptionSqlQueriesTest, kInsertTTSChunk_ExpectDataInserted) {
 TEST_F(ResumptionSqlQueriesTest, kInsertApplication_ExpectDataInserted) {
   // Arrange
   SQLQuery temp_query(db());
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, 9);
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       9);
   // Checks
   const std::string select_count_application =
       "SELECT COUNT(*) FROM application;";
@@ -1950,10 +2477,18 @@ TEST_F(ResumptionSqlQueriesTest, kInsertApplication_ExpectDataInserted) {
 TEST_F(ResumptionSqlQueriesTest, kSelectCountFiles_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t app_key =
-      FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                           hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                           app_id1, device_id, 9).LastInsertId();
+  int64_t app_key = FillApplicationTable(temp_query,
+                                         connection_key,
+                                         grammarID,
+                                         test_hash,
+                                         hmiAppID,
+                                         hmiLevel,
+                                         ign_off_count,
+                                         timeStamp,
+                                         false,
+                                         app_id1,
+                                         device_id,
+                                         9).LastInsertId();
   int64_t file_key =
       FillFileTable(temp_query, 1, true, true, "tst_name").LastInsertId();
   FillApplicationFilesArrayTable(temp_query, app_key, file_key);
@@ -1967,10 +2502,18 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCountFiles_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kSelectFiles_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t app_key =
-      FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                           hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                           app_id1, device_id, 9).LastInsertId();
+  int64_t app_key = FillApplicationTable(temp_query,
+                                         connection_key,
+                                         grammarID,
+                                         test_hash,
+                                         hmiAppID,
+                                         hmiLevel,
+                                         ign_off_count,
+                                         timeStamp,
+                                         false,
+                                         app_id1,
+                                         device_id,
+                                         9).LastInsertId();
   int64_t file_key =
       FillFileTable(temp_query, 1, true, true, "tst_name").LastInsertId();
   FillApplicationFilesArrayTable(temp_query, app_key, file_key);
@@ -1986,10 +2529,18 @@ TEST_F(ResumptionSqlQueriesTest, kSelectFiles_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kSelectCountSubMenu_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t app_key =
-      FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                           hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                           app_id1, device_id, 9).LastInsertId();
+  int64_t app_key = FillApplicationTable(temp_query,
+                                         connection_key,
+                                         grammarID,
+                                         test_hash,
+                                         hmiAppID,
+                                         hmiLevel,
+                                         ign_off_count,
+                                         timeStamp,
+                                         false,
+                                         app_id1,
+                                         device_id,
+                                         9).LastInsertId();
   int64_t submenu_key =
       FillSubMenuTable(temp_query, 1, "menu_name", 1).LastInsertId();
   FillApplicationSubMenuArrayTable(temp_query, app_key, submenu_key);
@@ -2002,10 +2553,18 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCountSubMenu_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kSelectSubMenu_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t app_key =
-      FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                           hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                           app_id1, device_id, 9).LastInsertId();
+  int64_t app_key = FillApplicationTable(temp_query,
+                                         connection_key,
+                                         grammarID,
+                                         test_hash,
+                                         hmiAppID,
+                                         hmiLevel,
+                                         ign_off_count,
+                                         timeStamp,
+                                         false,
+                                         app_id1,
+                                         device_id,
+                                         9).LastInsertId();
   int64_t submenu_key =
       FillSubMenuTable(temp_query, 1, "menu_name", 1).LastInsertId();
 
@@ -2021,10 +2580,18 @@ TEST_F(ResumptionSqlQueriesTest, kSelectSubMenu_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kSelectCountCommands_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t app_key =
-      FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                           hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                           app_id1, device_id, 9).LastInsertId();
+  int64_t app_key = FillApplicationTable(temp_query,
+                                         connection_key,
+                                         grammarID,
+                                         test_hash,
+                                         hmiAppID,
+                                         hmiLevel,
+                                         ign_off_count,
+                                         timeStamp,
+                                         false,
+                                         app_id1,
+                                         device_id,
+                                         9).LastInsertId();
   int64_t command_key =
       FillCommandTable(temp_query, 1, "menu_name", 1, 2, 5).LastInsertId();
   FillApplicationCommandsArrayTable(temp_query, app_key, command_key);
@@ -2037,20 +2604,30 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCountCommands_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kSelectCommandsFromCommand_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t app_key =
-      FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                           hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                           app_id1, device_id, 9).LastInsertId();
+  int64_t app_key = FillApplicationTable(temp_query,
+                                         connection_key,
+                                         grammarID,
+                                         test_hash,
+                                         hmiAppID,
+                                         hmiLevel,
+                                         ign_off_count,
+                                         timeStamp,
+                                         false,
+                                         app_id1,
+                                         device_id,
+                                         9).LastInsertId();
   int64_t image_key = FillImageTable(temp_query, 2, "tst_image").LastInsertId();
 
-  FillChoiceTable(temp_query, 1, "menu_name", "sec_text", "tert_text",
-                  image_key).LastInsertId();
-  int64_t command_key = FillCommandTable(temp_query, 1, "menu_name", 1, 2,
-                                         image_key).LastInsertId();
+  FillChoiceTable(
+      temp_query, 1, "menu_name", "sec_text", "tert_text", image_key)
+      .LastInsertId();
+  int64_t command_key =
+      FillCommandTable(temp_query, 1, "menu_name", 1, 2, image_key)
+          .LastInsertId();
 
   FillApplicationCommandsArrayTable(temp_query, app_key, command_key);
-  FillVRCommandsArrayTable(temp_query, "best", kVRCommandFromCommand,
-                           command_key);
+  FillVRCommandsArrayTable(
+      temp_query, "best", kVRCommandFromCommand, command_key);
   ValToPosPair p1(0, app_id1);
   ValToPosPair p2(1, device_id);
   // Check
@@ -2067,20 +2644,31 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCommandsFromCommand_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kSelectCommandsFromChoice_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t app_key =
-      FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                           hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                           app_id1, device_id, 9).LastInsertId();
+  int64_t app_key = FillApplicationTable(temp_query,
+                                         connection_key,
+                                         grammarID,
+                                         test_hash,
+                                         hmiAppID,
+                                         hmiLevel,
+                                         ign_off_count,
+                                         timeStamp,
+                                         false,
+                                         app_id1,
+                                         device_id,
+                                         9).LastInsertId();
   int64_t image_key = FillImageTable(temp_query, 2, "tst_image").LastInsertId();
 
-  int64_t choice_key = FillChoiceTable(temp_query, 1, "menu_name", "sec_text",
-                                       "tert_text", image_key).LastInsertId();
-  int64_t command_key = FillCommandTable(temp_query, 1, "menu_name", 1, 2,
-                                         image_key).LastInsertId();
+  int64_t choice_key =
+      FillChoiceTable(
+          temp_query, 1, "menu_name", "sec_text", "tert_text", image_key)
+          .LastInsertId();
+  int64_t command_key =
+      FillCommandTable(temp_query, 1, "menu_name", 1, 2, image_key)
+          .LastInsertId();
 
   FillApplicationCommandsArrayTable(temp_query, app_key, command_key);
-  FillVRCommandsArrayTable(temp_query, "best", kVRCommandFromChoice,
-                           choice_key);
+  FillVRCommandsArrayTable(
+      temp_query, "best", kVRCommandFromChoice, choice_key);
   ValToPosPair p1(0, app_id1);
   ValToPosPair p2(1, device_id);
   const std::string kChecksVrCommandFromSelectCommand =
@@ -2109,10 +2697,18 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCommandsFromChoice_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kSelectCountSubscriptions_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t app_key =
-      FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                           hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                           app_id1, device_id, 9).LastInsertId();
+  int64_t app_key = FillApplicationTable(temp_query,
+                                         connection_key,
+                                         grammarID,
+                                         test_hash,
+                                         hmiAppID,
+                                         hmiLevel,
+                                         ign_off_count,
+                                         timeStamp,
+                                         false,
+                                         app_id1,
+                                         device_id,
+                                         9).LastInsertId();
   FillAppSubscriptionsArrayTable(temp_query, 2, 3, app_key);
   ValToPosPair p1(0, app_id1);
   ValToPosPair p2(1, device_id);
@@ -2123,10 +2719,18 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCountSubscriptions_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kSelectSubscriptions_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t app_key =
-      FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                           hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                           app_id1, device_id, 9).LastInsertId();
+  int64_t app_key = FillApplicationTable(temp_query,
+                                         connection_key,
+                                         grammarID,
+                                         test_hash,
+                                         hmiAppID,
+                                         hmiLevel,
+                                         ign_off_count,
+                                         timeStamp,
+                                         false,
+                                         app_id1,
+                                         device_id,
+                                         9).LastInsertId();
   FillAppSubscriptionsArrayTable(temp_query, 2, 3, app_key);
   ValToPosPair p1(0, app_id1);
   ValToPosPair p2(1, device_id);
@@ -2138,10 +2742,18 @@ TEST_F(ResumptionSqlQueriesTest, kSelectSubscriptions_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kSelectCountChoiceSet_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t app_key =
-      FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                           hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                           app_id1, device_id, 9).LastInsertId();
+  int64_t app_key = FillApplicationTable(temp_query,
+                                         connection_key,
+                                         grammarID,
+                                         test_hash,
+                                         hmiAppID,
+                                         hmiLevel,
+                                         ign_off_count,
+                                         timeStamp,
+                                         false,
+                                         app_id1,
+                                         device_id,
+                                         9).LastInsertId();
   FillApplicationChoiceSetArrayTable(temp_query, 2, app_key);
   ValToPosPair p1(0, app_id1);
   ValToPosPair p2(1, device_id);
@@ -2152,20 +2764,30 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCountChoiceSet_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kSelectChoiceSets_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  int64_t app_key =
-      FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                           hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                           app_id1, device_id, 9).LastInsertId();
+  int64_t app_key = FillApplicationTable(temp_query,
+                                         connection_key,
+                                         grammarID,
+                                         test_hash,
+                                         hmiAppID,
+                                         hmiLevel,
+                                         ign_off_count,
+                                         timeStamp,
+                                         false,
+                                         app_id1,
+                                         device_id,
+                                         9).LastInsertId();
   int64_t image_key = FillImageTable(temp_query, 2, "tst_image").LastInsertId();
-  int64_t choice_key = FillChoiceTable(temp_query, 1, "menu_name", "sec_text",
-                                       "tert_text", image_key).LastInsertId();
+  int64_t choice_key =
+      FillChoiceTable(
+          temp_query, 1, "menu_name", "sec_text", "tert_text", image_key)
+          .LastInsertId();
   int64_t app_choice_set_key =
       FillApplicationChoiceSetTable(temp_query, 23, 2).LastInsertId();
 
   FillChoiceArrayTable(temp_query, app_choice_set_key, choice_key);
   FillApplicationChoiceSetArrayTable(temp_query, app_choice_set_key, app_key);
-  FillVRCommandsArrayTable(temp_query, "best", kVRCommandFromChoice,
-                           choice_key);
+  FillVRCommandsArrayTable(
+      temp_query, "best", kVRCommandFromChoice, choice_key);
 
   ValToPosPair p1(0, app_id1);
   ValToPosPair p2(1, device_id);
@@ -2199,11 +2821,21 @@ TEST_F(ResumptionSqlQueriesTest,
   // Arrange
   SQLQuery temp_query(db());
   int64_t glob_prop_key =
-      FillGlobalPropertiesTable(temp_query, "tst_vr_title", "tst_menu", 2, 3, 3,
-                                "auto", 5).LastInsertId();
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, glob_prop_key).LastInsertId();
+      FillGlobalPropertiesTable(
+          temp_query, "tst_vr_title", "tst_menu", 2, 3, 3, "auto", 5)
+          .LastInsertId();
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       glob_prop_key).LastInsertId();
 
   // Check
   ValToPosPair p1(0, app_id1);
@@ -2216,11 +2848,21 @@ TEST_F(ResumptionSqlQueriesTest, kSelectGlobalProperties_ExpectDataCorrect) {
   SQLQuery temp_query(db());
   int64_t image_key = FillImageTable(temp_query, 2, "tst_image").LastInsertId();
   int64_t glob_prop_key =
-      FillGlobalPropertiesTable(temp_query, "tst_vr_title", "tst_menu", 2, 3, 3,
-                                "auto", image_key).LastInsertId();
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, glob_prop_key).LastInsertId();
+      FillGlobalPropertiesTable(
+          temp_query, "tst_vr_title", "tst_menu", 2, 3, 3, "auto", image_key)
+          .LastInsertId();
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       glob_prop_key).LastInsertId();
   FillHelpTimeoutPromptArrayTable(temp_query, glob_prop_key, 3, 7);
 
   // Check
@@ -2243,8 +2885,9 @@ TEST_F(ResumptionSqlQueriesTest, kChecksVrHelpItem_ExpectDataCorrect) {
   SQLQuery temp_query(db());
   int64_t image_key = FillImageTable(temp_query, 2, "tst_image").LastInsertId();
   int64_t glob_prop_key =
-      FillGlobalPropertiesTable(temp_query, "tst_vr_title", "tst_menu", 2, 3, 3,
-                                "auto", image_key).LastInsertId();
+      FillGlobalPropertiesTable(
+          temp_query, "tst_vr_title", "tst_menu", 2, 3, 3, "auto", image_key)
+          .LastInsertId();
   int64_t vr_help_item_key =
       FillVRHelpItemTable(temp_query, "tst_text", 2, image_key).LastInsertId();
   FillVRHelpItemArrayTable(temp_query, glob_prop_key, vr_help_item_key);
@@ -2259,8 +2902,9 @@ TEST_F(ResumptionSqlQueriesTest, kSelectVrHelpItem_ExpectDataCorrect) {
   SQLQuery temp_query(db());
   int64_t image_key = FillImageTable(temp_query, 2, "tst_image").LastInsertId();
   int64_t glob_prop_key =
-      FillGlobalPropertiesTable(temp_query, "tst_vr_title", "tst_menu", 2, 3, 3,
-                                "auto", image_key).LastInsertId();
+      FillGlobalPropertiesTable(
+          temp_query, "tst_vr_title", "tst_menu", 2, 3, 3, "auto", image_key)
+          .LastInsertId();
   int64_t vr_help_item_key =
       FillVRHelpItemTable(temp_query, "tst_text", 2, image_key).LastInsertId();
   FillVRHelpItemArrayTable(temp_query, glob_prop_key, vr_help_item_key);
@@ -2277,8 +2921,9 @@ TEST_F(ResumptionSqlQueriesTest, kChecksCharacter_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t glob_prop_key =
-      FillGlobalPropertiesTable(temp_query, "tst_vr_title", "tst_menu", 2, 3, 3,
-                                "auto", 2).LastInsertId();
+      FillGlobalPropertiesTable(
+          temp_query, "tst_vr_title", "tst_menu", 2, 3, 3, "auto", 2)
+          .LastInsertId();
   string character_list = "abcdefghijkl";
   int64_t lim_char_list_key = FillTableLimitedCharacterListTable(
                                   temp_query, character_list).LastInsertId();
@@ -2293,8 +2938,9 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCharacter_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
   int64_t glob_prop_key =
-      FillGlobalPropertiesTable(temp_query, "tst_vr_title", "tst_menu", 2, 3, 3,
-                                "auto", 2).LastInsertId();
+      FillGlobalPropertiesTable(
+          temp_query, "tst_vr_title", "tst_menu", 2, 3, 3, "auto", 2)
+          .LastInsertId();
   string character_list = "abcdefghijkl";
   int64_t lim_char_list_key = FillTableLimitedCharacterListTable(
                                   temp_query, character_list).LastInsertId();
@@ -2308,13 +2954,31 @@ TEST_F(ResumptionSqlQueriesTest, kSelectCharacter_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kSelectAllApps_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, 1);
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       1);
 
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id2, device_id2, 2);
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id2,
+                       device_id2,
+                       2);
   // Checks
   SQLQuery query(db());
   EXPECT_TRUE(query.Prepare(kSelectAllApps) && query.Exec());
@@ -2328,9 +2992,18 @@ TEST_F(ResumptionSqlQueriesTest, kSelectAllApps_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kUpdateApplicationData_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, false,
-                       app_id1, device_id, 1);
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       false,
+                       app_id1,
+                       device_id,
+                       1);
   string select_hmi_level_and_time_stamp =
       "SELECT `hmiLevel`, `timeStamp`FROM `application` "
       "WHERE `appID` = ? AND `deviceID` = ?;";
@@ -2384,9 +3057,18 @@ TEST_F(ResumptionSqlQueriesTest, kSelectTTSChunk_ExpectDataCorrect) {
 TEST_F(ResumptionSqlQueriesTest, kSelectAppTable_ExpectDataCorrect) {
   // Arrange
   SQLQuery temp_query(db());
-  FillApplicationTable(temp_query, connection_key, grammarID, test_hash,
-                       hmiAppID, hmiLevel, ign_off_count, timeStamp, true,
-                       app_id1, device_id, 1);
+  FillApplicationTable(temp_query,
+                       connection_key,
+                       grammarID,
+                       test_hash,
+                       hmiAppID,
+                       hmiLevel,
+                       ign_off_count,
+                       timeStamp,
+                       true,
+                       app_id1,
+                       device_id,
+                       1);
 
   ValToPosPair p1(0, app_id1);
   ValToPosPair p2(1, device_id);

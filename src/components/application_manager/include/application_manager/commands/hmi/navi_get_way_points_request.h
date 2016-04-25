@@ -42,31 +42,30 @@ namespace commands {
 /**
  * @brief NaviGetWayPointsRequest command class
  **/
-class NaviGetWayPointsRequest
-    : public RequestToHMI {
-public:
-    /**
-     * @brief NaviGetWayPointsRequest class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    NaviGetWayPointsRequest(const MessageSharedPtr& message,
-                            ApplicationManager& application_manager);
-    /**
-     * @brief NaviGetWayPointsRequest class destructor
-     **/
-    virtual ~NaviGetWayPointsRequest();
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run() OVERRIDE;
+class NaviGetWayPointsRequest : public RequestToHMI {
+ public:
+  /**
+   * @brief NaviGetWayPointsRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  NaviGetWayPointsRequest(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
+  /**
+   * @brief NaviGetWayPointsRequest class destructor
+   **/
+  virtual ~NaviGetWayPointsRequest();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run() OVERRIDE;
 
-private:
+ private:
   DISALLOW_COPY_AND_ASSIGN(NaviGetWayPointsRequest);
 };
 
-} // namespace commands
+}  // namespace commands
 
-} // namespace application_manager
+}  // namespace application_manager
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_GET_WAY_POINTS_REQUEST_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_GET_WAY_POINTS_REQUEST_H_

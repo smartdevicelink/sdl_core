@@ -50,7 +50,8 @@ class OnVIOdometerNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnVIOdometerNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnVIOdometerNotification(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
   /**
    * @brief OnVIOdometerNotification class destructor

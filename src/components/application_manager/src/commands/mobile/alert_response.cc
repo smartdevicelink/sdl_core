@@ -41,12 +41,11 @@ namespace application_manager {
 
 namespace commands {
 
-AlertResponse::AlertResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+AlertResponse::AlertResponse(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-AlertResponse::~AlertResponse() {
-}
+AlertResponse::~AlertResponse() {}
 
 void AlertResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

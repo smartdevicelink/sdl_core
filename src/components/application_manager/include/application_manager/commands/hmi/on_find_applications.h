@@ -49,7 +49,8 @@ class OnFindApplications : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnFindApplications(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnFindApplications(const MessageSharedPtr& message,
+                     ApplicationManager& application_manager);
 
   /**
    * @brief OnFindApplications class destructor

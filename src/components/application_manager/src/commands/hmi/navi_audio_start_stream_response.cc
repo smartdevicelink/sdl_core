@@ -31,17 +31,15 @@
  */
 #include "application_manager/commands/hmi/navi_audio_start_stream_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
-AudioStartStreamResponse::AudioStartStreamResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+AudioStartStreamResponse::AudioStartStreamResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-AudioStartStreamResponse::~AudioStartStreamResponse() {
-}
+AudioStartStreamResponse::~AudioStartStreamResponse() {}
 
 void AudioStartStreamResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

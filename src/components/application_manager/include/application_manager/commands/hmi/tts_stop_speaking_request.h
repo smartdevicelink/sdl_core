@@ -49,7 +49,8 @@ class TTSStopSpeakingRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  TTSStopSpeakingRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  TTSStopSpeakingRequest(const MessageSharedPtr& message,
+                         ApplicationManager& application_manager);
 
   /**
    * @brief TTSStopSpeakingRequest class destructor

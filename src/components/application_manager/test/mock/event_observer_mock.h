@@ -41,9 +41,12 @@ namespace test {
 namespace components {
 namespace event_engine_test {
 
-class MockEventObserver : public application_manager::event_engine::EventObserver {
+class MockEventObserver
+    : public application_manager::event_engine::EventObserver {
  public:
-    MockEventObserver(::application_manager::event_engine::EventDispatcher& event_dispatcher): application_manager::event_engine::EventObserver(event_dispatcher){}
+  MockEventObserver(
+      ::application_manager::event_engine::EventDispatcher& event_dispatcher)
+      : application_manager::event_engine::EventObserver(event_dispatcher) {}
   MOCK_METHOD1(on_event,
                void(const application_manager::event_engine::Event& event));
 };
@@ -52,5 +55,4 @@ class MockEventObserver : public application_manager::event_engine::EventObserve
 }  // namespace components
 }  // namespace test
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_MOCK_EVENT_OBSERVER_MOCK_H_
-
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_MOCK_EVENT_OBSERVER_MOCK_H_

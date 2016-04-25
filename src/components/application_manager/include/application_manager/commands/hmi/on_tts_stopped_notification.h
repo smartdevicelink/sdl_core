@@ -49,7 +49,8 @@ class OnTTSStoppedNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject OnTTSStartedNotificationmessage
    **/
-  OnTTSStoppedNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnTTSStoppedNotification(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
   /**
    * @brief OnTTSStoppedNotification class destructor

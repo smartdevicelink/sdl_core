@@ -51,7 +51,8 @@ class DiagnosticMessageRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  DiagnosticMessageRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  DiagnosticMessageRequest(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
   /**
    * @brief DiagnosticMessageRequest class destructor

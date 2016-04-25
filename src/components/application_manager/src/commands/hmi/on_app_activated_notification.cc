@@ -41,15 +41,14 @@ namespace commands {
 
 OnAppActivatedNotification::OnAppActivatedNotification(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : NotificationFromHMI(message, application_manager) {
-}
+    : NotificationFromHMI(message, application_manager) {}
 
-OnAppActivatedNotification::~OnAppActivatedNotification() {
-}
+OnAppActivatedNotification::~OnAppActivatedNotification() {}
 
 void OnAppActivatedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_OnAppActivated);
+  event_engine::Event event(
+      hmi_apis::FunctionID::BasicCommunication_OnAppActivated);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());
 }
@@ -57,4 +56,3 @@ void OnAppActivatedNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

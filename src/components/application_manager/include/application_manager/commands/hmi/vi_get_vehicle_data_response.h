@@ -50,7 +50,8 @@ class VIGetVehicleDataResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  VIGetVehicleDataResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  VIGetVehicleDataResponse(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
   /**
    * @brief VIGetVehicleDataResponse class destructor

@@ -49,7 +49,8 @@ class ClosePopupResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  ClosePopupResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  ClosePopupResponse(const MessageSharedPtr& message,
+                     ApplicationManager& application_manager);
 
   /**
    * @brief ClosePopupResponse class destructor

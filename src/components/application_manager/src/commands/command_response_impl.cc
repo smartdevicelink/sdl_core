@@ -41,8 +41,7 @@ CommandResponseImpl::CommandResponseImpl(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandImpl(message, application_manager) {}
 
-CommandResponseImpl::~CommandResponseImpl() {
-}
+CommandResponseImpl::~CommandResponseImpl() {}
 
 bool CommandResponseImpl::Init() {
   return true;
@@ -52,11 +51,12 @@ bool CommandResponseImpl::CleanUp() {
   return true;
 }
 
-void CommandResponseImpl::Run() {
-}
+void CommandResponseImpl::Run() {}
 
 void CommandResponseImpl::SendResponse(
-    bool success, const mobile_apis::Result::eType& result_code, bool final_message) {
+    bool success,
+    const mobile_apis::Result::eType& result_code,
+    bool final_message) {
   LOG4CXX_INFO(logger_, "Trying to send response");
 
   (*message_)[strings::params][strings::protocol_type] = mobile_protocol_type_;

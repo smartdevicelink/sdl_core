@@ -50,7 +50,8 @@ class OnResumeAudioSourceNotification : public NotificationToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnResumeAudioSourceNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnResumeAudioSourceNotification(const MessageSharedPtr& message,
+                                  ApplicationManager& application_manager);
 
   /**
    * @brief OnResumeAudioSourceNotification class destructor
@@ -63,7 +64,6 @@ class OnResumeAudioSourceNotification : public NotificationToHMI {
   virtual void Run();
 
  private:
-
   DISALLOW_COPY_AND_ASSIGN(OnResumeAudioSourceNotification);
 };
 

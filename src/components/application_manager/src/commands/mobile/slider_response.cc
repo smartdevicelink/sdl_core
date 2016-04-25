@@ -33,17 +33,15 @@
 
 #include "application_manager/commands/mobile/slider_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
-SliderResponse::SliderResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+SliderResponse::SliderResponse(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-SliderResponse::~SliderResponse() {
-}
+SliderResponse::~SliderResponse() {}
 
 void SliderResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

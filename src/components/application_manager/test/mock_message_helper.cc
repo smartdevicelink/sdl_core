@@ -121,16 +121,18 @@ smart_objects::SmartObjectSPtr CreateDeviceListSO(
 }
 
 void MessageHelper::SendOnAppPermissionsChangedNotification(
-    uint32_t connection_key, const policy::AppPermissions& permissions,
+    uint32_t connection_key,
+    const policy::AppPermissions& permissions,
     ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()
-      ->SendOnAppPermissionsChangedNotification(connection_key, permissions,
-                                                app_mngr);
+      ->SendOnAppPermissionsChangedNotification(
+          connection_key, permissions, app_mngr);
 }
 
 void MessageHelper::SendGetUserFriendlyMessageResponse(
     const std::vector<policy::UserFriendlyMessage>& msg,
-    uint32_t correlation_id, ApplicationManager& app_mngr) {
+    uint32_t correlation_id,
+    ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()->SendGetUserFriendlyMessageResponse(
       msg, correlation_id, app_mngr);
 }
@@ -153,7 +155,8 @@ void MessageHelper::SendGetSystemInfoRequest(ApplicationManager& app_mngr) {
 }
 
 void MessageHelper::CreateGetVehicleDataRequest(
-    uint32_t correlation_id, const std::vector<std::string>& params,
+    uint32_t correlation_id,
+    const std::vector<std::string>& params,
     ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()->CreateGetVehicleDataRequest(
       correlation_id, params, app_mngr);
@@ -161,13 +164,15 @@ void MessageHelper::CreateGetVehicleDataRequest(
 
 void MessageHelper::SendGetListOfPermissionsResponse(
     const std::vector<policy::FunctionalGroupPermission>& permissions,
-    uint32_t correlation_id, ApplicationManager& app_mngr) {
+    uint32_t correlation_id,
+    ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()->SendGetListOfPermissionsResponse(
       permissions, correlation_id, app_mngr);
 }
 
 void MessageHelper::SendOnPermissionsChangeNotification(
-    uint32_t connection_key, const policy::Permissions& permissions,
+    uint32_t connection_key,
+    const policy::Permissions& permissions,
     ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()->SendOnPermissionsChangeNotification(
       connection_key, permissions, app_mngr);
@@ -183,17 +188,19 @@ void MessageHelper::SendPolicySnapshotNotification(
 }
 
 void MessageHelper::SendSDLActivateAppResponse(
-    policy::AppPermissions& permissions, uint32_t correlation_id,
+    policy::AppPermissions& permissions,
+    uint32_t correlation_id,
     ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()->SendSDLActivateAppResponse(
       permissions, correlation_id, app_mngr);
 }
 
-void MessageHelper::SendPolicyUpdate(const std::string& file_path, int timeout,
+void MessageHelper::SendPolicyUpdate(const std::string& file_path,
+                                     int timeout,
                                      const std::vector<int>& retries,
                                      ApplicationManager& app_mngr) {
-  MockMessageHelper::message_helper_mock()->SendPolicyUpdate(file_path, timeout,
-                                                             retries, app_mngr);
+  MockMessageHelper::message_helper_mock()->SendPolicyUpdate(
+      file_path, timeout, retries, app_mngr);
 }
 
 void MessageHelper::SendUpdateSDLResponse(const std::string& result,
@@ -203,9 +210,10 @@ void MessageHelper::SendUpdateSDLResponse(const std::string& result,
       result, correlation_id, app_mngr);
 }
 
-hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(const std::string& language) {
-   return MockMessageHelper::message_helper_mock()->CommonLanguageFromString(
-        language);
+hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
+    const std::string& language) {
+  return MockMessageHelper::message_helper_mock()->CommonLanguageFromString(
+      language);
 }
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateModuleInfoSO(
@@ -262,7 +270,8 @@ smart_objects::SmartObjectList MessageHelper::GetIVISubscriptionRequests(
 }
 
 mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
-    smart_objects::SmartObject& message, ApplicationConstSharedPtr app,
+    smart_objects::SmartObject& message,
+    ApplicationConstSharedPtr app,
     ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()->VerifyImageFiles(
       message, app, app_mngr);
@@ -276,10 +285,15 @@ smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
     ApplicationConstSharedPtr app,
     const protocol_handler::SessionObserver& session_observer,
     const policy::PolicyHandlerInterface& policy_handler,
-    hmi_apis::Common_HMILevel::eType level, bool send_policy_priority,
+    hmi_apis::Common_HMILevel::eType level,
+    bool send_policy_priority,
     ApplicationManager& app_mngr) {
   return MockMessageHelper::message_helper_mock()->GetBCActivateAppRequestToHMI(
-      app, session_observer, policy_handler, level, send_policy_priority,
+      app,
+      session_observer,
+      policy_handler,
+      level,
+      send_policy_priority,
       app_mngr);
 }
 

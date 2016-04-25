@@ -40,11 +40,9 @@ namespace commands {
 
 UIDeleteCommandResponse::UIDeleteCommandResponse(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+    : ResponseFromHMI(message, application_manager) {}
 
-UIDeleteCommandResponse::~UIDeleteCommandResponse() {
-}
+UIDeleteCommandResponse::~UIDeleteCommandResponse() {}
 
 void UIDeleteCommandResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

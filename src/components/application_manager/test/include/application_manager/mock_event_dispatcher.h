@@ -42,26 +42,27 @@ namespace test {
 namespace components {
 namespace event_engine_test {
 
-
-class MockEventDispatcher : public ::application_manager::event_engine::EventDispatcher {
+class MockEventDispatcher
+    : public ::application_manager::event_engine::EventDispatcher {
  public:
   MOCK_METHOD1(raise_event,
-      void(const ::application_manager::event_engine::Event& event));
-  MOCK_METHOD3(add_observer,
+               void(const ::application_manager::event_engine::Event& event));
+  MOCK_METHOD3(
+      add_observer,
       void(const ::application_manager::event_engine::Event::EventID& event_id,
            int32_t hmi_correlation_id,
            ::application_manager::event_engine::EventObserver& observer));
-  MOCK_METHOD2(remove_observer,
+  MOCK_METHOD2(
+      remove_observer,
       void(const ::application_manager::event_engine::Event::EventID& event_id,
            ::application_manager::event_engine::EventObserver& observer));
-  MOCK_METHOD1(remove_observer,
+  MOCK_METHOD1(
+      remove_observer,
       void(::application_manager::event_engine::EventObserver& observer));
 };
-
 
 }  // namespace event_engine_test
 }  // namespace components
 }  // namespace test
-
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_EVENT_DISPATCHER_H_

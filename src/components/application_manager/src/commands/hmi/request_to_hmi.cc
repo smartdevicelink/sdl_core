@@ -32,8 +32,6 @@
 
 #include "application_manager/commands/hmi/request_to_hmi.h"
 
-
-
 namespace application_manager {
 
 namespace commands {
@@ -45,8 +43,7 @@ RequestToHMI::RequestToHMI(const MessageSharedPtr& message,
   ReplaceMobileByHMIAppId(*(message.get()));
 }
 
-RequestToHMI::~RequestToHMI() {
-}
+RequestToHMI::~RequestToHMI() {}
 
 bool RequestToHMI::Init() {
   return true;
@@ -56,8 +53,7 @@ bool RequestToHMI::CleanUp() {
   return true;
 }
 
-void RequestToHMI::Run() {
-}
+void RequestToHMI::Run() {}
 
 void RequestToHMI::SendRequest() {
   (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;

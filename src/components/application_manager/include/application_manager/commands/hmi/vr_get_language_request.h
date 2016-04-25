@@ -49,7 +49,8 @@ class VRGetLanguageRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  VRGetLanguageRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  VRGetLanguageRequest(const MessageSharedPtr& message,
+                       ApplicationManager& application_manager);
 
   /**
    * @brief VRGetLanguageRequest class destructor

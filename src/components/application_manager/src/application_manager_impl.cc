@@ -128,8 +128,7 @@ ApplicationManagerImpl::ApplicationManagerImpl(
     , application_list_update_timer_(
           "AM ListUpdater",
           new TimerTaskImpl<ApplicationManagerImpl>(
-              this,
-              &ApplicationManagerImpl::OnApplicationListUpdateTimer))
+              this, &ApplicationManagerImpl::OnApplicationListUpdateTimer))
     , tts_global_properties_timer_(
           "AM TTSGLPRTimer",
           new TimerTaskImpl<ApplicationManagerImpl>(
@@ -145,10 +144,9 @@ ApplicationManagerImpl::ApplicationManagerImpl(
 
   sync_primitives::AutoLock lock(timer_pool_lock_);
   TimerSPtr clearing_timer(utils::MakeShared<timer::Timer>(
-                              "ClearTimerPoolTimer",
-                              new TimerTaskImpl<ApplicationManagerImpl>(
-                                  this,
-                                  &ApplicationManagerImpl::ClearTimerPool)));
+      "ClearTimerPoolTimer",
+      new TimerTaskImpl<ApplicationManagerImpl>(
+          this, &ApplicationManagerImpl::ClearTimerPool)));
   const uint32_t timeout_ms = 10000u;
   clearing_timer->Start(timeout_ms, false);
   timer_pool_.push_back(clearing_timer);
@@ -184,15 +182,15 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 template <class UnaryPredicate>
 ApplicationSharedPtr FindApp(DataAccessor<ApplicationSet> accessor,
                              UnaryPredicate finder) {
-    ApplicationSet::iterator it = std::find_if(
-        accessor.GetData().begin(), accessor.GetData().end(), finder);
-    if (accessor.GetData().end() == it) {
-      LOG4CXX_DEBUG(logger_, "Unable to find application");
-      return ApplicationSharedPtr();
-    }
-    ApplicationSharedPtr app = *it;
-    LOG4CXX_DEBUG(logger_," Found Application app_id = " << app->app_id());
-    return app;
+  ApplicationSet::iterator it = std::find_if(
+      accessor.GetData().begin(), accessor.GetData().end(), finder);
+  if (accessor.GetData().end() == it) {
+    LOG4CXX_DEBUG(logger_, "Unable to find application");
+    return ApplicationSharedPtr();
+  }
+  ApplicationSharedPtr app = *it;
+  LOG4CXX_DEBUG(logger_, " Found Application app_id = " << app->app_id());
+  return app;
 }
 
 template <class UnaryPredicate>
@@ -219,7 +217,6 @@ ApplicationSharedPtr ApplicationManagerImpl::application(
   DataAccessor<ApplicationSet> accessor = applications();
   return FindApp(accessor, finder);
 }
-
 
 ApplicationSharedPtr ApplicationManagerImpl::application_by_hmi_app(
     uint32_t hmi_app_id) const {
@@ -428,8 +425,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   LOG4CXX_DEBUG(logger_, "Restarting application list update timer");
   GetPolicyHandler().OnAppsSearchStarted();
-  uint32_t timeout =
-      get_settings().application_list_update_timeout();
+  uint32_t timeout = get_settings().application_list_update_timeout();
   application_list_update_timer_.Start(timeout, false);
 
   if (!is_all_apps_allowed_) {
@@ -555,8 +551,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   applications_.insert(application);
   applications_list_lock_.Release();
 
-  GetPolicyHandler().AddApplication(
-      application->policy_app_id());
+  GetPolicyHandler().AddApplication(application->policy_app_id());
 
   return application;
 }
@@ -638,15 +633,18 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
   MessageHelper::SendGetSystemInfoRequest(*this);
 
   utils::SharedPtr<smart_objects::SmartObject> is_vr_ready(
-      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_IsReady, *this));
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::VR_IsReady,
+                                        *this));
   ManageHMICommand(is_vr_ready);
 
   utils::SharedPtr<smart_objects::SmartObject> is_tts_ready(
-      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::TTS_IsReady, *this));
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::TTS_IsReady,
+                                        *this));
   ManageHMICommand(is_tts_ready);
 
   utils::SharedPtr<smart_objects::SmartObject> is_ui_ready(
-      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::UI_IsReady, *this));
+      MessageHelper::CreateModuleInfoSO(hmi_apis::FunctionID::UI_IsReady,
+                                        *this));
   ManageHMICommand(is_ui_ready);
 
   utils::SharedPtr<smart_objects::SmartObject> is_navi_ready(
@@ -666,7 +664,8 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
 
   utils::SharedPtr<smart_objects::SmartObject> mixing_audio_supported_request(
       MessageHelper::CreateModuleInfoSO(
-          hmi_apis::FunctionID::BasicCommunication_MixingAudioSupported, *this));
+          hmi_apis::FunctionID::BasicCommunication_MixingAudioSupported,
+          *this));
   ManageHMICommand(mixing_audio_supported_request);
   resume_controller().ResetLaunchTime();
 }
@@ -741,9 +740,7 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
   LOG4CXX_INFO(logger_, "START MICROPHONE RECORDER");
   DCHECK_OR_RETURN_VOID(media_manager_);
   media_manager_->StartMicrophoneRecording(
-      session_key,
-      get_settings().recording_file_name(),
-      max_duration);
+      session_key, get_settings().recording_file_name(), max_duration);
 }
 
 void ApplicationManagerImpl::SendAudioPassThroughNotification(
@@ -893,7 +890,7 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
     device_info.AdoptDeviceType(dev_params.device_connection_type);
 
     GetPolicyHandler().AddDevice(dev_params.device_mac_address,
-                                                 device_info.connection_type);
+                                 device_info.connection_type);
   }
 
   smart_objects::SmartObjectSPtr msg_params =
@@ -919,8 +916,7 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
 void ApplicationManagerImpl::OnFindNewApplicationsRequest() {
   connection_handler().ConnectToAllDevices();
   LOG4CXX_DEBUG(logger_, "Starting application list update timer");
-  uint32_t timeout =
-      get_settings().application_list_update_timeout();
+  uint32_t timeout = get_settings().application_list_update_timeout();
   application_list_update_timer_.Start(timeout, false);
   GetPolicyHandler().OnAppsSearchStarted();
 }
@@ -960,8 +956,7 @@ mobile_apis::HMILevel::eType ApplicationManagerImpl::GetDefaultHmiLevel(
   if (policy_handler_.PolicyEnabled()) {
     const std::string policy_app_id = application->policy_app_id();
     std::string default_hmi_string = "";
-    if (policy_handler_.GetDefaultHmi(policy_app_id,
-                                                         &default_hmi_string)) {
+    if (policy_handler_.GetDefaultHmi(policy_app_id, &default_hmi_string)) {
       if ("BACKGROUND" == default_hmi_string) {
         default_hmi = HMILevel::HMI_BACKGROUND;
       } else if ("FULL" == default_hmi_string) {
@@ -1005,13 +1000,12 @@ void ApplicationManagerImpl::ReplaceMobileByHMIAppId(
     smart_objects::SmartObject& message) {
   MessageHelper::PrintSmartObject(message);
   if (message.keyExists(strings::app_id)) {
-    ApplicationSharedPtr application_ptr = application(
-            message[strings::app_id].asUInt());
+    ApplicationSharedPtr application_ptr =
+        application(message[strings::app_id].asUInt());
     if (application_ptr.valid()) {
       LOG4CXX_DEBUG(logger_,
                     "ReplaceMobileByHMIAppId from "
-                        << message[strings::app_id].asInt()
-                        << " to "
+                        << message[strings::app_id].asInt() << " to "
                         << application_ptr->hmi_app_id());
       message[strings::app_id] = application_ptr->hmi_app_id();
     }
@@ -1042,14 +1036,13 @@ void ApplicationManagerImpl::ReplaceMobileByHMIAppId(
 void ApplicationManagerImpl::ReplaceHMIByMobileAppId(
     smart_objects::SmartObject& message) {
   if (message.keyExists(strings::app_id)) {
-    ApplicationSharedPtr application = application_by_hmi_app(
-            message[strings::app_id].asUInt());
+    ApplicationSharedPtr application =
+        application_by_hmi_app(message[strings::app_id].asUInt());
 
     if (application.valid()) {
       LOG4CXX_DEBUG(logger_,
                     "ReplaceHMIByMobileAppId from "
-                        << message[strings::app_id].asInt()
-                        << " to "
+                        << message[strings::app_id].asInt() << " to "
                         << application->app_id());
       message[strings::app_id] = application->app_id();
     }
@@ -1201,8 +1194,10 @@ void ApplicationManagerImpl::OnServiceEndedCallback(
         is_resuming = true;
         is_unexpected_disconnect = false;
 
-        ManageMobileCommand(MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-            session_key, AppInterfaceUnregisteredReason::TOO_MANY_REQUESTS), commands::Command::ORIGIN_SDL);
+        ManageMobileCommand(
+            MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+                session_key, AppInterfaceUnregisteredReason::TOO_MANY_REQUESTS),
+            commands::Command::ORIGIN_SDL);
         break;
       }
       case CloseSessionReason::kMalformed: {
@@ -1289,7 +1284,8 @@ ApplicationManagerImpl::connection_handler() const {
   return *connection_handler_;
 }
 
-protocol_handler::ProtocolHandler& ApplicationManagerImpl::protocol_handler() const {
+protocol_handler::ProtocolHandler& ApplicationManagerImpl::protocol_handler()
+    const {
   return *protocol_handler_;
 }
 
@@ -1540,9 +1536,11 @@ bool ApplicationManagerImpl::ManageMobileCommand(
                     "RET  Unable to perform request: "
                         << "TOO_MANY_REQUESTS");
 
-      ManageMobileCommand(MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-          connection_key,
-          mobile_api::AppInterfaceUnregisteredReason::TOO_MANY_REQUESTS), commands::Command::ORIGIN_SDL);
+      ManageMobileCommand(
+          MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+              connection_key,
+              mobile_api::AppInterfaceUnregisteredReason::TOO_MANY_REQUESTS),
+          commands::Command::ORIGIN_SDL);
 
       UnregisterApplication(connection_key,
                             mobile_apis::Result::TOO_MANY_PENDING_REQUESTS,
@@ -1558,10 +1556,12 @@ bool ApplicationManagerImpl::ManageMobileCommand(
                     "RET  Unable to perform request: "
                         << "REQUEST_WHILE_IN_NONE_HMI_LEVEL");
 
-      ManageMobileCommand(MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-          connection_key,
-          mobile_api::AppInterfaceUnregisteredReason::
-              REQUEST_WHILE_IN_NONE_HMI_LEVEL), commands::Command::ORIGIN_SDL);
+      ManageMobileCommand(
+          MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+              connection_key,
+              mobile_api::AppInterfaceUnregisteredReason::
+                  REQUEST_WHILE_IN_NONE_HMI_LEVEL),
+          commands::Command::ORIGIN_SDL);
 
       ApplicationSharedPtr app_ptr = application(connection_key);
       if (app_ptr) {
@@ -1667,8 +1667,7 @@ bool ApplicationManagerImpl::ManageHMICommand(
 bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
                                   media_manager::MediaManager* media_manager) {
   LOG4CXX_TRACE(logger_, "Init application manager");
-  const std::string app_storage_folder =
-      get_settings().app_storage_folder();
+  const std::string app_storage_folder = get_settings().app_storage_folder();
   if (!InitDirectory(app_storage_folder, TYPE_STORAGE) ||
       !IsReadWriteAllowed(app_storage_folder, TYPE_STORAGE)) {
     return false;
@@ -1686,14 +1685,12 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
     return false;
   }
 
-  const std::string system_files_path =
-      get_settings().system_files_path();
+  const std::string system_files_path = get_settings().system_files_path();
   if (!InitDirectory(system_files_path, TYPE_SYSTEM) ||
       !IsReadWriteAllowed(system_files_path, TYPE_SYSTEM)) {
     return false;
   }
-  const std::string app_icons_folder =
-      get_settings().app_icons_folder();
+  const std::string app_icons_folder = get_settings().app_icons_folder();
   if (!InitDirectory(app_icons_folder, TYPE_ICONS)) {
     return false;
   }
@@ -2118,11 +2115,12 @@ void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
   }
 
   const HMICapabilities& hmi_cap = hmi_capabilities();
-  std::string cur_vr_lang(MessageHelper::CommonLanguageToString
-                          (hmi_cap.active_vr_language()));
+  std::string cur_vr_lang(
+      MessageHelper::CommonLanguageToString(hmi_cap.active_vr_language()));
   const SmartObject& languages = app_data[json::languages];
 
-  std::transform(cur_vr_lang.begin(), cur_vr_lang.end(), cur_vr_lang.begin(), ::toupper);
+  std::transform(
+      cur_vr_lang.begin(), cur_vr_lang.end(), cur_vr_lang.begin(), ::toupper);
 
   ssize_t default_idx = -1;
   ssize_t specific_idx = -1;
@@ -2130,15 +2128,15 @@ void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
   const size_t size = languages.length();
   for (size_t idx = 0; idx < size; ++idx) {
     if (languages[idx].keyExists(cur_vr_lang)) {
-        LOG4CXX_DEBUG(logger_, "Found active HMI language " << cur_vr_lang);
-        specific_idx = idx;
+      LOG4CXX_DEBUG(logger_, "Found active HMI language " << cur_vr_lang);
+      specific_idx = idx;
     } else if (languages[idx].keyExists(json::default_)) {
-        LOG4CXX_DEBUG(logger_, "Found default language");
-        default_idx = idx;
-      }
+      LOG4CXX_DEBUG(logger_, "Found default language");
+      default_idx = idx;
+    }
   }
 
-  if ( (-1 == specific_idx) && (-1 == default_idx) ) {
+  if ((-1 == specific_idx) && (-1 == default_idx)) {
     LOG4CXX_DEBUG(logger_, "No suitable language found");
     return;
   }
@@ -2180,13 +2178,12 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     }
 
     const std::string policy_app_id(app_data[json::appId].asString());
-    ApplicationSharedPtr registered_app = application_by_policy_id(
-            policy_app_id);
+    ApplicationSharedPtr registered_app =
+        application_by_policy_id(policy_app_id);
     if (registered_app) {
-      LOG4CXX_DEBUG(
-          logger_,
-          "Application with the same id: " << policy_app_id
-                                           << " is registered already.");
+      LOG4CXX_DEBUG(logger_,
+                    "Application with the same id: "
+                        << policy_app_id << " is registered already.");
       continue;
     }
 
@@ -2196,7 +2193,8 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     SmartObject vrSynonym;
     SmartObject ttsName;
 
-    const custom_str::CustomString appName(app_data[json::name].asCustomString());
+    const custom_str::CustomString appName(
+        app_data[json::name].asCustomString());
 
     if (app_data.keyExists(json::ios)) {
       os_type = json::ios;
@@ -2222,7 +2220,8 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
 
     uint32_t device_id = 0;
 
-    if (-1 == connection_handler().GetDataOnSessionKey(
+    if (-1 ==
+        connection_handler().GetDataOnSessionKey(
             connection_key, NULL, NULL, &device_id)) {
       LOG4CXX_ERROR(logger_,
                     "Failed to create application: no connection info.");
@@ -2230,11 +2229,8 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     }
 
     std::string device_mac;
-    connection_handler().get_session_observer().GetDataOnDeviceID(device_id,
-                                                                  NULL,
-                                                                  NULL,
-                                                                  &device_mac,
-                                                                  NULL);
+    connection_handler().get_session_observer().GetDataOnDeviceID(
+        device_id, NULL, NULL, &device_mac, NULL);
 
     const uint32_t hmi_app_id =
         resume_ctrl_.IsApplicationSaved(policy_app_id, device_mac)
@@ -2289,7 +2285,8 @@ void ApplicationManagerImpl::ProcessQueryApp(
     for (; it != apps_to_register_.end(); ++it) {
       const std::string full_icon_path((*it)->app_icon_path());
       if (file_system::FileExists(full_icon_path)) {
-        MessageHelper::SendSetAppIcon((*it)->hmi_app_id(), full_icon_path, *this);
+        MessageHelper::SendSetAppIcon(
+            (*it)->hmi_app_id(), full_icon_path, *this);
       }
     }
   }
@@ -2325,8 +2322,7 @@ void ApplicationManagerImpl::updateRequestTimeout(
       connection_key, mobile_correlation_id, new_timeout_value);
 }
 
-uint32_t ApplicationManagerImpl::application_id(
-    const int32_t correlation_id) {
+uint32_t ApplicationManagerImpl::application_id(const int32_t correlation_id) {
   // ykazakov: there is no erase for const iterator for QNX
   std::map<const int32_t, const uint32_t>::iterator it =
       appID_list_.find(correlation_id);
@@ -2461,8 +2457,10 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
     ApplicationSetConstIt it = accessor.GetData().begin();
     while (it != accessor.GetData().end()) {
       ApplicationSharedPtr app_to_remove = *it;
-        ManageMobileCommand(MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-            app_to_remove->app_id(), unregister_reason_), commands::Command::ORIGIN_SDL);
+      ManageMobileCommand(
+          MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+              app_to_remove->app_id(), unregister_reason_),
+          commands::Command::ORIGIN_SDL);
       UnregisterApplication(app_to_remove->app_id(),
                             mobile_apis::Result::INVALID_ENUM,
                             is_ignition_off,
@@ -2487,7 +2485,8 @@ void ApplicationManagerImpl::RemoveAppsWaitingForRegistration(
 
   while (apps_to_register_.end() != it_app) {
     LOG4CXX_DEBUG(logger_,
-                  "Waiting app: " << (*it_app)->name().c_str() << " is removed.");
+                  "Waiting app: " << (*it_app)->name().c_str()
+                                  << " is removed.");
     apps_to_register_.erase(it_app);
     it_app = std::find_if(
         apps_to_register_.begin(), apps_to_register_.end(), device_finder);
@@ -2512,7 +2511,7 @@ void ApplicationManagerImpl::UnregisterApplication(
   {
     sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
     subscribed_for_way_points_app_count =
-      subscribed_way_points_apps_list_.size();
+        subscribed_way_points_apps_list_.size();
   }
   if (1 == subscribed_for_way_points_app_count) {
     LOG4CXX_ERROR(logger_, "Send UnsubscribeWayPoints");
@@ -2581,7 +2580,7 @@ void ApplicationManagerImpl::UnregisterApplication(
     }
     applications_.erase(app_to_remove);
     AppV4DevicePredicate finder(handle);
-    ApplicationSharedPtr app =  FindApp(accessor,finder);
+    ApplicationSharedPtr app = FindApp(accessor, finder);
     if (!app) {
       LOG4CXX_DEBUG(
           logger_, "There is no more SDL4 apps with device handle: " << handle);
@@ -2592,7 +2591,7 @@ void ApplicationManagerImpl::UnregisterApplication(
   }
 
   if (is_resuming) {
-      resume_ctrl_.SaveApplication(app_to_remove);
+    resume_ctrl_.SaveApplication(app_to_remove);
   } else {
     resume_ctrl_.RemoveApplicationFromSaved(app_to_remove);
   }
@@ -2604,8 +2603,8 @@ void ApplicationManagerImpl::UnregisterApplication(
     MessageHelper::SendStopAudioPathThru(*this);
   }
 
-  MessageHelper::SendOnAppUnregNotificationToHMI(app_to_remove,
-                                                 is_unexpected_disconnect, *this);
+  MessageHelper::SendOnAppUnregNotificationToHMI(
+      app_to_remove, is_unexpected_disconnect, *this);
   request_ctrl_.terminateAppRequests(app_id);
   return;
 }
@@ -2748,10 +2747,10 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
                                              << stringified_functionID);
   policy::CheckPermissionResult result;
   GetPolicyHandler().CheckPermissions(policy_app_id,
-                                                      stringified_hmi_level,
-                                                      stringified_functionID,
-                                                      rpc_params,
-                                                      result);
+                                      stringified_hmi_level,
+                                      stringified_functionID,
+                                      rpc_params,
+                                      result);
 
   if (NULL != params_permissions) {
     params_permissions->allowed_params = result.list_of_allowed_params;
@@ -2882,8 +2881,10 @@ void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
   NaviServiceStatusMap::iterator it = navi_service_status_.find(app_id);
   if (navi_service_status_.end() == it ||
       (!it->second.first && !it->second.second)) {
-    ManageMobileCommand(MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-        app_id, PROTOCOL_VIOLATION), commands::Command::ORIGIN_SDL);
+    ManageMobileCommand(
+        MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+            app_id, PROTOCOL_VIOLATION),
+        commands::Command::ORIGIN_SDL);
     UnregisterApplication(app_id, ABORTED);
     return;
   }
@@ -2943,10 +2944,9 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
     navi_app_to_stop_.push_back(app_id);
 
     TimerSPtr close_timer(utils::MakeShared<timer::Timer>(
-                             "CloseNaviAppTimer",
-                             new TimerTaskImpl<ApplicationManagerImpl>(
-                                 this,
-                                 &ApplicationManagerImpl::CloseNaviApp)));
+        "CloseNaviAppTimer",
+        new TimerTaskImpl<ApplicationManagerImpl>(
+            this, &ApplicationManagerImpl::CloseNaviApp)));
     close_timer->Start(navi_close_app_timeout_, true);
 
     sync_primitives::AutoLock lock(timer_pool_lock_);
@@ -2985,11 +2985,9 @@ void ApplicationManagerImpl::OnHMILevelChanged(
       LOG4CXX_TRACE(logger_, "HMILevel from FULL or LIMITED");
       navi_app_to_end_stream_.push_back(app_id);
       TimerSPtr end_stream_timer(utils::MakeShared<timer::Timer>(
-                                 "AppShouldFinishStreaming",
-                                 new TimerTaskImpl<ApplicationManagerImpl>(
-                                     this,
-                                     &ApplicationManagerImpl::EndNaviStreaming)
-                                 ));
+          "AppShouldFinishStreaming",
+          new TimerTaskImpl<ApplicationManagerImpl>(
+              this, &ApplicationManagerImpl::EndNaviStreaming)));
       end_stream_timer->Start(navi_end_stream_timeout_, true);
 
       sync_primitives::AutoLock lock(timer_pool_lock_);
@@ -3063,8 +3061,10 @@ void ApplicationManagerImpl::CloseNaviApp() {
     if (it->second.first || it->second.second) {
       LOG4CXX_INFO(logger_,
                    "App haven't answered for EndService. Unregister it.");
-      ManageMobileCommand(MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-          app_id, PROTOCOL_VIOLATION), commands::Command::ORIGIN_SDL);
+      ManageMobileCommand(
+          MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+              app_id, PROTOCOL_VIOLATION),
+          commands::Command::ORIGIN_SDL);
       UnregisterApplication(app_id, ABORTED);
     }
   }
@@ -3133,8 +3133,8 @@ bool ApplicationManagerImpl::IsApplicationForbidden(
 }
 
 policy::DeviceConsent ApplicationManagerImpl::GetUserConsentForDevice(
-        const std::string& device_id) const {
-    return policy_handler_.GetUserConsentForDevice(device_id);
+    const std::string& device_id) const {
+  return policy_handler_.GetUserConsentForDevice(device_id);
 }
 
 void ApplicationManagerImpl::OnWakeUp() {
@@ -3250,7 +3250,8 @@ void ApplicationManagerImpl::OnTimerSendTTSGlobalProperties() {
     for (uint32_t i = 0; i < app_list.size(); ++i) {
       LOG4CXX_INFO(logger_,
                    "Send TTS GlobalProperties to HMI with default helpPrompt");
-      MessageHelper::SendTTSGlobalProperties(application(app_list[i]), true, *this);
+      MessageHelper::SendTTSGlobalProperties(
+          application(app_list[i]), true, *this);
       RemoveAppFromTTSGlobalPropertiesList(app_list[i]);
     }
   }
@@ -3259,8 +3260,7 @@ void ApplicationManagerImpl::OnTimerSendTTSGlobalProperties() {
 void ApplicationManagerImpl::AddAppToTTSGlobalPropertiesList(
     const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  uint16_t timeout =
-      get_settings().tts_global_properties_timeout();
+  uint16_t timeout = get_settings().tts_global_properties_timeout();
   TimevalStruct current_time = date_time::DateTime::getCurrentTime();
   current_time.tv_sec += timeout;
   // please avoid AutoLock usage to avoid deadlock
@@ -3362,7 +3362,9 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
       smart_objects::SmartType_Array);
   bool flag_diffirence_app_hmi_type = false;
   DataAccessor<ApplicationSet> accessor(applications());
-  for (ApplicationSetIt it = accessor.GetData().begin(); it != accessor.GetData().end(); ++it) {
+  for (ApplicationSetIt it = accessor.GetData().begin();
+       it != accessor.GetData().end();
+       ++it) {
     it_app_hmi_types_from_policy = app_hmi_types.find(((*it)->policy_app_id()));
 
     if (it_app_hmi_types_from_policy != app_hmi_types.end() &&
@@ -3401,7 +3403,8 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
         } else if (((*it)->hmi_level() == mobile_api::HMILevel::HMI_FULL) ||
                    ((*it)->hmi_level() == mobile_api::HMILevel::HMI_LIMITED)) {
           MessageHelper::SendUIChangeRegistrationRequestToHMI(*it, *this);
-          state_controller().SetRegularState(*it, mobile_apis::HMILevel::HMI_BACKGROUND, true);
+          state_controller().SetRegularState(
+              *it, mobile_apis::HMILevel::HMI_BACKGROUND, true);
         }
       }
     }
@@ -3410,7 +3413,7 @@ void ApplicationManagerImpl::OnUpdateHMIAppType(
 
 ProtocolVersion ApplicationManagerImpl::SupportedSDLVersion() const {
   LOG4CXX_AUTO_TRACE(logger_);
-  bool heart_beat_support =  get_settings().heart_beat_timeout();
+  bool heart_beat_support = get_settings().heart_beat_timeout();
   bool sdl4_support = protocol_handler_->get_settings().enable_protocol_4();
 
   if (sdl4_support) {
@@ -3500,7 +3503,8 @@ void ApplicationManagerImpl::SubscribeAppForWayPoints(const uint32_t app_id) {
   subscribed_way_points_apps_list_.insert(app_id);
 }
 
-void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(const uint32_t app_id) {
+void ApplicationManagerImpl::UnsubscribeAppFromWayPoints(
+    const uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock lock(subscribed_way_points_apps_lock_);
   subscribed_way_points_apps_list_.erase(app_id);

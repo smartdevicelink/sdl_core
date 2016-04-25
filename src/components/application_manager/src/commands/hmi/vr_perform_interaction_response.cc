@@ -38,11 +38,9 @@ namespace commands {
 
 VRPerformInteractionResponse::VRPerformInteractionResponse(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+    : ResponseFromHMI(message, application_manager) {}
 
-VRPerformInteractionResponse::~VRPerformInteractionResponse() {
-}
+VRPerformInteractionResponse::~VRPerformInteractionResponse() {}
 
 void VRPerformInteractionResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

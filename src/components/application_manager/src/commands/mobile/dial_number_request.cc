@@ -40,12 +40,11 @@ namespace application_manager {
 
 namespace commands {
 
-DialNumberRequest::DialNumberRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandRequestImpl(message, application_manager) {
-}
+DialNumberRequest::DialNumberRequest(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-DialNumberRequest::~DialNumberRequest() {
-}
+DialNumberRequest::~DialNumberRequest() {}
 
 bool DialNumberRequest::Init() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -77,7 +76,8 @@ void DialNumberRequest::Run() {
 
   StripNumberParam(number);
   if (number.empty()) {
-    LOG4CXX_ERROR(logger_, "After strip number param is empty. Invalid incoming data");
+    LOG4CXX_ERROR(logger_,
+                  "After strip number param is empty. Invalid incoming data");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -87,8 +87,8 @@ void DialNumberRequest::Run() {
       (*message_)[strings::msg_params][strings::number].asString();
   msg_params[strings::app_id] = application->hmi_app_id();
 
-  SendHMIRequest(hmi_apis::FunctionID::BasicCommunication_DialNumber,
-                 &msg_params, true);
+  SendHMIRequest(
+      hmi_apis::FunctionID::BasicCommunication_DialNumber, &msg_params, true);
 }
 
 void DialNumberRequest::on_event(const event_engine::Event& event) {
@@ -106,9 +106,9 @@ void DialNumberRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::BasicCommunication_DialNumber: {
       LOG4CXX_INFO(logger_, "Received DialNumber event");
-      result_code =  CommandRequestImpl::GetMobileResultCode(
-        static_cast<hmi_apis::Common_Result::eType>(
-          message[strings::params][hmi_response::code].asInt()));
+      result_code = CommandRequestImpl::GetMobileResultCode(
+          static_cast<hmi_apis::Common_Result::eType>(
+              message[strings::params][hmi_response::code].asInt()));
       break;
     }
     default: {
@@ -133,7 +133,8 @@ void DialNumberRequest::on_event(const event_engine::Event& event) {
 
 void DialNumberRequest::StripNumberParam(std::string& number) {
   std::size_t found = 0;
-  while (std::string::npos != (found = number.find_first_not_of("0123456789*#,;+"))) {
+  while (std::string::npos !=
+         (found = number.find_first_not_of("0123456789*#,;+"))) {
     number.erase(number.begin() + found);
   }
   (*message_)[strings::msg_params][strings::number] = number;

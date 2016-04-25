@@ -48,7 +48,8 @@ class AudioStopStreamResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  AudioStopStreamResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  AudioStopStreamResponse(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief OnNaviStopStreamResponse class destructor

@@ -97,8 +97,8 @@ mobile_apis::AudioStreamingState::eType TTSHmiState::audio_streaming_state()
   AudioStreamingState::eType expected_state = AudioStreamingState::NOT_AUDIBLE;
   if (app_mngr_.is_attenuated_supported() &&
       AudioStreamingState::NOT_AUDIBLE != parent()->audio_streaming_state() &&
-      Compare<HMILevel::eType, EQ, ONE>(hmi_level(), HMILevel::HMI_FULL,
-                                        HMILevel::HMI_LIMITED)) {
+      Compare<HMILevel::eType, EQ, ONE>(
+          hmi_level(), HMILevel::HMI_FULL, HMILevel::HMI_LIMITED)) {
     expected_state = AudioStreamingState::ATTENUATED;
   }
   return expected_state;
@@ -151,7 +151,7 @@ SafetyModeHmiState::SafetyModeHmiState(uint32_t app_id,
 
 DeactivateHMI::DeactivateHMI(uint32_t app_id,
                              const ApplicationManager& app_mngr)
-: HmiState(app_id, app_mngr, STATE_ID_DEACTIVATE_HMI) {}
+    : HmiState(app_id, app_mngr, STATE_ID_DEACTIVATE_HMI) {}
 
 mobile_apis::HMILevel::eType DeactivateHMI::hmi_level() const {
   using namespace helpers;
@@ -165,7 +165,7 @@ mobile_apis::HMILevel::eType DeactivateHMI::hmi_level() const {
 }
 
 AudioSource::AudioSource(uint32_t app_id, const ApplicationManager& app_mngr)
-  : HmiState(app_id, app_mngr, STATE_ID_AUDIO_SOURCE) {}
+    : HmiState(app_id, app_mngr, STATE_ID_AUDIO_SOURCE) {}
 
 mobile_apis::HMILevel::eType AudioSource::hmi_level() const {
   using namespace mobile_apis;

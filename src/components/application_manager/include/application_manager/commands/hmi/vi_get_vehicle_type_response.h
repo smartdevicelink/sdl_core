@@ -49,7 +49,8 @@ class VIGetVehicleTypeResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  VIGetVehicleTypeResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  VIGetVehicleTypeResponse(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
   /**
    * @brief VIGetVehicleTypeResponse class destructor

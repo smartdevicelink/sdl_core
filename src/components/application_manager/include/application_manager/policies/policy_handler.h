@@ -68,10 +68,9 @@ typedef std::vector<uint32_t> AppIds;
 typedef std::vector<uint32_t> DeviceHandles;
 namespace custom_str = utils::custom_string;
 
-class PolicyHandler
-    : public PolicyHandlerInterface,
-      public PolicyListener,
-      public threads::AsyncRunner {
+class PolicyHandler : public PolicyHandlerInterface,
+                      public PolicyListener,
+                      public threads::AsyncRunner {
  public:
   PolicyHandler(const policy::PolicySettings& get_settings,
                 application_manager::ApplicationManager& application_manager);
@@ -81,7 +80,8 @@ class PolicyHandler
   bool InitPolicyTable() OVERRIDE;
   bool ResetPolicyTable() OVERRIDE;
   bool ClearUserConsent() OVERRIDE;
-  bool SendMessageToSDK(const BinaryMessage& pt_string, const std::string& url) OVERRIDE;
+  bool SendMessageToSDK(const BinaryMessage& pt_string,
+                        const std::string& url) OVERRIDE;
   bool ReceiveMessageFromSDK(const std::string& file,
                              const BinaryMessage& pt_string) OVERRIDE;
   bool UnloadPolicyLibrary() OVERRIDE;
@@ -94,7 +94,8 @@ class PolicyHandler
 
   virtual void OnSnapshotCreated(const BinaryMessage& pt_string) OVERRIDE;
 
-  virtual bool GetPriority(const std::string& policy_app_id, std::string* priority) const OVERRIDE;
+  virtual bool GetPriority(const std::string& policy_app_id,
+                           std::string* priority) const OVERRIDE;
   void CheckPermissions(const PTString& app_id,
                         const PTString& hmi_level,
                         const PTString& rpc,
@@ -102,7 +103,8 @@ class PolicyHandler
                         CheckPermissionResult& result) OVERRIDE;
 
   uint32_t GetNotificationsNumber(const std::string& priority) const OVERRIDE;
-  virtual DeviceConsent GetUserConsentForDevice(const std::string& device_id) const OVERRIDE;
+  virtual DeviceConsent GetUserConsentForDevice(
+      const std::string& device_id) const OVERRIDE;
   bool GetDefaultHmi(const std::string& policy_app_id,
                      std::string* default_hmi) const OVERRIDE;
   bool GetInitialAppData(const std::string& application_id,
@@ -119,7 +121,8 @@ class PolicyHandler
   void add_listener(PolicyHandlerObserver* listener) OVERRIDE;
   void remove_listener(PolicyHandlerObserver* listener) OVERRIDE;
 
-  utils::SharedPtr<usage_statistics::StatisticsManager> GetStatisticManager() const OVERRIDE;
+  utils::SharedPtr<usage_statistics::StatisticsManager> GetStatisticManager()
+      const OVERRIDE;
 
   /**
    * @brief CheckSystemAction allows to check whether certain system
@@ -149,8 +152,8 @@ class PolicyHandler
    * @param Device id or empty string, if concern to all SDL functionality
    * @param User consent from response
    */
-  void OnAllowSDLFunctionalityNotification(bool is_allowed,
-                                           const std::string& device_id) OVERRIDE;
+  void OnAllowSDLFunctionalityNotification(
+      bool is_allowed, const std::string& device_id) OVERRIDE;
 
   /**
    * @brief Increment counter for ignition cycles
@@ -228,7 +231,8 @@ class PolicyHandler
    * application
    * @param policy_app_id Application id
    */
-  std::string OnCurrentDeviceIdUpdateRequired(const std::string& policy_app_id) OVERRIDE;
+  std::string OnCurrentDeviceIdUpdateRequired(
+      const std::string& policy_app_id) OVERRIDE;
 
   /**
    * @brief Set parameters from OnSystemInfoChanged to policy table
@@ -260,7 +264,8 @@ class PolicyHandler
    * @brief Allows to update vechicle data info.
    * @param SmartObject which contains all needed information.
    */
-  virtual void OnVehicleDataUpdated(const smart_objects::SmartObject& message) OVERRIDE;
+  virtual void OnVehicleDataUpdated(
+      const smart_objects::SmartObject& message) OVERRIDE;
 
   /**
    * Removes device
@@ -286,12 +291,14 @@ class PolicyHandler
    */
   uint32_t GetAppIdForSending() const OVERRIDE;
 
-  custom_str::CustomString GetAppName(const std::string& policy_app_id) OVERRIDE;
+  custom_str::CustomString GetAppName(
+      const std::string& policy_app_id) OVERRIDE;
 
   virtual void OnUpdateHMIAppType(
       std::map<std::string, StringArray> app_hmi_types) OVERRIDE;
 
-  virtual void OnCertificateUpdated(const std::string& certificate_data) OVERRIDE;
+  virtual void OnCertificateUpdated(
+      const std::string& certificate_data) OVERRIDE;
 
   virtual bool CanUpdate() OVERRIDE;
 
@@ -354,8 +361,9 @@ class PolicyHandler
    * @param type Request type
    * @return true, if allowed, otherwise - false
    */
-  bool IsRequestTypeAllowed(const std::string& policy_app_id,
-                            mobile_apis::RequestType::eType type) const OVERRIDE;
+  bool IsRequestTypeAllowed(
+      const std::string& policy_app_id,
+      mobile_apis::RequestType::eType type) const OVERRIDE;
 
   /**
    * @brief Gets application request types
@@ -401,9 +409,9 @@ class PolicyHandler
   std::string RetrieveCertificate() const OVERRIDE;
 #endif  // ENABLE_SECURITY
 
-  const PolicySettings &get_settings() const OVERRIDE;
+  const PolicySettings& get_settings() const OVERRIDE;
 
-  protected:
+ protected:
   /**
    * Starts next retry exchange policy table
    */
@@ -447,8 +455,7 @@ class PolicyHandler
 
  private:
   class StatisticManagerImpl : public usage_statistics::StatisticsManager {
-    public:
-
+   public:
     StatisticManagerImpl(PolicyHandler* policy_handler)
         : policy_handler_(policy_handler) {
       DCHECK(policy_handler_);
@@ -459,25 +466,26 @@ class PolicyHandler
     }
 
     void Increment(const std::string& app_id,
-                           usage_statistics::AppCounterId type) {
+                   usage_statistics::AppCounterId type) {
       policy_handler_->AsyncRun(
           new StatisticsDelegate(*policy_handler_, app_id, type));
     }
 
     void Set(const std::string& app_id,
-                     usage_statistics::AppInfoId type,
-                     const std::string& value) {
+             usage_statistics::AppInfoId type,
+             const std::string& value) {
       policy_handler_->AsyncRun(
           new StatisticsDelegate(*policy_handler_, app_id, type, value));
     }
 
     void Add(const std::string& app_id,
-                     usage_statistics::AppStopwatchId type,
-                     int32_t timespan_seconds) {
+             usage_statistics::AppStopwatchId type,
+             int32_t timespan_seconds) {
       policy_handler_->AsyncRun(new StatisticsDelegate(
           *policy_handler_, app_id, type, timespan_seconds));
     }
-  private:
+
+   private:
     PolicyHandler* policy_handler_;
   };
 

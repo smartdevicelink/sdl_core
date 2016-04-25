@@ -47,9 +47,9 @@ namespace commands {
 
 namespace custom_str = utils::custom_string;
 
-UpdateTurnListRequest::UpdateTurnListRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
- : CommandRequestImpl(message, application_manager) {
-}
+UpdateTurnListRequest::UpdateTurnListRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
 UpdateTurnListRequest::~UpdateTurnListRequest() {}
 
@@ -75,8 +75,10 @@ void UpdateTurnListRequest::Run() {
   // ProcessSoftButtons checks strings on the contents incorrect character
 
   mobile_apis::Result::eType processing_result =
-      MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app,
-          application_manager_.GetPolicyHandler(), application_manager_);
+      MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params],
+                                        app,
+                                        application_manager_.GetPolicyHandler(),
+                                        application_manager_);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
     LOG4CXX_ERROR(logger_, "INVALID_DATA!");
@@ -91,7 +93,8 @@ void UpdateTurnListRequest::Run() {
       if ((turn_list_array[i].keyExists(strings::turn_icon)) &&
           (mobile_apis::Result::SUCCESS !=
            MessageHelper::VerifyImage(turn_list_array[i][strings::turn_icon],
-                                      app, application_manager_))) {
+                                      app,
+                                      application_manager_))) {
         LOG4CXX_ERROR(logger_,
                       "MessageHelper::VerifyImage return INVALID_DATA");
         SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -221,7 +224,6 @@ bool UpdateTurnListRequest::IsWhiteSpaceExist() {
           return true;
         }
       }
-
     }
   }
   return false;

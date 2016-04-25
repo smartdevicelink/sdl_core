@@ -48,7 +48,8 @@ class NaviStopStreamResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  NaviStopStreamResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  NaviStopStreamResponse(const MessageSharedPtr& message,
+                         ApplicationManager& application_manager);
 
   /**
    * @brief OnNaviStopStreamResponse class destructor

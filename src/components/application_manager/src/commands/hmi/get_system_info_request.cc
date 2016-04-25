@@ -32,17 +32,15 @@
 
 #include "application_manager/commands/hmi/get_system_info_request.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 GetSystemInfoRequest::GetSystemInfoRequest(
-  const MessageSharedPtr& message, ApplicationManager& application_manager): RequestToHMI(message, application_manager) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-GetSystemInfoRequest::~GetSystemInfoRequest() {
-}
+GetSystemInfoRequest::~GetSystemInfoRequest() {}
 
 void GetSystemInfoRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -55,5 +53,3 @@ void GetSystemInfoRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-
-

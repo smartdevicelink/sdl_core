@@ -49,7 +49,8 @@ class TTSIsReadyRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  TTSIsReadyRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  TTSIsReadyRequest(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief TTSIsReadyRequest class destructor

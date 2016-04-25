@@ -37,12 +37,11 @@ namespace application_manager {
 
 namespace commands {
 
-VIGetDTCsResponse::VIGetDTCsResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+VIGetDTCsResponse::VIGetDTCsResponse(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-VIGetDTCsResponse::~VIGetDTCsResponse() {
-}
+VIGetDTCsResponse::~VIGetDTCsResponse() {}
 
 void VIGetDTCsResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

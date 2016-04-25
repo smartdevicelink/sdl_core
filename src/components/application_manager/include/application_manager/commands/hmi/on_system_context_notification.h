@@ -51,7 +51,8 @@ class OnSystemContextNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnSystemContextNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnSystemContextNotification(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief OnSystemContextNotification class destructor

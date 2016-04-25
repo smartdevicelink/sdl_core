@@ -41,11 +41,10 @@ namespace commands {
 namespace hmi {
 
 OnUIResetTimeoutNotification::OnUIResetTimeoutNotification(
-    const MessageSharedPtr& message, ApplicationManager& application_manager) : NotificationFromHMI(message, application_manager) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnUIResetTimeoutNotification::~OnUIResetTimeoutNotification() {
-}
+OnUIResetTimeoutNotification::~OnUIResetTimeoutNotification() {}
 
 void OnUIResetTimeoutNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -60,4 +59,3 @@ void OnUIResetTimeoutNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

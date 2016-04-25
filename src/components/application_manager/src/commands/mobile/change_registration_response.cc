@@ -33,18 +33,15 @@
 
 #include "application_manager/commands/mobile/change_registration_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 ChangeRegistrationResponse::ChangeRegistrationResponse(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+    : CommandResponseImpl(message, application_manager) {}
 
-ChangeRegistrationResponse::~ChangeRegistrationResponse() {
-}
+ChangeRegistrationResponse::~ChangeRegistrationResponse() {}
 
 void ChangeRegistrationResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

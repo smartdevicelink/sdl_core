@@ -121,11 +121,11 @@ bool LifeCycle::StartComponents() {
   DCHECK(protocol_handler_);
 
   DCHECK(!app_manager_);
-  app_manager_ = new application_manager::ApplicationManagerImpl(profile_, profile_);
+  app_manager_ =
+      new application_manager::ApplicationManagerImpl(profile_, profile_);
 
   DCHECK(!hmi_handler_);
-  hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(
-      profile_);
+  hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(profile_);
 
   media_manager_ = new media_manager::MediaManagerImpl(*app_manager_, profile_);
   if (!app_manager_->Init(*last_state_, media_manager_)) {
@@ -137,8 +137,7 @@ bool LifeCycle::StartComponents() {
   security_manager_ = new security_manager::SecurityManagerImpl();
   crypto_manager_ = new security_manager::CryptoManagerImpl(
       utils::MakeShared<security_manager::CryptoManagerSettingsImpl>(
-          profile_,
-                  app_manager_->GetPolicyHandler().RetrieveCertificate()));
+          profile_, app_manager_->GetPolicyHandler().RetrieveCertificate()));
   protocol_handler_->AddProtocolObserver(security_manager_);
   protocol_handler_->set_security_manager(security_manager_);
 
@@ -167,10 +166,11 @@ bool LifeCycle::StartComponents() {
   connection_handler_->set_protocol_handler(protocol_handler_);
   connection_handler_->set_connection_handler_observer(app_manager_);
 
-// it is important to initialise TelemetryMonitor before TM to listen TM Adapters
+// it is important to initialise TelemetryMonitor before TM to listen TM
+// Adapters
 #ifdef TELEMETRY_MONITOR
-  telemetry_monitor_ = new telemetry_monitor::TelemetryMonitor(profile_.server_address(),
-                                              profile_.time_testing_port());
+  telemetry_monitor_ = new telemetry_monitor::TelemetryMonitor(
+      profile_.server_address(), profile_.time_testing_port());
   telemetry_monitor_->Start();
   telemetry_monitor_->Init(protocol_handler_, app_manager_, transport_manager_);
 #endif  // TELEMETRY_MONITOR
@@ -197,9 +197,7 @@ bool LifeCycle::InitMessageSystem() {
   }
 
   message_broker_server_ = new NsMessageBroker::TcpServer(
-      profile_.server_address(),
-      profile_.server_port(),
-      message_broker_);
+      profile_.server_address(), profile_.server_port(), message_broker_);
   if (!message_broker_server_) {
     LOG4CXX_FATAL(logger_, " Wrong pJSONRPC20Server pointer!");
     return false;
@@ -225,9 +223,7 @@ bool LifeCycle::InitMessageSystem() {
   }
 
   mb_adapter_ = new hmi_message_handler::MessageBrokerAdapter(
-      hmi_handler_,
-      profile_.server_address(),
-      profile_.server_port());
+      hmi_handler_, profile_.server_address(), profile_.server_port());
 
   hmi_handler_->AddHMIMessageAdapter(mb_adapter_);
   if (!mb_adapter_->Connect()) {
@@ -306,25 +302,25 @@ bool LifeCycle::InitMessageSystem() {
 #endif  // MQUEUE_HMIADAPTER
 
 namespace {
-  void sig_handler(int sig) {
-    switch(sig) {
-      case SIGINT:
-        LOG4CXX_DEBUG(logger_, "SIGINT signal has been caught");
-        break;
-      case SIGTERM:
-        LOG4CXX_DEBUG(logger_, "SIGTERM signal has been caught");
-        break;
-      case SIGSEGV:
-        LOG4CXX_DEBUG(logger_, "SIGSEGV signal has been caught");
-        FLUSH_LOGGER();
-        // exit need to prevent endless sending SIGSEGV
-        // http://stackoverflow.com/questions/2663456/how-to-write-a-signal-handler-to-catch-sigsegv
-        abort();
-      default:
-        LOG4CXX_DEBUG(logger_, "Unexpected signal has been caught");
-        exit(EXIT_FAILURE);
-    }
+void sig_handler(int sig) {
+  switch (sig) {
+    case SIGINT:
+      LOG4CXX_DEBUG(logger_, "SIGINT signal has been caught");
+      break;
+    case SIGTERM:
+      LOG4CXX_DEBUG(logger_, "SIGTERM signal has been caught");
+      break;
+    case SIGSEGV:
+      LOG4CXX_DEBUG(logger_, "SIGSEGV signal has been caught");
+      FLUSH_LOGGER();
+      // exit need to prevent endless sending SIGSEGV
+      // http://stackoverflow.com/questions/2663456/how-to-write-a-signal-handler-to-catch-sigsegv
+      abort();
+    default:
+      LOG4CXX_DEBUG(logger_, "Unexpected signal has been caught");
+      exit(EXIT_FAILURE);
   }
+}
 }  //  namespace
 
 void LifeCycle::Run() {
@@ -332,7 +328,7 @@ void LifeCycle::Run() {
   // Register signal handlers and wait sys signals
   // from OS
   if (!utils::WaitTerminationSignals(&sig_handler)) {
-      LOG4CXX_FATAL(logger_, "Fail to catch system signal!");
+    LOG4CXX_FATAL(logger_, "Fail to catch system signal!");
   }
 }
 

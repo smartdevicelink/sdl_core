@@ -50,7 +50,8 @@ class OnVIRpmNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnVIRpmNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnVIRpmNotification(const MessageSharedPtr& message,
+                      ApplicationManager& application_manager);
 
   /**
    * @brief OnVIRpmNotification class destructor

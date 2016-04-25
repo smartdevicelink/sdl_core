@@ -43,11 +43,10 @@ namespace application_manager {
 namespace commands {
 
 OnExitApplicationNotification::OnExitApplicationNotification(
-    const MessageSharedPtr& message, ApplicationManager& application_manager) : NotificationFromHMI(message, application_manager) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnExitApplicationNotification::~OnExitApplicationNotification() {
-}
+OnExitApplicationNotification::~OnExitApplicationNotification() {}
 
 void OnExitApplicationNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -64,8 +63,8 @@ void OnExitApplicationNotification::Run() {
   }
 
   Common_ApplicationExitReason::eType reason;
-  reason = static_cast<Common_ApplicationExitReason::eType>
-      ((*message_)[strings::msg_params][strings::reason].asInt());
+  reason = static_cast<Common_ApplicationExitReason::eType>(
+      (*message_)[strings::msg_params][strings::reason].asInt());
 
   switch (reason) {
     case Common_ApplicationExitReason::DRIVER_DISTRACTION_VIOLATION: {
@@ -80,15 +79,19 @@ void OnExitApplicationNotification::Run() {
       break;
     }
     case Common_ApplicationExitReason::UNAUTHORIZED_TRANSPORT_REGISTRATION: {
-      application_manager_.ManageMobileCommand(MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-          app_id, AppInterfaceUnregisteredReason::APP_UNAUTHORIZED), commands::Command::ORIGIN_SDL);
+      application_manager_.ManageMobileCommand(
+          MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+              app_id, AppInterfaceUnregisteredReason::APP_UNAUTHORIZED),
+          commands::Command::ORIGIN_SDL);
       // HMI rejects registration for navi application
       application_manager_.UnregisterApplication(app_id, Result::SUCCESS);
       return;
     }
     case Common_ApplicationExitReason::UNSUPPORTED_HMI_RESOURCE: {
-      application_manager_.ManageMobileCommand(MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-          app_id, AppInterfaceUnregisteredReason::UNSUPPORTED_HMI_RESOURCE), commands::Command::ORIGIN_SDL);
+      application_manager_.ManageMobileCommand(
+          MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+              app_id, AppInterfaceUnregisteredReason::UNSUPPORTED_HMI_RESOURCE),
+          commands::Command::ORIGIN_SDL);
       application_manager_.UnregisterApplication(app_id, Result::SUCCESS);
       return;
     }

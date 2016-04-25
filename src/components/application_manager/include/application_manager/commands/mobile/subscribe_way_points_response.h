@@ -44,7 +44,7 @@ namespace commands {
  * @brief SubscribeWayPointsResponse command class
  **/
 class SubscribeWayPointsResponse : public CommandResponseImpl {
-public:
+ public:
   /**
    * \brief SubscribeWayPointsResponse class constructor
    **/
@@ -60,12 +60,13 @@ public:
    * @brief Execute command
    **/
   virtual void Run() OVERRIDE;
-private:
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(SubscribeWayPointsResponse);
 };
 
-} // commands
+}  // commands
 
-} // application_manager
+}  // application_manager
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SUBSCRIBE_WAY_POINTS_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SUBSCRIBE_WAY_POINTS_RESPONSE_H_

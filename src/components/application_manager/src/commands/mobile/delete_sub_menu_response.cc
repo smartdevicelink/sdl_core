@@ -33,17 +33,15 @@
 
 #include "application_manager/commands/mobile/delete_sub_menu_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
-DeleteSubMenuResponse::DeleteSubMenuResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+DeleteSubMenuResponse::DeleteSubMenuResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-DeleteSubMenuResponse::~DeleteSubMenuResponse() {
-}
+DeleteSubMenuResponse::~DeleteSubMenuResponse() {}
 
 void DeleteSubMenuResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

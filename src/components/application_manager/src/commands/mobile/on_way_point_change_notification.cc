@@ -51,7 +51,8 @@ void OnWayPointChangeNotification::Run() {
 
   for (std::set<int32_t>::const_iterator app_id =
            subscribed_for_way_points.begin();
-       app_id != subscribed_for_way_points.end(); ++app_id) {
+       app_id != subscribed_for_way_points.end();
+       ++app_id) {
     (*message_)[strings::params][strings::connection_key] = *app_id;
     SendNotification();
   }

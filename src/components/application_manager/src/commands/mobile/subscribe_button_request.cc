@@ -33,25 +33,22 @@
 
 #include "application_manager/commands/mobile/subscribe_button_request.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 namespace str = strings;
 
-SubscribeButtonRequest::SubscribeButtonRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandRequestImpl(message, application_manager) {
-}
+SubscribeButtonRequest::SubscribeButtonRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-SubscribeButtonRequest::~SubscribeButtonRequest() {
-}
+SubscribeButtonRequest::~SubscribeButtonRequest() {}
 
 void SubscribeButtonRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app =
-      application_manager_.application(connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "APPLICATION_NOT_REGISTERED");
@@ -64,15 +61,16 @@ void SubscribeButtonRequest::Run() {
           (*message_)[str::msg_params][str::button_name].asUInt());
 
   if (!IsSubscriptionAllowed(app, btn_id)) {
-    LOG4CXX_ERROR(logger_, "Subscribe on button " << btn_id
-                      << " isn't allowed");
+    LOG4CXX_ERROR(logger_,
+                  "Subscribe on button " << btn_id << " isn't allowed");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
 
   if (!CheckHMICapabilities(btn_id)) {
-    LOG4CXX_ERROR(logger_, "Subscribe on button " << btn_id
-                      << " isn't allowed by HMI capabilities");
+    LOG4CXX_ERROR(logger_,
+                  "Subscribe on button "
+                      << btn_id << " isn't allowed by HMI capabilities");
     SendResponse(false, mobile_apis::Result::UNSUPPORTED_RESOURCE);
     return;
   }
@@ -96,11 +94,10 @@ void SubscribeButtonRequest::Run() {
 
 bool SubscribeButtonRequest::IsSubscriptionAllowed(
     ApplicationSharedPtr app, mobile_apis::ButtonName::eType btn_id) {
-
   if (!app->is_media_application() &&
       ((mobile_apis::ButtonName::SEEKLEFT == btn_id) ||
-       (mobile_apis::ButtonName::SEEKRIGHT == btn_id)||
-       (mobile_apis::ButtonName::TUNEUP == btn_id)   ||
+       (mobile_apis::ButtonName::SEEKRIGHT == btn_id) ||
+       (mobile_apis::ButtonName::TUNEUP == btn_id) ||
        (mobile_apis::ButtonName::TUNEDOWN == btn_id))) {
     return false;
   }
@@ -126,8 +123,8 @@ bool SubscribeButtonRequest::CheckHMICapabilities(
     const size_t length = button_caps.length();
     for (size_t i = 0; i < length; ++i) {
       const SmartObject& caps = button_caps[i];
-      const ButtonName::eType name =
-          static_cast<ButtonName::eType>(caps.getElement(hmi_response::button_name).asInt());
+      const ButtonName::eType name = static_cast<ButtonName::eType>(
+          caps.getElement(hmi_response::button_name).asInt());
       if (name == button) {
         return true;
       }

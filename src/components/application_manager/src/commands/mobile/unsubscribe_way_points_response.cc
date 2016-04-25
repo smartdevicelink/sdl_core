@@ -6,7 +6,7 @@ namespace application_manager {
 namespace commands {
 
 UnsubscribeWayPointsResponse::UnsubscribeWayPointsResponse(
-    const MessageSharedPtr &message, ApplicationManager& application_manager)
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandResponseImpl(message, application_manager) {}
 
 UnsubscribeWayPointsResponse::~UnsubscribeWayPointsResponse() {}

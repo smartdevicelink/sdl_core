@@ -32,17 +32,15 @@
 
 #include "application_manager/commands/hmi/on_device_chosen_notification.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 OnDeviceChosenNotification::OnDeviceChosenNotification(
-    const MessageSharedPtr& message, ApplicationManager& application_manager) : NotificationFromHMI(message, application_manager) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnDeviceChosenNotification::~OnDeviceChosenNotification() {
-}
+OnDeviceChosenNotification::~OnDeviceChosenNotification() {}
 
 void OnDeviceChosenNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

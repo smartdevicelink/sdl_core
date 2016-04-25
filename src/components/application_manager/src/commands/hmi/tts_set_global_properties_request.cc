@@ -38,11 +38,9 @@ namespace commands {
 
 TTSSetGlobalPropertiesRequest::TTSSetGlobalPropertiesRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : RequestToHMI(message, application_manager) {
-}
+    : RequestToHMI(message, application_manager) {}
 
-TTSSetGlobalPropertiesRequest::~TTSSetGlobalPropertiesRequest() {
-}
+TTSSetGlobalPropertiesRequest::~TTSSetGlobalPropertiesRequest() {}
 
 void TTSSetGlobalPropertiesRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,4 +51,3 @@ void TTSSetGlobalPropertiesRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

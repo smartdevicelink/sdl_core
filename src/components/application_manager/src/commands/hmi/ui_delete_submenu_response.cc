@@ -40,11 +40,9 @@ namespace commands {
 
 UIDeleteSubmenuResponse::UIDeleteSubmenuResponse(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+    : ResponseFromHMI(message, application_manager) {}
 
-UIDeleteSubmenuResponse::~UIDeleteSubmenuResponse() {
-}
+UIDeleteSubmenuResponse::~UIDeleteSubmenuResponse() {}
 
 void UIDeleteSubmenuResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

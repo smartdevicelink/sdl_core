@@ -38,12 +38,11 @@ namespace application_manager {
 
 namespace commands {
 
-SDLActivateAppRequest::SDLActivateAppRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : RequestFromHMI(message, application_manager) {
-}
+SDLActivateAppRequest::SDLActivateAppRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestFromHMI(message, application_manager) {}
 
-SDLActivateAppRequest::~SDLActivateAppRequest() {
-}
+SDLActivateAppRequest::~SDLActivateAppRequest() {}
 
 void SDLActivateAppRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -73,14 +72,18 @@ void SDLActivateAppRequest::Run() {
 
   if (!app->IsRegistered()) {
     if (devices_apps.first) {
-      MessageHelper::SendLaunchApp(
-          devices_apps.first->app_id(), app->SchemaUrl(), app->PackageName(), application_manager_);
+      MessageHelper::SendLaunchApp(devices_apps.first->app_id(),
+                                   app->SchemaUrl(),
+                                   app->PackageName(),
+                                   application_manager_);
     } else {
       std::vector<ApplicationSharedPtr>::const_iterator it =
           devices_apps.second.begin();
       for (; it != devices_apps.second.end(); ++it) {
-        MessageHelper::SendLaunchApp(
-            (*it)->app_id(), app->SchemaUrl(), app->PackageName(), application_manager_);
+        MessageHelper::SendLaunchApp((*it)->app_id(),
+                                     app->SchemaUrl(),
+                                     app->PackageName(),
+                                     application_manager_);
       }
     }
     subscribe_on_event(BasicCommunication_OnAppRegistered);
@@ -91,9 +94,9 @@ void SDLActivateAppRequest::Run() {
                                    app->PackageName(),
                                    application_manager_);
     } else {
-    const uint32_t application_id = app_id();
-    application_manager_.GetPolicyHandler().OnActivateApp(application_id,
-                                                     correlation_id());
+      const uint32_t application_id = app_id();
+      application_manager_.GetPolicyHandler().OnActivateApp(application_id,
+                                                            correlation_id());
     }
   }
 }
@@ -103,7 +106,8 @@ void SDLActivateAppRequest::onTimeOut() {
   using namespace hmi_apis::Common_Result;
   using namespace application_manager;
   unsubscribe_from_event(BasicCommunication_OnAppRegistered);
-  SendResponse(false, correlation_id(), SDL_ActivateApp, APPLICATION_NOT_REGISTERED);
+  SendResponse(
+      false, correlation_id(), SDL_ActivateApp, APPLICATION_NOT_REGISTERED);
 }
 
 void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
@@ -125,15 +129,14 @@ void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
         logger_, "Application not found by HMI app id: " << hmi_application_id);
     return;
   }
-  application_manager_.GetPolicyHandler()
-      .OnActivateApp(app->app_id(), correlation_id());
+  application_manager_.GetPolicyHandler().OnActivateApp(app->app_id(),
+                                                        correlation_id());
 }
 
 uint32_t SDLActivateAppRequest::app_id() const {
-
   if ((*message_).keyExists(strings::msg_params)) {
-    if ((*message_)[strings::msg_params].keyExists(strings::app_id)){
-        return (*message_)[strings::msg_params][strings::app_id].asUInt();
+    if ((*message_)[strings::msg_params].keyExists(strings::app_id)) {
+      return (*message_)[strings::msg_params][strings::app_id].asUInt();
     }
   }
   LOG4CXX_DEBUG(logger_, "app_id section is absent in the message.");

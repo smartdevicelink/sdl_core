@@ -35,7 +35,7 @@
 
 namespace application_manager {
 class RequestControlerSettings {
-public:
+ public:
   virtual uint32_t thread_pool_size() const = 0;
   virtual const uint32_t& app_hmi_level_none_time_scale() const = 0;
   virtual const uint32_t& app_hmi_level_none_time_scale_max_requests()

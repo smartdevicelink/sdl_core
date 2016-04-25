@@ -49,7 +49,8 @@ class UISetMediaClockTimerResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  UISetMediaClockTimerResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  UISetMediaClockTimerResponse(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager);
 
   /**
    * @brief UISetMediaClockTimerResponse class destructor

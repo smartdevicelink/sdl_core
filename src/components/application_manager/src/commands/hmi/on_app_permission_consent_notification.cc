@@ -40,12 +40,11 @@ namespace application_manager {
 
 namespace commands {
 
-OnAppPermissionConsentNotification::OnAppPermissionConsentNotification(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : NotificationFromHMI(message, application_manager) {
-}
+OnAppPermissionConsentNotification::OnAppPermissionConsentNotification(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnAppPermissionConsentNotification::~OnAppPermissionConsentNotification() {
-}
+OnAppPermissionConsentNotification::~OnAppPermissionConsentNotification() {}
 
 void OnAppPermissionConsentNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -81,11 +80,10 @@ void OnAppPermissionConsentNotification::Run() {
       permission_consent.group_permissions.push_back(permissions);
     }
 
-    permission_consent.consent_source =
-        msg_params["source"].asString();
+    permission_consent.consent_source = msg_params["source"].asString();
 
-    application_manager_.GetPolicyHandler().OnAppPermissionConsent(connection_key,
-      permission_consent);
+    application_manager_.GetPolicyHandler().OnAppPermissionConsent(
+        connection_key, permission_consent);
   }
 }
 

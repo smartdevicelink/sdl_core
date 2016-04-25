@@ -52,7 +52,8 @@ class OnHashChangeNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  OnHashChangeNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnHashChangeNotification(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
   /**
    * @brief OnHashChangeNotification class destructor
@@ -68,7 +69,7 @@ class OnHashChangeNotification : public CommandNotificationImpl {
   DISALLOW_COPY_AND_ASSIGN(OnHashChangeNotification);
 };
 
-}   // namespace mobile
+}  // namespace mobile
 }  // namespace commands
 }  // namespace application_manager
 

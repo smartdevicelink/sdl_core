@@ -51,7 +51,8 @@ class ReadDIDResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  ReadDIDResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  ReadDIDResponse(const MessageSharedPtr& message,
+                  ApplicationManager& application_manager);
 
   /**
    * @brief ReadDIDResponse class destructor

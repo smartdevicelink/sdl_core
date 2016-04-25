@@ -52,8 +52,7 @@ class SetIconResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  SetIconResponse(const MessageSharedPtr& message,
-                           ApplicationManager& app_man);
+  SetIconResponse(const MessageSharedPtr& message, ApplicationManager& app_man);
 
   /**
    * @brief SetIconResponse class destructor

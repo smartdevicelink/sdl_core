@@ -6,12 +6,10 @@ namespace application_manager {
 namespace commands {
 
 SubscribeWayPointsResponse::SubscribeWayPointsResponse(
-    const MessageSharedPtr &message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-SubscribeWayPointsResponse::~SubscribeWayPointsResponse() {
-}
+SubscribeWayPointsResponse::~SubscribeWayPointsResponse() {}
 
 void SubscribeWayPointsResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

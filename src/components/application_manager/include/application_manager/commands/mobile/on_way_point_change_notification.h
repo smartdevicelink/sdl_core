@@ -40,30 +40,30 @@ namespace application_manager {
 
 namespace commands {
 
-class OnWayPointChangeNotification: public CommandNotificationImpl {
+class OnWayPointChangeNotification : public CommandNotificationImpl {
  public:
- /**
-  * @brief OnWayPointChangeNotification class constructor
-  *
-  * @param message Incoming SmartObject message
-  **/
- OnWayPointChangeNotification(const MessageSharedPtr& message,
-                              ApplicationManager& application_manager);
+  /**
+   * @brief OnWayPointChangeNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  OnWayPointChangeNotification(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager);
 
- /**
-  * @brief OnWayPointChangeNotification class destructor
-  **/
- virtual ~OnWayPointChangeNotification();
+  /**
+   * @brief OnWayPointChangeNotification class destructor
+   **/
+  virtual ~OnWayPointChangeNotification();
 
- /**
-  * @brief Execute command
-  **/
- virtual void Run() OVERRIDE;
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run() OVERRIDE;
 
  private:
- DISALLOW_COPY_AND_ASSIGN(OnWayPointChangeNotification);
+  DISALLOW_COPY_AND_ASSIGN(OnWayPointChangeNotification);
 };
 
 }  // namespace commands
 }  // namespace application_manager
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_WAY_POINT_CHANGE_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_WAY_POINT_CHANGE_NOTIFICATION_H_

@@ -49,7 +49,8 @@ class UIGetLanguageRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  UIGetLanguageRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  UIGetLanguageRequest(const MessageSharedPtr& message,
+                       ApplicationManager& application_manager);
 
   /**
    * @brief UIGetLanguageRequest class destructor

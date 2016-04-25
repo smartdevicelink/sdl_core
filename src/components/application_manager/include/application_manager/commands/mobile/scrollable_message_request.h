@@ -50,7 +50,8 @@ class ScrollableMessageRequest : public CommandRequestImpl {
   /**
    * @brief ScrollableMessageRequest class constructor
    **/
-  ScrollableMessageRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  ScrollableMessageRequest(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
   /**
    * @brief SliderCommand class destructor

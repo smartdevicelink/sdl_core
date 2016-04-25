@@ -38,12 +38,11 @@ namespace application_manager {
 
 namespace commands {
 
-VRAddCommandResponse::VRAddCommandResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+VRAddCommandResponse::VRAddCommandResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-VRAddCommandResponse::~VRAddCommandResponse() {
-}
+VRAddCommandResponse::~VRAddCommandResponse() {}
 
 void VRAddCommandResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

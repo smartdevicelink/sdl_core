@@ -39,12 +39,11 @@ namespace application_manager {
 
 namespace commands {
 
-GetVehicleDataResponse::GetVehicleDataResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+GetVehicleDataResponse::GetVehicleDataResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-GetVehicleDataResponse::~GetVehicleDataResponse() {
-}
+GetVehicleDataResponse::~GetVehicleDataResponse() {}
 
 void GetVehicleDataResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

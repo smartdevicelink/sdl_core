@@ -40,8 +40,7 @@ namespace commands {
 
 OnAllowSDLFunctionalityNotification::OnAllowSDLFunctionalityNotification(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : NotificationFromHMI(message, application_manager) {
-}
+    : NotificationFromHMI(message, application_manager) {}
 
 OnAllowSDLFunctionalityNotification::~OnAllowSDLFunctionalityNotification() {}
 
@@ -49,8 +48,7 @@ void OnAllowSDLFunctionalityNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   std::string device_id;
   if ((*message_)[strings::msg_params].keyExists("device")) {
-    device_id = (*message_)[strings::msg_params]["device"]["id"]
-	.asString();
+    device_id = (*message_)[strings::msg_params]["device"]["id"].asString();
   }
   application_manager_.GetPolicyHandler().OnAllowSDLFunctionalityNotification(
       (*message_)[strings::msg_params][hmi_response::allowed].asBool(),

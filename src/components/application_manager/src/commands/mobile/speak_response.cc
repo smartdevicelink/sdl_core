@@ -40,12 +40,11 @@ namespace application_manager {
 
 namespace commands {
 
-SpeakResponse::SpeakResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+SpeakResponse::SpeakResponse(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-SpeakResponse::~SpeakResponse() {
-}
+SpeakResponse::~SpeakResponse() {}
 
 void SpeakResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -42,7 +42,6 @@
 #include "application_manager/test_resumption_data_db.h"
 #include "resumption_data_test.h"
 
-
 #include "application_manager/resumption/resumption_sql_queries.h"
 #include "application_manager/resumption/resumption_data_db.h"
 
@@ -84,7 +83,8 @@ class ResumptionDataDBTest : public ResumptionDataTest {
     kDatabaseName = "resumption";
     path_ = "test_storage";
     CreateDirectory("./" + path_);
-    ON_CALL(mock_application_manager_settings_, app_storage_folder()).WillByDefault(ReturnRef(path_));
+    ON_CALL(mock_application_manager_settings_, app_storage_folder())
+        .WillByDefault(ReturnRef(path_));
     test_db_ = new utils::dbms::SQLDatabase(kDatabaseName);
     test_db_->set_path(path_ + "/");
     res_db_ = new TestResumptionDataDB(mock_application_manager_settings_);
@@ -114,11 +114,11 @@ class ResumptionDataDBTest : public ResumptionDataTest {
   }
 
   void SetZeroIgnOffTime() {
-      utils::dbms::SQLQuery query(test_db());
-      EXPECT_TRUE(query.Prepare(KUpdateLastIgnOffTime));
-      query.Bind(0, 0);
-      EXPECT_TRUE(query.Exec());
-    }
+    utils::dbms::SQLQuery query(test_db());
+    EXPECT_TRUE(query.Prepare(KUpdateLastIgnOffTime));
+    query.Bind(0, 0);
+    EXPECT_TRUE(query.Exec());
+  }
 
   static TestResumptionDataDB* res_db_;
 

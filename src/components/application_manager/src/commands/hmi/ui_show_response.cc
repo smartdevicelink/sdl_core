@@ -36,12 +36,11 @@ namespace application_manager {
 
 namespace commands {
 
-UIShowResponse::UIShowResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+UIShowResponse::UIShowResponse(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-UIShowResponse::~UIShowResponse() {
-}
+UIShowResponse::~UIShowResponse() {}
 
 void UIShowResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -42,18 +42,16 @@ namespace application_manager {
 
 namespace commands {
 
-DiagnosticMessageRequest::DiagnosticMessageRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandRequestImpl(message, application_manager) {
-}
+DiagnosticMessageRequest::DiagnosticMessageRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-DiagnosticMessageRequest::~DiagnosticMessageRequest() {
-}
+DiagnosticMessageRequest::~DiagnosticMessageRequest() {}
 
 void DiagnosticMessageRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app =
-      application_manager_.application(connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application is not registered.");
@@ -72,9 +70,11 @@ void DiagnosticMessageRequest::Run() {
   if (supported_diag_modes.end() == std::find(supported_diag_modes.begin(),
                                               supported_diag_modes.end(),
                                               msg_diagnostic_mode)) {
-    LOG4CXX_ERROR(logger_, "Received diagnostic mode " << msg_diagnostic_mode <<
-                           " is not supported.");
-    SendResponse(false, mobile_apis::Result::REJECTED,
+    LOG4CXX_ERROR(logger_,
+                  "Received diagnostic mode " << msg_diagnostic_mode
+                                              << " is not supported.");
+    SendResponse(false,
+                 mobile_apis::Result::REJECTED,
                  "Received diagnostic mode is not supported.");
     return;
   }
@@ -83,8 +83,8 @@ void DiagnosticMessageRequest::Run() {
   (*message_)[strings::msg_params][strings::app_id] = app->app_id();
 
   SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage,
-                 &(*message_)[strings::msg_params], true);
-
+                 &(*message_)[strings::msg_params],
+                 true);
 }
 
 void DiagnosticMessageRequest::on_event(const event_engine::Event& event) {

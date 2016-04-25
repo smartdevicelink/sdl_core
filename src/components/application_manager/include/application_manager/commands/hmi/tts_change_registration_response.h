@@ -49,7 +49,8 @@ class TTSChangeRegistratioResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  TTSChangeRegistratioResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  TTSChangeRegistratioResponse(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager);
 
   /**
    * @brief TTSChangeRegistratioResponse class destructor

@@ -51,7 +51,8 @@ class GetDTCsResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  GetDTCsResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  GetDTCsResponse(const MessageSharedPtr& message,
+                  ApplicationManager& application_manager);
 
   /**
    * @brief GetDTCsResponse class destructor

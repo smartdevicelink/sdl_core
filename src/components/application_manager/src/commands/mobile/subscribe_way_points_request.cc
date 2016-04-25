@@ -6,7 +6,7 @@ namespace application_manager {
 namespace commands {
 
 SubscribeWayPointsRequest::SubscribeWayPointsRequest(
-    const MessageSharedPtr &message, ApplicationManager& application_manager)
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager) {}
 
 SubscribeWayPointsRequest::~SubscribeWayPointsRequest() {}
@@ -14,13 +14,12 @@ SubscribeWayPointsRequest::~SubscribeWayPointsRequest() {}
 void SubscribeWayPointsRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app =
-      application_manager_.application(
-          connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_, "An application with connection key "
-                               << connection_key() << " is not registered.");
+    LOG4CXX_ERROR(logger_,
+                  "An application with connection key "
+                      << connection_key() << " is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -36,16 +35,14 @@ void SubscribeWayPointsRequest::Run() {
     return;
   }
 
-  SendHMIRequest(hmi_apis::FunctionID::Navigation_SubscribeWayPoints, NULL,
-                 true);
+  SendHMIRequest(
+      hmi_apis::FunctionID::Navigation_SubscribeWayPoints, NULL, true);
 }
 
-void SubscribeWayPointsRequest::on_event(const event_engine::Event &event) {
+void SubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationSharedPtr app =
-      application_manager_.application(
-          connection_key());
-  const smart_objects::SmartObject &message = event.smart_object();
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
+  const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_SubscribeWayPoints: {
       LOG4CXX_INFO(logger_, "Received Navigation_SubscribeWayPoints event");

@@ -38,11 +38,9 @@ namespace commands {
 
 VRPerformInteractionRequest::VRPerformInteractionRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : RequestToHMI(message, application_manager) {
-}
+    : RequestToHMI(message, application_manager) {}
 
-VRPerformInteractionRequest::~VRPerformInteractionRequest() {
-}
+VRPerformInteractionRequest::~VRPerformInteractionRequest() {}
 
 void VRPerformInteractionRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,4 +51,3 @@ void VRPerformInteractionRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

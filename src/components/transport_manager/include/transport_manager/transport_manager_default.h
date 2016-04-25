@@ -48,25 +48,22 @@ namespace transport_manager {
  * @brief Default realization of transport_manager_impl class.
  */
 class TransportManagerDefault : public TransportManagerImpl {
-
-public:
- explicit TransportManagerDefault(const TransportManagerSettings& settings);
+ public:
+  explicit TransportManagerDefault(const TransportManagerSettings& settings);
 
   /**
    * @brief Initialize transport manager.
    *
    * @return Code error.
    */
-  int Init(resumption::LastState &last_state) OVERRIDE;
+  int Init(resumption::LastState& last_state) OVERRIDE;
 
   /**
    * @brief Destructor.
    */
   virtual ~TransportManagerDefault();
 
-
   DISALLOW_COPY_AND_ASSIGN(TransportManagerDefault);
-
 };
 }
 

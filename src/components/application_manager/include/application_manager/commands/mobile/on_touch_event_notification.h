@@ -53,7 +53,8 @@ class OnTouchEventNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  OnTouchEventNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnTouchEventNotification(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
   /**
    * @brief OnTouchEventNotification class destructor

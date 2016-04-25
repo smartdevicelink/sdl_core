@@ -52,7 +52,8 @@ class UnsubscribeVehicleDataRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  UnsubscribeVehicleDataRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  UnsubscribeVehicleDataRequest(const MessageSharedPtr& message,
+                                ApplicationManager& application_manager);
 
   /**
    * @brief UnsubscribeVehicleDataRequest class destructor
@@ -83,7 +84,7 @@ class UnsubscribeVehicleDataRequest : public CommandRequestImpl {
 
   typedef std::vector<HmiRequest> HmiRequests;
   HmiRequests hmi_requests_;
-#endif // #ifdef HMI_DBUS_API
+#endif  // #ifdef HMI_DBUS_API
 
  private:
   /**

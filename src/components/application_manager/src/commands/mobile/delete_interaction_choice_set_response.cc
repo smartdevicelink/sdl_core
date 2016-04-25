@@ -43,11 +43,9 @@ namespace commands {
 
 DeleteInteractionChoiceSetResponse::DeleteInteractionChoiceSetResponse(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+    : CommandResponseImpl(message, application_manager) {}
 
-DeleteInteractionChoiceSetResponse::~DeleteInteractionChoiceSetResponse() {
-}
+DeleteInteractionChoiceSetResponse::~DeleteInteractionChoiceSetResponse() {}
 
 void DeleteInteractionChoiceSetResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

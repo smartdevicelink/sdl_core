@@ -32,7 +32,6 @@
 
 #include "application_manager/commands/hmi/update_device_list_request.h"
 
-
 #include "interfaces/HMI_API.h"
 
 #include <unistd.h>
@@ -46,14 +45,14 @@ UpdateDeviceListRequest::UpdateDeviceListRequest(
     : RequestToHMI(message, application_manager)
     , EventObserver(application_manager_.event_dispatcher()) {}
 
-UpdateDeviceListRequest::~UpdateDeviceListRequest() {
-}
+UpdateDeviceListRequest::~UpdateDeviceListRequest() {}
 
 void UpdateDeviceListRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(wait_hmi_lock);
   // Fix problem with SDL and HMI HTML. This problem is not actual for HMI PASA.
-  // Flag conditional compilation for specific customer is used in order to exclude
+  // Flag conditional compilation for specific customer is used in order to
+  // exclude
   // hit code to RTC
   if (true == application_manager_.get_settings().launch_hmi()) {
     if (!application_manager_.IsHMICooperating()) {
@@ -71,13 +70,13 @@ void UpdateDeviceListRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(wait_hmi_lock);
   switch (event.id()) {
-    case hmi_apis::FunctionID::BasicCommunication_OnReady : {
+    case hmi_apis::FunctionID::BasicCommunication_OnReady: {
       LOG4CXX_INFO(logger_, "received OnReady");
       unsubscribe_from_event(hmi_apis::FunctionID::BasicCommunication_OnReady);
       termination_condition_.Broadcast();
       break;
     };
-    default : {
+    default: {
       LOG4CXX_ERROR(logger_, "Unknown event ");
       break;
     };
@@ -93,4 +92,3 @@ bool UpdateDeviceListRequest::CleanUp() {
 }  // namespace commands
 
 }  // namespace application_manager
-

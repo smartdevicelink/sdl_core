@@ -51,7 +51,8 @@ class EndAudioPassThruResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  EndAudioPassThruResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  EndAudioPassThruResponse(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
   /**
    * @brief EndAudioPassThruResponse class destructor

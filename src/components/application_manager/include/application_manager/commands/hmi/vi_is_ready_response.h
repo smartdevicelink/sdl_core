@@ -50,7 +50,8 @@ class VIIsReadyResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  VIIsReadyResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  VIIsReadyResponse(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief VIIsReadyResponse class destructor

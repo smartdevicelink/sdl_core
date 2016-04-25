@@ -40,7 +40,7 @@ namespace application_manager {
 namespace commands {
 
 NaviUnsubscribeWayPointsResponse::NaviUnsubscribeWayPointsResponse(
-    const MessageSharedPtr &message, ApplicationManager& application_manager)
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
     : ResponseFromHMI(message, application_manager) {}
 
 NaviUnsubscribeWayPointsResponse::~NaviUnsubscribeWayPointsResponse() {}

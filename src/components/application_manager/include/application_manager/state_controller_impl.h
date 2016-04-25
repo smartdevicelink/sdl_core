@@ -47,7 +47,7 @@
 namespace application_manager {
 
 class StateControllerImpl : public event_engine::EventObserver,
-                        public StateController {
+                            public StateController {
  public:
   explicit StateControllerImpl(ApplicationManager& app_mngr);
 
@@ -58,7 +58,8 @@ class StateControllerImpl : public event_engine::EventObserver,
    * @param state state of new regular state
    */
 
-  virtual void SetRegularState(ApplicationSharedPtr app, HmiStatePtr state,
+  virtual void SetRegularState(ApplicationSharedPtr app,
+                               HmiStatePtr state,
                                const bool SendActivateApp);
 
   /**
@@ -81,8 +82,8 @@ class StateControllerImpl : public event_engine::EventObserver,
    * @param SendActivateApp: if true, ActivateAppRequest will be sent on HMI
    */
   virtual void SetRegularState(ApplicationSharedPtr app,
-                       const mobile_apis::HMILevel::eType hmi_level,
-                       const bool SendActivateApp);
+                               const mobile_apis::HMILevel::eType hmi_level,
+                               const bool SendActivateApp);
 
   /**
    * @brief SetRegularState Change regular hmi level, audio state and system
@@ -107,7 +108,7 @@ class StateControllerImpl : public event_engine::EventObserver,
    * @param hmi_level new hmi level for application
    */
   virtual void SetRegularState(ApplicationSharedPtr app,
-                       const mobile_apis::HMILevel::eType hmi_level);
+                               const mobile_apis::HMILevel::eType hmi_level);
 
   /**
    * @brief SetRegularState Change regular audio state
@@ -164,8 +165,8 @@ class StateControllerImpl : public event_engine::EventObserver,
    * @param new_state state after change
    */
   virtual void OnStateChanged(ApplicationSharedPtr app,
-                      HmiStatePtr old_state,
-                      HmiStatePtr new_state);
+                              HmiStatePtr old_state,
+                              HmiStatePtr new_state);
 
   /**
    * @brief Checks activity of Deactivate HMI state.
@@ -304,7 +305,8 @@ class StateControllerImpl : public event_engine::EventObserver,
   void TempStateStarted(HmiState::StateID ID);
 
   /**
-   * @brief TempStateStopped remove HMI State ID from StateControllerImpl collection
+   * @brief TempStateStopped remove HMI State ID from StateControllerImpl
+   * collection
    * @param ID state identifier
    */
   void TempStateStopped(HmiState::StateID ID);
@@ -441,7 +443,6 @@ class StateControllerImpl : public event_engine::EventObserver,
   std::map<uint32_t, HmiStatePtr> waiting_for_activate;
   ApplicationManager& app_mngr_;
 };
-
 }
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_STATE_CONTROLLER_IMPL_H_

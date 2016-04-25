@@ -49,7 +49,8 @@ class UIShowRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  UIShowRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  UIShowRequest(const MessageSharedPtr& message,
+                ApplicationManager& application_manager);
 
   /**
    * @brief UIShowRequest class destructor

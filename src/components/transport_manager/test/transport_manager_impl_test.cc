@@ -70,13 +70,12 @@ class TransportManagerImplTest : public ::testing::Test {
  protected:
   TransportManagerImplTest()
       : tm_(settings)
-      ,  device_handle_(1)
+      , device_handle_(1)
       , mac_address_("MA:CA:DR:ES:S")
       , dev_info_(device_handle_, mac_address_, "TestDeviceName", "BTMAC") {}
 
   void SetUp() OVERRIDE {
-    resumption::LastState  last_state_("app_storage_folder",
-                                       "app_info_storage");
+    resumption::LastState last_state_("app_storage_folder", "app_info_storage");
     tm_.Init(last_state_);
     mock_adapter_ = new MockTransportAdapter();
     tm_listener_ = MakeShared<TransportManagerListenerMock>();
@@ -332,8 +331,9 @@ class TransportManagerImplTest : public ::testing::Test {
 };
 
 TEST_F(TransportManagerImplTest, SearchDevices_AdaptersNotAdded) {
-  EXPECT_CALL(*mock_adapter_, SearchDevices()).WillOnce(Return(
-        transport_manager::transport_adapter::TransportAdapter::OK));
+  EXPECT_CALL(*mock_adapter_, SearchDevices())
+      .WillOnce(
+          Return(transport_manager::transport_adapter::TransportAdapter::OK));
   EXPECT_EQ(E_SUCCESS, tm_.SearchDevices());
 }
 
@@ -408,11 +408,12 @@ TEST_F(TransportManagerImplTest, Disconnect_DisconnectionFailed) {
       .WillOnce(Return(TransportAdapter::FAIL));
   // Assert
   // Even with fail, we get Success
-  EXPECT_EQ(E_SUCCESS,  tm_.Disconnect(connection_key_));
+  EXPECT_EQ(E_SUCCESS, tm_.Disconnect(connection_key_));
 }
 
 TEST_F(TransportManagerImplTest, Disconnect_ConnectionNotExist) {
-  EXPECT_CALL(*mock_adapter_, Disconnect(mac_address_, application_id_)).Times(0);
+  EXPECT_CALL(*mock_adapter_, Disconnect(mac_address_, application_id_))
+      .Times(0);
   // Assert
   EXPECT_EQ(E_INVALID_HANDLE, tm_.Disconnect(connection_key_));
 }
@@ -494,7 +495,7 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice) {
       .WillOnce(Return(TransportAdapter::OK));
 
 #ifdef TELEMETRY_MONITOR
-    EXPECT_CALL(mock_metric_observer_, StartRawMsg(test_message_.get()));
+  EXPECT_CALL(mock_metric_observer_, StartRawMsg(test_message_.get()));
 #endif  // TELEMETRY_MONITOR
 
   EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
@@ -673,8 +674,12 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_OnSearchDeviceFail) {
   const int type = static_cast<int>(
       TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL);
 
-  TransportAdapterEvent test_event(type, mock_adapter_, mac_address_,
-                                   application_id_, test_message_, error_);
+  TransportAdapterEvent test_event(type,
+                                   mock_adapter_,
+                                   mac_address_,
+                                   application_id_,
+                                   test_message_,
+                                   error_);
 
   EXPECT_CALL(*tm_listener_, OnScanDevicesFailed(_));
 
@@ -686,8 +691,12 @@ TEST_F(TransportManagerImplTest, ReceiveEventFromDevice_DeviceListUpdated) {
   const int type = static_cast<int>(
       TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED);
 
-  TransportAdapterEvent test_event(type, mock_adapter_, dev_info_.mac_address(),
-                                   application_id_, test_message_, error_);
+  TransportAdapterEvent test_event(type,
+                                   mock_adapter_,
+                                   dev_info_.mac_address(),
+                                   application_id_,
+                                   test_message_,
+                                   error_);
   device_list_.push_back(dev_info_.mac_address());
   std::vector<DeviceInfo> vector_dev_info;
   vector_dev_info.push_back(dev_info_);

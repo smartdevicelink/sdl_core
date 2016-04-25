@@ -32,17 +32,15 @@
 
 #include "application_manager/commands/hmi/sdl_get_list_of_permissions_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 SDLGetListOfPermissionsResponse::SDLGetListOfPermissionsResponse(
-  const MessageSharedPtr& message, ApplicationManager& application_manager): ResponseToHMI(message, application_manager) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseToHMI(message, application_manager) {}
 
-SDLGetListOfPermissionsResponse::~SDLGetListOfPermissionsResponse() {
-}
+SDLGetListOfPermissionsResponse::~SDLGetListOfPermissionsResponse() {}
 
 void SDLGetListOfPermissionsResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -54,5 +52,3 @@ void SDLGetListOfPermissionsResponse::Run() {
 
 }  // namespace commands
 }  // namespace application_manager
-
-

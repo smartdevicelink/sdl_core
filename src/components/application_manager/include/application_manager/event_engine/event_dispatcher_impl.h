@@ -63,8 +63,12 @@ class EventDispatcherImpl : public EventDispatcher {
   EventDispatcherImpl();
 
 #ifdef BUILD_TESTS
-  EventObserverMap get_observers() const { return observers_event_; }
-  ObserverVector get_observers_list() const { return observers_; }
+  EventObserverMap get_observers() const {
+    return observers_event_;
+  }
+  ObserverVector get_observers_list() const {
+    return observers_;
+  }
 #endif  // BUILD_TESTS
 
   /*
@@ -82,8 +86,8 @@ class EventDispatcherImpl : public EventDispatcher {
    * @param observer    The observer to subscribe for event
    */
   void add_observer(const Event::EventID& event_id,
-                            int32_t hmi_correlation_id,
-                            EventObserver& observer) OVERRIDE;
+                    int32_t hmi_correlation_id,
+                    EventObserver& observer) OVERRIDE;
 
   /*
    * @brief Unsubscribes the observer from specific event
@@ -92,7 +96,7 @@ class EventDispatcherImpl : public EventDispatcher {
    * @param observer    The observer to be unsubscribed
    */
   void remove_observer(const Event::EventID& event_id,
-                               EventObserver& observer) OVERRIDE;
+                       EventObserver& observer) OVERRIDE;
 
   /*
    * @brief Unsubscribes the observer from all events
@@ -102,7 +106,6 @@ class EventDispatcherImpl : public EventDispatcher {
   void remove_observer(EventObserver& observer) OVERRIDE;
 
  private:
-
   /*
    * @brief removes observer
    * when occurs unsubscribe from event

@@ -57,15 +57,17 @@ using namespace resumption;
 using namespace mobile_apis;
 
 class ResumptionDataTest : public ::testing::Test {
- public :
-    ResumptionDataTest() :tts_chunks_count(4) {}
+ public:
+  ResumptionDataTest() : tts_chunks_count(4) {}
+
  protected:
   // Check structure in saved application
   void CheckSavedApp(sm::SmartObject& saved_data);
 
   // Set data for resumption
   virtual void PrepareData();
-  utils::SharedPtr<NiceMock<application_manager_test::MockApplication>> app_mock;
+  utils::SharedPtr<NiceMock<application_manager_test::MockApplication>>
+      app_mock;
 
   profile::Profile profile_;
   HMILevel::eType hmi_level_;

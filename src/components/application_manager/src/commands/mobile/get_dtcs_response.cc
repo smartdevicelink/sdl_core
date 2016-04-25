@@ -33,17 +33,15 @@
 
 #include "application_manager/commands/mobile/get_dtcs_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
-GetDTCsResponse::GetDTCsResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+GetDTCsResponse::GetDTCsResponse(const MessageSharedPtr& message,
+                                 ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-GetDTCsResponse::~GetDTCsResponse() {
-}
+GetDTCsResponse::~GetDTCsResponse() {}
 
 void GetDTCsResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

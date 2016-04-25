@@ -32,18 +32,15 @@
 
 #include "application_manager/commands/hmi/on_vr_stopped_notification.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 OnVRStoppedNotification::OnVRStoppedNotification(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : NotificationFromHMI(message, application_manager) {
-}
+    : NotificationFromHMI(message, application_manager) {}
 
-OnVRStoppedNotification::~OnVRStoppedNotification() {
-}
+OnVRStoppedNotification::~OnVRStoppedNotification() {}
 
 void OnVRStoppedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -56,4 +53,3 @@ void OnVRStoppedNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

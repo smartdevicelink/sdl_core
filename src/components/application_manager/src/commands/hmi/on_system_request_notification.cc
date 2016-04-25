@@ -44,12 +44,10 @@ namespace application_manager {
 namespace commands {
 
 OnSystemRequestNotification::OnSystemRequestNotification(
-  const MessageSharedPtr& message, ApplicationManager& application_manager)
-  : NotificationFromHMI(message, application_manager) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
-OnSystemRequestNotification::~OnSystemRequestNotification() {
-}
+OnSystemRequestNotification::~OnSystemRequestNotification() {}
 
 void OnSystemRequestNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,27 +56,29 @@ void OnSystemRequestNotification::Run() {
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
 
   params[strings::function_id] =
-    static_cast<int32_t>(mobile_apis::FunctionID::eType::OnSystemRequestID);
+      static_cast<int32_t>(mobile_apis::FunctionID::eType::OnSystemRequestID);
 
   const std::string app_id = msg_params[strings::app_id].asString();
-  LOG4CXX_DEBUG(logger_, "Received OnSystemRequest for " << app_id );
+  LOG4CXX_DEBUG(logger_, "Received OnSystemRequest for " << app_id);
 
   ApplicationSharedPtr app;
   if (strings::default_app_id == app_id) {
-    const policy::PolicyHandlerInterface& policy_handler = 
-	application_manager_.GetPolicyHandler();
+    const policy::PolicyHandlerInterface& policy_handler =
+        application_manager_.GetPolicyHandler();
     const uint32_t selected_app_id = policy_handler.GetAppIdForSending();
     if (0 == selected_app_id) {
-      LOG4CXX_WARN(logger_,
-                   "Can't select application to forward OnSystemRequestNotification");
+      LOG4CXX_WARN(
+          logger_,
+          "Can't select application to forward OnSystemRequestNotification");
       return;
     }
     app = application_manager_.application(selected_app_id);
   }
 
   if (!app.valid()) {
-    LOG4CXX_WARN(logger_, "Application with connection key " << app_id <<
-                 "is not registered.");
+    LOG4CXX_WARN(logger_,
+                 "Application with connection key " << app_id
+                                                    << "is not registered.");
     return;
   }
 
@@ -89,4 +89,3 @@ void OnSystemRequestNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

@@ -38,11 +38,9 @@ namespace commands {
 
 OnAudioDataStreamingNotification::OnAudioDataStreamingNotification(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : NotificationToHMI(message, application_manager) {
-}
+    : NotificationToHMI(message, application_manager) {}
 
-OnAudioDataStreamingNotification::~OnAudioDataStreamingNotification() {
-}
+OnAudioDataStreamingNotification::~OnAudioDataStreamingNotification() {}
 
 void OnAudioDataStreamingNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,4 +50,3 @@ void OnAudioDataStreamingNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

@@ -51,7 +51,8 @@ class SetGlobalPropertiesRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  SetGlobalPropertiesRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  SetGlobalPropertiesRequest(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager);
 
   /**
    * @brief SetGlobalPropertiesRequest class destructor
@@ -72,22 +73,26 @@ class SetGlobalPropertiesRequest : public CommandRequestImpl {
 
  private:
   // Verify correctness VrHelptitle value
-  static bool ValidateVRHelpTitle(const smart_objects::SmartObject* const vr_help_so_ptr);
+  static bool ValidateVRHelpTitle(
+      const smart_objects::SmartObject* const vr_help_so_ptr);
 
   // prepare UI sending data (VrHelps, Menus, Keyboard) to SmartObject
-  static void PrepareUIRequestVRHelpData(const ApplicationSharedPtr app,
-                                         const smart_objects::SmartObject& msg_params,
-                                         smart_objects::SmartObject& out_params);
+  static void PrepareUIRequestVRHelpData(
+      const ApplicationSharedPtr app,
+      const smart_objects::SmartObject& msg_params,
+      smart_objects::SmartObject& out_params);
 
-  static bool PrepareUIRequestDefaultVRHelpData(const ApplicationSharedPtr app,
-                                                smart_objects::SmartObject& out_params);
+  static bool PrepareUIRequestDefaultVRHelpData(
+      const ApplicationSharedPtr app, smart_objects::SmartObject& out_params);
 
-  static void PrepareUIRequestMenuAndKeyboardData(const ApplicationSharedPtr app,
-                                        const smart_objects::SmartObject& msg_params,
-                                        smart_objects::SmartObject& out_params);
+  static void PrepareUIRequestMenuAndKeyboardData(
+      const ApplicationSharedPtr app,
+      const smart_objects::SmartObject& msg_params,
+      smart_objects::SmartObject& out_params);
 
   // Send TTS request to HMI
-  void SendTTSRequest(const smart_objects::SmartObject& params, bool use_events);
+  void SendTTSRequest(const smart_objects::SmartObject& params,
+                      bool use_events);
 
   // Send UI request to HMI
   void SendUIRequest(const smart_objects::SmartObject& params, bool use_events);

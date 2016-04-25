@@ -79,9 +79,8 @@ namespace application_manager {
 namespace commands {
 
 OnDeviceStateChangedNotification::OnDeviceStateChangedNotification(
-  const MessageSharedPtr& message, ApplicationManager& application_manager)
-  : NotificationFromHMI(message, application_manager) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationFromHMI(message, application_manager) {}
 
 OnDeviceStateChangedNotification::~OnDeviceStateChangedNotification() {}
 

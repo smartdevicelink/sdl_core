@@ -39,11 +39,9 @@ namespace commands {
 
 OnVIHeadLampStatusNotification::OnVIHeadLampStatusNotification(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : NotificationFromHMI(message, application_manager) {
-}
+    : NotificationFromHMI(message, application_manager) {}
 
-OnVIHeadLampStatusNotification::~OnVIHeadLampStatusNotification() {
-}
+OnVIHeadLampStatusNotification::~OnVIHeadLampStatusNotification() {}
 
 void OnVIHeadLampStatusNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,4 +56,3 @@ void OnVIHeadLampStatusNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

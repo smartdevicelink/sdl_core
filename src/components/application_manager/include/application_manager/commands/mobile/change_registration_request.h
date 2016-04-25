@@ -57,7 +57,8 @@ class ChangeRegistrationRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  ChangeRegistrationRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  ChangeRegistrationRequest(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /**
    * @brief ChangeRegistrationRequest class destructor

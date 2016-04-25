@@ -31,25 +31,23 @@
  */
 #include "application_manager/commands/hmi/mixing_audio_supported_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 MixingAudioSupportedResponse::MixingAudioSupportedResponse(
-  const MessageSharedPtr& message, ApplicationManager& application_manager) : ResponseFromHMI(message, application_manager) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-MixingAudioSupportedResponse::~MixingAudioSupportedResponse() {
-}
+MixingAudioSupportedResponse::~MixingAudioSupportedResponse() {}
 
 void MixingAudioSupportedResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  HMICapabilities& hmi_capabilities =
-      application_manager_.hmi_capabilities();
-  hmi_capabilities.set_attenuated_supported((*message_)
-      [strings::msg_params][hmi_response::attenuated_supported].asBool());
+  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
+  hmi_capabilities.set_attenuated_supported(
+      (*message_)[strings::msg_params][hmi_response::attenuated_supported]
+          .asBool());
 }
 
 }  // namespace commands

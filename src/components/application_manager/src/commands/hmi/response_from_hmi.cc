@@ -51,8 +51,7 @@ ResponseFromHMI::ResponseFromHMI(const MessageSharedPtr& message,
   ReplaceHMIByMobileAppId(*(message.get()));
 }
 
-ResponseFromHMI::~ResponseFromHMI() {
-}
+ResponseFromHMI::~ResponseFromHMI() {}
 
 bool ResponseFromHMI::Init() {
   return true;
@@ -62,10 +61,10 @@ bool ResponseFromHMI::CleanUp() {
   return true;
 }
 
-void ResponseFromHMI::Run() {
-}
+void ResponseFromHMI::Run() {}
 
-void ResponseFromHMI::SendResponseToMobile(const MessageSharedPtr& message, ApplicationManager& application_manager) {
+void ResponseFromHMI::SendResponseToMobile(
+    const MessageSharedPtr& message, ApplicationManager& application_manager) {
   (*message)[strings::params][strings::message_type] = MessageType::kResponse;
 
   application_manager_.ManageMobileCommand(message, ORIGIN_SDL);
@@ -74,7 +73,6 @@ void ResponseFromHMI::SendResponseToMobile(const MessageSharedPtr& message, Appl
 void ResponseFromHMI::CreateHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject& msg_params) const {
-
   smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
 
   if (!result) {
@@ -83,7 +81,8 @@ void ResponseFromHMI::CreateHMIRequest(
   }
 
   // get hmi correlation id for chaining further request from this object
-  const uint32_t hmi_correlation_id_ = application_manager_.GetNextHMICorrelationID();
+  const uint32_t hmi_correlation_id_ =
+      application_manager_.GetNextHMICorrelationID();
 
   NsSmartDeviceLink::NsSmartObjects::SmartObject& request = *result;
   request[strings::params][strings::message_type] = MessageType::kRequest;

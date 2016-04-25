@@ -37,12 +37,11 @@ namespace application_manager {
 
 namespace commands {
 
-UpdateSDLRequest::UpdateSDLRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : RequestToHMI(message, application_manager) {
-}
+UpdateSDLRequest::UpdateSDLRequest(const MessageSharedPtr& message,
+                                   ApplicationManager& application_manager)
+    : RequestToHMI(message, application_manager) {}
 
-UpdateSDLRequest::~UpdateSDLRequest() {
-}
+UpdateSDLRequest::~UpdateSDLRequest() {}
 
 void UpdateSDLRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -54,4 +53,3 @@ void UpdateSDLRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

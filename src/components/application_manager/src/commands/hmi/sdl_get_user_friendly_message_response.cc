@@ -32,17 +32,15 @@
 
 #include "application_manager/commands/hmi/sdl_get_user_friendly_message_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 SDLGetUserFriendlyMessageResponse::SDLGetUserFriendlyMessageResponse(
-  const MessageSharedPtr& message, ApplicationManager& application_manager): ResponseToHMI(message, application_manager) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseToHMI(message, application_manager) {}
 
-SDLGetUserFriendlyMessageResponse::~SDLGetUserFriendlyMessageResponse() {
-}
+SDLGetUserFriendlyMessageResponse::~SDLGetUserFriendlyMessageResponse() {}
 
 void SDLGetUserFriendlyMessageResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -54,5 +52,3 @@ void SDLGetUserFriendlyMessageResponse::Run() {
 
 }  // namespace commands
 }  // namespace application_manager
-
-

@@ -72,7 +72,8 @@ class PolicyHandlerInterface {
   virtual bool GetPriority(const std::string& policy_app_id,
                            std::string* priority) const = 0;
   virtual void CheckPermissions(const PTString& app_id,
-                                const PTString& hmi_level, const PTString& rpc,
+                                const PTString& hmi_level,
+                                const PTString& rpc,
                                 const RPCParams& rpc_params,
                                 CheckPermissionResult& result) = 0;
 
@@ -182,7 +183,8 @@ class PolicyHandlerInterface {
    */
   virtual void OnGetUserFriendlyMessage(
       const std::vector<std::string>& message_codes,
-      const std::string& language, uint32_t correlation_id) = 0;
+      const std::string& language,
+      uint32_t correlation_id) = 0;
 
   /**
    * @brief Get list of permissions for application/device binded to
@@ -361,7 +363,8 @@ class PolicyHandlerInterface {
   virtual void Increment(usage_statistics::GlobalCounterId type) = 0;
   virtual void Increment(const std::string& app_id,
                          usage_statistics::AppCounterId type) = 0;
-  virtual void Set(const std::string& app_id, usage_statistics::AppInfoId type,
+  virtual void Set(const std::string& app_id,
+                   usage_statistics::AppInfoId type,
                    const std::string& value) = 0;
   virtual void Add(const std::string& app_id,
                    usage_statistics::AppStopwatchId type,
@@ -375,10 +378,10 @@ class PolicyHandlerInterface {
   virtual const std::string RemoteAppsUrl() const = 0;
 
  private:
-   virtual void OnAppPermissionConsentInternal(const uint32_t connection_key,
-                                        PermissionConsent& permissions) =0;
+  virtual void OnAppPermissionConsentInternal(
+      const uint32_t connection_key, PermissionConsent& permissions) = 0;
 
-      friend class AppPermissionDelegate;
+  friend class AppPermissionDelegate;
 };
 
 }  //  namespace policy

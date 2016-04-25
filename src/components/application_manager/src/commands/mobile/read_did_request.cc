@@ -41,22 +41,23 @@ namespace application_manager {
 
 namespace commands {
 
-ReadDIDRequest::ReadDIDRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandRequestImpl(message, application_manager) {
-}
+ReadDIDRequest::ReadDIDRequest(const MessageSharedPtr& message,
+                               ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
-ReadDIDRequest::~ReadDIDRequest() {
-}
+ReadDIDRequest::~ReadDIDRequest() {}
 
 void ReadDIDRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  uint32_t app_id = (*message_)[strings::params][strings::connection_key]
-      .asUInt();
+  uint32_t app_id =
+      (*message_)[strings::params][strings::connection_key].asUInt();
 
   ApplicationSharedPtr app = application_manager_.application(app_id);
-  LOG4CXX_INFO(logger_, "Correlation_id :" << (*message_)[strings::params][strings::correlation_id]
-               .asUInt());
+  LOG4CXX_INFO(
+      logger_,
+      "Correlation_id :"
+          << (*message_)[strings::params][strings::correlation_id].asUInt());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "An application is not registered.");
@@ -65,8 +66,8 @@ void ReadDIDRequest::Run() {
   }
 
   if (app->IsCommandLimitsExceeded(
-        static_cast<mobile_apis::FunctionID::eType>(function_id()),
-        application_manager::TLimitSource::CONFIG_FILE)) {
+          static_cast<mobile_apis::FunctionID::eType>(function_id()),
+          application_manager::TLimitSource::CONFIG_FILE)) {
     LOG4CXX_ERROR(logger_, "ReadDID frequency is too high.");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
@@ -78,8 +79,8 @@ void ReadDIDRequest::Run() {
     return;
   }
 
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObject msg_params =
+      smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app->app_id();
   msg_params[strings::ecu_name] =
       (*message_)[strings::msg_params][strings::ecu_name];
@@ -104,7 +105,9 @@ void ReadDIDRequest::on_event(const event_engine::Event& event) {
       const std::string return_info =
           message[strings::msg_params][hmi_response::message].asString();
 
-      SendResponse(result, result_code, return_info.c_str(),
+      SendResponse(result,
+                   result_code,
+                   return_info.c_str(),
                    &(message[strings::msg_params]));
       break;
     }

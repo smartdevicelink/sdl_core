@@ -40,11 +40,9 @@ namespace commands {
 
 OnTTSStoppedNotification::OnTTSStoppedNotification(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : NotificationFromHMI(message, application_manager) {
-}
+    : NotificationFromHMI(message, application_manager) {}
 
-OnTTSStoppedNotification::~OnTTSStoppedNotification() {
-}
+OnTTSStoppedNotification::~OnTTSStoppedNotification() {}
 
 void OnTTSStoppedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -57,4 +55,3 @@ void OnTTSStoppedNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

@@ -51,7 +51,8 @@ class ListFilesResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  ListFilesResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  ListFilesResponse(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief ListFilesResponse class destructor

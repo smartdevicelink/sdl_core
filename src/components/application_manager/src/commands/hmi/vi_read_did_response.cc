@@ -32,18 +32,15 @@
 #include "application_manager/commands/hmi/vi_read_did_response.h"
 #include "application_manager/event_engine/event.h"
 
-
-
 namespace application_manager {
 
 namespace commands {
 
-VIReadDIDResponse::VIReadDIDResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+VIReadDIDResponse::VIReadDIDResponse(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-VIReadDIDResponse::~VIReadDIDResponse() {
-}
+VIReadDIDResponse::~VIReadDIDResponse() {}
 
 void VIReadDIDResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

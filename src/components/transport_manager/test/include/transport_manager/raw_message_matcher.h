@@ -56,7 +56,7 @@ class RawMessageMatcher : public MatcherInterface<RawMessagePtr> {
   explicit RawMessageMatcher(RawMessagePtr ptr);
 
   virtual bool MatchAndExplain(const RawMessagePtr ptr,
-                                   MatchResultListener* listener) const;
+                               MatchResultListener* listener) const;
   virtual void DescribeTo(::std::ostream* os) const;
   virtual void DescribeNegationTo(::std::ostream* os) const;
 
@@ -72,4 +72,5 @@ inline const Matcher<RawMessagePtr> RawMessageEq(RawMessagePtr msg) {
 }  // namespace components
 }  // namespace test
 
-#endif /* APPLINK_TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_RAW_MESSAGE_MATCHER_H_ */
+#endif /* APPLINK_TEST_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_RAW_MESSAGE_MATCHER_H_ \
+          */

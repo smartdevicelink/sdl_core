@@ -37,11 +37,9 @@ namespace commands {
 
 UpdateDeviceListResponse::UpdateDeviceListResponse(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+    : ResponseFromHMI(message, application_manager) {}
 
-UpdateDeviceListResponse::~UpdateDeviceListResponse() {
-}
+UpdateDeviceListResponse::~UpdateDeviceListResponse() {}
 
 void UpdateDeviceListResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

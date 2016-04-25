@@ -33,18 +33,15 @@
 
 #include "application_manager/commands/mobile/perform_interaction_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 PerformInteractionResponse::PerformInteractionResponse(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+    : CommandResponseImpl(message, application_manager) {}
 
-PerformInteractionResponse::~PerformInteractionResponse() {
-}
+PerformInteractionResponse::~PerformInteractionResponse() {}
 
 void PerformInteractionResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

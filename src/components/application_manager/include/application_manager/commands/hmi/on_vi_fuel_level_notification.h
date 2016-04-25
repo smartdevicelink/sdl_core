@@ -50,7 +50,8 @@ class OnVIFuelLevelNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnVIFuelLevelNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnVIFuelLevelNotification(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /**
    * @brief OnVIFuelLevelNotification class destructor

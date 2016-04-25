@@ -41,11 +41,9 @@ namespace commands {
 
 SubscribeVehicleDataResponse::SubscribeVehicleDataResponse(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+    : CommandResponseImpl(message, application_manager) {}
 
-SubscribeVehicleDataResponse::~SubscribeVehicleDataResponse() {
-}
+SubscribeVehicleDataResponse::~SubscribeVehicleDataResponse() {}
 
 void SubscribeVehicleDataResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

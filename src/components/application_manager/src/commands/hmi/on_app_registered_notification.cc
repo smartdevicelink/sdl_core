@@ -32,24 +32,23 @@
 
 #include "application_manager/commands/hmi/on_app_registered_notification.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 OnAppRegisteredNotification::OnAppRegisteredNotification(
-    const MessageSharedPtr& message, ApplicationManager& application_manager) : NotificationToHMI(message, application_manager) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : NotificationToHMI(message, application_manager) {}
 
-OnAppRegisteredNotification::~OnAppRegisteredNotification() {
-}
+OnAppRegisteredNotification::~OnAppRegisteredNotification() {}
 
 void OnAppRegisteredNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   // SDL must notify system about app registration before any dependent actions
   // will be started
   SendNotification();
-  event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
+  event_engine::Event event(
+      hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());
 }
@@ -57,4 +56,3 @@ void OnAppRegisteredNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

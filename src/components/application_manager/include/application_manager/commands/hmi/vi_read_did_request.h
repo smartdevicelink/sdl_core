@@ -49,7 +49,8 @@ class VIReadDIDRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  VIReadDIDRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  VIReadDIDRequest(const MessageSharedPtr& message,
+                   ApplicationManager& application_manager);
 
   /**
    * @brief VIReadDIDRequest class destructor

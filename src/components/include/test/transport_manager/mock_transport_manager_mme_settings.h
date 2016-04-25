@@ -53,7 +53,6 @@ class MockTransportManagerMMESettings
   MOCK_CONST_METHOD0(iap_system_config, const std::string&());
   MOCK_CONST_METHOD0(iap2_system_config, const std::string&());
   MOCK_CONST_METHOD0(iap_hub_connection_wait_timeout, uint32_t());
-
 };
 
 }  // namespace transport_manager_test

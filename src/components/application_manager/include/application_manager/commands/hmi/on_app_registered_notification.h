@@ -49,7 +49,8 @@ class OnAppRegisteredNotification : public NotificationToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnAppRegisteredNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnAppRegisteredNotification(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief OnAppRegisteredNotification class destructor

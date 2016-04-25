@@ -40,12 +40,11 @@ namespace application_manager {
 
 namespace commands {
 
-SendLocationResponse::SendLocationResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+SendLocationResponse::SendLocationResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-SendLocationResponse::~SendLocationResponse() {
-}
+SendLocationResponse::~SendLocationResponse() {}
 
 void SendLocationResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

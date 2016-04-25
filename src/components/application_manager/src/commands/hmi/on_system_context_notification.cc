@@ -41,18 +41,17 @@ namespace commands {
 
 OnSystemContextNotification::OnSystemContextNotification(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : NotificationFromHMI(message, application_manager) {
-}
+    : NotificationFromHMI(message, application_manager) {}
 
-OnSystemContextNotification::~OnSystemContextNotification() {
-}
+OnSystemContextNotification::~OnSystemContextNotification() {}
 
 void OnSystemContextNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   mobile_api::SystemContext::eType system_context =
-    static_cast<mobile_api::SystemContext::eType>(
-    (*message_)[strings::msg_params][hmi_notification::system_context].asInt());
+      static_cast<mobile_api::SystemContext::eType>(
+          (*message_)[strings::msg_params][hmi_notification::system_context]
+              .asInt());
 
   ApplicationSharedPtr app;
   if ((mobile_api::SystemContext::SYSCTXT_VRSESSION == system_context) ||
@@ -62,13 +61,14 @@ void OnSystemContextNotification::Run() {
   } else if ((mobile_api::SystemContext::SYSCTXT_ALERT == system_context) ||
              (mobile_api::SystemContext::SYSCTXT_MAIN == system_context)) {
     if ((*message_)[strings::msg_params].keyExists(strings::app_id)) {
-      app = application_manager_.
-        application((*message_)[strings::msg_params][strings::app_id].asUInt());
+      app = application_manager_.application(
+          (*message_)[strings::msg_params][strings::app_id].asUInt());
     }
   }
 
   if (app && mobile_api::SystemContext::INVALID_ENUM != system_context) {
-    application_manager_.state_controller().SetRegularState(app, system_context);
+    application_manager_.state_controller().SetRegularState(app,
+                                                            system_context);
   } else {
     LOG4CXX_ERROR(logger_, "Application does not exist");
   }

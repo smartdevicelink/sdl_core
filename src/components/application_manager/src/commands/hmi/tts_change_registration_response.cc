@@ -40,11 +40,9 @@ namespace commands {
 
 TTSChangeRegistratioResponse::TTSChangeRegistratioResponse(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+    : ResponseFromHMI(message, application_manager) {}
 
-TTSChangeRegistratioResponse::~TTSChangeRegistratioResponse() {
-}
+TTSChangeRegistratioResponse::~TTSChangeRegistratioResponse() {}
 
 void TTSChangeRegistratioResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

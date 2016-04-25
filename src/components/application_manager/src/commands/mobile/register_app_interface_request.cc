@@ -187,8 +187,8 @@ void RegisterAppInterfaceRequest::Run() {
 
   const std::string& policy_app_id = msg_params[strings::app_id].asString();
 
-  if (application_manager_.IsApplicationForbidden(
-          connection_key(), policy_app_id)) {
+  if (application_manager_.IsApplicationForbidden(connection_key(),
+                                                  policy_app_id)) {
     SendResponse(false, mobile_apis::Result::TOO_MANY_PENDING_REQUESTS);
     return;
   }
@@ -230,16 +230,14 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
-  application =
-      application_manager_.RegisterApplication(message_);
+  application = application_manager_.RegisterApplication(message_);
 
   if (!application) {
     LOG4CXX_ERROR(logger_, "Application hasn't been registered!");
     return;
   }
   // For resuming application need to restore hmi_app_id from resumeCtrl
-  resumption::ResumeCtrl& resumer =
-      application_manager_.resume_controller();
+  resumption::ResumeCtrl& resumer = application_manager_.resume_controller();
   const std::string& device_mac = application->mac_address();
 
   // there is side affect with 2 mobile app with the same mobile app_id
@@ -323,11 +321,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
       application_manager_.hmi_capabilities();
 
   const uint32_t key = connection_key();
-  ApplicationSharedPtr application =
-      application_manager_.application(key);
+  ApplicationSharedPtr application = application_manager_.application(key);
 
-  resumption::ResumeCtrl& resumer =
-      application_manager_.resume_controller();
+  resumption::ResumeCtrl& resumer = application_manager_.resume_controller();
 
   if (!application) {
     LOG4CXX_ERROR(logger_,
@@ -338,9 +334,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
   }
 
   response_params[strings::sync_msg_version][strings::major_version] =
-      major_version; // From generated file interfaces/generated_msg_version.h
+      major_version;  // From generated file interfaces/generated_msg_version.h
   response_params[strings::sync_msg_version][strings::minor_version] =
-      minor_version; // From generated file interfaces/generated_msg_version.h
+      minor_version;  // From generated file interfaces/generated_msg_version.h
 
   response_params[strings::language] = hmi_capabilities.active_vr_language();
   response_params[strings::hmi_display_language] =
@@ -534,9 +530,8 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
 
   // in case application exist in resumption we need to send resumeVrgrammars
   if (false == resumption) {
-    resumption = resumer.IsApplicationSaved(
-        application->policy_app_id(),
-        application->mac_address());
+    resumption = resumer.IsApplicationSaved(application->policy_app_id(),
+                                            application->mac_address());
   }
 
   SendOnAppRegisteredNotificationToHMI(
@@ -551,7 +546,8 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
 
   // By default app subscribed to CUSTOM_BUTTON
   SendSubscribeCustomButtonNotification();
-  MessageHelper::SendChangeRegistrationRequestToHMI(application, application_manager_);
+  MessageHelper::SendChangeRegistrationRequestToHMI(application,
+                                                    application_manager_);
 }
 
 void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
@@ -621,8 +617,7 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
   }
 
   std::vector<std::string> request_types =
-      GetPolicyHandler().GetAppRequestTypes(
-          application_impl.policy_app_id());
+      GetPolicyHandler().GetAppRequestTypes(application_impl.policy_app_id());
 
   application[strings::request_type] = SmartObject(SmartType_Array);
   smart_objects::SmartObject& request_array =
@@ -638,8 +633,7 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
   application[strings::device_info] = SmartObject(SmartType_Map);
   smart_objects::SmartObject& device_info = application[strings::device_info];
   const protocol_handler::SessionObserver& session_observer =
-      application_manager_.connection_handler()
-          .get_session_observer();
+      application_manager_.connection_handler().get_session_observer();
   std::string device_name;
   std::string mac_address;
   std::string transport_type;
@@ -660,8 +654,7 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
       policy::DeviceConsent::kDeviceAllowed == device_consent;
 
   device_info[strings::transport_type] =
-      application_manager_.GetDeviceTransportType(
-          transport_type);
+      application_manager_.GetDeviceTransportType(transport_type);
 
   DCHECK(application_manager_.ManageHMICommand(notification));
 }
@@ -1006,7 +999,8 @@ void RegisterAppInterfaceRequest::SendSubscribeCustomButtonNotification() {
   CreateHMINotification(FunctionID::Buttons_OnButtonSubscription, msg_params);
 }
 
-policy::PolicyHandlerInterface& RegisterAppInterfaceRequest::GetPolicyHandler() {
+policy::PolicyHandlerInterface&
+RegisterAppInterfaceRequest::GetPolicyHandler() {
   return application_manager_.GetPolicyHandler();
 }
 

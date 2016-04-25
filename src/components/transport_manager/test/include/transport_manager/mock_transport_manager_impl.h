@@ -46,13 +46,13 @@ namespace transport_manager_test {
 class MockTransportManagerImpl
     : public ::transport_manager::TransportManagerImpl {
  public:
-
-  explicit MockTransportManagerImpl(MockTransportManagerSettings& settings):
-        ::transport_manager::TransportManagerImpl(settings) {}
+  explicit MockTransportManagerImpl(MockTransportManagerSettings& settings)
+      : ::transport_manager::TransportManagerImpl(settings) {}
 
   int TestReceiveEventFromDevice(
       const ::transport_manager::TransportAdapterEvent& event) {
-    return ::transport_manager::TransportManagerImpl::ReceiveEventFromDevice(event);
+    return ::transport_manager::TransportManagerImpl::ReceiveEventFromDevice(
+        event);
   }
 
   void TestHandle(::transport_manager::TransportAdapterEvent test_event) {

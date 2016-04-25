@@ -49,7 +49,8 @@ class TTSGetSupportedLanguagesResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  TTSGetSupportedLanguagesResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  TTSGetSupportedLanguagesResponse(const MessageSharedPtr& message,
+                                   ApplicationManager& application_manager);
 
   /**
    * @brief TTSGetSupportedLanguagesResponse class destructor

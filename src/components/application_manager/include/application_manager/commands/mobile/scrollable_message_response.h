@@ -45,13 +45,13 @@ class ScrollableMessageResponse : public CommandResponseImpl {
   /**
    * \brief ScrollableMessageResponse class constructor
    **/
-  ScrollableMessageResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  ScrollableMessageResponse(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /**
    * \brief SpeakResponseCommand class destructor
    **/
-  virtual ~ScrollableMessageResponse() {
-  }
+  virtual ~ScrollableMessageResponse() {}
 
   /**
    * @brief Execute command

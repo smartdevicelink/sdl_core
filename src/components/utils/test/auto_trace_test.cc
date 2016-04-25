@@ -62,15 +62,16 @@ void Preconditions() {
 
 void InitLogger() {
   // Set enabled logs
-  INIT_LOGGER("log4cxx.properties", true);  // DEINIT_LOGGER will be called in test_main.cc
+  INIT_LOGGER("log4cxx.properties",
+              true);  // DEINIT_LOGGER will be called in test_main.cc
 }
 
-void CreateDeleteAutoTrace(const std::string & testlog) {
+void CreateDeleteAutoTrace(const std::string& testlog) {
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_DEBUG(logger_, testlog);
 }
 
-bool CheckAutoTraceDebugInFile(const std::string & testlog) {
+bool CheckAutoTraceDebugInFile(const std::string& testlog) {
   bool isLogFound = false;
   std::string line;
 
@@ -93,8 +94,7 @@ bool CheckAutoTraceDebugInFile(const std::string & testlog) {
 }
 
 TEST(AutoTraceTest, AutoTrace_WriteToFile_ReadCorrectString) {
-  const std::string testlog =
-      "Test trace is working!";
+  const std::string testlog = "Test trace is working!";
   Preconditions();
   InitLogger();
   CreateDeleteAutoTrace(testlog);
@@ -105,7 +105,8 @@ TEST(AutoTraceTest, AutoTrace_WriteToFile_ReadCorrectString) {
   LogMessageLoopThread loop_thread;
   while (loop_thread.GetMessageQueueSize()) {
     ASSERT_LT(date_time::DateTime::calculateTimeDiff(
-        date_time::DateTime::getCurrentTime(), startTime), timeout_msec);
+                  date_time::DateTime::getCurrentTime(), startTime),
+              timeout_msec);
     threads::Thread::yield();
   }
   ASSERT_TRUE(CheckAutoTraceDebugInFile(testlog));

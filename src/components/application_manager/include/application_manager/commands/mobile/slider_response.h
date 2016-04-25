@@ -45,7 +45,8 @@ class SliderResponse : public CommandResponseImpl {
   /**
    * \brief SliderResponse class constructor
    **/
-  SliderResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  SliderResponse(const MessageSharedPtr& message,
+                 ApplicationManager& application_manager);
 
   /**
    * \brief SpeakResponseCommand class destructor

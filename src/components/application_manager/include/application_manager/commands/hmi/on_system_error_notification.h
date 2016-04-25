@@ -49,7 +49,8 @@ class OnSystemErrorNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnSystemErrorNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnSystemErrorNotification(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /**
    * @brief OnSystemErrorNotification class destructor

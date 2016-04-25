@@ -33,17 +33,15 @@
 
 #include "application_manager/commands/mobile/add_command_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
-AddCommandResponse::AddCommandResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+AddCommandResponse::AddCommandResponse(const MessageSharedPtr& message,
+                                       ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-AddCommandResponse::~AddCommandResponse() {
-}
+AddCommandResponse::~AddCommandResponse() {}
 
 void AddCommandResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -49,7 +49,8 @@ class AllowAllAppsRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  AllowAllAppsRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  AllowAllAppsRequest(const MessageSharedPtr& message,
+                      ApplicationManager& application_manager);
 
   /**
    * @brief AllowAllAppsRequest class destructor

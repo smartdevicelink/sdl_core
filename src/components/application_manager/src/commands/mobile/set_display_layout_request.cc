@@ -35,18 +35,15 @@
 
 #include "application_manager/application_impl.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 SetDisplayLayoutRequest::SetDisplayLayoutRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandRequestImpl(message, application_manager) {
-}
+    : CommandRequestImpl(message, application_manager) {}
 
-SetDisplayLayoutRequest::~SetDisplayLayoutRequest() {
-}
+SetDisplayLayoutRequest::~SetDisplayLayoutRequest() {}
 
 void SetDisplayLayoutRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -61,8 +58,8 @@ void SetDisplayLayoutRequest::Run() {
 
   (*message_)[strings::msg_params][strings::app_id] = app->app_id();
   SendHMIRequest(hmi_apis::FunctionID::UI_SetDisplayLayout,
-                 &((*message_)[strings::msg_params]), true);
-
+                 &((*message_)[strings::msg_params]),
+                 true);
 }
 
 void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
@@ -74,8 +71,8 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
       LOG4CXX_INFO(logger_, "Received UI_SetDisplayLayout event");
 
       mobile_apis::Result::eType result_code =
-            static_cast<mobile_apis::Result::eType>(
-                message[strings::params][hmi_response::code].asInt());
+          static_cast<mobile_apis::Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
       bool response_success = mobile_apis::Result::SUCCESS == result_code;
 
       smart_objects::SmartObject msg_params = message[strings::msg_params];
@@ -86,9 +83,13 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
 
         // in case templates_available is empty copy from hmi capabilities
         if (msg_params.keyExists(hmi_response::display_capabilities)) {
-          if (0 == msg_params[hmi_response::display_capabilities][hmi_response::templates_available].length()) {
-            msg_params[hmi_response::display_capabilities][hmi_response::templates_available] =
-                hmi_capabilities.display_capabilities()->getElement(hmi_response::templates_available);
+          if (0 ==
+              msg_params[hmi_response::display_capabilities]
+                        [hmi_response::templates_available].length()) {
+            msg_params[hmi_response::display_capabilities]
+                      [hmi_response::templates_available] =
+                          hmi_capabilities.display_capabilities()->getElement(
+                              hmi_response::templates_available);
           }
         }
       }
@@ -96,7 +97,7 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
       return;
     }
   }

@@ -46,23 +46,26 @@ namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 class MockResumptionData : public ::resumption::ResumptionData {
  public:
-  MockResumptionData(const application_manager_test::MockApplicationManager& application_manager):
-      ResumptionData(application_manager) {}
+  MockResumptionData(const application_manager_test::MockApplicationManager&
+                         application_manager)
+      : ResumptionData(application_manager) {}
   MOCK_METHOD1(SaveApplication,
                void(app_mngr::ApplicationSharedPtr application));
   MOCK_CONST_METHOD2(GetStoredHMILevel,
                      int32_t(const std::string& policy_app_id,
                              const std::string& device_id));
   MOCK_CONST_METHOD1(IsHMIApplicationIdExist, bool(uint32_t hmi_app_id));
-  MOCK_METHOD2(CheckSavedApplication, bool(const std::string& policy_app_id,
-                                           const std::string& device_id));
+  MOCK_METHOD2(CheckSavedApplication,
+               bool(const std::string& policy_app_id,
+                    const std::string& device_id));
   MOCK_CONST_METHOD2(GetHMIApplicationID,
                      uint32_t(const std::string& policy_app_id,
                               const std::string& device_id));
   MOCK_METHOD0(OnSuspend, void());
   MOCK_CONST_METHOD3(GetHashId,
                      bool(const std::string& policy_app_id,
-                          const std::string& device_id, std::string& hash_id));
+                          const std::string& device_id,
+                          std::string& hash_id));
   MOCK_METHOD0(OnAwake, void());
   MOCK_CONST_METHOD3(GetSavedApplication,
                      bool(const std::string& policy_app_id,
@@ -77,9 +80,10 @@ class MockResumptionData : public ::resumption::ResumptionData {
                              const std::string& device_id));
   MOCK_CONST_METHOD1(GetDataForLoadResumeData,
                      void(smart_objects::SmartObject& saved_data));
-  MOCK_METHOD3(UpdateHmiLevel, void(const std::string& policy_app_id,
-                                    const std::string& device_id,
-                                    mobile_apis::HMILevel::eType hmi_level));
+  MOCK_METHOD3(UpdateHmiLevel,
+               void(const std::string& policy_app_id,
+                    const std::string& device_id,
+                    mobile_apis::HMILevel::eType hmi_level));
   MOCK_METHOD0(Init, bool());
   MOCK_METHOD2(DropAppDataResumption,
                bool(const std::string& device_id, const std::string& app_id));

@@ -52,7 +52,8 @@ class UpdateTurnListRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  UpdateTurnListRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  UpdateTurnListRequest(const MessageSharedPtr& message,
+                        ApplicationManager& application_manager);
 
   /**
    * @brief UpdateTurnListRequest class destructor

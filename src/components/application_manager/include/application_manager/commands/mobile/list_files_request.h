@@ -51,7 +51,8 @@ class ListFilesRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  ListFilesRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  ListFilesRequest(const MessageSharedPtr& message,
+                   ApplicationManager& application_manager);
 
   /**
    * @brief ListFilesRequest class destructor

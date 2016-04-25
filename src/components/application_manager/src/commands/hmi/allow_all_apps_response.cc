@@ -31,17 +31,15 @@
  */
 #include "application_manager/commands/hmi/allow_all_apps_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
-AllowAllAppsResponse::AllowAllAppsResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+AllowAllAppsResponse::AllowAllAppsResponse(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-AllowAllAppsResponse::~AllowAllAppsResponse() {
-}
+AllowAllAppsResponse::~AllowAllAppsResponse() {}
 
 void AllowAllAppsResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -49,34 +49,33 @@ const static size_t BUFSIZE = 32;
 
 class A2DPSourcePlayerAdapter::A2DPSourcePlayerThread
     : public threads::ThreadDelegate {
-  public:
-    explicit A2DPSourcePlayerThread(const std::string& device);
+ public:
+  explicit A2DPSourcePlayerThread(const std::string& device);
 
-    void threadMain();
+  void threadMain();
 
-    void exitThreadMain();
+  void exitThreadMain();
 
-  private:
-    // The Sample format to use
-    static const pa_sample_spec sSampleFormat_;
+ private:
+  // The Sample format to use
+  static const pa_sample_spec sSampleFormat_;
 
-    pa_simple* s_in, *s_out;
-    std::string device_;
-    bool should_be_stopped_;
-    sync_primitives::Lock should_be_stopped_lock_;
+  pa_simple* s_in, *s_out;
+  std::string device_;
+  bool should_be_stopped_;
+  sync_primitives::Lock should_be_stopped_lock_;
 
-    void freeStreams();
+  void freeStreams();
 
-    DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerThread);
+  DISALLOW_COPY_AND_ASSIGN(A2DPSourcePlayerThread);
 };
 
-A2DPSourcePlayerAdapter::A2DPSourcePlayerAdapter(protocol_handler::SessionObserver &session_observer)
-    : session_observer_(session_observer) {
-}
+A2DPSourcePlayerAdapter::A2DPSourcePlayerAdapter(
+    protocol_handler::SessionObserver& session_observer)
+    : session_observer_(session_observer) {}
 
 A2DPSourcePlayerAdapter::~A2DPSourcePlayerAdapter() {
-  for (SourcesMap::iterator it = sources_.begin();
-       sources_.end() != it; ++it) {
+  for (SourcesMap::iterator it = sources_.begin(); sources_.end() != it; ++it) {
     Pair pair = it->second;
     pair.first->join();
     delete pair.second;
@@ -86,24 +85,19 @@ A2DPSourcePlayerAdapter::~A2DPSourcePlayerAdapter() {
 }
 
 void A2DPSourcePlayerAdapter::StartActivity(int32_t application_key) {
-  LOG4CXX_INFO(logger_, "Starting a2dp playing music for "
-               << application_key << " application.");
+  LOG4CXX_INFO(logger_,
+               "Starting a2dp playing music for " << application_key
+                                                  << " application.");
   if (application_key != current_application_) {
     current_application_ = application_key;
 
-    const protocol_handler::SessionObserver& session_observer =
-        ->connection_handler()
-        .get_session_observer();
+    const protocol_handler::SessionObserver&
+        session_observer =->connection_handler().get_session_observer();
 
     uint32_t device_id = 0;
-    session_observer_.GetDataOnSessionKey(
-        application_key, 0, NULL, &device_id);
+    session_observer_.GetDataOnSessionKey(application_key, 0, NULL, &device_id);
     std::string mac_adddress;
-    session_observer_.GetDataOnDeviceID(
-      device_id,
-      NULL,
-      NULL,
-      &mac_adddress);
+    session_observer_.GetDataOnDeviceID(device_id, NULL, NULL, &mac_adddress);
 
     // TODO(PK): Convert mac_adddress to the
     // following format : "bluez_source.XX_XX_XX_XX_XX_XX" if needed
@@ -111,16 +105,17 @@ void A2DPSourcePlayerAdapter::StartActivity(int32_t application_key) {
 
     A2DPSourcePlayerThread* delegate =
         new A2DPSourcePlayerAdapter::A2DPSourcePlayerThread(mac_adddress);
-    threads::Thread* new_activity = threads::CreateThread(
-      mac_adddress.c_str(), delegate);
+    threads::Thread* new_activity =
+        threads::CreateThread(mac_adddress.c_str(), delegate);
     sources_[application_key] = Pair(new_activity, delegate);
     new_activity->start();
   }
 }
 
 void A2DPSourcePlayerAdapter::StopActivity(int32_t application_key) {
-  LOG4CXX_INFO(logger_, "Stopping 2dp playing for "
-               << application_key << " application.");
+  LOG4CXX_INFO(logger_,
+               "Stopping 2dp playing for " << application_key
+                                           << " application.");
   if (application_key != current_application_) {
     return;
   }
@@ -139,18 +134,15 @@ bool A2DPSourcePlayerAdapter::is_app_performing_activity(
   return (application_key == current_application_);
 }
 
-const pa_sample_spec A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::
-sSampleFormat_ = {
-  /*format*/    PA_SAMPLE_S16LE,
-  /*rate*/      44100,
-  /*channels*/  2
-};
+const pa_sample_spec
+    A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::sSampleFormat_ = {
+        /*format*/ PA_SAMPLE_S16LE,
+        /*rate*/ 44100,
+        /*channels*/ 2};
 
 A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::A2DPSourcePlayerThread(
-  const std::string& device)
-  : threads::ThreadDelegate(),
-    device_(device) {
-}
+    const std::string& device)
+    : threads::ThreadDelegate(), device_(device) {}
 
 void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::freeStreams() {
   LOG4CXX_INFO(logger_, "Free streams in A2DPSourcePlayerThread.");
@@ -185,15 +177,29 @@ void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::threadMain() {
   LOG4CXX_DEBUG(logger_, "Creating streams");
 
   /* Create a new playback stream */
-  if (!(s_out = pa_simple_new(NULL, "AudioManager", PA_STREAM_PLAYBACK, NULL,
-                           "playback", &sSampleFormat_, NULL, NULL, &error))) {
+  if (!(s_out = pa_simple_new(NULL,
+                              "AudioManager",
+                              PA_STREAM_PLAYBACK,
+                              NULL,
+                              "playback",
+                              &sSampleFormat_,
+                              NULL,
+                              NULL,
+                              &error))) {
     LOG4CXX_ERROR(logger_, "pa_simple_new() failed: " << pa_strerror(error));
     freeStreams();
     return;
   }
 
-  if (!(s_in = pa_simple_new(NULL, "AudioManager", PA_STREAM_RECORD, a2dpSource,
-                             "record", &sSampleFormat_, NULL, NULL, &error))) {
+  if (!(s_in = pa_simple_new(NULL,
+                             "AudioManager",
+                             PA_STREAM_RECORD,
+                             a2dpSource,
+                             "record",
+                             &sSampleFormat_,
+                             NULL,
+                             NULL,
+                             &error))) {
     LOG4CXX_ERROR(logger_, "pa_simple_new() failed: " << pa_strerror(error));
     freeStreams();
     return;
@@ -206,17 +212,17 @@ void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::threadMain() {
 
     pa_usec_t latency;
 
-    if ((latency = pa_simple_get_latency(s_in, &error)) == (pa_usec_t) - 1) {
-      LOG4CXX_ERROR(logger_, "pa_simple_get_latency() failed: "
-                    << pa_strerror(error));
+    if ((latency = pa_simple_get_latency(s_in, &error)) == (pa_usec_t)-1) {
+      LOG4CXX_ERROR(logger_,
+                    "pa_simple_get_latency() failed: " << pa_strerror(error));
       break;
     }
 
     // LOG4CXX_INFO(logger_, "In: " << static_cast<float>(latency));
 
-    if ((latency = pa_simple_get_latency(s_out, &error)) == (pa_usec_t) - 1) {
-      LOG4CXX_ERROR(logger_, "pa_simple_get_latency() failed: "
-                    << pa_strerror(error));
+    if ((latency = pa_simple_get_latency(s_out, &error)) == (pa_usec_t)-1) {
+      LOG4CXX_ERROR(logger_,
+                    "pa_simple_get_latency() failed: " << pa_strerror(error));
       break;
     }
 
@@ -229,8 +235,8 @@ void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::threadMain() {
 
     /* ... and play it */
     if (pa_simple_write(s_out, buf, sizeof(buf), &error) < 0) {
-      LOG4CXX_ERROR(logger_, "pa_simple_write() failed: "
-                    << pa_strerror(error));
+      LOG4CXX_ERROR(logger_,
+                    "pa_simple_write() failed: " << pa_strerror(error));
       break;
     }
 

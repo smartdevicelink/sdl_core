@@ -40,11 +40,10 @@ namespace application_manager {
 
 namespace commands {
 
-
 class RequestToHMI : public CommandImpl {
  public:
   RequestToHMI(const MessageSharedPtr& message,
-                        ApplicationManager& application_manager);
+               ApplicationManager& application_manager);
   virtual ~RequestToHMI();
   virtual bool Init();
   virtual bool CleanUp();

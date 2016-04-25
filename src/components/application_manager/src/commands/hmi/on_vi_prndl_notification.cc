@@ -39,11 +39,9 @@ namespace commands {
 
 OnVIPrndlNotification::OnVIPrndlNotification(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : NotificationFromHMI(message, application_manager) {
-}
+    : NotificationFromHMI(message, application_manager) {}
 
-OnVIPrndlNotification::~OnVIPrndlNotification() {
-}
+OnVIPrndlNotification::~OnVIPrndlNotification() {}
 
 void OnVIPrndlNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,4 +56,3 @@ void OnVIPrndlNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

@@ -52,9 +52,7 @@ using ::testing::Return;
 class PolicyEventObserverTest : public ::testing::Test {
  public:
   PolicyEventObserverTest()
-      : policy_event_observer_(NULL),
-        event_(NULL),
-        field_name("odometer") {}
+      : policy_event_observer_(NULL), event_(NULL), field_name("odometer") {}
 
  protected:
   MockPolicyHandlerInterface policy_handler_mock_;
@@ -66,8 +64,8 @@ class PolicyEventObserverTest : public ::testing::Test {
   const int field_value = 100;
 
   virtual void SetUp() OVERRIDE {
-    policy_event_observer_ = new PolicyEventObserver(&policy_handler_mock_,
-                                                     mock_event_dispatcher_);
+    policy_event_observer_ =
+        new PolicyEventObserver(&policy_handler_mock_, mock_event_dispatcher_);
   }
 
   void TearDown() OVERRIDE {
@@ -89,14 +87,17 @@ class PolicyEventObserverTest : public ::testing::Test {
   void CheckResultsOnEvent(uint32_t pt_updated_calls_number,
                            uint32_t on_system_ready_calls_number) {
     event_->set_smart_object(smart_object_);
-    EXPECT_CALL(policy_handler_mock_, PTUpdatedAt(Counters::KILOMETERS, field_value))
+    EXPECT_CALL(policy_handler_mock_,
+                PTUpdatedAt(Counters::KILOMETERS, field_value))
         .Times(pt_updated_calls_number);
     EXPECT_CALL(policy_handler_mock_, OnSystemReady())
         .Times(on_system_ready_calls_number);
     policy_event_observer_->on_event(*event_);
   }
 
-  void DeleteEvent() { delete event_; }
+  void DeleteEvent() {
+    delete event_;
+  }
 };
 
 TEST_F(PolicyEventObserverTest, OnEvent_EventInvalid_ExpectNoProcessingEvent) {
@@ -110,8 +111,8 @@ TEST_F(PolicyEventObserverTest,
        OnEvent_EventInvalidCommonResult_ExpectNoProcessingEvent) {
   // Arrange
   CreateEvent(Event::EventID::VehicleInfo_GetVehicleData);
-  CookSmartObject(hmi_apis::Common_Result::INVALID_DATA, field_name,
-                  field_value);
+  CookSmartObject(
+      hmi_apis::Common_Result::INVALID_DATA, field_name, field_value);
   // Check
   CheckResultsOnEvent(0u, 0u);
 }

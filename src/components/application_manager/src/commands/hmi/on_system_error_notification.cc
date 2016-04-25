@@ -40,17 +40,15 @@ namespace commands {
 
 OnSystemErrorNotification::OnSystemErrorNotification(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : NotificationFromHMI(message, application_manager) {
-}
+    : NotificationFromHMI(message, application_manager) {}
 
-OnSystemErrorNotification::~OnSystemErrorNotification() {
-}
+OnSystemErrorNotification::~OnSystemErrorNotification() {}
 
 void OnSystemErrorNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  const int code = (*message_)[strings::msg_params][hmi_notification::error]
-      .asInt();
+  const int code =
+      (*message_)[strings::msg_params][hmi_notification::error].asInt();
 
   application_manager_.GetPolicyHandler().OnSystemError(code);
 }
@@ -58,4 +56,3 @@ void OnSystemErrorNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

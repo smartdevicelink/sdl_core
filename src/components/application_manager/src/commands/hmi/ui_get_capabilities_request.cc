@@ -38,11 +38,9 @@ namespace commands {
 
 UIGetCapabilitiesRequest::UIGetCapabilitiesRequest(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : RequestToHMI(message, application_manager) {
-}
+    : RequestToHMI(message, application_manager) {}
 
-UIGetCapabilitiesRequest::~UIGetCapabilitiesRequest() {
-}
+UIGetCapabilitiesRequest::~UIGetCapabilitiesRequest() {}
 
 void UIGetCapabilitiesRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -53,4 +51,3 @@ void UIGetCapabilitiesRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

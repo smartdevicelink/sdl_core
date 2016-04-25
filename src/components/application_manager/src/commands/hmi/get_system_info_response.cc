@@ -36,8 +36,8 @@ namespace application_manager {
 namespace commands {
 
 GetSystemInfoResponse::GetSystemInfoResponse(
-  const MessageSharedPtr& message, ApplicationManager& application_manager): ResponseFromHMI(message, application_manager) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
 GetSystemInfoResponse::~GetSystemInfoResponse() {}
 
@@ -69,7 +69,8 @@ const SystemInfo GetSystemInfoResponse::GetSystemInfo(
   info.wers_country_code =
       (*message_)[strings::msg_params]["wersCountryCode"].asString();
 
-  const uint32_t lang_code = (*message_)[strings::msg_params]["language"].asUInt();
+  const uint32_t lang_code =
+      (*message_)[strings::msg_params]["language"].asUInt();
   info.language = application_manager::MessageHelper::CommonLanguageToString(
       static_cast<hmi_apis::Common_Language::eType>(lang_code));
 

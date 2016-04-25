@@ -31,35 +31,31 @@
  */
 #include "application_manager/commands/hmi/tts_get_capabilities_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 TTSGetCapabilitiesResponse::TTSGetCapabilitiesResponse(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+    : ResponseFromHMI(message, application_manager) {}
 
-TTSGetCapabilitiesResponse::~TTSGetCapabilitiesResponse() {
-}
+TTSGetCapabilitiesResponse::~TTSGetCapabilitiesResponse() {}
 
 void TTSGetCapabilitiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  HMICapabilities& hmi_capabilities =
-      application_manager_.hmi_capabilities();
-  if ((*message_)[strings::msg_params].keyExists(hmi_response::speech_capabilities)) {
+  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
+  if ((*message_)[strings::msg_params].keyExists(
+          hmi_response::speech_capabilities)) {
     hmi_capabilities.set_speech_capabilities(
-       (*message_)[strings::msg_params][hmi_response::speech_capabilities]);
+        (*message_)[strings::msg_params][hmi_response::speech_capabilities]);
   }
   if ((*message_)[strings::msg_params].keyExists(
-      hmi_response::prerecorded_speech_capabilities)) {
+          hmi_response::prerecorded_speech_capabilities)) {
     hmi_capabilities.set_prerecorded_speech(
         (*message_)[strings::msg_params]
-                    [hmi_response::prerecorded_speech_capabilities]);
+                   [hmi_response::prerecorded_speech_capabilities]);
   }
-
 }
 
 }  // namespace commands

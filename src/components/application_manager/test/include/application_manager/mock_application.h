@@ -45,7 +45,7 @@ namespace custom_str = utils::custom_string;
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 class MockApplication : public ::application_manager::Application {
  public:
-  MockApplication(){}
+  MockApplication() {}
   MOCK_CONST_METHOD0(active_message, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(curHash, const std::string&());
   MOCK_METHOD0(UpdateHash, void());
@@ -70,7 +70,8 @@ class MockApplication : public ::application_manager::Application {
   MOCK_METHOD1(StartStreaming,
                void(protocol_handler::ServiceType service_type));
   MOCK_METHOD1(StopStreaming, void(protocol_handler::ServiceType service_type));
-  MOCK_METHOD1(StopStreamingForce, void(protocol_handler::ServiceType service_type));
+  MOCK_METHOD1(StopStreamingForce,
+               void(protocol_handler::ServiceType service_type));
   MOCK_METHOD1(SuspendStreaming,
                void(protocol_handler::ServiceType service_type));
   MOCK_METHOD1(WakeUpStreaming,
@@ -99,7 +100,8 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(device, connection_handler::DeviceHandle());
   MOCK_CONST_METHOD0(CurrentHmiState, const application_manager::HmiStatePtr());
   MOCK_CONST_METHOD0(RegularHmiState, const application_manager::HmiStatePtr());
-  MOCK_CONST_METHOD0(PostponedHmiState, const application_manager::HmiStatePtr());
+  MOCK_CONST_METHOD0(PostponedHmiState,
+                     const application_manager::HmiStatePtr());
   MOCK_METHOD1(set_tts_properties_in_none, void(bool active));
   MOCK_METHOD0(tts_properties_in_none, bool());
   MOCK_METHOD1(set_tts_properties_in_full, void(bool active));
@@ -261,8 +263,10 @@ class MockApplication : public ::application_manager::Application {
   MOCK_CONST_METHOD0(is_perform_interaction_active, uint32_t());
   MOCK_METHOD1(set_perform_interaction_mode, void(int32_t mode));
   MOCK_CONST_METHOD0(perform_interaction_mode, int32_t());
-  MOCK_METHOD1(set_perform_interaction_layout, void(mobile_apis::LayoutMode::eType mode));
-  MOCK_CONST_METHOD0(perform_interaction_layout, mobile_apis::LayoutMode::eType());
+  MOCK_METHOD1(set_perform_interaction_layout,
+               void(mobile_apis::LayoutMode::eType mode));
+  MOCK_CONST_METHOD0(perform_interaction_layout,
+                     mobile_apis::LayoutMode::eType());
   MOCK_METHOD1(set_reset_global_properties_active, void(bool active));
   MOCK_CONST_METHOD0(is_reset_global_properties_active, bool());
   MOCK_CONST_METHOD0(app_id, uint32_t());

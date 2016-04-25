@@ -418,9 +418,9 @@ uint32_t SystemRequest::index = 0;
 const std::string kSYNC = "SYNC";
 const std::string kIVSU = "IVSU";
 
-SystemRequest::SystemRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandRequestImpl(message, application_manager) {
-}
+SystemRequest::SystemRequest(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager)
+    : CommandRequestImpl(message, application_manager) {}
 
 SystemRequest::~SystemRequest() {}
 
@@ -442,8 +442,8 @@ void SystemRequest::Run() {
 
   const policy::PolicyHandlerInterface& policy_handler =
       application_manager_.GetPolicyHandler();
-  if (!policy_handler.IsRequestTypeAllowed(
-           application->policy_app_id(), request_type)) {
+  if (!policy_handler.IsRequestTypeAllowed(application->policy_app_id(),
+                                           request_type)) {
     SendResponse(false, mobile_apis::Result::DISALLOWED);
     return;
   }
@@ -470,15 +470,18 @@ void SystemRequest::Run() {
   std::string binary_data_folder;
   if ((*message_)[strings::params].keyExists(strings::binary_data)) {
     binary_data = (*message_)[strings::params][strings::binary_data].asBinary();
-    binary_data_folder = application_manager_.get_settings().system_files_path();
+    binary_data_folder =
+        application_manager_.get_settings().system_files_path();
   } else {
-    binary_data_folder = application_manager_.get_settings().app_storage_folder();
+    binary_data_folder =
+        application_manager_.get_settings().app_storage_folder();
     binary_data_folder += "/";
     binary_data_folder += application->folder_name();
     binary_data_folder += "/";
   }
 
-  std::string file_dst_path = application_manager_.get_settings().system_files_path();
+  std::string file_dst_path =
+      application_manager_.get_settings().system_files_path();
   file_dst_path += "/";
   file_dst_path += file_name;
 
@@ -499,8 +502,7 @@ void SystemRequest::Run() {
 
     LOG4CXX_DEBUG(logger_,
                   "Binary data is not present. Trying to find file "
-                      << file_name
-                      << " within previously saved app file in "
+                      << file_name << " within previously saved app file in "
                       << binary_data_folder);
 
     const AppFile* file = application->GetFile(app_full_file_path);
@@ -579,14 +581,13 @@ void SystemRequest::on_event(const event_engine::Event& event) {
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asUInt()));
 
-      const bool result =
-          Compare<mobile_api::Result::eType, EQ, ONE>(
-            result_code,
-            mobile_api::Result::SUCCESS,
-            mobile_api::Result::WARNINGS);
+      const bool result = Compare<mobile_api::Result::eType, EQ, ONE>(
+          result_code,
+          mobile_api::Result::SUCCESS,
+          mobile_api::Result::WARNINGS);
 
       ApplicationSharedPtr application =
-             application_manager_.application(connection_key());
+          application_manager_.application(connection_key());
 
       if (!(application.valid())) {
         LOG4CXX_ERROR(logger_, "NULL pointer");

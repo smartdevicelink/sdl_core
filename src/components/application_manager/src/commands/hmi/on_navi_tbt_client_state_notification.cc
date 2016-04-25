@@ -39,11 +39,9 @@ namespace commands {
 
 OnNaviTBTClientStateNotification::OnNaviTBTClientStateNotification(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : NotificationFromHMI(message, application_manager) {
-}
+    : NotificationFromHMI(message, application_manager) {}
 
-OnNaviTBTClientStateNotification::~OnNaviTBTClientStateNotification() {
-}
+OnNaviTBTClientStateNotification::~OnNaviTBTClientStateNotification() {}
 
 void OnNaviTBTClientStateNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,4 +56,3 @@ void OnNaviTBTClientStateNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

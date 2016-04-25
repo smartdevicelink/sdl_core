@@ -46,8 +46,8 @@ class MockMessageHelper {
  public:
   MOCK_METHOD1(GetHashUpdateNotification,
                smart_objects::SmartObjectSPtr(const uint32_t app_id));
-  MOCK_METHOD2(SendHashUpdateNotification, void(const uint32_t app_id,
-                                                ApplicationManager &app_mngr));
+  MOCK_METHOD2(SendHashUpdateNotification,
+               void(const uint32_t app_id, ApplicationManager& app_mngr));
   MOCK_METHOD1(HMIResultToString,
                std::string(hmi_apis::Common_Result::eType hmi_result));
   MOCK_METHOD1(HMIResultFromString,
@@ -67,47 +67,51 @@ class MockMessageHelper {
   MOCK_METHOD1(CreateDeviceListSO,
                smart_objects::SmartObjectSPtr(
                    const connection_handler::DeviceMap& devices));
-  MOCK_METHOD2(SendNaviStartStream, void(int32_t connection_key,
-                                         ApplicationManager &app_mngr));
-  MOCK_METHOD2(SendNaviStopStream, void(int32_t connection_key,
-                                        ApplicationManager &app_mngr));
+  MOCK_METHOD2(SendNaviStartStream,
+               void(int32_t connection_key, ApplicationManager& app_mngr));
+  MOCK_METHOD2(SendNaviStopStream,
+               void(int32_t connection_key, ApplicationManager& app_mngr));
   MOCK_METHOD3(SendOnAppPermissionsChangedNotification,
                void(uint32_t connection_key,
                     const policy::AppPermissions& permissions,
                     ApplicationManager& app_mngr));
-  MOCK_METHOD2(SendAudioStartStream, void(int32_t connection_key,
-                                          ApplicationManager &app_mngr));
-  MOCK_METHOD2(SendAudioStopStream, void(int32_t connection_key,
-                                         ApplicationManager &app_mngr));
+  MOCK_METHOD2(SendAudioStartStream,
+               void(int32_t connection_key, ApplicationManager& app_mngr));
+  MOCK_METHOD2(SendAudioStopStream,
+               void(int32_t connection_key, ApplicationManager& app_mngr));
   MOCK_METHOD3(SendOnDataStreaming,
-               void(protocol_handler::ServiceType service, bool available,
-                    ApplicationManager &app_mngr));
+               void(protocol_handler::ServiceType service,
+                    bool available,
+                    ApplicationManager& app_mngr));
   MOCK_METHOD3(CreateGetVehicleDataRequest,
                void(uint32_t correlation_id,
                     const std::vector<std::string>& params,
-                    ApplicationManager &app_mngr));
+                    ApplicationManager& app_mngr));
   MOCK_METHOD3(SendUpdateSDLResponse,
-               void(const std::string& result, uint32_t correlation_id,
-                    ApplicationManager &app_mngr));
+               void(const std::string& result,
+                    uint32_t correlation_id,
+                    ApplicationManager& app_mngr));
   MOCK_METHOD3(SendGetUserFriendlyMessageResponse,
                void(const std::vector<policy::UserFriendlyMessage>& msg,
-                    uint32_t correlation_id, ApplicationManager &app_mngr));
+                    uint32_t correlation_id,
+                    ApplicationManager& app_mngr));
   MOCK_METHOD3(SendGetStatusUpdateResponse,
-               void(const std::string& status, uint32_t correlation_id,
-                    ApplicationManager &app_mngr));
-  MOCK_METHOD2(SendOnStatusUpdate, void(const std::string& status,
-                                        ApplicationManager &app_mngr));
+               void(const std::string& status,
+                    uint32_t correlation_id,
+                    ApplicationManager& app_mngr));
+  MOCK_METHOD2(SendOnStatusUpdate,
+               void(const std::string& status, ApplicationManager& app_mngr));
   MOCK_METHOD3(SendSDLActivateAppResponse,
                void(policy::AppPermissions& permissions,
                     uint32_t correlation_id,
-                    ApplicationManager &app_mngr));
-  MOCK_METHOD1(SendGetSystemInfoRequest, void(ApplicationManager &app_mngr));
+                    ApplicationManager& app_mngr));
+  MOCK_METHOD1(SendGetSystemInfoRequest, void(ApplicationManager& app_mngr));
 
   MOCK_METHOD4(SendPolicyUpdate,
                void(const std::string& file_path,
                     int timeout,
                     const std::vector<int>& retries,
-                    ApplicationManager &app_mngr));
+                    ApplicationManager& app_mngr));
   MOCK_METHOD3(
       SendGetListOfPermissionsResponse,
       void(const std::vector<policy::FunctionalGroupPermission>& permissions,
@@ -128,18 +132,18 @@ class MockMessageHelper {
                std::string(hmi_apis::Common_Language::eType));
   MOCK_METHOD2(CreateModuleInfoSO,
                smart_objects::SmartObjectSPtr(uint32_t function_id,
-                                              ApplicationManager &app_mngr));
+                                              ApplicationManager& app_mngr));
   MOCK_METHOD2(SendAllOnButtonSubscriptionNotificationsForApp,
                void(ApplicationConstSharedPtr app,
-                    ApplicationManager &app_mngr));
-  MOCK_METHOD2(SendOnResumeAudioSourceToHMI, void(uint32_t app_id,
-                                                  ApplicationManager &app_mngr));
+                    ApplicationManager& app_mngr));
+  MOCK_METHOD2(SendOnResumeAudioSourceToHMI,
+               void(uint32_t app_id, ApplicationManager& app_mngr));
   MOCK_METHOD2(CreateAddSubMenuRequestToHMI,
                smart_objects::SmartObjectList(ApplicationConstSharedPtr app,
                                               const uint32_t correlation_id));
   MOCK_METHOD2(CreateAddCommandRequestToHMI,
                smart_objects::SmartObjectList(ApplicationConstSharedPtr app,
-                                              ApplicationManager &app_mngr));
+                                              ApplicationManager& app_mngr));
   MOCK_METHOD1(CreateAddVRCommandRequestFromChoiceToHMI,
                smart_objects::SmartObjectList(ApplicationConstSharedPtr app));
   MOCK_METHOD1(SendGlobalPropertiesToHMI, void(ApplicationConstSharedPtr app));
@@ -153,10 +157,11 @@ class MockMessageHelper {
   MOCK_METHOD6(GetBCActivateAppRequestToHMI,
                smart_objects::SmartObjectSPtr(
                    ApplicationConstSharedPtr app,
-                         const protocol_handler::SessionObserver& session_observer,
-                         const policy::PolicyHandlerInterface& policy_handler,
-                         hmi_apis::Common_HMILevel::eType level,
-                         bool send_policy_priority, ApplicationManager &app_mngr));
+                   const protocol_handler::SessionObserver& session_observer,
+                   const policy::PolicyHandlerInterface& policy_handler,
+                   hmi_apis::Common_HMILevel::eType level,
+                   bool send_policy_priority,
+                   ApplicationManager& app_mngr));
   MOCK_METHOD2(GetOnAppInterfaceUnregisteredNotificationToMobile,
                NsSmartDeviceLink::NsSmartObjects::SmartObjectSPtr(
                    int32_t connection_key,

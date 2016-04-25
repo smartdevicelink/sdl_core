@@ -32,22 +32,20 @@
 
 #include "application_manager/commands/hmi/on_event_changed_notification.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 OnEventChangedNotification::OnEventChangedNotification(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : NotificationFromHMI(message, application_manager) {
-}
+    : NotificationFromHMI(message, application_manager) {}
 
-OnEventChangedNotification::~OnEventChangedNotification() {
-}
+OnEventChangedNotification::~OnEventChangedNotification() {}
 
 void OnEventChangedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_OnEventChanged);
+  event_engine::Event event(
+      hmi_apis::FunctionID::BasicCommunication_OnEventChanged);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());
 }
@@ -55,4 +53,3 @@ void OnEventChangedNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

@@ -49,7 +49,8 @@ class VRDeleteCommandResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  VRDeleteCommandResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  VRDeleteCommandResponse(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief VRDeleteCommandResponse class destructor

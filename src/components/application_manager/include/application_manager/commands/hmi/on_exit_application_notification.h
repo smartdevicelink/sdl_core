@@ -49,7 +49,8 @@ class OnExitApplicationNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnExitApplicationNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnExitApplicationNotification(const MessageSharedPtr& message,
+                                ApplicationManager& application_manager);
 
   /**
    * @brief OnExitApplicationNotification class destructor

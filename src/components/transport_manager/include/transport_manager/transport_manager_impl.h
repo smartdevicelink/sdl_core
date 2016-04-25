@@ -59,22 +59,23 @@
 namespace transport_manager {
 
 typedef threads::MessageLoopThread<std::queue<protocol_handler::RawMessagePtr> >
-  RawMessageLoopThread;
+    RawMessageLoopThread;
 typedef threads::MessageLoopThread<std::queue<TransportAdapterEvent> >
-  TransportAdapterEventLoopThread;
+    TransportAdapterEventLoopThread;
 typedef utils::SharedPtr<timer::Timer> TimerSPtr;
 
 /**
  * @brief Implementation of transport manager.s
  */
-class TransportManagerImpl : public TransportManager,
-                             public RawMessageLoopThread::Handler,
-                             public TransportAdapterEventLoopThread::Handler
+class TransportManagerImpl
+    : public TransportManager,
+      public RawMessageLoopThread::Handler,
+      public TransportAdapterEventLoopThread::Handler
 #ifdef TELEMETRY_MONITOR
       ,
       public telemetry_monitor::TelemetryObservable<TMTelemetryObserver>
 #endif  // TELEMETRY_MONITOR
- {
+      {
  public:
   struct Connection {
     ConnectionUID id;
@@ -86,7 +87,7 @@ class TransportManagerImpl : public TransportManager,
   /**
    * @brief Structure that contains internal connection parameters
    */
-  struct ConnectionInternal: public Connection {
+  struct ConnectionInternal : public Connection {
     TransportManagerImpl* transport_manager;
     TransportAdapter* transport_adapter;
     TimerSPtr timer;
@@ -103,9 +104,8 @@ class TransportManagerImpl : public TransportManager,
 
     void DisconnectFailedRoutine();
   };
+
  public:
-
-
   /**
    * @brief Constructor.
    **/
@@ -121,7 +121,7 @@ class TransportManagerImpl : public TransportManager,
    *
    * @return Code error.
    */
-  int Init(resumption::LastState &last_state) OVERRIDE;
+  int Init(resumption::LastState& last_state) OVERRIDE;
 
   /**
    * Reinitializes transport manager
@@ -177,7 +177,8 @@ class TransportManagerImpl : public TransportManager,
    *
    * @return Code error.
    **/
-  int SendMessageToDevice(const protocol_handler::RawMessagePtr message) OVERRIDE;
+  int SendMessageToDevice(
+      const protocol_handler::RawMessagePtr message) OVERRIDE;
 
   /**
    * @brief Post event in the event queue.
@@ -254,7 +255,8 @@ class TransportManagerImpl : public TransportManager,
   void RaiseEvent(Proc proc, Args... args) {
     for (TransportManagerListenerList::iterator it =
              transport_manager_listener_.begin();
-         it != transport_manager_listener_.end(); ++it) {
+         it != transport_manager_listener_.end();
+         ++it) {
       ((*it)->*proc)(args...);
     }
   }
@@ -306,14 +308,14 @@ class TransportManagerImpl : public TransportManager,
 
     DeviceHandle UidToHandle(const DeviceUID& dev_uid, bool& is_new) {
       {
-      sync_primitives::AutoReadLock lock(conversion_table_lock);
-      ConversionTable::iterator it = std::find(
-          conversion_table_.begin(), conversion_table_.end(), dev_uid);
-      if (it != conversion_table_.end()) {
-        is_new = false;
-        return std::distance(conversion_table_.begin(), it) +
-               1;  // handle begin since 1 (one)
-      }
+        sync_primitives::AutoReadLock lock(conversion_table_lock);
+        ConversionTable::iterator it = std::find(
+            conversion_table_.begin(), conversion_table_.end(), dev_uid);
+        if (it != conversion_table_.end()) {
+          is_new = false;
+          return std::distance(conversion_table_.begin(), it) +
+                 1;  // handle begin since 1 (one)
+        }
       }
       is_new = true;
       sync_primitives::AutoWriteLock lock(conversion_table_lock);
@@ -354,7 +356,7 @@ class TransportManagerImpl : public TransportManager,
   TransportAdapterEventLoopThread event_queue_;
   const TransportManagerSettings& settings_;
   typedef std::vector<std::pair<const TransportAdapter*, DeviceInfo> >
-  DeviceInfoList;
+      DeviceInfoList;
   sync_primitives::RWLock device_list_lock_;
   DeviceInfoList device_list_;
 
@@ -368,12 +370,15 @@ class TransportManagerImpl : public TransportManager,
       ConnectionUID id,
       std::map<ConnectionUID, std::pair<unsigned int, unsigned char*> >&
           container,
-      unsigned char* data, unsigned int data_size);
-  bool GetFrameSize(unsigned char* data, unsigned int data_size,
+      unsigned char* data,
+      unsigned int data_size);
+  bool GetFrameSize(unsigned char* data,
+                    unsigned int data_size,
                     unsigned int& frame_size);
   bool GetFrame(std::map<ConnectionUID,
-                std::pair<unsigned int, unsigned char*> >& container,
-                ConnectionUID id, unsigned int frame_size,
+                         std::pair<unsigned int, unsigned char*> >& container,
+                ConnectionUID id,
+                unsigned int frame_size,
                 unsigned char** frame);
 
   void OnDeviceListUpdated(TransportAdapter* ta);

@@ -40,12 +40,11 @@ namespace application_manager {
 
 namespace commands {
 
-ShowResponse::ShowResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+ShowResponse::ShowResponse(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-ShowResponse::~ShowResponse() {
-}
+ShowResponse::~ShowResponse() {}
 
 void ShowResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

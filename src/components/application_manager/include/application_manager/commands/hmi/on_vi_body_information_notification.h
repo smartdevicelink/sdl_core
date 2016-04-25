@@ -50,7 +50,8 @@ class OnVIBodyInformationNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnVIBodyInformationNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnVIBodyInformationNotification(const MessageSharedPtr& message,
+                                  ApplicationManager& application_manager);
 
   /**
    * @brief OnVIBodyInformationNotification class destructor

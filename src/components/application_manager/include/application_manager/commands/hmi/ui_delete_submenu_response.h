@@ -49,7 +49,8 @@ class UIDeleteSubmenuResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  UIDeleteSubmenuResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  UIDeleteSubmenuResponse(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief UIDeleteSubmenuResponse class destructor

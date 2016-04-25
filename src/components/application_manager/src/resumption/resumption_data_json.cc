@@ -45,7 +45,8 @@ namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
-ResumptionDataJson::ResumptionDataJson(LastState& last_state,
+ResumptionDataJson::ResumptionDataJson(
+    LastState& last_state,
     const application_manager::ApplicationManager& application_manager)
     : ResumptionData(application_manager), last_state_(last_state) {}
 
@@ -57,15 +58,15 @@ void ResumptionDataJson::SaveApplication(
 
   const std::string& policy_app_id = application->policy_app_id();
   LOG4CXX_DEBUG(logger_,
-                "app_id : " << application->app_id() << " policy_app_id : "
-                            << policy_app_id);
+                "app_id : " << application->app_id()
+                            << " policy_app_id : " << policy_app_id);
   const std::string hash = application->curHash();
   const uint32_t grammar_id = application->get_grammar_id();
   const uint32_t time_stamp = (uint32_t)time(NULL);
   const std::string device_mac = application->mac_address();
   const mobile_apis::HMILevel::eType hmi_level = application->hmi_level();
-  const bool is_subscribed_for_way_points = application_manager_.
-      IsAppSubscribedForWayPoints(application->app_id());
+  const bool is_subscribed_for_way_points =
+      application_manager_.IsAppSubscribedForWayPoints(application->app_id());
 
   sync_primitives::AutoLock autolock(resumption_lock_);
   Json::Value tmp;
@@ -151,9 +152,7 @@ bool ResumptionDataJson::CheckSavedApplication(const std::string& policy_app_id,
     LOG4CXX_INFO(
         logger_,
         "Resumption data for app_id "
-            << policy_app_id
-            << " device id "
-            << device_id
+            << policy_app_id << " device id " << device_id
             << " is corrupted. Remove application from resumption list");
     RemoveApplicationFromSaved(policy_app_id, device_id);
     return false;
@@ -386,11 +385,9 @@ void ResumptionDataJson::UpdateHmiLevel(
 
   int idx = GetObjectIndex(policy_app_id, device_id);
   if (-1 == idx) {
-    LOG4CXX_WARN(
-        logger_,
-        "Application isn't saved with mobile_app_id = " << policy_app_id
-                                                        << " device_id = "
-                                                        << device_id);
+    LOG4CXX_WARN(logger_,
+                 "Application isn't saved with mobile_app_id = "
+                     << policy_app_id << " device_id = " << device_id);
     return;
   }
   GetSavedApplications()[idx][strings::hmi_level] = hmi_level;
@@ -419,7 +416,8 @@ Json::Value& ResumptionDataJson::GetResumptionData() const {
   sync_primitives::AutoLock autolock(resumption_lock_);
   Json::Value& dictionary = last_state().dictionary;
   if (!dictionary.isMember(strings::resumption)) {
-    last_state().dictionary[strings::resumption] = Json::Value(Json::objectValue);
+    last_state().dictionary[strings::resumption] =
+        Json::Value(Json::objectValue);
     LOG4CXX_WARN(logger_, "resumption section is missed");
   }
   Json::Value& resumption = dictionary[strings::resumption];
@@ -505,8 +503,9 @@ bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
   sync_primitives::AutoLock autolock(resumption_lock_);
   Json::Value& application = GetFromSavedOrAppend(app_id, device_id);
   if (application.isNull()) {
-    LOG4CXX_DEBUG(logger_, "Application " << app_id << " with device_id "
-                  << device_id << " hasn't been found in resumption data.");
+    LOG4CXX_DEBUG(logger_,
+                  "Application " << app_id << " with device_id " << device_id
+                                 << " hasn't been found in resumption data.");
     return false;
   }
   application[strings::application_commands].clear();
@@ -516,14 +515,15 @@ bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
   application[strings::application_subscribtions].clear();
   application[strings::application_files].clear();
   application.removeMember(strings::grammar_id);
-  LOG4CXX_DEBUG(logger_, "Resumption data for application " << app_id <<
-                " with device_id " << device_id << " has been dropped.");
+  LOG4CXX_DEBUG(logger_,
+                "Resumption data for application "
+                    << app_id << " with device_id " << device_id
+                    << " has been dropped.");
   return true;
 }
 
 void ResumptionDataJson::Persist() {
-    last_state().SaveToFileSystem();
+  last_state().SaveToFileSystem();
 }
-
 
 }  // resumption

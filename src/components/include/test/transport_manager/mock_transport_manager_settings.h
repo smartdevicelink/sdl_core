@@ -42,12 +42,11 @@ namespace components {
 namespace transport_manager_test {
 
 class MockTransportManagerSettings
-    : public ::transport_manager::TransportManagerSettings{
+    : public ::transport_manager::TransportManagerSettings {
  public:
   MOCK_CONST_METHOD0(use_last_state, bool());
   MOCK_CONST_METHOD0(transport_manager_disconnect_timeout, uint32_t());
   MOCK_CONST_METHOD0(transport_manager_tcp_adapter_port, uint16_t());
-
 
   // from mme settings
   MOCK_CONST_METHOD0(event_mq_name, const std::string&());

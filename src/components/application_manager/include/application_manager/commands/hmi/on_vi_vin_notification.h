@@ -50,7 +50,8 @@ class OnVIVinNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnVIVinNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnVIVinNotification(const MessageSharedPtr& message,
+                      ApplicationManager& application_manager);
 
   /**
    * @brief OnVIVinNotification class destructor

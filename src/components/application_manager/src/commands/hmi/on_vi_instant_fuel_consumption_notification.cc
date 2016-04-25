@@ -39,11 +39,10 @@ namespace commands {
 
 OnVIInstantFuelConsumptionNotification::OnVIInstantFuelConsumptionNotification(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : NotificationFromHMI(message, application_manager) {
-}
+    : NotificationFromHMI(message, application_manager) {}
 
-OnVIInstantFuelConsumptionNotification::~OnVIInstantFuelConsumptionNotification() {
-}
+OnVIInstantFuelConsumptionNotification::
+    ~OnVIInstantFuelConsumptionNotification() {}
 
 void OnVIInstantFuelConsumptionNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -58,4 +57,3 @@ void OnVIInstantFuelConsumptionNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

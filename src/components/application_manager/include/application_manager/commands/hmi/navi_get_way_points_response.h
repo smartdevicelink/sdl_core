@@ -42,32 +42,32 @@ namespace commands {
 /**
  * @brief NaviGetWaypoints command class
  **/
-class NaviGetWayPointsResponse
-    : public ResponseFromHMI {
+class NaviGetWayPointsResponse : public ResponseFromHMI {
  public:
-    /**
-     * @brief NaviGetWaypoints class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    NaviGetWayPointsResponse(const MessageSharedPtr& message,
-                             ApplicationManager& application_manager);
+  /**
+   * @brief NaviGetWaypoints class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  NaviGetWayPointsResponse(const MessageSharedPtr& message,
+                           ApplicationManager& application_manager);
 
-    /**
-     * @brief NaviGetWaypoints class destructor
-     **/
-    virtual ~NaviGetWayPointsResponse();
+  /**
+   * @brief NaviGetWaypoints class destructor
+   **/
+  virtual ~NaviGetWayPointsResponse();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run() OVERRIDE;
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run() OVERRIDE;
+
  private:
   DISALLOW_COPY_AND_ASSIGN(NaviGetWayPointsResponse);
 };
 
-} // namespace commands
+}  // namespace commands
 
-} // namespace application_manager
+}  // namespace application_manager
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_GET_WAY_POINTS_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_GET_WAY_POINTS_RESPONSE_H_

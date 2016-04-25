@@ -39,11 +39,9 @@ namespace commands {
 
 OnUICommandNotification::OnUICommandNotification(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : NotificationFromHMI(message, application_manager) {
-}
+    : NotificationFromHMI(message, application_manager) {}
 
-OnUICommandNotification::~OnUICommandNotification() {
-}
+OnUICommandNotification::~OnUICommandNotification() {}
 
 void OnUICommandNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -59,4 +57,3 @@ void OnUICommandNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

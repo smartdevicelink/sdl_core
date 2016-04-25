@@ -126,16 +126,15 @@ int32_t main(int32_t argc, char** argv) {
   // Components initialization
   profile::Profile profile_instance;
   main_namespace::LifeCycle life_cycle(profile_instance);
-  if ((argc > 1)&&(0 != argv)) {
-      profile_instance.config_file_name(argv[1]);
+  if ((argc > 1) && (0 != argv)) {
+    profile_instance.config_file_name(argv[1]);
   } else {
     profile_instance.config_file_name("smartDeviceLink.ini");
   }
 
   // --------------------------------------------------------------------------
   // Logger initialization
-  INIT_LOGGER("log4cxx.properties", 
-	      profile_instance.logs_enabled());
+  INIT_LOGGER("log4cxx.properties", profile_instance.logs_enabled());
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 

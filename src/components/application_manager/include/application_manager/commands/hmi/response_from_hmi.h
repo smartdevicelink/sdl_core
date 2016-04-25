@@ -52,12 +52,13 @@ namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 class ResponseFromHMI : public CommandImpl {
  public:
   ResponseFromHMI(const MessageSharedPtr& message,
-                           ApplicationManager& application_manager);
+                  ApplicationManager& application_manager);
   virtual ~ResponseFromHMI();
   virtual bool Init();
   virtual bool CleanUp();
   virtual void Run();
-  void SendResponseToMobile(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  void SendResponseToMobile(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /*
    * @brief Creates HMI request

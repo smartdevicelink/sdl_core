@@ -49,7 +49,8 @@ class VIUnsubscribeVehicleDataResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  VIUnsubscribeVehicleDataResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  VIUnsubscribeVehicleDataResponse(const MessageSharedPtr& message,
+                                   ApplicationManager& application_manager);
 
   /**
    * @brief VIUnsubscribeVehicleDataResponse class destructor

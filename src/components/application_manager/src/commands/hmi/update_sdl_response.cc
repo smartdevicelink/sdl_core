@@ -31,17 +31,15 @@
  */
 #include "application_manager/commands/hmi/update_sdl_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
-UpdateSDLResponse::UpdateSDLResponse(
-  const MessageSharedPtr& message, ApplicationManager& application_manager): ResponseFromHMI(message, application_manager) {
-}
+UpdateSDLResponse::UpdateSDLResponse(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-UpdateSDLResponse::~UpdateSDLResponse() {
-}
+UpdateSDLResponse::~UpdateSDLResponse() {}
 
 void UpdateSDLResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

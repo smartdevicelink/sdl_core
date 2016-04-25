@@ -49,7 +49,8 @@ class OnStartDeviceDiscovery : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnStartDeviceDiscovery(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnStartDeviceDiscovery(const MessageSharedPtr& message,
+                         ApplicationManager& application_manager);
 
   /**
    * @brief OnStartDeviceDiscovery class destructor

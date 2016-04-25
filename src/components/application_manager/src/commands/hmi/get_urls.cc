@@ -38,12 +38,11 @@
 namespace application_manager {
 namespace commands {
 
-GetUrls::GetUrls(const MessageSharedPtr& message, ApplicationManager& application_manager)
-  : RequestFromHMI(message, application_manager) {
-}
+GetUrls::GetUrls(const MessageSharedPtr& message,
+                 ApplicationManager& application_manager)
+    : RequestFromHMI(message, application_manager) {}
 
-GetUrls::~GetUrls() {
-}
+GetUrls::~GetUrls() {}
 
 void GetUrls::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,12 +51,13 @@ void GetUrls::Run() {
   if (application_manager_.GetPolicyHandler().PolicyEnabled()) {
     policy::EndpointUrls endpoints;
     application_manager_.GetPolicyHandler().GetServiceUrls(
-        object[strings::msg_params][hmi_request::service].asString(), endpoints);
+        object[strings::msg_params][hmi_request::service].asString(),
+        endpoints);
     if (!endpoints.empty()) {
       object[strings::msg_params].erase(hmi_request::service);
 
       object[strings::msg_params][hmi_response::urls] =
-        smart_objects::SmartObject(smart_objects::SmartType_Array);
+          smart_objects::SmartObject(smart_objects::SmartType_Array);
 
       smart_objects::SmartObject& urls =
           object[strings::msg_params][hmi_response::urls];
@@ -68,14 +68,13 @@ void GetUrls::Run() {
         for (size_t k = 0; k < endpoints[i].url.size(); ++k, ++index) {
           const std::string url = endpoints[i].url[k];
 
-          urls[index] = smart_objects::SmartObject(
-                smart_objects::SmartType_Map);
+          urls[index] =
+              smart_objects::SmartObject(smart_objects::SmartType_Map);
           smart_objects::SmartObject& service_info = urls[index];
 
           service_info[strings::url] = url;
           if (policy::kDefaultId != endpoints[i].app_id) {
-            service_info[hmi_response::policy_app_id] =
-              endpoints[i].app_id;
+            service_info[hmi_response::policy_app_id] = endpoints[i].app_id;
           }
         }
       }

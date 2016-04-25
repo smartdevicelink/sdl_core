@@ -49,7 +49,8 @@ class NaviSendLocationRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    */
-  NaviSendLocationRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  NaviSendLocationRequest(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief NaviSendLocationRequest class destructor

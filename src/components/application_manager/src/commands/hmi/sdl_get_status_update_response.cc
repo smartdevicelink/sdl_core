@@ -32,17 +32,15 @@
 
 #include "application_manager/commands/hmi/sdl_get_status_update_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 SDLGetStatusUpdateResponse::SDLGetStatusUpdateResponse(
-  const MessageSharedPtr& message, ApplicationManager& application_manager): ResponseToHMI(message, application_manager) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseToHMI(message, application_manager) {}
 
-SDLGetStatusUpdateResponse::~SDLGetStatusUpdateResponse() {
-}
+SDLGetStatusUpdateResponse::~SDLGetStatusUpdateResponse() {}
 
 void SDLGetStatusUpdateResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -54,6 +52,3 @@ void SDLGetStatusUpdateResponse::Run() {
 
 }  // namespace commands
 }  // namespace application_manager
-
-
-

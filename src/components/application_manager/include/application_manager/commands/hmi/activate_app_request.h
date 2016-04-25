@@ -43,26 +43,27 @@ namespace commands {
  * @brief ActivateAppRequest command class
  **/
 class ActivateAppRequest : public RequestToHMI {
-  public:
-    /**
-     * @brief ActivateAppRequest class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
-    ActivateAppRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+ public:
+  /**
+   * @brief ActivateAppRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  ActivateAppRequest(const MessageSharedPtr& message,
+                     ApplicationManager& application_manager);
 
-    /**
-     * @brief ActivateAppRequest class destructor
-     **/
-    virtual ~ActivateAppRequest();
+  /**
+   * @brief ActivateAppRequest class destructor
+   **/
+  virtual ~ActivateAppRequest();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(ActivateAppRequest);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(ActivateAppRequest);
 };
 
 }  // namespace commands

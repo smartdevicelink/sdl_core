@@ -39,7 +39,7 @@ namespace application_manager {
 namespace commands {
 
 NaviSubscribeWayPointsResponse::NaviSubscribeWayPointsResponse(
-    const MessageSharedPtr &message, ApplicationManager& application_manager)
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
     : ResponseFromHMI(message, application_manager) {}
 
 NaviSubscribeWayPointsResponse::~NaviSubscribeWayPointsResponse() {}

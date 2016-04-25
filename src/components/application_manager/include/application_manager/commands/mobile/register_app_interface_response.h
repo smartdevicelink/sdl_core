@@ -48,14 +48,13 @@ class RegisterAppInterfaceResponse : public CommandResponseImpl {
    * \brief RegisterAppInterfaceResponse class constructor
    **/
   RegisterAppInterfaceResponse(const MessageSharedPtr& response,
-                                        ApplicationManager& application_manager)
+                               ApplicationManager& application_manager)
       : CommandResponseImpl(response, application_manager) {}
 
   /**
    * \brief RegisterAppInterfaceResponse class destructor
    **/
-  virtual ~RegisterAppInterfaceResponse() {
-  }
+  virtual ~RegisterAppInterfaceResponse() {}
 
   /**
    * @brief Execute command

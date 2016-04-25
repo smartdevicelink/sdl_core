@@ -50,7 +50,8 @@ class OnVIWiperStatusNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnVIWiperStatusNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnVIWiperStatusNotification(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief OnVIWiperStatusNotification class destructor

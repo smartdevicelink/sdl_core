@@ -45,7 +45,8 @@ class SetMediaClockTimerResponse : public CommandResponseImpl {
   /**
    * \brief SetMediaClockTimerResponse class constructor
    **/
-  SetMediaClockTimerResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  SetMediaClockTimerResponse(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager);
 
   /**
    * \brief SetMediaClockTimerResponse class destructor

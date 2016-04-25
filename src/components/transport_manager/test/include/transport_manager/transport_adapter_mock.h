@@ -93,7 +93,8 @@ class MockTransportAdapter
       std::string(const ::transport_manager::DeviceUID& device_handle));
 
 #ifdef TELEMETRY_MONITOR
-  MOCK_METHOD0(GetTelemetryObserver, ::transport_manager::TMTelemetryObserver*());
+  MOCK_METHOD0(GetTelemetryObserver,
+               ::transport_manager::TMTelemetryObserver*());
 #endif  // TELEMETRY_MONITOR
 };
 

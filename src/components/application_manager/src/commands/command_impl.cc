@@ -34,7 +34,6 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/application_manager.h"
 
-
 namespace application_manager {
 namespace commands {
 
@@ -55,7 +54,7 @@ CommandImpl::~CommandImpl() {
   CleanUp();
 }
 
-bool CommandImpl::CheckPermissions(){
+bool CommandImpl::CheckPermissions() {
   return true;
 }
 
@@ -67,8 +66,7 @@ bool CommandImpl::CleanUp() {
   return true;
 }
 
-void CommandImpl::Run() {
-}
+void CommandImpl::Run() {}
 
 uint32_t CommandImpl::default_timeout() const {
   return default_timeout_;
@@ -86,23 +84,21 @@ uint32_t CommandImpl::connection_key() const {
   return (*message_)[strings::params][strings::connection_key].asUInt();
 }
 
-void CommandImpl::onTimeOut() {
-
-}
+void CommandImpl::onTimeOut() {}
 
 bool CommandImpl::AllowedToTerminate() {
-    return allowed_to_terminate_;
+  return allowed_to_terminate_;
 }
 
 void CommandImpl::SetAllowedToTerminate(const bool allowed) {
-    allowed_to_terminate_ = allowed;
+  allowed_to_terminate_ = allowed;
 }
 
 void CommandImpl::ReplaceMobileByHMIAppId(
     NsSmartDeviceLink::NsSmartObjects::SmartObject& message) {
   if (message.keyExists(strings::app_id)) {
-    ApplicationSharedPtr application = application_manager_.application(
-            message[strings::app_id].asUInt());
+    ApplicationSharedPtr application =
+        application_manager_.application(message[strings::app_id].asUInt());
     if (application.valid()) {
       LOG4CXX_DEBUG(logger_,
                     "ReplaceMobileByHMIAppId from "

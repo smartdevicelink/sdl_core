@@ -38,7 +38,7 @@
 #include "application_manager/application_manager.h"
 
 namespace application_manager {
-    class ApplicationManagerSettings;
+class ApplicationManagerSettings;
 }
 
 namespace resumption {
@@ -69,8 +69,7 @@ class ResumptionData {
    * @brief Save application persistent info for future resuming
    * @param application is application witch need to be saved
    */
-  virtual void SaveApplication(
-      app_mngr::ApplicationSharedPtr application) = 0;
+  virtual void SaveApplication(app_mngr::ApplicationSharedPtr application) = 0;
 
   /**
    * @brief Returns HMI level of application from saved data
@@ -208,8 +207,8 @@ class ResumptionData {
    * @brief Persist saves resumption data on file system
    */
   virtual void Persist() = 0;
- protected:
 
+ protected:
   /**
    * @brief Retrieves of commands from application
    * @param application contains application of which selection commands
@@ -287,7 +286,7 @@ class ResumptionData {
       ++first;
     }
   }
-  mutable sync_primitives::Lock           resumption_lock_;
+  mutable sync_primitives::Lock resumption_lock_;
   const application_manager::ApplicationManager& application_manager_;
 };
 }  // namespace resumption

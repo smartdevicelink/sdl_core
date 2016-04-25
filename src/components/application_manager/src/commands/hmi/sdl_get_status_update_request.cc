@@ -37,20 +37,17 @@ namespace application_manager {
 
 namespace commands {
 
-SDLGetStatusUpdateRequest::SDLGetStatusUpdateRequest(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : RequestFromHMI(message, application_manager) {
-}
+SDLGetStatusUpdateRequest::SDLGetStatusUpdateRequest(
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : RequestFromHMI(message, application_manager) {}
 
-SDLGetStatusUpdateRequest::~SDLGetStatusUpdateRequest() {
-}
+SDLGetStatusUpdateRequest::~SDLGetStatusUpdateRequest() {}
 
 void SDLGetStatusUpdateRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   application_manager_.GetPolicyHandler().OnGetStatusUpdate(
-        (*message_)[strings::params][strings::correlation_id].asUInt());
+      (*message_)[strings::params][strings::correlation_id].asUInt());
 }
 
 }  // namespace commands
 }  // namespace application_manager
-
-

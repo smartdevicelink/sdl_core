@@ -53,7 +53,8 @@ class DeleteFileRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  DeleteFileRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  DeleteFileRequest(const MessageSharedPtr& message,
+                    ApplicationManager& application_manager);
 
   /**
    * @brief DeleteFileRequest class destructor

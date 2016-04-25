@@ -49,9 +49,9 @@ const std::string kAppInfoStorageFile = "app_info_storage";
 class LastStateTest : public ::testing::Test {
  protected:
   LastStateTest()
-    : empty_dictionary_("null\n")
-    , app_info_dat_file_("app_info.dat")
-    , last_state_(kAppStorageFolder, kAppInfoStorageFile){}
+      : empty_dictionary_("null\n")
+      , app_info_dat_file_("app_info.dat")
+      , last_state_(kAppStorageFolder, kAppInfoStorageFile) {}
 
   static void SetUpTestCase() {
     file_system::DeleteFile(kAppInfoStorageFile);
@@ -80,14 +80,16 @@ TEST_F(LastStateTest, Basic) {
 TEST_F(LastStateTest, SetGetData) {
   {
     const Value& dictionary = last_state_.dictionary;
-    const Value& bluetooth_info = dictionary["TransportManager"]["BluetoothAdapter"];
+    const Value& bluetooth_info =
+        dictionary["TransportManager"]["BluetoothAdapter"];
     EXPECT_EQ(empty_dictionary_, bluetooth_info.toStyledString());
 
     const Value& tcp_adapter_info =
         dictionary["TransportManager"]["TcpAdapter"]["devices"];
     EXPECT_EQ(empty_dictionary_, tcp_adapter_info.toStyledString());
 
-    const Value& resumption_time = dictionary["resumption"]["last_ign_off_time"];
+    const Value& resumption_time =
+        dictionary["resumption"]["last_ign_off_time"];
     EXPECT_EQ("null\n", resumption_time.toStyledString());
 
     const Value& resumption_list = dictionary["resumption"]["resume_app_list"];
@@ -96,17 +98,17 @@ TEST_F(LastStateTest, SetGetData) {
     Value test_value;
     test_value["name"] = "test_device";
 
-    last_state_
-        .dictionary["TransportManager"]["TcpAdapter"]["devices"] = test_value;
-    last_state_
-        .dictionary["TransportManager"]["BluetoothAdapter"]["devices"] =
+    last_state_.dictionary["TransportManager"]["TcpAdapter"]["devices"] =
+        test_value;
+    last_state_.dictionary["TransportManager"]["BluetoothAdapter"]["devices"] =
         "bluetooth_device";
     last_state_.SaveToFileSystem();
   }
 
   const Value& dictionary = last_state_.dictionary;
 
-  const Value& bluetooth_info = dictionary["TransportManager"]["BluetoothAdapter"];
+  const Value& bluetooth_info =
+      dictionary["TransportManager"]["BluetoothAdapter"];
   const Value& tcp_adapter_info = dictionary["TransportManager"]["TcpAdapter"];
   EXPECT_EQ("{\n   \"devices\" : \"bluetooth_device\"\n}\n",
             bluetooth_info.toStyledString());

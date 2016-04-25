@@ -39,11 +39,9 @@ namespace commands {
 
 VRChangeRegistrationResponse::VRChangeRegistrationResponse(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+    : ResponseFromHMI(message, application_manager) {}
 
-VRChangeRegistrationResponse::~VRChangeRegistrationResponse() {
-}
+VRChangeRegistrationResponse::~VRChangeRegistrationResponse() {}
 
 void VRChangeRegistrationResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

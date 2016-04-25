@@ -38,12 +38,11 @@ namespace application_manager {
 
 namespace commands {
 
-UIAlertResponse::UIAlertResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+UIAlertResponse::UIAlertResponse(const MessageSharedPtr& message,
+                                 ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-UIAlertResponse::~UIAlertResponse() {
-}
+UIAlertResponse::~UIAlertResponse() {}
 
 void UIAlertResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

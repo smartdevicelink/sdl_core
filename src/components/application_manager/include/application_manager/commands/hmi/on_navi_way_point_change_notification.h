@@ -51,7 +51,7 @@ class OnNaviWayPointChangeNotification : public NotificationFromHMI {
    * @param message Incoming SmartObject message
    **/
   OnNaviWayPointChangeNotification(const MessageSharedPtr& message,
-                                            ApplicationManager& app_man);
+                                   ApplicationManager& app_man);
 
   /**
    * @brief OnNaviWayPointChangeNotification class destructor
@@ -70,4 +70,4 @@ class OnNaviWayPointChangeNotification : public NotificationFromHMI {
 }  // namespace commands
 
 }  // namespace application_manager
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_NAVI_WAY_POINT_CHANGE_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_NAVI_WAY_POINT_CHANGE_NOTIFICATION_H_

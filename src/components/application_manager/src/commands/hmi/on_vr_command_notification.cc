@@ -46,16 +46,14 @@ namespace commands {
 
 OnVRCommandNotification::OnVRCommandNotification(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : NotificationFromHMI(message, application_manager) {
-}
+    : NotificationFromHMI(message, application_manager) {}
 
-OnVRCommandNotification::~OnVRCommandNotification() {
-}
+OnVRCommandNotification::~OnVRCommandNotification() {}
 
 void OnVRCommandNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  const uint32_t cmd_id = (*message_)[strings::msg_params][strings::cmd_id]
-      .asUInt();
+  const uint32_t cmd_id =
+      (*message_)[strings::msg_params][strings::cmd_id].asUInt();
   uint32_t max_cmd_id = application_manager_.get_settings().max_cmd_id();
 
   // Check if this is one of standart VR commands (i.e. "Help")
@@ -76,8 +74,8 @@ void OnVRCommandNotification::Run() {
   if (cmd_id == max_cmd_id + 1) {
     return;
   }
-  const uint32_t app_id = (*message_)[strings::msg_params][strings::app_id]
-      .asUInt();
+  const uint32_t app_id =
+      (*message_)[strings::msg_params][strings::app_id].asUInt();
   ApplicationSharedPtr app = application_manager_.application(app_id);
   if (!app) {
     LOG4CXX_ERROR(logger_, "NULL pointer");
@@ -104,4 +102,3 @@ void OnVRCommandNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

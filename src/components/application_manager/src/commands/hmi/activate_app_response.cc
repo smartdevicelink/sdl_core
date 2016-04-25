@@ -38,15 +38,15 @@ namespace application_manager {
 namespace commands {
 
 ActivateAppResponse::ActivateAppResponse(
-  const MessageSharedPtr& message, ApplicationManager& application_manager): ResponseFromHMI(message, application_manager) {
-}
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-ActivateAppResponse::~ActivateAppResponse() {
-}
+ActivateAppResponse::~ActivateAppResponse() {}
 
 void ActivateAppResponse::Run() {
   LOG4CXX_TRACE(logger_, "enter");
-  event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_ActivateApp);
+  event_engine::Event event(
+      hmi_apis::FunctionID::BasicCommunication_ActivateApp);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());
   LOG4CXX_TRACE(logger_, "exit");

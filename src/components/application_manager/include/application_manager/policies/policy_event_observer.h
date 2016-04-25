@@ -41,8 +41,8 @@ namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 class PolicyHandlerInterface;
 
-class PolicyEventObserver :
-    public application_manager::event_engine::EventObserver {
+class PolicyEventObserver
+    : public application_manager::event_engine::EventObserver {
  public:
   PolicyEventObserver(
       policy::PolicyHandlerInterface* const policy_handler,
@@ -52,6 +52,7 @@ class PolicyEventObserver :
   void subscribe_on_event(
       const application_manager::event_engine::Event::EventID& event_id,
       int32_t hmi_correlation_id = 0);
+
  private:
   sync_primitives::Lock policy_handler_lock_;
   PolicyHandlerInterface* policy_handler_;

@@ -31,17 +31,15 @@
  */
 #include "application_manager/commands/hmi/ui_is_ready_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
-UIIsReadyResponse::UIIsReadyResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+UIIsReadyResponse::UIIsReadyResponse(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager)
+    : ResponseFromHMI(message, application_manager) {}
 
-UIIsReadyResponse::~UIIsReadyResponse() {
-}
+UIIsReadyResponse::~UIIsReadyResponse() {}
 
 void UIIsReadyResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -52,8 +50,7 @@ void UIIsReadyResponse::Run() {
     is_available = object[strings::msg_params][strings::available].asBool();
   }
 
-  HMICapabilities& hmi_capabilities =
-      application_manager_.hmi_capabilities();
+  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
 
   hmi_capabilities.set_is_ui_cooperating(is_available);
 }

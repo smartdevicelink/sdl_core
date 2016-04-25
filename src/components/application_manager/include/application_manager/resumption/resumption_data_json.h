@@ -48,8 +48,9 @@ class ResumptionDataJson : public ResumptionData {
   /**
    * @brief Constructor of ResumptionDataJson
    */
-  ResumptionDataJson(LastState& last_state,
-                     const application_manager::ApplicationManager& application_manager);
+  ResumptionDataJson(
+      LastState& last_state,
+      const application_manager::ApplicationManager& application_manager);
 
   /**
    * @brief allows to destroy ResumptionDataJson object
@@ -185,14 +186,13 @@ class ResumptionDataJson : public ResumptionData {
   bool DropAppDataResumption(const std::string& device_id,
                              const std::string& app_id) OVERRIDE;
 
-
   /**
    * @brief Write json resumption info to file system
    */
   void Persist() OVERRIDE;
 
   resumption::LastState& last_state() const {
-      return last_state_;
+    return last_state_;
   }
 
  private:

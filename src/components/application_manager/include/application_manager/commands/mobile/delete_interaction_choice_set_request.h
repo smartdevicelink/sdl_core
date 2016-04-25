@@ -52,7 +52,8 @@ class DeleteInteractionChoiceSetRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  DeleteInteractionChoiceSetRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  DeleteInteractionChoiceSetRequest(const MessageSharedPtr& message,
+                                    ApplicationManager& application_manager);
 
   /**
    * @brief DeleteInteractionChoiceSetRequest class destructor
@@ -65,7 +66,6 @@ class DeleteInteractionChoiceSetRequest : public CommandRequestImpl {
   virtual void Run();
 
  private:
-
   /*
    * @brief Check if requested choice set ID in use by perform interaction
    *

@@ -51,7 +51,8 @@ class OnPermissionsChangeNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  OnPermissionsChangeNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnPermissionsChangeNotification(const MessageSharedPtr& message,
+                                  ApplicationManager& application_manager);
 
   /**
    * @brief OnPermissionsChangeNotification class destructor

@@ -39,11 +39,9 @@ namespace commands {
 
 UISetMediaClockTimerResponse::UISetMediaClockTimerResponse(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+    : ResponseFromHMI(message, application_manager) {}
 
-UISetMediaClockTimerResponse::~UISetMediaClockTimerResponse() {
-}
+UISetMediaClockTimerResponse::~UISetMediaClockTimerResponse() {}
 
 void UISetMediaClockTimerResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

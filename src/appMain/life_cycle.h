@@ -88,7 +88,6 @@ class LifeCycle {
   void Run();
   void StopComponents();
 
-
  private:
   transport_manager::TransportManagerImpl* transport_manager_;
   protocol_handler::ProtocolHandlerImpl* protocol_handler_;
@@ -118,7 +117,6 @@ class LifeCycle {
   System::Thread* mb_server_thread_;
   System::Thread* mb_adapter_thread_;
 #endif  // MESSAGEBROKER_HMIADAPTER
-
 
   const profile::Profile& profile_;
   DISALLOW_COPY_AND_ASSIGN(LifeCycle);

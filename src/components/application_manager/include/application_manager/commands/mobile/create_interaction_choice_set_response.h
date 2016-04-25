@@ -51,7 +51,8 @@ class CreateInteractionChoiceSetResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  CreateInteractionChoiceSetResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  CreateInteractionChoiceSetResponse(const MessageSharedPtr& message,
+                                     ApplicationManager& application_manager);
 
   /**
    * @brief CreateInteractionChoiceSetResponse class destructor

@@ -40,11 +40,9 @@ namespace commands {
 
 TTSSetGlobalPropertiesResponse::TTSSetGlobalPropertiesResponse(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+    : ResponseFromHMI(message, application_manager) {}
 
-TTSSetGlobalPropertiesResponse::~TTSSetGlobalPropertiesResponse() {
-}
+TTSSetGlobalPropertiesResponse::~TTSSetGlobalPropertiesResponse() {}
 
 void TTSSetGlobalPropertiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

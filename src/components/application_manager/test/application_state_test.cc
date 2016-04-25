@@ -65,7 +65,6 @@ std::vector<StateID> GenerateCurrentStates() {
 
 class ApplicationStateTest : public ::testing::Test {
  protected:
-
   static std::vector<StateID> added_states_;
   ApplicationState app_state;
   const StateID current_id = StateID::STATE_ID_CURRENT;

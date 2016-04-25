@@ -48,11 +48,13 @@ void UnregisterAppInterfaceRequest::Run() {
     return;
   }
 
-  application_manager_.ManageMobileCommand(MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-      connection_key(),
-      mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM), commands::Command::ORIGIN_SDL);
+  application_manager_.ManageMobileCommand(
+      MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
+          connection_key(),
+          mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM),
+      commands::Command::ORIGIN_SDL);
   application_manager_.UnregisterApplication(connection_key(),
-                                     mobile_apis::Result::SUCCESS);
+                                             mobile_apis::Result::SUCCESS);
   SendResponse(true, mobile_apis::Result::SUCCESS);
 }
 

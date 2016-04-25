@@ -49,7 +49,8 @@ class SliderRequest : public CommandRequestImpl {
   /**
    * \brief SliderRequest class constructor
    **/
-  SliderRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  SliderRequest(const MessageSharedPtr& message,
+                ApplicationManager& application_manager);
 
   /**
    * \brief SliderRequest class destructor

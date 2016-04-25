@@ -64,7 +64,8 @@ typedef utils::SharedPtr<RequestController> RequestControllerSPtr;
 class RequestControllerTestClass : public ::testing::Test {
  public:
   RequestControllerTestClass()
-      : request_ctrl_(utils::MakeShared<RequestController>(mock_request_controller_settings_)) {
+      : request_ctrl_(utils::MakeShared<RequestController>(
+            mock_request_controller_settings_)) {
     register_request_ = GetMockRequest();
   }
 
@@ -125,14 +126,16 @@ class RequestControllerTestClass : public ::testing::Test {
 TEST_F(RequestControllerTestClass, CheckPosibilitytoAdd_HMI_FULL_SUCCESS) {
   CallSettings();
   EXPECT_EQ(RequestController::TResult::SUCCESS,
-            AddRequest(RequestInfo::RequestType::MobileRequest, true,
+            AddRequest(RequestInfo::RequestType::MobileRequest,
+                       true,
                        mobile_apis::HMILevel::HMI_FULL));
 }
 
 TEST_F(RequestControllerTestClass, CheckPosibilitytoAdd_HMI_NONE_SUCCESS) {
   CallSettings();
   EXPECT_EQ(RequestController::TResult::SUCCESS,
-            AddRequest(RequestInfo::RequestType::MobileRequest, true,
+            AddRequest(RequestInfo::RequestType::MobileRequest,
+                       true,
                        mobile_apis::HMILevel::HMI_NONE));
 }
 
@@ -171,12 +174,12 @@ TEST_F(RequestControllerTestClass, ZeroValuePendingRequestsAmount) {
   const uint32_t big_count_of_requests_for_test_ = 10;
   for (uint32_t i = 0; i < big_count_of_requests_for_test_; ++i) {
     CallSettings();
-    EXPECT_EQ(RequestController::SUCCESS, AddRequest(RequestInfo::RequestType::MobileRequest,
-                                                     true,
-                                                     mobile_apis::HMILevel::HMI_FULL));
+    EXPECT_EQ(RequestController::SUCCESS,
+              AddRequest(RequestInfo::RequestType::MobileRequest,
+                         true,
+                         mobile_apis::HMILevel::HMI_FULL));
   }
 }
-
 
 }  // namespace request_controller
 }  // namespace components

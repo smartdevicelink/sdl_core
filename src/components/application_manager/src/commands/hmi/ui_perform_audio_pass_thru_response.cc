@@ -39,11 +39,9 @@ namespace commands {
 
 UIPerformAudioPassThruResponse::UIPerformAudioPassThruResponse(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+    : ResponseFromHMI(message, application_manager) {}
 
-UIPerformAudioPassThruResponse::~UIPerformAudioPassThruResponse() {
-}
+UIPerformAudioPassThruResponse::~UIPerformAudioPassThruResponse() {}
 
 void UIPerformAudioPassThruResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

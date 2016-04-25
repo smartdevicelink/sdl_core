@@ -42,7 +42,8 @@ namespace application_manager {
 namespace commands {
 
 /**
- * @brief OnAudioPassThruNotification class used to send notification with binary data written from
+ * @brief OnAudioPassThruNotification class used to send notification with
+ *binary data written from
  * microphone to mobile device while PerformAudioPassThru is active.
  **/
 class OnAudioPassThruNotification : public CommandNotificationImpl {
@@ -52,7 +53,8 @@ class OnAudioPassThruNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  OnAudioPassThruNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnAudioPassThruNotification(const MessageSharedPtr& message,
+                              ApplicationManager& application_manager);
 
   /**
    * @brief OnAudioPassThruNotification class destructor

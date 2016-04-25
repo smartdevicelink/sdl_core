@@ -51,7 +51,8 @@ class ChangeRegistrationResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  ChangeRegistrationResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  ChangeRegistrationResponse(const MessageSharedPtr& message,
+                             ApplicationManager& application_manager);
 
   /**
    * @brief ChangeRegistrationResponse class destructor

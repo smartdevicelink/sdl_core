@@ -49,7 +49,8 @@ class OnFileRemovedNotification : public NotificationToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnFileRemovedNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnFileRemovedNotification(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /**
    * @brief OnFileRemovedNotification class destructor

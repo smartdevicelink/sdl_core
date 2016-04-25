@@ -39,12 +39,11 @@ namespace application_manager {
 
 namespace commands {
 
-AddSubMenuResponse::AddSubMenuResponse(const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {
-}
+AddSubMenuResponse::AddSubMenuResponse(const MessageSharedPtr& message,
+                                       ApplicationManager& application_manager)
+    : CommandResponseImpl(message, application_manager) {}
 
-AddSubMenuResponse::~AddSubMenuResponse() {
-}
+AddSubMenuResponse::~AddSubMenuResponse() {}
 
 void AddSubMenuResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);

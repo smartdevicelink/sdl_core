@@ -35,8 +35,6 @@
 
 #include <stdint.h>
 
-namespace main_namespace {
-
-}  // namespace main_namespace
+namespace main_namespace {}  // namespace main_namespace
 
 #endif  // SRC_APPMAIN_SIGNAL_HANDLERS_H_

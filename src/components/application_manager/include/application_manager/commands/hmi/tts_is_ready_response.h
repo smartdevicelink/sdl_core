@@ -49,7 +49,8 @@ class TTSIsReadyResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  TTSIsReadyResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  TTSIsReadyResponse(const MessageSharedPtr& message,
+                     ApplicationManager& application_manager);
 
   /**
    * @brief TTSIsReadyResponse class destructor

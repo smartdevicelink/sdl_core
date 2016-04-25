@@ -50,7 +50,8 @@ class OnReadyNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnReadyNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnReadyNotification(const MessageSharedPtr& message,
+                      ApplicationManager& application_manager);
 
   /**
    * @brief OnReadyNotification class destructor

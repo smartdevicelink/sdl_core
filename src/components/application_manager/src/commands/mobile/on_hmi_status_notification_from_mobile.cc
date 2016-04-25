@@ -39,8 +39,7 @@ namespace application_manager {
 namespace commands {
 
 OnHMIStatusNotificationFromMobile::OnHMIStatusNotificationFromMobile(
-    const MessageSharedPtr& message,
-    ApplicationManager& application_manager)
+    const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandNotificationFromMobileImpl(message, application_manager) {}
 
 OnHMIStatusNotificationFromMobile::~OnHMIStatusNotificationFromMobile() {}
@@ -50,8 +49,7 @@ void OnHMIStatusNotificationFromMobile::Run() {
 
   (*message_)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
-  ApplicationSharedPtr app =
-      application_manager_.application(connection_key());
+  ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app.valid()) {
     LOG4CXX_ERROR(
@@ -72,11 +70,9 @@ void OnHMIStatusNotificationFromMobile::Run() {
   bool is_apps_requested_before =
       application_manager_.IsAppsQueriedFrom(handle);
 
-  LOG4CXX_DEBUG(
-      logger_,
-      "Mobile HMI state notication came for connection key:" << connection_key()
-                                                             << " and handle: "
-                                                             << handle);
+  LOG4CXX_DEBUG(logger_,
+                "Mobile HMI state notication came for connection key:"
+                    << connection_key() << " and handle: " << handle);
 
   if (!is_apps_requested_before &&
       ProtocolVersion::kV4 == app->protocol_version() && app->is_foreground()) {
@@ -109,7 +105,8 @@ void OnHMIStatusNotificationFromMobile::Run() {
       }
 
       if (!is_another_foreground_sdl4_app) {
-        application_manager_.MarkAppsGreyOut(handle, !is_current_state_foreground);
+        application_manager_.MarkAppsGreyOut(handle,
+                                             !is_current_state_foreground);
         application_manager_.SendUpdateAppList();
       }
     }

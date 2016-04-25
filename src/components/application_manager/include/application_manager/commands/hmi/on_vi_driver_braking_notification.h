@@ -50,7 +50,8 @@ class OnVIDriverBrakingNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnVIDriverBrakingNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnVIDriverBrakingNotification(const MessageSharedPtr& message,
+                                ApplicationManager& application_manager);
 
   /**
    * @brief OnVIDriverBrakingNotification class destructor

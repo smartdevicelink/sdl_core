@@ -50,7 +50,8 @@ class OnVIGpsDataNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  OnVIGpsDataNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnVIGpsDataNotification(const MessageSharedPtr& message,
+                          ApplicationManager& application_manager);
 
   /**
    * @brief OnVIGpsDataNotification class destructor

@@ -51,7 +51,8 @@ class UnsubscribeButtonResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  UnsubscribeButtonResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  UnsubscribeButtonResponse(const MessageSharedPtr& message,
+                            ApplicationManager& application_manager);
 
   /**
    * @brief UnsubscribeButtonResponse class destructor

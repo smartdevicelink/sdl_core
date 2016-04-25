@@ -31,24 +31,20 @@
  */
 #include "application_manager/commands/hmi/ui_get_capabilities_response.h"
 
-
 namespace application_manager {
 
 namespace commands {
 
 UIGetCapabilitiesResponse::UIGetCapabilitiesResponse(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : ResponseFromHMI(message, application_manager) {
-}
+    : ResponseFromHMI(message, application_manager) {}
 
-UIGetCapabilitiesResponse::~UIGetCapabilitiesResponse() {
-}
+UIGetCapabilitiesResponse::~UIGetCapabilitiesResponse() {}
 
 void UIGetCapabilitiesResponse::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  HMICapabilities& hmi_capabilities =
-      application_manager_.hmi_capabilities();
+  HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
@@ -83,7 +79,6 @@ void UIGetCapabilitiesResponse::Run() {
           msg_params[strings::hmi_capabilities][strings::phone_call].asBool());
     }
   }
-
 }
 
 }  // namespace commands
