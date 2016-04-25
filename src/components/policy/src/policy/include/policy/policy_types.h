@@ -234,7 +234,8 @@ struct AppPermissions {
           appRevoked(false),
           appPermissionsConsentNeeded(false),
           appUnauthorized(false),
-          requestTypeChanged(false) {
+          requestTypeChanged(false),
+          isSDLAllowed(false) {
     }
 
     std::string application_id;
