@@ -45,7 +45,7 @@ class ScrollableMessageResponse : public CommandResponseImpl {
   /**
    * \brief ScrollableMessageResponse class constructor
    **/
-  explicit ScrollableMessageResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  ScrollableMessageResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * \brief SpeakResponseCommand class destructor

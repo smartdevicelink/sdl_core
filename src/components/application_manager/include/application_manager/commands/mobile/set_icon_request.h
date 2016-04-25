@@ -60,7 +60,7 @@ class SetIconRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SetIconRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  SetIconRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief SetIconRequest class destructor

@@ -49,7 +49,7 @@ class UIAddSubmenuResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIAddSubmenuResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  UIAddSubmenuResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief UIAddSubmenuResponse class destructor

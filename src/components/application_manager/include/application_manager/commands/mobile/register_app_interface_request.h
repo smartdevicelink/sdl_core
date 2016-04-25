@@ -59,7 +59,7 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
   /**
    * \brief RegisterAppInterfaceRequest class constructor
    **/
-  explicit RegisterAppInterfaceRequest(const MessageSharedPtr& message,
+  RegisterAppInterfaceRequest(const MessageSharedPtr& message,
                                        ApplicationManager& application_manager);
 
   /**
@@ -118,7 +118,7 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
   * return TRUE if there is coincidence of VR, otherwise FALSE
   */
   struct CoincidencePredicateVR {
-    explicit CoincidencePredicateVR(const custom_str::CustomString& newItem)
+    CoincidencePredicateVR(const custom_str::CustomString& newItem)
         : newItem_(newItem){}
 
     bool operator()(const smart_objects::SmartObject& obj) {

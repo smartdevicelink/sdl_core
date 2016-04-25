@@ -51,7 +51,7 @@ class AddSubMenuRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AddSubMenuRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  AddSubMenuRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief AddSubMenuRequest class destructor

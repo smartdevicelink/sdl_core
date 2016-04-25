@@ -50,7 +50,7 @@ class TTSSpeakResponse
    *
    * @param message Incoming SmartObject message
    **/
-  explicit TTSSpeakResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  TTSSpeakResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief TTSSpeakResponse class destructor

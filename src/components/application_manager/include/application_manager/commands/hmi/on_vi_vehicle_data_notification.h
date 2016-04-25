@@ -51,7 +51,7 @@ class OnVIVehicleDataNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVIVehicleDataNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnVIVehicleDataNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnVIVehicleDataNotification class destructor

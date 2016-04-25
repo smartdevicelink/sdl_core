@@ -53,7 +53,7 @@ class OnDriverDistractionNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnDriverDistractionNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnDriverDistractionNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnDriverDistractionNotification class destructor

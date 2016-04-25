@@ -49,7 +49,7 @@ class TTSSetGlobalPropertiesRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit TTSSetGlobalPropertiesRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  TTSSetGlobalPropertiesRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief TTSSetGlobalPropertiesRequest class destructor

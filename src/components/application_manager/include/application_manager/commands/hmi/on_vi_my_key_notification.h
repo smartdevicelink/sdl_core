@@ -50,7 +50,7 @@ class OnVIMyKeyNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVIMyKeyNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnVIMyKeyNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnVIMyKeyNotification class destructor

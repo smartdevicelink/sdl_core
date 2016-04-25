@@ -50,7 +50,7 @@ class UpdateSDLRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UpdateSDLRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  UpdateSDLRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief UpdateSDLRequest class destructor

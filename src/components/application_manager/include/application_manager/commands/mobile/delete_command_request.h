@@ -51,7 +51,7 @@ class DeleteCommandRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit DeleteCommandRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  DeleteCommandRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief DeleteCommandRequest class destructor

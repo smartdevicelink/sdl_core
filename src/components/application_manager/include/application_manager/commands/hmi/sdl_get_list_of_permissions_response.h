@@ -49,7 +49,7 @@ class SDLGetListOfPermissionsResponse : public ResponseToHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit SDLGetListOfPermissionsResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+    SDLGetListOfPermissionsResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief SDLGetListOfPermissionsResponse class destructor

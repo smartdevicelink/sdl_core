@@ -47,7 +47,7 @@ class RegisterAppInterfaceResponse : public CommandResponseImpl {
   /**
    * \brief RegisterAppInterfaceResponse class constructor
    **/
-  explicit RegisterAppInterfaceResponse(const MessageSharedPtr& response,
+  RegisterAppInterfaceResponse(const MessageSharedPtr& response,
                                         ApplicationManager& application_manager)
       : CommandResponseImpl(response, application_manager) {}
 

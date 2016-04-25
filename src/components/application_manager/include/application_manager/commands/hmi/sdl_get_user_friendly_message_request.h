@@ -50,7 +50,7 @@ class SDLGetUserFriendlyMessageRequest : public RequestFromHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit SDLGetUserFriendlyMessageRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+    SDLGetUserFriendlyMessageRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief SDLGetUserFriendlyMessageRequest class destructor

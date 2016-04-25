@@ -49,7 +49,7 @@ class SDLGetUserFriendlyMessageResponse : public ResponseToHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit SDLGetUserFriendlyMessageResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+    SDLGetUserFriendlyMessageResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief SDLGetUserFriendlyMessageResponse class destructor

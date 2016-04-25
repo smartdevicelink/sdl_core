@@ -56,7 +56,7 @@ class GetSystemInfoResponse : public ResponseFromHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit GetSystemInfoResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+    GetSystemInfoResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief GetSystemInfoResponse class destructor

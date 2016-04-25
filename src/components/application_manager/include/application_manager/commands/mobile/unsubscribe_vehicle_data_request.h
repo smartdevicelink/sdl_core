@@ -52,7 +52,7 @@ class UnsubscribeVehicleDataRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UnsubscribeVehicleDataRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  UnsubscribeVehicleDataRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief UnsubscribeVehicleDataRequest class destructor

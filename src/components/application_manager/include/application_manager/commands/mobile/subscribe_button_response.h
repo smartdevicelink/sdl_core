@@ -51,7 +51,7 @@ class SubscribeButtonResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SubscribeButtonResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  SubscribeButtonResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief SubscribeButtonResponse class destructor

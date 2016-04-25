@@ -50,7 +50,7 @@ class VISubscribeVehicleDataResponseTemplate : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VISubscribeVehicleDataResponseTemplate(
+  VISubscribeVehicleDataResponseTemplate(
       const MessageSharedPtr& message, ApplicationManager& application_manager)
       : ResponseFromHMI(message, application_manager) {
   }

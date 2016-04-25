@@ -49,7 +49,7 @@ class UiSetDisplayLayoutResponse : public ResponseFromHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit UiSetDisplayLayoutResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+    UiSetDisplayLayoutResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief UiSetDisplayLayoutResponse class destructor

@@ -51,7 +51,7 @@ namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
 
 class ResponseToHMI : public CommandImpl {
  public:
-  explicit ResponseToHMI(const MessageSharedPtr& message,
+  ResponseToHMI(const MessageSharedPtr& message,
                          ApplicationManager& application_manager);
   virtual ~ResponseToHMI();
   virtual bool Init();

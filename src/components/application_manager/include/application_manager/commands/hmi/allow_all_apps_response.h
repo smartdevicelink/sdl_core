@@ -49,7 +49,7 @@ class AllowAllAppsResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit AllowAllAppsResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  AllowAllAppsResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief AllowAllAppsResponse class destructor

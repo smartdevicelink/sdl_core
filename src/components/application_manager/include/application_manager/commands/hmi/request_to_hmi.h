@@ -43,7 +43,7 @@ namespace commands {
 
 class RequestToHMI : public CommandImpl {
  public:
-  explicit RequestToHMI(const MessageSharedPtr& message,
+  RequestToHMI(const MessageSharedPtr& message,
                         ApplicationManager& application_manager);
   virtual ~RequestToHMI();
   virtual bool Init();

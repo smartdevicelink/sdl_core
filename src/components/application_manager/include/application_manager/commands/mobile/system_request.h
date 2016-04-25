@@ -60,7 +60,7 @@ class SystemRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SystemRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  SystemRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief SystemRequest class destructor

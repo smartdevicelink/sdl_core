@@ -47,7 +47,7 @@ namespace commands {
 
 class CommandNotificationImpl : public CommandImpl {
  public:
-  explicit CommandNotificationImpl(const MessageSharedPtr& message,
+  CommandNotificationImpl(const MessageSharedPtr& message,
                                    ApplicationManager& application_manager);
   virtual ~CommandNotificationImpl();
   virtual bool Init();

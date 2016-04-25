@@ -50,7 +50,7 @@ class ShowRequest : public CommandRequestImpl {
   /**
    * \brief ShowRequest class constructor
    **/
-  explicit ShowRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  ShowRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * \brief ShowRequest class destructor

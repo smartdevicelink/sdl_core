@@ -49,7 +49,7 @@ class UIDeleteSubmenuRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIDeleteSubmenuRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  UIDeleteSubmenuRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief UIDeleteSubmenuRequest class destructor

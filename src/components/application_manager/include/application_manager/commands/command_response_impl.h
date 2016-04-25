@@ -48,7 +48,7 @@ namespace commands {
 
 class CommandResponseImpl : public CommandImpl {
  public:
-  explicit CommandResponseImpl(const MessageSharedPtr& message,
+  CommandResponseImpl(const MessageSharedPtr& message,
                                ApplicationManager& application_manager);
   virtual ~CommandResponseImpl();
   virtual bool Init();

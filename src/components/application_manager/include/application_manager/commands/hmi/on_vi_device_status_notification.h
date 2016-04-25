@@ -50,7 +50,7 @@ class OnVIDeviceStatusNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVIDeviceStatusNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnVIDeviceStatusNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnVIDeviceStatusNotification class destructor

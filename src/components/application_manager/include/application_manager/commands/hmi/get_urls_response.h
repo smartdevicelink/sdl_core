@@ -45,7 +45,7 @@ class GetUrlsResponse : public ResponseToHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit GetUrlsResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+    GetUrlsResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief GetUrlsResponse class destructor

@@ -50,7 +50,7 @@ class TTSSpeakRequest
    *
    * @param message Incoming SmartObject message
    **/
-  explicit TTSSpeakRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  TTSSpeakRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief TTSSpeakRequest class destructor

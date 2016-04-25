@@ -51,7 +51,7 @@ class VIGetVehicleDataResponseTemplate : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VIGetVehicleDataResponseTemplate(const MessageSharedPtr& message, ApplicationManager& application_manager)
+  VIGetVehicleDataResponseTemplate(const MessageSharedPtr& message, ApplicationManager& application_manager)
       : ResponseFromHMI(message, application_manager) {
   }
 

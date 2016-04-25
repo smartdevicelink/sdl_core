@@ -50,7 +50,7 @@ class OnVISpeedNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVISpeedNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnVISpeedNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnVISpeedNotification class destructor

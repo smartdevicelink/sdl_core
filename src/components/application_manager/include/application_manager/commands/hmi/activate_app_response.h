@@ -49,7 +49,7 @@ class ActivateAppResponse : public ResponseFromHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit ActivateAppResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+    ActivateAppResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief ActivateAppResponse class destructor

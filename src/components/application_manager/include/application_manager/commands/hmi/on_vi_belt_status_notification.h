@@ -50,7 +50,7 @@ class OnVIBeltStatusNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVIBeltStatusNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnVIBeltStatusNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnVIBeltStatusNotification class destructor

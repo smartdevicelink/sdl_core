@@ -50,7 +50,7 @@ class OnNaviWayPointChangeNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnNaviWayPointChangeNotification(const MessageSharedPtr& message,
+  OnNaviWayPointChangeNotification(const MessageSharedPtr& message,
                                             ApplicationManager& app_man);
 
   /**

@@ -51,7 +51,7 @@ class DeleteSubMenuResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit DeleteSubMenuResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  DeleteSubMenuResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief DeleteSubMenuResponse class destructor

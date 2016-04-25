@@ -48,7 +48,7 @@ class UiSetDisplayLayoutRequest : public RequestToHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit UiSetDisplayLayoutRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+    UiSetDisplayLayoutRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief UiSetDisplayLayoutRequest class destructor

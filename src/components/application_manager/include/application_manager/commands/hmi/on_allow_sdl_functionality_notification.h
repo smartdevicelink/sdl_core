@@ -49,7 +49,7 @@ class OnAllowSDLFunctionalityNotification : public NotificationFromHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit OnAllowSDLFunctionalityNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+    OnAllowSDLFunctionalityNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief OnAllowSDLFunctionalityNotification class destructor

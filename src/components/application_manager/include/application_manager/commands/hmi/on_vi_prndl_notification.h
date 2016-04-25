@@ -50,7 +50,7 @@ class OnVIPrndlNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVIPrndlNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnVIPrndlNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnVIPrndlNotification class destructor

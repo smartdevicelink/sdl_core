@@ -51,7 +51,7 @@ class SystemResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SystemResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  SystemResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief SystemResponse class destructor

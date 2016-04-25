@@ -57,7 +57,7 @@ class ChangeRegistrationRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit ChangeRegistrationRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  ChangeRegistrationRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief ChangeRegistrationRequest class destructor
@@ -146,7 +146,7 @@ class ChangeRegistrationRequest : public CommandRequestImpl {
    * @return TRUE if there is coincidence of VR, otherwise FALSE
    */
   struct CoincidencePredicateVR {
-    explicit CoincidencePredicateVR(const custom_str::CustomString& newItem)
+    CoincidencePredicateVR(const custom_str::CustomString& newItem)
         : newItem_(newItem){};
 
     bool operator()(const smart_objects::SmartObject& obj) const {

@@ -50,7 +50,7 @@ class OnVISteeringWheelAngleNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVISteeringWheelAngleNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnVISteeringWheelAngleNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnVISteeringWheelAngleNotification class destructor

@@ -49,7 +49,7 @@ class TTSSetGlobalPropertiesResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit TTSSetGlobalPropertiesResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  TTSSetGlobalPropertiesResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief TTSSetGlobalPropertiesResponse class destructor

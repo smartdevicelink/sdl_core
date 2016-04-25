@@ -50,7 +50,7 @@
 
   class RequestFromHMI : public CommandImpl, public event_engine::EventObserver {
    public:
-    explicit RequestFromHMI(const MessageSharedPtr& message,
+    RequestFromHMI(const MessageSharedPtr& message,
                             ApplicationManager& application_manager);
     virtual ~RequestFromHMI();
     virtual bool Init();

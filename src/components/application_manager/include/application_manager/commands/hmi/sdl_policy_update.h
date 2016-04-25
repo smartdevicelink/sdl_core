@@ -46,7 +46,7 @@ class SDLPolicyUpdate : public RequestToHMI {
        *
        * @param message Incoming SmartObject message
        **/
-    explicit SDLPolicyUpdate(const MessageSharedPtr& message, ApplicationManager& application_manager);
+    SDLPolicyUpdate(const MessageSharedPtr& message, ApplicationManager& application_manager);
     virtual ~SDLPolicyUpdate();
     /**
      * @brief Execute command

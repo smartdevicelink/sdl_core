@@ -49,7 +49,7 @@ class UIPerformAudioPassThruResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIPerformAudioPassThruResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  UIPerformAudioPassThruResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief UIPerformAudioPassThruResponse class destructor

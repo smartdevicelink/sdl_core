@@ -49,7 +49,7 @@ class TTSGetLanguageResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit TTSGetLanguageResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  TTSGetLanguageResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief TTSGetLanguageResponse class destructor

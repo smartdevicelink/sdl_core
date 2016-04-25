@@ -52,7 +52,7 @@ class VIGetVehicleDataRequestTemplate : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VIGetVehicleDataRequestTemplate(const MessageSharedPtr& message, ApplicationManager& application_manager)
+  VIGetVehicleDataRequestTemplate(const MessageSharedPtr& message, ApplicationManager& application_manager)
       : RequestToHMI(message, application_manager) {
   }
 

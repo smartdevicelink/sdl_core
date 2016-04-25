@@ -52,7 +52,7 @@ class SetIconResponse : public CommandResponseImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SetIconResponse(const MessageSharedPtr& message,
+  SetIconResponse(const MessageSharedPtr& message,
                            ApplicationManager& app_man);
 
   /**

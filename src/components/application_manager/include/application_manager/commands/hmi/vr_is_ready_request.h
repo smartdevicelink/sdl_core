@@ -49,7 +49,7 @@ class VRIsReadyRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VRIsReadyRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  VRIsReadyRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief VRIsReadyRequest class destructor

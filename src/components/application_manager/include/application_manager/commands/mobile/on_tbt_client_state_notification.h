@@ -51,7 +51,7 @@ class OnTBTClientStateNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnTBTClientStateNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnTBTClientStateNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnTBTClientStateNotification class destructor

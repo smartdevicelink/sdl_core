@@ -50,7 +50,7 @@ class OnVIExternalTemperatureNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVIExternalTemperatureNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnVIExternalTemperatureNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnVIExternalTemperatureNotification class destructor

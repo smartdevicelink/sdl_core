@@ -49,7 +49,7 @@ class SendLocationRequest : public CommandRequestImpl {
   /**
    * @brief SendLocationRquest class constructor
    */
-  explicit SendLocationRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  SendLocationRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief SendLocationRquest class destructor

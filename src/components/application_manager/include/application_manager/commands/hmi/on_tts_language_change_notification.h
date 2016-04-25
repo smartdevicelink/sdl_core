@@ -49,7 +49,7 @@ class OnTTSLanguageChangeNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnTTSLanguageChangeNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnTTSLanguageChangeNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnTTSLanguageChangeNotification class destructor

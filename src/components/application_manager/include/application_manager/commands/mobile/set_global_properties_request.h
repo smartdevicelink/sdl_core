@@ -51,7 +51,7 @@ class SetGlobalPropertiesRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit SetGlobalPropertiesRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  SetGlobalPropertiesRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief SetGlobalPropertiesRequest class destructor

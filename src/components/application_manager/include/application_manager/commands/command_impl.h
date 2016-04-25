@@ -62,7 +62,7 @@ class CommandImpl : public Command {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit CommandImpl(const MessageSharedPtr& message,
+  CommandImpl(const MessageSharedPtr& message,
                        ApplicationManager& application_manager);
 
   /**

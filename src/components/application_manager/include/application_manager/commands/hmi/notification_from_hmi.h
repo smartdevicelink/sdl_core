@@ -50,7 +50,7 @@ namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 class NotificationFromHMI : public CommandImpl {
  public:
-  explicit NotificationFromHMI(const MessageSharedPtr& message,
+  NotificationFromHMI(const MessageSharedPtr& message,
                                ApplicationManager& application_manager);
   virtual ~NotificationFromHMI();
   virtual bool Init();

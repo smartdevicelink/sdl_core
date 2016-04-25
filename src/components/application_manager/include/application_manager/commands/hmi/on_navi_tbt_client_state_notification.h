@@ -50,7 +50,7 @@ class OnNaviTBTClientStateNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnNaviTBTClientStateNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnNaviTBTClientStateNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnNaviTBTClientStateNotification class destructor

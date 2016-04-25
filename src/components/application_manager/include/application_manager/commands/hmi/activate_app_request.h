@@ -49,7 +49,7 @@ class ActivateAppRequest : public RequestToHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit ActivateAppRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+    ActivateAppRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief ActivateAppRequest class destructor

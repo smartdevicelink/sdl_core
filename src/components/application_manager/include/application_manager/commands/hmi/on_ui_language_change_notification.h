@@ -49,7 +49,7 @@ class OnUILanguageChangeNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnUILanguageChangeNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnUILanguageChangeNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnUILanguageChangeNotification class destructor

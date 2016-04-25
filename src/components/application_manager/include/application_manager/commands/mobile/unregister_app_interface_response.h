@@ -47,7 +47,7 @@ class UnregisterAppInterfaceResponse : public CommandResponseImpl {
   /**
    * \brief UnregisterAppInterfaceResponse class constructor
    **/
-  explicit UnregisterAppInterfaceResponse(
+  UnregisterAppInterfaceResponse(
       const MessageSharedPtr& response, ApplicationManager& application_manager)
       : CommandResponseImpl(response, application_manager) {}
 

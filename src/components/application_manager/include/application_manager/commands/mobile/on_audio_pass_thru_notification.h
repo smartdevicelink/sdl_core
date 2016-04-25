@@ -52,7 +52,7 @@ class OnAudioPassThruNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnAudioPassThruNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnAudioPassThruNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnAudioPassThruNotification class destructor

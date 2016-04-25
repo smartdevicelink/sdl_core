@@ -51,7 +51,7 @@ class DialNumberResponse : public ResponseFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit DialNumberResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  DialNumberResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief DialNumberResponse class destructor

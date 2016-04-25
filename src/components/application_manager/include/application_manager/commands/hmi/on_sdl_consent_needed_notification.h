@@ -49,7 +49,7 @@ class OnSDLConsentNeededNotification : public NotificationToHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit OnSDLConsentNeededNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+    OnSDLConsentNeededNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief OnSDLConsentNeededNotification class destructor

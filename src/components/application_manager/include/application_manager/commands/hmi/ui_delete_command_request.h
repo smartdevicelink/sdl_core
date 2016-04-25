@@ -49,7 +49,7 @@ class UIDeleteCommandRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIDeleteCommandRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  UIDeleteCommandRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief UIDeleteCommandRequest class destructor

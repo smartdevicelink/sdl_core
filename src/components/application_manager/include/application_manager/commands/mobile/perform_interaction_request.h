@@ -55,7 +55,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit PerformInteractionRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  PerformInteractionRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief PerformInteractionRequest class destructor

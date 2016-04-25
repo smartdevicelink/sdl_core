@@ -50,7 +50,7 @@ class OnVIEngineTorqueNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVIEngineTorqueNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnVIEngineTorqueNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnVIEngineTorqueNotification class destructor

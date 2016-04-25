@@ -54,7 +54,7 @@ class OnCommandNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnCommandNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnCommandNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnCommandNotification class destructor

@@ -49,7 +49,7 @@ class OnDeviceChosenNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnDeviceChosenNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnDeviceChosenNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnDeviceChosenNotification class destructor

@@ -41,7 +41,7 @@ namespace commands {
 
 class NotificationToHMI : public CommandImpl {
  public:
-  explicit NotificationToHMI(const MessageSharedPtr& message,
+  NotificationToHMI(const MessageSharedPtr& message,
                              ApplicationManager& application_manager);
   virtual ~NotificationToHMI();
   virtual bool Init();

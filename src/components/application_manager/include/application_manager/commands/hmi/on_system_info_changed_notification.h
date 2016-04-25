@@ -49,7 +49,7 @@ class OnSystemInfoChangedNotification : public NotificationFromHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit OnSystemInfoChangedNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+    OnSystemInfoChangedNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief OnSystemInfoChangedNotification class destructor

@@ -58,7 +58,7 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit CreateInteractionChoiceSetRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+    CreateInteractionChoiceSetRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief CreateInteractionChoiceSetRequest class destructor
@@ -104,7 +104,7 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
      */
     struct VRCommandInfo {
       VRCommandInfo() {}
-      explicit VRCommandInfo(uint32_t cmd_id):
+      VRCommandInfo(uint32_t cmd_id):
         cmd_id_(cmd_id),
         succesful_response_received_(false) {}
       uint32_t cmd_id_;
@@ -154,7 +154,7 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
     * return TRUE if there is coincidence of choice ID, otherwise FALSE
     */
     struct CoincidencePredicateChoiceID {
-      explicit CoincidencePredicateChoiceID(const uint32_t newItem)
+      CoincidencePredicateChoiceID(const uint32_t newItem)
         : newItem_(newItem)
       {}
 
@@ -171,7 +171,7 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
     * return TRUE if there is coincidence of menu name, otherwise FALSE
     */
     struct CoincidencePredicateMenuName {
-      explicit CoincidencePredicateMenuName(const std::string& newItem)
+      CoincidencePredicateMenuName(const std::string& newItem)
         : newItem_(newItem)
       {};
 
@@ -188,7 +188,7 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
     * return TRUE if there is coincidence of VR commands, otherwise FALSE
     */
     struct CoincidencePredicateVRCommands {
-      explicit CoincidencePredicateVRCommands(
+      CoincidencePredicateVRCommands(
             const smart_objects::SmartObject& newItem): newItem_(newItem) {}
 
       bool operator()(smart_objects::SmartObject obj) {

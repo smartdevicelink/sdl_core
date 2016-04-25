@@ -49,7 +49,7 @@ class GetSystemInfoRequest : public RequestToHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit GetSystemInfoRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+    GetSystemInfoRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief GetSystemInfoRequest class destructor

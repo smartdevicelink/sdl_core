@@ -49,7 +49,7 @@ class OnVRLanguageChangeNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVRLanguageChangeNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnVRLanguageChangeNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnVRLanguageChangeNotification class destructor

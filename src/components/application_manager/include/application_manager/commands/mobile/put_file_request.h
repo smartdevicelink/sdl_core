@@ -52,7 +52,7 @@ class PutFileRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit PutFileRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  PutFileRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief PutFileRequest class destructor

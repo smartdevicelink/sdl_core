@@ -49,7 +49,7 @@ class BasicCommunicationSystemResponse : public ResponseFromHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit BasicCommunicationSystemResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+    BasicCommunicationSystemResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief BasicCommunicationSystemResponse class destructor

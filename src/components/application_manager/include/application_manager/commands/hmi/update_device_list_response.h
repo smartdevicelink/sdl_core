@@ -49,7 +49,7 @@ class UpdateDeviceListResponse : public ResponseFromHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit UpdateDeviceListResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
+    UpdateDeviceListResponse(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief UpdateDeviceListResponse class destructor

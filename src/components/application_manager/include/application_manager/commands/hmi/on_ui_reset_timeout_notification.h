@@ -51,7 +51,7 @@ class OnUIResetTimeoutNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnUIResetTimeoutNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnUIResetTimeoutNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnUIResetTimeoutNotification class destructor

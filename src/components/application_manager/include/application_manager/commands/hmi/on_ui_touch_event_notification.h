@@ -52,7 +52,7 @@ class OnUITouchEventNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnUITouchEventNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnUITouchEventNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnUITouchEventNotification class destructor

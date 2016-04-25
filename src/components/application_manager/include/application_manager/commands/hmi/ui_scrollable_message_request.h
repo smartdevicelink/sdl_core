@@ -49,7 +49,7 @@ class UIScrollableMessageRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit UIScrollableMessageRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  UIScrollableMessageRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief UIScrollableMessageRequest class destructor

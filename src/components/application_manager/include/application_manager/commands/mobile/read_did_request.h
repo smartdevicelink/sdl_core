@@ -51,7 +51,7 @@ class ReadDIDRequest : public CommandRequestImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit ReadDIDRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  ReadDIDRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief ReadDIDRequest class destructor

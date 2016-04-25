@@ -51,7 +51,7 @@ class SDLActivateAppRequest : public RequestFromHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit SDLActivateAppRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+    SDLActivateAppRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief SDLActivateAppRequest class destructor

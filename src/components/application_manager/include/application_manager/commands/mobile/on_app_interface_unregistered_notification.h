@@ -51,7 +51,7 @@ class OnAppInterfaceUnregisteredNotification : public CommandNotificationImpl {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnAppInterfaceUnregisteredNotification(
+  OnAppInterfaceUnregisteredNotification(
       const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**

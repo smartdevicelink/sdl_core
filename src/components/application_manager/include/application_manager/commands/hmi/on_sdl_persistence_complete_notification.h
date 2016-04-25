@@ -49,7 +49,7 @@ class OnSDLPersistenceCompleteNotification : public NotificationToHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit OnSDLPersistenceCompleteNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+    OnSDLPersistenceCompleteNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief OnSDLPersistenceCompleteNotification class destructor

@@ -49,7 +49,7 @@ class OnUICommandNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnUICommandNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnUICommandNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnUICommandNotification class destructor

@@ -48,7 +48,7 @@ class NaviStopStreamRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit NaviStopStreamRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  NaviStopStreamRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief NaviStopStreamRequest class destructor

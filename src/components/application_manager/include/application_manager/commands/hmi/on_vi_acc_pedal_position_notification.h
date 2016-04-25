@@ -50,7 +50,7 @@ class OnVIAccPedalPositionNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnVIAccPedalPositionNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnVIAccPedalPositionNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnVIAccPedalPositionNotification class destructor

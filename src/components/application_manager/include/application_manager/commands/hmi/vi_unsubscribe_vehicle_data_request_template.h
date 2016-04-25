@@ -52,7 +52,7 @@ class VIUnsubscribeVehicleDataRequestTemplate : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit VIUnsubscribeVehicleDataRequestTemplate(
+  VIUnsubscribeVehicleDataRequestTemplate(
       const MessageSharedPtr& message, ApplicationManager& application_manager)
       : RequestToHMI(message, application_manager) {
   }

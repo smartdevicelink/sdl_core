@@ -49,7 +49,7 @@ class OnAppDeactivatedNotification : public NotificationFromHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit OnAppDeactivatedNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  OnAppDeactivatedNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief OnAppDeactivatedNotification class destructor

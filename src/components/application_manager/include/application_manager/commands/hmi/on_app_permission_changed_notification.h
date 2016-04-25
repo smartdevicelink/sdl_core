@@ -49,7 +49,7 @@ class OnAppPermissionChangedNotification : public NotificationToHMI {
      *
      * @param message Incoming SmartObject message
      **/
-    explicit OnAppPermissionChangedNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
+    OnAppPermissionChangedNotification(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
     /**
      * @brief OnAppPermissionChangedNotification class destructor

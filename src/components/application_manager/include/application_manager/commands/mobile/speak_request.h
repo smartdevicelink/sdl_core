@@ -49,7 +49,7 @@ class SpeakRequest : public CommandRequestImpl {
   /**
    * \brief SpeakRequest class constructor
    **/
-  explicit SpeakRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  SpeakRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * \brief SpeakRequest class destructor

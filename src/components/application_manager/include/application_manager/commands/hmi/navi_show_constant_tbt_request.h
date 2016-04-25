@@ -49,7 +49,7 @@ class NaviShowConstantTBTRequest : public RequestToHMI {
    *
    * @param message Incoming SmartObject message
    **/
-  explicit NaviShowConstantTBTRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
+  NaviShowConstantTBTRequest(const MessageSharedPtr& message, ApplicationManager& application_manager);
 
   /**
    * @brief NaviShowConstantTBTRequest class destructor
