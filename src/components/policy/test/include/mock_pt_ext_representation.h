@@ -32,7 +32,6 @@
 #ifndef SRC_COMPONENTS_POLICY_TEST_POLICY_INCLUDE_MOCK_PT_EXT_REPRESENTATION_H_
 #define SRC_COMPONENTS_POLICY_TEST_POLICY_INCLUDE_MOCK_PT_EXT_REPRESENTATION_H_
 
-
 #include <string>
 #include <vector>
 
@@ -47,84 +46,92 @@ namespace policy_table = ::rpc::policy_table_interface_base;
 
 namespace policy {
 class MockPTExtRepresentation : public MockPTRepresentation,
-    public PTExtRepresentation {
+                                public PTExtRepresentation {
  public:
-  MOCK_METHOD1(CanAppKeepContext,
-      bool(const std::string& app_id));
-  MOCK_METHOD1(CanAppStealFocus,
-      bool(const std::string& app_id));
+  MOCK_METHOD1(CanAppKeepContext, bool(const std::string& app_id));
+  MOCK_METHOD1(CanAppStealFocus, bool(const std::string& app_id));
   MOCK_METHOD2(GetDefaultHMI,
-      bool(const std::string& app_id, std::string* default_hmi));
-  MOCK_METHOD0(ResetUserConsent,
-      bool());
+               bool(const std::string& app_id, std::string* default_hmi));
+  MOCK_METHOD0(ResetUserConsent, bool());
   MOCK_METHOD0(ResetDeviceConsents, bool());
   MOCK_METHOD0(ResetAppConsents, bool());
   MOCK_METHOD3(GetUserPermissionsForDevice,
-      bool(const std::string&, StringArray*, StringArray*));
+               bool(const std::string&, StringArray*, StringArray*));
   MOCK_METHOD3(GetPermissionsForApp,
-      bool(const std::string&, const std::string&,
-          FunctionalIdType* group_types));
+               bool(const std::string&,
+                    const std::string&,
+                    FunctionalIdType* group_types));
   MOCK_METHOD2(GetDeviceGroupsFromPolicies,
-      bool(policy_table::Strings*, policy_table::Strings*));
-  MOCK_METHOD2(GetUserFriendlyMsg,
+               bool(policy_table::Strings*, policy_table::Strings*));
+  MOCK_METHOD2(
+      GetUserFriendlyMsg,
       std::vector<UserFriendlyMessage>(const std::vector<std::string>& msg_code,
-          const std::string& language));
-  MOCK_METHOD8(SetDeviceData, bool(const std::string& device_id,
-          const std::string& hardware,
-          const std::string& firmware,
-          const std::string& os,
-          const std::string& os_version,
-          const std::string& carrier,
-          const uint32_t number_of_ports,
-          const std::string& connection_type));
+                                       const std::string& language));
+  MOCK_METHOD8(SetDeviceData,
+               bool(const std::string& device_id,
+                    const std::string& hardware,
+                    const std::string& firmware,
+                    const std::string& os,
+                    const std::string& os_version,
+                    const std::string& carrier,
+                    const uint32_t number_of_ports,
+                    const std::string& connection_type));
   MOCK_METHOD6(SetDeviceData,
-      bool(const std::string&, const std::string&, const std::string&, const std::string&, const std::string&, const std::string&));
+               bool(const std::string&,
+                    const std::string&,
+                    const std::string&,
+                    const std::string&,
+                    const std::string&,
+                    const std::string&));
   MOCK_METHOD2(SetMaxNumberPorts,
-      bool(const std::string& device_id, unsigned int number_of_ports));
+               bool(const std::string& device_id,
+                    unsigned int number_of_ports));
   MOCK_METHOD3(SetUserPermissionsForDevice,
-      bool(const std::string&, const StringArray&, const StringArray&));
-  MOCK_METHOD1(SetUserPermissionsForApp,
-      bool(const PermissionConsent&));
-  MOCK_METHOD1(IncreaseStatisticsData,
-      bool(StatisticsType type));
+               bool(const std::string&,
+                    const StringArray&,
+                    const StringArray&));
+  MOCK_METHOD1(SetUserPermissionsForApp, bool(const PermissionConsent&));
+  MOCK_METHOD1(IncreaseStatisticsData, bool(StatisticsType type));
   MOCK_METHOD3(SetAppRegistrationLanguage,
-      bool(const std::string& app_id, LanguageType type, const std::string& language));
+               bool(const std::string& app_id,
+                    LanguageType type,
+                    const std::string& language));
   MOCK_METHOD3(SetMetaInfo,
-      bool(const std::string& ccpu_version, const std::string& wers_country_code, const std::string& vin));
-  MOCK_METHOD0(IsMetaInfoPresent,
-      bool());
-  MOCK_METHOD1(SetSystemLanguage,
-      bool(const std::string& language));
-  MOCK_METHOD0(GetKmFromSuccessfulExchange,
-      int());
-  MOCK_METHOD0(GetDayFromScsExchange,
-      int());
-  MOCK_METHOD0(GetIgnitionsFromScsExchange,
-      int());
-  MOCK_CONST_METHOD1(Increment,
-      void(const std::string& type));
+               bool(const std::string& ccpu_version,
+                    const std::string& wers_country_code,
+                    const std::string& vin));
+  MOCK_METHOD0(IsMetaInfoPresent, bool());
+  MOCK_METHOD1(SetSystemLanguage, bool(const std::string& language));
+  MOCK_METHOD0(GetKmFromSuccessfulExchange, int());
+  MOCK_METHOD0(GetDayFromScsExchange, int());
+  MOCK_METHOD0(GetIgnitionsFromScsExchange, int());
+  MOCK_CONST_METHOD1(Increment, void(const std::string& type));
   MOCK_CONST_METHOD2(Increment,
-      void(const std::string& app_id, const std::string& type));
+                     void(const std::string& app_id, const std::string& type));
   MOCK_CONST_METHOD3(Set,
-      void(const std::string& app_id, const std::string& type, const std::string& value));
+                     void(const std::string& app_id,
+                          const std::string& type,
+                          const std::string& value));
   MOCK_CONST_METHOD3(Add,
-      void(const std::string& app_id, const std::string& type, int seconds));
+                     void(const std::string& app_id,
+                          const std::string& type,
+                          int seconds));
   MOCK_CONST_METHOD3(CountUnconsentedGroups,
-      bool(const std::string& app_id,
-          const std::string& device_id,
-          int* count));
-  MOCK_METHOD1(GetFunctionalGroupNames,
-      bool(FunctionalGroupNames& names));
-  MOCK_CONST_METHOD1(CleanupUnpairedDevices,
-      bool(const DeviceIds& device_ids));
+                     bool(const std::string& app_id,
+                          const std::string& device_id,
+                          int* count));
+  MOCK_METHOD1(GetFunctionalGroupNames, bool(FunctionalGroupNames& names));
+  MOCK_CONST_METHOD1(CleanupUnpairedDevices, bool(const DeviceIds& device_ids));
   MOCK_METHOD2(ReactOnUserDevConsentForApp,
-      bool(const std::string& app_id, bool is_device_allowed));
+               bool(const std::string& app_id, bool is_device_allowed));
   MOCK_METHOD1(SetPredataPolicy, bool(const std::string& app_id));
   MOCK_METHOD2(SetIsPredata, bool(const std::string& app_id, bool is_predata));
-  MOCK_CONST_METHOD2(SetUnpairedDevice, bool(const std::string& device_id, bool unpaired));
+  MOCK_CONST_METHOD2(SetUnpairedDevice,
+                     bool(const std::string& device_id, bool unpaired));
   MOCK_CONST_METHOD1(UnpairedDevicesList, bool(DeviceIds* device_ids));
-  MOCK_CONST_METHOD2(RemoveAppConsentForGroup, bool(const std::string& policy_app_id,
-          const std::string& functional_group));
+  MOCK_CONST_METHOD2(RemoveAppConsentForGroup,
+                     bool(const std::string& policy_app_id,
+                          const std::string& functional_group));
 };
 
 }  // namespace policy

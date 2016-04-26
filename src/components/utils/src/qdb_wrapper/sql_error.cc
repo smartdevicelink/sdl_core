@@ -36,9 +36,7 @@ namespace utils {
 namespace dbms {
 
 SQLError::SQLError(Error number, const std::string& text)
-    : number_(number),
-      text_(text) {
-}
+    : number_(number), text_(text) {}
 
 Error SQLError::number() const {
   return number_;
@@ -63,4 +61,3 @@ std::string SQLError::text() const {
 
 }  // namespace dbms
 }  // namespace utils
-

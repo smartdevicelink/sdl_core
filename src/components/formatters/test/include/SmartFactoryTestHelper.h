@@ -74,12 +74,7 @@ enum eType {
 }  // namespace TestType
 
 namespace FunctionIdTest {
-enum eType {
-  INVALID_ENUM = -1,
-  Function1,
-  Function2,
-  Function3
-};
+enum eType { INVALID_ENUM = -1, Function1, Function2, Function3 };
 }  // namespace FunctionIdTest
 
 namespace MessageTypeTest {
@@ -93,69 +88,67 @@ enum eType {
 }  // namespace MessageTypeTest
 
 namespace StructIdentifiersTest {
-enum eType {
-  INVALID_ENUM = -1,
-  Common_1,
-  Common_2,
-  Common_3
-};
+enum eType { INVALID_ENUM = -1, Common_1, Common_2, Common_3 };
 }  // namespace StructIdentifiersTest
 
 class CSmartFactoryTest : public CSmartFactory<FunctionIdTest::eType,
-    MessageTypeTest::eType, StructIdentifiersTest::eType> {
+                                               MessageTypeTest::eType,
+                                               StructIdentifiersTest::eType> {
  public:
   CSmartFactoryTest();
   std::map<SmartSchemaKey<FunctionIdTest::eType, MessageTypeTest::eType>,
-      CSmartSchema> function_schemes() {
+           CSmartSchema>
+  function_schemes() {
     return functions_schemes_;
   }
   std::map<StructIdentifiersTest::eType, CSmartSchema> structs_schemes() {
     return structs_schemes_;
   }
+
  protected:
   typedef std::map<const StructIdentifiersTest::eType,
-      utils::SharedPtr<ISchemaItem> > TStructsSchemaItems;
+                   utils::SharedPtr<ISchemaItem> > TStructsSchemaItems;
 
   static utils::SharedPtr<ISchemaItem> ProvideObjectSchemaItemForStruct(
-      TStructsSchemaItems &struct_schema_items,
+      TStructsSchemaItems& struct_schema_items,
       const StructIdentifiersTest::eType struct_id);
 
-  void InitStructSchemes(TStructsSchemaItems &struct_schema_items);
+  void InitStructSchemes(TStructsSchemaItems& struct_schema_items);
 
   void InitFunctionSchemes(
-      const TStructsSchemaItems &struct_schema_items,
-      const std::set<FunctionIdTest::eType> &function_id_items,
-      const std::set<MessageTypeTest::eType> &message_type_items);
+      const TStructsSchemaItems& struct_schema_items,
+      const std::set<FunctionIdTest::eType>& function_id_items,
+      const std::set<MessageTypeTest::eType>& message_type_items);
 
   static CSmartSchema InitFunction_Function1_request(
-      const std::set<FunctionIdTest::eType> &function_id_items,
-      const std::set<MessageTypeTest::eType> &message_type_items);
+      const std::set<FunctionIdTest::eType>& function_id_items,
+      const std::set<MessageTypeTest::eType>& message_type_items);
 
   static CSmartSchema InitFunction_Function1_response(
-      const TStructsSchemaItems &struct_schema_items,
-      const std::set<FunctionIdTest::eType> &function_id_items,
-      const std::set<MessageTypeTest::eType> &message_type_items);
+      const TStructsSchemaItems& struct_schema_items,
+      const std::set<FunctionIdTest::eType>& function_id_items,
+      const std::set<MessageTypeTest::eType>& message_type_items);
 
   static CSmartSchema InitFunction_Function2_request(
-      const std::set<FunctionIdTest::eType> &function_id_items,
-      const std::set<MessageTypeTest::eType> &message_type_items);
+      const std::set<FunctionIdTest::eType>& function_id_items,
+      const std::set<MessageTypeTest::eType>& message_type_items);
 
   static CSmartSchema InitFunction_Function2_response(
-      const TStructsSchemaItems &struct_schema_items,
-      const std::set<FunctionIdTest::eType> &function_id_items,
-      const std::set<MessageTypeTest::eType> &message_type_items);
+      const TStructsSchemaItems& struct_schema_items,
+      const std::set<FunctionIdTest::eType>& function_id_items,
+      const std::set<MessageTypeTest::eType>& message_type_items);
 
   static CSmartSchema InitFunction_Function3_request(
-      const std::set<FunctionIdTest::eType> &function_id_items,
-      const std::set<MessageTypeTest::eType> &message_type_items);
+      const std::set<FunctionIdTest::eType>& function_id_items,
+      const std::set<MessageTypeTest::eType>& message_type_items);
 
   static CSmartSchema InitFunction_Function3_response(
-      const TStructsSchemaItems &struct_schema_items,
-      const std::set<FunctionIdTest::eType> &function_id_items,
-      const std::set<MessageTypeTest::eType> &message_type_items);
+      const TStructsSchemaItems& struct_schema_items,
+      const std::set<FunctionIdTest::eType>& function_id_items,
+      const std::set<MessageTypeTest::eType>& message_type_items);
 
   static utils::SharedPtr<ISchemaItem> InitStructSchemaItem_Common_1(
-      TStructsSchemaItems &struct_schema_items);
+      TStructsSchemaItems& struct_schema_items);
 
   static utils::SharedPtr<ISchemaItem> InitStructSchemaItem_Common_2();
 };

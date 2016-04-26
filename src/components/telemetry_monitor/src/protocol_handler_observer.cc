@@ -39,26 +39,29 @@ namespace telemetry_monitor {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TelemetryMonitor")
 
-ProtocolHandlerObserver::ProtocolHandlerObserver(TelemetryMonitor *telemetry_monitor):
-  telemetry_monitor_(telemetry_monitor) {
-}
+ProtocolHandlerObserver::ProtocolHandlerObserver(
+    TelemetryMonitor* telemetry_monitor)
+    : telemetry_monitor_(telemetry_monitor) {}
 
-void ProtocolHandlerObserver::StartMessageProcess(uint32_t message_id,
-                                                  const TimevalStruct &start_time) {
+void ProtocolHandlerObserver::StartMessageProcess(
+    uint32_t message_id, const TimevalStruct& start_time) {
   if (message_id == 0) {
     return;
   }
   if (time_starts.find(message_id) != time_starts.end()) {
-    LOG4CXX_DEBUG(logger_, "Already waiting for stop processing for Message ID: "
-                  << message_id);
+    LOG4CXX_DEBUG(
+        logger_,
+        "Already waiting for stop processing for Message ID: " << message_id);
     return;
   }
   time_starts[message_id] = start_time;
 }
 
-void ProtocolHandlerObserver::EndMessageProcess(utils::SharedPtr<MessageMetric> m) {
+void ProtocolHandlerObserver::EndMessageProcess(
+    utils::SharedPtr<MessageMetric> m) {
   uint32_t message_id = m->message_id;
-  std::map<uint32_t, TimevalStruct>::const_iterator it = time_starts.find(message_id);
+  std::map<uint32_t, TimevalStruct>::const_iterator it =
+      time_starts.find(message_id);
   if (it == time_starts.end()) {
     LOG4CXX_WARN(logger_, "Cant find start time for message" << message_id);
     return;

@@ -57,17 +57,9 @@ namespace transport_adapter {
 class TransportAdapterListener;
 
 // TODO(EZamakhov): cahnge to DeviceUID
-//typedef std::string DeviceType;
+// typedef std::string DeviceType;
 
-enum DeviceType {
-  AOA,
-  PASA_AOA,
-  BLUETOOTH,
-  PASA_BLUETOOTH,
-  MME,
-  TCP,
-  UNKNOWN
-};
+enum DeviceType { AOA, PASA_AOA, BLUETOOTH, PASA_BLUETOOTH, MME, TCP, UNKNOWN };
 
 typedef std::map<DeviceType, std::string> DeviceTypes;
 
@@ -87,14 +79,7 @@ class TransportAdapter {
   /**
    * @enum Available types of errors.
    */
-  enum Error {
-    OK,
-    FAIL,
-    NOT_SUPPORTED,
-    ALREADY_EXISTS,
-    BAD_STATE,
-    BAD_PARAM
-  };
+  enum Error { OK, FAIL, NOT_SUPPORTED, ALREADY_EXISTS, BAD_STATE, BAD_PARAM };
 
  public:
   /**
@@ -260,8 +245,8 @@ class TransportAdapter {
    *
    * @return Container(vector) that holds application unique identifiers.
    */
-  virtual ApplicationList GetApplicationList(const DeviceUID& device_handle)
-      const = 0;
+  virtual ApplicationList GetApplicationList(
+      const DeviceUID& device_handle) const = 0;
 
   /**
    * @brief Return name of device.

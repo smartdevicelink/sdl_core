@@ -60,7 +60,7 @@ void CompactJson(std::string& str) {
   Json::FastWriter writer;
   str = writer.write(root);
   if (str[str.size() - 1] == '\n') {
-      str.erase(str.size()-1,1);
+    str.erase(str.size() - 1, 1);
   }
 }
 
@@ -69,11 +69,14 @@ const int64_t big_64int = 100000000000;
 const std::string str_with_big_int64 = "100000000000";
 }  // namespace
 
-TEST(FormatterJsonRPCTest, CheckCompactJson){
+TEST(FormatterJsonRPCTest, CheckCompactJson) {
   std::string before_compact(
-     "{\n   \"jsonrpc\" : \"2.0\",\n   \"method\" : \"BasicCommunication.OnSystemRequest\","
-     "\n   \"params\" : {\n      \"fileName\" : \"file \n Name\",\n      \"length\" : 100000000000,\n"
-     "\"offset\" : 100000000000,\n      \"requestType\" : \"PROPRIETARY\"\n   }\n}\n");
+      "{\n   \"jsonrpc\" : \"2.0\",\n   \"method\" : "
+      "\"BasicCommunication.OnSystemRequest\","
+      "\n   \"params\" : {\n      \"fileName\" : \"file \n Name\",\n      "
+      "\"length\" : 100000000000,\n"
+      "\"offset\" : 100000000000,\n      \"requestType\" : \"PROPRIETARY\"\n   "
+      "}\n}\n");
   std::string after_compact = before_compact;
   CompactJson(after_compact);
 
@@ -278,7 +281,8 @@ TEST(FormatterJsonRPCTest, RequestWithoutCorID_ToString_Fail) {
   EXPECT_FALSE(FormatterJsonRpc::ToString(obj, result));
   CompactJson(result);
 
-  const std::string json_string("{\"jsonrpc\":\"2.0\",\"method\":\"AddCommandID\"}");
+  const std::string json_string(
+      "{\"jsonrpc\":\"2.0\",\"method\":\"AddCommandID\"}");
   EXPECT_EQ(json_string, result);
 }
 

@@ -46,7 +46,8 @@ using ::testing::_;
 TEST(TransportManagerObserverTest, MessageProcess) {
   MockTelemetryMonitor mock_telemetry_monitor;
   TransportManagerObserver tr_observer(&mock_telemetry_monitor);
-  protocol_handler::RawMessage* ptr = new ::protocol_handler::RawMessage(0, 0, NULL, 0);
+  protocol_handler::RawMessage* ptr =
+      new ::protocol_handler::RawMessage(0, 0, NULL, 0);
   tr_observer.StartRawMsg(ptr);
   EXPECT_CALL(mock_telemetry_monitor, SendMetric(_));
   tr_observer.StopRawMsg(ptr);

@@ -43,17 +43,19 @@ namespace components {
 namespace application_manager_test {
 
 using namespace ::usage_statistics;
-class MockStatisticsManager: public StatisticsManager {
+class MockStatisticsManager : public StatisticsManager {
  public:
   MOCK_METHOD1(Increment, void(GlobalCounterId type));
   MOCK_METHOD2(Increment, void(const std::string& app_id, AppCounterId type));
-  MOCK_METHOD3(Set, void(const std::string& app_id,
-                         AppInfoId type,
-                         const std::string& value));
-  MOCK_METHOD3(Add, void(const std::string& app_id,
-                         AppStopwatchId type,
-                         int32_t timespan_seconds));
-  virtual ~MockStatisticsManager(){}
+  MOCK_METHOD3(Set,
+               void(const std::string& app_id,
+                    AppInfoId type,
+                    const std::string& value));
+  MOCK_METHOD3(Add,
+               void(const std::string& app_id,
+                    AppStopwatchId type,
+                    int32_t timespan_seconds));
+  virtual ~MockStatisticsManager() {}
 };
 
 }  // namespace application_manager_test

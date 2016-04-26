@@ -50,10 +50,12 @@ class ValidationReportTest : public testing::Test {
   static const std::string parent_object_name_;
 
   static void SetUpTestCase() {
-      report_ = new ValidationReport(object_name_);
-      report_2 = new ValidationReport(object_name_2);
+    report_ = new ValidationReport(object_name_);
+    report_2 = new ValidationReport(object_name_2);
   }
-  virtual void TearDown() { ClearReports(); }
+  virtual void TearDown() {
+    ClearReports();
+  }
 
   void ClearReports() {
     ValidationReports& temp =
@@ -61,16 +63,17 @@ class ValidationReportTest : public testing::Test {
     temp.clear();
   }
 
-  void GeneratePrettyFormatResult(std::string& result, const std::string& parent_name,
-                                  const std::string& obj_name, const std::string& val_info) {
+  void GeneratePrettyFormatResult(std::string& result,
+                                  const std::string& parent_name,
+                                  const std::string& obj_name,
+                                  const std::string& val_info) {
     std::string temp;
     if (obj_name[0] != '[') {
-        temp = ".";
+      temp = ".";
     } else {
-        temp = "";
+      temp = "";
     }
-    result = parent_name + temp + obj_name + ":" + " " +
-             val_info + "\n";
+    result = parent_name + temp + obj_name + ":" + " " + val_info + "\n";
   }
 
   void ClearValidationInfo() {
@@ -100,7 +103,6 @@ const std::string ValidationReportTest::subobject_name_3 = "test_subobject3";
 const std::string ValidationReportTest::test_validation_info_ =
     "test_validation_info";
 const std::string ValidationReportTest::parent_object_name_ = "test_parent";
-
 
 TEST_F(ValidationReportTest, Ctor_and_object_name_test_ExpectDataCorrect) {
   EXPECT_EQ(object_name_, report_->object_name());
@@ -145,9 +147,11 @@ TEST_F(ValidationReportTest, PrettyFormat_ExpectDataCorrect) {
   impl::PrettyFormat(*report_, parent_object_name_, &result1);
   impl::PrettyFormat(*report_2, parent_object_name_, &result2);
   std::string temp1;
-  GeneratePrettyFormatResult(temp1, parent_object_name_, object_name_, test_validation_info_);
+  GeneratePrettyFormatResult(
+      temp1, parent_object_name_, object_name_, test_validation_info_);
   std::string temp2;
-  GeneratePrettyFormatResult(temp2, parent_object_name_, object_name_2, test_validation_info_);
+  GeneratePrettyFormatResult(
+      temp2, parent_object_name_, object_name_2, test_validation_info_);
   // Checks
   EXPECT_EQ(temp1, result1);
   EXPECT_EQ(temp2, result2);

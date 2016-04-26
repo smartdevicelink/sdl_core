@@ -34,10 +34,10 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_VEHICLE_INFO_DATA_H_
 
 namespace application_manager {
-  /*
- * @brief Typedef for the vehicle data types that can
- * be published and subscribed to
- */
+/*
+*@brief Typedef for the vehicle data types that can
+*be published and subscribed to
+*/
 enum VehicleDataType {
   GPS = 0,
   SPEED,

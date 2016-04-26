@@ -46,8 +46,7 @@ class TransportManagerListener {
   /**
    * @brief Destructor.
    */
-  virtual ~TransportManagerListener() {
-  }
+  virtual ~TransportManagerListener() {}
 
   /**
    * @brief Reaction to the event, when the list of devices is updated.
@@ -78,7 +77,8 @@ class TransportManagerListener {
   /**
    * @brief Reaction to the event, when scanning of devices is failed.
    *
-   * @param error Error information about possible reason of scanning of devices failure.
+   * @param error Error information about possible reason of scanning of devices
+   *failure.
    */
   virtual void OnScanDevicesFailed(const SearchDeviceError& error) = 0;
 
@@ -108,7 +108,8 @@ class TransportManagerListener {
   virtual void OnConnectionClosed(const ConnectionUID connection_id) = 0;
 
   /**
-   * @brief Called when connection is closed unexpectedly, i.e. disconnect was not requested
+   * @brief Called when connection is closed unexpectedly, i.e. disconnect was
+   *not requested
    *
    * @param connection_id Connection ID.
    * @param error Error information.
@@ -134,9 +135,11 @@ class TransportManagerListener {
                                       const DisconnectDeviceError& error) = 0;
 
   /**
-   * \brief Inform about failure during DisconnectDevice procedure of transport manager.
+   * \brief Inform about failure during DisconnectDevice procedure of transport
+   * manager.
    * \param device Handle of device.
-   * \param error Error information about possible reason of disconnecting failure.
+   * \param error Error information about possible reason of disconnecting
+   * failure.
    */
   virtual void OnDisconnectFailed(const DeviceHandle& device,
                                   const DisconnectDeviceError& error) = 0;
@@ -145,10 +148,12 @@ class TransportManagerListener {
    *
    * @param message Received message
    **/
-  virtual void OnTMMessageReceived(const ::protocol_handler::RawMessagePtr message) = 0;
+  virtual void OnTMMessageReceived(
+      const ::protocol_handler::RawMessagePtr message) = 0;
 
   /**
-   * @brief Reaction to the event, when receiving of massage for transport manager is failed.
+   * @brief Reaction to the event, when receiving of massage for transport
+   *manager is failed.
    *
    * @param connection_id connection unique identifier.
    * @param error Error information about possible reason of failure.
@@ -158,16 +163,19 @@ class TransportManagerListener {
   /**
    * @brief Reaction to the event, when transport manager sent a massage.
    */
-  virtual void OnTMMessageSend(const ::protocol_handler::RawMessagePtr message) = 0;
+  virtual void OnTMMessageSend(
+      const ::protocol_handler::RawMessagePtr message) = 0;
 
   /**
-   * @brief Reaction to the event, when sending of massage by transport manager is failed.
+   * @brief Reaction to the event, when sending of massage by transport manager
+   *is failed.
    *
    * @param error Error information about possible reason of failure.
    * @param message Smart pointer to the raw massage.
    */
-  virtual void OnTMMessageSendFailed(const DataSendError& error,
-                                     const ::protocol_handler::RawMessagePtr message) = 0;
+  virtual void OnTMMessageSendFailed(
+      const DataSendError& error,
+      const ::protocol_handler::RawMessagePtr message) = 0;
 };
 }  //  namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_H_

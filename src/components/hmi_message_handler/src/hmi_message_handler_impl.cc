@@ -39,15 +39,16 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "HMIMessageHandler")
 
 HMIMessageHandlerImpl::HMIMessageHandlerImpl(
     const HMIMessageHandlerSettings& settings)
-  : settings_(settings)
-  , observer_(NULL)
-  , messages_to_hmi_("HMH ToHMI", this,
-               threads::ThreadOptions(
-                   get_settings().thread_min_stack_size()))
-  , messages_from_hmi_("HMH FromHMI", this,
-               threads::ThreadOptions(
-                   get_settings().thread_min_stack_size())){
-}
+    : settings_(settings)
+    , observer_(NULL)
+    , messages_to_hmi_(
+          "HMH ToHMI",
+          this,
+          threads::ThreadOptions(get_settings().thread_min_stack_size()))
+    , messages_from_hmi_(
+          "HMH FromHMI",
+          this,
+          threads::ThreadOptions(get_settings().thread_min_stack_size())) {}
 
 HMIMessageHandlerImpl::~HMIMessageHandlerImpl() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -87,8 +88,7 @@ void HMIMessageHandlerImpl::OnErrorSending(MessageSharedPointer message) {
   observer_->OnErrorSending(message);
 }
 
-void HMIMessageHandlerImpl::AddHMIMessageAdapter(
-    HMIMessageAdapter* adapter) {
+void HMIMessageHandlerImpl::AddHMIMessageAdapter(HMIMessageAdapter* adapter) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!adapter) {
     LOG4CXX_WARN(logger_, "HMIMessageAdapter is not valid!");
@@ -108,7 +108,7 @@ void HMIMessageHandlerImpl::RemoveHMIMessageAdapter(
 }
 
 const HMIMessageHandlerSettings& HMIMessageHandlerImpl::get_settings() const {
-  return  settings_;
+  return settings_;
 }
 
 void HMIMessageHandlerImpl::Handle(const impl::MessageFromHmi message) {
@@ -121,16 +121,13 @@ void HMIMessageHandlerImpl::Handle(const impl::MessageFromHmi message) {
 
   observer_->OnMessageReceived(message);
   LOG4CXX_INFO(logger_, "Message from hmi given away.");
-
 }
 void HMIMessageHandlerImpl::Handle(const impl::MessageToHmi message) {
-  for (std::set<HMIMessageAdapter*>::iterator it =
-      message_adapters_.begin();
-      it != message_adapters_.end();
-      ++it) {
+  for (std::set<HMIMessageAdapter*>::iterator it = message_adapters_.begin();
+       it != message_adapters_.end();
+       ++it) {
     (*it)->SendMessageToHMI(message);
   }
 }
-
 
 }  //  namespace hmi_message_handler

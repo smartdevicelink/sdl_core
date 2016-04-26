@@ -46,7 +46,7 @@ namespace NsSmartObjects {
  * @brief Number schema item.
  * @tparam NumberType Number type.
  **/
-template<typename NumberType>
+template <typename NumberType>
 class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
  public:
   /**
@@ -57,10 +57,12 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
    * @return Shared pointer to a new schema item.
    **/
   static utils::SharedPtr<TNumberSchemaItem> create(
-    const TSchemaItemParameter<NumberType>& MinValue = TSchemaItemParameter <NumberType > (),
-    const TSchemaItemParameter<NumberType>& MaxValue = TSchemaItemParameter <NumberType > (),
-    const TSchemaItemParameter<NumberType>& DefaultValue =
-      TSchemaItemParameter<NumberType>());
+      const TSchemaItemParameter<NumberType>& MinValue =
+          TSchemaItemParameter<NumberType>(),
+      const TSchemaItemParameter<NumberType>& MaxValue =
+          TSchemaItemParameter<NumberType>(),
+      const TSchemaItemParameter<NumberType>& DefaultValue =
+          TSchemaItemParameter<NumberType>());
 
   /**
    * @brief Validate smart object.
@@ -99,29 +101,27 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
   DISALLOW_COPY_AND_ASSIGN(TNumberSchemaItem);
 };
 
-template<typename NumberType>
-utils::SharedPtr<TNumberSchemaItem<NumberType> >
-TNumberSchemaItem<NumberType>::create(
-  const TSchemaItemParameter<NumberType>& MinValue,
-  const TSchemaItemParameter<NumberType>& MaxValue,
-  const TSchemaItemParameter<NumberType>& DefaultValue) {
+template <typename NumberType>
+utils::SharedPtr<TNumberSchemaItem<NumberType> > TNumberSchemaItem<
+    NumberType>::create(const TSchemaItemParameter<NumberType>& MinValue,
+                        const TSchemaItemParameter<NumberType>& MaxValue,
+                        const TSchemaItemParameter<NumberType>& DefaultValue) {
   return new TNumberSchemaItem<NumberType>(MinValue, MaxValue, DefaultValue);
 }
 
-template<typename NumberType>
+template <typename NumberType>
 bool TNumberSchemaItem<NumberType>::isValidNumberType(SmartType type) {
   NumberType value(0);
-  if ((SmartType_Double == type) &&
-      (typeid(double) == typeid(value))) {
-	  return true;
+  if ((SmartType_Double == type) && (typeid(double) == typeid(value))) {
+    return true;
   } else if ((SmartType_Integer == type) &&
-		     (typeid(int32_t) == typeid(value)  ||
-		      typeid(uint32_t) == typeid(value) ||
-              typeid(int64_t) == typeid(value)  ||
+             (typeid(int32_t) == typeid(value) ||
+              typeid(uint32_t) == typeid(value) ||
+              typeid(int64_t) == typeid(value) ||
               typeid(double) == typeid(value))) {
-	  return true;
+    return true;
   } else {
-	  return false;
+    return false;
   }
 }
 
@@ -133,9 +133,9 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(
   }
   NumberType value(0);
   if (typeid(int32_t) == typeid(value)) {
-    value = utils::SafeStaticCast<int64_t,int32_t>(Object.asInt());
+    value = utils::SafeStaticCast<int64_t, int32_t>(Object.asInt());
   } else if (typeid(uint32_t) == typeid(value)) {
-    value = utils::SafeStaticCast<uint64_t,uint32_t>(Object.asUInt());
+    value = utils::SafeStaticCast<uint64_t, uint32_t>(Object.asUInt());
   } else if (typeid(double) == typeid(value)) {
     value = Object.asDouble();
   } else if (typeid(int64_t) == typeid(value)) {
@@ -157,17 +157,16 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(
   return Errors::OK;
 }
 
-template<typename NumberType>
+template <typename NumberType>
 TNumberSchemaItem<NumberType>::TNumberSchemaItem(
-  const TSchemaItemParameter<NumberType>& MinValue,
-  const TSchemaItemParameter<NumberType>& MaxValue,
-  const TSchemaItemParameter<NumberType>& DefaultValue)
-  : CDefaultSchemaItem<NumberType>(DefaultValue),
-    mMinValue(MinValue),
-    mMaxValue(MaxValue) {
-}
+    const TSchemaItemParameter<NumberType>& MinValue,
+    const TSchemaItemParameter<NumberType>& MaxValue,
+    const TSchemaItemParameter<NumberType>& DefaultValue)
+    : CDefaultSchemaItem<NumberType>(DefaultValue)
+    , mMinValue(MinValue)
+    , mMaxValue(MaxValue) {}
 
-template<typename NumberType>
+template <typename NumberType>
 NumberType TNumberSchemaItem<NumberType>::getDefaultValue() const {
   return NumberType(0);
 }
@@ -176,21 +175,21 @@ NumberType TNumberSchemaItem<NumberType>::getDefaultValue() const {
  * @brief Specialization of getSmartType for number types.
  * @return SmartType.
  **/
-template<typename NumberType>
+template <typename NumberType>
 SmartType TNumberSchemaItem<NumberType>::getSmartType() const {
   DCHECK(!"Wrong type of template class");
   return SmartType_Invalid;
 }
-template<>
+template <>
 SmartType TNumberSchemaItem<int32_t>::getSmartType() const;
 
-template<>
+template <>
 SmartType TNumberSchemaItem<uint32_t>::getSmartType() const;
 
-template<>
+template <>
 SmartType TNumberSchemaItem<int64_t>::getSmartType() const;
 
-template<>
+template <>
 SmartType TNumberSchemaItem<double>::getSmartType() const;
 
 }  // namespace NsSmartObjects

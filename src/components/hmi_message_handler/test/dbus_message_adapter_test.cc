@@ -38,15 +38,14 @@ namespace Json {
 class Value;
 }
 
-class MockDBusMessageController :
-    public ::dbus::DBusMessageController {
+class MockDBusMessageController : public ::dbus::DBusMessageController {
  public:
   MockDBusMessageController(const std::string& serviceName,
                             const std::string& path,
-							const std::string& hmiserviceName,
-							const std::string& hmipath)
-    : DBusMessageController(serviceName, path, hmiserviceName,hmipath),
-      thread_() {}
+                            const std::string& hmiserviceName,
+                            const std::string& hmipath)
+      : DBusMessageController(serviceName, path, hmiserviceName, hmipath)
+      , thread_() {}
 
   virtual void processResponse(std::string method, Json::Value& root) {}
   virtual void processRequest(Json::Value& root) {}
@@ -54,13 +53,15 @@ class MockDBusMessageController :
 
   bool Init() {
     return ::dbus::DBusMessageController::Init() &&
-        pthread_create(&thread_, 0, &Run, this) == 0;
+           pthread_create(&thread_, 0, &Run, this) == 0;
   }
+
  private:
   pthread_t thread_;
   static void* Run(void* data) {
     if (NULL != data) {
-        static_cast<MockDBusMessageController*>(data)->MethodForReceiverThread(nullptr);
+      static_cast<MockDBusMessageController*>(data)
+          ->MethodForReceiverThread(nullptr);
     }
     return 0;
   }

@@ -40,14 +40,10 @@ const std::string SQLDatabase::kInMemory = ":memory:";
 const std::string SQLDatabase::kExtension = ".sqlite";
 
 SQLDatabase::SQLDatabase()
-    : conn_(NULL),
-      databasename_(kInMemory),
-      error_(SQLITE_OK) {}
+    : conn_(NULL), databasename_(kInMemory), error_(SQLITE_OK) {}
 
 SQLDatabase::SQLDatabase(const std::string& db_name)
-    : conn_(NULL),
-      databasename_(db_name + kExtension),
-      error_(SQLITE_OK) {}
+    : conn_(NULL), databasename_(db_name + kExtension), error_(SQLITE_OK) {}
 
 SQLDatabase::~SQLDatabase() {
   Close();
@@ -55,7 +51,8 @@ SQLDatabase::~SQLDatabase() {
 
 bool SQLDatabase::Open() {
   sync_primitives::AutoLock auto_lock(conn_lock_);
-  if (conn_) return true;
+  if (conn_)
+    return true;
   error_ = sqlite3_open(databasename_.c_str(), &conn_);
   return error_ == SQLITE_OK;
 }
@@ -104,7 +101,7 @@ sqlite3* SQLDatabase::conn() const {
 }
 
 void SQLDatabase::set_path(const std::string& path) {
-  databasename_ = path +  databasename_;
+  databasename_ = path + databasename_;
 }
 
 std::string SQLDatabase::get_path() const {
@@ -112,7 +109,7 @@ std::string SQLDatabase::get_path() const {
 }
 
 bool SQLDatabase::Backup() {
-   return true;
+  return true;
 }
 }  // namespace dbms
 }  // namespace utils

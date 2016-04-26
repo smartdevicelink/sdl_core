@@ -40,11 +40,12 @@ namespace telemetry_monitor {
 
 class TelemetryMonitor;
 
-class ProtocolHandlerObserver: public protocol_handler::PHTelemetryObserver {
+class ProtocolHandlerObserver : public protocol_handler::PHTelemetryObserver {
  public:
   explicit ProtocolHandlerObserver(TelemetryMonitor* telemetry_monitor);
 
-  virtual void StartMessageProcess(uint32_t message_id, const TimevalStruct& start_time);
+  virtual void StartMessageProcess(uint32_t message_id,
+                                   const TimevalStruct& start_time);
 
   virtual void EndMessageProcess(utils::SharedPtr<MessageMetric> m);
 

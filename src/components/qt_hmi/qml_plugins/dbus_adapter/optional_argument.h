@@ -38,38 +38,34 @@
 #include "qt_version.h"
 #include <QtDBus/QDBusArgument>
 
-template<class T>
+template <class T>
 struct OptionalArgument {
   T val;
   bool presence;
-  explicit OptionalArgument(const T& value)
-      : val(value),
-        presence(true) {}
-  OptionalArgument()
-      : presence(false) {}
+  explicit OptionalArgument(const T& value) : val(value), presence(true) {}
+  OptionalArgument() : presence(false) {}
 };
 
-template<class T>
-inline
-QDBusArgument& operator << (QDBusArgument& arg, const OptionalArgument<T>& o) {
+template <class T>
+inline QDBusArgument& operator<<(QDBusArgument& arg,
+                                 const OptionalArgument<T>& o) {
   arg.beginStructure();
   arg << o.presence << o.val;
   arg.endStructure();
   return arg;
 }
 
-template<class T>
-inline
-const QDBusArgument& operator >> (const QDBusArgument& arg, OptionalArgument<T>& o) {
+template <class T>
+inline const QDBusArgument& operator>>(const QDBusArgument& arg,
+                                       OptionalArgument<T>& o) {
   arg.beginStructure();
   arg >> o.presence >> o.val;
   arg.endStructure();
   return arg;
 }
 
-template<class T>
-inline
-bool VariantToValue(const QVariant& variant, OptionalArgument<T>& o) {
+template <class T>
+inline bool VariantToValue(const QVariant& variant, OptionalArgument<T>& o) {
   if (variant.isNull()) {
     o.presence = false;
     return true;
@@ -80,7 +76,7 @@ bool VariantToValue(const QVariant& variant, OptionalArgument<T>& o) {
 
 #if QT_4
 Q_DECLARE_METATYPE(QList<int>)
-#endif // QT_4
+#endif  // QT_4
 
 Q_DECLARE_METATYPE(OptionalArgument<int>)
 Q_DECLARE_METATYPE(OptionalArgument<QString>)

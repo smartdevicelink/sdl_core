@@ -35,12 +35,9 @@
 namespace media_manager {
 
 FileAudioStreamerAdapter::FileAudioStreamerAdapter(
-    const std::string& audio_stream_file,
-    const std::string& app_storage_folder)
-  : FileStreamerAdapter(audio_stream_file, app_storage_folder) {
-}
+    const std::string& audio_stream_file, const std::string& app_storage_folder)
+    : FileStreamerAdapter(audio_stream_file, app_storage_folder) {}
 
-FileAudioStreamerAdapter::~FileAudioStreamerAdapter() {
-}
+FileAudioStreamerAdapter::~FileAudioStreamerAdapter() {}
 
 }  // namespace media_manager

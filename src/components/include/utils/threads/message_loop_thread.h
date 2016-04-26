@@ -53,7 +53,7 @@ using ::utils::MessageQueue;
  * to it's queue. To handle messages someone, Handler must be implemented and
  * passed to MessageLoopThread constructor.
  */
-template < class Q >
+template <class Q>
 class MessageLoopThread {
  public:
   typedef Q Queue;
@@ -102,7 +102,6 @@ class MessageLoopThread {
    * able to correctly shut it down
    */
   class LoopThreadDelegate : public threads::ThreadDelegate {
-
    public:
     LoopThreadDelegate(MessageQueue<Message, Queue>* message_queue,
                        Handler* handler);
@@ -128,18 +127,17 @@ class MessageLoopThread {
 
 ///////// Implementation
 
-template<class Q>
+template <class Q>
 size_t MessageLoopThread<Q>::GetMessageQueueSize() const {
   return message_queue_.size();
 }
 
-template<class Q>
-MessageLoopThread<Q>::MessageLoopThread(const std::string&   name,
-                                        Handler*             handler,
+template <class Q>
+MessageLoopThread<Q>::MessageLoopThread(const std::string& name,
+                                        Handler* handler,
                                         const ThreadOptions& thread_opts)
-    : thread_delegate_(new LoopThreadDelegate(&message_queue_, handler)),
-      thread_(threads::CreateThread(name.c_str(),
-                                    thread_delegate_)) {
+    : thread_delegate_(new LoopThreadDelegate(&message_queue_, handler))
+    , thread_(threads::CreateThread(name.c_str(), thread_delegate_)) {
   const bool started = thread_->start(thread_opts);
   if (!started) {
     CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
@@ -147,7 +145,7 @@ MessageLoopThread<Q>::MessageLoopThread(const std::string&   name,
   }
 }
 
-template<class Q>
+template <class Q>
 MessageLoopThread<Q>::~MessageLoopThread() {
   Shutdown();
   delete thread_delegate_;
@@ -164,22 +162,21 @@ void MessageLoopThread<Q>::Shutdown() {
   thread_->join();
 }
 
-template<class Q>
+template <class Q>
 void MessageLoopThread<Q>::WaitDumpQueue() {
   message_queue_.WaitUntilEmpty();
 }
 
 //////////
-template<class Q>
+template <class Q>
 MessageLoopThread<Q>::LoopThreadDelegate::LoopThreadDelegate(
     MessageQueue<Message, Queue>* message_queue, Handler* handler)
-    : handler_(*handler),
-      message_queue_(*message_queue) {
+    : handler_(*handler), message_queue_(*message_queue) {
   DCHECK(handler != NULL);
   DCHECK(message_queue != NULL);
 }
 
-template<class Q>
+template <class Q>
 void MessageLoopThread<Q>::LoopThreadDelegate::threadMain() {
   CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
   LOG4CXX_AUTO_TRACE(logger_);
@@ -191,12 +188,12 @@ void MessageLoopThread<Q>::LoopThreadDelegate::threadMain() {
   DrainQue();
 }
 
-template<class Q>
+template <class Q>
 void MessageLoopThread<Q>::LoopThreadDelegate::exitThreadMain() {
   message_queue_.Shutdown();
 }
 
-template<class Q>
+template <class Q>
 void MessageLoopThread<Q>::LoopThreadDelegate::DrainQue() {
   while (!message_queue_.empty()) {
     Message msg;

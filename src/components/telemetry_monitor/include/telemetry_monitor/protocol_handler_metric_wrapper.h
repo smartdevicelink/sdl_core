@@ -40,11 +40,11 @@
 
 namespace telemetry_monitor {
 
-class ProtocolHandlerMecticWrapper: public MetricWrapper {
-
-  public:
-    utils::SharedPtr<protocol_handler::PHTelemetryObserver::MessageMetric> message_metric;
-    virtual Json::Value GetJsonMetric();
+class ProtocolHandlerMecticWrapper : public MetricWrapper {
+ public:
+  utils::SharedPtr<protocol_handler::PHTelemetryObserver::MessageMetric>
+      message_metric;
+  virtual Json::Value GetJsonMetric();
 };
 }  // namespace telemetry_monitor
 #endif  // SRC_COMPONENTS_TELEMETRY_MONITOR_INCLUDE_TELEMETRY_MONITOR_PROTOCOL_HANDLER_MECTRIC_WRAPPER_H_

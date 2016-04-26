@@ -38,26 +38,22 @@ namespace media_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "FileStreamerAdapter")
 
-FileStreamerAdapter::FileStreamerAdapter(
-    const std::string& file_name, const std::string& app_storage_folder)
-  : StreamerAdapter(new FileStreamer(this, file_name, app_storage_folder)) {
-}
+FileStreamerAdapter::FileStreamerAdapter(const std::string& file_name,
+                                         const std::string& app_storage_folder)
+    : StreamerAdapter(new FileStreamer(this, file_name, app_storage_folder)) {}
 
-FileStreamerAdapter::~FileStreamerAdapter() {
-}
+FileStreamerAdapter::~FileStreamerAdapter() {}
 
 FileStreamerAdapter::FileStreamer::FileStreamer(
     FileStreamerAdapter* const adapter,
     const std::string& file_name,
     const std::string& app_storage_folder)
-  : Streamer(adapter),
-    file_name_(file_name),
-    app_storage_folder_(app_storage_folder),
-    file_stream_(NULL) {
-}
+    : Streamer(adapter)
+    , file_name_(file_name)
+    , app_storage_folder_(app_storage_folder)
+    , file_stream_(NULL) {}
 
-FileStreamerAdapter::FileStreamer::~FileStreamer() {
-}
+FileStreamerAdapter::FileStreamer::~FileStreamer() {}
 
 bool FileStreamerAdapter::FileStreamer::Connect() {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -68,13 +64,11 @@ bool FileStreamerAdapter::FileStreamer::Connect() {
 
   file_stream_ = file_system::Open(file_name_);
   if (!file_stream_) {
-    LOG4CXX_ERROR(logger_, "Cannot open file stream "
-                  << file_name_);
+    LOG4CXX_ERROR(logger_, "Cannot open file stream " << file_name_);
     return false;
   }
 
-  LOG4CXX_INFO(logger_, "File " << file_name_
-                << " was successfuly opened");
+  LOG4CXX_INFO(logger_, "File " << file_name_ << " was successfuly opened");
   return true;
 }
 
@@ -92,15 +86,12 @@ bool FileStreamerAdapter::FileStreamer::Send(
     protocol_handler::RawMessagePtr msg) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (!file_stream_) {
-    LOG4CXX_ERROR(logger_, "File stream not found "
-                  << file_name_);
+    LOG4CXX_ERROR(logger_, "File stream not found " << file_name_);
     return false;
   }
 
-  if (!file_system::Write(file_stream_, msg->data(),
-                          msg->data_size())) {
-    LOG4CXX_ERROR(logger_, "Failed writing data to file "
-                  << file_name_);
+  if (!file_system::Write(file_stream_, msg->data(), msg->data_size())) {
+    LOG4CXX_ERROR(logger_, "Failed writing data to file " << file_name_);
     return false;
   }
 

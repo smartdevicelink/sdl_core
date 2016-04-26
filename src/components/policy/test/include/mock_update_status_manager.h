@@ -40,26 +40,16 @@ namespace policy {
 
 class MockUpdateStatusManager : public UpdateStatusManager {
  public:
-  MOCK_METHOD1(set_listener,
-      void(PolicyListener* listener));
-  MOCK_METHOD1(OnUpdateSentOut,
-      void(uint32_t update_timeout));
-  MOCK_METHOD0(OnUpdateTimeoutOccurs,
-      void());
-  MOCK_METHOD0(OnValidUpdateReceived,
-      void());
-  MOCK_METHOD0(OnWrongUpdateReceived,
-      void());
-  MOCK_METHOD1(OnResetDefaultPT,
-      void(bool is_update_required));
-  MOCK_METHOD0(OnResetRetrySequence,
-      void());
-  MOCK_METHOD0(OnNewApplicationAdded,
-      void());
-  MOCK_METHOD1(OnPolicyInit,
-      void(bool is_update_required));
-  MOCK_METHOD0(GetUpdateStatus,
-      PolicyTableStatus());
+  MOCK_METHOD1(set_listener, void(PolicyListener* listener));
+  MOCK_METHOD1(OnUpdateSentOut, void(uint32_t update_timeout));
+  MOCK_METHOD0(OnUpdateTimeoutOccurs, void());
+  MOCK_METHOD0(OnValidUpdateReceived, void());
+  MOCK_METHOD0(OnWrongUpdateReceived, void());
+  MOCK_METHOD1(OnResetDefaultPT, void(bool is_update_required));
+  MOCK_METHOD0(OnResetRetrySequence, void());
+  MOCK_METHOD0(OnNewApplicationAdded, void());
+  MOCK_METHOD1(OnPolicyInit, void(bool is_update_required));
+  MOCK_METHOD0(GetUpdateStatus, PolicyTableStatus());
 };
 
 }  // namespace policy

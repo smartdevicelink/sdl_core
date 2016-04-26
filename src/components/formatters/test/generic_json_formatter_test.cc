@@ -76,18 +76,20 @@ TEST(GenericJsonFormatter, ToString) {
   obj["subobject"]["arrayField"][1] = 'c';
   obj["subobject"]["arrayField"][2][0] = 10.0;
   formatters::GenericJsonFormatter::ToString(obj, result);
-  ASSERT_STREQ("{\n"
-               "   \"intField\" : 100500,\n"
-               "   \"stringField\" : \"s\",\n"
-               "   \"subobject\" : {\n"
-               "      \"arrayField\" : [\n"
-               "         0,\n"
-               "         \"c\",\n"
-               "         [ 10.0 ]\n"
-               "      ],\n"
-               "      \"boolField\" : false\n"
-               "   }\n"
-               "}\n", result.c_str());
+  ASSERT_STREQ(
+      "{\n"
+      "   \"intField\" : 100500,\n"
+      "   \"stringField\" : \"s\",\n"
+      "   \"subobject\" : {\n"
+      "      \"arrayField\" : [\n"
+      "         0,\n"
+      "         \"c\",\n"
+      "         [ 10.0 ]\n"
+      "      ],\n"
+      "      \"boolField\" : false\n"
+      "   }\n"
+      "}\n",
+      result.c_str());
 }
 
 TEST(GenericJsonFormatter, FromString) {
@@ -120,8 +122,8 @@ TEST(GenericJsonFormatter, FromString) {
   ASSERT_EQ(smartobj::SmartType_String, result.getType());
   ASSERT_STREQ("str", result.asString().c_str());
 
-  ASSERT_TRUE(formatters::GenericJsonFormatter::FromString("[true, null, 10]",
-                                                           result));
+  ASSERT_TRUE(
+      formatters::GenericJsonFormatter::FromString("[true, null, 10]", result));
   ASSERT_EQ(smartobj::SmartType_Array, result.getType());
   ASSERT_EQ(smartobj::SmartType_Boolean, result.getElement(0U).getType());
   ASSERT_EQ(true, result.getElement(0U).asBool());
@@ -129,15 +131,15 @@ TEST(GenericJsonFormatter, FromString) {
   ASSERT_EQ(smartobj::SmartType_Integer, result.getElement(2U).getType());
   ASSERT_EQ(10, result.getElement(2U).asInt());
 
-  ASSERT_TRUE(
-    formatters::GenericJsonFormatter::FromString("{"
-                                                 " \"intField\": 100500,"
-                                                 " \"subobject\": {"
-                                                 "  \"arrayField\": [1, null],"
-                                                 "  \"strField\": \"str\""
-                                                 " }"
-                                                 "}",
-                                                 result));
+  ASSERT_TRUE(formatters::GenericJsonFormatter::FromString(
+      "{"
+      " \"intField\": 100500,"
+      " \"subobject\": {"
+      "  \"arrayField\": [1, null],"
+      "  \"strField\": \"str\""
+      " }"
+      "}",
+      result));
   ASSERT_EQ(smartobj::SmartType_Map, result.getType());
   ASSERT_EQ(smartobj::SmartType_Integer,
             result.getElement("intField").getType());
@@ -146,17 +148,27 @@ TEST(GenericJsonFormatter, FromString) {
   ASSERT_EQ(smartobj::SmartType_Array,
             result.getElement("subobject").getElement("arrayField").getType());
   ASSERT_EQ(smartobj::SmartType_Integer,
-            result.getElement("subobject").getElement("arrayField").getElement(0U).getType());
-  ASSERT_EQ(1, result.getElement("subobject").getElement("arrayField").getElement(0U).asInt());
+            result.getElement("subobject")
+                .getElement("arrayField")
+                .getElement(0U)
+                .getType());
+  ASSERT_EQ(1,
+            result.getElement("subobject")
+                .getElement("arrayField")
+                .getElement(0U)
+                .asInt());
   ASSERT_EQ(smartobj::SmartType_Null,
-            result.getElement("subobject").getElement("arrayField").getElement(1U).getType());
+            result.getElement("subobject")
+                .getElement("arrayField")
+                .getElement(1U)
+                .getType());
   ASSERT_EQ(smartobj::SmartType_String,
             result.getElement("subobject").getElement("strField").getType());
   ASSERT_STREQ(
-    "str",
-    result.getElement("subobject").getElement("strField").asString().c_str());
+      "str",
+      result.getElement("subobject").getElement("strField").asString().c_str());
 }
 
-} // formatters
-} // components
-} // test
+}  // formatters
+}  // components
+}  // test

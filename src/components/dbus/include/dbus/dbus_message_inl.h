@@ -161,13 +161,10 @@ inline std::string MessageReader::TakeString() {
   return value;
 }
 
-
 inline MessageReader::DataType MessageReader::NextValueType() const {
   DBusMessageIter* iter = const_cast<DBusMessageIter*>(&iterator_);
   return failed_ ? DBUS_TYPE_INVALID : dbus_message_iter_get_arg_type(iter);
 }
-
-
 
 // Message writer methods
 inline void MessageWriter::PutBool(bool value) {
@@ -212,7 +209,6 @@ inline void MessageWriter::PutString(const std::string& value) {
   WriteAndCheck(DBUS_TYPE_STRING, &pointer);
 }
 
-
 }  // namespace dbus
 
-#endif // DBUS_MESSAGE_INL_H
+#endif  // DBUS_MESSAGE_INL_H

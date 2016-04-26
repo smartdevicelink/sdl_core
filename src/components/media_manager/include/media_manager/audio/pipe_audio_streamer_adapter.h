@@ -39,9 +39,8 @@ namespace media_manager {
 
 class PipeAudioStreamerAdapter : public PipeStreamerAdapter {
  public:
-  PipeAudioStreamerAdapter(
-      const std::string& named_audio_pipe_path,
-      const std::string& app_storage_folder);
+  PipeAudioStreamerAdapter(const std::string& named_audio_pipe_path,
+                           const std::string& app_storage_folder);
   ~PipeAudioStreamerAdapter();
 };
 

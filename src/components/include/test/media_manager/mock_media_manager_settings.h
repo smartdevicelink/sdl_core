@@ -40,8 +40,6 @@ namespace test {
 namespace components {
 namespace media_manager_test {
 
-
-
 class MockMediaManagerSettings : public ::media_manager::MediaManagerSettings {
  public:
   MOCK_CONST_METHOD0(video_server_type, const std::string&());

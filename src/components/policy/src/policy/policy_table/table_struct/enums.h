@@ -19,7 +19,6 @@ bool IsValidEnum(Priority val);
 const char* EnumToJsonString(Priority val);
 bool EnumFromJsonString(const std::string& literal, Priority* result);
 
-
 enum HmiLevel {
   HL_BACKGROUND,
   HL_FULL,
@@ -29,7 +28,6 @@ enum HmiLevel {
 bool IsValidEnum(HmiLevel val);
 const char* EnumToJsonString(HmiLevel val);
 bool EnumFromJsonString(const std::string& literal, HmiLevel* result);
-
 
 enum Parameter {
   P_GPS,
@@ -62,7 +60,6 @@ bool IsValidEnum(Parameter val);
 const char* EnumToJsonString(Parameter val);
 bool EnumFromJsonString(const std::string& literal, Parameter* result);
 
-
 enum AppHMIType {
   AHT_DEFAULT,
   AHT_COMMUNICATION,
@@ -78,7 +75,6 @@ enum AppHMIType {
 bool IsValidEnum(AppHMIType val);
 const char* EnumToJsonString(AppHMIType val);
 bool EnumFromJsonString(const std::string& literal, AppHMIType* result);
-
 
 enum RequestType {
   RT_HTTP,

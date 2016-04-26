@@ -46,17 +46,12 @@ namespace media_manager_test {
 class MockMediaAdapterListener : public ::media_manager::MediaAdapterListener {
  public:
   MOCK_METHOD2(OnDataReceived,
-      void(int32_t application_key,
-           const int32_t& data));
-  MOCK_METHOD1(OnActivityStarted,
-      void(int32_t application_key));
-  MOCK_METHOD1(OnActivityEnded,
-      void(int32_t application_key));
+               void(int32_t application_key, const int32_t& data));
+  MOCK_METHOD1(OnActivityStarted, void(int32_t application_key));
+  MOCK_METHOD1(OnActivityEnded, void(int32_t application_key));
   MOCK_METHOD2(OnErrorReceived,
-      void(int32_t application_key,
-           const int32_t& data));
+               void(int32_t application_key, const int32_t& data));
 };
-
 
 }  // namespace media_manager_test
 }  // namespace components

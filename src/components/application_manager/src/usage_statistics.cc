@@ -47,7 +47,8 @@ namespace {
 
 std::string LanguageIdToString(Language::eType lang_id) {
   const char* str;
-  const bool ok = EnumConversionHelper<Language::eType>::EnumToCString(lang_id, &str);
+  const bool ok =
+      EnumConversionHelper<Language::eType>::EnumToCString(lang_id, &str);
   return ok ? str : "unknown";
 }
 
@@ -73,9 +74,10 @@ UsageStatistics::UsageStatistics(
   time_in_hmi_state_sptr_->Start(SECONDS_HMI_NONE);
 }
 
-UsageStatistics::UsageStatistics(const std::string& app_id,
+UsageStatistics::UsageStatistics(
+    const std::string& app_id,
     utils::SharedPtr<StatisticsManager> statistics_manager,
-      AppStopwatch* time_in_hmi_state_ptr)
+    AppStopwatch* time_in_hmi_state_ptr)
     : time_in_hmi_state_sptr_(time_in_hmi_state_ptr)
     , app_registration_language_gui_(statistics_manager, app_id, LANGUAGE_GUI)
     , app_registration_language_vui_(statistics_manager, app_id, LANGUAGE_VUI)

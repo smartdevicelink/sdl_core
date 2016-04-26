@@ -33,19 +33,20 @@
 #include "media_manager/video/socket_video_streamer_adapter.h"
 
 namespace {
-  const std::string kHeader = "HTTP/1.1 200 OK\r\n"
-                              "Connection: Keep-Alive\r\n"
-                              "Keep-Alive: timeout=15, max=300\r\n"
-                              "Server: SDL\r\n"
-                              "Content-Type: video/mp4\r\n\r\n";
+const std::string kHeader =
+    "HTTP/1.1 200 OK\r\n"
+    "Connection: Keep-Alive\r\n"
+    "Keep-Alive: timeout=15, max=300\r\n"
+    "Server: SDL\r\n"
+    "Content-Type: video/mp4\r\n\r\n";
 }
 
 namespace media_manager {
 
-SocketVideoStreamerAdapter::SocketVideoStreamerAdapter(const std::string& server_address, uint16_t video_streaming_port)
+SocketVideoStreamerAdapter::SocketVideoStreamerAdapter(
+    const std::string& server_address, uint16_t video_streaming_port)
     : SocketStreamerAdapter(server_address, video_streaming_port, kHeader) {}
 
-SocketVideoStreamerAdapter::~SocketVideoStreamerAdapter() {
-}
+SocketVideoStreamerAdapter::~SocketVideoStreamerAdapter() {}
 
 }  // namespace media_manager

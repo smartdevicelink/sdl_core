@@ -39,8 +39,8 @@ namespace utils {
 namespace dbms {
 
 typedef enum Error {
-  OK          = 0,    /* Successful result */
-  ERROR               /* Error */
+  OK = 0, /* Successful result */
+  ERROR   /* Error */
 } Error;
 
 /**

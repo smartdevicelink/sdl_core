@@ -61,10 +61,18 @@ namespace {
 
 const unsigned char kJjson_size = 0x5e;
 const unsigned char kCorrelation_id = 0x5c;
-unsigned char binary_header[PROTOCOL_HEADER_V2_SIZE] = {
-    0x20, 0x00, 0x00, 0xf7,
-    0x00, 0x00, 0x00, kCorrelation_id,
-    0x00, 0x00, 0x00, kJjson_size};
+unsigned char binary_header[PROTOCOL_HEADER_V2_SIZE] = {0x20,
+                                                        0x00,
+                                                        0x00,
+                                                        0xf7,
+                                                        0x00,
+                                                        0x00,
+                                                        0x00,
+                                                        kCorrelation_id,
+                                                        0x00,
+                                                        0x00,
+                                                        0x00,
+                                                        kJjson_size};
 
 std::string data(
     "{\n   \"audioStreamingState\" : \"AUDIBLE\",\n   \"hmiLevel\" : "
@@ -95,9 +103,12 @@ class MobileMessageHandlerTest : public testing::Test {
 
     size_t full_size = sizeof(uint8_t) * full_data.size();
 
-    message_ptr_ = utils::MakeShared<RawMessage>(
-        connection_key_, protocol_version, &full_data[0], full_size,
-        ServiceType::kRpc, payload_size);
+    message_ptr_ = utils::MakeShared<RawMessage>(connection_key_,
+                                                 protocol_version,
+                                                 &full_data[0],
+                                                 full_size,
+                                                 ServiceType::kRpc,
+                                                 payload_size);
 
     return MobileMessageHandler::HandleIncomingMessageProtocol(message_ptr_);
   }
@@ -210,9 +221,12 @@ class MobileMessageHandlerTest : public testing::Test {
     const uint32_t correlation_id = 92u;
     const uint32_t connection_key = 1u;
 
-    MobileMessage message_to_send =
-        CreateMessageForSending(protocol_version, function_id, correlation_id,
-                                connection_key, data, bin_dat);
+    MobileMessage message_to_send = CreateMessageForSending(protocol_version,
+                                                            function_id,
+                                                            correlation_id,
+                                                            connection_key,
+                                                            data,
+                                                            bin_dat);
     // Act
     RawMessage* result_message =
         MobileMessageHandler::HandleOutgoingMessageProtocol(message_to_send);

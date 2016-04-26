@@ -41,7 +41,7 @@ typedef std::vector<std::string> Value;
 typedef std::map<Key, Value> Map;
 
 namespace {
-void MakeMapObject(Map &obj, const int size) {
+void MakeMapObject(Map& obj, const int size) {
   char i_key[8], j_key[8];
 
   Value array;

@@ -48,10 +48,10 @@ namespace custom_string {
  * bit representation of one character: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
  */
 enum UTFFormat {
-  kByteOfUTF8 = 0x80, //10xxxxxx
-  kHigestByteOfUTF8Byte2 = 0xc0, //110xxxxx
-  kHigestByteOfUTF8Byte3 = 0xe0, //1110xxxx
-  kHigestByteOfUTF8Byte4 = 0xf0 //11110xxx
+  kByteOfUTF8 = 0x80,             // 10xxxxxx
+  kHigestByteOfUTF8Byte2 = 0xc0,  // 110xxxxx
+  kHigestByteOfUTF8Byte3 = 0xe0,  // 1110xxxx
+  kHigestByteOfUTF8Byte4 = 0xf0   // 11110xxx
 };
 
 class CustomString {
@@ -202,7 +202,6 @@ class CustomString {
   std::wstring ToWStringLowerCase() const;
 
  private:
-
   /**
    * @brief Initiates members of CustomString
    */

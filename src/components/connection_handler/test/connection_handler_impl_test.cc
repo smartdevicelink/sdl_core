@@ -433,7 +433,7 @@ TEST_F(ConnectionHandlerTest, IsHeartBeatSupported) {
 TEST_F(ConnectionHandlerTest, SendEndServiceWithoutSetProtocolHandler) {
   AddTestDeviceConnection();
   AddTestSession();
-  EXPECT_CALL(mock_protocol_handler_, SendEndService(_,_,kRpc)).Times(0);
+  EXPECT_CALL(mock_protocol_handler_, SendEndService(_, _, kRpc)).Times(0);
   connection_handler_->SendEndService(connection_key_, kRpc);
 }
 
@@ -441,7 +441,7 @@ TEST_F(ConnectionHandlerTest, SendEndService) {
   AddTestDeviceConnection();
   AddTestSession();
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
-  EXPECT_CALL(mock_protocol_handler_, SendEndService(_,_,kRpc));
+  EXPECT_CALL(mock_protocol_handler_, SendEndService(_, _, kRpc));
   connection_handler_->SendEndService(connection_key_, kRpc);
 }
 
@@ -513,7 +513,8 @@ TEST_F(ConnectionHandlerTest, OnApplicationFloodCallBack) {
 
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
 
-  EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_,start_session_id_)).Times(1);
+  EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_, start_session_id_))
+      .Times(1);
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kMobileNav, kCommon));
@@ -539,7 +540,7 @@ TEST_F(ConnectionHandlerTest, OnApplicationFloodCallBack_SessionFound) {
       &mock_connection_handler_observer);
 
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
-  EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_,start_session_id_));
+  EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_, start_session_id_));
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kMobileNav, kFlood));
@@ -810,7 +811,8 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithCommonReason) {
       &mock_connection_handler_observer);
 
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
-  EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_,start_session_id_)).Times(1);
+  EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_, start_session_id_))
+      .Times(1);
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kMobileNav, kCommon))
@@ -837,7 +839,8 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithFloodReason) {
       &mock_connection_handler_observer);
 
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
-  EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_,start_session_id_)).Times(1);
+  EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_, start_session_id_))
+      .Times(1);
 
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
@@ -865,7 +868,8 @@ TEST_F(ConnectionHandlerTest, CloseSessionWithMalformedMessage) {
 
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
 
-  EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_,start_session_id_)).Times(0);
+  EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_, start_session_id_))
+      .Times(0);
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kMobileNav, kMalformed))
@@ -895,7 +899,8 @@ TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithMalformedMessage) {
 
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
 
-  EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_,start_session_id_)).Times(0);
+  EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_, start_session_id_))
+      .Times(0);
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kMobileNav, kMalformed))
@@ -925,7 +930,8 @@ TEST_F(ConnectionHandlerTest, CloseConnectionSessionsWithCommonReason) {
 
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
 
-  EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_,start_session_id_)).Times(1);
+  EXPECT_CALL(mock_protocol_handler_, SendEndSession(uid_, start_session_id_))
+      .Times(1);
   InSequence seq;
   EXPECT_CALL(mock_connection_handler_observer,
               OnServiceEndedCallback(connection_key_, kMobileNav, kCommon))
@@ -1418,7 +1424,7 @@ TEST_F(ConnectionHandlerTest, SendHeartBeat) {
   AddTestDeviceConnection();
   AddTestSession();
   connection_handler_->set_protocol_handler(&mock_protocol_handler_);
-  EXPECT_CALL(mock_protocol_handler_,SendHeartBeat(uid_,start_session_id_) );
+  EXPECT_CALL(mock_protocol_handler_, SendHeartBeat(uid_, start_session_id_));
   connection_handler_->SendHeartBeat(uid_, start_session_id_);
 }
 

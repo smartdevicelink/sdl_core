@@ -55,8 +55,9 @@ class SQLQueryTest : public ::testing::Test {
   static void SetUpTestCase() {
     conn = qdb_connect(kDatabaseName.c_str(), 0);
     ASSERT_TRUE(conn);
-    int ret = qdb_statement(conn, "CREATE TABLE testTable (integerValue INTEGER,"
-                 " doubleValue REAL, stringValue TEXT)");
+    int ret = qdb_statement(conn,
+                            "CREATE TABLE testTable (integerValue INTEGER,"
+                            " doubleValue REAL, stringValue TEXT)");
     ASSERT_NE(-1, ret);
   }
 
@@ -93,9 +94,10 @@ TEST_F(SQLQueryTest, Query) {
 }
 
 TEST_F(SQLQueryTest, ExecString) {
-  const std::string kInsert("INSERT INTO testTable"
-                            " (integerValue, doubleValue, stringValue)"
-                            " VALUES(1, 1.1, 'one-один')");
+  const std::string kInsert(
+      "INSERT INTO testTable"
+      " (integerValue, doubleValue, stringValue)"
+      " VALUES(1, 1.1, 'one-один')");
 
   SQLDatabase* db = new SQLDatabase(kDatabaseName);
   ASSERT_TRUE(db->Open());
@@ -153,8 +155,9 @@ TEST_F(SQLQueryTest, BindString) {
 }
 
 TEST_F(SQLQueryTest, BindAllTypes) {
-  const std::string kInsert("INSERT INTO testTable (integerValue, doubleValue,"
-                             " stringValue) VALUES (?, ?, ?)");
+  const std::string kInsert(
+      "INSERT INTO testTable (integerValue, doubleValue,"
+      " stringValue) VALUES (?, ?, ?)");
   const int kIntegerValue = 5;
   const double kDoubleValue = 5.5;
   const std::string kStringValue = "five-пять";
@@ -176,13 +179,15 @@ TEST_F(SQLQueryTest, BindAllTypes) {
 }
 
 TEST_F(SQLQueryTest, Value) {
-  const char* insert = "INSERT INTO testTable "
+  const char* insert =
+      "INSERT INTO testTable "
       "(integerValue, doubleValue, stringValue) "
       "VALUES (6, 6.6, 'six-шесть');";
   ASSERT_NE(-1, qdb_statement(conn, insert));
 
-  const std::string kSelect("SELECT integerValue, doubleValue, stringValue"
-                            " FROM testTable WHERE integerValue = 6");
+  const std::string kSelect(
+      "SELECT integerValue, doubleValue, stringValue"
+      " FROM testTable WHERE integerValue = 6");
   const int kIntegerValue = 6;
   const double kDoubleValue = 6.6;
   const std::string kStringValue = "six-шесть";
@@ -203,8 +208,9 @@ TEST_F(SQLQueryTest, Value) {
 }
 
 TEST_F(SQLQueryTest, EmptySelect) {
-  const std::string kSelect("SELECT integerValue, doubleValue, stringValue"
-                            " FROM testTable WHERE 0");
+  const std::string kSelect(
+      "SELECT integerValue, doubleValue, stringValue"
+      " FROM testTable WHERE 0");
   SQLDatabase* db = new SQLDatabase(kDatabaseName);
   ASSERT_TRUE(db->Open());
 
@@ -216,13 +222,15 @@ TEST_F(SQLQueryTest, EmptySelect) {
 }
 
 TEST_F(SQLQueryTest, NextAndBind) {
-  const char* insert = "INSERT INTO testTable "
+  const char* insert =
+      "INSERT INTO testTable "
       "(integerValue, doubleValue, stringValue) "
       "VALUES (7, 7.7, 'seven-семь');";
   ASSERT_NE(-1, qdb_statement(conn, insert));
 
-  const std::string kSelect("SELECT integerValue, doubleValue, stringValue"
-                            " FROM testTable WHERE integerValue = ?");
+  const std::string kSelect(
+      "SELECT integerValue, doubleValue, stringValue"
+      " FROM testTable WHERE integerValue = ?");
   const int kIntegerValue = 7;
   const double kDoubleValue = 7.7;
   const std::string kStringValue = "seven-семь";
@@ -245,7 +253,8 @@ TEST_F(SQLQueryTest, NextAndBind) {
 }
 
 TEST_F(SQLQueryTest, LastInsertId) {
-  const char* create = "CREATE TABLE idTable ( "
+  const char* create =
+      "CREATE TABLE idTable ( "
       "id INTEGER PRIMARY KEY AUTOINCREMENT,"
       "value TEXT)";
   ASSERT_NE(-1, qdb_statement(conn, create));
@@ -270,8 +279,9 @@ TEST_F(SQLQueryTest, LastInsertId) {
 }
 
 TEST_F(SQLQueryTest, BindNull) {
-  const std::string kInsert("INSERT INTO testTable (`integerValue`)"
-                            " VALUES (?)");
+  const std::string kInsert(
+      "INSERT INTO testTable (`integerValue`)"
+      " VALUES (?)");
   SQLDatabase* db = new SQLDatabase(kDatabaseName);
   ASSERT_TRUE(db->Open());
 

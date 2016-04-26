@@ -46,7 +46,6 @@ namespace formatters {
 
 class CMetaFormatterTestHelper : public ::testing::Test {
  protected:
-
   virtual void SetUp();
 
   virtual void TearDown();
@@ -80,4 +79,4 @@ class CMetaFormatterTestHelper : public ::testing::Test {
 }  // namespace components
 }  // namespace test
 
-#endif // SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_METAFORMATTERTESTHELPER_H_
+#endif  // SRC_COMPONENTS_FORMATTERS_TEST_INCLUDE_METAFORMATTERTESTHELPER_H_

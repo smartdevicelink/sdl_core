@@ -47,124 +47,131 @@
 
 namespace utils {
 
-template<typename T, class Q = std::queue<T> > class MessageQueue {
-  public:
-    typedef Q Queue;
-    /**
-     * \brief Default constructor
-     */
-    MessageQueue();
+template <typename T, class Q = std::queue<T> >
+class MessageQueue {
+ public:
+  typedef Q Queue;
+  /**
+   * \brief Default constructor
+   */
+  MessageQueue();
 
-    /**
-     * \brief Destructor
-     */
-    ~MessageQueue();
+  /**
+   * \brief Destructor
+   */
+  ~MessageQueue();
 
-    /**
-     * \brief Returns size of the queue.
-     * \return Size of the queue.
-     */
-    size_t size() const;
+  /**
+   * \brief Returns size of the queue.
+   * \return Size of the queue.
+   */
+  size_t size() const;
 
-    /**
-     * \brief If queue is empty.
-     * \return Is queue empty.
-     */
-    bool empty() const;
+  /**
+   * \brief If queue is empty.
+   * \return Is queue empty.
+   */
+  bool empty() const;
 
-    /**
-     * \brief Tells if queue is being shut down
-     */
-    bool IsShuttingDown() const;
+  /**
+   * \brief Tells if queue is being shut down
+   */
+  bool IsShuttingDown() const;
 
-    /**
-     * \brief Adds element to the queue.
-     * \param element Element to be added to the queue.n
-     */
-    void push(const T& element);
+  /**
+   * \brief Adds element to the queue.
+   * \param element Element to be added to the queue.n
+   */
+  void push(const T& element);
 
-    /**
-     * \brief Removes element from the queue and returns it
-     * \param element Element to be returned
-     * \return True on success, false if queue is empty
-     */
-    bool pop(T& element);
+  /**
+   * \brief Removes element from the queue and returns it
+   * \param element Element to be returned
+   * \return True on success, false if queue is empty
+   */
+  bool pop(T& element);
 
-    /**
-     * \brief Conditional wait.
-     */
-    void wait();
+  /**
+   * \brief Conditional wait.
+   */
+  void wait();
 
-    /**
-      * \brief waitUntilEmpty message queue
-      * Wait until message queue is empty
-      */
-    void WaitUntilEmpty();
+  /**
+    * \brief waitUntilEmpty message queue
+    * Wait until message queue is empty
+    */
+  void WaitUntilEmpty();
 
-    /**
-     * \brief Shutdown the queue.
-     * This leads to waking up everyone waiting on the queue
-     * Queue being shut down can be drained ( with pop() )
-     * But nothing must be added to the queue after it began
-     * shutting down
-     */
-    void Shutdown();
+  /**
+   * \brief Shutdown the queue.
+   * This leads to waking up everyone waiting on the queue
+   * Queue being shut down can be drained ( with pop() )
+   * But nothing must be added to the queue after it began
+   * shutting down
+   */
+  void Shutdown();
 
-    /**
-      * \brief Clears queue.
-      */
-    void Reset();
+  /**
+    * \brief Clears queue.
+    */
+  void Reset();
 
-  private:
-    /**
-     *\brief Queue
-     */
-    Queue queue_;
-    volatile bool shutting_down_;
+ private:
+  /**
+   *\brief Queue
+   */
+  Queue queue_;
+  volatile bool shutting_down_;
 
-    /**
-     *\brief Platform specific syncronisation variable
-     */
-    mutable sync_primitives::Lock queue_lock_;
-    sync_primitives::ConditionalVariable queue_new_items_;
+  /**
+   *\brief Platform specific syncronisation variable
+   */
+  mutable sync_primitives::Lock queue_lock_;
+  sync_primitives::ConditionalVariable queue_new_items_;
 };
 
-template<typename T, class Q> MessageQueue<T, Q>::MessageQueue()
-    : shutting_down_(false) {
-}
+template <typename T, class Q>
+MessageQueue<T, Q>::MessageQueue()
+    : shutting_down_(false) {}
 
-template<typename T, class Q> MessageQueue<T, Q>::~MessageQueue() {
-}
+template <typename T, class Q>
+MessageQueue<T, Q>::~MessageQueue() {}
 
-template<typename T, class Q> void MessageQueue<T, Q>::wait() {
+template <typename T, class Q>
+void MessageQueue<T, Q>::wait() {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   while ((!shutting_down_) && queue_.empty()) {
     queue_new_items_.Wait(auto_lock);
   }
 }
 
-template<typename T, class Q> void MessageQueue<T, Q>::WaitUntilEmpty() {
+template <typename T, class Q>
+void MessageQueue<T, Q>::WaitUntilEmpty() {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   while ((!shutting_down_) && !queue_.empty()) {
     queue_new_items_.Wait(auto_lock);
   }
 }
 
-template<typename T, class Q> size_t MessageQueue<T, Q>::size() const {
+template <typename T, class Q>
+size_t MessageQueue<T, Q>::size() const {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   return queue_.size();
 }
 
-template<typename T, class Q> bool MessageQueue<T, Q>::empty() const {
+template <typename T, class Q>
+bool MessageQueue<T, Q>::empty() const {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   return queue_.empty();
 }
 
-template<typename T, class Q> bool MessageQueue<T, Q>::IsShuttingDown() const {
+template <typename T, class Q>
+bool MessageQueue<T, Q>::IsShuttingDown() const {
   return shutting_down_;
 }
 
-template<typename T, class Q> void MessageQueue<T, Q>::push(const T& element) {
+template <typename T, class Q>
+void MessageQueue<T, Q>::push(const T& element) {
   {
     sync_primitives::AutoLock auto_lock(queue_lock_);
     if (shutting_down_) {
@@ -175,7 +182,8 @@ template<typename T, class Q> void MessageQueue<T, Q>::push(const T& element) {
   queue_new_items_.Broadcast();
 }
 
-template<typename T, class Q> bool MessageQueue<T, Q>::pop(T& element) {
+template <typename T, class Q>
+bool MessageQueue<T, Q>::pop(T& element) {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   if (queue_.empty()) {
     return false;
@@ -186,7 +194,8 @@ template<typename T, class Q> bool MessageQueue<T, Q>::pop(T& element) {
   return true;
 }
 
-template<typename T, class Q> void MessageQueue<T, Q>::Shutdown() {
+template <typename T, class Q>
+void MessageQueue<T, Q>::Shutdown() {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   shutting_down_ = true;
   if (!queue_.empty()) {
@@ -196,7 +205,8 @@ template<typename T, class Q> void MessageQueue<T, Q>::Shutdown() {
   queue_new_items_.Broadcast();
 }
 
-template<typename T, class Q> void MessageQueue<T, Q>::Reset() {
+template <typename T, class Q>
+void MessageQueue<T, Q>::Reset() {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   shutting_down_ = false;
   if (!queue_.empty()) {

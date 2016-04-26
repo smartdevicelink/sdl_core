@@ -3,16 +3,14 @@
 
 #include <QQuickItem>
 
-class SdlAlert : public QQuickItem
-{
-    Q_OBJECT
-public:
-    explicit SdlAlert(QObject *parent = 0);
-    
+class SdlAlert : public QQuickItem {
+  Q_OBJECT
+ public:
+  explicit SdlAlert(QObject* parent = 0);
+
 signals:
-    
-public slots:
-    
+
+ public slots:
 };
 
-#endif // SDLALERT_H
+#endif  // SDLALERT_H

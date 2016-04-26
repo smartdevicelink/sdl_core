@@ -77,7 +77,8 @@ class TcpSocketConnection : public ThreadedSocketConnection {
 };
 
 /**
- * @brief Class responsible for communication over sockets that originated by server.
+ * @brief Class responsible for communication over sockets that originated by
+ * server.
  */
 class TcpServerOiginatedSocketConnection : public ThreadedSocketConnection {
  public:
@@ -89,8 +90,8 @@ class TcpServerOiginatedSocketConnection : public ThreadedSocketConnection {
    * @param controller Pointer to the device adapter controller.
    */
   TcpServerOiginatedSocketConnection(const DeviceUID& device_uid,
-                      const ApplicationHandle& app_handle,
-                      TransportAdapterController* controller);
+                                     const ApplicationHandle& app_handle,
+                                     TransportAdapterController* controller);
 
   /**
    * @brief Destructor.

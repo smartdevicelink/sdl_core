@@ -59,7 +59,8 @@ const int32_t CFormatterJsonSDLRPCv1::kCorrelationIdNotFound = 1 << 3;
 
 const std::string CFormatterJsonSDLRPCv1::getMessageType(
     const smart_objects_ns::SmartObject& obj) {
-  return obj.getElement(strings::S_PARAMS).getElement(strings::S_MESSAGE_TYPE)
+  return obj.getElement(strings::S_PARAMS)
+      .getElement(strings::S_MESSAGE_TYPE)
       .asString();
 }
 
@@ -91,7 +92,8 @@ bool CFormatterJsonSDLRPCv1::toString(const smart_objects_ns::SmartObject& obj,
     Json::Value params(Json::objectValue);
 
     smart_objects_ns::SmartObject formattedObj(obj);
-    formattedObj.getSchema().unapplySchema(formattedObj);  // converts enums(as int32_t) to strings
+    formattedObj.getSchema().unapplySchema(
+        formattedObj);  // converts enums(as int32_t) to strings
 
     objToJsonValue(formattedObj.getElement(strings::S_MSG_PARAMS), params);
 
@@ -104,8 +106,8 @@ bool CFormatterJsonSDLRPCv1::toString(const smart_objects_ns::SmartObject& obj,
           formattedObj[strings::S_PARAMS][strings::S_CORRELATION_ID].asInt());
     }
 
-    root[type][S_NAME] = formattedObj[strings::S_PARAMS][strings::S_FUNCTION_ID]
-        .asString();
+    root[type][S_NAME] =
+        formattedObj[strings::S_PARAMS][strings::S_FUNCTION_ID].asString();
 
     outStr = root.toStyledString();
 
@@ -119,30 +121,33 @@ bool CFormatterJsonSDLRPCv1::toString(const smart_objects_ns::SmartObject& obj,
 
 // ----------------------------------------------------------------------------
 
-CFormatterJsonSDLRPCv1::tMetaFormatterErrorCode CFormatterJsonSDLRPCv1::MetaFormatToString(
+CFormatterJsonSDLRPCv1::tMetaFormatterErrorCode
+CFormatterJsonSDLRPCv1::MetaFormatToString(
     const smart_objects_ns::SmartObject& object,
-    const smart_objects_ns::CSmartSchema& schema, std::string& outStr) {
+    const smart_objects_ns::CSmartSchema& schema,
+    std::string& outStr) {
   meta_formatter_error_code::tMetaFormatterErrorCode result_code =
       meta_formatter_error_code::kErrorOk;
 
   smart_objects_ns::SmartObject tmp_object;
 
-  if (false
-      == CMetaFormatter::CreateObjectByPattern(object, schema, tmp_object)) {
+  if (false ==
+      CMetaFormatter::CreateObjectByPattern(object, schema, tmp_object)) {
     result_code |= meta_formatter_error_code::kErrorFailedCreateObjectBySchema;
     return result_code;
   }
 
   // determine whether smart objects are functions
   // (in terms of SDLRPC communication)
-  bool is_root_object_created_by_schema = ((tmp_object.getType()
-      == smart_objects_ns::SmartType_Map)
-      && tmp_object.keyExists(strings::S_PARAMS)
-      && tmp_object.keyExists(strings::S_MSG_PARAMS));
+  bool is_root_object_created_by_schema =
+      ((tmp_object.getType() == smart_objects_ns::SmartType_Map) &&
+       tmp_object.keyExists(strings::S_PARAMS) &&
+       tmp_object.keyExists(strings::S_MSG_PARAMS));
 
-  bool is_root_object = ((object.getType() == smart_objects_ns::SmartType_Map)
-      && object.keyExists(strings::S_PARAMS)
-      && object.keyExists(strings::S_MSG_PARAMS));
+  bool is_root_object =
+      ((object.getType() == smart_objects_ns::SmartType_Map) &&
+       object.keyExists(strings::S_PARAMS) &&
+       object.keyExists(strings::S_MSG_PARAMS));
 
   if (false == is_root_object) {
     result_code |= meta_formatter_error_code::kErrorObjectIsNotFunction;
@@ -155,7 +160,6 @@ CFormatterJsonSDLRPCv1::tMetaFormatterErrorCode CFormatterJsonSDLRPCv1::MetaForm
 
   return result_code;
 }
-
 }
 }
 }

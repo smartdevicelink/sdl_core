@@ -50,55 +50,52 @@ namespace dbms {
 }
 
 TEST(SQLDatabaseTest, OpenCloseMemory_OpenAndCloseDB_ActsWithoutError) {
-
-  //arrange
+  // arrange
   SQLDatabase db;
   bool ret = db.Open();
 
-  //assert
+  // assert
   EXPECT_FALSE(IsError(db.LastError()));
   ASSERT_TRUE(ret);
 
-  //act
+  // act
   db.Close();
 
-  //assert
+  // assert
   EXPECT_FALSE(IsError(db.LastError()));
 }
 
 TEST(SQLDatabaseTest, OpenCloseFile_OpenAndCloseSpecifiedDB_ActsWithoutError) {
-
-  //arrange
+  // arrange
   SQLDatabase db("test-database");
   bool ret = db.Open();
 
-  //assert
+  // assert
   EXPECT_FALSE(IsError(db.LastError()));
   ASSERT_TRUE(ret);
 
-  //act
+  // act
   db.Close();
 
-  //assert
+  // assert
   EXPECT_FALSE(IsError(db.LastError()));
 
   remove("test-database.sqlite");
 }
 
 TEST(SQLDatabaseTest, OpenDBTwice_NoError) {
-
-  //arrange
+  // arrange
   SQLDatabase db;
   bool ret = db.Open();
 
-  //assert
+  // assert
   EXPECT_FALSE(IsError(db.LastError()));
   ASSERT_TRUE(ret);
 
-  //act
+  // act
   ret = db.Open();
 
-  //assert
+  // assert
   EXPECT_FALSE(IsError(db.LastError()));
   ASSERT_TRUE(ret);
 
@@ -106,44 +103,42 @@ TEST(SQLDatabaseTest, OpenDBTwice_NoError) {
 }
 
 TEST(SQLDatabaseTest, CloseDBTwice_NoError) {
-
-  //arrange
+  // arrange
   SQLDatabase db;
   bool ret = db.Open();
 
-  //assert
+  // assert
   EXPECT_FALSE(IsError(db.LastError()));
   ASSERT_TRUE(ret);
 
-  //act
+  // act
   db.Close();
 
-  //assert
+  // assert
   EXPECT_FALSE(IsError(db.LastError()));
 
-  //act
+  // act
   db.Close();
 
-  //assert
+  // assert
   EXPECT_FALSE(IsError(db.LastError()));
 }
 
 TEST(SQLDatabaseTest, Close_DBWasNotOpened_NoError) {
-
-  //act
+  // act
   SQLDatabase db;
   db.Close();
 
-  //assert
+  // assert
   EXPECT_FALSE(IsError(db.LastError()));
 }
 
-TEST(SQLDatabaseTest, CommitTransaction_StartAndCommitTransaction_ExpectActsWithoutError) {
-
-  //arrange
+TEST(SQLDatabaseTest,
+     CommitTransaction_StartAndCommitTransaction_ExpectActsWithoutError) {
+  // arrange
   SQLDatabase db;
 
-  //assert
+  // assert
   ASSERT_TRUE(db.Open());
   EXPECT_TRUE(db.BeginTransaction());
   EXPECT_FALSE(IsError(db.LastError()));
@@ -153,12 +148,12 @@ TEST(SQLDatabaseTest, CommitTransaction_StartAndCommitTransaction_ExpectActsWith
   db.Close();
 }
 
-TEST(SQLDatabaseTest, RollbackTransaction_StartAndRollbackTransaction_ExpectActsWithoutError) {
-
-  //arrange
+TEST(SQLDatabaseTest,
+     RollbackTransaction_StartAndRollbackTransaction_ExpectActsWithoutError) {
+  // arrange
   SQLDatabase db;
 
-  //assert
+  // assert
   ASSERT_TRUE(db.Open());
   EXPECT_TRUE(db.BeginTransaction());
   EXPECT_FALSE(IsError(db.LastError()));
@@ -168,12 +163,12 @@ TEST(SQLDatabaseTest, RollbackTransaction_StartAndRollbackTransaction_ExpectActs
   db.Close();
 }
 
-TEST(SQLDatabaseTest, FailedCommitTransaction_CommitTransactionWithoutBeginning_ExpectError) {
-
-  //arrange
+TEST(SQLDatabaseTest,
+     FailedCommitTransaction_CommitTransactionWithoutBeginning_ExpectError) {
+  // arrange
   SQLDatabase db;
 
-  //assert
+  // assert
   ASSERT_TRUE(db.Open());
   EXPECT_FALSE(db.CommitTransaction());
   EXPECT_TRUE(IsError(db.LastError()));
@@ -181,12 +176,13 @@ TEST(SQLDatabaseTest, FailedCommitTransaction_CommitTransactionWithoutBeginning_
   db.Close();
 }
 
-TEST(SQLDatabaseTest, FailedRollbackTransaction_RollbackTransactionWithoutBeginning_ExpectError) {
-
-  //arrange
+TEST(
+    SQLDatabaseTest,
+    FailedRollbackTransaction_RollbackTransactionWithoutBeginning_ExpectError) {
+  // arrange
   SQLDatabase db;
 
-  //assert
+  // assert
   ASSERT_TRUE(db.Open());
   EXPECT_FALSE(db.RollbackTransaction());
   EXPECT_TRUE(IsError(db.LastError()));
@@ -195,27 +191,25 @@ TEST(SQLDatabaseTest, FailedRollbackTransaction_RollbackTransactionWithoutBeginn
 }
 
 TEST(SQLDatabaseTest, BadTransaction_BeginTransitionWithoutOpenDB_ExpectError) {
-
-  //arrange
+  // arrange
   SQLDatabase db;
 
-  //assert
+  // assert
   EXPECT_FALSE(db.BeginTransaction());
   EXPECT_TRUE(IsError(db.LastError()));
 }
 
 TEST(SQLDatabaseTest, IsReadWrite_FirstOpenDBIsRWSecondIsNot) {
-
-  //arrange
+  // arrange
   SQLDatabase db("test-database");
 
-  //assert
+  // assert
   ASSERT_TRUE(db.Open());
   EXPECT_TRUE(db.IsReadWrite());
   db.Close();
   chmod("test-database.sqlite", S_IRUSR);
 
-  //assert
+  // assert
   ASSERT_TRUE(db.Open());
   EXPECT_FALSE(db.IsReadWrite());
 
