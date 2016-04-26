@@ -235,6 +235,9 @@ class AutoTrace {
 #undef DEINIT_LOGGER
 #define DEINIT_LOGGER()
 
+#undef FLUSH_LOGGER
+#define FLUSH_LOGGER()
+
 #undef SET_LOGGER
 #define SET_LOGGER(logger)
 

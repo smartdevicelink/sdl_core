@@ -475,7 +475,11 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 SDL_EXPORT
 policy::PolicyManager* CreateManager(const std::string& app_storage_folder,
                                      uint16_t attempts_to_open_policy_db,
-                                     uint16_t open_attempt_timeout_ms,
-                                     logger::Logger::Pimpl& logger);
+                                     uint16_t open_attempt_timeout_ms
+#ifdef ENABLE_LOG
+                                     ,
+                                     logger::Logger::Pimpl& logger
+#endif
+                                     );
 
 #endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_H_

@@ -29,6 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
+#include <sstream>
 #include "utils/bluetooth_win/bluetooth_utils.h"
 #include "utils/bluetooth_win/bluetooth_uuid.h"
 
