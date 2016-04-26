@@ -58,6 +58,6 @@ bool GenericJsonFormatter::FromString(const std::string& str,
   return result;
 }
 
-} // namespace Formatters
-} // namespace NsJSONHandler
-} // namespace NsSmartDeviceLink
+}  // namespace Formatters
+}  // namespace NsJSONHandler
+}  // namespace NsSmartDeviceLink

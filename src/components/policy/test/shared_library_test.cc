@@ -45,27 +45,28 @@ namespace policy {
   }
 }
 
-TEST(SharedLibraryTest, FullTest_OpenLibrarySetSymbolCloseLibrary_ExpectActsWithoutErrors) {
-  //Arrange
+TEST(SharedLibraryTest,
+     FullTest_OpenLibrarySetSymbolCloseLibrary_ExpectActsWithoutErrors) {
+  // Arrange
   const std::string kLib = "../src/policy/libPolicy.so";
   void* handle = dlopen(kLib.c_str(), RTLD_LAZY);
 
-  //Assert
+  // Assert
   EXPECT_FALSE(IsError(dlerror()));
   ASSERT_TRUE(handle);
 
-  //Act
+  // Act
   const std::string kSymbol = "CreateManager";
   void* symbol = dlsym(handle, kSymbol.c_str());
 
-  //Assert
+  // Assert
   EXPECT_FALSE(IsError(dlerror()));
   EXPECT_TRUE(symbol);
 
-  //Act
+  // Act
   int ret = dlclose(handle);
 
-  //Assert
+  // Assert
   EXPECT_FALSE(ret);
   EXPECT_FALSE(IsError(dlerror()));
 }

@@ -190,7 +190,7 @@ TEST(SmartObjectsDraftTest, test_helper_methods) {
   // ---- DOUBLE ---- //
   obj = 3.14;
   ASSERT_EQ(3.14, obj.asDouble());
-  //TEST_COMPONENTS_SMART_OBJECTS_SMARTOBJECTDRAFTTEST_H_
+  // TEST_COMPONENTS_SMART_OBJECTS_SMARTOBJECTDRAFTTEST_H_
   // ---- CHAR ---- //
   obj = 'a';
   ASSERT_EQ('a', obj.asChar());
@@ -358,7 +358,7 @@ TEST(SmartObjectsDraftTest, compare_map_type) {
   ASSERT_NE(other_value2, SmartObject());
 }
 // TODO(Ezamakhov): add test for conversion string/int/double
-}// namespace SmartObjectDraftTest
+}  // namespace SmartObjectDraftTest
 }  // namespace SmartObjects
 }  // namespace components
 }  // namespace test

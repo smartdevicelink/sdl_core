@@ -42,8 +42,8 @@ namespace media_manager {
 
 class SocketVideoStreamerAdapter : public SocketStreamerAdapter {
  public:
-  SocketVideoStreamerAdapter(
-      const std::string& server_address, uint16_t video_streaming_port);
+  SocketVideoStreamerAdapter(const std::string& server_address,
+                             uint16_t video_streaming_port);
   virtual ~SocketVideoStreamerAdapter();
 };
 

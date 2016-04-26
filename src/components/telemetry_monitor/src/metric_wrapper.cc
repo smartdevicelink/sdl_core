@@ -35,9 +35,7 @@
 
 namespace telemetry_monitor {
 
-  MetricWrapper::MetricWrapper():
-    resources(NULL) {
-  }
+MetricWrapper::MetricWrapper() : resources(NULL) {}
 
 bool MetricWrapper::grabResources() {
   Clear();
@@ -74,5 +72,4 @@ void MetricWrapper::Clear() {
 MetricWrapper::~MetricWrapper() {
   Clear();
 }
-
 }

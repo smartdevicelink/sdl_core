@@ -54,18 +54,10 @@ enum eType {
 }
 
 namespace Language {
-enum eType {
-  INVALID_ENUM = -1,
-  EN_EU,
-  RU_RU
-};
+enum eType { INVALID_ENUM = -1, EN_EU, RU_RU };
 }
 namespace AppTypeTest {
-enum eType {
-  INVALID_ENUM = -1,
-  SYSTEM,
-  MEDIA
-};
+enum eType { INVALID_ENUM = -1, SYSTEM, MEDIA };
 }
 namespace SpeechCapabilities {
 enum eType {
@@ -75,11 +67,7 @@ enum eType {
 }
 
 namespace StructIdentifiers {
-enum eType {
-  INVALID_ENUM = -1,
-  Struct1,
-  Struct2
-};
+enum eType { INVALID_ENUM = -1, Struct1, Struct2 };
 }
 
 CSmartSchema initObjectSchema();

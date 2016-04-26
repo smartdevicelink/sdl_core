@@ -44,12 +44,9 @@ namespace connection_handler_test {
 class MockConnectionHandlerSettings
     : public connection_handler::ConnectionHandlerSettings {
  public:
-  MOCK_CONST_METHOD0(heart_beat_timeout,
-      uint32_t());
-  MOCK_CONST_METHOD0(force_protected_service,
-      const std::vector<int>&());
-  MOCK_CONST_METHOD0(force_unprotected_service,
-      const std::vector<int>&());
+  MOCK_CONST_METHOD0(heart_beat_timeout, uint32_t());
+  MOCK_CONST_METHOD0(force_protected_service, const std::vector<int>&());
+  MOCK_CONST_METHOD0(force_unprotected_service, const std::vector<int>&());
 };
 
 }  // namespace connection_handler_test

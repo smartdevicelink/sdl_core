@@ -37,7 +37,8 @@ class SecurityManagerListener {
  public:
   /**
    * \brief Notification about protection result
-   * \param connection_key Unique key used by other components as session identifier
+   * \param connection_key Unique key used by other components as session
+   * identifier
    * \param success result of connection protection
    * \return \c true on success notification or \c false otherwise
    */

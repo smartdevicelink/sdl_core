@@ -49,7 +49,7 @@ class TMTelemetryObserver {
   virtual void StartRawMsg(const protocol_handler::RawMessage* ptr) = 0;
   virtual void StopRawMsg(const protocol_handler::RawMessage* ptr) = 0;
 
-  virtual ~TMTelemetryObserver(){}
+  virtual ~TMTelemetryObserver() {}
 };
 }  // transport_manager
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TIME_METRIC_OBSERVER_H_

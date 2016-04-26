@@ -41,7 +41,8 @@ namespace transport_manager {
 namespace transport_adapter {
 
 /**
- * @brief Implement transport dependent connection that was originated by the user.
+ * @brief Implement transport dependent connection that was originated by the
+ * user.
  */
 class ServerConnectionFactory {
  public:
@@ -79,8 +80,7 @@ class ServerConnectionFactory {
   /**
    * @brief Destructor.
    */
-  virtual ~ServerConnectionFactory() {
-  }
+  virtual ~ServerConnectionFactory() {}
 };
 
 }  // namespace transport_adapter

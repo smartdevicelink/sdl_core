@@ -44,15 +44,14 @@ namespace hmi_message_handler {
 using ::hmi_message_handler::HMIMessageObserver;
 
 class MockHMIMessageObserver : public HMIMessageObserver,
-    public utils::Singleton<MockHMIMessageObserver> {
+                               public utils::Singleton<MockHMIMessageObserver> {
  public:
   MOCK_METHOD1(OnMessageReceived,
-      void(utils::SharedPtr<application_manager::Message> message));
+               void(utils::SharedPtr<application_manager::Message> message));
   MOCK_METHOD1(OnErrorSending,
-      void(utils::SharedPtr<application_manager::Message> message));
+               void(utils::SharedPtr<application_manager::Message> message));
   virtual ~MockHMIMessageObserver() {}
 };
-}   // namespace hmi_message_handler
-
+}  // namespace hmi_message_handler
 
 #endif  // SRC_COMPONENTS_HMI_MESSAGE_HANDLER_TEST_INCLUDE_HMI_MESSAGE_HANDLER_MOCK_HMI_MESSAGE_OBSERVER_H_

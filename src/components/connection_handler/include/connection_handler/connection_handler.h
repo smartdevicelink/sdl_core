@@ -167,13 +167,14 @@ class ConnectionHandler {
                                       uint32_t* app_id,
                                       std::list<int32_t>* sessions_list,
                                       uint32_t* device_id) const = 0;
-    /**
-     * @brief GetConnectedDevicesMAC allows to obtain MAC adresses for all
-     * currently connected devices.
-     *
-     * @param device_macs collection of MAC adresses for connected devices.
-     */
-    virtual void GetConnectedDevicesMAC(std::vector<std::string> &device_macs) const = 0;
+  /**
+   * @brief GetConnectedDevicesMAC allows to obtain MAC adresses for all
+   * currently connected devices.
+   *
+   * @param device_macs collection of MAC adresses for connected devices.
+   */
+  virtual void GetConnectedDevicesMAC(
+      std::vector<std::string>& device_macs) const = 0;
 
   /**
    * \brief Connection handler settings getter

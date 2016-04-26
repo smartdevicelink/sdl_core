@@ -39,8 +39,8 @@ namespace media_manager {
 
 class SocketAudioStreamerAdapter : public SocketStreamerAdapter {
  public:
-  SocketAudioStreamerAdapter(
-      const std::string& server_address, uint16_t audio_streaming_port);
+  SocketAudioStreamerAdapter(const std::string& server_address,
+                             uint16_t audio_streaming_port);
   virtual ~SocketAudioStreamerAdapter();
 };
 

@@ -44,7 +44,8 @@ namespace security_manager_test {
  * Matcher for checking RawMessage with InternalError Query
  * Check error id
  */
-MATCHER_P(InternalErrorWithErrId, expectedErrorId,
+MATCHER_P(InternalErrorWithErrId,
+          expectedErrorId,
           std::string(negation ? "is not" : "is") +
               " InternalError with selected error") {
   const size_t header_size =
@@ -93,12 +94,14 @@ MATCHER_P(InternalErrorWithErrId, expectedErrorId,
     * Matcher for checking QueryHeader equal in GTests
     */
 ::testing::AssertionResult QueryHeader_EQ(
-    const char* m_expr, const char* n_expr,
+    const char* m_expr,
+    const char* n_expr,
     const ::security_manager::SecurityQuery::QueryHeader& q1,
     const ::security_manager::SecurityQuery::QueryHeader& q2);
 
 ::testing::AssertionResult QueryHeader_EQ(
-    const char* m_expr, const char* n_expr,
+    const char* m_expr,
+    const char* n_expr,
     const ::security_manager::SecurityQuery::QueryHeader& q1,
     const ::security_manager::SecurityQuery::QueryHeader& q2) {
   ::testing::AssertionResult fail_result = ::testing::AssertionFailure();

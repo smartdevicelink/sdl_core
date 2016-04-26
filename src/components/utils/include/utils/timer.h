@@ -65,7 +65,7 @@ class Timer {
    * Stops timer if it's running
    */
   ~Timer();
-  
+
   /**
    * @brief Starts timer with specified timeout
    * @param timeout Timer timeout

@@ -60,11 +60,12 @@ class Streamer : public threads::ThreadDelegate {
 
   virtual void PushMessage(utils::SharedPtr<MetricWrapper> metric);
   volatile bool is_client_connected_;
+
  private:
   void Start();
   void Stop();
   bool IsReady() const;
-  bool Send(const std::string &msg);
+  bool Send(const std::string& msg);
   void ShutDownAndCloseSocket(int32_t socket_fd);
   TelemetryMonitor* const kserver_;
   int32_t server_socket_fd_;
@@ -78,10 +79,12 @@ class TelemetryMonitor {
  public:
   TelemetryMonitor(const std::string& server_address, uint16_t port);
   virtual ~TelemetryMonitor();
-  virtual void Init(
-      TelemetryObservable<protocol_handler::PHTelemetryObserver>* protocol_handler,
-      TelemetryObservable<application_manager::AMTelemetryObserver>* app_manager,
-      TelemetryObservable<transport_manager::TMTelemetryObserver>* transport_manager);
+  virtual void Init(TelemetryObservable<protocol_handler::PHTelemetryObserver>*
+                        protocol_handler,
+                    TelemetryObservable<
+                        application_manager::AMTelemetryObserver>* app_manager,
+                    TelemetryObservable<transport_manager::TMTelemetryObserver>*
+                        transport_manager);
   virtual void Stop();
   virtual void Start();
   virtual void SendMetric(utils::SharedPtr<MetricWrapper> metric);

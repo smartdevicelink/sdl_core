@@ -30,13 +30,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #ifdef __QNX__
-#  include <process.h>
+#include <process.h>
 #else  // __QNX__
-#  include <sys/types.h>
-#  include <sys/wait.h>
-#  include <sys/stat.h>
-#  include <fcntl.h>
-#  include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 #endif  // __QNX__
 
 #include <algorithm>
@@ -52,13 +52,12 @@ namespace utils {
 CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
 
 struct GetCString {
-  char * operator ()(const std::string& string) {
+  char* operator()(const std::string& string) {
     return const_cast<char*>(string.c_str());
   }
 };
 
-System::System(const std::string& command)
-    : command_(command) {
+System::System(const std::string& command) : command_(command) {
   argv_.push_back(command);
 }
 
@@ -88,7 +87,7 @@ bool System::Execute() {
 
 bool System::Execute(bool wait) {
   size_t size = argv_.size();
-  char * *argv = new char*[size + 1];
+  char** argv = new char* [size + 1];
   std::transform(argv_.begin(), argv_.end(), argv, GetCString());
   argv[size] = NULL;
 
@@ -97,8 +96,9 @@ bool System::Execute(bool wait) {
   delete[] argv;
 
   if (ret == -1) {
-    LOG4CXX_ERROR(logger_, "Can't execute command: " << command_
-        << " Errno is: " << std::strerror(errno));
+    LOG4CXX_ERROR(logger_,
+                  "Can't execute command: " << command_ << " Errno is: "
+                                            << std::strerror(errno));
     return false;
   }
 
@@ -137,7 +137,7 @@ bool System::Execute(bool wait) {
       dup2(fd_dev0, STDERR_FILENO);
 
       size_t size = argv_.size();
-      char * *argv = new char*[size + 1];
+      char** argv = new char* [size + 1];
       std::transform(argv_.begin(), argv_.end(), argv, GetCString());
       argv[size] = NULL;
 

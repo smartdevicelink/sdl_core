@@ -76,28 +76,28 @@ StatisticsDelegate::StatisticsDelegate(PolicyHandler& policy_handler,
     , timespan_seconds_(timespan_seconds)
     , policy_handler_(policy_handler) {}
 
-  void StatisticsDelegate::threadMain() {
-    LOG4CXX_AUTO_TRACE(logger_);
-    switch (type_) {
-      case INCREMENT_GLOBAL:
-        policy_handler_.Increment(global_counter_);
-        break;
-      case INCREMENT_APP:
-        policy_handler_.Increment(app_id_, app_counter_);
-        break;
-      case SET:
-        policy_handler_.Set(app_id_, app_info_, value_);
-        break;
-      case ADD:
-        policy_handler_.Add(app_id_, stop_watch_, timespan_seconds_);
-        break;
-      default:
-        LOG4CXX_ERROR(logger_,"Unknown statistics operator");
-        break;
-    }
+void StatisticsDelegate::threadMain() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  switch (type_) {
+    case INCREMENT_GLOBAL:
+      policy_handler_.Increment(global_counter_);
+      break;
+    case INCREMENT_APP:
+      policy_handler_.Increment(app_id_, app_counter_);
+      break;
+    case SET:
+      policy_handler_.Set(app_id_, app_info_, value_);
+      break;
+    case ADD:
+      policy_handler_.Add(app_id_, stop_watch_, timespan_seconds_);
+      break;
+    default:
+      LOG4CXX_ERROR(logger_, "Unknown statistics operator");
+      break;
   }
+}
 
-  void StatisticsDelegate::exitThreadMain() {
-    // Do nothing
-  }
-} // namespace policy
+void StatisticsDelegate::exitThreadMain() {
+  // Do nothing
+}
+}  // namespace policy

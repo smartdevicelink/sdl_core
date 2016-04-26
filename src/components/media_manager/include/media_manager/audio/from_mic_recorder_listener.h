@@ -37,7 +37,7 @@
 #include "media_manager/media_adapter_listener.h"
 
 namespace application_manager {
-  class ApplicationManager;
+class ApplicationManager;
 }
 
 namespace threads {
@@ -46,25 +46,23 @@ class Thread;
 
 namespace media_manager {
 class FromMicRecorderListener : public MediaAdapterListener {
-  public:
-    FromMicRecorderListener(const std::string& file_name,
-      application_manager::ApplicationManager &);
-    ~FromMicRecorderListener();
-    virtual void OnDataReceived(
-      int32_t application_key,
-      const DataForListener& data);
-    virtual void OnErrorReceived(
-      int32_t application_key,
-      const DataForListener& data);
-    virtual void OnActivityStarted(int32_t application_key);
-    virtual void OnActivityEnded(int32_t application_key);
+ public:
+  FromMicRecorderListener(const std::string& file_name,
+                          application_manager::ApplicationManager&);
+  ~FromMicRecorderListener();
+  virtual void OnDataReceived(int32_t application_key,
+                              const DataForListener& data);
+  virtual void OnErrorReceived(int32_t application_key,
+                               const DataForListener& data);
+  virtual void OnActivityStarted(int32_t application_key);
+  virtual void OnActivityEnded(int32_t application_key);
 
-  private:
-    threads::Thread* reader_;
-    std::string file_name_;
-    int32_t current_application_;
-    application_manager::ApplicationManager& application_manager_;
-    DISALLOW_COPY_AND_ASSIGN(FromMicRecorderListener);
+ private:
+  threads::Thread* reader_;
+  std::string file_name_;
+  int32_t current_application_;
+  application_manager::ApplicationManager& application_manager_;
+  DISALLOW_COPY_AND_ASSIGN(FromMicRecorderListener);
 };
 }  //  namespace media_manager
 

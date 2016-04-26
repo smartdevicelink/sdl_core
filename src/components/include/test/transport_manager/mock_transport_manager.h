@@ -52,21 +52,19 @@ using ::transport_manager::TransportManagerListener;
 /*
  * MOCK implementation of ::transport_manager::TransportManager interface
  */
-class MockTransportManager
-    : public ::transport_manager::TransportManager,
-      public ::telemetry_monitor::TelemetryObservable<
-          transport_manager::TMTelemetryObserver>{
-
+class MockTransportManager : public ::transport_manager::TransportManager,
+                             public ::telemetry_monitor::TelemetryObservable<
+                                 transport_manager::TMTelemetryObserver> {
  public:
-  MOCK_METHOD1(Init, int(resumption::LastState &last_state));
+  MOCK_METHOD1(Init, int(resumption::LastState& last_state));
   MOCK_METHOD0(Reinit, int());
   MOCK_METHOD0(SearchDevices, int());
   MOCK_METHOD1(ConnectDevice, int(const DeviceHandle));
   MOCK_METHOD1(DisconnectDevice, int(const DeviceHandle));
   MOCK_METHOD1(Disconnect, int(const ConnectionUID));
   MOCK_METHOD1(DisconnectForce, int(const ConnectionUID));
- MOCK_METHOD1(SendMessageToDevice,
-              int(const ::protocol_handler::RawMessagePtr));
+  MOCK_METHOD1(SendMessageToDevice,
+               int(const ::protocol_handler::RawMessagePtr));
   MOCK_METHOD1(ReceiveEventFromDevice, int(const TransportAdapterEvent&));
   MOCK_METHOD1(AddTransportAdapter, int(TransportAdapter* adapter));
   MOCK_METHOD1(AddEventListener, int(TransportManagerListener* listener));
@@ -75,7 +73,6 @@ class MockTransportManager
   MOCK_CONST_METHOD1(Visibility, int(const bool&));
   MOCK_METHOD1(SetTelemetryObserver,
                void(transport_manager::TMTelemetryObserver* observer));
-
 };
 
 }  // namespace transport_manager_test

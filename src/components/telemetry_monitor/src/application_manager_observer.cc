@@ -36,11 +36,12 @@
 
 namespace telemetry_monitor {
 
-ApplicationManagerObserver::ApplicationManagerObserver(TelemetryMonitor* telemetry_monitor):
-  telemetry_monitor_(telemetry_monitor) {
-}
+ApplicationManagerObserver::ApplicationManagerObserver(
+    TelemetryMonitor* telemetry_monitor)
+    : telemetry_monitor_(telemetry_monitor) {}
 
-void ApplicationManagerObserver::OnMessage(utils::SharedPtr<MessageMetric> metric) {
+void ApplicationManagerObserver::OnMessage(
+    utils::SharedPtr<MessageMetric> metric) {
   ApplicationManagerMetricWrapper* m = new ApplicationManagerMetricWrapper();
   m->message_metric = metric;
   m->grabResources();

@@ -40,11 +40,10 @@ namespace utils {
 using namespace ::utils;
 
 TEST(BackTraceTest, CallStackShouldNotBeEmpty) {
-
-  //arrange
+  // arrange
   Backtrace newtrace = Backtrace();
-  std::vector < std::string > symbols = newtrace.CallStack();
-  //assert
+  std::vector<std::string> symbols = newtrace.CallStack();
+  // assert
   ASSERT_FALSE(symbols.empty());
 }
 

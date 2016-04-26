@@ -70,8 +70,8 @@ TEST(MetricWrapper, GetJsonMetricWithGrabResources) {
   EXPECT_NE("null/n", jvalue[strings::utime].toStyledString());
   EXPECT_NE("null/n", jvalue[strings::memory].toStyledString());
 
-  EXPECT_NEAR(resources->stime, jvalue[strings::stime].asInt(),1);
-  EXPECT_NEAR(resources->utime, jvalue[strings::utime].asInt(),1);
+  EXPECT_NEAR(resources->stime, jvalue[strings::stime].asInt(), 1);
+  EXPECT_NEAR(resources->utime, jvalue[strings::utime].asInt(), 1);
   EXPECT_EQ(resources->memory, jvalue[strings::memory].asInt());
 
   delete resources;

@@ -41,7 +41,7 @@
 
 typedef bool (*fillRoutine)(QDBusMessage&, const QVariantMap&);
 
-class DBusController: public QObject {
+class DBusController : public QObject {
   struct delayedReply {
     QDBusMessage message;
     fillRoutine fill;
@@ -49,12 +49,14 @@ class DBusController: public QObject {
   Q_OBJECT
 
  public:
-  explicit DBusController(QObject *parent = 0);
+  explicit DBusController(QObject* parent = 0);
   void addMessage(const QDBusMessage& message, fillRoutine fill, int async_uid);
   Q_INVOKABLE void sendReply(QVariant asyncObject, QVariant data);
   Q_INVOKABLE void sendReply(QVariant data);
   Q_INVOKABLE void sendError(QVariant asyncObject, QVariant code);
-  Q_INVOKABLE void sendError(QVariant asyncObject, QVariant code, QVariant message);
+  Q_INVOKABLE void sendError(QVariant asyncObject,
+                             QVariant code,
+                             QVariant message);
   const QDBusMessage* message;
   fillRoutine fill;
 

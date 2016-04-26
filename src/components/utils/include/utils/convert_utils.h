@@ -60,7 +60,6 @@ unsigned long long int ConvertUInt64ToLongLongUInt(const uint64_t value);
  */
 uint64_t ConvertLongLongUIntToUInt64(const unsigned long long int value);
 
-
 /**
  * Convert one number value to another type value
  */

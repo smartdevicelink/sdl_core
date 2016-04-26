@@ -40,17 +40,20 @@
  * \class security_manager::CryptoManager
  * \brief Class factory, producing instances of \ref SSLContext
  *
- * \fn security_manager::SSLContext *security_manager::CryptoManager::CreateSSLContext()
+ * \fn security_manager::SSLContext
+ **security_manager::CryptoManager::CreateSSLContext()
  * \brief Creates an instance of \ref SSLContext class
  *
-  * \fn void security_manager::CryptoManager::ReleaseSSLContext(security_manager::SSLContext *context)
+  * \fn void
+ *security_manager::CryptoManager::ReleaseSSLContext(security_manager::SSLContext
+ **context)
  * \brief Frees \ref SSLContext instance
  */
 
 namespace security_manager {
 class SSLContext;
 
-class CryptoManager: public policy::PolicyHandlerObserver{
+class CryptoManager : public policy::PolicyHandlerObserver {
  public:
   /**
    * @brief Init allows to initialize cryptomanager with certain values.
@@ -58,9 +61,9 @@ class CryptoManager: public policy::PolicyHandlerObserver{
    * @return true in case initialization was succesfull, false otherwise.
    */
   virtual bool Init() = 0;
-  virtual SSLContext *CreateSSLContext() = 0;
+  virtual SSLContext* CreateSSLContext() = 0;
   virtual bool OnCertificateUpdated(const std::string& data) = 0;
-  virtual void ReleaseSSLContext(SSLContext *context) = 0;
+  virtual void ReleaseSSLContext(SSLContext* context) = 0;
   virtual std::string LastError() const = 0;
 
   virtual bool IsCertificateUpdateRequired() const = 0;
@@ -69,7 +72,7 @@ class CryptoManager: public policy::PolicyHandlerObserver{
   * \return pointer to crypto manager settings class
   */
   virtual const CryptoManagerSettings& get_settings() const = 0;
-  virtual ~CryptoManager() { }
+  virtual ~CryptoManager() {}
 };
 
 }  // namespace security_manager

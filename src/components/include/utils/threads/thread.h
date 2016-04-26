@@ -119,11 +119,11 @@ class Thread {
     return delegate_lock_;
   }
 
-  ThreadDelegate *delegate() const {
+  ThreadDelegate* delegate() const {
     return delegate_;
   }
 
-  void set_delegate(ThreadDelegate *delegate) {
+  void set_delegate(ThreadDelegate* delegate) {
     delegate_ = delegate;
   }
 
@@ -131,7 +131,6 @@ class Thread {
   friend void DeleteThread(Thread* thread);
 
  public:
-
   // Yield current thread
   static void yield();
 

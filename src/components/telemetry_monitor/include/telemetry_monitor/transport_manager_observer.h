@@ -41,11 +41,12 @@ namespace telemetry_monitor {
 
 class TelemetryMonitor;
 
-class TransportManagerObserver: public transport_manager::TMTelemetryObserver {
+class TransportManagerObserver : public transport_manager::TMTelemetryObserver {
  public:
   explicit TransportManagerObserver(TelemetryMonitor* telemetry_monitor);
   virtual void StartRawMsg(const protocol_handler::RawMessage* ptr);
   virtual void StopRawMsg(const protocol_handler::RawMessage* ptr);
+
  private:
   TelemetryMonitor* telemetry_monitor_;
   std::map<const protocol_handler::RawMessage*, TimevalStruct> time_starts;

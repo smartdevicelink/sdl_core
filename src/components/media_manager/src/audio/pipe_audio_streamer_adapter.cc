@@ -37,10 +37,8 @@ namespace media_manager {
 PipeAudioStreamerAdapter::PipeAudioStreamerAdapter(
     const std::string& named_audio_pipe_path,
     const std::string& app_storage_folder)
-  : PipeStreamerAdapter(named_audio_pipe_path, app_storage_folder) {
-}
+    : PipeStreamerAdapter(named_audio_pipe_path, app_storage_folder) {}
 
-PipeAudioStreamerAdapter::~PipeAudioStreamerAdapter() {
-}
+PipeAudioStreamerAdapter::~PipeAudioStreamerAdapter() {}
 
 }  // namespace media_manager

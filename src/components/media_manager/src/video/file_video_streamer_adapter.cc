@@ -35,12 +35,9 @@
 namespace media_manager {
 
 FileVideoStreamerAdapter::FileVideoStreamerAdapter(
-    const std::string& video_stream_file,
-    const std::string& app_storage_folder)
-  : FileStreamerAdapter(video_stream_file, app_storage_folder) {
-}
+    const std::string& video_stream_file, const std::string& app_storage_folder)
+    : FileStreamerAdapter(video_stream_file, app_storage_folder) {}
 
-FileVideoStreamerAdapter::~FileVideoStreamerAdapter() {
-}
+FileVideoStreamerAdapter::~FileVideoStreamerAdapter() {}
 
 }  // namespace media_manager

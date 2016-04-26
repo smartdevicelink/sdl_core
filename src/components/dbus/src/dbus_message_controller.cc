@@ -41,22 +41,30 @@ DBusMessageController::DBusMessageController(const std::string& sdlServiceName,
                                              const std::string& sdlObjectPath,
                                              const std::string& hmiServiceName,
                                              const std::string& hmiObjectPath)
-    : DBusAdapter(sdlServiceName, sdlObjectPath,
-                  hmiServiceName, hmiObjectPath) {}
+    : DBusAdapter(
+          sdlServiceName, sdlObjectPath, hmiServiceName, hmiObjectPath) {}
 
 void DBusMessageController::SubscribeTo(const std::string& interface,
                                         const std::string& signal) {
   std::string rule = "type='signal'";
-  rule.append(", sender='").append(hmi_service_name_).append("'")
-      .append(", path='").append(hmi_object_path_).append("'")
-      .append(", interface='").append(hmi_service_name_).append(".")
-      .append(interface).append("'")
-      .append(", member='").append(signal).append("'");
+  rule.append(", sender='")
+      .append(hmi_service_name_)
+      .append("'")
+      .append(", path='")
+      .append(hmi_object_path_)
+      .append("'")
+      .append(", interface='")
+      .append(hmi_service_name_)
+      .append(".")
+      .append(interface)
+      .append("'")
+      .append(", member='")
+      .append(signal)
+      .append("'");
   DBusAdapter::AddMatch(rule);
 }
 
-DBusMessageController::~DBusMessageController() {
-}
+DBusMessageController::~DBusMessageController() {}
 
 void* DBusMessageController::MethodForReceiverThread(void*) {
   while (true) {

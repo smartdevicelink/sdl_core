@@ -42,29 +42,31 @@ namespace components {
 namespace connection_handler_test {
 
 /*
- * MOCK implementation of ::connection_handler::ConnectionHandlerObserver interface
+ * MOCK implementation of ::connection_handler::ConnectionHandlerObserver
+ * interface
  */
-class ConnectionHandlerObserverMock : public ::connection_handler::ConnectionHandlerObserver {
+class ConnectionHandlerObserverMock
+    : public ::connection_handler::ConnectionHandlerObserver {
  public:
   MOCK_METHOD1(OnDeviceListUpdated,
-      void(const connection_handler::DeviceMap &device_list));
-  MOCK_METHOD0(OnFindNewApplicationsRequest,void());
+               void(const connection_handler::DeviceMap& device_list));
+  MOCK_METHOD0(OnFindNewApplicationsRequest, void());
   MOCK_METHOD1(RemoveDevice,
-      void(const connection_handler::DeviceHandle &device_handle));
+               void(const connection_handler::DeviceHandle& device_handle));
   MOCK_METHOD3(OnServiceStartedCallback,
-      bool(const connection_handler::DeviceHandle &device_handle,
-           const int32_t &session_key,
-           const protocol_handler::ServiceType &type));
-  MOCK_METHOD3(OnServiceEndedCallback,
-      void(const int32_t &session_key,
-           const protocol_handler::ServiceType &type,
+               bool(const connection_handler::DeviceHandle& device_handle,
+                    const int32_t& session_key,
+                    const protocol_handler::ServiceType& type));
+  MOCK_METHOD3(
+      OnServiceEndedCallback,
+      void(const int32_t& session_key,
+           const protocol_handler::ServiceType& type,
            const connection_handler::CloseSessionReason& close_reason));
-  MOCK_CONST_METHOD1(GetHandshakeContext,
-                     security_manager::SSLContext::HandshakeContext(
-                       uint32_t key));
-
+  MOCK_CONST_METHOD1(
+      GetHandshakeContext,
+      security_manager::SSLContext::HandshakeContext(uint32_t key));
 };
-} // namespace connection_handler_test
-} // namespace components
-} // namespace test
-#endif  //SRC_COMPONENTS_CONNECTION_HANDLER_TEST_INCLUDE_CONNECTION_HANDLER_OBSERVER_MOCK_H_
+}  // namespace connection_handler_test
+}  // namespace components
+}  // namespace test
+#endif  // SRC_COMPONENTS_CONNECTION_HANDLER_TEST_INCLUDE_CONNECTION_HANDLER_OBSERVER_MOCK_H_

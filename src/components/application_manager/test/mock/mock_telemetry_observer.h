@@ -40,8 +40,9 @@ namespace test {
 namespace components {
 namespace application_manager_test {
 
-class MockAMTelemetryObserver : public application_manager::AMTelemetryObserver {
-  public:
+class MockAMTelemetryObserver
+    : public application_manager::AMTelemetryObserver {
+ public:
   MOCK_METHOD1(OnMessage, void(MessageMetricSharedPtr));
 };
 

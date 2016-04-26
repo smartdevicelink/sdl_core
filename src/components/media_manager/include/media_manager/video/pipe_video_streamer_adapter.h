@@ -39,9 +39,8 @@ namespace media_manager {
 
 class PipeVideoStreamerAdapter : public PipeStreamerAdapter {
  public:
-  PipeVideoStreamerAdapter(
-      const std::string& named_video_pipe_path,
-      const std::string& app_storage_folder);
+  PipeVideoStreamerAdapter(const std::string& named_video_pipe_path,
+                           const std::string& app_storage_folder);
   ~PipeVideoStreamerAdapter();
 };
 

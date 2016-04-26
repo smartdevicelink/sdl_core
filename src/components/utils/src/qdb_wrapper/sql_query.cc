@@ -41,70 +41,65 @@
 namespace utils {
 namespace dbms {
 
-  CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 class SetBindInteger {
  public:
-  explicit SetBindInteger(qdb_binding_t* array)
-      : array_(array) {
-  }
+  explicit SetBindInteger(qdb_binding_t* array) : array_(array) {}
   void operator()(const std::pair<int, int64_t>& x) {
     // In QDB the number of position for binding starts since 1.
     QDB_SETARRAYBIND_INT(array_, x.first + 1, x.second);
   }
+
  private:
   qdb_binding_t* array_;
 };
 
 class SetBindReal {
  public:
-  explicit SetBindReal(qdb_binding_t* array)
-      : array_(array) {
-  }
+  explicit SetBindReal(qdb_binding_t* array) : array_(array) {}
   void operator()(const std::pair<int, double>& x) {
     // In QDB the number of position for binding starts since 1.
     QDB_SETARRAYBIND_REAL(array_, x.first + 1, x.second);
   }
+
  private:
   qdb_binding_t* array_;
 };
 
 class SetBindText {
  public:
-  explicit SetBindText(qdb_binding_t* array)
-      : array_(array) {
-  }
+  explicit SetBindText(qdb_binding_t* array) : array_(array) {}
   void operator()(const std::pair<int, std::string>& x) {
     // In QDB the number of position for binding starts since 1.
     QDB_SETARRAYBIND_TEXT(array_, x.first + 1, x.second.c_str());
   }
+
  private:
   qdb_binding_t* array_;
 };
 
 class SetBindNull {
  public:
-  explicit SetBindNull(qdb_binding_t* array)
-      : array_(array) {
-  }
+  explicit SetBindNull(qdb_binding_t* array) : array_(array) {}
   void operator()(int x) {
     // In QDB the number of position for binding starts since 1.
     QDB_SETARRAYBIND_NULL(array_, x + 1);
   }
+
  private:
   qdb_binding_t* array_;
 };
 
 SQLQuery::SQLQuery(SQLDatabase* db)
-    : db_(db),
-      query_(""),
-      statement_(-1),
-      bindings_(NULL),
-      result_(NULL),
-      current_row_(0),
-      rows_(0),
-      error_(Error::OK) {
-}
+    : db_(db)
+    , query_("")
+    , statement_(-1)
+    , bindings_(NULL)
+    , result_(NULL)
+    , current_row_(0)
+    , rows_(0)
+    , error_(Error::OK) {}
 
 SQLQuery::~SQLQuery() {
   Finalize();
@@ -124,17 +119,17 @@ bool SQLQuery::Prepare(const std::string& query) {
 }
 
 uint8_t SQLQuery::SetBinds() {
-  uint8_t binding_count = int_binds_.size() + double_binds_.size()
-      + string_binds_.size() + null_binds_.size();
+  uint8_t binding_count = int_binds_.size() + double_binds_.size() +
+                          string_binds_.size() + null_binds_.size();
 
   bindings_ = new qdb_binding_t[binding_count];
 
-  std::for_each(int_binds_.begin(), int_binds_.end(),
-                SetBindInteger(bindings_));
-  std::for_each(double_binds_.begin(), double_binds_.end(),
-                SetBindReal(bindings_));
-  std::for_each(string_binds_.begin(), string_binds_.end(),
-                SetBindText(bindings_));
+  std::for_each(
+      int_binds_.begin(), int_binds_.end(), SetBindInteger(bindings_));
+  std::for_each(
+      double_binds_.begin(), double_binds_.end(), SetBindReal(bindings_));
+  std::for_each(
+      string_binds_.begin(), string_binds_.end(), SetBindText(bindings_));
   std::for_each(null_binds_.begin(), null_binds_.end(), SetBindNull(bindings_));
 
   return binding_count;
@@ -239,7 +234,7 @@ bool SQLQuery::GetBoolean(int pos) const {
 
 int SQLQuery::GetInteger(int pos) const {
   void* ret = qdb_cell(result_, current_row_, pos);
-  if (rows_ !=0 && ret) {
+  if (rows_ != 0 && ret) {
     return *static_cast<int*>(ret);
   }
   return 0;
@@ -247,7 +242,7 @@ int SQLQuery::GetInteger(int pos) const {
 
 uint32_t SQLQuery::GetUInteger(int pos) const {
   void* ret = qdb_cell(result_, current_row_, pos);
-  if (rows_ !=0 && ret) {
+  if (rows_ != 0 && ret) {
     return *static_cast<uint32_t*>(ret);
   }
   return 0;
@@ -255,16 +250,15 @@ uint32_t SQLQuery::GetUInteger(int pos) const {
 
 int64_t SQLQuery::GetLongInt(int pos) const {
   void* ret = qdb_cell(result_, current_row_, pos);
-  if (rows_ !=0 && ret) {
+  if (rows_ != 0 && ret) {
     return *static_cast<int64_t*>(ret);
   }
   return 0;
 }
 
-
 double SQLQuery::GetDouble(int pos) const {
   void* ret = qdb_cell(result_, current_row_, pos);
-  if (rows_ !=0 && ret) {
+  if (rows_ != 0 && ret) {
     return *static_cast<double*>(ret);
   }
   return 0;
@@ -297,4 +291,3 @@ int64_t SQLQuery::LastInsertId() const {
 
 }  // namespace dbms
 }  // namespace utils
-

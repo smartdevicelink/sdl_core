@@ -42,7 +42,8 @@ namespace protocol_handler {
 
 /**
  * \class IncomingDataHandler
- * \brief Class for contecat TM messages to ford frames and validate ford header data
+ * \brief Class for contecat TM messages to ford frames and validate ford header
+ * data
  * IncomingDataHandler methods are reentrant and not thread-safe
  */
 class IncomingDataHandler {
@@ -52,7 +53,8 @@ class IncomingDataHandler {
    * @brief Setting additional validator for checking malformed packets
    * \param validator pointer
    */
-  void set_validator(const ProtocolPacket::ProtocolHeaderValidator* const validator);
+  void set_validator(
+      const ProtocolPacket::ProtocolHeaderValidator* const validator);
   /**
    * @brief Concatenate TM messages to ford frames and validate ford header data
    * \param TM messages for converting to frames
@@ -70,13 +72,11 @@ class IncomingDataHandler {
   /**
    * @brief Add connection for data handling and verification
    */
-  void AddConnection(
-    const transport_manager::ConnectionUID connection_id);
+  void AddConnection(const transport_manager::ConnectionUID connection_id);
   /**
    * @brief Remove connection and all unhandled data
    */
-  void RemoveConnection(
-    const transport_manager::ConnectionUID connection_id);
+  void RemoveConnection(const transport_manager::ConnectionUID connection_id);
 
  private:
   /**
@@ -100,10 +100,10 @@ class IncomingDataHandler {
                           const transport_manager::ConnectionUID connection_id);
 
   typedef std::map<transport_manager::ConnectionUID, std::vector<uint8_t> >
-  ConnectionsDataMap;
+      ConnectionsDataMap;
   ConnectionsDataMap connections_data_;
   ProtocolPacket::ProtocolHeader header_;
-  const  ProtocolPacket::ProtocolHeaderValidator* validator_;
+  const ProtocolPacket::ProtocolHeaderValidator* validator_;
   bool last_portion_of_data_was_malformed_;
   DISALLOW_COPY_AND_ASSIGN(IncomingDataHandler);
 };

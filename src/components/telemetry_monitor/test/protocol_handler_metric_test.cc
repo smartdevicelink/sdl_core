@@ -58,7 +58,8 @@ TEST(ProtocolHandlerMetricTest, GetJsonMetric) {
   TimevalStruct end_time;
   end_time.tv_sec = 10;
   end_time.tv_usec = 0;
-  metric_test.message_metric = new protocol_handler::PHTelemetryObserver::MessageMetric();
+  metric_test.message_metric =
+      new protocol_handler::PHTelemetryObserver::MessageMetric();
   metric_test.message_metric->begin = start_time;
   metric_test.message_metric->end = end_time;
   metric_test.message_metric->message_id = 5;
@@ -70,8 +71,10 @@ TEST(ProtocolHandlerMetricTest, GetJsonMetric) {
   EXPECT_EQ("null\n", jvalue[strings::utime].toStyledString());
   EXPECT_EQ("null\n", jvalue[strings::memory].toStyledString());
 
-  EXPECT_EQ(date_time::DateTime::getuSecs(start_time), jvalue[strings::begin].asInt64());
-  EXPECT_EQ(date_time::DateTime::getuSecs(end_time), jvalue[strings::end].asInt64());
+  EXPECT_EQ(date_time::DateTime::getuSecs(start_time),
+            jvalue[strings::begin].asInt64());
+  EXPECT_EQ(date_time::DateTime::getuSecs(end_time),
+            jvalue[strings::end].asInt64());
   EXPECT_EQ(5, jvalue[strings::message_id].asInt64());
   EXPECT_EQ(2, jvalue[strings::connection_key].asInt());
 }
@@ -89,7 +92,8 @@ TEST(ProtocolHandlerMetricTest, GetJsonMetricWithGrabResources) {
   TimevalStruct end_time;
   end_time.tv_sec = 10;
   end_time.tv_usec = 0;
-  metric_test.message_metric = new protocol_handler::PHTelemetryObserver::MessageMetric();
+  metric_test.message_metric =
+      new protocol_handler::PHTelemetryObserver::MessageMetric();
   metric_test.message_metric->begin = start_time;
   metric_test.message_metric->end = end_time;
   metric_test.message_metric->message_id = 5;
@@ -103,13 +107,15 @@ TEST(ProtocolHandlerMetricTest, GetJsonMetricWithGrabResources) {
   EXPECT_NE("null/n", jvalue[strings::utime].toStyledString());
   EXPECT_NE("null/n", jvalue[strings::memory].toStyledString());
 
-  EXPECT_EQ(date_time::DateTime::getuSecs(start_time), jvalue[strings::begin].asInt64());
-  EXPECT_EQ(date_time::DateTime::getuSecs(end_time), jvalue[strings::end].asInt64());
+  EXPECT_EQ(date_time::DateTime::getuSecs(start_time),
+            jvalue[strings::begin].asInt64());
+  EXPECT_EQ(date_time::DateTime::getuSecs(end_time),
+            jvalue[strings::end].asInt64());
   EXPECT_EQ(5, jvalue[strings::message_id].asInt64());
   EXPECT_EQ(2, jvalue[strings::connection_key].asInt());
 
-  EXPECT_NEAR(resources->stime, jvalue[strings::stime].asInt(),1);
-  EXPECT_NEAR(resources->utime, jvalue[strings::utime].asInt(),1);
+  EXPECT_NEAR(resources->stime, jvalue[strings::stime].asInt(), 1);
+  EXPECT_NEAR(resources->utime, jvalue[strings::utime].asInt(), 1);
   EXPECT_EQ(resources->memory, jvalue[strings::memory].asInt());
   delete resources;
 }

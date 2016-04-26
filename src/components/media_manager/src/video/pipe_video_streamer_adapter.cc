@@ -37,10 +37,8 @@ namespace media_manager {
 PipeVideoStreamerAdapter::PipeVideoStreamerAdapter(
     const std::string& named_video_pipe_path,
     const std::string& app_storage_folder)
-  : PipeStreamerAdapter(named_video_pipe_path, app_storage_folder) {
-}
+    : PipeStreamerAdapter(named_video_pipe_path, app_storage_folder) {}
 
-PipeVideoStreamerAdapter::~PipeVideoStreamerAdapter() {
-}
+PipeVideoStreamerAdapter::~PipeVideoStreamerAdapter() {}
 
 }  // namespace media_manager

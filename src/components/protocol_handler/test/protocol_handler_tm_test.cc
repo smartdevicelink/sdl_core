@@ -274,7 +274,8 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   testing::StrictMock<protocol_handler_test::MockSessionObserver>
       session_observer_mock;
 #ifdef ENABLE_SECURITY
-  testing::NiceMock<security_manager_test::MockSecurityManager> security_manager_mock;
+  testing::NiceMock<security_manager_test::MockSecurityManager>
+      security_manager_mock;
   testing::NiceMock<security_manager_test::MockSSLContext> ssl_context_mock;
 #endif  // ENABLE_SECURITY
 };

@@ -45,9 +45,8 @@ namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 /**
  * \brief adapter for DBus
  */
-class DBusMessageAdapter
-    : public HMIMessageAdapterImpl,
-      public dbus::DBusMessageController {
+class DBusMessageAdapter : public HMIMessageAdapterImpl,
+                           public dbus::DBusMessageController {
  public:
   typedef utils::SharedPtr<application_manager::Message> MessageSharedPointer;
   explicit DBusMessageAdapter(HMIMessageHandler* hmi_msg_handler);
@@ -69,7 +68,7 @@ class DBusMessageAdapter
    * \brief sends request to HMI
    * \param obj request
    */
-  void Request(const smart_objects::SmartObject &obj);
+  void Request(const smart_objects::SmartObject& obj);
 
   /**
    * \brief sends notification to HMI
@@ -81,7 +80,7 @@ class DBusMessageAdapter
    * \brief sends response to HMI
    * \param obj response
    */
-  void Response(const smart_objects::SmartObject &obj);
+  void Response(const smart_objects::SmartObject& obj);
 
   /**
    * \brief sends error response to HMI
@@ -93,7 +92,7 @@ class DBusMessageAdapter
    * \brief sends message to core
    * \param obj
    */
-  void SendMessageToCore(const smart_objects::SmartObject &obj);
+  void SendMessageToCore(const smart_objects::SmartObject& obj);
 };
 
 }  // namespace hmi_message_handler

@@ -54,6 +54,7 @@ class CAlwaysTrueSchemaItem : public ISchemaItem {
    * @return NsSmartObjects::Errors::eType
    **/
   Errors::eType validate(const SmartObject& Object) OVERRIDE;
+
  private:
   CAlwaysTrueSchemaItem();
   DISALLOW_COPY_AND_ASSIGN(CAlwaysTrueSchemaItem);

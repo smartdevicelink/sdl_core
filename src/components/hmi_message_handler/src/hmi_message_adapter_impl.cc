@@ -36,6 +36,8 @@ namespace hmi_message_handler {
 HMIMessageAdapterImpl::HMIMessageAdapterImpl(HMIMessageHandler* handler)
     : handler_(handler) {}
 
-HMIMessageAdapterImpl::~HMIMessageAdapterImpl() { handler_ = 0; }
+HMIMessageAdapterImpl::~HMIMessageAdapterImpl() {
+  handler_ = 0;
+}
 
 }  // namespace hmi_message_handler

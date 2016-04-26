@@ -238,7 +238,7 @@ class SQLQuery {
   /**
    * The result of query
    */
-  qdb_result_t *result_;
+  qdb_result_t* result_;
 
   /**
    * The current row in result for select

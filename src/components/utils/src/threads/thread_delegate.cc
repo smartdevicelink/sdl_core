@@ -55,7 +55,7 @@ void ThreadDelegate::exitThreadMain() {
   }
 }
 
-void ThreadDelegate::set_thread(Thread *thread) {
+void ThreadDelegate::set_thread(Thread* thread) {
   DCHECK(thread);
   thread_ = thread;
 }
