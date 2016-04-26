@@ -153,7 +153,8 @@ bool MessageLanguages::Validate() const {
 }
 
 bool ConsumerFriendlyMessages::Validate() const {
-  if (PT_SNAPSHOT == GetPolicyTableType()) {
+  if (PT_SNAPSHOT == GetPolicyTableType() && 
+    messages.is_initialized()) {
     return false;
   }
   return true;
