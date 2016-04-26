@@ -49,4 +49,13 @@ deploy:
   skip_cleanup: true
   on:
     tags: true
+notifications:
+  email:
+    - AKutsan@luxoft.com
+    - AByzhynar@luxoft.com
+    - NSnitsar@luxoft.com
+    - RMalynovskyi@luxoft.com
+    - MGhiumiusliu@luxoft.com
+    - AGaliuzov@luxoft.com
+    - ANosach@luxoft.com
 
