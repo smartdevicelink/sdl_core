@@ -17,11 +17,11 @@ rm -rf $COVERAGE_DIR
 rm -rf $REPORTS_DIR -
 
 mkdir $COVERAGE_DIR
-lcov --capture --directory . --output-file $COVERAGE_DIR/full_report.info
-lcov --remove $COVERAGE_DIR/full_report.info '/usr/*' '*/test/*' '*/src/3rd*' '*/build/src/*'  --output-file $COVERAGE_DIR/coverage.info
+lcov --quiet --capture --directory . --output-file $COVERAGE_DIR/full_report.info
+lcov --quiet --remove $COVERAGE_DIR/full_report.info '/usr/*' '*/test/*' '*/src/3rd*' '*/build/src/*'  --output-file $COVERAGE_DIR/coverage.info
 
 mkdir $REPORTS_DIR
-genhtml $COVERAGE_DIR/coverage.info --output-directory $REPORTS_DIR
+genhtml --quiet $COVERAGE_DIR/coverage.info --output-directory $REPORTS_DIR
 html2text -width 150 $REPORTS_DIR/index.html
 tar -zcf coverage_report.tar.gz $REPORTS_DIR
 echo More information avaliable in $REPORTS_DIR/index.html
