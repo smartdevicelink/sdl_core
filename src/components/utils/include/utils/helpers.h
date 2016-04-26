@@ -32,6 +32,8 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_HELPERS_H
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_HELPERS_H
 
+#include <algorithm>
+
 /**
  * These helpers allows to simplify compare strategy between some objects.
  * Suppose user has some enum with value E with some numbers of possible values

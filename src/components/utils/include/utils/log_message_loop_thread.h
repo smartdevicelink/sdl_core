@@ -35,6 +35,7 @@
 #include <string>
 #include <queue>
 
+#if defined(ENABLE_LOG)
 #if defined(LOG4CXX_LOGGER)
 #include <log4cxx/logger.h>
 #elif defined(WIN_NATIVE)
@@ -44,6 +45,7 @@
 #else
 #error "Logger is not implemented for this platform"
 #endif
+#endif // ENABLE_LOG
 
 #include "utils/macro.h"
 #include "utils/threads/message_loop_thread.h"
@@ -51,6 +53,7 @@
 namespace logger {
 
 struct LogMessage {
+#if defined(ENABLE_LOG)
   logger::LoggerType logger_;
   logger::LogLevel::Type level_;
   std::string entry_;
@@ -66,6 +69,7 @@ struct LogMessage {
   QDateTime time_;
   uint32_t thread_id_;
 #endif
+#endif // ENABLE_LOG
 };
 
 typedef std::queue<LogMessage> LogMessageQueue;

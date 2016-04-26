@@ -339,7 +339,9 @@ bool SecurityManagerImpl::ProccessInternalError(
   if (!parse_result.second) {
     return false;
   }
+#if defined(ENABLE_LOG)
   JsonValue& root_json = parse_result.first;
+#endif
   LOGGER_DEBUG(logger_,
                "Received InternalError id "
                << root_json[kErrId].AsString()
