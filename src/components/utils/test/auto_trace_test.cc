@@ -51,11 +51,15 @@ using namespace ::logger;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "AutoTraceTestLog")
 
+namespace{
+const std::string kFileName =
+    file_system::CurrentWorkingDirectory() + "/AutoTraceTestLogFile.log";
+}  // namespace
+
 void Preconditions() {
-  const char* file_name = "AutoTraceTestLogFile.log";
   // Delete file with previous logs
-  if (file_system::FileExists(file_name)) {
-    ASSERT_TRUE(file_system::DeleteFile(file_name))
+  if (file_system::FileExists(kFileName)) {
+    ASSERT_TRUE(file_system::DeleteFile(kFileName))
         << "Can't delete AutoTraceTestLogFile.log";
   }
 }
@@ -75,7 +79,7 @@ bool CheckAutoTraceDebugInFile(const std::string& testlog) {
   bool isLogFound = false;
   std::string line;
 
-  std::ifstream file_log("AutoTraceTestLogFile.log");
+  std::ifstream file_log(kFileName);
 
   if (file_log.is_open()) {
     while (getline(file_log, line)) {
@@ -99,16 +103,7 @@ TEST(AutoTraceTest, AutoTrace_WriteToFile_ReadCorrectString) {
   InitLogger();
   CreateDeleteAutoTrace(testlog);
 
-  const TimevalStruct startTime = date_time::DateTime::getCurrentTime();
-  const int64_t timeout_msec = 10000;
-  // Waiting for empty Logger MessageQueue 10 seconds
-  LogMessageLoopThread loop_thread;
-  while (loop_thread.GetMessageQueueSize()) {
-    ASSERT_LT(date_time::DateTime::calculateTimeDiff(
-                  date_time::DateTime::getCurrentTime(), startTime),
-              timeout_msec);
-    threads::Thread::yield();
-  }
+  FLUSH_LOGGER();
   ASSERT_TRUE(CheckAutoTraceDebugInFile(testlog));
 }
 
