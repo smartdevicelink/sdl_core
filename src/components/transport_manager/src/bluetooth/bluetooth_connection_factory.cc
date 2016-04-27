@@ -55,8 +55,8 @@ TransportAdapter::Error BluetoothConnectionFactory::Init() {
 TransportAdapter::Error BluetoothConnectionFactory::CreateConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
   LOGGER_TRACE(logger_,
-                "enter. device_uid: " << &device_uid
-                                      << ", app_handle: " << &app_handle);
+               "enter. device_uid: " << &device_uid
+                                     << ", app_handle: " << &app_handle);
   BluetoothSocketConnection* connection(
       new BluetoothSocketConnection(device_uid, app_handle, controller_));
   TransportAdapter::Error error = connection->Start();

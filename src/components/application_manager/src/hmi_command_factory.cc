@@ -280,8 +280,8 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     ApplicationManager& application_manager) {
   const int function_id =
       (*message)[strings::params][strings::function_id].asInt();
-  LOGGER_DEBUG(
-      logger_, "HMICommandFactory::CreateCommand function_id: " << function_id);
+  LOGGER_DEBUG(logger_,
+               "HMICommandFactory::CreateCommand function_id: " << function_id);
 
   CommandSharedPtr command(new application_manager::commands::CommandImpl(
       message, application_manager));

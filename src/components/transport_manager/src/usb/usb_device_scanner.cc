@@ -203,12 +203,12 @@ void UsbDeviceScanner::SupportedDeviceFound(PlatformUsbDevice* device) {
   devices_.push_back(device);
   devices_mutex_.Release();
   LOGGER_DEBUG(logger_,
-                "USB device (bus number "
-                    << static_cast<int>(device->bus_number()) << ", address "
-                    << static_cast<int>(device->address())
-                    << ") identified as: " << device->GetManufacturer() << ", "
-                    << device->GetProductName()
-                    << ", serial: " << device->GetSerialNumber());
+               "USB device (bus number "
+                   << static_cast<int>(device->bus_number()) << ", address "
+                   << static_cast<int>(device->address())
+                   << ") identified as: " << device->GetManufacturer() << ", "
+                   << device->GetProductName()
+                   << ", serial: " << device->GetSerialNumber());
   UpdateList();
 }
 

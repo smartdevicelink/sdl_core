@@ -55,8 +55,8 @@ Device::Device(DeviceHandle device_handle,
     , connection_type_(connection_type) {
   mac_address_ = encryption::MakeHash(mac_address);
   LOGGER_DEBUG(logger_,
-                "Device: MAC address - " << mac_address << ", hash - "
-                                         << mac_address_);
+               "Device: MAC address - " << mac_address << ", hash - "
+                                        << mac_address_);
 }
 
 DeviceHandle Device::device_handle() const {

@@ -1268,7 +1268,7 @@ bool MessageHelper::CreateHMIApplicationStruct(
       session_observer.GetDataOnDeviceID(
           app->device(), &device_name, NULL, &mac_address, &transport_type)) {
     LOGGER_ERROR(logger_,
-                  "Failed to extract information for device " << app->device());
+                 "Failed to extract information for device " << app->device());
   }
 
   message = smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -2200,7 +2200,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
 
       if (mobile_apis::Result::SUCCESS != verification_result) {
         LOGGER_DEBUG(logger_,
-                      "VerifyImageFiles result:" << verification_result);
+                     "VerifyImageFiles result:" << verification_result);
         return verification_result;  // exit point
       }
     } else {
@@ -2301,8 +2301,8 @@ bool MessageHelper::VerifySoftButtonString(const std::string& str) {
       (std::string::npos != str.find("\\t")) ||
       (std::string::npos == str.find_first_not_of(' '))) {
     LOGGER_ERROR(logger_,
-                  "MessageHelper::VerifySoftButtonString"
-                  "string contains incorrect character");
+                 "MessageHelper::VerifySoftButtonString"
+                 "string contains incorrect character");
     return false;
   }
   return true;

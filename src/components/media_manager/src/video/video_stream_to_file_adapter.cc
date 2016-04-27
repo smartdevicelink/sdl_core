@@ -68,8 +68,7 @@ void VideoStreamToFileAdapter::Init() {
 
 void VideoStreamToFileAdapter::SendData(
     int32_t application_key, const ::protocol_handler::RawMessagePtr message) {
-  LOGGER_INFO(logger,
-               "VideoStreamToFileAdapter::SendData " << application_key);
+  LOGGER_INFO(logger, "VideoStreamToFileAdapter::SendData " << application_key);
 
   if (application_key != current_application_) {
     LOGGER_WARN(logger, "Wrong application " << application_key);
@@ -83,10 +82,10 @@ void VideoStreamToFileAdapter::SendData(
 
 void VideoStreamToFileAdapter::StartActivity(int32_t application_key) {
   LOGGER_INFO(logger,
-               "VideoStreamToFileAdapter::StartActivity " << application_key);
+              "VideoStreamToFileAdapter::StartActivity " << application_key);
   if (application_key == current_application_) {
-    LOGGER_WARN(
-        logger, "Already running video stream to file for " << application_key);
+    LOGGER_WARN(logger,
+                "Already running video stream to file for " << application_key);
     return;
   }
 
@@ -102,10 +101,10 @@ void VideoStreamToFileAdapter::StartActivity(int32_t application_key) {
 
 void VideoStreamToFileAdapter::StopActivity(int32_t application_key) {
   LOGGER_INFO(logger,
-               "VideoStreamToFileAdapter::StopActivity " << application_key);
+              "VideoStreamToFileAdapter::StopActivity " << application_key);
   if (application_key != current_application_) {
-    LOGGER_WARN(
-        logger, "Performing activity for another key " << current_application_);
+    LOGGER_WARN(logger,
+                "Performing activity for another key " << current_application_);
     return;
   }
 

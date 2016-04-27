@@ -60,7 +60,7 @@ void RetrySequence::StartNextRetry() {
     const int timeout = policy_handler_->TimeoutExchange();
     const int seconds = policy_handler_->NextRetryTimeout();
     LOGGER_DEBUG(logger_,
-                  "Timeout response: " << timeout << " Next try: " << seconds);
+                 "Timeout response: " << timeout << " Next try: " << seconds);
     if (timeout > 0) {
       sleep(timeout);
       policy_handler_->OnExceededTimeout();

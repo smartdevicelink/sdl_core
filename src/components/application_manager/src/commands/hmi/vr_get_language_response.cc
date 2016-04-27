@@ -59,9 +59,9 @@ void VRGetLanguageResponse::Run() {
   application_manager_.hmi_capabilities().set_active_vr_language(language);
 
   LOGGER_DEBUG(logger_,
-                "Raising event for function_id " << function_id()
-                                                 << " and correlation_id "
-                                                 << correlation_id());
+               "Raising event for function_id " << function_id()
+                                                << " and correlation_id "
+                                                << correlation_id());
   event_engine::Event event(FunctionID::VR_GetLanguage);
   event.set_smart_object(*message_);
   event.raise(application_manager_.event_dispatcher());

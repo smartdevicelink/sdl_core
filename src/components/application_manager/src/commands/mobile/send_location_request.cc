@@ -55,8 +55,8 @@ void SendLocationRequest::Run() {
 
   if (!app) {
     LOGGER_ERROR(logger_,
-                  "An application with connection key "
-                      << connection_key() << " is not registered.");
+                 "An application with connection key "
+                     << connection_key() << " is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -157,13 +157,13 @@ bool SendLocationRequest::CheckFieldsCompatibility() {
 
   if (latitude_degrees_exist ^ longitude_degrees_exist) {
     LOGGER_DEBUG(logger_,
-                  "latitude and longitude should be provided only in pair");
+                 "latitude and longitude should be provided only in pair");
     return false;
   }
 
   if (!address_exist && !longitude_degrees_exist && !latitude_degrees_exist) {
     LOGGER_DEBUG(logger_,
-                  "address or latitude/longtitude should should be provided");
+                 "address or latitude/longtitude should should be provided");
     return false;
   }
   return true;
@@ -217,7 +217,7 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
     const std::string& str = it->AsMBString();
     if (!CheckSyntax(str, false)) {
       LOGGER_ERROR(logger_,
-                    "string '" << str << "'' contains invalid characters");
+                   "string '" << str << "'' contains invalid characters");
       return true;
     }
   }

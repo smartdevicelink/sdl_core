@@ -58,8 +58,8 @@ void OnSystemRequestNotification::Run() {
 
   if (!app.valid()) {
     LOGGER_ERROR(logger_,
-                  "Application with connection key " << connection_key()
-                                                     << " is not registered.");
+                 "Application with connection key " << connection_key()
+                                                    << " is not registered.");
     return;
   }
 
@@ -70,8 +70,8 @@ void OnSystemRequestNotification::Run() {
   if (!policy_handler.IsRequestTypeAllowed(app->policy_app_id(),
                                            request_type)) {
     LOGGER_WARN(logger_,
-                 "Request type " << request_type
-                                 << " is not allowed by policies");
+                "Request type " << request_type
+                                << " is not allowed by policies");
     return;
   }
 

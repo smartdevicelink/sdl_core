@@ -50,8 +50,8 @@ AudioStartStreamRequest::AudioStartStreamRequest(
   default_timeout_ = stream_retry.second;
   retry_number_ = stream_retry.first;
   LOGGER_DEBUG(logger_,
-                "default_timeout_ = " << default_timeout_
-                                      << "; retry_number_ = " << retry_number_);
+               "default_timeout_ = " << default_timeout_
+                                     << "; retry_number_ = " << retry_number_);
 }
 
 AudioStartStreamRequest::~AudioStartStreamRequest() {}
@@ -70,8 +70,8 @@ void AudioStartStreamRequest::Run() {
     SendRequest();
   } else {
     LOGGER_ERROR(logger_,
-                  "Applcation with hmi_app_id " << application_id()
-                                                << " does not exist");
+                 "Applcation with hmi_app_id " << application_id()
+                                               << " does not exist");
   }
 }
 
@@ -83,7 +83,7 @@ void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
       application_manager_.application_by_hmi_app(application_id());
   if (!app) {
     LOGGER_ERROR(logger_,
-                  "StartAudioStreamRequest aborted. Application not found");
+                 "StartAudioStreamRequest aborted. Application not found");
     return;
   }
 
@@ -134,7 +134,7 @@ void AudioStartStreamRequest::RetryStartSession() {
       application_manager_.application_by_hmi_app(application_id());
   if (!app) {
     LOGGER_ERROR(logger_,
-                  "StartAudioStreamRequest aborted. Application not found");
+                 "StartAudioStreamRequest aborted. Application not found");
     return;
   }
 
@@ -145,8 +145,8 @@ void AudioStartStreamRequest::RetryStartSession() {
 
   if (app->audio_streaming_approved()) {
     LOGGER_INFO(logger_,
-                 "AudioStartStream retry sequence stopped. "
-                     << "SUCCESS received");
+                "AudioStartStream retry sequence stopped. "
+                    << "SUCCESS received");
     app->set_audio_stream_retry_number(0);
     return;
   }
@@ -160,8 +160,8 @@ void AudioStartStreamRequest::RetryStartSession() {
     app->set_audio_stream_retry_number(++curr_retry_number);
   } else {
     LOGGER_DEBUG(logger_,
-                  "Audio start stream retry sequence stopped. "
-                      << "Attempts expired.");
+                 "Audio start stream retry sequence stopped. "
+                     << "Attempts expired.");
 
     application_manager_.EndNaviServices(app->app_id());
   }

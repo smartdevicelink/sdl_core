@@ -59,7 +59,7 @@ PipeStreamerAdapter::PipeStreamer::PipeStreamer(
     , pipe_fd_(0) {
   if (!file_system::CreateDirectoryRecursively(app_storage_folder_)) {
     LOGGER_ERROR(logger_,
-                  "Cannot create app storage folder " << app_storage_folder_);
+                 "Cannot create app storage folder " << app_storage_folder_);
     return;
   }
   if ((mkfifo(named_pipe_path_.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) <
@@ -68,7 +68,7 @@ PipeStreamerAdapter::PipeStreamer::PipeStreamer(
     LOGGER_ERROR(logger_, "Cannot create pipe " << named_pipe_path_);
   } else {
     LOGGER_INFO(logger_,
-                 "Pipe " << named_pipe_path_ << " was successfully created");
+                "Pipe " << named_pipe_path_ << " was successfully created");
   }
 }
 PipeStreamerAdapter::PipeStreamer::~PipeStreamer() {
@@ -89,8 +89,8 @@ bool PipeStreamerAdapter::PipeStreamer::Connect() {
   }
 
   LOGGER_INFO(logger_,
-               "Pipe " << named_pipe_path_
-                       << " was successfuly opened for writing");
+              "Pipe " << named_pipe_path_
+                      << " was successfuly opened for writing");
   return true;
 }
 
@@ -114,7 +114,7 @@ bool PipeStreamerAdapter::PipeStreamer::Send(
 
   if (static_cast<uint32_t>(ret) != msg->data_size()) {
     LOGGER_WARN(logger_,
-                 "Couldn't write all the data to pipe " << named_pipe_path_);
+                "Couldn't write all the data to pipe " << named_pipe_path_);
   }
 
   LOGGER_INFO(logger_, "Streamer::sent " << msg->data_size());

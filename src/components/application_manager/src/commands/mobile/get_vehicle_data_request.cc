@@ -137,7 +137,7 @@ void GetVehicleDataRequest::SendRequestsToHmi(const int32_t app_id) {
   }
 
   LOGGER_INFO(logger_,
-               hmi_requests_.size() << " requests are going to be sent to HMI");
+              hmi_requests_.size() << " requests are going to be sent to HMI");
 
   for (HmiRequests::const_iterator it = hmi_requests_.begin();
        it != hmi_requests_.end();
@@ -183,9 +183,9 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
         status = mobile_api::Result::eType::GENERIC_ERROR;
       }
       LOGGER_TRACE(logger_,
-                    "Status from HMI: " << it->status
-                                        << ", so response status become "
-                                        << status);
+                   "Status from HMI: " << it->status
+                                       << ", so response status become "
+                                       << status);
     } else {
       any_arg_success = true;
     }

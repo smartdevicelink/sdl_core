@@ -335,7 +335,7 @@ bool ShowRequest::CheckStringsOfShowRequest() {
                      [strings::value].asCharArray();
     if (!CheckSyntax(str)) {
       LOGGER_ERROR(logger_,
-                    "Invalid secondary_graphic value syntax check failed");
+                   "Invalid secondary_graphic value syntax check failed");
       return false;
     }
   }

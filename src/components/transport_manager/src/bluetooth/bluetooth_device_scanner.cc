@@ -185,8 +185,8 @@ void BluetoothDeviceScanner::DoInquiry() {
   }
 
   LOGGER_INFO(logger_,
-               "Check rfcomm channel on " << paired_devices_.size()
-                                          << " paired devices.");
+              "Check rfcomm channel on " << paired_devices_.size()
+                                         << " paired devices.");
 
   paired_devices_with_sdl_.clear();
   CheckSDLServiceOnDevices(
@@ -207,7 +207,7 @@ void BluetoothDeviceScanner::DoInquiry() {
 
   if (number_of_devices >= 0) {
     LOGGER_INFO(logger_,
-                 "hci_inquiry: found " << number_of_devices << " devices");
+                "hci_inquiry: found " << number_of_devices << " devices");
     std::vector<bdaddr_t> found_devices(number_of_devices);
     for (int i = 0; i < number_of_devices; ++i) {
       found_devices[i] = inquiry_info_list[i].bdaddr;
@@ -233,9 +233,9 @@ void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
     int device_handle,
     DeviceVector* discovered_devices) {
   LOGGER_TRACE(logger_,
-                "enter. bd_addresses: "
-                    << &bd_addresses << ", device_handle: " << device_handle
-                    << ", discovered_devices: " << discovered_devices);
+               "enter. bd_addresses: "
+                   << &bd_addresses << ", device_handle: " << device_handle
+                   << ", discovered_devices: " << discovered_devices);
   std::vector<RfcommChannelVector> sdl_rfcomm_channels =
       DiscoverSmartDeviceLinkRFCOMMChannels(bd_addresses);
 
@@ -309,8 +309,8 @@ BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
 bool BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
     const bdaddr_t& device_address, RfcommChannelVector* channels) {
   LOGGER_TRACE(logger_,
-                "enter. device_address: " << &device_address
-                                          << ", channels: " << channels);
+               "enter. device_address: " << &device_address
+                                         << ", channels: " << channels);
   static bdaddr_t any_address = {{0, 0, 0, 0, 0, 0}};
 
   sdp_session_t* sdp_session = sdp_connect(
@@ -397,8 +397,8 @@ bool BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
             << " at channel(s): " << rfcomm_channels_string.str().c_str());
   } else {
     LOGGER_INFO(logger_,
-                 "SmartDeviceLink service was not discovered on device "
-                     << BluetoothDevice::GetUniqueDeviceId(device_address));
+                "SmartDeviceLink service was not discovered on device "
+                    << BluetoothDevice::GetUniqueDeviceId(device_address));
   }
   LOGGER_TRACE(logger_, "exit with TRUE");
   return true;
@@ -472,7 +472,7 @@ void BluetoothDeviceScanner::Terminate() {
       device_scan_requested_cv_.NotifyOne();
     }
     LOGGER_INFO(logger_,
-                 "Waiting for bluetooth device scanner thread termination");
+                "Waiting for bluetooth device scanner thread termination");
     thread_->stop();
     LOGGER_INFO(logger_, "Bluetooth device scanner thread stopped");
   }

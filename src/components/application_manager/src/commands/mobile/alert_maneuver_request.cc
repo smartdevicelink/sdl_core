@@ -74,8 +74,8 @@ void AlertManeuverRequest::Run() {
 
   if (IsWhiteSpaceExist()) {
     LOGGER_ERROR(logger_,
-                  "Incoming alert maneuver has contains \\t\\n \\\\t \\\\n"
-                  "text contains only whitespace in ttsChunks");
+                 "Incoming alert maneuver has contains \\t\\n \\\\t \\\\n"
+                 "text contains only whitespace in ttsChunks");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -179,8 +179,8 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
 
   if (!pending_requests_.IsFinal(event_id)) {
     LOGGER_DEBUG(logger_,
-                  "There are some pending responses from HMI."
-                  "AlertManeuverRequest still waiting.");
+                 "There are some pending responses from HMI."
+                 "AlertManeuverRequest still waiting.");
     return;
   }
 

@@ -191,17 +191,17 @@ CryptoManagerImpl::SSLContextImpl::CheckCertContext() {
 
   if (!(hsh_context_.expected_cn.CompareIgnoreCase(cn.c_str()))) {
     LOGGER_ERROR(logger_,
-                  "Trying to run handshake with wrong app name: "
-                      << cn << ". Expected app name: "
-                      << hsh_context_.expected_cn.AsMBString());
+                 "Trying to run handshake with wrong app name: "
+                     << cn << ". Expected app name: "
+                     << hsh_context_.expected_cn.AsMBString());
     return Handshake_Result_AppNameMismatch;
   }
 
   if (!(hsh_context_.expected_sn.CompareIgnoreCase(sn.c_str()))) {
     LOGGER_ERROR(logger_,
-                  "Trying to run handshake with wrong app id: "
-                      << sn << ". Expected app id: "
-                      << hsh_context_.expected_sn.AsMBString());
+                 "Trying to run handshake with wrong app id: "
+                     << sn << ". Expected app id: "
+                     << hsh_context_.expected_sn.AsMBString());
     return Handshake_Result_AppIDMismatch;
   }
   return Handshake_Result_Success;
@@ -276,9 +276,9 @@ CryptoManagerImpl::SSLContextImpl::PerformHandshake() {
       const long error = SSL_get_verify_result(connection_);
       SetHandshakeError(error);
       LOGGER_WARN(logger_,
-                   "Handshake failed with error "
-                       << " -> " << SSL_get_error(connection_, error) << " \""
-                       << LastError() << '"');
+                  "Handshake failed with error "
+                      << " -> " << SSL_get_error(connection_, error) << " \""
+                      << LastError() << '"');
       ResetConnection();
       is_handshake_pending_ = false;
 
@@ -489,7 +489,7 @@ std::string CryptoManagerImpl::SSLContextImpl::GetTextBy(X509_NAME* name,
 
   if (-1 == req_len) {
     LOGGER_WARN(logger_,
-                 "Unable to obtain object: " << object << " from certificate");
+                "Unable to obtain object: " << object << " from certificate");
     return std::string();
   }
 

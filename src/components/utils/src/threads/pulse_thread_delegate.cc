@@ -62,7 +62,7 @@ PulseThreadDelegate::PulseThreadDelegate() : run_(false) {
 void PulseThreadDelegate::threadMain() {
   if (!Init()) {
     LOGGER_ERROR(logger_,
-                  "Failed to initialize thread for QNX channel " << chid_);
+                 "Failed to initialize thread for QNX channel " << chid_);
     return;
   }
   while (run_) {
@@ -81,11 +81,11 @@ void PulseThreadDelegate::threadMain() {
       } else {
         if (run_) {
           LOGGER_WARN(logger_,
-                       "Error occurred while waiting for pulse on QNX channel "
-                           << chid_);
+                      "Error occurred while waiting for pulse on QNX channel "
+                          << chid_);
         } else {
           LOGGER_INFO(logger_,
-                       "QNX channel " << chid_ << " is apparently destroyed");
+                      "QNX channel " << chid_ << " is apparently destroyed");
         }
       }
     }

@@ -53,8 +53,8 @@ void StreamerAdapter::StartActivity(int32_t application_key) {
   LOGGER_AUTO_TRACE(logger);
   if (is_app_performing_activity(application_key)) {
     LOGGER_WARN(logger,
-                 "Activity for application: " << application_key
-                                              << " has been already started");
+                "Activity for application: " << application_key
+                                             << " has been already started");
     return;
   }
   messages_.Reset();
@@ -75,8 +75,8 @@ void StreamerAdapter::StopActivity(int32_t application_key) {
   LOGGER_AUTO_TRACE(logger);
   if (!is_app_performing_activity(application_key)) {
     LOGGER_WARN(logger,
-                 "Activity for application: " << application_key
-                                              << " has not been started");
+                "Activity for application: " << application_key
+                                             << " has not been started");
     return;
   }
 
@@ -96,8 +96,8 @@ void StreamerAdapter::SendData(int32_t application_key,
   LOGGER_AUTO_TRACE(logger);
   if (!is_app_performing_activity(application_key)) {
     LOGGER_ERROR(logger,
-                  "Activity for application: " << application_key
-                                               << " has not been started");
+                 "Activity for application: " << application_key
+                                              << " has not been started");
     return;
   }
   messages_.push(msg);
@@ -147,9 +147,9 @@ void StreamerAdapter::Streamer::threadMain() {
       ++messages_for_session;
 
       LOGGER_DEBUG(logger,
-                    "Handling map streaming message. This is "
-                        << messages_for_session << " message for "
-                        << adapter_->current_application_);
+                   "Handling map streaming message. This is "
+                       << messages_for_session << " message for "
+                       << adapter_->current_application_);
       std::set<MediaListenerPtr>::iterator it =
           adapter_->media_listeners_.begin();
       for (; adapter_->media_listeners_.end() != it; ++it) {

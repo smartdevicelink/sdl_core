@@ -65,8 +65,8 @@ void SetGlobalPropertiesRequest::Run() {
 
   if (!app) {
     LOGGER_ERROR(logger_,
-                  "No application associated with connection key "
-                      << connection_key());
+                 "No application associated with connection key "
+                     << connection_key());
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -86,8 +86,8 @@ void SetGlobalPropertiesRequest::Run() {
         app,
         application_manager_);
     if (mobile_apis::Result::SUCCESS != verification_result) {
-      LOGGER_ERROR(
-          logger_, "MessageHelper::VerifyImage return " << verification_result);
+      LOGGER_ERROR(logger_,
+                   "MessageHelper::VerifyImage return " << verification_result);
       SendResponse(false, verification_result);
       return;
     }
@@ -123,7 +123,7 @@ void SetGlobalPropertiesRequest::Run() {
   // check VR params
   if (is_vr_help_title_present ^ is_vr_help_present) {
     LOGGER_ERROR(logger_,
-                  "Reject because of vr_help or vr_help_title only provided");
+                 "Reject because of vr_help or vr_help_title only provided");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
@@ -132,8 +132,8 @@ void SetGlobalPropertiesRequest::Run() {
 
     if (!CheckVrHelpItemsOrder(msg_params[strings::vr_help])) {
       LOGGER_ERROR(logger_,
-                    "VR Help Items contains nonsequential positions"
-                        << " (e.g. [1,2,4]) or not started from 1");
+                   "VR Help Items contains nonsequential positions"
+                       << " (e.g. [1,2,4]) or not started from 1");
       SendResponse(false, mobile_apis::Result::REJECTED);
       return;
     }
@@ -207,8 +207,8 @@ bool SetGlobalPropertiesRequest::CheckVrHelpItemsOrder(
     // Elements shall start from 1 and increment one by one
     if (position != (j + 1)) {
       LOGGER_ERROR(logger_,
-                    "VR help items order is wrong"
-                        << " at " << j << ", position value:" << position);
+                   "VR help items order is wrong"
+                       << " at " << j << ", position value:" << position);
       return false;
     }
   }
@@ -483,7 +483,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
         str = (*it_vh)[strings::image][strings::value].asCharArray();
         if (!CheckSyntax(str)) {
           LOGGER_ERROR(logger_,
-                        "Invalid vr_help image value syntax check failed");
+                       "Invalid vr_help image value syntax check failed");
           return true;
         }
       }  // if image exists
@@ -528,8 +528,8 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
         str = (*it_lcl).asCharArray();
         if (!CheckSyntax(str)) {
           LOGGER_ERROR(logger_,
-                        "Invalid keyboard_properties "
-                        "limited_character_list syntax check failed");
+                       "Invalid keyboard_properties "
+                       "limited_character_list syntax check failed");
           return true;
         }
       }
@@ -543,8 +543,8 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
 
       if (!CheckSyntax(str)) {
         LOGGER_ERROR(logger_,
-                      "Invalid keyboard_properties "
-                      "auto_complete_text syntax check failed");
+                     "Invalid keyboard_properties "
+                     "auto_complete_text syntax check failed");
         return true;
       }
     }

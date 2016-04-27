@@ -59,7 +59,7 @@ void FromMicRecorderAdapter::StartActivity(int32_t application_key) {
   LOGGER_DEBUG(logger_, "Start with app " << application_key);
   if (application_key == current_application_) {
     LOGGER_WARN(logger_,
-                 "Running recording from mic for " << current_application_);
+                "Running recording from mic for " << current_application_);
     return;
   }
 
@@ -78,10 +78,10 @@ void FromMicRecorderAdapter::StartActivity(int32_t application_key) {
 
 void FromMicRecorderAdapter::StopActivity(int32_t application_key) {
   LOGGER_INFO(logger_,
-               "FromMicRecorderAdapter::StopActivity " << application_key);
+              "FromMicRecorderAdapter::StopActivity " << application_key);
   if (application_key != current_application_) {
     LOGGER_WARN(logger_,
-                 "Running activity on other app key " << current_application_);
+                "Running activity on other app key " << current_application_);
     return;
   }
 

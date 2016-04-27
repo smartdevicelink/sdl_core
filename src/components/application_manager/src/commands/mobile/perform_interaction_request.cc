@@ -117,8 +117,8 @@ void PerformInteractionRequest::Run() {
   if ((mobile_apis::InteractionMode::VR_ONLY == interaction_mode_) &&
       (mobile_apis::LayoutMode::KEYBOARD == interaction_layout)) {
     LOGGER_ERROR(logger_,
-                  "PerformInteraction contains InteractionMode"
-                  "=VR_ONLY and interactionLayout=KEYBOARD");
+                 "PerformInteraction contains InteractionMode"
+                 "=VR_ONLY and interactionLayout=KEYBOARD");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -130,16 +130,16 @@ void PerformInteractionRequest::Run() {
     if (mobile_apis::LayoutMode::KEYBOARD == interaction_layout) {
       if (mobile_apis::InteractionMode::BOTH == interaction_mode_) {
         LOGGER_ERROR(logger_,
-                      "interactionChoiceSetIDList is empty,"
-                      " InteractionMode=BOTH and"
-                      " interactionLayout=KEYBOARD");
+                     "interactionChoiceSetIDList is empty,"
+                     " InteractionMode=BOTH and"
+                     " interactionLayout=KEYBOARD");
         SendResponse(false, mobile_apis::Result::INVALID_DATA);
         return;
       }
     } else {
       LOGGER_ERROR(logger_,
-                    "interactionChoiceSetIDList is empty"
-                    " and interactionLayout!=KEYBOARD");
+                   "interactionChoiceSetIDList is empty"
+                   " and interactionLayout!=KEYBOARD");
       SendResponse(false, mobile_apis::Result::INVALID_DATA);
       return;
     }
@@ -151,8 +151,8 @@ void PerformInteractionRequest::Run() {
            choice_set_id_list_length,
            msg_params[strings::interaction_choice_set_id_list]))) {
     LOGGER_ERROR(logger_,
-                  "PerformInteraction has choice sets with "
-                  "duplicated IDs or application does not have choice sets");
+                 "PerformInteraction has choice sets with "
+                 "duplicated IDs or application does not have choice sets");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
@@ -162,7 +162,7 @@ void PerformInteractionRequest::Run() {
         MessageHelper::VerifyImageVrHelpItems(
             msg_params[strings::vr_help], app, application_manager_)) {
       LOGGER_ERROR(logger_,
-                    "Verification of " << strings::vr_help << " failed.");
+                   "Verification of " << strings::vr_help << " failed.");
       SendResponse(false, mobile_apis::Result::INVALID_DATA);
       return;
     }
@@ -170,7 +170,7 @@ void PerformInteractionRequest::Run() {
 
   if (IsWhiteSpaceExist()) {
     LOGGER_ERROR(logger_,
-                  "Incoming perform interaction has contains \t\n \\t \\n");
+                 "Incoming perform interaction has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -332,8 +332,8 @@ void PerformInteractionRequest::ProcessVRResponse(
   if (SUCCESS == vr_resultCode_ &&
       InteractionMode::MANUAL_ONLY == interaction_mode_) {
     LOGGER_DEBUG(logger_,
-                  "VR response SUCCESS in MANUAL_ONLY mode "
-                      << "Wait for UI response");
+                 "VR response SUCCESS in MANUAL_ONLY mode "
+                     << "Wait for UI response");
     // in case MANUAL_ONLY mode VR.PI SUCCESS just return
     return;
   }
@@ -845,7 +845,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
         str = (*it_vh)[strings::image][strings::value].asCharArray();
         if (!CheckSyntax(str)) {
           LOGGER_ERROR(logger_,
-                        "Invalid vr_help image value syntax check failed");
+                       "Invalid vr_help image value syntax check failed");
           return true;
         }
       }
@@ -917,9 +917,9 @@ bool PerformInteractionRequest::CheckChoiceIDFromRequest(
           choice_id_set.insert(choices_list[k][strings::choice_id].asInt());
       if (!ins_res.second) {
         LOGGER_ERROR(logger_,
-                      "Choise with ID "
-                          << choices_list[k][strings::choice_id].asInt()
-                          << " already exists");
+                     "Choise with ID "
+                         << choices_list[k][strings::choice_id].asInt()
+                         << " already exists");
         return false;
       }
     }

@@ -86,8 +86,8 @@ A2DPSourcePlayerAdapter::~A2DPSourcePlayerAdapter() {
 
 void A2DPSourcePlayerAdapter::StartActivity(int32_t application_key) {
   LOGGER_INFO(logger_,
-               "Starting a2dp playing music for " << application_key
-                                                  << " application.");
+              "Starting a2dp playing music for " << application_key
+                                                 << " application.");
   if (application_key != current_application_) {
     current_application_ = application_key;
 
@@ -114,8 +114,8 @@ void A2DPSourcePlayerAdapter::StartActivity(int32_t application_key) {
 
 void A2DPSourcePlayerAdapter::StopActivity(int32_t application_key) {
   LOGGER_INFO(logger_,
-               "Stopping 2dp playing for " << application_key
-                                           << " application.");
+              "Stopping 2dp playing for " << application_key
+                                          << " application.");
   if (application_key != current_application_) {
     return;
   }
@@ -214,7 +214,7 @@ void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::threadMain() {
 
     if ((latency = pa_simple_get_latency(s_in, &error)) == (pa_usec_t)-1) {
       LOGGER_ERROR(logger_,
-                    "pa_simple_get_latency() failed: " << pa_strerror(error));
+                   "pa_simple_get_latency() failed: " << pa_strerror(error));
       break;
     }
 
@@ -222,7 +222,7 @@ void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::threadMain() {
 
     if ((latency = pa_simple_get_latency(s_out, &error)) == (pa_usec_t)-1) {
       LOGGER_ERROR(logger_,
-                    "pa_simple_get_latency() failed: " << pa_strerror(error));
+                   "pa_simple_get_latency() failed: " << pa_strerror(error));
       break;
     }
 
@@ -235,8 +235,7 @@ void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::threadMain() {
 
     /* ... and play it */
     if (pa_simple_write(s_out, buf, sizeof(buf), &error) < 0) {
-      LOGGER_ERROR(logger_,
-                    "pa_simple_write() failed: " << pa_strerror(error));
+      LOGGER_ERROR(logger_, "pa_simple_write() failed: " << pa_strerror(error));
       break;
     }
 

@@ -139,8 +139,7 @@ int32_t main(int32_t argc, char** argv) {
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
   if (!utils::appenders_loader.Loaded()) {
-    LOGGER_ERROR(logger_,
-                  "Appenders plugin not loaded, file logging disabled");
+    LOGGER_ERROR(logger_, "Appenders plugin not loaded, file logging disabled");
   }
 
   LOGGER_INFO(logger_, "Application started!");

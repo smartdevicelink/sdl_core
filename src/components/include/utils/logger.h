@@ -85,7 +85,7 @@ log4cxx_time_t time_now();
               logLevel,                                              \
               accumulator.str(),                                     \
               time_now(),                                            \
-              LOGGER_LOCATION,                                      \
+              LOGGER_LOCATION,                                       \
               ::log4cxx::spi::LoggingEvent::getCurrentThreadName()); \
         }                                                            \
       }                                                              \
@@ -123,13 +123,13 @@ log4cxx_time_t time_now();
 
 #define LOGGER_ERROR_WITH_ERRNO(loggerPtr, message)                           \
   LOGGER_ERROR(loggerPtr,                                                     \
-                message << ", error code " << errno << " (" << strerror(errno) \
-                        << ")")
+               message << ", error code " << errno << " (" << strerror(errno) \
+                       << ")")
 
 #define LOGGER_WARN_WITH_ERRNO(loggerPtr, message)                           \
   LOGGER_WARN(loggerPtr,                                                     \
-               message << ", error code " << errno << " (" << strerror(errno) \
-                       << ")")
+              message << ", error code " << errno << " (" << strerror(errno) \
+                      << ")")
 
 #else  // ENABLE_LOG is OFF
 

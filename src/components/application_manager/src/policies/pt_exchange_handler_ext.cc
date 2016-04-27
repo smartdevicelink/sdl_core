@@ -73,8 +73,8 @@ void PTExchangeHandlerExt::Start() {
           policy_handler_->RetrySequenceDelaysSeconds());
     } else {
       LOGGER_ERROR(logger_,
-                    "Failed to write snapshot file to "
-                        << policy_snapshot_file_name);
+                   "Failed to write snapshot file to "
+                       << policy_snapshot_file_name);
     }
   } else {
     LOGGER_ERROR(logger_, "Failed to obtain policy table snapshot");

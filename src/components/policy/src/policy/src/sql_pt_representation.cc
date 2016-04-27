@@ -81,8 +81,8 @@ void SQLPTRepresentation::CheckPermissions(const PTString& app_id,
 
   if (!query.Prepare(sql_pt::kSelectRpc)) {
     LOGGER_WARN(logger_,
-                 "Incorrect select statement from rpcs"
-                     << query.LastError().text());
+                "Incorrect select statement from rpcs"
+                    << query.LastError().text());
     return;
   }
   query.Bind(0, app_id);
@@ -92,9 +92,9 @@ void SQLPTRepresentation::CheckPermissions(const PTString& app_id,
   bool ret = query.Next();
   result.hmi_level_permitted = ret ? kRpcAllowed : kRpcDisallowed;
   LOGGER_INFO(logger_,
-               "Level is " << (result.hmi_level_permitted == kRpcAllowed
-                                   ? "permitted"
-                                   : "not permitted"));
+              "Level is " << (result.hmi_level_permitted == kRpcAllowed
+                                  ? "permitted"
+                                  : "not permitted"));
   std::string parameter;
   while (ret) {
     if (!query.IsNull(0)) {
@@ -149,7 +149,7 @@ bool SQLPTRepresentation::SetCountersPassedForSuccessfulUpdate(
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kUpdateCountersSuccessfulUpdate)) {
     LOGGER_WARN(logger_,
-                 "Wrong update query for counters on successful update.");
+                "Wrong update query for counters on successful update.");
     return false;
   }
   query.Bind(0, kilometers);
@@ -196,7 +196,7 @@ bool SQLPTRepresentation::SecondsBetweenRetries(std::vector<int>* seconds) {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kSelectSecondsBetweenRetries)) {
     LOGGER_INFO(logger_,
-                 "Incorrect select statement from seconds between retries");
+                "Incorrect select statement from seconds between retries");
     return false;
   }
   while (query.Next()) {
@@ -220,7 +220,7 @@ std::vector<UserFriendlyMessage> SQLPTRepresentation::GetUserFriendlyMsg(
 
 EndpointUrls SQLPTRepresentation::GetUpdateUrls(int service_type) {
   LOGGER_INFO(logger_,
-               "SQLPTRepresentation::GetUpdateUrls for " << service_type);
+              "SQLPTRepresentation::GetUpdateUrls for " << service_type);
   utils::dbms::SQLQuery query(db());
   EndpointUrls ret;
   if (query.Prepare(sql_pt::kSelectEndpoint)) {
@@ -267,8 +267,8 @@ int SQLPTRepresentation::GetNotificationsNumber(const std::string& priority) {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kSelectNotificationsPerPriority)) {
     LOGGER_WARN(logger_,
-                 "Incorrect select statement for priority "
-                 "notification number.");
+                "Incorrect select statement for priority "
+                "notification number.");
     return 0;
   }
   query.Bind(0, priority);
@@ -330,7 +330,7 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
         get_settings().open_attempt_timeout_ms();
     const useconds_t sleep_interval_mcsec = open_attempt_timeout_ms * 1000;
     LOGGER_DEBUG(logger_,
-                  "Open attempt timeout(ms) is: " << open_attempt_timeout_ms);
+                 "Open attempt timeout(ms) is: " << open_attempt_timeout_ms);
     for (int i = 0; i < attempts; ++i) {
       usleep(sleep_interval_mcsec);
       LOGGER_INFO(logger_, "Attempt: " << i + 1);
@@ -345,10 +345,10 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
     }
     if (!is_opened) {
       LOGGER_ERROR(logger_,
-                    "Open retry sequence failed. Tried "
-                        << attempts << " attempts with "
-                        << open_attempt_timeout_ms
-                        << " open timeout(ms) for each.");
+                   "Open retry sequence failed. Tried "
+                       << attempts << " attempts with "
+                       << open_attempt_timeout_ms
+                       << " open timeout(ms) for each.");
       return InitResult::FAIL;
     }
   }
@@ -374,8 +374,8 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
             if (check_first_run.Prepare(sql_pt::kIsFirstRun) &&
                 check_first_run.Next()) {
               LOGGER_INFO(logger_,
-                           "Selecting is first run "
-                               << check_first_run.GetBoolean(0));
+                          "Selecting is first run "
+                              << check_first_run.GetBoolean(0));
               if (check_first_run.GetBoolean(0)) {
                 utils::dbms::SQLQuery set_not_first_run(db());
                 set_not_first_run.Exec(sql_pt::kSetNotFirstRun);
@@ -387,7 +387,7 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
             return InitResult::EXISTS;
           } else {
             LOGGER_ERROR(logger_,
-                          "Existing policy table representation is invlaid.");
+                         "Existing policy table representation is invlaid.");
             // TODO(PV): add handle
             return InitResult::FAIL;
           }
@@ -430,7 +430,7 @@ bool SQLPTRepresentation::Drop() {
   utils::dbms::SQLQuery query(db());
   if (!query.Exec(sql_pt::kDropSchema)) {
     LOGGER_WARN(logger_,
-                 "Failed dropping database: " << query.LastError().text());
+                "Failed dropping database: " << query.LastError().text());
     return false;
   }
   return true;
@@ -444,7 +444,7 @@ bool SQLPTRepresentation::Clear() {
   utils::dbms::SQLQuery query(db());
   if (!query.Exec(sql_pt::kDeleteData)) {
     LOGGER_ERROR(logger_,
-                  "Failed clearing database: " << query.LastError().text());
+                 "Failed clearing database: " << query.LastError().text());
     return false;
   }
   if (!query.Exec(sql_pt::kInsertInitData)) {
@@ -460,7 +460,7 @@ bool SQLPTRepresentation::RefreshDB() {
   utils::dbms::SQLQuery query(db());
   if (!query.Exec(sql_pt::kDropSchema)) {
     LOGGER_WARN(logger_,
-                 "Failed dropping database: " << query.LastError().text());
+                "Failed dropping database: " << query.LastError().text());
     return false;
   }
   if (!query.Exec(sql_pt::kCreateSchema)) {
@@ -543,7 +543,7 @@ void SQLPTRepresentation::GatherModuleConfig(
   utils::dbms::SQLQuery seconds(db());
   if (!seconds.Prepare(sql_pt::kSelectSecondsBetweenRetries)) {
     LOGGER_INFO(logger_,
-                 "Incorrect select statement from seconds between retries");
+                "Incorrect select statement from seconds between retries");
   } else {
     while (seconds.Next()) {
       config->seconds_between_retries.push_back(seconds.GetInteger(0));
@@ -883,7 +883,7 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   utils::dbms::SQLQuery app_query(db());
   if (!app_query.Prepare(sql_pt::kInsertApplication)) {
     LOGGER_WARN(logger_,
-                 "Incorrect insert statement into application (device).");
+                "Incorrect insert statement into application (device).");
     return false;
   }
 
@@ -968,8 +968,8 @@ bool SQLPTRepresentation::SaveAppGroup(
     query.Bind(1, *it);
     if (!query.Exec() || !query.Reset()) {
       LOGGER_WARN(logger_,
-                   "Incorrect insert into app group."
-                       << query.LastError().text());
+                  "Incorrect insert into app group."
+                      << query.LastError().text());
       return false;
     }
   }
@@ -1224,7 +1224,7 @@ bool SQLPTRepresentation::SaveSecondsBetweenRetries(
   }
   if (!query.Prepare(sql_pt::kInsertSecondsBetweenRetry)) {
     LOGGER_WARN(logger_,
-                 "Incorrect insert statement for seconds between retries.");
+                "Incorrect insert statement for seconds between retries.");
     return false;
   }
 
@@ -1245,7 +1245,7 @@ bool SQLPTRepresentation::SaveNumberOfNotificationsPerMinute(
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kInsertNotificationsByPriority)) {
     LOGGER_WARN(logger_,
-                 "Incorrect insert statement for notifications by priority.");
+                "Incorrect insert statement for notifications by priority.");
     return false;
   }
 
@@ -1326,8 +1326,7 @@ void SQLPTRepresentation::ResetIgnitionCycles() {
 bool SQLPTRepresentation::UpdateRequired() const {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kSelectFlagUpdateRequired) || !query.Exec()) {
-    LOGGER_WARN(logger_,
-                 "Failed select update required flag from module meta");
+    LOGGER_WARN(logger_, "Failed select update required flag from module meta");
     return false;
   }
   return query.GetBoolean(0);
@@ -1339,8 +1338,8 @@ void SQLPTRepresentation::SaveUpdateRequired(bool value) {
   if (!query.Prepare(/*sql_pt::kUpdateFlagUpdateRequired*/
                      "UPDATE `module_meta` SET `flag_update_required` = ?")) {
     LOGGER_WARN(logger_,
-                 "Incorrect update into module meta (update_required): "
-                     << strerror(errno));
+                "Incorrect update into module meta (update_required): "
+                    << strerror(errno));
     return;
   }
   query.Bind(0, value);
@@ -1577,16 +1576,16 @@ bool SQLPTRepresentation::IsDBVersionActual() const {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kSelectDBVersion) || !query.Exec()) {
     LOGGER_ERROR(logger_,
-                  "Failed to get DB version: " << query.LastError().text());
+                 "Failed to get DB version: " << query.LastError().text());
     return false;
   }
 
   const int32_t saved_db_version = query.GetInteger(0);
   const int32_t current_db_version = GetDBVersion();
   LOGGER_DEBUG(logger_,
-                "Saved DB version is: " << saved_db_version
-                                        << ". Current DB vesion is: "
-                                        << current_db_version);
+               "Saved DB version is: " << saved_db_version
+                                       << ". Current DB vesion is: "
+                                       << current_db_version);
 
   return current_db_version == saved_db_version;
 }
@@ -1596,7 +1595,7 @@ bool SQLPTRepresentation::UpdateDBVersion() const {
   utils::dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kUpdateDBVersion)) {
     LOGGER_ERROR(logger_,
-                  "Incorrect DB version query: " << query.LastError().text());
+                 "Incorrect DB version query: " << query.LastError().text());
     return false;
   }
 
@@ -1606,7 +1605,7 @@ bool SQLPTRepresentation::UpdateDBVersion() const {
 
   if (!query.Exec()) {
     LOGGER_ERROR(logger_,
-                  "DB version getting failed: " << query.LastError().text());
+                 "DB version getting failed: " << query.LastError().text());
     return false;
   }
 

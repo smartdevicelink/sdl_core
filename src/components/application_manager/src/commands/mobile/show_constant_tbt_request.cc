@@ -75,7 +75,7 @@ void ShowConstantTBTRequest::Run() {
 
   if (IsWhiteSpaceExist()) {
     LOGGER_ERROR(logger_,
-                  "Incoming show constant TBT has contains \t\n \\t \\n");
+                 "Incoming show constant TBT has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -230,8 +230,7 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
     str = (*message_)[strings::msg_params][strings::next_turn_icon]
                      [strings::value].asCharArray();
     if (!CheckSyntax(str)) {
-      LOGGER_ERROR(logger_,
-                    "Invalid next_turn_icon value syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid next_turn_icon value syntax check failed");
       return true;
     }
   }
@@ -241,7 +240,7 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
               .asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
       LOGGER_ERROR(logger_,
-                    "Invalid navigation_text_1 value syntax check failed");
+                   "Invalid navigation_text_1 value syntax check failed");
       return true;
     }
   }
@@ -251,7 +250,7 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
               .asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
       LOGGER_ERROR(logger_,
-                    "Invalid navigation_text_2 value syntax check failed");
+                   "Invalid navigation_text_2 value syntax check failed");
       return true;
     }
   }
@@ -268,8 +267,7 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
     str =
         (*message_)[strings::msg_params][strings::total_distance].asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
-      LOGGER_ERROR(logger_,
-                    "Invalid total_distance value syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid total_distance value syntax check failed");
       return true;
     }
   }
@@ -280,7 +278,7 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
               .asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
       LOGGER_ERROR(logger_,
-                    "Invalid time_to_destination value syntax check failed");
+                   "Invalid time_to_destination value syntax check failed");
       return true;
     }
   }

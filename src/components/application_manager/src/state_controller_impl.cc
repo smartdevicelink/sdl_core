@@ -300,9 +300,9 @@ void StateControllerImpl::HmiLevelConflictResolver::operator()(
 
   if (cur_state->hmi_level() != result_hmi_level) {
     LOGGER_DEBUG(logger_,
-                  "Application " << to_resolve->app_id()
-                                 << " will change HMI level to "
-                                 << result_hmi_level);
+                 "Application " << to_resolve->app_id()
+                                << " will change HMI level to "
+                                << result_hmi_level);
     state_ctrl_->SetupRegularHmiState(to_resolve,
                                       result_hmi_level,
                                       result_hmi_level == HMILevel::HMI_LIMITED
@@ -310,8 +310,8 @@ void StateControllerImpl::HmiLevelConflictResolver::operator()(
                                           : AudioStreamingState::NOT_AUDIBLE);
   } else {
     LOGGER_DEBUG(logger_,
-                  "Application " << to_resolve->app_id()
-                                 << " will not change HMI level");
+                 "Application " << to_resolve->app_id()
+                                << " will not change HMI level");
   }
 }
 
@@ -321,10 +321,10 @@ HmiStatePtr StateControllerImpl::ResolveHmiState(ApplicationSharedPtr app,
   using namespace helpers;
   LOGGER_AUTO_TRACE(logger_);
   LOGGER_DEBUG(logger_,
-                "State to resolve: hmi_level "
-                    << state->hmi_level() << ", audio_state "
-                    << state->audio_streaming_state() << ", system_context "
-                    << state->system_context());
+               "State to resolve: hmi_level "
+                   << state->hmi_level() << ", audio_state "
+                   << state->audio_streaming_state() << ", system_context "
+                   << state->system_context());
 
   HmiStatePtr available_state =
       CreateHmiState(app->app_id(), HmiState::StateID::STATE_ID_REGULAR);
@@ -359,16 +359,16 @@ bool StateControllerImpl::IsResumptionAllowed(ApplicationSharedPtr app,
   if (IsTempStateActive(HmiState::StateID::STATE_ID_AUDIO_SOURCE) &&
       app->is_media_application()) {
     LOGGER_DEBUG(logger_,
-                  "Resumption for media app is not allowed. "
-                      << "AUDIO_SOURCE event is active");
+                 "Resumption for media app is not allowed. "
+                     << "AUDIO_SOURCE event is active");
     return false;
   }
 
   if (IsTempStateActive(HmiState::StateID::STATE_ID_EMBEDDED_NAVI) &&
       app->is_navi()) {
     LOGGER_DEBUG(logger_,
-                  "Resumption for navi app is not allowed. "
-                      << "EMBEDDED_NAVI event is active");
+                 "Resumption for navi app is not allowed. "
+                     << "EMBEDDED_NAVI event is active");
     return false;
   }
 
@@ -406,14 +406,14 @@ mobile_apis::HMILevel::eType StateControllerImpl::GetAvailableHmiLevel(
     } else if (app->is_navi() &&
                IsTempStateActive(HmiState::StateID::STATE_ID_AUDIO_SOURCE)) {
       LOGGER_DEBUG(logger_,
-                    "Navigation app will be resumed to LIMITED, "
-                    "because of AUDIO_SOURCE ia active.");
+                   "Navigation app will be resumed to LIMITED, "
+                   "because of AUDIO_SOURCE ia active.");
       result = mobile_apis::HMILevel::HMI_LIMITED;
     } else if (app->is_media_application() &&
                IsTempStateActive(HmiState::StateID::STATE_ID_EMBEDDED_NAVI)) {
       LOGGER_DEBUG(logger_,
-                    "Media app will be resumed to LIMITED, "
-                    "because of EMBEDDED_NAVI is active.");
+                   "Media app will be resumed to LIMITED, "
+                   "because of EMBEDDED_NAVI is active.");
       result = mobile_apis::HMILevel::HMI_LIMITED;
     }
   } else if (is_active_app_exist) {
@@ -429,10 +429,10 @@ bool StateControllerImpl::IsStateAvailable(ApplicationSharedPtr app,
   using namespace helpers;
   LOGGER_AUTO_TRACE(logger_);
   LOGGER_DEBUG(logger_,
-                "Checking state: hmi_level "
-                    << state->hmi_level() << ", audio_state "
-                    << state->audio_streaming_state() << ", system_context "
-                    << state->system_context());
+               "Checking state: hmi_level "
+                   << state->hmi_level() << ", audio_state "
+                   << state->audio_streaming_state() << ", system_context "
+                   << state->system_context());
 
   if (app->is_resuming()) {
     return IsStateAvailableForResumption(app, state);
@@ -442,8 +442,8 @@ bool StateControllerImpl::IsStateAvailable(ApplicationSharedPtr app,
       IsTempStateActive(HmiState::StateID::STATE_ID_EMBEDDED_NAVI)) {
     if (HMILevel::HMI_FULL == state->hmi_level()) {
       LOGGER_DEBUG(logger_,
-                    "AUDIO_SOURCE or EMBEDDED_NAVI is active."
-                        << " Requested state is not available");
+                   "AUDIO_SOURCE or EMBEDDED_NAVI is active."
+                       << " Requested state is not available");
       return false;
     }
   }
@@ -462,29 +462,29 @@ bool StateControllerImpl::IsStateAvailableForResumption(
       !Compare<HMILevel::eType, EQ, ONE>(
           state->hmi_level(), HMILevel::HMI_FULL, HMILevel::HMI_LIMITED)) {
     LOGGER_DEBUG(logger_,
-                  "Application is not in resuming mode."
-                      << " Requested state is available");
+                 "Application is not in resuming mode."
+                     << " Requested state is available");
     return true;
   }
 
   if (IsTempStateActive(HmiState::StateID::STATE_ID_VR_SESSION) ||
       IsTempStateActive(HmiState::StateID::STATE_ID_SAFETY_MODE)) {
     LOGGER_DEBUG(logger_,
-                  "Requested state is not available. "
-                      << "VR session or emergency event is active");
+                 "Requested state is not available. "
+                     << "VR session or emergency event is active");
     return false;
   }
   if (IsTempStateActive(HmiState::StateID::STATE_ID_PHONE_CALL) &&
       app->is_media_application()) {
     LOGGER_DEBUG(logger_,
-                  "Requested state for media application "
-                      << "is not available. Phone call is active");
+                 "Requested state for media application "
+                     << "is not available. Phone call is active");
     return false;
   }
   if (IsTempStateActive(HmiState::StateID::STATE_ID_DEACTIVATE_HMI)) {
     LOGGER_DEBUG(logger_,
-                  "Requested state is not available. "
-                      << "Deactivate HMI event is active");
+                 "Requested state is not available. "
+                     << "Deactivate HMI event is active");
     return false;
   }
 
@@ -499,9 +499,9 @@ void StateControllerImpl::SetupRegularHmiState(ApplicationSharedPtr app,
   LOGGER_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(state);
   LOGGER_DEBUG(logger_,
-                "hmi_level " << state->hmi_level() << ", audio_state "
-                             << state->audio_streaming_state()
-                             << ", system_context " << state->system_context());
+               "hmi_level " << state->hmi_level() << ", audio_state "
+                            << state->audio_streaming_state()
+                            << ", system_context " << state->system_context());
   HmiStatePtr curr_state = app->CurrentHmiState();
   HmiStatePtr old_state =
       CreateHmiState(app->app_id(), HmiState::StateID::STATE_ID_REGULAR);
@@ -513,8 +513,8 @@ void StateControllerImpl::SetupRegularHmiState(ApplicationSharedPtr app,
 
   if (HMILevel::HMI_LIMITED == state->hmi_level() && app->is_resuming()) {
     LOGGER_DEBUG(logger_,
-                  "Resuming to LIMITED level. "
-                      << "Send OnResumeAudioSource notification");
+                 "Resuming to LIMITED level. "
+                     << "Send OnResumeAudioSource notification");
     MessageHelper::SendOnResumeAudioSourceToHMI(app->app_id(), app_mngr_);
   }
   app->set_is_resuming(false);
@@ -670,15 +670,15 @@ void StateControllerImpl::OnStateChanged(ApplicationSharedPtr app,
   DCHECK_OR_RETURN_VOID(old_state);
   DCHECK_OR_RETURN_VOID(new_state);
   LOGGER_DEBUG(logger_,
-                "old: hmi_level " << old_state->hmi_level() << ", audio_state "
-                                  << old_state->audio_streaming_state()
-                                  << ", system_context "
-                                  << old_state->system_context());
+               "old: hmi_level " << old_state->hmi_level() << ", audio_state "
+                                 << old_state->audio_streaming_state()
+                                 << ", system_context "
+                                 << old_state->system_context());
   LOGGER_DEBUG(logger_,
-                "new: hmi_level " << new_state->hmi_level() << ", audio_state "
-                                  << new_state->audio_streaming_state()
-                                  << ", system_context "
-                                  << new_state->system_context());
+               "new: hmi_level " << new_state->hmi_level() << ", audio_state "
+                                 << new_state->audio_streaming_state()
+                                 << ", system_context "
+                                 << new_state->system_context());
   if (IsStatusChanged(old_state, new_state)) {
     app_mngr_.SendHMIStatusNotification(app);
     if (new_state->hmi_level() == mobile_apis::HMILevel::HMI_NONE) {

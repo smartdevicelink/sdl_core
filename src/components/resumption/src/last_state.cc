@@ -58,7 +58,7 @@ void LastState::SaveToFileSystem() {
 
   DCHECK(file_system::CreateDirectoryRecursively(app_storage_folder_));
   LOGGER_INFO(logger_,
-               "LastState::SaveToFileSystem " << app_info_storage_ << str);
+              "LastState::SaveToFileSystem " << app_info_storage_ << str);
   DCHECK(file_system::Write(app_info_storage_, char_vector_pdata));
 }
 
@@ -68,7 +68,7 @@ void LastState::LoadFromFileSystem() {
   Json::Reader m_reader;
   if (result && m_reader.parse(buffer, dictionary)) {
     LOGGER_INFO(logger_,
-                 "Valid last state was found." << dictionary.toStyledString());
+                "Valid last state was found." << dictionary.toStyledString());
     return;
   }
   LOGGER_WARN(logger_, "No valid last state was found.");

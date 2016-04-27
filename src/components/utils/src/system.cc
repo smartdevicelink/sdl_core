@@ -97,8 +97,8 @@ bool System::Execute(bool wait) {
 
   if (ret == -1) {
     LOGGER_ERROR(logger_,
-                  "Can't execute command: " << command_ << " Errno is: "
-                                            << std::strerror(errno));
+                 "Can't execute command: " << command_ << " Errno is: "
+                                           << std::strerror(errno));
     return false;
   }
 

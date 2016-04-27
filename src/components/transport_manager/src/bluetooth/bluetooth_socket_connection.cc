@@ -70,7 +70,7 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
   if (!bluetooth_device->GetRfcommChannel(application_handle(),
                                           &rfcomm_channel)) {
     LOGGER_DEBUG(logger_,
-                  "Application " << application_handle() << " not found");
+                 "Application " << application_handle() << " not found");
     *error = new ConnectError();
     LOGGER_TRACE(logger_, "exit with FALSE");
     return false;
@@ -92,8 +92,8 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
     rfcomm_socket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
     if (-1 == rfcomm_socket) {
       LOGGER_ERROR_WITH_ERRNO(logger_,
-                               "Failed to create RFCOMM socket for device "
-                                   << device_handle());
+                              "Failed to create RFCOMM socket for device "
+                                  << device_handle());
       *error = new ConnectError();
       LOGGER_TRACE(logger_, "exit with FALSE");
       return false;

@@ -204,8 +204,8 @@ uint32_t CommandRequestImpl::SendHMIRequest(
       application_manager_.GetNextHMICorrelationID();
   if (use_events) {
     LOGGER_DEBUG(logger_,
-                  "subscribe_on_event " << function_id << " "
-                                        << hmi_correlation_id);
+                 "subscribe_on_event " << function_id << " "
+                                       << hmi_correlation_id);
     subscribe_on_event(function_id, hmi_correlation_id);
   }
 
@@ -485,8 +485,8 @@ void CommandRequestImpl::RemoveDisallowedParameters(
       params.erase(key);
       parameters_permissions_.undefined_params.push_back(key);
       LOGGER_INFO(logger_,
-                   "Following parameter is not found among allowed parameters '"
-                       << key << "' and will be treated as disallowed.");
+                  "Following parameter is not found among allowed parameters '"
+                      << key << "' and will be treated as disallowed.");
     }
   }
 }

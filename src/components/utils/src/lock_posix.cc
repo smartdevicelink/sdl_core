@@ -69,8 +69,8 @@ Lock::~Lock() {
   int32_t status = pthread_mutex_destroy(&mutex_);
   if (status != 0) {
     LOGGER_ERROR(logger_,
-                  "Failed to destroy mutex " << &mutex_ << ": "
-                                             << strerror(status));
+                 "Failed to destroy mutex " << &mutex_ << ": "
+                                            << strerror(status));
   }
 }
 
@@ -78,8 +78,8 @@ void Lock::Acquire() {
   const int32_t status = pthread_mutex_lock(&mutex_);
   if (status != 0) {
     LOGGER_FATAL(logger_,
-                  "Failed to acquire mutex " << &mutex_ << ": "
-                                             << strerror(status));
+                 "Failed to acquire mutex " << &mutex_ << ": "
+                                            << strerror(status));
     DCHECK(status != 0);
   } else {
     AssertFreeAndMarkTaken();
@@ -91,8 +91,8 @@ void Lock::Release() {
   const int32_t status = pthread_mutex_unlock(&mutex_);
   if (status != 0) {
     LOGGER_ERROR(logger_,
-                  "Failed to unlock mutex" << &mutex_ << ": "
-                                           << strerror(status));
+                 "Failed to unlock mutex" << &mutex_ << ": "
+                                          << strerror(status));
   }
 }
 
@@ -138,7 +138,7 @@ void Lock::Init(bool is_recursive) {
 
   if (status != 0) {
     LOGGER_FATAL(logger_,
-                  "Failed to initialize mutex. " << std::strerror(status));
+                 "Failed to initialize mutex. " << std::strerror(status));
     DCHECK(status != 0);
   }
 }

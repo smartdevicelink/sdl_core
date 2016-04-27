@@ -74,43 +74,43 @@
           __FUNCTION__)
 #endif
 
-#define DCHECK(condition)                                                     \
-  if (!(condition)) {                                                         \
-    CREATE_LOGGERPTR_LOCAL(logger_, "Utils");                                 \
+#define DCHECK(condition)                                                    \
+  if (!(condition)) {                                                        \
+    CREATE_LOGGERPTR_LOCAL(logger_, "Utils");                                \
     LOGGER_FATAL(logger_,                                                    \
-                  "DCHECK failed with \"" << #condition << "\" ["             \
-                                          << __FUNCTION__ << "][" << __FILE__ \
-                                          << ':' << __LINE__ << ']');         \
-    ASSERT((condition));                                                      \
+                 "DCHECK failed with \"" << #condition << "\" ["             \
+                                         << __FUNCTION__ << "][" << __FILE__ \
+                                         << ':' << __LINE__ << ']');         \
+    ASSERT((condition));                                                     \
   }
 
 /*
  * Will cauch assert on debug version,
  * Will return return_value in release build
  */
-#define DCHECK_OR_RETURN(condition, return_value)                             \
-  if (!(condition)) {                                                         \
-    CREATE_LOGGERPTR_LOCAL(logger_, "Utils");                                 \
+#define DCHECK_OR_RETURN(condition, return_value)                            \
+  if (!(condition)) {                                                        \
+    CREATE_LOGGERPTR_LOCAL(logger_, "Utils");                                \
     LOGGER_FATAL(logger_,                                                    \
-                  "DCHECK failed with \"" << #condition << "\" ["             \
-                                          << __FUNCTION__ << "][" << __FILE__ \
-                                          << ':' << __LINE__ << ']');         \
-    ASSERT((condition));                                                      \
-    return (return_value);                                                    \
+                 "DCHECK failed with \"" << #condition << "\" ["             \
+                                         << __FUNCTION__ << "][" << __FILE__ \
+                                         << ':' << __LINE__ << ']');         \
+    ASSERT((condition));                                                     \
+    return (return_value);                                                   \
   }
 /*
  * Will cauch assert on debug version,
  * Will return return_value in release build
  */
-#define DCHECK_OR_RETURN_VOID(condition)                                      \
-  if (!(condition)) {                                                         \
-    CREATE_LOGGERPTR_LOCAL(logger_, "Utils");                                 \
+#define DCHECK_OR_RETURN_VOID(condition)                                     \
+  if (!(condition)) {                                                        \
+    CREATE_LOGGERPTR_LOCAL(logger_, "Utils");                                \
     LOGGER_FATAL(logger_,                                                    \
-                  "DCHECK failed with \"" << #condition << "\" ["             \
-                                          << __FUNCTION__ << "][" << __FILE__ \
-                                          << ':' << __LINE__ << ']');         \
-    ASSERT((condition));                                                      \
-    return;                                                                   \
+                 "DCHECK failed with \"" << #condition << "\" ["             \
+                                         << __FUNCTION__ << "][" << __FILE__ \
+                                         << ':' << __LINE__ << ']');         \
+    ASSERT((condition));                                                     \
+    return;                                                                  \
   }
 
 #define NOTREACHED() DCHECK(!"Unreachable code")

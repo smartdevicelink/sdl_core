@@ -88,8 +88,7 @@ void ApplicationState::RemoveState(HmiState::StateID state) {
   switch (state) {
     case HmiState::StateID::STATE_ID_CURRENT:
     case HmiState::StateID::STATE_ID_REGULAR:
-      LOGGER_ERROR(logger_,
-                    "State of type '" << state << "'can't be removed.");
+      LOGGER_ERROR(logger_, "State of type '" << state << "'can't be removed.");
       break;
     case HmiState::StateID::STATE_ID_POSTPONED:
       RemovePostponedState();

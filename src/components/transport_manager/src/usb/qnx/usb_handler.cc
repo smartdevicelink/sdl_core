@@ -66,14 +66,14 @@ UsbHandler::~UsbHandler() {
     const int disconnect_rc = usbd_disconnect(usbd_general_connection_);
     if (EOK != disconnect_rc) {
       LOGGER_ERROR(logger_,
-                    "usbd_disconnect failed, error code " << disconnect_rc);
+                   "usbd_disconnect failed, error code " << disconnect_rc);
     }
   }
   if (usbd_aoa_connection_) {
     const int disconnect_rc = usbd_disconnect(usbd_aoa_connection_);
     if (EOK != disconnect_rc) {
       LOGGER_ERROR(logger_,
-                    "usbd_disconnect failed, error code " << disconnect_rc);
+                   "usbd_disconnect failed, error code " << disconnect_rc);
     }
   }
 }
@@ -234,11 +234,11 @@ void ArrivedCallback(usbd_connection* connection,
   if (kAoaVid == instance->ident.vendor)
     return;
   LOGGER_INFO(logger_,
-               "USB device arrived (path "
-                   << static_cast<int>(instance->path) << ", devno "
-                   << static_cast<int>(instance->devno) << ", config "
-                   << static_cast<int>(instance->config) << ", iface "
-                   << static_cast<int>(instance->iface) << ")");
+              "USB device arrived (path "
+                  << static_cast<int>(instance->path) << ", devno "
+                  << static_cast<int>(instance->devno) << ", config "
+                  << static_cast<int>(instance->config) << ", iface "
+                  << static_cast<int>(instance->iface) << ")");
   usb_handler->DeviceArrived(connection, instance);
 }
 
@@ -247,11 +247,11 @@ void ArrivedAoaCallback(usbd_connection* connection,
   if (kAoaVid != instance->ident.vendor)
     return;
   LOGGER_INFO(logger_,
-               "USB AOA device arrived (path "
-                   << static_cast<int>(instance->path) << ", devno "
-                   << static_cast<int>(instance->devno) << ", config "
-                   << static_cast<int>(instance->config) << ", iface "
-                   << static_cast<int>(instance->iface) << ")");
+              "USB AOA device arrived (path "
+                  << static_cast<int>(instance->path) << ", devno "
+                  << static_cast<int>(instance->devno) << ", config "
+                  << static_cast<int>(instance->config) << ", iface "
+                  << static_cast<int>(instance->iface) << ")");
   usb_handler->DeviceArrived(connection, instance);
 }
 
@@ -260,11 +260,11 @@ void LeftCallback(usbd_connection* connection,
   if (kAoaVid == instance->ident.vendor)
     return;
   LOGGER_INFO(logger_,
-               "USB device left (path "
-                   << static_cast<int>(instance->path) << ", devno "
-                   << static_cast<int>(instance->devno) << ", config "
-                   << static_cast<int>(instance->config) << ", iface "
-                   << static_cast<int>(instance->iface) << ")");
+              "USB device left (path "
+                  << static_cast<int>(instance->path) << ", devno "
+                  << static_cast<int>(instance->devno) << ", config "
+                  << static_cast<int>(instance->config) << ", iface "
+                  << static_cast<int>(instance->iface) << ")");
   usb_handler->DeviceLeft(instance);
 }
 
@@ -273,11 +273,11 @@ void LeftAoaCallback(usbd_connection* connection,
   if (kAoaVid != instance->ident.vendor)
     return;
   LOGGER_INFO(logger_,
-               "USB AOA device left (path "
-                   << static_cast<int>(instance->path) << ", devno "
-                   << static_cast<int>(instance->devno) << ", config "
-                   << static_cast<int>(instance->config) << ", iface "
-                   << static_cast<int>(instance->iface) << ")");
+              "USB AOA device left (path "
+                  << static_cast<int>(instance->path) << ", devno "
+                  << static_cast<int>(instance->devno) << ", config "
+                  << static_cast<int>(instance->config) << ", iface "
+                  << static_cast<int>(instance->iface) << ")");
   usb_handler->DeviceLeft(instance);
 }
 

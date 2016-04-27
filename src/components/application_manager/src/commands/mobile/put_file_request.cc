@@ -74,7 +74,7 @@ void PutFileRequest::Run() {
     // If application is in the HMI_NONE level the quantity of allowed
     // PutFile request is limited by the configuration profile
     LOGGER_ERROR(logger_,
-                  "Too many requests from the app with HMILevel HMI_NONE ");
+                 "Too many requests from the app with HMILevel HMI_NONE ");
     SendResponse(false,
                  mobile_apis::Result::REJECTED,
                  "Too many requests from the app with HMILevel HMI_NONE",
@@ -178,16 +178,16 @@ void PutFileRequest::Run() {
   const std::string full_path = file_path + "/" + sync_file_name_;
   UNUSED(full_path);
   LOGGER_DEBUG(logger_,
-                "Wrtiting " << binary_data.size() << "bytes to " << full_path
-                            << " (current size is"
-                            << file_system::FileSize(full_path) << ")");
+               "Wrtiting " << binary_data.size() << "bytes to " << full_path
+                           << " (current size is"
+                           << file_system::FileSize(full_path) << ")");
 
   mobile_apis::Result::eType save_result = application_manager_.SaveBinary(
       binary_data, file_path, sync_file_name_, offset_);
 
   LOGGER_DEBUG(logger_,
-                "New size of " << full_path << " is "
-                               << file_system::FileSize(full_path) << " bytes");
+               "New size of " << full_path << " is "
+                              << file_system::FileSize(full_path) << " bytes");
   if (!is_system_file) {
     response_params[strings::space_available] =
         static_cast<uint32_t>(application->GetAvailableDiskSpace());
@@ -207,8 +207,8 @@ void PutFileRequest::Run() {
           LOGGER_INFO(logger_, "New file downloading");
           if (!application->AddFile(file)) {
             LOGGER_INFO(logger_,
-                         "Couldn't add file to application (File already Exist"
-                             << " in application and was rewritten on FS)");
+                        "Couldn't add file to application (File already Exist"
+                            << " in application and was rewritten on FS)");
             /* It can be first part of new big file, so we need to update
                information about it's downloading status and persistence */
             if (!application->UpdateFile(file)) {
@@ -237,8 +237,7 @@ void PutFileRequest::Run() {
       break;
     }
     default:
-      LOGGER_WARN(logger_,
-                   "PutFile is unsuccessful. Result = " << save_result);
+      LOGGER_WARN(logger_, "PutFile is unsuccessful. Result = " << save_result);
       SendResponse(false, save_result, "Can't save file", &response_params);
       break;
   }

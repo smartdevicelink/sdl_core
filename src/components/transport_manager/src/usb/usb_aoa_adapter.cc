@@ -72,15 +72,15 @@ TransportAdapter::Error UsbAoaAdapter::Init() {
   TransportAdapter::Error error = usb_handler_->Init();
   if (error != TransportAdapter::OK) {
     LOGGER_TRACE(logger_,
-                  "exit with error "
-                      << error << ". Condition: error != TransportAdapter::OK");
+                 "exit with error "
+                     << error << ". Condition: error != TransportAdapter::OK");
     return error;
   }
   error = TransportAdapterImpl::Init();
   if (error != TransportAdapter::OK) {
     LOGGER_TRACE(logger_,
-                  "exit with error "
-                      << error << ". Condition: error != TransportAdapter::OK");
+                 "exit with error "
+                     << error << ". Condition: error != TransportAdapter::OK");
     return error;
   }
   is_initialised_ = true;

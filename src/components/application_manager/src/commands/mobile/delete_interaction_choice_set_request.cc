@@ -55,8 +55,8 @@ void DeleteInteractionChoiceSetRequest::Run() {
 
   if (!app) {
     LOGGER_ERROR(logger_,
-                  "No application associated with connection key "
-                      << connection_key());
+                 "No application associated with connection key "
+                     << connection_key());
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -67,7 +67,7 @@ void DeleteInteractionChoiceSetRequest::Run() {
 
   if (!app->FindChoiceSet(choice_set_id)) {
     LOGGER_ERROR(logger_,
-                  "Choice set with id " << choice_set_id << " is not found.");
+                 "Choice set with id " << choice_set_id << " is not found.");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
@@ -116,7 +116,7 @@ bool DeleteInteractionChoiceSetRequest::ChoiceSetInUse(
     for (; choice.end() != choice_it; ++choice_it) {
       if (choice_it->first == choice_set_id) {
         LOGGER_ERROR(logger_,
-                      "Choice set with id " << choice_set_id << " is in use.");
+                     "Choice set with id " << choice_set_id << " is in use.");
         return true;
       }
     }
@@ -136,7 +136,7 @@ void DeleteInteractionChoiceSetRequest::SendVrDeleteCommand(
 
   if (!choice_set) {
     LOGGER_ERROR(logger_,
-                  "Choice set with id " << choice_set_id << " is not found.");
+                 "Choice set with id " << choice_set_id << " is not found.");
     return;
   }
 

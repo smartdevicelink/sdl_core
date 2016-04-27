@@ -67,7 +67,7 @@ void ListFilesRequest::Run() {
     // If application is in the HMI_NONE level the quantity of allowed
     // DeleteFile request is limited by the configuration profile
     LOGGER_ERROR(logger_,
-                  "Too many requests from the app with HMILevel HMI_NONE ");
+                 "Too many requests from the app with HMILevel HMI_NONE ");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
@@ -87,11 +87,11 @@ void ListFilesRequest::Run() {
     // Plus one required for move to next letter after '/'.
     if (i < application_manager_.get_settings().list_files_response_size()) {
       LOGGER_DEBUG(logger_,
-                    "File " + filename + " added to ListFiles response");
+                   "File " + filename + " added to ListFiles response");
       (*message_)[strings::msg_params][strings::filenames][i++] = filename;
     } else {
       LOGGER_DEBUG(logger_,
-                    "File " + filename + " not added to ListFiles response");
+                   "File " + filename + " not added to ListFiles response");
     }
   }
   (*message_)[strings::params][strings::message_type] =

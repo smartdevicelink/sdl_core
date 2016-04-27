@@ -212,13 +212,13 @@ void ThreadedSocketConnection::Transmit() {
     return;
   }
   LOGGER_DEBUG(logger_,
-                "poll is ok " << this << " revents0: " << std::hex
-                              << poll_fds[0].revents << " revents1:" << std::hex
-                              << poll_fds[1].revents);
+               "poll is ok " << this << " revents0: " << std::hex
+                             << poll_fds[0].revents << " revents1:" << std::hex
+                             << poll_fds[1].revents);
   // error check
   if (0 != (poll_fds[1].revents & (POLLERR | POLLHUP | POLLNVAL))) {
     LOGGER_ERROR(logger_,
-                  "Notification pipe for connection " << this << " terminated");
+                 "Notification pipe for connection " << this << " terminated");
     Abort();
     return;
   }
@@ -278,8 +278,8 @@ bool ThreadedSocketConnection::Receive() {
 
     if (bytes_read > 0) {
       LOGGER_DEBUG(logger_,
-                    "Received " << bytes_read << " bytes for connection "
-                                << this);
+                   "Received " << bytes_read << " bytes for connection "
+                               << this);
       ::protocol_handler::RawMessagePtr frame(
           new protocol_handler::RawMessage(0, 0, buffer, bytes_read));
       controller_->DataReceiveDone(
@@ -287,7 +287,7 @@ bool ThreadedSocketConnection::Receive() {
     } else if (bytes_read < 0) {
       if (EAGAIN != errno && EWOULDBLOCK != errno) {
         LOGGER_ERROR_WITH_ERRNO(logger_,
-                                 "recv() failed for connection " << this);
+                                "recv() failed for connection " << this);
         return false;
       }
     } else {

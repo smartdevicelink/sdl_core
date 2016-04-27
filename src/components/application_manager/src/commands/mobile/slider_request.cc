@@ -149,8 +149,8 @@ void SliderRequest::on_event(const event_engine::Event& event) {
           message[strings::params][strings::data][strings::slider_position];
     } else {
       LOGGER_ERROR(logger_,
-                    strings::slider_position << " field is absent"
-                                                " in response.");
+                   strings::slider_position << " field is absent"
+                                               " in response.");
       response_msg_params[strings::slider_position] = 0;
     }
   }

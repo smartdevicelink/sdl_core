@@ -488,7 +488,7 @@ class ApplicationManagerImpl
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
       LOGGER_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, audio_state);
@@ -505,7 +505,7 @@ class ApplicationManagerImpl
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
       LOGGER_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, new_state, SendActivateApp);
@@ -521,7 +521,7 @@ class ApplicationManagerImpl
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
       LOGGER_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, hmi_level, SendActivateApp);
@@ -541,7 +541,7 @@ class ApplicationManagerImpl
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
       LOGGER_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, hmi_level, audio_state, SendActivateApp);
@@ -562,7 +562,7 @@ class ApplicationManagerImpl
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
       LOGGER_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(
@@ -579,7 +579,7 @@ class ApplicationManagerImpl
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
       LOGGER_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, system_context);
@@ -594,7 +594,7 @@ class ApplicationManagerImpl
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
       LOGGER_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, hmi_level);
@@ -609,7 +609,7 @@ class ApplicationManagerImpl
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
       LOGGER_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, state);

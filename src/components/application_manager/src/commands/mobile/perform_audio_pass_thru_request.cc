@@ -86,9 +86,9 @@ void PerformAudioPassThruRequest::Run() {
 
   if (IsWhiteSpaceExist()) {
     LOGGER_ERROR(logger_,
-                  "Incoming perform audio pass thru has contains "
-                  "\\t\\n \\\\t \\\\n"
-                  " text contains only whitespace in initialPrompt");
+                 "Incoming perform audio pass thru has contains "
+                 "\\t\\n \\\\t \\\\n"
+                 " text contains only whitespace in initialPrompt");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }

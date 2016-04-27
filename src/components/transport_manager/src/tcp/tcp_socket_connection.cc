@@ -82,8 +82,8 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
   const int port = tcp_device->GetApplicationPort(application_handle());
   if (-1 == port) {
     LOGGER_ERROR(logger_,
-                  "Application port for " << application_handle()
-                                          << " not found");
+                 "Application port for " << application_handle()
+                                         << " not found");
     *error = new ConnectError();
     return false;
   }
@@ -101,11 +101,11 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
   addr.sin_port = htons(port);
 
   LOGGER_DEBUG(logger_,
-                "Connecting " << inet_ntoa(addr.sin_addr) << ":" << port);
+               "Connecting " << inet_ntoa(addr.sin_addr) << ":" << port);
   if (::connect(socket, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
     LOGGER_ERROR(logger_,
-                  "Failed to connect for application " << application_handle()
-                                                       << ", error " << errno);
+                 "Failed to connect for application " << application_handle()
+                                                      << ", error " << errno);
     *error = new ConnectError();
     ::close(socket);
     return false;

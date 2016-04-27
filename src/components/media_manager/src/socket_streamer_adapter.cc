@@ -139,7 +139,7 @@ bool SocketStreamerAdapter::SocketStreamer::Send(
 
   if (static_cast<uint32_t>(ret) != msg->data_size()) {
     LOGGER_WARN(logger,
-                 "Couldn't send all the data to socket " << send_socket_fd_);
+                "Couldn't send all the data to socket " << send_socket_fd_);
   }
 
   LOGGER_INFO(logger, "Streamer::sent " << msg->data_size());

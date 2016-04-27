@@ -146,24 +146,24 @@ void UnsubscribeVehicleDataRequest::Run() {
 
         if (!app->UnsubscribeFromIVI(static_cast<uint32_t>(key_type))) {
           LOGGER_ERROR(logger_,
-                        "Unable to unsubscribe from "
-                        "VehicleDataType: "
-                            << key_type);
+                       "Unable to unsubscribe from "
+                       "VehicleDataType: "
+                           << key_type);
           continue;
         }
 
         LOGGER_DEBUG(logger_,
-                      "Unsubscribed app with connection key "
-                          << connection_key()
-                          << " from VehicleDataType: " << key_type);
+                     "Unsubscribed app with connection key "
+                         << connection_key()
+                         << " from VehicleDataType: " << key_type);
 
         ++unsubscribed_items;
 
         if (IsSomeoneSubscribedFor(key_type)) {
           LOGGER_DEBUG(logger_,
-                        "There are another apps still subscribed for "
-                        "VehicleDataType: "
-                            << key_type);
+                       "There are another apps still subscribed for "
+                       "VehicleDataType: "
+                           << key_type);
 
           vi_still_subscribed_by_another_apps_.insert(key_type);
           response_params[key_name][strings::data_type] = key_type;
@@ -228,7 +228,7 @@ void UnsubscribeVehicleDataRequest::Run() {
     }
   }
   LOGGER_INFO(logger_,
-               hmi_requests_.size() << " requests are going to be sent to HMI");
+              hmi_requests_.size() << " requests are going to be sent to HMI");
 
   // Send subrequests
   for (HmiRequests::const_iterator it = hmi_requests_.begin();
@@ -285,9 +285,9 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
         status = mobile_api::Result::eType::GENERIC_ERROR;
       }
       LOGGER_TRACE(logger_,
-                    "Status from HMI: " << it->status
-                                        << ", so response status become "
-                                        << status);
+                   "Status from HMI: " << it->status
+                                       << ", so response status become "
+                                       << status);
     } else {
       any_arg_success = true;
     }
@@ -398,8 +398,8 @@ void UnsubscribeVehicleDataRequest::UpdateHash() const {
     application->UpdateHash();
   } else {
     LOGGER_ERROR(logger_,
-                  "Application with connection_key = " << connection_key()
-                                                       << " doesn't exist.");
+                 "Application with connection_key = " << connection_key()
+                                                      << " doesn't exist.");
   }
   application_manager_.TerminateRequest(connection_key(), correlation_id());
 }

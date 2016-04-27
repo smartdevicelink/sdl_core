@@ -61,8 +61,8 @@ void UsbConnectionFactory::SetUsbHandler(const UsbHandlerSptr usb_handler) {
 TransportAdapter::Error UsbConnectionFactory::CreateConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
   LOGGER_TRACE(logger_,
-                "enter DeviceUID: " << &device_uid
-                                    << ", ApplicationHandle: " << &app_handle);
+               "enter DeviceUID: " << &device_uid
+                                   << ", ApplicationHandle: " << &app_handle);
   DeviceSptr device = controller_->FindDevice(device_uid);
   if (!device.valid()) {
     LOGGER_ERROR(logger_, "device " << device_uid << " not found");
@@ -84,13 +84,13 @@ TransportAdapter::Error UsbConnectionFactory::CreateConnection(
   if (usb_connection->Init()) {
     LOGGER_INFO(logger_, "USB connection initialised");
     LOGGER_TRACE(logger_,
-                  "exit with TransportAdapter::OK. Condition: USB connection "
-                  "initialised");
+                 "exit with TransportAdapter::OK. Condition: USB connection "
+                 "initialised");
     return TransportAdapter::OK;
   } else {
     LOGGER_TRACE(logger_,
-                  "exit with TransportAdapter::FAIL. Condition: USB connection "
-                  "NOT initialised");
+                 "exit with TransportAdapter::FAIL. Condition: USB connection "
+                 "NOT initialised");
     return TransportAdapter::FAIL;
   }
 }

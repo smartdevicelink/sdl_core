@@ -116,7 +116,7 @@ void SetAppIconRequest::CopyToIconStorage(
            .get_settings()
            .enable_protocol_4()) {
     LOGGER_WARN(logger_,
-                 "Icon copying skipped, since protocol ver. 4 is not enabled.");
+                "Icon copying skipped, since protocol ver. 4 is not enabled.");
     return;
   }
 
@@ -134,10 +134,10 @@ void SetAppIconRequest::CopyToIconStorage(
 
   if (storage_max_size < file_size) {
     LOGGER_ERROR(logger_,
-                  "Icon size (" << file_size << ") is bigger, than "
-                                                " icons storage maximum size ("
-                                << storage_max_size << ")."
-                                                       "Copying skipped.");
+                 "Icon size (" << file_size << ") is bigger, than "
+                                               " icons storage maximum size ("
+                               << storage_max_size << ")."
+                                                      "Copying skipped.");
     return;
   }
 
@@ -149,8 +149,8 @@ void SetAppIconRequest::CopyToIconStorage(
 
     if (!icons_amount) {
       LOGGER_DEBUG(logger_,
-                    "No icons will be deleted, since amount icons to remove "
-                    "is zero. Icon saving skipped.");
+                   "No icons will be deleted, since amount icons to remove "
+                   "is zero. Icon saving skipped.");
       return;
     }
 
@@ -180,8 +180,8 @@ void SetAppIconRequest::CopyToIconStorage(
   }
 
   LOGGER_DEBUG(logger_,
-                "Icon was successfully copied from :" << path_to_file << " to "
-                                                      << icon_path);
+               "Icon was successfully copied from :" << path_to_file << " to "
+                                                     << icon_path);
 
   return;
 }
@@ -213,7 +213,7 @@ void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
     }
     icon_modification_time.erase(icon_modification_time.begin());
     LOGGER_DEBUG(logger_,
-                  "Old icon " << file_path << " was deleted successfully.");
+                 "Old icon " << file_path << " was deleted successfully.");
   }
 }
 
@@ -258,7 +258,7 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
         app->set_app_icon_path(path);
 
         LOGGER_INFO(logger_,
-                     "Icon path was set to '" << app->app_icon_path() << "'");
+                    "Icon path was set to '" << app->app_icon_path() << "'");
       }
 
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));

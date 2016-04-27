@@ -78,8 +78,8 @@ class QueryAppsDataValidator {
     LOGGER_AUTO_TRACE(logger_);
     if (!data_.isValid()) {
       LOGGER_ERROR(logger_,
-                    kQueryAppsValidationFailedPrefix
-                        << "QueryApps response is not valid.");
+                   kQueryAppsValidationFailedPrefix
+                       << "QueryApps response is not valid.");
       return false;
     }
     if (!HasResponseKey()) {
@@ -92,9 +92,9 @@ class QueryAppsDataValidator {
   bool HasResponseKey() const {
     if (!data_.keyExists(json::response)) {
       LOGGER_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "QueryApps response does not contain '"
-                       << json::response << "' parameter.");
+                  kQueryAppsValidationFailedPrefix
+                      << "QueryApps response does not contain '"
+                      << json::response << "' parameter.");
       return false;
     }
     return true;
@@ -105,8 +105,8 @@ class QueryAppsDataValidator {
         data_[json::response].asArray();
     if (!objects_array) {
       LOGGER_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "QueryApps response is not array.");
+                  kQueryAppsValidationFailedPrefix
+                      << "QueryApps response is not array.");
       return false;
     }
     const std::size_t arr_size(objects_array->size());
@@ -116,8 +116,8 @@ class QueryAppsDataValidator {
 
       if (!app_data.isValid()) {
         LOGGER_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "Wrong application data in json file.");
+                    kQueryAppsValidationFailedPrefix
+                        << "Wrong application data in json file.");
         return false;
       }
       std::set<std::string> app_ids_set;
@@ -130,8 +130,8 @@ class QueryAppsDataValidator {
         os_type = json::ios;
         if (!app_data[os_type].keyExists(json::urlScheme)) {
           LOGGER_WARN(logger_,
-                       kQueryAppsValidationFailedPrefix
-                           << "Can't find URL scheme in json file.");
+                      kQueryAppsValidationFailedPrefix
+                          << "Can't find URL scheme in json file.");
           return false;
         }
         if (app_data[os_type][json::urlScheme].asString().length() >
@@ -150,19 +150,19 @@ class QueryAppsDataValidator {
           os_type = json::android;
           if (!app_data[os_type].keyExists(json::packageName)) {
             LOGGER_WARN(logger_,
-                         kQueryAppsValidationFailedPrefix
-                             << "Can't find package name in json file.");
+                        kQueryAppsValidationFailedPrefix
+                            << "Can't find package name in json file.");
             return false;
           }
           if (app_data[json::android][json::packageName].asString().length() >
               kPackageNameLengthMax) {
             LOGGER_WARN(logger_,
-                         kQueryAppsValidationFailedPrefix
-                             << "Package name length ["
-                             << app_data[json::android][json::packageName]
-                                    .asString()
-                                    .length() << "] exceeds max length ["
-                             << kPackageNameLengthMax << "]in json file.");
+                        kQueryAppsValidationFailedPrefix
+                            << "Package name length ["
+                            << app_data[json::android][json::packageName]
+                                   .asString()
+                                   .length() << "] exceeds max length ["
+                            << kPackageNameLengthMax << "]in json file.");
             return false;
           }
         }
@@ -170,16 +170,16 @@ class QueryAppsDataValidator {
 
       if (os_type.empty()) {
         LOGGER_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "Can't find mobile OS type in json file.");
+                    kQueryAppsValidationFailedPrefix
+                        << "Can't find mobile OS type in json file.");
         return false;
       }
 
       // Languages verification
       if (!app_data[os_type].keyExists(json::languages)) {
         LOGGER_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "'languages' doesn't exist");
+                    kQueryAppsValidationFailedPrefix
+                        << "'languages' doesn't exist");
         return false;
       }
       if (!ValidateLanguages(app_data[os_type][json::languages],
@@ -195,25 +195,25 @@ class QueryAppsDataValidator {
     // Verify appid
     if (!app_data.keyExists(json::appId)) {
       LOGGER_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "Can't find app ID in json file.");
+                  kQueryAppsValidationFailedPrefix
+                      << "Can't find app ID in json file.");
       return false;
     }
     // Verify appid length
     const std::string app_id(app_data[json::appId].asString());
     if (app_id.length() > kAppIdLengthMax) {
       LOGGER_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "An Object ID length exceeds maximum allowed ["
-                       << app_id.length() << "]>[" << kAppIdLengthMax << "]");
+                  kQueryAppsValidationFailedPrefix
+                      << "An Object ID length exceeds maximum allowed ["
+                      << app_id.length() << "]>[" << kAppIdLengthMax << "]");
       return false;
     }
 
     // Verify that appid is unique
     if (app_ids_set.find(app_id) != app_ids_set.end()) {
       LOGGER_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "An Object ID is not unigue [" << app_id << "]");
+                  kQueryAppsValidationFailedPrefix
+                      << "An Object ID is not unigue [" << app_id << "]");
       return false;
     }
     app_ids_set.insert(app_id);
@@ -223,26 +223,26 @@ class QueryAppsDataValidator {
         manager_.application_by_policy_id(app_id);
     if (registered_app) {
       LOGGER_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "Application with the same id: " << app_id
-                       << " is registered already.");
+                  kQueryAppsValidationFailedPrefix
+                      << "Application with the same id: " << app_id
+                      << " is registered already.");
       return false;
     }
     // Verify app name exist
     if (!app_data.keyExists(json::name)) {
       LOGGER_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "Can't find app name in json file.");
+                  kQueryAppsValidationFailedPrefix
+                      << "Can't find app name in json file.");
       return false;
     }
     // And app name length
     const std::string appName(app_data[json::name].asString());
     if (appName.length() > kAppNameLengthMax) {
       LOGGER_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "Name of application exceeds maximum allowed ["
-                       << appName.length() << "]>[" << kAppNameLengthMax
-                       << "].");
+                  kQueryAppsValidationFailedPrefix
+                      << "Name of application exceeds maximum allowed ["
+                      << appName.length() << "]>[" << kAppNameLengthMax
+                      << "].");
       return false;
     }
     return true;
@@ -254,10 +254,10 @@ class QueryAppsDataValidator {
     const size_t languages_array_size = languages.length();
     if (languages_array_size > kLanguageArraySizeMax) {
       LOGGER_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "'languages' array exceeds max size ["
-                       << languages_array_size << "]>[" << kLanguageArraySizeMax
-                       << "]");
+                  kQueryAppsValidationFailedPrefix
+                      << "'languages' array exceeds max size ["
+                      << languages_array_size << "]>[" << kLanguageArraySizeMax
+                      << "]");
       return false;
     }
     // Every language has ttsname string and vrsynonyms array
@@ -265,21 +265,21 @@ class QueryAppsDataValidator {
       const smart_objects::SmartObject& language = languages.getElement(idx);
       if (smart_objects::SmartType_Map != language.getType()) {
         LOGGER_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "language is not a map.");
+                    kQueryAppsValidationFailedPrefix
+                        << "language is not a map.");
         return false;
       }
       if (language.length() != 1) {
         LOGGER_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "language map size is not equal 1.");
+                    kQueryAppsValidationFailedPrefix
+                        << "language map size is not equal 1.");
         return false;
       }
       const std::string language_name = (*language.map_begin()).first;
       if (!language_name.length()) {
         LOGGER_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "language name is empty");
+                    kQueryAppsValidationFailedPrefix
+                        << "language name is empty");
         return false;
       }
       // Verify default language defined
@@ -293,8 +293,8 @@ class QueryAppsDataValidator {
       // ttsName verification
       if (!language[language_name].keyExists(json::ttsName)) {
         LOGGER_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "'languages.ttsName' doesn't exist");
+                    kQueryAppsValidationFailedPrefix
+                        << "'languages.ttsName' doesn't exist");
         return false;
       }
       const smart_objects::SmartObject& ttsNameObject =
@@ -305,16 +305,16 @@ class QueryAppsDataValidator {
             language[language_name][json::ttsName].asString();
         if (ttsName.length() > kTtsNameLengthMax) {
           LOGGER_WARN(logger_,
-                       kQueryAppsValidationFailedPrefix
-                           << "ttsName string exceeds max length ["
-                           << ttsName.length() << "]>[" << kTtsNameLengthMax
-                           << "]");
+                      kQueryAppsValidationFailedPrefix
+                          << "ttsName string exceeds max length ["
+                          << ttsName.length() << "]>[" << kTtsNameLengthMax
+                          << "]");
           return false;
         }
       } else {
         LOGGER_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "ttsName is not the string type.");
+                    kQueryAppsValidationFailedPrefix
+                        << "ttsName is not the string type.");
         return false;
       }
 
@@ -324,8 +324,8 @@ class QueryAppsDataValidator {
     }
     if (!default_language_found) {
       LOGGER_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << " 'languages'.default' doesn't exist");
+                  kQueryAppsValidationFailedPrefix
+                      << " 'languages'.default' doesn't exist");
       return false;
     }
     return true;
@@ -336,33 +336,33 @@ class QueryAppsDataValidator {
                                   SynonymsMap& synonyms_map) const {
     if (!language[language_name].keyExists(json::vrSynonyms)) {
       LOGGER_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "'languages.vrSynonyms' doesn't exist");
+                  kQueryAppsValidationFailedPrefix
+                      << "'languages.vrSynonyms' doesn't exist");
       return false;
     }
     const smart_objects::SmartArray* synonyms_array =
         language[language_name][json::vrSynonyms].asArray();
     if (!synonyms_array) {
       LOGGER_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "vrSynonyms is not array.");
+                  kQueryAppsValidationFailedPrefix
+                      << "vrSynonyms is not array.");
       return false;
     }
     const size_t synonyms_array_size = synonyms_array->size();
     if (synonyms_array_size < kVrArraySizeMin) {
       LOGGER_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "vrSynomyms array has [" << synonyms_array_size
-                       << "] size < allowed min size [" << kVrArraySizeMin
-                       << "]");
+                  kQueryAppsValidationFailedPrefix
+                      << "vrSynomyms array has [" << synonyms_array_size
+                      << "] size < allowed min size [" << kVrArraySizeMin
+                      << "]");
       return false;
     }
     if (synonyms_array_size > kVrArraySizeMax) {
       LOGGER_WARN(logger_,
-                   kQueryAppsValidationFailedPrefix
-                       << "vrSynomyms array size [" << synonyms_array_size
-                       << "] exceeds maximum allowed size [" << kVrArraySizeMax
-                       << "]");
+                  kQueryAppsValidationFailedPrefix
+                      << "vrSynomyms array size [" << synonyms_array_size
+                      << "] exceeds maximum allowed size [" << kVrArraySizeMax
+                      << "]");
       return false;
     }
 
@@ -371,18 +371,18 @@ class QueryAppsDataValidator {
       const std::string vrSynonym = synonym.asString();
       if (vrSynonym.length() > kVrSynonymLengthMax) {
         LOGGER_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "vrSYnomym item [" << idx
-                         << "] exceeds max length [" << vrSynonym.length()
-                         << "]>[" << kVrSynonymLengthMax << "]");
+                    kQueryAppsValidationFailedPrefix
+                        << "vrSYnomym item [" << idx << "] exceeds max length ["
+                        << vrSynonym.length() << "]>[" << kVrSynonymLengthMax
+                        << "]");
         return false;
       }
       if (vrSynonym.length() < kVrSynonymLengthMin) {
         LOGGER_WARN(logger_,
-                     kQueryAppsValidationFailedPrefix
-                         << "vrSYnomym item [" << idx << "] length ["
-                         << vrSynonym.length() << "] is less then min length ["
-                         << kVrSynonymLengthMin << "] allowed.");
+                    kQueryAppsValidationFailedPrefix
+                        << "vrSYnomym item [" << idx << "] length ["
+                        << vrSynonym.length() << "] is less then min length ["
+                        << kVrSynonymLengthMin << "] allowed.");
         return false;
       }
       // Verify duplicates
@@ -391,10 +391,10 @@ class QueryAppsDataValidator {
       if (synonyms_map_iter != synonyms_map.end()) {
         if (!(*synonyms_map_iter).second.insert(vrSynonym).second) {
           LOGGER_WARN(logger_,
-                       kQueryAppsValidationFailedPrefix
-                           << "vrSYnomym item already defined ["
-                           << vrSynonym.c_str() << "] for language ["
-                           << language_name << "]");
+                      kQueryAppsValidationFailedPrefix
+                          << "vrSYnomym item already defined ["
+                          << vrSynonym.c_str() << "] for language ["
+                          << language_name << "]");
           return false;
         }
       }
@@ -501,9 +501,9 @@ void SystemRequest::Run() {
     app_full_file_path += file_name;
 
     LOGGER_DEBUG(logger_,
-                  "Binary data is not present. Trying to find file "
-                      << file_name << " within previously saved app file in "
-                      << binary_data_folder);
+                 "Binary data is not present. Trying to find file "
+                     << file_name << " within previously saved app file in "
+                     << binary_data_folder);
 
     const AppFile* file = application->GetFile(app_full_file_path);
     if (!file || !file->is_download_complete ||
@@ -613,15 +613,15 @@ bool SystemRequest::ValidateQueryAppData(
     const smart_objects::SmartObject& data) const {
   if (!data.isValid()) {
     LOGGER_ERROR(logger_,
-                  kQueryAppsValidationFailedPrefix
-                      << "QueryApps response is not valid.");
+                 kQueryAppsValidationFailedPrefix
+                     << "QueryApps response is not valid.");
     return false;
   }
   if (!data.keyExists(json::response)) {
     LOGGER_ERROR(logger_,
-                  kQueryAppsValidationFailedPrefix
-                      << "QueryApps response does not contain '"
-                      << json::response << "' parameter.");
+                 kQueryAppsValidationFailedPrefix
+                     << "QueryApps response does not contain '"
+                     << json::response << "' parameter.");
     return false;
   }
 

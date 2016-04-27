@@ -86,16 +86,16 @@ MqueueAdapter::MqueueAdapter(HMIMessageHandler* hmi_message_handler)
       mq_open(kSdlToHmiQueue, O_CREAT | O_RDWR, S_IRWXU, &mq_attributes);
   if (-1 == sdl_to_hmi_mqueue_) {
     LOGGER_ERROR(logger_,
-                  "Could not open message queue " << kSdlToHmiQueue
-                                                  << ", error " << errno);
+                 "Could not open message queue " << kSdlToHmiQueue << ", error "
+                                                 << errno);
     return;
   }
   hmi_to_sdl_mqueue_ =
       mq_open(kHmiToSdlQueue, O_CREAT | O_RDWR, S_IRWXU, &mq_attributes);
   if (-1 == hmi_to_sdl_mqueue_) {
     LOGGER_ERROR(logger_,
-                  "Could not open message queue " << kHmiToSdlQueue
-                                                  << ", error " << errno);
+                 "Could not open message queue " << kHmiToSdlQueue << ", error "
+                                                 << errno);
     return;
   }
   receiver_thread_delegate_ =

@@ -58,8 +58,8 @@ void ResumptionDataJson::SaveApplication(
 
   const std::string& policy_app_id = application->policy_app_id();
   LOGGER_DEBUG(logger_,
-                "app_id : " << application->app_id()
-                            << " policy_app_id : " << policy_app_id);
+               "app_id : " << application->app_id()
+                           << " policy_app_id : " << policy_app_id);
   const std::string hash = application->curHash();
   const uint32_t grammar_id = application->get_grammar_id();
   const uint32_t time_stamp = (uint32_t)time(NULL);
@@ -245,7 +245,7 @@ bool ResumptionDataJson::GetHashId(const std::string& policy_app_id,
 
   const Json::Value& json_app = GetSavedApplications()[idx];
   LOGGER_DEBUG(logger_,
-                "Saved_application_data: " << json_app.toStyledString());
+               "Saved_application_data: " << json_app.toStyledString());
   if (json_app.isMember(strings::hash_id) &&
       json_app.isMember(strings::time_stamp)) {
     hash_id = json_app[strings::hash_id].asString();
@@ -386,8 +386,8 @@ void ResumptionDataJson::UpdateHmiLevel(
   int idx = GetObjectIndex(policy_app_id, device_id);
   if (-1 == idx) {
     LOGGER_WARN(logger_,
-                 "Application isn't saved with mobile_app_id = "
-                     << policy_app_id << " device_id = " << device_id);
+                "Application isn't saved with mobile_app_id = "
+                    << policy_app_id << " device_id = " << device_id);
     return;
   }
   GetSavedApplications()[idx][strings::hmi_level] = hmi_level;
@@ -504,8 +504,8 @@ bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
   Json::Value& application = GetFromSavedOrAppend(app_id, device_id);
   if (application.isNull()) {
     LOGGER_DEBUG(logger_,
-                  "Application " << app_id << " with device_id " << device_id
-                                 << " hasn't been found in resumption data.");
+                 "Application " << app_id << " with device_id " << device_id
+                                << " hasn't been found in resumption data.");
     return false;
   }
   application[strings::application_commands].clear();
@@ -516,9 +516,9 @@ bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
   application[strings::application_files].clear();
   application.removeMember(strings::grammar_id);
   LOGGER_DEBUG(logger_,
-                "Resumption data for application "
-                    << app_id << " with device_id " << device_id
-                    << " has been dropped.");
+               "Resumption data for application "
+                   << app_id << " with device_id " << device_id
+                   << " has been dropped.");
   return true;
 }
 

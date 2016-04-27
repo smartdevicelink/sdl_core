@@ -77,8 +77,8 @@ void OnSystemRequestNotification::Run() {
 
   if (!app.valid()) {
     LOGGER_WARN(logger_,
-                 "Application with connection key " << app_id
-                                                    << "is not registered.");
+                "Application with connection key " << app_id
+                                                   << "is not registered.");
     return;
   }
 

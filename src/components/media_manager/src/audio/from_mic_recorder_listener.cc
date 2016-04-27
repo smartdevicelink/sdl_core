@@ -61,8 +61,7 @@ void FromMicRecorderListener::OnErrorReceived(int32_t application_key,
 
 void FromMicRecorderListener::OnActivityStarted(int32_t application_key) {
   LOGGER_INFO(logger_,
-               "FromMicRecorderListener::OnActivityStarted "
-                   << application_key);
+              "FromMicRecorderListener::OnActivityStarted " << application_key);
   if (application_key == current_application_) {
     return;
   }
@@ -79,11 +78,11 @@ void FromMicRecorderListener::OnActivityStarted(int32_t application_key) {
 
 void FromMicRecorderListener::OnActivityEnded(int32_t application_key) {
   LOGGER_INFO(logger_,
-               "FromMicRecorderListener::OnActivityEnded " << application_key);
+              "FromMicRecorderListener::OnActivityEnded " << application_key);
   if (application_key != current_application_) {
     LOGGER_WARN(logger_,
-                 "Not performing activity on " << application_key << " but on "
-                                               << current_application_);
+                "Not performing activity on " << application_key << " but on "
+                                              << current_application_);
     return;
   }
   if (reader_) {

@@ -78,8 +78,8 @@ bool AlertRequest::Init() {
   // response.
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     LOGGER_INFO(logger_,
-                 "Request contains soft buttons - request timeout "
-                 "will be set to 0.");
+                "Request contains soft buttons - request timeout "
+                "will be set to 0.");
     default_timeout_ = 0;
   }
 
@@ -125,8 +125,8 @@ void AlertRequest::onTimeOut() {
     return;
   }
   LOGGER_INFO(logger_,
-               "Default timeout ignored. "
-               "AlertRequest with soft buttons wait timeout on HMI side");
+              "Default timeout ignored. "
+              "AlertRequest with soft buttons wait timeout on HMI side");
 }
 
 void AlertRequest::on_event(const event_engine::Event& event) {
@@ -139,11 +139,11 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::TTS_OnResetTimeout:
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
       LOGGER_INFO(logger_,
-                   "Received UI_OnResetTimeout event "
-                   " or TTS_OnResetTimeout event"
-                       << awaiting_tts_speak_response_ << " "
-                       << awaiting_tts_stop_speaking_response_ << " "
-                       << awaiting_ui_alert_response_);
+                  "Received UI_OnResetTimeout event "
+                  " or TTS_OnResetTimeout event"
+                      << awaiting_tts_speak_response_ << " "
+                      << awaiting_tts_stop_speaking_response_ << " "
+                      << awaiting_ui_alert_response_);
       application_manager_.updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
       break;

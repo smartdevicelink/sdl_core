@@ -158,11 +158,11 @@ void RegisterAppInterfaceRequest::Run() {
   while (!application_manager_.IsStopping() &&
          !application_manager_.IsHMICooperating()) {
     LOGGER_DEBUG(logger_,
-                  "Waiting for the HMI... conn_key="
-                      << connection_key()
-                      << ", correlation_id=" << correlation_id()
-                      << ", default_timeout=" << default_timeout()
-                      << ", thread=" << pthread_self());
+                 "Waiting for the HMI... conn_key="
+                     << connection_key()
+                     << ", correlation_id=" << correlation_id()
+                     << ", default_timeout=" << default_timeout()
+                     << ", thread=" << pthread_self());
     application_manager_.updateRequestTimeout(
         connection_key(), correlation_id(), default_timeout());
     sleep(1);
@@ -225,7 +225,7 @@ void RegisterAppInterfaceRequest::Run() {
 
   if (IsWhiteSpaceExist()) {
     LOGGER_INFO(logger_,
-                 "Incoming register app interface has contains \t\n \\t \\n");
+                "Incoming register app interface has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -297,8 +297,8 @@ void RegisterAppInterfaceRequest::Run() {
                              &dev_params.device_mac_address,
                              &dev_params.device_connection_type)) {
     LOGGER_ERROR(logger_,
-                  "Failed to extract information for device "
-                      << application->device());
+                 "Failed to extract information for device "
+                     << application->device());
   }
   policy::DeviceInfo device_info;
   device_info.AdoptDeviceType(dev_params.device_connection_type);
@@ -327,7 +327,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
 
   if (!application) {
     LOGGER_ERROR(logger_,
-                  "There is no application for such connection key" << key);
+                 "There is no application for such connection key" << key);
     LOGGER_DEBUG(logger_, "Need to start resume data persistent timer");
     resumer.OnAppRegistrationEnd();
     return;
@@ -350,8 +350,8 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
       msg_params[strings::hmi_display_language_desired].asInt() !=
           hmi_capabilities.active_ui_language()) {
     LOGGER_WARN(logger_,
-                 "Wrong language on registering application "
-                     << application->name().c_str());
+                "Wrong language on registering application "
+                    << application->name().c_str());
 
     LOGGER_ERROR(
         logger_,
@@ -509,7 +509,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
     hash_id = (*message_)[strings::msg_params][strings::hash_id].asString();
     if (!resumer.CheckApplicationHash(application, hash_id)) {
       LOGGER_WARN(logger_,
-                   "Hash from RAI does not match to saved resume data.");
+                  "Hash from RAI does not match to saved resume data.");
       result_code = mobile_apis::Result::RESUME_FAILED;
       add_info = "Hash from RAI does not match to saved resume data.";
       need_restore_vr = false;
@@ -642,7 +642,7 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
       session_observer.GetDataOnDeviceID(
           handle, &device_name, NULL, &mac_address, &transport_type)) {
     LOGGER_ERROR(logger_,
-                  "Failed to extract information for device " << handle);
+                 "Failed to extract information for device " << handle);
   }
 
   device_info[strings::name] = device_name;
@@ -736,8 +736,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
     policy::StringArray::const_iterator it =
         std::find_if(app_nicknames.begin(), app_nicknames.end(), compare);
     if (app_nicknames.end() == it) {
-      LOGGER_WARN(logger_,
-                   "Application name was not found in nicknames list.");
+      LOGGER_WARN(logger_, "Application name was not found in nicknames list.");
       // App should be unregistered, if its name is not present in nicknames
       // list
       usage_statistics::AppCounter count_of_rejections_nickname_mismatch(
@@ -875,7 +874,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
               .asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
       LOGGER_ERROR(logger_,
-                    "Invalid ngn_media_screen_app_name syntax check failed");
+                   "Invalid ngn_media_screen_app_name syntax check failed");
       return true;
     }
   }
@@ -911,7 +910,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
                        [strings::hardware].asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
         LOGGER_ERROR(logger_,
-                      "Invalid device_info hardware syntax check failed");
+                     "Invalid device_info hardware syntax check failed");
         return true;
       }
     }
@@ -922,7 +921,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
                        [strings::firmware_rev].asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
         LOGGER_ERROR(logger_,
-                      "Invalid device_info firmware_rev syntax check failed");
+                     "Invalid device_info firmware_rev syntax check failed");
         return true;
       }
     }
@@ -943,7 +942,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
                        [strings::os_version].asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
         LOGGER_ERROR(logger_,
-                      "Invalid device_info os_version syntax check failed");
+                     "Invalid device_info os_version syntax check failed");
         return true;
       }
     }
@@ -954,7 +953,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
                        [strings::carrier].asCharArray();
       if (strlen(str) && !CheckSyntax(str)) {
         LOGGER_ERROR(logger_,
-                      "Invalid device_info carrier syntax check failed");
+                     "Invalid device_info carrier syntax check failed");
         return true;
       }
     }
@@ -979,8 +978,8 @@ void RegisterAppInterfaceRequest::CheckResponseVehicleTypeParam(
   if (!vehicle_type.keyExists(param) || vehicle_type[param].empty()) {
     if (!backup_value.empty()) {
       LOGGER_DEBUG(logger_,
-                    param << " is missing."
-                             "Will be replaced with policy table value.");
+                   param << " is missing."
+                            "Will be replaced with policy table value.");
       vehicle_type[param] = backup_value;
     } else {
       vehicle_type.erase(param);

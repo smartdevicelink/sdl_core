@@ -48,7 +48,7 @@ void SDLGetUserFriendlyMessageRequest::Run() {
   const std::string messageCodes = "messageCodes";
   if (!(*message_)[strings::msg_params].keyExists(messageCodes)) {
     LOGGER_WARN(logger_,
-                 "Mandatory parameter '" + messageCodes + "'' is missing");
+                "Mandatory parameter '" + messageCodes + "'' is missing");
     return;
   }
   smart_objects::SmartArray* msg =

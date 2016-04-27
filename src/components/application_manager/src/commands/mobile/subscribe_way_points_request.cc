@@ -18,8 +18,8 @@ void SubscribeWayPointsRequest::Run() {
 
   if (!app) {
     LOGGER_ERROR(logger_,
-                  "An application with connection key "
-                      << connection_key() << " is not registered.");
+                 "An application with connection key "
+                     << connection_key() << " is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }

@@ -202,8 +202,8 @@ void Streamer::Start() {
                  reinterpret_cast<struct sockaddr*>(&serv_addr_),
                  sizeof(serv_addr_))) {
     LOGGER_ERROR(logger_,
-                  "Unable to bind server " << kserver_->ip().c_str() << ':'
-                                           << kserver_->port());
+                 "Unable to bind server " << kserver_->ip().c_str() << ':'
+                                          << kserver_->port());
     return;
   }
   if (-1 == listen(server_socket_fd_, 1)) {

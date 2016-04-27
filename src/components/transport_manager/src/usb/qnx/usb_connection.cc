@@ -123,8 +123,8 @@ void UsbConnection::OnInTransfer(usbd_urb* urb) {
     error = true;
   }
   LOGGER_INFO(logger_,
-               "USB in transfer, status " << std::hex << status << ", length "
-                                          << std::dec << len);
+              "USB in transfer, status " << std::hex << status << ", length "
+                                         << std::dec << len);
 
   if (!error) {
     switch (status) {
@@ -197,8 +197,8 @@ void UsbConnection::OnOutTransfer(usbd_urb* urb) {
     error = true;
   }
   LOGGER_INFO(logger_,
-               "USB out transfer, status " << std::hex << status << ", length "
-                                           << std::dec << len);
+              "USB out transfer, status " << std::hex << status << ", length "
+                                          << std::dec << len);
 
   if (!error) {
     switch (status) {
@@ -332,8 +332,8 @@ bool UsbConnection::OpenEndpoints() {
       break;
     }
     LOGGER_INFO(logger_,
-                 "USB configuration " << static_cast<int>(
-                     config_desc->configuration.bConfigurationValue));
+                "USB configuration " << static_cast<int>(
+                    config_desc->configuration.bConfigurationValue));
     int iface = 0;
     usbd_desc_node* iface_desc_node;
     while (!found) {
@@ -351,10 +351,10 @@ bool UsbConnection::OpenEndpoints() {
       const uint8_t interface_subclass =
           iface_desc->interface.bInterfaceSubClass;
       LOGGER_INFO(logger_,
-                   "USB interface number "
-                       << static_cast<int>(interface_number) << ", subclass "
-                       << std::hex << static_cast<int>(interface_subclass)
-                       << std::dec);
+                  "USB interface number "
+                      << static_cast<int>(interface_number) << ", subclass "
+                      << std::hex << static_cast<int>(interface_subclass)
+                      << std::dec);
       if (interface_subclass != 0xff) {
         continue;
       }
@@ -371,9 +371,9 @@ bool UsbConnection::OpenEndpoints() {
           const uint8_t endpoint_address =
               endpoint_desc->endpoint.bEndpointAddress;
           LOGGER_INFO(logger_,
-                       "Endpoint with address "
-                           << std::hex << static_cast<int>(endpoint_address)
-                           << std::dec << " found");
+                      "Endpoint with address "
+                          << std::hex << static_cast<int>(endpoint_address)
+                          << std::dec << " found");
           if (endpoint_address & USB_ENDPOINT_IN) {
             if (NULL == in_endpoint_desc) {
               in_endpoint_desc = endpoint_desc;

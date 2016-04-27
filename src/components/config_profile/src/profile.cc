@@ -48,19 +48,19 @@
 #endif  // ENABLE_SECURITY
 
 namespace {
-#define LOG_UPDATED_VALUE(value, key, section)                              \
-  {                                                                         \
+#define LOG_UPDATED_VALUE(value, key, section)                             \
+  {                                                                        \
     LOGGER_INFO(logger_,                                                   \
-                 "Setting value '" << value << "' for key '" << key         \
-                                   << "' in section '" << section << "'."); \
+                "Setting value '" << value << "' for key '" << key         \
+                                  << "' in section '" << section << "'."); \
   }
 
-#define LOG_UPDATED_BOOL_VALUE(value, key, section)                            \
-  {                                                                            \
+#define LOG_UPDATED_BOOL_VALUE(value, key, section)                           \
+  {                                                                           \
     LOGGER_INFO(logger_,                                                      \
-                 "Setting value '" << std::boolalpha << value << "' for key '" \
-                                   << key << "' in section '" << section       \
-                                   << "'.");                                   \
+                "Setting value '" << std::boolalpha << value << "' for key '" \
+                                  << key << "' in section '" << section       \
+                                  << "'.");                                   \
   }
 
 const char* kDefaultConfigFileName = "smartDeviceLink.ini";

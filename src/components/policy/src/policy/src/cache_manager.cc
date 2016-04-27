@@ -55,20 +55,20 @@ namespace policy {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
-#define CACHE_MANAGER_CHECK(return_value)                            \
-  {                                                                  \
-    if (!pt_) {                                                      \
+#define CACHE_MANAGER_CHECK(return_value)                           \
+  {                                                                 \
+    if (!pt_) {                                                     \
       LOGGER_WARN(logger_, "The cache manager is not initialized"); \
-      return return_value;                                           \
-    }                                                                \
+      return return_value;                                          \
+    }                                                               \
   }
 
-#define CACHE_MANAGER_CHECK_VOID()                                   \
-  {                                                                  \
-    if (!pt_) {                                                      \
+#define CACHE_MANAGER_CHECK_VOID()                                  \
+  {                                                                 \
+    if (!pt_) {                                                     \
       LOGGER_WARN(logger_, "The cache manager is not initialized"); \
-      return;                                                        \
-    }                                                                \
+      return;                                                       \
+    }                                                               \
   }
 
 struct LanguageFinder {
@@ -405,8 +405,8 @@ void CacheManager::CheckPermissions(const PTString& app_id,
 
   if (pt_->policy_table.app_policies_section.apps.end() ==
       pt_->policy_table.app_policies_section.apps.find(app_id)) {
-    LOGGER_ERROR(
-        logger_, "Application id " << app_id << " was not found in policy DB.");
+    LOGGER_ERROR(logger_,
+                 "Application id " << app_id << " was not found in policy DB.");
     return;
   }
 
@@ -575,9 +575,9 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
 
     if (msg_languages.languages.end() == it_language) {
       LOGGER_WARN(logger_,
-                   "Language "
-                       << language
-                       << " haven't been found for message code: " << *it);
+                  "Language "
+                      << language
+                      << " haven't been found for message code: " << *it);
 
       LanguageFinder fallback_language_finder("en-us");
 
@@ -588,7 +588,7 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
 
       if (msg_languages.languages.end() == it_fallback_language) {
         LOGGER_ERROR(logger_,
-                      "No fallback language found for message code: " << *it);
+                     "No fallback language found for message code: " << *it);
         continue;
       }
 
@@ -700,7 +700,7 @@ void CacheManager::CheckSnapshotInitialization() {
         rpc::Optional<policy_table::Messages>();
   } else {
     LOGGER_WARN(logger_,
-                 "policy_table.consumer_friendly_messages is not initialized");
+                "policy_table.consumer_friendly_messages is not initialized");
   }
 
   /* policy_table.usage_and_error_counts are required for PTS and
@@ -776,7 +776,7 @@ void CacheManager::CheckSnapshotInitialization() {
     }
   } else {
     LOGGER_WARN(logger_,
-                 "usage_and_error_counts or app_level is not initialized");
+                "usage_and_error_counts or app_level is not initialized");
   }
 }
 
@@ -845,8 +845,8 @@ void CacheManager::AddCalculatedPermissions(const std::string& device_id,
                                             const std::string& policy_app_id,
                                             const Permissions& permissions) {
   LOGGER_DEBUG(logger_,
-                "AddCalculatedPermissions for device: "
-                    << device_id << " and app: " << policy_app_id);
+               "AddCalculatedPermissions for device: "
+                   << device_id << " and app: " << policy_app_id);
   sync_primitives::AutoLock lock(calculated_permissions_lock_);
   calculated_permissions_[device_id][policy_app_id] = permissions;
 }
@@ -855,8 +855,8 @@ bool CacheManager::IsPermissionsCalculated(const std::string& device_id,
                                            const std::string& policy_app_id,
                                            Permissions& permission) {
   LOGGER_DEBUG(logger_,
-                "IsPermissionsCalculated for device: "
-                    << device_id << " and app: " << policy_app_id);
+               "IsPermissionsCalculated for device: "
+                   << device_id << " and app: " << policy_app_id);
   sync_primitives::AutoLock lock(calculated_permissions_lock_);
   CalculatedPermissions::const_iterator it =
       calculated_permissions_.find(device_id);
@@ -1116,8 +1116,8 @@ bool CacheManager::SetPredataPolicy(const std::string& app_id) {
 
   if (pt_->policy_table.app_policies_section.apps.end() == iter) {
     LOGGER_ERROR(logger_,
-                  "Could not set " << kPreDataConsentId
-                                   << " permissions for app " << app_id);
+                 "Could not set " << kPreDataConsentId
+                                  << " permissions for app " << app_id);
     return false;
   }
 
@@ -1159,8 +1159,8 @@ bool CacheManager::SetUnpairedDevice(const std::string& device_id,
                       pt_->policy_table.device_data->find(device_id);
   if (!result) {
     LOGGER_DEBUG(logger_,
-                  "Couldn't set unpaired flag for device id "
-                      << device_id << " , since it wasn't found.");
+                 "Couldn't set unpaired flag for device id "
+                     << device_id << " , since it wasn't found.");
     return false;
   }
 
@@ -1171,7 +1171,7 @@ bool CacheManager::SetUnpairedDevice(const std::string& device_id,
   } else {
     is_unpaired_.erase(device_id);
     LOGGER_DEBUG(logger_,
-                  "Unpaired flag was removed for device id " << device_id);
+                 "Unpaired flag was removed for device id " << device_id);
   }
   return result;
 }
@@ -1224,7 +1224,7 @@ bool CacheManager::Init(const std::string& file_name,
       utils::SharedPtr<policy_table::Table> snapshot = GenerateSnapshot();
       result &= snapshot->is_valid();
       LOGGER_DEBUG(logger_,
-                    "Check if snapshot is valid: " << std::boolalpha << result);
+                   "Check if snapshot is valid: " << std::boolalpha << result);
       if (!result) {
         rpc::ValidationReport report("policy_table");
         snapshot->ReportErrors(&report);
@@ -1287,7 +1287,7 @@ bool CacheManager::LoadFromFile(const std::string& file_name,
     rpc::ValidationReport report("policy_table");
     table.ReportErrors(&report);
     LOGGER_FATAL(logger_,
-                  "Parsed table is not valid " << rpc::PrettyFormat(report));
+                 "Parsed table is not valid " << rpc::PrettyFormat(report));
     return false;
   }
   return true;
@@ -1333,7 +1333,7 @@ void CacheManager::GetAppRequestTypes(
       pt_->policy_table.app_policies_section.apps.find(policy_app_id);
   if (pt_->policy_table.app_policies_section.apps.end() == policy_iter) {
     LOGGER_DEBUG(logger_,
-                  "Can't find request types for app_id " << policy_app_id);
+                 "Can't find request types for app_id " << policy_app_id);
     return;
   }
   policy_table::RequestTypes::iterator it_request_type =

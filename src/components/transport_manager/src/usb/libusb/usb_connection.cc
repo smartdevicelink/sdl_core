@@ -128,16 +128,16 @@ void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
   LOGGER_TRACE(logger_, "enter with Libusb_transfer*: " << transfer);
   if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
     LOGGER_DEBUG(logger_,
-                  "USB incoming transfer, size:"
-                      << transfer->actual_length << ", data:"
-                      << hex_data(transfer->buffer, transfer->actual_length));
+                 "USB incoming transfer, size:"
+                     << transfer->actual_length << ", data:"
+                     << hex_data(transfer->buffer, transfer->actual_length));
     ::protocol_handler::RawMessagePtr data(new protocol_handler::RawMessage(
         0, 0, in_buffer_, transfer->actual_length));
     controller_->DataReceiveDone(device_uid_, app_handle_, data);
   } else {
     LOGGER_ERROR(logger_,
-                  "USB incoming transfer failed: "
-                      << libusb_error_name(transfer->status));
+                 "USB incoming transfer failed: "
+                     << libusb_error_name(transfer->status));
     controller_->DataReceiveFailed(
         device_uid_, app_handle_, DataReceiveError());
   }
@@ -146,8 +146,8 @@ void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
   } else {
     if (!PostInTransfer()) {
       LOGGER_ERROR(logger_,
-                    "USB incoming transfer failed with "
-                        << "LIBUSB_TRANSFER_NO_DEVICE. Abort connection.");
+                   "USB incoming transfer failed with "
+                       << "LIBUSB_TRANSFER_NO_DEVICE. Abort connection.");
       AbortConnection();
     }
   }
@@ -185,14 +185,13 @@ bool UsbConnection::PostOutTransfer() {
                             0);
   const int libusb_ret = libusb_submit_transfer(out_transfer_);
   if (LIBUSB_SUCCESS != libusb_ret) {
-    LOGGER_ERROR(
-        logger_,
-        "libusb_submit_transfer failed: " << libusb_error_name(libusb_ret)
-                                          << ". Abort connection.");
+    LOGGER_ERROR(logger_,
+                 "libusb_submit_transfer failed: "
+                     << libusb_error_name(libusb_ret) << ". Abort connection.");
     AbortConnection();
     LOGGER_TRACE(logger_,
-                  "exit with FALSE. Condition: "
-                      << "LIBUSB_SUCCESS != libusb_fill_bulk_transfer");
+                 "exit with FALSE. Condition: "
+                     << "LIBUSB_SUCCESS != libusb_fill_bulk_transfer");
     return false;
   }
   LOGGER_TRACE(logger_, "exit with TRUE");
@@ -232,8 +231,8 @@ TransportAdapter::Error UsbConnection::SendData(
   LOGGER_TRACE(logger_, "enter with RawMessagePtr: " << message.get());
   if (disconnecting_) {
     LOGGER_TRACE(logger_,
-                  "exit with TransportAdapter::BAD_STATE. Condition: "
-                      << "disconnecting_");
+                 "exit with TransportAdapter::BAD_STATE. Condition: "
+                     << "disconnecting_");
     return TransportAdapter::BAD_STATE;
   }
   sync_primitives::AutoLock locker(out_messages_mutex_);
@@ -335,10 +334,10 @@ bool UsbConnection::FindEndpoints() {
       libusb_get_active_config_descriptor(libusb_device_, &config);
   if (LIBUSB_SUCCESS != libusb_ret) {
     LOGGER_ERROR(logger_,
-                  "libusb_get_active_config_descriptor failed: "
-                      << libusb_error_name(libusb_ret));
+                 "libusb_get_active_config_descriptor failed: "
+                     << libusb_error_name(libusb_ret));
     LOGGER_TRACE(logger_,
-                  "exit with FALSE. Condition: LIBUSB_SUCCESS != libusb_ret");
+                 "exit with FALSE. Condition: LIBUSB_SUCCESS != libusb_ret");
     return false;
   }
 

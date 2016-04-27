@@ -101,9 +101,9 @@ void CommandImpl::ReplaceMobileByHMIAppId(
         application_manager_.application(message[strings::app_id].asUInt());
     if (application.valid()) {
       LOGGER_DEBUG(logger_,
-                    "ReplaceMobileByHMIAppId from "
-                        << message[strings::app_id].asInt() << " to "
-                        << application->hmi_app_id());
+                   "ReplaceMobileByHMIAppId from "
+                       << message[strings::app_id].asInt() << " to "
+                       << application->hmi_app_id());
       message[strings::app_id] = application->hmi_app_id();
     }
   } else {
@@ -139,9 +139,9 @@ void CommandImpl::ReplaceHMIByMobileAppId(
 
     if (application.valid()) {
       LOGGER_DEBUG(logger_,
-                    "ReplaceHMIByMobileAppId from "
-                        << message[strings::app_id].asInt() << " to "
-                        << application->app_id());
+                   "ReplaceHMIByMobileAppId from "
+                       << message[strings::app_id].asInt() << " to "
+                       << application->app_id());
       message[strings::app_id] = application->app_id();
     }
   } else {

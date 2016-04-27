@@ -157,8 +157,8 @@ bool Resources::GetProcInfo(Resources::PidStats& output) {
   int fd = open(GetProcPath().c_str(), O_RDONLY);
   if (0 >= fd) {
     LOGGER_ERROR(logger_,
-                  "Failed open process proc file : "
-                      << GetProcPath() << "; error no : " << strerror(errno));
+                 "Failed open process proc file : "
+                     << GetProcPath() << "; error no : " << strerror(errno));
 
     close(fd);
     return false;

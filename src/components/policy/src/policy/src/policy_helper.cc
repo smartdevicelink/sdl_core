@@ -273,7 +273,7 @@ void CheckAppPolicy::SendPermissionsToApp(
   const std::string device_id = pm_->GetCurrentDeviceId(app_id);
   if (device_id.empty()) {
     LOGGER_WARN(logger_,
-                 "Couldn't find device info for application id: " << app_id);
+                "Couldn't find device info for application id: " << app_id);
     return;
   }
   std::vector<FunctionalGroupPermission> group_permissons;
@@ -324,7 +324,7 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
 
   if (!IsKnownAppication(app_id)) {
     LOGGER_WARN(logger_,
-                 "Application:" << app_id << " is not present in snapshot.");
+                "Application:" << app_id << " is not present in snapshot.");
     return true;
   }
 
@@ -347,14 +347,13 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   }
   if (RESULT_NO_CHANGES == result) {
     LOGGER_INFO(logger_,
-                 "Permissions for application:" << app_id
-                                                << " wasn't changed.");
+                "Permissions for application:" << app_id << " wasn't changed.");
     return true;
   }
 
   LOGGER_INFO(logger_,
-               "Permissions for application:" << app_id
-                                              << " have been changed.");
+              "Permissions for application:" << app_id
+                                             << " have been changed.");
 
   if (!IsPredefinedApp(app_policy) && RESULT_CONSENT_NOT_REQIURED != result) {
     SetPendingPermissions(app_policy, result);
@@ -793,8 +792,8 @@ bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies) {
         it->second.set_to_string(kDefaultId);
       } else {
         LOGGER_ERROR(logger_,
-                      "There is no default application policy was "
-                      "found in PTU.");
+                     "There is no default application policy was "
+                     "found in PTU.");
         return false;
       }
     }
