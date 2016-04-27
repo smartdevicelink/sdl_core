@@ -55,7 +55,7 @@ class Timer {
   /**
    * @brief Constructor
    * Does not start timer
-   * @param name Timer name for identity
+   * @param name Timer name for identification
    * @param task Task for tracking
    */
   Timer(const std::string& name, TimerTask* task);
@@ -69,7 +69,7 @@ class Timer {
   /**
    * @brief Starts timer with specified timeout
    * @param timeout Timer timeout
-   * @param single_shot Shows needs to restart timer after timeout
+   * @param single_shot Single shot flag for timer
    */
   void Start(const Milliseconds timeout, const bool single_shot);
 
@@ -101,7 +101,7 @@ class Timer {
      * @brief Constructor
      * @param timer Timer instance pointer for callback calling
      */
-    explicit TimerDelegate(const Timer* timer);
+    TimerDelegate(const Timer* timer, sync_primitives::Lock& state_lock_ref);
 
     /**
      * @brief Sets timer timeout
@@ -127,55 +127,84 @@ class Timer {
      */
     bool stop_flag() const;
 
+    /**
+     * @brief Sets timer delegate finalized flag
+     * @param finalized_flag Bool flag to be set
+     */
+    void set_finalized_flag(const bool finalized_flag);
+
+    /**
+     * @brief Gets timer delegate finalized flag
+     * @return Delegate finalized flag
+     */
+    bool finalized_flag() const;
+
     void threadMain() OVERRIDE;
     void exitThreadMain() OVERRIDE;
 
    private:
     const Timer* timer_;
-
-    /*
-     * Params lock used to protect timeout_ and stop_flag_ variables
-     */
-    mutable sync_primitives::Lock params_lock_;
     Milliseconds timeout_;
+
+    /**
+     * @brief Stop flag shows if timer should be stopped
+     * after next iteration
+     */
     bool stop_flag_;
 
-    /*
-     * State lock used to protect condition variable
+    /**
+     * @brief Finalized flag shows if timer is finalized
+     * and cannot be restarted until actual thread stopping
      */
-    sync_primitives::Lock state_lock_;
-    sync_primitives::ConditionalVariable termination_condition_;
+    bool finalized_flag_;
+
+    sync_primitives::Lock& state_lock_ref_;
+    sync_primitives::ConditionalVariable state_condition_;
 
     DISALLOW_COPY_AND_ASSIGN(TimerDelegate);
   };
 
-  void StopUnsafe();
+  /**
+   * @brief Sets up timer delegate to start state.
+   * Not thread-safe
+   * @param timeout Timer timeout
+   */
+  void StartDelegate(const Milliseconds timeout) const;
 
   /**
-   * @brief Callback called on timeout
+   * @brief Sets up timer delegate to stop state.
+   * Not thread-safe
+   */
+  void StopDelegate() const;
+
+  /**
+   * @brief Starts timer thread.
+   * Not thread-safe
+   */
+  void StartThread();
+
+  /**
+   * @brief Stops timer thread.
+   * Not thread-safe
+   */
+  void StopThread();
+
+  /**
+   * @brief Callback called on timeout.
+   * Not thread-safe
    */
   void OnTimeout() const;
 
   const std::string name_;
-
-  /*
-   * Task lock used to protect task from deleting during execution
-   */
-  mutable sync_primitives::Lock task_lock_;
   TimerTask* task_;
 
-  /*
-   * State lock used to protect thread and delegate
-   */
-  sync_primitives::Lock state_lock_;
+  mutable sync_primitives::Lock state_lock_;
+
   mutable TimerDelegate delegate_;
   threads::Thread* thread_;
 
-  /*
-   * We should not protect this variable with any
-   * synchronization primitives in current implementation
-   * because we use it only in two places, that cannot
-   * be invoked simultaneously
+  /**
+   * @brief Single shot flag shows if timer should be fired once
    */
   bool single_shot_;
 
