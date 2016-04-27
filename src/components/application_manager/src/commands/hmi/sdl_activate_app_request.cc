@@ -45,7 +45,7 @@ SDLActivateAppRequest::SDLActivateAppRequest(
 SDLActivateAppRequest::~SDLActivateAppRequest() {}
 
 void SDLActivateAppRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   using namespace hmi_apis::FunctionID;
   using namespace hmi_apis::Common_Result;
 
@@ -55,14 +55,14 @@ void SDLActivateAppRequest::Run() {
       application_manager_.application(application_id);
 
   if (!app) {
-    LOG4CXX_WARN(
+    LOGGER_WARN(
         logger_,
         "Can't find application within regular apps: " << application_id);
   }
 
   DevicesApps devices_apps = FindAllAppOnParticularDevice(app->device());
   if (!devices_apps.first && devices_apps.second.empty()) {
-    LOG4CXX_ERROR(logger_,
+    LOGGER_ERROR(logger_,
                   "Can't find regular foreground app with the same "
                   "connection id:"
                       << app->device());
@@ -125,7 +125,7 @@ void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
   ApplicationSharedPtr app =
       application_manager_.application_by_hmi_app(hmi_application_id);
   if (!app) {
-    LOG4CXX_ERROR(
+    LOGGER_ERROR(
         logger_, "Application not found by HMI app id: " << hmi_application_id);
     return;
   }
@@ -139,7 +139,7 @@ uint32_t SDLActivateAppRequest::app_id() const {
       return (*message_)[strings::msg_params][strings::app_id].asUInt();
     }
   }
-  LOG4CXX_DEBUG(logger_, "app_id section is absent in the message.");
+  LOGGER_DEBUG(logger_, "app_id section is absent in the message.");
   return 0;
 }
 
@@ -154,7 +154,7 @@ uint32_t SDLActivateAppRequest::hmi_app_id(
       }
     }
   }
-  LOG4CXX_DEBUG(logger_, "Can't find app_id section is absent in the message.");
+  LOGGER_DEBUG(logger_, "Can't find app_id section is absent in the message.");
   return 0;
 }
 

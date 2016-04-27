@@ -56,13 +56,13 @@ DeleteCommandRequest::DeleteCommandRequest(
 DeleteCommandRequest::~DeleteCommandRequest() {}
 
 void DeleteCommandRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application =
       application_manager_.application(connection_key());
 
   if (!application) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    LOGGER_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -73,7 +73,7 @@ void DeleteCommandRequest::Run() {
   smart_objects::SmartObject* command = application->FindCommand(cmd_id);
 
   if (!command) {
-    LOG4CXX_ERROR(logger_, "Command with id " << cmd_id << " is not found.");
+    LOGGER_ERROR(logger_, "Command with id " << cmd_id << " is not found.");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
@@ -112,7 +112,7 @@ void DeleteCommandRequest::Run() {
 }
 
 void DeleteCommandRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   using namespace helpers;
 
   const smart_objects::SmartObject& message = event.smart_object();
@@ -122,7 +122,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
       is_ui_received_ = true;
       const int result = message[strings::params][hmi_response::code].asInt();
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(result);
-      LOG4CXX_DEBUG(logger_,
+      LOGGER_DEBUG(logger_,
                     "Received UI_DeleteCommand event with result "
                         << MessageHelper::HMIResultToString(ui_result_));
       break;
@@ -131,19 +131,19 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
       is_vr_received_ = true;
       const int result = message[strings::params][hmi_response::code].asInt();
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(result);
-      LOG4CXX_DEBUG(logger_,
+      LOGGER_DEBUG(logger_,
                     "Received VR_DeleteCommand event with result "
                         << MessageHelper::HMIResultToString(vr_result_));
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
       return;
     }
   }
 
   if (IsPendingResponseExist()) {
-    LOG4CXX_DEBUG(logger_, "Still awaiting for other responses.");
+    LOGGER_DEBUG(logger_, "Still awaiting for other responses.");
     return;
   }
 
@@ -151,7 +151,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
       application_manager_.application(connection_key());
 
   if (!application) {
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    LOGGER_ERROR(logger_, "Application is not registered");
     return;
   }
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
@@ -161,7 +161,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
   smart_objects::SmartObject* command = application->FindCommand(cmd_id);
 
   if (!command) {
-    LOG4CXX_ERROR(logger_,
+    LOGGER_ERROR(logger_,
                   "Command id " << cmd_id << " not found for "
                                              "application with connection key "
                                 << connection_key());
@@ -194,7 +194,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
       // or one of them is WARNINGS
       is_vr_or_ui_warning;
 
-  LOG4CXX_DEBUG(logger_, "Result code is " << (result ? "true" : "false"));
+  LOGGER_DEBUG(logger_, "Result code is " << (result ? "true" : "false"));
 
   if (result) {
     application->RemoveCommand(msg_params[strings::cmd_id].asInt());
@@ -204,7 +204,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
   if (!result && hmi_apis::Common_Result::REJECTED == ui_result_) {
     result_code = MessageHelper::HMIToMobileResult(vr_result_);
   } else if (is_vr_or_ui_warning) {
-    LOG4CXX_DEBUG(logger_, "VR or UI result is warning");
+    LOGGER_DEBUG(logger_, "VR or UI result is warning");
     result_code = mobile_apis::Result::WARNINGS;
   } else {
     result_code =
@@ -218,7 +218,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
 }
 
 bool DeleteCommandRequest::IsPendingResponseExist() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   return is_ui_send_ != is_ui_received_ || is_vr_send_ != is_vr_received_;
 }
 

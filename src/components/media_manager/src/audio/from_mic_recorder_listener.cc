@@ -45,7 +45,7 @@ FromMicRecorderListener::FromMicRecorderListener(
     : reader_(NULL), file_name_(file_name), application_manager_(app_mngr) {}
 
 FromMicRecorderListener::~FromMicRecorderListener() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   if (reader_) {
     reader_->join();
     delete reader_->delegate();
@@ -60,7 +60,7 @@ void FromMicRecorderListener::OnErrorReceived(int32_t application_key,
                                               const DataForListener& data) {}
 
 void FromMicRecorderListener::OnActivityStarted(int32_t application_key) {
-  LOG4CXX_INFO(logger_,
+  LOGGER_INFO(logger_,
                "FromMicRecorderListener::OnActivityStarted "
                    << application_key);
   if (application_key == current_application_) {
@@ -78,10 +78,10 @@ void FromMicRecorderListener::OnActivityStarted(int32_t application_key) {
 }
 
 void FromMicRecorderListener::OnActivityEnded(int32_t application_key) {
-  LOG4CXX_INFO(logger_,
+  LOGGER_INFO(logger_,
                "FromMicRecorderListener::OnActivityEnded " << application_key);
   if (application_key != current_application_) {
-    LOG4CXX_WARN(logger_,
+    LOGGER_WARN(logger_,
                  "Not performing activity on " << application_key << " but on "
                                                << current_application_);
     return;

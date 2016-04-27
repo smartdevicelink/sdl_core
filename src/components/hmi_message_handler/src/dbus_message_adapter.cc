@@ -64,13 +64,13 @@ DBusMessageAdapter::DBusMessageAdapter(HMIMessageHandler* hmi_msg_handler)
                             SDL_OBJECT_PATH,
                             HMI_SERVICE_NAME,
                             HMI_OBJECT_PATH) {
-  LOG4CXX_INFO(logger_, "Created DBusMessageAdapter");
+  LOGGER_INFO(logger_, "Created DBusMessageAdapter");
 }
 
 DBusMessageAdapter::~DBusMessageAdapter() {}
 
 void DBusMessageAdapter::SendMessageToHMI(MessageSharedPointer message) {
-  LOG4CXX_INFO(logger_, "DBusMessageAdapter::sendMessageToHMI");
+  LOGGER_INFO(logger_, "DBusMessageAdapter::sendMessageToHMI");
 
   const smart_objects::SmartObject& smart = message->smart_object();
   switch (smart[sos::S_PARAMS][sos::S_MESSAGE_TYPE].asInt()) {
@@ -88,12 +88,12 @@ void DBusMessageAdapter::SendMessageToHMI(MessageSharedPointer message) {
       break;
     case hmi_apis::messageType::INVALID_ENUM:
     default:
-      LOG4CXX_WARN(logger_, "Message type is invalid");
+      LOGGER_WARN(logger_, "Message type is invalid");
   }
 }
 
 void DBusMessageAdapter::SubscribeTo() {
-  LOG4CXX_INFO(logger_, "DBusMessageAdapter::subscribeTo");
+  LOGGER_INFO(logger_, "DBusMessageAdapter::subscribeTo");
   DBusMessageController::SubscribeTo("Buttons", "OnButtonEvent");
   DBusMessageController::SubscribeTo("Buttons", "OnButtonPress");
   DBusMessageController::SubscribeTo("UI", "OnCommand");
@@ -162,15 +162,15 @@ void DBusMessageAdapter::SubscribeTo() {
   DBusMessageController::SubscribeTo("SDL", "AddStatisticsInfo");
   DBusMessageController::SubscribeTo("SDL", "OnDeviceStateChanged");
 
-  LOG4CXX_INFO(logger_, "Subscribed to notifications.");
+  LOGGER_INFO(logger_, "Subscribed to notifications.");
 }
 
 void DBusMessageAdapter::SendMessageToCore(
     const smart_objects::SmartObject& obj) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   if (!handler()) {
-    LOG4CXX_WARN(logger_, "DBusMessageAdapter hasn't handler");
+    LOGGER_WARN(logger_, "DBusMessageAdapter hasn't handler");
     return;
   }
 
@@ -184,11 +184,11 @@ void DBusMessageAdapter::SendMessageToCore(
   message->set_protocol_version(application_manager::ProtocolVersion::kHMI);
   message->set_smart_object(obj);
   handler()->OnMessageReceived(message);
-  LOG4CXX_INFO(logger_, "Successfully sent to observer");
+  LOGGER_INFO(logger_, "Successfully sent to observer");
 }
 
 void DBusMessageAdapter::Request(const smart_objects::SmartObject& obj) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   dbus::MessageId func_id = static_cast<dbus::MessageId>(
       obj[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt());
   dbus::MessageName name = get_schema().getMessageName(func_id);
@@ -197,7 +197,7 @@ void DBusMessageAdapter::Request(const smart_objects::SmartObject& obj) {
 }
 
 void DBusMessageAdapter::Notification(const smart_objects::SmartObject& obj) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   dbus::MessageId func_id = static_cast<dbus::MessageId>(
       obj[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt());
   dbus::MessageName name = get_schema().getMessageName(func_id);
@@ -205,7 +205,7 @@ void DBusMessageAdapter::Notification(const smart_objects::SmartObject& obj) {
 }
 
 void DBusMessageAdapter::Response(const smart_objects::SmartObject& obj) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   dbus::MessageId func_id = static_cast<dbus::MessageId>(
       obj[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt());
   dbus::MessageName name = get_schema().getMessageName(func_id);
@@ -214,7 +214,7 @@ void DBusMessageAdapter::Response(const smart_objects::SmartObject& obj) {
 }
 
 void DBusMessageAdapter::ErrorResponse(const smart_objects::SmartObject& obj) {
-  LOG4CXX_DEBUG(logger_, "Error");
+  LOGGER_DEBUG(logger_, "Error");
   std::string error = obj[sos::S_PARAMS][sos::kCode].asString();
   std::string description = obj[sos::S_PARAMS][sos::kMessage].asString();
   uint id = obj[sos::S_PARAMS][sos::S_CORRELATION_ID].asInt();

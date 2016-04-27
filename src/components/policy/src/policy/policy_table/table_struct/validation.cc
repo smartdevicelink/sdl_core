@@ -30,13 +30,13 @@ bool ApplicationPoliciesSection::Validate() const {
 
   // Default and PreData policies are mandatory
   if (apps.end() == it_default_policy || apps.end() == it_pre_data_policy) {
-    LOG4CXX_ERROR(logger_, "Default or preData policy is not present.");
+    LOGGER_ERROR(logger_, "Default or preData policy is not present.");
     return false;
   }
 
   // Device policy is mandatory
   if (!device.is_initialized()) {
-    LOG4CXX_ERROR(logger_, "Device policy is not present.");
+    LOGGER_ERROR(logger_, "Device policy is not present.");
     return false;
   }
 
@@ -46,14 +46,14 @@ bool ApplicationPoliciesSection::Validate() const {
   }
 
   if (!it_default_policy->second.RequestType.is_valid()) {
-    LOG4CXX_WARN(logger_,
+    LOGGER_WARN(logger_,
                  "Default policy RequestTypes are not valid. Will be cleaned.");
     RemoveInvalidTypes(*it_default_policy->second.RequestType);
     // If preloaded does not have valid default types - validation fails
     // Otherwise default will be empty, i.e. all types allowed
     if (PT_PRELOADED == pt_type) {
       if (it_default_policy->second.RequestType->empty()) {
-        LOG4CXX_ERROR(
+        LOGGER_ERROR(
             logger_,
             "Default policy RequestTypes empty after clean-up. Exiting.");
         return false;
@@ -72,11 +72,11 @@ bool ApplicationPoliciesSection::Validate() const {
 
     if (PT_PRELOADED == pt_type) {
       if (!is_request_type_valid) {
-        LOG4CXX_WARN(logger_,
+        LOGGER_WARN(logger_,
                      "App policy RequestTypes are not valid. Will be cleaned.");
         RemoveInvalidTypes(*app_params.RequestType);
         if (app_params.RequestType->empty()) {
-          LOG4CXX_ERROR(
+          LOGGER_ERROR(
               logger_,
               "App policy RequestTypes empty after clean-up. Exiting.");
           return false;
@@ -84,7 +84,7 @@ bool ApplicationPoliciesSection::Validate() const {
       }
     } else {
       if (is_request_type_ommited) {
-        LOG4CXX_WARN(logger_,
+        LOGGER_WARN(logger_,
                      "App policy RequestTypes ommited."
                      " Will be replaced with default.");
         app_params.RequestType = apps[kDefaultApp].RequestType;
@@ -92,11 +92,11 @@ bool ApplicationPoliciesSection::Validate() const {
         continue;
       }
       if (!is_request_type_valid) {
-        LOG4CXX_WARN(logger_,
+        LOGGER_WARN(logger_,
                      "App policy RequestTypes are invalid. Will be cleaned.");
         RemoveInvalidTypes(*app_params.RequestType);
         if (app_params.RequestType->empty()) {
-          LOG4CXX_WARN(logger_,
+          LOGGER_WARN(logger_,
                        "App policy RequestTypes empty after clean-up."
                        " Will be replaced with default.");
           app_params.RequestType = apps[kDefaultApp].RequestType;
@@ -105,7 +105,7 @@ bool ApplicationPoliciesSection::Validate() const {
         }
       }
       if (is_request_type_empty) {
-        LOG4CXX_WARN(logger_, "App policy RequestTypes empty.");
+        LOGGER_WARN(logger_, "App policy RequestTypes empty.");
       }
     }
     ++iter;

@@ -46,7 +46,7 @@ TTSSpeakResponse::TTSSpeakResponse(const MessageSharedPtr& message,
 TTSSpeakResponse::~TTSSpeakResponse() {}
 
 void TTSSpeakResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::TTS_Speak);
   event.set_smart_object(*message_);

@@ -208,7 +208,7 @@ std::string file_system::CurrentWorkingDirectory() {
   const size_t filename_max_length = 1024;
   char path[filename_max_length];
   if (0 == getcwd(path, filename_max_length)) {
-    LOG4CXX_WARN(logger_, "Could not get CWD");
+    LOGGER_WARN(logger_, "Could not get CWD");
   }
   return std::string(path);
 }

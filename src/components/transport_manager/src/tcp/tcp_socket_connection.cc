@@ -68,12 +68,12 @@ TcpServerOiginatedSocketConnection::TcpServerOiginatedSocketConnection(
 TcpServerOiginatedSocketConnection::~TcpServerOiginatedSocketConnection() {}
 
 bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   DCHECK(error);
-  LOG4CXX_DEBUG(logger_, "error " << error);
+  LOGGER_DEBUG(logger_, "error " << error);
   DeviceSptr device = controller()->FindDevice(device_handle());
   if (!device.valid()) {
-    LOG4CXX_ERROR(logger_, "Device " << device_handle() << " not found");
+    LOGGER_ERROR(logger_, "Device " << device_handle() << " not found");
     *error = new ConnectError();
     return false;
   }
@@ -81,7 +81,7 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
 
   const int port = tcp_device->GetApplicationPort(application_handle());
   if (-1 == port) {
-    LOG4CXX_ERROR(logger_,
+    LOGGER_ERROR(logger_,
                   "Application port for " << application_handle()
                                           << " not found");
     *error = new ConnectError();
@@ -90,7 +90,7 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
 
   const int socket = ::socket(AF_INET, SOCK_STREAM, 0);
   if (socket < 0) {
-    LOG4CXX_ERROR(logger_, "Failed to create socket");
+    LOGGER_ERROR(logger_, "Failed to create socket");
     *error = new ConnectError();
     return false;
   }
@@ -100,10 +100,10 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
   addr.sin_addr.s_addr = tcp_device->in_addr();
   addr.sin_port = htons(port);
 
-  LOG4CXX_DEBUG(logger_,
+  LOGGER_DEBUG(logger_,
                 "Connecting " << inet_ntoa(addr.sin_addr) << ":" << port);
   if (::connect(socket, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
-    LOG4CXX_ERROR(logger_,
+    LOGGER_ERROR(logger_,
                   "Failed to connect for application " << application_handle()
                                                        << ", error " << errno);
     *error = new ConnectError();

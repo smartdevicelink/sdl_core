@@ -12,12 +12,12 @@ UnSubscribeWayPointsRequest::UnSubscribeWayPointsRequest(
 UnSubscribeWayPointsRequest::~UnSubscribeWayPointsRequest() {}
 
 void UnSubscribeWayPointsRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
-    LOG4CXX_ERROR(logger_,
+    LOGGER_ERROR(logger_,
                   "An application with connection key "
                       << connection_key() << " is not registered.");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -34,12 +34,12 @@ void UnSubscribeWayPointsRequest::Run() {
 }
 
 void UnSubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   ApplicationSharedPtr app = application_manager_.application(connection_key());
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_UnsubscribeWayPoints: {
-      LOG4CXX_INFO(logger_, "Received Navigation_UnSubscribeWayPoints event");
+      LOGGER_INFO(logger_, "Received Navigation_UnSubscribeWayPoints event");
       mobile_apis::Result::eType result_code =
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asUInt()));
@@ -51,7 +51,7 @@ void UnSubscribeWayPointsRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
       break;
     }
   }

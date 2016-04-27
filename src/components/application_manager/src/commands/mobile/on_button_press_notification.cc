@@ -49,7 +49,7 @@ OnButtonPressNotification::OnButtonPressNotification(
 OnButtonPressNotification::~OnButtonPressNotification() {}
 
 void OnButtonPressNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   const uint32_t btn_id = static_cast<uint32_t>(
       (*message_)[strings::msg_params][hmi_response::button_name].asInt());
@@ -58,7 +58,7 @@ void OnButtonPressNotification::Run() {
   if (static_cast<uint32_t>(mobile_apis::ButtonName::CUSTOM_BUTTON) == btn_id) {
     // app_id is mandatory for CUSTOM_BUTTON notification
     if (false == (*message_)[strings::msg_params].keyExists(strings::app_id)) {
-      LOG4CXX_ERROR(logger_, "CUSTOM_BUTTON OnButtonPress without app_id.");
+      LOGGER_ERROR(logger_, "CUSTOM_BUTTON OnButtonPress without app_id.");
       return;
     }
 
@@ -66,7 +66,7 @@ void OnButtonPressNotification::Run() {
     if (false ==
         (*message_)[strings::msg_params].keyExists(
             hmi_response::custom_button_id)) {
-      LOG4CXX_ERROR(logger_,
+      LOGGER_ERROR(logger_,
                     "CUSTOM_BUTTON OnButtonPress without custom_button_id.");
       return;
     }
@@ -75,7 +75,7 @@ void OnButtonPressNotification::Run() {
         (*message_)[strings::msg_params][strings::app_id].asUInt());
 
     if (false == app.valid()) {
-      LOG4CXX_ERROR(logger_, "Application doesn't exist.");
+      LOGGER_ERROR(logger_, "Application doesn't exist.");
       return;
     }
 
@@ -85,7 +85,7 @@ void OnButtonPressNotification::Run() {
             .asUInt();
 
     if (false == app->IsSubscribedToSoftButton(custom_btn_id)) {
-      LOG4CXX_ERROR(logger_,
+      LOGGER_ERROR(logger_,
                     "Application doesn't subscribed to this custom_button_id.");
       return;
     }
@@ -101,14 +101,14 @@ void OnButtonPressNotification::Run() {
   for (; subscribedApps.end() != it; ++it) {
     ApplicationSharedPtr subscribed_app = *it;
     if (!subscribed_app) {
-      LOG4CXX_WARN(logger_, "Null pointer to subscribed app.");
+      LOGGER_WARN(logger_, "Null pointer to subscribed app.");
       continue;
     }
 
     // Send ButtonPress notification only in HMI_FULL or HMI_LIMITED mode
     if ((mobile_api::HMILevel::HMI_FULL != subscribed_app->hmi_level()) &&
         (mobile_api::HMILevel::HMI_LIMITED != subscribed_app->hmi_level())) {
-      LOG4CXX_WARN(logger_,
+      LOGGER_WARN(logger_,
                    "OnButtonPress notification is allowed only"
                        << "in FULL or LIMITED hmi level");
       continue;
@@ -117,7 +117,7 @@ void OnButtonPressNotification::Run() {
     // Send ButtonPress notification for OK button only in HMI_FULL mode
     if ((static_cast<uint32_t>(mobile_apis::ButtonName::OK) == btn_id) &&
         (mobile_api::HMILevel::HMI_FULL != subscribed_app->hmi_level())) {
-      LOG4CXX_WARN(logger_,
+      LOGGER_WARN(logger_,
                    "OnButtonPress notification for OK button"
                        << "is allowed only in FULL hmi level");
       continue;
@@ -129,7 +129,7 @@ void OnButtonPressNotification::Run() {
 
 void OnButtonPressNotification::SendButtonPress(ApplicationConstSharedPtr app) {
   if (!app) {
-    LOG4CXX_ERROR(logger_, "OnButtonPress NULL pointer");
+    LOGGER_ERROR(logger_, "OnButtonPress NULL pointer");
     return;
   }
 
@@ -137,7 +137,7 @@ void OnButtonPressNotification::SendButtonPress(ApplicationConstSharedPtr app) {
       new smart_objects::SmartObject();
 
   if (!on_btn_press) {
-    LOG4CXX_ERROR(logger_, "OnButtonPress NULL pointer");
+    LOGGER_ERROR(logger_, "OnButtonPress NULL pointer");
     return;
   }
 

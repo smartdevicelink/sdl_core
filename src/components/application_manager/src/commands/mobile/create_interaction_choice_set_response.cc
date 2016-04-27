@@ -47,12 +47,12 @@ CreateInteractionChoiceSetResponse::CreateInteractionChoiceSetResponse(
 CreateInteractionChoiceSetResponse::~CreateInteractionChoiceSetResponse() {}
 
 void CreateInteractionChoiceSetResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   // check if response false
   if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
     if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
-      LOG4CXX_ERROR(logger_, "Success = false");
+      LOGGER_ERROR(logger_, "Success = false");
       SendResponse(false);
       return;
     }

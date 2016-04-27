@@ -89,14 +89,14 @@ bool CommandRequestImpl::CleanUp() {
 void CommandRequestImpl::Run() {}
 
 void CommandRequestImpl::onTimeOut() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   unsubscribe_from_all_events();
   {
     // FIXME (dchmerev@luxoft.com): atomic_xchg fits better
     sync_primitives::AutoLock auto_lock(state_lock_);
     if (kCompleted == current_state_) {
-      LOG4CXX_DEBUG(logger_, "current_state_ = kCompleted");
+      LOGGER_DEBUG(logger_, "current_state_ = kCompleted");
       // don't send timeout if request completed
       return;
     }
@@ -132,7 +132,7 @@ void CommandRequestImpl::SendResponse(
 
   smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
   if (!result) {
-    LOG4CXX_ERROR(logger_, "Memory allocation failed.");
+    LOGGER_ERROR(logger_, "Memory allocation failed.");
     return;
   }
   smart_objects::SmartObject& response = *result;
@@ -178,12 +178,12 @@ void CommandRequestImpl::SendResponse(
 bool CommandRequestImpl::CheckSyntax(const std::string& str,
                                      bool allow_empty_line) {
   if (std::string::npos != str.find_first_of("\t\n")) {
-    LOG4CXX_ERROR(logger_, "CheckSyntax failed! :" << str);
+    LOGGER_ERROR(logger_, "CheckSyntax failed! :" << str);
     return false;
   }
   if (std::string::npos != str.find("\\n") ||
       std::string::npos != str.find("\\t")) {
-    LOG4CXX_ERROR(logger_, "CheckSyntax failed! :" << str);
+    LOGGER_ERROR(logger_, "CheckSyntax failed! :" << str);
     return false;
   }
   if (!allow_empty_line) {
@@ -203,7 +203,7 @@ uint32_t CommandRequestImpl::SendHMIRequest(
   const uint32_t hmi_correlation_id =
       application_manager_.GetNextHMICorrelationID();
   if (use_events) {
-    LOG4CXX_DEBUG(logger_,
+    LOGGER_DEBUG(logger_,
                   "subscribe_on_event " << function_id << " "
                                         << hmi_correlation_id);
     subscribe_on_event(function_id, hmi_correlation_id);
@@ -223,7 +223,7 @@ uint32_t CommandRequestImpl::SendHMIRequest(
   }
 
   if (!application_manager_.ManageHMICommand(result)) {
-    LOG4CXX_ERROR(logger_, "Unable to send request");
+    LOGGER_ERROR(logger_, "Unable to send request");
     SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
   }
   return hmi_correlation_id;
@@ -234,7 +234,7 @@ void CommandRequestImpl::CreateHMINotification(
     const NsSmart::SmartObject& msg_params) const {
   smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
   if (!result) {
-    LOG4CXX_ERROR(logger_, "Memory allocation failed.");
+    LOGGER_ERROR(logger_, "Memory allocation failed.");
     return;
   }
   smart_objects::SmartObject& notify = *result;
@@ -249,7 +249,7 @@ void CommandRequestImpl::CreateHMINotification(
   notify[strings::msg_params] = msg_params;
 
   if (!application_manager_.ManageHMICommand(result)) {
-    LOG4CXX_ERROR(logger_, "Unable to send HMI notification");
+    LOGGER_ERROR(logger_, "Unable to send HMI notification");
   }
 }
 
@@ -358,7 +358,7 @@ mobile_apis::Result::eType CommandRequestImpl::GetMobileResultCode(
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Unknown HMI result code " << hmi_code);
+      LOGGER_ERROR(logger_, "Unknown HMI result code " << hmi_code);
       break;
     }
   }
@@ -367,7 +367,7 @@ mobile_apis::Result::eType CommandRequestImpl::GetMobileResultCode(
 }
 
 bool CommandRequestImpl::CheckAllowedParameters() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   // RegisterAppInterface should always be allowed
   if (mobile_apis::FunctionID::RegisterAppInterfaceID ==
@@ -391,7 +391,7 @@ bool CommandRequestImpl::CheckAllowedParameters() {
 
         for (; iter != iter_end; ++iter) {
           if (true == iter->second.asBool()) {
-            LOG4CXX_DEBUG(logger_, "Request's param: " << iter->first);
+            LOGGER_DEBUG(logger_, "Request's param: " << iter->first);
             params.push_back(iter->first);
           }
         }
@@ -435,7 +435,7 @@ bool CommandRequestImpl::CheckAllowedParameters() {
 
 void CommandRequestImpl::RemoveDisallowedParameters(
     const CommandParametersPermissions& params_permissions) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   smart_objects::SmartObject& params = (*message_)[strings::msg_params];
 
@@ -448,7 +448,7 @@ void CommandRequestImpl::RemoveDisallowedParameters(
     if (params.keyExists(*it_disallowed)) {
       params.erase(*it_disallowed);
       parameters_permissions_.disallowed_params.push_back(*it_disallowed);
-      LOG4CXX_INFO(
+      LOGGER_INFO(
           logger_,
           "Following parameter is disallowed by user: " << *it_disallowed);
     }
@@ -463,7 +463,7 @@ void CommandRequestImpl::RemoveDisallowedParameters(
     if (params.keyExists(*it_undefined)) {
       params.erase(*it_undefined);
       parameters_permissions_.undefined_params.push_back(*it_undefined);
-      LOG4CXX_INFO(
+      LOGGER_INFO(
           logger_,
           "Following parameter is disallowed by policy: " << *it_undefined);
     }
@@ -484,7 +484,7 @@ void CommandRequestImpl::RemoveDisallowedParameters(
                       key)) {
       params.erase(key);
       parameters_permissions_.undefined_params.push_back(key);
-      LOG4CXX_INFO(logger_,
+      LOGGER_INFO(logger_,
                    "Following parameter is not found among allowed parameters '"
                        << key << "' and will be treated as disallowed.");
     }

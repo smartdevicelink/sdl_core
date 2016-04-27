@@ -43,7 +43,7 @@ AllowAppRequest::AllowAppRequest(const MessageSharedPtr& message,
 AllowAppRequest::~AllowAppRequest() {}
 
 void AllowAppRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SendRequest();
 }

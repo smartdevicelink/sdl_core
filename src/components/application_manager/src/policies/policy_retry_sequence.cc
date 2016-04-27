@@ -49,7 +49,7 @@ void RetrySequence::threadMain() {
 }
 
 void RetrySequence::StartNextRetry() {
-  LOG4CXX_TRACE(logger_, "Start next retry of exchanging PT");
+  LOGGER_TRACE(logger_, "Start next retry of exchanging PT");
   DCHECK(policy_handler_);
   // TODO(Ezamakhov): inverstigate StartNextRetry on unload policy lib
 
@@ -59,7 +59,7 @@ void RetrySequence::StartNextRetry() {
 
     const int timeout = policy_handler_->TimeoutExchange();
     const int seconds = policy_handler_->NextRetryTimeout();
-    LOG4CXX_DEBUG(logger_,
+    LOGGER_DEBUG(logger_,
                   "Timeout response: " << timeout << " Next try: " << seconds);
     if (timeout > 0) {
       sleep(timeout);
@@ -69,7 +69,7 @@ void RetrySequence::StartNextRetry() {
       sleep(seconds);
       StartNextRetry();
     } else {
-      LOG4CXX_INFO(logger_, "End retry sequence. Update PT was not received");
+      LOGGER_INFO(logger_, "End retry sequence. Update PT was not received");
     }
   }
 }

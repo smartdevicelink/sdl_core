@@ -50,14 +50,14 @@
 namespace {
 #define LOG_UPDATED_VALUE(value, key, section)                              \
   {                                                                         \
-    LOG4CXX_INFO(logger_,                                                   \
+    LOGGER_INFO(logger_,                                                   \
                  "Setting value '" << value << "' for key '" << key         \
                                    << "' in section '" << section << "'."); \
   }
 
 #define LOG_UPDATED_BOOL_VALUE(value, key, section)                            \
   {                                                                            \
-    LOG4CXX_INFO(logger_,                                                      \
+    LOGGER_INFO(logger_,                                                      \
                  "Setting value '" << std::boolalpha << value << "' for key '" \
                                    << key << "' in section '" << section       \
                                    << "'.");                                   \
@@ -823,7 +823,7 @@ uint16_t Profile::open_attempt_timeout_ms_resumption_db() const {
 }
 
 void Profile::UpdateValues() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   // SDL version
   ReadStringValue(
@@ -1896,7 +1896,7 @@ bool Profile::StringToNumber(const std::string& input, uint64_t& output) const {
 
 bool Profile::IsRelativePath(const std::string& path) {
   if (path.empty()) {
-    LOG4CXX_ERROR(logger_, "Empty path passed.");
+    LOGGER_ERROR(logger_, "Empty path passed.");
     return false;
   }
   return '/' != path[0];

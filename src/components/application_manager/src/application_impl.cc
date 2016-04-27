@@ -208,17 +208,17 @@ bool ApplicationImpl::IsAudioApplication() const {
 }
 
 void ApplicationImpl::SetRegularState(HmiStatePtr state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   state_.AddState(state);
 }
 
 void ApplicationImpl::RemovePostponedState() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   state_.RemoveState(HmiState::STATE_ID_POSTPONED);
 }
 
 void ApplicationImpl::SetPostponedState(HmiStatePtr state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   state_.AddState(state);
 }
 
@@ -231,12 +231,12 @@ struct StateIDComparator {
 };
 
 void ApplicationImpl::AddHMIState(HmiStatePtr state) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   state_.AddState(state);
 }
 
 void ApplicationImpl::RemoveHMIState(HmiState::StateID state_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   state_.RemoveState(state_id);
 }
 
@@ -392,19 +392,19 @@ bool ApplicationImpl::audio_streaming_allowed() const {
 void ApplicationImpl::StartStreaming(
     protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   if (ServiceType::kMobileNav == service_type) {
-    LOG4CXX_TRACE(logger_, "ServiceType = Video");
+    LOGGER_TRACE(logger_, "ServiceType = Video");
     if (!video_streaming_approved()) {
-      LOG4CXX_TRACE(logger_, "Video streaming not approved");
+      LOGGER_TRACE(logger_, "Video streaming not approved");
       MessageHelper::SendNaviStartStream(app_id(), application_manager_);
       set_video_stream_retry_number(0);
     }
   } else if (ServiceType::kAudio == service_type) {
-    LOG4CXX_TRACE(logger_, "ServiceType = Audio");
+    LOGGER_TRACE(logger_, "ServiceType = Audio");
     if (!audio_streaming_approved()) {
-      LOG4CXX_TRACE(logger_, "Audio streaming not approved");
+      LOGGER_TRACE(logger_, "Audio streaming not approved");
       MessageHelper::SendAudioStartStream(app_id(), application_manager_);
       set_audio_stream_retry_number(0);
     }
@@ -414,7 +414,7 @@ void ApplicationImpl::StartStreaming(
 void ApplicationImpl::StopStreamingForce(
     protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SuspendStreaming(service_type);
 
@@ -428,7 +428,7 @@ void ApplicationImpl::StopStreamingForce(
 void ApplicationImpl::StopStreaming(
     protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   SuspendStreaming(service_type);
 
@@ -441,7 +441,7 @@ void ApplicationImpl::StopStreaming(
 }
 
 void ApplicationImpl::StopNaviStreaming() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   video_stream_suspend_timer_.Stop();
   MessageHelper::SendNaviStopStream(app_id(), application_manager_);
   set_video_streaming_approved(false);
@@ -449,7 +449,7 @@ void ApplicationImpl::StopNaviStreaming() {
 }
 
 void ApplicationImpl::StopAudioStreaming() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   audio_stream_suspend_timer_.Stop();
   MessageHelper::SendAudioStopStream(app_id(), application_manager_);
   set_audio_streaming_approved(false);
@@ -459,7 +459,7 @@ void ApplicationImpl::StopAudioStreaming() {
 void ApplicationImpl::SuspendStreaming(
     protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   if (ServiceType::kMobileNav == service_type) {
     video_stream_suspend_timer_.Stop();
@@ -478,7 +478,7 @@ void ApplicationImpl::SuspendStreaming(
 void ApplicationImpl::WakeUpStreaming(
     protocol_handler::ServiceType service_type) {
   using namespace protocol_handler;
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   if (ServiceType::kMobileNav == service_type) {
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
@@ -503,15 +503,15 @@ void ApplicationImpl::WakeUpStreaming(
 
 void ApplicationImpl::OnVideoStreamSuspend() {
   using namespace protocol_handler;
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_INFO(logger_, "Suspend video streaming by timer");
+  LOGGER_AUTO_TRACE(logger_);
+  LOGGER_INFO(logger_, "Suspend video streaming by timer");
   SuspendStreaming(ServiceType::kMobileNav);
 }
 
 void ApplicationImpl::OnAudioStreamSuspend() {
   using namespace protocol_handler;
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_INFO(logger_, "Suspend audio streaming by timer");
+  LOGGER_AUTO_TRACE(logger_);
+  LOGGER_INFO(logger_, "Suspend audio streaming by timer");
   SuspendStreaming(ServiceType::kAudio);
 }
 
@@ -603,7 +603,7 @@ bool ApplicationImpl::is_resuming() const {
 
 bool ApplicationImpl::AddFile(const AppFile& file) {
   if (app_files_.count(file.file_name) == 0) {
-    LOG4CXX_INFO(logger_,
+    LOGGER_INFO(logger_,
                  "AddFile file " << file.file_name << " File type is "
                                  << file.file_type);
     app_files_[file.file_name] = file;
@@ -614,7 +614,7 @@ bool ApplicationImpl::AddFile(const AppFile& file) {
 
 bool ApplicationImpl::UpdateFile(const AppFile& file) {
   if (app_files_.count(file.file_name) != 0) {
-    LOG4CXX_INFO(logger_,
+    LOGGER_INFO(logger_,
                  "UpdateFile file " << file.file_name << " File type is "
                                     << file.file_type);
     app_files_[file.file_name] = file;
@@ -626,7 +626,7 @@ bool ApplicationImpl::UpdateFile(const AppFile& file) {
 bool ApplicationImpl::DeleteFile(const std::string& file_name) {
   AppFilesMap::iterator it = app_files_.find(file_name);
   if (it != app_files_.end()) {
-    LOG4CXX_INFO(logger_,
+    LOGGER_INFO(logger_,
                  "DeleteFile file " << it->second.file_name << " File type is "
                                     << it->second.file_type);
     app_files_.erase(it);
@@ -698,7 +698,7 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
       CommandNumberTimeLimit::iterator it =
           cmd_number_to_time_limits_.find(cmd_id);
       if (cmd_number_to_time_limits_.end() == it) {
-        LOG4CXX_WARN(logger_,
+        LOGGER_WARN(logger_,
                      "Limits for command id " << cmd_id << "had not been set.");
         return true;
       }
@@ -715,11 +715,11 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
         frequency_restrictions =
             application_manager_.get_settings().get_vehicle_data_frequency();
       } else {
-        LOG4CXX_INFO(logger_, "No restrictions for request");
+        LOGGER_INFO(logger_, "No restrictions for request");
         return false;
       }
 
-      LOG4CXX_INFO(logger_,
+      LOGGER_INFO(logger_,
                    "Time Info: "
                        << "\n Current: " << current.tv_sec << "\n Limit: ("
                        << limit.first.tv_sec << "," << limit.second
@@ -780,7 +780,7 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
       break;
     }
     default: {
-      LOG4CXX_WARN(logger_, "Limit source is not implemented.");
+      LOGGER_WARN(logger_, "Limit source is not implemented.");
       break;
     }
   }
@@ -811,7 +811,7 @@ void ApplicationImpl::set_is_application_data_changed(
 }
 
 void ApplicationImpl::UpdateHash() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   hash_val_ =
       utils::gen_hash(application_manager_.get_settings().hash_string_size());
   set_is_application_data_changed(true);
@@ -836,7 +836,7 @@ void ApplicationImpl::CleanupFiles() {
       app_files_it = app_files_.find(file_name);
       if ((app_files_it == app_files_.end()) ||
           (!app_files_it->second.is_persistent)) {
-        LOG4CXX_INFO(logger_, "DeleteFile file " << file_name);
+        LOGGER_INFO(logger_, "DeleteFile file " << file_name);
         file_system::DeleteFile(file_name);
       }
     }
@@ -888,7 +888,7 @@ void ApplicationImpl::LoadPersistentFiles() {
         file.file_type = StringToFileType(file_type.c_str());
       }
 
-      LOG4CXX_INFO(logger_,
+      LOGGER_INFO(logger_,
                    "Loaded persistent file "
                        << file.file_name << " File type is " << file.file_type);
       AddFile(file);

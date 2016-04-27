@@ -69,7 +69,7 @@ DeviceType BluetoothTransportAdapter::GetDeviceType() const {
 }
 
 void BluetoothTransportAdapter::Store() const {
-  LOG4CXX_TRACE(logger_, "enter");
+  LOGGER_TRACE(logger_, "enter");
   Json::Value bluetooth_adapter_dictionary;
   Json::Value devices_dictionary;
   DeviceList device_ids = GetDeviceList();
@@ -113,11 +113,11 @@ void BluetoothTransportAdapter::Store() const {
   bluetooth_adapter_dictionary["devices"] = devices_dictionary;
   last_state().dictionary["TransportManager"]["BluetoothAdapter"] =
       bluetooth_adapter_dictionary;
-  LOG4CXX_TRACE(logger_, "exit");
+  LOGGER_TRACE(logger_, "exit");
 }
 
 bool BluetoothTransportAdapter::Restore() {
-  LOG4CXX_TRACE(logger_, "enter");
+  LOGGER_TRACE(logger_, "enter");
   bool errors_occured = false;
   const Json::Value bluetooth_adapter_dictionary =
       last_state().dictionary["TransportManager"]["BluetoothAdapter"];
@@ -160,9 +160,9 @@ bool BluetoothTransportAdapter::Restore() {
   }
   bool result = !errors_occured;
   if (result) {
-    LOG4CXX_TRACE(logger_, "exit with TRUE");
+    LOGGER_TRACE(logger_, "exit with TRUE");
   } else {
-    LOG4CXX_TRACE(logger_, "exit with FALSE");
+    LOGGER_TRACE(logger_, "exit with FALSE");
   }
   return result;
 }

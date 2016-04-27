@@ -100,7 +100,7 @@ void CommandImpl::ReplaceMobileByHMIAppId(
     ApplicationSharedPtr application =
         application_manager_.application(message[strings::app_id].asUInt());
     if (application.valid()) {
-      LOG4CXX_DEBUG(logger_,
+      LOGGER_DEBUG(logger_,
                     "ReplaceMobileByHMIAppId from "
                         << message[strings::app_id].asInt() << " to "
                         << application->hmi_app_id());
@@ -138,7 +138,7 @@ void CommandImpl::ReplaceHMIByMobileAppId(
             message[strings::app_id].asUInt());
 
     if (application.valid()) {
-      LOG4CXX_DEBUG(logger_,
+      LOGGER_DEBUG(logger_,
                     "ReplaceHMIByMobileAppId from "
                         << message[strings::app_id].asInt() << " to "
                         << application->app_id());

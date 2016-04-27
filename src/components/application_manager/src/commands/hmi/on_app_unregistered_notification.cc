@@ -45,7 +45,7 @@ OnAppUnregisteredNotification::OnAppUnregisteredNotification(
 OnAppUnregisteredNotification::~OnAppUnregisteredNotification() {}
 
 void OnAppUnregisteredNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   // sending event for delete VRCommand on PerformInteraction
   event_engine::Event event(

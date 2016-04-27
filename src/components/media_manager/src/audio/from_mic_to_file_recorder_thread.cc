@@ -50,12 +50,12 @@ FromMicToFileRecorderThread::FromMicToFileRecorderThread(
     , tKey_("-t")
     , sleepThread_(NULL)
     , outputFileName_(output_file) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   set_record_duration(duration);
 }
 
 FromMicToFileRecorderThread::~FromMicToFileRecorderThread() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   if (sleepThread_) {
     sleepThread_->join();
     delete sleepThread_->delegate();
@@ -65,12 +65,12 @@ FromMicToFileRecorderThread::~FromMicToFileRecorderThread() {
 
 void FromMicToFileRecorderThread::set_output_file(
     const std::string& output_file) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   outputFileName_ = output_file;
 }
 
 void FromMicToFileRecorderThread::set_record_duration(int32_t duration) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   std::stringstream stringStream;
   stringStream << duration / 1000;
@@ -78,7 +78,7 @@ void FromMicToFileRecorderThread::set_record_duration(int32_t duration) {
 }
 
 void FromMicToFileRecorderThread::initArgs() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   argv_ = new gchar* [argc_];
 
@@ -96,7 +96,7 @@ void FromMicToFileRecorderThread::initArgs() {
 }
 
 void FromMicToFileRecorderThread::threadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   {
     sync_primitives::AutoLock auto_lock(stopFlagLock_);
@@ -154,9 +154,9 @@ void FromMicToFileRecorderThread::threadMain() {
     g_error("Must supply destination (-d FILE)\n");
   }
 
-  LOG4CXX_TRACE(logger_, "Reading from device: " << device);
-  LOG4CXX_TRACE(logger_, "Saving pipeline output to: " << outfile);
-  LOG4CXX_TRACE(logger_, "Duration set to: " << duration);
+  LOGGER_TRACE(logger_, "Reading from device: " << device);
+  LOGGER_TRACE(logger_, "Saving pipeline output to: " << outfile);
+  LOGGER_TRACE(logger_, "Duration set to: " << duration);
 
   // Initialize gstreamer and setup the main loop information
   gst_init(&argc_, &argv_);
@@ -193,7 +193,7 @@ void FromMicToFileRecorderThread::threadMain() {
 
   gst_element_set_state(pipeline, GST_STATE_PLAYING);
 
-  LOG4CXX_TRACE(logger_, "Initializing pipeline ...");
+  LOGGER_TRACE(logger_, "Initializing pipeline ...");
   while (GST_STATE(pipeline) != GST_STATE_PLAYING) {
     bool shouldBeStoped;
     {
@@ -214,7 +214,7 @@ void FromMicToFileRecorderThread::threadMain() {
       return;
     }
   }
-  LOG4CXX_TRACE(logger_, "Pipeline started ...\n");
+  LOGGER_TRACE(logger_, "Pipeline started ...\n");
 
   // Start up a timer for the pipeline
   if (duration > 0) {
@@ -233,7 +233,7 @@ void FromMicToFileRecorderThread::threadMain() {
 
   gst_element_set_state(pipeline, GST_STATE_NULL);
 
-  LOG4CXX_TRACE(logger_, "Deleting pipeline\n");
+  LOGGER_TRACE(logger_, "Deleting pipeline\n");
   gst_object_unref(GST_OBJECT(pipeline));
   g_main_loop_unref(loop);
   g_option_context_free(context);
@@ -251,7 +251,7 @@ FromMicToFileRecorderThread::SleepThreadDelegate::SleepThreadDelegate(
     : threads::ThreadDelegate(), timeout_(timeout) {}
 
 void FromMicToFileRecorderThread::SleepThreadDelegate::threadMain() {
-  LOG4CXX_TRACE(logger_, "Sleep for " << timeout_.duration << " seconds");
+  LOGGER_TRACE(logger_, "Sleep for " << timeout_.duration << " seconds");
 
   sleep(timeout_.duration);
 
@@ -263,21 +263,21 @@ void FromMicToFileRecorderThread::SleepThreadDelegate::threadMain() {
 }
 
 void FromMicToFileRecorderThread::exitThreadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   if (NULL != loop) {
     if (g_main_loop_is_running(loop)) {
-      LOG4CXX_TRACE(logger_, "Quit loop\n");
+      LOGGER_TRACE(logger_, "Quit loop\n");
       g_main_loop_quit(loop);
     }
   }
 
   if (sleepThread_) {
-    LOG4CXX_DEBUG(logger_, "Stop sleep thread\n");
+    LOGGER_DEBUG(logger_, "Stop sleep thread\n");
     sleepThread_->stop();
   }
 
-  LOG4CXX_TRACE(logger_, "Set should be stopped flag\n");
+  LOGGER_TRACE(logger_, "Set should be stopped flag\n");
   sync_primitives::AutoLock auto_lock(stopFlagLock_);
   shouldBeStoped_ = true;
 }

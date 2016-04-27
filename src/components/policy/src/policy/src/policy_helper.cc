@@ -229,7 +229,7 @@ std::vector<FunctionalGroupPermission> policy::CheckAppPolicy::GetRevokedGroups(
 
   FunctionalGroupNames groups_attributes;
   if (!pm_->cache_->GetFunctionalGroupNames(groups_attributes)) {
-    LOG4CXX_WARN(logger_, "Can't get functional group names");
+    LOGGER_WARN(logger_, "Can't get functional group names");
     return std::vector<FunctionalGroupPermission>();
   }
 
@@ -272,7 +272,7 @@ void CheckAppPolicy::SendPermissionsToApp(
 
   const std::string device_id = pm_->GetCurrentDeviceId(app_id);
   if (device_id.empty()) {
-    LOG4CXX_WARN(logger_,
+    LOGGER_WARN(logger_,
                  "Couldn't find device info for application id: " << app_id);
     return;
   }
@@ -285,7 +285,7 @@ void CheckAppPolicy::SendPermissionsToApp(
                                group_permissons,
                                notification_data);
 
-  LOG4CXX_INFO(logger_, "Send notification for application_id: " << app_id);
+  LOGGER_INFO(logger_, "Send notification for application_id: " << app_id);
   // Default_hmi is Ford-specific and should not be used with basic policy
   const std::string default_hmi;
   pm_->listener()->OnPermissionsUpdated(app_id, notification_data, default_hmi);
@@ -293,7 +293,7 @@ void CheckAppPolicy::SendPermissionsToApp(
 
 bool CheckAppPolicy::IsAppRevoked(
     const AppPoliciesValueType& app_policy) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   // Application params are not initialized = application revoked
   // i.e. "123":null
   return app_policy.second.is_null();
@@ -323,7 +323,7 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   const std::string app_id = app_policy.first;
 
   if (!IsKnownAppication(app_id)) {
-    LOG4CXX_WARN(logger_,
+    LOGGER_WARN(logger_,
                  "Application:" << app_id << " is not present in snapshot.");
     return true;
   }
@@ -346,13 +346,13 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
     NotifySystem(app_policy);
   }
   if (RESULT_NO_CHANGES == result) {
-    LOG4CXX_INFO(logger_,
+    LOGGER_INFO(logger_,
                  "Permissions for application:" << app_id
                                                 << " wasn't changed.");
     return true;
   }
 
-  LOG4CXX_INFO(logger_,
+  LOGGER_INFO(logger_,
                "Permissions for application:" << app_id
                                               << " have been changed.");
 
@@ -697,7 +697,7 @@ void FillFunctionalGroupPermissions(
     FunctionalGroupNames& names,
     GroupConsent state,
     std::vector<FunctionalGroupPermission>& permissions) {
-  LOG4CXX_INFO(logger_, "FillFunctionalGroupPermissions");
+  LOGGER_INFO(logger_, "FillFunctionalGroupPermissions");
   FunctionalGroupIDs::const_iterator it = ids.begin();
   FunctionalGroupIDs::const_iterator it_end = ids.end();
   for (; it != it_end; ++it) {
@@ -717,7 +717,7 @@ bool IsPredefinedApp(const AppPoliciesValueType& app) {
 
 FunctionalGroupIDs ExcludeSame(const FunctionalGroupIDs& from,
                                const FunctionalGroupIDs& what) {
-  LOG4CXX_INFO(logger_, "Exclude same groups");
+  LOGGER_INFO(logger_, "Exclude same groups");
   FunctionalGroupIDs from_copy(from);
   FunctionalGroupIDs what_copy(what);
 
@@ -739,7 +739,7 @@ FunctionalGroupIDs ExcludeSame(const FunctionalGroupIDs& from,
 
 FunctionalGroupIDs Merge(const FunctionalGroupIDs& first,
                          const FunctionalGroupIDs& second) {
-  LOG4CXX_INFO(logger_, "Merge groups");
+  LOGGER_INFO(logger_, "Merge groups");
   FunctionalGroupIDs first_copy(first);
   FunctionalGroupIDs second_copy(second);
 
@@ -761,7 +761,7 @@ FunctionalGroupIDs Merge(const FunctionalGroupIDs& first,
 
 FunctionalGroupIDs FindSame(const FunctionalGroupIDs& first,
                             const FunctionalGroupIDs& second) {
-  LOG4CXX_INFO(logger_, "Find same groups");
+  LOGGER_INFO(logger_, "Find same groups");
   FunctionalGroupIDs first_copy(first);
   FunctionalGroupIDs second_copy(second);
 
@@ -792,7 +792,7 @@ bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies) {
         (*it).second = (*it_default).second;
         it->second.set_to_string(kDefaultId);
       } else {
-        LOG4CXX_ERROR(logger_,
+        LOGGER_ERROR(logger_,
                       "There is no default application policy was "
                       "found in PTU.");
         return false;

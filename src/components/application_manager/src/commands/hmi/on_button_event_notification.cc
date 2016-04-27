@@ -46,7 +46,7 @@ OnButtonEventNotification::OnButtonEventNotification(
     : NotificationFromHMI(message, application_manager) {}
 
 void OnButtonEventNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   (*message_)[strings::params][strings::function_id] =
       static_cast<int32_t>(mobile_apis::FunctionID::OnButtonEventID);

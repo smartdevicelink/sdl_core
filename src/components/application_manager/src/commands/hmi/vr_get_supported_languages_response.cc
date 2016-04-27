@@ -45,7 +45,7 @@ VRGetSupportedLanguagesResponse::VRGetSupportedLanguagesResponse(
 VRGetSupportedLanguagesResponse::~VRGetSupportedLanguagesResponse() {}
 
 void VRGetSupportedLanguagesResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   const hmi_apis::Common_Result::eType code =
       static_cast<hmi_apis::Common_Result::eType>(

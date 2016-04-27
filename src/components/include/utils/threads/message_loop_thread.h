@@ -141,7 +141,7 @@ MessageLoopThread<Q>::MessageLoopThread(const std::string& name,
   const bool started = thread_->start(thread_opts);
   if (!started) {
     CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-    LOG4CXX_ERROR(logger_, "Failed to start thread " << name);
+    LOGGER_ERROR(logger_, "Failed to start thread " << name);
   }
 }
 
@@ -179,7 +179,7 @@ MessageLoopThread<Q>::LoopThreadDelegate::LoopThreadDelegate(
 template <class Q>
 void MessageLoopThread<Q>::LoopThreadDelegate::threadMain() {
   CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   while (!message_queue_.IsShuttingDown()) {
     DrainQue();
     message_queue_.wait();

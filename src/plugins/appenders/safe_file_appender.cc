@@ -35,7 +35,7 @@
 using namespace log4cxx;
 using namespace log4cxx::helpers;
 
-IMPLEMENT_LOG4CXX_OBJECT(SafeFileAppender)
+IMPLEMENT_LOGGER_OBJECT(SafeFileAppender)
 
 void SafeFileAppender::subAppend(const spi::LoggingEventPtr& event,
                                  log4cxx::helpers::Pool& p) {

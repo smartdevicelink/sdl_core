@@ -58,66 +58,66 @@ PipeStreamerAdapter::PipeStreamer::PipeStreamer(
     , app_storage_folder_(app_storage_folder)
     , pipe_fd_(0) {
   if (!file_system::CreateDirectoryRecursively(app_storage_folder_)) {
-    LOG4CXX_ERROR(logger_,
+    LOGGER_ERROR(logger_,
                   "Cannot create app storage folder " << app_storage_folder_);
     return;
   }
   if ((mkfifo(named_pipe_path_.c_str(), S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) <
        0) &&
       (errno != EEXIST)) {
-    LOG4CXX_ERROR(logger_, "Cannot create pipe " << named_pipe_path_);
+    LOGGER_ERROR(logger_, "Cannot create pipe " << named_pipe_path_);
   } else {
-    LOG4CXX_INFO(logger_,
+    LOGGER_INFO(logger_,
                  "Pipe " << named_pipe_path_ << " was successfully created");
   }
 }
 PipeStreamerAdapter::PipeStreamer::~PipeStreamer() {
   if (0 == unlink(named_pipe_path_.c_str())) {
-    LOG4CXX_INFO(logger_, "Pipe " << named_pipe_path_ << " was removed");
+    LOGGER_INFO(logger_, "Pipe " << named_pipe_path_ << " was removed");
   } else {
-    LOG4CXX_ERROR(logger_, "Error removing pipe " << named_pipe_path_);
+    LOGGER_ERROR(logger_, "Error removing pipe " << named_pipe_path_);
   }
 }
 
 bool PipeStreamerAdapter::PipeStreamer::Connect() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   pipe_fd_ = open(named_pipe_path_.c_str(), O_RDWR, 0);
   if (-1 == pipe_fd_) {
-    LOG4CXX_ERROR(logger_, "Cannot open pipe for writing " << named_pipe_path_);
+    LOGGER_ERROR(logger_, "Cannot open pipe for writing " << named_pipe_path_);
     return false;
   }
 
-  LOG4CXX_INFO(logger_,
+  LOGGER_INFO(logger_,
                "Pipe " << named_pipe_path_
                        << " was successfuly opened for writing");
   return true;
 }
 
 void PipeStreamerAdapter::PipeStreamer::Disconnect() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   if (0 == close(pipe_fd_)) {
-    LOG4CXX_INFO(logger_, "Pipe " << named_pipe_path_ << " was closed");
+    LOGGER_INFO(logger_, "Pipe " << named_pipe_path_ << " was closed");
   } else {
-    LOG4CXX_ERROR(logger_, "Error closing pipe " << named_pipe_path_);
+    LOGGER_ERROR(logger_, "Error closing pipe " << named_pipe_path_);
   }
 }
 
 bool PipeStreamerAdapter::PipeStreamer::Send(
     protocol_handler::RawMessagePtr msg) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   ssize_t ret = write(pipe_fd_, msg->data(), msg->data_size());
   if (-1 == ret) {
-    LOG4CXX_ERROR(logger_, "Failed writing data to pipe " << named_pipe_path_);
+    LOGGER_ERROR(logger_, "Failed writing data to pipe " << named_pipe_path_);
     return false;
   }
 
   if (static_cast<uint32_t>(ret) != msg->data_size()) {
-    LOG4CXX_WARN(logger_,
+    LOGGER_WARN(logger_,
                  "Couldn't write all the data to pipe " << named_pipe_path_);
   }
 
-  LOG4CXX_INFO(logger_, "Streamer::sent " << msg->data_size());
+  LOGGER_INFO(logger_, "Streamer::sent " << msg->data_size());
   return true;
 }
 

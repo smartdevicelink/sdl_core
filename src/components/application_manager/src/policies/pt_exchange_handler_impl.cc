@@ -46,7 +46,7 @@ PTExchangeHandlerImpl::PTExchangeHandlerImpl(PolicyHandler* handler)
     , retry_sequence_(
           threads::CreateThread("RetrySequence", new RetrySequence(handler))) {
   DCHECK(policy_handler_);
-  LOG4CXX_INFO(logger_, "Exchan created");
+  LOGGER_INFO(logger_, "Exchan created");
 }
 
 PTExchangeHandlerImpl::~PTExchangeHandlerImpl() {
@@ -56,7 +56,7 @@ PTExchangeHandlerImpl::~PTExchangeHandlerImpl() {
 
 void PTExchangeHandlerImpl::Start() {
   sync_primitives::AutoLock locker(retry_sequence_lock_);
-  LOG4CXX_INFO(logger_, "Exchan started");
+  LOGGER_INFO(logger_, "Exchan started");
 
   retry_sequence_->stop();
   threads::DeleteThread(retry_sequence_);

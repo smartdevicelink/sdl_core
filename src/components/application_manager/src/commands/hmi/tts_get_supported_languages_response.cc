@@ -44,7 +44,7 @@ TTSGetSupportedLanguagesResponse::TTSGetSupportedLanguagesResponse(
 TTSGetSupportedLanguagesResponse::~TTSGetSupportedLanguagesResponse() {}
 
 void TTSGetSupportedLanguagesResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   const hmi_apis::Common_Result::eType code =
       static_cast<hmi_apis::Common_Result::eType>(

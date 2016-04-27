@@ -55,7 +55,7 @@ PTExchangeHandlerExt::PTExchangeHandlerExt(PolicyHandler* policy_handler)
 PTExchangeHandlerExt::~PTExchangeHandlerExt() {}
 
 void PTExchangeHandlerExt::Start() {
-  LOG4CXX_TRACE(logger_, "Start exchange PT");
+  LOGGER_TRACE(logger_, "Start exchange PT");
 
   const string policy_snapshot_file_name =
       policy_handler_->get_settings().policies_snapshot_file_name();
@@ -72,12 +72,12 @@ void PTExchangeHandlerExt::Start() {
           policy_handler_->TimeoutExchange(),
           policy_handler_->RetrySequenceDelaysSeconds());
     } else {
-      LOG4CXX_ERROR(logger_,
+      LOGGER_ERROR(logger_,
                     "Failed to write snapshot file to "
                         << policy_snapshot_file_name);
     }
   } else {
-    LOG4CXX_ERROR(logger_, "Failed to obtain policy table snapshot");
+    LOGGER_ERROR(logger_, "Failed to obtain policy table snapshot");
   }
 }
 

@@ -46,7 +46,7 @@ OnSystemContextNotification::OnSystemContextNotification(
 OnSystemContextNotification::~OnSystemContextNotification() {}
 
 void OnSystemContextNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   mobile_api::SystemContext::eType system_context =
       static_cast<mobile_api::SystemContext::eType>(
@@ -70,7 +70,7 @@ void OnSystemContextNotification::Run() {
     application_manager_.state_controller().SetRegularState(app,
                                                             system_context);
   } else {
-    LOG4CXX_ERROR(logger_, "Application does not exist");
+    LOGGER_ERROR(logger_, "Application does not exist");
   }
 }
 

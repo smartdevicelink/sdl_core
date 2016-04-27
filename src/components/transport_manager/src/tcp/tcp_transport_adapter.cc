@@ -68,7 +68,7 @@ DeviceType TcpTransportAdapter::GetDeviceType() const {
 }
 
 void TcpTransportAdapter::Store() const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   Json::Value tcp_adapter_dictionary;
   Json::Value devices_dictionary;
   DeviceList device_ids = GetDeviceList();
@@ -115,7 +115,7 @@ void TcpTransportAdapter::Store() const {
 }
 
 bool TcpTransportAdapter::Restore() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   bool errors_occurred = false;
   const Json::Value tcp_adapter_dictionary =
       last_state().dictionary["TransportManager"]["TcpAdapter"];
@@ -145,7 +145,7 @@ bool TcpTransportAdapter::Restore() {
     }
   }
   bool result = !errors_occurred;
-  LOG4CXX_DEBUG(logger_, "result " << std::boolalpha << result);
+  LOGGER_DEBUG(logger_, "result " << std::boolalpha << result);
   return result;
 }
 

@@ -48,13 +48,13 @@ DeleteSubMenuRequest::DeleteSubMenuRequest(
 DeleteSubMenuRequest::~DeleteSubMenuRequest() {}
 
 void DeleteSubMenuRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application_manager_.application(connection_key());
 
   if (!app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    LOG4CXX_ERROR(logger_, "Application is not registered");
+    LOGGER_ERROR(logger_, "Application is not registered");
     return;
   }
 
@@ -62,7 +62,7 @@ void DeleteSubMenuRequest::Run() {
       (*message_)[strings::msg_params][strings::menu_id].asInt();
 
   if (!app->FindSubMenu(menu_id)) {
-    LOG4CXX_ERROR(logger_, "Menu with id " << menu_id << " is not found.");
+    LOGGER_ERROR(logger_, "Menu with id " << menu_id << " is not found.");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
@@ -79,7 +79,7 @@ void DeleteSubMenuRequest::Run() {
 
 void DeleteSubMenuRequest::DeleteSubMenuVRCommands(
     ApplicationConstSharedPtr app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   const DataAccessor<CommandsMap> accessor = app->commands_map();
   const CommandsMap& commands = accessor.GetData();
@@ -106,7 +106,7 @@ void DeleteSubMenuRequest::DeleteSubMenuVRCommands(
 
 void DeleteSubMenuRequest::DeleteSubMenuUICommands(
     ApplicationSharedPtr const app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   const DataAccessor<CommandsMap> accessor(app->commands_map());
   const CommandsMap& commands = accessor.GetData();
@@ -114,7 +114,7 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(
 
   while (commands.end() != it) {
     if (!(*it->second).keyExists(strings::menu_params)) {
-      LOG4CXX_ERROR(logger_, "menu_params not exist");
+      LOGGER_ERROR(logger_, "menu_params not exist");
       ++it;
       continue;
     }
@@ -137,7 +137,7 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(
 }
 
 void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   using namespace helpers;
   const smart_objects::SmartObject& message = event.smart_object();
 
@@ -156,7 +156,7 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
           application_manager_.application(connection_key());
 
       if (!application) {
-        LOG4CXX_ERROR(logger_, "NULL pointer");
+        LOGGER_ERROR(logger_, "NULL pointer");
         return;
       }
 
@@ -175,7 +175,7 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      LOGGER_ERROR(logger_, "Received unknown event" << event.id());
       return;
     }
   }

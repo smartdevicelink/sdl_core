@@ -43,7 +43,7 @@ SDLPolicyUpdate::SDLPolicyUpdate(const MessageSharedPtr& message,
 SDLPolicyUpdate::~SDLPolicyUpdate() {}
 
 void SDLPolicyUpdate::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   SendRequest();
 }
 

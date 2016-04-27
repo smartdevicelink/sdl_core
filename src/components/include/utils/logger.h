@@ -69,7 +69,7 @@ void deinit_logger();
 // it's need, for example, when crash happend
 #define FLUSH_LOGGER() logger::flush_logger()
 
-#define LOG4CXX_IS_TRACE_ENABLED(logger) logger->isTraceEnabled()
+#define LOGGER_IS_TRACE_ENABLED(logger) logger->isTraceEnabled()
 
 log4cxx_time_t time_now();
 
@@ -85,49 +85,49 @@ log4cxx_time_t time_now();
               logLevel,                                              \
               accumulator.str(),                                     \
               time_now(),                                            \
-              LOG4CXX_LOCATION,                                      \
+              LOGGER_LOCATION,                                      \
               ::log4cxx::spi::LoggingEvent::getCurrentThreadName()); \
         }                                                            \
       }                                                              \
     }                                                                \
   } while (false)
 
-#undef LOG4CXX_TRACE
-#define LOG4CXX_TRACE(loggerPtr, logEvent) \
+#undef LOGGER_TRACE
+#define LOGGER_TRACE(loggerPtr, logEvent) \
   LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getTrace(), logEvent)
 
-#define LOG4CXX_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, auto_trace) \
-  logger::AutoTrace auto_trace(loggerPtr, LOG4CXX_LOCATION)
-#define LOG4CXX_AUTO_TRACE(loggerPtr) \
-  LOG4CXX_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, SDL_local_auto_trace_object)
+#define LOGGER_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, auto_trace) \
+  logger::AutoTrace auto_trace(loggerPtr, LOGGER_LOCATION)
+#define LOGGER_AUTO_TRACE(loggerPtr) \
+  LOGGER_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, SDL_local_auto_trace_object)
 
-#undef LOG4CXX_DEBUG
-#define LOG4CXX_DEBUG(loggerPtr, logEvent) \
+#undef LOGGER_DEBUG
+#define LOGGER_DEBUG(loggerPtr, logEvent) \
   LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getDebug(), logEvent)
 
-#undef LOG4CXX_INFO
-#define LOG4CXX_INFO(loggerPtr, logEvent) \
+#undef LOGGER_INFO
+#define LOGGER_INFO(loggerPtr, logEvent) \
   LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getInfo(), logEvent)
 
-#undef LOG4CXX_WARN
-#define LOG4CXX_WARN(loggerPtr, logEvent) \
+#undef LOGGER_WARN
+#define LOGGER_WARN(loggerPtr, logEvent) \
   LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getWarn(), logEvent)
 
-#undef LOG4CXX_ERROR
-#define LOG4CXX_ERROR(loggerPtr, logEvent) \
+#undef LOGGER_ERROR
+#define LOGGER_ERROR(loggerPtr, logEvent) \
   LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getError(), logEvent)
 
-#undef LOG4CXX_FATAL
-#define LOG4CXX_FATAL(loggerPtr, logEvent) \
+#undef LOGGER_FATAL
+#define LOGGER_FATAL(loggerPtr, logEvent) \
   LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getFatal(), logEvent)
 
-#define LOG4CXX_ERROR_WITH_ERRNO(loggerPtr, message)                           \
-  LOG4CXX_ERROR(loggerPtr,                                                     \
+#define LOGGER_ERROR_WITH_ERRNO(loggerPtr, message)                           \
+  LOGGER_ERROR(loggerPtr,                                                     \
                 message << ", error code " << errno << " (" << strerror(errno) \
                         << ")")
 
-#define LOG4CXX_WARN_WITH_ERRNO(loggerPtr, message)                           \
-  LOG4CXX_WARN(loggerPtr,                                                     \
+#define LOGGER_WARN_WITH_ERRNO(loggerPtr, message)                           \
+  LOGGER_WARN(loggerPtr,                                                     \
                message << ", error code " << errno << " (" << strerror(errno) \
                        << ")")
 
@@ -141,34 +141,34 @@ log4cxx_time_t time_now();
 
 #define DEINIT_LOGGER(file_name)
 
-#define LOG4CXX_IS_TRACE_ENABLED(logger) false
+#define LOGGER_IS_TRACE_ENABLED(logger) false
 
-#undef LOG4CXX_TRACE
-#define LOG4CXX_TRACE(x, y)
+#undef LOGGER_TRACE
+#define LOGGER_TRACE(x, y)
 
-#define LOG4CXX_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, auto_trace)
-#define LOG4CXX_AUTO_TRACE(loggerPtr)
+#define LOGGER_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, auto_trace)
+#define LOGGER_AUTO_TRACE(loggerPtr)
 
-#undef LOG4CXX_DEBUG
-#define LOG4CXX_DEBUG(x, y)
+#undef LOGGER_DEBUG
+#define LOGGER_DEBUG(x, y)
 
-#undef LOG4CXX_INFO
-#define LOG4CXX_INFO(x, y)
+#undef LOGGER_INFO
+#define LOGGER_INFO(x, y)
 
-#undef LOG4CXX_WARN
-#define LOG4CXX_WARN(x, y)
+#undef LOGGER_WARN
+#define LOGGER_WARN(x, y)
 
-#undef LOG4CXX_ERROR
-#define LOG4CXX_ERROR(x, y)
+#undef LOGGER_ERROR
+#define LOGGER_ERROR(x, y)
 
-#undef LOG4CXX_ERROR_WITH_ERRNO
-#define LOG4CXX_ERROR_WITH_ERRNO(x, y)
+#undef LOGGER_ERROR_WITH_ERRNO
+#define LOGGER_ERROR_WITH_ERRNO(x, y)
 
-#undef LOG4CXX_WARN_WITH_ERRNO
-#define LOG4CXX_WARN_WITH_ERRNO(x, y)
+#undef LOGGER_WARN_WITH_ERRNO
+#define LOGGER_WARN_WITH_ERRNO(x, y)
 
-#undef LOG4CXX_FATAL
-#define LOG4CXX_FATAL(x, y)
+#undef LOGGER_FATAL
+#define LOGGER_FATAL(x, y)
 #endif  // ENABLE_LOG
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_LOGGER_H_

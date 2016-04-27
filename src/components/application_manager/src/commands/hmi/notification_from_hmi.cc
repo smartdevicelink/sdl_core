@@ -69,7 +69,7 @@ void NotificationFromHMI::CreateHMIRequest(
     const smart_objects::SmartObject& msg_params) const {
   smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
   if (!result) {
-    LOG4CXX_ERROR(logger_, "Memory allocation failed.");
+    LOGGER_ERROR(logger_, "Memory allocation failed.");
     return;
   }
 
@@ -91,7 +91,7 @@ void NotificationFromHMI::CreateHMIRequest(
   request[strings::msg_params] = msg_params;
 
   if (!application_manager_.ManageHMICommand(result)) {
-    LOG4CXX_ERROR(logger_, "Unable to send request");
+    LOGGER_ERROR(logger_, "Unable to send request");
     return;
   }
 }

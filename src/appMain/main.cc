@@ -81,7 +81,7 @@ const std::string kLocalHostAddress = "127.0.0.1";
 bool InitHmi(std::string hmi_link) {
   struct stat sb;
   if (stat(hmi_link.c_str(), &sb) == -1) {
-    LOG4CXX_FATAL(logger_, "HMI index file " << hmi_link << " doesn't exist!");
+    LOGGER_FATAL(logger_, "HMI index file " << hmi_link << " doesn't exist!");
     return false;
   }
   return utils::System(kBrowser, kBrowserName)
@@ -100,7 +100,7 @@ bool InitHmi() {
   std::string kStartHmi = "./start_hmi.sh";
   struct stat sb;
   if (stat(kStartHmi.c_str(), &sb) == -1) {
-    LOG4CXX_FATAL(logger_, "HMI start script doesn't exist!");
+    LOGGER_FATAL(logger_, "HMI start script doesn't exist!");
     return false;
   }
 
@@ -139,17 +139,17 @@ int32_t main(int32_t argc, char** argv) {
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
   if (!utils::appenders_loader.Loaded()) {
-    LOG4CXX_ERROR(logger_,
+    LOGGER_ERROR(logger_,
                   "Appenders plugin not loaded, file logging disabled");
   }
 
-  LOG4CXX_INFO(logger_, "Application started!");
-  LOG4CXX_INFO(logger_, "SDL version: " << profile_instance.sdl_version());
+  LOGGER_INFO(logger_, "Application started!");
+  LOGGER_INFO(logger_, "SDL version: " << profile_instance.sdl_version());
 
   // --------------------------------------------------------------------------
   // Components initialization
   if (!life_cycle.StartComponents()) {
-    LOG4CXX_FATAL(logger_, "Failed to start components");
+    LOGGER_FATAL(logger_, "Failed to start components");
     life_cycle.StopComponents();
     DEINIT_LOGGER();
     exit(EXIT_FAILURE);
@@ -159,22 +159,22 @@ int32_t main(int32_t argc, char** argv) {
   // Third-Party components initialization.
 
   if (!life_cycle.InitMessageSystem()) {
-    LOG4CXX_FATAL(logger_, "Failed to init message system");
+    LOGGER_FATAL(logger_, "Failed to init message system");
     life_cycle.StopComponents();
     DEINIT_LOGGER();
     _exit(EXIT_FAILURE);
   }
-  LOG4CXX_INFO(logger_, "InitMessageBroker successful");
+  LOGGER_INFO(logger_, "InitMessageBroker successful");
 
   if (profile_instance.launch_hmi()) {
     if (profile_instance.server_address() == kLocalHostAddress) {
-      LOG4CXX_INFO(logger_, "Start HMI on localhost");
+      LOGGER_INFO(logger_, "Start HMI on localhost");
 
 #ifndef NO_HMI
       if (!InitHmi(profile_instance.link_to_web_hmi())) {
-        LOG4CXX_INFO(logger_, "InitHmi successful");
+        LOGGER_INFO(logger_, "InitHmi successful");
       } else {
-        LOG4CXX_WARN(logger_, "Failed to init HMI");
+        LOGGER_WARN(logger_, "Failed to init HMI");
       }
 #endif  // #ifndef NO_HMI
     }
@@ -182,10 +182,10 @@ int32_t main(int32_t argc, char** argv) {
   // --------------------------------------------------------------------------
 
   life_cycle.Run();
-  LOG4CXX_INFO(logger_, "Stop SDL due to caught signal");
+  LOGGER_INFO(logger_, "Stop SDL due to caught signal");
 
   life_cycle.StopComponents();
-  LOG4CXX_INFO(logger_, "Application has been stopped successfuly");
+  LOGGER_INFO(logger_, "Application has been stopped successfuly");
 
   DEINIT_LOGGER();
 

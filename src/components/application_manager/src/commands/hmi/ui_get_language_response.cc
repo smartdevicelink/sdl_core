@@ -45,7 +45,7 @@ UIGetLanguageResponse::UIGetLanguageResponse(
 UIGetLanguageResponse::~UIGetLanguageResponse() {}
 
 void UIGetLanguageResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   using namespace hmi_apis;
 
   Common_Language::eType language = Common_Language::INVALID_ENUM;
@@ -58,7 +58,7 @@ void UIGetLanguageResponse::Run() {
 
   application_manager_.hmi_capabilities().set_active_ui_language(language);
 
-  LOG4CXX_DEBUG(logger_,
+  LOGGER_DEBUG(logger_,
                 "Raising event for function_id " << function_id()
                                                  << " and correlation_id "
                                                  << correlation_id());
