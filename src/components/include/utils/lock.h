@@ -164,6 +164,9 @@ class AutoLock {
 // This class is used to temporarly unlock autolocked lock
 class AutoUnlock {
  public:
+  explicit AutoUnlock(Lock& lock) : lock_(lock) {
+    lock_.Release();
+  }
   explicit AutoUnlock(AutoLock& lock) : lock_(lock.GetLock()) {
     lock_.Release();
   }
