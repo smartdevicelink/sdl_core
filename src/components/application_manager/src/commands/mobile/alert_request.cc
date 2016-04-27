@@ -106,8 +106,8 @@ void AlertRequest::Run() {
   if ((tts_chunks_exists && length_tts_chunks) ||
       ((*message_)[strings::msg_params].keyExists(strings::play_tone) &&
        (*message_)[strings::msg_params][strings::play_tone].asBool())) {
-      awaiting_tts_speak_response_ = true;
-    }
+    awaiting_tts_speak_response_ = true;
+  }
   SendAlertRequest(app_id);
   if (awaiting_tts_speak_response_) {
     SendSpeakRequest(app_id, tts_chunks_exists, length_tts_chunks);
@@ -377,10 +377,10 @@ void AlertRequest::SendSpeakRequest(int32_t app_id,
   SmartObject msg_params = smart_objects::SmartObject(SmartType_Map);
 
   if (tts_chunks_exists && length_tts_chunks) {
-  msg_params[hmi_request::tts_chunks] =
-      smart_objects::SmartObject(SmartType_Array);
-  msg_params[hmi_request::tts_chunks] =
-      (*message_)[strings::msg_params][strings::tts_chunks];
+    msg_params[hmi_request::tts_chunks] =
+        smart_objects::SmartObject(SmartType_Array);
+    msg_params[hmi_request::tts_chunks] =
+        (*message_)[strings::msg_params][strings::tts_chunks];
   }
   if ((*message_)[strings::msg_params].keyExists(strings::play_tone) &&
       (*message_)[strings::msg_params][strings::play_tone].asBool()) {

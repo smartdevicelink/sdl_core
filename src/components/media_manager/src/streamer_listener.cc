@@ -58,8 +58,7 @@ void StreamerListener::OnErrorReceived(int32_t application_key,
 void StreamerListener::OnActivityStarted(int32_t application_key) {
   LOGGER_AUTO_TRACE(logger_);
   if (current_application_ == application_key) {
-    LOGGER_WARN(logger_,
-                 "Already performing activity for " << application_key);
+    LOGGER_WARN(logger_, "Already performing activity for " << application_key);
     return;
   }
   current_application_ = application_key;
@@ -69,7 +68,7 @@ void StreamerListener::OnActivityEnded(int32_t application_key) {
   LOGGER_AUTO_TRACE(logger_);
   if (current_application_ != application_key) {
     LOGGER_WARN(logger_,
-                 "Already not performing activity for " << application_key);
+                "Already not performing activity for " << application_key);
     return;
   }
   current_application_ = 0;

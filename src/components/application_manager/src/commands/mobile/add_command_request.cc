@@ -79,8 +79,8 @@ void AddCommandRequest::Run() {
         (*message_)[strings::msg_params][strings::cmd_icon], app);
 
     if (mobile_apis::Result::SUCCESS != verification_result) {
-      LOGGER_ERROR(
-          logger_, "MessageHelper::VerifyImage return " << verification_result);
+      LOGGER_ERROR(logger_,
+                   "MessageHelper::VerifyImage return " << verification_result);
       SendResponse(false, verification_result);
       return;
     }

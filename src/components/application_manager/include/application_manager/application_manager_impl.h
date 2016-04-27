@@ -170,13 +170,13 @@ struct MessageToHmi : public utils::SharedPtr<Message> {
 };
 
 // Short type names for prioritized message queues
-typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromMobile> >
+typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromMobile>>
     FromMobileQueue;
-typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToMobile> >
+typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToMobile>>
     ToMobileQueue;
-typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromHmi> >
+typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromHmi>>
     FromHmiQueue;
-typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToHmi> >
+typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToHmi>>
     ToHmiQueue;
 
 // AudioPassThru
@@ -1305,7 +1305,7 @@ class ApplicationManagerImpl
    * 1st value - is video service opened or not
    * 2nd value - is audio service opened or not
    */
-  typedef std::map<uint32_t, std::pair<bool, bool> > NaviServiceStatusMap;
+  typedef std::map<uint32_t, std::pair<bool, bool>> NaviServiceStatusMap;
 
   typedef utils::SharedPtr<timer::Timer> TimerSPtr;
 

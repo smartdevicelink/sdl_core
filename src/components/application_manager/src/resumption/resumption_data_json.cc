@@ -75,10 +75,10 @@ void ResumptionDataJson::SaveApplication(
   json_app[strings::device_id] = device_mac;
   json_app[strings::app_id] = policy_app_id;
   json_app[strings::grammar_id] = utils::json::JsonValue::UInt(grammar_id);
-  json_app[strings::connection_key] = utils::json::JsonValue::UInt(
-                                        application->app_id());
-  json_app[strings::hmi_app_id] = utils::json::JsonValue::UInt(
-                                    application->hmi_app_id());
+  json_app[strings::connection_key] =
+      utils::json::JsonValue::UInt(application->app_id());
+  json_app[strings::hmi_app_id] =
+      utils::json::JsonValue::UInt(application->hmi_app_id());
   json_app[strings::is_media_application] = application->IsAudioApplication();
   json_app[strings::hmi_level] = utils::json::JsonValue::Int(hmi_level);
   json_app[strings::ign_off_count] = utils::json::JsonValue::UInt(0);
@@ -244,8 +244,7 @@ void ResumptionDataJson::OnAwake() {
           utils::json::JsonValue::UInt(ign_off_count - 1);
     } else {
       LOGGER_WARN(logger_, "Unknown key among saved applications");
-      (*itr)[strings::ign_off_count] =
-          utils::json::JsonValue::UInt(0);
+      (*itr)[strings::ign_off_count] = utils::json::JsonValue::UInt(0);
     }
   }
 }
@@ -340,8 +339,7 @@ uint32_t ResumptionDataJson::GetIgnOffTime() const {
   sync_primitives::AutoLock autolock(resumption_lock_);
   JsonValueRef resumption = GetResumptionData();
   if (!resumption.HasMember(strings::last_ign_off_time)) {
-    resumption[strings::last_ign_off_time] =
-        utils::json::JsonValue::UInt(0);
+    resumption[strings::last_ign_off_time] = utils::json::JsonValue::UInt(0);
     LOGGER_WARN(logger_, "last_save_time section is missed");
   }
   return resumption[strings::last_ign_off_time].AsUInt();
@@ -542,11 +540,12 @@ bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
   LOGGER_AUTO_TRACE(logger_);
   using namespace app_mngr;
   sync_primitives::AutoLock autolock(resumption_lock_);
-  utils::json::JsonValueRef application = GetFromSavedOrAppend(app_id, device_id);
+  utils::json::JsonValueRef application =
+      GetFromSavedOrAppend(app_id, device_id);
   if (application.IsNull()) {
     LOGGER_DEBUG(logger_,
-                  "Application " << app_id << " with device_id " << device_id
-                                 << " hasn't been found in resumption data.");
+                 "Application " << app_id << " with device_id " << device_id
+                                << " hasn't been found in resumption data.");
     return false;
   }
   application[strings::application_commands].Clear();
@@ -556,12 +555,12 @@ bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
   application[strings::application_subscribtions].Clear();
   application[strings::application_files].Clear();
   // Seems there is no interface for json wrapper - needs to be created
-  //application.removeMember(strings::grammar_id);
+  // application.removeMember(strings::grammar_id);
   application[strings::grammar_id].Clear();
   LOGGER_DEBUG(logger_,
-                "Resumption data for application "
-                    << app_id << " with device_id " << device_id
-                    << " has been dropped.");
+               "Resumption data for application "
+                   << app_id << " with device_id " << device_id
+                   << " has been dropped.");
   return true;
 }
 

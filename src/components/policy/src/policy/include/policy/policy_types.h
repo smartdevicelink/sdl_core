@@ -304,7 +304,6 @@ struct VehicleInfo {
 #if defined(OS_POSIX) || defined(OS_WINDOWS)
   VehicleInfo(){};
 #endif
-
 };
 
 /**

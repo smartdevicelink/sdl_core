@@ -133,7 +133,7 @@ void SliderRequest::on_event(const event_engine::Event& event) {
   LOGGER_DEBUG(logger_, "Received UI_Slider event");
 
   const Common_Result::eType response_code = static_cast<Common_Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
+      message[strings::params][hmi_response::code].asInt());
 
   SmartObject response_msg_params = message[strings::msg_params];
 
@@ -143,13 +143,13 @@ void SliderRequest::on_event(const event_engine::Event& event) {
   if (is_timeout_aborted) {
     if (message[strings::params][strings::data].keyExists(
             strings::slider_position)) {
-    // Copy slider_position info to msg_params section
-    response_msg_params[strings::slider_position] =
-        message[strings::params][strings::data][strings::slider_position];
+      // Copy slider_position info to msg_params section
+      response_msg_params[strings::slider_position] =
+          message[strings::params][strings::data][strings::slider_position];
     } else {
       LOGGER_ERROR(logger_,
-                    strings::slider_position << " field is absent"
-                                                " in response.");
+                   strings::slider_position << " field is absent"
+                                               " in response.");
       response_msg_params[strings::slider_position] = 0;
     }
   }

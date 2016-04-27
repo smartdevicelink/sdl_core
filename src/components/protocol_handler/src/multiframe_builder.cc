@@ -53,7 +53,7 @@ void MultiFrameBuilder::set_waiting_timeout(
     LOGGER_WARN(logger_, "Waiting timout disabled");
   } else {
     LOGGER_DEBUG(logger_,
-                  "Waiting time in msec: " << consecutive_frame_wait_msecs_);
+                 "Waiting time in msec: " << consecutive_frame_wait_msecs_);
   }
 }
 
@@ -81,8 +81,8 @@ bool MultiFrameBuilder::RemoveConnection(const ConnectionID connection_id) {
   if (!session_to_frame_map.empty()) {
     // FIXME(EZamakhov): Ask ReqManager - do we need to send GenericError
     LOGGER_WARN(logger_,
-                 "For connection_id: " << connection_id
-                                       << " waiting: " << multiframes_map_);
+                "For connection_id: " << connection_id
+                                      << " waiting: " << multiframes_map_);
   }
   multiframes_map_.erase(it);
   return true;
@@ -186,18 +186,18 @@ RESULT_CODE MultiFrameBuilder::HandleFirstFrame(const ProtocolFramePtr packet) {
   MessageIDToFrameMap::iterator messageId_it = messageId_map.find(message_id);
   if (messageId_it != messageId_map.end()) {
     LOGGER_ERROR(logger_,
-                  "Already waiting message for connection_id: "
-                      << connection_id
-                      << ", session_id: " << static_cast<int>(session_id)
-                      << ", message_id: " << message_id);
+                 "Already waiting message for connection_id: "
+                     << connection_id
+                     << ", session_id: " << static_cast<int>(session_id)
+                     << ", message_id: " << message_id);
     return RESULT_FAIL;
   }
 
   LOGGER_DEBUG(logger_,
-                "Start waiting frames for connection_id: "
-                    << connection_id
-                    << ", session_id: " << static_cast<int>(session_id)
-                    << ", message_id: " << message_id);
+               "Start waiting frames for connection_id: "
+                   << connection_id
+                   << ", session_id: " << static_cast<int>(session_id)
+                   << ", message_id: " << message_id);
 
   ProtocolFrameData frame_data;
   frame_data.frame = packet;
@@ -227,10 +227,10 @@ RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(
   MessageIDToFrameMap::iterator messageId_it = messageId_map.find(message_id);
   if (messageId_it == messageId_map.end()) {
     LOGGER_ERROR(logger_,
-                  "No waiting message for connection_id: "
-                      << connection_id
-                      << ", session_id: " << static_cast<int>(session_id)
-                      << ", message_id: " << message_id);
+                 "No waiting message for connection_id: "
+                     << connection_id
+                     << ", session_id: " << static_cast<int>(session_id)
+                     << ", message_id: " << message_id);
     return RESULT_FAIL;
   }
 
@@ -254,11 +254,11 @@ RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(
     // The next frame data is bigger at 1
     if (new_frame_data != (previous_frame_data + 1)) {
       LOGGER_ERROR(logger_,
-                    "Unexpected CONSECUTIVE frame for connection_id: "
-                        << connection_id
-                        << ", session_id: " << static_cast<int>(session_id)
-                        << ", message_id: " << message_id
-                        << ", frame: " << packet);
+                   "Unexpected CONSECUTIVE frame for connection_id: "
+                       << connection_id
+                       << ", session_id: " << static_cast<int>(session_id)
+                       << ", message_id: " << message_id
+                       << ", frame: " << packet);
       return RESULT_FAIL;
     }
   }
@@ -266,12 +266,12 @@ RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(
   assembling_frame->set_frame_data(new_frame_data);
 
   LOGGER_DEBUG(logger_,
-                "Appending " << packet->data_size() << " bytes "
-                             << "; frame_data "
-                             << static_cast<int>(new_frame_data)
-                             << "; for connection_id: " << connection_id
-                             << ", session_id: " << static_cast<int>(session_id)
-                             << ", message_id: " << message_id);
+               "Appending " << packet->data_size() << " bytes "
+                            << "; frame_data "
+                            << static_cast<int>(new_frame_data)
+                            << "; for connection_id: " << connection_id
+                            << ", session_id: " << static_cast<int>(session_id)
+                            << ", message_id: " << message_id);
 
   if (assembling_frame->appendData(packet->data(), packet->data_size()) !=
       RESULT_OK) {
@@ -279,8 +279,8 @@ RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(
     return RESULT_FAIL;
   }
   LOGGER_INFO(logger_,
-               "Assembled frame with payload size: "
-                   << assembling_frame->payload_size());
+              "Assembled frame with payload size: "
+                  << assembling_frame->payload_size());
   frame_data.append_time = date_time::DateTime::getCurrentTime();
   return RESULT_OK;
 }

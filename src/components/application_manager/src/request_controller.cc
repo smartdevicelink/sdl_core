@@ -237,8 +237,8 @@ void RequestController::terminateRequest(const uint32_t& correlation_id,
                                          bool force_terminate) {
   LOGGER_AUTO_TRACE(logger_);
   LOGGER_DEBUG(logger_,
-                "correlation_id = "
-                    << correlation_id << " connection_key = " << connection_key
+               "correlation_id = " << correlation_id
+                                   << " connection_key = " << connection_key
                                    << " force_terminate = " << force_terminate);
   RequestInfoPtr request =
       waiting_for_response_.Find(connection_key, correlation_id);
@@ -289,8 +289,8 @@ void RequestController::terminateWaitingForResponseAppRequests(
     const uint32_t& app_id) {
   LOGGER_AUTO_TRACE(logger_);
   waiting_for_response_.RemoveByConnectionKey(app_id);
-  LOGGER_DEBUG(
-      logger_, "Waiting for response count : " << waiting_for_response_.Size());
+  LOGGER_DEBUG(logger_,
+               "Waiting for response count : " << waiting_for_response_.Size());
 }
 
 void RequestController::terminateAppRequests(const uint32_t& app_id) {
@@ -511,8 +511,7 @@ void RequestController::UpdateTimer() {
               << " Diff (current - end) (ms): "
               << date_time::DateTime::getmSecs(current_time - end_time)
               << " Request timeout (sec): "
-              << front->timeout_msec() /
-                     date_time::kMillisecondsInSecond);
+              << front->timeout_msec() / date_time::kMillisecondsInSecond);
       timer_.Start(0u, true);
     }
   }

@@ -232,8 +232,7 @@ void PutFileRequest::Run() {
       break;
     }
     default:
-      LOGGER_WARN(logger_,
-                   "PutFile is unsuccessful. Result = " << save_result);
+      LOGGER_WARN(logger_, "PutFile is unsuccessful. Result = " << save_result);
       SendResponse(false, save_result, "Can't save file", &response_params);
       break;
   }

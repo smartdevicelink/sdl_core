@@ -81,7 +81,6 @@ class MessageHelper {
   static void CreateGetVehicleDataRequest(
       uint32_t correlation_id, const std::vector<std::string>& params);
 
-
   /**
    * @brief Create mobile HashUpdateNotification
    */

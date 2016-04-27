@@ -344,7 +344,7 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
     const uint16_t open_attempt_timeout_ms =
         get_settings().open_attempt_timeout_ms();
     LOGGER_DEBUG(logger_,
-                  "Open attempt timeout(ms) is: " << open_attempt_timeout_ms);
+                 "Open attempt timeout(ms) is: " << open_attempt_timeout_ms);
     for (int i = 0; i < attempts; ++i) {
       threads::sleep(open_attempt_timeout_ms * 1000);
       LOGGER_INFO(logger_, "Attempt: " << i + 1);
@@ -360,8 +360,8 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
     if (!is_opened) {
       LOGGER_ERROR(logger_,
                    "Open retry sequence failed. Tried "
-                        << attempts << " attempts with "
-                        << open_attempt_timeout_ms
+                       << attempts << " attempts with "
+                       << open_attempt_timeout_ms
                        << " open timeout(ms) for each.");
       return InitResult::FAIL;
     }

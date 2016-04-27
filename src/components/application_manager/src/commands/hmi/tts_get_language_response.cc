@@ -59,9 +59,9 @@ void TTSGetLanguageResponse::Run() {
       .set_active_tts_language(language);
 
   LOGGER_DEBUG(logger_,
-                "Raising event for function_id " << function_id()
-                                                 << " and correlation_id "
-                                                 << correlation_id());
+               "Raising event for function_id " << function_id()
+                                                << " and correlation_id "
+                                                << correlation_id());
   event_engine::Event event(FunctionID::TTS_GetLanguage);
   event.set_smart_object(*message_);
   event.raise();

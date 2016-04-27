@@ -172,8 +172,7 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
   if (msg_params.keyExists(strings::phone_number)) {
     str = msg_params[strings::phone_number].asCharArray();
     if (!CheckSyntax(str)) {
-      LOGGER_ERROR(logger_,
-                    "parameter phoneNumber contains invalid character");
+      LOGGER_ERROR(logger_, "parameter phoneNumber contains invalid character");
       return true;
     }
   }

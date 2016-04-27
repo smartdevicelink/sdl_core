@@ -114,7 +114,7 @@ media_manager::FromMicToFileRecorderThread::Impl::Impl(
     const std::string tKey_,
     const std::string outputFileName,
     int32_t duration)
-  : duration_(duration) {
+    : duration_(duration) {
   argc_ = 5;
   argv_ = new gchar* [argc_];
 
@@ -297,10 +297,9 @@ media_manager::FromMicToFileRecorderThread::FromMicToFileRecorderThread(
     : threads::ThreadDelegate()
     , impl_(new Impl("-o", "-t", output_file, duration)) {
   LOGGER_AUTO_TRACE(logger_);
-  sleep_thread_ =
-	  FromMicToFileRecorderThreadPtr(new timer::Timer(
-        "AudioFromMicSuspend",
-        new timer::TimerTaskImpl<FromMicToFileRecorderThread>(
+  sleep_thread_ = FromMicToFileRecorderThreadPtr(new timer::Timer(
+      "AudioFromMicSuspend",
+      new timer::TimerTaskImpl<FromMicToFileRecorderThread>(
           this,
           &FromMicToFileRecorderThread::onFromMicToFileRecorderThreadSuspned)));
 }

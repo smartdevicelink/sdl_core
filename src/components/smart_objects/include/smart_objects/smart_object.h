@@ -903,7 +903,8 @@ class SmartObject FINAL {
    * @param Value Pointer to string to convert
    * @return int64_t int64_t
    **/
-  static uint64_t convert_string_to_integer(const custom_str::CustomString* Value);
+  static uint64_t convert_string_to_integer(
+      const custom_str::CustomString* Value);
 
   /**
    * @brief Converts double value to string

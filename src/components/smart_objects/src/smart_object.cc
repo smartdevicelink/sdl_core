@@ -411,8 +411,8 @@ char SmartObject::convert_char() const {
     case SmartType_String:
       return (m_data.str_value->length() == 1 &&
               m_data.str_value->is_ascii_string())
-              ? m_data.str_value->at(0)
-              : invalid_char_value;
+                 ? m_data.str_value->at(0)
+                 : invalid_char_value;
     case SmartType_Character:
       return m_data.char_value;
     default:

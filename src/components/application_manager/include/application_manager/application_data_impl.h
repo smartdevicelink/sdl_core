@@ -66,6 +66,7 @@ class InitialApplicationDataImpl : public virtual Application {
   void set_perform_interaction_layout(
       mobile_api::LayoutMode::eType layout) OVERRIDE;
   mobile_api::LayoutMode::eType perform_interaction_layout() const OVERRIDE;
+
  protected:
   smart_objects::SmartObject* app_types_;
   smart_objects::SmartObject* vr_synonyms_;

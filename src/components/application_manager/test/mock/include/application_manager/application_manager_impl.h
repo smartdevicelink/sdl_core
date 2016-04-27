@@ -252,7 +252,7 @@ class ApplicationManagerImpl
   MOCK_METHOD1(GetDeviceTransportType,
                hmi_apis::Common_TransportType::eType(const std::string&));
   MOCK_CONST_METHOD1(application_by_policy_id,
-               ApplicationSharedPtr(const std::string&));
+                     ApplicationSharedPtr(const std::string&));
   MOCK_METHOD1(RemoveAppDataFromHMI, bool(ApplicationSharedPtr));
   MOCK_METHOD1(HeadUnitReset,
                void(mobile_api::AppInterfaceUnregisteredReason::eType));
@@ -406,7 +406,7 @@ class ApplicationManagerImpl
    public:
     ApplicationListAccessor()
         : DataAccessor<ApplicationSet>(ApplicationSet(),
-                                      sync_primitives::Lock()) {}
+                                       sync_primitives::Lock()) {}
     MOCK_CONST_METHOD0(applications, const ApplicationSet());
     MOCK_METHOD0(begin, ApplicationSetConstIt());
     MOCK_METHOD0(end, ApplicationSetConstIt());

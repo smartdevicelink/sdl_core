@@ -45,7 +45,7 @@
 #else
 #error "Logger is not implemented for this platform"
 #endif
-#endif // ENABLE_LOG
+#endif  // ENABLE_LOG
 
 #include "utils/macro.h"
 #include "utils/threads/message_loop_thread.h"
@@ -69,7 +69,7 @@ struct LogMessage {
   QDateTime time_;
   uint32_t thread_id_;
 #endif
-#endif // ENABLE_LOG
+#endif  // ENABLE_LOG
 };
 
 typedef std::queue<LogMessage> LogMessageQueue;

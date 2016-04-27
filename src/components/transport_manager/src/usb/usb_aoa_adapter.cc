@@ -44,8 +44,10 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "UsbTransportAdapter")
 UsbAoaAdapter::UsbAoaAdapter(resumption::LastState& last_state)
-    : TransportAdapterImpl(
-          new UsbDeviceScanner(this), new UsbConnectionFactory(this), NULL, last_state)
+    : TransportAdapterImpl(new UsbDeviceScanner(this),
+                           new UsbConnectionFactory(this),
+                           NULL,
+                           last_state)
     , is_initialised_(false)
     , usb_handler_(new UsbHandler()) {
   static_cast<UsbDeviceScanner*>(device_scanner_)->SetUsbHandler(usb_handler_);

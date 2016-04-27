@@ -83,9 +83,9 @@ void SDLGetUserFriendlyMessageRequest::Run() {
   application_manager::ApplicationManagerImpl::instance()
       ->GetPolicyHandler()
       .OnGetUserFriendlyMessage(
-      msg_codes,
-      required_language,
-      (*message_)[strings::params][strings::correlation_id].asInt());
+          msg_codes,
+          required_language,
+          (*message_)[strings::params][strings::correlation_id].asInt());
 }
 
 }  // namespace commands

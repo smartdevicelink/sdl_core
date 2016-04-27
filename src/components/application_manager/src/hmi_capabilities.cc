@@ -346,7 +346,6 @@ HMICapabilities::HMICapabilities(ApplicationManagerImpl* const app_mngr)
     , is_navigation_supported_(false)
     , is_phone_call_supported_(false)
     , app_mngr_(app_mngr) {
-
   InitCapabilities();
   if (false == profile::Profile::instance()->launch_hmi()) {
     is_vr_ready_response_recieved_ = true;

@@ -149,9 +149,8 @@ void BluetoothSocketConnection::Transmit() {
   poll_fds[1].events = POLLIN | POLLPRI;
   errno = 0;
   if (-1 == poll(poll_fds, kPollFdsSize, -1)) {
-    LOGGER_ERROR_WITH_ERRNO(
-          logger_,
-          "poll failed for the socket " << rfcomm_socket_);
+    LOGGER_ERROR_WITH_ERRNO(logger_,
+                            "poll failed for the socket " << rfcomm_socket_);
     OnError(errno);
     return;
   }
@@ -162,9 +161,9 @@ void BluetoothSocketConnection::Transmit() {
                    << poll_fds[1].revents);
   // error check
   if (0 != (poll_fds[1].revents & (POLLERR | POLLHUP | POLLNVAL))) {
-    LOGGER_ERROR(
-          logger_,
-          "Notification pipe for socket " << rfcomm_socket_ << " terminated.");
+    LOGGER_ERROR(logger_,
+                 "Notification pipe for socket " << rfcomm_socket_
+                                                 << " terminated.");
     OnError(errno);
     return;
   }
@@ -183,9 +182,9 @@ void BluetoothSocketConnection::Transmit() {
   } while (bytes_read > 0);
   if ((bytes_read < 0) && (EAGAIN != errno)) {
     LOGGER_ERROR_WITH_ERRNO(
-          logger_,
-          "Failed to clear notification pipe. Poll failed for socket "
-          << rfcomm_socket_ );
+        logger_,
+        "Failed to clear notification pipe. Poll failed for socket "
+            << rfcomm_socket_);
     OnError(errno);
     return;
   }
@@ -331,10 +330,12 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
     return false;
   }
 
-  LOGGER_DEBUG(logger_, "Connecting to " << "bluetooth device on port"
-               << ":" << rfcomm_channel);
+  LOGGER_DEBUG(logger_,
+               "Connecting to "
+                   << "bluetooth device on port"
+                   << ":" << rfcomm_channel);
 
-  sockaddr_rc remoteSocketAddress = { 0 };
+  sockaddr_rc remoteSocketAddress = {0};
   remoteSocketAddress.rc_family = AF_BLUETOOTH;
   remoteSocketAddress.rc_channel = rfcomm_channel;
   bacpy(&remoteSocketAddress.rc_bdaddr, &bluetooth_device->address());
@@ -350,16 +351,16 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
     rfcomm_socket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
     if (-1 == rfcomm_socket) {
       LOGGER_ERROR_WITH_ERRNO(logger_,
-                               "Failed to create RFCOMM socket for device.");
+                              "Failed to create RFCOMM socket for device.");
       Close();
       LOGGER_TRACE(logger_, "exit with FALSE");
       return false;
     }
     errno = 0;
-    connect_status = ::connect(
-                       rfcomm_socket,
-                       reinterpret_cast<sockaddr*>(&remoteSocketAddress),
-                       sizeof(remoteSocketAddress));
+    connect_status =
+        ::connect(rfcomm_socket,
+                  reinterpret_cast<sockaddr*>(&remoteSocketAddress),
+                  sizeof(remoteSocketAddress));
     if (0 == connect_status) {
       LOGGER_DEBUG(logger_, "rfcomm Connect ok");
       break;
@@ -377,8 +378,8 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
   LOGGER_INFO(logger_, "rfcomm Connect attempts finished");
   if (0 != connect_status) {
     LOGGER_DEBUG(logger_,
-                  "Failed to Connect to remote bluetooth device for session "
-                 << this);
+                 "Failed to Connect to remote bluetooth device for session "
+                     << this);
     CloseSocket(rfcomm_socket);
     LOGGER_TRACE(logger_, "exit with FALSE");
     return false;
@@ -398,15 +399,15 @@ TransportAdapter::Error BluetoothSocketConnection::Notify() {
   if (-1 == write_fd_) {
     LOGGER_ERROR(logger_,
                  "File descriptior for writing is invalid. "
-                 "Failed to wake up connection thread for connection " << this);
+                 "Failed to wake up connection thread for connection "
+                     << this);
     return TransportAdapter::FAIL;
   }
   uint8_t buffer = 0;
   errno = 0;
   if (1 != write(write_fd_, &buffer, 1)) {
     LOGGER_ERROR_WITH_ERRNO(
-          logger_,
-          "Failed to wake up connection thread for connection " << this);
+        logger_, "Failed to wake up connection thread for connection " << this);
     return TransportAdapter::FAIL;
   }
   return TransportAdapter::OK;
@@ -475,9 +476,8 @@ void BluetoothSocketConnection::OnRead() {
     } else if (bytes_read < 0) {
       int socket_error = errno;
       if (EAGAIN != socket_error && EWOULDBLOCK != socket_error) {
-        LOGGER_ERROR_WITH_ERRNO(logger_,
-                                "recv() failed for connection "
-                                << rfcomm_socket_ );
+        LOGGER_ERROR_WITH_ERRNO(
+            logger_, "recv() failed for connection " << rfcomm_socket_);
         OnError(socket_error);
         return;
       }

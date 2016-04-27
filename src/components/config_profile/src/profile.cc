@@ -856,10 +856,10 @@ void Profile::UpdateValues() {
 
 #ifdef ENABLE_SECURITY
   force_protected_service_ =
-       ReadIntContainer(kSecuritySection, kForceProtectedService, NULL);
+      ReadIntContainer(kSecuritySection, kForceProtectedService, NULL);
 
   force_unprotected_service_ =
-       ReadIntContainer(kSecuritySection, kForceUnprotectedService, NULL);
+      ReadIntContainer(kSecuritySection, kForceUnprotectedService, NULL);
 
   ReadStringValue(&security_manager_protocol_name_,
                   kDefaultSecurityProtocol,
@@ -1787,8 +1787,8 @@ int32_t hex_to_int(const std::string& value) {
 }
 
 std::vector<int> Profile::ReadIntContainer(const char* const pSection,
-                                         const char* const pKey,
-                                         bool* out_result) const {
+                                           const char* const pKey,
+                                           bool* out_result) const {
   const std::vector<std::string> string_list =
       ReadStringContainer(pSection, pKey, out_result);
   std::vector<int> value_list;
@@ -1798,9 +1798,10 @@ std::vector<int> Profile::ReadIntContainer(const char* const pSection,
   return value_list;
 }
 
-std::vector<std::string> Profile::ReadStringContainer(const char* const pSection,
-                                                    const char* const pKey,
-                                                    bool* out_result) const {
+std::vector<std::string> Profile::ReadStringContainer(
+    const char* const pSection,
+    const char* const pKey,
+    bool* out_result) const {
   std::string string;
   const bool result = ReadValue(&string, pSection, pKey);
   if (out_result)

@@ -92,8 +92,8 @@ void ConnectionHandlerImpl::Stop() {
 void ConnectionHandlerImpl::set_connection_handler_observer(
     ConnectionHandlerObserver* observer) {
   LOGGER_DEBUG(logger_,
-                "ConnectionHandlerImpl::set_connection_handler_observer() "
-                    << observer);
+               "ConnectionHandlerImpl::set_connection_handler_observer() "
+                   << observer);
   sync_primitives::AutoWriteLock write_lock(connection_handler_observer_lock_);
   if (!observer) {
     LOGGER_WARN(logger_, "Set Null pointer to observer.");
@@ -104,8 +104,8 @@ void ConnectionHandlerImpl::set_connection_handler_observer(
 void ConnectionHandlerImpl::set_protocol_handler(
     protocol_handler::ProtocolHandler* protocol_handler) {
   LOGGER_DEBUG(logger_,
-                "ConnectionHandlerImpl::set_protocol_handler()"
-                    << protocol_handler);
+               "ConnectionHandlerImpl::set_protocol_handler()"
+                   << protocol_handler);
   if (!protocol_handler) {
     LOGGER_WARN(logger_, "Set Null pointer to protocol handler.");
   }
@@ -200,8 +200,7 @@ void ConnectionHandlerImpl::OnConnectionEstablished(
     LOGGER_ERROR(logger_, "Unknown device!");
     return;
   }
-  LOGGER_DEBUG(logger_,
-                "Add Connection #" << connection_id << " to the list.");
+  LOGGER_DEBUG(logger_, "Add Connection #" << connection_id << " to the list.");
   sync_primitives::AutoWriteLock lock(connection_list_lock_);
   connection_list_.insert(ConnectionList::value_type(
       connection_id,
@@ -273,12 +272,12 @@ bool AllowProtection(const ConnectionHandlerSettings& settings,
                 force_unprotected_list.end(),
                 service_type) != force_unprotected_list.end()) {
     LOGGER_ERROR(logger_,
-                  "Service " << static_cast<int>(service_type)
-                             << " shall be protected");
+                 "Service " << static_cast<int>(service_type)
+                            << " shall be protected");
     return false;
   }
   LOGGER_DEBUG(logger_,
-                "Service " << static_cast<int>(service_type) << " allowed");
+               "Service " << static_cast<int>(service_type) << " allowed");
   return true;
 }
 #endif  // ENABLE_SECURITY
@@ -320,10 +319,10 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   } else {  // Could be create new service or protected exists one
     if (!connection->AddNewService(session_id, service_type, is_protected)) {
       LOGGER_ERROR(logger_,
-                    "Couldn't establish "
-                        << (is_protected ? "protected" : "non-protected")
-                        << " service " << static_cast<int>(service_type)
-                        << " for session " << static_cast<int>(session_id));
+                   "Couldn't establish "
+                       << (is_protected ? "protected" : "non-protected")
+                       << " service " << static_cast<int>(service_type)
+                       << " for session " << static_cast<int>(session_id));
       return 0;
     }
     new_session_id = session_id;
@@ -338,7 +337,7 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
         connection->connection_device_handle(), session_key, service_type);
     if (!success) {
       LOGGER_WARN(logger_,
-                   "Service starting forbidden by connection_handler_observer");
+                  "Service starting forbidden by connection_handler_observer");
       if (protocol_handler::kRpc == service_type) {
         connection->RemoveSession(new_session_id);
       } else {
@@ -401,32 +400,32 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
 
   if (protocol_handler::kRpc == service_type) {
     LOGGER_INFO(logger_,
-                 "Session " << static_cast<uint32_t>(session_id)
-                            << " to be removed");
+                "Session " << static_cast<uint32_t>(session_id)
+                           << " to be removed");
     // old version of protocol doesn't support hash
     if (protocol_handler::HASH_ID_NOT_SUPPORTED != hashCode) {
       if (protocol_handler::HASH_ID_WRONG == hashCode ||
           session_key != hashCode) {
         LOGGER_WARN(logger_,
-                     "Wrong hash_id for session "
-                         << static_cast<uint32_t>(session_id));
+                    "Wrong hash_id for session "
+                        << static_cast<uint32_t>(session_id));
         return 0;
       }
     }
     if (!connection->RemoveSession(session_id)) {
       LOGGER_WARN(logger_,
-                   "Couldn't remove session "
-                       << static_cast<uint32_t>(session_id));
+                  "Couldn't remove session "
+                      << static_cast<uint32_t>(session_id));
       return 0;
     }
   } else {
     LOGGER_INFO(logger_,
-                 "Service " << static_cast<uint32_t>(service_type)
-                            << " to be removed");
+                "Service " << static_cast<uint32_t>(service_type)
+                           << " to be removed");
     if (!connection->RemoveService(session_id, service_type)) {
       LOGGER_WARN(logger_,
-                   "Couldn't remove service "
-                       << static_cast<uint32_t>(service_type));
+                  "Couldn't remove service "
+                      << static_cast<uint32_t>(service_type));
       return 0;
     }
   }
@@ -444,14 +443,14 @@ uint32_t ConnectionHandlerImpl::KeyFromPair(
     uint8_t session_id) const {
   const uint32_t key = connection_handle | (session_id << 16);
   LOGGER_DEBUG(logger_,
-                "Key for ConnectionHandle:"
-                    << static_cast<uint32_t>(connection_handle)
-                    << " Session:" << static_cast<uint32_t>(session_id)
-                    << " is: " << static_cast<uint32_t>(key));
+               "Key for ConnectionHandle:"
+                   << static_cast<uint32_t>(connection_handle)
+                   << " Session:" << static_cast<uint32_t>(session_id)
+                   << " is: " << static_cast<uint32_t>(key));
   if (protocol_handler::HASH_ID_WRONG == key) {
     LOGGER_ERROR(logger_,
-                  "Connection key is WRONG_HASH_ID "
-                  "(session id shall be greater 0)");
+                 "Connection key is WRONG_HASH_ID "
+                 "(session id shall be greater 0)");
   }
   return key;
 }
@@ -491,8 +490,8 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
   const SessionMap session_map = connection.session_map();
   if (0 == session_id || session_map.end() == session_map.find(session_id)) {
     LOGGER_ERROR(logger_,
-                  "Session not found in connection: "
-                      << static_cast<int32_t>(conn_handle));
+                 "Session not found in connection: "
+                     << static_cast<int32_t>(conn_handle));
     return error_result;
   }
 
@@ -512,8 +511,8 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
   }
 
   LOGGER_INFO(logger_,
-               "Connection " << static_cast<int32_t>(conn_handle) << " has "
-                             << session_map.size() << " sessions.");
+              "Connection " << static_cast<int32_t>(conn_handle) << " has "
+                            << session_map.size() << " sessions.");
   return 0;
 }
 
@@ -791,7 +790,7 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
       connection_list_itr->second->RemoveSession(session_id);
     } else {
       LOGGER_ERROR(logger_,
-                    "Connection with id: " << connection_id << " not found");
+                   "Connection with id: " << connection_id << " not found");
       return;
     }
   }
@@ -822,8 +821,8 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
   }
 
   LOGGER_DEBUG(logger_,
-                "Session with id: " << session_id
-                                    << " has been closed successfully");
+               "Session with id: " << session_id
+                                   << " has been closed successfully");
 }
 
 void ConnectionHandlerImpl::CloseConnectionSessions(
@@ -853,7 +852,7 @@ void ConnectionHandlerImpl::CloseConnectionSessions(
       }
     } else {
       LOGGER_ERROR(logger_,
-                    "Connection with id: " << connection_id << " not found");
+                   "Connection with id: " << connection_id << " not found");
       return;
     }
   }
@@ -864,8 +863,8 @@ void ConnectionHandlerImpl::CloseConnectionSessions(
   session_id_vector.clear();
 
   LOGGER_DEBUG(logger_,
-                "All sessions for connection with id: "
-                    << connection_id << " have been closed successfully");
+               "All sessions for connection with id: "
+                   << connection_id << " have been closed successfully");
 }
 
 void ConnectionHandlerImpl::SendEndService(uint32_t key, uint8_t service_type) {
@@ -926,8 +925,8 @@ void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key,
 void ConnectionHandlerImpl::OnConnectionEnded(
     const transport_manager::ConnectionUID connection_id) {
   LOGGER_INFO(logger_,
-               "Delete Connection: " << static_cast<int32_t>(connection_id)
-                                     << " from the list.");
+              "Delete Connection: " << static_cast<int32_t>(connection_id)
+                                    << " from the list.");
   connection_list_lock_.AcquireForWriting();
   ConnectionList::iterator itr = connection_list_.find(connection_id);
   if (connection_list_.end() == itr) {

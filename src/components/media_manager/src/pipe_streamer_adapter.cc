@@ -39,13 +39,18 @@ CREATE_LOGGERPTR_GLOBAL(logger, "PipeStreamerAdapter")
 
 PipeStreamerAdapter::PipeStreamerAdapter(const std::string& named_pipe_path,
                                          const std::string& app_storage_folder)
-    : StreamerAdapter(new PipeStreamer(this, named_pipe_path, app_storage_folder)) {}
+    : StreamerAdapter(
+          new PipeStreamer(this, named_pipe_path, app_storage_folder)) {}
 
 PipeStreamerAdapter::~PipeStreamerAdapter() {}
 
 PipeStreamerAdapter::PipeStreamer::PipeStreamer(
-    PipeStreamerAdapter* const adapter, const std::string& named_pipe_path, const std::string& app_storage_folder)
-    : Streamer(adapter), pipe_(named_pipe_path), app_storage_folder_(app_storage_folder) {}
+    PipeStreamerAdapter* const adapter,
+    const std::string& named_pipe_path,
+    const std::string& app_storage_folder)
+    : Streamer(adapter)
+    , pipe_(named_pipe_path)
+    , app_storage_folder_(app_storage_folder) {}
 
 PipeStreamerAdapter::PipeStreamer::~PipeStreamer() {}
 

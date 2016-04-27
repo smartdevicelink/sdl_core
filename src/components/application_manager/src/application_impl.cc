@@ -114,7 +114,6 @@ ApplicationImpl::ApplicationImpl(
           "AudioStreamSuspend",
           new ::timer::TimerTaskImpl<ApplicationImpl>(
               this, &ApplicationImpl::OnAudioStreamSuspend)) {
-
   cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] =
       std::make_pair(date_time::DateTime::getCurrentTime(), 0);
   cmd_number_to_time_limits_[mobile_apis::FunctionID::GetVehicleDataID] =
@@ -141,7 +140,6 @@ ApplicationImpl::ApplicationImpl(
       profile::Profile::instance()->video_data_stopped_timeout();
   audio_stream_suspend_timeout_ =
       profile::Profile::instance()->audio_data_stopped_timeout();
-
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -209,7 +207,7 @@ bool ApplicationImpl::IsAudioApplication() const {
 void ApplicationImpl::SetRegularState(HmiStatePtr state) {
   LOGGER_AUTO_TRACE(logger_);
   state_.AddState(state);
-    }
+}
 void ApplicationImpl::RemovePostponedState() {
   LOGGER_AUTO_TRACE(logger_);
   state_.RemoveState(HmiState::STATE_ID_POSTPONED);
@@ -442,15 +440,15 @@ void ApplicationImpl::StopStreaming(
 void ApplicationImpl::StopNaviStreaming() {
   LOGGER_AUTO_TRACE(logger_);
   video_stream_suspend_timer_.Stop();
-      MessageHelper::SendNaviStopStream(app_id());
-      set_video_streaming_approved(false);
-      set_video_stream_retry_number(0);
-    }
+  MessageHelper::SendNaviStopStream(app_id());
+  set_video_streaming_approved(false);
+  set_video_stream_retry_number(0);
+}
 void ApplicationImpl::StopAudioStreaming() {
   LOGGER_AUTO_TRACE(logger_);
   audio_stream_suspend_timer_.Stop();
-      MessageHelper::SendAudioStopStream(app_id());
-      set_audio_streaming_approved(false);
+  MessageHelper::SendAudioStopStream(app_id());
+  set_audio_streaming_approved(false);
   set_audio_stream_retry_number(0);
 }
 
@@ -760,7 +758,8 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
           cmd_number_to_time_limits_.find(cmd_id);
       // If no command with cmd_id had been executed yet, just add to limits
       if (cmd_number_to_time_limits_.end() == it) {
-        cmd_number_to_time_limits_[cmd_id] = std::make_pair(current, dummy_limit);
+        cmd_number_to_time_limits_[cmd_id] =
+            std::make_pair(current, dummy_limit);
         return false;
       }
 
@@ -819,8 +818,8 @@ void ApplicationImpl::UpdateHash() {
 
 void ApplicationImpl::CleanupFiles() {
   profile::Profile* profile = profile::Profile::instance();
-  std::string directory_name = file_system::ConcatPath(
-      profile->app_storage_folder(), folder_name());
+  std::string directory_name =
+      file_system::ConcatPath(profile->app_storage_folder(), folder_name());
 
   if (file_system::DirectoryExists(directory_name)) {
     std::vector<std::string> files = file_system::ListFiles(directory_name);

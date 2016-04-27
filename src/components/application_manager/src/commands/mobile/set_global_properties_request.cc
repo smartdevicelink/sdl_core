@@ -86,8 +86,8 @@ void SetGlobalPropertiesRequest::Run() {
     verification_result = MessageHelper::VerifyImage(
         (*message_)[strings::msg_params][strings::menu_icon], app);
     if (mobile_apis::Result::SUCCESS != verification_result) {
-      LOGGER_ERROR(
-          logger_, "MessageHelper::VerifyImage return " << verification_result);
+      LOGGER_ERROR(logger_,
+                   "MessageHelper::VerifyImage return " << verification_result);
       SendResponse(false, verification_result);
       return;
     }
@@ -122,7 +122,7 @@ void SetGlobalPropertiesRequest::Run() {
   // check VR params
   if (is_vr_help_title_present ^ is_vr_help_present) {
     LOGGER_ERROR(logger_,
-                  "Reject because of vr_help or vr_help_title only provided");
+                 "Reject because of vr_help or vr_help_title only provided");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
@@ -131,12 +131,11 @@ void SetGlobalPropertiesRequest::Run() {
 
     if (!CheckVrHelpItemsOrder(msg_params[strings::vr_help])) {
       LOGGER_ERROR(logger_,
-                    "VR Help Items contains nonsequential positions"
-                        << " (e.g. [1,2,4]) or not started from 1");
+                   "VR Help Items contains nonsequential positions"
+                       << " (e.g. [1,2,4]) or not started from 1");
       SendResponse(false, mobile_apis::Result::REJECTED);
       return;
     }
-
 
     smart_objects::SmartObject params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -167,7 +166,7 @@ void SetGlobalPropertiesRequest::Run() {
     if (params.empty()) {
       LOGGER_DEBUG(logger_, "No UI info provided");
     } else {
-    params[strings::app_id] = app->app_id();
+      params[strings::app_id] = app->app_id();
       SendUIRequest(params, true);
     }
   }
@@ -207,12 +206,11 @@ bool SetGlobalPropertiesRequest::CheckVrHelpItemsOrder(
     // Elements shall start from 1 and increment one by one
     if (position != (j + 1)) {
       LOGGER_ERROR(logger_,
-                    "VR help items order is wrong"
-                        << " at " << j << ", position value:" << position);
-    return false;
-  }
-
+                   "VR help items order is wrong"
+                       << " at " << j << ", position value:" << position);
+      return false;
     }
+  }
 
   return true;
 }

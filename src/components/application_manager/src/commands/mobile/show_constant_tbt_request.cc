@@ -229,8 +229,7 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
     str = (*message_)[strings::msg_params][strings::next_turn_icon]
                      [strings::value].asCharArray();
     if (!CheckSyntax(str)) {
-      LOGGER_ERROR(logger_,
-                    "Invalid next_turn_icon value syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid next_turn_icon value syntax check failed");
       return true;
     }
   }
@@ -267,8 +266,7 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
     str =
         (*message_)[strings::msg_params][strings::total_distance].asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
-      LOGGER_ERROR(logger_,
-                    "Invalid total_distance value syntax check failed");
+      LOGGER_ERROR(logger_, "Invalid total_distance value syntax check failed");
       return true;
     }
   }

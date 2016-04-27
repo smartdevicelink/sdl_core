@@ -59,7 +59,8 @@ void resumption::LastState::SaveToFileSystem() {
   const std::vector<uint8_t> char_vector_pdata(str.begin(), str.end());
 
   DCHECK(file_system::CreateDirectoryRecursively(app_storage_folder_));
-  LOGGER_INFO(logger_, "LastState::SaveToFileSystem " << app_info_storage_ << str);
+  LOGGER_INFO(logger_,
+              "LastState::SaveToFileSystem " << app_info_storage_ << str);
   DCHECK(file_system::Write(app_info_storage_, char_vector_pdata));
 }
 
@@ -70,7 +71,8 @@ void resumption::LastState::LoadFromFileSystem() {
 
   if (!result) {
     LOGGER_WARN(logger_,
-                "Failed to load last state. Cannot read file " << app_info_storage_);
+                "Failed to load last state. Cannot read file "
+                    << app_info_storage_);
     return;
   }
 

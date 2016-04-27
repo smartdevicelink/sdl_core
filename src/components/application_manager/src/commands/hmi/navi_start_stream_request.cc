@@ -110,8 +110,8 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
       if (hmi_apis::Common_Result::REJECTED == code) {
         LOGGER_INFO(logger_, "StartStream response REJECTED ");
         SendRequest();
-      break;
-    }
+        break;
+      }
     }
     default: {
       LOGGER_ERROR(logger_, "Received unknown event" << event.id());
@@ -144,8 +144,8 @@ void NaviStartStreamRequest::RetryStartSession() {
   }
   if (app->video_streaming_approved()) {
     LOGGER_INFO(logger_,
-                 "NaviStartStream retry sequence stopped. "
-                     << "SUCCESS received");
+                "NaviStartStream retry sequence stopped. "
+                    << "SUCCESS received");
     app->set_video_stream_retry_number(0);
     return;
   }

@@ -99,12 +99,12 @@ class MockCacheManagerInterface : public CacheManagerInterface {
   MOCK_CONST_METHOD1(CanAppKeepContext, bool(const std::string& app_id));
   MOCK_CONST_METHOD1(CanAppStealFocus, bool(const std::string& app_id));
   MOCK_CONST_METHOD2(GetDefaultHMI,
-               bool(const std::string& app_id, std::string& default_hmi));
+                     bool(const std::string& app_id, std::string& default_hmi));
   MOCK_METHOD0(ResetUserConsent, bool());
   MOCK_CONST_METHOD3(GetUserPermissionsForDevice,
-               bool(const std::string& device_id,
-                    StringArray& consented_groups,
-                    StringArray& disallowed_groups));
+                     bool(const std::string& device_id,
+                          StringArray& consented_groups,
+                          StringArray& disallowed_groups));
   MOCK_METHOD3(GetPermissionsForApp,
                bool(const std::string& device_id,
                     const std::string& app_id,

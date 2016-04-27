@@ -109,7 +109,6 @@ class PolicyManagerImplTest : public ::testing::Test {
     manager->set_listener(&listener);
     cache_manager = new MockCacheManagerInterface();
     manager->set_cache_manager(cache_manager);
-
   }
 
   void TearDown() OVERRIDE {
@@ -164,7 +163,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     hmi_level.assign(levels, levels + sizeof(levels) / sizeof(levels[0]));
     srand(time(NULL));
     index = rand() % 3;
-}
+  }
 
   std::vector<std::string> JsonToVectorString(
       const Json::Value& PTU_request_types) {
@@ -218,7 +217,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     // Check number of RT in PTU and PT now are equal
     ASSERT_EQ(PTU_request_types_size - invalid_rt_number,
               PT_request_types.size());
-}
+  }
 
   void AddRTtoAppSectionPT(const std::string& update_file_name,
                            const std::string& section_name,
@@ -250,7 +249,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
     ::policy::AppPermissions permissions =
         manager->GetAppPermissionsChanges(section_name);
     EXPECT_TRUE(permissions.requestTypeChanged);
-}
+  }
 
   std::vector<policy_table::RequestType> PushRequestTypesToContainer(
       const std::vector<std::string>& temp_result) {
@@ -317,7 +316,7 @@ class PolicyManagerImplTest2 : public ::testing::Test {
   void TearDown() OVERRIDE {
     profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
     delete manager;
-}
+  }
 };
 
 Json::Value CreatePTforLoad() {

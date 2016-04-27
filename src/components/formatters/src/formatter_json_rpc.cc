@@ -120,7 +120,8 @@ bool FormatterJsonRpc::ToString(const NsSmartObjects::SmartObject& obj,
               if (NsSmartObjects::SmartType_Integer != code.getType()) {
                 result = false;
               } else {
-                root[kResult][kCode] = utils::ConvertInt64ToLongLongInt(code.asInt());
+                root[kResult][kCode] =
+                    utils::ConvertInt64ToLongLongInt(code.asInt());
               }
             }
           } else if (kNotification == message_type) {
@@ -136,7 +137,8 @@ bool FormatterJsonRpc::ToString(const NsSmartObjects::SmartObject& obj,
             if (NsSmartObjects::SmartType_Integer != code.getType()) {
               result = false;
             } else {
-              root[kError][kCode] = utils::ConvertInt64ToLongLongInt(code.asInt());
+              root[kError][kCode] =
+                  utils::ConvertInt64ToLongLongInt(code.asInt());
             }
           }
         }

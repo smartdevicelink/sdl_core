@@ -100,7 +100,8 @@ void TcpTransportAdapter::Store() const {
         int port = tcp_device->GetApplicationPort(app_handle);
         if (port != -1) {  // don't want to store incoming applications
           JsonValue application_dictionary;
-          application_dictionary["port"] = utils::ConvertInt64ToLongLongInt(port);
+          application_dictionary["port"] =
+              utils::ConvertInt64ToLongLongInt(port);
           applications_dictionary.Append(application_dictionary);
         }
       }

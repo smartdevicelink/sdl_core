@@ -350,8 +350,7 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   }
   if (RESULT_NO_CHANGES == result) {
     LOGGER_INFO(logger_,
-                 "Permissions for application:" << app_id
-                                                << " wasn't changed.");
+                "Permissions for application:" << app_id << " wasn't changed.");
     return true;
   }
 

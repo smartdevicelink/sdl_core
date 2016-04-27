@@ -36,7 +36,7 @@
 #include <string>
 #include "protocol/service_type.h"
 #include "media_manager/media_manager_settings.h"
-namespace media_manager {	
+namespace media_manager {
 
 class MediaManager {
  public:

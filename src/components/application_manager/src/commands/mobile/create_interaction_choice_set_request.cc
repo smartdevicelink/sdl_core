@@ -134,9 +134,9 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
         choice_id_set.insert((*choice_set_it)[strings::choice_id].asInt());
     if (!ins_res.second) {
       LOGGER_ERROR(logger_,
-                    "Choise with ID "
-                        << (*choice_set_it)[strings::choice_id].asInt()
-                        << " already exists");
+                   "Choise with ID "
+                       << (*choice_set_it)[strings::choice_id].asInt()
+                       << " already exists");
       return mobile_apis::Result::INVALID_ID;
     }
 

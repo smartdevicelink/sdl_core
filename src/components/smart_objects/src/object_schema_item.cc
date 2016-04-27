@@ -177,7 +177,7 @@ CObjectSchemaItem::CObjectSchemaItem(const Members& members)
 
 void CObjectSchemaItem::RemoveFakeParams(SmartObject& Object) {
   for (SmartMap::const_iterator it = Object.map_begin();
-      it != Object.map_end();) {
+       it != Object.map_end();) {
     const std::string& key = it->first;
     if (mMembers.end() == mMembers.find(key)
         // FIXME(EZamakhov): Remove illegal usage of filed in AM

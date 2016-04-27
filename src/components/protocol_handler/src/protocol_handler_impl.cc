@@ -33,7 +33,7 @@
 #include "protocol_handler/protocol_handler_impl.h"
 #include <memory.h>
 #include <algorithm>  // std::find
-#include <cctype>  // std::isprint
+#include <cctype>     // std::isprint
 
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/session_observer.h"
@@ -96,9 +96,9 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
   if (message_frequency_time > 0u && message_frequency_count > 0u) {
     message_meter_.set_time_range(message_frequency_time);
     LOGGER_DEBUG(logger_,
-                  "Frequency meter is enabled ( "
-                      << message_frequency_count << " per "
-                      << message_frequency_time << " mSecond)");
+                 "Frequency meter is enabled ( "
+                     << message_frequency_count << " per "
+                     << message_frequency_time << " mSecond)");
   } else {
     LOGGER_WARN(logger_, "Frequency meter is disabled");
   }
@@ -112,9 +112,9 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
     if (malformed_frequency_time > 0u && malformed_frequency_count > 0u) {
       malformed_message_meter_.set_time_range(malformed_frequency_time);
       LOGGER_DEBUG(logger_,
-                    "Malformed frequency meter is enabled ( "
-                        << malformed_frequency_count << " per "
-                        << malformed_frequency_time << " mSecond)");
+                   "Malformed frequency meter is enabled ( "
+                       << malformed_frequency_count << " per "
+                       << malformed_frequency_time << " mSecond)");
     } else {
       LOGGER_WARN(logger_, "Malformed frequency meter is disabled");
     }
@@ -132,8 +132,8 @@ ProtocolHandlerImpl::~ProtocolHandlerImpl() {
   sync_primitives::AutoLock lock(protocol_observers_lock_);
   if (!protocol_observers_.empty()) {
     LOGGER_WARN(logger_,
-                 "Not all observers have unsubscribed"
-                 " from ProtocolHandlerImpl");
+                "Not all observers have unsubscribed"
+                " from ProtocolHandlerImpl");
   }
 }
 
@@ -162,12 +162,12 @@ void set_hash_id(uint32_t hash_id, protocol_handler::ProtocolPacket& packet) {
   }
   if (packet.protocol_version() < PROTOCOL_VERSION_2) {
     LOGGER_DEBUG(logger_,
-                  "Packet needs no hash data (protocol version less 2)");
+                 "Packet needs no hash data (protocol version less 2)");
     return;
   }
   LOGGER_DEBUG(logger_,
-                "Set hash_id 0x" << std::hex << hash_id << " to the packet 0x"
-                                 << &packet);
+               "Set hash_id 0x" << std::hex << hash_id << " to the packet 0x"
+                                << &packet);
   // Hash id shall be 4 bytes according Ford Protocol v8
   DCHECK(sizeof(hash_id) == 4);
   const uint32_t hash_id_be = LE_TO_BE32(hash_id);
@@ -202,11 +202,11 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
       impl::RawFordMessageToMobile(ptr, false));
 
   LOGGER_DEBUG(logger_,
-                "SendStartSessionAck() for connection "
-                    << connection_id << " for service_type "
-                    << static_cast<int32_t>(service_type) << " session_id "
-                    << static_cast<int32_t>(session_id) << " protection "
-                    << (protection ? "ON" : "OFF"));
+               "SendStartSessionAck() for connection "
+                   << connection_id << " for service_type "
+                   << static_cast<int32_t>(service_type) << " session_id "
+                   << static_cast<int32_t>(session_id) << " protection "
+                   << (protection ? "ON" : "OFF"));
 }
 
 void ProtocolHandlerImpl::SendStartSessionNAck(ConnectionID connection_id,
@@ -230,10 +230,10 @@ void ProtocolHandlerImpl::SendStartSessionNAck(ConnectionID connection_id,
       impl::RawFordMessageToMobile(ptr, false));
 
   LOGGER_DEBUG(logger_,
-                "SendStartSessionNAck() for connection "
-                    << connection_id << " for service_type "
-                    << static_cast<int32_t>(service_type) << " session_id "
-                    << static_cast<int32_t>(session_id));
+               "SendStartSessionNAck() for connection "
+                   << connection_id << " for service_type "
+                   << static_cast<int32_t>(service_type) << " session_id "
+                   << static_cast<int32_t>(session_id));
 }
 
 void ProtocolHandlerImpl::SendEndSessionNAck(ConnectionID connection_id,
@@ -257,10 +257,10 @@ void ProtocolHandlerImpl::SendEndSessionNAck(ConnectionID connection_id,
       impl::RawFordMessageToMobile(ptr, false));
 
   LOGGER_DEBUG(logger_,
-                "SendEndSessionNAck() for connection "
-                    << connection_id << " for service_type "
-                    << static_cast<int32_t>(service_type) << " session_id "
-                    << static_cast<int32_t>(session_id));
+               "SendEndSessionNAck() for connection "
+                   << connection_id << " for service_type "
+                   << static_cast<int32_t>(service_type) << " session_id "
+                   << static_cast<int32_t>(session_id));
 }
 
 SessionObserver& ProtocolHandlerImpl::get_session_observer() {
@@ -288,10 +288,10 @@ void ProtocolHandlerImpl::SendEndSessionAck(ConnectionID connection_id,
       impl::RawFordMessageToMobile(ptr, false));
 
   LOGGER_DEBUG(logger_,
-                "SendEndSessionAck() for connection "
-                    << connection_id << " for service_type "
-                    << static_cast<int32_t>(service_type) << " session_id "
-                    << static_cast<int32_t>(session_id));
+               "SendEndSessionAck() for connection "
+                   << connection_id << " for service_type "
+                   << static_cast<int32_t>(service_type) << " session_id "
+                   << static_cast<int32_t>(session_id));
 }
 
 void ProtocolHandlerImpl::SendEndServicePrivate(int32_t connection_id,
@@ -316,9 +316,9 @@ void ProtocolHandlerImpl::SendEndServicePrivate(int32_t connection_id,
     raw_ford_messages_to_mobile_.PostMessage(
         impl::RawFordMessageToMobile(ptr, false));
     LOGGER_DEBUG(logger_,
-                  "SendEndSession() for connection "
-                      << connection_id << " for service_type " << service_type
-                      << " session_id " << static_cast<int32_t>(session_id));
+                 "SendEndSession() for connection "
+                     << connection_id << " for service_type " << service_type
+                     << " session_id " << static_cast<int32_t>(session_id));
   } else {
     LOGGER_WARN(
         logger_,
@@ -386,9 +386,8 @@ void ProtocolHandlerImpl::SendHeartBeat(int32_t connection_id,
         impl::RawFordMessageToMobile(ptr, false));
     LOGGER_DEBUG(logger_, "SendHeartBeat finished successfully");
   } else {
-    LOGGER_WARN(
-        logger_,
-        "SendHeartBeat is failed connection or session does not exist");
+    LOGGER_WARN(logger_,
+                "SendHeartBeat is failed connection or session does not exist");
   }
 }
 
@@ -400,7 +399,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
   LOGGER_AUTO_TRACE(logger_);
   if (!message) {
     LOGGER_ERROR(logger_,
-                  "Invalid message for sending to mobile app is received.");
+                 "Invalid message for sending to mobile app is received.");
     return;
   }
 
@@ -436,7 +435,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
     if (max_block_size > 0) {
       frame_size = max_block_size;
       LOGGER_DEBUG(logger_,
-                    "Security set new optimal packet size " << frame_size);
+                   "Security set new optimal packet size " << frame_size);
     } else {
       LOGGER_ERROR(
           logger_,
@@ -456,12 +455,12 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
                                                 final_message);
     if (result != RESULT_OK) {
       LOGGER_ERROR(logger_,
-                    "ProtocolHandler failed to send single frame message.");
+                   "ProtocolHandler failed to send single frame message.");
     }
   } else {
     LOGGER_DEBUG(logger_,
-                  "Message will be sent in multiple frames; max frame size is "
-                      << frame_size);
+                 "Message will be sent in multiple frames; max frame size is "
+                     << frame_size);
 
     RESULT_CODE result = SendMultiFrameMessage(connection_handle,
                                                sessionID,
@@ -473,7 +472,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
                                                final_message);
     if (result != RESULT_OK) {
       LOGGER_ERROR(logger_,
-                    "ProtocolHandler failed to send multiframe messages.");
+                   "ProtocolHandler failed to send multiframe messages.");
     }
   }
 #ifdef TELEMETRY_MONITOR
@@ -493,16 +492,16 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
 
   if (!tm_message) {
     LOGGER_ERROR(logger_,
-                  "Invalid incoming message received in"
-                      << " ProtocolHandler from Transport Manager.");
+                 "Invalid incoming message received in"
+                     << " ProtocolHandler from Transport Manager.");
     return;
   }
 
   const uint32_t connection_key = tm_message->connection_key();
   LOGGER_DEBUG(logger_,
-                "Received data from TM  with connection id "
-                    << connection_key << " msg data_size "
-                    << tm_message->data_size());
+               "Received data from TM  with connection id "
+                   << connection_key << " msg data_size "
+                   << tm_message->data_size());
 
   RESULT_CODE result;
   size_t malformed_occurs = 0u;
@@ -513,8 +512,7 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
   if (result != RESULT_OK) {
     if (result == RESULT_MALFORMED_OCCURS) {
       LOGGER_WARN(logger_,
-                   "Malformed message occurs, connection id "
-                       << connection_key);
+                  "Malformed message occurs, connection id " << connection_key);
       if (!get_settings().malformed_message_filtering()) {
         LOGGER_DEBUG(logger_, "Malformed message filterign disabled");
         session_observer_.OnMalformedMessageCallback(connection_key);
@@ -632,10 +630,10 @@ void ProtocolHandlerImpl::OnTMMessageSendFailed(
   DCHECK_OR_RETURN_VOID(message);
   // TODO(PV): implement
   LOGGER_ERROR(logger_,
-                "Sending message " << message->data_size()
-                                   << "bytes failed, connection_key "
-                                   << message->connection_key()
-                                   << "Error_text: " << error.text());
+               "Sending message " << message->data_size()
+                                  << "bytes failed, connection_key "
+                                  << message->connection_key()
+                                  << "Error_text: " << error.text());
 }
 
 void ProtocolHandlerImpl::OnConnectionEstablished(
@@ -668,19 +666,18 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
   }
 #endif  // ENABLE_SECURITY
 
-  LOGGER_DEBUG(
-      logger_,
-      "Packet to be sent: "
-          << ConvertPacketDataToString(packet->data(), packet->data_size())
-          << " of size: " << packet->data_size());
+  LOGGER_DEBUG(logger_,
+               "Packet to be sent: " << ConvertPacketDataToString(
+                                            packet->data(), packet->data_size())
+                                     << " of size: " << packet->data_size());
   const RawMessagePtr message_to_send = packet->serializePacket();
   if (!message_to_send) {
     LOGGER_ERROR(logger_, "Serialization error");
     return RESULT_FAIL;
   }
   LOGGER_DEBUG(logger_,
-                "Message to send with connection id "
-                    << static_cast<int>(packet->connection_id()));
+               "Message to send with connection id "
+                   << static_cast<int>(packet->connection_id()));
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_.SendMessageToDevice(message_to_send)) {
@@ -729,8 +726,8 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   LOGGER_AUTO_TRACE(logger_);
 
   LOGGER_DEBUG(logger_,
-                " data size " << data_size << " max_frame_size "
-                              << max_frame_size);
+               " data size " << data_size << " max_frame_size "
+                             << max_frame_size);
 
   // remainder of last frame
   const size_t lastframe_remainder = data_size % max_frame_size;
@@ -743,8 +740,8 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
                               (lastframe_remainder > 0 ? 1 : 0);
 
   LOGGER_DEBUG(logger_,
-                "Data " << data_size << " bytes in " << frames_count
-                        << " frames with last frame size " << lastframe_size);
+               "Data " << data_size << " bytes in " << frames_count
+                       << " frames with last frame size " << lastframe_size);
 
   DCHECK(max_frame_size >= FIRST_FRAME_DATA_SIZE);
   DCHECK(FIRST_FRAME_DATA_SIZE >= 8);
@@ -901,15 +898,15 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
     case FRAME_DATA_HEART_BEAT_ACK: {
       LOGGER_TRACE(logger_, "FrameData Heartbeat ACK");
       LOGGER_DEBUG(logger_,
-                    "Received Heartbeat ACK from mobile,"
-                    " connection: "
-                        << packet->connection_id());
+                   "Received Heartbeat ACK from mobile,"
+                   " connection: "
+                       << packet->connection_id());
       return RESULT_OK;
     }
     default:
       LOGGER_WARN(logger_,
-                   "Control message of type "
-                       << static_cast<int>(packet->frame_data()) << " ignored");
+                  "Control message of type "
+                      << static_cast<int>(packet->frame_data()) << " ignored");
       return RESULT_OK;
   }
   return RESULT_OK;
@@ -917,8 +914,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
 
 uint32_t get_hash_id(const ProtocolPacket& packet) {
   if (packet.protocol_version() < PROTOCOL_VERSION_2) {
-    LOGGER_DEBUG(logger_,
-                  "Packet without hash data (protocol version less 2)");
+    LOGGER_DEBUG(logger_, "Packet without hash data (protocol version less 2)");
     return HASH_ID_NOT_SUPPORTED;
   }
   if (packet.data_size() < 4) {
@@ -952,8 +948,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
     message_counters_.erase(current_session_id);
   } else {
     LOGGER_WARN(logger_,
-                 "Refused to end session " << static_cast<int>(service_type)
-                                           << " type.");
+                "Refused to end session " << static_cast<int>(service_type)
+                                          << " type.");
     SendEndSessionNAck(connection_id,
                        current_session_id,
                        packet.protocol_version(),
@@ -1089,8 +1085,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
 
   if (0 == session_id) {
     LOGGER_WARN(logger_,
-                 "Refused by session_observer to create service "
-                     << static_cast<int32_t>(service_type) << " type.");
+                "Refused by session_observer to create service "
+                    << static_cast<int32_t>(service_type) << " type.");
     SendStartSessionNAck(connection_id,
                          packet.session_id(),
                          protocol_version,
@@ -1149,8 +1145,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
       }
     }
     LOGGER_DEBUG(logger_,
-                  "Protection establishing for connection "
-                      << connection_key << " is in progress");
+                 "Protection establishing for connection "
+                     << connection_key << " is in progress");
     return RESULT_OK;
   }
 #endif  // ENABLE_SECURITY
@@ -1168,8 +1164,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
     const ProtocolPacket& packet) {
   const ConnectionID connection_id = packet.connection_id();
   LOGGER_DEBUG(logger_,
-                "Sending heart beat acknowledgment for connection "
-                    << connection_id);
+               "Sending heart beat acknowledgment for connection "
+                   << connection_id);
   uint8_t protocol_version;
   if (session_observer_.ProtocolVersionUsed(
           connection_id, packet.session_id(), protocol_version)) {
@@ -1205,8 +1201,8 @@ void ProtocolHandlerImpl::PopValideAndExpirateMultiframes() {
     const uint32_t connection_key = session_observer_.KeyFromPair(
         frame->connection_id(), frame->session_id());
     LOGGER_DEBUG(logger_,
-                  "Result frame" << frame << "for connection "
-                                 << connection_key);
+                 "Result frame" << frame << "for connection "
+                                << connection_key);
     const RawMessagePtr rawMessage(new RawMessage(connection_key,
                                                   frame->protocol_version(),
                                                   frame->data(),
@@ -1235,11 +1231,11 @@ bool ProtocolHandlerImpl::TrackMessage(const uint32_t& connection_key) {
     const size_t message_frequency =
         message_meter_.TrackMessage(connection_key);
     LOGGER_DEBUG(logger_,
-                  "Frequency of " << connection_key << " is "
-                                  << message_frequency);
+                 "Frequency of " << connection_key << " is "
+                                 << message_frequency);
     if (message_frequency > frequency_count) {
       LOGGER_WARN(logger_,
-                   "Frequency of " << connection_key << " is marked as high.");
+                  "Frequency of " << connection_key << " is marked as high.");
       session_observer_.OnApplicationFloodCallBack(connection_key);
       message_meter_.RemoveIdentifier(connection_key);
       return true;
@@ -1258,13 +1254,13 @@ bool ProtocolHandlerImpl::TrackMalformedMessage(const uint32_t& connection_key,
     const size_t malformed_message_frequency =
         malformed_message_meter_.TrackMessages(connection_key, count);
     LOGGER_DEBUG(logger_,
-                  "Malformed frequency of " << connection_key << " is "
-                                            << malformed_message_frequency);
+                 "Malformed frequency of " << connection_key << " is "
+                                           << malformed_message_frequency);
     if (!get_settings().malformed_message_filtering() ||
         malformed_message_frequency > malformed_frequency_count) {
       LOGGER_WARN(logger_,
-                   "Malformed frequency of " << connection_key
-                                             << " is marked as high.");
+                  "Malformed frequency of " << connection_key
+                                            << " is marked as high.");
       session_observer_.OnMalformedMessageCallback(connection_key);
       malformed_message_meter_.RemoveIdentifier(connection_key);
       return true;
@@ -1305,19 +1301,19 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageFromMobile message) {
     PopValideAndExpirateMultiframes();
   } else {
     LOGGER_WARN(logger_,
-                 "handleMessagesFromMobileApp() - incorrect or NULL data");
+                "handleMessagesFromMobileApp() - incorrect or NULL data");
   }
 }
 
 void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile message) {
   LOGGER_DEBUG(logger_,
-                "Message to mobile app: connection id "
-                    << static_cast<int>(message->connection_id())
-                    << ";"
-                       " dataSize: " << message->data_size()
-                    << " ;"
-                       " protocolVersion "
-                    << static_cast<int>(message->protocol_version()));
+               "Message to mobile app: connection id "
+                   << static_cast<int>(message->connection_id())
+                   << ";"
+                      " dataSize: " << message->data_size()
+                   << " ;"
+                      " protocolVersion "
+                   << static_cast<int>(message->protocol_version()));
 
   if (message.is_final) {
     sessions_last_message_id_.insert(std::pair<uint8_t, uint32_t>(
@@ -1378,8 +1374,8 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
     return RESULT_OK;
   }
   LOGGER_DEBUG(logger_,
-                "Encrypted " << packet->data_size() << " bytes to "
-                             << out_data_size << " bytes");
+               "Encrypted " << packet->data_size() << " bytes to "
+                            << out_data_size << " bytes");
   DCHECK(out_data);
   DCHECK(out_data_size);
   packet->set_protection_flag(true);
@@ -1406,7 +1402,7 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
   if (!context || !context->IsInitCompleted()) {
     const std::string error_text("Fail decryption for unprotected service ");
     LOGGER_ERROR(logger_,
-                  error_text << static_cast<int>(packet->service_type()));
+                 error_text << static_cast<int>(packet->service_type()));
     security_manager_->SendInternalError(
         connection_key,
         security_manager::SecurityManager::ERROR_SERVICE_NOT_PROTECTED,
@@ -1431,8 +1427,8 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
     return RESULT_ENCRYPTION_FAILED;
   }
   LOGGER_DEBUG(logger_,
-                "Decrypted " << packet->data_size() << " bytes to "
-                             << out_data_size << " bytes");
+               "Decrypted " << packet->data_size() << " bytes to "
+                            << out_data_size << " bytes");
   DCHECK(out_data);
   DCHECK(out_data_size);
   packet->set_data(out_data, out_data_size);
@@ -1442,8 +1438,8 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
 
 void ProtocolHandlerImpl::SendFramesNumber(uint32_t connection_key,
                                            int32_t number_of_frames) {
-  LOGGER_DEBUG(
-      logger_, "SendFramesNumber MobileNaviAck for session " << connection_key);
+  LOGGER_DEBUG(logger_,
+               "SendFramesNumber MobileNaviAck for session " << connection_key);
 
   // TODO(EZamakhov): add protocol version check - to avoid send for
   // PROTOCOL_VERSION_1

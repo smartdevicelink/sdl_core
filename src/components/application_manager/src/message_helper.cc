@@ -72,13 +72,17 @@ typedef std::map<std::string, hmi_apis::Common_AppPriority::eType>
 #ifdef SDL_CPP11
 CommonAppPriorityMap app_priority_values = {
     std::make_pair(std::string("NORMAL"), hmi_apis::Common_AppPriority::NORMAL),
-    std::make_pair(std::string("COMMUNICATION"), hmi_apis::Common_AppPriority::COMMUNICATION),
-    std::make_pair(std::string("EMERGENCY"), hmi_apis::Common_AppPriority::EMERGENCY),
-    std::make_pair(std::string("NAVIGATION"), hmi_apis::Common_AppPriority::NAVIGATION),
+    std::make_pair(std::string("COMMUNICATION"),
+                   hmi_apis::Common_AppPriority::COMMUNICATION),
+    std::make_pair(std::string("EMERGENCY"),
+                   hmi_apis::Common_AppPriority::EMERGENCY),
+    std::make_pair(std::string("NAVIGATION"),
+                   hmi_apis::Common_AppPriority::NAVIGATION),
     std::make_pair(std::string("NONE"), hmi_apis::Common_AppPriority::NONE),
-    std::make_pair(std::string("VOICECOM"), hmi_apis::Common_AppPriority::VOICE_COMMUNICATION),
-    std::make_pair(std::string("INVALID_ENUM"), hmi_apis::Common_AppPriority::INVALID_ENUM)
-};
+    std::make_pair(std::string("VOICECOM"),
+                   hmi_apis::Common_AppPriority::VOICE_COMMUNICATION),
+    std::make_pair(std::string("INVALID_ENUM"),
+                   hmi_apis::Common_AppPriority::INVALID_ENUM)};
 #else
 CommonAppPriorityMap create_map() {
   CommonAppPriorityMap app_priority_values;
@@ -1241,7 +1245,7 @@ bool MessageHelper::CreateHMIApplicationStruct(
       session_observer.GetDataOnDeviceID(
           app->device(), &device_name, NULL, &mac_address, &transport_type)) {
     LOGGER_ERROR(logger_,
-                  "Failed to extract information for device " << app->device());
+                 "Failed to extract information for device " << app->device());
   }
 
   message = SmartObject(smart_objects::SmartType_Map);
@@ -2206,7 +2210,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
 
       if (mobile_apis::Result::SUCCESS != verification_result) {
         LOGGER_DEBUG(logger_,
-                      "VerifyImageFiles result:" << verification_result);
+                     "VerifyImageFiles result:" << verification_result);
         return verification_result;  // exit point
       }
     } else {
@@ -2301,8 +2305,8 @@ bool MessageHelper::VerifySoftButtonString(const std::string& str) {
       (std::string::npos != str.find("\\t")) ||
       (std::string::npos == str.find_first_not_of(' '))) {
     LOGGER_ERROR(logger_,
-                  "MessageHelper::VerifySoftButtonString"
-                  "string contains incorrect character");
+                 "MessageHelper::VerifySoftButtonString"
+                 "string contains incorrect character");
     return false;
   }
   return true;

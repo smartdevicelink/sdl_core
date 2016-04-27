@@ -224,7 +224,7 @@ bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
   }
   application->set_is_resuming(true);
   ApplicationManagerImpl::instance()->SetHmiState(application->app_id(),
-                                               hmi_level);
+                                                  hmi_level);
   LOGGER_INFO(logger_,
               "Application with policy id " << application->mobile_app_id()
                                             << " got HMI level " << hmi_level);
@@ -294,7 +294,7 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
       "Resume app_id = " << application->app_id()
                          << " hmi_app_id = " << application->hmi_app_id()
                          << " policy_id = " << application->mobile_app_id()
-                          << " received hash = " << hash);
+                         << " received hash = " << hash);
   SetupDefaultHMILevel(application);
   smart_objects::SmartObject saved_app;
   const std::string& device_mac = application->mac_address();
@@ -350,8 +350,7 @@ void ResumeCtrl::StartAppHmiStateResumption(ApplicationSharedPtr application) {
       CheckAppRestrictions(application, saved_app) &&
       ((0 == ign_off_count) || CheckIgnCycleRestrictions(saved_app));
   if (restore_data_allowed) {
-    LOGGER_INFO(logger_,
-                 "Resume application " << application->mobile_app_id());
+    LOGGER_INFO(logger_, "Resume application " << application->mobile_app_id());
     RestoreAppHMIState(application);
     RemoveApplicationFromSaved(application);
   } else {
@@ -731,13 +730,13 @@ void ResumeCtrl::LoadResumeData() {
       const std::string app_id = application[strings::app_id].asString();
       LOGGER_INFO(logger_, "Data resumption is expired.");
       LOGGER_DEBUG(logger_,
-                    "Resumption data for application "
-                        << app_id << " and device id " << device_id
-                        << " will be dropped.");
+                   "Resumption data for application "
+                       << app_id << " and device id " << device_id
+                       << " will be dropped.");
       resumption_storage_->DropAppDataResumption(device_id, app_id);
       continue;
-     }
-   }
+    }
+  }
 }
 
 void ResumeCtrl::OnAppRegistrationStart(const std::string& policy_app_id,
@@ -749,12 +748,12 @@ void ResumeCtrl::OnAppRegistrationStart(const std::string& policy_app_id,
         "Application is found in resumption "
         "data and will try to resume. Stopping resume data persistent timer");
     StopSavePersistentDataTimer();
-      }
-    }
+  }
+}
 void ResumeCtrl::OnAppRegistrationEnd() {
   LOGGER_AUTO_TRACE(logger_);
   StartSavePersistentDataTimer();
-  }
+}
 bool ResumeCtrl::IsAppDataResumptionExpired(
     const smart_objects::SmartObject& application) const {
   const int32_t max_ign_off_count = 3;

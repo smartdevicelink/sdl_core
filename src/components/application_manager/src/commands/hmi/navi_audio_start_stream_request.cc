@@ -54,7 +54,6 @@ AudioStartStreamRequest::AudioStartStreamRequest(
 
 AudioStartStreamRequest::~AudioStartStreamRequest() {}
 
-
 void AudioStartStreamRequest::Run() {
   LOGGER_AUTO_TRACE(logger_);
 
@@ -112,8 +111,8 @@ void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
       if (hmi_apis::Common_Result::REJECTED == code) {
         LOGGER_INFO(logger_, "StartAudioStream response REJECTED");
         RetryStartSession();
-      break;
-    }
+        break;
+      }
     }
     default: {
       LOGGER_ERROR(logger_, "Received unknown event" << event.id());
@@ -137,7 +136,7 @@ void AudioStartStreamRequest::RetryStartSession() {
           application_id());
   if (!app) {
     LOGGER_ERROR(logger_,
-                  "StartAudioStreamRequest aborted. Application not found");
+                 "StartAudioStreamRequest aborted. Application not found");
     return;
   }
 
@@ -148,8 +147,8 @@ void AudioStartStreamRequest::RetryStartSession() {
 
   if (app->audio_streaming_approved()) {
     LOGGER_INFO(logger_,
-                 "AudioStartStream retry sequence stopped. "
-                     << "SUCCESS received");
+                "AudioStartStream retry sequence stopped. "
+                    << "SUCCESS received");
     app->set_audio_stream_retry_number(0);
     return;
   }
@@ -163,8 +162,8 @@ void AudioStartStreamRequest::RetryStartSession() {
     app->set_audio_stream_retry_number(++curr_retry_number);
   } else {
     LOGGER_DEBUG(logger_,
-                  "Audio start stream retry sequence stopped. "
-                      << "Attempts expired.");
+                 "Audio start stream retry sequence stopped. "
+                     << "Attempts expired.");
 
     ApplicationManagerImpl::instance()->EndNaviServices(app->app_id());
   }

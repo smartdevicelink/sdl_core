@@ -66,8 +66,8 @@ typedef utils::SharedPtr<timer::Timer> TimerSPtr;
 /**
  * @brief Implementation of transport manager.s
  */
-class TransportManagerImpl:
-      public TransportManager,
+class TransportManagerImpl
+    : public TransportManager,
       public RawMessageLoopThread::Handler
 #ifdef TELEMETRY_MONITOR
       ,

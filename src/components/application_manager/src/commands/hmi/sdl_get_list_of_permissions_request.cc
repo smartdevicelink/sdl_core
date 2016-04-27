@@ -52,8 +52,8 @@ void SDLGetListOfPermissionsRequest::Run() {
   application_manager::ApplicationManagerImpl::instance()
       ->GetPolicyHandler()
       .OnGetListOfPermissions(
-      connection_key,
-      (*message_)[strings::params][strings::correlation_id].asUInt());
+          connection_key,
+          (*message_)[strings::params][strings::correlation_id].asUInt());
 }
 
 }  // namespace commands

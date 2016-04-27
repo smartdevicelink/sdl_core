@@ -206,8 +206,7 @@ void UpdateStatusManager::set_exchange_in_progress(bool value) {
 
 void UpdateStatusManager::set_exchange_pending(bool value) {
   sync_primitives::AutoLock lock(exchange_pending_lock_);
-  LOGGER_INFO(logger_,
-               "Exchange pending value is:" << std::boolalpha << value);
+  LOGGER_INFO(logger_, "Exchange pending value is:" << std::boolalpha << value);
   exchange_pending_ = value;
   CheckUpdateStatus();
 }

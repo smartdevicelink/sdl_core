@@ -46,7 +46,7 @@ using timer::Timer;
 class GlobalCounter {
  public:
   GlobalCounter(utils::SharedPtr<StatisticsManager> statistics_manager,
-      GlobalCounterId counter_type);
+                GlobalCounterId counter_type);
   void operator++() const;
 
  private:
@@ -57,8 +57,8 @@ class GlobalCounter {
 class AppCounter {
  public:
   AppCounter(utils::SharedPtr<StatisticsManager> statistics_manager,
-      const std::string& app_id,
-      AppCounterId counter_type);
+             const std::string& app_id,
+             AppCounterId counter_type);
   void operator++() const;
 
  private:
@@ -70,8 +70,8 @@ class AppCounter {
 class AppInfo {
  public:
   AppInfo(utils::SharedPtr<StatisticsManager> statistics_manager,
-      const std::string& app_id,
-      AppInfoId info_type);
+          const std::string& app_id,
+          AppInfoId info_type);
   void Update(const std::string& new_info) const;
 
  private:
@@ -83,9 +83,9 @@ class AppInfo {
 class AppStopwatchImpl : public AppStopwatch {
  public:
   AppStopwatchImpl(utils::SharedPtr<StatisticsManager> statistics_manager,
-      const std::string& app_id);
+                   const std::string& app_id);
   AppStopwatchImpl(utils::SharedPtr<StatisticsManager> statistics_manager,
-      const std::string& app_id,
+                   const std::string& app_id,
                    std::uint32_t timeout);
   void Start(AppStopwatchId stopwatch_type) OVERRIDE;
   void Switch(AppStopwatchId stopwatch_type) OVERRIDE;

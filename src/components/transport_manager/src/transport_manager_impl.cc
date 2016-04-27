@@ -937,9 +937,9 @@ TransportManagerImpl::ConnectionInternal::ConnectionInternal(
     : transport_manager(transport_manager)
     , transport_adapter(transport_adapter)
     , timer(utils::MakeShared<timer::Timer>(
-            "TM DiscRoutine",
-            new ::timer::TimerTaskImpl<ConnectionInternal>(
-                this, &ConnectionInternal::DisconnectFailedRoutine)))
+          "TM DiscRoutine",
+          new ::timer::TimerTaskImpl<ConnectionInternal>(
+              this, &ConnectionInternal::DisconnectFailedRoutine)))
     , shut_down(false)
     , device_handle_(device_handle)
     , messages_count(0) {

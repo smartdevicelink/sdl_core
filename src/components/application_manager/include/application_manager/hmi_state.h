@@ -170,6 +170,7 @@ class HmiState {
   mobile_apis::HMILevel::eType hmi_level_;
   mobile_apis::AudioStreamingState::eType audio_streaming_state_;
   mobile_apis::SystemContext::eType system_context_;
+
  protected:
   /**
    * @brief is_navi_app check if app is navi

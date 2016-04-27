@@ -75,42 +75,67 @@ RequestTypeMap type_to_string_map = {
     std::make_pair(RequestType::PROPRIETARY, std::string("PROPRIETARY")),
     std::make_pair(RequestType::QUERY_APPS, std::string("QUERY_APPS")),
     std::make_pair(RequestType::LAUNCH_APP, std::string("LAUNCH_APP")),
-    std::make_pair(RequestType::LOCK_SCREEN_ICON_URL, std::string("LOCK_SCREEN_ICON_URL")),
-    std::make_pair(RequestType::TRAFFIC_MESSAGE_CHANNEL, std::string("TRAFFIC_MESSAGE_CHANNEL")),
+    std::make_pair(RequestType::LOCK_SCREEN_ICON_URL,
+                   std::string("LOCK_SCREEN_ICON_URL")),
+    std::make_pair(RequestType::TRAFFIC_MESSAGE_CHANNEL,
+                   std::string("TRAFFIC_MESSAGE_CHANNEL")),
     std::make_pair(RequestType::DRIVER_PROFILE, std::string("DRIVER_PROFILE")),
     std::make_pair(RequestType::VOICE_SEARCH, std::string("VOICE_SEARCH")),
     std::make_pair(RequestType::NAVIGATION, std::string("NAVIGATION")),
     std::make_pair(RequestType::PHONE, std::string("PHONE")),
     std::make_pair(RequestType::CLIMATE, std::string("CLIMATE")),
     std::make_pair(RequestType::SETTINGS, std::string("SETTINGS")),
-    std::make_pair(RequestType::VEHICLE_DIAGNOSTICS, std::string("VEHICLE_DIAGNOSTICS")),
+    std::make_pair(RequestType::VEHICLE_DIAGNOSTICS,
+                   std::string("VEHICLE_DIAGNOSTICS")),
     std::make_pair(RequestType::EMERGENCY, std::string("EMERGENCY")),
     std::make_pair(RequestType::MEDIA, std::string("MEDIA")),
     std::make_pair(RequestType::FOTA, std::string("FOTA"))};
 #else
 RequestTypeMap create_map() {
   RequestTypeMap type_to_string_map;
-  type_to_string_map.insert(std::make_pair(RequestType::INVALID_ENUM, std::string("INVALID_ENUM")));
-  type_to_string_map.insert(std::make_pair(RequestType::HTTP, std::string("HTTP")));
-  type_to_string_map.insert(std::make_pair(RequestType::FILE_RESUME, std::string("FILE_RESUME")));
-  type_to_string_map.insert(std::make_pair(RequestType::AUTH_REQUEST, std::string("AUTH_REQUEST")));
-  type_to_string_map.insert(std::make_pair(RequestType::AUTH_CHALLENGE, std::string("AUTH_CHALLENGE")));
-  type_to_string_map.insert(std::make_pair(RequestType::AUTH_ACK, std::string("AUTH_ACK")));
-  type_to_string_map.insert(std::make_pair(RequestType::PROPRIETARY, std::string("PROPRIETARY")));
-  type_to_string_map.insert(std::make_pair(RequestType::QUERY_APPS, std::string("QUERY_APPS")));
-  type_to_string_map.insert(std::make_pair(RequestType::LAUNCH_APP, std::string("LAUNCH_APP")));
-  type_to_string_map.insert(std::make_pair(RequestType::LOCK_SCREEN_ICON_URL, std::string("LOCK_SCREEN_ICON_URL")));
-  type_to_string_map.insert(std::make_pair(RequestType::TRAFFIC_MESSAGE_CHANNEL, std::string("TRAFFIC_MESSAGE_CHANNEL")));
-  type_to_string_map.insert(std::make_pair(RequestType::DRIVER_PROFILE, std::string("DRIVER_PROFILE")));
-  type_to_string_map.insert(std::make_pair(RequestType::VOICE_SEARCH, std::string("VOICE_SEARCH")));
-  type_to_string_map.insert(std::make_pair(RequestType::NAVIGATION, std::string("NAVIGATION")));
-  type_to_string_map.insert(std::make_pair(RequestType::PHONE, std::string("PHONE")));
-  type_to_string_map.insert(std::make_pair(RequestType::CLIMATE, std::string("CLIMATE")));
-  type_to_string_map.insert(std::make_pair(RequestType::SETTINGS, std::string("SETTINGS")));
-  type_to_string_map.insert(std::make_pair(RequestType::VEHICLE_DIAGNOSTICS, std::string("VEHICLE_DIAGNOSTICS")));
-  type_to_string_map.insert(std::make_pair(RequestType::EMERGENCY, std::string("EMERGENCY")));
-  type_to_string_map.insert(std::make_pair(RequestType::MEDIA, std::string("MEDIA")));
-  type_to_string_map.insert(std::make_pair(RequestType::FOTA, std::string("FOTA")));
+  type_to_string_map.insert(
+      std::make_pair(RequestType::INVALID_ENUM, std::string("INVALID_ENUM")));
+  type_to_string_map.insert(
+      std::make_pair(RequestType::HTTP, std::string("HTTP")));
+  type_to_string_map.insert(
+      std::make_pair(RequestType::FILE_RESUME, std::string("FILE_RESUME")));
+  type_to_string_map.insert(
+      std::make_pair(RequestType::AUTH_REQUEST, std::string("AUTH_REQUEST")));
+  type_to_string_map.insert(std::make_pair(RequestType::AUTH_CHALLENGE,
+                                           std::string("AUTH_CHALLENGE")));
+  type_to_string_map.insert(
+      std::make_pair(RequestType::AUTH_ACK, std::string("AUTH_ACK")));
+  type_to_string_map.insert(
+      std::make_pair(RequestType::PROPRIETARY, std::string("PROPRIETARY")));
+  type_to_string_map.insert(
+      std::make_pair(RequestType::QUERY_APPS, std::string("QUERY_APPS")));
+  type_to_string_map.insert(
+      std::make_pair(RequestType::LAUNCH_APP, std::string("LAUNCH_APP")));
+  type_to_string_map.insert(std::make_pair(
+      RequestType::LOCK_SCREEN_ICON_URL, std::string("LOCK_SCREEN_ICON_URL")));
+  type_to_string_map.insert(
+      std::make_pair(RequestType::TRAFFIC_MESSAGE_CHANNEL,
+                     std::string("TRAFFIC_MESSAGE_CHANNEL")));
+  type_to_string_map.insert(std::make_pair(RequestType::DRIVER_PROFILE,
+                                           std::string("DRIVER_PROFILE")));
+  type_to_string_map.insert(
+      std::make_pair(RequestType::VOICE_SEARCH, std::string("VOICE_SEARCH")));
+  type_to_string_map.insert(
+      std::make_pair(RequestType::NAVIGATION, std::string("NAVIGATION")));
+  type_to_string_map.insert(
+      std::make_pair(RequestType::PHONE, std::string("PHONE")));
+  type_to_string_map.insert(
+      std::make_pair(RequestType::CLIMATE, std::string("CLIMATE")));
+  type_to_string_map.insert(
+      std::make_pair(RequestType::SETTINGS, std::string("SETTINGS")));
+  type_to_string_map.insert(std::make_pair(RequestType::VEHICLE_DIAGNOSTICS,
+                                           std::string("VEHICLE_DIAGNOSTICS")));
+  type_to_string_map.insert(
+      std::make_pair(RequestType::EMERGENCY, std::string("EMERGENCY")));
+  type_to_string_map.insert(
+      std::make_pair(RequestType::MEDIA, std::string("MEDIA")));
+  type_to_string_map.insert(
+      std::make_pair(RequestType::FOTA, std::string("FOTA")));
   return type_to_string_map;
 }
 RequestTypeMap type_to_string_map = create_map();
@@ -139,11 +164,11 @@ const policy::DeviceParams GetDeviceParams(
           &device_params.device_mac_address,
           &device_params.device_connection_type)) {
     LOGGER_ERROR(logger_,
-                  "Failed to extract information for device " << device_handle);
+                 "Failed to extract information for device " << device_handle);
   }
   device_params.device_handle = device_handle;
   return device_params;
-  }
+}
 
 #define POLICY_LIB_CHECK(return_value)                                     \
   {                                                                        \
@@ -850,11 +875,11 @@ bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
   }
 
   LOGGER_DEBUG(logger_,
-                "Update url is " << url << " for application "
-                                 << ApplicationManagerImpl::instance()
-                                        ->application(app_id)
-                                        ->name()
-                                        .c_str());
+               "Update url is " << url << " for application "
+                                << ApplicationManagerImpl::instance()
+                                       ->application(app_id)
+                                       ->name()
+                                       .c_str());
 
   MessageHelper::SendPolicySnapshotNotification(app_id, pt_string, url);
 
@@ -937,7 +962,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
     uint32_t device_handle = 0;
     if (!connection_handler.GetDeviceID(device_mac, &device_handle)) {
       LOGGER_WARN(logger_,
-                   "Device hadle with mac " << device_mac << " wasn't found.");
+                  "Device hadle with mac " << device_mac << " wasn't found.");
     }
   }
 
@@ -946,7 +971,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(
     uint32_t device_handle = 0;
     if (!connection_handler.GetDeviceID(device_mac, &device_handle)) {
       LOGGER_WARN(logger_,
-                   "Device hadle with mac " << device_mac << " wasn't found.");
+                  "Device hadle with mac " << device_mac << " wasn't found.");
     }
     DeviceHandles::iterator it = std::find(pending_device_handles_.begin(),
                                            pending_device_handles_.end(),
@@ -1094,16 +1119,14 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
 
   LOGGER_DEBUG(logger_,
                "Notification sent for application_id:"
-                    << policy_app_id << " and connection_key "
-                    << app->app_id());
+                   << policy_app_id << " and connection_key " << app->app_id());
 }
 
 bool PolicyHandler::SaveSnapshot(const BinaryMessage& pt_string,
                                  std::string& snap_path) {
   const std::string& policy_snapshot_file_name =
       get_settings().policies_snapshot_file_name();
-  const std::string& system_files_path =
-      get_settings().system_files_path();
+  const std::string& system_files_path = get_settings().system_files_path();
   snap_path =
       file_system::ConcatPath(system_files_path, policy_snapshot_file_name);
 

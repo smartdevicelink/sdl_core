@@ -54,8 +54,8 @@ void OnHMIStatusNotificationFromMobile::Run() {
       ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!app.valid()) {
-    LOGGER_ERROR(
-        logger_, "OnHMIStatusNotificationFromMobile application doesn't exist");
+    LOGGER_ERROR(logger_,
+                 "OnHMIStatusNotificationFromMobile application doesn't exist");
     return;
   }
 

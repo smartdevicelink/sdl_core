@@ -76,7 +76,7 @@ class MediaManagerImpl : public MediaManager,
 
   virtual const MediaManagerSettings& settings() const OVERRIDE;
 
-#ifdef BUILD_TESTS  
+#ifdef BUILD_TESTS
   void set_mock_mic_listener(MediaListenerPtr media_listener);
   void set_mock_mic_recorder(MediaAdapterImpl* media_adapter);
   void set_mock_streamer(protocol_handler::ServiceType stype,

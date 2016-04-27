@@ -66,8 +66,8 @@ typedef std::vector<uint32_t> DeviceHandles;
 namespace custom_str = utils::custom_string;
 
 class PolicyHandler : public PolicyHandlerInterface,
-      public PolicyListener,
-      public threads::AsyncRunner {
+                      public PolicyListener,
+                      public threads::AsyncRunner {
  public:
   PolicyHandler(const policy::PolicySettings& get_settings);
   ~PolicyHandler();
@@ -82,7 +82,7 @@ class PolicyHandler : public PolicyHandlerInterface,
                              const BinaryMessage& pt_string) OVERRIDE;
   bool UnloadPolicyLibrary() OVERRIDE;
   void OnPermissionsUpdated(const std::string& policy_app_id,
-                                    const Permissions& permissions,
+                            const Permissions& permissions,
                             const HMILevel& default_hmi) OVERRIDE;
 
   void OnPermissionsUpdated(const std::string& policy_app_id,
@@ -383,10 +383,10 @@ class PolicyHandler : public PolicyHandlerInterface,
   void Increment(const std::string& app_id,
                  usage_statistics::AppCounterId type) OVERRIDE;
   void Set(const std::string& app_id,
-                   usage_statistics::AppInfoId type,
+           usage_statistics::AppInfoId type,
            const std::string& value) OVERRIDE;
   void Add(const std::string& app_id,
-                   usage_statistics::AppStopwatchId type,
+           usage_statistics::AppStopwatchId type,
            int32_t timespan_seconds) OVERRIDE;
 
 #ifdef BUILD_TESTS
@@ -454,24 +454,25 @@ class PolicyHandler : public PolicyHandlerInterface,
     }
 
     void Increment(const std::string& app_id,
-                           usage_statistics::AppCounterId type) {
+                   usage_statistics::AppCounterId type) {
       policy_handler_->AsyncRun(
           new StatisticsDelegate(*policy_handler_, app_id, type));
     }
 
     void Set(const std::string& app_id,
-                     usage_statistics::AppInfoId type,
-                     const std::string& value) {
+             usage_statistics::AppInfoId type,
+             const std::string& value) {
       policy_handler_->AsyncRun(
           new StatisticsDelegate(*policy_handler_, app_id, type, value));
     }
 
     void Add(const std::string& app_id,
-                     usage_statistics::AppStopwatchId type,
-                     int32_t timespan_seconds) {
+             usage_statistics::AppStopwatchId type,
+             int32_t timespan_seconds) {
       policy_handler_->AsyncRun(new StatisticsDelegate(
           *policy_handler_, app_id, type, timespan_seconds));
     }
+
    private:
     PolicyHandler* policy_handler_;
   };

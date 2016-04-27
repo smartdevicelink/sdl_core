@@ -70,11 +70,11 @@ const SystemInfo GetSystemInfoResponse::GetSystemInfo(
       (*message_)[strings::msg_params]["ccpu_version"].asString();
 
   info.wers_country_code =
-        (*message_)[strings::msg_params]["wersCountryCode"].asString();
+      (*message_)[strings::msg_params]["wersCountryCode"].asString();
   const uint32_t lang_code =
       (*message_)[strings::msg_params]["language"].asUInt();
   info.language = application_manager::MessageHelper::CommonLanguageToString(
-        static_cast<hmi_apis::Common_Language::eType>(lang_code));
+      static_cast<hmi_apis::Common_Language::eType>(lang_code));
 
   application_manager::ApplicationManagerImpl::instance()
       ->hmi_capabilities()

@@ -150,8 +150,8 @@ void PerformInteractionRequest::Run() {
            choice_set_id_list_length,
            msg_params[strings::interaction_choice_set_id_list]))) {
     LOGGER_ERROR(logger_,
-                  "PerformInteraction has choice sets with "
-                  "duplicated IDs or application does not have choice sets");
+                 "PerformInteraction has choice sets with "
+                 "duplicated IDs or application does not have choice sets");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
@@ -166,7 +166,6 @@ void PerformInteractionRequest::Run() {
       return;
     }
   }
-
 
   if (IsWhiteSpaceExist()) {
     LOGGER_ERROR(logger_,
@@ -429,7 +428,7 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
   const SmartObject* response_params = msg_params.empty() ? NULL : &msg_params;
 
   if (mobile_apis::InteractionMode::BOTH != interaction_mode_) {
-  DisablePerformInteraction();
+    DisablePerformInteraction();
 
     SendResponse(ui_result_, ui_resultCode_, info.c_str(), response_params);
   }
@@ -920,9 +919,9 @@ bool PerformInteractionRequest::CheckChoiceIDFromRequest(
           choice_id_set.insert(choices_list[k][strings::choice_id].asInt());
       if (!ins_res.second) {
         LOGGER_ERROR(logger_,
-                      "Choise with ID "
-                          << choices_list[k][strings::choice_id].asInt()
-                          << " already exists");
+                     "Choise with ID "
+                         << choices_list[k][strings::choice_id].asInt()
+                         << " already exists");
         return false;
       }
     }

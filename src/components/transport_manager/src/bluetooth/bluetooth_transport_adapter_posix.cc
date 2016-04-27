@@ -58,7 +58,8 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 BluetoothTransportAdapter::~BluetoothTransportAdapter() {}
 
-BluetoothTransportAdapter::BluetoothTransportAdapter(resumption::LastState& last_state)
+BluetoothTransportAdapter::BluetoothTransportAdapter(
+    resumption::LastState& last_state)
     : TransportAdapterImpl(
           new BluetoothDeviceScanner(
               this,

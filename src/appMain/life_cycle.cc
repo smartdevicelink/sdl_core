@@ -116,11 +116,11 @@ bool LifeCycle::StartComponents() {
       *profile::Profile::instance(), *transport_manager_);
   DCHECK(connection_handler_ != NULL);
 
-  protocol_handler_ = new protocol_handler::ProtocolHandlerImpl(
-      *(profile::Profile::instance()),
-      *connection_handler_,
-      *connection_handler_,
-      *transport_manager_);
+  protocol_handler_ =
+      new protocol_handler::ProtocolHandlerImpl(*(profile::Profile::instance()),
+                                                *connection_handler_,
+                                                *connection_handler_,
+                                                *transport_manager_);
   DCHECK(protocol_handler_ != NULL);
 
   app_manager_ = application_manager::ApplicationManagerImpl::instance();
@@ -130,9 +130,8 @@ bool LifeCycle::StartComponents() {
       *(profile::Profile::instance()));
   DCHECK(hmi_handler_ != NULL);
 
-  media_manager_ = new media_manager::MediaManagerImpl(*app_manager_,
-                                                       *protocol_handler_,
-                                                       *profile);
+  media_manager_ = new media_manager::MediaManagerImpl(
+      *app_manager_, *protocol_handler_, *profile);
   DCHECK(media_manager_ != NULL);
 
   if (!app_manager_->Init(*last_state_, media_manager_)) {
@@ -172,8 +171,8 @@ bool LifeCycle::StartComponents() {
   connection_handler_->set_protocol_handler(protocol_handler_);
   connection_handler_->set_connection_handler_observer(app_manager_);
 
-  // it is important to initialise TelemetryMonitor before TM to listen TM
-  // Adapters
+// it is important to initialise TelemetryMonitor before TM to listen TM
+// Adapters
 #ifdef TELEMETRY_MONITOR
   telemetry_monitor_ = new telemetry_monitor::TelemetryMonitor(
       profile::Profile::instance()->server_address(),
@@ -236,8 +235,7 @@ bool LifeCycle::InitMessageSystem() {
       profile::Profile::instance()->server_address(),
       profile::Profile::instance()->server_port());
 
-  hmi_handler_->AddHMIMessageAdapter(
-      mb_adapter_);
+  hmi_handler_->AddHMIMessageAdapter(mb_adapter_);
   if (!mb_adapter_->Connect()) {
     LOGGER_FATAL(logger_, "Cannot connect to remote peer!");
     return false;

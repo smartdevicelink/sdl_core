@@ -348,8 +348,8 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
                                          const RPCParams& rpc_params,
                                          CheckPermissionResult& result) {
   LOGGER_INFO(logger_,
-               "CheckPermissions for " << app_id << " and rpc " << rpc
-                                       << " for " << hmi_level << " level.");
+              "CheckPermissions for " << app_id << " and rpc " << rpc << " for "
+                                      << hmi_level << " level.");
 
   cache_->CheckPermissions(app_id, hmi_level, rpc, result);
 }
@@ -761,7 +761,7 @@ uint32_t PolicyManagerImpl::NextRetryTimeout() {
       retry_sequence_index_ >= retry_sequence_seconds_.size()) {
     return next;
   }
-    ++retry_sequence_index_;
+  ++retry_sequence_index_;
   for (uint32_t i = 0u; i < retry_sequence_index_; ++i) {
     next += retry_sequence_seconds_[i];
     // According to requirement APPLINK-18244
@@ -949,14 +949,14 @@ bool PolicyManagerImpl::CheckAppStorageFolder() const {
   LOGGER_DEBUG(logger_, "AppStorageFolder " << app_storage_folder);
   if (!file_system::DirectoryExists(app_storage_folder)) {
     LOGGER_WARN(logger_,
-                 "Storage directory doesn't exist " << app_storage_folder);
+                "Storage directory doesn't exist " << app_storage_folder);
     return false;
   }
   if (!(file_system::IsWritingAllowed(app_storage_folder) &&
         file_system::IsReadingAllowed(app_storage_folder))) {
     LOGGER_WARN(logger_,
                 "Storage directory doesn't have read/write permissions "
-                     << app_storage_folder);
+                    << app_storage_folder);
     return false;
   }
   return true;

@@ -95,7 +95,7 @@ void ProtocolPacket::ProtocolHeader::deserialize(const uint8_t* message,
   DCHECK_OR_RETURN_VOID(message);
   if (messageSize < PROTOCOL_HEADER_V1_SIZE) {
     LOGGER_DEBUG(logger_,
-                  "Message size less " << PROTOCOL_HEADER_V1_SIZE << " bytes");
+                 "Message size less " << PROTOCOL_HEADER_V1_SIZE << " bytes");
     return;
   }
   // first 4 bits
@@ -117,8 +117,8 @@ void ProtocolPacket::ProtocolHeader::deserialize(const uint8_t* message,
     case PROTOCOL_VERSION_4: {
       if (messageSize < PROTOCOL_HEADER_V2_SIZE) {
         LOGGER_DEBUG(logger_,
-                      "Message size less " << PROTOCOL_HEADER_V2_SIZE
-                                           << " bytes");
+                     "Message size less " << PROTOCOL_HEADER_V2_SIZE
+                                          << " bytes");
         return;
       }
       messageId = read_be_uint32(message + 8);
@@ -162,15 +162,15 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
       break;
     default:
       LOGGER_WARN(logger_,
-                   "Unknown version:" << static_cast<int>(header.version));
+                  "Unknown version:" << static_cast<int>(header.version));
       return RESULT_FAIL;
   }
   // ServiceType shall be equal 0x0 (Control), 0x07 (RPC), 0x0A (PCM), 0x0B
   // (Video), 0x0F (Bulk)
   if (ServiceTypeFromByte(header.serviceType) == kInvalidServiceType) {
     LOGGER_WARN(logger_,
-                 "Invalide service type"
-                     << static_cast<int>(header.serviceType));
+                "Invalide service type"
+                    << static_cast<int>(header.serviceType));
     return RESULT_FAIL;
   }
   // Check frame info for each frame type
@@ -194,8 +194,8 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
           break;
         default:
           LOGGER_WARN(logger_,
-                       "FRAME_TYPE_CONTROL - Invalide frame data "
-                           << static_cast<int>(header.frameData));
+                      "FRAME_TYPE_CONTROL - Invalide frame data "
+                          << static_cast<int>(header.frameData));
           return RESULT_FAIL;
       }
       break;
@@ -203,16 +203,16 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
     case FRAME_TYPE_SINGLE:
       if (header.frameData != FRAME_DATA_SINGLE) {
         LOGGER_WARN(logger_,
-                     "FRAME_TYPE_SINGLE - Invalide frame data "
-                         << static_cast<int>(header.frameData));
+                    "FRAME_TYPE_SINGLE - Invalide frame data "
+                        << static_cast<int>(header.frameData));
         return RESULT_FAIL;
       }
       break;
     case FRAME_TYPE_FIRST:
       if (header.frameData != FRAME_DATA_FIRST) {
         LOGGER_WARN(logger_,
-                     "FRAME_TYPE_FIRST - Invalide frame data "
-                         << static_cast<int>(header.frameData));
+                    "FRAME_TYPE_FIRST - Invalide frame data "
+                        << static_cast<int>(header.frameData));
         return RESULT_FAIL;
       }
       break;
@@ -221,7 +221,7 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
       break;
     default:
       LOGGER_WARN(logger_,
-                   "Unknown frame type " << static_cast<int>(header.frameType));
+                  "Unknown frame type " << static_cast<int>(header.frameType));
       // All other Frame type is invalid
       return RESULT_FAIL;
   }
@@ -230,10 +230,10 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
   // and shall be less than payload size
   if (header.dataSize > payload_size) {
     LOGGER_WARN(logger_,
-                 "Packet data size is "
-                     << header.dataSize
-                     << " and bigger than allowed payload size " << payload_size
-                     << " bytes");
+                "Packet data size is "
+                    << header.dataSize
+                    << " and bigger than allowed payload size " << payload_size
+                    << " bytes");
     return RESULT_FAIL;
   }
   switch (header.frameType) {
@@ -241,8 +241,8 @@ RESULT_CODE ProtocolPacket::ProtocolHeaderValidator::validate(
     case FRAME_TYPE_CONSECUTIVE:
       if (header.dataSize <= 0u) {
         LOGGER_WARN(logger_,
-                     "Data size of Single and Consecutive frame shall be not "
-                     "equal 0 byte ");
+                    "Data size of Single and Consecutive frame shall be not "
+                    "equal 0 byte ");
         return RESULT_FAIL;
       }
       break;

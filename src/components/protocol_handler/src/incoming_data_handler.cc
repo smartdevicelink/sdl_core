@@ -67,8 +67,8 @@ ProtocolFramePtrList IncomingDataHandler::ProcessData(
     return ProtocolFramePtrList();
   }
   LOGGER_INFO(logger_,
-               "Processing incoming data of size "
-                   << tm_message_size << " for connection " << connection_id);
+              "Processing incoming data of size "
+                  << tm_message_size << " for connection " << connection_id);
   ConnectionsDataMap::iterator it = connections_data_.find(connection_id);
   if (connections_data_.end() == it) {
     LOGGER_WARN(logger_, "ProcessData requested for unknown connection");
@@ -78,18 +78,18 @@ ProtocolFramePtrList IncomingDataHandler::ProcessData(
   std::vector<uint8_t>& connection_data = it->second;
   connection_data.insert(connection_data.end(), data, data + tm_message_size);
   LOGGER_DEBUG(logger_,
-                "Total data size for connection " << connection_id << " is "
-                                                  << connection_data.size());
+               "Total data size for connection " << connection_id << " is "
+                                                 << connection_data.size());
   ProtocolFramePtrList out_frames;
   *malformed_occurrence = 0;
   *result = CreateFrame(
       connection_data, out_frames, *malformed_occurrence, connection_id);
   LOGGER_DEBUG(logger_,
-                "New data size for connection " << connection_id << " is "
-                                                << connection_data.size());
+               "New data size for connection " << connection_id << " is "
+                                               << connection_data.size());
   if (!out_frames.empty()) {
     LOGGER_INFO(logger_,
-                 "Created and passed " << out_frames.size() << " packets");
+                "Created and passed " << out_frames.size() << " packets");
   } else {
     if (RESULT_DEFERRED == *result) {
       LOGGER_DEBUG(
@@ -131,7 +131,7 @@ uint32_t IncomingDataHandler::GetPacketSize(
       return header.dataSize + PROTOCOL_HEADER_V2_SIZE;
     default:
       LOGGER_WARN(logger_,
-                   "Unknown version: " << static_cast<int>(header.version));
+                  "Unknown version: " << static_cast<int>(header.version));
       break;
   }
   return 0u;
@@ -156,14 +156,14 @@ RESULT_CODE IncomingDataHandler::CreateFrame(
       if (!last_portion_of_data_was_malformed_) {
         ++malformed_occurrence;
         LOGGER_DEBUG(logger_,
-                      "Malformed message found " << malformed_occurrence);
+                     "Malformed message found " << malformed_occurrence);
       }
       last_portion_of_data_was_malformed_ = true;
       ++data_it;
       --data_size;
       LOGGER_DEBUG(logger_,
-                    "Moved to the next byte "
-                        << std::hex << static_cast<const void*>(&*data_it));
+                   "Moved to the next byte "
+                       << std::hex << static_cast<const void*>(&*data_it));
       continue;
     }
     LOGGER_DEBUG(logger_, "Payload size " << header_.dataSize);
@@ -173,8 +173,8 @@ RESULT_CODE IncomingDataHandler::CreateFrame(
       ++data_it;
       --data_size;
       LOGGER_DEBUG(logger_,
-                    "Moved to the next byte "
-                        << std::hex << static_cast<const void*>(&*data_it));
+                   "Moved to the next byte "
+                       << std::hex << static_cast<const void*>(&*data_it));
       continue;
     }
     if (data_size < packet_size) {
@@ -195,8 +195,8 @@ RESULT_CODE IncomingDataHandler::CreateFrame(
     out_frames.push_back(frame);
     last_portion_of_data_was_malformed_ = false;
     LOGGER_DEBUG(logger_,
-                  "Frame added. "
-                      << "Connection ID " << connection_id);
+                 "Frame added. "
+                     << "Connection ID " << connection_id);
 
     data_it += packet_size;
     data_size -= packet_size;

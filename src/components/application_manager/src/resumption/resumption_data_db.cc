@@ -165,7 +165,7 @@ void ResumptionDataDB::SaveApplication(
   const std::string& device_mac = application->mac_address();
   LOGGER_INFO(logger_,
               "app_id : " << application->app_id() << " policy_app_id : "
-                           << policy_app_id << " device_id : " << device_mac);
+                          << policy_app_id << " device_id : " << device_mac);
 
   if (!CheckExistenceApplication(
           policy_app_id, device_mac, application_exist)) {
@@ -276,8 +276,7 @@ void ResumptionDataDB::OnSuspend() {
 
   if (query_update_suspend_data.Prepare(kUpdateSuspendData)) {
     if (query_update_suspend_data.Exec()) {
-      LOGGER_INFO(logger_,
-                   "Data ign_off_count and suspend_count were updated");
+      LOGGER_INFO(logger_, "Data ign_off_count and suspend_count were updated");
     }
   }
 
@@ -475,7 +474,7 @@ bool ResumptionDataDB::CheckExistenceHMIId(uint32_t hmi_app_id) const {
     }
   }
   LOGGER_FATAL(logger_,
-    "HMI appID = " << hmi_app_id << " doesn't exist in saved data");
+               "HMI appID = " << hmi_app_id << " doesn't exist in saved data");
   return false;
 }
 
@@ -1138,8 +1137,7 @@ bool ResumptionDataDB::SelectGlobalPropertiesData(
   saved_app[strings::application_global_properties] =
       SmartObject(SmartType_Map);
   if (0 == count_item) {
-    LOGGER_INFO(logger_,
-                 "Application does not contain global properties data");
+    LOGGER_INFO(logger_, "Application does not contain global properties data");
     return true;
   }
   utils::dbms::SQLQuery select_globalproperties(db());
@@ -1426,8 +1424,7 @@ bool ResumptionDataDB::SelectDataFromAppTable(
   saved_app[strings::device_id] = query.GetString(9);
   saved_app[strings::is_media_application] = query.GetBoolean(10);
 
-  LOGGER_INFO(logger_,
-               "Data from application table was restored successfully");
+  LOGGER_INFO(logger_, "Data from application table was restored successfully");
   return true;
 }
 
@@ -2149,8 +2146,7 @@ bool ResumptionDataDB::InsertCommandsData(
                                 command_primary_key,
                                 kInsertApplicationCommandArray)) ||
         !query_insert_command.Reset()) {
-      LOGGER_WARN(logger_,
-                   "Incorrect insertion to application commands array");
+      LOGGER_WARN(logger_, "Incorrect insertion to application commands array");
       return false;
     }
   }
@@ -2347,8 +2343,7 @@ bool ResumptionDataDB::InsertGlobalPropertiesData(
         strings::auto_complete_text, kb_prop, insert_global_properties, 6);
   }
   if (!insert_global_properties.Exec()) {
-    LOGGER_WARN(logger_,
-                 "Problem with insert data to global properties table");
+    LOGGER_WARN(logger_, "Problem with insert data to global properties table");
     return false;
   }
 
@@ -2431,8 +2426,7 @@ bool ResumptionDataDB::ExecInsertHelpTimeoutArray(
     if (i < timeout_prompt_length) {
       if (!ExecInsertTTSChunks(global_properties[strings::timeout_prompt][i],
                                tts_chunk_key)) {
-        LOGGER_WARN(logger_,
-                     "Problem with insertion timeoutPrompt's ttsChunk");
+        LOGGER_WARN(logger_, "Problem with insertion timeoutPrompt's ttsChunk");
         return false;
       }
       insert_help_prompt_array.Bind(1, tts_chunk_key);
@@ -2559,8 +2553,7 @@ bool ResumptionDataDB::ExecInsertVRHelpItem(
                                 insert_vrhelp_item.LastInsertId(),
                                 kInsertVRHelpItemArray)) ||
         (!insert_vrhelp_item.Reset())) {
-      LOGGER_WARN(logger_,
-                   "Problem with insert data to vrHelpItemArray table");
+      LOGGER_WARN(logger_, "Problem with insert data to vrHelpItemArray table");
       return false;
     }
   }
@@ -2752,7 +2745,7 @@ bool ResumptionDataDB::UpdateGrammarID(const std::string& policy_app_id,
 
   if (!query.Prepare(kUpdateGrammarID)) {
     LOGGER_WARN(logger_,
-                 "Problem with verification query for updating grammar id.");
+                "Problem with verification query for updating grammar id.");
     return false;
   }
 

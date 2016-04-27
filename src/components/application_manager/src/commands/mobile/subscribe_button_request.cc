@@ -62,8 +62,7 @@ void SubscribeButtonRequest::Run() {
           (*message_)[str::msg_params][str::button_name].asUInt());
 
   if (!IsSubscriptionAllowed(app, btn_id)) {
-    LOGGER_ERROR(logger_,
-                  "Subscribe on button " << btn_id << " isn't allowed");
+    LOGGER_ERROR(logger_, "Subscribe on button " << btn_id << " isn't allowed");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }

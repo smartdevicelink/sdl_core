@@ -71,8 +71,8 @@ void RegisterAppInterfaceResponse::Run() {
           connection_key());
   if (!application) {
     LOGGER_ERROR(logger_,
-                  "Application with connection key " << connection_key()
-                                                     << " is not registered.");
+                 "Application with connection key " << connection_key()
+                                                    << " is not registered.");
     return;
   }
 

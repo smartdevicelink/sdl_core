@@ -163,11 +163,11 @@ void RegisterAppInterfaceRequest::Run() {
          !ApplicationManagerImpl::instance()->IsStopping() &&
          !ApplicationManagerImpl::instance()->IsHMICooperating()) {
     LOGGER_DEBUG(logger_,
-                  "Waiting for the HMI... conn_key="
-                      << connection_key()
-                      << ", correlation_id=" << correlation_id()
-                      << ", default_timeout=" << default_timeout()
-                      << ", thread=" << threads::Thread::CurrentId());
+                 "Waiting for the HMI... conn_key="
+                     << connection_key()
+                     << ", correlation_id=" << correlation_id()
+                     << ", default_timeout=" << default_timeout()
+                     << ", thread=" << threads::Thread::CurrentId());
     ApplicationManagerImpl::instance()->updateRequestTimeout(
         connection_key(), correlation_id(), default_timeout());
 #if defined(OS_POSIX)
@@ -239,7 +239,6 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
-
   application =
       ApplicationManagerImpl::instance()->RegisterApplication(message_);
 
@@ -247,58 +246,58 @@ void RegisterAppInterfaceRequest::Run() {
     LOGGER_ERROR(logger_, "Application hasn't been registered!");
     return;
   }
-    // For resuming application need to restore hmi_app_id from resumeCtrl
-    resumption::ResumeCtrl& resumer =
-        ApplicationManagerImpl::instance()->resume_controller();
+  // For resuming application need to restore hmi_app_id from resumeCtrl
+  resumption::ResumeCtrl& resumer =
+      ApplicationManagerImpl::instance()->resume_controller();
   const std::string& device_mac = application->mac_address();
 
-    // there is side affect with 2 mobile app with the same mobile app_id
+  // there is side affect with 2 mobile app with the same mobile app_id
   if (resumer.IsApplicationSaved(policy_app_id, device_mac)) {
-      application->set_hmi_application_id(
+    application->set_hmi_application_id(
         resumer.GetHMIApplicationID(policy_app_id, device_mac));
-    } else {
-      application->set_hmi_application_id(
-          ApplicationManagerImpl::instance()->GenerateNewHMIAppID());
-    }
-    application->set_is_media_application(
-        msg_params[strings::is_media_application].asBool());
+  } else {
+    application->set_hmi_application_id(
+        ApplicationManagerImpl::instance()->GenerateNewHMIAppID());
+  }
+  application->set_is_media_application(
+      msg_params[strings::is_media_application].asBool());
 
-    if (msg_params.keyExists(strings::vr_synonyms)) {
-      application->set_vr_synonyms(msg_params[strings::vr_synonyms]);
-    }
+  if (msg_params.keyExists(strings::vr_synonyms)) {
+    application->set_vr_synonyms(msg_params[strings::vr_synonyms]);
+  }
 
-    if (msg_params.keyExists(strings::ngn_media_screen_app_name)) {
-      application->set_ngn_media_screen_name(
-          msg_params[strings::ngn_media_screen_app_name]);
-    }
+  if (msg_params.keyExists(strings::ngn_media_screen_app_name)) {
+    application->set_ngn_media_screen_name(
+        msg_params[strings::ngn_media_screen_app_name]);
+  }
 
-    if (msg_params.keyExists(strings::tts_name)) {
-      application->set_tts_name(msg_params[strings::tts_name]);
-    }
+  if (msg_params.keyExists(strings::tts_name)) {
+    application->set_tts_name(msg_params[strings::tts_name]);
+  }
 
-    if (msg_params.keyExists(strings::app_hmi_type)) {
-      application->set_app_types(msg_params[strings::app_hmi_type]);
+  if (msg_params.keyExists(strings::app_hmi_type)) {
+    application->set_app_types(msg_params[strings::app_hmi_type]);
 
-      // check app type
-      const smart_objects::SmartObject& app_type =
-          msg_params.getElement(strings::app_hmi_type);
+    // check app type
+    const smart_objects::SmartObject& app_type =
+        msg_params.getElement(strings::app_hmi_type);
 
-      for (size_t i = 0; i < app_type.length(); ++i) {
-        if (mobile_apis::AppHMIType::NAVIGATION ==
-            static_cast<mobile_apis::AppHMIType::eType>(
-                app_type.getElement(i).asUInt())) {
-          application->set_is_navi(true);
-        }
-        if (mobile_apis::AppHMIType::COMMUNICATION ==
-            static_cast<mobile_apis::AppHMIType::eType>(
-                app_type.getElement(i).asUInt())) {
-          application->set_voice_communication_supported(true);
-        }
+    for (size_t i = 0; i < app_type.length(); ++i) {
+      if (mobile_apis::AppHMIType::NAVIGATION ==
+          static_cast<mobile_apis::AppHMIType::eType>(
+              app_type.getElement(i).asUInt())) {
+        application->set_is_navi(true);
+      }
+      if (mobile_apis::AppHMIType::COMMUNICATION ==
+          static_cast<mobile_apis::AppHMIType::eType>(
+              app_type.getElement(i).asUInt())) {
+        application->set_voice_communication_supported(true);
       }
     }
+  }
 
-    // Add device to policy table and set device info, if any
-    policy::DeviceParams dev_params;
+  // Add device to policy table and set device info, if any
+  policy::DeviceParams dev_params;
   if (-1 ==
       ApplicationManagerImpl::instance()
           ->connection_handler()
@@ -309,19 +308,18 @@ void RegisterAppInterfaceRequest::Run() {
                              &dev_params.device_mac_address,
                              &dev_params.device_connection_type)) {
     LOGGER_ERROR(logger_,
-                  "Failed to extract information for device "
-                      << application->device());
+                 "Failed to extract information for device "
+                     << application->device());
   }
-    policy::DeviceInfo device_info;
-    device_info.AdoptDeviceType(dev_params.device_connection_type);
-    if (msg_params.keyExists(strings::device_info)) {
-      FillDeviceInfo(&device_info);
-    }
+  policy::DeviceInfo device_info;
+  device_info.AdoptDeviceType(dev_params.device_connection_type);
+  if (msg_params.keyExists(strings::device_info)) {
+    FillDeviceInfo(&device_info);
+  }
 
   GetPolicyHandler().SetDeviceInfo(device_mac, device_info);
 
-    SendRegisterAppInterfaceResponseToMobile();
-
+  SendRegisterAppInterfaceResponseToMobile();
 }
 
 void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
@@ -364,7 +362,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
           hmi_capabilities.active_ui_language()) {
     LOGGER_WARN(logger_,
                 "Wrong language on registering application "
-                     << application->name().c_str());
+                    << application->name().c_str());
 
     LOGGER_ERROR(
         logger_,
@@ -372,7 +370,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
             << msg_params[strings::language_desired].asInt()
             << " , active VR language code is "
             << hmi_capabilities.active_vr_language() << ", UI language code is "
-              << msg_params[strings::hmi_display_language_desired].asInt()
+            << msg_params[strings::hmi_display_language_desired].asInt()
             << " , active UI language code is "
             << hmi_capabilities.active_ui_language());
 
@@ -520,7 +518,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile() {
     hash_id = (*message_)[strings::msg_params][strings::hash_id].asString();
     if (!resumer.CheckApplicationHash(application, hash_id)) {
       LOGGER_WARN(logger_,
-                   "Hash from RAI does not match to saved resume data.");
+                  "Hash from RAI does not match to saved resume data.");
       result_code = mobile_apis::Result::RESUME_FAILED;
       add_info = "Hash from RAI does not match to saved resume data.";
       need_restore_vr = false;
@@ -655,7 +653,7 @@ void RegisterAppInterfaceRequest::SendOnAppRegisteredNotificationToHMI(
       session_observer.GetDataOnDeviceID(
           handle, &device_name, NULL, &mac_address, &transport_type)) {
     LOGGER_ERROR(logger_,
-                  "Failed to extract information for device " << handle);
+                 "Failed to extract information for device " << handle);
   }
 
   device_info[strings::name] = device_name;
@@ -750,8 +748,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
     policy::StringArray::const_iterator it =
         std::find_if(app_nicknames.begin(), app_nicknames.end(), compare);
     if (app_nicknames.end() == it) {
-      LOGGER_WARN(logger_,
-                   "Application name was not found in nicknames list.");
+      LOGGER_WARN(logger_, "Application name was not found in nicknames list.");
       // App should be unregistered, if its name is not present in nicknames
       // list
       usage_statistics::AppCounter count_of_rejections_nickname_mismatch(

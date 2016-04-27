@@ -42,7 +42,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "FromMicRecorderAdapter")
 
 FromMicRecorderAdapter::FromMicRecorderAdapter()
     : recorder_thread_(NULL)
-    , output_file_("audio.8bit.wav") // default file within SDL appMain
+    , output_file_("audio.8bit.wav")  // default file within SDL appMain
     , kDefaultDuration(1000)
     , duration_(kDefaultDuration) {}
 

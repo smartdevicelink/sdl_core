@@ -121,8 +121,8 @@ void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
       application_manager::ApplicationManagerImpl::instance()
           ->application_by_hmi_app(hmi_application_id);
   if (!app) {
-    LOGGER_ERROR(
-        logger_, "Application not found by HMI app id: " << hmi_application_id);
+    LOGGER_ERROR(logger_,
+                 "Application not found by HMI app id: " << hmi_application_id);
     return;
   }
   application_manager::ApplicationManagerImpl::instance()

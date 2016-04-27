@@ -127,10 +127,10 @@ TEST_F(RequestInfoTest, AddRemoveHMIRequests) {
   for (uint32_t i = 0; i < count_of_requests_for_test_; ++i) {
     utils::SharedPtr<TestRequestInfo> request =
         CreateTestInfo(hmi_connection_key_,
-                         i,
-                         request_info::RequestInfo::HMIRequest,
-                         date_time::DateTime::getCurrentTime(),
-                         default_timeout_);
+                       i,
+                       request_info::RequestInfo::HMIRequest,
+                       date_time::DateTime::getCurrentTime(),
+                       default_timeout_);
     EXPECT_TRUE(request_info_set_.Add(request));
     EXPECT_TRUE(request_info_set_.RemoveRequest(request));
   }
@@ -145,10 +145,10 @@ TEST_F(RequestInfoTest, AddHMIRequests_RemoveAllRequests) {
   for (uint32_t i = 0; i < count_of_requests_for_test_; ++i) {
     utils::SharedPtr<TestRequestInfo> request =
         CreateTestInfo(hmi_connection_key_,
-                         i,
-                         request_info::RequestInfo::HMIRequest,
-                         date_time::DateTime::getCurrentTime(),
-                         default_timeout_);
+                       i,
+                       request_info::RequestInfo::HMIRequest,
+                       date_time::DateTime::getCurrentTime(),
+                       default_timeout_);
     requests.push_back(request);
     EXPECT_TRUE(request_info_set_.Add(request));
   }
@@ -171,7 +171,7 @@ TEST_F(RequestInfoTest, AddHMIRequests_RemoveAllRequests) {
   EXPECT_EQ(count_of_requests_for_test_,
             request_info_set_.RemoveByConnectionKey(hmi_connection_key_));
   EXPECT_EQ(0u, request_info_set_.Size());
-  }
+}
 TEST_F(RequestInfoTest, CheckRequestsMaxCount) {
   const uint32_t app_hmi_level_time_scale = 100;
   const uint32_t hmi_level_count = 1000;
@@ -276,17 +276,17 @@ TEST_F(RequestInfoTest, CheckMaxCountOfRequest) {
 TEST_F(RequestInfoTest, AddMobileRequests_RemoveMobileRequests) {
   utils::SharedPtr<TestRequestInfo> mobile_request1 =
       CreateTestInfo(mobile_connection_key1_,
-                       12345,
-                       request_info::RequestInfo::MobileRequest,
-                       date_time::DateTime::getCurrentTime(),
-                       default_timeout_);
+                     12345,
+                     request_info::RequestInfo::MobileRequest,
+                     date_time::DateTime::getCurrentTime(),
+                     default_timeout_);
   EXPECT_TRUE(request_info_set_.Add(mobile_request1));
   utils::SharedPtr<TestRequestInfo> mobile_request2 =
       CreateTestInfo(mobile_connection_key2_,
-                       54321,
-                       request_info::RequestInfo::MobileRequest,
-                       date_time::DateTime::getCurrentTime(),
-                       default_timeout_);
+                     54321,
+                     request_info::RequestInfo::MobileRequest,
+                     date_time::DateTime::getCurrentTime(),
+                     default_timeout_);
   EXPECT_TRUE(request_info_set_.Add(mobile_request2));
   EXPECT_EQ(2u, request_info_set_.Size());
   EXPECT_EQ(2u, request_info_set_.RemoveMobileRequests());
@@ -306,7 +306,7 @@ TEST_F(RequestInfoTest, AddMobileRequests_RemoveMobileRequestsByConnectionKey) {
                        default_timeout_);
 
     requests.push_back(mobile_request1);
-  EXPECT_TRUE(request_info_set_.Add(mobile_request1));
+    EXPECT_TRUE(request_info_set_.Add(mobile_request1));
   }
   EXPECT_EQ(count_of_mobile_request1, request_info_set_.Size());
 
@@ -319,7 +319,7 @@ TEST_F(RequestInfoTest, AddMobileRequests_RemoveMobileRequestsByConnectionKey) {
                        default_timeout_);
 
     requests.push_back(mobile_request2);
-  EXPECT_TRUE(request_info_set_.Add(mobile_request2));
+    EXPECT_TRUE(request_info_set_.Add(mobile_request2));
   }
   EXPECT_EQ(count_of_mobile_request1 + count_of_mobile_request2,
             request_info_set_.Size());
@@ -335,10 +335,10 @@ TEST_F(RequestInfoTest, RequestInfoSetFront) {
   for (uint32_t i = 0; i < count_of_requests_for_test_; ++i) {
     utils::SharedPtr<TestRequestInfo> request =
         CreateTestInfo(mobile_connection_key1_,
-                         i,
-                         request_info::RequestInfo::HMIRequest,
-                         date_time::DateTime::getCurrentTime(),
-                         i);
+                       i,
+                       request_info::RequestInfo::HMIRequest,
+                       date_time::DateTime::getCurrentTime(),
+                       i);
     request_info_set_.Add(request);
   }
 
@@ -370,9 +370,9 @@ TEST_F(RequestInfoTest, RequestInfoSetFind) {
     utils::SharedPtr<TestRequestInfo> request =
         CreateTestInfo(req_it->first,
                        req_it->second,
-                         request_info::RequestInfo::HMIRequest,
-                         date_time::DateTime::getCurrentTime(),
-                         10);
+                       request_info::RequestInfo::HMIRequest,
+                       date_time::DateTime::getCurrentTime(),
+                       10);
     EXPECT_TRUE(request_info_set_.Add(request));
   }
 
@@ -397,10 +397,10 @@ TEST_F(RequestInfoTest, RequestInfoSetEqualHash) {
   const uint32_t corr_id = 65483;
   utils::SharedPtr<TestRequestInfo> request =
       CreateTestInfo(connection_key,
-                       corr_id,
-                       request_info::RequestInfo::HMIRequest,
-                       date_time::DateTime::getCurrentTime(),
-                       10);
+                     corr_id,
+                     request_info::RequestInfo::HMIRequest,
+                     date_time::DateTime::getCurrentTime(),
+                     10);
   EXPECT_TRUE(request_info_set.Add(request));
   EXPECT_FALSE(request_info_set.Add(request));
   EXPECT_FALSE(request_info_set.Add(request));

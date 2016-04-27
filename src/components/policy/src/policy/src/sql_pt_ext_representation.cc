@@ -337,8 +337,7 @@ bool SQLPTExtRepresentation::SetUserPermissionsForDevice(
     // TODO(AOleynik): Get this info from external data
     query.Bind(3, std::string("GUI"));
     if (!query.Exec() || !query.Reset()) {
-      LOGGER_WARN(logger_,
-                   "Failed insert to device allowed consented groups.");
+      LOGGER_WARN(logger_, "Failed insert to device allowed consented groups.");
       return false;
     }
   }
@@ -1105,8 +1104,7 @@ bool SQLPTExtRepresentation::SaveConsentGroup(
                         << it_groups->second);
       } else {
         if (!query.Prepare(sql_pt_ext::kInsertConsentGroups)) {
-          LOGGER_WARN(logger_,
-                       "Incorrect insert statement for consent group.");
+          LOGGER_WARN(logger_, "Incorrect insert statement for consent group.");
           return false;
         }
         query.Bind(0, device_id);

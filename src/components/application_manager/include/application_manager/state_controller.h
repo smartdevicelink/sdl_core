@@ -90,15 +90,15 @@ class StateController : public event_engine::EventObserver {
     if (SendActivateApp && is_full_allowed) {
       int64_t corr_id = SendBCActivateApp(app, hmi_level, true);
       if (-1 != corr_id) {
-      subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_ActivateApp,
-                         corr_id);
-      waiting_for_activate[app->app_id()] = resolved_state;
+        subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_ActivateApp,
+                           corr_id);
+        waiting_for_activate[app->app_id()] = resolved_state;
         return;
       }
       LOGGER_ERROR(logger_, "Unable to send BC.ActivateApp");
       return;
     }
-     ApplyRegularState(app, resolved_state);
+    ApplyRegularState(app, resolved_state);
   }
 
   /**
@@ -227,7 +227,7 @@ class StateController : public event_engine::EventObserver {
    */
   virtual void SetRegularState(
       ApplicationSharedPtr app,
-                       const mobile_apis::SystemContext::eType system_context) {
+      const mobile_apis::SystemContext::eType system_context) {
     if (!app) {
       return;
     }

@@ -122,11 +122,11 @@ MobileMessageHandler::HandleIncomingMessageProtocol(
   }
   LOGGER_DEBUG(logger_,
                "Incoming RPC_INFO: " << (out_message->connection_key() >> 16)
-                                      << ", "
-                                      << GetMessageType(out_message->type())
-                                      << ", " << out_message->function_id()
-                                      << ", " << out_message->correlation_id()
-                                      << ", " << out_message->json_message());
+                                     << ", "
+                                     << GetMessageType(out_message->type())
+                                     << ", " << out_message->function_id()
+                                     << ", " << out_message->correlation_id()
+                                     << ", " << out_message->json_message());
   return out_message;
 }
 
@@ -135,8 +135,8 @@ MobileMessageHandler::HandleOutgoingMessageProtocol(
     const MobileMessage& message) {
   LOGGER_DEBUG(logger_,
                "Outgoing RPC_INFO: " << (message->connection_key() >> 16)
-                                      << ", " << GetMessageType(message->type())
-                                      << ", " << message->function_id() << ", "
+                                     << ", " << GetMessageType(message->type())
+                                     << ", " << message->function_id() << ", "
                                      << message->correlation_id() << ", "
                                      << message->json_message());
 

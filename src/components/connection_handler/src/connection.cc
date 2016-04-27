@@ -162,16 +162,16 @@ bool Connection::AddNewService(uint8_t session_id,
 #ifdef ENABLE_SECURITY
     if (!request_protection) {
       LOGGER_WARN(logger_,
-                   "Session " << static_cast<int>(session_id)
-                              << " already has unprotected service "
-                              << static_cast<int>(service_type));
+                  "Session " << static_cast<int>(session_id)
+                             << " already has unprotected service "
+                             << static_cast<int>(service_type));
       return false;
     }
     if (service->is_protected_) {
       LOGGER_WARN(logger_,
-                   "Session " << static_cast<int>(session_id)
-                              << " already has protected service "
-                              << static_cast<int>(service_type));
+                  "Session " << static_cast<int>(session_id)
+                             << " already has protected service "
+                             << static_cast<int>(service_type));
       return false;
     }
     // For unproteced service could be start protection
@@ -203,7 +203,7 @@ bool Connection::RemoveService(uint8_t session_id,
   // Ignore wrong and required for Session services
   if (is_incorrect_for_remove_service(service_type)) {
     LOGGER_WARN(logger_,
-                 "Could not remove service " << static_cast<int>(service_type));
+                "Could not remove service " << static_cast<int>(service_type));
     return false;
   }
   sync_primitives::AutoLock lock(session_map_lock_);
@@ -219,8 +219,8 @@ bool Connection::RemoveService(uint8_t session_id,
       find(service_list.begin(), service_list.end(), service_type);
   if (service_list.end() == service_it) {
     LOGGER_WARN(logger_,
-                 "Session " << session_id << " didn't established"
-                                             " service " << service_type);
+                "Session " << session_id << " didn't established"
+                                            " service " << service_type);
     return false;
   }
   service_list.erase(service_it);

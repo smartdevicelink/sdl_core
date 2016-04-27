@@ -53,8 +53,8 @@ void GlobalCounter::operator++() const {
 }
 
 AppCounter::AppCounter(utils::SharedPtr<StatisticsManager> statistics_manager,
-    const std::string& app_id,
-    AppCounterId counter_type)
+                       const std::string& app_id,
+                       AppCounterId counter_type)
     : app_id_(app_id)
     , counter_type_(counter_type)
     , statistics_manager_(statistics_manager) {}
@@ -66,8 +66,8 @@ void AppCounter::operator++() const {
 }
 
 AppInfo::AppInfo(utils::SharedPtr<StatisticsManager> statistics_manager,
-    const std::string& app_id,
-    AppInfoId info_type)
+                 const std::string& app_id,
+                 AppInfoId info_type)
     : app_id_(app_id)
     , info_type_(info_type)
     , statistics_manager_(statistics_manager) {}

@@ -70,8 +70,8 @@ void HeartBeatMonitor::Process() {
         continue;
       } else {
         LOGGER_DEBUG(logger_,
-                      "Send heart beat into session with id "
-                          << static_cast<int32_t>(session_id));
+                     "Send heart beat into session with id "
+                         << static_cast<int32_t>(session_id));
         state.PrepareToClose();
         connection_->SendHeartBeat(it->first);
       }
@@ -84,8 +84,8 @@ void HeartBeatMonitor::Process() {
 void HeartBeatMonitor::threadMain() {
   AutoLock main_lock(main_thread_lock_);
   LOGGER_DEBUG(logger_,
-                "Start heart beat monitor. Timeout is "
-                    << default_heartbeat_timeout_);
+               "Start heart beat monitor. Timeout is "
+                   << default_heartbeat_timeout_);
   while (run_) {
     heartbeat_monitor_.WaitFor(main_lock, kDefaultCycleTimeout);
     Process();
@@ -94,12 +94,12 @@ void HeartBeatMonitor::threadMain() {
 
 void HeartBeatMonitor::AddSession(uint8_t session_id) {
   LOGGER_DEBUG(logger_,
-                "Add session with id " << static_cast<int32_t>(session_id));
+               "Add session with id " << static_cast<int32_t>(session_id));
   AutoLock auto_lock(sessions_list_lock_);
   if (sessions_.end() != sessions_.find(session_id)) {
     LOGGER_WARN(logger_,
-                 "Session with id " << static_cast<int32_t>(session_id)
-                                    << " already exists");
+                "Session with id " << static_cast<int32_t>(session_id)
+                                   << " already exists");
     return;
   }
   sessions_.insert(
@@ -112,12 +112,12 @@ void HeartBeatMonitor::RemoveSession(uint8_t session_id) {
   AutoLock auto_lock(sessions_list_lock_);
 
   LOGGER_DEBUG(logger_,
-                "Remove session with id " << static_cast<int>(session_id));
+               "Remove session with id " << static_cast<int>(session_id));
 
   if (sessions_.erase(session_id) == 0) {
     LOGGER_WARN(logger_,
-                 "Remove session with id " << static_cast<int>(session_id)
-                                           << " was unsuccessful");
+                "Remove session with id " << static_cast<int>(session_id)
+                                          << " was unsuccessful");
   }
 }
 
@@ -127,8 +127,8 @@ void HeartBeatMonitor::KeepAlive(uint8_t session_id) {
 
   if (sessions_.end() != sessions_.find(session_id)) {
     LOGGER_INFO(logger_,
-                 "Resetting heart beat timer for session with id "
-                     << static_cast<int32_t>(session_id));
+                "Resetting heart beat timer for session with id "
+                    << static_cast<int32_t>(session_id));
 
     sessions_[session_id].KeepAlive();
   }
@@ -147,8 +147,8 @@ void HeartBeatMonitor::exitThreadMain() {
 void HeartBeatMonitor::set_heartbeat_timeout_milliseconds(uint32_t timeout,
                                                           uint8_t session_id) {
   LOGGER_DEBUG(logger_,
-                "Set new heart beat timeout " << timeout
-                                              << "For session: " << session_id);
+               "Set new heart beat timeout " << timeout
+                                             << "For session: " << session_id);
 
   AutoLock session_locker(sessions_list_lock_);
   if (sessions_.end() != sessions_.find(session_id)) {
@@ -175,7 +175,7 @@ void HeartBeatMonitor::SessionState::RefreshExpiration() {
 void HeartBeatMonitor::SessionState::UpdateTimeout(
     uint32_t heartbeat_timeout_mseconds) {
   LOGGER_DEBUG(logger_,
-                "Update timout with value " << heartbeat_timeout_mseconds_);
+               "Update timout with value " << heartbeat_timeout_mseconds_);
   heartbeat_timeout_mseconds_ = heartbeat_timeout_mseconds;
   RefreshExpiration();
 }

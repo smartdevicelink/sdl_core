@@ -310,6 +310,7 @@ class PTRepresentation {
    * @return true if success, otherwise - false
    */
   virtual bool UpdateDBVersion() const = 0;
+
  protected:
   const PolicySettings& get_settings() const {
     DCHECK(settings_);

@@ -470,8 +470,7 @@ bool ChangeRegistrationRequest::IsNicknameAllowed(
     policy::StringArray::const_iterator it =
         std::find_if(app_nicknames.begin(), app_nicknames.end(), compare);
     if (app_nicknames.end() == it) {
-      LOGGER_WARN(logger_,
-                   "Application name was not found in nicknames list.");
+      LOGGER_WARN(logger_, "Application name was not found in nicknames list.");
 
       usage_statistics::AppCounter count_of_rejections_nickname_mismatch(
           application_manager::ApplicationManagerImpl::instance()

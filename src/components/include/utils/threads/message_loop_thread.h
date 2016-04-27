@@ -68,8 +68,7 @@ class MessageLoopThread {
      * from it's queue. After calling this method message is discarded.
      */
     // TODO (AKozoriz) : change to const reference (APPLINK-20235)
-    virtual void Handle(
-        const Message message) = 0;
+    virtual void Handle(const Message message) = 0;
 
     virtual ~Handler() {}
   };

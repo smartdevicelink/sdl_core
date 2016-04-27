@@ -77,9 +77,7 @@ bool BluetoothDevice::GetRfcommChannel(const ApplicationHandle app_handle,
 }
 
 std::string BluetoothDevice::GetUniqueDeviceId(const bdaddr_t& device_address) {
-  LOGGER_TRACE(
-      logger_,
-      "enter. device_adress: " << &device_address);
+  LOGGER_TRACE(logger_, "enter. device_adress: " << &device_address);
   char device_address_string[32];
   ba2str(&device_address, device_address_string);
   LOGGER_TRACE(logger_, "exit with BT-" << device_address_string);

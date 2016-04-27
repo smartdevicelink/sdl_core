@@ -63,7 +63,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
       LOGGER_WARN(logger_, "The cache manager is not initialized"); \
       return return_value;                                          \
     }                                                               \
-}
+  }
 
 #define CACHE_MANAGER_CHECK_VOID()                                  \
   {                                                                 \
@@ -71,7 +71,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
       LOGGER_WARN(logger_, "The cache manager is not initialized"); \
       return;                                                       \
     }                                                               \
-}
+  }
 
 struct LanguageFinder {
   LanguageFinder(const std::string& language) : language_(language) {}
@@ -410,8 +410,8 @@ void CacheManager::CheckPermissions(const PTString& app_id,
 
   if (pt_->policy_table.app_policies_section.apps.end() ==
       pt_->policy_table.app_policies_section.apps.find(app_id)) {
-    LOGGER_ERROR(
-        logger_, "Application id " << app_id << " was not found in policy DB.");
+    LOGGER_ERROR(logger_,
+                 "Application id " << app_id << " was not found in policy DB.");
     return;
   }
 
@@ -703,7 +703,7 @@ void CacheManager::CheckSnapshotInitialization() {
         rpc::Optional<policy_table::Messages>();
   } else {
     LOGGER_WARN(logger_,
-                 "policy_table.consumer_friendly_messages is not initialized");
+                "policy_table.consumer_friendly_messages is not initialized");
   }
 
   /* policy_table.usage_and_error_counts are required for PTS and
@@ -779,7 +779,7 @@ void CacheManager::CheckSnapshotInitialization() {
     }
   } else {
     LOGGER_WARN(logger_,
-                 "usage_and_error_counts or app_level is not initialized");
+                "usage_and_error_counts or app_level is not initialized");
   }
 }
 
@@ -1227,7 +1227,7 @@ bool CacheManager::Init(const std::string& file_name,
       utils::SharedPtr<policy_table::Table> snapshot = GenerateSnapshot();
       result &= snapshot->is_valid();
       LOGGER_DEBUG(logger_,
-                    "Check if snapshot is valid: " << std::boolalpha << result);
+                   "Check if snapshot is valid: " << std::boolalpha << result);
       if (!result) {
         rpc::ValidationReport report("policy_table");
         snapshot->ReportErrors(&report);
