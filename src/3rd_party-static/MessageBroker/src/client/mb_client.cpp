@@ -66,7 +66,11 @@ namespace NsMessageBroker
 
    void Client::Close()
    {
+#ifdef _WIN32
+      shutdown(m_sock, SD_BOTH);
+#else
       shutdown(m_sock, SHUT_RDWR);
+#endif
 
       close(m_sock);
       m_sock = -1;

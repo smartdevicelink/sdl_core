@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/commands/hmi/on_system_context_notification.h"
-
 #include "application_manager/application_impl.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
@@ -49,7 +48,7 @@ void OnSystemContextNotification::Run() {
   LOGGER_AUTO_TRACE(logger_);
 
   mobile_api::SystemContext::eType system_context =
-      static_cast<mobile_api::SystemContext::eType>(
+    static_cast<mobile_api::SystemContext::eType>(
           (*message_)[strings::msg_params][hmi_notification::system_context]
               .asInt());
 

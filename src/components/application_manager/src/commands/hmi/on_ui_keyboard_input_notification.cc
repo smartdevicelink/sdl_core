@@ -48,9 +48,9 @@ OnUIKeyBoardInputNotification::~OnUIKeyBoardInputNotification() {}
 void OnUIKeyBoardInputNotification::Run() {
   LOGGER_AUTO_TRACE(logger_);
 
-  // prepare SmartObject for mobile factory
+  //prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-      mobile_apis::FunctionID::OnKeyboardInputID;
+  mobile_apis::FunctionID::OnKeyboardInputID;
   SendNotificationToMobile(message_);
 }
 
@@ -59,3 +59,4 @@ void OnUIKeyBoardInputNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
+

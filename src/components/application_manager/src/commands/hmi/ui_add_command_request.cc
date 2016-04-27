@@ -51,3 +51,4 @@ void UIAddCommandRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
+

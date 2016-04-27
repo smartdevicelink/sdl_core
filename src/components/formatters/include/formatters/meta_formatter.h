@@ -45,7 +45,7 @@ namespace Formatters {
 
 /**
   * @brief Formats to string the smart object against given schema for given
-  *formatter
+ * formatter
   *
   * Sample usage:
   *    CSmartFactory factory;
@@ -55,6 +55,7 @@ namespace Formatters {
   */
 class CMetaFormatter {
  public:
+
   /**
     * @brief Creates smart object by the given schema having copied
     *        matched tree elements from original object.
@@ -66,13 +67,13 @@ class CMetaFormatter {
     * @return true if successful, false - otherwise
     */
   static bool CreateObjectByPattern(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
-      const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
+          const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
+          const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
+          NsSmartDeviceLink::NsSmartObjects::SmartObject& result_object);
 };
 
-}  // namespace NsSmartDeviceLink
-}  // namespace NsSmartDeviceLink::NsJSONHandler
-}  // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
+}// namespace NsSmartDeviceLink
+}// namespace NsSmartDeviceLink::NsJSONHandler
+}// namespace NsSmartDeviceLink::NsJSONHandler::Formatters
 
-#endif  // __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS_METAFORMATTER_H__
+#endif // __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS_METAFORMATTER_H__

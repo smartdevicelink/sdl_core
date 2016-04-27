@@ -41,15 +41,14 @@ namespace application_manager {
 
 class HmiState;
 class ApplicationManager;
-
 typedef utils::SharedPtr<HmiState> HmiStatePtr;
 
 /**
-* @brief The HmiState class
+ * @brief The HmiState class
 *  Handle Hmi state of application (hmi level,
 *  audio streaming state, system context)
 *
-*/
+ */
 class HmiState {
  public:
   /**

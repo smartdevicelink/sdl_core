@@ -31,7 +31,10 @@
  */
 #include "connection_handler/heartbeat_monitor.h"
 
+#if defined(OS_POSIX)
 #include <unistd.h>
+#endif
+
 #include <utility>
 
 #include "utils/logger.h"

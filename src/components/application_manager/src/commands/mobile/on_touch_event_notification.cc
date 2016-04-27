@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/on_touch_event_notification.h"
-
 #include "application_manager/application_impl.h"
 
 namespace application_manager {

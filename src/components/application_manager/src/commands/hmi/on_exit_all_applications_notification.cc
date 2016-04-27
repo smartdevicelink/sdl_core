@@ -33,12 +33,17 @@
 #include "application_manager/commands/hmi/on_exit_all_applications_notification.h"
 
 #include <sys/types.h>
-#include <unistd.h>
 #include <signal.h>
 
+#if defined(OS_POSIX)
+#include <unistd.h>
+#endif
+
+#include "application_manager/application_manager_impl.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/resumption/resume_ctrl.h"
 #include "interfaces/HMI_API.h"
+
 
 namespace application_manager {
 
@@ -78,7 +83,7 @@ void OnExitAllApplicationsNotification::Run() {
       SendOnSDLPersistenceComplete();
       return;
     }
-    default: {
+    default : {
       LOGGER_ERROR(logger_, "Unknown Application close reason" << reason);
       return;
     }
@@ -91,7 +96,11 @@ void OnExitAllApplicationsNotification::Run() {
           mob_reason) {
     application_manager_.HeadUnitReset(mob_reason);
   }
+#if defined(OS_POSIX)
   kill(getpid(), SIGINT);
+#elif defined(OS_WINDOWS)
+  raise(SIGINT);
+#endif
 }
 
 void OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete() {
@@ -112,3 +121,4 @@ void OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete() {
 }  // namespace commands
 
 }  // namespace application_manager
+

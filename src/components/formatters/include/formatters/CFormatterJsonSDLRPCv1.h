@@ -30,8 +30,6 @@
 #ifndef __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV1_HPP__
 #define __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV1_HPP__
 
-#include "json/json.h"
-
 #include "smart_objects/smart_object.h"
 #include "smart_objects/enum_schema_item.h"
 
@@ -40,6 +38,7 @@
 #include "formatters/CSmartFactory.h"
 #include "formatters/meta_formatter.h"
 
+#include "utils/json_utils.h"
 namespace NsSmartDeviceLink {
 namespace NsJSONHandler {
 namespace Formatters {
@@ -76,7 +75,8 @@ class CFormatterJsonSDLRPCv1 : public CFormatterJsonBase {
    *
    * @return Type or empty string if there's no type in the JSON object.
    */
-  static const std::string getMessageType(const Json::Value& root);
+  static const std::string getMessageType(
+      const utils::json::JsonValueRef json_obj);
 
   // SDLRPCv1 string consts
 
@@ -111,6 +111,7 @@ class CFormatterJsonSDLRPCv1 : public CFormatterJsonBase {
   static const std::string S_CORRELATION_ID;
 
  public:
+
   static const int32_t kSuccess;
   static const int32_t kParsingError;
   static const int32_t kFunctionIdNotFound;
@@ -129,7 +130,7 @@ class CFormatterJsonSDLRPCv1 : public CFormatterJsonBase {
    * @return true if success, false otherwise
    */
   static bool toString(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject& obj,
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject &obj,
       std::string& outStr);
 
   /**
@@ -139,17 +140,17 @@ class CFormatterJsonSDLRPCv1 : public CFormatterJsonBase {
    * @param out The resulting SmartObject
    * @return true if success, otherwise - false
    */
-  template <typename FunctionId, typename MessageType>
+  template<typename FunctionId, typename MessageType>
   static int32_t fromString(
       const std::string& str,
-      NsSmartDeviceLink::NsSmartObjects::SmartObject& out);
+                        NsSmartDeviceLink::NsSmartObjects::SmartObject &out);
 
   /**
    * @brief Converts to string the smart object against the given schema
    *
    * @param object Original smart object
    * @param schema Smart schema which describes 'fake' smart object to be
-   *formatted
+   * formatted
    * @param outStr Resulting JSON string
    * @return formatting error code
    */
@@ -157,29 +158,32 @@ class CFormatterJsonSDLRPCv1 : public CFormatterJsonBase {
       const NsSmartDeviceLink::NsSmartObjects::SmartObject& object,
       const NsSmartDeviceLink::NsSmartObjects::CSmartSchema& schema,
       std::string& outStr);
+
 };
 
 // ----------------------------------------------------------------------------
 
-template <typename FunctionId, typename MessageType>
+template<typename FunctionId, typename MessageType>
 int32_t Formatters::CFormatterJsonSDLRPCv1::fromString(
     const std::string& str,
     NsSmartDeviceLink::NsSmartObjects::SmartObject& out) {
+  using namespace utils::json;
   int32_t result = kSuccess;
 
   try {
-    Json::Value root;
-    Json::Reader reader;
-    std::string type;
-
-    if (false == reader.parse(str, root)) {
+    JsonValue::ParseResult parse_result = JsonValue::Parse(str);
+    if (!parse_result.second) {
       result = kParsingError | kMessageTypeNotFound | kFunctionIdNotFound |
                kCorrelationIdNotFound;
     }
+    const JsonValue& root_json = parse_result.first;
+    std::string type;
+
 
     if (kSuccess == result) {
-      type = getMessageType(root);
-      if (true == type.empty()) {
+      // getMessageType call without static_cast is ambiguous (VS 2010)
+      type = getMessageType(static_cast<const JsonValueRef>(root_json));
+      if (type.empty()) {
         result =
             kMessageTypeNotFound | kFunctionIdNotFound | kCorrelationIdNotFound;
       }
@@ -191,8 +195,8 @@ int32_t Formatters::CFormatterJsonSDLRPCv1::fromString(
     if (kSuccess == result) {
       if (!NsSmartObjects::EnumConversionHelper<MessageType>::StringToEnum(
               type, &messageType)) {
-        // If MessageType is not found than FunctionId and CorrelationId can not
-        // be found either
+        // If MessageType is not found than FunctionId and CorrelationId can
+        // not be found either
         result =
             kMessageTypeNotFound | kFunctionIdNotFound | kCorrelationIdNotFound;
       }
@@ -200,7 +204,7 @@ int32_t Formatters::CFormatterJsonSDLRPCv1::fromString(
 
     if (kSuccess == result) {
       if (!NsSmartObjects::EnumConversionHelper<FunctionId>::StringToEnum(
-              root[type][S_NAME].asString(), &functionId)) {
+              root_json[type][S_NAME].AsString(), &functionId)) {
         result = kFunctionIdNotFound;
         functionId = FunctionId::INVALID_ENUM;
       }
@@ -209,19 +213,19 @@ int32_t Formatters::CFormatterJsonSDLRPCv1::fromString(
     namespace S = NsSmartDeviceLink::NsJSONHandler::strings;
 
     if (!(result & kMessageTypeNotFound)) {
-      jsonValueToObj(root[type][S_PARAMETERS], out[S::S_MSG_PARAMS]);
+      jsonValueToObj(root_json[type][S_PARAMETERS], out[S::S_MSG_PARAMS]);
 
       out[S::S_PARAMS][S::S_MESSAGE_TYPE] = messageType;
       out[S::S_PARAMS][S::S_FUNCTION_ID] = functionId;
-      if (true == root[type][S_CORRELATION_ID].empty()) {
-        if (type !=
-            S_NOTIFICATION) {  // Notification may not have CorrelationId
+      if (root_json[type][S_CORRELATION_ID].IsEmpty()) {
+        if (type != S_NOTIFICATION) {  // Notification may not have
+                                       // CorrelationId
           result |= kCorrelationIdNotFound;
           out[S::S_PARAMS][S::S_CORRELATION_ID] = -1;
         }
       } else {
         out[S::S_PARAMS][S::S_CORRELATION_ID] =
-            root[type][S_CORRELATION_ID].asInt();
+            static_cast<int64_t>(root_json[type][S_CORRELATION_ID].AsInt());
       }
       out[S::S_PARAMS][S::S_PROTOCOL_TYPE] = 0;
       out[S::S_PARAMS][S::S_PROTOCOL_VERSION] = 1;
@@ -232,8 +236,9 @@ int32_t Formatters::CFormatterJsonSDLRPCv1::fromString(
 
   return result;
 }
+
 }
 }
 }  // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
 
-#endif  // __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV1_HPP__
+#endif // __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV1_HPP__

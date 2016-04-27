@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/set_media_clock_timer_request.h"
-
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -108,6 +107,7 @@ bool SetMediaClockRequest::isDataValid() {
 
   if (update_mode == mobile_apis::UpdateMode::COUNTUP ||
       update_mode == mobile_apis::UpdateMode::COUNTDOWN) {
+
     if (!msg_params.keyExists(strings::start_time)) {
       LOGGER_INFO(logger_, "Invalid data");
       return false;
@@ -131,9 +131,9 @@ bool SetMediaClockRequest::isDataValid() {
           (msg_params[strings::end_time][strings::seconds].asUInt());
 
       if (((end_time_in_seconds > start_time_in_seconds) &&
-           (update_mode == mobile_apis::UpdateMode::COUNTDOWN)) ||
+          (update_mode == mobile_apis::UpdateMode::COUNTDOWN)) ||
           ((end_time_in_seconds < start_time_in_seconds) &&
-           (update_mode == mobile_apis::UpdateMode::COUNTUP))) {
+          (update_mode == mobile_apis::UpdateMode::COUNTUP))) {
         LOGGER_INFO(logger_, "Invalid data");
         return false;
       }

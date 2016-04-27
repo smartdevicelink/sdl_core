@@ -32,10 +32,8 @@
  */
 
 #include "application_manager/commands/mobile/reset_global_properties_request.h"
-
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 
@@ -70,8 +68,8 @@ void ResetGlobalPropertiesRequest::Run() {
 
   size_t obj_length =
       (*message_)[strings::msg_params][strings::properties].length();
-  // if application waits for sending ttsGlobalProperties need to remove this
-  // application from tts_global_properties_app_list_
+  //if application waits for sending ttsGlobalProperties need to remove this
+  //application from tts_global_properties_app_list_
   LOGGER_INFO(logger_, "RemoveAppFromTTSGlobalPropertiesList");
   application_manager_.RemoveAppFromTTSGlobalPropertiesList(app_id);
 
@@ -96,7 +94,7 @@ void ResetGlobalPropertiesRequest::Run() {
     } else if (((mobile_apis::GlobalProperty::VRHELPTITLE == global_property) ||
                 (mobile_apis::GlobalProperty::VRHELPITEMS ==
                  global_property)) &&
-               (0 == number_of_reset_vr)) {
+        (0 == number_of_reset_vr)) {
       ++number_of_reset_vr;
       vr_help_title_items = ResetVrHelpTitleItems(app);
     } else if (mobile_apis::GlobalProperty::MENUNAME == global_property) {
@@ -137,8 +135,8 @@ void ResetGlobalPropertiesRequest::Run() {
       msg_params[hmi_request::menu_title] = "";
       app->set_menu_title(msg_params[hmi_request::menu_title]);
     }
-    // TODO(DT): clarify the sending parameter menuIcon
-    // if (menu_icon) {
+    //TODO(DT): clarify the sending parameter menuIcon
+    //if (menu_icon) {
     //}
     if (is_key_board_properties) {
       smart_objects::SmartObject key_board_properties =
@@ -246,24 +244,24 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
       application_manager_.application(connection_key());
 
   switch (event.id()) {
-    case hmi_apis::FunctionID::UI_SetGlobalProperties: {
+  case hmi_apis::FunctionID::UI_SetGlobalProperties: {
       LOGGER_INFO(logger_, "Received UI_SetGlobalProperties event");
-      is_ui_received_ = true;
-      ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
-      break;
-    }
-    case hmi_apis::FunctionID::TTS_SetGlobalProperties: {
+    is_ui_received_ = true;
+    ui_result_ = static_cast<hmi_apis::Common_Result::eType>(
+                   message[strings::params][hmi_response::code].asInt());
+    break;
+  }
+  case hmi_apis::FunctionID::TTS_SetGlobalProperties: {
       LOGGER_INFO(logger_, "Received TTS_SetGlobalProperties event");
-      is_tts_received_ = true;
-      tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
-      break;
-    }
-    default: {
+    is_tts_received_ = true;
+    tts_result_ = static_cast<hmi_apis::Common_Result::eType>(
+                    message[strings::params][hmi_response::code].asInt());
+    break;
+  }
+  default: {
       LOGGER_ERROR(logger_, "Received unknown event" << event.id());
-      return;
-    }
+    return;
+  }
   }
 
   if (!IsPendingResponseExist()) {
@@ -286,11 +284,11 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
             std::string("Unsupported phoneme type sent in a prompt").c_str();
       } else {
         result_code = static_cast<mobile_apis::Result::eType>(
-            std::max(ui_result_, tts_result_));
+                        std::max(ui_result_, tts_result_));
       }
     } else {
       result_code = static_cast<mobile_apis::Result::eType>(
-          std::max(ui_result_, tts_result_));
+                      std::max(ui_result_, tts_result_));
     }
 
     SendResponse(result,
@@ -310,6 +308,7 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
     LOGGER_WARN(logger_, "unable to find application: " << connection_key());
   }
 }
+
 
 bool ResetGlobalPropertiesRequest::IsPendingResponseExist() {
   return is_ui_send_ != is_ui_received_ || is_tts_send_ != is_tts_received_;

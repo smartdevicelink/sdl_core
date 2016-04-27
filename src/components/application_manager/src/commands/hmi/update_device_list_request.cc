@@ -31,10 +31,7 @@
  */
 
 #include "application_manager/commands/hmi/update_device_list_request.h"
-
 #include "interfaces/HMI_API.h"
-
-#include <unistd.h>
 
 namespace application_manager {
 
@@ -70,13 +67,13 @@ void UpdateDeviceListRequest::on_event(const event_engine::Event& event) {
   LOGGER_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(wait_hmi_lock);
   switch (event.id()) {
-    case hmi_apis::FunctionID::BasicCommunication_OnReady: {
+    case hmi_apis::FunctionID::BasicCommunication_OnReady : {
       LOGGER_INFO(logger_, "received OnReady");
       unsubscribe_from_event(hmi_apis::FunctionID::BasicCommunication_OnReady);
       termination_condition_.Broadcast();
       break;
     };
-    default: {
+    default : {
       LOGGER_ERROR(logger_, "Unknown event ");
       break;
     };
@@ -92,3 +89,4 @@ bool UpdateDeviceListRequest::CleanUp() {
 }  // namespace commands
 
 }  // namespace application_manager
+

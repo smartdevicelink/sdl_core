@@ -43,27 +43,27 @@ namespace commands {
  * @brief SDLActivateAppResponse command class
  **/
 class SDLActivateAppResponse : public ResponseToHMI {
- public:
-  /**
-   * @brief SDLActivateAppResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
+  public:
+    /**
+     * @brief SDLActivateAppResponse class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
   SDLActivateAppResponse(const MessageSharedPtr& message,
                          ApplicationManager& application_manager);
 
-  /**
-   * @brief SDLActivateAppResponse class destructor
-   **/
-  virtual ~SDLActivateAppResponse();
+    /**
+     * @brief SDLActivateAppResponse class destructor
+     **/
+    virtual ~SDLActivateAppResponse();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(SDLActivateAppResponse);
+  private:
+    DISALLOW_COPY_AND_ASSIGN(SDLActivateAppResponse);
 };
 
 }  // namespace commands

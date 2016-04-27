@@ -60,7 +60,7 @@ TelemetryMonitor::TelemetryMonitor(const std::string& server_address,
 
 void TelemetryMonitor::Start() {
   streamer_ = new Streamer(this);
-  thread_ = threads::CreateThread("TelemetryMonitor", streamer_);
+  thread_ = threads::CreateThread("TelemetryMonitor", streamer_ );
 }
 
 void TelemetryMonitor::set_streamer(Streamer* streamer) {
@@ -76,7 +76,7 @@ void TelemetryMonitor::set_streamer(Streamer* streamer) {
   }
 }
 
-const std::string& TelemetryMonitor::ip() const {
+const std::string& TelemetryMonitor::ip() const  {
   return server_address_;
 }
 
@@ -116,7 +116,7 @@ void TelemetryMonitor::Stop() {
 }
 
 void TelemetryMonitor::SendMetric(utils::SharedPtr<MetricWrapper> metric) {
-  if ((NULL != streamer_) && streamer_->is_client_connected_) {
+  if ((NULL != streamer_ )&& streamer_->is_client_connected_) {
     streamer_->PushMessage(metric);
   }
 }
@@ -193,7 +193,7 @@ void Streamer::Start() {
     return;
   }
 
-  sockaddr_in serv_addr_ = {0};
+  sockaddr_in serv_addr_ = { 0 };
   serv_addr_.sin_addr.s_addr = inet_addr(kserver_->ip().c_str());
   serv_addr_.sin_family = AF_INET;
   serv_addr_.sin_port = htons(kserver_->port());
@@ -214,7 +214,7 @@ void Streamer::Start() {
 
 void Streamer::ShutDownAndCloseSocket(int32_t socket_fd) {
   LOGGER_AUTO_TRACE(logger_);
-  if (0 < socket_fd) {
+  if (0 < socket_fd){
     LOGGER_INFO(logger_, "Shutdown socket");
     if (-1 == ::shutdown(socket_fd, SHUT_RDWR)) {
       LOGGER_ERROR(logger_, "Unable to shutdown socket");
@@ -251,7 +251,7 @@ bool Streamer::IsReady() const {
   FD_ZERO(&fds);
   FD_SET(client_socket_fd_, &fds);
   TimevalStruct tv = {0, 0};
-  tv.tv_sec = 5;  // set a 5 second timeout
+  tv.tv_sec = 5;                       // set a 5 second timeout
   tv.tv_usec = 0;
 
   const int retval = select(client_socket_fd_ + 1, 0, &fds, 0, &tv);

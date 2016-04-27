@@ -51,3 +51,4 @@ void UIAddSubmenuRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
+

@@ -41,6 +41,7 @@ void MessageHelper::SendHashUpdateNotification(uint32_t const app_id,
   MockMessageHelper::message_helper_mock()->SendHashUpdateNotification(
       app_id, app_mngr);
 }
+
 void MessageHelper::SendNaviStartStream(int32_t connection_key,
                                         ApplicationManager& app_mngr) {
   MockMessageHelper::message_helper_mock()->SendNaviStartStream(connection_key,
@@ -212,13 +213,13 @@ void MessageHelper::SendUpdateSDLResponse(const std::string& result,
 
 hmi_apis::Common_Language::eType MessageHelper::CommonLanguageFromString(
     const std::string& language) {
-  return MockMessageHelper::message_helper_mock()->CommonLanguageFromString(
-      language);
+   return MockMessageHelper::message_helper_mock()->CommonLanguageFromString(
+        language);
 }
 
 smart_objects::SmartObjectSPtr MessageHelper::CreateModuleInfoSO(
     uint32_t function_id, ApplicationManager& app_mngr) {
-  return MockMessageHelper::message_helper_mock()->CreateModuleInfoSO(
+    return  MockMessageHelper::message_helper_mock()->CreateModuleInfoSO(
       function_id, app_mngr);
 }
 
@@ -284,7 +285,7 @@ std::string MessageHelper::CommonLanguageToString(
 smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
     ApplicationConstSharedPtr app,
     const protocol_handler::SessionObserver& session_observer,
-    const policy::PolicyHandlerInterface& policy_handler,
+    const policy::PolicyHandlerInterface &policy_handler,
     hmi_apis::Common_HMILevel::eType level,
     bool send_policy_priority,
     ApplicationManager& app_mngr) {

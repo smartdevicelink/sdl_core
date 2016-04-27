@@ -189,11 +189,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   virtual bool flag_sending_hash_change_after_awake() const;
   virtual void set_flag_sending_hash_change_after_awake(bool flag);
 #endif  // CUSTOMER_PASA
-        /**
-         * @brief Change Hash for current application
-         * and send notification to mobile
-         * @return updated_hash
-         */
+  /**
+   * @brief Change Hash for current application
+   * and send notification to mobile
+   * @return updated_hash
+   */
   virtual void UpdateHash();
 
   UsageStatistics& usage_report();
@@ -294,7 +294,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * @return free app space.
    */
   uint32_t GetAvailableDiskSpace() OVERRIDE;
-
  protected:
   /**
    * @brief Clean up application folder. Persistent files will stay
@@ -302,6 +301,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void CleanupFiles();
 
  private:
+
   /**
    * @brief Callback for video streaming suspend timer.
    * Suspends video streaming process for application

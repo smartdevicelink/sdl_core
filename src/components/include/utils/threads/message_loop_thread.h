@@ -41,7 +41,6 @@
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
 #include "utils/shared_ptr.h"
-#include "utils/lock.h"
 
 namespace threads {
 
@@ -190,6 +189,8 @@ void MessageLoopThread<Q>::LoopThreadDelegate::threadMain() {
 
 template <class Q>
 void MessageLoopThread<Q>::LoopThreadDelegate::exitThreadMain() {
+  CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
+  LOGGER_AUTO_TRACE(logger_);
   message_queue_.Shutdown();
 }
 
@@ -202,6 +203,5 @@ void MessageLoopThread<Q>::LoopThreadDelegate::DrainQue() {
     }
   }
 }
-
 }  // namespace threads
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_THREADS_MESSAGE_LOOP_THREAD_H_

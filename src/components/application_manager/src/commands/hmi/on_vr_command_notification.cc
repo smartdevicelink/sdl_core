@@ -31,11 +31,9 @@
  */
 
 #include "application_manager/commands/hmi/on_vr_command_notification.h"
-
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/state_controller.h"
-
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "application_manager/event_engine/event.h"
@@ -102,3 +100,4 @@ void OnVRCommandNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
+

@@ -38,10 +38,13 @@
 #include "policy/policy_helper.h"
 #include "policy/policy_manager_impl.h"
 
+#if defined(OS_WINDOWS)
+#define strcasecmp _stricmp
+#endif
+
 namespace policy {
 
 namespace custom_str = utils::custom_string;
-
 namespace {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")

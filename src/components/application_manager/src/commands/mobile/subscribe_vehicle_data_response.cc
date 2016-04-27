@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/subscribe_vehicle_data_response.h"
-
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 

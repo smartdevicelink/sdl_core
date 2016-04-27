@@ -74,6 +74,9 @@ class BluetoothTransportAdapter : public TransportAdapterImpl {
    * @return True on success false otherwise
    */
   virtual bool Restore();
+
+ private:
+  static const int kDeviceRepeatSearchIntervalSec = 1;
 };
 
 }  // namespace transport_adapter

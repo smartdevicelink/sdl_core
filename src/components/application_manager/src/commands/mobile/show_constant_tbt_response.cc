@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/show_constant_tbt_response.h"
-
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {

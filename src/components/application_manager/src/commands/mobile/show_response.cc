@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/show_response.h"
-
 #include "application_manager/application_impl.h"
 #include "interfaces/HMI_API.h"
 

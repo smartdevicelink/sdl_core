@@ -33,7 +33,6 @@
 
 #include <string>
 #include "application_manager/commands/mobile/update_turn_list_request.h"
-
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
@@ -67,7 +66,7 @@ void UpdateTurnListRequest::Run() {
 
   if (IsWhiteSpaceExist()) {
     LOGGER_ERROR(logger_,
-                 "Incoming update turn list has contains \t\n \\t \\n");
+                  "Incoming update turn list has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }

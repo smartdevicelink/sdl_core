@@ -47,7 +47,7 @@ void VRGetCapabilitiesResponse::Run() {
   HMICapabilities& hmi_capabilities = application_manager_.hmi_capabilities();
 
   hmi_capabilities.set_vr_capabilities(
-      (*message_)[strings::msg_params][strings::vr_capabilities]);
+    (*message_)[strings::msg_params][strings::vr_capabilities]);
 }
 
 }  // namespace commands

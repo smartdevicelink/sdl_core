@@ -33,10 +33,6 @@
 
 #include "transport_manager/tcp/tcp_socket_connection.h"
 
-#include <memory.h>
-#include <signal.h>
-#include <errno.h>
-#include <unistd.h>
 
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
@@ -88,30 +84,20 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
     return false;
   }
 
-  const int socket = ::socket(AF_INET, SOCK_STREAM, 0);
-  if (socket < 0) {
-    LOGGER_ERROR(logger_, "Failed to create socket");
-    *error = new ConnectError();
-    return false;
-  }
-
-  struct sockaddr_in addr = {0};
-  addr.sin_family = AF_INET;
-  addr.sin_addr.s_addr = tcp_device->in_addr();
-  addr.sin_port = htons(port);
-
-  LOGGER_DEBUG(logger_,
-               "Connecting " << inet_ntoa(addr.sin_addr) << ":" << port);
-  if (::connect(socket, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
+  const std::string address = tcp_device->Address().ToString();
+  LOGGER_DEBUG(logger_, "Connecting to " << address << ":" << port);
+  utils::TcpSocketConnection connection;
+  if (!connection.Connect(tcp_device->Address(), port)) {
     LOGGER_ERROR(logger_,
-                 "Failed to connect for application " << application_handle()
-                                                      << ", error " << errno);
+                 "Failed to connect to the server " << address << ":" << port
+                                                    << " for application "
+                                                    << application_handle());
     *error = new ConnectError();
-    ::close(socket);
     return false;
   }
 
-  set_socket(socket);
+  // Transfer ownership on the connection
+  SetSocket(connection);
   return true;
 }
 

@@ -114,21 +114,27 @@ size_t des_cbc3_sha_max_block_size(size_t mtu) {
 std::map<std::string, CryptoManagerImpl::SSLContextImpl::BlockSizeGetter>
 CryptoManagerImpl::SSLContextImpl::create_max_block_sizes() {
   std::map<std::string, CryptoManagerImpl::SSLContextImpl::BlockSizeGetter> rc;
+  rc.insert(std::make_pair(std::string("AES128-GCM-SHA256"),
+                           aes128_gcm_sha256_max_block_size));
+  rc.insert(std::make_pair(std::string("AES128-SHA256"),
+                           aes128_sha256_max_block_size));
+  rc.insert(std::make_pair(std::string("AES128-SHA"), seed_sha_max_block_size));
+  rc.insert(std::make_pair(std::string("AES256-GCM-SHA384"),
+                           aes128_gcm_sha256_max_block_size));
+  rc.insert(std::make_pair(std::string("AES256-SHA256"),
+                           aes128_sha256_max_block_size));
+  rc.insert(std::make_pair(std::string("AES256-SHA"), seed_sha_max_block_size));
   rc.insert(
-      std::make_pair("AES128-GCM-SHA256", aes128_gcm_sha256_max_block_size));
-  rc.insert(std::make_pair("AES128-SHA256", aes128_sha256_max_block_size));
-  rc.insert(std::make_pair("AES128-SHA", seed_sha_max_block_size));
+      std::make_pair(std::string("CAMELLIA128-SHA"), seed_sha_max_block_size));
   rc.insert(
-      std::make_pair("AES256-GCM-SHA384", aes128_gcm_sha256_max_block_size));
-  rc.insert(std::make_pair("AES256-SHA256", aes128_sha256_max_block_size));
-  rc.insert(std::make_pair("AES256-SHA", seed_sha_max_block_size));
-  rc.insert(std::make_pair("CAMELLIA128-SHA", seed_sha_max_block_size));
-  rc.insert(std::make_pair("CAMELLIA256-SHA", seed_sha_max_block_size));
-  rc.insert(std::make_pair("DES-CBC3-SHA", des_cbc3_sha_max_block_size));
-  rc.insert(std::make_pair("DES-CBC-SHA", des_cbc3_sha_max_block_size));
-  rc.insert(std::make_pair("RC4-MD5", rc4_md5_max_block_size));
-  rc.insert(std::make_pair("RC4-SHA", rc4_sha_max_block_size));
-  rc.insert(std::make_pair("SEED-SHA", seed_sha_max_block_size));
+      std::make_pair(std::string("CAMELLIA256-SHA"), seed_sha_max_block_size));
+  rc.insert(
+      std::make_pair(std::string("DES-CBC3-SHA"), des_cbc3_sha_max_block_size));
+  rc.insert(
+      std::make_pair(std::string("DES-CBC-SHA"), des_cbc3_sha_max_block_size));
+  rc.insert(std::make_pair(std::string("RC4-MD5"), rc4_md5_max_block_size));
+  rc.insert(std::make_pair(std::string("RC4-SHA"), rc4_sha_max_block_size));
+  rc.insert(std::make_pair(std::string("SEED-SHA"), seed_sha_max_block_size));
   return rc;
 }
 

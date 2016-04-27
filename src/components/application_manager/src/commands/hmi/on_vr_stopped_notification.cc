@@ -53,3 +53,4 @@ void OnVRStoppedNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
+

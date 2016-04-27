@@ -30,7 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/button_get_capabilities_response.h"
-
 #include "utils/logger.h"
 
 namespace application_manager {

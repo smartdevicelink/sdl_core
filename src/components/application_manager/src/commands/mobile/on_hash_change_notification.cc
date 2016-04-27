@@ -33,7 +33,6 @@
  */
 
 #include "application_manager/commands/mobile/on_hash_change_notification.h"
-
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include <string>
@@ -66,9 +65,10 @@ void OnHashChangeNotification::Run() {
     LOGGER_WARN(logger_,
                 "Application with app_id " << app_id << " does not exist");
   }
+
 }
 
-}  // namespace mobile
+}  //namespace mobile
 
 }  // namespace commands
 

@@ -50,7 +50,7 @@ void DialNumberResponse::Run() {
   event.raise(application_manager_.event_dispatcher());
 }
 
-}  // namespace hmi
+} // namespace hmi
 
 }  // namespace commands
 

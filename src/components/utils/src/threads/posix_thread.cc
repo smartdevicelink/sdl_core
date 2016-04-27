@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,33 +34,46 @@
 #include <limits.h>
 #include <stddef.h>
 #include <signal.h>
-#include <pthread.h>
-#include <algorithm>
-#include <functional>
+#ifdef BUILD_TESTS
+// Temporary fix for UnitTest until APPLINK-9987 is resolved
+#include <unistd.h>
+#endif
 
 #include "utils/threads/thread.h"
+#include "pthread.h"
 #include "utils/atomic.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/logger.h"
+#include <chrono>
+#include <string.h>
+#include <pthread.h>
+#include <thread>
 
 #ifndef __QNXNTO__
 const int EOK = 0;
 #endif
 
-#if defined(OS_POSIX)
 const size_t THREAD_NAME_SIZE = 15;
-#endif
 
 namespace threads {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
+
+void sleep(uint32_t ms) {
+#if defined(SDL_CPP11)
+  std::chrono::microseconds sleep_interval_mcsec(ms * 1000);
+  std::this_thread::sleep_for(std::chrono::microseconds(sleep_interval_mcsec));
+#else
+  usleep(ms * 1000);
+#endif
+}
 
 size_t Thread::kMinStackSize =
     PTHREAD_STACK_MIN; /* Ubuntu : 16384 ; QNX : 256; */
 
 void Thread::cleanup(void* arg) {
   LOGGER_AUTO_TRACE(logger_);
-  Thread* thread = reinterpret_cast<Thread*>(arg);
+  Thread* thread = static_cast<Thread*>(arg);
   sync_primitives::AutoLock auto_lock(thread->state_lock_);
   thread->isThreadRunning_ = false;
   thread->state_cond_.Broadcast();
@@ -81,40 +94,40 @@ void* Thread::threadFunc(void* arg) {
   //     finalized = 1
   pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 
-  threads::Thread* thread = reinterpret_cast<Thread*>(arg);
+  threads::Thread* thread = static_cast<Thread*>(arg);
   DCHECK(thread);
 
   pthread_cleanup_push(&cleanup, thread);
 
-  thread->state_lock_.Acquire();
-  thread->state_cond_.Broadcast();
+    thread->state_lock_.Acquire();
+    thread->state_cond_.Broadcast();
 
-  while (!thread->finalized_) {
+    while (!thread->finalized_) {
     LOGGER_DEBUG(logger_, "Thread #" << pthread_self() << " iteration");
-    thread->run_cond_.Wait(thread->state_lock_);
+      thread->run_cond_.Wait(thread->state_lock_);
     LOGGER_DEBUG(logger_,
                  "Thread #" << pthread_self() << " execute. "
                             << "stopped_ = " << thread->stopped_
                             << "; finalized_ = " << thread->finalized_);
-    if (!thread->stopped_ && !thread->finalized_) {
-      thread->isThreadRunning_ = true;
-      pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
-      pthread_testcancel();
+      if (!thread->stopped_ && !thread->finalized_) {
+        thread->isThreadRunning_ = true;
+        pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
+        pthread_testcancel();
 
-      thread->state_lock_.Release();
-      thread->delegate_->threadMain();
-      thread->state_lock_.Acquire();
+        thread->state_lock_.Release();
+        thread->delegate_->threadMain();
+        thread->state_lock_.Acquire();
 
-      pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
-      thread->isThreadRunning_ = false;
-    }
-    thread->state_cond_.Broadcast();
+        pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
+        thread->isThreadRunning_ = false;
+      }
+      thread->state_cond_.Broadcast();
     LOGGER_DEBUG(logger_,
-                 "Thread #" << pthread_self() << " finished iteration");
-  }
+                    "Thread #" << pthread_self() << " finished iteration");
+    }
 
-  thread->state_lock_.Release();
-  pthread_cleanup_pop(1);
+    thread->state_lock_.Release();
+    pthread_cleanup_pop(1);
 
   LOGGER_DEBUG(logger_, "Thread #" << pthread_self() << " exited successfully");
   return NULL;
@@ -127,7 +140,7 @@ void Thread::SetNameForId(const PlatformThreadHandle& thread_id,
   const int rc = pthread_setname_np(thread_id, name.c_str());
   if (rc != EOK) {
     LOGGER_WARN(logger_,
-                "Couldn't set pthread name \"" << name << "\", error code "
+          "Couldn't set pthread name \"" << name << "\", error code "
                                                << rc << " (" << strerror(rc)
                                                << ")");
   }
@@ -138,7 +151,7 @@ Thread::Thread(const char* name, ThreadDelegate* delegate)
     , delegate_(delegate)
     , handle_(0)
     , thread_options_()
-    , isThreadRunning_(0)
+    , isThreadRunning_(false)
     , stopped_(false)
     , finalized_(false)
     , thread_created_(false) {}
@@ -165,7 +178,7 @@ bool Thread::start(const ThreadOptions& options) {
 
   if (!delegate_) {
     LOGGER_ERROR(logger_,
-                 "Cannot start thread " << name_ << ": delegate is NULL");
+                  "Cannot start thread " << name_ << ": delegate is NULL");
     // 0 - state_lock unlocked
     return false;
   }
@@ -235,8 +248,8 @@ bool Thread::start(const ThreadOptions& options) {
   stopped_ = false;
   run_cond_.NotifyOne();
   LOGGER_DEBUG(logger_,
-               "Thread " << name_ << " #" << handle_ << " started."
-                         << " pthread_result = " << pthread_result);
+               "Thread " << name_ << " #" << handle_
+                         << " started. pthread_result = " << pthread_result);
   pthread_attr_destroy(&attributes);
   return pthread_result == EOK;
 }
@@ -252,14 +265,14 @@ void Thread::stop() {
   stopped_ = true;
 
   LOGGER_DEBUG(logger_,
-               "Stopping thread #" << handle_ << " \"" << name_ << "\"");
+               "Stopping thread #" << handle_ << " \"" << name_ << " \"");
 
   if (delegate_ && isThreadRunning_) {
     delegate_->exitThreadMain();
   }
 
   LOGGER_DEBUG(logger_,
-               "Stopped thread #" << handle_ << " \"" << name_ << " \"");
+                "Stopped thread #" << handle_ << " \"" << name_ << " \"");
 }
 
 void Thread::join() {
@@ -271,13 +284,7 @@ void Thread::join() {
   sync_primitives::AutoLock auto_lock(state_lock_);
   run_cond_.NotifyOne();
   if (isThreadRunning_) {
-    if (!pthread_equal(pthread_self(), handle_)) {
-      LOGGER_DEBUG(logger_,
-                   "Waiting for #" << handle_
-                                   << " finished iteration in thread #"
-                                   << pthread_self());
       state_cond_.Wait(auto_lock);
-    }
   }
 }
 

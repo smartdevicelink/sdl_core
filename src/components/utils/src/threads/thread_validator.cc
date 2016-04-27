@@ -49,17 +49,14 @@ void SingleThreadSimpleValidator::AssertRunningOnCreationThread() const {
     LOGGER_ERROR(logger_,
                  "Single-threaded object created at thread "
                      << creation_thread_id_ << " is accessed from thread "
-                     << current_id
-#ifdef BACKTRACE_SUPPORT
-                     << "\n" << utils::Backtrace()
-#endif
-                     );
+                     << current_id);
   }
 }
 
 PlatformThreadHandle SingleThreadSimpleValidator::creation_thread_id() const {
   return creation_thread_id_;
 }
+
 
 SingleThreadValidator::SingleThreadValidator()
     : owning_thread_id_(Thread::CurrentId()) {}
@@ -76,14 +73,10 @@ void SingleThreadValidator::AssertRunningOnValidThread() const {
     LOGGER_ERROR(logger_,
                  "Single-threaded object owned by thread "
                      << owning_thread_id_ << " is accessed from thread "
-                     << current_id << "\n"
-#ifdef BACKTRACE_SUPPORT
-                     << utils::Backtrace()
-#endif
-                     );
+                     << current_id << "\n");
   }
 }
 
-}  // namespace threads
 
-// vim: set ts=2 sw=2 et:
+} // namespace threads
+

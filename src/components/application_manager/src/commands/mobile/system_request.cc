@@ -32,7 +32,6 @@ Copyright (c) 2013, Ford Motor Company
  */
 
 #include "application_manager/commands/mobile/system_request.h"
-
 #include <vector>
 #include <string>
 #include <stdio.h>
@@ -42,12 +41,16 @@ Copyright (c) 2013, Ford Motor Company
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "formatters/CFormatterJsonBase.h"
-#include "json/json.h"
+
 #include "utils/helpers.h"
 #include "utils/custom_string.h"
+#include "utils/json_utils.h"
+
+#if defined(_MSC_VER)
+#define snprintf _snprintf_s
+#endif
 
 namespace application_manager {
-
 CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
 namespace {
 
@@ -410,7 +413,6 @@ class QueryAppsDataValidator {
 }
 
 namespace commands {
-
 namespace custom_str = utils::custom_string;
 
 uint32_t SystemRequest::index = 0;
@@ -473,17 +475,15 @@ void SystemRequest::Run() {
     binary_data_folder =
         application_manager_.get_settings().system_files_path();
   } else {
-    binary_data_folder =
-        application_manager_.get_settings().app_storage_folder();
-    binary_data_folder += "/";
-    binary_data_folder += application->folder_name();
-    binary_data_folder += "/";
+    binary_data_folder = file_system::ConcatPath(
+        application_manager_.get_settings().app_storage_folder(),
+        application->folder_name());
+    binary_data_folder += file_system::GetPathDelimiter();
   }
 
-  std::string file_dst_path =
-      application_manager_.get_settings().system_files_path();
-  file_dst_path += "/";
-  file_dst_path += file_name;
+  std::string file_dst_path = file_system::ConcatPath(
+      application_manager_.get_settings().system_files_path(),
+      file_name);
 
   if ((*message_)[strings::params].keyExists(strings::binary_data)) {
     LOGGER_DEBUG(
@@ -501,9 +501,9 @@ void SystemRequest::Run() {
     app_full_file_path += file_name;
 
     LOGGER_DEBUG(logger_,
-                 "Binary data is not present. Trying to find file "
+                  "Binary data is not present. Trying to find file "
                      << file_name << " within previously saved app file in "
-                     << binary_data_folder);
+                      << binary_data_folder);
 
     const AppFile* file = application->GetFile(app_full_file_path);
     if (!file || !file->is_download_complete ||
@@ -532,15 +532,17 @@ void SystemRequest::Run() {
     using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
 
     smart_objects::SmartObject sm_object;
-    Json::Reader reader;
-    std::string json(binary_data.begin(), binary_data.end());
-    Json::Value root;
-    if (!reader.parse(json.c_str(), root)) {
+    std::string json_string(binary_data.begin(), binary_data.end());
+
+    JsonValue::ParseResult parse_result = JsonValue::Parse(json_string);
+    if (!parse_result.second) {
       LOGGER_DEBUG(logger_, "Unable to parse query_app json file.");
       return;
     }
+    JsonValue& root_json = parse_result.first;
 
-    CFormatterJsonBase::jsonValueToObj(root, sm_object);
+    CFormatterJsonBase::jsonValueToObj(root_json, sm_object);
+
     if (!ValidateQueryAppData(sm_object)) {
       SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
       return;
@@ -598,7 +600,6 @@ void SystemRequest::on_event(const event_engine::Event& event) {
         file_system::DeleteFile(processing_file_);
         processing_file_.clear();
       }
-
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
       break;
     }

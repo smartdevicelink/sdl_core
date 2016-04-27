@@ -119,7 +119,7 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
   */
   struct CoincidencePredicateVR {
     CoincidencePredicateVR(const custom_str::CustomString& newItem)
-        : newItem_(newItem) {}
+        : newItem_(newItem){}
 
     bool operator()(const smart_objects::SmartObject& obj) {
       const custom_str::CustomString& vr_synonym = obj.asCustomString();
@@ -168,7 +168,7 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
   std::string response_info_;
   mobile_apis::Result::eType result_checking_app_hmi_type_;
 
-  policy::PolicyHandlerInterface& GetPolicyHandler();
+  policy::PolicyHandlerInterface &GetPolicyHandler();
   DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);
 };
 

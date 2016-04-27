@@ -33,7 +33,6 @@
 
 #include <cstring>
 #include "application_manager/commands/mobile/show_constant_tbt_request.h"
-
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
@@ -75,16 +74,16 @@ void ShowConstantTBTRequest::Run() {
 
   if (IsWhiteSpaceExist()) {
     LOGGER_ERROR(logger_,
-                 "Incoming show constant TBT has contains \t\n \\t \\n");
+                  "Incoming show constant TBT has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
-  // ProcessSoftButtons checks strings on the contents incorrect character
+  //ProcessSoftButtons checks strings on the contents incorrect character
 
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons(msg_params,
-                                        app,
+          app,
                                         application_manager_.GetPolicyHandler(),
                                         application_manager_);
 
@@ -93,6 +92,7 @@ void ShowConstantTBTRequest::Run() {
     SendResponse(false, processing_result);
     return;
   }
+
 
   mobile_apis::Result::eType verification_result = mobile_apis::Result::SUCCESS;
   if (msg_params.keyExists(strings::turn_icon)) {
@@ -158,12 +158,12 @@ void ShowConstantTBTRequest::Run() {
   }
 
   if (msg_params.keyExists(strings::time_to_destination)) {
-    // erase useless param
-    msg_params.erase(strings::time_to_destination);
-    msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
-        static_cast<int32_t>(hmi_apis::Common_TextFieldName::timeToDestination);
-    msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
-        (*message_)[strings::msg_params][strings::time_to_destination];
+      // erase useless param
+      msg_params.erase(strings::time_to_destination);
+      msg_params[hmi_request::navi_texts][index][hmi_request::field_name] =
+          static_cast<int32_t>(hmi_apis::Common_TextFieldName::timeToDestination);
+      msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
+          (*message_)[strings::msg_params][strings::time_to_destination];
   }
 
   if (msg_params.keyExists(strings::soft_buttons)) {
@@ -175,6 +175,7 @@ void ShowConstantTBTRequest::Run() {
   SendHMIRequest(
       hmi_apis::FunctionID::Navigation_ShowConstantTBT, &msg_params, true);
 }
+
 
 void ShowConstantTBTRequest::on_event(const event_engine::Event& event) {
   LOGGER_AUTO_TRACE(logger_);
@@ -196,7 +197,7 @@ void ShowConstantTBTRequest::on_event(const event_engine::Event& event) {
         return_info =
             message[strings::msg_params][hmi_response::message].asString();
       } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code) &&
-                 hmi_capabilities.is_ui_cooperating()) {
+          hmi_capabilities.is_ui_cooperating()) {
         result = true;
       }
 
@@ -240,7 +241,7 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
               .asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
       LOGGER_ERROR(logger_,
-                   "Invalid navigation_text_1 value syntax check failed");
+                    "Invalid navigation_text_1 value syntax check failed");
       return true;
     }
   }
@@ -250,7 +251,7 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
               .asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
       LOGGER_ERROR(logger_,
-                   "Invalid navigation_text_2 value syntax check failed");
+                    "Invalid navigation_text_2 value syntax check failed");
       return true;
     }
   }
@@ -278,7 +279,7 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
               .asCharArray();
     if (strlen(str) && !CheckSyntax(str)) {
       LOGGER_ERROR(logger_,
-                   "Invalid time_to_destination value syntax check failed");
+                    "Invalid time_to_destination value syntax check failed");
       return true;
     }
   }

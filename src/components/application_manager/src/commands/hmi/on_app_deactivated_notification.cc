@@ -31,10 +31,8 @@
  */
 
 #include "application_manager/commands/hmi/on_app_deactivated_notification.h"
-
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-
 #include "utils/helpers.h"
 
 namespace application_manager {

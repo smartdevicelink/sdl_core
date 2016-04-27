@@ -46,8 +46,10 @@ SDLGetStatusUpdateRequest::~SDLGetStatusUpdateRequest() {}
 void SDLGetStatusUpdateRequest::Run() {
   LOGGER_AUTO_TRACE(logger_);
   application_manager_.GetPolicyHandler().OnGetStatusUpdate(
-      (*message_)[strings::params][strings::correlation_id].asUInt());
+        (*message_)[strings::params][strings::correlation_id].asUInt());
 }
 
 }  // namespace commands
 }  // namespace application_manager
+
+

@@ -42,7 +42,7 @@ namespace commands {
 /**
  * @brief VISubscriveVehicleDataResponseTemplate command class
  **/
-template <event_engine::Event::EventID eventID>
+template<event_engine::Event::EventID eventID>
 class VISubscribeVehicleDataResponseTemplate : public ResponseFromHMI {
  public:
   /**
@@ -63,7 +63,6 @@ class VISubscribeVehicleDataResponseTemplate : public ResponseFromHMI {
     event.set_smart_object(*message_);
     event.raise(application_manager_.event_dispatcher());
   }
-
  private:
   DISALLOW_COPY_AND_ASSIGN(VISubscribeVehicleDataResponseTemplate<eventID>);
 };

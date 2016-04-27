@@ -57,3 +57,4 @@ void OnVIInstantFuelConsumptionNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
+

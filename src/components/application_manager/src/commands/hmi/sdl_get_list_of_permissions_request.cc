@@ -50,9 +50,11 @@ void SDLGetListOfPermissionsRequest::Run() {
     connection_key = (*message_)[strings::msg_params][strings::app_id].asUInt();
   }
   application_manager_.GetPolicyHandler().OnGetListOfPermissions(
-      connection_key,
-      (*message_)[strings::params][strings::correlation_id].asUInt());
+        connection_key,
+        (*message_)[strings::params][strings::correlation_id].asUInt());
 }
 
 }  // namespace commands
 }  // namespace application_manager
+
+

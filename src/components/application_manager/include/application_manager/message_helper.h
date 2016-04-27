@@ -97,26 +97,26 @@ class MessageHelper {
   static void SendHashUpdateNotification(const uint32_t app_id,
                                          ApplicationManager& app_mngr);
 
-  /**
-   * @brief Sends OnLanguageChange notification to application
-   * @param connection_key Connection key of application
-   */
-  static void SendOnLanguageChangeToMobile(uint32_t connection_key);
+    /**
+     * @brief Sends OnLanguageChange notification to application
+     * @param connection_key Connection key of application
+     */
+    static void SendOnLanguageChangeToMobile(uint32_t connection_key);
 
-  /*
-   * @brief Retrieve vehicle data map for param name in mobile request
-   * to VehicleDataType
-   *
-   * @return VehicleData reference
-   */
-  static const VehicleData& vehicle_data();
+    /*
+     * @brief Retrieve vehicle data map for param name in mobile request
+     * to VehicleDataType
+     *
+     * @return VehicleData reference
+     */
+    static const VehicleData& vehicle_data();
 
-  /**
-   * @brief Converts HMI Result enum value to string
-   * @param hmi_result HMI Result enum value
-   * @return stringified value for enum if succedeed, otherwise - empty string
-   */
-  static std::string HMIResultToString(
+    /**
+     * @brief Converts HMI Result enum value to string
+     * @param hmi_result HMI Result enum value
+     * @return stringified value for enum if succedeed, otherwise - empty string
+     */
+    static std::string HMIResultToString(
       hmi_apis::Common_Result::eType hmi_result);
 
   /**
@@ -292,7 +292,7 @@ class MessageHelper {
   static bool CreateHMIApplicationStruct(
       ApplicationConstSharedPtr app,
       const protocol_handler::SessionObserver& session_observer,
-      const policy::PolicyHandlerInterface& policy_handler,
+      const policy::PolicyHandlerInterface &policy_handler,
       smart_objects::SmartObject* output,
       ApplicationManager& app_mngr);
 
@@ -315,7 +315,7 @@ class MessageHelper {
   GetBCActivateAppRequestToHMI(
       ApplicationConstSharedPtr app,
       const protocol_handler::SessionObserver& session_observer,
-      const policy::PolicyHandlerInterface& policy_handler,
+      const policy::PolicyHandlerInterface &policy_handler,
       hmi_apis::Common_HMILevel::eType level,
       bool send_policy_priority,
       ApplicationManager& app_mngr);
@@ -593,6 +593,7 @@ class MessageHelper {
   }
 
   static const uint32_t GetPriorityCode(const std::string& priority);
+
   /**
    * @brief Convert common language to string representation
    * @param language Common language
@@ -601,101 +602,100 @@ class MessageHelper {
   static std::string CommonLanguageToString(
       hmi_apis::Common_Language::eType language);
 
-  /**
-   * @brief Converts string to mobile language enum value
-   * @param language language as string
-   * @return Mobile language enum value
-   */
-  static mobile_apis::Language::eType MobileLanguageFromString(
-      const std::string& language);
+    /**
+     * @brief Converts string to mobile language enum value
+     * @param language language as string
+     * @return Mobile language enum value
+     */
+    static mobile_apis::Language::eType MobileLanguageFromString(
+            const std::string& language);
 
-  /**
-   * @brief Converts mobile language enum to HMI language enum
-   * @param language Mobile language enum
-   * @return HMI language enum
-   */
-  static hmi_apis::Common_Language::eType MobileToCommonLanguage(
-      const mobile_apis::Language::eType language);
+    /**
+     * @brief Converts mobile language enum to HMI language enum
+     * @param language Mobile language enum
+     * @return HMI language enum
+     */
+    static hmi_apis::Common_Language::eType MobileToCommonLanguage(
+          const mobile_apis::Language::eType language);
 
-  /**
-   * @brief Converts HMI language enum to mobile language enum
-   * @param language HMI language enum
-   * @return Mobile language enum
-   */
-  static mobile_apis::Language::eType CommonToMobileLanguage(
-      const hmi_apis::Common_Language::eType language);
+    /**
+     * @brief Converts HMI language enum to mobile language enum
+     * @param language HMI language enum
+     * @return Mobile language enum
+     */
+    static mobile_apis::Language::eType CommonToMobileLanguage(
+          const hmi_apis::Common_Language::eType language);
 
-  /**
-   * @brief Gets command limit number per minute for specific application
-   * @param policy_app_id Unique application id
-   * @return Limit for number of command per minute
-   */
-  static uint32_t GetAppCommandLimit(const std::string& policy_app_id);
+    /**
+     * @brief Gets command limit number per minute for specific application
+     * @param policy_app_id Unique application id
+     * @return Limit for number of command per minute
+     */
+    static uint32_t GetAppCommandLimit(const std::string& policy_app_id);
 
-  /**
-   * @brief Creates TTS.SetGlobalProperties request and sends
-   * to HMI for VCA module.
-   * @param app contains application which sends TTS GlobalProperties to HMI
-   * after timeout or first time when application register with level NONE or
-   * BACKGROUND
-   * @param default_help_prompt
+    /**
+     * @brief Creates TTS.SetGlobalProperties request and sends
+     * to HMI for VCA module.
+     * @param app contains application which sends TTS GlobalProperties to HMI
+     * after timeout or first time when application register with level NONE or
+     * BACKGROUND
+     * @param default_help_prompt
    * if default_help_prompt=TRUE->TTSGlobalProperties request will be created
    * with
    * default helpPrompt array, otherwise TTSGlobalProperties request will be
    * created
-   * with empty helpPrompt array.
-   */
+     * with empty helpPrompt array.
+     */
   static void SendTTSGlobalProperties(ApplicationSharedPtr app,
                                       const bool default_help_prompt,
                                       ApplicationManager& app_man);
 
-  /**
-   * @brief SendSetAppIcon allows to send SetAppIcon request.
-   *
-   * @param app_id application for which icon request should be sent.
-   *
-   * @param icon_path path to the icon.
-   */
+    /**
+     * @brief SendSetAppIcon allows to send SetAppIcon request.
+     *
+     * @param app_id application for which icon request should be sent.
+     *
+     * @param icon_path path to the icon.
+     */
   static void SendSetAppIcon(const uint32_t app_id,
                              const std::string& icon_path,
                              ApplicationManager& application_manager);
 
-  static hmi_apis::Common_Language::eType CommonLanguageFromString(
-      const std::string& language);
-
+    static hmi_apis::Common_Language::eType CommonLanguageFromString(
+        const std::string& language);
   static smart_objects::SmartObjectSPtr
   GetOnAppInterfaceUnregisteredNotificationToMobile(
       int32_t connection_key,
       mobile_api::AppInterfaceUnregisteredReason::eType reason);
 
- private:
-  /**
-   * @brief Creates new request object and fill its header
-   * @return New request object
-   */
+  private:
+    /**
+     * @brief Creates new request object and fill its header
+     * @return New request object
+     */
   static smart_objects::SmartObjectSPtr CreateRequestObject(
       const uint32_t correlation_id);
 
-  /**
-   * @brief Allows to fill SO according to the  current permissions.
-   * @param permissions application permissions.
-   * @param message which should be filled.
-   */
-  static void FillAppRevokedPermissions(
-      const policy::AppPermissions& permissions,
-      smart_objects::SmartObject& message);
+    /**
+     * @brief Allows to fill SO according to the  current permissions.
+     * @param permissions application permissions.
+     * @param message which should be filled.
+     */
+    static void FillAppRevokedPermissions(
+        const policy::AppPermissions& permissions,
+        smart_objects::SmartObject& message);
 
-  static smart_objects::SmartObjectSPtr CreateChangeRegistration(
-      const int32_t function_id,
-      const int32_t language,
-      const uint32_t app_id,
+    static smart_objects::SmartObjectSPtr CreateChangeRegistration(
+        const int32_t function_id,
+        const int32_t language,
+        const uint32_t app_id,
       const smart_objects::SmartObject* app_types,
       ApplicationManager& app_mngr);
 
-  MessageHelper();
+    MessageHelper();
 
-  static const VehicleData vehicle_data_;
-  DISALLOW_COPY_AND_ASSIGN(MessageHelper);
+    static const VehicleData vehicle_data_;
+    DISALLOW_COPY_AND_ASSIGN(MessageHelper);
 };
 
 }  // namespace application_manager

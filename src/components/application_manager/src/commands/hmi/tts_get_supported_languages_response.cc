@@ -30,7 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/tts_get_supported_languages_response.h"
-
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {

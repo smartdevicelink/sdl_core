@@ -36,6 +36,7 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_DEFAULT_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_DEFAULT_H_
 
+
 #include "transport_manager/transport_manager_impl.h"
 
 namespace resumption {
@@ -56,14 +57,16 @@ class TransportManagerDefault : public TransportManagerImpl {
    *
    * @return Code error.
    */
-  int Init(resumption::LastState& last_state) OVERRIDE;
+  int Init(resumption::LastState &last_state) OVERRIDE;
 
   /**
    * @brief Destructor.
    */
   virtual ~TransportManagerDefault();
 
+
   DISALLOW_COPY_AND_ASSIGN(TransportManagerDefault);
+
 };
 }
 

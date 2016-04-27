@@ -79,14 +79,14 @@ smart_objects::SmartObject ResumptionData::GetApplicationSubMenus(
   const DataAccessor<SubMenuMap> accessor = application->sub_menu_map();
   const SubMenuMap& sub_menus = accessor.GetData();
   SubMenuMap::const_iterator it = sub_menus.begin();
-  for (int i = 0; it != sub_menus.end(); ++it, ++i) {
+  for (int i = 0;it != sub_menus.end(); ++it, ++i) {
     submenues_array[i] = *(it->second);
   }
   return submenues_array;
 }
 
 smart_objects::SmartObject ResumptionData::GetApplicationInteractionChoiseSets(
-    app_mngr::ApplicationConstSharedPtr application) const {
+      app_mngr::ApplicationConstSharedPtr application) const {
   using namespace app_mngr;
   LOGGER_AUTO_TRACE(logger_);
 
@@ -95,8 +95,8 @@ smart_objects::SmartObject ResumptionData::GetApplicationInteractionChoiseSets(
       smart_objects::SmartObject(smart_objects::SmartType_Array);
   if (!application) {
     LOGGER_ERROR(logger_, "NULL Pointer App");
-    return interaction_choice_set_array;
-  }
+     return interaction_choice_set_array;
+   }
   const DataAccessor<ChoiceSetMap> accessor = application->choice_set_map();
   const ChoiceSetMap& choices = accessor.GetData();
   ChoiceSetMap::const_iterator it = choices.begin();
@@ -107,7 +107,7 @@ smart_objects::SmartObject ResumptionData::GetApplicationInteractionChoiseSets(
 }
 
 smart_objects::SmartObject ResumptionData::GetApplicationGlobalProperties(
-    app_mngr::ApplicationConstSharedPtr application) const {
+      app_mngr::ApplicationConstSharedPtr application) const {
   using namespace app_mngr;
   LOGGER_AUTO_TRACE(logger_);
 
@@ -132,14 +132,14 @@ smart_objects::SmartObject ResumptionData::GetApplicationGlobalProperties(
   global_properties[strings::keyboard_properties] =
       PointerToSmartObj(application->keyboard_props());
   global_properties[strings::menu_title] =
-      PointerToSmartObj(application->menu_title());
+        PointerToSmartObj(application->menu_title());
   global_properties[strings::menu_icon] =
-      PointerToSmartObj(application->menu_icon());
+          PointerToSmartObj(application->menu_icon());
   return global_properties;
 }
 
 smart_objects::SmartObject ResumptionData::GetApplicationSubscriptions(
-    app_mngr::ApplicationConstSharedPtr application) const {
+        app_mngr::ApplicationConstSharedPtr application) const {
   using namespace app_mngr;
   LOGGER_AUTO_TRACE(logger_);
   DCHECK(application.get());
@@ -191,7 +191,7 @@ smart_objects::SmartObject ResumptionData::GetApplicationFiles(
 
   const AppFilesMap& app_files = application->getAppFiles();
   int i = 0;
-  for (AppFilesMap::const_iterator file_it = app_files.begin();
+  for(AppFilesMap::const_iterator file_it = app_files.begin();
        file_it != app_files.end();
        file_it++) {
     const AppFile& file = file_it->second;

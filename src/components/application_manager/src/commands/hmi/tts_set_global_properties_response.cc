@@ -31,7 +31,6 @@
  */
 #include "application_manager/commands/hmi/tts_set_global_properties_response.h"
 #include "application_manager/event_engine/event.h"
-
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {

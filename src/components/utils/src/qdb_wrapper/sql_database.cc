@@ -37,7 +37,7 @@
 namespace utils {
 namespace dbms {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
+CREATE_LOGGERPTR_GLOBAL(logger_, "SQLDatabase")
 
 SQLDatabase::SQLDatabase(const std::string& db_name)
     : conn_(NULL), db_name_(db_name), error_(Error::OK) {}
@@ -92,6 +92,10 @@ bool SQLDatabase::Exec(const std::string& query) {
 
 SQLError SQLDatabase::LastError() const {
   return SQLError(error_, qdb_geterrmsg(conn_));
+}
+
+bool SQLDatabase::HasErrors() const {
+  return Error(error_) != OK;
 }
 
 qdb_hdl_t* SQLDatabase::conn() const {

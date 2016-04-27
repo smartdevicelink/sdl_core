@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,10 +37,14 @@
 #else  // RELEASE
 #include <stdio.h>
 #endif
-#include "logger.h"
+#include "utils/logger.h"
+
+#if defined(QT_PORT)
+#include <QCoreApplication>
+#endif
 
 // A macro to set some action for variable to avoid "unused variable" warning
-#define UNUSED(x) (void) x;
+#define UNUSED(x) (void)x;
 // A macro to disallow the copy constructor and operator= functions
 // This should be used in the private: declarations for a class
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
@@ -59,14 +63,14 @@
   friend utils::deleters::Deleter<TypeName>::~Deleter()
 
 #ifdef DEBUG
-#define ASSERT(condition) \
-  FLUSH_LOGGER();         \
-  do {                    \
-    DEINIT_LOGGER();      \
-    assert(condition);    \
-  } while (false)
+#define SDL_ASSERT(condition) \
+    FLUSH_LOGGER(); \
+    do { \
+      DEINIT_LOGGER(); \
+      assert(condition); \
+    } while (false)
 #else  // RELEASE
-#define ASSERT(condition)                                        \
+#define SDL_ASSERT(condition)                                    \
   fprintf(stderr,                                                \
           "Failed condition \"" #condition "\" [%s:%d][%s]\n\n", \
           __FILE__,                                              \
@@ -74,50 +78,54 @@
           __FUNCTION__)
 #endif
 
-#define DCHECK(condition)                                                    \
-  if (!(condition)) {                                                        \
+#define DCHECK(condition) \
+  if (!(condition)) { \
     CREATE_LOGGERPTR_LOCAL(logger_, "Utils");                                \
     LOGGER_FATAL(logger_,                                                    \
                  "DCHECK failed with \"" << #condition << "\" ["             \
                                          << __FUNCTION__ << "][" << __FILE__ \
                                          << ':' << __LINE__ << ']');         \
-    ASSERT((condition));                                                     \
+    SDL_ASSERT((condition));                                                 \
   }
 
 /*
  * Will cauch assert on debug version,
  * Will return return_value in release build
  */
-#define DCHECK_OR_RETURN(condition, return_value)                            \
-  if (!(condition)) {                                                        \
+#define DCHECK_OR_RETURN(condition, return_value) \
+  if (!(condition)) { \
     CREATE_LOGGERPTR_LOCAL(logger_, "Utils");                                \
     LOGGER_FATAL(logger_,                                                    \
                  "DCHECK failed with \"" << #condition << "\" ["             \
                                          << __FUNCTION__ << "][" << __FILE__ \
                                          << ':' << __LINE__ << ']');         \
-    ASSERT((condition));                                                     \
-    return (return_value);                                                   \
+    SDL_ASSERT((condition));                                                 \
+    return (return_value); \
   }
 /*
  * Will cauch assert on debug version,
  * Will return return_value in release build
  */
-#define DCHECK_OR_RETURN_VOID(condition)                                     \
-  if (!(condition)) {                                                        \
+#define DCHECK_OR_RETURN_VOID(condition) \
+  if (!(condition)) { \
     CREATE_LOGGERPTR_LOCAL(logger_, "Utils");                                \
     LOGGER_FATAL(logger_,                                                    \
                  "DCHECK failed with \"" << #condition << "\" ["             \
                                          << __FUNCTION__ << "][" << __FILE__ \
                                          << ':' << __LINE__ << ']');         \
-    ASSERT((condition));                                                     \
-    return;                                                                  \
+    SDL_ASSERT((condition));                                                 \
+    return ; \
   }
+
 
 #define NOTREACHED() DCHECK(!"Unreachable code")
 
+#if __cplusplus >= 201103L
+#define SDL_CPP11
+#endif
 // Allows to perform static check that virtual function from base class is
 // actually being overriden if compiler support is available
-#if __cplusplus >= 201103L
+#ifdef SDL_CPP11
 #define OVERRIDE override
 #define FINAL final
 #else
@@ -129,11 +137,28 @@
 * @brief Calculate size of na array
 * @param arr  array, which size need to calculate
 */
-#define ARRAYSIZE(arr) sizeof(arr) / sizeof(*arr)
+#define GETARRAYSIZE(arr) sizeof(arr) / sizeof(*arr)
+
+#if defined(OS_POSIX)
+#define SDL_EXPORT extern "C"
+#elif defined(OS_WINDOWS)
+#define SDL_EXPORT extern "C" __declspec(dllexport)
+#endif
 
 #ifdef BUILD_TESTS
-#define FRIEND_TEST(test_case_name, test_name) \
-  friend class test_case_name##_##test_name##_Test
+#define FRIEND_TEST(test_case_name, test_name)\
+friend class test_case_name##_##test_name##_Test
+#endif
+
+#if defined(QT_PORT)
+extern Q_CORE_EXPORT int qt_ntfs_permission_lookup;
+#define PLATFORM_INIT(argc, argv)                    \
+  qt_ntfs_permission_lookup++;                       \
+  QCoreApplication application(argc, argv);          \
+  QThreadPool* pool = QThreadPool::globalInstance(); \
+  pool->setMaxThreadCount(100)
+#else
+#define PLATFORM_INIT(argc, argv)
 #endif
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_MACRO_H_

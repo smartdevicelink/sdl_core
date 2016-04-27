@@ -51,3 +51,4 @@ void UISetMediaClockTimerRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
+

@@ -51,3 +51,4 @@ void UIDeleteCommandRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
+

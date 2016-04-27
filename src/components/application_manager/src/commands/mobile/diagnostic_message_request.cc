@@ -33,9 +33,7 @@
 
 #include <algorithm>
 #include "application_manager/commands/mobile/diagnostic_message_request.h"
-
 #include "application_manager/application_impl.h"
-
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -85,6 +83,7 @@ void DiagnosticMessageRequest::Run() {
   SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage,
                  &(*message_)[strings::msg_params],
                  true);
+
 }
 
 void DiagnosticMessageRequest::on_event(const event_engine::Event& event) {

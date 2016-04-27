@@ -69,6 +69,7 @@ class SendLocationRequest : public CommandRequestImpl {
    */
   virtual void on_event(const event_engine::Event& event);
 
+
  private:
   /**
  * @brief CheckFieldsCompatibility checks if fields are compatible with each

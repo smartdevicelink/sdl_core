@@ -48,7 +48,7 @@ void SDLGetUserFriendlyMessageRequest::Run() {
   const std::string messageCodes = "messageCodes";
   if (!(*message_)[strings::msg_params].keyExists(messageCodes)) {
     LOGGER_WARN(logger_,
-                "Mandatory parameter '" + messageCodes + "'' is missing");
+                 "Mandatory parameter '"+messageCodes+"'' is missing");
     return;
   }
   smart_objects::SmartArray* msg =
@@ -68,7 +68,7 @@ void SDLGetUserFriendlyMessageRequest::Run() {
         (*message_)[strings::msg_params][strings::language].asUInt();
     required_language =
         application_manager::MessageHelper::CommonLanguageToString(
-            static_cast<hmi_apis::Common_Language::eType>(lang_code));
+          static_cast<hmi_apis::Common_Language::eType>(lang_code));
   } else {
     hmi_apis::Common_Language::eType ui_language =
         application_manager_.hmi_capabilities().active_ui_language();
@@ -80,8 +80,10 @@ void SDLGetUserFriendlyMessageRequest::Run() {
   application_manager_.GetPolicyHandler().OnGetUserFriendlyMessage(
       msg_codes,
       required_language,
-      (*message_)[strings::params][strings::correlation_id].asInt());
+        (*message_)[strings::params][strings::correlation_id].asInt());
 }
 
 }  // namespace commands
 }  // namespace application_manager
+
+

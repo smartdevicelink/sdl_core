@@ -30,7 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/ui_get_language_response.h"
-
 #include "application_manager/event_engine/event.h"
 #include "interfaces/HMI_API.h"
 
@@ -52,8 +51,9 @@ void UIGetLanguageResponse::Run() {
 
   if ((*message_).keyExists(strings::msg_params) &&
       (*message_)[strings::msg_params].keyExists(hmi_response::language)) {
+
     language = static_cast<Common_Language::eType>(
-        (*message_)[strings::msg_params][hmi_response::language].asInt());
+             (*message_)[strings::msg_params][hmi_response::language].asInt());
   }
 
   application_manager_.hmi_capabilities().set_active_ui_language(language);

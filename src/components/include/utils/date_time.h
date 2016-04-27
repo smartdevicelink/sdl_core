@@ -34,24 +34,24 @@
 
 #if defined(OS_POSIX)
 #include <sys/time.h>
-typedef struct timeval TimevalStruct;
+#elif defined(OS_WINDOWS)
+#include "utils/winhdr.h"
 #endif
 #include <stdint.h>
 
+typedef struct timeval TimevalStruct;
 namespace date_time {
 
 enum TimeCompare { LESS, EQUAL, GREATER };
 
+const uint64_t kDeltaEpochInMicrosecs = 11644473600000000u;
+const uint32_t kMillisecondsInSecond = 1000u;
+const uint32_t kMicrosecondsInMillisecond = 1000u;
+const uint32_t kMicrosecondsInSecond =
+    kMillisecondsInSecond * kMicrosecondsInMillisecond;
+
 class DateTime {
  public:
-  static const int32_t MILLISECONDS_IN_SECOND = 1000;
-  static const int32_t MICROSECONDS_IN_MILLISECOND = 1000;
-  static const int32_t NANOSECONDS_IN_MICROSECOND = 1000;
-  static const int32_t MICROSECONDS_IN_SECOND =
-      MILLISECONDS_IN_SECOND * MICROSECONDS_IN_MILLISECOND;
-  static const int32_t NANOSECONDS_IN_MILLISECOND =
-      MICROSECONDS_IN_MILLISECOND * NANOSECONDS_IN_MICROSECOND;
-
   static TimevalStruct getCurrentTime();
 
   // return SECONDS count
@@ -86,9 +86,8 @@ class DateTime {
   static bool Greater(const TimevalStruct& time1, const TimevalStruct& time2);
   static bool Less(const TimevalStruct& time1, const TimevalStruct& time2);
   static bool Equal(const TimevalStruct& time1, const TimevalStruct& time2);
-
  private:
-  static TimevalStruct ConvertionUsecs(const TimevalStruct& time);
+  static TimevalStruct ConvertionUsecs(const TimevalStruct &time);
 };
 
 }  // namespace date_time

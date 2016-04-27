@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/delete_interaction_choice_set_request.h"
-
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -56,7 +55,7 @@ void DeleteInteractionChoiceSetRequest::Run() {
   if (!app) {
     LOGGER_ERROR(logger_,
                  "No application associated with connection key "
-                     << connection_key());
+                  << connection_key());
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -111,7 +110,7 @@ bool DeleteInteractionChoiceSetRequest::ChoiceSetInUse(
 
   PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
   for (; choice_set_map.end() != it; ++it) {
-    const PerformChoice& choice = it->second;
+    const PerformChoice& choice =  it->second;
     PerformChoice::const_iterator choice_it = choice.begin();
     for (; choice.end() != choice_it; ++choice_it) {
       if (choice_it->first == choice_set_id) {
@@ -146,7 +145,7 @@ void DeleteInteractionChoiceSetRequest::SendVrDeleteCommand(
   msg_params[strings::type] = hmi_apis::Common_VRCommandType::Choice;
   msg_params[strings::grammar_id] = (*choice_set)[strings::grammar_id];
   choice_set = &((*choice_set)[strings::choice_set]);
-  for (uint32_t i = 0; i < (*choice_set).length(); ++i) {
+  for (uint32_t i = 0; i < (*choice_set).length() ; ++i) {
     msg_params[strings::cmd_id] = (*choice_set)[i][strings::choice_id];
     SendHMIRequest(hmi_apis::FunctionID::VR_DeleteCommand, &msg_params);
   }

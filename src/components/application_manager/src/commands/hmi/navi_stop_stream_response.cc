@@ -43,6 +43,7 @@ NaviStopStreamResponse::~NaviStopStreamResponse() {}
 
 void NaviStopStreamResponse::Run() {
   LOGGER_AUTO_TRACE(logger_);
+
 }
 
 }  // namespace commands

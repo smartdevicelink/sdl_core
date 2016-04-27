@@ -51,3 +51,4 @@ void VIUnsubscribeVehicleDataRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
+

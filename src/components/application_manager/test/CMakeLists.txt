@@ -32,13 +32,14 @@
 # application manager(AM) singleton while refactoring of AM is finished.
 
 if (BUILD_TESTS)
- 
-  include_directories(
-    include
+
+
+include_directories(
+  include
     ${CMAKE_BINARY_DIR}/src/components/
     ${COMPONENTS_DIR}/resumption/include
     ${GMOCK_INCLUDE_DIRECTORY}
-    ${COMPONENTS_DIR}/application_manager/include/
+  ${COMPONENTS_DIR}/application_manager/include/
     ${COMPONENTS_DIR}/application_manager/include/application_manager/commands/
     ${COMPONENTS_DIR}/utils/include/utils
     ${COMPONENTS_DIR}/include/utils
@@ -49,9 +50,9 @@ if (BUILD_TESTS)
     ${SecurityManagerIncludeDir}
     ${COMPONENTS_DIR}/security_manager/include
     ${AM_TEST_DIR}/resumption/include/
-    )
+)
 
-  set(testSources
+set(testSources
     ${AM_TEST_DIR}/mobile_message_handler_test.cc
     ${AM_TEST_DIR}/mobile_message_handler_v1_test.cc
     ${AM_TEST_DIR}/request_info_test.cc
@@ -190,13 +191,12 @@ endif()
   if (${CMAKE_SYSTEM_NAME} MATCHES "QNX")
     list(REMOVE_ITEM test_exec_libraries dl)
   endif()
-
-  if (ENABLE_LOG)
-    list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
-    list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
-    list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
-    list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
-  endif()
+if(ENABLE_LOG)
+  list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+  list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
+  list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
+  list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
+endif()
 
   file(COPY smartDeviceLink_test2.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
   file(COPY sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -209,8 +209,9 @@ OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/libPolicy.so
   set(CMAKE_EXE_LINKER_FLAGS
     "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath=${CMAKE_CURRENT_BINARY_DIR}")
   create_test("application_manager_test" "${testSources}" "${testLibraries}" )
-# TODO [AKozoriz] : Fix not buildable tests 
- set(ResumptionData_SOURCES
+
+# TODO [AKozoriz] : Fix not buildable tests
+  set(ResumptionData_SOURCES
     ${AM_TEST_DIR}/resumption/resumption_data_test.cc
 #    ${AM_TEST_DIR}/resumption/resumption_data_db_test.cc
 #    ${AM_TEST_DIR}/resumption/resumption_data_json_test.cc

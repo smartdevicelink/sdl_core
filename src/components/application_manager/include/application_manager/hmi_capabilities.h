@@ -37,6 +37,7 @@
 #include "interfaces/MOBILE_API.h"
 #include "json/json.h"
 #include "utils/macro.h"
+#include "utils/json_utils.h"
 #include "application_manager/hmi_language_handler.h"
 
 namespace NsSmartDeviceLink {
@@ -54,7 +55,9 @@ namespace application_manager {
 class ApplicationManager;
 
 class HMICapabilities {
+
  public:
+
   /*
    * @ Class constructor
    *
@@ -189,7 +192,7 @@ class HMICapabilities {
    * @param language Currently active TTS language
    */
   void set_active_tts_language(
-      const hmi_apis::Common_Language::eType& language);
+    const hmi_apis::Common_Language::eType& language);
 
   /*
    * @brief Retrieves TTS  supported languages
@@ -352,7 +355,7 @@ class HMICapabilities {
    * @param prerecorded_speech supported prerecorded speech
    */
   void set_prerecorded_speech(
-      const smart_objects::SmartObject& prerecorded_speech);
+       const smart_objects::SmartObject& prerecorded_speech);
 
   /*
    * @brief Interface used to store information if navigation
@@ -402,6 +405,7 @@ class HMICapabilities {
   void Init(resumption::LastState* last_state);
 
  protected:
+
   /*
    * @brief Loads capabilities from local file in case SDL was launched
    * without HMI
@@ -434,42 +438,42 @@ class HMICapabilities {
                                      smart_objects::SmartObject& languages);
 
  private:
-  bool is_vr_cooperating_;
-  bool is_tts_cooperating_;
-  bool is_ui_cooperating_;
-  bool is_navi_cooperating_;
-  bool is_ivi_cooperating_;
+  bool                             is_vr_cooperating_;
+  bool                             is_tts_cooperating_;
+  bool                             is_ui_cooperating_;
+  bool                             is_navi_cooperating_;
+  bool                             is_ivi_cooperating_;
 
   // to check if IsReady response for corresponding interface received
-  bool is_vr_ready_response_recieved_;
-  bool is_tts_ready_response_recieved_;
-  bool is_ui_ready_response_recieved_;
-  bool is_navi_ready_response_recieved_;
-  bool is_ivi_ready_response_recieved_;
+  bool                             is_vr_ready_response_recieved_;
+  bool                             is_tts_ready_response_recieved_;
+  bool                             is_ui_ready_response_recieved_;
+  bool                             is_navi_ready_response_recieved_;
+  bool                             is_ivi_ready_response_recieved_;
 
-  bool attenuated_supported_;
+  bool                             attenuated_supported_;
   hmi_apis::Common_Language::eType ui_language_;
   hmi_apis::Common_Language::eType vr_language_;
   hmi_apis::Common_Language::eType tts_language_;
-  smart_objects::SmartObject* vehicle_type_;
-  smart_objects::SmartObject* ui_supported_languages_;
-  smart_objects::SmartObject* tts_supported_languages_;
-  smart_objects::SmartObject* vr_supported_languages_;
-  smart_objects::SmartObject* display_capabilities_;
-  smart_objects::SmartObject* hmi_zone_capabilities_;
-  smart_objects::SmartObject* soft_buttons_capabilities_;
-  smart_objects::SmartObject* button_capabilities_;
-  smart_objects::SmartObject* preset_bank_capabilities_;
-  smart_objects::SmartObject* vr_capabilities_;
-  smart_objects::SmartObject* speech_capabilities_;
-  smart_objects::SmartObject* audio_pass_thru_capabilities_;
-  smart_objects::SmartObject* prerecorded_speech_;
-  std::string ccpu_version_;
-  bool is_navigation_supported_;
-  bool is_phone_call_supported_;
+  smart_objects::SmartObject*      vehicle_type_;
+  smart_objects::SmartObject*      ui_supported_languages_;
+  smart_objects::SmartObject*      tts_supported_languages_;
+  smart_objects::SmartObject*      vr_supported_languages_;
+  smart_objects::SmartObject*      display_capabilities_;
+  smart_objects::SmartObject*      hmi_zone_capabilities_;
+  smart_objects::SmartObject*      soft_buttons_capabilities_;
+  smart_objects::SmartObject*      button_capabilities_;
+  smart_objects::SmartObject*      preset_bank_capabilities_;
+  smart_objects::SmartObject*      vr_capabilities_;
+  smart_objects::SmartObject*      speech_capabilities_;
+  smart_objects::SmartObject*      audio_pass_thru_capabilities_;
+  smart_objects::SmartObject*      prerecorded_speech_;
+  std::string                      ccpu_version_;
+  bool                             is_navigation_supported_;
+  bool                             is_phone_call_supported_;
 
   ApplicationManager& app_mngr_;
-  HMILanguageHandler hmi_language_handler_;
+  HMILanguageHandler               hmi_language_handler_;
 
   DISALLOW_COPY_AND_ASSIGN(HMICapabilities);
 };

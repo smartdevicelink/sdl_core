@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/delete_command_request.h"
-
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
@@ -124,7 +123,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
       ui_result_ = static_cast<hmi_apis::Common_Result::eType>(result);
       LOGGER_DEBUG(logger_,
                    "Received UI_DeleteCommand event with result "
-                       << MessageHelper::HMIResultToString(ui_result_));
+                    << MessageHelper::HMIResultToString(ui_result_));
       break;
     }
     case hmi_apis::FunctionID::VR_DeleteCommand: {
@@ -133,7 +132,7 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
       vr_result_ = static_cast<hmi_apis::Common_Result::eType>(result);
       LOGGER_DEBUG(logger_,
                    "Received VR_DeleteCommand event with result "
-                       << MessageHelper::HMIResultToString(vr_result_));
+                    << MessageHelper::HMIResultToString(vr_result_));
       break;
     }
     default: {
@@ -170,15 +169,15 @@ void DeleteCommandRequest::on_event(const event_engine::Event& event) {
 
   const bool is_vr_success_invalid =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-          vr_result_,
-          hmi_apis::Common_Result::SUCCESS,
-          hmi_apis::Common_Result::INVALID_ENUM);
+        vr_result_,
+        hmi_apis::Common_Result::SUCCESS,
+        hmi_apis::Common_Result::INVALID_ENUM);
 
   const bool is_ui_success_invalid =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-          ui_result_,
-          hmi_apis::Common_Result::SUCCESS,
-          hmi_apis::Common_Result::INVALID_ENUM);
+        ui_result_,
+        hmi_apis::Common_Result::SUCCESS,
+        hmi_apis::Common_Result::INVALID_ENUM);
 
   const bool is_vr_ui_invalid =
       Compare<hmi_apis::Common_Result::eType, EQ, ALL>(

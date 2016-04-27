@@ -41,7 +41,6 @@
 #include "utils/macro.h"
 
 namespace usage_statistics {
-
 using timer::Timer;
 
 class GlobalCounter {

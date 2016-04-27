@@ -32,8 +32,8 @@
  */
 
 #include "application_manager/commands/mobile/set_display_layout_request.h"
-
 #include "application_manager/application_impl.h"
+
 
 namespace application_manager {
 
@@ -60,6 +60,7 @@ void SetDisplayLayoutRequest::Run() {
   SendHMIRequest(hmi_apis::FunctionID::UI_SetDisplayLayout,
                  &((*message_)[strings::msg_params]),
                  true);
+
 }
 
 void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
@@ -71,8 +72,8 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
       LOGGER_INFO(logger_, "Received UI_SetDisplayLayout event");
 
       mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
-              message[strings::params][hmi_response::code].asInt());
+            static_cast<mobile_apis::Result::eType>(
+                message[strings::params][hmi_response::code].asInt());
       bool response_success = mobile_apis::Result::SUCCESS == result_code;
 
       smart_objects::SmartObject msg_params = message[strings::msg_params];

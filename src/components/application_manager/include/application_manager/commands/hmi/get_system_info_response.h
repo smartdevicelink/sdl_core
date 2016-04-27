@@ -50,30 +50,30 @@ struct SystemInfo {
  * @brief GetSystemInfoResponse command class
  **/
 class GetSystemInfoResponse : public ResponseFromHMI {
- public:
-  /**
-   * @brief GetSystemInfoResponse class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
+  public:
+    /**
+     * @brief GetSystemInfoResponse class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
   GetSystemInfoResponse(const MessageSharedPtr& message,
                         ApplicationManager& application_manager);
 
-  /**
-   * @brief GetSystemInfoResponse class destructor
-   **/
-  virtual ~GetSystemInfoResponse();
+    /**
+     * @brief GetSystemInfoResponse class destructor
+     **/
+    virtual ~GetSystemInfoResponse();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
- private:
+  private:
   const SystemInfo GetSystemInfo(
       const hmi_apis::Common_Result::eType code) const;
 
-  DISALLOW_COPY_AND_ASSIGN(GetSystemInfoResponse);
+    DISALLOW_COPY_AND_ASSIGN(GetSystemInfoResponse);
 };
 
 }  // namespace commands

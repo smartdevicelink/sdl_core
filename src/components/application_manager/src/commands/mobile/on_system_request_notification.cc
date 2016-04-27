@@ -71,7 +71,7 @@ void OnSystemRequestNotification::Run() {
                                            request_type)) {
     LOGGER_WARN(logger_,
                 "Request type " << request_type
-                                << " is not allowed by policies");
+                 <<" is not allowed by policies");
     return;
   }
 
@@ -89,7 +89,7 @@ void OnSystemRequestNotification::Run() {
   SendNotification();
 }
 
-}  // namespace mobile
+}  //namespace mobile
 
 }  // namespace commands
 

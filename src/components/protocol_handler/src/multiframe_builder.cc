@@ -82,7 +82,7 @@ bool MultiFrameBuilder::RemoveConnection(const ConnectionID connection_id) {
     // FIXME(EZamakhov): Ask ReqManager - do we need to send GenericError
     LOGGER_WARN(logger_,
                 "For connection_id: " << connection_id
-                                      << " waiting: " << multiframes_map_);
+                 << " waiting: " << multiframes_map_);
   }
   multiframes_map_.erase(it);
   return true;
@@ -113,7 +113,7 @@ ProtocolFramePtrList MultiFrameBuilder::PopMultiframes() {
         ProtocolFramePtr frame = frame_data.frame;
 
         if (frame && frame->frame_data() == FRAME_DATA_LAST_CONSECUTIVE &&
-            frame->payload_size() > 0u) {
+            frame->payload_size() > 0u ) {
           LOGGER_DEBUG(logger_, "Ready frame: " << frame);
           outpute_frame_list.push_back(frame);
           messageId_map.erase(messageId_it++);
@@ -122,7 +122,7 @@ ProtocolFramePtrList MultiFrameBuilder::PopMultiframes() {
         if (consecutive_frame_wait_msecs_ != 0) {
           LOGGER_TRACE(logger_, "Expiration verification");
           const int64_t time_left =
-              date_time::DateTime::calculateTimeSpan(frame_data.append_time);
+            date_time::DateTime::calculateTimeSpan(frame_data.append_time);
           LOGGER_DEBUG(logger_, "mSecs left: " << time_left);
           if (time_left >= consecutive_frame_wait_msecs_) {
             LOGGER_WARN(logger_, "Expired frame: " << frame);
@@ -133,8 +133,8 @@ ProtocolFramePtrList MultiFrameBuilder::PopMultiframes() {
         }
         ++messageId_it;
       }  // iteration over messageId_map
-    }    // iteration over session_map
-  }      // iteration over multiframes_map_
+    }  // iteration over session_map
+  }    // iteration over multiframes_map_
   LOGGER_DEBUG(logger_, "Result frames count: " << outpute_frame_list.size());
   return outpute_frame_list;
 }
@@ -188,17 +188,20 @@ RESULT_CODE MultiFrameBuilder::HandleFirstFrame(const ProtocolFramePtr packet) {
     LOGGER_ERROR(logger_,
                  "Already waiting message for connection_id: "
                      << connection_id
-                     << ", session_id: " << static_cast<int>(session_id)
-                     << ", message_id: " << message_id);
+                  << ", session_id: " << static_cast<int>(session_id)
+                  << ", message_id: " << message_id);
     return RESULT_FAIL;
   }
 
   LOGGER_DEBUG(logger_,
                "Start waiting frames for connection_id: "
                    << connection_id
-                   << ", session_id: " << static_cast<int>(session_id)
-                   << ", message_id: " << message_id);
-  messageId_map[message_id] = {packet, date_time::DateTime::getCurrentTime()};
+                << ", session_id: " << static_cast<int>(session_id)
+                << ", message_id: " << message_id);
+  ProtocolFrameData frame_data;
+  frame_data.frame = packet;
+  frame_data.append_time = date_time::DateTime::getCurrentTime();
+  messageId_map[message_id] = frame_data;
   return RESULT_OK;
 }
 
@@ -206,6 +209,7 @@ RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(
     const ProtocolFramePtr packet) {
   DCHECK_OR_RETURN(packet->frame_type() == FRAME_TYPE_CONSECUTIVE, RESULT_FAIL);
   LOGGER_DEBUG(logger_, "Handling CONSECUTIVE frame: " << packet);
+
 
   const ConnectionID connection_id = packet->connection_id();
   MultiFrameMap::iterator connection_it = multiframes_map_.find(connection_id);
@@ -225,8 +229,8 @@ RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(
     LOGGER_ERROR(logger_,
                  "No waiting message for connection_id: "
                      << connection_id
-                     << ", session_id: " << static_cast<int>(session_id)
-                     << ", message_id: " << message_id);
+                  << ", session_id: " << static_cast<int>(session_id)
+                  << ", message_id: " << message_id);
     return RESULT_FAIL;
   }
 
@@ -252,9 +256,9 @@ RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(
       LOGGER_ERROR(logger_,
                    "Unexpected CONSECUTIVE frame for connection_id: "
                        << connection_id
-                       << ", session_id: " << static_cast<int>(session_id)
-                       << ", message_id: " << message_id
-                       << ", frame: " << packet);
+                    << ", session_id: " << static_cast<int>(session_id)
+                    << ", message_id: " << message_id
+                    << ", frame: " << packet);
       return RESULT_FAIL;
     }
   }
@@ -262,12 +266,12 @@ RESULT_CODE MultiFrameBuilder::HandleConsecutiveFrame(
   assembling_frame->set_frame_data(new_frame_data);
 
   LOGGER_DEBUG(logger_,
-               "Appending " << packet->data_size() << " bytes "
+                "Appending " << packet->data_size() << " bytes "
                             << "; frame_data "
                             << static_cast<int>(new_frame_data)
-                            << "; for connection_id: " << connection_id
-                            << ", session_id: " << static_cast<int>(session_id)
-                            << ", message_id: " << message_id);
+                << "; for connection_id: " << connection_id
+                << ", session_id: " << static_cast<int>(session_id)
+                << ", message_id: " << message_id);
 
   if (assembling_frame->appendData(packet->data(), packet->data_size()) !=
       RESULT_OK) {

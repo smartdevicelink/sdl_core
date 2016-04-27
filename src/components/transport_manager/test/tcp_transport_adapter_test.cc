@@ -54,11 +54,31 @@ using namespace ::protocol_handler;
 using namespace ::transport_manager;
 using namespace transport_manager::transport_adapter;
 
+class TestTCPTransportAdapter : public TcpTransportAdapter {
+ public:
+  TestTCPTransportAdapter(uint16_t port, resumption::LastState& last_state)
+    : TcpTransportAdapter(port, last_state) {
+    ::profile::Profile::instance()->config_file_name(
+        "smartDeviceLink_test.ini");
+  }
+  MOCK_CONST_METHOD2(FindEstablishedConnection,
+                     ConnectionSPtr(const DeviceUID& device_handle,
+                                    const ApplicationHandle& app_handle));
+
+  MOCK_CONST_METHOD1(FindDevice, DeviceSptr(const DeviceUID& device_handle));
+  MOCK_METHOD2(Connect,
+               TransportAdapter::Error(const DeviceUID& device_handle,
+                                       const ApplicationHandle& app_handle));
+  void CallStore() { Store(); }
+  bool CallRestore() { return Restore(); }
+};
+
 class TcpAdapterTest : public ::testing::Test {
  protected:
   TcpAdapterTest() : last_state_("app_storage_folder", "app_info_storage") {}
   MockTransportManagerSettings transport_manager_settings;
-  resumption::LastState last_state_;
+
+  resumption::LastState  last_state_;
   const uint32_t port = 12345;
   const std::string string_port = "12345";
 };

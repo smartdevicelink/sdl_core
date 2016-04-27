@@ -33,6 +33,8 @@
 #include "utils/logger.h"
 #include "protocol/common.h"
 
+#include <algorithm>
+
 namespace protocol_handler {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")

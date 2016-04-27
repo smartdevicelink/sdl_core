@@ -142,7 +142,8 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     const commands::MessageSharedPtr& message,
     commands::Command::CommandOrigin origin,
     ApplicationManager& application_manager) {
-  CommandSharedPtr command;
+
+    CommandSharedPtr command;
 
   switch ((*message)[strings::params][strings::function_id].asInt()) {
     case mobile_apis::FunctionID::RegisterAppInterfaceID: {
@@ -150,7 +151,6 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
           static_cast<int>(application_manager::MessageType::kRequest)) {
         command.reset(new commands::RegisterAppInterfaceRequest(
             message, application_manager));
-
       } else {
         command.reset(new commands::RegisterAppInterfaceResponse(
             message, application_manager));

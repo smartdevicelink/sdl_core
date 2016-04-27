@@ -130,7 +130,7 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
   }
   void TearDown() OVERRIDE {
     DeleteTablesData();
-  }
+                  }
 
   void CheckDeleteQuery(const string& count_query,
                         const string& query_to_check,
@@ -1254,6 +1254,7 @@ TEST_F(ResumptionSqlQueriesTest, kUpdateSuspendData_ExpectDataUpdated) {
       "SELECT ign_off_count FROM `application`;";
   CheckSelectQuery(kSelectIgnOffCount, 4, 0);
 }
+
 
 TEST_F(ResumptionSqlQueriesTest, kDeleteFile_ExpectDataDeleted) {
   // Arrange
@@ -2566,6 +2567,7 @@ TEST_F(ResumptionSqlQueriesTest, kSelectSubMenu_ExpectDataCorrect) {
                                          device_id,
                                          9).LastInsertId();
   int64_t submenu_key =
+
       FillSubMenuTable(temp_query, 1, "menu_name", 1).LastInsertId();
 
   FillApplicationSubMenuArrayTable(temp_query, app_key, submenu_key);

@@ -38,6 +38,7 @@ include_directories(
   ${COMPONENTS_DIR}/rpc_base/include
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/utils/include/
+
   ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
   ${COMPONENTS_DIR}/policy/src/policy/policy_table/
   ${COMPONENTS_DIR}/policy/test/include/
@@ -52,15 +53,15 @@ set(testLibraries
 
 set(testSources
   counter_test.cc
-  shared_library_test.cc
+  shared_library_test.cc    
   generated_code_test.cc
   policy_manager_impl_test.cc
   update_status_manager_test.cc
 )
 
-list (APPEND testSources
-  sql_pt_representation_test.cc
-)
+  list (APPEND testSources
+    sql_pt_representation_test.cc
+  )
 
 create_test("policy_test" "${testSources}" "${testLibraries}")
 

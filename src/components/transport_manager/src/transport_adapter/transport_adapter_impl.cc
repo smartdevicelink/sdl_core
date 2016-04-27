@@ -43,15 +43,30 @@
 namespace transport_manager {
 namespace transport_adapter {
 
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 namespace {
-DeviceTypes devicesType = {
-    std::make_pair(AOA, std::string("USB_AOA")),
-    std::make_pair(PASA_AOA, std::string("USB_AOA")),
-    std::make_pair(MME, std::string("USB_IOS")),
-    std::make_pair(BLUETOOTH, std::string("BLUETOOTH")),
-    std::make_pair(PASA_BLUETOOTH, std::string("BLUETOOTH")),
+#ifdef SDL_CPP11
+DeviceTypes devices_type = {
+  std::make_pair(AOA, std::string("USB_AOA")),
+  std::make_pair(PASA_AOA, std::string("USB_AOA")),
+  std::make_pair(MME, std::string("USB_IOS")),
+  std::make_pair(BLUETOOTH, std::string("BLUETOOTH")),
+  std::make_pair(PASA_BLUETOOTH, std::string("BLUETOOTH")),
     std::make_pair(TCP, std::string("WIFI"))};
+#else
+DeviceTypes create_map() {
+  DeviceTypes devices_type;
+  devices_type.insert(std::make_pair(AOA, std::string("USB_AOA")));
+  devices_type.insert(std::make_pair(PASA_AOA, std::string("USB_AOA")));
+  devices_type.insert(std::make_pair(MME, std::string("USB_IOS")));
+  devices_type.insert(std::make_pair(BLUETOOTH, std::string("BLUETOOTH")));
+  devices_type.insert(std::make_pair(PASA_BLUETOOTH, std::string("BLUETOOTH")));
+  devices_type.insert(std::make_pair(TCP, std::string("WIFI")));
+  return devices_type;
+}
+DeviceTypes devices_type = create_map();
+#endif  // SDL_CPP11
 }
 
 TransportAdapterImpl::TransportAdapterImpl(
@@ -122,9 +137,10 @@ void TransportAdapterImpl::Terminate() {
   }
 
   ConnectionMap connections;
-  connections_lock_.AcquireForWriting();
+  {
+    sync_primitives::AutoWriteLock lock(connections_lock_);
   std::swap(connections, connections_);
-  connections_lock_.Release();
+  }
   connections.clear();
 
   LOGGER_DEBUG(logger_, "Connections deleted");
@@ -180,7 +196,7 @@ TransportAdapter::Error TransportAdapterImpl::SearchDevices() {
 }
 
 TransportAdapter::Error TransportAdapterImpl::Connect(
-    const DeviceUID& device_id, const ApplicationHandle& app_handle) {
+  const DeviceUID& device_id, const ApplicationHandle& app_handle) {
   LOGGER_TRACE(logger_,
                "enter. DeviceUID " << device_id << " ApplicationHandle "
                                    << app_handle);
@@ -193,35 +209,35 @@ TransportAdapter::Error TransportAdapterImpl::Connect(
     return BAD_STATE;
   }
 
-  connections_lock_.AcquireForWriting();
+  {
+    sync_primitives::AutoWriteLock lock(connections_lock_);
   const bool already_exists =
-      connections_.end() !=
-      connections_.find(std::make_pair(device_id, app_handle));
+    connections_.end() !=
+    connections_.find(std::make_pair(device_id, app_handle));
   if (!already_exists) {
-    ConnectionInfo& info = connections_[std::make_pair(device_id, app_handle)];
+      ConnectionInfo& info =
+          connections_[std::make_pair(device_id, app_handle)];
     info.app_handle = app_handle;
     info.device_id = device_id;
     info.state = ConnectionInfo::NEW;
-  }
-  connections_lock_.Release();
-  if (already_exists) {
-    LOGGER_TRACE(logger_, "exit with ALREADY_EXISTS");
+    } else {
+      LOGGER_TRACE(logger_, "exit with ALREADY_EXISTS");
     return ALREADY_EXISTS;
+  }
   }
 
   const TransportAdapter::Error err =
-      server_connection_factory_->CreateConnection(device_id, app_handle);
+    server_connection_factory_->CreateConnection(device_id, app_handle);
   if (TransportAdapter::OK != err) {
-    connections_lock_.AcquireForWriting();
+    sync_primitives::AutoWriteLock lock(connections_lock_);
     connections_.erase(std::make_pair(device_id, app_handle));
-    connections_lock_.Release();
   }
   LOGGER_TRACE(logger_, "exit with error: " << err);
   return err;
 }
 
 TransportAdapter::Error TransportAdapterImpl::ConnectDevice(
-    const DeviceUID& device_handle) {
+  const DeviceUID& device_handle) {
   LOGGER_TRACE(logger_, "enter with device_handle: " << &device_handle);
   DeviceSptr device = FindDevice(device_handle);
   if (device) {
@@ -235,7 +251,7 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(
 }
 
 TransportAdapter::Error TransportAdapterImpl::Disconnect(
-    const DeviceUID& device_id, const ApplicationHandle& app_handle) {
+  const DeviceUID& device_id, const ApplicationHandle& app_handle) {
   LOGGER_TRACE(logger_,
                "enter. device_id: " << &device_id
                                     << ", device_id: " << &device_id);
@@ -255,7 +271,7 @@ TransportAdapter::Error TransportAdapterImpl::Disconnect(
 }
 
 TransportAdapter::Error TransportAdapterImpl::DisconnectDevice(
-    const DeviceUID& device_id) {
+  const DeviceUID& device_id) {
   LOGGER_TRACE(logger_, "enter. device_id: " << &device_id);
   if (!initialised_) {
     LOGGER_TRACE(logger_, "exit with BAD_STATE");
@@ -265,17 +281,18 @@ TransportAdapter::Error TransportAdapterImpl::DisconnectDevice(
   Error error = OK;
 
   std::vector<ConnectionInfo> to_disconnect;
-  connections_lock_.AcquireForReading();
-  for (ConnectionMap::const_iterator i = connections_.begin();
-       i != connections_.end();
-       ++i) {
+  {
+    sync_primitives::AutoReadLock lock(connections_lock_);
+    for (ConnectionMap::const_iterator i = connections_.begin();
+         i != connections_.end();
+         ++i) {
     ConnectionInfo info = i->second;
-    if (info.device_id == device_id &&
-        info.state != ConnectionInfo::FINALISING) {
+      if (info.device_id == device_id &&
+          info.state != ConnectionInfo::FINALISING) {
       to_disconnect.push_back(info);
     }
   }
-  connections_lock_.Release();
+  }
 
   for (std::vector<ConnectionInfo>::const_iterator j = to_disconnect.begin();
        j != to_disconnect.end();
@@ -293,7 +310,7 @@ TransportAdapter::Error TransportAdapterImpl::DisconnectDevice(
 TransportAdapter::Error TransportAdapterImpl::SendData(
     const DeviceUID& device_id,
     const ApplicationHandle& app_handle,
-    const ::protocol_handler::RawMessagePtr data) {
+  const ::protocol_handler::RawMessagePtr data) {
   LOGGER_TRACE(logger_,
                "enter. device_id: " << &device_id << ", app_handle: "
                                     << &app_handle << ", data: " << data);
@@ -426,17 +443,18 @@ void TransportAdapterImpl::SearchDeviceDone(const DeviceVector& devices) {
     new_devices[device->unique_device_id()] = device;
   }
 
-  connections_lock_.AcquireForReading();
   std::set<DeviceUID> connected_devices;
+  {
+    sync_primitives::AutoReadLock lock(connections_lock_);
   for (ConnectionMap::const_iterator it = connections_.begin();
-       it != connections_.end();
-       ++it) {
+         it != connections_.end();
+         ++it) {
     const ConnectionInfo& info = it->second;
     if (info.state != ConnectionInfo::FINALISING) {
       connected_devices.insert(info.device_id);
     }
   }
-  connections_lock_.Release();
+  }
 
   DeviceMap all_devices = new_devices;
   devices_mutex_.Acquire();
@@ -517,18 +535,17 @@ bool TransportAdapterImpl::IsClientOriginatedConnectSupported() const {
 void TransportAdapterImpl::ConnectionCreated(
     ConnectionSPtr connection,
     const DeviceUID& device_id,
-    const ApplicationHandle& app_handle) {
+  const ApplicationHandle& app_handle) {
   LOGGER_TRACE(logger_,
                "enter connection:" << connection
                                    << ", device_id: " << &device_id
-                                   << ", app_handle: " << &app_handle);
-  connections_lock_.AcquireForReading();
+                << ", app_handle: " << &app_handle);
+  sync_primitives::AutoReadLock lock(connections_lock_);
   ConnectionInfo& info = connections_[std::make_pair(device_id, app_handle)];
   info.app_handle = app_handle;
   info.device_id = device_id;
   info.connection = connection;
   info.state = ConnectionInfo::NEW;
-  connections_lock_.Release();
 }
 
 void TransportAdapterImpl::DeviceDisconnected(
@@ -558,14 +575,15 @@ void TransportAdapterImpl::DeviceDisconnected(
     listener->OnDisconnectDeviceDone(this, device_uid);
   }
 
-  connections_lock_.AcquireForWriting();
-  for (ApplicationList::const_iterator i = app_list.begin();
-       i != app_list.end();
-       ++i) {
+  {
+    sync_primitives::AutoWriteLock lock(connections_lock_);
+    for (ApplicationList::const_iterator i = app_list.begin();
+         i != app_list.end();
+         ++i) {
     ApplicationHandle app_handle = *i;
     connections_.erase(std::make_pair(device_uid, app_handle));
   }
-  connections_lock_.Release();
+  }
 
   RemoveDevice(device_uid);
   LOGGER_TRACE(logger_, "exit");
@@ -615,9 +633,10 @@ void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_handle,
       listener->OnDisconnectDeviceDone(this, device_uid);
     }
   }
-  connections_lock_.AcquireForWriting();
+  {
+    sync_primitives::AutoWriteLock lock(connections_lock_);
   connections_.erase(std::make_pair(device_uid, app_uid));
-  connections_lock_.Release();
+  }
 
   if (device_disconnected) {
     RemoveDevice(device_uid);
@@ -652,7 +671,7 @@ void TransportAdapterImpl::DataReceiveDone(
 void TransportAdapterImpl::DataReceiveFailed(
     const DeviceUID& device_id,
     const ApplicationHandle& app_handle,
-    const DataReceiveError& error) {
+  const DataReceiveError& error) {
   LOGGER_TRACE(logger_, "enter");
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end();
@@ -664,8 +683,8 @@ void TransportAdapterImpl::DataReceiveFailed(
 
 void TransportAdapterImpl::DataSendDone(
     const DeviceUID& device_id,
-    const ApplicationHandle& app_handle,
-    ::protocol_handler::RawMessagePtr message) {
+                                        const ApplicationHandle& app_handle,
+                                        ::protocol_handler::RawMessagePtr message) {
   LOGGER_TRACE(logger_, "enter");
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end();
@@ -709,14 +728,15 @@ void TransportAdapterImpl::ConnectDone(const DeviceUID& device_id,
   LOGGER_TRACE(logger_,
                "enter. device_id: " << &device_id
                                     << ", app_handle: " << &app_handle);
-  connections_lock_.AcquireForReading();
+  {
+    sync_primitives::AutoReadLock lock(connections_lock_);
   ConnectionMap::iterator it_conn =
-      connections_.find(std::make_pair(device_id, app_handle));
+    connections_.find(std::make_pair(device_id, app_handle));
   if (it_conn != connections_.end()) {
     ConnectionInfo& info = it_conn->second;
     info.state = ConnectionInfo::ESTABLISHED;
   }
-  connections_lock_.Release();
+  }
 
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end();
@@ -736,9 +756,10 @@ void TransportAdapterImpl::ConnectFailed(const DeviceUID& device_handle,
   LOGGER_TRACE(logger_,
                "enter. device_id: " << &device_uid << ", app_handle: "
                                     << &app_uid << ", error: " << &error);
-  connections_lock_.AcquireForWriting();
+  {
+    sync_primitives::AutoWriteLock lock(connections_lock_);
   connections_.erase(std::make_pair(device_uid, app_uid));
-  connections_lock_.Release();
+  }
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end();
        ++it) {
@@ -754,7 +775,7 @@ void TransportAdapterImpl::AddListener(TransportAdapterListener* listener) {
 }
 
 ApplicationList TransportAdapterImpl::GetApplicationList(
-    const DeviceUID& device_id) const {
+  const DeviceUID& device_id) const {
   LOGGER_TRACE(logger_, "enter. device_id: " << &device_id);
   DeviceSptr device = FindDevice(device_id);
   if (device.valid()) {
@@ -771,24 +792,23 @@ ApplicationList TransportAdapterImpl::GetApplicationList(
 }
 
 void TransportAdapterImpl::ConnectionFinished(
-    const DeviceUID& device_id, const ApplicationHandle& app_handle) {
+  const DeviceUID& device_id, const ApplicationHandle& app_handle) {
   LOGGER_TRACE(logger_,
                "enter. device_id: " << &device_id
                                     << ", app_handle: " << &app_handle);
-  connections_lock_.AcquireForReading();
+  sync_primitives::AutoReadLock lock(connections_lock_);
   ConnectionMap::iterator it =
-      connections_.find(std::make_pair(device_id, app_handle));
+    connections_.find(std::make_pair(device_id, app_handle));
   if (it != connections_.end()) {
     ConnectionInfo& info = it->second;
     info.state = ConnectionInfo::FINALISING;
   }
-  connections_lock_.Release();
 }
 
 void TransportAdapterImpl::ConnectionAborted(
     const DeviceUID& device_id,
     const ApplicationHandle& app_handle,
-    const CommunicationError& error) {
+  const CommunicationError& error) {
   ConnectionFinished(device_id, app_handle);
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end();
@@ -837,7 +857,7 @@ std::string TransportAdapterImpl::DeviceName(const DeviceUID& device_id) const {
 }
 
 std::string TransportAdapterImpl::GetConnectionType() const {
-  return devicesType[GetDeviceType()];
+  return devices_type[GetDeviceType()];
 }
 
 #ifdef TELEMETRY_MONITOR
@@ -867,21 +887,22 @@ bool TransportAdapterImpl::ToBeAutoDisconnected(DeviceSptr device) const {
 }
 
 ConnectionSPtr TransportAdapterImpl::FindEstablishedConnection(
-    const DeviceUID& device_id, const ApplicationHandle& app_handle) const {
+  const DeviceUID& device_id, const ApplicationHandle& app_handle) const {
   LOGGER_TRACE(logger_,
                "enter. device_id: " << &device_id
                                     << ", app_handle: " << &app_handle);
   ConnectionSPtr connection;
-  connections_lock_.AcquireForReading();
+  {
+    sync_primitives::AutoReadLock lock(connections_lock_);
   ConnectionMap::const_iterator it =
-      connections_.find(std::make_pair(device_id, app_handle));
+    connections_.find(std::make_pair(device_id, app_handle));
   if (it != connections_.end()) {
     const ConnectionInfo& info = it->second;
     if (info.state == ConnectionInfo::ESTABLISHED) {
       connection = info.connection;
     }
   }
-  connections_lock_.Release();
+  }
   LOGGER_TRACE(logger_, "exit with Connection: " << connection);
   return connection;
 }

@@ -51,3 +51,4 @@ void VRIsReadyRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
+

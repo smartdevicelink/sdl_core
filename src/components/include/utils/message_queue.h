@@ -49,85 +49,85 @@ namespace utils {
 
 template <typename T, class Q = std::queue<T> >
 class MessageQueue {
- public:
-  typedef Q Queue;
-  /**
-   * \brief Default constructor
-   */
-  MessageQueue();
+  public:
+    typedef Q Queue;
+    /**
+     * \brief Default constructor
+     */
+    MessageQueue();
 
-  /**
-   * \brief Destructor
-   */
-  ~MessageQueue();
+    /**
+     * \brief Destructor
+     */
+    ~MessageQueue();
 
-  /**
-   * \brief Returns size of the queue.
-   * \return Size of the queue.
-   */
-  size_t size() const;
+    /**
+     * \brief Returns size of the queue.
+     * \return Size of the queue.
+     */
+    size_t size() const;
 
-  /**
-   * \brief If queue is empty.
-   * \return Is queue empty.
-   */
-  bool empty() const;
+    /**
+     * \brief If queue is empty.
+     * \return Is queue empty.
+     */
+    bool empty() const;
 
-  /**
-   * \brief Tells if queue is being shut down
-   */
-  bool IsShuttingDown() const;
+    /**
+     * \brief Tells if queue is being shut down
+     */
+    bool IsShuttingDown() const;
 
-  /**
-   * \brief Adds element to the queue.
-   * \param element Element to be added to the queue.n
-   */
-  void push(const T& element);
+    /**
+     * \brief Adds element to the queue.
+     * \param element Element to be added to the queue.n
+     */
+    void push(const T& element);
 
-  /**
-   * \brief Removes element from the queue and returns it
-   * \param element Element to be returned
-   * \return True on success, false if queue is empty
-   */
-  bool pop(T& element);
+    /**
+     * \brief Removes element from the queue and returns it
+     * \param element Element to be returned
+     * \return True on success, false if queue is empty
+     */
+    bool pop(T& element);
 
-  /**
-   * \brief Conditional wait.
-   */
-  void wait();
+    /**
+     * \brief Conditional wait.
+     */
+    void wait();
 
-  /**
-    * \brief waitUntilEmpty message queue
-    * Wait until message queue is empty
-    */
-  void WaitUntilEmpty();
+    /**
+      * \brief waitUntilEmpty message queue
+      * Wait until message queue is empty
+      */
+    void WaitUntilEmpty();
 
-  /**
-   * \brief Shutdown the queue.
-   * This leads to waking up everyone waiting on the queue
-   * Queue being shut down can be drained ( with pop() )
-   * But nothing must be added to the queue after it began
-   * shutting down
-   */
-  void Shutdown();
+    /**
+     * \brief Shutdown the queue.
+     * This leads to waking up everyone waiting on the queue
+     * Queue being shut down can be drained ( with pop() )
+     * But nothing must be added to the queue after it began
+     * shutting down
+     */
+    void Shutdown();
 
-  /**
-    * \brief Clears queue.
-    */
-  void Reset();
+    /**
+      * \brief Clears queue.
+      */
+    void Reset();
 
- private:
-  /**
-   *\brief Queue
-   */
-  Queue queue_;
-  volatile bool shutting_down_;
+  private:
+    /**
+     *\brief Queue
+     */
+    Queue queue_;
+    volatile bool shutting_down_;
 
-  /**
-   *\brief Platform specific syncronisation variable
-   */
-  mutable sync_primitives::Lock queue_lock_;
-  sync_primitives::ConditionalVariable queue_new_items_;
+    /**
+     *\brief Platform specific syncronisation variable
+     */
+    mutable sync_primitives::Lock queue_lock_;
+    sync_primitives::ConditionalVariable queue_new_items_;
 };
 
 template <typename T, class Q>

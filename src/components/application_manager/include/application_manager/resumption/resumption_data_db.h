@@ -34,8 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_DB_H_
 #include "application_manager/resumption/resumption_data.h"
 
-#include "sql_database.h"
-#include "sql_query.h"
+#include "utils/sql_wrapper.h"
 
 namespace resumption {
 
@@ -201,6 +200,7 @@ class ResumptionDataDB : public ResumptionData {
   virtual void UpdateHmiLevel(const std::string& policy_app_id,
                               const std::string& device_id,
                               mobile_apis::HMILevel::eType hmi_level);
+
 
   /**
    * @brief Write database to file system

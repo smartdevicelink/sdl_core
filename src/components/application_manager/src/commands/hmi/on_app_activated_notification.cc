@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/commands/hmi/on_app_activated_notification.h"
-
 #include "application_manager/message_helper.h"
 #include "interfaces/HMI_API.h"
 
@@ -56,3 +55,4 @@ void OnAppActivatedNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
+

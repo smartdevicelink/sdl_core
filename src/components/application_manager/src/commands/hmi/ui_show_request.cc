@@ -51,3 +51,4 @@ void UIShowRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
+

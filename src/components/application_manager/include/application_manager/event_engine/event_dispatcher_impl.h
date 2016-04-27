@@ -106,6 +106,7 @@ class EventDispatcherImpl : public EventDispatcher {
   void remove_observer(EventObserver& observer) OVERRIDE;
 
  private:
+
   /*
    * @brief removes observer
    * when occurs unsubscribe from event
@@ -116,11 +117,13 @@ class EventDispatcherImpl : public EventDispatcher {
   DISALLOW_COPY_AND_ASSIGN(EventDispatcherImpl);
 
  private:
+
   // Members section
-  sync_primitives::Lock state_lock_;
-  sync_primitives::Lock observer_lock_;
-  EventObserverMap observers_event_;
-  ObserverVector observers_;
+  sync_primitives::Lock                               state_lock_;
+  sync_primitives::Lock                               observer_lock_;
+  EventObserverMap                                    observers_event_;
+  ObserverVector                                      observers_;
+
 };
 
 }  // namespace event_engine

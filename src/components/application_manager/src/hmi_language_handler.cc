@@ -43,6 +43,7 @@ static const std::string VRKey = "VR";
 static const std::string TTSKey = "TTS";
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+
 namespace application_manager {
 
 HMILanguageHandler::HMILanguageHandler(ApplicationManager& application_manager)
@@ -77,8 +78,8 @@ void HMILanguageHandler::set_language_for(
       return;
   }
   LOGGER_DEBUG(logger_,
-               "Setting language " << language << " for interface "
-                                   << interface);
+                "Setting language " << language << " for interface "
+                                    << interface);
   last_state_->dictionary[LanguagesKey][key] = language;
   return;
 }
@@ -104,10 +105,10 @@ hmi_apis::Common_Language::eType HMILanguageHandler::get_language_for(
       return Common_Language::INVALID_ENUM;
   }
 
-  if (last_state_->dictionary.isMember(LanguagesKey)) {
-    if (last_state_->dictionary[LanguagesKey].isMember(key)) {
+  if (last_state_->dictionary.HasMember(LanguagesKey)) {
+    if (last_state_->dictionary[LanguagesKey].HasMember(key)) {
       Common_Language::eType language = static_cast<Common_Language::eType>(
-          last_state_->dictionary[LanguagesKey][key].asInt());
+          last_state_->dictionary[LanguagesKey][key].AsInt());
       return language;
     }
   }
@@ -118,24 +119,24 @@ void HMILanguageHandler::on_event(const event_engine::Event& event) {
   LOGGER_AUTO_TRACE(logger_);
   smart_objects::SmartObject msg = event.smart_object();
   switch (event.id()) {
-    case hmi_apis::FunctionID::UI_GetLanguage:
+  case hmi_apis::FunctionID::UI_GetLanguage:
       LOGGER_DEBUG(logger_, "Got UI language response.");
-      is_ui_language_received_ = true;
-      break;
-    case hmi_apis::FunctionID::VR_GetLanguage:
+    is_ui_language_received_ = true;
+    break;
+  case hmi_apis::FunctionID::VR_GetLanguage:
       LOGGER_DEBUG(logger_, "Got VR language response.");
-      is_vr_language_received_ = true;
-      break;
-    case hmi_apis::FunctionID::TTS_GetLanguage:
+    is_vr_language_received_ = true;
+    break;
+  case hmi_apis::FunctionID::TTS_GetLanguage:
       LOGGER_DEBUG(logger_, "Got TTS language response.");
-      is_tts_language_received_ = true;
-      break;
-    case hmi_apis::FunctionID::BasicCommunication_OnAppRegistered:
+    is_tts_language_received_ = true;
+    break;
+  case hmi_apis::FunctionID::BasicCommunication_OnAppRegistered:
       CheckApplication(
           std::make_pair(msg[strings::params][strings::app_id].asUInt(), true));
-      return;
-    default:
-      return;
+    return;
+  default:
+    return;
   }
 
   if (is_ui_language_received_ && is_vr_language_received_ &&
@@ -169,15 +170,15 @@ void HMILanguageHandler::set_handle_response_for(
 
   hmi_apis::FunctionID::eType function_id =
       static_cast<hmi_apis::FunctionID::eType>(
-          request[strings::params][strings::function_id].asInt());
+        request[strings::params][strings::function_id].asInt());
 
   if (!Compare<hmi_apis::FunctionID::eType, EQ, ONE>(
-          function_id,
-          hmi_apis::FunctionID::UI_GetLanguage,
-          hmi_apis::FunctionID::VR_GetLanguage,
-          hmi_apis::FunctionID::TTS_GetLanguage)) {
+        function_id,
+        hmi_apis::FunctionID::UI_GetLanguage,
+        hmi_apis::FunctionID::VR_GetLanguage,
+        hmi_apis::FunctionID::TTS_GetLanguage)) {
     LOGGER_ERROR(logger_,
-                 "Only *GetLanguage request are allowed to be subscribed.");
+                  "Only *GetLanguage request are allowed to be subscribed.");
     return;
   }
 
@@ -212,7 +213,7 @@ void HMILanguageHandler::set_default_capabilities_languages(
 }
 
 void HMILanguageHandler::SendOnLanguageChangeToMobile(
-    const uint32_t connection_key) {
+      const uint32_t connection_key) {
   LOGGER_AUTO_TRACE(logger_);
 
   smart_objects::SmartObjectSPtr notification = new smart_objects::SmartObject;
@@ -248,13 +249,13 @@ void HMILanguageHandler::VerifyWithPersistedLanguages() {
       hmi_capabilities.active_vr_language() == persisted_vr_language_ &&
       hmi_capabilities.active_tts_language() == persisted_tts_language_) {
     LOGGER_INFO(logger_,
-                "All languages gotten from HMI match to persisted values.");
+            "All languages gotten from HMI match to persisted values.");
     return;
   }
 
   LOGGER_INFO(logger_,
               "Some languages gotten from HMI have "
-              "mismatch with persisted values.");
+                        "mismatch with persisted values.");
 
   const ApplicationSet& accessor =
       application_manager_.applications().GetData();
@@ -265,7 +266,7 @@ void HMILanguageHandler::VerifyWithPersistedLanguages() {
     LOGGER_INFO(logger_,
                 "Application with app_id "
                     << app->app_id() << " will be unregistered because of "
-                                        "HMI language(s) mismatch.");
+                    "HMI language(s) mismatch.");
 
     CheckApplication(std::make_pair(app->app_id(), false));
   }
@@ -273,7 +274,7 @@ void HMILanguageHandler::VerifyWithPersistedLanguages() {
   sync_primitives::AutoLock lock(apps_lock_);
   if (0 == apps_.size()) {
     LOGGER_DEBUG(logger_,
-                 "No registered apps found. Unsubscribing from all events.");
+                  "No registered apps found. Unsubscribing from all events.");
     unsubscribe_from_all_events();
   }
 }
@@ -291,7 +292,7 @@ void HMILanguageHandler::HandleWrongLanguageApp(const Apps::value_type& app) {
 
   LOGGER_INFO(logger_,
               "Unregistering application with app_id "
-                  << app.first << " because of HMI language(s) mismatch.");
+               << app.first << " because of HMI language(s) mismatch.");
 
   SendOnLanguageChangeToMobile(app.first);
   application_manager_.ManageMobileCommand(
@@ -329,6 +330,7 @@ void HMILanguageHandler::Init(resumption::LastState* value) {
   persisted_ui_language_ = get_language_for(INTERFACE_UI);
   persisted_vr_language_ = get_language_for(INTERFACE_VR);
   persisted_tts_language_ = get_language_for(INTERFACE_TTS);
+
 }
 
 }  // namespace application_manager

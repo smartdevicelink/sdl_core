@@ -32,16 +32,15 @@
  */
 
 #include "application_manager/commands/mobile/alert_maneuver_response.h"
-
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-AlertManeuverResponse::AlertManeuverResponse(
-    const MessageSharedPtr& message, ApplicationManager& application_manager)
-    : CommandResponseImpl(message, application_manager) {}
+AlertManeuverResponse::AlertManeuverResponse(const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
+}
 
 AlertManeuverResponse::~AlertManeuverResponse() {}
 

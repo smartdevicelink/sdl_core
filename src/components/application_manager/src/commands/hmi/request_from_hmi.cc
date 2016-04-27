@@ -42,6 +42,7 @@ RequestFromHMI::RequestFromHMI(const MessageSharedPtr& message,
                                ApplicationManager& application_manager)
     : CommandImpl(message, application_manager)
     , EventObserver(application_manager.event_dispatcher()) {
+
   // Replace HMI app id with Mobile connection id
   ReplaceHMIByMobileAppId(*(message.get()));
 }
@@ -100,7 +101,12 @@ void RequestFromHMI::FillCommonParametersOfSO(
   (*message)[strings::params][strings::protocol_type] = hmi_protocol_type_;
   (*message)[strings::params][strings::protocol_version] = protocol_version_;
   (*message)[strings::params][strings::correlation_id] = correlation_id;
+  (*message)[strings::params][hmi_response::code] = result_code;
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(message);
 }
+
 
 }  // namespace commands
 }  // namespace application_manager
+

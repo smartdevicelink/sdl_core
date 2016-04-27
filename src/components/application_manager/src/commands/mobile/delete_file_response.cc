@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/delete_file_response.h"
-
 #include "application_manager/application_impl.h"
 
 namespace application_manager {

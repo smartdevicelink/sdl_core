@@ -29,35 +29,29 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "transport_manager/transport_adapter/threaded_socket_connection.h"
 
-#include <algorithm>
-#include <errno.h>
-#include <fcntl.h>
-#include <memory.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
 
-#include "transport_manager/transport_adapter/threaded_socket_connection.h"
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 namespace transport_manager {
 namespace transport_adapter {
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+////////////////////////////////////////////////////////////////////////////////
+/// SocketConnectionDelegate:
+////////////////////////////////////////////////////////////////////////////////
 
 ThreadedSocketConnection::ThreadedSocketConnection(
     const DeviceUID& device_id,
     const ApplicationHandle& app_handle,
     TransportAdapterController* controller)
-    : read_fd_(-1)
-    , write_fd_(-1)
-    , controller_(controller)
+    : controller_(controller)
     , frames_to_send_()
     , frames_to_send_mutex_()
-    , socket_(-1)
+    , socket_connection_()
     , terminate_flag_(false)
     , unexpected_disconnect_(false)
     , device_uid_(device_id)
@@ -75,12 +69,6 @@ ThreadedSocketConnection::~ThreadedSocketConnection() {
   delete thread_->delegate();
   threads::DeleteThread(thread_);
 
-  if (-1 != read_fd_) {
-    close(read_fd_);
-  }
-  if (-1 != write_fd_) {
-    close(write_fd_);
-  }
 }
 
 void ThreadedSocketConnection::Abort() {
@@ -89,25 +77,14 @@ void ThreadedSocketConnection::Abort() {
   terminate_flag_ = true;
 }
 
-TransportAdapter::Error ThreadedSocketConnection::Start() {
-  LOGGER_AUTO_TRACE(logger_);
-  int fds[2];
-  const int pipe_ret = pipe(fds);
-  if (0 == pipe_ret) {
-    LOGGER_DEBUG(logger_, "pipe created");
-    read_fd_ = fds[0];
-    write_fd_ = fds[1];
-  } else {
-    LOGGER_ERROR(logger_, "pipe creation failed");
-    return TransportAdapter::FAIL;
-  }
-  const int fcntl_ret =
-      fcntl(read_fd_, F_SETFL, fcntl(read_fd_, F_GETFL) | O_NONBLOCK);
-  if (0 != fcntl_ret) {
-    LOGGER_ERROR(logger_, "fcntl failed");
-    return TransportAdapter::FAIL;
+void ThreadedSocketConnection::SetSocket(
+    utils::TcpSocketConnection& socket_connection) {
+  socket_connection_ = socket_connection;
+  socket_connection_.SetEventHandler(this);
   }
 
+TransportAdapter::Error ThreadedSocketConnection::Start() {
+  LOGGER_AUTO_TRACE(logger_);
   if (!thread_->start()) {
     LOGGER_ERROR(logger_, "thread creation failed");
     return TransportAdapter::FAIL;
@@ -126,24 +103,13 @@ void ThreadedSocketConnection::Finalize() {
     LOGGER_DEBUG(logger_, "not unexpected_disconnect");
     controller_->ConnectionFinished(device_handle(), application_handle());
   }
-  close(socket_);
+  socket_connection_.Close();
 }
 
-TransportAdapter::Error ThreadedSocketConnection::Notify() const {
+TransportAdapter::Error ThreadedSocketConnection::Notify() {
   LOGGER_AUTO_TRACE(logger_);
-  if (-1 == write_fd_) {
-    LOGGER_ERROR_WITH_ERRNO(
-        logger_, "Failed to wake up connection thread for connection " << this);
-    LOGGER_TRACE(logger_, "exit with TransportAdapter::BAD_STATE");
-    return TransportAdapter::BAD_STATE;
-  }
-  uint8_t c = 0;
-  if (1 != write(write_fd_, &c, 1)) {
-    LOGGER_ERROR_WITH_ERRNO(
-        logger_, "Failed to wake up connection thread for connection " << this);
-    return TransportAdapter::FAIL;
-  }
-  return TransportAdapter::OK;
+  return socket_connection_.Notify() ? TransportAdapter::OK
+                                     : TransportAdapter::FAIL;
 }
 
 TransportAdapter::Error ThreadedSocketConnection::SendData(
@@ -185,156 +151,77 @@ void ThreadedSocketConnection::threadMain() {
   }
 }
 
-bool ThreadedSocketConnection::IsFramesToSendQueueEmpty() const {
-  // Check Frames queue is empty or not
-  sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
-  return frames_to_send_.empty();
-}
 
 void ThreadedSocketConnection::Transmit() {
   LOGGER_AUTO_TRACE(logger_);
+  LOGGER_DEBUG(logger_, "Waiting for connection events. " << this);
+  socket_connection_.Wait();
 
-  const nfds_t kPollFdsSize = 2;
-  pollfd poll_fds[kPollFdsSize];
-  poll_fds[0].fd = socket_;
-
-  const bool is_queue_empty_on_poll = IsFramesToSendQueueEmpty();
-
-  poll_fds[0].events =
-      POLLIN | POLLPRI | (is_queue_empty_on_poll ? 0 : POLLOUT);
-  poll_fds[1].fd = read_fd_;
-  poll_fds[1].events = POLLIN | POLLPRI;
-
-  LOGGER_DEBUG(logger_, "poll " << this);
-  if (-1 == poll(poll_fds, kPollFdsSize, -1)) {
-    LOGGER_ERROR_WITH_ERRNO(logger_, "poll failed for connection " << this);
-    Abort();
-    return;
-  }
-  LOGGER_DEBUG(logger_,
-               "poll is ok " << this << " revents0: " << std::hex
-                             << poll_fds[0].revents << " revents1:" << std::hex
-                             << poll_fds[1].revents);
-  // error check
-  if (0 != (poll_fds[1].revents & (POLLERR | POLLHUP | POLLNVAL))) {
-    LOGGER_ERROR(logger_,
-                 "Notification pipe for connection " << this << " terminated");
-    Abort();
-    return;
+  LOGGER_DEBUG(logger_, "Waited for connection events: " << this);
   }
 
-  if (poll_fds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
-    LOGGER_WARN(logger_, "Connection " << this << " terminated");
-    Abort();
-    return;
-  }
-
-  // clear notifications
-  char buffer[256];
-  ssize_t bytes_read = -1;
-  do {
-    bytes_read = read(read_fd_, buffer, sizeof(buffer));
-  } while (bytes_read > 0);
-  if ((bytes_read < 0) && (EAGAIN != errno)) {
-    LOGGER_ERROR_WITH_ERRNO(logger_, "Failed to clear notification pipe");
-    LOGGER_ERROR_WITH_ERRNO(logger_, "poll failed for connection " << this);
-    Abort();
-    return;
-  }
-
-  const bool is_queue_empty = IsFramesToSendQueueEmpty();
-
-  // Send data if possible
-  if (!is_queue_empty && (poll_fds[0].revents | POLLOUT)) {
-    LOGGER_DEBUG(logger_, "frames_to_send_ not empty() ");
-
-    // send data
-    const bool send_ok = Send();
-    if (!send_ok) {
-      LOGGER_ERROR(logger_, "Send() failed ");
-      Abort();
-      return;
-    }
-  }
-
-  // receive data
-  if (poll_fds[0].revents & (POLLIN | POLLPRI)) {
-    const bool receive_ok = Receive();
-    if (!receive_ok) {
-      LOGGER_ERROR(logger_, "Receive() failed ");
-      Abort();
-      return;
-    }
-  }
-}
-
-bool ThreadedSocketConnection::Receive() {
+void ThreadedSocketConnection::Send() {
   LOGGER_AUTO_TRACE(logger_);
-  uint8_t buffer[4096];
-  ssize_t bytes_read = -1;
-
-  do {
-    bytes_read = recv(socket_, buffer, sizeof(buffer), MSG_DONTWAIT);
-
-    if (bytes_read > 0) {
-      LOGGER_DEBUG(logger_,
-                   "Received " << bytes_read << " bytes for connection "
-                               << this);
-      ::protocol_handler::RawMessagePtr frame(
-          new protocol_handler::RawMessage(0, 0, buffer, bytes_read));
-      controller_->DataReceiveDone(
-          device_handle(), application_handle(), frame);
-    } else if (bytes_read < 0) {
-      if (EAGAIN != errno && EWOULDBLOCK != errno) {
-        LOGGER_ERROR_WITH_ERRNO(logger_,
-                                "recv() failed for connection " << this);
-        return false;
-      }
-    } else {
-      LOGGER_WARN(logger_, "Connection " << this << " closed by remote peer");
-      return false;
-    }
-  } while (bytes_read > 0);
-
-  return true;
-}
-
-bool ThreadedSocketConnection::Send() {
-  LOGGER_AUTO_TRACE(logger_);
-  FrameQueue frames_to_send_local;
-
+  LOGGER_DEBUG(logger_, "Trying to send data if available");
+  FrameQueue frames_to_send;
   {
     sync_primitives::AutoLock auto_lock(frames_to_send_mutex_);
-    std::swap(frames_to_send_local, frames_to_send_);
+    std::swap(frames_to_send, frames_to_send_);
   }
 
   size_t offset = 0;
-  while (!frames_to_send_local.empty()) {
-    LOGGER_INFO(logger_, "frames_to_send is not empty");
-    ::protocol_handler::RawMessagePtr frame = frames_to_send_local.front();
-    const ssize_t bytes_sent =
-        ::send(socket_, frame->data() + offset, frame->data_size() - offset, 0);
-
-    if (bytes_sent >= 0) {
-      LOGGER_DEBUG(logger_, "bytes_sent >= 0");
-      offset += bytes_sent;
-      if (offset == frame->data_size()) {
-        frames_to_send_local.pop();
-        offset = 0;
-        controller_->DataSendDone(device_handle(), application_handle(), frame);
-      }
-    } else {
-      LOGGER_DEBUG(logger_, "bytes_sent < 0");
-      LOGGER_ERROR_WITH_ERRNO(logger_, "Send failed for connection " << this);
-      frames_to_send_local.pop();
+  while (!frames_to_send.empty()) {
+    ::protocol_handler::RawMessagePtr frame = frames_to_send.front();
+    std::size_t bytes_sent = 0u;
+    const bool sent = socket_connection_.Send(
+        frame->data() + offset, frame->data_size() - offset, bytes_sent);
+    if (!sent) {
+      LOGGER_ERROR(logger_, "Send failed for connection " << this);
+      frames_to_send.pop();
       offset = 0;
       controller_->DataSendFailed(
           device_handle(), application_handle(), frame, DataSendError());
-    }
+    Abort();
+    return;
   }
 
-  return true;
+    if (bytes_sent >= 0) {
+      offset += bytes_sent;
+      if (offset == frame->data_size()) {
+        frames_to_send.pop();
+        offset = 0;
+        controller_->DataSendDone(device_handle(), application_handle(), frame);
+     }
+    }
+  }
 }
+
+void ThreadedSocketConnection::OnError(int error) {
+  LOGGER_ERROR(logger_, "Connection error: " << error);
+  Abort();
+      }
+ 
+
+void ThreadedSocketConnection::OnData(const uint8_t* const buffer,
+                                      std::size_t buffer_size) {
+  protocol_handler::RawMessagePtr frame(
+      new protocol_handler::RawMessage(0, 0, buffer, buffer_size));
+  controller_->DataReceiveDone(device_handle(), application_handle(), frame);
+}
+
+void ThreadedSocketConnection::OnCanWrite() {
+  LOGGER_DEBUG(logger_, "OnCanWrite event. Trying to send data.");
+  Send();
+  }
+
+void ThreadedSocketConnection::OnClose() {
+  LOGGER_DEBUG(logger_, "Connection has been closed");
+  Abort();
+  }
+
+////////////////////////////////////////////////////////////////////////////////
+/// SocketConnectionDelegate::SocketConnectionDelegate
+////////////////////////////////////////////////////////////////////////////////
 
 ThreadedSocketConnection::SocketConnectionDelegate::SocketConnectionDelegate(
     ThreadedSocketConnection* connection)

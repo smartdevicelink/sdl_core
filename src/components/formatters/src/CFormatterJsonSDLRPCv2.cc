@@ -44,7 +44,7 @@ bool CFormatterJsonSDLRPCv2::toString(const smart_objects_ns::SmartObject& obj,
                                       std::string& outStr) {
   bool result = true;
   try {
-    Json::Value root(Json::objectValue);
+    utils::json::JsonValue root(utils::json::ValueType::OBJECT_VALUE);
 
     smart_objects_ns::SmartObject formattedObj(obj);
     formattedObj.getSchema().unapplySchema(
@@ -52,7 +52,7 @@ bool CFormatterJsonSDLRPCv2::toString(const smart_objects_ns::SmartObject& obj,
 
     objToJsonValue(formattedObj.getElement(strings::S_MSG_PARAMS), root);
 
-    outStr = root.toStyledString();
+    outStr = root.ToJson();
 
     result = true;
   } catch (...) {
@@ -69,13 +69,14 @@ CFormatterJsonSDLRPCv2::MetaFormatToString(
     const smart_objects_ns::SmartObject& object,
     const smart_objects_ns::CSmartSchema& schema,
     std::string& outStr) {
+
   meta_formatter_error_code::tMetaFormatterErrorCode result_code =
       meta_formatter_error_code::kErrorOk;
 
   smart_objects_ns::SmartObject tmp_object;
 
-  if (false ==
-      CMetaFormatter::CreateObjectByPattern(object, schema, tmp_object)) {
+  if (false
+      == CMetaFormatter::CreateObjectByPattern(object, schema, tmp_object)) {
     result_code |= meta_formatter_error_code::kErrorFailedCreateObjectBySchema;
     return result_code;
   }
@@ -92,10 +93,10 @@ CFormatterJsonSDLRPCv2::MetaFormatToString(
        object.keyExists(strings::S_PARAMS) &&
        object.keyExists(strings::S_MSG_PARAMS));
 
-  if (false == is_root_object) {
+  if (!is_root_object) {
     result_code |= meta_formatter_error_code::kErrorObjectIsNotFunction;
   }
-  if (false == is_root_object_created_by_schema) {
+  if (!is_root_object_created_by_schema) {
     result_code |= meta_formatter_error_code::kErrorSchemaIsNotFunction;
   }
 
@@ -103,6 +104,7 @@ CFormatterJsonSDLRPCv2::MetaFormatToString(
 
   return result_code;
 }
+
 }
 }
 }

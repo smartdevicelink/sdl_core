@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,23 +30,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/select.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <unistd.h>
-#include "utils/logger.h"
 #include "media_manager/socket_streamer_adapter.h"
+#include "utils/logger.h"
 
 namespace media_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger, "SocketStreamerAdapter")
 
 SocketStreamerAdapter::SocketStreamerAdapter(const std::string& ip,
-                                             const uint16_t port,
-                                             const std::string& header)
+                                             int32_t port,
+    const std::string& header)
     : StreamerAdapter(new SocketStreamer(this, ip, port, header)) {}
 
 SocketStreamerAdapter::~SocketStreamerAdapter() {}
@@ -54,92 +47,65 @@ SocketStreamerAdapter::~SocketStreamerAdapter() {}
 SocketStreamerAdapter::SocketStreamer::SocketStreamer(
     SocketStreamerAdapter* const adapter,
     const std::string& ip,
-    const uint16_t port,
+    int32_t port,
     const std::string& header)
     : Streamer(adapter)
     , ip_(ip)
     , port_(port)
     , header_(header)
-    , socket_fd_(0)
-    , send_socket_fd_(0)
+    , server_socket_()
+    , client_socket_()
     , is_first_frame_(true) {}
 
 SocketStreamerAdapter::SocketStreamer::~SocketStreamer() {}
 
 bool SocketStreamerAdapter::SocketStreamer::Connect() {
   LOGGER_AUTO_TRACE(logger);
-  socket_fd_ = socket(AF_INET, SOCK_STREAM, 0);
-  if (0 >= socket_fd_) {
-    LOGGER_ERROR(logger, "Unable to create socket");
-    return false;
-  }
 
-  int32_t optval = 1;
-  if (-1 == setsockopt(
-                socket_fd_, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval)) {
-    LOGGER_ERROR(logger, "Unable to set sockopt");
-    return false;
-  }
-
-  struct sockaddr_in serv_addr_ = {0};
-  serv_addr_.sin_addr.s_addr = inet_addr(ip_.c_str());
-  serv_addr_.sin_family = AF_INET;
-  serv_addr_.sin_port = htons(port_);
-  if (-1 == bind(socket_fd_,
-                 reinterpret_cast<struct sockaddr*>(&serv_addr_),
-                 sizeof(serv_addr_))) {
-    LOGGER_ERROR(logger, "Unable to bind");
-    return false;
-  }
-
-  if (-1 == listen(socket_fd_, 5)) {
+  const int backlog = 5;
+  if (!server_socket_.Listen(utils::HostAddress(ip_), port_, backlog)) {
     LOGGER_ERROR(logger, "Unable to listen");
     return false;
   }
 
-  send_socket_fd_ = accept(socket_fd_, NULL, NULL);
-  if (0 >= send_socket_fd_) {
+  client_socket_ = server_socket_.Accept();
+  if (!client_socket_.IsValid()) {
     LOGGER_ERROR(logger, "Unable to accept");
     return false;
   }
 
   is_first_frame_ = true;
-  LOGGER_INFO(logger, "Client connected: " << send_socket_fd_);
+  LOGGER_INFO(logger, "Client connected");
   return true;
 }
 
 void SocketStreamerAdapter::SocketStreamer::Disconnect() {
   LOGGER_AUTO_TRACE(logger);
-  if (0 < send_socket_fd_) {
-    close(send_socket_fd_);
-  }
-  if (0 < socket_fd_) {
-    close(socket_fd_);
-  }
+  client_socket_.Close();
+  server_socket_.Close();
 }
 
 bool SocketStreamerAdapter::SocketStreamer::Send(
     protocol_handler::RawMessagePtr msg) {
   LOGGER_AUTO_TRACE(logger);
-  ssize_t ret;
+  std::size_t written = 0u;
   if (is_first_frame_) {
-    ret = send(send_socket_fd_, header_.c_str(), header_.size(), MSG_NOSIGNAL);
-    if (static_cast<uint32_t>(ret) != header_.size()) {
+    bool sent = client_socket_.Send(header_.c_str(), header_.size(), written);
+    if (!sent || written != header_.size()) {
       LOGGER_ERROR(logger, "Unable to send data to socket");
       return false;
     }
     is_first_frame_ = false;
   }
 
-  ret = send(send_socket_fd_, msg->data(), msg->data_size(), MSG_NOSIGNAL);
-  if (-1 == ret) {
+  bool sent = client_socket_.Send(msg->data(), msg->data_size(), written);
+  if (!sent) {
     LOGGER_ERROR(logger, "Unable to send data to socket");
     return false;
   }
 
-  if (static_cast<uint32_t>(ret) != msg->data_size()) {
-    LOGGER_WARN(logger,
-                "Couldn't send all the data to socket " << send_socket_fd_);
+  if (written != msg->data_size()) {
+    LOGGER_WARN(logger, "Couldn't send all the data to socket");
   }
 
   LOGGER_INFO(logger, "Streamer::sent " << msg->data_size());

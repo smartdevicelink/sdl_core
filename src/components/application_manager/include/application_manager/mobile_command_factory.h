@@ -53,7 +53,7 @@ class MobileCommandFactory {
    * @return Pointer to created command object.
    **/
   static CommandSharedPtr CreateCommand(
-      const commands::MessageSharedPtr& message,
+          const commands::MessageSharedPtr& message,
       commands::Command::CommandOrigin origin,
       ApplicationManager& application_manager);
 

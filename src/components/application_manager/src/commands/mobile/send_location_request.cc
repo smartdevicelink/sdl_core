@@ -119,6 +119,7 @@ void SendLocationRequest::Run() {
   SmartObject request_msg_params = SmartObject(smart_objects::SmartType_Map);
   request_msg_params = msg_params;
   request_msg_params[strings::app_id] = app->hmi_app_id();
+
   SendHMIRequest(
       hmi_apis::FunctionID::Navigation_SendLocation, &request_msg_params, true);
 }
@@ -132,7 +133,7 @@ void SendLocationRequest::on_event(const event_engine::Event& event) {
     LOGGER_INFO(logger_, "Received Navigation_SendLocation event");
     mobile_apis::Result::eType result_code =
         GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
-            message[strings::params][hmi_response::code].asUInt()));
+              message[strings::params][hmi_response::code].asUInt()));
     const bool result =
         Compare<Result::eType, EQ, ONE>(result_code,
                                         Result::SAVED,
@@ -141,7 +142,7 @@ void SendLocationRequest::on_event(const event_engine::Event& event) {
                                         Result::UNSUPPORTED_RESOURCE);
     SendResponse(result, result_code, NULL, &(message[strings::params]));
     return;
-  }
+    }
   LOGGER_ERROR(logger_, "Received unknown event" << event.id());
 }
 
@@ -159,15 +160,15 @@ bool SendLocationRequest::CheckFieldsCompatibility() {
     LOGGER_DEBUG(logger_,
                  "latitude and longitude should be provided only in pair");
     return false;
-  }
-
+    }
   if (!address_exist && !longitude_degrees_exist && !latitude_degrees_exist) {
     LOGGER_DEBUG(logger_,
                  "address or latitude/longtitude should should be provided");
     return false;
   }
-  return true;
-}
+
+     return true;
+    }
 void insert_if_contains(
     const smart_objects::SmartObject& msg_params,
     const std::string& param_key,
@@ -221,6 +222,7 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
       return true;
     }
   }
+
   return false;
 }
 
@@ -229,6 +231,7 @@ bool SendLocationRequest::CheckHMICapabilities(
   LOGGER_AUTO_TRACE(logger_);
   using namespace smart_objects;
   using namespace hmi_apis;
+
   if (fields_names.empty()) {
     return true;
   }

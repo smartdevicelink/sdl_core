@@ -33,10 +33,8 @@
 
 #include <algorithm>
 #include "application_manager/commands/mobile/put_file_request.h"
-
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/application_impl.h"
-
 #include "utils/file_system.h"
 
 namespace application_manager {
@@ -46,10 +44,10 @@ namespace commands {
 PutFileRequest::PutFileRequest(const MessageSharedPtr& message,
                                ApplicationManager& application_manager)
     : CommandRequestImpl(message, application_manager)
-    , offset_(0)
-    , sync_file_name_()
-    , length_(0)
-    , file_type_(mobile_apis::FileType::INVALID_ENUM)
+  , offset_(0)
+  , sync_file_name_()
+  , length_(0)
+  , file_type_(mobile_apis::FileType::INVALID_ENUM)
     , is_persistent_file_(false) {}
 
 PutFileRequest::~PutFileRequest() {}
@@ -70,11 +68,11 @@ void PutFileRequest::Run() {
 
   if (mobile_api::HMILevel::HMI_NONE == application->hmi_level() &&
       application_manager_.get_settings().put_file_in_none() <=
-          application->put_file_in_none_count()) {
+      application->put_file_in_none_count()) {
     // If application is in the HMI_NONE level the quantity of allowed
     // PutFile request is limited by the configuration profile
     LOGGER_ERROR(logger_,
-                 "Too many requests from the app with HMILevel HMI_NONE ");
+                  "Too many requests from the app with HMILevel HMI_NONE ");
     SendResponse(false,
                  mobile_apis::Result::REJECTED,
                  "Too many requests from the app with HMILevel HMI_NONE",
@@ -109,11 +107,11 @@ void PutFileRequest::Run() {
     return;
   }
   sync_file_name_ =
-      (*message_)[strings::msg_params][strings::sync_file_name].asString();
+    (*message_)[strings::msg_params][strings::sync_file_name].asString();
   file_type_ = static_cast<mobile_apis::FileType::eType>(
       (*message_)[strings::msg_params][strings::file_type].asInt());
   const std::vector<uint8_t> binary_data =
-      (*message_)[strings::params][strings::binary_data].asBinary();
+    (*message_)[strings::params][strings::binary_data].asBinary();
 
   // Policy table update in json format is currently to be received via PutFile
   // TODO(PV): after latest discussion has to be changed
@@ -136,11 +134,11 @@ void PutFileRequest::Run() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::persistent_file)) {
     is_persistent_file_ =
-        (*message_)[strings::msg_params][strings::persistent_file].asBool();
+      (*message_)[strings::msg_params][strings::persistent_file].asBool();
   }
   if ((*message_)[strings::msg_params].keyExists(strings::system_file)) {
     is_system_file =
-        (*message_)[strings::msg_params][strings::system_file].asBool();
+      (*message_)[strings::msg_params][strings::system_file].asBool();
   }
 
   std::string file_path;
@@ -149,12 +147,14 @@ void PutFileRequest::Run() {
     response_params[strings::space_available] = 0;
     file_path = application_manager_.get_settings().system_files_path();
   } else {
-    file_path = application_manager_.get_settings().app_storage_folder();
-    file_path += "/" + application->folder_name();
+file_path = file_system::ConcatPath(
+        application_manager_.get_settings().app_storage_folder(),
+        application->folder_name());    
 
     uint32_t space_available = application->GetAvailableDiskSpace();
 
     if (binary_data.size() > space_available) {
+
       response_params[strings::space_available] =
           static_cast<uint32_t>(space_available);
 
@@ -193,7 +193,7 @@ void PutFileRequest::Run() {
         static_cast<uint32_t>(application->GetAvailableDiskSpace());
   }
 
-  sync_file_name_ = file_path + "/" + sync_file_name_;
+  sync_file_name_ = file_system::ConcatPath(file_path, sync_file_name_);
   switch (save_result) {
     case mobile_apis::Result::SUCCESS: {
       LOGGER_INFO(logger_, "PutFile is successful");
@@ -206,9 +206,10 @@ void PutFileRequest::Run() {
         if (0 == offset_) {
           LOGGER_INFO(logger_, "New file downloading");
           if (!application->AddFile(file)) {
+
             LOGGER_INFO(logger_,
-                        "Couldn't add file to application (File already Exist"
-                            << " in application and was rewritten on FS)");
+                         "Couldn't add file to application (File already Exist"
+                         << " in application and was rewritten on FS)");
             /* It can be first part of new big file, so we need to update
                information about it's downloading status and persistence */
             if (!application->UpdateFile(file)) {
@@ -250,7 +251,7 @@ void PutFileRequest::SendOnPutFileNotification() {
 
   smart_objects::SmartObject& message = *notification;
   message[strings::params][strings::function_id] =
-      hmi_apis::FunctionID::BasicCommunication_OnPutFile;
+    hmi_apis::FunctionID::BasicCommunication_OnPutFile;
 
   message[strings::params][strings::message_type] = MessageType::kNotification;
   message[strings::msg_params][strings::app_id] = connection_key();

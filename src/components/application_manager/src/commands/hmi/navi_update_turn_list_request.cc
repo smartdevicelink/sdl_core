@@ -51,3 +51,4 @@ void NaviUpdateTurnListRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
+

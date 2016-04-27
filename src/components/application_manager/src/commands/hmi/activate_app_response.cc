@@ -30,7 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/activate_app_response.h"
-
 #include "application_manager/message_helper.h"
 
 namespace application_manager {

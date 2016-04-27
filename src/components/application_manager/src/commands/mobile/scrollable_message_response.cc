@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/scrollable_message_response.h"
-
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 
@@ -48,9 +47,9 @@ void ScrollableMessageResponse::Run() {
   LOGGER_AUTO_TRACE(logger_);
   mobile_apis::Result::eType result_code =
       static_cast<mobile_apis::Result::eType>(
-          (*message_)[strings::msg_params][strings::result_code].asInt());
+      (*message_)[strings::msg_params][strings::result_code].asInt());
   ApplicationSharedPtr application = application_manager_.application(
-      (*message_)[strings::params][strings::connection_key].asInt());
+          (*message_)[strings::params][strings::connection_key].asInt());
   if ((mobile_apis::Result::REJECTED != result_code) && application) {
     application->UnsubscribeFromSoftButtons(
         (*message_)[strings::params][strings::function_id].asInt());

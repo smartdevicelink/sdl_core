@@ -30,16 +30,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef OS_POSIX
 #include <pthread.h>
 #include <unistd.h>
+#elif defined(OS_WINDOWS)
+#include <io.h>
+#endif
 #include <iomanip>
 
-#include <libusb/libusb.h>
 
 #include <sstream>
 
-#include "transport_manager/usb/libusb/usb_connection.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "transport_manager/usb/libusb/usb_connection.h"
 
 #include "utils/logger.h"
 
@@ -47,6 +50,7 @@ namespace transport_manager {
 namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+
 
 UsbConnection::UsbConnection(const DeviceUID& device_uid,
                              const ApplicationHandle& app_handle,
@@ -82,11 +86,11 @@ UsbConnection::~UsbConnection() {
 }
 
 // Callback for handling income and outcome data from lib_usb
-void InTransferCallback(libusb_transfer* transfer) {
+void LIBUSB_CALL InTransferCallback(libusb_transfer* transfer) {
   static_cast<UsbConnection*>(transfer->user_data)->OnInTransfer(transfer);
 }
 
-void OutTransferCallback(libusb_transfer* transfer) {
+void LIBUSB_CALL OutTransferCallback(libusb_transfer* transfer) {
   static_cast<UsbConnection*>(transfer->user_data)->OnOutTransfer(transfer);
 }
 
@@ -107,7 +111,7 @@ bool UsbConnection::PostInTransfer() {
         "libusb_submit_transfer failed: " << libusb_error_name(libusb_ret));
     LOGGER_TRACE(
         logger_,
-        "exit with FALSE. Condition: LIBUSB_SUCCESS != libusb_submit_transfer");
+                  "exit with FALSE. Condition: LIBUSB_SUCCESS != libusb_submit_transfer");
     return false;
   }
   LOGGER_TRACE(logger_, "exit with TRUE");
@@ -132,12 +136,12 @@ void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
                      << transfer->actual_length << ", data:"
                      << hex_data(transfer->buffer, transfer->actual_length));
     ::protocol_handler::RawMessagePtr data(new protocol_handler::RawMessage(
-        0, 0, in_buffer_, transfer->actual_length));
+                         0, 0, in_buffer_, transfer->actual_length));
     controller_->DataReceiveDone(device_uid_, app_handle_, data);
   } else {
     LOGGER_ERROR(logger_,
                  "USB incoming transfer failed: "
-                     << libusb_error_name(transfer->status));
+                  << libusb_error_name(transfer->status));
     controller_->DataReceiveFailed(
         device_uid_, app_handle_, DataReceiveError());
   }
@@ -147,7 +151,7 @@ void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
     if (!PostInTransfer()) {
       LOGGER_ERROR(logger_,
                    "USB incoming transfer failed with "
-                       << "LIBUSB_TRANSFER_NO_DEVICE. Abort connection.");
+                    << "LIBUSB_TRANSFER_NO_DEVICE. Abort connection.");
       AbortConnection();
     }
   }
@@ -187,11 +191,11 @@ bool UsbConnection::PostOutTransfer() {
   if (LIBUSB_SUCCESS != libusb_ret) {
     LOGGER_ERROR(logger_,
                  "libusb_submit_transfer failed: "
-                     << libusb_error_name(libusb_ret) << ". Abort connection.");
+                  << libusb_error_name(libusb_ret) << ". Abort connection.");
     AbortConnection();
     LOGGER_TRACE(logger_,
                  "exit with FALSE. Condition: "
-                     << "LIBUSB_SUCCESS != libusb_fill_bulk_transfer");
+                  << "LIBUSB_SUCCESS != libusb_fill_bulk_transfer");
     return false;
   }
   LOGGER_TRACE(logger_, "exit with TRUE");
@@ -232,7 +236,7 @@ TransportAdapter::Error UsbConnection::SendData(
   if (disconnecting_) {
     LOGGER_TRACE(logger_,
                  "exit with TransportAdapter::BAD_STATE. Condition: "
-                     << "disconnecting_");
+                  << "disconnecting_");
     return TransportAdapter::BAD_STATE;
   }
   sync_primitives::AutoLock locker(out_messages_mutex_);
@@ -261,13 +265,13 @@ void UsbConnection::Finalise() {
     disconnecting_ = true;
     if (out_transfer_) {
       waiting_out_transfer_cancel_ = true;
-      if (LIBUSB_SUCCESS != libusb_cancel_transfer(out_transfer_)) {
+      if ( LIBUSB_SUCCESS != libusb_cancel_transfer(out_transfer_)) {
         waiting_out_transfer_cancel_ = false;
       }
     }
     if (in_transfer_) {
       waiting_in_transfer_cancel_ = true;
-      if (LIBUSB_SUCCESS != libusb_cancel_transfer(in_transfer_)) {
+      if ( LIBUSB_SUCCESS != libusb_cancel_transfer(in_transfer_)) {
         waiting_in_transfer_cancel_ = false;
       }
     }
@@ -280,7 +284,11 @@ void UsbConnection::Finalise() {
     }
   }
   while (waiting_in_transfer_cancel_ || waiting_out_transfer_cancel_) {
+#ifdef OS_POSIX
     pthread_yield();
+#elif defined(OS_WINDOWS)
+    SwitchToThread();
+#endif
   }
   LOGGER_TRACE(logger_, "exit");
 }
@@ -331,11 +339,11 @@ bool UsbConnection::FindEndpoints() {
   LOGGER_TRACE(logger_, "enter");
   struct libusb_config_descriptor* config;
   const int libusb_ret =
-      libusb_get_active_config_descriptor(libusb_device_, &config);
+    libusb_get_active_config_descriptor(libusb_device_, &config);
   if (LIBUSB_SUCCESS != libusb_ret) {
     LOGGER_ERROR(logger_,
                  "libusb_get_active_config_descriptor failed: "
-                     << libusb_error_name(libusb_ret));
+                  << libusb_error_name(libusb_ret));
     LOGGER_TRACE(logger_,
                  "exit with FALSE. Condition: LIBUSB_SUCCESS != libusb_ret");
     return false;
@@ -350,10 +358,10 @@ bool UsbConnection::FindEndpoints() {
       const libusb_interface_descriptor& iface_desc = interface.altsetting[i];
       for (int i = 0; i < iface_desc.bNumEndpoints; ++i) {
         const libusb_endpoint_descriptor& endpoint_desc =
-            iface_desc.endpoint[i];
+          iface_desc.endpoint[i];
 
         const uint8_t endpoint_dir =
-            endpoint_desc.bEndpointAddress & LIBUSB_ENDPOINT_DIR_MASK;
+          endpoint_desc.bEndpointAddress & LIBUSB_ENDPOINT_DIR_MASK;
         if (find_in_endpoint && endpoint_dir == LIBUSB_ENDPOINT_IN) {
           in_endpoint_ = endpoint_desc.bEndpointAddress;
           in_endpoint_max_packet_size_ = endpoint_desc.wMaxPacketSize;

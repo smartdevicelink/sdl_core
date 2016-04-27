@@ -31,27 +31,20 @@
  */
 
 #include <sys/stat.h>
-#include <unistd.h>
-#include <signal.h>
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
 #include <string>
-#include <iostream>  // cpplint: Streams are highly discouraged.
-#include <fstream>   // cpplint: Streams are highly discouraged.
 
-// ----------------------------------------------------------------------------
-
-#include "utils/log_message_loop_thread.h"
 #include "utils/logger.h"
 
-#include "./life_cycle.h"
-#include "signal_handlers.h"
+#include "life_cycle.h"
+#include "utils/system.h"
 
 #include "utils/signals.h"
-#include "utils/system.h"
 #include "config_profile/profile.h"
-#include "utils/appenders_loader.h"
+#include "networking.h"
+#include "utils/macro.h"
 
 #if defined(EXTENDED_MEDIA_MODE)
 #include <gst/gst.h>
@@ -107,7 +100,26 @@ bool InitHmi() {
   return utils::System(kStartHmi).Execute();
 }
 #endif  // QT_HMI
+
+#ifdef OS_POSIX
+bool UnsibscribeFromTermination() {
+  // Disable some system signals receiving in thread
+  // by blocking those signals
+  // (system signals processes only in the main thread)
+  // Mustn't block all signals!
+  // See "Advanced Programming in the UNIX Environment, 3rd Edition"
+  // (http://poincare.matf.bg.ac.rs/~ivana//courses/ps/sistemi_knjige/pomocno/apue.pdf,
+  // "12.8. Threads and Signals".
+  sigset_t signal_set;
+  sigemptyset(&signal_set);
+  sigaddset(&signal_set, SIGINT);
+  sigaddset(&signal_set, SIGTERM);
+
+  return !pthread_sigmask(SIG_BLOCK, &signal_set, NULL);
 }
+#endif
+
+}  // namespace
 
 /**
  * \brief Entry point of the program.
@@ -116,22 +128,25 @@ bool InitHmi() {
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
 int32_t main(int32_t argc, char** argv) {
+#ifdef OS_POSIX
   // Unsibscribe once for all threads
-  if (!utils::UnsibscribeFromTermination()) {
+  if (!UnsibscribeFromTermination()) {
     // Can't use internal logger here
     exit(EXIT_FAILURE);
   }
+#endif
 
   // --------------------------------------------------------------------------
   // Components initialization
   profile::Profile profile_instance;
   main_namespace::LifeCycle life_cycle(profile_instance);
-  if ((argc > 1) && (0 != argv)) {
+  if ((argc > 1)&&(0 != argv)) {
     profile_instance.config_file_name(argv[1]);
   } else {
     profile_instance.config_file_name("smartDeviceLink.ini");
   }
 
+  PLATFORM_INIT(argc, argv);
   // --------------------------------------------------------------------------
   // Logger initialization
   INIT_LOGGER("log4cxx.properties", profile_instance.logs_enabled());

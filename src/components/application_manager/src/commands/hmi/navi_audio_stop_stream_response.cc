@@ -43,6 +43,7 @@ AudioStopStreamResponse::~AudioStopStreamResponse() {}
 
 void AudioStopStreamResponse::Run() {
   LOGGER_AUTO_TRACE(logger_);
+
 }
 
 }  // namespace commands

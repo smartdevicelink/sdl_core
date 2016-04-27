@@ -36,15 +36,14 @@
 #include "application_manager/commands/hmi/response_from_hmi.h"
 
 namespace application_manager {
-
 namespace commands {
-
 /**
  * @brief NaviGetWaypoints command class
  **/
 class NaviGetWayPointsResponse : public ResponseFromHMI {
- public:
-  /**
+  public:
+
+    /**
    * @brief NaviGetWaypoints class constructor
    *
    * @param message Incoming SmartObject message
@@ -52,12 +51,12 @@ class NaviGetWayPointsResponse : public ResponseFromHMI {
   NaviGetWayPointsResponse(const MessageSharedPtr& message,
                            ApplicationManager& application_manager);
 
-  /**
+    /**
    * @brief NaviGetWaypoints class destructor
    **/
   virtual ~NaviGetWayPointsResponse();
 
-  /**
+    /**
    * @brief Execute command
    **/
   virtual void Run() OVERRIDE;

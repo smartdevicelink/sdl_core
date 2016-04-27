@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/on_hmi_status_notification.h"
-
 #include "application_manager/message_helper.h"
 #include "application_manager/message.h"
 #include "interfaces/MOBILE_API.h"
@@ -66,15 +65,15 @@ void OnHMIStatusNotification::Run() {
       app->set_tts_properties_in_none(true);
       LOGGER_INFO(logger_,
                   "OnHMIStatusNotification::Send TTS GlobalProperties"
-                  " with empty array to HMI");
+                   " with empty array to HMI");
       MessageHelper::SendTTSGlobalProperties(app, false, application_manager_);
     }
   } else if ((mobile_apis::HMILevel::HMI_FULL == hmi_level) ||
-             (mobile_apis::HMILevel::HMI_LIMITED == hmi_level)) {
+      (mobile_apis::HMILevel::HMI_LIMITED == hmi_level)) {
     if (!(app->tts_properties_in_full())) {
       app->set_tts_properties_in_full(true);
       LOGGER_INFO(logger_,
-                  "OnHMIStatusNotification AddAppToTTSGlobalPropertiesList");
+                   "OnHMIStatusNotification AddAppToTTSGlobalPropertiesList");
       application_manager_.AddAppToTTSGlobalPropertiesList(app->app_id());
     }
   }

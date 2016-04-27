@@ -211,10 +211,12 @@ class SQLQuery {
    */
   std::string query_;
 
+#ifndef QT_PORT
   /**
    * The SQL statement in SQLite
    */
   sqlite3_stmt* statement_;
+#endif  // QT_PORT
 
   /**
    * Lock for guarding statement

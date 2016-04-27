@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2013-2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,12 +29,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#if defined(OS_POSIX)
 
 #include "utils/lock.h"
 #include <errno.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <string.h>
 #include <cstring>
 #include "utils/logger.h"
 
@@ -144,3 +143,5 @@ void Lock::Init(bool is_recursive) {
 }
 
 }  // namespace sync_primitives
+
+#endif  // OS_POSIX

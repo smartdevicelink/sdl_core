@@ -35,7 +35,8 @@
 #include "protocol_handler/protocol_packet.h"
 #include "utils/logger.h"
 #include "utils/byte_order.h"
-#include "json/json.h"
+#include "utils/json_utils.h"
+#include "utils/convert_utils.h"
 
 namespace security_manager {
 
@@ -77,7 +78,7 @@ void SecurityManagerImpl::OnMobileMessageSent(
     const ::protocol_handler::RawMessagePtr) {}
 
 void SecurityManagerImpl::set_session_observer(
-    protocol_handler::SessionObserver* observer) {
+    protocol_handler::SessionObserver *observer) {
   if (!observer) {
     LOGGER_ERROR(logger_, "Invalid (NULL) pointer to SessionObserver.");
     return;
@@ -86,7 +87,7 @@ void SecurityManagerImpl::set_session_observer(
 }
 
 void SecurityManagerImpl::set_protocol_handler(
-    protocol_handler::ProtocolHandler* handler) {
+    protocol_handler::ProtocolHandler *handler) {
   if (!handler) {
     LOGGER_ERROR(logger_, "Invalid (NULL) pointer to ProtocolHandler.");
     return;
@@ -94,7 +95,7 @@ void SecurityManagerImpl::set_protocol_handler(
   protocol_handler_ = handler;
 }
 
-void SecurityManagerImpl::set_crypto_manager(CryptoManager* crypto_manager) {
+void SecurityManagerImpl::set_crypto_manager(CryptoManager *crypto_manager) {
   if (!crypto_manager) {
     LOGGER_ERROR(logger_, "Invalid (NULL) pointer to CryptoManager.");
     return;
@@ -105,7 +106,7 @@ void SecurityManagerImpl::set_crypto_manager(CryptoManager* crypto_manager) {
 void SecurityManagerImpl::Handle(const SecurityMessage message) {
   DCHECK(message);
   LOGGER_INFO(logger_, "Received Security message from Mobile side");
-  if (!crypto_manager_) {
+  if (!crypto_manager_)  {
     const std::string error_text("Invalid (NULL) CryptoManager.");
     LOGGER_ERROR(logger_, error_text);
     SendInternalError(
@@ -132,11 +133,11 @@ void SecurityManagerImpl::Handle(const SecurityMessage message) {
                         error_text,
                         message->get_header().seq_number);
     } break;
-  }
+    }
 }
 
-security_manager::SSLContext* SecurityManagerImpl::CreateSSLContext(
-    const uint32_t& connection_key) {
+security_manager::SSLContext *SecurityManagerImpl::CreateSSLContext(
+    const uint32_t &connection_key) {
   LOGGER_INFO(logger_, "ProtectService processing");
   DCHECK(session_observer_);
   DCHECK(crypto_manager_);
@@ -179,7 +180,7 @@ void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
   if (!ssl_context) {
     const std::string error_text(
         "StartHandshake failed, "
-        "connection is not protected");
+                                 "connection is not protected");
     LOGGER_ERROR(logger_, error_text);
     SendInternalError(connection_key, ERROR_INTERNAL, error_text);
     NotifyListenersOnHandshakeDone(connection_key,
@@ -187,7 +188,7 @@ void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
     return;
   }
 
-  if (crypto_manager_->IsCertificateUpdateRequired()) {
+  if(crypto_manager_->IsCertificateUpdateRequired()) {
     NotifyOnCertififcateUpdateRequired();
   }
 
@@ -198,10 +199,10 @@ void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
   }
 
   ssl_context->SetHandshakeContext(
-      session_observer_->GetHandshakeContext(connection_key));
+        session_observer_->GetHandshakeContext(connection_key));
 
   size_t data_size = 0;
-  const uint8_t* data = NULL;
+  const uint8_t *data = NULL;
 
   const security_manager::SSLContext::HandshakeResult result =
       ssl_context->StartHandshake(&data, &data_size);
@@ -218,7 +219,7 @@ void SecurityManagerImpl::StartHandshake(uint32_t connection_key) {
     SendHandshakeBinData(connection_key, data, data_size);
   }
 }
-void SecurityManagerImpl::AddListener(SecurityManagerListener* const listener) {
+void SecurityManagerImpl::AddListener(SecurityManagerListener *const listener) {
   if (!listener) {
     LOGGER_ERROR(logger_, "Invalid (NULL) pointer to SecurityManagerListener.");
     return;
@@ -267,7 +268,7 @@ bool SecurityManagerImpl::ProccessHandshakeData(
 
   LOGGER_DEBUG(logger_,
                "Received " << inMessage->get_data_size()
-                           << " bytes handshake data ");
+                << " bytes handshake data ");
 
   if (!inMessage->get_data_size()) {
     const std::string error_text("SendHandshakeData: null arguments size.");
@@ -289,7 +290,7 @@ bool SecurityManagerImpl::ProccessHandshakeData(
     return false;
   }
   size_t out_data_size;
-  const uint8_t* out_data;
+  const uint8_t *out_data;
   const SSLContext::HandshakeResult handshake_result =
       sslContext->DoHandshakeStep(inMessage->get_data(),
                                   inMessage->get_data_size(),
@@ -312,7 +313,7 @@ bool SecurityManagerImpl::ProccessHandshakeData(
     LOGGER_DEBUG(logger_, "SSL initialization finished success.");
     NotifyListenersOnHandshakeDone(connection_key,
                                    SSLContext::Handshake_Result_Success);
-  } else if (handshake_result != SSLContext::Handshake_Result_Success) {
+  } else if (handshake_result != SSLContext::Handshake_Result_Success){
     // On handshake fail
     LOGGER_WARN(logger_, "SSL initialization finished with fail.");
     NotifyListenersOnHandshakeDone(connection_key, handshake_result);
@@ -327,19 +328,21 @@ bool SecurityManagerImpl::ProccessHandshakeData(
 
 bool SecurityManagerImpl::ProccessInternalError(
     const SecurityMessage& inMessage) {
+  std::string json_message = inMessage->get_json_message();
   LOGGER_INFO(logger_,
-              "Received InternalError with Json message"
-                  << inMessage->get_json_message());
-  Json::Value root;
-  Json::Reader reader;
-  const bool parsingSuccessful =
-      reader.parse(inMessage->get_json_message(), root);
-  if (!parsingSuccessful)
+              "Received InternalError with Json message" << json_message);
+  using namespace utils::json;
+  JsonValue::ParseResult parse_result = JsonValue::Parse(json_message);
+  if (!parse_result.second) {
     return false;
+  }
+#if defined(ENABLE_LOG)
+  JsonValue& root_json = parse_result.first;
+#endif
   LOGGER_DEBUG(logger_,
                "Received InternalError id "
-                   << root[kErrId].asString()
-                   << ", text: " << root[kErrText].asString());
+                   << root_json[kErrId].AsString()
+                   << ", text: " << root_json[kErrText].AsString());
   return true;
 }
 void SecurityManagerImpl::SendHandshakeBinData(const uint32_t connection_key,
@@ -349,7 +352,7 @@ void SecurityManagerImpl::SendHandshakeBinData(const uint32_t connection_key,
   const SecurityQuery::QueryHeader header(SecurityQuery::NOTIFICATION,
                                           SecurityQuery::SEND_HANDSHAKE_DATA,
                                           seq_number);
-  DCHECK(data_size < 1024 * 1024 * 1024);
+  DCHECK(data_size < 1024 * 1024 *1024 );
   const SecurityQuery query =
       SecurityQuery(header, connection_key, data, data_size);
   SendQuery(query, connection_key);
@@ -357,35 +360,36 @@ void SecurityManagerImpl::SendHandshakeBinData(const uint32_t connection_key,
 }
 
 void SecurityManagerImpl::SendInternalError(const uint32_t connection_key,
-                                            const uint8_t& error_id,
-                                            const std::string& erorr_text,
-                                            const uint32_t seq_number) {
-  Json::Value value;
-  value[kErrId] = error_id;
+                                        const uint8_t &error_id,
+                                        const std::string &erorr_text,
+                                        const uint32_t seq_number) {
+  using namespace utils::json;
+  JsonValue value;
+  value[kErrId] = utils::ConvertUInt64ToLongLongUInt(error_id);
   value[kErrText] = erorr_text;
-  const std::string error_str = value.toStyledString();
+  const std::string error_str = value.ToJson();
   SecurityQuery::QueryHeader header(
       SecurityQuery::NOTIFICATION,
-      SecurityQuery::SEND_INTERNAL_ERROR,
-      // header save json size only (exclude last byte)
+                                    SecurityQuery::SEND_INTERNAL_ERROR,
+                                    // header save json size only (exclude last byte)
       seq_number,
       error_str.size());
 
   // Raw data is json string and error id at last byte
   std::vector<uint8_t> data_sending(error_str.size() + 1);
   memcpy(&data_sending[0], error_str.c_str(), error_str.size());
-  data_sending[data_sending.size() - 1] = error_id;
+  data_sending[data_sending.size()-1] = error_id;
 
   const SecurityQuery query(
       header, connection_key, &data_sending[0], data_sending.size());
   SendQuery(query, connection_key);
   LOGGER_DEBUG(logger_,
                "Sent Internal error id " << static_cast<int>(error_id)
-                                         << " : \"" << erorr_text << "\".");
+                << " : \"" << erorr_text << "\".");
 }
 
 void SecurityManagerImpl::SendQuery(const SecurityQuery& query,
-                                    const uint32_t connection_key) {
+                                const uint32_t connection_key) {
   const std::vector<uint8_t> data_sending = query.DeserializeQuery();
   uint32_t connection_handle = 0;
   uint8_t sessionID = 0;
@@ -395,18 +399,18 @@ void SecurityManagerImpl::SendQuery(const SecurityQuery& query,
   if (session_observer_->ProtocolVersionUsed(
           connection_handle, sessionID, protocol_version)) {
     const ::protocol_handler::RawMessagePtr rawMessagePtr(
-        new protocol_handler::RawMessage(connection_key,
-                                         protocol_version,
+      new protocol_handler::RawMessage(connection_key,
+    		                           protocol_version,
                                          &data_sending[0],
                                          data_sending.size(),
-                                         protocol_handler::kControl));
+                                       protocol_handler::kControl));
     DCHECK(protocol_handler_);
     // Add RawMessage to ProtocolHandler message query
     protocol_handler_->SendMessageToMobileApp(rawMessagePtr, false);
   }
 }
 
-const char* SecurityManagerImpl::ConfigSection() {
+const char *SecurityManagerImpl::ConfigSection() {
   return "Security Manager";
 }
 

@@ -79,6 +79,7 @@ void UIGetCapabilitiesResponse::Run() {
           msg_params[strings::hmi_capabilities][strings::phone_call].asBool());
     }
   }
+
 }
 
 }  // namespace commands

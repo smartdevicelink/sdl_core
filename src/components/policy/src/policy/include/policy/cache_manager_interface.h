@@ -117,7 +117,7 @@ class CacheManagerInterface {
    * @param seconds Return value: array of 5 elements
    * @return bool Success of operation
    */
-  virtual bool SecondsBetweenRetries(std::vector<int>& seconds) = 0;
+  virtual bool SecondsBetweenRetries(std::vector<int> &seconds) = 0;
 
   /**
    * @brief Get information about vehicle
@@ -158,7 +158,7 @@ class CacheManagerInterface {
    * @brief GetLockScreenIcon allows to obtain lock screen icon url;
    *
    * @return url which point to the resourse where lock screen icon could be
-   *obtained.
+   * obtained.
    */
   virtual std::string GetLockScreenIconUrl() const = 0;
 
@@ -307,7 +307,7 @@ class CacheManagerInterface {
    * @return true, if succedeed, otherwise - false
    */
   virtual bool GetDefaultHMI(const std::string& app_id,
-                             std::string& default_hmi) const = 0;
+                             std::string &default_hmi) const = 0;
 
   /**
    * @brief Reset user consent for device data and applications permissions
@@ -324,8 +324,8 @@ class CacheManagerInterface {
    */
   virtual bool GetUserPermissionsForDevice(
       const std::string& device_id,
-      StringArray& consented_groups,
-      StringArray& disallowed_groups) const = 0;
+                                           StringArray &consented_groups,
+                                           StringArray &disallowed_groups) const = 0;
 
   /**
    * @brief Gets list of groups permissions from policy table
@@ -336,7 +336,7 @@ class CacheManagerInterface {
    */
   virtual bool GetPermissionsForApp(const std::string& device_id,
                                     const std::string& app_id,
-                                    FunctionalIdType& group_types) = 0;
+                                    FunctionalIdType &group_types) = 0;
 
   /**
    * @brief Get device groups and preconsented groups from policies section
@@ -345,8 +345,8 @@ class CacheManagerInterface {
    * @return true, if query was successful, otherwise - false
    */
   virtual bool GetDeviceGroupsFromPolicies(
-      rpc::policy_table_interface_base::Strings& groups,
-      rpc::policy_table_interface_base::Strings& preconsented_groups) const = 0;
+      rpc::policy_table_interface_base::Strings &groups,
+      rpc::policy_table_interface_base::Strings &preconsented_groups) const = 0;
 
   /**
    * @brief Add's information about mobile device in Policy Table.
@@ -459,7 +459,7 @@ class CacheManagerInterface {
    * @param the count of unconsented groups
    */
   virtual int CountUnconsentedGroups(const std::string& policy_app_id,
-                                     const std::string& device_id) = 0;
+                                      const std::string& device_id) = 0;
 
   /**
    * @brief Gets functional group names and user_consent_prompts, if any
@@ -482,7 +482,7 @@ class CacheManagerInterface {
    * @param preconsented_groups parameter to fill.
    */
   virtual void GetPreConsentedGroups(
-      const std::string& app_id, FunctionalGroupIDs& preconsented_groups) = 0;
+      const std::string &app_id, FunctionalGroupIDs& preconsented_groups) = 0;
   /**
    * @brief GetConsentedGroups allows to obtain list of allowed and disallowed
    * groups for specific application on certain device.
@@ -491,8 +491,8 @@ class CacheManagerInterface {
    * @param allowed_groups list of allowed groups
    * @param disallowed_groups list of disallowed groups
    */
-  virtual void GetConsentedGroups(const std::string& device_id,
-                                  const std::string& app_id,
+  virtual void GetConsentedGroups(const std::string &device_id,
+                                  const std::string &app_id,
                                   FunctionalGroupIDs& allowed_groups,
                                   FunctionalGroupIDs& disallowed_groups) = 0;
 
@@ -593,8 +593,8 @@ class CacheManagerInterface {
    * @return true if present, otherwise false
    */
   virtual bool IsPermissionsCalculated(const std::string& device_id,
-                                       const std::string& policy_app_id,
-                                       policy::Permissions& permission) = 0;
+      const std::string& policy_app_id,
+      policy::Permissions& permission) = 0;
 
   /**
    * @brief Gets request types for application
@@ -605,13 +605,13 @@ class CacheManagerInterface {
       const std::string& policy_app_id,
       std::vector<std::string>& request_types) const = 0;
 
-  /**
-   * @brief GetCertificate allows to obtain certificate in order to
-   * make secure connection
-   *
-   * @return The certificate in PKCS#7.
-   */
-  virtual std::string GetCertificate() const = 0;
+    /**
+     * @brief GetCertificate allows to obtain certificate in order to
+     * make secure connection
+     *
+     * @return The certificate in PKCS#7.
+     */
+    virtual std::string GetCertificate() const = 0;
 
 #ifdef BUILD_TESTS
   /**
@@ -620,7 +620,7 @@ class CacheManagerInterface {
    * @return SharedPTR to PT
    *
    */
-  virtual utils::SharedPtr<policy_table::Table> GetPT() const = 0;
+  virtual utils::SharedPtr<policy_table::Table> GetPT() const  = 0;
 #endif
 };
 

@@ -56,3 +56,4 @@ void OnVIGpsDataNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
+

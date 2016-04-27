@@ -51,3 +51,4 @@ void UIDeleteSubmenuRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
+

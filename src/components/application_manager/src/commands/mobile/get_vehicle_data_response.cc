@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/get_vehicle_data_response.h"
-
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {

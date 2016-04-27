@@ -56,3 +56,4 @@ void OnVIFuelLevelStateNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
+

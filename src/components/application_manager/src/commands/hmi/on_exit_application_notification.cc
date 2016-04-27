@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/commands/hmi/on_exit_application_notification.h"
-
 #include "application_manager/application_impl.h"
 #include "application_manager/state_controller.h"
 #include "application_manager/message_helper.h"
@@ -56,7 +55,7 @@ void OnExitApplicationNotification::Run() {
 
   uint32_t app_id = (*message_)[strings::msg_params][strings::app_id].asUInt();
   ApplicationSharedPtr app_impl = application_manager_.application(app_id);
-
+      
   if (!(app_impl.valid())) {
     LOGGER_ERROR(logger_, "Application does not exist");
     return;
@@ -100,6 +99,7 @@ void OnExitApplicationNotification::Run() {
       return;
     }
   }
+
   ApplicationSharedPtr app = application_manager_.application(app_id);
   if (app) {
     application_manager_.state_controller().SetRegularState(

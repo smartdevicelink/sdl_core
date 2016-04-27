@@ -81,7 +81,7 @@ void ChangeRegistrationRequest::Run() {
 
   if (IsWhiteSpaceExist()) {
     LOGGER_INFO(logger_,
-                "Incoming request contains \t\n \\t \\n or whitespace");
+                 "Incoming request contains \t\n \\t \\n or whitespace");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -250,8 +250,8 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
                  &(message[strings::msg_params]));
   } else {
     LOGGER_INFO(logger_,
-                "There are some pending responses from HMI."
-                "ChangeRegistrationRequest still waiting.");
+                 "There are some pending responses from HMI."
+                 "ChangeRegistrationRequest still waiting.");
   }
 }
 
@@ -357,7 +357,7 @@ bool ChangeRegistrationRequest::IsWhiteSpaceExist() {
               .asCharArray();
     if (!CheckSyntax(str)) {
       LOGGER_ERROR(logger_,
-                   "Invalid ngn_media_screen_app_name syntax check failed");
+                    "Invalid ngn_media_screen_app_name syntax check failed");
       return true;
     }
   }
@@ -441,8 +441,8 @@ bool ChangeRegistrationRequest::IsNicknameAllowed(
 
   if (!app) {
     LOGGER_ERROR(logger_,
-                 "Can't find appication with connection key "
-                     << connection_key());
+                  "Can't find appication with connection key "
+                      << connection_key());
     return false;
   }
 
@@ -456,8 +456,8 @@ bool ChangeRegistrationRequest::IsNicknameAllowed(
 
   if (!init_result) {
     LOGGER_ERROR(logger_,
-                 "Error during getting of nickname list for application "
-                     << policy_app_id);
+                  "Error during getting of nickname list for application "
+                      << policy_app_id);
     return false;
   }
 

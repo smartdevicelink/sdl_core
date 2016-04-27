@@ -68,7 +68,6 @@ class StateControllerImpl : public event_engine::EventObserver,
    * @param hmi_level of new regular state
    * @param audio_state of new regular state
    * @param SendActivateApp: if true, ActivateAppRequest will be sent on HMI */
-
   virtual void SetRegularState(
       ApplicationSharedPtr app,
       const mobile_apis::HMILevel::eType hmi_level,
@@ -93,7 +92,6 @@ class StateControllerImpl : public event_engine::EventObserver,
    * @param audio_state of new regular state
    * @param system_context of new regular state
    * @param SendActivateApp: if true, ActivateAppRequest will be sent on HMI */
-
   virtual void SetRegularState(
       ApplicationSharedPtr app,
       const mobile_apis::HMILevel::eType hmi_level,
@@ -165,8 +163,8 @@ class StateControllerImpl : public event_engine::EventObserver,
    * @param new_state state after change
    */
   virtual void OnStateChanged(ApplicationSharedPtr app,
-                              HmiStatePtr old_state,
-                              HmiStatePtr new_state);
+                      HmiStatePtr old_state,
+                      HmiStatePtr new_state);
 
   /**
    * @brief Checks activity of Deactivate HMI state.
@@ -424,6 +422,7 @@ class StateControllerImpl : public event_engine::EventObserver,
         std::mem_fun(&StateControllerImpl::HMIStateStopped<ID>), this));
     TempStateStopped(ID);
   }
+
 
   /**
    * @brief CreateHmiState creates Hmi state according to state_id

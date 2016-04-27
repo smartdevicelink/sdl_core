@@ -256,7 +256,6 @@ TEST(mobile_message_test, basic_test) {
   message->set_binary_data(binary_data);
   EXPECT_TRUE(message->has_binary_data());
 }
-
 TEST_F(
     MobileMessageHandlerTest,
     Test_HandleIncomingMessageProtocol_MessageWithUnknownProtocolVersion_ExpectNull) {
@@ -271,7 +270,6 @@ TEST_F(
   // Checks
   EXPECT_EQ(NULL, message);
 }
-
 TEST_F(
     MobileMessageHandlerTest,
     Test_HandleOutgoingMessageProtocol_MessageWithUnknownProtocolVersion_ExpectNull) {

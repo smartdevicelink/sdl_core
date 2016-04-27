@@ -1,4 +1,4 @@
-# Copyright (c) 2014, Ford Motor Company
+# Copyright (c) 2015, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-cmake_minimum_required(VERSION 2.8.0)
+cmake_minimum_required(VERSION 2.8.11)
 
 set (PROJECT smartDeviceLinkCore)
 
@@ -36,7 +36,7 @@ set (PROJECT smartDeviceLinkCore)
 #dont modify this section if you dont know details about integration with Jenkins!!!
 set (HMI "web" CACHE STRING "HMI type")
 option(HMI2 "Use Qt HMI" OFF)
-option(EXTENDED_MEDIA_MODE "Turn on and off extended Madia Manager features relates to PulseAudio A2DP and GStreamer" OFF)
+option(EXTENDED_MEDIA_MODE "Turn on and off extended Media Manager features relates to PulseAudio A2DP and GStreamer" ON)
 option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
 option(BUILD_USB_SUPPORT "libusb support" ON)
@@ -62,17 +62,29 @@ set(POLICY_OPTION 	"$ENV{POLICY_TYPE}")
 set(SECURITY_OPTION 	"$ENV{SECURITY_MODE}")
 set(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
 set(SNAPSHOT_TAG 	"$ENV{SNAPSHOT_TAG}")
-
 set(CMAKE_CXX_COMPILER   $ENV{CMAKE_CXX_COMPILER})
 set(CMAKE_C_COMPILER     $ENV{CMAKE_C_COMPILER})
+set(BUILDDIR "$ENV{BUILDDIR}")
 
-if (ARCH_TYPE_OPTION)
-  if (NOT (${ARCH_TYPE_OPTION} STREQUAL "x86") AND NOT (${ARCH_TYPE_OPTION} STREQUAL "armv7"))
-    message(AUTHOR_WARNING "HW architecture is not defined, using x86. Allowed values are x86/armv7 (case sensitive)")
-    set(ARCH_TYPE_OPTION	"x86")
-  endif ()
+project (${PROJECT})
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  if(QT_PORT)
+      message(STATUS "Build QT port")
+      set(ARCH_TYPE_OPTION	"x86")
+    else()
+      set(ARCH_TYPE_OPTION	"x86_64")
+    endif()
+
 else ()
-    set(ARCH_TYPE_OPTION	"x86")
+    if (ARCH_TYPE_OPTION)
+      if (NOT (${ARCH_TYPE_OPTION} STREQUAL "x86") AND NOT (${ARCH_TYPE_OPTION} STREQUAL "armv7"))
+        message(AUTHOR_WARNING "HW architecture is not defined, using x86. Allowed values are x86/armv7 (case sensitive)")
+        set(ARCH_TYPE_OPTION	"x86")
+      endif ()
+    else ()
+        set(ARCH_TYPE_OPTION	"x86")
+    endif()
 endif()
 
 if (HMI_TYPE_OPTION)
@@ -183,6 +195,30 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 
+if(MSVC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /GF /GR /EHsc /W3 /D_CONSOLE")
+  # /WD4996 - disable warning C4996.
+  # 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS
+  # to disable deprecated API warnings
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4996")
+  # /WD4503 - disable warning C4503.
+  # xmemory0(592): warning C4503: 'std::_Tree<std::_Tmap_traits<_Kty,_Ty,_Pr,_Alloc,false>>::_Insert_nohint' :
+  # decorated name length exceeded, name was truncated
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4503")
+  if(QT_PORT)
+    #Add MSVS 2010 for Qt specific flags
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DWIN32")
+  else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DWIN64 /Zc:wchar_t /favor:blend")# Add MSVS specific flags
+  endif()
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MD -DNDEBUG")
+  set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MDd -DDEBUG")
+
+  # /NOLOGO option prevents display of the copyright message and version number
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /nologo")
+
+  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+else()
 set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror -Wno-deprecated-declarations -Wuninitialized -Wvla")
 
 if(ENABLE_SANITIZE)
@@ -194,6 +230,15 @@ if(ENABLE_GCOV)
 endif()
 set(CMAKE_CXX_FLAGS_RELEASE " -DNDEBUG -s -O2")
 set(CMAKE_CXX_FLAGS_DEBUG   " -DDEBUG -g3 -ggdb3")
+endif()
+
+if(QT_PORT)
+  set(CMAKE_AUTOMOC ON)
+  find_package(Qt5 REQUIRED Core Network)
+  include_directories(
+    ${Qt5Core_INCLUDE_DIRS}
+    ${Qt5Network_INCLUDE_DIRS})
+endif ()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   add_definitions(-DOS_LINUX)
@@ -229,8 +274,23 @@ if (TELEMETRY_MONITOR)
     add_definitions(-DTELEMETRY_MONITOR)
 endif()
 
-# TODO(AK): check current OS here
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  add_definitions(-DOS_WINDOWS)
+  if(QT_PORT)
+    add_definitions(-DQT_PORT)
+  else()
+    add_definitions(-DWIN_NATIVE)
+    # AN: Temporary set WIN_NATIVE option to ON
+    # until cmd files refactoring will be done.
+    # WIN_NATIVE option should be passed from cmd
+    set(WIN_NATIVE ON)
+  endif()
+else()
 add_definitions(-DOS_POSIX)
+  if(ENABLE_LOG)
+    add_definitions(-DLOG4CXX_LOGGER)
+  endif()
+endif()
 
 if (EXTENDED_MEDIA_MODE)
 add_definitions(-DEXTENDED_MEDIA_MODE)
@@ -246,8 +306,10 @@ endif()
 find_package(PythonInterp)
 if(NOT PYTHONINTERP_FOUND)
     message(STATUS "Python interpreter is not found")
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     message(STATUS "To install it type in the command line:")
     message(STATUS "sudo apt-get install python")
+  endif()
     message(FATAL_ERROR "Exiting!")
 endif(NOT PYTHONINTERP_FOUND)
 
@@ -404,7 +466,7 @@ if(FORCE_3RD_PARTY)
   endif()
 endif()
 
-if(ENABLE_LOG)
+if((ENABLE_LOG) AND (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
   if(NO_REBUILD_3RD_PARTY_LOGGER)
   	message(STATUS "Not rebuilding logger.")
   else()
@@ -613,7 +675,7 @@ add_custom_target(install-3rd_party
   WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
 )
 
-if(ENABLE_LOG)
+if((ENABLE_LOG) AND NOT (QT_PORT) AND NOT (WIN_NATIVE))
   include_directories ( ${LOG4CXX_INCLUDE_DIRECTORY} )
 endif()
 
@@ -629,7 +691,9 @@ if(ENABLE_HMI_PTU_DECRYPTION)
   add_definitions(-DUSE_HMI_PTU_DECRYPTION)
 endif()
 
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 set(RTLIB rt)
+endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
 set(RTLIB )
 endif()
@@ -659,6 +723,9 @@ add_subdirectory(./src/appMain)
 # --- Plugins
 add_subdirectory(./src/plugins)
 
+
+ADD_DEPENDENCIES(${PROJECT} Policy)
+ADD_DEPENDENCIES(${PROJECT} copy_library_Policy)
 
 # Building tests
 if(BUILD_TESTS)

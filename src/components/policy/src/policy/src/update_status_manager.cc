@@ -34,7 +34,7 @@
 #include "policy/policy_listener.h"
 #include "utils/logger.h"
 
-namespace policy {
+namespace  policy {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Policy")
 
@@ -82,19 +82,19 @@ void UpdateStatusManager::OnUpdateTimeoutOccurs() {
   set_exchange_in_progress(false);
   set_exchange_pending(false);
   DCHECK(update_status_thread_delegate_);
-  update_status_thread_delegate_->updateTimeOut(0);  // Stop Timer
+  update_status_thread_delegate_->updateTimeOut(0); // Stop Timer
 }
 
 void UpdateStatusManager::OnValidUpdateReceived() {
   LOGGER_AUTO_TRACE(logger_);
-  update_status_thread_delegate_->updateTimeOut(0);  // Stop Timer
+  update_status_thread_delegate_->updateTimeOut(0); // Stop Timer
   set_exchange_pending(false);
   set_exchange_in_progress(false);
 }
 
 void UpdateStatusManager::OnWrongUpdateReceived() {
   LOGGER_AUTO_TRACE(logger_);
-  update_status_thread_delegate_->updateTimeOut(0);  // Stop Timer
+  update_status_thread_delegate_->updateTimeOut(0); // Stop Timer
   set_update_required(true);
   set_exchange_in_progress(false);
   set_exchange_pending(false);
@@ -199,7 +199,7 @@ void UpdateStatusManager::CheckUpdateStatus() {
 void UpdateStatusManager::set_exchange_in_progress(bool value) {
   sync_primitives::AutoLock lock(exchange_in_progress_lock_);
   LOGGER_INFO(logger_,
-              "Exchange in progress value is:" << std::boolalpha << value);
+               "Exchange in progress value is:" << std::boolalpha << value);
   exchange_in_progress_ = value;
   CheckUpdateStatus();
 }
@@ -222,7 +222,7 @@ UpdateStatusManager::UpdateThreadDelegate::UpdateThreadDelegate(
     UpdateStatusManager* update_status_manager)
     : timeout_(0)
     , stop_flag_(false)
-    , state_lock_(true)
+    , state_lock_(false)
     , update_status_manager_(update_status_manager) {
   LOGGER_INFO(logger_, "Create UpdateThreadDelegate");
 }
@@ -238,9 +238,10 @@ void UpdateStatusManager::UpdateThreadDelegate::threadMain() {
     if (timeout_ > 0) {
       LOGGER_DEBUG(logger_, "Timeout is greater then 0");
       sync_primitives::ConditionalVariable::WaitStatus wait_status =
-          termination_condition_.WaitFor(auto_lock, timeout_);
-      if (sync_primitives::ConditionalVariable::kTimeout == wait_status) {
+              termination_condition_.WaitFor(auto_lock, timeout_);
+      if (sync_primitives::ConditionalVariable::kTimeout == wait_status ) {
         if (update_status_manager_) {
+          sync_primitives::AutoUnlock auto_unlock(auto_lock);
           update_status_manager_->OnUpdateTimeoutOccurs();
         }
       }
@@ -266,4 +267,4 @@ void UpdateStatusManager::UpdateThreadDelegate::updateTimeOut(
   termination_condition_.NotifyOne();
 }
 
-}  // namespace policy
+} // namespace policy

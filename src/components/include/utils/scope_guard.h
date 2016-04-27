@@ -48,7 +48,7 @@ namespace utils {
  *
  * bool SomeClass::Init() {
  *   memberObject_ = custom_allocate() // initialize member object with some
- *value
+ * value
  *   if(!some_condition) {
  *     custom_release(memberObject();
  *     return false;
@@ -66,7 +66,7 @@ namespace utils {
  *
  * bool SomeClass::Init() {
  *   memberObject_ = custom_allocate() // initialize member object with some
- *value
+ * value
  *   // The guard will call custom release function when it goes out of scope.
  *   ScopeGaurd guard = MakeGuard(custom_release, memberObject);
  *   if(!some_condition) {
@@ -83,48 +83,50 @@ namespace utils {
  * }
  */
 class ScopeGuardImplBase {
- public:
-  /**
-   * @brief ScopeGuardImplBase the ScopeGuards constructor.
-   */
-  ScopeGuardImplBase() : dismissed_(false) {}
+  public:
+    /**
+     * @brief ScopeGuardImplBase the ScopeGuards constructor.
+     */
+    ScopeGuardImplBase(): dismissed_(false) {}
 
-  /**
-   * @brief Dismiss function which allows to dismiss releasing of stored object.
-   */
-  void Dismiss() const {
-    dismissed_ = true;
-  }
 
- protected:
-  /**
-   * @brief ScopeGuardImplBase the copy constructor
-   *
-   * @param other the object that should be copied.
-   */
-  ScopeGuardImplBase(const ScopeGuardImplBase& other)
-      : dismissed_(other.dismissed_) {
-    other.Dismiss();
-  }
 
-  /**
-   * Allows to safely execute release function(i.e. it will be called only
-   * in case of releasing wasn't dismiss.)
-   */
-  template <typename T>
-  void SafeExecute(T& t) {
-    if (!t.dismissed_) {
-      t.Execute();
+    /**
+     * @brief Dismiss function which allows to dismiss releasing of stored object.
+     */
+    void Dismiss() const {
+      dismissed_ = true;
     }
-  }
 
-  ~ScopeGuardImplBase() {}
+  protected:
+    /**
+     * @brief ScopeGuardImplBase the copy constructor
+     *
+     * @param other the object that should be copied.
+     */
+    ScopeGuardImplBase(const ScopeGuardImplBase& other)
+      : dismissed_(other.dismissed_) {
+      other.Dismiss();
+    }
 
-  mutable bool dismissed_;
+    /**
+     * Allows to safely execute release function(i.e. it will be called only
+     * in case of releasing wasn't dismiss.)
+     */
+    template<typename T>
+    void SafeExecute(T& t) {
+      if (!t.dismissed_) {
+        t.Execute();
+      }
+    }
 
- private:
-  // Disallow copying via assign operator.
-  ScopeGuardImplBase& operator=(const ScopeGuardImplBase&);
+    ~ScopeGuardImplBase() {}
+
+    mutable bool dismissed_;
+
+  private:
+    // Disallow copying via assign operator.
+    ScopeGuardImplBase& operator=(const ScopeGuardImplBase&);
 };
 
 /**
@@ -136,52 +138,53 @@ class ScopeGuardImplBase {
  *
  * So the parameter p will be passed to the specified function.
  */
-template <typename Function, typename Parameter1>
-class ScopeGuardImpl1 : public ScopeGuardImplBase {
- public:
-  /**
-   * @brief MakeGuard allows to create ScopeGuard object.
-   *
-   * @param fun function to call, when out of scope.
-   *
-   * @param p1 parameter which will be passed to the certain function.
-   *
-   * @return ScopeGuard object.
-   */
+template<typename Function, typename Parameter1>
+class ScopeGuardImpl1: public ScopeGuardImplBase {
+  public:
+    /**
+     * @brief MakeGuard allows to create ScopeGuard object.
+     *
+     * @param fun function to call, when out of scope.
+     *
+     * @param p1 parameter which will be passed to the certain function.
+     *
+     * @return ScopeGuard object.
+     */
   static ScopeGuardImpl1<Function, Parameter1> MakeGuard(Function fun,
                                                          const Parameter1& p1) {
-    return ScopeGuardImpl1<Function, Parameter1>(fun, p1);
-  }
+      return ScopeGuardImpl1<Function, Parameter1>(fun, p1);
+    }
 
-  /**
-    Execute the SafeExecute function in destructor.
-   */
-  ~ScopeGuardImpl1() {
-    SafeExecute(*this);
-  }
+    /**
+      Execute the SafeExecute function in destructor.
+     */
+    ~ScopeGuardImpl1() {
+      SafeExecute(*this);
+    }
 
- protected:
-  /**
-   * @brief Execute allows to execute certain function with certain parameter.
-   */
-  void Execute() {
-    fun_(p1_);
-  }
+  protected:
 
-  /**
-   * @brief ScopeGuardImpl1 create ScopeGuard object.
-   *
-   * @param f function object.
-   *
-   * @param p1 parameter to to pass to the function object.
-   */
+    /**
+     * @brief Execute allows to execute certain function with certain parameter.
+     */
+    void Execute() {
+      fun_(p1_);
+    }
+
+    /**
+     * @brief ScopeGuardImpl1 create ScopeGuard object.
+     *
+     * @param f function object.
+     *
+     * @param p1 parameter to to pass to the function object.
+     */
   ScopeGuardImpl1(const Function& f, const Parameter1& p1) : fun_(f), p1_(p1) {}
 
- private:
-  Function fun_;
-  const Parameter1 p1_;
+  private:
+    Function fun_;
+    const Parameter1 p1_;
 
-  friend class ScopeGuardImplBase;
+    friend class ScopeGuardImplBase;
 };
 
 /**
@@ -196,52 +199,53 @@ class ScopeGuardImpl1 : public ScopeGuardImplBase {
  *   vec.push_back(5);
  * }
  */
-template <typename Obj, typename MemFun>
-class ObjScopeGuardImpl0 : public ScopeGuardImplBase {
- public:
-  /**
-   * @brief MakeObjGuard creates ScopeGuard object.
-   *
-   * @param obj object whose method will be called.
-   *
-   * @param memFun the method to call.
-   *
-   * @return ScopeGuard object.
-   */
+template<typename Obj, typename MemFun>
+class ObjScopeGuardImpl0: public ScopeGuardImplBase {
+  public:
+    /**
+     * @brief MakeObjGuard creates ScopeGuard object.
+     *
+     * @param obj object whose method will be called.
+     *
+     * @param memFun the method to call.
+     *
+     * @return ScopeGuard object.
+     */
   static ObjScopeGuardImpl0<Obj, MemFun> MakeObjGuard(Obj& obj, MemFun memFun) {
-    return ObjScopeGuardImpl0<Obj, MemFun>(obj, memFun);
-  }
+      return ObjScopeGuardImpl0<Obj, MemFun>(obj, memFun);
+    }
 
-  /**
-    Execute the SafeExecute function in destructor.
-   */
-  ~ObjScopeGuardImpl0() {
-    SafeExecute(*this);
-  }
+    /**
+      Execute the SafeExecute function in destructor.
+     */
+    ~ObjScopeGuardImpl0() {
+      SafeExecute(*this);
+    }
 
- protected:
-  /**
-   * @brief Execute allows to execute certain function with certain parameter.
-   */
-  void Execute() {
-    (obj_.*memFun_)();
-  }
+  protected:
 
-  /**
-   * @brief ObjScopeGuardImpl0 Create ScopeGuard object.
-   *
-   * @param obj object whose method will be called.
-   *
-   * @param memFun the method to call.
-   *
-   * @return ScopeGuard object.
-   */
-  ObjScopeGuardImpl0(Obj& obj, MemFun memFun) : obj_(obj), memFun_(memFun) {}
+    /**
+     * @brief Execute allows to execute certain function with certain parameter.
+     */
+    void Execute() {
+      (obj_.*memFun_)();
+    }
 
- private:
-  Obj& obj_;
-  MemFun memFun_;
-  friend class ScopeGuardImplBase;
+    /**
+     * @brief ObjScopeGuardImpl0 Create ScopeGuard object.
+     *
+     * @param obj object whose method will be called.
+     *
+     * @param memFun the method to call.
+     *
+     * @return ScopeGuard object.
+     */
+    ObjScopeGuardImpl0(Obj& obj, MemFun memFun) : obj_(obj), memFun_(memFun) {}
+
+  private:
+    Obj& obj_;
+    MemFun memFun_;
+    friend class ScopeGuardImplBase;
 };
 
 /**
@@ -249,59 +253,59 @@ class ObjScopeGuardImpl0 : public ScopeGuardImplBase {
  * in case of ScopeGuard object out of scope.
 
  */
-template <typename Obj, typename MemFun, typename Parameter1>
-class ObjScopeGuardImpl1 : public ScopeGuardImplBase {
- public:
-  /**
-   * @brief MakeObjGuard creates ScopeGuard object.
-   *
-   * @param obj object whose method will be called.
-   *
-   * @param memFun the method to call.
-   *
-   * @param p1 the parameter to pass to the member function.
-   *
-   * @return ScopeGuard object.
-   */
-  static ObjScopeGuardImpl1<Obj, MemFun, Parameter1> MakeObjGuard(
-      Obj& obj, MemFun memFun, const Parameter1& p1) {
-    return ObjScopeGuardImpl1<Obj, MemFun, Parameter1>(obj, memFun, p1);
-  }
+template<typename Obj, typename MemFun, typename Parameter1>
+class ObjScopeGuardImpl1: public ScopeGuardImplBase {
+  public:
+    /**
+     * @brief MakeObjGuard creates ScopeGuard object.
+     *
+     * @param obj object whose method will be called.
+     *
+     * @param memFun the method to call.
+     *
+     * @param p1 the parameter to pass to the member function.
+     *
+     * @return ScopeGuard object.
+     */
+    static ObjScopeGuardImpl1<Obj, MemFun, Parameter1> MakeObjGuard(
+        Obj& obj, MemFun memFun, const Parameter1& p1) {
+      return ObjScopeGuardImpl1<Obj, MemFun, Parameter1>(obj, memFun, p1);
+    }
 
-  /**
-    Execute the SafeExecute function in destructor.
-   */
-  ~ObjScopeGuardImpl1() {
-    SafeExecute(*this);
-  }
+    /**
+      Execute the SafeExecute function in destructor.
+     */
+    ~ObjScopeGuardImpl1() {
+      SafeExecute(*this);
+    }
 
- protected:
-  /**
-   * @brief Execute allows to execute certain function with certain parameter.
-   */
-  void Execute() {
-    (obj_.*memFun_)(p1_);
-  }
+  protected:
+    /**
+     * @brief Execute allows to execute certain function with certain parameter.
+     */
+    void Execute() {
+      (obj_.*memFun_)(p1_);
+    }
 
-  /**
-   * @brief MakeObjGuard creates ScopeGuard object.
-   *
-   * @param obj object whose method will be called.
-   *
-   * @param memFun the method to call.
-   *
-   * @param p1 the parameter to pass to the member function.
-   *
-   * @return ScopeGuard object.
-   */
-  ObjScopeGuardImpl1(Obj& obj, MemFun memFun, const Parameter1& p1)
+    /**
+     * @brief MakeObjGuard creates ScopeGuard object.
+     *
+     * @param obj object whose method will be called.
+     *
+     * @param memFun the method to call.
+     *
+     * @param p1 the parameter to pass to the member function.
+     *
+     * @return ScopeGuard object.
+     */
+    ObjScopeGuardImpl1(Obj& obj, MemFun memFun, const Parameter1& p1)
       : obj_(obj), memFun_(memFun), p1_(p1) {}
 
- private:
-  Obj& obj_;
-  MemFun memFun_;
-  const Parameter1 p1_;
-  friend class ScopeGuardImplBase;
+  private:
+    Obj& obj_;
+    MemFun memFun_;
+    const Parameter1 p1_;
+    friend class ScopeGuardImplBase;
 };
 
 typedef const ScopeGuardImplBase& ScopeGuard;
@@ -322,5 +326,6 @@ ObjScopeGuardImpl1<Obj, MemFun, P1> MakeObjGuard(Obj& obj,
                                                  const P1& p1) {
   return ObjScopeGuardImpl1<Obj, MemFun, P1>::MakeObjGuard(obj, memFun, p1);
 }
+
 }
-#endif  // SRC_COMPONENTS_INCLUDE_UTILS_SCOPE_GUARD_H
+#endif // SRC_COMPONENTS_INCLUDE_UTILS_SCOPE_GUARD_H

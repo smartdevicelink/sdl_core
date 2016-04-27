@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/slider_request.h"
-
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "utils/helpers.h"
@@ -51,6 +50,7 @@ SliderRequest::SliderRequest(const MessageSharedPtr& message,
 SliderRequest::~SliderRequest() {}
 
 bool SliderRequest::Init() {
+
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
   if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
@@ -66,7 +66,7 @@ void SliderRequest::Run() {
   LOGGER_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application = application_manager_.application(
-      (*message_)[strings::params][strings::connection_key].asUInt());
+          (*message_)[strings::params][strings::connection_key].asUInt());
 
   if (!application) {
     LOGGER_ERROR(logger_, "Application is not registered");
@@ -144,13 +144,13 @@ void SliderRequest::on_event(const event_engine::Event& event) {
   if (is_timeout_aborted) {
     if (message[strings::params][strings::data].keyExists(
             strings::slider_position)) {
-      // Copy slider_position info to msg_params section
+      //Copy slider_position info to msg_params section
       response_msg_params[strings::slider_position] =
           message[strings::params][strings::data][strings::slider_position];
     } else {
       LOGGER_ERROR(logger_,
                    strings::slider_position << " field is absent"
-                                               " in response.");
+                    " in response.");
       response_msg_params[strings::slider_position] = 0;
     }
   }
@@ -194,3 +194,4 @@ bool SliderRequest::IsWhiteSpaceExist() {
 
 }  // namespace commands
 }  // namespace application_manager
+

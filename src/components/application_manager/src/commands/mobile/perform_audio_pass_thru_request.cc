@@ -33,7 +33,6 @@
 
 #include <cstring>
 #include "application_manager/commands/mobile/perform_audio_pass_thru_request.h"
-
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "utils/helpers.h"
@@ -86,9 +85,9 @@ void PerformAudioPassThruRequest::Run() {
 
   if (IsWhiteSpaceExist()) {
     LOGGER_ERROR(logger_,
-                 "Incoming perform audio pass thru has contains "
-                 "\\t\\n \\\\t \\\\n"
-                 " text contains only whitespace in initialPrompt");
+                  "Incoming perform audio pass thru has contains "
+                  "\\t\\n \\\\t \\\\n"
+                  " text contains only whitespace in initialPrompt");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -135,15 +134,15 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
 
       std::string return_info;
       const bool result = Compare<mobile_api::Result::eType, EQ, ONE>(
-          mobile_code,
-          mobile_apis::Result::SUCCESS,
-          mobile_apis::Result::RETRY,
-          mobile_apis::Result::WARNINGS);
+            mobile_code,
+            mobile_apis::Result::SUCCESS,
+            mobile_apis::Result::RETRY,
+            mobile_apis::Result::WARNINGS);
 
       const bool is_result_ok = Compare<mobile_api::Result::eType, EQ, ONE>(
-          mobile_code,
-          mobile_apis::Result::SUCCESS,
-          mobile_apis::Result::WARNINGS);
+            mobile_code,
+            mobile_apis::Result::SUCCESS,
+            mobile_apis::Result::WARNINGS);
 
       if (is_result_ok &&
           mobile_apis::Result::UNSUPPORTED_RESOURCE == result_tts_speak_) {
@@ -161,7 +160,7 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
       LOGGER_INFO(logger_, "Received TTS_Speak event");
       result_tts_speak_ =
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
-              message[strings::params][hmi_response::code].asUInt()));
+          message[strings::params][hmi_response::code].asUInt()));
       is_active_tts_speak_ = false;
       if (mobile_apis::Result::SUCCESS == result_tts_speak_) {
         SendRecordStartNotification();
@@ -198,8 +197,8 @@ void PerformAudioPassThruRequest::SendSpeakRequest() {
   if ((*message_)[str::msg_params].keyExists(str::initial_prompt) &&
       (0 < (*message_)[str::msg_params][str::initial_prompt].length())) {
     for (uint32_t i = 0;
-         i < (*message_)[str::msg_params][str::initial_prompt].length();
-         ++i) {
+        i < (*message_)[str::msg_params][str::initial_prompt].length();
+        ++i) {
       msg_params[hmi_request::tts_chunks][i][str::text] =
           (*message_)[str::msg_params][str::initial_prompt][i][str::text];
       msg_params[hmi_request::tts_chunks][i][str::type] =
@@ -233,7 +232,7 @@ void PerformAudioPassThruRequest::SendPerformAudioPassThruRequest() {
                   hmi_apis::Common_TextFieldName::audioPassThruDisplayText1);
     msg_params[hmi_request::audio_pass_display_texts][0]
               [hmi_request::field_text] =
-                  (*message_)[str::msg_params][str::audio_pass_display_text1];
+        (*message_)[str::msg_params][str::audio_pass_display_text1];
   }
 
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text2)) {
@@ -242,7 +241,7 @@ void PerformAudioPassThruRequest::SendPerformAudioPassThruRequest() {
                   hmi_apis::Common_TextFieldName::audioPassThruDisplayText2);
     msg_params[hmi_request::audio_pass_display_texts][1]
               [hmi_request::field_text] =
-                  (*message_)[str::msg_params][str::audio_pass_display_text2];
+        (*message_)[str::msg_params][str::audio_pass_display_text2];
   }
 
   if ((*message_)[str::msg_params].keyExists(str::mute_audio)) {
@@ -359,7 +358,7 @@ bool PerformAudioPassThruRequest::WaitTTSSpeak() {
       FinishTTSSpeak();
       SendResponse(false,
                    mobile_apis::Result::eType::GENERIC_ERROR,
-                   "Expired timeout for TTS.Speak response");
+        "Expired timeout for TTS.Speak response");
       return false;
     }
   }

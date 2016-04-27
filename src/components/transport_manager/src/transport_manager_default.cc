@@ -32,6 +32,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+
 #include "transport_manager/transport_manager_default.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "utils/logger.h"
@@ -40,9 +41,12 @@
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
 #endif
 
+
 #if defined(USB_SUPPORT)
 #include "transport_manager/usb/usb_aoa_adapter.h"
 #endif  // USB_SUPPORT
+
+
 
 namespace transport_manager {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
@@ -55,8 +59,8 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
   LOGGER_TRACE(logger_, "enter");
   if (E_SUCCESS != TransportManagerImpl::Init(last_state)) {
     LOGGER_TRACE(logger_,
-                 "exit with E_TM_IS_NOT_INITIALIZED. Condition: E_SUCCESS != "
-                 "TransportManagerImpl::Init()");
+                  "exit with E_TM_IS_NOT_INITIALIZED. Condition: E_SUCCESS != "
+                  "TransportManagerImpl::Init()");
     return E_TM_IS_NOT_INITIALIZED;
   }
 
@@ -84,6 +88,7 @@ int TransportManagerDefault::Init(resumption::LastState& last_state) {
 #endif  // TELEMETRY_MONITOR
   AddTransportAdapter(ta_tcp);
   ta_tcp = NULL;
+
 
 #if defined(USB_SUPPORT)
   transport_adapter::TransportAdapterImpl* ta_usb =

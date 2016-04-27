@@ -29,7 +29,13 @@
 * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 */
+#include <csignal>
 
+#ifdef OS_WINDOWS
+#include "utils/winhdr.h"
+#endif
+
+#include "utils/logger.h"
 #include "life_cycle.h"
 #include "utils/signals.h"
 #include "utils/make_shared.h"
@@ -101,6 +107,13 @@ LifeCycle::LifeCycle(const profile::Profile& profile)
 
 bool LifeCycle::StartComponents() {
   LOGGER_AUTO_TRACE(logger_);
+#ifdef OS_WINDOWS
+  WSAData wsa_data;
+  if (0 != WSAStartup(MAKEWORD(2, 2), &wsa_data)) {
+    LOGGER_ERROR(logger_, "WSAStartup() failed");
+    return false;
+  }
+#endif
   DCHECK(!last_state_);
   last_state_ = new resumption::LastState(profile_.app_storage_folder(),
                                           profile_.app_info_storage());
@@ -136,7 +149,7 @@ bool LifeCycle::StartComponents() {
 #ifdef ENABLE_SECURITY
   security_manager_ = new security_manager::SecurityManagerImpl();
   crypto_manager_ = new security_manager::CryptoManagerImpl(
-      utils::MakeShared<security_manager::CryptoManagerSettingsImpl>(
+        utils::MakeShared<security_manager::CryptoManagerSettingsImpl>(
           profile_, app_manager_->GetPolicyHandler().RetrieveCertificate()));
   protocol_handler_->AddProtocolObserver(security_manager_);
   protocol_handler_->set_security_manager(security_manager_);
@@ -325,11 +338,9 @@ void sig_handler(int sig) {
 
 void LifeCycle::Run() {
   LOGGER_AUTO_TRACE(logger_);
-  // Register signal handlers and wait sys signals
-  // from OS
-  if (!utils::WaitTerminationSignals(&sig_handler)) {
-    LOGGER_FATAL(logger_, "Fail to catch system signal!");
-  }
+  ::utils::CreateSdlEvent();
+  ::utils::SubscribeToTerminationSignals();
+  ::utils::WaitForSdlExecute();
 }
 
 void LifeCycle::StopComponents() {
@@ -417,12 +428,12 @@ void LifeCycle::StopComponents() {
 #ifdef MESSAGEBROKER_HMIADAPTER
   if (mb_adapter_) {
     DCHECK_OR_RETURN_VOID(hmi_handler_);
-    hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
-    mb_adapter_->unregisterController();
-    mb_adapter_->exitReceivingThread();
+  hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
+  mb_adapter_->unregisterController();
+  mb_adapter_->exitReceivingThread();
     StopThread(mb_adapter_thread_);
-    delete mb_adapter_;
-    mb_adapter_ = NULL;
+  delete mb_adapter_;
+  mb_adapter_ = NULL;
   }
 
   DCHECK_OR_RETURN_VOID(hmi_handler_);
@@ -432,7 +443,6 @@ void LifeCycle::StopComponents() {
   LOGGER_INFO(logger_, "Destroying Message Broker");
   StopThread(mb_server_thread_);
   StopThread(mb_thread_);
-
   if (message_broker_server_) {
     message_broker_server_->Close();
     delete message_broker_server_;
@@ -454,6 +464,9 @@ void LifeCycle::StopComponents() {
     telemetry_monitor_ = NULL;
   }
 #endif  // TELEMETRY_MONITOR
+#ifdef OS_WINDOWS
+  WSACleanup();
+#endif
 }
 
 }  //  namespace main_namespace

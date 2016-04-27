@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/commands/hmi/on_button_event_notification.h"
-
 #include "application_manager/application_impl.h"
 #include "utils/logger.h"
 
@@ -59,3 +58,4 @@ void OnButtonEventNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
+

@@ -50,3 +50,4 @@ void OnStatusUpdateNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
+

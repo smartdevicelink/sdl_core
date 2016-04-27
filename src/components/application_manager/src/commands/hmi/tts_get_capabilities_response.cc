@@ -48,14 +48,15 @@ void TTSGetCapabilitiesResponse::Run() {
   if ((*message_)[strings::msg_params].keyExists(
           hmi_response::speech_capabilities)) {
     hmi_capabilities.set_speech_capabilities(
-        (*message_)[strings::msg_params][hmi_response::speech_capabilities]);
+       (*message_)[strings::msg_params][hmi_response::speech_capabilities]);
   }
   if ((*message_)[strings::msg_params].keyExists(
-          hmi_response::prerecorded_speech_capabilities)) {
+      hmi_response::prerecorded_speech_capabilities)) {
     hmi_capabilities.set_prerecorded_speech(
         (*message_)[strings::msg_params]
-                   [hmi_response::prerecorded_speech_capabilities]);
+                    [hmi_response::prerecorded_speech_capabilities]);
   }
+
 }
 
 }  // namespace commands

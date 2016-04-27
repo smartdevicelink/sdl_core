@@ -33,7 +33,6 @@
 
 #include <algorithm>
 #include "application_manager/commands/mobile/set_app_icon_request.h"
-
 #include "application_manager/application_impl.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -50,8 +49,8 @@ SetAppIconRequest::SetAppIconRequest(const MessageSharedPtr& message,
     , is_icons_saving_enabled_(false) {
   const std::string path =
       application_manager_.get_settings().app_icons_folder();
-  is_icons_saving_enabled_ = file_system::IsWritingAllowed(path) &&
-                             file_system::IsReadingAllowed(path);
+    is_icons_saving_enabled_ = file_system::IsWritingAllowed(path) &&
+                               file_system::IsReadingAllowed(path);
 }
 
 SetAppIconRequest::~SetAppIconRequest() {}
@@ -71,10 +70,10 @@ void SetAppIconRequest::Run() {
       (*message_)[strings::msg_params][strings::sync_file_name].asString();
 
   std::string full_file_path =
-      application_manager_.get_settings().app_storage_folder() + "/";
-  full_file_path += app->folder_name();
-  full_file_path += "/";
-  full_file_path += sync_file_name;
+ile_system::ConcatPath(
+      application_manager_.get_settings().app_storage_folder(),
+      app->folder_name(),
+      sync_file_name);
 
   if (!file_system::FileExists(full_file_path)) {
     LOGGER_ERROR(logger_, "No such file " << full_file_path);
@@ -116,7 +115,7 @@ void SetAppIconRequest::CopyToIconStorage(
            .get_settings()
            .enable_protocol_4()) {
     LOGGER_WARN(logger_,
-                "Icon copying skipped, since protocol ver. 4 is not enabled.");
+                 "Icon copying skipped, since protocol ver. 4 is not enabled.");
     return;
   }
 
@@ -134,10 +133,10 @@ void SetAppIconRequest::CopyToIconStorage(
 
   if (storage_max_size < file_size) {
     LOGGER_ERROR(logger_,
-                 "Icon size (" << file_size << ") is bigger, than "
-                                               " icons storage maximum size ("
+                  "Icon size (" << file_size << ") is bigger, than "
+                                                " icons storage maximum size ("
                                << storage_max_size << ")."
-                                                      "Copying skipped.");
+                                   "Copying skipped.");
     return;
   }
 
@@ -149,8 +148,8 @@ void SetAppIconRequest::CopyToIconStorage(
 
     if (!icons_amount) {
       LOGGER_DEBUG(logger_,
-                   "No icons will be deleted, since amount icons to remove "
-                   "is zero. Icon saving skipped.");
+                    "No icons will be deleted, since amount icons to remove "
+                    "is zero. Icon saving skipped.");
       return;
     }
 
@@ -168,7 +167,8 @@ void SetAppIconRequest::CopyToIconStorage(
     return;
   }
 
-  const std::string icon_path = icon_storage + "/" + app->policy_app_id();
+  const std::string icon_path = 
+    file_system::ConcatPath(icon_storage, app->mobile_app_id());
   if (!file_system::CreateFile(icon_path)) {
     LOGGER_ERROR(logger_, "Can't create icon: " << icon_path);
     return;
@@ -180,8 +180,8 @@ void SetAppIconRequest::CopyToIconStorage(
   }
 
   LOGGER_DEBUG(logger_,
-               "Icon was successfully copied from :" << path_to_file << " to "
-                                                     << icon_path);
+                "Icon was successfully copied from :" << path_to_file << " to "
+                                                      << icon_path);
 
   return;
 }
@@ -193,7 +193,7 @@ void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
   std::vector<std::string>::const_iterator it = icons_list.begin();
   for (; it != icons_list.end(); ++it) {
     const std::string file_name = *it;
-    const std::string file_path = storage + "/" + file_name;
+    const std::string file_path = file_system::ConcatPath(storage, file_name);
     if (!file_system::FileExists(file_path)) {
       continue;
     }
@@ -207,13 +207,13 @@ void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
       return;
     }
     const std::string file_name = icon_modification_time.begin()->second;
-    const std::string file_path = storage + "/" + file_name;
+    const std::string file_path = file_system::ConcatPath(storage, file_name);
     if (!file_system::DeleteFile(file_path)) {
       LOGGER_DEBUG(logger_, "Error while deleting icon " << file_path);
     }
     icon_modification_time.erase(icon_modification_time.begin());
     LOGGER_DEBUG(logger_,
-                 "Old icon " << file_path << " was deleted successfully.");
+                  "Old icon " << file_path << " was deleted successfully.");
   }
 }
 
@@ -258,7 +258,7 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
         app->set_app_icon_path(path);
 
         LOGGER_INFO(logger_,
-                    "Icon path was set to '" << app->app_icon_path() << "'");
+                     "Icon path was set to '" << app->app_icon_path() << "'");
       }
 
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));

@@ -51,3 +51,5 @@ void UpdateAppListRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
+
+

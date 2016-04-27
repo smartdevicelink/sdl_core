@@ -1,4 +1,5 @@
 /*
+
  Copyright (c) 2016, Ford Motor Company
  All rights reserved.
 
@@ -33,7 +34,6 @@
 #include <algorithm>
 #include <string>
 #include "application_manager/commands/mobile/dial_number_request.h"
-
 #include "application_manager/application_impl.h"
 
 namespace application_manager {
@@ -65,7 +65,6 @@ void DialNumberRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
-
   std::string number =
       (*message_)[strings::msg_params][strings::number].asString();
   if (!CheckSyntax(number)) {
@@ -73,7 +72,6 @@ void DialNumberRequest::Run() {
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
-
   StripNumberParam(number);
   if (number.empty()) {
     LOGGER_ERROR(logger_,

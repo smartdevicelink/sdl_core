@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/delete_sub_menu_request.h"
-
 #include "application_manager/application_impl.h"
 #include "interfaces/HMI_API.h"
 #include "utils/helpers.h"
@@ -86,6 +85,7 @@ void DeleteSubMenuRequest::DeleteSubMenuVRCommands(
   CommandsMap::const_iterator it = commands.begin();
 
   for (; commands.end() != it; ++it) {
+
     if (!(*it->second).keyExists(strings::vr_commands)) {
       continue;
     }
@@ -148,9 +148,9 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
               message[strings::params][hmi_response::code].asInt());
 
       const bool result = Compare<mobile_api::Result::eType, EQ, ONE>(
-          result_code,
-          mobile_api::Result::SUCCESS,
-          mobile_api::Result::WARNINGS);
+            result_code,
+            mobile_api::Result::SUCCESS,
+            mobile_api::Result::WARNINGS);
 
       ApplicationSharedPtr application =
           application_manager_.application(connection_key());
@@ -166,7 +166,7 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
         DeleteSubMenuUICommands(application);
         application->RemoveSubMenu(
             (*message_)[strings::msg_params][strings::menu_id].asInt());
-      }
+       }
 
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
       if (result) {
@@ -180,6 +180,7 @@ void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
     }
   }
 }
+
 
 }  // namespace commands
 

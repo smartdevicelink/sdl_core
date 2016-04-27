@@ -48,6 +48,7 @@ void SetDisplayLayoutResponse::Run() {
   LOGGER_AUTO_TRACE(logger_);
 
   application_manager_.SendMessageToMobile(message_);
+
 }
 
 }  // namespace commands

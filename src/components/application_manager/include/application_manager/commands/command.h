@@ -32,6 +32,7 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_COMMAND_H_
+
 #include <stdint.h>
 #include "smart_objects/smart_object.h"
 #include "utils/shared_ptr.h"
@@ -108,16 +109,18 @@ class Command {
  */
   virtual bool AllowedToTerminate() = 0;
 
-  /**
- * @brief SetAllowedToTerminate set up allowed to terminate flag.
- * If true, request controller will terminate request on response
- */
+    /**
+   * @brief SetAllowedToTerminate set up allowed to terminate flag.
+   * If true, request controller will terminate request on response
+   */
   virtual void SetAllowedToTerminate(const bool allowed) = 0;
+
 
   enum CommandOrigin { ORIGIN_SDL, ORIGIN_MOBILE };
 };
 
 typedef smart_objects::SmartObjectSPtr MessageSharedPtr;
+
 }  // namespace commands
 
 }  // namespace application_manager

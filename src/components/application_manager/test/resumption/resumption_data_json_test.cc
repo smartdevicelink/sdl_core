@@ -105,6 +105,7 @@ class ResumptionDataJsonTest : public ResumptionDataTest {
 
   resumption::LastState last_state_;
   ResumptionDataJson res_json;
+
   application_manager_test::MockApplicationManagerSettings
       mock_application_manager_settings_;
   std::string policy_app_id_;

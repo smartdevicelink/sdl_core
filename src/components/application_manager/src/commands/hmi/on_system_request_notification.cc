@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/application_impl.h"
-
 #include "application_manager/commands/hmi/on_system_request_notification.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "interfaces/MOBILE_API.h"
@@ -56,20 +55,20 @@ void OnSystemRequestNotification::Run() {
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
 
   params[strings::function_id] =
-      static_cast<int32_t>(mobile_apis::FunctionID::eType::OnSystemRequestID);
+    static_cast<int32_t>(mobile_apis::FunctionID::eType::OnSystemRequestID);
 
   const std::string app_id = msg_params[strings::app_id].asString();
   LOGGER_DEBUG(logger_, "Received OnSystemRequest for " << app_id);
 
   ApplicationSharedPtr app;
   if (strings::default_app_id == app_id) {
-    const policy::PolicyHandlerInterface& policy_handler =
+    const policy::PolicyHandlerInterface& policy_handler = 
         application_manager_.GetPolicyHandler();
     const uint32_t selected_app_id = policy_handler.GetAppIdForSending();
     if (0 == selected_app_id) {
       LOGGER_WARN(
           logger_,
-          "Can't select application to forward OnSystemRequestNotification");
+                   "Can't select application to forward OnSystemRequestNotification");
       return;
     }
     app = application_manager_.application(selected_app_id);
@@ -89,3 +88,4 @@ void OnSystemRequestNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
+

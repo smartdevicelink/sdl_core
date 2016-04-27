@@ -43,6 +43,7 @@ class EventObserver;
 
 class EventDispatcher {
  public:
+
   /*
    * @brief Delivers the event to all subscribers
    *
@@ -58,7 +59,7 @@ class EventDispatcher {
    * @param observer    The observer to subscribe for event
    */
   virtual void add_observer(const Event::EventID& event_id,
-                            int32_t hmi_correlation_id,
+                    int32_t hmi_correlation_id,
                             EventObserver& observer) = 0;
 
   /*

@@ -30,6 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#if defined(OS_WINDOWS)
+#include "utils/winhdr.h"
+#endif
+
 #include "transport_manager/tcp/tcp_connection_factory.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
 

@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/commands/hmi/on_tts_stopped_notification.h"
-
 #include "application_manager/event_engine/event.h"
 
 namespace application_manager {
@@ -55,3 +54,4 @@ void OnTTSStoppedNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
+

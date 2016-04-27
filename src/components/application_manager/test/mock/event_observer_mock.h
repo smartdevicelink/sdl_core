@@ -55,4 +55,5 @@ class MockEventObserver
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_MOCK_EVENT_OBSERVER_MOCK_H_
+#endif // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_MOCK_EVENT_OBSERVER_MOCK_H_
+

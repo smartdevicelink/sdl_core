@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/send_location_response.h"
-
 #include "application_manager/application_impl.h"
 #include "interfaces/HMI_API.h"
 
