@@ -30,6 +30,8 @@
 
 if(BUILD_TESTS)
 
+find_package(LibUSBx REQUIRED)
+
 include_directories(
   include
   ${GMOCK_INCLUDE_DIRECTORY}
@@ -75,7 +77,7 @@ set(testLibraries
 )
 
 if (BUILD_USB_SUPPORT)
-  list(APPEND testLibraries Libusb-1.0.16)
+  list(APPEND testLibraries ${LIBUSBX_LIBRARIES})
 endif()
 
 if (BUILD_BT_SUPPORT)

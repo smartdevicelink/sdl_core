@@ -30,6 +30,8 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 
+find_package(LibUSBx REQUIRED)
+
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows" AND NOT QT_PORT)
   add_custom_target(copy_sqlite_dll ALL
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
@@ -107,7 +109,7 @@ if (BUILD_BT_SUPPORT)
   endif()     
 endif()
 if (BUILD_USB_SUPPORT)
- list(APPEND LIBRARIES Libusb-1.0.16)
+ list(APPEND LIBRARIES ${LIBUSBX_LIBRARIES})
 endif()
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   if(ENABLE_LOG)

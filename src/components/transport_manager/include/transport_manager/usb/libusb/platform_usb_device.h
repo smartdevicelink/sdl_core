@@ -40,7 +40,7 @@
 #include "utils/winhdr.h"
 #endif
 
-#include <libusb/libusb.h>
+#include <libusb.h>
 #include <string>
 
 namespace transport_manager {

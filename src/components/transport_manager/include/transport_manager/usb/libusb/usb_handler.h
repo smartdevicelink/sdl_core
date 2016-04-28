@@ -39,7 +39,8 @@
 #if defined(OS_WINDOWS)
 #include "utils/winhdr.h"
 #endif
-#include <libusb/libusb.h>
+
+#include <libusb.h>
 
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/usb/libusb/platform_usb_device.h"
