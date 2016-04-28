@@ -137,7 +137,7 @@ void GetUrls::ProcessPolicyServiceURLs(const policy::EndpointUrls& endpoints) {
     }
   }
 
-  service_info[hmi_response::policy_app_id] = mobile_app_id;
+  service_info[strings::app_id] = app->app_id();
   service_info[strings::url] = default_url;
   urls[0] = service_info;
   // TODO(AOleynik): Issue with absent policy_app_id. Need to fix later on.
