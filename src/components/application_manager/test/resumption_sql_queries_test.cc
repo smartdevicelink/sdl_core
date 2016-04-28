@@ -130,7 +130,7 @@ class ResumptionSqlQueriesTest : public ::testing::Test {
   }
   void TearDown() OVERRIDE {
     DeleteTablesData();
-                  }
+  }
 
   void CheckDeleteQuery(const string& count_query,
                         const string& query_to_check,
@@ -1254,7 +1254,6 @@ TEST_F(ResumptionSqlQueriesTest, kUpdateSuspendData_ExpectDataUpdated) {
       "SELECT ign_off_count FROM `application`;";
   CheckSelectQuery(kSelectIgnOffCount, 4, 0);
 }
-
 
 TEST_F(ResumptionSqlQueriesTest, kDeleteFile_ExpectDataDeleted) {
   // Arrange

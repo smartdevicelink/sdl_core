@@ -47,9 +47,7 @@ using namespace ::profile;
 class ProfileTest : public ::testing::Test {
  protected:
   profile::Profile profile_;
-
 };
-
 
 TEST_F(ProfileTest, UpdateConfigWithDefaultFile) {
   // Default value
@@ -257,7 +255,7 @@ TEST_F(ProfileTest, UpdateBool_ValueAppearsInFileTwice) {
 
 TEST_F(ProfileTest, UpdateVectorOfString_ValueAppearsInFileTwice) {
   // Default values
-  std::vector < std::string > time_out_promt;
+  std::vector<std::string> time_out_promt;
   EXPECT_EQ(time_out_promt, profile_.time_out_promt());
   // Change config file
   profile_.config_file_name("smartDeviceLink_test.ini");
@@ -281,7 +279,7 @@ TEST_F(ProfileTest, UpdateString_ValueAppearsInFileTwice) {
 
 TEST_F(ProfileTest, UpdatePairsValue) {
   // Default values
-  std::pair < uint32_t, int32_t > value;
+  std::pair<uint32_t, int32_t> value;
   value.first = 0;
   value.second = 0;
   EXPECT_EQ(value, profile_.get_vehicle_data_frequency());
@@ -302,7 +300,7 @@ TEST_F(ProfileTest, UpdatePairsValue) {
 
 TEST_F(ProfileTest, PairsValueEmpty) {
   // Default values
-  std::pair < uint32_t, int32_t > value;
+  std::pair<uint32_t, int32_t> value;
   value.first = 0;
   value.second = 0;
   EXPECT_EQ(value, profile_.read_did_frequency());
@@ -322,7 +320,7 @@ TEST_F(ProfileTest, PairsValueEmpty) {
 }
 
 TEST_F(ProfileTest, CharValueInPairInsteadOfInt) {
-  std::pair < uint32_t, int32_t > value;
+  std::pair<uint32_t, int32_t> value;
   value.first = 0;
   value.second = 0;
   EXPECT_EQ(value, profile_.get_vehicle_data_frequency());
@@ -342,7 +340,7 @@ TEST_F(ProfileTest, EmptyValuesInPair) {
   profile_.config_file_name("smartDeviceLink_invalid_pairs.ini");
   EXPECT_EQ("smartDeviceLink_invalid_pairs.ini", profile_.config_file_name());
 
-  std::pair < uint32_t, int32_t > value;
+  std::pair<uint32_t, int32_t> value;
   value.first = 0;
   value.second = 0;
   EXPECT_EQ(value, profile_.get_vehicle_data_frequency());
@@ -355,7 +353,7 @@ TEST_F(ProfileTest, EmptyValuesInPair) {
 
 TEST_F(ProfileTest, IntInsteadOfPair) {
   // Default values
-  std::pair < uint32_t, int32_t > value;
+  std::pair<uint32_t, int32_t> value;
   value.first = 0;
   value.second = 0;
   EXPECT_EQ(value, profile_.start_stream_retry_amount());
@@ -421,9 +419,9 @@ TEST_F(ProfileTest, WrongMinIntValue) {
   profile_.config_file_name("smartDeviceLink_invalid_int.ini");
   EXPECT_EQ("smartDeviceLink_invalid_int.ini", profile_.config_file_name());
 
-  //File include 0, value should be lefted as default
+  // File include 0, value should be lefted as default
   EXPECT_EQ(minvalue, profile_.thread_min_stack_size());
-  //File include -1, value should be lefted as default
+  // File include -1, value should be lefted as default
   EXPECT_EQ(server_port, profile_.server_port());
 
   // Update config file
@@ -483,7 +481,7 @@ TEST_F(ProfileTest, StringValueIncludeSlashesAndRussianLetters) {
   std::string tts_delimiter_ = "";
   std::string app_storage_folder = "";
 
-  std::string current_dir =  file_system::CurrentWorkingDirectory();
+  std::string current_dir = file_system::CurrentWorkingDirectory();
   profile_.config_file_name("smartDeviceLink_invalid_string.ini");
   EXPECT_EQ("smartDeviceLink_invalid_string.ini", profile_.config_file_name());
 
@@ -659,7 +657,6 @@ TEST_F(ProfileTest, CheckVectorContainer) {
   for (std::vector<uint32_t>::const_iterator it = diag_modes.begin();
        it != diag_modes.end();
        it++) {
-
     if ((uint32_t)(*iter) != (*it)) {
       isEqual = false;
       break;
@@ -714,19 +711,19 @@ TEST_F(ProfileTest, CheckIntContainerInSecurityData) {
   std::vector<int>::iterator res_protect =
       std::find(force_protected_list.begin(), force_protected_list.end(), 0x07);
   // This element doesn't appear in both lists
-  EXPECT_EQ(res_unprotect, force_unprotected_list.end() );
-  EXPECT_EQ(res_protect, force_protected_list.end() );
+  EXPECT_EQ(res_unprotect, force_unprotected_list.end());
+  EXPECT_EQ(res_protect, force_protected_list.end());
 
   // Both lists include 0
   res_unprotect = std::find(
       force_unprotected_list.begin(), force_unprotected_list.end(), 0);
   res_protect =
       std::find(force_protected_list.begin(), force_protected_list.end(), 0);
-  EXPECT_EQ(res_unprotect, force_unprotected_list.begin() );
-  EXPECT_EQ(res_protect, force_protected_list.begin() );
+  EXPECT_EQ(res_unprotect, force_unprotected_list.begin());
+  EXPECT_EQ(res_protect, force_protected_list.begin());
 }
 #endif
 
-} // namespace profile
-} // namespace components
-} // namespace test
+}  // namespace profile
+}  // namespace components
+}  // namespace test

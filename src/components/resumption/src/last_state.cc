@@ -60,10 +60,9 @@ void LastState::SaveToFileSystem() {
   LOGGER_INFO(logger_,
               "LastState::SaveToFileSystem " << app_info_storage_ << str);
   DCHECK(file_system::Write(app_info_storage_, char_vector_pdata));
-
 }
 
-utils::json::JsonValue&LastState::dictionary() {
+utils::json::JsonValue& LastState::dictionary() {
   return dictionary_;
 }
 
@@ -80,8 +79,7 @@ void LastState::LoadFromFileSystem() {
   if (buffer.empty()) {
     LOGGER_DEBUG(logger_, "Buffer is empty.");
     return;
-}
-
+  }
 
   JsonValue::ParseResult parse_result = JsonValue::Parse(buffer);
   if (!parse_result.second) {

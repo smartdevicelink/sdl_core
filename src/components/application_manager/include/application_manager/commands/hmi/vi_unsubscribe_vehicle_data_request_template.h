@@ -44,7 +44,7 @@ namespace commands {
  *
  * Template class for sending 1 unsubscribe thin request
  **/
-template<event_engine::Event::EventID eventID>
+template <event_engine::Event::EventID eventID>
 class VIUnsubscribeVehicleDataRequestTemplate : public RequestToHMI {
  public:
   /**

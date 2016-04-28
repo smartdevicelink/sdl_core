@@ -41,24 +41,23 @@ namespace commands {
  * @brief NaviGetWaypoints command class
  **/
 class NaviGetWayPointsResponse : public ResponseFromHMI {
-  public:
-
-    /**
-   * @brief NaviGetWaypoints class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
+ public:
+  /**
+ * @brief NaviGetWaypoints class constructor
+ *
+ * @param message Incoming SmartObject message
+ **/
   NaviGetWayPointsResponse(const MessageSharedPtr& message,
                            ApplicationManager& application_manager);
 
-    /**
-   * @brief NaviGetWaypoints class destructor
-   **/
+  /**
+ * @brief NaviGetWaypoints class destructor
+ **/
   virtual ~NaviGetWayPointsResponse();
 
-    /**
-   * @brief Execute command
-   **/
+  /**
+ * @brief Execute command
+ **/
   virtual void Run() OVERRIDE;
 
  private:

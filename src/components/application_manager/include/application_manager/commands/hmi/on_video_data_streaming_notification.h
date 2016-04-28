@@ -43,27 +43,27 @@ namespace commands {
  * @brief OnVideoDataStreamingNotification command class
  **/
 class OnVideoDataStreamingNotification : public NotificationToHMI {
-  public:
-    /**
-     * @brief OnVideoDataStreamingNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
+ public:
+  /**
+   * @brief OnVideoDataStreamingNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
   OnVideoDataStreamingNotification(const MessageSharedPtr& message,
                                    ApplicationManager& application_manager);
 
-    /**
-     * @brief OnVideoDataStreamingNotification class destructor
-     **/
-    virtual ~OnVideoDataStreamingNotification();
+  /**
+   * @brief OnVideoDataStreamingNotification class destructor
+   **/
+  virtual ~OnVideoDataStreamingNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnVideoDataStreamingNotification);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnVideoDataStreamingNotification);
 };
 
 }  // namespace commands
@@ -71,4 +71,3 @@ class OnVideoDataStreamingNotification : public NotificationToHMI {
 }  // namespace application_manager
 
 #endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_VIDEO_DATA_STREAMING_NOTIFICATION_H_
-

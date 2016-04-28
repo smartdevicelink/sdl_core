@@ -245,7 +245,6 @@ class ApplicationManager {
   virtual bool ManageMobileCommand(const commands::MessageSharedPtr message,
                                    commands::Command::CommandOrigin origin) = 0;
 
-
   virtual mobile_api::HMILevel::eType GetDefaultHmiLevel(
       ApplicationConstSharedPtr application) const = 0;
   /**

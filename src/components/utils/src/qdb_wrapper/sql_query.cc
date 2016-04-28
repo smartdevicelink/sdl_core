@@ -50,6 +50,7 @@ class SetBindInteger {
     // In QDB the number of position for binding starts since 1.
     QDB_SETARRAYBIND_INT(array_, x.first + 1, x.second);
   }
+
  private:
   qdb_binding_t* array_;
 };
@@ -61,6 +62,7 @@ class SetBindReal {
     // In QDB the number of position for binding starts since 1.
     QDB_SETARRAYBIND_REAL(array_, x.first + 1, x.second);
   }
+
  private:
   qdb_binding_t* array_;
 };
@@ -72,6 +74,7 @@ class SetBindText {
     // In QDB the number of position for binding starts since 1.
     QDB_SETARRAYBIND_TEXT(array_, x.first + 1, x.second.c_str());
   }
+
  private:
   qdb_binding_t* array_;
 };
@@ -83,6 +86,7 @@ class SetBindNull {
     // In QDB the number of position for binding starts since 1.
     QDB_SETARRAYBIND_NULL(array_, x + 1);
   }
+
  private:
   qdb_binding_t* array_;
 };
@@ -230,7 +234,7 @@ bool SQLQuery::GetBoolean(int pos) const {
 
 int SQLQuery::GetInteger(int pos) const {
   void* ret = qdb_cell(result_, current_row_, pos);
-  if (rows_ !=0 && ret) {
+  if (rows_ != 0 && ret) {
     return *static_cast<int*>(ret);
   }
   return 0;
@@ -238,7 +242,7 @@ int SQLQuery::GetInteger(int pos) const {
 
 uint32_t SQLQuery::GetUInteger(int pos) const {
   void* ret = qdb_cell(result_, current_row_, pos);
-  if (rows_ !=0 && ret) {
+  if (rows_ != 0 && ret) {
     return *static_cast<uint32_t*>(ret);
   }
   return 0;
@@ -246,16 +250,15 @@ uint32_t SQLQuery::GetUInteger(int pos) const {
 
 int64_t SQLQuery::GetLongInt(int pos) const {
   void* ret = qdb_cell(result_, current_row_, pos);
-  if (rows_ !=0 && ret) {
+  if (rows_ != 0 && ret) {
     return *static_cast<int64_t*>(ret);
   }
   return 0;
 }
 
-
 double SQLQuery::GetDouble(int pos) const {
   void* ret = qdb_cell(result_, current_row_, pos);
-  if (rows_ !=0 && ret) {
+  if (rows_ != 0 && ret) {
     return *static_cast<double*>(ret);
   }
   return 0;
@@ -288,4 +291,3 @@ int64_t SQLQuery::LastInsertId() const {
 
 }  // namespace dbms
 }  // namespace utils
-

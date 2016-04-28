@@ -143,7 +143,7 @@ TEST_F(EventEngineTest,
 
 TEST_F(
     EventEngineTest,
-       EventDispatcherImpl_RaiseEvent_EventSOTypeErrorResponse_ExpectEventRaised) {
+    EventDispatcherImpl_RaiseEvent_EventSOTypeErrorResponse_ExpectEventRaised) {
   CheckRaiseEvent(event_id3, 1u, smart_object_with_type_error_response);
 }
 

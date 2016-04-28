@@ -163,8 +163,8 @@ class StateControllerImpl : public event_engine::EventObserver,
    * @param new_state state after change
    */
   virtual void OnStateChanged(ApplicationSharedPtr app,
-                      HmiStatePtr old_state,
-                      HmiStatePtr new_state);
+                              HmiStatePtr old_state,
+                              HmiStatePtr new_state);
 
   /**
    * @brief Checks activity of Deactivate HMI state.
@@ -422,7 +422,6 @@ class StateControllerImpl : public event_engine::EventObserver,
         std::mem_fun(&StateControllerImpl::HMIStateStopped<ID>), this));
     TempStateStopped(ID);
   }
-
 
   /**
    * @brief CreateHmiState creates Hmi state according to state_id

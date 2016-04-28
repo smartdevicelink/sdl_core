@@ -40,7 +40,7 @@ namespace commands {
 ResponseFromHMI::ResponseFromHMI(const MessageSharedPtr& message,
                                  ApplicationManager& application_manager)
     : CommandImpl(message, application_manager) {
-  //If it is error response, shift info
+  // If it is error response, shift info
   if ((*message)[strings::params].keyExists(hmi_response::message)) {
     (*message)[strings::msg_params][strings::info] =
         (*message)[strings::params][hmi_response::message];
@@ -72,7 +72,6 @@ void ResponseFromHMI::SendResponseToMobile(
 void ResponseFromHMI::CreateHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject& msg_params) const {
-
   smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
 
   if (!result) {

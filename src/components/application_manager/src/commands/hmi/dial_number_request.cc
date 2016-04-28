@@ -48,9 +48,8 @@ void DialNumberRequest::Run() {
   SendRequest();
 }
 
-} // namespace hmi
+}  // namespace hmi
 
 }  // namespace commands
 
 }  // namespace application_manager
-

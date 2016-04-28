@@ -34,7 +34,7 @@ class CryptoManagerSettingsImpl : public CryptoManagerSettings {
       return security_manager::SSLv3;
     }
     LOGGER_ERROR(
-          logger_,
+        logger_,
         "Unknown protocol: " << profile_.security_manager_protocol_name());
     return static_cast<security_manager::Protocol>(-1);
   }

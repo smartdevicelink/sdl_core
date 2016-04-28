@@ -41,7 +41,6 @@ namespace commands {
 NotificationFromHMI::NotificationFromHMI(
     const MessageSharedPtr& message, ApplicationManager& application_manager)
     : CommandImpl(message, application_manager) {
-
   // Replace HMI app id with Mobile connection id
   ReplaceHMIByMobileAppId(*message);
 }
@@ -60,7 +59,6 @@ void NotificationFromHMI::Run() {}
 
 void NotificationFromHMI::SendNotificationToMobile(
     const MessageSharedPtr& message) {
-
   (*message)[strings::params][strings::message_type] =
       static_cast<int32_t>(application_manager::MessageType::kNotification);
   application_manager_.ManageMobileCommand(message, ORIGIN_SDL);
@@ -69,7 +67,6 @@ void NotificationFromHMI::SendNotificationToMobile(
 void NotificationFromHMI::CreateHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject& msg_params) const {
-
   smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
   if (!result) {
     LOGGER_ERROR(logger_, "Memory allocation failed.");

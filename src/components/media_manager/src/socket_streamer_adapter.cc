@@ -39,7 +39,7 @@ CREATE_LOGGERPTR_GLOBAL(logger, "SocketStreamerAdapter")
 
 SocketStreamerAdapter::SocketStreamerAdapter(const std::string& ip,
                                              int32_t port,
-    const std::string& header)
+                                             const std::string& header)
     : StreamerAdapter(new SocketStreamer(this, ip, port, header)) {}
 
 SocketStreamerAdapter::~SocketStreamerAdapter() {}

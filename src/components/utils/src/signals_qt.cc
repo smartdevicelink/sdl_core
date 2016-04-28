@@ -61,7 +61,7 @@ void SigHandler(int sig) {
     default:
       HandleSignals("Unexpected signal has been caught");
       break;
-}
+  }
 }
 }  //  namespace
 

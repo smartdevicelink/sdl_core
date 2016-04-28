@@ -43,27 +43,27 @@ namespace commands {
  * @brief OnAppActivatedNotification command class
  **/
 class OnAppActivatedNotification : public NotificationFromHMI {
-  public:
-    /**
-     * @brief OnAppActivatedNotification class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
+ public:
+  /**
+   * @brief OnAppActivatedNotification class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
   OnAppActivatedNotification(const MessageSharedPtr& message,
                              ApplicationManager& application_manager);
 
-    /**
-     * @brief OnAppActivatedNotification class destructor
-     **/
-    virtual ~OnAppActivatedNotification();
+  /**
+   * @brief OnAppActivatedNotification class destructor
+   **/
+  virtual ~OnAppActivatedNotification();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnAppActivatedNotification);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnAppActivatedNotification);
 };
 
 }  // namespace commands

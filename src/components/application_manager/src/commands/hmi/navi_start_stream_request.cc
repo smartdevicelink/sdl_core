@@ -50,7 +50,7 @@ NaviStartStreamRequest::NaviStartStreamRequest(
   retry_number_ = stream_retry.first;
   LOGGER_DEBUG(logger_,
                "default_timeout_ = " << default_timeout_
-                <<"; retry_number_ = " << retry_number_);
+                                     << "; retry_number_ = " << retry_number_);
 }
 
 NaviStartStreamRequest::~NaviStartStreamRequest() {}
@@ -82,7 +82,7 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
       application_manager_.application_by_hmi_app(application_id());
   if (!app) {
     LOGGER_ERROR(logger_,
-        "NaviStartStreamRequest aborted. Application not found");
+                 "NaviStartStreamRequest aborted. Application not found");
     return;
   }
 
@@ -103,7 +103,7 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
         } else {
           LOGGER_DEBUG(
               logger_,
-                       "NaviStartStreamRequest aborted. Application can not stream");
+              "NaviStartStreamRequest aborted. Application can not stream");
         }
         break;
       }
@@ -133,7 +133,7 @@ void NaviStartStreamRequest::RetryStartSession() {
       application_manager_.application_by_hmi_app(application_id());
   if (!app) {
     LOGGER_ERROR(logger_,
-        "NaviStartStreamRequest aborted. Application not found");
+                 "NaviStartStreamRequest aborted. Application not found");
     return;
   }
 
@@ -145,7 +145,7 @@ void NaviStartStreamRequest::RetryStartSession() {
   if (app->video_streaming_approved()) {
     LOGGER_INFO(logger_,
                 "NaviStartStream retry sequence stopped. "
-                 << "SUCCESS received");
+                    << "SUCCESS received");
     app->set_video_stream_retry_number(0);
     return;
   }
@@ -160,7 +160,7 @@ void NaviStartStreamRequest::RetryStartSession() {
   } else {
     LOGGER_DEBUG(logger_,
                  "NaviStartStream retry sequence stopped. "
-                 << "Attempts expired");
+                     << "Attempts expired");
 
     application_manager_.EndNaviServices(app->app_id());
   }

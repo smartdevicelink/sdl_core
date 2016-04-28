@@ -164,11 +164,11 @@ void UsbHandler::DeviceArrived(libusb_device* device_libusb) {
                                                   device_address,
                                                   descriptor,
                                                   device_libusb,
-                            device_handle_libusb));
+                                                  device_handle_libusb));
   devices_.push_back(device);
 
   for (std::list<UsbDeviceListener*>::iterator it =
-         usb_device_listeners_.begin();
+           usb_device_listeners_.begin();
        it != usb_device_listeners_.end();
        ++it) {
     (*it)->OnDeviceArrived(device);
@@ -191,7 +191,7 @@ void UsbHandler::DeviceLeft(libusb_device* device_libusb) {
   }
 
   for (std::list<UsbDeviceListener*>::iterator it =
-         usb_device_listeners_.begin();
+           usb_device_listeners_.begin();
        it != usb_device_listeners_.end();
        ++it) {
     (*it)->OnDeviceLeft(device);
@@ -213,13 +213,13 @@ void UsbHandler::DeviceLeft(libusb_device* device_libusb) {
 }
 
 void UsbHandler::StartControlTransferSequence(
-  UsbControlTransferSequence* sequence, PlatformUsbDevice* device) {
+    UsbControlTransferSequence* sequence, PlatformUsbDevice* device) {
   LOGGER_TRACE(logger_,
                "enter. UsbControlTransferSequence* "
                    << sequence << "PlatformUsbDevice* " << device);
   TransferSequences::iterator it = transfer_sequences_.insert(
-                                     transfer_sequences_.end(),
-                                     new ControlTransferSequenceState(this, sequence, device));
+      transfer_sequences_.end(),
+      new ControlTransferSequenceState(this, sequence, device));
   SubmitControlTransfer(*it);
   LOGGER_TRACE(logger_, "exit");
 }
@@ -234,8 +234,8 @@ int LIBUSB_CALL ArrivedCallback(libusb_context* context,
                                 void* data) {
   LOGGER_TRACE(logger_,
                "enter. libusb device arrived (bus number "
-                << static_cast<int>(libusb_get_bus_number(device))
-                << ", device address "
+                   << static_cast<int>(libusb_get_bus_number(device))
+                   << ", device address "
                    << static_cast<int>(libusb_get_device_address(device))
                    << ")");
   UsbHandler* usb_handler = static_cast<UsbHandler*>(data);
@@ -250,8 +250,8 @@ int LIBUSB_CALL LeftCallback(libusb_context* context,
                              void* data) {
   LOGGER_TRACE(logger_,
                "enter libusb device left (bus number "
-                << static_cast<int>(libusb_get_bus_number(device))
-                << ", device address "
+                   << static_cast<int>(libusb_get_bus_number(device))
+                   << ", device address "
                    << static_cast<int>(libusb_get_device_address(device))
                    << ")");
   UsbHandler* usb_handler = static_cast<UsbHandler*>(data);
@@ -289,11 +289,11 @@ TransportAdapter::Error UsbHandler::Init() {
                                        LIBUSB_HOTPLUG_MATCH_ANY,
                                        ArrivedCallback,
                                        this,
-                 &arrived_callback_handle_);
+                                       &arrived_callback_handle_);
 
   if (LIBUSB_SUCCESS != libusb_ret) {
     LOGGER_ERROR(logger_,
-                  "libusb_hotplug_register_callback failed: " << libusb_ret);
+                 "libusb_hotplug_register_callback failed: " << libusb_ret);
     LOGGER_TRACE(logger_,
                  "exit with TransportAdapter::FAIL. Condition: "
                  "LIBUSB_SUCCESS != libusb_ret");
@@ -309,11 +309,11 @@ TransportAdapter::Error UsbHandler::Init() {
                                        LIBUSB_HOTPLUG_MATCH_ANY,
                                        LeftCallback,
                                        this,
-                 &left_callback_handle_);
+                                       &left_callback_handle_);
 
   if (LIBUSB_SUCCESS != libusb_ret) {
     LOGGER_ERROR(logger_,
-                  "libusb_hotplug_register_callback failed: " << libusb_ret);
+                 "libusb_hotplug_register_callback failed: " << libusb_ret);
     LOGGER_TRACE(logger_,
                  "exit with TransportAdapter::FAIL. Condition: "
                  "LIBUSB_SUCCESS != libusb_ret");
@@ -346,7 +346,7 @@ void UsbHandler::Thread() {
     }
 
     for (std::list<libusb_device_handle*>::iterator it =
-           device_handles_to_close_.begin();
+             device_handles_to_close_.begin();
          it != device_handles_to_close_.end();
          it = device_handles_to_close_.erase(it)) {
       libusb_close(*it);
@@ -365,7 +365,7 @@ void LIBUSB_CALL UsbTransferSequenceCallback(libusb_transfer* transfer) {
 }
 
 void UsbHandler::SubmitControlTransfer(
-  ControlTransferSequenceState* sequence_state) {
+    ControlTransferSequenceState* sequence_state) {
   LOGGER_TRACE(logger_,
                "enter. ControlTransferSequenceState* " << sequence_state);
   UsbControlTransfer* transfer = sequence_state->CurrentTransfer();
@@ -399,7 +399,7 @@ void UsbHandler::SubmitControlTransfer(
   const uint16_t length = transfer->Length();
 
   unsigned char* buffer =
-    static_cast<unsigned char*>(malloc(length + LIBUSB_CONTROL_SETUP_SIZE));
+      static_cast<unsigned char*>(malloc(length + LIBUSB_CONTROL_SETUP_SIZE));
   if (NULL == buffer) {
     LOGGER_ERROR(logger_, "buffer allocation failed");
     libusb_free_transfer(libusb_transfer);
@@ -437,7 +437,7 @@ void UsbHandler::SubmitControlTransfer(
 void UsbHandler::ControlTransferCallback(libusb_transfer* transfer) {
   LOGGER_TRACE(logger_, "enter. libusb_transfer* " << transfer);
   ControlTransferSequenceState* sequence_state =
-    static_cast<ControlTransferSequenceState*>(transfer->user_data);
+      static_cast<ControlTransferSequenceState*>(transfer->user_data);
   if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
     LOGGER_INFO(logger_, "USB control transfer completed");
     UsbControlTransfer* current_transfer = sequence_state->CurrentTransfer();
@@ -445,8 +445,8 @@ void UsbHandler::ControlTransferCallback(libusb_transfer* transfer) {
     if (current_transfer &&
         current_transfer->Direction() == UsbControlTransfer::IN) {
       submit_next =
-        static_cast<UsbControlInTransfer*>(current_transfer)
-        ->OnCompleted(libusb_control_transfer_get_data(transfer));
+          static_cast<UsbControlInTransfer*>(current_transfer)
+              ->OnCompleted(libusb_control_transfer_get_data(transfer));
     }
 
     sequence_state->Next();
@@ -466,7 +466,7 @@ void UsbHandler::ControlTransferCallback(libusb_transfer* transfer) {
 UsbHandler::ControlTransferSequenceState::ControlTransferSequenceState(
     UsbHandler* usb_handler,
     UsbControlTransferSequence* sequence,
-  PlatformUsbDevice* device)
+    PlatformUsbDevice* device)
     : usb_handler_(usb_handler)
     , device_(device)
     , finished_(false)

@@ -40,27 +40,27 @@ namespace application_manager {
 namespace commands {
 
 class OnReceivedPolicyUpdate : public NotificationFromHMI {
-  public:
-    /**
-       * @brief OnReceivedPolicyUpdate class constructor
-       *
-       * @param message Incoming SmartObject message
-       **/
+ public:
+  /**
+     * @brief OnReceivedPolicyUpdate class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
   OnReceivedPolicyUpdate(const MessageSharedPtr& message,
                          ApplicationManager& application_manager);
 
-    /**
-     * @brief OnReceivedPolicyUpdate class destructor
-     **/
-    virtual ~OnReceivedPolicyUpdate();
+  /**
+   * @brief OnReceivedPolicyUpdate class destructor
+   **/
+  virtual ~OnReceivedPolicyUpdate();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(OnReceivedPolicyUpdate);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnReceivedPolicyUpdate);
 };
 
 }  // namespace commands

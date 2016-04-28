@@ -41,9 +41,9 @@ namespace media_manager {
 CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
 FromMicRecorderAdapter::FromMicRecorderAdapter()
-  : recorder_thread_(NULL)
+    : recorder_thread_(NULL)
     , output_file_("audio.8bit.wav")  // default file within SDL appMain
-  , kDefaultDuration(1000)
+    , kDefaultDuration(1000)
     , duration_(kDefaultDuration) {}
 
 FromMicRecorderAdapter::~FromMicRecorderAdapter() {
@@ -63,7 +63,7 @@ void FromMicRecorderAdapter::StartActivity(int32_t application_key) {
     return;
   }
 
-// Todd: No gstreamer recorder thread
+  // Todd: No gstreamer recorder thread
   if (!recorder_thread_) {
     FromMicToFileRecorderThread* thread_delegate =
         new FromMicToFileRecorderThread(output_file_, duration_);

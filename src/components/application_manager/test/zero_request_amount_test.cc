@@ -53,7 +53,6 @@ using namespace application_manager;
 using namespace NsSmartDeviceLink::NsSmartObjects;
 
 commands::Command* RegisterApplication() {
-
   SmartObjectSPtr resultsmart =
       application_manager::MessageHelper::CreateModuleInfoSO(1);
   SmartObject& test_message = *resultsmart;
@@ -69,14 +68,13 @@ commands::Command* RegisterApplication() {
 commands::Command* UnregisterApplication() {
   SmartObjectSPtr resultsmart =
       application_manager::MessageHelper::CreateModuleInfoSO(2);
-  commands::Command *testregCommand =
+  commands::Command* testregCommand =
       new commands::UnregisterAppInterfaceRequest(resultsmart);
   return testregCommand;
 }
 
-commands::Command* PutFileCommand(uint32_t &correlation_id,
-                                  uint32_t &connection_key) {
-
+commands::Command* PutFileCommand(uint32_t& correlation_id,
+                                  uint32_t& connection_key) {
   SmartObjectSPtr resultsmart =
       application_manager::MessageHelper::CreateModuleInfoSO(32);
   SmartObject& test_message = *resultsmart;
@@ -99,7 +97,7 @@ TEST(RequestControlTest, ZeroValuePendingRequestsAmount) {
   RequestController::TResult result;
   RequestController request_ctrl_;
 
-  commands::Command * reg = RegisterApplication();
+  commands::Command* reg = RegisterApplication();
   request_ctrl_.addMobileRequest(reg, mobile_apis::HMILevel::HMI_FULL);
 
   for (uint32_t i = 0; i < big_count_of_requests_for_test_; ++i) {
@@ -111,7 +109,7 @@ TEST(RequestControlTest, ZeroValuePendingRequestsAmount) {
     EXPECT_EQ(RequestController::SUCCESS, result);
   }
 
-  commands::Command * unreg = UnregisterApplication();
+  commands::Command* unreg = UnregisterApplication();
   request_ctrl_.addMobileRequest(unreg, mobile_apis::HMILevel::HMI_FULL);
 }
 
@@ -124,7 +122,7 @@ TEST(RequestControlTest, ZeroValueAppRequestsTimeScale) {
   RequestController::TResult result;
   RequestController request_ctrl_;
 
-  commands::Command * reg = RegisterApplication();
+  commands::Command* reg = RegisterApplication();
   request_ctrl_.addMobileRequest(reg, mobile_apis::HMILevel::HMI_FULL);
 
   for (uint32_t i = 0; i < big_count_of_requests_for_test_; ++i) {
@@ -135,7 +133,6 @@ TEST(RequestControlTest, ZeroValueAppRequestsTimeScale) {
                                             mobile_apis::HMILevel::HMI_FULL);
     EXPECT_EQ(RequestController::SUCCESS, result);
   }
-
 
   commands::Command* unreg = UnregisterApplication();
   request_ctrl_.addMobileRequest(unreg, mobile_apis::HMILevel::HMI_FULL);
@@ -150,7 +147,7 @@ TEST(RequestControlTest, ZeroValueAppTimeScaleMaxRequests) {
   RequestController::TResult result;
   RequestController request_ctrl_;
 
-  commands::Command * reg = RegisterApplication();
+  commands::Command* reg = RegisterApplication();
   request_ctrl_.addMobileRequest(reg, mobile_apis::HMILevel::HMI_FULL);
 
   for (uint32_t i = 0; i < big_count_of_requests_for_test_; ++i) {

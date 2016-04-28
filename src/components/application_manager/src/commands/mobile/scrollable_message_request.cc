@@ -54,7 +54,6 @@ ScrollableMessageRequest::ScrollableMessageRequest(
 ScrollableMessageRequest::~ScrollableMessageRequest() {}
 
 bool ScrollableMessageRequest::Init() {
-
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
   if ((*message_)[strings::msg_params].keyExists(strings::timeout)) {
@@ -79,7 +78,7 @@ void ScrollableMessageRequest::Run() {
     return;
   }
 
-  //ProcessSoftButtons checks strings on the contents incorrect character
+  // ProcessSoftButtons checks strings on the contents incorrect character
 
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params],
@@ -137,9 +136,9 @@ void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
           application_manager_.hmi_capabilities();
 
       bool result = Compare<mobile_api::Result::eType, EQ, ONE>(
-            result_code,
-            mobile_api::Result::SUCCESS,
-            mobile_api::Result::WARNINGS);
+          result_code,
+          mobile_api::Result::SUCCESS,
+          mobile_api::Result::WARNINGS);
 
       if (mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code &&
           hmi_capabilities.is_ui_cooperating()) {
@@ -158,4 +157,3 @@ void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
 
 }  // namespace commands
 }  // namespace application_manager
-

@@ -140,7 +140,7 @@ int32_t main(int32_t argc, char** argv) {
   // Components initialization
   profile::Profile profile_instance;
   main_namespace::LifeCycle life_cycle(profile_instance);
-  if ((argc > 1)&&(0 != argv)) {
+  if ((argc > 1) && (0 != argv)) {
     profile_instance.config_file_name(argv[1]);
   } else {
     profile_instance.config_file_name("smartDeviceLink.ini");

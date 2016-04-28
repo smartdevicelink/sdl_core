@@ -62,8 +62,8 @@ void SpeakRequest::Run() {
 
   if (IsWhiteSpaceExist()) {
     LOGGER_ERROR(logger_,
-                  "Incoming speak has contains \\t\\n \\\\t \\\\n "
-                  " text contains only whitespace in ttsChunks");
+                 "Incoming speak has contains \\t\\n \\\\t \\\\n "
+                 " text contains only whitespace in ttsChunks");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -100,7 +100,7 @@ void SpeakRequest::on_event(const event_engine::Event& event) {
 }
 
 void SpeakRequest::ProcessTTSSpeakResponse(
-  const smart_objects::SmartObject& message) {
+    const smart_objects::SmartObject& message) {
   LOGGER_AUTO_TRACE(logger_);
   using namespace helpers;
 
@@ -114,10 +114,10 @@ void SpeakRequest::ProcessTTSSpeakResponse(
 
   hmi_apis::Common_Result::eType hmi_result_code =
       static_cast<hmi_apis::Common_Result::eType>(
-      message[strings::params][hmi_response::code].asInt());
+          message[strings::params][hmi_response::code].asInt());
 
   mobile_apis::Result::eType result_code =
-    MessageHelper::HMIToMobileResult(hmi_result_code);
+      MessageHelper::HMIToMobileResult(hmi_result_code);
 
   const bool result = Compare<mobile_api::Result::eType, EQ, ONE>(
       result_code, mobile_api::Result::SUCCESS, mobile_api::Result::WARNINGS);
@@ -128,9 +128,9 @@ void SpeakRequest::ProcessTTSSpeakResponse(
   const char* return_info = NULL;
 
   const bool is_result_ok = Compare<mobile_api::Result::eType, EQ, ONE>(
-        result_code,
-        mobile_api::Result::UNSUPPORTED_RESOURCE,
-        mobile_api::Result::WARNINGS);
+      result_code,
+      mobile_api::Result::UNSUPPORTED_RESOURCE,
+      mobile_api::Result::WARNINGS);
 
   if (is_result_ok) {
     result_code = mobile_apis::Result::WARNINGS;

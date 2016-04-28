@@ -91,7 +91,6 @@ class HMICapabilitiesTest : public ::testing::Test {
   MockApplicationManagerSettings mock_application_manager_settings_;
   utils::SharedPtr<HMICapabilitiesForTesting> hmi_capabilities_test;
   const std::string kFileName = "hmi_capabilities.json";
-
 };
 
 const char* const cstring_values_[] = {
@@ -166,10 +165,9 @@ TEST_F(HMICapabilitiesTest, LoadCapabilitiesFromFile) {
       .WillRepeatedly(Invoke(TestCommonLanguageFromString));
 
   if (file_system::FileExists("./app_info_data")) {
-     EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
-   }
+    EXPECT_TRUE(::file_system::DeleteFile("./app_info_data"));
+  }
   EXPECT_TRUE(hmi_capabilities_test->LoadCapabilitiesFromFile());
-
 
   // Check active languages
   EXPECT_EQ(hmi_apis::Common_Language::EN_US,

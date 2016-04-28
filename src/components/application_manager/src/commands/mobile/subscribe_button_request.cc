@@ -93,11 +93,10 @@ void SubscribeButtonRequest::Run() {
 
 bool SubscribeButtonRequest::IsSubscriptionAllowed(
     ApplicationSharedPtr app, mobile_apis::ButtonName::eType btn_id) {
-
   if (!app->is_media_application() &&
       ((mobile_apis::ButtonName::SEEKLEFT == btn_id) ||
-       (mobile_apis::ButtonName::SEEKRIGHT == btn_id)||
-       (mobile_apis::ButtonName::TUNEUP == btn_id)   ||
+       (mobile_apis::ButtonName::SEEKRIGHT == btn_id) ||
+       (mobile_apis::ButtonName::TUNEUP == btn_id) ||
        (mobile_apis::ButtonName::TUNEDOWN == btn_id))) {
     return false;
   }

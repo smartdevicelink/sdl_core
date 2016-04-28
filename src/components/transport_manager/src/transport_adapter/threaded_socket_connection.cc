@@ -68,7 +68,6 @@ ThreadedSocketConnection::~ThreadedSocketConnection() {
   thread_->join();
   delete thread_->delegate();
   threads::DeleteThread(thread_);
-
 }
 
 void ThreadedSocketConnection::Abort() {
@@ -81,7 +80,7 @@ void ThreadedSocketConnection::SetSocket(
     utils::TcpSocketConnection& socket_connection) {
   socket_connection_ = socket_connection;
   socket_connection_.SetEventHandler(this);
-  }
+}
 
 TransportAdapter::Error ThreadedSocketConnection::Start() {
   LOGGER_AUTO_TRACE(logger_);
@@ -151,14 +150,13 @@ void ThreadedSocketConnection::threadMain() {
   }
 }
 
-
 void ThreadedSocketConnection::Transmit() {
   LOGGER_AUTO_TRACE(logger_);
   LOGGER_DEBUG(logger_, "Waiting for connection events. " << this);
   socket_connection_.Wait();
 
   LOGGER_DEBUG(logger_, "Waited for connection events: " << this);
-  }
+}
 
 void ThreadedSocketConnection::Send() {
   LOGGER_AUTO_TRACE(logger_);
@@ -181,9 +179,9 @@ void ThreadedSocketConnection::Send() {
       offset = 0;
       controller_->DataSendFailed(
           device_handle(), application_handle(), frame, DataSendError());
-    Abort();
-    return;
-  }
+      Abort();
+      return;
+    }
 
     if (bytes_sent >= 0) {
       offset += bytes_sent;
@@ -191,7 +189,7 @@ void ThreadedSocketConnection::Send() {
         frames_to_send.pop();
         offset = 0;
         controller_->DataSendDone(device_handle(), application_handle(), frame);
-     }
+      }
     }
   }
 }
@@ -199,8 +197,7 @@ void ThreadedSocketConnection::Send() {
 void ThreadedSocketConnection::OnError(int error) {
   LOGGER_ERROR(logger_, "Connection error: " << error);
   Abort();
-      }
- 
+}
 
 void ThreadedSocketConnection::OnData(const uint8_t* const buffer,
                                       std::size_t buffer_size) {
@@ -212,12 +209,12 @@ void ThreadedSocketConnection::OnData(const uint8_t* const buffer,
 void ThreadedSocketConnection::OnCanWrite() {
   LOGGER_DEBUG(logger_, "OnCanWrite event. Trying to send data.");
   Send();
-  }
+}
 
 void ThreadedSocketConnection::OnClose() {
   LOGGER_DEBUG(logger_, "Connection has been closed");
   Abort();
-  }
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 /// SocketConnectionDelegate::SocketConnectionDelegate

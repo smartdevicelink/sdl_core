@@ -44,7 +44,6 @@
 #include "application_manager/resumption/resume_ctrl.h"
 #include "interfaces/HMI_API.h"
 
-
 namespace application_manager {
 
 namespace commands {
@@ -83,7 +82,7 @@ void OnExitAllApplicationsNotification::Run() {
       SendOnSDLPersistenceComplete();
       return;
     }
-    default : {
+    default: {
       LOGGER_ERROR(logger_, "Unknown Application close reason" << reason);
       return;
     }
@@ -121,4 +120,3 @@ void OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete() {
 }  // namespace commands
 
 }  // namespace application_manager
-

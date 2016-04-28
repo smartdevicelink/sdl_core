@@ -40,7 +40,6 @@
 #include "utils/threads/thread_delegate.h"
 #include "transport_manager/transport_adapter/client_connection_listener.h"
 
-
 namespace transport_manager {
 namespace transport_adapter {
 
@@ -101,7 +100,6 @@ class TcpClientListener : public ClientConnectionListener {
    */
   virtual TransportAdapter::Error StopListening();
 
-
  private:
   const uint16_t port_;
   const bool enable_keepalive_;
@@ -117,6 +115,7 @@ class TcpClientListener : public ClientConnectionListener {
     explicit ListeningThreadDelegate(TcpClientListener* parent);
     virtual void threadMain();
     void exitThreadMain();
+
    private:
     TcpClientListener* parent_;
   };

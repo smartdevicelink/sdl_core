@@ -570,8 +570,7 @@ bool ResumptionDataJson::DropAppDataResumption(const std::string& device_id,
 }
 
 void ResumptionDataJson::Persist() {
-    last_state().SaveToFileSystem();
+  last_state().SaveToFileSystem();
 }
-
 
 }  // resumption

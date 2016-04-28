@@ -57,7 +57,7 @@ void GetUrls::Run() {
       object[strings::msg_params].erase(hmi_request::service);
 
       object[strings::msg_params][hmi_response::urls] =
-        smart_objects::SmartObject(smart_objects::SmartType_Array);
+          smart_objects::SmartObject(smart_objects::SmartType_Array);
 
       smart_objects::SmartObject& urls =
           object[strings::msg_params][hmi_response::urls];

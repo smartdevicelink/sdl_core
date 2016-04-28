@@ -125,7 +125,7 @@ class CacheManager : public CacheManagerInterface {
    * @param seconds Return value: array of 5 elements
    * @return bool Success of operation
    */
-  virtual bool SecondsBetweenRetries(std::vector<int> &seconds);
+  virtual bool SecondsBetweenRetries(std::vector<int>& seconds);
 
   /**
    * @brief Get information about vehicle
@@ -151,7 +151,7 @@ class CacheManager : public CacheManagerInterface {
    * @return Array of appropriate messages parameters
    */
   std::vector<UserFriendlyMessage> GetUserFriendlyMsg(
-    const std::vector<std::string>& msg_codes, const std::string& language);
+      const std::vector<std::string>& msg_codes, const std::string& language);
 
   /**
    * @brief Get list of URLs related to particular service
@@ -190,7 +190,7 @@ class CacheManager : public CacheManagerInterface {
    * @brief Initialized Policy Table (load)
    * @return bool Success of operation
    */
-  bool Init(const std::string& file_name, const PolicySettings *settings);
+  bool Init(const std::string& file_name, const PolicySettings* settings);
 
   /**
    * @brief Get snapshot of Policy Table
@@ -327,7 +327,7 @@ class CacheManager : public CacheManagerInterface {
    * @return true, if query was successfull, otherwise - false
    */
   bool GetUserPermissionsForDevice(const std::string& device_id,
-                                   StringArray &consented_groups,
+                                   StringArray& consented_groups,
                                    StringArray& disallowed_groups) const;
 
   /**
@@ -339,7 +339,7 @@ class CacheManager : public CacheManagerInterface {
    */
   bool GetPermissionsForApp(const std::string& device_id,
                             const std::string& app_id,
-                            FunctionalIdType &group_types);
+                            FunctionalIdType& group_types);
 
   /**
    * @brief Get device groups and preconsented groups from policies section
@@ -348,7 +348,7 @@ class CacheManager : public CacheManagerInterface {
    * @return true, if query was successful, otherwise - false
    */
   bool GetDeviceGroupsFromPolicies(
-      rpc::policy_table_interface_base::Strings &groups,
+      rpc::policy_table_interface_base::Strings& groups,
       rpc::policy_table_interface_base::Strings& preconsented_groups) const;
 
   /**
@@ -461,7 +461,7 @@ class CacheManager : public CacheManagerInterface {
    * @return the count of unconsented groups
    */
   int CountUnconsentedGroups(const std::string& policy_app_id,
-                              const std::string& device_id);
+                             const std::string& device_id);
 
   /**
    * @brief Gets functional group names and user_consent_prompts, if any
@@ -483,7 +483,7 @@ class CacheManager : public CacheManagerInterface {
    * @param app_id specific application id.
    * @param preconsented_groups parameter to fill.
    */
-  void GetPreConsentedGroups(const std::string &app_id,
+  void GetPreConsentedGroups(const std::string& app_id,
                              FunctionalGroupIDs& preconsented_groups);
   /**
    * @brief GetConsentedGroups allows to obtain list of allowed and disallowed
@@ -493,8 +493,8 @@ class CacheManager : public CacheManagerInterface {
    * @param allowed_groups list of allowed groups
    * @param disallowed_groups list of disallowed groups
    */
-  void GetConsentedGroups(const std::string &device_id,
-                          const std::string &app_id,
+  void GetConsentedGroups(const std::string& device_id,
+                          const std::string& app_id,
                           FunctionalGroupIDs& allowed_groups,
                           FunctionalGroupIDs& disallowed_groups);
 
@@ -557,7 +557,6 @@ class CacheManager : public CacheManagerInterface {
    * @brief Backup allows to save cache onto hard drive.
    */
   void Backup();
-
 
   /**
    * Returns heart beat timeout
@@ -677,20 +676,20 @@ class CacheManager : public CacheManagerInterface {
   void MergeCFM(const policy_table::PolicyTable& new_pt,
                 policy_table::PolicyTable& pt);
 
-   const PolicySettings& get_settings() const;
+  const PolicySettings& get_settings() const;
 
 #ifdef BUILD_TESTS
- utils::SharedPtr<policy_table::Table> GetPT() const {
-     return pt_;
- }
+  utils::SharedPtr<policy_table::Table> GetPT() const {
+    return pt_;
+  }
 #endif
 
-private:
+ private:
   std::string currentDateTime();
   struct AppHMITypeToString {
-      std::string operator()(rpc::Enum<policy_table::AppHMIType> value) {
+    std::string operator()(rpc::Enum<policy_table::AppHMIType> value) {
       return std::string(policy_table::EnumToJsonString(value));
-      }
+    }
   };
 
   void GetGroupNameByHashID(const int32_t group_id, std::string& group_name);
@@ -709,13 +708,14 @@ private:
   void ResetCalculatedPermissions();
 
   void AddCalculatedPermissions(const std::string& device_id,
-      const std::string& policy_app_id,
-      const policy::Permissions& permissions);
+                                const std::string& policy_app_id,
+                                const policy::Permissions& permissions);
 
   bool IsPermissionsCalculated(const std::string& device_id,
                                const std::string& policy_app_id,
                                policy::Permissions& permission);
-private:
+
+ private:
   /**
    * @brief Checks, if input string is known service represented by number, than
    * converts input string to service number
@@ -725,7 +725,7 @@ private:
    */
   bool IsNumberService(const std::string& input, std::string& output) const;
 
-private:
+ private:
   utils::SharedPtr<policy_table::Table> pt_;
   utils::SharedPtr<policy_table::Table> snapshot_;
   utils::SharedPtr<PTRepresentation> backup_;
@@ -741,23 +741,25 @@ private:
   CalculatedPermissions calculated_permissions_;
   sync_primitives::Lock calculated_permissions_lock_;
 
-  class BackgroundBackuper: public threads::ThreadDelegate {
-      friend class CacheManager;
-    public:
-      BackgroundBackuper(CacheManager* cache_manager);
-      ~BackgroundBackuper();
-      virtual void threadMain();
-      virtual void exitThreadMain();
-      void DoBackup();
-    private:
-      void InternalBackup();
-      CacheManager* cache_manager_;
-      sync_primitives::ConditionalVariable backup_notifier_;
-      volatile bool stop_flag_;
-      volatile bool new_data_available_;
+  class BackgroundBackuper : public threads::ThreadDelegate {
+    friend class CacheManager;
 
-      sync_primitives::Lock need_backup_lock_;
-      DISALLOW_COPY_AND_ASSIGN(BackgroundBackuper);
+   public:
+    BackgroundBackuper(CacheManager* cache_manager);
+    ~BackgroundBackuper();
+    virtual void threadMain();
+    virtual void exitThreadMain();
+    void DoBackup();
+
+   private:
+    void InternalBackup();
+    CacheManager* cache_manager_;
+    sync_primitives::ConditionalVariable backup_notifier_;
+    volatile bool stop_flag_;
+    volatile bool new_data_available_;
+
+    sync_primitives::Lock need_backup_lock_;
+    DISALLOW_COPY_AND_ASSIGN(BackgroundBackuper);
   };
   threads::Thread* backup_thread_;
   sync_primitives::Lock backuper_locker_;
@@ -765,4 +767,4 @@ private:
   const PolicySettings* settings_;
 };
 }  // namespace policy
-#endif // SRC_COMPONENTS_POLICY_INCLUDE_CACHE_MANAGER_H_
+#endif  // SRC_COMPONENTS_POLICY_INCLUDE_CACHE_MANAGER_H_

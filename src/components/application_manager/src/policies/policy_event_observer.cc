@@ -70,7 +70,7 @@ void PolicyEventObserver::on_event(const event_engine::Event& event) {
       break;
     }
     default: { break; }
-  unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_GetOdometer);
+      unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_GetOdometer);
 #else
     case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
       ProcessOdometerEvent(message);
@@ -92,12 +92,11 @@ void PolicyEventObserver::ProcessOdometerEvent(
   if (hmi_apis::Common_Result::SUCCESS ==
       static_cast<hmi_apis::Common_Result::eType>(
           message[strings::params][hmi_response::code].asInt())) {
-
     if (message[strings::msg_params].keyExists(strings::odometer)) {
       if (policy_handler_) {
         policy_handler_->PTUpdatedAt(
-              Counters::KILOMETERS,
-              message[strings::msg_params][strings::odometer].asInt());
+            Counters::KILOMETERS,
+            message[strings::msg_params][strings::odometer].asInt());
       }
     }
   }

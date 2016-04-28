@@ -83,7 +83,6 @@ void DiagnosticMessageRequest::Run() {
   SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage,
                  &(*message_)[strings::msg_params],
                  true);
-
 }
 
 void DiagnosticMessageRequest::on_event(const event_engine::Event& event) {

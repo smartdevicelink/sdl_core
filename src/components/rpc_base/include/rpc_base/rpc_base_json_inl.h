@@ -47,8 +47,8 @@ inline PrimitiveType::ValueState PrimitiveType::InitHelper(
   } else if ((value.*type_check)()) {
     return kValid;
   }
-    return kInvalid;
-  }
+  return kInvalid;
+}
 
 inline policy_table_interface_base::PolicyTableType
 PrimitiveType::GetPolicyTableType() const {
@@ -74,8 +74,8 @@ inline CompositeType::InitializationState CompositeType::InitHelper(
       return kInitialized;
     }
   }
-    return kInvalidInitialized;
-  }
+  return kInvalidInitialized;
+}
 
 inline policy_table_interface_base::PolicyTableType
 CompositeType::GetPolicyTableType() const {
@@ -97,7 +97,7 @@ inline const utils::json::JsonValueRef ValueMember(
   return utils::json::JsonValueRef();
 }
 
-template<class T>
+template <class T>
 inline void WriteJsonField(const char* field_name,
                            const T& field,
                            utils::json::JsonValueRef json_value) {
@@ -125,7 +125,7 @@ inline utils::json::JsonValue Boolean::ToJsonValue() const {
   return utils::json::JsonValue(value_);
 }
 
-template<typename T, T minval, T maxval>
+template <typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer(const utils::json::JsonValueRef& value)
     : PrimitiveType(InitHelper(value, &utils::json::JsonValueRef::IsInt))
     , value_() {
@@ -139,12 +139,12 @@ Integer<T, minval, maxval>::Integer(const utils::json::JsonValueRef& value)
   }
 }
 
-template<typename T, T minval, T maxval>
+template <typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer(const Integer& val)
     : PrimitiveType(range_.Includes(val.value_) ? kValid : kInvalid)
     , value_(val.value_) {}
 
-template<typename T, T minval, T maxval>
+template <typename T, T minval, T maxval>
 Integer<T, minval, maxval>::Integer(const utils::json::JsonValueRef& value,
                                     IntType def_value)
     : PrimitiveType(InitHelper(value, &utils::json::JsonValueRef::IsInt))
@@ -161,12 +161,12 @@ Integer<T, minval, maxval>::Integer(const utils::json::JsonValueRef& value,
   }
 }
 
-template<typename T, T minval, T maxval>
+template <typename T, T minval, T maxval>
 utils::json::JsonValue Integer<T, minval, maxval>::ToJsonValue() const {
   return utils::json::JsonValue(utils::json::JsonValue::Int(value_));
 }
 
-template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
+template <int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float(
     const utils::json::JsonValueRef& value)
     : PrimitiveType(InitHelper(value, &utils::json::JsonValueRef::IsDouble))
@@ -177,7 +177,7 @@ Float<minnum, maxnum, minden, maxden>::Float(
   }
 }
 
-template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
+template <int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float(
     const utils::json::JsonValueRef& value, double def_value)
     : PrimitiveType(InitHelper(value, &utils::json::JsonValue::IsDouble))
@@ -190,13 +190,13 @@ Float<minnum, maxnum, minden, maxden>::Float(
   }
 }
 
-template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
+template <int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 utils::json::JsonValue Float<minnum, maxnum, minden, maxden>::ToJsonValue()
     const {
   return utils::json::JsonValue(value_);
 }
 
-template<size_t minlen, size_t maxlen>
+template <size_t minlen, size_t maxlen>
 String<minlen, maxlen>::String(const utils::json::JsonValueRef& value)
     : PrimitiveType(InitHelper(value, &utils::json::JsonValueRef::IsString))
     , value_(is_valid() ? value.AsString() : std::string()) {
@@ -205,7 +205,7 @@ String<minlen, maxlen>::String(const utils::json::JsonValueRef& value)
   }
 }
 
-template<size_t minlen, size_t maxlen>
+template <size_t minlen, size_t maxlen>
 String<minlen, maxlen>::String(const utils::json::JsonValueRef& value,
                                const std::string& def_value)
     : PrimitiveType(InitHelper(value, &utils::json::JsonValueRef::IsString))
@@ -217,12 +217,12 @@ String<minlen, maxlen>::String(const utils::json::JsonValueRef& value,
   }
 }
 
-template<size_t minlen, size_t maxlen>
+template <size_t minlen, size_t maxlen>
 utils::json::JsonValue String<minlen, maxlen>::ToJsonValue() const {
   return utils::json::JsonValue(value_);
 }
 
-template<typename T>
+template <typename T>
 Enum<T>::Enum(const utils::json::JsonValueRef& value)
     : PrimitiveType(InitHelper(value, &utils::json::JsonValueRef::IsString))
     , value_(EnumType()) {
@@ -232,7 +232,7 @@ Enum<T>::Enum(const utils::json::JsonValueRef& value)
   }
 }
 
-template<typename T>
+template <typename T>
 Enum<T>::Enum(const utils::json::JsonValueRef& value, EnumType def_value)
     : PrimitiveType(InitHelper(value, &utils::json::JsonValueRef::IsString))
     , value_(def_value) {
@@ -244,13 +244,13 @@ Enum<T>::Enum(const utils::json::JsonValueRef& value, EnumType def_value)
   }
 }
 
-template<typename T>
+template <typename T>
 utils::json::JsonValue Enum<T>::ToJsonValue() const {
   return utils::json::JsonValue(EnumToJsonString(value_));
 }
 
 // Non-const version
-template<typename T, size_t minsize, size_t maxsize>
+template <typename T, size_t minsize, size_t maxsize>
 Array<T, minsize, maxsize>::Array(utils::json::JsonValueRef& value)
     : CompositeType(InitHelper(value, &utils::json::JsonValueRef::IsArray)) {
   if (value.IsValid()) {
@@ -270,7 +270,7 @@ Array<T, minsize, maxsize>::Array(utils::json::JsonValueRef& value)
 }
 
 // Const version, must be identical to the non-const version
-template<typename T, size_t minsize, size_t maxsize>
+template <typename T, size_t minsize, size_t maxsize>
 Array<T, minsize, maxsize>::Array(const utils::json::JsonValueRef& value)
     : CompositeType(InitHelper(value, &utils::json::JsonValueRef::IsArray)) {
   if (value.IsValid()) {
@@ -289,7 +289,7 @@ Array<T, minsize, maxsize>::Array(const utils::json::JsonValueRef& value)
   }
 }
 
-template<typename T, size_t minsize, size_t maxsize>
+template <typename T, size_t minsize, size_t maxsize>
 utils::json::JsonValue Array<T, minsize, maxsize>::ToJsonValue() const {
   utils::json::JsonValue array(utils::json::ValueType::ARRAY_VALUE);
   for (size_t i = 0; i != this->size(); ++i) {
@@ -300,7 +300,7 @@ utils::json::JsonValue Array<T, minsize, maxsize>::ToJsonValue() const {
 }
 
 // Non-const version
-template<typename T, size_t minsize, size_t maxsize>
+template <typename T, size_t minsize, size_t maxsize>
 Map<T, minsize, maxsize>::Map(utils::json::JsonValueRef& value)
     : CompositeType(InitHelper(value, &utils::json::JsonValueRef::IsObject)) {
   if (value.IsValid()) {
@@ -318,7 +318,7 @@ Map<T, minsize, maxsize>::Map(utils::json::JsonValueRef& value)
   }
 }
 
-template<typename T, size_t minsize, size_t maxsize>
+template <typename T, size_t minsize, size_t maxsize>
 Map<T, minsize, maxsize>::Map(const utils::json::JsonValueRef& value)
     : CompositeType(InitHelper(value, &utils::json::JsonValueRef::IsObject)) {
   if (value.IsValid()) {
@@ -336,7 +336,7 @@ Map<T, minsize, maxsize>::Map(const utils::json::JsonValueRef& value)
   }
 }
 
-template<typename T, size_t minsize, size_t maxsize>
+template <typename T, size_t minsize, size_t maxsize>
 utils::json::JsonValue Map<T, minsize, maxsize>::ToJsonValue() const {
   utils::json::JsonValue map(utils::json::ValueType::OBJECT_VALUE);
   for (typename MapType::const_iterator i = this->begin(), end = this->end();
@@ -347,52 +347,52 @@ utils::json::JsonValue Map<T, minsize, maxsize>::ToJsonValue() const {
   return map;
 }
 
-template<typename T>
+template <typename T>
 Nullable<T>::Nullable(const utils::json::JsonValueRef& value)
     : T(value), marked_null_(value.IsValid() && value.IsNull()) {}
 
-template<typename T>
+template <typename T>
 Nullable<T>::Nullable(utils::json::JsonValueRef& value)
     : T(value), marked_null_(value.IsValid() && value.IsNull()) {}
 
-template<typename T>
-template<typename U>
+template <typename T>
+template <typename U>
 Nullable<T>::Nullable(const utils::json::JsonValueRef& value,
                       const U& def_value)
     : T(value, def_value), marked_null_(value.IsValid() && value.IsNull()) {}
 
-template<typename T>
+template <typename T>
 inline utils::json::JsonValue Nullable<T>::ToJsonValue() const {
   return marked_null_ ? utils::json::JsonValue() : T::ToJsonValue();
 }
 
-template<typename T>
-template<typename U>
+template <typename T>
+template <typename U>
 Optional<T>::Optional(const utils::json::JsonValueRef& value,
                       const U& def_value)
     : value_(value, def_value) {}
 
-template<typename T>
+template <typename T>
 inline utils::json::JsonValue Optional<T>::ToJsonValue() const {
   return value_.ToJsonValue();
 }
 
-template<typename T>
+template <typename T>
 Stringifyable<T>::Stringifyable(const utils::json::JsonValueRef& value)
     : T(value.IsValid() && !value.IsString() ? value
                                              : utils::json::JsonValueRef())
     , predefined_string_(value.IsValid() && value.IsString() ? value.AsString()
                                                              : "") {}
 
-template<typename T>
+template <typename T>
 Stringifyable<T>::Stringifyable(utils::json::JsonValueRef& value)
     : T(value.IsValid() && !value.IsString() ? value
                                              : utils::json::JsonValueRef())
     , predefined_string_(value.IsValid() && value.IsString() ? value.AsString()
                                                              : "") {}
 
-template<typename T>
-template<typename U>
+template <typename T>
+template <typename U>
 Stringifyable<T>::Stringifyable(const utils::json::JsonValueRef& value,
                                 const U& def_value)
     : T(value.IsValid() && !value.IsString() ? (value, def_value)
@@ -400,7 +400,7 @@ Stringifyable<T>::Stringifyable(const utils::json::JsonValueRef& value,
     , predefined_string_(value.IsValid() && value.IsString() ? value.AsString()
                                                              : "") {}
 
-template<typename T>
+template <typename T>
 inline utils::json::JsonValue Stringifyable<T>::ToJsonValue() const {
   return predefined_string_.empty() ? T::ToJsonValue() : predefined_string_;
 }

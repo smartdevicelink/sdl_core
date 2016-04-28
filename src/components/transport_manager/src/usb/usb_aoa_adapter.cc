@@ -54,7 +54,7 @@ UsbAoaAdapter::UsbAoaAdapter(resumption::LastState& last_state,
     , usb_handler_(new UsbHandler()) {
   static_cast<UsbDeviceScanner*>(device_scanner_)->SetUsbHandler(usb_handler_);
   static_cast<UsbConnectionFactory*>(server_connection_factory_)
-  ->SetUsbHandler(usb_handler_);
+      ->SetUsbHandler(usb_handler_);
 }
 
 UsbAoaAdapter::~UsbAoaAdapter() {}

@@ -51,9 +51,8 @@ void VRGetLanguageResponse::Run() {
 
   if ((*message_).keyExists(strings::msg_params) &&
       (*message_)[strings::msg_params].keyExists(hmi_response::language)) {
-
     language = static_cast<Common_Language::eType>(
-             (*message_)[strings::msg_params][hmi_response::language].asInt());
+        (*message_)[strings::msg_params][hmi_response::language].asInt());
   }
 
   application_manager_.hmi_capabilities().set_active_vr_language(language);

@@ -86,8 +86,9 @@ class DateTime {
   static bool Greater(const TimevalStruct& time1, const TimevalStruct& time2);
   static bool Less(const TimevalStruct& time1, const TimevalStruct& time2);
   static bool Equal(const TimevalStruct& time1, const TimevalStruct& time2);
+
  private:
-  static TimevalStruct ConvertionUsecs(const TimevalStruct &time);
+  static TimevalStruct ConvertionUsecs(const TimevalStruct& time);
 };
 
 }  // namespace date_time

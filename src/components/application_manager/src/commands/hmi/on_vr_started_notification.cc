@@ -53,4 +53,3 @@ void OnVRStartedNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

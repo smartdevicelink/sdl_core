@@ -108,7 +108,7 @@ void SQLPTRepresentation::CheckPermissions(const PTString& app_id,
   LOGGER_INFO(logger_,
               "Level is " << (result.hmi_level_permitted == kRpcAllowed
                                   ? "permitted"
-                                                  : "not permitted"));
+                                  : "not permitted"));
   std::string parameter;
   while (ret) {
     if (!query.IsNull(0)) {
@@ -163,7 +163,7 @@ bool SQLPTRepresentation::SetCountersPassedForSuccessfulUpdate(
   Query query(db());
   if (!query.Prepare(sql_pt::kUpdateCountersSuccessfulUpdate)) {
     LOGGER_WARN(logger_,
-                 "Wrong update query for counters on successful update.");
+                "Wrong update query for counters on successful update.");
     return false;
   }
   query.Bind(0, kilometers);
@@ -210,7 +210,7 @@ bool SQLPTRepresentation::SecondsBetweenRetries(std::vector<int>* seconds) {
   Query query(db());
   if (!query.Prepare(sql_pt::kSelectSecondsBetweenRetries)) {
     LOGGER_INFO(logger_,
-                 "Incorrect select statement from seconds between retries");
+                "Incorrect select statement from seconds between retries");
     return false;
   }
   while (query.Next()) {
@@ -261,7 +261,7 @@ std::string SQLPTRepresentation::GetLockScreenIconUrl() const {
     query.Bind(0, std::string("lock_screen_icon_url"));
     query.Bind(1, std::string("default"));
 
-    if(!query.Exec()) {
+    if (!query.Exec()) {
       LOGGER_WARN(logger_, "Incorrect select from notifications by priority.");
       return ret;
     }
@@ -283,7 +283,7 @@ int SQLPTRepresentation::GetNotificationsNumber(const std::string& priority) {
   if (!query.Prepare(sql_pt::kSelectNotificationsPerPriority)) {
     LOGGER_WARN(logger_,
                 "Incorrect select statement for priority "
-                 "notification number.");
+                "notification number.");
     return 0;
   }
   query.Bind(0, priority);
@@ -330,11 +330,11 @@ bool SQLPTRepresentation::GetPriority(const std::string& policy_app_id,
 }
 
 InitResult SQLPTRepresentation::Init(const PolicySettings *settings) {
-   settings_ = settings;
+  settings_ = settings;
   LOGGER_AUTO_TRACE(logger_);
 #ifdef BUILD_TESTS
   open_counter_ = 0;
-#endif // BUILD_TESTS
+#endif  // BUILD_TESTS
   if (!db_->Open()) {
     LOGGER_ERROR(logger_, "Failed opening database.");
     LOGGER_INFO(logger_, "Starting opening retries.");
@@ -350,8 +350,8 @@ InitResult SQLPTRepresentation::Init(const PolicySettings *settings) {
       LOGGER_INFO(logger_, "Attempt: " << i + 1);
 #ifdef BUILD_TESTS
       ++open_counter_;
-#endif // BUILD_TESTS
-      if (db_->Open()){
+#endif  // BUILD_TESTS
+      if (db_->Open()) {
         LOGGER_INFO(logger_, "Database opened.");
         is_opened = true;
         break;
@@ -360,9 +360,9 @@ InitResult SQLPTRepresentation::Init(const PolicySettings *settings) {
     if (!is_opened) {
       LOGGER_ERROR(logger_,
                    "Open retry sequence failed. Tried "
-                    << attempts << " attempts with "
-                    << open_attempt_timeout_ms
-                    << " open timeout(ms) for each.");
+                       << attempts << " attempts with "
+                       << open_attempt_timeout_ms
+                       << " open timeout(ms) for each.");
       return InitResult::FAIL;
     }
   }
@@ -389,7 +389,7 @@ InitResult SQLPTRepresentation::Init(const PolicySettings *settings) {
                 check_first_run.Next()) {
               LOGGER_INFO(logger_,
                           "Selecting is first run "
-                           << check_first_run.GetBoolean(0));
+                              << check_first_run.GetBoolean(0));
               if (check_first_run.GetBoolean(0)) {
                 Query set_not_first_run(db());
                 set_not_first_run.Exec(sql_pt::kSetNotFirstRun);
@@ -401,7 +401,7 @@ InitResult SQLPTRepresentation::Init(const PolicySettings *settings) {
             return InitResult::EXISTS;
           } else {
             LOGGER_ERROR(logger_,
-                          "Existing policy table representation is invlaid.");
+                         "Existing policy table representation is invlaid.");
             // TODO(PV): add handle
             return InitResult::FAIL;
           }
@@ -412,14 +412,14 @@ InitResult SQLPTRepresentation::Init(const PolicySettings *settings) {
   Query query(db());
   if (!query.Exec(sql_pt::kCreateSchema)) {
     LOGGER_ERROR(
-      logger_,
-      "Failed creating schema of database: " << query.LastError().text());
+        logger_,
+        "Failed creating schema of database: " << query.LastError().text());
     return InitResult::FAIL;
   }
   if (!query.Exec(sql_pt::kInsertInitData)) {
     LOGGER_ERROR(
-      logger_,
-      "Failed insert init data to database: " << query.LastError().text());
+        logger_,
+        "Failed insert init data to database: " << query.LastError().text());
     return InitResult::FAIL;
   }
   return InitResult::SUCCESS;
@@ -444,7 +444,7 @@ bool SQLPTRepresentation::Drop() {
   Query query(db());
   if (!query.Exec(sql_pt::kDropSchema)) {
     LOGGER_WARN(logger_,
-                 "Failed dropping database: " << query.LastError().text());
+                "Failed dropping database: " << query.LastError().text());
     return false;
   }
   return true;
@@ -463,8 +463,8 @@ bool SQLPTRepresentation::Clear() {
   }
   if (!query.Exec(sql_pt::kInsertInitData)) {
     LOGGER_ERROR(
-      logger_,
-      "Failed insert init data to database: " << query.LastError().text());
+        logger_,
+        "Failed insert init data to database: " << query.LastError().text());
     return false;
   }
   return true;
@@ -474,19 +474,19 @@ bool SQLPTRepresentation::RefreshDB() {
   Query query(db());
   if (!query.Exec(sql_pt::kDropSchema)) {
     LOGGER_WARN(logger_,
-                 "Failed dropping database: " << query.LastError().text());
+                "Failed dropping database: " << query.LastError().text());
     return false;
   }
   if (!query.Exec(sql_pt::kCreateSchema)) {
     LOGGER_ERROR(
-      logger_,
-      "Failed creating schema of database: " << query.LastError().text());
+        logger_,
+        "Failed creating schema of database: " << query.LastError().text());
     return false;
   }
   if (!query.Exec(sql_pt::kInsertInitData)) {
     LOGGER_ERROR(
-      logger_,
-      "Failed insert init data to database: " << query.LastError().text());
+        logger_,
+        "Failed insert init data to database: " << query.LastError().text());
     return false;
   }
   return true;
@@ -502,7 +502,7 @@ utils::SharedPtr<policy_table::Table> SQLPTRepresentation::GenerateSnapshot()
   GatherDeviceData(&*table->policy_table.device_data);
   GatherFunctionalGroupings(&table->policy_table.functional_groupings);
   GatherConsumerFriendlyMessages(
-    &*table->policy_table.consumer_friendly_messages);
+      &*table->policy_table.consumer_friendly_messages);
   GatherApplicationPoliciesSection(&table->policy_table.app_policies_section);
   return table;
 }
@@ -549,13 +549,13 @@ void SQLPTRepresentation::GatherModuleConfig(
   } else {
     while (notifications.Next()) {
       config->notifications_per_minute_by_priority[notifications.GetString(0)] =
-        notifications.GetInteger(1);
+          notifications.GetInteger(1);
     }
   }
   Query seconds(db());
   if (!seconds.Prepare(sql_pt::kSelectSecondsBetweenRetries)) {
     LOGGER_INFO(logger_,
-                 "Incorrect select statement from seconds between retries");
+                "Incorrect select statement from seconds between retries");
   } else {
     while (seconds.Next()) {
       config->seconds_between_retries.push_back(seconds.GetInteger(0));
@@ -722,7 +722,7 @@ bool SQLPTRepresentation::Save(const policy_table::Table& table) {
     return false;
   }
   if (!SaveConsumerFriendlyMessages(
-        *table.policy_table.consumer_friendly_messages)) {
+          *table.policy_table.consumer_friendly_messages)) {
     db_->RollbackTransaction();
     return false;
   }
@@ -813,9 +813,9 @@ bool SQLPTRepresentation::SaveRpcs(int64_t group_id,
         for (ps_it = parameters.begin(); ps_it != parameters.end(); ++ps_it) {
           query_parameter.Bind(0, it->first);
           query_parameter.Bind(
-                1, std::string(policy_table::EnumToJsonString(*hmi_it)));
+              1, std::string(policy_table::EnumToJsonString(*hmi_it)));
           query_parameter.Bind(
-                2, std::string(policy_table::EnumToJsonString(*ps_it)));
+              2, std::string(policy_table::EnumToJsonString(*ps_it)));
           query_parameter.Bind(3, group_id);
           if (!query_parameter.Exec() || !query_parameter.Reset()) {
             LOGGER_WARN(logger_, "Incorrect insert into rpc with parameter");
@@ -1091,7 +1091,7 @@ bool SQLPTRepresentation::SaveModuleConfig(
   }
 
   if (!SaveNumberOfNotificationsPerMinute(
-        config.notifications_per_minute_by_priority)) {
+          config.notifications_per_minute_by_priority)) {
     return false;
   }
 
@@ -1236,7 +1236,7 @@ bool SQLPTRepresentation::SaveSecondsBetweenRetries(
   }
   if (!query.Prepare(sql_pt::kInsertSecondsBetweenRetry)) {
     LOGGER_WARN(logger_,
-                 "Incorrect insert statement for seconds between retries.");
+                "Incorrect insert statement for seconds between retries.");
     return false;
   }
 
@@ -1257,7 +1257,7 @@ bool SQLPTRepresentation::SaveNumberOfNotificationsPerMinute(
   Query query(db());
   if (!query.Prepare(sql_pt::kInsertNotificationsByPriority)) {
     LOGGER_WARN(logger_,
-                 "Incorrect insert statement for notifications by priority.");
+                "Incorrect insert statement for notifications by priority.");
     return false;
   }
 

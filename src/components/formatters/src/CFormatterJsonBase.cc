@@ -37,7 +37,7 @@
 
 void NsSmartDeviceLink::NsJSONHandler::Formatters::CFormatterJsonBase::
     jsonValueToObj(const utils::json::JsonValueRef value,
-    NsSmartDeviceLink::NsSmartObjects::SmartObject& obj) {
+                   NsSmartDeviceLink::NsSmartObjects::SmartObject& obj) {
   using namespace utils::json;
   try {
     const ValueType::Type json_type = value.Type();

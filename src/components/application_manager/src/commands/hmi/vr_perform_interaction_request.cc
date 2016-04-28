@@ -51,4 +51,3 @@ void VRPerformInteractionRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

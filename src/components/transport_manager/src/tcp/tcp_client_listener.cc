@@ -33,7 +33,6 @@
 
 #include "transport_manager/tcp/tcp_client_listener.h"
 
-
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
@@ -90,7 +89,7 @@ void TcpClientListener::Loop() {
     LOGGER_ERROR(logger_,
                  "Failed to listen on " << address.ToString() << ":" << port_);
     return;
-}
+  }
   while (!thread_stop_requested_) {
     // Wait for the new connection
     utils::TcpSocketConnection client_connection = server_socket.Accept();
@@ -157,7 +156,7 @@ TransportAdapter::Error TcpClientListener::StartListening() {
   if (thread_->is_running()) {
     LOGGER_WARN(
         logger_,
-                 "TransportAdapter::BAD_STATE. Listener has already been started");
+        "TransportAdapter::BAD_STATE. Listener has already been started");
     return TransportAdapter::BAD_STATE;
   }
 

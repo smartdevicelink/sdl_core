@@ -32,7 +32,7 @@
 
 #include "policy/policy_table.h"
 
-#  include "policy/sql_pt_representation.h"
+#include "policy/sql_pt_representation.h"
 
 #include "utils/logger.h"
 

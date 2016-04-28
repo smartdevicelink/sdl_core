@@ -56,4 +56,3 @@ void OnVIPrndlNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

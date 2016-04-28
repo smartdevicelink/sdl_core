@@ -106,13 +106,12 @@ sqlite3* SQLDatabase::conn() const {
   return conn_;
 }
 
-
 std::string SQLDatabase::get_path() const {
   return database_path_;
 }
 
 bool SQLDatabase::Backup() {
-   return true;
+  return true;
 }
 }  // namespace dbms
 }  // namespace utils

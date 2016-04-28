@@ -56,4 +56,3 @@ void OnVISpeedNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

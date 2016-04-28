@@ -66,12 +66,12 @@ void InitLogger() {
               true);  // DEINIT_LOGGER will be called in test_main.cc
 }
 
-void CreateDeleteAutoTrace(const std::string & testlog) {
+void CreateDeleteAutoTrace(const std::string& testlog) {
   LOGGER_AUTO_TRACE(logger_);
   LOGGER_DEBUG(logger_, testlog);
 }
 
-bool CheckAutoTraceDebugInFile(const std::string & testlog) {
+bool CheckAutoTraceDebugInFile(const std::string& testlog) {
   bool isLogFound = false;
   std::string line;
 

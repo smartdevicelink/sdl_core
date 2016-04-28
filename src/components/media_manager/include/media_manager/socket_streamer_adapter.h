@@ -68,7 +68,7 @@ class SocketStreamerAdapter : public StreamerAdapter {
 
     utils::TcpServerSocket server_socket_;
     utils::TcpSocketConnection client_socket_;
-    bool        is_first_frame_;
+    bool is_first_frame_;
   };
 };
 

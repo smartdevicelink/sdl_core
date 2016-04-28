@@ -48,7 +48,7 @@ void AddStatisticsInfoNotification::Run() {
   LOGGER_AUTO_TRACE(logger_);
 
   int type = (*message_)[strings::msg_params][hmi_notification::statistic_type]
-      .asInt();
+                 .asInt();
 
   application_manager_.GetPolicyHandler().AddStatisticsInfo(type);
 }
@@ -56,4 +56,3 @@ void AddStatisticsInfoNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

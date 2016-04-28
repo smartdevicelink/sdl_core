@@ -50,13 +50,13 @@ std::string utils::ReplaceString(std::string str,
                                  const std::string& to) {
   ReplaceStringInPlace(str, from, to);
   return str;
-  }
+}
 std::string utils::Trim(const std::string& value,
                         const std::string& whitespace) {
   const std::size_t begin = value.find_first_not_of(whitespace);
   if (begin == std::string::npos) {
     return "";
-}
+  }
 
   const std::size_t end = value.find_last_not_of(whitespace);
   const std::size_t range = end - begin + 1;

@@ -45,29 +45,29 @@
 namespace media_manager {
 
 class FromMicToFileRecorderThread : public threads::ThreadDelegate {
-  public:
+ public:
   FromMicToFileRecorderThread(const std::string& output_file, int32_t duration);
-    ~FromMicToFileRecorderThread();
-    void threadMain();
+  ~FromMicToFileRecorderThread();
+  void threadMain();
 
-    void exitThreadMain();
+  void exitThreadMain();
 
   void setRecordDuration(int32_t duration);
 
   void onFromMicToFileRecorderThreadSuspned();
 
-  private:
+ private:
   class Impl;
   Impl* impl_;
 
-    void psleep(void* timeout);
+  void psleep(void* timeout);
 
   std::string output_file_name_;
 
   typedef utils::SharedPtr<timer::Timer> FromMicToFileRecorderThreadPtr;
   FromMicToFileRecorderThreadPtr sleep_thread_;
 
-    DISALLOW_COPY_AND_ASSIGN(FromMicToFileRecorderThread);
+  DISALLOW_COPY_AND_ASSIGN(FromMicToFileRecorderThread);
 };
 
 }  // namespace media_manager

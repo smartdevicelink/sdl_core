@@ -36,7 +36,7 @@
 #ifdef ENABLE_LOG
 #include <cerrno>
 #include <string>
-  #include <sstream>
+#include <sstream>
 
 #if defined(LOG4CXX_LOGGER)
 #include <log4cxx/logger.h>
@@ -141,10 +141,10 @@ class Logger {
 #endif
 
 #undef CREATE_LOGGERPTR_GLOBAL
-    #define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name) \
-      namespace { \
-        CREATE_LOGGERPTR_LOCAL(logger_var, logger_name); \
-      }
+#define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name) \
+  namespace {                                            \
+  CREATE_LOGGERPTR_LOCAL(logger_var, logger_name);       \
+  }
 
 #undef LOG_WITH_LEVEL
 #define LOG_WITH_LEVEL(logger_var, level, message, line)    \
@@ -245,7 +245,7 @@ class AutoTrace {
 #define GET_LOGGER()
 
 #undef CREATE_LOGGERPTR_LOCAL
-    #define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name)
+#define CREATE_LOGGERPTR_LOCAL(logger_var, logger_name)
 
 #undef CREATE_LOGGERPTR_GLOBAL
 #define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name)

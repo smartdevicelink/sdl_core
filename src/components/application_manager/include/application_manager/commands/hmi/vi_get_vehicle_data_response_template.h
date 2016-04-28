@@ -43,7 +43,7 @@ namespace commands {
 /**
  * @brief VIGetVehicleDataResponseTemplate command class
  **/
-template<event_engine::Event::EventID eventID>
+template <event_engine::Event::EventID eventID>
 class VIGetVehicleDataResponseTemplate : public ResponseFromHMI {
  public:
   /**

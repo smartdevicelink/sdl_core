@@ -60,8 +60,7 @@ typedef CRITICAL_SECTION PlatformMutex;
 #else
 #error "Lock is not defined for this platform"
 #endif
-} // namespace impl
-
+}  // namespace impl
 
 class SpinMutex {
  public:
@@ -74,7 +73,7 @@ class SpinMutex {
 #endif
       return;
     }
-    for(;;) {
+    for (;;) {
 #if defined(OS_POSIX)
       sched_yield();
 #elif defined(WIN_NATIVE)
@@ -95,6 +94,7 @@ class SpinMutex {
     state_ = 0;
   }
   ~SpinMutex() {}
+
  private:
 #ifdef QT_PORT
   QAtomicInteger<unsigned int> state_;
@@ -173,6 +173,7 @@ class AutoLock {
   ~AutoLock() {
     lock_.Release();
   }
+
  private:
   Lock& GetLock() {
     return lock_;
@@ -194,6 +195,7 @@ class AutoUnlock {
   ~AutoUnlock() {
     lock_.Acquire();
   }
+
  private:
   Lock& lock_;
 

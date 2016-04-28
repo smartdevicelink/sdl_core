@@ -115,8 +115,8 @@ void PerformInteractionRequest::Run() {
   if ((mobile_apis::InteractionMode::VR_ONLY == interaction_mode_) &&
       (mobile_apis::LayoutMode::KEYBOARD == interaction_layout)) {
     LOGGER_ERROR(logger_,
-                  "PerformInteraction contains InteractionMode"
-                  "=VR_ONLY and interactionLayout=KEYBOARD");
+                 "PerformInteraction contains InteractionMode"
+                 "=VR_ONLY and interactionLayout=KEYBOARD");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -128,16 +128,16 @@ void PerformInteractionRequest::Run() {
     if (mobile_apis::LayoutMode::KEYBOARD == interaction_layout) {
       if (mobile_apis::InteractionMode::BOTH == interaction_mode_) {
         LOGGER_ERROR(logger_,
-                      "interactionChoiceSetIDList is empty,"
-                      " InteractionMode=BOTH and"
-                      " interactionLayout=KEYBOARD");
+                     "interactionChoiceSetIDList is empty,"
+                     " InteractionMode=BOTH and"
+                     " interactionLayout=KEYBOARD");
         SendResponse(false, mobile_apis::Result::INVALID_DATA);
         return;
       }
     } else {
       LOGGER_ERROR(logger_,
-                    "interactionChoiceSetIDList is empty"
-                    " and interactionLayout!=KEYBOARD");
+                   "interactionChoiceSetIDList is empty"
+                   " and interactionLayout!=KEYBOARD");
       SendResponse(false, mobile_apis::Result::INVALID_DATA);
       return;
     }
@@ -147,11 +147,10 @@ void PerformInteractionRequest::Run() {
       (!CheckChoiceIDFromRequest(
            app,
            choice_set_id_list_length,
-          msg_params[strings::interaction_choice_set_id_list]))) {
-
+           msg_params[strings::interaction_choice_set_id_list]))) {
     LOGGER_ERROR(logger_,
                  "PerformInteraction has choice sets with "
-        "duplicated IDs or application does not have choice sets");
+                 "duplicated IDs or application does not have choice sets");
     SendResponse(false, mobile_apis::Result::INVALID_ID);
     return;
   }
@@ -161,7 +160,7 @@ void PerformInteractionRequest::Run() {
         MessageHelper::VerifyImageVrHelpItems(
             msg_params[strings::vr_help], app, application_manager_)) {
       LOGGER_ERROR(logger_,
-                    "Verification of " << strings::vr_help << " failed.");
+                   "Verification of " << strings::vr_help << " failed.");
       SendResponse(false, mobile_apis::Result::INVALID_DATA);
       return;
     }
@@ -169,7 +168,7 @@ void PerformInteractionRequest::Run() {
 
   if (IsWhiteSpaceExist()) {
     LOGGER_ERROR(logger_,
-                  "Incoming perform interaction has contains \t\n \\t \\n");
+                 "Incoming perform interaction has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -231,7 +230,7 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
       unsubscribe_from_event(hmi_apis::FunctionID::UI_PerformInteraction);
       ui_resultCode_ =
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
-          message[strings::params][hmi_response::code].asUInt()));
+              message[strings::params][hmi_response::code].asUInt()));
       ProcessPerformInteractionResponse(event.smart_object(), msg_param);
       break;
     }
@@ -241,7 +240,7 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
       unsubscribe_from_event(hmi_apis::FunctionID::VR_PerformInteraction);
       vr_resultCode_ =
           GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
-          message[strings::params][hmi_response::code].asUInt()));
+              message[strings::params][hmi_response::code].asUInt()));
       ProcessVRResponse(event.smart_object(), msg_param);
       break;
     }
@@ -331,8 +330,8 @@ void PerformInteractionRequest::ProcessVRResponse(
   if (SUCCESS == vr_resultCode_ &&
       InteractionMode::MANUAL_ONLY == interaction_mode_) {
     LOGGER_DEBUG(logger_,
-                  "VR response SUCCESS in MANUAL_ONLY mode "
-                      << "Wait for UI response");
+                 "VR response SUCCESS in MANUAL_ONLY mode "
+                     << "Wait for UI response");
     // in case MANUAL_ONLY mode VR.PI SUCCESS just return
     return;
   }
@@ -377,10 +376,10 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
   }
 
   ui_result_ = Compare<mobile_api::Result::eType, EQ, ONE>(
-        ui_resultCode_,
-        mobile_apis::Result::SUCCESS,
-        mobile_apis::Result::WARNINGS,
-        mobile_apis::Result::UNSUPPORTED_RESOURCE);
+      ui_resultCode_,
+      mobile_apis::Result::SUCCESS,
+      mobile_apis::Result::WARNINGS,
+      mobile_apis::Result::UNSUPPORTED_RESOURCE);
 
   const bool is_pi_warning = Compare<mobile_api::Result::eType, EQ, ONE>(
       ui_resultCode_, mobile_apis::Result::WARNINGS);
@@ -845,7 +844,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
         str = (*it_vh)[strings::image][strings::value].asCharArray();
         if (!CheckSyntax(str)) {
           LOGGER_ERROR(logger_,
-                        "Invalid vr_help image value syntax check failed");
+                       "Invalid vr_help image value syntax check failed");
           return true;
         }
       }
@@ -918,8 +917,8 @@ bool PerformInteractionRequest::CheckChoiceIDFromRequest(
       if (!ins_res.second) {
         LOGGER_ERROR(logger_,
                      "Choise with ID "
-                      << choices_list[k][strings::choice_id].asInt()
-                      << " already exists");
+                         << choices_list[k][strings::choice_id].asInt()
+                         << " already exists");
         return false;
       }
     }
@@ -943,7 +942,7 @@ void PerformInteractionRequest::CheckResponseResultCode() {
     LOGGER_DEBUG(logger_, "VR had been rejected.");
     resultCode = mobile_apis::Result::REJECTED;
   } else if (mobile_apis::Result::WARNINGS == vr_resultCode_ ||
-      mobile_apis::Result::UNSUPPORTED_REQUEST == vr_resultCode_) {
+             mobile_apis::Result::UNSUPPORTED_REQUEST == vr_resultCode_) {
     LOGGER_DEBUG(logger_, "VR response WARNINGS");
     resultCode = mobile_api::Result::WARNINGS;
     result = true;
@@ -967,12 +966,12 @@ void PerformInteractionRequest::SendBothModeResponse(
       UNSUPPORTED_RESOURCE != ui_resultCode_) {
     perform_interaction_result_code = vr_resultCode_;
   } else if (UNSUPPORTED_RESOURCE == vr_resultCode_ &&
-      UNSUPPORTED_RESOURCE == ui_resultCode_) {
+             UNSUPPORTED_RESOURCE == ui_resultCode_) {
     result = false;
   }
 
   const bool is_error_code = (SUCCESS != perform_interaction_result_code ||
-      WARNINGS != perform_interaction_result_code);
+                              WARNINGS != perform_interaction_result_code);
 
   if (vr_resultCode_ == ui_resultCode_ && is_error_code) {
     result = false;

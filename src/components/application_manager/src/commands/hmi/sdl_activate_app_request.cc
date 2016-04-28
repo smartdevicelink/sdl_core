@@ -60,15 +60,15 @@ void SDLActivateAppRequest::Run() {
         "Can't find application within regular apps: " << application_id);
   }
 
-    DevicesApps devices_apps = FindAllAppOnParticularDevice(app->device());
-    if (!devices_apps.first && devices_apps.second.empty()) {
+  DevicesApps devices_apps = FindAllAppOnParticularDevice(app->device());
+  if (!devices_apps.first && devices_apps.second.empty()) {
     LOGGER_ERROR(logger_,
-                    "Can't find regular foreground app with the same "
-                    "connection id:"
-                        << app->device());
+                 "Can't find regular foreground app with the same "
+                 "connection id:"
+                     << app->device());
     SendResponse(false, correlation_id(), SDL_ActivateApp, NO_APPS_REGISTERED);
-      return;
-    }
+    return;
+  }
   if (!app->IsRegistered()) {
     if (devices_apps.first) {
       MessageHelper::SendLaunchApp(devices_apps.first->app_id(),
@@ -92,12 +92,12 @@ void SDLActivateAppRequest::Run() {
                                    app->SchemaUrl(),
                                    app->PackageName(),
                                    application_manager_);
-  } else {
-    const uint32_t application_id = app_id();
+    } else {
+      const uint32_t application_id = app_id();
       application_manager_.GetPolicyHandler().OnActivateApp(application_id,
                                                             correlation_id());
+    }
   }
-}
 }
 
 void SDLActivateAppRequest::onTimeOut() {

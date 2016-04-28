@@ -165,4 +165,3 @@ int64_t SQLQuery::LastInsertId() const {
 
 }  // namespace dbms
 }  // namespace utils
-

@@ -53,7 +53,7 @@ gboolean HandleBusMessage(GstBus* bus, GstMessage* message, gpointer data) {
 
       g_main_loop_quit(loop);
       break;
-}
+    }
     case GST_MESSAGE_ERROR: {
       gchar* debug;
       GError* error;
@@ -66,10 +66,10 @@ gboolean HandleBusMessage(GstBus* bus, GstMessage* message, gpointer data) {
 
       g_main_loop_quit(loop);
       break;
-  }
+    }
     default:
       break;
-}
+  }
 
   return true;
 }
@@ -116,7 +116,7 @@ media_manager::FromMicToFileRecorderThread::Impl::Impl(
     int32_t duration)
     : duration_(duration) {
   argc_ = 5;
-  argv_ = new gchar*[argc_];
+  argv_ = new gchar* [argc_];
 
   std::stringstream stringStream;
   stringStream << duration / 1000;
@@ -147,9 +147,9 @@ int32_t media_manager::FromMicToFileRecorderThread::Impl::getDuration() const {
 
 void media_manager::FromMicToFileRecorderThread::Impl::setShouldBeStoped(
     const bool shouldBeStoped) {
-    sync_primitives::AutoLock auto_lock(stopFlagLock_);
+  sync_primitives::AutoLock auto_lock(stopFlagLock_);
   shouldBeStoped_ = shouldBeStoped;
-  }
+}
 
 void media_manager::FromMicToFileRecorderThread::Impl::stopGstLoop() {
   if (loop) {
@@ -191,7 +191,7 @@ void media_manager::FromMicToFileRecorderThread::Impl::startGstLoop() {
                              "length of time in seconds to capture",
                              "int32_t"},
                             {NULL}};
-#ifndef GLIB_VERSION_2_32 // g_thread_init() does nothing since 2.32
+#ifndef GLIB_VERSION_2_32  // g_thread_init() does nothing since 2.32
   if (!g_thread_supported()) {
     g_thread_init(NULL);
   }
@@ -261,7 +261,7 @@ void media_manager::FromMicToFileRecorderThread::Impl::startGstLoop() {
       g_option_context_free(context);
 
       if (argv_) {
-        delete [] argv_;
+        delete[] argv_;
         argv_ = NULL;
       }
       return;
@@ -281,7 +281,7 @@ void media_manager::FromMicToFileRecorderThread::Impl::startGstLoop() {
   g_option_context_free(context);
 
   if (argv_) {
-    delete [] argv_;
+    delete[] argv_;
     argv_ = NULL;
   }
 
@@ -308,10 +308,10 @@ media_manager::FromMicToFileRecorderThread::~FromMicToFileRecorderThread() {
   LOGGER_AUTO_TRACE(logger_);
   if (sleep_thread_) {
     sleep_thread_->Stop();
-    }
+  }
   delete impl_;
   impl_ = NULL;
-  }
+}
 void media_manager::FromMicToFileRecorderThread::setRecordDuration(
     int32_t duration) {
   LOGGER_AUTO_TRACE(logger_);
@@ -327,8 +327,8 @@ void media_manager::FromMicToFileRecorderThread::threadMain() {
   // Start up a timer for the pipeline
   if (impl_->getDuration() > 0) {
     sleep_thread_->Start(impl_->getDuration(), true);
-    }
   }
+}
 
 void media_manager::FromMicToFileRecorderThread::
     onFromMicToFileRecorderThreadSuspned() {
@@ -336,7 +336,7 @@ void media_manager::FromMicToFileRecorderThread::
   impl_->stopGstLoop();
   LOGGER_TRACE(logger_, "Set should be stopped flag\n");
   impl_->setShouldBeStoped(true);
-  }
+}
 
 void media_manager::FromMicToFileRecorderThread::exitThreadMain() {
   LOGGER_AUTO_TRACE(logger_);
@@ -345,7 +345,7 @@ void media_manager::FromMicToFileRecorderThread::exitThreadMain() {
   if (sleep_thread_) {
     LOGGER_DEBUG(logger_, "Stop sleep thread\n");
     sleep_thread_->Stop();
-}
+  }
 
   LOGGER_TRACE(logger_, "Set should be stopped flag\n");
   impl_->setShouldBeStoped(true);

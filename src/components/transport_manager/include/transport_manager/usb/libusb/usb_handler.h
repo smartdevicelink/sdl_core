@@ -76,10 +76,11 @@ class UsbHandler {
   UsbTransferSequenceCallback(libusb_transfer* transfer);
 
  private:
-  class UsbHandlerDelegate: public threads::ThreadDelegate {
+  class UsbHandlerDelegate : public threads::ThreadDelegate {
    public:
     explicit UsbHandlerDelegate(UsbHandler* handler);
     void threadMain() OVERRIDE;
+
    private:
     UsbHandler* handler_;
   };

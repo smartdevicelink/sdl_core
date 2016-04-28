@@ -55,21 +55,21 @@ class MockApplication : public application_manager::Application {
   MOCK_CONST_METHOD0(mobile_app_id, std::string());
   MOCK_CONST_METHOD0(tts_name, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(ngn_media_screen_name,
-      const smart_objects::SmartObject*());
+                     const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(language, const mobile_apis::Language::eType&());
   MOCK_CONST_METHOD0(ui_language, const mobile_apis::Language::eType&());
   MOCK_METHOD1(set_app_types,
-      void(const smart_objects::SmartObject& app_types));
+               void(const smart_objects::SmartObject& app_types));
   MOCK_METHOD1(set_vr_synonyms,
-      void(const smart_objects::SmartObject& vr_synonyms));
+               void(const smart_objects::SmartObject& vr_synonyms));
   MOCK_METHOD1(set_mobile_app_id, void(const std::string& mobile_app_id));
   MOCK_METHOD1(set_tts_name, void(const smart_objects::SmartObject& tts_name));
   MOCK_METHOD1(set_ngn_media_screen_name,
-      void(const smart_objects::SmartObject& ngn_name));
+               void(const smart_objects::SmartObject& ngn_name));
   MOCK_METHOD1(set_language,
-      void(const mobile_apis::Language::eType& language));
+               void(const mobile_apis::Language::eType& language));
   MOCK_METHOD1(set_ui_language,
-      void(const mobile_apis::Language::eType& ui_language));
+               void(const mobile_apis::Language::eType& ui_language));
 
   //  DynamicApplicationData
   MOCK_CONST_METHOD0(help_prompt, const smart_objects::SmartObject*());
@@ -79,92 +79,92 @@ class MockApplication : public application_manager::Application {
   MOCK_CONST_METHOD0(tbt_state, const mobile_apis::TBTState::eType&());
   MOCK_CONST_METHOD0(show_command, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(tbt_show_command, const smart_objects::SmartObject*());
-   MOCK_CONST_METHOD0(SubscribedButtons,
-       DataAccessor<application_manager::ButtonSubscriptions>());
+  MOCK_CONST_METHOD0(SubscribedButtons,
+                     DataAccessor<application_manager::ButtonSubscriptions>());
   MOCK_CONST_METHOD0(
       SubscribedIVI,
-       DataAccessor<application_manager::VehicleInfoSubscriptions>());
+      DataAccessor<application_manager::VehicleInfoSubscriptions>());
   MOCK_CONST_METHOD0(keyboard_props, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(menu_title, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(menu_icon, const smart_objects::SmartObject*());
-   MOCK_METHOD1(load_global_properties,
-       void(const smart_objects::SmartObject& so));
-   MOCK_METHOD1(set_help_prompt,
-       void(const smart_objects::SmartObject& help_prompt));
-   MOCK_METHOD1(set_timeout_prompt,
-       void(const smart_objects::SmartObject& timeout_prompt));
-   MOCK_METHOD1(set_vr_help_title,
-       void(const smart_objects::SmartObject& vr_help_title));
+  MOCK_METHOD1(load_global_properties,
+               void(const smart_objects::SmartObject& so));
+  MOCK_METHOD1(set_help_prompt,
+               void(const smart_objects::SmartObject& help_prompt));
+  MOCK_METHOD1(set_timeout_prompt,
+               void(const smart_objects::SmartObject& timeout_prompt));
+  MOCK_METHOD1(set_vr_help_title,
+               void(const smart_objects::SmartObject& vr_help_title));
   MOCK_METHOD0(reset_vr_help_title, void());
   MOCK_METHOD1(set_vr_help, void(const smart_objects::SmartObject& vr_help));
   MOCK_METHOD0(reset_vr_help, void());
-   MOCK_METHOD1(set_tbt_state,
-       void(const mobile_apis::TBTState::eType& tbt_state));
-   MOCK_METHOD1(set_show_command,
-       void(const smart_objects::SmartObject& show_command));
-   MOCK_METHOD1(set_tbt_show_command,
-       void(const smart_objects::SmartObject& tbt_show));
-   MOCK_METHOD1(set_keyboard_props,
-       void(const smart_objects::SmartObject& keyboard_props));
-   MOCK_METHOD1(set_menu_title,
-       void(const smart_objects::SmartObject& menu_title));
-   MOCK_METHOD1(set_menu_icon,
-       void(const smart_objects::SmartObject& menu_icon));
+  MOCK_METHOD1(set_tbt_state,
+               void(const mobile_apis::TBTState::eType& tbt_state));
+  MOCK_METHOD1(set_show_command,
+               void(const smart_objects::SmartObject& show_command));
+  MOCK_METHOD1(set_tbt_show_command,
+               void(const smart_objects::SmartObject& tbt_show));
+  MOCK_METHOD1(set_keyboard_props,
+               void(const smart_objects::SmartObject& keyboard_props));
+  MOCK_METHOD1(set_menu_title,
+               void(const smart_objects::SmartObject& menu_title));
+  MOCK_METHOD1(set_menu_icon,
+               void(const smart_objects::SmartObject& menu_icon));
   MOCK_CONST_METHOD0(audio_stream_retry_number, uint32_t());
-   MOCK_METHOD1(set_audio_stream_retry_number,
-       void(const uint32_t& audio_stream_retry_number));
+  MOCK_METHOD1(set_audio_stream_retry_number,
+               void(const uint32_t& audio_stream_retry_number));
   MOCK_CONST_METHOD0(video_stream_retry_number, uint32_t());
-   MOCK_METHOD1(set_video_stream_retry_number,
-       void(const uint32_t& video_stream_retry_number));
-   MOCK_METHOD2(AddCommand,
+  MOCK_METHOD1(set_video_stream_retry_number,
+               void(const uint32_t& video_stream_retry_number));
+  MOCK_METHOD2(AddCommand,
                void(uint32_t cmd_id,
                     const smart_objects::SmartObject& command));
   MOCK_METHOD1(RemoveCommand, void(uint32_t cmd_id));
   MOCK_METHOD1(FindCommand, smart_objects::SmartObject*(uint32_t cmd_id));
-   MOCK_METHOD2(AddSubMenu,
-       void(uint32_t menu_id, const smart_objects::SmartObject& menu));
+  MOCK_METHOD2(AddSubMenu,
+               void(uint32_t menu_id, const smart_objects::SmartObject& menu));
   MOCK_METHOD1(RemoveSubMenu, void(uint32_t menu_id));
-   MOCK_CONST_METHOD1(FindSubMenu,
-       smart_objects::SmartObject*(uint32_t menu_id));
+  MOCK_CONST_METHOD1(FindSubMenu,
+                     smart_objects::SmartObject*(uint32_t menu_id));
   MOCK_METHOD1(IsSubMenuNameAlreadyExist, bool(const std::string& name));
-   MOCK_METHOD2(AddChoiceSet,
+  MOCK_METHOD2(AddChoiceSet,
                void(uint32_t choice_set_id,
                     const smart_objects::SmartObject& choice_set));
   MOCK_METHOD1(RemoveChoiceSet, void(uint32_t choice_set_id));
-   MOCK_METHOD1(FindChoiceSet,
-       smart_objects::SmartObject*(uint32_t choice_set_id));
-   MOCK_METHOD3(AddPerformInteractionChoiceSet,
+  MOCK_METHOD1(FindChoiceSet,
+               smart_objects::SmartObject*(uint32_t choice_set_id));
+  MOCK_METHOD3(AddPerformInteractionChoiceSet,
                void(uint32_t correlation_id,
                     uint32_t choice_set_id,
                     const smart_objects::SmartObject& choice_set));
-   MOCK_METHOD1(DeletePerformInteractionChoiceSet,
-       void(uint32_t correlation_id));
-   MOCK_CONST_METHOD0(performinteraction_choice_set_map,
-       DataAccessor<application_manager::PerformChoiceSetMap>());
-   MOCK_CONST_METHOD0(commands_map,
-       DataAccessor<application_manager::CommandsMap>());
-   MOCK_CONST_METHOD0(sub_menu_map,
-       DataAccessor<application_manager::SubMenuMap>());
-   MOCK_CONST_METHOD0(choice_set_map,
-       DataAccessor<application_manager::ChoiceSetMap>());
+  MOCK_METHOD1(DeletePerformInteractionChoiceSet,
+               void(uint32_t correlation_id));
+  MOCK_CONST_METHOD0(performinteraction_choice_set_map,
+                     DataAccessor<application_manager::PerformChoiceSetMap>());
+  MOCK_CONST_METHOD0(commands_map,
+                     DataAccessor<application_manager::CommandsMap>());
+  MOCK_CONST_METHOD0(sub_menu_map,
+                     DataAccessor<application_manager::SubMenuMap>());
+  MOCK_CONST_METHOD0(choice_set_map,
+                     DataAccessor<application_manager::ChoiceSetMap>());
   MOCK_METHOD1(set_perform_interaction_active, void(uint32_t active));
   MOCK_CONST_METHOD0(is_perform_interaction_active, uint32_t());
-   MOCK_METHOD1(set_perform_interaction_layout,
-       void(mobile_apis::LayoutMode::eType layout));
-   MOCK_CONST_METHOD0(perform_interaction_layout,
-       mobile_apis::LayoutMode::eType());
+  MOCK_METHOD1(set_perform_interaction_layout,
+               void(mobile_apis::LayoutMode::eType layout));
+  MOCK_CONST_METHOD0(perform_interaction_layout,
+                     mobile_apis::LayoutMode::eType());
   MOCK_METHOD1(set_perform_interaction_mode, void(int32_t mode));
   MOCK_CONST_METHOD0(perform_interaction_mode, int32_t());
   MOCK_METHOD1(set_reset_global_properties_active, void(bool active));
   MOCK_CONST_METHOD0(is_reset_global_properties_active, bool());
-// Application
+  // Application
 
   MOCK_CONST_METHOD0(active_message, const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(curHash, const std::string&());
   MOCK_METHOD0(UpdateHash, void());
   MOCK_CONST_METHOD0(is_application_data_changed, bool());
   MOCK_METHOD1(set_is_application_data_changed,
-      void(bool state_application_data));
+               void(bool state_application_data));
   MOCK_METHOD0(CloseActiveMessage, void());
   MOCK_CONST_METHOD0(IsFullscreen, bool());
   MOCK_METHOD0(ChangeSupportingAppHMIType, void());
@@ -179,17 +179,17 @@ class MockApplication : public application_manager::Application {
   MOCK_CONST_METHOD0(audio_streaming_allowed, bool());
   MOCK_METHOD1(set_audio_streaming_allowed, void(bool state));
   MOCK_METHOD1(StartStreaming,
-      void(protocol_handler::ServiceType service_type));
+               void(protocol_handler::ServiceType service_type));
   MOCK_METHOD1(StopStreamingForce,
-      void(protocol_handler::ServiceType service_type));
+               void(protocol_handler::ServiceType service_type));
   MOCK_METHOD1(StopStreaming, void(protocol_handler::ServiceType service_type));
   MOCK_METHOD1(SuspendStreaming,
-      void(protocol_handler::ServiceType service_type));
+               void(protocol_handler::ServiceType service_type));
   MOCK_METHOD1(WakeUpStreaming,
-      void(protocol_handler::ServiceType service_type));
+               void(protocol_handler::ServiceType service_type));
   MOCK_CONST_METHOD0(is_voice_communication_supported, bool());
   MOCK_METHOD1(set_voice_communication_supported,
-      void(bool is_voice_communication_supported));
+               void(bool is_voice_communication_supported));
   MOCK_CONST_METHOD0(app_allowed, bool());
   MOCK_CONST_METHOD0(has_been_activated, bool());
   MOCK_METHOD1(set_activated, bool(bool is_active));
@@ -209,7 +209,7 @@ class MockApplication : public application_manager::Application {
   MOCK_CONST_METHOD0(list_files_in_none_count, const uint32_t());
   MOCK_CONST_METHOD0(system_context, const mobile_apis::SystemContext::eType());
   MOCK_CONST_METHOD0(audio_streaming_state,
-      const mobile_apis::AudioStreamingState::eType());
+                     const mobile_apis::AudioStreamingState::eType());
   MOCK_CONST_METHOD0(app_icon_path, const std::string&());
   MOCK_CONST_METHOD0(device, connection_handler::DeviceHandle());
   MOCK_METHOD1(set_tts_properties_in_none, void(bool active));
@@ -241,11 +241,11 @@ class MockApplication : public application_manager::Application {
       GetFile,
       const application_manager::AppFile*(const std::string& file_name));
   MOCK_METHOD1(SubscribeToButton,
-      bool(mobile_apis::ButtonName::eType btn_name));
+               bool(mobile_apis::ButtonName::eType btn_name));
   MOCK_METHOD1(IsSubscribedToButton,
-      bool(mobile_apis::ButtonName::eType btn_name));
+               bool(mobile_apis::ButtonName::eType btn_name));
   MOCK_METHOD1(UnsubscribeFromButton,
-      bool(mobile_apis::ButtonName::eType btn_name));
+               bool(mobile_apis::ButtonName::eType btn_name));
   MOCK_METHOD1(SubscribeToIVI, bool(uint32_t vehicle_info_type));
   MOCK_CONST_METHOD1(IsSubscribedToIVI, bool(uint32_t vehicle_info_type));
   MOCK_METHOD1(UnsubscribeFromIVI, bool(uint32_t vehicle_info_type));
@@ -259,11 +259,11 @@ class MockApplication : public application_manager::Application {
   MOCK_METHOD0(RemovePostponedState, void());
   MOCK_METHOD1(AddHMIState, void(application_manager::HmiStatePtr state));
   MOCK_METHOD1(RemoveHMIState,
-      void(application_manager::HmiState::StateID state_id));
+               void(application_manager::HmiState::StateID state_id));
   MOCK_CONST_METHOD0(CurrentHmiState, const application_manager::HmiStatePtr());
   MOCK_CONST_METHOD0(RegularHmiState, const application_manager::HmiStatePtr());
   MOCK_CONST_METHOD0(PostponedHmiState,
-      const application_manager::HmiStatePtr());
+                     const application_manager::HmiStatePtr());
   MOCK_METHOD2(SubscribeToSoftButtons,
                void(int32_t cmd_id,
                     const application_manager::SoftButtonID& softbuttons_id));

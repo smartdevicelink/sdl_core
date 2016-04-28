@@ -59,9 +59,9 @@
 namespace transport_manager {
 
 typedef threads::MessageLoopThread<std::queue<protocol_handler::RawMessagePtr> >
-  RawMessageLoopThread;
+    RawMessageLoopThread;
 typedef threads::MessageLoopThread<std::queue<TransportAdapterEvent> >
-  TransportAdapterEventLoopThread;
+    TransportAdapterEventLoopThread;
 typedef utils::SharedPtr<timer::Timer> TimerSPtr;
 
 /**
@@ -87,7 +87,7 @@ class TransportManagerImpl
   /**
    * @brief Structure that contains internal connection parameters
    */
-  struct ConnectionInternal: public Connection {
+  struct ConnectionInternal : public Connection {
     TransportManagerImpl* transport_manager;
     TransportAdapter* transport_adapter;
     TimerSPtr timer;
@@ -104,6 +104,7 @@ class TransportManagerImpl
 
     void DisconnectFailedRoutine();
   };
+
  public:
   /**
    * @brief Constructor.
@@ -120,7 +121,7 @@ class TransportManagerImpl
    *
    * @return Code error.
    */
-  int Init(resumption::LastState &last_state) OVERRIDE;
+  int Init(resumption::LastState& last_state) OVERRIDE;
 
   /**
    * Reinitializes transport manager
@@ -242,13 +243,13 @@ class TransportManagerImpl
   void SetTelemetryObserver(TMTelemetryObserver* observer);
 #endif  // TELEMETRY_MONITOR
 
-
   /**
    * @brief Constructor.
    **/
   TransportManagerImpl();
 
   const TransportManagerSettings& get_settings() const;
+
  protected:
 #if defined(SDL_CPP11)
   template <class Proc, class... Args>
@@ -366,14 +367,14 @@ class TransportManagerImpl
 
     DeviceHandle UidToHandle(const DeviceUID& dev_uid, bool& is_new) {
       {
-      sync_primitives::AutoReadLock lock(conversion_table_lock);
-      ConversionTable::iterator it = std::find(
-          conversion_table_.begin(), conversion_table_.end(), dev_uid);
-      if (it != conversion_table_.end()) {
-        is_new = false;
-        return std::distance(conversion_table_.begin(), it) +
-               1;  // handle begin since 1 (one)
-      }
+        sync_primitives::AutoReadLock lock(conversion_table_lock);
+        ConversionTable::iterator it = std::find(
+            conversion_table_.begin(), conversion_table_.end(), dev_uid);
+        if (it != conversion_table_.end()) {
+          is_new = false;
+          return std::distance(conversion_table_.begin(), it) +
+                 1;  // handle begin since 1 (one)
+        }
       }
       is_new = true;
       sync_primitives::AutoWriteLock lock(conversion_table_lock);
@@ -415,7 +416,7 @@ class TransportManagerImpl
 
   const TransportManagerSettings& settings_;
   typedef std::vector<std::pair<const TransportAdapter*, DeviceInfo> >
-  DeviceInfoList;
+      DeviceInfoList;
   sync_primitives::RWLock device_list_lock_;
   DeviceInfoList device_list_;
 
@@ -435,7 +436,7 @@ class TransportManagerImpl
                     unsigned int data_size,
                     unsigned int& frame_size);
   bool GetFrame(std::map<ConnectionUID,
-                std::pair<unsigned int, unsigned char*> >& container,
+                         std::pair<unsigned int, unsigned char*> >& container,
                 ConnectionUID id,
                 unsigned int frame_size,
                 unsigned char** frame);

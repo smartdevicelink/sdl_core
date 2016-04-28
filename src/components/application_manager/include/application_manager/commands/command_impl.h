@@ -140,7 +140,7 @@ class CommandImpl : public Command {
   // members
   static const int32_t hmi_protocol_type_;
   static const int32_t mobile_protocol_type_;
-  static const int32_t protocol_version_;  
+  static const int32_t protocol_version_;
 
  protected:
   /**
@@ -166,7 +166,7 @@ class CommandImpl : public Command {
 #elif defined(OS_WINDOWS)
   static std::string logger_;
 #endif
-#endif // ENABLE_LOG
+#endif  // ENABLE_LOG
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandImpl);

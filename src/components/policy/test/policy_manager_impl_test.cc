@@ -115,14 +115,14 @@ class PolicyManagerImplTest : public ::testing::Test {
   }
 
   ::testing::AssertionResult IsValid(const policy_table::Table& table) {
-     if (table.is_valid()) {
-       return ::testing::AssertionSuccess();
-     } else {
-       ::rpc::ValidationReport report(" - table");
-       table.ReportErrors(&report);
-       return ::testing::AssertionFailure() << ::rpc::PrettyFormat(report);
-     }
-   }
+    if (table.is_valid()) {
+      return ::testing::AssertionSuccess();
+    } else {
+      ::rpc::ValidationReport report(" - table");
+      table.ReportErrors(&report);
+      return ::testing::AssertionFailure() << ::rpc::PrettyFormat(report);
+    }
+  }
 };
 
 class PolicyManagerImplTest2 : public ::testing::Test {
@@ -318,89 +318,89 @@ class PolicyManagerImplTest2 : public ::testing::Test {
 
 Json::Value CreatePTforLoad() {
   const std::string load_table(
-  "{"
-  "\"policy_table\": {"
+      "{"
+      "\"policy_table\": {"
       "\"module_config\": {"
-          "\"preloaded_pt\": true,"
-          "\"exchange_after_x_ignition_cycles\": 10,"
-          "\"exchange_after_x_kilometers\": 100,"
-          "\"exchange_after_x_days\": 5,"
-          "\"timeout_after_x_seconds\": 500,"
-          "\"seconds_between_retries\": [10, 20, 30],"
-          "\"endpoints\": {"
-              "\"0x00\": {"
-                  "\"default\": [\"http://ford.com/cloud/default\"]"
-               "}"
-           "},"
-          "\"notifications_per_minute_by_priority\": {"
-              "\"emergency\": 1,"
-              "\"navigation\": 2,"
-              "\"VOICECOMM\": 3,"
-              "\"communication\": 4,"
-              "\"normal\": 5,"
-              "\"none\": 6"
-           "},"
-          "\"vehicle_make\" : \"MakeT\","
-          "\"vehicle_model\" : \"ModelT\","
-          "\"vehicle_year\": \"2014\""
-       "},"
-      "\"app_policies\": {"
-          "\"default\": {"
-              "\"memory_kb\": 50,"
-              "\"heart_beat_timeout_ms\": 100,"
-              "\"groups\": [\"default\"],"
-              "\"keep_context\": true,"
-              "\"steal_focus\": true,"
-              "\"priority\": \"EMERGENCY\","
-              "\"default_hmi\": \"FULL\","
-              "\"certificate\": \"sign\""
-           "},   "
-          "\"pre_DataConsent\": {"
-              "\"memory_kb\": 50,"
-              "\"heart_beat_timeout_ms\": 100,"
-              "\"groups\": [\"default\"],"
-              "\"keep_context\": true,"
-              "\"steal_focus\": true,"
-              "\"priority\": \"EMERGENCY\","
-              "\"default_hmi\": \"FULL\","
-              "\"certificate\": \"sign\""
-           "},         "
-          "\"device\": {"
-              "\"memory_kb\": 50,"
-              "\"heart_beat_timeout_ms\": 100,"
-              "\"groups\": [\"default\"],"
-              "\"keep_context\": true,"
-              "\"steal_focus\": true,"
-              "\"priority\": \"EMERGENCY\","
-              "\"default_hmi\": \"FULL\","
-              "\"certificate\": \"sign\""
-           "},"
-          "\"1234\": {"
-              "\"memory_kb\": 50,"
-              "\"heart_beat_timeout_ms\": 100,"
-              "\"groups\": [\"default\"],"
-              "\"keep_context\": true,"
-              "\"steal_focus\": true,"
-              "\"priority\": \"EMERGENCY\","
-              "\"default_hmi\": \"FULL\","
-              "\"certificate\": \"sign\""
-           "}"
-       "},"
-      "\"consumer_friendly_messages\": {"
-          "\"version\": \"1.2\""
-       "},"
-      "\"functional_groupings\": {"
-          "\"default\": {"
-              "\"rpcs\": {"
-                  "\"Update\": {"
-                      "\"hmi_levels\": [\"FULL\"],"
-                      "\"parameters\" : [\"speed\"]"
-                  "}"
-              "}"
-          "}"
+      "\"preloaded_pt\": true,"
+      "\"exchange_after_x_ignition_cycles\": 10,"
+      "\"exchange_after_x_kilometers\": 100,"
+      "\"exchange_after_x_days\": 5,"
+      "\"timeout_after_x_seconds\": 500,"
+      "\"seconds_between_retries\": [10, 20, 30],"
+      "\"endpoints\": {"
+      "\"0x00\": {"
+      "\"default\": [\"http://ford.com/cloud/default\"]"
       "}"
-    "}"
-  "}");
+      "},"
+      "\"notifications_per_minute_by_priority\": {"
+      "\"emergency\": 1,"
+      "\"navigation\": 2,"
+      "\"VOICECOMM\": 3,"
+      "\"communication\": 4,"
+      "\"normal\": 5,"
+      "\"none\": 6"
+      "},"
+      "\"vehicle_make\" : \"MakeT\","
+      "\"vehicle_model\" : \"ModelT\","
+      "\"vehicle_year\": \"2014\""
+      "},"
+      "\"app_policies\": {"
+      "\"default\": {"
+      "\"memory_kb\": 50,"
+      "\"heart_beat_timeout_ms\": 100,"
+      "\"groups\": [\"default\"],"
+      "\"keep_context\": true,"
+      "\"steal_focus\": true,"
+      "\"priority\": \"EMERGENCY\","
+      "\"default_hmi\": \"FULL\","
+      "\"certificate\": \"sign\""
+      "},   "
+      "\"pre_DataConsent\": {"
+      "\"memory_kb\": 50,"
+      "\"heart_beat_timeout_ms\": 100,"
+      "\"groups\": [\"default\"],"
+      "\"keep_context\": true,"
+      "\"steal_focus\": true,"
+      "\"priority\": \"EMERGENCY\","
+      "\"default_hmi\": \"FULL\","
+      "\"certificate\": \"sign\""
+      "},         "
+      "\"device\": {"
+      "\"memory_kb\": 50,"
+      "\"heart_beat_timeout_ms\": 100,"
+      "\"groups\": [\"default\"],"
+      "\"keep_context\": true,"
+      "\"steal_focus\": true,"
+      "\"priority\": \"EMERGENCY\","
+      "\"default_hmi\": \"FULL\","
+      "\"certificate\": \"sign\""
+      "},"
+      "\"1234\": {"
+      "\"memory_kb\": 50,"
+      "\"heart_beat_timeout_ms\": 100,"
+      "\"groups\": [\"default\"],"
+      "\"keep_context\": true,"
+      "\"steal_focus\": true,"
+      "\"priority\": \"EMERGENCY\","
+      "\"default_hmi\": \"FULL\","
+      "\"certificate\": \"sign\""
+      "}"
+      "},"
+      "\"consumer_friendly_messages\": {"
+      "\"version\": \"1.2\""
+      "},"
+      "\"functional_groupings\": {"
+      "\"default\": {"
+      "\"rpcs\": {"
+      "\"Update\": {"
+      "\"hmi_levels\": [\"FULL\"],"
+      "\"parameters\" : [\"speed\"]"
+      "}"
+      "}"
+      "}"
+      "}"
+      "}"
+      "}");
   Json::Value table(Json::objectValue);
   Json::Reader reader;
   EXPECT_TRUE(reader.parse(load_table, table));
@@ -417,7 +417,7 @@ TEST_F(PolicyManagerImplTest, GetNotificationsNumber) {
 }
 
 TEST_F(PolicyManagerImplTest2, GetNotificationsNumberAfterPTUpdate) {
-  // Arrange  
+  // Arrange
   Json::Value table = CreatePTforLoad();
   policy_table::Table update(&table);
   update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);

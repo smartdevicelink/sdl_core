@@ -76,7 +76,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
   static DBMS* dbms;
   static SQLPTRepresentation* reps;
   static const std::string kDatabaseName;
-  //Gtest can show message that this object doesn't destroyed
+  // Gtest can show message that this object doesn't destroyed
   static std::auto_ptr<policy_handler_test::MockPolicySettings>
       policy_settings_;
 
@@ -87,7 +87,7 @@ class SQLPTRepresentationTest : public SQLPTRepresentation,
     reps = new SQLPTRepresentation;
     dbms = new DBMS(kDatabaseName);
     policy_settings_ = std::auto_ptr<policy_handler_test::MockPolicySettings>(
-          new policy_handler_test::MockPolicySettings());
+        new policy_handler_test::MockPolicySettings());
     ON_CALL(*policy_settings_, app_storage_folder())
         .WillByDefault(ReturnRef(kAppStorageFolder));
     EXPECT_EQ(::policy::SUCCESS, reps->Init(policy_settings_.get()));
@@ -337,8 +337,8 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
  protected:
   SQLPTRepresentationTest2()
       : kAppStorageFolder("storage123")
-                               , kOpenAttemptTimeoutMs(700u)
-                               , kAttemptsToOpenPolicyDB(8u){}
+      , kOpenAttemptTimeoutMs(700u)
+      , kAttemptsToOpenPolicyDB(8u) {}
 
   void SetUp() OVERRIDE {
     file_system::CreateDirectory(kAppStorageFolder);
@@ -353,7 +353,7 @@ class SQLPTRepresentationTest2 : public ::testing::Test {
   }
 
   void TearDown() OVERRIDE {
-    file_system::RemoveDirectory(kAppStorageFolder,true);
+    file_system::RemoveDirectory(kAppStorageFolder, true);
     delete reps;
   }
 
@@ -1425,7 +1425,7 @@ TEST_F(SQLPTRepresentationTest,
 TEST(SQLPTRepresentationTest3, RemoveDB_RemoveDB_ExpectFileDeleted) {
   // Arrange
   policy_handler_test::MockPolicySettings policy_settings_;
-  SQLPTRepresentation* reps = new SQLPTRepresentation;  
+  SQLPTRepresentation* reps = new SQLPTRepresentation;
   EXPECT_EQ(::policy::SUCCESS, reps->Init(&policy_settings_));
   EXPECT_EQ(::policy::EXISTS, reps->Init(&policy_settings_));
   std::string path = (reps->db())->get_path();
@@ -1446,7 +1446,7 @@ TEST_F(SQLPTRepresentationTest,
   update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
 
   // Assert
-  //ASSERT_TRUE(IsValid(update));
+  // ASSERT_TRUE(IsValid(update));
   ASSERT_TRUE(reps->Save(update));
 
   // Act
@@ -1526,7 +1526,7 @@ TEST_F(SQLPTRepresentationTest, Save_SetPolicyTableThenSave_ExpectSavedToPT) {
   policy_table::UsageAndErrorCounts counts;
   GatherUsageAndErrorCounts(&counts);
   EXPECT_EQ(0u, counts.app_level->size());
-  //ASSERT_TRUE(IsValid(update));
+  // ASSERT_TRUE(IsValid(update));
   // Act
   ASSERT_TRUE(reps->Save(update));
 

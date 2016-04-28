@@ -100,4 +100,3 @@ void OnVRCommandNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

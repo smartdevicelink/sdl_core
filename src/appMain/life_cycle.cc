@@ -139,9 +139,8 @@ bool LifeCycle::StartComponents() {
   DCHECK(!hmi_handler_);
   hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(profile_);
 
-  media_manager_ = new media_manager::MediaManagerImpl(*app_manager_,
-                                                       *protocol_handler_,
-                                                       profile_);
+  media_manager_ = new media_manager::MediaManagerImpl(
+      *app_manager_, *protocol_handler_, profile_);
   if (!app_manager_->Init(*last_state_, media_manager_)) {
     LOGGER_ERROR(logger_, "Application manager init failed.");
     return false;
@@ -150,7 +149,7 @@ bool LifeCycle::StartComponents() {
 #ifdef ENABLE_SECURITY
   security_manager_ = new security_manager::SecurityManagerImpl();
   crypto_manager_ = new security_manager::CryptoManagerImpl(
-        utils::MakeShared<security_manager::CryptoManagerSettingsImpl>(
+      utils::MakeShared<security_manager::CryptoManagerSettingsImpl>(
           profile_, app_manager_->GetPolicyHandler().RetrieveCertificate()));
   protocol_handler_->AddProtocolObserver(security_manager_);
   protocol_handler_->set_security_manager(security_manager_);
@@ -426,12 +425,12 @@ void LifeCycle::StopComponents() {
 #ifdef MESSAGEBROKER_HMIADAPTER
   if (mb_adapter_) {
     DCHECK_OR_RETURN_VOID(hmi_handler_);
-  hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
-  mb_adapter_->unregisterController();
-  mb_adapter_->exitReceivingThread();
+    hmi_handler_->RemoveHMIMessageAdapter(mb_adapter_);
+    mb_adapter_->unregisterController();
+    mb_adapter_->exitReceivingThread();
     StopThread(mb_adapter_thread_);
-  delete mb_adapter_;
-  mb_adapter_ = NULL;
+    delete mb_adapter_;
+    mb_adapter_ = NULL;
   }
 
   DCHECK_OR_RETURN_VOID(hmi_handler_);

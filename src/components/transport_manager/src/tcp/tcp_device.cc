@@ -33,12 +33,10 @@
 #include "transport_manager/tcp/tcp_device.h"
 #include "utils/logger.h"
 
-
 namespace transport_manager {
 namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
-
 
 TcpDevice::TcpDevice(const utils::HostAddress& address, const std::string& name)
     : Device(name, name)

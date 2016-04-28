@@ -482,8 +482,7 @@ void SystemRequest::Run() {
   }
 
   std::string file_dst_path = file_system::ConcatPath(
-      application_manager_.get_settings().system_files_path(),
-      file_name);
+      application_manager_.get_settings().system_files_path(), file_name);
 
   if ((*message_)[strings::params].keyExists(strings::binary_data)) {
     LOGGER_DEBUG(
@@ -501,9 +500,9 @@ void SystemRequest::Run() {
     app_full_file_path += file_name;
 
     LOGGER_DEBUG(logger_,
-                  "Binary data is not present. Trying to find file "
+                 "Binary data is not present. Trying to find file "
                      << file_name << " within previously saved app file in "
-                      << binary_data_folder);
+                     << binary_data_folder);
 
     const AppFile* file = application->GetFile(app_full_file_path);
     if (!file || !file->is_download_complete ||

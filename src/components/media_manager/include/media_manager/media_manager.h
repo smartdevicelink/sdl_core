@@ -39,26 +39,25 @@
 namespace media_manager {
 
 class MediaManager {
-  public:
-
-    virtual void StartMicrophoneRecording(int32_t application_key,
-                                          const std::string& outputFileName,
-                                          int32_t duration) = 0;
-    virtual void StopMicrophoneRecording(int32_t application_key) = 0;
+ public:
+  virtual void StartMicrophoneRecording(int32_t application_key,
+                                        const std::string& outputFileName,
+                                        int32_t duration) = 0;
+  virtual void StopMicrophoneRecording(int32_t application_key) = 0;
 
   virtual void StartStreaming(int32_t application_key,
                               protocol_handler::ServiceType service_type) = 0;
   virtual void StopStreaming(int32_t application_key,
                              protocol_handler::ServiceType service_type) = 0;
-    virtual void FramesProcessed(int32_t application_key,
-                                 int32_t frame_number) = 0;
-    /**
-     * \brief Media manager settings getter
-     * \return pointer to media manager settings class
-     */
-    virtual const MediaManagerSettings& settings() const = 0;
+  virtual void FramesProcessed(int32_t application_key,
+                               int32_t frame_number) = 0;
+  /**
+   * \brief Media manager settings getter
+   * \return pointer to media manager settings class
+   */
+  virtual const MediaManagerSettings& settings() const = 0;
 
-    virtual ~MediaManager(){}
+  virtual ~MediaManager() {}
 };
 
 }  // namespace media_manager

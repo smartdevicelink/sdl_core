@@ -56,4 +56,3 @@ void OnVISteeringWheelAngleNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

@@ -83,7 +83,6 @@ class LogMessageHandler : public LogMessageLoopThreadTemplate::Handler {
 };
 
 class LogMessageLoopThread : public LogMessageLoopThreadTemplate {
-
  public:
   LogMessageLoopThread()
       : LogMessageLoopThreadTemplate("Logger", new LogMessageHandler()) {}
@@ -91,7 +90,7 @@ class LogMessageLoopThread : public LogMessageLoopThreadTemplate {
   ~LogMessageLoopThread() {}
 
  private:
-DISALLOW_COPY_AND_ASSIGN(LogMessageLoopThread);
+  DISALLOW_COPY_AND_ASSIGN(LogMessageLoopThread);
 };
 
 }  // namespace logger

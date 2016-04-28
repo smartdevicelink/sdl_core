@@ -62,7 +62,6 @@ typedef std::vector<uint8_t> RfcommChannelVector;
  */
 class BluetoothDevice : public Device {
  public:
-
 #if defined(OS_WINDOWS)
 #define BLUETOOTH_ADDR_INFO BLUETOOTH_DEVICE_INFO
 #else

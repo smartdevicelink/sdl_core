@@ -54,7 +54,7 @@ void RegisterAppInterfaceResponse::Run() {
       (*message_)[strings::msg_params].keyExists(strings::result_code)) {
     result_code = static_cast<mobile_apis::Result::eType>(
         (*message_)[strings::msg_params][strings::result_code].asInt());
-    if (result_code ==  mobile_apis::Result::APPLICATION_REGISTERED_ALREADY) {
+    if (result_code == mobile_apis::Result::APPLICATION_REGISTERED_ALREADY) {
       last_message = false;
     }
   }

@@ -49,7 +49,6 @@ namespace Formatters {
  */
 class CFormatterJsonSDLRPCv2 : public CFormatterJsonBase {
  private:
-
   /**
    * @brief Hidden constructor.
    *
@@ -65,7 +64,6 @@ class CFormatterJsonSDLRPCv2 : public CFormatterJsonBase {
   CFormatterJsonSDLRPCv2(const CFormatterJsonSDLRPCv2&);
 
  public:
-
   typedef NsSmartDeviceLink::NsJSONHandler::Formatters::
       meta_formatter_error_code::tMetaFormatterErrorCode
           tMetaFormatterErrorCode;
@@ -78,7 +76,7 @@ class CFormatterJsonSDLRPCv2 : public CFormatterJsonBase {
    * @return true if success, false otherwise
    */
   static bool toString(
-      const NsSmartDeviceLink::NsSmartObjects::SmartObject &obj,
+      const NsSmartDeviceLink::NsSmartObjects::SmartObject& obj,
       std::string& outStr);
 
   /**
@@ -92,9 +90,9 @@ class CFormatterJsonSDLRPCv2 : public CFormatterJsonBase {
    * this param.
    * @return true if success, otherwise - false
    */
-  template<typename FunctionId, typename MessageType>
-  static bool fromString(const std::string &str,
-                         NsSmartDeviceLink::NsSmartObjects::SmartObject &out,
+  template <typename FunctionId, typename MessageType>
+  static bool fromString(const std::string& str,
+                         NsSmartDeviceLink::NsSmartObjects::SmartObject& out,
                          FunctionId functionId,
                          MessageType messageType);
 
@@ -114,9 +112,9 @@ class CFormatterJsonSDLRPCv2 : public CFormatterJsonBase {
    *  is filled with this param.
    * @return true if success, otherwise - false
    */
-  template<typename FunctionId, typename MessageType>
-  static bool fromString(const std::string &str,
-                         NsSmartDeviceLink::NsSmartObjects::SmartObject &out,
+  template <typename FunctionId, typename MessageType>
+  static bool fromString(const std::string& str,
+                         NsSmartDeviceLink::NsSmartObjects::SmartObject& out,
                          FunctionId functionId,
                          MessageType messageType,
                          int32_t correlationId);
@@ -136,13 +134,12 @@ class CFormatterJsonSDLRPCv2 : public CFormatterJsonBase {
       std::string& outStr);
 };
 
-template<typename FunctionId, typename MessageType>
+template <typename FunctionId, typename MessageType>
 inline bool CFormatterJsonSDLRPCv2::fromString(
     const std::string& str,
     NsSmartDeviceLink::NsSmartObjects::SmartObject& out,
     FunctionId functionId,
     MessageType messageType) {
-
   try {
     using namespace utils::json;
     JsonValue::ParseResult parse_result = JsonValue::Parse(str);
@@ -153,12 +150,12 @@ inline bool CFormatterJsonSDLRPCv2::fromString(
 
     namespace strings = NsSmartDeviceLink::NsJSONHandler::strings;
 
-      out[strings::S_PARAMS][strings::S_MESSAGE_TYPE] = messageType;
-      out[strings::S_PARAMS][strings::S_FUNCTION_ID] = functionId;
-      out[strings::S_PARAMS][strings::S_PROTOCOL_TYPE] = 0;
-      out[strings::S_PARAMS][strings::S_PROTOCOL_VERSION] = 2;
+    out[strings::S_PARAMS][strings::S_MESSAGE_TYPE] = messageType;
+    out[strings::S_PARAMS][strings::S_FUNCTION_ID] = functionId;
+    out[strings::S_PARAMS][strings::S_PROTOCOL_TYPE] = 0;
+    out[strings::S_PARAMS][strings::S_PROTOCOL_VERSION] = 2;
 
-      jsonValueToObj(root, out[strings::S_MSG_PARAMS]);
+    jsonValueToObj(root, out[strings::S_MSG_PARAMS]);
   } catch (...) {
     return false;
   }
@@ -166,14 +163,13 @@ inline bool CFormatterJsonSDLRPCv2::fromString(
   return true;
 }
 
-template<typename FunctionId, typename MessageType>
+template <typename FunctionId, typename MessageType>
 inline bool CFormatterJsonSDLRPCv2::fromString(
     const std::string& str,
     NsSmartDeviceLink::NsSmartObjects::SmartObject& out,
     FunctionId functionId,
     MessageType messageType,
     int32_t correlationId) {
-
   bool result = fromString(str, out, functionId, messageType);
   namespace strings = NsSmartDeviceLink::NsJSONHandler::strings;
 
@@ -183,9 +179,8 @@ inline bool CFormatterJsonSDLRPCv2::fromString(
 
   return result;
 }
-
 }
 }
 }  // namespace NsSmartDeviceLink::NsJSONHandler::Formatters
 
-#endif // __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV2_HPP__
+#endif  // __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV2_HPP__

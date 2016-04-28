@@ -204,8 +204,8 @@ uint32_t CommandRequestImpl::SendHMIRequest(
       application_manager_.GetNextHMICorrelationID();
   if (use_events) {
     LOGGER_DEBUG(logger_,
-                  "subscribe_on_event " << function_id << " "
-                                        << hmi_correlation_id);
+                 "subscribe_on_event " << function_id << " "
+                                       << hmi_correlation_id);
     subscribe_on_event(function_id, hmi_correlation_id);
   }
 
@@ -401,10 +401,10 @@ bool CommandRequestImpl::CheckAllowedParameters() {
       mobile_apis::Result::eType check_result =
           application_manager_.CheckPolicyPermissions(
               (*it_app_list).get()->policy_app_id(),
-                  (*it_app_list).get()->hmi_level(),
-                  static_cast<mobile_api::FunctionID::eType>(function_id()),
-                  params,
-                  &params_permissions);
+              (*it_app_list).get()->hmi_level(),
+              static_cast<mobile_api::FunctionID::eType>(function_id()),
+              params,
+              &params_permissions);
 
       // Check, if RPC is allowed by policy
       if (mobile_apis::Result::SUCCESS != check_result) {
@@ -485,7 +485,7 @@ void CommandRequestImpl::RemoveDisallowedParameters(
       params.erase(key);
       parameters_permissions_.undefined_params.push_back(key);
       LOGGER_INFO(logger_,
-                   "Following parameter is not found among allowed parameters '"
+                  "Following parameter is not found among allowed parameters '"
                       << key << "' and will be treated as disallowed.");
     }
   }

@@ -160,7 +160,6 @@ CFormatterJsonSDLRPCv1::MetaFormatToString(
 
   return result_code;
 }
-
 }
 }
 }

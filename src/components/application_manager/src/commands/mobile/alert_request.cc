@@ -78,7 +78,7 @@ bool AlertRequest::Init() {
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     LOGGER_INFO(logger_,
                 "Request contains soft buttons - request timeout "
-                 "will be set to 0.");
+                "will be set to 0.");
     default_timeout_ = 0;
   }
 
@@ -106,7 +106,7 @@ void AlertRequest::Run() {
 
   if ((tts_chunks_exists && length_tts_chunks) ||
       ((*message_)[strings::msg_params].keyExists(strings::play_tone) &&
-      (*message_)[strings::msg_params][strings::play_tone].asBool())) {
+       (*message_)[strings::msg_params][strings::play_tone].asBool())) {
     awaiting_tts_speak_response_ = true;
   }
 
@@ -125,7 +125,7 @@ void AlertRequest::onTimeOut() {
   }
   LOGGER_INFO(logger_,
               "Default timeout ignored. "
-               "AlertRequest with soft buttons wait timeout on HMI side");
+              "AlertRequest with soft buttons wait timeout on HMI side");
 }
 
 void AlertRequest::on_event(const event_engine::Event& event) {
@@ -139,10 +139,10 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
       LOGGER_INFO(logger_,
                   "Received UI_OnResetTimeout event "
-          " or TTS_OnResetTimeout event"
-                   << awaiting_tts_speak_response_ << " "
-                   << awaiting_tts_stop_speaking_response_ << " "
-                   << awaiting_ui_alert_response_);
+                  " or TTS_OnResetTimeout event"
+                      << awaiting_tts_speak_response_ << " "
+                      << awaiting_tts_stop_speaking_response_ << " "
+                      << awaiting_ui_alert_response_);
       application_manager_.updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
       break;
@@ -164,10 +164,10 @@ void AlertRequest::on_event(const event_engine::Event& event) {
       // Mobile Alert request is successful when UI_Alert is successful
 
       const bool is_alert_ok = Compare<mobile_api::Result::eType, EQ, ONE>(
-            result_code,
-            mobile_apis::Result::SUCCESS,
-            mobile_apis::Result::UNSUPPORTED_RESOURCE,
-            mobile_apis::Result::WARNINGS);
+          result_code,
+          mobile_apis::Result::SUCCESS,
+          mobile_apis::Result::UNSUPPORTED_RESOURCE,
+          mobile_apis::Result::WARNINGS);
 
       is_alert_succeeded_ = is_alert_ok;
       alert_result_ = result_code;
@@ -202,9 +202,9 @@ void AlertRequest::on_event(const event_engine::Event& event) {
 
   const bool is_tts_alert_unsupported =
       Compare<mobile_api::Result::eType, EQ, ALL>(
-        mobile_api::Result::UNSUPPORTED_RESOURCE,
-        tts_speak_result_,
-        alert_result_);
+          mobile_api::Result::UNSUPPORTED_RESOURCE,
+          tts_speak_result_,
+          alert_result_);
 
   const bool is_alert_ok = Compare<mobile_api::Result::eType, EQ, ONE>(
       alert_result_, mobile_api::Result::SUCCESS, mobile_api::Result::WARNINGS);
@@ -225,16 +225,16 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     alert_result_ = mobile_apis::Result::WARNINGS;
     response_info = "Unsupported phoneme type sent in a prompt";
   } else if (mobile_apis::Result::SUCCESS == tts_speak_result_ &&
-            (mobile_apis::Result::INVALID_ENUM == alert_result_ &&
-            !is_ui_alert_sent_)) {
+             (mobile_apis::Result::INVALID_ENUM == alert_result_ &&
+              !is_ui_alert_sent_)) {
     alert_result_ = mobile_apis::Result::SUCCESS;
     is_alert_succeeded_ = true;
   }
 
   const bool is_tts_not_ok =
       Compare<mobile_api::Result::eType, EQ, ONE>(tts_speak_result_,
-        mobile_api::Result::ABORTED,
-        mobile_api::Result::REJECTED);
+                                                  mobile_api::Result::ABORTED,
+                                                  mobile_api::Result::REJECTED);
 
   if (is_tts_not_ok && !is_ui_alert_sent_) {
     is_alert_succeeded_ = false;
@@ -263,8 +263,8 @@ bool AlertRequest::Validate(uint32_t app_id) {
 
   if (mobile_apis::HMILevel::HMI_BACKGROUND == app->hmi_level() &&
       app->IsCommandLimitsExceeded(
-        static_cast<mobile_apis::FunctionID::eType>(function_id()),
-        application_manager::TLimitSource::POLICY_TABLE)) {
+          static_cast<mobile_apis::FunctionID::eType>(function_id()),
+          application_manager::TLimitSource::POLICY_TABLE)) {
     LOGGER_ERROR(logger_, "Alert frequency is too high.");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return false;
@@ -275,7 +275,7 @@ bool AlertRequest::Validate(uint32_t app_id) {
     return false;
   }
 
-  //ProcessSoftButtons checks strings on the contents incorrect character
+  // ProcessSoftButtons checks strings on the contents incorrect character
 
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params],
@@ -318,9 +318,9 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text1)) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
         hmi_apis::Common_TextFieldName::alertText1;
-     msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
-         (*message_)[strings::msg_params][strings::alert_text1];
-     index++;
+    msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
+        (*message_)[strings::msg_params][strings::alert_text1];
+    index++;
   }
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text2)) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
@@ -333,7 +333,7 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
         hmi_apis::Common_TextFieldName::alertText3;
     msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
-         (*message_)[strings::msg_params][strings::alert_text3];
+        (*message_)[strings::msg_params][strings::alert_text3];
   }
 
   // softButtons
@@ -350,7 +350,7 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   // NAVI platform progressIndicator
   if ((*message_)[strings::msg_params].keyExists(strings::progress_indicator)) {
     msg_params[strings::progress_indicator] =
-      (*message_)[strings::msg_params][strings::progress_indicator];
+        (*message_)[strings::msg_params][strings::progress_indicator];
   }
 
   // PASA Alert type
@@ -362,7 +362,6 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   // check out if there are alert strings or soft buttons
   if (msg_params[hmi_request::alert_strings].length() > 0 ||
       msg_params.keyExists(hmi_request::soft_buttons)) {
-
     awaiting_ui_alert_response_ = true;
     is_ui_alert_sent_ = true;
     SendHMIRequest(hmi_apis::FunctionID::UI_Alert, &msg_params, true);
@@ -400,7 +399,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
     str = (*message_)[strings::msg_params][strings::alert_text1].asCharArray();
     if (!CheckSyntax(str)) {
       LOGGER_ERROR(logger_, "Invalid alert_text_1 syntax check failed");
-      return  false;
+      return false;
     }
   }
 
@@ -408,7 +407,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
     str = (*message_)[strings::msg_params][strings::alert_text2].asCharArray();
     if (!CheckSyntax(str)) {
       LOGGER_ERROR(logger_, "Invalid alert_text_2 syntax check failed");
-      return  false;
+      return false;
     }
   }
 
@@ -416,7 +415,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
     str = (*message_)[strings::msg_params][strings::alert_text3].asCharArray();
     if (!CheckSyntax(str)) {
       LOGGER_ERROR(logger_, "Invalid alert_text_3 syntax check failed");
-      return  false;
+      return false;
     }
   }
 

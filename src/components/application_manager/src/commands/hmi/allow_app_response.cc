@@ -46,7 +46,7 @@ void AllowAppResponse::Run() {
   LOGGER_AUTO_TRACE(logger_);
 
   uint32_t connection_key =
-    (*message_)[strings::params][strings::connection_key].asInt();
+      (*message_)[strings::params][strings::connection_key].asInt();
 
   ApplicationSharedPtr app = application_manager_.application(connection_key);
 

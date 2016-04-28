@@ -57,7 +57,6 @@ PlatformThreadHandle SingleThreadSimpleValidator::creation_thread_id() const {
   return creation_thread_id_;
 }
 
-
 SingleThreadValidator::SingleThreadValidator()
     : owning_thread_id_(Thread::CurrentId()) {}
 
@@ -77,6 +76,4 @@ void SingleThreadValidator::AssertRunningOnValidThread() const {
   }
 }
 
-
-} // namespace threads
-
+}  // namespace threads

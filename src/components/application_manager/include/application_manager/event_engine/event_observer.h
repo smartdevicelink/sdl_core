@@ -73,7 +73,6 @@ class EventObserver {
   virtual void on_event(const Event& event) = 0;
 
  protected:
-
   /*
    * @brief Subscribe to an event
    *
@@ -98,7 +97,6 @@ class EventObserver {
   void unsubscribe_from_all_events();
 
  private:
-
   ObserverID id_;
   EventDispatcher& event_dispatcher_;
 
@@ -112,4 +110,4 @@ const EventObserver::ObserverID& EventObserver::id() const {
 }  // namespace event_engine
 }  // namespace application_manager
 
-#endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_OBSERVER_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_EVENT_OBSERVER_H_

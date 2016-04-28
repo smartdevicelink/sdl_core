@@ -251,7 +251,7 @@ extern const char* sdl_version;
 extern const char* system_software_version;
 extern const char* priority;
 
-//resuming
+// resuming
 extern const char* application_commands;
 extern const char* application_submenus;
 extern const char* application_choice_sets;
@@ -314,7 +314,7 @@ extern const char* default_;
 extern const char* languages;
 extern const char* ttsName;
 extern const char* vrSynonyms;
-} // namespace json
+}  // namespace json
 
 namespace http_request {
 extern const char* httpRequest;
@@ -330,7 +330,7 @@ extern const char* instance_follow_redirect;
 extern const char* charset;
 extern const char* content_lenght;
 extern const char* GET;
-} // http_request
+}  // http_request
 
 namespace mobile_notification {
 extern const char* state;

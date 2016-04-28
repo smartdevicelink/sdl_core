@@ -60,12 +60,12 @@ void DeleteFileRequest::Run() {
   if ((mobile_api::HMILevel::HMI_NONE == application->hmi_level()) &&
       (application_manager_.get_settings().delete_file_in_none() <=
        application->delete_file_in_none_count())) {
-      // If application is in the HMI_NONE level the quantity of allowed
-      // DeleteFile request is limited by the configuration profile
+    // If application is in the HMI_NONE level the quantity of allowed
+    // DeleteFile request is limited by the configuration profile
     LOGGER_ERROR(logger_,
                  "Too many requests from the app with HMILevel HMI_NONE ");
-      SendResponse(false, mobile_apis::Result::REJECTED);
-      return;
+    SendResponse(false, mobile_apis::Result::REJECTED);
+    return;
   }
 
   const std::string& sync_file_name =
@@ -75,7 +75,7 @@ void DeleteFileRequest::Run() {
       application_manager_.get_settings().app_storage_folder(),
       application->folder_name(),
       sync_file_name);
- 
+
   if (file_system::FileExists(full_file_path)) {
     if (file_system::DeleteFile(full_file_path)) {
       const AppFile* file = application->GetFile(full_file_path);
@@ -98,9 +98,9 @@ void DeleteFileRequest::SendFileRemovedNotification(const AppFile* file) const {
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-    msg_params[strings::app_id] = connection_key();
-    msg_params[strings::file_name] = file->file_name;
-    msg_params[strings::file_type] = file->file_type;
+  msg_params[strings::app_id] = connection_key();
+  msg_params[strings::file_name] = file->file_name;
+  msg_params[strings::file_type] = file->file_type;
 
   CreateHMINotification(hmi_apis::FunctionID::BasicCommunication_OnFileRemoved,
                         msg_params);

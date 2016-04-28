@@ -33,7 +33,6 @@
 
 #include "transport_manager/tcp/tcp_socket_connection.h"
 
-
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
 #include "transport_manager/tcp/tcp_device.h"

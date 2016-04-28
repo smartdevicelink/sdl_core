@@ -118,7 +118,7 @@ size_t MessageMeter<Id>::TrackMessages(const Id& id, const size_t count) {
 template <class Id>
 size_t MessageMeter<Id>::Frequency(const Id& id) {
   typename TimingMap::iterator it = timing_map_.find(id);
-  if(it == timing_map_.end()) {
+  if (it == timing_map_.end()) {
     return 0u;
   }
   Timings& timings = it->second;

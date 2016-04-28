@@ -562,7 +562,7 @@ void HMICapabilities::set_navigation_supported(const bool supported) {
 }
 
 void HMICapabilities::set_phone_call_supported(const bool supported) {
-    is_phone_call_supported_ = supported;
+  is_phone_call_supported_ = supported;
 }
 namespace {
 
@@ -587,7 +587,7 @@ void convert_json_languages_to_obj(
 
 }  // namespace
 
-void HMICapabilities::Init(resumption::LastState *last_state) {    
+void HMICapabilities::Init(resumption::LastState* last_state) {
   hmi_language_handler_.Init(last_state);
   if (false == load_capabilities_from_file()) {
     LOGGER_ERROR(logger_, "file hmi_capabilities.json was not loaded");
@@ -595,7 +595,7 @@ void HMICapabilities::Init(resumption::LastState *last_state) {
     LOGGER_INFO(logger_, "file hmi_capabilities.json was loaded");
   }
   hmi_language_handler_.set_default_capabilities_languages(
-        ui_language_, vr_language_, tts_language_);
+      ui_language_, vr_language_, tts_language_);
 }
 
 bool HMICapabilities::load_capabilities_from_file() {
@@ -828,7 +828,6 @@ bool HMICapabilities::load_capabilities_from_file() {
         set_active_vr_language(
             MessageHelper::CommonLanguageFromString("EN-US"));
       }
-
 
       if (vr.HasMember("languages")) {
         const JsonValueRef languages_vr = vr["languages"];

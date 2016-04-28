@@ -39,7 +39,7 @@ namespace event_engine {
 
 EventObserver::EventObserver(EventDispatcher& event_dispatcher)
     : id_(0), event_dispatcher_(event_dispatcher) {
-  //Get unique id based on this
+  // Get unique id based on this
   id_ = reinterpret_cast<unsigned long>(this);
 }
 

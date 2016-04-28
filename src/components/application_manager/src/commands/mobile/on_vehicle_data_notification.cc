@@ -51,7 +51,7 @@ void OnVehicleDataNotification::Run() {
 
   std::vector<ApplicationSharedPtr> appNotification;
   std::vector<ApplicationSharedPtr>::iterator appNotification_it =
-    appNotification.begin();
+      appNotification.begin();
   std::vector<smart_objects::SmartObject> appSO;
 
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();
@@ -64,14 +64,14 @@ void OnVehicleDataNotification::Run() {
               it->second, (*message_)[strings::msg_params][it->first].asInt());
 
       std::vector<ApplicationSharedPtr>::const_iterator app_it =
-        applications.begin();
+          applications.begin();
 
       for (; applications.end() != app_it; ++app_it) {
         const ApplicationSharedPtr app = *app_it;
         if (!app) {
           LOGGER_ERROR(logger_, "NULL pointer");
           continue;
-}
+        }
 
         appNotification_it =
             find(appNotification.begin(), appNotification.end(), app);
@@ -85,7 +85,6 @@ void OnVehicleDataNotification::Run() {
           size_t idx =
               std::distance(appNotification.begin(), appNotification_it);
           appSO[idx][it->first] = (*message_)[strings::msg_params][it->first];
-
         }
       }
     }
@@ -99,9 +98,9 @@ void OnVehicleDataNotification::Run() {
     LOGGER_INFO(logger_,
                 "Send OnVehicleData PRNDL notification to "
                     << appNotification[idx]->name().c_str()
-      << " application id " << appNotification[idx]->app_id());
+                    << " application id " << appNotification[idx]->app_id());
     (*message_)[strings::params][strings::connection_key] =
-      appNotification[idx]->app_id();
+        appNotification[idx]->app_id();
     (*message_)[strings::msg_params] = appSO[idx];
     SendNotification();
   }

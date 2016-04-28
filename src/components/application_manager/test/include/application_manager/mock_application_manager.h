@@ -54,7 +54,7 @@ class MockApplicationManager : public application_manager::ApplicationManager {
  public:
   MOCK_METHOD2(Init,
                bool(resumption::LastState& last_state,
-                          media_manager::MediaManager* media_manager));
+                    media_manager::MediaManager* media_manager));
   MOCK_METHOD0(Stop, bool());
 
   MOCK_METHOD1(set_hmi_message_handler,

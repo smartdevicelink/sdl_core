@@ -48,9 +48,9 @@ OnUITouchEventNotification::~OnUITouchEventNotification() {}
 void OnUITouchEventNotification::Run() {
   LOGGER_AUTO_TRACE(logger_);
 
-  //prepare SmartObject for mobile factory
+  // prepare SmartObject for mobile factory
   (*message_)[strings::params][strings::function_id] =
-  mobile_apis::FunctionID::OnTouchEventID;
+      mobile_apis::FunctionID::OnTouchEventID;
   SendNotificationToMobile(message_);
 }
 
@@ -59,4 +59,3 @@ void OnUITouchEventNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

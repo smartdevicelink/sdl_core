@@ -84,13 +84,13 @@ DeviceTypes devicesType = {
 DeviceTypes create_map() {
   DeviceTypes devices_type;
   devicesType.insert(std::make_pair(std::string("USB_AOA"),
-                                     hmi_apis::Common_TransportType::USB_AOA));
+                                    hmi_apis::Common_TransportType::USB_AOA));
   devicesType.insert(std::make_pair(std::string("USB_IOS"),
-                                     hmi_apis::Common_TransportType::USB_IOS));
-  devicesType.insert(std::make_pair(
-      std::string("BLUETOOTH"), hmi_apis::Common_TransportType::BLUETOOTH));
+                                    hmi_apis::Common_TransportType::USB_IOS));
+  devicesType.insert(std::make_pair(std::string("BLUETOOTH"),
+                                    hmi_apis::Common_TransportType::BLUETOOTH));
   devicesType.insert(std::make_pair(std::string("WIFI"),
-                                     hmi_apis::Common_TransportType::WIFI));
+                                    hmi_apis::Common_TransportType::WIFI));
   return devicesType;
 }
 DeviceTypes devicesType = create_map();
@@ -160,8 +160,8 @@ ApplicationManagerImpl::ApplicationManagerImpl(
 
   sync_primitives::AutoLock lock(timer_pool_lock_);
   TimerSPtr clearing_timer(utils::MakeShared<timer::Timer>(
-                              "ClearTimerPoolTimer",
-                              new TimerTaskImpl<ApplicationManagerImpl>(
+      "ClearTimerPoolTimer",
+      new TimerTaskImpl<ApplicationManagerImpl>(
           this, &ApplicationManagerImpl::ClearTimerPool)));
   const uint32_t timeout_ms = 10000u;
   clearing_timer->Start(timeout_ms, false);
@@ -345,7 +345,7 @@ void ApplicationManagerImpl::OnApplicationRegistered(ApplicationSharedPtr app) {
   // block all the requests/notifications to mobile
   // APPLINK-20764 - introduce usage of internal events or re-implement
   event_engine::Event event(
-        hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
+      hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
 
   smart_objects::SmartObject msg;
   msg[strings::params][strings::message_type] =
@@ -444,7 +444,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   if (!is_all_apps_allowed_) {
     LOGGER_WARN(logger_,
-                 "RegisterApplication: access to app's disabled by user");
+                "RegisterApplication: access to app's disabled by user");
     utils::SharedPtr<smart_objects::SmartObject> response(
         MessageHelper::CreateNegativeResponse(
             connection_key,
@@ -466,13 +466,13 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
     LOGGER_ERROR(logger_, "Failed to extract device mac for id " << device_id);
   } else {
     LOGGER_DEBUG(logger_,
-                  "Device mac for id" << device_id << " is " << device_mac);
+                 "Device mac for id" << device_id << " is " << device_mac);
   }
   ApplicationSharedPtr application(
       new ApplicationImpl(app_id,
-      policy_app_id,
-      device_mac,
-      app_name,
+                          policy_app_id,
+                          device_mac,
+                          app_name,
                           GetPolicyHandler().GetStatisticManager(),
                           *this));
   if (!application) {
@@ -619,7 +619,7 @@ mobile_api::HMILevel::eType ApplicationManagerImpl::IsHmiLevelFullAllowed(
   LOGGER_ERROR(logger_,
                "is_audio_app : "
                    << is_audio_app << "; does_audio_app_with_same_type_exist : "
-                                  << does_audio_app_with_same_type_exist
+                   << does_audio_app_with_same_type_exist
                    << "; is_active_app_exist : " << is_active_app_exist
                    << "; result : " << result);
   return result;
@@ -764,8 +764,8 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
 
   if (!audio_pass_thru_active_) {
     LOGGER_ERROR(logger_,
-                  "Trying to send PassThroughNotification"
-                  " when PassThrough is not active");
+                 "Trying to send PassThroughNotification"
+                 " when PassThrough is not active");
     return;
   }
 
@@ -787,7 +787,7 @@ std::string ApplicationManagerImpl::GetDeviceName(
   DCHECK(connection_handler_);
   std::string device_name = "";
   if (connection_handler().get_session_observer().GetDataOnDeviceID(
-        handle, &device_name, NULL, NULL, NULL) == -1) {
+          handle, &device_name, NULL, NULL, NULL) == -1) {
     LOGGER_ERROR(logger_, "Failed to extract device name for id " << handle);
   } else {
     LOGGER_DEBUG(logger_, "\t\t\t\t\tDevice name is " << device_name);
@@ -895,17 +895,17 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
   for (; device_list.end() != it; ++it) {
     policy::DeviceParams dev_params;
     connection_handler().get_session_observer().GetDataOnDeviceID(
-      it->second.device_handle(),
-      &dev_params.device_name,
-      NULL,
-      &dev_params.device_mac_address,
-      &dev_params.device_connection_type);
+        it->second.device_handle(),
+        &dev_params.device_name,
+        NULL,
+        &dev_params.device_mac_address,
+        &dev_params.device_connection_type);
 
     policy::DeviceInfo device_info;
     device_info.AdoptDeviceType(dev_params.device_connection_type);
 
     GetPolicyHandler().AddDevice(dev_params.device_mac_address,
-                                                 device_info.connection_type);
+                                 device_info.connection_type);
   }
 
   smart_objects::SmartObjectSPtr msg_params =
@@ -987,7 +987,7 @@ mobile_apis::HMILevel::eType ApplicationManagerImpl::GetDefaultHmiLevel(
       }
     } else {
       LOGGER_ERROR(logger_,
-                    "Unable to get default hmi_level for " << policy_app_id);
+                   "Unable to get default hmi_level for " << policy_app_id);
     }
   }
   return default_hmi;
@@ -1019,7 +1019,7 @@ void ApplicationManagerImpl::ReplaceMobileByHMIAppId(
         application(message[strings::app_id].asUInt());
     if (application_ptr.valid()) {
       LOGGER_DEBUG(logger_,
-                    "ReplaceMobileByHMIAppId from "
+                   "ReplaceMobileByHMIAppId from "
                        << message[strings::app_id].asInt() << " to "
                        << application_ptr->hmi_app_id());
       message[strings::app_id] = application_ptr->hmi_app_id();
@@ -1056,9 +1056,9 @@ void ApplicationManagerImpl::ReplaceHMIByMobileAppId(
 
     if (application.valid()) {
       LOGGER_DEBUG(logger_,
-                    "ReplaceHMIByMobileAppId from "
+                   "ReplaceHMIByMobileAppId from "
                        << message[strings::app_id].asInt() << " to "
-                        << application->app_id());
+                       << application->app_id());
       message[strings::app_id] = application->app_id();
     }
   } else {
@@ -1148,8 +1148,8 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   using namespace protocol_handler;
   LOGGER_AUTO_TRACE(logger_);
   LOGGER_DEBUG(logger_,
-                "ServiceType = " << type << ". Session = " << std::hex
-                                 << session_key);
+               "ServiceType = " << type << ". Session = " << std::hex
+                                << session_key);
 
   if (type == kRpc) {
     LOGGER_DEBUG(logger_, "RPC service is about to be started.");
@@ -1158,8 +1158,8 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   ApplicationSharedPtr app = application(session_key);
   if (!app) {
     LOGGER_WARN(logger_,
-                  "The application with id:" << session_key
-                                             << " doesn't exists.");
+                "The application with id:" << session_key
+                                           << " doesn't exists.");
     return false;
   }
 
@@ -1390,8 +1390,8 @@ void ApplicationManagerImpl::SendMessageToMobile(
       const std::string string_functionID =
           MessageHelper::StringifiedFunctionID(function_id);
       LOGGER_WARN(logger_,
-                   "Function \"" << string_functionID << "\" (#" << function_id
-                                 << ") not allowed by policy");
+                  "Function \"" << string_functionID << "\" (#" << function_id
+                                << ") not allowed by policy");
       return;
     }
 
@@ -1444,7 +1444,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
 
   if (!command) {
     LOGGER_WARN(logger_,
-                 "RET  Failed to create mobile command from smart object");
+                "RET  Failed to create mobile command from smart object");
     return false;
   }
 
@@ -1527,8 +1527,8 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     } else if (result == request_controller::RequestController::
                              TOO_MANY_PENDING_REQUESTS) {
       LOGGER_ERROR(logger_,
-                    "RET  Unable top perform request: "
-                        << "TOO_MANY_PENDING_REQUESTS");
+                   "RET  Unable top perform request: "
+                       << "TOO_MANY_PENDING_REQUESTS");
 
       smart_objects::SmartObjectSPtr response =
           MessageHelper::CreateNegativeResponse(
@@ -1547,12 +1547,12 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     } else if (result ==
                request_controller::RequestController::TOO_MANY_REQUESTS) {
       LOGGER_ERROR(logger_,
-                    "RET  Unable to perform request: "
-                        << "TOO_MANY_REQUESTS");
+                   "RET  Unable to perform request: "
+                       << "TOO_MANY_REQUESTS");
 
       ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-          connection_key,
+              connection_key,
               mobile_api::AppInterfaceUnregisteredReason::TOO_MANY_REQUESTS),
           commands::Command::ORIGIN_SDL);
 
@@ -1568,13 +1568,13 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     } else if (result == request_controller::RequestController::
                              NONE_HMI_LEVEL_MANY_REQUESTS) {
       LOGGER_ERROR(logger_,
-                    "RET  Unable to perform request: "
-                        << "REQUEST_WHILE_IN_NONE_HMI_LEVEL");
+                   "RET  Unable to perform request: "
+                       << "REQUEST_WHILE_IN_NONE_HMI_LEVEL");
 
       ManageMobileCommand(
           MessageHelper::GetOnAppInterfaceUnregisteredNotificationToMobile(
-          connection_key,
-          mobile_api::AppInterfaceUnregisteredReason::
+              connection_key,
+              mobile_api::AppInterfaceUnregisteredReason::
                   REQUEST_WHILE_IN_NONE_HMI_LEVEL),
           commands::Command::ORIGIN_SDL);
 
@@ -1661,10 +1661,10 @@ bool ApplicationManagerImpl::ManageHMICommand(
   int32_t message_type =
       (*(message.get()))[strings::params][strings::message_type].asInt();
 
-    if (kRequest == message_type) {
+  if (kRequest == message_type) {
     LOGGER_DEBUG(logger_, "ManageHMICommand");
-      request_ctrl_.addHMIRequest(command);
-    }
+    request_ctrl_.addHMIRequest(command);
+  }
 
   if (command->Init()) {
     command->Run();
@@ -1695,7 +1695,7 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
   if (!(file_system::IsWritingAllowed(app_storage_folder) &&
         file_system::IsReadingAllowed(app_storage_folder))) {
     LOGGER_ERROR(logger_,
-                  "Storage directory doesn't have read/write permissions");
+                 "Storage directory doesn't have read/write permissions");
     return false;
   }
 
@@ -1714,7 +1714,7 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
   if (GetPolicyHandler().PolicyEnabled()) {
     if (!GetPolicyHandler().LoadPolicyLibrary()) {
       LOGGER_ERROR(logger_,
-                    "Policy library is not loaded. Check LD_LIBRARY_PATH");
+                   "Policy library is not loaded. Check LD_LIBRARY_PATH");
       return false;
     }
     LOGGER_INFO(logger_, "Policy library is loaded, now initing PT");
@@ -1724,7 +1724,7 @@ bool ApplicationManagerImpl::Init(resumption::LastState& last_state,
     }
   } else {
     LOGGER_WARN(logger_,
-                 "System is configured to work without policy functionality.");
+                "System is configured to work without policy functionality.");
   }
   media_manager_ = media_manager;
   return true;
@@ -1755,9 +1755,9 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
     const Message& message, smart_objects::SmartObject& output) {
   LOGGER_AUTO_TRACE(logger_);
   LOGGER_DEBUG(logger_,
-                "\t\t\tMessage to convert: protocol "
+               "\t\t\tMessage to convert: protocol "
                    << message.protocol_version() << "; json "
-                    << message.json_message());
+                   << message.json_message());
 
   switch (message.protocol_version()) {
     case ProtocolVersion::kV4:
@@ -1774,8 +1774,8 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
           !mobile_so_factory().attachSchema(output, true) ||
           ((output.validate() != smart_objects::Errors::OK))) {
         LOGGER_WARN(logger_,
-                     "Failed to parse string to smart object :"
-                         << message.json_message());
+                    "Failed to parse string to smart object :"
+                        << message.json_message());
         utils::SharedPtr<smart_objects::SmartObject> response(
             MessageHelper::CreateNegativeResponse(
                 message.connection_key(),
@@ -1787,7 +1787,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       }
       LOGGER_DEBUG(logger_,
                    "Convertion result for sdl object is true function_id "
-                        << output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
+                       << output[jhs::S_PARAMS][jhs::S_FUNCTION_ID].asInt());
       output[strings::params][strings::connection_key] =
           message.connection_key();
       output[strings::params][strings::protocol_version] =
@@ -1795,10 +1795,10 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       if (message.binary_data()) {
         if (message.payload_size() < message.data_size()) {
           LOGGER_ERROR(logger_,
-                        "Incomplete binary"
+                       "Incomplete binary"
                            << " binary size should be  " << message.data_size()
-                            << " payload data size is "
-                            << message.payload_size());
+                           << " payload data size is "
+                           << message.payload_size());
           utils::SharedPtr<smart_objects::SmartObject> response(
               MessageHelper::CreateNegativeResponse(
                   message.connection_key(),
@@ -1817,7 +1817,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
 #ifdef ENABLE_LOG
       int32_t result =
 #endif
-     formatters::FormatterJsonRpc::FromString<
+          formatters::FormatterJsonRpc::FromString<
               hmi_apis::FunctionID::eType,
               hmi_apis::messageType::eType>(message.json_message(), output);
       LOGGER_DEBUG(logger_,
@@ -1879,7 +1879,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
           output[strings::msg_params][strings::result_code] =
               NsSmartDeviceLinkRPC::V1::Result::UNSUPPORTED_VERSION;
 
-            smart_objects::SmartObjectSPtr msg_to_send =
+          smart_objects::SmartObjectSPtr msg_to_send =
               new smart_objects::SmartObject(output);
           v1_shema.attachSchema(*msg_to_send, false);
           SendMessageToMobile(msg_to_send);
@@ -1893,7 +1893,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       // TODO(PV):
       //  removed NOTREACHED() because some app can still have vesion 1.
       LOGGER_WARN(logger_,
-                   "Application used unsupported protocol :"
+                  "Application used unsupported protocol :"
                       << message.protocol_version() << ".");
       return false;
   }
@@ -1919,12 +1919,12 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
                                        .asInt());
 
   std::string output_string;
-    const int64_t protocol_type = message.getElement(jhs::S_PARAMS)
-                                       .getElement(jhs::S_PROTOCOL_TYPE)
-                                      .asInt();
-    const int64_t protocol_version = message.getElement(jhs::S_PARAMS)
-                                          .getElement(jhs::S_PROTOCOL_VERSION)
-                                         .asInt();
+  const int64_t protocol_type = message.getElement(jhs::S_PARAMS)
+                                    .getElement(jhs::S_PROTOCOL_TYPE)
+                                    .asInt();
+  const int64_t protocol_version = message.getElement(jhs::S_PARAMS)
+                                       .getElement(jhs::S_PROTOCOL_VERSION)
+                                       .asInt();
   switch (protocol_type) {
     case 0: {
       if (protocol_version == 1) {
@@ -2143,14 +2143,14 @@ void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
   for (size_t idx = 0; idx < size; ++idx) {
     if (languages[idx].keyExists(cur_vr_lang)) {
       LOGGER_DEBUG(logger_, "Found active HMI language " << cur_vr_lang);
-        specific_idx = idx;
+      specific_idx = idx;
     } else if (languages[idx].keyExists(json::default_)) {
       LOGGER_DEBUG(logger_, "Found default language");
-        default_idx = idx;
-      }
+      default_idx = idx;
+    }
   }
 
-  if ( (-1 == specific_idx) && (-1 == default_idx) ) {
+  if ((-1 == specific_idx) && (-1 == default_idx)) {
     LOGGER_DEBUG(logger_, "No suitable language found");
     return;
   }
@@ -2162,7 +2162,7 @@ void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
         app_data[json::languages][specific_idx][cur_vr_lang][json::ttsName];
   } else {
     LOGGER_DEBUG(logger_,
-                  "No data for ttsName for " << cur_vr_lang << " language");
+                 "No data for ttsName for " << cur_vr_lang << " language");
   }
 
   if (app_data[json::languages][specific_idx][cur_vr_lang].keyExists(
@@ -2172,7 +2172,7 @@ void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
         app_data[json::languages][specific_idx][cur_vr_lang][json::vrSynonyms];
   } else {
     LOGGER_DEBUG(logger_,
-                  "No data for vrSynonyms for " << cur_vr_lang << " language");
+                 "No data for vrSynonyms for " << cur_vr_lang << " language");
   }
 }
 
@@ -2229,7 +2229,7 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     }
 
     const std::string app_icon_dir(settings_.app_icons_folder());
-const std::string full_icon_path(
+    const std::string full_icon_path(
         file_system::ConcatPath(app_icon_dir, policy_app_id));
 
     uint32_t device_id = 0;
@@ -2238,7 +2238,7 @@ const std::string full_icon_path(
         connection_handler().GetDataOnSessionKey(
             connection_key, NULL, NULL, &device_id)) {
       LOGGER_ERROR(logger_,
-                    "Failed to create application: no connection info.");
+                   "Failed to create application: no connection info.");
       continue;
     }
 
@@ -2275,7 +2275,7 @@ const std::string full_icon_path(
                  "apps_to_register_ size before: " << apps_to_register_.size());
     apps_to_register_.insert(app);
     LOGGER_DEBUG(logger_,
-                  "apps_to_register_ size after: " << apps_to_register_.size());
+                 "apps_to_register_ size after: " << apps_to_register_.size());
   }
 }
 
@@ -2383,16 +2383,14 @@ void ApplicationManagerImpl::HeadUnitReset(
       GetPolicyHandler().UnloadPolicyLibrary();
 
       resume_controller().StopSavePersistentDataTimer();
-      file_system::RemoveDirectoryContent(
-          get_settings().app_storage_folder());
+      file_system::RemoveDirectoryContent(get_settings().app_storage_folder());
       break;
     }
     case mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS: {
       GetPolicyHandler().ClearUserConsent();
 
       resume_controller().StopSavePersistentDataTimer();
-      file_system::RemoveDirectoryContent(
-          get_settings().app_storage_folder());
+      file_system::RemoveDirectoryContent(get_settings().app_storage_folder());
       break;
     }
     default: {
@@ -2430,7 +2428,7 @@ void ApplicationManagerImpl::SendOnSDLClose() {
   hmi_so_factory().attachSchema(*msg, false);
   LOGGER_DEBUG(
       logger_,
-    "Attached schema to message, result if valid: " << msg->isValid());
+      "Attached schema to message, result if valid: " << msg->isValid());
 
 #ifdef HMI_DBUS_API
   message_to_send->set_smart_object(*msg);
@@ -2514,10 +2512,10 @@ void ApplicationManagerImpl::UnregisterApplication(
     bool is_resuming,
     bool is_unexpected_disconnect) {
   LOGGER_DEBUG(logger_,
-                "app_id = " << app_id << "; reason = " << reason
+               "app_id = " << app_id << "; reason = " << reason
                            << "; is_resuming = " << is_resuming
-                            << "; is_unexpected_disconnect = "
-                            << is_unexpected_disconnect);
+                           << "; is_unexpected_disconnect = "
+                           << is_unexpected_disconnect);
   size_t subscribed_for_way_points_app_count = 0;
 
   // SDL sends UnsubscribeWayPoints only for last application
@@ -2645,7 +2643,7 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromMobile message) {
 void ApplicationManagerImpl::Handle(const impl::MessageToMobile message) {
   if (!protocol_handler_) {
     LOGGER_WARN(logger_,
-                 "Protocol Handler is not set; cannot send message to mobile.");
+                "Protocol Handler is not set; cannot send message to mobile.");
     return;
   }
 
@@ -2755,15 +2753,15 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
   const std::string stringified_hmi_level =
       MessageHelper::StringifiedHMILevel(hmi_level);
   LOGGER_DEBUG(logger_,
-                "Checking permissions for  " << policy_app_id << " in "
+               "Checking permissions for  " << policy_app_id << " in "
                                             << stringified_hmi_level << " rpc "
-                                             << stringified_functionID);
+                                            << stringified_functionID);
   policy::CheckPermissionResult result;
   GetPolicyHandler().CheckPermissions(policy_app_id,
-                                                      stringified_hmi_level,
-                                                      stringified_functionID,
-                                                      rpc_params,
-                                                      result);
+                                      stringified_hmi_level,
+                                      stringified_functionID,
+                                      rpc_params,
+                                      result);
 
   if (NULL != params_permissions) {
     params_permissions->allowed_params = result.list_of_allowed_params;
@@ -2957,8 +2955,8 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
     navi_app_to_stop_.push_back(app_id);
 
     TimerSPtr close_timer(utils::MakeShared<timer::Timer>(
-                             "CloseNaviAppTimer",
-                             new TimerTaskImpl<ApplicationManagerImpl>(
+        "CloseNaviAppTimer",
+        new TimerTaskImpl<ApplicationManagerImpl>(
             this, &ApplicationManagerImpl::CloseNaviApp)));
     close_timer->Start(navi_close_app_timeout_, true);
 
@@ -2969,8 +2967,8 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
 
 void ApplicationManagerImpl::OnHMILevelChanged(
     uint32_t app_id,
-                                               mobile_apis::HMILevel::eType from,
-                                               mobile_apis::HMILevel::eType to) {
+    mobile_apis::HMILevel::eType from,
+    mobile_apis::HMILevel::eType to) {
   LOGGER_AUTO_TRACE(logger_);
   using namespace mobile_apis::HMILevel;
   using namespace helpers;
@@ -2999,8 +2997,8 @@ void ApplicationManagerImpl::OnHMILevelChanged(
       navi_app_to_end_stream_.push_back(app_id);
 
       TimerSPtr end_stream_timer(utils::MakeShared<timer::Timer>(
-                                 "AppShouldFinishStreaming",
-                                 new TimerTaskImpl<ApplicationManagerImpl>(
+          "AppShouldFinishStreaming",
+          new TimerTaskImpl<ApplicationManagerImpl>(
               this, &ApplicationManagerImpl::EndNaviStreaming)));
       end_stream_timer->Start(navi_end_stream_timeout_, true);
 
@@ -3169,14 +3167,15 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
     return mobile_apis::Result::OUT_OF_MEMORY;
   }
 
-  const std::string full_file_path = file_system::ConcatPath(file_path, file_name);
+  const std::string full_file_path =
+      file_system::ConcatPath(file_path, file_name);
   const uint64_t file_size = file_system::FileSize(full_file_path);
   std::ofstream* file_stream;
   if (offset != 0) {
     if (file_size != static_cast<uint64_t>(offset)) {
       LOGGER_DEBUG(logger_,
-                    "ApplicationManagerImpl::SaveBinaryWithOffset offset"
-                        << " does'n match existing file size");
+                   "ApplicationManagerImpl::SaveBinaryWithOffset offset"
+                       << " does'n match existing file size");
       return mobile_apis::Result::INVALID_DATA;
     }
     file_stream = file_system::Open(full_file_path, std::ios_base::app);
@@ -3206,9 +3205,8 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
 uint32_t ApplicationManagerImpl::GetAvailableSpaceForApp(
     const std::string& folder_name) {
   const uint32_t app_quota = settings_.app_dir_quota();
-  std::string app_storage_path = file_system::ConcatPath(
-      settings_.app_storage_folder(), folder_name);
-
+  std::string app_storage_path =
+      file_system::ConcatPath(settings_.app_storage_folder(), folder_name);
 
   if (file_system::DirectoryExists(app_storage_path)) {
     size_t size_of_directory = file_system::DirectorySize(app_storage_path);
@@ -3260,7 +3258,7 @@ void ApplicationManagerImpl::OnTimerSendTTSGlobalProperties() {
   if (!app_list.empty()) {
     for (uint32_t i = 0; i < app_list.size(); ++i) {
       LOGGER_INFO(logger_,
-                   "Send TTS GlobalProperties to HMI with default helpPrompt");
+                  "Send TTS GlobalProperties to HMI with default helpPrompt");
       MessageHelper::SendTTSGlobalProperties(
           application(app_list[i]), true, *this);
       RemoveAppFromTTSGlobalPropertiesList(app_list[i]);
@@ -3429,16 +3427,16 @@ ProtocolVersion ApplicationManagerImpl::SupportedSDLVersion() const {
 
   if (sdl4_support) {
     LOGGER_DEBUG(logger_,
-                  "SDL Supported protocol version " << ProtocolVersion::kV4);
+                 "SDL Supported protocol version " << ProtocolVersion::kV4);
     return ProtocolVersion::kV4;
   }
   if (heart_beat_support) {
     LOGGER_DEBUG(logger_,
-                  "SDL Supported protocol version " << ProtocolVersion::kV3);
+                 "SDL Supported protocol version " << ProtocolVersion::kV3);
     return ProtocolVersion::kV3;
   }
   LOGGER_DEBUG(logger_,
-                "SDL Supported protocol version " << ProtocolVersion::kV2);
+               "SDL Supported protocol version " << ProtocolVersion::kV2);
   return ProtocolVersion::kV2;
 }
 
@@ -3463,12 +3461,12 @@ bool ApplicationManagerImpl::InitDirectory(
     // if storage directory doesn't exist try to create it
     if (!file_system::CreateDirectoryRecursively(path)) {
       LOGGER_ERROR(logger_,
-                    "Unable to create " << directory_type << " directory "
-                                        << path);
+                   "Unable to create " << directory_type << " directory "
+                                       << path);
       return false;
     }
     LOGGER_DEBUG(logger_,
-                  directory_type << " directory has been created: " << path);
+                 directory_type << " directory has been created: " << path);
   }
 
   return true;
@@ -3480,13 +3478,13 @@ bool ApplicationManagerImpl::IsReadWriteAllowed(const std::string& path,
   if (!(file_system::IsWritingAllowed(path) &&
         file_system::IsReadingAllowed(path))) {
     LOGGER_ERROR(logger_,
-                  directory_type
-                      << " directory doesn't have read/write permissions.");
+                 directory_type
+                     << " directory doesn't have read/write permissions.");
     return false;
   }
 
   LOGGER_DEBUG(logger_,
-                directory_type << " directory has read/write permissions.");
+               directory_type << " directory has read/write permissions.");
 
   return true;
 }

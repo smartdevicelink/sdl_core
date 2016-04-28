@@ -50,27 +50,26 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 ConditionalVariable::ConditionalVariable() {
   pthread_condattr_t attrs;
-  int initialized  = pthread_condattr_init(&attrs);
+  int initialized = pthread_condattr_init(&attrs);
   if (initialized != 0)
     LOGGER_ERROR(logger_,
                  "Failed to initialize "
-                            "conditional variable attributes");
+                 "conditional variable attributes");
   pthread_condattr_setclock(&attrs, CLOCK_MONOTONIC);
   initialized = pthread_cond_init(&cond_var_, &attrs);
   if (initialized != 0)
     LOGGER_ERROR(logger_,
                  "Failed to initialize "
-                            "conditional variable");
+                 "conditional variable");
   int rv = pthread_condattr_destroy(&attrs);
   if (rv != 0)
     LOGGER_ERROR(logger_,
                  "Failed to destroy "
-                            "conditional variable attributes");
+                 "conditional variable attributes");
 }
 
 ConditionalVariable::~ConditionalVariable() {
   pthread_cond_destroy(&cond_var_);
-
 }
 
 void ConditionalVariable::NotifyOne() {
@@ -78,14 +77,12 @@ void ConditionalVariable::NotifyOne() {
   if (signaled != 0) {
     LOGGER_ERROR(logger_, "Failed to signal conditional variable");
   }
-
 }
 
 void ConditionalVariable::Broadcast() {
   int signaled = pthread_cond_broadcast(&cond_var_);
   if (signaled != 0)
     LOGGER_ERROR(logger_, "Failed to broadcast conditional variable");
-
 }
 
 bool ConditionalVariable::Wait(Lock& lock) {
@@ -109,7 +106,7 @@ bool ConditionalVariable::Wait(AutoLock& auto_lock) {
 }
 
 ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
-    AutoLock& auto_lock, uint32_t milliseconds){
+    AutoLock& auto_lock, uint32_t milliseconds) {
   struct timespec now;
   clock_gettime(CLOCK_MONOTONIC, &now);
   timespec wait_interval;
@@ -130,7 +127,7 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
       pthread_cond_timedwait(&cond_var_, &lock.mutex_, &wait_interval);
   lock.AssertFreeAndMarkTaken();
   WaitStatus wait_status = kNoTimeout;
-  switch(timedwait_status) {
+  switch (timedwait_status) {
     case 0: {
       wait_status = kNoTimeout;
       break;
@@ -153,5 +150,5 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
   return wait_status;
 }
 
-} // namespace sync_primitives
+}  // namespace sync_primitives
 #endif  // OS_POSIX

@@ -43,27 +43,27 @@ namespace commands {
  * @brief SDLGetListOfPermissionsRequest command class
  **/
 class SDLGetListOfPermissionsRequest : public RequestFromHMI {
-  public:
-    /**
-     * @brief SDLGetListOfPermissionsRequest class constructor
-     *
-     * @param message Incoming SmartObject message
-     **/
+ public:
+  /**
+   * @brief SDLGetListOfPermissionsRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
   SDLGetListOfPermissionsRequest(const MessageSharedPtr& message,
                                  ApplicationManager& application_manager);
 
-    /**
-     * @brief SDLGetListOfPermissionsRequest class destructor
-     **/
-    virtual ~SDLGetListOfPermissionsRequest();
+  /**
+   * @brief SDLGetListOfPermissionsRequest class destructor
+   **/
+  virtual ~SDLGetListOfPermissionsRequest();
 
-    /**
-     * @brief Execute command
-     **/
-    virtual void Run();
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  private:
-    DISALLOW_COPY_AND_ASSIGN(SDLGetListOfPermissionsRequest);
+ private:
+  DISALLOW_COPY_AND_ASSIGN(SDLGetListOfPermissionsRequest);
 };
 
 }  // namespace commands

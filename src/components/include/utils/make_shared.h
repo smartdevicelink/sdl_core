@@ -60,18 +60,18 @@ class SharedPtr;
 
 namespace {
 template <typename T>
-  SharedPtr<T>Initialize(T* object) {
-      return object == NULL ? SharedPtr<T>() : SharedPtr<T>(object);
-  }
+SharedPtr<T> Initialize(T* object) {
+  return object == NULL ? SharedPtr<T>() : SharedPtr<T>(object);
+}
 }
 
-template<typename T>
+template <typename T>
 SharedPtr<T> MakeShared() {
   T* t = new (std::nothrow) T;
   return Initialize(t);
 }
 
-template<typename T, typename Arg1>
+template <typename T, typename Arg1>
 SharedPtr<T> MakeShared(Arg1& arg1) {
   T* t = new (std::nothrow) T(arg1);
   return Initialize(t);
@@ -126,20 +126,20 @@ SharedPtr<T> MakeShared(
 
 template <typename T, typename Arg1>
 SharedPtr<T> MakeShared(const Arg1& arg1) {
-    T* t = new (std::nothrow) T(arg1);
-    return Initialize(t);
+  T* t = new (std::nothrow) T(arg1);
+  return Initialize(t);
 }
 
-template<typename T, typename Arg1, typename Arg2>
+template <typename T, typename Arg1, typename Arg2>
 SharedPtr<T> MakeShared(const Arg1& arg1, const Arg2& arg2) {
-    T* t = new (std::nothrow) T(arg1, arg2);
-    return Initialize(t);
+  T* t = new (std::nothrow) T(arg1, arg2);
+  return Initialize(t);
 }
 
-template<typename T, typename Arg1, typename Arg2, typename Arg3>
+template <typename T, typename Arg1, typename Arg2, typename Arg3>
 SharedPtr<T> MakeShared(const Arg1& arg1, const Arg2& arg2, const Arg3& arg3) {
-    T* t = new (std::nothrow) T(arg1, arg2, arg3);
-    return Initialize(t);
+  T* t = new (std::nothrow) T(arg1, arg2, arg3);
+  return Initialize(t);
 }
 
 template <typename T,
@@ -151,8 +151,8 @@ SharedPtr<T> MakeShared(const Arg1& arg1,
                         const Arg2& arg2,
                         const Arg3& arg3,
                         const Arg4& arg4) {
-    T* t = new (std::nothrow) T(arg1, arg2, arg3, arg4);
-    return Initialize(t);
+  T* t = new (std::nothrow) T(arg1, arg2, arg3, arg4);
+  return Initialize(t);
 }
 
 template <typename T,
@@ -166,8 +166,8 @@ SharedPtr<T> MakeShared(const Arg1& arg1,
                         const Arg3& arg3,
                         const Arg4& arg4,
                         const Arg5& arg5) {
-    T* t = new (std::nothrow) T(arg1, arg2, arg3, arg4, arg5);
-    return Initialize(t);
+  T* t = new (std::nothrow) T(arg1, arg2, arg3, arg4, arg5);
+  return Initialize(t);
 }
 
 template <typename T,
@@ -183,9 +183,9 @@ SharedPtr<T> MakeShared(const Arg1& arg1,
                         const Arg4& arg4,
                         const Arg5& arg5,
                         const Arg6& arg6) {
-    T* t = new (std::nothrow) T(arg1, arg2, arg3, arg4, arg5, arg6);
-    return Initialize(t);
+  T* t = new (std::nothrow) T(arg1, arg2, arg3, arg4, arg5, arg6);
+  return Initialize(t);
 }
 
-} // namespace utils;
-#endif // SRC_COMPONENTS_INCLUDE_UTILS_MAKE_SHARED_H_
+}  // namespace utils;
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_MAKE_SHARED_H_

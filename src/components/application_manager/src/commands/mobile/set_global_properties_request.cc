@@ -65,7 +65,7 @@ void SetGlobalPropertiesRequest::Run() {
   if (!app) {
     LOGGER_ERROR(logger_,
                  "No application associated with connection key "
-                  << connection_key());
+                     << connection_key());
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
@@ -110,8 +110,8 @@ void SetGlobalPropertiesRequest::Run() {
     return;
   }
 
-  //if application waits for sending ttsGlobalProperties need to remove this
-  //application from tts_global_properties_app_list_
+  // if application waits for sending ttsGlobalProperties need to remove this
+  // application from tts_global_properties_app_list_
   application_manager_.RemoveAppFromTTSGlobalPropertiesList(connection_key());
   bool is_help_prompt_present = msg_params.keyExists(strings::help_prompt);
   bool is_timeout_prompt_present =
@@ -247,27 +247,27 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
 
   const bool is_tts_succeeded =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-        tts_result_,
-        hmi_apis::Common_Result::SUCCESS,
-        hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
-        hmi_apis::Common_Result::WARNINGS);
+          tts_result_,
+          hmi_apis::Common_Result::SUCCESS,
+          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
+          hmi_apis::Common_Result::WARNINGS);
 
   const bool is_ui_succeeded = Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-        ui_result_,
-        hmi_apis::Common_Result::SUCCESS,
-        hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
-        hmi_apis::Common_Result::WARNINGS);
+      ui_result_,
+      hmi_apis::Common_Result::SUCCESS,
+      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE,
+      hmi_apis::Common_Result::WARNINGS);
 
   const bool is_ui_invalid_unsupported =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-        ui_result_,
-        hmi_apis::Common_Result::INVALID_ENUM,
-        hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
+          ui_result_,
+          hmi_apis::Common_Result::INVALID_ENUM,
+          hmi_apis::Common_Result::UNSUPPORTED_RESOURCE);
 
   bool result = (is_tts_succeeded && is_ui_succeeded) ||
-      (is_ui_succeeded &&
-       hmi_apis::Common_Result::INVALID_ENUM == tts_result_) ||
-      (is_ui_invalid_unsupported && is_tts_succeeded);
+                (is_ui_succeeded &&
+                 hmi_apis::Common_Result::INVALID_ENUM == tts_result_) ||
+                (is_ui_invalid_unsupported && is_tts_succeeded);
 
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
   const char* return_info = NULL;
@@ -277,7 +277,7 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
           hmi_apis::Common_Result::WARNINGS, tts_result_, ui_result_);
 
   if (result && (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_ ||
-       is_ui_or_tts_warning)) {
+                 is_ui_or_tts_warning)) {
     result_code = mobile_apis::Result::WARNINGS;
     return_info =
         std::string("Unsupported phoneme type sent in a prompt").c_str();
@@ -286,13 +286,12 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
         MessageHelper::HMIToMobileResult(std::max(ui_result_, tts_result_));
   }
 
-  //TODO{ALeshin} APPLINK-15858. connection_key removed during SendResponse
+  // TODO{ALeshin} APPLINK-15858. connection_key removed during SendResponse
   ApplicationSharedPtr application =
       application_manager_.application(connection_key());
 
-  SendResponse(result, result_code, return_info,
-               &(message[strings::msg_params]));
-
+  SendResponse(
+      result, result_code, return_info, &(message[strings::msg_params]));
 
   if (!application) {
     LOGGER_DEBUG(logger_, "NULL pointer.");
@@ -318,7 +317,7 @@ bool SetGlobalPropertiesRequest::ValidateVRHelpTitle(
 void SetGlobalPropertiesRequest::PrepareUIRequestVRHelpData(
     const ApplicationSharedPtr app,
     const smart_objects::SmartObject& msg_params,
-    smart_objects::SmartObject &out_params) {
+    smart_objects::SmartObject& out_params) {
   LOGGER_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
 
@@ -367,7 +366,7 @@ bool SetGlobalPropertiesRequest::PrepareUIRequestDefaultVRHelpData(
 void SetGlobalPropertiesRequest::PrepareUIRequestMenuAndKeyboardData(
     const ApplicationSharedPtr app,
     const smart_objects::SmartObject& msg_params,
-    smart_objects::SmartObject &out_params) {
+    smart_objects::SmartObject& out_params) {
   LOGGER_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
 
@@ -395,7 +394,7 @@ void SetGlobalPropertiesRequest::PrepareUIRequestMenuAndKeyboardData(
 }
 
 void SetGlobalPropertiesRequest::SendTTSRequest(
-    const smart_objects::SmartObject &params, bool use_events) {
+    const smart_objects::SmartObject& params, bool use_events) {
   LOGGER_AUTO_TRACE(logger_);
   SendHMIRequest(
       hmi_apis::FunctionID::TTS_SetGlobalProperties, &params, use_events);
@@ -403,7 +402,7 @@ void SetGlobalPropertiesRequest::SendTTSRequest(
 }
 
 void SetGlobalPropertiesRequest::SendUIRequest(
-    const smart_objects::SmartObject &params, bool use_events) {
+    const smart_objects::SmartObject& params, bool use_events) {
   LOGGER_AUTO_TRACE(logger_);
   SendHMIRequest(
       hmi_apis::FunctionID::UI_SetGlobalProperties, &params, use_events);
@@ -487,7 +486,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
           return true;
         }
       }  // if image exists
-    }  // for - vh_array iteration
+    }    // for - vh_array iteration
   }
 
   if (msg_params.keyExists(strings::menu_icon)) {
@@ -514,13 +513,12 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
     }
   }
 
-
   if (msg_params.keyExists(strings::keyboard_properties)) {
     if (msg_params[strings::keyboard_properties].keyExists(
             strings::limited_character_list)) {
       const smart_objects::SmartArray* lcl_array =
           msg_params[strings::keyboard_properties]
-                     [strings::limited_character_list].asArray();
+                    [strings::limited_character_list].asArray();
 
       smart_objects::SmartArray::const_iterator it_lcl = lcl_array->begin();
       smart_objects::SmartArray::const_iterator it_lcl_end = lcl_array->end();
@@ -530,7 +528,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
         if (!CheckSyntax(str)) {
           LOGGER_ERROR(logger_,
                        "Invalid keyboard_properties "
-              "limited_character_list syntax check failed");
+                       "limited_character_list syntax check failed");
           return true;
         }
       }
@@ -545,7 +543,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
       if (!CheckSyntax(str)) {
         LOGGER_ERROR(logger_,
                      "Invalid keyboard_properties "
-            "auto_complete_text syntax check failed");
+                     "auto_complete_text syntax check failed");
         return true;
       }
     }

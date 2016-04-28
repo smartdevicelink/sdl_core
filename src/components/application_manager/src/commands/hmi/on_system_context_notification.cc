@@ -48,7 +48,7 @@ void OnSystemContextNotification::Run() {
   LOGGER_AUTO_TRACE(logger_);
 
   mobile_api::SystemContext::eType system_context =
-    static_cast<mobile_api::SystemContext::eType>(
+      static_cast<mobile_api::SystemContext::eType>(
           (*message_)[strings::msg_params][hmi_notification::system_context]
               .asInt());
 

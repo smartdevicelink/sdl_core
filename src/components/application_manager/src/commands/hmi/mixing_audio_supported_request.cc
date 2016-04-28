@@ -51,4 +51,3 @@ void MixingAudioSupportedRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

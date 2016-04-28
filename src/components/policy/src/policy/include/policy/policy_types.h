@@ -61,10 +61,10 @@ const std::string kDeviceId = "device";
  * @brief Status of policy table update
  */
 enum PolicyTableStatus {
-    StatusUpToDate = 0,
-    StatusUpdatePending,
-    StatusUpdateRequired,
-    StatusUnknown
+  StatusUpToDate = 0,
+  StatusUpdatePending,
+  StatusUpdateRequired,
+  StatusUnknown
 };
 
 // Code generator uses String class name, so this typedef was renamed to PTSring
@@ -82,8 +82,8 @@ typedef std::map<std::string, std::set<policy::Parameter> >
     ParameterPermissions;
 
 struct RpcPermissions {
-    HMIPermissions hmi_permissions;
-    ParameterPermissions parameter_permissions;
+  HMIPermissions hmi_permissions;
+  ParameterPermissions parameter_permissions;
 };
 
 typedef std::map<RpcName, RpcPermissions> Permissions;
@@ -108,24 +108,24 @@ enum PermitResult { kRpcAllowed = 0, kRpcDisallowed, kRpcUserDisallowed };
 struct CheckPermissionResult {
   CheckPermissionResult() : hmi_level_permitted(kRpcDisallowed) {}
 
-    PermitResult hmi_level_permitted;
-    std::vector<PTString> list_of_allowed_params;
-    std::vector<PTString> list_of_disallowed_params;
-    std::vector<PTString> list_of_undefined_params;
+  PermitResult hmi_level_permitted;
+  std::vector<PTString> list_of_allowed_params;
+  std::vector<PTString> list_of_disallowed_params;
+  std::vector<PTString> list_of_undefined_params;
 };
 
 /**
   @struct Holds Url string and optional policy app id.
   */
 struct EndpointData {
-    explicit EndpointData(const std::string& url_string = "")
-        : app_id("default") {
-      if (false == url_string.empty()) {
-        url.push_back(url_string);
-      }
+  explicit EndpointData(const std::string& url_string = "")
+      : app_id("default") {
+    if (false == url_string.empty()) {
+      url.push_back(url_string);
     }
-    std::vector<std::string> url;
-    std::string app_id;
+  }
+  std::vector<std::string> url;
+  std::string app_id;
 };
 
 typedef std::vector<EndpointData> EndpointUrls;
@@ -134,25 +134,25 @@ typedef std::vector<EndpointData> EndpointUrls;
  * @brief Struct contains device data to be used for dialogs, generation of IDs
  */
 struct DeviceParams {
-    DeviceParams()
+  DeviceParams()
       : device_name(kDefaultDeviceName)
       , device_mac_address(kDefaultDeviceMacAddress)
       , device_connection_type(kDefaultDeviceConnectionType)
       , device_handle(0) {}
 
-    std::string device_name;
-    std::string device_mac_address;
-    std::string device_connection_type;
-    uint32_t device_handle;
+  std::string device_name;
+  std::string device_mac_address;
+  std::string device_connection_type;
+  uint32_t device_handle;
 };
 
 /**
  * @brief User consent for device data usage
  */
 enum DeviceConsent {
-    kDeviceAllowed = 0,
-    kDeviceDisallowed,
-    kDeviceHasNoConsent
+  kDeviceAllowed = 0,
+  kDeviceDisallowed,
+  kDeviceHasNoConsent
 };
 
 /**
@@ -162,23 +162,23 @@ enum DeviceConsent {
 struct DeviceInfo {
   DeviceInfo() : max_number_rfcom_ports(0) {}
 
-    std::string hardware;
-    std::string firmware_rev;
-    std::string os;
-    std::string os_ver;
-    std::string carrier;
-    uint32_t max_number_rfcom_ports;
-    std::string connection_type;
+  std::string hardware;
+  std::string firmware_rev;
+  std::string os;
+  std::string os_ver;
+  std::string carrier;
+  uint32_t max_number_rfcom_ports;
+  std::string connection_type;
 
-    void AdoptDeviceType(const std::string& deviceType) {
-      connection_type = "USB_serial_number";
-      using namespace helpers;
-      static const std::string bluetooth("BLUETOOTH");
-      static const std::string wifi("WIFI");
-      if (Compare<std::string, EQ, ONE>(deviceType, bluetooth, wifi)) {
-        connection_type.assign("BTMAC");
-      }
+  void AdoptDeviceType(const std::string& deviceType) {
+    connection_type = "USB_serial_number";
+    using namespace helpers;
+    static const std::string bluetooth("BLUETOOTH");
+    static const std::string wifi("WIFI");
+    if (Compare<std::string, EQ, ONE>(deviceType, bluetooth, wifi)) {
+      connection_type.assign("BTMAC");
     }
+  }
 };
 
 /**
@@ -193,27 +193,26 @@ enum GroupConsent { kGroupAllowed = 0, kGroupDisallowed, kGroupUndefined };
 struct FunctionalGroupPermission {
   FunctionalGroupPermission() : group_id(0), state(kGroupUndefined) {}
 
-    bool operator ==(const FunctionalGroupPermission& rhs) {
-      if (this->group_id == rhs.group_id &&
-          this->group_alias == rhs.group_alias &&
-          this->group_name == rhs.group_name) {
-        return true;
-      }
-      return false;
+  bool operator==(const FunctionalGroupPermission& rhs) {
+    if (this->group_id == rhs.group_id &&
+        this->group_alias == rhs.group_alias &&
+        this->group_name == rhs.group_name) {
+      return true;
     }
+    return false;
+  }
 
-    std::string group_alias;
-    std::string group_name;
-    int32_t group_id;
-    GroupConsent state;
+  std::string group_alias;
+  std::string group_name;
+  int32_t group_id;
+  GroupConsent state;
 };
 
 /**
  * @brief Stores data to be sent to HMI on application permissions change
  */
 struct AppPermissions {
-
-    AppPermissions(const std::string& app_id)
+  AppPermissions(const std::string& app_id)
       : application_id(app_id)
       , isAppPermissionsRevoked(false)
       , appRevoked(false)
@@ -221,17 +220,17 @@ struct AppPermissions {
       , appUnauthorized(false)
       , requestTypeChanged(false) {}
 
-    std::string application_id;
-    bool isAppPermissionsRevoked;
-    std::vector<policy::FunctionalGroupPermission> appRevokedPermissions;
-    bool appRevoked;
-    bool appPermissionsConsentNeeded;
-    bool appUnauthorized;
-    bool isSDLAllowed;
-    std::string priority;
-    DeviceParams deviceInfo;
-    bool requestTypeChanged;
-    std::vector<std::string> requestType;
+  std::string application_id;
+  bool isAppPermissionsRevoked;
+  std::vector<policy::FunctionalGroupPermission> appRevokedPermissions;
+  bool appRevoked;
+  bool appPermissionsConsentNeeded;
+  bool appUnauthorized;
+  bool isSDLAllowed;
+  std::string priority;
+  DeviceParams deviceInfo;
+  bool requestTypeChanged;
+  std::vector<std::string> requestType;
 };
 
 /**
@@ -239,34 +238,34 @@ struct AppPermissions {
  * functional groups on given device
  */
 struct PermissionConsent {
-    std::string device_id;
-    std::string policy_app_id;
-    std::vector<FunctionalGroupPermission> group_permissions;
-    std::string consent_source;
+  std::string device_id;
+  std::string policy_app_id;
+  std::vector<FunctionalGroupPermission> group_permissions;
+  std::string consent_source;
 };
 
 /**
  * @brief Contain data for GetUserFriendyMessage response
  */
 struct UserFriendlyMessage {
-    std::string message_code;
+  std::string message_code;
 };
 
 /**
  * @brief Types of functional groups in policy table
  */
 enum GroupType {
-    kTypeDefault = 0,      // groups assigned to 'default' permissions section
-    kTypeAllowed,          // groups allowed by user for specific application
-    kTypeDisallowed,       // groups disallowed by user for specific application
+  kTypeDefault = 0,   // groups assigned to 'default' permissions section
+  kTypeAllowed,       // groups allowed by user for specific application
+  kTypeDisallowed,    // groups disallowed by user for specific application
   kTypeUnconsented,   // groups disallowed by default but consent may be changed
                       // by user
-    kTypePreconsented,     // groups allowed for specific application without
-                           // user consent by default (could be changed by user)
-    kTypeGeneral,          // groups assigned to specific application
-    kTypePreDataConsented, // groups assigned to 'pre_DataConsent' permissions
-                           // section
-    kTypeDevice            // groups assigned to 'device' permissions section
+  kTypePreconsented,  // groups allowed for specific application without
+                      // user consent by default (could be changed by user)
+  kTypeGeneral,       // groups assigned to specific application
+  kTypePreDataConsented,  // groups assigned to 'pre_DataConsent' permissions
+                          // section
+  kTypeDevice             // groups assigned to 'device' permissions section
 };
 
 /**
@@ -312,9 +311,9 @@ struct VehicleInfo {
  * @brief The MetaInfo information
  */
 struct MetaInfo {
-    std::string ccpu_version;
-    std::string wers_country_code;
-    std::string language;
+  std::string ccpu_version;
+  std::string wers_country_code;
+  std::string language;
 #if defined(OS_POSIX) || defined(OS_WINDOWS)
   MetaInfo(){};
 #endif

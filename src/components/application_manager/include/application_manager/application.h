@@ -347,16 +347,16 @@ class DynamicApplicationData {
   virtual void set_perform_interaction_layout(
       mobile_api::LayoutMode::eType layout) = 0;
 
- /*
-  * @brief Retrieve perform interaction layout
-  */
- virtual mobile_api::LayoutMode::eType perform_interaction_layout() const = 0;
-
-/*
-   * @brief Sets the mode for perform interaction: UI/VR/BOTH
-   *
-   * @param mode Mode that was selected (MENU; VR; BOTH)
+  /*
+   * @brief Retrieve perform interaction layout
    */
+  virtual mobile_api::LayoutMode::eType perform_interaction_layout() const = 0;
+
+  /*
+     * @brief Sets the mode for perform interaction: UI/VR/BOTH
+     *
+     * @param mode Mode that was selected (MENU; VR; BOTH)
+     */
   virtual void set_perform_interaction_mode(int32_t mode) = 0;
 
   /*

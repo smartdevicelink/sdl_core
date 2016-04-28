@@ -77,4 +77,3 @@ class StatisticsManager {
 }  //  namespace usage_statistics
 
 #endif  //  SRC_COMPONENTS_POLICY_INCLUDE_POLICY_USAGE_STATISTICS_STATISTICS_MANAGER_H_
-

@@ -225,14 +225,14 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateRequestObject(
   using namespace smart_objects;
 
   SmartObjectSPtr request = utils::MakeShared<SmartObject>(SmartType_Map);
-    SmartObject& ref = *request;
+  SmartObject& ref = *request;
 
-    ref[strings::params][strings::message_type] =
-        static_cast<int>(hmi_apis::messageType::request);
-    ref[strings::params][strings::protocol_version] =
-        commands::CommandImpl::protocol_version_;
-    ref[strings::params][strings::protocol_type] =
-        commands::CommandImpl::hmi_protocol_type_;
+  ref[strings::params][strings::message_type] =
+      static_cast<int>(hmi_apis::messageType::request);
+  ref[strings::params][strings::protocol_version] =
+      commands::CommandImpl::protocol_version_;
+  ref[strings::params][strings::protocol_type] =
+      commands::CommandImpl::hmi_protocol_type_;
   ref[strings::params][strings::correlation_id] = correlation_id;
   return request;
 }
@@ -1265,7 +1265,7 @@ bool MessageHelper::CreateHMIApplicationStruct(
       session_observer.GetDataOnDeviceID(
           app->device(), &device_name, NULL, &mac_address, &transport_type)) {
     LOGGER_ERROR(logger_,
-                  "Failed to extract information for device " << app->device());
+                 "Failed to extract information for device " << app->device());
   }
 
   message = smart_objects::SmartObject(smart_objects::SmartType_Map);
@@ -1382,7 +1382,7 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(
 smart_objects::SmartObjectSPtr MessageHelper::GetBCActivateAppRequestToHMI(
     ApplicationConstSharedPtr app,
     const protocol_handler::SessionObserver& session_observer,
-    const policy::PolicyHandlerInterface &policy_handler,
+    const policy::PolicyHandlerInterface& policy_handler,
     hmi_apis::Common_HMILevel::eType level,
     bool send_policy_priority,
     ApplicationManager& app_mngr) {
@@ -1491,7 +1491,6 @@ void MessageHelper::SendSDLActivateAppResponse(
     (*message)[strings::msg_params]["priority"] =
         GetPriorityCode(permissions.priority);
   }
-
 
   // If application is revoked it should not be activated
   if (permissions.appRevoked || !permissions.isSDLAllowed) {
@@ -1655,7 +1654,6 @@ void MessageHelper::SendNaviStartStream(const int32_t app_id,
   (*start_stream)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::Navigation_StartStream;
 
-
   char url[100] = {'\0'};
   if ("socket" == app_mngr.get_settings().video_server_type()) {
     snprintf(url,
@@ -1712,7 +1710,6 @@ void MessageHelper::SendAudioStartStream(const int32_t app_id,
 
   (*start_stream)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::Navigation_StartAudioStream;
-
 
   char url[100] = {'\0'};
   if ("socket" == app_mngr.get_settings().audio_server_type()) {
@@ -2197,7 +2194,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
 
       if (mobile_apis::Result::SUCCESS != verification_result) {
         LOGGER_DEBUG(logger_,
-                      "VerifyImageFiles result:" << verification_result);
+                     "VerifyImageFiles result:" << verification_result);
         return verification_result;  // exit point
       }
     } else {
@@ -2298,8 +2295,8 @@ bool MessageHelper::VerifySoftButtonString(const std::string& str) {
       (std::string::npos != str.find("\\t")) ||
       (std::string::npos == str.find_first_not_of(' '))) {
     LOGGER_ERROR(logger_,
-                  "MessageHelper::VerifySoftButtonString"
-                  "string contains incorrect character");
+                 "MessageHelper::VerifySoftButtonString"
+                 "string contains incorrect character");
     return false;
   }
   return true;
@@ -2367,7 +2364,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
       case SoftButtonType::SBT_TEXT: {
         if ((!request_soft_buttons[i].keyExists(strings::text)) ||
             (!VerifySoftButtonString(
-                request_soft_buttons[i][strings::text].asString()))) {
+                 request_soft_buttons[i][strings::text].asString()))) {
           return Result::INVALID_DATA;
         }
         break;
@@ -2376,7 +2373,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         if ((!request_soft_buttons[i].keyExists(strings::text)) ||
             ((request_soft_buttons[i][strings::text].length()) &&
              (!VerifySoftButtonString(
-                 request_soft_buttons[i][strings::text].asString())))) {
+                  request_soft_buttons[i][strings::text].asString())))) {
           return Result::INVALID_DATA;
         }
 

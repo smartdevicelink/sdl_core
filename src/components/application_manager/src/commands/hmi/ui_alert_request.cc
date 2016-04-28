@@ -51,4 +51,3 @@ void UIAlertRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

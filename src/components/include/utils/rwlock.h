@@ -33,12 +33,10 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_RWLOCK_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_RWLOCK_H_
 
-
 #include "utils/macro.h"
 #include "utils/pimpl.h"
 
 namespace sync_primitives {
-
 
 /**
  * RW locks wrapper

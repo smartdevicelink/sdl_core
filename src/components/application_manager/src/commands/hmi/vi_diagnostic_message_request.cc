@@ -51,4 +51,3 @@ void VIDiagnosticMessageRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

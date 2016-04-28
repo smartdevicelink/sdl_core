@@ -35,30 +35,29 @@
 #include <stdint.h>
 #include "utils/date_time.h"
 
-
 namespace date_time {
 
-  TimevalStruct DateTime::getCurrentTime() {
-    TimevalStruct currentTime;
-    timezone timeZone;
+TimevalStruct DateTime::getCurrentTime() {
+  TimevalStruct currentTime;
+  timezone timeZone;
 
-    gettimeofday(&currentTime, &timeZone);
+  gettimeofday(&currentTime, &timeZone);
 
-    return currentTime;
-  }
-
-int64_t date_time::DateTime::getSecs(const TimevalStruct &time) {
-   const TimevalStruct times = ConvertionUsecs(time);
-   return static_cast<int64_t>(times.tv_sec);
+  return currentTime;
 }
 
-int64_t DateTime::getmSecs(const TimevalStruct &time) {
+int64_t date_time::DateTime::getSecs(const TimevalStruct& time) {
+  const TimevalStruct times = ConvertionUsecs(time);
+  return static_cast<int64_t>(times.tv_sec);
+}
+
+int64_t DateTime::getmSecs(const TimevalStruct& time) {
   const TimevalStruct times = ConvertionUsecs(time);
   return static_cast<int64_t>(times.tv_sec) * kMillisecondsInSecond +
          times.tv_usec / kMicrosecondsInMillisecond;
 }
 
-int64_t DateTime::getuSecs(const TimevalStruct &time) {
+int64_t DateTime::getuSecs(const TimevalStruct& time) {
   const TimevalStruct times = ConvertionUsecs(time);
   return static_cast<int64_t>(times.tv_sec) * kMillisecondsInSecond *
              kMicrosecondsInMillisecond +
@@ -69,8 +68,8 @@ int64_t DateTime::calculateTimeSpan(const TimevalStruct& sinceTime) {
   return calculateTimeDiff(getCurrentTime(), sinceTime);
 }
 
-int64_t DateTime::calculateTimeDiff(const TimevalStruct &time1,
-                                    const TimevalStruct &time2){
+int64_t DateTime::calculateTimeDiff(const TimevalStruct& time1,
+                                    const TimevalStruct& time2) {
   const TimevalStruct times1 = ConvertionUsecs(time1);
   const TimevalStruct times2 = ConvertionUsecs(time2);
   TimevalStruct ret;
@@ -103,19 +102,19 @@ TimevalStruct DateTime::Sub(const TimevalStruct& time1,
 bool DateTime::Greater(const TimevalStruct& time1, const TimevalStruct& time2) {
   const TimevalStruct times1 = ConvertionUsecs(time1);
   const TimevalStruct times2 = ConvertionUsecs(time2);
-  return timercmp(&times1, &times2, >);
+  return timercmp(&times1, &times2, > );
 }
 
 bool DateTime::Less(const TimevalStruct& time1, const TimevalStruct& time2) {
   const TimevalStruct times1 = ConvertionUsecs(time1);
   const TimevalStruct times2 = ConvertionUsecs(time2);
-  return timercmp(&times1, &times2, <);
+  return timercmp(&times1, &times2, < );
 }
 
 bool DateTime::Equal(const TimevalStruct& time1, const TimevalStruct& time2) {
   const TimevalStruct times1 = ConvertionUsecs(time1);
   const TimevalStruct times2 = ConvertionUsecs(time2);
-  return !timercmp(&times1, &times2, !=);
+  return !timercmp(&times1, &times2, != );
 }
 
 TimeCompare date_time::DateTime::compareTime(const TimevalStruct& time1,
@@ -127,7 +126,7 @@ TimeCompare date_time::DateTime::compareTime(const TimevalStruct& time1,
   return EQUAL;
 }
 
-TimevalStruct date_time::DateTime::ConvertionUsecs(const TimevalStruct &time){
+TimevalStruct date_time::DateTime::ConvertionUsecs(const TimevalStruct& time) {
   if (time.tv_usec >= kMicrosecondsInSecond) {
     TimevalStruct time1;
     time1.tv_sec = static_cast<int64_t>(time.tv_sec) +
@@ -150,6 +149,6 @@ bool operator==(const TimevalStruct& time1, const TimevalStruct& time2) {
 
 const TimevalStruct operator-(const TimevalStruct& time1,
                               const TimevalStruct& time2) {
-    return date_time::DateTime::Sub(time1, time2);
+  return date_time::DateTime::Sub(time1, time2);
 }
 #endif  // OS_POSIX

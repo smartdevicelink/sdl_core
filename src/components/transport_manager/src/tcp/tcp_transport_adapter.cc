@@ -82,7 +82,7 @@ void TcpTransportAdapter::Store() const {
   JsonValue devices_dictionary;
   DeviceList device_ids = GetDeviceList();
   for (DeviceList::const_iterator i = device_ids.begin(); i != device_ids.end();
-      ++i) {
+       ++i) {
     DeviceUID device_id = *i;
     DeviceSptr device = FindDevice(device_id);
     if (!device) {  // device could have been disconnected
@@ -160,4 +160,3 @@ bool TcpTransportAdapter::Restore() {
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-

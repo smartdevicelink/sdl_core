@@ -54,12 +54,11 @@ namespace application_manager {
 using protocol_handler::Extract;
 
 namespace {
-  typedef std::map<MessageType, std::string> MessageTypeMap;
+typedef std::map<MessageType, std::string> MessageTypeMap;
 #ifdef SDL_CPP11
-MessageTypeMap messageTypes = {
-    std::make_pair(kRequest, "Request"),
-    std::make_pair(kResponse, "Response"),
-    std::make_pair(kNotification, "Notification")};
+MessageTypeMap messageTypes = {std::make_pair(kRequest, "Request"),
+                               std::make_pair(kResponse, "Response"),
+                               std::make_pair(kNotification, "Notification")};
 #else
 MessageTypeMap create_map() {
   MessageTypeMap messageTypes;
@@ -84,38 +83,38 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 application_manager::Message*
 MobileMessageHandler::HandleIncomingMessageProtocol(
-  const protocol_handler::RawMessagePtr message) {
+    const protocol_handler::RawMessagePtr message) {
   DCHECK_OR_RETURN(message, NULL);
   application_manager::Message* out_message = NULL;
   switch (message->protocol_version()) {
-  case ProtocolVersion::kV1:
+    case ProtocolVersion::kV1:
       LOGGER_DEBUG(logger_, "Protocol version - V1");
       out_message =
           MobileMessageHandler::HandleIncomingMessageProtocolV1(message);
-    break;
-  case ProtocolVersion::kV2:
+      break;
+    case ProtocolVersion::kV2:
       LOGGER_DEBUG(logger_, "Protocol version - V2");
       out_message =
           MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
-    break;
-  case ProtocolVersion::kV3:
+      break;
+    case ProtocolVersion::kV3:
       LOGGER_DEBUG(logger_, "Protocol version - V3");
       out_message =
           MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
-    break;
-  case ProtocolVersion::kV4:
+      break;
+    case ProtocolVersion::kV4:
       LOGGER_DEBUG(logger_, "Protocol version - V4");
       out_message =
           MobileMessageHandler::HandleIncomingMessageProtocolV2(message);
-    break;
-  default:
+      break;
+    default:
       LOGGER_WARN(logger_, "Can't recognise protocol version");
-    out_message = NULL;
-    break;
+      out_message = NULL;
+      break;
   }
   if (out_message == NULL) {
     LOGGER_WARN(logger_, "Message is NULL");
-      return NULL;
+    return NULL;
   }
   LOGGER_DEBUG(logger_,
                "Incoming RPC_INFO: " << (out_message->connection_key() >> 16)
@@ -129,8 +128,7 @@ MobileMessageHandler::HandleIncomingMessageProtocol(
 
 protocol_handler::RawMessage*
 MobileMessageHandler::HandleOutgoingMessageProtocol(
-  const MobileMessage& message) {
-
+    const MobileMessage& message) {
   LOGGER_DEBUG(logger_,
                "Outgoing RPC_INFO: " << (message->connection_key() >> 16)
                                      << ", " << messageTypes[message->type()]
@@ -149,14 +147,13 @@ MobileMessageHandler::HandleOutgoingMessageProtocol(
   return NULL;
 }
 
-
 application_manager::Message*
 MobileMessageHandler::HandleIncomingMessageProtocolV1(
-  const ::protocol_handler::RawMessagePtr message) {
+    const ::protocol_handler::RawMessagePtr message) {
   LOGGER_AUTO_TRACE(logger_);
   application_manager::Message* outgoing_message =
-    new application_manager::Message(
-    protocol_handler::MessagePriority::FromServiceType(
+      new application_manager::Message(
+          protocol_handler::MessagePriority::FromServiceType(
               message->service_type()));
   if (!message) {
     NOTREACHED();
@@ -180,7 +177,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV1(
 
 application_manager::Message*
 MobileMessageHandler::HandleIncomingMessageProtocolV2(
-  const ::protocol_handler::RawMessagePtr message) {
+    const ::protocol_handler::RawMessagePtr message) {
   LOGGER_AUTO_TRACE(logger_);
   utils::BitStream message_bytestream(message->data(), message->data_size());
   protocol_handler::ProtocolPayloadV2 payload;
@@ -221,7 +218,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV2(
 
 protocol_handler::RawMessage*
 MobileMessageHandler::HandleOutgoingMessageProtocolV1(
-  const MobileMessage& message) {
+    const MobileMessage& message) {
   LOGGER_AUTO_TRACE(logger_);
   std::string messageString = message->json_message();
   if (messageString.length() == 0) {
@@ -233,16 +230,16 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV1(
   memcpy(rawMessage, messageString.c_str(), messageString.length() + 1);
 
   protocol_handler::RawMessage* result = new protocol_handler::RawMessage(
-    message->connection_key(), 1, rawMessage, messageString.length() + 1);
+      message->connection_key(), 1, rawMessage, messageString.length() + 1);
 
-  delete [] rawMessage;
+  delete[] rawMessage;
 
   return result;
 }
 
 protocol_handler::RawMessage*
 MobileMessageHandler::HandleOutgoingMessageProtocolV2(
-  const MobileMessage& message) {
+    const MobileMessage& message) {
   LOGGER_AUTO_TRACE(logger_);
   if (message->json_message().length() == 0) {
     LOGGER_ERROR(logger_, "json string is empty.");
@@ -292,10 +289,10 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV2(
   dataForSending[offset++] = jsonSize;
 
   memcpy(dataForSending + offset, message->json_message().c_str(), jsonSize);
-  
+
   // Default the service type to RPC Service
-  uint8_t type = 0x07;  
-    
+  uint8_t type = 0x07;
+
   if (message->has_binary_data()) {
     // Change the service type to Hybrid Service
     type = 0x0F;
@@ -307,13 +304,13 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV2(
   }
 
   protocol_handler::RawMessage* msgToProtocolHandler =
-    new protocol_handler::RawMessage(message->connection_key(),
-                                     message->protocol_version(),
-                                     dataForSending,
-                                     dataForSendingSize,
-                                     type);
+      new protocol_handler::RawMessage(message->connection_key(),
+                                       message->protocol_version(),
+                                       dataForSending,
+                                       dataForSendingSize,
+                                       type);
 
-  delete [] dataForSending;
+  delete[] dataForSending;
 
   return msgToProtocolHandler;
 }

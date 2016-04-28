@@ -73,10 +73,10 @@ mobile_apis::FileType::eType StringToFileType(const char* str) {
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 namespace application_manager {
 ApplicationImpl::ApplicationImpl(
-      uint32_t application_id,
-      const std::string& mobile_app_id,
-      const std::string& mac_address,
-      const custom_str::CustomString& app_name,
+    uint32_t application_id,
+    const std::string& mobile_app_id,
+    const std::string& mac_address,
+    const custom_str::CustomString& app_name,
     utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager,
     ApplicationManager& application_manager)
     : grammar_id_(0)
@@ -131,10 +131,10 @@ ApplicationImpl::ApplicationImpl(
   // load persistent files
   LoadPersistentFiles();
   HmiStatePtr initial_state = application_manager_.CreateRegularState(
-          app_id(),
-          mobile_apis::HMILevel::INVALID_ENUM,
-          mobile_apis::AudioStreamingState::INVALID_ENUM,
-          mobile_api::SystemContext::SYSCTXT_MAIN);
+      app_id(),
+      mobile_apis::HMILevel::INVALID_ENUM,
+      mobile_apis::AudioStreamingState::INVALID_ENUM,
+      mobile_api::SystemContext::SYSCTXT_MAIN);
   state_.InitState(initial_state);
 
   video_stream_suspend_timeout_ =
@@ -319,7 +319,7 @@ connection_handler::DeviceHandle ApplicationImpl::device() const {
   return device_;
 }
 
-const std::string& ApplicationImpl::mac_address() const{
+const std::string& ApplicationImpl::mac_address() const {
   return mac_address_;
 }
 
@@ -602,8 +602,8 @@ bool ApplicationImpl::is_resuming() const {
 bool ApplicationImpl::AddFile(const AppFile& file) {
   if (app_files_.count(file.file_name) == 0) {
     LOGGER_INFO(logger_,
-                 "AddFile file " << file.file_name << " File type is "
-                                 << file.file_type);
+                "AddFile file " << file.file_name << " File type is "
+                                << file.file_type);
     app_files_[file.file_name] = file;
     return true;
   }
@@ -613,8 +613,8 @@ bool ApplicationImpl::AddFile(const AppFile& file) {
 bool ApplicationImpl::UpdateFile(const AppFile& file) {
   if (app_files_.count(file.file_name) != 0) {
     LOGGER_INFO(logger_,
-                 "UpdateFile file " << file.file_name << " File type is "
-                                    << file.file_type);
+                "UpdateFile file " << file.file_name << " File type is "
+                                   << file.file_type);
     app_files_[file.file_name] = file;
     return true;
   }
@@ -625,8 +625,8 @@ bool ApplicationImpl::DeleteFile(const std::string& file_name) {
   AppFilesMap::iterator it = app_files_.find(file_name);
   if (it != app_files_.end()) {
     LOGGER_INFO(logger_,
-                 "DeleteFile file " << it->second.file_name << " File type is "
-                                    << it->second.file_type);
+                "DeleteFile file " << it->second.file_name << " File type is "
+                                   << it->second.file_type);
     app_files_.erase(it);
     return true;
   }
@@ -697,7 +697,7 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
           cmd_number_to_time_limits_.find(cmd_id);
       if (cmd_number_to_time_limits_.end() == it) {
         LOGGER_WARN(logger_,
-                     "Limits for command id " << cmd_id << "had not been set.");
+                    "Limits for command id " << cmd_id << "had not been set.");
         return true;
       }
 
@@ -718,11 +718,11 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
       }
 
       LOGGER_INFO(logger_,
-                   "Time Info: "
+                  "Time Info: "
                       << "\n Current: " << current.tv_sec << "\n Limit: ("
                       << limit.first.tv_sec << "," << limit.second
-                       << ")"
-                          "\n frequency_restrictions: ("
+                      << ")"
+                         "\n frequency_restrictions: ("
                       << frequency_restrictions.first << ","
                       << frequency_restrictions.second << ")");
       if (current.tv_sec < limit.first.tv_sec + frequency_restrictions.second) {
@@ -818,8 +818,8 @@ void ApplicationImpl::UpdateHash() {
 }
 
 void ApplicationImpl::CleanupFiles() {
-  std::string directory_name =
-      file_system::ConcatPath(application_manager_.get_settings().app_storage_folder(), folder_name());
+  std::string directory_name = file_system::ConcatPath(
+      application_manager_.get_settings().app_storage_folder(), folder_name());
 
   if (file_system::DirectoryExists(directory_name)) {
     std::vector<std::string> files = file_system::ListFiles(directory_name);
@@ -892,10 +892,8 @@ void ApplicationImpl::LoadPersistentFiles() {
 uint32_t ApplicationImpl::GetAvailableDiskSpace() {
   const uint32_t app_quota =
       application_manager_.get_settings().app_dir_quota();
-  std::string app_storage_path =
-        file_system::ConcatPath(
-            application_manager_.get_settings().app_storage_folder(),
-            folder_name());
+  std::string app_storage_path = file_system::ConcatPath(
+      application_manager_.get_settings().app_storage_folder(), folder_name());
 
   if (file_system::DirectoryExists(app_storage_path)) {
     size_t size_of_directory = file_system::DirectorySize(app_storage_path);

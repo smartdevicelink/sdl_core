@@ -47,26 +47,26 @@ SubscribeVehicleDataRequest::~SubscribeVehicleDataRequest() {}
 
 #ifdef HMI_DBUS_API
 namespace {
-  struct Subrequest {
-    hmi_apis::FunctionID::eType func_id;
-    const char* str;
-  };
-  Subrequest subrequests[] = {
-    { hmi_apis::FunctionID::VehicleInfo_SubscribeGps, strings::gps},
-    { hmi_apis::FunctionID::VehicleInfo_SubscribeSpeed, strings::speed},
-    { hmi_apis::FunctionID::VehicleInfo_SubscribeRpm, strings::rpm},
-    { hmi_apis::FunctionID::VehicleInfo_SubscribeFuelLevel, strings::fuel_level},
+struct Subrequest {
+  hmi_apis::FunctionID::eType func_id;
+  const char* str;
+};
+Subrequest subrequests[] = {
+    {hmi_apis::FunctionID::VehicleInfo_SubscribeGps, strings::gps},
+    {hmi_apis::FunctionID::VehicleInfo_SubscribeSpeed, strings::speed},
+    {hmi_apis::FunctionID::VehicleInfo_SubscribeRpm, strings::rpm},
+    {hmi_apis::FunctionID::VehicleInfo_SubscribeFuelLevel, strings::fuel_level},
     {hmi_apis::FunctionID::VehicleInfo_SubscribeFuelLevel_State,
      strings::fuel_level_state},
     {hmi_apis::FunctionID::VehicleInfo_SubscribeInstantFuelConsumption,
      strings::instant_fuel_consumption},
     {hmi_apis::FunctionID::VehicleInfo_SubscribeExternalTemperature,
      strings::external_temp},
-    { hmi_apis::FunctionID::VehicleInfo_SubscribeVin, strings::vin},
-    { hmi_apis::FunctionID::VehicleInfo_SubscribePrndl, strings::prndl},
+    {hmi_apis::FunctionID::VehicleInfo_SubscribeVin, strings::vin},
+    {hmi_apis::FunctionID::VehicleInfo_SubscribePrndl, strings::prndl},
     {hmi_apis::FunctionID::VehicleInfo_SubscribeTirePressure,
      strings::tire_pressure},
-    { hmi_apis::FunctionID::VehicleInfo_SubscribeOdometer, strings::odometer},
+    {hmi_apis::FunctionID::VehicleInfo_SubscribeOdometer, strings::odometer},
     {hmi_apis::FunctionID::VehicleInfo_SubscribeBeltStatus,
      strings::belt_status},
     {hmi_apis::FunctionID::VehicleInfo_SubscribeBodyInformation,
@@ -93,10 +93,10 @@ namespace {
      strings::emergency_event},
     {hmi_apis::FunctionID::VehicleInfo_SubscribeClusterModeStatus,
      strings::cluster_mode_status},
-    { hmi_apis::FunctionID::VehicleInfo_SubscribeMyKey, strings::my_key},
-  };
+    {hmi_apis::FunctionID::VehicleInfo_SubscribeMyKey, strings::my_key},
+};
 }
-#endif // #ifdef HMI_DBUS_API
+#endif  // #ifdef HMI_DBUS_API
 
 void SubscribeVehicleDataRequest::Run() {
   LOGGER_AUTO_TRACE(logger_);
@@ -135,8 +135,8 @@ void SubscribeVehicleDataRequest::Run() {
           LOGGER_DEBUG(logger_,
                        "App with connection key "
                            << connection_key()
-                        << " is subscribed already for VehicleDataType: "
-                        << key_type);
+                           << " is subscribed already for VehicleDataType: "
+                           << key_type);
           ++subscribed_items;
           vi_already_subscribed_by_this_app_.insert(key_type);
           response_params[key_name][strings::data_type] = key_type;
@@ -186,7 +186,7 @@ void SubscribeVehicleDataRequest::Run() {
   bool is_everything_already_subscribed =
       static_cast<uint32_t>(items_to_subscribe) ==
       vi_already_subscribed_by_another_apps_.size() +
-      vi_already_subscribed_by_this_app_.size();
+          vi_already_subscribed_by_this_app_.size();
 
   if (0 == items_to_subscribe) {
     if (HasDisallowedParams()) {
@@ -209,19 +209,19 @@ void SubscribeVehicleDataRequest::Run() {
   if (is_everything_already_subscribed) {
     mobile_apis::Result::eType result_code =
         vi_already_subscribed_by_this_app_.size()
-        ? mobile_apis::Result::IGNORED
-        : mobile_apis::Result::SUCCESS;
+            ? mobile_apis::Result::IGNORED
+            : mobile_apis::Result::SUCCESS;
 
     const char* info = vi_already_subscribed_by_this_app_.size()
-        ? "Already subscribed on some provided VehicleData."
-        : NULL;
+                           ? "Already subscribed on some provided VehicleData."
+                           : NULL;
 
     SendResponse(true, result_code, info, &response_params);
     return;
   }
 
 #ifdef HMI_DBUS_API
-  //Generate list of subrequests
+  // Generate list of subrequests
   for (size_t i = 0; i < sizeof(subrequests) / sizeof(subrequests[0]); ++i) {
     const Subrequest& sr = subrequests[i];
     if (true == (*message_)[strings::msg_params].keyExists(sr.str) &&
@@ -236,7 +236,7 @@ void SubscribeVehicleDataRequest::Run() {
   LOGGER_DEBUG(logger_,
                hmi_requests_.size() << " requests are going to be sent to HMI");
 
-  //Send subrequests
+  // Send subrequests
   for (HmiRequests::const_iterator it = hmi_requests_.begin();
        it != hmi_requests_.end();
        ++it)
@@ -245,7 +245,7 @@ void SubscribeVehicleDataRequest::Run() {
   SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
                  &msg_params,
                  true);
-#endif // #ifdef HMI_DBUS_API
+#endif  // #ifdef HMI_DBUS_API
 }
 
 void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
@@ -271,17 +271,17 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
   for (HmiRequests::iterator it = hmi_requests_.begin();
        it != hmi_requests_.end();
        ++it) {
-    HmiRequest & hmi_request = *it;
+    HmiRequest& hmi_request = *it;
     if (hmi_request.func_id == event.id()) {
       hmi_request.status = static_cast<hmi_apis::Common_Result::eType>(
-            message[strings::params][hmi_response::code].asInt());
+          message[strings::params][hmi_response::code].asInt());
       if (hmi_apis::Common_Result::SUCCESS == hmi_request.status)
         hmi_request.value = message[strings::msg_params][hmi_request.str];
       hmi_request.complete = true;
       break;
     }
   }
- bool all_complete = true;
+  bool all_complete = true;
   bool any_arg_success = false;
   mobile_api::Result::eType status = mobile_api::Result::eType::SUCCESS;
   for (HmiRequests::const_iterator it = hmi_requests_.begin();
@@ -330,9 +330,9 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
 
   const bool is_result_no_error =
       Compare<hmi_apis::Common_Result::eType, EQ, ONE>(
-        hmi_result,
-        hmi_apis::Common_Result::SUCCESS,
-        hmi_apis::Common_Result::WARNINGS);
+          hmi_result,
+          hmi_apis::Common_Result::SUCCESS,
+          hmi_apis::Common_Result::WARNINGS);
 
   bool is_succeeded =
       is_result_no_error || !vi_already_subscribed_by_another_apps_.empty();
@@ -362,7 +362,7 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
   if (is_succeeded) {
     app->UpdateHash();
   }
-#endif // #ifdef HMI_DBUS_API
+#endif  // #ifdef HMI_DBUS_API
 }
 
 void SubscribeVehicleDataRequest::AddAlreadySubscribedVI(
@@ -371,7 +371,7 @@ void SubscribeVehicleDataRequest::AddAlreadySubscribedVI(
   using namespace mobile_apis;
   VehicleInfoSubscriptions::const_iterator it_same_app =
       vi_already_subscribed_by_this_app_.begin();
-  for (;vi_already_subscribed_by_this_app_.end() != it_same_app;
+  for (; vi_already_subscribed_by_this_app_.end() != it_same_app;
        ++it_same_app) {
     msg_params[*it_same_app][strings::result_code] =
         VehicleDataResultCode::VDRC_DATA_ALREADY_SUBSCRIBED;
@@ -379,7 +379,7 @@ void SubscribeVehicleDataRequest::AddAlreadySubscribedVI(
 
   VehicleInfoSubscriptions::const_iterator it_another_app =
       vi_already_subscribed_by_another_apps_.begin();
-  for (;vi_already_subscribed_by_another_apps_.end() != it_another_app;
+  for (; vi_already_subscribed_by_another_apps_.end() != it_another_app;
        ++it_another_app) {
     msg_params[*it_another_app][strings::result_code] =
         VehicleDataResultCode::VDRC_SUCCESS;
@@ -396,12 +396,12 @@ void SubscribeVehicleDataRequest::UnsubscribeFailedSubscriptions(
   for (; vehicle_data.end() != it; ++it) {
     if (msg_params.keyExists(it->first)) {
       if (msg_params[it->first][strings::result_code].asInt() !=
-        hmi_apis::Common_VehicleDataResultCode::VDRC_SUCCESS) {
+          hmi_apis::Common_VehicleDataResultCode::VDRC_SUCCESS) {
         LOGGER_DEBUG(logger_,
                      "Subscription for VehicleDataType "
-                      << it->first
-                      << " is unsuccessfull. "
-                         "Unsubscribing app with connection key "
+                         << it->first
+                         << " is unsuccessfull. "
+                            "Unsubscribing app with connection key "
                          << connection_key() << " from it.");
         app->UnsubscribeFromIVI(it->second);
       }

@@ -57,18 +57,16 @@ class ValidationReport;
 
 namespace policy_table_interface_base {
 
-  enum PolicyTableType {
-    INVALID_PT_TYPE = -1,
-    PT_PRELOADED,
-    PT_UPDATE,
-    PT_SNAPSHOT
-  };
-  const std::string ommited_validation_info = "should be ommited in ";
-  const std::string required_validation_info = "is required in ";
+enum PolicyTableType {
+  INVALID_PT_TYPE = -1,
+  PT_PRELOADED,
+  PT_UPDATE,
+  PT_SNAPSHOT
+};
+const std::string ommited_validation_info = "should be ommited in ";
+const std::string required_validation_info = "is required in ";
 
-  std::string PolicyTableTypeToString(const PolicyTableType pt_type);
-
-
+std::string PolicyTableTypeToString(const PolicyTableType pt_type);
 }
 
 template <typename T>
@@ -98,18 +96,19 @@ class Optional;
 template <typename T>
 class Stringifyable;
 
-template<typename T>
+template <typename T>
 class Range {
-  public:
-    // Methods
-    Range(const T min, const T max);
-    T min() const;
-    T max() const;
-    template<typename U>
-    bool Includes(U val) const;
-  private:
-    T min_;
-    T max_;
+ public:
+  // Methods
+  Range(const T min, const T max);
+  T min() const;
+  T max() const;
+  template <typename U>
+  bool Includes(U val) const;
+
+ private:
+  T min_;
+  T max_;
 };
 
 /*
@@ -117,236 +116,241 @@ class Range {
  * tell whether descendant object was initialized
  */
 class PrimitiveType {
-  public:
-    bool is_initialized() const;
-    bool is_valid() const;
-    void ReportErrors(ValidationReport* report) const;
-    policy_table_interface_base::PolicyTableType GetPolicyTableType() const;
+ public:
+  bool is_initialized() const;
+  bool is_valid() const;
+  void ReportErrors(ValidationReport* report) const;
+  policy_table_interface_base::PolicyTableType GetPolicyTableType() const;
   virtual void SetPolicyTableType(
       policy_table_interface_base::PolicyTableType pt_type);
 
-  protected:
+ protected:
   enum ValueState { kUninitialized, kInvalid, kValid };
-    explicit PrimitiveType(ValueState value_state);
-    static ValueState InitHelper(bool is_next);
+  explicit PrimitiveType(ValueState value_state);
+  static ValueState InitHelper(bool is_next);
   static ValueState InitHelper(const utils::json::JsonValueRef& value,
                                bool (utils::json::JsonValueRef::*type_check)()
                                    const);
 
-  protected:
-    ValueState value_state_;
-    policy_table_interface_base::PolicyTableType policy_table_type_;
+ protected:
+  ValueState value_state_;
+  policy_table_interface_base::PolicyTableType policy_table_type_;
 };
 
 /*
  * Base class for all composite types (arrays and all user-defined types)
  */
 class CompositeType {
-  public:
-    void mark_initialized();
-    void ReportErrors(ValidationReport* report) const;
-    policy_table_interface_base::PolicyTableType GetPolicyTableType() const;
+ public:
+  void mark_initialized();
+  void ReportErrors(ValidationReport* report) const;
+  policy_table_interface_base::PolicyTableType GetPolicyTableType() const;
   virtual void SetPolicyTableType(
       policy_table_interface_base::PolicyTableType pt_type);
 
-  protected:
-    enum InitializationState {
-      kUninitialized,
-      kInitialized,
-      kInvalidInitialized
-    };
-    explicit CompositeType(InitializationState init_state);
-    virtual ~CompositeType(){}
-    static InitializationState InitHelper(bool is_next);
+ protected:
+  enum InitializationState {
+    kUninitialized,
+    kInitialized,
+    kInvalidInitialized
+  };
+  explicit CompositeType(InitializationState init_state);
+  virtual ~CompositeType() {}
+  static InitializationState InitHelper(bool is_next);
   static InitializationState InitHelper(
       const utils::json::JsonValueRef& value,
       bool (utils::json::JsonValueRef::*type_check)() const);
-  protected:
-    mutable InitializationState initialization_state__;
-    policy_table_interface_base::PolicyTableType policy_table_type_;
 
+ protected:
+  mutable InitializationState initialization_state__;
+  policy_table_interface_base::PolicyTableType policy_table_type_;
 };
 
 /*
  * Class that holds primitive boolean value. It is always valid.
  */
 class Boolean : public PrimitiveType {
-  public:
-    // Types
-    typedef bool ValueType;
-  public:
-    // Methods
-    Boolean();
-    explicit Boolean(bool value);
+ public:
+  // Types
+  typedef bool ValueType;
+
+ public:
+  // Methods
+  Boolean();
+  explicit Boolean(bool value);
   explicit Boolean(const utils::json::JsonValueRef& value);
-    explicit Boolean(dbus::MessageReader* reader);
+  explicit Boolean(dbus::MessageReader* reader);
   Boolean(const utils::json::JsonValueRef& value, bool def_value);
-    Boolean& operator=(bool new_val);
-    operator bool() const;
+  Boolean& operator=(bool new_val);
+  operator bool() const;
   utils::json::JsonValue ToJsonValue() const;
-    void ToDbusWriter(dbus::MessageWriter* writer) const;
+  void ToDbusWriter(dbus::MessageWriter* writer) const;
 
-  private:
-    // Fields
-    ValueType value_;
+ private:
+  // Fields
+  ValueType value_;
 };
 
-template<typename T, T minval, T maxval>
+template <typename T, T minval, T maxval>
 class Integer : public PrimitiveType {
-  public:
-    // Types
-    typedef T IntType;
-  public:
-    // Methods
-    Integer();
-    explicit Integer(IntType value);
-    Integer(const Integer& value);
+ public:
+  // Types
+  typedef T IntType;
+
+ public:
+  // Methods
+  Integer();
+  explicit Integer(IntType value);
+  Integer(const Integer& value);
   explicit Integer(const utils::json::JsonValueRef& value);
-    explicit Integer(dbus::MessageReader* reader);
+  explicit Integer(dbus::MessageReader* reader);
   Integer(const utils::json::JsonValueRef& value, IntType def_value);
-    Integer& operator=(IntType new_val);
-    Integer& operator=(const Integer& new_val);
-    Integer& operator++();
-    Integer& operator+=(int value);
-    operator IntType() const;
+  Integer& operator=(IntType new_val);
+  Integer& operator=(const Integer& new_val);
+  Integer& operator++();
+  Integer& operator+=(int value);
+  operator IntType() const;
   utils::json::JsonValue ToJsonValue() const;
-    void ToDbusWriter(dbus::MessageWriter* writer) const;
+  void ToDbusWriter(dbus::MessageWriter* writer) const;
 
-  private:
-    IntType value_;
-    static const Range<T> range_;
+ private:
+  IntType value_;
+  static const Range<T> range_;
 };
 
-template<int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
+template <int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 class Float : public PrimitiveType {
-  public:
-    // Methods
-    Float();
-    explicit Float(double value);
+ public:
+  // Methods
+  Float();
+  explicit Float(double value);
   explicit Float(const utils::json::JsonValueRef& value);
-    explicit Float(dbus::MessageReader* reader);
+  explicit Float(dbus::MessageReader* reader);
   Float(const utils::json::JsonValueRef& value, double def_value);
-    Float& operator=(double new_val);
-    operator double() const;
+  Float& operator=(double new_val);
+  operator double() const;
   utils::json::JsonValue ToJsonValue() const;
-    void ToDbusWriter(dbus::MessageWriter* writer) const;
+  void ToDbusWriter(dbus::MessageWriter* writer) const;
 
-  private:
-    double value_;
-    static const Range<double> range_;
+ private:
+  double value_;
+  static const Range<double> range_;
 };
 
-template<size_t minlen, size_t maxlen>
+template <size_t minlen, size_t maxlen>
 class String : public PrimitiveType {
-  public:
-    // Methods
-    String();
-    explicit String(const std::string& value);
-    explicit String(const char* value);
+ public:
+  // Methods
+  String();
+  explicit String(const std::string& value);
+  explicit String(const char* value);
   explicit String(const utils::json::JsonValueRef& value);
-    explicit String(dbus::MessageReader* reader);
+  explicit String(dbus::MessageReader* reader);
   String(const utils::json::JsonValueRef& value, const std::string& def_value);
   bool operator<(const String& new_val) const;
-    String& operator=(const std::string& new_val);
-    String& operator=(const String& new_val);
+  String& operator=(const std::string& new_val);
+  String& operator=(const String& new_val);
   bool operator==(const String& rhs) const;
-    operator const std::string& () const;
+  operator const std::string&() const;
   utils::json::JsonValue ToJsonValue() const;
-    void ToDbusWriter(dbus::MessageWriter* writer) const;
+  void ToDbusWriter(dbus::MessageWriter* writer) const;
 
-  private:
-    std::string value_;
-    static const Range<size_t> length_range_;
+ private:
+  std::string value_;
+  static const Range<size_t> length_range_;
 };
 
-template<typename T>
+template <typename T>
 class Enum : public PrimitiveType {
-  public:
-    // Types
-    typedef T EnumType;
-  public:
-    // Methods
-    Enum();
-    explicit Enum(EnumType value);
+ public:
+  // Types
+  typedef T EnumType;
+
+ public:
+  // Methods
+  Enum();
+  explicit Enum(EnumType value);
   explicit Enum(const utils::json::JsonValueRef& value);
-    explicit Enum(dbus::MessageReader* reader);
+  explicit Enum(dbus::MessageReader* reader);
   Enum(const utils::json::JsonValueRef& value, EnumType def_value);
   Enum& operator=(const EnumType& new_val);
-    operator EnumType() const;
+  operator EnumType() const;
   utils::json::JsonValue ToJsonValue() const;
-    void ToDbusWriter(dbus::MessageWriter* writer) const;
+  void ToDbusWriter(dbus::MessageWriter* writer) const;
 
-  private:
-    // Fields
-    EnumType value_;
+ private:
+  // Fields
+  EnumType value_;
 };
 
-template<typename T, size_t minsize, size_t maxsize>
+template <typename T, size_t minsize, size_t maxsize>
 class Array : public std::vector<T>, public CompositeType {
-  public:
-    // Types
-    typedef std::vector<T> ArrayType;
-  public:
-    // Methods
-    Array();
-    // Need const and non-const versions to beat all-type accepting constructor
+ public:
+  // Types
+  typedef std::vector<T> ArrayType;
+
+ public:
+  // Methods
+  Array();
+  // Need const and non-const versions to beat all-type accepting constructor
   explicit Array(utils::json::JsonValueRef& value);
   explicit Array(const utils::json::JsonValueRef& value);
-    explicit Array(dbus::MessageReader* reader);
-    template<typename U>
-    explicit Array(const U& value);
-    template<typename U>
-    Array& operator=(const U& that);
-    using ArrayType::push_back;
-    template<typename U>
-    void push_back(const U& value);
+  explicit Array(dbus::MessageReader* reader);
+  template <typename U>
+  explicit Array(const U& value);
+  template <typename U>
+  Array& operator=(const U& that);
+  using ArrayType::push_back;
+  template <typename U>
+  void push_back(const U& value);
   utils::json::JsonValue ToJsonValue() const;
-    void ToDbusWriter(dbus::MessageWriter* writer) const;
+  void ToDbusWriter(dbus::MessageWriter* writer) const;
 
-    bool is_valid() const;
-    bool is_initialized() const;
-    void ReportErrors(ValidationReport* report) const;
+  bool is_valid() const;
+  bool is_initialized() const;
+  void ReportErrors(ValidationReport* report) const;
   virtual void SetPolicyTableType(
       policy_table_interface_base::PolicyTableType pt_type);
 };
 
-template<typename T, size_t minsize, size_t maxsize>
-class Map : public std::map<std::string, T>, public CompositeType  {
-  public:
-    // Types
-    typedef Map<T, minsize, maxsize> Frankenbase;
-    typedef std::map<std::string, T> MapType;
-  public:
-    // Methods
-    Map();
-    // Need const and non-const versions to beat all-type accepting constructor
+template <typename T, size_t minsize, size_t maxsize>
+class Map : public std::map<std::string, T>, public CompositeType {
+ public:
+  // Types
+  typedef Map<T, minsize, maxsize> Frankenbase;
+  typedef std::map<std::string, T> MapType;
+
+ public:
+  // Methods
+  Map();
+  // Need const and non-const versions to beat all-type accepting constructor
   explicit Map(utils::json::JsonValueRef& value);
   explicit Map(const utils::json::JsonValueRef& value);
-    explicit Map(dbus::MessageReader* reader);
-    template<typename U>
-    explicit Map(const U& value);
-    template<typename U>
-    Map& operator=(const U& that);
-    using MapType::insert;
-    template<typename U>
-    void insert(const std::pair<std::string, U>& value);
+  explicit Map(dbus::MessageReader* reader);
+  template <typename U>
+  explicit Map(const U& value);
+  template <typename U>
+  Map& operator=(const U& that);
+  using MapType::insert;
+  template <typename U>
+  void insert(const std::pair<std::string, U>& value);
   utils::json::JsonValue ToJsonValue() const;
-    void ToDbusWriter(dbus::MessageWriter* writer) const;
+  void ToDbusWriter(dbus::MessageWriter* writer) const;
 
-    bool is_valid() const;
-    bool is_initialized() const;
-    void ReportErrors(ValidationReport* report) const;
+  bool is_valid() const;
+  bool is_initialized() const;
+  void ReportErrors(ValidationReport* report) const;
   virtual void SetPolicyTableType(
       policy_table_interface_base::PolicyTableType pt_type);
 };
 
-template<typename T>
+template <typename T>
 class Nullable : public T {
-  public:
-    // Methods
-    Nullable();
-    explicit Nullable(dbus::MessageReader* reader);
-    // Need const and non-const versions to beat all-type accepting constructor
+ public:
+  // Methods
+  Nullable();
+  explicit Nullable(dbus::MessageReader* reader);
+  // Need const and non-const versions to beat all-type accepting constructor
   explicit Nullable(utils::json::JsonValueRef& value);
 
   explicit Nullable(const utils::json::JsonValueRef& value);
@@ -357,7 +361,7 @@ class Nullable : public T {
    * fails with error (unable to match function definition to an existing
    * declaration).
    */
-    template<typename U>
+  template <typename U>
   explicit Nullable(
       const U& non_nullable,
       typename utils::type_traits::enable_if<
@@ -370,7 +374,7 @@ class Nullable : public T {
    * fails with error (unable to match function definition to an existing
    * declaration).
    */
-    template<typename U>
+  template <typename U>
   explicit Nullable(
       const U& nullable,
       typename utils::type_traits::enable_if<
@@ -379,26 +383,27 @@ class Nullable : public T {
 
   template <typename U>
   Nullable(const utils::json::JsonValueRef& value, const U& def_value);
-    template<typename U>
-    Nullable& operator=(const U& new_val);
+  template <typename U>
+  Nullable& operator=(const U& new_val);
   utils::json::JsonValue ToJsonValue() const;
 
-    bool is_valid() const;
-    bool is_initialized() const;
-    bool is_null() const;
-    void set_to_null();
-    void ReportErrors(ValidationReport* report) const;
-  private:
-    bool marked_null_;
+  bool is_valid() const;
+  bool is_initialized() const;
+  bool is_null() const;
+  void set_to_null();
+  void ReportErrors(ValidationReport* report) const;
+
+ private:
+  bool marked_null_;
 };
 
-template<typename T>
+template <typename T>
 class Stringifyable : public T {
-  public:
-    // Methods
-    Stringifyable();
-    explicit Stringifyable(dbus::MessageReader* reader);
-    // Need const and non-const versions to beat all-type accepting constructor
+ public:
+  // Methods
+  Stringifyable();
+  explicit Stringifyable(dbus::MessageReader* reader);
+  // Need const and non-const versions to beat all-type accepting constructor
   explicit Stringifyable(utils::json::JsonValueRef& value);
 
   explicit Stringifyable(const utils::json::JsonValueRef& value);
@@ -409,7 +414,7 @@ class Stringifyable : public T {
    * fails with error (unable to match function definition to an existing
    * declaration).
    */
-    template<typename U>
+  template <typename U>
   explicit Stringifyable(
       const U& non_stringifyable,
       typename utils::type_traits::enable_if<
@@ -422,7 +427,7 @@ class Stringifyable : public T {
    * fails with error (unable to match function definition to an existing
    * declaration).
    */
-    template<typename U>
+  template <typename U>
   explicit Stringifyable(
       const U& stringifyable,
       typename utils::type_traits::enable_if<
@@ -432,57 +437,59 @@ class Stringifyable : public T {
 
   template <typename U>
   Stringifyable(const utils::json::JsonValueRef& value, const U& def_value);
-    template<typename U>
-    Stringifyable& operator=(const U& new_val);
+  template <typename U>
+  Stringifyable& operator=(const U& new_val);
   utils::json::JsonValue ToJsonValue() const;
 
-    bool is_valid() const;
-    bool is_initialized() const;
-    bool is_string() const;
-    std::string get_string() const;
-    void set_to_string(const std::string& input);
-    void ReportErrors(ValidationReport* report) const;
-  private:
-    std::string predefined_string_;
+  bool is_valid() const;
+  bool is_initialized() const;
+  bool is_string() const;
+  std::string get_string() const;
+  void set_to_string(const std::string& input);
+  void ReportErrors(ValidationReport* report) const;
+
+ private:
+  std::string predefined_string_;
 };
 
-template<typename T>
+template <typename T>
 class Optional {
-  public:
-    // Methods
-    Optional();
-    explicit Optional(dbus::MessageReader* reader);
-    template<typename U>
-    explicit Optional(const U& value);
-    template<typename U>
+ public:
+  // Methods
+  Optional();
+  explicit Optional(dbus::MessageReader* reader);
+  template <typename U>
+  explicit Optional(const U& value);
+  template <typename U>
   Optional(const utils::json::JsonValueRef& value, const U& def_value);
   utils::json::JsonValue ToJsonValue() const;
 
-    void ToDbusWriter(dbus::MessageWriter* writer) const;
+  void ToDbusWriter(dbus::MessageWriter* writer) const;
 
-    // Pointer semantics
-    T& operator*();
-    const T& operator*() const;
-    T* operator->();
-    const T* operator->() const;
+  // Pointer semantics
+  T& operator*();
+  const T& operator*() const;
+  T* operator->();
+  const T* operator->() const;
 
-    void assign_if_valid(const Optional<T>& value);
-    // For pointer-like 'if (optional_value)' tests
-    // Better than operator bool because bool can be implicitly
-    // casted to integral types
-    operator const void* () const;
+  void assign_if_valid(const Optional<T>& value);
+  // For pointer-like 'if (optional_value)' tests
+  // Better than operator bool because bool can be implicitly
+  // casted to integral types
+  operator const void*() const;
 
-    bool is_valid() const;
-    bool is_initialized() const;
-    void ReportErrors(ValidationReport* report) const;
-    policy_table_interface_base::PolicyTableType GetPolicyTableType() const;
+  bool is_valid() const;
+  bool is_initialized() const;
+  void ReportErrors(ValidationReport* report) const;
+  policy_table_interface_base::PolicyTableType GetPolicyTableType() const;
   virtual void SetPolicyTableType(
       policy_table_interface_base::PolicyTableType pt_type);
 
-  protected:
-    policy_table_interface_base::PolicyTableType policy_table_type_;
-  private:
-    T value_;
+ protected:
+  policy_table_interface_base::PolicyTableType policy_table_type_;
+
+ private:
+  T value_;
 };
 
 }  // namespace rpc

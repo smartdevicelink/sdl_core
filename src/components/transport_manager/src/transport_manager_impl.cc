@@ -61,7 +61,7 @@ namespace transport_manager {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 TransportManagerImpl::Connection TransportManagerImpl::convert(
-  const TransportManagerImpl::ConnectionInternal& p) {
+    const TransportManagerImpl::ConnectionInternal& p) {
   LOGGER_TRACE(logger_, "enter. ConnectionInternal: " << &p);
   TransportManagerImpl::Connection c;
   c.application = p.application;
@@ -70,7 +70,7 @@ TransportManagerImpl::Connection TransportManagerImpl::convert(
   LOGGER_TRACE(
       logger_,
       "exit with TransportManagerImpl::Connection. It's ConnectionUID = "
-                << c.id);
+          << c.id);
   return c;
 }
 
@@ -93,14 +93,14 @@ TransportManagerImpl::~TransportManagerImpl() {
   event_queue_.Shutdown();
 
   for (std::vector<TransportAdapter*>::iterator it =
-         transport_adapters_.begin();
+           transport_adapters_.begin();
        it != transport_adapters_.end();
        ++it) {
     delete *it;
   }
 
   for (std::map<TransportAdapter*, TransportAdapterListenerImpl*>::iterator it =
-         transport_adapter_listeners_.begin();
+           transport_adapter_listeners_.begin();
        it != transport_adapter_listeners_.end();
        ++it) {
     delete it->second;
@@ -115,7 +115,7 @@ int TransportManagerImpl::ConnectDevice(const DeviceHandle device_handle) {
     LOGGER_ERROR(logger_, "TransportManager is not initialized.");
     LOGGER_TRACE(
         logger_,
-                  "exit with E_TM_IS_NOT_INITIALIZED. Condition: !this->is_initialized_");
+        "exit with E_TM_IS_NOT_INITIALIZED. Condition: !this->is_initialized_");
     return E_TM_IS_NOT_INITIALIZED;
   }
 
@@ -123,7 +123,7 @@ int TransportManagerImpl::ConnectDevice(const DeviceHandle device_handle) {
   LOGGER_DEBUG(logger_, "Convert handle to id:" << device_id);
 
   sync_primitives::AutoReadLock lock(device_to_adapter_map_lock_);
-  DeviceToAdapterMap::iterator it  = device_to_adapter_map_.find(device_id);
+  DeviceToAdapterMap::iterator it = device_to_adapter_map_.find(device_id);
   if (it == device_to_adapter_map_.end()) {
     LOGGER_ERROR(logger_, "No device adapter found by id " << device_id);
     LOGGER_TRACE(logger_, "exit with E_INVALID_HANDLE. Condition: NULL == ta");
@@ -143,14 +143,14 @@ int TransportManagerImpl::DisconnectDevice(const DeviceHandle device_handle) {
     LOGGER_ERROR(logger_, "TransportManager is not initialized.");
     LOGGER_TRACE(
         logger_,
-                  "exit with E_TM_IS_NOT_INITIALIZED. Condition: !this->is_initialized_");
+        "exit with E_TM_IS_NOT_INITIALIZED. Condition: !this->is_initialized_");
     return E_TM_IS_NOT_INITIALIZED;
   }
   DeviceUID device_id = converter_.HandleToUid(device_handle);
   LOGGER_DEBUG(logger_, "Convert handle to id:" << device_id);
 
   sync_primitives::AutoReadLock lock(device_to_adapter_map_lock_);
-  DeviceToAdapterMap::iterator it  = device_to_adapter_map_.find(device_id);
+  DeviceToAdapterMap::iterator it = device_to_adapter_map_.find(device_id);
   if (it == device_to_adapter_map_.end()) {
     LOGGER_WARN(logger_, "No device adapter found by id " << device_id);
     LOGGER_TRACE(logger_, "exit with E_INVALID_HANDLE. Condition: NULL == ta");
@@ -168,7 +168,7 @@ int TransportManagerImpl::Disconnect(const ConnectionUID cid) {
     LOGGER_ERROR(logger_, "TransportManager is not initialized.");
     LOGGER_TRACE(
         logger_,
-                  "exit with E_TM_IS_NOT_INITIALIZED. Condition: !this->is_initialized_");
+        "exit with E_TM_IS_NOT_INITIALIZED. Condition: !this->is_initialized_");
     return E_TM_IS_NOT_INITIALIZED;
   }
 
@@ -184,7 +184,7 @@ int TransportManagerImpl::Disconnect(const ConnectionUID cid) {
   }
 
   connection->transport_adapter->Disconnect(connection->device,
-      connection->application);
+                                            connection->application);
   // TODO(dchmerev@luxoft.com): Return disconnect timeout
   /*
   int messages_count = 0;
@@ -227,14 +227,14 @@ int TransportManagerImpl::DisconnectForce(const ConnectionUID cid) {
   const ConnectionInternal* connection = GetConnection(cid);
   if (NULL == connection) {
     LOGGER_ERROR(
-      logger_,
-      "TransportManagerImpl::DisconnectForce: Connection does not exist.");
+        logger_,
+        "TransportManagerImpl::DisconnectForce: Connection does not exist.");
     LOGGER_TRACE(logger_,
                  "exit with E_INVALID_HANDLE. Condition: NULL == connection");
     return E_INVALID_HANDLE;
   }
   connection->transport_adapter->Disconnect(connection->device,
-      connection->application);
+                                            connection->application);
   LOGGER_TRACE(logger_, "exit with E_SUCCESS");
   return E_SUCCESS;
 }
@@ -309,17 +309,17 @@ int TransportManagerImpl::SendMessageToDevice(
   }
 
   {
-  sync_primitives::AutoReadLock lock(connections_lock_);
+    sync_primitives::AutoReadLock lock(connections_lock_);
     const ConnectionInternal* connection =
         GetConnection(message->connection_key());
-  if (NULL == connection) {
+    if (NULL == connection) {
       LOGGER_ERROR(logger_,
                    "Connection with id " << message->connection_key()
-                  << " does not exist.");
+                                         << " does not exist.");
       LOGGER_TRACE(logger_,
                    "exit with E_INVALID_HANDLE. Condition: NULL == connection");
-    return E_INVALID_HANDLE;
-  }
+      return E_INVALID_HANDLE;
+    }
 
     if (connection->shutdown_) {
       LOGGER_ERROR(
@@ -328,8 +328,8 @@ int TransportManagerImpl::SendMessageToDevice(
       LOGGER_TRACE(logger_,
                    "exit with E_CONNECTION_IS_TO_SHUTDOWN. Condition: "
                    "connection->shutDown");
-    return E_CONNECTION_IS_TO_SHUTDOWN;
-  }
+      return E_CONNECTION_IS_TO_SHUTDOWN;
+    }
   }
 #ifdef TELEMETRY_MONITOR
   if (metric_observer_) {
@@ -373,7 +373,7 @@ int TransportManagerImpl::RemoveDevice(const DeviceHandle device_handle) {
 }
 
 int TransportManagerImpl::AddTransportAdapter(
-  transport_adapter::TransportAdapter* transport_adapter) {
+    transport_adapter::TransportAdapter* transport_adapter) {
   LOGGER_TRACE(logger_, "enter. TransportAdapter: " << transport_adapter);
 
   if (transport_adapter_listeners_.find(transport_adapter) !=
@@ -386,9 +386,9 @@ int TransportManagerImpl::AddTransportAdapter(
     return E_ADAPTER_EXISTS;
   }
   transport_adapter_listeners_[transport_adapter] =
-    new TransportAdapterListenerImpl(this, transport_adapter);
+      new TransportAdapterListenerImpl(this, transport_adapter);
   transport_adapter->AddListener(
-    transport_adapter_listeners_[transport_adapter]);
+      transport_adapter_listeners_[transport_adapter]);
 
   if (transport_adapter->IsInitialised() ||
       transport_adapter->Init() == TransportAdapter::OK) {
@@ -404,7 +404,7 @@ int TransportManagerImpl::SearchDevices() {
     LOGGER_ERROR(logger_, "TM is not initialized");
     LOGGER_TRACE(
         logger_,
-                  "exit with E_TM_IS_NOT_INITIALIZED. Condition: !this->is_initialized_");
+        "exit with E_TM_IS_NOT_INITIALIZED. Condition: !this->is_initialized_");
     return E_TM_IS_NOT_INITIALIZED;
   }
 
@@ -413,7 +413,7 @@ int TransportManagerImpl::SearchDevices() {
   bool success_occurred = false;
 
   for (std::vector<TransportAdapter*>::iterator it =
-         transport_adapters_.begin();
+           transport_adapters_.begin();
        it != transport_adapters_.end();
        ++it) {
     LOGGER_DEBUG(logger_, "Iterating over transport adapters");
@@ -449,7 +449,7 @@ int TransportManagerImpl::SearchDevices() {
   }
   int transport_adapter_search =
       (success_occurred || transport_adapters_.empty()) ? E_SUCCESS
-                                 : E_ADAPTERS_FAIL;
+                                                        : E_ADAPTERS_FAIL;
   if (transport_adapter_search == E_SUCCESS) {
     LOGGER_TRACE(logger_,
                  "exit with E_SUCCESS. Condition: success_occured || "
@@ -462,13 +462,13 @@ int TransportManagerImpl::SearchDevices() {
   return transport_adapter_search;
 }
 
-int TransportManagerImpl::Init(resumption::LastState &last_state) {
+int TransportManagerImpl::Init(resumption::LastState& last_state) {
   // Last state requred to initialize Transport adapters
   UNUSED(last_state);
   LOGGER_TRACE(logger_, "enter");
-    is_initialized_ = true;
+  is_initialized_ = true;
   LOGGER_TRACE(logger_, "exit with E_SUCCESS");
-    return E_SUCCESS;
+  return E_SUCCESS;
 }
 
 int TransportManagerImpl::Reinit() {
@@ -493,7 +493,7 @@ int TransportManagerImpl::Visibility(const bool& on_off) const {
   }
 
   for (std::vector<TransportAdapter*>::const_iterator it =
-         transport_adapters_.begin();
+           transport_adapters_.begin();
        it != transport_adapters_.end();
        ++it) {
     if (on_off) {
@@ -504,7 +504,7 @@ int TransportManagerImpl::Visibility(const bool& on_off) const {
     if (TransportAdapter::Error::NOT_SUPPORTED == ret) {
       LOGGER_DEBUG(logger_,
                    "Visibility change is not supported for adapter "
-                    << *it << "[" << (*it)->GetDeviceType() << "]");
+                       << *it << "[" << (*it)->GetDeviceType() << "]");
     }
   }
   LOGGER_TRACE(logger_, "exit with E_SUCCESS");
@@ -516,26 +516,26 @@ void TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
   std::set<DeviceInfo> old_devices;
   std::set<DeviceInfo> new_devices;
   {
-  sync_primitives::AutoWriteLock lock(device_list_lock_);
-  for (DeviceInfoList::iterator it = device_list_.begin();
-       it != device_list_.end();) {
-    if (it->first == ta) {
-      old_devices.insert(it->second);
-      it = device_list_.erase(it);
-    } else {
-      ++it;
+    sync_primitives::AutoWriteLock lock(device_list_lock_);
+    for (DeviceInfoList::iterator it = device_list_.begin();
+         it != device_list_.end();) {
+      if (it->first == ta) {
+        old_devices.insert(it->second);
+        it = device_list_.erase(it);
+      } else {
+        ++it;
+      }
     }
-  }
 
-  const DeviceList dev_list = ta->GetDeviceList();
+    const DeviceList dev_list = ta->GetDeviceList();
     for (DeviceList::const_iterator it = dev_list.begin(); it != dev_list.end();
          ++it) {
-    DeviceHandle device_handle = converter_.UidToHandle(*it);
+      DeviceHandle device_handle = converter_.UidToHandle(*it);
       DeviceInfo info(
           device_handle, *it, ta->DeviceName(*it), ta->GetConnectionType());
-    device_list_.push_back(std::make_pair(ta, info));
-    new_devices.insert(info);
-  }
+      device_list_.push_back(std::make_pair(ta, info));
+      new_devices.insert(info);
+    }
   }
 
   std::set<DeviceInfo> added_devices;
@@ -618,7 +618,7 @@ TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
 }
 
 TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
-  const DeviceUID& device, const ApplicationHandle& application) {
+    const DeviceUID& device, const ApplicationHandle& application) {
   LOGGER_AUTO_TRACE(logger_);
   LOGGER_DEBUG(logger_,
                "DeviceUID: " << &device
@@ -700,9 +700,9 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
           &TransportManagerListener::OnConnectionEstablished,
           DeviceInfo(device_handle,
                      event.device_uid,
-                                event.transport_adapter->DeviceName(event.device_uid),
-                                event.transport_adapter->GetConnectionType()),
-                 connection_id_counter_);
+                     event.transport_adapter->DeviceName(event.device_uid),
+                     event.transport_adapter->GetConnectionType()),
+          connection_id_counter_);
       LOGGER_DEBUG(logger_, "event_type = ON_CONNECT_DONE");
       break;
     }
@@ -711,9 +711,9 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
           &TransportManagerListener::OnConnectionFailed,
           DeviceInfo(converter_.UidToHandle(event.device_uid),
                      event.device_uid,
-                                event.transport_adapter->DeviceName(event.device_uid),
-                                event.transport_adapter->GetConnectionType()),
-                 ConnectError());
+                     event.transport_adapter->DeviceName(event.device_uid),
+                     event.transport_adapter->GetConnectionType()),
+          ConnectError());
       LOGGER_DEBUG(logger_, "event_type = ON_CONNECT_FAIL");
       break;
     }
@@ -724,7 +724,7 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       if (NULL == connection) {
         LOGGER_ERROR(logger_, "Connection not found");
         LOGGER_DEBUG(logger_,
-                      "event_type = ON_DISCONNECT_DONE && NULL == connection");
+                     "event_type = ON_DISCONNECT_DONE && NULL == connection");
         connections_lock_.ReleaseForReading();
         break;
       }
@@ -760,14 +760,14 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
                                      << event.application_id << ") not found");
         LOGGER_DEBUG(
             logger_,
-                      "event_type = ON_SEND_DONE. Condition: NULL == connection");
+            "event_type = ON_SEND_DONE. Condition: NULL == connection");
         break;
       }
       RaiseEvent(&TransportManagerListener::OnTMMessageSend, event.event_data);
       if (connection->shutdown_ && --connection->messages_count == 0) {
         connection->timer->Stop();
         connection->transport_adapter->Disconnect(connection->device,
-            connection->application);
+                                                  connection->application);
       }
       LOGGER_DEBUG(logger_, "event_type = ON_SEND_DONE");
       break;
@@ -779,19 +779,19 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       }
 #endif  // TELEMETRY_MONITOR
       {
-      sync_primitives::AutoReadLock lock(connections_lock_);
-      ConnectionInternal* connection =
-          GetConnection(event.device_uid, event.application_id);
-      if (connection == NULL) {
+        sync_primitives::AutoReadLock lock(connections_lock_);
+        ConnectionInternal* connection =
+            GetConnection(event.device_uid, event.application_id);
+        if (connection == NULL) {
           LOGGER_ERROR(logger_,
                        "Connection ('" << event.device_uid << ", "
-                      << event.application_id
-                      << ") not found");
+                                       << event.application_id
+                                       << ") not found");
           LOGGER_DEBUG(
               logger_,
-                      "event_type = ON_SEND_FAIL. Condition: NULL == connection");
-        break;
-      }
+              "event_type = ON_SEND_FAIL. Condition: NULL == connection");
+          break;
+        }
       }
 
       // TODO(YK): start timer here to wait before notify caller
@@ -809,20 +809,20 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
     }
     case TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE: {
       {
-      sync_primitives::AutoReadLock lock(connections_lock_);
-      ConnectionInternal* connection =
-          GetConnection(event.device_uid, event.application_id);
-      if (connection == NULL) {
+        sync_primitives::AutoReadLock lock(connections_lock_);
+        ConnectionInternal* connection =
+            GetConnection(event.device_uid, event.application_id);
+        if (connection == NULL) {
           LOGGER_ERROR(logger_,
                        "Connection ('" << event.device_uid << ", "
-                      << event.application_id
-                      << ") not found");
+                                       << event.application_id
+                                       << ") not found");
           LOGGER_DEBUG(
               logger_,
-                      "event_type = ON_RECEIVED_DONE. Condition: NULL == connection");
-        break;
-      }
-      event.event_data->set_connection_key(connection->id);
+              "event_type = ON_RECEIVED_DONE. Condition: NULL == connection");
+          break;
+        }
+        event.event_data->set_connection_key(connection->id);
       }
 #ifdef TELEMETRY_MONITOR
       if (metric_observer_) {
@@ -904,7 +904,7 @@ void TransportManagerImpl::Handle(::protocol_handler::RawMessagePtr msg) {
   TransportAdapter* transport_adapter = connection->transport_adapter;
   LOGGER_DEBUG(logger_,
                "Got adapter " << transport_adapter << "["
-                << transport_adapter->GetDeviceType() << "]"
+                              << transport_adapter->GetDeviceType() << "]"
                               << " by session id " << msg->connection_key());
 
   if (NULL == transport_adapter) {
@@ -916,7 +916,7 @@ void TransportManagerImpl::Handle(::protocol_handler::RawMessagePtr msg) {
   } else {
     if (TransportAdapter::OK ==
         transport_adapter->SendData(
-          connection->device, connection->application, msg)) {
+            connection->device, connection->application, msg)) {
       LOGGER_TRACE(logger_, "Data sent to adapter");
     } else {
       LOGGER_ERROR(logger_, "Data sent error");
@@ -940,8 +940,8 @@ TransportManagerImpl::ConnectionInternal::ConnectionInternal(
     , timer(utils::MakeShared<timer::Timer,
                               const char*,
                               ::timer::TimerTaskImpl<ConnectionInternal>*>(
-                "TM DiscRoutine",
-                new ::timer::TimerTaskImpl<ConnectionInternal> (
+          "TM DiscRoutine",
+          new ::timer::TimerTaskImpl<ConnectionInternal>(
               this, &ConnectionInternal::DisconnectFailedRoutine)))
     , shutdown_(false)
     , device_handle_(device_handle)
@@ -962,5 +962,3 @@ void TransportManagerImpl::ConnectionInternal::DisconnectFailedRoutine() {
 }
 
 }  // namespace transport_manager
-
-

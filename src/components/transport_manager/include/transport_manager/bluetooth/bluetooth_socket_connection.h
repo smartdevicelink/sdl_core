@@ -62,7 +62,6 @@ class TransportAdapterController;
  */
 class BluetoothSocketConnection : public Connection {
  public:
-
   /**
    * @brief Constructor.
    *
@@ -79,8 +78,8 @@ class BluetoothSocketConnection : public Connection {
    * @brief Destructor.
    */
   ~BluetoothSocketConnection();
- protected:
 
+ protected:
   /**
    * @brief Establish connection.
    *

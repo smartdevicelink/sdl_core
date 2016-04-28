@@ -31,7 +31,7 @@
  */
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_HELPERS_H
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_HELPERS_H
-#include<algorithm>
+#include <algorithm>
 /**
  * These helpers allows to simplify compare strategy between some objects.
  * Suppose user has some enum with value E with some numbers of possible values
@@ -57,71 +57,70 @@
  */
 namespace helpers {
 
-  template<typename T>
-  bool EQ (T what, T to) {
-    return what == to;
-  }
+template <typename T>
+bool EQ(T what, T to) {
+  return what == to;
+}
 
-  template<typename T>
-  bool NEQ (T what, T to) {
-    return !EQ<T>(what, to);
-  }
+template <typename T>
+bool NEQ(T what, T to) {
+  return !EQ<T>(what, to);
+}
 
 inline bool ALL(bool what, bool to) {
-    return what && to;
-  }
+  return what && to;
+}
 
 inline bool ONE(bool what, bool to) {
-    return what || to;
-  }
+  return what || to;
+}
 
-  template <typename T,
-            bool (*CompareType)(T ,T),
-            bool (*CmpStrategy)(bool ,bool)>
-  bool Compare (T what, T to) {
-    return CompareType(what, to);
-  }
+template <typename T,
+          bool (*CompareType)(T, T),
+          bool (*CmpStrategy)(bool, bool)>
+bool Compare(T what, T to) {
+  return CompareType(what, to);
+}
 
-  template <typename T,
-            bool (*CompareType)(T ,T),
-            bool (*CmpStrategy)(bool, bool)>
-  bool Compare(T what, T to, T to1) {
-    return CmpStrategy(Compare<T, CompareType, CmpStrategy>(what, to),
-                       Compare<T, CompareType, CmpStrategy>(what, to1));
-  }
+template <typename T,
+          bool (*CompareType)(T, T),
+          bool (*CmpStrategy)(bool, bool)>
+bool Compare(T what, T to, T to1) {
+  return CmpStrategy(Compare<T, CompareType, CmpStrategy>(what, to),
+                     Compare<T, CompareType, CmpStrategy>(what, to1));
+}
 
-  template <typename T,
-            bool (*CompareType)(T ,T),
-            bool (*CmpStrategy)(bool, bool)>
-  bool Compare(T what, T to, T to1, T to2) {
-    return CmpStrategy(Compare<T, CompareType, CmpStrategy>(what, to, to1),
-                       Compare<T, CompareType, CmpStrategy>(what, to2));
-  }
+template <typename T,
+          bool (*CompareType)(T, T),
+          bool (*CmpStrategy)(bool, bool)>
+bool Compare(T what, T to, T to1, T to2) {
+  return CmpStrategy(Compare<T, CompareType, CmpStrategy>(what, to, to1),
+                     Compare<T, CompareType, CmpStrategy>(what, to2));
+}
 
-  template <typename T,
-            bool (*CompareType)(T ,T),
-            bool (*CmpStrategy)(bool, bool)>
-  bool Compare(T what, T to, T to1, T to2, T to3) {
-    return CmpStrategy(Compare<T, CompareType, CmpStrategy>(what, to, to1, to2),
-                       Compare<T, CompareType, CmpStrategy>(what, to3));
-  }
+template <typename T,
+          bool (*CompareType)(T, T),
+          bool (*CmpStrategy)(bool, bool)>
+bool Compare(T what, T to, T to1, T to2, T to3) {
+  return CmpStrategy(Compare<T, CompareType, CmpStrategy>(what, to, to1, to2),
+                     Compare<T, CompareType, CmpStrategy>(what, to3));
+}
 
-  template <typename T,
-            bool (*CompareType)(T ,T),
-            bool (*CmpStrategy)(bool, bool)>
-  bool Compare(T what, T to, T to1, T to2, T to3, T to4) {
+template <typename T,
+          bool (*CompareType)(T, T),
+          bool (*CmpStrategy)(bool, bool)>
+bool Compare(T what, T to, T to1, T to2, T to3, T to4) {
   return CmpStrategy(
       Compare<T, CompareType, CmpStrategy>(what, to, to1, to2, to3),
-                       Compare<T, CompareType, CmpStrategy>(what, to4));
-  }
+      Compare<T, CompareType, CmpStrategy>(what, to4));
+}
 
-
-  template<typename Container>
+template <typename Container>
 bool in_range(const Container& container,
               const typename Container::value_type& value) {
   return std::find(container.begin(), container.end(), value) !=
          container.end();
-  }
+}
 }
 
-#endif // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_HELPERS_H
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_HELPERS_H

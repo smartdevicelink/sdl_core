@@ -486,7 +486,7 @@ class ApplicationManagerImpl
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
       LOGGER_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, audio_state);
@@ -503,7 +503,7 @@ class ApplicationManagerImpl
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
       LOGGER_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, new_state, SendActivateApp);
@@ -519,7 +519,7 @@ class ApplicationManagerImpl
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
       LOGGER_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, hmi_level, SendActivateApp);
@@ -539,7 +539,7 @@ class ApplicationManagerImpl
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
       LOGGER_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, hmi_level, audio_state, SendActivateApp);
@@ -560,7 +560,7 @@ class ApplicationManagerImpl
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
       LOGGER_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(
@@ -577,7 +577,7 @@ class ApplicationManagerImpl
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
       LOGGER_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, system_context);
@@ -592,7 +592,7 @@ class ApplicationManagerImpl
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
       LOGGER_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, hmi_level);
@@ -607,17 +607,17 @@ class ApplicationManagerImpl
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
       LOGGER_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, state);
   }
 
- /**
-   * @brief Checks, if particular state is active
-   * @param state_id State
-   * @return True, if state is active, otherwise - false
-   */
+  /**
+    * @brief Checks, if particular state is active
+    * @param state_id State
+    * @return True, if state is active, otherwise - false
+    */
   bool IsStateActive(HmiState::StateID state_id) const;
 
   /**
@@ -936,7 +936,7 @@ class ApplicationManagerImpl
   protocol_handler::ProtocolHandler& protocol_handler() const OVERRIDE;
 
   virtual policy::PolicyHandlerInterface& GetPolicyHandler() OVERRIDE {
-      return policy_handler_;
+    return policy_handler_;
   }
   /**
    * @brief Checks, if given RPC is allowed at current HMI level for specific
@@ -1116,7 +1116,6 @@ class ApplicationManagerImpl
   void PullLanguagesInfo(const smart_objects::SmartObject& app_data,
                          smart_objects::SmartObject& ttsName,
                          smart_objects::SmartObject& vrSynonym);
-
 
   /**
    * @brief Method transforms string to AppHMIType

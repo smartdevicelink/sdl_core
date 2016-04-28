@@ -56,7 +56,6 @@ void PutFileResponse::Run() {
     return;
   }
 
-
   SendResponse((*message_)[strings::msg_params][strings::success].asBool());
 }
 

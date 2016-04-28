@@ -178,8 +178,8 @@ class TransportAdapterImpl : public TransportAdapter,
    **/
   virtual TransportAdapter::Error SendData(
       const DeviceUID& device_handle,
-                                           const ApplicationHandle& app_handle,
-                                           const ::protocol_handler::RawMessagePtr data);
+      const ApplicationHandle& app_handle,
+      const ::protocol_handler::RawMessagePtr data);
 
   /**
    * @brief Start client listener.
@@ -437,7 +437,6 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual bool ToBeAutoConnected(DeviceSptr device) const;
 
-
   /**
    * @brief Returns true if \a device is to be disconnected automatically when
    * all applications will be closed
@@ -454,7 +453,7 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual ConnectionSPtr FindEstablishedConnection(
       const DeviceUID& device_handle,
-                                           const ApplicationHandle& app_handle) const;
+      const ApplicationHandle& app_handle) const;
   const TransportManagerSettings& get_settings() const {
     return settings_;
   }
@@ -542,7 +541,7 @@ class TransportAdapterImpl : public TransportAdapter,
 #endif  // TELEMETRY_MONITOR
 
   resumption::LastState& last_state() const {
-      return last_state_;
+    return last_state_;
   }
 
   /**
@@ -567,4 +566,4 @@ class TransportAdapterImpl : public TransportAdapter,
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_IMPL_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_IMPL_H_

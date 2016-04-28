@@ -51,4 +51,3 @@ void UIEndAudioPassThruRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

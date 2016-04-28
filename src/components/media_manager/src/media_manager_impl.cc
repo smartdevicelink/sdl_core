@@ -30,7 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "media_manager/media_manager_impl.h"
 #include "media_manager/audio/from_mic_recorder_listener.h"
 #include "media_manager/streamer_listener.h"
@@ -55,7 +54,6 @@
 
 namespace media_manager {
 
-
 CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManager")
 
 MediaManagerImpl::MediaManagerImpl(
@@ -70,7 +68,6 @@ MediaManagerImpl::MediaManagerImpl(
 }
 
 MediaManagerImpl::~MediaManagerImpl() {
-
   if (from_mic_recorder_) {
     delete from_mic_recorder_;
     from_mic_recorder_ = NULL;
@@ -79,28 +76,28 @@ MediaManagerImpl::~MediaManagerImpl() {
 
 #ifdef BUILD_TESTS
 
-  void MediaManagerImpl::set_mock_mic_listener(MediaListenerPtr media_listener) {
-    from_mic_listener_ = media_listener;
-  }
+void MediaManagerImpl::set_mock_mic_listener(MediaListenerPtr media_listener) {
+  from_mic_listener_ = media_listener;
+}
 
 #ifdef EXTENDED_MEDIA_MODE
-  void MediaManagerImpl::set_mock_mic_recorder(MediaAdapterImpl* media_adapter) {
-    from_mic_recorder_ = media_adapter;
-  }
+void MediaManagerImpl::set_mock_mic_recorder(MediaAdapterImpl* media_adapter) {
+  from_mic_recorder_ = media_adapter;
+}
 
-#endif // EXTENDED_MEDIA_MODE
+#endif  // EXTENDED_MEDIA_MODE
 
-  void MediaManagerImpl::set_mock_streamer(protocol_handler::ServiceType stype,
-                                           MediaAdapterImpl* mock_stream) {
-    streamer_[stype]=  mock_stream;
-  }
+void MediaManagerImpl::set_mock_streamer(protocol_handler::ServiceType stype,
+                                         MediaAdapterImpl* mock_stream) {
+  streamer_[stype] = mock_stream;
+}
 
 void MediaManagerImpl::set_mock_streamer_listener(
     protocol_handler::ServiceType stype, MediaAdapterListener* mock_stream) {
-    streamer_listener_[stype]=  mock_stream;
-  }
+  streamer_listener_[stype] = mock_stream;
+}
 
-#endif // BUILD_TESTS
+#endif  // BUILD_TESTS
 
 void MediaManagerImpl::Init() {
   using namespace protocol_handler;
@@ -110,7 +107,7 @@ void MediaManagerImpl::Init() {
     streamer_[ServiceType::kMobileNav] = new SocketVideoStreamerAdapter(
         settings().server_address(), settings().video_streaming_port());
   } else if ("pipe" == settings().video_server_type()) {
-    streamer_[ServiceType::kMobileNav]= new PipeVideoStreamerAdapter(
+    streamer_[ServiceType::kMobileNav] = new PipeVideoStreamerAdapter(
         settings().named_video_pipe_path(), settings().app_storage_folder());
   } else if ("file" == settings().video_server_type()) {
     streamer_[ServiceType::kMobileNav] = new FileVideoStreamerAdapter(
@@ -143,8 +140,8 @@ void MediaManagerImpl::Init() {
 }
 
 void MediaManagerImpl::StartMicrophoneRecording(int32_t application_key,
-  const std::string& output_file,
-  int32_t duration) {
+                                                const std::string& output_file,
+                                                int32_t duration) {
   LOGGER_INFO(logger_,
               "MediaManagerImpl::StartMicrophoneRecording to " << output_file);
   application_manager::ApplicationSharedPtr app =
@@ -158,9 +155,9 @@ void MediaManagerImpl::StartMicrophoneRecording(int32_t application_key,
   if (from_mic_recorder_) {
     from_mic_recorder_->AddListener(from_mic_listener_);
     (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
-    ->set_output_file(file_path);
+        ->set_output_file(file_path);
     (static_cast<FromMicRecorderAdapter*>(from_mic_recorder_))
-    ->set_duration(duration);
+        ->set_duration(duration);
     from_mic_recorder_->StartActivity(application_key);
   }
 #else
@@ -171,10 +168,10 @@ void MediaManagerImpl::StartMicrophoneRecording(int32_t application_key,
     } else {
       LOGGER_WARN(logger_, "Could not remove file " << output_file);
     }
-    }
+  }
   const std::string record_file_source = settings().app_resource_folder() +
                                          "/" +
-      settings().recording_file_source();
+                                         settings().recording_file_source();
   std::vector<uint8_t> buf;
   if (file_system::ReadBinaryFile(record_file_source, buf)) {
     if (file_system::Write(file_path, buf)) {
@@ -226,7 +223,6 @@ void MediaManagerImpl::StopStreaming(
   }
 }
 
-
 void MediaManagerImpl::OnMessageReceived(
     const ::protocol_handler::RawMessagePtr message) {
   using namespace protocol_handler;
@@ -238,7 +234,7 @@ void MediaManagerImpl::OnMessageReceived(
   const ServiceType service_type = message->service_type();
 
   if (Compare<ServiceType, NEQ, ALL>(
-        service_type, ServiceType::kMobileNav, ServiceType::kAudio)) {
+          service_type, ServiceType::kMobileNav, ServiceType::kAudio)) {
     LOGGER_DEBUG(logger_, "Unsupported service type in MediaManager");
     return;
   }

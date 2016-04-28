@@ -52,5 +52,3 @@ void SDLActivateAppResponse::Run() {
 
 }  // namespace commands
 }  // namespace application_manager
-
-

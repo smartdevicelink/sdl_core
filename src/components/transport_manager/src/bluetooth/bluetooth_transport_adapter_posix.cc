@@ -82,11 +82,11 @@ void BluetoothTransportAdapter::Store() const {
        ++i) {
     DeviceUID device_id = *i;
     DeviceSptr device = FindDevice(device_id);
-    if (!device) { // device could have been disconnected
+    if (!device) {  // device could have been disconnected
       continue;
     }
     utils::SharedPtr<BluetoothDevice> bluetooth_device =
-      DeviceSptr::static_pointer_cast<BluetoothDevice>(device);
+        DeviceSptr::static_pointer_cast<BluetoothDevice>(device);
     JsonValue device_dictionary;
     device_dictionary["name"] = bluetooth_device->name();
     char address[18];
@@ -118,7 +118,7 @@ void BluetoothTransportAdapter::Store() const {
   bluetooth_adapter_dictionary["devices"] = devices_dictionary;
   JsonValue& dictionary = last_state().dictionary();
   dictionary["TransportManager"]["BluetoothAdapter"] =
-    bluetooth_adapter_dictionary;
+      bluetooth_adapter_dictionary;
   LOGGER_TRACE(logger_, "exit");
 }
 
@@ -151,18 +151,18 @@ bool BluetoothTransportAdapter::Restore() {
       std::string rfcomm_channel_record =
           application_dictionary["rfcomm_channel"].AsString();
       uint8_t rfcomm_channel =
-        static_cast<uint8_t>(atoi(rfcomm_channel_record.c_str()));
+          static_cast<uint8_t>(atoi(rfcomm_channel_record.c_str()));
       rfcomm_channels.push_back(rfcomm_channel);
     }
     BluetoothDevice* bluetooth_device =
-      new BluetoothDevice(address, name.c_str(), rfcomm_channels);
+        new BluetoothDevice(address, name.c_str(), rfcomm_channels);
     DeviceSptr device(bluetooth_device);
     AddDevice(device);
     for (RfcommChannelVector::const_iterator j = rfcomm_channels.begin();
          j != rfcomm_channels.end();
          ++j) {
       ApplicationHandle app_handle =
-        *j; // for Bluetooth device app_handle is just RFCOMM channel
+          *j;  // for Bluetooth device app_handle is just RFCOMM channel
       if (Error::OK != Connect(device->unique_device_id(), app_handle)) {
         errors_occured = true;
       }

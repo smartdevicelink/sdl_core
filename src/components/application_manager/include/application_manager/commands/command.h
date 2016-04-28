@@ -109,12 +109,11 @@ class Command {
  */
   virtual bool AllowedToTerminate() = 0;
 
-    /**
-   * @brief SetAllowedToTerminate set up allowed to terminate flag.
-   * If true, request controller will terminate request on response
-   */
+  /**
+ * @brief SetAllowedToTerminate set up allowed to terminate flag.
+ * If true, request controller will terminate request on response
+ */
   virtual void SetAllowedToTerminate(const bool allowed) = 0;
-
 
   enum CommandOrigin { ORIGIN_SDL, ORIGIN_MOBILE };
 };

@@ -54,4 +54,3 @@ void OnReadyNotification::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-

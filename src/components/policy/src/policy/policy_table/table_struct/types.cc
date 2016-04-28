@@ -6,25 +6,25 @@
 namespace rpc {
 namespace policy_table_interface_base {
 
-  std::string PolicyTableTypeToString(const PolicyTableType pt_type) {
-      switch (pt_type) {
-        case PT_PRELOADED: {
-          return "PT_PRELOADED";
-        }
-        case PT_UPDATE: {
-          return "PT_UPDATE";
-        }
-        case PT_SNAPSHOT: {
-          return "PT_SNAPSHOT";
-        }
+std::string PolicyTableTypeToString(const PolicyTableType pt_type) {
+  switch (pt_type) {
+    case PT_PRELOADED: {
+      return "PT_PRELOADED";
+    }
+    case PT_UPDATE: {
+      return "PT_UPDATE";
+    }
+    case PT_SNAPSHOT: {
+      return "PT_SNAPSHOT";
+    }
     default: { return "INVALID_PT_TYPE"; }
-      }
   }
+}
 
-  // PolicyBase methods
+// PolicyBase methods
 PolicyBase::PolicyBase() : CompositeType(kUninitialized) {}
 
-  PolicyBase::PolicyBase(Priority priority)
+PolicyBase::PolicyBase(Priority priority)
     : CompositeType(kUninitialized), priority(priority) {}
 PolicyBase::~PolicyBase() {}
 PolicyBase::PolicyBase(const utils::json::JsonValueRef& value__)
@@ -33,50 +33,50 @@ PolicyBase::PolicyBase(const utils::json::JsonValueRef& value__)
 utils::json::JsonValue PolicyBase::ToJsonValue() const {
   utils::json::JsonValue result__(utils::json::ValueType::OBJECT_VALUE);
   impl::WriteJsonField("priority", priority, result__);
-    return result__;
-  }
+  return result__;
+}
 
-  bool PolicyBase::is_valid() const {
-    if (!priority.is_valid()) {
-      return false;
-    }
-    return Validate();
+bool PolicyBase::is_valid() const {
+  if (!priority.is_valid()) {
+    return false;
   }
+  return Validate();
+}
 
-  bool PolicyBase::is_initialized() const {
-    return (initialization_state__ != kUninitialized) || (!struct_empty());
+bool PolicyBase::is_initialized() const {
+  return (initialization_state__ != kUninitialized) || (!struct_empty());
+}
+
+bool PolicyBase::struct_empty() const {
+  if (priority.is_initialized()) {
+    return false;
   }
+  return true;
+}
 
-  bool PolicyBase::struct_empty() const {
-    if (priority.is_initialized()) {
-      return false;
-    }
-    return true;
+void PolicyBase::ReportErrors(rpc::ValidationReport* report__) const {
+  if (struct_empty()) {
+    rpc::CompositeType::ReportErrors(report__);
   }
-
-  void PolicyBase::ReportErrors(rpc::ValidationReport* report__) const {
-    if (struct_empty()) {
-      rpc::CompositeType::ReportErrors(report__);
-    }
-    if (!priority.is_valid()) {
-      priority.ReportErrors(&report__->ReportSubobject("priority"));
-    }
+  if (!priority.is_valid()) {
+    priority.ReportErrors(&report__->ReportSubobject("priority"));
   }
+}
 
-  void PolicyBase::SetPolicyTableType(PolicyTableType pt_type) {
-    CompositeType::SetPolicyTableType(pt_type);
-    priority.SetPolicyTableType(pt_type);
-  }
+void PolicyBase::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  priority.SetPolicyTableType(pt_type);
+}
 
-  // DevicePolicy methods
+// DevicePolicy methods
 DevicePolicy::DevicePolicy() : PolicyBase() {}
 DevicePolicy::DevicePolicy(Priority priority) : PolicyBase(priority) {}
 DevicePolicy::~DevicePolicy() {}
 DevicePolicy::DevicePolicy(const utils::json::JsonValueRef& value__)
     : PolicyBase(value__) {}
 
-  // AppPoliciesSection methods
-  ApplicationPoliciesSection::ApplicationPoliciesSection()
+// AppPoliciesSection methods
+ApplicationPoliciesSection::ApplicationPoliciesSection()
     : CompositeType(kUninitialized) {}
 ApplicationPoliciesSection::ApplicationPoliciesSection(
     const ApplicationPolicies& apps, const DevicePolicy& device)
@@ -87,61 +87,61 @@ ApplicationPoliciesSection::ApplicationPoliciesSection(
     : CompositeType(InitHelper(value__, &utils::json::JsonValueRef::IsObject))
     , apps(value__)
     , device(impl::ValueMember(value__, "device")) {
-    // Since "device" is moved to separate struct, we have to delete it from
-    // parsed apps to avoid validation issues due to possible wrong params in
-    // device section
-    apps.erase("device");
-  }
+  // Since "device" is moved to separate struct, we have to delete it from
+  // parsed apps to avoid validation issues due to possible wrong params in
+  // device section
+  apps.erase("device");
+}
 
 utils::json::JsonValue ApplicationPoliciesSection::ToJsonValue() const {
   utils::json::JsonValue result__(utils::json::ValueType::OBJECT_VALUE);
-    result__ = apps.ToJsonValue();
+  result__ = apps.ToJsonValue();
   impl::WriteJsonField("device", device, result__);
-    return result__;
-  }
+  return result__;
+}
 
-  bool ApplicationPoliciesSection::is_valid() const {
-    if (!device.is_valid()) {
-      return false;
-    }
-    if (!apps.is_valid()) {
-      return false;
-    }
-    return Validate();
+bool ApplicationPoliciesSection::is_valid() const {
+  if (!device.is_valid()) {
+    return false;
   }
+  if (!apps.is_valid()) {
+    return false;
+  }
+  return Validate();
+}
 
-  bool ApplicationPoliciesSection::is_initialized() const {
-    return (initialization_state__ != kUninitialized) || (!struct_empty());
-  }
+bool ApplicationPoliciesSection::is_initialized() const {
+  return (initialization_state__ != kUninitialized) || (!struct_empty());
+}
 
-  bool ApplicationPoliciesSection::struct_empty() const {
-    if (device.is_initialized()) {
-      return false;
-    }
-    if (apps.is_initialized()) {
-      return false;
-    }
-    return true;
+bool ApplicationPoliciesSection::struct_empty() const {
+  if (device.is_initialized()) {
+    return false;
   }
+  if (apps.is_initialized()) {
+    return false;
+  }
+  return true;
+}
 
 void ApplicationPoliciesSection::ReportErrors(
     rpc::ValidationReport* report__) const {
-    if (struct_empty()) {
-      rpc::CompositeType::ReportErrors(report__);
-    }
-    if (!device.is_valid()) {
-      device.ReportErrors(&report__->ReportSubobject("device"));
-    }
-    if (!apps.is_valid()) {
-      apps.ReportErrors(&report__->ReportSubobject("apps"));
-    }
+  if (struct_empty()) {
+    rpc::CompositeType::ReportErrors(report__);
   }
+  if (!device.is_valid()) {
+    device.ReportErrors(&report__->ReportSubobject("device"));
+  }
+  if (!apps.is_valid()) {
+    apps.ReportErrors(&report__->ReportSubobject("apps"));
+  }
+}
 
-  void ApplicationPoliciesSection::SetPolicyTableType(PolicyTableType pt_type) {
-    CompositeType::SetPolicyTableType(pt_type);
-    device.SetPolicyTableType(pt_type);
-    apps.SetPolicyTableType(pt_type);
-  }
+void ApplicationPoliciesSection::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  device.SetPolicyTableType(pt_type);
+  apps.SetPolicyTableType(pt_type);
+}
 
 // ApplicationParams methods
 ApplicationParams::ApplicationParams() : PolicyBase(), groups() {}
@@ -438,8 +438,7 @@ void ModuleConfig::SafeCopyFrom(const ModuleConfig& from) {
   vehicle_make.assign_if_valid(from.vehicle_make);
   vehicle_model.assign_if_valid(from.vehicle_model);
   vehicle_year.assign_if_valid(from.vehicle_year);
-  certificate .assign_if_valid(from.certificate);
-
+  certificate.assign_if_valid(from.certificate);
 }
 
 utils::json::JsonValue ModuleConfig::ToJsonValue() const {
@@ -773,7 +772,7 @@ void MessageLanguages::ReportErrors(rpc::ValidationReport* report__) const {
     if (languages.is_initialized()) {
       std::string validation_info =
           ommited_validation_info +
-                                    PolicyTableTypeToString(GetPolicyTableType());
+          PolicyTableTypeToString(GetPolicyTableType());
       report__->ReportSubobject("languages")
           .set_validation_info(validation_info);
     }
@@ -839,7 +838,7 @@ void ConsumerFriendlyMessages::ReportErrors(
     if (messages.is_initialized()) {
       std::string validation_info =
           ommited_validation_info +
-                                    PolicyTableTypeToString(GetPolicyTableType());
+          PolicyTableTypeToString(GetPolicyTableType());
       report__->ReportSubobject("messages")
           .set_validation_info(validation_info);
     }
@@ -1039,7 +1038,6 @@ bool AppLevel::is_initialized() const {
   return (initialization_state__ != kUninitialized) || (!struct_empty());
 }
 bool AppLevel::struct_empty() const {
-
   if (minutes_in_hmi_full.is_initialized()) {
     return false;
   }
@@ -1371,4 +1369,3 @@ void Table::SetPolicyTableType(PolicyTableType pt_type) {
 
 }  // namespace policy_table_interface_base
 }  // namespace rpc
-

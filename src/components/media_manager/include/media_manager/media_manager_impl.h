@@ -42,39 +42,39 @@
 #include "media_manager/media_adapter_listener.h"
 
 namespace application_manager {
-  class ApplicationManager;
+class ApplicationManager;
 }
 
 namespace connection_handler {
-  class ConnectionHandlerImpl;
+class ConnectionHandlerImpl;
 }
 
 namespace media_manager {
 
 class MediaManagerImpl : public MediaManager,
-  public protocol_handler::ProtocolObserver {
-  public:
+                         public protocol_handler::ProtocolObserver {
+ public:
   MediaManagerImpl(application_manager::ApplicationManager& application_manager,
                    protocol_handler::ProtocolHandler& protocol_handler,
-       const MediaManagerSettings& settings);
-    virtual ~MediaManagerImpl();
+                   const MediaManagerSettings& settings);
+  virtual ~MediaManagerImpl();
 
-    virtual void StartMicrophoneRecording(int32_t application_key,
-                                          const std::string& outputFileName,
-                                          int32_t duration);
-    virtual void StopMicrophoneRecording(int32_t application_key);
+  virtual void StartMicrophoneRecording(int32_t application_key,
+                                        const std::string& outputFileName,
+                                        int32_t duration);
+  virtual void StopMicrophoneRecording(int32_t application_key);
 
   virtual void StartStreaming(int32_t application_key,
                               protocol_handler::ServiceType service_type);
   virtual void StopStreaming(int32_t application_key,
                              protocol_handler::ServiceType service_type);
-    virtual void OnMessageReceived(
+  virtual void OnMessageReceived(
       const ::protocol_handler::RawMessagePtr message);
-    virtual void OnMobileMessageSent(
+  virtual void OnMobileMessageSent(
       const ::protocol_handler::RawMessagePtr message);
-    virtual void FramesProcessed(int32_t application_key, int32_t frame_number);
+  virtual void FramesProcessed(int32_t application_key, int32_t frame_number);
 
-   virtual const MediaManagerSettings& settings() const OVERRIDE;
+  virtual const MediaManagerSettings& settings() const OVERRIDE;
 
 #ifdef BUILD_TESTS
   void set_mock_mic_listener(MediaListenerPtr media_listener);
@@ -92,11 +92,11 @@ class MediaManagerImpl : public MediaManager,
 
   protocol_handler::ProtocolHandler& protocol_handler_;
 
-    MediaAdapterImpl*                  from_mic_recorder_;
-    MediaListenerPtr                   from_mic_listener_;
+  MediaAdapterImpl* from_mic_recorder_;
+  MediaListenerPtr from_mic_listener_;
 
-    std::map<protocol_handler::ServiceType, MediaAdapterImplPtr> streamer_;
-    std::map<protocol_handler::ServiceType, MediaListenerPtr>    streamer_listener_;
+  std::map<protocol_handler::ServiceType, MediaAdapterImplPtr> streamer_;
+  std::map<protocol_handler::ServiceType, MediaListenerPtr> streamer_listener_;
 
   application_manager::ApplicationManager& application_manager_;
 

@@ -51,4 +51,3 @@ void TTSGetCapabilitiesRequest::Run() {
 }  // namespace commands
 
 }  // namespace application_manager
-
