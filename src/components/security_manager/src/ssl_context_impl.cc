@@ -68,7 +68,7 @@ std::string CryptoManagerImpl::SSLContextImpl::LastError() const {
 }
 
 bool CryptoManagerImpl::SSLContextImpl::IsInitCompleted() const {
-  sync_primitives::AutoLock locker(bio_locker);
+  sync_primitives::AutoLock locker(ssl_locker_);
   return SSL_is_init_finished(connection_);
 }
 
@@ -172,6 +172,7 @@ void CryptoManagerImpl::SSLContextImpl::PrintCertData(
 }
 
 void CryptoManagerImpl::SSLContextImpl::PrintCertInfo() {
+  sync_primitives::AutoLock locker(ssl_locker_);
   PrintCertData(SSL_get_certificate(connection_), "HU's");
 
   STACK_OF(X509)* peer_certs = SSL_get_peer_cert_chain(connection_);
@@ -216,6 +217,7 @@ CryptoManagerImpl::SSLContextImpl::CheckCertContext() {
 bool CryptoManagerImpl::SSLContextImpl::ReadHandshakeData(
     const uint8_t** const out_data, size_t* out_data_size) {
   LOGGER_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock locker(ssl_locker_);
   const size_t pend = BIO_ctrl_pending(bioOut_);
   LOGGER_DEBUG(logger_, "Available " << pend << " bytes for handshake");
 
@@ -241,6 +243,7 @@ bool CryptoManagerImpl::SSLContextImpl::ReadHandshakeData(
 bool CryptoManagerImpl::SSLContextImpl::WriteHandshakeData(
     const uint8_t* const in_data, size_t in_data_size) {
   LOGGER_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock locker(ssl_locker_);
   if (in_data && in_data_size) {
     const int ret = BIO_write(bioIn_, in_data, in_data_size);
     if (ret <= 0) {
@@ -256,46 +259,71 @@ SSLContext::HandshakeResult
 CryptoManagerImpl::SSLContextImpl::PerformHandshake() {
   const int handshake_result = SSL_do_handshake(connection_);
   if (handshake_result == 1) {
-    const HandshakeResult result = CheckCertContext();
-    if (result != Handshake_Result_Success) {
-      ResetConnection();
-      is_handshake_pending_ = false;
-      return result;
-    }
-
-    LOGGER_DEBUG(logger_, "SSL handshake successfully finished");
-    // Handshake is successful
-    bioFilter_ = BIO_new(BIO_f_ssl());
-    BIO_set_ssl(bioFilter_, connection_, BIO_NOCLOSE);
-
-    const SSL_CIPHER* cipher = SSL_get_current_cipher(connection_);
-    max_block_size_ = max_block_sizes[SSL_CIPHER_get_name(cipher)];
-    is_handshake_pending_ = false;
-
+    return ProcessSuccessHandshake();
   } else if (handshake_result == 0) {
+    sync_primitives::AutoLock locker(ssl_locker_);
     SSL_clear(connection_);
     is_handshake_pending_ = false;
     return Handshake_Result_Fail;
   } else {
-    const int error = SSL_get_error(connection_, handshake_result);
-    if (error != SSL_ERROR_WANT_READ) {
-      const long error = SSL_get_verify_result(connection_);
-      SetHandshakeError(error);
-      LOGGER_WARN(logger_,
-                  "Handshake failed with error "
-                      << " -> " << SSL_get_error(connection_, error) << " \""
-                      << LastError() << '"');
-      ResetConnection();
-      is_handshake_pending_ = false;
-
-      // In case error happened but ssl verification shows OK
-      // method will return AbnormalFail.
-      if (X509_V_OK == error) {
-        return Handshake_Result_AbnormalFail;
-      }
-      return openssl_error_convert_to_internal(error);
-    }
+    return ProcessHandshakeError(handshake_result);
   }
+  return Handshake_Result_Success;
+}
+
+SSLContext::HandshakeResult
+CryptoManagerImpl::SSLContextImpl::ProcessSuccessHandshake() {
+  sync_primitives::AutoLock locker(ssl_locker_);
+  const HandshakeResult result = CheckCertContext();
+  if (result != Handshake_Result_Success) {
+    ResetConnection();
+    is_handshake_pending_ = false;
+    return result;
+  }
+
+  LOG4CXX_DEBUG(logger_, "SSL handshake successfully finished");
+  // Handshake is successful
+  bioFilter_ = BIO_new(BIO_f_ssl());
+  BIO_set_ssl(bioFilter_, connection_, BIO_NOCLOSE);
+
+  const SSL_CIPHER* cipher = SSL_get_current_cipher(connection_);
+  max_block_size_ = max_block_sizes[SSL_CIPHER_get_name(cipher)];
+  is_handshake_pending_ = false;
+
+  return result;
+}
+
+SSLContext::HandshakeResult
+CryptoManagerImpl::SSLContextImpl::ProcessHandshakeError(
+    const int handshake_error) {
+  // Since the LastError function uses lock and this one is public
+  // we need to cache its value before execute code below
+  // in order  to prevent dead lock, since our mutex is not recursive one.
+  const std::string& last_error = LastError();
+
+  sync_primitives::AutoLock locker(ssl_locker_);
+  const int error = SSL_get_error(connection_, handshake_error);
+  if (error != SSL_ERROR_WANT_READ) {
+    const long error = SSL_get_verify_result(connection_);
+    SetHandshakeError(error);
+    LOG4CXX_WARN(logger_,
+                 "Handshake failed with error "
+                     << " -> "
+                     << SSL_get_error(connection_, error)
+                     << " \""
+                     << last_error
+                     << '"');
+    ResetConnection();
+    is_handshake_pending_ = false;
+
+    // In case error happened but ssl verification shows OK
+    // method will return AbnormalFail.
+    if (X509_V_OK == error) {
+      return Handshake_Result_AbnormalFail;
+    }
+    return openssl_error_convert_to_internal(error);
+  }
+
   return Handshake_Result_Success;
 }
 
@@ -310,15 +338,8 @@ SSLContext::HandshakeResult CryptoManagerImpl::SSLContextImpl::DoHandshakeStep(
   *out_data = NULL;
   *out_data_size = 0;
 
-  // TODO(Ezamakhov): add test - hanshake fail -> restart StartHandshake
-  {
-    sync_primitives::AutoLock locker(bio_locker);
-
-    if (SSL_is_init_finished(connection_)) {
-      LOGGER_DEBUG(logger_, "SSL initilization is finished");
-      is_handshake_pending_ = false;
-      return Handshake_Result_Success;
-    }
+  if (CheckInitFinished()) {
+    return Handshake_Result_Success;
   }
 
   if (!WriteHandshakeData(in_data, in_data_size)) {
@@ -339,11 +360,22 @@ SSLContext::HandshakeResult CryptoManagerImpl::SSLContextImpl::DoHandshakeStep(
   return res;
 }
 
+bool CryptoManagerImpl::SSLContextImpl::CheckInitFinished() {
+  // TODO(Ezamakhov): add test - hanshake fail -> restart StartHandshake
+  sync_primitives::AutoLock locker(ssl_locker_);
+  if (SSL_is_init_finished(connection_)) {
+    LOG4CXX_DEBUG(logger_, "SSL initilization is finished");
+    is_handshake_pending_ = false;
+    return true;
+  }
+  return false;
+}
+
 bool CryptoManagerImpl::SSLContextImpl::Encrypt(const uint8_t* const in_data,
                                                 size_t in_data_size,
                                                 const uint8_t** const out_data,
                                                 size_t* out_data_size) {
-  sync_primitives::AutoLock locker(bio_locker);
+  sync_primitives::AutoLock locker(ssl_locker_);
   if (!SSL_is_init_finished(connection_) || !in_data || !in_data_size) {
     return false;
   }
@@ -369,7 +401,7 @@ bool CryptoManagerImpl::SSLContextImpl::Decrypt(const uint8_t* const in_data,
                                                 size_t in_data_size,
                                                 const uint8_t** const out_data,
                                                 size_t* out_data_size) {
-  sync_primitives::AutoLock locker(bio_locker);
+  sync_primitives::AutoLock locker(ssl_locker_);
   if (!SSL_is_init_finished(connection_)) {
     return false;
   }

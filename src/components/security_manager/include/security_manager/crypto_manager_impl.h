@@ -89,12 +89,16 @@ class CryptoManagerImpl : public CryptoManager {
     void PrintCertData(X509* cert, const std::string& cert_owner);
 
    private:
+    X509* GetCertificate() const;
     void PrintCertInfo();
     HandshakeResult CheckCertContext();
     bool ReadHandshakeData(const uint8_t** const out_data,
                            size_t* out_data_size);
     bool WriteHandshakeData(const uint8_t* const in_data, size_t in_data_size);
     HandshakeResult PerformHandshake();
+    HandshakeResult ProcessSuccessHandshake();
+    HandshakeResult ProcessHandshakeError(const int handshake_error);
+    bool CheckInitFinished();
     typedef size_t (*BlockSizeGetter)(size_t);
     void EnsureBufferSizeEnough(size_t size);
     void SetHandshakeError(const int error);
@@ -106,7 +110,7 @@ class CryptoManagerImpl : public CryptoManager {
     BIO* bioIn_;
     BIO* bioOut_;
     BIO* bioFilter_;
-    mutable sync_primitives::Lock bio_locker;
+    mutable sync_primitives::Lock ssl_locker_;
     size_t buffer_size_;
     uint8_t* buffer_;
     bool is_handshake_pending_;
