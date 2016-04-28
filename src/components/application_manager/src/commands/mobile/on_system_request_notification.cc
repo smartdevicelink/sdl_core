@@ -108,7 +108,7 @@ void OnSystemRequestNotification::AddHeader(BinaryMessage& message) const {
 
   char size_str[24];
 
-  if (0 > sprintf(size_str, "%lu", message.size())) {
+  if (0 > sprintf(size_str, "%zu", static_cast<size_t>(message.size()))) {
     memset(size_str, 0, sizeof(size_str));
   }
 
