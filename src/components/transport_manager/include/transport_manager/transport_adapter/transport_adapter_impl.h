@@ -143,8 +143,8 @@ class TransportAdapterImpl : public TransportAdapter,
    * @param device_handle Handle of device
    * @return Error information about connecting applications on device
    */
-  TransportAdapter::Error ConnectDevice(const DeviceUID& device_handle)
-      OVERRIDE;
+  TransportAdapter::Error ConnectDevice(
+      const DeviceUID& device_handle) OVERRIDE;
 
   /**
    * @brief Disconnect from specified session.
@@ -154,9 +154,9 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @return Error information about possible reason of disconnecting failure.
    **/
-  TransportAdapter::Error Disconnect(const DeviceUID& device_handle,
-                                     const ApplicationHandle& app_handle)
-                                         OVERRIDE;
+  TransportAdapter::Error Disconnect(
+      const DeviceUID& device_handle,
+      const ApplicationHandle& app_handle) OVERRIDE;
 
   /**
    * @brief Disconnect from all sessions on specified device.
@@ -166,8 +166,8 @@ class TransportAdapterImpl : public TransportAdapter,
    * @return Error information about possible reason of disconnecting from
    *specified device failure.
    **/
-  TransportAdapter::Error DisconnectDevice(const DeviceUID& device_handle)
-      OVERRIDE;
+  TransportAdapter::Error DisconnectDevice(
+      const DeviceUID& device_handle) OVERRIDE;
 
   /**
    * @brief Send frame of data.
@@ -178,10 +178,10 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @return Error information about possible reason of sending data failure
    **/
-  TransportAdapter::Error SendData(const DeviceUID& device_handle,
-                                   const ApplicationHandle& app_handle,
-                                   const ::protocol_handler::RawMessagePtr data)
-                                       OVERRIDE;
+  TransportAdapter::Error SendData(
+      const DeviceUID& device_handle,
+      const ApplicationHandle& app_handle,
+      const ::protocol_handler::RawMessagePtr data) OVERRIDE;
 
   /**
    * @brief Start client listener.
@@ -233,8 +233,8 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * @return Container(vector) that holds application unique identifiers.
    */
-  ApplicationList GetApplicationList(const DeviceUID& device_handle) const
-      OVERRIDE;
+  ApplicationList GetApplicationList(
+      const DeviceUID& device_handle) const OVERRIDE;
 
   /**
    * @brief Find device in the internal container(map).
