@@ -304,11 +304,26 @@ class HMICapabilities {
       const smart_objects::SmartObject& audio_pass_thru_capabilities);
 
   /*
+   * @brief Sets supported pcm_stream capabilities
+   *
+   * @param supported pcm stream capabilities
+   */
+  void set_pcm_stream_capabilities(
+      const smart_objects::SmartObject& pcm_stream_capabilities);
+
+  /*
    * @brief Retrieves information about the audio_pass_thru capabilities
    *
    * @return Currently supported audio_pass_thru capabilities
    */
   inline const smart_objects::SmartObject* audio_pass_thru_capabilities() const;
+
+  /*
+   * @brief Retrieves information about the pcm_stream capabilities
+   *
+   * @return Currently supported pcm_streaming capabilities
+   */
+  inline const smart_objects::SmartObject* pcm_stream_capabilities() const;
 
   /*
    * @brief Retrieves information about the preset bank capabilities
@@ -463,6 +478,7 @@ class HMICapabilities {
   smart_objects::SmartObject* vr_capabilities_;
   smart_objects::SmartObject* speech_capabilities_;
   smart_objects::SmartObject* audio_pass_thru_capabilities_;
+  smart_objects::SmartObject* pcm_stream_capabilities_;
   smart_objects::SmartObject* prerecorded_speech_;
   std::string ccpu_version_;
   bool is_navigation_supported_;
@@ -539,6 +555,11 @@ const smart_objects::SmartObject* HMICapabilities::vr_capabilities() const {
 const smart_objects::SmartObject*
 HMICapabilities::audio_pass_thru_capabilities() const {
   return audio_pass_thru_capabilities_;
+}
+
+const smart_objects::SmartObject* HMICapabilities::pcm_stream_capabilities()
+    const {
+  return pcm_stream_capabilities_;
 }
 
 const smart_objects::SmartObject* HMICapabilities::preset_bank_capabilities()

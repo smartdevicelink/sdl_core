@@ -2518,6 +2518,10 @@
       <description>See AudioPassThruCapability</description>
     </param>
 
+    <param name="pcmStreamCapabilities" type="AudioPassThruCapabilities" array="false" mandatory="false">
+      <description>See AudioPassThruCapability</description>
+    </param>
+
     <param name="vehicleType" type="VehicleType" mandatory="false">
       <description>Specifies the vehicle's type. See VehicleType.</description>
     </param>

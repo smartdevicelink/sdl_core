@@ -312,7 +312,13 @@
 		{
 			"samplingRate"	: "44KHZ",
 			"bitsPerSample" : "RATE_8_BIT",
-			"audioType"		: "PCM"
+			"audioType"	: "PCM"
+		},
+		"pcmStreamCapabilities":
+		{
+			"samplingRate"  : "16KHZ",
+			"bitsPerSample" : "RATE_16_BIT",
+			"audioType"	: "PCM"
 		},
 		"hmiZoneCapabilities":"FRONT",
 		"softButtonCapabilities":

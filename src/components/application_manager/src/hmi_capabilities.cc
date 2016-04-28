@@ -132,15 +132,21 @@ std::map<std::string, hmi_apis::Common_ImageType::eType> image_type_enum = {
     {"DYNAMIC", hmi_apis::Common_ImageType::DYNAMIC}};
 
 std::map<std::string, hmi_apis::Common_SamplingRate::eType> sampling_rate_enum =
-    {{"8KHZ", hmi_apis::Common_SamplingRate::RATE_8KHZ},
+    {{"RATE_8KHZ", hmi_apis::Common_SamplingRate::RATE_8KHZ},
+     {"8KHZ", hmi_apis::Common_SamplingRate::RATE_8KHZ},
+     {"RATE_16KHZ", hmi_apis::Common_SamplingRate::RATE_16KHZ},
      {"16KHZ", hmi_apis::Common_SamplingRate::RATE_16KHZ},
+     {"RATE_22KHZ", hmi_apis::Common_SamplingRate::RATE_22KHZ},
      {"22KHZ", hmi_apis::Common_SamplingRate::RATE_22KHZ},
+     {"RATE_44KHZ", hmi_apis::Common_SamplingRate::RATE_44KHZ},
      {"44KHZ", hmi_apis::Common_SamplingRate::RATE_44KHZ}};
 
 std::map<std::string, hmi_apis::Common_BitsPerSample::eType>
     bit_per_sample_enum = {
         {"RATE_8_BIT", hmi_apis::Common_BitsPerSample::RATE_8_BIT},
-        {"RATE_16_BIT", hmi_apis::Common_BitsPerSample::RATE_16_BIT}};
+        {"8_BIT", hmi_apis::Common_BitsPerSample::RATE_8_BIT},
+        {"RATE_16_BIT", hmi_apis::Common_BitsPerSample::RATE_16_BIT},
+        {"16_BIT", hmi_apis::Common_BitsPerSample::RATE_16_BIT}};
 
 std::map<std::string, hmi_apis::Common_AudioType::eType> audio_type_enum = {
     {"PCM", hmi_apis::Common_AudioType::PCM}};
@@ -225,6 +231,7 @@ HMICapabilities::HMICapabilities(ApplicationManager& app_mngr)
     , vr_capabilities_(NULL)
     , speech_capabilities_(NULL)
     , audio_pass_thru_capabilities_(NULL)
+    , pcm_stream_capabilities_(NULL)
     , prerecorded_speech_(NULL)
     , is_navigation_supported_(false)
     , is_phone_call_supported_(false)
@@ -258,6 +265,7 @@ HMICapabilities::~HMICapabilities() {
   delete vr_capabilities_;
   delete speech_capabilities_;
   delete audio_pass_thru_capabilities_;
+  delete pcm_stream_capabilities_;
   delete prerecorded_speech_;
 }
 
@@ -527,6 +535,15 @@ void HMICapabilities::set_audio_pass_thru_capabilities(
       new smart_objects::SmartObject(audio_pass_thru_capabilities);
 }
 
+void HMICapabilities::set_pcm_stream_capabilities(
+    const smart_objects::SmartObject& pcm_stream_capabilities) {
+  if (pcm_stream_capabilities_) {
+    delete pcm_stream_capabilities_;
+  }
+  pcm_stream_capabilities_ = new smart_objects::SmartObject(
+      pcm_stream_capabilities);
+}
+
 void HMICapabilities::set_preset_bank_capabilities(
     const smart_objects::SmartObject& preset_bank_capabilities) {
   if (preset_bank_capabilities_) {
@@ -774,6 +791,34 @@ bool HMICapabilities::load_capabilities_from_file() {
                                        .asString())->second;
         }
         set_audio_pass_thru_capabilities(audio_capabilities_so);
+      }
+
+      if (check_existing_json_member(ui, "pcmStreamCapabilities")) {
+        Json::Value pcm_capabilities = ui.get("pcmStreamCapabilities", "");
+        smart_objects::SmartObject pcm_capabilities_so =
+                smart_objects::SmartObject(smart_objects::SmartType_Map);
+
+        if (check_existing_json_member(pcm_capabilities, "samplingRate")) {
+          pcm_capabilities_so["samplingRate"] =
+              sampling_rate_enum.find(pcm_capabilities.get("samplingRate", "")
+                                          .asString())
+                  ->second;
+        }
+        if (check_existing_json_member(pcm_capabilities, "bitsPerSample")) {
+          pcm_capabilities_so["bitsPerSample"] =
+              bit_per_sample_enum.find(
+                                     pcm_capabilities.get("bitsPerSample", "")
+                                         .asString())
+                  ->second;
+        }
+        if (check_existing_json_member(pcm_capabilities, "audioType")) {
+          pcm_capabilities_so["audioType"] =
+              audio_type_enum.find(pcm_capabilities.get("audioType", "")
+                                       .asString())
+                  ->second;
+        }
+
+        set_pcm_stream_capabilities(pcm_capabilities_so);
       }
 
       if (check_existing_json_member(ui, "hmiZoneCapabilities")) {
