@@ -37,7 +37,7 @@
 #include "utils/winhdr.h"
 #endif
 
-#include <libusb/libusb.h>
+#include <libusb.h>
 #include <list>
 
 #include "utils/lock.h"

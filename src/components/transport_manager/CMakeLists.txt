@@ -28,6 +28,8 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+find_package(LibUSBx REQUIRED)
+
 set(target TransportManager)
 set(TM_SRC_DIR ${COMPONENTS_DIR}/transport_manager/src)
 set(TM_INC_DIR ${COMPONENTS_DIR}/transport_manager/include/transport_manager)
@@ -40,7 +42,7 @@ include_directories (
   ${COMPONENTS_DIR}/config_profile/include
   ${COMPONENTS_DIR}/resumption/include
   ${JSONCPP_INCLUDE_DIRECTORY}
-  ${LIBUSB_INCLUDE_DIRECTORY}
+  ${LIBUSBX_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
