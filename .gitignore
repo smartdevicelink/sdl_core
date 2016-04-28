@@ -2,6 +2,7 @@ build/
 *.user
 src/appMain/sdl_preloaded_pt.json
 src/3rd_party-static/openssl-1.0.2/
+src/3rd_party-static/libusbx-1.0.17/
 *.pyc
 src/components/utils/src/threads/thread.h
 src/components/utils/src/threads/thread_delegate.h

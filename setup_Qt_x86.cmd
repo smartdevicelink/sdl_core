@@ -18,4 +18,6 @@ if %errorlevel% == 2 exit /b 1
 
 call "%SDL_ROOT%\ms\openssl_setup.cmd" x86
 
+call "%SDL_ROOT%\ms\libusbx_setup.cmd" x86
+
 call "%SDL_ROOT%\ms\cmake_generate.cmd" WinQt_x86
