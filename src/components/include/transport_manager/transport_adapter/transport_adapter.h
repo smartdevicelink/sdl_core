@@ -196,6 +196,15 @@ class TransportAdapter {
   virtual Error StopClientListening() = 0;
 
   /**
+   * @brief Remove marked as FINALISING connection from accounting.
+   *
+   * @param device_handle Device unique identifier.
+   * @param app_handle Handle of application.
+   */
+  virtual void RemoveFinalizedConnection(const DeviceUID& device_handle,
+                                         const ApplicationHandle& app_handle) = 0;
+
+  /**
    * @brief Disconnect from specified session.
    *
    * @param device_handle Handle of device to Disconnect from.
