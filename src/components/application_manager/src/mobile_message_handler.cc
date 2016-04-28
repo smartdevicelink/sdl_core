@@ -71,8 +71,8 @@ MessageTypeMap message_types_map = create_map();
 #endif  // SDL_CPP11
 
 std::string GetMessageType(const MessageType message_type) {
-  MessageTypeMap::const_iterator it = messageTypes.find(message_type);
-  if (messageTypes.end() != it) {
+  MessageTypeMap::const_iterator it = message_types_map.find(message_type);
+  if (message_types_map.end() != it) {
     return (*it).second;
   }
   return std::string();
@@ -119,7 +119,7 @@ MobileMessageHandler::HandleIncomingMessageProtocol(
   LOGGER_DEBUG(logger_,
                "Incoming RPC_INFO: " << (out_message->connection_key() >> 16)
                                      << ", "
-                                     << messageTypes[out_message->type()]
+                                     << message_types_map[out_message->type()]
                                      << ", " << out_message->function_id()
                                      << ", " << out_message->correlation_id()
                                      << ", " << out_message->json_message());
@@ -131,10 +131,10 @@ MobileMessageHandler::HandleOutgoingMessageProtocol(
     const MobileMessage& message) {
   LOGGER_DEBUG(logger_,
                "Outgoing RPC_INFO: " << (message->connection_key() >> 16)
-                                     << ", " << messageTypes[message->type()]
-                                     << ", " << message->function_id() << ", "
-                                     << message->correlation_id() << ", "
-                                     << message->json_message());
+               << ", " << message_types_map[message->type()]
+               << ", " << message->function_id() << ", "
+               << message->correlation_id() << ", "
+               << message->json_message());
 
   if (message->protocol_version() == application_manager::kV1) {
     return MobileMessageHandler::HandleOutgoingMessageProtocolV1(message);

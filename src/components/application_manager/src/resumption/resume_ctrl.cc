@@ -33,6 +33,7 @@
 
 #include <fstream>
 #include <algorithm>
+#include <functional>
 
 #include "application_manager/application_manager.h"
 

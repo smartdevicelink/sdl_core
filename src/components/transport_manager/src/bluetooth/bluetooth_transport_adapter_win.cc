@@ -59,7 +59,8 @@ namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 BluetoothTransportAdapter::BluetoothTransportAdapter(
-    resumption::LastState& last_state)
+    resumption::LastState& last_state,
+    const TransportManagerSettings& settings)
     : TransportAdapterImpl(
           new BluetoothDeviceScanner(
               this,
@@ -67,7 +68,8 @@ BluetoothTransportAdapter::BluetoothTransportAdapter(
               BluetoothTransportAdapter::kDeviceRepeatSearchIntervalSec),
           new BluetoothConnectionFactory(this),
           0,
-          last_state) {}
+          last_state,
+          settings) {}
 
 BluetoothTransportAdapter::~BluetoothTransportAdapter() {}
 

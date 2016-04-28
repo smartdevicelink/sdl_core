@@ -53,6 +53,7 @@
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "config_profile/profile.h"
+#include "resumption/last_state.h"
 
 using ::transport_manager::transport_adapter::TransportAdapter;
 

@@ -281,7 +281,7 @@ CryptoManagerImpl::SSLContextImpl::ProcessSuccessHandshake() {
     return result;
   }
 
-  LOG4CXX_DEBUG(logger_, "SSL handshake successfully finished");
+  LOGGER_DEBUG(logger_, "SSL handshake successfully finished");
   // Handshake is successful
   bioFilter_ = BIO_new(BIO_f_ssl());
   BIO_set_ssl(bioFilter_, connection_, BIO_NOCLOSE);
@@ -306,7 +306,7 @@ CryptoManagerImpl::SSLContextImpl::ProcessHandshakeError(
   if (error != SSL_ERROR_WANT_READ) {
     const long error = SSL_get_verify_result(connection_);
     SetHandshakeError(error);
-    LOG4CXX_WARN(logger_,
+    LOGGER_WARN(logger_,
                  "Handshake failed with error "
                      << " -> "
                      << SSL_get_error(connection_, error)
@@ -364,7 +364,7 @@ bool CryptoManagerImpl::SSLContextImpl::CheckInitFinished() {
   // TODO(Ezamakhov): add test - hanshake fail -> restart StartHandshake
   sync_primitives::AutoLock locker(ssl_locker_);
   if (SSL_is_init_finished(connection_)) {
-    LOG4CXX_DEBUG(logger_, "SSL initilization is finished");
+    LOGGER_DEBUG(logger_, "SSL initilization is finished");
     is_handshake_pending_ = false;
     return true;
   }

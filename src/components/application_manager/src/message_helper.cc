@@ -32,6 +32,10 @@
 
 #include "application_manager/message_helper.h"
 
+#if defined(_MSC_VER)
+#define snprintf _snprintf_s
+#endif
+
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 #undef __STDC_FORMAT_MACROS

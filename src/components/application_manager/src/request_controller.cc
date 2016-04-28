@@ -41,6 +41,10 @@ namespace application_manager {
 
 namespace request_controller {
 
+#if defined(_MSC_VER)
+#define snprintf _snprintf_s
+#endif
+
 using namespace sync_primitives;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController")

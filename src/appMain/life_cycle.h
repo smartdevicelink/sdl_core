@@ -33,8 +33,6 @@
 #ifndef SRC_APPMAIN_LIFE_CYCLE_H_
 #define SRC_APPMAIN_LIFE_CYCLE_H_
 #include "utils/macro.h"
-#include "unistd.h"
-
 #include "config_profile/profile.h"
 #include "hmi_message_handler/hmi_message_handler_impl.h"
 #ifdef DBUS_HMIADAPTER

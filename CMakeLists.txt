@@ -42,7 +42,7 @@ option(BUILD_BT_SUPPORT "Bluetooth support" ON)
 option(BUILD_USB_SUPPORT "libusb support" ON)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
-option(TELEMETRY_MONITOR "Enable profiling time test util" ON)
+option(TELEMETRY_MONITOR "Enable profiling time test util" OFF)
 option(ENABLE_LOG "Logging feature" ON)
 option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
@@ -293,11 +293,13 @@ add_definitions(-DOS_POSIX)
 endif()
 
 if (EXTENDED_MEDIA_MODE)
-add_definitions(-DEXTENDED_MEDIA_MODE)
-# required to find 'glibconfig.h'
-find_package(PkgConfig)
-pkg_check_modules(GLIB2 REQUIRED glib-2.0)
-add_definitions(${GLIB2_CFLAGS})
+    add_definitions(-DEXTENDED_MEDIA_MODE)
+    if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+        # required to find 'glibconfig.h'
+        find_package(PkgConfig)
+        pkg_check_modules(GLIB2 REQUIRED glib-2.0)
+        add_definitions(${GLIB2_CFLAGS})
+    endif()
 endif()
 
 

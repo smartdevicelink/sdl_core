@@ -82,7 +82,7 @@ DeviceTypes devicesType = {
     std::make_pair(std::string("WIFI"), hmi_apis::Common_TransportType::WIFI)};
 #else
 DeviceTypes create_map() {
-  DeviceTypes devices_type;
+  DeviceTypes devicesType;
   devicesType.insert(std::make_pair(std::string("USB_AOA"),
                                     hmi_apis::Common_TransportType::USB_AOA));
   devicesType.insert(std::make_pair(std::string("USB_IOS"),
@@ -154,9 +154,12 @@ ApplicationManagerImpl::ApplicationManagerImpl(
   std::srand(std::time(0));
   AddPolicyObserver(this);
 
-  dir_type_to_string_map_ = {{TYPE_STORAGE, "Storage"},
-                             {TYPE_SYSTEM, "System"},
-                             {TYPE_ICONS, "Icons"}};
+  dir_type_to_string_map_.insert(
+      std::make_pair(TYPE_STORAGE, std::string("Storage")));
+  dir_type_to_string_map_.insert(
+      std::make_pair(TYPE_SYSTEM, std::string("System")));
+  dir_type_to_string_map_.insert(
+      std::make_pair(TYPE_ICONS, std::string("Icons")));
 
   sync_primitives::AutoLock lock(timer_pool_lock_);
   TimerSPtr clearing_timer(utils::MakeShared<timer::Timer>(

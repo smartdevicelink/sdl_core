@@ -46,10 +46,6 @@
 #include "networking.h"
 #include "utils/macro.h"
 
-#if defined(EXTENDED_MEDIA_MODE)
-#include <gst/gst.h>
-#endif
-
 #include "media_manager/media_manager_impl.h"
 // ----------------------------------------------------------------------------
 // Third-Party includes
