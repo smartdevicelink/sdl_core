@@ -21,6 +21,7 @@ addons:
     - libudev-dev
     - cmake
     - html2text
+    - clang-format-3.6
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get -q -y install libavahi-client-dev bluez-tools sqlite3 libsqlite3-dev automake1.11
@@ -28,6 +29,7 @@ before_install:
   - sudo dpkg -i lcov_1.11-3_all.deb
 script:
   - sudo ln -sf /usr/bin/gcov-4.9 /usr/bin/gcov
+  - bash -e tools/Utils/check_style.sh
   - mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON && make install
   - sudo ldconfig
   - make test
