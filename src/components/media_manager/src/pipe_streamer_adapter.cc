@@ -59,7 +59,7 @@ bool PipeStreamerAdapter::PipeStreamer::Connect() {
   LOGGER_AUTO_TRACE(logger_);
 
   if (!file_system::CreateDirectoryRecursively(app_storage_folder_)) {
-    LOGGER_ERROR(logger), "Cannot create app folder");
+    LOGGER_ERROR(logger_, "Cannot create app folder");
     return false;
   }
 

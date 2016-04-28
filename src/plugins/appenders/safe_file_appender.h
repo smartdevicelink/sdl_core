@@ -39,7 +39,7 @@ namespace log4cxx {
 
 class SafeFileAppender : public FileAppender {
  public:
-  DECLARE_LOGGER_OBJECT(SafeFileAppender)
+  DECLARE_LOG4CXX_OBJECT(SafeFileAppender)
  protected:
   virtual void subAppend(const spi::LoggingEventPtr& event,
                          log4cxx::helpers::Pool& p);

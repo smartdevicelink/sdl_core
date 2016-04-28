@@ -57,7 +57,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 BluetoothTransportAdapter::~BluetoothTransportAdapter() {}
 
 BluetoothTransportAdapter::BluetoothTransportAdapter(
-    resumption::LastState& last_state, , const TransportManagerSettings& settings)
+    resumption::LastState& last_state, const TransportManagerSettings& settings)
     : TransportAdapterImpl(
           new BluetoothDeviceScanner(
               this,
@@ -116,7 +116,7 @@ void BluetoothTransportAdapter::Store() const {
     }
   }
   bluetooth_adapter_dictionary["devices"] = devices_dictionary;
-  JsonValue& dictionary = last_state().dictionary;
+  JsonValue& dictionary = last_state().dictionary();
   dictionary["TransportManager"]["BluetoothAdapter"] =
     bluetooth_adapter_dictionary;
   LOGGER_TRACE(logger_, "exit");
@@ -126,7 +126,7 @@ bool BluetoothTransportAdapter::Restore() {
   using namespace utils::json;
   LOGGER_TRACE(logger_, "enter");
   bool errors_occured = false;
-  const JsonValue& dictionary = last_state().dictionary;
+  const JsonValue& dictionary = last_state().dictionary();
   const JsonValueRef bluetooth_adapter_dictionary =
       dictionary["TransportManager"]["BluetoothAdapter"];
   const JsonValueRef devices_dictionary =

@@ -72,17 +72,17 @@ include_directories (
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     file (GLOB_RECURSE inc RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} include/application_manager/*.h)
-  
+
     file( GLOB_RECURSE src RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*.cc )
     foreach( file ${inc};${src} )
          get_filename_component( path ${file} PATH )
          string( REPLACE / \\ group ${path} )
          source_group( ${group} FILES ${file} )
      endforeach()
-    add_library("ApplicationManager" ${inc} 
-                                     ${src} )    
-  
-    set(LIBRARIES HMI_API 
+    add_library("ApplicationManager" ${inc}
+                                     ${src} )
+
+    set(LIBRARIES HMI_API
                   Utils
                   MOBILE_API
                   v4_protocol_v1_2_no_extra
@@ -95,7 +95,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
       message ("Generating project ${PROJECT_NAME} in ${CMAKE_CURRENT_BINARY_DIR} set ${HMI_JSON_API}")
       set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_JSON})
     endif (${HMI_JSON_API})
-    message ("Generating project ${PROJECT_NAME} in ${CMAKE_CURRENT_BINARY_DIR} set HMI_DBUS_API: ${HMI_DBUS_API}")        
+    message ("Generating project ${PROJECT_NAME} in ${CMAKE_CURRENT_BINARY_DIR} set HMI_DBUS_API: ${HMI_DBUS_API}")
     if (${HMI_DBUS_API})
         set (HMI_COMMANDS_SOURCES ${HMI_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES_DBUS})
     endif (${HMI_DBUS_API})
@@ -120,7 +120,7 @@ file (GLOB SOURCES
 )
 
 set (MESSAGE_HELPER_SOURCES
-  ${AM_SOURCE_DIR}/src/message_helper/message_helper.cc
+  ${AM_SOURCE_DIR}/src/message_helper.cc
 )
 
 set (POLICIES_MANAGER

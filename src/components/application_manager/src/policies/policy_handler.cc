@@ -168,7 +168,7 @@ const policy::DeviceParams GetDeviceParams(
   device_params.device_handle = device_handle;
   return device_params;
 }
-}
+
 #define POLICY_LIB_CHECK(return_value)                                      \
   {                                                                         \
     sync_primitives::AutoReadLock lock(policy_manager_lock_);               \

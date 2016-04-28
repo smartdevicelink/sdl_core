@@ -125,10 +125,6 @@ class UpdateStatusManager {
     return GetUpdateStatus();
   }
 #endif  // BUILD_TESTS
-<<<<<<< HEAD
-
-=======
->>>>>>> feature/sdl-winport-merge
  private:
   /*
    * @brief Sets flag for update progress

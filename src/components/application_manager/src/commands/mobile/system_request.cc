@@ -530,6 +530,7 @@ void SystemRequest::Run() {
 
   if (mobile_apis::RequestType::QUERY_APPS == request_type) {
     using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
+    using namespace utils::json;
 
     smart_objects::SmartObject sm_object;
     std::string json_string(binary_data.begin(), binary_data.end());

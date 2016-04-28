@@ -85,7 +85,6 @@ LifeCycle::LifeCycle(const profile::Profile& profile)
 #endif  // ENABLE_SECURITY
     , hmi_handler_(NULL)
     , hmi_message_adapter_(NULL)
-    , media_manager_(NULL)
     , last_state_(NULL)
 #ifdef TELEMETRY_MONITOR
     , telemetry_monitor_(NULL)
@@ -140,7 +139,9 @@ bool LifeCycle::StartComponents() {
   DCHECK(!hmi_handler_);
   hmi_handler_ = new hmi_message_handler::HMIMessageHandlerImpl(profile_);
 
-  media_manager_ = new media_manager::MediaManagerImpl(*app_manager_, profile_);
+  media_manager_ = new media_manager::MediaManagerImpl(*app_manager_,
+                                                       *protocol_handler_,
+                                                       profile_);
   if (!app_manager_->Init(*last_state_, media_manager_)) {
     LOGGER_ERROR(logger_, "Application manager init failed.");
     return false;
@@ -173,8 +174,6 @@ bool LifeCycle::StartComponents() {
 
   protocol_handler_->AddProtocolObserver(media_manager_);
   protocol_handler_->AddProtocolObserver(app_manager_);
-
-  media_manager_->SetProtocolHandler(protocol_handler_);
 
   connection_handler_->set_protocol_handler(protocol_handler_);
   connection_handler_->set_connection_handler_observer(app_manager_);
@@ -378,7 +377,6 @@ void LifeCycle::StopComponents() {
 
   LOGGER_INFO(logger_, "Destroying Media Manager");
   DCHECK_OR_RETURN_VOID(media_manager_);
-  media_manager_->SetProtocolHandler(NULL);
   delete media_manager_;
   media_manager_ = NULL;
 

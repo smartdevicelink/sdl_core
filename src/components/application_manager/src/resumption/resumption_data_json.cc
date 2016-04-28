@@ -56,6 +56,7 @@ ResumptionDataJson::ResumptionDataJson(
 void ResumptionDataJson::SaveApplication(
     app_mngr::ApplicationSharedPtr application) {
   using namespace app_mngr;
+  using namespace utils::json;
   LOGGER_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(application);
 
@@ -195,7 +196,6 @@ uint32_t ResumptionDataJson::GetHMIApplicationID(
 
 void ResumptionDataJson::OnSuspend() {
   using namespace app_mngr;
-  using namespace profile;
   using namespace utils::json;
 
   LOGGER_AUTO_TRACE(logger_);
@@ -224,7 +224,6 @@ void ResumptionDataJson::OnSuspend() {
     } else {
       LOGGER_WARN(logger_, "Unknown key among saved applications");
       (*itr)[strings::ign_off_count] = utils::json::JsonValue::UInt(1);
-      ign_off_count = 1;
     }
     to_save.Append(*itr);
   }
@@ -456,7 +455,7 @@ utils::json::JsonValueRef ResumptionDataJson::GetResumptionData() const {
   using namespace utils::json;
   LOGGER_AUTO_TRACE(logger_);
   sync_primitives::AutoLock autolock(resumption_lock_);
-  JsonValue& last_state = last_state().dictionary;
+  JsonValue& last_state = last_state_.dictionary();
   if (!last_state.HasMember(strings::resumption)) {
     last_state[strings::resumption] = JsonValue(ValueType::OBJECT_VALUE);
     LOGGER_WARN(logger_, "resumption section is missed");

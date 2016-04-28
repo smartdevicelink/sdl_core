@@ -43,7 +43,6 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 namespace {
 #ifdef SDL_CPP11

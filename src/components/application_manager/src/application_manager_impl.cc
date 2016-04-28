@@ -98,8 +98,6 @@ DeviceTypes devicesType = create_map();
 
 }  // namespace
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
-
 uint32_t ApplicationManagerImpl::corelation_id_ = 0;
 const uint32_t ApplicationManagerImpl::max_corelation_id_ = UINT_MAX;
 
@@ -2385,7 +2383,7 @@ void ApplicationManagerImpl::HeadUnitReset(
       GetPolicyHandler().UnloadPolicyLibrary();
 
       resume_controller().StopSavePersistentDataTimer();
-      file_system::RemoveDirectoryContent(          
+      file_system::RemoveDirectoryContent(
           get_settings().app_storage_folder());
       break;
     }
@@ -2868,7 +2866,7 @@ bool ApplicationManagerImpl::CanAppStream(
     LOGGER_WARN(logger_, "Unsupported service_type " << service_type);
   }
 
-  return HMILevelAllowsStreaming(app_id, service_type) && is_allowed; 
+  return HMILevelAllowsStreaming(app_id, service_type) && is_allowed;
 }
 
 void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
@@ -3172,7 +3170,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
   }
 
   const std::string full_file_path = file_system::ConcatPath(file_path, file_name);
-  const int64_t file_size = file_system::FileSize(full_file_path);
+  const uint64_t file_size = file_system::FileSize(full_file_path);
   std::ofstream* file_stream;
   if (offset != 0) {
     if (file_size != static_cast<uint64_t>(offset)) {

@@ -328,7 +328,7 @@ void RequestController::updateRequestTimeout(const uint32_t& app_id,
   LOGGER_DEBUG(logger_,
                "New_timeout is NULL. RequestCtrl will "
                          "not manage this request any more");
-  
+
   RequestInfoPtr request_info =
       waiting_for_response_.Find(app_id, correlation_id);
   if (request_info) {
@@ -487,7 +487,7 @@ void RequestController::UpdateTimer() {
   const uint32_t delay_time = 100u;
   if (front) {
     const TimevalStruct current_time = date_time::DateTime::getCurrentTime();
-    const TimevalStruct end_time = front->end_time();
+    TimevalStruct end_time = front->end_time();
     date_time::DateTime::AddMilliseconds(end_time, delay_time);
     if (current_time < end_time) {
       const uint32_t msecs = static_cast<uint32_t>(

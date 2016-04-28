@@ -69,8 +69,7 @@ void SetAppIconRequest::Run() {
   const std::string& sync_file_name =
       (*message_)[strings::msg_params][strings::sync_file_name].asString();
 
-  std::string full_file_path =
-ile_system::ConcatPath(
+  std::string full_file_path = file_system::ConcatPath(
       application_manager_.get_settings().app_storage_folder(),
       app->folder_name(),
       sync_file_name);
@@ -167,8 +166,8 @@ void SetAppIconRequest::CopyToIconStorage(
     return;
   }
 
-  const std::string icon_path = 
-    file_system::ConcatPath(icon_storage, app->mobile_app_id());
+  const std::string icon_path =
+    file_system::ConcatPath(icon_storage, app->policy_app_id());
   if (!file_system::CreateFile(icon_path)) {
     LOGGER_ERROR(logger_, "Can't create icon: " << icon_path);
     return;

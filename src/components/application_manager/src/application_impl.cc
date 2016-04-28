@@ -894,8 +894,8 @@ uint32_t ApplicationImpl::GetAvailableDiskSpace() {
       application_manager_.get_settings().app_dir_quota();
   std::string app_storage_path =
         file_system::ConcatPath(
-            application_manager_.get_settings().app_storage_folder(), 
-            folder_name(); 
+            application_manager_.get_settings().app_storage_folder(),
+            folder_name());
 
   if (file_system::DirectoryExists(app_storage_path)) {
     size_t size_of_directory = file_system::DirectorySize(app_storage_path);

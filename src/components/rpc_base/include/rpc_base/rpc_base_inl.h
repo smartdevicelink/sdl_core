@@ -508,11 +508,6 @@ template<typename T>
 Nullable<T>::Nullable()
     : marked_null_(false) {}
 
-template <typename T>
-template <typename U>
-Nullable<T>::Nullable(const U& value)
-    : T(value), marked_null_(false) {}
-
 template<typename T>
 template<typename U>
 Nullable<T>& Nullable<T>::operator=(const U& new_val) {
@@ -629,11 +624,6 @@ void rpc::Optional<T>::SetPolicyTableType(
 template<typename T>
 Stringifyable<T>::Stringifyable()
     : predefined_string_("") {}
-
-template <typename T>
-template <typename U>
-Stringifyable<T>::Stringifyable(const U& value)
-    : T(value), predefined_string_("") {}
 
 template<typename T>
 template<typename U>

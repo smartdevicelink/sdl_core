@@ -63,6 +63,10 @@ void LastState::SaveToFileSystem() {
 
 }
 
+utils::json::JsonValue&LastState::dictionary() {
+  return dictionary_;
+}
+
 void LastState::LoadFromFileSystem() {
   using namespace utils::json;
   std::string buffer;
@@ -88,4 +92,5 @@ void LastState::LoadFromFileSystem() {
   dictionary_ = parse_result.first;
   LOGGER_INFO(logger_, "Valid last state was found." << dictionary_.ToJson());
   return;
+}
 }

@@ -643,7 +643,7 @@ void TransportManagerImpl::OnDeviceListUpdated(TransportAdapter* ta) {
        ++it) {
     device_to_adapter_map_lock_.AcquireForWriting();
     device_to_adapter_map_.insert(std::make_pair(*it, ta));
-    device_to_adapter_map_lock_.Release();
+    device_to_adapter_map_lock_.ReleaseForWriting();
     DeviceHandle device_handle = converter_.UidToHandle(*it);
     DeviceInfo info(
         device_handle, *it, ta->DeviceName(*it), ta->GetConnectionType());
@@ -657,7 +657,7 @@ void TransportManagerImpl::OnDeviceListUpdated(TransportAdapter* ta) {
        ++it) {
     device_infos.push_back(it->second);
   }
-  device_list_lock_.Release();
+  device_list_lock_.ReleaseForReading();
   RaiseEvent(&TransportManagerListener::OnDeviceListUpdated, device_infos);
   LOGGER_TRACE(logger_, "exit");
 }
@@ -725,11 +725,11 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
         LOGGER_ERROR(logger_, "Connection not found");
         LOGGER_DEBUG(logger_,
                       "event_type = ON_DISCONNECT_DONE && NULL == connection");
-        connections_lock_.Release();
+        connections_lock_.ReleaseForReading();
         break;
       }
       const ConnectionUID id = connection->id;
-      connections_lock_.Release();
+      connections_lock_.ReleaseForReading();
 
       RaiseEvent(&TransportManagerListener::OnConnectionClosed, id);
       RemoveConnection(id);
@@ -843,10 +843,10 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
         LOGGER_ERROR(logger_,
                      "Connection ('" << event.device_uid << ", "
                                      << event.application_id << ") not found");
-        connections_lock_.Release();
+        connections_lock_.ReleaseForReading();
         break;
       }
-      connections_lock_.Release();
+      connections_lock_.ReleaseForReading();
 
       RaiseEvent(&TransportManagerListener::OnTMMessageReceiveFailed,
                  *static_cast<DataReceiveError*>(event.event_error.get()));
@@ -864,13 +864,13 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
           GetConnection(event.device_uid, event.application_id);
       if (connection) {
         const ConnectionUID id = connection->id;
-        connections_lock_.Release();
+        connections_lock_.ReleaseForReading();
         RaiseEvent(&TransportManagerListener::OnUnexpectedDisconnect,
                    id,
                    *static_cast<CommunicationError*>(event.event_error.get()));
         RemoveConnection(id);
       } else {
-        connections_lock_.Release();
+        connections_lock_.ReleaseForReading();
         LOGGER_ERROR(logger_,
                      "Connection ('" << event.device_uid << ", "
                                      << event.application_id << ") not found");

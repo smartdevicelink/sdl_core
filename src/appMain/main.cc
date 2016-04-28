@@ -149,13 +149,9 @@ int32_t main(int32_t argc, char** argv) {
   PLATFORM_INIT(argc, argv);
   // --------------------------------------------------------------------------
   // Logger initialization
-  INIT_LOGGER("log4cxx.properties", profile_instance.logs_enabled());
+  INIT_LOGGER(profile_instance.logs_enabled());
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
-
-  if (!utils::appenders_loader.Loaded()) {
-    LOGGER_ERROR(logger_, "Appenders plugin not loaded, file logging disabled");
-  }
 
   LOGGER_INFO(logger_, "Application started!");
   LOGGER_INFO(logger_, "SDL version: " << profile_instance.sdl_version());
