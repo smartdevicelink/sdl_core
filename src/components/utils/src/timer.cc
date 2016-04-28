@@ -45,9 +45,9 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 timer::Timer::Timer(const std::string& name, TimerTask* task)
     : name_(name)
-    , task_lock_()
     , task_(task)
-    , delegate_(this)
+    , state_lock_()
+    , delegate_(this, state_lock_)
     , thread_(threads::CreateThread(name_.c_str(), &delegate_))
     , single_shot_(true) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -59,11 +59,12 @@ timer::Timer::Timer(const std::string& name, TimerTask* task)
 
 timer::Timer::~Timer() {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock state_auto_lock(state_lock_);
-  StopUnsafe();
-  DCHECK(thread_);
+  sync_primitives::AutoLock auto_lock(state_lock_);
+  StopThread();
+  StopDelegate();
+  single_shot_ = true;
+
   DeleteThread(thread_);
-  sync_primitives::AutoLock task_auto_lock(task_lock_);
   DCHECK(task_);
   delete task_;
   LOG4CXX_DEBUG(logger_, "Timer " << name_ << " has been destroyed");
@@ -72,98 +73,136 @@ timer::Timer::~Timer() {
 void timer::Timer::Start(const Milliseconds timeout, const bool single_shot) {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(state_lock_);
-  StopUnsafe();
-  DCHECK_OR_RETURN_VOID(thread_);
-  delegate_.set_timeout(timeout);
+  StopThread();
   single_shot_ = single_shot;
-  thread_->start();
-  delegate_.set_stop_flag(false);
+  StartDelegate(timeout);
+  StartThread();
   LOG4CXX_DEBUG(logger_, "Timer " << name_ << " has been started");
 }
 
 void timer::Timer::Stop() {
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(state_lock_);
-  StopUnsafe();
+  StopThread();
+  StopDelegate();
+  single_shot_ = true;
+  LOG4CXX_DEBUG(logger_, "Timer " << name_ << " has been stopped");
 }
 
 bool timer::Timer::is_running() const {
+  sync_primitives::AutoLock auto_lock(state_lock_);
   return !delegate_.stop_flag();
 }
 
 timer::Milliseconds timer::Timer::timeout() const {
+  sync_primitives::AutoLock auto_lock(state_lock_);
   return delegate_.timeout();
 }
 
-void timer::Timer::StopUnsafe() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK_OR_RETURN_VOID(thread_);
+void timer::Timer::StartDelegate(const Milliseconds timeout) const {
+  delegate_.set_stop_flag(false);
+  delegate_.set_timeout(timeout);
+}
+
+void timer::Timer::StopDelegate() const {
   delegate_.set_stop_flag(true);
-  if (!thread_->IsCurrentThread()) {
-    thread_->join();
-  }
   delegate_.set_timeout(0);
-  LOG4CXX_DEBUG(logger_, "Timer " << name_ << " has been stopped");
+}
+
+void timer::Timer::StartThread() {
+  if (delegate_.finalized_flag()) {
+    return;
+  }
+
+  DCHECK_OR_RETURN_VOID(thread_);
+  if (!thread_->IsCurrentThread()) {
+    thread_->start();
+  }
+}
+
+void timer::Timer::StopThread() {
+  if (delegate_.finalized_flag()) {
+    return;
+  }
+
+  DCHECK_OR_RETURN_VOID(thread_);
+  if (!thread_->IsCurrentThread()) {
+    delegate_.set_finalized_flag(true);
+    {
+      sync_primitives::AutoUnlock auto_unlock(state_lock_);
+      thread_->join();
+    }
+    delegate_.set_finalized_flag(false);
+  }
 }
 
 void timer::Timer::OnTimeout() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  delegate_.set_stop_flag(single_shot_);
-  sync_primitives::AutoLock auto_lock(task_lock_);
+  {
+    sync_primitives::AutoLock auto_lock(state_lock_);
+    if (single_shot_) {
+      StopDelegate();
+    }
+  }
+
   DCHECK_OR_RETURN_VOID(task_);
   task_->run();
 }
 
-timer::Timer::TimerDelegate::TimerDelegate(const Timer* timer)
+timer::Timer::TimerDelegate::TimerDelegate(
+    const Timer* timer, sync_primitives::Lock& state_lock_ref)
     : timer_(timer)
-    , params_lock_()
     , timeout_(0)
     , stop_flag_(true)
-    , state_lock_() {
+    , finalized_flag_(false)
+    , state_lock_ref_(state_lock_ref)
+    , state_condition_() {
   DCHECK(timer_);
 }
 
 void timer::Timer::TimerDelegate::set_timeout(const Milliseconds timeout) {
-  sync_primitives::AutoLock auto_lock(params_lock_);
   timeout_ = timeout;
 }
 
 timer::Milliseconds timer::Timer::TimerDelegate::timeout() const {
-  sync_primitives::AutoLock auto_lock(params_lock_);
   return timeout_;
 }
 
 void timer::Timer::TimerDelegate::set_stop_flag(const bool stop_flag) {
-  sync_primitives::AutoLock auto_lock(params_lock_);
   stop_flag_ = stop_flag;
 }
 
 bool timer::Timer::TimerDelegate::stop_flag() const {
-  sync_primitives::AutoLock auto_lock(params_lock_);
   return stop_flag_;
 }
 
+void timer::Timer::TimerDelegate::set_finalized_flag(
+    const bool finalized_flag) {
+  finalized_flag_ = finalized_flag;
+}
+
+bool timer::Timer::TimerDelegate::finalized_flag() const {
+  return finalized_flag_;
+}
+
 void timer::Timer::TimerDelegate::threadMain() {
-  sync_primitives::AutoLock auto_lock(state_lock_);
-  set_stop_flag(false);
-  while (!stop_flag()) {
-    const Milliseconds curr_timeout = timeout();
-    LOG4CXX_DEBUG(logger_, "Milliseconds left to wait: " << curr_timeout);
+  sync_primitives::AutoLock auto_lock(state_lock_ref_);
+  while (!stop_flag_ && !finalized_flag_) {
+    LOG4CXX_DEBUG(logger_, "Milliseconds left to wait: " << timeout_);
     if (sync_primitives::ConditionalVariable::kTimeout ==
-        termination_condition_.WaitFor(auto_lock, curr_timeout)) {
-      LOG4CXX_DEBUG(
-          logger_,
-          "Timer has finished counting. Timeout (ms): " << curr_timeout);
+        state_condition_.WaitFor(auto_lock, timeout_)) {
+      LOG4CXX_DEBUG(logger_,
+                    "Timer has finished counting. Timeout (ms): " << timeout_);
       if (timer_) {
+        sync_primitives::AutoUnlock auto_unlock(auto_lock);
         timer_->OnTimeout();
       }
     } else {
       LOG4CXX_DEBUG(logger_, "Timer has been force reset");
     }
   }
-  set_timeout(0);
 }
 
 void timer::Timer::TimerDelegate::exitThreadMain() {
-  sync_primitives::AutoLock auto_lock(state_lock_);
-  termination_condition_.NotifyOne();
+  sync_primitives::AutoLock auto_lock(state_lock_ref_);
+  state_condition_.NotifyOne();
 }
