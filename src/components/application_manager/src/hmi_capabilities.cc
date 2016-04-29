@@ -540,8 +540,8 @@ void HMICapabilities::set_pcm_stream_capabilities(
   if (pcm_stream_capabilities_) {
     delete pcm_stream_capabilities_;
   }
-  pcm_stream_capabilities_ = new smart_objects::SmartObject(
-      pcm_stream_capabilities);
+  pcm_stream_capabilities_ =
+      new smart_objects::SmartObject(pcm_stream_capabilities);
 }
 
 void HMICapabilities::set_preset_bank_capabilities(
@@ -796,26 +796,22 @@ bool HMICapabilities::load_capabilities_from_file() {
       if (check_existing_json_member(ui, "pcmStreamCapabilities")) {
         Json::Value pcm_capabilities = ui.get("pcmStreamCapabilities", "");
         smart_objects::SmartObject pcm_capabilities_so =
-                smart_objects::SmartObject(smart_objects::SmartType_Map);
+            smart_objects::SmartObject(smart_objects::SmartType_Map);
 
         if (check_existing_json_member(pcm_capabilities, "samplingRate")) {
           pcm_capabilities_so["samplingRate"] =
               sampling_rate_enum.find(pcm_capabilities.get("samplingRate", "")
-                                          .asString())
-                  ->second;
+                                          .asString())->second;
         }
         if (check_existing_json_member(pcm_capabilities, "bitsPerSample")) {
           pcm_capabilities_so["bitsPerSample"] =
-              bit_per_sample_enum.find(
-                                     pcm_capabilities.get("bitsPerSample", "")
-                                         .asString())
-                  ->second;
+              bit_per_sample_enum.find(pcm_capabilities.get("bitsPerSample", "")
+                                           .asString())->second;
         }
         if (check_existing_json_member(pcm_capabilities, "audioType")) {
           pcm_capabilities_so["audioType"] =
               audio_type_enum.find(pcm_capabilities.get("audioType", "")
-                                       .asString())
-                  ->second;
+                                       .asString())->second;
         }
 
         set_pcm_stream_capabilities(pcm_capabilities_so);

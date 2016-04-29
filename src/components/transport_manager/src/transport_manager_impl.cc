@@ -746,7 +746,8 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
     case TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL: {
       const DeviceHandle device_handle =
           converter_.UidToHandle(event.device_uid);
-      RaiseEvent(&TransportManagerListener::OnDisconnectFailed, device_handle,
+      RaiseEvent(&TransportManagerListener::OnDisconnectFailed,
+                 device_handle,
                  DisconnectDeviceError());
       LOG4CXX_DEBUG(logger_, "event_type = ON_DISCONNECT_FAIL");
       break;
@@ -761,11 +762,12 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       ConnectionInternal* connection =
           GetConnection(event.device_uid, event.application_id);
       if (connection == NULL) {
-        LOG4CXX_ERROR(logger_, "Connection ('" << event.device_uid << ", "
-                      << event.application_id
-                      << ") not found");
-        LOG4CXX_DEBUG(logger_,
-                      "event_type = ON_SEND_DONE. Condition: NULL == connection");
+        LOG4CXX_ERROR(logger_,
+                      "Connection ('" << event.device_uid << ", "
+                                      << event.application_id << ") not found");
+        LOG4CXX_DEBUG(
+            logger_,
+            "event_type = ON_SEND_DONE. Condition: NULL == connection");
         break;
       }
       RaiseEvent(&TransportManagerListener::OnTMMessageSend, event.event_data);
@@ -785,12 +787,13 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
 #endif  // TELEMETRY_MONITOR
       {
         sync_primitives::AutoReadLock lock(connections_lock_);
-        ConnectionInternal* connection = GetConnection(event.device_uid,
-                                                       event.application_id);
+        ConnectionInternal* connection =
+            GetConnection(event.device_uid, event.application_id);
         if (connection == NULL) {
-          LOG4CXX_ERROR(
-              logger_,
-              "Connection ('" << event.device_uid << ", " << event.application_id << ") not found");
+          LOG4CXX_ERROR(logger_,
+                        "Connection ('" << event.device_uid << ", "
+                                        << event.application_id
+                                        << ") not found");
           LOG4CXX_DEBUG(
               logger_,
               "event_type = ON_SEND_FAIL. Condition: NULL == connection");
@@ -814,12 +817,13 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
     case TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE: {
       {
         sync_primitives::AutoReadLock lock(connections_lock_);
-        ConnectionInternal* connection = GetConnection(event.device_uid,
-                                                       event.application_id);
+        ConnectionInternal* connection =
+            GetConnection(event.device_uid, event.application_id);
         if (connection == NULL) {
-          LOG4CXX_ERROR(
-              logger_,
-              "Connection ('" << event.device_uid << ", " << event.application_id << ") not found");
+          LOG4CXX_ERROR(logger_,
+                        "Connection ('" << event.device_uid << ", "
+                                        << event.application_id
+                                        << ") not found");
           LOG4CXX_DEBUG(
               logger_,
               "event_type = ON_RECEIVED_DONE. Condition: NULL == connection");
@@ -843,9 +847,9 @@ void TransportManagerImpl::Handle(TransportAdapterEvent event) {
       ConnectionInternal* connection =
           GetConnection(event.device_uid, event.application_id);
       if (connection == NULL) {
-        LOG4CXX_ERROR(
-            logger_,
-            "Connection ('" << event.device_uid << ", " << event.application_id << ") not found");
+        LOG4CXX_ERROR(logger_,
+                      "Connection ('" << event.device_uid << ", "
+                                      << event.application_id << ") not found");
         connections_lock_.Release();
         break;
       }
@@ -957,7 +961,8 @@ TransportManagerImpl::ConnectionInternal::ConnectionInternal(
 void TransportManagerImpl::ConnectionInternal::DisconnectFailedRoutine() {
   LOG4CXX_TRACE(logger_, "enter");
   transport_manager->RaiseEvent(&TransportManagerListener::OnDisconnectFailed,
-                                device_handle_, DisconnectDeviceError());
+                                device_handle_,
+                                DisconnectDeviceError());
   shutdown_ = false;
   timer->Stop();
   LOG4CXX_TRACE(logger_, "exit");
