@@ -51,7 +51,7 @@ using namespace ::logger;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "AutoTraceTestLog")
 
-namespace{
+namespace {
 const std::string kFileName =
     file_system::CurrentWorkingDirectory() + "/AutoTraceTestLogFile.log";
 }  // namespace
