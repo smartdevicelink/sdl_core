@@ -285,6 +285,12 @@ class RequestController {
   bool is_low_voltage_;
   const RequestControlerSettings& settings_;
   DISALLOW_COPY_AND_ASSIGN(RequestController);
+#ifdef BUILD_TESTS
+ public:
+  RequestInfoSet& get_waiting_for_response();
+  const std::list<RequestInfoPtr> get_mobile_request_info_list() const;
+  const std::list<RequestPtr>& get_notification_list() const;
+#endif  // BUILD_TESTS
 };
 
 }  // namespace request_controller

@@ -498,5 +498,20 @@ void RequestController::UpdateTimer() {
   }
 }
 
+#ifdef BUILD_TESTS
+RequestInfoSet& RequestController::get_waiting_for_response() {
+  return waiting_for_response_;
+}
+
+const std::list<RequestInfoPtr>
+RequestController::get_mobile_request_info_list() const {
+  return mobile_request_list_;
+}
+
+const std::list<RequestPtr>& RequestController::get_notification_list() const {
+  return notification_list_;
+}
+#endif  // BUILD_TESTS
+
 }  //  namespace request_controller
 }  //  namespace application_manager

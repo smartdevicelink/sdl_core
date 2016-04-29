@@ -60,7 +60,6 @@ set(REQUEST_CONTROLLER_PATHS
 )
 # Temporary exclude some resumption tests from build due to compile errors APPLINK-26346
 set(REQUEST_CONTROLLER_EXCLUDE
-  request_controller_test.cc
   zero_request_amount_test.cc
 )
 collect_sources(REQUEST_CONTROLLER_SOURCES "${REQUEST_CONTROLLER_PATHS}" "${REQUEST_CONTROLLER_EXCLUDE}")
