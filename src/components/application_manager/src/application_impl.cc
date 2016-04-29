@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -98,6 +98,7 @@ ApplicationImpl::ApplicationImpl(
     , has_been_activated_(false)
     , tts_properties_in_none_(false)
     , tts_properties_in_full_(false)
+    , is_foreground_(false)
     , is_application_data_changed_(false)
     , put_file_in_none_count_(0)
     , delete_file_in_none_count_(0)
