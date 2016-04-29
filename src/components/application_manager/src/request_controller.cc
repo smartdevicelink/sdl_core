@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -510,7 +510,6 @@ void RequestController::UpdateTimer() {
               << " Request timeout (sec): "
               << front->timeout_msec() /
                      date_time::DateTime::MILLISECONDS_IN_SECOND);
-      timer_.Start(0u, true);
     }
   }
 }

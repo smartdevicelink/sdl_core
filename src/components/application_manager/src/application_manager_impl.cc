@@ -426,7 +426,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   LOG4CXX_DEBUG(logger_, "Restarting application list update timer");
   GetPolicyHandler().OnAppsSearchStarted();
   uint32_t timeout = get_settings().application_list_update_timeout();
-  application_list_update_timer_.Start(timeout, false);
+  application_list_update_timer_.Start(timeout, true);
 
   if (!is_all_apps_allowed_) {
     LOG4CXX_WARN(logger_,
@@ -917,7 +917,7 @@ void ApplicationManagerImpl::OnFindNewApplicationsRequest() {
   connection_handler().ConnectToAllDevices();
   LOG4CXX_DEBUG(logger_, "Starting application list update timer");
   uint32_t timeout = get_settings().application_list_update_timeout();
-  application_list_update_timer_.Start(timeout, false);
+  application_list_update_timer_.Start(timeout, true);
   GetPolicyHandler().OnAppsSearchStarted();
 }
 
