@@ -29,11 +29,11 @@ before_install:
   - sudo dpkg -i lcov_1.11-3_all.deb
 script:
   - sudo ln -sf /usr/bin/gcov-4.9 /usr/bin/gcov
-  - bash -e tools/Utils/check_style.sh
+  - bash -e tools/infrastructure/check_style.sh
   - mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON -DENABLE_GCOV=ON && make install
   - sudo ldconfig
   - make test
-  - bash -ex ../tools/Utils/collect_coverage.sh ./
+  - bash -ex ../tools/infrastructure/collect_coverage.sh ./
 env:
   global:
   - LC_CTYPE=en_US.UTF-8
