@@ -53,7 +53,7 @@ set(testSources
   usage_statistics_test.cc    
   shared_library_test.cc    
   generated_code_test.cc 
-  #policy_manager_impl_test.cc
+  policy_manager_impl_test.cc
 )
 
   include_directories(${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct)
