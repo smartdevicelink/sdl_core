@@ -97,6 +97,7 @@ int FindPairedDevs(std::vector<bdaddr_t>* result) {
   }
   pclose(pipe);
   LOG4CXX_TRACE(logger_, "exit with 0");
+  delete [] buffer;
   return 0;
 }
 }  //  namespace
