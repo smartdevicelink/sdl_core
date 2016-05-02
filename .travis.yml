@@ -7,7 +7,7 @@ env:
 language: cpp
 dist: trusty
 before_install:
-  - sudo apt-get install -y libavahi-client-dev libssl-dev libbluetooth3 libbluetooth-dev bluez-tools libudev-dev libgtest-dev
+  - sudo apt-get install -y libavahi-client-dev libssl-dev libbluetooth3 libbluetooth-dev bluez-tools libudev-dev
   - sudo add-apt-repository ppa:kalakris/cmake -y
   - sudo apt-get install -y cmake
   - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
@@ -27,10 +27,6 @@ addons:
       name: "smartdevicelink/sdl_core"
       description: "Build submitted via Travis CI"
     notification_email: jack@livio.io
-    build_command_prepend: "mkdir build && cd build && cmake ../ -DBUILD_TESTS=ON"
+    build_command_prepend: "mkdir build && cd build && cmake ../"
     build_command:   "make install"
     branch_pattern: coverity
-script: 
-  - sudo ldconfig
-  - cd build
-  - travis_wait make test
