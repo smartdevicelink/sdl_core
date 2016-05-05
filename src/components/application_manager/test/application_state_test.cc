@@ -181,6 +181,36 @@ TEST_F(ApplicationStateTest, AddRegularState_RemoveFirstState_GetRegularState) {
   EXPECT_EQ(*new_state, reg_state->state_id());
 }
 
+TEST_F(ApplicationStateTest, AddRegularState_PreviousStatePostponed) {
+  // Add some state
+  StateID first_state = StateID::STATE_ID_PHONE_CALL;
+  HmiStatePtr state =
+      utils::MakeShared<HmiState>(app_id, app_mngr_, first_state);
+  app_state.AddState(state);
+
+  // Add postponed state
+  state = utils::MakeShared<HmiState>(app_id, app_mngr_, postponed_id);
+  app_state.AddState(state);
+
+  // Add new postponed state
+  const uint32_t app_id2 = 10;
+  state = utils::MakeShared<HmiState>(app_id2, app_mngr_, postponed_id);
+  app_state.AddState(state);
+
+  // Add regular state
+  state =
+      utils::MakeShared<HmiState>(app_id, app_mngr_, StateID::STATE_ID_REGULAR);
+  app_state.AddState(state);
+
+  // Postponed state is the first
+  HmiStatePtr reg_state = app_state.GetState(StateID::STATE_ID_POSTPONED);
+  ASSERT_EQ(postponed_id, reg_state->state_id());
+
+  // Regular state is the second one
+  reg_state = app_state.GetState(StateID::STATE_ID_REGULAR);
+  EXPECT_EQ(StateID::STATE_ID_REGULAR, reg_state->state_id());
+}
+
 TEST_F(ApplicationStateTest, InitState_GetRegularState) {
   StateID init_state = StateID::STATE_ID_REGULAR;
   HmiStatePtr state =
