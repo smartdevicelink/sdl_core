@@ -59,6 +59,8 @@ const std::string kFileName =
 void Preconditions() {
   // Delete file with previous logs
   if (file_system::FileExists(kFileName)) {
+    // If logger is active now deleting log file cause undefined befaviour.
+    DEINIT_LOGGER();
     ASSERT_TRUE(file_system::DeleteFile(kFileName))
         << "Can't delete AutoTraceTestLogFile.log";
   }
