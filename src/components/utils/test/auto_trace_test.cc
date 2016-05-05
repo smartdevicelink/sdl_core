@@ -42,6 +42,7 @@
 #include "utils/threads/thread.h"
 #include "utils/date_time.h"
 #include "utils/logger_status.h"
+#include "utils/helpers.h"
 
 namespace test {
 namespace components {
@@ -59,6 +60,8 @@ const std::string kFileName =
 void Preconditions() {
   // Delete file with previous logs
   if (file_system::FileExists(kFileName)) {
+    // If logger is active now deleting log file cause undefined befaviour.
+    DEINIT_LOGGER();
     ASSERT_TRUE(file_system::DeleteFile(kFileName))
         << "Can't delete AutoTraceTestLogFile.log";
   }
@@ -66,8 +69,8 @@ void Preconditions() {
 
 void InitLogger() {
   // Set enabled logs
-  INIT_LOGGER("log4cxx.properties",
-              true);  // DEINIT_LOGGER will be called in test_main.cc
+  INIT_LOGGER("log4cxx.properties", true);
+  // DEINIT_LOGGER will be called in test_main.cc
 }
 
 void CreateDeleteAutoTrace(const std::string& testlog) {
@@ -75,26 +78,56 @@ void CreateDeleteAutoTrace(const std::string& testlog) {
   LOG4CXX_DEBUG(logger_, testlog);
 }
 
-bool CheckAutoTraceDebugInFile(const std::string& testlog) {
-  bool isLogFound = false;
-  std::string line;
+/**
+ * @brief IsLogLineContains cheks if log line contains debug message with
+ * specified debug message
+ * @param log_line line to search in
+ * @param debug_level expected debug level
+ * @param debug_log_message expected debug message
+ * @return true if debug_message exist in log_line with debug_level
+ */
+bool IsLogLineContains(const std::string& log_line,
+                       const std::string& debug_level,
+                       const std::string& debug_message) {
+  return log_line.find(debug_level) != std::string::npos &&
+         log_line.find(debug_message) != std::string::npos;
+}
 
+/**
+ * @brief CheckAutoTraceDebugInFile chacks if logfile contains autotrace and
+ * debug for test AutoTrace_WriteToFile_ReadCorrectString
+ * @param debug_message message that should be logged with DEBUG level
+ * @return true if trace enter, trace exit, debug message exist in log file
+ */
+bool CheckAutoTraceDebugInFile(const std::string& debug_message) {
+  using namespace helpers;
+  const std::string debug_log_level = "DEBUG";
+  const std::string trace_log_level = "TRACE";
+  const std::string enter_message = ": Enter";
+  const std::string exit_message = ": Exit";
   std::ifstream file_log(kFileName);
-
-  if (file_log.is_open()) {
-    while (getline(file_log, line)) {
-      std::size_t found = line.find(testlog);
-      std::size_t founddebug = line.find("DEBUG");
-      if ((found != std::string::npos) && (founddebug != std::string::npos)) {
-        isLogFound = true;
-        break;
-      }
-    }
-    file_log.close();
-  } else {
-    std::cout << "file cannot be opened \n";
+  if (!file_log.is_open()) {
+    return false;
   }
-  return isLogFound;
+
+  bool debug_found = false;
+  bool trace_enter = false;
+  bool trace_exit = false;
+  for (std::string line;
+       Compare<bool, EQ, ONE>(false, debug_found, trace_enter, trace_exit) &&
+           getline(file_log, line);) {
+    debug_found = debug_found
+                      ? debug_found
+                      : IsLogLineContains(line, debug_log_level, debug_message);
+    trace_enter = trace_enter
+                      ? trace_enter
+                      : IsLogLineContains(line, trace_log_level, enter_message);
+    trace_exit = trace_exit
+                     ? trace_exit
+                     : IsLogLineContains(line, trace_log_level, exit_message);
+  }
+  file_log.close();
+  return Compare<bool, EQ, ALL>(true, debug_found, trace_enter, trace_exit);
 }
 
 TEST(AutoTraceTest, AutoTrace_WriteToFile_ReadCorrectString) {
