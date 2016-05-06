@@ -2531,7 +2531,7 @@ bool ResumptionDataDB::InsertApplicationData(
   const mobile_apis::HMILevel::eType hmi_level = application.m_hmi_level;
   bool is_media_application = application.m_is_media_application;
   bool is_subscribed_for_way_points =
-      application_manager_.IsAppSubscribedForWayPoints(connection_key);
+      application.m_is_subscribed_for_way_points;
 
   if (!query.Prepare(kInsertApplication)) {
     SDL_WARN(
@@ -2721,7 +2721,8 @@ ApplicationParams::ApplicationParams(
     , m_hmi_app_id(0)
     , m_hmi_level(mobile_apis::HMILevel::INVALID_ENUM)
     , m_is_media_application(false)
-    , m_is_valid(false) {
+    , m_is_valid(false)
+    , m_is_subscribed_for_way_points(false) {
   using namespace app_mngr::strings;
   if (!application.keyExists(app_id) || !application.keyExists(hash_id) ||
       !application.keyExists(grammar_id) ||
@@ -2738,6 +2739,8 @@ ApplicationParams::ApplicationParams(
   m_hmi_level =
       static_cast<mobile_apis::HMILevel::eType>(application[hmi_level].asInt());
   m_is_media_application = application[is_media_application].asBool();
+  m_is_subscribed_for_way_points =
+      application[subscribed_for_way_points].asBool();
 }
 
 ApplicationParams::ApplicationParams(app_mngr::ApplicationSharedPtr application)
@@ -2747,7 +2750,8 @@ ApplicationParams::ApplicationParams(app_mngr::ApplicationSharedPtr application)
     , m_hmi_app_id(0)
     , m_hmi_level(mobile_apis::HMILevel::INVALID_ENUM)
     , m_is_media_application(false)
-    , m_is_valid(false) {
+    , m_is_valid(false)
+    , m_is_subscribed_for_way_points(false) {
   if (application) {
     m_is_valid = true;
     m_hash = application->curHash();
@@ -2756,6 +2760,8 @@ ApplicationParams::ApplicationParams(app_mngr::ApplicationSharedPtr application)
     m_hmi_app_id = application->hmi_app_id();
     m_hmi_level = application->hmi_level();
     m_is_media_application = application->IsAudioApplication();
+    m_is_subscribed_for_way_points =
+        application->IsAppSubscribedForWayPoints(m_connection_key);
   }
 }
 

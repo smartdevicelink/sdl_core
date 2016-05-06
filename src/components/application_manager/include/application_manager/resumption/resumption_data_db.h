@@ -54,6 +54,7 @@ struct ApplicationParams {
   mobile_apis::HMILevel::eType m_hmi_level;
   bool m_is_media_application;
   bool m_is_valid;
+  bool m_is_subscribed_for_way_points;
 };
 
 /**
