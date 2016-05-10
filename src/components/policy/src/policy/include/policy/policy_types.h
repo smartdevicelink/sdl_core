@@ -234,6 +234,7 @@ struct AppPermissions {
           appRevoked(false),
           appPermissionsConsentNeeded(false),
           appUnauthorized(false),
+          isSDLAllowed(false),
           requestTypeChanged(false) {
     }
 
