@@ -34,22 +34,17 @@
 if (BUILD_TESTS)
  
   include_directories(
-    include
-    ${CMAKE_BINARY_DIR}/src/components/
-    ${COMPONENTS_DIR}/resumption/include
     ${GMOCK_INCLUDE_DIRECTORY}
+    ${CMAKE_BINARY_DIR}/src/components/
     ${COMPONENTS_DIR}/application_manager/include/
-    ${COMPONENTS_DIR}/application_manager/include/application_manager/commands/
-    ${COMPONENTS_DIR}/utils/include/utils
-    ${COMPONENTS_DIR}/include/utils
-    ${COMPONENTS_DIR}/include/
-    ${COMPONENTS_DIR}/policy/include/policy
-    ${COMPONENTS_DIR}/policy/test/include
-    ${COMPONENTS_DIR}/policy/src/policy/usage_statistics
+    ${COMPONENTS_DIR}/utils/include/
+    ${COMPONENTS_DIR}/resumption/include/
+    ${COMPONENTS_DIR}/utils/include/
+    ${COMPONENTS_DIR}/policy/include/
     ${COMPONENTS_DIR}/media_manager/include/
-    ${SecurityManagerIncludeDir}
-    ${COMPONENTS_DIR}/security_manager/include
-    ${AM_TEST_DIR}/resumption/include/
+    ${COMPONENTS_DIR}/security_manager/include/
+    ${COMPONENTS_DIR}/policy/test/include/
+    ${COMPONENTS_DIR}/application_manager/test/include/
     )
 
   set(testSources
@@ -68,62 +63,8 @@ if (BUILD_TESTS)
   )
   set (request_controller_SOURCES
     ${AM_TEST_DIR}/request_controller/request_controller_test.cc
-    )
-
-  set(mockedSources ${AM_MOCK_DIR}/src/application_manager_impl.cc)
-
-  set(AM_SOURCES
-
-    ${AM_SOURCE_DIR}/src/policies/policy_handler.cc
-    ${AM_SOURCE_DIR}/src/policies/policy_event_observer.cc
-    ${AM_SOURCE_DIR}/src/policies/delegates/app_permission_delegate.cc
-    ${AM_SOURCE_DIR}/src/policies/delegates/statistics_delegate.cc
-
-    ${AM_SOURCE_DIR}/src/event_engine/event_dispatcher_impl.cc
-    ${AM_SOURCE_DIR}/src/event_engine/event_observer.cc
-    ${AM_SOURCE_DIR}/src/event_engine/event.cc
-
-    ${AM_SOURCE_DIR}/src/commands/command_impl.cc
-    ${AM_SOURCE_DIR}/src/commands/command_request_impl.cc
-    ${AM_SOURCE_DIR}/src/commands/command_response_impl.cc
-    ${AM_SOURCE_DIR}/src/commands/command_notification_impl.cc
-    ${AM_SOURCE_DIR}/src/commands/command_notification_from_mobile_impl.cc
-    ${AM_SOURCE_DIR}/src/commands/pending.cc
-
-    ${AM_SOURCE_DIR}/src/resumption/resume_ctrl.cc
-    ${AM_SOURCE_DIR}/src/resumption/resumption_data_db.cc
-    ${AM_SOURCE_DIR}/src/resumption/resumption_data_json.cc
-    ${AM_SOURCE_DIR}/src/resumption/resumption_data.cc
-    ${AM_SOURCE_DIR}/src/resumption/resumption_sql_queries.cc
-
-    ${AM_SOURCE_DIR}/src/usage_statistics.cc
-    ${AM_SOURCE_DIR}/src/request_info.cc
-    ${AM_SOURCE_DIR}/src/message.cc
-    ${AM_SOURCE_DIR}/src/application_impl.cc
-    ${AM_SOURCE_DIR}/src/application_state.cc
-    ${AM_SOURCE_DIR}/src/state_controller.cc
-    ${AM_SOURCE_DIR}/src/mobile_command_factory.cc
-    ${AM_TEST_DIR}/mock_message_helper.cc
-
-    ${AM_SOURCE_DIR}/src/hmi_command_factory.cc
-    ${AM_SOURCE_DIR}/src/hmi_state.cc
-
-    ${AM_SOURCE_DIR}/src/hmi_capabilities.cc
-    ${AM_SOURCE_DIR}/src/hmi_language_handler.cc
-    ${AM_SOURCE_DIR}/src/application_data_impl.cc
-    ${AM_SOURCE_DIR}/src/request_controller.cc
-
-    ${AM_SOURCE_DIR}/src/commands/mobile/register_app_interface_request.cc
-    ${AM_SOURCE_DIR}/src/commands/mobile/unregister_app_interface_request.cc
-
-    ${AM_SOURCE_DIR}/src/mobile_message_handler.cc
-    ${AM_SOURCE_DIR}/src/commands/mobile/put_file_request.cc
-    ${AM_SOURCE_DIR}/src/commands/command_request_impl.cc
   )
 
-  include_directories(
-    ${AM_SOURCE_DIR}/policy/src/policy/policy_table/table_struct
-  )
 set(testLibraries
   ApplicationManager
   Utils
