@@ -80,7 +80,7 @@ utils::SharedPtr<policy_table::Table> PolicyManagerImpl::Parse(
     return new policy_table::Table(&value);
   } else {
     return utils::SharedPtr<policy_table::Table>();
-  } 
+  }
 }
 
 #else
@@ -94,7 +94,7 @@ utils::SharedPtr<policy_table::Table> PolicyManagerImpl::ParseArray(
     //For PT Update received from SDL Server.
     if (value["data"].size()!=0) {
       Json::Value data = value["data"];
-      //First Element in 
+      //First Element in
       return new policy_table::Table(&data[0]);
     } else {
       return new policy_table::Table(&value);
@@ -131,9 +131,9 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
   // Parse message into table struct
   utils::SharedPtr<policy_table::Table> pt_update = Parse(pt_content);
   #else
-  //Message Received from server unecnrypted with PTU in first element 
+  //Message Received from server unecnrypted with PTU in first element
   //of 'data' array. No Parsing was done by HMI.
-  utils::SharedPtr<policy_table::Table> pt_update = ParseArray(pt_content); 
+  utils::SharedPtr<policy_table::Table> pt_update = ParseArray(pt_content);
   #endif
   if (!pt_update) {
     LOG4CXX_WARN(logger_, "Parsed table pointer is 0.");
@@ -250,9 +250,7 @@ void PolicyManagerImpl::RequestPTUpdate() {
   BinaryMessage update(message_string.begin(), message_string.end());
 
 
-  listener_->OnSnapshotCreated(update,
-                               RetrySequenceDelaysSeconds(),
-                               TimeoutExchange());
+  listener_->OnSnapshotCreated(update);
 
   // Need to reset update schedule since all currenly registered applications
   // were already added to the snapshot so no update for them required.

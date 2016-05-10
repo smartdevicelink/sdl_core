@@ -69,14 +69,8 @@ class PolicyListener {
    * when snapshot for PTU has been created.
    *
    * @param pt_string the snapshot
-   *
-   * @param retry_seconds retry sequence timeouts.
-   *
-   * @param timeout_exceed timeout.
    */
-  virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
-                                 const std::vector<int>& retry_seconds,
-                                 int timeout_exceed) = 0;
+  virtual void OnSnapshotCreated(const BinaryMessage& pt_string) = 0;
 
   /**
    * @brief Make appropriate changes for related applications permissions and
