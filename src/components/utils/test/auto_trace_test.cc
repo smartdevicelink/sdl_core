@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include <stddef.h>
 
 #include <fstream>
 #include <ctime>
@@ -73,9 +74,9 @@ void InitLogger() {
   // DEINIT_LOGGER will be called in test_main.cc
 }
 
-void CreateDeleteAutoTrace(const std::string& testlog) {
+void CreateDebugAndAutoTrace(const std::string& debug_message) {
   LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, testlog);
+  LOG4CXX_DEBUG(logger_, debug_message);
 }
 
 /**
@@ -94,50 +95,59 @@ bool IsLogLineContains(const std::string& log_line,
 }
 
 /**
- * @brief CheckAutoTraceDebugInFile chacks if logfile contains autotrace and
- * debug for test AutoTrace_WriteToFile_ReadCorrectString
- * @param debug_message message that should be logged with DEBUG level
- * @return true if trace enter, trace exit, debug message exist in log file
+ * @brief LogWithLevel Log message with log level.
+ * @first log level
+ * @second log message
  */
-bool CheckAutoTraceDebugInFile(const std::string& debug_message) {
-  using namespace helpers;
+typedef std::pair<std::string, std::string> LogWithLevel;
+
+/**
+ * @brief CheckIfIstreamContains chacks if file stream contains all log lines
+ * from search for vector
+ * @param stream file stream
+ * @param search_for vector with logg messages that exist in stream
+ * @return index of first element from search_for vector or -1 if all elements
+ * exists in stream
+ */
+ssize_t CheckIfIstreamContains(std::ifstream& stream,
+                               const std::vector<LogWithLevel>& search_for) {
+  std::vector<LogWithLevel>::const_iterator it = search_for.begin();
+  std::string line;
+  while (it != search_for.end() && getline(stream, line)) {
+    if (IsLogLineContains(line, it->first, it->second)) {
+      ++it;
+    }
+  }
+  return it == search_for.end() ? -1 : std::distance(search_for.begin(), it);
+}
+
+TEST(AutoTraceTest, AutoTrace_WriteToFile_ReadCorrectString) {
   const std::string debug_log_level = "DEBUG";
   const std::string trace_log_level = "TRACE";
   const std::string enter_message = ": Enter";
   const std::string exit_message = ": Exit";
-  std::ifstream file_log(kFileName);
-  if (!file_log.is_open()) {
-    return false;
-  }
-
-  bool debug_found = false;
-  bool trace_enter = false;
-  bool trace_exit = false;
-  for (std::string line;
-       Compare<bool, EQ, ONE>(false, debug_found, trace_enter, trace_exit) &&
-           getline(file_log, line);) {
-    debug_found = debug_found
-                      ? debug_found
-                      : IsLogLineContains(line, debug_log_level, debug_message);
-    trace_enter = trace_enter
-                      ? trace_enter
-                      : IsLogLineContains(line, trace_log_level, enter_message);
-    trace_exit = trace_exit
-                     ? trace_exit
-                     : IsLogLineContains(line, trace_log_level, exit_message);
-  }
-  file_log.close();
-  return Compare<bool, EQ, ALL>(true, debug_found, trace_enter, trace_exit);
-}
-
-TEST(AutoTraceTest, AutoTrace_WriteToFile_ReadCorrectString) {
-  const std::string testlog = "Test trace is working!";
+  const std::string debug_message =
+      "Trying to debug AutoTrace_WriteToFile_ReadCorrectString";
   Preconditions();
   InitLogger();
-  CreateDeleteAutoTrace(testlog);
+  CreateDebugAndAutoTrace(debug_message);
 
   FLUSH_LOGGER();
-  ASSERT_TRUE(CheckAutoTraceDebugInFile(testlog));
+  std::ifstream file_log(kFileName);
+  ASSERT_TRUE(file_log.is_open()) << "Unable to open log file";
+
+  std::vector<LogWithLevel> log_messages;
+  log_messages.push_back(LogWithLevel(trace_log_level, enter_message));
+  log_messages.push_back(LogWithLevel(debug_log_level, debug_message));
+  log_messages.push_back(LogWithLevel(trace_log_level, exit_message));
+  const ssize_t index_of_missed_element =
+      CheckIfIstreamContains(file_log, log_messages);
+  if (index_of_missed_element != -1) {
+    const std::string missed_log = log_messages[index_of_missed_element].first +
+                                   " " +
+                                   log_messages[index_of_missed_element].second;
+    FAIL() << "Missed log :" << missed_log.c_str();
+  }
 }
 
 }  // namespace utils_test
