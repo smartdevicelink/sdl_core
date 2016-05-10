@@ -37,7 +37,7 @@ include_directories(
   ${COMPONENTS_DIR}/formatters/include
   ${COMPONENTS_DIR}/formatters/test/include
   ${CMAKE_BINARY_DIR}/src/components/interfaces
-  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/jsoncpp/include
+  ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
 set(LIBRARIES
