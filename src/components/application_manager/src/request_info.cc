@@ -36,6 +36,11 @@
 #include "application_manager/request_info.h"
 
 #include <algorithm>
+
+#if defined(OS_WINDOWS)
+#define ssize_t SSIZE_T
+#endif
+
 namespace application_manager {
 
 namespace request_controller {

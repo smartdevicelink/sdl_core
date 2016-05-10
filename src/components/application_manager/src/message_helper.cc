@@ -36,10 +36,6 @@
 #define snprintf _snprintf_s
 #endif
 
-#define __STDC_FORMAT_MACROS
-#include <inttypes.h>
-#undef __STDC_FORMAT_MACROS
-
 #include <set>
 #include <string>
 #include <algorithm>
@@ -64,6 +60,10 @@
 #include "formatters/CFormatterJsonSDLRPCv2.h"
 #include "formatters/CFormatterJsonSDLRPCv1.h"
 
+#if defined(_MSC_VER)
+#define snprintf _snprintf_s
+#endif
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 namespace application_manager {
@@ -72,14 +72,39 @@ namespace {
 typedef std::map<std::string, hmi_apis::Common_AppPriority::eType>
     CommonAppPriorityMap;
 
+#ifdef SDL_CPP11
 CommonAppPriorityMap app_priority_values = {
-    {"NORMAL", hmi_apis::Common_AppPriority::NORMAL},
-    {"COMMUNICATION", hmi_apis::Common_AppPriority::COMMUNICATION},
-    {"EMERGENCY", hmi_apis::Common_AppPriority::EMERGENCY},
-    {"NAVIGATION", hmi_apis::Common_AppPriority::NAVIGATION},
-    {"NONE", hmi_apis::Common_AppPriority::NONE},
-    {"VOICECOM", hmi_apis::Common_AppPriority::VOICE_COMMUNICATION},
-    {"INVALID_ENUM", hmi_apis::Common_AppPriority::INVALID_ENUM}};
+    std::make_pair(std::string("NORMAL"), hmi_apis::Common_AppPriority::NORMAL),
+    std::make_pair(std::string("COMMUNICATION"), hmi_apis::Common_AppPriority::COMMUNICATION),
+    std::make_pair(std::string("EMERGENCY"), hmi_apis::Common_AppPriority::EMERGENCY),
+    std::make_pair(std::string("NAVIGATION"), hmi_apis::Common_AppPriority::NAVIGATION),
+    std::make_pair(std::string("NONE"), hmi_apis::Common_AppPriority::NONE),
+    std::make_pair(std::string("VOICECOM"), hmi_apis::Common_AppPriority::VOICE_COMMUNICATION),
+    std::make_pair(std::string("INVALID_ENUM"), hmi_apis::Common_AppPriority::INVALID_ENUM)
+};
+#else
+CommonAppPriorityMap create_map() {
+  CommonAppPriorityMap app_priority_values;
+  app_priority_values.insert(std::make_pair(
+      std::string("NORMAL"), hmi_apis::Common_AppPriority::NORMAL));
+  app_priority_values.insert(
+      std::make_pair(std::string("COMMUNICATION"),
+                     hmi_apis::Common_AppPriority::COMMUNICATION));
+  app_priority_values.insert(std::make_pair(
+      std::string("EMERGENCY"), hmi_apis::Common_AppPriority::EMERGENCY));
+  app_priority_values.insert(std::make_pair(
+      std::string("NAVIGATION"), hmi_apis::Common_AppPriority::NAVIGATION));
+  app_priority_values.insert(
+      std::make_pair(std::string("NONE"), hmi_apis::Common_AppPriority::NONE));
+  app_priority_values.insert(
+      std::make_pair(std::string("VOICECOM"),
+                     hmi_apis::Common_AppPriority::VOICE_COMMUNICATION));
+  app_priority_values.insert(std::make_pair(
+      std::string("INVALID_ENUM"), hmi_apis::Common_AppPriority::INVALID_ENUM));
+  return app_priority_values;
+}
+CommonAppPriorityMap app_priority_values = create_map();
+#endif  // SDL_CPP11
 
 bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
   using namespace smart_objects;

@@ -49,7 +49,6 @@
 #if defined(OS_POSIX)
 #include <strings.h>
 #elif defined(OS_WINDOWS)
-#define ssize_t SSIZE_T
 #define strcasecmp _stricmp
 #endif
 namespace NsSmartDeviceLink {
@@ -786,7 +785,6 @@ class Application : public virtual InitialApplicationData,
   std::string url_;
   std::string package_name_;
   std::string device_id_;
-  ssize_t connection_id_;
   bool is_greyed_out_;
 };
 

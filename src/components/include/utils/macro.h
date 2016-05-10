@@ -39,7 +39,9 @@
 #endif
 #include "utils/logger.h"
 
-#if defined(QT_PORT)
+#if defined(OS_POSIX)
+#include <signal.h>
+#elif defined(QT_PORT)
 #include <QCoreApplication>
 #endif
 
@@ -149,7 +151,21 @@
   friend class test_case_name##_##test_name##_Test
 #endif
 
-#if defined(QT_PORT)
+#if defined(OS_POSIX)
+// Disable some system signals receiving in thread
+// by blocking those signals
+// (system signals processes only in the main thread)
+// Mustn't block all signals!
+// See "Advanced Programming in the UNIX Environment, 3rd Edition"
+// (http://poincare.matf.bg.ac.rs/~ivana//courses/ps/sistemi_knjige/pomocno/apue.pdf,
+// "12.8. Threads and Signals".
+#define PLATFORM_INIT(argc, argv)                    \
+  sigset_t signal_set;                               \
+  sigemptyset(&signal_set);                          \
+  sigaddset(&signal_set, SIGINT);                    \
+  sigaddset(&signal_set, SIGTERM);                   \
+  pthread_sigmask(SIG_BLOCK, &signal_set, NULL);
+#elif defined(QT_PORT)
 extern Q_CORE_EXPORT int qt_ntfs_permission_lookup;
 #define PLATFORM_INIT(argc, argv)                    \
   qt_ntfs_permission_lookup++;                       \

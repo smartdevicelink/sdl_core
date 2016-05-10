@@ -32,35 +32,26 @@
 
 #ifndef SRC_APPMAIN_LIFE_CYCLE_H_
 #define SRC_APPMAIN_LIFE_CYCLE_H_
-#include "utils/macro.h"
-#include "config_profile/profile.h"
-#include "hmi_message_handler/hmi_message_handler_impl.h"
+
 #ifdef DBUS_HMIADAPTER
 #include "hmi_message_handler/dbus_message_adapter.h"
 #endif  // DBUS_HMIADAPTER
-#if (defined(MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI))
-#include "hmi_message_handler/messagebroker_adapter.h"
-#endif  // #if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
-#ifdef MQUEUE_HMIADAPTER
-#include "hmi_message_handler/mqueue_adapter.h"
-#endif  // MQUEUE_HMIADAPTER
-#include "application_manager/application_manager_impl.h"
-#include "connection_handler/connection_handler_impl.h"
-#include "protocol_handler/protocol_handler_impl.h"
-#include "transport_manager/transport_manager.h"
-#include "transport_manager/transport_manager_default.h"
-#include "media_manager/media_manager_impl.h"
-#ifdef TELEMETRY_MONITOR
-#include "telemetry_monitor/telemetry_monitor.h"
-#endif
 
-//#if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
 #ifdef MESSAGEBROKER_HMIADAPTER
+#include "hmi_message_handler/messagebroker_adapter.h"
 #include "CMessageBroker.hpp"
 #include "mb_tcpserver.hpp"
 #include "networking.h"  // cpplint: Include the directory when naming .h files
-#endif                   // MESSAGEBROKER_HMIADAPTER
 #include "system.h"      // cpplint: Include the directory when naming .h files
+#endif  // MESSAGEBROKER_HMIADAPTER
+
+#ifdef MQUEUE_HMIADAPTER
+#include "hmi_message_handler/mqueue_adapter.h"
+#endif  // MQUEUE_HMIADAPTER
+
+#ifdef TELEMETRY_MONITOR
+#include "telemetry_monitor/telemetry_monitor.h"
+#endif
 
 #ifdef ENABLE_SECURITY
 namespace security_manager {
@@ -68,6 +59,16 @@ class CryptoManager;
 class SecurityManagerImpl;
 }  // namespace security_manager
 #endif  // ENABLE_SECURITY
+
+#include "utils/macro.h"
+#include "config_profile/profile.h"
+#include "hmi_message_handler/hmi_message_handler_impl.h"
+#include "application_manager/application_manager_impl.h"
+#include "connection_handler/connection_handler_impl.h"
+#include "protocol_handler/protocol_handler_impl.h"
+#include "transport_manager/transport_manager.h"
+#include "transport_manager/transport_manager_default.h"
+#include "media_manager/media_manager_impl.h"
 
 namespace main_namespace {
 class LifeCycle {

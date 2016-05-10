@@ -39,6 +39,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "transport_manager/transport_manager_default.h"
 #include "utils/resource_usage.h"

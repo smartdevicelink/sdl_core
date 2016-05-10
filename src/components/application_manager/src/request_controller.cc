@@ -37,6 +37,10 @@
 #include "utils/make_shared.h"
 #include "utils/timer_task_impl.h"
 
+#if defined(_MSC_VER)
+#define snprintf _snprintf_s
+#endif
+
 namespace application_manager {
 
 namespace request_controller {

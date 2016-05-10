@@ -64,6 +64,12 @@
 #include "utils/custom_string.h"
 #include <time.h>
 
+#if defined(OS_WINDOWS)
+#define ssize_t SSIZE_T
+#endif
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+
 namespace application_manager {
 
 namespace {
@@ -72,7 +78,7 @@ int get_rand_from_range(uint32_t from = 0, int to = RAND_MAX) {
 }
 
 #ifdef SDL_CPP11
-DeviceTypes devicesType = {
+DeviceTypes devices_type = {
     std::make_pair(std::string("USB_AOA"),
                    hmi_apis::Common_TransportType::USB_AOA),
     std::make_pair(std::string("USB_IOS"),
@@ -82,18 +88,18 @@ DeviceTypes devicesType = {
     std::make_pair(std::string("WIFI"), hmi_apis::Common_TransportType::WIFI)};
 #else
 DeviceTypes create_map() {
-  DeviceTypes devicesType;
-  devicesType.insert(std::make_pair(std::string("USB_AOA"),
-                                    hmi_apis::Common_TransportType::USB_AOA));
-  devicesType.insert(std::make_pair(std::string("USB_IOS"),
-                                    hmi_apis::Common_TransportType::USB_IOS));
-  devicesType.insert(std::make_pair(std::string("BLUETOOTH"),
-                                    hmi_apis::Common_TransportType::BLUETOOTH));
-  devicesType.insert(std::make_pair(std::string("WIFI"),
-                                    hmi_apis::Common_TransportType::WIFI));
-  return devicesType;
+  DeviceTypes devices_type;
+  devices_type.insert(std::make_pair(std::string("USB_AOA"),
+                                     hmi_apis::Common_TransportType::USB_AOA));
+  devices_type.insert(std::make_pair(std::string("USB_IOS"),
+                                     hmi_apis::Common_TransportType::USB_IOS));
+  devices_type.insert(std::make_pair(std::string("BLUETOOTH"),
+                                     hmi_apis::Common_TransportType::BLUETOOTH));
+  devices_type.insert(std::make_pair(std::string("WIFI"),
+                                     hmi_apis::Common_TransportType::WIFI));
+  return devices_type;
 }
-DeviceTypes devicesType = create_map();
+DeviceTypes devices_type = create_map();
 #endif  // SDL_CPP11
 
 }  // namespace
@@ -805,9 +811,9 @@ ApplicationManagerImpl::GetDeviceTransportType(
   hmi_apis::Common_TransportType::eType result =
       hmi_apis::Common_TransportType::INVALID_ENUM;
 
-  DeviceTypes::const_iterator it = devicesType.find(transport_type);
-  if (it != devicesType.end()) {
-    return devicesType[transport_type];
+  DeviceTypes::const_iterator it = devices_type.find(transport_type);
+  if (it != devices_type.end()) {
+    return devices_type[transport_type];
   } else {
     LOGGER_ERROR(logger_, "Unknown transport type " << transport_type);
   }

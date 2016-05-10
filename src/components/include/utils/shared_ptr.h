@@ -230,12 +230,13 @@ class SharedPtr {
 template <typename ObjectType>
 inline utils::SharedPtr<ObjectType>::SharedPtr(ObjectType* Object)
 #ifdef QT_PORT
-    : mObject(NULL), mReferenceCounter(new QAtomicInt(1)) {
+    : mObject(NULL),
+      mReferenceCounter(new QAtomicInt(1)),
+      deleter_(DummyDeleter) {
 #else
     : mObject(NULL)
     , mReferenceCounter(new uint32_t(1))
     , deleter_(DummyDeleter) {
-
 #endif
   DCHECK(Object != NULL);
   mObject = Object;

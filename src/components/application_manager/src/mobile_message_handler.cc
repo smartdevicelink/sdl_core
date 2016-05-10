@@ -56,16 +56,16 @@ using protocol_handler::Extract;
 namespace {
 typedef std::map<MessageType, std::string> MessageTypeMap;
 #ifdef SDL_CPP11
-MessageTypeMap messageTypes = {std::make_pair(kRequest, "Request"),
-                               std::make_pair(kResponse, "Response"),
-                               std::make_pair(kNotification, "Notification")};
+MessageTypeMap message_types_map = {std::make_pair(kRequest, std::string("Request")),
+                                    std::make_pair(kResponse, std::string("Response")),
+                                    std::make_pair(kNotification, std::string("Notification"))};
 #else
 MessageTypeMap create_map() {
-  MessageTypeMap messageTypes;
-  messageTypes.insert(std::make_pair(kRequest, "Request"));
-  messageTypes.insert(std::make_pair(kResponse, "Response"));
-  messageTypes.insert(std::make_pair(kNotification, "Notification"));
-  return messageTypes;
+  MessageTypeMap message_types_map;
+  message_types_map.insert(std::make_pair(kRequest, std::string("Request")));
+  message_types_map.insert(std::make_pair(kResponse, std::string("Response")));
+  message_types_map.insert(std::make_pair(kNotification, std::string("Notification")));
+  return message_types_map;
 }
 MessageTypeMap message_types_map = create_map();
 #endif  // SDL_CPP11
@@ -119,7 +119,7 @@ MobileMessageHandler::HandleIncomingMessageProtocol(
   LOGGER_DEBUG(logger_,
                "Incoming RPC_INFO: " << (out_message->connection_key() >> 16)
                                      << ", "
-                                     << message_types_map[out_message->type()]
+                                     << GetMessageType(out_message->type())
                                      << ", " << out_message->function_id()
                                      << ", " << out_message->correlation_id()
                                      << ", " << out_message->json_message());
@@ -131,10 +131,10 @@ MobileMessageHandler::HandleOutgoingMessageProtocol(
     const MobileMessage& message) {
   LOGGER_DEBUG(logger_,
                "Outgoing RPC_INFO: " << (message->connection_key() >> 16)
-               << ", " << message_types_map[message->type()]
-               << ", " << message->function_id() << ", "
-               << message->correlation_id() << ", "
-               << message->json_message());
+                                     << ", " << GetMessageType(message->type())
+                                     << ", " << message->function_id() << ", "
+                                     << message->correlation_id() << ", "
+                                     << message->json_message());
 
   if (message->protocol_version() == application_manager::kV1) {
     return MobileMessageHandler::HandleOutgoingMessageProtocolV1(message);

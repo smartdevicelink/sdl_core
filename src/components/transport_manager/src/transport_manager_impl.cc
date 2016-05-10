@@ -465,7 +465,6 @@ int TransportManagerImpl::SearchDevices() {
 
 int TransportManagerImpl::Init(resumption::LastState& last_state) {
   // Last state requred to initialize Transport adapters
-  UNUSED(last_state);
   LOGGER_TRACE(logger_, "enter");
   is_initialized_ = true;
   LOGGER_TRACE(logger_, "exit with E_SUCCESS");

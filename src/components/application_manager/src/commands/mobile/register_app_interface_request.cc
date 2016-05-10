@@ -42,6 +42,7 @@
 #include <string.h>
 
 #include <utils/make_shared.h>
+#include "utils/threads/thread.h"
 #include "application_manager/application_manager.h"
 #include "application_manager/policies/policy_handler_interface.h"
 #include "application_manager/application_impl.h"
@@ -166,8 +167,7 @@ void RegisterAppInterfaceRequest::Run() {
                      << connection_key()
                      << ", correlation_id=" << correlation_id()
                      << ", default_timeout=" << default_timeout()
-                     << ", thread=" << threads::Thread::CurrentId());                     
-
+                     << ", thread=" << threads::Thread::CurrentId());
     application_manager_.updateRequestTimeout(
         connection_key(), correlation_id(), default_timeout());
 #if defined(OS_POSIX)

@@ -36,6 +36,10 @@
 #include "application_manager/application.h"
 #include "application_manager/application_manager.h"
 
+#if defined(OS_WINDOWS)
+#define ssize_t SSIZE_T
+#endif
+
 namespace application_manager {
 class ApplicationManagerSettings;
 }
