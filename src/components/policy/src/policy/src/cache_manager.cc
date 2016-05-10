@@ -790,8 +790,22 @@ utils::SharedPtr<policy_table::Table>
 CacheManager::GenerateSnapshot() {
   CACHE_MANAGER_CHECK(snapshot_);
   sync_primitives::AutoLock lock(cache_lock_);
+
   snapshot_ = new policy_table::Table();
-  snapshot_->policy_table = pt_->policy_table;
+
+  //Copy all members of policy table except messages in consumer friendly messages
+  snapshot_->policy_table.app_policies_section = pt_->policy_table.app_policies_section;
+  snapshot_->policy_table.functional_groupings = pt_->policy_table.functional_groupings;
+  snapshot_->policy_table.consumer_friendly_messages->version = pt_->policy_table.consumer_friendly_messages->version;
+  snapshot_->policy_table.consumer_friendly_messages->mark_initialized();
+  snapshot_->policy_table.module_config = pt_->policy_table.module_config;
+  snapshot_->policy_table.module_meta = pt_->policy_table.module_meta;
+  snapshot_->policy_table.usage_and_error_counts = pt_->policy_table.usage_and_error_counts;
+  snapshot_->policy_table.device_data = pt_->policy_table.device_data;
+
+  //Set policy table type to Snapshot
+  snapshot_->SetPolicyTableType(rpc::policy_table_interface_base::PolicyTableType::PT_SNAPSHOT);
+  
   CheckSnapshotInitialization();
   return snapshot_;
 }
