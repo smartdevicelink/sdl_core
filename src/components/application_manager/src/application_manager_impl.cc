@@ -485,10 +485,16 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   }
   apps_to_register_list_lock_.Release();
 
+  const std::string device_mac =
+      MessageHelper::GetDeviceMacAddressForHandle(application->device());
+
   if (!application->hmi_app_id()) {
-    const bool is_saved = resume_ctrl_.IsApplicationSaved(mobile_app_id);
-    application->set_hmi_application_id(is_saved ?
-              resume_ctrl_.GetHMIApplicationID(mobile_app_id) : GenerateNewHMIAppID());
+    const bool is_saved = resume_ctrl_.IsApplicationSaved(mobile_app_id,
+                                                          device_mac);
+    application->set_hmi_application_id(
+          is_saved
+          ? resume_ctrl_.GetHMIApplicationID(mobile_app_id, device_mac)
+          : GenerateNewHMIAppID());
   }
 
   ApplicationListAccessor app_list_accesor;
@@ -1963,13 +1969,28 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
       continue;
     }
 
+    uint32_t device_id = 0;
+    connection_handler::ConnectionHandlerImpl* con_handler_impl =
+      static_cast<connection_handler::ConnectionHandlerImpl*>(
+        connection_handler_);
+
+    if (-1 == con_handler_impl->GetDataOnSessionKey(
+          connection_key, NULL, NULL, &device_id)) {
+      LOG4CXX_ERROR(logger_,
+                    "Failed to create application: no connection info.");
+      continue;
+    }
+
     const std::string mobile_app_id(app_data[json::appId].asString());
     ApplicationSharedPtr registered_app =
         ApplicationManagerImpl::instance()->
         application_by_policy_id(mobile_app_id);
-    if (registered_app) {
+
+    if (registered_app && device_id == registered_app->device()) {
       LOG4CXX_DEBUG(logger_, "Application with the same id: " << mobile_app_id
-                    << " is registered already.");
+                    << " is registered already on the same device."
+                       " Device id is:" << device_id
+                    << " Application processing skipped.");
       continue;
     }
 
@@ -2000,23 +2021,17 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
       vrSynonym[0] = appName;
     }
 
-    const uint32_t hmi_app_id = resume_ctrl_.IsApplicationSaved(mobile_app_id)?
-          resume_ctrl_.GetHMIApplicationID(mobile_app_id) : GenerateNewHMIAppID();
+    const std::string device_mac =
+        MessageHelper::GetDeviceMacAddressForHandle(device_id);
+
+    const uint32_t hmi_app_id =
+        resume_ctrl_.IsApplicationSaved(mobile_app_id, device_mac)
+        ? resume_ctrl_.GetHMIApplicationID(mobile_app_id, device_mac)
+        : GenerateNewHMIAppID();
+
 
     const std::string app_icon_dir(Profile::instance()->app_icons_folder());
     const std::string full_icon_path(app_icon_dir + "/" + mobile_app_id);
-
-    uint32_t device_id = 0;
-    connection_handler::ConnectionHandlerImpl* con_handler_impl =
-      static_cast<connection_handler::ConnectionHandlerImpl*>(
-        connection_handler_);
-
-    if (-1 == con_handler_impl->GetDataOnSessionKey(
-          connection_key, NULL, NULL, &device_id)) {
-      LOG4CXX_ERROR(logger_,
-                    "Failed to create application: no connection info.");
-      continue;
-    }
 
     // AppId = 0 because this is query_app(provided by hmi for download, but not yet registered)
     ApplicationSharedPtr app(
@@ -2338,7 +2353,9 @@ void ApplicationManagerImpl::UnregisterApplication(
   if (is_resuming) {
       resume_ctrl_.SaveApplication(app_to_remove);
   } else {
-    resume_ctrl_.RemoveApplicationFromSaved(app_to_remove->mobile_app_id());
+    resume_ctrl_.RemoveApplicationFromSaved(
+          app_to_remove->mobile_app_id(),
+          MessageHelper::GetDeviceMacAddressForHandle(app_to_remove->device()));
   }
 
   if (audio_pass_thru_active_) {

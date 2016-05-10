@@ -127,9 +127,11 @@ class ResumeCtrl: public event_engine::EventObserver {
     /**
      * @brief Remove application from list of saved applications
      * @param mobile_app_id application witch need to be removed
+     * @param device_mac Device MAC of device needs to be checked
      * @return return true, if success, otherwise return false
      */
-    bool RemoveApplicationFromSaved(const std::string& mobile_app_id);
+    bool RemoveApplicationFromSaved(const std::string& mobile_app_id,
+                                    const std::string& device_mac);
 
     /**
      * @brief Increments ignition counter for all registered applications
@@ -199,9 +201,11 @@ class ResumeCtrl: public event_engine::EventObserver {
     /**
      * @brief Check if Resume controller have saved instance of application
      * @param mobile_app_id - mobile application id
+     * @param device_mac Device MAC of device needs to be checked
      * @return true if exist, false otherwise
      */
-    bool IsApplicationSaved(const std::string& mobile_app_id);
+    bool IsApplicationSaved(const std::string& mobile_app_id,
+                            const std::string& device_mac);
 
     /**
      * @brief Function is used for application resume. HMI app ID must be
@@ -209,9 +213,12 @@ class ResumeCtrl: public event_engine::EventObserver {
      * Retrieves HMI app ID for the given mobile app ID from stored information.
      *
      * @param mobile_app_id - mobile application id
+     * @param device_mac Device MAC of device needs to be checked
+     *
      * @return HMI app ID
      */
-    uint32_t GetHMIApplicationID(const std::string& mobile_app_id);
+    uint32_t GetHMIApplicationID(const std::string& mobile_app_id,
+                                 const std::string& device_mac);
 
     /**
      * @brief SaveDataOnTimer :
@@ -464,10 +471,12 @@ class ResumeCtrl: public event_engine::EventObserver {
      * applications arrays.
      *
      * @param mobile_app_id application id that should be found.
+     * @param device_mac Device MAC of device needs to be checked
      *
      * @return application's index of or -1 if it doesn't exists
      */
-    int GetObjectIndex(const std::string& mobile_app_id);
+    int GetObjectIndex(const std::string& mobile_app_id,
+                       const std::string& device_mac);
 
     /**
      * @brief Timer callback for  restoring HMI Level
