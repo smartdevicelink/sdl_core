@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdlib>
+#include <locale>
 #include "./types.h"
 #include "utils/macro.h"
 

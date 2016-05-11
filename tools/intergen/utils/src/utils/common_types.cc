@@ -57,7 +57,7 @@ bool Fraction::FromFloatPointString(const std::string& literal, Fraction* fracti
   }
   int64_t numer_val = 0;
   if (StringToNumber(wholes_str + decs_str, &numer_val)) {
-    int64_t denumer_val = pow(10, decs_str.size());
+    int64_t denumer_val = std::pow(10, decs_str.size());
     *fraction = Fraction(numer_val, denumer_val);
     return true;
   }

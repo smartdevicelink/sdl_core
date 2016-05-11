@@ -79,7 +79,7 @@ if (OS_TYPE_OPTION)
     message(STATUS "Jenkins integration: set build process for QNX")
     #do not use include after project() command.
     #Such usecase results in infinite cycle of reinitialization of compiler and other variables
-    INCLUDE("./qnx_6.5.0_linux_x86.cmake")
+    INCLUDE("./qnx_6.6.0_linux_x86.cmake")
     set(objcopy "nto${ARCH_TYPE_OPTION}-objcopy")
     #tests are not supported yet for QNX build
     set (BUILD_TESTS OFF)
@@ -245,7 +245,7 @@ pkg_check_modules(GLIB2 REQUIRED glib-2.0)
 add_definitions(${GLIB2_CFLAGS})
 endif()
 
-set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror")
+set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror -Wno-error=deprecated-declarations")
 if (CMAKE_BUILD_TYPE)
   if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
