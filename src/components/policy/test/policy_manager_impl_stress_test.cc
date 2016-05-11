@@ -47,8 +47,8 @@ namespace policy {
 class PolicyManagerImplStressTest : public ::testing::Test {
  protected:
   static const std::string kNameFile;
-  static const int kNumberGroups = 3;  //10;
-  static const int kNumberFuncs = 4;  //100;
+  static const int kNumberGroups = 3;
+  static const int kNumberFuncs = 4;  
   static const int kNumberApps = 5;
   static const int kNumberAppGroups = 5;
   static PolicyManagerImpl* manager;
@@ -138,6 +138,28 @@ void PolicyManagerImplStressTest::CreateApps(std::ofstream& ofs) {
       "\"steal_focus\": true,\n"
       "\"priority\": \"NORMAL\",\n"
       "\"default_hmi\": \"FULL\",\n";
+  ofs << "\"groups\":["
+      "\"Group-1\""
+      "]"
+      "},\n";
+
+  //Device app_policies object must be present and initialized for PT to be valid.    
+  ofs << "\"device\":{\n";
+  ofs << "\"keep_context\": false,\n"
+      "\"steal_focus\": false,\n"
+      "\"priority\": \"NONE\",\n"
+      "\"default_hmi\": \"NONE\",\n";
+  ofs << "\"groups\":["
+      "\"Group-1\""
+      "]"
+      "},\n";
+
+  //preData app_policies must be present and initialized for PT to be valid.
+  ofs << "\"pre_DataConsent\":{\n";
+  ofs << "\"keep_context\": false,\n"
+      "\"steal_focus\": false,\n"
+      "\"priority\": \"NONE\",\n"
+      "\"default_hmi\": \"NONE\",\n";
   ofs << "\"groups\":["
       "\"Group-1\""
       "]"
