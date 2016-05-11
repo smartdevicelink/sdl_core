@@ -73,7 +73,7 @@ set(testLibraries
   ConfigProfile
 )
 
-include_directories(${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct)
+include_directories(${COMPONENTS_DIR}/policy/include)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   # --- Tests for QDB Wrapper

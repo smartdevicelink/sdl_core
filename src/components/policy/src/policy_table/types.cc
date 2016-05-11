@@ -1,5 +1,5 @@
 // This file is generated, do not edit
-#include "./types.h"
+#include "policy/policy_table/types.h"
 #include "rpc_base/rpc_base_json_inl.h"
 
 namespace rpc {

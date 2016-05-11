@@ -40,8 +40,8 @@
 
 #include "policy/policy_manager_impl.h"
 #include "config_profile/profile.h"
-#include "table_struct/enums.h"
-#include "table_struct/types.h"
+#include "policy/policy_table/enums.h"
+#include "policy/policy_table/types.h"
 #include "policy/mock_policy_settings.h"
 #include "mock_policy_listener.h"
 #include "mock_cache_manager.h"

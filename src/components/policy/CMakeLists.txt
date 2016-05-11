@@ -28,11 +28,87 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# --- Policy
-add_subdirectory(./src/policy)
-#======================= Unit-Test section =======================
+set(target Policy)
+set(install_destination bin)
+set(copy_destination ${CMAKE_BINARY_DIR}/src/appMain)
+set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_SUFFIX})
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
+
+#Generation of policy table interface...
+#include(${CMAKE_SOURCE_DIR}/tools/intergen/GenerateInterfaceLibrary.cmake)
+
+include_directories (
+  ${COMPONENTS_DIR}/policy/include
+  ${COMPONENTS_DIR}/rpc_base/include
+  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${COMPONENTS_DIR}/utils/include/
+  ${COMPONENTS_DIR}/config_profile/include
+  ${LOG4CXX_INCLUDE_DIRECTORY}
+)
+
+set(SOURCES
+  ./src/policy_manager_impl.cc
+  ./src/policy_helper.cc
+  ./src/policy_table.cc
+  ./src/sql_pt_queries.cc
+  ./src/sql_pt_representation.cc
+  ./src/update_status_manager.cc
+  ./src/cache_manager.cc
+  ${CMAKE_SOURCE_DIR}/src/components/rpc_base/src/rpc_base/rpc_base.cc
+)
+
+# --- Table struct section
+set(policy_struct_target policy_struct)
+set(POLICY_TABLE_SOURCES
+  ./src/policy_table/enums.cc
+  ./src/policy_table/types.cc
+  ./src/policy_table/validation.cc
+)
+
+add_library(${policy_struct_target} ${POLICY_TABLE_SOURCES})
+target_link_libraries(${policy_struct_target} Utils)
+# --- end of Table struct section
+
+# --- Usage statistics section
+set(USAGE_STATISTICS_SOURCES
+  src/usage_statistics/counter.cc
+)
+add_library(UsageStatistics ${USAGE_STATISTICS_SOURCES})
+# --- end of Usage statistics section
+
+set(LIBRARIES ConfigProfile policy_struct dbms jsoncpp Utils)
+if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+  # --- QDB Wrapper 
+  include_directories (${COMPONENTS_DIR}/utils/include/utils)
+else ()
+  # --- SQLite Wrapper
+  include_directories (${COMPONENTS_DIR}/utils/include/utils)
+  list(APPEND LIBRARIES sqlite3)
+endif ()
+
+add_library(${target} SHARED ${SOURCES})
+target_link_libraries(${target} ${LIBRARIES} )
+
+if(ENABLE_LOG)
+  target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+endif()
+
+add_custom_target(copy_library_${target} ALL
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_BINARY_DIR}/${library_name}
+    ${copy_destination}
+    DEPENDS ${target}
+    COMMENT "Copying library ${library_name}")
+
+install(TARGETS ${target}
+  DESTINATION ${install_destination}
+  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+    GROUP_READ GROUP_EXECUTE
+    WORLD_READ WORLD_EXECUTE
+)
+
 if(BUILD_TESTS)
   add_subdirectory(test)
-endif()
-#=================================================================
-
+endif() # BUILD_TESTS

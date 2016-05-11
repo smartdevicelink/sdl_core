@@ -63,8 +63,7 @@ set(LIBRARIES
     glib-2.0
 )
 else(EXTENDED_MEDIA_MODE)
-set(default_includes
-)
+
 set(default_sources
     ${COMPONENTS_DIR}/media_manager/src/audio/socket_audio_streamer_adapter.cc
     ${COMPONENTS_DIR}/media_manager/src/audio/pipe_audio_streamer_adapter.cc
@@ -96,9 +95,7 @@ include_directories (
     ${COMPONENTS_DIR}/config_profile/include/
     ${JSONCPP_INCLUDE_DIRECTORY}
     ${CMAKE_BINARY_DIR}/src/components/
-    ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/include/
-    ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/usage_statistics/include/
-    ${default_includes}
+    ${COMPONENTS_DIR}/policy/include/
     ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
