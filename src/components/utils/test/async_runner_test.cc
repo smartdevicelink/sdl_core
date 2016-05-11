@@ -30,13 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdlib.h>
 #include <ctime>
-#include "lock.h"
-#include "threads/async_runner.h"
-#include "utils/conditional_variable.h"
+#include <stdlib.h>
 
 #include "gtest/gtest.h"
+
+#include "utils/lock.h"
+#include "utils/conditional_variable.h"
+#include "utils/threads/async_runner.h"
 
 namespace test {
 namespace components {

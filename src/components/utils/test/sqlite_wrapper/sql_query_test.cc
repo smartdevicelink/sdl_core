@@ -29,14 +29,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sqlite3.h>
 #include <string>
+#include <sqlite3.h>
 
 #include "gtest/gtest.h"
 
-#include "sqlite_wrapper/sql_error.h"
-#include "sqlite_wrapper/sql_database.h"
-#include "sqlite_wrapper/sql_query.h"
+#include "utils/sqlite_wrapper/sql_error.h"
+#include "utils/sqlite_wrapper/sql_database.h"
+#include "utils/sqlite_wrapper/sql_query.h"
 
 using ::utils::dbms::SQLError;
 using ::utils::dbms::SQLDatabase;

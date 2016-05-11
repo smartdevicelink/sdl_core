@@ -32,12 +32,11 @@ if(BUILD_TESTS)
 
 include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
-  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/include
-  ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/gtest/include
-  ${COMPONENTS_DIR}/utils/include/utils
-  ${COMPONENTS_DIR}/include/utils
+  ${GMOCK_INCLUDE_DIRECTORY}
+  ${COMPONENTS_DIR}/utils/include
   ${COMPONENTS_DIR}/rpc_base/include
   ${COMPONENTS_DIR}/utils/test/include
+  ${COMPONENTS_DIR}/policy/include
 )
 
 set(testSources
@@ -72,8 +71,6 @@ set(testLibraries
   Policy
   ConfigProfile
 )
-
-include_directories(${COMPONENTS_DIR}/policy/include)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
   # --- Tests for QDB Wrapper

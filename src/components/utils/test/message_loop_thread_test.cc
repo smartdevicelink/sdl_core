@@ -31,7 +31,7 @@
  */
 
 #include "gtest/gtest.h"
-#include "test_handler.h"
+#include "utils/test_handler.h"
 
 namespace test {
 namespace components {
