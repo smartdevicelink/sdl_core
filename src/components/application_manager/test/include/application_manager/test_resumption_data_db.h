@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Ford Motor Company
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,6 +36,7 @@
 #include "utils/sqlite_wrapper/sql_database.h"
 #include "application_manager/resumption/resumption_data_db.h"
 #include "application_manager/mock_application_manager_settings.h"
+#include "application_manager/mock_application_manager.h"
 
 using ::resumption::ResumptionDataDB;
 
@@ -45,9 +46,13 @@ namespace resumption_test {
 
 class TestResumptionDataDB : public ResumptionDataDB {
  public:
-  TestResumptionDataDB(application_manager_test::MockApplicationManagerSettings&
-                           mock_application_manager_settings)
-      : ResumptionDataDB(mock_application_manager_settings) {}
+  utils::dbms::SQLDatabase* get_db_handle() {
+    return db();
+  }
+
+  application_manager_test::MockApplicationManager mock_application_manager_;
+  TestResumptionDataDB(DbStorage db_storage)
+      : ResumptionDataDB(db_storage, mock_application_manager_) {}
 };
 
 }  // namespace resumption_test

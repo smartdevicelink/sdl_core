@@ -29,8 +29,8 @@
 * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_RESUMPTION_INCLUDE_RESUMPTION_DATA_MOCK_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_RESUMPTION_INCLUDE_RESUMPTION_DATA_MOCK_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RESUMPTION_DATA_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RESUMPTION_DATA_H_
 #include <string>
 #include "gmock/gmock.h"
 #include "application_manager/resumption/resumption_data.h"
@@ -41,14 +41,15 @@
 namespace test {
 namespace components {
 namespace resumption_test {
+
 namespace app_mngr = application_manager;
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 class MockResumptionData : public ::resumption::ResumptionData {
  public:
   MockResumptionData(
-      const application_manager_test::MockApplicationManager& application_manager)
-      : ResumptionData(application_manager) {}
+      const application_manager_test::MockApplicationManager& settings)
+      : ResumptionData(settings) {}
   MOCK_METHOD1(SaveApplication,
                void(app_mngr::ApplicationSharedPtr application));
   MOCK_CONST_METHOD2(GetStoredHMILevel,
@@ -91,4 +92,4 @@ class MockResumptionData : public ::resumption::ResumptionData {
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_RESUMPTION_INCLUDE_RESUMPTION_DATA_MOCK_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_TEST_INCLUDE_APPLICATION_MANAGER_MOCK_RESUMPTION_DATA_H_
