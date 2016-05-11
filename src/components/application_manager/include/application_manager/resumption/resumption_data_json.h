@@ -65,31 +65,11 @@ class ResumptionDataJson : public ResumptionData {
       app_mngr::ApplicationSharedPtr application) OVERRIDE;
 
   /**
-   * @brief Returns HMI level of application from saved data
-   * @param policy_app_id contains policy application id of application
-   * @param device_id contains id of device on which is running application
-   * @return HMI level, if saved data does not contain HMI level method
-   * returns -1
-   */
-  virtual int32_t GetStoredHMILevel(const std::string& policy_app_id,
-                                    const std::string& device_id) const;
-
-  /**
    * @brief Checks if saved data of applications have hmi app id
    * @param hmi_app_id - hmi application id
    * @return true if exist, false otherwise
    */
   virtual bool IsHMIApplicationIdExist(uint32_t hmi_app_id) const;
-
-  /**
-   * @brief Checks if saved data have application
-   * and removes this data if it is not valid
-   * @param policy_app_id - policy application id
-   * @param device_id - contains id of device on which is running application
-   * @return true if data exists and data is valid, false otherwise
-   */
-  virtual bool CheckSavedApplication(const std::string& policy_app_id,
-                                     const std::string& device_id);
 
   /**
    * @brief Retrieves HMI app ID for the given mobile app ID

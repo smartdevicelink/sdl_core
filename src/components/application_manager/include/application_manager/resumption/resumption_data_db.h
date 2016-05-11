@@ -58,6 +58,14 @@ struct ApplicationParams {
 };
 
 /**
+ * @brief Show should database be saved in a disk file or in memory
+ */
+enum DbStorage {
+  In_Memory_Storage = 0,
+  In_File_Storage
+};
+
+/**
  * @brief class contains logic for representation application data in
  * data base
  */
@@ -68,6 +76,7 @@ class ResumptionDataDB : public ResumptionData {
    * @param db_storage show database should be saved in a disk file or in memory
    */
   ResumptionDataDB(
+      DbStorage db_storage,
       const application_manager::ApplicationManager& application_manager);
 
   /**
@@ -88,30 +97,11 @@ class ResumptionDataDB : public ResumptionData {
    */
   void SaveApplication(app_mngr::ApplicationSharedPtr application) OVERRIDE;
   /**
-   * @brief Returns HMI level of application from saved data
-   * @param policy_app_id contains policy id of application
-   * @param device_id contains id of device on which is running application
-   * @return HMI level, if saved data does not contain HMI level method
-   * returns -1
-   */
-  virtual int32_t GetStoredHMILevel(const std::string& policy_app_id,
-                                    const std::string& device_id) const;
-
-  /**
    * @brief Checks if saved data of applications have hmi app id
    * @param hmi_app_id - hmi application id
    * @return true if exist, otherwise false
    */
   virtual bool IsHMIApplicationIdExist(uint32_t hmi_app_id) const;
-  /**
-   * @brief Checks if saved data have application
-   * @param policy_app_id - policy application id
-   * @param device_id - contains id of device on which is running application
-   * @return true if application exists, false otherwise
-   */
-  virtual bool CheckSavedApplication(const std::string& policy_app_id,
-                                     const std::string& device_id);
-
   /**
    * @brief Retrieves HMI app ID for the given mobile app ID
    * and device ID from stored data.
@@ -203,11 +193,6 @@ class ResumptionDataDB : public ResumptionData {
                               mobile_apis::HMILevel::eType hmi_level);
 
   /**
-   * @brief Write database to file system
-   */
-  void Persist() OVERRIDE;
-
-  /**
    * @brief Re-creates and re-init DB
    * @return true if success, otherwise - false
    */
@@ -241,6 +226,16 @@ class ResumptionDataDB : public ResumptionData {
 
   bool DropAppDataResumption(const std::string& device_id,
                              const std::string& app_id) OVERRIDE;
+  /**
+   * @brief Write json resumption info to file system
+   */
+  void Persist() OVERRIDE;
+
+protected:
+  /**
+   * @brief returns pointer to data base
+   */
+  utils::dbms::SQLDatabase* db() const;
 
  private:
   /**
@@ -305,7 +300,7 @@ class ResumptionDataDB : public ResumptionData {
    */
   bool CheckExistenceApplication(const std::string& policy_app_id,
                                  const std::string& device_id,
-                                 bool application_exist) const;
+                                 bool& application_exist) const;
 
   /**
    * @brief Retrieves data from saved application
@@ -825,11 +820,6 @@ class ResumptionDataDB : public ResumptionData {
    * @brief Writes data to DB after update
    */
   void WriteDb();
-
-  /**
-   * @brief returns pointer to data base
-   */
-  utils::dbms::SQLDatabase* db() const;
 
   /**
    * @brief Updates grammarID for application

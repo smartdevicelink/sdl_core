@@ -127,8 +127,6 @@ smart_objects::SmartObject ResumptionData::GetApplicationGlobalProperties(
       PointerToSmartObj(application->vr_help());
   global_properties[strings::vr_help_title] =
       PointerToSmartObj(application->vr_help_title());
-  global_properties[strings::vr_synonyms] =
-      PointerToSmartObj(application->vr_synonyms());
   global_properties[strings::keyboard_properties] =
       PointerToSmartObj(application->keyboard_props());
   global_properties[strings::menu_title] =
