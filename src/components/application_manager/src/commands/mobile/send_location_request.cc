@@ -30,6 +30,8 @@
  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
  */
+#include <algorithm>
+
 #include "application_manager/commands/mobile/send_location_request.h"
 
 #include "application_manager/message_helper.h"
@@ -61,9 +63,18 @@ void SendLocationRequest::Run() {
     return;
   }
 
-  SmartObject& msg_params = (*message_)[strings::msg_params];
-  std::list<Common_TextFieldName::eType> fields_to_check;
+  smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
+  if (msg_params.keyExists(strings::delivery_mode)) {
+    const std::vector<std::string>& allowed_params =
+        parameters_permissions().allowed_params;
+    if (allowed_params.end() == std::find(allowed_params.begin(),
+                                          allowed_params.end(),
+                                          strings::delivery_mode)) {
+      msg_params.erase(strings::delivery_mode);
+    }
+  }
 
+  std::vector<Common_TextFieldName::eType> fields_to_check;
   if (msg_params.keyExists(strings::location_name)) {
     fields_to_check.push_back(Common_TextFieldName::locationName);
   }
@@ -225,8 +236,7 @@ bool SendLocationRequest::IsWhiteSpaceExist() {
 }
 
 bool SendLocationRequest::CheckHMICapabilities(
-    std::list<hmi_apis::Common_TextFieldName::eType>& fields_names) {
-  LOG4CXX_AUTO_TRACE(logger_);
+    std::vector<hmi_apis::Common_TextFieldName::eType>& fields_names) {
   using namespace smart_objects;
   using namespace hmi_apis;
   if (fields_names.empty()) {
@@ -250,7 +260,7 @@ bool SendLocationRequest::CheckHMICapabilities(
       const Common_TextFieldName::eType filed_name =
           static_cast<Common_TextFieldName::eType>(
               text_field.getElement(strings::name).asInt());
-      const std::list<Common_TextFieldName::eType>::iterator it =
+      const std::vector<Common_TextFieldName::eType>::iterator it =
           std::find(fields_names.begin(), fields_names.end(), filed_name);
       if (it != fields_names.end()) {
         fields_names.erase(it);

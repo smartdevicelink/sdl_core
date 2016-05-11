@@ -300,6 +300,8 @@ extern const char* number;
 extern const char* location_image;
 extern const char* is_suscribed;
 extern const char* message_data;
+
+extern const char* delivery_mode;
 }  // namespace strings
 
 namespace json {
