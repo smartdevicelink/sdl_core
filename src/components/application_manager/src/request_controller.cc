@@ -515,8 +515,7 @@ void RequestController::UpdateTimer() {
               << " Diff (current - end) (ms): "
               << date_time::DateTime::getmSecs(current_time - end_time)
               << " Request timeout (sec): "
-              << front->timeout_msec() /
-                     date_time::DateTime::MILLISECONDS_IN_SECOND);
+              << front->timeout_msec() / date_time::kMillisecondsInSecond);
     }
   }
 }

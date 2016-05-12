@@ -312,28 +312,6 @@ bool LifeCycle::InitMessageSystem() {
 
 #endif  // MQUEUE_HMIADAPTER
 
-namespace {
-void sig_handler(int sig) {
-  switch (sig) {
-    case SIGINT:
-      LOGGER_DEBUG(logger_, "SIGINT signal has been caught");
-      break;
-    case SIGTERM:
-      LOGGER_DEBUG(logger_, "SIGTERM signal has been caught");
-      break;
-    case SIGSEGV:
-      LOGGER_DEBUG(logger_, "SIGSEGV signal has been caught");
-      FLUSH_LOGGER();
-      // exit need to prevent endless sending SIGSEGV
-      // http://stackoverflow.com/questions/2663456/how-to-write-a-signal-handler-to-catch-sigsegv
-      abort();
-    default:
-      LOGGER_DEBUG(logger_, "Unexpected signal has been caught");
-      exit(EXIT_FAILURE);
-  }
-}
-}  //  namespace
-
 void LifeCycle::Run() {
   LOGGER_AUTO_TRACE(logger_);
   ::utils::CreateSdlEvent();

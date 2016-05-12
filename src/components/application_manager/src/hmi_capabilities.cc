@@ -930,31 +930,31 @@ bool HMICapabilities::load_capabilities_from_file() {
         set_audio_pass_thru_capabilities(audio_capabilities_so);
       }
 
-      if (check_existing_json_member(ui, "pcmStreamCapabilities")) {
-        Json::Value pcm_capabilities = ui.get("pcmStreamCapabilities", "");
+      if (ui.HasMember("pcmStreamCapabilities")) {
+        const JsonValueRef pcm_capabilities = ui["pcmStreamCapabilities"];
         smart_objects::SmartObject pcm_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Map);
 
-        if (check_existing_json_member(pcm_capabilities, "samplingRate")) {
+        if (pcm_capabilities.HasMember("samplingRate")) {
           pcm_capabilities_so["samplingRate"] =
-              sampling_rate_enum.find(pcm_capabilities.get("samplingRate", "")
-                                          .asString())->second;
+              sampling_rate_enum.find(pcm_capabilities["samplingRate"]
+                                          .AsString())->second;
         }
-        if (check_existing_json_member(pcm_capabilities, "bitsPerSample")) {
+        if (pcm_capabilities.HasMember("bitsPerSample")) {
           pcm_capabilities_so["bitsPerSample"] =
-              bit_per_sample_enum.find(pcm_capabilities.get("bitsPerSample", "")
-                                           .asString())->second;
+              bit_per_sample_enum.find(pcm_capabilities["bitsPerSample"]
+                                           .AsString())->second;
         }
-        if (check_existing_json_member(pcm_capabilities, "audioType")) {
+        if (pcm_capabilities.HasMember("audioType")) {
           pcm_capabilities_so["audioType"] =
-              audio_type_enum.find(pcm_capabilities.get("audioType", "")
-                                       .asString())->second;
+              audio_type_enum.find(pcm_capabilities["audioType"]
+                                       .AsString())->second;
         }
 
         set_pcm_stream_capabilities(pcm_capabilities_so);
       }
 
-      if (check_existing_json_member(ui, "hmiZoneCapabilities")) {
+      if (ui.HasMember("hmiZoneCapabilities")) {
         smart_objects::SmartObject hmi_zone_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
         int32_t index = 0;
