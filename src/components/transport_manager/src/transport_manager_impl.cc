@@ -596,12 +596,12 @@ void TransportManagerImpl::RemoveConnection(
   for (std::vector<ConnectionInternal>::iterator it = connections_.begin();
        it != connections_.end();
        ++it) {
-    if (it->id == id) {
-      connections_.erase(it);
+    if (it->id == id) {              
       if (transport_adapter) {
         transport_adapter->RemoveFinalizedConnection(it->device,
                                                      it->application);
       }
+      connections_.erase(it);
       break;
     }
   }
