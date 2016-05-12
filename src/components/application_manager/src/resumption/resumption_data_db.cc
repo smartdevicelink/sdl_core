@@ -57,13 +57,14 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Resumption")
 
 ResumptionDataDB::ResumptionDataDB(
     DbStorage db_storage,
-    const application_manager::ApplicationManager& application_manager)
-    : ResumptionData(application_manager) {
+    const application_manager::ApplicationManagerSettings&
+        application_manager_settings)
+    : ResumptionData(application_manager_settings) {
   if (db_storage == In_File_Storage) {
 #ifndef __QNX__
     db_ = new utils::dbms::SQLDatabase(
         file_system::ConcatPath(
-            application_manager_.get_settings().app_storage_folder(),
+            application_manager_settings.app_storage_folder(),
             kDatabaseName),
         "ResumptionDatabase");
 #else
@@ -88,11 +89,11 @@ bool ResumptionDataDB::Init() {
     LOGGER_ERROR(logger_, "Failed opening database.");
     LOGGER_INFO(logger_, "Starting opening retries.");
     const uint16_t attempts =
-        application_manager_.get_settings().attempts_to_open_resumption_db();
+        application_manager_settings_.attempts_to_open_resumption_db();
     LOGGER_DEBUG(logger_, "Total attempts number is: " << attempts);
     bool is_opened = false;
     const uint16_t open_attempt_timeout_ms =
-        application_manager_.get_settings()
+        application_manager_settings_
             .open_attempt_timeout_ms_resumption_db();
 #if defined(OS_POSIX)
     const useconds_t sleep_interval_mcsec = open_attempt_timeout_ms * 1000;

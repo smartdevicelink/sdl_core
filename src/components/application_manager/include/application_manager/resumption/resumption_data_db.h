@@ -72,9 +72,9 @@ class ResumptionDataDB : public ResumptionData {
    * @brief Constructor of ResumptionDataDB
    * @param db_storage show database should be saved in a disk file or in memory
    */
-  ResumptionDataDB(
-      DbStorage db_storage,
-      const application_manager::ApplicationManager& application_manager);
+  ResumptionDataDB(DbStorage db_storage,
+                   const application_manager::ApplicationManagerSettings&
+                       application_manager_settings);
 
   /**
    * @brief allows to destroy ResumptionDataDB object
