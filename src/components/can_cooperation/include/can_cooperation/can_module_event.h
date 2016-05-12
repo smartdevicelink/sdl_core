@@ -44,17 +44,16 @@ namespace can_cooperation {
 class CanModuleEvent :
     public event_engine::Event<application_manager::MessagePtr, std::string> {
  public:
-
-  /*
+  /**
    * @brief Constructor with parameters
    *
    * @param id Event ID. (HMI or CAN function name)
    * @param message Message received in HMI or CAN response
    */
-  CanModuleEvent(application_manager::MessagePtr& message,
+  CanModuleEvent(const application_manager::MessagePtr& message,
                  const std::string& id);
 
-  /*
+  /**
    * @brief Destructor
    */
   virtual ~CanModuleEvent();
@@ -74,10 +73,10 @@ class CanModuleEvent :
    */
   virtual int32_t event_message_type() const;
 
-private:
+ private:
   DISALLOW_COPY_AND_ASSIGN(CanModuleEvent);
 };
 
-}
+}  // namespace can_cooperation
 
 #endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_EVENT_H_

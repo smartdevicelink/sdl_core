@@ -37,8 +37,6 @@ namespace can_cooperation {
 
 namespace validators {
 
-using namespace message_params;
-
 RadioStationValidator::RadioStationValidator() {
 /*  // name="frequency"
   frequency_[kType] = ValueType::INT;
@@ -79,7 +77,7 @@ ValidationResult RadioStationValidator::Validate(const Json::Value& json,
   return ValidateSimpleValues(json, outgoing_json);
 }
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

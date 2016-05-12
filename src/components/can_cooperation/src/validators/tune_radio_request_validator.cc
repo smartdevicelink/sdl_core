@@ -39,8 +39,7 @@ namespace can_cooperation {
 
 namespace validators {
 
-using namespace message_params;
-using namespace json_keys;
+using message_params::kRadioStation;
 
 ValidationResult TuneRadioRequestValidator::Validate(const Json::Value& json,
                                                    Json::Value& outgoing_json) {
@@ -52,7 +51,7 @@ ValidationResult TuneRadioRequestValidator::Validate(const Json::Value& json,
   }
 }
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

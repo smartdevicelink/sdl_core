@@ -1746,7 +1746,7 @@ bool SQLPTRepresentation::GatherAccessModule(
     if (!GatherRemoteRpc(id, &rpcs)) {
       return false;
     }
-    modules->insert(std::make_pair(name,rpcs));
+    modules->insert(std::make_pair(name, rpcs));
   }
   return true;
 }
@@ -1928,8 +1928,8 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
   SetPreloaded(false);
 
   policy_table::Strings default_groups;
-  bool ret = ( GatherAppGroup(kDefaultId, &default_groups)
-      && SaveAppGroup(app_id, default_groups));
+  bool ret = GatherAppGroup(kDefaultId, &default_groups)
+      && SaveAppGroup(app_id, default_groups);
 #ifdef SDL_REMOTE_CONTROL
   policy_table::Strings groups_primary;
   ret = ret && (GatherAppGroupPrimary(kDefaultId, &groups_primary)

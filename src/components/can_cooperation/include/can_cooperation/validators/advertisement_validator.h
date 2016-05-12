@@ -45,7 +45,6 @@ namespace validators {
  */
 class AdvertisementValidator : public Validator, public utils::Singleton<AdvertisementValidator> {
  public:
-
   /**
    * @brief Validate json with message params
    *
@@ -58,17 +57,17 @@ class AdvertisementValidator : public Validator, public utils::Singleton<Adverti
                             Json::Value& outgoing_json);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(AdvertisementValidator);
   FRIEND_BASE_SINGLETON_CLASS(AdvertisementValidator);
   AdvertisementValidator();
-  ~AdvertisementValidator() {};
+  ~AdvertisementValidator() {}
 /*
   std::map<std::string, int> product_name_;
   std::map<std::string, int> company_name_;
   std::map<std::string, int> phone_number_;*/
+  DISALLOW_COPY_AND_ASSIGN(AdvertisementValidator);
 };
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

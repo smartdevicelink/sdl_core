@@ -90,7 +90,7 @@ void* TCPServer::Listen(void* self_object) {
   pthread_mutex_unlock(&self->mutex_);
   if (-1 == listen(self->socket_, 1)) {
     printf("failed to listen\n");
-    return (void*) - 1;
+    return reinterpret_cast<void*>(-1);
   }
   struct sockaddr_in client_addr;
   socklen_t client_addr_size = sizeof(client_addr);
@@ -99,7 +99,7 @@ void* TCPServer::Listen(void* self_object) {
   if (-1 == self->client_socket_) {
     printf("Failed to accept\n");
     close(self->socket_);
-    return (void*) - 1;
+    return reinterpret_cast<void*>(-1);
   }
   return NULL;
 }
@@ -143,13 +143,13 @@ bool TCPServer::Receive(std::string* message) {
 
 class TcpConnectionTest {
  public:
-  TcpConnectionTest(CANTCPConnection& conn)
+  explicit TcpConnectionTest(const CANTCPConnection& conn)
     : conn_(conn) {}
   ConnectionState state() const {
     return conn_.current_state_;
   }
  private:
-  CANTCPConnection& conn_;
+  const CANTCPConnection& conn_;
 };
 
 TEST(CanTcpConnectionTest, DISABLED_OpenClose) {

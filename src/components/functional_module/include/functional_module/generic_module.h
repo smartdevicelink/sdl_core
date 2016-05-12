@@ -38,7 +38,6 @@
 #include "functional_module/module_observer.h"
 #include "functional_module/function_ids.h"
 #include "utils/shared_ptr.h"
-#include "utils/singleton.h"
 #include "application_manager/service.h"
 
 namespace functional_modules {
@@ -59,9 +58,6 @@ enum ServiceState {
 };
 
 typedef std::string HMIFunctionID;
-
-class GenericModule;
-typedef utils::SharedPtr<GenericModule> ModulePtr;
 
 struct PluginInfo {
   std::string name;
@@ -167,6 +163,8 @@ class GenericModule {
   friend class DriverGenericModuleTest;
   DISALLOW_COPY_AND_ASSIGN(GenericModule);
 };
+
+typedef utils::SharedPtr<GenericModule> ModulePtr;
 
 }  //  namespace functional_modules
 

@@ -32,8 +32,8 @@
 #ifndef SRC_COMPONENTS_POLICY_TEST_POLICY_INCLUDE_MOCK_POLICY_LISTENER_H_
 #define SRC_COMPONENTS_POLICY_TEST_POLICY_INCLUDE_MOCK_POLICY_LISTENER_H_
 
-
 #include <string>
+#include <vector>
 
 #include "gmock/gmock.h"
 

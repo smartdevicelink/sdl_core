@@ -50,15 +50,14 @@ template<typename EventMessage, typename EventID>
 class EventDispatcher :
     public utils::Singleton<EventDispatcher<EventMessage, EventID>> {
  public:
-
-  /*
+  /**
    * @brief Delivers the event to all subscribers
    *
    * @param event Received event
    */
   void raise_event(const Event<EventMessage, EventID>& event);
 
-  /*
+  /**
    * @brief Subscribe the observer to event
    *
    * @param event_id    The event ID to subscribe for
@@ -69,7 +68,7 @@ class EventDispatcher :
                     int32_t hmi_correlation_id,
                     EventObserver<EventMessage, EventID>* const observer);
 
-  /*
+  /**
    * @brief Unsubscribes the observer from specific event
    *
    * @param event_id    The event ID to unsubscribe from
@@ -78,7 +77,7 @@ class EventDispatcher :
   void remove_observer(const EventID& event_id,
                     const EventObserver<EventMessage, EventID>* const observer);
 
-  /*
+  /**
    * @brief Unsubscribes the observer from all events
    *
    * @param observer  The observer to be unsubscribed
@@ -86,21 +85,17 @@ class EventDispatcher :
   void remove_observer(
       const EventObserver<EventMessage, EventID>* const observer);
 
- protected:
-
  private:
-
-  /*
+  /**
    * @brief Default constructor
    */
   EventDispatcher();
 
-  /*
+  /**
    * @brief Destructor
    */
   virtual ~EventDispatcher();
 
-  DISALLOW_COPY_AND_ASSIGN(EventDispatcher);
 
   FRIEND_BASE_SINGLETON_CLASS(EventDispatcher);
 
@@ -112,6 +107,7 @@ class EventDispatcher :
   // Members section
   sync_primitives::Lock                               state_lock_;
   EventObserverMap                                    observers_;
+  DISALLOW_COPY_AND_ASSIGN(EventDispatcher);
 };
 
 
@@ -136,8 +132,6 @@ void EventDispatcher<EventMessage, EventID>::raise_event(
     // check if event is notification
     if (hmi_apis::messageType::notification ==
         event.event_message_type()) {
-
-      //ObserversMap iterator
       typename ObserversMap::iterator it = observers_[event.id()].begin();
       for (; observers_[event.id()].end() != it; ++it) {
         list = it->second;
@@ -177,8 +171,6 @@ void EventDispatcher<EventMessage, EventID>::remove_observer(
   sync_primitives::AutoLock auto_lock(state_lock_);
   typename ObserversMap::iterator it =  observers_[event_id].begin();
   for (; observers_[event_id].end() != it; ++it) {
-
-    //ObserverList iterator
     typename ObserverList::iterator observer_it =  it->second.begin();
     while (it->second.end() != observer_it) {
       if (observer->id() == (*observer_it)->id()) {
@@ -197,11 +189,8 @@ void EventDispatcher<EventMessage, EventID>::remove_observer(
   sync_primitives::AutoLock auto_lock(state_lock_);
   typename EventObserverMap::iterator event_map = observers_.begin();
   for (; observers_.end() != event_map; ++event_map) {
-
     typename ObserversMap::iterator it =  event_map->second.begin();
     for (; event_map->second.end() != it; ++it) {
-
-      //ObserverList iterator
       typename ObserverList::iterator observer_it =  it->second.begin();
       while (it->second.end() != observer_it) {
         if (observer->id() == (*observer_it)->id()) {
@@ -214,6 +203,6 @@ void EventDispatcher<EventMessage, EventID>::remove_observer(
   }
 }
 
-}
+}  // namespace event_engine
 
 #endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_ENGINE_EVENT_DISPATCHER_H_

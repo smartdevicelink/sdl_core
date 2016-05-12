@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_ON_RADIO_DETAILS_NOTIFICATION_VALIDATOR_H_
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_ON_RADIO_DETAILS_NOTIFICATION_VALIDATOR_H_
 
+#include <string>
+
 #include "can_cooperation/validators/validator.h"
 #include "utils/singleton.h"
 
@@ -46,7 +48,6 @@ namespace validators {
 class OnRadioDetailsNotificationValidator : public Validator,
                   public utils::Singleton<OnRadioDetailsNotificationValidator> {
  public:
-
   /**
    * @brief Validate json with message params
    *
@@ -54,18 +55,18 @@ class OnRadioDetailsNotificationValidator : public Validator,
    *
    * @return validation result
    */
-  ValidationResult Validate(std::string& json_string);
+  ValidationResult Validate(const std::string& json_string);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(OnRadioDetailsNotificationValidator);
   FRIEND_BASE_SINGLETON_CLASS(OnRadioDetailsNotificationValidator);
   OnRadioDetailsNotificationValidator();
-  ~OnRadioDetailsNotificationValidator() {};
+  ~OnRadioDetailsNotificationValidator() {}
 
-  //td::map<std::string, int> trigger_source_;
+  // td::map<std::string, int> trigger_source_;
+  DISALLOW_COPY_AND_ASSIGN(OnRadioDetailsNotificationValidator);
 };
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

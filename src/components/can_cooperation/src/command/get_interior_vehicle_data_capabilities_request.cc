@@ -47,8 +47,11 @@ namespace can_cooperation {
 
 namespace commands {
 
-using namespace json_keys;
-using namespace message_params;
+using json_keys::kResult;
+using message_params::kInteriorVehicleDataCapabilities;
+using message_params::kZone;
+using message_params::kModuleType;
+using message_params::kModuleTypes;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "GetInteriorVehicleDataCapabiliesRequest")
 
@@ -162,8 +165,9 @@ void GetInteriorVehicleDataCapabiliesRequest::OnEvent(
 }
 
 bool GetInteriorVehicleDataCapabiliesRequest::ReadCapabilitiesFromFile() {
-  LOG4CXX_INFO(logger_, "Failed to get correct response from HMI; \
-      trying to read from file");
+  LOG4CXX_INFO(
+      logger_,
+      "Failed to get correct response from HMI. Trying to read from file");
   Json::Value request;
   Json::Reader reader;
   if (!reader.parse(message_->json_message(), request)) {

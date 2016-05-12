@@ -36,7 +36,6 @@
 #include "can_cooperation/can_module_constants.h"
 #include "functional_module/function_ids.h"
 #include "json/json.h"
-#include "can_cooperation/can_module_constants.h"
 
 namespace can_cooperation {
 

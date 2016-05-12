@@ -45,7 +45,17 @@ using event_engine::EventDispatcher;
 using application_manager::SeatLocation;
 using application_manager::SeatLocationPtr;
 
-using namespace json_keys;
+using json_keys::kSuccess;
+using json_keys::kResultCode;
+using json_keys::kInfo;
+using json_keys::kId;
+using json_keys::kParams;
+using json_keys::kJsonrpc;
+using json_keys::kMethod;
+using json_keys::kResult;
+using json_keys::kCode;
+using json_keys::kError;
+using json_keys::kMessage;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "CANCooperation")
 

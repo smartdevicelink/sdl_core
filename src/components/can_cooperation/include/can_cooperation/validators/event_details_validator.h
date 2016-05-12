@@ -45,7 +45,6 @@ namespace validators {
  */
 class EventDetailsValidator : public Validator, public utils::Singleton<EventDetailsValidator> {
  public:
-
   /**
    * @brief Validate json with message params
    *
@@ -58,17 +57,17 @@ class EventDetailsValidator : public Validator, public utils::Singleton<EventDet
                             Json::Value& outgoing_json);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(EventDetailsValidator);
   FRIEND_BASE_SINGLETON_CLASS(EventDetailsValidator);
   EventDetailsValidator();
-  ~EventDetailsValidator() {};
+  ~EventDetailsValidator() {}
 
 /*  std::map<std::string, int> event_name_;
   std::map<std::string, int> phone_number_;
   std::map<std::string, int> price_;*/
+  DISALLOW_COPY_AND_ASSIGN(EventDetailsValidator);
 };
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

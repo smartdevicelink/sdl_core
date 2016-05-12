@@ -95,7 +95,6 @@ class PolicyManagerImplTest : public ::testing::Test {
   }
 
 #ifdef SDL_REMOTE_CONTROL
- public:
   bool CheckPTURemoteCtrlChange(
       const utils::SharedPtr<policy_table::Table> pt_update,
       const utils::SharedPtr<policy_table::Table> snapshot) {
@@ -413,7 +412,7 @@ TEST_F(PolicyManagerImplTest, CheckAccess_DisabledRremoteControl) {
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(false));
   EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(false));
 
-  SeatLocation zone {0,0,0};
+  SeatLocation zone {0, 0, 0};
   EXPECT_EQ(TypeAccess::kDisallowed,
             manager->CheckAccess("dev1", "12345", zone, "RADIO", "",
                                  RemoteControlParams()));
@@ -429,7 +428,7 @@ TEST_F(PolicyManagerImplTest, CheckAccess_Result) {
       WillOnce(Return(true));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev1")).WillOnce(Return(false));
   EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(true));
-  EXPECT_CALL(*access_remote, CheckParameters(_,_,_)).WillOnce(Return(kManual));
+  EXPECT_CALL(*access_remote, CheckParameters(_, _, _)).WillOnce(Return(kManual));
   EXPECT_CALL(*access_remote, Check(who, what)).
       WillOnce(Return(TypeAccess::kAllowed));
 
@@ -454,7 +453,7 @@ TEST_F(PolicyManagerImplTest, TwoDifferentDevice) {
       WillOnce(Return(true));
   EXPECT_CALL(*access_remote, IsPrimaryDevice("dev2")).WillOnce(Return(false));
   EXPECT_CALL(*access_remote, IsEnabled()).WillOnce(Return(true));
-  EXPECT_CALL(*access_remote, CheckParameters(_,_,_)).WillOnce(Return(kManual));
+  EXPECT_CALL(*access_remote, CheckParameters(_, _, _)).WillOnce(Return(kManual));
   EXPECT_CALL(*access_remote, Check(who2, what)).
         WillOnce(Return(TypeAccess::kDisallowed));
 

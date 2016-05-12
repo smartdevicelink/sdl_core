@@ -45,66 +45,65 @@ using application_manager::SeatLocation;
 namespace can_cooperation {
 
 class CANAppExtension : public application_manager::AppExtension {
-  public:
-    explicit CANAppExtension(application_manager::AppExtensionUID uid);
-    ~CANAppExtension();
+ public:
+  explicit CANAppExtension(application_manager::AppExtensionUID uid);
+  ~CANAppExtension();
 
-    /**
-     * @brief Checks is application has access to a radio tune control
-     * @return true if control given
-     */
-    bool IsControlGiven() const;
+  /**
+   * @brief Checks is application has access to a radio tune control
+   * @return true if control given
+   */
+  bool IsControlGiven() const;
 
-    /**
-     * @brief Give radio tune control to application
-     * @param is_control_given true - give control, false - cancel control
-     */
-    void GiveControl(bool is_control_given);
+  /**
+   * @brief Give radio tune control to application
+   * @param is_control_given true - give control, false - cancel control
+   */
+  void GiveControl(bool is_control_given);
 
-    void set_seat(const SeatLocation& seat) {
-      seat_ = seat;
-    }
+  void set_seat(const SeatLocation& seat) {
+    seat_ = seat;
+  }
 
-    const SeatLocation seat() const {
-      return seat_;
-    }
+  const SeatLocation seat() const {
+    return seat_;
+  }
 
-    bool is_on_driver_device() const {
-        return is_on_driver_device_;
-    }
+  bool is_on_driver_device() const {
+      return is_on_driver_device_;
+  }
 
-    void set_is_on_driver_device(bool is_driver_dev) {
-        is_on_driver_device_ = is_driver_dev;
-    }
+  void set_is_on_driver_device(bool is_driver_dev) {
+      is_on_driver_device_ = is_driver_dev;
+  }
 
-    /**
-     * @brief Subscribe to OnInteriorVehicleDataNotification
-     * @param module interior data specification(zone, data type)
-     */
-    void SubscribeToInteriorVehicleData(const Json::Value& moduleDescription);
+  /**
+   * @brief Subscribe to OnInteriorVehicleDataNotification
+   * @param module interior data specification(zone, data type)
+   */
+  void SubscribeToInteriorVehicleData(const Json::Value& moduleDescription);
 
 
-    /**
-     * @brief Unsubscribe from OnInteriorVehicleDataNotification
-     * @param module interior data specification(zone, data type)
-     */
-    void UnsubscribeFromInteriorVehicleData(const Json::Value& moduleDescription);
+  /**
+   * @brief Unsubscribe from OnInteriorVehicleDataNotification
+   * @param module interior data specification(zone, data type)
+   */
+  void UnsubscribeFromInteriorVehicleData(const Json::Value& moduleDescription);
 
-    /**
-     * @brief Check if application subscribed to OnInteriorVehicleDataNotification
-     * @param module interior data specification(zone, data type)
-     */
-    bool IsSubscibedToInteriorVehicleData(const Json::Value& moduleDescription);
+  /**
+   * @brief Check if application subscribed to OnInteriorVehicleDataNotification
+   * @param module interior data specification(zone, data type)
+   */
+  bool IsSubscibedToInteriorVehicleData(const Json::Value& moduleDescription);
 
-    friend void CANModule::UnsubscribeAppForAllZones(uint32_t hmi_app_id,
-                                                     CANAppExtensionPtr app);
+  friend void CANModule::UnsubscribeAppForAllZones(uint32_t hmi_app_id,
+                                                   CANAppExtensionPtr app);
 
-  private:
-    bool is_control_given_;
-    SeatLocation seat_;
-    bool is_on_driver_device_;
-    std::set<Json::Value> subscribed_interior_vehicle_data_;
-
+ private:
+  bool is_control_given_;
+  SeatLocation seat_;
+  bool is_on_driver_device_;
+  std::set<Json::Value> subscribed_interior_vehicle_data_;
 };
 
 typedef utils::SharedPtr<CANAppExtension> CANAppExtensionPtr;

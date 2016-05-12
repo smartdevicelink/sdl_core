@@ -37,7 +37,7 @@ namespace can_cooperation {
 
 TEST(CanAppExtensionTest, Create) {
   CANAppExtension extension(7);
-  ASSERT_TRUE(extension.uid() == 7);
+  ASSERT_EQ(7, extension.uid());
 }
 
 TEST(CanAppExtensionTest, Control) {

@@ -43,8 +43,10 @@ namespace can_cooperation {
 
 namespace commands {
 
-using namespace json_keys;
-using namespace message_params;
+using json_keys::kResult;
+using message_params::kSubscribe;
+using message_params::kIsSubscribed;
+using message_params::kModuleDescription;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "GetInteriorVehicleDataRequest")
 
@@ -105,11 +107,11 @@ void GetInteriorVehicleDataRequest::ProccessSubscription() {
   Json::Reader reader;
   reader.parse(message_->json_message(), params);
 
-  if (IsMember(params, kSubscribe)){
+  if (IsMember(params, kSubscribe)) {
     bool subscribe = params[kSubscribe].asBool();
 
     if (!response_params_.isMember(kIsSubscribed)) {
-      if (subscribe){
+      if (subscribe) {
         response_params_[kIsSubscribed] = false;
       } else {
         response_params_[kIsSubscribed] = true;

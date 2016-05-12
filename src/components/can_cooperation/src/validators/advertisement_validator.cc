@@ -38,9 +38,6 @@ namespace can_cooperation {
 
 namespace validators {
 
-using namespace message_params;
-
-
 AdvertisementValidator::AdvertisementValidator() {
 /*  // name="productName"
   product_name_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
@@ -73,18 +70,18 @@ ValidationResult AdvertisementValidator::Validate(const Json::Value& json,
   ValidationResult result = ValidateSimpleValues(json, outgoing_json);
 
   if (result != ValidationResult::SUCCESS) {
-     return result;
-   }
+    return result;
+  }
 
-   if (json.isMember(kLocation)) {
-     result = LocationValidator::instance()->Validate(json[kLocation],
-                                                      outgoing_json[kLocation]);
-   }
+  if (json.isMember(kLocation)) {
+    result = LocationValidator::instance()->Validate(json[kLocation],
+                                                     outgoing_json[kLocation]);
+  }
 
-   return result;
+  return result;
 }
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

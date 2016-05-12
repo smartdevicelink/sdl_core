@@ -30,8 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_SRC_CAN_CONNECTION_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_SRC_CAN_CONNECTION_H_
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_CONNECTION_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_CONNECTION_H_
+
+#include <string>
 
 #include "json/json.h"
 #include "utils/shared_ptr.h"
@@ -100,6 +102,7 @@ class CANConnection {
       observer_ = observer;
     }
   }
+
  protected:
   /**
    * \brief Class constructor
@@ -121,6 +124,6 @@ class CANConnection {
  */
 typedef utils::SharedPtr<CANConnection> CANConnectionSPtr;
 
-}  //  namespace can_cooperation
+}  // namespace can_cooperation
 
-#endif  //  SRC_COMPONENTS_CAN_COOPERATION_SRC_CAN_CONNECTION_H_
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_CONNECTION_H_

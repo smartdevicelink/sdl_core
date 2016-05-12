@@ -35,7 +35,7 @@
 
 namespace can_cooperation {
 
-CanModuleEvent::CanModuleEvent(application_manager::MessagePtr& message,
+CanModuleEvent::CanModuleEvent(const application_manager::MessagePtr& message,
                                const std::string& id)
 : event_engine::Event<application_manager::MessagePtr,
                       std::string>(message, id) {

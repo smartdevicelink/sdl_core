@@ -30,9 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_FUNCTINAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_FUNCTION_IDS_H_
-#define SRC_COMPONENTS_FUNCTINAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_FUNCTION_IDS_H_
-
+#ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_FUNCTION_IDS_H_
+#define SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_FUNCTION_IDS_H_
 
 namespace functional_modules {
 
@@ -56,20 +55,20 @@ enum MobileFunctionID {
 };
 
 namespace hmi_api {
-  const char get_interior_vehicle_data_capabilities[] =
-                               "RC.GetInteriorVehicleDataCapabilities";
-  const char get_interior_vehicle_data[] = "RC.GetInteriorVehicleData";
-  const char set_interior_vehicle_data[] = "RC.SetInteriorVehicleData";
-  const char on_interior_vehicle_data[]  = "RC.OnInteriorVehicleData";
-  const char button_press[]              = "Buttons.ButtonPress";
+const char get_interior_vehicle_data_capabilities[] =
+                             "RC.GetInteriorVehicleDataCapabilities";
+const char get_interior_vehicle_data[] = "RC.GetInteriorVehicleData";
+const char set_interior_vehicle_data[] = "RC.SetInteriorVehicleData";
+const char on_interior_vehicle_data[]  = "RC.OnInteriorVehicleData";
+const char button_press[]              = "Buttons.ButtonPress";
 
-  const char get_user_consent[]          = "RC.GetInteriorVehicleDataConsent";
-  const char on_reverse_apps_allowing[]  = "VehicleInfo.OnReverseAppsAllowing";
-  const char on_app_deactivated[]        = "BasicCommunication.OnAppDeactivated";
-  const char sdl_activate_app[]          = "SDL.ActivateApp";
-  const char on_device_rank_changed[]    = "RC.OnDeviceRankChanged";
-  const char on_device_location_changed[] = "RC.OnDeviceLocationChanged";
-}
+const char get_user_consent[]          = "RC.GetInteriorVehicleDataConsent";
+const char on_reverse_apps_allowing[]  = "VehicleInfo.OnReverseAppsAllowing";
+const char on_app_deactivated[]        = "BasicCommunication.OnAppDeactivated";
+const char sdl_activate_app[]          = "SDL.ActivateApp";
+const char on_device_rank_changed[]    = "RC.OnDeviceRankChanged";
+const char on_device_location_changed[] = "RC.OnDeviceLocationChanged";
+}  // namespace hmi_api
 
 /*namespace can_api {
   const char start_scan[]         = "CAN.StartScan";
@@ -83,6 +82,6 @@ namespace hmi_api {
   const char get_seat_control[]   = "CAN.GetSeatControl";
 }*/
 
-}  //  namespace functional_modules
+}  // namespace functional_modules
 
-#endif  //  SRC_COMPONENTS_FUNCTINAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_FUNCTION_IDS_H_
+#endif  // SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_FUNCTION_IDS_H_

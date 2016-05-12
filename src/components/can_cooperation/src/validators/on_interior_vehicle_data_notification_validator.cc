@@ -40,8 +40,7 @@ namespace can_cooperation {
 namespace validators {
 CREATE_LOGGERPTR_GLOBAL(logger_, "OnInteriorVehicleDataNotificationValidator")
 
-using namespace message_params;
-using namespace json_keys;
+using message_params::kModuleData;
 
 OnInteriorVehicleDataNotificationValidator::OnInteriorVehicleDataNotificationValidator() {
 }
@@ -61,7 +60,7 @@ ValidationResult OnInteriorVehicleDataNotificationValidator::Validate(
         Validate(json[kModuleData], outgoing_json[kModuleData]);
   } else {
     result = ValidationResult::INVALID_DATA;
-    LOG4CXX_ERROR(logger_, "Mandatory param " <<kModuleData <<" missing!" );
+    LOG4CXX_ERROR(logger_, "Mandatory param " <<kModuleData <<" missing!");
   }
 
   if  (ValidationResult::SUCCESS == result) {
@@ -71,7 +70,7 @@ ValidationResult OnInteriorVehicleDataNotificationValidator::Validate(
   return result;
 }
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

@@ -33,6 +33,9 @@
 #ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_BASE_COMMAND_REQUEST_H_
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_BASE_COMMAND_REQUEST_H_
 
+#include <string>
+#include <vector>
+
 #include "can_cooperation/commands/command.h"
 #include "can_cooperation/event_engine/event_observer.h"
 #include "application_manager/message.h"

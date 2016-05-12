@@ -36,12 +36,12 @@
 #include <list>
 #include <deque>
 #include <algorithm>
-#include <time.h>
 #include "utils/lock.h"
+#include "utils/date_time.h"
 
 namespace functional_modules {
 
-typedef unsigned int TimeUnit;  //seconds
+typedef int64_t TimeUnit;  //seconds
 
 class Trackable {
  public:
@@ -185,13 +185,7 @@ void ModuleTimer<Trackable>::OnTimeout(const Trackable& object) {
 
 template<class Trackable>
 TimeUnit ModuleTimer<Trackable>::CurrentTime() const {
-  // TODO(PV): move outside to platform-dependant parts
-  struct timespec current_time;
-  if (0 == clock_gettime(CLOCK_MONOTONIC, &current_time)) {
-    return current_time.tv_sec;
-  } else {
-    return 0;
-  }
+  return date_time::DateTime::getSecs(date_time::DateTime::getCurrentTime());
 }
 
 }  //  namespace functional_modules

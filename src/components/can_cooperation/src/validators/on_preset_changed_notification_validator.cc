@@ -38,9 +38,6 @@ namespace can_cooperation {
 
 namespace validators {
 
-using namespace message_params;
-using namespace json_keys;
-
 OnPresetChangedNotificationValidator::OnPresetChangedNotificationValidator() {
   // name="customPresets"
   custom_presets_[ValidationParams::TYPE] = ValueType::STRING;
@@ -72,7 +69,7 @@ ValidationResult OnPresetChangedNotificationValidator::Validate(
   return result;
 }
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

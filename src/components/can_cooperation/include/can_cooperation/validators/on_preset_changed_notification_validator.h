@@ -33,6 +33,9 @@
 #ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_ON_PRESET_CHANGED_NOTIFICATION_VALIDATOR_H_
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_ON_PRESET_CHANGED_NOTIFICATION_VALIDATOR_H_
 
+#include <map>
+#include <string>
+
 #include "can_cooperation/validators/validator.h"
 #include "utils/singleton.h"
 
@@ -46,7 +49,6 @@ namespace validators {
 class OnPresetChangedNotificationValidator : public Validator,
                   public utils::Singleton<OnPresetChangedNotificationValidator> {
  public:
-
   /**
    * @brief Validate json with message params
    *
@@ -54,18 +56,18 @@ class OnPresetChangedNotificationValidator : public Validator,
    *
    * @return validation result
    */
-  ValidationResult Validate(std::string& json_string);
+  ValidationResult Validate(const std::string& json_string);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(OnPresetChangedNotificationValidator);
   FRIEND_BASE_SINGLETON_CLASS(OnPresetChangedNotificationValidator);
   OnPresetChangedNotificationValidator();
-  ~OnPresetChangedNotificationValidator() {};
+  ~OnPresetChangedNotificationValidator() {}
 
   std::map<int, int> custom_presets_;
+  DISALLOW_COPY_AND_ASSIGN(OnPresetChangedNotificationValidator);
 };
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

@@ -41,7 +41,8 @@ namespace validators {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "GetInteriorVehicleDataRequestValidator")
 
-using namespace message_params;
+using message_params::kSubscribe;
+using message_params::kModuleDescription;
 
 GetInteriorVehicleDataRequestValidator::
 GetInteriorVehicleDataRequestValidator() {
@@ -51,7 +52,7 @@ GetInteriorVehicleDataRequestValidator() {
   subscribe_[ValidationParams::MANDATORY] = 0;
 
   validation_scope_map_[kSubscribe] = &subscribe_;
-};
+}
 
 ValidationResult GetInteriorVehicleDataRequestValidator::Validate(
                                                    const Json::Value& json,
@@ -69,13 +70,13 @@ ValidationResult GetInteriorVehicleDataRequestValidator::Validate(
         Validate(json[kModuleDescription], outgoing_json[kModuleDescription]);
   } else {
     result = ValidationResult::INVALID_DATA;
-    LOG4CXX_ERROR(logger_, "Mandatory param " <<kModuleDescription <<" missing!" );
+    LOG4CXX_ERROR(logger_, "Mandatory param " <<kModuleDescription <<" missing!");
   }
 
   return result;
 }
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

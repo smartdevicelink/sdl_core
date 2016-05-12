@@ -48,7 +48,6 @@ namespace can_cooperation {
  **/
 class MessageHelper {
  public:
-
   /**
    * @brief Returns unique correlation ID for next CAN request
    *
@@ -90,12 +89,11 @@ class MessageHelper {
   static bool ValidateInteriorZone(const Json::Value& value);
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(MessageHelper);
-
   MessageHelper();
 
   static uint32_t next_correlation_id_;
   static const std::map<functional_modules::MobileFunctionID, std::string> kMobileAPINames;
+  DISALLOW_COPY_AND_ASSIGN(MessageHelper);
 };
 
 /**

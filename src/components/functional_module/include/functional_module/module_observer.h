@@ -48,6 +48,6 @@ class ModuleObserver {
   virtual ~ModuleObserver() {}
   virtual void OnError(Errors error, ModuleID module_id) = 0;
 };
-}  //  namespace functional_modules {
+}  // namespace functional_modules
 
 #endif  //  SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_MODULE_OBSERVER_H_

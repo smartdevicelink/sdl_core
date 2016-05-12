@@ -80,7 +80,7 @@ ValidationResult AddressValidator::Validate(const Json::Value& json,
   return ValidateSimpleValues(json, outgoing_json);
 }
 
-}  // namespace valdiators
+}  // namespace validators
 
 }  // namespace can_cooperation
 

@@ -33,7 +33,6 @@
 
 #include <algorithm>
 #include <iterator>
-#include "policy/cache_manager.h"
 #include "utils/logger.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyManagerImpl")
@@ -51,6 +50,7 @@ struct Erase {
   explicit Erase(const Subject& who)
       : who_(who) {
   }
+  // NOLINTNEXTLINE
   void operator() (AccessRemoteImpl::AccessControlList::value_type& row) const {
     row.second.erase(who_);
   }
