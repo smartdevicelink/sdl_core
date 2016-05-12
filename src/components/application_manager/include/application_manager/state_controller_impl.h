@@ -68,7 +68,6 @@ class StateControllerImpl : public event_engine::EventObserver,
    * @param hmi_level of new regular state
    * @param audio_state of new regular state
    * @param SendActivateApp: if true, ActivateAppRequest will be sent on HMI */
-
   virtual void SetRegularState(
       ApplicationSharedPtr app,
       const mobile_apis::HMILevel::eType hmi_level,
@@ -93,7 +92,6 @@ class StateControllerImpl : public event_engine::EventObserver,
    * @param audio_state of new regular state
    * @param system_context of new regular state
    * @param SendActivateApp: if true, ActivateAppRequest will be sent on HMI */
-
   virtual void SetRegularState(
       ApplicationSharedPtr app,
       const mobile_apis::HMILevel::eType hmi_level,

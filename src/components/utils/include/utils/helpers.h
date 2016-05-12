@@ -37,7 +37,7 @@
  * Suppose user has some enum with value E with some numbers of possible values
  * enum E {V1, V2, V3, V5};
  * So we want to know if some user-input value is belong to one of the enum's
- *subset.
+ * subset.
  * Usually user has to do next routine
  *
  * E input_value = V3;
@@ -67,13 +67,11 @@ bool NEQ(T what, T to) {
   return !EQ<T>(what, to);
 }
 
-template <class U = bool>
-bool ALL(U what, U to) {
+inline bool ALL(bool what, bool to) {
   return what && to;
 }
 
-template <class U = bool>
-bool ONE(U what, U to) {
+inline bool ONE(bool what, bool to) {
   return what || to;
 }
 

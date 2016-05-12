@@ -593,6 +593,7 @@ class MessageHelper {
   }
 
   static const uint32_t GetPriorityCode(const std::string& priority);
+
   /**
    * @brief Convert common language to string representation
    * @param language Common language
@@ -639,10 +640,10 @@ class MessageHelper {
    * after timeout or first time when application register with level NONE or
    * BACKGROUND
    * @param default_help_prompt
-   * if default_help_prompt=TRUE->TTSGlobalProperties request will be created
-   * with
-   * default helpPrompt array, otherwise TTSGlobalProperties request will be
-   * created
+ * if default_help_prompt=TRUE->TTSGlobalProperties request will be created
+ * with
+ * default helpPrompt array, otherwise TTSGlobalProperties request will be
+ * created
    * with empty helpPrompt array.
    */
   static void SendTTSGlobalProperties(ApplicationSharedPtr app,
@@ -662,7 +663,6 @@ class MessageHelper {
 
   static hmi_apis::Common_Language::eType CommonLanguageFromString(
       const std::string& language);
-
   static smart_objects::SmartObjectSPtr
   GetOnAppInterfaceUnregisteredNotificationToMobile(
       int32_t connection_key,

@@ -465,7 +465,6 @@ class TransportAdapterImpl : public TransportAdapter,
   virtual ConnectionSPtr FindEstablishedConnection(
       const DeviceUID& device_handle,
       const ApplicationHandle& app_handle) const;
-
   const TransportManagerSettings& get_settings() const {
     return settings_;
   }

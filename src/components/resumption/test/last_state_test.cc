@@ -31,9 +31,7 @@
  */
 
 #include <string>
-
 #include "gtest/gtest.h"
-
 #include "resumption/last_state.h"
 #include "utils/file_system.h"
 
@@ -57,7 +55,6 @@ class LastStateTest : public ::testing::Test {
     file_system::DeleteFile(kAppInfoStorageFile);
     file_system::RemoveDirectory(kAppStorageFolder);
   }
-
   void SetUp() OVERRIDE {
     ASSERT_TRUE(file_system::CreateFile(app_info_dat_file_));
   }
@@ -65,7 +62,6 @@ class LastStateTest : public ::testing::Test {
   void TearDown() OVERRIDE {
     EXPECT_TRUE(file_system::DeleteFile((app_info_dat_file_)));
   }
-
   const std::string empty_dictionary_;
   const std::string app_info_dat_file_;
 
@@ -104,7 +100,6 @@ TEST_F(LastStateTest, SetGetData) {
         "bluetooth_device";
     last_state_.SaveToFileSystem();
   }
-
   const Value& dictionary = last_state_.dictionary;
 
   const Value& bluetooth_info =

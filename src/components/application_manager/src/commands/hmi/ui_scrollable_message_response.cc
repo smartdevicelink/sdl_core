@@ -44,7 +44,7 @@ UIScrollableMessageResponse::UIScrollableMessageResponse(
 UIScrollableMessageResponse::~UIScrollableMessageResponse() {}
 
 void UIScrollableMessageResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::UI_ScrollableMessage);
   event.set_smart_object(*message_);

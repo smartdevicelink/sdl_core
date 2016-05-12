@@ -45,7 +45,6 @@
 #include "transport_manager/mock_transport_manager_settings.h"
 #include "utils/make_shared.h"
 #include "utils/shared_ptr.h"
-
 #include "resumption/last_state.h"
 #include "utils/make_shared.h"
 
@@ -311,6 +310,7 @@ class TransportManagerImplTest : public ::testing::Test {
     EXPECT_CALL(*mock_adapter_, Terminate());
     ASSERT_EQ(E_SUCCESS, tm_.Stop());
   }
+
   MockTransportManagerSettings settings;
   MockTransportManagerImpl tm_;
 #ifdef TELEMETRY_MONITOR
@@ -495,11 +495,9 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice) {
   EXPECT_CALL(*mock_adapter_,
               SendData(mac_address_, application_id_, test_message_))
       .WillOnce(Return(TransportAdapter::OK));
-
 #ifdef TELEMETRY_MONITOR
   EXPECT_CALL(mock_metric_observer_, StartRawMsg(test_message_.get()));
 #endif  // TELEMETRY_MONITOR
-
   EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
   testing::Mock::AsyncVerifyAndClearExpectations(kAsyncExpectationsTimeout);
 }
@@ -507,11 +505,9 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice) {
 TEST_F(TransportManagerImplTest, SendMessageToDevice_SendingFailed) {
   // Arrange
   HandleConnection();
-
   MockTMTelemetryObserver* mock_metric_observer = new MockTMTelemetryObserver();
   tm_.SetTelemetryObserver(mock_metric_observer);
   EXPECT_CALL(*mock_metric_observer, StartRawMsg(_));
-
   EXPECT_CALL(*mock_adapter_,
               SendData(mac_address_, application_id_, test_message_))
       .WillOnce(Return(TransportAdapter::FAIL));
@@ -550,7 +546,6 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_SendDone) {
       .WillOnce(Return(TransportAdapter::OK));
   EXPECT_CALL(mock_metric_observer_, StartRawMsg(test_message_.get()));
   EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));
-
   HandleSendDone();
 
   testing::Mock::AsyncVerifyAndClearExpectations(kAsyncExpectationsTimeout);
@@ -559,10 +554,10 @@ TEST_F(TransportManagerImplTest, SendMessageToDevice_SendDone) {
 TEST_F(TransportManagerImplTest, SendMessageFailed_GetHandleSendFailed) {
   // Arrange
   HandleConnection();
-
   EXPECT_CALL(*mock_adapter_,
               SendData(mac_address_, application_id_, test_message_))
       .WillOnce(Return(TransportAdapter::FAIL));
+
   EXPECT_CALL(mock_metric_observer_, StartRawMsg(test_message_.get()));
   EXPECT_CALL(*tm_listener_, OnTMMessageSendFailed(_, test_message_));
   EXPECT_EQ(E_SUCCESS, tm_.SendMessageToDevice(test_message_));

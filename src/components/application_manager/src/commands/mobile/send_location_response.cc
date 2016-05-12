@@ -32,7 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/send_location_response.h"
-
 #include "application_manager/application_impl.h"
 #include "interfaces/HMI_API.h"
 
@@ -47,7 +46,7 @@ SendLocationResponse::SendLocationResponse(
 SendLocationResponse::~SendLocationResponse() {}
 
 void SendLocationResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   application_manager_.SendMessageToMobile(message_);
 }

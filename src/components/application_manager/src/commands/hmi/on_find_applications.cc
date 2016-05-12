@@ -43,7 +43,7 @@ OnFindApplications::OnFindApplications(const MessageSharedPtr& message,
 OnFindApplications::~OnFindApplications() {}
 
 void OnFindApplications::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 
   // TODO(PV): add UpdateAppsOnDevice to ApplicationManager
 }

@@ -29,6 +29,9 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 if(BUILD_TESTS)
+
+find_package(LibUSBx REQUIRED)
+
 set(TM_TEST_DIR ${COMPONENTS_DIR}/transport_manager/test)
 
 include_directories(
@@ -54,7 +57,7 @@ set(LIBRARIES
 )
 
 if (BUILD_USB_SUPPORT)
-  list(APPEND LIBRARIES Libusb-1.0.16)
+  list(APPEND LIBRARIES ${LIBUSBX_LIBRARIES})
 endif()
 
 if (BUILD_BT_SUPPORT)

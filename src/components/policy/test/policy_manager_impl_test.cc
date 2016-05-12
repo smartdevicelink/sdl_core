@@ -37,7 +37,6 @@
 
 #include "json/reader.h"
 #include "gtest/gtest.h"
-
 #include "policy/policy_manager_impl.h"
 #include "config_profile/profile.h"
 #include "table_struct/enums.h"

@@ -78,8 +78,8 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   /**
    * @brief GetLockScreenIcon allows to obtain lock screen icon url;
    *
-   * @return url which point to the resourse where lock screen icon could be
-   *obtained.
+ * @return url which point to the resourse where lock screen icon could be
+ * obtained.
    */
   virtual std::string GetLockScreenIconUrl() const = 0;
 
@@ -217,8 +217,8 @@ class PolicyManager : public usage_statistics::StatisticsManager {
   /**
    * @brief Retrieves data from app_policies about app on its registration:
    * @param app_id - id of registered app
-   * @param app_types Section on HMI where app can appear (Navigation, Phone
-   * etc)
+ * @param app_types Section on HMI where app can appear (Navigation, Phone
+ * etc)
    * @param nicknames Synonyms for application
    */
   virtual bool GetInitialAppData(const std::string& application_id,
@@ -475,7 +475,14 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
 }  // namespace policy
 
-extern "C" policy::PolicyManager* CreateManager();
-extern "C" void DeleteManager(policy::PolicyManager*);
+SDL_EXPORT
+policy::PolicyManager* CreateManager(const std::string& app_storage_folder,
+                                     uint16_t attempts_to_open_policy_db,
+                                     uint16_t open_attempt_timeout_ms
+#ifdef ENABLE_LOG
+                                     ,
+                                     logger::Logger::Pimpl& logger
+#endif
+                                     );
 
 #endif  // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_MANAGER_H_

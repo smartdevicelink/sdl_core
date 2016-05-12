@@ -36,10 +36,12 @@
 #include <string>
 #include <vector>
 #include <set>
+
 #include "vehicle_info_data.h"
 #include "application_manager/application.h"
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/commands/command.h"
+
 #include "connection_handler/connection_handler.h"
 #include "utils/data_accessor.h"
 #include "utils/shared_ptr.h"
@@ -80,7 +82,6 @@ class Application;
 class StateControllerImpl;
 struct CommandParametersPermissions;
 typedef std::vector<std::string> RPCParams;
-
 struct ApplicationsAppIdSorter {
   bool operator()(const ApplicationSharedPtr lhs,
                   const ApplicationSharedPtr rhs) const {
@@ -203,7 +204,6 @@ class ApplicationManager {
    **/
   virtual void SendHMIStatusNotification(
       const utils::SharedPtr<Application> app) = 0;
-
   /**
    * @brief Checks if Application is subscribed for way points
    * @param Application AppID
@@ -244,6 +244,7 @@ class ApplicationManager {
   virtual bool ManageHMICommand(const commands::MessageSharedPtr message) = 0;
   virtual bool ManageMobileCommand(const commands::MessageSharedPtr message,
                                    commands::Command::CommandOrigin origin) = 0;
+
   virtual mobile_api::HMILevel::eType GetDefaultHmiLevel(
       ApplicationConstSharedPtr application) const = 0;
   /**
@@ -277,7 +278,6 @@ class ApplicationManager {
    * @param app Application
    */
   virtual void OnApplicationRegistered(ApplicationSharedPtr app) = 0;
-
   virtual connection_handler::ConnectionHandler& connection_handler() const = 0;
   virtual protocol_handler::ProtocolHandler& protocol_handler() const = 0;
   virtual policy::PolicyHandlerInterface& GetPolicyHandler() = 0;

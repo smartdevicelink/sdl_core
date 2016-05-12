@@ -5,9 +5,12 @@
 
 #include "./enums.h"
 #include "rpc_base/rpc_message.h"
-namespace Json {
-class Value;
-}  // namespace Json
+namespace utils {
+namespace json {
+class JsonValue;
+class JsonValueRef;
+}  // namespace json
+}  // namespace utils
 namespace rpc {
 namespace policy_table_interface_base {
 struct AppLevel;
@@ -68,8 +71,8 @@ struct PolicyBase : CompositeType {
   PolicyBase();
   PolicyBase(Priority priority);
   virtual ~PolicyBase();
-  explicit PolicyBase(const Json::Value* value__);
-  Json::Value ToJsonValue() const;
+  explicit PolicyBase(const utils::json::JsonValueRef& value__);
+  utils::json::JsonValue ToJsonValue() const;
   bool is_valid() const;
   bool is_initialized() const;
   bool struct_empty() const;
@@ -85,7 +88,7 @@ struct DevicePolicy : PolicyBase {
   DevicePolicy();
   DevicePolicy(Priority priority);
   ~DevicePolicy();
-  explicit DevicePolicy(const Json::Value* value__);
+  explicit DevicePolicy(const utils::json::JsonValueRef& value__);
 };
 
 struct ApplicationParams : PolicyBase {
@@ -102,8 +105,8 @@ struct ApplicationParams : PolicyBase {
   ApplicationParams();
   ApplicationParams(const Strings& groups, Priority priority);
   ~ApplicationParams();
-  explicit ApplicationParams(const Json::Value* value__);
-  Json::Value ToJsonValue() const;
+  explicit ApplicationParams(const utils::json::JsonValueRef& value__);
+  utils::json::JsonValue ToJsonValue() const;
   bool is_valid() const;
   bool is_initialized() const;
   bool struct_empty() const;
@@ -124,8 +127,8 @@ struct ApplicationPoliciesSection : CompositeType {
   ApplicationPoliciesSection(const ApplicationPolicies& apps,
                              const DevicePolicy& device);
   ~ApplicationPoliciesSection();
-  explicit ApplicationPoliciesSection(const Json::Value* value__);
-  Json::Value ToJsonValue() const;
+  explicit ApplicationPoliciesSection(const utils::json::JsonValueRef& value__);
+  utils::json::JsonValue ToJsonValue() const;
   bool is_valid() const;
   bool is_initialized() const;
   bool struct_empty() const;
@@ -145,8 +148,8 @@ struct RpcParameters : CompositeType {
   RpcParameters();
   explicit RpcParameters(const HmiLevels& hmi_levels);
   ~RpcParameters();
-  explicit RpcParameters(const Json::Value* value__);
-  Json::Value ToJsonValue() const;
+  explicit RpcParameters(const utils::json::JsonValueRef& value__);
+  utils::json::JsonValue ToJsonValue() const;
   bool is_valid() const;
   bool is_initialized() const;
   bool struct_empty() const;
@@ -166,8 +169,8 @@ struct Rpcs : CompositeType {
   Rpcs();
   explicit Rpcs(const Rpc& rpcs);
   ~Rpcs();
-  explicit Rpcs(const Json::Value* value__);
-  Json::Value ToJsonValue() const;
+  explicit Rpcs(const utils::json::JsonValueRef& value__);
+  utils::json::JsonValue ToJsonValue() const;
   bool is_valid() const;
   bool is_initialized() const;
   bool struct_empty() const;
@@ -206,9 +209,9 @@ struct ModuleConfig : CompositeType {
                const NumberOfNotificationsPerMinute&
                    notifications_per_minute_by_priority);
   ~ModuleConfig();
-  explicit ModuleConfig(const Json::Value* value__);
+  explicit ModuleConfig(const utils::json::JsonValueRef& value__);
   void SafeCopyFrom(const ModuleConfig& from);
-  Json::Value ToJsonValue() const;
+  utils::json::JsonValue ToJsonValue() const;
   bool is_valid() const;
   bool is_initialized() const;
   bool struct_empty() const;
@@ -230,8 +233,8 @@ struct MessageString : CompositeType {
  public:
   MessageString();
   ~MessageString();
-  explicit MessageString(const Json::Value* value__);
-  Json::Value ToJsonValue() const;
+  explicit MessageString(const utils::json::JsonValueRef& value__);
+  utils::json::JsonValue ToJsonValue() const;
   bool is_valid() const;
   bool is_initialized() const;
   bool struct_empty() const;
@@ -250,8 +253,8 @@ struct MessageLanguages : CompositeType {
   MessageLanguages();
   explicit MessageLanguages(const Languages& languages);
   ~MessageLanguages();
-  explicit MessageLanguages(const Json::Value* value__);
-  Json::Value ToJsonValue() const;
+  explicit MessageLanguages(const utils::json::JsonValueRef& value__);
+  utils::json::JsonValue ToJsonValue() const;
   bool is_valid() const;
   bool is_initialized() const;
   bool struct_empty() const;
@@ -271,8 +274,8 @@ struct ConsumerFriendlyMessages : CompositeType {
   ConsumerFriendlyMessages();
   explicit ConsumerFriendlyMessages(const std::string& version);
   ~ConsumerFriendlyMessages();
-  explicit ConsumerFriendlyMessages(const Json::Value* value__);
-  Json::Value ToJsonValue() const;
+  explicit ConsumerFriendlyMessages(const utils::json::JsonValueRef& value__);
+  utils::json::JsonValue ToJsonValue() const;
   bool is_valid() const;
   bool is_initialized() const;
   bool struct_empty() const;
@@ -288,8 +291,8 @@ struct ModuleMeta : CompositeType {
  public:
   ModuleMeta();
   ~ModuleMeta();
-  explicit ModuleMeta(const Json::Value* value__);
-  Json::Value ToJsonValue() const;
+  explicit ModuleMeta(const utils::json::JsonValueRef& value__);
+  utils::json::JsonValue ToJsonValue() const;
   bool is_valid() const;
   bool is_initialized() const;
   bool struct_empty() const;
@@ -335,8 +338,8 @@ struct AppLevel : CompositeType {
            uint16_t count_of_tls_errors,
            uint16_t count_of_run_attempts_while_revoked);
   ~AppLevel();
-  explicit AppLevel(const Json::Value* value__);
-  Json::Value ToJsonValue() const;
+  explicit AppLevel(const utils::json::JsonValueRef& value__);
+  utils::json::JsonValue ToJsonValue() const;
   bool is_valid() const;
   bool is_initialized() const;
   bool struct_empty() const;
@@ -353,8 +356,8 @@ struct UsageAndErrorCounts : CompositeType {
  public:
   UsageAndErrorCounts();
   ~UsageAndErrorCounts();
-  explicit UsageAndErrorCounts(const Json::Value* value__);
-  Json::Value ToJsonValue() const;
+  explicit UsageAndErrorCounts(const utils::json::JsonValueRef& value__);
+  utils::json::JsonValue ToJsonValue() const;
   bool is_valid() const;
   bool is_initialized() const;
   bool struct_empty() const;
@@ -370,8 +373,8 @@ struct DeviceParams : CompositeType {
  public:
   DeviceParams();
   ~DeviceParams();
-  explicit DeviceParams(const Json::Value* value__);
-  Json::Value ToJsonValue() const;
+  explicit DeviceParams(const utils::json::JsonValueRef& value__);
+  utils::json::JsonValue ToJsonValue() const;
   bool is_valid() const;
   bool is_initialized() const;
   bool struct_empty() const;
@@ -398,8 +401,8 @@ struct PolicyTable : CompositeType {
               const ConsumerFriendlyMessages& consumer_friendly_messages,
               const ModuleConfig& module_config);
   ~PolicyTable();
-  explicit PolicyTable(const Json::Value* value__);
-  Json::Value ToJsonValue() const;
+  explicit PolicyTable(const utils::json::JsonValueRef& value__);
+  utils::json::JsonValue ToJsonValue() const;
   bool is_valid() const;
   bool is_initialized() const;
   bool struct_empty() const;
@@ -418,8 +421,8 @@ struct Table : CompositeType {
   Table();
   explicit Table(const PolicyTable& policy_table);
   ~Table();
-  explicit Table(const Json::Value* value__);
-  Json::Value ToJsonValue() const;
+  explicit Table(const utils::json::JsonValueRef& value__);
+  utils::json::JsonValue ToJsonValue() const;
   bool is_valid() const;
   bool is_initialized() const;
   bool struct_empty() const;

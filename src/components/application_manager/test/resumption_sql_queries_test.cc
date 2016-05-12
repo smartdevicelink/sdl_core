@@ -2566,6 +2566,7 @@ TEST_F(ResumptionSqlQueriesTest, kSelectSubMenu_ExpectDataCorrect) {
                                          device_id,
                                          9).LastInsertId();
   int64_t submenu_key =
+
       FillSubMenuTable(temp_query, 1, "menu_name", 1).LastInsertId();
 
   FillApplicationSubMenuArrayTable(temp_query, app_key, submenu_key);

@@ -52,6 +52,7 @@ struct CommandParametersPermissions {
 };
 
 namespace commands {
+
 /**
  * @brief Class is intended to encapsulate RPC as an object
  **/
@@ -90,6 +91,7 @@ class CommandImpl : public Command {
    * @brief Execute corresponding command by calling the action on reciever
    **/
   void Run() OVERRIDE;
+
   /**
    * @brief Retrieves request default timeout.
    * If request has a custom timeout, request_timeout_ should be reassign to it
@@ -154,14 +156,16 @@ class CommandImpl : public Command {
    * @param message Smartobject to be parsed
    */
   void ReplaceHMIByMobileAppId(smart_objects::SmartObject& message);
-
   MessageSharedPtr message_;
   uint32_t default_timeout_;
   bool allowed_to_terminate_;
   ApplicationManager& application_manager_;
-
 #ifdef ENABLE_LOG
+#if defined(OS_POSIX)
   static log4cxx::LoggerPtr logger_;
+#elif defined(OS_WINDOWS)
+  static std::string logger_;
+#endif
 #endif  // ENABLE_LOG
 
  private:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,18 +29,19 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "utils/conditional_variable.h"
+#if defined(OS_POSIX)
 
 #include <errno.h>
 #include <time.h>
 
+#include "utils/conditional_variable.h"
 #include "utils/lock.h"
 #include "utils/logger.h"
 
 namespace {
-const long kNanosecondsPerSecond = 1000000000;
-const long kMillisecondsPerSecond = 1000;
-const long kNanosecondsPerMillisecond = 1000000;
+const uint64_t kNanosecondsPerSecond = 1000000000;
+const uint64_t kMillisecondsPerSecond = 1000;
+const uint64_t kNanosecondsPerMillisecond = 1000000;
 }
 
 namespace sync_primitives {
@@ -51,20 +52,20 @@ ConditionalVariable::ConditionalVariable() {
   pthread_condattr_t attrs;
   int initialized = pthread_condattr_init(&attrs);
   if (initialized != 0)
-    LOG4CXX_ERROR(logger_,
-                  "Failed to initialize "
-                  "conditional variable attributes");
+    LOGGER_ERROR(logger_,
+                 "Failed to initialize "
+                 "conditional variable attributes");
   pthread_condattr_setclock(&attrs, CLOCK_MONOTONIC);
   initialized = pthread_cond_init(&cond_var_, &attrs);
   if (initialized != 0)
-    LOG4CXX_ERROR(logger_,
-                  "Failed to initialize "
-                  "conditional variable");
+    LOGGER_ERROR(logger_,
+                 "Failed to initialize "
+                 "conditional variable");
   int rv = pthread_condattr_destroy(&attrs);
   if (rv != 0)
-    LOG4CXX_ERROR(logger_,
-                  "Failed to destroy "
-                  "conditional variable attributes");
+    LOGGER_ERROR(logger_,
+                 "Failed to destroy "
+                 "conditional variable attributes");
 }
 
 ConditionalVariable::~ConditionalVariable() {
@@ -73,37 +74,35 @@ ConditionalVariable::~ConditionalVariable() {
 
 void ConditionalVariable::NotifyOne() {
   int signaled = pthread_cond_signal(&cond_var_);
-  if (signaled != 0)
-    LOG4CXX_ERROR(logger_, "Failed to signal conditional variable");
+  if (signaled != 0) {
+    LOGGER_ERROR(logger_, "Failed to signal conditional variable");
+  }
 }
 
 void ConditionalVariable::Broadcast() {
   int signaled = pthread_cond_broadcast(&cond_var_);
   if (signaled != 0)
-    LOG4CXX_ERROR(logger_, "Failed to broadcast conditional variable");
+    LOGGER_ERROR(logger_, "Failed to broadcast conditional variable");
 }
 
 bool ConditionalVariable::Wait(Lock& lock) {
+// Disable wait recursive mutexes. Added for compatible with Qt.
+// Actual Qt version (5.5) cannot support waiting on recursive mutex.
+#ifndef NDEBUG
+  DCHECK(!lock.is_mutex_recursive_);
+#endif
   lock.AssertTakenAndMarkFree();
   int wait_status = pthread_cond_wait(&cond_var_, &lock.mutex_);
   lock.AssertFreeAndMarkTaken();
   if (wait_status != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to wait for conditional variable");
+    LOGGER_ERROR(logger_, "Failed to wait for conditional variable");
     return false;
   }
   return true;
 }
 
 bool ConditionalVariable::Wait(AutoLock& auto_lock) {
-  Lock& lock = auto_lock.GetLock();
-  lock.AssertTakenAndMarkFree();
-  int wait_status = pthread_cond_wait(&cond_var_, &lock.mutex_);
-  lock.AssertFreeAndMarkTaken();
-  if (wait_status != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to wait for conditional variable");
-    return false;
-  }
-  return true;
+  return Wait(auto_lock.GetLock());
 }
 
 ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
@@ -118,6 +117,11 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
   wait_interval.tv_sec += wait_interval.tv_nsec / kNanosecondsPerSecond;
   wait_interval.tv_nsec %= kNanosecondsPerSecond;
   Lock& lock = auto_lock.GetLock();
+// Disable wait recursive mutexes. Added for compatible with Qt.
+// Actual Qt version (5.5) cannot support waiting on recursive mutex.
+#ifndef NDEBUG
+  DCHECK(!lock.is_mutex_recursive_);
+#endif
   lock.AssertTakenAndMarkFree();
   int timedwait_status =
       pthread_cond_timedwait(&cond_var_, &lock.mutex_, &wait_interval);
@@ -137,7 +141,7 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
       break;
     }
     default: {
-      LOG4CXX_ERROR(
+      LOGGER_ERROR(
           logger_,
           "Failed to timewait for conditional variable timedwait_status: "
               << timedwait_status);
@@ -147,3 +151,4 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
 }
 
 }  // namespace sync_primitives
+#endif  // OS_POSIX

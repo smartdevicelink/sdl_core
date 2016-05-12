@@ -130,7 +130,6 @@ class StateControllerImplTest : public ::testing::Test {
       : ::testing::Test()
       , usage_stat("0",
                    utils::SharedPtr<usage_statistics::StatisticsManager>(
-
                        new state_controller_test::MockStatisticsManager))
       , applications_(application_set_, applications_lock_) {}
   NiceMock<application_manager_test::MockApplicationManager> app_manager_mock_;
@@ -835,7 +834,6 @@ class StateControllerImplTest : public ::testing::Test {
     ON_CALL(app_manager_mock_, event_dispatcher())
         .WillByDefault(ReturnRef(mock_event_dispatcher_));
     state_ctrl_ = utils::MakeShared<am::StateControllerImpl>(app_manager_mock_);
-
     ON_CALL(app_manager_mock_, applications())
         .WillByDefault(Return(applications_));
     ConfigureApps();
@@ -1738,7 +1736,6 @@ TEST_F(StateControllerImplTest, DISABLED_ActivateAppSuccessReceivedFromHMI) {
       new smart_objects::SmartObject();
   (*bc_activate_app_request)[am::strings::params][am::strings::correlation_id] =
       corr_id;
-
   for (; it != hmi_states.end(); ++it) {
     am::HmiStatePtr hmi_state = it->first;
     am::HmiStatePtr initial_hmi_state = it->first;

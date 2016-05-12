@@ -50,11 +50,17 @@ set (SOURCES
     ${SMART_OBJECTS_SRC_DIR}/object_schema_item.cc
     ${SMART_OBJECTS_SRC_DIR}/array_schema_item.cc
 )
-
-add_library("SmartObjects" ${SOURCES})
-
-if(ENABLE_LOG)
-  target_link_libraries("SmartObjects" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  file (GLOB inc ${COMPONENTS_DIR}/smart_objects/include/smart_objects/*.h)
+  string( REPLACE / \\ group ${inc} )
+  source_group("Header Files" FILES ${inc} )
+  add_library("SmartObjects" ${inc} ${SOURCES})
+  target_link_libraries("SmartObjects")
+else ()
+  add_library("SmartObjects" ${SOURCES})
+  if(ENABLE_LOG)
+    target_link_libraries("SmartObjects" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+  endif()
 endif()
 
 if(BUILD_TESTS)

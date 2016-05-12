@@ -28,6 +28,25 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
+cmake_minimum_required(VERSION 2.8.11)
+
+find_package(LibUSBx REQUIRED)
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows" AND NOT QT_PORT)
+  add_custom_target(copy_sqlite_dll ALL
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+	%SDL_SQLITE_DIR%/sqlite3.dll
+	${CMAKE_CURRENT_BINARY_DIR}/sqlite3.dll
+    COMMENT "Copying sqlite")
+endif()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  find_package(WinOpenSSL REQUIRED)
+  if(NOT QT_PORT)
+    find_package(WinSqlite3 REQUIRED)
+  endif()
+endif()
+
 IF (HMIADAPTER STREQUAL "messagebroker")
 set (BROKER_LIBRARIES
   MessageBrokerClient
@@ -43,8 +62,7 @@ link_directories(${LIBUSB_LIBS_DIRECTORY})
 cmake_policy(POP)
 
 if (EXTENDED_MEDIA_MODE)
-set(default_media_inc
-${GSTREAMER_gst_INCLUDE_DIR}
+set(default_media_inc ${GSTREAMER_gst_INCLUDE_DIR}
 )
 else(EXTENDED_MEDIA_MODE)
 set(default_media_inc
@@ -59,7 +77,6 @@ endif()
 set(LIBRARIES
   MediaManager
   ApplicationManager
-  MessageHelper
   HMI_API
   MOBILE_API
   v4_protocol_v1_2_no_extra
@@ -78,6 +95,7 @@ set(LIBRARIES
   jsoncpp
   ConfigProfile
   Resumption
+  UsageStatistics
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -86,19 +104,20 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 if (BUILD_BT_SUPPORT)
-  list(APPEND LIBRARIES bluetooth)
+  if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    list(APPEND LIBRARIES bluetooth)
+  endif()
 endif()
 if (BUILD_USB_SUPPORT)
+ list(APPEND LIBRARIES ${LIBUSBX_LIBRARIES})
+endif()
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  list(APPEND LIBRARIES Libusb-1.0.16)
-endif()
-endif()
-
-if(ENABLE_LOG)
-  list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
-  list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
-  list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
-  list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
+  if(ENABLE_LOG)
+    list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+    list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
+    list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
+    list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
+  endif()
 endif()
 
 include_directories (
@@ -131,6 +150,7 @@ include_directories (
   ${CMAKE_SOURCE_DIR}
   ${default_media_inc}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${OPENSSL_INCLUDE_DIRECTORY}
   ${CMAKE_SOURCE_DIR}/src/3rd_party/dbus-1.7.8
   ${CMAKE_SOURCE_DIR}/src/3rd_party/dbus-1.7.8/dbus/
 )
@@ -138,16 +158,48 @@ include_directories (
 set (SOURCES
   main.cc
   life_cycle.cc
-  signal_handlers.cc
 )
+
+set (HEADERS
+     btinclude.h
+     life_cycle.h
+)
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  if(NOT QT_PORT)
+    list(APPEND LIBRARIES sqlite3 bthprops)
+    link_directories(${SQLITE_LIB_DIRECTORY})
+  endif()
+  link_directories (${OPENSSL_LIB_DIRECTORY})
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /INCREMENTAL:NO" )
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /FORCE:MULTIPLE" )
+  # /IGNORE:4099 - flag of linker. Ignored 'warning LNK4099' if linker was not found PBD files.
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /IGNORE:4099" )
+
+endif()
 
 if( NOT CMAKE_BUILD_TYPE )
   set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build. Options are: None, Debug, Release, RelWithDebInfo, MinSizeRel." FORCE)
 endif()
 
-add_executable(${PROJECT} ${SOURCES})
-target_link_libraries(${PROJECT} ${LIBRARIES})
+add_executable(${PROJECT} ${HEADERS} ${SOURCES})
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+  target_link_libraries(${PROJECT} ws2_32 ${LIBRARIES})
+  if (BUILD_BT_SUPPORT)
+    target_link_libraries(${PROJECT} irprops ${LIBRARIES})
+  endif()
+endif()
+
+if(QT_PORT)
+    if(EXTENDED_MEDIA_MODE)
+      find_package(Qt5 REQUIRED Multimedia)
+      target_link_libraries(${PROJECT} Qt5::Multimedia ${LIBRARIES})
+    endif()
+    target_link_libraries(${PROJECT} Qt5::Core ${LIBRARIES})
+else()
+    target_link_libraries(${PROJECT} ${LIBRARIES})
+endif()
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/audio.8bit.wav DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -228,3 +280,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
       GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 endif ()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows" AND NOT QT_PORT)
+    add_dependencies(${PROJECT} copy_sqlite_dll)
+endif()

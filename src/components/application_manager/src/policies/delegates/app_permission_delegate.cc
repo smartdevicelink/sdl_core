@@ -45,7 +45,7 @@ AppPermissionDelegate::AppPermissionDelegate(
     , policy_handler_(policy_handler) {}
 
 void AppPermissionDelegate::threadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   policy_handler_.OnAppPermissionConsentInternal(connection_key_, permissions_);
 }
 

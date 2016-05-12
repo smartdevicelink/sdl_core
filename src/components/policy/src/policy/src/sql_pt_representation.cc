@@ -34,7 +34,12 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <errno.h>
+#ifdef OS_POSIX
 #include <unistd.h>
+#elif defined(OS_WINDOWS)
+
+#include <io.h>
+#endif
 
 #include "utils/logger.h"
 #include "utils/file_system.h"
@@ -65,8 +70,17 @@ void InsertUnique(K value, T* array) {
 
 const std::string SQLPTRepresentation::kDatabaseName = "policy";
 
-SQLPTRepresentation::SQLPTRepresentation()
-    : db_(new utils::dbms::SQLDatabase(kDatabaseName)) {}
+SQLPTRepresentation::SQLPTRepresentation(const std::string& app_storage_folder,
+                                         uint16_t attempts_to_open_policy_db,
+                                         uint16_t open_attempt_timeout_ms)
+#if defined(__QNX__)
+    : db_(new utils::dbms::SQLDatabase(kDatabaseName)
+#else
+    : db_(new utils::dbms::SQLDatabase(
+          file_system::ConcatPath(app_storage_folder, kDatabaseName),
+          "PolicyDatabase"))
+#endif
+{}
 
 SQLPTRepresentation::~SQLPTRepresentation() {
   db_->Close();
@@ -77,12 +91,12 @@ void SQLPTRepresentation::CheckPermissions(const PTString& app_id,
                                            const PTString& hmi_level,
                                            const PTString& rpc,
                                            CheckPermissionResult& result) {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
 
   if (!query.Prepare(sql_pt::kSelectRpc)) {
-    LOG4CXX_WARN(logger_,
-                 "Incorrect select statement from rpcs"
-                     << query.LastError().text());
+    LOGGER_WARN(logger_,
+                "Incorrect select statement from rpcs"
+                    << query.LastError().text());
     return;
   }
   query.Bind(0, app_id);
@@ -91,10 +105,10 @@ void SQLPTRepresentation::CheckPermissions(const PTString& app_id,
 
   bool ret = query.Next();
   result.hmi_level_permitted = ret ? kRpcAllowed : kRpcDisallowed;
-  LOG4CXX_INFO(logger_,
-               "Level is " << (result.hmi_level_permitted == kRpcAllowed
-                                   ? "permitted"
-                                   : "not permitted"));
+  LOGGER_INFO(logger_,
+              "Level is " << (result.hmi_level_permitted == kRpcAllowed
+                                  ? "permitted"
+                                  : "not permitted"));
   std::string parameter;
   while (ret) {
     if (!query.IsNull(0)) {
@@ -106,14 +120,14 @@ void SQLPTRepresentation::CheckPermissions(const PTString& app_id,
 }
 
 bool SQLPTRepresentation::IsPTPreloaded() {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   return query.Prepare(sql_pt::kSelectPreloaded) && query.Next();
 }
 
 int SQLPTRepresentation::IgnitionCyclesBeforeExchange() {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Prepare(sql_pt::kSelectIgnitionCycles) || !query.Exec()) {
-    LOG4CXX_WARN(logger_, "Can not select ignition cycles");
+    LOGGER_WARN(logger_, "Can not select ignition cycles");
     return 0;
   }
   int limit = query.GetInteger(0);
@@ -127,9 +141,9 @@ int SQLPTRepresentation::IgnitionCyclesBeforeExchange() {
 }
 
 int SQLPTRepresentation::KilometersBeforeExchange(int current) {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Prepare(sql_pt::kSelectKilometers) || !query.Exec()) {
-    LOG4CXX_WARN(logger_, "Can not select kilometers");
+    LOGGER_WARN(logger_, "Can not select kilometers");
     return 0;
   }
   int limit = query.GetInteger(0);
@@ -144,27 +158,27 @@ int SQLPTRepresentation::KilometersBeforeExchange(int current) {
 }
 
 bool SQLPTRepresentation::SetCountersPassedForSuccessfulUpdate(
-    int kilometers, int days_after_epoch) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  utils::dbms::SQLQuery query(db());
+  int kilometers, int days_after_epoch) {
+  LOGGER_AUTO_TRACE(logger_);
+  Query query(db());
   if (!query.Prepare(sql_pt::kUpdateCountersSuccessfulUpdate)) {
-    LOG4CXX_WARN(logger_,
-                 "Wrong update query for counters on successful update.");
+    LOGGER_WARN(logger_,
+                "Wrong update query for counters on successful update.");
     return false;
   }
   query.Bind(0, kilometers);
   query.Bind(1, days_after_epoch);
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Failed to update counters on successful update.");
+    LOGGER_WARN(logger_, "Failed to update counters on successful update.");
     return false;
   }
   return true;
 }
 
 int SQLPTRepresentation::DaysBeforeExchange(int current) {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Prepare(sql_pt::kSelectDays) || !query.Exec()) {
-    LOG4CXX_WARN(logger_, "Can not select days");
+    LOGGER_WARN(logger_, "Can not select days");
     return 0;
   }
   int limit = query.GetInteger(0);
@@ -183,9 +197,9 @@ int SQLPTRepresentation::DaysBeforeExchange(int current) {
 }
 
 int SQLPTRepresentation::TimeoutResponse() {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Prepare(sql_pt::kSelectTimeoutResponse) || !query.Exec()) {
-    LOG4CXX_INFO(logger_, "Can not select timeout response for retry sequence");
+    LOGGER_INFO(logger_, "Can not select timeout response for retry sequence");
     const int kDefault = 30;
     return kDefault;
   }
@@ -193,10 +207,10 @@ int SQLPTRepresentation::TimeoutResponse() {
 }
 
 bool SQLPTRepresentation::SecondsBetweenRetries(std::vector<int>* seconds) {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Prepare(sql_pt::kSelectSecondsBetweenRetries)) {
-    LOG4CXX_INFO(logger_,
-                 "Incorrect select statement from seconds between retries");
+    LOGGER_INFO(logger_,
+                "Incorrect select statement from seconds between retries");
     return false;
   }
   while (query.Next()) {
@@ -206,7 +220,7 @@ bool SQLPTRepresentation::SecondsBetweenRetries(std::vector<int>* seconds) {
 }
 
 std::vector<UserFriendlyMessage> SQLPTRepresentation::GetUserFriendlyMsg(
-    const std::vector<std::string>& msg_codes, const std::string& language) {
+  const std::vector<std::string>& msg_codes, const std::string& language) {
   std::vector<UserFriendlyMessage> result;
   std::vector<std::string>::const_iterator it = msg_codes.begin();
   std::vector<std::string>::const_iterator it_end = msg_codes.end();
@@ -219,9 +233,9 @@ std::vector<UserFriendlyMessage> SQLPTRepresentation::GetUserFriendlyMsg(
 }
 
 EndpointUrls SQLPTRepresentation::GetUpdateUrls(int service_type) {
-  LOG4CXX_INFO(logger_,
-               "SQLPTRepresentation::GetUpdateUrls for " << service_type);
-  utils::dbms::SQLQuery query(db());
+  LOGGER_INFO(logger_,
+              "SQLPTRepresentation::GetUpdateUrls for " << service_type);
+  Query query(db());
   EndpointUrls ret;
   if (query.Prepare(sql_pt::kSelectEndpoint)) {
     query.Bind(0, service_type);
@@ -235,20 +249,20 @@ EndpointUrls SQLPTRepresentation::GetUpdateUrls(int service_type) {
       ret.push_back(data);
     }
   } else {
-    LOG4CXX_WARN(logger_, "Invalid select endpoints statement.");
+    LOGGER_WARN(logger_, "Invalid select endpoints statement.");
   }
   return ret;
 }
 
 std::string SQLPTRepresentation::GetLockScreenIconUrl() const {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   std::string ret;
   if (query.Prepare(sql_pt::kSelectLockScreenIcon)) {
     query.Bind(0, std::string("lock_screen_icon_url"));
     query.Bind(1, std::string("default"));
 
     if (!query.Exec()) {
-      LOG4CXX_WARN(logger_, "Incorrect select from notifications by priority.");
+      LOGGER_WARN(logger_, "Incorrect select from notifications by priority.");
       return ret;
     }
 
@@ -257,23 +271,24 @@ std::string SQLPTRepresentation::GetLockScreenIconUrl() const {
     }
 
   } else {
-    LOG4CXX_WARN(logger_, "Invalid select endpoints statement.");
+    LOGGER_WARN(logger_, "Invalid select endpoints statement.");
   }
   return ret;
 }
 
+
 int SQLPTRepresentation::GetNotificationsNumber(const std::string& priority) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  utils::dbms::SQLQuery query(db());
+  LOGGER_AUTO_TRACE(logger_);
+  Query query(db());
   if (!query.Prepare(sql_pt::kSelectNotificationsPerPriority)) {
-    LOG4CXX_WARN(logger_,
-                 "Incorrect select statement for priority "
-                 "notification number.");
+    LOGGER_WARN(logger_,
+                "Incorrect select statement for priority "
+                "notification number.");
     return 0;
   }
   query.Bind(0, priority);
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Incorrect select from notifications by priority.");
+    LOGGER_WARN(logger_, "Incorrect select from notifications by priority.");
     return 0;
   }
 
@@ -286,21 +301,21 @@ int SQLPTRepresentation::GetNotificationsNumber(const std::string& priority) {
 
 bool SQLPTRepresentation::GetPriority(const std::string& policy_app_id,
                                       std::string* priority) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   if (NULL == priority) {
-    LOG4CXX_WARN(logger_, "Input priority parameter is null.");
+    LOGGER_WARN(logger_, "Input priority parameter is null.");
     return false;
   }
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Prepare(sql_pt::kSelectPriority)) {
-    LOG4CXX_INFO(logger_, "Incorrect statement for priority.");
+    LOGGER_INFO(logger_, "Incorrect statement for priority.");
     return false;
   }
 
   query.Bind(0, policy_app_id);
 
   if (!query.Exec()) {
-    LOG4CXX_INFO(logger_, "Error during select priority.");
+    LOGGER_INFO(logger_, "Error during select priority.");
     return false;
   }
 
@@ -314,80 +329,79 @@ bool SQLPTRepresentation::GetPriority(const std::string& policy_app_id,
   return true;
 }
 
-InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
+InitResult SQLPTRepresentation::Init(const PolicySettings *settings) {
   settings_ = settings;
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 #ifdef BUILD_TESTS
   open_counter_ = 0;
 #endif  // BUILD_TESTS
   if (!db_->Open()) {
-    LOG4CXX_ERROR(logger_, "Failed opening database.");
-    LOG4CXX_INFO(logger_, "Starting opening retries.");
+    LOGGER_ERROR(logger_, "Failed opening database.");
+    LOGGER_INFO(logger_, "Starting opening retries.");
     const uint16_t attempts = get_settings().attempts_to_open_policy_db();
-    LOG4CXX_DEBUG(logger_, "Total attempts number is: " << attempts);
+    LOGGER_DEBUG(logger_, "Total attempts number is: " << attempts);
     bool is_opened = false;
     const uint16_t open_attempt_timeout_ms =
         get_settings().open_attempt_timeout_ms();
-    const useconds_t sleep_interval_mcsec = open_attempt_timeout_ms * 1000;
-    LOG4CXX_DEBUG(logger_,
-                  "Open attempt timeout(ms) is: " << open_attempt_timeout_ms);
+    LOGGER_DEBUG(logger_,
+                 "Open attempt timeout(ms) is: " << open_attempt_timeout_ms);
     for (int i = 0; i < attempts; ++i) {
-      usleep(sleep_interval_mcsec);
-      LOG4CXX_INFO(logger_, "Attempt: " << i + 1);
+      threads::sleep(open_attempt_timeout_ms * 1000);
+      LOGGER_INFO(logger_, "Attempt: " << i + 1);
 #ifdef BUILD_TESTS
       ++open_counter_;
 #endif  // BUILD_TESTS
       if (db_->Open()) {
-        LOG4CXX_INFO(logger_, "Database opened.");
+        LOGGER_INFO(logger_, "Database opened.");
         is_opened = true;
         break;
       }
     }
     if (!is_opened) {
-      LOG4CXX_ERROR(logger_,
-                    "Open retry sequence failed. Tried "
-                        << attempts << " attempts with "
-                        << open_attempt_timeout_ms
-                        << " open timeout(ms) for each.");
+      LOGGER_ERROR(logger_,
+                   "Open retry sequence failed. Tried "
+                       << attempts << " attempts with "
+                       << open_attempt_timeout_ms
+                       << " open timeout(ms) for each.");
       return InitResult::FAIL;
     }
   }
 #ifndef __QNX__
   if (!db_->IsReadWrite()) {
-    LOG4CXX_ERROR(logger_, "There are no read/write permissions for database");
+    LOGGER_ERROR(logger_, "There are no read/write permissions for database");
     return InitResult::FAIL;
   }
 
 #endif  // __QNX__
-  utils::dbms::SQLQuery check_pages(db());
+  Query check_pages(db());
   if (!check_pages.Prepare(sql_pt::kCheckPgNumber) || !check_pages.Next()) {
-    LOG4CXX_WARN(logger_, "Incorrect pragma for page counting.");
+    LOGGER_WARN(logger_, "Incorrect pragma for page counting.");
   } else {
     if (0 < check_pages.GetInteger(0)) {
-      utils::dbms::SQLQuery db_check(db());
+      Query db_check(db());
       if (!db_check.Prepare(sql_pt::kCheckDBIntegrity)) {
-        LOG4CXX_WARN(logger_, "Incorrect pragma for integrity check.");
+        LOGGER_WARN(logger_, "Incorrect pragma for integrity check.");
       } else {
         while (db_check.Next()) {
           if (db_check.GetString(0).compare("ok") == 0) {
-            utils::dbms::SQLQuery check_first_run(db());
+            Query check_first_run(db());
             if (check_first_run.Prepare(sql_pt::kIsFirstRun) &&
                 check_first_run.Next()) {
-              LOG4CXX_INFO(logger_,
-                           "Selecting is first run "
-                               << check_first_run.GetBoolean(0));
+              LOGGER_INFO(logger_,
+                          "Selecting is first run "
+                              << check_first_run.GetBoolean(0));
               if (check_first_run.GetBoolean(0)) {
-                utils::dbms::SQLQuery set_not_first_run(db());
+                Query set_not_first_run(db());
                 set_not_first_run.Exec(sql_pt::kSetNotFirstRun);
                 return InitResult::SUCCESS;
               }
             } else {
-              LOG4CXX_WARN(logger_, "Incorrect select is first run");
+              LOGGER_WARN(logger_, "Incorrect select is first run");
             }
             return InitResult::EXISTS;
           } else {
-            LOG4CXX_ERROR(logger_,
-                          "Existing policy table representation is invlaid.");
+            LOGGER_ERROR(logger_,
+                         "Existing policy table representation is invlaid.");
             // TODO(PV): add handle
             return InitResult::FAIL;
           }
@@ -395,15 +409,15 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
       }
     }
   }
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Exec(sql_pt::kCreateSchema)) {
-    LOG4CXX_ERROR(
+    LOGGER_ERROR(
         logger_,
         "Failed creating schema of database: " << query.LastError().text());
     return InitResult::FAIL;
   }
   if (!query.Exec(sql_pt::kInsertInitData)) {
-    LOG4CXX_ERROR(
+    LOGGER_ERROR(
         logger_,
         "Failed insert init data to database: " << query.LastError().text());
     return InitResult::FAIL;
@@ -413,7 +427,7 @@ InitResult SQLPTRepresentation::Init(const PolicySettings* settings) {
 
 bool SQLPTRepresentation::Close() {
   db_->Close();
-  return db_->LastError().number() == utils::dbms::OK;
+  return !db_->HasErrors();
 }
 
 const VehicleInfo SQLPTRepresentation::GetVehicleInfo() const {
@@ -427,10 +441,10 @@ const VehicleInfo SQLPTRepresentation::GetVehicleInfo() const {
 }
 
 bool SQLPTRepresentation::Drop() {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Exec(sql_pt::kDropSchema)) {
-    LOG4CXX_WARN(logger_,
-                 "Failed dropping database: " << query.LastError().text());
+    LOGGER_WARN(logger_,
+                "Failed dropping database: " << query.LastError().text());
     return false;
   }
   return true;
@@ -441,14 +455,14 @@ void SQLPTRepresentation::WriteDb() {
 }
 
 bool SQLPTRepresentation::Clear() {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Exec(sql_pt::kDeleteData)) {
-    LOG4CXX_ERROR(logger_,
-                  "Failed clearing database: " << query.LastError().text());
+    LOGGER_ERROR(logger_,
+                 "Failed clearing database: " << query.LastError().text());
     return false;
   }
   if (!query.Exec(sql_pt::kInsertInitData)) {
-    LOG4CXX_ERROR(
+    LOGGER_ERROR(
         logger_,
         "Failed insert init data to database: " << query.LastError().text());
     return false;
@@ -457,20 +471,20 @@ bool SQLPTRepresentation::Clear() {
 }
 
 bool SQLPTRepresentation::RefreshDB() {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Exec(sql_pt::kDropSchema)) {
-    LOG4CXX_WARN(logger_,
-                 "Failed dropping database: " << query.LastError().text());
+    LOGGER_WARN(logger_,
+                "Failed dropping database: " << query.LastError().text());
     return false;
   }
   if (!query.Exec(sql_pt::kCreateSchema)) {
-    LOG4CXX_ERROR(
+    LOGGER_ERROR(
         logger_,
         "Failed creating schema of database: " << query.LastError().text());
     return false;
   }
   if (!query.Exec(sql_pt::kInsertInitData)) {
-    LOG4CXX_ERROR(
+    LOGGER_ERROR(
         logger_,
         "Failed insert init data to database: " << query.LastError().text());
     return false;
@@ -480,7 +494,7 @@ bool SQLPTRepresentation::RefreshDB() {
 
 utils::SharedPtr<policy_table::Table> SQLPTRepresentation::GenerateSnapshot()
     const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   utils::SharedPtr<policy_table::Table> table = new policy_table::Table();
   GatherModuleMeta(&*table->policy_table.module_meta);
   GatherModuleConfig(&table->policy_table.module_config);
@@ -494,18 +508,18 @@ utils::SharedPtr<policy_table::Table> SQLPTRepresentation::GenerateSnapshot()
 }
 
 void SQLPTRepresentation::GatherModuleMeta(
-    policy_table::ModuleMeta* meta) const {
-  LOG4CXX_INFO(logger_, "Gather Module Meta Info");
+  policy_table::ModuleMeta* meta) const {
+  LOGGER_INFO(logger_, "Gather Module Meta Info");
   meta->mark_initialized();
   // Section Module Meta is empty for SDL specific
 }
 
 void SQLPTRepresentation::GatherModuleConfig(
-    policy_table::ModuleConfig* config) const {
-  LOG4CXX_INFO(logger_, "Gather Configuration Info");
-  utils::dbms::SQLQuery query(db());
+  policy_table::ModuleConfig* config) const {
+  LOGGER_INFO(logger_, "Gather Configuration Info");
+  Query query(db());
   if (!query.Prepare(sql_pt::kSelectModuleConfig) || !query.Next()) {
-    LOG4CXX_WARN(logger_, "Incorrect select statement for module config");
+    LOGGER_WARN(logger_, "Incorrect select statement for module config");
   } else {
     *config->preloaded_pt = query.GetBoolean(0);
     config->exchange_after_x_ignition_cycles = query.GetInteger(1);
@@ -519,31 +533,29 @@ void SQLPTRepresentation::GatherModuleConfig(
     *config->certificate = query.GetString(9);
   }
 
-  utils::dbms::SQLQuery endpoints(db());
+  Query endpoints(db());
   if (!endpoints.Prepare(sql_pt::kSelectEndpoints)) {
-    LOG4CXX_WARN(logger_, "Incorrect select statement for endpoints");
+    LOGGER_WARN(logger_, "Incorrect select statement for endpoints");
   } else {
     while (endpoints.Next()) {
-      std::stringstream stream;
-      stream << "0x0" << endpoints.GetInteger(1);
-      config->endpoints[stream.str()][endpoints.GetString(2)].push_back(
-          endpoints.GetString(0));
+      config->endpoints[endpoints.GetString(1)][endpoints.GetString(2)]
+          .push_back(endpoints.GetString(0));
     }
   }
 
-  utils::dbms::SQLQuery notifications(db());
+  Query notifications(db());
   if (!notifications.Prepare(sql_pt::kSelectNotificationsPerMin)) {
-    LOG4CXX_WARN(logger_, "Incorrect select statement for notifications");
+    LOGGER_WARN(logger_, "Incorrect select statement for notifications");
   } else {
     while (notifications.Next()) {
       config->notifications_per_minute_by_priority[notifications.GetString(0)] =
           notifications.GetInteger(1);
     }
   }
-  utils::dbms::SQLQuery seconds(db());
+  Query seconds(db());
   if (!seconds.Prepare(sql_pt::kSelectSecondsBetweenRetries)) {
-    LOG4CXX_INFO(logger_,
-                 "Incorrect select statement from seconds between retries");
+    LOGGER_INFO(logger_,
+                "Incorrect select statement from seconds between retries");
   } else {
     while (seconds.Next()) {
       config->seconds_between_retries.push_back(seconds.GetInteger(0));
@@ -552,9 +564,9 @@ void SQLPTRepresentation::GatherModuleConfig(
 }
 
 bool SQLPTRepresentation::GatherUsageAndErrorCounts(
-    policy_table::UsageAndErrorCounts* counts) const {
-  LOG4CXX_INFO(logger_, "Gather Usage and Error Counts.");
-  utils::dbms::SQLQuery query(db());
+  policy_table::UsageAndErrorCounts* counts) const {
+  LOGGER_INFO(logger_, "Gather Usage and Error Counts.");
+  Query query(db());
   if (query.Prepare(sql_pt::kSelectAppLevels)) {
     policy_table::AppLevel app_level_empty;
     app_level_empty.mark_initialized();
@@ -566,11 +578,11 @@ bool SQLPTRepresentation::GatherUsageAndErrorCounts(
 }
 
 void SQLPTRepresentation::GatherDeviceData(
-    policy_table::DeviceData* data) const {
-  LOG4CXX_INFO(logger_, "Gather device data.");
+  policy_table::DeviceData* data) const {
+  LOGGER_INFO(logger_, "Gather device data.");
   data->mark_initialized();
 
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (query.Prepare(sql_pt::kSelectDeviceData)) {
     policy_table::DeviceParams device_data_empty;
     device_data_empty.mark_initialized();
@@ -581,16 +593,16 @@ void SQLPTRepresentation::GatherDeviceData(
 }
 
 bool SQLPTRepresentation::GatherFunctionalGroupings(
-    policy_table::FunctionalGroupings* groups) const {
-  LOG4CXX_INFO(logger_, "Gather Functional Groupings info");
-  utils::dbms::SQLQuery func_group(db());
+  policy_table::FunctionalGroupings* groups) const {
+  LOGGER_INFO(logger_, "Gather Functional Groupings info");
+  Query func_group(db());
   if (!func_group.Prepare(sql_pt::kSelectFunctionalGroups)) {
-    LOG4CXX_WARN(logger_, "Incorrect select from functional_groupings");
+    LOGGER_WARN(logger_, "Incorrect select from functional_groupings");
     return false;
   }
-  utils::dbms::SQLQuery rpcs(db());
+  Query rpcs(db());
   if (!rpcs.Prepare(sql_pt::kSelectAllRpcs)) {
-    LOG4CXX_WARN(logger_, "Incorrect select all from rpc");
+    LOGGER_WARN(logger_, "Incorrect select all from rpc");
     return false;
   }
   while (func_group.Next()) {
@@ -624,11 +636,11 @@ bool SQLPTRepresentation::GatherFunctionalGroupings(
 }
 
 bool SQLPTRepresentation::GatherConsumerFriendlyMessages(
-    policy_table::ConsumerFriendlyMessages* messages) const {
-  LOG4CXX_INFO(logger_, "Gather Consumer Friendly Messages");
-  utils::dbms::SQLQuery query(db());
+  policy_table::ConsumerFriendlyMessages* messages) const {
+  LOGGER_INFO(logger_, "Gather Consumer Friendly Messages");
+  Query query(db());
   if (!query.Prepare(sql_pt::kSelectUserMsgsVersion) || !query.Next()) {
-    LOG4CXX_WARN(logger_, "Incorrect select from consumer_friendly_messages");
+    LOGGER_WARN(logger_, "Incorrect select from consumer_friendly_messages");
     return false;
   }
   messages->version = query.GetString(0);
@@ -637,10 +649,10 @@ bool SQLPTRepresentation::GatherConsumerFriendlyMessages(
 
 bool SQLPTRepresentation::GatherApplicationPoliciesSection(
     policy_table::ApplicationPoliciesSection* policies) const {
-  LOG4CXX_INFO(logger_, "Gather applications policies");
-  utils::dbms::SQLQuery query(db());
+  LOGGER_INFO(logger_, "Gather applications policies");
+  Query query(db());
   if (!query.Prepare(sql_pt::kSelectAppPolicies)) {
-    LOG4CXX_WARN(logger_, "Incorrect select from app_policies");
+    LOGGER_WARN(logger_, "Incorrect select from app_policies");
     return false;
   }
 
@@ -694,7 +706,7 @@ bool SQLPTRepresentation::GatherApplicationPoliciesSection(
 }
 
 bool SQLPTRepresentation::Save(const policy_table::Table& table) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   db_->BeginTransaction();
   if (!SaveFunctionalGroupings(table.policy_table.functional_groupings)) {
     db_->RollbackTransaction();
@@ -732,20 +744,20 @@ bool SQLPTRepresentation::Save(const policy_table::Table& table) {
 }
 
 bool SQLPTRepresentation::SaveFunctionalGroupings(
-    const policy_table::FunctionalGroupings& groups) {
-  utils::dbms::SQLQuery query_delete(db());
+  const policy_table::FunctionalGroupings& groups) {
+  Query query_delete(db());
   if (!query_delete.Exec(sql_pt::kDeleteRpc)) {
-    LOG4CXX_WARN(logger_, "Incorrect delete from rpc.");
+    LOGGER_WARN(logger_, "Incorrect delete from rpc.");
     return false;
   }
 
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Exec(sql_pt::kDeleteFunctionalGroup)) {
-    LOG4CXX_WARN(logger_, "Incorrect delete from seconds between retries.");
+    LOGGER_WARN(logger_, "Incorrect delete from seconds between retries.");
     return false;
   }
   if (!query.Prepare(sql_pt::kInsertFunctionalGroup)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for functional groups");
+    LOGGER_WARN(logger_, "Incorrect insert statement for functional groups");
     return false;
   }
 
@@ -768,11 +780,11 @@ bool SQLPTRepresentation::SaveFunctionalGroupings(
         : query.Bind(2);
 
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_, "Incorrect insert into functional groups");
+      LOGGER_WARN(logger_, "Incorrect insert into functional groups");
       return false;
     }
 
-    if (!SaveRpcs(query.LastInsertId(), it->second.rpcs)) {
+    if (!SaveRpcs(id, it->second.rpcs)) {
       return false;
     }
   }
@@ -781,11 +793,11 @@ bool SQLPTRepresentation::SaveFunctionalGroupings(
 
 bool SQLPTRepresentation::SaveRpcs(int64_t group_id,
                                    const policy_table::Rpc& rpcs) {
-  utils::dbms::SQLQuery query(db());
-  utils::dbms::SQLQuery query_parameter(db());
+  Query query(db());
+  Query query_parameter(db());
   if (!query.Prepare(sql_pt::kInsertRpc) ||
       !query_parameter.Prepare(sql_pt::kInsertRpcWithParameter)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for rpc");
+    LOGGER_WARN(logger_, "Incorrect insert statement for rpc");
     return false;
   }
 
@@ -806,7 +818,7 @@ bool SQLPTRepresentation::SaveRpcs(int64_t group_id,
               2, std::string(policy_table::EnumToJsonString(*ps_it)));
           query_parameter.Bind(3, group_id);
           if (!query_parameter.Exec() || !query_parameter.Reset()) {
-            LOG4CXX_WARN(logger_, "Incorrect insert into rpc with parameter");
+            LOGGER_WARN(logger_, "Incorrect insert into rpc with parameter");
             return false;
           }
         }
@@ -815,7 +827,7 @@ bool SQLPTRepresentation::SaveRpcs(int64_t group_id,
         query.Bind(1, std::string(policy_table::EnumToJsonString(*hmi_it)));
         query.Bind(2, group_id);
         if (!query.Exec() || !query.Reset()) {
-          LOG4CXX_WARN(logger_, "Incorrect insert into rpc");
+          LOGGER_WARN(logger_, "Incorrect insert into rpc");
           return false;
         }
       }
@@ -827,18 +839,18 @@ bool SQLPTRepresentation::SaveRpcs(int64_t group_id,
 
 bool SQLPTRepresentation::SaveApplicationPoliciesSection(
     const policy_table::ApplicationPoliciesSection& policies) {
-  utils::dbms::SQLQuery query_delete(db());
+  Query query_delete(db());
   if (!query_delete.Exec(sql_pt::kDeleteAppGroup)) {
-    LOG4CXX_WARN(logger_, "Incorrect delete from app_group.");
+    LOGGER_WARN(logger_, "Incorrect delete from app_group.");
     return false;
   }
   if (!query_delete.Exec(sql_pt::kDeleteApplication)) {
-    LOG4CXX_WARN(logger_, "Incorrect delete from application.");
+    LOGGER_WARN(logger_, "Incorrect delete from application.");
     return false;
   }
 
   if (!query_delete.Exec(sql_pt::kDeleteRequestType)) {
-    LOG4CXX_WARN(logger_, "Incorrect delete from request type.");
+    LOGGER_WARN(logger_, "Incorrect delete from request type.");
     return false;
   }
 
@@ -880,10 +892,10 @@ bool SQLPTRepresentation::SaveApplicationPoliciesSection(
 
 bool SQLPTRepresentation::SaveSpecificAppPolicy(
     const policy_table::ApplicationPolicies::value_type& app) {
-  utils::dbms::SQLQuery app_query(db());
+  Query app_query(db());
   if (!app_query.Prepare(sql_pt::kInsertApplication)) {
-    LOG4CXX_WARN(logger_,
-                 "Incorrect insert statement into application (device).");
+    LOGGER_WARN(logger_,
+                "Incorrect insert statement into application (device).");
     return false;
   }
 
@@ -897,7 +909,7 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
       ? app_query.Bind(5, *app.second.certificate)
       : app_query.Bind(5);
   if (!app_query.Exec() || !app_query.Reset()) {
-    LOG4CXX_WARN(logger_, "Incorrect insert into application.");
+    LOGGER_WARN(logger_, "Incorrect insert into application.");
     return false;
   }
 
@@ -930,9 +942,9 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
 
 bool policy::SQLPTRepresentation::SaveDevicePolicy(
     const policy_table::DevicePolicy& device) {
-  utils::dbms::SQLQuery app_query(db());
+  Query app_query(db());
   if (!app_query.Prepare(sql_pt::kInsertApplication)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement into application.");
+    LOGGER_WARN(logger_, "Incorrect insert statement into application.");
     return false;
   }
 
@@ -945,7 +957,7 @@ bool policy::SQLPTRepresentation::SaveDevicePolicy(
   app_query.Bind(5);
 
   if (!app_query.Exec() || !app_query.Reset()) {
-    LOG4CXX_WARN(logger_, "Incorrect insert into application.");
+    LOGGER_WARN(logger_, "Incorrect insert into application.");
     return false;
   }
 
@@ -953,23 +965,23 @@ bool policy::SQLPTRepresentation::SaveDevicePolicy(
 }
 
 bool SQLPTRepresentation::SaveAppGroup(
-    const std::string& app_id, const policy_table::Strings& app_groups) {
-  utils::dbms::SQLQuery query(db());
+  const std::string& app_id, const policy_table::Strings& app_groups) {
+  Query query(db());
   if (!query.Prepare(sql_pt::kInsertAppGroup)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for app group");
+    LOGGER_WARN(logger_, "Incorrect insert statement for app group");
     return false;
   }
-  LOG4CXX_INFO(logger_, "SaveAppGroup");
+  LOGGER_INFO(logger_, "SaveAppGroup");
   policy_table::Strings::const_iterator it;
   for (it = app_groups.begin(); it != app_groups.end(); ++it) {
     std::string ssss = *it;
-    LOG4CXX_INFO(logger_, "Group: " << ssss);
+    LOGGER_INFO(logger_, "Group: " << ssss);
     query.Bind(0, app_id);
     query.Bind(1, *it);
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_,
-                   "Incorrect insert into app group."
-                       << query.LastError().text());
+      LOGGER_WARN(logger_,
+                  "Incorrect insert into app group."
+                      << query.LastError().text());
       return false;
     }
   }
@@ -979,9 +991,9 @@ bool SQLPTRepresentation::SaveAppGroup(
 
 bool SQLPTRepresentation::SaveNickname(const std::string& app_id,
                                        const policy_table::Strings& nicknames) {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Prepare(sql_pt::kInsertNickname)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for nickname");
+    LOGGER_WARN(logger_, "Incorrect insert statement for nickname");
     return false;
   }
 
@@ -990,7 +1002,7 @@ bool SQLPTRepresentation::SaveNickname(const std::string& app_id,
     query.Bind(0, app_id);
     query.Bind(1, *it);
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_, "Incorrect insert into nickname.");
+      LOGGER_WARN(logger_, "Incorrect insert into nickname.");
       return false;
     }
   }
@@ -1000,9 +1012,9 @@ bool SQLPTRepresentation::SaveNickname(const std::string& app_id,
 
 bool SQLPTRepresentation::SaveAppType(const std::string& app_id,
                                       const policy_table::AppHMITypes& types) {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Prepare(sql_pt::kInsertAppType)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for app type");
+    LOGGER_WARN(logger_, "Incorrect insert statement for app type");
     return false;
   }
 
@@ -1011,7 +1023,7 @@ bool SQLPTRepresentation::SaveAppType(const std::string& app_id,
     query.Bind(0, app_id);
     query.Bind(1, std::string(policy_table::EnumToJsonString(*it)));
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_, "Incorrect insert into app type.");
+      LOGGER_WARN(logger_, "Incorrect insert into app type.");
       return false;
     }
   }
@@ -1021,9 +1033,9 @@ bool SQLPTRepresentation::SaveAppType(const std::string& app_id,
 
 bool SQLPTRepresentation::SaveRequestType(
     const std::string& app_id, const policy_table::RequestTypes& types) {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Prepare(sql_pt::kInsertRequestType)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for request types.");
+    LOGGER_WARN(logger_, "Incorrect insert statement for request types.");
     return false;
   }
 
@@ -1032,7 +1044,7 @@ bool SQLPTRepresentation::SaveRequestType(
     query.Bind(0, app_id);
     query.Bind(1, std::string(policy_table::EnumToJsonString(*it)));
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_, "Incorrect insert into request types.");
+      LOGGER_WARN(logger_, "Incorrect insert into request types.");
       return false;
     }
   }
@@ -1046,10 +1058,10 @@ bool SQLPTRepresentation::SaveModuleMeta(const policy_table::ModuleMeta& meta) {
 }
 
 bool SQLPTRepresentation::SaveModuleConfig(
-    const policy_table::ModuleConfig& config) {
-  utils::dbms::SQLQuery query(db());
+  const policy_table::ModuleConfig& config) {
+  Query query(db());
   if (!query.Prepare(sql_pt::kUpdateModuleConfig)) {
-    LOG4CXX_WARN(logger_, "Incorrect update statement for module config");
+    LOGGER_WARN(logger_, "Incorrect update statement for module config");
     return false;
   }
 
@@ -1070,7 +1082,7 @@ bool SQLPTRepresentation::SaveModuleConfig(
                                        : query.Bind(8);
 
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Incorrect update module config");
+    LOGGER_WARN(logger_, "Incorrect update module config");
     return false;
   }
 
@@ -1091,15 +1103,15 @@ bool SQLPTRepresentation::SaveModuleConfig(
 }
 
 bool SQLPTRepresentation::SaveServiceEndpoints(
-    const policy_table::ServiceEndpoints& endpoints) {
-  utils::dbms::SQLQuery query(db());
+  const policy_table::ServiceEndpoints& endpoints) {
+  Query query(db());
   if (!query.Exec(sql_pt::kDeleteEndpoint)) {
-    LOG4CXX_WARN(logger_, "Incorrect delete from endpoint.");
+    LOGGER_WARN(logger_, "Incorrect delete from endpoint.");
     return false;
   }
 
   if (!query.Prepare(sql_pt::kInsertEndpoint)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for endpoint");
+    LOGGER_WARN(logger_, "Incorrect insert statement for endpoint");
     return false;
   }
 
@@ -1115,7 +1127,7 @@ bool SQLPTRepresentation::SaveServiceEndpoints(
         query.Bind(1, *url_it);
         query.Bind(2, app_it->first);
         if (!query.Exec() || !query.Reset()) {
-          LOG4CXX_WARN(logger_, "Incorrect insert into endpoint");
+          LOGGER_WARN(logger_, "Incorrect insert into endpoint");
           return false;
         }
       }
@@ -1126,27 +1138,27 @@ bool SQLPTRepresentation::SaveServiceEndpoints(
 }
 
 bool SQLPTRepresentation::SaveConsumerFriendlyMessages(
-    const policy_table::ConsumerFriendlyMessages& messages) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  const policy_table::ConsumerFriendlyMessages& messages) {
+  LOGGER_AUTO_TRACE(logger_);
 
   // According CRS-2419  If there is no “consumer_friendly_messages” key,
   // the current local consumer_friendly_messages section shall be maintained in
   // the policy table. So it won't be changed/updated
   if (messages.messages.is_initialized()) {
-    utils::dbms::SQLQuery query(db());
+    Query query(db());
     if (!query.Exec(sql_pt::kDeleteMessageString)) {
-      LOG4CXX_WARN(logger_, "Incorrect delete from message.");
+      LOGGER_WARN(logger_, "Incorrect delete from message.");
       return false;
     }
 
     if (query.Prepare(sql_pt::kUpdateVersion)) {
       query.Bind(0, messages.version);
       if (!query.Exec()) {
-        LOG4CXX_WARN(logger_, "Incorrect update into version.");
+        LOGGER_WARN(logger_, "Incorrect update into version.");
         return false;
       }
     } else {
-      LOG4CXX_WARN(logger_, "Incorrect update statement for version.");
+      LOGGER_WARN(logger_, "Incorrect update statement for version.");
       return false;
     }
 
@@ -1169,22 +1181,22 @@ bool SQLPTRepresentation::SaveConsumerFriendlyMessages(
       }
     }
   } else {
-    LOG4CXX_INFO(logger_, "Messages list is empty");
+    LOGGER_INFO(logger_, "Messages list is empty");
   }
 
   return true;
 }
 
 bool SQLPTRepresentation::SaveMessageType(const std::string& type) {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Prepare(sql_pt::kInsertMessageType)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for message type.");
+    LOGGER_WARN(logger_, "Incorrect insert statement for message type.");
     return false;
   }
 
   query.Bind(0, type);
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Incorrect insert into message type.");
+    LOGGER_WARN(logger_, "Incorrect insert into message type.");
     return false;
   }
 
@@ -1192,15 +1204,15 @@ bool SQLPTRepresentation::SaveMessageType(const std::string& type) {
 }
 
 bool SQLPTRepresentation::SaveLanguage(const std::string& code) {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Prepare(sql_pt::kInsertLanguage)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for language.");
+    LOGGER_WARN(logger_, "Incorrect insert statement for language.");
     return false;
   }
 
   query.Bind(0, code);
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Incorrect insert into language.");
+    LOGGER_WARN(logger_, "Incorrect insert into language.");
     return false;
   }
 
@@ -1210,21 +1222,21 @@ bool SQLPTRepresentation::SaveLanguage(const std::string& code) {
 bool SQLPTRepresentation::SaveMessageString(
     const std::string& type,
     const std::string& lang,
-    const policy_table::MessageString& strings) {
+  const policy_table::MessageString& strings) {
   // Section is empty for SDL specific
   return true;
 }
 
 bool SQLPTRepresentation::SaveSecondsBetweenRetries(
-    const policy_table::SecondsBetweenRetries& seconds) {
-  utils::dbms::SQLQuery query(db());
+  const policy_table::SecondsBetweenRetries& seconds) {
+  Query query(db());
   if (!query.Exec(sql_pt::kDeleteSecondsBetweenRetries)) {
-    LOG4CXX_WARN(logger_, "Incorrect delete from seconds between retries.");
+    LOGGER_WARN(logger_, "Incorrect delete from seconds between retries.");
     return false;
   }
   if (!query.Prepare(sql_pt::kInsertSecondsBetweenRetry)) {
-    LOG4CXX_WARN(logger_,
-                 "Incorrect insert statement for seconds between retries.");
+    LOGGER_WARN(logger_,
+                "Incorrect insert statement for seconds between retries.");
     return false;
   }
 
@@ -1232,7 +1244,7 @@ bool SQLPTRepresentation::SaveSecondsBetweenRetries(
     query.Bind(0, static_cast<int>(i));
     query.Bind(1, seconds[i]);
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_, "Incorrect insert into seconds between retries.");
+      LOGGER_WARN(logger_, "Incorrect insert into seconds between retries.");
       return false;
     }
   }
@@ -1241,11 +1253,11 @@ bool SQLPTRepresentation::SaveSecondsBetweenRetries(
 }
 
 bool SQLPTRepresentation::SaveNumberOfNotificationsPerMinute(
-    const policy_table::NumberOfNotificationsPerMinute& notifications) {
-  utils::dbms::SQLQuery query(db());
+  const policy_table::NumberOfNotificationsPerMinute& notifications) {
+  Query query(db());
   if (!query.Prepare(sql_pt::kInsertNotificationsByPriority)) {
-    LOG4CXX_WARN(logger_,
-                 "Incorrect insert statement for notifications by priority.");
+    LOGGER_WARN(logger_,
+                "Incorrect insert statement for notifications by priority.");
     return false;
   }
 
@@ -1254,7 +1266,7 @@ bool SQLPTRepresentation::SaveNumberOfNotificationsPerMinute(
     query.Bind(0, it->first);
     query.Bind(1, it->second);
     if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(logger_, "Incorrect insert into notifications by priority.");
+      LOGGER_WARN(logger_, "Incorrect insert into notifications by priority.");
       return false;
     }
   }
@@ -1263,10 +1275,10 @@ bool SQLPTRepresentation::SaveNumberOfNotificationsPerMinute(
 }
 
 bool SQLPTRepresentation::SaveDeviceData(
-    const policy_table::DeviceData& devices) {
-  utils::dbms::SQLQuery query(db());
+  const policy_table::DeviceData& devices) {
+  Query query(db());
   if (!query.Prepare(sql_pt::kInsertDeviceData)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for device data.");
+    LOGGER_WARN(logger_, "Incorrect insert statement for device data.");
     return false;
   }
 
@@ -1274,7 +1286,7 @@ bool SQLPTRepresentation::SaveDeviceData(
   for (it = devices.begin(); it != devices.end(); ++it) {
     query.Bind(0, it->first);
     if (!query.Exec()) {
-      LOG4CXX_WARN(logger_, "Incorrect insert into device data.");
+      LOGGER_WARN(logger_, "Incorrect insert into device data.");
       return false;
     }
   }
@@ -1283,15 +1295,15 @@ bool SQLPTRepresentation::SaveDeviceData(
 }
 
 bool SQLPTRepresentation::SaveUsageAndErrorCounts(
-    const policy_table::UsageAndErrorCounts& counts) {
+  const policy_table::UsageAndErrorCounts& counts) {
   const_cast<policy_table::UsageAndErrorCounts&>(counts).mark_initialized();
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Exec(sql_pt::kDeleteAppLevel)) {
-    LOG4CXX_WARN(logger_, "Incorrect delete from app level.");
+    LOGGER_WARN(logger_, "Incorrect delete from app level.");
     return false;
   }
   if (!query.Prepare(sql_pt::kInsertAppLevel)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for app level.");
+    LOGGER_WARN(logger_, "Incorrect insert statement for app level.");
     return false;
   }
 
@@ -1301,7 +1313,7 @@ bool SQLPTRepresentation::SaveUsageAndErrorCounts(
   for (it = app_levels.begin(); it != app_levels.end(); ++it) {
     query.Bind(0, it->first);
     if (!query.Exec()) {
-      LOG4CXX_WARN(logger_, "Incorrect insert into app level.");
+      LOGGER_WARN(logger_, "Incorrect insert into app level.");
       return false;
     }
   }
@@ -1309,58 +1321,57 @@ bool SQLPTRepresentation::SaveUsageAndErrorCounts(
 }
 
 void SQLPTRepresentation::IncrementIgnitionCycles() {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Exec(sql_pt::kIncrementIgnitionCycles)) {
-    LOG4CXX_WARN(logger_, "Failed incrementing ignition cycles");
+    LOGGER_WARN(logger_, "Failed incrementing ignition cycles");
   }
 }
 
 void SQLPTRepresentation::ResetIgnitionCycles() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  utils::dbms::SQLQuery query(db());
+  LOGGER_AUTO_TRACE(logger_);
+  Query query(db());
   if (!query.Exec(sql_pt::kResetIgnitionCycles)) {
-    LOG4CXX_WARN(logger_, "Failed to reset ignition cycles number.");
+    LOGGER_WARN(logger_, "Failed to reset ignition cycles number.");
   }
 }
 
 bool SQLPTRepresentation::UpdateRequired() const {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Prepare(sql_pt::kSelectFlagUpdateRequired) || !query.Exec()) {
-    LOG4CXX_WARN(logger_,
-                 "Failed select update required flag from module meta");
+    LOGGER_WARN(logger_, "Failed select update required flag from module meta");
     return false;
   }
   return query.GetBoolean(0);
 }
 
 void SQLPTRepresentation::SaveUpdateRequired(bool value) {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   // TODO(AOleynik): Quick fix, will be reworked
   if (!query.Prepare(/*sql_pt::kUpdateFlagUpdateRequired*/
                      "UPDATE `module_meta` SET `flag_update_required` = ?")) {
-    LOG4CXX_WARN(logger_,
-                 "Incorrect update into module meta (update_required): "
-                     << strerror(errno));
+    LOGGER_WARN(logger_,
+                "Incorrect update into module meta (update_required): "
+                    << strerror(errno));
     return;
   }
   query.Bind(0, value);
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Failed update module meta (update_required)");
+    LOGGER_WARN(logger_, "Failed update module meta (update_required)");
   }
 }
 
 bool SQLPTRepresentation::GetInitialAppData(const std::string& app_id,
-                                            StringArray* nicknames,
-                                            StringArray* app_types) {
-  LOG4CXX_INFO(logger_, "Getting initial application data.");
-  utils::dbms::SQLQuery app_names(db());
+    StringArray* nicknames,
+    StringArray* app_types) {
+  LOGGER_INFO(logger_, "Getting initial application data.");
+  Query app_names(db());
   if (!app_names.Prepare(sql_pt::kSelectNicknames)) {
-    LOG4CXX_WARN(logger_, "Incorrect select from app nicknames");
+    LOGGER_WARN(logger_, "Incorrect select from app nicknames");
     return false;
   }
-  utils::dbms::SQLQuery app_hmi_types(db());
+  Query app_hmi_types(db());
   if (!app_hmi_types.Prepare(sql_pt::kSelectAppTypes)) {
-    LOG4CXX_WARN(logger_, "Incorrect select from app types");
+    LOGGER_WARN(logger_, "Incorrect select from app types");
     return false;
   }
   app_names.Bind(0, app_id);
@@ -1377,16 +1388,16 @@ bool SQLPTRepresentation::GetInitialAppData(const std::string& app_id,
 }
 
 bool SQLPTRepresentation::GetFunctionalGroupings(
-    policy_table::FunctionalGroupings& groups) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  policy_table::FunctionalGroupings& groups) {
+  LOGGER_AUTO_TRACE(logger_);
   return GatherFunctionalGroupings(&groups);
 }
 
 bool SQLPTRepresentation::GatherAppType(
-    const std::string& app_id, policy_table::AppHMITypes* app_types) const {
-  utils::dbms::SQLQuery query(db());
+  const std::string& app_id, policy_table::AppHMITypes* app_types) const {
+  Query query(db());
   if (!query.Prepare(sql_pt::kSelectAppTypes)) {
-    LOG4CXX_WARN(logger_, "Incorrect select from app types");
+    LOGGER_WARN(logger_, "Incorrect select from app types");
     return false;
   }
 
@@ -1404,9 +1415,9 @@ bool SQLPTRepresentation::GatherAppType(
 bool SQLPTRepresentation::GatherRequestType(
     const std::string& app_id,
     policy_table::RequestTypes* request_types) const {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Prepare(sql_pt::kSelectRequestTypes)) {
-    LOG4CXX_WARN(logger_, "Incorrect select from request types.");
+    LOGGER_WARN(logger_, "Incorrect select from request types.");
     return false;
   }
 
@@ -1422,10 +1433,10 @@ bool SQLPTRepresentation::GatherRequestType(
 }
 
 bool SQLPTRepresentation::GatherNickName(
-    const std::string& app_id, policy_table::Strings* nicknames) const {
-  utils::dbms::SQLQuery query(db());
+  const std::string& app_id, policy_table::Strings* nicknames) const {
+  Query query(db());
   if (!query.Prepare(sql_pt::kSelectNicknames)) {
-    LOG4CXX_WARN(logger_, "Incorrect select from app nicknames");
+    LOGGER_WARN(logger_, "Incorrect select from app nicknames");
     return false;
   }
 
@@ -1437,10 +1448,10 @@ bool SQLPTRepresentation::GatherNickName(
 }
 
 bool SQLPTRepresentation::GatherAppGroup(
-    const std::string& app_id, policy_table::Strings* app_groups) const {
-  utils::dbms::SQLQuery query(db());
+  const std::string& app_id, policy_table::Strings* app_groups) const {
+  Query query(db());
   if (!query.Prepare(sql_pt::kSelectAppGroups)) {
-    LOG4CXX_WARN(logger_, "Incorrect select from app groups");
+    LOGGER_WARN(logger_, "Incorrect select from app groups");
     return false;
   }
 
@@ -1455,9 +1466,9 @@ bool SQLPTRepresentation::SaveApplicationCustomData(const std::string& app_id,
                                                     bool is_revoked,
                                                     bool is_default,
                                                     bool is_predata) {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Prepare(sql_pt::kUpdateApplicationCustomData)) {
-    LOG4CXX_WARN(logger_, "Incorrect update in application");
+    LOGGER_WARN(logger_, "Incorrect update in application");
     return false;
   }
 
@@ -1467,7 +1478,7 @@ bool SQLPTRepresentation::SaveApplicationCustomData(const std::string& app_id,
   query.Bind(3, app_id);
 
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Failed update in application");
+    LOGGER_WARN(logger_, "Failed update in application");
     return false;
   }
 
@@ -1476,45 +1487,46 @@ bool SQLPTRepresentation::SaveApplicationCustomData(const std::string& app_id,
 
 bool SQLPTRepresentation::IsApplicationRevoked(
     const std::string& app_id) const {
-  utils::dbms::SQLQuery query(db());
+
+  Query query(db());
   if (!query.Prepare(sql_pt::kSelectApplicationRevoked)) {
-    LOG4CXX_WARN(logger_, "Incorrect select from is_revoked of application");
+    LOGGER_WARN(logger_, "Incorrect select from is_revoked of application");
   }
 
   query.Bind(0, app_id);
 
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Failed select is_revoked of application");
+    LOGGER_WARN(logger_, "Failed select is_revoked of application");
     return false;
   }
   return query.IsNull(0) ? false : query.GetBoolean(0);
-}
+ }
 bool SQLPTRepresentation::IsApplicationRepresented(
-    const std::string& app_id) const {
-  utils::dbms::SQLQuery query(db());
+  const std::string& app_id) const {
+  Query query(db());
   if (!query.Prepare(sql_pt::kSelectApplicationRepresented)) {
-    LOG4CXX_WARN(logger_, "Incorrect select application by id");
+    LOGGER_WARN(logger_, "Incorrect select application by id");
     return false;
   }
 
   query.Bind(0, app_id);
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Failed select application by id");
+    LOGGER_WARN(logger_, "Failed select application by id");
     return false;
   }
   return query.GetInteger(0) != 0;
 }
 
 bool SQLPTRepresentation::IsDefaultPolicy(const std::string& app_id) const {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Prepare(sql_pt::kSelectApplicationIsDefault)) {
-    LOG4CXX_WARN(logger_, "Incorrect select application by id");
+    LOGGER_WARN(logger_, "Incorrect select application by id");
     return false;
   }
 
   query.Bind(0, app_id);
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Failed select application by id");
+    LOGGER_WARN(logger_, "Failed select application by id");
     return false;
   }
   return query.IsNull(0) ? false : query.GetBoolean(0);
@@ -1525,14 +1537,14 @@ bool SQLPTRepresentation::IsPredataPolicy(const std::string& app_id) const {
 }
 
 bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Prepare(sql_pt::kDeleteAppGroupByApplicationId)) {
-    LOG4CXX_ERROR(logger_, "Incorrect statement to delete from app_group.");
+    LOGGER_ERROR(logger_, "Incorrect statement to delete from app_group.");
     return false;
   }
   query.Bind(0, app_id);
   if (!query.Exec()) {
-    LOG4CXX_ERROR(logger_, "Failed deleting from app_group.");
+    LOGGER_ERROR(logger_, "Failed deleting from app_group.");
     return false;
   }
 
@@ -1552,17 +1564,17 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
 
 bool SQLPTRepresentation::SetIsDefault(const std::string& app_id,
                                        bool is_default) const {
-  LOG4CXX_TRACE(logger_, "Set flag is_default of application");
-  utils::dbms::SQLQuery query(db());
+  LOGGER_TRACE(logger_, "Set flag is_default of application");
+  Query query(db());
   if (!query.Prepare(sql_pt::kUpdateIsDefault)) {
-    LOG4CXX_WARN(logger_, "Incorect statement for updating is_default");
+    LOGGER_WARN(logger_, "Incorect statement for updating is_default");
     return false;
   }
 
   query.Bind(0, is_default);
   query.Bind(1, app_id);
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Failed update is_default");
+    LOGGER_WARN(logger_, "Failed update is_default");
     return false;
   }
   return true;
@@ -1573,40 +1585,40 @@ void SQLPTRepresentation::RemoveDB() const {
 }
 
 bool SQLPTRepresentation::IsDBVersionActual() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  utils::dbms::SQLQuery query(db());
+  LOGGER_AUTO_TRACE(logger_);
+  Query query(db());
   if (!query.Prepare(sql_pt::kSelectDBVersion) || !query.Exec()) {
-    LOG4CXX_ERROR(logger_,
-                  "Failed to get DB version: " << query.LastError().text());
+    LOGGER_ERROR(logger_,
+                 "Failed to get DB version: " << query.LastError().text());
     return false;
   }
 
   const int32_t saved_db_version = query.GetInteger(0);
   const int32_t current_db_version = GetDBVersion();
-  LOG4CXX_DEBUG(logger_,
-                "Saved DB version is: " << saved_db_version
-                                        << ". Current DB vesion is: "
-                                        << current_db_version);
+  LOGGER_DEBUG(logger_,
+               "Saved DB version is: " << saved_db_version
+                                       << ". Current DB vesion is: "
+                                       << current_db_version);
 
   return current_db_version == saved_db_version;
 }
 
 bool SQLPTRepresentation::UpdateDBVersion() const {
-  LOG4CXX_AUTO_TRACE(logger_);
-  utils::dbms::SQLQuery query(db());
+  LOGGER_AUTO_TRACE(logger_);
+  Query query(db());
   if (!query.Prepare(sql_pt::kUpdateDBVersion)) {
-    LOG4CXX_ERROR(logger_,
-                  "Incorrect DB version query: " << query.LastError().text());
+    LOGGER_ERROR(logger_,
+                 "Incorrect DB version query: " << query.LastError().text());
     return false;
   }
 
   const int32_t db_version = GetDBVersion();
-  LOG4CXX_DEBUG(logger_, "DB version will be updated to: " << db_version);
+  LOGGER_DEBUG(logger_, "DB version will be updated to: " << db_version);
   query.Bind(0, db_version);
 
   if (!query.Exec()) {
-    LOG4CXX_ERROR(logger_,
-                  "DB version getting failed: " << query.LastError().text());
+    LOGGER_ERROR(logger_,
+                 "DB version getting failed: " << query.LastError().text());
     return false;
   }
 
@@ -1618,9 +1630,10 @@ const int32_t SQLPTRepresentation::GetDBVersion() const {
 }
 
 utils::dbms::SQLDatabase* SQLPTRepresentation::db() const {
-#ifdef __QNX__
+#if defined(__QNX__)
   utils::dbms::SQLDatabase* db = new utils::dbms::SQLDatabase(kDatabaseName);
-  db->Open();
+  const bool result = db->Open();
+  DCHECK(result);
   return db;
 #else
   return db_;
@@ -1629,20 +1642,20 @@ utils::dbms::SQLDatabase* SQLPTRepresentation::db() const {
 
 bool SQLPTRepresentation::CopyApplication(const std::string& source,
                                           const std::string& destination) {
-  utils::dbms::SQLQuery source_app(db());
+  Query source_app(db());
   if (!source_app.Prepare(sql_pt::kSelectApplicationFull)) {
-    LOG4CXX_WARN(logger_, "Incorrect select statement from application.");
+    LOGGER_WARN(logger_, "Incorrect select statement from application.");
     return false;
   }
   source_app.Bind(0, source);
   if (!source_app.Exec()) {
-    LOG4CXX_WARN(logger_, "Failed selecting from application.");
+    LOGGER_WARN(logger_, "Failed selecting from application.");
     return false;
   }
 
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Prepare(sql_pt::kInsertApplicationFull)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement into application.");
+    LOGGER_WARN(logger_, "Incorrect insert statement into application.");
     return false;
   }
   query.Bind(0, destination);
@@ -1663,22 +1676,22 @@ bool SQLPTRepresentation::CopyApplication(const std::string& source,
   source_app.IsNull(9) ? query.Bind(10)
                        : query.Bind(10, source_app.GetString(9));
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Failed inserting into application.");
+    LOGGER_WARN(logger_, "Failed inserting into application.");
     return false;
   }
   return true;
 }
 
 void SQLPTRepresentation::SetPreloaded(bool value) {
-  utils::dbms::SQLQuery query(db());
+  Query query(db());
   if (!query.Prepare(sql_pt::kUpdatePreloaded)) {
-    LOG4CXX_WARN(logger_, "Incorrect statement of updating preloaded.");
+    LOGGER_WARN(logger_, "Incorrect statement of updating preloaded.");
     return;
   }
 
   query.Bind(0, value);
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Failed updating preloaded.");
+    LOGGER_WARN(logger_, "Failed updating preloaded.");
     return;
   }
 }

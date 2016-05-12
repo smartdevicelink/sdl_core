@@ -45,7 +45,7 @@ GetUrls::GetUrls(const MessageSharedPtr& message,
 GetUrls::~GetUrls() {}
 
 void GetUrls::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   smart_objects::SmartObject& object = *message_;
   object[strings::params][strings::message_type] = MessageType::kResponse;
   if (application_manager_.GetPolicyHandler().PolicyEnabled()) {

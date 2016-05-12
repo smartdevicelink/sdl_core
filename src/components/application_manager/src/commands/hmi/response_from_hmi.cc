@@ -31,7 +31,6 @@
  */
 
 #include "application_manager/commands/hmi/response_from_hmi.h"
-
 #include "smart_objects/smart_object.h"
 
 namespace application_manager {
@@ -76,7 +75,7 @@ void ResponseFromHMI::CreateHMIRequest(
   smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
 
   if (!result) {
-    LOG4CXX_ERROR(logger_, "Memory allocation failed.");
+    LOGGER_ERROR(logger_, "Memory allocation failed.");
     return;
   }
 
@@ -96,7 +95,7 @@ void ResponseFromHMI::CreateHMIRequest(
   request[strings::msg_params] = msg_params;
 
   if (!application_manager_.ManageHMICommand(result)) {
-    LOG4CXX_ERROR(logger_, "Unable to send request");
+    LOGGER_ERROR(logger_, "Unable to send request");
     return;
   }
 }

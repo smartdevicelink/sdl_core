@@ -36,6 +36,13 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_CONTROL_TRANSFER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_CONTROL_TRANSFER_H_
 
+#ifdef OS_WINDOWS
+#ifdef IN
+#undef IN
+#undef OUT
+#endif
+#endif
+
 namespace transport_manager {
 
 namespace transport_adapter {

@@ -40,6 +40,9 @@
 
 #include "rpc_base/validation_report.h"
 
+#if defined(_MSC_VER)
+#define snprintf _snprintf_s
+#endif
 namespace rpc {
 
 /*
@@ -204,8 +207,8 @@ Integer<T, minval, maxval>::operator IntType() const {
  * Float class
  */
 template <int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
-const Range<double> Float<minnum, maxnum, minden, maxden>::range_(
-    (double(minnum) / minden), (double(maxnum) / maxden));
+const Range<double> Float<minnum, maxnum, minden, maxden>::range_ =
+    ((double(minnum) / minden), (double(maxnum) / maxden));
 
 template <int64_t minnum, int64_t maxnum, int64_t minden, int64_t maxden>
 Float<minnum, maxnum, minden, maxden>::Float()
@@ -381,7 +384,7 @@ void Array<T, minsize, maxsize>::ReportErrors(ValidationReport* report) const {
     const T& elem = this->operator[](i);
     if (!elem.is_valid()) {
       char elem_idx[32] = {};
-      snprintf(elem_idx, 32, "[%zu]", i);
+      snprintf(elem_idx, 32, "[%lu]", static_cast<unsigned long>(i));
       ValidationReport& elem_report = report->ReportSubobject(elem_idx);
       elem.ReportErrors(&elem_report);
     }
@@ -504,11 +507,6 @@ Nullable<T>::Nullable()
 
 template <typename T>
 template <typename U>
-Nullable<T>::Nullable(const U& value)
-    : T(value), marked_null_(false) {}
-
-template <typename T>
-template <typename U>
 Nullable<T>& Nullable<T>::operator=(const U& new_val) {
   this->T::operator=(new_val);
   return *this;
@@ -623,11 +621,6 @@ void rpc::Optional<T>::SetPolicyTableType(
 template <typename T>
 Stringifyable<T>::Stringifyable()
     : predefined_string_("") {}
-
-template <typename T>
-template <typename U>
-Stringifyable<T>::Stringifyable(const U& value)
-    : T(value), predefined_string_("") {}
 
 template <typename T>
 template <typename U>

@@ -42,7 +42,7 @@ UpdateSDLResponse::UpdateSDLResponse(const MessageSharedPtr& message,
 UpdateSDLResponse::~UpdateSDLResponse() {}
 
 void UpdateSDLResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   (*message_)[strings::params][strings::protocol_type] = hmi_protocol_type_;
   (*message_)[strings::params][strings::protocol_version] = protocol_version_;
 

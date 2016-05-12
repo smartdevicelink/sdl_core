@@ -77,7 +77,7 @@ StatisticsDelegate::StatisticsDelegate(PolicyHandler& policy_handler,
     , policy_handler_(policy_handler) {}
 
 void StatisticsDelegate::threadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   switch (type_) {
     case INCREMENT_GLOBAL:
       policy_handler_.Increment(global_counter_);
@@ -92,7 +92,7 @@ void StatisticsDelegate::threadMain() {
       policy_handler_.Add(app_id_, stop_watch_, timespan_seconds_);
       break;
     default:
-      LOG4CXX_ERROR(logger_, "Unknown statistics operator");
+      LOGGER_ERROR(logger_, "Unknown statistics operator");
       break;
   }
 }

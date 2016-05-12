@@ -35,8 +35,8 @@
 
 #include <string>
 
+#include "utils/json_utils.h"
 #include "utils/macro.h"
-#include "json/json.h"
 
 namespace resumption {
 
@@ -59,13 +59,11 @@ class LastState {
   void SaveToFileSystem();
 
   /**
-   * @brief public dictionary
+   * @brief refference to dictionary
    */
-  Json::Value dictionary;
+  utils::json::JsonValue& dictionary();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(LastState);
-
   /**
    * @brief Load dictionary from filesystem
    */
@@ -73,6 +71,9 @@ class LastState {
 
   std::string app_storage_folder_;
   std::string app_info_storage_;
+  utils::json::JsonValue dictionary_;
+
+  DISALLOW_COPY_AND_ASSIGN(LastState);
 };
 
 }  // namespace resumption

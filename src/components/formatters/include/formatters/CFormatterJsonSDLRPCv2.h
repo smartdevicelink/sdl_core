@@ -31,7 +31,7 @@
 #ifndef __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV2_HPP__
 #define __SMARTDEVICELINKCORE_JSONHANDLER_FORMATTERS__CFORMATTERJSONSDLRPCV2_HPP__
 
-#include "json/json.h"
+#include "utils/json_utils.h"
 
 #include "smart_objects/smart_object.h"
 
@@ -85,9 +85,9 @@ class CFormatterJsonSDLRPCv2 : public CFormatterJsonBase {
    * @param str Input JSON string in SDLRPCv2 format
    * @param out Output SmartObject
    * @param functionId The corresponding field in SmartObject is filled with
-   *this param.
+   * this param.
    * @param messageType The corresponding field in SmartObject is filled with
-   *this param.
+   * this param.
    * @return true if success, otherwise - false
    */
   template <typename FunctionId, typename MessageType>
@@ -104,11 +104,11 @@ class CFormatterJsonSDLRPCv2 : public CFormatterJsonBase {
    * @param str Input JSON string in SDLRPCv2 format
    * @param out Output SmartObject
    * @param functionId The corresponding field in SmartObject is filled with
-   *this param.
+   * this param.
    * @param messageType The corresponding field in SmartObject is filled with
-   *this param.
+   * this param.
    * @param correlatioId It's like sequence number. The corresponding field in
-   *SmartObject
+   * SmartObject
    *  is filled with this param.
    * @return true if success, otherwise - false
    */
@@ -124,7 +124,7 @@ class CFormatterJsonSDLRPCv2 : public CFormatterJsonBase {
    *
    * @param object Original smart object
    * @param schema Smart schema which describes 'fake' smart object to be
-   *formatted
+   * formatted
    * @param outStr Resulting JSON string
    * @return formatting error code
    */
@@ -140,28 +140,27 @@ inline bool CFormatterJsonSDLRPCv2::fromString(
     NsSmartDeviceLink::NsSmartObjects::SmartObject& out,
     FunctionId functionId,
     MessageType messageType) {
-  bool result = true;
-
   try {
-    Json::Value root;
-    Json::Reader reader;
+    using namespace utils::json;
+    JsonValue::ParseResult parse_result = JsonValue::Parse(str);
+    if (!parse_result.second) {
+      return false;
+    }
+    const JsonValue& root = parse_result.first;
 
     namespace strings = NsSmartDeviceLink::NsJSONHandler::strings;
-    bool result = reader.parse(str, root);
 
-    if (true == result) {
-      out[strings::S_PARAMS][strings::S_MESSAGE_TYPE] = messageType;
-      out[strings::S_PARAMS][strings::S_FUNCTION_ID] = functionId;
-      out[strings::S_PARAMS][strings::S_PROTOCOL_TYPE] = 0;
-      out[strings::S_PARAMS][strings::S_PROTOCOL_VERSION] = 2;
+    out[strings::S_PARAMS][strings::S_MESSAGE_TYPE] = messageType;
+    out[strings::S_PARAMS][strings::S_FUNCTION_ID] = functionId;
+    out[strings::S_PARAMS][strings::S_PROTOCOL_TYPE] = 0;
+    out[strings::S_PARAMS][strings::S_PROTOCOL_VERSION] = 2;
 
-      jsonValueToObj(root, out[strings::S_MSG_PARAMS]);
-    }
+    jsonValueToObj(root, out[strings::S_MSG_PARAMS]);
   } catch (...) {
-    result = false;
+    return false;
   }
 
-  return result;
+  return true;
 }
 
 template <typename FunctionId, typename MessageType>

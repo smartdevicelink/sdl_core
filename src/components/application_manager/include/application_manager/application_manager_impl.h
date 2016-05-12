@@ -51,7 +51,6 @@
 #include "application_manager/state_controller_impl.h"
 #include "application_manager/application_manager_settings.h"
 #include "application_manager/event_engine/event_dispatcher_impl.h"
-
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
 #include "hmi_message_handler/hmi_message_observer.h"
@@ -172,13 +171,13 @@ struct MessageToHmi : public utils::SharedPtr<Message> {
 };
 
 // Short type names for prioritized message queues
-typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromMobile> >
+typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromMobile>>
     FromMobileQueue;
-typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToMobile> >
+typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToMobile>>
     ToMobileQueue;
-typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromHmi> >
+typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromHmi>>
     FromHmiQueue;
-typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToHmi> >
+typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToHmi>>
     ToHmiQueue;
 
 // AudioPassThru
@@ -189,7 +188,7 @@ typedef struct {
 typedef std::queue<AudioData> RawAudioDataQueue;
 typedef threads::MessageLoopThread<RawAudioDataQueue> AudioPassThruQueue;
 }
-CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
+
 typedef std::vector<std::string> RPCParams;
 typedef utils::SharedPtr<timer::Timer> TimerSPtr;
 
@@ -272,7 +271,6 @@ class ApplicationManagerImpl
    * @return true if exist otherwise false
    */
   bool IsAppTypeExistsInFullOrLimited(ApplicationConstSharedPtr app) const;
-
   /**
    * @brief Checks if Application is subscribed for way points
    * @param Application AppID
@@ -487,8 +485,9 @@ class ApplicationManagerImpl
                 mobile_apis::AudioStreamingState::eType audio_state) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
-      LOG4CXX_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
+      LOGGER_ERROR(logger_,
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, audio_state);
@@ -504,8 +503,9 @@ class ApplicationManagerImpl
   void SetState(uint32_t app_id, HmiStatePtr new_state) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
-      LOG4CXX_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
+      LOGGER_ERROR(logger_,
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, new_state, SendActivateApp);
@@ -520,8 +520,9 @@ class ApplicationManagerImpl
   void SetState(uint32_t app_id, mobile_apis::HMILevel::eType hmi_level) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
-      LOG4CXX_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
+      LOGGER_ERROR(logger_,
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, hmi_level, SendActivateApp);
@@ -540,8 +541,9 @@ class ApplicationManagerImpl
                 mobile_apis::AudioStreamingState::eType audio_state) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
-      LOG4CXX_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
+      LOGGER_ERROR(logger_,
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, hmi_level, audio_state, SendActivateApp);
@@ -561,8 +563,9 @@ class ApplicationManagerImpl
                 mobile_apis::SystemContext::eType system_context) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
-      LOG4CXX_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
+      LOGGER_ERROR(logger_,
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(
@@ -578,8 +581,9 @@ class ApplicationManagerImpl
                 mobile_apis::SystemContext::eType system_context) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
-      LOG4CXX_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
+      LOGGER_ERROR(logger_,
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, system_context);
@@ -593,8 +597,9 @@ class ApplicationManagerImpl
   void SetHmiState(uint32_t app_id, mobile_apis::HMILevel::eType hmi_level) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
-      LOG4CXX_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
+      LOGGER_ERROR(logger_,
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, hmi_level);
@@ -608,18 +613,19 @@ class ApplicationManagerImpl
   void SetState(uint32_t app_id, HmiStatePtr state) {
     ApplicationSharedPtr app = application(app_id);
     if (!app) {
-      LOG4CXX_ERROR(logger_,
-                    "Application with appID=" << app_id << " does not exist");
+      CREATE_LOGGERPTR_LOCAL(logger_, "ApplicationManager")
+      LOGGER_ERROR(logger_,
+                   "Application with appID=" << app_id << " does not exist");
       return;
     }
     state_ctrl_.SetRegularState(app, state);
   }
 
   /**
-   * @brief Checks, if particular state is active
-   * @param state_id State
-   * @return True, if state is active, otherwise - false
-   */
+    * @brief Checks, if particular state is active
+    * @param state_id State
+    * @return True, if state is active, otherwise - false
+    */
   bool IsStateActive(HmiState::StateID state_id) const;
 
   /**
@@ -635,7 +641,7 @@ class ApplicationManagerImpl
    * for app with HMI level BACKGROUND.
    */
   void OnUpdateHMIAppType(
-      std::map<std::string, std::vector<std::string> > app_hmi_types) OVERRIDE;
+      std::map<std::string, std::vector<std::string>> app_hmi_types) OVERRIDE;
 
   /*
    * @brief Starts audio pass thru thread
@@ -697,7 +703,6 @@ class ApplicationManagerImpl
   // after processing this message
   void SendMessageToMobile(const commands::MessageSharedPtr message,
                            bool final_message = false) OVERRIDE;
-
   void SendMessageToHMI(const commands::MessageSharedPtr message) OVERRIDE;
 
   bool ManageMobileCommand(const commands::MessageSharedPtr message,
@@ -748,12 +753,11 @@ class ApplicationManagerImpl
   security_manager::SSLContext::HandshakeContext GetHandshakeContext(
       uint32_t key) const OVERRIDE FINAL;
 #endif  // ENABLE_SECURITY
-
-  /**
-   * @ Add notification to collection
-   *
-   * @param ptr Reference to shared pointer that point on hmi notification
-   */
+        /**
+         * @ Add notification to collection
+         *
+         * @param ptr Reference to shared pointer that point on hmi notification
+         */
   void addNotification(const CommandSharedPtr ptr);
 
   /**
@@ -1104,7 +1108,6 @@ class ApplicationManagerImpl
   bool IsStopping() const OVERRIDE {
     return is_stopping_;
   }
-
   StateController& state_controller() OVERRIDE;
   const ApplicationManagerSettings& get_settings() const OVERRIDE;
   virtual event_engine::EventDispatcher& event_dispatcher() OVERRIDE;
@@ -1182,7 +1185,7 @@ class ApplicationManagerImpl
     typename ApplicationList::const_iterator it;
     for (it = app_list.begin(); it != app_list.end(); ++it) {
       if (!it->valid()) {
-        LOG4CXX_ERROR(logger_, "Application not found ");
+        LOGGER_ERROR(logger_, "Application not found ");
         continue;
       }
 
@@ -1196,12 +1199,12 @@ class ApplicationManagerImpl
                                                     app_mngr)) {
         applications[app_count++] = hmi_application;
       } else {
-        LOG4CXX_DEBUG(logger_, "Can't CreateHMIApplicationStruct ");
+        LOGGER_DEBUG(logger_, "Can't CreateHMIApplicationStruct ");
       }
     }
 
     if (0 == app_count) {
-      LOG4CXX_WARN(logger_, "Empty applications list");
+      LOGGER_WARN(logger_, "Empty applications list");
     }
   }
 
@@ -1237,7 +1240,7 @@ class ApplicationManagerImpl
    * 1st value - is video service opened or not
    * 2nd value - is audio service opened or not
    */
-  typedef std::map<uint32_t, std::pair<bool, bool> > NaviServiceStatusMap;
+  typedef std::map<uint32_t, std::pair<bool, bool>> NaviServiceStatusMap;
 
   /**
    * @brief GetHashedAppID allows to obtain unique application id as a string.
@@ -1387,7 +1390,6 @@ class ApplicationManagerImpl
   bool is_vr_session_strated_;
   bool hmi_cooperating_;
   bool is_all_apps_allowed_;
-
   event_engine::EventDispatcherImpl event_dispatcher_;
   media_manager::MediaManager* media_manager_;
 
@@ -1447,7 +1449,6 @@ class ApplicationManagerImpl
   Timer tts_global_properties_timer_;
 
   bool is_low_voltage_;
-
   volatile bool is_stopping_;
 
   DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);

@@ -133,6 +133,7 @@ TEST(MessageHelperTestCreate, CreateSetAppIcon_SendPathImagetype_Equal) {
 TEST(MessageHelperTestCreate,
      CreateGlobalPropertiesRequestsToHMI_SmartObject_EmptyList) {
   MockApplicationSharedPtr appSharedMock = utils::MakeShared<MockApplication>();
+
   EXPECT_CALL(*appSharedMock, vr_help_title()).Times(AtLeast(1));
   EXPECT_CALL(*appSharedMock, vr_help()).Times(AtLeast(1));
   EXPECT_CALL(*appSharedMock, help_prompt()).Times(AtLeast(1));
@@ -232,6 +233,7 @@ TEST(MessageHelperTestCreate,
 
   EXPECT_CALL(*appSharedMock, commands_map()).WillOnce(Return(data_accessor));
   application_manager_test::MockApplicationManager mock_application_manager;
+
   smart_objects::SmartObjectList ptr =
       MessageHelper::CreateAddCommandRequestToHMI(appSharedMock,
                                                   mock_application_manager);
@@ -258,6 +260,7 @@ TEST(MessageHelperTestCreate,
   EXPECT_CALL(*appSharedMock, commands_map()).WillOnce(Return(data_accessor));
   EXPECT_CALL(*appSharedMock, app_id()).WillOnce(Return(1u));
   application_manager_test::MockApplicationManager mock_application_manager;
+
   smart_objects::SmartObjectList ptr =
       MessageHelper::CreateAddCommandRequestToHMI(appSharedMock,
                                                   mock_application_manager);
@@ -288,6 +291,7 @@ TEST(MessageHelperTestCreate,
 
   EXPECT_CALL(*appSharedMock, choice_set_map()).WillOnce(Return(data_accessor));
   application_manager_test::MockApplicationManager mock_application_manager;
+
   smart_objects::SmartObjectList ptr =
       MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
           appSharedMock, mock_application_manager);
@@ -321,6 +325,7 @@ TEST(MessageHelperTestCreate,
       .Times(AtLeast(5))
       .WillRepeatedly(Return(1u));
   application_manager_test::MockApplicationManager mock_application_manager;
+
   smart_objects::SmartObjectList ptr =
       MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(
           appSharedMock, mock_application_manager);
@@ -707,7 +712,6 @@ TEST_F(MessageHelperTest,
   // Calls for ApplicationManager
   EXPECT_CALL(*appSharedMock, app_id()).WillOnce(Return(1u));
   EXPECT_CALL(*appSharedMock, SubscribedIVI()).WillOnce(Return(data_accessor));
-
   smart_objects::SmartObjectList outList =
       MessageHelper::GetIVISubscriptionRequests(appSharedMock,
                                                 mock_application_manager);

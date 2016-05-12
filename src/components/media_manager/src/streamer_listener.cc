@@ -52,24 +52,23 @@ void StreamerListener::OnDataReceived(int32_t application_key,
 
 void StreamerListener::OnErrorReceived(int32_t application_key,
                                        const DataForListener& data) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
 }
 
 void StreamerListener::OnActivityStarted(int32_t application_key) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   if (current_application_ == application_key) {
-    LOG4CXX_WARN(logger_,
-                 "Already performing activity for " << application_key);
+    LOGGER_WARN(logger_, "Already performing activity for " << application_key);
     return;
   }
   current_application_ = application_key;
 }
 
 void StreamerListener::OnActivityEnded(int32_t application_key) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOGGER_AUTO_TRACE(logger_);
   if (current_application_ != application_key) {
-    LOG4CXX_WARN(logger_,
-                 "Already not performing activity for " << application_key);
+    LOGGER_WARN(logger_,
+                "Already not performing activity for " << application_key);
     return;
   }
   current_application_ = 0;

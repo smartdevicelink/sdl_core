@@ -139,8 +139,8 @@ class PTRepresentation {
   /**
    * @brief Get message text for displaying/pronouncing for user
    * dependent on language and context.
-   * @param msg_codes Context of message (Driver distraction, Grant permission
-   * etc)
+ * @param msg_codes Context of message (Driver distraction, Grant permission
+ * etc)
    * @param language Language of the message
    * @return Array of appropriate messages parameters
    */
@@ -158,8 +158,8 @@ class PTRepresentation {
   /**
    * @brief GetLockScreenIcon allows to obtain lock screen icon url;
    *
-   * @return url which point to the resourse where lock screen icon could be
-   *obtained.
+ * @return url which point to the resourse where lock screen icon could be
+ * obtained.
    */
   virtual std::string GetLockScreenIconUrl() const = 0;
 

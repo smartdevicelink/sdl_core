@@ -60,7 +60,6 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
                 public application_manager::ApplicationManagerSettings {
  public:
   // Methods section
-
   /**
    * Default constructor
    *
@@ -601,8 +600,8 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
 
  private:
   /**
-   * @brief Reads a string value from the profile and interpret it
-   * as \c true on "true" value or as \c false on any other value
+ * @brief Reads a string value from the profile and interpret it
+ * as \c true on "true" value or as \c false on any other value
    *
    * @param value      The value to return
    * @param pSection   The section to read the value in
@@ -616,7 +615,7 @@ class Profile : public protocol_handler::ProtocolHandlerSettings,
                  const char* const pKey) const;
 
   /**
-   * @brief Reads a boolean value from the profile
+ * @brief Reads a boolean value from the profile
    *
    * @param value      The value to return
    * @param pSection   The section to read the value in

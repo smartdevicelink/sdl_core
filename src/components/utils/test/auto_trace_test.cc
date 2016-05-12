@@ -74,8 +74,8 @@ void InitLogger() {
 }
 
 void CreateDeleteAutoTrace(const std::string& testlog) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, testlog);
+  LOGGER_AUTO_TRACE(logger_);
+  LOGGER_DEBUG(logger_, testlog);
 }
 
 /**
