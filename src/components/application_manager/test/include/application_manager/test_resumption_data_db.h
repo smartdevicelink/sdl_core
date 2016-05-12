@@ -37,6 +37,7 @@
 #include "application_manager/resumption/resumption_data_db.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_application_manager.h"
+#include "application_manager/mock_application_manager_settings.h"
 
 using ::resumption::ResumptionDataDB;
 
@@ -50,9 +51,10 @@ class TestResumptionDataDB : public ResumptionDataDB {
     return db();
   }
 
-  application_manager_test::MockApplicationManager mock_application_manager_;
+  application_manager_test::MockApplicationManagerSettings
+      mock_application_manager_settings_;
   TestResumptionDataDB(DbStorage db_storage)
-      : ResumptionDataDB(db_storage, mock_application_manager_) {}
+      : ResumptionDataDB(db_storage, mock_application_manager_settings_) {}
 };
 
 }  // namespace resumption_test

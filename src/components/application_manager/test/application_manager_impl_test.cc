@@ -102,7 +102,7 @@ class ApplicationManagerImplTest : public ::testing::Test {
 
     mock_storage =
         ::utils::MakeShared<NiceMock<resumption_test::MockResumptionData>>(
-            *app_manager_impl_);
+            mock_application_manager_settings_);
 
     app_manager_impl_->resume_controller().set_resumption_storage(mock_storage);
     app_manager_impl_->set_connection_handler(&mock_connection_handler);

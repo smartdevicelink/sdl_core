@@ -50,8 +50,9 @@ SDL_CREATE_LOGGER("Resumption")
 
 ResumptionDataJson::ResumptionDataJson(
     LastState& last_state,
-    const application_manager::ApplicationManager& application_manager)
-    : ResumptionData(application_manager), last_state_(last_state) {}
+    const application_manager::ApplicationManagerSettings&
+        application_manager_settings)
+    : ResumptionData(application_manager_settings), last_state_(last_state) {}
 
 void ResumptionDataJson::SaveApplication(
     app_mngr::ApplicationSharedPtr application) {
@@ -70,7 +71,7 @@ void ResumptionDataJson::SaveApplication(
   const std::string device_mac = application->mac_address();
   const mobile_apis::HMILevel::eType hmi_level = application->hmi_level();
   const bool is_subscribed_for_way_points =
-      application_manager_.IsAppSubscribedForWayPoints(application->app_id());
+      application->IsAppSubscribedForWayPoints(application->app_id());
 
   sync_primitives::AutoLock autolock(resumption_lock_);
   JsonValue tmp;

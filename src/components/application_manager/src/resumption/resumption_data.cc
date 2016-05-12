@@ -41,8 +41,10 @@ namespace resumption {
 SDL_CREATE_LOGGER("Resumption")
 
 ResumptionData::ResumptionData(
-    const application_manager::ApplicationManager& application_manager)
-    : resumption_lock_(true), application_manager_(application_manager) {}
+    const application_manager::ApplicationManagerSettings&
+        application_manager_settings)
+    : resumption_lock_(true)
+    , application_manager_settings_(application_manager_settings) {}
 
 smart_objects::SmartObject ResumptionData::GetApplicationCommands(
     app_mngr::ApplicationConstSharedPtr application) const {

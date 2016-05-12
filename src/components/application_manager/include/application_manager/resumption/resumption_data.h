@@ -60,8 +60,8 @@ class ResumptionData {
   /**
    * @brief Constructor of ResumptionData
    */
-  ResumptionData(
-      const application_manager::ApplicationManager& application_manager);
+  ResumptionData(const application_manager::ApplicationManagerSettings&
+                     application_manager_settings);
 
   /**
    * @brief Destructor of ResumptionData
@@ -270,7 +270,8 @@ class ResumptionData {
     }
   }
   mutable sync_primitives::Lock resumption_lock_;
-  const application_manager::ApplicationManager& application_manager_;
+  const application_manager::ApplicationManagerSettings&
+      application_manager_settings_;
 };
 }  // namespace resumption
 
