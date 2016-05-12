@@ -41,12 +41,9 @@
 
 #ifndef _WIN32
 #include <unistd.h>
+#define USE_MKSTEMP   1
 #else
 #define PATH_MAX   _MAX_PATH
-#endif
-
-#ifdef __linux__
-#define USE_MKSTEMP   1
 #endif
 
 #include <string>

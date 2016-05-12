@@ -36,6 +36,7 @@
 #include <functional>
 #include <ctime>
 #include <cmath>
+#include <errno.h>
 
 #include "utils/file_system.h"
 #include "json/reader.h"

@@ -42,7 +42,6 @@
 
 // ----------------------------------------------------------------------------
 
-#include "utils/log_message_loop_thread.h"
 #include "utils/logger.h"
 
 #include "./life_cycle.h"

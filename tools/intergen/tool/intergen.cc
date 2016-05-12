@@ -35,8 +35,7 @@
 #include <iterator>
 #include <set>
 #include <sstream>
-
-#include "getopt.h"
+#include <unistd.h>
 
 #include "cppgen/cpp_api_code_generator.h"
 #include "model/api.h"

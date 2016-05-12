@@ -80,6 +80,10 @@ set(LIBRARIES
   FunctionalModule
 )
 
+if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
+  list(APPEND LIBRARIES socket)
+endif()
+
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES pthread)
   list(APPEND LIBRARIES dl)

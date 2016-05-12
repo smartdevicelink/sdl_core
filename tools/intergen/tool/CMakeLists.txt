@@ -6,5 +6,5 @@ include_directories(
 )
 
 add_executable(intergen intergen.cc)
-target_link_libraries(intergen intergen_cppgen intergen_model intergen_utils pugixml)
+target_link_libraries(intergen intergen_cppgen intergen_model intergen_utils pugixml m)
 install(TARGETS intergen RUNTIME DESTINATION bin)
