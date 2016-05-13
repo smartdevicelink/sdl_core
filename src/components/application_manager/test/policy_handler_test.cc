@@ -324,7 +324,8 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(mock_state_controller, SetRegularState(_, new_hmi_level, true));
   // Act
   Permissions perms;
-  policy_handler_.OnPermissionsUpdated(kPolicyAppId_, perms, new_kHmiLevel_string);
+  policy_handler_.OnPermissionsUpdated(
+      kPolicyAppId_, perms, new_kHmiLevel_string);
 }
 
 TEST_F(PolicyHandlerTest,
@@ -352,7 +353,8 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(mock_state_controller, SetRegularState(_, new_hmi_level, false));
   // Act
   Permissions perms;
-  policy_handler_.OnPermissionsUpdated(kPolicyAppId_, perms, new_kHmiLevel_string);
+  policy_handler_.OnPermissionsUpdated(
+      kPolicyAppId_, perms, new_kHmiLevel_string);
 }
 
 TEST_F(PolicyHandlerTest,
@@ -377,7 +379,8 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(app_manager_, state_controller()).Times(0);
   // Act
   Permissions perms;
-  policy_handler_.OnPermissionsUpdated(kPolicyAppId_, perms, new_kHmiLevel_string);
+  policy_handler_.OnPermissionsUpdated(
+      kPolicyAppId_, perms, new_kHmiLevel_string);
 }
 
 TEST_F(PolicyHandlerTest, GetPriority) {
@@ -395,8 +398,9 @@ TEST_F(PolicyHandlerTest, CheckPermissions) {
   CheckPermissionResult result;
   RPCParams kRpc_params;
   // Check expectations
-  EXPECT_CALL(*mock_policy_manager_,
-              CheckPermissions(kPolicyAppId_, kHmiLevel_, kRpc_, kRpc_params, _));
+  EXPECT_CALL(
+      *mock_policy_manager_,
+      CheckPermissions(kPolicyAppId_, kHmiLevel_, kRpc_, kRpc_params, _));
   // Act
   policy_handler_.CheckPermissions(
       kPolicyAppId_, kHmiLevel_, kRpc_, kRpc_params, result);
@@ -425,7 +429,8 @@ TEST_F(PolicyHandlerTest, GetDefaultHmi) {
   // Arrange
   EnablePolicyAndPolicyManagerMock();
   // Check expectations
-  EXPECT_CALL(*mock_policy_manager_, GetDefaultHmi(kPolicyAppId_, &default_hmi_));
+  EXPECT_CALL(*mock_policy_manager_,
+              GetDefaultHmi(kPolicyAppId_, &default_hmi_));
   // Act
   policy_handler_.GetDefaultHmi(kPolicyAppId_, &default_hmi_);
 }
@@ -730,10 +735,10 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))
       .WillOnce(Return(permissions));
 
-  EXPECT_CALL(
-      *MockMessageHelper::message_helper_mock(),
-      GetOnAppInterfaceUnregisteredNotificationToMobile(
-          kAppId_, mobile_api::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED))
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              GetOnAppInterfaceUnregisteredNotificationToMobile(
+                  kAppId_,
+                  mobile_api::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED))
       .WillOnce(Return(message));
   EXPECT_CALL(app_manager_,
               ManageMobileCommand(_, commands::Command::ORIGIN_SDL));
@@ -763,10 +768,10 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(*mock_policy_manager_, GetAppPermissionsChanges(_))
       .WillOnce(Return(permissions));
 
-  EXPECT_CALL(
-      *MockMessageHelper::message_helper_mock(),
-      GetOnAppInterfaceUnregisteredNotificationToMobile(
-          kAppId_, mobile_api::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED))
+  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
+              GetOnAppInterfaceUnregisteredNotificationToMobile(
+                  kAppId_,
+                  mobile_api::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED))
       .WillOnce(Return(message));
   EXPECT_CALL(app_manager_,
               ManageMobileCommand(_, commands::Command::ORIGIN_SDL));
@@ -1216,8 +1221,9 @@ TEST_F(PolicyHandlerTest, OnSnapshotCreated_UrlAdded) {
       .WillRepeatedly(Return(mock_app_));
   EXPECT_CALL(*mock_app_, policy_app_id()).WillOnce(Return(kPolicyAppId_));
 
-  EXPECT_CALL(*MockMessageHelper::message_helper_mock(),
-              SendPolicySnapshotNotification(kAppId_, msg, data.url.front(), _));
+  EXPECT_CALL(
+      *MockMessageHelper::message_helper_mock(),
+      SendPolicySnapshotNotification(kAppId_, msg, data.url.front(), _));
 
   policy_handler_.OnSnapshotCreated(msg);
 }
@@ -1240,7 +1246,8 @@ TEST_F(PolicyHandlerTest,
   EXPECT_CALL(conn_handler, GetDeviceID(kPolicyAppId_, _))
       .WillRepeatedly(Return(true));
 
-  policy_handler_.OnAllowSDLFunctionalityNotification(is_allowed, kPolicyAppId_);
+  policy_handler_.OnAllowSDLFunctionalityNotification(is_allowed,
+                                                      kPolicyAppId_);
 }
 
 TEST_F(PolicyHandlerTest,

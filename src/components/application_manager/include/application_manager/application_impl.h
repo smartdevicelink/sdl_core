@@ -423,7 +423,6 @@ bool ApplicationImpl::IsRegistered() const {
   return app_state_ == kRegistered;
 }
 
-
 }  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_IMPL_H_
