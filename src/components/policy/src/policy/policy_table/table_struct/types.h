@@ -58,17 +58,11 @@ typedef Array<Enum<RequestType>, 0, 255> RequestTypes;
 
 struct PolicyBase : CompositeType {
 public:
-  Strings groups;
-  Optional<Strings> preconsented_groups;
   Enum<Priority> priority;
-  Enum<HmiLevel> default_hmi;
-  Boolean keep_context;
-  Boolean steal_focus;
 
 public:
   PolicyBase();
-  PolicyBase(const Strings &groups, Priority priority, HmiLevel default_hmi,
-             bool keep_context, bool steal_focus);
+  PolicyBase(Priority priority);
   virtual ~PolicyBase();
   explicit PolicyBase(const Json::Value *value__);
   Json::Value ToJsonValue() const;
@@ -85,14 +79,14 @@ private:
 struct DevicePolicy : PolicyBase {
 public:
   DevicePolicy();
-  DevicePolicy(const Strings &groups, Priority priority, HmiLevel default_hmi,
-               bool keep_context, bool steal_focus);
+  DevicePolicy(Priority priority);
   ~DevicePolicy();
   explicit DevicePolicy(const Json::Value *value__);
 };
 
 struct ApplicationParams : PolicyBase {
 public:
+  Strings groups;
   Optional<Strings> nicknames;
   Optional<AppHMITypes> AppHMIType;
   Optional<RequestTypes> RequestType;
@@ -102,8 +96,7 @@ public:
 
 public:
   ApplicationParams();
-  ApplicationParams(const Strings &groups, Priority priority,
-                    HmiLevel default_hmi, bool keep_context, bool steal_focus);
+  ApplicationParams(const Strings &groups, Priority priority);
   ~ApplicationParams();
   explicit ApplicationParams(const Json::Value *value__);
   Json::Value ToJsonValue() const;

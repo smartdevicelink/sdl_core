@@ -148,17 +148,7 @@ void CacheManager::GetAllAppGroups(const std::string &app_id,
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK_VOID();
   if (kDeviceId == app_id) {
-    policy_table::DevicePolicy &device =
-        pt_->policy_table.app_policies_section.device;
-
-    policy_table::Strings::const_iterator iter = device.groups.begin();
-    policy_table::Strings::const_iterator iter_end = device.groups.end();
-
-    for (; iter != iter_end; ++iter) {
-      const uint32_t group_id = static_cast<uint32_t>((GenerateHash(*iter)));
-      all_group_ids.push_back(group_id);
-    }
-
+    LOG4CXX_INFO(logger_, "Devices doesn't have groups");
     return;
   }
 
