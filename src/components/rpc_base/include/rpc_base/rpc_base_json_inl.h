@@ -130,7 +130,7 @@ Integer<T, minval, maxval>::Integer(const utils::json::JsonValueRef& value)
     : PrimitiveType(InitHelper(value, &utils::json::JsonValueRef::IsInt))
     , value_() {
   if (is_valid()) {
-    utils::json::JsonValue::UInt intval = value.AsUInt();
+    utils::json::JsonValue::Int intval = value.AsInt();
     if (range_.Includes(intval)) {
       value_ = IntType(intval);
     } else {
