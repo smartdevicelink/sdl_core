@@ -35,10 +35,6 @@ set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_S
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-
-#Generation of policy table interface...
-#include(${CMAKE_SOURCE_DIR}/tools/intergen/GenerateInterfaceLibrary.cmake)
-
 include_directories (
   ${COMPONENTS_DIR}/policy/include
   ${COMPONENTS_DIR}/rpc_base/include
@@ -49,22 +45,22 @@ include_directories (
 )
 
 set(SOURCES
-  ./src/policy_manager_impl.cc
-  ./src/policy_helper.cc
-  ./src/policy_table.cc
-  ./src/sql_pt_queries.cc
-  ./src/sql_pt_representation.cc
-  ./src/update_status_manager.cc
-  ./src/cache_manager.cc
-  ${CMAKE_SOURCE_DIR}/src/components/rpc_base/src/rpc_base/rpc_base.cc
+  ${COMPONENTS_DIR}/policy/src/policy_manager_impl.cc
+  ${COMPONENTS_DIR}/policy/src/policy_helper.cc
+  ${COMPONENTS_DIR}/policy/src/policy_table.cc
+  ${COMPONENTS_DIR}/policy/src/sql_pt_queries.cc
+  ${COMPONENTS_DIR}/policy/src/sql_pt_representation.cc
+  ${COMPONENTS_DIR}/policy/src/update_status_manager.cc
+  ${COMPONENTS_DIR}/policy/src/cache_manager.cc
+  ${COMPONENTS_DIR}/rpc_base/src/rpc_base/rpc_base.cc
 )
 
 # --- Table struct section
 set(policy_struct_target policy_struct)
 set(POLICY_TABLE_SOURCES
-  ./src/policy_table/enums.cc
-  ./src/policy_table/types.cc
-  ./src/policy_table/validation.cc
+  ${COMPONENTS_DIR}/policy/src/policy_table/enums.cc
+  ${COMPONENTS_DIR}/policy/src/policy_table/types.cc
+  ${COMPONENTS_DIR}/policy/src/policy_table/validation.cc
 )
 
 add_library(${policy_struct_target} ${POLICY_TABLE_SOURCES})
@@ -73,7 +69,7 @@ target_link_libraries(${policy_struct_target} Utils)
 
 # --- Usage statistics section
 set(USAGE_STATISTICS_SOURCES
-  src/usage_statistics/counter.cc
+  ${COMPONENTS_DIR}/policy/src/usage_statistics/counter.cc
 )
 add_library(UsageStatistics ${USAGE_STATISTICS_SOURCES})
 # --- end of Usage statistics section
