@@ -1489,7 +1489,7 @@ std::string ConvertPacketDataToString(const uint8_t* data,
   const char* text = reinterpret_cast<const char*>(data);
   // Check data for printability
   for (size_t i = 0; i < data_size; ++i) {
-    if (!std::isprint(text[i])) {
+    if (!std::isprint(static_cast<unsigned char>(text[i]))) {
       is_printable_array = false;
       break;
     }
