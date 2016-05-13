@@ -55,9 +55,12 @@ void SDLActivateAppRequest::Run() {
       application_manager_.application(application_id);
 
   if (!app) {
-    LOG4CXX_WARN(
+    LOG4CXX_ERROR(
         logger_,
         "Can't find application within regular apps: " << application_id);
+    //APPLINK-16115
+    SendResponse(false, correlation_id(), SDL_ActivateApp, INVALID_DATA);
+    return;
   }
 
   DevicesApps devices_apps = FindAllAppOnParticularDevice(app->device());
