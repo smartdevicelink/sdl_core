@@ -5233,12 +5233,10 @@
         <description>See Result</description>
         <element name="SUCCESS"/>
         <element name="INVALID_DATA"/>
-        <element name="TIMED_OUT"/>
         <element name="GENERIC_ERROR"/>
         <element name="REJECTED"/>
         <element name="UNSUPPORTED_RESOURCE"/>
         <element name="IGNORED"/>
-        <element name="IN_USE"/>
         <element name="DISALLOWED"/>
       </param>
       <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
