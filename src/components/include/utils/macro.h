@@ -166,9 +166,13 @@
   sigaddset(&signal_set, SIGTERM); \
   pthread_sigmask(SIG_BLOCK, &signal_set, NULL);
 #elif defined(QT_PORT)
+// setupapi.dll should be loaded explicitly to avoid
+// Windows 7 known issue with this library unloading.
+// See: https://bugreports.qt.io/browse/QTBUG-20067
 extern Q_CORE_EXPORT int qt_ntfs_permission_lookup;
 #define PLATFORM_INIT(argc, argv)                    \
   qt_ntfs_permission_lookup++;                       \
+  QLibrary("setupapi.dll").load();                   \
   QCoreApplication application(argc, argv);          \
   QThreadPool* pool = QThreadPool::globalInstance(); \
   pool->setMaxThreadCount(100)
