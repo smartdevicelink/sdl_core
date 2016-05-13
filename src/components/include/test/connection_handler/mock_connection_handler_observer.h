@@ -1,4 +1,5 @@
-/* Copyright (c) 2016, Ford Motor Company
+/*
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,25 +30,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_POLICY_USAGE_STATISTICS_MOCK_APP_STOPWATCH_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_POLICY_USAGE_STATISTICS_MOCK_APP_STOPWATCH_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_CONNECTION_HANDLER_MOCK_CONNECTION_HANDLER_OBSERVER_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_CONNECTION_HANDLER_MOCK_CONNECTION_HANDLER_OBSERVER_H_
 
 #include "gmock/gmock.h"
-#include "policy/usage_statistics/app_stopwatch.h"
+#include "connection_handler/connection_handler_observer.h"
 
 namespace test {
 namespace components {
-namespace usage_statistics_test {
+namespace connection_handler_test {
 
-class MockAppStopwatch : public usage_statistics::AppStopwatch {
+class MockConnectionHandlerObserver : public ConnectionHandlerObserver {
  public:
-  MOCK_METHOD1(Start, void(usage_statistics::AppStopwatchId stopwatch_type));
-  MOCK_METHOD1(Switch, void(usage_statistics::AppStopwatchId stopwatch_type));
-  MOCK_METHOD0(WriteTime, void());
+  MOCK_METHOD1(OnDeviceListUpdated,
+      void(const connection_handler::DeviceMap& device_list));
+  MOCK_METHOD0(OnFindNewApplicationsRequest,
+      void());
+  MOCK_METHOD1(RemoveDevice,
+      void(const connection_handler::DeviceHandle& device_handle));
+  MOCK_METHOD3(OnServiceStartedCallback,
+      bool(const connection_handler::DeviceHandle& device_handle, const int32_t& session_key, const protocol_handler::ServiceType& type));
+  MOCK_METHOD3(OnServiceEndedCallback,
+      void(const int32_t& session_key, const protocol_handler::ServiceType& type, const connection_handler::CloseSessionReason& close_reason));
+  MOCK_CONST_METHOD1(GetHandshakeContext,
+      security_manager::SSLContext::HandshakeContext(uint32_t key));
 };
 
-}  // namespace usage_statistics_test
+
+}  // namespace connection_handler_test
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_POLICY_USAGE_STATISTICS_MOCK_APP_STOPWATCH_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_CONNECTION_HANDLER_MOCK_CONNECTION_HANDLER_OBSERVER_H_

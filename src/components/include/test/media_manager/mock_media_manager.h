@@ -1,4 +1,5 @@
-/* Copyright (c) 2016, Ford Motor Company
+/*
+ * Copyright (c) 2016, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,26 +29,38 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_POLICY_USAGE_STATISTICS_MOCK_APP_STOPWATCH_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_POLICY_USAGE_STATISTICS_MOCK_APP_STOPWATCH_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_MEDIA_MANAGER_MOCK_MEDIA_MANAGER_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_MEDIA_MANAGER_MOCK_MEDIA_MANAGER_H_
 
 #include "gmock/gmock.h"
-#include "policy/usage_statistics/app_stopwatch.h"
+#include "media_manager/media_manager.h"
 
 namespace test {
 namespace components {
-namespace usage_statistics_test {
+namespace media_manager_test {
 
-class MockAppStopwatch : public usage_statistics::AppStopwatch {
+class MockMediaManager : public media_manager::MediaManager {
  public:
-  MOCK_METHOD1(Start, void(usage_statistics::AppStopwatchId stopwatch_type));
-  MOCK_METHOD1(Switch, void(usage_statistics::AppStopwatchId stopwatch_type));
-  MOCK_METHOD0(WriteTime, void());
+  MOCK_METHOD1(PlayA2DPSource,
+      void(int32_t application_key));
+  MOCK_METHOD1(StopA2DPSource,
+      void(int32_t application_key));
+  MOCK_METHOD3(StartMicrophoneRecording,
+      void(int32_t application_key, const std::string& outputFileName, int32_t duration));
+  MOCK_METHOD1(StopMicrophoneRecording,
+      void(int32_t application_key));
+  MOCK_METHOD2(StartStreaming,
+      void(int32_t application_key, protocol_handler::ServiceType service_type));
+  MOCK_METHOD2(StopStreaming,
+      void(int32_t application_key, protocol_handler::ServiceType service_type));
+  MOCK_METHOD2(FramesProcessed,
+      void(int32_t application_key, int32_t frame_number));
+  MOCK_CONST_METHOD0(settings,
+      const MediaManagerSettings&());
 };
 
-}  // namespace usage_statistics_test
+}  // namespace media_manager_test
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_POLICY_USAGE_STATISTICS_MOCK_APP_STOPWATCH_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_MEDIA_MANAGER_MOCK_MEDIA_MANAGER_H_

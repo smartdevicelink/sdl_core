@@ -1,4 +1,5 @@
-/* Copyright (c) 2016, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,25 +30,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_POLICY_USAGE_STATISTICS_MOCK_APP_STOPWATCH_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_POLICY_USAGE_STATISTICS_MOCK_APP_STOPWATCH_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_TELEMETRY_OBSERVER_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_TELEMETRY_OBSERVER_H_
 
 #include "gmock/gmock.h"
-#include "policy/usage_statistics/app_stopwatch.h"
+
+#include "protocol_handler/telemetry_observer.h"
 
 namespace test {
 namespace components {
-namespace usage_statistics_test {
+namespace protocol_handler_test {
 
-class MockAppStopwatch : public usage_statistics::AppStopwatch {
+class MockPHTelemetryObserver : public PHTelemetryObserver {
  public:
-  MOCK_METHOD1(Start, void(usage_statistics::AppStopwatchId stopwatch_type));
-  MOCK_METHOD1(Switch, void(usage_statistics::AppStopwatchId stopwatch_type));
-  MOCK_METHOD0(WriteTime, void());
+  MOCK_METHOD2(StartMessageProcess,
+      void(uint32_t message_id, const TimevalStruct& start_time));
+  MOCK_METHOD1(EndMessageProcess,
+      void(utils::SharedPtr<MessageMetric> m));
 };
 
-}  // namespace usage_statistics_test
+}  // namespace protocol_handler_test
 }  // namespace components
 }  // namespace test
-
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_POLICY_USAGE_STATISTICS_MOCK_APP_STOPWATCH_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_PROTOCOL_HANDLER_MOCK_TELEMETRY_OBSERVER_H_

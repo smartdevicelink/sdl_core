@@ -30,25 +30,26 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_INCLUDE_TEST_TELEMETRY_MONITOR_MOCK_TELEMETRY_OBSERVER_H_
-#define SRC_COMPONENTS_INCLUDE_TEST_TELEMETRY_MONITOR_MOCK_TELEMETRY_OBSERVER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TEST_HMI_MESSAGE_HANDLER_MOCK_HMI_MESSAGE_ADAPTER_H_
+#define SRC_COMPONENTS_INCLUDE_TEST_HMI_MESSAGE_HANDLER_MOCK_HMI_MESSAGE_ADAPTER_H_
 
-#include <string>
 #include "gmock/gmock.h"
-#include "transport_manager/telemetry_observer.h"
-#include "protocol/raw_message.h"
+#include "hmi_message_handler/hmi_message_adapter.h"
+
 namespace test {
 namespace components {
-namespace transport_manager_test {
+namespace hmi_message_handler_test {
 
-class TMTelemetryObserverMock
-    : public ::transport_manager::TMTelemetryObserver {
+using hmi_message_handler::HMIMessageAdapter;
+
+class MockHMIMessageAdapter : public HMIMessageAdapter {
  public:
-  MOCK_METHOD1(StartRawMsg, void(const protocol_handler::RawMessage* ptr));
-  MOCK_METHOD1(StopRawMsg, void(const protocol_handler::RawMessage* ptr));
+  MOCK_METHOD0(SubscribeTo,
+      void());
 };
-}  // namespace transport_manager_test
+
+}  // namespace hmi_message_handler_test
 }  // namespace components
 }  // namespace test
 
-#endif  // SRC_COMPONENTS_INCLUDE_TEST_TELEMETRY_MONITOR_MOCK_TELEMETRY_OBSERVER_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TEST_HMI_MESSAGE_HANDLER_MOCK_HMI_MESSAGE_ADAPTER_H_
