@@ -88,7 +88,6 @@ class ResumeCtrlTest : public ::testing::Test {
     res_ctrl = utils::MakeShared<ResumeCtrl>(app_mngr_);
     res_ctrl->set_resumption_storage(mock_storage);
 
-
     ON_CALL(app_mngr_, state_controller())
         .WillByDefault(ReturnRef(state_controller_));
     ON_CALL(app_mngr_, get_settings())
@@ -124,7 +123,7 @@ class ResumeCtrlTest : public ::testing::Test {
   // app_mock.Device() will return this value
   const uint32_t kTestDevId_;
   const uint32_t kTestGrammarId_;
-  std::string kHash_;
+  const std::string kHash_;
   const uint32_t kAppResumingTimeout_;
 };
 

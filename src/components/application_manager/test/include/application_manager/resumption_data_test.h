@@ -61,9 +61,16 @@ using namespace mobile_apis;
 
 class ResumptionDataTest : public ::testing::Test {
  protected:
+  ResumptionDataTest()
+      : kCountOfCommands_(5u)
+      , kCountOfChoice_(2u)
+      , kCountOfChoiceSets_(4u)
+      , kCountOfSubmenues_(3u)
+      , kCountOfFiles_(8u)
+      , kCountOfVrhelptitle_(2u)
+      , kMacAddress_("12345") {}
   // Check structure in saved application
   void CheckSavedApp(sm::SmartObject& saved_data);
-
   // Set data for resumption
   virtual void PrepareData();
   utils::SharedPtr<NiceMock<application_manager_test::MockApplication>>
@@ -116,13 +123,13 @@ class ResumptionDataTest : public ::testing::Test {
   void CheckVRTitle(sm::SmartObject& res_list);
   void CheckSubscriptions(sm::SmartObject& res_list);
 
-  const size_t count_of_commands = 5;
-  const size_t count_of_choice = 2;
-  const size_t count_of_choice_sets = 4;
-  const size_t count_of_submenues = 3;
-  const size_t count_of_files = 8;
-  const size_t count_of_vrhelptitle = 2;
-  const std::string mac_address_ = "12345";
+  const size_t kCountOfCommands_;
+  const size_t kCountOfChoice_;
+  const size_t kCountOfChoiceSets_;
+  const size_t kCountOfSubmenues_;
+  const size_t kCountOfFiles_;
+  const size_t kCountOfVrhelptitle_;
+  const std::string kMacAddress_;
 
   am::CommandsMap test_commands_map;
   am::SubMenuMap test_submenu_map;

@@ -150,7 +150,7 @@ void ResumptionDataJson::OnSuspend() {
   Json::Value to_save;
   for (Json::Value::iterator it = GetSavedApplications().begin();
        it != GetSavedApplications().end();
-       ++it) {    
+       ++it) {
     if ((*it).isMember(strings::ign_off_count)) {
       Json::Value& ign_off_count = (*it)[strings::ign_off_count];
       const uint32_t counter_value = ign_off_count.asUInt();

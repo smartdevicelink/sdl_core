@@ -60,10 +60,7 @@ struct ApplicationParams {
 /**
  * @brief Show should database be saved in a disk file or in memory
  */
-enum DbStorage {
-  In_Memory_Storage = 0,
-  In_File_Storage
-};
+enum DbStorage { In_Memory_Storage = 0, In_File_Storage };
 
 /**
  * @brief class contains logic for representation application data in
@@ -231,7 +228,7 @@ class ResumptionDataDB : public ResumptionData {
    */
   void Persist() OVERRIDE;
 
-protected:
+ protected:
   /**
    * @brief returns pointer to data base
    */
