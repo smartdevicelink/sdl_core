@@ -275,14 +275,16 @@ std::string PolicyManagerImpl::GetLockScreenIconUrl() const {
 void PolicyManagerImpl::StartPTExchange() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (update_status_manager_.IsAppsSearchInProgress()) {
+  const bool update_required = update_status_manager_.IsUpdateRequired();
+
+  if (update_status_manager_.IsAppsSearchInProgress() && update_required) {
     update_status_manager_.ScheduleUpdate();
     LOG4CXX_INFO(logger_, "Starting exchange skipped, since applications "
                           "search is in progress.");
     return;
   }
 
-  if (update_status_manager_.IsUpdatePending()) {
+  if (update_status_manager_.IsUpdatePending() && update_required) {
     update_status_manager_.ScheduleUpdate();
     LOG4CXX_INFO(logger_, "Starting exchange skipped, since another exchange "
                           "is in progress.");
@@ -295,7 +297,7 @@ void PolicyManagerImpl::StartPTExchange() {
       ignition_check = false;
     }
 
-    if (update_status_manager_.IsUpdateRequired()) {
+    if (update_required) {
       if (RequestPTUpdate() && !timer_retry_sequence_.isRunning()) {
         LOG4CXX_DEBUG(logger_, "Starting retry sequence.");
         timer_retry_sequence_.start(NextRetryTimeout());
