@@ -699,6 +699,7 @@ void PolicyManagerImpl::KmsChanged(int kilometers) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (0 == cache_->KilometersBeforeExchange(kilometers)) {
     LOG4CXX_INFO(logger_, "Enough kilometers passed to send for PT update.");
+    update_status_manager_.ScheduleUpdate();
     StartPTExchange();
   }
 }
