@@ -4912,7 +4912,8 @@ newos6*)
   ;;
 
 nto-qnx*)
-  lt_cv_deplibs_check_method=unknown
+#  lt_cv_deplibs_check_method=unknown
+  lt_cv_deplibs_check_method=pass_all
   ;;
 
 openbsd*)
