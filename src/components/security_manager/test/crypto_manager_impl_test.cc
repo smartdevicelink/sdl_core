@@ -33,7 +33,7 @@
 #ifdef __QNXNTO__
 #include <openssl/ssl3.h>
 #else
-#include <openssl/tls1.h>
+#include <openssl/ssl.h>
 #endif
 
 #include <fstream>
