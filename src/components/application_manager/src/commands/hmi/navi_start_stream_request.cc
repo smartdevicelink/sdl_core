@@ -110,7 +110,7 @@ void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
       }
       if (hmi_apis::Common_Result::REJECTED == code) {
         LOG4CXX_INFO(logger_, "StartStream response REJECTED ");
-        SendRequest();
+        RetryStartSession();
         break;
       }
     }
